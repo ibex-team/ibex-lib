@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_Linear.h
-// Author      : Gilles Chabert, Antoine Marendet
+// Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Apr 17, 2012
@@ -65,21 +65,12 @@ void real_LU(const Matrix& A, Matrix& LU, int* p);
  */
 void real_LU(const Matrix& A, Matrix& LU, int* pr, int* pc);
 
-/*
- * \brief LU decomposition of an interval matrix with partial pivoting.
- *
- * \see ibex::real_LU(const Matrix&, Matrix&, int*, int*).
- */
 void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* p);
 
-/*
- * \brief LU decomposition of an interval matrix with full pivoting.
- *
- * \see ibex::real_LU(const Matrix&, Matrix&, int*, int*).
- */
 void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* pr, int* pc);
 
 /**
+<<<<<<< HEAD
  * \brief True only if A is full rank.
  *
  * If the function returns false, the matrix may be full
@@ -88,18 +79,10 @@ void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* pr, int* pc);
 bool full_rank(const IntervalMatrix& A);
 
 /**
- * \brief Solve a square linear system of equations given the LU decomposition of A.
+ * \ingroup numeric
  *
- * \param LU - The LU decomposition of A.
- * \param p  - The permutation array of row indices of the LU decomposition.
- * \param b  - The right-hand side of the system of equations.
- * \param x (output) - The solution computed by Gauss elimination.
- *
- * \throw SingularMatrixException if too small values appear during computations.
- */
-void real_LU_solve(const Matrix &LU, const int* p, const Vector& b, Vector& x);
-
-/**
+=======
+>>>>>>> origin/develop
  * \brief Computes an (approximative) inverse of a real matrix.
  *
  * \param A - The matrix to inverse.
@@ -112,33 +95,6 @@ void real_LU_solve(const Matrix &LU, const int* p, const Vector& b, Vector& x);
  *
  */
 void real_inverse(const Matrix& A, Matrix& invA);
-
-/**
- * \brief Computes an enclosure of the inverse of an interval matrix.
- * See "Interval Methods for Systems of Equations", A. Neumaier, 1990, p 123, theorem 4.1.11.
- *
- * \param A - The interval matrix to inverse.
- * \param invA (output) - The enclosure of the inverse of A.
- *
- * \throw SquareMatrixException if the matrix A is not square.
- * \throw SingularMatrixException if the matrix A is singular.
- *
- * Author: Antoine Marendet
- */
-void neumaier_inverse(const IntervalMatrix& A, IntervalMatrix& invA);
-
-/**
- * \brief Computes the exact inverse of a matrix with unit midpoint.
- * See "Inverse interval matrix: A survey", J. Rohn & R. Farhadsefat, Electronic Journal of Linear Algebra, Vol. 22, 2011, section 10.
- *
- * \param A - The interval matrix to inverse.
- * \param invA (output) - The exact inverse of A if A is a matrix with unit midpoint.
- *
- * \throw SingularMatrixException if the matrix A is singular.
- *
- * Author: Antoine Marendet
- */
-void precond_rohn_inverse(const IntervalMatrix& A, IntervalMatrix& invA);
 
 /**
  * \brief Preconditions system \f$[A]x=[b]\f$.

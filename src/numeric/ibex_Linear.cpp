@@ -149,6 +149,36 @@ void LU(const M& A, M& LU, int* pr, int* pc) {
 		}
 	}
 }
+
+template<class M, class V>
+void LU_solve(const M& LU, const int* p, const V& b, V& x) {
+    int n = LU.nb_rows();
+    assert(n == LU.nb_cols());
+    assert(n == b.size() && n == x.size());
+
+    // solve LX=b
+    x[0] = b[p[0]];
+    for (int i = 1; i < n; ++i) {
+        x[i] = b[p[i]];
+        for (int j = 0; j < i; ++j) {
+            x[i] -= LU[p[i]][j] * x[j];
+        }
+    }
+
+    // solve Uy=x
+    if (_mig(LU[p[n - 1]][n - 1]) <= TOO_SMALL)
+        throw SingularMatrixException();
+    x[n - 1] /= LU[p[n - 1]][n - 1];
+    for (int i = n - 2; i >= 0; --i) {
+        for (int j = i + 1; j < n; ++j) {
+            x[i] -= LU[p[i]][j] * x[j];
+        }
+        if (_mig(LU[p[i]][i]) <= TOO_SMALL)
+            throw SingularMatrixException();
+        x[i] /= LU[p[i]][i];
+    }
+}
+
 } // end anonymous namespace
 
 void real_LU(const Matrix& A, Matrix& _LU, int* p) {
@@ -167,59 +197,12 @@ void interval_LU(const IntervalMatrix& A, IntervalMatrix& _LU, int* pr, int* pc)
 	LU<Interval,IntervalMatrix>(A,_LU,pr,pc);
 }
 
-bool full_rank(const IntervalMatrix& A) {
-	int *pr = new int[A.nb_rows()]; // ignored
-	int *pc = new int[A.nb_cols()]; // ignored
-	 try {
-		 IntervalMatrix LU(A);
-
-		 interval_LU(A,LU,pr,pc);
-
-		 delete [] pr;
-		 delete [] pc;
-		 return true;
-	 } catch(SingularMatrixException& e) {
-		 // means in particular that we could not extract an
-		 // invertible m*m submatrix
-		 delete [] pr;
-		 delete [] pc;
-		 return false;
-	 }
+void real_LU_solve(const Matrix &LU, const int* p, const Vector& b, Vector& x) {
+    LU_solve<Matrix, Vector>(LU, p, b, x);
 }
 
-namespace {
-
-void real_LU_solve(const Matrix& LU, const int* p, const Vector& b, Vector& x) {
-	//cout << "LU=" << LU << " b=" << b << endl;
-
-	int n = (LU.nb_rows());
-	assert(n == (LU.nb_cols())); // throw NotSquareMatrixException();
-	assert(n == (b.size()) && n == (x.size()));
-
-	// solve Lx=b
-	x[0] = b[p[0]];
-	for (int i=1; i<n; i++) {
-		x[i] = b[p[i]];
-		for (int j=0; j<i; j++) {
-			x[i] -= LU[p[i]][j]*x[j];
-		}
-	}
-	//cout << " x1=" << x << endl;
-
-	// solve Uy=x
-	if (fabs(LU[p[n-1]][n-1])<=TOO_SMALL) throw SingularMatrixException();
-	x[n-1] /= LU[p[n-1]][n-1];
-
-	for (int i=n-2; i>=0; i--) {
-		for (int j=i+1; j<n; j++) {
-			x[i] -= LU[p[i]][j]*x[j];
-		}
-		if (fabs(LU[p[i]][i])<=TOO_SMALL) throw SingularMatrixException();
-		x[i] /= LU[p[i]][i];
-	}
-	//cout << " x2=" << x << endl;
-}
-
+void interval_LU_solve(const IntervalMatrix& LU, const int *p, const IntervalVector& b, IntervalVector& x) {
+    LU_solve<IntervalMatrix, IntervalVector>(LU, p, b, x);
 }
 
 void real_inverse(const Matrix& A, Matrix& invA) {
@@ -246,6 +229,70 @@ void real_inverse(const Matrix& A, Matrix& invA) {
 		throw e;
 	}
 	delete[] p;
+}
+
+void neumaier_inverse(const IntervalMatrix& A, IntervalMatrix& invA) {
+    int n = A.nb_rows();
+    if (n != A.nb_cols()) throw NotSquareMatrixException();
+
+    Vector u(n, 1);
+    Matrix C(n, n);
+    real_inverse(A.mid(), C); // throw SingularMatrixException
+    double beta = infinite_norm(C * A - Matrix::eye(n));
+    if (beta >= 1)
+        throw SingularMatrixException();
+    Vector w(n);
+    for (int j = 0; j < n; ++j) {
+        w[j] = infinite_norm(C.col(j));
+    }
+    Matrix uw = outer_product(u, w);
+    IntervalMatrix E(n, n);
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            E[i][j] = Interval(-uw[i][j], uw[i][j]);
+    invA = C + beta / (1 - beta) * E;
+}
+
+void precond_rohn_inverse(const IntervalMatrix& A, IntervalMatrix& invA) {
+    //Th. 10.2, not the best
+    int n = A.nb_rows();
+    assert(n == A.nb_cols());
+    Matrix delta = (A - Matrix::eye(n)).ub();
+    if (infinite_norm(delta) >= 1) {
+        throw SingularMatrixException();
+    }
+    Matrix invM = Matrix::eye(n) - delta;
+    Matrix M(n, n);
+    real_inverse(invM, M);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (i != j) {
+                invA[i][j] = Interval(-M[i][j], M[i][j]);
+            } else {
+                invA[i][j] = Interval(M[i][j] / (2 * M[i][j] - 1), M[i][j]);
+            }
+        }
+    }
+}
+
+bool full_rank(const IntervalMatrix& A) {
+	int *pr = new int[A.nb_rows()]; // ignored
+	int *pc = new int[A.nb_cols()]; // ignored
+	 try {
+		 IntervalMatrix LU(A);
+
+		 interval_LU(A,LU,pr,pc);
+
+		 delete [] pr;
+		 delete [] pc;
+		 return true;
+	 } catch(SingularMatrixException& e) {
+		 // means in particular that we could not extract an
+		 // invertible m*m submatrix
+		 delete [] pr;
+		 delete [] pc;
+		 return false;
+	 }
 }
 
 void precond(IntervalMatrix& A) {
@@ -284,27 +331,6 @@ void precond(IntervalMatrix& A, IntervalVector& b) {
 	A = C*A;
 	b = C*b;
 }
-
-// static void lu_interval(IntervalMatrix& A, int i, int n, Interval& det) {
-
-//   if (i==n) {
-//     if (A[n][n].contains(0)) throw NullPivotException();
-//     det=A[n][n];
-//     return;
-//   }
-
-//   Interval pivot = A[i][i];
-
-//   if (pivot.contains(0)) throw NullPivotException();
-
-//   for (int j=i+1; j<=n; j++) {
-//     for (int k=i+1; k<=n; k++) A[j][k]-=(A[j][i]/pivot)*A[i][k];
-//     A[j][i] = A[j][i]/pivot;
-//   }
-
-//   lu_interval(A, i+1, n, det);
-//   det = A[i][i]*det;
-// }
 
 void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio) {
 	int n=(A.nb_rows());
@@ -361,11 +387,6 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
 	return (mu<mu_max);
 
 }
-
-// void PrecGaussSeidel(IntervalMatrix& A, IntervalVector& b, IntervalVector& x) throw(LinearException) {
-//   Precond(A, b);
-//   GaussSeidel(A, b, x);
-// }
 
 void hansen_bliek(const IntervalMatrix& A, const IntervalVector& B, IntervalVector& x) {
 	int n=A.nb_rows();
@@ -444,19 +465,6 @@ bool is_posdef_sylvester(const IntervalMatrix& A) {
 
     return true;
 }
-
-
-/**
- * Checks one corner of an interval matrix in Rohn's test for
- * positive definiteness (this function is called recursively
- * with all corners of the input interval matrix).
- * \param n The dimension of the matrices.
- * \param i The index of test.
- * \param Ac The center matrix.
- * \param Ad The radius matrix.
- * \param z The corner vector.
- * \return true if the matrix is definite positive; false otherwise.
- */
 
 bool is_posdef_rohn(const IntervalMatrix& A) {
 	int n=A.nb_rows();

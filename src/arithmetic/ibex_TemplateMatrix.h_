@@ -181,28 +181,33 @@ inline std::ostream& _displayM(std::ostream& os, const M& m) {
 	return os;
 }
 
-template<class M,class V>
-Matrix _randomM(const M& m) {
-	assert(!m.is_empty());
+template<typename M>
+inline M _absM(const M& m) {
+	M res(m.nb_rows(),m.nb_cols());
 
-	Matrix mm(m.nb_rows(), m.nb_cols());
-	for (int i=0; i<m.nb_rows(); i++) {
-		const V& vi=m[i];
-		mm[i] = vi.random();
-	}
-	return mm;
+	if (___is_empty(m)) { ___set_empty(res); return res; }
+
+	for (int i=0; i<m.nb_rows(); i++)
+		res[i]=abs(m[i]);
+
+	return res;
 }
 
-template<class M,class V>
-Matrix _randomM(const M& m, int seed) {
-	assert(!m.is_empty());
-
-	Matrix mm(m.nb_rows(), m.nb_cols());
-	for (int i=0; i<m.nb_rows(); i++) {
-		const V& vi=m[i];
-		mm[i] = vi.random(seed);
-	}
-	return mm;
+template<typename M>
+inline double _infinite_normM(const M& m) {
+	assert(!___is_empty(m));
+			
+    double norm = 0;
+    for (int j=0; j<m.nb_cols(); j++)
+        norm += ___mag(m[0][j]);
+    for (int i=1; i<m.nb_rows(); i++) {
+        double sum = 0;
+        for (int j=0; j<m.nb_cols(); j++)
+            sum += ___mag(m[i][j]);
+        if (sum > norm)
+            norm = sum;
+    }
+    return norm;
 }
 
 } // end anonymous namespace

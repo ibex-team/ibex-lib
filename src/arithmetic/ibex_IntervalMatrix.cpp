@@ -355,7 +355,35 @@ Matrix IntervalMatrix::diam() const {
 	return M;
 }
 
-Matrix	        IntervalMatrix::random(int seed) const                            { return _randomM<IntervalMatrix,IntervalVector>(*this,seed); }
-Matrix	        IntervalMatrix::random() const                                    { return _randomM<IntervalMatrix,IntervalVector>(*this); }
+Matrix random(const IntervalMatrix& m) {
+	assert(!m.is_empty());
+
+	Matrix mm(m.nb_rows(), m.nb_cols());
+	for (int i=0; i<m.nb_rows(); i++) {
+		const IntervalVector& vi=m[i];
+		mm[i] = vi.random();
+	}
+	return mm;
+}
+
+Matrix random(const IntervalMatrix& m, int seed) {
+	assert(!m.is_empty());
+
+	Matrix mm(m.nb_rows(), m.nb_cols());
+	for (int i=0; i<m.nb_rows(); i++) {
+		const IntervalVector& vi=m[i];
+		mm[i] = vi.random(seed);
+	}
+	return mm;
+}
+
+IntervalMatrix abs(const IntervalMatrix& m) {
+	return _absM(m);
+}
+
+double infinite_norm(const IntervalMatrix& m) {
+	return _infinite_normM(m);
+}
+
 
 } // namespace ibex

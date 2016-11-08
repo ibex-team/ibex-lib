@@ -271,7 +271,12 @@ Vector operator*(const Vector& x, const Matrix& m);
 /**
  * \brief |x|.
  */
-Matrix abs(const Matrix& x);
+Matrix abs(const Matrix& m);
+
+/**
+ * \brief ||x||_oo.
+ */
+double infinite_norm(const Matrix& m);
 
 /**
  * \brief Stream out a matrix.
@@ -402,10 +407,6 @@ inline Vector operator*(const Matrix& m, const Vector& v) {
 
 inline Vector operator*(const Vector& v, const Matrix& m) {
 	return mulVM<Vector,Matrix,Vector>(v,m);
-}
-
-inline Matrix abs(const Matrix& m) {
-	return absM(m);
 }
 
 } // namespace ibex

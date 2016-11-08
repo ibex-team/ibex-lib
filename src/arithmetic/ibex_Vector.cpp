@@ -72,18 +72,29 @@ double Vector::max() const {
 }
 
 
-double Vector::norm() const {
+double norm(const Vector& x) {
 	double n=0;
-	for (int i=0; i<size(); i++)
-		n+=::pow((*this)[i],2);
+	for (int i=0; i<x.size(); i++)
+		n+=::pow(x[i],2);
 	return ::sqrt(n);
+}
+
+double infinite_norm(const Vector& v) {
+    double norm = ___mag(v[0]);
+    for (int i=1; i<v.size(); i++) {
+        double x = ___mag(v[i]);
+        if (x > norm)
+            norm = x;
+    }
+    return norm;
 }
 
 Vector  Vector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
 void    Vector::put(int start_index, const Vector& x)             { _put(*this, start_index, x); }
 Vector& Vector::operator=(const Vector& x)                        { resize(x.size()); // see issue #10
                                                                     return _assignV(*this,x); }
-bool    Vector::operator==(const Vector& x) const                 { return _equalsV(*this,x); }
+Vector abs(const Vector& v)                                       { return _abs(v); }
+bool   Vector::operator==(const Vector& x) const                  { return _equalsV(*this,x); }
 std::ostream&   operator<<(std::ostream& os, const Vector& x)     { return _displayV(os,x); }
 
 } // end namespace ibex

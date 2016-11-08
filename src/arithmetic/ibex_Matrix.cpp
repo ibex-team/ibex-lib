@@ -150,6 +150,14 @@ void Matrix::set_col(int col1, const Vector& v) {
 	_set_col(*this,col1,v);
 }
 
+Matrix abs(const Matrix& m) {
+	return _absM(m);
+}
+
+double infinite_norm(const Matrix& m) {
+	return _infinite_normM(m);
+}
+
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {
 	return _displayM(os,m);
 }
