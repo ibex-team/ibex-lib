@@ -148,12 +148,12 @@ double Matrix::compute_det(){
     if(_nb_cols ==2)
         return M[0][0]*M[1][1]-M[1][0]*M[0][1];
     else {
-        for(int i=0;i<_nb_cols;i++) {
+        for(int i=0;i<_nb_rows;i++) {
             Matrix sub(_nb_rows-1,_nb_rows-1);
             int row_it(0);
-            for(int j=0;j<_nb_rows-1;j++) { //create sub matrix
+            for(int j=0;j<_nb_rows;j++) { //create sub matrix
                 if(j!=i){
-                    sub.set_row(row_it,(this->row(j).subvector(2,_nb_cols-1)));
+                    sub.set_row(row_it,(this->row(j).subvector(1,_nb_cols-1)));
                     row_it++;
                 }
             }
