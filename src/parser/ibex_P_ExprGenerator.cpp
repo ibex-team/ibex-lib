@@ -9,42 +9,368 @@
 //============================================================================
 
 #include "ibex_P_ExprGenerator.h"
-#include "ibex_ConstantGenerator.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_Exception.h"
+#include "ibex_Expr.h"
+
+#include <sstream>
+
+using namespace std;
 
 namespace ibex {
+
 namespace parser {
 
-ExprGenerator::ExprGenerator(const Scope& scope) : scope(scope) {
+extern stack<Scope>& scopes();
+
+class LabelNode : public Label {
+public:
+	LabelNode(const ExprNode* node) : _node(node) { }
+
+	virtual ~LabelNode() { }
+
+	virtual const ExprNode& node() const { return *_node; }
+
+	virtual bool is_const() const { return false; }
+
+	virtual const Domain& domain() const {
+		throw SyntaxError("Unexpected symbol inside constant expression");
+	}
+
+	virtual const Dim& dim() const { return _node->dim; }
+
+	const ExprNode* _node;
+};
+
+class LabelConst : public Label {
+public:
+	// do not use POS_INFINITY to avoid confusion
+	typedef enum { NEG_INF=0, POS_INF=1, OTHER=2 } number_type;
+
+	// This constant cannot be represented by a Domain
+	// object because (+oo,+oo) is automatically replaced by the empty set.
+	static LabelConst* pos_infinity() {
+		return new LabelConst(POS_INF);
+	}
+
+	static LabelConst* neg_infinity() {
+		return new LabelConst(NEG_INF);
+	}
+
+	LabelConst(int v) : _domain(Dim::scalar()), num_type(OTHER), cst(NULL) {
+		_domain.i()=Interval(v,v);
+	}
+
+	LabelConst(const Interval& itv) : _domain(Dim::scalar()), num_type(OTHER), cst(NULL) {
+		_domain.i()=itv;
+	}
+
+	LabelConst(const Domain& d, bool ref=false) : _domain(d,ref), num_type(OTHER), cst(NULL) {
+
+	}
+
+	// Label of a constant symbol.
+//	LabelConst(std::pair<const ExprConstant*, const Domain*>& p) : _domain(*p.second,true), num_type(OTHER), cst(p.first) {
+//
+//	}
+//
+	LabelConst(const ExprConstant& node) : _domain(node.get(),true), num_type(OTHER), cst(&node) {
+
+	}
+
+
+	virtual const ExprNode& node() const {
+
+		if (cst==NULL) {
+			if (num_type!=OTHER)
+				throw SyntaxError("Unexpected infinity symbol \"oo\"");
+
+			// The final node domain is *not* a reference to
+			// the constant domain: all objects created
+			// during parsing can be safely deleted
+
+			((LabelConst*) this)->cst = &ExprConstant::new_(_domain, false);
+
+		}
+		return *cst;
+	}
+
+	virtual bool is_const() const { return true; }
+
+	virtual const Domain& domain() const { return _domain; }
+
+	virtual const Dim& dim() const { return _domain.dim; }
+
+	Domain _domain;
+	number_type num_type;
+	const ExprConstant* cst; // only built if necessary
+
+private:
+	LabelConst(number_type num_type) : _domain(Dim::scalar()), num_type(num_type), cst(NULL) {
+		_domain.set_empty();
+	}
+
+};
+
+int to_integer(const Domain& d) {
+	assert(d.dim.is_scalar());
+	assert(d.i().is_degenerated());
+	double x=d.i().mid();
+	assert(floor(x)==x);
+	return (int)x;
+}
+
+double to_double(const Domain& d) {
+	assert(d.dim.is_scalar());
+	// WARNING: this is quite unsafe. But
+	// requiring d.i().is_degenerated() is wrong,
+	// the result of a calculus with degenerated intervals
+	// may not be degenerated (and large)... Still, we could
+	// give some warning if, say, the diameter here was > 1e-10.
+	return d.i().mid();
+}
+
+ExprGenerator::ExprGenerator() : scope(scopes().top()) {
 
 }
 
-const ExprNode& ExprGenerator::generate(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
-	return ExprGenerator::copy(old_x,new_x,y,true);
+Domain ExprGenerator::generate_cst(const P_ExprNode& y) {
+	visit(y);
+	Domain d=y.lab->domain();
+
+	// cleanup important in case of the same expression
+	// evaluated several times in different context
+	// (iterator values changing)
+	y.cleanup();
+	return d;
 }
 
-void ExprGenerator::visit(const ExprNode& e) {
-	if (!clone.found(e)) {
+int ExprGenerator::generate_int(const P_ExprNode& y) {
+	return to_integer(generate_cst(y));
+}
+
+double ExprGenerator::generate_dbl(const P_ExprNode& y) {
+	visit(y);
+	const Domain& d=y.lab->domain();
+	double value;
+
+	switch(((LabelConst*) y.lab)->num_type) {
+	case LabelConst::NEG_INF:
+		value=NEG_INFINITY;
+		break;
+	case LabelConst::POS_INF:
+		value=POS_INFINITY;
+		break;
+	default:
+		value=to_double(d);
+	}
+	y.cleanup();
+	return value;
+}
+
+const ExprNode& ExprGenerator::generate(const P_ExprNode& y) {
+//	// create the nodes for the constants symbols
+//	// by default, all constants are used (see destruction below)
+//	int m=scope.cst.size();
+//	Array<const ExprConstant> csts(m);
+//	for (int i=0; i<m; i++) {
+//		const char* id=scope.cst[i];
+//		// Domains passed by copy
+//		csts.set_ref(i,ExprConstant::new_(*scope.get_cst(id).second));
+//		scope.bind_cst_node(id, csts[i]);
+//	}
+
+	visit(y);
+	const ExprNode& e=y.lab->node();
+
+	// cleanup important in case of the same expression
+	// evaluated several times in different context
+	// (iterator values changing)
+	y.cleanup();
+
+	// destroy unused constants
+//	for (int i=0; i<m; i++) {
+//		if (csts[i].fathers.is_empty() // no father
+//				&& (&csts[i]!=&(y.lab->node())) // and not root node
+//		)
+//			delete &csts[i];
+//	}
+
+	return e;
+}
+
+void ExprGenerator::visit(const P_ExprNode& e) {
+
+	if (e.lab!=NULL) return;
+
+	if (e.op==P_ExprNode::POWER ||
+		e.op==P_ExprNode::EXPR_WITH_IDX) {
 		e.acceptVisitor(*this);
+		return;
+	}
+
+	Array<const Domain> arg_cst(e.arg.size());
+
+	bool all_cst=true;
+	for (int i=0; i<e.arg.size(); i++) {
+		visit(e.arg[i]);
+		all_cst = all_cst && (e.arg[i].lab->is_const());
+		if (all_cst) arg_cst.set_ref(i,e.arg[i].lab->domain());
+	}
+
+	if (all_cst) {
+
+		if (e.op==P_ExprNode::MINUS) {
+			LabelConst& c=*((LabelConst*) e.arg[0].lab);
+			switch(c.num_type) {
+			case LabelConst::POS_INF:
+				e.lab = LabelConst::neg_infinity();
+				break;
+			case LabelConst::NEG_INF:
+				e.lab = LabelConst::pos_infinity();
+				break;
+			default:
+				e.lab = new LabelConst(-arg_cst[0]);
+			}
+			return;
+		}
+
+		try {
+			switch(e.op) {
+			case P_ExprNode::INFTY:      e.lab=LabelConst::pos_infinity(); break;
+			case P_ExprNode::VAR_SYMBOL: e.lab=new LabelNode(scope.get_var(((P_ExprVarSymbol&) e).name).first); break;
+			case P_ExprNode::CST_SYMBOL: e.lab=new LabelConst(scope.get_cst(((P_ExprCstSymbol&) e).name)); break;
+			case P_ExprNode::TMP_SYMBOL:
+				{
+					const P_ExprNode& e2=scope.get_func_tmp_expr(((P_ExprTmpSymbol&) e).name);
+					visit(e2);
+					e.lab = new LabelNode(&e2.lab->node());
+				}
+				break;
+			case P_ExprNode::CST:     e.lab=new LabelConst(((P_ExprConstant&) e).value,true); break;
+			case P_ExprNode::ITER:    e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;
+			case P_ExprNode::IDX:
+			case P_ExprNode::IDX_RANGE:
+			case P_ExprNode::IDX_ALL:
+			case P_ExprNode::EXPR_WITH_IDX:  assert(false); /* impossible */ break;
+			case P_ExprNode::ROW_VEC: e.lab=new LabelConst(Domain(arg_cst,true)); break;
+			case P_ExprNode::COL_VEC: e.lab=new LabelConst(Domain(arg_cst,false)); break;
+			case P_ExprNode::APPLY:   e.lab=new LabelConst((((const P_ExprApply&) e).f).basic_evaluator().eval(arg_cst)); break;
+			case P_ExprNode::CHI:     not_implemented("Chi in constant expressions"); break;
+			case P_ExprNode::ADD:     e.lab=new LabelConst(arg_cst[0] + arg_cst[1]); break;
+			case P_ExprNode::MUL:     e.lab=new LabelConst(arg_cst[0] * arg_cst[1]); break;
+			case P_ExprNode::SUB:     e.lab=new LabelConst(arg_cst[0] - arg_cst[1]); break;
+			case P_ExprNode::DIV:     e.lab=new LabelConst(arg_cst[0] / arg_cst[1]); break;
+			case P_ExprNode::MAX:     e.lab=new LabelConst(max(arg_cst)); break;
+			case P_ExprNode::MIN:     e.lab=new LabelConst(min(arg_cst)); break;
+			case P_ExprNode::ATAN2:   e.lab=new LabelConst(atan2(arg_cst[0], arg_cst[1])); break;
+			case P_ExprNode::POWER:
+			case P_ExprNode::MINUS:   assert(false); /* impossible */ break;
+			case P_ExprNode::TRANS:   e.lab=new LabelConst(transpose(arg_cst[0])); break;
+			case P_ExprNode::SIGN:    e.lab=new LabelConst(sign (arg_cst[0])); break;
+			case P_ExprNode::ABS:     e.lab=new LabelConst(abs  (arg_cst[0])); break;
+			case P_ExprNode::SQR:     e.lab=new LabelConst(sqr  (arg_cst[0])); break;
+			case P_ExprNode::SQRT:    e.lab=new LabelConst(sqrt (arg_cst[0])); break;
+			case P_ExprNode::EXP:     e.lab=new LabelConst(exp  (arg_cst[0])); break;
+			case P_ExprNode::LOG:     e.lab=new LabelConst(log  (arg_cst[0])); break;
+			case P_ExprNode::COS:     e.lab=new LabelConst(cos  (arg_cst[0])); break;
+			case P_ExprNode::SIN:     e.lab=new LabelConst(sin  (arg_cst[0])); break;
+			case P_ExprNode::TAN:     e.lab=new LabelConst(tan  (arg_cst[0])); break;
+			case P_ExprNode::ACOS:    e.lab=new LabelConst(acos (arg_cst[0])); break;
+			case P_ExprNode::ASIN:    e.lab=new LabelConst(asin (arg_cst[0])); break;
+			case P_ExprNode::ATAN:    e.lab=new LabelConst(atan (arg_cst[0])); break;
+			case P_ExprNode::COSH:    e.lab=new LabelConst(cosh (arg_cst[0])); break;
+			case P_ExprNode::SINH:    e.lab=new LabelConst(sinh (arg_cst[0])); break;
+			case P_ExprNode::TANH:    e.lab=new LabelConst(tanh (arg_cst[0])); break;
+			case P_ExprNode::ACOSH:   e.lab=new LabelConst(acosh(arg_cst[0])); break;
+			case P_ExprNode::ASINH:   e.lab=new LabelConst(asinh(arg_cst[0])); break;
+			case P_ExprNode::ATANH:   e.lab=new LabelConst(atanh(arg_cst[0])); break;
+			case P_ExprNode::INF:
+				if (!arg_cst[0].dim.is_scalar()) throw DimException("\"inf\" expects an interval as argument");
+				e.lab=new LabelConst(arg_cst[0].i().lb()); break;
+			case P_ExprNode::MID:
+				if (!arg_cst[0].dim.is_scalar()) throw DimException("\"mid\" expects an interval as argument");
+				e.lab=new LabelConst(arg_cst[0].i().mid()); break;
+			case P_ExprNode::SUP:
+				if (!arg_cst[0].dim.is_scalar()) throw DimException("\"sup\" expects an interval as argument");
+				e.lab=new LabelConst(arg_cst[0].i().ub()); break;
+			}
+		} catch(DimException& exc) {
+			throw SyntaxError(exc.message(),NULL,e.line);
+		}
+		return;
+	}
+
+	Array<const ExprNode> arg_node(e.arg.size());
+
+	for (int i=0; i<e.arg.size(); i++) {
+		// may force constants to become nodes
+		arg_node.set_ref(i,e.arg[i].lab->node());
+	}
+
+	const ExprNode* node;
+
+	try {
+		switch(e.op) {
+		case P_ExprNode::INFTY:
+		case P_ExprNode::VAR_SYMBOL:
+		case P_ExprNode::CST_SYMBOL:
+		case P_ExprNode::TMP_SYMBOL:
+		case P_ExprNode::CST:
+		case P_ExprNode::ITER:
+		case P_ExprNode::IDX:
+		case P_ExprNode::IDX_RANGE:
+		case P_ExprNode::IDX_ALL:
+		case P_ExprNode::EXPR_WITH_IDX: assert(false); /* impossible */ break;
+		case P_ExprNode::ROW_VEC:node=&ExprVector::new_(arg_node,true); break;
+		case P_ExprNode::COL_VEC:node=&ExprVector::new_(arg_node,false); break;
+		case P_ExprNode::APPLY:  node=&(((const P_ExprApply&) e).f)(arg_node); break;
+		case P_ExprNode::CHI:    node=&chi(arg_node[0], arg_node[1], arg_node[2]); break;
+		case P_ExprNode::ADD:    node=&(arg_node[0] + arg_node[1]); break;
+		case P_ExprNode::MUL:    node=&(arg_node[0] * arg_node[1]); break;
+		case P_ExprNode::SUB:    node=&(arg_node[0] - arg_node[1]); break;
+		case P_ExprNode::DIV:    node=&(arg_node[0] / arg_node[1]); break;
+		case P_ExprNode::MAX:    node=&max(arg_node); break;
+		case P_ExprNode::MIN:    node=&min(arg_node); break;
+		case P_ExprNode::ATAN2:  node=&atan2(arg_node[0], arg_node[1]); break;
+		case P_ExprNode::POWER:  assert(false); /* impossible */ break;
+		case P_ExprNode::MINUS:  node=&(-arg_node[0]); break;
+		case P_ExprNode::TRANS:  node=&transpose(arg_node[0]); break;
+		case P_ExprNode::SIGN:   node=&sign (arg_node[0]); break;
+		case P_ExprNode::ABS:    node=&abs  (arg_node[0]); break;
+		case P_ExprNode::SQR:    node=&sqr  (arg_node[0]); break;
+		case P_ExprNode::SQRT:   node=&sqrt (arg_node[0]); break;
+		case P_ExprNode::EXP:    node=&exp  (arg_node[0]); break;
+		case P_ExprNode::LOG:    node=&log  (arg_node[0]); break;
+		case P_ExprNode::COS:    node=&cos  (arg_node[0]); break;
+		case P_ExprNode::SIN:    node=&sin  (arg_node[0]); break;
+		case P_ExprNode::TAN:    node=&tan  (arg_node[0]); break;
+		case P_ExprNode::ACOS:   node=&acos (arg_node[0]); break;
+		case P_ExprNode::ASIN:   node=&asin (arg_node[0]); break;
+		case P_ExprNode::ATAN:   node=&atan (arg_node[0]); break;
+		case P_ExprNode::COSH:   node=&cosh (arg_node[0]); break;
+		case P_ExprNode::SINH:   node=&sinh (arg_node[0]); break;
+		case P_ExprNode::TANH:   node=&tanh (arg_node[0]); break;
+		case P_ExprNode::ACOSH:  node=&acosh(arg_node[0]); break;
+		case P_ExprNode::ASINH:  node=&asinh(arg_node[0]); break;
+		case P_ExprNode::ATANH:  node=&atanh(arg_node[0]); break;
+		case P_ExprNode::INF:    throw SyntaxError("\"inf\" operator requires constant interval"); break;
+		case P_ExprNode::MID:    throw SyntaxError("\"mid\" operator requires constant interval"); break;
+		case P_ExprNode::SUP:    throw SyntaxError("\"sup\" operator requires constant interval"); break;
+		}
+		e.lab = new LabelNode(node);
+	} catch(DimException& exc) {
+		throw SyntaxError(exc.message(),NULL,e.line);
 	}
 }
-
-#define LEFT   (*clone[e.left])
-#define RIGHT  (*clone[e.right])
 
 void ExprGenerator::visit(const P_ExprPower& e) {
 
-	visit(e.left);
-	visit(e.right);
+	visit(e.arg[0]);
+	visit(e.arg[1]);
 
-	if (!fold) {
-		// TODO: if fold is false, even x^(1) will be transformed into exp(1*ln(x)) :-(
-		mark(e.left);
-		mark(e.right);
-		clone.insert(e, &exp(RIGHT * log(LEFT)));
-		return;
-	}
+	Label& left=(*(e.arg[0].lab));
+	Label& right=(*(e.arg[1].lab));
 
 	typedef enum { IBEX_INTEGER, IBEX_INTERVAL, IBEX_EXPRNODE } _type;
 	_type right_type;
@@ -54,12 +380,11 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 	Interval itv_right;
 	Interval itv_left;
 
-	const ExprConstant* cr=dynamic_cast<const ExprConstant*>(&RIGHT);
-	if (cr) {
-		if (!cr->dim.is_scalar()) throw SyntaxError("exponent must be scalar");
+	if (right.is_const()) {
+		if (!right.domain().dim.is_scalar()) throw SyntaxError("exponent must be scalar");
 
 		right_type=IBEX_INTERVAL;
-		itv_right=cr->get_value();
+		itv_right=right.domain().i();
 		//delete cr; // not now (see comment in ExprCopy.h)
 		// NOTE: we can delete cr because
 		// even in the case where right_type==IBEX_INTERVAL and left_type==IBEX_EXPRNODE
@@ -78,10 +403,9 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 		right_type=IBEX_EXPRNODE;
 
 
-	const ExprConstant* cl=dynamic_cast<const ExprConstant*>(&LEFT);
-	if (cl) {
+	if (left.is_const()) {
 		left_type=IBEX_INTERVAL;
-		itv_left=cl->get_value();
+		itv_left=left.domain().i();
 		//delete cl; // LEFT will no longer be used // not now (see comment in ExprCopy.h)
 	} else
 		left_type=IBEX_EXPRNODE;
@@ -89,85 +413,134 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 
 	if (left_type==IBEX_INTERVAL) {
 		if (right_type==IBEX_INTEGER) {
-			clone.insert(e, &ExprConstant::new_scalar(pow(itv_left,int_right)));
+			e.lab=new LabelConst(pow(itv_left,int_right));
 		} else if (right_type==IBEX_INTERVAL) {
-			clone.insert(e, &ExprConstant::new_scalar(pow(itv_left,itv_right)));
+			e.lab=new LabelConst(pow(itv_left,itv_right));
 		} else {
-			mark(e.right);
-			clone.insert(e, &exp(RIGHT * log(itv_left))); // *log(...) will create a new ExprConstant.
+			e.lab=new LabelNode(&exp(right.node() * log(itv_left))); // *log(...) will create a new ExprConstant.
 		}
 	}  else {
-		mark(e.left);
 		if (right_type==IBEX_INTEGER) {
-			clone.insert(e, &(pow(LEFT,int_right)));
-		} else if (right_type==IBEX_INTERVAL) { // do not forget this case (RIGHT does not exist anymore)
-			clone.insert(e, &exp(itv_right * log(LEFT)));
+			e.lab=new LabelNode(&pow(left.node(),int_right));
+		} else if (right_type==IBEX_INTERVAL) {
+			e.lab=new LabelNode(&exp(itv_right * log(left.node())));
 		} else {
-			mark(e.right);
-			clone.insert(e, &exp(RIGHT * log(LEFT)));
+			e.lab=new LabelNode(&exp(right.node() * log(left.node())));
 		}
 	}
-
 }
 
-void ExprGenerator::visit(const P_ExprIndex& e) {
-	int index=ConstantGenerator(scope).eval_integer(e.right);
+pair<int,int> ExprGenerator::visit_index_tmp(const Dim& dim, const P_ExprNode& idx, bool matlab_style) {
+	int i1,i2;
 
-	visit(e.left);
-
-	int real_index=e.matlab_style? index-1 : index;
-
-	if (real_index<0)
-		throw SyntaxError("negative index. Note: indices in Matlab-style (using parenthesis like in \"x(i)\") start from 1 (not 0).");
-	if (real_index>LEFT.dim.max_index())
-		throw SyntaxError("index out of bounds. Note: indices in C-style (using square brackets like in \"x[i]\") start from 0 (not 1).");
-
-	if (fold) {
-		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&LEFT);
-		if (c) {
-			clone.insert(e, &ExprConstant::new_(c->get()[real_index]));
-			//delete c; // not now (see comment in ExprCopy.h)
-			return;
-		}
+	switch(idx.op) {
+	case P_ExprNode::IDX_ALL :
+		assert(idx.arg.size()==0);
+		i1=i2=-1;
+		break;
+	case P_ExprNode::IDX_RANGE :
+		assert(idx.arg.size()==2);
+		visit(idx.arg[0]);
+		visit(idx.arg[1]);
+		assert(idx.arg[0].lab->is_const());
+		assert(idx.arg[1].lab->is_const());
+		i1=to_integer(idx.arg[0].lab->domain());
+		i2=to_integer(idx.arg[1].lab->domain());
+		if (matlab_style) { i1--; i2--; }
+		if (i1<0 || i2<0)
+			throw SyntaxError("negative index. Note: indices in Matlab-style (using parenthesis like in \"x(i)\") start from 1 (not 0).");
+		break;
+	case P_ExprNode::IDX :
+		assert(idx.arg.size()==1);
+		visit(idx.arg[0]);
+		assert(idx.arg[0].lab->is_const());
+		i1=i2=to_integer(idx.arg[0].lab->domain());
+		if (matlab_style) { i1--; i2--; }
+		if (i1<0)
+			throw SyntaxError("negative index. Note: indices in Matlab-style (using parenthesis like in \"x(i)\") start from 1 (not 0).");
+		break;
+	default:
+		assert(false);
 	}
 
-	const ExprConstantRef* s=dynamic_cast<const ExprConstantRef*>(&LEFT);
-	if (s) {
-		assert(e.fathers.size()==1);
-		if (dynamic_cast<const P_ExprIndex*>(&e.fathers[0])) {
-			clone.insert(e, new ExprConstantRef(s->value[real_index]));
-		} else {
-			// "last time": we cannot keep reference anymore.
-			clone.insert(e, &ExprConstant::new_(s->value[real_index]));
-		}
-		//delete s; // not now: there may be inside a DAG (via a function) (see comment in ExprCopy.h)
-		return;
-	}
+	/**
+	 * To be clean, we should create a LabeNode subclass
+	 * that contains the returned pair. Meanwhile, we
+	 * have to create a dummy label so that
+	 * the cleanup will not consider this node as already visited
+	 * (and delete properly the labels of the index/indices).
+	 */
+	idx.lab = new LabelConst(0); // dummy
 
-	mark(e.left);
-	clone.insert(e, &(LEFT[real_index]));
+	return pair<int,int>(i1,i2);
 }
 
-void ExprGenerator::visit(const ExprConstantRef& c) {
-	assert(c.fathers.size()==1);
-	if (dynamic_cast<const P_ExprIndex*>(&c.fathers[0])) {
-		// temporary copy (with domain passed by reference).
-		// will be replaced by a ExprConstant at the
-		// last time (in P_ExprIndex)
-		clone.insert(c, new ExprConstantRef(c.value));
+DoubleIndex ExprGenerator::visit_index(const Dim& dim, const P_ExprNode& idx1, bool matlab_style) {
+
+	pair<int,int> p=visit_index_tmp(dim,idx1,matlab_style);
+
+	// If only one index is supplied
+	// it may corresponds to a row number or
+	// a column number (in case of row vector).
+	if (p.first==-1) {
+		return DoubleIndex::all(dim);
+	} else if (p.second==p.first) {
+		return DoubleIndex::one_index(dim,p.first);
 	} else {
-		clone.insert(c, & ExprConstant::new_(c.value)); //ExprConstSymbol(c.value));
+		if (dim.nb_rows()>1)
+			return DoubleIndex::rows(dim,p.first,p.second);
+		else
+			return DoubleIndex::cols(dim,p.first,p.second);
 	}
 }
 
-void ExprGenerator::visit(const ExprIter& x) {
-	clone.insert(x, & ExprConstant::new_scalar(scope.get_iter_value(x.name)));
+DoubleIndex ExprGenerator::visit_index(const Dim& dim, const P_ExprNode& idx1, const P_ExprNode& idx2, bool matlab_style) {
+
+	pair<int,int> r=visit_index_tmp(dim,idx1,matlab_style);
+	pair<int,int> c=visit_index_tmp(dim,idx2,matlab_style);
+
+	if (r.first==-1) {
+		if (c.first==-1)
+			return DoubleIndex::all(dim);
+		else if (c.first==c.second)
+			return DoubleIndex::one_col(dim,c.first);
+		else
+			return DoubleIndex::cols(dim,c.first,c.second);
+	} else if (r.first==r.second) {
+		if (c.first==-1)
+			return DoubleIndex::one_row(dim,r.first);
+		else if (c.first==c.second)
+			return DoubleIndex::one_elt(dim,r.first,c.first);
+		else
+			return DoubleIndex::subrow(dim,r.first,c.first,c.second);
+	} else {
+		if (c.first==-1)
+			return DoubleIndex::rows(dim,r.first,r.second);
+		else if (c.first==c.second)
+			return DoubleIndex::subcol(dim,r.first,r.second,c.first);
+		else
+			return DoubleIndex::submatrix(dim,r.first,r.second,c.first,c.second);
+	}
 }
 
-void ExprGenerator::visit(const ExprInfinity& x) {
-	ibex_warning("infinity value \"oo\" inside an expression means the empty interval");
-	clone.insert(x, & ExprConstant::new_scalar(Interval::EMPTY_SET));
+void ExprGenerator::visit(const P_ExprWithIndex& e) {
+	visit(e.arg[0]);
+
+	Label& expr=(*(e.arg[0].lab));
+
+	DoubleIndex idx=e.arg.size()==2?
+			visit_index(expr.dim(), e.arg[1], e.matlab_style)
+			:
+			visit_index(expr.dim(), e.arg[1], e.arg[2], e.matlab_style);
+
+	if (expr.is_const()) {
+		Domain d=expr.domain()[idx];
+		e.lab = new LabelConst(d,d.is_reference);
+	} else {
+		e.lab = new LabelNode(&ExprIndex::new_(expr.node(),idx));
+	}
 }
+
 
 } // end namespace parser
 } // end namespace ibex

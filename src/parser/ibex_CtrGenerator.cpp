@@ -13,25 +13,31 @@
 #include "ibex_P_NumConstraint.h"
 #include "ibex_Function.h"
 #include "ibex_P_ExprGenerator.h"
-#include "ibex_ConstantGenerator.h"
+#include "ibex_Expr2DAG.h"
+#include "ibex_P_Source.h"
+#include "ibex_Scope.h"
+
+#include <sstream>
 
 using namespace std;
 
 namespace ibex {
+
 namespace parser {
 
-void CtrGenerator::generate(const Array<const ExprSymbol>& _src_vars, const P_ConstraintList& src,
-		std::vector<NumConstraint*>& dest) {
-	src_vars = &_src_vars;
-	ctrs = &dest;
+extern stack<Scope>& scopes();
 
-	assert(dest.empty());
+CtrGenerator::CtrGenerator() {
+	for (vector<const char*>::iterator it=scopes().top().cst.begin(); it!=scopes().top().cst.end(); it++) {
+		s.lock.insert(scopes().top().get_cst(*it),true);
+	}
+}
 
-	scopes.push(Scope()); // a fresh new scope! (needed otherwise scopes.top() is NULL -> fix issue #36)
+std::vector<ExprCtr*> CtrGenerator::generate(const P_ConstraintList& ctrs) {
 
-	visit(src);
+	visit(ctrs);
 
-	scopes.pop();
+	return this->ctrs;
 }
 
 void CtrGenerator::visit(const P_NumConstraint& c) {
@@ -39,14 +45,24 @@ void CtrGenerator::visit(const P_NumConstraint& c) {
 }
 
 void CtrGenerator::visit(const P_OneConstraint& c) {
-	int n=src_vars->size();
 
-	Array<const ExprSymbol> dest_vars(n);
-	varcopy(*src_vars,dest_vars);
+//	Array<const ExprSymbol> dest_vars2(n);
+//	varcopy(vars,dest_vars2);
+//
+//	const ExprNode& e2=Expr2DAG().transform(vars, (const Array<const ExprNode>&) dest_vars2, e);
+//
+//	cleanup(e,true);
 
-	const ExprNode& e=ExprGenerator(scopes.top()).generate(*src_vars, dest_vars, c.expr);
+//	ctrs->push_back(new NumConstraint(dest_vars2, ExprCtr(e2,c.op)));
 
-	ctrs->push_back(new NumConstraint(dest_vars, ExprCtr(e,c.op)));
+	try {
+
+		ExprCtr* e=new ExprCtr(s.simplify(c.expr.generate()),c.op);
+		//cout << "[parser] generated ctr: " << *e << endl;
+		ctrs.push_back(e);
+	} catch(DimException& e) {
+		throw SyntaxError(e.message(),NULL,c.expr.line);
+	}
 }
 
 void CtrGenerator::visit(const P_ConstraintList& list) {
@@ -58,21 +74,18 @@ void CtrGenerator::visit(const P_ConstraintList& list) {
 void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	const char* name     = loop.iter;
 
-	int begin=ConstantGenerator(scopes.top()).eval_integer(loop.first_value); //scope.it_first_value(name);
-	int end=ConstantGenerator(scopes.top()).eval_integer(loop.last_value); //scope.it_last_value(name);
+	int begin=loop.first_value._2int();
+	int end=loop.last_value._2int();
 
-	if (!scopes.empty())
-		scopes.push(scopes.top());
-	else
-		scopes.push(Scope());
+	scopes().push(scopes().top());
 
-	scopes.top().add_iterator(name);
+	scopes().top().add_iterator(name);
 
 	for (int i=begin; i<=end; i++) {
-		scopes.top().set_iter_value(name,i);
+		scopes().top().set_iter_value(name,i);
 		visit(loop.ctrs);
 	}
-	scopes.pop();
+	scopes().pop();
 }
 
 

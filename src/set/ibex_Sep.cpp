@@ -14,9 +14,6 @@ using namespace std;
 
 namespace ibex {
 
-Sep::Sep() : _status1(YES), _status2(NO) {
-}
-
 void Sep::contract(Set& set, double eps) {
 	set.root = set.root->inter(false, set.Rn, *this, eps);
 }

@@ -29,10 +29,12 @@ static IntervalMatrix M1() {
 	return IntervalMatrix(2,3,m);
 }
 
-static bool checkExpr(const ExprNode& node, const char* expr) {
-	std::stringstream s;
-	s << node;
-	return strcmp(s.str().c_str(),expr)==0;
+bool TestExpr::same_mask(int n, int m, bool* m1, bool** m2) {
+	for (int i=0; i<n; i++)
+		for (int j=0; j<m; j++)
+			if (m1[i*m+j]!=m2[i][j]) return false;
+
+	return true;
 }
 
 void TestExpr::symbol() {
@@ -44,11 +46,11 @@ void TestExpr::symbol() {
 	CPPUNIT_ASSERT(x.key==0);
 	CPPUNIT_ASSERT(strcmp(x.name,"x")==0);
 	CPPUNIT_ASSERT(x.size==1);
-	//CPPUNIT_ASSERT(x.deco.d->dim==x.dim);
+	//CPPUNIT_ASSERT(x.deco.d-	bool same_mask(int, int, bool**,bool**);>dim==x.dim);
 	CPPUNIT_ASSERT(x.fathers.size()==0);
 	CPPUNIT_ASSERT(!x.is_zero());
 	CPPUNIT_ASSERT(x.type()==Dim::SCALAR);
-	CPPUNIT_ASSERT(checkExpr(x,"x"));
+	CPPUNIT_ASSERT(sameExpr(x,"x"));
 }
 
 void TestExpr::addxy01() {
@@ -74,8 +76,7 @@ void TestExpr::addxy01() {
 	CPPUNIT_ASSERT(&y.fathers[0]==&e);
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
-
-	CPPUNIT_ASSERT(checkExpr(e,"(x+y)"));
+	CPPUNIT_ASSERT(sameExpr(e,"(x+y)"));
 }
 
 void TestExpr::addxy02() {
@@ -121,7 +122,7 @@ void TestExpr::addxx01() {
 	CPPUNIT_ASSERT(&x.fathers[1]==&e);
 	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
 
-	CPPUNIT_ASSERT(checkExpr(e,"(x+x)"));
+	CPPUNIT_ASSERT(sameExpr(e,"(x+x)"));
 }
 
 // scalar * scalar
@@ -184,7 +185,7 @@ void TestExpr::mulxy06() {
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::ROW_VECTOR);
 
-	CPPUNIT_ASSERT(checkExpr(e,"(x*y)"));
+	CPPUNIT_ASSERT(sameExpr(e,"(x*y)"));
 }
 
 // vector * vector (outer product)
@@ -253,43 +254,43 @@ void TestExpr::dag01() {
 	CPPUNIT_ASSERT(&e3.fathers[0]==&e4);
 	CPPUNIT_ASSERT(e4.fathers.size()==0);
 
-	CPPUNIT_ASSERT(checkExpr(e4,"(((x-(x+y)^2)*(x+y)^2)+(x-(x+y)^2))"));
+	CPPUNIT_ASSERT(sameExpr(e4,"(((x-(x+y)^2)*(x+y)^2)+(x-(x+y)^2))"));
 }
 
 void TestExpr::unaryOp() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::scalar());
-	CPPUNIT_ASSERT(checkExpr(-x,"(-x)"));
-	CPPUNIT_ASSERT(checkExpr(sign(x),"sign(x)"));
-	CPPUNIT_ASSERT(checkExpr(abs(x),"abs(x)"));
-	CPPUNIT_ASSERT(checkExpr(pow(x,4),"x^4"));
-	CPPUNIT_ASSERT(checkExpr(sqr(x),"x^2"));
-	CPPUNIT_ASSERT(checkExpr(sqrt(x),"sqrt(x)"));
-	CPPUNIT_ASSERT(checkExpr(exp(x),"exp(x)"));
-	CPPUNIT_ASSERT(checkExpr(log(x),"log(x)"));
-	CPPUNIT_ASSERT(checkExpr(cos(x),"cos(x)"));
-	CPPUNIT_ASSERT(checkExpr(sin(x),"sin(x)"));
-	CPPUNIT_ASSERT(checkExpr(tan(x),"tan(x)"));
-	CPPUNIT_ASSERT(checkExpr(cosh(x),"cosh(x)"));
-	CPPUNIT_ASSERT(checkExpr(sinh(x),"sinh(x)"));
-	CPPUNIT_ASSERT(checkExpr(tanh(x),"tanh(x)"));
-	CPPUNIT_ASSERT(checkExpr(acos(x),"acos(x)"));
-	CPPUNIT_ASSERT(checkExpr(asin(x),"asin(x)"));
-	CPPUNIT_ASSERT(checkExpr(atan(x),"atan(x)"));
-	CPPUNIT_ASSERT(checkExpr(acosh(x),"acosh(x)"));
-	CPPUNIT_ASSERT(checkExpr(asinh(x),"asinh(x)"));
-	CPPUNIT_ASSERT(checkExpr(atanh(x),"atanh(x)"));
+	CPPUNIT_ASSERT(sameExpr(-x,"(-x)"));
+	CPPUNIT_ASSERT(sameExpr(sign(x),"sign(x)"));
+	CPPUNIT_ASSERT(sameExpr(abs(x),"abs(x)"));
+	CPPUNIT_ASSERT(sameExpr(pow(x,4),"x^4"));
+	CPPUNIT_ASSERT(sameExpr(sqr(x),"x^2"));
+	CPPUNIT_ASSERT(sameExpr(sqrt(x),"sqrt(x)"));
+	CPPUNIT_ASSERT(sameExpr(exp(x),"exp(x)"));
+	CPPUNIT_ASSERT(sameExpr(log(x),"log(x)"));
+	CPPUNIT_ASSERT(sameExpr(cos(x),"cos(x)"));
+	CPPUNIT_ASSERT(sameExpr(sin(x),"sin(x)"));
+	CPPUNIT_ASSERT(sameExpr(tan(x),"tan(x)"));
+	CPPUNIT_ASSERT(sameExpr(cosh(x),"cosh(x)"));
+	CPPUNIT_ASSERT(sameExpr(sinh(x),"sinh(x)"));
+	CPPUNIT_ASSERT(sameExpr(tanh(x),"tanh(x)"));
+	CPPUNIT_ASSERT(sameExpr(acos(x),"acos(x)"));
+	CPPUNIT_ASSERT(sameExpr(asin(x),"asin(x)"));
+	CPPUNIT_ASSERT(sameExpr(atan(x),"atan(x)"));
+	CPPUNIT_ASSERT(sameExpr(acosh(x),"acosh(x)"));
+	CPPUNIT_ASSERT(sameExpr(asinh(x),"asinh(x)"));
+	CPPUNIT_ASSERT(sameExpr(atanh(x),"atanh(x)"));
 }
 
 void TestExpr::binaryOp() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::scalar());
 	const ExprSymbol& y=ExprSymbol::new_("y",Dim::scalar());
-	CPPUNIT_ASSERT(checkExpr(x+y,"(x+y)"));
-	CPPUNIT_ASSERT(checkExpr(x-y,"(x-y)"));
-	CPPUNIT_ASSERT(checkExpr(x*y,"(x*y)"));
-	CPPUNIT_ASSERT(checkExpr(x/y,"(x/y)"));
-	CPPUNIT_ASSERT(checkExpr(max(x,y),"max(x,y)"));
-	CPPUNIT_ASSERT(checkExpr(min(x,y),"min(x,y)"));
-	CPPUNIT_ASSERT(checkExpr(atan2(x,y),"atan2(x,y)"));
+	CPPUNIT_ASSERT(sameExpr(x+y,"(x+y)"));
+	CPPUNIT_ASSERT(sameExpr(x-y,"(x-y)"));
+	CPPUNIT_ASSERT(sameExpr(x*y,"(x*y)"));
+	CPPUNIT_ASSERT(sameExpr(x/y,"(x/y)"));
+	CPPUNIT_ASSERT(sameExpr(max(x,y),"max(x,y)"));
+	CPPUNIT_ASSERT(sameExpr(min(x,y),"min(x,y)"));
+	CPPUNIT_ASSERT(sameExpr(atan2(x,y),"atan2(x,y)"));
 }
 
 void TestExpr::cst01() {
@@ -372,7 +373,7 @@ void TestExpr::vector01() {
 	CPPUNIT_ASSERT(v.length()==4);
 	CPPUNIT_ASSERT(v.size==5);
 	CPPUNIT_ASSERT(v.type()==Dim::MATRIX);
-	CPPUNIT_ASSERT(checkExpr(v,"(x;y;(x+y);(x+(x+y)))"));
+	CPPUNIT_ASSERT(sameExpr(v,"(x;y;(x+y);(x+(x+y)))"));
 }
 
 void TestExpr::vector02() {
@@ -387,67 +388,76 @@ void TestExpr::vector02() {
 	CPPUNIT_ASSERT(v.dim==Dim::matrix(3,4));
 	CPPUNIT_ASSERT(v.row_vector());
 	CPPUNIT_ASSERT(v.type()==Dim::MATRIX);
-	CPPUNIT_ASSERT(checkExpr(v,"(x,y,(x+y),(x+(x+y)))"));
+	CPPUNIT_ASSERT(sameExpr(v,"(x,y,(x+y),(x+(x+y)))"));
 }
 
 void TestExpr::index01() {
 
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(2,3,4));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
 	const ExprIndex& e=x[1];
 	Function f(x,e);
 	CPPUNIT_ASSERT(e.f==&f);
 	//CPPUNIT_ASSERT(e.deco.d->dim==e.dim);
-	CPPUNIT_ASSERT(e.dim==Dim::matrix(3,4));
+	CPPUNIT_ASSERT(e.dim==Dim::row_vec(4));
 	CPPUNIT_ASSERT(e.height==1);
 	CPPUNIT_ASSERT(e.size==2);
-	CPPUNIT_ASSERT(e.type()==Dim::MATRIX);
-	CPPUNIT_ASSERT(checkExpr(e,"x[1]"));
+	CPPUNIT_ASSERT(e.type()==Dim::ROW_VECTOR);
+	CPPUNIT_ASSERT(sameExpr(e,"x(2,:)"));
 	CPPUNIT_ASSERT(e.indexed_symbol());
-	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==12);
+	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
+	CPPUNIT_ASSERT(p.first==&x);
+	bool mask[3][4]={{false,false,false,false},{true,true,true,true},{false,false,false,false}};
+//	for (int i=0; i<3; i++) {
+//		for (int j=0; j<4; j++)
+//			cout << p.second[i][j] << " ";
+//		cout << endl;
+//	}
+	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
 }
 
 void TestExpr::index02() {
-
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(2,3,4));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
 	const ExprIndex& e=x[1][1];
 	Function f(x,e);
 
 	CPPUNIT_ASSERT(e.f==&f);
 	//CPPUNIT_ASSERT(e.deco.d->dim==e.dim);
-	CPPUNIT_ASSERT(e.dim==Dim::row_vec(4));
 	CPPUNIT_ASSERT(e.height==2);
 	CPPUNIT_ASSERT(e.size==3);
-	CPPUNIT_ASSERT(e.type()==Dim::ROW_VECTOR);
-	CPPUNIT_ASSERT(checkExpr(e,"x[1][1]"));
+	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
+	CPPUNIT_ASSERT(sameExpr(e,"x(2,:)(2)"));
 	CPPUNIT_ASSERT(e.indexed_symbol());
-	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==16);
+
+	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
+	CPPUNIT_ASSERT(p.first==&x);
+	bool mask[3][4]={{false,false,false,false},{false,true,false,false},{false,false,false,false}};
+	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
 }
 
 void TestExpr::index03() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(2,3,4));
-	const ExprIndex& e=x[1][1][1];
-	Function f(x,e);
-
-	CPPUNIT_ASSERT(e.f==&f);
-	//CPPUNIT_ASSERT(e.deco.d->dim==e.dim);
-	CPPUNIT_ASSERT(e.height==3);
-	CPPUNIT_ASSERT(e.size==4);
-	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
-	CPPUNIT_ASSERT(checkExpr(e,"x[1][1][1]"));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
+	const ExprIndex& e=x[DoubleIndex::one_elt(x.dim,2,1)];
 	CPPUNIT_ASSERT(e.indexed_symbol());
-	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==17);
+	CPPUNIT_ASSERT(sameExpr(e,"x(3,2)"));
+	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
+	CPPUNIT_ASSERT(p.first==&x);
+	bool mask[3][4]={{false,false,false,false},{false,false,false,false},{false,true,false,false}};
+	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
 }
 
 void TestExpr::index04() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(3,3,4));
-	const ExprIndex& e=x[2][1][3];
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
+	const ExprIndex& tmp=x[DoubleIndex::submatrix(x.dim,1,2,1,4)];
+	const ExprIndex& e=tmp[DoubleIndex::submatrix(x.dim,0,1,2,3)];
 	CPPUNIT_ASSERT(e.indexed_symbol());
-	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==31);
+	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
+	CPPUNIT_ASSERT(p.first==&x);
+	bool mask[3][4]={{false,false,false,false},
+			         {false,false, true, true},
+					 {false,false, true, true}};
+	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
 }
+
 
 void TestExpr::apply01() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
@@ -475,7 +485,7 @@ void TestExpr::apply01() {
 	CPPUNIT_ASSERT(e.height==2);
 	CPPUNIT_ASSERT(e.size==5);
 	CPPUNIT_ASSERT(e.type()==Dim::COL_VECTOR);
-	CPPUNIT_ASSERT(checkExpr(e,"func(x2,(A2*y2),A2)"));
+	CPPUNIT_ASSERT(sameExpr(e,"func(x2,(A2*y2),A2)"));
 }
 
 void TestExpr::apply03() {
@@ -497,7 +507,9 @@ void TestExpr::apply03() {
 
 	CPPUNIT_ASSERT(e.height==2);
 	CPPUNIT_ASSERT(e.size==4);
-	CPPUNIT_ASSERT(checkExpr(e,"(f1(x3,x3)-f2(x3,x3))"));
+
+	CPPUNIT_ASSERT(sameExpr(e,"((x3+x3)-(x3*x3))"));
+	//CPPUNIT_ASSERT(sameExpr(e,"(f1(x3,x3)-f2(x3,x3))"));
 }
 
 void TestExpr::subnodes01() {

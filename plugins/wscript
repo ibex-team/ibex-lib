@@ -13,6 +13,12 @@ def get_plugins(path):
 	return map(basename,folders)
 
 def configure (conf):
+    
+    	##################################################################################################
+	# Enable AFFINE plugin if option --with-affine-extended is enable
+	if (conf.options.WITH_AFFINE_EXTEND):
+		conf.options.WITH_AFFINE =True
+  
 	#store the list of plugins in the environment
 	#conf.env['plugins']=get_plugins(conf.path)
 	plugins=get_plugins(conf.path)

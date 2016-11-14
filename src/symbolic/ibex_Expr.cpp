@@ -10,9 +10,9 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Expr.h"
-#include "ibex_DimException.h"
 #include "ibex_Function.h"
 #include "ibex_ExprPrinter.h"
+#include "ibex_ExprSimplify.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_ExprSize.h"
 #include "ibex_ExprCmp.h"
@@ -57,6 +57,10 @@ bool ExprNode::operator!=(const ExprNode& e) const {
 	return !(*this==e);
 }
 
+const ExprNode& ExprNode::simplify() const {
+	return ExprSimplify().simplify(*this);
+}
+
 void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 	ExprSubNodes nodes(expr);
 
@@ -66,10 +70,8 @@ void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 		}
 }
 
-ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
-: ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) {
-	if (index<0 || index>subexpr.dim.max_index())
-		throw DimException("index out of bounds");
+ExprIndex::ExprIndex(const ExprNode& subexpr, const DoubleIndex& index)
+: ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim(index)), expr(subexpr), index(index) {
 	((ExprNode&) (subexpr)).fathers.add(*this);
 }
 
@@ -84,25 +86,63 @@ bool ExprIndex::indexed_symbol() const {
 	return expr_index->indexed_symbol();
 }
 
-pair<const ExprSymbol*, int> ExprIndex::symbol_shift() const {
+bool** ExprSymbol::mask() const {
+	int n=dim.nb_rows();
+	int m=dim.nb_cols();
+	bool **mask=new bool*[n];
+	for (int i=0; i<n; i++) {
+		mask[i]=new bool[m];
+		for (int j=0; j<m; j++)
+			mask[i][j]=true;
+	}
+	return mask;
+}
 
-	int expr_shift;
+pair<const ExprSymbol*, bool**> ExprIndex::symbol_mask() const {
+	bool** mask;
 
 	const ExprSymbol* symbol=dynamic_cast<const ExprSymbol*>(&expr);
 
-	if (symbol)
-		expr_shift=0;
-	else {
+	int n=expr.dim.nb_rows();
+	int m=expr.dim.nb_cols();
+
+	if (symbol) {
+		mask=symbol->mask();
+	} else {
 		const ExprIndex* expr_index=dynamic_cast<const ExprIndex*>(&expr);
-		if (!expr_index) return pair<const ExprSymbol*, int>(NULL,-1);
+		if (!expr_index) return pair<const ExprSymbol*, bool**>(NULL,NULL);
 		else {
-			pair<const ExprSymbol*, int> p = expr_index->symbol_shift();
+			pair<const ExprSymbol*, bool**> p = expr_index->symbol_mask();
 			symbol=p.first;
-			expr_shift=p.second;
+			mask=p.second;
 		}
 	}
 
-	return pair<const ExprSymbol*, int>(symbol, expr_shift + index*dim.size());
+	// Find the first element in the mask which is "true".
+	// This delimits the portion of the matrix that corresponds
+	// to the sub-expression.
+	int r=0;
+	int c=0;
+	while (!mask[r][c]) {
+		c++;
+		if (c==symbol->dim.nb_cols()) {
+			r++;
+			c=0;
+		}
+		assert(r<symbol->dim.nb_rows());
+	}
+
+	int i=0;
+	for (; i<index.first_row(); i++)
+		for (int j=0; j<m; j++) mask[r+i][c+j]=false;
+	for (; i<=index.last_row(); i++) {
+		for (int j=0; j<index.first_col(); j++) mask[r+i][c+j]=false;
+		for (int j=index.last_col()+1; j<m; j++) mask[r+i][c+j]=false;
+	}
+	for (; i<n; i++)
+		for (int j=0; j<m; j++) mask[r+i][c+j]=false;
+
+	return pair<const ExprSymbol*, bool**>(symbol, mask);
 }
 
 ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
@@ -116,7 +156,9 @@ ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
 
 static Array<const Dim> dims(const Array<const ExprNode>& comp) {
 	Array<const Dim> a(comp.size());
-	for (int i=0; i<comp.size(); i++) a.set_ref(i,comp[i].dim);
+	for (int i=0; i<comp.size(); i++) {
+		a.set_ref(i,comp[i].dim);
+	}
 	return a;
 }
 
@@ -129,7 +171,7 @@ const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, bool
 }
 
 ExprVector::ExprVector(const Array<const ExprNode>& comp, bool in_row) :
-		ExprNAryOp(comp, vec_dim(dims(comp),in_row)) {
+		ExprNAryOp(comp, vec_dim(dims(comp),in_row)), in_row(in_row) {
 }
 
 const ExprChi& ExprChi::new_(const Array<const ExprNode>& args) {
@@ -207,8 +249,6 @@ Variable::Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n)))             
 Variable::Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n)))                        { variables().insert(*symbol,this); }
 Variable::Variable(int m, int n) : symbol(new ExprSymbol(Dim::matrix(m,n)))                                        { variables().insert(*symbol,this); }
 Variable::Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n)))                { variables().insert(*symbol,this); }
-Variable::Variable(int k, int m, int n) : symbol(new ExprSymbol(Dim::matrix_array(k,m,n)))                         { variables().insert(*symbol,this); }
-Variable::Variable(int k, int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix_array(k,m,n))) { variables().insert(*symbol,this); }
 
 Variable::~Variable()                                                                                              {
 	variables().erase(*symbol);
@@ -271,7 +311,12 @@ ExprConstant::ExprConstant(const IntervalMatrix& m)
   : ExprLeaf(Dim::matrix(m.nb_rows(),m.nb_cols())),
     value(Dim::matrix(m.nb_rows(),m.nb_cols())) {
 
-	value.m() = m;
+	switch(dim.type()) { // the matrix may actually be a vector or a scalar!
+	case Dim::SCALAR:     value.i()=m[0][0]; break;
+	case Dim::ROW_VECTOR: value.v()=m.row(0); break;
+	case Dim::COL_VECTOR: value.v()=m.col(0); break;
+	default: value.m() = m;
+	}
 }
 
 Matrix::operator const ExprConstant&() const {
@@ -282,24 +327,11 @@ IntervalMatrix::operator const ExprConstant&() const {
 	return ExprConstant::new_matrix(*this);
 }
 
-ExprConstant::ExprConstant(const IntervalMatrixArray& ma)
-  : ExprLeaf(Dim::matrix_array(ma.size(),ma.nb_rows(),ma.nb_cols())),
-    value(Dim::matrix_array(ma.size(),ma.nb_rows(),ma.nb_cols())) {
-
-	value.ma() = ma;
-}
-
 ExprConstant::ExprConstant(const Domain& d, bool reference) : ExprLeaf(d.dim), value(d,reference) {
 }
 
 bool ExprConstant::is_zero() const {
-	switch(dim.type()) {
-	case Dim::SCALAR:     return value.i()==Interval::ZERO; break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR: return value.v().is_zero(); break;
-	case Dim::MATRIX:     return value.m().is_zero(); break;
-	default:              return false;
-	}
+	return value.is_zero();
 }
 
 const ExprConstant& ExprConstant::copy() const {
@@ -351,6 +383,10 @@ ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
 			ExprBinaryOp(left,right,Dim()) {
 	if (!(left.type() == Dim::SCALAR)) throw DimException("\"atan2\" expects scalar arguments");
 	if (!(right.type() == Dim::SCALAR)) throw DimException("\"atan2\" expects scalar arguments");
+}
+
+ExprPower::ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.dim), expon(expon) {
+	if (!expr.dim.is_scalar()) throw DimException("cannot raise a non-scalar value to some power");
 }
 
 ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :

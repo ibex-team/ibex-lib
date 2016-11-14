@@ -7,6 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Mar 2, 2012
+ * Last Update : May 25, 2016
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_DIM_H__
@@ -24,16 +25,23 @@ class TestDim : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestDim);
-	CPPUNIT_TEST(test01);
-	CPPUNIT_TEST(test02);
-	CPPUNIT_TEST(test03);
-	CPPUNIT_TEST(test04);
+	CPPUNIT_TEST(scalar);
+	CPPUNIT_TEST(row_vec);
+	CPPUNIT_TEST(col_vec);
+	CPPUNIT_TEST(add);
+	CPPUNIT_TEST(mul);
+	CPPUNIT_TEST(vec);
+	CPPUNIT_TEST(index);
 	CPPUNIT_TEST_SUITE_END();
 
-	void test01();
-	void test02();
-	void test03();
-	void test04();
+	void scalar();
+	void row_vec();
+	void col_vec();
+	void matrix();
+	void add();
+	void mul();
+	void vec();
+	void index();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestDim);

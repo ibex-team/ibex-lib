@@ -18,7 +18,7 @@ using std::vector;
 
 namespace ibex {
 
-SystemFactory::SystemFactory() : nb_arg(0), nb_var(0), goal(NULL), args(NULL) { }
+SystemFactory::SystemFactory() : nb_arg(0), nb_var(0), goal(NULL), bound_init(1), args(NULL) { }
 
 
 SystemFactory::~SystemFactory() {
@@ -26,14 +26,28 @@ SystemFactory::~SystemFactory() {
 }
 
 void SystemFactory::add_var(const ExprSymbol& v) {
+	add_var(v,IntervalVector(v.dim.size()));
+}
+
+void SystemFactory::add_var(const ExprSymbol& v,  const IntervalVector& init_box ) {
+	assert(v.dim.size()==init_box.size());
 	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
 
 	tmp_args.push_back(&v);
 	nb_arg++;
 	nb_var+= v.dim.size();
+
+	tmp_bound.push_back(init_box);
 }
 
 void SystemFactory::add_var(const Array<const ExprSymbol>& a) {
+	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
+
+	for (int i=0; i<a.size(); i++)
+		add_var(a[i]);
+}
+
+void SystemFactory::add_var(const Array<const ExprSymbol>& a, const IntervalVector& box) {
 	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
 
 	for (int i=0; i<a.size(); i++) {
@@ -41,10 +55,32 @@ void SystemFactory::add_var(const Array<const ExprSymbol>& a) {
 		nb_arg++;
 		nb_var+= a[i].dim.size();
 	}
+	tmp_bound.push_back(box);
+}
+
+/*
+void SystemFactory::add_var(const Array<const ExprSymbol>& a, const Array<const IntervalVector>& init_boxes) {
+	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
+
+	for (int i=0; i<a.size(); i++)
+		add_var(a[i],init_boxes[i]);
+}
+*/
+
+void SystemFactory::init_arg_bound() {
+	if (!args) args = new Array<const ExprSymbol>(tmp_args);
+
+	bound_init.resize(nb_var);
+	int i=0;
+	for (typename std::vector<IntervalVector>::const_iterator it=tmp_bound.begin(); it!=tmp_bound.end(); it++) {
+		bound_init.put(i,*it);
+		i+=(*it).size();
+	}
+
 }
 
 void SystemFactory::add_goal(const ExprNode& goal) {
-	if (!args) args = new Array<const ExprSymbol>(tmp_args);
+	init_arg_bound();
 
 	Array<const ExprSymbol> goal_vars(args->size());
 	varcopy(*args,goal_vars);
@@ -53,7 +89,7 @@ void SystemFactory::add_goal(const ExprNode& goal) {
 }
 
 void SystemFactory::add_goal(const Function& goal) {
-	if (!args) args = new Array<const ExprSymbol>(tmp_args);
+	init_arg_bound();
 
 	// check that the arguments of the goal
 	// matches the arguments entered
@@ -63,7 +99,7 @@ void SystemFactory::add_goal(const Function& goal) {
 }
 
 void SystemFactory::add_ctr(const ExprCtr& ctr) {
-	if (!args) args = new Array<const ExprSymbol>(tmp_args);
+	init_arg_bound();
 
 	Array<const ExprSymbol> ctr_vars(args->size());
 	varcopy(*args,ctr_vars);
@@ -83,7 +119,7 @@ void SystemFactory::add_ctr2(const ExprCtr& ctr) {
 }
 
 void SystemFactory::add_ctr(const NumConstraint& ctr) {
-	if (!args) args = new Array<const ExprSymbol>(tmp_args);
+	init_arg_bound();
 
 	// check that the arguments of the constraint
 	// matches the arguments entered
@@ -145,8 +181,8 @@ void System::init_f_from_ctrs() {
 				image.set_ref(i++,e[k]);
 			break;
 		case Dim::MATRIX:
-			for (int k=0; k<fjd.dim2; k++)
-				for (int l=0; l<fjd.dim3; l++)
+			for (int k=0; k<fjd.nb_rows(); k++)
+				for (int l=0; l<fjd.nb_cols(); l++)
 					image.set_ref(i++,e[k][l]);
 			break;
 		default:
@@ -187,6 +223,7 @@ void System::init(const SystemFactory& fac) {
 	varcopy(*fac.args, args);
 
 	box.resize(nb_var);
+	box=fac.bound_init;
 
 	// =========== init ctrs ==============
 	ctrs.resize(nb_ctr);
@@ -194,6 +231,12 @@ void System::init(const SystemFactory& fac) {
 		ctrs.set_ref(i,*(fac.ctrs[i]));
 
 	// =========== init main function
+	// we cannot generate first the global function f and
+	// then each constraint with (f[i] op 0) because
+	// a constraint can be vector or matrix valued.
+	// so we do the contrary: we generate first the constraints,
+	// and build f with the components of all constraints' functions.
+
 	init_f_from_ctrs();
 }
 

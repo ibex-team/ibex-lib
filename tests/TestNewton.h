@@ -23,14 +23,17 @@ class TestNewton : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestNewton);
-	
-		CPPUNIT_TEST(newton01);
-		CPPUNIT_TEST(inflating_newton01);
-		CPPUNIT_TEST(ctc_parameter01);
+
+	CPPUNIT_TEST(newton01);
+	CPPUNIT_TEST(inflating_newton01);
+	CPPUNIT_TEST(inflating_newton02);
+	CPPUNIT_TEST(ctc_parameter01);
+
 	CPPUNIT_TEST_SUITE_END();
 
 	void newton01();
 	void inflating_newton01();
+	void inflating_newton02();
 	void ctc_parameter01();
 };
 

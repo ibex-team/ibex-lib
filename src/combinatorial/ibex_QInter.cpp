@@ -70,9 +70,9 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 			size[i]=1;
 		}
 
-		cout << "i=" << i << endl;
-		for (int j=0; j<=size[i]; j++) cout << x[i][j] << " ";
-		cout << endl << endl;
+		// cout << "i=" << i << endl;
+		// for (int j=0; j<=size[i]; j++) cout << x[i][j] << " ";
+		// cout << endl << endl;
 
 	}
 

@@ -32,10 +32,9 @@ void int_ctr_domain(Domain& d, CmpOp op) {
 
 	switch(d.dim.type()) {
 	case Dim::SCALAR:       d.i()=right_cst; break;
-	case Dim::ROW_VECTOR:   d.v()=IntervalVector(d.dim.dim3,right_cst); break;
-	case Dim::COL_VECTOR:   d.v()=IntervalVector(d.dim.dim2,right_cst); break;
-	case Dim::MATRIX:       d.m()=IntervalMatrix(d.dim.dim2,d.dim.dim3,right_cst); break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
+	case Dim::ROW_VECTOR:   d.v()=IntervalVector(d.dim.nb_cols(),right_cst); break;
+	case Dim::COL_VECTOR:   d.v()=IntervalVector(d.dim.nb_rows(),right_cst); break;
+	case Dim::MATRIX:       d.m()=IntervalMatrix(d.dim.nb_rows(),d.dim.nb_cols(),right_cst); break;
 	}
 }
 

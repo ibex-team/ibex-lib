@@ -12,15 +12,33 @@
 #ifndef IBEX_AFFINE2_FAF2_H_
 #define IBEX_AFFINE2_FAF2_H_
 
+#include <math.h>
+#ifndef _MSC_VER
+	#ifdef __FP_FAST_FMA
+		#define IBEX_FMA
+	#endif
+	#ifdef FP_FAST_FMA
+		#define IBEX_FMA
+	#endif
+
+#else
+#if (_MSC_VER >= 1800)
+	#define IBEX_FMA
+#endif
+#endif
+
+
+
+
 #include "ibex_Interval.h"
 
 namespace ibex {
 
-template<class T>  class Affine2Main;
+template<class T>  class AffineMain;
 
 class AF_fAF2 {
 
-	friend class Affine2Main<AF_fAF2>;
+	friend class AffineMain<AF_fAF2>;
 
 private:
 	/**
@@ -88,6 +106,11 @@ inline void AF_fAF2::Split(double x, int sp, double *x_high, double *x_low)
 
 inline double AF_fAF2::twoProd(double x, double y, double *r_1)
 {
+#ifdef IBEX_FMA
+	*r_1 = (x * y);
+	return std::fma(x,y,-(*r_1));
+#else
+
 	int SHIFT_POW = 27; //  53 / 2 for double precision.
 	double x_high, x_low;
 	double y_high, y_low;
@@ -101,6 +124,9 @@ inline double AF_fAF2::twoProd(double x, double y, double *r_1)
 	t_2 =   (t_1 + x_high * y_low );
 	t_3 =	(t_2 + x_low  * y_high);
 	return  (t_3 + x_low  * y_low );
+
+#endif
+
 }
 
 

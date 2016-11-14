@@ -9,8 +9,6 @@
 //============================================================================
 
 #include "ibex_AmplInterface.h"
-
-#ifdef _IBEX_WITH_AMPL_
 #include "ibex_Exception.h"
 
 #include "asl.h"
@@ -131,17 +129,7 @@ namespace ibex {
 const double AmplInterface::default_max_bound= 1.e20;
 
 
-// create an AMPL problem by using ASL interface to the .nl file
-System::System(const AmplInterface& ampl): nb_var(0), nb_ctr(0), box(ampl._bound_init.size()){
-	init(ampl._problem);
-	box = ampl._bound_init;
-}
-
-
-
-
-AmplInterface::AmplInterface(std::string nlfile) :
-		_bound_init(1), asl(NULL), _nlfile(nlfile), _x(NULL){
+AmplInterface::AmplInterface(std::string nlfile) : asl(NULL), _nlfile(nlfile), _x(NULL){
 
 	if (!readASLfg()) {
 		ibex_error("Fail to read the ampl file.\n");
@@ -226,8 +214,7 @@ bool AmplInterface::readnl() {
 	// the variable /////////////////////////////////////////////////////////////
 	// TODO only continuous variables for the moment
 	_x =new Variable(n_var,"x");
-	_bound_init.resize(n_var);
-	_problem.add_var(*_x);
+	IntervalVector bound(n_var);
 
 		// Each has a linear and a nonlinear part
 		// thanks to Dominique Orban:
@@ -235,8 +222,26 @@ bool AmplInterface::readnl() {
 		//        http://www.gerad.ca/~orban/drampl/dag.html
 
 	try {
+
+	// lower and upper bounds of the variables ///////////////////////////////////////////////////////////////
+		if (LUv) {
+			real *Uvx_copy = Uvx;
+			// LUv is the variable lower bound if Uvx!=0, and the variable lower and upper bound if Uvx == 0
+			if (!Uvx_copy)
+				for (int i=0; i<n_var; i++) {
+					bound[i] = Interval(  ((LUv[2*i] <= -default_max_bound) ? -default_max_bound : LUv[2*i] ),
+												((LUv[2*i+1] >= default_max_bound) ? default_max_bound : LUv[2*i+1]) );
+				}
+			else
+				for (int i=n_var; i--;) {
+					bound[i] = Interval(	(LUv [i] <= -default_max_bound ? -default_max_bound : LUv[i] ),
+												(Uvx_copy [i] >= default_max_bound ? default_max_bound : Uvx_copy[i]) );
+				}
+		} // else it is [-oo,+oo]
+		add_var(*_x, bound);
+
 	// objective functions /////////////////////////////////////////////////////////////
-		if (n_obj>1) {ibex_error("too much objective function in the ampl model."); return false;}
+		if (n_obj>1) {ibex_error("Error AmplInterface: too much objective function in the ampl model."); return false;}
 
 		for (int i = 0; i < n_obj; i++) {
 			///////////////////////////////////////////////////
@@ -281,9 +286,9 @@ bool AmplInterface::readnl() {
 			// Max or Min
 			// 3rd/ASL/solvers/asl.h, line 336: 0 is minimization, 1 is maximization
 			if (OBJ_sense [i] == 0) {
-				_problem.add_goal(*body);
+				add_goal(*body);
 			} else {
-				_problem.add_goal(-(*body));
+				add_goal(-(*body));
 			}
 		}
 
@@ -385,34 +390,34 @@ bool AmplInterface::readnl() {
 			case  1:  {
 				if (lb==ub) {
 					if (lb==0) {
-						_problem.add_ctr_eq((*(body_con[i])));
+						add_ctr_eq((*(body_con[i])));
 					} else if (lb<0) {
-						_problem.add_ctr_eq((*(body_con[i])+(-lb)));
+						add_ctr_eq((*(body_con[i])+(-lb)));
 					} else {
-						_problem.add_ctr_eq((*(body_con[i])-lb));
+						add_ctr_eq((*(body_con[i])-lb));
 					}
 				} else  {
-					 _problem.add_ctr_eq((*(body_con[i])-Interval(lb,ub)));
+					 add_ctr_eq((*(body_con[i])-Interval(lb,ub)));
 				}
 				break;
 			}
 			case  2:  {
 				if (lb==0) {
-					_problem.add_ctr(ExprCtr(*(body_con[i]),GEQ));
+					add_ctr(ExprCtr(*(body_con[i]),GEQ));
 				} else if (lb<0) {
-					_problem.add_ctr(ExprCtr(*(body_con[i])+(-lb),GEQ));
+					add_ctr(ExprCtr(*(body_con[i])+(-lb),GEQ));
 				} else {
-					_problem.add_ctr(ExprCtr(*(body_con[i])-lb,GEQ));
+					add_ctr(ExprCtr(*(body_con[i])-lb,GEQ));
 				}
 				break;
 			}
 			case  3: {
 				if (ub==0) {
-					_problem.add_ctr(ExprCtr(*(body_con[i]),LEQ));
+					add_ctr(ExprCtr(*(body_con[i]),LEQ));
 				} else if (ub<0) {
-					 _problem.add_ctr(ExprCtr(*(body_con[i])+(-ub),LEQ));
+					add_ctr(ExprCtr(*(body_con[i])+(-ub),LEQ));
 				} else {
-					 _problem.add_ctr(ExprCtr(*(body_con[i])-ub,LEQ));
+					add_ctr(ExprCtr(*(body_con[i])-ub,LEQ));
 				}
 				break;
 			}
@@ -420,22 +425,6 @@ bool AmplInterface::readnl() {
 			}
 		}
 
-	// lower and upper bounds of the variables ///////////////////////////////////////////////////////////////
-		if (LUv) {
-			real *Uvx_copy = Uvx;
-			// LUv is the variable lower bound if Uvx!=0, and the variable lower and upper bound if Uvx == 0
-			if (!Uvx_copy)
-				for (int i=0; i<n_var; i++) {
-					_bound_init[i] = Interval(  ((LUv[2*i] <= -default_max_bound) ? -default_max_bound : LUv[2*i] ),
-							((LUv[2*i+1] >= default_max_bound) ? default_max_bound : LUv[2*i+1]) );
-				}
-			else
-				for (int i=n_var; i--;) {
-					_bound_init[i] = Interval(	(LUv [i] <= -default_max_bound ? -default_max_bound : LUv[i] ),
-							(Uvx_copy [i] >= default_max_bound ? default_max_bound : Uvx_copy[i]) );
-				}
-
-		} // else it is [-oo,+oo]
 
 		delete[] body_con;
 
@@ -641,14 +630,14 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 				}
 
 			} else {
-				ibex_error("Error: unknown variable x \n");
+				ibex_error("Error AmplInterface: unknown defined variable \n");
 				throw -1;
 			}
 		}
 	}
 
 	default: {
-		ibex_error( "ERROR: unknown operator, aborting.\n");
+		ibex_error( "Error AmplInterface: unknown operator or not implemented \n");
 		throw -2;
 	}
 	}
@@ -658,4 +647,3 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 
 }
 
-#endif // _IBEX_WITH_AMPL_

@@ -149,17 +149,30 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 	const int nn=size();
 	IntervalVector x=*this;
 	IntervalVector *tmp = new IntervalVector[2*nn]; // in the worst case, there is 2n boxes
+	IntervalVector z=x & y;
 	Interval c1, c2;
+	bool return_x=z.is_empty();
+
+	// check if in one dimension y is flat and x not,
+	// in which case the diff returns also x directly
+	if (!return_x) {
+		for (int i=0; i<nn; i++) {
+			if (z[i].is_degenerated() && !x[i].is_degenerated()) { return_x=true; break; }
+		}
+	}
+
 	int b=0;
-	if (y.is_empty()) {
+
+	if (return_x) { // includes the case of empty intersection
 		tmp[b].resize(nn);
 		tmp[b]=x; // copy of this
-		b++;
+		if (!x.is_empty()) b++;
 	} else {
 		for (int var=0; var<nn; var++) {
 
 			x[var].diff(y[var],c1,c2);
 
+			//std::cout << x[var] << " diff " << y[var] << "=" << c1  << " and " << c2 << std::endl;
 			if (!c1.is_empty()) {
 				tmp[b].resize(nn);
 				IntervalVector& v=tmp[b++];
@@ -174,12 +187,12 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 					v[var]=c2;
 					for (int i=var+1; i<nn; i++) v[i]=x[i];
 				}
-                                x[var] &= y[var];
+				x[var] = z[var];
 			}
 		}
 	}
 
-	if (b==0) {
+	if (b==0) { // happens when x \subset y
 		result = new IntervalVector[1];
 		result[0].resize(nn);
 		result[0].set_empty();
@@ -257,7 +270,15 @@ bool bwd_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 	return true;
 }
 
+IntervalVector& IntervalVector::inflate(double delta, double chi) {
+	if (is_empty()) return *this;
+	for (int i=0; i<size(); i++) {
+		vec[i].inflate(delta,chi);
+	}
+	return *this;
+}
 
+// why inflate is template?
 IntervalVector& IntervalVector::inflate(double rad1)                              { return _inflate(*this,rad1); }
 IntervalVector  IntervalVector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
 void            IntervalVector::put(int start_index, const IntervalVector& x)     { _put(*this, start_index, x); }

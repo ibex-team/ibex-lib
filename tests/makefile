@@ -20,7 +20,7 @@ $(TARGET):	$(OBJS)
 utest.o : $(SRCS) $(HEADERS) 
 
 %.o :	%.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $< $(LIBS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 nonreg : nonreg.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LIBS)

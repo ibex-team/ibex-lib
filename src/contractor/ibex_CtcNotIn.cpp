@@ -21,7 +21,6 @@ CtcNotIn::CtcNotIn(Function& f, const Domain& y) : Ctc(f.nb_var()), f(f) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   init (y.v()); break;
 	case Dim::MATRIX:       init(y.m()); break;
-	case Dim::MATRIX_ARRAY: assert(false); /* not allowed */ break;
 	}
 }
 

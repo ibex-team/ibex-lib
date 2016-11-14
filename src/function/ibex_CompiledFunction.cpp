@@ -60,7 +60,10 @@ void CompiledFunction::visit(const ExprNode& e) {
 }
 
 void CompiledFunction::visit(const ExprIndex& i) {
-	code[ptr]=IDX;
+	if (i.index.domain_ref())
+		code[ptr]=IDX;
+	else
+		code[ptr]=IDX_CP;
 	nb_args[ptr]=1;
 	args[ptr]=new int[1];
 	args[ptr][0]=nodes->rank(i.expr);

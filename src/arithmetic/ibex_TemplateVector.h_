@@ -37,7 +37,7 @@ inline V& _inflate(V& v, double rad1) {
 
 template<class V>
 inline V _subvector(const V& v, int start_index, int end_index) {
-	assert(!___is_empty(v));
+	//assert(!___is_empty(v));
 	assert(end_index>=0 && start_index>=0);
 	assert(end_index<v.size() && start_index<=end_index);
 	//throw InvalidIntervalVectorOp("Invalid indices for IntervalVector::subvector");

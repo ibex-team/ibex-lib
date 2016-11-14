@@ -62,7 +62,8 @@ public: // because called from CompiledFunction
 
 	       void vector_fwd (int* x, int y);
 	       void apply_fwd  (int* x, int y);
-	inline void index_fwd  (int x, int y);
+	inline void idx_fwd    (int x, int y);
+	inline void idx_cp_fwd (int x, int y);
 	inline void symbol_fwd (int y);
 	inline void cst_fwd    (int y);
 	inline void chi_fwd    (int x1, int x2, int x3, int y);
@@ -114,7 +115,7 @@ public: // because called from CompiledFunction
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
-inline void Eval::index_fwd(int, int) { /* nothing to do */ }
+inline void Eval::idx_fwd(int, int) { /* nothing to do */ }
 
 inline void Eval::symbol_fwd(int) { /* nothing to do */ }
 
@@ -125,7 +126,6 @@ inline void Eval::cst_fwd(int y) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   d[y].v() = c.get_vector_value();  break;
 	case Dim::MATRIX:       d[y].m() = c.get_matrix_value();  break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 }
 

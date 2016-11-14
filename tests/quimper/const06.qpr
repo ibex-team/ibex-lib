@@ -1,9 +1,0 @@
-// check "oo" symbol
-variables
- x in [1,+oo];
- y in [-oo,0];
- z in [-oo,+oo];
- 
-constraints
- x=0;
-end

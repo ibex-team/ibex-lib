@@ -35,7 +35,7 @@ int main() {
       // Push the contractor corresponding to 
       // the detection of beacon n°b at time t
       NumConstraint* c=new NumConstraint(
-               x,dist(x[t],beacons[b])=d[t][b]);
+               x,dist(transpose(x[t]),beacons[b])=d[t][b]);
       ctc.push_back(new CtcFwdBwd(*c));
     }
 

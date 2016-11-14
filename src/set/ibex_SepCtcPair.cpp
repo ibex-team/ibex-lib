@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_SepCtcPair.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-SepCtcPair::SepCtcPair(Ctc& _ctc_in, Ctc& _ctc_out) : ctc_in(_ctc_in), ctc_out(_ctc_out) {
+SepCtcPair::SepCtcPair(Ctc& _ctc_in, Ctc& _ctc_out) : Sep(_ctc_in.nb_var), ctc_in(_ctc_in), ctc_out(_ctc_out) {
 
 }
 

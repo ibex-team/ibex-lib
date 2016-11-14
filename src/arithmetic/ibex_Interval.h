@@ -65,7 +65,9 @@
 	#define IBEX_NAN filib::primitive::compose(0,0x7FF,1 << 19,0)
 #else
 #ifdef _IBEX_WITH_DIRECT_
-
+	// TODO: [gch] 1.0/0.0 is ugly, why not using
+	// std::numeric_limits<T>::infinity()
+	// instead?
 	/** \brief NEG_INFINITY: double representation of -oo */
 	#define NEG_INFINITY (-(1.0/0.0))
 	/** \brief POS_INFINITY: double representation of +oo */
@@ -79,9 +81,8 @@
 
 		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
 		DIRECT_INTERVAL(double a, double b) {
-			if (a==POS_INFINITY || b==NEG_INFINITY)
+			if (a==POS_INFINITY || b==NEG_INFINITY || a>b )
 			                 {inf = 0; sup = 0; isEmpty=true; }
-			else if  (a>=b)  {inf = b; sup = a; isEmpty=false;}
 			else             {inf = a; sup = b; isEmpty=false;}
 		}
 
@@ -112,7 +113,6 @@ namespace ibex {
 
 class IntervalVector;
 class IntervalMatrix;
-class IntervalMatrixArray;
 class ExprConstant;
 
 /** \defgroup arithmetic Interval Arithmetic */
@@ -213,6 +213,15 @@ class Interval {
      * Return a reference to *this.
      */
     Interval& inflate(double rad);
+
+	/**
+	 * \brief Absolute and relative inflation.
+	 *
+	 * [x] <- mid[x] + delta*([x]-mid[x]) + chi*[-1,+1]
+	 *
+	 * \return *this.
+	 */
+	Interval& inflate(double delta, double chi);
 
     /** \brief Lower bound.
      *
@@ -513,7 +522,6 @@ class Interval {
     typedef Interval SCALAR;
     typedef IntervalVector VECTOR;
     typedef IntervalMatrix MATRIX;
-    typedef IntervalMatrixArray MATRIX_ARRAY;
 
     /**
      * \brief Cast the interval to an expression
@@ -872,16 +880,16 @@ bool bwd_imod(Interval& x, Interval& y, const double& p);
 } // end namespace ibex
 
 #ifdef _IBEX_WITH_GAOL_
-#include "ibex_gaol_Interval.h_"
+#include "ibex_Interval_gaol.h_"
 #else
 #ifdef _IBEX_WITH_BIAS_
-#include "ibex_bias_Interval.h_"
+#include "ibex_Interval_bias.h_"
 #else
 #ifdef _IBEX_WITH_FILIB_
-#include "ibex_filib_Interval.h_"
+#include "ibex_Interval_filib.h_"
 #else
 #ifdef _IBEX_WITH_DIRECT_
-#include "ibex_direct_Interval.h_"
+#include "ibex_Interval_direct.h_"
 #endif
 #endif
 #endif
@@ -928,6 +936,7 @@ inline Interval& Interval::operator=(double x) {
 }
 
 
+
 inline Interval& Interval::operator=(const Interval& x) {
 	itv = x.itv;
 	return *this;
@@ -937,6 +946,13 @@ inline Interval& Interval::inflate(double radd) {
 	(*this) += Interval(-radd,radd);
 	return *this;
 }
+
+inline Interval& Interval::inflate(double delta, double chi) {
+	double m=mid();
+	(*this) = m + delta*(*this-m)+Interval(-chi,chi);
+	return *this;
+}
+
 
 inline bool Interval::operator!=(const Interval& x) const {
 	return !(*this==x);
@@ -1051,8 +1067,21 @@ inline Interval atan2(const Interval& y, const Interval& x) {
 	} else {
 		if (y.lb()>=0)
 			return atan(y/x.ub()) | (atan(y/x.lb()) + Interval::PI);
-		else if (y.ub()<=0)
-			return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+		else if (y.ub()<=0){
+			if(x.lb()!=NEG_INFINITY){
+				if(x.ub()!=POS_INFINITY){
+					return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+				}
+				else
+					return (atan(y/x.lb())-Interval::PI) | Interval::ZERO;
+			}
+			else{
+				if(x.ub()!=POS_INFINITY)
+					return (-Interval::PI) | atan(y/x.ub());
+				else
+					return -Interval::PI | Interval::ZERO;
+			}
+		}
 		else
 			return Interval(-1,1)*Interval::PI;
 	}

@@ -35,7 +35,6 @@ Ctc* _neg(Function& f, CmpOp& op) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   d.v().init(x); break;
 	case Dim::MATRIX:       d.m().init(x); break;
-	case Dim::MATRIX_ARRAY: assert(false); /* not allowed */ break;
 	}
 
 	return new CtcNotIn(f,d);

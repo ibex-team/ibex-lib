@@ -39,6 +39,8 @@ public:
 
 	ExprTemplateDomain(const Function& f);
 
+	~ExprTemplateDomain();
+
 	// Why my compiler forces me to redeclare these functions?
 	// ------------------------------------------------------
 	const TemplateDomain<D>& operator[](int i) const;
@@ -85,6 +87,8 @@ public:
 	 */
 	void read_arg_domains(typename D::VECTOR& box) const;
 
+private:
+	ExprTemplateDomain(const ExprTemplateDomain&); // forbidden
 };
 
 typedef ExprTemplateDomain<Interval> ExprDomain;
@@ -99,21 +103,8 @@ ExprDomainFactory<D>::~ExprDomainFactory() {
 
 template<class D>
 TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprIndex& e, TemplateDomain<D>& d_expr) {
-	switch (e.expr.type()) {
-	case Dim::SCALAR:
-		return new TemplateDomain<D>(d_expr.i());
-		break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:
-		return new TemplateDomain<D>(d_expr.v()[e.index]);
-		break;
-	case Dim::MATRIX:
-		return new TemplateDomain<D>(d_expr.m()[e.index],true);
-		break;
-	default: // Dim::MATRIX_ARRAY:
-		return new TemplateDomain<D>(d_expr.ma()[e.index]);
-		break;
-	}
+	TemplateDomain<D> d(d_expr[e.index]); // Depending on the type of index, can be a reference or a copy.
+	return new TemplateDomain<D>(d,d.is_reference);
 }
 
 template<class D>
@@ -152,6 +143,13 @@ TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprTrans& e, TemplateDomain
 template<class D>
 inline ExprTemplateDomain<D>::ExprTemplateDomain(const Function& f) : ExprData<TemplateDomain<D> >(f, ExprDomainFactory<D>()) {
 
+}
+
+template<class D>
+inline ExprTemplateDomain<D>::~ExprTemplateDomain() {
+	for (int i=0; i<ExprData<TemplateDomain<D> >::data.size(); i++) {
+		delete &ExprData<TemplateDomain<D> >::data[i];
+	}
 }
 
 template<class D>

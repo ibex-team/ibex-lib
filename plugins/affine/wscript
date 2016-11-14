@@ -15,6 +15,9 @@ def configure (conf):
 	
 	Logs.pprint ("BLUE", "Configure the Affine Arithmetic plugin")
 	
+	if not conf.options.WITH_OPTIM:
+		Logs.pprint ("YELLOW", "Warning: The LinearRelaxAffine class (part of option --with-affine) will not be generated (requires --with-optim).")
+
 	# add AFFINE plugin include directory
 	conf.env.append_unique("INCLUDES","../../plugins/affine/src/arithmetic")
 	conf.env.append_unique("INCLUDES","../../plugins/affine/src/function")
@@ -27,10 +30,17 @@ def build (bld):
 	
 	Logs.pprint ("BLUE", "Build the Affine Arithmetic plugin")
 
-	# add AFFINE plugin sources
-	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
-	# add AFFINE plugin headers
-	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
+	# LinearRelaxAffine requires the LinearRelax base class from the optim plugin.
+	if bld.env.WITH_OPTIM:
+		# add AFFINE plugin sources
+		bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
+		# add AFFINE plugin headers
+		bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
+	else:
+		# add AFFINE plugin sources (no LinearRelaxAffine2)
+		bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp", excl="src/numeric/ibex_LinearRelaxAffine2.*"))
+		# add AFFINE plugin headers (no LinearRelaxAffine2)
+		bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h", excl="src/numeric/ibex_LinearRelaxAffine2.*"))
 	
 	# Add information in ibex_Setting
 	bld.env.settings['_IBEX_WITH_AFFINE_']='1'

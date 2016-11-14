@@ -58,7 +58,6 @@ public:
 		CPPUNIT_TEST(index01);
 		CPPUNIT_TEST(index02);
 		CPPUNIT_TEST(index03);
-		CPPUNIT_TEST(index04);
 
 		CPPUNIT_TEST(apply01);
 		CPPUNIT_TEST(apply03);
@@ -124,6 +123,9 @@ public:
 
 	// row vector variable + (column) vector constant
 	void bug81();
+
+private:
+	bool same_mask(int, int, bool*, bool**);
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestExpr);

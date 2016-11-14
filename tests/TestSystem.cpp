@@ -80,7 +80,7 @@ void TestSystem::factory01() {
 	CPPUNIT_ASSERT(sys.args[0].dim==Dim::col_vec(3));
 	CPPUNIT_ASSERT(sys.args[1].dim==Dim::matrix(3,3));
 	CPPUNIT_ASSERT(sys.args[2].dim==Dim::scalar());
-	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x[1]))"));
+	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x(2)))"));
 
 	CPPUNIT_ASSERT(sys.box.size()==13);
 
@@ -90,7 +90,7 @@ void TestSystem::factory01() {
 	CPPUNIT_ASSERT(sys.f.image_dim()==4);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(A*x)"));
 	CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
-	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x[0])"));
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x(1))"));
 	CPPUNIT_ASSERT(sys.ctrs[1].op==GEQ);
 
 	delete &sys;
@@ -119,7 +119,7 @@ void TestSystem::copy01() {
 	CPPUNIT_ASSERT(sys.args[0].dim==Dim::col_vec(3));
 	CPPUNIT_ASSERT(sys.args[1].dim==Dim::matrix(3,3));
 	CPPUNIT_ASSERT(sys.args[2].dim==Dim::scalar());
-	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x[1]))"));
+	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x(2)))"));
 
 	CPPUNIT_ASSERT(sys.box.size()==13);
 
@@ -129,7 +129,7 @@ void TestSystem::copy01() {
 	CPPUNIT_ASSERT(sys.f.image_dim()==4);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(A*x)"));
 	CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
-	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x[0])"));
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x(1))"));
 	CPPUNIT_ASSERT(sys.ctrs[1].op==GEQ);
 }
 
@@ -194,7 +194,8 @@ void TestSystem::extend01() {
 	CPPUNIT_ASSERT(sys.args[0].dim==Dim::col_vec(3));
 	CPPUNIT_ASSERT(sys.args[1].dim==Dim::scalar());
 	CPPUNIT_ASSERT(sys.args[2].dim==Dim::scalar());
-	CPPUNIT_ASSERT(sys.goal==NULL);
+	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"__goal__"));
+	//CPPUNIT_ASSERT(sys.goal==NULL);
 
 	CPPUNIT_ASSERT(sys.box.size()==5);
 
@@ -202,13 +203,13 @@ void TestSystem::extend01() {
 	CPPUNIT_ASSERT(sys.f.nb_arg()==3);
 	CPPUNIT_ASSERT(sys.f.nb_var()==5);
 	CPPUNIT_ASSERT(sys.f.image_dim()==4);
-	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((y-cos(x[1]))-__goal__)"));
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((y-cos(x(2)))-__goal__)"));
 	CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
-	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(-(x[0]+x[1]))"));
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(-(x(1)+x(2)))"));
 	CPPUNIT_ASSERT(sys.ctrs[1].op==LEQ);
-	CPPUNIT_ASSERT(sameExpr(sys.ctrs[2].f.expr(),"((x[1]+x[2])-y)"));
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[2].f.expr(),"((x(2)+x(3))-y)"));
 	CPPUNIT_ASSERT(sys.ctrs[2].op==LEQ);
-	CPPUNIT_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"(-(y-x[0]))"));
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"(-(y-x(1)))"));
 	CPPUNIT_ASSERT(sys.ctrs[3].op==LEQ);
 }
 
@@ -218,7 +219,8 @@ void TestSystem::extend02() {
 
 	CPPUNIT_ASSERT(sys.nb_ctr==1);
 	CPPUNIT_ASSERT(sys.nb_var==3);
-	CPPUNIT_ASSERT(sys.goal==NULL);
+	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"__goal__"));
+	//CPPUNIT_ASSERT(sys.goal==NULL);
 	CPPUNIT_ASSERT(sys.ctrs.size()==1);
 	CPPUNIT_ASSERT(sys.f.nb_arg()==3);
 	CPPUNIT_ASSERT(sys.f.nb_var()==3);

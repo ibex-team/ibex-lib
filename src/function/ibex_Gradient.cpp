@@ -104,17 +104,58 @@ void Gradient::vector_fwd(int* x, int y) {
 		g[y].m().clear();
 }
 
+void Gradient::idx_cp_bwd(int x, int y) {
+	assert(dynamic_cast<const ExprIndex*> (&f.node(y)));
+
+	const ExprIndex& e = (const ExprIndex&) f.node(y);
+
+	g[x].put(e.index.first_row(), e.index.first_col(), g[y]);
+}
+
 void Gradient::vector_bwd(int* x, int y) {
+	assert(dynamic_cast<const ExprVector*>(&(f.node(y))));
+
 	const ExprVector& v = (const ExprVector&) f.node(y);
 
+	assert(v.type()!=Dim::SCALAR);
+
+	int j=0;
+
 	if (v.dim.is_vector()) {
-		for (int i=0; i<v.length(); i++) g[x[i]].i()+=g[y].v()[i];
+		for (int i=0; i<v.length(); i++) {
+			if (v.arg(i).dim.is_vector()) {
+				g[x[i]].v()+=g[y].v().subvector(j,j+v.arg(i).dim.vec_size());
+				j+=v.arg(i).dim.vec_size();
+			} else {
+				g[x[i]].i()+=g[y].v()[j];
+				j++;
+			}
+		}
+
+		assert(j==v.dim.vec_size());
 	}
 	else {
-		if (v.row_vector())
-			for (int i=0; i<v.length(); i++) g[x[i]].v()+=g[y].m()[i];
-		else
-			for (int i=0; i<v.length(); i++) g[x[i]].v()+=g[y].m().col(i);
+		if (v.row_vector()) {
+			for (int i=0; i<v.length(); i++) {
+				if (v.arg(i).dim.is_matrix()) {
+					g[x[i]].m()+=g[y].m().submatrix(0,v.dim.nb_rows(),j,v.arg(i).dim.nb_cols());
+					j+=v.arg(i).dim.nb_cols();
+				} else if (v.arg(i).dim.is_vector()) {
+					g[x[i]].v()+=g[y].m().col(j);
+					j++;
+				}
+			}
+		} else {
+			for (int i=0; i<v.length(); i++) {
+				if (v.arg(i).dim.is_matrix()) {
+					g[x[i]].m()+=g[y].m().submatrix(j,v.arg(i).dim.nb_rows(),0,v.dim.nb_cols());
+					j+=v.arg(i).dim.nb_rows();
+				} else if (v.arg(i).dim.is_vector()) {
+					g[x[i]].v()+=g[y].m().row(j);
+					j++;
+				}
+			}
+		}
 	}
 }
 

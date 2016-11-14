@@ -12,6 +12,7 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_Expr.h"
+#include "ibex_ExprSimplify.h"
 
 using namespace std;
 
@@ -20,18 +21,6 @@ namespace ibex {
 #define ONE          ExprConstant::new_scalar(1.0)
 #define ZERO         ExprConstant::new_scalar(0.0)
 #define ALL_REALS    ExprConstant::new_scalar(Interval::ALL_REALS)
-
-const ExprVector& zeros(int n, bool in_row) {
-	Array<const ExprNode> zeros(n);
-	for (int i=0; i<n; i++) zeros.set_ref(i,ExprConstant::new_scalar(0));
-	return ExprVector::new_(zeros,in_row);
-}
-
-const ExprVector& zeros(int m, int n) {
-	Array<const ExprNode> _zeros(m);
-	for (int i=0; i<m; i++) _zeros.set_ref(i,zeros(n,true));
-	return ExprVector::new_(_zeros,false);
-}
 
 ExprDiffException::ExprDiffException(const std::string& msg) : msg(msg) {
 
@@ -51,52 +40,28 @@ void ExprDiff::add_grad_expr(const ExprNode& node, const ExprNode& _expr_) {
 }
 
 const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
-
-	//cout << "diff of " << y << endl;
+	const ExprNode* result;
 	if (y.dim.is_scalar()) {
-		return gradient(old_x,new_x,y);
+		result=&gradient(old_x,new_x,y);
 	} else if (y.dim.is_vector()) {
-		if (y.dim.dim3>1)
+		if (y.dim.type()==Dim::ROW_VECTOR)
 			ibex_warning("differentiation of a function returning a row vector (considered as a column vector)");
 
-		const ExprVector* vec=dynamic_cast<const ExprVector*>(&y); // TODO: not correct, ex: Function f("x","y","2*(x,y)");
-
-		if (!vec) {
-			throw ExprDiffException("differentation of a multivalued function involving vector/matrix operations");
-		}
 		int m=y.dim.vec_size();
 		int n=old_x.size();
 		Array<const ExprNode> a(m);
-		// TODO: we should have an "ExprNode to ExprConstant conversion" extracted from ExprCopy
-		// (for the moment, we are obliged to call ExprCopy to benefit from this)
-		bool cst=true;
+
 		for (int i=0; i<m; i++) { // y.dim.vec_size() == vec->nb_args()
-			a.set_ref(i,gradient(old_x,new_x,vec->arg(i)));
-			cst &= dynamic_cast<const ExprConstant*>(&a[i])!=NULL;
+			const ExprNode& argi=y[i]; // temporary node creation
+			a.set_ref(i,gradient(old_x,new_x,argi));
+			delete &argi;
 		}
-		if (!cst)
-			return ExprVector::new_(a,false);
-		else {
-			if (n==1) {
-				IntervalVector vec(m);
-				for (int i=0; i<m; i++) {
-					vec[i]=(dynamic_cast<const ExprConstant*>(&a[i]))->get_value();
-				}
-				cleanup(a,false);
-				return ExprConstant::new_vector(vec,false);
-			} else {
-				IntervalMatrix M(m,n);
-				for (int i=0; i<m; i++) {
-					M.set_row(i, (dynamic_cast<const ExprConstant*>(&a[i]))->get_vector_value());
-				}
-				cleanup(a,false);
-				return ExprConstant::new_matrix(M);
-			}
-		}
+		result=&ExprVector::new_(a,false);
 	} else {
 		throw ExprDiffException("differentiation of matrix-valued functions");
-		return y;
 	}
+
+	return result->simplify();
 }
 
 const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
@@ -133,21 +98,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 			leaves.push_back(&v);
 
 			// this symbol does not appear in the expression -> null derivative
-			switch (v.dim.type()) {
-			case Dim::SCALAR:
-				grad.insert(v, &ExprConstant::new_scalar(0));
-				break;
-			case Dim::ROW_VECTOR:
-			case Dim::COL_VECTOR:
-				grad.insert(v, &zeros(v.dim.vec_size(), v.dim.type()==Dim::ROW_VECTOR));
-				break;
-			case Dim::MATRIX:
-				grad.insert(v, &zeros(v.dim.dim2,v.dim.dim3));
-				break;
-			default:
-				throw ExprDiffException("diff with matrix arrays");
-				break;
-			}
+			grad.insert(v, &ExprConstant::new_matrix(Matrix::zeros(v.dim.nb_rows(),v.dim.nb_cols())));
 		}
 	}
 
@@ -155,38 +106,26 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 		int k=0;
 		for (int i=0; i<old_x.size(); i++) {
 
-			//cout << "grad % " << old_x[i].name << " : " << *grad[old_x[i]] << endl;
-			switch (old_x[i].dim.type()) {
+	    	const Dim& d=old_x[i].dim;
+	    	//cout << "grad % " << old_x[i].name << " : " << *grad[old_x[i]] << endl;
+			switch (d.type()) {
 			case Dim::SCALAR:
 				dX.set_ref(k++,*grad[old_x[i]]);
 				break;
 			case Dim::ROW_VECTOR:
 			case Dim::COL_VECTOR:
-				{	assert(dynamic_cast<const ExprVector*>(grad[old_x[i]]));
-					const ExprVector& vec = * ((const ExprVector*) grad[old_x[i]]);
-					for (int j=0; j<old_x[i].dim.vec_size(); j++)
-						dX.set_ref(k++,vec.arg(j));
+				{
+					for (int j=0; j<d.vec_size(); j++)
+						dX.set_ref(k++,(*grad[old_x[i]])[j]);
 				}
 			break;
 			case Dim::MATRIX:
 			    {
-			    	assert(dynamic_cast<const ExprVector*>(grad[old_x[i]]));
-			    	const ExprVector& vec = * ((const ExprVector*) grad[old_x[i]]);
-
-			    	for (int j2=0; j2<old_x[i].dim.dim2; j2++) {
-			    		const ExprVector* vec2=dynamic_cast<const ExprVector*>(&(vec.arg(j2)));
-
-			    		for (int j3=0; j3<old_x[i].dim.dim3; j3++)
-			    			if (vec2)
-			    				dX.set_ref(k++, vec2->arg(j3));
-			    			else
-			    				dX.set_ref(k++, vec.arg(j2)[j3]); // TODO: memory leak
-			    	}
+			    	for (int j=0; j<d.nb_rows(); j++)
+			    		for (int j2=0; j2<d.nb_cols(); j2++)
+			    			dX.set_ref(k++,(*grad[old_x[i]])[DoubleIndex::one_elt(d,j,j2)]);
 			    }
 			    break;
-			default:
-				throw ExprDiffException("diff with matrix arrays");
-				break;
 			}
 		}
 		assert(k==nb_var);
@@ -208,7 +147,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	//   we had proceeded in the other way around, there would be
 	//   memory leaks).
 
-	const ExprNode& result=ExprCopy().copy(old_x,new_x,df,true);
+	const ExprNode& result=ExprCopy().copy(old_x,new_x,df);
 
 	// ------------------------- CLEANUP -------------------------
 	// cleanup(df,true); // don't! some nodes are shared with y
@@ -252,54 +191,56 @@ void ExprDiff::visit(const ExprNode& e) {
 
 void ExprDiff::visit(const ExprIndex& i) {
 
-	if (i.expr.dim.is_scalar()) { // => i.index==0
+	if (i.index.all_rows() && i.index.all_cols()) {
 		add_grad_expr(i.expr, *grad[i]);
 		return;
 	}
 
-	if (i.expr.dim.type()==Dim::MATRIX_ARRAY) {
-		throw ExprDiffException("diff with matrix arrays");
+	vector<const ExprNode*> row_vec;
+
+	int n=i.expr.dim.nb_rows();
+	int m=i.index.first_col();
+
+	if (m>0) { // fill with zeros the left part of the matrix expression
+		// will be automatically transformed to a vector (if n=1) or a scalar (n=m=1)
+		row_vec.push_back(&ExprConstant::new_matrix(Matrix::zeros(n,m)));
 	}
 
-	int n = i.expr.dim.max_index()+1;
+	n=i.index.first_row();
+	m=i.index.nb_cols();
 
-	// we will build a new vector from scratch
-	Array<const ExprNode> new_comp(n);
+	vector<const ExprNode*> col_vec;
+	if (n>0) { // fill with zeros on the top
+		// will be automatically transformed to a vector (if n=1) or a scalar (n=m=1)
+		col_vec.push_back(&ExprConstant::new_matrix(Matrix::zeros(n,m)));
+	}
 
-	if (grad.found(i.expr)) {
-		const ExprVector* old_g=(const ExprVector*) grad[i.expr];
-		assert(old_g);
-		for (int j=0; j<n; j++) {
-			if (j!=i.index)
-				// duplicate all other components
-				new_comp.set_ref(j, old_g->arg(j));
-			else {
-				if (old_g->arg(i.index).is_zero()) {
-					new_comp.set_ref(i.index, *(grad[i]));
-					delete &old_g->arg(i.index);
-				}
-				else
-					new_comp.set_ref(i.index, old_g->arg(i.index) + *(grad[i]));
-			}
-		}
-		// do not call cleanup(*old_g) because subnodes are still used.
-		delete old_g;
+	col_vec.push_back(grad[i]);
+
+	n=i.expr.dim.nb_rows() - i.index.last_row() -1;
+	if (n>0) { // fill with zeros on the right
+		col_vec.push_back(&ExprConstant::new_matrix(Matrix::zeros(n,m)));
+	}
+
+	if (col_vec.size()==1) {
+		assert(i.index.all_rows());
+		row_vec.push_back(col_vec.back());
 	} else {
-		// not found means "zero"
-		for (int j=0; j<n; j++) {
-			if (j!=i.index)
-				// duplicate all other components
-				if (i.expr.dim.is_vector())
-					new_comp.set_ref(j, ExprConstant::new_scalar(0));
-				else
-					new_comp.set_ref(j, zeros(i.expr.dim.dim2,true));
-			else
-				new_comp.set_ref(i.index, *(grad[i]));
-		}
+		row_vec.push_back(&ExprVector::new_(col_vec,false));
 	}
 
-	grad[i.expr] = & ExprVector::new_(new_comp, i.expr.dim.type()==Dim::ROW_VECTOR);
-	//cout << " grad of " << i.expr << " --> " << *grad[i.expr] << endl;
+	n=i.expr.dim.nb_rows();
+	m=i.expr.dim.nb_cols() - i.index.last_col() -1;
+	if (m>0) { // fill with zeros on the bottom
+		row_vec.push_back(&ExprConstant::new_matrix(Matrix::zeros(n,m)));
+	}
+
+	if (row_vec.size()==1) {
+		assert(i.index.all_cols());
+		add_grad_expr(i.expr,*row_vec.back());
+	} else {
+		add_grad_expr(i.expr, ExprVector::new_(row_vec,true));
+	}
 }
 
 void ExprDiff::visit(const ExprSymbol& x) {
@@ -310,36 +251,28 @@ void ExprDiff::visit(const ExprConstant& c) {
 	leaves.push_back(&c);
 }
 
-// (useless so far)
-void ExprDiff::visit(const ExprNAryOp& e) {
-	assert(false);
-}
-
-void ExprDiff::visit(const ExprLeaf& e) {
-	assert(false);
-}
-
-// (useless so far)
-void ExprDiff::visit(const ExprBinaryOp& b) {
-	assert(false);
-}
-
-// (useless so far)
-void ExprDiff::visit(const ExprUnaryOp& u) {
-	assert(false);
-}
-
-
 void ExprDiff::visit(const ExprVector& e) {
-
+	int j=0;
+	int n;
+	DoubleIndex idx;
 	for (int i=0; i<e.nb_args; i++) {
-		assert(dynamic_cast<const ExprVector*>(grad[e])); // TODO: not necessarily true...
-		add_grad_expr(e.arg(i), ((const ExprVector*) grad[e])->get(i));
+		if (e.row_vector()) {
+			n=e.arg(i).dim.nb_cols();
+			idx=DoubleIndex::cols(e.dim,j,j+n-1);
+		} else  {
+			n=e.arg(i).dim.nb_rows();
+			idx=DoubleIndex::rows(e.dim,j,j+n-1);
+		}
+		j+=n;
+		//cout << "i=" << i << " idx=" << idx << " grad[idx]=" << (*grad[e])[idx] << endl;
+		add_grad_expr(e.arg(i), (*grad[e])[idx]); // needs a call to simplify
 	}
-	delete grad[e];
 }
 
 void ExprDiff::visit(const ExprApply& e) {
+
+	/* ******* TODO:old code ********/
+
 	const Function& df=e.func.diff();
 	int k=0;
 	const ExprNode& gradf=df(e.args);
@@ -371,8 +304,8 @@ void ExprDiff::visit(const ExprApply& e) {
 			// to the i^th argument of the gradient (see visit(ExprVector&).
 //			const ExprVector* vec=dynamic_cast<const ExprVector*>(&e.arg(i));
 //			if (vec!=NULL) {
-//				int m=e.arg(i).dim.dim2;
-//				int n=e.arg(i).dim.dim3;
+//				int m=e.arg(i).dim.nb_rows();
+//				int n=e.arg(i).dim.nb_cols();
 //				if (Array<const ExprNode> rows(m);
 //				for (int i=0; i<m; i++) {
 //					Array<const ExprNode> col(n);
@@ -383,27 +316,47 @@ void ExprDiff::visit(const ExprApply& e) {
 //			}
 		}
 		break;
-		default:
-			throw ExprDiffException("diff with matrix arrays");
-			break;
 		}
 	}
 
 }
 
 void ExprDiff::visit(const ExprChi& e) {
+	throw ExprDiffException("symbolic differentiation with chi");
+}
 
-	//TODO
-	throw ExprDiffException("diff with chi");
+
+void ExprDiff::visit(const ExprMul& e)   {
+	if (e.left.dim.is_scalar()) {
+		if (!e.right.dim.is_matrix()) {
+			add_grad_expr(e.left,  (*grad[e])*e.right); // S*S or V*V
+		} else {
+			for (int i=0; i<e.right.dim.nb_rows(); i++) {
+				DoubleIndex idx=DoubleIndex::one_row(e.right.dim,i);
+				add_grad_expr(e.left, (*grad[e])[idx]*(e.right[idx]));
+			}
+		}
+		add_grad_expr(e.right, e.left*(*grad[e])); // S*S or S*V or S*M
+	} else if (e.left.dim.is_vector()) {
+		if (e.right.dim.is_vector()) {
+			add_grad_expr(e.left,  (*grad[e])*transpose(e.right)); // S*V
+			add_grad_expr(e.right, (*grad[e])*transpose(e.left));  // S*V
+		} else {
+			assert(e.right.dim.is_matrix());
+			add_grad_expr(e.left,  transpose(e.right*(*grad[e]))); // (M*V)'
+			add_grad_expr(e.right, (transpose(e.left))*(*grad[e])); // V'*V
+		}
+	} else {
+		assert(e.left.dim.is_matrix());
+		add_grad_expr(e.left, *grad[e]*transpose(e.right)); // V*V' or M*M
+		add_grad_expr(e.right,transpose(e.left)*(*grad[e])); // M*V or M*M
+	}
 }
 
 void ExprDiff::visit(const ExprAdd& e)   { add_grad_expr(e.left,  *grad[e]);
                                            add_grad_expr(e.right, *grad[e]); }
-void ExprDiff::visit(const ExprMul& e)   { if (!e.dim.is_scalar()) throw ExprDiffException("diff with matrix/vector multiplication"); // TODO
-                                           add_grad_expr(e.left,  (*grad[e])*e.right);
-                                           add_grad_expr(e.right, (*grad[e])*e.left); }
 void ExprDiff::visit(const ExprSub& e)   { add_grad_expr(e.left,  *grad[e]);
-										   add_grad_expr(e.right, -*grad[e]); }
+                                           add_grad_expr(e.right, -*grad[e]); }
 void ExprDiff::visit(const ExprDiv& e)   { add_grad_expr(e.left,  *grad[e]/e.right);
 		                                   add_grad_expr(e.right, -((*grad[e])*e.left/sqr(e.right))); }
 void ExprDiff::visit(const ExprMax& e)   { add_grad_expr(e.left, (*grad[e])*chi(e.right-e.left, ONE, ZERO));
@@ -415,13 +368,12 @@ void ExprDiff::visit(const ExprAtan2& e) {
     add_grad_expr(e.right, - e.left / (sqr(e.left) + sqr(e.right)) * *grad[e]);
 }
 
-
 void ExprDiff::visit(const ExprPower& e) {
 	add_grad_expr(e.expr,Interval(e.expon)*pow(e.expr,e.expon-1)*(*grad[e]));
 }
 
 void ExprDiff::visit(const ExprMinus& e) { add_grad_expr(e.expr, -*grad[e]); }
-void ExprDiff::visit(const ExprTrans& e) { throw ExprDiffException("diff with transpose"); } //TODO
+void ExprDiff::visit(const ExprTrans& e) { add_grad_expr(e.expr, transpose(*grad[e])); }
 void ExprDiff::visit(const ExprSign& e)  { add_grad_expr(e.expr, (*grad[e])*chi(abs(e.expr),ALL_REALS,ZERO)); }
 void ExprDiff::visit(const ExprAbs& e)   { add_grad_expr(e.expr, (*grad[e])*sign(e.expr)); }
 void ExprDiff::visit(const ExprSqr& e)   { add_grad_expr(e.expr, (*grad[e])*Interval(2.0)*e.expr); }
@@ -430,10 +382,10 @@ void ExprDiff::visit(const ExprExp& e)   { add_grad_expr(e.expr, (*grad[e])*exp(
 void ExprDiff::visit(const ExprLog& e)   { add_grad_expr(e.expr, (*grad[e])/e.expr ); }
 void ExprDiff::visit(const ExprCos& e)   { add_grad_expr(e.expr,-(*grad[e])*sin(e.expr) ); }
 void ExprDiff::visit(const ExprSin& e)   { add_grad_expr(e.expr, (*grad[e])*cos(e.expr) ); }
-void ExprDiff::visit(const ExprTan& e)   { add_grad_expr(e.expr, (*grad[e])*(ONE+sqr(tan(e.expr)))); }
+void ExprDiff::visit(const ExprTan& e)   { add_grad_expr(e.expr, (*grad[e])*(1.0+sqr(tan(e.expr)))); }
 void ExprDiff::visit(const ExprCosh& e)  { add_grad_expr(e.expr, (*grad[e])*sinh(e.expr)); }
 void ExprDiff::visit(const ExprSinh& e)  { add_grad_expr(e.expr, (*grad[e])*cosh(e.expr)); }
-void ExprDiff::visit(const ExprTanh& e)  { add_grad_expr(e.expr, (*grad[e])*(ONE - sqr(tanh(e.expr)))); }
+void ExprDiff::visit(const ExprTanh& e)  { add_grad_expr(e.expr, (*grad[e])*(1.0-sqr(tanh(e.expr)))); }
 void ExprDiff::visit(const ExprAcos& e)  { add_grad_expr(e.expr,-(*grad[e])/sqrt(1.0-sqr(e.expr))); }
 void ExprDiff::visit(const ExprAsin& e)  { add_grad_expr(e.expr, (*grad[e])/sqrt(1.0-sqr(e.expr))); }
 void ExprDiff::visit(const ExprAtan& e)  { add_grad_expr(e.expr, (*grad[e])/(1.0+sqr(e.expr))); }

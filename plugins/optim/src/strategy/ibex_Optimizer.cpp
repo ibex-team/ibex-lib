@@ -18,6 +18,7 @@
 #include "ibex_Random.h"
 
 #include "ibex_ExprCopy.h"
+#include "ibex_ExprDiff.h"
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
 //#include "ibex_Multipliers.h"
@@ -67,8 +68,18 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
                 				timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), loup_box(n), nb_cells(0),
-                				df(*user_sys.goal,Function::DIFF), loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
+                				df(NULL), loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
                 				uplo_of_epsboxes(POS_INFINITY) {
+
+
+	try {
+		df = new Function(*user_sys.goal,Function::DIFF);
+	} catch(Exception&) {
+		//TODO: replace with ExprDiffException.
+		// Currently, DimException is also sometimes raised.
+		cerr << "Warning: symbolic differentiation of the goal function has failed ==> first-order contraction disabled" << endl;
+		df = NULL;
+	}
 
 	// ==== build the system of equalities only ====
 	try {
@@ -111,6 +122,7 @@ Optimizer::~Optimizer() {
 	}
 	buffer.flush();
 	if (equs) delete equs;
+	if (df) delete df;
 	delete mylp;
 	delete lr;
 	delete &buffer.cost1();
@@ -355,7 +367,8 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	//gradient=0 contraction for unconstrained optimization ; 
 	//first order test for constrained optimization (useful only when there are no equations replaced by inequalities) 
 	//works with the box without the objective (tmp_box)
-	firstorder_contract(tmp_box,init_box);
+	if (df)
+		firstorder_contract(tmp_box,init_box);
 
 	if (tmp_box.is_empty()) {
 		c.box.set_empty();
@@ -372,9 +385,9 @@ void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& i
 		// for unconstrained optimization  contraction with gradient=0
 		if (box.is_strict_interior_subset(init_box)) {
 			if (n==1)
-				df.backward(Interval::ZERO,box);
+				df->backward(Interval::ZERO,box);
 			else
-				df.backward(IntervalVector(n,Interval::ZERO),box);
+				df->backward(IntervalVector(n,Interval::ZERO),box);
 		}
 	}
 

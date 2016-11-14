@@ -41,7 +41,7 @@ class FindInputsUsed: public ExprVisitor {
 public:
 	std::vector<bool>& is_used;
 	int* symbol_index;
-	int current_index; // first index for a subexpression. -1 when subexpression is not a symbol or an indexed symbol.
+	NodeMap<bool> visited;
 
 	FindInputsUsed(const Array<const ExprSymbol>& x, const ExprNode& y, int* symbol_index, std::vector<bool>& is_used) : is_used(is_used), symbol_index(symbol_index) {
 
@@ -51,61 +51,68 @@ public:
 			}
 		}
 
-		visit(y);
+		if (!add(y)) visit(y);
+	}
 
-		if (current_index!=-1) {
-			for (int i=0; i<y.dim.size(); i++)
-				is_used[current_index+i]=true;
-		}
+	bool add_symbol(const ExprNode& e) {
+		const ExprSymbol* s=dynamic_cast<const ExprSymbol*>(&e);
+		if (s)  {
+			int current_index = symbol_index[s->key];
+			for (int i=0; i<s->dim.size(); i++) is_used[current_index+i]=true;
+			return true;
+		} else
+			return false;
+	}
+
+	bool add_index(const ExprNode& e) {
+		const ExprIndex* idx=dynamic_cast<const ExprIndex*>(&e);
+		if (idx && idx->indexed_symbol())  {
+			pair<const ExprSymbol*, bool**> p = idx->symbol_mask();
+			if (p.first==NULL) return false;
+			const ExprSymbol& s= *p.first;
+			bool** mask=p.second;
+			int current_index = symbol_index[s.key];
+			for (int i=0; i<s.dim.nb_rows(); i++) {
+				for (int j=0; j<s.dim.nb_cols(); j++)
+					if (mask[i][j])  is_used[current_index+(i*s.dim.nb_cols())+j]=true;
+				delete[] mask[i];
+			}
+			delete[] mask;
+			return true;
+		} else
+			return false;
+	}
+
+	bool add(const ExprNode& e) {
+		return add_symbol(e) || add_index(e);
 	}
 
 	virtual void visit(const ExprNode& e)     {
+		if (visited.found(e)) return;
 		e.acceptVisitor(*this);
+		visited.insert(e,true);
 	}
 
-	virtual void visit(const ExprLeaf& e)     {
-		e.acceptVisitor(*this);
-	}
+	virtual void visit(const ExprIndex& e)    { }
 
-	virtual void visit(const ExprIndex& e)    {
-		visit(e.expr);
-		if (current_index!=-1)
-			current_index+=e.index*e.dim.size();
-		// symbol_index is left unchanged.
-	}
+	virtual void visit(const ExprSymbol& e)   {	}
 
-	virtual void visit(const ExprSymbol& e)   {
-		current_index=symbol_index[e.key];
-	}
-
-	virtual void visit(const ExprConstant&)   {
-		current_index=-1;
-	}
+	virtual void visit(const ExprConstant&)   { }
 
 	virtual void visit(const ExprNAryOp& e)   {
 		for (int i=0; i<e.nb_args; i++) {
-			visit(e.args[i]);
-			if (current_index!=-1)
-				for (int j=0; j<e.arg(i).dim.size(); j++) is_used[current_index+j]=true;
+			if (!add(e.arg(i)))
+				visit(e.arg(i));
 		}
-		current_index=-1;
 	}
 
 	virtual void visit(const ExprBinaryOp& e) {
-		visit(e.left);
-		if (current_index!=-1)
-			for (int i=0; i<e.left.dim.size(); i++) is_used[current_index+i]=true;
-		visit(e.right);
-		if (current_index!=-1)
-			for (int i=0; i<e.right.dim.size(); i++) is_used[current_index+i]=true;
-		current_index=-1;
+		if (!add(e.left)) visit(e.left);
+		if (!add(e.right)) visit(e.right);
 	}
 
 	virtual void visit(const ExprUnaryOp& e)  {
-		visit(e.expr);
-		if (current_index!=-1)
-			for (int i=0; i<e.expr.dim.size(); i++) is_used[current_index+i]=true;
-		current_index=-1;
+		if (!add(e.expr)) visit(e.expr);
 	}
 
 };
@@ -117,7 +124,8 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL), _used_var(NULL) {
+Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL),
+		_eval(NULL), _hc4revise(NULL), _grad(NULL), _inhc4revise(NULL), _used_var(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 
@@ -250,51 +258,51 @@ Function::Function(const char* x1, const char* x2, const char* x3, const char* x
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,  const char* x17,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,  const char* x17,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,  const char* x17,  const char* x18,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,  const char* x17,  const char* x18,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,  const char* x17,  const char* x18,  const char* x19,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,  const char* x17,  const char* x18,  const char* x19,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19),y);
 }
 
-Function::Function( const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,  const char* x17,  const char* x18,  const char* x19,  const char* x20,const char* y) {
+Function::Function(const char* x1,  const char* x2,  const char* x3,  const char* x4,  const char* x5,  const char* x6,  const char* x7,  const char* x8,  const char* x9,  const char* x10,  const char* x11,  const char* x12,  const char* x13,  const char* x14,  const char* x15,  const char* x16,  const char* x17,  const char* x18,  const char* x19,  const char* x20,const char* y) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20),y);
 }
 
@@ -406,8 +414,10 @@ void Function::generate_comp() {
 		for (int i=0; i<expr().dim.vec_size(); i++) {
 			Array<const ExprSymbol> x(nb_arg());
 			varcopy(symbs,x);
-			const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i);
-			Function* fi=new Function(x,y);
+			const ExprIndex& yi_tmp=expr()[i];
+			const ExprNode& yi=ExprCopy().copy(symbs, x, yi_tmp).simplify();
+			delete &yi_tmp;
+			Function* fi=new Function(x,yi);
 			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fi->expr()));
 			if (c && c->get_value()==Interval::ZERO) { // use a more efficient structure than a DAG!
 				if (!zero) zero=fi;
@@ -420,14 +430,16 @@ void Function::generate_comp() {
 	}
 
 	else {
-		int n=expr().dim.dim3;
-		for (int i=0; i<expr().dim.dim2; i++) {
+		int n=expr().dim.nb_cols();
+		for (int i=0; i<expr().dim.nb_rows(); i++) {
 
 			for (int j=0; j<n; j++) {
 				Array<const ExprSymbol> x(nb_arg());
 				varcopy(symbs,x);
-				const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i, j);
-				Function* fij=new Function(x,y);
+				const ExprIndex& yij_tmp=expr()[DoubleIndex::one_elt(expr().dim,i,j)];
+				const ExprNode& yij=ExprCopy().copy(symbs, x, yij_tmp).simplify();
+				delete &yij_tmp;
+				Function* fij=new Function(x,yij);
 				const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fij->expr()));
 				if (c && c->get_value()==Interval::ZERO) { // use a more efficient structure than a DAG!
 					if (!zero) zero=fij;
@@ -487,6 +499,14 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 			index++;
 		}
 	}
+
+//	// Find input used
+//	ExprSubNodes nodes(y);
+//	NodeMap<bool> visited;
+//	for (int i=0; i<nodes.size(); i++) {
+//		ExprNAryOp* nary_op = dynamic_cast<const ExprNA>)
+//	}
+
 
 	FindInputsUsed fsu(x, y, symbol_index, is_used);
 
@@ -554,9 +574,8 @@ std::string Function::minibex(bool human) const {
 	for (int i=0; i<nb_arg(); i++) {
 		const ExprSymbol& x=arg(i);
 		s << x.name;
-		if (x.dim.dim1>1) s << '[' << x.dim.dim1 << ']';
-		if (x.dim.dim2>1) s << '[' << x.dim.dim2 << ']';
-		if (x.dim.dim3>1) s << '[' << x.dim.dim3 << ']';
+		if (x.dim.nb_rows()>1) s << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_cols()>1) s << '[' << x.dim.nb_cols() << ']';
 		if (i<nb_arg()-1) s << ",";
 	}
 	s << ")" << endl;

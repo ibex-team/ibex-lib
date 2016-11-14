@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_CtcXNewton.cpp
 // Author      : Ignacio Araya, Bertrand Neveu , Gilles Trombettoni
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -35,7 +35,9 @@ LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_po
 
 	try {
 		df = new Function(sys1.f,Function::DIFF);
-	} catch(ExprDiffException&) {
+	} catch(Exception&) {
+		//TODO: replace with ExprDiffException.
+		// Currently, DimException is also sometimes raised.
 		df = NULL;
 	}
 
@@ -81,6 +83,7 @@ LinearRelaxXTaylor::~LinearRelaxXTaylor() {
 	for(int ctr=0; ctr<sys.nb_ctr; ctr++) delete[] linear[ctr];
 	delete[] linear;
 	delete[] linear_ctr;
+	if (df) delete df;
 }
 
 int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver& lp_solver)  {
@@ -270,7 +273,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& box, int ctr, corn
 }
 
 int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
-		int ctr, corner_point cpoint, CmpOp op, 
+		int ctr, corner_point cpoint, CmpOp op,
 		IntervalVector& G2, int id_point, int& nb_nonlinear_vars, LinearSolver& lp_solver) {
 
 	IntervalVector G = G2;
@@ -389,23 +392,23 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
                         (abs(Inf(G(j+1))) >= abs(Sup(G(j+1))) && (op == GEQ || op== GT))  )? true:false;
 	       break;
 	  case MONO:
-	    if (ctr==goal_ctr && ((Inf(G(j+1)) >0 && (op == LEQ || op== LT)) || 
+	    if (ctr==goal_ctr && ((Inf(G(j+1)) >0 && (op == LEQ || op== LT)) ||
 				  (Sup (G(j+1)) < 0 && (op == GEQ || op== GT))))
 	      inf_x = true;
-	    else if 
+	    else if
 	      (ctr == goal_ctr  &&
-	      ((Sup(G(j+1)) <0 && (op == LEQ || op== LT)) || 
+	      ((Sup(G(j+1)) <0 && (op == LEQ || op== LT)) ||
 	       (Inf(G(j+1)) > 0 && (op == GEQ || op== GT))))
 	      inf_x=false;
 	    else inf_x = (RNG::rand()%2==0);
 	    last_rnd[j]=inf_x? 0:1;
 	    break;
 	  case NEGMONO:
-	    if ((Inf(G(j+1)) >0 && (op == LEQ || op== LT)) || 
+	    if ((Inf(G(j+1)) >0 && (op == LEQ || op== LT)) ||
 		(Sup (G(j+1)) < 0 && (op == GEQ || op== GT)))
 	      inf_x = false;
-	    else if 
-	      ((Sup(G(j+1)) <0 && (op == LEQ || op== LT)) || 
+	    else if
+	      ((Sup(G(j+1)) <0 && (op == LEQ || op== LT)) ||
 	       (Inf(G(j+1)) > 0 && (op == GEQ || op== GT)))
 	      inf_x=true;
 	    else inf_x = (RNG::rand()%2==0);
@@ -417,12 +420,12 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 
 			/*
               case GREEDY7:
-                 //select the coin nearest to the loup 
+                 //select the coin nearest to the loup
                  if(goal_ctr!=-1 && Dimension(Optimizer::global_optimizer())>0){
 //                     if(j==0)cout<< Optimizer::global_optimizer()<<end;
                     inf_x=(abs(Optimizer::global_optimizer()(j+1)-Inf(savebox(j+1))) <
                       abs(Optimizer::global_optimizer()(j+1)-Sup(savebox(j+1))))? true:false;
-                 }else{ 
+                 }else{
                    inf_x=(RNG::rand()%2==0);
 		   }
                  break;
@@ -441,7 +444,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
                     inf_x=((fh_sup-fh_inf)/(REAL)(n-1) - 0.5*D*(Inf(G(j+1))+Sup(G(j+1)))  > 0)? false:true;
                  else
                     inf_x=((fh_sup-fh_inf)/(REAL)(n-1) - 0.5*D*(Inf(G(j+1))+Sup(G(j+1))) < 0)? false:true;
-		 last_rnd[j]=inf_x? 0:1;  
+		 last_rnd[j]=inf_x? 0:1;
 		 space.box=save;
               break;
              case GREEDY5:
@@ -457,7 +460,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
                     inf_x=(fh_sup-fh_inf - 0.5*D*(Inf(G(j+1))+Sup(G(j+1)))  > 0)? false:true;
                  else
                     inf_x=(fh_sup-fh_inf - 0.5*D*(Inf(G(j+1))+Sup(G(j+1))) < 0)? false:true;
-		 last_rnd[j]=inf_x? 0:1;  
+		 last_rnd[j]=inf_x? 0:1;
 		 space.box=save;
               break;
 			 */

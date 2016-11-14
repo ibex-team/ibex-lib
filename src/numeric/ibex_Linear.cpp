@@ -317,7 +317,7 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
 	assert(n == (x.size()) && n == (b.size()));
 	assert(min_dist>0);
 	//cout << " ====== inflating Gauss-Seidel ========= " << endl;
-	double red;
+	//double red;
 	IntervalVector xold(n);
 	Interval proj;
 	double d=DBL_MAX; // Hausdorff distances between 2 iterations

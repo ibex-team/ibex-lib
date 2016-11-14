@@ -126,11 +126,22 @@ public:
 	void init(const Interval& x);
 
 	/**
-	 * \brief Add [-rad,+rad] to all the components of *this.
+	 * \brief Absolute inflation.
+	 *
+	 * Add [-rad,+rad] to all the components of *this.
 	 *
 	 * \return *this.
 	 */
 	IntervalVector& inflate(double rad);
+
+	/**
+	 * \brief Absolute and relative inflation.
+	 *
+	 * [x] <- mid[x] + delta*([x]-mid[x]) + chi*[-1,+1]
+	 *
+	 * \return *this.
+	 */
+	IntervalVector& inflate(double delta, double chi);
 
 	/**
 	 * \brief Resize this IntervalVector.
@@ -719,7 +730,8 @@ inline IntervalVector::~IntervalVector() {
 }
 
 inline void IntervalVector::set_empty() {
-	(*this)[0]=Interval::EMPTY_SET;
+	for (int i=0; i<size(); i++)
+		(*this)[i]=Interval::EMPTY_SET;
 }
 
 inline const Interval& IntervalVector::operator[](int i) const {
@@ -779,8 +791,12 @@ inline double IntervalVector::min_diam() const {
 
 inline IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y) {
 	IntervalVector z(x.size()+y.size());
-	z.put(0,x);
-	z.put(x.size(),y);
+	if (x.is_empty() || y.is_empty())
+		z.set_empty();
+	else {
+		z.put(0,x);
+		z.put(x.size(),y);
+	}
 	return z;
 }
 

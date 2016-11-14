@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string.h>
 
+#include "ibex_DoubleIndex.h"
 #include "ibex_ExprVisitor.h"
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
@@ -118,8 +119,14 @@ public:
 	/** Return the type of this subexpression. */
 	Dim::Type type() const;
 
+	/** Simplify the expression. */
+	const ExprNode& simplify() const;
+
 	/** Indexing */
-	const ExprIndex& operator[](int index) const;
+	const ExprIndex& operator[](int i) const;
+
+	/** Indexing */
+	const ExprIndex& operator[](const DoubleIndex& index) const;
 
 	/** Create an equality constraint expr=expr. */
 	const ExprCtr& operator=(const ExprNode& right) const;
@@ -196,27 +203,25 @@ public:
 	const ExprNode& expr;
 
 	/** The index. */
-	const int index;
+	const DoubleIndex index;
 
 	/**
 	 * \brief Return true iff this node is an indexed symbol.
 	 *
-	 * E.g. x[0], x[0][1], x[0][1][0] are indexed symbols, (x+y)[0] is not.
+	 * E.g. x[0], x[0][1] are indexed symbols, (x+y)[0] is not.
 	 */
 	bool indexed_symbol() const;
 
 	/**
-	 * \brief The symbol and the shift (in the domain)
-	 *
-	 * \return <NULL,-1> if this node is not an indexed symbol.
+	 * \brief The components of the symbol that are used.
 	 */
-	std::pair<const ExprSymbol*, int> symbol_shift() const;
+	std::pair<const ExprSymbol*, bool**> symbol_mask() const;
 
-	static const ExprIndex& new_(const ExprNode& subexpr, int index);
+	static const ExprIndex& new_(const ExprNode& subexpr, const DoubleIndex& index);
 
 private:
 	/** Create an indexed expression. */
-	ExprIndex(const ExprNode& subexpr, int index);
+	ExprIndex(const ExprNode& subexpr, const DoubleIndex& index);
 
 };
 
@@ -303,6 +308,8 @@ public:
 	int length() const { return nb_args; }
 
 private:
+	bool in_row;
+
 	ExprVector(const Array<const ExprNode>&, bool in_row);
 
 };
@@ -468,6 +475,8 @@ public:
 	/* Create a new symbol. The string \a name is duplicated. */
 	static const ExprSymbol& new_(const char* name, const Dim& dim=Dim::scalar());
 
+	bool** mask() const;
+
 private:
 	friend class Variable;
 	friend class parser::ExprEntity;
@@ -509,12 +518,6 @@ public:
 
 	/** Create a \a m x \a n matrix variable named \a name. */
 	Variable(int m, int n, const char* name);
-
-	/** Create a (\a k-sized array of \a m x \a n matrices) variable. */
-	Variable(int k, int m, int n);
-
-	/** Create a (\a k-sized array of \a m x \a n matrices) variable named \a name. */
-	Variable(int k, int m, int n, const char* name);
 
 	/** Delete this. */
 	~Variable();
@@ -586,9 +589,6 @@ public:
 	/** Create a matrix constant. */
 	static const ExprConstant& new_matrix(const IntervalMatrix& value);
 
-	/** Create a constant array of matrices. */
-	static const ExprConstant& new_matrix_array(const IntervalMatrixArray& value);
-
 	/** Create a constant from a domain. */
 	static const ExprConstant& new_(const Domain& d, bool reference=false);
 
@@ -607,9 +607,6 @@ public:
 	/** Return the value of the constant iff it is an IntervalMatrix. */
 	const IntervalMatrix& get_matrix_value() const;
 
-	/** Return the value of the constant iff it is an IntervalMatrixArray. */
-	const IntervalMatrixArray& get_matrix_array_value() const;
-
 	/** Return the value of the constant under the form of a domain. */
 	const Domain& get() const;
 
@@ -625,8 +622,6 @@ private:
 	ExprConstant(const IntervalVector& value, bool in_row);
 
 	ExprConstant(const IntervalMatrix& value);
-
-	ExprConstant(const IntervalMatrixArray& value);
 
 	ExprConstant(const Domain& value, bool reference);
 
@@ -992,7 +987,7 @@ public:
 	const int expon;
 
 private:
-	ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.dim), expon(expon) { }
+	ExprPower(const ExprNode& expr, int expon);
 	ExprPower(const ExprPower&); // copy constructor forbidden
 };
 
@@ -1403,77 +1398,98 @@ inline ExprNode::~ExprNode() {
 }
 
 inline bool ExprNode::is_zero() const {
-	return false; }
+	return false;
+}
 
 inline Dim::Type ExprNode::type() const {
-	return dim.type(); }
+	return dim.type();
+}
 
-inline const ExprIndex& ExprNode::operator[](int index) const {
-	return ExprIndex::new_(*this, index); }
+inline const ExprIndex& ExprNode::operator[](int i) const {
+	return ExprIndex::new_(*this, DoubleIndex::one_index(dim, i));
+}
 
-inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, int index) {
-	return *new ExprIndex(subexpr,index); }
+inline const ExprIndex& ExprNode::operator[](const DoubleIndex& index) const {
+	return ExprIndex::new_(*this, index);
+}
+
+inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, const DoubleIndex& index) {
+	return *new ExprIndex(subexpr,index);
+}
 
 inline bool ExprVector::row_vector() const {
-	return (dim.type()==Dim::ROW_VECTOR || get(0).type()==Dim::COL_VECTOR); /* last case occurs if *this is a matrix */ }
+	return in_row;
+}
 
-inline ExprLeaf::ExprLeaf(const Dim& dim) : ExprNode(0,1,dim) { }
+inline ExprLeaf::ExprLeaf(const Dim& dim) : ExprNode(0,1,dim) {
+
+}
 
 inline const ExprSymbol& ExprSymbol::new_(const char* name, const Dim& dim) {
-	return *new ExprSymbol(name,dim); }
+	return *new ExprSymbol(name,dim);
+}
 
 inline ExprSymbol::ExprSymbol(const char* name, const Dim& dim)
-: ExprLeaf(dim), name(strdup(name)), key(-1) { }
+: ExprLeaf(dim), name(strdup(name)), key(-1) {
+
+}
 
 inline const ExprConstant& ExprConstant::new_scalar(const Interval& value) {
-	return *new ExprConstant(value); }
+	return *new ExprConstant(value);
+}
 
 inline const ExprConstant& ExprConstant::new_vector(const IntervalVector& value, bool in_row) {
-	return *new ExprConstant(value,in_row); }
+	return *new ExprConstant(value,in_row);
+}
 
 inline const ExprConstant& ExprConstant::new_matrix(const IntervalMatrix& value) {
-	return *new ExprConstant(value); }
-
-inline const ExprConstant& ExprConstant::new_matrix_array(const IntervalMatrixArray& value) {
-	return *new ExprConstant(value); }
+	return *new ExprConstant(value);
+}
 
 inline const ExprConstant& ExprConstant::new_(const Domain& value, bool reference) {
-	return *new ExprConstant(value,reference); }
+	return *new ExprConstant(value,reference);
+}
 
 inline const Interval& ExprConstant::get_value() const {
-	return value.i(); }
+	return value.i();
+}
 
 inline const IntervalVector& ExprConstant::get_vector_value() const {
-	return value.v(); }
+	return value.v();
+}
 
 inline const IntervalMatrix& ExprConstant::get_matrix_value() const {
-	return value.m(); }
-
-inline const IntervalMatrixArray& ExprConstant::get_matrix_array_value() const {
-	return value.ma(); }
+	return value.m();
+}
 
 inline const Domain& ExprConstant::get() const {
-	return value; }
+	return value;
+}
 
 /** Addition */
 inline const ExprAdd& operator+(const ExprNode& left, const ExprNode& right) {
-	return ExprAdd::new_(left, right); }
+	return ExprAdd::new_(left, right);
+}
 
 /** Subtraction */
 inline const ExprSub& operator-(const ExprNode& left, const ExprNode& right) {
-	return ExprSub::new_(left, right); }
+	return ExprSub::new_(left, right);
+}
 
 /** Multiplication */
 inline const ExprMul& operator*(const ExprNode& left, const ExprNode& right) {
-	return ExprMul::new_(left, right); }
+	return ExprMul::new_(left, right);
+}
 
 /** Division */
 inline const ExprDiv& operator/(const ExprNode& left, const ExprNode& right) {
-	return ExprDiv::new_(left, right); }
+	return ExprDiv::new_(left, right);
+}
 
 /** Maximum */
 inline const ExprMax& max(const ExprNode& left, const ExprNode& right) {
-	return ExprMax::new_(left, right); }
+	return ExprMax::new_(left, right);
+}
 
 /** Maximum */
 inline const ExprMax& max(const Array<const ExprNode> args) {
@@ -1486,7 +1502,8 @@ inline const ExprMax& max(const Array<const ExprNode> args) {
 
 /** Minimum */
 inline const ExprMin& min(const ExprNode& left, const ExprNode& right) {
-	return ExprMin::new_(left, right); }
+	return ExprMin::new_(left, right);
+}
 
 /** Minimum */
 inline const ExprMin& min(const Array<const ExprNode> args) {
@@ -1499,67 +1516,83 @@ inline const ExprMin& min(const Array<const ExprNode> args) {
 
 /** Arctangent2 of two expressions */
 inline const ExprAtan2& atan2(const ExprNode& exp1, const ExprNode& exp2) {
-	return ExprAtan2::new_(exp1, exp2); }
+	return ExprAtan2::new_(exp1, exp2);
+}
 
 /** Chi function of three expressions */
 inline const ExprChi& chi(const ExprNode& exp1, const ExprNode& exp2, const ExprNode& exp3) {
-	return ExprChi::new_(exp1, exp2, exp3); }
+	return ExprChi::new_(exp1, exp2, exp3);
+}
 
 /** Addition of an expression to a constant */
 inline const ExprAdd& operator+(const ExprNode& left, double value) {
-	return left+ExprConstant::new_scalar(value); }
+	return left+ExprConstant::new_scalar(value);
+}
 
 /** Subtraction of an expression from a constant */
 inline const ExprSub& operator-(const ExprNode& left, double value) {
-	return left-ExprConstant::new_scalar(value); }
+	return left-ExprConstant::new_scalar(value);
+}
 
 /** Multiplication of an expression by a constant */
 inline const ExprMul& operator*(const ExprNode& left, double value) {
-	return left*ExprConstant::new_scalar(value); }
+	return left*ExprConstant::new_scalar(value);
+}
 
 /** Division of an expression by a constant */
 inline const ExprDiv& operator/(const ExprNode& left, double value) {
-	return left/ExprConstant::new_scalar(value); }
+	return left/ExprConstant::new_scalar(value);
+}
 
 /** Maximum of an expression and a constant */
 inline const ExprMax& max(const ExprNode& left, double value) {
-	return max(left, ExprConstant::new_scalar(value)); }
+	return max(left, ExprConstant::new_scalar(value));
+}
 
 /** Minimum of an expression and a constant */
 inline const ExprMin& min(const ExprNode& left, double value) {
-	return min(left, ExprConstant::new_scalar(value)); }
+	return min(left, ExprConstant::new_scalar(value));
+}
 
 /** Arctangent2 of an expression and a constant */
 inline const ExprAtan2& atan2(const ExprNode& exp1, double value) {
-	return ExprAtan2::new_(exp1, ExprConstant::new_scalar(value)); }
+	return ExprAtan2::new_(exp1, ExprConstant::new_scalar(value));
+}
 
 /** Addition of a constant to an expression */
 inline const ExprAdd& operator+(double value, const ExprNode& right) {
-	return ExprConstant::new_scalar(value)+right; }
+	return ExprConstant::new_scalar(value)+right;
+}
 
 /** Subtraction of a constant from an expression */
 inline const ExprSub& operator-(double value, const ExprNode& right) {
-	return ExprConstant::new_scalar(value)-right; }
+	return ExprConstant::new_scalar(value)-right;
+}
 
 /** Multiplication of a constant by an expression*/
 inline const ExprMul& operator*(double value, const ExprNode& right) {
-	return ExprConstant::new_scalar(value)*right; }
+	return ExprConstant::new_scalar(value)*right;
+}
 
 /** Division of a constant by an expression */
 inline const ExprDiv& operator/(double value, const ExprNode& right) {
-	return ExprConstant::new_scalar(value)/right; }
+	return ExprConstant::new_scalar(value)/right;
+}
 
 /** Maximum of a constant and an expression */
 inline const ExprMax& max (double value, const ExprNode& right) {
-	return max(ExprConstant::new_scalar(value), right); }
+	return max(ExprConstant::new_scalar(value), right);
+}
 
 /** Minimum of a constant and an expression */
 inline const ExprMin& min (double value, const ExprNode& right) {
-	return min(ExprConstant::new_scalar(value), right); }
+	return min(ExprConstant::new_scalar(value), right);
+}
 
 /** Arctangent2 of a constant and an expression */
 inline const ExprAtan2& atan2(double value, const ExprNode& exp2) {
-	return ExprAtan2::new_(ExprConstant::new_scalar(value), exp2); }
+	return ExprAtan2::new_(ExprConstant::new_scalar(value), exp2);
+}
 
 /** Square of an expression */
 inline const ExprSqr& sqr  (const ExprNode& exp) { return ExprSqr::new_(exp); }

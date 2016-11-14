@@ -64,7 +64,6 @@ bool HC4Revise::backward(const Domain& y) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   if (root.v().is_subset(y.v())) return true; break;
 	case Dim::MATRIX:       if (root.m().is_subset(y.m())) return true; break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 
 	root &= y;
@@ -77,6 +76,14 @@ bool HC4Revise::backward(const Domain& y) {
 
 	return false;
 	//std::cout << "backward:" << std::endl; f.cf.print();
+}
+
+void HC4Revise::idx_cp_bwd(int x, int y) {
+	assert(dynamic_cast<const ExprIndex*> (&f.node(y)));
+
+	const ExprIndex& e = (const ExprIndex&) f.node(y);
+
+	d[x].put(e.index.first_row(), e.index.first_col(), d[y]);
 }
 
 void HC4Revise::apply_bwd(int* x, int y) {
@@ -104,19 +111,51 @@ void HC4Revise::vector_bwd(int* x, int y) {
 
 	const ExprVector& v = (const ExprVector&) f.node(y);
 
+	assert(v.type()!=Dim::SCALAR);
+
+	int j=0;
+
 	if (v.dim.is_vector()) {
-		for (int i=0; i<v.length(); i++)
-			if ((d[x[i]].i() &= d[y].v()[i]).is_empty()) throw EmptyBoxException();
+		for (int i=0; i<v.length(); i++) {
+			if (v.arg(i).dim.is_vector()) {
+				if ((d[x[i]].v() &= d[y].v().subvector(j,j+v.arg(i).dim.vec_size())).is_empty())
+						throw EmptyBoxException();
+				j+=v.arg(i).dim.vec_size();
+			} else {
+				if ((d[x[i]].i() &= d[y].v()[j]).is_empty())
+					throw EmptyBoxException();
+				j++;
+			}
+		}
+
+		assert(j==v.dim.vec_size());
 	}
 	else {
-		if (v.row_vector())
+		if (v.row_vector()) {
 			for (int i=0; i<v.length(); i++) {
-				if ((d[x[i]].v()&=d[y].m().col(i)).is_empty()) throw EmptyBoxException();
+				if (v.arg(i).dim.is_matrix()) {
+					if ((d[x[i]].m()&=d[y].m().submatrix(0,v.dim.nb_rows(),j,v.arg(i).dim.nb_cols())).is_empty())
+						throw EmptyBoxException();
+					j+=v.arg(i).dim.nb_cols();
+				} else if (v.arg(i).dim.is_vector()) {
+					if ((d[x[i]].v()&=d[y].m().col(j)).is_empty())
+						throw EmptyBoxException();
+					j++;
+				}
 			}
-		else
+		} else {
 			for (int i=0; i<v.length(); i++) {
-				if ((d[x[i]].v()&=d[y].m().row(i)).is_empty()) throw EmptyBoxException();
+				if (v.arg(i).dim.is_matrix()) {
+					if ((d[x[i]].m()&=d[y].m().submatrix(j,v.arg(i).dim.nb_rows(),0,v.dim.nb_cols())).is_empty())
+						throw EmptyBoxException();
+					j+=v.arg(i).dim.nb_rows();
+				} else if (v.arg(i).dim.is_vector()) {
+					if ((d[x[i]].v()&=d[y].m().row(j)).is_empty())
+						throw EmptyBoxException();
+					j++;
+				}
 			}
+		}
 	}
 }
 
