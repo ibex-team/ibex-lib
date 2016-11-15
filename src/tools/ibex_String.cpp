@@ -62,26 +62,27 @@ char* next_generated_func_name() {
 const char* intv2str(const Interval& intv, int precision) {
   std::ostringstream o;
 
-  if(intv == Interval::EMPTY_SET ||
-     intv == Interval::POS_REALS ||
-     intv == Interval::NEG_REALS ||
-     intv == Interval::ALL_REALS)
-  {
-    o << intv;
-  }
+  // A specific string has to be set for the following cases:
+  // (in order to not depend on the interval library)
+  if(intv == Interval::EMPTY_SET)
+    o << "[ EMPTY_SET ]";
+  
+  else if(intv == Interval::POS_REALS)
+    o << "[ POS_REALS ]";
+  
+  else if(intv == Interval::NEG_REALS)
+    o << "[ NEG_REALS ]";
+  
+  else if(intv == Interval::ALL_REALS)
+    o << "[ ALL_REALS ]";
 
   else
   {
-    if(precision == -1)
-      o << intv;
-
-    else
-    {
+    if(precision != -1) // default: use of operator<< precision
       o.precision(precision);
-      o << "[" << (double)intv.lb() << ", " << (double)intv.ub() << "]";
-    }
+    o << "[" << (double)intv.lb() << ", " << (double)intv.ub() << "]";
   }
-
+  
   return o.str().c_str();
 }
 
@@ -100,7 +101,7 @@ const Interval str2intv(const char* str) {
   else if(s.find(intv2str(Interval::ALL_REALS)) != std::string::npos)
     return Interval::ALL_REALS;
 
-  else { // string of the form "[float_lb,float_ub]"
+  else { // string of the form "[float_lb, float_ub]"
     // Removing unwanted spaces:
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
 
