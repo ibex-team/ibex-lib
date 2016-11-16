@@ -404,9 +404,7 @@ inline Interval sqr(const Interval& x) {
 }
 
 inline Interval sqrt(const Interval& x) {
-	Interval res(filib::sqrt(x.itv));
-	if (res.lb()<0) res &= Interval::POS_REALS;
-	return res;
+	return filib::sqrt(x.itv) & Interval::POS_REALS;
 }
 
 inline Interval pow(const Interval& x, int n) {
