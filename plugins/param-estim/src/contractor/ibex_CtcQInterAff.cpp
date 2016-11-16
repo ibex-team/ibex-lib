@@ -341,7 +341,9 @@ void CtcQInterAff::contract(IntervalVector& box) {
 
     //    cout << " fin contract proj affine " <<  box << endl;
     }
-    catch (AffineProjectionException err) { cout << " erreur proj affine " << endl;}
+    catch (AffineProjectionException err) {
+      //cout << " erreur proj affine " << endl;
+    }
       //      if (points->size()<q) {box.set_empty();}
      }
       

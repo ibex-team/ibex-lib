@@ -186,7 +186,7 @@ namespace ibex {
 
 
   /*   variant without oracle  and without use of maximal depth for branching 
-   
+       /*
 void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
  
   if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
@@ -200,6 +200,7 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
   else if (!(c2.box.is_empty())) buffer.push(&c2);
 }
   */
+  
   
 
   
@@ -352,7 +353,8 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
     if //( qvalid >= ctcq.q) 
       (qvalid > bestsolpointnumber) // a better solution has been found.
       {//ctcq.q = qvalid+1;
-	ctcq.q = qvalid+epsobj;
+	if (ctcq.q < qvalid+epsobj)
+	  ctcq.q = qvalid+epsobj;
 	bestsolpoint=newvalidpoint1;
 	bestsolpointnumber=qvalid;
 	postsolution();
@@ -619,7 +621,7 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
       //  if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
     }
     return feasiblepoint;
-}
+  }
 
   /* in case of constraints, the system is transformed in a normalized system  */
   SolverOptConstrainedQInter::SolverOptConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq,  double epscont, int optim)  : SolverOptQInter (ctc,bsc, buffer, ctcq, optim),  epscont(epscont), normsys(sys,epscont), sys(sys)

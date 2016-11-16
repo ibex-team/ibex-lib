@@ -214,6 +214,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	Function m_id(v, v );
 	cout << " apres lecture " << endl;
 
+	// coefficients from calib_matrix.txt :  essential test2
 	double b1=939.5973154362416;
 	double b3=600.0;
 	double b5=b1;
@@ -465,8 +466,8 @@ Interval matrixtrace (IntervalMatrix& M){
 	  if (_box[i][1] > 1/sqrt(2) ) _box[i][1]=1/sqrt(2);
 	}
 
-	if (_box[0][0] <0 &&_box[0][1] >0) {_box[0][0]=0;}
-
+	//	if (_box[0][0] <0 &&_box[0][1] >0) {_box[0][0]=0;}
+	if (_box[1][0] <0 &&_box[1][1] >0) {_box[1][1]=0;}
 	/*
 	_box[8][0]=1-1.e-8;
 	_box[8][1]=1+1.e-8;
@@ -477,6 +478,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	    _box[i][1]= eps1;
 	  }
 	*/
+	// solution ransac
 	fundmat[0]=0.0212236;
 	fundmat[1]=-0.4939788;
 	fundmat[2]=0.0420022;
@@ -486,6 +488,85 @@ Interval matrixtrace (IntervalMatrix& M){
 	fundmat[6]=-0.0376943;
         fundmat[7]=0.5039347 ;
 	fundmat[8]=0.0173491;
+	
+	// solution 36 points
+	/*
+	fundmat[0]=0.051878505;
+	fundmat[1]=-0.67384236;
+	fundmat[2]=0.17677669;
+	fundmat[3]=0.61617291;
+	fundmat[4]=-0.060021;
+	fundmat[5]=-0.29566712;
+	fundmat[6]=-0.1575514;
+        fundmat[7]=-0.0931053;
+	fundmat[8]=0.108733;
+	*/
+	// autre solution 36 points
+	/*
+	fundmat[0]=0.006115248636;
+	fundmat[1]=-0.3093592167;
+	fundmat[2]=0.02132338913;
+	fundmat[3]= -0.187611492;
+	fundmat[4]=-0.0075254091;
+	fundmat[5]=-0.681386479;
+	fundmat[6]=5.55111512e-17;
+        fundmat[7]=0.6358397512;
+	fundmat[8]=0.00258861;
+	*/
+
+	/* solution 65 points */
+	/*
+	fundmat[0]=0.001846158503;
+	fundmat[1]= -0.66547894;
+	fundmat[2]=0.137056674995;
+	fundmat[3]= 0.6455853789;
+	fundmat[4]=-0.089087087;
+	fundmat[5]=-0.2320194125;
+	fundmat[6]=-0.1420048;
+	fundmat[7]=-0.176776;
+	fundmat[8]=0.091658;
+	*/
+
+	/* solution 65 points tolerance 0.002*/
+	
+	fundmat[0]=0.07057908;
+	fundmat[1]=-0.66491832;
+	fundmat[2]=  0.10810699;
+	fundmat[3]=0.6663365;
+	fundmat[4]=-0.0009837;
+	fundmat[5]=-0.198873;
+	fundmat[6]=-0.1073815;
+	fundmat[7]=-0.20280645;
+	fundmat[8]=0.071353338;
+	
+	/* solution 448 inliers obtenue au bout 'une demie-heure.*/
+	/*
+fundmat[0]=0.0673397580437431 ; 
+fundmat[1]=-0.6640702371798197 ; 
+fundmat[2]=0.1033196888284916 ; 
+fundmat[3]=0.669006333703101 ; 
+fundmat[4]=-0.0009316076044640622 ; 
+fundmat[5]=-0.1935001265164315 ;
+fundmat[6]= -0.1021990269683681 ;
+fundmat[7]= -0.20883359402083 ; 
+ fundmat[8]=0.06806691240640026;
+	*/
+
+	/*solution 472 inliers tolerance 0.002 */
+	
+	fundmat[0]=0.00982155956082418;
+	fundmat[1]= -0.2552844736068178;
+	fundmat[2]= 0.01678052337538191;
+	fundmat[3]= -0.08214969878281949;
+	fundmat[4]=5.551115123125783e-17;
+	fundmat[5]=-0.702034692721456;
+	fundmat[6]=-0.019346278149729;
+	fundmat[7]=0.6590548691336243;
+	fundmat[8]=0.009204709488344947;
+	
+
+
+
 
 	IntervalVector box(9,_box);
 	//	box[8]=Interval(1,1);

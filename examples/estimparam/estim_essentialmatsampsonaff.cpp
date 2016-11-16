@@ -582,6 +582,38 @@ Interval matrixtrace (IntervalMatrix& M){
 	swap(fundmat[2],fundmat[6]);
 	swap(fundmat[5],fundmat[7]);
 
+	
+	/*  solution critere algébrique : mauvais oracle pour critère Sampson
+	fundmat[0]=0.051878505;
+	fundmat[1]=-0.67384236;
+	fundmat[2]=0.17677669;
+	fundmat[3]=0.61617291;
+	fundmat[4]=-0.060021;
+	fundmat[5]=-0.29566712;
+	fundmat[6]=-0.1575514;
+        fundmat[7]=-0.0931053;
+	fundmat[8]=0.108733;
+	*/
+	fundmat[0]=0.0123088842481506 ;
+	fundmat[1]=-0.1695172999999999 ; 
+	fundmat[2]=0.0222993 ; 
+	fundmat[3]=-0.1426569709445837 ; 
+	fundmat[4]=0.001476000000000002 ; 
+	fundmat[5]=-0.6920955389229777 ; 
+	fundmat[6]=-0.0281015 ; 
+	fundmat[7]=0.6857227394114003 ; 
+	fundmat[8]=0.01354322141801832 ;
+
+
+ 
+
+fundmat[0]=0.01264265638778085 ;fundmat[1]= -0.1895172999999998 ;fundmat[2]= 0.02229930000000001 ; fundmat[3]=-0.1264550697036973 ; fundmat[4]=0.001476000000000006 ; fundmat[5]=-0.6952441461702683 ; fundmat[6]=-0.0281015 ; fundmat[7]=0.6804680057817976 ; fundmat[8]=0.01359002895389031 ;
+fundmat[0]=0.004973299637651936 ; fundmat[1]=-0.2187495222726825 ; fundmat[2]=0.007997978287603392 ; fundmat[3]=-0.1171908213207728 ; fundmat[4]=-0.001453396513006809 ; fundmat[5]=-0.6972671885067933 ; fundmat[6]=-0.01057296010348493 ; fundmat[7]=0.6723133098774586 ; fundmat[8]=0.003132584139120488 ;
+
+ fundmat[0]=0.01064079179477381 ; fundmat[1]=-0.2644238712876459 ; fundmat[2]=0.01799797828760341 ; fundmat[3]=-0.08483390380414423 ; fundmat[4]=-0.0004412470495029621 ; fundmat[5]=-0.7017328918319272 ; fundmat[6]=-0.0198493281129698 ; fundmat[7]=0.6554107177707676 ; fundmat[8]=0.009691811312245058 ;
+
+
+
 	for (int i=0; i< 9; i++)
 	  cout << fundmat[i] << "  ";
 	cout << endl;
