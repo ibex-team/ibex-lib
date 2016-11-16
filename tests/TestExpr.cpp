@@ -290,7 +290,7 @@ void TestExpr::binaryOp() {
 	CPPUNIT_ASSERT(sameExpr(x/y,"(x/y)"));
 	CPPUNIT_ASSERT(sameExpr(max(x,y),"max(x,y)"));
 	CPPUNIT_ASSERT(sameExpr(min(x,y),"min(x,y)"));
-	CPPUNIT_ASSERT(sameExpr(atan2(x,y),"atan2(x,y)"));
+	CPPUNIT_ASSERT(sameExpr(atan2(y,x),"atan2(y,x)"));
 }
 
 void TestExpr::cst01() {

@@ -737,7 +737,7 @@ cos(x)       sin(x)   tan(x)
 acos(x)      asin(x)  atan(x)
 cosh(x)      sinh(x)  tanh(x)
 acosh(x)     asinh(x) atanh(x)
-atan2(x,y)
+atan2(y,x)
 ==========   ======== ========
 
 
