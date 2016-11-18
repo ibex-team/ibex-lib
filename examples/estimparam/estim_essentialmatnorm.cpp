@@ -490,7 +490,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	fundmat[8]=0.0173491;
 	
 	// solution 36 points
-	/*
+
 	fundmat[0]=0.051878505;
 	fundmat[1]=-0.67384236;
 	fundmat[2]=0.17677669;
@@ -500,7 +500,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	fundmat[6]=-0.1575514;
         fundmat[7]=-0.0931053;
 	fundmat[8]=0.108733;
-	*/
+
 	// autre solution 36 points
 	/*
 	fundmat[0]=0.006115248636;
@@ -529,6 +529,7 @@ Interval matrixtrace (IntervalMatrix& M){
 
 	/* solution 65 points tolerance 0.002*/
 	
+	/*
 	fundmat[0]=0.07057908;
 	fundmat[1]=-0.66491832;
 	fundmat[2]=  0.10810699;
@@ -538,7 +539,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	fundmat[6]=-0.1073815;
 	fundmat[7]=-0.20280645;
 	fundmat[8]=0.071353338;
-	
+	*/
 	/* solution 448 inliers obtenue au bout 'une demie-heure.*/
 	/*
 fundmat[0]=0.0673397580437431 ; 
@@ -553,7 +554,8 @@ fundmat[7]= -0.20883359402083 ;
 	*/
 
 	/*solution 472 inliers tolerance 0.002 */
-	
+
+	/*	
 	fundmat[0]=0.00982155956082418;
 	fundmat[1]= -0.2552844736068178;
 	fundmat[2]= 0.01678052337538191;
@@ -564,9 +566,7 @@ fundmat[7]= -0.20883359402083 ;
 	fundmat[7]=0.6590548691336243;
 	fundmat[8]=0.009204709488344947;
 	
-
-
-
+	*/
 
 	IntervalVector box(9,_box);
 	//	box[8]=Interval(1,1);
@@ -575,8 +575,8 @@ fundmat[7]= -0.20883359402083 ;
         for (int j=0; j<9; j++)
 	  prec[j]=prec0;
 
-	//CellHeapQInter buff;
-       	CellStack buff;
+	CellHeapQInter buff;
+       	//CellStack buff;
 	SmearSumRelative bs(sys,prec,0.5);
 	//	SmearMaxRelative  bs(sys,prec,0.5);
        	//RoundRobin bs (prec,0.5);
@@ -624,8 +624,9 @@ fundmat[7]= -0.20883359402083 ;
 
 
 	//	SolverQInter s(ctcqf0,bs,buff,ctcq,1);
-	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,1);
-
+	//	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,1);
+	//	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,2);
+	SolverOptBSConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont);
 	//	SolverOptQInter s(ctcf,bs,buff,ctcq,1);
 	cout << " apres solver " << endl;
 	s.time_limit = time0;

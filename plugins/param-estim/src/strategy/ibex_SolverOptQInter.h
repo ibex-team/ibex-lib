@@ -15,6 +15,7 @@
 #include "ibex_SolverOpt.h"
 #include "ibex_Cell.h"
 #include "ibex_CellBuffer.h"
+#include "ibex_CellStack.h"
 #include "ibex_CtcQInter.h"
 #include "ibex_QInterPoints.h"
 #include "ibex_LinearSolver.h"
@@ -124,5 +125,16 @@ a linear solver is used for finding a feasible point.
    NormalizedSystem normsys;
  };
 
+ class SolverOptBSConstrainedQInter : public SolverOptConstrainedQInter {
+ public:
+   CellStack* stackbuffer;
+   SolverOptBSConstrainedQInter(System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq, double eps_cont);
+   ~SolverOptBSConstrainedQInter();
+ protected :
+   void push_cells(Cell& c1, Cell& c2);
+   Cell* pop_cell();
+   bool empty_buffer();
+   Cell* top_cell();
+ };
 } // end namespace ibex
 #endif // __IBEX_SOLVEROPTQINTER_H__

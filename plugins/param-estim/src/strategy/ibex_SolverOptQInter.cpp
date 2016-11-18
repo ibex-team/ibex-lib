@@ -673,6 +673,52 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
 
   }
 
+
+  SolverOptBSConstrainedQInter::SolverOptBSConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq,  double epscont)  : SolverOptConstrainedQInter (sys,ctc,bsc, buffer, ctcq, epscont, 2){stackbuffer= new CellStack() ;}
+
+   Cell*  SolverOptBSConstrainedQInter::top_cell() 
+   { if (!(stackbuffer->empty()))
+       return stackbuffer->top();
+     else
+       return buffer.top();
+   }
+
+   Cell* SolverOptBSConstrainedQInter::pop_cell() 
+   { if (!(stackbuffer->empty()))
+        return stackbuffer->pop();
+     else
+       return buffer.pop();
+   }
+
+void SolverOptBSConstrainedQInter::push_cells(Cell&c1, Cell& c2){
+    if (!(c1.box.is_empty())&& c1.box.contains(oracle))
+      {
+	if  (!(c2.box.is_empty())) buffer.push(&c2);
+	stackbuffer->push(&c1);}
+    else if 
+      (!(c2.box.is_empty())&& c2.box.contains(oracle))
+      {
+	if (!(c1.box.is_empty())) buffer.push(&c1);
+	stackbuffer->push(&c2);}
+
+    else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
+      {
+	int val1= validate_value (c1);
+	int val2= validate_value (c2);
+	if (val1 >= val2) {stackbuffer->push(&c1); buffer.push(&c2);}
+	else  {stackbuffer->push(&c2); buffer.push(&c1);}
+      }
+	  
+
+    else if (!(c1.box.is_empty())) stackbuffer->push(&c1);
+    else if (!(c2.box.is_empty())) stackbuffer->push(&c2);
+  }
+  
+  bool SolverOptBSConstrainedQInter::empty_buffer () {return (buffer.empty() && stackbuffer->empty());}
+
+  SolverOptBSConstrainedQInter::~SolverOptBSConstrainedQInter() {delete stackbuffer;}
+
+
 } // end namespace ibex
 
 

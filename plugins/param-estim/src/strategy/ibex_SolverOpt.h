@@ -141,6 +141,9 @@ protected :
 	virtual void init_buffer_info(Cell& c) {};
 	virtual void update_buffer_info(Cell & c) {};
 	virtual void push_cells(Cell&c1, Cell& c2);
+	virtual Cell* pop_cell();
+	virtual Cell* top_cell();
+	virtual bool empty_buffer();
 	BitSet impact;
         void handle_cell(Cell & cell);
 };

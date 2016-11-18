@@ -80,16 +80,21 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 
   }
 
-  
+  Cell* SolverOpt::top_cell(){ return buffer.top();}
+
+  Cell* SolverOpt::pop_cell() {return  buffer.pop();}
+
   int SolverOpt::validate_value(Cell & c) {return 0;}
+  
+  bool SolverOpt::empty_buffer() {return buffer.empty();}
 
   bool SolverOpt::next(std::vector<IntervalVector>& sols) {
 	try  {
-		while (!buffer.empty()) {
+	  while (! (empty_buffer())) {
 
 		  if (trace==2) {cout << buffer << endl; cout <<buffer.top()->box << endl;}
 
-			Cell* c=buffer.top();
+			Cell* c=top_cell();
 
 			try {
 
@@ -99,7 +104,8 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 			  pair<Cell*,Cell*> new_cells = bisect(*c,boxes.first,boxes.second);
 
 			  update_buffer_info(*c);	
-			  buffer.pop();
+			  pop_cell();
+
 			  Cell * c1= new_cells.first;
 			  handle_cell(*c1);
 					
@@ -121,7 +127,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 			    
 			    handle_small_box (*c);  // small_box 
 			  
-			  delete buffer.pop();
+			  delete pop_cell();
 			  
 			  return !buffer.empty();
 				  
