@@ -182,6 +182,16 @@ class Interval {
     /** \brief Create [a,a]. */
     Interval(double a);
 
+    /**
+     * \brief Parses the std::string str, interpreting its content as
+     * an interval and instantiating the corresponding object.
+     *
+     * Note: unwanted spaces are removed before cast.
+     *
+     * \param str std::string, e.g.: "[-0.215,53.2]" or "[ empty ]"
+     */
+    Interval(const std::string& str);
+
     /** \brief True iff *this and x are exactly the same intervals. */
     bool operator==(const Interval& x) const;
 
@@ -497,6 +507,12 @@ class Interval {
      * \pre 0<ratio<1.
      */
     std::pair<Interval,Interval> bisect(double ratio=0.5) const;
+
+    /** \brief String
+     *
+     * Return string stream of \a x with a given precision.
+     */
+    std::string str(int precision = 6) const;
 
     /** \brief pi. */
     static const Interval PI;

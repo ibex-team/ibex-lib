@@ -11,7 +11,6 @@
  * ---------------------------------------------------------------------------- */
 
 #include "TestString.h"
-#include "ibex_String.h"
 
 using namespace std;
 
@@ -31,13 +30,12 @@ void TestString::test02() {
 	free(buf);
 }
 
-bool testConversion(const Interval& intv, int precision)
+bool TestString::testConversion(const Interval& intv, int precision)
 {
-	// Adding unwanted spaces:
-	string str_intv = "  " + string(intv2str(intv, precision)) + "  ";
-	Interval intv_parsed = str2intv(str_intv.c_str());
+	string intv_string = "  " + intv.str(precision) + "  "; // adding unwanted spaces
+	Interval intv_parsed = Interval(intv_string);
 	return intv_parsed == intv ||
-					fabs(intv_parsed.lb() - intv.lb()) < 1.0e-1 && fabs(intv_parsed.ub() - intv.ub()) < 1.0e-1;
+			fabs(intv_parsed.lb() - intv.lb()) < 1.0e-1 && fabs(intv_parsed.ub() - intv.ub()) < 1.0e-1;
 }
 
 void TestString::test03() {

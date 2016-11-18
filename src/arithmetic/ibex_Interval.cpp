@@ -12,6 +12,8 @@
 #include "ibex_Interval.h"
 #include <float.h>
 #include <cassert>
+#include <sstream>
+#include <iomanip>
 
 #ifdef _IBEX_WITH_GAOL_
 #include "ibex_Interval_gaol.cpp_"
@@ -289,5 +291,68 @@ int Interval::diff(const Interval& y, Interval& c1, Interval& c2) const {
 	return res;
 }
 
+Interval::Interval(const std::string& s)
+{
+	if(s.find(EMPTY_SET.str()) != std::string::npos)
+		*this = EMPTY_SET;
+
+	else if(s.find(POS_REALS.str()) != std::string::npos)
+		*this = POS_REALS;
+
+	else if(s.find(NEG_REALS.str()) != std::string::npos)
+		*this = NEG_REALS;
+
+	else if(s.find(ALL_REALS.str()) != std::string::npos)
+		*this = ALL_REALS;
+
+	else { // string of the form "[lb, ub]"
+		// Removing unwanted spaces:
+		std::string clean_s = s;
+		clean_s.erase(std::remove(clean_s.begin(), clean_s.end(), ' '), clean_s.end());
+
+		std::string delimiter = ",";
+		size_t pos_delimiter = clean_s.find(',');
+
+		assert(pos_delimiter != std::string::npos);
+
+		std::string lb = clean_s.substr(1, clean_s.find(delimiter) - delimiter.length());
+		std::string ub = clean_s.substr(lb.length() + 2, clean_s.length() - lb.length() - delimiter.length()  - 2);
+
+		*this = Interval(atof(lb.c_str()), atof(ub.c_str()));
+	}
+}
+
+std::ostream& operator<<(std::ostream& os, const Interval& x) {
+  // A specific string has to be set for the following cases:
+  // (in order to not depend on the interval library)
+  if(x == Interval::EMPTY_SET)
+    os << "[ empty ]";
+  
+  else if(x == Interval::POS_REALS)
+    os << "[ pos_reals ]";
+  
+  else if(x == Interval::NEG_REALS)
+    os << "[ neg_reals ]";
+  
+  else if(x == Interval::ALL_REALS)
+    os << "[ all_reals ]";
+
+  else
+  {
+  	#ifdef _IBEX_WITH_FILIB_
+  		filib::interval<FI_BASE,FI_ROUNDING,FI_MODE>::precision(os.precision());
+  	#endif
+    os << "[" << (double)x.lb() << ", " << (double)x.ub() << "]";
+  }
+  
+  return os;
+}
+
+std::string Interval::str(int precision) const
+{
+	std::stringstream sstream;
+	sstream << std::setprecision(precision) << *this;
+	return sstream.str();
+}
 
 } // end namespace

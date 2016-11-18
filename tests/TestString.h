@@ -35,6 +35,10 @@ public:
 	void test01();
 	void test02();
 	void test03();
+
+protected:
+
+	bool testConversion(const Interval& intv, int precision);
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestString);
