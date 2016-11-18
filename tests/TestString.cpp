@@ -10,6 +10,7 @@
  * Updated     : April 18, 2016
  * ---------------------------------------------------------------------------- */
 
+#include <iomanip>
 #include "TestString.h"
 
 using namespace std;
@@ -32,8 +33,21 @@ void TestString::test02() {
 
 bool TestString::testConversion(const Interval& intv, int precision)
 {
-	string intv_string = "  " + intv.str(precision) + "  "; // adding unwanted spaces
-	Interval intv_parsed = Interval(intv_string);
+	return testConversionString(intv) && testConversionOstream(intv, precision);
+}
+
+bool TestString::testConversionString(const Interval& intv)
+{
+	Interval intv_parsed = Interval("  " + intv + "  "); // adding unwanted spaces
+	return intv_parsed == intv ||
+			fabs(intv_parsed.lb() - intv.lb()) < 1.0e-1 && fabs(intv_parsed.ub() - intv.ub()) < 1.0e-1;
+}
+
+bool TestString::testConversionOstream(const Interval& intv, int precision)
+{
+	stringstream sstream;
+	sstream << setprecision(precision) << "  " << intv << "  "; // adding unwanted spaces
+	Interval intv_parsed = Interval(sstream.str());
 	return intv_parsed == intv ||
 			fabs(intv_parsed.lb() - intv.lb()) < 1.0e-1 && fabs(intv_parsed.ub() - intv.ub()) < 1.0e-1;
 }

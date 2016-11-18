@@ -39,6 +39,8 @@ public:
 protected:
 
 	bool testConversion(const Interval& intv, int precision);
+	bool testConversionString(const Interval& intv);
+	bool testConversionOstream(const Interval& intv, int precision);
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestString);

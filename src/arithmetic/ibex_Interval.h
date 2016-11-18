@@ -508,12 +508,6 @@ class Interval {
      */
     std::pair<Interval,Interval> bisect(double ratio=0.5) const;
 
-    /** \brief String
-     *
-     * Return string stream of \a x with a given precision.
-     */
-    std::string str(int precision = 6) const;
-
     /** \brief pi. */
     static const Interval PI;
     /** \brief 2*pi. */
@@ -543,6 +537,10 @@ class Interval {
      * \brief Cast the interval to an expression
      */
     operator const ExprConstant&() const;
+
+    /** \brief Cast the interval into a const std::string
+     */
+    operator std::string() const;
 
 //private:
 #ifdef _IBEX_WITH_GAOL_
@@ -951,8 +949,6 @@ inline Interval& Interval::operator=(double x) {
 	return *this;
 }
 
-
-
 inline Interval& Interval::operator=(const Interval& x) {
 	itv = x.itv;
 	return *this;
@@ -968,7 +964,6 @@ inline Interval& Interval::inflate(double delta, double chi) {
 	(*this) = m + delta*(*this-m)+Interval(-chi,chi);
 	return *this;
 }
-
 
 inline bool Interval::operator!=(const Interval& x) const {
 	return !(*this==x);
@@ -1206,7 +1201,6 @@ inline bool bwd_atan(const Interval& y,  Interval& x) {
 
 	return !x.is_empty();
 }
-
 
 inline bool bwd_acosh(const Interval& y,  Interval& x) {
 	if (y.is_empty() || y.ub()<0.0) {
@@ -1534,6 +1528,14 @@ inline bool bwd_imod(Interval& x, Interval& y, const double& p) {
     }
 
     return true;
+}
+
+inline std::string operator+(const std::string& s, const Interval& x) {
+    return s + (std::string)x;
+}
+
+inline std::string operator+(const Interval& x, const std::string& s) {
+    return (std::string)x + s;
 }
 
 } // end namespace ibex
