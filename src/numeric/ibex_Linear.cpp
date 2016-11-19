@@ -457,13 +457,17 @@ Interval det(const IntervalMatrix& A) {
 bool is_posdef_sylvester(const IntervalMatrix& A) {
     int n = A.nb_cols();
 
-    for (int i=0; i<n-1; i++) {
-        if (det(A.submatrix(0, i, 0, i)).lb()<0) return false;
+    try {
+    	for (int i=0; i<n-1; i++) {
+    		if (det(A.submatrix(0, i, 0, i)).lb()<0) return false;
+    	}
+
+    	if (det(A).lb()<0) return false;
+
+    	return true;
+    } catch(SingularMatrixException&) {
+    	return false;
     }
-
-    if (det(A).lb()<0) return false;
-
-    return true;
 }
 
 bool is_posdef_rohn(const IntervalMatrix& A) {
