@@ -221,7 +221,7 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 //		}
 
 		y = mid-box;
-		if (y==y1) break;
+		//if (y==y1) break; <--- allowed in Newton inflation
 		y1=y;
 
 		try {
