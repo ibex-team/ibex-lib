@@ -92,6 +92,16 @@ public:
 	void find_solution_in_facets(Function& f, IntervalVector& x);
 
 	/**
+	 * \brief Look for a solution in the facets that does not belong to adjacent cells
+	 *
+	 * The adjacent cells are those in "neighboors".
+	 *
+	 * This function also subdivides the facet into subfacets. It is intended to replace
+	 * a call to "diff" followed by "find_solution_facets".
+	 */
+	void find_solution_in_facets_not_in(Function& f, IntervalVector& x, std::list<ContCell*> neighboors);
+
+	/**
 	 * Watch dog: no cell must contain the solution x
 	 * after the "diff" step.
 	 */

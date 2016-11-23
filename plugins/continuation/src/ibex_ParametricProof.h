@@ -21,7 +21,7 @@ namespace ibex {
 
 /* Precision  of the parametric Newton contraction
  * (when apply on a box [p]x[x]) */
-#define NEWTON_CTC_PREC 1e-08
+#define NEWTON_CTC_PREC 1e-10
 
 /* Precision  of the parametric Newton certificate
  * (when apply on a box {p}x[x], p being instantiated) */

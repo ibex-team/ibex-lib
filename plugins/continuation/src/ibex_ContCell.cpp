@@ -13,8 +13,10 @@
 #include "ibex_ContCell.h"
 #include "ibex_ParametricProof.h"
 #include "ibex_Cont.h"
+#include "ibex_Newton.h"
 
 #include <cassert>
+#include <iomanip>
 
 using namespace std;
 
@@ -33,6 +35,8 @@ void ContCell::diff(const IntervalVector& box, Function& f, const VarSet& box_va
 	if (box.intersects(cell.unicity_box)) {
 
 		bool same_vars=(((BitSet&) vars.is_var)==box_vars.is_var);
+
+//		if (!same_vars) return;
 
 		for (list<Facet>::iterator it=cell.facets.begin(); it!=cell.facets.end(); ) {
 			IntervalVector* result;
@@ -156,6 +160,125 @@ void ContCell::find_solution_in_facets(Function& f, IntervalVector& x) {
 		}
 	}
 }
+
+void ContCell::find_solution_in_facets_not_in(Function& f, IntervalVector& px_sol, list<ContCell*> neighboors) {
+
+	int n=f.nb_var();
+
+	px_sol.set_empty(); // by default
+
+	while (!facets.empty()) {
+
+		Facet& facet=facets.front(); // note: has already been Newton-contracted (see below)
+		//cout << "[find-not-in] facet=" << facet.facet << endl;
+
+		// ============ try to discard the whole subfacet ========================
+		list<ContCell*>::iterator it=neighboors.begin();
+
+		while (it!=neighboors.end() && !(*it)->unicity_box.is_superset(facet.facet)) {
+			it++;
+		}
+
+		if (!neighboors.empty() && it!=neighboors.end()) { // already included in a cell
+			//cout << "[find-not-in] facet discarded" << endl;
+			facets.pop_front();
+			__total_facet_count--;
+			continue;
+		}
+		// ===============================================================================
+
+
+		// ============ Build a sample solution inside the subfacet ========================
+
+		IntervalVector x(vars.var_box(facet.facet));
+		IntervalVector p(vars.param_box(facet.facet));
+		bool solution_found;
+
+		// -------------------------------------------------------------------------------
+		// with inflating Newton
+		// -------------------------------------------------------------------------------
+//		IntervalVector __ignore__(n);
+//		IntervalVector existence(n);
+//		solution_found = inflating_newton(f,vars,vars.full_box(x,p.mid()),existence,__ignore__);
+//
+//		if (!solution_found) {
+//			cout << "[find-not-in] Fatal: inflating Newton failed\n";
+//			exit(-1);
+//		}
+//
+//		if (!vars.var_box(existence).is_subset(vars.var_box(existence_box))) {
+//			cout << "[find-not-in] Fatal: solution outside the cell!\n";
+//			exit(-1);
+//		}
+		// -------------------------------------------------------------------------------
+
+
+		// -------------------------------------------------------------------------------
+		// with contracting Newton
+		// -------------------------------------------------------------------------------
+		IntervalVector existence=vars.full_box(x,p.mid());
+
+		newton(f,vars,existence,NEWTON_CTC_PREC);
+
+		if (existence.is_empty()) {
+			cout << "[find-not-in] Fatal: Newton gives no solution!\n";
+			cout << setprecision(25) << endl;
+			cout << "cell param box= " << vars.param_box(existence_box) << endl;
+			cout << "facet param box=" << p << endl;
+			cout << "facet param mid=" << p.mid() << endl;
+
+			cout << "cell var box= " << vars.var_box(existence_box) << endl;
+			cout << "facet var box=" << x << endl;
+			exit(-1);
+		}
+
+		solution_found = vars.var_box(existence).is_interior_subset(x);
+		// -------------------------------------------------------------------------------
+
+
+		// ============ check that this solution belongs to no cell ========================
+		if (solution_found) {
+			it=neighboors.begin();
+
+			while (it!=neighboors.end() && !(*it)->unicity_box.intersects(existence)) {
+				it++;
+			}
+
+			if (neighboors.empty() || it==neighboors.end()) { // belongs to no cell ---> OK!
+				//cout << "[find-not-in] solution found!" << endl;
+				px_sol=existence;
+				return;
+			}
+		}
+		// ===============================================================================
+
+		// ============================ bisect the subfacet ==============================
+		if (p.max_diam()<1e-12) { // TODO: remove hard-coded value
+			throw FindSolutionFail();
+		}
+
+		pair<IntervalVector,IntervalVector> p12=p.bisect(p.extr_diam_index(false));
+
+		IntervalVector px1(vars.full_box(x,p12.first));
+		IntervalVector px2(vars.full_box(x,p12.second));
+		// Contract the new boxes immediately
+		newton(f,vars,px1,NEWTON_CTC_PREC);
+		newton(f,vars,px2,NEWTON_CTC_PREC);
+
+		facets.pop_front();
+		__total_facet_count++;
+		if (!px1.is_empty()) {
+			facets.push_front(Facet(facet.p,facet.sign,px1));
+			__total_facet_count++;
+		}
+		if (!px2.is_empty()) {
+			facets.push_front(Facet(facet.p,facet.sign,px2));
+			__total_facet_count++;
+		}
+		// ===============================================================================
+	}
+}
+
 
 void ContCell::check_no_facet_contains(const IntervalVector& x) {
 	for (list<Facet>::const_iterator it=facets.begin(); it!=facets.end(); it++) {

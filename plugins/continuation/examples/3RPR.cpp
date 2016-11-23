@@ -25,10 +25,7 @@ int main() {
     double __start_sol[][2]={{0., 0.}, {0., 0.}, {0., 0.}, {0.866025, 0.866025}, {0.866025,0.866025}, {0.866025, 0.866025}};
 
     IntervalVector start_sol(6,__start_sol);
-    cout << domain << endl;
-    cout << start_sol << endl;
     start_sol.inflate(1e-10);
-    cout << f.eval_vector(start_sol) << endl;
 
     Cont cont(f, domain, 1e-3, 0.9, 1.1);
 

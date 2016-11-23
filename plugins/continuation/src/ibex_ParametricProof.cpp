@@ -32,18 +32,7 @@ void CtcParamNewton::contract(IntervalVector& box) {
 	//cout << "     gives=" << box << endl;
 }
 
-VarSet /* ============================================================================
- * I B E X - Continuation cells
- * ============================================================================
- * Copyright   : Ecole des Mines de Nantes and CNRS
- *
- * License     : This program can be distributed under the terms of the GNU LGPL.
- *               See the file COPYING.LESSER.
- *
- * Author(s)   : Gilles Chabert, Alexandre Goldsztejn
- * Created     : Sep 06, 2016
- * ---------------------------------------------------------------------------- */
-get_vars(Function& f, const Vector& pt, const BitSet& forced_params) {
+VarSet get_vars(Function& f, const Vector& pt, const BitSet& forced_params) {
 	int n=f.nb_var();
 	int m=f.image_dim();
 	Matrix A=f.jacobian(pt).mid();

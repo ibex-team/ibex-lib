@@ -70,8 +70,11 @@ public:
 	 * \param h_min - Minimal width of parameter domains in a cell.
 	 * \param alpha - Increase ratio of the parameter width. When a cell is built successfully
 	 *                with some parameter width h, we try to build the next cell with ratio*h
-	 * \param beta  - Decrease ratio of the paramter width. When a cell fails to be built with
+	 * \param beta  - Decrease ratio of the parameter width. When a cell fails to be built with
 	 *                a parameter width h, we try with beta*h. If beta*h<h_min, an exception is raised.
+	 *
+	 * \warning       Do not use the argument "g" to enter bound inequalities (like xi<=0).
+	 *                Use the variant of the constructor with the "domain" argument instead.
 	 */
 	Cont(Function &f, Function &g, double h_min, double alpha, double beta);
 
@@ -107,11 +110,13 @@ public:
 	 * \brief Export the structure into files using Mathematica syntax.
 	 *
 	 * To files are created:
-	 * - "filename.txt" :       contains the set of all facets successfully handled
-	 * - "filename-failed.txt":
+	 * - "basename.txt" :               cells successfully handled
+	 * - "basename-choose-failed.txt":  cells for which "choose" failed
+	 * - "basename-find-failed.txt"  :  cells for which "find solution" failed
+	 * - "basename-todo.txt"         :  cells to do
+	 * - "basename-todo-facets.tx"   :  facets to do
 	 */
 	void to_mathematica(const std::string& basename) const;
-
 
 	/**
 	 * \brief Cell choice heuristic.
@@ -130,9 +135,10 @@ public:
 	/**
 	 * \brief Build a cell around a solution x
 	 *
-	 * \param x - a (very small) box proven to contain a solution.
-	 * \param h - the parameter width we first try with. The procedure
-	 *            decreases h by beta until it succeeds.
+	 * \param x_facet - the facet x belongs to (if any, NULL otherwise)
+	 * \param x       - a (very small) box proven to contain a solution.
+	 * \param h       - the parameter width we first try with. The procedure
+	 *                  decreases h by beta until it succeeds.
 	 */
 	ContCell* choose(const ContCell::Facet* x_facet, const IntervalVector& x, double h);
 
@@ -158,7 +164,7 @@ public:
 	/**
 	 * When it is neither possible to find a solution in a facet
 	 * or to entirely contract it, the facet cannot be handled
-	 * anymore and is moved to a "trash" list
+	 * anymore and is moved to a "fail" list
 	 */
 	void move_facet_to_fails(bool choose);
 

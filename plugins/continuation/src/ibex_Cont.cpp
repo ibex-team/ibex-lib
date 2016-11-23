@@ -19,8 +19,10 @@
 #include "ibex_Timer.h"
 #include "ibex_Newton.h"
 #include "ibex_Linear.h"
-
 #include <fstream>
+
+// strategy with diff
+//#define WITH_DIFF
 
 using namespace std;
 
@@ -108,7 +110,7 @@ Cont::~Cont() {
 	if (g!=NULL) delete &f;
 
 	// Destroy all the cells
-	for(IBEX_NEIGHBORHOOD::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
+	for(IBEX_NEIGHBORHOOD::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++) {
 		delete it->first;
 	}
 }
@@ -118,6 +120,7 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 	iteration=0; // count the iterations
 	RNG::srand(1);
 
+	// Assign the domains of slack variables (extend x)
 	if (g!=NULL) {
 		x.resize(n);
 		if (g->image_dim()==1)
@@ -126,8 +129,11 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 			x.put(n-g->image_dim(),g->eval_vector(x));
 	}
 
+	// The cell/facet to which the current solution x belongs
+	// NULL means "none".
 	pair<ContCell*,ContCell::Facet*> p(NULL,NULL);
 
+	// Computation times (for profiling)
 	choose_time=0;
 	find_time=0;
 	diff_time=0;
@@ -144,6 +150,7 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 			Timer::stop();
 			choose_time+=Timer::VIRTUAL_TIMELAPSE();
             
+            // Update neighborhoods
             Timer::start();
             add_to_neighbors(new_cell);
             Timer::stop();
@@ -152,12 +159,20 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 			// Intersects the list of existing cells
 			// with the current cell and vice-versa
 			Timer::start();
+
+#ifdef WITH_DIFF
 			diff(new_cell);
+#else
+			l.push_back(new_cell);
+#endif
+
 			Timer::stop();
 			diff_time+=Timer::VIRTUAL_TIMELAPSE();
 
 			// assert
+#ifdef WITH_DIFF // in VARIANT #2, the facet where x has been found is still alive
 			check_no_facet_contains(x);
+#endif
 
 		} catch(ChooseFail&) {
 			//cout << "ChooseFail:" << endl;
@@ -171,21 +186,14 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		// cell in turn and search in all its facets.
 		// Some facets may be discarded and some cells may be moved
 		// to l_empty_facets or l_solution_find_fail_facets.
-		cout << "k=" << iteration << " ";
-		cout << "#todo=" << l.size() << " ";
-		cout << "#done=" << l_empty_facets.size() << " ";
-		cout << "#failed=(" << l_choose_failed_facets.size() << ", ";
-		cout <<                l_find_solution_failed_facets.size() << ") ";
-		cout << "#facets=" << ContCell::total_facet_count() << " ";
-		cout << "h=" << h << " ";
-		if (!l.empty()) cout << "(" << l.back()->vars << ")";
-		cout << " t=(" << choose_time << "," << diff_time << "," << find_time << "," << neighborhood_time << ")" << endl;
-
 		Timer::start();
 		p=find_solution_in_cells(x);
 		Timer::stop();
 		find_time+=Timer::VIRTUAL_TIMELAPSE();
 
+		// In case of success, the value of h for the next "choose" is set
+		// to the parameter width of the cell where the solution has been
+		// found (multiplied by beta).
 		if (!x.is_empty()) {
 			h=p.first->h*beta;
 			//h*=1+0.001*(RNG::rand(0,1)-0.5);
@@ -198,6 +206,16 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 //		cout << endl;
 
 		iteration++;
+
+		cout << "k=" << iteration << " ";
+		cout << "#todo=" << l.size() << " ";
+		cout << "#done=" << l_empty_facets.size() << " ";
+		cout << "#failed=(" << l_choose_failed_facets.size() << ", ";
+		cout <<                l_find_solution_failed_facets.size() << ") ";
+		cout << "#facets=" << ContCell::total_facet_count() << " ";
+		cout << "h=" << h << " ";
+		if (!l.empty()) cout << "(" << l.back()->vars << ")";
+		cout << " t=(" << choose_time << "," << diff_time << "," << find_time << "," << neighborhood_time << ")" << endl;
 
 	} while ((kmax==-1 || iteration<kmax) && !l.empty());
 }
@@ -215,7 +233,7 @@ void Cont::diff(ContCell* new_cell) {
 
 			if ((*it)->empty_facets()) { // move the cell to the list without facets
 				l_empty_facets.push_back(*it);
-				it=l.erase(it); // it points to the next element
+				it=l.erase(it); // "it" points to the next element
 			} else it++;
 		} else it++;
 	}
@@ -528,7 +546,12 @@ pair<ContCell*,ContCell::Facet*> Cont::find_solution_in_cells(IntervalVector& x)
 		ContCell* cell=next_cell();
 
 		try {
+
+#ifdef WITH_DIFF
 			cell->find_solution_in_facets(f,x);
+#else
+			cell->find_solution_in_facets_not_in(f,x,neighborhood[cell]);
+#endif
 
 			// No solution in all the remaining facets => remove the cell
 			if (x.is_empty()) {
