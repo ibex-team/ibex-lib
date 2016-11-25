@@ -292,16 +292,16 @@ int Interval::diff(const Interval& y, Interval& c1, Interval& c2) const {
 }
 
 Interval::Interval(const std::string& s) {
-	if(s.find((std::string)EMPTY_SET) != std::string::npos)
+	if(s.find(EMPTY_SET) != std::string::npos)
 		*this = EMPTY_SET;
 
-	else if(s.find((std::string)POS_REALS) != std::string::npos)
+	else if(s.find(POS_REALS) != std::string::npos)
 		*this = POS_REALS;
 
-	else if(s.find((std::string)NEG_REALS) != std::string::npos)
+	else if(s.find(NEG_REALS) != std::string::npos)
 		*this = NEG_REALS;
 
-	else if(s.find((std::string)ALL_REALS) != std::string::npos)
+	else if(s.find(ALL_REALS) != std::string::npos)
 		*this = ALL_REALS;
 
 	else { // string of the form "[lb, ub]"
