@@ -21,7 +21,7 @@ int main() {
     IntervalVector start_sol(4,__start_sol);
 
     Cont cont(f, domain, 1e-3, 0.5, 1.1);
-
+    cont.full_diff=false;
     cont.start(start_sol);
 
 	cont.to_mathematica("data/rprpr");

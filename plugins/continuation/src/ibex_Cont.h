@@ -122,9 +122,23 @@ public:
 	 * \brief Cell choice heuristic.
 	 *
 	 * If true, performs a depth-first search. Otherwise, a
-	 * breadth-first search. By default: false.
+	 * breadth-first search.
+	 *
+	 * By default: false.
 	 */
 	bool dfs;
+
+	/**
+	 * \brief Diff heuristic.
+	 *
+	 * If true, performs a set difference between cells
+	 * in all dimensions (parameters and variables).
+	 * Otherwise, the non-inclusion with adjacent cells
+	 * is tested while a solution is sought in a facet.
+	 *
+	 * By default: true.
+	 */
+	bool full_diff;
 
 	static int iteration;
 
@@ -179,12 +193,12 @@ public:
 	 *
 	 * TODO: for the moment, we print unicity boxes (instead of existence?)
 	 */
-	void cells_to_mathematica(const std::list<ContCell*>& l, const std::string& filename) const;
+	static void cells_to_mathematica(const std::list<ContCell*>& l, const std::string& filename);
 
 	/**
 	 * Send a list of boxes to Mathematica.
 	 */
-	void boxes_to_mathematica(const std::list<IntervalVector>& l, const std::string& filename) const;
+	static void boxes_to_mathematica(const std::list<IntervalVector>& l, const std::string& filename);
 
 	/**
 	 * Merge g into f introducing slack variables

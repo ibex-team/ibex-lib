@@ -123,6 +123,20 @@ public:
 	~VarSet();
 
 	/**
+	 * \brief True if the bitsets are the same.
+	 *
+	 * The original function is not take into account
+	 */
+	bool operator==(const VarSet& v) const;
+
+	/**
+	 * \brief True if the bitsets differ.
+	 *
+	 * The original function is not take into account
+	 */
+	bool operator!=(const VarSet& v) const;
+
+	/**
 	 * \brief Assignment (erases everything)
 	 */
 	VarSet& operator=(const VarSet& v);
@@ -221,6 +235,15 @@ inline int VarSet::param(int i) const {
 	assert(i>=0 && i<nb_param);
 	return params[i];
 }
+
+inline bool VarSet::operator==(const VarSet& v) const {
+	return ((BitSet&) is_var) == v.is_var;
+}
+
+inline bool VarSet::operator!=(const VarSet& v) const {
+	return !(*this==v);
+}
+
 
 } // namespace ibex
 

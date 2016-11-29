@@ -70,7 +70,7 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 			f.hansen_matrix(full_box,J);
 		//		f.jacobian(box,J);
 
-		if (J.is_empty()) break;
+		if (J.is_empty() || (vars && Jp->is_empty())) break;
 
 		/* remove this block
 		 *

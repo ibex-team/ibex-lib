@@ -20,9 +20,7 @@
 #include "ibex_Newton.h"
 #include "ibex_Linear.h"
 #include <fstream>
-
-// strategy with diff
-//#define WITH_DIFF
+#include <iomanip>
 
 using namespace std;
 
@@ -83,17 +81,17 @@ Function* Cont::merge(Function &f, Function& g) {
 	return new Function(x,ExprVector::new_(fg,false));
 }
 
-Cont::Cont(Function &f, Function &g, double h_min, double alpha, double beta) : dfs(false), n(f.nb_var()+g.image_dim()), m(f.image_dim()+g.image_dim()), f(*merge(f,g)), g(&g), domain(this->f.nb_var()), h_min(h_min), alpha(alpha), beta(beta) {
+Cont::Cont(Function &f, Function &g, double h_min, double alpha, double beta) : dfs(false), full_diff(true), n(f.nb_var()+g.image_dim()), m(f.image_dim()+g.image_dim()), f(*merge(f,g)), g(&g), domain(this->f.nb_var()), h_min(h_min), alpha(alpha), beta(beta) {
 
 	for (int i=0; i<g.image_dim(); i++)
 		domain[f.nb_var()+i] = Interval::NEG_REALS;
 }
 
-Cont::Cont(Function &f, const IntervalVector& domain, double h_min, double alpha, double beta) : dfs(false), n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(domain), h_min(h_min), alpha(alpha), beta(beta) {
+Cont::Cont(Function &f, const IntervalVector& domain, double h_min, double alpha, double beta) : dfs(false), full_diff(true), n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(domain), h_min(h_min), alpha(alpha), beta(beta) {
 
 }
 
-Cont::Cont(Function &f, double h_min, double alpha, double beta) : dfs(false), n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(f.nb_var(),Interval::ALL_REALS), h_min(h_min), alpha(alpha), beta(beta) {
+Cont::Cont(Function &f, double h_min, double alpha, double beta) : dfs(false), full_diff(true), n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(f.nb_var(),Interval::ALL_REALS), h_min(h_min), alpha(alpha), beta(beta) {
 
 }
 
@@ -160,19 +158,15 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 			// with the current cell and vice-versa
 			Timer::start();
 
-#ifdef WITH_DIFF
 			diff(new_cell);
-#else
-			l.push_back(new_cell);
-#endif
 
 			Timer::stop();
 			diff_time+=Timer::VIRTUAL_TIMELAPSE();
 
 			// assert
-#ifdef WITH_DIFF // in VARIANT #2, the facet where x has been found is still alive
-			check_no_facet_contains(x);
-#endif
+			if (full_diff)
+				// if full_diff is false, the facet where x has been found is still alive
+				check_no_facet_contains(x);
 
 		} catch(ChooseFail&) {
 			//cout << "ChooseFail:" << endl;
@@ -226,6 +220,12 @@ void Cont::diff(ContCell* new_cell) {
 	//	for (list<ContCell*>::iterator it=neighborhood[new_cell].begin(); it!=neighborhood[new_cell].end(); ) {
 
 	for (list<ContCell*>::iterator it=l.begin(); it!=l.end(); ) {
+
+		if (!full_diff && ((*it)->vars!=new_cell->vars)) {
+			it++;
+			continue;
+		}
+
 		new_cell->diff((*it)->unicity_box,f,(*it)->vars);
 
 		if (!(*it)->empty_facets()) {
@@ -362,6 +362,19 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
     //     of the implicit function.
     bool flag=is_homeomorph_half_ball(ginf_wrong, J_implicit_wrong, p);
 
+//    if (flag==false) {
+//    	cout << "x=" << box_existence << endl;
+//    	cout << "vars=" << vars << endl;
+//    	cout << "wrong vars: ";
+//    	if (wrong_vars.size()>=1) cout << wrong_vars[0].first << " (" << wrong_vars[0].second << ") ";
+//    	if (wrong_vars.size()>=2) cout << wrong_vars[1].first << " (" << wrong_vars[1].second << ") ";
+//    	if (wrong_vars.size()>=3) cout << wrong_vars[2].first << " (" << wrong_vars[2].second << ") ";
+//    	cout << endl;
+//    	cout << J_implicit << endl;
+//    	cout << endl;
+//    	cout << J_implicit_wrong << endl;
+//    	cout << "==================" << endl;
+//    }
     return flag;
 }
 
@@ -500,7 +513,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
                     	}
                     }
 				}
-                if(vars.is_var[i]) var_number++;
+                if (vars.is_var[i]) var_number++;
 			}
 		}
 
@@ -547,11 +560,10 @@ pair<ContCell*,ContCell::Facet*> Cont::find_solution_in_cells(IntervalVector& x)
 
 		try {
 
-#ifdef WITH_DIFF
-			cell->find_solution_in_facets(f,x);
-#else
-			cell->find_solution_in_facets_not_in(f,x,neighborhood[cell]);
-#endif
+			if (full_diff)
+				cell->find_solution_in_facets(f,x);
+			else
+				cell->find_solution_in_facets_not_in(f,x,neighborhood[cell]);
 
 			// No solution in all the remaining facets => remove the cell
 			if (x.is_empty()) {
@@ -611,7 +623,7 @@ void Cont::check_no_facet_contains(const IntervalVector& x) {
 	}
 }
 
-void Cont::cells_to_mathematica(const list<ContCell*>& l, const string& filename) const {
+void Cont::cells_to_mathematica(const list<ContCell*>& l, const string& filename) {
     ofstream file (filename.c_str());
     file << '{';
     int count=0;
@@ -630,7 +642,7 @@ void Cont::cells_to_mathematica(const list<ContCell*>& l, const string& filename
     file.close();
 }
 
-void Cont::boxes_to_mathematica(const list<IntervalVector>& l, const string& filename) const {
+void Cont::boxes_to_mathematica(const list<IntervalVector>& l, const string& filename) {
     ofstream file (filename.c_str());
     file << '{';
     int count=0;

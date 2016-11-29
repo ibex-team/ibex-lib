@@ -29,6 +29,8 @@ int main() {
 
     Cont cont(f, domain, 1e-3, 0.9, 1.1);
 
+    cont.full_diff=true;
+
     cont.start(start_sol,1);
 
 //    cout << cont.neighborhood.size() << endl;
