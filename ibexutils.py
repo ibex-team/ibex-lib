@@ -135,10 +135,11 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 		cmd_conf = [conf.env.SH, "-c", "./configure %s"%conf_args]
 		cmd_rmconfig = [conf.env.SH, "-c", "rm config.sub config.guess"]
 		cmd_reconf = [conf.env.SH, "-c", "autoreconf -i"]
+		cmd_make = conf.env.MAKE
 	else:
 		conf_args += " --prefix=%s" % destnode.abspath ()
 		cmd_conf = "./configure %s" % (conf_args)
-	cmd_make = conf.env.MAKE + ["-j%d"%conf.options.jobs]
+		cmd_make = conf.env.MAKE + ["-j%d"%conf.options.jobs]
 	cmd_install = conf.env.MAKE + ["install"]
 
 	stages = []
