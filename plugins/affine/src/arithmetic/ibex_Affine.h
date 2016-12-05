@@ -2387,10 +2387,10 @@ AffineMain<AF_No>& AffineMain<AF_No>::Apow(int n, const Interval& itv);
 #endif /* IBEX_Affine_H_ */
 
 
-/** \brief atan2(AF[x],AF[y]). */
-//Affine2 atan2(const Affine2& x, const Affine2& y);
-/** \brief atan2([x],AF[y]). */
-//Affine2 atan2(const Interval& x, const Affine2& y);
-/** \brief atan2(AF[x],[y]). */
-//Affine2 atan2(const Affine2& x, const Interval& y);
+/** \brief atan2(AF[y],AF[x]). */
+//Affine2 atan2(const Affine2& y, const Affine2& x);
+/** \brief atan2([y],AF[x]). */
+//Affine2 atan2(const Interval& y, const Affine2& x);
+/** \brief atan2(AF[y],[x]). */
+//Affine2 atan2(const Affine2& y, const Interval& x);
 /** \brief cosh(AF[x]). */
