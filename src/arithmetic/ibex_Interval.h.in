@@ -569,8 +569,8 @@ Interval asin(const Interval& x);
 /** \brief atan([x]). */
 Interval atan(const Interval& x);
 
-/** \brief atan2([x],[y]). */
-Interval atan2(const Interval& x, const Interval& y);
+/** \brief atan2([y],[x]). */
+Interval atan2(const Interval& y, const Interval& x);
 
 /** \brief cosh([x]). */
 Interval cosh(const Interval& x);
