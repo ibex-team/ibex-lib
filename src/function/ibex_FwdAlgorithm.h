@@ -102,6 +102,12 @@ protected:
 	void minus_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
+	void minus_V_fwd(int x, int y);
+
+	/** TO BE DEFINED (by the subclass) */
+	void minus_M_fwd(int x, int y);
+
+	/** TO BE DEFINED (by the subclass) */
 	void trans_V_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */

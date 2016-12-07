@@ -25,16 +25,15 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestEval);
 	
-		CPPUNIT_TEST(deco01);
-		CPPUNIT_TEST(deco02);
+	CPPUNIT_TEST(deco01);
+	CPPUNIT_TEST(deco02);
+	CPPUNIT_TEST(dist01);
+	CPPUNIT_TEST(apply01);
+	CPPUNIT_TEST(apply02);
+	CPPUNIT_TEST(apply03);
+	CPPUNIT_TEST(apply04);
+	CPPUNIT_TEST(issue242);
 
-
-		CPPUNIT_TEST(dist01);
-
-		CPPUNIT_TEST(apply01);
-		CPPUNIT_TEST(apply02);
-		CPPUNIT_TEST(apply03);
-		CPPUNIT_TEST(apply04);
 	CPPUNIT_TEST_SUITE_END();
 
 	void deco01();
@@ -46,6 +45,8 @@ public:
 	void apply02();
 	void apply03();
 	void apply04();
+
+	void issue242();
 
 private:
 	void check_deco(Function& f, const ExprNode& e);

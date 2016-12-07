@@ -212,4 +212,9 @@ void TestEval::apply04() {
 	CPPUNIT_ASSERT((f3.eval_domain(_x3).i()).is_superset(Interval(10,10)));
 }
 
+void TestEval::issue242() {
+	Function f("x[3]","-x");
+	IntervalVector x(3,Interval::ONE);
+	CPPUNIT_ASSERT(almost_eq(f.eval_vector(x),-x,0));
+}
 }
