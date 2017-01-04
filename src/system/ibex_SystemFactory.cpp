@@ -12,7 +12,6 @@
 #include "ibex_Exception.h"
 #include "ibex_ExprCtr.h"
 #include "ibex_ExprCopy.h"
-#include "ibex_EmptySystemException.h"
 
 using std::vector;
 
@@ -100,16 +99,6 @@ void SystemFactory::add_goal(const Function& goal) {
 
 void SystemFactory::add_ctr(const ExprCtr& ctr) {
 	init_arg_bound();
-
-	Array<const ExprSymbol> ctr_vars(args->size());
-	varcopy(*args,ctr_vars);
-	const ExprNode& ctr_expr=ExprCopy().copy(*args, ctr_vars, ctr.e); //, true);
-
-	ctrs.push_back(new NumConstraint(*new Function(ctr_vars, ctr_expr), ctr.op, true));
-}
-
-void SystemFactory::add_ctr2(const ExprCtr& ctr) {
-	if (!args) args = new Array<const ExprSymbol>(tmp_args);
 
 	Array<const ExprSymbol> ctr_vars(args->size());
 	varcopy(*args,ctr_vars);
@@ -208,7 +197,11 @@ void System::init(const SystemFactory& fac) {
 
 	// the field fac.args is initialized upon addition of an objective
 	// function or a constraint.
-	if (!fac.args) throw EmptySystemException();
+	if (!fac.args) {
+		// an empty system is not an error
+		// (and may happen with automatic generation)
+		((SystemFactory&) fac).init_arg_bound();
+	}
 
 	(int&) nb_var = fac.nb_var;
 	(int&) nb_ctr = fac.ctrs.size();

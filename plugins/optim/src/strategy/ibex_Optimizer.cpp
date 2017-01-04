@@ -8,7 +8,6 @@
 //============================================================================
 
 #include "ibex_Optimizer.h"
-#include "ibex_EmptySystemException.h"
 #include "ibex_Timer.h"
 #include "ibex_OptimProbing.cpp_"
 #include "ibex_OptimSimplex.cpp_"
@@ -82,9 +81,9 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	}
 
 	// ==== build the system of equalities only ====
-	try {
-		equs= new System(user_sys,System::EQ_ONLY);
-	} catch(EmptySystemException&) {
+	equs= new System(user_sys,System::EQ_ONLY);
+	if (equs->nb_ctr==0) {
+		delete equs;
 		equs= NULL;
 	}
 
