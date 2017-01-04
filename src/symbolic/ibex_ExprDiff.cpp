@@ -343,7 +343,7 @@ void ExprDiff::visit(const ExprMul& e)   {
 			add_grad_expr(e.right, (*grad[e])*transpose(e.left));  // S*V
 		} else {
 			assert(e.right.dim.is_matrix());
-			add_grad_expr(e.left,  transpose(e.right*(*grad[e]))); // (M*V)'
+			add_grad_expr(e.left,  (*grad[e])*transpose(e.right)); // (M*V)'
 			add_grad_expr(e.right, (transpose(e.left))*(*grad[e])); // V'*V
 		}
 	} else {
