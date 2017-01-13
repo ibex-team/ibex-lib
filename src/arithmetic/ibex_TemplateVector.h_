@@ -192,6 +192,18 @@ Vector _diam(const V& v) {
 }
 
 template<class V>
+V _abs(const V& v) {
+	V res(v.size());
+
+	if (___is_empty(v)) { ___set_empty(res); return res; }
+
+	for (int i=0; i<v.size(); i++)
+		res[i]=___abs(v[i]);
+
+	return res;
+}
+
+template<class V>
 int _extr_diam_index(const V& v, bool min) {
 	double d=min? POS_INFINITY : -1; // -1 to be sure that even a 0-diameter interval will be selected
 	int selectedIndex=-1;

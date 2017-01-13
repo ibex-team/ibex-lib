@@ -176,29 +176,45 @@ public:
     Matrix& operator*=(const Matrix& m);
 
     /**
-     * Return the identity matrix n*n
+     * \brief Return the identity matrix n*n
      */
     static Matrix eye(int n);
 
     /**
-     * Return a n*n matrix of zeros
+     * \brief Return a n*n matrix of zeros
      */
     static Matrix zeros(int n);
 
     /**
-     * Return a m*n matrix of zeros
+     * \brief Return a m*n matrix of zeros
      */
     static Matrix zeros(int m, int n);
 
     /**
-     * Return a n*n matrix of ones
+     * \brief Return a n*n matrix of ones
      */
     static Matrix ones(int n);
 
     /**
-     * Return a m*n matrix of ones
+     * \brief Return a m*n matrix of ones
      */
     static Matrix ones(int m, int n);
+
+    /**
+     * \brief Return a m*n random matrix
+     *
+     * If n=-1, return a m*m matrix.
+     *
+     * Each entry is inside [0,1].
+     */
+    static Matrix rand(int m, int n=-1);
+
+    /**
+     * \brief Return a matrix with the given diagonal.
+     *
+     * The off-diagonal entries are 0.
+     */
+    static Matrix diag(const Vector& v);
 
     /**
      * \brief Cast the matrix to an expression
@@ -255,7 +271,12 @@ Vector operator*(const Vector& x, const Matrix& m);
 /**
  * \brief |x|.
  */
-Matrix abs(const Matrix& x);
+Matrix abs(const Matrix& m);
+
+/**
+ * \brief ||x||_oo.
+ */
+double infinite_norm(const Matrix& m);
 
 /**
  * \brief Stream out a matrix.
@@ -386,10 +407,6 @@ inline Vector operator*(const Matrix& m, const Vector& v) {
 
 inline Vector operator*(const Vector& v, const Matrix& m) {
 	return mulVM<Vector,Matrix,Vector>(v,m);
-}
-
-inline Matrix abs(const Matrix& m) {
-	return absM(m);
 }
 
 } // namespace ibex

@@ -673,8 +673,8 @@ Interval asin(const Interval& x);
 /** \brief atan([x]). */
 Interval atan(const Interval& x);
 
-/** \brief atan2([x],[y]). */
-Interval atan2(const Interval& x, const Interval& y);
+/** \brief atan2([y],[x]). */
+Interval atan2(const Interval& y, const Interval& x);
 
 /** \brief cosh([x]). */
 Interval cosh(const Interval& x);
@@ -903,13 +903,14 @@ namespace ibex {
 
 // the following functions are
 // introduced to allow genericity
-inline bool ___is_empty(double)                  { return false; }
-inline bool ___is_empty(const Interval& x)       { return x.is_empty(); }
+inline bool ___is_empty(double)             { return false; }
+inline bool ___is_empty(const Interval& x)  { return x.is_empty(); }
 inline void ___set_empty(double)            { }
 inline void ___set_empty(Interval& x)       { x.set_empty(); }
-
-inline double abs(double x) {return fabs(x);}
-
+inline double ___abs(double x)              { return fabs(x);}
+inline Interval ___abs(const Interval& x)   { return abs(x);}
+inline double ___mag(double x)              { return fabs(x);}
+inline double ___mag(const Interval& x)     { return x.mag();}
 
 inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY) {
 
@@ -1067,8 +1068,21 @@ inline Interval atan2(const Interval& y, const Interval& x) {
 	} else {
 		if (y.lb()>=0)
 			return atan(y/x.ub()) | (atan(y/x.lb()) + Interval::PI);
-		else if (y.ub()<=0)
-			return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+		else if (y.ub()<=0){
+			if(x.lb()!=NEG_INFINITY){
+				if(x.ub()!=POS_INFINITY){
+					return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+				}
+				else
+					return (atan(y/x.lb())-Interval::PI) | Interval::ZERO;
+			}
+			else{
+				if(x.ub()!=POS_INFINITY)
+					return (-Interval::PI) | atan(y/x.ub());
+				else
+					return -Interval::PI | Interval::ZERO;
+			}
+		}
 		else
 			return Interval(-1,1)*Interval::PI;
 	}

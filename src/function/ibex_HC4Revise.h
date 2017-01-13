@@ -108,6 +108,8 @@ public: // because called from CompiledFunction
 	inline void min_bwd    (int x1, int x2, int y) { if (!(bwd_min(d[y].i(),d[x1].i(),d[x2].i()))) throw EmptyBoxException();  }
 	inline void atan2_bwd  (int x1, int x2, int y) { if (!(bwd_atan2(d[y].i(),d[x1].i(),d[x2].i()))) throw EmptyBoxException();  }
 	inline void minus_bwd  (int x, int y)          { if ((d[x].i() &=-d[y].i()).is_empty()) throw EmptyBoxException();  }
+	inline void minus_V_bwd(int x, int y)          { if ((d[x].v() &=-d[y].v()).is_empty()) throw EmptyBoxException();  }
+	inline void minus_M_bwd(int x, int y)          { if ((d[x].m() &=-d[y].m()).is_empty()) throw EmptyBoxException();  }
     inline void trans_V_bwd(int x, int y)          { if ((d[x].v() &= d[y].v()).is_empty()) throw EmptyBoxException();  }
     inline void trans_M_bwd(int x, int y)          { if ((d[x].m() &= d[y].m().transpose()).is_empty()) throw EmptyBoxException();  }
 	inline void sign_bwd   (int x, int y)          { if (!(bwd_sign(d[y].i(),d[x].i()))) throw EmptyBoxException();  }

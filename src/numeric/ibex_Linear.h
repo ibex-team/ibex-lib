@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_Linear.h
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Antoine Marendet
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Apr 17, 2012
@@ -22,9 +22,10 @@ namespace ibex {
  * \degroup numeric Numerical Algorithms
  */
 
+/** \ingroup numeric */
+/*@{*/
+
 /**
- * \ingroup numeric
- *
  * \brief LU decomposition of a real matrix with partial pivoting
  *
  * \param A - The matrix to decompose.
@@ -44,8 +45,6 @@ namespace ibex {
 void real_LU(const Matrix& A, Matrix& LU, int* p);
 
 /*
- * \ingroup numeric
- *
  * \brief LU decomposition of a real matrix with full pivoting.
  *
  * \param A - The matrix to decompose.
@@ -66,13 +65,41 @@ void real_LU(const Matrix& A, Matrix& LU, int* p);
  */
 void real_LU(const Matrix& A, Matrix& LU, int* pr, int* pc);
 
+/*
+ * \brief LU decomposition of an interval matrix with partial pivoting.
+ *
+ * \see ibex::real_LU(const Matrix&, Matrix&, int*, int*).
+ */
 void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* p);
 
+/*
+ * \brief LU decomposition of an interval matrix with full pivoting.
+ *
+ * \see ibex::real_LU(const Matrix&, Matrix&, int*, int*).
+ */
 void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* pr, int* pc);
 
 /**
- * \ingroup numeric
+ * \brief True only if A is full rank.
  *
+ * If the function returns false, the matrix may be full
+ * rank or not. Nothing is proven.
+ */
+bool full_rank(const IntervalMatrix& A);
+
+/**
+ * \brief Solve a square linear system of equations given the LU decomposition of A.
+ *
+ * \param LU - The LU decomposition of A.
+ * \param p  - The permutation array of row indices of the LU decomposition.
+ * \param b  - The right-hand side of the system of equations.
+ * \param x (output) - The solution computed by Gauss elimination.
+ *
+ * \throw SingularMatrixException if too small values appear during computations.
+ */
+void real_LU_solve(const Matrix &LU, const int* p, const Vector& b, Vector& x);
+
+/**
  * \brief Computes an (approximative) inverse of a real matrix.
  *
  * \param A - The matrix to inverse.
@@ -87,8 +114,33 @@ void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* pr, int* pc);
 void real_inverse(const Matrix& A, Matrix& invA);
 
 /**
- * \ingroup numeric
+ * \brief Computes an enclosure of the inverse of an interval matrix.
+ * See "Interval Methods for Systems of Equations", A. Neumaier, 1990, p 123, theorem 4.1.11.
  *
+ * \param A - The interval matrix to inverse.
+ * \param invA (output) - The enclosure of the inverse of A.
+ *
+ * \throw SquareMatrixException if the matrix A is not square.
+ * \throw SingularMatrixException if the matrix A is singular.
+ *
+ * Author: Antoine Marendet
+ */
+void neumaier_inverse(const IntervalMatrix& A, IntervalMatrix& invA);
+
+/**
+ * \brief Computes the exact inverse of a matrix with unit midpoint.
+ * See "Inverse interval matrix: A survey", J. Rohn & R. Farhadsefat, Electronic Journal of Linear Algebra, Vol. 22, 2011, section 10.
+ *
+ * \param A - The interval matrix to inverse.
+ * \param invA (output) - The exact inverse of A if A is a matrix with unit midpoint.
+ *
+ * \throw SingularMatrixException if the matrix A is singular.
+ *
+ * Author: Antoine Marendet
+ */
+void precond_rohn_inverse(const IntervalMatrix& A, IntervalMatrix& invA);
+
+/**
  * \brief Preconditions system \f$[A]x=[b]\f$.
  *
  * <br> Precondition is made by multiplying [A] and [b]
@@ -105,8 +157,6 @@ void real_inverse(const Matrix& A, Matrix& invA);
 void precond(IntervalMatrix& A, IntervalVector& b);
 
 /**
- * \ingroup numeric
- *
  * \brief Precondition the matrix \f$[A]\f$.
  *
  * <br> Precondition is made by multiplying [A]
@@ -119,9 +169,8 @@ void precond(IntervalMatrix& A, IntervalVector& b);
  *                                In this case, A and b are not modified.
  */
 void precond(IntervalMatrix& A);
+
 /**
- * \ingroup numeric
- *
  * \brief Gauss-Seidel algorithm.
  *
  * No preconditioning is done.
@@ -139,9 +188,7 @@ void precond(IntervalMatrix& A);
  */
 void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio=0.01);
 
-/*
- * \ingroup numeric
- *
+/**
  * \brief Gauss-Seidel algorithm (inflating variant).<br>
  *
  * Compute a non-rigorous approximation of \f$\Sigma([A],[b])\f$
@@ -161,9 +208,7 @@ void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVect
 bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double min_dist=1e-12, double mu_max_divergence=1.0);
 
 /**
- * \ingroup numeric
- *
- * \brief Hansen-Bliek algorithm
+ * \brief Hansen-Bliek algorithm.
  *
  * Applies Hansen-Bliek algorithm (including midpoint preconditioning).<br>
  * The result is an outer approximation of \f$\Sigma(C[A],C[b])\f$
@@ -183,7 +228,42 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
  */
 void hansen_bliek(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x);
 
+/**
+ * \brief An enclosure of the determinant of A.
+ */
+Interval det(const IntervalMatrix& A);
 
-} // end namespace
+/**
+ * \brief Sylvester's Positive definiteness criterion.
+ *
+ * \return true only if A is positive definite (otherwise,
+ *         nothing can be said).
+ *
+ * Uses Sylvester's test (positive minor determinants).
+ * Complexity: O(n^3).
+ */
+bool is_posdef_sylvester(const IntervalMatrix& A);
+
+/* \brief Rohn's Positive definiteness criterion.
+ *
+ * \see Rohn, J. (1994). Positive definiteness and stability of interval matrices.
+ *      SIAM Journal on Matrix Analysis and Applications, 15(1), 175-184.
+ *
+ * Complexity: O(2^n).
+ */
+bool is_posdef_rohn(const IntervalMatrix& A);
+
+/**
+ * \brief Check diagonal dominance.
+ *
+ * True if the sum of the magnitudes of the off-diagonal
+ * entries in a given row is less than the
+ * mignitude of the diagonal one.
+ */
+bool is_diagonal_dominant(const IntervalMatrix& A);
+
+/*@}*/  // end group numeric
+
+}       // end namespace
 
 #endif // __IBEX_LINEAR_H__

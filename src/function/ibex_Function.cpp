@@ -81,18 +81,19 @@ void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	}
 }
 
-void Function::jacobian(const IntervalVector& box, IntervalMatrix& J, const VarSet& set) const {
+void Function::jacobian(const IntervalVector& box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const {
 
-	assert(J.nb_cols()==set.nb_var);
+	assert(J_var.nb_cols()==set.nb_var);
 	assert(box.size()==nb_var());
-	assert(J.nb_rows()==image_dim());
+	assert(J_var.nb_rows()==image_dim());
 
 	IntervalVector g(nb_var());
 
 	// calculate the gradient of each component of f
 	for (int i=0; i<image_dim(); i++) {
 		(*this)[i].gradient(box,g);
-		J.set_row(i,set.var_box(g));
+		J_var.set_row(i,set.var_box(g));
+		J_param.set_row(i,set.param_box(g));
 	}
 }
 
@@ -116,22 +117,22 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 		//var=tab[i];
 		x[var]=box[var];
 		jacobian(x,J);
-                if (J.is_empty()) {
-                    H.set_empty();
-                    return;
-                }
+		if (J.is_empty()) {
+			H.set_empty();
+			return;
+		}
 		H.set_col(var,J.col(var));
 	}
 
 }
 
-void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H, const VarSet& set) const {
+void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
 	int n=set.nb_var;
 	int m=image_dim();
 
-	assert(H.nb_cols()==n);
+	assert(H_var.nb_cols()==n);
 	assert(box.size()==nb_var());
-	assert(H.nb_rows()==m);
+	assert(H_var.nb_rows()==m);
 
 	IntervalVector var_box=set.var_box(box);
 	IntervalVector param_box=set.param_box(box);
@@ -142,12 +143,15 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H, const
 	for (int var=0; var<n; var++) {
 		//var=tab[i];
 		x[var]=var_box[var];
-		jacobian(set.full_box(x,param_box),J,set);
-                if (J.is_empty()) {
-                    H.set_empty();
-                    return;
-                }
-		H.set_col(var,J.col(var));
+
+		// The last evaluation of the jacobian is on the
+		// "full" box -> J_param is correct
+		jacobian(set.full_box(x,param_box),J,J_param,set);
+		if (J.is_empty()) {
+			H_var.set_empty();
+			return;
+		}
+		H_var.set_col(var,J.col(var));
 	}
 }
 

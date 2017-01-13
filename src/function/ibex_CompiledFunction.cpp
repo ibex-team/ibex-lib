@@ -146,9 +146,13 @@ void CompiledFunction::visit(const ExprMin& e)   { visit(e,MIN); }
 
 void CompiledFunction::visit(const ExprAtan2& e) { visit(e,ATAN2); }
 
-void CompiledFunction::visit(const ExprMinus& e) { visit(e,MINUS); }
+void CompiledFunction::visit(const ExprMinus& e) {
+	if (e.dim.is_vector())      visit(e,MINUS_V);
+	else if (e.dim.is_matrix()) visit(e,MINUS_M);
+	else                        visit(e,MINUS);
+}
 
-void CompiledFunction::visit(const ExprTrans& e)   {
+void CompiledFunction::visit(const ExprTrans& e) {
 	if (e.dim.is_vector())              visit(e,TRANS_V);
 	else if (e.dim.type()==Dim::MATRIX) visit(e,TRANS_M);
 	else assert(false);
@@ -205,7 +209,8 @@ const char* CompiledFunction::op(operation o) const {
 		        return "+";
 	case MUL: case MUL_SV: case MUL_SM: case MUL_VV: case MUL_MV: case MUL_MM:  case MUL_VM:
 		        return "*";
-	case MINUS: case SUB: case SUB_V: case SUB_M:
+	case MINUS: case MINUS_V: case MINUS_M:
+	case SUB: case SUB_V: case SUB_M:
 		        return "-";
 	case DIV:   return "/";
 	case MAX:   return "max";

@@ -93,4 +93,100 @@ void TestLinear::inflating_gauss_seidel03() {
 	CPPUNIT_ASSERT(!ret);
 }
 
+void TestLinear::det01() {
+    double _tab[] = { 1, 3, 2, 9, 4, 5, 6, 8, 7 };
+    Matrix M1(3,3,_tab);
+    CPPUNIT_ASSERT(almost_eq(det(M1),-15,ERROR));
+}
+
+void TestLinear::det02() {
+	CPPUNIT_ASSERT_THROW(det(Matrix(1,2)), NotSquareMatrixException);
+}
+
+namespace {
+
+// Return an orthogonal matrix and its inverse
+pair<IntervalMatrix,IntervalMatrix> orthogonal_matrix() {
+
+	// Create an orthogonal 3x3 matrix
+	// with 3 rotations
+	IntervalMatrix R1(3,3,Interval::ZERO);
+	R1[0][0]=cos(Interval::PI/4.0);
+	R1[0][1]=-sin(Interval::PI/4.0);
+	R1[1][0]=sin(Interval::PI/4.0);
+	R1[1][1]=cos(Interval::PI/4.0);
+	R1[2][2]=Interval::ONE;
+
+	IntervalMatrix R2(3,3,Interval::ZERO);
+	R2[1][1]=cos(Interval::PI/3.0);
+	R2[1][2]=-sin(Interval::PI/3.0);
+	R2[2][1]=sin(Interval::PI/3.0);
+	R2[2][2]=cos(Interval::PI/3.0);
+	R2[0][0]=Interval::ONE;
+
+	IntervalMatrix R3(3,3,Interval::ZERO);
+	R3[2][2]=cos(Interval::PI/5.0);
+	R3[2][0]=-sin(Interval::PI/5.0);
+	R3[0][2]=sin(Interval::PI/5.0);
+	R3[0][0]=cos(Interval::PI/5.0);
+	R3[1][1]=Interval::ONE;
+
+	IntervalMatrix R=R1*R2*R3;
+	IntervalMatrix Rinv=R3.transpose()*R2.transpose()*R1.transpose();
+	return make_pair(R,Rinv);
+}
+
+}
+
+void TestLinear::is_posdef_sylvester01() {
+
+	pair<IntervalMatrix,IntervalMatrix> R=orthogonal_matrix();
+
+	double d[9]={2, 0, 0, 0, 1, 0, 0, 0, 3};
+	Matrix D(3,3,d);
+
+	CPPUNIT_ASSERT(is_posdef_sylvester(R.first*D*R.second));
+
+	D[1][1]=0.1;
+	CPPUNIT_ASSERT(is_posdef_sylvester(R.first*D*R.second));
+
+	D[1][1]=-0.1;
+	CPPUNIT_ASSERT(!is_posdef_sylvester(R.first*D*R.second));
+
+}
+
+void TestLinear::is_posdef_rohn01() {
+
+	pair<IntervalMatrix,IntervalMatrix> R=orthogonal_matrix();
+
+	double d[9]={2, 0, 0, 0, 1, 0, 0, 0, 3};
+	Matrix D(3,3,d);
+
+	CPPUNIT_ASSERT(is_posdef_rohn(R.first*D*R.second));
+
+	D[1][1]=0.1;
+	CPPUNIT_ASSERT(is_posdef_sylvester(R.first*D*R.second));
+
+	D[1][1]=-0.1;
+	CPPUNIT_ASSERT(!is_posdef_sylvester(R.first*D*R.second));
+}
+
+void TestLinear::is_diagonal_dominant01() {
+	int n=10;
+	IntervalMatrix M=Matrix::eye(n);
+	for (int i=0; i<n; i++) {
+		for (int j=0; j<n; j++) {
+			if (i<j) M[i][j]=-1.0/((double) n);
+			else if (i>j) M[i][j]=1.0/((double) n);
+		}
+	}
+	CPPUNIT_ASSERT(is_diagonal_dominant(M));
+
+	M[n-1][n-2]=Interval(0,1.99/((double) n));
+	CPPUNIT_ASSERT(is_diagonal_dominant(M));
+
+	M[n-1][n-2]=Interval(0,2.00/((double) n));
+	CPPUNIT_ASSERT(!is_diagonal_dominant(M));
+}
+
 } // end namespace ibex

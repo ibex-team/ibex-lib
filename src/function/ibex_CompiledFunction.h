@@ -72,7 +72,8 @@ protected:
 		IDX_CP, // index with copy
 		VEC, SYM, CST, APPLY, CHI,
 		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2,
-		MINUS, TRANS_V, TRANS_M, SIGN, ABS, POWER,
+		MINUS, MINUS_V, MINUS_M,
+		TRANS_V, TRANS_M, SIGN, ABS, POWER,
 		SQR, SQRT, EXP, LOG,
 		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
 		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
@@ -185,6 +186,8 @@ void CompiledFunction::forward(const V& algo) const {
 		case MIN:    ((V&) algo).min_fwd    (args[i][0], args[i][1], i); break;
 		case ATAN2:  ((V&) algo).atan2_fwd  (args[i][0], args[i][1], i); break;
 		case MINUS:  ((V&) algo).minus_fwd  (args[i][0], i); break;
+		case MINUS_V:((V&) algo).minus_V_fwd(args[i][0], i); break;
+		case MINUS_M:((V&) algo).minus_M_fwd(args[i][0], i); break;
 		case TRANS_V:((V&) algo).trans_V_fwd(args[i][0], i); break;
 		case TRANS_M:((V&) algo).trans_M_fwd(args[i][0], i); break;
 		case SIGN:   ((V&) algo).sign_fwd   (args[i][0], i); break;
@@ -243,6 +246,8 @@ void CompiledFunction::backward(const V& algo) const {
 		case MIN:    ((V&) algo).min_bwd    (args[i][0], args[i][1], i); break;
 		case ATAN2:  ((V&) algo).atan2_bwd  (args[i][0], args[i][1], i); break;
 		case MINUS:  ((V&) algo).minus_bwd  (args[i][0], i); break;
+		case MINUS_V:((V&) algo).minus_V_bwd(args[i][0], i); break;
+		case MINUS_M:((V&) algo).minus_M_bwd(args[i][0], i); break;
 		case TRANS_V:((V&) algo).trans_V_bwd(args[i][0], i); break;
 		case TRANS_M:((V&) algo).trans_M_bwd(args[i][0], i); break;
 		case SIGN:   ((V&) algo).sign_bwd   (args[i][0], i); break;

@@ -8,10 +8,12 @@
 // Last Update : Aug 29, 2013
 //============================================================================
 
-#include <math.h>
-#include <float.h>
 #include "ibex_Linear.h"
 #include "ibex_LinearException.h"
+
+#include <math.h>
+#include <float.h>
+#include <stack>
 
 #define TOO_LARGE 1e30
 #define TOO_SMALL 1e-10
@@ -147,6 +149,36 @@ void LU(const M& A, M& LU, int* pr, int* pc) {
 		}
 	}
 }
+
+template<class M, class V>
+void LU_solve(const M& LU, const int* p, const V& b, V& x) {
+    int n = LU.nb_rows();
+    assert(n == LU.nb_cols());
+    assert(n == b.size() && n == x.size());
+
+    // solve LX=b
+    x[0] = b[p[0]];
+    for (int i = 1; i < n; ++i) {
+        x[i] = b[p[i]];
+        for (int j = 0; j < i; ++j) {
+            x[i] -= LU[p[i]][j] * x[j];
+        }
+    }
+
+    // solve Uy=x
+    if (_mig(LU[p[n - 1]][n - 1]) <= TOO_SMALL)
+        throw SingularMatrixException();
+    x[n - 1] /= LU[p[n - 1]][n - 1];
+    for (int i = n - 2; i >= 0; --i) {
+        for (int j = i + 1; j < n; ++j) {
+            x[i] -= LU[p[i]][j] * x[j];
+        }
+        if (_mig(LU[p[i]][i]) <= TOO_SMALL)
+            throw SingularMatrixException();
+        x[i] /= LU[p[i]][i];
+    }
+}
+
 } // end anonymous namespace
 
 void real_LU(const Matrix& A, Matrix& _LU, int* p) {
@@ -165,39 +197,12 @@ void interval_LU(const IntervalMatrix& A, IntervalMatrix& _LU, int* pr, int* pc)
 	LU<Interval,IntervalMatrix>(A,_LU,pr,pc);
 }
 
-namespace {
-
-void real_LU_solve(const Matrix& LU, const int* p, const Vector& b, Vector& x) {
-	//cout << "LU=" << LU << " b=" << b << endl;
-
-	int n = (LU.nb_rows());
-	assert(n == (LU.nb_cols())); // throw NotSquareMatrixException();
-	assert(n == (b.size()) && n == (x.size()));
-
-	// solve Lx=b
-	x[0] = b[p[0]];
-	for (int i=1; i<n; i++) {
-		x[i] = b[p[i]];
-		for (int j=0; j<i; j++) {
-			x[i] -= LU[p[i]][j]*x[j];
-		}
-	}
-	//cout << " x1=" << x << endl;
-
-	// solve Uy=x
-	if (fabs(LU[p[n-1]][n-1])<=TOO_SMALL) throw SingularMatrixException();
-	x[n-1] /= LU[p[n-1]][n-1];
-
-	for (int i=n-2; i>=0; i--) {
-		for (int j=i+1; j<n; j++) {
-			x[i] -= LU[p[i]][j]*x[j];
-		}
-		if (fabs(LU[p[i]][i])<=TOO_SMALL) throw SingularMatrixException();
-		x[i] /= LU[p[i]][i];
-	}
-	//cout << " x2=" << x << endl;
+void real_LU_solve(const Matrix &LU, const int* p, const Vector& b, Vector& x) {
+    LU_solve<Matrix, Vector>(LU, p, b, x);
 }
 
+void interval_LU_solve(const IntervalMatrix& LU, const int *p, const IntervalVector& b, IntervalVector& x) {
+    LU_solve<IntervalMatrix, IntervalVector>(LU, p, b, x);
 }
 
 void real_inverse(const Matrix& A, Matrix& invA) {
@@ -224,6 +229,70 @@ void real_inverse(const Matrix& A, Matrix& invA) {
 		throw e;
 	}
 	delete[] p;
+}
+
+void neumaier_inverse(const IntervalMatrix& A, IntervalMatrix& invA) {
+    int n = A.nb_rows();
+    if (n != A.nb_cols()) throw NotSquareMatrixException();
+
+    Vector u(n, 1);
+    Matrix C(n, n);
+    real_inverse(A.mid(), C); // throw SingularMatrixException
+    double beta = infinite_norm(C * A - Matrix::eye(n));
+    if (beta >= 1)
+        throw SingularMatrixException();
+    Vector w(n);
+    for (int j = 0; j < n; ++j) {
+        w[j] = infinite_norm(C.col(j));
+    }
+    Matrix uw = outer_product(u, w);
+    IntervalMatrix E(n, n);
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            E[i][j] = Interval(-uw[i][j], uw[i][j]);
+    invA = C + beta / (1 - beta) * E;
+}
+
+void precond_rohn_inverse(const IntervalMatrix& A, IntervalMatrix& invA) {
+    //Th. 10.2, not the best
+    int n = A.nb_rows();
+    assert(n == A.nb_cols());
+    Matrix delta = (A - Matrix::eye(n)).ub();
+    if (infinite_norm(delta) >= 1) {
+        throw SingularMatrixException();
+    }
+    Matrix invM = Matrix::eye(n) - delta;
+    Matrix M(n, n);
+    real_inverse(invM, M);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (i != j) {
+                invA[i][j] = Interval(-M[i][j], M[i][j]);
+            } else {
+                invA[i][j] = Interval(M[i][j] / (2 * M[i][j] - 1), M[i][j]);
+            }
+        }
+    }
+}
+
+bool full_rank(const IntervalMatrix& A) {
+	int *pr = new int[A.nb_rows()]; // ignored
+	int *pc = new int[A.nb_cols()]; // ignored
+	 try {
+		 IntervalMatrix LU(A);
+
+		 interval_LU(A,LU,pr,pc);
+
+		 delete [] pr;
+		 delete [] pc;
+		 return true;
+	 } catch(SingularMatrixException& e) {
+		 // means in particular that we could not extract an
+		 // invertible m*m submatrix
+		 delete [] pr;
+		 delete [] pc;
+		 return false;
+	 }
 }
 
 void precond(IntervalMatrix& A) {
@@ -262,27 +331,6 @@ void precond(IntervalMatrix& A, IntervalVector& b) {
 	A = C*A;
 	b = C*b;
 }
-
-// static void lu_interval(IntervalMatrix& A, int i, int n, Interval& det) {
-
-//   if (i==n) {
-//     if (A[n][n].contains(0)) throw NullPivotException();
-//     det=A[n][n];
-//     return;
-//   }
-
-//   Interval pivot = A[i][i];
-
-//   if (pivot.contains(0)) throw NullPivotException();
-
-//   for (int j=i+1; j<=n; j++) {
-//     for (int k=i+1; k<=n; k++) A[j][k]-=(A[j][i]/pivot)*A[i][k];
-//     A[j][i] = A[j][i]/pivot;
-//   }
-
-//   lu_interval(A, i+1, n, det);
-//   det = A[i][i]*det;
-// }
 
 void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio) {
 	int n=(A.nb_rows());
@@ -340,11 +388,6 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
 
 }
 
-// void PrecGaussSeidel(IntervalMatrix& A, IntervalVector& b, IntervalVector& x) throw(LinearException) {
-//   Precond(A, b);
-//   GaussSeidel(A, b, x);
-// }
-
 void hansen_bliek(const IntervalMatrix& A, const IntervalVector& B, IntervalVector& x) {
 	int n=A.nb_rows();
 	assert(n == A.nb_cols()); // throw NotSquareMatrixException();
@@ -393,6 +436,88 @@ void hansen_bliek(const IntervalMatrix& A, const IntervalVector& B, IntervalVect
 			else { x.set_empty(); return; }
 		}
 	}
+}
+
+Interval det(const IntervalMatrix& A) {
+	int n=A.nb_cols();
+	if(n!=A.nb_rows())
+		throw NotSquareMatrixException();
+
+	IntervalMatrix LU(A);
+	int *p = new int[n];
+	interval_LU(A,LU,p);
+	Interval res=LU[p[0]][0];
+	for (int i=1; i<n; i++) {
+		res*=LU[p[i]][i];
+	}
+
+	return res;
+}
+
+bool is_posdef_sylvester(const IntervalMatrix& A) {
+    int n = A.nb_cols();
+
+    try {
+    	for (int i=0; i<n-1; i++) {
+    		if (det(A.submatrix(0, i, 0, i)).lb()<0) return false;
+    	}
+
+    	if (det(A).lb()<0) return false;
+
+    	return true;
+    } catch(SingularMatrixException&) {
+    	return false;
+    }
+}
+
+bool is_posdef_rohn(const IntervalMatrix& A) {
+	int n=A.nb_rows();
+	if (!A.nb_cols()==n) throw NotSquareMatrixException();
+
+	Matrix midA=A.mid();
+	Matrix radA=A.rad();
+	Matrix Tz(n,n);
+
+	// the integer is the position in the vector where the sign
+	// has to be changed.
+	stack<pair<Vector,int> > s;
+
+	// The first index is 1 to break symmetry (the sign of index 0
+	// is always 1).
+	s.push(make_pair(Vector::ones(n),1));
+
+	// initial test with z=(1,...,1)
+	if (!is_posdef_sylvester(midA - radA)) return false;
+
+	while (!s.empty()) {
+		pair<Vector,int> p=s.top();
+		s.pop();
+
+		Vector& v=p.first;
+		int i=p.second;
+
+		if (i<n-1) s.push(make_pair(v,i+1));
+
+		v[i]=-1;
+		Tz=Matrix::diag(v);
+		if (!is_posdef_sylvester(midA - Tz*radA*Tz)) return false;
+
+		if (i<n-1) s.push(make_pair(v,i+1));
+	}
+
+	return true;
+}
+
+bool is_diagonal_dominant(const IntervalMatrix& A) {
+	double s;
+	for (int i=0; i<A.nb_rows(); i++) {
+    	s=0;
+    	for (int j=0; j<A.nb_cols(); j++) {
+    		if (j!=i) s+=A[i][j].mag();
+    	}
+    	if (s>=A[i][i].mig()) return false;
+    }
+    return true;
 }
 
 } // end namespace

@@ -118,6 +118,25 @@ public:
 	VarSet(const VarSet& v);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~VarSet();
+
+	/**
+	 * \brief True if the bitsets are the same.
+	 *
+	 * The original function is not take into account
+	 */
+	bool operator==(const VarSet& v) const;
+
+	/**
+	 * \brief True if the bitsets differ.
+	 *
+	 * The original function is not take into account
+	 */
+	bool operator!=(const VarSet& v) const;
+
+	/**
 	 * \brief Assignment (erases everything)
 	 */
 	VarSet& operator=(const VarSet& v);
@@ -147,6 +166,25 @@ public:
 	 */
 	IntervalVector param_box(const IntervalVector& full_box) const;
 
+	/**
+	 * \brief Retun the ith variable
+	 *
+	 * Return the index of the ith variable in all the dimensions
+	 * of the "full box".
+	 *
+	 * \pre 0<=i<nb_var
+	 */
+	int var(int i) const;
+
+	/**
+	 * \brief Retun the ith parameter
+	 *
+	 * Return the index of the ith parameter in all the dimensions
+	 * of the "full box".
+	 *
+	 * \pre 0<=i<nb_param
+	 */
+	int param(int i) const;
 
 	/**
 	 * \brief Number of variables.
@@ -165,14 +203,47 @@ public:
 	 * vars[i]==true <=> the ith component is a variable
 	 * Otherwise, the ith component is a parameter
 	 */
-	BitSet vars;
+	const BitSet is_var;
 
 protected:
 
-	void init(Function& f, const Array<const ExprNode>& x, bool var);
+	// variables
+	int* vars;
+
+	// parameters
+	int* params;
+
+	// Init is_var
+	void init_bitset(Function& f, const Array<const ExprNode>& x, bool var);
+
+	// Init vars & params
+	// (to be called after init_bitset)
+	void init_arrays();
 };
 
 std::ostream& operator<<(std::ostream& os, const VarSet& v);
+
+
+/*================================== inline implementations ========================================*/
+
+inline int VarSet::var(int i) const {
+	assert(i>=0 && i<nb_var);
+	return vars[i];
+}
+
+inline int VarSet::param(int i) const {
+	assert(i>=0 && i<nb_param);
+	return params[i];
+}
+
+inline bool VarSet::operator==(const VarSet& v) const {
+	return ((BitSet&) is_var) == v.is_var;
+}
+
+inline bool VarSet::operator!=(const VarSet& v) const {
+	return !(*this==v);
+}
+
 
 } // namespace ibex
 

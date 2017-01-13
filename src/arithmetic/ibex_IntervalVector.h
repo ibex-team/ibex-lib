@@ -549,6 +549,26 @@ public:
      */
 	operator const ExprConstant&() const;
 
+	/**
+	 * \brief Interval vector iterator
+	 */
+	typedef Interval* iterator;
+
+	/**
+	 * \brief Interval vector const iterator
+	 */
+	typedef const Interval* const_iterator;
+
+	/**
+	 * \brief First iterator
+	 */
+	iterator begin() { return &vec[0]; }
+
+	/**
+	 * \brief Past-the-end iterator
+	 */
+	iterator end() { return &vec[n]; }
+
 private:
 	friend class IntervalMatrix;
 
@@ -667,6 +687,11 @@ IntervalVector hadamard_product(const IntervalVector& x, const IntervalVector& y
  * \brief |x|.
  */
 IntervalVector abs(const IntervalVector& x);
+
+/**
+ * \brief ||x||_oo.
+ */
+double infinite_norm(const IntervalVector& x);
 
 /**
  * \brief Projection of $y=x_1+x_2$.
@@ -895,11 +920,6 @@ inline IntervalVector operator*(const Matrix& m, const IntervalVector& v) {
 inline IntervalVector operator*(const IntervalVector& v, const Matrix& m) {
 	return mulVM<IntervalVector,Matrix,IntervalVector>(v,m);
 }
-
-inline IntervalVector abs(const IntervalVector& v) {
-	return absV(v);
-}
-
 
 } // end namespace
 

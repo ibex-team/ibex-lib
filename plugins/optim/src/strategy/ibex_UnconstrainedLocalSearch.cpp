@@ -88,7 +88,7 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 		xk=xk1;
 
 		// initialization the trust region radius
-		double Delta = 0.1*gk.norm();
+		double Delta = 0.1*norm(gk);
 		IntervalVector region(n);
 		BitSet I(BitSet::empty(n));
 
@@ -379,7 +379,7 @@ Vector UnconstrainedLocalSearch::conj_grad(const Vector& gk, const Matrix& Bk, c
 	}
 
 	double rho1 = 1.0; 					// norm of the restricted gradient at the previous iterate
-	double rho2 = ::pow(hr.norm(),2); 	// norm of the restricted gradient
+	double rho2 = ::pow(norm(hr),2); 	// norm of the restricted gradient
 
 	// ====================== STEP 3.1 : Test for the required accuracy in c.g. iteration ======================
 	bool cond = (rho2>::pow(eta,2));
