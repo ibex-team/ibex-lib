@@ -12,7 +12,6 @@
 #include "ibex_Exception.h"
 #include "ibex_ExprCtr.h"
 #include "ibex_ExprCopy.h"
-#include "ibex_EmptySystemException.h"
 
 using std::vector;
 
@@ -100,7 +99,7 @@ void SystemFactory::add_goal(const Function& goal) {
 
 void SystemFactory::add_ctr(const ExprCtr& ctr) {
 	init_arg_bound();
-
+	
 	Array<const ExprSymbol> ctr_vars(args->size());
 	varcopy(*args,ctr_vars);
 	const ExprNode& ctr_expr=ExprCopy().copy(*args, ctr_vars, ctr.e); //, true);
@@ -108,8 +107,11 @@ void SystemFactory::add_ctr(const ExprCtr& ctr) {
 	ctrs.push_back(new NumConstraint(*new Function(ctr_vars, ctr_expr), ctr.op, true));
 }
 
+/*
 void SystemFactory::add_ctr2(const ExprCtr& ctr) {
 	if (!args) args = new Array<const ExprSymbol>(tmp_args);
+=======
+>>>>>>> refs/remotes/origin/develop
 
 	Array<const ExprSymbol> ctr_vars(args->size());
 	varcopy(*args,ctr_vars);
@@ -117,6 +119,7 @@ void SystemFactory::add_ctr2(const ExprCtr& ctr) {
 
 	ctrs.push_back(new NumConstraint(*new Function(ctr_vars, ctr_expr), ctr.op, true));
 }
+*/
 
 void SystemFactory::add_ctr(const NumConstraint& ctr) {
 	init_arg_bound();
@@ -208,7 +211,11 @@ void System::init(const SystemFactory& fac) {
 
 	// the field fac.args is initialized upon addition of an objective
 	// function or a constraint.
-	if (!fac.args) throw EmptySystemException();
+	if (!fac.args) {
+		// an empty system is not an error
+		// (and may happen with automatic generation)
+		((SystemFactory&) fac).init_arg_bound();
+	}
 
 	(int&) nb_var = fac.nb_var;
 	(int&) nb_ctr = fac.ctrs.size();
@@ -218,13 +225,31 @@ void System::init(const SystemFactory& fac) {
 
 	// f is not initialized here --> see init_f_from_ctrs() below
 
-	// =========== init args ==============
-	args.resize(fac.nb_arg);
-	varcopy(*fac.args, args);
+	// the field fac.args is initialized upon addition of an objective
+	// function or a constraint.
+	//if (!fac.args) throw EmptySystemException();
+	if (!fac.args) {
+		// =========== init args ==============
+		args.resize(fac.nb_arg);
+		Array<const ExprSymbol> tmp(fac.tmp_args);
+		varcopy(tmp, args);
 
-	box.resize(nb_var);
-	box=fac.bound_init;
+		box.resize(nb_var);
+		int i=0;
+		for (typename std::vector<IntervalVector>::const_iterator it=fac.tmp_bound.begin(); it!=fac.tmp_bound.end(); it++) {
+			box.put(i,*it);
+			i+=(*it).size();
+		}
 
+	} else {
+		// =========== init args ==============
+		args.resize(fac.nb_arg);
+		varcopy(*fac.args, args);
+
+		box.resize(nb_var);
+		box=fac.bound_init;
+
+	}
 	// =========== init ctrs ==============
 	ctrs.resize(nb_ctr);
 	for (int i=0; i<nb_ctr; i++)

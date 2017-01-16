@@ -55,6 +55,9 @@ public:
 
 	Heap(CostFunc<T>& costf);
 
+	Heap(const Heap& original_heap);
+
+	~Heap() { flush(); }
 	/**
 	 * \brief Flush the buffer.
 	 *
@@ -129,6 +132,17 @@ struct HeapComparator {
 template<class T>
 Heap<T>::Heap(CostFunc<T>& costf) : costf(costf) {
 
+}
+
+template<class T>
+Heap<T>::Heap(const Heap& original_heap) : costf(original_heap.costf) {
+    for(unsigned i=0;i<original_heap.l.size();i++) {
+        T * elem = new T(*(original_heap.l.at(i).first));
+        std::pair<T*,double> p;
+        p.first = elem;
+        p.second = original_heap.l.at(i).second;
+        l.push_back(p);
+    }
 }
 
 template<class T>
