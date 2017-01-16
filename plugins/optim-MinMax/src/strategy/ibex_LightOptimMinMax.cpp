@@ -42,6 +42,7 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 
 bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
+        bool cst = xy_sys.nb_ctr>0;
 	found_point  = false;
 	prec_y = prec_y1;
 	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
@@ -58,15 +59,18 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 	time= Timer::get_time();
 
 	// ********** contract x_box with ctc_xy***************
-	IntervalVector xy_box = xy_box_hull(x_cell->box);
-	ctc_xy.contract(xy_box);
-	if(xy_box.is_empty()) {
-		delete x_cell;
-		return false;
-	} else {
-		// contract the result on x
-		x_cell->box &= xy_box.subvector(0,x_cell->box.size()-1);
-	}
+        if(cst) // contraction needed only if constraints on xy
+        {
+            IntervalVector xy_box = xy_box_hull(x_cell->box);
+            ctc_xy.contract(xy_box);
+            if(xy_box.is_empty()) {
+                delete x_cell;
+                return false;
+            } else {
+                // contract the result on x
+                x_cell->box &= xy_box.subvector(0,x_cell->box.size()-1);
+            }
+        }
 
 	// *********** loop ********************
 	try {
@@ -79,14 +83,14 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 				std::pair<Cell*,Cell*> subcells_pair=bsc->bisect_cell(*y_cell);// bisect tmp_cell into 2 subcells
 				delete y_cell;
 
-				bool res = handle_cell( x_cell, subcells_pair.first);
+                                bool res = handle_cell( x_cell, subcells_pair.first,cst);
 				if (!res) { // x_cell has been deleted
 					delete subcells_pair.second;
 					//std::cout <<"       OUT 1 "<<std::endl;
 					return false;
 				}
 
-				res = handle_cell( x_cell, subcells_pair.second);
+                                res = handle_cell( x_cell, subcells_pair.second,cst);
 				if (!res) { // x_cell has been deleted
 					//std::cout <<"       OUT 2 "<<std::endl;
 					return false;
@@ -149,40 +153,25 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 
 
-bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
+bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,bool cst) {
 
 	IntervalVector xy_box =init_xy_box(x_cell->box,y_cell->box);
 	// recuperer les data
 	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
 	OptimData  *data_y = &(y_cell->get<OptimData>());
 
-	// Check the constraints
-	switch(check_constraints(xy_box)){
-	case 2: { // all the constraints are satisfied
-		data_y->pu=1;
-		break;
-	}
-	case 0: { // One constraint is false
-		// constraint on x and y not respected, move on.
-		delete y_cell;
-		return true;
-	}
-	default: // nothing to do
-		break;
-	}
-
-	//
-	if(data_y->pu != 1)  {// there is a constraint on x and y
-		ctc_xy.contract(xy_box);
-		if (xy_box.is_empty()) { // constraint on x and y not respected, move on.
-			delete y_cell;
-			return true;
-		} else {
-			// TODO to check normalement on peut propager la contraction sur le y
-			for (int k=0; k<y_cell->box.size(); k++)
-				y_cell->box[k] = xy_box[x_cell->box.size()+k];
-		}
-	}
+        if(cst) { // Check constraints
+            if(handle_constraint(data_y,&xy_box,x_cell->box.size(),y_cell->box.size())) {
+                delete y_cell;
+                return true;
+            }
+        }
+        else {
+            if(handle_cstfree(&xy_box)) {
+                delete y_cell;
+                return true;
+            }
+        }
 	/********************************************************************************/
 	//mid point test (TO DO: replace with local optim to find a better point than midpoint)
 	IntervalVector mid_y_box = get_feasible_point(x_cell,y_cell);
@@ -255,7 +244,39 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 }
 
 
+bool handle_constraint(OptimData  *data_y, IntervalVector * xy_box,int xbox_dim,int ybox_dim) {
+    switch(check_constraints(*xy_box)){
+    case 2: { // all the constraints are satisfied
+            data_y->pu=1;
+            break;
+    }
+    case 0: { // One constraint is false
+            // constraint on x and y not respected, move on.
+            return true;
+    }
+    default: // nothing to do
+            break;
+    }
 
+    //
+    if(data_y->pu != 1)  {// there is a constraint on x and y
+            ctc_xy.contract(xy_box);
+            if (xy_box.is_empty()) { // constraint on x and y not respected, move on.
+                    delete y_cell;
+                    return true;
+            } else {
+                    // TODO to check normalement on peut propager la contraction sur le y
+                    for (int k=0; k<ybox_dim; k++)
+                            y_cell->box[k] = xy_box[xbox_dim+k];
+            }
+    }
+    return false;
+}
+
+bool handle_cstfree(IntervalVector * xy_box) {
+    //TO DO
+    return false;
+}
 
 /*
 void LightOptimMinMax::contract_best_max_cst(Ctc& max_ctc,IntervalVector& xy_box,IntervalVector& xy_box_ctc,y_heap_elem& elem) {
