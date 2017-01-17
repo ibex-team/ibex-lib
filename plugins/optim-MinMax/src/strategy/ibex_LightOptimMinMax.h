@@ -21,6 +21,8 @@
 
 namespace ibex {
 
+
+
 class LightOptimMinMax {
 public:
 
@@ -41,7 +43,7 @@ public:
      *         -min_prec: minimum size of boxes in y_heap
      *         -is_midp: true if optimize run with x midpoint eval, false else
      * */
-    bool optimize(Cell* x_cell, int nb_iter, double prec_y);
+    bool optimize(Cell* x_cell);
 
 	/**
 	 * Allows to add the backtrackable data required
@@ -53,6 +55,10 @@ public:
 
     int trace;
     double timeout;
+    int list_elem_max;
+    double ext_crit_prob;
+    int nb_iter;
+    double prec_y;
 
 private:
     Ctc& ctc_xy; //contractor for constraints on xy
@@ -60,12 +66,18 @@ private:
     //double abs_min_prec; // absolute minimum prec bissection on y
     Bsc* bsc; // bissector
     std::vector<Cell*> heap_save;
-    double prec_y;
     bool found_point;
     double time;
+
     /* contract xy_box and xy_box_ctc w.r.t max_ctc contractor
      * */
 //    void contract_best_max_cst( Ctc* max_ctc,IntervalVector* xy_box,IntervalVector* xy_box_ctc,y_heap_elem* elem);
+
+    /* return true if the stop criterion is reached
+     */
+
+    bool stop_crit_reached(int current_iter,int heap_size);
+
 
     /* return a feasible point in y_box w.r.t constraints on xy
      *  */
@@ -101,6 +113,10 @@ private:
 
 	/** Default timeout: 60 */
 	static const double default_timeout;
+        static const double default_prec_y;
+        static const double default_ext_prob;
+        static const double default_list_elem_max;
+        static const int default_nb_iter;
 
 
 };

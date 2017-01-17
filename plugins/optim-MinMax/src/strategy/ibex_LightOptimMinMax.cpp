@@ -18,9 +18,16 @@
 namespace ibex{
 
 const double LightOptimMinMax::default_timeout = 60;
+const double LightOptimMinMax::default_prec_y = 1.e-6;
+const double LightOptimMinMax::default_ext_prob = 0;
+const double LightOptimMinMax::default_list_elem_max = 1000;
+const int LightOptimMinMax::default_nb_iter = 1000;
 
-LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):  trace(false) , timeout(default_timeout),
-	ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(1.e-6), found_point(false), time(0)  {
+LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):
+    trace(false) , timeout(default_timeout),
+        ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(default_prec_y), found_point(false), time(0),
+        list_elem_max(default_list_elem_max),ext_crit_prob(default_ext_prob),nb_iter(default_nb_iter){
+
 
 }
 
@@ -39,11 +46,10 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 	data_x->y_heap->push(y_cell);
 }
 
-bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
+bool LightOptimMinMax::optimize(Cell* x_cell) {
 
         bool cst = xy_sys.nb_ctr>0;
 	found_point  = false;
-	prec_y = prec_y1;
 	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
 
 	//std::cout <<"    DEB "<<data_x->fmax <<std::endl;
@@ -73,23 +79,27 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 	// *********** loop ********************
 	try {
-		for(int i = 0; (!y_heap->empty()) && (i<nb_iter) ;i++) {
-
+            int current_iter(0);
+                while(!stop_crit_reached(current_iter,y_heap->size())) {
 			if (trace >= 3) std::cout<< *y_heap<<std::endl;
 
 			Cell * y_cell = y_heap->pop1(); // we extract an element according to the first order
+                        current_iter++;
+//                        std::cout<<"current_iter: "<<current_iter<<std::endl;
 			try {
 				std::pair<Cell*,Cell*> subcells_pair=bsc->bisect_cell(*y_cell);// bisect tmp_cell into 2 subcells
 				delete y_cell;
-
+//                                std::cout<<"handle cell in light optim"<<std::endl;
                                 bool res = handle_cell( x_cell, subcells_pair.first,cst);
+//                                std::cout<<"cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
 					delete subcells_pair.second;
 					//std::cout <<"       OUT 1 "<<std::endl;
 					return false;
 				}
-
+//                                std::cout<<"handle second cell in light optim"<<std::endl;
                                 res = handle_cell( x_cell, subcells_pair.second,cst);
+//                                std::cout<<"second cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
 					//std::cout <<"       OUT 2 "<<std::endl;
 					return false;
@@ -113,6 +123,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 	}
 	catch (TimeOutException& ) { }
+//        std::cout<<"light optim: out of loop"<<std::endl;
 	/*
 ??    if(is_midp && !midp_hit) // midpoint x eval case: if no y found such as xy constraint respected, cannot keep the result
 ??        return Interval::EMPTY_SET;
@@ -151,6 +162,15 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 }
 
 
+bool LightOptimMinMax::stop_crit_reached(int current_iter,int heap_size) {
+    if(nb_iter!=0 && current_iter>nb_iter)
+        return true;
+    if(list_elem_max != 0 && heap_size>list_elem_max)
+        return true;
+    if(heap_size == 0)
+        return true;
+    return false;
+}
 
 bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,bool cst) {
 

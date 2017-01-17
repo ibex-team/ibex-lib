@@ -17,13 +17,22 @@ using namespace std;
 
 namespace ibex {
 
+const int OptimMinMax::default_iter = 10;
+const int OptimMinMax::default_list_rate = 0;
+const double OptimMinMax::default_min_perc_coef = 0;
+const int OptimMinMax::default_list_elem_absolute_max = 1000;
+
 OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec):
-		Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
+                Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
 				prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
 	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
-	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
+        x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
 	bsc(new LargestFirst()),
-	prec_y(prec_y) {
+        prec_y(prec_y),
+        iter(default_iter),
+        list_rate(default_list_rate),
+        min_perc_coef(default_min_perc_coef),
+        list_elem_absolute_max(default_list_elem_absolute_max){
 };
 
 OptimMinMax::~OptimMinMax() {
@@ -186,10 +195,13 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	}
 
 	//************ evaluation of f(x,y_heap) *****************
-	double min_prec_light_solver = compute_min_prec(x_cell->box);
-	int nb_iter = choose_nbiter(false);
+        lsolve.prec_y = compute_min_prec(x_cell->box);
+        lsolve.nb_iter = choose_nbiter(false);
+        lsolve.list_elem_max = compute_heap_max_size(data_x->y_heap->size());
 	// compute
-	bool res =lsolve.optimize(x_cell,nb_iter,min_prec_light_solver);
+//        cout<<"run light optim"<<endl;
+        bool res =lsolve.optimize(x_cell);
+//        cout<<"light optim result: "<<data_x->fmax<< endl;
 	//std::cout<<" apres res="<<res<<" bound= "<<data_x->fmax <<std::endl;
 
 	if(!res) { // certified that x box does not contains the solution
@@ -207,8 +219,10 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 		Cell *x_copy = new Cell(*x_cell); // copy of the Cell and the y_heap
 		x_copy->box=midp; // set the box to the middle of x
 
-		nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
-		bool res1 = lsolve.optimize(x_copy,nb_iter,prec_y); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
+                lsolve.nb_iter = choose_nbiter(true);
+                lsolve.prec_y = prec_y;
+                lsolve.list_elem_max = 0; // no limit on heap size
+                bool res1 = lsolve.optimize(x_copy); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
 		if (res1) {
 			double new_loup = x_copy->get<DataMinMax>().fmax.ub();
 
@@ -228,10 +242,11 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 	//***** if x_cell is too small ******************
 	if(x_cell->box.max_diam()<prec) {
-		nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
-
+                lsolve.nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
+                lsolve.prec_y = prec_y;
+                lsolve.list_elem_max = 0; // no limit on heap size
 		//cout<<"fmax ini: "<<x_cell->fmax<<endl;
-		bool res =lsolve.optimize(x_cell,nb_iter,prec_y); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
+                bool res =lsolve.optimize(x_cell); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
 		//cout<<"fmax min prec: "<<x_cell->fmax<<endl;
 
 		if(res){
@@ -259,17 +274,27 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 
 double OptimMinMax::compute_min_prec( const IntervalVector& x_box) {
-	double ratio = 0;
-	for(int r=0;r<x_box_init.size();r++)
-		ratio += (x_box_init[r]).diam()/(x_box[r]).diam();
-	return ratio/y_box_init.volume()>prec_y?ratio/(10*y_box_init.volume()):prec_y;
+    if(min_perc_coef == 0)
+        return prec_y;
+
+    double ratio = 0;
+    for(int r=0;r<x_box_init.size();r++)
+            ratio += (x_box_init[r]).diam()/(x_box[r]).diam();
+    return ratio/y_box_init.volume()>prec_y?ratio/(10*y_box_init.volume()):prec_y;
 }
 
 int OptimMinMax::choose_nbiter(bool midpoint_eval) {
-	if(!midpoint_eval)
-		return 10;
-	else
-		return 1000000000;
+
+    if(!midpoint_eval)
+            return iter;
+    else
+            return 0; // go to min prec
+}
+
+int OptimMinMax::compute_heap_max_size(int y_heap_size) {
+    if(list_rate == 0 || y_heap_size>= list_elem_absolute_max) // no constraint on list growth rate or max size already reached
+        return list_elem_absolute_max;
+    return  y_heap_size+list_rate;
 }
 
 IntervalVector OptimMinMax::get_feasible_point(Cell * elem) {
