@@ -17,6 +17,7 @@
 #include "ibex_NormalizedSystem.h"
 #include "ibex_Cell.h"
 #include "ibex_DoubleHeap.h"
+#include "ibex_OptimData.h"
 
 namespace ibex {
 
@@ -74,8 +75,11 @@ private:
      * */
     int check_constraints(const IntervalVector& xy_box);
 
+    bool handle_cstfree(IntervalVector * xy_box);
 
-    bool handle_cell( Cell* x_cell, Cell* y_cell);
+    bool handle_cell( Cell* x_cell, Cell* y_cell, bool cst);
+
+    bool handle_constraint(OptimData  *data_y, IntervalVector * xy_box,IntervalVector * y_box);
 
     /* returns a box composed of x_box(not modified) and the middle of y_box, needed for midpoint evaluation
      * Inputs: -xy_box: whole box

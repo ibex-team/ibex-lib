@@ -9,7 +9,6 @@
 
 
 #include "ibex_LightOptimMinMax.h"
-#include "ibex_OptimData.h"
 #include "ibex_DataMinMax.h"
 //#include <stdio.h>
 #include "ibex_LargestFirst.h"
@@ -102,7 +101,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 				//}
 			}
 			catch (NoBisectableVariableException& ) {
-				bool res = handle_cell(x_cell,y_cell);
+                                bool res = handle_cell(x_cell,y_cell,cst);
 
 				if (res) heap_save.push_back(y_cell);
 				else return false;
@@ -161,7 +160,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,bool cst) {
 	OptimData  *data_y = &(y_cell->get<OptimData>());
 
         if(cst) { // Check constraints
-            if(handle_constraint(data_y,&xy_box,x_cell->box.size(),y_cell->box.size())) {
+            if(handle_constraint(data_y,&xy_box,&(y_cell->box))) {
                 delete y_cell;
                 return true;
             }
@@ -244,7 +243,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,bool cst) {
 }
 
 
-bool handle_constraint(OptimData  *data_y, IntervalVector * xy_box,int xbox_dim,int ybox_dim) {
+bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector * xy_box,IntervalVector * y_box) {
     switch(check_constraints(*xy_box)){
     case 2: { // all the constraints are satisfied
             data_y->pu=1;
@@ -260,20 +259,19 @@ bool handle_constraint(OptimData  *data_y, IntervalVector * xy_box,int xbox_dim,
 
     //
     if(data_y->pu != 1)  {// there is a constraint on x and y
-            ctc_xy.contract(xy_box);
-            if (xy_box.is_empty()) { // constraint on x and y not respected, move on.
-                    delete y_cell;
+            ctc_xy.contract(*xy_box);
+            if (xy_box->is_empty()) { // constraint on x and y not respected, move on.
                     return true;
             } else {
                     // TODO to check normalement on peut propager la contraction sur le y
-                    for (int k=0; k<ybox_dim; k++)
-                            y_cell->box[k] = xy_box[xbox_dim+k];
+                    for (int k=0; k<y_box->size(); k++)
+                            (*y_box)[k] = (*xy_box)[xy_box->size()-y_box->size()-1+k];
             }
     }
     return false;
 }
 
-bool handle_cstfree(IntervalVector * xy_box) {
+bool LightOptimMinMax::handle_cstfree(IntervalVector * xy_box) {
     //TO DO
     return false;
 }
