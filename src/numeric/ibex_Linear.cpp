@@ -450,8 +450,23 @@ Interval det(const IntervalMatrix& A) {
 	for (int i=1; i<n; i++) {
 		res*=LU[p[i]][i];
 	}
+	// we need now to multiply by the sign
+	// of the permutation. The sign is +1
+	// iff the permutation is decomposable
+	// into an even number of transpositions:
+	int i=0;
+	double sign=1;
+	while (i<n) {
+		if (p[i]==i) { i++; continue; }
+		// warning: we modify p (but OK since it
+		// is not used anymore)
+		sign=-sign;
+		int tmp=p[i];
+		p[i]=p[tmp];
+		p[tmp]=tmp;
+	}
 
-	return res;
+	return sign*res;
 }
 
 bool is_posdef_sylvester(const IntervalMatrix& A) {
