@@ -43,7 +43,7 @@ bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSol
 	}
 
 	goal_af_evl->eval(box);
-	Affine2 af2 = goal_af_evl->af2.top->i();
+	Affine2 af2 = goal_af_evl->af.top->i();
 	if (af2.is_empty()) {
 		return false;
 	}
@@ -88,7 +88,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
 		CmpOp op = sys.ctrs[ctr].op;
 		ev  = ctr_af_evl[ctr]->eval(box).i();
-		af2 = ctr_af_evl[ctr]->af2.top->i();
+		af2 = ctr_af_evl[ctr]->af.top->i();
 
 		//std::cout <<ev<<":::"<< af2<<"  "<<af2.size()<<"  " <<sys.nb_var<< std::endl;
 
@@ -165,7 +165,7 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 
 		op  = sys.ctrs[ctr].op;
 		ev  = ctr_af_evl[ctr]->eval(box).i();
-		af2 = ctr_af_evl[ctr]->af2.top->i();
+		af2 = ctr_af_evl[ctr]->af.top->i();
 
 		if (ev.is_empty()) {
 			af2.set_empty();
