@@ -17,7 +17,7 @@ namespace ibex {
 
 
 template<class T>
-AffineEval<T>::AffineEval(const Function& f) : f(f), d(f), af(f) {
+AffineEval<T>::AffineEval(Function& f) : Eval(f), af(f) {
 
 }
 

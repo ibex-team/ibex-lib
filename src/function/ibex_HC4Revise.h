@@ -24,9 +24,9 @@ class HC4Revise : public BwdAlgorithm {
 public:
 
 	/**
-	 * \brief Build the gradient algorithm.
+	 * \brief Build the HC4revise algorithm.
 	 *
-	 * For memory saving, the gradient is built from an
+	 * For memory saving, the HC4revise is built from an
 	 * already existing evaluator "e".
 	 */
 	HC4Revise(Eval& e);

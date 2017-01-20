@@ -16,6 +16,7 @@
 #include "ibex_AffineDomain.h"
 #include "ibex_FwdAlgorithm.h"
 #include "ibex_Domain.h"
+#include "ibex_Eval.h"
 
 
 namespace ibex {
@@ -26,13 +27,15 @@ namespace ibex {
  * \brief Evaluate a function with affine form.
  */
 template<class T>
-class AffineEval : public FwdAlgorithm {
+class AffineEval : protected Eval {
 
 public:
 	/**
 	 * \brief Build an Affine evaluator for f.
 	 */
-	AffineEval(const Function& f);
+	AffineEval(Function& f);
+
+	virtual ~AffineEval();
 
 	/**
 	 * \brief Run the forward algorithm with input domains.
@@ -80,27 +83,12 @@ public:
 	Domain& eval(const IntervalVector& box, const AffineMainVector<T>& af);
 
 
-protected:
-	/**
-	 * Class used internally to interrupt the forward procedure
-	 * when an empty domain occurs (<=> the input box is outside
-	 * the definition domain of the function).
-	 */
-	class EmptyBoxException { };
-
-	/**
-	 * Since there is no affine evaluator in the Function class,
-	 * we store here all the evaluators of the called functions
-	 * (this avoids to create this object at each evaluation).
-	 */
-	NodeMap<AffineEval<T>*> apply_eval;
-
 public:	// because called from CompiledFunction
 
 	       void vector_fwd (int* x, int y);
 	       void apply_fwd  (int* x, int y);
+	       void idx_cp_fwd (int x, int y);
 	inline void idx_fwd    (int x, int y);
-	inline void idx_cp_fwd (int x, int y);
 	inline void symbol_fwd (int y);
 	inline void cst_fwd    (int y);
 	inline void chi_fwd    (int x1, int x2, int x3, int y);
@@ -147,10 +135,15 @@ public:	// because called from CompiledFunction
 	inline void sub_M_fwd  (int x1, int x2, int y);
 
 
-	Function& f;
-	ExprDomain d;
-	ExprTemplateDomain<AffineMain<T> > af;
+	ExprTemplateDomain< AffineMain<T> > af;
 
+protected:
+	/**
+	 * Since there is no affine evaluator in the Function class,
+	 * we store here all the evaluators of the called functions
+	 * (this avoids to create this object at each evaluation).
+	 */
+	NodeMap<AffineEval<T>*> apply_eval;
 
 };
 

@@ -82,7 +82,7 @@ public:
 	Domain d;
 
 protected:
-	void init();
+	virtual void init();
 };
 
 } // namespace ibex

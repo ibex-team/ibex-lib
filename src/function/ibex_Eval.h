@@ -35,20 +35,22 @@ public:
 	 */
 	Eval(Function &f);
 
-	/**
-	 * \brief Run the forward algorithm with input domains.
-	 */
-	Domain& eval(const Array<const Domain>& d);
+	virtual ~Eval();
 
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	Domain& eval(const Array<Domain>& d);
+	virtual Domain& eval(const Array<const Domain>& d);
+
+	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
+	virtual Domain& eval(const Array<Domain>& d);
 
 	/**
 	 * \brief Run the forward algorithm with an input box.
 	 */
-	Domain& eval(const IntervalVector& box);
+	virtual Domain& eval(const IntervalVector& box);
 
 protected:
 	/**
@@ -60,54 +62,54 @@ protected:
 
 public: // because called from CompiledFunction
 
-	       void vector_fwd (int* x, int y);
-	       void apply_fwd  (int* x, int y);
-	inline void idx_fwd    (int x, int y);
-	inline void idx_cp_fwd (int x, int y);
-	inline void symbol_fwd (int y);
-	inline void cst_fwd    (int y);
-	inline void chi_fwd    (int x1, int x2, int x3, int y);
-	inline void add_fwd    (int x1, int x2, int y);
-	inline void mul_fwd    (int x1, int x2, int y);
-	inline void sub_fwd    (int x1, int x2, int y);
-	inline void div_fwd    (int x1, int x2, int y);
-	inline void max_fwd    (int x1, int x2, int y);
-	inline void min_fwd    (int x1, int x2, int y);
-	inline void atan2_fwd  (int x1, int x2, int y);
-	inline void minus_fwd  (int x, int y);
-	inline void minus_V_fwd(int x, int y);
-	inline void minus_M_fwd(int x, int y);
-	inline void trans_V_fwd(int x, int y);
-	inline void trans_M_fwd(int x, int y);
-	inline void sign_fwd   (int x, int y);
-	inline void abs_fwd    (int x, int y);
-	inline void power_fwd  (int x, int y, int p);
-	inline void sqr_fwd    (int x, int y);
-	inline void sqrt_fwd   (int x, int y);
-	inline void exp_fwd    (int x, int y);
-	inline void log_fwd    (int x, int y);
-	inline void cos_fwd    (int x, int y);
-	inline void sin_fwd    (int x, int y);
-	inline void tan_fwd    (int x, int y);
-	inline void cosh_fwd   (int x, int y);
-	inline void sinh_fwd   (int x, int y);
-	inline void tanh_fwd   (int x, int y);
-	inline void acos_fwd   (int x, int y);
-	inline void asin_fwd   (int x, int y);
-	inline void atan_fwd   (int x, int y);
-	inline void acosh_fwd  (int x, int y);
-	inline void asinh_fwd  (int x, int y);
-	inline void atanh_fwd  (int x, int y);
-	inline void add_V_fwd  (int x1, int x2, int y);
-	inline void add_M_fwd  (int x1, int x2, int y);
-	inline void mul_SV_fwd (int x1, int x2, int y);
-	inline void mul_SM_fwd (int x1, int x2, int y);
-	inline void mul_VV_fwd (int x1, int x2, int y);
-	inline void mul_MV_fwd (int x1, int x2, int y);
-	inline void mul_VM_fwd (int x1, int x2, int y);
-	inline void mul_MM_fwd (int x1, int x2, int y);
-	inline void sub_V_fwd  (int x1, int x2, int y);
-	inline void sub_M_fwd  (int x1, int x2, int y);
+	       virtual void vector_fwd (int* x, int y);
+	       virtual void apply_fwd  (int* x, int y);
+	       virtual void idx_cp_fwd (int x, int y);
+	inline virtual void idx_fwd    (int x, int y);
+	inline virtual void symbol_fwd (int y);
+	inline virtual void cst_fwd    (int y);
+	inline virtual void chi_fwd    (int x1, int x2, int x3, int y);
+	inline virtual void add_fwd    (int x1, int x2, int y);
+	inline virtual void mul_fwd    (int x1, int x2, int y);
+	inline virtual void sub_fwd    (int x1, int x2, int y);
+	inline virtual void div_fwd    (int x1, int x2, int y);
+	inline virtual void max_fwd    (int x1, int x2, int y);
+	inline virtual void min_fwd    (int x1, int x2, int y);
+	inline virtual void atan2_fwd  (int x1, int x2, int y);
+	inline virtual void minus_fwd  (int x, int y);
+	inline virtual void minus_V_fwd(int x, int y);
+	inline virtual void minus_M_fwd(int x, int y);
+	inline virtual void trans_V_fwd(int x, int y);
+	inline virtual void trans_M_fwd(int x, int y);
+	inline virtual void sign_fwd   (int x, int y);
+	inline virtual void abs_fwd    (int x, int y);
+	inline virtual void power_fwd  (int x, int y, int p);
+	inline virtual void sqr_fwd    (int x, int y);
+	inline virtual void sqrt_fwd   (int x, int y);
+	inline virtual void exp_fwd    (int x, int y);
+	inline virtual void log_fwd    (int x, int y);
+	inline virtual void cos_fwd    (int x, int y);
+	inline virtual void sin_fwd    (int x, int y);
+	inline virtual void tan_fwd    (int x, int y);
+	inline virtual void cosh_fwd   (int x, int y);
+	inline virtual void sinh_fwd   (int x, int y);
+	inline virtual void tanh_fwd   (int x, int y);
+	inline virtual void acos_fwd   (int x, int y);
+	inline virtual void asin_fwd   (int x, int y);
+	inline virtual void atan_fwd   (int x, int y);
+	inline virtual void acosh_fwd  (int x, int y);
+	inline virtual void asinh_fwd  (int x, int y);
+	inline virtual void atanh_fwd  (int x, int y);
+	inline virtual void add_V_fwd  (int x1, int x2, int y);
+	inline virtual void add_M_fwd  (int x1, int x2, int y);
+	inline virtual void mul_SV_fwd (int x1, int x2, int y);
+	inline virtual void mul_SM_fwd (int x1, int x2, int y);
+	inline virtual void mul_VV_fwd (int x1, int x2, int y);
+	inline virtual void mul_MV_fwd (int x1, int x2, int y);
+	inline virtual void mul_VM_fwd (int x1, int x2, int y);
+	inline virtual void mul_MM_fwd (int x1, int x2, int y);
+	inline virtual void sub_V_fwd  (int x1, int x2, int y);
+	inline virtual void sub_M_fwd  (int x1, int x2, int y);
 
 	Function& f;
 	ExprDomain d;
