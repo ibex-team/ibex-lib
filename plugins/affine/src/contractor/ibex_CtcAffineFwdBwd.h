@@ -12,6 +12,7 @@
 #ifndef __IBEX_CTC_AFFINEFWDBWD_H__
 #define __IBEX_CTC_AFFINEFWDBWD_H__
 
+#include "ibex_Ctc.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_AffineEval.h"
 #include "ibex_CtcFwdBwd.h"
@@ -23,24 +24,50 @@ namespace ibex {
  * \brief Forward-backward contractor (HC4Revise).
  *
  */
-class CtcAffineFwdBwd: public CtcFwdBwd {
-
+class CtcAffineFwdBwd: protected CtcFwdBwd {
 
 	/**
-	 * \brief Delete this.
+	 * \brief Build the contractor for "f(x)=0" or "f(x)<=0".
+	 *
+	 * \param op: by default: EQ.
+	 *
 	 */
-	virtual ~CtcAffineFwdBwd();
+	CtcAffineFwdBwd(Function& f, CmpOp op=EQ);
+
+	/**
+	 * \brief Build the contractor for "f(x) in [y]".
+	 */
+	CtcAffineFwdBwd(Function& f, const Domain& y);
+
+	/**
+	 * \brief Build the contractor for "f(x) in [y]".
+	 */
+	CtcAffineFwdBwd(Function& f, const Interval& y);
+
+	/**
+	 * \brief Build the contractor for "f(x) in [y]".
+	 */
+	CtcAffineFwdBwd(Function& f, const IntervalVector& y);
+
+	/**
+	 * \brief Build the contractor for "f(x) in [y]".
+	 */
+	CtcAffineFwdBwd(Function& f, const IntervalMatrix& y);
+
+	/**
+	 * \remark ctr is not kept by reference.
+	 */
+	CtcAffineFwdBwd(const NumConstraint& ctr);
 
 	/**
 	 * \brief Contract the box.
 	 */
-	virtual void contract(IntervalVector& box);
+	void contract(IntervalVector& box);
 
 protected:
-	virtual void init();
 
-	Affine2Eval * _affine_evaluator;
-	HC4Revise * _hc4revise;
+	Affine2Eval _affine_evaluator;
+	HC4Revise _hc4revise;
 };
 
 } // namespace ibex

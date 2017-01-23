@@ -27,7 +27,7 @@ namespace ibex {
  * \brief Evaluate a function with affine form.
  */
 template<class T>
-class AffineEval : protected Eval {
+class AffineEval : public Eval {
 
 public:
 	/**

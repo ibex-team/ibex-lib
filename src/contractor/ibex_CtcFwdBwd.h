@@ -61,7 +61,7 @@ public:
 	/**
 	 * \brief Delete this.
 	 */
-	~CtcFwdBwd();
+	virtual ~CtcFwdBwd();
 
 	/**
 	 * \brief Contract the box.

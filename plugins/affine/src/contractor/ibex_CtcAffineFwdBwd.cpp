@@ -14,27 +14,23 @@
 namespace ibex {
 
 
-void CtcAffineFwdBwd::init() {
+CtcAffineFwdBwd::CtcAffineFwdBwd(Function& f, CmpOp op): CtcFwdBwd(f,op),
+		_affine_evaluator(f), _hc4revise(_affine_evaluator) { }
 
+CtcAffineFwdBwd::CtcAffineFwdBwd(Function& f, const Domain& y): CtcFwdBwd(f,y),
+		_affine_evaluator(f), _hc4revise(_affine_evaluator) { }
 
-	input = new BitSet(0,nb_var-1,BitSet::empt);
-	output = new BitSet(0,nb_var-1,BitSet::empt);
+CtcAffineFwdBwd::CtcAffineFwdBwd(Function& f, const Interval& y): CtcFwdBwd(f,y),
+		_affine_evaluator(f), _hc4revise(_affine_evaluator) { }
 
-	int v;
-	for (int i=0; i<f.nb_used_vars(); i++) {
-		v=f.used_var(i);
-		output->add(v);
-		input->add(v);
-	}
+CtcAffineFwdBwd::CtcAffineFwdBwd(Function& f, const IntervalVector& y): CtcFwdBwd(f,y),
+		_affine_evaluator(f), _hc4revise(_affine_evaluator) { }
 
-	_affine_evaluator = new Affine2Eval(f);
-	_hc4revise = new HC4Revise(*_affine_evaluator);
-}
+CtcAffineFwdBwd::CtcAffineFwdBwd(Function& f, const IntervalMatrix& y): CtcFwdBwd(f,y),
+		_affine_evaluator(f), _hc4revise(_affine_evaluator) { }
 
-CtcAffineFwdBwd::~CtcAffineFwdBwd(){
-	delete _affine_evaluator;
-	delete _hc4revise;
-}
+CtcAffineFwdBwd::CtcAffineFwdBwd(const NumConstraint& ctr): CtcFwdBwd(ctr),
+		_affine_evaluator(ctr.f), _hc4revise(_affine_evaluator) { }
 
 
 void CtcAffineFwdBwd::contract(IntervalVector& box) {
@@ -42,7 +38,7 @@ void CtcAffineFwdBwd::contract(IntervalVector& box) {
 	assert(box.size()==f.nb_var());
 
 	//std::cout << " AffineHC4 of " << f << "=" << d << " with box=" << box << std::endl;
-	if (_hc4revise->proj(d,box)) {
+	if (_hc4revise.proj(d,box)) {
 		set_flag(INACTIVE);
 		set_flag(FIXPOINT);
 	}
