@@ -16,7 +16,7 @@
 
 namespace ibex {
 
-Eval::Eval(Function& f) : f(f), d(f) {
+Eval::Eval(const Function& f) : f(f), d(f) {
 
 }
 

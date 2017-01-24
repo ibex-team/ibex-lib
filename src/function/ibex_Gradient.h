@@ -152,7 +152,7 @@ public:
 	inline void sub_V_bwd (int x1, int x2, int y) { g[x1].v() += g[y].v(); g[x2].v() -= g[y].v(); }
 	inline void sub_M_bwd (int x1, int x2, int y) { g[x1].m() += g[y].m(); g[x2].m() -= g[y].m(); }
 
-	Function& f;
+	const Function& f;
 	Eval& _eval;
 	ExprDomain& d;
 	ExprDomain  g;

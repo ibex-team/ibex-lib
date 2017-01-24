@@ -25,7 +25,7 @@ public:
 
 	void iproj(const Domain& y, IntervalVector& x, const IntervalVector& xin);
 
-	Function& f;
+	const Function& f;
 
 	Eval& eval;
 	ExprDomain& d;

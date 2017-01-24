@@ -33,9 +33,12 @@ public:
 	/**
 	 * \brief Build the evaluator for the function f.
 	 */
-	Eval(Function &f);
+	Eval(const Function &f);
 
-	virtual ~Eval();
+	/**
+	 * \brief Delete this.
+	 */
+	virtual ~Eval() {};
 
 	/**
 	 * \brief Run the forward algorithm with input domains.
@@ -111,7 +114,7 @@ public: // because called from CompiledFunction
 	inline virtual void sub_V_fwd  (int x1, int x2, int y);
 	inline virtual void sub_M_fwd  (int x1, int x2, int y);
 
-	Function& f;
+	const Function& f;
 	ExprDomain d;
 };
 

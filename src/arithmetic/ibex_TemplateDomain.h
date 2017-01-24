@@ -575,7 +575,7 @@ void TemplateDomain<D>::put(int ii, int j, const TemplateDomain<D>& d) {
 			break;
 		case Dim::COL_VECTOR:
 		{
-			IntervalMatrix tmp(d.dim.vec_size(),1);
+			typename D::MATRIX tmp(d.dim.vec_size(),1);
 			m().put(ii,j,tmp);
 			break;
 		}

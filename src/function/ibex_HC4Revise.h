@@ -78,7 +78,7 @@ protected:
 	 */
 	bool backward(const Domain& y);
 
-	Function& f;
+	const Function& f;
 	Eval& eval;
 	ExprDomain& d;
 
