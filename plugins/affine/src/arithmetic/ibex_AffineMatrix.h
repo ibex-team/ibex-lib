@@ -15,6 +15,7 @@
 #include "ibex_Matrix.h"
 #include <iostream>
 #include "ibex_AffineVector.h"
+#include "ibex_Expr.h"
 
 namespace ibex {
 
@@ -183,8 +184,9 @@ public:
 
 	/**
 	 * \brief Return a submatrix.
+	 * \pre (*this) must be nonempty
 	 */
-	AffineMainMatrix submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index);
+	AffineMainMatrix submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const;
 
 	/**
 	 * \brief Transpose of *this.
@@ -232,6 +234,31 @@ public:
 	 */
 	void set_col(int col, const AffineMainVector<T>& v);
 
+	/**
+	 * \brief Insert a submatrix at some position
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const Matrix& M);
+
+	/**
+	 * \brief Insert a submatrix at some position
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const AffineMainMatrix<T>& M);
+
+	/**
+	 * \brief Insert a subvecvtor at some position
+	 * \param row_vec true if the vector is a row vector
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const Vector& V, bool row_vec);
+
+	/**
+	 * \brief Insert a subvecvtor at some position
+	 * \param row_vec true if the vector is a row vector
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const AffineMainVector<T>& V, bool row_vec);
 
     /**
      * \brief (*this)+=m.
@@ -284,6 +311,10 @@ public:
     AffineMainMatrix& operator*=(const AffineMainMatrix& m);
     AffineMainMatrix& operator*=(const IntervalMatrix& m);
 
+    /**
+     * \brief Cast the matrix to an expression
+     */
+    operator const ExprConstant&() const;
 
 };
 
@@ -595,7 +626,10 @@ inline bool AffineMainMatrix<T>::is_empty() const {
 	return (*this)[0].is_empty();
 }
 
-
+template<class T>
+AffineMainMatrix<T>::operator const ExprConstant&() const {
+	return ExprConstant::new_matrix(this->itv());
+}
 
 template<class T>
 inline IntervalMatrix operator|(const IntervalMatrix& x, const AffineMainMatrix<T>& y) {

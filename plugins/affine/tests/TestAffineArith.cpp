@@ -11,7 +11,6 @@
  * ---------------------------------------------------------------------------- */
 
 #include "TestAffineArith.h"
-#include "ibex_AffineEval.h"
 
 template<class T>
 bool TestAffineArith<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a) {
@@ -1005,8 +1004,8 @@ void TestAffineArith<T>::test101()   {
 	AffineMainVector<T> va(v);
 
 	IntervalVector res = ydot.eval_vector(v);
-	AffineEval<T> eval_af2(ydot);
-	AffineMainVector<T> resa = eval_af2.eval(va).v();
+	AffineEval<T> eval_af(ydot);
+	AffineMainVector<T> resa = eval_af.eval(va).v();
 
 	for (int j = 0; j < 3; ++j) {
 		CPPUNIT_ASSERT(compare_results (INCLUSION, res[j], resa[j]));

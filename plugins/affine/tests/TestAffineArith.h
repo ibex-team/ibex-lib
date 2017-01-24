@@ -16,6 +16,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Interval.h"
 #include "ibex_Affine.h"
+#include "ibex_AffineEval.h"
 #include "utils.h"
 #include <string>
 #include <iostream>
@@ -242,16 +243,6 @@ public:
 CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_Default>);
 CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_Other>);
 
-#ifdef _IBEX_WITH_AFFINE_EXTENDED_
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_fAF2>);
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_fAFFullI>);
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_iAF>);
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_fAF1>);
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_No>);
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_sAF>);
-
-#endif
-//#include "TestAffineArith.cpp"
 
 #endif

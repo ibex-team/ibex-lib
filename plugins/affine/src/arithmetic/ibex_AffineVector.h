@@ -287,6 +287,10 @@ public:
 	AffineMainVector& operator*=(const Interval& x1);
 	AffineMainVector& operator*=(const AffineMain<T>& x1);
 
+    /**
+     * \brief Cast the vector to an expression
+     */
+	operator const ExprConstant&() const;
 
 };
 
@@ -578,6 +582,13 @@ inline AffineMainVector<T>& AffineMainVector<T>::operator*=(const Interval& x1) 
 template<class T>
 inline AffineMainVector<T>& AffineMainVector<T>::operator*=(const AffineMain<T>& x1) {
 	return set_mulSV<AffineMain<T>,AffineMainVector<T> >(x1,*this);
+}
+
+template<class T>
+inline AffineMainVector<T>::operator const ExprConstant&() const {
+	const ExprConstant& e=ExprConstant::new_vector(this->itv(),false);
+	((Dim&) e.dim).cst_vec = true;
+	return e;
 }
 
 template<class T>

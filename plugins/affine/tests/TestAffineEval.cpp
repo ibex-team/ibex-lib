@@ -20,6 +20,10 @@
 #include "ibex_AffineEval.h"
 //using namespace std;
 
+
+namespace ibex {
+
+
 template<class T>
 void TestAffineEval<T>::test01() {
 	Variable x(2);
@@ -1148,7 +1152,7 @@ bool TestAffineEval<T>::check_af2 (Function& f, Interval& I){
 
 	itv = eval_af.eval(IntervalVector(1,I)).i();
 
-	faa = eval_af.af2.top->i();
+	faa = eval_af.af.top->i();
 
 	if (!(itv2.is_subset(faa.itv())))
 	{
@@ -1190,3 +1194,137 @@ bool TestAffineEval<T>::check_af2 (Function& f, Interval& I){
 }
 
 
+
+
+
+template<class T>
+void TestAffineEval<T>::dist01() {
+
+	const ExprSymbol& xa = ExprSymbol::new_("xa");
+	const ExprSymbol& ya = ExprSymbol::new_("ya");
+	const ExprSymbol& xb = ExprSymbol::new_("xb");
+	const ExprSymbol& yb = ExprSymbol::new_("yb");
+
+	const ExprSymbol* args[4]={&xa, &ya, &xb, &yb};
+	Function f(Array<const ExprSymbol>(args,4),sqrt(sqr(xa-ya)+sqr(xb-yb)));
+
+	double _xy[][2] = { {3,3}, {4,4},
+						{4,4}, {5,5} };
+	IntervalVector box(4,_xy);
+
+	AffineEval<T> evaluator(f);
+	Interval res=evaluator.eval(box).i();
+	//cout << e.f << endl;
+	check(res,Interval(::sqrt(2),::sqrt(2)));
+	CPPUNIT_ASSERT(res.is_superset(Interval(::sqrt(2),::sqrt(2))));
+}
+
+template<class T>
+void TestAffineEval<T>::apply01() {
+
+	const ExprSymbol& x1 = ExprSymbol::new_("x1");
+	const ExprSymbol& x2 = ExprSymbol::new_("x2");
+
+	Function f1(x1,x1,"f1");
+
+	Function f2(x2,f1(x2));
+
+	IntervalVector _x2(1,Interval(2,2));
+
+	AffineEval<T> evaluator(f2);
+	Interval res=evaluator.eval(_x2).i();
+	check(res, Interval(2,2));
+	CPPUNIT_ASSERT((f2.eval(_x2)).is_superset(Interval(2,2)));
+}
+
+template<class T>
+void TestAffineEval<T>::apply02() {
+
+	const ExprSymbol& x1 = ExprSymbol::new_("x1");
+	const ExprSymbol& y1 = ExprSymbol::new_("y1");
+
+	const ExprSymbol& x2 = ExprSymbol::new_("x2");
+	const ExprSymbol& y2 = ExprSymbol::new_("y2");
+
+	Function f1(x1,y1,x1+y1,"f1");
+	Function f2(x2,y2,f1(x2,x2+y2)+y2,"f2");
+
+	//cout << f1 << endl;
+	//cout << f2 << endl;
+
+	IntervalVector x(2);
+	x[0]=Interval(2,2);
+	x[1]=Interval(3,3);
+
+	AffineEval<T> evaluator(f2);
+	Interval res=evaluator.eval(x).i();
+
+	check(res, Interval(10,10));
+	CPPUNIT_ASSERT((f2.eval_domain(x).i()).is_superset(Interval(10,10)));
+}
+
+template<class T>
+void TestAffineEval<T>::apply03() {
+
+	const ExprSymbol& x1 = ExprSymbol::new_("x1");
+	const ExprSymbol& y1 = ExprSymbol::new_("y1");
+
+	const ExprSymbol& x2 = ExprSymbol::new_("x2");
+	const ExprSymbol& y2 = ExprSymbol::new_("y2");
+
+	const ExprSymbol& x3 = ExprSymbol::new_("x3");
+
+	Function f1(x1,y1,x1+y1);
+	Function f2(x2,y2,x2*y2);
+	Function f3(x3,f1(x3,x3)-f2(x3,x3));
+
+	//cout << f3 << endl;
+	IntervalVector _x3(1,Interval(3,3));
+
+	/*
+	e.eval().i();
+	cout << "f1:---------\n";
+	f1.cf.print<Domain>();
+	cout << "f2:---------\n";
+	f2.cf.print<Domain>();
+	cout << "f3:---------\n";
+	f3.cf.print<Domain>();
+	*/
+	AffineEval<T> evaluator(f3);
+	Interval res=evaluator.eval(_x3).i();
+
+	check(res, Interval(-3,-3));
+	CPPUNIT_ASSERT((f3.eval_domain(_x3).i()).is_superset(Interval(-3,-3)));
+}
+
+template<class T>
+void TestAffineEval<T>::apply04() {
+
+	const ExprSymbol& x1 = ExprSymbol::new_("x1");
+	const ExprSymbol& x2 = ExprSymbol::new_("x2");
+	const ExprSymbol& x3 = ExprSymbol::new_("x3");
+
+	Function f1(x1,sqr(x1));
+	Function f2(x2,x2+Interval(1,1));
+	Function f3(x3,f2(f1(x3)));
+
+	IntervalVector _x3(1,Interval(3,3));
+
+	AffineEval<T> evaluator(f3);
+	Interval res=evaluator.eval(_x3).i();
+
+	check(res, Interval(10,10));
+	CPPUNIT_ASSERT((f3.eval_domain(_x3).i()).is_superset(Interval(10,10)));
+}
+
+template<class T>
+void TestAffineEval<T>::issue242() {
+	Function f("x[3]","-x");
+	IntervalVector x(3,Interval::ONE);
+
+	AffineEval<T> evaluator(f);
+	IntervalVector res=evaluator.eval(x).v();
+
+	CPPUNIT_ASSERT(almost_eq(res,-x,0));
+}
+}
