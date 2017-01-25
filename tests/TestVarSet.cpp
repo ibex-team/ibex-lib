@@ -11,6 +11,7 @@
 
 #include "TestVarSet.h"
 #include "ibex_VarSet.h"
+#include "ibex_Function.h"
 
 namespace ibex {
 

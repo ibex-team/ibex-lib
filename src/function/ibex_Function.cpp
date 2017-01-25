@@ -15,7 +15,6 @@
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
-#include "ibex_VarSet.h"
 #include "ibex_FunctionBuild.cpp_"
 
 using namespace std;
@@ -97,7 +96,7 @@ void Function::jacobian(const IntervalVector& box, IntervalMatrix& J_var, Interv
 	}
 }
 
-void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
+void Function::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, IntervalMatrix& H) const {
 	int n=nb_var();
 	int m=image_dim();
 
@@ -105,7 +104,7 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 	assert(box.size()==n);
 	assert(H.nb_rows()==m);
 
-	IntervalVector x=box.mid();
+	IntervalVector x=x0;
 	IntervalMatrix J(m,n);
 
 	// test!
@@ -126,7 +125,8 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 
 }
 
-void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
+void Function::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
+
 	int n=set.nb_var;
 	int m=image_dim();
 
@@ -137,7 +137,7 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H_var, I
 	IntervalVector var_box=set.var_box(box);
 	IntervalVector param_box=set.param_box(box);
 
-	IntervalVector x=var_box.mid();
+	IntervalVector x=x0;
 	IntervalMatrix J(m,n);
 
 	for (int var=0; var<n; var++) {
