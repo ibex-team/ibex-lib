@@ -18,6 +18,8 @@
 #include "ibex_Cell.h"
 #include "ibex_DoubleHeap.h"
 #include "ibex_OptimData.h"
+#include <fstream>
+#include <string>
 
 namespace ibex {
 
@@ -59,6 +61,7 @@ public:
     double ext_crit_prob;
     int nb_iter;
     double prec_y;
+    bool monitor;
 
 private:
     Ctc& ctc_xy; //contractor for constraints on xy
@@ -87,9 +90,9 @@ private:
      * */
     int check_constraints(const IntervalVector& xy_box);
 
-    bool handle_cstfree(IntervalVector * xy_box);
+    bool handle_cstfree(IntervalVector * xy_box,Cell * y_cell);
 
-    bool handle_cell( Cell* x_cell, Cell* y_cell, bool cst);
+    bool handle_cell( Cell* x_cell, Cell* y_cell);
 
     bool handle_constraint(OptimData  *data_y, IntervalVector * xy_box,IntervalVector * y_box);
 
@@ -120,6 +123,6 @@ private:
 
 
 };
-
+void export_monitor(std::vector<double> * ub,std::vector<double> * lb,std::vector<double> * nbel,std::vector<double> * nbel_save,const IntervalVector& box);
 } // end namespace ibex
 #endif

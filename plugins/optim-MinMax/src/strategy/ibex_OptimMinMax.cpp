@@ -20,14 +20,14 @@ namespace ibex {
 const int OptimMinMax::default_iter = 10;
 const int OptimMinMax::default_list_rate = 0;
 const double OptimMinMax::default_min_perc_coef = 0;
-const int OptimMinMax::default_list_elem_absolute_max = 1000;
+const int OptimMinMax::default_list_elem_absolute_max = 5000;
 
 OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec):
                 Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
-				prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
-	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
+                                prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
+        x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
         x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
-	bsc(new LargestFirst()),
+        bsc(new LargestFirst()),
         prec_y(prec_y),
         iter(default_iter),
         list_rate(default_list_rate),
@@ -49,7 +49,7 @@ Optim::Status OptimMinMax::optimize() {
 
 
 Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj_init_bound) {
-
+        bool monitor = false;
 	if (trace) lsolve.trace =trace;
 	// we estimate that one iteration is at most 1% of the total time
 	lsolve.timeout=timeout/100;
@@ -75,6 +75,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 	// *** initialisation Algo ***
 	loup_changed=false;
+        double ymax;
 	initial_loup=obj_init_bound;
 	loup_point=x_box_init.mid();
 	time=0;
@@ -85,8 +86,13 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 	update_uplo();
 
+        //monitoring variables, used to track upper bound, lower bound, number of elem in y_heap and heap_save at each iteration
+        std::vector<double> ub,lb,nbel,nbyel;
+        long long int nbel_count(0);
+        bool handle_res1,handle_res2;
+
 	try {
-		while (!buffer->empty()) {
+                while (!buffer->empty()) {
 			//			if (trace >= 2) cout << " buffer " << buffer << endl;
 			if (trace >= 2) buffer->print(cout);
 
@@ -94,14 +100,29 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 			loup_changed=false;
 
 			Cell *c = buffer->pop();
+                        DataMinMax * data_x = &(c->get<DataMinMax>());
+                        nbel_count -= data_x->y_heap->size();
 
 			try {
 				pair<Cell*,Cell*> new_cells=bsc->bisect_cell(*c);
 				delete c; // deletes the cell.
 
-				handle_cell(new_cells.first);
+                                handle_res1 = handle_cell(new_cells.first);
+                                if(handle_res1 && monitor) {
+                                    cout<<"try to get backtrack 1"<<endl;
+                                    DataMinMax * data_x1 = &((new_cells.first)->get<DataMinMax>());
+                                    cout<<"get backtrack 1"<<endl;
+                                    nbel_count += data_x1->y_heap->size();
+                                }
 
-				handle_cell(new_cells.second);
+                                handle_res2 = handle_cell(new_cells.second);
+                                if(handle_res2,monitor) {
+                                    cout<<"try to get backtrack 2"<<endl;
+                                    DataMinMax * data_x2 = &((new_cells.second)->get<DataMinMax>());
+                                    cout<<"get backtrack 2"<<endl;
+                                    nbel_count += data_x2->y_heap->size();
+                                }
+
 
 				if (uplo_of_epsboxes == NEG_INFINITY) {
 					cout << " possible infinite minimum " << endl;
@@ -114,7 +135,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 					// that the current cell is removed by contractHeap. See comments in
 					// older version of the code (before revision 284).
 
-					double ymax=compute_ymax();
+                                        ymax=compute_ymax();
 
 					buffer->contract(ymax);
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
@@ -127,6 +148,16 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 					if (trace) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  ymax=" << ymax << ",  uplo= " <<  uplo<< endl;
 				}
 				update_uplo();
+
+                                if(monitor)
+                                {
+                                    lb.push_back(uplo);
+                                    ub.push_back(ymax);
+                                    nbel.push_back(buffer->size());
+                                    nbyel.push_back(nbel_count);
+                                }
+
+
 				Timer::check(timeout);
 
 			}
@@ -138,6 +169,8 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 			}
 		}
+                if(monitor)
+                    export_monitor(&ub,&lb,&nbel,&nbyel);
 	}
 	catch (TimeOutException& ) {
 		Timer::stop();
@@ -166,8 +199,11 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 	DataMinMax * data_x = &(x_cell->get<DataMinMax>());
 
+        double ymax;
+        if (loup==POS_INFINITY) ymax=POS_INFINITY;
+        else ymax= compute_ymax()+1.e-15;
 	// update the upper bound with the loup
-	data_x->fmax &= Interval(NEG_INFINITY,loup);
+        data_x->fmax &= Interval(NEG_INFINITY,ymax);
 	//std::cout <<" debut "<<data_x->fmax <<std::endl;
 
 	if (data_x->fmax.is_empty()) {
@@ -176,14 +212,15 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	}
 
 	//***************** contraction w.r.t constraint on x ****************
-	if(check_constraints(x_cell->box)==2)
+        int res_cst = check_constraints(x_cell->box);
+        if(res_cst==2)
 		data_x->pu=1;
 	if (data_x->pu != 1)     {
 		x_ctc.contract(x_cell->box);
 		if(x_cell->box.is_empty()) {
 			//vol_rejected += x_cell->box.volume();
 			delete x_cell;
-			//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
+                        //cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
 			return false;
 		}
 		/*  TODO faire des options de TRACE
@@ -208,8 +245,8 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 		// TODO Trace
 		//vol_rejected += x_cell->box.volume();
 		//x_cell->y_heap.flush();
-		//delete x_cell;
-		//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
+//                delete x_cell;
+                //cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
 		return false;
 	}
 
@@ -230,7 +267,9 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 				loup = new_loup;
 				loup_changed = true;
 				loup_point = (midp.mid());
-				data_x->fmax &= Interval(NEG_INFINITY,loup);
+                                ymax= compute_ymax()+1.e-15;
+                                data_x->fmax &= Interval(NEG_INFINITY,ymax);
+
 				if (trace) cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
 				//max_y = heap_copy.top1()->box;
 				//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
@@ -319,6 +358,16 @@ int OptimMinMax::check_constraints(const IntervalVector& box) {
 	return res;
 }
 
+void export_monitor(std::vector<double> * ub,std::vector<double> * lb,std::vector<double> * nbxel,std::vector<double> * nbyel) {
+    std::ofstream out;
+//    std::string output_name = "log.txt";
+    out.open("log.txt");
+//    out<<"x box: "<<box<<std::endl;
+    for(int i = 0;i<ub->size();i++) {
+        out<<ub->at(i)<<" "<<lb->at(i)<<" "<<nbxel->at(i)<<" "<<nbyel->at(i)<<std::endl;
+    }
+    out.close();
 
+}
 }
 

@@ -59,7 +59,7 @@ public:
 	 *
 	 *         TIMEOUT             time is out.
 	 */
-	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
+        Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 	Status optimize();
 
 
@@ -103,7 +103,7 @@ private:
         static const double default_min_perc_coef;
 
 };
-
+void export_monitor(std::vector<double> * ub,std::vector<double> * lb,std::vector<double> * nbxel,std::vector<double> * nbyel);
 
 }// end namespace
 
