@@ -15,6 +15,7 @@
 namespace ibex {
 
 class Function;
+class ExprNode;
 
 /**
  * \ingroup function
