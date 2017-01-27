@@ -16,8 +16,31 @@ using namespace std;
 
 namespace ibex {
 
-Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f) {
+Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f), fwd_agenda(NULL), bwd_agenda(NULL) {
 
+	int m=f.image_dim();
+	if (m>1) {
+		const ExprVector* vec=dynamic_cast<const ExprVector*>(&f.expr());
+		if (vec && m==vec->nb_args) {
+			fwd_agenda = new Agenda*[m];
+			bwd_agenda = new Agenda*[m];
+			for (int i=0; i<m; i++) {
+				bwd_agenda[i] = f.cf.agenda(f.nodes.rank(vec->arg(i)));
+				fwd_agenda[i] = new Agenda(*bwd_agenda[i],true); // true<=>swap
+			}
+		}
+	}
+}
+
+Gradient::~Gradient() {
+	if (fwd_agenda!=NULL) {
+		for (int i=0; i<f.image_dim(); i++) {
+			delete fwd_agenda[i];
+			delete bwd_agenda[i];
+		}
+		delete[] fwd_agenda;
+		delete[] bwd_agenda;
+	}
 }
 
 void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) {
@@ -65,6 +88,104 @@ void Gradient::gradient(const IntervalVector& box, IntervalVector& gbox) {
 	g.read_arg_domains(gbox);
 }
 
+void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
+
+	int n=f.nb_var();
+	int m=f.image_dim();
+
+	assert(J.nb_rows()==m);
+	assert(J.nb_cols()==n);
+	assert(box.size()==n);
+
+	if (f.expr().dim.is_matrix()) {
+		ibex_error("Cannot called \"jacobian\" on a matrix-valued function");
+	}
+
+	if (m==1) {
+		gradient(box,J[0]);
+
+	} else if(fwd_agenda!=NULL) {
+
+		// If f is just a vector of expressions, we avoid to generate
+		// all the components. This has two advantages:
+		// - we spare time and space (generation of all components can be very heavy)
+		// - we take advantage of the DAG structure, since common subexpressions are
+		//   duplicated in each components. Note that this is however only true for the
+		//   forward phase (in the backward phase, each components are handled
+		//   separately so that shared subexpressions are treated as if they were separate).
+
+		if (_eval.eval(box).is_empty()) {
+			// outside definition domain -> empty jacobian
+			J.set_empty(); return;
+		}
+
+		for (int i=0; i<m; i++) {
+			J.row(i).clear();
+
+			g.write_arg_domains(J.row(i));
+
+			f.cf.forward<Gradient>(*this, *fwd_agenda[i]);
+
+			g[bwd_agenda[i]->first()].i() = 1.0;
+
+			f.cf.backward<Gradient>(*this, *bwd_agenda[i]);
+
+			if (J[i].is_empty()) {
+				J.set_empty();
+				return;
+			} else
+				g.read_arg_domains(J.row(i));
+		}
+	} else {
+
+		// Option 1: we calculate the gradient of each component.
+		// Option 2: we perform an automatic differentation of p_i(f)
+		//           where p_i is the ith projection.
+		// Advantage of option 1:
+		// - we benefit from the symbolic simplification of components
+		//   (that can be sometimes drastic)
+		// Advantage of option 2:
+		// - we don't need to generate the components of f
+		//   (that can also sometimes save a lot of time and memory)
+		// We chose option 1 since option 2 is already what is done
+		// when f is a vector of expressions (the most frequent case).
+		// ======================== option 1 =============================
+		for (int i=0; i<m; i++) {
+			f[i].gradient(box,J[i]);
+			if (J[i].is_empty()) {
+				J.set_empty();
+				return;
+			}
+		}
+
+		// ======================== option 2 =============================
+//		if (_eval.eval(box).is_empty()) {
+//			// outside definition domain -> empty jacobian
+//			J.set_empty(); return;
+//		}
+//
+//		for (int i=0; i<m; i++) {
+//			J.row(i).clear();
+//
+//			g.write_arg_domains(J.row(i));
+//
+//			f.forward<Gradient>(*this);
+//
+//			g.top->v()=Vector::zeros(m);
+//			g.top->v()[i]=1.0;
+//
+//			f.backward<Gradient>(*this);
+//
+//			if (J[i].is_empty()) {
+//				J.set_empty();
+//				return;
+//			} else
+//				g.read_arg_domains(J.row(i));
+//		}
+		// ===============================================================
+	}
+}
+
 
 void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) {
 
@@ -74,6 +195,7 @@ void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) {
 
 	int m=f.expr().dim.vec_size();
 
+	// ================== Option n°1 ===========================
 	// calculate the gradient of each component of f
 	for (int i=0; i<m; i++) {
 		const Function* fi=dynamic_cast<const Function*>(&f[i]);
@@ -93,6 +215,10 @@ void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) {
 			if (J[i].is_empty()) { J.set_empty(); return; }
 		}
 	}
+
+	// ================== Option n°2 ===========================
+	// direct calculation
+	// TODO
 }
 
 void Gradient::vector_fwd(int* x, int y) {

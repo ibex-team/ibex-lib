@@ -63,36 +63,17 @@ Function::~Function() {
 	}
 }
 
-void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
-	assert(J.nb_cols()==nb_var());
-	assert(x.size()==nb_var());
-	assert(J.nb_rows()==image_dim());
-
-	// calculate the gradient of each component of f
-	// TODO: we could take advantage of the DAG structure
-	// by calling just once the forward phase on f itself
-	for (int i=0; i<image_dim(); i++) {
-		(*this)[i].gradient(x,J[i]);
-		if (J[i].is_empty()) {
-			J.set_empty();
-			return;
-		}
-	}
-}
-
 void Function::jacobian(const IntervalVector& box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const {
 
 	assert(J_var.nb_cols()==set.nb_var);
 	assert(box.size()==nb_var());
 	assert(J_var.nb_rows()==image_dim());
 
-	IntervalVector g(nb_var());
-
-	// calculate the gradient of each component of f
+	IntervalMatrix J(image_dim(), nb_var());
+	jacobian(box,J);
 	for (int i=0; i<image_dim(); i++) {
-		(*this)[i].gradient(box,g);
-		J_var.set_row(i,set.var_box(g));
-		J_param.set_row(i,set.param_box(g));
+		J_var.set_row(i,set.var_box(J[i]));
+		J_param.set_row(i,set.param_box(J[i]));
 	}
 }
 

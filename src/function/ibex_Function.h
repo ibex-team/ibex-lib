@@ -1116,6 +1116,10 @@ inline IntervalVector Function::gradient(const IntervalVector& x) const {
 	return g;
 }
 
+inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
+	_grad->jacobian(x,J);
+}
+
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
 	IntervalMatrix J(image_dim(),x.size());
 	jacobian(x,J);
