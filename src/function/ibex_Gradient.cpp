@@ -125,7 +125,7 @@ void Gradient::vector_bwd(int* x, int y) {
 	if (v.dim.is_vector()) {
 		for (int i=0; i<v.length(); i++) {
 			if (v.arg(i).dim.is_vector()) {
-				g[x[i]].v()+=g[y].v().subvector(j,j+v.arg(i).dim.vec_size());
+				g[x[i]].v()+=g[y].v().subvector(j,j+v.arg(i).dim.vec_size()-1);
 				j+=v.arg(i).dim.vec_size();
 			} else {
 				g[x[i]].i()+=g[y].v()[j];
@@ -139,7 +139,7 @@ void Gradient::vector_bwd(int* x, int y) {
 		if (v.row_vector()) {
 			for (int i=0; i<v.length(); i++) {
 				if (v.arg(i).dim.is_matrix()) {
-					g[x[i]].m()+=g[y].m().submatrix(0,v.dim.nb_rows(),j,v.arg(i).dim.nb_cols());
+					g[x[i]].m()+=g[y].m().submatrix(0,v.dim.nb_rows()-1,j,j+v.arg(i).dim.nb_cols()-1);
 					j+=v.arg(i).dim.nb_cols();
 				} else if (v.arg(i).dim.is_vector()) {
 					g[x[i]].v()+=g[y].m().col(j);
@@ -149,7 +149,7 @@ void Gradient::vector_bwd(int* x, int y) {
 		} else {
 			for (int i=0; i<v.length(); i++) {
 				if (v.arg(i).dim.is_matrix()) {
-					g[x[i]].m()+=g[y].m().submatrix(j,v.arg(i).dim.nb_rows(),0,v.dim.nb_cols());
+					g[x[i]].m()+=g[y].m().submatrix(j,j+v.arg(i).dim.nb_rows()-1,0,v.dim.nb_cols()-1);
 					j+=v.arg(i).dim.nb_rows();
 				} else if (v.arg(i).dim.is_vector()) {
 					g[x[i]].v()+=g[y].m().row(j);
