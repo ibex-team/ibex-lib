@@ -108,8 +108,9 @@ void Gradient::idx_cp_bwd(int x, int y) {
 	assert(dynamic_cast<const ExprIndex*> (&f.node(y)));
 
 	const ExprIndex& e = (const ExprIndex&) f.node(y);
-
-	g[x].put(e.index.first_row(), e.index.first_col(), g[y]);
+	Domain gx=g[x][e.index];
+	gx = gx + g[y];
+	g[x].put(e.index.first_row(), e.index.first_col(), gx);
 }
 
 void Gradient::vector_bwd(int* x, int y) {
