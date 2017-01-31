@@ -16,6 +16,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Interval.h"
+#include "ibex_Function.h"
 #include "utils.h"
 
 using namespace ibex;
@@ -24,6 +25,7 @@ class TestArith : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestArith);
+	
 		CPPUNIT_TEST(tan_issue248);
 
 		CPPUNIT_TEST(float01);
@@ -728,6 +730,8 @@ private:
 	void bwd_imod_07();
 	void bwd_imod_08();
 
+	void tan_issue248();
+
 
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_add(const Interval& x, const Interval& z, const Interval& y_expected);
@@ -754,7 +758,6 @@ private:
 	bool checkbwd_imod(const double& period, const Interval& x_bef, const Interval& y_bef,
 								const Interval& x_aft, const Interval& y_aft);
 
-	void tan_issue248();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestArith);

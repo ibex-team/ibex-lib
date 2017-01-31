@@ -26,7 +26,7 @@ public:
 	CPPUNIT_TEST_SUITE(TestAffineEval<T>);
 
 	CPPUNIT_TEST(test_tan_issue);
-/*
+
 	CPPUNIT_TEST(test_sqrt);
 	CPPUNIT_TEST(test_exp);
 	CPPUNIT_TEST(test_log);
@@ -49,7 +49,7 @@ public:
 	CPPUNIT_TEST(apply03);
 	CPPUNIT_TEST(apply04);
 	CPPUNIT_TEST(issue242);
-*/
+
 
 
 	CPPUNIT_TEST_SUITE_END();
@@ -1222,7 +1222,7 @@ bool TestAffineEval<T>::check_af2 (Function& f, Interval& I){
 	AffineEval<T> eval_af(f);
 
 	IntervalVector x(1);
-/*
+
 	if (!((I.is_unbounded())||(I.is_degenerated())||(!I.is_bisectable())||(I.is_empty()))){
 		for (double ii= I.lb(); ii<I.ub(); ii += I.diam()/n) {
 			x[0] = Interval(ii,ii+epsilon);
@@ -1232,16 +1232,16 @@ bool TestAffineEval<T>::check_af2 (Function& f, Interval& I){
 
 			if (!(itv2.is_subset(faa.itv())))
 			{
-				std::cout  << " DEP = "<< ii<< "  "  << f<< std::endl;
+//				std::cout  << " DEP = "<< ii<< "  "  << f<< std::endl;
 				//std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
-				std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
+//				std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
 
 				return false;
 			}
 		}
 	}
 
-*/
+
 	x[0] = I;
 	itv2 =f.eval(x);
 
@@ -1251,11 +1251,11 @@ bool TestAffineEval<T>::check_af2 (Function& f, Interval& I){
 
 	if (!(itv2.is_subset(faa.itv())))
 	{
-		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
+/*		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
 //		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
 		std::cout  << " RES = eval  "<< itv2 << " ///// " << itv3<< std::endl;
 		std::cout  << " RES = evalaffine  "<< itv << " ///// " << faa << std::endl;
-
+*/
 		return false;
 	}
 /*	if (faa.size()>0) {

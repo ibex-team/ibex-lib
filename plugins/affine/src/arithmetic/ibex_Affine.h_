@@ -419,8 +419,8 @@ inline AffineMain<T>& AffineMain<T>::Asin(const Interval& itv){
 template<class T>
 inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 	Interval res_itv = tan(itv);
-	std::cout.precision(20);
-	std::cout <<"IN tan:  "<< *this << "   " << itv << " res itv " << res_itv<<std::endl;
+	//std::cout.precision(20);
+	//std::cout <<"IN tan:  "<< *this << "   " << itv << " res itv " << res_itv<<std::endl;
 
 	// Particular case
 	if (res_itv.is_empty() || res_itv.is_unbounded() || (!is_actif()) || (itv.diam()<AF_EC)) {
@@ -496,10 +496,9 @@ inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
-	std::cout << alpha<< "   "  << beta<<"   "<<ddelta << std::endl;
 	}
 
-	std::cout << "OUT tan: "<< *this << std::endl;
+	//std::cout << "OUT tan: "<< *this << std::endl;
 	return *this;
 }
 
