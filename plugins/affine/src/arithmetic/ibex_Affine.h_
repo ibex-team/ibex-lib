@@ -292,7 +292,7 @@ inline AffineMain<T>& AffineMain<T>::Acos(const Interval& itv){
 		fxb1 = ::cos(xb1);
 
 		c0 = (0.5)*(fxb0+fxb1);
-		c1 = x0*fxb0-x0*fxb1;
+		c1 = x0*(fxb0-fxb1);
 
 		alpha  = 2*c1/(itv.diam());
 		beta   = c0-c1*((itv.lb()+itv.ub())/(itv.diam()));
@@ -373,7 +373,7 @@ inline AffineMain<T>& AffineMain<T>::Asin(const Interval& itv){
 		fxb1 = ::sin(xb1);
 
 		c0 = (0.5)*(fxb0+fxb1);
-		c1 = x0*fxb0-x0*fxb1;
+		c1 = x0*(fxb0-fxb1);
 
 		alpha  = 2*c1/(itv.diam());
 		beta   = c0-c1*((itv.lb()+itv.ub())/(itv.diam()));
@@ -418,7 +418,9 @@ inline AffineMain<T>& AffineMain<T>::Asin(const Interval& itv){
 
 template<class T>
 inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
-	Interval res_itv = tan(itv);;
+	Interval res_itv = tan(itv);
+	std::cout.precision(20);
+	std::cout <<"IN tan:  "<< *this << " res itv " << res_itv<<std::endl;
 
 	// Particular case
 	if (res_itv.is_empty() || res_itv.is_unbounded() || (!is_actif()) || (itv.diam()<AF_EC)) {
@@ -427,10 +429,6 @@ inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 	// General case
 		double alpha, beta, ddelta, t1, t2;
 		Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
-		if (itv.diam()>=Interval::TWO_PI.lb()) {
-			*this = Interval(-1,1);
-			return *this;
-		}
 		//  pour _itv = [a,b]
 		// x0 = 1/sqrt(2)
 		// x1= - x0
@@ -454,7 +452,7 @@ inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 		fxb1 = ::tan(xb1);
 
 		c0 = (0.5)*(fxb0+fxb1);
-		c1 = x0*fxb0-x0*fxb1;
+		c1 = x0*(fxb0-fxb1);
 
 		alpha  = 2*c1/(itv.diam());
 		beta   = c0-c1*((itv.lb()+itv.ub())/(itv.diam()));
@@ -498,7 +496,10 @@ inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
+	std::cout << alpha<< "   "  << beta<<"   "<<ddelta << std::endl;
 	}
+
+	std::cout << "OUT tan: "<< *this << std::endl;
 	return *this;
 }
 
@@ -956,7 +957,7 @@ inline AffineMain<T>& AffineMain<T>::Apow(int n, const Interval& itv) {
 			this->Apow(-n,itv);
 			return this->Ainv(pow(itv,-n));
 
-		} else if (n % 2 == 0) {
+		} else if ((n % 2 == 0)||(itv.lb()>=0)) {// the formula is true if the function is convex
 			// alpha = (F(sup(x)) - F(inf(x)))/diam(X)
 			// u = (f')^{-1}(alpha)
 			// d_a = f(inf(x)) -alpha*inf(X)
@@ -995,6 +996,49 @@ inline AffineMain<T>& AffineMain<T>::Apow(int n, const Interval& itv) {
 			*this += beta;
 			this->inflate(ddelta);
 			//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+
+		} else if (itv.ub()<=0) {// the formula is true if the function is concave
+			// alpha = (F(sup(x)) - F(inf(x)))/diam(X)
+			// u = (f')^{-1}(alpha)
+			// d_a = f(inf(x)) -alpha*inf(X)
+			// d_b = f(sup(x)) -alpha*sup(x)
+			// d_min = min(d_a,d_b)
+			// d_max = f(u) - alpha*u
+			// beta = Interval(d_min,d_max).mid()
+			// zeta = Interval(d_min,d_max).rad()
+			double alpha, beta, ddelta, t1, t2;
+			Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
+
+			dmm = pow(itv, n);
+			alpha = ((__builtin_powi(itv.ub(),n)-__builtin_powi(itv.lb(),n))/itv.diam());
+
+			TEMP1 = (dmm.lb()) - alpha * Interval(itv.lb());
+			TEMP2 = (dmm.ub()) - alpha * Interval(itv.ub());
+			// u = (alpha/n)^(1/(n-1))
+			if (TEMP1.ub() > TEMP2.ub()) {
+				TEMP1 = Interval(alpha) / n;
+				band = Interval(
+						TEMP2.ub(),
+						((1 - n) * TEMP1 * (root(TEMP1, n - 1))).lb()
+						);
+			} else {
+				TEMP2 = Interval(alpha) / n;
+				band = Interval(
+						TEMP1.ub(),
+						((1 - n) * TEMP2 * (root(TEMP2, n - 1))).lb()
+						);
+			}
+
+			beta = band.mid();
+			t1 = (beta - band).ub();
+			t2 = (band - beta).ub();
+			ddelta = (t1 > t2) ? t1 : t2;
+
+			*this *= alpha;
+			*this += beta;
+			this->inflate(ddelta);
+			//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+
 
 		} else {
 			// for _itv = [a,b]

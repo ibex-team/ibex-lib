@@ -201,17 +201,18 @@ IntervalVector operator|(const AffineMainVector<T>& y,const AffineMainVector<T>&
 	return res;
 }
 
-
 template<class T>
 IntervalVector AffineMainVector<T>::itv() const {
-	assert(!is_empty());
-	IntervalVector intv(_n);
-	for (int i = 0; i < _n; i++) {
-		intv[i] = (*this)[i].itv();
+	if (is_empty()) {
+		return IntervalVector::empty(_n);
+	} else {
+		IntervalVector intv(_n);
+		for (int i = 0; i < _n; i++) {
+			intv[i] = (*this)[i].itv();
+		}
+		return intv;
 	}
-	return intv;
 }
-
 
 
 template<class T>
