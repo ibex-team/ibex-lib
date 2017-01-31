@@ -24,7 +24,8 @@ class TestArith : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestArith);
-	
+		CPPUNIT_TEST(tan_issue248);
+
 		CPPUNIT_TEST(float01);
 		CPPUNIT_TEST(float02);
 		CPPUNIT_TEST(float03);
@@ -753,6 +754,7 @@ private:
 	bool checkbwd_imod(const double& period, const Interval& x_bef, const Interval& y_bef,
 								const Interval& x_aft, const Interval& y_aft);
 
+	void tan_issue248();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestArith);

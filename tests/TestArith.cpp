@@ -13,6 +13,7 @@
 #include "ibex_Linear.h"
 #include "utils.h"
 #include <float.h>
+#include "ibex_Function.h"
 
 using namespace std;
 
@@ -961,3 +962,14 @@ void TestArith::bwd_imod_07() {
 void TestArith::bwd_imod_08() {
 	CPPUNIT_ASSERT(checkbwd_imod(2.*M_PI,Interval(7.*M_PI/4.,8.*M_PI/3),Interval(-M_PI/2,M_PI/2.),Interval(7.*M_PI/4.,5.*M_PI/2.),Interval(-M_PI/4,M_PI/2.)));
 }
+
+void TestArith::tan_issue248() {
+	Interval itv = Interval(-Interval::PI.lb()/2,3*Interval::PI.ub()/8);
+	std::cout<<std::endl <<tan(itv)<<std::endl;
+	Variable x;
+	Function rr(x,tan(x) );
+	std::cout<< rr.eval(IntervalVector(1,itv)) <<std::endl;
+
+	CPPUNIT_ASSERT(tan(itv).is_empty());
+}
+

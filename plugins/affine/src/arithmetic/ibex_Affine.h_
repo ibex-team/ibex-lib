@@ -420,7 +420,7 @@ template<class T>
 inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 	Interval res_itv = tan(itv);
 	std::cout.precision(20);
-	std::cout <<"IN tan:  "<< *this << " res itv " << res_itv<<std::endl;
+	std::cout <<"IN tan:  "<< *this << "   " << itv << " res itv " << res_itv<<std::endl;
 
 	// Particular case
 	if (res_itv.is_empty() || res_itv.is_unbounded() || (!is_actif()) || (itv.diam()<AF_EC)) {
