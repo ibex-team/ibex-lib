@@ -16,6 +16,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Interval.h"
+#include "ibex_Function.h"
 #include "utils.h"
 
 using namespace ibex;
@@ -25,6 +26,8 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestArith);
 	
+		CPPUNIT_TEST(tan_issue248);
+
 		CPPUNIT_TEST(float01);
 		CPPUNIT_TEST(float02);
 		CPPUNIT_TEST(float03);
@@ -726,6 +729,8 @@ private:
 	void bwd_imod_06();
 	void bwd_imod_07();
 	void bwd_imod_08();
+
+	void tan_issue248();
 
 
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
