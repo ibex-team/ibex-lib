@@ -16,7 +16,6 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Interval.h"
-#include "ibex_Function.h"
 #include "utils.h"
 
 using namespace ibex;
