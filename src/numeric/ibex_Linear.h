@@ -128,11 +128,11 @@ void real_inverse(const Matrix& A, Matrix& invA);
 void neumaier_inverse(const IntervalMatrix& A, IntervalMatrix& invA);
 
 /**
- * \brief Computes the exact inverse of a matrix with unit midpoint.
+ * \brief Computes the exact inverse of a midpoint-preconditioned matrix.
  * See "Inverse interval matrix: A survey", J. Rohn & R. Farhadsefat, Electronic Journal of Linear Algebra, Vol. 22, 2011, section 10.
  *
  * \param A - The interval matrix to inverse.
- * \param invA (output) - The exact inverse of A if A is a matrix with unit midpoint.
+ * \param invA (output) - The exact inverse of A if A is midpoint-preconditioned.
  *
  * \throw SingularMatrixException if the matrix A is singular.
  *

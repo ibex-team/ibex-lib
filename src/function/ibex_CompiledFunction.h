@@ -18,6 +18,7 @@
 #include "ibex_ExprSubNodes.h"
 #include "ibex_FwdAlgorithm.h"
 #include "ibex_BwdAlgorithm.h"
+#include "ibex_Agenda.h"
 
 namespace ibex {
 
@@ -55,11 +56,32 @@ public:
 	void forward(const V& algo) const;
 
 	/**
+	 * Forward phase on a specific set of operations (in the agenda).
+	 */
+	template<class V>
+	void forward(const V& algo, const Agenda& a) const;
+
+	/**
 	 * Run the backward phase.  V must be a subclass of BwdAlgorithm.
 	 * Note that the type V is just passed in order to have static linkage.
 	 */
 	template<class V>
 	void backward(const V& algo) const;
+
+	/**
+	 * Backward phase on a specific set of operations (in the agenda).
+	 */
+	template<class V>
+	void backward(const V& algo, const Agenda& a) const;
+
+	/**
+	 * Return an agenda of all the operations
+	 * that need to be considered for a subexpression
+	 * of a given rank (including itself).
+	 *
+	 * \note To be deleted by the caller.
+	 */
+	Agenda* agenda(int rank) const;
 
 	/**
 	 * Print the structure to the standard output.
@@ -132,6 +154,12 @@ private:
 	void visit(const ExprAtanh& e);
 
 private:
+	template<class V>
+	void forward(const V& algo, int i) const;
+
+	template<class V>
+	void backward(const V& algo, int i) const;
+
 	friend std::ostream& operator<<(std::ostream& os, const CompiledFunction& data);
 
 	const char* op(operation o) const;
@@ -156,61 +184,75 @@ private:
 std::ostream& operator<<(std::ostream& os, const CompiledFunction& data);
 
 template<class V>
-void CompiledFunction::forward(const V& algo) const {
+inline void CompiledFunction::forward(const V& algo) const {
 	assert(dynamic_cast<const FwdAlgorithm* >(&algo)!=NULL);
 
 	for (int i=n-1; i>=0; i--) {
-		switch(code[i]) {
-		case IDX:    ((V&) algo).idx_fwd    (args[i][0], i); break;
-		case IDX_CP: ((V&) algo).idx_cp_fwd (args[i][0], i); break;
-		case VEC:    ((V&) algo).vector_fwd (args[i], i); break;
-		case SYM:    ((V&) algo).symbol_fwd (i); break;
-		case CST:    ((V&) algo).cst_fwd    (i); break;
-		case APPLY:  ((V&) algo).apply_fwd  (args[i],i); break;
-		case CHI:    ((V&) algo).chi_fwd    (args[i][0], args[i][1], args[i][2], i); break;
-		case ADD:    ((V&) algo).add_fwd    (args[i][0], args[i][1], i); break;
-		case ADD_V:  ((V&) algo).add_V_fwd  (args[i][0], args[i][1], i); break;
-		case ADD_M:  ((V&) algo).add_M_fwd  (args[i][0], args[i][1], i); break;
-		case MUL:    ((V&) algo).mul_fwd    (args[i][0], args[i][1], i); break;
-		case MUL_SV: ((V&) algo).mul_SV_fwd (args[i][0], args[i][1], i); break;
-		case MUL_SM: ((V&) algo).mul_SM_fwd (args[i][0], args[i][1], i); break;
-		case MUL_VV: ((V&) algo).mul_VV_fwd (args[i][0], args[i][1], i); break;
-		case MUL_MV: ((V&) algo).mul_MV_fwd (args[i][0], args[i][1], i); break;
-		case MUL_MM: ((V&) algo).mul_MM_fwd (args[i][0], args[i][1], i); break;
-		case MUL_VM: ((V&) algo).mul_VM_fwd (args[i][0], args[i][1], i); break;
-		case SUB:    ((V&) algo).sub_fwd    (args[i][0], args[i][1], i); break;
-		case SUB_V:  ((V&) algo).sub_V_fwd  (args[i][0], args[i][1], i); break;
-		case SUB_M:  ((V&) algo).sub_M_fwd  (args[i][0], args[i][1], i); break;
-		case DIV:    ((V&) algo).div_fwd    (args[i][0], args[i][1], i); break;
-		case MAX:    ((V&) algo).max_fwd    (args[i][0], args[i][1], i); break;
-		case MIN:    ((V&) algo).min_fwd    (args[i][0], args[i][1], i); break;
-		case ATAN2:  ((V&) algo).atan2_fwd  (args[i][0], args[i][1], i); break;
-		case MINUS:  ((V&) algo).minus_fwd  (args[i][0], i); break;
-		case MINUS_V:((V&) algo).minus_V_fwd(args[i][0], i); break;
-		case MINUS_M:((V&) algo).minus_M_fwd(args[i][0], i); break;
-		case TRANS_V:((V&) algo).trans_V_fwd(args[i][0], i); break;
-		case TRANS_M:((V&) algo).trans_M_fwd(args[i][0], i); break;
-		case SIGN:   ((V&) algo).sign_fwd   (args[i][0], i); break;
-		case ABS:    ((V&) algo).abs_fwd    (args[i][0], i); break;
-		case POWER:  ((V&) algo).power_fwd  (args[i][0], i, ((const ExprPower&) (*nodes)[i]).expon); break;
-		case SQR:    ((V&) algo).sqr_fwd    (args[i][0], i); break;
-		case SQRT:   ((V&) algo).sqrt_fwd   (args[i][0], i); break;
-		case EXP:    ((V&) algo).exp_fwd    (args[i][0], i); break;
-		case LOG:    ((V&) algo).log_fwd    (args[i][0], i); break;
-		case COS:    ((V&) algo).cos_fwd    (args[i][0], i); break;
-		case SIN:    ((V&) algo).sin_fwd    (args[i][0], i); break;
-		case TAN:    ((V&) algo).tan_fwd    (args[i][0], i); break;
-		case COSH:   ((V&) algo).cosh_fwd   (args[i][0], i); break;
-		case SINH:   ((V&) algo).sinh_fwd   (args[i][0], i); break;
-		case TANH:   ((V&) algo).tanh_fwd   (args[i][0], i); break;
-		case ACOS:   ((V&) algo).acos_fwd   (args[i][0], i); break;
-		case ASIN:   ((V&) algo).asin_fwd   (args[i][0], i); break;
-		case ATAN:   ((V&) algo).atan_fwd   (args[i][0], i); break;
-		case ACOSH:  ((V&) algo).acosh_fwd  (args[i][0], i); break;
-		case ASINH:  ((V&) algo).asinh_fwd  (args[i][0], i); break;
-		case ATANH:  ((V&) algo).atanh_fwd  (args[i][0], i); break;
-		default: 	 assert(false);
-		}
+		forward(algo, i);
+	}
+}
+
+template<class V>
+inline void CompiledFunction::forward(const V& algo, const Agenda& a) const {
+	assert(dynamic_cast<const FwdAlgorithm* >(&algo)!=NULL);
+
+	for (int i=a.first(); i!=a.end(); i=a.next(i)) {
+		forward(algo, i);
+	}
+}
+
+template<class V>
+void CompiledFunction::forward(const V& algo, int i) const {
+	switch(code[i]) {
+	case IDX:    ((V&) algo).idx_fwd    (args[i][0], i); break;
+	case IDX_CP: ((V&) algo).idx_cp_fwd (args[i][0], i); break;
+	case VEC:    ((V&) algo).vector_fwd (args[i], i); break;
+	case SYM:    ((V&) algo).symbol_fwd (i); break;
+	case CST:    ((V&) algo).cst_fwd    (i); break;
+	case APPLY:  ((V&) algo).apply_fwd  (args[i],i); break;
+	case CHI:    ((V&) algo).chi_fwd    (args[i][0], args[i][1], args[i][2], i); break;
+	case ADD:    ((V&) algo).add_fwd    (args[i][0], args[i][1], i); break;
+	case ADD_V:  ((V&) algo).add_V_fwd  (args[i][0], args[i][1], i); break;
+	case ADD_M:  ((V&) algo).add_M_fwd  (args[i][0], args[i][1], i); break;
+	case MUL:    ((V&) algo).mul_fwd    (args[i][0], args[i][1], i); break;
+	case MUL_SV: ((V&) algo).mul_SV_fwd (args[i][0], args[i][1], i); break;
+	case MUL_SM: ((V&) algo).mul_SM_fwd (args[i][0], args[i][1], i); break;
+	case MUL_VV: ((V&) algo).mul_VV_fwd (args[i][0], args[i][1], i); break;
+	case MUL_MV: ((V&) algo).mul_MV_fwd (args[i][0], args[i][1], i); break;
+	case MUL_MM: ((V&) algo).mul_MM_fwd (args[i][0], args[i][1], i); break;
+	case MUL_VM: ((V&) algo).mul_VM_fwd (args[i][0], args[i][1], i); break;
+	case SUB:    ((V&) algo).sub_fwd    (args[i][0], args[i][1], i); break;
+	case SUB_V:  ((V&) algo).sub_V_fwd  (args[i][0], args[i][1], i); break;
+	case SUB_M:  ((V&) algo).sub_M_fwd  (args[i][0], args[i][1], i); break;
+	case DIV:    ((V&) algo).div_fwd    (args[i][0], args[i][1], i); break;
+	case MAX:    ((V&) algo).max_fwd    (args[i][0], args[i][1], i); break;
+	case MIN:    ((V&) algo).min_fwd    (args[i][0], args[i][1], i); break;
+	case ATAN2:  ((V&) algo).atan2_fwd  (args[i][0], args[i][1], i); break;
+	case MINUS:  ((V&) algo).minus_fwd  (args[i][0], i); break;
+	case MINUS_V:((V&) algo).minus_V_fwd(args[i][0], i); break;
+	case MINUS_M:((V&) algo).minus_M_fwd(args[i][0], i); break;
+	case TRANS_V:((V&) algo).trans_V_fwd(args[i][0], i); break;
+	case TRANS_M:((V&) algo).trans_M_fwd(args[i][0], i); break;
+	case SIGN:   ((V&) algo).sign_fwd   (args[i][0], i); break;
+	case ABS:    ((V&) algo).abs_fwd    (args[i][0], i); break;
+	case POWER:  ((V&) algo).power_fwd  (args[i][0], i, ((const ExprPower&) (*nodes)[i]).expon); break;
+	case SQR:    ((V&) algo).sqr_fwd    (args[i][0], i); break;
+	case SQRT:   ((V&) algo).sqrt_fwd   (args[i][0], i); break;
+	case EXP:    ((V&) algo).exp_fwd    (args[i][0], i); break;
+	case LOG:    ((V&) algo).log_fwd    (args[i][0], i); break;
+	case COS:    ((V&) algo).cos_fwd    (args[i][0], i); break;
+	case SIN:    ((V&) algo).sin_fwd    (args[i][0], i); break;
+	case TAN:    ((V&) algo).tan_fwd    (args[i][0], i); break;
+	case COSH:   ((V&) algo).cosh_fwd   (args[i][0], i); break;
+	case SINH:   ((V&) algo).sinh_fwd   (args[i][0], i); break;
+	case TANH:   ((V&) algo).tanh_fwd   (args[i][0], i); break;
+	case ACOS:   ((V&) algo).acos_fwd   (args[i][0], i); break;
+	case ASIN:   ((V&) algo).asin_fwd   (args[i][0], i); break;
+	case ATAN:   ((V&) algo).atan_fwd   (args[i][0], i); break;
+	case ACOSH:  ((V&) algo).acosh_fwd  (args[i][0], i); break;
+	case ASINH:  ((V&) algo).asinh_fwd  (args[i][0], i); break;
+	case ATANH:  ((V&) algo).atanh_fwd  (args[i][0], i); break;
+	default: 	 assert(false);
 	}
 }
 
@@ -220,57 +262,72 @@ void CompiledFunction::backward(const V& algo) const {
 	assert(dynamic_cast<const BwdAlgorithm* >(&algo)!=NULL);
 
 	for (int i=0; i<n; i++) {
-		switch(code[i]) {
-		case IDX:    ((V&) algo).idx_bwd    (args[i][0], i); break;
-		case IDX_CP: ((V&) algo).idx_cp_bwd (args[i][0], i); break;
-		case VEC:    ((V&) algo).vector_bwd (args[i], i); break;
-		case SYM:    ((V&) algo).symbol_bwd (i); break;
-		case CST:    ((V&) algo).cst_bwd    (i); break;
-		case APPLY:  ((V&) algo).apply_bwd  (args[i], i); break;
-		case CHI:    ((V&) algo).chi_bwd    (args[i][0], args[i][1], args[i][2], i); break;
-		case ADD:    ((V&) algo).add_bwd    (args[i][0], args[i][1], i); break;
-		case ADD_V:  ((V&) algo).add_V_bwd  (args[i][0], args[i][1], i); break;
-		case ADD_M:  ((V&) algo).add_M_bwd  (args[i][0], args[i][1], i); break;
-		case MUL:    ((V&) algo).mul_bwd    (args[i][0], args[i][1], i); break;
-		case MUL_SV: ((V&) algo).mul_SV_bwd (args[i][0], args[i][1], i); break;
-		case MUL_SM: ((V&) algo).mul_SM_bwd (args[i][0], args[i][1], i); break;
-		case MUL_VV: ((V&) algo).mul_VV_bwd (args[i][0], args[i][1], i); break;
-		case MUL_MV: ((V&) algo).mul_MV_bwd (args[i][0], args[i][1], i); break;
-		case MUL_MM: ((V&) algo).mul_MM_bwd (args[i][0], args[i][1], i); break;
-		case MUL_VM: ((V&) algo).mul_VM_bwd (args[i][0], args[i][1], i); break;
-		case SUB:    ((V&) algo).sub_bwd    (args[i][0], args[i][1], i); break;
-		case SUB_V:  ((V&) algo).sub_V_bwd  (args[i][0], args[i][1], i); break;
-		case SUB_M:  ((V&) algo).sub_M_bwd  (args[i][0], args[i][1], i); break;
-		case DIV:    ((V&) algo).div_bwd    (args[i][0], args[i][1], i); break;
-		case MAX:    ((V&) algo).max_bwd    (args[i][0], args[i][1], i); break;
-		case MIN:    ((V&) algo).min_bwd    (args[i][0], args[i][1], i); break;
-		case ATAN2:  ((V&) algo).atan2_bwd  (args[i][0], args[i][1], i); break;
-		case MINUS:  ((V&) algo).minus_bwd  (args[i][0], i); break;
-		case MINUS_V:((V&) algo).minus_V_bwd(args[i][0], i); break;
-		case MINUS_M:((V&) algo).minus_M_bwd(args[i][0], i); break;
-		case TRANS_V:((V&) algo).trans_V_bwd(args[i][0], i); break;
-		case TRANS_M:((V&) algo).trans_M_bwd(args[i][0], i); break;
-		case SIGN:   ((V&) algo).sign_bwd   (args[i][0], i); break;
-		case ABS:    ((V&) algo).abs_bwd    (args[i][0], i); break;
-		case POWER:  ((V&) algo).power_bwd  (args[i][0], i, ((const ExprPower&) (*nodes)[i]).expon); break;
-		case SQR:    ((V&) algo).sqr_bwd    (args[i][0], i); break;
-		case SQRT:   ((V&) algo).sqrt_bwd   (args[i][0], i); break;
-		case EXP:    ((V&) algo).exp_bwd    (args[i][0], i); break;
-		case LOG:    ((V&) algo).log_bwd    (args[i][0], i); break;
-		case COS:    ((V&) algo).cos_bwd    (args[i][0], i); break;
-		case SIN:    ((V&) algo).sin_bwd    (args[i][0], i); break;
-		case TAN:    ((V&) algo).tan_bwd    (args[i][0], i); break;
-		case COSH:   ((V&) algo).cosh_bwd   (args[i][0], i); break;
-		case SINH:   ((V&) algo).sinh_bwd   (args[i][0], i); break;
-		case TANH:   ((V&) algo).tanh_bwd   (args[i][0], i); break;
-		case ACOS:   ((V&) algo).acos_bwd   (args[i][0], i); break;
-		case ASIN:   ((V&) algo).asin_bwd   (args[i][0], i); break;
-		case ATAN:   ((V&) algo).atan_bwd   (args[i][0], i); break;
-		case ACOSH:  ((V&) algo).acosh_bwd  (args[i][0], i); break;
-		case ASINH:  ((V&) algo).asinh_bwd  (args[i][0], i); break;
-		case ATANH:  ((V&) algo).atanh_bwd  (args[i][0], i); break;
-		default: 	 assert(false);
-		}
+		backward(algo, i);
+	}
+}
+
+template<class V>
+void CompiledFunction::backward(const V& algo, const Agenda& a) const {
+
+	assert(dynamic_cast<const BwdAlgorithm* >(&algo)!=NULL);
+
+	for (int i=a.first(); i!=a.end(); i=a.next(i)) {
+		backward(algo, i);
+	}
+}
+
+template<class V>
+void CompiledFunction::backward(const V& algo, int i) const {
+	switch(code[i]) {
+	case IDX:    ((V&) algo).idx_bwd    (args[i][0], i); break;
+	case IDX_CP: ((V&) algo).idx_cp_bwd (args[i][0], i); break;
+	case VEC:    ((V&) algo).vector_bwd (args[i], i); break;
+	case SYM:    ((V&) algo).symbol_bwd (i); break;
+	case CST:    ((V&) algo).cst_bwd    (i); break;
+	case APPLY:  ((V&) algo).apply_bwd  (args[i], i); break;
+	case CHI:    ((V&) algo).chi_bwd    (args[i][0], args[i][1], args[i][2], i); break;
+	case ADD:    ((V&) algo).add_bwd    (args[i][0], args[i][1], i); break;
+	case ADD_V:  ((V&) algo).add_V_bwd  (args[i][0], args[i][1], i); break;
+	case ADD_M:  ((V&) algo).add_M_bwd  (args[i][0], args[i][1], i); break;
+	case MUL:    ((V&) algo).mul_bwd    (args[i][0], args[i][1], i); break;
+	case MUL_SV: ((V&) algo).mul_SV_bwd (args[i][0], args[i][1], i); break;
+	case MUL_SM: ((V&) algo).mul_SM_bwd (args[i][0], args[i][1], i); break;
+	case MUL_VV: ((V&) algo).mul_VV_bwd (args[i][0], args[i][1], i); break;
+	case MUL_MV: ((V&) algo).mul_MV_bwd (args[i][0], args[i][1], i); break;
+	case MUL_MM: ((V&) algo).mul_MM_bwd (args[i][0], args[i][1], i); break;
+	case MUL_VM: ((V&) algo).mul_VM_bwd (args[i][0], args[i][1], i); break;
+	case SUB:    ((V&) algo).sub_bwd    (args[i][0], args[i][1], i); break;
+	case SUB_V:  ((V&) algo).sub_V_bwd  (args[i][0], args[i][1], i); break;
+	case SUB_M:  ((V&) algo).sub_M_bwd  (args[i][0], args[i][1], i); break;
+	case DIV:    ((V&) algo).div_bwd    (args[i][0], args[i][1], i); break;
+	case MAX:    ((V&) algo).max_bwd    (args[i][0], args[i][1], i); break;
+	case MIN:    ((V&) algo).min_bwd    (args[i][0], args[i][1], i); break;
+	case ATAN2:  ((V&) algo).atan2_bwd  (args[i][0], args[i][1], i); break;
+	case MINUS:  ((V&) algo).minus_bwd  (args[i][0], i); break;
+	case MINUS_V:((V&) algo).minus_V_bwd(args[i][0], i); break;
+	case MINUS_M:((V&) algo).minus_M_bwd(args[i][0], i); break;
+	case TRANS_V:((V&) algo).trans_V_bwd(args[i][0], i); break;
+	case TRANS_M:((V&) algo).trans_M_bwd(args[i][0], i); break;
+	case SIGN:   ((V&) algo).sign_bwd   (args[i][0], i); break;
+	case ABS:    ((V&) algo).abs_bwd    (args[i][0], i); break;
+	case POWER:  ((V&) algo).power_bwd  (args[i][0], i, ((const ExprPower&) (*nodes)[i]).expon); break;
+	case SQR:    ((V&) algo).sqr_bwd    (args[i][0], i); break;
+	case SQRT:   ((V&) algo).sqrt_bwd   (args[i][0], i); break;
+	case EXP:    ((V&) algo).exp_bwd    (args[i][0], i); break;
+	case LOG:    ((V&) algo).log_bwd    (args[i][0], i); break;
+	case COS:    ((V&) algo).cos_bwd    (args[i][0], i); break;
+	case SIN:    ((V&) algo).sin_bwd    (args[i][0], i); break;
+	case TAN:    ((V&) algo).tan_bwd    (args[i][0], i); break;
+	case COSH:   ((V&) algo).cosh_bwd   (args[i][0], i); break;
+	case SINH:   ((V&) algo).sinh_bwd   (args[i][0], i); break;
+	case TANH:   ((V&) algo).tanh_bwd   (args[i][0], i); break;
+	case ACOS:   ((V&) algo).acos_bwd   (args[i][0], i); break;
+	case ASIN:   ((V&) algo).asin_bwd   (args[i][0], i); break;
+	case ATAN:   ((V&) algo).atan_bwd   (args[i][0], i); break;
+	case ACOSH:  ((V&) algo).acosh_bwd  (args[i][0], i); break;
+	case ASINH:  ((V&) algo).asinh_bwd  (args[i][0], i); break;
+	case ATANH:  ((V&) algo).atanh_bwd  (args[i][0], i); break;
+	default: 	 assert(false);
 	}
 }
 

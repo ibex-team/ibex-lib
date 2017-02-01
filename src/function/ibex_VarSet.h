@@ -10,10 +10,12 @@
 #ifndef __IBEX_VAR_SET_H__
 #define __IBEX_VAR_SET_H__
 
-#include "ibex_Function.h"
 #include "ibex_BitSet.h"
 
 namespace ibex {
+
+class Function;
+class ExprNode;
 
 /**
  * \ingroup function

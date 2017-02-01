@@ -736,9 +736,19 @@ public:
 	void jacobian(const IntervalVector& full_box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const;
 
 	/**
-	 * \brief Calculate the Hansen matrix of f
+	 * \brief Calculate the Hansen matrix of f.
+	 *
+	 * The expansion point is the center of x.
 	 */
 	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+
+	/**
+	 * \brief Calculate the Hansen matrix of f for a given (set of) expansion point x0.
+	 *
+	 * \note If the expansion point x0 is set to x, the Hansen matrix is equal to the Jacobian
+	 *       matrix (but computation is much slower).
+	 */
+	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& h) const;
 
 	/**
 	 * \brief Calculate the Hansen matrix of a restriction of f
@@ -751,6 +761,20 @@ public:
 	 *                  Note: no more "Hansen scheme" here.
 	 */
 	void hansen_matrix(const IntervalVector& full_box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const;
+
+	/**
+	 * \brief Calculate the Hansen matrix of a restriction of f with a given (set of) expansion point x0.
+	 *
+	 * The function f(x,p) is restricted to the n variables x, the others m variables p are parameters
+	 * (considered as constants).
+	 *
+	 * \param full_box - The (n+m)-dimensional box [x]x[p]
+	 * \param x0       - The n-dimensional expansion point x0 (usually inside [x])
+	 * \param H_var    - The n-columned Hansen matrix w.r.t. x (all the p are interval constants)
+	 * \param J_param  - The m-columned Jacobian w.r.t. p (all the x are interval constants).
+	 *                   Note: no more "Hansen scheme" here.
+	 */
+	void hansen_matrix(const IntervalVector& full_box, const IntervalVector& x0, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const;
 
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
@@ -925,6 +949,7 @@ private:
 #include "ibex_Gradient.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
+#include "ibex_VarSet.h"
 
 namespace ibex {
 
@@ -1091,10 +1116,22 @@ inline IntervalVector Function::gradient(const IntervalVector& x) const {
 	return g;
 }
 
+inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
+	_grad->jacobian(x,J);
+}
+
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
 	IntervalMatrix J(image_dim(),x.size());
 	jacobian(x,J);
 	return J;
+}
+
+inline void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
+	hansen_matrix(box, box.mid(), H);
+}
+
+inline void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
+	hansen_matrix(box, set.var_box(box).mid(), H_var, J_param, set);
 }
 
 inline Eval& Function::basic_evaluator() const {

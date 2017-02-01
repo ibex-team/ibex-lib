@@ -275,6 +275,7 @@ void TestExprDiff::mul04() {
 	CPPUNIT_ASSERT(c->dim.type()==Dim::MATRIX);
 	CPPUNIT_ASSERT(c->get_matrix_value()==Matrix::eye(2));
 }
+
 void TestExprDiff::apply_mul01() {
 	Variable x,y;
 	Function f(x,y,x,"f");
@@ -304,6 +305,19 @@ void TestExprDiff::apply_mul02() {
 //
 //	cout << "DG=" << dg << endl;
 //	CPPUNIT_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
+}
+
+void TestExprDiff::issue247() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	const ExprSymbol& y=ExprSymbol::new_();
+	const ExprNode& e=x+y;
+	Array<const ExprNode> a(e,e,e);
+	const ExprVector& v1=ExprVector::new_(a,false);
+	DoubleIndex idx(v1.dim,0,1,0,0);
+	const ExprVector& v2=ExprVector::new_(v1[idx],v1[idx],false);
+	Function f(x,y,v2[0]);
+	IntervalVector g=f.gradient(IntervalVector(2));
+	CPPUNIT_ASSERT(g==Vector::ones(2));
 }
 
 } // end namespace

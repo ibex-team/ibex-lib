@@ -15,7 +15,6 @@
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
-#include "ibex_VarSet.h"
 #include "ibex_FunctionBuild.cpp_"
 
 using namespace std;
@@ -64,40 +63,21 @@ Function::~Function() {
 	}
 }
 
-void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
-	assert(J.nb_cols()==nb_var());
-	assert(x.size()==nb_var());
-	assert(J.nb_rows()==image_dim());
-
-	// calculate the gradient of each component of f
-	// TODO: we could take advantage of the DAG structure
-	// by calling just once the forward phase on f itself
-	for (int i=0; i<image_dim(); i++) {
-		(*this)[i].gradient(x,J[i]);
-		if (J[i].is_empty()) {
-			J.set_empty();
-			return;
-		}
-	}
-}
-
 void Function::jacobian(const IntervalVector& box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const {
 
 	assert(J_var.nb_cols()==set.nb_var);
 	assert(box.size()==nb_var());
 	assert(J_var.nb_rows()==image_dim());
 
-	IntervalVector g(nb_var());
-
-	// calculate the gradient of each component of f
+	IntervalMatrix J(image_dim(), nb_var());
+	jacobian(box,J);
 	for (int i=0; i<image_dim(); i++) {
-		(*this)[i].gradient(box,g);
-		J_var.set_row(i,set.var_box(g));
-		J_param.set_row(i,set.param_box(g));
+		J_var.set_row(i,set.var_box(J[i]));
+		J_param.set_row(i,set.param_box(J[i]));
 	}
 }
 
-void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
+void Function::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, IntervalMatrix& H) const {
 	int n=nb_var();
 	int m=image_dim();
 
@@ -105,7 +85,7 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 	assert(box.size()==n);
 	assert(H.nb_rows()==m);
 
-	IntervalVector x=box.mid();
+	IntervalVector x=x0;
 	IntervalMatrix J(m,n);
 
 	// test!
@@ -126,7 +106,8 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 
 }
 
-void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
+void Function::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
+
 	int n=set.nb_var;
 	int m=image_dim();
 
@@ -137,7 +118,7 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H_var, I
 	IntervalVector var_box=set.var_box(box);
 	IntervalVector param_box=set.param_box(box);
 
-	IntervalVector x=var_box.mid();
+	IntervalVector x=x0;
 	IntervalMatrix J(m,n);
 
 	for (int var=0; var<n; var++) {
