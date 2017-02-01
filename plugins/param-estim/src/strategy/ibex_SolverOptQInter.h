@@ -50,6 +50,7 @@ Qintersection contractors.
    int bestsolpointnumber;
    int epsobj;
    Vector oracle;
+   bool with_oracle;
 
    void report_possible_inliers();
    void report_solution();
@@ -120,6 +121,7 @@ a linear solver is used for finding a feasible point.
    LinearSolver* mylp;  // linear solver for finding a feasible point
 
    Vector newvalidpoint (Cell& c);
+   Vector feasiblepoint (const IntervalVector & box, bool & res, Vector & feasiblepoint2);
    Vector feasiblepoint (const IntervalVector & box, bool & res);
    double epscont;
    NormalizedSystem normsys;

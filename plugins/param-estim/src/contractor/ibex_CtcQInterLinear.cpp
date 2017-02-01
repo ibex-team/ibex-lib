@@ -113,10 +113,11 @@ for n=2,3,4 */
   */
   
 
-  
+ 
+
   
   void CtcQInterLinear::point_contract(IntervalVector & box, int iter){
-    point_fwdbwd (box,iter);
+       point_fwdbwd (box,iter);
   }
   
   //double    CtcQInterLinear::max_diam_threshold(const IntervalVector& box) {return box.max_diam();}
@@ -220,11 +221,12 @@ void CtcQInterLinear::fwdbwd(IntervalVector & box, int iter, int k){
       eval[i]= eval[i-1] + box[i-1]* linfun[iter][i][k];
     }
     //    cout << "eval0 " << eval[nbvar] << endl;
+    if (eval[nbvar].is_subset(eps)) cout << " measure validation " << " iter " << iter << endl;
     eval[nbvar]&=eps;
-    //    cout << "eval " << eval[nbvar] << endl;
+    cout << "eval " << eval[nbvar] << endl;
     for (int i=nbvar-1; i>= 0; i--) {
       box[i] &= (eval[i+1] - eval[i])/ linfun[iter][i+1][k];
-      //      cout << i << "  " << box[i] << endl;
+      cout << i << "  " << box[i] << endl;
       if (box[i].is_empty()) {box.set_empty();return;}
       if(i>0) eval[i] &= eval[i+1]-box[i]* linfun[iter][i+1][k];
     }
@@ -241,8 +243,11 @@ void CtcQInterLinear::fwd(IntervalVector & box, int iter, int k){
       eval[i]= eval[i-1] + box[i-1]* linfun[iter][i][k];
     }
     //    cout << "eval0 " << eval[nbvar] << endl;
+
+    if (eval[nbvar].is_subset(eps)) cout << " measure validation " << " iter " << iter << endl;
     eval[nbvar]&=eps;
-    if (eval[nbvar].is_empty()) box.set_empty();
+
+
 }
 
 
@@ -354,6 +359,8 @@ void CtcQInterAffLinear::fwdbwd(IntervalVector & box, int iter, int k){
       eval[i]= eval[i-1] - box[i-1]* linfun[iter][i][k];
     }
     //    cout << "eval0 " << eval[nbvar] << endl;
+
+    //    if (eval[nbvar].is_subset(eps)) cout << " measure validation " << " iter " << iter << endl;
     eval[nbvar]&=eps;
     if (eval[nbvar].is_empty()) {box.set_empty();return;}  // ajout 10 juin
     //    cout << "eval " << eval[nbvar] << endl;
@@ -376,7 +383,8 @@ void CtcQInterAffLinear::fwd(IntervalVector & box, int iter, int k){
     for (int i=1; i< nbvar+1; i++) {
       eval[i]= eval[i-1] - box[i-1]* linfun[iter][i][k];
     }
-    //    cout << "eval0 " << eval[nbvar] << endl;
+    //      cout << "eval0 " << eval[nbvar] << endl;
+    //    if (eval[nbvar].is_subset(eps)) cout << " measure validation " << " iter " << iter << endl;
     eval[nbvar]&=eps;
     if (eval[nbvar].is_empty())
       box.set_empty(); 
@@ -430,12 +438,133 @@ void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter)
   // contraction with fwd bwd
   
   
- void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter)
- {point_fwdbwd(box,iter);
+ void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter){
+   point_verif_prod (box,iter);
+   if (!(box.is_empty()))
+     point_fwdbwd(box,iter);
  }
   
+    //avec retrait des mesures telles que Ep2 < epsilon ou p1Et < epsilon 
+
+ int CtcQInterAffLinear::midactivepoints_count(const Vector& vec){
+    int p=0;
+    //    cout << " points size active count " << points->size() << " box " << box <<endl;
+    list<int>::iterator iter = points->begin() ;
+    
+    Matrix msol (3,3);
+    Matrix msolt (3,3);
+    Vector pt1 (3);
+    Vector pt2 (3);
+    Vector res1(3);
+    Vector res2(3);
+    double epsilon=0.05;
+    for (int i=0;i<3;i++)
+      for (int j=0;j<3;j++)
+	{ msol[i][j]=vec[3*i+j];
+	  msolt[j][i]=vec[3*i+j];
+	}
+    
+    while (iter != points->end()){
+    
+    
+      pt1[0]= - linfun[*iter][3][0];
+      pt1[1]=- linfun[*iter][6][0];
+      pt1[2]=1;
+
+      res1= msolt * pt1;
+
+
+      pt2[0]= - linfun[*iter][7][0];
+      pt2[1]= - linfun[*iter][8][0];
+      pt2[2]=1;
+	
+      res2 = msol * pt2;
+
+      if ((fabs(res1[0]) < epsilon && fabs(res1[1]) < epsilon && fabs(res1[2]) < epsilon)
+	  ||
+	  (fabs(res2[0]) < epsilon && fabs(res2[1]) < epsilon && fabs(res2[2]) < epsilon))
+	{//cout << "res1 " << res1 << " res2 " << res2 << endl;
+	  iter++; continue;}
+      IntervalVector box1(vec);
+      
+      point_contract(box1,*iter);
+      
+      //      point_contract_exact(box1,*iter);
+      //      cout << *iter <<  "  ";
+	//<< " " << box1 << endl;
+      
+      if (!(box1.is_empty())) {
+	//cout << *iter << "  "  ;
+	p++;};
+
+      iter++;
+    }
+    //    cout << endl;
+
+    return p;
+ }
+  /*
+int CtcQInterAffLinear::midactivepoints_count(const Vector& vec){
+    int p=0;
+    //    cout << " points size active count " << points->size() << " box " << box <<endl;
+    list<int>::iterator iter = points->begin() ;
+    
+    
+    
+    while (iter != points->end()){
+    
+    
+      
+      IntervalVector box1(vec);
+      
+      point_contract(box1,*iter);
+      
+      //      point_contract_exact(box1,*iter);
+      //      cout << *iter <<  "  ";
+	//<< " " << box1 << endl;
+      
+      if (!(box1.is_empty()))  
+	//{cout << *iter << "  "  ; p++;}
+	p++;
+      iter++;
+    }
+    //    cout << endl;
+
+    return p;
+ }
+  */
+ void CtcQInterAffLinear::point_verif_prod (IntervalVector & box, int iter) {
   
 
+   IntervalMatrix msol (3,3);
+   IntervalMatrix msolt (3,3);
+   IntervalVector pt1 (3);
+   IntervalVector pt2 (3);
+   IntervalVector res1(3);
+   IntervalVector res2(3);
+   double epsilon=0.05;
+   for (int i=0;i<3;i++)
+     for (int j=0;j<3;j++)
+       { msol[i][j]=box[3*i+j];
+	 msolt[j][i]=box[3*i+j];
+       }
+   pt1[0]= - linfun[iter][3][0];
+   pt2[1]= - linfun[iter][6][0];
+   pt1[2]=1;
+
+      res1= msolt * pt1;
+
+
+      pt2[0]= - linfun[iter][7][0];
+      pt2[1]= - linfun[iter][8][0];
+      pt2[2]=1;
+	
+      res2 = msol * pt2;
+      
+      if ((res1.mag()).max()< epsilon || (res2.mag()).max() < epsilon){
+	//	cout << " res1 " << res1 << " res2 " << res2 << endl; 
+	box.set_empty(); return;}
+ }
 
   /*
   void CtcQInterAffLinear::fwdbwd(IntervalVector & box, int iter, int k){
@@ -566,7 +695,7 @@ void CtcQInterLinear::fwdbwd(IntervalVector & box, int iter, int k){
  Interval CtcQInterAffLinear::eval_ctc(IntervalVector & box, int iter, int k){
    double flin0 = fabs (linfun[iter][0][k]);
    Interval eps1 (-epseq * flin0,epseq *flin0);
-    //    cout << iter << " eps "  << eps << " " << " dist " << eval_dist(box,iter,k) << endl;
+   cout << iter << " eps "  << eps << " " << " dist " << eval_dist(box,iter,k) << endl;
    return (eval_dist(box,iter,k) +   eps1 );
   }
   

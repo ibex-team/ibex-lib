@@ -52,7 +52,7 @@ public:
   
   virtual int midactivepoints_count(const Vector& vec);
   virtual int ctc_contract(IntervalVector& box);
-  virtual	void ctc_contract_all(IntervalVector& box);
+  virtual void ctc_contract_all(IntervalVector& box);
   void ctc_contract_observ(IntervalVector& box, list<int> & observ);
   int fwdbwdcount(IntervalVector& box);
 

@@ -135,6 +135,7 @@ namespace ibex {
   /* push cells with an oracle : one tries to follow it, 
      the cell containing the oracle is pushed on the top of the queue */
   
+  
   void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
     if (!(c1.box.is_empty())&& c1.box.contains(oracle))
       {
@@ -185,8 +186,8 @@ namespace ibex {
   }
 
 
-  /*   variant without oracle  and without use of maximal depth for branching 
-       /*
+  /*   variant without oracle  and without use of maximal depth for branching */
+  /*       
 void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
  
   if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
@@ -409,7 +410,10 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
  void SolverOptQInter::postsolution()
   { 
     if (optimbuffer==2) //best first search
-      (dynamic_cast<CellHeapQInter*> (&buffer))->contract_heap(-(ctcq.q));
+      { cout << " buffer size avant " << buffer.size() << " q " << ctcq.q << endl;
+	(dynamic_cast<CellHeapQInter*> (&buffer))->contract_heap(-(ctcq.q));
+	cout << " buffer size apres " << buffer.size()  << endl;
+      }
   }
 
 
@@ -477,7 +481,16 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
   // search for a feasible point using an inner polytope
   // the feasible point is the corner of the polytope returned by the simplex algorithm (the direction to optimize is random)
   // return value res =1  if a feasible point is found, else res=0
-  Vector SolverOptConstrainedQInter::feasiblepoint (const IntervalVector& box, bool & res) {
+  Vector midpoint (Vector& vec1, Vector& vec2){
+    int n = vec1.size();
+    Vector mid (n);
+    for (int i=0; i<n; i++)
+      mid[i]= (vec1[i]+vec2[i])/2.0;
+    return mid;
+  }
+
+
+ Vector SolverOptConstrainedQInter::feasiblepoint (const IntervalVector& box, bool & res) {
     res=0;
     int n = normsys.nb_var;
     int m = normsys.nb_ctr;
@@ -537,6 +550,8 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
     }
     mylp->cleanConst();
     mylp->initBoundVar(bound);
+    for (int i=0; i< n ;i++)
+      mylp->setVarObj(i,0);
     int rr=rand();
     double sig=0.0;
     if (rr%2) sig=1.0;
@@ -544,44 +559,43 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
     mylp->setVarObj(rr%n,sig); // random objective and random direction
     
     //The linear system is generated
-    if (m>0)
-      {
-	// the evaluation of the constraints in the corner x_corner
-	IntervalVector g_corner(normsys.f.eval_vector(x_corner));
+    // the evaluation of the constraints in the corner x_corner
+    IntervalVector g_corner(normsys.f.eval_vector(x_corner));
 
-	for (int i=0; i<m; i++) {
+    for (int i=0; i<m; i++) {
 
 	  
-	  if (normsys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
-	  
-	  normsys.ctrs[i].f.gradient(box,G);                     // gradient calculation
+      if (normsys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+      
+      normsys.ctrs[i].f.gradient(box,G);                     // gradient calculation
 		  
-	  for (int ii =0; ii< n ; ii++)
-	    if (G[ii].diam() > 1e8) {
-	      mylp->cleanConst();
-	      return feasiblepoint; //to avoid problems with SoPleX
-	    }
+      for (int ii =0; ii< n ; ii++)
+	if (G[ii].diam() > 1e8) {
+	  mylp->cleanConst();
+	  return feasiblepoint; //to avoid problems with SoPleX
+	}
 	
 	  //The contraints i is generated:
 	  // c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
 	  
-	  for (int j=0; j<n; j++) {
+      for (int j=0; j<n; j++) {
 	    
-	    if (corner[j])
-	      row[j]=G[j].ub();
-	    else
-	      row[j]=G[j].lb();
-	  }
-		  
-	  mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
-	  
-	}
+	if (corner[j])
+	  row[j]=G[j].ub();
+	else
+	  row[j]=G[j].lb();
       }
+		  
+      mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
+	  
+    }
+    
 
-
-	//    	       		mylp->writeFile("dump.lp");
-	//			system ("cat dump.lp");
-
+    /*
+	if (nb_cells < 10) {mylp->writeFile("dump.lp");
+	system ("cat dump.lp");
+	}
+    */
     LinearSolver::Status_Sol stat = mylp->solve();
 	
      delete [] corner;
@@ -602,7 +616,7 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
       //      cout << " stat " << stat <<  " res " << res << endl;
       if (res) {
 	feasiblepoint = tmpvec;
-		  /*
+	/*
 		  if (trace)
 		    { 
 		      int prec=std::cout.precision();
@@ -610,7 +624,7 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
 		    std:cout << "feasible point found " << feasiblepoint << endl;
 		      std::cout.precision(prec);
 		    }
-		  */
+	*/
 
 		}
 
@@ -621,7 +635,179 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
       //  if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
     }
     return feasiblepoint;
+	}
+
+
+  
+  Vector SolverOptConstrainedQInter::feasiblepoint (const IntervalVector& box, bool & res, Vector & feasiblepoint2) {
+    res=0;
+    int n = normsys.nb_var;
+    int m = normsys.nb_ctr;
+  
+    Vector feasiblepoint(n);
+    Vector feasiblepoint1(n);
+    //    Vector feasiblepoint2(n);
+  
+    //  cout << " box simplex " << box << endl;
+    IntervalVector G(n); // vector to be used by the partial derivatives
+
+	// boolean indicating which corner in direction i is used : true for inferior corner, false for superior one.
+    bool * corner = new bool[n]; 
+    
+	// random corner choice
+    for (int i=0; i<n ; i++)
+      
+      {//int rr=RNG::rand();
+
+        if (rand()%2)
+	  corner[i]=false;
+	else
+	  corner[i]=true;}  
+	  
+  
+    IntervalVector x_corner(n);
+    for (int i=0 ; i< n ; i++)	  {
+      if (corner[i]) {
+	if (box[i].lb()>NEG_INFINITY)
+	  x_corner[i]=box[i].lb() ;
+	else if  (box[i].ub()<POS_INFINITY)
+	  x_corner[i]=box[i].ub() ;
+	else
+	  {delete [] corner; return feasiblepoint;}
+      }
+      else {
+	if (box[i].ub()<POS_INFINITY)
+	  x_corner[i]=box[i].ub() ;
+	else if  (box[i].lb()>NEG_INFINITY)
+	  x_corner[i]=box[i].lb() ;
+	else
+	  {delete [] corner; return feasiblepoint;}
+      }
+    }
+ 
+    Vector row(n);
+    IntervalVector bound(n);
+    for (int j=0; j<n; j++){
+    //The linear variables are generated
+    //0 <= xl_j <= diam([x_j])
+      if (corner[j])    {
+	bound[j] = Interval(0,box[j].diam());
+	row[j]=0;
+	  }
+      else   {
+	bound[j] = Interval(-box[j].diam(),0);
+	row[j] = 0;
+      }
+    }
+
+ //The linear system is generated
+    if (m>0)
+      {
+	// the evaluation of the constraints in the corner x_corner
+	IntervalVector g_corner(normsys.f.eval_vector(x_corner));
+	int rr=rand();
+	for (int k=0;k<2;k++){
+	  mylp->cleanConst();
+	  for (int i=0; i< n ;i++)
+	    mylp->setVarObj(i,0);
+	  //	  mylp->cleanAll();
+	  mylp->initBoundVar(bound);
+	  double sig=0.0;
+
+	  if (k==0) sig=1.0;
+	  else sig=-1.0;
+	  mylp->setVarObj(rr%n,sig); // random objective and random direction
+	  for (int i=0; i<m; i++) {
+	    if (normsys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+	    normsys.ctrs[i].f.gradient(box,G);                     // gradient calculation
+	    for (int ii =0; ii< n ; ii++)
+	      if (G[ii].diam() > 1e8) {
+		mylp->cleanConst();
+		return feasiblepoint; //to avoid problems with SoPleX
+	      }
+	    for (int j=0; j<n; j++) {
+	    
+	      if (corner[j])
+		row[j]=G[j].ub();
+	      else
+		row[j]=G[j].lb();
+	    }
+
+
+	    mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
+      
+      //The contraints i is generated:
+	  // c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
+
+      
+	    
+	  }
+    
+	  //	  cout << " nb_cells " << nb_cells << endl;
+	  /*
+	  if (nb_cells < 10){
+	    mylp->writeFile("dump.lp");
+	    system ("cat dump.lp");
+	  }
+	  */
+	  LinearSolver::Status_Sol stat = mylp->solve();
+	
+    
+	  //	  std::cout << " stat solver " << stat << std::endl;
+	  if (stat == LinearSolver::OPTIMAL) {
+	    //the linear solution is mapped to intervals and evaluated
+	    Vector prim(n);
+	    mylp->getPrimalSol(prim);
+
+	    IntervalVector tmpbox(n);
+
+	    for (int j=0; j<n; j++)
+	      tmpbox[j]=x_corner[j]+prim[j];
+      //		std::cout << " simplex result " << tmpbox << std::endl;
+		
+	    Vector tmpvec= tmpbox.mid();
+	    res= box.contains(tmpvec) ;
+      //      cout << " stat " << stat <<  " res " << res << endl;
+	    if (res) {
+	      feasiblepoint = tmpvec;
+	/*
+		  if (trace)
+		    { 
+		      int prec=std::cout.precision();
+		      std::cout.precision(12);
+		    std:cout << "feasible point found " << feasiblepoint << endl;
+		      std::cout.precision(prec);
+		    }
+	*/
+
+
+
+	      if (k==0) feasiblepoint1= feasiblepoint;
+	      else feasiblepoint2=feasiblepoint;
+	    }
+	    else {delete [] corner; return feasiblepoint1;}
+	  }
+	  else {res=0; delete [] corner; return feasiblepoint;}
+	  if (trace) {
+	    if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
+      //  if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
+	  }
+	}
+	delete [] corner;
+    /*
+    int rr0 = rand();
+    cout << " rr0 " << rr0 << endl;
+    if (rr0%3==0)
+      return feasiblepoint1;
+    else if (rr0%3==2)
+      return feasiblepoint2;
+    else 
+    */
+	return feasiblepoint;
+	  //	return midpoint(feasiblepoint1,feasiblepoint2);
+      }
   }
+
 
   /* in case of constraints, the system is transformed in a normalized system  */
   SolverOptConstrainedQInter::SolverOptConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq,  double epscont, int optim)  : SolverOptQInter (ctc,bsc, buffer, ctcq, optim),  epscont(epscont), normsys(sys,epscont), sys(sys)
@@ -637,7 +823,60 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
   // at most nsimpl (here fixed to 10) calls to "feasiblepoint" are performed.
   // the search stops when a polytope built by feasiblepoint is empty (res=0).
 
+  // version avec 2 appels au simplexe : une direction et son opposée
+  /*
   Vector SolverOptConstrainedQInter::newvalidpoint (Cell & c){
+    Vector newvalidpoint(ctcq.nb_var);
+    int nbsimpl=10;   // the maximum number of tries 
+    Vector newvalidpoint1(ctcq.nb_var);
+    Vector newvalidpoint2 (ctcq.nb_var);
+    Vector newvalidpoint3 (ctcq.nb_var);
+    bool res=false;
+	//	int fail=0;
+    for (int kk=0;kk<nbsimpl;kk++){
+      int qvalid1=0;
+      int qvalid2=0;
+      int qvalid3=0;
+
+      newvalidpoint1=feasiblepoint(c.box,res,newvalidpoint2);
+
+      if (res)
+	{
+	  qvalid1= ctcq.midactivepoints_count(newvalidpoint1); 
+	  qvalid2= ctcq.midactivepoints_count(newvalidpoint2); 
+	  newvalidpoint3= midpoint(newvalidpoint1,newvalidpoint2);
+	  qvalid3 = ctcq.midactivepoints_count(newvalidpoint3); 
+	  //	  cout << " qvalid1 " << qvalid1 << " qvalid2 " << qvalid2 << " qvalid3 " << qvalid3 << endl;
+	  //	  cout << " npt1 " << newvalidpoint1 << endl;
+	  //	  cout << " npt2 " << newvalidpoint2 << endl;
+	  //	  cout << " npt3 " << newvalidpoint3 << endl;
+
+	}	    
+      else break;  // stopping the search if the last polytope built is empty
+	 
+      if (qvalid1>qvalid){
+	qvalid=qvalid1;
+	newvalidpoint=newvalidpoint1;
+      }
+      if (qvalid2>qvalid){
+	qvalid=qvalid2;
+	newvalidpoint=newvalidpoint2;
+      }
+      if (qvalid3>qvalid){
+	qvalid=qvalid3;
+	newvalidpoint=newvalidpoint3;
+      }
+
+      //      cout <<  " qvalid " << qvalid << " point " << newvalidpoint; 
+    }
+
+    return newvalidpoint;
+
+  }
+  */
+
+  //version avec un seul appel au simplexe par système de contraintes (1 direction)
+Vector SolverOptConstrainedQInter::newvalidpoint (Cell & c){
     Vector newvalidpoint(ctcq.nb_var);
     int nbsimpl=10;   // the maximum number of tries 
     Vector newvalidpoint2(ctcq.nb_var);
@@ -653,15 +892,16 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
 	  qvalid2 = ctcq.midactivepoints_count(newvalidpoint2); 
 	}	    
       else break;  // stopping the search if the last polytope built is empty
-	  /*
+
 	  
-	  else if (kk==0) {fail=1; continue;} 
+//	  else if (kk==0) {fail=1; continue;} 
 	  
-	  else if (kk==1 && fail==1) break;
+//	  else if (kk==1 && fail==1) break;
 	  
-	  else if (kk==0) continue;
-	  else continue;
-	  */
+//	  else if (kk==0) continue;
+//	  else continue;
+
+
       if (qvalid2>qvalid){
 	qvalid=qvalid2;
 
@@ -691,12 +931,13 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
    }
 
 void SolverOptBSConstrainedQInter::push_cells(Cell&c1, Cell& c2){
-    if (!(c1.box.is_empty())&& c1.box.contains(oracle))
+  
+  if (with_oracle && (!(c1.box.is_empty())&& c1.box.contains(oracle)))
       {
 	if  (!(c2.box.is_empty())) buffer.push(&c2);
 	stackbuffer->push(&c1);}
     else if 
-      (!(c2.box.is_empty())&& c2.box.contains(oracle))
+      (with_oracle &&(!(c2.box.is_empty())&& c2.box.contains(oracle)))
       {
 	if (!(c1.box.is_empty())) buffer.push(&c1);
 	stackbuffer->push(&c2);}
@@ -709,6 +950,7 @@ void SolverOptBSConstrainedQInter::push_cells(Cell&c1, Cell& c2){
 	else  {stackbuffer->push(&c2); buffer.push(&c1);}
       }
 	  
+  
 
     else if (!(c1.box.is_empty())) stackbuffer->push(&c1);
     else if (!(c2.box.is_empty())) stackbuffer->push(&c2);

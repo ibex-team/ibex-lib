@@ -64,7 +64,7 @@ public:
 		     double epseq, int q,  qintermethod meth=QINTERPROJ, int K=1);
 
     void point_contract(IntervalVector& box,int iter); 
-
+   int midactivepoints_count(const Vector& vec);
  
  protected :
 
@@ -82,6 +82,7 @@ public:
    int effective_size(const IntervalVector &box) ;
    int affine_threshold();
 
+   void point_verif_prod(IntervalVector & box, int iter);
 };
 
 
