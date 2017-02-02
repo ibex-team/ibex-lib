@@ -399,7 +399,7 @@ bool Cont::is_valid_cell_2(const IntervalVector& box_existence, const VarSet& va
 				else
 					box[i]=domain[i].ub();
 
-				VarSet tmpvars=get_vars(f, box.mid(), forced_params);
+				VarSet tmpvars=get_newton_vars(f, box.mid(), forced_params);
 
 				valid_cell=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
 
@@ -427,7 +427,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 	IntervalVector box(n);
 	IntervalVector box_unicity(n);
 	IntervalVector box_existence(n);
-	VarSet vars=get_vars(f, x.mid(), BitSet::empty(n));
+	VarSet vars=get_newton_vars(f, x.mid(), BitSet::empty(n));
 
 	x_box=vars.var_box(x);
 	p_box=vars.param_box(x);

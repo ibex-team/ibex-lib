@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
-// Last Update : August 21, 2013
+// Last Update : Feb 02, 2017
 //============================================================================
 
 #ifndef __IBEX_SOLVER_H__
@@ -28,7 +28,8 @@ namespace ibex {
  *
  * \brief  Solver.
  *
- * This class implements an branch and prune algorithm that finds all the solutions of a well constrained systems of equations (the system may contain additional inequalities).
+ * This class implements an branch and prune algorithm that finds all the solutions of a systems of equations (the system may contain additional inequalities).
+ *
  */
 
 
@@ -39,11 +40,37 @@ public:
 	/**
 	 * \brief Build a solver.
 	 *
-	 * \param ctc  -  the contractor (for contracting each node of the search tree) 
-	 * \param bsc  -  the bisector   (for branching). Contains the stop criterion.
-	 * \param buffer - the cell buffer (a CellStack in a depth first search strategy)
+	 * \param ctc    - The contractor (for contracting each node of the search tree)
+	 * \param bsc    - The bisector   (for branching). Contains the stop criterion.
+	 * \param buffer - The cell buffer (a CellStack in a depth first search strategy)
 	 */
 	Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer);
+
+	/**
+	 * \brief Build a solver with certification.
+	 *
+	 * \param sys    - The system to be solved
+	 * \param ctc    - The contractor (for contracting each node of the search tree)
+	 * \param bsc    - The bisector   (for branching). Contains the stop criterion.
+	 * \param buffer - The cell buffer (a CellStack in a depth first search strategy)
+	 */
+	Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer);
+
+	/**
+	 * \brief Build a solver with certification.
+	 *
+	 * \param sys    - The system to be solved
+	 * \param params - Force which dimensions correspond to parameters
+	 * \param ctc    - The contractor (for contracting each node of the search tree)
+	 * \param bsc    - The bisector   (for branching). Contains the stop criterion.
+	 * \param buffer - The cell buffer (a CellStack in a depth first search strategy)
+	 */
+	Solver(const System& sys, const BitSet& params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer);
+
+	/**
+	 * \brief Destructor.
+	 */
+	~Solver();
 
 	/**
 	 * \brief Solve the system (non-interactive mode).
@@ -62,19 +89,44 @@ public:
 	void start(const IntervalVector& init_box);
 
 	/**
+	 * Return type for the next(...) function.
+	 *
+	 * \see #next(std::vector<IntervalVector>&).
+	 */
+	typedef enum { SEARCH_OVER, NEW_SAFE, NEW_UNSAFE, SAFE, UNSAFE } sol_type;
+
+	/**
 	 * \brief Continue solving (interactive mode).
 	 *
 	 * Look for the next solution and push it into the vector.
-	 * \return false if the search is over (true otherwise).
+	 *
+	 * When the system is well-constrained, a "solution" is a box [x] such that
+	 * there exists x in [x] f(x)=0.
+	 *
+	 * When the system is under-constrained, a "solution" is a box ([x],[p]) such that
+	 * for all p in [p] there exists x in f(x,p)=0.
+	 *
+	 * A "new" solution is a solution that is proven to have an empty intersection with all
+	 * previously found solutions. For efficiency reason, this test is not performed in the
+	 * case of under-constrained systems.
+	 *
+	 * If certification is not required, the return type is always UNSAFE.
+	 *
+	 * \return
+	 *          NEW_SAFE:        The box is proven to contain a new solution.
+	 *          NEW_UNSAFE:      The box may contain a solution and if it does, this is a new solution.
+	 *          SAFE:            The box is proven to contain a solution but that may have already been found earlier.
+	 *          UNSAFE:          The box may contain a solution and if it does, the solution may have already been found earlier;
+	 *          SEARCH_OVER:     There is no more solution.
 	 */
-	bool next(std::vector<IntervalVector>& sols);
-
+	sol_type next(std::vector<IntervalVector>& sols);
 
 	/**
-	 * \brief  The contractor 
+	 * \brief The contractor.
 	 *
-	 * contractor used by the solver for contracting the current box at each node : 
-	 * generally, a sequence (with or without fixpoint) of different contractors (hc4 , acid, Newton , a linear relaxation )
+	 * Contractor used by the solver for contracting the current box at each node:
+	 * generally, a sequence (with or without fixpoint) of different contractors (HC4,
+	 * Acid, Newton, a linear relaxation, ... )
 	 *
 	 */ 
 	Ctc& ctc;
@@ -107,20 +159,56 @@ public:
 	 */
 	int trace;
 
-	/** Number of nodes  in the search tree */
+	/** Number of nodes in the search tree */
 	int nb_cells;
-
 
 	/** Remember running time of the last exploration */
 	double time;
 
 protected :
 
+	void init(const System& sys, const BitSet* params);
+
 	void time_limit_check();
 
-	void new_sol(std::vector<IntervalVector> & sols, IntervalVector & box);
+	/*
+	 * Return false if the new solution "x" is surely not a new solution.
+	 * If it returns true, a more precise status of the solution is given in "type".
+	 * If the status is SAFE or NEW_SAFE the box "x" may have slightly changed (due
+	 * to inflating Newton) and the actual solution is stored at the end of "solve_solutions".
+	 * So, in any case the new solution (safe or not) should be read from "solve_solutions".
+	 */
+	bool check_sol(IntervalVector& x, sol_type& type);
+
 
 	BitSet impact;
+
+	/*
+	 * Initial box of the current search.
+	 */
+	IntervalVector solve_init_box;
+
+	/*
+	 * The equations to be solved. Only used if certification required.
+	 */
+	const System* eqs;
+
+	/*
+	 * The inequalities to be solved. Only used if certification required.
+	 */
+	const System* ineqs;
+
+	/**
+	 * The forced parameters (if any). Only used if certification required.
+	 */
+	const BitSet* params;
+
+	/*
+	 * Solutions found in the current search.
+	 *
+	 * Each solution is represented by an existence (first) and unicity (second) box.
+	 */
+	std::vector<std::pair<IntervalVector,IntervalVector> > solve_solutions;
 
 };
 

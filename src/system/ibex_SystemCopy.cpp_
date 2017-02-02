@@ -31,6 +31,9 @@ public:
 			if (mode==System::COPY ||
 					(sys.ctrs[i].op==EQ && mode==System::EQ_ONLY) ||
 					(sys.ctrs[i].op!=EQ && mode==System::INEQ_ONLY))
+
+				// TODO: we lose DAG structure here...
+
 				add_ctr(sys.ctrs[i]);
 		}
 	}
