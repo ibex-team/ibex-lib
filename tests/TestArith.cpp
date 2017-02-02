@@ -961,3 +961,9 @@ void TestArith::bwd_imod_07() {
 void TestArith::bwd_imod_08() {
 	CPPUNIT_ASSERT(checkbwd_imod(2.*M_PI,Interval(7.*M_PI/4.,8.*M_PI/3),Interval(-M_PI/2,M_PI/2.),Interval(7.*M_PI/4.,5.*M_PI/2.),Interval(-M_PI/4,M_PI/2.)));
 }
+
+void TestArith::tan_issue248() {
+	//Interval itv = Interval(-Interval::PI.lb()/2,3*Interval::PI.ub()/8);
+	Interval itv = Interval(-1.57079632679489678, 1.1780972450961728626);
+	CPPUNIT_ASSERT(!(tan(itv).is_empty()));
+}
