@@ -21,7 +21,7 @@ namespace ibex {
 
 Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(ctc.nb_var), eqs(NULL), ineqs(NULL), params(NULL) {
+		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL) {
 
 	n=ctc.nb_var;
 	m=-1;
@@ -29,7 +29,7 @@ Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 
 Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(ctc.nb_var), eqs(NULL), ineqs(NULL), params(NULL) {
+		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL) {
 
 	init(sys, NULL);
 
@@ -37,7 +37,7 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 
 Solver::Solver(const System& sys, const BitSet& _params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(ctc.nb_var), eqs(NULL), ineqs(NULL), params(NULL) {
+		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL) {
 
 	init(sys,&_params);
 
@@ -90,6 +90,7 @@ void Solver::start(const IntervalVector& init_box) {
 	solutions.clear();
 	solve_init_box = init_box;
 	nb_cells=0;
+	time=0;
 
 	assert(init_box.size()==ctc.nb_var);
 
