@@ -103,5 +103,16 @@ bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVecto
 		double delta_relative_inflat=1.1, double chi_absolute_inflat=1e-12);
 
 
+/**
+ * Determine which variables should be considered as parameters
+ * when solving an under-constrained system f(x)=0 around a point "pt"
+ * using interval Newton's iteration.
+ *
+ * Parameters are chosen according to Hansen's strategy: they
+ * are the "most influencing" variable obtained by the pivoting
+ * of Gauss elimination.
+ */
+VarSet get_newton_vars(const Function& f, const Vector& pt, const BitSet& forced_params);
+
 } // end namespace ibex
 #endif // __IBEX_NEWTON_H__

@@ -3,9 +3,9 @@ class Test {
 	
 	public static void main(String[] args) {
 		
-		Ibex ibex=new Ibex();
+		Ibex ibex=new Ibex(new int[]{0,1}, 1e-2);
 		
-		ibex.add_ctr(2,"{0}-{1}=0"); 
+		ibex.add_ctr("{0}-{1}=0"); 
 		
 		
 		double domains[]={1.5,10.5,5.5,12.0};
@@ -23,12 +23,7 @@ class Test {
 			System.out.println("Nothing.");	
 		}
 		 
-		 
-		ibex.add_int_ctr(2);
-		ibex.contract(1,domains);
-		System.out.println("After contract #1:");
-		System.out.println("(["+domains[0]+","+domains[1]+"] ; ["+domains[2]+","+domains[3]+"])");		
-		 
+		 		 
 		//ibex.release();
 	}
 }

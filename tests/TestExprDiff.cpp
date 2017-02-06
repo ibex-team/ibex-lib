@@ -102,6 +102,17 @@ void TestExprDiff::vec03() {
 	CPPUNIT_ASSERT(c->get_vector_value()==IntervalVector(2,_v));
 }
 
+void TestExprDiff::row_vec() {
+	Variable x(1,3,"x");
+	Function f(x,x);
+	Function df(f,Function::DIFF);
+
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.type()==Dim::MATRIX);
+	CPPUNIT_ASSERT(c->get_matrix_value()==Matrix::eye(3));
+}
+
 void TestExprDiff::mat01() {
 	Variable x(2,2,"x");
 	Function f(x,x[1][0]);
@@ -229,6 +240,42 @@ void TestExprDiff::mul01() {
 	CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+x)+2)"));
 }
 
+void TestExprDiff::mul02() {
+	Variable x("x");
+	const ExprVector& v1=ExprVector::new_(x,x,false);
+	const ExprVector& v2=ExprVector::new_(x,Interval(2,2),false);
+	Function f(x,transpose(v1)*v2);
+	Function df(f,Function::DIFF);
+	//CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+2)+x)"));
+	CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+x)+2)"));
+}
+
+void TestExprDiff::mul03() {
+	Variable x("x");
+	Variable y("y");
+	const ExprVector& v=ExprVector::new_(x,y,false);
+	const ExprConstant& M=ExprConstant::new_matrix(Matrix::eye(2));
+	Function f(x,y,M*v);
+	Function df(f,Function::DIFF);
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.type()==Dim::MATRIX);
+	CPPUNIT_ASSERT(c->get_matrix_value()==Matrix::eye(2));
+}
+
+void TestExprDiff::mul04() {
+	Variable x("x");
+	Variable y("y");
+	const ExprVector& v=ExprVector::new_(x,y,true);
+	const ExprConstant& M=ExprConstant::new_matrix(Matrix::eye(2));
+	Function f(x,y,v*M);
+	Function df(f,Function::DIFF);
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.type()==Dim::MATRIX);
+	CPPUNIT_ASSERT(c->get_matrix_value()==Matrix::eye(2));
+}
+
 void TestExprDiff::apply_mul01() {
 	Variable x,y;
 	Function f(x,y,x,"f");
@@ -258,6 +305,19 @@ void TestExprDiff::apply_mul02() {
 //
 //	cout << "DG=" << dg << endl;
 //	CPPUNIT_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
+}
+
+void TestExprDiff::issue247() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	const ExprSymbol& y=ExprSymbol::new_();
+	const ExprNode& e=x+y;
+	Array<const ExprNode> a(e,e,e);
+	const ExprVector& v1=ExprVector::new_(a,false);
+	DoubleIndex idx(v1.dim,0,1,0,0);
+	const ExprVector& v2=ExprVector::new_(v1[idx],v1[idx],false);
+	Function f(x,y,v2[0]);
+	IntervalVector g=f.gradient(IntervalVector(2));
+	CPPUNIT_ASSERT(g==Vector::ones(2));
 }
 
 } // end namespace

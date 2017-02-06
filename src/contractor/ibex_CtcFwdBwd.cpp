@@ -13,33 +13,6 @@
 
 namespace ibex {
 
-namespace {
-
-/**
- * Initialize the domain "d" such that a constraint "f op 0" is equivalent to "f in d".
- */
-void int_ctr_domain(Domain& d, CmpOp op) {
-
-	Interval right_cst;
-
-	switch (op) {
-	case LT :
-	case LEQ : right_cst=Interval::NEG_REALS; break;
-	case EQ  : right_cst=Interval::ZERO;      break;
-	case GEQ :
-	case GT : right_cst=Interval::POS_REALS;  break;
-	}
-
-	switch(d.dim.type()) {
-	case Dim::SCALAR:       d.i()=right_cst; break;
-	case Dim::ROW_VECTOR:   d.v()=IntervalVector(d.dim.nb_cols(),right_cst); break;
-	case Dim::COL_VECTOR:   d.v()=IntervalVector(d.dim.nb_rows(),right_cst); break;
-	case Dim::MATRIX:       d.m()=IntervalMatrix(d.dim.nb_rows(),d.dim.nb_cols(),right_cst); break;
-	}
-}
-
-} // end anonymous namespace
-
 CtcFwdBwd::CtcFwdBwd(Function& f, const Domain& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim) {
 	assert(f.expr().dim==y.dim);
 	d = y;
@@ -68,15 +41,11 @@ CtcFwdBwd::CtcFwdBwd(Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op) : Ctc(f.nb_var()), f(f), d(f.expr().dim)  {
-	int_ctr_domain(d,op);
-
+CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op) : Ctc(f.nb_var()), f(f), d(NumConstraint(f,op).right_hand_side())  {
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), f(ctr.f), d(ctr.f.expr().dim) {
-	int_ctr_domain(d,ctr.op);
-
+CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), f(ctr.f), d(ctr.right_hand_side()) {
 	init();
 }
 

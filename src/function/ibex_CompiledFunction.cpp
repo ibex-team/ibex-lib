@@ -42,7 +42,6 @@ void CompiledFunction::compile(Function& f) {
 	for (ptr=n-1; ptr>=0; ptr--) {
 		(*nodes)[ptr].acceptVisitor(*this);
 	}
-
 	//cout << f.name << " : n=" << n << " nb_args[" << 0 << "]=" << nb_args[0] << endl;
 }
 
@@ -53,6 +52,16 @@ CompiledFunction::~CompiledFunction() {
 	for (int i=0; i<n; i++) delete[] args[i];
 	delete[] args;
 	delete[] nb_args;
+}
+
+Agenda* CompiledFunction::agenda(int rank) const {
+	Agenda* a=new Agenda(n);
+	a->push(rank);
+	for (int i=a->first(); i!=a->end(); i=a->next(i)) {
+		for (int j=0; j<nb_args[i]; j++)
+			a->push(args[i][j]);
+	}
+	return a;
 }
 
 void CompiledFunction::visit(const ExprNode& e) {

@@ -474,7 +474,11 @@ inline Interval sin(const Interval& x) {
 }
 
 inline Interval tan(const Interval& x) {
-	return filib::tan(x.itv);
+	Interval res =  filib::tan(x.itv);
+	if (res.is_empty()&& (!x.is_empty())) {
+		return Interval::ALL_REALS;
+	} else
+		return res;
 }
 
 inline Interval acos(const Interval& x) {
