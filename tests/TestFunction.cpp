@@ -16,6 +16,8 @@
 #include "ibex_SyntaxError.h"
 #include <sstream>
 
+#include "fmemopen.h"
+
 using namespace std;
 
 namespace ibex {
