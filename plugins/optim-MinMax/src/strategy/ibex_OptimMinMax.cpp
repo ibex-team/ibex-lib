@@ -32,7 +32,28 @@ OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& 
         iter(default_iter),
         list_rate(default_list_rate),
         min_perc_coef(default_min_perc_coef),
-        list_elem_absolute_max(default_list_elem_absolute_max){
+        list_elem_absolute_max(default_list_elem_absolute_max),
+        fa_lsolve(xy_sys,xy_ctc), // useless if no fa cst but need to construct it...
+        fa_y_cst(false)
+{
+};
+
+OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,NormalizedSystem& max_fa_y_cst_sys, Ctc& x_ctc,Ctc& xy_ctc,
+                         double prec_x,double prec_y,double goal_rel_prec,double fa_cst_prec):
+    Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
+                    prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
+    x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
+    x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
+    bsc(new LargestFirst()),
+    prec_y(prec_y),
+    iter(default_iter),
+    list_rate(default_list_rate),
+    min_perc_coef(default_min_perc_coef),
+    list_elem_absolute_max(default_list_elem_absolute_max),
+    prec_fa_y(fa_cst_prec),
+    fa_lsolve(max_fa_y_cst_sys,xy_ctc), // construct light solver for for all y cst with fake contractor, contractor useless since no constraint on xy only the objective function matter
+    fa_y_cst(true)
+{
 };
 
 OptimMinMax::~OptimMinMax() {
@@ -251,32 +272,33 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	}
 
 	//************* midpoint evaluation ****************
-	IntervalVector  midp = get_feasible_point(x_cell);
-	if(!midp.is_empty())    { // we found a feasible point
-		Cell *x_copy = new Cell(*x_cell); // copy of the Cell and the y_heap
-		x_copy->box=midp; // set the box to the middle of x
+        IntervalVector  midp = get_feasible_point(x_cell);
+        if(!midp.is_empty())    { // we found a feasible point
+                Cell *x_copy = new Cell(*x_cell); // copy of the Cell and the y_heap
+                x_copy->box=midp; // set the box to the middle of x
 
                 lsolve.nb_iter = choose_nbiter(true);
                 lsolve.prec_y = prec_y;
                 lsolve.list_elem_max = 0; // no limit on heap size
                 bool res1 = lsolve.optimize(x_copy); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
-		if (res1) {
-			double new_loup = x_copy->get<DataMinMax>().fmax.ub();
+                if (res1) {
+                        double new_loup = x_copy->get<DataMinMax>().fmax.ub();
 
-			if(new_loup<loup) { // update best current solution
-				loup = new_loup;
-				loup_changed = true;
-				loup_point = (midp.mid());
+                        if(new_loup<loup) { // update best current solution
+                            cout<<"worst case over Y: "<<x_copy->get<DataMinMax>().y_heap->top1()->box<<endl;
+                                loup = new_loup;
+                                loup_changed = true;
+                                loup_point = (midp.mid());
                                 ymax= compute_ymax()+1.e-15;
                                 data_x->fmax &= Interval(NEG_INFINITY,ymax);
 
-				if (trace) cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
-				//max_y = heap_copy.top1()->box;
-				//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
-			}
-			delete x_copy; // delete copy of the heap, no more use after the computation of max f(midp,heap_copy)
-		}
-	}
+                                if (trace) cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+                                //max_y = heap_copy.top1()->box;
+                                //cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
+                        }
+                        delete x_copy; // delete copy of the heap, no more use after the computation of max f(midp,heap_copy)
+                }
+        }
 
 
 	//***** if x_cell is too small ******************
@@ -284,9 +306,10 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
                 lsolve.nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
                 lsolve.prec_y = prec_y;
                 lsolve.list_elem_max = 0; // no limit on heap size
-		//cout<<"fmax ini: "<<x_cell->fmax<<endl;
+                cout<<"fmax ini: "<<data_x->fmax<<endl;
+                cout<<"for box: "<<x_cell->box<<endl;
                 bool res =lsolve.optimize(x_cell); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
-		//cout<<"fmax min prec: "<<x_cell->fmax<<endl;
+                cout<<"fmax min prec: "<<data_x->fmax<<endl;
 
 		if(res){
 			update_uplo_of_epsboxes(data_x->fmax.lb());

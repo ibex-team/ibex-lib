@@ -20,6 +20,7 @@
 #include "ibex_OptimData.h"
 #include <fstream>
 #include <string>
+#include "ibex_CtcIdentity.h"
 
 namespace ibex {
 
@@ -30,6 +31,9 @@ public:
 
     /* Constructor*/
     LightOptimMinMax(NormalizedSystem& y_sys,Ctc& ctc_xy);
+
+    /* Constructor*/
+//    LightOptimMinMax(NormalizedSystem& y_sys);
 
     /* Destructor */
     ~LightOptimMinMax();
@@ -62,15 +66,17 @@ public:
     int nb_iter;
     double prec_y;
     bool monitor;
+    NormalizedSystem& xy_sys; // contains constraints on x and y
 
 private:
     Ctc& ctc_xy; //contractor for constraints on xy
-    NormalizedSystem& xy_sys; // contains constraints on x and y
+
     //double abs_min_prec; // absolute minimum prec bissection on y
     Bsc* bsc; // bissector
     std::vector<Cell*> heap_save;
     bool found_point;
     double time;
+    bool csp_actif;
 
     /* contract xy_box and xy_box_ctc w.r.t max_ctc contractor
      * */

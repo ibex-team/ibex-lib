@@ -14,11 +14,11 @@ namespace ibex {
 CellCostMaxPFub DataMinMax::y_heap_costf1;
 CellCostPFlb DataMinMax::y_heap_costf2;
 
-DataMinMax::DataMinMax() : fmax(), pu(0), y_heap(new DoubleHeap<Cell>(y_heap_costf1,false,y_heap_costf2,false)) {
+DataMinMax::DataMinMax() : fmax(), pu(0), y_heap(new DoubleHeap<Cell>(y_heap_costf1,false,y_heap_costf2,false)),y_fa_heap(new DoubleHeap<Cell>(y_heap_costf1,false,y_heap_costf2,false)) {
 
 }
 
-DataMinMax::DataMinMax(const DataMinMax& e) : fmax(e.fmax), pu(e.pu),y_heap(e.y_heap->deepcopy()) {
+DataMinMax::DataMinMax(const DataMinMax& e) : fmax(e.fmax), pu(e.pu),y_heap(e.y_heap->deepcopy()),y_fa_heap(e.y_fa_heap->deepcopy()) {
 }
 
 std::pair<Backtrackable*,Backtrackable*> DataMinMax::down() {
@@ -27,7 +27,9 @@ std::pair<Backtrackable*,Backtrackable*> DataMinMax::down() {
 
 DataMinMax::~DataMinMax() {
 	y_heap->flush();
+        y_fa_heap->flush();
 	delete y_heap;
+        delete y_fa_heap;
 }
 
 CellCostFmaxlb::CellCostFmaxlb(): CellCostFunc(false) { }

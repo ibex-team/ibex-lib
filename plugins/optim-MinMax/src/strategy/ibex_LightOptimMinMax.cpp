@@ -26,30 +26,60 @@ const int LightOptimMinMax::default_nb_iter = 1000;
 LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):
     trace(false) , timeout(default_timeout),
         ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(default_prec_y), found_point(false), time(0),
-        list_elem_max(default_list_elem_max),ext_crit_prob(default_ext_prob),nb_iter(default_nb_iter),monitor(false){
+        list_elem_max(default_list_elem_max),ext_crit_prob(default_ext_prob),nb_iter(default_nb_iter),monitor(false), csp_actif(false){
 
 
 }
+
+//LightOptimMinMax::LightOptimMinMax(NormalizedSystem& fa_y_sys):
+//    trace(false) , timeout(default_timeout),
+//        xy_sys(fa_y_sys), bsc(new LargestFirst()), prec_y(default_prec_y), found_point(false), time(0),
+//        list_elem_max(default_list_elem_max),ext_crit_prob(default_ext_prob),nb_iter(default_nb_iter),monitor(false), csp_actif(true){
+
+
+//}
 
 LightOptimMinMax::~LightOptimMinMax() {
 	delete bsc;
 }
 
 void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_init) {
-	root.add<DataMinMax>();
+//        if (csp_actif)
+//            root.add<DataMinMaxCsp>();
+//        else
+//            root.add<DataMinMaxOpti>();
+        root.add<DataMinMax>();
 	Cell * y_cell = new Cell(y_init);
 	y_cell->add<OptimData>();
 	bsc->add_backtrackable(*y_cell);
-	DataMinMax *data_x = &(root.get<DataMinMax>());
+        DataMinMax *data_x ;
+//        DataMinMaxOpti *data_x ;
+
+//        if (csp_actif)
+//            data_x = &(root.get<DataMinMaxCsp>());
+//        else
+//            data_x = &(root.get<DataMinMaxOpti>());
+        data_x = &(root.get<DataMinMax>());
+
 	data_x->y_heap_costf1.add_backtrackable(*y_cell);
 	data_x->y_heap_costf2.add_backtrackable(*y_cell);
 	data_x->y_heap->push(y_cell);
 }
 
 bool LightOptimMinMax::optimize(Cell* x_cell) {
+//    std::cout<<"run light optim"<<std::endl;
 
-	found_point  = false;
-	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
+    std::cout<<std::endl<<std::endl<<"********************* Light optim res for box "<<x_cell->box<<" *************** "<<std::endl;
+    std::cout<<"current optim parameters: "<<std::endl<<"list max elem: "<<list_elem_max<<std::endl<<"nb itex: "<<nb_iter<<std::endl;
+
+        found_point  = false;
+        DataMinMax *data_x;
+//        DataMinMaxOpti *data_x;
+//        if (csp_actif )
+//            data_x = &(x_cell->get<DataMinMaxCsp>());
+//        else
+//            data_x = &(x_cell->get<DataMinMaxOpti>());
+        data_x = &(x_cell->get<DataMinMax>());
 
 	//std::cout <<"    DEB "<<data_x->fmax <<std::endl;
 
@@ -63,15 +93,18 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 	time= Timer::get_time();
 
 	// ********** contract x_box with ctc_xy***************
-        IntervalVector xy_box = xy_box_hull(x_cell->box);
-        ctc_xy.contract(xy_box);
-        if(xy_box.is_empty()) {
-            delete x_cell;
-            return false;
-        } else {
-            // contract the result on x
-            x_cell->box &= xy_box.subvector(0,x_cell->box.size()-1);
-        }
+//        if(!csp_actif) // no constraint if dealing with fa cst, better not use the useless contractor
+//        {
+            IntervalVector xy_box = xy_box_hull(x_cell->box);
+            ctc_xy.contract(xy_box);
+            if(xy_box.is_empty()) {
+                delete x_cell;
+                return false;
+            } else {
+                // contract the result on x
+                x_cell->box &= xy_box.subvector(0,x_cell->box.size()-1);
+            }
+//        }
 
         //monitoring variables, used to track upper bound, lower bound, number of elem in y_heap and heap_save at each iteration
         std::vector<double> ub,lb,nbel,nbel_save;
@@ -79,10 +112,13 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 
 	// *********** loop ********************
 	try {
-            int current_iter(0);
+            int current_iter(1);
                 while(!stop_crit_reached(current_iter,y_heap->size())) {
 			if (trace >= 3) std::cout<< *y_heap<<std::endl;
 
+//                        if (csp_actif && (y_heap->top1()->get<OptimData>().pf.ub() < 0  )) {
+//                                break;
+//                        }
 			Cell * y_cell = y_heap->pop1(); // we extract an element according to the first order
                         current_iter++;
 //                        std::cout<<"current_iter: "<<current_iter<<std::endl;
@@ -125,6 +161,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
                             nbel.push_back(y_heap->size());
                             nbel_save.push_back(heap_save.size());
                         }
+//                        std::cout<<"nb iter: "<<current_iter<<std::endl;
 
 		}
 
@@ -137,13 +174,15 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 	 */
 	// insert the y_box with a too small diameter (those which were stored in heap_save)
 //         std::cout<<"try to fill y_heap"<<std::endl;
-	fill_y_heap(*y_heap);
+
+        fill_y_heap(*y_heap);
+
+        if (found_point) { // a feasible solution has been found
+                y_heap->contract(-(data_x->fmax.lb())); // to check
+        }
 //        std::cout<<"y_heap filled"<<std::endl;
 
 	// ** contract y_heap now
-	if (found_point) { // a feasible solution has been found
-		y_heap->contract(-(data_x->fmax.lb())); // to check
-	}
 
 //        std::cout<<"found point pass"<<std::endl;
 	if(y_heap->empty()){
@@ -155,11 +194,19 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 	// Update the lower and upper bound of of "max f(x,y_heap)"
 	double new_fmax_ub = y_heap->top1()->get<OptimData>().pf.ub(); // get the upper bound of max f(x,y_heap)
 	double new_fmax_lb = y_heap->top2()->get<OptimData>().pf.lb(); // get the lower bound of max f(x,y_heap)
-//        std::cout<<"fmax computed"<<std::endl;
+
+        std::cout<<"new_fmax_ub: "<<new_fmax_ub<<std::endl<<"new_fmax_lb: "<<new_fmax_lb<<std::endl<<"fmax_lb (from found point): "<<data_x->fmax.lb()<<std::endl;
 
 	if (new_fmax_ub< new_fmax_lb) ibex_error("ibex_LightOptimMinMax: error, please report this bug.");
 
+//        std::cout<<"fmax ini: "<<data_x->fmax<<std::endl;
 	data_x->fmax &= Interval(new_fmax_lb, new_fmax_ub);
+//        std::cout<<"new_fmax_lb: "<<new_fmax_lb<<" new_fmax_ub: "<<new_fmax_ub<<std::endl;
+//        std::cout<<"fmax ini: "<<data_x->fmax<<std::endl;
+//        if(data_x->fmax.lb()>100000){
+//            std::cout<<"Issue: fmax_lb > 100,000"<<std::endl;
+
+//        }
 
         if(monitor)
         {
@@ -181,7 +228,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 }
 
 bool LightOptimMinMax::stop_crit_reached(int current_iter,int heap_size) {
-    if(nb_iter!=0 && current_iter>nb_iter)
+    if(nb_iter != 0 && current_iter>=nb_iter) // nb_iter ==  0 implies minimum precision required (may be mid point x case)
         return true;
     if(list_elem_max != 0 && heap_size>list_elem_max)
         return true;
@@ -194,7 +241,8 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 
 	IntervalVector xy_box =init_xy_box(x_cell->box,y_cell->box);
 	// recuperer les data
-	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
+        DataMinMax *data_x = &(x_cell->get<DataMinMax>());
+//        DataMinMaxOpti *data_x = &(x_cell->get<DataMinMaxOpti>());
 	OptimData  *data_y = &(y_cell->get<OptimData>());
 
         if(data_y->pu!=1) { // Check constraints
@@ -237,16 +285,12 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 		delete y_cell;
 		return true;
 	} else {
-		// TODO to check normalement on peut propager la contraction sur le y
+                // TODO to check normalement on peut propager la contraction sur le y et sur le x
 		for (int k=0; k<y_cell->box.size(); k++)
-			y_cell->box[k] = xy_box[x_cell->box.size()+k];
+                        y_cell->box[k] &= xy_box[x_cell->box.size()+k];
+//                if(data_y->pu==1) // constraint on xy is respected, contraction of x_box is possible
+//                    x_cell->box &= xy_box.subvector(0,x_cell->box.size()-1);
 	}
-	// TODO je n'ai pas regarde ceci, mais il me semble que ce n'est plus necessaire
-	//            contract_best_max_cst(&max_ctc,&xy_box,&xy_box_ctc,subcells[j]);
-	//            if(xy_box.is_empty()||xy_box_ctc.is_empty()) { // there are no x in x_box such as exists y in y_box, f(x,y)<best_max || no point (x,y) in xy_box such as both constraints are respected
-	//                delete subcells[j];
-	//                continue;
-	//            }
 	//********************************************
 
 	// Update the lower and upper bound on y
@@ -309,17 +353,17 @@ bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector * xy
 
 bool LightOptimMinMax::handle_cstfree(IntervalVector * xy_box,Cell * y_cell) {
 //    std::cout<<"init box: "<<*xy_box<<std::endl;
-    IntervalVector grad(xy_box->size());
-    xy_sys.goal->gradient(*xy_box,grad);
-    for(int i=xy_box->size()-y_cell->box.size();i<xy_box->size();i++) {
-//        std::cout<<"i = "<<i<<std::endl;
-        if(grad[i].lb()>0) {
-            (*xy_box)[i] = Interval((*xy_box)[i].ub() -1.e-15,(*xy_box)[i].ub());
-        }
-        if(grad[i].ub()<0) {
-            (*xy_box)[i] = Interval((*xy_box)[i].lb(),(*xy_box)[i].lb()+1.e-15);
-        }
-    }
+//    IntervalVector grad(xy_box->size());
+//    xy_sys.goal->gradient(*xy_box,grad);
+//    for(int i=xy_box->size()-y_cell->box.size();i<xy_box->size();i++) {
+////        std::cout<<"i = "<<i<<std::endl;
+//        if(grad[i].lb()>0) {
+//            (*xy_box)[i] = Interval((*xy_box)[i].ub() -1.e-15,(*xy_box)[i].ub());
+//        }
+//        if(grad[i].ub()<0) {
+//            (*xy_box)[i] = Interval((*xy_box)[i].lb(),(*xy_box)[i].lb()+1.e-15);
+//        }
+//    }
 //    std::cout<<"final box: "<<*xy_box<<std::endl;
 //    std::cout<<"free cst contraction done, contracted box: "<<*xy_box<<std::endl;
     return true;
@@ -400,9 +444,13 @@ IntervalVector LightOptimMinMax::xy_box_hull(const IntervalVector& x_box) {
 
 void LightOptimMinMax::fill_y_heap(DoubleHeap<Cell>& y_heap) {
 	Cell* tmp_cell;
+//        int nb_pt(0);
 	while(!heap_save.empty()) { // push all boxes of heap_save in y_heap
+
 //            std::cout<<"try to get last elem of heap_save"<<std::endl;
 		tmp_cell = heap_save.back();
+//                if(tmp_cell->box.max_diam()<1.e-14)
+//                    nb_pt++;
 //                OptimData  *data_y = &(tmp_cell->get<OptimData>());
 //                std::cout<<""
 //                std::cout<<"try to push last elem of heap_save,box: "<<tmp_cell->box<<std::endl;
@@ -410,6 +458,9 @@ void LightOptimMinMax::fill_y_heap(DoubleHeap<Cell>& y_heap) {
 //                std::cout<<"try to pop last elem of heap_save"<<std::endl;
 		heap_save.pop_back();
 	}
+//        if(nb_pt>1) {
+//            std::cout<<"CRITICAL ISSUE: more than 1 point in heap"<<std::endl;
+//        }
 	heap_save.clear();
 }
 

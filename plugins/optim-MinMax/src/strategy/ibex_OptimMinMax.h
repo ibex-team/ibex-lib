@@ -27,6 +27,9 @@ public:
     /* Constructor*/
     OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec);
 
+    OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,NormalizedSystem& max_fa_y_cst, Ctc& x_ctc,Ctc& xy_ctc,
+                             double prec_x,double prec_y,double goal_rel_prec,double fa_cst_prec);
+
     /* Runs a B&B like algorithm
      * arguments: -x_ini: initial x box
      *            -y_ini: initial y box
@@ -78,7 +81,7 @@ public:
     //algorithm param
     int list_rate; // rate of growth of y_heap size, see compute_heap_max_size function for formula detail
     int list_elem_absolute_max;
-    int iter; // number of iteration of lightsolver allowed
+    int iter; // number of iteration of lightsolver allowedNormalizedSystem *
     double min_perc_coef; // used to compute y_prec allowed when run the light solver, see compute_min_prec function for formula
 
 private:
@@ -88,6 +91,7 @@ private:
     LightOptimMinMax lsolve;
     Bsc* bsc;
     double prec_y;
+    bool fa_y_cst; // indicates if there is for all y constraints
 
     double compute_min_prec( const IntervalVector& x_box);
     int choose_nbiter(bool midpoint_eval);
@@ -95,6 +99,11 @@ private:
     IntervalVector get_feasible_point(Cell * elem);
     int check_constraints(const IntervalVector& box);
     bool handle_cell(Cell * x_cell);
+
+    // Fa cst variables
+    double prec_fa_y;
+    LightOptimMinMax fa_lsolve;
+
 
 
         static const int default_list_rate;

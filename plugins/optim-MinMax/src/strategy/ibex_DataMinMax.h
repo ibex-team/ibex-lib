@@ -16,6 +16,9 @@
 
 namespace ibex {
 
+
+
+
 /**
  * \ingroup strategy
  *
@@ -56,6 +59,8 @@ public:
 	 * y_heap inherited from father of box
 	 */
     DoubleHeap<Cell>* y_heap;
+
+    DoubleHeap<Cell>* y_fa_heap;
 
 
 	/**
@@ -143,6 +148,18 @@ public:
      virtual void add_backtrackable(Cell& root);
 
 };
+
+class DataMinMaxOpti : public DataMinMax {
+
+
+};
+
+
+class DataMinMaxCsp : public DataMinMax {
+
+
+};
+
 
 } // end namespace ibex
 #endif // __IBEX_DATA_MINMAX_H__
