@@ -44,6 +44,8 @@ public:
 	CPPUNIT_TEST(mul03);
 	CPPUNIT_TEST(mul04);
 	CPPUNIT_TEST(apply_mul01);
+	CPPUNIT_TEST(issue247);
+
 	CPPUNIT_TEST_SUITE_END();
 
 	void linear01();
@@ -100,6 +102,8 @@ public:
 
 	// void (x,y) -> f(x,y)*f(y,x) with f(x,y)=g(x,y) with g(x,y)=x
 	void apply_mul02();
+
+	void issue247();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestExprDiff);

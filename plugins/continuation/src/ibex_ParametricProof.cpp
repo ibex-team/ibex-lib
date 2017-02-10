@@ -32,49 +32,6 @@ void CtcParamNewton::contract(IntervalVector& box) {
 	//cout << "     gives=" << box << endl;
 }
 
-VarSet get_vars(Function& f, const Vector& pt, const BitSet& forced_params) {
-	int n=f.nb_var();
-	int m=f.image_dim();
-	Matrix A=f.jacobian(pt).mid();
-	Matrix LU(m,n);
-	int *pr = new int[m];
-	int *pc = new int[n]; // the interesting output: the variables permutation
-
-	// To force the Gauss elimination not to choose
-	// the "forced" parameters, we fill their respective
-	// column with zeros
-	for (int i=0; i<n; i++) {
-		if (forced_params[i]) {
-			A.set_col(i,Vector::zeros(m));
-		}
-	}
-
-	try {
-		real_LU(A,LU,pr,pc);
-	} catch(SingularMatrixException& e) {
-		// means in particular that we could not extract an
-		// invertible m*m submatrix
-		delete [] pr;
-		delete [] pc;
-		throw e;
-	}
-	// ==============================================================
-
-	BitSet _vars=BitSet::empty(n);
-
-	for (int i=0; i<m; i++) {
-		_vars.add(pc[i]);
-	}
-
-	for (int j=0; j<n; j++) {
-		assert(!(forced_params[j] && _vars[j]));
-	}
-
-	delete [] pr;
-	delete [] pc;
-	return VarSet(f.nb_var(),_vars);
-}
-
 IntervalVector find_solution(Function& f, IntervalVector& facet, const VarSet& vars) {
 	int n=facet.size();
 

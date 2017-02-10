@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 18, 2012
-// Last Update : Jul 18, 2012
+// Last Update : Feb 03, 2017
 //============================================================================
 
 #include "ibex_CtcCompo.h"
@@ -13,225 +13,165 @@
 #include "ibex_CtcNewton.h"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcInteger.h"
+#include "ibex_CtcNotIn.h"
 #include "ibex_CtcUnion.h"
 #include "ibex_CtcIdentity.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_System.h"
-//#include "Ibex.h_"
+#include "ibex_VarSet.h"
+#include "ibex_SmearFunction.h"
+#include "ibex_Solver.h"
+#include "ibex_CellStack.h"
+
 #include <stdio.h>
 #include <vector>
+#include <list>
+#include <sstream>
+#include <jni.h>
 
 using namespace std;
 using namespace ibex;
 
-static vector<System*> sys;
-static vector<Ctc*> ctc;
-static vector<Ctc*> neg; // contractor for the negation
-static vector<int> options;  // which contractor is used for the ith constraint?
-
-enum { COMPO=0, HC4=1, HC4_NEWTON=2, INTEGER=3 };
-
-enum { FAIL=0, ENTAILED=1, CONTRACT=2, NOTHING=3,
-	   NOT_SIGNIFICANT=4, INFLATE=5, FULL_INFLATE=6, BAD_POINT=7, UNKNOWN_POINT=8
-};
-
-enum { FALSE_=0, TRUE_=1, FALSE_OR_TRUE=2 };
-
-static const double EPS_CONTRACT=0.01;
 
 namespace {
 
-vector<Ctc*> ptrs;
+enum {
+	FAIL     = 0,
+	ENTAILED = 1,
+	CONTRACT = 2,
+	NOTHING  = 3,
+};
 
-Ctc* rec(Ctc* ptr) { ptrs.push_back(ptr); return ptr; }
+enum {
+	NOT_SIGNIFICANT = 4,
+	INFLATE         = 5,
+	FULL_INFLATE    = 6,
+	BAD_POINT       = 7,
+	UNKNOWN_POINT   = 8
+};
 
-void clean_ctc() {
-	for (vector<Ctc*>::iterator it=ptrs.begin(); it!=ptrs.end(); it++) {
-		delete *it;
+enum {
+	STARTED = 0,
+	DISCRETE_NOT_INSTANCIATED = 1
+};
+
+enum {
+	UNKNOWN     = 0,
+	SOLUTION    = 1,
+	SEARCH_OVER = 2,
+	NOT_STARTED = 3
+};
+
+enum {
+	FALSE_        = 0,
+	TRUE_         = 1,
+	FALSE_OR_TRUE = 2
+};
+
+enum {
+	SYNTAX_ERROR  = -1,
+	BAD_DOMAIN    = -2,
+};
+
+class Instance {
+public:
+	int nb_var;
+	BitSet params;
+	double prec;
+	vector<char*> ctrs_syntax;
+
+	System* sys;       // all the constraints
+	CtcCompo* ctc;     // contractor for the system
+	CtcUnion* neg;     // contractor for the negation
+
+	SmearSumRelative* bis;  // bisector for the solver
+	CellStack* stack;       // cell buffer for the solver
+	Solver* solver;         // the solver
+
+	Instance(int n, const BitSet& _params, double prec) : nb_var(n), params(_params), prec(prec), sys(NULL),
+			ctc(NULL), neg(NULL), bis(NULL), stack(NULL), solver(NULL) {
+
 	}
-	ptrs.clear();
-}
 
-}
+	void build() {
+		//cout << " [ibex] new constraint:" << _syntax << " nb var=" << nb_var << " option=" << option << endl;
 
-
-Ctc* negation(const NumConstraint& c) {
-	if (c.op==EQ) {
-                /** 
-                 * OPTIMIZATION: discard negation in case of equality
-                 */
-		return rec(new CtcIdentity(c.f.nb_var()));
-		//return rec(new CtcUnion(*rec(new CtcFwdBwd(c.f, LT)), *rec(new CtcFwdBwd(c.f, GT))));
-        }
-	else
-		return rec(new CtcFwdBwd(c.f, !c.op));
-}
-
-JNIEXPORT void JNICALL Java_Ibex_add_1ctr__ILjava_lang_String_2I(JNIEnv *env, jobject, jint nb_var, jstring syntax, jint option) {
-	const char* _syntax = env->GetStringUTFChars(syntax,0);
-	//cout << " [ibex] new constraint:" << _syntax << " nb var=" << nb_var << " option=" << option << endl;
-	System* s;
-
-	try {
-		s=new System(nb_var,_syntax);
-	} catch(SyntaxError& e) {
-		cerr << e << endl;
-		exit(1);
-	}
-//	cout << " system built:" << *s << endl;
-	sys.push_back(s);
-	options.push_back(option);
-
-	if (s->nb_ctr==1) {
-		ctc.push_back(rec(new CtcFwdBwd(s->ctrs[0])));
-		neg.push_back(negation(s->ctrs[0]));
-	} else {
-		Ctc* c;
-
-		switch (option) {
-		case COMPO:      {
-			Array<Ctc> array(s->nb_ctr);
-			for (int i=0; i<s->nb_ctr; i++) {
-				array.set_ref(i,*rec(new CtcFwdBwd(s->ctrs[i])));
-			}
-			c=rec(new CtcCompo(array));
-			break;
-		}
-		case HC4:
-			c=rec(new CtcHC4(s->ctrs));
-			break;
-		case HC4_NEWTON:
-			c=rec(new CtcCompo(*rec(new CtcHC4(s->ctrs)), *rec(new CtcNewton(s->f))));
-			break;
-		default:
-			not_implemented("unimplemented option");
-			break;
-		}
-
-		ctc.push_back(c);
-
-		// in all cases, the negation is a simple union of forward-backward
-		Array<Ctc> neg_array(s->nb_ctr);
-		for (int i=0; i<s->nb_ctr; i++) {
-			neg_array.set_ref(i,*negation(s->ctrs[i]));
-		}
-		neg.push_back(rec(new CtcUnion(neg_array)));
-	}
-	//cout << " [ibex] add_ctr done.\n";
-}
-
-
-JNIEXPORT void JNICALL Java_Ibex_add_1ctr__ILjava_lang_String_2(JNIEnv *env, jobject o, jint nb_var, jstring syntax) {
-	Java_Ibex_add_1ctr__ILjava_lang_String_2I(env,o,nb_var,syntax,COMPO);
-}
-
-JNIEXPORT void JNICALL Java_Ibex_add_1int_1ctr(JNIEnv *env, jobject o, jint nb_var) {
-	sys.push_back(NULL);
-	options.push_back(INTEGER);
-	BitSet is_int(BitSet::all(nb_var));
-
-	ctc.push_back(rec(new CtcInteger(nb_var,is_int)));
-	neg.push_back(rec(new CtcIdentity(nb_var)));
-}
-
-static void read_box(JNIEnv *env, const jdouble* d, jint size, IntervalVector& box) {
-
-	assert(size%2==0);
-	int nb_var=size/2;
-
-	assert(box.size()==nb_var);
-
-	for (int i=0; i<nb_var; i++) {
-		box[i]=Interval(d[2*i],d[2*i+1]);
-	}
-}
-
-static void write_box(JNIEnv *env, const IntervalVector& box, jdouble* d) {
-
-	for (int i=0; i<box.size(); i++) {
-		d[2*i]=box[i].lb();
-		d[2*i+1]=box[i].ub();
-	}
-}
-
-JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, jdoubleArray domains, jint reif) {
-	jboolean isCopy;
-	jdouble* d = env->GetDoubleArrayElements(domains, &isCopy);
-	//cout << "is copy? " << isCopy << endl;
-	jint size  = env->GetArrayLength(domains);
-	jint result = NOTHING; // by default
-
-	IntervalVector box(size/2); // warning: sys[n]==NULL for INTEGER
-	read_box(env,d,size,box);
-
-	IntervalVector savebox(box);
-	//cout << " [ibex] contract n°" << n << " with box=" << box << endl;
-	if (reif==TRUE_ || reif==FALSE_OR_TRUE) {
-
-		ctc[n]->contract(box);
-
-		if (box.is_empty()) {
-			//cout << " [ibex] emtpybox --> FAILED\n";
-			result=FAIL;
+		stringstream s;
+		for (int i=0; i<ctrs_syntax.size(); i++) {
+			if (i>0) s << ';';
+			s << ctrs_syntax[i];
 		}
 
-		else {
-			if (reif==TRUE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
+		sys=new System(nb_var,s.str().c_str()); // may throw SyntaxError
 
-				//cout << " [ibex] --> CONTRACT to " << box << "\n";
-				savebox = box;
-				result=CONTRACT; // temporary assignment (final result may be ENTAILED)
-			}
+		Array<Ctc> c_out(sys->nb_ctr);
+		for (int i=0; i<sys->nb_ctr; i++) {
+			c_out.set_ref(i,*new CtcFwdBwd(sys->ctrs[i]));
+		}
+		ctc = new CtcCompo(c_out);
 
-			//cout << " [ibex] try negation.\n";
-			neg[n]->contract(box);
+		Array<Ctc> c_in(sys->nb_ctr);
+		for (int i=0; i<sys->nb_ctr; i++) {
+			NumConstraint& ctr=sys->ctrs[i];
+			c_in.set_ref(i,*new CtcNotIn(ctr.f,ctr.right_hand_side()));
+		}
+		neg = new CtcUnion(c_in);
 
-			if (box.is_empty()) {
-				//cout << " [ibex] emtpybox --> ENTAILED\n";
-				result=ENTAILED;
-			}
-			else if (result==CONTRACT) {
-				//cout << " [ibex] nothing --> CONTRACT to " << savebox << "\n";
-				write_box(env,savebox,d);
-			}
+		bis=new SmearSumRelative(*sys, prec);
+		stack=new CellStack();
+		solver = new Solver(*sys, params, *ctc, *bis, *stack);
+	}
+
+	IntervalVector read_box(JNIEnv *env, const jdouble* d, int size) {
+
+		if (size!=nb_var*2) return IntervalVector::empty(nb_var);
+
+		IntervalVector box(nb_var);
+
+		for (int i=0; i<nb_var; i++) {
+			box[i]=Interval(d[2*i],d[2*i+1]);
+		}
+
+		return box;
+	}
+
+	void write_box(JNIEnv *env, const IntervalVector& box, jdouble* d) {
+
+		for (int i=0; i<nb_var; i++) {
+			d[2*i]=box[i].lb();
+			d[2*i+1]=box[i].ub();
 		}
 	}
 
-	if (reif==FALSE_OR_TRUE) box=savebox;
+	~Instance() {
+		if (sys) {
+			delete sys;
 
-	if (reif==FALSE_ || reif==FALSE_OR_TRUE) {
-
-		neg[n]->contract(box);
-
-		if (box.is_empty()) {
-			result=ENTAILED;
-		} else {
-
-			if (reif==FALSE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
-				savebox = box;
-				result=CONTRACT; // temporary assignment (final result may be FAIL)
+			for (int i=0; i<ctc->list.size(); i++) {
+				delete &ctc->list[i];
 			}
+			delete ctc;
 
-			ctc[n]->contract(box);
-
-			if (box.is_empty()) {
-				result=FAIL;
-			} else if (result==CONTRACT) {
-				write_box(env,savebox,d);
+			for (int i=0; i<neg->list.size(); i++) {
+				delete &neg->list[i];
 			}
+			delete neg;
+
+			delete bis;
+			delete stack;
+			delete solver;
 		}
+
+		for (int i=0; i<ctrs_syntax.size(); i++)
+			free(ctrs_syntax[i]);
 	}
+};
 
-	//cout << " [ibex] before release.\n";	
-	env->ReleaseDoubleArrayElements(domains, d, 0);
-	//cout << " [ibex] contract done.\n";
-	return result;
+int get_id(JNIEnv* env, jobject obj) {
+	jclass clazz = env->GetObjectClass(obj);
+	jfieldID _id = env->GetFieldID(clazz, "id", "I");
+	return env->GetIntField(obj ,_id);
 }
-
-JNIEXPORT jint JNICALL Java_Ibex_contract__I_3D(JNIEnv *env, jobject o, jint n, jdoubleArray domains) {
-	return Java_Ibex_contract__I_3DI(env,o,n,domains,1);
-}
-
 
 // either return BAD_POINT, UNKNOWN_POINT or INFLATE (the latter case also corresponds to the NOT_SIGNIFICANT case)
 jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, jboolean in) {
@@ -269,22 +209,165 @@ jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, j
 	return result;
 }
 
-JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleArray p, jdoubleArray X, jboolean in) {
+
+/* ====================================== static variables =============================== */
+
+vector<Instance*> ibex_instances;
+
+const double EPS_CONTRACT=0.01;
+/* ======================================================================================= */
+
+}
+
+JNIEXPORT void JNICALL Java_Ibex_init(JNIEnv* env, jobject obj, jintArray _int_vars, jdouble prec) {
+	jint size  = env->GetArrayLength(_int_vars);
+	jint* int_vars = env->GetIntArrayElements(_int_vars, 0);
+
+	jclass clazz = env->GetObjectClass(obj);
+	jfieldID _id = env->GetFieldID(clazz, "id", "I");
+	env->SetIntField(obj ,_id, ibex_instances.size());
+
+	BitSet b;
+	b.initialise(0,size-1,BitSet::empt);
+	for (int i=0; i<size; i++) {
+		if (int_vars[i]==1) b.add(i);
+	}
+
+	ibex_instances.push_back(new Instance(size, b, prec));
+
+	env->ReleaseIntArrayElements(_int_vars, int_vars, 0);
+}
+
+JNIEXPORT void JNICALL Java_Ibex_add_1ctr(JNIEnv* env, jobject obj, jstring _syntax) {
+	const char* syntax = env->GetStringUTFChars(_syntax, 0);
+
+	ibex_instances[get_id(env, obj)]->ctrs_syntax.push_back(strdup(syntax));
+
+	env->ReleaseStringUTFChars(_syntax, syntax);
+}
+
+JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv* env, jobject obj, jint n, jdoubleArray _d, jint reif) {
+
+	Instance& inst = *ibex_instances[get_id(env, obj)];
+
+	if (inst.sys==NULL) {
+		try {
+			inst.build();
+		} catch(SyntaxError&) {
+			return SYNTAX_ERROR;
+		}
+	}
+
+	jint result = NOTHING; // by default
+
+	jdouble* d = env->GetDoubleArrayElements(_d, 0);
+	IntervalVector box=inst.read_box(env,d,env->GetArrayLength(_d));
+	if (box.is_empty()) {
+		env->ReleaseDoubleArrayElements(_d, d, 0);
+		return BAD_DOMAIN;
+	}
+
+	IntervalVector savebox(box);
+	//cout << " [ibex] contract n°" << n << " with box=" << box << endl;
+	if (reif==TRUE_ || reif==FALSE_OR_TRUE) {
+
+		inst.ctc->list[n].contract(box);
+
+		if (box.is_empty()) {
+			//cout << " [ibex] emtpybox --> FAILED\n";
+			result=FAIL;
+		}
+
+		else {
+			if (reif==TRUE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
+
+				//cout << " [ibex] --> CONTRACT to " << box << "\n";
+				savebox = box;
+				result=CONTRACT; // temporary assignment (final result may be ENTAILED)
+			}
+
+			//cout << " [ibex] try negation.\n";
+			inst.neg->list[n].contract(box);
+
+			if (box.is_empty()) {
+				//cout << " [ibex] emtpybox --> ENTAILED\n";
+				result=ENTAILED;
+			}
+			else if (result==CONTRACT) {
+				//cout << " [ibex] nothing --> CONTRACT to " << savebox << "\n";
+				inst.write_box(env,savebox,d);
+			}
+		}
+	}
+
+	if (reif==FALSE_OR_TRUE) box=savebox;
+
+	if (reif==FALSE_ || reif==FALSE_OR_TRUE) {
+
+		inst.neg->list[n].contract(box);
+
+		if (box.is_empty()) {
+			result=ENTAILED;
+		} else {
+
+			if (reif==FALSE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
+				savebox = box;
+				result=CONTRACT; // temporary assignment (final result may be FAIL)
+			}
+
+			inst.ctc->list[n].contract(box);
+
+			if (box.is_empty()) {
+				result=FAIL;
+			} else if (result==CONTRACT) {
+				inst.write_box(env,savebox,d);
+			}
+		}
+	}
+
+	env->ReleaseDoubleArrayElements(_d, d, 0);
+
+	return result;
+}
+
+
+JNIEXPORT jint JNICALL Java_Ibex_contract__I_3D(JNIEnv* env, jobject obj, jint n, jdoubleArray _d) {
+	return Java_Ibex_contract__I_3DI(env,obj,n,_d,1);
+}
+
+
+JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv* env, jobject obj, jint n, jdoubleArray _din, jdoubleArray _d, jboolean in) {
+
+	Instance& inst = *ibex_instances[get_id(env, obj)];
+
+	if (inst.sys==NULL) {
+		try {
+			inst.build();
+		} catch(SyntaxError&) {
+			return SYNTAX_ERROR;
+		}
+	}
 
 	jint result;
 
-	jboolean isCopy;
-	jdouble* d = env->GetDoubleArrayElements(X, &isCopy);
-	jint size  = env->GetArrayLength(X);
+	jdouble* d = env->GetDoubleArrayElements(_d, 0);
+	IntervalVector x=inst.read_box(env,d,env->GetArrayLength(_d));
+	if (x.is_empty()) {
+		env->ReleaseDoubleArrayElements(_d, d, 0);
+		return BAD_DOMAIN;
+	}
 
-	jdouble* d2 = env->GetDoubleArrayElements(p, NULL);
-	jint size2  = env->GetArrayLength(p);
+	jdouble* din = env->GetDoubleArrayElements(_din, NULL);
+	if (env->GetArrayLength(_din)!=inst.nb_var) {
+		env->ReleaseDoubleArrayElements(_d, d, 0);
+		env->ReleaseDoubleArrayElements(_din, din, 0);
+		return BAD_DOMAIN;
+	}
 
-	IntervalVector x(size/2); // warning: sys[n]==NULL for INTEGER
-	read_box(env,d,size,x);
-
-	IntervalVector xin(size/2);
-	for (int i=0; i<size/2; i++) xin[i]=d2[i];
+	IntervalVector xin(inst.nb_var); // we cannot use read_box because din is a vector (not interval)
+	for (int i=0; i<inst.nb_var; i++) {
+		xin[i]=Interval(din[i],din[i]);
+	}
 
 	IntervalVector savebox(x);
 
@@ -293,7 +376,7 @@ JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleAr
 		// (because of inner rounding, the inflation may
 		// fail in entirely proving x is inner so we use
 		// the contractor instead)
-		neg[n]->contract(x);
+		inst.neg->list[n].contract(x);
 
 		if (x.is_empty())
 			result=FULL_INFLATE;
@@ -303,21 +386,18 @@ JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleAr
 		x=savebox; // result==FULL_INFLATE => savebox is entirely "inside" this constraint
 
 		if (result!=FULL_INFLATE) {
-			// note: in principle, we could also slightly optimize the
+			// old note (for the case of a list of several sub-constraints):
+			// in principle, we could also slightly optimize the
 			// loop below by using the negation contractor of
 			// sub-constraints (to remove the inner rounding effect).
 			// But this would bring non significant gain since the
 			// result would probably not be FULL_INFLATE in this case.
-			for (int i=0; i<sys[n]->ctrs.size(); i++) {
-				NumConstraint& ctr=sys[n]->ctrs[i];
-				result=inflate(ctr,xin,x,in); // will "contract" x to the inflated box.
-				if (result!=INFLATE) break;
-			}
+			result=inflate(inst.sys->ctrs[n],xin,x,in); // will "contract" x to the inflated box.
 		}
 	} else {
 
 		// same comments as above
-		ctc[n]->contract(x);
+		inst.ctc->list[n].contract(x);
 
 		if (x.is_empty())
 			result=FULL_INFLATE;
@@ -328,23 +408,8 @@ JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleAr
 
 		if (result!=FULL_INFLATE) {
 
-			for (int i=0; i<sys[n]->ctrs.size(); i++) {
-				NumConstraint& ctr=sys[n]->ctrs[i];
+			result=inflate(inst.sys->ctrs[n],xin,x,in);
 
-				int r=inflate(ctr,xin,x,in);
-
-				// kind of logical "or" between the results of
-				// inflation for of each constraint
-				if (r==INFLATE)
-					result=INFLATE;
-				else if (r==UNKNOWN_POINT && result==BAD_POINT)
-					result=UNKNOWN_POINT;
-
-				xin=x;
-				x=savebox;
-			}
-
-			x=xin;
 		}
 	}
 
@@ -354,26 +419,79 @@ JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleAr
 		if (savebox.is_subset(x))
 			result=FULL_INFLATE;
 		else if (savebox.rel_distance(x) <= (1.0-EPS_CONTRACT))
-			write_box(env,x,d);
+			inst.write_box(env,x,d);
 		else
 			result=NOT_SIGNIFICANT;
 	}
 
-	env->ReleaseDoubleArrayElements(X, d, 0);
-	env->ReleaseDoubleArrayElements(p, d2, 0); // 0-->JNI_ABORT since the array was not modified?
+	env->ReleaseDoubleArrayElements(_d, d, 0);
+	env->ReleaseDoubleArrayElements(_din, din, 0);
 
 	return result;
 }
 
-JNIEXPORT void JNICALL Java_Ibex_release(JNIEnv *, jobject) {
-	for (unsigned int i=0; i<sys.size(); i++) {
-		if (options[i]!=INTEGER) {
-			delete sys[i]; // free the system (except if INTEGER)
+JNIEXPORT jint JNICALL Java_Ibex_start_1solve(JNIEnv* env, jobject obj, jdoubleArray _d) {
+
+	Instance& inst = *ibex_instances[get_id(env, obj)];
+
+	if (inst.sys==NULL) {
+		try {
+			inst.build();
+		} catch(SyntaxError&) {
+			return SYNTAX_ERROR;
 		}
 	}
-	clean_ctc();
-	sys.clear();
-	options.clear();
-	ctc.clear();
-	neg.clear();
+
+	jdouble* d = env->GetDoubleArrayElements(_d, 0);
+
+	IntervalVector box=inst.read_box(env,d,env->GetArrayLength(_d));
+	if (box.is_empty()) {
+		env->ReleaseDoubleArrayElements(_d, d, 0);
+		return BAD_DOMAIN;
+	}
+
+	for (int i=0; i<inst.nb_var; i++) {
+		if (inst.params.contain(i) && !box[i].is_degenerated()) {
+			return DISCRETE_NOT_INSTANCIATED;
+		}
+	}
+
+	inst.solver->start(box);
+
+	env->ReleaseDoubleArrayElements(_d, d, 0);
+	return STARTED;
+}
+
+JNIEXPORT jint JNICALL Java_Ibex_next_1solution(JNIEnv* env, jobject obj, jdoubleArray _d) {
+	Instance& inst = *ibex_instances[get_id(env, obj)];
+
+	if (inst.sys==NULL) {
+		return NOT_STARTED;
+	}
+
+	jint result;
+
+	jdouble* d = env->GetDoubleArrayElements(_d, 0);
+
+	IntervalVector box=inst.read_box(env,d,env->GetArrayLength(_d));
+	if (box.is_empty()) {
+		env->ReleaseDoubleArrayElements(_d, d, 0);
+		return BAD_DOMAIN;
+	}
+
+	const Solver::Solution* sol;
+
+	if (inst.solver->next(sol)) {
+		inst.write_box(env,sol->existence(),d);
+		result = sol->status==Solver::UNKNOWN? UNKNOWN : SOLUTION;
+	} else {
+		result = SEARCH_OVER;
+	}
+
+	env->ReleaseDoubleArrayElements(_d, d, 0);
+	return result;
+}
+
+JNIEXPORT void JNICALL Java_Ibex_release(JNIEnv* env, jobject obj) {
+	delete ibex_instances[get_id(env, obj)];
 }

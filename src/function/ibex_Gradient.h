@@ -14,6 +14,7 @@
 
 #include "ibex_Eval.h"
 #include "ibex_BwdAlgorithm.h"
+#include "ibex_Agenda.h"
 
 namespace ibex {
 
@@ -35,6 +36,11 @@ public:
 	Gradient(Eval& eval);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~Gradient();
+
+	/**
 	 * \brief Calculate the gradient of f on the domains \a d and store the result in \a g.
 	 */
 	void gradient(const Array<Domain>& d, IntervalVector& g);
@@ -43,6 +49,11 @@ public:
 	 * \brief Calculate the gradient of f on the box \a box and store the result in \a g.
 	 */
 	void gradient(const IntervalVector& box, IntervalVector& g);
+
+	/**
+	 * \brief Calculate the Jacobian of f on the box \a box and store the result in \a J.
+	 */
+	void jacobian(const IntervalVector& box, IntervalMatrix& J);
 
 	/**
 	 * \brief Calculate the Jacobian on the domains \a d and store the result in \a J.
@@ -156,6 +167,8 @@ public:
 	Eval& _eval;
 	ExprDomain& d;
 	ExprDomain  g;
+	Agenda** fwd_agenda; // one agenda for each component
+	Agenda** bwd_agenda; // one agenda for each component
 };
 
 } // namespace ibex

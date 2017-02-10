@@ -31,8 +31,8 @@ void Optimizer::monotonicity_analysis(IntervalVector& box, bool inner_found) {
 	for (int j=0; j<n; j++) {
 		//TODO: if box is unbounded, we have a problem here.
 		if (inner_found || !sys.f.used(j)) {
-			if (g[j].lb()>=0) box[j]=box[j].lb();
-			if (g[j].ub()<=0) box[j]=box[j].ub();
+			if (g[j].lb()>=0 && box[j].lb()!=NEG_INFINITY) box[j]=box[j].lb();
+			if (g[j].ub()<=0 && box[j].ub()!=POS_INFINITY) box[j]=box[j].ub();
 		}
 	}
 }

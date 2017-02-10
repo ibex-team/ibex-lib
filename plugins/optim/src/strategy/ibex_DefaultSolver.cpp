@@ -86,7 +86,7 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 }
 
 
-DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(rec(ctc(sys,prec)),
+DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(sys, rec(ctc(sys,prec)),
 		rec(new SmearSumRelative(sys, prec)),
 		rec(new CellStack())),
 		sys(sys) {

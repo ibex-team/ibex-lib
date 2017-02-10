@@ -7,7 +7,8 @@
 // Created     : Sep 1, 2015
 //============================================================================
 
-#include "ibex_VarSet.h"
+#include "ibex_Function.h"
+
 #include <sstream>
 
 using namespace std;

@@ -93,7 +93,12 @@ public:
 		visited.insert(e,true);
 	}
 
-	virtual void visit(const ExprIndex& e)    { }
+	virtual void visit(const ExprIndex& e)    {
+		// note: if called => e is not an indexed symbol
+		// which means that e.expr is also not an indexed symbol
+		assert(!add(e.expr));
+		visit(e.expr);
+	}
 
 	virtual void visit(const ExprSymbol& e)   {	}
 

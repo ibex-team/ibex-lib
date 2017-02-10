@@ -52,16 +52,6 @@ public:
 };
 
 /**
- * Determine which variables should be considered as parameters
- * when solving an under-constrained system f(x)=0 around a point "pt".
- *
- * Parameters are chosen according to Hansen's strategy: they
- * are the "most influencing" variable obtained by the pivoting
- * of Gauss elimination.
- */
-VarSet get_vars(Function& f, const Vector& pt, const BitSet& forced_params);
-
-/**
  * \brief Thrown by find_solution
  *
  * Thrown when find_solution could neither find a certified

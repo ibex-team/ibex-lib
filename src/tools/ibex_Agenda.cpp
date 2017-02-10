@@ -49,16 +49,12 @@ std::ostream& operator<<(std::ostream& os, const ArcAgenda& a) {
 	if (a.empty()) return os << "(empty)";
 
 	int M = a.nb_var;
-	int i = a.first/M;
-	int j = a.first%M;
-	int tmp;
+	int tmp = a.first();
 
 	do {
-		os << "(" << i << ", " << j << ") ";
-		tmp = a.table[i*M+j];
-		i = tmp/M;
-		j = tmp%M;
-	} while (tmp!=a.first);
+		os << "(" << (tmp/M) << ", " << (tmp%M) << ") ";
+		tmp = a.next(tmp);
+	} while (tmp!=a.end());
 
 	return os << std::endl;
 }
@@ -66,13 +62,13 @@ std::ostream& operator<<(std::ostream& os, const ArcAgenda& a) {
 std::ostream& operator<<(std::ostream& os, const Agenda& a) {
 	if (a.empty()) return os << "(empty)";
 
-	int p=a.first;
+	int p=a.first();
 	os << "(";
 	do {
 		os << p;
-		p=a.table[p];
-		if (p!=a.first) os << ' ';
-	} while (p!=a.first);
+		p=a.next(p);
+		if (p!=a.end()) os << ' ';
+	} while (p!=a.end());
 	return os << ')';
 }
 
