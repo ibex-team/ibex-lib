@@ -98,7 +98,7 @@ private:
 public:
 
 
-	/** \brief Create an empty affine form. */
+	/** \brief Create an affine form of all real. */
 	AffineMain();
 
 	/** \brief Create an affine form with n variables and  initialized val[0] with d. */
@@ -131,7 +131,7 @@ public:
 	/** \brief True iff *this and x are not exactly the same intervals. */
 	bool operator!=(const Interval& x) const ;
 
-	/** \brief Set this interval to the empty set. */
+	/** \brief Set this affine form to the empty set. */
 	void set_empty();
 
 	/** \brief Set *this to x.

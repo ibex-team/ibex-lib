@@ -15,9 +15,9 @@ namespace ibex {
 
 // the constructor
 LinearRelaxAffine2::LinearRelaxAffine2(const System& sys1) :
-				LinearRelax(sys1), sys(sys1),
-				goal_af_evl(NULL),
-				ctr_af_evl(new AffineEval<AF_Default>*[sys1.nb_ctr]) {
+						LinearRelax(sys1), sys(sys1),
+						goal_af_evl(NULL),
+						ctr_af_evl(new AffineEval<AF_Default>*[sys1.nb_ctr]) {
 
 	if (sys1.goal) {
 		goal_af_evl = new AffineEval<AF_Default>(*sys1.goal);
@@ -33,6 +33,8 @@ LinearRelaxAffine2::~LinearRelaxAffine2() {
 		delete ctr_af_evl[i];
 	}
 	delete[] ctr_af_evl;
+
+	if (sys.goal) delete[] goal_af_evl;
 }
 
 bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
@@ -136,6 +138,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 				}
 				case EQ: {
 					not_implemented("LinearRelaxAffine2::inlinearization not implemented for equality constraints");
+					break;
 				}
 				default:
 					break;
@@ -152,9 +155,9 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 /*********generation of the linearized system*********/
 int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 
-	Affine2 af2;
+	Affine2Vector af2;
 	Vector rowconst(sys.nb_var);
-	Interval ev(0.0);
+	IntervalVector itv(1);
 	Interval center(0.0);
 	Interval err(0.0);
 	CmpOp op;
@@ -164,75 +167,87 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
 
 		op  = sys.ctrs[ctr].op;
-		ev  = ctr_af_evl[ctr]->eval(box).i();
-		af2 = ctr_af_evl[ctr]->af.top->i();
-
-		if (ev.is_empty()) {
-			af2.set_empty();
+		itv.resize(sys.ctrs[ctr].f.image_dim());
+		af2.resize(sys.ctrs[ctr].f.image_dim());
+		if (sys.ctrs[ctr].f.image_dim() ==1 ) {
+			itv[0]  = ctr_af_evl[ctr]->eval(box).i();
+			af2[0] = ctr_af_evl[ctr]->af.top->i();
+		} else {
+			itv = ctr_af_evl[ctr]->eval(box).v();
+			af2 = ctr_af_evl[ctr]->af.top->v();
 		}
-		//std::cout <<ev<<":::"<< af2<<"  "<<af2.size()<<"  " <<sys.nb_var<< std::endl;
 
-		if (af2.size() == sys.nb_var) { // if the affine2 form is valid
-			bool b_abort=false;
-			// convert the epsilon variables to the original box
-			double tmp=0;
-			center =0;
-			err =0;
-			for (int i =0;(!b_abort) &&(i <sys.nb_var); i++) {
-				tmp = box[i].rad();
-				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
-					if (af2.val(i+1)==0)
-						rowconst[i]=0;
-					else {
-						b_abort =true;
-					}
-				} else {
-					rowconst[i] =af2.val(i+1) / tmp;
-					center += rowconst[i]*box[i].mid();
-					err += fabs(rowconst[i])*  pow(2,-50);
-				}
-			}
-			if (!b_abort) {
-				switch (op) {
-				case LT:
-					if (ev.lb() == 0.0) return -1;
-				case LEQ:
-					if (0.0 < ev.lb()) return -1;
-					else if (0.0 < ev.ub()) {
-						try {
-							lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
-							cont++;
-						} catch (LPException&) { }
-					}
-					break;
-				case GT:
-					if (ev.ub() == 0.0) return -1;
-				case GEQ:
-					if (ev.ub() < 0.0) return -1;
-					else if (ev.lb() < 0.0) {
-						try {
-							lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
-							cont++;
-						} catch (LPException&) { }
-					}
-					break;
-				case EQ:
-					if (!ev.contains(0.0)) return -1;
-					else {
-						if (ev.diam()>2*lp_solver.getEpsilon()) {
-							try {
-								lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
-								cont++;
-								lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
-								cont++;
-							} catch (LPException&) { }
+
+		if (itv.is_empty()) {
+			af2.set_empty();
+		} else {
+			for (int k = 0; k<sys.ctrs[ctr].f.image_dim(); k++) {
+				//std::cout <<ev<<":::"<< af2<<"  "<<af2.size()<<"  " <<sys.nb_var<< std::endl;
+
+				if (af2[k].size() == sys.nb_var) { // if the affine2 form is valid
+					bool b_abort=false;
+					// convert the epsilon variables to the original box
+					double tmp=0;
+					center =0;
+					err =0;
+					for (int i =0;(!b_abort) &&(i <sys.nb_var); i++) {
+						tmp = box[i].rad();
+						if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
+							if (af2[k].val(i+1)==0)
+								rowconst[i]=0;
+							else {
+								b_abort =true;
+							}
+						} else {
+							rowconst[i] =af2[k].val(i+1) / tmp;
+							center += rowconst[i]*box[i].mid();
+							err += fabs(rowconst[i])*  pow(2,-50);
 						}
 					}
-					break;
+					if (!b_abort) {
+						switch (op) {
+						case LT:
+							if (itv[k].lb() == 0.0) return -1;
+							break;
+						case LEQ:
+							if (0.0 < itv[k].lb()) return -1;
+							else if (0.0 < itv[k].ub()) {
+								try {
+									lp_solver.addConstraint(rowconst, LEQ,	((af2[k].err()+err) - (af2[k].val(0)-center)).ub());
+									cont++;
+								} catch (LPException&) { }
+							}
+							break;
+						case GT:
+							if (itv[k].ub() == 0.0) return -1;
+							break;
+						case GEQ:
+							if (itv[k].ub() < 0.0) return -1;
+							else if (itv[k].lb() < 0.0) {
+								try {
+									lp_solver.addConstraint(rowconst, GEQ,	(-(af2[k].err()+err) - (af2[k].val(0)-center)).lb());
+									cont++;
+								} catch (LPException&) { }
+							}
+							break;
+						case EQ:
+							if (!itv[k].contains(0.0)) return -1;
+							else {
+								if (itv[k].diam()>2*lp_solver.getEpsilon()) {
+									try {
+										lp_solver.addConstraint(rowconst, GEQ,	(-(af2[k].err()+err) - (af2[k].val(0)-center)).lb());
+										cont++;
+										lp_solver.addConstraint(rowconst, LEQ,	((af2[k].err()+err) - (af2[k].val(0)-center)).ub());
+										cont++;
+									} catch (LPException&) { }
+								}
+							}
+							break;
+						}
+					}
 				}
 			}
 		}
-
 	}
 	return cont;
 

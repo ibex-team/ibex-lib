@@ -517,7 +517,7 @@ inline void AffineEval<T>::atan2_fwd(int x1, int x2, int y) {
 
 template<class T>
 inline void AffineEval<T>::minus_fwd(int x, int y) {
-	af[y].i()=-af[x].i();
+	af[y].i()= -af[x].i();
 	d[y].i()=(af[y].i().itv() & (-d[x].i()));
 }
 

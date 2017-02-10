@@ -25,7 +25,7 @@ namespace ibex {
  *
  */
 class CtcAffineFwdBwd: protected CtcFwdBwd {
-
+public:
 	/**
 	 * \brief Build the contractor for "f(x)=0" or "f(x)<=0".
 	 *
