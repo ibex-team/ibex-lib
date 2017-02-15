@@ -48,13 +48,13 @@ void TestOptimMinMax::ex_messine() {
 
 	OptimMinMax oo(x_sys, xy_sys,x_ctc,xy_ctc,x_prec, y_prec,stop_prec);
 	//oo.trace=1;
-    oo.timeout=10;
+    oo.timeout=100;
 	Optim::Status res = oo.optimize();
-	//oo.report();
+	oo.report();
 
 	CPPUNIT_ASSERT(res==Optim::SUCCESS);
-	CPPUNIT_ASSERT(oo.loup<=0.524615);
-	CPPUNIT_ASSERT(oo.nb_cells<=360);
+	CPPUNIT_ASSERT(oo.loup<=0.5286);
+	CPPUNIT_ASSERT(oo.nb_cells<=9000);
 
 }
 
@@ -90,11 +90,13 @@ void TestOptimMinMax::ex_segundo1() {
     NormalizedSystem xy_sys(xy_fac);
     CtcHC4 xy_ctc(xy_sys);
 
+
     OptimMinMax oo(x_sys, xy_sys,x_ctc,xy_ctc,x_prec, y_prec,stop_prec);
     //oo.trace=1;
-    oo.timeout=10;
+    oo.timeout=100;
+
     Optim::Status res = oo.optimize();
-    //oo.report();
+    oo.report();
 
     CPPUNIT_ASSERT(res==Optim::SUCCESS);
     CPPUNIT_ASSERT(oo.loup<=0.009);
@@ -133,9 +135,9 @@ void TestOptimMinMax::ex_segundo2() {
 
     OptimMinMax oo(x_sys, xy_sys,x_ctc,xy_ctc,x_prec, y_prec,stop_prec);
     //oo.trace=1;
-    oo.timeout=10;
+    oo.timeout=100;
     Optim::Status res = oo.optimize();
-    //oo.report();
+    oo.report();
 
     CPPUNIT_ASSERT(res==Optim::SUCCESS);
     CPPUNIT_ASSERT(oo.loup<=1.103);
@@ -172,9 +174,9 @@ void TestOptimMinMax::ex_segundo3() {
 
     OptimMinMax oo(x_sys, xy_sys,x_ctc,xy_ctc,x_prec, y_prec,stop_prec);
     //oo.trace=1;
-    oo.timeout=10;
+    oo.timeout=100;
     Optim::Status res = oo.optimize();
-    //oo.report();
+    oo.report();
 
     CPPUNIT_ASSERT(res==Optim::SUCCESS);
     CPPUNIT_ASSERT(oo.loup<=-6.6415);
@@ -218,9 +220,9 @@ void TestOptimMinMax::ex_segundo4() {
 
     OptimMinMax oo(x_sys, xy_sys,x_ctc,xy_ctc,x_prec, y_prec,stop_prec);
     //oo.trace=1;
-    oo.timeout=1;
+    oo.timeout=10;
     Optim::Status res = oo.optimize();
-    //oo.report();
+    oo.report();
 
     CPPUNIT_ASSERT(res==Optim::TIME_OUT);
     CPPUNIT_ASSERT(oo.loup<=-1.9);

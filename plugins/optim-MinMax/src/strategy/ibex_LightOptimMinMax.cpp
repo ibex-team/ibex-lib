@@ -69,8 +69,8 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 bool LightOptimMinMax::optimize(Cell* x_cell) {
 	//    std::cout<<"run light optim"<<std::endl;
 
-	std::cout<<std::endl<<std::endl<<"********************* Light optim res for box "<<x_cell->box<<" *************** "<<std::endl;
-	std::cout<<"current optim parameters: "<<std::endl<<"list max elem: "<<list_elem_max<<std::endl<<"nb itex: "<<nb_iter<<std::endl;
+	//std::cout<<std::endl<<std::endl<<"********************* Light optim res for box "<<x_cell->box<<" *************** "<<std::endl;
+	//std::cout<<"current optim parameters: "<<std::endl<<"list max elem: "<<list_elem_max<<std::endl<<"nb itex: "<<nb_iter<<std::endl;
 
 	found_point  = false;
 	DataMinMax *data_x;
@@ -195,9 +195,11 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 	double new_fmax_ub = y_heap->top1()->get<OptimData>().pf.ub(); // get the upper bound of max f(x,y_heap)
 	double new_fmax_lb = y_heap->top2()->get<OptimData>().pf.lb(); // get the lower bound of max f(x,y_heap)
 
-	std::cout<<"new_fmax_ub: "<<new_fmax_ub<<std::endl<<"new_fmax_lb: "<<new_fmax_lb<<std::endl<<"fmax_lb (from found point): "<<data_x->fmax.lb()<<std::endl;
+	//std::cout<<"new_fmax_ub: "<<new_fmax_ub<<std::endl<<"new_fmax_lb: "<<new_fmax_lb<<std::endl<<"fmax_lb (from found point): "<<data_x->fmax.lb()<<std::endl;
 
-	if (new_fmax_ub< new_fmax_lb) ibex_error("ibex_LightOptimMinMax: error, please report this bug.");
+	if (new_fmax_ub< new_fmax_lb) {
+		ibex_error("ibex_LightOptimMinMax: error, please report this bug.");
+	}
 
 	//        std::cout<<"fmax ini: "<<data_x->fmax<<std::endl;
 	data_x->fmax &= Interval(new_fmax_lb, new_fmax_ub);
@@ -228,7 +230,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 }
 
 bool LightOptimMinMax::stop_crit_reached(int current_iter,int heap_size) {
-	if(nb_iter != 0 && current_iter>=nb_iter) // nb_iter ==  0 implies minimum precision required (may be mid point x case)
+	if( current_iter>=nb_iter) // nb_iter ==  0 implies minimum precision required (may be mid point x case)
 		return true;
 	if(list_elem_max != 0 && heap_size>list_elem_max)
 		return true;
@@ -245,14 +247,15 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	//        DataMinMaxOpti *data_x = &(x_cell->get<DataMinMaxOpti>());
 	OptimData  *data_y = &(y_cell->get<OptimData>());
 
+
 	if(data_y->pu!=1) { // Check constraints
-		if(handle_constraint(data_y,&xy_box,&(y_cell->box))) {
+		if(handle_constraint(data_y,xy_box, y_cell->box)) {
 			delete y_cell;
 			return true;
 		}
 	}
 	else {
-		handle_cstfree(&xy_box,y_cell);
+		handle_cstfree(xy_box,y_cell);
 	}
 	/********************************************************************************/
 	//mid point test (TO DO: replace with local optim to find a better point than midpoint)
@@ -281,13 +284,15 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 
 	//************ part below add a contraction w.r.t f(x,y)<best_max, this part may not be efficient on every problem ******************************
 	xy_sys.goal->backward(data_x->fmax,xy_box);
+
 	if (xy_box.is_empty()) { // constraint on x and y not respected, move on.
 		delete y_cell;
 		return true;
 	} else {
 		// TODO to check normalement on peut propager la contraction sur le y et sur le x
-		for (int k=0; k<y_cell->box.size(); k++)
+		for (int k=0; k<y_cell->box.size(); k++) {
 			y_cell->box[k] &= xy_box[x_cell->box.size()+k];
+		}
 		//                if(data_y->pu==1) // constraint on xy is respected, contraction of x_box is possible
 		//                    x_cell->box &= xy_box.subvector(0,x_cell->box.size()-1);
 	}
@@ -323,8 +328,8 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 }
 
 
-bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector * xy_box,IntervalVector * y_box) {
-	switch(check_constraints(*xy_box)){
+bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector & xy_box,IntervalVector & y_box) {
+	switch(check_constraints(xy_box)){
 	case 2: { // all the constraints are satisfied
 		data_y->pu=1;
 		break;
@@ -337,21 +342,24 @@ bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector * xy
 		break;
 	}
 
-	//
+
 	if(data_y->pu != 1)  {// there is a constraint on x and y
-		ctc_xy.contract(*xy_box);
-		if (xy_box->is_empty()) { // constraint on x and y not respected, move on.
+		ctc_xy.contract(xy_box);
+		if (xy_box.is_empty()) { // constraint on x and y not respected, move on.
 			return true;
 		} else {
 			// TODO to check normalement on peut propager la contraction sur le y
-			for (int k=0; k<y_box->size(); k++)
-				(*y_box)[k] = (*xy_box)[xy_box->size()-y_box->size()-1+k];
+			for (int k=0; k<y_box.size(); k++) {
+				//y_cell->box[k] &= xy_box[x_cell->box.size()+k];
+				//y_box[k] &= xy_box[xy_box.size()-y_box.size()-1+k];
+				y_box[k] &= xy_box[xy_box.size()-y_box.size()+k];
+			}
 		}
 	}
 	return false;
 }
 
-bool LightOptimMinMax::handle_cstfree(IntervalVector * xy_box,Cell * y_cell) {
+bool LightOptimMinMax::handle_cstfree(IntervalVector& xy_box,Cell * y_cell) {
 	//    std::cout<<"init box: "<<*xy_box<<std::endl;
 	//    IntervalVector grad(xy_box->size());
 	//    xy_sys.goal->gradient(*xy_box,grad);
