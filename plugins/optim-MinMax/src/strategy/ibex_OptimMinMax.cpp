@@ -259,7 +259,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	lsolve.list_elem_max = compute_heap_max_size(data_x->y_heap->size());
 	// compute
 	//        cout<<"run light optim"<<endl;
-	bool res =lsolve.optimize(x_cell);
+        bool res =lsolve.optimize(x_cell,loup);
 	//        cout<<"light optim result: "<<data_x->fmax<< endl;
 	//std::cout<<" apres res="<<res<<" bound= "<<data_x->fmax <<std::endl;
 
@@ -277,14 +277,16 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	if(!midp.is_empty())    { // we found a feasible point
 		Cell *x_copy = new Cell(*x_cell); // copy of the Cell and the y_heap
 		x_copy->box=midp; // set the box to the middle of x
-
+//                cout<<"try mid point "<<midp<<", init fmax: "<<x_copy->get<DataMinMax>().fmax<<endl;
 		lsolve.nb_iter = choose_nbiter(true);
 		lsolve.prec_y = prec_y;
 		lsolve.list_elem_max = 0; // no limit on heap size
-		bool res1 = lsolve.optimize(x_copy); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
+                bool res1 = lsolve.optimize(x_copy,loup); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
+//                cout<<"res eval: "<<x_copy->get<DataMinMax>().fmax<<endl;
 		if (res1) {
-			double new_loup = x_copy->get<DataMinMax>().fmax.ub();
-			data_x->fmax &= Interval(NEG_INFINITY,new_loup);
+                        double new_loup = x_copy->get<DataMinMax>().fmax.ub();
+
+                        //data_x->fmax &= Interval(NEG_INFINITY,new_loup);
 
 			if(new_loup<loup) { // update best current solution
 				//cout<<"worst case over Y: "<<x_copy->get<DataMinMax>().y_heap->top1()->box<<endl;
@@ -308,7 +310,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 		lsolve.list_elem_max = 0; // no limit on heap size
 		//cout<<"fmax ini: "<<data_x->fmax<<endl;
 		//cout<<"for box: "<<x_cell->box<<endl;
-		bool res =lsolve.optimize(x_cell); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
+                bool res =lsolve.optimize(x_cell,loup); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
 		//cout<<"fmax min prec: "<<data_x->fmax<<endl;
 
 		if(res){

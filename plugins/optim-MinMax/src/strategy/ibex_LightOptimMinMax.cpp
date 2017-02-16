@@ -66,7 +66,7 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 	data_x->y_heap->push(y_cell);
 }
 
-bool LightOptimMinMax::optimize(Cell* x_cell) {
+bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 	//    std::cout<<"run light optim"<<std::endl;
 
 	//std::cout<<std::endl<<std::endl<<"********************* Light optim res for box "<<x_cell->box<<" *************** "<<std::endl;
@@ -126,18 +126,18 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 				std::pair<Cell*,Cell*> subcells_pair=bsc->bisect_cell(*y_cell);// bisect tmp_cell into 2 subcells
 				delete y_cell;
 				//                                std::cout<<"handle first cell in light optim"<<std::endl;
-				bool res = handle_cell( x_cell, subcells_pair.first);
+                                bool res = handle_cell( x_cell, subcells_pair.first,loup);
 				//                                std::cout<<"first cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
 					delete subcells_pair.second;
-					//std::cout <<"       OUT 1 "<<std::endl;
+//                                        std::cout <<"       OUT 1 "<<std::endl;
 					return false;
 				}
 				//                                std::cout<<"handle second cell in light optim"<<std::endl;
-				res = handle_cell( x_cell, subcells_pair.second);
+                                res = handle_cell( x_cell, subcells_pair.second,loup);
 				//                                std::cout<<"second cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
-					//std::cout <<"       OUT 2 "<<std::endl;
+//                                        std::cout <<"       OUT 2 "<<std::endl;
 					return false;
 				}
 
@@ -147,7 +147,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 				//}
 			}
 			catch (NoBisectableVariableException& ) {
-				bool res = handle_cell(x_cell,y_cell);
+                                bool res = handle_cell(x_cell,y_cell,loup);
 
 				if (res) heap_save.push_back(y_cell);
 				else return false;
@@ -230,7 +230,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell) {
 }
 
 bool LightOptimMinMax::stop_crit_reached(int current_iter,int heap_size) {
-	if( current_iter>=nb_iter) // nb_iter ==  0 implies minimum precision required (may be mid point x case)
+        if(nb_iter !=0 && current_iter>=nb_iter) // nb_iter ==  0 implies minimum precision required (may be mid point x case)
 		return true;
 	if(list_elem_max != 0 && heap_size>list_elem_max)
 		return true;
@@ -239,7 +239,7 @@ bool LightOptimMinMax::stop_crit_reached(int current_iter,int heap_size) {
 	return false;
 }
 
-bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
+bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 
 	IntervalVector xy_box =init_xy_box(x_cell->box,y_cell->box);
 	// recuperer les data
@@ -265,16 +265,16 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 		// x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
 		//midp_hit = true; <- JN:what is the variable?
 		Interval midres = xy_sys.goal->eval(mid_y_box);
-		if ( data_x->fmax.ub() < midres.lb() ) {  // midres.lb()> best_max
+                if ( loup < midres.lb() ) {  // midres.lb()> best_max ->is now false since fmax.ub() unchanged in
 			// there exists y such as constraint is respected and f(x,y)>best max, the max on x will be worst than the best known solution
 			delete y_cell;
 			delete x_cell;
-			//std::cout <<"           OUT 6 mid="<<y_cell->box<<std::endl;
+//                        std::cout <<"           OUT 6 mid="<<y_cell->box<<std::endl;
 			return false; // no need to go further, x_box does not contains the solution
 		}
 		else if(midres.lb()>data_y->pf.lb()) { // found y such as xy constraint is respected
 			// TODO	 to check		// il faut faire un contract de y_heap
-			data_y->pf   &= Interval(midres.lb(),POS_INFINITY);
+//			data_y->pf   &= Interval(midres.lb(),POS_INFINITY);
 			if (data_x->fmax.lb() < midres.lb() ) {
 				found_point = true;
 				data_x->fmax &= Interval(midres.lb(),POS_INFINITY);; // yes we found a feasible solution for all x
@@ -283,19 +283,31 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	}
 
 	//************ part below add a contraction w.r.t f(x,y)<best_max, this part may not be efficient on every problem ******************************
-	xy_sys.goal->backward(data_x->fmax,xy_box);
 
-	if (xy_box.is_empty()) { // constraint on x and y not respected, move on.
-		delete y_cell;
-		return true;
-	} else {
-		// TODO to check normalement on peut propager la contraction sur le y et sur le x
-		for (int k=0; k<y_cell->box.size(); k++) {
-			y_cell->box[k] &= xy_box[x_cell->box.size()+k];
-		}
-		//                if(data_y->pu==1) // constraint on xy is respected, contraction of x_box is possible
-		//                    x_cell->box &= xy_box.subvector(0,x_cell->box.size()-1);
-	}
+        if(data_y->pu == 1) {
+            IntervalVector xy_box_mem(xy_box);
+            xy_sys.goal->backward(Interval(NEG_INFINITY,loup),xy_box);
+
+            if(xy_box.is_empty()) {
+                delete y_cell;
+                delete x_cell;
+//                std::cout<<"delete x cell because empty contraction"<<std::endl;
+                return false;
+            }
+            for(int i=x_cell->box.size();i<xy_box.size();i++) { // y contracted => E y, for all x f(x,y)>loup, x deleted
+                if(xy_box[i] != xy_box_mem[i]) {
+//                    std::cout<<"delete x cell because contraction on y"<<std::endl;
+                    delete y_cell;
+                    delete x_cell;
+                    return false;
+                }
+            }
+            // no contraction on y but contraction on  x: keep contraction on x
+            // TODO to check normalement on peut propager la contraction sur le y et sur le x
+            for (int k=0; k<x_cell->box.size(); k++) {
+                    x_cell->box[k] &= xy_box[k];
+            }
+        }
 	//********************************************
 
 	// Update the lower and upper bound on y
@@ -306,7 +318,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	}
 
 	// check if it is possible to find a better solution than those already found on x
-	if((data_y->pf.lb() > data_x->fmax.ub()) && (data_y->pu == 1)){
+        if((data_y->pf.lb() > loup) && (data_y->pu == 1)){
 		// box verified condition and eval is above best max, x box does not contains the solution
 		// I think this case was already check with the mid-point.
 		delete y_cell;
@@ -361,20 +373,22 @@ bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector & xy
 
 bool LightOptimMinMax::handle_cstfree(IntervalVector& xy_box,Cell * y_cell) {
 	//    std::cout<<"init box: "<<*xy_box<<std::endl;
-	//    IntervalVector grad(xy_box->size());
-	//    xy_sys.goal->gradient(*xy_box,grad);
-	//    for(int i=xy_box->size()-y_cell->box.size();i<xy_box->size();i++) {
-	////        std::cout<<"i = "<<i<<std::endl;
-	//        if(grad[i].lb()>0) {
-	//            (*xy_box)[i] = Interval((*xy_box)[i].ub() -1.e-15,(*xy_box)[i].ub());
-	//        }
-	//        if(grad[i].ub()<0) {
-	//            (*xy_box)[i] = Interval((*xy_box)[i].lb(),(*xy_box)[i].lb()+1.e-15);
-	//        }
-	//    }
-	//    std::cout<<"final box: "<<*xy_box<<std::endl;
-	//    std::cout<<"free cst contraction done, contracted box: "<<*xy_box<<std::endl;
-	return true;
+            if((xy_box.subvector(xy_box.size()-y_cell->box.size(), xy_box.size()-1)).max_diam()<=1.e-14)
+                return true;
+            IntervalVector grad(xy_box.size());
+            xy_sys.goal->gradient(xy_box,grad);
+            for(int i=xy_box.size()-y_cell->box.size();i<xy_box.size();i++) {
+//        //        std::cout<<"i = "<<i<<std::endl;
+                if(grad[i].lb()>0) {
+                    (xy_box)[i] = Interval((xy_box)[i].ub() -1.e-15,(xy_box)[i].ub());
+                }
+                if(grad[i].ub()<0) {
+                    (xy_box)[i] = Interval((xy_box)[i].lb(),(xy_box)[i].lb()+1.e-15);
+                }
+            }
+        //    std::cout<<"final box: "<<*xy_box<<std::endl;
+        //    std::cout<<"free cst contraction done, contracted box: "<<*xy_box<<std::endl;
+        return true;
 }
 
 /*

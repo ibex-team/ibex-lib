@@ -49,7 +49,7 @@ public:
      *         -min_prec: minimum size of boxes in y_heap
      *         -is_midp: true if optimize run with x midpoint eval, false else
      * */
-    bool optimize(Cell* x_cell);
+    bool optimize(Cell* x_cell,double loup);
 
 	/**
 	 * Allows to add the backtrackable data required
@@ -98,7 +98,7 @@ private:
 
     bool handle_cstfree(IntervalVector& xy_box,Cell * y_cell);
 
-    bool handle_cell( Cell* x_cell, Cell* y_cell);
+    bool handle_cell( Cell* x_cell, Cell* y_cell,double loup);
 
     bool handle_constraint(OptimData  *data_y, IntervalVector& xy_box,IntervalVector& y_box);
 
