@@ -106,6 +106,11 @@ public:
 	VarSet(Function& f, const Array<const ExprNode>& x, bool var=true);
 
 	/**
+	 * \brief Create the set of variables (or parameters) x[0],...
+	 */
+	VarSet(Function& f, const Array<const ExprSymbol>& x, bool var=true);
+
+	/**
 	 * \brief Create a set of variables (or parameters) from a bitset
 	 *
 	 * \param total - The number of variables and parameters (sum)

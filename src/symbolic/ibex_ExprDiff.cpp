@@ -84,6 +84,15 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 		visit(nodes[i]);
 	}
 
+	// ====== for cleanup =====================================
+	// we cannot build a (artificial) big ExprVector gathering
+	// all the leaves' gradients and use ExprSubNodes on
+	// this vector to get all the nodes because the gradients
+	// are of heterogeneous dimensions when we use
+	// vector or matrix variables.
+	NodeMap<bool> other_nodes;
+	// =========================================================
+
 	Array<const ExprNode> dX(nb_var);
 
 	{   // =============== set null derivative for missing variables ===================
@@ -115,15 +124,21 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 			case Dim::ROW_VECTOR:
 			case Dim::COL_VECTOR:
 				{
-					for (int j=0; j<d.vec_size(); j++)
-						dX.set_ref(k++,(*grad[old_x[i]])[j]);
+					for (int j=0; j<d.vec_size(); j++) {
+						dX.set_ref(k,(*grad[old_x[i]])[j]);
+						other_nodes.insert(dX[k],true);
+						k++;
+					}
 				}
 			break;
 			case Dim::MATRIX:
 			    {
 			    	for (int j=0; j<d.nb_rows(); j++)
-			    		for (int j2=0; j2<d.nb_cols(); j2++)
-			    			dX.set_ref(k++,(*grad[old_x[i]])[DoubleIndex::one_elt(d,j,j2)]);
+			    		for (int j2=0; j2<d.nb_cols(); j2++) {
+			    			dX.set_ref(k,(*grad[old_x[i]])[DoubleIndex::one_elt(d,j,j2)]);
+			    			other_nodes.insert(dX[k],true);
+			    			k++;
+			    		}
 			    }
 			    break;
 			}
@@ -156,12 +171,6 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	//	for (int i=0; i<n; i++)
 	//	  delete grad[*nodes[i]];
 
-	// we cannot build a (artificial) big ExprVector gathering
-	// all the leaves' gradients and use ExprSubNodes on
-	// this vector to get all the nodes because the gradients
-	// are of heterogeneous dimensions when we use
-	// vector or matrix variables.
-	NodeMap<bool> other_nodes;
 
 	for (unsigned int i=0; i<leaves.size(); i++) {
 		ExprSubNodes gnodes(*grad[*leaves[i]]);
