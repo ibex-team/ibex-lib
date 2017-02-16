@@ -121,8 +121,9 @@ void SystemFactory::add_ctr(const NumConstraint& ctr) {
 void System::init_f_from_ctrs() {
 
 	if (ctrs.is_empty()) {
-		// delete the symbols of the global function "f"
-		for (int i=0; i<args.size(); i++) delete &args[i];
+		// don't delete the symbols now because
+		// one may read the "args" field of System even
+		// if there is no constraint
 		return; // <=> m>0
 	}
 
