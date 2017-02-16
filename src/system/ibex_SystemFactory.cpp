@@ -120,7 +120,11 @@ void SystemFactory::add_ctr(const NumConstraint& ctr) {
 // precondition: nb_ctr > 0
 void System::init_f_from_ctrs() {
 
-	if (ctrs.is_empty()) return; // <=> m>0
+	if (ctrs.is_empty()) {
+		// delete the symbols of the global function "f"
+		for (int i=0; i<args.size(); i++) delete &args[i];
+		return; // <=> m>0
+	}
 
 	int total_output_size=0;
 	for (int j=0; j<ctrs.size(); j++)
