@@ -62,8 +62,8 @@ void TestOptimMinMax::ex_messine() {
 
 void TestOptimMinMax::ex_segundo1() {
 
-    double x_prec = 1e-5;
-    double y_prec = 1e-5;
+    double x_prec = 1e-6;
+    double y_prec = 1e-3;
     double stop_prec = 1e-3;
 
     Variable x(1),y(1);
@@ -93,7 +93,7 @@ void TestOptimMinMax::ex_segundo1() {
 
     OptimMinMax oo(x_sys, xy_sys,x_ctc,xy_ctc,x_prec, y_prec,stop_prec);
     //oo.trace=1;
-    oo.timeout=100;
+    oo.timeout=120;
 
     Optim::Status res = oo.optimize();
     oo.report();

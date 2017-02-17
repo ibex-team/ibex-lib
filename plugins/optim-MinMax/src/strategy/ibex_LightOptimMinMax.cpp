@@ -24,9 +24,9 @@ const double LightOptimMinMax::default_list_elem_max = 1000;
 const int LightOptimMinMax::default_nb_iter = 1000;
 
 LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):
-    		trace(false) , timeout(default_timeout),
-    		ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(default_prec_y), found_point(false), time(0),
-    		list_elem_max(default_list_elem_max),ext_crit_prob(default_ext_prob),nb_iter(default_nb_iter),monitor(false), csp_actif(false){
+    						trace(false) , timeout(default_timeout),
+    						ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(default_prec_y), found_point(false), time(0),
+    						list_elem_max(default_list_elem_max),ext_crit_prob(default_ext_prob),nb_iter(default_nb_iter),monitor(false), csp_actif(false){
 
 
 }
@@ -97,6 +97,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 	//        {
 	IntervalVector xy_box = xy_box_hull(x_cell->box);
 	ctc_xy.contract(xy_box);
+
 	if(xy_box.is_empty()) {
 		delete x_cell;
 		return false;
@@ -116,6 +117,9 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 		while(!stop_crit_reached(current_iter,y_heap->size())) {
 			if (trace >= 3) std::cout<< *y_heap<<std::endl;
 
+
+			found_point  = false;
+
 			//                        if (csp_actif && (y_heap->top1()->get<OptimData>().pf.ub() < 0  )) {
 			//                                break;
 			//                        }
@@ -126,28 +130,32 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 				std::pair<Cell*,Cell*> subcells_pair=bsc->bisect_cell(*y_cell);// bisect tmp_cell into 2 subcells
 				delete y_cell;
 				//                                std::cout<<"handle first cell in light optim"<<std::endl;
-                                bool res = handle_cell( x_cell, subcells_pair.first,loup);
+				bool res = handle_cell( x_cell, subcells_pair.first,loup);
 				//                                std::cout<<"first cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
 					delete subcells_pair.second;
-//                                        std::cout <<"       OUT 1 "<<std::endl;
+					//                                        std::cout <<"       OUT 1 "<<std::endl;
 					return false;
 				}
 				//                                std::cout<<"handle second cell in light optim"<<std::endl;
-                                res = handle_cell( x_cell, subcells_pair.second,loup);
+				res = handle_cell( x_cell, subcells_pair.second,loup);
 				//                                std::cout<<"second cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
-//                                        std::cout <<"       OUT 2 "<<std::endl;
+					//                                        std::cout <<"       OUT 2 "<<std::endl;
 					return false;
 				}
 
+				if (found_point) { // a feasible solution has been found
+					y_heap->contract(-(data_x->fmax.lb())); // to check
+
+				}
 				// ** contract not yet
 				//if (found_point) { // a feasible solution has been found
 				//	y_heap->contract(-(data_x->fmax.lb())); // to check
 				//}
 			}
 			catch (NoBisectableVariableException& ) {
-                                bool res = handle_cell(x_cell,y_cell,loup);
+				bool res = handle_cell(x_cell,y_cell,loup);
 
 				if (res) heap_save.push_back(y_cell);
 				else return false;
@@ -177,9 +185,9 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 
 	fill_y_heap(*y_heap);
 
-	if (found_point) { // a feasible solution has been found
-		y_heap->contract(-(data_x->fmax.lb())); // to check
-	}
+	//if (found_point) { // a feasible solution has been found
+	y_heap->contract(-(data_x->fmax.lb())); // to check
+	//}
 	//        std::cout<<"y_heap filled"<<std::endl;
 
 	// ** contract y_heap now
@@ -210,6 +218,14 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 
 	//        }
 
+
+	if(  data_x->fmax.is_empty() || data_x->fmax.lb() > loup) {
+		//                std::cout <<"       OUT 4 "<<std::endl;
+		delete x_cell;
+		return false;
+	}
+
+
 	if(monitor)
 	{
 		lb.push_back(data_x->fmax.lb());
@@ -219,18 +235,12 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 		export_monitor(&ub,&lb,&nbel,&nbel_save,x_cell->box);
 	}
 
-	if(  data_x->fmax.is_empty()) {
-		//                std::cout <<"       OUT 4 "<<std::endl;
-		delete x_cell;
-		return false;
-	}
-
 	//        std::cout <<"    FIN "<<data_x->fmax <<std::endl;
 	return true;
 }
 
 bool LightOptimMinMax::stop_crit_reached(int current_iter,int heap_size) {
-        if(nb_iter !=0 && current_iter>=nb_iter) // nb_iter ==  0 implies minimum precision required (may be mid point x case)
+	if(nb_iter !=0 && current_iter>=nb_iter) // nb_iter ==  0 implies minimum precision required (may be mid point x case)
 		return true;
 	if(list_elem_max != 0 && heap_size>list_elem_max)
 		return true;
@@ -265,16 +275,16 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 		// x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
 		//midp_hit = true; <- JN:what is the variable?
 		Interval midres = xy_sys.goal->eval(mid_y_box);
-                if ( loup < midres.lb() ) {  // midres.lb()> best_max ->is now false since fmax.ub() unchanged in
+		if ( loup < midres.lb() ) {  // midres.lb()> best_max ->is now false since fmax.ub() unchanged in
 			// there exists y such as constraint is respected and f(x,y)>best max, the max on x will be worst than the best known solution
 			delete y_cell;
 			delete x_cell;
-//                        std::cout <<"           OUT 6 mid="<<y_cell->box<<std::endl;
+			//                        std::cout <<"           OUT 6 mid="<<y_cell->box<<std::endl;
 			return false; // no need to go further, x_box does not contains the solution
 		}
 		else if(midres.lb()>data_y->pf.lb()) { // found y such as xy constraint is respected
 			// TODO	 to check		// il faut faire un contract de y_heap
-//			data_y->pf   &= Interval(midres.lb(),POS_INFINITY);
+			data_y->pf   &= Interval(midres.lb(),POS_INFINITY);
 			if (data_x->fmax.lb() < midres.lb() ) {
 				found_point = true;
 				data_x->fmax &= Interval(midres.lb(),POS_INFINITY);; // yes we found a feasible solution for all x
@@ -284,30 +294,30 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 
 	//************ part below add a contraction w.r.t f(x,y)<best_max, this part may not be efficient on every problem ******************************
 
-        if(data_y->pu == 1) {
-            IntervalVector xy_box_mem(xy_box);
-            xy_sys.goal->backward(Interval(NEG_INFINITY,loup),xy_box);
+	if(data_y->pu == 1) {
+		IntervalVector xy_box_mem(xy_box);
+		xy_sys.goal->backward(Interval(NEG_INFINITY,loup),xy_box);
 
-            if(xy_box.is_empty()) {
-                delete y_cell;
-                delete x_cell;
-//                std::cout<<"delete x cell because empty contraction"<<std::endl;
-                return false;
-            }
-            for(int i=x_cell->box.size();i<xy_box.size();i++) { // y contracted => E y, for all x f(x,y)>loup, x deleted
-                if(xy_box[i] != xy_box_mem[i]) {
-//                    std::cout<<"delete x cell because contraction on y"<<std::endl;
-                    delete y_cell;
-                    delete x_cell;
-                    return false;
-                }
-            }
-            // no contraction on y but contraction on  x: keep contraction on x
-            // TODO to check normalement on peut propager la contraction sur le y et sur le x
-            for (int k=0; k<x_cell->box.size(); k++) {
-                    x_cell->box[k] &= xy_box[k];
-            }
-        }
+		if(xy_box.is_empty()) {
+			delete y_cell;
+			delete x_cell;
+			//                std::cout<<"delete x cell because empty contraction"<<std::endl;
+			return false;
+		}
+		for(int i=x_cell->box.size();i<xy_box.size();i++) { // y contracted => E y, for all x f(x,y)>loup, x deleted
+			if(xy_box[i] != xy_box_mem[i]) {
+				//                    std::cout<<"delete x cell because contraction on y"<<std::endl;
+				delete y_cell;
+				delete x_cell;
+				return false;
+			}
+		}
+		// no contraction on y but contraction on  x: keep contraction on x
+		// TODO to check normalement on peut propager la contraction sur le y et sur le x
+		for (int k=0; k<x_cell->box.size(); k++) {
+			x_cell->box[k] &= xy_box[k];
+		}
+	}
 	//********************************************
 
 	// Update the lower and upper bound on y
@@ -318,7 +328,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 	}
 
 	// check if it is possible to find a better solution than those already found on x
-        if((data_y->pf.lb() > loup) && (data_y->pu == 1)){
+	if((data_y->pf.lb() > loup) && (data_y->pu == 1)){
 		// box verified condition and eval is above best max, x box does not contains the solution
 		// I think this case was already check with the mid-point.
 		delete y_cell;
@@ -373,22 +383,22 @@ bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector & xy
 
 bool LightOptimMinMax::handle_cstfree(IntervalVector& xy_box,Cell * y_cell) {
 	//    std::cout<<"init box: "<<*xy_box<<std::endl;
-            if((xy_box.subvector(xy_box.size()-y_cell->box.size(), xy_box.size()-1)).max_diam()<=1.e-14)
-                return true;
-            IntervalVector grad(xy_box.size());
-            xy_sys.goal->gradient(xy_box,grad);
-            for(int i=xy_box.size()-y_cell->box.size();i<xy_box.size();i++) {
-//        //        std::cout<<"i = "<<i<<std::endl;
-                if(grad[i].lb()>0) {
-                    (xy_box)[i] = Interval((xy_box)[i].ub() -1.e-15,(xy_box)[i].ub());
-                }
-                if(grad[i].ub()<0) {
-                    (xy_box)[i] = Interval((xy_box)[i].lb(),(xy_box)[i].lb()+1.e-15);
-                }
-            }
-        //    std::cout<<"final box: "<<*xy_box<<std::endl;
-        //    std::cout<<"free cst contraction done, contracted box: "<<*xy_box<<std::endl;
-        return true;
+	if((xy_box.subvector(xy_box.size()-y_cell->box.size(), xy_box.size()-1)).max_diam()<=1.e-14)
+		return true;
+	IntervalVector grad(xy_box.size());
+	xy_sys.goal->gradient(xy_box,grad);
+	for(int i=xy_box.size()-y_cell->box.size();i<xy_box.size();i++) {
+		//        //        std::cout<<"i = "<<i<<std::endl;
+		if(grad[i].lb()>0) {
+			(xy_box)[i] = Interval((xy_box)[i].ub() -1.e-15,(xy_box)[i].ub());
+		}
+		if(grad[i].ub()<0) {
+			(xy_box)[i] = Interval((xy_box)[i].lb(),(xy_box)[i].lb()+1.e-15);
+		}
+	}
+	//    std::cout<<"final box: "<<*xy_box<<std::endl;
+	//    std::cout<<"free cst contraction done, contracted box: "<<*xy_box<<std::endl;
+	return true;
 }
 
 /*
