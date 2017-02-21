@@ -371,6 +371,15 @@ T* DoubleHeap<T>::pop() {
 	assert(heap1->heap_state());
 	assert(!heap2 || heap2->heap_state());
 
+
+	// select the heap
+	if (RNG::rand() % 100 >= static_cast<unsigned>(critpr)) {
+		current_heap_id=0;
+	}
+	else {
+		current_heap_id=1;
+	}
+
 	return data;
 }
 
