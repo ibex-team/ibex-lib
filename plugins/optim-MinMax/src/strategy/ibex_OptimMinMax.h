@@ -83,6 +83,7 @@ public:
     int list_elem_absolute_max;
     int iter; // number of iteration of lightsolver allowedNormalizedSystem *
     double min_perc_coef; // used to compute y_prec allowed when run the light solver, see compute_min_prec function for formula
+    bool monitor; // creat log file if true
 
 private:
 

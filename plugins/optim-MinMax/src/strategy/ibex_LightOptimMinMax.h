@@ -78,6 +78,8 @@ private:
     double time;
     bool csp_actif;
 
+    double save_heap_ub;
+
     /* contract xy_box and xy_box_ctc w.r.t max_ctc contractor
      * */
 //    void contract_best_max_cst( Ctc* max_ctc,IntervalVector* xy_box,IntervalVector* xy_box_ctc,y_heap_elem* elem);

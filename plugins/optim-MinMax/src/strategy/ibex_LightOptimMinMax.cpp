@@ -15,6 +15,7 @@
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_Timer.h"
 
+using namespace std;
 namespace ibex{
 
 const double LightOptimMinMax::default_timeout = 60;
@@ -110,6 +111,9 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 	//monitoring variables, used to track upper bound, lower bound, number of elem in y_heap and heap_save at each iteration
 	std::vector<double> ub,lb,nbel,nbel_save;
 
+        save_heap_ub = NEG_INFINITY;
+//        cout<<"initial fmax: "<<data_x->fmax<<endl;
+
 
 	// *********** loop ********************
 	try {
@@ -129,17 +133,17 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 			try {
 				std::pair<Cell*,Cell*> subcells_pair=bsc->bisect_cell(*y_cell);// bisect tmp_cell into 2 subcells
 				delete y_cell;
-				//                                std::cout<<"handle first cell in light optim"<<std::endl;
+//                                                                std::cout<<"handle first cell in light optim"<<std::endl;
 				bool res = handle_cell( x_cell, subcells_pair.first,loup);
-				//                                std::cout<<"first cell handled"<<std::endl;
+//                                                                std::cout<<"first cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
 					delete subcells_pair.second;
 					//                                        std::cout <<"       OUT 1 "<<std::endl;
 					return false;
 				}
-				//                                std::cout<<"handle second cell in light optim"<<std::endl;
+//                                                                std::cout<<"handle second cell in light optim"<<std::endl;
 				res = handle_cell( x_cell, subcells_pair.second,loup);
-				//                                std::cout<<"second cell handled"<<std::endl;
+//                                                                std::cout<<"second cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
 					//                                        std::cout <<"       OUT 2 "<<std::endl;
 					return false;
@@ -161,21 +165,26 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 				else return false;
 
 			}
-			Timer::check(time+timeout);
 			if(monitor)
 			{
-				lb.push_back(data_x->fmax.lb());
-				ub.push_back(y_heap->top1()->get<OptimData>().pf.ub());
-				nbel.push_back(y_heap->size());
-				nbel_save.push_back(heap_save.size());
+                            if(!y_heap->empty()) {
+                                lb.push_back(data_x->fmax.lb());
+                                if(save_heap_ub<y_heap->top1()->get<OptimData>().pf.ub())
+                                    ub.push_back(y_heap->top1()->get<OptimData>().pf.ub());
+                                else
+                                    ub.push_back(save_heap_ub);
+                                nbel.push_back(y_heap->size());
+                                nbel_save.push_back(heap_save.size());
+                            }
 			}
-			//                        std::cout<<"nb iter: "<<current_iter<<std::endl;
+//                                                std::cout<<"nb iter: "<<current_iter<<std::endl;
+                        Timer::check(time+timeout);
 
 		}
 
 	}
 	catch (TimeOutException& ) { }
-	//        std::cout<<"light optim: out of loop"<<std::endl;
+//                std::cout<<"light optim: out of loop"<<std::endl;
 	/*
 ??    if(is_midp && !midp_hit) // midpoint x eval case: if no y found such as xy constraint respected, cannot keep the result
 ??        return Interval::EMPTY_SET;
@@ -209,10 +218,10 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 		ibex_error("ibex_LightOptimMinMax: error, please report this bug.");
 	}
 
-	//        std::cout<<"fmax ini: "<<data_x->fmax<<std::endl;
+//                std::cout<<"fmax ini: "<<data_x->fmax<<std::endl;
 	data_x->fmax &= Interval(new_fmax_lb, new_fmax_ub);
 	//        std::cout<<"new_fmax_lb: "<<new_fmax_lb<<" new_fmax_ub: "<<new_fmax_ub<<std::endl;
-	//        std::cout<<"fmax ini: "<<data_x->fmax<<std::endl;
+//                std::cout<<"fmax final: "<<data_x->fmax<<std::endl;
 	//        if(data_x->fmax.lb()>100000){
 	//            std::cout<<"Issue: fmax_lb > 100,000"<<std::endl;
 
@@ -341,6 +350,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 	// store y_cell
 	if (y_cell->box.max_diam()<prec_y) {
 		//            std::cout<<"y_cell pushed in heap_save, box: "<<y_cell->box<<" pf: "<<data_y->pf<<" pu: "<<data_y->pu<<std::endl;
+                save_heap_ub = save_heap_ub<data_y->pf.ub()?data_y->pf.ub():save_heap_ub;
 		heap_save.push_back(y_cell);
 	} else {
 		data_x->y_heap->push(y_cell);
@@ -383,19 +393,19 @@ bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector & xy
 
 bool LightOptimMinMax::handle_cstfree(IntervalVector& xy_box,Cell * y_cell) {
 	//    std::cout<<"init box: "<<*xy_box<<std::endl;
-	if((xy_box.subvector(xy_box.size()-y_cell->box.size(), xy_box.size()-1)).max_diam()<=1.e-14)
-		return true;
-	IntervalVector grad(xy_box.size());
-	xy_sys.goal->gradient(xy_box,grad);
-	for(int i=xy_box.size()-y_cell->box.size();i<xy_box.size();i++) {
-		//        //        std::cout<<"i = "<<i<<std::endl;
-		if(grad[i].lb()>0) {
-			(xy_box)[i] = Interval((xy_box)[i].ub() -1.e-15,(xy_box)[i].ub());
-		}
-		if(grad[i].ub()<0) {
-			(xy_box)[i] = Interval((xy_box)[i].lb(),(xy_box)[i].lb()+1.e-15);
-		}
-	}
+//        if((xy_box.subvector(xy_box.size()-y_cell->box.size(), xy_box.size()-1)).max_diam()<=1.e-14)
+//                return true;
+//        IntervalVector grad(xy_box.size());
+//        xy_sys.goal->gradient(xy_box,grad);
+//        for(int i=xy_box.size()-y_cell->box.size();i<xy_box.size();i++) {
+//                //        //        std::cout<<"i = "<<i<<std::endl;
+//                if(grad[i].lb()>0) {
+//                        (xy_box)[i] = Interval((xy_box)[i].ub() -1.e-15,(xy_box)[i].ub());
+//                }
+//                if(grad[i].ub()<0) {
+//                        (xy_box)[i] = Interval((xy_box)[i].lb(),(xy_box)[i].lb()+1.e-15);
+//                }
+//        }
 	//    std::cout<<"final box: "<<*xy_box<<std::endl;
 	//    std::cout<<"free cst contraction done, contracted box: "<<*xy_box<<std::endl;
 	return true;

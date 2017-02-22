@@ -34,7 +34,8 @@ OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& 
                 								min_perc_coef(default_min_perc_coef),
                 								list_elem_absolute_max(default_list_elem_absolute_max),
                 								fa_lsolve(xy_sys,xy_ctc), // useless if no fa cst but need to construct it...
-                								fa_y_cst(false)
+                                                                                fa_y_cst(false),
+                                                                                monitor(false)
 {
 };
 
@@ -52,7 +53,8 @@ OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,Normal
     								list_elem_absolute_max(default_list_elem_absolute_max),
     								prec_fa_y(fa_cst_prec),
     								fa_lsolve(max_fa_y_cst_sys,xy_ctc), // construct light solver for for all y cst with fake contractor, contractor useless since no constraint on xy only the objective function matter
-    								fa_y_cst(true)
+                                                                fa_y_cst(true),
+                                                                monitor(false)
 {
 };
 
@@ -70,7 +72,7 @@ Optim::Status OptimMinMax::optimize() {
 
 
 Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj_init_bound) {
-	bool monitor = false;
+//	bool monitor = false;
 	if (trace) lsolve.trace =trace;
 	// we estimate that one iteration is at most 1% of the total time
 	lsolve.timeout=timeout/100;
@@ -113,7 +115,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 	bool handle_res1,handle_res2;
 
 	try {
-		while (!buffer->empty()) {
+                while (!buffer->empty() && (loup-uplo)>goal_rel_prec) {
 			//			if (trace >= 2) cout << " buffer " << buffer << endl;
 			if (trace >= 2) buffer->print(cout);
 
@@ -130,18 +132,18 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 				handle_res1 = handle_cell(new_cells.first);
 				if(handle_res1 && monitor) {
-					cout<<"try to get backtrack 1"<<endl;
+//					cout<<"try to get backtrack 1"<<endl;
 					DataMinMax * data_x1 = &((new_cells.first)->get<DataMinMax>());
-					cout<<"get backtrack 1"<<endl;
+//					cout<<"get backtrack 1"<<endl;
 					nbel_count += data_x1->y_heap->size();
 				}
 
 				handle_res2 = handle_cell(new_cells.second);
 
 				if(handle_res2 && monitor) {
-					cout<<"try to get backtrack 2"<<endl;
+//					cout<<"try to get backtrack 2"<<endl;
 					DataMinMax * data_x2 = &((new_cells.second)->get<DataMinMax>());
-					cout<<"get backtrack 2"<<endl;
+//					cout<<"get backtrack 2"<<endl;
 					nbel_count += data_x2->y_heap->size();
 				}
 
@@ -173,8 +175,9 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 				if(monitor)
 				{
+
 					lb.push_back(uplo);
-					ub.push_back(ymax);
+                                        ub.push_back(loup);
 					nbel.push_back(buffer->size());
 					nbyel.push_back(nbel_count);
 				}
@@ -359,7 +362,7 @@ int OptimMinMax::choose_nbiter(bool midpoint_eval) {
 	if(!midpoint_eval)
 		return iter;
 	else
-		return 0; // go to min prec
+                return 0; // go to min prec
 }
 
 int OptimMinMax::compute_heap_max_size(int y_heap_size) {
@@ -369,13 +372,13 @@ int OptimMinMax::compute_heap_max_size(int y_heap_size) {
 }
 
 IntervalVector OptimMinMax::get_feasible_point(Cell * elem) {
-	Vector mid_x = elem->box.mid(); // get the box (x,mid(y))
-	if( (x_sys.nb_ctr >0 ) && (elem->get<DataMinMax>().pu != 1)) { // constraint on xy exist and is not proved to be satisfied
-		int res = check_constraints(mid_x);
-		if(res==0 || res==1)
-			return IntervalVector(1,Interval::EMPTY_SET);
-	}
-	return mid_x;
+        Vector mid_x = elem->box.mid(); // get the box (x,mid(y))
+        if( (x_sys.nb_ctr >0 ) && (elem->get<DataMinMax>().pu != 1)) { // constraint on xy exist and is not proved to be satisfied
+                int res = check_constraints(mid_x);
+                if(res==0 || res==1)
+                        return IntervalVector(1,Interval::EMPTY_SET);
+        }
+        return mid_x;
 }
 
 int OptimMinMax::check_constraints(const IntervalVector& box) {
