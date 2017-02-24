@@ -30,7 +30,7 @@ class LightOptimMinMax {
 public:
 
     /* Constructor*/
-    LightOptimMinMax(NormalizedSystem& y_sys,Ctc& ctc_xy);
+    LightOptimMinMax(NormalizedSystem& y_sys,Ctc& ctc_xy,bool csp_actif = false);
 
     /* Constructor*/
 //    LightOptimMinMax(NormalizedSystem& y_sys);
@@ -55,7 +55,7 @@ public:
 	 * Allows to add the backtrackable data required
 	 * by this MinMax optimizer to the root cell
 	 */
-    void add_backtrackable(Cell& root, const IntervalVector& y_init);
+    void add_backtrackable(Cell& root, const IntervalVector& y_init,int critpr);
 
 
 

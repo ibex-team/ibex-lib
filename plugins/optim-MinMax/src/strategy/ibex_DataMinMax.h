@@ -30,7 +30,8 @@ public:
 	/**
 	 * \brief Constructor for the root node (followed by a call to init_root).
 	 */
-	DataMinMax();
+        DataMinMax();
+
 
 	/**
 	 * \brief Delete *this.
@@ -60,8 +61,6 @@ public:
 	 */
     DoubleHeap<Cell>* y_heap;
 
-    DoubleHeap<Cell>* y_fa_heap;
-
 
 	/**
 	 * Cost function of the heap to store the element of the light solver
@@ -84,25 +83,46 @@ protected:
 
 };
 
+/* Inherited classes from DataMinMax */
+
+class DataMinMaxOpti : public DataMinMax {
+
+protected:
+    Backtrackable* copy() const { return new DataMinMaxOpti(*this);};
+
+};
+
+
+class DataMinMaxCsp : public DataMinMax {
+
+protected:
+    Backtrackable* copy() const { return new DataMinMaxCsp(*this);};
+
+
+};
+
+
+/* Cost function definition for DataMinMaxOpti class */
+
 
 class CellCostFmaxlb : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
 public:
 
-	CellCostFmaxlb();
+        CellCostFmaxlb();
 
-	/**
-	 * \brief Return the cost associated to "data"
-	 */
-	virtual double cost(const Cell& elem) const;
+        /**
+         * \brief Return the cost associated to "data"
+         */
+        virtual double cost(const Cell& elem) const;
 
-	/**
-	 * \brief Add backtrackable data required by this cost function
-	 *
-	 * This function is called for the root cell (before a
-	 * strategy is executed).
-	 *
-	 * Does nothing by default.
-	 */
+        /**
+         * \brief Add backtrackable data required by this cost function
+         *
+         * This function is called for the root cell (before a
+         * strategy is executed).
+         *
+         * Does nothing by default.
+         */
      virtual void add_backtrackable(Cell& root);
 
 };
@@ -110,20 +130,20 @@ public:
 class CellCostmaxFmaxub : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
 public:
 
-	CellCostmaxFmaxub();
-	/**
-	 * \brief Return the cost associated to "data"
-	 */
-	virtual double cost(const Cell& elem) const;
+        CellCostmaxFmaxub();
+        /**
+         * \brief Return the cost associated to "data"
+         */
+        virtual double cost(const Cell& elem) const;
 
-	/**
-	 * \brief Add backtrackable data required by this cost function
-	 *
-	 * This function is called for the root cell (before a
-	 * strategy is executed).
-	 *
-	 * Does nothing by default.
-	 */
+        /**
+         * \brief Add backtrackable data required by this cost function
+         *
+         * This function is called for the root cell (before a
+         * strategy is executed).
+         *
+         * Does nothing by default.
+         */
      virtual void add_backtrackable(Cell& root);
 
 };
@@ -131,32 +151,156 @@ public:
 class CellCostFmaxub : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
 public:
 
-	CellCostFmaxub();
-	/**
-	 * \brief Return the cost associated to "data"
-	 */
-	virtual double cost(const Cell& elem) const;
+        CellCostFmaxub();
+        /**
+         * \brief Return the cost associated to "data"
+         */
+        virtual double cost(const Cell& elem) const;
 
-	/**
-	 * \brief Add backtrackable data required by this cost function
-	 *
-	 * This function is called for the root cell (before a
-	 * strategy is executed).
-	 *
-	 * Does nothing by default.
-	 */
+        /**
+         * \brief Add backtrackable data required by this cost function
+         *
+         * This function is called for the root cell (before a
+         * strategy is executed).
+         *
+         * Does nothing by default.
+         */
      virtual void add_backtrackable(Cell& root);
 
 };
 
-class DataMinMaxOpti : public DataMinMax {
 
+/* Cost function definition for DataMinMaxOpti class */
+
+
+class CellCostFmaxlb_opt : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+public:
+
+        CellCostFmaxlb_opt();
+
+        /**
+         * \brief Return the cost associated to "data"
+         */
+        virtual double cost(const Cell& elem) const;
+
+        /**
+         * \brief Add backtrackable data required by this cost function
+         *
+         * This function is called for the root cell (before a
+         * strategy is executed).
+         *
+         * Does nothing by default.
+         */
+     virtual void add_backtrackable(Cell& root);
 
 };
 
+class CellCostmaxFmaxub_opt : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+public:
 
-class DataMinMaxCsp : public DataMinMax {
+        CellCostmaxFmaxub_opt();
+        /**
+         * \brief Return the cost associated to "data"
+         */
+        virtual double cost(const Cell& elem) const;
 
+        /**
+         * \brief Add backtrackable data required by this cost function
+         *
+         * This function is called for the root cell (before a
+         * strategy is executed).
+         *
+         * Does nothing by default.
+         */
+     virtual void add_backtrackable(Cell& root);
+
+};
+
+class CellCostFmaxub_opt : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+public:
+
+        CellCostFmaxub_opt();
+        /**
+         * \brief Return the cost associated to "data"
+         */
+        virtual double cost(const Cell& elem) const;
+
+        /**
+         * \brief Add backtrackable data required by this cost function
+         *
+         * This function is called for the root cell (before a
+         * strategy is executed).
+         *
+         * Does nothing by default.
+         */
+     virtual void add_backtrackable(Cell& root);
+
+};
+
+/* Cost function definition for DataMinMaxCsp class */
+
+
+class CellCostFmaxlb_csp : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+public:
+
+        CellCostFmaxlb_csp();
+
+        /**
+         * \brief Return the cost associated to "data"
+         */
+        virtual double cost(const Cell& elem) const;
+
+        /**
+         * \brief Add backtrackable data required by this cost function
+         *
+         * This function is called for the root cell (before a
+         * strategy is executed).
+         *
+         * Does nothing by default.
+         */
+     virtual void add_backtrackable(Cell& root);
+
+};
+
+class CellCostmaxFmaxub_csp : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+public:
+
+        CellCostmaxFmaxub_csp();
+        /**
+         * \brief Return the cost associated to "data"
+         */
+        virtual double cost(const Cell& elem) const;
+
+        /**
+         * \brief Add backtrackable data required by this cost function
+         *
+         * This function is called for the root cell (before a
+         * strategy is executed).
+         *
+         * Does nothing by default.
+         */
+     virtual void add_backtrackable(Cell& root);
+
+};
+
+class CellCostFmaxub_csp : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+public:
+
+        CellCostFmaxub_csp();
+        /**
+         * \brief Return the cost associated to "data"
+         */
+        virtual double cost(const Cell& elem) const;
+
+        /**
+         * \brief Add backtrackable data required by this cost function
+         *
+         * This function is called for the root cell (before a
+         * strategy is executed).
+         *
+         * Does nothing by default.
+         */
+     virtual void add_backtrackable(Cell& root);
 
 };
 

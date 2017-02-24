@@ -27,6 +27,11 @@ public:
     /* Constructor*/
     OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec);
 
+    /* Constructor, with "for all y" constraints
+     * for all constraint in the objectif function of max_fa_y_cst lower than 0. If several for all constraints the objectif is equal to the max
+     * of constraint functions lower than 0
+     */
+
     OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,NormalizedSystem& max_fa_y_cst, Ctc& x_ctc,Ctc& xy_ctc,
                              double prec_x,double prec_y,double goal_rel_prec,double fa_cst_prec);
 
@@ -73,6 +78,7 @@ public:
 
     IntervalVector x_box_init;
     IntervalVector y_box_init;
+    IntervalVector y_box_init_fa; // y box for constraints of type for all y may be different than y_box_ini
 
     inline void set_prec_y(double prec_y) {this->prec_y = prec_y; }
 
@@ -83,6 +89,7 @@ public:
     int list_elem_absolute_max;
     int iter; // number of iteration of lightsolver allowedNormalizedSystem *
     double min_perc_coef; // used to compute y_prec allowed when run the light solver, see compute_min_prec function for formula
+    int critpr; // probability to choose second heap in light_solver
     bool monitor; // creat log file if true
 
 private:
@@ -97,8 +104,10 @@ private:
     double compute_min_prec( const IntervalVector& x_box);
     int choose_nbiter(bool midpoint_eval);
     int compute_heap_max_size(int y_heap_size);
-    IntervalVector get_feasible_point(Cell * elem);
-    int check_constraints(const IntervalVector& box);
+    bool get_feasible_point(Cell * elem);
+    int check_constraints(Cell * x_cell);
+    int check_regular_ctr(const IntervalVector& box);
+    int check_fa_ctr(Cell * x_cell);
     bool handle_cell(Cell * x_cell);
 
     // Fa cst variables
@@ -111,6 +120,7 @@ private:
         static const int default_list_elem_absolute_max;
         static const int default_iter;
         static const double default_min_perc_coef;
+        static const int default_prob_heap;
 
 };
 void export_monitor(std::vector<double> * ub,std::vector<double> * lb,std::vector<double> * nbxel,std::vector<double> * nbyel);

@@ -24,10 +24,10 @@ const double LightOptimMinMax::default_ext_prob = 0;
 const double LightOptimMinMax::default_list_elem_max = 1000;
 const int LightOptimMinMax::default_nb_iter = 1000;
 
-LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):
+LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy,bool csp_actif):
     						trace(false) , timeout(default_timeout),
     						ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(default_prec_y), found_point(false), time(0),
-    						list_elem_max(default_list_elem_max),ext_crit_prob(default_ext_prob),nb_iter(default_nb_iter),monitor(false), csp_actif(false){
+                                                list_elem_max(default_list_elem_max),ext_crit_prob(default_ext_prob),nb_iter(default_nb_iter),monitor(false), csp_actif(csp_actif){
 
 
 }
@@ -44,27 +44,28 @@ LightOptimMinMax::~LightOptimMinMax() {
 	delete bsc;
 }
 
-void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_init) {
-	//        if (csp_actif)
-	//            root.add<DataMinMaxCsp>();
-	//        else
-	//            root.add<DataMinMaxOpti>();
-	root.add<DataMinMax>();
+void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_init,int critpr) {
+        if (csp_actif)
+            root.add<DataMinMaxCsp>();
+        else
+            root.add<DataMinMaxOpti>();
+//        root.add<DataMinMax>();
 	Cell * y_cell = new Cell(y_init);
 	y_cell->add<OptimData>();
 	bsc->add_backtrackable(*y_cell);
-	DataMinMax *data_x ;
-	//        DataMinMaxOpti *data_x ;
+        DataMinMax *data_x;
+//                DataMinMaxOpti *data_x ;
 
-	//        if (csp_actif)
-	//            data_x = &(root.get<DataMinMaxCsp>());
-	//        else
-	//            data_x = &(root.get<DataMinMaxOpti>());
-	data_x = &(root.get<DataMinMax>());
+                if (csp_actif)
+                    data_x = &(root.get<DataMinMaxCsp>());
+                else
+                    data_x = &(root.get<DataMinMaxOpti>());
+//	data_x = &(root.get<DataMinMax>());
 
 	data_x->y_heap_costf1.add_backtrackable(*y_cell);
 	data_x->y_heap_costf2.add_backtrackable(*y_cell);
 	data_x->y_heap->push(y_cell);
+        data_x->y_heap->critpr = critpr;
 }
 
 bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
@@ -74,21 +75,21 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 	//std::cout<<"current optim parameters: "<<std::endl<<"list max elem: "<<list_elem_max<<std::endl<<"nb itex: "<<nb_iter<<std::endl;
 
 	found_point  = false;
-	DataMinMax *data_x;
-	//        DataMinMaxOpti *data_x;
-	//        if (csp_actif )
-	//            data_x = &(x_cell->get<DataMinMaxCsp>());
-	//        else
-	//            data_x = &(x_cell->get<DataMinMaxOpti>());
-	data_x = &(x_cell->get<DataMinMax>());
+        DataMinMax *data_x;
+
+        if (csp_actif )
+            data_x = &(x_cell->get<DataMinMaxCsp>());
+        else
+            data_x = &(x_cell->get<DataMinMaxOpti>());
+//	data_x = &(x_cell->get<DataMinMax>());
 
 	//std::cout <<"    DEB "<<data_x->fmax <<std::endl;
+//                cout<<endl<<"*************************"<<endl;
 
 	DoubleHeap<Cell> *y_heap = data_x->y_heap; // current cell
-
-	// /!\ Does creating a contractor here cause memory leak ? If so, it must be recreated in the minimax_solver algo only when best_max change to limit the memory leak, and pass it as an argument of this function
-	//    CtcFwdBwd max_ctc((*objective_function),Interval(NEG_INFINITY,best_max)); // contract w.r.t "the objective function must be lower than the current best solution best_max"
-	//    cout<<"lsolve: contractor ok"<<endl;
+//        cout<<"get y_heap of size: "<<y_heap->size()<<endl;
+//        cout<<"initial fmax: "<<data_x->fmax<<endl;
+//        cout<<"box: "<<x_cell->box<<endl;
 
 	// Define the TimeOut of to compute the bounds of x_cell
 	time= Timer::get_time();
@@ -124,10 +125,10 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 
 			found_point  = false;
 
-			//                        if (csp_actif && (y_heap->top1()->get<OptimData>().pf.ub() < 0  )) {
-			//                                break;
-			//                        }
-			Cell * y_cell = y_heap->pop1(); // we extract an element according to the first order
+                        if (csp_actif && (y_heap->top1()->get<OptimData>().pf.ub() < 0  )) {
+                                break;
+                        }
+                        Cell * y_cell = y_heap->pop(); // we extract an element with critprob probability to take it according to the first crit
 			current_iter++;
 			//                        std::cout<<"current_iter: "<<current_iter<<std::endl;
 			try {
@@ -212,7 +213,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 	double new_fmax_ub = y_heap->top1()->get<OptimData>().pf.ub(); // get the upper bound of max f(x,y_heap)
 	double new_fmax_lb = y_heap->top2()->get<OptimData>().pf.lb(); // get the lower bound of max f(x,y_heap)
 
-	//std::cout<<"new_fmax_ub: "<<new_fmax_ub<<std::endl<<"new_fmax_lb: "<<new_fmax_lb<<std::endl<<"fmax_lb (from found point): "<<data_x->fmax.lb()<<std::endl;
+//        std::cout<<"new_fmax_ub: "<<new_fmax_ub<<std::endl<<"new_fmax_lb: "<<new_fmax_lb<<std::endl<<"fmax_lb (from found point): "<<data_x->fmax.lb()<<std::endl;
 
 	if (new_fmax_ub< new_fmax_lb) {
 		ibex_error("ibex_LightOptimMinMax: error, please report this bug.");
@@ -250,11 +251,15 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 
 bool LightOptimMinMax::stop_crit_reached(int current_iter,int heap_size) {
 	if(nb_iter !=0 && current_iter>=nb_iter) // nb_iter ==  0 implies minimum precision required (may be mid point x case)
+        {
+            return true;
+        }
+        if(list_elem_max != 0 && heap_size>list_elem_max) {
 		return true;
-	if(list_elem_max != 0 && heap_size>list_elem_max)
+        }
+        if(heap_size == 0) {
 		return true;
-	if(heap_size == 0)
-		return true;
+        }
 	return false;
 }
 
@@ -262,9 +267,15 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 
 	IntervalVector xy_box =init_xy_box(x_cell->box,y_cell->box);
 	// recuperer les data
-	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
-	//        DataMinMaxOpti *data_x = &(x_cell->get<DataMinMaxOpti>());
+        DataMinMax *data_x;
+
+        if (csp_actif )
+            data_x = &(x_cell->get<DataMinMaxCsp>());
+        else
+            data_x = &(x_cell->get<DataMinMaxOpti>());
+
 	OptimData  *data_y = &(y_cell->get<OptimData>());
+//        cout<<"xy_cell box: "<<xy_box<<endl;
 
 
 	if(data_y->pu!=1) { // Check constraints
@@ -281,8 +292,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 	IntervalVector mid_y_box = get_feasible_point(x_cell,y_cell);
 
 	if (!(mid_y_box.is_empty())) {
-		// x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
-		//midp_hit = true; <- JN:what is the variable?
+                // x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
 		Interval midres = xy_sys.goal->eval(mid_y_box);
 		if ( loup < midres.lb() ) {  // midres.lb()> best_max ->is now false since fmax.ub() unchanged in
 			// there exists y such as constraint is respected and f(x,y)>best max, the max on x will be worst than the best known solution
@@ -331,6 +341,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 
 	// Update the lower and upper bound on y
 	data_y->pf &= xy_sys.goal->eval(xy_box); // objective function evaluation
+//        cout<<"res of eval: "<<xy_sys.goal->eval(xy_box)<<endl;
 	if( data_y->pf.is_empty() || data_x->fmax.lb() > data_y->pf.ub()) {  // y_box cannot contains max f(x,y)
 		delete y_cell;
 		return true;
@@ -406,9 +417,9 @@ bool LightOptimMinMax::handle_cstfree(IntervalVector& xy_box,Cell * y_cell) {
 //                        (xy_box)[i] = Interval((xy_box)[i].lb(),(xy_box)[i].lb()+1.e-15);
 //                }
 //        }
-	//    std::cout<<"final box: "<<*xy_box<<std::endl;
-	//    std::cout<<"free cst contraction done, contracted box: "<<*xy_box<<std::endl;
-	return true;
+//	//    std::cout<<"final box: "<<*xy_box<<std::endl;
+//	//    std::cout<<"free cst contraction done, contracted box: "<<*xy_box<<std::endl;
+        return true;
 }
 
 /*
