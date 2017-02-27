@@ -87,7 +87,7 @@ private:
     /* return true if the stop criterion is reached
      */
 
-    bool stop_crit_reached(int current_iter,int heap_size);
+    bool stop_crit_reached(int current_iter,DoubleHeap<Cell> * y_heap);
 
 
     /* return a feasible point in y_box w.r.t constraints on xy
@@ -125,7 +125,6 @@ private:
 	/** Default timeout: 60 */
 	static const double default_timeout;
         static const double default_prec_y;
-        static const double default_ext_prob;
         static const double default_list_elem_max;
         static const int default_nb_iter;
 

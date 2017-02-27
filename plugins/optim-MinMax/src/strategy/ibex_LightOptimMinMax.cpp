@@ -20,14 +20,13 @@ namespace ibex{
 
 const double LightOptimMinMax::default_timeout = 60;
 const double LightOptimMinMax::default_prec_y = 1.e-6;
-const double LightOptimMinMax::default_ext_prob = 0;
 const double LightOptimMinMax::default_list_elem_max = 1000;
 const int LightOptimMinMax::default_nb_iter = 1000;
 
 LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy,bool csp_actif):
     						trace(false) , timeout(default_timeout),
     						ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(default_prec_y), found_point(false), time(0),
-                                                list_elem_max(default_list_elem_max),ext_crit_prob(default_ext_prob),nb_iter(default_nb_iter),monitor(false), csp_actif(csp_actif){
+                                                list_elem_max(default_list_elem_max),nb_iter(default_nb_iter),monitor(false), csp_actif(csp_actif){
 
 
 }
@@ -56,10 +55,10 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
         DataMinMax *data_x;
 //                DataMinMaxOpti *data_x ;
 
-                if (csp_actif)
-                    data_x = &(root.get<DataMinMaxCsp>());
-                else
-                    data_x = &(root.get<DataMinMaxOpti>());
+        if (csp_actif)
+            data_x = &(root.get<DataMinMaxCsp>());
+        else
+            data_x = &(root.get<DataMinMaxOpti>());
 //	data_x = &(root.get<DataMinMax>());
 
 	data_x->y_heap_costf1.add_backtrackable(*y_cell);
@@ -69,10 +68,10 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 }
 
 bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
-	//    std::cout<<"run light optim"<<std::endl;
+        //    std::cout<<"run light optim"<<std::endl;
 
 	//std::cout<<std::endl<<std::endl<<"********************* Light optim res for box "<<x_cell->box<<" *************** "<<std::endl;
-	//std::cout<<"current optim parameters: "<<std::endl<<"list max elem: "<<list_elem_max<<std::endl<<"nb itex: "<<nb_iter<<std::endl;
+//        std::cout<<"current optim parameters: "<<std::endl<<"list max elem: "<<list_elem_max<<std::endl<<"nb iter: "<<nb_iter<<std::endl;
 
 	found_point  = false;
         DataMinMax *data_x;
@@ -119,15 +118,12 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 	// *********** loop ********************
 	try {
 		int current_iter = 1;
-		while(!stop_crit_reached(current_iter,y_heap->size())) {
+                while(!stop_crit_reached(current_iter,y_heap)) {
 			if (trace >= 3) std::cout<< *y_heap<<std::endl;
 
 
 			found_point  = false;
 
-                        if (csp_actif && (y_heap->top1()->get<OptimData>().pf.ub() < 0  )) {
-                                break;
-                        }
                         Cell * y_cell = y_heap->pop(); // we extract an element with critprob probability to take it according to the first crit
 			current_iter++;
 			//                        std::cout<<"current_iter: "<<current_iter<<std::endl;
@@ -139,14 +135,14 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 //                                                                std::cout<<"first cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
 					delete subcells_pair.second;
-					//                                        std::cout <<"       OUT 1 "<<std::endl;
+//                                                                                std::cout <<"       OUT 1 "<<std::endl;
 					return false;
 				}
 //                                                                std::cout<<"handle second cell in light optim"<<std::endl;
 				res = handle_cell( x_cell, subcells_pair.second,loup);
 //                                                                std::cout<<"second cell handled"<<std::endl;
 				if (!res) { // x_cell has been deleted
-					//                                        std::cout <<"       OUT 2 "<<std::endl;
+//                                                                                std::cout <<"       OUT 2 "<<std::endl;
 					return false;
 				}
 
@@ -249,16 +245,23 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 	return true;
 }
 
-bool LightOptimMinMax::stop_crit_reached(int current_iter,int heap_size) {
+bool LightOptimMinMax::stop_crit_reached(int current_iter,DoubleHeap<Cell> * y_heap) {
 	if(nb_iter !=0 && current_iter>=nb_iter) // nb_iter ==  0 implies minimum precision required (may be mid point x case)
         {
+//            cout<<"Stop light solver: nb_iter max reached"<<endl;
             return true;
         }
-        if(list_elem_max != 0 && heap_size>list_elem_max) {
+        if(list_elem_max != 0 && y_heap->size()>list_elem_max) {
+//            cout<<"Stop light solver: list reached max elem"<<endl;
 		return true;
         }
-        if(heap_size == 0) {
+        if(y_heap->size() == 0) {
+//            cout<<"Stop light solver: empty buffer"<<endl;
 		return true;
+        }
+        if (csp_actif && (y_heap->top1()->get<OptimData>().pf.ub() < 0  )) {
+//            cout<<"Stop light solver: Csp case, upper bound lower than 0"<<endl;
+            return true;
         }
 	return false;
 }
@@ -289,11 +292,12 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 	}
 	/********************************************************************************/
 	//mid point test (TO DO: replace with local optim to find a better point than midpoint)
-	IntervalVector mid_y_box = get_feasible_point(x_cell,y_cell);
+        IntervalVector mid_y_box = get_feasible_point(x_cell,y_cell);
 
 	if (!(mid_y_box.is_empty())) {
                 // x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
 		Interval midres = xy_sys.goal->eval(mid_y_box);
+//                cout<<"midp: "<<mid_y_box<<", eval = "<<midres<<endl;
 		if ( loup < midres.lb() ) {  // midres.lb()> best_max ->is now false since fmax.ub() unchanged in
 			// there exists y such as constraint is respected and f(x,y)>best max, the max on x will be worst than the best known solution
 			delete y_cell;

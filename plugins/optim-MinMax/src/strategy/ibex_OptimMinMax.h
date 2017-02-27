@@ -84,13 +84,22 @@ public:
 
     int trace_freq;
 
-    //algorithm param
+    //light solver param for objectif function
     int list_rate; // rate of growth of y_heap size, see compute_heap_max_size function for formula detail
     int list_elem_absolute_max;
     int iter; // number of iteration of lightsolver allowedNormalizedSystem *
     double min_perc_coef; // used to compute y_prec allowed when run the light solver, see compute_min_prec function for formula
     int critpr; // probability to choose second heap in light_solver
-    bool monitor; // creat log file if true
+
+    //light solver param for csp
+    int list_rate_csp; // rate of growth of y_heap size, see compute_heap_max_size function for formula detail
+    int list_elem_absolute_max_csp;
+    int iter_csp; // number of iteration of lightsolver allowedNormalizedSystem *
+    double min_perc_coef_csp; // used to compute y_prec allowed when run the light solver, see compute_min_prec function for formula
+    int critpr_csp; // probability to choose second heap in light_solver
+
+
+    bool monitor; // create log file if true
 
 private:
 
@@ -102,12 +111,12 @@ private:
     bool fa_y_cst; // indicates if there is for all y constraints
 
     double compute_min_prec( const IntervalVector& x_box);
-    int choose_nbiter(bool midpoint_eval);
-    int compute_heap_max_size(int y_heap_size);
+    int choose_nbiter(bool midpoint_eval,bool csp);
+    int compute_heap_max_size(int y_heap_size,bool csp);
     bool get_feasible_point(Cell * elem);
-    int check_constraints(Cell * x_cell);
+    int check_constraints(Cell * x_cell,bool midp);
     int check_regular_ctr(const IntervalVector& box);
-    int check_fa_ctr(Cell * x_cell);
+    int check_fa_ctr(Cell * x_cell,bool midp);
     bool handle_cell(Cell * x_cell);
 
     // Fa cst variables
@@ -116,11 +125,20 @@ private:
 
 
 
-        static const int default_list_rate;
-        static const int default_list_elem_absolute_max;
-        static const int default_iter;
-        static const double default_min_perc_coef;
-        static const int default_prob_heap;
+    //Objectif function default parameters for light solver
+    static const int default_list_rate;
+    static const int default_list_elem_absolute_max;
+    static const int default_iter;
+    static const double default_min_perc_coef;
+    static const int default_prob_heap;
+
+    //Csp fa function default parameters for light solver
+    static const int default_list_rate_csp;
+    static const int default_list_elem_absolute_max_csp;
+    static const int default_iter_csp;
+    static const double default_min_perc_coef_csp;
+    static const int default_prob_heap_csp;
+
 
 };
 void export_monitor(std::vector<double> * ub,std::vector<double> * lb,std::vector<double> * nbxel,std::vector<double> * nbyel);

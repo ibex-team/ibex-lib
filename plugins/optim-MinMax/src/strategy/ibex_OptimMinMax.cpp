@@ -17,11 +17,20 @@ using namespace std;
 
 namespace ibex {
 
+//Objectif function default parameters for light solver
 const int OptimMinMax::default_iter = 10;
 const int OptimMinMax::default_list_rate = 0;
 const double OptimMinMax::default_min_perc_coef = 0;
 const int OptimMinMax::default_list_elem_absolute_max = 5000;
 const int OptimMinMax::default_prob_heap = 10; //10% to pop second heap in light_solver
+
+// Csp default parameters for light solver
+const int OptimMinMax::default_iter_csp = 10;
+const int OptimMinMax::default_list_rate_csp = 0;
+const double OptimMinMax::default_min_perc_coef_csp = 0;
+const int OptimMinMax::default_list_elem_absolute_max_csp = 100;
+const int OptimMinMax::default_prob_heap_csp = 0; //0% to pop second heap in light_solver
+
 
 OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec):
                                                                 Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb_opt(), *new CellCostFmaxub_opt()),
@@ -35,7 +44,7 @@ OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& 
                 								min_perc_coef(default_min_perc_coef),
                                                                                 critpr(default_prob_heap),
                 								list_elem_absolute_max(default_list_elem_absolute_max),
-                								fa_lsolve(xy_sys,xy_ctc), // useless if no fa cst but need to construct it...
+                                                                                fa_lsolve(xy_sys,xy_ctc,true), // useless if no fa cst but need to construct it...
                                                                                 fa_y_cst(false),
                                                                                 y_box_init_fa(IntervalVector(1)),
                                                                                 monitor(false)
@@ -56,9 +65,14 @@ OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,Normal
                                                                 critpr(default_prob_heap),
                                                                 list_elem_absolute_max(default_list_elem_absolute_max),
     								prec_fa_y(fa_cst_prec),
-    								fa_lsolve(max_fa_y_cst_sys,xy_ctc), // construct light solver for for all y cst with fake contractor, contractor useless since no constraint on xy only the objective function matter
+                                                                fa_lsolve(max_fa_y_cst_sys,xy_ctc,true), // construct light solver for for all y cst with fake contractor, contractor useless since no constraint on xy only the objective function matter
                                                                 fa_y_cst(true),
                                                                 y_box_init_fa(max_fa_y_cst_sys.box.subvector(x_sys.nb_var, max_fa_y_cst_sys.nb_var-1)),
+                                                                iter_csp(default_iter_csp),
+                                                                list_rate_csp(default_list_rate_csp),
+                                                                min_perc_coef_csp(default_min_perc_coef_csp),
+                                                                critpr_csp(default_prob_heap_csp),
+                                                                list_elem_absolute_max_csp(default_list_elem_absolute_max_csp),
                                                                 monitor(false)
 {
 };
@@ -95,33 +109,33 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 	bsc->add_backtrackable(*root);
         lsolve.add_backtrackable(*root,y_box_init,critpr);
 	buffer->cost1().add_backtrackable(*root);
-	buffer->cost2().add_backtrackable(*root);
+        buffer->cost2().add_backtrackable(*root);
 
         if(fa_y_cst)
-            fa_lsolve.add_backtrackable(*root,y_box_init_fa,critpr);
+            fa_lsolve.add_backtrackable(*root,y_box_init_fa,critpr_csp);
 
 
 	//****** x_heap initialization ********
 	nb_cells=0;
-	buffer->flush();
+        buffer->flush();
 
 	// *** initialisation Algo ***
 	loup_changed=false;
 	double ymax;
-	initial_loup=obj_init_bound;
+        initial_loup=obj_init_bound;
 	loup_point=x_box_init.mid();
-	time=0;
-	Timer::reset_time();
-	Timer::start();
+        time=0;
+        Timer::reset_time();
+        Timer::start();
 
-	handle_cell(root);
+        handle_cell(root);
 
 	update_uplo();
 
 	//monitoring variables, used to track upper bound, lower bound, number of elem in y_heap and heap_save at each iteration
 	std::vector<double> ub,lb,nbel,nbyel;
 	long long int nbel_count(0);
-	bool handle_res1,handle_res2;
+        bool handle_res1,handle_res2;
 
 	try {
                 while (!buffer->empty() && (loup-uplo)>goal_rel_prec) {
@@ -250,7 +264,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 	//***************** contraction w.r.t constraint on x ****************
 //        cout<<"checking ctr.... ";
-        int res_cst = check_constraints(x_cell);
+        int res_cst = check_constraints(x_cell,false);
         if (res_cst == 0) {
             delete x_cell;
             return false;
@@ -274,8 +288,8 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 	//************ evaluation of f(x,y_heap) *****************
 	lsolve.prec_y = compute_min_prec(x_cell->box);
-	lsolve.nb_iter = choose_nbiter(false);
-	lsolve.list_elem_max = compute_heap_max_size(data_x->y_heap->size());
+        lsolve.nb_iter = choose_nbiter(false,false);
+        lsolve.list_elem_max = compute_heap_max_size(data_x->y_heap->size(),false);
 //        CellCostmaxFmaxub cost;
 //        cout<<"cost after eval: "<<cost.cost(*x_cell)<<endl;
 //        DataMinMax *data_opt_x = &(x_cell->get<DataMinMax>());
@@ -303,7 +317,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 //                cout<<endl<<"**************"<<endl;
 //                                cout<<"try mid point "<<midp<<", init fmax: "<<x_copy->get<DataMinMaxOpti>().fmax<<endl;
-		lsolve.nb_iter = choose_nbiter(true);
+                lsolve.nb_iter = choose_nbiter(true,false);
 		lsolve.prec_y = prec_y;
 		lsolve.list_elem_max = 0; // no limit on heap size
                 bool res1 = lsolve.optimize(x_copy,loup); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
@@ -326,13 +340,13 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
                         delete x_copy; // delete copy of the heap, no more use and it was not delete in light optim since res1 = 1
 		}
 	}
-        else // need to delete x_copy
-            delete x_copy;
+//        else // need to delete x_copy
+//            delete x_copy;
 
 
 	//***** if x_cell is too small ******************
 	if(x_cell->box.max_diam()<prec) {
-		lsolve.nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
+                lsolve.nb_iter = choose_nbiter(true,false);   // need to be great enough so the minimum precision on y is reached
 		lsolve.prec_y = prec_y;
 		lsolve.list_elem_max = 0; // no limit on heap size
 		//cout<<"fmax ini: "<<data_x->fmax<<endl;
@@ -382,24 +396,37 @@ double OptimMinMax::compute_min_prec( const IntervalVector& x_box) {
 	return ratio/y_box_init.volume()>prec_y?ratio/(10*y_box_init.volume()):prec_y;
 }
 
-int OptimMinMax::choose_nbiter(bool midpoint_eval) {
+int OptimMinMax::choose_nbiter(bool midpoint_eval,bool csp) {
 
-	if(!midpoint_eval)
+        if(!midpoint_eval) {
+            if(!csp)
 		return iter;
+            else
+                return iter_csp;
+        }
 	else
-                return 0; // go to min prec
+            return 0; // go to min prec
 }
 
-int OptimMinMax::compute_heap_max_size(int y_heap_size) {
-	if(list_rate == 0 || y_heap_size>= list_elem_absolute_max) // no constraint on list growth rate or max size already reached
+int OptimMinMax::compute_heap_max_size(int y_heap_size,bool csp) {
+    if(!csp) {
+        if(list_rate == 0 || y_heap_size>= list_elem_absolute_max) { // no constraint on list growth rate or max size already reached
 		return list_elem_absolute_max;
+        }
 	return  y_heap_size+list_rate;
+    }
+    else {
+        if(list_rate_csp == 0 || y_heap_size>= list_elem_absolute_max_csp) { // no constraint on list growth rate or max size already reached
+                return list_elem_absolute_max_csp;
+        }
+        return  y_heap_size+list_rate_csp;
+    }
 }
 
 bool OptimMinMax::get_feasible_point(Cell * elem) {
 //        cout<<endl<<"     get_feasible_point"<<endl;
         elem->box = elem->box.mid(); // get the box (x,mid(y))
-        int res = check_constraints(elem);
+        int res = check_constraints(elem,true);
 //        cout<<"done, res = "<<res<<endl;
         if(res == 2)
             return true;
@@ -418,10 +445,15 @@ int OptimMinMax::check_regular_ctr(const IntervalVector& box) {
         return res;
 }
 
-int OptimMinMax::check_fa_ctr(Cell* x_cell) {
-    DataMinMaxCsp * data_csp = &(x_cell->get<DataMinMaxCsp>());
-    if(data_csp->pu =! 1) {
-        bool ok = fa_lsolve.optimize(x_cell,0);
+int OptimMinMax::check_fa_ctr(Cell* x_cell,bool midp) {
+    DataMinMax * data_csp = &(x_cell->get<DataMinMaxCsp>());
+    if(data_csp->pu != 1) {
+        fa_lsolve.nb_iter = choose_nbiter(midp,true);
+        if(midp)
+            fa_lsolve.list_elem_max = 0;
+        else
+            fa_lsolve.list_elem_max = compute_heap_max_size(data_csp->y_heap->size(),true);
+        bool ok= fa_lsolve.optimize(x_cell,0);
         if(!ok) {
             return 0;
         }
@@ -435,16 +467,18 @@ int OptimMinMax::check_fa_ctr(Cell* x_cell) {
     return 2;
 }
 
-int OptimMinMax::check_constraints(Cell * x_cell) {
+int OptimMinMax::check_constraints(Cell * x_cell,bool midp) {
         int res_rctr = 2;
         int res_factr = 2;
         DataMinMaxOpti * data_opt = &(x_cell->get<DataMinMaxOpti>());
 
         if(data_opt->pu != 1)
             res_rctr = check_regular_ctr(x_cell->box);
+        if(res_rctr == 2)
+            data_opt->pu = 1;
         if(fa_y_cst)
-            res_factr = check_fa_ctr(x_cell);
-
+            res_factr = check_fa_ctr(x_cell,midp);
+//        cout<<"res_factr: "<<res_factr<<endl;
         if(res_rctr == 2 &&  res_factr == 2) // all ctr satisfied
             return 2;
         else if(res_rctr == 0 || res_factr == 0)
