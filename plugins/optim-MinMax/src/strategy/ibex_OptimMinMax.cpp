@@ -263,10 +263,9 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	// ATTENTION CECI EST FAUX !!!!!
 
 	//***************** contraction w.r.t constraint on x ****************
-//        cout<<"checking ctr.... ";
+//        cout<<"checking ctr.... "<<endl;
         int res_cst = check_constraints(x_cell,false);
         if (res_cst == 0) {
-            delete x_cell;
             return false;
         }
         else if (data_x->pu != 1)     {
@@ -284,7 +283,8 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
             }
 		 */
 	}
-//        cout<<"done"<<endl<<" evaluation of objectif... ";
+//        cout<<"done"<<endl;
+//        cout<<" evaluation of objectif... "<<endl;
 
 	//************ evaluation of f(x,y_heap) *****************
 	lsolve.prec_y = compute_min_prec(x_cell->box);
@@ -300,7 +300,8 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 //                cout<<"light optim result: "<<data_x->fmax<< endl;
 	//std::cout<<" apres res="<<res<<" bound= "<<data_x->fmax <<std::endl;
 
-//        cout<<"done"<<endl<<"midpoint evaluation... ";
+//        cout<<"done"<<endl;
+//        cout<<"midpoint evaluation... "<<endl;
 	if(!res) { // certified that x box does not contains the solution
 		// TODO Trace
 		//vol_rejected += x_cell->box.volume();
@@ -342,10 +343,19 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	}
 //        else // need to delete x_copy
 //            delete x_copy;
-
+//        cout<<"done"<<endl;
+//        cout<<"check min prec..."<<endl;
 
 	//***** if x_cell is too small ******************
 	if(x_cell->box.max_diam()<prec) {
+            cout<<"Min prec, box: "<<x_cell->box<<endl;
+            int ctr_ok = 2;
+            if(fa_y_cst) { // go min precision on csp problem
+                ctr_ok= check_constraints(x_cell, true);
+                DataMinMaxCsp * data_csp = &(x_cell->get<DataMinMaxCsp>());
+                cout<<"Min prec, fa ctr eval: "<<data_csp->fmax<<endl;
+            }
+            if (ctr_ok !=0) {
                 lsolve.nb_iter = choose_nbiter(true,false);   // need to be great enough so the minimum precision on y is reached
 		lsolve.prec_y = prec_y;
 		lsolve.list_elem_max = 0; // no limit on heap size
@@ -358,13 +368,14 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 			update_uplo_of_epsboxes(data_x->fmax.lb());
 			delete x_cell;
 		}
-
+            }
 		//cout<<"minprec reached! "<<" box: "<<x_cell->box<<" eval full prec: "<<x_cell->fmax <<endl;
 		//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
 		//min_prec_reached = true;
 		return false;
 	}
-//        cout<<"done"<<endl<<"update cell data...";
+//        cout<<"done"<<endl;
+//        cout<<"update cell data..."<<endl;
 
 
 	/*	if (data_x->fmax.is_empty()) {
@@ -468,16 +479,24 @@ int OptimMinMax::check_fa_ctr(Cell* x_cell,bool midp) {
 }
 
 int OptimMinMax::check_constraints(Cell * x_cell,bool midp) {
+//        cout<<"     check constraints for box: "<<x_cell->box<<endl;
         int res_rctr = 2;
         int res_factr = 2;
         DataMinMaxOpti * data_opt = &(x_cell->get<DataMinMaxOpti>());
-
+//        cout<<"     check regular ctr..."<<endl;
         if(data_opt->pu != 1)
             res_rctr = check_regular_ctr(x_cell->box);
         if(res_rctr == 2)
             data_opt->pu = 1;
+        else if(res_rctr == 0) {
+            delete x_cell;
+            return 0;
+        }
+//        cout<<"     done, res_rctr = "<<res_rctr<<endl;
+//        cout<<"     check fa ctr..."<<endl;
         if(fa_y_cst)
             res_factr = check_fa_ctr(x_cell,midp);
+//        cout<<"     done, res_factr = "<<res_factr<<endl;
 //        cout<<"res_factr: "<<res_factr<<endl;
         if(res_rctr == 2 &&  res_factr == 2) // all ctr satisfied
             return 2;
