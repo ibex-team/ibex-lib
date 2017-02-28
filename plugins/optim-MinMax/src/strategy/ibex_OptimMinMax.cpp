@@ -247,7 +247,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
-        DataMinMax * data_x = &(x_cell->get<DataMinMaxOpti>());
+        DataMinMaxOpti * data_x = &(x_cell->get<DataMinMaxOpti>());
 
 	// ATTENTION CECI EST FAUX !!!!!
 	//double ymax;
@@ -295,7 +295,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 //        DataMinMax *data_opt_x = &(x_cell->get<DataMinMax>());
 //        cout<<"fmax from DataMinMax cast: "<<data_opt_x->fmax<<endl;
 	// compute
-	//        cout<<"run light optim"<<endl;
+//                cout<<"run light optim"<<endl;
 	bool res =lsolve.optimize(x_cell,loup);
 //                cout<<"light optim result: "<<data_x->fmax<< endl;
 	//std::cout<<" apres res="<<res<<" bound= "<<data_x->fmax <<std::endl;
@@ -352,17 +352,24 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
             int ctr_ok = 2;
             if(fa_y_cst) { // go min precision on csp problem
                 ctr_ok= check_constraints(x_cell, true);
-                DataMinMaxCsp * data_csp = &(x_cell->get<DataMinMaxCsp>());
-                cout<<"Min prec, fa ctr eval: "<<data_csp->fmax<<endl;
+//                cout<<" ctr ok = "<<ctr_ok<<endl;
+                if(ctr_ok == 0) {
+                    cout<<"fa ctr not respected"<<endl;
+                }
+                else {
+                    DataMinMaxCsp * data_csp = &(x_cell->get<DataMinMaxCsp>());
+                    cout<<"Min prec, fa ctr eval: "<<data_csp->fmax<<endl;
+                }
+
             }
             if (ctr_ok !=0) {
                 lsolve.nb_iter = choose_nbiter(true,false);   // need to be great enough so the minimum precision on y is reached
 		lsolve.prec_y = prec_y;
 		lsolve.list_elem_max = 0; // no limit on heap size
-		//cout<<"fmax ini: "<<data_x->fmax<<endl;
+//                cout<<"fmax ini: "<<data_x->fmax<<endl;
 		//cout<<"for box: "<<x_cell->box<<endl;
 		bool res =lsolve.optimize(x_cell,loup); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
-		//cout<<"fmax min prec: "<<data_x->fmax<<endl;
+//                cout<<"fmax min prec: "<<data_x->fmax<<endl;
 
 		if(res){
 			update_uplo_of_epsboxes(data_x->fmax.lb());
@@ -458,6 +465,7 @@ int OptimMinMax::check_regular_ctr(const IntervalVector& box) {
 
 int OptimMinMax::check_fa_ctr(Cell* x_cell,bool midp) {
     DataMinMax * data_csp = &(x_cell->get<DataMinMaxCsp>());
+//    cout<<"data_csp->pu: "<<data_csp->pu<<endl;
     if(data_csp->pu != 1) {
         fa_lsolve.nb_iter = choose_nbiter(midp,true);
         if(midp)
@@ -466,9 +474,10 @@ int OptimMinMax::check_fa_ctr(Cell* x_cell,bool midp) {
             fa_lsolve.list_elem_max = compute_heap_max_size(data_csp->y_heap->size(),true);
         bool ok= fa_lsolve.optimize(x_cell,0);
         if(!ok) {
+//            cout<<"     fa ctr not satisfied for box: "<<x_cell->box<<endl;
             return 0;
         }
-        else if (data_csp->y_heap->top2()->get<OptimData>().pf.ub()<0) {
+        else if (data_csp->y_heap->top1()->get<OptimData>().pf.ub()<0) {
             data_csp->pu = 1;
             data_csp->y_heap->flush();
             return 2;

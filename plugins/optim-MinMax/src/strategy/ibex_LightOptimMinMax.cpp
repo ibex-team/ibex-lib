@@ -70,7 +70,7 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
         //    std::cout<<"run light optim"<<std::endl;
 
-	//std::cout<<std::endl<<std::endl<<"********************* Light optim res for box "<<x_cell->box<<" *************** "<<std::endl;
+//        std::cout<<std::endl<<std::endl<<"********************* Light optim res for box "<<x_cell->box<<" *************** "<<std::endl;
 //        std::cout<<"current optim parameters: "<<std::endl<<"list max elem: "<<list_elem_max<<std::endl<<"nb iter: "<<nb_iter<<std::endl;
 
 	found_point  = false;
@@ -126,7 +126,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 
                         Cell * y_cell = y_heap->pop(); // we extract an element with critprob probability to take it according to the first crit
 			current_iter++;
-			//                        std::cout<<"current_iter: "<<current_iter<<std::endl;
+//                                                std::cout<<"current_iter: "<<current_iter<<std::endl;
 			try {
 				std::pair<Cell*,Cell*> subcells_pair=bsc->bisect_cell(*y_cell);// bisect tmp_cell into 2 subcells
 				delete y_cell;
@@ -146,7 +146,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 					return false;
 				}
 
-				if (found_point) { // a feasible solution has been found
+                                if (found_point && !csp_actif) { // a feasible solution has been found
 					y_heap->contract(-(data_x->fmax.lb())); // to check
 
 				}
@@ -155,7 +155,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 				//	y_heap->contract(-(data_x->fmax.lb())); // to check
 				//}
 			}
-			catch (NoBisectableVariableException& ) {
+                        catch (NoBisectableVariableException& ) {
 				bool res = handle_cell(x_cell,y_cell,loup);
 
 				if (res) heap_save.push_back(y_cell);
@@ -192,14 +192,17 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 	fill_y_heap(*y_heap);
 
 	//if (found_point) { // a feasible solution has been found
-	y_heap->contract(-(data_x->fmax.lb())); // to check
+//        if(!csp_actif)
+            y_heap->contract(-(data_x->fmax.lb())); // to check
+//        else
+//            y_heap->contract(-loup); // in csp solve, remove all boxes y that satisfy the constraint for all
 	//}
 	//        std::cout<<"y_heap filled"<<std::endl;
 
 	// ** contract y_heap now
 
 	//        std::cout<<"found point pass"<<std::endl;
-	if(y_heap->empty()){
+        if(y_heap->empty()){
 		//                std::cout <<"       OUT 3 "<<std::endl;
 		delete x_cell;
 		return false;
@@ -259,7 +262,7 @@ bool LightOptimMinMax::stop_crit_reached(int current_iter,DoubleHeap<Cell> * y_h
 //            cout<<"Stop light solver: empty buffer"<<endl;
 		return true;
         }
-        if (csp_actif && (y_heap->top1()->get<OptimData>().pf.ub() < 0  )) {
+        if (csp_actif && (y_heap->top1()->get<OptimData>().pf.ub() < 0) ) {
 //            cout<<"Stop light solver: Csp case, upper bound lower than 0"<<endl;
             return true;
         }
