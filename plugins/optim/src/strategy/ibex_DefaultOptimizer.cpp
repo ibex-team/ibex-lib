@@ -74,16 +74,15 @@ Ctc&  DefaultOptimizer::ctc(System& sys, System& ext_sys, double prec) {
 	ctc_list.set_ref(1, rec(new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys.ctrs,0.1,true)),true)));
 	// the last contractor is CtcXNewtonIter  with rfp=0.2 and rfp2=0.2
 	// the limits for calling soplex are the default values 1e6 for the derivatives and 1e6 for the domains : no error found with these bounds
-	int index=2;
 	if (sys.nb_ctr > 0) {
 		ctc_list.set_ref(2,rec(new CtcFixPoint
 				(rec(new CtcCompo(
 						rec(new CtcPolytopeHull(rec(new LinearRelaxCombo (ext_sys,LinearRelaxCombo::XNEWTON)),
 								CtcPolytopeHull::ALL_BOX)),
 								rec(new CtcHC4(ext_sys.ctrs,0.01)))), default_relax_ratio)));
-		index++;
+	} else {
+		ctc_list.set_ref(2,rec(new CtcPolytopeHull(rec(new LinearRelaxCombo (ext_sys,LinearRelaxCombo::XNEWTON)), CtcPolytopeHull::ALL_BOX)));
 	}
-	ctc_list.resize(index);
 	return rec(new CtcCompo(ctc_list));
 }
 
