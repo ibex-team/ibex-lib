@@ -1,0 +1,6 @@
+constants
+ c=3;
+
+function f(x,y)
+  return c*x^2+y^2;
+end

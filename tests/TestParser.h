@@ -34,7 +34,9 @@ public:
 	CPPUNIT_TEST(func02);
 	CPPUNIT_TEST(func03);
 	CPPUNIT_TEST(loop01);
-
+	CPPUNIT_TEST(issue245_1);
+	CPPUNIT_TEST(issue245_2);
+	CPPUNIT_TEST(issue245_3);
 	CPPUNIT_TEST(nary_max);
 	//		CPPUNIT_TEST(error01);
 	CPPUNIT_TEST_SUITE_END();
@@ -52,7 +54,9 @@ public:
 	void choco01();
 	void error01();
 	void loop01();
-
+	void issue245_1();
+	void issue245_2();
+	void issue245_3();
 	void nary_max();
 
 };
