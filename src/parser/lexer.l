@@ -103,7 +103,13 @@ using namespace ibex::parser;
                                  }
 [_a-zA-Z][_a-zA-Z0-9]*	         { ibexlval.str = (char*) malloc(strlen(ibextext)+1);
                                    strcpy(ibexlval.str,ibextext);
-                                   return scopes().top().token(ibextext);
+                                   if (scopes().empty())
+                                      // happens when the program starts by an identifier (an error). 
+  									  // The lexer tries to retreive this identifier from the scope, which has not
+  									  // been created yet -> seg fault
+  									  return TK_NEW_SYMBOL;
+  								   else
+                                      return scopes().top().token(ibextext);
                                  }
 ([0-9]{6,10}[0-9]*|([0-9][0-9]*\.[0-9]*)|(\.[0-9]+))(e(\-|\+)?[0-9]+)?|([0-9]{1,5}e(\-|\+)?[0-9]+)  {
                                    ibexlval.real = atof(ibextext); return TK_FLOAT;

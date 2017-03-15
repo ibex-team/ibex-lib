@@ -289,6 +289,20 @@ void TestParser::error01() {
 	CPPUNIT_ASSERT_THROW(System("quimper/error01.qpr"),SyntaxError);
 }
 
+void TestParser::issue245_1() {
+	Function f("minibex/issue245_1.mbx");
+	CPPUNIT_ASSERT(sameExpr(f.expr(),"((3*x^2)+y^2)"));
+}
+
+void TestParser::issue245_2() {
+	CPPUNIT_ASSERT_THROW(System("minibex/issue245_2.mbx"),SyntaxError);
+}
+
+void TestParser::issue245_3() {
+	System sys("minibex/issue245_3.mbx");
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(((3*x^2)+y^2)-3)"));
+}
+
 void TestParser::nary_max() {
 	Function f("x","y","z","max(x,y,z)");
 

@@ -74,7 +74,7 @@ public:
 //
 //	}
 //
-	LabelConst(const ExprConstant& node) : _domain(node.get(),true), num_type(OTHER), cst(&node) {
+	LabelConst(const ExprConstant& node) : _domain(node.get(),true), num_type(OTHER), cst(NULL) {
 
 	}
 

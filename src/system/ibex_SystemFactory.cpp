@@ -120,7 +120,12 @@ void SystemFactory::add_ctr(const NumConstraint& ctr) {
 // precondition: nb_ctr > 0
 void System::init_f_from_ctrs() {
 
-	if (ctrs.is_empty()) return; // <=> m>0
+	if (ctrs.is_empty()) {
+		// don't delete the symbols now because
+		// one may read the "args" field of System even
+		// if there is no constraint
+		return; // <=> m>0
+	}
 
 	int total_output_size=0;
 	for (int j=0; j<ctrs.size(); j++)

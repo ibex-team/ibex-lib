@@ -487,7 +487,7 @@ bool is_posdef_sylvester(const IntervalMatrix& A) {
 
 bool is_posdef_rohn(const IntervalMatrix& A) {
 	int n=A.nb_rows();
-	if (!A.nb_cols()==n) throw NotSquareMatrixException();
+	if (A.nb_cols()!=n) throw NotSquareMatrixException();
 
 	Matrix midA=A.mid();
 	Matrix radA=A.rad();
