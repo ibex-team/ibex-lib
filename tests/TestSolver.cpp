@@ -101,8 +101,8 @@ void TestSolver::circle3() {
 	f.add_ctr(sqr(x-1)+sqr(y)=1);
 
 	double cospi6=0.5;
-	double sinpi6=::sqrt(3)/2;
-	f.add_ctr(y<=sinpi6);
+	double sinpi6=(sqrt(Interval(3))/2).lb();
+	f.add_ctr(4*y*abs(y)<=3); // a rigorous way to impose y<=sin(pi/6).
 
 	double _sol1[]={cospi6,sinpi6};
 	double _sol2[]={cospi6,-sinpi6};
