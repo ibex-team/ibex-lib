@@ -7,63 +7,69 @@ public class Ibex {
 	 * domain has been reduced */
 	public static final double RATIO      = 0.01; 
 
-	/* Possible contraction strategies. */
-	public static final int COMPO      = 0;
-	public static final int HC4        = 1;
-	public static final int HC4_NEWTON = 2;
-
 	/* Constants for the status of a contraction. */
 	public static final int FAIL             = 0;
 	public static final int ENTAILED         = 1;
 	public static final int CONTRACT         = 2;
 	public static final int NOTHING          = 3;
 
-	/* Constants for the status of a inflation. */
+	/* Constants for the status of an inflation. */
 	public static final int NOT_SIGNIFICANT  = 4;
 	public static final int INFLATE          = 5;
 	public static final int FULL_INFLATE     = 6;
 	public static final int BAD_POINT        = 7;
 	public static final int UNKNOWN_POINT    = 8;
+	
+	/* Return values of start_solve. */
+	public static final int STARTED  = 0;
+	public static final int DISCRETE_NOT_INSTANCIATED = 1;
+	
+	/* Return values of next_solution. */
+	public static final int UNKNOWN         = 0;
+	public static final int SOLUTION        = 1;
+	public static final int SEARCH_OVER     = 2;
+	public static final int NOT_STARTED     = 3;
 
 	/* Constants for describing a boolean domain (by an integer). */
 	public static final int FALSE         = 0;
 	public static final int TRUE          = 1;
 	public static final int FALSE_OR_TRUE = 2;
 
+	/* Other error codes */
+	public static final int SYNTAX_ERROR  = -1;
+	public static final int BAD_DOMAIN    = -2;
+
+
 	static {
 		System.loadLibrary("ibex-java");
 	}
 
 	/**
-	 * Create a new IBEX constraint with a default contractor.
-	 * 
-	 * The default contractor is COMPO.
-	 * 
-	 * Example: add_ctr(2,{0}={1}) will add the constraint x=y.
-	 * 
-	 * @param nb_var - Number of variables.
-	 * @param syntax - The constraint
-	 */
-	public native void add_ctr(int nb_var, String syntax);
+	 * Create a new Ibex object.
+	 *
+	 * An IBEX (and only one) object has to be created for each different CSP.
+	 * The IBEX object gathers all the constraints.
+	 *
+	 * @param vars - An array of n booleans (where n is the total number of variables of the CSP).
+	 *               Each boolean indicates whether a variable is integral or not. 
+	 *               int_var[i]==true <=> the ith variable is integral.
+	 *               
+	 * @param prec - The precision required on real variables.
+    */
+    public Ibex(int[] vars, double prec) {
+       init(vars, prec);
+    }
 
 	/**
-	 * Same as add_ctr except that a specific contractor is used.
+	 * Add a new IBEX constraint with a default contractor.
 	 * 
-	 * @param nb_var - Number of variables
+	 * The default contractor is Forward/backward.
+	 * 
+	 * Example: add_ctr({0}={1}) will add the constraint x=y.
+	 * 
 	 * @param syntax - The constraint
-	 * @param option - A value between COMPO, HC4 or HC4_NEWTON.
 	 */
-	public native void add_ctr(int nb_var, String syntax, int option);
-
-	/**
-	 * Constraint nb_var variables to be integer variables.
-	 * 
-	 * @param nb_var - Number of variables
-	 * /////@param mask   - Set whether a variable is integral or not. 
-	 * /////                mask[i]==true <=> the ith variable is integral.
-	 */
-	public native void add_int_ctr(int nb_var);
-
+	public native void add_ctr(String syntax);
 
 	/**
 	 * Call the contractor associated to a constraint or its negation.
@@ -101,6 +107,10 @@ public class Ibex {
 	 *                     is outside.
 	 *        
 	 *   NOTHING         - No bound has been reduced and nothing could be proven.
+	 *
+	 *   SYNTAX_ERROR    - One constraint has not been parsed successfully.
+	 *
+	 *   BAD_DOMAIN      - The domain has not the expected number of dimensions.
 	 */
 	public native int contract(int i, double bounds[], int reif);    
 
@@ -148,6 +158,10 @@ public class Ibex {
 	 *     
 	 *   UNKWOWN_POINT   - No inflation at all could be done and it could even not be decided 
 	 *                     whether p is inside or outside the constraint.
+	 *
+	 *   SYNTAX_ERROR    - One constraint has not been parsed successfully. 
+	 *
+	 *   BAD_DOMAIN      - The domain has not the expected number of dimensions.
 	 */
 	public native int inflate(int i, double p[], double bounds[], boolean in);
 
@@ -155,11 +169,63 @@ public class Ibex {
 	/**
 	 * Same as contract(int, double bounds[], int reif) with reif=TRUE.
 	 */
-	public native int contract(int i, double bounds[]);   
+	public native int contract(int i, double bounds[]);  
 
-
+    /**
+     * Let IBEX terminates the solving process for the CSP, once all the integer
+     * variables have been instanciated.
+     *  
+     * This function initializes the solving process. Each solution is then retreived 
+     * in turn via a call to next_solution().
+     * 
+     * @param
+     * 
+     *   domains                   - the domain in which all solutions will be searched
+     *                               (include all variables, real and integer ones).
+     * 
+     * @return 
+     * 
+	 *   STARTED                 _ - OK (success)
+	 *
+	 *   DISCRETE_NOT_INSTANCIATED - One discrete variable is not instanciated
+	 *
+	 *   SYNTAX_ERROR              - One constraint has not been parsed successfully. 
+	 *
+	 *   BAD_DOMAIN                - The domain has not the expected number of dimensions.
+	*/
+    public native int start_solve(double bounds[]);
+    
+	/**
+	 * Look up for the next solution.
+	 * 
+     *   domains     - (output argument): array in which the solution will 
+     *                 be stored (if any)
+	 * @return 
+	 * 
+	 *   SOLUTION    - A certified solution has been found
+	 *   
+	 *   UNKNOWN     - An uncertified solution has been found
+	 *   
+	 *   SEARCH_OVER - No more solution
+     *   
+     *   NOT_STARTED - A call to start_solve is missing
+     *   
+     *   BAD_DOMAIN  - The domain has not the expected number of dimensions.
+	 */
+    public native int next_solution(double sol[]);
+   
 	/**
 	 * Free IBEX structures from memory
 	 */
 	public native void release();
+
+	/**
+	 * Initialize IBEX variables.
+	 *
+	 * This method is automatically called by the constructor.
+	 */
+	private native void init(int[] vars, double prec);
+	
+	// Internal: do not modify!
+	private int id;
 };

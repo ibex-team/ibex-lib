@@ -19,17 +19,13 @@
 
 namespace ibex {
 
-
 class TestDoubleHeap : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestDoubleHeap);
-	
-
-		CPPUNIT_TEST(test01);
-		CPPUNIT_TEST(test02);
+	CPPUNIT_TEST(test01);
+	CPPUNIT_TEST(test02);
 	CPPUNIT_TEST_SUITE_END();
-
 
 	void test01();
 	void test02();
@@ -37,9 +33,6 @@ public:
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestDoubleHeap);
 
-
-
-
-
 } // namespace ibex
+
 #endif // __TEST_CTC_DOUBLEHEAP_H__

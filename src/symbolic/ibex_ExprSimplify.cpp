@@ -143,8 +143,8 @@ const ExprNode& ExprSimplify::get(const ExprNode& e, const DoubleIndex& idx2) {
 		idx=idx2;
 		e.acceptVisitor(*this);
 		idx=old_idx;
+		assert(v.back().first==idx2);
 	}
-	assert(v.back().first==idx2);
 
 	return *v[i].second;
 }

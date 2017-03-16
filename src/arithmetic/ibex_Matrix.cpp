@@ -68,6 +68,26 @@ Matrix::~Matrix() {
 	delete[] M;
 }
 
+Matrix Matrix::rand(int m, int n) {
+	if (n==-1) n=m;
+
+	double* _M=new double[m*n];
+	for (int i=0; i<m*n; i++)
+		_M[i]=RNG::rand(0,1);
+
+	Matrix M(m,n,_M);
+
+	delete[] _M;
+	return M;
+}
+
+Matrix Matrix::diag(const Vector& v) {
+	Matrix M=Matrix::zeros(v.size());
+	for (int i=0; i<v.size(); i++)
+		M[i][i]=v[i];
+	return M;
+}
+
 Matrix& Matrix::operator=(const Matrix& x) {
 	resize(x.nb_rows(), x.nb_cols());
 	return _assignM(*this,x);
@@ -128,6 +148,14 @@ Vector Matrix::col(int j) const {
 
 void Matrix::set_col(int col1, const Vector& v) {
 	_set_col(*this,col1,v);
+}
+
+Matrix abs(const Matrix& m) {
+	return _absM(m);
+}
+
+double infinite_norm(const Matrix& m) {
+	return _infinite_normM(m);
 }
 
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {

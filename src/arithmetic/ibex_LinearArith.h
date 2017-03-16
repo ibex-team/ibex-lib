@@ -20,13 +20,13 @@ class Interval;
 class IntervalVector;
 class IntervalMatrix;
 
-
-double abs(double x) ;
-Interval abs(const Interval& x);
-Vector abs(const Vector& v);
-IntervalVector abs(const IntervalVector& v);
-Matrix abs(const Matrix& m);
-IntervalMatrix abs(const IntervalMatrix& m);
+//
+//double abs(double x) ;
+//Interval abs(const Interval& x);
+//Vector abs(const Vector& v);
+//IntervalVector abs(const IntervalVector& v);
+//Matrix abs(const Matrix& m);
+//IntervalMatrix abs(const IntervalMatrix& m);
 
 // the following functions are
 // introduced to allow genericity
@@ -251,30 +251,6 @@ inline Mout mulMM(const Min1& m1, const Min2& m2) {
 		}
 	}
 	return m3;
-}
-
-template<typename V>
-inline V absV(const V& v) {
-	V res(v.size());
-
-	if (___is_empty(v)) { ___set_empty(res); return res; }
-
-	for (int i=0; i<v.size(); i++)
-		res[i]=abs(v[i]);
-
-	return res;
-}
-
-template<typename M>
-inline M absM(const M& m) {
-	M res(m.nb_rows(),m.nb_cols());
-
-	if (___is_empty(m)) { ___set_empty(res); return res; }
-
-	for (int i=0; i<m.nb_rows(); i++)
-		res[i]=abs(m[i]);
-
-	return res;
 }
 
 } // anonymous namespace

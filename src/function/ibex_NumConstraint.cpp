@@ -140,4 +140,25 @@ pair<const ExprNode*, const Interval*> NumConstraint::is_thick_equality() const 
 	RETURN(NULL,NULL);
 }
 
+Domain NumConstraint::right_hand_side() const {
+	Domain d(f.expr().dim);
+	Interval right_cst;
+
+	switch (op) {
+	case LT :
+	case LEQ : right_cst=Interval::NEG_REALS; break;
+	case EQ  : right_cst=Interval::ZERO;      break;
+	case GEQ :
+	case GT : right_cst=Interval::POS_REALS;  break;
+	}
+
+	switch(d.dim.type()) {
+	case Dim::SCALAR:       d.i()=right_cst; break;
+	case Dim::ROW_VECTOR:   d.v()=IntervalVector(d.dim.nb_cols(),right_cst); break;
+	case Dim::COL_VECTOR:   d.v()=IntervalVector(d.dim.nb_rows(),right_cst); break;
+	case Dim::MATRIX:       d.m()=IntervalMatrix(d.dim.nb_rows(),d.dim.nb_cols(),right_cst); break;
+	}
+	return d;
+}
+
 } // end namespace

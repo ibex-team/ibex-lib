@@ -14,6 +14,7 @@
 
 #include "ibex_Eval.h"
 #include "ibex_BwdAlgorithm.h"
+#include "ibex_Agenda.h"
 
 namespace ibex {
 
@@ -35,6 +36,11 @@ public:
 	Gradient(Eval& eval);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~Gradient();
+
+	/**
 	 * \brief Calculate the gradient of f on the domains \a d and store the result in \a g.
 	 */
 	void gradient(const Array<Domain>& d, IntervalVector& g);
@@ -43,6 +49,11 @@ public:
 	 * \brief Calculate the gradient of f on the box \a box and store the result in \a g.
 	 */
 	void gradient(const IntervalVector& box, IntervalVector& g);
+
+	/**
+	 * \brief Calculate the Jacobian of f on the box \a box and store the result in \a J.
+	 */
+	void jacobian(const IntervalVector& box, IntervalMatrix& J);
 
 	/**
 	 * \brief Calculate the Jacobian on the domains \a d and store the result in \a J.
@@ -66,6 +77,8 @@ public:
 	inline void min_fwd(int, int, int y)      { g[y].i()=0; }
 	inline void atan2_fwd(int, int, int y)    { g[y].i()=0; }
 	inline void minus_fwd(int, int y)         { g[y].i()=0; }
+	inline void minus_V_fwd(int, int y)       { g[y].v().clear(); }
+	inline void minus_M_fwd(int, int y)       { g[y].m().clear(); }
 	inline void trans_V_fwd(int, int y)       { g[y].v().clear(); }
 	inline void trans_M_fwd(int, int y)       { g[y].m().clear(); }
 	inline void sign_fwd(int, int y)          { g[y].i()=0; }
@@ -115,6 +128,8 @@ public:
 	       void min_bwd    (int x1, int x2, int y);
 	       void atan2_bwd  (int x1, int x2, int y);
 	inline void minus_bwd  (int x, int y) { g[x].i() += -1.0*g[y].i(); }
+	inline void minus_V_bwd(int x, int y) { g[x].v() += -1.0*g[y].v(); }
+	inline void minus_M_bwd(int x, int y) { g[x].m() += -1.0*g[y].m(); }
         inline void trans_V_bwd(int, int) { /* nothing to do because g[x].v() is a reference to g[y].v() */ }
         inline void trans_M_bwd(int x, int y) { g[x].m() += g[y].m().transpose(); }
 	       void sign_bwd   (int x, int y);
@@ -152,6 +167,8 @@ public:
 	Eval& _eval;
 	ExprDomain& d;
 	ExprDomain  g;
+	Agenda** fwd_agenda; // one agenda for each component
+	Agenda** bwd_agenda; // one agenda for each component
 };
 
 } // namespace ibex

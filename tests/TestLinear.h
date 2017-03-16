@@ -23,12 +23,15 @@ class TestLinear : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestLinear);
-
-	
-		CPPUNIT_TEST(lu_partial_underctr);
-		CPPUNIT_TEST(inflating_gauss_seidel01);
-		CPPUNIT_TEST(inflating_gauss_seidel02);
-		CPPUNIT_TEST(inflating_gauss_seidel03);
+	CPPUNIT_TEST(lu_partial_underctr);
+	CPPUNIT_TEST(inflating_gauss_seidel01);
+	CPPUNIT_TEST(inflating_gauss_seidel02);
+	CPPUNIT_TEST(inflating_gauss_seidel03);
+	CPPUNIT_TEST(det01);
+	CPPUNIT_TEST(det02);
+	CPPUNIT_TEST(is_posdef_sylvester01);
+	CPPUNIT_TEST(is_posdef_rohn01);
+	CPPUNIT_TEST(is_diagonal_dominant01);
 	CPPUNIT_TEST_SUITE_END();
 
 	void lu_partial_underctr();
@@ -41,6 +44,13 @@ public:
 	void inflating_gauss_seidel02();
 	// divergence, start with thick vector
 	void inflating_gauss_seidel03();
+
+	void det01();
+	void det02();
+
+	void is_posdef_sylvester01();
+	void is_posdef_rohn01();
+	void is_diagonal_dominant01();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestLinear);

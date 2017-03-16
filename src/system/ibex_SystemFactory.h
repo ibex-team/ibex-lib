@@ -77,7 +77,6 @@ public:
 	 * \pre All the variables must have been added.
 	 */
 	void add_ctr(const NumConstraint& ctr);
-	void add_ctr2(const ExprCtr& ctr);
 
 	/**
 	 * \brief Add a new equality constraint (by copy).

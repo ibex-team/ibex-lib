@@ -102,6 +102,12 @@ protected:
 	void minus_bwd(const ExprMinus&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
+	void minus_V_bwd(const ExprMinus&, int x, int y);
+
+	/** TO BE DEFINED (by the subclass) */
+	void minus_M_bwd(const ExprMinus&, int x, int y);
+
+	/** TO BE DEFINED (by the subclass) */
 	void trans_V_bwd(const ExprTrans&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */

@@ -163,6 +163,4 @@ void TestDoubleHeap::test02() {
 	CPPUNIT_ASSERT(h.size()==0);
 }
 
-
-
 } // end namespace

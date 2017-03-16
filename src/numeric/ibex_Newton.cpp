@@ -40,6 +40,17 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 	assert(full_box.size()==f.nb_var());
 
 	IntervalMatrix J(m, n);
+
+//	IntervalVector* p=NULL;      // Parameter box
+//	IntervalVector* midp=NULL;   // Parameter box midpoint
+	IntervalMatrix* Jp=NULL;     // Jacobian % parameters
+//
+	if (vars) {
+//		p=new IntervalVector(vars->param_box(full_box));
+//		midp=new IntervalVector(p->mid());
+		Jp=new IntervalMatrix(n,vars->nb_param);
+	}
+
 	IntervalVector y(n);
 	IntervalVector y1(n);
 	IntervalVector mid(n);
@@ -54,12 +65,12 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 
 	do {
 		if (vars)
-			f.hansen_matrix(full_box,J,*vars);
+			f.hansen_matrix(full_box,J,*Jp,*vars);
 		else
 			f.hansen_matrix(full_box,J);
 		//		f.jacobian(box,J);
 
-		if (J.is_empty()) break;
+		if (J.is_empty() || (vars && Jp->is_empty())) break;
 
 		/* remove this block
 		 *
@@ -73,6 +84,12 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 		if (vars) vars->set_var_box(full_mid, mid);
 
 		Fmid = f.eval_vector(full_mid);
+
+		// Use the jacobian % parameters to calculate
+		// a mean-value form for Fmid
+//		if (vars) {
+//			Fmid &= f.eval_vector(vars->full_box(mid,*midp))+(*Jp)*(*p-*midp);
+//		}
 
 		y = mid-box;
 		if (y==y1) break;
@@ -114,6 +131,9 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 	while (gain >= prec);
 
 	if (vars) {
+//		delete p;
+//		delete midp;
+		delete Jp;
 		delete &box;
 		delete &full_mid;
 	}
@@ -134,15 +154,31 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 	assert(f.image_dim()==n);
 	assert(full_box.size()==f.nb_var());
 
+	if (full_box.is_empty()) {
+		box_existence.set_empty();
+		box_unicity.set_empty();
+		return false;
+	}
+
 	int k=0;
 	bool success=false;
 
-	IntervalMatrix J2(n, n);
-	IntervalMatrix J(n, n);
+	IntervalVector mid(n);       // Midpoint of the current box
+	IntervalVector Fmid(n);      // Evaluation of f at the midpoint
+	IntervalMatrix J(n, n);	     // Hansen matrix of f % variables
+
+//	IntervalVector* p=NULL;      // Parameter box
+//	IntervalVector* midp=NULL;   // Parameter box midpoint
+	IntervalMatrix* Jp=NULL;     // Jacobian % parameters
+//
+	if (vars) {
+//		p=new IntervalVector(vars->param_box(full_box));
+//		midp=new IntervalVector(p->mid());
+		Jp=new IntervalMatrix(n,vars->nb_param);
+	}
+
 	IntervalVector y(n);
 	IntervalVector y1(n);
-	IntervalVector mid(n);
-	IntervalVector Fmid(n);
 
 	IntervalVector box = vars ? vars->var_box(full_box) : full_box;
 	IntervalVector& full_mid = vars ? *new IntervalVector(full_box) : mid;
@@ -166,7 +202,7 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 		//cout << "current box=" << box << endl << endl;
 
 		if (vars)
-			f.hansen_matrix(box_existence, J, *vars);
+			f.hansen_matrix(box_existence, J, *Jp, *vars);
 		else
 			f.hansen_matrix(box_existence, J);
 
@@ -178,8 +214,14 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 
 		Fmid=f.eval_vector(full_mid);
 
+		// Use the jacobian % parameters to calculate
+		// a mean-value form for Fmid
+//		if (vars) {
+//			Fmid &= f.eval_vector(vars->full_box(mid,*midp))+(*Jp)*(*p-*midp);
+//		}
+
 		y = mid-box;
-		if (y==y1) break;
+		//if (y==y1) break; <--- allowed in Newton inflation
 		y1=y;
 
 		try {
@@ -199,10 +241,44 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 		IntervalVector box2=mid-y;
 
 		if (box2.is_subset(box)) {
+
+			assert(!box2.is_empty());
+
 			if (!success) { // to get the largest unicity box, we do this
 				            // only when the first contraction occurs
+
 				if (vars) vars->set_var_box(box_unicity,box2);
 				else box_unicity = box2;
+
+				//=================================================
+				// We now try to enlarge the unicity box as possible
+				// =================================================
+//				IntervalVector box2copy=box2;
+//
+//				bool inflate_ok=true;
+//
+//				while (inflate_ok) {
+//
+//					box2copy.inflate(delta,0.0);
+//
+//					// box_existence is also used inside this iteration
+//					// to store the "full box"
+//					if (vars) vars->set_var_box(box_existence,box2copy);
+//					else box_existence = box2copy;
+//
+//					newton(f,vars,box_existence,0.0,default_gauss_seidel_ratio);
+//
+//					if (vars) {
+//						if (vars->var_box(box_existence).is_interior_subset(box2))
+//							vars->set_var_box(box_unicity,box2copy);
+//						else inflate_ok=false;
+//					} else {
+//						if (box_existence.is_interior_subset(box2))
+//							box_unicity = box2copy;
+//						else inflate_ok=false;
+//					}
+//				}
+
 			}
 			success=true;  // we don't return now, to let the box being contracted more
 		}
@@ -220,6 +296,9 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 	}
 
 	if (vars) {
+//		delete p;
+//		delete midp;
+		delete Jp;
 		delete &full_mid;
 	}
 
@@ -235,8 +314,56 @@ bool inflating_newton(const Function& f, const IntervalVector& full_box, Interva
 	return inflating_newton(f,NULL,full_box,box_existence,box_unicity,k_max,mu_max,delta,chi);
 }
 
-bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVector& full_box, IntervalVector& box_unicity, IntervalVector& box_existence, int k_max, double mu_max, double delta, double chi) {
-	return inflating_newton(f,&vars,full_box,box_unicity,box_existence,k_max,mu_max,delta,chi);
+bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
+	return inflating_newton(f,&vars,full_box,box_existence,box_unicity,k_max,mu_max,delta,chi);
+}
+
+VarSet get_newton_vars(const Function& f, const Vector& pt, const BitSet& forced_params) {
+	int n=f.nb_var();
+	int m=f.image_dim();
+
+	if (forced_params.size()==n-m)
+		// no need to find parameters: they are given
+		return VarSet(n,forced_params,false);
+
+	Matrix A=f.jacobian(pt).mid();
+	Matrix LU(m,n);
+	int *pr = new int[m];
+	int *pc = new int[n]; // the interesting output: the variables permutation
+
+	// To force the Gauss elimination not to choose
+	// the "forced" parameters, we fill their respective
+	// column with zeros
+	for (int i=0; i<n; i++) {
+		if (forced_params[i]) {
+			A.set_col(i,Vector::zeros(m));
+		}
+	}
+
+	try {
+		real_LU(A,LU,pr,pc);
+	} catch(SingularMatrixException& e) {
+		// means in particular that we could not extract an
+		// invertible m*m submatrix
+		delete [] pr;
+		delete [] pc;
+		throw e;
+	}
+	// ==============================================================
+
+	BitSet _vars=BitSet::empty(n);
+
+	for (int i=0; i<m; i++) {
+		_vars.add(pc[i]);
+	}
+
+	for (int j=0; j<n; j++) {
+		assert(!(forced_params[j] && _vars[j]));
+	}
+
+	delete [] pr;
+	delete [] pc;
+	return VarSet(f.nb_var(),_vars);
 }
 
 } // end namespace ibex

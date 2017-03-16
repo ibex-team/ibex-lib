@@ -224,6 +224,11 @@ public:
 	~NumConstraint();
 
 	/**
+	 * \brief The domain "d" such that the constraint is equivalent to "f in d".
+	 */
+	Domain right_hand_side() const;
+
+	/**
 	 * \brief The function.
 	 */
 	Function& f;
