@@ -1,0 +1,13 @@
+constants
+  c=3;
+
+Variables
+  x,y;
+
+function f(x,y)
+  return c*x^2+y^2;
+end
+
+constraints
+  f(x,y)<=c;
+end

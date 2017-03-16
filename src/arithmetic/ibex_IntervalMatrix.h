@@ -191,6 +191,16 @@ public:
 	bool is_zero() const;
 
 	/**
+	 * \brief Matrix of radii.
+	 */
+	Matrix rad() const;
+
+	/**
+	 * \brief Matrix of diameters.
+	 */
+	Matrix diam() const;
+
+	/**
 	 * \brief True iff this interval matrix is a subset of \a x.
 	 *
 	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
@@ -295,8 +305,6 @@ public:
 	 * \sa #ibex::Interval::is_disjoint(double) const.
 	 */
 	bool is_disjoint(const IntervalMatrix& x) const;
-
-
 
 	/**
 	 * \brief Return a submatrix.
@@ -570,6 +578,11 @@ IntervalMatrix outer_product(const IntervalVector& x1, const IntervalVector& x2)
 IntervalMatrix abs(const IntervalMatrix& m);
 
 /**
+ * \brief ||x||_oo.
+ */
+double infinite_norm(const IntervalMatrix& m);
+
+/**
  * \brief Projection of $y=x_1+x_2$.
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$.
@@ -812,15 +825,6 @@ inline IntervalMatrix operator*(const IntervalMatrix& m1, const Matrix& m2) {
 inline IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2) {
 	return mulMM<IntervalMatrix,IntervalMatrix,IntervalMatrix>(m1,m2);
 }
-
-inline IntervalMatrix abs(const IntervalMatrix& m) {
-	return absM(m);
-}
-
-
-
-
-
 
 } // namespace ibex
 #endif // __IBEX_INTERVAL_MATRIX_H__

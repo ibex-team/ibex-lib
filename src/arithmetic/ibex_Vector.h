@@ -134,11 +134,6 @@ public:
 	double min() const;
 
 	/**
-	 * \brief ||x||.
-	 */
-	double norm() const;
-
-	/**
 	 * \brief (*this)+=x2.
 	 */
 	Vector& operator+=(const Vector& x2);
@@ -167,6 +162,26 @@ public:
 	 * \brief Cast the vector to an expression
 	 */
 	operator const ExprConstant&() const;
+
+	/**
+	 * \brief Vector iterator
+	 */
+	typedef double* iterator;
+
+	/**
+	 * \brief Vector const iterator
+	 */
+	typedef const double* const_iterator;
+
+	/**
+	 * \brief First iterator
+	 */
+	iterator begin() { return &vec[0]; }
+
+	/**
+	 * \brief Past-the-end iterator
+	 */
+	iterator end() { return &vec[n]; }
 
 private:
 	friend class Matrix;
@@ -222,6 +237,16 @@ Vector operator*(double d, const Vector& x);
  * \brief |x|.
  */
 Vector abs(const Vector& x);
+
+/**
+ * \brief ||x||_2.
+ */
+double norm(const Vector& x);
+
+/**
+ * \brief ||x||_oo.
+ */
+double infinite_norm(const Vector& x);
 
 /**
  * \brief Display the Vector \a x
@@ -301,10 +326,6 @@ inline Vector operator*(double x, const Vector& v) {
 
 inline Vector hadamard_product(const Vector& v1, const Vector& v2) {
 	return hadamard_prod<Vector,Vector,Vector>(v1,v2);
-}
-
-inline Vector abs(const Vector& v) {
-	return absV(v);
 }
 
 inline double operator*(const Vector& v1, const Vector& v2) {

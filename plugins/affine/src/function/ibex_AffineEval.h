@@ -64,6 +64,8 @@ public:
 	void min_fwd   (int x1, int x2, int y);
 	void atan2_fwd (int x1, int x2, int y);
 	void minus_fwd (int x, int y);
+	void minus_V_fwd(int x, int y);
+	void minus_M_fwd(int x, int y);
 	void trans_V_fwd(int x, int y);
 	void trans_M_fwd(int x, int y);
 	void sign_fwd   (int x, int y);
@@ -285,6 +287,19 @@ template<class T>
 inline void AffineEval<T>::minus_fwd(int x, int y) {
 	af2[y].i()=-af2[x].i();
 	d[y].i()=(af2[y].i().itv() & (-d[x].i()));
+}
+
+template<class T>
+inline void AffineEval<T>::minus_V_fwd(int x, int y) {
+	af2[y].v()=-af2[x].v();
+	d[y].v()=(af2[y].v().itv() & (-d[x].v()));
+}
+
+template<class T>
+inline void AffineEval<T>::minus_M_fwd(int x, int y) {
+	af2[y].m()=-af2[x].m();
+	d[y].m() = af2[y].m().itv();
+	d[y].m()&= (-d[x].m());
 }
 
 template<class T>

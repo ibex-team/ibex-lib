@@ -95,7 +95,7 @@ using namespace ibex::parser;
 "constraints"|"Constraints"|"CONSTRAINTS" { return TK_CTRS; }
 
 "oo"                             { return TK_INFINITY; }
-"\""[^\n]*"\""                   { ibexlval.str = (char*) malloc(strlen(ibextext)-1);
+"\""[^\n\r]*"\""                 { ibexlval.str = (char*) malloc(strlen(ibextext)-1);
                                    /* copy while removing quotes */
                                    strncpy(ibexlval.str,&ibextext[1],strlen(ibextext)-2);
                                    ibexlval.str[strlen(ibextext)-2]='\0';
@@ -103,7 +103,13 @@ using namespace ibex::parser;
                                  }
 [_a-zA-Z][_a-zA-Z0-9]*	         { ibexlval.str = (char*) malloc(strlen(ibextext)+1);
                                    strcpy(ibexlval.str,ibextext);
-                                   return scopes().top().token(ibextext);
+                                   if (scopes().empty())
+                                      // happens when the program starts by an identifier (an error). 
+  									  // The lexer tries to retreive this identifier from the scope, which has not
+  									  // been created yet -> seg fault
+  									  return TK_NEW_SYMBOL;
+  								   else
+                                      return scopes().top().token(ibextext);
                                  }
 ([0-9]{6,10}[0-9]*|([0-9][0-9]*\.[0-9]*)|(\.[0-9]+))(e(\-|\+)?[0-9]+)?|([0-9]{1,5}e(\-|\+)?[0-9]+)  {
                                    ibexlval.real = atof(ibextext); return TK_FLOAT;
@@ -116,7 +122,7 @@ using namespace ibex::parser;
                                  }
 [0-9]+                           { ibexlval.itg = atoi(ibextext); return TK_INTEGER; }
 
-"//".*                           { /* C++-like comments */ }
+"//"[^\n\r]*                     { /* C++-like comments. Note: '.' also accepts CR characters (not LF).*/ }
 "/*"([^*]|("*"[^/]))*"*/"        { /* C-like comments */
                                    /*strtok (ibextext,"\n");
                                    while (strtok(NULL,"\n")) ++ibex_lineno; */
@@ -125,13 +131,16 @@ using namespace ibex::parser;
                                  }
 
 [ \t]+                           { /* skipping spaces */ }
-"\n"                             { ++ibex_lineno; /* counting CR */ }
+
+\n|\r|"\r\n"                     { ++ibex_lineno; /* counting end of lines (either CR, LF or CRLF depending on the encoding) */
+					               /* the line count is OK if different conventions are not mixed in the same file (should be ok). */
+}
 
 "<="                             { return TK_LEQ; }
 ">="                             { return TK_GEQ; }
 "="                              { return TK_EQU; }
 ":="                             { return TK_ASSIGN; }
-.			         { return ibextext [0]; }
+.			                     { return ibextext [0]; }
 <<EOF>>                          {YY_NEW_FILE; yyterminate();}
 
 %%

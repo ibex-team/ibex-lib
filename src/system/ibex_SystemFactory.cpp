@@ -12,7 +12,6 @@
 #include "ibex_Exception.h"
 #include "ibex_ExprCtr.h"
 #include "ibex_ExprCopy.h"
-#include "ibex_EmptySystemException.h"
 
 using std::vector;
 
@@ -108,16 +107,6 @@ void SystemFactory::add_ctr(const ExprCtr& ctr) {
 	ctrs.push_back(new NumConstraint(*new Function(ctr_vars, ctr_expr), ctr.op, true));
 }
 
-void SystemFactory::add_ctr2(const ExprCtr& ctr) {
-	if (!args) args = new Array<const ExprSymbol>(tmp_args);
-
-	Array<const ExprSymbol> ctr_vars(args->size());
-	varcopy(*args,ctr_vars);
-	const ExprNode& ctr_expr=ExprCopy().copy(*args, ctr_vars, ctr.e); //, true);
-
-	ctrs.push_back(new NumConstraint(*new Function(ctr_vars, ctr_expr), ctr.op, true));
-}
-
 void SystemFactory::add_ctr(const NumConstraint& ctr) {
 	init_arg_bound();
 
@@ -131,7 +120,12 @@ void SystemFactory::add_ctr(const NumConstraint& ctr) {
 // precondition: nb_ctr > 0
 void System::init_f_from_ctrs() {
 
-	if (ctrs.is_empty()) return; // <=> m>0
+	if (ctrs.is_empty()) {
+		// don't delete the symbols now because
+		// one may read the "args" field of System even
+		// if there is no constraint
+		return; // <=> m>0
+	}
 
 	int total_output_size=0;
 	for (int j=0; j<ctrs.size(); j++)
@@ -208,7 +202,11 @@ void System::init(const SystemFactory& fac) {
 
 	// the field fac.args is initialized upon addition of an objective
 	// function or a constraint.
-	if (!fac.args) throw EmptySystemException();
+	if (!fac.args) {
+		// an empty system is not an error
+		// (and may happen with automatic generation)
+		((SystemFactory&) fac).init_arg_bound();
+	}
 
 	(int&) nb_var = fac.nb_var;
 	(int&) nb_ctr = fac.ctrs.size();

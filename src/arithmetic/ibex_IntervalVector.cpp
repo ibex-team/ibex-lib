@@ -278,6 +278,17 @@ IntervalVector& IntervalVector::inflate(double delta, double chi) {
 	return *this;
 }
 
+double infinite_norm(const IntervalVector& v) {
+	assert(!v.is_empty());
+    double norm = v[0].mag();
+    for (int i=1; i<v.size(); i++) {
+        double x = v[i].mag();
+        if (x > norm)
+            norm = x;
+    }
+    return norm;
+}
+
 // why inflate is template?
 IntervalVector& IntervalVector::inflate(double rad1)                              { return _inflate(*this,rad1); }
 IntervalVector  IntervalVector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
@@ -304,7 +315,7 @@ double          IntervalVector::rel_distance(const IntervalVector& x) const     
 Vector          IntervalVector::random(int seed) const                            { return _random<IntervalVector,Interval>(*this,seed); }
 Vector          IntervalVector::random() const                            		  { return _random<IntervalVector,Interval>(*this); }
 std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ratio) const  { return _bisect(*this, i, ratio); }
-
+IntervalVector  abs(const IntervalVector& v)                                      {	return _abs(v); }
 
 } // end namespace
 

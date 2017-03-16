@@ -329,6 +329,8 @@ public:
 		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5),in_rows)) { }
 	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, const ExprNode& f6, bool in_rows=false) :
 		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5,f6),in_rows)) { }
+    Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, const ExprNode& f6, const ExprNode& f7, bool in_rows=false) :
+    vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5,f6,f7),in_rows)) { }
 
 	operator const ExprVector&() const { return vec; }
 

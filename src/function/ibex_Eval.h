@@ -75,6 +75,8 @@ public: // because called from CompiledFunction
 	inline void min_fwd    (int x1, int x2, int y);
 	inline void atan2_fwd  (int x1, int x2, int y);
 	inline void minus_fwd  (int x, int y);
+	inline void minus_V_fwd(int x, int y);
+	inline void minus_M_fwd(int x, int y);
 	inline void trans_V_fwd(int x, int y);
 	inline void trans_M_fwd(int x, int y);
 	inline void sign_fwd   (int x, int y);
@@ -139,6 +141,8 @@ inline void Eval::min_fwd(int x1, int x2, int y)   { d[y].i()=min(d[x1].i(),d[x2
 inline void Eval::atan2_fwd(int x1, int x2, int y) { d[y].i()=atan2(d[x1].i(),d[x2].i()); }
 
 inline void Eval::minus_fwd(int x, int y)          { d[y].i()=-d[x].i(); }
+inline void Eval::minus_V_fwd(int x, int y)        { d[y].v()=-d[x].v(); }
+inline void Eval::minus_M_fwd(int x, int y)        { d[y].m()=-d[x].m(); }
 inline void Eval::sign_fwd(int x, int y)           { d[y].i()=sign(d[x].i()); }
 inline void Eval::abs_fwd(int x, int y)            { d[y].i()=abs(d[x].i()); }
 inline void Eval::power_fwd(int x, int y, int p)   { d[y].i()=pow(d[x].i(),p); }

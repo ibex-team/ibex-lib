@@ -92,8 +92,8 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, Li
 
 		switch (stat) {
 		case LinearSolver::OPTIMAL : {
-			if( ((sense==LinearSolver::MINIMIZE) && (  obj_value <=bound)) ||
-					((sense==LinearSolver::MAXIMIZE) && ((-obj_value)>=bound))) {
+			if( ((sense==LinearSolver::MINIMIZE) && (  obj_value <bound)) ||
+					((sense==LinearSolver::MAXIMIZE) && ((-obj_value)>bound))) {
 				stat = LinearSolver::UNKNOWN;
 				break;
 			}

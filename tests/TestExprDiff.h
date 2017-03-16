@@ -29,6 +29,7 @@ public:
 	CPPUNIT_TEST(vec01);
 	CPPUNIT_TEST(vec02);
 	CPPUNIT_TEST(vec03);
+	CPPUNIT_TEST(row_vec);
 	CPPUNIT_TEST(one_var_one_func);
 	CPPUNIT_TEST(mat01);
 	CPPUNIT_TEST(mat02);
@@ -39,7 +40,12 @@ public:
 	CPPUNIT_TEST(vecimg01);
 	CPPUNIT_TEST(vecimg02);
 	CPPUNIT_TEST(mul01);
+	CPPUNIT_TEST(mul02);
+	CPPUNIT_TEST(mul03);
+	CPPUNIT_TEST(mul04);
 	CPPUNIT_TEST(apply_mul01);
+	CPPUNIT_TEST(issue247);
+
 	CPPUNIT_TEST_SUITE_END();
 
 	void linear01();
@@ -52,6 +58,9 @@ public:
 	void vec02();
 	// x (vec) -> (x[0];x[1])[1]
 	void vec03();
+
+	// x (row vec) -> x
+	void row_vec();
 
 	// x (mat) -> x[1][0]
 	void mat01();
@@ -79,11 +88,22 @@ public:
 	// V*V
 	void mul01();
 
+	// V'*V
+	void mul02();
+
+	// M*V
+	void mul03();
+
+	// V*M
+	void mul04();
+
 	// void (x,y) -> f(x,y)*f(y,x) with f(x,y)=x
 	void apply_mul01();
 
 	// void (x,y) -> f(x,y)*f(y,x) with f(x,y)=g(x,y) with g(x,y)=x
 	void apply_mul02();
+
+	void issue247();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestExprDiff);

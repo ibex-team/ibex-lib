@@ -126,7 +126,7 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 	 * numbers from 0 to n-1.
 	 */
 
-	int nb_ctr=system.ctrs.size();
+	int nb_ctr=system.f.image_dim(); //system.ctrs.size();
 
 	if (smearorder.size()!=0) smearorder.clear();
 

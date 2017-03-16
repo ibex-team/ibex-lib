@@ -123,6 +123,12 @@ System::~System() {
 
 	for (int i=0; i<ctrs.size(); i++)
 		delete &ctrs[i];
+
+	if (nb_ctr==0) {
+		// delete the symbols of the global function "f" that
+		// has never been created
+		for (int i=0; i<args.size(); i++) delete &args[i];
+	}
 }
 
 } // end namespace ibex

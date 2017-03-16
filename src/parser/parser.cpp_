@@ -89,14 +89,12 @@ void begin_system() {
 	if (system==NULL) { // someone tries to load a Function from a file containing a system
 		throw SyntaxError("unexpected (global) variable declaration for a function.");
 	}
-	begin();
 }
 
 void begin_choco() {
 	if (system==NULL) { // someone tries to load a Function from a file with CHOCO constraint syntax
 		throw SyntaxError("unexpected constraints declaration for a function.");
 	}
-	begin();
 
 	// ----- generate all the variables {i} -----
 	Dim dim=Dim::scalar();
@@ -114,8 +112,6 @@ void begin_function() {
 	if (function==NULL) { // someone tries to load a system from a file containing a function only
 		throw SyntaxError("a system requires declaration of variables.");
 	}
-
-	begin();
 }
 
 void end_system() {
