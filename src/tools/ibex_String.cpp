@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_String.cpp
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Simon Rohou
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 18, 2012
-// Last Update : Jul 18, 2012
+// Last Update : April 18, 2016
 //============================================================================
 
 #include "ibex_String.h"
@@ -57,6 +57,5 @@ char* next_generated_func_name() {
 	static int generated_func_count=0;
 	return next_generated_name(BASE_FUNC_NAME,generated_func_count++);
 }
-
 
 } // end namespace ibex

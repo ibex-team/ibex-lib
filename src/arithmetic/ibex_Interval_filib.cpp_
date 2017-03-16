@@ -59,15 +59,5 @@ const Interval Interval::HALF_PI =(filib::interval<FI_BASE,FI_ROUNDING,FI_MODE>:
 	filib::fp_traits<FI_BASE,FI_ROUNDING>::upward_divides(filib::constructFromBitSet<FI_BASE>(	"0:10000000000:1001001000011111101101010100010001000010110100011001"),2.0)));
 */
 
-
-
-std::ostream& operator<<(std::ostream& os, const Interval& x) {
-	if (x.is_empty())
-		return os << "[ empty ]";
-	else
-		filib::interval<FI_BASE,FI_ROUNDING,FI_MODE>::precision(os.precision());
-		return os << x.itv;
-}
-
 } // end namespace
 

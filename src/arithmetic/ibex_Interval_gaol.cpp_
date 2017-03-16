@@ -47,8 +47,4 @@ const Interval Interval::PI(pi_dn,pi_up);
 const Interval Interval::TWO_PI(2.0*pi_dn,2.0*pi_up);
 const Interval Interval::HALF_PI(half_pi_dn,half_pi_up);
 
-std::ostream& operator<<(std::ostream& os, const Interval& x) {
-	return os << x.itv;
-}
-
 } // end namespace

@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_String.h
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Simon Rohou
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 18, 2012
-// Last Update : Jul 18, 2012
+// Last Update : April 18, 2016
 //============================================================================
 
 #ifndef __IBEX_STRING_H_
@@ -14,6 +14,7 @@
 #include <cassert>
 #include <string.h>
 #include <stdio.h>
+#include "ibex_Interval.h"
 
 namespace ibex {
 
