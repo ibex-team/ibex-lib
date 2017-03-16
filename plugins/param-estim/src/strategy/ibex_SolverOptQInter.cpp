@@ -137,18 +137,23 @@ namespace ibex {
   
   
   void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
-    if (!(c1.box.is_empty())&& c1.box.contains(oracle))
+    if (with_oracle && !(c1.box.is_empty())&& c1.box.contains(oracle))
       {
 	if  (!(c2.box.is_empty())) buffer.push(&c2);
 	buffer.push(&c1);}
     else if 
-      (!(c2.box.is_empty())&& c2.box.contains(oracle))
+      (with_oracle && !(c2.box.is_empty())&& c2.box.contains(oracle))
       {
 	if (!(c1.box.is_empty())) buffer.push(&c1);
 	buffer.push(&c2);}
 
     else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
-      {push_cells_depth(c1,c2);}
+      {if (optimbuffer==1) push_cells_depth(c1,c2);  // DFS
+	else{
+	  buffer.push(&c1);	buffer.push(&c2);   //BFS
+	}
+      }
+	  
 
     else if (!(c1.box.is_empty())) buffer.push(&c1);
     else if (!(c2.box.is_empty())) buffer.push(&c2);
@@ -338,6 +343,9 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
   { 
     int psize = ctcq.points->size();
     qposs= psize;
+    if (trace && ( nb_cells % 100000 ==0))
+      if (optimbuffer==2 && !(buffer.empty()))
+	cout << " qmax " << buffer.top()->get<QInterPoints>().qmax << endl;
     //    cout << " validate : qposs " <<  qposs << "box " <<  c.box << endl;
        //in optimization ctcq.qmax can be used as qposs for the stopping criterion
     if (ctcq.qmax < qposs) {
@@ -372,9 +380,11 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
 	  cout << " time " << time << endl;	    ;
 	  cout << " nb boxes " << nb_cells << endl;	    ;
 	  cout << " depth " << c.get<QInterPoints>().depth << endl;
-	     cout << " valid point " << newvalidpoint1 << endl;
-	     cout << " best sol point " << bestsolpoint << endl;
-	     cout <<" qmax epsboxes " << qmax_epsboxes << endl;
+	  if (optimbuffer==2 && !(buffer.empty()))
+	    cout << " qmax " << buffer.top()->get<QInterPoints>().qmax << endl;
+	  cout << " valid point " << newvalidpoint1 << endl;
+	  cout << " best sol point " << bestsolpoint << endl;
+	  cout <<" qmax epsboxes " << qmax_epsboxes << endl;
 	}
 	if (qposs < qvalid+epsobj)  // stop condition  :  the
        // maximum number of valid points is reached : no need of further bisections.
@@ -409,7 +419,7 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
  
  void SolverOptQInter::postsolution()
   { 
-    if (optimbuffer==2) //best first search
+    if (optimbuffer==2) //best first search  or feasible diving
       { cout << " buffer size avant " << buffer.size() << " q " << ctcq.q << endl;
 	(dynamic_cast<CellHeapQInter*> (&buffer))->contract_heap(-(ctcq.q));
 	cout << " buffer size apres " << buffer.size()  << endl;
@@ -450,7 +460,7 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
   cout << " " <<   bestsolpoint << endl;
   if (epsobj > 1){
     cout << " possible discarded solutions  with " ;
-    if ((bestsolpointnumber + epsobj) < measure_nb) 
+    if ((bestsolpointnumber + epsobj -1) < measure_nb) 
       cout <<    (bestsolpointnumber + epsobj -1) << "  ";
     else
       cout << measure_nb <<  " ";
@@ -473,7 +483,11 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
 	break;
       }
 
-    cout << " max possible inliers in open nodes " << possin << endl;
+    cout << " max possible inliers in open nodes ";
+    if (optimbuffer==2 && !(buffer.empty()))
+      cout << buffer.top()->get<QInterPoints>().qmax << endl;
+    else 
+    cout <<  possin << endl;
     
   }    
 

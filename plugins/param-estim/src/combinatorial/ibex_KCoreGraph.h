@@ -60,9 +60,14 @@ public:
 	/* Removes all vertices that do not belong to the k-core of the graph */
 	void apply_coreness();
 	
-	/* Performs a greedy coloring accroding to the order given by "boxes".
+	/* Performs a greedy coloring according to the order given by "boxes".
 	 * Returns the first box of color at least q (or -1 if none is found) */
 	int qcoloring(const std::pair<double, int>* boxes, int nboxes, int q);
+
+	/* Performs a greedy coloring according to the order given by "boxes".
+	 * Returns the first box of color at least q (or -1 if none is found)
+         * Colors the entire graph and returns in qmax the number of colors used */
+	int qcoloring(const std::pair<double, int>* boxes, int nboxes, int q, int& qmax);
 	
 	/* Misc */
 	inline int maxsize() {return neighbourhoods.size();};

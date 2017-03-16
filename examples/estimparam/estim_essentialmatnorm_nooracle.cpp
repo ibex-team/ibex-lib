@@ -708,22 +708,26 @@ fundmat[7]= -0.20883359402083 ;
 	//	CtcQInterAff ctcq(9,m_ctc,Q,m_fun);
 	//	CtcQInter ctcq(9,m_ctc,Q);
 	CtcQInterAffLinear ctcq(9,m_ctc,linfun,epseq,Q);
+	//	CtcQInterAffLinear ctcq(9,m_ctc,linfun,epseq,Q,QINTERCORE);
 	//	CtcCompo ctcqf0(*cdet,c_essential, ctcq);
 	//	CtcCompo ctcqf1(*ctcnorm,*cdet,c_essential);
 		//		CtcCompo ctcqf0(ctcqf1,lphull);
 	//	CtcCompo ctcqf0(*ctcnorm,*cdet,c_essential, lphull, ctcq);
         //	CtcCompo ctcqf0(*ctcnorm,*cdet,c_essential,  ctcq);
 
+	//	CtcHC4 hc44cid(sys0,0.005,true);
 	CtcHC4 hc44cid(sys0,0.005,true);
 	//	CtcHC4 hc44cid(sys0,10,false);
 	
 
-	CtcAcid acidhc4(sys,hc44cid,true);
+	CtcAcid acidhc4(sys0,hc44cid,true);
 	//	CtcCompo ctcqf0(lphull,  ctcq);
 	//	CtcCompo ctcqf0(hc44cid,  acidhc4,lphull,ctcq);
 
 	//	CtcCompo ctcqf0(hc44cid, acidhc4,lphull,ctcq);
 	CtcCompo ctcqf0(hc44cid, lphull,  ctcq);
+	//CtcCompo ctcqf0(acidhc4, lphull,  ctcq);
+	//	CtcCompo ctcqf0(hc44cid,  ctcq);
 	//	CtcCompo ctcqf1(*ctcnorm,*cdet,c_essential, lphull);
 	//	CtcFixPoint ctcf0(ctcqf1, 0.1);
 	//	CtcCompo ctcqf0(ctcf0, ctcq);
@@ -749,9 +753,10 @@ fundmat[7]= -0.20883359402083 ;
 	//	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,2);
 	if (optim ==0)
 	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont,1);
-	else
+	else if (optim==1)
 	  s= new SolverOptBSConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont);
-		      
+	else 
+	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont,2);
 
 	//	SolverOptQInter s(ctcf,bs,buff,ctcq,1);
 	cout << " apres solver " << endl;
@@ -763,8 +768,8 @@ fundmat[7]= -0.20883359402083 ;
 	s->gaplimit=gaplimit;
 	//	s->oracle=fundmat;
 	s->oracle=oraclemat;
-	//        s->with_oracle=0;
-	s->with_oracle=1;
+	s->with_oracle=0;
+	//s->with_oracle=1;
 	cout << " oracle " << oraclemat << endl;
 	cout << "box init " << box << endl;
 

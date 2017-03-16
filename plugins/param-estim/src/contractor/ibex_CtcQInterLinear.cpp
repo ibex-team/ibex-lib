@@ -439,7 +439,7 @@ void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter)
   
   
  void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter){
-   point_verif_prod (box,iter);
+   point_verif_prod (box,iter);    //avec retrait des mesures telles que Ep2 < epsilon ou p1Et < epsilon 
    if (!(box.is_empty()))
      point_fwdbwd(box,iter);
  }
@@ -483,23 +483,23 @@ void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter)
       if ((fabs(res1[0]) < epsilon && fabs(res1[1]) < epsilon && fabs(res1[2]) < epsilon)
 	  ||
 	  (fabs(res2[0]) < epsilon && fabs(res2[1]) < epsilon && fabs(res2[2]) < epsilon))
-	{//cout << "res1 " << res1 << " res2 " << res2 << endl;
+	{//cout << *iter << " res1 " << res1 << " res2 " << res2 << endl;
 	  iter++; continue;}
       IntervalVector box1(vec);
       
       point_contract(box1,*iter);
       
       //      point_contract_exact(box1,*iter);
-      //      cout << *iter <<  "  ";
+      //cout << *iter <<  "  ";
 	//<< " " << box1 << endl;
       
       if (!(box1.is_empty())) {
-	//cout << *iter << "  "  ;
+	//	cout << *iter << "  "  ;
 	p++;};
 
       iter++;
     }
-    //    cout << endl;
+    //cout << endl;
 
     return p;
  }
@@ -535,13 +535,13 @@ int CtcQInterAffLinear::midactivepoints_count(const Vector& vec){
   */
  void CtcQInterAffLinear::point_verif_prod (IntervalVector & box, int iter) {
   
-
+   //   cout << " debut point_verif_prod " << endl;
    IntervalMatrix msol (3,3);
    IntervalMatrix msolt (3,3);
    IntervalVector pt1 (3);
-   IntervalVector pt2 (3);
+   //   IntervalVector pt2 (3);
    IntervalVector res1(3);
-   IntervalVector res2(3);
+   //   IntervalVector res2(3);
    double epsilon=0.05;
    for (int i=0;i<3;i++)
      for (int j=0;j<3;j++)
@@ -549,21 +549,21 @@ int CtcQInterAffLinear::midactivepoints_count(const Vector& vec){
 	 msolt[j][i]=box[3*i+j];
        }
    pt1[0]= - linfun[iter][3][0];
-   pt2[1]= - linfun[iter][6][0];
+   pt1[1]= - linfun[iter][6][0];
    pt1[2]=1;
 
-      res1= msolt * pt1;
-
-
-      pt2[0]= - linfun[iter][7][0];
-      pt2[1]= - linfun[iter][8][0];
-      pt2[2]=1;
-	
-      res2 = msol * pt2;
-      
-      if ((res1.mag()).max()< epsilon || (res2.mag()).max() < epsilon){
-	//	cout << " res1 " << res1 << " res2 " << res2 << endl; 
-	box.set_empty(); return;}
+   res1= msolt * pt1;
+   if ((res1.mag()).max()< epsilon){
+     box.set_empty(); return;}
+   pt1[0]= - linfun[iter][7][0];
+   pt1[1]= - linfun[iter][8][0];
+   pt1[2]=1;
+   
+   res1 = msol * pt1;
+      //      cout << iter << "  " << res1.mag() << "  " << res2.mag() << endl;
+   if ((res1.mag()).max() < epsilon){
+     //cout << iter << " res1 " << res1 << " res2 " << res2 << endl; 
+     box.set_empty(); return;}
  }
 
   /*
@@ -685,7 +685,7 @@ void CtcQInterLinear::fwdbwd(IntervalVector & box, int iter, int k){
   }
 
   int CtcQInterAffLinear::affine_threshold(){ 
-    // return 10;
+    //return 10;
     return INT_MAX;
   }
 

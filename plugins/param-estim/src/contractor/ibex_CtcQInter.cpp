@@ -183,12 +183,12 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
       if (points->size() < 30)
 	cout << " iter " << *iter << " box " << box ;
       */
-      point_contract_exact(box1,*iter); 
+      //      point_contract_exact(box1,*iter); 
       /*
       if (points->size() < 30)
 	cout  << " box1 " << box1 << endl ;
       */
-      //point_contract(box1,*iter); 
+      point_contract(box1,*iter); 
       if (box1.is_empty())
 	iter=points->erase(iter);
       else {
@@ -241,7 +241,7 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
 
 	{//case QINTERPROJ : box=  qinter_projf(*boxes,q,qproj, p,  varbis, points,  n0, n1); break;
 	case QINTERPROJ : box=  qinter_projf(*boxes,q,qproj, p, points,  n0, n1); break;
-	case QINTERCORE :box = qinter_coref(*boxes,q,p, points,n0); break;
+	case QINTERCORE :box = qinter_coref(*boxes,q,p, points,qproj,n0); break;
 	case QINTERFULL : box =  qinter2(*boxes,q,p, points); break;
 	case QINTERGRID : box= qinter(*boxes,q,p,points); break;
 	default : ibex_error("Qinter contract : impossible case");
@@ -251,6 +251,7 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
     //    cout << " qproj " << qproj << "   " << side_effects() << " qmax " << qmax << endl;
     //    var_biss= varbis;
     if (qproj < qmax && side_effects() ) {
+      //    cout << " qproj " << qproj << " qmax " << qmax << endl;
       qmax=qproj;}  // during the projection the value of qproj has been decreased ; qmax should be updated
     return box;
   }

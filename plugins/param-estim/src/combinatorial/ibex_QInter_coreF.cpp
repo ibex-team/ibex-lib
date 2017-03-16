@@ -7,7 +7,6 @@
 // Created     : Jul 24, 2013
 // Last Update : Jul 24, 2013
 //============================================================================
-
 #include "ibex_QInter.h"
 #include "ibex_KCoreGraph.h"
 #include <algorithm>
@@ -23,8 +22,13 @@ inline bool basic_intersects(const Interval& x, const Interval& y) {
 bool leftcompC(const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); }
 bool rightcompC(const pair<double,int>& i, const pair<double,int>& j) { return (i.first>j.first); }
 
-  IntervalVector qinter_coref( IntervalMatrix& _boxes, int q, int& p, list<int>* points, int i0) {
-	
+  /* qmax is an upperbound of the maxclique : it is the minimum in number of colors used in the 2xn greedy
+     coloring performed. */
+
+
+  IntervalVector qinter_coref( IntervalMatrix& _boxes, int q, int& p, list<int>* points, int& qmax, int i0) {
+ 
+    
 	assert(q>0);
 
 	unsigned int n = _boxes[0].size();
@@ -88,8 +92,9 @@ bool rightcompC(const pair<double,int>& i, const pair<double,int>& j) { return (
 	  }
 		
 	  sort(x,x+p,leftcompC);
-		
-	  b = origin->qcoloring(x, p, q);
+	  int qm=0;
+	  b = origin->qcoloring(x, p, q, qm);
+	  if (qmax > qm) qmax=qm;
 		
 	  if (b == -1) {
 	    res.set_empty();
@@ -108,9 +113,9 @@ bool rightcompC(const pair<double,int>& i, const pair<double,int>& j) { return (
 	
 		
 	  sort(x,x+p,rightcompC);
-		
-	  b = origin->qcoloring(x, p,q);
-		
+	  qm=0;
+	  b = origin->qcoloring(x, p,q,qm);
+	  if (qmax > qm) qmax=qm;
 	  if (b == -1) {
 	    res.set_empty();
 	    break;
@@ -126,6 +131,6 @@ bool rightcompC(const pair<double,int>& i, const pair<double,int>& j) { return (
 	delete [] x;
 	return res;
 
-}
+  }
 
 } // end namespace ibex

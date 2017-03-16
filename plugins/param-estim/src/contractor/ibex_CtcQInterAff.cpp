@@ -280,10 +280,10 @@ void CtcQInterAff::contract(IntervalVector& box) {
 
   // la projection affine n'est appelée que par la contraction directe (pas dans 3bcid)
   //
-   
+  
   if (
 
-      side_effects() 
+      side_effects()  
 
       )
   

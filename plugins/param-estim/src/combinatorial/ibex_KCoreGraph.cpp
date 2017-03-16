@@ -183,4 +183,62 @@ graph_t *KCoreGraph::subgraph(IntStack *vset) {
 	return g;
 };
 
+
+  
+  int KCoreGraph::qcoloring(const std::pair<double, int>* boxes, int nboxes, int q, int& qmax) {
+	
+	assert(maxsize() == nboxes);
+	
+	/* Reinit the coloring vector, just in case */
+	for (int i=0; i<maxsize(); i++) {
+		colors[i] = 0;
+	}
+	
+	int vert0=-1; 
+	int vert;
+	qmax=0;
+	for (int i=0; i<nboxes; i++) {
+		
+		/* The current box to be colored */
+		vert = boxes[i].second;
+		
+		/* Find the smallest available color for "vert" */
+		
+		if (!allid->contain(vert)) continue;
+		
+		if (neighbourhoods.at(vert)->empty()) {
+			colors[vert] = 1;
+			continue;
+		}
+		
+		used->clear();
+		
+		int val = neighbourhoods.at(vert)->head();
+		int preval = val-1;
+		while (val != preval) {
+			if (colors[val] != 0) {
+				used->add(colors[val]);
+			}
+			preval = val;
+			val = neighbourhoods.at(vert)->next(preval);
+		}
+		
+		/* "used" now contains all the colors used in the neighbourhood of "vert" */
+		
+		for (int j=1; j<nboxes+1; j++) {
+			if (!used->contain(j)) {
+				colors[vert] = j;
+				if (qmax<j) qmax=j;
+				break;
+			}
+			/* Note : q-1 is actually the qth color */
+			if (j==q-1 && vert0==-1) vert0=vert;
+		}
+	}
+	
+	return vert0;
+  }
+
+
+
 }; // end namespace ibex
