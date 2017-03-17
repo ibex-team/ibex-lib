@@ -91,10 +91,14 @@ def configure (conf):
 	conf.load("waf_unit_test")
 
 	# cppunit is needed to run the tests but we set mandatory=False because the
-	# tests are not mandatory.
-	conf.check_cxx (header_name="cppunit/Test.h", uselib_store="CPPUNIT",
-				mandatory=False)
-	conf.check_cxx (lib="cppunit", uselib_store="CPPUNIT", mandatory=False)
+	# tests are not mandatory. First we try with pkg-config
+	try:
+		conf.check_cfg (package="cppunit", args="--cflags --libs",
+										uselib_store="CPPUNIT")
+	except Errors.WafError:
+		conf.check_cxx (header_name="cppunit/Test.h", uselib_store="CPPUNIT",
+										mandatory=False)
+		conf.check_cxx (lib="cppunit", uselib_store="CPPUNIT", mandatory=False)
 
 	# Looking for fmemopen
 	conf.check_cxx (function_name = "fmemopen", header_name = "stdio.h",
@@ -130,11 +134,13 @@ def utest (tst):
 		tst.env.env = tst.env.env if tst.env.env else {}
 
 		# Set PKG_CONFIG_PATH if it does not contain tst.env.PKGDIR
-		pkg_path = os.getenv ("PKG_CONFIG_PATH", "").split (":")
+		# On Windows, we assume that PKG_CONFIG_PATH is a ";"-separated list
+		split_char = ";" if Utils.is_win32 else ":"
+		pkg_path = os.getenv ("PKG_CONFIG_PATH", "").split (split_char)
 		if not tst.env.PKGDIR in pkg_path:
 			Logs.warn ("You should add '%s' to your PKG_CONFIG_PATH" % tst.env.PKGDIR)
 			pkg_path.append (tst.env.PKGDIR)
-		tst.env.env["PKG_CONFIG_PATH"] = ":".join (pkg_path)
+		tst.env.env["PKG_CONFIG_PATH"] = split_char.join (pkg_path)
 
 		# Using pkg-config to retrieve info on ibex (assume './waf install' was run)
 		try:

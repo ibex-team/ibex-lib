@@ -133,8 +133,6 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 		conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspath ())
 		conf.find_program ("sh")
 		cmd_conf = [conf.env.SH, "-c", "./configure %s"%conf_args]
-		cmd_rmconfig = [conf.env.SH, "-c", "rm config.sub config.guess"]
-		cmd_reconf = [conf.env.SH, "-c", "autoreconf -i"]
 		cmd_make = conf.env.MAKE
 	else:
 		conf_args += " --prefix=%s" % destnode.abspath ()
@@ -144,8 +142,6 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 
 	stages = []
 	if not without_configure:
-		if Utils.is_win32:
-			stages += [ (cmd_rmconfig, cmd_rmconfig[2]), (cmd_reconf, "autoreconf") ]
 		stages += [ (cmd_conf, "configure") ]
 	stages += [ (cmd_make, "make") ]
 	if not without_make_install:
