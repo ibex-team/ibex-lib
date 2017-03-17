@@ -118,7 +118,7 @@ void TestArith::float08() { CPPUNIT_ASSERT( NEG_INFINITY == ibex::previous_float
 void TestArith::float09() { CPPUNIT_ASSERT( POS_INFINITY == ibex::next_float(DBL_MAX)); }
 void TestArith::float10() {
 	const double CNEG_INF = NEG_INFINITY;
-    CPPUNIT_ASSERT( CNEG_INF == previous_float(-DBL_MAX));
+    CPPUNIT_ASSERT( CNEG_INF == ibex::previous_float(-DBL_MAX));
 }
 
 void TestArith::minus01() { check(-Interval(0,1), Interval(-1,0)); }
