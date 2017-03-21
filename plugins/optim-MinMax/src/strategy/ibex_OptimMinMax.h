@@ -27,6 +27,8 @@ public:
     /* Constructor*/
     OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec);
 
+//    OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec,Function& max_goal);
+
     /* Constructor, with "for all y" constraints
      * for all constraint in the objectif function of max_fa_y_cst lower than 0. If several for all constraints the objectif is equal to the max
      * of constraint functions lower than 0
@@ -34,6 +36,9 @@ public:
 
     OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,NormalizedSystem& max_fa_y_cst, Ctc& x_ctc,Ctc& xy_ctc,
                              double prec_x,double prec_y,double goal_rel_prec,double fa_cst_prec);
+
+//    OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,NormalizedSystem& max_fa_y_cst, Ctc& x_ctc,Ctc& xy_ctc,
+//                             double prec_x,double prec_y,double goal_rel_prec,double fa_cst_prec,Function& max_goal,Function& max_goal_fa);
 
     /* Runs a B&B like algorithm
      * arguments: -x_ini: initial x box
@@ -90,6 +95,7 @@ public:
     int iter; // number of iteration of lightsolver allowedNormalizedSystem *
     double min_perc_coef; // used to compute y_prec allowed when run the light solver, see compute_min_prec function for formula
     int critpr; // probability to choose second heap in light_solver
+    int local_iter; // number of local solver run
 
     //light solver param for csp
     int list_rate_csp; // rate of growth of y_heap size, see compute_heap_max_size function for formula detail
@@ -97,6 +103,7 @@ public:
     int iter_csp; // number of iteration of lightsolver allowedNormalizedSystem *
     double min_perc_coef_csp; // used to compute y_prec allowed when run the light solver, see compute_min_prec function for formula
     int critpr_csp; // probability to choose second heap in light_solver
+    int local_iter_csp; // number of local solver run
 
 
     bool monitor; // create log file if true
@@ -109,6 +116,10 @@ private:
     Bsc* bsc;
     double prec_y;
     bool fa_y_cst; // indicates if there is for all y constraints
+    Function* minus_goal;
+    Function* minus_goal_csp;
+    UnconstrainedLocalSearch * local_search;
+    UnconstrainedLocalSearch * local_search_csp;
 
     double compute_min_prec( const IntervalVector& x_box);
     int choose_nbiter(bool midpoint_eval,bool csp);
@@ -131,6 +142,7 @@ private:
     static const int default_iter;
     static const double default_min_perc_coef;
     static const int default_prob_heap;
+    static const int default_local_iter;
 
     //Csp fa function default parameters for light solver
     static const int default_list_rate_csp;
@@ -138,6 +150,7 @@ private:
     static const int default_iter_csp;
     static const double default_min_perc_coef_csp;
     static const int default_prob_heap_csp;
+    static const int default_local_iter_csp;
 
 
 };

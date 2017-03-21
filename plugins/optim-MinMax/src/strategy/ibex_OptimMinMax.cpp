@@ -20,9 +20,10 @@ namespace ibex {
 //Objectif function default parameters for light solver
 const int OptimMinMax::default_iter = 10;
 const int OptimMinMax::default_list_rate = 0;
-const double OptimMinMax::default_min_perc_coef = 0;
+const double OptimMinMax::default_min_perc_coef = 1;
 const int OptimMinMax::default_list_elem_absolute_max = 5000;
 const int OptimMinMax::default_prob_heap = 10; //10% to pop second heap in light_solver
+const int OptimMinMax::default_local_iter = 0; //10% to pop second heap in light_solver
 
 // Csp default parameters for light solver
 const int OptimMinMax::default_iter_csp = 10;
@@ -30,33 +31,73 @@ const int OptimMinMax::default_list_rate_csp = 0;
 const double OptimMinMax::default_min_perc_coef_csp = 0;
 const int OptimMinMax::default_list_elem_absolute_max_csp = 100;
 const int OptimMinMax::default_prob_heap_csp = 0; //0% to pop second heap in light_solver
+const int OptimMinMax::default_local_iter_csp = 0; //10% to pop second heap in light_solver
 
 
 OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec):
                                                                 Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb_opt(), *new CellCostFmaxub_opt()),
-                								prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
-                								x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
-                								x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
-                								bsc(new LargestFirst()),
-                								prec_y(prec_y),
-                								iter(default_iter),
-                								list_rate(default_list_rate),
-                								min_perc_coef(default_min_perc_coef),
+                                                                                prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
+                                                                                x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
+                                                                                lsolve(xy_sys,xy_ctc,NULL),
+                                                                                x_ctc(x_ctc),x_sys(x_sys),
+                                                                                bsc(new LargestFirst()),
+                                                                                prec_y(prec_y),
+                                                                                iter(default_iter),
+                                                                                list_rate(default_list_rate),
+                                                                                min_perc_coef(default_min_perc_coef),
                                                                                 critpr(default_prob_heap),
-                								list_elem_absolute_max(default_list_elem_absolute_max),
-                                                                                fa_lsolve(xy_sys,xy_ctc,true), // useless if no fa cst but need to construct it...
+                                                                                list_elem_absolute_max(default_list_elem_absolute_max),
+                                                                                local_iter(0),
+                                                                                fa_lsolve(xy_sys,xy_ctc,NULL,true), // useless if no fa cst but need to construct it...
                                                                                 fa_y_cst(false),
                                                                                 y_box_init_fa(IntervalVector(1)),
                                                                                 monitor(false)
 {
+        Array<const ExprNode> args(xy_sys.goal->nb_arg());
+        Array<const ExprSymbol> var;
+        for(int i = 0;i<xy_sys.goal->nb_arg();i++) {
+            const ExprSymbol& a = ExprSymbol::new_(xy_sys.goal->arg(i).dim);
+            var.add(a);
+            args.set_ref(i,a);
+        }
+        minus_goal = new Function(var,-(*xy_sys.goal)(args));
+
+//        minus_goal_csp = minus_goal;// does not matter, fa solver not used
+
+        local_search = new UnconstrainedLocalSearch(*minus_goal,IntervalVector(1));
+        lsolve.local_solver = local_search;
+    //    fa_lsolve(xy_sys,xy_ctc,UnconstrainedLocalSearch(minus_goal_csp,IntervalVector(1)),true); // useless if no fa cst but need to construct it...
+
 };
 
+//OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec,Function& max_goal):
+//                                                                Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb_opt(), *new CellCostFmaxub_opt()),
+//                                                                                prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
+//                                                                                x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
+//                                                                                lsolve(xy_sys,xy_ctc,new UnconstrainedLocalSearch(max_goal,IntervalVector(1))),
+//                                                                                x_ctc(x_ctc),x_sys(x_sys),
+//                                                                                bsc(new LargestFirst()),
+//                                                                                prec_y(prec_y),
+//                                                                                iter(default_iter),
+//                                                                                list_rate(default_list_rate),
+//                                                                                min_perc_coef(default_min_perc_coef),
+//                                                                                critpr(default_prob_heap),
+//                                                                                list_elem_absolute_max(default_list_elem_absolute_max),
+//                                                                                local_iter(default_local_iter),
+//                                                                                fa_lsolve(xy_sys,xy_ctc,NULL,true), // useless if no fa cst but need to construct it...
+//                                                                                fa_y_cst(false),
+//                                                                                y_box_init_fa(IntervalVector(1)),
+//                                                                                monitor(false)
+//{
+//};
+
 OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,NormalizedSystem& max_fa_y_cst_sys, Ctc& x_ctc,Ctc& xy_ctc,
-		double prec_x,double prec_y,double goal_rel_prec,double fa_cst_prec):
+                double prec_x,double prec_y,double goal_rel_prec,double fa_cst_prec):
                                                 Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb_opt(), *new CellCostFmaxub_opt()),
-    								prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
+                                                                prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
                                                                 x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
-                                                                x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
+                                                                x_ctc(x_ctc),x_sys(x_sys),
+                                                                lsolve(xy_sys,xy_ctc,NULL),
                                                                 bsc(new LargestFirst()),
                                                                 prec_y(prec_y),
                                                                 iter(default_iter),
@@ -64,8 +105,9 @@ OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,Normal
                                                                 min_perc_coef(default_min_perc_coef),
                                                                 critpr(default_prob_heap),
                                                                 list_elem_absolute_max(default_list_elem_absolute_max),
+                                                                local_iter(default_local_iter),
     								prec_fa_y(fa_cst_prec),
-                                                                fa_lsolve(max_fa_y_cst_sys,xy_ctc,true), // construct light solver for for all y cst with fake contractor, contractor useless since no constraint on xy only the objective function matter
+                                                                fa_lsolve(max_fa_y_cst_sys,xy_ctc,NULL,true), // construct light solver for for all y cst with fake contractor, contractor useless since no constraint on xy only the objective function matter
                                                                 fa_y_cst(true),
                                                                 y_box_init_fa(max_fa_y_cst_sys.box.subvector(x_sys.nb_var, max_fa_y_cst_sys.nb_var-1)),
                                                                 iter_csp(default_iter_csp),
@@ -73,9 +115,65 @@ OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,Normal
                                                                 min_perc_coef_csp(default_min_perc_coef_csp),
                                                                 critpr_csp(default_prob_heap_csp),
                                                                 list_elem_absolute_max_csp(default_list_elem_absolute_max_csp),
+                                                                local_iter_csp(default_local_iter_csp),
                                                                 monitor(false)
 {
+        Array<const ExprNode> args(xy_sys.goal->nb_arg());
+        Array<const ExprSymbol> var;
+        for(int i = 0;i<xy_sys.goal->nb_arg();i++) {
+            const ExprSymbol& a = ExprSymbol::new_(xy_sys.goal->arg(i).dim);
+            var.add(a);
+            args.set_ref(i,a);
+        }
+        minus_goal = new Function(var,-(*xy_sys.goal)(args));
+
+        Array<const ExprNode> args_csp(max_fa_y_cst_sys.goal->nb_arg());
+        Array<const ExprSymbol> var_csp;
+        for(int i = 0;i<max_fa_y_cst_sys.goal->nb_arg();i++) {
+            const ExprSymbol& a = ExprSymbol::new_(max_fa_y_cst_sys.goal->arg(i).dim);
+            var_csp.add(a);
+            args_csp.set_ref(i,a);
+        }
+
+        minus_goal_csp = new Function(var_csp,-(*max_fa_y_cst_sys.goal)(args_csp));
+
+        local_search = new UnconstrainedLocalSearch(*minus_goal,IntervalVector(1));
+        lsolve.local_solver = local_search;
+
+        local_search_csp = new UnconstrainedLocalSearch(*minus_goal_csp,IntervalVector(1));
+        fa_lsolve.local_solver = local_search_csp;
+
 };
+
+//OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys,NormalizedSystem& max_fa_y_cst_sys, Ctc& x_ctc,Ctc& xy_ctc,
+//                double prec_x,double prec_y,double goal_rel_prec,double fa_cst_prec,Function& max_goal,Function& max_goal_fa):
+//                                                Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb_opt(), *new CellCostFmaxub_opt()),
+//                                                                prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
+//                                                                x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
+//                                                                x_ctc(x_ctc),x_sys(x_sys),
+//                                                                lsolve(xy_sys,xy_ctc,UnconstrainedLocalSearch(max_goal,IntervalVector(1))),
+//                                                                bsc(new LargestFirst()),
+//                                                                prec_y(prec_y),
+//                                                                iter(default_iter),
+//                                                                list_rate(default_list_rate),
+//                                                                min_perc_coef(default_min_perc_coef),
+//                                                                critpr(default_prob_heap),
+//                                                                list_elem_absolute_max(default_list_elem_absolute_max),
+//                                                                local_iter(default_local_iter),
+//                                                                prec_fa_y(fa_cst_prec),
+//                                                                fa_lsolve(max_fa_y_cst_sys,xy_ctc,UnconstrainedLocalSearch(max_goal_fa,IntervalVector(1)),true), // construct light solver for for all y cst with fake contractor, contractor useless since no constraint on xy only the objective function matter
+//                                                                fa_y_cst(true),
+//                                                                y_box_init_fa(max_fa_y_cst_sys.box.subvector(x_sys.nb_var, max_fa_y_cst_sys.nb_var-1)),
+//                                                                iter_csp(default_iter_csp),
+//                                                                list_rate_csp(default_list_rate_csp),
+//                                                                min_perc_coef_csp(default_min_perc_coef_csp),
+//                                                                critpr_csp(default_prob_heap_csp),
+//                                                                list_elem_absolute_max_csp(default_list_elem_absolute_max_csp),
+//                                                                local_iter_csp(default_local_iter_csp),
+//                                                                monitor(false)
+//{
+//};
+
 
 OptimMinMax::~OptimMinMax() {
 	buffer->flush();
@@ -83,6 +181,10 @@ OptimMinMax::~OptimMinMax() {
 	delete &(buffer->cost2());
 	delete buffer;
 	delete bsc;
+        delete minus_goal;
+        delete minus_goal_csp;
+        delete local_search;
+        delete local_search_csp;
 }
 
 Optim::Status OptimMinMax::optimize() {
@@ -108,11 +210,17 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 	Cell * root = new Cell(x_box_init);
 	bsc->add_backtrackable(*root);
         lsolve.add_backtrackable(*root,y_box_init,critpr);
-	buffer->cost1().add_backtrackable(*root);
+        buffer->cost1().add_backtrackable(*root);
         buffer->cost2().add_backtrackable(*root);
 
-        if(fa_y_cst)
+        if(fa_y_cst) {
             fa_lsolve.add_backtrackable(*root,y_box_init_fa,critpr_csp);
+        }
+
+        //************* set local search solver param *********
+        lsolve.local_search_iter = local_iter;
+        cout<<"local_search_iter: "<<local_iter<<endl;
+        fa_lsolve.local_search_iter = local_iter_csp;
 
 
 	//****** x_heap initialization ********
@@ -150,6 +258,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
                             DataMinMax * data_x = &(c->get<DataMinMaxOpti>());
                             nbel_count -= data_x->y_heap->size();
                         }
+
 
 			try {
 				pair<Cell*,Cell*> new_cells=bsc->bisect_cell(*c);
@@ -248,6 +357,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
         DataMinMaxOpti * data_x = &(x_cell->get<DataMinMaxOpti>());
+//        cout<<"handle cell of box: "<<x_cell->box<<endl<<"and of fmax: "<<data_x->fmax<<endl;
 
 	// ATTENTION CECI EST FAUX !!!!!
 	//double ymax;
@@ -287,7 +397,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 //        cout<<" evaluation of objectif... "<<endl;
 
 	//************ evaluation of f(x,y_heap) *****************
-	lsolve.prec_y = compute_min_prec(x_cell->box);
+        lsolve.prec_y = compute_min_prec(x_cell->box);
         lsolve.nb_iter = choose_nbiter(false,false);
         lsolve.list_elem_max = compute_heap_max_size(data_x->y_heap->size(),false);
 //        CellCostmaxFmaxub cost;
@@ -295,7 +405,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 //        DataMinMax *data_opt_x = &(x_cell->get<DataMinMax>());
 //        cout<<"fmax from DataMinMax cast: "<<data_opt_x->fmax<<endl;
 	// compute
-//                cout<<"run light optim"<<endl;
+//                cout<<"run light optim with box: "<<x_cell->box<<endl;
 	bool res =lsolve.optimize(x_cell,loup);
 //                cout<<"light optim result: "<<data_x->fmax<< endl;
 	//std::cout<<" apres res="<<res<<" bound= "<<data_x->fmax <<std::endl;
@@ -317,30 +427,32 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
         if(found_feas_pt)    { // we found a feasible point
 
 //                cout<<endl<<"**************"<<endl;
-//                                cout<<"try mid point "<<midp<<", init fmax: "<<x_copy->get<DataMinMaxOpti>().fmax<<endl;
+//                                cout<<"try mid point "<<x_cell->box.mid()<<", init fmax: "<<x_copy->get<DataMinMaxOpti>().fmax<<endl;
                 lsolve.nb_iter = choose_nbiter(true,false);
-		lsolve.prec_y = prec_y;
-		lsolve.list_elem_max = 0; // no limit on heap size
+                lsolve.prec_y = prec_y;
+                lsolve.list_elem_max = 0; // no limit on heap size
                 bool res1 = lsolve.optimize(x_copy,loup); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
 //                cout<<"res1: "<<res1<<endl;
-//                                cout<<"res midp eval: "<<x_copy->get<DataMinMaxOpti>().fmax<<endl;
-		if (res1) {
+
+
+                if (res1) {
+//                    cout<<"res midp eval: "<<x_copy->get<DataMinMaxOpti>().fmax<<endl;
                         double new_loup = x_copy->get<DataMinMaxOpti>().fmax.ub();
 
-			//data_x->fmax &= Interval(NEG_INFINITY,new_loup);
+                        //data_x->fmax &= Interval(NEG_INFINITY,new_loup);
 
-			if(new_loup<loup) { // update best current solution
-				//cout<<"worst case over Y: "<<x_copy->get<DataMinMax>().y_heap->top1()->box<<endl;
-				loup = new_loup;
-				loup_changed = true;
+                        if(new_loup<loup) { // update best current solution
+                                //cout<<"worst case over Y: "<<x_copy->get<DataMinMax>().y_heap->top1()->box<<endl;
+                                loup = new_loup;
+                                loup_changed = true;
                                 loup_point = (x_copy->box.mid());
 
-				if (trace) cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
-				//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
+                                if (trace) cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+                                //cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
                         }
                         delete x_copy; // delete copy of the heap, no more use and it was not delete in light optim since res1 = 1
-		}
-	}
+                }
+        }
 //        else // need to delete x_copy
 //            delete x_copy;
 //        cout<<"done"<<endl;
@@ -348,17 +460,17 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 	//***** if x_cell is too small ******************
 	if(x_cell->box.max_diam()<prec) {
-            cout<<"Min prec, box: "<<x_cell->box<<endl;
+//            cout<<"Min prec, box: "<<x_cell->box<<endl;
             int ctr_ok = 2;
             if(fa_y_cst) { // go min precision on csp problem
                 ctr_ok= check_constraints(x_cell, true);
 //                cout<<" ctr ok = "<<ctr_ok<<endl;
                 if(ctr_ok == 0) {
-                    cout<<"fa ctr not respected"<<endl;
+//                    cout<<"fa ctr not respected"<<endl;
                 }
                 else {
                     DataMinMaxCsp * data_csp = &(x_cell->get<DataMinMaxCsp>());
-                    cout<<"Min prec, fa ctr eval: "<<data_csp->fmax<<endl;
+//                    cout<<"Min prec, fa ctr eval: "<<data_csp->fmax<<endl;
                 }
 
             }
@@ -372,7 +484,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 //                cout<<"fmax min prec: "<<data_x->fmax<<endl;
 
 		if(res){
-			update_uplo_of_epsboxes(data_x->fmax.lb());
+                        update_uplo_of_epsboxes(data_x->fmax.lb());
 			delete x_cell;
 		}
             }
@@ -397,7 +509,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 	if (trace && (nb_cells%trace_freq==0)) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  loup=" << loup << ",  uplo= " <<  uplo<< endl;
 
-	//std::cout<<" fin "<<data_x->fmax <<std::endl;
+//        std::cout<<" fin "<<data_x->fmax <<std::endl;
 //        cout<<"done, exit handle_cell()"<<endl;
 	return true;
 }
@@ -408,10 +520,12 @@ double OptimMinMax::compute_min_prec( const IntervalVector& x_box) {
 	if(min_perc_coef == 0)
 		return prec_y;
 
-	double ratio = 0;
-	for(int r=0;r<x_box_init.size();r++)
-		ratio += (x_box_init[r]).diam()/(x_box[r]).diam();
-	return ratio/y_box_init.volume()>prec_y?ratio/(10*y_box_init.volume()):prec_y;
+        double ratio = 0;
+        for(int r=0;r<x_box_init.size();r++)
+                ratio += (x_box_init[r]).diam()/(x_box[r]).diam();
+        ratio/=x_box.size();
+        double new_prec = y_box_init.max_diam()*ratio/min_perc_coef;
+        return new_prec>prec_y?new_prec:prec_y;
 }
 
 int OptimMinMax::choose_nbiter(bool midpoint_eval,bool csp) {

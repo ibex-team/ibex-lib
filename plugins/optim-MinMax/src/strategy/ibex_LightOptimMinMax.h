@@ -21,6 +21,7 @@
 #include <fstream>
 #include <string>
 #include "ibex_CtcIdentity.h"
+#include "ibex_UnconstrainedLocalSearch.h"
 
 namespace ibex {
 
@@ -30,7 +31,7 @@ class LightOptimMinMax {
 public:
 
     /* Constructor*/
-    LightOptimMinMax(NormalizedSystem& y_sys,Ctc& ctc_xy,bool csp_actif = false);
+    LightOptimMinMax(NormalizedSystem& y_sys,Ctc& ctc_xy,UnconstrainedLocalSearch* local_solver,bool csp_actif = false);
 
     /* Constructor*/
 //    LightOptimMinMax(NormalizedSystem& y_sys);
@@ -66,11 +67,13 @@ public:
     int nb_iter;
     double prec_y;
     bool monitor;
+    int local_search_iter;
     NormalizedSystem& xy_sys; // contains constraints on x and y
 
 private:
+    friend class OptimMinMax;
     Ctc& ctc_xy; //contractor for constraints on xy
-
+    UnconstrainedLocalSearch *local_solver;
     //double abs_min_prec; // absolute minimum prec bissection on y
     Bsc* bsc; // bissector
     std::vector<Cell*> heap_save;
@@ -104,6 +107,12 @@ private:
 
     bool handle_constraint(OptimData  *data_y, IntervalVector& xy_box,IntervalVector& y_box);
 
+    /* run local search algorithm for a particular x and maximizes over y to provide y_max a local maximum. Objectif function is then evaluate at (xbox,max_y) to try to provide a better lower bound.
+     * Inputs: x_box: current x box, xy_box: box after contraction w.r.t contraction, loup: current lower upper.
+     */
+
+    double local_search_process(const IntervalVector& x_box,const IntervalVector & xy_box,double loup);
+
     /* returns a box composed of x_box(not modified) and the middle of y_box, needed for midpoint evaluation
      * Inputs: -xy_box: whole box
      *         -y_box: y box to get the middle
@@ -127,6 +136,7 @@ private:
         static const double default_prec_y;
         static const double default_list_elem_max;
         static const int default_nb_iter;
+        static const int default_local_search_iter;
 
 
 };
