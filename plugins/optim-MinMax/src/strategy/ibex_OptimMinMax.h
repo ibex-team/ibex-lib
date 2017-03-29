@@ -105,8 +105,12 @@ public:
     int critpr_csp; // probability to choose second heap in light_solver
     int local_iter_csp; // number of local solver run
 
+    bool only_csp; // solve a csp problem, no objective function.
+
 
     bool monitor; // create log file if true
+    bool monitor_csp; // create a "paver.txt" file that contains boxes plus a value which indicates whether constraints are respected or not
+    // each line of paver.txt corresponds to: x[0].lb x[0].ub x[1].lb ... x[n].ub val, val=0 -> constraint not respected, val=1 -> maybe, val=2 -> constraint respected
 
 private:
 
@@ -121,7 +125,7 @@ private:
     UnconstrainedLocalSearch * local_search;
     UnconstrainedLocalSearch * local_search_csp;
 
-    double compute_min_prec( const IntervalVector& x_box);
+    double compute_min_prec( const IntervalVector& x_box,bool csp);
     int choose_nbiter(bool midpoint_eval,bool csp);
     int compute_heap_max_size(int y_heap_size,bool csp);
     bool get_feasible_point(Cell * elem);

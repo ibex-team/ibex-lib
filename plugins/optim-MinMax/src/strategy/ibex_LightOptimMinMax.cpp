@@ -19,7 +19,7 @@ using namespace std;
 namespace ibex{
 
 const double LightOptimMinMax::default_timeout = 60;
-const double LightOptimMinMax::default_prec_y = 1.e-6;
+const double LightOptimMinMax::default_prec_y = 1.e-2;
 const double LightOptimMinMax::default_list_elem_max = 1000;
 const int LightOptimMinMax::default_nb_iter = 1000;
 const int LightOptimMinMax::default_local_search_iter = 0;
@@ -42,6 +42,7 @@ LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy,Unconstr
 
 LightOptimMinMax::~LightOptimMinMax() {
 	delete bsc;
+        delete local_solver;
 }
 
 void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_init,int critpr) {
@@ -353,7 +354,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup) {
 
         if(data_y->pu == 1) {
                 IntervalVector xy_box_mem(xy_box);
-                xy_sys.goal->backward(Interval(NEG_INFINITY,loup),xy_box);
+//                xy_sys.goal->backward(Interval(NEG_INFINITY,loup),xy_box);
 
                 if(xy_box.is_empty()) {
                         delete y_cell;
