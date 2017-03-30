@@ -1,8 +1,8 @@
---- gaol-4.2.0/Makefile.am	2016-11-02 18:05:57.775496711 +0100
-+++ gaol-4.2.0/Makefile.am	2016-11-02 18:06:07.811889038 +0100
-@@ -23,8 +23,8 @@
- #------------------------------------------------------------------------------
- 
+--- gaol-4.2.0/Makefile.in	2016-12-01 14:13:36.915562360 +0100
++++ gaol-4.2.0/Makefile.in	2016-12-01 14:13:45.355870019 +0100
+@@ -353,8 +353,8 @@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
  EXTRA_DIST = BUGS msvc examples
 -SUBDIRS = gdtoa gaol check gdtoa/test
 -DIST_SUBDIRS = gdtoa gaol check doc gdtoa/test
@@ -11,33 +11,6 @@
  ACLOCAL_AMFLAGS = -I m4
  
  # Requires automake 1.4
---- gaol-4.2.0/configure.ac	2016-11-02 16:49:23.515135709 +0100
-+++ gaol-4.2.0/configure.ac	2016-11-02 16:49:55.120391000 +0100
-@@ -333,6 +333,7 @@
- # Determines the kind of architecture to use
- AC_CANONICAL_HOST
- 
-+AC_MSG_WARN([$host])
- case $host in
- i?86-*-linux*)
- 	AC_DEFINE(IX86_LINUX,1,
-@@ -351,6 +352,16 @@
-           [Define this if your system is a cygwin-based ix86 or compatible])
- 	AM_CONDITIONAL([IS_CYGWIN_COND],[true])
- 	;;
-+*-*-msys*)
-+	AC_DEFINE(IX86_LINUX,1,
-+          [Define this if your system is a Linux-based ix86 or compatible])
-+	AM_CONDITIONAL([IS_CYGWIN_COND],[false])
-+	;;
-+*-*-mingw*)
-+	AC_DEFINE(IX86_LINUX,1,
-+          [Define this if your system is a Linux-based ix86 or compatible])
-+	AM_CONDITIONAL([IS_CYGWIN_COND],[false])
-+	;;
- i?86-apple-*)
- 	AC_DEFINE(IX86_MACOSX,1,
-           [Define this if your system is a Linux-based ix86 or compatible])
 --- gaol-4.2.0/gdtoa/gdtoa.h	2016-11-02 17:41:31.922173915 +0100
 +++ gaol-4.2.0/gdtoa/gdtoa.h	2016-11-02 17:42:24.568240369 +0100
 @@ -117,7 +117,7 @@
@@ -146,16 +119,3 @@
  
  const size_t MAX = 1000000;
  const size_t LOOPS = 10;
---- gaol-4.2.0/Makefile.in	2016-12-01 14:13:36.915562360 +0100
-+++ gaol-4.2.0/Makefile.in	2016-12-01 14:13:45.355870019 +0100
-@@ -353,8 +353,8 @@
- top_builddir = @top_builddir@
- top_srcdir = @top_srcdir@
- EXTRA_DIST = BUGS msvc examples
--SUBDIRS = gdtoa gaol check gdtoa/test
--DIST_SUBDIRS = gdtoa gaol check doc gdtoa/test
-+SUBDIRS = gdtoa gaol gdtoa/test
-+DIST_SUBDIRS = gdtoa gaol doc gdtoa/test
- ACLOCAL_AMFLAGS = -I m4
- 
- # Requires automake 1.4
