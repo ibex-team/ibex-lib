@@ -108,7 +108,7 @@ def configure (conf):
 		flags += " -fmessage-length=0"
 		conf.define ("DEBUG", 1)
 	else:
-		flags = ""#"-O3"
+		flags = "-O3"
 		conf.define ("NDEBUG", 1)
 	for f in flags.split():
 		conf.check_cxx(cxxflags=f, use="IBEX", mandatory=False, uselib_store="IBEX")
