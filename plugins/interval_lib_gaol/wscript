@@ -121,6 +121,10 @@ def configure (conf):
 		if Utils.is_win32:
 			args = "--with-mathlib-include=%s" % ibexutils.convert_path_win2msys (mathlib_include)
 			args += " --with-mathlib-lib=%s" % ibexutils.convert_path_win2msys (mathlib_lib)
+			# On windows, we disable SSE instructions (it can generate failures during
+			# execution). You can enable SSE instructions by deleting the next line,
+			# do it at your own risk.
+			args += " --disable-simd"
 		else:
 			args = "--with-mathlib-include=%s" % mathlib_include
 			args += " --with-mathlib-lib=%s" % mathlib_lib
