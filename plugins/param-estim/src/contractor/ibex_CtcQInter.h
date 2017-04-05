@@ -86,7 +86,7 @@ public:
 	int varbiss;
         
 	list<int>* points;  // the list of current compatible measurements : initialized to all measures and managed by solver when the QInter constraint is used in a parameter estimation solver.
-	
+
         bool points_to_delete;  //to manage shared pointer  points
 
 	virtual IntervalVector randomvalidpoint(IntervalVector& box);

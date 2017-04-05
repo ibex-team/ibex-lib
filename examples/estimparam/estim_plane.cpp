@@ -513,9 +513,9 @@ int main(int argc, char** argv) {
 	      //	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERCORE,K);
 	    else
 	      ctcq= new  
-		//CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
+		CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
 		//    	    CtcQInterPlane (n,m_ctc1,linfun,epseq,Q,QINTERCORE,K);	    
-		CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERFULL, K);
+		//		CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERFULL, K);
 
 	    CtcCompo ctcqf0 (*ctc0,*ctcq);
 	    //	    Ctc3BCid cid(*ctcq,10,1,3);
@@ -564,7 +564,7 @@ int main(int argc, char** argv) {
 	    SolverQInter s(*ctcs,*bs,buff,*ctcq);
 
 	    //	    Solver s(ctcqf0,*bs,buff);
-	    ctcq->disable_side_effects();
+	    //	    ctcq->disable_side_effects();
 	    //	    ctcqf0.disable_side_effects();
 	    s.time_limit = 1000;
 	    s.trace=0;

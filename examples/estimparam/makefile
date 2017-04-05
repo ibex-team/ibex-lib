@@ -5,11 +5,11 @@ CXXFLAGS := $(shell pkg-config --cflags ibex)
 LIBS	 := $(shell pkg-config --libs  ibex)
 
 ifeq ($(DEBUG), yes)#
-#CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math -m32
-CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math
+CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math -m32
+#CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math
 else
-#CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-deprecated -frounding-math -m32
-CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-deprecated -frounding-math 
+CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-deprecated -frounding-math -m32
+#CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-deprecated -frounding-math 
 endif
 
 all: $(BINS)

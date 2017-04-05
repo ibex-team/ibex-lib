@@ -87,11 +87,17 @@ namespace ibex {
     valstack = new int [measure_nb+1];
     for (int i=0; i< measure_nb+1; i++)
       valstack[i]=0;
+    points0=*(ctcq.points);
+    points1=points0;
   }
  
-  /* the backtrackable  list of active points is put from the cell into the qinter constraint : shared pointer */
+  /* the list of active points is a pointer to points1 for the first cell and to points2 for the second cell */
+
   void SolverOptQInter::manage_cell_info(Cell& c) {
-    ctcq.points=c.get<QInterPoints>().points;
+    if (second_cell)   
+      ctcq.points=&points2;
+    else 
+      ctcq.points=&points1;
     ctcq.qmax=c.get<QInterPoints>().qmax;
     ctcq.varbiss=c.get<BisectedVar>().var;  //useless ??
     valstack[ctcq.qmax]--;  // number of cells in stack with ctcq.qmax
@@ -107,7 +113,6 @@ namespace ibex {
   void SolverOptQInter::update_cell_info(Cell& c){
     //    c.var_biss= ctcq.var_biss;
     c.get<QInterPoints>().qmax=ctcq.qmax;
-    c.get<QInterPoints>().points=ctcq.points;
   }
 
   void SolverOptQInter::update_buffer_info (Cell& c) {
@@ -115,7 +120,7 @@ namespace ibex {
   }
   
   void SolverOptQInter::precontract(Cell& c) {
-    //    cout << "qmax " << c.get<QInterPoints>().qmax  << endl;
+    //    cout << "qmax avant contract " << c.get<QInterPoints>().qmax  << "  " << ctcq.qmax <<  endl;
     if (c.get<QInterPoints>().qmax < ctcq.q) {c.box.set_empty();}
     manage_cell_info(c);
     ctc.enable_side_effects();
@@ -124,6 +129,7 @@ namespace ibex {
   }
 
   void SolverOptQInter::postcontract(Cell& c) {
+    //    cout << "qmax apres contract " << c.get<QInterPoints>().qmax  << "  " << ctcq.qmax <<  endl;
     update_cell_info(c);
     ctcq.disable_side_effects();
     ctc.disable_side_effects();
@@ -132,11 +138,41 @@ namespace ibex {
 
   
     
-  /* push cells with an oracle : one tries to follow it, 
+ 
+ Cell* SolverOptQInter::pop_cell() 
+   { if (optimbuffer==1){
+       Cell* c = buffer.top();
+       points1 = c->get<QInterPoints>().points;
+       points2 = c->get<QInterPoints>().points;
+     }
+     else{
+       points1=points0;
+       points2=points0;
+     }
+     return buffer.pop();
+   }
+   
+
+  void SolverOptQInter::push_cell(Cell&c1){
+    if (!(c1.box.is_empty())) {
+      if (optimbuffer==1){  // DFS / one stores the possible points in the cell.
+	c1.get<QInterPoints>().points=*ctcq.points;
+      }
+      buffer.push(&c1);
+    }
+  }
+
+
+ /* push cells with an oracle : one tries to follow it, 
      the cell containing the oracle is pushed on the top of the queue */
   
-  
   void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
+    if (optimbuffer==1){  // DFS / one stores the possible points in the cell.
+      if (!(c1.box.is_empty())) {c1.get<QInterPoints>().points=points1;}
+      if (!(c2.box.is_empty())) {c2.get<QInterPoints>().points=points2;}
+    }
+
+
     if (with_oracle && !(c1.box.is_empty())&& c1.box.contains(oracle))
       {
 	if  (!(c2.box.is_empty())) buffer.push(&c2);
@@ -404,7 +440,7 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
 
     QInterPoints* qinterpoints=&root->get<QInterPoints>();
 
-    qinterpoints->points= ctcq.points; 
+    //    qinterpoints->points= ctcq.points; 
     cout << " point size " << ctcq.points->size() << endl;
     qinterpoints->qmax=ctcq.points->size();
     Vector* mid = new Vector(init_box.mid());
@@ -484,7 +520,7 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
       }
 
     cout << " max possible inliers in open nodes ";
-    if (optimbuffer==2 && !(buffer.empty()))
+    if (optimbuffer==2 && !(buffer.empty()))  // qmax managed by bfs and beamsearch
       cout << buffer.top()->get<QInterPoints>().qmax << endl;
     else 
     cout <<  possin << endl;
@@ -938,43 +974,52 @@ Vector SolverOptConstrainedQInter::newvalidpoint (Cell & c){
    }
 
    Cell* SolverOptBSConstrainedQInter::pop_cell() 
-   { if (!(stackbuffer->empty()))
-        return stackbuffer->pop();
-     else
-       return buffer.pop();
+   { if (!(stackbuffer->empty())){
+       Cell* c = stackbuffer->top();
+       points1 = c->get<QInterPoints>().points;
+       points2 = c->get<QInterPoints>().points;
+       return stackbuffer->pop();}
+     else{
+       points1=points0;
+       points2=points0;
+       return buffer.pop();}
    }
+
+
+
+ 
 
 void SolverOptBSConstrainedQInter::push_cells(Cell&c1, Cell& c2){
   
   if (with_oracle && (!(c1.box.is_empty())&& c1.box.contains(oracle)))
       {
 	if  (!(c2.box.is_empty())) buffer.push(&c2);
-	stackbuffer->push(&c1);}
+        c1.get<QInterPoints>().points=points1; stackbuffer->push(&c1);}
     else if 
       (with_oracle &&(!(c2.box.is_empty())&& c2.box.contains(oracle)))
       {
 	if (!(c1.box.is_empty())) buffer.push(&c1);
-	stackbuffer->push(&c2);}
+	c2.get<QInterPoints>().points=points2;stackbuffer->push(&c2);}
 
     else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
       {
 	int val1= validate_value (c1);
 	int val2= validate_value (c2);
-	if (val1 >= val2) {stackbuffer->push(&c1); buffer.push(&c2);}
-	else  {stackbuffer->push(&c2); buffer.push(&c1);}
+	if (val1 >= val2) {c1.get<QInterPoints>().points=points1; stackbuffer->push(&c1); buffer.push(&c2);}
+	else  {c2.get<QInterPoints>().points=points2; stackbuffer->push(&c2); buffer.push(&c1);}
       }
 	  
   
 
-    else if (!(c1.box.is_empty())) stackbuffer->push(&c1);
-    else if (!(c2.box.is_empty())) stackbuffer->push(&c2);
-  }
+    else if (!(c1.box.is_empty())) {c1.get<QInterPoints>().points=points1;stackbuffer->push(&c1);}
+    else if (!(c2.box.is_empty())) {c2.get<QInterPoints>().points=points2;stackbuffer->push(&c2);}
+}
   
   bool SolverOptBSConstrainedQInter::empty_buffer () {return (buffer.empty() && stackbuffer->empty());}
 
   SolverOptBSConstrainedQInter::~SolverOptBSConstrainedQInter() {delete stackbuffer;}
 
-
+  
 } // end namespace ibex
 
 

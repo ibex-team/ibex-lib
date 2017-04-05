@@ -733,7 +733,7 @@ fundmat[7]= -0.20883359402083 ;
 	//CtcCompo ctcqf0(*cdet,  ctcq);
 	CtcFixPoint ctcf(ctcqf0,0.2);
 
-	cout << " solution ransac " <<  ctcq.activepoints_count(vec) << endl;
+	//	cout << " solution ransac " <<  ctcq.activepoints_count(vec) << endl;
 
 	
 	cout << " avant solver " << endl;

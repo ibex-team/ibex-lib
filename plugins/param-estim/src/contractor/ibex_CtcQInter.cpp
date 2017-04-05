@@ -46,10 +46,20 @@ namespace ibex {
 
 void CtcQInter::init ()
   {
+    cout << " debut init " << endl;
     points= new list<int> (); 
 
     boxes= new IntervalMatrix(nb_obs,nb_var);
+    /*
+    points0.clear();
+    for(int i=0;i<nb_obs;i++) {points0.push_back(i);}
+    cout << "nb_obs " << points0.size();
+    points1=points0;
+    cout << "  points 1 " << points1.size() << endl;
+    points=&points1;
+    */
     for(int i=0;i<nb_obs;i++) {points->push_back(i);}
+    cout << " points " << points-> size() << endl;
     _side_effects=false;
     points_to_delete=true;
     qmax=nb_obs;
@@ -61,7 +71,7 @@ void CtcQInter::init ()
   CtcQInter::~CtcQInter()
    {
      //    cout << " points to delete " << points_to_delete << endl;
-     if (points_to_delete) {points->clear(); delete points;}
+     //     if (points_to_delete) {points->clear(); delete points;}
      delete boxes;
    }
 
@@ -176,6 +186,7 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
  int CtcQInter::activepoints_contract_count(IntervalVector& box){
     int p=0;
     list<int>::iterator iter = points->begin() ;
+    //    cout << " point size " << points->size() << endl;
     //    cout << " box  contract count " << box << endl;
     while (iter != points->end()){
       IntervalVector box1=box;
@@ -344,7 +355,7 @@ int  CtcQInter::ctc_contract(IntervalVector& box)
   box_maxdiam=max_diam_threshold(box);
   //   box_maxdiam=0;
    list<int>::iterator iter = points->begin() ;
-   // cout << " nb points  " << points->size() <<  " box max diam " << box_maxdiam << endl;
+   //   cout << " nb points  " << points->size() <<  " box max diam " << box_maxdiam << endl;
   while (iter != points->end())
     
     { 

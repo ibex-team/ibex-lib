@@ -16,7 +16,7 @@
 #include "ibex_Cell.h"
 #include "ibex_CellBuffer.h"
 #include "ibex_CtcQInter.h"
-#include "ibex_QInterPoints.h"
+#include "ibex_QInterPointsL.h"
 #include "ibex_ValidPoint.h"
 
 

@@ -46,8 +46,8 @@ namespace ibex {
  
   /* the backtrackable  list of active points is put from the cell into the qinter constraint : shared pointer */
   void SolverQInter::manage_cell_info(Cell& c) {
-    ctcq.points=c.get<QInterPoints>().points;
-    ctcq.qmax=c.get<QInterPoints>().qmax;
+    ctcq.points= c.get<QInterPointsL>().points;
+    ctcq.qmax=c.get<QInterPointsL>().qmax;
     ctcq.varbiss=c.get<BisectedVar>().var;  //useless ??
     valstack[ctcq.qmax]--;  // number of cells in stack with ctcq.qmax
   }
@@ -62,11 +62,11 @@ namespace ibex {
 
   void SolverQInter::update_cell_info(Cell& c){
     //    c.var_biss= ctcq.var_biss;
-    c.get<QInterPoints>().qmax=ctcq.qmax;
+    c.get<QInterPointsL>().qmax=ctcq.qmax;
   }
 
   void SolverQInter::update_buffer_info (Cell& c) {
-    valstack[c.get<QInterPoints>().qmax]+=2;
+    valstack[c.get<QInterPointsL>().qmax]+=2;
   }
   
   void SolverQInter::precontract(Cell& c) {
@@ -291,9 +291,9 @@ void SolverQInter::other_checks(Cell& c){
   Cell* SolverQInter::root_cell(const IntervalVector& init_box) 
   { // cout << " debut root cell " << endl;
     Cell* root= new Cell(init_box) ; 
-    root->add<QInterPoints>();
+    root->add<QInterPointsL>();
     root->add<ValidPoint>();
-    QInterPoints* qinterpoints=&root->get<QInterPoints>();
+    QInterPointsL* qinterpoints=&root->get<QInterPointsL>();
     ValidPoint* validpoint=&root->get<ValidPoint>();
     //    cout << " fin validpoint " << endl;
     qinterpoints->points= ctcq.points; 
@@ -302,7 +302,7 @@ void SolverQInter::other_checks(Cell& c){
     Vector* mid = new Vector(init_box.mid());
     validpoint->point= mid;
     validpoint->validpoints_number=0;
-    ctcq.points_to_delete= false;  // ctcq.points will be deleted by the QInterPoints destructor.
+    ctcq.points_to_delete= false;  // ctcq.points will be deleted by the QInterPointsL destructor.
     initbox=init_box;
     //    cout << " fin root cell " << endl;
     return root;}

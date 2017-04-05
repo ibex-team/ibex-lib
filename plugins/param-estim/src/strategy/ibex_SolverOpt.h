@@ -124,7 +124,7 @@ public:
 
 
 protected :
-
+	int second_cell;
         std::pair<Cell*,Cell*> 	bisect(Cell& c, IntervalVector& box1, IntervalVector& box2);
 	virtual Cell* root_cell(const IntervalVector& box);
         virtual int validate_value(Cell & cell);
@@ -141,6 +141,7 @@ protected :
 	virtual void init_buffer_info(Cell& c) {};
 	virtual void update_buffer_info(Cell & c) {};
 	virtual void push_cells(Cell&c1, Cell& c2);
+	virtual void push_cell(Cell&c1);
 	virtual Cell* pop_cell();
 	virtual Cell* top_cell();
 	virtual bool empty_buffer();

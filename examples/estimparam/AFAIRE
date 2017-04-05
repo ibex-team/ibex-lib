@@ -64,3 +64,16 @@ pour que ça continue à tourner sans le plugin
 __________________________________________________________________________
 
 verifier les appels au simplexe 
+
+
+____________________________________________________________________________
+
+Supprimer  valstack[] (utile en DFS ?)
+
+
+_______________________________________________________________________
+
+commenter code estim_essentialmatnorm.cpp  : 3 systèmes 
+
+simplifier (retrait ce qui est inutile ?)
+

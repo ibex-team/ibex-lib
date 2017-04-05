@@ -258,9 +258,9 @@ namespace ibex {
 
 
 void CtcQInterAff::contract(IntervalVector& box) {
-  //   cout << " avant ctc_contract  "<< box << endl;
+  //cout << " avant ctc_contract  "<< box << endl;
   int p=ctc_contract(box);  // contraction of all the measurements in current box (depending on the pb : fwd or fwdbwd)
-  //  cout << " p " << p << endl;
+  //cout << " p " << p << endl;
   int gap=affine_threshold();
 
   if (box.is_empty()) return;

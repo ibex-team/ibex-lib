@@ -374,7 +374,7 @@ int main(int argc, char** argv) {
 	    proba[1]=0.33;
 	    proba[2]=0.34;
 	    CellStack buff;
-	    //CellHeapQInter buff;
+	    //	    CellHeapQInter buff;
 	    Bsc * bs;
 	    if (bisect=="rr")
 	      bs = new RoundRobin(prec, 0.5);
@@ -443,8 +443,8 @@ int main(int argc, char** argv) {
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
 
-	    SolverOptQInter s(*ctcs,*bs,buff,*ctcq,1);
-	    //	    SolverQInter s(*ctcs,*bs,buff,*ctcq,1);
+	    //	    SolverOptQInter s(*ctcs,*bs,buff,*ctcq,1);
+	    SolverQInter s(*ctcs,*bs,buff,*ctcq);
 	    //	    OptimQInter s(*ctcs,*bs,buff,*ctcq);
 		    //	    cout << "ctcq.qmax" << ctcq->qmax << endl;
 	    //OptimizerQInter s(*ctcs,*bs,buff,*ctcq);
@@ -452,7 +452,7 @@ int main(int argc, char** argv) {
 	    //Solver s(ctcqf0,bs,buff);
 	    s.time_limit = 1000;
 
-	    s.trace=1;
+	    s.trace=0;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
 	    s.bestsolpointnumber=Qoct;

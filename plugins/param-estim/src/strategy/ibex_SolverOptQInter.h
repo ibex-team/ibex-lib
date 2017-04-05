@@ -64,7 +64,9 @@ Qintersection contractors.
  
 
  protected :
-   
+   list<int> points0;
+   list <int> points1;
+   list <int> points2;
    IntervalVector initbox;
    int* valstack;   
    int optimbuffer;  // 1 dfs, 2 bfs
@@ -90,7 +92,8 @@ Qintersection contractors.
 
 
    void report_time_limit();
-
+   Cell* pop_cell();
+   void push_cell(Cell& c1);
    void push_cells(Cell& c1, Cell& c2);
    void push_cells_depth (Cell& c1, Cell& c2);
    void postsolution ();
@@ -127,6 +130,19 @@ a linear solver is used for finding a feasible point.
    NormalizedSystem normsys;
  };
 
+/**
+ * \ingroup strategy
+ *
+ * \brief  SolverBSOptConstrainedQInter.
+ *
+ * This class implements a branch and bound algorithm (beam search variant)
+ for the parameter estimation using the
+Qintersection contractors and other constraints.
+a linear solver is used for finding a feasible point.
+ */
+
+
+
  class SolverOptBSConstrainedQInter : public SolverOptConstrainedQInter {
  public:
    CellStack* stackbuffer;
@@ -134,6 +150,7 @@ a linear solver is used for finding a feasible point.
    ~SolverOptBSConstrainedQInter();
  protected :
    void push_cells(Cell& c1, Cell& c2);
+
    Cell* pop_cell();
    bool empty_buffer();
    Cell* top_cell();

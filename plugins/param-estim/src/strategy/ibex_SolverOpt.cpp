@@ -29,17 +29,20 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 
   void SolverOpt::start(const IntervalVector& init_box) {
 	buffer.flush();
-	
-	Cell* root= root_cell(init_box); 
+	cout << " avant init box" << endl;
 
+	Cell* root= root_cell(init_box); 
+	cout << " apres init box" << endl;
 	// add data required by this solver
 	root->add<BisectedVar>();
 
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);
+	second_cell=0;
+	cout << " avant handle cell" << endl;
 	handle_cell(*root);
-        if (!(root->box.is_empty()))	
-	  buffer.push(root);
+	cout << " apres handle cell" << endl;
+        push_cell(*root);
 	init_buffer_info(*root);
 
 	Timer::start();
@@ -67,10 +70,11 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
       impact.remove(v);
     else                              // root node : impact set to 0 for all variables after contraction
       impact.clear();
+    //    if (c.box.is_empty()) cout << " avant other checks : empty box " << endl;
     if (!(c.box.is_empty()))  other_checks(c);
-
+    //    if (c.box.is_empty()) cout << " avant validate : empty box " << endl;
     if (!(c.box.is_empty()))  validate(c);
-    //    if (c.box.is_empty())  cout << " empty box " << endl;
+    //    if (c.box.is_empty())  cout << " fin validate : empty box " << endl;
   }
 	  
 	  
@@ -78,6 +82,9 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
     if (! (c1.box.is_empty())) buffer.push(&c1);
     if (! (c2.box.is_empty())) buffer.push(&c2);
 
+  }
+  void SolverOpt::push_cell(Cell&c1){
+    if (! (c1.box.is_empty())) buffer.push(&c1);
   }
 
   Cell* SolverOpt::top_cell(){ return buffer.top();}
@@ -107,9 +114,11 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 			  pop_cell();
 
 			  Cell * c1= new_cells.first;
+			  second_cell=0;
 			  handle_cell(*c1);
 					
 			  Cell* c2= new_cells.second;
+			  second_cell=1;
 			  handle_cell(*c2);
 			  push_cells(*c1,*c2);
 			  if (c1->box.is_empty()) delete c1;
@@ -156,6 +165,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 vector<IntervalVector> SolverOpt::solve(const IntervalVector& init_box) {
 	vector<IntervalVector> sols;
 	start(init_box);
+	
 	while (next(sols)) { }
 	return sols;
 }

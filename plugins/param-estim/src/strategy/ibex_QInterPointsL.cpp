@@ -9,21 +9,32 @@
 //============================================================================
 
 
-#include "ibex_QInterPoints.h"
+#include "ibex_QInterPointsL.h"
 #include <stdlib.h>
 
 using namespace std;
 
-namespace ibex {
-pair<Backtrackable*,Backtrackable*> QInterPoints::down() {
-	return pair<Backtrackable*,Backtrackable*> (new QInterPoints(*this),new QInterPoints(*this));
-}
-  QInterPoints::QInterPoints() {;};
 
-  QInterPoints::~QInterPoints(){
+
+namespace ibex {
+pair<Backtrackable*,Backtrackable*> QInterPointsL::down() {
+	return pair<Backtrackable*,Backtrackable*> (new QInterPointsL(*this),new QInterPointsL(*this));
+}
+  QInterPointsL::QInterPointsL() {;};
+
+  QInterPointsL::~QInterPointsL(){
+    delete points;
   }
 
-  QInterPoints::QInterPoints (const QInterPoints& qp) {
+  QInterPointsL::QInterPointsL (const QInterPointsL& qp) {
+
+    list<int>::const_iterator iter = qp.points->begin() ;
+    points= new list<int> ();
+    while (iter != qp.points->end())
+      {points->push_back(*iter);
+      iter++;
+      }
+
     qmax=qp.qmax;
     depth=qp.depth+1;
   }
