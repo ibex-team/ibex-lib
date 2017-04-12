@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
 	
 	  if (pb==6)	for (int j=0; j< NP/2;j++) x->push_back(rand()%256);
 	}
-	srand(atoi(argv[8]));
+	srand(atoi(argv[10]));
 
 	//	cout << " nb points " << x->size() <<  " " << y->size() << " " << z->size() << endl;
 	//	for (int i=0; i< x->size(); i++) cout << (*x)[i] <<  " " << (*y)[i] << " " << (*z)[i] <<endl;
@@ -356,25 +356,27 @@ int main(int argc, char** argv) {
 	    // les precisions dans l'article soumis
 
 
-	    
+	    /*
 	    prec[0]=0.000007;
 	    prec[1]=0.000007;
 	    prec[2]=0.0007;
-	    
+	    */
 
 	    /*
 	    prec[0]=0.000001;
 	    prec[1]=0.000001;
 	    prec[2]=0.00001;
 	    */
-
+	    prec[0]=atof(argv[8]);
+	    prec[1]=atof(argv[8]);
+	    prec[2]=atof(argv[9]);
 
 	    Vector proba(3);
 	    proba[0]=0.33;
 	    proba[1]=0.33;
 	    proba[2]=0.34;
-	    CellStack buff;
-	    //	    CellHeapQInter buff;
+	    //	    CellStack buff;
+	    CellHeapQInter buff;
 	    Bsc * bs;
 	    if (bisect=="rr")
 	      bs = new RoundRobin(prec, 0.5);
@@ -444,7 +446,8 @@ int main(int argc, char** argv) {
 	    else ctcs=&ctcf;
 
 	    //	    SolverOptQInter s(*ctcs,*bs,buff,*ctcq,1);
-	    SolverQInter s(*ctcs,*bs,buff,*ctcq);
+	    SolverOptBSQInter s(*ctcs,*bs,buff,*ctcq);
+	    //SolverQInter s(*ctcs,*bs,buff,*ctcq);
 	    //	    OptimQInter s(*ctcs,*bs,buff,*ctcq);
 		    //	    cout << "ctcq.qmax" << ctcq->qmax << endl;
 	    //OptimizerQInter s(*ctcs,*bs,buff,*ctcq);
@@ -452,7 +455,7 @@ int main(int argc, char** argv) {
 	    //Solver s(ctcqf0,bs,buff);
 	    s.time_limit = 1000;
 
-	    s.trace=0;
+	    s.trace=1;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
 	    s.bestsolpointnumber=Qoct;
@@ -463,7 +466,7 @@ int main(int argc, char** argv) {
 
 
 	    cout << "Number of branches : " << s.nb_cells << endl;
-	    cout << "Number of solutions : " << res.size() << endl;
+
 	    nb_cells +=s.nb_cells;
 	    cputime += s.time;
             Qoct=s.bestsolpointnumber;
@@ -472,7 +475,7 @@ int main(int argc, char** argv) {
 
 
 	    s.report_possible_inliers();
-	    
+	    s.report_solution();	    
 
 	    
 	for (int i=0; i<p; i++)
@@ -493,6 +496,7 @@ int main(int argc, char** argv) {
 	cout << " total time " << totaltime << endl;
 	cout << " cpu time " << cputime << endl;
 	cout <<" total branch number " << nb_cells << endl;
+
 	for (int i=0; i<p; i++)
 	      delete [] linfun[i];
 	delete [] linfun;

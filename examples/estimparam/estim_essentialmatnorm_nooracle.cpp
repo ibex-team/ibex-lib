@@ -168,36 +168,9 @@ Interval matrixtrace (IntervalMatrix& M){
 
 	int p;
 	if (nbp>0) p=nbp;
-	else p = x1.size();
-	cout << " nombre de paires de points " << p << endl;
+	else
+	  p=x1.size();
 
-	int K=1;
-    	double *** linfun;
-	linfun = new double**[p];
-	for (int i=0; i<p; i++)
-	  {  linfun[i] = new double*[n+1];
-	    for (int j=0; j<n+1; j++)
-	      linfun[i][j]= new double[K];
-	  }
-
-
-	Array<Ctc> m_ctc(p);
-
-	Function* m_func[p] ;	
-	Function *** m_fun;
-	m_fun=new Function **[K];
-	for (int i=0; i<K; i++)
-	  m_fun[i]=new Function*[p];
-
-	Ctc* ctcnorm;
-
-	Function* m_det;
-	Function* m_det1;
-
-	Ctc* cdet;
-
-
-	
         Function* m_norm = new Function (v, sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2])+ sqr(v[1][0]) + sqr(v[1][1]) + sqr(v[1][2]) + sqr(v[2][0]) + sqr(v[2][1])+sqr(v[2][2]) -1 + eps2);
 	Function* m_norm1 = new Function (v, sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2])+ sqr(v[1][0]) + sqr(v[1][1]) + sqr(v[1][2]) + sqr(v[2][0]) + sqr(v[2][1])+sqr(v[2][2]) -1 );
 

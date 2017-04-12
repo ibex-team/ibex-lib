@@ -141,7 +141,20 @@ Qintersection contractors and other constraints.
 a linear solver is used for finding a feasible point.
  */
 
+ class SolverOptBSQInter : public SolverOptQInter {
+ public:
+   CellStack* stackbuffer;
+   bool with_storage;
+   SolverOptBSQInter(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq);
+   ~SolverOptBSQInter();
+ protected :
+   void push_cell(Cell& c1);
+   void push_cells(Cell& c1, Cell& c2);
 
+   Cell* pop_cell();
+   bool empty_buffer();
+   Cell* top_cell();
+ };
 
  class SolverOptBSConstrainedQInter : public SolverOptConstrainedQInter {
  public:

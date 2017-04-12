@@ -22,23 +22,100 @@ Interval matrixtrace (IntervalMatrix& M){
    vector<double> x1;
    vector<double> y1;
    vector<double> x2;
-	vector<double> y2;
+   vector<double> y2;
+
+   vector<double> x11;
+   vector<double> y11;
+   vector<double> x22;
+   vector<double> y22;
 	string input_file_name=argv[1];
-	int Q = atoi(argv[2]);
-	double epseq = atof(argv[3]);
-        double eps1 = atof(argv[4]);
-	double prec0= atof(argv[5]);
-	double epscont= atof(argv[6]);
-	int gaplimit = atoi (argv[7]);
-	int nbr = atoi (argv[8]);
-	int dmax= atoi (argv[9]);
-	int eobj= atoi (argv[10]);
+	int nbp = atoi(argv[2]);
+	string calib_file_name=argv[3];
+	string oracle_file_name=argv[4];
+	int Q = atoi(argv[5]);
+	double epseq = atof(argv[6]);
+        double eps1 = atof(argv[7]);
+	double prec0= atof(argv[8]);
+	double epscont= atof(argv[9]);
+	int gaplimit = atoi (argv[10]);
+	int nbr = atoi (argv[11]);
+	int dmax= atoi (argv[12]);
+	int eobj= atoi (argv[13]);
 
+	int optim = atoi(argv[14]);
+	double time0= atof(argv[15]);
 
-	double time0= atof(argv[11]);
-	srand (atoi(argv[12]));
+	srand (atoi(argv[16]));
 	cout << input_file_name << endl;
 	ifstream input(input_file_name.c_str());
+
+		
+	int nb_pairs;
+	input >> nb_pairs;
+	cout << "nb_pairs" << nb_pairs << endl;
+	while (!input.eof())
+	  {double in;
+	    input >> in;
+	    x11.push_back(in);
+	    //	    cout << in << " " ;
+	    input >> in;
+	    y11.push_back(in);
+	    //	    cout << in << " " ;
+	    input >> in;
+            x22.push_back(in);
+	    //	    cout << in << " " ;
+            input >> in;
+            y22.push_back(in);
+	    //	    cout << in << " " << endl;
+	  }
+	x11.pop_back();y11.pop_back();x22.pop_back();y22.pop_back();
+	for (int i=0; i< x11.size() ; i++){
+	  int present=0;
+	  for (int j=0; j<i; j++)
+	    if (x11[i]==x11[j] && y11[i]==y11[j]&& x22[i]==x22[j] &&  y22[i]==y22[j]){
+	      present=1; break;}
+	  if (present==0){
+	    x1.push_back(x11[i]); 
+	    y1.push_back(y11[i]); 
+            x2.push_back(x22[i]); 
+	    y2.push_back(y22[i]);
+	  }
+	}
+	
+	cout << "nb points sans doublons" << x1.size() << endl;
+cout << calib_file_name << endl;
+	ifstream calib(calib_file_name.c_str());
+	double b1,b2,b3,b5,b6;
+	double b11,b12,b13,b15,b16;
+	while (!calib.eof())
+	  {calib >> b1;
+	    calib >> b2;
+            calib >> b3;
+	    calib >> b5;
+            calib >> b6;
+	    calib >> b11;
+	    calib >> b12;
+            calib >> b13;
+	    calib >> b15;
+            calib >> b16;
+	  }
+	ifstream oraclefile(oracle_file_name.c_str());
+	Vector  oraclemat(9);
+	for (int i=0; i<9; i++)
+	  oraclefile >> oraclemat[i];
+	cout << "b1 " << b1;
+	cout << " b2 " << b2;
+	cout << " b3 " << b3;
+	cout << " b5 " << b5;
+	cout << " b6 " << b6 << endl;
+	cout << "b11 " << b11;
+	cout << " b12 " << b12;
+	cout << " b13 " << b13;
+	cout << " b15 " << b15;
+	cout << " b16 " << b16 << endl;
+
+
+	/*
 	while (!input.eof())
 	  {double in;
 	    input >> in;
@@ -58,6 +135,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	x1.pop_back();y1.pop_back();x2.pop_back();y2.pop_back();
 	
 	cout << " fin lecture " << endl;
+	*/
 	int n=9;
         Variable v(3,3);
         SystemFactory fac;
@@ -100,8 +178,10 @@ Interval matrixtrace (IntervalMatrix& M){
 	  y2[i]=y2[i]/1000;
 	}
 	*/
+	int p;
+	if (nbp>0) p=nbp;
+	else p = x1.size();
 
-	int p = x1.size();
 	cout << " p " << p << endl;
 
 	int K=1;
@@ -217,6 +297,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	Function m_id(v, v );
 	cout << " apres lecture " << endl;
 
+	/*
 	double b1=939.5973154362416;
 	double b3=600.0;
 	double b5=b1;
@@ -225,7 +306,19 @@ Interval matrixtrace (IntervalMatrix& M){
         double a3=- b3/b1;
 	double a5=1/b5;
 	double a6=-b6/b5;
-
+	*/
+	double a1=1/b1;
+        double a3=- b3/b1;
+	double a5=1/b5;
+	double a6=-b6/b5;
+	double a11=1/b11;
+        double a13=- b13/b11;
+	double a15=1/b15;
+	double a16=-b16/b15;
+        cout << a1 << endl;
+        cout << a3 << endl;
+        cout << a5 << endl;
+        cout << a6 << endl;
 
 
 	Matrix k1 (3,3);
@@ -326,7 +419,7 @@ Interval matrixtrace (IntervalMatrix& M){
 				       //                                   Interval(1,1) + Interval(-epseq,epseq)));
 				       v[2][2]+Interval(-epseq,epseq)));
 	  */
-
+	  /*
 	  m_func[i]= new Function (v,(v[0][0]* (x1.at(i) * x2.at(i) * a1*a1  + x1.at(i) * a1 * a3 + x2.at(i) *a1* a3 + a3*a3 ) 
 				      +  v[0][1] * (x1.at(i)*y2.at(i)*a1*a5 + x1.at(i)* a1* a6 + y2.at(i)*a3*a5 + a3*a6)
 				      + v[0][2]*(x1.at(i) * a1 + a3) 
@@ -345,6 +438,30 @@ Interval matrixtrace (IntervalMatrix& M){
 				      +  v[1][2] * ( y1.at(i)* a5 + a6) 
 				      +  v[2][0]* (x2.at(i) *a1+ a3) 
 					 +  v[2][1] * ( y2.at(i)* a5 + a6)) +Interval(-epseq,epseq)));
+	  */
+	  m_func[i]= new Function (v,(v[0][0]* (x1.at(i) * x2.at(i) * a1*a11  + x1.at(i) * a1 * a13 + x2.at(i) *a11* a3 + a3*a13 ) 
+				      +  v[0][1] * (x1.at(i)*y2.at(i)*a1*a15 + x1.at(i)* a1* a16 + y2.at(i)*a3*a15 + a3*a16)
+				      +  v[0][2]*(x1.at(i) * a1 + a3) 
+				      +  v[1][0]*(x2.at(i) *  y1.at(i) * a11*a5 + x2.at(i)* a11*a6 + y1.at(i) * a13*a5 + a6*a13)
+				      +  v[1][1] * ( y1.at(i) * y2.at(i) * a5*a15 +  y1.at(i) * a5 * a16 + y2.at(i)*a15 * a6 + a6*a16)
+				      +  v[1][2] * ( y1.at(i)* a5 + a6) 
+				      +  v[2][0]* (x2.at(i) *a11+ a13) 
+				      +  v[2][1] * ( y2.at(i)* a15 + a16) 
+				      +  v[2][2]
+				      +Interval(-epseq,epseq)
+				      ));
+
+	  m_fun[0][i]=new Function (v,(-(v[0][0]* (x1.at(i) * x2.at(i) * a1*a11  + x1.at(i) * a1 * a13 + x2.at(i) *a11* a3 + a3*a13 ) 
+					 +  v[0][1] * (x1.at(i)*y2.at(i)*a1*a15 + x1.at(i)* a1* a16 + y2.at(i)*a3*a15 + a3*a16)
+					 +  v[0][2]*(x1.at(i) * a1 + a3) 
+					 +  v[1][0]*(x2.at(i) *  y1.at(i) * a11*a5 + x2.at(i)* a11*a6 + y1.at(i) * a13*a5 + a6*a13)
+					 +  v[1][1] * ( y1.at(i) * y2.at(i) * a5*a15 +  y1.at(i) * a5 * a16 + y2.at(i)*a15 * a6 + a6*a16)
+					 +  v[1][2] * ( y1.at(i)* a5 + a6) 
+					 +  v[2][0]* (x2.at(i) *a11+ a13) 
+
+					 +  v[2][1] * ( y2.at(i)* a15 + a16)) +Interval(-epseq,epseq)));
+
+
 	  /*
 	  linfun[i][0][0]=1;
           linfun[i][1][0]=x1.at(i) * x2.at(i);
@@ -357,16 +474,16 @@ Interval matrixtrace (IntervalMatrix& M){
           linfun[i][8][0]=y1.at(i) ;
 	  */
 	  linfun[i][0][0]=1;
-	  linfun[i][1][0]= (x1.at(i) * x2.at(i) * a1*a1 + x1.at(i) * a1 * a3 + x2.at(i) * a1* a3 + a3*a3);
-	  linfun[i][2][0]=(x1.at(i)*y2.at(i)*a1*a5 + x1.at(i)* a1* a6 + y2.at(i)*a3*a5 + a3*a6);
+	  linfun[i][1][0]= (x1.at(i) * x2.at(i) * a1*a11 + x1.at(i) * a1 * a13 + x2.at(i) * a11* a3 + a3*a13);
+	  linfun[i][2][0]=(x1.at(i)*y2.at(i)*a1*a15 + x1.at(i)* a1* a16 + y2.at(i)*a3*a15 + a3*a16);
 	  linfun[i][3][0]=(x1.at(i) * a1 + a3);
-	  linfun[i][4][0]=(x2.at(i) *  y1.at(i) * a1*a5 + x2.at(i)* a1*a6 + y1.at(i) * a3*a5 + a6*a3);
-	  linfun[i][5][0]=( y1.at(i) * y2.at(i) * a5*a5 +  y1.at(i) * a5 * a6 + y2.at(i)* a5 * a6 + a6*a6);
+	  linfun[i][4][0]=(x2.at(i) *  y1.at(i) * a11*a5 + x2.at(i)* a11*a6 + y1.at(i) * a13*a5 + a6*a13);
+	  linfun[i][5][0]=( y1.at(i) * y2.at(i) * a5*a15 +  y1.at(i) * a5 * a16 + y2.at(i)* a15 * a6 + a6*a16);
 	  linfun[i][6][0]=(y1.at(i)* a5 + a6);
-	  linfun[i][7][0]=(x2.at(i)*a1 +a3);
-	  linfun[i][8][0]=(y2.at(i)* a5 + a6) ;
+	  linfun[i][7][0]=(x2.at(i)*a11 +a13);
+	  linfun[i][8][0]=(y2.at(i)* a15 + a16) ;
 
-
+	  // a changer pour calib non symétriques
 
           linfun1[i][0]= x2.at(i)* a1*a1+ a1* a3;          
 	  linfun1[i][1]= x1.at(i)* a1*a1+ a1* a3;
@@ -417,7 +534,7 @@ Interval matrixtrace (IntervalMatrix& M){
 
 
 	Vector fundmat(9);
-	
+	/*
 	
 	
 	fundmat[0]=0.0212236;
@@ -429,7 +546,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	fundmat[6]=-0.0376943;
         fundmat[7]=0.5039347 ;
 	fundmat[8]=0.0173491;
-	
+	*/
 	/*
 	fundmat[0]=2.1327e-02;
 	fundmat[1]=-3.7447e-01;
@@ -560,7 +677,12 @@ Interval matrixtrace (IntervalMatrix& M){
 	  prec[j]=prec0;
 
 	//CellHeapQInter buff;
-	CellStack buff;
+	CellBuffer * buff;
+	if (optim==0)
+	  buff = new CellStack();
+	else
+	  buff = new CellHeapQInter();
+
 	//      	RoundRobin bs (prec,0.5);
 	SmearSumRelative bs(sys,prec,0.5);
 	//	RoundRobinQInter bs (prec,0.5);
@@ -612,18 +734,28 @@ Interval matrixtrace (IntervalMatrix& M){
 
 
 	//	SolverQInter s(ctcqf0,bs,buff,ctcq,1);
-	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,1);
+	SolverOptQInter* s;
+
+	//SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,1);
+	//	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,2);
+	if (optim ==0)
+	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont,1);
+	else
+	  s= new SolverOptBSConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont);
+
+	//	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,*buff,ctcq,epscont,1);
 
 	//	SolverOptQInter s(ctcf,bs,buff,ctcq,1);
 	cout << " apres solver " << endl;
-	s.time_limit = time0;
-	s.trace=1;
-	s.nbr=nbr;
+	s->time_limit = time0;
+	s->trace=1;
+	s->nbr=nbr;
 
-	s.gaplimit=gaplimit;
-	s.oracle=fundmat;
-        s.depthmax=dmax;
-	s.epsobj=eobj;
+	s->gaplimit=gaplimit;
+	s->oracle=oraclemat;
+	s->with_oracle=1;
+        s->depthmax=dmax;
+	s->epsobj=eobj;
 	cout << "box init " << box << endl;
 
 	cout << "essential " << m_essential1.eval_matrix(box) << endl;
@@ -634,16 +766,16 @@ Interval matrixtrace (IntervalMatrix& M){
 	cout << "essential apres contract " << m_essential1.eval_matrix(box) << endl;
 
 	cout << "determinant " << m_det->eval(box);
-	vector<IntervalVector> res=s.solve(box);
+	vector<IntervalVector> res=s->solve(box);
 
-	cout << "Number of branches : " << s.nb_cells << endl;
-	cout << "time used : " << s.time << endl;
+	cout << "Number of branches : " << s->nb_cells << endl;
+	cout << "time used : " << s->time << endl;
 
-	s.report_possible_inliers();
-	s.report_solution();
+	s->report_possible_inliers();
+	s->report_solution();
 
 
-	IntervalVector bestsolbox(s.bestsolpoint);
+	IntervalVector bestsolbox(s->bestsolpoint);
 
 
 	CtcQInterSampson ctcq2(9,m_ctc2,linfun,linfun1,epseq,Q);
@@ -657,8 +789,8 @@ Interval matrixtrace (IntervalMatrix& M){
 	    delete &m_ctc[i];
 	  }
 	Timer::stop();
-	cout <<  " time used " << s.time << "  "<< endl ;
-	cout <<" total branch number " << s.nb_cells << endl;
+	cout <<  " time used " << s->time << "  "<< endl ;
+	cout <<" total branch number " << s->nb_cells << endl;
 	}
 	catch (SyntaxError e)
 	  {cout <<e << endl;}

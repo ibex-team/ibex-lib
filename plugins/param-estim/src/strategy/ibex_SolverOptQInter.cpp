@@ -88,7 +88,8 @@ namespace ibex {
     for (int i=0; i< measure_nb+1; i++)
       valstack[i]=0;
     points0=*(ctcq.points);
-    points1=points0;
+    points1=points0;    
+    points2=points0;
   }
  
   /* the list of active points is a pointer to points1 for the first cell and to points2 for the second cell */
@@ -962,6 +963,88 @@ Vector SolverOptConstrainedQInter::newvalidpoint (Cell & c){
     return newvalidpoint;
 
   }
+
+ SolverOptBSQInter::SolverOptBSQInter ( Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq)  : SolverOptQInter (ctc,bsc, buffer, ctcq,  2){stackbuffer= new CellStack() ;}
+
+   Cell*  SolverOptBSQInter::top_cell() 
+   { if (!(stackbuffer->empty()))
+       return stackbuffer->top();
+     else
+       return buffer.top();
+   }
+
+  Cell* SolverOptBSQInter::pop_cell() {
+    if (!(stackbuffer->empty())){
+       Cell* c = stackbuffer->top();
+       points1 = c->get<QInterPoints>().points;
+       points2 = c->get<QInterPoints>().points;
+       return stackbuffer->pop();}
+     else  if (with_storage){
+	 Cell* c = buffer.top();
+	 points1 = c->get<QInterPoints>().points;
+	 points2 = c->get<QInterPoints>().points;
+
+	 return buffer.pop();
+     }
+     else{
+
+       points1=points0;
+       points2=points0;
+       return buffer.pop();}
+  }
+   
+
+
+
+  void SolverOptBSQInter::push_cell(Cell&c1){
+    if (!(c1.box.is_empty())) {
+      if (optimbuffer==1 || (with_storage)){  // DFS / one stores the possible points in the cell.
+	c1.get<QInterPoints>().points=*ctcq.points;
+      }
+      buffer.push(&c1);
+    }
+  }
+
+void SolverOptBSQInter::push_cells(Cell&c1, Cell& c2){
+  
+  if (with_oracle && (!(c1.box.is_empty())&& c1.box.contains(oracle)))
+      {
+	if  (!(c2.box.is_empty())) {buffer.push(&c2);
+	  if (with_storage) 	c2.get<QInterPoints>().points=points2;}
+        c1.get<QInterPoints>().points=points1; stackbuffer->push(&c1);}
+  else if 
+      (with_oracle &&(!(c2.box.is_empty())&& c2.box.contains(oracle)))
+      {
+	if (!(c1.box.is_empty())) {buffer.push(&c1);
+	  if (with_storage) 	c1.get<QInterPoints>().points=points1;}
+	c2.get<QInterPoints>().points=points2;stackbuffer->push(&c2);}
+
+    else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
+      {
+	int val1= validate_value (c1);
+	int val2= validate_value (c2);
+	if (val1 >= val2) {c1.get<QInterPoints>().points=points1; stackbuffer->push(&c1); buffer.push(&c2);
+	  if (with_storage) 	c2.get<QInterPoints>().points=points2;
+	}
+	else  {c2.get<QInterPoints>().points=points2; stackbuffer->push(&c2); buffer.push(&c1);
+	  if (with_storage) 	c1.get<QInterPoints>().points=points1;
+	}
+      }
+	  
+  
+
+    else if (!(c1.box.is_empty())) {c1.get<QInterPoints>().points=points1;stackbuffer->push(&c1);}
+    else if (!(c2.box.is_empty())) {c2.get<QInterPoints>().points=points2;stackbuffer->push(&c2);}
+}
+  
+  bool SolverOptBSQInter::empty_buffer () {return (buffer.empty() && stackbuffer->empty());}
+
+  SolverOptBSQInter::~SolverOptBSQInter() {delete stackbuffer;}
+
+  
+
+
+
 
 
   SolverOptBSConstrainedQInter::SolverOptBSConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq,  double epscont)  : SolverOptConstrainedQInter (sys,ctc,bsc, buffer, ctcq, epscont, 2){stackbuffer= new CellStack() ;}

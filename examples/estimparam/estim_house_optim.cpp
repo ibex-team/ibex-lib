@@ -142,6 +142,7 @@ int main(int argc, char** argv) {
 	cout << np << "  " << Q0 << " " << Qvalid << " " << epseq << endl;
 
 	int Qoct=Q;
+	Vector bestsol (3);
 	for (int oct=0; oct <4; oct++)
 	  { int diry= pow(-1,oct%2);
 	    int dirz= pow(-1,oct/2);
@@ -272,7 +273,8 @@ int main(int argc, char** argv) {
 	    proba[0]=0.33;
 	    proba[1]=0.33;
 	    proba[2]=0.34;
-	    CellStack buff;
+	    //	    CellStack buff;
+	    CellHeapQInter buff;
 	    //RoundRobin bs (prec,0.5);
 	    RoundRobinNvar bs (2,prec,0.5);
 	    //  RoundRobinQInter bs (2,prec,0.5);
@@ -296,17 +298,21 @@ int main(int argc, char** argv) {
 	    //CtcFixPoint ctcf(ctcid,0.1);
 
 
-	    //	    SolverQInter s(ctcf,bs,buff,ctcq,1);
-	    SolverOptQInter s(ctcf,bs,buff,ctcq,1);
+	    
+	    //	    SolverOptQInter s(ctcf,bs,buff,ctcq,1);
+	    SolverOptBSQInter s(ctcf,bs,buff,ctcq);
 	    //	    Solver s(ctcf,bs,buff);
 	    //	    s.onesol_permaximalset=true;
 
+	    s.with_oracle=false;
+	    s.with_storage=true;
 	    s.time_limit = 3600;
 	    s.trace=1;
 	    s.gaplimit=gap;
 	    s.nbr=nbrand;
 	    //	    s.greedy=false;
-
+	    s.bestsolpointnumber=Qoct;
+	    s.bestsolpoint=bestsol;
 	    cout << " avant resolution " << endl;
 
 	vector<IntervalVector> res=s.solve(box);
@@ -314,9 +320,11 @@ int main(int argc, char** argv) {
 	cout << "Number of branches : " << s.nb_cells << endl;
 	nb_cells +=s.nb_cells;
 	cputime += s.time;
-	Qoct=ctcq.q;
+	Qoct=s.bestsolpointnumber;
+	bestsol=s.bestsolpoint;
 	s.report_possible_inliers();
-	cout << " nb sols " << res.size() << endl;   
+	//	s.report_solution();
+	//	cout << " nb sols " << res.size() << endl;   
 
   
 
