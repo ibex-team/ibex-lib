@@ -306,6 +306,15 @@ class Interval {
     bool is_interior_subset(const Interval& x) const;
 
     /**
+     * \brief True iff this interval is in the relative interior of \a x.
+     *
+     * When x is degenerated, the relative interior of x is x itself
+     * (it is not an open set). Otherwise, the relative interior of x
+     * is the interior (in the usual meaning).
+     */
+    bool is_relative_interior_subset(const Interval& x) const;
+
+    /**
      * \brief True iff this interval is in the interior of \a x and different from x.
      *
      * \note In particular, (-oo,oo) is not "strictly" in the interior of (-oo,oo)

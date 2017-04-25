@@ -372,6 +372,50 @@ void TestIntervalVector::is_subset07() {
 	CPPUNIT_ASSERT(!x2.is_strict_interior_subset(x1));
 }
 
+void TestIntervalVector::is_relative_interior01() {
+	double _x1[][2]={{1,1},{3,4}};
+	double _x2[][2]={{1,1},{2,5}};
+
+	IntervalVector x1(2,_x1);
+	IntervalVector x2(2,_x2);
+
+	CPPUNIT_ASSERT(x1.is_relative_interior_subset(x2));
+}
+
+void TestIntervalVector::is_relative_interior02() {
+	double _x1[][2]={{3,4},{3,3}};
+	double _x2[][2]={{2,5},{3,3}};
+
+	IntervalVector x1(2,_x1);
+	IntervalVector x2(2,_x2);
+
+	CPPUNIT_ASSERT(x1.is_relative_interior_subset(x2));
+}
+
+void TestIntervalVector::is_relative_interior03() {
+	double _x1[][2]={{0,0},{1,1}};
+	double _x2[][2]={{1,1},{1,1}};
+
+	IntervalVector x1(2,_x1);
+	IntervalVector x2(2,_x2);
+
+	CPPUNIT_ASSERT(!x1.is_relative_interior_subset(x2));
+}
+
+void TestIntervalVector::is_relative_interior04() {
+	double _x1[][2]={{0,0},{1,1}};
+	double _x2[][2]={{0,0},{1,1}};
+
+	IntervalVector x1(2,_x1);
+	IntervalVector x2(2,_x2);
+
+	CPPUNIT_ASSERT(x1.is_relative_interior_subset(x2));
+}
+
+void TestIntervalVector::is_relative_interior05() {
+	CPPUNIT_ASSERT(IntervalVector::empty(2).is_relative_interior_subset(IntervalVector(2)));
+}
+
 void TestIntervalVector::extr_diam_index01() {
 	 double _x1[][2]={{0,2},{0,1},{0,3}};
 	IntervalVector x1(3,_x1);

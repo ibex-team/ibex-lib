@@ -233,7 +233,18 @@ public:
 	 */
 	bool is_interior_subset(const IntervalMatrix& x) const;
 
-	/**
+    /**
+     * \brief True iff this interval matrix is in the relative interior of \a x.
+     *
+     * The relative interior of an interval matrix is defined as the matrix
+     * of the relative interiors of its components, where
+     *
+     *     rel([a,b]) := [a,b] (the closed interval) if a==b ;
+     *                   (a,b) (the open interval) otherwise.
+     */
+    bool is_relative_interior_subset(const IntervalMatrix& x) const;
+
+    /**
 	 * \brief True iff this interval matrix is a subset of the interior of \a x and different from x.
 	 *
 	 * \pre Dimension of \a x must be equal to the dimension of this matrix.

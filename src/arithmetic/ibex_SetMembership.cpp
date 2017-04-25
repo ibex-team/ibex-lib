@@ -44,6 +44,9 @@ inline bool basic_is_interior_subset(const Interval& x, const Interval& y) {
 		   (y.ub()==POS_INFINITY || y.ub()>x.ub());
 }
 
+inline bool basic_is_relative_interior_subset(const Interval& x, const Interval& y) {
+	return (y.is_degenerated() && x==y) || basic_is_interior_subset(x,y);
+}
 
 // 0= not interior subset
 // 1=interior subset
@@ -166,6 +169,7 @@ inline bool basic_is_disjoint(const Interval& x, const Interval& y) {
 __IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,Interval, basic_is_subset)
 __IBEX_GENERATE_BASIC_SET_OP_AND_OR__(Interval,Interval, basic_is_strict_subset)
 __IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,Interval, basic_is_interior_subset)
+__IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,Interval, basic_is_relative_interior_subset)
 __IBEX_GENERATE_BASIC_SET_OP_AND_OR__(Interval,Interval, basic_is_strict_interior_subset)
 __IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,__Real,   basic_contains)
 __IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,__Real,   basic_interior_contains)
@@ -188,6 +192,11 @@ inline bool is_strict_subset(const T& x, const T& y) {
 template<typename T>
 inline bool is_interior_subset(const T& x, const T& y) {
 	return x.is_empty() || (!y.is_empty() && basic_is_interior_subset(x,y));
+}
+
+template<typename T>
+inline bool is_relative_interior_subset(const T& x, const T& y) {
+	return x.is_empty() || (!y.is_empty() && basic_is_relative_interior_subset(x,y));
 }
 
 template<typename T>
@@ -239,6 +248,7 @@ inline bool is_disjoint(const T& x, const S& y) {
 __IBEX_GENERATE_SET_OP__(Interval,is_subset)
 __IBEX_GENERATE_SET_OP__(Interval,is_strict_subset)
 __IBEX_GENERATE_SET_OP__(Interval,is_interior_subset)
+__IBEX_GENERATE_SET_OP__(Interval,is_relative_interior_subset)
 __IBEX_GENERATE_SET_OP__(Interval,is_strict_interior_subset)
 __IBEX_GENERATE_SET_OP__(Interval,is_superset)
 __IBEX_GENERATE_SET_OP__(Interval,is_strict_superset)

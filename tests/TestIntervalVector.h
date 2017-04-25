@@ -87,6 +87,12 @@ public:
 	CPPUNIT_TEST(is_subset06);
 	CPPUNIT_TEST(is_subset07);
 
+	CPPUNIT_TEST(is_relative_interior01);
+	CPPUNIT_TEST(is_relative_interior02);
+	CPPUNIT_TEST(is_relative_interior03);
+	CPPUNIT_TEST(is_relative_interior04);
+	CPPUNIT_TEST(is_relative_interior05);
+
 	CPPUNIT_TEST(extr_diam_index01);
 	CPPUNIT_TEST(extr_diam_index02);
 	CPPUNIT_TEST(extr_diam_index03);
@@ -257,6 +263,12 @@ public:
 	void is_subset05();
 	void is_subset06();
 	void is_subset07();
+
+	void is_relative_interior01();
+	void is_relative_interior02();
+	void is_relative_interior03();
+	void is_relative_interior04();
+	void is_relative_interior05();
 
 	// test:
 	//    extr_diam_index() const

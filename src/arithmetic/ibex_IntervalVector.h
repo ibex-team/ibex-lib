@@ -282,7 +282,7 @@ public:
 	bool is_subset(const IntervalVector& x) const;
 
 	/**
-	 * \brief True iff this interval vector is inside the interior of \a x.
+	 * \brief True iff this interval vector is a subset of \a x, and not \a x itself.
 	 *
 	 * \pre Dimension of \a x must be equal to the dimension of this vector.
 	 *
@@ -302,6 +302,17 @@ public:
 	 * \sa #ibex::Interval::is_interior_subset(const Interval&) const.
 	 */
 	bool is_interior_subset(const IntervalVector& x) const;
+
+    /**
+     * \brief True iff this interval vector is in the relative interior of \a x.
+     *
+     * The relative interior of an interval vector is defined as the vector
+     * of the relative interiors of its components, where
+     *
+     *     rel([a,b]) := [a,b] (the closed interval) if a==b ;
+     *                   (a,b) (the open interval) otherwise.
+     */
+    bool is_relative_interior_subset(const IntervalVector& x) const;
 
 	/**
 	 * \brief True iff this interval vector is a subset of the interior of \a x and different from x.
