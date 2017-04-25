@@ -42,7 +42,7 @@
 
 #else
 #ifdef _IBEX_WITH_CLP_
-#include "coin/ClpSimplex.hpp"
+#include "ClpSimplex.hpp"
 #else
 #ifdef _IBEX_WITH_ILOCPLEX_
 #include <ilcplex/ilocplex.h>

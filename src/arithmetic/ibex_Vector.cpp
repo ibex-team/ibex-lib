@@ -11,7 +11,7 @@
 #include "ibex_Vector.h"
 #include <float.h>
 #include <math.h>
-#include "ibex_TemplateVector.h_"
+#include "ibex_TemplateVector.h"
 
 namespace ibex {
 

@@ -1,0 +1,21 @@
+--- gaol-4.2.0/gaol/gaol_interval.h	2016-07-28 10:11:07.667045528 +0200
++++ gaol-4.2.0/gaol/gaol_interval.h	2016-07-28 10:11:38.535044616 +0200
+@@ -32,6 +32,7 @@
+ 
+ #include <cmath>
+ #include <iosfwd>
++#include <ios> /* for std::streamsize, patch from ibex */
+ #include <string>
+ #include <limits>
+ #include "gaol/gaol_config.h"
+--- gaol-4.2.0/gdtoa/dtoa.c	2016-07-28 10:46:47.474982304 +0200
++++ gaol-4.2.0/gdtoa/dtoa.c	2016-07-28 10:47:20.322981333 +0200
+@@ -73,7 +73,7 @@
+ #define Rounding Flt_Rounds
+ #endif
+ 
+-int Flt_Rounds;
++int Flt_Rounds = 1; /* round to the nearest by default, patched by ibex */
+ 
+  char *
+ dtoa

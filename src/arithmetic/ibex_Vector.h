@@ -265,7 +265,7 @@ inline void ___set_empty(Vector&)              { }
 
 } // end namespace ibex
 
-#include "ibex_LinearArith.h_"
+#include "ibex_LinearArith.h"
 
 namespace ibex {
 

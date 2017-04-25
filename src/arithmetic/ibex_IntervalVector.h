@@ -742,7 +742,7 @@ inline void ___set_empty(IntervalVector& v) { v.set_empty(); }
 
 } // end namespace ibex
 
-#include "ibex_LinearArith.h_"
+#include "ibex_LinearArith.h"
 
 namespace ibex {
 
