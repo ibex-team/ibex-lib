@@ -35,4 +35,32 @@ void TestExprCopy::index_copy01() {
 //	CPPUNIT_ASSERT(c->get_value()==Interval(0,1));
 }
 
+void TestExprCopy::var_component01() {
+	const ExprSymbol& x=ExprSymbol::new_(Dim::matrix(3,3));
+	const ExprSymbol& y=ExprSymbol::new_(Dim::scalar());
+	const ExprSymbol& z=ExprSymbol::new_(Dim::row_vec(4));
+	const ExprSymbol& w=ExprSymbol::new_(Dim::scalar());
+	const ExprSymbol& k=ExprSymbol::new_(Dim::matrix(2,2));
+	Array<const ExprSymbol> symbols(x,y,z,w,k);
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,0),x[0][0]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,1),x[0][1]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,2),x[0][2]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,3),x[1][0]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,4),x[1][1]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,5),x[1][2]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,6),x[2][0]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,7),x[2][1]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,8),x[2][2]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,9),y));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,10),z[0]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,11),z[1]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,12),z[2]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,13),z[3]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,14),w));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,15),k[0][0]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,16),k[0][1]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,17),k[1][0]));
+	CPPUNIT_ASSERT(sameExpr(var_component(symbols,18),k[1][1]));
+}
+
 } // end namespace

@@ -24,10 +24,12 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestExprCopy);
 	CPPUNIT_TEST(index_copy01);
+	CPPUNIT_TEST(var_component01);
 	CPPUNIT_TEST_SUITE_END();
 
 	// case where the vector is a constant vector
 	void index_copy01();
+	void var_component01();
 
 };
 
