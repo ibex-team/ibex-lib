@@ -25,7 +25,6 @@ class Function;
  *
  * \brief Function evaluator.
  *
- * \pre Requires the function to be decorated with BasicDecorator.
  */
 class Eval : public FwdAlgorithm {
 

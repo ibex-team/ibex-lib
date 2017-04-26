@@ -11,6 +11,7 @@
 #define __IBEX_VAR_SET_H__
 
 #include "ibex_BitSet.h"
+#include "ibex_Expr.h"
 
 namespace ibex {
 

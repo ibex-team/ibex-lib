@@ -15,7 +15,7 @@ namespace ibex {
 
 const double CtcNewton::default_ceil = 0.01;
 
-CtcNewton::CtcNewton(const Function& f, double ceil, double prec, double ratio) :
+CtcNewton::CtcNewton(const Fnc& f, double ceil, double prec, double ratio) :
 		Ctc(f.nb_var()), f(f), vars(NULL), ceil(ceil), prec(prec), gauss_seidel_ratio(ratio) {
 
 	if (f.nb_var()!=f.image_dim()) {
@@ -23,7 +23,7 @@ CtcNewton::CtcNewton(const Function& f, double ceil, double prec, double ratio) 
 	}
 }
 
-CtcNewton::CtcNewton(const Function& f, const VarSet& vars, double ceil, double prec, double ratio) :
+CtcNewton::CtcNewton(const Fnc& f, const VarSet& vars, double ceil, double prec, double ratio) :
 		Ctc(f.nb_var()), f(f), vars(&vars), ceil(ceil), prec(prec), gauss_seidel_ratio(ratio) {
 
 	if (vars.nb_var!=f.image_dim()) {

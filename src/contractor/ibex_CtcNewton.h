@@ -24,7 +24,7 @@ namespace ibex {
 class CtcNewton : public Ctc {
 public:
 	/**
-	 * See #ibex::newton(const Function&, IntervalVector&, double, double);
+	 * See #ibex::newton(const Fnc&, IntervalVector&, double, double);
 	 * \param ceil - Criterion for applying interval Newton contractor.
 	 *  When the diameter of all components of the current box is smaller than \a ceil,
 	 *  the interval Newton method is applied. This criterion is useful to avoid useless
@@ -32,7 +32,7 @@ public:
 	 *
 	 *  Default value is #default_ceil.
 	 */
-	CtcNewton(const Function& f,
+	CtcNewton(const Fnc& f,
 			double ceil=default_ceil,
 			double prec=default_newton_prec,
 			double ratio=default_gauss_seidel_ratio);
@@ -41,7 +41,7 @@ public:
 	/**
 	 * Variant where only a sub-set of variables is considered
 	 */
-	CtcNewton(const Function& f, const VarSet& vars,
+	CtcNewton(const Fnc& f, const VarSet& vars,
 			double ceil=default_ceil,
 			double prec=default_newton_prec,
 			double ratio=default_gauss_seidel_ratio);
@@ -49,7 +49,7 @@ public:
 	void contract(IntervalVector& box);
 
 	/** The function. */
-	const Function& f;
+	const Fnc& f;
 
 	/**
 	 * The sub-set of variables on which Newton is applied
@@ -61,9 +61,9 @@ public:
 
 	/** Newton application ceiling. */
 	const double ceil;
-	/** Precision. See #ibex::newton(const Function&, IntervalVector&, double, double);*/
+	/** Precision. See #ibex::newton(const Fnc&, IntervalVector&, double, double);*/
 	const double prec;
-	/** Gauss-Seidel ratio. See #ibex::newton(const Function&, IntervalVector&, double, double);*/
+	/** Gauss-Seidel ratio. See #ibex::newton(const Fnc&, IntervalVector&, double, double);*/
 	const double gauss_seidel_ratio;
 
 	/** Initialized to 0.01 */

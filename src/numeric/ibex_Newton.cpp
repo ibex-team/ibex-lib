@@ -24,7 +24,7 @@ double default_gauss_seidel_ratio=1e-04;
 
 namespace {
 //
-//inline bool newton_step(const Function& f, IntervalVector& box,
+//inline bool newton_step(const Fnc& f, IntervalVector& box,
 //		IntervalVector& mid, IntervalVector& Fmid, IntervalMatrix& J) {
 //
 //	f.hansen_matrix(box,J);
@@ -34,7 +34,7 @@ namespace {
 //
 }
 
-bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, double prec, double ratio_gauss_seidel) {
+bool newton(const Fnc& f, const VarSet* vars, IntervalVector& full_box, double prec, double ratio_gauss_seidel) {
 	int n=vars? vars->nb_var : f.nb_var();
 	int m=f.image_dim();
 	assert(full_box.size()==f.nb_var());
@@ -141,15 +141,15 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 	return reducted;
 }
 
-bool newton(const Function& f, IntervalVector& box, double prec, double ratio_gauss_seidel) {
+bool newton(const Fnc& f, IntervalVector& box, double prec, double ratio_gauss_seidel) {
 	return newton(f,NULL,box,prec,ratio_gauss_seidel);
 }
 
-bool newton(const Function& f, const VarSet& vars, IntervalVector& full_box, double prec, double ratio_gauss_seidel) {
+bool newton(const Fnc& f, const VarSet& vars, IntervalVector& full_box, double prec, double ratio_gauss_seidel) {
 	return newton(f,&vars,full_box,prec,ratio_gauss_seidel);
 }
 
-bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
+bool inflating_newton(const Fnc& f, const VarSet* vars, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
 	int n=vars ? vars->nb_var : f.nb_var();
 	assert(f.image_dim()==n);
 	assert(full_box.size()==f.nb_var());
@@ -310,15 +310,15 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 }
 
 
-bool inflating_newton(const Function& f, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
+bool inflating_newton(const Fnc& f, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
 	return inflating_newton(f,NULL,full_box,box_existence,box_unicity,k_max,mu_max,delta,chi);
 }
 
-bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
+bool inflating_newton(const Fnc& f, const VarSet& vars, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
 	return inflating_newton(f,&vars,full_box,box_existence,box_unicity,k_max,mu_max,delta,chi);
 }
 
-VarSet get_newton_vars(const Function& f, const Vector& pt, const BitSet& forced_params) {
+VarSet get_newton_vars(const Fnc& f, const Vector& pt, const BitSet& forced_params) {
 	int n=f.nb_var();
 	int m=f.image_dim();
 
