@@ -38,6 +38,20 @@ const ExprNode& arg(const ExprNode& node, int i) {
 	}
 }
 
+const ExprNode& arg(const ExprNode& node, int i, int j) {
+	const ExprVector* vec=dynamic_cast<const ExprVector*>(&node);
+	if (vec) return arg(vec->arg(i),j);
+	else {
+		const ExprConstant* cst=dynamic_cast<const ExprConstant*>(&node);
+		assert(cst);
+		assert(cst->dim.is_matrix());
+		assert(i<cst->dim.nb_rows());
+		assert(j<cst->dim.nb_cols());
+		return ExprConstant::new_scalar(cst->get_matrix_value()[i][j]);
+	}
+}
+
+
 class FritzJohnFactory : public SystemFactory {
 
 public:
@@ -172,6 +186,7 @@ public:
 		// constraints with a single multivalued function
 		std::vector<const ExprNode*> to_clean;
 		to_clean.push_back(&df);
+		cout <<
 		to_clean.push_back(dg);
 
 		k=0;
@@ -189,7 +204,7 @@ public:
 
 				const ExprNode& dgij=dg->dim.is_scalar()? /* => i=j=0 */ *dg :
 								    (dg->dim.is_vector()? /* => i=0 */   arg(*dg,j) :
-								    		                             arg(arg(*dg,i),j));
+								    		                             arg(*dg,i,j));
 
 				to_clean.push_back(&dgij); // because we may have created new constants...
 

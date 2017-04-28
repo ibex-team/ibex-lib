@@ -175,7 +175,7 @@ public:
 	 */
 	void hansen_matrix(const IntervalVector& full_box, const IntervalVector& x0, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const;
 
-private:
+protected:
 	friend class Function;
 
 	Fnc(); // for Function only
