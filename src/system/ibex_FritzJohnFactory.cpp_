@@ -186,7 +186,6 @@ public:
 		// constraints with a single multivalued function
 		std::vector<const ExprNode*> to_clean;
 		to_clean.push_back(&df);
-		cout <<
 		to_clean.push_back(dg);
 
 		k=0;
