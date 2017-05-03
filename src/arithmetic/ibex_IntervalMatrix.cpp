@@ -355,23 +355,23 @@ Matrix IntervalMatrix::diam() const {
 	return M;
 }
 
-Matrix random(const IntervalMatrix& m) {
-	assert(!m.is_empty());
+Matrix IntervalMatrix::random() const {
+	assert(!is_empty());
 
-	Matrix mm(m.nb_rows(), m.nb_cols());
-	for (int i=0; i<m.nb_rows(); i++) {
-		const IntervalVector& vi=m[i];
+	Matrix mm(nb_rows(), nb_cols());
+	for (int i=0; i<nb_rows(); i++) {
+		const IntervalVector& vi=(*this)[i];
 		mm[i] = vi.random();
 	}
 	return mm;
 }
 
-Matrix random(const IntervalMatrix& m, int seed) {
-	assert(!m.is_empty());
+Matrix IntervalMatrix::random(int seed) const {
+	assert(!is_empty());
 
-	Matrix mm(m.nb_rows(), m.nb_cols());
-	for (int i=0; i<m.nb_rows(); i++) {
-		const IntervalVector& vi=m[i];
+	Matrix mm(nb_rows(), nb_cols());
+	for (int i=0; i<nb_rows(); i++) {
+		const IntervalVector& vi=(*this)[i];
 		mm[i] = vi.random(seed);
 	}
 	return mm;
