@@ -3,7 +3,7 @@
 
 import os, sys
 from distutils.version import LooseVersion
-from waflib import Scripting, Logs, Options
+from waflib import Scripting, Logs, Options, Utils
 from waflib.Build import BuildContext
 import ibexutils
 
@@ -42,12 +42,13 @@ def options (opt):
 	libdir = [ os.path.basename(str(d)) for d in libdir ]
 	list_of_interval_lib_plugin = [ d[len(ITVLIB_PLUGIN_PREFIX):] for d in libdir]
 	# set default interval library
+	deflib = "gaol" if not Utils.is_win32 else "filib"
 	if list_of_interval_lib_plugin == []: # this will raise a error at configure
 		default_interval_lib = None
-	elif "gaol" in list_of_interval_lib_plugin:
-		default_interval_lib = "gaol"
-	elif any(lib.startswith("gaol") for lib in list_of_interval_lib_plugin):
-		L = [ lib for lib in list_of_interval_lib_plugin if lib.startswith("gaol") ]
+	elif deflib in list_of_interval_lib_plugin:
+		default_interval_lib = deflib
+	elif any(lib.startswith(deflib) for lib in list_of_interval_lib_plugin):
+		L = [ lib for lib in list_of_interval_lib_plugin if lib.startswith(deflib) ]
 		L.sort(key=LooseVersion)
 		default_interval_lib = L[-1] # choose the latest version
 	else: # use the first of the list as default
