@@ -4,11 +4,6 @@ image: Visual Studio 2015
 platform:
   - x86
 
-environment:
-  matrix:
-    - TEST_INTERVAL_LIB: "gaol"
-    - TEST_INTERVAL_LIB: "filib"
-
 install:
   - cmd: echo %Platform%
   - cmd: set MINGW-W64_BASE=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
@@ -20,7 +15,7 @@ install:
   - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
 
 build_script:
-  - cmd: python -x %cd%\waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX%
+  - cmd: python -x %cd%\waf configure --prefix=%PREFIX%
   - cmd: python -x %cd%\waf build install clean
 
 test_script:
