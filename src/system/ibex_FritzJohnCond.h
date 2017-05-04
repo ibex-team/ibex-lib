@@ -19,6 +19,8 @@ namespace ibex {
  * \ingroup system
  * \brief System of Fritz-John conditions
  *
+ * The system contains n+M+R+K+1 variables ( "+1" because of the multiplier of the objective)
+ *
  */
 class FritzJohnCond : public System {
 

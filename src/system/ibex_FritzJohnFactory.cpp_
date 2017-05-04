@@ -38,6 +38,20 @@ const ExprNode& arg(const ExprNode& node, int i) {
 	}
 }
 
+const ExprNode& arg(const ExprNode& node, int i, int j) {
+	const ExprVector* vec=dynamic_cast<const ExprVector*>(&node);
+	if (vec) return arg(vec->arg(i),j);
+	else {
+		const ExprConstant* cst=dynamic_cast<const ExprConstant*>(&node);
+		assert(cst);
+		assert(cst->dim.is_matrix());
+		assert(i<cst->dim.nb_rows());
+		assert(j<cst->dim.nb_cols());
+		return ExprConstant::new_scalar(cst->get_matrix_value()[i][j]);
+	}
+}
+
+
 class FritzJohnFactory : public SystemFactory {
 
 public:
@@ -46,12 +60,15 @@ public:
 
 	/** bound_ctr is an array representing the bounds of the initial box of the system
 	 * that are less (in absolute value) than #ACTIVE_BOUND_CEIL.
-	* bound_ctr[i][0] is the number of the variable and bound_ctr[i] is
-	* 0 (resp 1) is this is the lower (resp. upper) bound.
-	*/
+	 * bound_ctr[i][0] is the number of the variable and bound_ctr[i] is
+	 * LB (resp UB) is this is the lower (resp. upper) bound.
+	 */
 	int (*bound_ctr)[2];
 
-	int n,M,R,K;
+	int n; // number of basic variables
+	int M; // number of inequalities
+	int R; // number of equalities
+	int K; // number of bound constraints
 
 	FritzJohnFactory(const System& sys) {
 
@@ -186,7 +203,7 @@ public:
 
 				const ExprNode& dgij=dg->dim.is_scalar()? /* => i=j=0 */ *dg :
 								    (dg->dim.is_vector()? /* => i=0 */   arg(*dg,j) :
-								    		                             arg(arg(*dg,i),j));
+								    		                             arg(*dg,i,j));
 
 				to_clean.push_back(&dgij); // because we may have created new constants...
 
@@ -261,13 +278,19 @@ public:
 		}
 		assert(m==M);
 
+		i=0; // counter for variable symbols (may be vectors)
+		// -------------  Idem for bound constraints -----------
 		for (k=0; k<K; k++) {
-			int i=bound_ctr[k][0];
+			int j=bound_ctr[k][0];
+			const ExprNode& xj=var_component(vars,j);
 			const ExprNode* bk;
 			if (bound_ctr[k][1]==LB)
-				bk = & ((*bmult)[k]*(sys.box[i].lb()-vars[i]));
+				bk = & ((*bmult)[k]*(sys.box[j].lb()-xj));
 			else
-				bk = & ((*bmult)[k]*(vars[i]-sys.box[i].ub()));
+				bk = & ((*bmult)[k]*(xj-sys.box[j].ub()));
+
+			add_ctr(ExprCtr(bk->simplify(),EQ));
+
 			to_clean.push_back(bk);
 		}
 

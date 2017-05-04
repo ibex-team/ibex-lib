@@ -11,7 +11,7 @@
 #ifndef __IBEX_NEWTON_H__
 #define __IBEX_NEWTON_H__
 
-#include "ibex_Function.h"
+#include "ibex_Fnc.h"
 #include "ibex_VarSet.h"
 
 namespace ibex {
@@ -44,12 +44,12 @@ extern double default_gauss_seidel_ratio;
  * The default value is #default_gauss_seidel_ratio (1e-04).
  * \return True if one variable has been reduced by more than \a prec.
  */
-bool newton(const Function& f, IntervalVector& box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
+bool newton(const Fnc& f, IntervalVector& box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
 
 /**
  * \brief Newton on a subset of variables.
  */
-bool newton(const Function& f, const VarSet& vars, IntervalVector& full_box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
+bool newton(const Fnc& f, const VarSet& vars, IntervalVector& full_box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
 
 /**
  * \ingroup numeric
@@ -85,7 +85,7 @@ bool newton(const Function& f, const VarSet& vars, IntervalVector& full_box, dou
  *
  * \return True if it is proven that the output box contains a solution.
  */
-bool inflating_newton(const Function& f, const IntervalVector& box, IntervalVector& box_existence, IntervalVector& box_unicity,
+bool inflating_newton(const Fnc& f, const IntervalVector& box, IntervalVector& box_existence, IntervalVector& box_unicity,
 		int k_max_iteration=15, double mu_max_divergence=1.0,
 		double delta_relative_inflat=1.1, double chi_absolute_inflat=1e-12);
 
@@ -95,10 +95,10 @@ bool inflating_newton(const Function& f, const IntervalVector& box, IntervalVect
  *
  * \brief Multivariate Newton operator (inflating).
  *
- * Same function as #ibex::inflating_newton(const Function&, const IntervalVector&, IntervalVector&, IntervalVector&, int, double, double, double)
+ * Same function as #ibex::inflating_newton(const Fnc&, const IntervalVector&, IntervalVector&, IntervalVector&, int, double, double, double)
  * but with an extra argument "vars" that allows to call Newton on a subset of variables.
  */
-bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVector& box, IntervalVector& box_existence, IntervalVector& box_unicity,
+bool inflating_newton(const Fnc& f, const VarSet& vars, const IntervalVector& box, IntervalVector& box_existence, IntervalVector& box_unicity,
 		int k_max_iteration=15, double mu_max_divergence=1.0,
 		double delta_relative_inflat=1.1, double chi_absolute_inflat=1e-12);
 
@@ -112,7 +112,7 @@ bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVecto
  * are the "most influencing" variable obtained by the pivoting
  * of Gauss elimination.
  */
-VarSet get_newton_vars(const Function& f, const Vector& pt, const BitSet& forced_params);
+VarSet get_newton_vars(const Fnc& f, const Vector& pt, const BitSet& forced_params);
 
 } // end namespace ibex
 #endif // __IBEX_NEWTON_H__

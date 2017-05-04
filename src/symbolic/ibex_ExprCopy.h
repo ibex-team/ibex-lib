@@ -37,6 +37,13 @@ bool varequals(const Array<const ExprSymbol>& args1, Array<const ExprSymbol>& ar
 
 
 /**
+ * \brief Get the ith component of a symbol list.
+ *
+ * Example: if args=(x[3],y,z[2]) then var_component(args,4) return the expression z[0].
+ */
+const ExprNode& var_component(const Array<const ExprSymbol>& args, int i);
+
+/**
  * \brief Duplicate an expression
  */
 class ExprCopy : public virtual ExprVisitor {

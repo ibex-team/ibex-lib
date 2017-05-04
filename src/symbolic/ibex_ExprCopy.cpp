@@ -33,6 +33,27 @@ bool varequals(const Array<const ExprSymbol>& arg1, Array<const ExprSymbol>& arg
 	return true;
 }
 
+const ExprNode& var_component(const Array<const ExprSymbol>& args, int i) {
+
+	int n=0; // count the symbols
+	int j=0; // count the number of components up to symbol n;
+	while (n<args.size() && j<=i) {
+		const ExprNode& x=args[n];
+		if (j+x.dim.size() > i) { // we have found the right symbol
+			switch (x.dim.type()) {
+			case Dim::SCALAR :      return x;
+			case Dim::ROW_VECTOR:
+			case Dim::COL_VECTOR:   return x[i-j];
+			case Dim::MATRIX:       return x[(i-j) / x.dim.nb_cols()][(i-j) % x.dim.nb_cols()];
+			}
+		} else {
+			j+=x.dim.size();
+			n++;
+		}
+	}
+	ibex_error("var_component: index exceeds size.");
+}
+
 const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y) {
 
 	clone.clean();
