@@ -12,6 +12,10 @@
 #ifndef __TEST_SYSTEM_H__
 #define __TEST_SYSTEM_H__
 
+#ifndef SRCDIR_TESTS
+  #define SRCDIR_TESTS "."
+#endif
+
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"

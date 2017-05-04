@@ -12,6 +12,10 @@
 #ifndef __TEST_PARSER_H__
 #define __TEST_PARSER_H__
 
+#ifndef SRCDIR_TESTS
+  #define SRCDIR_TESTS "."
+#endif
+
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
@@ -34,6 +38,7 @@ public:
 	CPPUNIT_TEST(func02);
 	CPPUNIT_TEST(func03);
 	CPPUNIT_TEST(loop01);
+	CPPUNIT_TEST(const08);
 	CPPUNIT_TEST(issue245_1);
 	CPPUNIT_TEST(issue245_2);
 	CPPUNIT_TEST(issue245_3);

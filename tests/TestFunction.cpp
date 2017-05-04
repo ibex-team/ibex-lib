@@ -15,6 +15,9 @@
 #include "ibex_Expr.h"
 #include "ibex_SyntaxError.h"
 #include <sstream>
+#ifndef HAVE_FMEMOPEN
+  #include "fmemopen.h"
+#endif
 
 using namespace std;
 

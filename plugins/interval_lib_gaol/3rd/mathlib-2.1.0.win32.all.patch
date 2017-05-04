@@ -1,0 +1,8 @@
+--- mathlib-2.1.0/src/mathlib_config_mingw.h	2016-11-02 15:00:25.163426658 +0100
++++ mathlib-2.1.0/src/mathlib_config_mingw.h	2016-11-02 15:00:45.048205037 +0100
+@@ -9,3 +9,5 @@
+ #define VERSION "0.0.1"
+ 
+ #define MATHLIB_MINGW 1
++#define MATHLIB_CYGWIN 1
++#define IX86_CPU 1

@@ -11,7 +11,7 @@
 
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Agenda.h"
-#include "ibex_TemplateMatrix.h_"
+#include "ibex_TemplateMatrix.h"
 
 namespace ibex {
 

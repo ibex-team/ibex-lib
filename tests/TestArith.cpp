@@ -118,7 +118,7 @@ void TestArith::float08() { CPPUNIT_ASSERT( NEG_INFINITY == ibex::previous_float
 void TestArith::float09() { CPPUNIT_ASSERT( POS_INFINITY == ibex::next_float(DBL_MAX)); }
 void TestArith::float10() {
 	const double CNEG_INF = NEG_INFINITY;
-    CPPUNIT_ASSERT( CNEG_INF == previous_float(-DBL_MAX));
+    CPPUNIT_ASSERT( CNEG_INF == ibex::previous_float(-DBL_MAX));
 }
 
 void TestArith::minus01() { check(-Interval(0,1), Interval(-1,0)); }
@@ -311,8 +311,8 @@ void TestArith::sin08() { check_trigo(Interval(1.5,3), Interval(sin(3.0),1)); }
 void TestArith::sin09() { check_trigo(Interval(3,4), Interval(sin(4.0),sin(3.0))); }
 void TestArith::sin10() { check_trigo(Interval(3,5), Interval(-1,sin(3.0))); }
 void TestArith::sin11() { check_trigo(Interval(3,2*piU+1.5), Interval(-1,sin(1.5))); }
-void TestArith::sin12() { check_trigo(Interval(5,2*piU+1.5), Interval(sin(5),sin(1.5))); }
-void TestArith::sin13() { check_trigo(Interval(5,2*piU+3), Interval(sin(5),1)); }
+void TestArith::sin12() { check_trigo(Interval(5,2*piU+1.5), Interval(sin(5.0),sin(1.5))); }
+void TestArith::sin13() { check_trigo(Interval(5,2*piU+3), Interval(sin(5.0),1)); }
 
 void TestArith::tan01() { check(tan(Interval::ALL_REALS), Interval::ALL_REALS); }
 void TestArith::tan02() { check(tan(-Interval::PI/4.0 | Interval::PI/4.0), Interval(-1,1)); }
