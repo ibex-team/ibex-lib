@@ -1,0 +1,80 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import ibexutils
+import os, sys
+from waflib import Logs
+
+######################
+###### options #######
+######################
+def options (opt):
+	pass # no options for this plugin
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	if conf.env["INTERVAL_LIB"]:
+		conf.fatal ("Trying to configure a second library for interval arithmetic")
+	conf.env["INTERVAL_LIB"] = "DIRECT"
+
+	Logs.warn ("Using interval library direct may not give exact results")
+
+	conf.check_cxx (cxxflags = "-frounding-math", use = [ "IBEX", "ITV_LIB" ],
+			uselib_store = "ITV_LIB")
+	conf.check_cxx (cxxflags = "-ffloat-store", use = [ "IBEX", "ITV_LIB" ],
+			uselib_store = "ITV_LIB")
+
+	# Define needed variables
+	cpp_wrapper_node = conf.path.make_node ("wrapper.cpp")
+	h_wrapper_node = conf.path.make_node ("wrapper.h")
+	conf.env.IBEX_INTERVAL_LIB_WRAPPER_CPP = cpp_wrapper_node.read()
+	conf.env.IBEX_INTERVAL_LIB_WRAPPER_H = h_wrapper_node.read()
+	conf.env.IBEX_INTERVAL_LIB_INCLUDES = "/* */"
+	conf.env.IBEX_INTERVAL_LIB_EXTRA_DEFINES = """
+class DIRECT_INTERVAL
+{
+	public:
+		double inf;
+		double sup;
+		bool isEmpty;
+
+	DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
+	DIRECT_INTERVAL(double a, double b)
+	{
+		if (a==POS_INFINITY || b==NEG_INFINITY || a>b )
+		{
+			inf = 0;
+			sup = 0;
+			isEmpty=true;
+		}
+		else
+		{
+			inf = a;
+			sup = b;
+			isEmpty=false;
+		}
+	}
+
+	DIRECT_INTERVAL(double a) : inf(a), sup(a), isEmpty(false) {}
+
+	/** assignment operator */
+	inline DIRECT_INTERVAL & operator= (DIRECT_INTERVAL const & o)
+	{
+		this->inf = o.inf;
+		this->sup = o.sup;
+		this->isEmpty = o.isEmpty;
+		return *this;
+	}
+};
+"""
+	# TODO: [gch] 1.0/0.0 is ugly, why not using
+	# std::numeric_limits<T>::infinity() instead?
+	conf.env.IBEX_INTERVAL_LIB_NEG_INFINITY = "(-(1.0/0.0))"
+	conf.env.IBEX_INTERVAL_LIB_POS_INFINITY = "(1.0/0.0)"
+	conf.env.IBEX_INTERVAL_LIB_ITV_EXTRA = "/* */"
+	conf.env.IBEX_INTERVAL_LIB_ITV_WRAP = "Interval(const DIRECT_INTERVAL& x);"
+	conf.env.IBEX_INTERVAL_LIB_ITV_ASSIGN = "Interval& operator=(const DIRECT_INTERVAL& x);"
+	conf.env.IBEX_INTERVAL_LIB_ITV_DEF = "DIRECT_INTERVAL itv;"
+	conf.env.IBEX_INTERVAL_LIB_DISTANCE = "fabs(x1.lb()-x2.lb()) <fabs(x1.ub()-x2.ub()) ? fabs(x1.ub()-x2.ub()) : fabs(x1.lb()-x2.lb()) ;"

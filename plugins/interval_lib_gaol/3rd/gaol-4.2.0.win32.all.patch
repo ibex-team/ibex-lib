@@ -1,0 +1,121 @@
+--- gaol-4.2.0/Makefile.in	2016-12-01 14:13:36.915562360 +0100
++++ gaol-4.2.0/Makefile.in	2016-12-01 14:13:45.355870019 +0100
+@@ -353,8 +353,8 @@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ EXTRA_DIST = BUGS msvc examples
+-SUBDIRS = gdtoa gaol check gdtoa/test
+-DIST_SUBDIRS = gdtoa gaol check doc gdtoa/test
++SUBDIRS = gdtoa gaol gdtoa/test
++DIST_SUBDIRS = gdtoa gaol doc gdtoa/test
+ ACLOCAL_AMFLAGS = -I m4
+ 
+ # Requires automake 1.4
+--- gaol-4.2.0/gdtoa/gdtoa.h	2016-11-02 17:41:31.922173915 +0100
++++ gaol-4.2.0/gdtoa/gdtoa.h	2016-11-02 17:42:24.568240369 +0100
+@@ -117,7 +117,7 @@
+ extern char* gdtoa ANSI((FPI *fpi, int be, ULong *bits, int *kindp,
+ 			int mode, int ndigits, int *decpt, char **rve));
+ extern void freedtoa ANSI((char*));
+-#if !IX86_MACOSX
++#if !IX86_MACOSX && !__MINGW32__
+ extern float  strtof ANSI((CONST char *, char **)) __GAOL_THROW();
+ extern double strtod ANSI((CONST char *, char **)) __GAOL_THROW();
+ #endif // IX86_MACOSX
+--- gaol-4.2.0/gaol/gaol_version.h	2016-11-02 17:52:49.176757087 +0100
++++ gaol-4.2.0/gaol/gaol_version.h	2016-11-02 17:53:04.505358760 +0100
+@@ -33,11 +33,7 @@
+ 
+ #if defined (_MSC_VER)
+ # include "gaol/gaol_version_msvc.h"
+-
+-#elif defined (__MINGW32__)
+-// Nothing for now. FIXME!
+-
+-#elif defined (__GNUC__)
++#else
+ # include "gaol/gaol_configuration.h"
+ #endif
+ 
+--- gaol-4.2.0/gaol/gaol_config.h	2016-11-02 17:52:49.176757087 +0100
++++ gaol-4.2.0/gaol/gaol_config.h	2016-11-02 17:53:04.505358760 +0100
+@@ -48,22 +48,7 @@
+ # define INLINE inline
+ # include "gaol/gaol_config_msvc.h"
+ 
+-#elif defined (__MINGW32__)
+-
+-# define GAOL_ERRNO errno
+-# undef PACKAGE
+-# undef VERSION
+-# include "gaol/gaol_config_mingw.h"
+-# ifndef __GAOL_PUBLIC__
+-#  if defined (HAVE_VISIBILITY_OPTIONS)
+-#     define __GAOL_PUBLIC__ __attribute__ ((visibility("default")))
+-#  else
+-#     define __GAOL_PUBLIC__
+-#  endif
+-# endif
+-# define INLINE inline
+-
+-#elif defined (__GNUC__)
++#else
+ # define GAOL_ERRNO errno
+ # undef PACKAGE
+ # undef VERSION
+@@ -77,16 +62,6 @@
+ # endif
+ # define INLINE inline
+ 
+-#else
+-
+-# define GAOL_ERRNO errno
+-# undef PACKAGE
+-# undef VERSION
+-# ifndef __GAOL_PUBLIC__
+-#  define __GAOL_PUBLIC__
+-# endif
+-# define INLINE inline
+-# include "gaol/gaol_configuration.h"
+ #endif
+ 
+ #endif /* __gaol_config_h__ */
+--- gaol-4.2.0/check/reverse_mappings.cpp	2016-12-01 13:51:39.479201019 +0100
++++ gaol-4.2.0/check/reverse_mappings.cpp	2016-12-01 13:51:14.342263016 +0100
+@@ -7,6 +7,11 @@
+  */
+ #define RAND_INIT_PID 1
+ 
++#ifdef __MINGW32__
++#define srand48(x) srand(x)
++#define drand48() ((double) rand() / ((double) RAND_MAX + 1.0))
++#endif
++
+ using std::cout;
+ using std::endl;
+ 
+--- gaol-4.2.0/check/performance_test_set.cpp	2016-12-01 13:52:56.294060677 +0100
++++ gaol-4.2.0/check/performance_test_set.cpp	2016-12-01 13:53:11.882639855 +0100
+@@ -31,6 +31,10 @@
+ #include "performance_test_set.h"
+ #include "../gaol/gaol.h"
+ 
++#ifdef __MINGW32__
++#define drand48() ((double) rand() / ((double) RAND_MAX + 1.0))
++#endif
++
+ using namespace std;
+ using namespace gaol;
+ 
+--- gaol-4.2.0/check/performances.cpp	2016-12-01 14:01:19.084604113 +0100
++++ gaol-4.2.0/check/performances.cpp	2016-12-01 14:01:40.221379179 +0100
+@@ -38,6 +38,9 @@
+ // Maximum bound on exponent used for pow
+ #define EXP_BOUND 10
+ 
++#ifdef __MINGW32__
++#define srand48(x) srand(x)
++#endif
+ 
+ const size_t MAX = 1000000;
+ const size_t LOOPS = 10;

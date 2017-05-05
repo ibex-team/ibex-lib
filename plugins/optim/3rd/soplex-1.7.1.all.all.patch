@@ -1,0 +1,22 @@
+--- soplex-1.7.1/src/mpsinput.cpp	2016-09-12 11:57:15.955000189 +0200
++++ soplex-1.7.1/src/mpsinput.cpp	2016-09-12 11:56:57.158356665 +0200
+@@ -70,7 +70,7 @@
+       // Read until we have a not comment line.
+       do
+       {
+-         if (m_input.getline(m_buf, sizeof(m_buf)) == 0)
++         if (!m_input.getline(m_buf, sizeof(m_buf)))
+             return false;
+         m_lineno++;
+
+--- soplex-1.7.1/Makefile	2016-09-12 14:29:39.702843260 +0200
++++ soplex-1.7.1/Makefile	2016-09-12 14:29:44.387020171 +0200
+@@ -67,7 +67,7 @@
+ LIBBUILD_o	=	$(AR_o)
+ LIBBUILDFLAGS	=       $(ARFLAGS)
+ 
+-CPPFLAGS	=	-Isrc
++CPPFLAGS	=	-Isrc -fPIC
+ CXXFLAGS	=	
+ BINOFLAGS	=	
+ LIBOFLAGS	=	

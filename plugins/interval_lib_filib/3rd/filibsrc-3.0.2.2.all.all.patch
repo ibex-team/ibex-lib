@@ -1,0 +1,24 @@
+--- filibsrc-3.0.2.2/interval/interval_arith.icc	2016-07-28 15:01:26.130530870 +0200
++++ filibsrc-3.0.2.2/interval/interval_arith.icc	2016-07-28 15:01:39.406530478 +0200
+@@ -214,8 +214,8 @@
+ 				else
+ 				{
+ 					if (
+-						isInfinite()   && ! a.isEmpty() ||
+-						a.isInfinite() && !   isEmpty()
++						(isInfinite()   && ! a.isEmpty()) ||
++						(a.isInfinite() && !   isEmpty())
+ 					)
+ 					{
+ 						*this = ENTIRE();
+--- filibsrc-3.0.2.2/interval/interval.icc	2016-07-28 15:09:07.522517238 +0200
++++ filibsrc-3.0.2.2/interval/interval.icc	2016-07-28 15:09:21.078516837 +0200
+@@ -723,7 +723,7 @@
+ 	bool interval<N,K,E>::interior(interval<N,K,E> const & a) const
+ 	{
+ 		if ( E )
+-			return a.INF < INF && SUP < a.SUP  || isEmpty();
++			return (a.INF < INF && SUP < a.SUP)  || isEmpty();
+ 		else
+ 			return a.INF < INF && SUP < a.SUP;
+ 	}

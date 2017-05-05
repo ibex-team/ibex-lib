@@ -1,0 +1,197 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import os
+from waflib import Logs, Errors, Utils
+from waflib.Tools import waf_unit_test
+import ibexutils
+
+# function called after the tests are run for pretty printing the results
+def utest_format_output (tst):
+	# The logger is freed at the end of the utest function but the tasks are
+	# performed afterwards, so we recreate the logger.
+	logfile = os.path.join (tst.bldnode.abspath(), "utest_run.log")
+	tst.logger = Logs.make_logger (logfile, "utest_run")
+
+	def to_unicode (s):
+		r = None
+		if isinstance (s, unicode):
+			r = s
+		else:
+			for f in [ 'ascii', 'cp1251', 'cp1252', 'latin1', 'utf-8' ] :
+				try:
+					r = s.decode(f)
+					break
+				except UnicodeDecodeError:
+					continue
+		assert (not r is None)
+		return r
+
+	def format_out (stream, name):
+		s = name + ":" + os.linesep
+		for l in to_unicode(stream).splitlines(True):
+			s += "  " + l
+		return s
+
+	def parse_output (stream):
+		for l in to_unicode(stream).splitlines(True):
+			if l.startswith ("Run"):
+				data = l.split()
+				return (int(data[1]), int(data[3]) + int(data[5]))
+			if l.startswith ("Tests run"):
+				data = l.split()
+				return (int(data[2][:-1]), int(data[4]))
+			elif l.startswith ("OK"):
+				return (int(l.split()[1][1:]), 0)
+		return (None, None)
+
+	lst = sorted (getattr(tst, 'utest_results', []), key = lambda x:x[0])
+	nfailed = 0
+	ntot = 0
+	errmsg = ""
+	for (f, ret, stdout, stderr) in lst:
+		name = os.path.basename (f)
+		tst.start_msg (name)
+		(n, nf) = parse_output (stdout)
+		if ret:
+			errmsg += os.linesep
+			errmsg += "Test '%s' failed with return code %s" %(name, ret)
+			errmsg += os.linesep
+			errmsg += format_out (stderr, "stderr") + format_out (stdout, "stdout")
+
+		if n is None: # An error occurs: could not parse the output
+			if ret:
+				tst.end_msg ("Error: program failure !", color = "RED")
+				ntot += 1
+				nfailed += 1
+			else:
+				tst.end_msg ("Could not parse the output", color = "YELLOW")
+				Logs.warn (format_out(stderr, "stderr") + format_out(stdout, "stdout"))
+		else:
+			tst.end_msg ("%d/%d" % (n-nf,n), color=("RED" if nf else "GREEN"))
+			ntot += n
+			nfailed += nf
+
+	tst.msg ("=========", "=========", color = "NORMAL")
+	if nfailed:
+		tst.msg ("All tests", "%d/%d" % (ntot-nfailed, ntot), color = "RED")
+		h = "Error: %s test%s failed" % (nfailed, "s" if nfailed > 1 else "")
+		tst.fatal (h + os.linesep + errmsg)
+	else:
+		tst.msg ("All tests", "%d/%d" % (ntot-nfailed, ntot), "GREEN")
+		Logs.info ("All tests passed")
+
+	Logs.free_logger (tst.logger)
+	tst.logger = None
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	conf.load("waf_unit_test")
+
+	# cppunit is needed to run the tests but we set mandatory=False because the
+	# tests are not mandatory. First we try with pkg-config
+	try:
+		conf.check_cfg (package="cppunit", args="--cflags --libs",
+										uselib_store="CPPUNIT")
+	except Errors.WafError:
+		conf.check_cxx (header_name="cppunit/Test.h", uselib_store="CPPUNIT",
+										mandatory=False)
+		conf.check_cxx (lib="cppunit", uselib_store="CPPUNIT", mandatory=False)
+
+	# Looking for fmemopen
+	conf.check_cxx (function_name = "fmemopen", header_name = "stdio.h",
+			mandatory = False)
+
+	# Set env variable containing the list of all test source files (by looking
+	# recursively for all files ending with '.cpp')
+	test_src = conf.path.ant_glob ("**/*.cpp")
+	test_src =[ f.path_from (conf.path) for f in test_src ]
+	conf.env.append_unique ("TEST_SRC", test_src)
+
+	# Add current directory to list of INCLUDES for TESTS
+	conf.env.append_unique ("INCLUDES_TESTS", conf.path.abspath ())
+
+	# if fmemopen is not available, use implementation from tests/3rd/fmemopen
+	if not conf.env.HAVE_FMEMOPEN:
+		if not Utils.is_win32:
+			conf.env.append_unique ("TEST_SRC", "3rd/fmemopen/fmemopen.c")
+			conf.env.append_unique ("INCLUDES_TESTS",
+					os.path.join (conf.path.abspath (), "3rd", "fmemopen"))
+		else:
+			# XXX The workaround does not work on windows. Missing header sys/mman.h
+			# So, for now, we remove the two test files that need fmemopen
+			conf.env.TEST_SRC.remove("TestFunction.cpp")
+			conf.env.TEST_SRC.remove("TestParser.cpp")
+
+######################
+####### utest ########
+######################
+def utest (tst):
+	if tst.env.HAVE_CPPUNIT:
+		env_bak = tst.env.env
+		tst.env.env = tst.env.env if tst.env.env else {}
+
+		# Set PKG_CONFIG_PATH if it does not contain tst.env.PKGDIR
+		# On Windows, we assume that PKG_CONFIG_PATH is a ";"-separated list
+		split_char = ";" if Utils.is_win32 else ":"
+		pkg_path = os.getenv ("PKG_CONFIG_PATH", "").split (split_char)
+		if not tst.env.PKGDIR in pkg_path:
+			Logs.warn ("You should add '%s' to your PKG_CONFIG_PATH" % tst.env.PKGDIR)
+			pkg_path.append (tst.env.PKGDIR)
+		tst.env.env["PKG_CONFIG_PATH"] = split_char.join (pkg_path)
+
+		# Using pkg-config to retrieve info on ibex (assume './waf install' was run)
+		try:
+			tst.check_cfg (package="ibex",args="--cflags --libs",uselib_store="TESTS")
+		except Errors.WafError:
+			tst.fatal ("Could not find ibex configuration via pkg-config.\n"
+								 "Did you run './waf install' first ?")
+
+		# reset env
+		tst.env.env = env_bak
+
+		# always run the tests
+		tst.options.all_tests = True
+
+		# define SRCDIR_TESTS
+		srcdir = ibexutils.escape_backslash_on_win32 (tst.path.abspath ())
+		defines = "SRCDIR_TESTS=\"%s\"" % srcdir
+
+		# Use own function for reporting test results
+		tst.add_post_fun (utest_format_output)
+
+		# split in two: the real tests (starting with "Test") and the utils files
+		def split_fun (f):
+			return os.path.basename (f).startswith("Test")
+
+		base_src = [ f for f in tst.env.TEST_SRC if not split_fun (f) ]
+		test_src = [ f for f in tst.env.TEST_SRC if split_fun (f) ]
+
+		tst (features = "cxx", source = base_src, target="utest_base",
+				use=["TESTS", "CPPUNIT"], defines = defines)
+
+		kwargs = {"features": "test",
+							"use": ["TESTS", "CPPUNIT", "utest_base"],
+							"defines": defines}
+
+		if tst.env.ENABLE_SHARED:
+			# add in rpath if not in LD_LIBRARY_PATH
+			ld_lib_path = os.getenv ("LD_LIBRARY_PATH", "").split (":")
+			lib_for_rpath = [p for p in tst.env.LIBPATH_TESTS if not p in ld_lib_path]
+			kwargs["rpath"] = ":".join(lib_for_rpath)
+			for path in lib_for_rpath: 
+				Logs.warn ("You should add '%s' to your LD_LIBRARY_PATH" % path)
+
+		for f in test_src:
+			dirname, basename = os.path.split (f)
+			name = basename[4:-4] # Remove "Test" at the beginning, ".cpp" at the end
+			if dirname:
+				name = os.path.basename (os.path.dirname (dirname)) + "_" + name
+			kwargs["source"] = f
+			kwargs["target"] = "utest_" + name
+			tst.program (**kwargs)
+
+	else:
+		tst.fatal ("Cannot run the tests without cppunit (not found at configure)")
