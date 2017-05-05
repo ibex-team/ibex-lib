@@ -10,7 +10,9 @@ import waf_java_utils
 def options (opt):
 	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
 			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
-	opt.add_option ("--with-java-package", action="store", type="string",
+
+	grp = opt.add_option_group ("Options for the plugin JNI/Java")
+	grp.add_option ("--java-package-name", action="store", type="string",
 			dest="JAVA_PACKAGE", default="ibex",
 			help="name of the java package to be build (default is ibex)")
 
