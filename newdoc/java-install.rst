@@ -7,6 +7,11 @@ Installation (Java Plugin for Choco with Ibex 2.4)
 
    Read how to :ref:`install Ibex <ibex-install>` before installing this plugin.
 
+
+.. warning::
+
+   The option ``--with-java-package`` has been changed to ``--java-package-name``
+   
 The installation of the plugin will generate, in addition to the Ibex library, the libibex-java library that contains the glue code between C++ and Java.
 
 ==========================
@@ -42,7 +47,7 @@ Under MinGW, the variable must be set in Liux-style (don't use backslash ("\\") 
 Then configure Ibex as follows::
 
 	~/Ibex/$ cd ibex-2.4.0
-	~/Ibex/ibex-2.4.0/$ ./waf configure [...] --enable-shared --with-jni --with-java-package=org.chocosolver.solver.constraints.real
+	~/Ibex/ibex-2.4.0/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
 
 **Note**: the ``--enable-shared`` option is mandatory.
 
@@ -55,7 +60,7 @@ Configuration options
 The IbexOpt plugin supports the following options (to be used with waf configure) :
 
 --with-jni 	                      Activate the Java plugin.
---with-java-package=PACKAGE_NAME
+--java-package-name=PACKAGE_NAME
  	                              The plugin will create the PACKAGE_NAME.jar file. This file is put into the ``[prefix]/share/java`` 
  	                              where [prefix] is ``/usr/local`` by default or whatever path specified via ``--prefix``.
 
@@ -79,7 +84,7 @@ When running the “CycloHexan” example from Choco using Ibex, the following e
 
 Solution: You probably did not set the Java package properly. The java package of the Ibex class in Choco is org.chocosolver.solver.constraints.real, try::
 
-	./waf configure [....] --with-java-package=org.chocosolver.solver.constraints.real
+	./waf configure [....] --java-package-name=org.chocosolver.solver.constraints.real
 
 ----------------------------------------------
 JAVA_HOME does not seem to be set properly

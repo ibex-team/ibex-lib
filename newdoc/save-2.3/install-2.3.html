@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation (Release 2.3.0) &mdash; IBEX 2.3.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="IBEX 2.3.0 documentation" href="index.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">IBEX 2.3.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation-release-2-3-0">
+<span id="ibex-install"></span><h1>Installation (Release 2.3.0)<a class="headerlink" href="#installation-release-2-3-0" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="linux-and-macos">
+<h2>Linux and MacOS<a class="headerlink" href="#linux-and-macos" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fast-install">
+<h3>Fast install<a class="headerlink" href="#fast-install" title="Permalink to this headline">¶</a></h3>
+<p>The installation assumes your system meets some <a class="reference internal" href="#requirements">requirements</a>.</p>
+<p>Save the archive <tt class="docutils literal"><span class="pre">ibex-2.3.0.tar.gz</span></tt> in some <tt class="docutils literal"><span class="pre">Ibex</span></tt> folder and:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-2.3.0.tar.gz
+~/Ibex/$ cd ibex-2.3.0
+~/Ibex/ibex-2.3.0/$ ./waf configure
+~/Ibex/ibex-2.3.0/$ sudo ./waf install
+</pre></div>
+</div>
+<p><strong>Note:</strong> Ibex can either be compiled with <a class="reference external" href="http://sourceforge.net/projects/gaol">Gaol</a>, <a class="reference external" href="http://www2.math.uni-wuppertal.de/~xsc/software/filib.html">Filib</a> or <a class="reference external" href="http://www.ti3.tu-harburg.de/keil/profil/index_e.html">Profil/Bias</a>.
+If your platform is 32 bits, the standard installation will automatically extract and build the Gaol library (and its dependencies) from the bundle, because Gaol is the fastest one. However, if your platform is 64 bits, it will extract and install Filib instead because the current release of Gaol does not support 64 bit platform.</p>
+</div>
+<div class="section" id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h3>
+<p>The following applications must be installed.</p>
+<ul class="simple">
+<li>g++</li>
+<li>gcc</li>
+<li>flex</li>
+<li>bison</li>
+<li>python2.x (<strong>warning</strong>: the script are currently not compatible with python3)</li>
+<li>make</li>
+<li>pkg-config (<em>optionnal</em>)</li>
+</ul>
+<p>On Ubuntu, you can install all you need with:</p>
+<div class="highlight-python"><div class="highlight"><pre>~$ sudo apt-get install -y python2.7 flex bison gcc g++ make pkg-config
+</pre></div>
+</div>
+</div>
+<div class="section" id="compiling-a-test-program">
+<span id="install-compiling-running"></span><h3>Compiling a Test Program<a class="headerlink" href="#compiling-a-test-program" title="Permalink to this headline">¶</a></h3>
+<p>Copy-paste the following example code in a file named <tt class="docutils literal"><span class="pre">foo.cpp</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre>#include &quot;ibex.h&quot;
+#include &lt;iostream&gt;
+
+using namespace std;
+using namespace ibex;
+
+int main(int argc, char** argv) {
+  Interval x(0,1);
+  cout &lt;&lt; &quot;My first interval: &lt;&lt; x &lt;&lt; endl;
+}
+</pre></div>
+</div>
+<p>There is a simple &#8220;makefile&#8221; in the <tt class="docutils literal"><span class="pre">examples</span></tt> folder that you can use to compile your own programs.
+This makefile however assumes <tt class="docutils literal"><span class="pre">pkg-config</span></tt> is installed on your system (which is done by default on many Linux distribution).</p>
+<p>So, place the file <tt class="docutils literal"><span class="pre">foo.cpp</span></tt> in the <tt class="docutils literal"><span class="pre">examples/</span></tt> folder and:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ cd examples
+~/Ibex/ibex-2.3.0/examples$ make foo
+~/Ibex/ibex-2.3.0/examples$ ./foo
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic">
+<li><p class="first">It may be necessary to set the <tt class="docutils literal"><span class="pre">PKG_CONFIG_PATH</span></tt> to <em>[prefix]</em><tt class="docutils literal"><span class="pre">/share/pkgconfig</span></tt> where <em>[prefix]</em> is
+<tt class="docutils literal"><span class="pre">/usr/local</span></tt> by default or whatever path specified via <tt class="docutils literal"><span class="pre">--prefix</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/
+</pre></div>
+</div>
+</li>
+<li><p class="first">If Ibex is compiled as a dynamic library (with <tt class="docutils literal"><span class="pre">--enabled-shared</span></tt>) set the <tt class="docutils literal"><span class="pre">LD_LIBRARY_PATH</span></tt> accordingly:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ export LD_LIBRARY_PATH=[prefix]/lib/
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<p><strong>Note:</strong> this makefile uses the extended syntax of GNU make.</p>
+</div>
+<div class="section" id="uninstall">
+<h3>Uninstall<a class="headerlink" href="#uninstall" title="Permalink to this headline">¶</a></h3>
+<p>Simply type in the path of IBEX (under the shell of MinGW for Windows):</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0$ sudo ./waf uninstall
+~/Ibex/ibex-2.3.0$ ./waf distclean
+</pre></div>
+</div>
+<p><strong>Note:</strong> sudo is useless if Ibex is installed in a local folder.</p>
+<p>It is highly recommended to uninstall Ibex like this before upgrading to a new release.</p>
+</div>
+</div>
+<div class="section" id="windows">
+<h2>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><dl class="first docutils">
+<dt>Install <a class="reference external" href="https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/">MinGW+Msys</a>.</dt>
+<dd><p class="first">Select the following components to be installed:</p>
+<ul class="last simple">
+<li>A MSYS Installation for MinGW Developers</li>
+<li>A Basic MinGW Installation</li>
+<li>The GNU C++ Compiler</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">With recent releases of MinGW, you have to run the executable <tt class="docutils literal"><span class="pre">pi.bat</span></tt> in <tt class="docutils literal"><span class="pre">C:\MinGW\msys\1.0\postinstall</span></tt></p>
+</li>
+<li><p class="first">Install <a class="reference external" href="https://www.python.org/download/releases/2.7.3/">Python2</a> (<strong>warning</strong>: the script are currently not compatible with python3)</p>
+</li>
+<li><p class="first">Create a new directory <tt class="docutils literal"><span class="pre">Ibex</span></tt> in the shell of MinGW (to open the shell of MinGW, click on <tt class="docutils literal"><span class="pre">Start</span> <span class="pre">-&gt;</span> <span class="pre">MinGW</span> <span class="pre">-&gt;</span> <span class="pre">MinGWShell</span></tt>):</p>
+<div class="highlight-python"><div class="highlight"><pre>mkdir Ibex
+</pre></div>
+</div>
+<p><strong>Note:</strong> if you don&#8217;t have MinGW in your Start menu, run the executable file <tt class="docutils literal"><span class="pre">msys.bat</span></tt> in <tt class="docutils literal"><span class="pre">C:\MinGW\msys\1.0</span></tt>.</p>
+</li>
+<li><p class="first">Assuming you have installed MinGW in <tt class="docutils literal"><span class="pre">C:\</span></tt>, the <tt class="docutils literal"><span class="pre">Ibex</span></tt> directory you have created should be located on your system here:</p>
+<div class="highlight-python"><div class="highlight"><pre>C:\MinGW\msys\1.0\home\[user]\Ibex
+</pre></div>
+</div>
+<p>We will assume now that this folder is the root folder of ibex.</p>
+</li>
+<li><p class="first">Save the archive <tt class="docutils literal"><span class="pre">ibex-2.3.0.tar.gz</span></tt> in <tt class="docutils literal"><span class="pre">C:\MinGW\msys\1.0\home\[user]\Ibex</span></tt></p>
+</li>
+<li><p class="first">Configure Ibex (still in the shell of MinGW):</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ export PATH=&quot;$PATH:/c/Python27&quot;
+~/Ibex/$ tar xvfz ibex-2.3.0.tar.gz
+~/Ibex/$ cd ibex-2.3.0
+~/Ibex/ibex-2.3.0/$ ./waf configure --prefix=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\ibex-2.3.0
+</pre></div>
+</div>
+<p><strong>Note:</strong> the paths must be entered in Windows-style and with double backslash (&#8220;\&#8221;) as separator.</p>
+</li>
+<li><p class="first">Install Ibex:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ ./waf install
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For mysterious reasons, the command sometimes gets frozen (this was observed while compiling Filib). Use Control-C to interrupt the command and run it again. Do this several times until compilation is over.</p>
+</div>
+<p><strong>Note:</strong> if g++ is not found, it probably means that you have not run the &#8220;postinstall&#8221; script of MinGW (see above).</p>
+<div class="section" id="id1">
+<h3>Compiling a Test Program<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Copy-paste the following example code in a file named <tt class="docutils literal"><span class="pre">foo.cpp</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre>#include &quot;ibex.h&quot;
+#include &lt;iostream&gt;
+
+using namespace std;
+using namespace ibex;
+
+int main(int argc, char** argv) {
+  Interval x(0,1);
+  cout &lt;&lt; &quot;My first interval: &lt;&lt; x &lt;&lt; endl;
+}
+</pre></div>
+</div>
+<p>To compile this file, use the following instructions:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ export IBEX_PATH=C:/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.3.0
+~/Ibex/ibex-2.3.0/$ g++ -I$IBEX_PATH/include -I$IBEX_PATH/include/ibex -L$IBEX_PATH/lib -o foo.exe foo.cpp -libex -lprim
+~/Ibex/ibex-2.3.0/$ ./foo.exe
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="configuration-options">
+<h2>Configuration options<a class="headerlink" href="#configuration-options" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">waf</span></tt> <tt class="docutils literal"><span class="pre">configure</span></tt> supports the following options:</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--enable-shared</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Compile Ibex as a dynamic library.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--prefix=<var>PREFIX</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">Set the folder where Ibex must be installed (by default, <tt class="docutils literal"><span class="pre">/usr/local</span></tt>).</p>
+<p class="last">You can use this option to install Ibex in a local folder.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--with-debug</span></kbd></td>
+<td><p class="first">Compile Ibex in debug mode</p>
+<p>Compiler optimizations are all discarded (<tt class="docutils literal"><span class="pre">-O0</span></tt>), low-level assertions in the code are activated and debug information is stored (<tt class="docutils literal"><span class="pre">-g</span> <span class="pre">-pg</span></tt>)</p>
+<p>Once Ibex has been compiled with this option, you should also compile your executable in debug mode. If you use the <tt class="docutils literal"><span class="pre">makefile</span></tt> of <tt class="docutils literal"><span class="pre">examples/</span></tt>, simply write:</p>
+<div class="last highlight-python"><div class="highlight"><pre>make DEBUG=yes ...
+</pre></div>
+</div>
+</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="headers-of-gaol-not-found">
+<h3>Headers of Gaol not found<a class="headerlink" href="#headers-of-gaol-not-found" title="Permalink to this headline">¶</a></h3>
+<p>When running <tt class="docutils literal"><span class="pre">waf</span> <span class="pre">configure</span></tt>, I get messages like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>Checking for header [&#39;gaol/gaol.h&#39;, &#39;gaol/gaol_interval.h&#39;]   : not found
+ ...
+</pre></div>
+</div>
+<p>Does it mean that Ibex is not properly installed?</p>
+<p><strong>Answer:</strong> No, this mesage simply indicates that gaol was not found on your system and that it will be automatically extracted from the bundle. It is not an error message.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation (Release 2.3.0)</a><ul>
+<li><a class="reference internal" href="#linux-and-macos">Linux and MacOS</a><ul>
+<li><a class="reference internal" href="#fast-install">Fast install</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#compiling-a-test-program">Compiling a Test Program</a></li>
+<li><a class="reference internal" href="#uninstall">Uninstall</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#windows">Windows</a><ul>
+<li><a class="reference internal" href="#id1">Compiling a Test Program</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration-options">Configuration options</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#headers-of-gaol-not-found">Headers of Gaol not found</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">Tutorial</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/install.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             >previous</a> |</li>
+        <li><a href="index.html">IBEX 2.3.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Gilles Chabert.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
