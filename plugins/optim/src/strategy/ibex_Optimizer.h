@@ -25,6 +25,7 @@
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_Random.h"
 #include "ibex_LinearRelaxCombo.h"
+#include "ibex_FritzJohnCond.h"
 
 namespace ibex {
 
@@ -149,6 +150,8 @@ public:
 	 * \warning kept by reference.
 	 */
 	System& user_sys;
+
+	NormalizedSystem normalized_user_sys;
 
 	/**
 	 * \brief The normalized system
@@ -483,7 +486,6 @@ protected:
 	 */
 	bool update_loup_simplex(const IntervalVector& box);
 
-
 	/**
 	 * \brief Display the loup (for debug)
 	 */
@@ -556,6 +558,13 @@ private:
 	int nb_inhc4;
 	double diam_inhc4;
 
+
+	void fritz_john_contract(IntervalVector& box);
+
+	//!! warning: sys.box should be properly set before call to constructor !!
+	//FritzJohnCond fjc;
+
+	Function** dg;
 
 };
 
