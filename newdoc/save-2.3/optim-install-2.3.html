@@ -1,0 +1,361 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation (IbexOpt) &mdash; IBEX 2.3.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="IBEX 2.3.0 documentation" href="index.html" />
+    <link rel="next" title="Tutorial (IbexOpt)" href="optim-tutorial.html" />
+    <link rel="prev" title="Do it Yourself!" href="lab.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="optim-tutorial.html" title="Tutorial (IbexOpt)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lab.html" title="Do it Yourself!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">IBEX 2.3.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation-ibexopt">
+<h1>Installation (IbexOpt)<a class="headerlink" href="#installation-ibexopt" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Read how to <a class="reference internal" href="install.html#ibex-install"><em>install Ibex</em></a> before installing this plugin.</p>
+</div>
+<p>The IbexOpt plugin relies on a LP solver that can either be <a class="reference external" href="http://www.ibm.com/software/commerce/optimization/cplex-optimizer">Cplex</a>, <a class="reference external" href="http://soplex.zib.de">Soplex 1.7.x</a> or <a class="reference external" href="https://projects.coin-or.org/Clp">CLP</a>.</p>
+<p>Because of licence compatibility, the LP solver installed by default is CLP.
+However, the installation process with CLP is still unstable and fails on some platforms.
+Installation with Cplex is also experimental.</p>
+<p>Only the <strong>installation with Soplex is currently stable</strong> so, if possible, we recommend to use Soplex.</p>
+<div class="section" id="linux-and-macos">
+<h2>Linux and MacOS<a class="headerlink" href="#linux-and-macos" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fast-install-experimental">
+<h3>Fast install (experimental)<a class="headerlink" href="#fast-install-experimental" title="Permalink to this headline">¶</a></h3>
+<p>Uncompress the archive <tt class="docutils literal"><span class="pre">ibex-2.3.0.tar.gz</span></tt> in some <tt class="docutils literal"><span class="pre">Ibex</span></tt> folder:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-2.3.0.tar.gz
+</pre></div>
+</div>
+<p>Uncompress the archive <tt class="docutils literal"><span class="pre">ibex-optim.tar.gz</span></tt> in the plugin folder:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-optim.tar.gz --directory=ibex-2.3.0/plugins
+</pre></div>
+</div>
+<p>Add the following option to <tt class="docutils literal"><span class="pre">waf</span> <span class="pre">configure</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ ./waf configure [...] --with-optim
+</pre></div>
+</div>
+<p>And then:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ sudo ./waf install
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The &#8220;fast&#8221; install automatically extracts and install CLP from the bundle. However, the compilation of CLP is not working on all platforms. If it fails, try to install the ubuntu package for CLP or try the procedure below with Soplex. The Linear Solver CLP from the project <a class="reference external" href="https://projects.coin-or.org/Clp">COIN-OR</a> can be install from an official ubuntu package:</p>
+<div class="last highlight-python"><div class="highlight"><pre>~$ sudo apt-get install -y coinor-libclp-dev
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="standard-install-stable">
+<h3>Standard install (stable)<a class="headerlink" href="#standard-install-stable" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Download <a class="reference external" href="http://soplex.zib.de">Soplex 1.7.x</a>, uncompress the archive.</li>
+</ul>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The current release of Ibex is not compatible with Soplex 2.0.</p>
+</div>
+<ul>
+<li><p class="first">Compile Soplex:</p>
+<div class="highlight-python"><div class="highlight"><pre>~$ cd soplex-1.7.x
+~/soplex-1.7.x$ make ZLIB=false
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If Ibex is installed as a dynamic library (<tt class="docutils literal"><span class="pre">--enable-shared</span></tt>), Soplex must also be installed as a dynamic library.
+For this, add the option <tt class="docutils literal"><span class="pre">SHARED=true</span></tt> to the previous command.</p>
+</div>
+</li>
+<li><p class="first">Uncompress the archive <tt class="docutils literal"><span class="pre">ibex-2.3.0.tar.gz</span></tt> in some <tt class="docutils literal"><span class="pre">Ibex</span></tt> folder:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-2.3.0.tar.gz
+</pre></div>
+</div>
+</li>
+<li><p class="first">Uncompress the archive <tt class="docutils literal"><span class="pre">ibex-optim.tar.gz</span></tt> in the plugin folder:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-optim.tar.gz --directory=ibex-2.3.0/plugins
+</pre></div>
+</div>
+</li>
+<li><p class="first">Configure Ibex with the following option:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ ./waf configure [...] --with-optim --with-soplex=[soplex-path]
+</pre></div>
+</div>
+<p>where <em>[soplex-path]</em> is the absolute path where soplex is installed (don&#8217;t use a relative path like <tt class="docutils literal"><span class="pre">--with-soplex=../soplex-1.7.x</span></tt>).</p>
+</li>
+<li><p class="first">Compile Ibex:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ sudo ./waf install
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="compiling-and-running-programs">
+<h3>Compiling and running programs<a class="headerlink" href="#compiling-and-running-programs" title="Permalink to this headline">¶</a></h3>
+<p>To compile and run the default optimizer:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ cd plugins/optim/examples
+~/Ibex/ibex-2.3.0/plugins/optim/$ export PKG_CONFIG_PATH=[ibex-path]/share/pkgconfig
+~/Ibex/ibex-2.3.0/plugins/optim/$ make defaultsolver
+~/Ibex/ibex-2.3.0/plugins/optim/$ ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">PKG_CONFIG_PATH</span></tt> variable is only necessary if you have installed Ibex with <tt class="docutils literal"><span class="pre">--prefix</span></tt>.</p>
+<p>The default solver solves the systems of equations in argument (cyclohexan3D) with a precision less than 1e-05 and
+within a time limit of 10 seconds.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If Ibex is compiled as a dynamic library (with <tt class="docutils literal"><span class="pre">--enabled-shared</span></tt>) set the <tt class="docutils literal"><span class="pre">LD_LIBRARY_PATH</span></tt> accordingly:</p>
+<div class="last highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ export LD_LIBRARY_PATH=[prefix]/lib/:[soplex-path]/lib/
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="windows">
+<h2>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>We assume that <tt class="docutils literal"><span class="pre">C:\MinGW\msys\1.0\home\[user]\Ibex</span></tt> this folder is the root folder of ibex (cf. instructions for
+installing the core library).</div></blockquote>
+<ul class="simple">
+<li>Download <a class="reference external" href="http://soplex.zib.de">Soplex 1.7.x</a> and save the archive in  <tt class="docutils literal"><span class="pre">C:\MinGW\msys\1.0\home\[user]\Ibex</span></tt>.</li>
+</ul>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The current release of Ibex is not compatible with Soplex 2.0.</p>
+</div>
+<ul>
+<li><p class="first">Uncompress and compile Soplex in <tt class="docutils literal"><span class="pre">C:\MinGW\msys\1.0\home\[user]\Ibex</span></tt> (still in the shell of MinGW):</p>
+<div class="highlight-python"><div class="highlight"><pre>~$ cd Ibex
+~/Ibex$ tar xvfz soplex-1.7.x.tgz
+~/Ibex$ cd soplex-1.7.x
+~/Ibex/soplex-1.7.x$ make ZLIB=false
+~/Ibex/soplex-1.7.x$ cd ..
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If Ibex is installed as a dynamic library (<tt class="docutils literal"><span class="pre">--enable-shared</span></tt>), Soplex must also be installed as a dynamic library.
+For this, add the options <tt class="docutils literal"><span class="pre">SHARED=true</span> <span class="pre">SHAREDLIBEXT=dll</span></tt> to the previous command.</p>
+</div>
+</li>
+<li><p class="first">Uncompress the archive <tt class="docutils literal"><span class="pre">ibex-optim.tar.gz</span></tt> in the plugin folder:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-optim.tar.gz --directory=ibex-2.3.0/plugins
+</pre></div>
+</div>
+</li>
+<li><p class="first">Configure Ibex with the following options:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ ./waf configure --prefix=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\ibex-2.3.0 --with-optim --with-soplex=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\soplex-1.7.x
+</pre></div>
+</div>
+<p><strong>Note:</strong> Remember that the paths must be entered in Windows-style and with double backslash (&#8220;\&#8221;) as separator.</p>
+<p><strong>Note:</strong> if you have any trouble to install a linear solver (Clp, Soplex or Cplex), you can install Ibex without linear solver by added the option <tt class="docutils literal"><span class="pre">--without-lp</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ ./waf configure --without-lp --prefix=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\ibex-2.3.0
+</pre></div>
+</div>
+</li>
+<li><p class="first">Install Ibex:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ ./waf install
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="section" id="compiling-and-running-examples">
+<h3>Compiling and running examples<a class="headerlink" href="#compiling-and-running-examples" title="Permalink to this headline">¶</a></h3>
+<p>To compile the default optimizer, use the following instructions:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ cd plugins/optim/examples
+~/Ibex/ibex-2.3.0/plugins/optim/examples$ export IBEX_PATH=C:/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.3.0
+~/Ibex/ibex-2.3.0/plugins/optim/examples$ export SOPLEX_PATH=C:/MinGW/msys/1.0/home/[user]/Ibex/soplex-1.7.x
+~/Ibex/ibex-2.3.0/plugins/optim/examples$ g++ -I$IBEX_PATH/include -I$IBEX_PATH/include/ibex -I$SOPLEX_PATH/src -L$SOPLEX_PATH/lib -L$IBEX_PATH/lib  -o defaultoptimizer defaultoptimizer.cpp -libex -lsoplex -lprim
+</pre></div>
+</div>
+<p>You can run now the default optimizer on an example:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/plugins/optim/examples$ ./defaultoptimizer ../../../benchs/ex3_1_3bis.bch 0.0001 0.001 100
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If you have compiled Ibex with <tt class="docutils literal"><span class="pre">--enable--shared</span></tt> you can run the program from a command window. Just
+update the path to dynamically link against Ibex and Soplex:</p>
+<div class="last highlight-python"><div class="highlight"><pre>&gt; set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.3.0
+&gt; set SOPLEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\soplex-1.7.x
+&gt; set PATH=%PATH%;%IBEX_PATH%\lib;%SOPLEX_PATH%\lib;C:\MinGW\bin
+&gt; cd %IBEX_PATH%\plugins\optim\examples
+&gt; defaultoptimizer.exe ../../../benchs/ex3_1_3bis.bch 0.0001 0.001 100
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="configuration-options">
+<h2>Configuration options<a class="headerlink" href="#configuration-options" title="Permalink to this headline">¶</a></h2>
+<p>The IbexOpt plugin supports the following options (to be used with <tt class="docutils literal"><span class="pre">waf</span></tt> <tt class="docutils literal"><span class="pre">configure</span></tt>)</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">--with-optim</span></kbd></td>
+<td>Activate the IbexOpt plugin.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--with-soplex=<var>SOPLEX_PATH</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">Look for Soplex at the given path instead of the parent directory.</p>
+<p class="last"><strong>Warning:</strong> The current release of Ibex is not compatible with Soplex 2.0.</p>
+</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--with-cplex=<var>CPLEX_PATH</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Link Ibex with Cplex (instead of Soplex). Cplex is searched at the given path.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--without-lp</span></kbd></td>
+<td><p class="first">Compile Ibex without Linear Solver</p>
+<p>You can use this option if you have some trouble to install Clp, Cplex or Soplex.</p>
+<p class="last">This option will disable the contractor <tt class="docutils literal"><span class="pre">CtcPolytopeHull</span></tt>.</p>
+</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="trouble-to-install-a-lp-solver">
+<h3>Trouble to install a LP Solver<a class="headerlink" href="#trouble-to-install-a-lp-solver" title="Permalink to this headline">¶</a></h3>
+<p>If you have any trouble to install a LP solver (CLP, Soplex or Cplex), you can install Ibex with the option <tt class="docutils literal"><span class="pre">--without-lp</span></tt>.</p>
+<p>This option will disable the contractor <tt class="docutils literal"><span class="pre">CtcPolytopeHull</span></tt>.:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ ./waf configure  [...] --without-lp
+~/Ibex/ibex-2.3.0/$ ./waf install
+</pre></div>
+</div>
+</div>
+<div class="section" id="linking-problem-with-coinor">
+<h3>Linking problem with CoinOR<a class="headerlink" href="#linking-problem-with-coinor" title="Permalink to this headline">¶</a></h3>
+<p>If the linker fails with undefined reference to <tt class="docutils literal"><span class="pre">dgetrf</span></tt> and <tt class="docutils literal"><span class="pre">dgetrs</span></tt>, it is probably because you have installed Lapack.
+You can either:</p>
+<ul class="simple">
+<li>try to adapt the makefile to link with Lapack.</li>
+<li>Remove Lapack, reinstall Ibex and reinstall Lapack (in this order).</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation (IbexOpt)</a><ul>
+<li><a class="reference internal" href="#linux-and-macos">Linux and MacOS</a><ul>
+<li><a class="reference internal" href="#fast-install-experimental">Fast install (experimental)</a></li>
+<li><a class="reference internal" href="#standard-install-stable">Standard install (stable)</a></li>
+<li><a class="reference internal" href="#compiling-and-running-programs">Compiling and running programs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#windows">Windows</a><ul>
+<li><a class="reference internal" href="#compiling-and-running-examples">Compiling and running examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration-options">Configuration options</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#trouble-to-install-a-lp-solver">Trouble to install a LP Solver</a></li>
+<li><a class="reference internal" href="#linking-problem-with-coinor">Linking problem with CoinOR</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="lab.html"
+                        title="previous chapter">Do it Yourself!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="optim-tutorial.html"
+                        title="next chapter">Tutorial (IbexOpt)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/optim-install.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="optim-tutorial.html" title="Tutorial (IbexOpt)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="lab.html" title="Do it Yourself!"
+             >previous</a> |</li>
+        <li><a href="index.html">IBEX 2.3.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Gilles Chabert.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
