@@ -34,7 +34,7 @@ matrix:
       env:
         - TEST_INTERVAL_LIB=gaol
         - STATIC_OR_SHARED=--enable-shared
-        - PLUGINS="--with-optim"
+        - PLUGINS=
         - CXXFLAGS=-std=c++11
 
 # only works on linux
