@@ -28,7 +28,8 @@ class bench (Task.Task):
 		return self.inputs[0].abspath()
 
 	def run (self):
-		cmd = [ self.get_bench_bin (), self.get_bch_file (), "1e-3", "1e-3", "5"]
+		cmd = [ self.get_bench_bin (), "--bench-file", self.get_bch_file () ]
+		cmd += [ "--time-limit", "5", "--max-prec", "1e-1", "--min-prec", "1e-6" ]
 		Logs.debug('run bench: %r', cmd)
 
 		src = None
