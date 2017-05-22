@@ -61,13 +61,15 @@ def configure (conf):
 	# Apply patches 
 	conf.apply_all_relevant_patches (ampl_name)
 
+	# Set CFLAGS
+	flags_list = [ "-O" ]
 	if conf.env.ENABLE_SHARED:
-		cflags = os.getenv("CFLAGS", "")
-		cxxflags = os.getenv("CXXFLAGS", "")
-		os.environ["CFLAGS"] = cflags + " ".join(conf.env.CFLAGS_cshlib)
-		os.environ["CXXFLAGS"] = cxxflags+" "+" ".join(conf.env.CXXFLAGS_cxxshlib)
+		flags_list += conf.env.CFLAGS_cshlib
+	if conf.env.INTERVAL_LIB == "GAOL":
+		flags_list += [ "-DNo_dtoa" ]
+	ampl_cflags = " ".join(flags_list)
 
-	cmd_conf = "./configurehere"
+	cmd_conf = "CFLAGS=\"%s\" ./configurehere" % ampl_cflags
 	cmd_make = conf.env.MAKE + [ "-j%d" % conf.options.jobs ]
 	stages = [ (cmd_conf, "configure"),  (cmd_make, "make"), (None, "install") ]
 	for cmd, stage in stages:
@@ -90,10 +92,6 @@ def configure (conf):
 			conf.fatal ("failed to %s %s (%s)" % (stage, ampl_name, cmd))
 
 	conf.to_log ((" Installation of %s: done " % ampl_name).center (80, "="))
-
-	if conf.env.ENABLE_SHARED:
-		os.environ["CFLAGS"] = cflags
-		os.environ["CXXFLAGS"] = cxxflags
 
 	conf.env.INSTALL_3RD = True
 	conf.env.append_unique ("LIB_3RD_LIST", "amplsolvers")
