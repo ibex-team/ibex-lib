@@ -174,6 +174,9 @@ def configure (conf):
 	Logs.pprint ("BLUE", "Configuration of the tests")
 	conf.recurse ("tests")
 
+	Logs.pprint ("BLUE", "Load benchmarks module")
+	conf.load ("waf_benchmarks")
+
 	# If we used a 3rd party library, add the install path (for *.pc file)
 	if conf.env.INSTALL_3RD: # It may not be necessary but it costs nothing
 		conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_3RD)

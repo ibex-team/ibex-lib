@@ -103,6 +103,9 @@ def options (opt):
 	                help = "Prefix the benchmarks command with this string",
 	                dest = 'benchs_precmd')
 
+def configure (conf):
+	conf.find_program ("gnuplot", var = "GNUPLOT", mandatory = False)
+
 def benchmarks (bch):
 	bch.add_post_fun (benchmarks_format_output)
 
