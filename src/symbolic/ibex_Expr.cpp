@@ -229,6 +229,10 @@ const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
 	//return new_(generated_name_buff, dim);
 }
 
+const ExprSymbol& ExprSymbol::new_(const char* name, const Dim& dim) {
+	return *new ExprSymbol(name,dim);
+}
+
 inline ExprSymbol::~ExprSymbol() {
 	if (variables().found(*this)) {
 		// before deleting me, associate the Variable

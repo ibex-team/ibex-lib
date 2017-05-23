@@ -487,7 +487,8 @@ private:
 	ExprSymbol(const Dim& dim);
 
 	/** Create a symbol. */
-	ExprSymbol(const char* name, const Dim& dim);
+	ExprSymbol(const char* name, const Dim& dim) : ExprLeaf(dim), name(strdup(name)), key(-1) {
+	}
 
 	/** Duplicate this symbol: forbidden. */
 	ExprSymbol(const ExprSymbol&);
@@ -1424,15 +1425,6 @@ inline bool ExprVector::row_vector() const {
 }
 
 inline ExprLeaf::ExprLeaf(const Dim& dim) : ExprNode(0,1,dim) {
-
-}
-
-inline const ExprSymbol& ExprSymbol::new_(const char* name, const Dim& dim) {
-	return *new ExprSymbol(name,dim);
-}
-
-inline ExprSymbol::ExprSymbol(const char* name, const Dim& dim)
-: ExprLeaf(dim), name(strdup(name)), key(-1) {
 
 }
 
