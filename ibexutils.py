@@ -86,6 +86,20 @@ def escape_backslash_on_win32 (s):
 	else:
 		return s
 
+def to_unicode (s):
+	r = None
+	if isinstance (s, unicode):
+		r = s
+	else:
+		for f in [ 'ascii', 'cp1251', 'cp1252', 'latin1', 'utf-8' ] :
+			try:
+				r = s.decode(f)
+				break
+			except UnicodeDecodeError:
+				continue
+	assert (not r is None)
+	return r
+
 @conf
 def path_pc_prefix (conf, path):
 	path = path.replace (conf.env.PREFIX, "${prefix}")
