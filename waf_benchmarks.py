@@ -145,6 +145,7 @@ class bench (Task.Task):
 
 		# Generate the graph if required
 		if not self.graph_node is None:
+			ret = self.run_graph ()
 			if ret != 0:
 				return ret
 
