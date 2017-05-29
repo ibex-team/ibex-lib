@@ -460,3 +460,15 @@ void TestInterval::diff15() {
 	Interval(0,2).diff(Interval(-1,1),c1,c2);
 	CPPUNIT_ASSERT(c1==Interval(1,2) && c2.is_empty());
 }
+
+void TestInterval::diff16() {
+	Interval c1,c2;
+	Interval(0,2).diff(Interval(1,1),c1,c2,false);
+	CPPUNIT_ASSERT(c1==Interval(0,1) && c2==Interval(1,2));
+}
+
+void TestInterval::diff17() {
+	Interval c1,c2;
+	Interval(1,1).diff(Interval(0,2),c1,c2,false);
+	CPPUNIT_ASSERT(c1.is_empty() && c2.is_empty());
+}
