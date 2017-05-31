@@ -31,24 +31,24 @@ Interval matrixtrace (IntervalMatrix& M){
 	string input_file_name=argv[1];
 	int nbp = atoi(argv[2]);
 	string calib_file_name=argv[3];
-	string oracle_file_name=argv[4];
+	//	string oracle_file_name=argv[4];
 	
 	
-	int Q = atoi(argv[5]);
-	double epseq = atof(argv[6]);
-        double eps1 = atof(argv[7]);
-	double prec0= atof(argv[8]);
-	double epscont= atof(argv[9]);
-	int gaplimit = atoi (argv[10]);
-	int nbr = atoi (argv[11]);
+	int Q = atoi(argv[4]);
+	double epseq = atof(argv[5]);
+        double eps1 = atof(argv[6]);
+	double prec0= atof(argv[7]);
+	double epscont= atof(argv[8]);
+	int gaplimit = atoi (argv[9]);
+	int nbr = atoi (argv[10]);
 
 
-	int dmax= atoi (argv[12]);
-	int eobj= atoi (argv[13]);
+	int dmax= atoi (argv[11]);
+	int eobj= atoi (argv[12]);
 
-	int optim = atoi(argv[14]);
-	double time0= atof(argv[15]);
-	srand (atoi(argv[16]));
+	int optim = atoi(argv[13]);
+	double time0= atof(argv[14]);
+	srand (atoi(argv[15]));
 
 	cout << input_file_name << endl;
 	ifstream input(input_file_name.c_str());
@@ -105,11 +105,12 @@ Interval matrixtrace (IntervalMatrix& M){
             calib >> b16;
 	  }
 	
+	/*
 	ifstream oraclefile(oracle_file_name.c_str());
 	Vector  oraclemat(9);
 	for (int i=0; i<9; i++)
 	  oraclefile >> oraclemat[i];
-	
+	*/
 	cout << "b1 " << b1;
 	cout << " b2 " << b2;
 	cout << " b3 " << b3;
@@ -170,6 +171,30 @@ Interval matrixtrace (IntervalMatrix& M){
 	if (nbp>0) p=nbp;
 	else
 	  p=x1.size();
+	int K=1;
+    	double *** linfun;
+	linfun = new double**[p];
+	for (int i=0; i<p; i++)
+	  {  linfun[i] = new double*[n+1];
+	    for (int j=0; j<n+1; j++)
+	      linfun[i][j]= new double[K];
+	  }
+
+
+	Array<Ctc> m_ctc(p);
+
+	Function* m_func[p] ;	
+	Function *** m_fun;
+	m_fun=new Function **[K];
+	for (int i=0; i<K; i++)
+	  m_fun[i]=new Function*[p];
+
+	Ctc* ctcnorm;
+
+	Function* m_det;
+	Function* m_det1;
+
+	Ctc* cdet;
 
         Function* m_norm = new Function (v, sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2])+ sqr(v[1][0]) + sqr(v[1][1]) + sqr(v[1][2]) + sqr(v[2][0]) + sqr(v[2][1])+sqr(v[2][2]) -1 + eps2);
 	Function* m_norm1 = new Function (v, sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2])+ sqr(v[1][0]) + sqr(v[1][1]) + sqr(v[1][2]) + sqr(v[2][0]) + sqr(v[2][1])+sqr(v[2][2]) -1 );
@@ -450,7 +475,11 @@ Interval matrixtrace (IntervalMatrix& M){
 	  {_box[i][0]= fundmat[i] - eps1;
 	    _box[i][1]= fundmat[i]+ eps1;
 	  }
-	*/
+
+	*/	
+	Vector  oraclemat(9);
+	for (int i=0; i<9; i++) oraclemat[i]=0;
+
 	for (int i=0; i< 9; i++)
 	  {_box[i][0]=  oraclemat[i]- eps1;
 	    _box[i][1]= oraclemat[i]+ eps1;
@@ -560,7 +589,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	else if (optim==1)
 	  s= new SolverOptBSConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont);
 	else 
-	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont,2);
+	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont,2);  //BFS
 
 	//	SolverOptQInter s(ctcf,bs,buff,ctcq,1);
 	cout << " apres solver " << endl;
@@ -571,7 +600,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	s->depthmax=dmax;
 	s->gaplimit=gaplimit;
 	//	s->oracle=fundmat;
-	s->oracle=oraclemat;
+	//	s->oracle=oraclemat;
 	s->with_oracle=0;
 	//s->with_oracle=1;
 	cout << " oracle " << oraclemat << endl;
@@ -586,7 +615,7 @@ Interval matrixtrace (IntervalMatrix& M){
 
 
 	cout << "determinant " << m_det->eval(box);
-	vector<IntervalVector> res=s->solve(box);
+	IntervalVector res=s->solve(box);
 
 	cout << "Number of branches : " << s->nb_cells << endl;
 	cout << "time used : " << s->time << endl;
@@ -594,17 +623,7 @@ Interval matrixtrace (IntervalMatrix& M){
 
 	s->report_possible_inliers();
        	s->report_solution();
-	  /*
-	if (res->size() > 0) {
-	  cout << "best sol " << res[res->size()-1] << endl;
-	}
-	*/
-	/*
-	cout << " best sol point " ;
-	for (int i=0; i< ctcq.nb_var; i++)
-	  cout << s->bestsolpoint[i] << " ";
-	cout << endl;
-	*/
+
 	IntervalVector bestsolbox(s->bestsolpoint);
 	
 	  

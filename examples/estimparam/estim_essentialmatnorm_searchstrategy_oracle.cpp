@@ -104,10 +104,13 @@ Interval matrixtrace (IntervalMatrix& M){
 	    calib >> b15;
             calib >> b16;
 	  }
+	
+	
 	ifstream oraclefile(oracle_file_name.c_str());
 	Vector  oraclemat(9);
 	for (int i=0; i<9; i++)
 	  oraclefile >> oraclemat[i];
+	
 	cout << "b1 " << b1;
 	cout << " b2 " << b2;
 	cout << " b3 " << b3;
@@ -166,9 +169,8 @@ Interval matrixtrace (IntervalMatrix& M){
 
 	int p;
 	if (nbp>0) p=nbp;
-	else p = x1.size();
-	cout << " nombre de paires de points " << p << endl;
-
+	else
+	  p=x1.size();
 	int K=1;
     	double *** linfun;
 	linfun = new double**[p];
@@ -194,8 +196,6 @@ Interval matrixtrace (IntervalMatrix& M){
 
 	Ctc* cdet;
 
-
-	
         Function* m_norm = new Function (v, sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2])+ sqr(v[1][0]) + sqr(v[1][1]) + sqr(v[1][2]) + sqr(v[2][0]) + sqr(v[2][1])+sqr(v[2][2]) -1 + eps2);
 	Function* m_norm1 = new Function (v, sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2])+ sqr(v[1][0]) + sqr(v[1][1]) + sqr(v[1][2]) + sqr(v[2][0]) + sqr(v[2][1])+sqr(v[2][2]) -1 );
 
@@ -275,13 +275,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	Function m_id(v, v );
 	cout << " apres lecture " << endl;
 
-	// coefficients from calib_matrix.txt :  essential test2
-	/*
-	double b1=939.5973154362416;
-	double b3=600.0;
-	double b5=b1;
-	double b6=399;
-	*/
+	
 	double a1=1/b1;
         double a3=- b3/b1;
 	double a5=1/b5;
@@ -295,7 +289,7 @@ Interval matrixtrace (IntervalMatrix& M){
         cout << a5 << endl;
         cout << a6 << endl;
 
-
+	/*
 	Matrix k1 (3,3);
 	k1[0][0]=b1;
 	k1[0][1]=0;
@@ -307,50 +301,10 @@ Interval matrixtrace (IntervalMatrix& M){
 	k1[2][1]=0;
 	k1[2][2]=1;
 
-
+	
         Matrix F (3,3);
-	
-	
-	F[0][0]=-2.20246e-06 ;
-	F[0][1]=7.06071e-05 ;
-	F[0][2]=-0.0315415;
-	F[1][0]=-2.3367e-05;
-	F[1][1]=-8.85794e-07;
-	F[1][2]=0.12567;
-	F[2][0]=0.0149924;
-	F[2][1]=-0.127773;
-	F[2][2]=-1.86073;
 
 
-	
-	/*
-	F[2][2]=8.01696 ;
-	F[0][0]=2.17745e-06 / F[2][2] ;
-	F[0][1]=-2.19382e-05/ F[2][2];
-	F[0][2]=0.0115024/ F[2][2] ;
-	F[1][0]=2.12724e-05/ F[2][2];
-	F[1][1]=-1.99877e-07 / F[2][2];
-	F[1][2]=-0.020719/ F[2][2] ;
-	F[2][0]=-0.0138558/ F[2][2];
-	F[2][1]=0.00894409/ F[2][2];
-	F[2][2]=1;
-
-
-	F[0][0]=2.17745e-06 ;
-	F[0][1]=-2.19382e-05;
-	F[0][2]=0.0115024 ;
-	F[1][0]=2.12724e-05;
-	F[1][1]=-1.99877e-07 ;
-	F[1][2]=-0.020719 ;
-	F[2][0]=-0.0138558;
-	F[2][1]=0.00894409;
-	F[2][2]=8.01696 ;
-
-	*/
-
-
-
-        
 	Matrix G (3,3);
 	G=F;
 
@@ -366,7 +320,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	vec[6]=Interval(G[2][0]);
 	vec[7]=Interval(G[2][1]);
 	vec[8]=Interval(G[2][2]);
-
+	*/
 	//	cout << "id G " << m_id.eval_matrix(vec) << endl;
 	
 	//	G= k1.transpose()*F*k1;
@@ -521,9 +475,14 @@ Interval matrixtrace (IntervalMatrix& M){
 	  {_box[i][0]= fundmat[i] - eps1;
 	    _box[i][1]= fundmat[i]+ eps1;
 	  }
+
+	*/	
+	/*
+	Vector  oraclemat(9);
+	for (int i=0; i<9; i++) oraclemat[i]=0;
 	*/
 	for (int i=0; i< 9; i++)
-	  {_box[i][0]= oraclemat[i] - eps1;
+	  {_box[i][0]=  oraclemat[i]- eps1;
 	    _box[i][1]= oraclemat[i]+ eps1;
 	  }
 
@@ -545,6 +504,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	  }
 	*/
 	// solution ransac
+	/*
 	fundmat[0]=0.0212236;
 	fundmat[1]=-0.4939788;
 	fundmat[2]=0.0420022;
@@ -554,135 +514,9 @@ Interval matrixtrace (IntervalMatrix& M){
 	fundmat[6]=-0.0376943;
         fundmat[7]=0.5039347 ;
 	fundmat[8]=0.0173491;
+	*/
 	
-	// solution 36 points
-	/*
-	fundmat[0]=0.051878505;
-	fundmat[1]=-0.67384236;
-	fundmat[2]=0.17677669;
-	fundmat[3]=0.61617291;
-	fundmat[4]=-0.060021;
-	fundmat[5]=-0.29566712;
-	fundmat[6]=-0.1575514;
-        fundmat[7]=-0.0931053;
-	fundmat[8]=0.108733;
-	*/
-	// autre solution 36 points
-	/*
-	fundmat[0]=0.006115248636;
-	fundmat[1]=-0.3093592167;
-	fundmat[2]=0.02132338913;
-	fundmat[3]= -0.187611492;
-	fundmat[4]=-0.0075254091;
-	fundmat[5]=-0.681386479;
-	fundmat[6]=5.55111512e-17;
-        fundmat[7]=0.6358397512;
-	fundmat[8]=0.00258861;
-	*/
 
-	/* solution 65 points */
-	/*
-	fundmat[0]=0.001846158503;
-	fundmat[1]= -0.66547894;
-	fundmat[2]=0.137056674995;
-	fundmat[3]= 0.6455853789;
-	fundmat[4]=-0.089087087;
-	fundmat[5]=-0.2320194125;
-	fundmat[6]=-0.1420048;
-	fundmat[7]=-0.176776;
-	fundmat[8]=0.091658;
-	*/
-
-	/* solution 65 points tolerance 0.002*/
-	
-	/*
-	fundmat[0]=0.07057908;
-	fundmat[1]=-0.66491832;
-	fundmat[2]=  0.10810699;
-	fundmat[3]=0.6663365;
-	fundmat[4]=-0.0009837;
-	fundmat[5]=-0.198873;
-	fundmat[6]=-0.1073815;
-	fundmat[7]=-0.20280645;
-	fundmat[8]=0.071353338;
-	*/
-	/* solution 448 inliers obtenue au bout 'une demie-heure.*/
-	/*
-fundmat[0]=0.0673397580437431 ; 
-fundmat[1]=-0.6640702371798197 ; 
-fundmat[2]=0.1033196888284916 ; 
-fundmat[3]=0.669006333703101 ; 
-fundmat[4]=-0.0009316076044640622 ; 
-fundmat[5]=-0.1935001265164315 ;
-fundmat[6]= -0.1021990269683681 ;
-fundmat[7]= -0.20883359402083 ; 
- fundmat[8]=0.06806691240640026;
-	*/
-
-	/*solution 472 inliers tolerance 0.002 */
-
-	/*	
-	fundmat[0]=0.00982155956082418;
-	fundmat[1]= -0.2552844736068178;
-	fundmat[2]= 0.01678052337538191;
-	fundmat[3]= -0.08214969878281949;
-	fundmat[4]=5.551115123125783e-17;
-	fundmat[5]=-0.702034692721456;
-	fundmat[6]=-0.019346278149729;
-	fundmat[7]=0.6590548691336243;
-	fundmat[8]=0.009204709488344947;
-	
-	*/
-
-	/*  test4 20 points tolerance 0.01*/
-	/*
-        fundmat[0]=0.00522148019533904 ; 
-	fundmat[1]=-0.6947375264275552 ;
-	fundmat[2]= 0.1236908272915087 ;
-	fundmat[3]= 0.7056960875468239 ; 
-	fundmat[4]=-0.001083949585550417 ;
-	fundmat[5]= -0.02209708691207955 ; 
-	fundmat[6]=-0.03838882241923755 ;
-	fundmat[7]= -0.04419417382415916 ;
-	fundmat[8]= 0.009046882364774707;
-	*/
-        /* test4 40 points */
-	/*
-	fundmat[0]=-0.5461411169546999 ;
-	fundmat[1]= -0.4304854928095038 ;
-	fundmat[2]= -0.1132915451867505 ;
-	fundmat[3]=-0.4318988311999083 ; 
-	fundmat[4]=0.558464377175729 ; 
-	fundmat[5]=-0.03929691996727829 ;
-	fundmat[6]=-0.0475011397537349 ; 
-	fundmat[7]=-0.03579056158685718 ; 
-	fundmat[8]=-0.009762186112362809;
-	*/
-	/* test4 80 points */
-	/*
-	fundmat[0]=-0.3606848252549065 ;
-	fundmat[1]= -0.6011448539351946 ;
-	fundmat[2]= 0.07790239393149015 ;
- 	fundmat[3]=0.6026626972755096 ; 
-	fundmat[4]=-0.3677737278848171 ;
- 	fundmat[5]=-0.03314563036811936 ;
- 	fundmat[6]=-0.04394792202052532 ;
- 	fundmat[7]=-0.03110818705729327 ;	
-	fundmat[8]= 0.006588430295296926;
-	*/
-
-	/* test4 160 points */
-	/*
-	fundmat[0]=-0.2276692261346002 ;
-	fundmat[1]= -0.6598006878454019 ;
-	fundmat[2]= 0.08838834764831851 ; 
-	fundmat[3]=0.6670557634678731 ;
-	fundmat[4]= -0.2330653111474023 ;
-	fundmat[5]= 5.551115123125783e-17 ;
-	fundmat[6]= -0.04941331767900834 ;
-	fundmat[7]= -0.05735787223146766 ;
-	fundmat[8]= 0.008821902693651048;
-	*/
 	IntervalVector box(9,_box);
 
 	cout << " box " << box << endl;
@@ -691,13 +525,22 @@ fundmat[7]= -0.20883359402083 ;
 	  prec[j]=prec0;
 
 	CellBuffer * buff;
+	SearchStrategy* str;
 	if (optim==0)
-	  buff = new CellStack();
-	else
+	  {
+	    buff = new CellStack();
+	    str = new DepthFirstSearch(*buff);
+	  }
+	else if (optim==1){
 	  buff = new CellHeapQInter();
-	
-	//	CellHeapQInter buff;
-	//	CellStack buff;
+	  str = new BeamSearch(*buff);
+	}
+	else{
+	  buff = new CellHeapQInter();
+	  str= new BestFirstSearch(*buff);
+	}
+
+
 	SmearSumRelative bs(sys,prec,0.5);
 	//	SmearMaxRelative  bs(sys,prec,0.5);
        	//RoundRobin bs (prec,0.5);
@@ -708,22 +551,26 @@ fundmat[7]= -0.20883359402083 ;
 	//	CtcQInterAff ctcq(9,m_ctc,Q,m_fun);
 	//	CtcQInter ctcq(9,m_ctc,Q);
 	CtcQInterAffLinear ctcq(9,m_ctc,linfun,epseq,Q);
+	//	CtcQInterAffLinear ctcq(9,m_ctc,linfun,epseq,Q,QINTERCORE);
 	//	CtcCompo ctcqf0(*cdet,c_essential, ctcq);
 	//	CtcCompo ctcqf1(*ctcnorm,*cdet,c_essential);
 		//		CtcCompo ctcqf0(ctcqf1,lphull);
 	//	CtcCompo ctcqf0(*ctcnorm,*cdet,c_essential, lphull, ctcq);
         //	CtcCompo ctcqf0(*ctcnorm,*cdet,c_essential,  ctcq);
 
+	//	CtcHC4 hc44cid(sys0,0.005,true);
 	CtcHC4 hc44cid(sys0,0.005,true);
 	//	CtcHC4 hc44cid(sys0,10,false);
 	
 
-	CtcAcid acidhc4(sys,hc44cid,true);
+	CtcAcid acidhc4(sys0,hc44cid,true);
 	//	CtcCompo ctcqf0(lphull,  ctcq);
 	//	CtcCompo ctcqf0(hc44cid,  acidhc4,lphull,ctcq);
 
 	//	CtcCompo ctcqf0(hc44cid, acidhc4,lphull,ctcq);
 	CtcCompo ctcqf0(hc44cid, lphull,  ctcq);
+	//CtcCompo ctcqf0(acidhc4, lphull,  ctcq);
+	//	CtcCompo ctcqf0(hc44cid,  ctcq);
 	//	CtcCompo ctcqf1(*ctcnorm,*cdet,c_essential, lphull);
 	//	CtcFixPoint ctcf0(ctcqf1, 0.1);
 	//	CtcCompo ctcqf0(ctcf0, ctcq);
@@ -733,7 +580,7 @@ fundmat[7]= -0.20883359402083 ;
 	//CtcCompo ctcqf0(*cdet,  ctcq);
 	CtcFixPoint ctcf(ctcqf0,0.2);
 
-	//	cout << " solution ransac " <<  ctcq.activepoints_count(vec) << endl;
+
 
 	
 	cout << " avant solver " << endl;
@@ -748,10 +595,11 @@ fundmat[7]= -0.20883359402083 ;
 	//SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,1);
 	//	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,2);
 	if (optim ==0)
-	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont,1);
-	else
-	  s= new SolverOptBSConstrainedQInter (sys1,ctcqf0,bs,*buff,ctcq,epscont);
-		      
+	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,1);  //DFS
+	else if (optim==1)
+	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);  // BS
+	else 
+	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);  //BFS
 
 	//	SolverOptQInter s(ctcf,bs,buff,ctcq,1);
 	cout << " apres solver " << endl;
@@ -759,12 +607,12 @@ fundmat[7]= -0.20883359402083 ;
 	s->trace=1;
 	s->nbr=nbr;
 	s->epsobj=eobj;
-	s->depthmax=dmax;
+	s->str.depthmax=dmax;
 	s->gaplimit=gaplimit;
-	//	s->oracle=fundmat;
-	s->oracle=oraclemat;
-	//        s->with_oracle=0;
-	s->with_oracle=1;
+
+	s->str.oracle=&oraclemat;
+	s->str.with_oracle=1;
+
 	cout << " oracle " << oraclemat << endl;
 	cout << "box init " << box << endl;
 
@@ -786,12 +634,6 @@ fundmat[7]= -0.20883359402083 ;
 	s->report_possible_inliers();
        	s->report_solution();
 
-	/*
-	cout << " best sol point " ;
-	for (int i=0; i< ctcq.nb_var; i++)
-	  cout << s->bestsolpoint[i] << " ";
-	cout << endl;
-	*/
 	IntervalVector bestsolbox(s->bestsolpoint);
 	
 	  

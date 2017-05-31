@@ -13,14 +13,14 @@
 
 
 #include "ibex_NoBisectableVariableException.h"
-#include <cassert>
+
 
 using namespace std;
 
 namespace ibex {
 
-SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
-  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), time(0), impact(BitSet::all(ctc.nb_var))  {
+SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
+  ctc(ctc), bsc(bsc), str(str), time_limit(-1), cell_limit(-1), trace(0), time(0), bestsolpoint(ctc.nb_var)  {
 	nb_cells=0;
 }
 
@@ -28,21 +28,21 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
   Cell* SolverOpt::root_cell(const IntervalVector& init_box) {return (new Cell(init_box));}
 
   void SolverOpt::start(const IntervalVector& init_box) {
-	buffer.flush();
+	str.buffer.flush();
 	cout << " avant init box" << endl;
 
 	Cell* root= root_cell(init_box); 
-	cout << " apres init box" << endl;
+
 	// add data required by this solver
 	root->add<BisectedVar>();
 
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);
 	second_cell=0;
-	cout << " avant handle cell" << endl;
+
 	handle_cell(*root);
-	cout << " apres handle cell" << endl;
-        push_cell(*root);
+
+        str.push_cell(*root);
 	init_buffer_info(*root);
 
 	Timer::start();
@@ -56,52 +56,32 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
  
 
   void SolverOpt::handle_cell (Cell & c){
-    int v=c.get<BisectedVar>().var;      // last bisected var.
-    if (v!=-1)     // no root node :  impact set to 1 for last bisected var only
-      impact.add(v);
-    else                                // root node : impact set to 1 for all variables
-      impact.fill(0,ctc.nb_var-1);
-
+    
     precontract(c);
 
-    if (! (c.box.is_empty())) {ctc.contract(c.box,impact);
+    if (! (c.box.is_empty())) {ctc.contract(c.box);
       postcontract(c);}
-    if (v!=-1)
-      impact.remove(v);
-    else                              // root node : impact set to 0 for all variables after contraction
-      impact.clear();
-    //    if (c.box.is_empty()) cout << " avant other checks : empty box " << endl;
+   
     if (!(c.box.is_empty()))  other_checks(c);
-    //    if (c.box.is_empty()) cout << " avant validate : empty box " << endl;
+
     if (!(c.box.is_empty()))  validate(c);
-    //    if (c.box.is_empty())  cout << " fin validate : empty box " << endl;
+
   }
 	  
 	  
-  void SolverOpt::push_cells(Cell&c1, Cell& c2){
-    if (! (c1.box.is_empty())) buffer.push(&c1);
-    if (! (c2.box.is_empty())) buffer.push(&c2);
-
-  }
-  void SolverOpt::push_cell(Cell&c1){
-    if (! (c1.box.is_empty())) buffer.push(&c1);
-  }
-
-  Cell* SolverOpt::top_cell(){ return buffer.top();}
-
-  Cell* SolverOpt::pop_cell() {return  buffer.pop();}
+ 
 
   int SolverOpt::validate_value(Cell & c) {return 0;}
   
-  bool SolverOpt::empty_buffer() {return buffer.empty();}
 
-  bool SolverOpt::next(std::vector<IntervalVector>& sols) {
+
+  bool SolverOpt::optimize() {
 	try  {
-	  while (! (empty_buffer())) {
+	  while (! (str.empty_buffer())) {
 
-		  if (trace==2) {cout << buffer << endl; cout <<buffer.top()->box << endl;}
+		  if (trace==2 && nb_cells > 0) {cout << str.buffer << endl; cout <<str.buffer.top()->box << endl;}
 
-			Cell* c=top_cell();
+			Cell* c=str.top_cell();
 
 			try {
 
@@ -111,7 +91,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 			  pair<Cell*,Cell*> new_cells = bisect(*c,boxes.first,boxes.second);
 
 			  update_buffer_info(*c);	
-			  pop_cell();
+			  str.pop_cell();
 
 			  Cell * c1= new_cells.first;
 			  second_cell=0;
@@ -120,7 +100,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 			  Cell* c2= new_cells.second;
 			  second_cell=1;
 			  handle_cell(*c2);
-			  push_cells(*c1,*c2);
+			  str.push_cells(*c1,*c2);
 			  if (c1->box.is_empty()) delete c1;
 			  if (c2->box.is_empty()) delete c2;
 			  delete c;
@@ -129,16 +109,16 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 			  if (cell_limit >=0 && nb_cells>=cell_limit) throw CellOptLimitException();}
 
 			catch (NoBisectableVariableException&) {
-			  //			  cout << " no bissectable " << c->box << endl;
+			  // cout << " no bissectable " << c->box << endl;
 
 			  
 			  if (!(c->box.is_empty()))
 			    
 			    handle_small_box (*c);  // small_box 
 			  
-			  delete pop_cell();
+			  delete str.pop_cell();
 			  
-			  return !buffer.empty();
+			  //			  return !str.buffer.empty();
 				  
 			}
 			time_limit_check();
@@ -151,23 +131,24 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 	}
 	catch (CellOptLimitException&) {
 		cout << "cell limit " << cell_limit << " reached " << endl;
+		return false;
 	}
 
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
 
-	return false;
+	return true;
 
   }
 
 
 
-vector<IntervalVector> SolverOpt::solve(const IntervalVector& init_box) {
-	vector<IntervalVector> sols;
+IntervalVector SolverOpt::solve(const IntervalVector& init_box) {
+
 	start(init_box);
 	
-	while (next(sols)) { }
-	return sols;
+	optimize();
+	return bestsolpoint;
 }
 
 void SolverOpt::time_limit_check () {

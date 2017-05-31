@@ -53,7 +53,7 @@ modèles aléatoires ?
 
 pour les cercles : revoir les 2 modélisations Circle et Circle2
 
-________________________________________________________________________________________
+_______________________________________e_________________________________________________
 
 terminer le plugin , 
 
@@ -76,4 +76,17 @@ _______________________________________________________________________
 commenter code estim_essentialmatnorm.cpp  : 3 systèmes 
 
 simplifier (retrait ce qui est inutile ?)
+
+____________________________________________________________________________
+
+Mettre a plat les 3 stratégies   BFS DFS et beamsearch.
+-> mettre les buffers dans cet objet stratégie
+
+algo ne connait que la stratégie, pas les buffers.
+algo avec contraintes , sous classe de l'algo sans contraintes
+
+
+
+rendre orthogonal   stratégie et stockage des possibles   -> généralisation du with_storage
+fait : classe  SearchStrategy pour un objet intermédiaire entre SolveOptQInter et CellBuffer.
 

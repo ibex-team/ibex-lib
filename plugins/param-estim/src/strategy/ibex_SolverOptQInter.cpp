@@ -22,7 +22,7 @@ using namespace std;
 namespace ibex {
 
   
-  SolverOptQInter::SolverOptQInter ( Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq,  int optimbuffer)  : SolverOpt (ctc,bsc,buffer), ctcq(ctcq) , optimbuffer(optimbuffer), bestsolpoint(ctcq.nb_var), oracle(ctcq.nb_var), initbox(ctcq.nb_var)
+  SolverOptQInter::SolverOptQInter ( Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq,  int optimbuffer)  : SolverOpt (ctc,bsc,str), ctcq(ctcq) , optimbuffer(optimbuffer),  initbox(ctcq.nb_var)
  { init();}
   
   /* utilitaires sur les matrices : non utilisé dans version courante
@@ -79,26 +79,27 @@ namespace ibex {
     nbr=0;
     epsobj=1;
     gaplimit=-1;
-    depthmax=INT_MAX;
+    str.depthmax=INT_MAX;
     bestsolpointnumber=0;
-    epsboxes_possiblesols=0;
-    qmax_epsboxes=0;
+    str.epsboxes_possiblesols=0;
+    str.qmax_epsboxes=0;
     measure_nb=ctcq.ctc_list.size() ;
     valstack = new int [measure_nb+1];
     for (int i=0; i< measure_nb+1; i++)
       valstack[i]=0;
-    points0=*(ctcq.points);
-    points1=points0;    
-    points2=points0;
+    str.points0=*(ctcq.points);
+    str.points1=str.points0;    
+    str.points2=str.points0;
+    str.ctcq=&ctcq;
   }
  
   /* the list of active points is a pointer to points1 for the first cell and to points2 for the second cell */
 
   void SolverOptQInter::manage_cell_info(Cell& c) {
     if (second_cell)   
-      ctcq.points=&points2;
+      ctcq.points=&(str.points2);
     else 
-      ctcq.points=&points1;
+      ctcq.points=&(str.points1);
     ctcq.qmax=c.get<QInterPoints>().qmax;
     ctcq.varbiss=c.get<BisectedVar>().var;  //useless ??
     valstack[ctcq.qmax]--;  // number of cells in stack with ctcq.qmax
@@ -118,7 +119,10 @@ namespace ibex {
 
   void SolverOptQInter::update_buffer_info (Cell& c) {
     valstack[c.get<QInterPoints>().qmax]+=2;
+   
+
   }
+
   
   void SolverOptQInter::precontract(Cell& c) {
     //    cout << "qmax avant contract " << c.get<QInterPoints>().qmax  << "  " << ctcq.qmax <<  endl;
@@ -138,73 +142,23 @@ namespace ibex {
 
 
   
-    
+
  
- Cell* SolverOptQInter::pop_cell() 
-   { if (optimbuffer==1){
-       Cell* c = buffer.top();
-       points1 = c->get<QInterPoints>().points;
-       points2 = c->get<QInterPoints>().points;
-     }
-     else{
-       points1=points0;
-       points2=points0;
-     }
-     return buffer.pop();
-   }
-   
-
-  void SolverOptQInter::push_cell(Cell&c1){
-    if (!(c1.box.is_empty())) {
-      if (optimbuffer==1){  // DFS / one stores the possible points in the cell.
-	c1.get<QInterPoints>().points=*ctcq.points;
-      }
-      buffer.push(&c1);
-    }
-  }
-
-
- /* push cells with an oracle : one tries to follow it, 
-     the cell containing the oracle is pushed on the top of the queue */
   
-  void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
-    if (optimbuffer==1){  // DFS / one stores the possible points in the cell.
-      if (!(c1.box.is_empty())) {c1.get<QInterPoints>().points=points1;}
-      if (!(c2.box.is_empty())) {c2.get<QInterPoints>().points=points2;}
-    }
 
-
-    if (with_oracle && !(c1.box.is_empty())&& c1.box.contains(oracle))
-      {
-	if  (!(c2.box.is_empty())) buffer.push(&c2);
-	buffer.push(&c1);}
-    else if 
-      (with_oracle && !(c2.box.is_empty())&& c2.box.contains(oracle))
-      {
-	if (!(c1.box.is_empty())) buffer.push(&c1);
-	buffer.push(&c2);}
-
-    else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
-      {if (optimbuffer==1) push_cells_depth(c1,c2);  // DFS
-	else{
-	  buffer.push(&c1);	buffer.push(&c2);   //BFS
-	}
-      }
 	  
 
-    else if (!(c1.box.is_empty())) buffer.push(&c1);
-    else if (!(c2.box.is_empty())) buffer.push(&c2);
-  }
-  
+ 
 
   /* 2 non empty cells non containing the oracle : the cells are valuated and depending on the depth, one or two cells are pushed
      in the cell buffer ; if one branch is not pushed, it is considered as a small box */
+  /*
   void SolverOptQInter::push_cells_depth(Cell&c1, Cell& c2) {
     int dep=c1.get<QInterPoints>().depth;
       int val1= validate_value (c1);
       int val2= validate_value (c2);
       if (val1 >= val2) {
-	if (dep < depthmax) buffer.push(&c2);
+	if (dep < depthmax) str.buffer.push(&c2);
 	else {
 	  c2.box.set_empty();
 	  epsboxes_possiblesols++; 
@@ -212,10 +166,10 @@ namespace ibex {
 	    if (trace) cout << "branch qmax" <<   qmax_value(c2) << endl;
 	    qmax_epsboxes=qmax_value(c2);}
 	}
-	buffer.push(&c1); 
+	str.buffer.push(&c1); 
       }
       else {
-	if (dep < depthmax) buffer.push(&c1);
+	if (dep < depthmax) str.buffer.push(&c1);
 	else {
 	  c1.box.set_empty();
 	  epsboxes_possiblesols++; 
@@ -223,10 +177,10 @@ namespace ibex {
 	    if (trace) cout << "branch qmax " <<   qmax_value(c1) << endl; 
 	    qmax_epsboxes=qmax_value(c1);}
 	}
-	buffer.push(&c2); 
+	str.buffer.push(&c2); 
       }
   }
-
+  */
 
   /*   variant without oracle  and without use of maximal depth for branching */
   /*       
@@ -248,16 +202,21 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
 
   
   /* the value of a cell is it maximum number of valid points */
+  /*
   int SolverOptQInter::validate_value(Cell& c){
     return    c.get<QInterPoints>().qmax;
     //return ctcq.midactivepoints_count(c.box.mid());
   }
 
+  */
+
+
   /* the qmax value of a cell */
+  /*
   int SolverOptQInter::qmax_value(Cell& c){
     return    c.get<QInterPoints>().qmax;
   }
-  
+  */
 
   /* if there is no gap between the number possible inliers and the q-inter threshold, all possible inliers must be inliers */
   void SolverOptQInter::other_checks(Cell& c){
@@ -380,9 +339,12 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
   { 
     int psize = ctcq.points->size();
     qposs= psize;
+
     if (trace && ( nb_cells % 100000 ==0))
-      if (optimbuffer==2 && !(buffer.empty()))
-	cout << " qmax " << buffer.top()->get<QInterPoints>().qmax << endl;
+      {// cout << "optimbuffer " << optimbuffer << endl;
+      if (optimbuffer==2 && !(str.buffer.empty()))
+	cout << " qmax " << str.buffer.top()->get<QInterPoints>().qmax << endl;
+      }
     //    cout << " validate : qposs " <<  qposs << "box " <<  c.box << endl;
        //in optimization ctcq.qmax can be used as qposs for the stopping criterion
     if (ctcq.qmax < qposs) {
@@ -417,18 +379,18 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
 	  cout << " time " << time << endl;	    ;
 	  cout << " nb boxes " << nb_cells << endl;	    ;
 	  cout << " depth " << c.get<QInterPoints>().depth << endl;
-	  if (optimbuffer==2 && !(buffer.empty()))
-	    cout << " qmax " << buffer.top()->get<QInterPoints>().qmax << endl;
+	  if (optimbuffer==2 && !(str.buffer.empty()))
+	    cout << " qmax " << str.buffer.top()->get<QInterPoints>().qmax << endl;
 	  cout << " valid point " << newvalidpoint1 << endl;
 	  cout << " best sol point " << bestsolpoint << endl;
-	  cout <<" qmax epsboxes " << qmax_epsboxes << endl;
+	  cout <<" qmax epsboxes " << str.qmax_epsboxes << endl;
 	}
 	if (qposs < qvalid+epsobj)  // stop condition  :  the
        // maximum number of valid points is reached : no need of further bisections.
        // the box is set empty (need to store it anywhere ?) and will not be stored in the cell buffer.
 	  { if (qposs > qvalid) 
-	      {epsboxes_possiblesols++; 
-		if (qposs > qmax_epsboxes )    qmax_epsboxes=qposs;}
+	      {str.epsboxes_possiblesols++; 
+		if (qposs > str.qmax_epsboxes )    str.qmax_epsboxes=qposs;}
 	    c.box.set_empty(); return;}
       }
   }
@@ -457,9 +419,9 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
  void SolverOptQInter::postsolution()
   { 
     if (optimbuffer==2) //best first search  or feasible diving
-      { cout << " buffer size avant " << buffer.size() << " q " << ctcq.q << endl;
-	(dynamic_cast<CellHeapQInter*> (&buffer))->contract_heap(-(ctcq.q));
-	cout << " buffer size apres " << buffer.size()  << endl;
+      { cout << " buffer size avant " << str.buffer.size() << " q " << ctcq.q << endl;
+	(dynamic_cast<CellHeapQInter*> (&(str.buffer)))->contract_heap(-(ctcq.q));
+	cout << " buffer size apres " << str.buffer.size()  << endl;
       }
   }
 
@@ -467,8 +429,8 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
   /* small box management  the bound qmax_epsboxes is updated */
   void SolverOptQInter::handle_small_box(Cell&  c)  {
     manage_cell_info(c);
-    epsboxes_possiblesols++;
-    if (ctcq.qmax > qmax_epsboxes) qmax_epsboxes = ctcq.qmax;
+    str.epsboxes_possiblesols++;
+    if (ctcq.qmax > str.qmax_epsboxes) str.qmax_epsboxes = ctcq.qmax;
    
   }
 
@@ -485,9 +447,9 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
  // the number of small boxes and their upper bound.
 
   void SolverOptQInter::report_possible_inliers(){
-    cout << " remaining small boxes  " << epsboxes_possiblesols;
+    cout << " remaining small boxes  " << str.epsboxes_possiblesols;
 
-    if (epsboxes_possiblesols)    cout << " max possible inliers in small boxes " << qmax_epsboxes;
+    if (str.epsboxes_possiblesols)    cout << " max possible inliers in small boxes " << str.qmax_epsboxes;
     cout << endl;
 
   }
@@ -521,8 +483,8 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
       }
 
     cout << " max possible inliers in open nodes ";
-    if (optimbuffer==2 && !(buffer.empty()))  // qmax managed by bfs and beamsearch
-      cout << buffer.top()->get<QInterPoints>().qmax << endl;
+    if (optimbuffer==2 && !(str.buffer.empty()))  // qmax managed by bfs and beamsearch
+      cout << str.buffer.top()->get<QInterPoints>().qmax << endl;
     else 
     cout <<  possin << endl;
     
@@ -861,7 +823,7 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
 
 
   /* in case of constraints, the system is transformed in a normalized system  */
-  SolverOptConstrainedQInter::SolverOptConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq,  double epscont, int optim)  : SolverOptQInter (ctc,bsc, buffer, ctcq, optim),  epscont(epscont), normsys(sys,epscont), sys(sys)
+  SolverOptConstrainedQInter::SolverOptConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq,  double epscont, int optim)  : SolverOptQInter (ctc,bsc, str, ctcq, optim),  epscont(epscont), normsys(sys,epscont), sys(sys)
   {    mylp=new LinearSolver(sys.nb_var,sys.nb_ctr,100);}
 
   SolverOptConstrainedQInter::~SolverOptConstrainedQInter() {
@@ -962,145 +924,9 @@ Vector SolverOptConstrainedQInter::newvalidpoint (Cell & c){
 
     return newvalidpoint;
 
-  }
-
- SolverOptBSQInter::SolverOptBSQInter ( Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq)  : SolverOptQInter (ctc,bsc, buffer, ctcq,  2){stackbuffer= new CellStack() ;}
-
-   Cell*  SolverOptBSQInter::top_cell() 
-   { if (!(stackbuffer->empty()))
-       return stackbuffer->top();
-     else
-       return buffer.top();
-   }
-
-  Cell* SolverOptBSQInter::pop_cell() {
-    if (!(stackbuffer->empty())){
-       Cell* c = stackbuffer->top();
-       points1 = c->get<QInterPoints>().points;
-       points2 = c->get<QInterPoints>().points;
-       return stackbuffer->pop();}
-     else  if (with_storage){
-	 Cell* c = buffer.top();
-	 points1 = c->get<QInterPoints>().points;
-	 points2 = c->get<QInterPoints>().points;
-
-	 return buffer.pop();
-     }
-     else{
-
-       points1=points0;
-       points2=points0;
-       return buffer.pop();}
-  }
-   
-
-
-
-  void SolverOptBSQInter::push_cell(Cell&c1){
-    if (!(c1.box.is_empty())) {
-      if (optimbuffer==1 || (with_storage)){  // DFS / one stores the possible points in the cell.
-	c1.get<QInterPoints>().points=*ctcq.points;
-      }
-      buffer.push(&c1);
-    }
-  }
-
-void SolverOptBSQInter::push_cells(Cell&c1, Cell& c2){
-  
-  if (with_oracle && (!(c1.box.is_empty())&& c1.box.contains(oracle)))
-      {
-	if  (!(c2.box.is_empty())) {buffer.push(&c2);
-	  if (with_storage) 	c2.get<QInterPoints>().points=points2;}
-        c1.get<QInterPoints>().points=points1; stackbuffer->push(&c1);}
-  else if 
-      (with_oracle &&(!(c2.box.is_empty())&& c2.box.contains(oracle)))
-      {
-	if (!(c1.box.is_empty())) {buffer.push(&c1);
-	  if (with_storage) 	c1.get<QInterPoints>().points=points1;}
-	c2.get<QInterPoints>().points=points2;stackbuffer->push(&c2);}
-
-    else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
-      {
-	int val1= validate_value (c1);
-	int val2= validate_value (c2);
-	if (val1 >= val2) {c1.get<QInterPoints>().points=points1; stackbuffer->push(&c1); buffer.push(&c2);
-	  if (with_storage) 	c2.get<QInterPoints>().points=points2;
-	}
-	else  {c2.get<QInterPoints>().points=points2; stackbuffer->push(&c2); buffer.push(&c1);
-	  if (with_storage) 	c1.get<QInterPoints>().points=points1;
-	}
-      }
-	  
-  
-
-    else if (!(c1.box.is_empty())) {c1.get<QInterPoints>().points=points1;stackbuffer->push(&c1);}
-    else if (!(c2.box.is_empty())) {c2.get<QInterPoints>().points=points2;stackbuffer->push(&c2);}
 }
-  
-  bool SolverOptBSQInter::empty_buffer () {return (buffer.empty() && stackbuffer->empty());}
-
-  SolverOptBSQInter::~SolverOptBSQInter() {delete stackbuffer;}
-
-  
 
 
-
-
-
-  SolverOptBSConstrainedQInter::SolverOptBSConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq,  double epscont)  : SolverOptConstrainedQInter (sys,ctc,bsc, buffer, ctcq, epscont, 2){stackbuffer= new CellStack() ;}
-
-   Cell*  SolverOptBSConstrainedQInter::top_cell() 
-   { if (!(stackbuffer->empty()))
-       return stackbuffer->top();
-     else
-       return buffer.top();
-   }
-
-   Cell* SolverOptBSConstrainedQInter::pop_cell() 
-   { if (!(stackbuffer->empty())){
-       Cell* c = stackbuffer->top();
-       points1 = c->get<QInterPoints>().points;
-       points2 = c->get<QInterPoints>().points;
-       return stackbuffer->pop();}
-     else{
-       points1=points0;
-       points2=points0;
-       return buffer.pop();}
-   }
-
-
-
- 
-
-void SolverOptBSConstrainedQInter::push_cells(Cell&c1, Cell& c2){
-  
-  if (with_oracle && (!(c1.box.is_empty())&& c1.box.contains(oracle)))
-      {
-	if  (!(c2.box.is_empty())) buffer.push(&c2);
-        c1.get<QInterPoints>().points=points1; stackbuffer->push(&c1);}
-    else if 
-      (with_oracle &&(!(c2.box.is_empty())&& c2.box.contains(oracle)))
-      {
-	if (!(c1.box.is_empty())) buffer.push(&c1);
-	c2.get<QInterPoints>().points=points2;stackbuffer->push(&c2);}
-
-    else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
-      {
-	int val1= validate_value (c1);
-	int val2= validate_value (c2);
-	if (val1 >= val2) {c1.get<QInterPoints>().points=points1; stackbuffer->push(&c1); buffer.push(&c2);}
-	else  {c2.get<QInterPoints>().points=points2; stackbuffer->push(&c2); buffer.push(&c1);}
-      }
-	  
-  
-
-    else if (!(c1.box.is_empty())) {c1.get<QInterPoints>().points=points1;stackbuffer->push(&c1);}
-    else if (!(c2.box.is_empty())) {c2.get<QInterPoints>().points=points2;stackbuffer->push(&c2);}
-}
-  
-  bool SolverOptBSConstrainedQInter::empty_buffer () {return (buffer.empty() && stackbuffer->empty());}
-
-  SolverOptBSConstrainedQInter::~SolverOptBSConstrainedQInter() {delete stackbuffer;}
 
   
 } // end namespace ibex

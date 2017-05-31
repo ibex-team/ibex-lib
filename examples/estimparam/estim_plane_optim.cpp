@@ -375,8 +375,11 @@ int main(int argc, char** argv) {
 	    proba[0]=0.33;
 	    proba[1]=0.33;
 	    proba[2]=0.34;
-	    //	    CellStack buff;
+	    //CellStack buff;
 	    CellHeapQInter buff;
+	    BeamSearch str(buff);
+	    //BestFirstSearch str (buff);
+	    //	    DepthFirstSearch str (buff);
 	    Bsc * bs;
 	    if (bisect=="rr")
 	      bs = new RoundRobin(prec, 0.5);
@@ -445,8 +448,12 @@ int main(int argc, char** argv) {
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
 
-	    //	    SolverOptQInter s(*ctcs,*bs,buff,*ctcq,1);
-	    SolverOptBSQInter s(*ctcs,*bs,buff,*ctcq);
+	    //SolverOptQInter s(*ctcs,*bs,str,*ctcq,1);
+	    
+	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,2);
+	    s.str.with_oracle=0;
+	    s.str.with_storage=true;
+	    //s.str.with_storage=false;
 	    //SolverQInter s(*ctcs,*bs,buff,*ctcq);
 	    //	    OptimQInter s(*ctcs,*bs,buff,*ctcq);
 		    //	    cout << "ctcq.qmax" << ctcq->qmax << endl;
@@ -454,7 +461,7 @@ int main(int argc, char** argv) {
 
 	    //Solver s(ctcqf0,bs,buff);
 	    s.time_limit = 1000;
-
+	    s.epsobj=1;
 	    s.trace=1;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
@@ -462,7 +469,7 @@ int main(int argc, char** argv) {
 	    s.bestsolpoint=bestsol;
 	    cout << " avant resolution " << endl;
 
-	    vector<IntervalVector> res=s.solve(box);
+	    IntervalVector res=s.solve(box);
 
 
 	    cout << "Number of branches : " << s.nb_cells << endl;

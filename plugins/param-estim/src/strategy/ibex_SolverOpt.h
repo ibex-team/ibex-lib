@@ -12,38 +12,36 @@
 #define __IBEX_SOLVEROPT_H__
 
 #include "ibex_Ctc.h"
-#include "ibex_Pdc.h"
+
 #include "ibex_Bsc.h"
 #include "ibex_Cell.h"
 #include "ibex_CellBuffer.h"
-#include "ibex_CtcQInter.h"
-#include "ibex_SubPaving.h"
+#include "ibex_SearchStrategy.h"
+
 #include "ibex_Timer.h"
 #include "ibex_Exception.h"
 
 
-#include <vector>
-#include <set>
-#include <algorithm>
-#include <utility>
+
+
 
 using namespace std;
 
 namespace ibex {
+
+  class CellOptLimitException : public Exception {} ;
 
 /**
  * \ingroup strategy
  *
  * \brief  SolverOpt.
  *
- * This class implements a branch and prune algorithm that finds all the solutions of a well constrained systems of equations (the system may contain additional inequalities).
+ * This class implements a generic branch and bound algorithm that finds the best solution : it is used
+ * for the parameter estimation problem using q-intersection in the subclass SolverOptQinter 
  */
 
-
-class CellOptLimitException : public Exception {} ;
-
-class SolverOpt {
-public:
+  class SolverOpt {
+  public:
 	/**
 	 * \brief Build a solver.
 	 *
@@ -51,31 +49,29 @@ public:
 	 * \param bsc  -  the bisector   (for branching). Contains the stop criterion.
 	 * \param buffer - the cell buffer (a CellStack in a depth first search strategy)
 	 */
-        SolverOpt(Ctc& ctc, Bsc& bsc, CellBuffer& buffer);
+        SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str);
 
 	/**
 	 * \brief Solve the system (non-interactive mode).
 	 *
 	 * \param init_box - the initial box (the search space)
 	 * 
-	 * Return :the vector of solutions (small boxes with the required precision) found by the solver.
+	 * Return :the best solution found.
 	 */
-	std::vector<IntervalVector> solve(const IntervalVector& init_box);
+	IntervalVector solve(const IntervalVector& init_box);
 
 	/**
-	 * \brief Start solving (interactive mode).
+	 * \brief Start solving 
 	 *
-	 * Can also be used to restart a new search.
 	 */
 	void start(const IntervalVector& init_box);
 
 	/**
-	 * \brief Continue solving (interactive mode).
+	 * \brief Optimize
 	 *
-	 * Look for the next solution and push it into the vector.
-	 * \return false if the search is over (true otherwise).
+	 * Look for the best solution 
 	 */
-	bool next(std::vector<IntervalVector>& sols);
+	bool optimize();
 
 
 	/**
@@ -90,8 +86,8 @@ public:
 	/** Bisector (tests also precision of boxes). */
 	Bsc& bsc;
 
-	/** Cell buffer. */
-	CellBuffer& buffer;
+	/** Search Strategy*/
+	SearchStrategy& str;
 
 	/** Maximum cpu time used by the solver.
 	 * This parameter allows to bound time complexity.
@@ -122,8 +118,10 @@ public:
 	/** Remember running time of the last exploration */
 	double time;
 
+	/** the best solution */
+	Vector bestsolpoint;
 
-protected :
+ protected :
 	int second_cell;
         std::pair<Cell*,Cell*> 	bisect(Cell& c, IntervalVector& box1, IntervalVector& box2);
 	virtual Cell* root_cell(const IntervalVector& box);
@@ -140,12 +138,8 @@ protected :
 	virtual void report_time_limit();
 	virtual void init_buffer_info(Cell& c) {};
 	virtual void update_buffer_info(Cell & c) {};
-	virtual void push_cells(Cell&c1, Cell& c2);
-	virtual void push_cell(Cell&c1);
-	virtual Cell* pop_cell();
-	virtual Cell* top_cell();
-	virtual bool empty_buffer();
-	BitSet impact;
+	
+
         void handle_cell(Cell & cell);
 };
 
