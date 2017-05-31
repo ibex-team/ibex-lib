@@ -45,17 +45,20 @@ SearchStrategy( CellBuffer& buffer);
     virtual Cell* pop_cell();
     virtual Cell* top_cell();
     virtual bool empty_buffer();
+    virtual void contract_buffer();
     list<int> points0; 
     list<int> points1;
     list<int> points2;
     CtcQInter* ctcq;
-    int validate_value(const Cell& c);
+
     bool with_oracle;
     bool with_storage;
     Vector* oracle;
     int qmax_epsboxes;
     int epsboxes_possiblesols;
     int depthmax;
+protected :
+int validate_value (const Cell& c);
   };
 
 
@@ -76,6 +79,7 @@ class BestFirstSearch : public SearchStrategy{
 public:
   BestFirstSearch (CellBuffer & buffer);
   Cell* pop_cell();
+void contract_buffer();
 };
 
 class BeamSearch : public SearchStrategy{
@@ -87,6 +91,7 @@ public:
   Cell* pop_cell();
   Cell* top_cell();
   bool empty_buffer();
+void contract_buffer();
 };
 
 }// end namespace ibex

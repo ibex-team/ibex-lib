@@ -12,7 +12,7 @@
 /* Solver for a parameter estimation problem optimizing the number of inliers */
 
 #include "ibex_SolverOptQInter.h"
-#include "ibex_CellHeapQInter.h" // for a possible BFS
+
 
 #include <algorithm>
 
@@ -54,7 +54,6 @@ namespace ibex {
   */
  
   // a mettre dans CtcQInterLinear
-  
 
   /*
     if ((norm(newvalidpoint)+Interval(-epscont,epscont)).contains(1.0))
@@ -62,6 +61,7 @@ namespace ibex {
 	return (matrix_contains(mx,0));}
     return false;
   */
+
   /*	  
 
     IntervalMatrix mx  = func->eval_matrix(newvalidpoint);
@@ -141,82 +141,9 @@ namespace ibex {
   }
 
 
-  
-
- 
-  
-
-	  
-
- 
-
-  /* 2 non empty cells non containing the oracle : the cells are valuated and depending on the depth, one or two cells are pushed
-     in the cell buffer ; if one branch is not pushed, it is considered as a small box */
-  /*
-  void SolverOptQInter::push_cells_depth(Cell&c1, Cell& c2) {
-    int dep=c1.get<QInterPoints>().depth;
-      int val1= validate_value (c1);
-      int val2= validate_value (c2);
-      if (val1 >= val2) {
-	if (dep < depthmax) str.buffer.push(&c2);
-	else {
-	  c2.box.set_empty();
-	  epsboxes_possiblesols++; 
-	  if (qmax_value(c2) > qmax_epsboxes ) {
-	    if (trace) cout << "branch qmax" <<   qmax_value(c2) << endl;
-	    qmax_epsboxes=qmax_value(c2);}
-	}
-	str.buffer.push(&c1); 
-      }
-      else {
-	if (dep < depthmax) str.buffer.push(&c1);
-	else {
-	  c1.box.set_empty();
-	  epsboxes_possiblesols++; 
-	  if (qmax_value(c1) > qmax_epsboxes )  { 
-	    if (trace) cout << "branch qmax " <<   qmax_value(c1) << endl; 
-	    qmax_epsboxes=qmax_value(c1);}
-	}
-	str.buffer.push(&c2); 
-      }
-  }
-  */
-
-  /*   variant without oracle  and without use of maximal depth for branching */
-  /*       
-void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
- 
-  if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
-    {
-      int val1= validate_value (c1);
-      int val2= validate_value (c2);
-      if (val1 >= val2) {buffer.push(&c2); buffer.push(&c1);}
-      else {buffer.push(&c1); buffer.push(&c2);}
-    }
-  else if (!(c1.box.is_empty())) buffer.push(&c1);
-  else if (!(c2.box.is_empty())) buffer.push(&c2);
-}
-  */
-  
-  
-
-  
-  /* the value of a cell is it maximum number of valid points */
-  /*
-  int SolverOptQInter::validate_value(Cell& c){
-    return    c.get<QInterPoints>().qmax;
-    //return ctcq.midactivepoints_count(c.box.mid());
-  }
-
-  */
+   
 
 
-  /* the qmax value of a cell */
-  /*
-  int SolverOptQInter::qmax_value(Cell& c){
-    return    c.get<QInterPoints>().qmax;
-  }
-  */
 
   /* if there is no gap between the number possible inliers and the q-inter threshold, all possible inliers must be inliers */
   void SolverOptQInter::other_checks(Cell& c){
@@ -416,15 +343,11 @@ void SolverOptQInter::push_cells(Cell&c1, Cell& c2){
  
   
  
- void SolverOptQInter::postsolution()
-  { 
-    if (optimbuffer==2) //best first search  or feasible diving
-      { cout << " buffer size avant " << str.buffer.size() << " q " << ctcq.q << endl;
-	(dynamic_cast<CellHeapQInter*> (&(str.buffer)))->contract_heap(-(ctcq.q));
-	cout << " buffer size apres " << str.buffer.size()  << endl;
-      }
+  void SolverOptQInter::postsolution(){
+    str.contract_buffer();
   }
 
+  
 
   /* small box management  the bound qmax_epsboxes is updated */
   void SolverOptQInter::handle_small_box(Cell&  c)  {

@@ -10,6 +10,7 @@
 
 
 #include "ibex_SearchStrategy.h"
+#include "ibex_CellHeapQInter.h" // for a possible BFS
 
 using namespace std;
 
@@ -36,6 +37,10 @@ namespace ibex {
     return    c.get<QInterPoints>().qmax;
     //return ctcq.midactivepoints_count(c.box.mid());
   }
+
+
+  void SearchStrategy::contract_buffer ()
+  {;}
 
   DepthFirstSearch::DepthFirstSearch (CellBuffer& buffer) : SearchStrategy(buffer) {};
 
@@ -81,7 +86,7 @@ namespace ibex {
  2 non empty cells non containing the oracle :
  the cells are valuated and depending on the depth, one or two cells are pushed
      in the cell buffer ; if one branch is not pushed, it is considered as a small box */
-*/
+
 
   void DepthFirstSearch::push_cells_depth(Cell&c1, Cell& c2) {
 
@@ -127,7 +132,11 @@ namespace ibex {
     return buffer.pop();
   }
 
-
+  void BestFirstSearch::contract_buffer()
+  { cout << " buffer size before " << buffer.size() << " q " << ctcq->q << endl;
+	(dynamic_cast<CellHeapQInter*> (&buffer))->contract_heap(-(ctcq->q));
+	cout << " buffer size after " << buffer.size()  << endl;
+      }
 
   BeamSearch::BeamSearch (CellBuffer& buffer) : SearchStrategy(buffer), stackbuffer() { with_storage=false;};
   
@@ -167,7 +176,11 @@ namespace ibex {
      }
    }
 
-
+  void BeamSearch::contract_buffer()
+  { cout << " buffer size before " << buffer.size() << " q " << ctcq->q << endl;
+	(dynamic_cast<CellHeapQInter*> (&buffer))->contract_heap(-(ctcq->q));
+	cout << " buffer size after " << buffer.size()  << endl;
+      }
 
   bool BeamSearch::empty_buffer () {return (buffer.empty() && stackbuffer.empty());}
 
