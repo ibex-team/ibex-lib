@@ -693,12 +693,12 @@ void TestIntervalVector::compl02() {
 	delete[] c;
 }
 
-bool TestIntervalVector::test_diff(int n, double _x[][2], double _y[][2], int m, double _z[][2], bool debug) {
+bool TestIntervalVector::test_diff(int n, double _x[][2], double _y[][2], int m, double _z[][2], bool compactness, bool debug) {
 	IntervalVector x(n,_x);
 	IntervalVector y(n,_y);
 	IntervalMatrix mz(m,n,_z);
 	IntervalVector* c;
-	int nn=x.diff(y,c);
+	int nn=x.diff(y,c,compactness);
 	if (debug) {
 		cout << x << " diff " << y << " gives:" << endl;
 		for (int i=0; i<nn; i++) {
@@ -1016,6 +1016,21 @@ void TestIntervalVector::diff36() {
 	double y[][2]= {{2,4},{-1,1},{-1,1}};
 	double z[][2]= {{-2,2},{-2,2},{-2,2}};
 	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
+}
+
+void TestIntervalVector::diff37() {
+	double x[][2]= {{-2,2},{-2,2}};
+	double y[][2]= {{-2,2},{1,1}};
+	double z[][2]= {{-2,2},{-2,1},
+									{-2,2},{1,2}};
+	CPPUNIT_ASSERT(test_diff(2,x,y,2,z,false));
+}
+
+void TestIntervalVector::diff38() {
+	double x[][2]= {{-2,2},{1,1}};
+	double y[][2]= {{0,2},{-2,2}};
+	double z[][2]= {{-2,0},{1,1}};
+	CPPUNIT_ASSERT(test_diff(2,x,y,1,z,false));
 }
 
 void TestIntervalVector::issue228() {
