@@ -4,8 +4,11 @@
 using namespace std;
 using namespace ibex;
 
+#define MAX(a,b) ((a < b) ? b : a)
+#define MIN(a,b) ((a < b) ? a : b)
 
-double double_from_arg (const char *argname, const char *str)
+double
+double_from_arg (const char *argname, const char *str)
 {
 	char *endptr = NULL;
 	double val = strtod (str, &endptr);
@@ -27,9 +30,29 @@ usage (const char *errmsg)
 	  << "Mandatory parameter are:" << std::endl
 	  << "  --bench-file <file>   file containing the problem" << std::endl
 	  << "  --time-limit <t>      optimizer will stop after <t> seconds" << std::endl
-	  << "  --min-prec <d>        " << std::endl
-	  << "  --max-prec <d>        " << std::endl;
+	  << "  --prec-ndigits-min <d>        " << std::endl
+	  << "  --prec-ndigits-max <d>        " << std::endl;
 	ibex_error (s.str().c_str());
+}
+
+/* return true if timeout was reached, false */
+bool
+do_one_bench (System &sys, double prec, double time_limit)
+{
+	/* Build the default optimizer */
+	DefaultOptimizer DefOpt (sys, prec, prec);
+
+	/* Set the time limit */
+	DefOpt.timeout = time_limit;
+
+	/* Do the actual computation */
+	DefOpt.optimize (sys.box);
+
+	/* Report some information (computation time, etc.) */
+	std::cout << "BENCH: eps = " << prec << " ; time = " << DefOpt.time
+						<< std::endl;
+
+	return 250*DefOpt.time >= time_limit;
 }
 
 int
@@ -38,7 +61,8 @@ main (int argc, char *argv[])
 	try
 	{
 		const char *benchfile = NULL;
-		double max_prec = NAN, min_prec = NAN, time_limit = NAN;
+		double prec_ndigits_max = NAN, prec_ndigits_min = NAN, time_limit = NAN;
+		double prec_min = NAN, prec_max = NAN;
 
 		argc--; argv++; /* skip argv[0] = binary name */
 
@@ -54,14 +78,14 @@ main (int argc, char *argv[])
 				time_limit = double_from_arg ("--time-limit", argv[1]);
 				argc-=2; argv+=2;
 			}
-			else if (strcmp (argv[0], "--min-prec") == 0)
+			else if (strcmp (argv[0], "--prec-ndigits-min") == 0)
 			{
-				min_prec = double_from_arg ("--min-prec", argv[1]);
+				prec_ndigits_min = double_from_arg ("--prec-ndigits-min", argv[1]);
 				argc-=2; argv+=2;
 			}
-			else if (strcmp (argv[0], "--max-prec") == 0)
+			else if (strcmp (argv[0], "--prec-ndigits-max") == 0)
 			{
-				max_prec = double_from_arg ("--max-prec", argv[1]);
+				prec_ndigits_max = double_from_arg ("--prec-ndigits-max", argv[1]);
 				argc-=2; argv+=2;
 			}
 			else
@@ -72,8 +96,25 @@ main (int argc, char *argv[])
 
 		cout << "# INPUT: bench file: " << benchfile << endl;
 		cout << "# INPUT: time limit: " << time_limit << "s" << endl;
-		cout << "# INPUT: max prec: " << max_prec << endl;
-		cout << "# INPUT: min_prec: " << min_prec << endl;
+		cout << "# INPUT: prec ndigits max: " << prec_ndigits_max << endl;
+		cout << "# INPUT: prec ndigits min: " << prec_ndigits_min << endl;
+
+		/* Check for missing command-line parameter */
+		if (isnan (prec_ndigits_max))
+			usage ("missing --prec-ndigits-max command-line parameter");
+		else
+			prec_max = pow (10, -prec_ndigits_max);
+
+		if (isnan (prec_ndigits_min))
+			usage ("missing --prec-ndigits-min command-line parameter");
+		else
+			prec_min = pow (10, -prec_ndigits_min);
+
+		if (prec_ndigits_min > prec_ndigits_max)
+			usage ("--prec-ndigits-min should not be larger than --prec-ndigits-max");
+
+		cout << "# INFO: prec max: " << prec_max << endl;
+		cout << "# INFO: prec min: " << prec_min << endl;
 
 		/* Load the file */
 		System sys (benchfile);
@@ -82,24 +123,30 @@ main (int argc, char *argv[])
 		if (!sys.goal)
 			ibex_error ("input file does not contains an optimization problem.");
 
-		for (double prec = 1; prec > 10e-12; prec /= 10)
+		/* always bench prec_min and prec_max */
+		do_one_bench (sys, prec_min, time_limit);
+		do_one_bench (sys, prec_max, time_limit);
+
+		double prec_ndigits = 0.;
+		for ( ; prec_ndigits <= MIN (10., prec_ndigits_max); prec_ndigits += 1.)
 		{
-			if (min_prec <= prec && prec <= max_prec)
+			if (prec_ndigits_min < prec_ndigits)
 			{
-				/* Build the default optimizer */
-				DefaultOptimizer DefOpt (sys, prec, prec);
-
-				/* Set the time limit */
-				DefOpt.timeout = time_limit;
-
-				/* Some options for the output */
-				DefOpt.trace = 0; /* prints each better feasible point when it is found */
-				/* Do the actual computation */
-				DefOpt.optimize (sys.box);
-
-				/* Report some information (computation time, etc.) */
-				//DefOpt.report();
-				std::cout << "BENCH: eps = " << prec << " ; time = " << DefOpt.time << std::endl;
+				double prec = pow (10, -prec_ndigits);
+				bool has_timeout = do_one_bench (sys, prec, time_limit);
+				if (has_timeout)
+					break;
+			}
+		}
+		prec_ndigits -= 1.;
+		for (unsigned int i = 0; i < 10; prec_ndigits += 0.1)
+		{
+			if (prec_ndigits_min < prec_ndigits)
+			{
+				double prec = pow (10, -prec_ndigits);
+				bool has_timeout = do_one_bench (sys, prec, time_limit);
+				if (has_timeout)
+					break;
 			}
 		}
 		return EXIT_SUCCESS;

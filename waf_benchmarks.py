@@ -3,7 +3,9 @@ import ibexutils
 from waflib import TaskGen, Task, Logs, Utils, Errors
 benchlock = Utils.threading.Lock()
 
-BENCHS_DEFAULT_ARGS = {"time_limit": 5, "max_prec": "1e-1", "min_prec": "1e-8"}
+BENCHS_DEFAULT_ARGS = {"time_limit": 5, "prec_ndigits_max": "8",
+                       "prec_ndigits_min": "1"}
+BENCHS_ARGS_NAME = BENCHS_DEFAULT_ARGS.keys()
 
 class bench (Task.Task):
 	"""
@@ -77,9 +79,9 @@ class bench (Task.Task):
 	def cmd_bench (self):
 		cmd = self.generator.bld.options.benchs_precmd.split()
 		cmd += [ self.bench_bin, "--bench-file", self.bch_file ]
-		for k in [ "time-limit", "max-prec", "min-prec" ]:
-			_k = k.replace("-", "_")
-			cmd += [ "--%s" % k, str(getattr(self, _k)) ]
+		for k in BENCHS_ARGS_NAME:
+			_k = k.replace("_", "-")
+			cmd += [ "--%s" % _k, str(getattr(self, k)) ]
 		return cmd
 
 	def run_bench (self):
@@ -198,7 +200,7 @@ def add_bch (self, node):
 
 	# Get (optional) attribute: time_limit, min_prec, max_prec
 	kw = {}
-	for k in [ "time_limit", "max_prec", "min_prec" ]:
+	for k in BENCHS_ARGS_NAME:
 		kw[k] = getattr (self, k, BENCHS_DEFAULT_ARGS[k])
 
 	# Set output nodes
