@@ -138,8 +138,8 @@ main (int argc, char *argv[])
 					break;
 			}
 		}
-		prec_ndigits -= 1.;
-		for (unsigned int i = 0; i < 10; prec_ndigits += 0.1)
+		prec_ndigits -= 0.9;
+		for (unsigned int i = 1; i < 10; i++, prec_ndigits += 0.1)
 		{
 			if (prec_ndigits_min < prec_ndigits)
 			{
