@@ -52,7 +52,7 @@ do_one_bench (System &sys, double prec, double time_limit)
 	std::cout << "BENCH: eps = " << prec << " ; time = " << DefOpt.time
 						<< std::endl;
 
-	return 250*DefOpt.time >= time_limit;
+	return DefOpt.time >= time_limit;
 }
 
 int
