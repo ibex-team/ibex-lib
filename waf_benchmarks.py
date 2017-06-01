@@ -123,13 +123,17 @@ class bench (Task.Task):
 		return data
 
 	def run_graph (self):
-		title = self.bch_node.relpath().replace ('_', '\_')
-		g = (self.data_file, self.graph_file, title)
-		args = "datafile='%s' ; outputfile='%s' ; title='%s'" % g
-		cmd = [ self.env.GNUPLOT[0], "-e", args, self.generator.graph_scriptfile ]
+		eargs_list = [ ("datafile", self.data_file),
+		               ("outputfile", self.graph_file),
+		               ("title", self.bch_node.relpath().replace ('_', '\_'))
+		             ]
+		for k in BENCHS_ARGS_NAME:
+			eargs_list.append((k, str(getattr(self, k))))
+		eargs = " ; ".join([ "%s = '%s'" % a for a in eargs_list])
+		cmd = [ self.env.GNUPLOT[0], "-e", eargs, self.generator.graph_scriptfile ]
 		proc = Utils.subprocess.Popen (cmd, env = self.bench_env,
-																	 stdout = Utils.subprocess.PIPE,
-																	 stderr = Utils.subprocess.PIPE)
+		                               stdout = Utils.subprocess.PIPE,
+		                               stderr = Utils.subprocess.PIPE)
 		(_, stderr) = proc.communicate ()
 		rc = proc.wait ()
 
