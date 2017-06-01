@@ -128,7 +128,7 @@ main (int argc, char *argv[])
 		do_one_bench (sys, prec_max, time_limit);
 
 		double prec_ndigits = 0.;
-		for ( ; prec_ndigits <= MIN (10., prec_ndigits_max); prec_ndigits += 1.)
+		for ( ; prec_ndigits < MIN (10., prec_ndigits_max); prec_ndigits += 1.)
 		{
 			if (prec_ndigits_min < prec_ndigits)
 			{
