@@ -215,10 +215,9 @@ def add_bch (self, node):
 
 # Format the output of benchmarks, using the list bench_results
 def benchmarks_format_output (bch):
-	# The logger is freed at the end of the benchmarks function but the tasks are
-	# performed afterwards, so we recreate the logger.
-	logfile = os.path.join (bch.bldnode.abspath(), "benchmarks_run.log")
-	bch.logger = Logs.make_logger (logfile, "benchmarks_run")
+	# Create the logger to store the output of this function
+	logfile = os.path.join (bch.bldnode.abspath(), "benchmarks.log")
+	bch.logger = Logs.make_logger (logfile, "benchmarks")
 
 	lst = sorted (getattr (bch, 'bench_results', []), key = lambda x:x[0])
 	for (f, data, outputs) in lst:
@@ -226,9 +225,6 @@ def benchmarks_format_output (bch):
 		n = len (data)
 		tot_time = sum ([t for _,t in data])
 		bch.end_msg ("%d measure%s, total time = %.2fs" % (n, "s" if n > 1 else "", tot_time))
-
-	Logs.free_logger (bch.logger)
-	bch.logger = None
 
 ######################
 ###### options #######
@@ -263,13 +259,6 @@ def benchmarks (bch):
 	p = [ "-j", "--jobs", "-j%d" % bch.jobs, "--jobs=%d" % bch.jobs ]
 	if all ([ not a in sys.argv for a in p]): # jobs is not explicitly set
 		bch.jobs = bch.options.jobs = 1
-
-	# Benchmarks are done with the Ibex library in the build tree
-	ibexlibpath = os.path.join (bch.bldnode.abspath(), "src")
-	bch.env.append_unique ("LIBPATH_BENCHMARKS", ibexlibpath)
-	bch.env.append_unique ("LIB_BENCHMARKS", "ibex")
-
-	bch.USELIST = ["BENCHMARKS", "IBEX", "ITV_LIB"] + bch.env.IBEX_PLUGIN_USE_LIST
 
 	# We need GNUPLOT to generate graphs
 	if bch.options.with_graphs and not bch.env.GNUPLOT:

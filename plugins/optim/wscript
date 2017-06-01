@@ -278,7 +278,7 @@ def benchmarks (bch):
 	# Build the benchmark program
 	bch.program (source = "benchmark_optim.cpp",
 	             target = "benchmark_optim",
-	             use = bch.USELIST,
+	             use = "ibex"
 	            )
 
 	gnuplotnode = bch.path.make_node ("benchmark_optim.gnuplot")

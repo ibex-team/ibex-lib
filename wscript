@@ -4,7 +4,6 @@
 import os, sys
 from distutils.version import LooseVersion
 from waflib import Scripting, Logs, Options, Utils
-from waflib.Build import BuildContext
 import ibexutils
 
 # The following variable is used to build ibex.pc and by "waf dist"
@@ -273,25 +272,16 @@ def utest (tst):
 	Logs.free_logger (tst.logger)
 	tst.logger = None
 
-class UTestContext (BuildContext):
-	cmd = "utest"
-	fun = "utest"
-
 ######################
 ##### benchmarks #####
 ######################
 def benchmarks (bch):
 	'''run the benchmarks'''
-	logfile = os.path.join (bch.bldnode.abspath(), "benchmarks_config.log")
-	bch.logger = Logs.make_logger (logfile, "benchmarks_config")
 
+	# Make sure all 'build' targets are up-to-date before doing benchmarks
+	bch.run_build()
+
+	# load benchmarks tools
 	bch.load ("waf_benchmarks")
 
 	bch.recurse ("benchmarks plugins", mandatory = False)
-
-	Logs.free_logger (bch.logger)
-	bch.logger = None
-
-class BenchmarksContext (BuildContext):
-	cmd = "benchmarks"
-	fun = "benchmarks"

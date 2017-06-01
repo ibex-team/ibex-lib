@@ -1,9 +1,18 @@
 import os, tarfile, functools, sys, shutil, copy
 
-from waflib import Logs, Errors, Utils
+from waflib import Logs, Errors, Utils, Build
 from waflib.Configure import conf, ConfigurationContext
 sys.path.append(os.path.abspath ("3rd"))
 import patch
+
+# Custom commands derived from build
+class UTestContext (Build.BuildContext):
+	cmd = "utest"
+	fun = "utest"
+
+class BenchmarksContext (Build.BuildContext):
+	cmd = "benchmarks"
+	fun = "benchmarks"
 
 # not @Configure.conf because, the function is also called by 'options'
 def get_dirlist (node):
@@ -34,6 +43,19 @@ def write_setting_header (conf, **kwargs):
 	conf.setenv("")
 	conf.env.append_unique ("cfg_files", bak)
 	conf.all_envs.pop("setting", None)
+
+@conf
+def run_build (self):
+	if not isinstance (self, Build.BuildContext):
+		cn = self.__class__.__name__
+		self.fatal ("Error in run_build, %s is not a subclass of BuildContext" % cn)
+	elif self.__class__ is Build.BuildContext:
+		pass # no need to run build twice from a BuildContext
+	else:
+		bak = self.fun
+		self.fun = "build"
+		self.recurse (self.run_dir)
+		self.fun = bak
 
 def archive_name_without_suffix (archive):
 	suffixes = [".tar.gz", ".tgz", ".tar" ]
