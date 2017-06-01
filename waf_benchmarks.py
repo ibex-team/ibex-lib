@@ -121,7 +121,9 @@ class bench (Task.Task):
 		return data
 
 	def run_graph (self):
-		args = "datafile='%s' ; outputfile='%s'" % (self.data_file, self.graph_file)
+		title = self.bch_node.relpath().replace ('_', '\_')
+		g = (self.data_file, self.graph_file, title)
+		args = "datafile='%s' ; outputfile='%s' ; title='%s'" % g
 		cmd = [ self.env.GNUPLOT[0], "-e", args, self.generator.graph_scriptfile ]
 		proc = Utils.subprocess.Popen (cmd, env = self.bench_env,
 																	 stdout = Utils.subprocess.PIPE,
@@ -204,7 +206,7 @@ def add_bch (self, node):
 	datanode = node.change_ext('.data', '.bch')
 	outputs = [ resnode, datanode ]
 	if self.bld.options.with_graphs and getattr(self, "graph_scriptfile", None):
-		fignode = node.change_ext('.png', '.bch')
+		fignode = node.change_ext('.pdf', '.bch')
 		outputs += [ fignode ]
 	
 	# Create the task
