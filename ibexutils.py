@@ -45,12 +45,13 @@ def write_setting_header (conf, **kwargs):
 	conf.all_envs.pop("setting", None)
 
 @conf
-def run_build (self):
+def add_build_targets (self):
 	if not isinstance (self, Build.BuildContext):
-		cn = self.__class__.__name__
-		self.fatal ("Error in run_build, %s is not a subclass of BuildContext" % cn)
+		n = self.__class__.__name__
+		err = "Error in add_build_targets, %s is not a subclass of BuildContext" % n
+		self.fatal (err)
 	elif self.__class__ is Build.BuildContext:
-		pass # no need to run build twice from a BuildContext
+		pass # no need to add build targets to the base class BuildContext
 	else:
 		bak = self.fun
 		self.fun = "build"

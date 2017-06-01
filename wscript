@@ -279,7 +279,7 @@ def benchmarks (bch):
 	'''run the benchmarks'''
 
 	# Make sure all 'build' targets are up-to-date before doing benchmarks
-	bch.run_build()
+	bch.add_build_targets()
 
 	# load benchmarks tools
 	bch.load ("waf_benchmarks")
