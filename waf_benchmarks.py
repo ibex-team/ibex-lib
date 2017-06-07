@@ -1,4 +1,4 @@
-import os, sys, re
+import os, sys, re, math, shutil
 import ibexutils
 from waflib import TaskGen, Task, Logs, Utils, Errors
 benchlock = Utils.threading.Lock()
@@ -7,7 +7,7 @@ BENCHS_DEFAULT_ARGS = {"time_limit": 5, "prec_ndigits_max": "8",
                        "prec_ndigits_min": "1"}
 BENCHS_ARGS_NAME = BENCHS_DEFAULT_ARGS.keys()
 
-class bench (Task.Task):
+class Bench (Task.Task):
 	"""
 	Execute a benchmark
 	"""
@@ -216,21 +216,84 @@ def add_bch (self, node):
 		outputs += [ fignode ]
 	
 	# Create the task
-	tsk = self.create_task ('bench', node, outputs, **kw)
+	tsk = self.create_task ('Bench', node, outputs, **kw)
 	tsk.set_run_after (self.bintask)
 
 # Format the output of benchmarks, using the list bench_results
+# Assume that for each result, data are already sorted
 def benchmarks_format_output (bch):
 	# Create the logger to store the output of this function
 	logfile = os.path.join (bch.bldnode.abspath(), "benchmarks.log")
 	bch.logger = Logs.make_logger (logfile, "benchmarks")
 
+	def compute_score (data):
+		S = 0.0
+		prev_elt = None
+		for eps, time in data:
+			if not prev_elt is None:
+				prev_eps, prev_time = prev_elt
+				log10_eps = -math.log10(eps)
+				prev_log10_eps = -math.log10(prev_eps)
+				S += (log10_eps-prev_log10_eps)*(time+prev_time)/2
+			prev_elt = (eps, time)
+		return S
+
+	def write_results (data):
+		for d in data:
+			bch.to_log ("BENCH: eps = %.12g ; time = %f" % d)
+
+	def parse_results_file (filename):
+		measures_pattern = "^([0-9]+) measure[s]?, Score ="
+		measures_re = re.compile (measures_pattern)
+		data = []
+		R = {}
+		current_bchfile = None
+		with open (filename, "r") as f:
+			for l in ibexutils.to_unicode(f.read()).splitlines(True):
+				match_measures = measures_re.match (l)
+				match_bench = Bench.RESULTS_RE.match (l)
+				if l.startswith ("FILE: "):
+					current_bchfile = str(l[6:-1])
+				elif match_measures:
+					assert (current_bchfile)
+					data.sort (key=lambda x:-x[0])
+					S = compute_score (data)
+					R[current_bchfile] = (S, data)
+					data = []
+				elif match_bench:
+					eps = float (match_bench.group(1))
+					time = float (match_bench.group(2))
+					data.append((eps, time))
+		return R
+
+	if bch.options.cmp_to:
+		cmpdata = parse_results_file (bch.options.cmp_to)
+	else:
+		cmpdata = {}
+
 	lst = sorted (getattr (bch, 'bench_results', []), key = lambda x:x[0])
 	for (f, data, outputs) in lst:
 		bch.start_msg (f.relpath ())
 		n = len (data)
-		tot_time = sum ([t for _,t in data])
-		bch.end_msg ("%d measure%s, total time = %.2fs" % (n, "s" if n > 1 else "", tot_time))
+		bch.to_log ("FILE: %s" % f.relpath())
+		write_results (data)
+		S = compute_score (data)
+		msg = "%d measure%s, Score = %g" % (n, "s" if n > 1 else "", S)
+		color = "CYAN"
+		cmpS, _ = cmpdata.get (f.relpath(), (None, None))
+		if cmpS:
+			percent = 100.*(S/cmpS-1.)
+			msg += " (%0.2f%%)" % percent
+			if percent <= 0:
+				color = "GREEN"
+			elif percent >= 2.5:
+				color = "RED"
+			else:
+				color = "YELLOW"
+		bch.end_msg (msg, color = color)
+
+	if bch.options.results_file:
+		shutil.copyfile (logfile, bch.options.results_file)
 
 ######################
 ###### options #######
@@ -242,6 +305,12 @@ def options (opt):
 	grp = opt.add_option_group ("Options for benchmarks")
 	grp.add_option ("--benchs-long", action = "store_true", default = False,
 	                help = "(Very) Long benchmarks", dest = "benchs_long")
+	grp.add_option ("--save-results", action = "store", default = "",
+	                help = "Save the results of the benchmarks in the given file",
+	                dest = "results_file")
+	grp.add_option ("--cmp-to", action = "store", default = "",
+	                help = "Compare to a previously saved benchmarks",
+	                dest = "cmp_to")
 	grp.add_option ("--with-graphs", action = "store_true", default = False,
 	                help = "Generate graphics from benchs (when available)",
 	                dest = "with_graphs")
@@ -265,6 +334,16 @@ def benchmarks (bch):
 	p = [ "-j", "--jobs", "-j%d" % bch.jobs, "--jobs=%d" % bch.jobs ]
 	if all ([ not a in sys.argv for a in p]): # jobs is not explicitly set
 		bch.jobs = bch.options.jobs = 1
+
+	# Do not overwrite file with --save-results option
+	if bch.options.results_file and os.path.exists (bch.options.results_file):
+		f = bch.options.results_file
+		bch.fatal ("Benchmarks: file %s already exists, will not overwrite it." % f)
+
+	# Check that option --cmp-to (if given) is a file
+	if bch.options.cmp_to and not os.path.isfile (bch.options.cmp_to):
+		f = bch.options.cmp_to
+		bch.fatal ("Benchmarks: cannot compare to %s: not a file." % f)
 
 	# We need GNUPLOT to generate graphs
 	if bch.options.with_graphs and not bch.env.GNUPLOT:
