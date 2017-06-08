@@ -1,0 +1,5 @@
+
+
+Probably need to desactivate symbolic differentation:
+	dualc1
+	polygon25
