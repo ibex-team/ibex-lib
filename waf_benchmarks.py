@@ -77,11 +77,14 @@ class Bench (Task.Task):
 			return node.abspath()
 
 	def cmd_bench (self):
-		cmd = self.generator.bld.options.benchs_precmd.split()
+		cmd = self.generator.bld.options.BENCHS_PRECMD.split()
 		cmd += [ self.bench_bin, "--bench-file", self.bch_file ]
 		for k in BENCHS_ARGS_NAME:
 			_k = k.replace("_", "-")
-			cmd += [ "--%s" % _k, str(getattr(self, k)) ]
+			v = getattr (self.generator.bld.options, "BENCHS_" + k.upper(), None)
+			if v is None:
+				v = getattr(self, k)
+			cmd += [ "--%s" % _k, str(v) ]
 		return cmd
 
 	def run_bench (self):
@@ -211,9 +214,10 @@ def add_bch (self, node):
 	resnode = node.change_ext('.bench_result', '.bch')
 	datanode = node.change_ext('.data', '.bch')
 	outputs = [ resnode, datanode ]
-	if self.bld.options.with_graphs and getattr(self, "graph_scriptfile", None):
-		fignode = node.change_ext('.pdf', '.bch')
-		outputs += [ fignode ]
+	if self.bld.options.BENCHS_WITH_GRAPHS:
+		if getattr(self, "graph_scriptfile", None):
+			fignode = node.change_ext('.pdf', '.bch')
+			outputs += [ fignode ]
 	
 	# Create the task
 	tsk = self.create_task ('Bench', node, outputs, **kw)
@@ -266,8 +270,8 @@ def benchmarks_format_output (bch):
 					data.append((eps, time))
 		return R
 
-	if bch.options.cmp_to:
-		cmpdata = parse_results_file (bch.options.cmp_to)
+	if bch.options.BENCHS_CMP_TO:
+		cmpdata = parse_results_file (bch.options.BENCHS_CMP_TO)
 	else:
 		cmpdata = {}
 
@@ -292,8 +296,8 @@ def benchmarks_format_output (bch):
 				color = "YELLOW"
 		bch.end_msg (msg, color = color)
 
-	if bch.options.results_file:
-		shutil.copyfile (logfile, bch.options.results_file)
+	if bch.options.BENCHS_SAVE:
+		shutil.copyfile (logfile, bch.options.BENCHS_SAVE)
 
 ######################
 ###### options #######
@@ -302,21 +306,32 @@ def options (opt):
 	"""
 	Options for the benchmarks
 	"""
+
+	categories = [ "easy", "medium", "hard" ]
+	default_cat = "medium"
+	cat_help = "Possible values: " + ", ".join(categories)
+	cat_help += " [default: %s]" % default_cat
+
 	grp = opt.add_option_group ("Options for benchmarks")
-	grp.add_option ("--benchs-long", action = "store_true", default = False,
-	                help = "(Very) Long benchmarks", dest = "benchs_long")
-	grp.add_option ("--save-results", action = "store", default = "",
+	for n, v in BENCHS_DEFAULT_ARGS.items():
+		optname = "--benchs-" + n.replace("_", "-")
+		helpstr = "Override default %s (default is %s)" % (n, v)
+		grp.add_option (optname, action="store", default=None,
+		                help = helpstr, dest = "BENCHS_" + n.upper())
+	grp.add_option ("--benchs-category", action = "store", default = default_cat,
+	                choices = categories, help = cat_help, dest = "BENCHS_CAT")
+	grp.add_option ("--benchs-save", action = "store", default = "",
 	                help = "Save the results of the benchmarks in the given file",
-	                dest = "results_file")
-	grp.add_option ("--cmp-to", action = "store", default = "",
+	                dest = "BENCHS_SAVE")
+	grp.add_option ("--benchs-cmp-to", action = "store", default = "",
 	                help = "Compare to a previously saved benchmarks",
-	                dest = "cmp_to")
-	grp.add_option ("--with-graphs", action = "store_true", default = False,
+	                dest = "BENCHS_CMP_TO")
+	grp.add_option ("--benchs-with-graphs", action = "store_true", default=False,
 	                help = "Generate graphics from benchs (when available)",
-	                dest = "with_graphs")
+	                dest = "BENCHS_WITH_GRAPHS")
 	grp.add_option ("--benchs-precmd", action = "store", default = "",
 	                help = "Prefix the benchmarks command with this string",
-	                dest = 'benchs_precmd')
+	                dest = 'BENCHS_PRECMD')
 
 ######################
 ##### configure ######
@@ -336,15 +351,16 @@ def benchmarks (bch):
 		bch.jobs = bch.options.jobs = 1
 
 	# Do not overwrite file with --save-results option
-	if bch.options.results_file and os.path.exists (bch.options.results_file):
-		f = bch.options.results_file
+	if bch.options.BENCHS_SAVE and os.path.exists (bch.options.BENCHS_SAVE):
+		f = bch.options.BENCHS_SAVE
 		bch.fatal ("Benchmarks: file %s already exists, will not overwrite it." % f)
 
-	# Check that option --cmp-to (if given) is a file
-	if bch.options.cmp_to and not os.path.isfile (bch.options.cmp_to):
-		f = bch.options.cmp_to
-		bch.fatal ("Benchmarks: cannot compare to %s: not a file." % f)
+	# Check that option --benchs-cmp-to (if given) is a file
+	if bch.options.BENCHS_CMP_TO:
+		if not os.path.isfile (bch.options.BENCHS_CMP_TO):
+			f = bch.options.BENCHS_CMP_TO
+			bch.fatal ("Benchmarks: cannot compare to %s: not a file." % f)
 
 	# We need GNUPLOT to generate graphs
-	if bch.options.with_graphs and not bch.env.GNUPLOT:
-		bch.fatal ("gnuplot is required for the option '--with-graphs'")
+	if bch.options.BENCHS_WITH_GRAPHS and not bch.env.GNUPLOT:
+		bch.fatal ("gnuplot is required for the option '--benchs-with-graphs'")
