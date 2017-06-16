@@ -23,9 +23,9 @@
 //#include "ibex_Multipliers.h"
 #include "ibex_PdcFirstOrder.h"
 #include "ibex_OptimData.h"
-
 #include <float.h>
 #include <stdlib.h>
+#include "../../../../src/system/ibex_ActiveConstraintsFnc.h"
 
 using namespace std;
 
@@ -142,6 +142,15 @@ double Optimizer::compute_ymax() {
 // launch Hansen test
 bool Optimizer::update_real_loup() {
 
+	// todo : change hard-coded value
+	ActiveConstraintsFnc af(user_sys,loup_point,1e-8,trace);
+
+	if (af.image_dim()==0) {
+		loup = pseudo_loup;
+		loup_box = loup_point;
+		return true;
+	}
+
 	IntervalVector epsbox(loup_point);
 
 	// ====================================================
@@ -154,7 +163,7 @@ bool Optimizer::update_real_loup() {
 
 	// ====================================================
 	// solution #2: we call Hansen test in inflating mode.
-	PdcHansenFeasibility pdc(equs->f, true);
+	PdcHansenFeasibility pdc(af, true);
 	// ====================================================
 
 	// TODO: maybe we should check first if the epsbox is inner...
@@ -169,13 +178,21 @@ bool Optimizer::update_real_loup() {
 		if (!resI.is_empty()) {
 			double res=resI.ub();
 			if (res<loup) {
-				//TODO : in is_inner, we check again all equalities,
-				// it's useless in this case!
-				if (is_inner(pdc.solution())) {
+				//note: don't call is_inner because it would check again all equalities (which is useless
+				// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
+				bool satisfy_inequalities=true;
+				for (int j=0; j<user_sys.nb_ctr; j++) {
+					if (user_sys.ctrs[j].op!=EQ && !entailed->original(j) &&
+						user_sys.ctrs[j].f.eval(pdc.solution()).ub()>0) {
+						satisfy_inequalities=false;
+						break;
+					}
+				}
+				if (satisfy_inequalities) {
 					loup = res;
 					loup_box = pdc.solution();
-
-					cout << setprecision (12) << " *real* loup update " << loup  << " loup box: " << loup_box << endl;
+					if (trace)
+						cout << setprecision (12) << " *real* loup update " << loup  << " loup box: " << loup_box << endl;
 					return true;
 				}
 			}
@@ -191,12 +208,12 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 	bool loup_change=false;
 	if (rigor && equs!=NULL) { // a loup point will not be safe (pseudo loup is not the real loup)
 		double old_pseudo_loup=pseudo_loup;
-		if (update_loup_probing(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
+		if (update_loup_probing(box)) { // && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
 			// update pseudo_loup
 			loup_change |= update_real_loup();
 			old_pseudo_loup=pseudo_loup; // because has changed
 		}
-		if (update_loup_simplex(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
+		if (update_loup_simplex(box)) { // && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
 			loup_change |= update_real_loup();
 		}
 	} else {
