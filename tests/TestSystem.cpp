@@ -351,8 +351,8 @@ void TestSystem::merge03() {
 
 
 void TestSystem::merge04() {
-	System sys1(SRCDIR_TESTS "/../benchs/benchs-optim/coconutbenchmark-library1/bearing.bch");
-	System sys2(SRCDIR_TESTS "/../benchs/benchs-satisfaction/benchs-coprin/I5.bch");
+	System sys1(SRCDIR_TESTS "/minibex/bearing.bch");
+	System sys2(SRCDIR_TESTS "/minibex/I5.bch");
 	System sys3(sys1,sys2);
 	CPPUNIT_ASSERT(strcmp(sys3.args[0].name,"x1")==0);
 	CPPUNIT_ASSERT(strcmp(sys3.args[4].name,"x6")==0);
