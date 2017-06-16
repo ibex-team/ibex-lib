@@ -49,8 +49,6 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
 
 	try {
-		// Update the bounds the variables
-		mylinearsolver->initBoundVar(box);
 
 		//returns the number of constraints in the linearized system
 		int cont = lr.linearization(box, *mylinearsolver);
@@ -105,6 +103,10 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 	int infnexti=0; // the bound to be contracted contract  infnexti=0 for the lower bound, infnexti=1 for the upper bound
 	LinearSolver::Status_Sol stat=LinearSolver::UNKNOWN;
 
+
+	// Update the bounds the variables
+	mylinearsolver->initBoundVar(box);
+
 	for(int ii=0; ii<(2*nb_var); ii++) {  // at most 2*n calls
 
 		int i= ii/2;
@@ -114,7 +116,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{
 			inf_bound[i]=1;
-			stat = mylinearsolver->run_simplex(box, LinearSolver::MINIMIZE, i, opt,box[i].lb());
+			stat = mylinearsolver->run_simplex(LinearSolver::MINIMIZE, i, opt,box[i].lb());
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
 			if (stat == LinearSolver::OPTIMAL) {
 				if(opt.lb()>box[i].ub()) {
@@ -162,7 +164,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		}
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
-			stat= mylinearsolver->run_simplex(box, LinearSolver::MAXIMIZE, i, opt, box[i].ub());
+			stat= mylinearsolver->run_simplex(LinearSolver::MAXIMIZE, i, opt, box[i].ub());
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << " opt=" << opt << endl;
 			if( stat == LinearSolver::OPTIMAL) {
 				if(opt.ub() <box[i].lb()) {
