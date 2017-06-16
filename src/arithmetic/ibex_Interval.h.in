@@ -334,12 +334,12 @@ class Interval {
     /*
      * \brief The complementary of x.
      */
-    int complementary(Interval& c1, Interval& c2) const;
+    int complementary(Interval& c1, Interval& c2, bool compactness = true) const;
 
     /**
      * \brief x\y
      */
-    int diff(const Interval& y, Interval& c1, Interval& c2) const;
+    int diff(const Interval& y, Interval& c1, Interval& c2, bool compactness = true) const;
 
     /** \brief Return -*this. */
     Interval operator-() const;
@@ -1374,7 +1374,7 @@ inline bool bwd_imod(Interval& x, Interval& y, const double& p) {
     {
         x.set_empty(); y.set_empty();
         return false;
-    }    
+    }
     if (ir.is_degenerated())
         bwd_sub(ir*p,x,y);
     else if (ir.diam()==1.)
