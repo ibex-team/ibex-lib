@@ -27,8 +27,8 @@ Optimizer::Status issue50(double init_loup, double prec) {
 	f.add_goal(x);
 
 	System sys(f);
-	DefaultOptimizer o(sys,prec,prec);
 
+	DefaultOptimizer o(sys,prec,prec);
 	IntervalVector init_box(1,Interval::ALL_REALS);
 	return o.optimize(init_box,init_loup);
 }

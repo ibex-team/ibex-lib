@@ -261,6 +261,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 			if (size_dual_solution != nb_rows) {
 				delete [] dual_solution;
 				dual_solution = new double[nb_rows];
+				size_dual_solution = nb_rows;
 			}
 			status_dual = mysoplex->getDual(dual);
 			for (int i=0; i<nb_rows; i++) {
@@ -287,7 +288,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	    	return UNKNOWN;
 	    }
 	    }
-	} catch(...){
+	}catch(...){
 		return UNKNOWN;
 	}
 
@@ -377,7 +378,7 @@ void LinearSolver::getDualSol(Vector & solution_dual) {
 
 	try {
 		if (status_dual == soplex::SPxSolver::OPTIMAL) {
-			for (int i=0; i<size_dual_solution; i++) {
+			for (int i=0; i<nb_rows; i++) {
 				solution_dual[i] = dual_solution[i];
 			}
 		}
@@ -1159,7 +1160,7 @@ void LinearSolver::initBoundVar(const IntervalVector& bounds) {
 			throw LPException();
 		}
 
-	} catch (...)) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;

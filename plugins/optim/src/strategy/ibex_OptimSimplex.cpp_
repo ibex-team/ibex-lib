@@ -113,7 +113,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box_in) {
 //If a new loup is found the method returns true
 
 bool Optimizer::update_loup_simplex(const IntervalVector& box) {
-
+ try {
   //  cout << " box simplex " << box << endl;
 	IntervalVector G(n); // vector to be used by the partial derivatives
 
@@ -253,6 +253,9 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
 	}
 	return false;
+ } catch (LPException&) {
+	 return false;
+ }
 }
 
 

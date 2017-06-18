@@ -201,7 +201,7 @@ def configure (conf):
 		cplex_dir = conf.options.CPLEX_PATH
 		if cplex_dir:
 			cplex_include = os.path.join (cplex_dir, "include")
-			cplex_lib = os.path.join (cplex_dir, "lib")
+			cplex_lib = os.path.join (cplex_dir, "lib/x86-64_linux/static_pic/")
 			conf.env.append_unique ("INCLUDES_IBEX_DEPS", cplex_include)
 			conf.env.append_unique ("LIBPATH_IBEX_DEPS", cplex_lib)
 		else:
