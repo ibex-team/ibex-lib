@@ -42,7 +42,8 @@
 
 #else
 #ifdef _IBEX_WITH_CLP_
-#include "ClpSimplex.hpp"
+// pourquoi enlever "coin/" dans le chemin?
+#include "coin/ClpSimplex.hpp"
 #else
 #ifdef _IBEX_WITH_ILOCPLEX_
 #include <ilcplex/ilocplex.h>

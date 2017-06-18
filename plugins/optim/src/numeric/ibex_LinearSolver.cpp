@@ -156,8 +156,8 @@ void LinearSolver::NeumaierShcherbina_postprocessing (int var, Interval & obj, S
 		else
 			obj = -(Lambda * B - Rest * boundvar);
 
-	} catch (LPException& e) {
-		throw e;
+	} catch (...) {
+		throw LPException();
 	}
 }
 
@@ -258,8 +258,10 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 			}
 			// the dual solution ; used by Neumaier Shcherbina test
 			soplex::DVector dual(nb_rows);
-			if (dual_solution != NULL) delete [] dual_solution;
-			dual_solution = new double[nb_rows];
+			if (size_dual_solution != nb_rows) {
+				delete [] dual_solution;
+				dual_solution = new double[nb_rows];
+			}
 			status_dual = mysoplex->getDual(dual);
 			for (int i=0; i<nb_rows; i++) {
 				if 	( ((mysoplex->rhs(i) >=  default_max_bound) && (dual[i]<=0)) ||
@@ -285,7 +287,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	    	return UNKNOWN;
 	    }
 	    }
-	}catch(soplex::SPxException&){
+	} catch(...){
 		return UNKNOWN;
 	}
 
@@ -295,7 +297,7 @@ void LinearSolver::writeFile(const char* name) {
 	try {
 		mysoplex->writeFile(name, NULL, NULL, NULL);
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -311,7 +313,7 @@ void LinearSolver::getCoefConstraint(Matrix &A) {
 			}
 		}
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -326,7 +328,7 @@ void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
 			}
 		}
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -349,7 +351,7 @@ void  LinearSolver::getB(IntervalVector& B) {
 			//           cout << B(i+1) << endl;
 		}
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -365,7 +367,7 @@ void LinearSolver::getPrimalSol(Vector & solution_primal) {
 			}
 		}
 	}
-	catch(soplex::SPxException&) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -375,12 +377,12 @@ void LinearSolver::getDualSol(Vector & solution_dual) {
 
 	try {
 		if (status_dual == soplex::SPxSolver::OPTIMAL) {
-			for (int i=0; i<nb_rows; i++) {
+			for (int i=0; i<size_dual_solution; i++) {
 				solution_dual[i] = dual_solution[i];
 			}
 		}
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -406,7 +408,7 @@ void LinearSolver::getInfeasibleDir(Vector & sol) {
 		}
 		//	else	res = FAIL; this condition does not work BNE
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 
@@ -427,7 +429,7 @@ void LinearSolver::cleanConst() {
 		nb_rows = nb_vars;
 		obj_value = POS_INFINITY;
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -444,7 +446,7 @@ void LinearSolver::cleanAll() {
 		nb_rows = 0;
 		obj_value = POS_INFINITY;
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -456,7 +458,7 @@ void LinearSolver::setMaxIter(int max) {
 	try {
 		mysoplex->setTerminationIter(max);
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -468,7 +470,7 @@ void LinearSolver::setMaxTimeOut(int time) {
 		double t = time;
 		mysoplex->setTerminationTime(t);
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -487,7 +489,7 @@ void LinearSolver::setSense(Sense s) {
 			throw LPException();
 
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -500,7 +502,7 @@ void LinearSolver::setVarObj(int var, double coef) {
 	try {
 		mysoplex->changeObj(var, coef);
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -515,7 +517,7 @@ void LinearSolver::initBoundVar(const IntervalVector& bounds) {
 		}
 		boundvar = bounds;
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -528,7 +530,7 @@ void LinearSolver::setBoundVar(int var, const Interval& bound) {
 		//std::cout << "improve bound var "<<var<< std::endl;
 		boundvar[var] = bound;
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -540,7 +542,7 @@ void LinearSolver::setEpsilon(double eps) {
 		mysoplex->setDelta(eps);
 		epsilon = eps;
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -566,7 +568,7 @@ void LinearSolver::addConstraint(const ibex::Vector& row, CmpOp sign, double rhs
 			throw LPException();
 
 	}
-	catch(soplex::SPxException& ) {
+	catch(...) {
 		throw LPException();
 	}
 
@@ -852,7 +854,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 		} else
 			return UNKNOWN;
 
-	} catch (Exception&) {
+	} catch (...) {
 		return UNKNOWN;
 	}
 
@@ -865,7 +867,7 @@ void LinearSolver::writeFile(const char* name) {
 			std::cerr << "Failed to write LP to disk." << std::endl;
 			throw LPException();
 		}
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -905,7 +907,7 @@ void LinearSolver::getCoefConstraint(Matrix &A) {
 
 		if (status) throw LPException();
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return;
@@ -947,7 +949,7 @@ void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
 
 		if (status) throw LPException();
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -966,7 +968,7 @@ void LinearSolver::getB(IntervalVector& B) {
 		delete[] rhs;
 
 		if (status) throw LPException();
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -982,7 +984,7 @@ void LinearSolver::getPrimalSol(Vector & primal) {
 		} else
 			throw LPException();
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return;
@@ -1000,7 +1002,7 @@ void LinearSolver::getDualSol(Vector & dual) {
 		} else
 			throw LPException();
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1021,7 +1023,7 @@ void LinearSolver::getInfeasibleDir(Vector & sol) {
 
 		if (status) 	throw LPException();
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 
@@ -1033,6 +1035,7 @@ void LinearSolver::cleanConst() {
 	try {
 		if (dual_solution) delete[] dual_solution;
 		dual_solution=NULL;
+		size_dual_solution=0;
 		status_prim = -1;
 		status_dual = -1;
 		int status=0;
@@ -1043,7 +1046,7 @@ void LinearSolver::cleanConst() {
 		obj_value = POS_INFINITY;
 		if (status) throw LPException();
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1061,7 +1064,7 @@ void LinearSolver::cleanAll() {
 		obj_value = POS_INFINITY;
 		if (status) throw LPException();
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1075,7 +1078,7 @@ void LinearSolver::setMaxIter(int max) {
 			//std::cerr<< "Error CPLEX: Could not change the maximal number of iteration, error "<< status << std::endl;
 			throw LPException();
 		}
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1090,7 +1093,7 @@ void LinearSolver::setMaxTimeOut(int time) {
 			//std::cerr<< "Error CPLEX: Could not change the maximal number of iteration "<< status << std::endl;
 			throw LPException();
 		}
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1101,13 +1104,21 @@ void LinearSolver::setSense(Sense s) {
 	try {
 
 		if (s == LinearSolver::MINIMIZE) {
-			CPXchgobjsen(envcplex, lpcplex, CPX_MIN); // Problem is minimization
+			int status = CPXchgobjsen(envcplex, lpcplex, CPX_MIN); // Problem is minimization
+			if (status) {
+				std::cerr<< "Error CPLEX: Could not change the sense, error "<< status << std::endl;
+				throw LPException();
+			}
 		} else if (s == LinearSolver::MAXIMIZE) {
-			CPXchgobjsen(envcplex, lpcplex, CPX_MAX); //Problem is maximisation
+			int status = CPXchgobjsen(envcplex, lpcplex, CPX_MAX); //Problem is maximisation
+			if (status) {
+				std::cerr<< "Error CPLEX: Could not change the sense, error "<< status << std::endl;
+				throw LPException();
+			}
 		} else
 			throw LPException();
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1119,11 +1130,11 @@ void LinearSolver::setVarObj(int var, double coef) {
 
 		int status = CPXchgobj(envcplex, lpcplex, 1, &var, &coef);
 		if (status) {
-			std::cerr<< "Error CPLEX: Could not change the objectif function, error "<< status << std::endl;
+			std::cerr<< "Error CPLEX: Could not change the objective function, error "<< status << std::endl;
 			throw LPException();
 		}
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1148,7 +1159,7 @@ void LinearSolver::initBoundVar(const IntervalVector& bounds) {
 			throw LPException();
 		}
 
-	} catch (Exception&) {
+	} catch (...)) {
 		throw LPException();
 	}
 	return ;
@@ -1170,7 +1181,7 @@ void LinearSolver::setBoundVar(int var, const Interval& bound) {
 			//std::cerr<< "Error CPLEX: Could not change the bound of a variable, error "<< status << std::endl;
 			throw LPException();
 		}
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1190,7 +1201,7 @@ void LinearSolver::setEpsilon(double eps) {
 		} else {
 			epsilon = eps;
 		}
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1226,7 +1237,7 @@ void LinearSolver::addConstraint(const ibex::Vector& row, CmpOp sign, double rhs
 		} else
 			throw LPException();
 
-	} catch (Exception&) {
+	} catch (...) {
 		throw LPException();
 	}
 	return ;
@@ -1238,7 +1249,7 @@ void LinearSolver::addConstraint(const ibex::Vector& row, CmpOp sign, double rhs
 
 
 
-
+///////////////////////////////////////////////////////////////////////////// TODO
 #ifdef _IBEX_WITH_CLP_
 
 
@@ -1365,7 +1376,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 		else
 			return UNKNOWN;
 
-	}catch(CoinError&){
+	}catch(...){
 		return UNKNOWN;
 	}
 
@@ -1375,7 +1386,7 @@ void LinearSolver::writeFile(const char* name) {
 	try {
 		myclp->writeMps(name);
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return;
@@ -1406,8 +1417,7 @@ void LinearSolver::getCoefConstraint(Matrix &A) {
 				}
 			}
 		}
-	}
-	catch(CoinError& ) {
+	} catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1439,7 +1449,7 @@ void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
 			}
 		}
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1462,7 +1472,7 @@ void  LinearSolver::getB(IntervalVector& B) {
 			//           cout << B(i+1) << endl;
 		}
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1478,7 +1488,7 @@ void LinearSolver::getPrimalSol(Vector & solution_primal) {
 			}
 		}
 	}
-	catch(CoinError&) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1493,7 +1503,7 @@ void LinearSolver::getDualSol(Vector & solution_dual) {
 			}
 		}
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1521,7 +1531,7 @@ void LinearSolver::getInfeasibleDir(Vector & sol) {
 		}
 
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 
@@ -1543,7 +1553,7 @@ void LinearSolver::cleanConst() {
 		nb_rows = nb_vars;
 		obj_value = POS_INFINITY;
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1562,7 +1572,7 @@ void LinearSolver::cleanAll() {
 		nb_rows = 0;
 		obj_value = POS_INFINITY;
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1574,7 +1584,7 @@ void LinearSolver::setMaxIter(int max) {
 	try {
 		myclp->setMaximumIterations(max);
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1585,7 +1595,7 @@ void LinearSolver::setMaxTimeOut(int time) {
 	try {
 		myclp->setMaximumSeconds((double)time);
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1605,7 +1615,7 @@ void LinearSolver::setSense(Sense s) {
 			throw LPException();
 
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1618,7 +1628,7 @@ void LinearSolver::setVarObj(int var, double coef) {
 	try {
 		myclp->setObjectiveCoefficient(var, coef);
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1632,7 +1642,7 @@ void LinearSolver::initBoundVar(const IntervalVector& bounds) {
 		}
 		boundvar = bounds;
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1646,7 +1656,7 @@ void LinearSolver::setBoundVar(int var, const Interval& bound) {
 		boundvar[var] = bound;
 
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1658,7 +1668,7 @@ void LinearSolver::setEpsilon(double eps) {
 		myclp->setPrimalTolerance(eps);
 		epsilon = eps;
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 	return ;
@@ -1678,7 +1688,7 @@ void LinearSolver::addConstraint(const ibex::Vector& row, CmpOp sign, double rhs
 		else
 			throw LPException();
 	}
-	catch(CoinError& ) {
+	catch(...) {
 		throw LPException();
 	}
 
