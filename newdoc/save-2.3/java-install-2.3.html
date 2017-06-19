@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation (Java Plugin for Choco) &mdash; IBEX 2.3.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="IBEX 2.3.0 documentation" href="index.html" />
+    <link rel="prev" title="Tutorial (IbexOpt)" href="optim-tutorial.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="optim-tutorial.html" title="Tutorial (IbexOpt)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">IBEX 2.3.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation-java-plugin-for-choco">
+<h1>Installation (Java Plugin for Choco)<a class="headerlink" href="#installation-java-plugin-for-choco" title="Permalink to this headline">¶</a></h1>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<ul class="last simple">
+<li>This plugin is <strong>under development</strong></li>
+<li>It is supported by Choco 3 (not Choco 2).</li>
+</ul>
+</div>
+<p>The installation of the plugin will generate, in addition to the Ibex library, the <tt class="docutils literal"><span class="pre">libibex-java</span></tt> library that contains the glue code between C++ and Java.</p>
+<div class="section" id="linux-and-macos">
+<h2>Linux and MacOS<a class="headerlink" href="#linux-and-macos" title="Permalink to this headline">¶</a></h2>
+<p>Uncompress the archive <tt class="docutils literal"><span class="pre">ibex-2.3.0.tar.gz</span></tt> in some <tt class="docutils literal"><span class="pre">Ibex</span></tt> folder:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-2.3.0.tar.gz
+</pre></div>
+</div>
+<p>Uncompress the archive <tt class="docutils literal"><span class="pre">ibex-java.tar.gz</span></tt> in the plugin folder:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-java.tar.gz --directory=ibex-2.3.0/plugins
+</pre></div>
+</div>
+<p>Set the environment variable <tt class="docutils literal"><span class="pre">JAVA_HOME</span></tt>. Typical paths are <tt class="docutils literal"><span class="pre">/Library/Java/Home</span></tt> (MacOS) or <tt class="docutils literal"><span class="pre">/usr/lib/jvm/java-7-openjdk-i38</span></tt> (Linux). Example:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ export JAVA_HOME=/Library/Java/Home
+</pre></div>
+</div>
+<p>Then configure Ibex as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ cd ibex-2.3.0
+~/Ibex/ibex-2.3.0/$ ./waf configure [...] --enable-shared --with-jni --with-java-package=org.chocosolver.solver.constraints.real
+</pre></div>
+</div>
+<p><strong>Note</strong>: the <tt class="docutils literal"><span class="pre">--enable-shared</span></tt> is mandatory.</p>
+<div class="section" id="compiling-and-running-a-test-progam">
+<h3>Compiling and Running a Test Progam<a class="headerlink" href="#compiling-and-running-a-test-progam" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Set the dynamic library paths.</p>
+<ul>
+<li><p class="first">Under <strong>Linux</strong>:</p>
+<div class="highlight-python"><div class="highlight"><pre>~$ export LD_LIBRARY_PATH=[prefix]/lib
+</pre></div>
+</div>
+</li>
+<li><p class="first">Under <strong>MacOS</strong>:</p>
+<div class="highlight-python"><div class="highlight"><pre>~$ export DYLD_LIBRARY_PATH=[prefix]/lib
+</pre></div>
+</div>
+</li>
+</ul>
+<p>where <em>[prefix]</em> is <tt class="docutils literal"><span class="pre">/usr/local</span></tt> by default or whatever path specified via <tt class="docutils literal"><span class="pre">--prefix</span></tt>. Then:</p>
+<div class="highlight-python"><div class="highlight"><pre>~$ cd Ibex/ibex-2.3.0/__build__/src/java
+~/Ibex/ibex-2.3.0/__build__/src/java$ java Test
+</pre></div>
+</div>
+<p>Alternatively, you can give the library path directly in argument of the <tt class="docutils literal"><span class="pre">java</span></tt> command instead of using an environment variable:</p>
+<div class="highlight-python"><div class="highlight"><pre>~$ cd Ibex/ibex-2.3.0/__build__/src/java
+~/Ibex/ibex-2.3.0/__build__/src/java$ java -Djava.library.path=[prefix]/lib Test
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="windows">
+<h2>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Under Windows, Ibex is compiled as a <strong>32-bit</strong> library although the platform is 64 bits (this is mainly because the MinGW environment is 32-bits). Hence, Java will fail in loading Ibex unless you have a 32-bits JVM.</p>
+</div>
+<p>Under the shell of MinGW,</p>
+<p>Uncompress the archive <tt class="docutils literal"><span class="pre">ibex-2.3.0.tar.gz</span></tt> in the <tt class="docutils literal"><span class="pre">Ibex</span></tt> folder (cf. instructions for the core library):</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-2.3.0.tar.gz
+</pre></div>
+</div>
+<p>Uncompress the archive <tt class="docutils literal"><span class="pre">ibex-java.tar.gz</span></tt> in the plugin folder:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ tar xvfz ibex-java.tar.gz --directory=ibex-2.3.0/plugins
+</pre></div>
+</div>
+<p>Set the JAVA_HOME variable in Windows-style and with double backslash (&#8220;\&#8221;) as separator, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/$ export JAVA_HOME=C:\\Java\\jdk1.7.1_17
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The path must not contain white spaces, like &#8221;...\Program Files\...&#8221;. Create a symbolik link of your Java directory if necessary.</p>
+</div>
+<p>Then, configure Ibex as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ ./waf configure --prefix=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\ibex-2.3.0 --enable-shared -with-jni --with-java-package=org.chocosolver.solver.constraints.real
+</pre></div>
+</div>
+<p>And install Ibex as usual:</p>
+<div class="highlight-python"><div class="highlight"><pre>~/Ibex/ibex-2.3.0/$ ./waf install
+</pre></div>
+</div>
+<div class="section" id="java-install-windows-example">
+<span id="id1"></span><h3>Compiling and Running a Test Progam<a class="headerlink" href="#java-install-windows-example" title="Permalink to this headline">¶</a></h3>
+<p>We assume here that MinGW has been installed in <tt class="docutils literal"><span class="pre">C:\</span></tt> and Ibex in <tt class="docutils literal"><span class="pre">C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.3.0</span></tt>.</p>
+<p>Open a command window (not the shell of MinGW) and type:</p>
+<div class="highlight-python"><div class="highlight"><pre>&gt; set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.3.0
+&gt; set PATH=%PATH%;%IBEX_PATH%\lib;C:\MinGW\bin
+&gt; cd %IBEX_PATH%\__build__\plugins\java\src
+C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.3.0\__build__\src\java&gt;
+C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.3.0\__build__\src\java&gt;java -Djava.library.path=%IBEX_PATH%\lib Test
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="configuration-options">
+<h2>Configuration options<a class="headerlink" href="#configuration-options" title="Permalink to this headline">¶</a></h2>
+<p>The IbexOpt plugin supports the following options (to be used with <tt class="docutils literal"><span class="pre">waf</span></tt> <tt class="docutils literal"><span class="pre">configure</span></tt>)</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">--with-jni</span></kbd></td>
+<td>Activate the Java plugin.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--with-java-package=<var>PACKAGE_NAME</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>The plugin will create the <em>PACKAGE_NAME</em>.jar file.
+This file is put into the <em>[prefix]</em><tt class="docutils literal"><span class="pre">/share/java</span></tt> where <em>[prefix]</em> is <tt class="docutils literal"><span class="pre">/usr/local</span></tt> by default or whatever path specified via <tt class="docutils literal"><span class="pre">--prefix</span></tt>.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="unsatisfiedlinkerror-with-choco">
+<h3>UnsatisfiedLinkError with Choco<a class="headerlink" href="#unsatisfiedlinkerror-with-choco" title="Permalink to this headline">¶</a></h3>
+<p>When running the &#8220;CycloHexan&#8221; example from Choco using Ibex, the following error appears:</p>
+<div class="highlight-python"><div class="highlight"><pre>Exception in thread &quot;main&quot; java.lang.UnsatisfiedLinkError: org.chocosolver.solver.constraints.real.Ibex.add_ctr(ILjava/lang/String;I)V
+      at org.chocosolver.solver.constraints.real.Ibex.add_ctr(Native Method)
+      at org.chocosolver.solver.constraint.propagators.real.RealPropagator.&amp;lt;init&amp;gt;(RealPropagator.java:77)
+      at org.chocosolver.solver.constraints.real.RealConstraint.addFunction(RealConstraint.java:82)
+      at samples.real.CycloHexan.buildModel(CycloHexan.java:87)
+      at samples.AbstractProblem.execute(AbstractProblem.java:130)
+      at samples.real.CycloHexan.main(CycloHexan.java:134)
+</pre></div>
+</div>
+<p><strong>Solution:</strong> You probably did not set the Java package properly. The java package of the Ibex class in Choco is <tt class="docutils literal"><span class="pre">org.chocosolver.solver.constraints.real</span></tt>, try:</p>
+<div class="highlight-python"><div class="highlight"><pre>./waf configure [....] --with-java-package=org.chocosolver.solver.constraints.real
+</pre></div>
+</div>
+</div>
+<div class="section" id="java-home-does-not-seem-to-be-set-properly">
+<h3>JAVA_HOME does not seem to be set properly<a class="headerlink" href="#java-home-does-not-seem-to-be-set-properly" title="Permalink to this headline">¶</a></h3>
+<p>I get this message when running <tt class="docutils literal"><span class="pre">waf</span> <span class="pre">configure</span></tt>.</p>
+<p><strong>Solution:</strong> The JAVA_HOME must be the path of the JDK and contain a subdirectoy <tt class="docutils literal"><span class="pre">include</span></tt> which, in turn, contains the <tt class="docutils literal"><span class="pre">jni.h</span></tt>
+header file. On MacOS this path can be <tt class="docutils literal"><span class="pre">/Library/Java/JavaVirtualMachines/jdkXXXX.jdk/Contents/Home</span></tt>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation (Java Plugin for Choco)</a><ul>
+<li><a class="reference internal" href="#linux-and-macos">Linux and MacOS</a><ul>
+<li><a class="reference internal" href="#compiling-and-running-a-test-progam">Compiling and Running a Test Progam</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#windows">Windows</a><ul>
+<li><a class="reference internal" href="#java-install-windows-example">Compiling and Running a Test Progam</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration-options">Configuration options</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#unsatisfiedlinkerror-with-choco">UnsatisfiedLinkError with Choco</a></li>
+<li><a class="reference internal" href="#java-home-does-not-seem-to-be-set-properly">JAVA_HOME does not seem to be set properly</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="optim-tutorial.html"
+                        title="previous chapter">Tutorial (IbexOpt)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/java-install.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="optim-tutorial.html" title="Tutorial (IbexOpt)"
+             >previous</a> |</li>
+        <li><a href="index.html">IBEX 2.3.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Gilles Chabert.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

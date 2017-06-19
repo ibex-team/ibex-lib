@@ -112,7 +112,13 @@ On Ubuntu, you can install all you need with::
 Configuration options
 ==============================	
 
-``waf`` ``configure`` supports the following options:
+The full list of options supported by ``waf configure`` can be obtained with::
+
+	~/Ibex/ibex-2.4.0/$ ./waf --help
+	
+This will display the full list of installed interval libraries and plugins with their specific options.
+
+In particular, ``waf`` ``configure`` supports the following options:
                     
 --enable-shared     
                     Compile Ibex as a dynamic library.
@@ -181,9 +187,7 @@ Copy-paste the following example code in a file named ``foo.cpp`` ::
 There is a simple "makefile" in the ``examples`` folder that you can use to compile your own programs (note: this makefile uses the extended syntax of GNU make).
 
 This makefile however assumes ``pkg-config`` is installed on your system, which is done by default on many Linux distribution).
-To install ``pkg-config`` under MinGW, follow the steps given here: 
-
-http://stackoverflow.com/questions/1710922/how-to-install-pkg-config-in-windows
+To install ``pkg-config`` under MinGW, follow the steps given `here <http://stackoverflow.com/questions/1710922/how-to-install-pkg-config-in-windows/22363820#22363820>`_.
 
 So, place the file ``foo.cpp`` in the ``examples/`` folder and::
 
@@ -206,6 +210,24 @@ Just update the path to dynamically link against Ibex::
 	 > set PATH=%PATH%;%IBEX_PATH%\lib;C:\MinGW\bin
 	 > cd %IBEX_PATH%\examples
 	 > foo.exe
+
+=======================================
+Running unit tests
+=======================================
+You can also run the whole unit tests suite with the **installed** version of Ibex.
+
+To this end, you must install first the `cppunit library <https://sourceforge.net/projects/cppunit/>`_. Then run::
+
+	~/Ibex/ibex-2.4.0/$ ./waf utest
+	
+Note also the following command::
+
+	~/Ibex/ibex-2.4.0/$ ./waf check
+	
+as a handy shortcut for::
+
+	~/Ibex/ibex-2.4.0/$ ./waf build install clean utest
+
 
 =============
 Uninstall

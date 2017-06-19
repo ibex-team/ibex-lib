@@ -28,6 +28,14 @@ matrix:
         - STATIC_OR_SHARED=
         - PLUGINS="--with-optim --optim-lib=soplex"
         - CXXFLAGS=-std=c++11
+    - os: osx
+      compiler: clang
+      osx_image: xcode8.3
+      env:
+        - TEST_INTERVAL_LIB=gaol
+        - STATIC_OR_SHARED=--enable-shared
+        - PLUGINS=
+        - CXXFLAGS=-std=c++11
 
 # only works on linux
 addons:
