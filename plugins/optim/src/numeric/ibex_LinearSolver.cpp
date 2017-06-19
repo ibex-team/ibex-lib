@@ -563,6 +563,10 @@ void LinearSolver::setSense(Sense s) {
 }
 
 
+void setObj(const Vector& coef) {
+	// TODO
+}
+
 void LinearSolver::setObjVar(int var, double coef) {
 
 	try {
@@ -1199,6 +1203,10 @@ void LinearSolver::setSense(Sense s) {
 	return ;
 }
 
+void setObj(const Vector& coef) {
+	// TODO
+}
+
 void LinearSolver::setObjVar(int var, double coef) {
 
 	try {
@@ -1702,6 +1710,9 @@ void LinearSolver::setSense(Sense s) {
 }
 
 
+void setObj(const Vector& coef) {
+	// TODO
+}
 
 void LinearSolver::setObjVar(int var, double coef) {
 
@@ -2344,6 +2355,10 @@ void LinearSolver::setMaxTimeOut(int time) {
 }
 
 void LinearSolver::setSense(Sense s) {
+	throw LPException();
+}
+
+void setObj(const Vector& coef) {
 	throw LPException();
 }
 
