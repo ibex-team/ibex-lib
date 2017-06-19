@@ -29,7 +29,7 @@
 
 #include <float.h>
 #include <stdlib.h>
-#include "../../../../src/system/ibex_ActiveConstraintsFnc.h"
+#include "ibex_ActiveConstraintsFnc.h"
 
 using namespace std;
 
