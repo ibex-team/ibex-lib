@@ -160,7 +160,7 @@ bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& D
 
 	while (!over) {
 
-		linsolve.initBoundVar(param_box);
+		linsolve.setBounds(param_box);
 
 		for (int i=0; i<k; i++) {
 			if (b[i])

@@ -176,8 +176,8 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	}
 
 	mylp->cleanConst();
-	mylp->initBoundVar(bound);
-	mylp->setVarObj(0,1.0); // set the objective
+	mylp->setBounds(bound);
+	mylp->setObjVar(0,1.0); // set the objective
 
 	mylp->addConstraint(row,LEQ,0.0); // add the constraint of the objective function
 

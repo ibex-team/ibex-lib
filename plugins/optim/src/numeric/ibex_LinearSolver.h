@@ -69,7 +69,7 @@ private:
 	int nb_vars;
 	int nb_rows;
 
-	double obj_value;
+	Interval obj_value;
 
 	double epsilon;
 
@@ -80,6 +80,7 @@ private:
 	int status_dual; //= 1 if OK
 
 	IntervalVector boundvar;
+
 
 #ifdef _IBEX_WITH_SOPLEX_
 	soplex::SoPlex *mysoplex;
@@ -112,6 +113,8 @@ private:
 public:
 
 	static const double default_eps;
+
+	/** the maximal bound of the variable, set to 1e20	 */
 	static const double default_max_bound;
 
     /** Default max_time_out, set to 100s  */
@@ -124,7 +127,7 @@ public:
 	/** Default max_diam_deriv value, set to 1e6  **/
 	static const Interval default_limit_diam_box;
 
-	typedef enum  {OPTIMAL=1, INFEASIBLE=2, INFEASIBLE_NOTPROVED=3, UNKNOWN=0, TIME_OUT=-1, MAX_ITER=-2} Status_Sol;
+	typedef enum  {OPTIMAL=1, INFEASIBLE=2, OPTIMAL_PROVED=3, INFEASIBLE_PROVED=4, UNKNOWN=0, TIME_OUT=-1, MAX_ITER=-2} Status_Sol;
 
 	typedef enum  {MINIMIZE, MAXIMIZE} Sense;
 
@@ -134,41 +137,33 @@ public:
 	~LinearSolver();
 
 	Status_Sol solve();
+	Status_Sol solve_robust();
 
 	void writeFile(const char* name="save_LP.lp");
 
-	/**
-	 * Call to linear solver
-	 */
-	Status_Sol run_simplex(Sense sense, int var, Interval & obj, double bound);
+	/**  Call to linear solver to optimize one variable */
+	Status_Sol solve_var(Sense sense, int var, Interval & obj);
 
-	/**
-	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
-	 */
-	void NeumaierShcherbina_postprocessing(int var, Interval & obj, Sense sense);
-
-	/**
-	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
-	 */
-	bool NeumaierShcherbina_infeasibilitytest();
 
 
 // GET
 	int getNbRows() const;
 
-	double getObjValue() const;
+	Interval getObjValue() const;
 
-	void getCoefConstraint(Matrix& A);
+	void getCoefObj(Vector& obj) const;
 
-	void getCoefConstraint_trans(Matrix& A_trans);
+	void getCoefConstraint(Matrix& A) const;
 
-	void getB(IntervalVector& B);
+	void getCoefConstraint_trans(Matrix& A_trans) const;
 
-	void getPrimalSol(Vector & prim);
+	void getB(IntervalVector& lhs_rhs) const;
 
-	void getDualSol(Vector & dual);
+	void getPrimalSol(Vector & prim) const;
 
-	void getInfeasibleDir(Vector & sol);
+	void getDualSol(Vector & dual) const;
+
+	void getInfeasibleDir(Vector & sol) const;
 
 	double getEpsilon() const;
 
@@ -185,17 +180,33 @@ public:
 
 	void setSense(Sense s);
 
-	void setVarObj(int var, double coef);
 
-	void initBoundVar(const IntervalVector& bounds);
+	void setObj(const Vector& coef);
 
-	void setBoundVar(int var, const Interval& bound);
+	void setObjVar(int var, double coef);
+
+	void setBounds(const IntervalVector& bounds);
+
+	void setBoundsVar(int var, const Interval& bound);
 
 	void setEpsilon(double eps);
 
 	void addConstraint(const Vector & row, CmpOp sign, double rhs );
 
+	void addConstraint(const Matrix & A, CmpOp sign, const Vector& rhs );
 
+private:
+
+	/**
+	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
+	 */
+	Interval  NeumaierShcherbina_postprocessing_var(int var, Sense sense);
+	Interval  NeumaierShcherbina_postprocessing();
+
+	/**
+	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
+	 */
+	bool NeumaierShcherbina_infeasibilitytest();
 
 };
 

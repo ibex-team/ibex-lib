@@ -34,12 +34,16 @@ std::ostream& operator<<(std::ostream& os, const LinearSolver::Status_Sol x){
 			os << "OPTIMAL";
 			break;
 	}
-	case(LinearSolver::INFEASIBLE_NOTPROVED) :{
-			os << "INFEASIBLE_NOTPROVED";
-			break;
-	}
 	case(LinearSolver::INFEASIBLE) :{
 			os << "INFEASIBLE";
+			break;
+	}
+	case(LinearSolver::OPTIMAL_PROVED) :{
+			os << "OPTIMAL_PROVED";
+			break;
+	}
+	case(LinearSolver::INFEASIBLE_PROVED) :{
+			os << "INFEASIBLE_PROVED";
 			break;
 	}
 	case(LinearSolver::TIME_OUT) :{
@@ -64,7 +68,7 @@ int LinearSolver::getNbRows() const {
 	return nb_rows;
 }
 
-double LinearSolver::getObjValue() const {
+Interval LinearSolver::getObjValue() const {
 	return obj_value;
 }
 
@@ -74,7 +78,7 @@ double LinearSolver::getEpsilon() const {
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-LinearSolver::Status_Sol LinearSolver::run_simplex(LinearSolver::Sense sense, int var, Interval& obj, double bound) {
+LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int var, Interval& obj) {
 	assert((0<=var)&&(var<=nb_vars));
 
 	LinearSolver::Status_Sol stat = LinearSolver::UNKNOWN;
@@ -82,29 +86,26 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(LinearSolver::Sense sense, in
 	try {
 		// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
 		if(sense==LinearSolver::MINIMIZE)
-			setVarObj(var, 1.0);
+			setObjVar(var, 1.0);
 		else
-			setVarObj(var, -1.0);
+			setObjVar(var, -1.0);
+
 		//	mylinearsolver->writeFile("coucou.lp");
 		//	system("cat coucou.lp");
 		stat = solve();
 		// std::cout << "[polytope-hull]->[run_simplex] solver returns " << stat << std::endl;
-
 		switch (stat) {
 		case LinearSolver::OPTIMAL : {
-			if( ((sense==LinearSolver::MINIMIZE) && (  obj_value <bound)) ||
-					((sense==LinearSolver::MAXIMIZE) && ((-obj_value)>bound))) {
-				stat = LinearSolver::UNKNOWN;
-				break;
-			}
 			// Neumaier - Shcherbina postprocessing
-			NeumaierShcherbina_postprocessing( var, obj, sense);
+			obj_value = NeumaierShcherbina_postprocessing_var(var, sense);
+			obj = obj_value;
+			stat = LinearSolver::OPTIMAL_PROVED;
 			break;
 		}
-		case  LinearSolver::INFEASIBLE_NOTPROVED: {
+		case  LinearSolver::INFEASIBLE: {
 			// infeasibility test  cf Neumaier Shcherbina paper
 			if (NeumaierShcherbina_infeasibilitytest()) {
-				stat = LinearSolver::INFEASIBLE;
+				stat = LinearSolver::INFEASIBLE_PROVED;
 			}
 			break;
 		}
@@ -113,19 +114,19 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(LinearSolver::Sense sense, in
 			break;
 		}
 		// Reset the objective of the LP solver
-		setVarObj(var, 0.0);
+		setObjVar(var, 0.0);
 	}
 	catch (LPException&) {
 		stat = LinearSolver::UNKNOWN;
 		// Reset the objective of the LP solver
-		setVarObj(var, 0.0);
+		setObjVar(var, 0.0);
 	}
 
 	return stat;
 
 }
 
-void LinearSolver::NeumaierShcherbina_postprocessing (int var, Interval & obj, Sense sense) {
+Interval LinearSolver::NeumaierShcherbina_postprocessing_var (int var, LinearSolver::Sense sense) {
 	try {
 		// the dual solution : used to compute the bound
 		Vector dual(nb_rows);
@@ -142,19 +143,50 @@ void LinearSolver::NeumaierShcherbina_postprocessing (int var, Interval & obj, S
 		IntervalVector Lambda(dual);
 
 		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-		if (sense==LinearSolver::MINIMIZE)
+		if (sense==LinearSolver::MINIMIZE) {
 			Rest[var] -=1; // because C is a vector of zero except for the coef "var"
-		else
+			return (Lambda * B - Rest * boundvar);
+		} else {
 			Rest[var] +=1;
+			return -(Lambda * B - Rest * boundvar);
+		}
 
 		//cout << " Rest " << Rest << endl;
 		//cout << " dual " << Lambda << endl;
 		//cout << " dual B " << Lambda * B << endl;
 		//cout << " rest box " << Rest * box  << endl;
-		if (sense==LinearSolver::MINIMIZE)
-			obj = Lambda * B - Rest * boundvar;
-		else
-			obj = -(Lambda * B - Rest * boundvar);
+
+
+	} catch (...) {
+		throw LPException();
+	}
+}
+
+
+Interval LinearSolver::NeumaierShcherbina_postprocessing() {
+	try {
+		// the dual solution : used to compute the bound
+		Vector dual(nb_rows);
+		getDualSol(dual);
+
+		Matrix A_trans (nb_vars,nb_rows) ;
+		getCoefConstraint_trans(A_trans);
+
+		IntervalVector B(nb_rows);
+		getB(B);
+
+		Vector obj(nb_vars);
+		getCoefObj(obj);
+
+		//cout <<" BOUND_test "<< endl;
+		IntervalVector Rest(nb_vars);
+		IntervalVector Lambda(dual);
+
+		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
+		Rest -= obj; // TODO
+		return (Lambda * B - Rest * boundvar);
+
+
 
 	} catch (...) {
 		throw LPException();
@@ -193,20 +225,48 @@ bool LinearSolver::NeumaierShcherbina_infeasibilitytest() {
 
 
 
+LinearSolver::Status_Sol LinearSolver::solve_robust() {
+	LinearSolver::Status_Sol stat = solve();
+	switch (stat) {
+	case LinearSolver::OPTIMAL : {
+		// Neumaier - Shcherbina postprocessing
+		obj_value = NeumaierShcherbina_postprocessing();
+		stat = LinearSolver::OPTIMAL_PROVED;
+		break;
+	}
+	case  LinearSolver::INFEASIBLE: {
+		// infeasibility test  cf Neumaier Shcherbina paper
+		if (NeumaierShcherbina_infeasibilitytest()) {
+			stat = LinearSolver::INFEASIBLE_PROVED;
+		}
+		break;
+	}
+	default:
+		stat = LinearSolver::UNKNOWN;
+		break;
+	}
+	return stat;
+
+}
 
 
+void LinearSolver::addConstraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
+	for (int i=0; i<A.nb_rows(); i++) {
+		try {
+			addConstraint(A[i],sign,rhs[i]);
+		} catch (LPException&) { }
+	}
+}
 
 
-
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////////TODO
 #ifdef _IBEX_WITH_SOPLEX_
 
 
 LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_out, double eps) :
 			nb_ctrs(nb_ctr), nb_vars(nb_vars1), nb_rows(0), obj_value(0.0), epsilon(eps),
 			primal_solution(new double[nb_vars1]), dual_solution(NULL), size_dual_solution(0),
-			status_prim(soplex::SPxSolver::UNKNOWN), status_dual(soplex::SPxSolver::UNKNOWN), boundvar(nb_vars1)  {
+			status_prim(soplex::SPxSolver::UNKNOWN), status_dual(soplex::SPxSolver::UNKNOWN), boundvar(nb_vars1) {
 
 
 	mysoplex= new soplex::SoPlex();
@@ -259,7 +319,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 			// the dual solution ; used by Neumaier Shcherbina test
 			soplex::DVector dual(nb_rows);
 			if (size_dual_solution != nb_rows) {
-				delete [] dual_solution;
+				if (dual_solution) delete [] dual_solution;
 				dual_solution = new double[nb_rows];
 				size_dual_solution = nb_rows;
 			}
@@ -282,7 +342,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	    	return MAX_ITER;
 	    }
 	    case (soplex::SPxSolver::INFEASIBLE):{
-	    	return INFEASIBLE_NOTPROVED;
+	    	return INFEASIBLE;
 	    }
 	    default : {
 	    	return UNKNOWN;
@@ -304,8 +364,12 @@ void LinearSolver::writeFile(const char* name) {
 	return ;
 }
 
+void LinearSolver::getCoefObj(Vector& obj) const {
+	//TODO
+	return;
+}
 
-void LinearSolver::getCoefConstraint(Matrix &A) {
+void LinearSolver::getCoefConstraint(Matrix &A) const {
 
 	try {
 		for (int i=0;i<nb_rows; i++){
@@ -320,7 +384,7 @@ void LinearSolver::getCoefConstraint(Matrix &A) {
 	return ;
 }
 
-void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
+void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) const {
 
 	try {
 		for (int i=0;i<nb_rows; i++){
@@ -335,7 +399,7 @@ void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
 	return ;
 }
 
-void  LinearSolver::getB(IntervalVector& B) {
+void  LinearSolver::getB(IntervalVector& B) const{
 
 	try {
 		// Get the bounds of the variables
@@ -359,7 +423,7 @@ void  LinearSolver::getB(IntervalVector& B) {
 }
 
 
-void LinearSolver::getPrimalSol(Vector & solution_primal) {
+void LinearSolver::getPrimalSol(Vector & solution_primal) const {
 
 	try {
 		if (status_prim == soplex::SPxSolver::OPTIMAL) {
@@ -374,7 +438,7 @@ void LinearSolver::getPrimalSol(Vector & solution_primal) {
 	return ;
 }
 
-void LinearSolver::getDualSol(Vector & solution_dual) {
+void LinearSolver::getDualSol(Vector & solution_dual) const {
 
 	try {
 		if (status_dual == soplex::SPxSolver::OPTIMAL) {
@@ -389,7 +453,7 @@ void LinearSolver::getDualSol(Vector & solution_dual) {
 	return ;
 }
 
-void LinearSolver::getInfeasibleDir(Vector & sol) {
+void LinearSolver::getInfeasibleDir(Vector & sol) const {
 
 	try {
 		soplex::SPxSolver::Status stat1;
@@ -421,6 +485,7 @@ void LinearSolver::cleanConst() {
 	try {
 		if (dual_solution!=NULL) delete[] dual_solution;
 		dual_solution=NULL;
+		size_dual_solution=0;
 		status_prim = soplex::SPxSolver::UNKNOWN;
 		status_dual = soplex::SPxSolver::UNKNOWN;
 		int status=0;
@@ -441,6 +506,7 @@ void LinearSolver::cleanAll() {
 	try {
 		if (dual_solution!=NULL) delete[] dual_solution;
 		dual_solution=NULL;
+		size_dual_solution = 0;
 		status_prim = soplex::SPxSolver::UNKNOWN;
 		status_dual = soplex::SPxSolver::UNKNOWN;
 		mysoplex->removeRowRange(0, nb_rows-1);
@@ -497,8 +563,7 @@ void LinearSolver::setSense(Sense s) {
 }
 
 
-
-void LinearSolver::setVarObj(int var, double coef) {
+void LinearSolver::setObjVar(int var, double coef) {
 
 	try {
 		mysoplex->changeObj(var, coef);
@@ -509,7 +574,7 @@ void LinearSolver::setVarObj(int var, double coef) {
 	return ;
 }
 
-void LinearSolver::initBoundVar(const IntervalVector& bounds) {
+void LinearSolver::setBounds(const IntervalVector& bounds) {
 
 	try {
 		for (int j=0; j<nb_vars; j++){
@@ -524,7 +589,7 @@ void LinearSolver::initBoundVar(const IntervalVector& bounds) {
 	return ;
 }
 
-void LinearSolver::setBoundVar(int var, const Interval& bound) {
+void LinearSolver::setBoundsVar(int var, const Interval& bound) {
 
 	try {
 		mysoplex->changeRange(var ,bound.lb(),bound.ub());
@@ -828,7 +893,10 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 
 			switch (solstat) {
 			case (CPX_STAT_OPTIMAL): {
-				int status = CPXgetobjval(envcplex, lpcplex, &obj_value);
+				double tmp;
+				int status = CPXgetobjval(envcplex, lpcplex, &tmp);
+				obj_value = tmp;
+
 				if (status) {
 					std::cerr << "LinearSolver: Failed to get the objective value." << std::endl;
 					throw LPException();
@@ -843,7 +911,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 				return OPTIMAL;
 			}
 			case (CPX_STAT_INFEASIBLE):
-				return INFEASIBLE_NOTPROVED;
+				return INFEASIBLE;
 			case (CPX_STAT_ABORT_IT_LIM):
 				return MAX_ITER;
 			case (CPX_STAT_ABORT_TIME_LIM):
@@ -875,8 +943,13 @@ void LinearSolver::writeFile(const char* name) {
 }
 
 
+void LinearSolver::getCoefObj(Vector& obj) const {
+	//TODO
+	return;
+}
 
-void LinearSolver::getCoefConstraint(Matrix &A) {
+
+void LinearSolver::getCoefConstraint(Matrix &A) const {
 	try {
 		int surplus = 0, nzcnt = 0;
 		int * t_Rmatbeg = new int[nb_rows];
@@ -914,7 +987,7 @@ void LinearSolver::getCoefConstraint(Matrix &A) {
 	return;
 }
 
-void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
+void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) const {
 
 	try {
 		int surplus = 0, nzcnt = 0;
@@ -956,7 +1029,7 @@ void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
 	return ;
 }
 
-void LinearSolver::getB(IntervalVector& B) {
+void LinearSolver::getB(IntervalVector& B) const {
 	try {
 		// Get the bounds of the variables
 		double * rhs = new double[nb_rows];
@@ -975,7 +1048,7 @@ void LinearSolver::getB(IntervalVector& B) {
 	return ;
 }
 
-void LinearSolver::getPrimalSol(Vector & primal) {
+void LinearSolver::getPrimalSol(Vector & primal) const {
 
 	try {
 		if (status_prim == 0) {
@@ -991,7 +1064,7 @@ void LinearSolver::getPrimalSol(Vector & primal) {
 	return;
 }
 
-void LinearSolver::getDualSol(Vector & dual) {
+void LinearSolver::getDualSol(Vector & dual) const {
 
 	try {
 		// the dual solution ; used by Neumaier Shcherbina test
@@ -1009,7 +1082,7 @@ void LinearSolver::getDualSol(Vector & dual) {
 	return ;
 }
 
-void LinearSolver::getInfeasibleDir(Vector & sol) {
+void LinearSolver::getInfeasibleDir(Vector & sol) const {
 
 	try {
 		double * solution_found = new double[nb_rows];
@@ -1058,6 +1131,7 @@ void LinearSolver::cleanAll() {
 	try {
 		if (dual_solution) delete[] dual_solution;
 		dual_solution=NULL;
+		size_dual_solution =0;
 		status_prim = -1;
 		status_dual = -1;
 		int status = CPXdelrows (envcplex, lpcplex, 0,  nb_rows - 1);
@@ -1125,7 +1199,7 @@ void LinearSolver::setSense(Sense s) {
 	return ;
 }
 
-void LinearSolver::setVarObj(int var, double coef) {
+void LinearSolver::setObjVar(int var, double coef) {
 
 	try {
 
@@ -1141,7 +1215,7 @@ void LinearSolver::setVarObj(int var, double coef) {
 	return ;
 }
 
-void LinearSolver::initBoundVar(const IntervalVector& bounds) {
+void LinearSolver::setBounds(const IntervalVector& bounds) {
 
 	try {
 		// Changement de la fonction objective = rhs du primal (car on est en formulation dual)
@@ -1166,7 +1240,7 @@ void LinearSolver::initBoundVar(const IntervalVector& bounds) {
 	return ;
 }
 
-void LinearSolver::setBoundVar(int var, const Interval& bound) {
+void LinearSolver::setBoundsVar(int var, const Interval& bound) {
 
 	try {
 		int * ind = new int[2];
@@ -1371,7 +1445,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 			return OPTIMAL;
 		}
 		else if (myclp->isProvenPrimalInfeasible())
-			return INFEASIBLE_NOTPROVED;
+			return INFEASIBLE;
 		else if (myclp->isIterationLimitReached())
 			return MAX_ITER;
 		else
@@ -1394,8 +1468,13 @@ void LinearSolver::writeFile(const char* name) {
 }
 
 
+void LinearSolver::getCoefObj(Vector& obj) const {
+	//TODO
+	return;
+}
 
-void LinearSolver::getCoefConstraint(Matrix &A) {
+
+void LinearSolver::getCoefConstraint(Matrix &A) const {
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
 		// see mat.getCorefficient()
@@ -1424,7 +1503,7 @@ void LinearSolver::getCoefConstraint(Matrix &A) {
 	return ;
 }
 
-void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
+void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) const {
 
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
@@ -1456,7 +1535,7 @@ void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
 	return ;
 }
 
-void  LinearSolver::getB(IntervalVector& B) {
+void  LinearSolver::getB(IntervalVector& B) const {
 
 	try {
 		// Get the bounds of the variables
@@ -1480,7 +1559,7 @@ void  LinearSolver::getB(IntervalVector& B) {
 }
 
 
-void LinearSolver::getPrimalSol(Vector & solution_primal) {
+void LinearSolver::getPrimalSol(Vector & solution_primal) const {
 
 	try {
 		if (status_prim == 1) {
@@ -1495,7 +1574,7 @@ void LinearSolver::getPrimalSol(Vector & solution_primal) {
 	return ;
 }
 
-void LinearSolver::getDualSol(Vector & solution_dual) {
+void LinearSolver::getDualSol(Vector & solution_dual) const {
 
 	try {
 		if (status_dual == 1) {
@@ -1510,7 +1589,7 @@ void LinearSolver::getDualSol(Vector & solution_dual) {
 	return ;
 }
 
-void LinearSolver::getInfeasibleDir(Vector & sol) {
+void LinearSolver::getInfeasibleDir(Vector & sol) const {
 
 	try {
 
@@ -1624,7 +1703,7 @@ void LinearSolver::setSense(Sense s) {
 
 
 
-void LinearSolver::setVarObj(int var, double coef) {
+void LinearSolver::setObjVar(int var, double coef) {
 
 	try {
 		myclp->setObjectiveCoefficient(var, coef);
@@ -1635,7 +1714,7 @@ void LinearSolver::setVarObj(int var, double coef) {
 	return ;
 }
 
-void LinearSolver::initBoundVar(const IntervalVector& bounds) {
+void LinearSolver::setBounds(const IntervalVector& bounds) {
 	try {
 		for (int j=0; j<nb_vars; j++){
 			// Change the LHS and RHS of each constraint associated to the bounds of the variable
@@ -1649,7 +1728,7 @@ void LinearSolver::initBoundVar(const IntervalVector& bounds) {
 	return ;
 }
 
-void LinearSolver::setBoundVar(int var, const Interval& bound) {
+void LinearSolver::setBoundsVar(int var, const Interval& bound) {
 
 	try {
 		myclp->setRowBounds(var,bound.lb(),bound.ub());
@@ -2268,15 +2347,15 @@ void LinearSolver::setSense(Sense s) {
 	throw LPException();
 }
 
-void LinearSolver::setVarObj(int var, double coef) {
+void LinearSolver::setObjVar(int var, double coef) {
 	throw LPException();
 }
 
-void LinearSolver::initBoundVar(const IntervalVector& bounds) {
+void LinearSolver::setBounds(const IntervalVector& bounds) {
 	throw LPException();
 }
 
-void LinearSolver::setBoundVar(int var, const Interval& bound) {
+void LinearSolver::setBoundsVar(int var, const Interval& bound) {
 	throw LPException();
 }
 

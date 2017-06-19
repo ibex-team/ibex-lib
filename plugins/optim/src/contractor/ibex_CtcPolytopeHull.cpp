@@ -105,7 +105,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 
 	// Update the bounds the variables
-	mylinearsolver->initBoundVar(box);
+	mylinearsolver->setBounds(box);
 
 	for(int ii=0; ii<(2*nb_var); ii++) {  // at most 2*n calls
 
@@ -116,9 +116,9 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{
 			inf_bound[i]=1;
-			stat = mylinearsolver->run_simplex(LinearSolver::MINIMIZE, i, opt,box[i].lb());
+			stat = mylinearsolver->solve_var(LinearSolver::MINIMIZE, i, opt);
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
-			if (stat == LinearSolver::OPTIMAL) {
+			if (stat == LinearSolver::OPTIMAL_PROVED) {
 				if(opt.lb()>box[i].ub()) {
 					delete[] inf_bound;
 					delete[] sup_bound;
@@ -127,21 +127,21 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 				if(opt.lb() > box[i].lb()) {
 					box[i]=Interval(opt.lb(),box[i].ub());
-					mylinearsolver->setBoundVar(i,box[i]);
+					mylinearsolver->setBoundsVar(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {
 					break;
 				}
 			}
-			else if (stat == LinearSolver::INFEASIBLE) {
+			else if (stat == LinearSolver::INFEASIBLE_PROVED) {
 				delete[] inf_bound;
 				delete[] sup_bound;
 				// the infeasibility is proved, the EmptyBox exception is raised
 				throw PolytopeHullEmptyBoxException();
 			}
 
-			else if (stat == LinearSolver::INFEASIBLE_NOTPROVED) {
+			else if (stat == LinearSolver::INFEASIBLE) {
 				// the infeasibility is found but not proved, no other call is needed
 				break;
 			}
@@ -164,9 +164,9 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		}
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
-			stat= mylinearsolver->run_simplex(LinearSolver::MAXIMIZE, i, opt, box[i].ub());
+			stat= mylinearsolver->solve_var(LinearSolver::MAXIMIZE, i, opt);
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << " opt=" << opt << endl;
-			if( stat == LinearSolver::OPTIMAL) {
+			if( stat == LinearSolver::OPTIMAL_PROVED) {
 				if(opt.ub() <box[i].lb()) {
 					delete[] inf_bound;
 					delete[] sup_bound;
@@ -175,20 +175,20 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 				if (opt.ub() < box[i].ub()) {
 					box[i] =Interval( box[i].lb(), opt.ub());
-					mylinearsolver->setBoundVar(i,box[i]);
+					mylinearsolver->setBoundsVar(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {
 					break;
 				}
 			}
-			else if(stat == LinearSolver::INFEASIBLE) {
+			else if(stat == LinearSolver::INFEASIBLE_PROVED) {
 				delete[] inf_bound;
 				delete[] sup_bound;
 				// the infeasibility is proved,  the EmptyBox exception is raised
 				throw PolytopeHullEmptyBoxException();
 			}
-			else if (stat == LinearSolver::INFEASIBLE_NOTPROVED) {
+			else if (stat == LinearSolver::INFEASIBLE) {
 				// the infeasibility is found but not proved, no other call is needed
 				break;
 			}

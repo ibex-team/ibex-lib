@@ -169,9 +169,9 @@ bool LinearRelaxXTaylor::goal_linearization(const IntervalVector& box, LinearSol
 	try {
 		for (int j=0; j<n; j++){
 			if (rand()%2)
-				lp_solver.setVarObj(j,G[j].ub());
+				lp_solver.setObjVar(j,G[j].ub());
 			else
-				lp_solver.setVarObj(j,G[j].lb());
+				lp_solver.setObjVar(j,G[j].lb());
 		}
 		return true;
 	} catch (LPException&) {
