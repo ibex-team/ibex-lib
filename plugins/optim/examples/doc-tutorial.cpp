@@ -653,7 +653,7 @@ int main() {
 
 	CtcAcid acid(system, hc4_2);
 
-	CtcNewton newton(system.f, 5e+08, prec, 1e-04);
+	CtcNewton newton(system.f_ctrs, 5e+08, prec, 1e-04);
 
 	LinearRelaxCombo linear_relax(system,LinearRelaxCombo::XNEWTON);
 

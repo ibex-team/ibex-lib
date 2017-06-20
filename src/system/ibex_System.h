@@ -135,7 +135,7 @@ public:
 	 *
 	 * \warning - if this system represents an unconstrained optimization problem,
 	 * this field is not initialized and must be ignored. */
-	Function f;
+	Function f_ctrs;
 
 	/** All the arguments */
 	Array<const ExprSymbol> args;

@@ -79,8 +79,8 @@ int main() {
 
 	{
 	//! [solver-parallel-C-2]
-	Solver solver1(*new CtcCompo(*new CtcHC4(sys1),*new CtcNewton(sys1.f)), *new RoundRobin(prec), *new CellStack());
-	Solver solver2(*new CtcCompo(*new CtcHC4(sys2),*new CtcNewton(sys2.f)), *new RoundRobin(prec), *new CellStack());
+	Solver solver1(*new CtcCompo(*new CtcHC4(sys1),*new CtcNewton(sys1.f_ctrs)), *new RoundRobin(prec), *new CellStack());
+	Solver solver2(*new CtcCompo(*new CtcHC4(sys2),*new CtcNewton(sys2.f_ctrs)), *new RoundRobin(prec), *new CellStack());
 	//! [solver-parallel-C-2]
 	}
 

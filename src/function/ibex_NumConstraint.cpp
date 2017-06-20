@@ -100,7 +100,7 @@ void NumConstraint::build_from_system(const System& sys) {
 	}
 	NumConstraint& c0=sys.ctrs[0]; // other constraints are ignored
 
-	Array<const ExprSymbol> x(sys.f.nb_arg());
+	Array<const ExprSymbol> x(sys.f_ctrs.nb_arg());
 	varcopy(c0.f.args(),x);
 	const ExprNode& y=ExprCopy().copy(c0.f.args(),x,c0.f.expr());
 

@@ -154,7 +154,7 @@ bool Optimizer::update_real_loup() {
 
 	// ====================================================
 	// solution #2: we call Hansen test in inflating mode.
-	PdcHansenFeasibility pdc(equs->f, true);
+	PdcHansenFeasibility pdc(equs->f_ctrs, true);
 	// ====================================================
 
 	// TODO: maybe we should check first if the epsbox is inner...

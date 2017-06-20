@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 	// the system.
 	CtcNewton* ctcnewton= NULL;
 	if (filtering == "acidhc4n" || filtering=="hc4n" || filtering=="3bcidhc4n")
-	  ctcnewton= new CtcNewton(sys.f,5e8,prec,1.e-4);
+	  ctcnewton= new CtcNewton(sys.f_ctrs,5e8,prec,1.e-4);
 	  
 
         // Build contractor #3

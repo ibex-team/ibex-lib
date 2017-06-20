@@ -175,7 +175,7 @@ bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& D
 		LinearSolver::Status_Sol stat = linsolve.run_simplex(LinearSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
 		//cout << "  status=" << stat << endl;
 
-		linsolve.cleanConst();
+		linsolve.clean_ctrs();
 
 		if (stat != LinearSolver::OPTIMAL) {
 			result=false;

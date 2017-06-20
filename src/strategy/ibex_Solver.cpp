@@ -57,7 +57,7 @@ void Solver::init(const System& sys, const BitSet* _params) {
 		if (sys.ctrs[i].op==EQ) nb_eq+=sys.ctrs[i].f.image_dim();
 	}
 
-	if (nb_eq==sys.f.image_dim())
+	if (nb_eq==sys.f_ctrs.image_dim())
 		eqs=&sys; // useless to create a new one
 	else {
 		ineqs=new System(sys,System::INEQ_ONLY);
@@ -69,7 +69,7 @@ void Solver::init(const System& sys, const BitSet* _params) {
 	}
 
 	n=sys.nb_var;
-	m=eqs? eqs->f.image_dim() : 0;
+	m=eqs? eqs->f_ctrs.image_dim() : 0;
 
 }
 
@@ -227,9 +227,9 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 		else if (m<n) {
 			// ====== under-constrained =========
 			try {
-				VarSet varset=get_newton_vars(eqs->f,box.mid(),params? *params: BitSet::empty(n));
+				VarSet varset=get_newton_vars(eqs->f_ctrs,box.mid(),params? *params: BitSet::empty(n));
 
-				proved=inflating_newton(eqs->f, varset, box, sol._existence, *sol._unicity);
+				proved=inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity);
 
 				if (params && params->size()<n-m)
 					sol.varset = new VarSet(varset);
@@ -245,7 +245,7 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 			}
 		} else {
 			// ====== well-constrained =========
-			proved=inflating_newton(eqs->f, box.mid(), sol._existence, *sol._unicity);
+			proved=inflating_newton(eqs->f_ctrs, box.mid(), sol._existence, *sol._unicity);
 
 			if (!proved) {
 				sol._existence=box;

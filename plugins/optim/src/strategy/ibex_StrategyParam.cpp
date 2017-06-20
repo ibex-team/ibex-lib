@@ -71,7 +71,7 @@ Ctc& StrategyParam::get_ctc() {
 	Ctc* ctcnewton= NULL;
 
 	if (filtering == "acidhc4n" || filtering=="hc4n" || filtering=="3bcidhc4n")
-	  ctcnewton= &rec(new CtcNewton(get_sys().f, NEWTON_CEIL, prec, GAUSS_SEIDEL_RATIO));
+	  ctcnewton= &rec(new CtcNewton(get_sys().f_ctrs, NEWTON_CEIL, prec, GAUSS_SEIDEL_RATIO));
 
 	if (filtering=="hc4" || filtering=="hc4n") {
 		ctc = (!ctcnewton)?

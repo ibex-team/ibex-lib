@@ -186,7 +186,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	if (m>0)
 	{
 		// the evaluation of the constraints in the corner x_corner
-		IntervalVector g_corner(sys.f.eval_vector(x_corner));
+		IntervalVector g_corner(sys.f_ctrs.eval_vector(x_corner));
 
 		for (int i=0; i<m; i++) {
 
