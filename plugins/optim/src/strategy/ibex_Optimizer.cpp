@@ -95,6 +95,10 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 
 	//	objshaver= new CtcOptimShaving (*new CtcHC4 (ext_sys.ctrs,0.1,true),20,1,1.e-11);
 
+
+	/**
+	 * Control the number of iterations inside the linear solver
+	 */
 	int niter=100;
 	// int niter=1000;
 	if (niter < 3*n) niter=3*n;
@@ -105,7 +109,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 #else
 	//lr = new LinearRelaxCombo(sys, LinearRelaxCombo::XNEWTON);
 	//mylp = new LinearSolver(sys.nb_var,sys.nb_ctr,niter);
-	lr = new LinearRelaxCombo(ext_sys, LinearRelaxCombo::XNEWTON);
+	lr = new LinearRelaxCombo(ext_sys, LinearRelaxCombo::XNEWTON); // *unused*
 	mylp = new LinearSolver(ext_sys.nb_var,ext_sys.nb_ctr,niter);
 	//	cout << "sys " << sys << endl;
 #endif // _IBEX_WITH_NOLP_
@@ -260,6 +264,7 @@ void Optimizer::update_uplo() {
 			ibex_error("optimizer: new_uplo<uplo (please report bug)");
 		}
 
+		// TODO: replace with uplo = std::max(uplo, std::min(new_uplo, uplo_of_epsboxes)) ??
 		if (new_uplo < uplo_of_epsboxes) {
 			if (new_uplo > uplo) {
 				//cout << "uplo update=" << uplo << endl;
@@ -316,6 +321,9 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 	double ymax;
 	if (loup==POS_INFINITY) ymax=POS_INFINITY;
+
+	// ymax is slightly increased to favour subboxes of the loup
+	// TODO: useful with double heap??
 	else ymax= compute_ymax()+1.e-15;
 	//	else ymax= compute_ymax();
 	/*
@@ -367,14 +375,13 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	}
 
 	/*====================================================================*/
-	// [gch] The case (!c.box.is_bisectable()) seems redundant
-	// with the case of a NoBisectableVariableException in
-	// optimize(). Is update_uplo_of_epsboxes called twice in this case?
-	// (bn] NO , the NoBisectableVariableException is raised by the bisector, there are 2 different cases of a non bisected box that may cause an update of uplo_of_epsboxes
+	// Note: there are three different cases of "epsilon" box,
+	// - NoBisectableVariableException raised by the bisector (---> see optimize(...)) which
+	//   is independent from the optimizer
+	// - the width of the box is less than the precision given to the optimizer ("prec" for the original variables
+	//   and "goal_abs_prec" for the goal variable)
+	// - the extended box has no bisectable domains (if prec=0 or <1 ulp)
 	if ((tmp_box.max_diam()<=prec && y.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
-		// rem1: tmp_box and not c.box because y is handled with goal_rel_prec and goal_abs_prec
-		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
-		// rem 3 : the extended  boxes with no bisectable domains should be caught for avoiding infinite bisections
 		update_uplo_of_epsboxes(y.lb());
 		c.box.set_empty();
 		return;
@@ -421,6 +428,9 @@ void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& i
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
+
+	// Just to initialize the "loup" for the buffer
+	// TODO: replace with a set_loup function
 	buffer.contract(loup);
 
 	uplo=NEG_INFINITY;
@@ -452,6 +462,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	loup_changed=false;
 	initial_loup=obj_init_bound;
+
+	// TODO: no loup-point if handle_cell contracts everything
 	loup_point=init_box.mid();
 	time=0;
 	Timer::start();
@@ -496,7 +508,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					buffer.contract(ymax);
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
-
+					// TODO: check if happens. What is the return code in this case?
 					if (ymax <= NEG_INFINITY) {
 						if (trace) cout << " infinite value for the minimum " << endl;
 						break;
@@ -504,7 +516,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo<< endl;
 				}
 				update_uplo();
-				time_limit_check();
+				time_limit_check(); // TODO: not reentrant
 
 			}
 			catch (NoBisectableVariableException& ) {
@@ -512,7 +524,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 				buffer.pop();
 				delete c; // deletes the cell.
 				//if (trace>=1) cout << "epsilon-box found: uplo cannot exceed " << uplo_of_epsboxes << endl;
-				update_uplo(); // the heap has changed -> recalculate the uplo
+				update_uplo(); // the heap has changed -> recalculate the uplo (eg: if not in best-first search)
 
 			}
 		}
@@ -523,6 +535,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
+
 
 	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0)))
 		return INFEASIBLE;

@@ -209,6 +209,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_
 			status_prim(soplex::SPxSolver::UNKNOWN), status_dual(soplex::SPxSolver::UNKNOWN)  {
 
 
+	// create a new Soplex environment
 	mysoplex= new soplex::SoPlex();
 
 	mysoplex->changeSense(soplex::SPxLP::MINIMIZE);

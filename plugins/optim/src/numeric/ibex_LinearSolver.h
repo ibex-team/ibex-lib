@@ -107,6 +107,7 @@ private:
 
 public:
 
+	/** Default precision on the objective */
 	static const double default_eps;
 	static const double default_max_bound;
 
@@ -124,22 +125,33 @@ public:
 
 	typedef enum  {MINIMIZE, MAXIMIZE} Sense;
 
+	// nb_ctr: as an indication only
 	LinearSolver(int nb_vars, int nb_ctr, int max_iter= default_max_iter,
 			int max_time_out= default_max_time_out, double eps=default_eps);
 
 	~LinearSolver();
 
+	// todo: rename run_simplex
 	Status_Sol solve();
 
 	void writeFile(const char* name="save_LP.lp");
 
 	/**
 	 * Call to linear solver
+	 * TODO: rename build_and_run_simplex
+	 *
+	 * \param obj - (output) guaranteed enclosure or the objective
+	 * \param bound - TODO: remove this parameter
 	 */
 	Status_Sol run_simplex(const IntervalVector &box, Sense sense, int var, Interval & obj, double bound);
 
 	/**
 	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
+	 *
+	 * TODO: all parameters should be removed: this function has to be called
+	 * after a call to solve(), all parameters are contextual.
+	 *
+	 * TODO: update the code so that it works for any objective (not necessarily +/-x_i).
 	 */
 	void NeumaierShcherbina_postprocessing(int var, Interval & obj, const IntervalVector& box, Sense sense);
 
@@ -158,6 +170,9 @@ public:
 
 	void getCoefConstraint_trans(Matrix& A_trans);
 
+	/**
+	 * lhs<=Ax<=rhs ----> Ax<=B
+	 */
 	void getB(IntervalVector& B);
 
 	void getPrimalSol(Vector & prim);
@@ -181,6 +196,9 @@ public:
 
 	void setSense(Sense s);
 
+	/**
+	 * Set the ith component of the objective vector
+	 */
 	void setVarObj(int var, double coef);
 
 	void initBoundVar(IntervalVector bounds);
