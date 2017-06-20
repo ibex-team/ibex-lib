@@ -8,8 +8,8 @@
 // Last Update : May 15, 2013
 //============================================================================
 
-#ifndef IBEX_LINEARSOLVER_H_
-#define IBEX_LINEARSOLVER_H_
+#ifndef __IBEX_LINEAR_SOLVER_H__
+#define __IBEX_LINEAR_SOLVER_H__
 
 #include "ibex_Setting.h"
 
@@ -76,57 +76,12 @@ namespace ibex {
 
 class LinearSolver {
 
-
-private:
-
-	/** Definition of the LP */
-	int nb_vars;
-	int nb_ctrs;
-	IntervalVector boundvar;  // bound constraints
-	double epsilon;           // precision on the objective
-
-	/** Results of the last call to solve() */
-	Interval obj_value;
-	double * primal_solution;
-	double * dual_solution;
-	int size_dual_solution;
-	int status_prim; //= 1 if OK
-	int status_dual; //= 1 if OK
-
-
-#ifdef _IBEX_WITH_SOPLEX_
-	soplex::SoPlex *mysoplex;
-#endif
-
-#ifdef _IBEX_WITH_CPLEX_
-	CPXENVptr  envcplex;
-	CPXLPptr lpcplex;
-	int * indice;
-	double * 	tmp;
-	int *  		r_matbeg;
-	double *  	r_matval;
-	int * 		r_matind;
-#endif
-
-#ifdef _IBEX_WITH_ILOCPLEX_
-	IloEnv		*myenv;
-    IloModel 	*mymodel;
-	IloCplex	*mycplex;
-#endif
-
-
-#ifdef _IBEX_WITH_CLP_
-	ClpSimplex 	*myclp;
-	int * _which;
-	int * _col1Index;
-#endif
-
-
 public:
 
+	/** the default precision on the objective, set to 1e-10. */
 	static const double default_eps;
 
-	/** the maximal bound of the variable, set to 1e20	 */
+	/** the maximal bound of the variable, set to 1e20. */
 	static const double default_max_bound;
 
     /** Default max_time_out, set to 100s  */
@@ -143,7 +98,7 @@ public:
 
 	typedef enum  {MINIMIZE, MAXIMIZE} Sense;
 
-	LinearSolver(int nb_vars, int nb_ctr, int max_iter= default_max_iter,
+	LinearSolver(int nb_vars, int max_iter= default_max_iter,
 			int max_time_out= default_max_time_out, double eps=default_eps);
 
 	~LinearSolver();
@@ -166,9 +121,7 @@ public:
 	Status_Sol solve_robust();
 
 
-
-	void writeFile(const char* name="save_LP.lp");
-
+	void write_file(const char* name="save_LP.lp");
 
 
 // GET
@@ -179,13 +132,13 @@ public:
 	 * Rows correspond to all constraints, including bound constraints
 	 *
 	 */
-	int getNbRows() const;
+	int get_nb_rows() const;
 
-	void getRows(Matrix& A) const;
+	void get_rows(Matrix& A) const;
 
 	void get_rows_trans(Matrix& A_trans) const;
 
-	void getB(IntervalVector& lhs_rhs) const;
+	void get_lhs_rhs(IntervalVector& lhs_rhs) const;
 
 	/**
 	 *
@@ -215,21 +168,21 @@ public:
 	 * Do not modify the bound constraints
 	 * (use clean_bounds or set_bounds)
 	 */
-	void cleanConst();
+	void clean_ctrs();
 
 	/**
 	 * \brief Delete the bound constraints
 	 *
 	 * TODO
 	 */
-	void clean_bounds();
+	void clean_bounds() { }
 
 	/**
 	 * \brief Set all the objective coefficients to 0.
 	 *
 	 * TODO
 	 */
-	void clean_obj();
+	void clean_obj() { }
 
 	/**
 	 * \brief Clean the LP
@@ -237,6 +190,10 @@ public:
 	 * Delete all constraints, including bound constraints
 	 * and set the coefficients of the objective to 0.
 	 */
+	void clean_all();
+
+
+	// TODO: to be removed
 	void cleanAll();
 
 	void setMaxIter(int max);
@@ -260,7 +217,9 @@ public:
 
 	void addConstraint(const Matrix & A, CmpOp sign, const Vector& rhs );
 
+
 private:
+
 	friend class CtcPolytopeHull;
 
 	/**  Call to linear solver to optimize one variable */
@@ -268,19 +227,62 @@ private:
 
 	/**
 	 * Neumaier Shcherbina postprocessing in case of optimal solution found :
-	 * the result obj is made reliable
+	 * the result "obj_value" is made reliable.
 	 *
-	 * A more efficient
+	 * A more efficient variant than NeumaierShcherbina_postprocessing()
 	 *
 	 * The solution point is *not* made reliable
 	 */
 	Interval  NeumaierShcherbina_postprocessing_var(int var, Sense sense);
+
+
 	Interval  NeumaierShcherbina_postprocessing();
 
 	/**
 	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
 	 */
 	bool NeumaierShcherbina_infeasibilitytest();
+
+	/** Definition of the LP */
+	int nb_vars;              // number of variables
+	int nb_rows;              // total number of rows
+	IntervalVector boundvar;  // bound constraints
+	double epsilon;           // precision on the objective
+
+	/** =================== Results of the last call to solve() ==================== */
+	Interval obj_value;       // (certified or not) enclosure of the minimum
+	Vector primal_solution;
+	Vector dual_solution;
+	int status_prim; // return status of the primal solving (implementation-specific)
+	int status_dual; // return status of the dual solving (implementation-specific)
+	/**===============================================================================*/
+
+#ifdef _IBEX_WITH_SOPLEX_
+	soplex::SoPlex *mysoplex;
+#endif
+
+#ifdef _IBEX_WITH_CPLEX_
+	CPXENVptr  envcplex;
+	CPXLPptr lpcplex;
+	int * indice;
+	double * 	tmp;
+	int *  		r_matbeg;
+	double *  	r_matval;
+	int * 		r_matind;
+#endif
+
+#ifdef _IBEX_WITH_ILOCPLEX_
+	IloEnv		*myenv;
+    IloModel 	*mymodel;
+	IloCplex	*mycplex;
+#endif
+
+
+#ifdef _IBEX_WITH_CLP_
+	ClpSimplex 	*myclp;
+	int * _which;
+	int * _col1Index;
+#endif
 
 };
 
@@ -290,4 +292,4 @@ std::ostream& operator<<(std::ostream& os, const LinearSolver::Status_Sol x);
 
 } // end namespace ibex
 
-#endif /* IBEX_LINEARSOLVER_H_ */
+#endif /* __IBEX_LINEAR_SOLVER_H__ */

@@ -106,7 +106,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	//lr = new LinearRelaxCombo(sys, LinearRelaxCombo::XNEWTON);
 	//mylp = new LinearSolver(sys.nb_var,sys.nb_ctr,niter);
 	lr = new LinearRelaxCombo(ext_sys, LinearRelaxCombo::XNEWTON);
-	mylp = new LinearSolver(ext_sys.nb_var,ext_sys.nb_ctr,niter);
+	mylp = new LinearSolver(ext_sys.nb_var,niter);
 	//	cout << "sys " << sys << endl;
 #endif // _IBEX_WITH_NOLP_
 }

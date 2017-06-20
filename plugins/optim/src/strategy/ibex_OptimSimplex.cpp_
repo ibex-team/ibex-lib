@@ -175,7 +175,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 	}
 
-	mylp->cleanConst();
+	mylp->clean_ctrs();
 	mylp->setBounds(bound);
 	mylp->setObjVar(0,1.0); // set the objective
 
@@ -197,7 +197,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 			for (int ii =0; ii< n ; ii++)
 				if (G[ii].diam() > 1e8) {
-					mylp->cleanConst();
+					mylp->clean_ctrs();
 					return false; //to avoid problems with SoPleX
 				}
 

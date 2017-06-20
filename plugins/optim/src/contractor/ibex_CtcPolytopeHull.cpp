@@ -23,7 +23,7 @@ CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, 
 		Ctc(lr.nb_var()), lr(lr), goal_var(lr.goal_var()), cmode(cmode),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(false) {
 
-	 mylinearsolver = new LinearSolver(nb_var, lr.nb_ctr(), max_iter, time_out, eps);
+	 mylinearsolver = new LinearSolver(nb_var, max_iter, time_out, eps);
 
 }
 
@@ -31,7 +31,7 @@ CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter,
 		Ctc(A.nb_cols()), lr(*new LinearRelaxFixed(A,b)), goal_var(lr.goal_var()), cmode(ALL_BOX),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(true) {
 
-	 mylinearsolver = new LinearSolver(nb_var, lr.nb_ctr(), max_iter, time_out, eps);
+	 mylinearsolver = new LinearSolver(nb_var, max_iter, time_out, eps);
 
 }
 
@@ -64,14 +64,14 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 		//mylinearsolver->writeFile("LP.lp");
 		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
-		mylinearsolver->cleanConst();
+		mylinearsolver->clean_ctrs();
 	}
 	catch(LPException&) {
-		mylinearsolver->cleanConst();
+		mylinearsolver->clean_ctrs();
 	}
 	catch(PolytopeHullEmptyBoxException& e) {
 		box.set_empty(); // empty the box before exiting
-		mylinearsolver->cleanConst();
+		mylinearsolver->clean_ctrs();
 	}
 
 }
