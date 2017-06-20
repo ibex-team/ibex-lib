@@ -64,10 +64,8 @@ class LinearSolver {
 
 private:
 
-	int nb_ctrs;
-
 	int nb_vars;
-	int nb_rows;
+	int nb_ctrs;
 
 	Interval obj_value;
 
@@ -139,10 +137,9 @@ public:
 	Status_Sol solve();
 	Status_Sol solve_robust();
 
-	void writeFile(const char* name="save_LP.lp");
 
-	/**  Call to linear solver to optimize one variable */
-	Status_Sol solve_var(Sense sense, int var, Interval & obj);
+
+	void writeFile(const char* name="save_LP.lp");
 
 
 
@@ -196,6 +193,10 @@ public:
 	void addConstraint(const Matrix & A, CmpOp sign, const Vector& rhs );
 
 private:
+	friend class CtcPolytopeHull;
+
+	/**  Call to linear solver to optimize one variable */
+	Status_Sol solve_var(Sense sense, int var, Interval & obj);
 
 	/**
 	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
