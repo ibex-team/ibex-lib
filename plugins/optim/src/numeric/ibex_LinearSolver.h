@@ -59,25 +59,39 @@
 
 namespace ibex {
 
+/**
+ * \brief LP solver.
+ *
+ * Solve a linear problem
+ *
+ *     Minimizer c^T x               --> objective
+ *     s.t. lhs <= Ax <= rhs         --> constraints
+ *           l  < x <= u             --> bounds
+ *
+ * The same LP solver can be used to solve several problems
+ * as long as they all share the same number of variables.
+ * The number of constraints may differ and the bounds of variables as well.
+ *
+ */
+
 class LinearSolver {
 
 
 private:
 
+	/** Definition of the LP */
 	int nb_vars;
 	int nb_ctrs;
+	IntervalVector boundvar;  // bound constraints
+	double epsilon;           // precision on the objective
 
+	/** Results of the last call to solve() */
 	Interval obj_value;
-
-	double epsilon;
-
 	double * primal_solution;
 	double * dual_solution;
 	int size_dual_solution;
 	int status_prim; //= 1 if OK
 	int status_dual; //= 1 if OK
-
-	IntervalVector boundvar;
 
 
 #ifdef _IBEX_WITH_SOPLEX_
@@ -134,7 +148,21 @@ public:
 
 	~LinearSolver();
 
+	/**
+	 * \brief Solve the LP.
+	 *
+	 * \return OPTIMAL, INFEASIBLE, UNKNOWN, TIME_OUT or MAX_ITER
+	 */
 	Status_Sol solve();
+
+	/**
+	 * \brief Solve the LP and try to prove the result.
+	 *
+	 * Call Neumaier-Shcherbina post-processing.
+	 *
+	 * \note only certify the objective (not the solution point)
+	 * \return all possible status, including OPTIMAL_PROVED and INFEASIBLE_PROVED
+	 */
 	Status_Sol solve_robust();
 
 
@@ -144,31 +172,71 @@ public:
 
 
 // GET
+
+	/**
+	 * \brief Total number of rows
+	 *
+	 * Rows correspond to all constraints, including bound constraints
+	 *
+	 */
 	int getNbRows() const;
 
-	Interval getObjValue() const;
+	void getRows(Matrix& A) const;
 
-	void getCoefObj(Vector& obj) const;
-
-	void getCoefConstraint(Matrix& A) const;
-
-	void getCoefConstraint_trans(Matrix& A_trans) const;
+	void get_rows_trans(Matrix& A_trans) const;
 
 	void getB(IntervalVector& lhs_rhs) const;
+
+	/**
+	 *
+	 */
+	void getCoefObj(Vector& obj) const;
+
+	double getEpsilon() const;
+
+
+	Interval getObjValue() const;
 
 	void getPrimalSol(Vector & prim) const;
 
 	void getDualSol(Vector & dual) const;
 
+	/**
+	 * \throw LPExpcetion if not infeasible
+	 */
 	void getInfeasibleDir(Vector & sol) const;
-
-	double getEpsilon() const;
 
 
 // SET
 
+	/**
+	 * \brief Delete the constraints
+	 *
+	 * Do not modify the bound constraints
+	 * (use clean_bounds or set_bounds)
+	 */
 	void cleanConst();
 
+	/**
+	 * \brief Delete the bound constraints
+	 *
+	 * TODO
+	 */
+	void clean_bounds();
+
+	/**
+	 * \brief Set all the objective coefficients to 0.
+	 *
+	 * TODO
+	 */
+	void clean_obj();
+
+	/**
+	 * \brief Clean the LP
+	 *
+	 * Delete all constraints, including bound constraints
+	 * and set the coefficients of the objective to 0.
+	 */
 	void cleanAll();
 
 	void setMaxIter(int max);
@@ -199,7 +267,12 @@ private:
 	Status_Sol solve_var(Sense sense, int var, Interval & obj);
 
 	/**
-	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
+	 * Neumaier Shcherbina postprocessing in case of optimal solution found :
+	 * the result obj is made reliable
+	 *
+	 * A more efficient
+	 *
+	 * The solution point is *not* made reliable
 	 */
 	Interval  NeumaierShcherbina_postprocessing_var(int var, Sense sense);
 	Interval  NeumaierShcherbina_postprocessing();

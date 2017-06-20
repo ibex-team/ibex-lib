@@ -369,7 +369,7 @@ void LinearSolver::getCoefObj(Vector& obj) const {
 	return;
 }
 
-void LinearSolver::getCoefConstraint(Matrix &A) const {
+void LinearSolver::getRows(Matrix &A) const {
 
 	try {
 		for (int i=0;i<nb_ctrs; i++){
@@ -384,7 +384,7 @@ void LinearSolver::getCoefConstraint(Matrix &A) const {
 	return ;
 }
 
-void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) const {
+void LinearSolver::get_rows_trans(Matrix &A_trans) const {
 
 	try {
 		for (int i=0;i<nb_ctrs; i++){
@@ -953,7 +953,7 @@ void LinearSolver::getCoefObj(Vector& obj) const {
 }
 
 
-void LinearSolver::getCoefConstraint(Matrix &A) const {
+void LinearSolver::getRows(Matrix &A) const {
 	try {
 		int surplus = 0, nzcnt = 0;
 		int * t_Rmatbeg = new int[nb_ctrs];
@@ -991,7 +991,7 @@ void LinearSolver::getCoefConstraint(Matrix &A) const {
 	return;
 }
 
-void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) const {
+void LinearSolver::get_rows_trans(Matrix &A_trans) const {
 
 	try {
 		int surplus = 0, nzcnt = 0;
@@ -1482,7 +1482,7 @@ void LinearSolver::getCoefObj(Vector& obj) const {
 }
 
 
-void LinearSolver::getCoefConstraint(Matrix &A) const {
+void LinearSolver::getRows(Matrix &A) const {
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
 		// see mat.getCorefficient()
@@ -1511,7 +1511,7 @@ void LinearSolver::getCoefConstraint(Matrix &A) const {
 	return ;
 }
 
-void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) const {
+void LinearSolver::get_rows_trans(Matrix &A_trans) const {
 
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
@@ -2314,11 +2314,11 @@ void LinearSolver::writeFile(const char* name) {
 	throw LPException();
 }
 
-void LinearSolver::getCoefConstraint(Matrix& A) {
+void LinearSolver::getRows(Matrix& A) {
 	throw LPException();
 }
 
-void LinearSolver::getCoefConstraint_trans(Matrix& A_trans) {
+void LinearSolver::get_rows_trans(Matrix& A_trans) {
 	throw LPException();
 }
 

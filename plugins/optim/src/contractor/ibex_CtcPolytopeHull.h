@@ -37,12 +37,13 @@ public:
 	/**
 	 * \brief Creates the iteration
 	 *
-	 * \param lr       - The linear relaxation
-	 * \param cmode    - ALL_BOX (contracts all variables in the box) | ONLY_Y (in optimization :only improves
-	 *                   the left bound of the objective)
-	 * \param max_iter - The maximum number of iterations of the linear solver (default value 100)
-	 * \param timeout  - The timeout of the linear solver at each iteration    (default value 100 second)
-	 * \param eps      - The accuracy required on the resolution of the linear program (default value 1e-10)
+	 * \param lr         - The linear relaxation
+	 * \param cmode      - ALL_BOX (contracts all variables in the box) | ONLY_Y (in optimization :only improves
+	 *                     the left bound of the objective)
+	 * \param max_iter   - The maximum number of iterations of the linear solver (default value 100)
+	 * \param timeout    - The timeout of the linear solver at each iteration    (default value 100 second)
+	 * \param eps        - The accuracy required on the resolution of the linear program (default value 1e-10)
+	 * \param limit_diam - The contractor does nothing if the diameter does not respect these bounds
 	 */
 
 	CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode=ALL_BOX, int max_iter=LinearSolver::default_max_iter,
@@ -57,13 +58,19 @@ public:
 	 * \param max_iter - The maximum number of iterations of the linear solver (default value 100)
 	 * \param timeout  - The timeout of the linear solver at each iteration    (default value 100 second)
 	 * \param eps      - The accuracy required on the resolution of the linear program (default value 1e-10)
+	 * \param limit_diam - The contractor does nothing if the diameter does not respect these bounds
 	 */
 	CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter=LinearSolver::default_max_iter,
 			int time_out=LinearSolver::default_max_time_out, double eps=LinearSolver::default_eps,
 			Interval limit_diam=LinearSolver::default_limit_diam_box);
-
+	/**
+	 * \brief Contract the box.
+	 */
 	virtual void contract(IntervalVector& box);
 
+	/**
+	 * \brief Delete this.
+	 */
 	virtual ~CtcPolytopeHull();
 
 protected:

@@ -121,7 +121,7 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 			sys.ctrs[ctr].f.gradient(box,G);               // gradient calculation
 
 			for (int ii =0; ii< n ; ii++) {
-				if (G[ii].diam() > 1e8) {
+				if (G[ii].diam() > 1e8) { // TODO: replace with max_diam_deriv (but default value is 1e6 or 1e8?)
 					delete [] corner;
 					return -1; //to avoid problems with LP solver
 				}
@@ -325,7 +325,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 	  else if (G[j].diam() > 1e-10)
 	    nonlinear_var++;
 
-	  bool inf_x;
+	  bool inf_x; // whether the jth variable is set to lower bound (true) or upper bound (false)
 
 		/*  for GREEDY heuristics :not implemented in v2
 		 IntervalVector save;
