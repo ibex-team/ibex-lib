@@ -69,7 +69,7 @@ public:
 	 * bisected variable and this information is copied to
 	 * the subcells data.
 	 */
-	virtual std::pair<IntervalVector,IntervalVector> bisect(Cell& cell);
+	virtual std::pair<Cell*,Cell*> bisect(Cell& cell);
 
 	/**
 	 * \brief Add an instance of #ibex::BisectedVar to the backtrackle data of the root cell.

@@ -19,6 +19,7 @@ namespace ibex {
 class Ponts30 {
 public:
 	Ponts30();
+	~Ponts30() { delete f;}
 
 	Function* f;
 	IntervalVector init_box;
