@@ -2,7 +2,12 @@ version: build{build}
 image: Visual Studio 2015
 
 platform:
-  - x86
+  - x64 
+  
+environment:
+  matrix:
+    - TEST_INTERVAL_LIB: "gaol"
+    - TEST_INTERVAL_LIB: "filib"
 
 install:
   - cmd: echo %Platform%
