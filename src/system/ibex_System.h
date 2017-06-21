@@ -114,7 +114,7 @@ public:
 
 	/** Number of variables.
 	 *
-	 * \note This number is also sys.f.nb_var() and box.size().
+	 * \note This number is also sys.f_ctrs.nb_var() and box.size().
 	 * However, in general, it does not match args.size(), which is
 	 * the number of arguments (or symbols). For instance, in case of
 	 * a single array x of 10 components, there is 10 variables but only one
@@ -157,9 +157,9 @@ public:
 	 * (contracted but not bisected) */
 	std::vector<int> eprs;
 
-	/** Initial Domains
+	/** Box Constraint on the variable
 	 * (not only "initial": may be used as input by CHOCO) */
-	IntervalVector box;
+	IntervalVector box_constraints;
 
 	/** Constraints.
 	 *

@@ -288,7 +288,7 @@ int main() {
 	CtcCompo compo(ctc);          // make the composition of all contractors
 	CtcFixPoint fix(compo,prec);  // make the fixpoint
 
-	IntervalVector box=sys.box;   // tested box (load domains written in the file)
+	IntervalVector box=sys.box_constraints;   // tested box (load domains written in the file)
 
 	fix.contract(box);
 
@@ -301,7 +301,7 @@ int main() {
 
 	CtcPropag propag(ctc, prec);   // Propagation of all contractors
 
-	IntervalVector box2=sys.box;               // tested box (load domains written in the file)
+	IntervalVector box2=sys.box_constraints;               // tested box (load domains written in the file)
 
 	propag.contract(box2);
 
@@ -339,7 +339,7 @@ int main() {
 
 	CtcPropag propag(ctc, prec);   // Propagation of all contractors
 
-	IntervalVector box2=sys.box;               // tested box (load domains written in the file)
+	IntervalVector box2=sys.box_constraints;               // tested box (load domains written in the file)
 
 	propag.contract(box2);
 
@@ -357,7 +357,7 @@ int main() {
 	CtcHC4 hc4(sys);
 
 	// Test the contraction
-	IntervalVector box(sys.box);
+	IntervalVector box(sys.box_constraints);
 	output << " Box before HC4:" << box << endl;
 	hc4.contract(box);
 	output << " Box after HC4:" << box << endl;

@@ -61,7 +61,7 @@ void LinearRelaxXTaylor::init_linear_coeffs() {
 		linear[ctr] = new bool[sys.nb_var];
 
 		IntervalVector G(sys.nb_var);
-		sys.ctrs[ctr].f.gradient(sys.box,G);
+		sys.ctrs[ctr].f.gradient(sys.box_constraints,G);
 
 		// for testing if a function is linear (with scalar coefficients) w.r.t all its variables,
 		// we test the diameter of the gradient components.

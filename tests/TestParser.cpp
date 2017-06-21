@@ -31,8 +31,8 @@ void TestParser::var01() {
 	CPPUNIT_ASSERT(sys.args[0].dim.is_scalar());
 	CPPUNIT_ASSERT(sys.eprs.empty());
 	CPPUNIT_ASSERT(sys.sybs.empty());
-	CPPUNIT_ASSERT(sys.box.size()==1);
-	CPPUNIT_ASSERT(sys.box[0]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(sys.box_constraints.size()==1);
+	CPPUNIT_ASSERT(sys.box_constraints[0]==Interval::ALL_REALS);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==1);
 	CPPUNIT_ASSERT(&sys.f_ctrs.arg(0) == &sys.args[0]);
 	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"x"));
@@ -86,52 +86,52 @@ void TestParser::const_var_idx() {
 		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::matrix(2,3));
 		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::matrix(3,2));
 		i=0;
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::ALL_REALS);
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::NEG_REALS);
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::POS_REALS);
-		CPPUNIT_ASSERT(sys.box[i++]==3.14);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::ALL_REALS);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::NEG_REALS);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::POS_REALS);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==3.14);
 
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::ALL_REALS);
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::ALL_REALS);
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,2));
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,0));
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(1,1));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::ALL_REALS);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::ALL_REALS);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(0,2));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(0,0));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(1,1));
 
 		// xcv3
-		CPPUNIT_ASSERT(sys.box.subvector(i,i+2)==IntervalVector(3,Interval::ALL_REALS));
+		CPPUNIT_ASSERT(sys.box_constraints.subvector(i,i+2)==IntervalVector(3,Interval::ALL_REALS));
 		i+=3;
 
-		CPPUNIT_ASSERT(sys.box.subvector(i,i+2)==IntervalVector(3,Interval::ALL_REALS));
+		CPPUNIT_ASSERT(sys.box_constraints.subvector(i,i+2)==IntervalVector(3,Interval::ALL_REALS));
 		i+=3;
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,2));
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,3));
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::ZERO);
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::ONE);
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(2,2));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(0,2));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(0,3));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::ZERO);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::ONE);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(2,2));
 
 		// xm22
-		CPPUNIT_ASSERT(sys.box.subvector(i,i+3)==IntervalVector(4,Interval::ALL_REALS));
+		CPPUNIT_ASSERT(sys.box_constraints.subvector(i,i+3)==IntervalVector(4,Interval::ALL_REALS));
 		i+=4;
-		CPPUNIT_ASSERT(sys.box.subvector(i,i+5)==IntervalVector(6,Interval::ALL_REALS));
+		CPPUNIT_ASSERT(sys.box_constraints.subvector(i,i+5)==IntervalVector(6,Interval::ALL_REALS));
 		i+=6;
-		CPPUNIT_ASSERT(sys.box.subvector(i,i+5)==IntervalVector(6,Interval::NEG_REALS));
+		CPPUNIT_ASSERT(sys.box_constraints.subvector(i,i+5)==IntervalVector(6,Interval::NEG_REALS));
 		i+=6;
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::POS_REALS);
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::ZERO);
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
-		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::ZERO);
-		CPPUNIT_ASSERT(sys.box[i++]==Interval::NEG_REALS);
-		CPPUNIT_ASSERT(sys.box[i++]==0);
-		CPPUNIT_ASSERT(sys.box[i++]==1);
-		CPPUNIT_ASSERT(sys.box[i++]==2);
-		CPPUNIT_ASSERT(sys.box[i++]==3);
-		CPPUNIT_ASSERT(sys.box[i++]==4);
-		CPPUNIT_ASSERT(sys.box[i++]==5);
-		CPPUNIT_ASSERT(sys.box.subvector(i,i+5)==IntervalVector(6,Interval::NEG_REALS));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::POS_REALS);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::ZERO);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::ZERO);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==Interval::NEG_REALS);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==0);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==1);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==2);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==3);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==4);
+		CPPUNIT_ASSERT(sys.box_constraints[i++]==5);
+		CPPUNIT_ASSERT(sys.box_constraints.subvector(i,i+5)==IntervalVector(6,Interval::NEG_REALS));
 		i+=6;
 
 	} catch(SyntaxError& e) {
@@ -221,8 +221,8 @@ void TestParser::ponts() {
 	}
 	CPPUNIT_ASSERT(sys.eprs.empty());
 	CPPUNIT_ASSERT(sys.sybs.empty());
-	CPPUNIT_ASSERT(sys.box.size()==30);
-	CPPUNIT_ASSERT(almost_eq(sys.box, sys2.init_box,1e-12));
+	CPPUNIT_ASSERT(sys.box_constraints.size()==30);
+	CPPUNIT_ASSERT(almost_eq(sys.box_constraints, sys2.init_box,1e-12));
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==30);
 	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),sys2.f->expr()));
 	CPPUNIT_ASSERT(sys.ctrs.size()==30);
@@ -243,7 +243,7 @@ void TestParser::choco01() {
 	CPPUNIT_ASSERT(strcmp(sys.args[1].name,"{1}")==0);
 	CPPUNIT_ASSERT(sys.eprs.empty());
 	CPPUNIT_ASSERT(sys.sybs.empty());
-	CPPUNIT_ASSERT(sys.box.size()==2);
+	CPPUNIT_ASSERT(sys.box_constraints.size()==2);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==2);
 	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"({1}+{0})"));
 	CPPUNIT_ASSERT(sys.ctrs.size()==1);

@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 		o.trace=1;
 
 		// the search itself
-		Optimizer::Status result=o.optimize(p.get_sys().box);
+		Optimizer::Status result=o.optimize(p.get_sys().box_constraints);
 
 		// printing the results
 		o.report();

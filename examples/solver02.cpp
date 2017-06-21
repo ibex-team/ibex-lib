@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 	//s.trace=true;
 
 	// Get the solutions
-	vector<IntervalVector> sols=s.solve(sys.box);
+	vector<IntervalVector> sols=s.solve(sys.box_constraints);
 
 	// Display the number of solutions
 	cout << "number of solutions=" << sols.size() << endl;

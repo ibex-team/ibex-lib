@@ -25,9 +25,9 @@ class SystemNormalize : public SystemFactory {
 
 	SystemNormalize(const System& sys, double eps) {
 
-		// do not initialize variables with sys.f.args
+		// do not initialize variables with sys.f_ctrs.args
 		// since f may be uninitialized (unconstrained problem)
-		add_var(sys.args,sys.box);
+		add_var(sys.args,sys.box_constraints);
 
 		if (sys.goal!=NULL) add_goal(*sys.goal);
 

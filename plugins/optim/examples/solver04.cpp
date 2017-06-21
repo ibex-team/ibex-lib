@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
 	s.trace=1;  // solutions are printed as soon as found when trace=1
 
 	// Solve the system and get the solutions
-	vector<IntervalVector> sols=s.solve(sys.box);
+	vector<IntervalVector> sols=s.solve(sys.box_constraints);
 
 	// Display the number of solutions
 	cout << "number of solutions=" << sols.size() << endl;
