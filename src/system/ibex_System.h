@@ -137,6 +137,15 @@ public:
 	 * this field is not initialized and must be ignored. */
 	Function f_ctrs;
 
+	/**
+	 * The array of comparison operators:
+	 *
+	 *         f_ctrs[i] (x) ops[i] 0.
+	 *
+	 * Set to NULL if there is no constraint.
+	 */
+	CmpOp *ops;
+
 	/** All the arguments */
 	Array<const ExprSymbol> args;
 

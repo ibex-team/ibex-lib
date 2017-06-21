@@ -132,6 +132,7 @@ void System::init_f_from_ctrs() {
 		total_output_size += ctrs[j].f.image_dim();
 
 	Array<const ExprNode> image(total_output_size);
+	ops = new CmpOp[total_output_size];
 	int i=0;
 
 	// concatenate all the components of all the constraints function
@@ -167,17 +168,22 @@ void System::init_f_from_ctrs() {
 		const Dim& fjd=fj.expr().dim;
 		switch (fjd.type()) {
 		case Dim::SCALAR :
+			ops[i]=ctrs[j].op;
 			image.set_ref(i++,e);
 			break;
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:
-			for (int k=0; k<fjd.vec_size(); k++)
+			for (int k=0; k<fjd.vec_size(); k++) {
+				ops[i]=ctrs[j].op;
 				image.set_ref(i++,e[k]);
+			}
 			break;
 		case Dim::MATRIX:
 			for (int k=0; k<fjd.nb_rows(); k++)
-				for (int l=0; l<fjd.nb_cols(); l++)
+				for (int l=0; l<fjd.nb_cols(); l++) {
+					ops[i]=ctrs[j].op;
 					image.set_ref(i++,e[k][l]);
+				}
 			break;
 		default:
 			assert(false);

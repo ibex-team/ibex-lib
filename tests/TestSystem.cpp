@@ -93,6 +93,11 @@ void TestSystem::factory01() {
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x(1))"));
 	CPPUNIT_ASSERT(sys.ctrs[1].op==GEQ);
 
+	CPPUNIT_ASSERT(sys.ops[0]==EQ);
+	CPPUNIT_ASSERT(sys.ops[1]==EQ);
+	CPPUNIT_ASSERT(sys.ops[2]==EQ);
+	CPPUNIT_ASSERT(sys.ops[3]==GEQ);
+
 	delete &sys;
 }
 
