@@ -26,6 +26,7 @@
 
 #include <float.h>
 #include <stdlib.h>
+#include "ibex_ActiveConstraintsFnc.h"
 
 using namespace std;
 
@@ -95,6 +96,10 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 
 	//	objshaver= new CtcOptimShaving (*new CtcHC4 (ext_sys.ctrs,0.1,true),20,1,1.e-11);
 
+
+	/**
+	 * Control the number of iterations inside the linear solver
+	 */
 	int niter=100;
 	// int niter=1000;
 	if (niter < 3*n) niter=3*n;
@@ -142,6 +147,15 @@ double Optimizer::compute_ymax() {
 // launch Hansen test
 bool Optimizer::update_real_loup() {
 
+	// todo : change hard-coded value
+	ActiveConstraintsFnc af(user_sys,loup_point,1e-8,trace);
+
+	if (af.image_dim()==0) {
+		loup = pseudo_loup;
+		loup_box = loup_point;
+		return true;
+	}
+
 	IntervalVector epsbox(loup_point);
 
 	// ====================================================
@@ -154,7 +168,7 @@ bool Optimizer::update_real_loup() {
 
 	// ====================================================
 	// solution #2: we call Hansen test in inflating mode.
-	PdcHansenFeasibility pdc(equs->f_ctrs, true);
+	PdcHansenFeasibility pdc(af, true);
 	// ====================================================
 
 	// TODO: maybe we should check first if the epsbox is inner...
@@ -169,13 +183,21 @@ bool Optimizer::update_real_loup() {
 		if (!resI.is_empty()) {
 			double res=resI.ub();
 			if (res<loup) {
-				//TODO : in is_inner, we check again all equalities,
-				// it's useless in this case!
-				if (is_inner(pdc.solution())) {
+				//note: don't call is_inner because it would check again all equalities (which is useless
+				// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
+				bool satisfy_inequalities=true;
+				for (int j=0; j<user_sys.nb_ctr; j++) {
+					if (user_sys.ctrs[j].op!=EQ && !entailed->original(j) &&
+						user_sys.ctrs[j].f.eval(pdc.solution()).ub()>0) {
+						satisfy_inequalities=false;
+						break;
+					}
+				}
+				if (satisfy_inequalities) {
 					loup = res;
 					loup_box = pdc.solution();
-
-					cout << setprecision (12) << " *real* loup update " << loup  << " loup box: " << loup_box << endl;
+					if (trace)
+						cout << setprecision (12) << " *real* loup update " << loup  << " loup box: " << loup_box << endl;
 					return true;
 				}
 			}
@@ -191,12 +213,12 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 	bool loup_change=false;
 	if (rigor && equs!=NULL) { // a loup point will not be safe (pseudo loup is not the real loup)
 		double old_pseudo_loup=pseudo_loup;
-		if (update_loup_probing(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
+		if (update_loup_probing(box)) { // && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
 			// update pseudo_loup
 			loup_change |= update_real_loup();
 			old_pseudo_loup=pseudo_loup; // because has changed
 		}
-		if (update_loup_simplex(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
+		if (update_loup_simplex(box)) { // && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
 			loup_change |= update_real_loup();
 		}
 	} else {
@@ -243,6 +265,7 @@ void Optimizer::update_uplo() {
 			ibex_error("optimizer: new_uplo<uplo (please report bug)");
 		}
 
+		// TODO: replace with uplo = std::max(uplo, std::min(new_uplo, uplo_of_epsboxes)) ??
 		if (new_uplo < uplo_of_epsboxes) {
 			if (new_uplo > uplo) {
 				//cout << "uplo update=" << uplo << endl;
@@ -299,6 +322,9 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 	double ymax;
 	if (loup==POS_INFINITY) ymax=POS_INFINITY;
+
+	// ymax is slightly increased to favour subboxes of the loup
+	// TODO: useful with double heap??
 	else ymax= compute_ymax()+1.e-15;
 	//	else ymax= compute_ymax();
 	/*
@@ -350,14 +376,13 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	}
 
 	/*====================================================================*/
-	// [gch] The case (!c.box.is_bisectable()) seems redundant
-	// with the case of a NoBisectableVariableException in
-	// optimize(). Is update_uplo_of_epsboxes called twice in this case?
-	// (bn] NO , the NoBisectableVariableException is raised by the bisector, there are 2 different cases of a non bisected box that may cause an update of uplo_of_epsboxes
+	// Note: there are three different cases of "epsilon" box,
+	// - NoBisectableVariableException raised by the bisector (---> see optimize(...)) which
+	//   is independent from the optimizer
+	// - the width of the box is less than the precision given to the optimizer ("prec" for the original variables
+	//   and "goal_abs_prec" for the goal variable)
+	// - the extended box has no bisectable domains (if prec=0 or <1 ulp)
 	if ((tmp_box.max_diam()<=prec && y.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
-		// rem1: tmp_box and not c.box because y is handled with goal_rel_prec and goal_abs_prec
-		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
-		// rem 3 : the extended  boxes with no bisectable domains should be caught for avoiding infinite bisections
 		update_uplo_of_epsboxes(y.lb());
 		c.box.set_empty();
 		return;
@@ -404,6 +429,9 @@ void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& i
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
+
+	// Just to initialize the "loup" for the buffer
+	// TODO: replace with a set_loup function
 	buffer.contract(loup);
 
 	uplo=NEG_INFINITY;
@@ -435,6 +463,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	loup_changed=false;
 	initial_loup=obj_init_bound;
+
+	// TODO: no loup-point if handle_cell contracts everything
 	loup_point=init_box.mid();
 	time=0;
 	Timer::start();
@@ -479,7 +509,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					buffer.contract(ymax);
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
-
+					// TODO: check if happens. What is the return code in this case?
 					if (ymax <= NEG_INFINITY) {
 						if (trace) cout << " infinite value for the minimum " << endl;
 						break;
@@ -487,7 +517,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo<< endl;
 				}
 				update_uplo();
-				time_limit_check();
+				time_limit_check(); // TODO: not reentrant
 
 			}
 			catch (NoBisectableVariableException& ) {
@@ -495,7 +525,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 				buffer.pop();
 				delete c; // deletes the cell.
 				//if (trace>=1) cout << "epsilon-box found: uplo cannot exceed " << uplo_of_epsboxes << endl;
-				update_uplo(); // the heap has changed -> recalculate the uplo
+				update_uplo(); // the heap has changed -> recalculate the uplo (eg: if not in best-first search)
 
 			}
 		}

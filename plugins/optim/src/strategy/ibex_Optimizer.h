@@ -537,6 +537,8 @@ private:
 
 	/** linear solver used in ibex_OptimSimplex.cpp_ */
 	LinearSolver *mylp;
+
+	// ** unused**
 	LinearRelaxCombo *lr;
 
 	/** Inner contractor (for the negation of g) */
