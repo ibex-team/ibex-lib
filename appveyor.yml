@@ -30,6 +30,6 @@ test_script:
   - cmd: python -x %cd%\waf utest
 
 on_failure:
-  - cmd: cat C:\projects\ibex-lib-q0c47\__build__\config.log
-  - cmd: cat C:\projects\ibex-lib-q0c47\__build__\utest_config.log
-  - cmd: cat C:\projects\ibex-lib-q0c47\__build__\utest_run.log
+  - cmd: cat %cd%\__build__\config.log
+  - cmd: cat %cd%\__build__\utest_config.log
+  - cmd: cat %cd%\__build__\utest_run.log
