@@ -132,7 +132,7 @@ void System::init_f_from_ctrs() {
 		total_output_size += ctrs[j].f.image_dim();
 
 	Array<const ExprNode> image(total_output_size);
-	ops = new CmpOp[total_output_size];
+	if (total_output_size>0) ops = new CmpOp[total_output_size];
 	int i=0;
 
 	// concatenate all the components of all the constraints function

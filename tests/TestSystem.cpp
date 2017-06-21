@@ -356,7 +356,9 @@ void TestSystem::merge03() {
 
 
 void TestSystem::merge04() {
+	std::cout<<"coucouIN"<<std::endl;
 	System sys1(SRCDIR_TESTS "/../benchs/benchs-optim/coconutbenchmark-library1/bearing.bch");
+	std::cout<<"coucouOUT"<<std::endl;
 	System sys2(SRCDIR_TESTS "/../benchs/benchs-satisfaction/benchs-coprin/I5.bch");
 	System sys3(sys1,sys2);
 	CPPUNIT_ASSERT(strcmp(sys3.args[0].name,"x1")==0);

@@ -497,18 +497,8 @@ void LinearSolver::clean_ctrs() {
 	return ;
 
 }
-void LinearSolver::cleanAll() {
-
-	try {
-		status_prim = soplex::SPxSolver::UNKNOWN;
-		status_dual = soplex::SPxSolver::UNKNOWN;
-		mysoplex->removeRowRange(0, nb_rows-1);
-		nb_rows = 0;
-		obj_value = POS_INFINITY;
-	}
-	catch(...) {
-		throw LPException();
-	}
+void LinearSolver::clean_all() {
+	// TODO
 	return ;
 }
 
@@ -2291,7 +2281,7 @@ void LinearSolver::clean_ctrs() {
 	throw LPException();
 }
 
-void LinearSolver::cleanAll() {
+void LinearSolver::clean_all() {
 	throw LPException();
 }
 
