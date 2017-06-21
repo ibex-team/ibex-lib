@@ -108,6 +108,7 @@ void Solver::start(const IntervalVector& init_box) {
 
 	IntervalVector tmpbox(ctc.nb_var);
 
+	Timer::reset_time();
 	Timer::start();
 
 }
@@ -182,7 +183,7 @@ bool Solver::next(const Solution*& sol) {
 				// of uncaught timeout in this case (but this case is probably already
 				// an error case).
 			}
-			time_limit_check();
+			if (time_limit>0) Timer::check(time_limit)();
 		}
 	}
 	catch (TimeOutException&) {
@@ -193,7 +194,7 @@ bool Solver::next(const Solution*& sol) {
 	}
 
 	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	time = Timer::get_time();
 
 	return false;
 
@@ -206,12 +207,6 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 	return sols;
 }
 
-void Solver::time_limit_check () {
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	if (time_limit >0 &&  time >=time_limit) throw TimeOutException();
-	Timer::start();
-}
 
 bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 

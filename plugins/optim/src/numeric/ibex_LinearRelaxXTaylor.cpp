@@ -186,7 +186,7 @@ bool LinearRelaxXTaylor::choose_corner(const IntervalVector& box, IntervalVector
 
 	for (int i=0 ; i< n ; i++)	  {
 		// random corner choice
-		if (rand()%2) {
+		if (RNG::rand()%2) {
 			if (box[i].lb()>NEG_INFINITY) {
 				corner[i]=true;
 				x_corner[i]=box[i].lb() ;

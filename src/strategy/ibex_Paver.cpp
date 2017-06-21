@@ -82,6 +82,9 @@ void Paver::bisect(Cell& c) {
 
 SubPaving* Paver::pave(const IntervalVector& init_box) {
 
+
+	Timer::Time start_time=Timer::get_time();
+	Timer::start();
 	SubPaving* paving=new SubPaving[ctc.size()];
 
 	buffer.flush();
@@ -104,13 +107,13 @@ SubPaving* Paver::pave(const IntervalVector& init_box) {
 
 		contract(*c, paving);
 
-		Timer::check(timeout);
+		Timer::check(timeout+start_time);
 		check_capacity(paving);
 
 		if (c->box.is_empty()) delete buffer.pop();
 		else bisect(*c);
 	}
-
+	Timer::stop();
 	return paving;
 }
 

@@ -467,7 +467,10 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// TODO: no loup-point if handle_cell contracts everything
 	loup_point=init_box.mid();
 	time=0;
-	Timer::start();
+
+    Timer::reset_time();
+    Timer::start();
+
 	handle_cell(*root,init_box);
 
 	update_uplo();
@@ -517,7 +520,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo<< endl;
 				}
 				update_uplo();
-				time_limit_check(); // TODO: not reentrant
+
+				Timer::check(timeout);//
 
 			}
 			catch (NoBisectableVariableException& ) {
@@ -531,11 +535,14 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 		}
 	}
 	catch (TimeOutException& ) {
+		Timer::stop();
+		time = Timer::get_time();
 		return TIME_OUT;
 	}
 
+
 	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	time = Timer::get_time();
 
 	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0)))
 		return INFEASIBLE;
@@ -644,11 +651,5 @@ void Optimizer::report_perf() {
 	cout <<  time << "  "<< endl ;
 }
 
-void Optimizer::time_limit_check () {
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	if (timeout >0 &&  time >=timeout ) throw TimeOutException();
-	Timer::start();
-}
 
 } // end namespace ibex

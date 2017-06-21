@@ -201,12 +201,12 @@ void Timer::stop( TimerType type )
 		resident_memory = res.ru_ixrss;
 #endif
 	}
+	local_time += Timer::VIRTUAL_TIMELAPSE();
 }
 
 void Timer::check(double timeout) {
 	//if (VIRTUAL_TIMELAPSE()>timeout) throw TimeOutException();
 	Timer::stop();
-	local_time += Timer::VIRTUAL_TIMELAPSE();
 	if (local_time >= timeout) throw TimeOutException();
 	Timer::start();
 
