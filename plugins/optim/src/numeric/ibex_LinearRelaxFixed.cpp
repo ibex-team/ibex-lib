@@ -27,7 +27,7 @@ int LinearRelaxFixed::inlinearization(const IntervalVector& box, LinearSolver& l
 
 int LinearRelaxFixed::linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
 	int start = lp_solver.get_nb_rows();
-	lp_solver.addConstraint(A,LEQ,b);
+	lp_solver.add_constraint(A,LEQ,b);
 	return lp_solver.get_nb_rows() - start;
 }
 

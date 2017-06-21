@@ -118,7 +118,7 @@ public:
 	 * \note only certify the objective (not the solution point)
 	 * \return all possible status, including OPTIMAL_PROVED and INFEASIBLE_PROVED
 	 */
-	Status_Sol solve_robust();
+	Status_Sol solve_proved();
 
 
 	void write_file(const char* name="save_LP.lp");
@@ -143,21 +143,21 @@ public:
 	/**
 	 *
 	 */
-	void getCoefObj(Vector& obj) const;
+	void get_coef_obj(Vector& obj) const;
 
-	double getEpsilon() const;
+	double get_epsilon() const;
 
 
-	Interval getObjValue() const;
+	Interval get_obj_value() const;
 
-	void getPrimalSol(Vector & prim) const;
+	void get_primal_sol(Vector & prim) const;
 
-	void getDualSol(Vector & dual) const;
+	void get_dual_sol(Vector & dual) const;
 
 	/**
 	 * \throw LPExpcetion if not infeasible
 	 */
-	void getInfeasibleDir(Vector & sol) const;
+	void get_infeasible_dir(Vector & sol) const;
 
 
 // SET
@@ -192,30 +192,26 @@ public:
 	 */
 	void clean_all();
 
+	void set_max_iter(int max);
 
-	// TODO: to be removed
-	void cleanAll();
+	void set_max_time_out(int time);
 
-	void setMaxIter(int max);
-
-	void setMaxTimeOut(int time);
-
-	void setSense(Sense s);
+	void set_sense(Sense s);
 
 
-	void setObj(const Vector& coef);
+	void set_obj(const Vector& coef);
 
-	void setObjVar(int var, double coef);
+	void set_obj_var(int var, double coef);
 
-	void setBounds(const IntervalVector& bounds);
+	void set_bounds(const IntervalVector& bounds);
 
-	void setBoundsVar(int var, const Interval& bound);
+	void set_bounds_var(int var, const Interval& bound);
 
-	void setEpsilon(double eps);
+	void set_epsilon(double eps);
 
-	void addConstraint(const Vector & row, CmpOp sign, double rhs );
+	void add_constraint(const Vector & row, CmpOp sign, double rhs );
 
-	void addConstraint(const Matrix & A, CmpOp sign, const Vector& rhs );
+	void add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs );
 
 
 private:
@@ -233,21 +229,21 @@ private:
 	 *
 	 * The solution point is *not* made reliable
 	 */
-	Interval  NeumaierShcherbina_postprocessing_var(int var, Sense sense);
+	Interval  neumaier_shcherbina_postprocessing_var(int var, Sense sense);
 
 
-	Interval  NeumaierShcherbina_postprocessing();
+	Interval  neumaier_shcherbina_postprocessing();
 
 	/**
 	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
 	 */
-	bool NeumaierShcherbina_infeasibilitytest();
+	bool neumaier_shcherbina_infeasibilitytest();
 
 	/** Definition of the LP */
 	int nb_vars;              // number of variables
 	int nb_rows;              // total number of rows
-	IntervalVector boundvar;  // bound constraints
 	double epsilon;           // precision on the objective
+	IntervalVector boundvar;  // bound constraints
 
 	/** =================== Results of the last call to solve() ==================== */
 	Interval obj_value;       // (certified or not) enclosure of the minimum

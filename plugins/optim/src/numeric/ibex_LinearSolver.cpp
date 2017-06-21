@@ -68,14 +68,14 @@ int LinearSolver::get_nb_rows() const {
 	return nb_rows;
 }
 
-Interval LinearSolver::getObjValue() const {
+Interval LinearSolver::get_obj_value() const {
 	return obj_value;
 }
 
 /*
  * TODO: get the actual internal precision of the LP solver
  */
-double LinearSolver::getEpsilon() const {
+double LinearSolver::get_epsilon() const {
 	return epsilon;
 }
 
@@ -89,9 +89,9 @@ LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int 
 	try {
 		// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
 		if(sense==LinearSolver::MINIMIZE)
-			setObjVar(var, 1.0);
+			set_obj_var(var, 1.0);
 		else
-			setObjVar(var, -1.0);
+			set_obj_var(var, -1.0);
 
 		//	mylinearsolver->writeFile("coucou.lp");
 		//	system("cat coucou.lp");
@@ -100,14 +100,14 @@ LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int 
 		switch (stat) {
 		case LinearSolver::OPTIMAL : {
 			// Neumaier - Shcherbina postprocessing
-			obj_value = NeumaierShcherbina_postprocessing_var(var, sense);
+			obj_value = neumaier_shcherbina_postprocessing_var(var, sense);
 			obj = obj_value;
 			stat = LinearSolver::OPTIMAL_PROVED;
 			break;
 		}
 		case  LinearSolver::INFEASIBLE: {
 			// infeasibility test  cf Neumaier Shcherbina paper
-			if (NeumaierShcherbina_infeasibilitytest()) {
+			if (neumaier_shcherbina_infeasibilitytest()) {
 				stat = LinearSolver::INFEASIBLE_PROVED;
 			}
 			break;
@@ -117,23 +117,23 @@ LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int 
 			break;
 		}
 		// Reset the objective of the LP solver
-		setObjVar(var, 0.0);
+		set_obj_var(var, 0.0);
 	}
 	catch (LPException&) {
 		stat = LinearSolver::UNKNOWN;
 		// Reset the objective of the LP solver
-		setObjVar(var, 0.0);
+		set_obj_var(var, 0.0);
 	}
 
 	return stat;
 
 }
 
-Interval LinearSolver::NeumaierShcherbina_postprocessing_var (int var, LinearSolver::Sense sense) {
+Interval LinearSolver::neumaier_shcherbina_postprocessing_var (int var, LinearSolver::Sense sense) {
 	try {
 		// the dual solution : used to compute the bound
 		Vector dual(nb_rows);
-		getDualSol(dual);
+		get_dual_sol(dual);
 
 		Matrix A_trans (nb_vars,nb_rows) ;
 		get_rows_trans(A_trans);
@@ -166,11 +166,11 @@ Interval LinearSolver::NeumaierShcherbina_postprocessing_var (int var, LinearSol
 }
 
 
-Interval LinearSolver::NeumaierShcherbina_postprocessing() {
+Interval LinearSolver::neumaier_shcherbina_postprocessing() {
 	try {
 		// the dual solution : used to compute the bound
 		Vector dual(nb_rows);
-		getDualSol(dual);
+		get_dual_sol(dual);
 
 		Matrix A_trans (nb_vars,nb_rows) ;
 		get_rows_trans(A_trans);
@@ -179,7 +179,7 @@ Interval LinearSolver::NeumaierShcherbina_postprocessing() {
 		get_lhs_rhs(B);
 
 		Vector obj(nb_vars);
-		getCoefObj(obj);
+		get_coef_obj(obj);
 
 		//cout <<" BOUND_test "<< endl;
 		IntervalVector Rest(nb_vars);
@@ -196,10 +196,10 @@ Interval LinearSolver::NeumaierShcherbina_postprocessing() {
 	}
 }
 
-bool LinearSolver::NeumaierShcherbina_infeasibilitytest() {
+bool LinearSolver::neumaier_shcherbina_infeasibilitytest() {
 	try {
 		Vector infeasible_dir(nb_rows);
-		getInfeasibleDir(infeasible_dir);
+		get_infeasible_dir(infeasible_dir);
 
 		Matrix A_trans (nb_vars,nb_rows) ;
 		get_rows_trans(A_trans);
@@ -228,18 +228,18 @@ bool LinearSolver::NeumaierShcherbina_infeasibilitytest() {
 
 
 
-LinearSolver::Status_Sol LinearSolver::solve_robust() {
+LinearSolver::Status_Sol LinearSolver::solve_proved() {
 	LinearSolver::Status_Sol stat = solve();
 	switch (stat) {
 	case LinearSolver::OPTIMAL : {
 		// Neumaier - Shcherbina postprocessing
-		obj_value = NeumaierShcherbina_postprocessing();
+		obj_value = neumaier_shcherbina_postprocessing();
 		stat = LinearSolver::OPTIMAL_PROVED;
 		break;
 	}
 	case  LinearSolver::INFEASIBLE: {
 		// infeasibility test  cf Neumaier Shcherbina paper
-		if (NeumaierShcherbina_infeasibilitytest()) {
+		if (neumaier_shcherbina_infeasibilitytest()) {
 			stat = LinearSolver::INFEASIBLE_PROVED;
 		}
 		break;
@@ -253,10 +253,10 @@ LinearSolver::Status_Sol LinearSolver::solve_robust() {
 }
 
 
-void LinearSolver::addConstraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
+void LinearSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
 	for (int i=0; i<A.nb_rows(); i++) {
 		try {
-			addConstraint(A[i],sign,rhs[i]);
+			add_constraint(A[i],sign,rhs[i]);
 		} catch (LPException&) { }
 	}
 }
@@ -267,9 +267,9 @@ void LinearSolver::addConstraint(const Matrix & A, CmpOp sign, const Vector& rhs
 
 
 LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
-			nb_vars(nb_vars1), nb_rows(0), obj_value(0.0), epsilon(eps),
-			primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
-			status_prim(soplex::SPxSolver::UNKNOWN), status_dual(soplex::SPxSolver::UNKNOWN), boundvar(nb_vars1) {
+			nb_vars(nb_vars1), nb_rows(0), epsilon(eps), boundvar(nb_vars1) ,
+			obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
+			status_prim(soplex::SPxSolver::UNKNOWN), status_dual(soplex::SPxSolver::UNKNOWN){
 
 
 	mysoplex= new soplex::SoPlex();
@@ -363,7 +363,7 @@ void LinearSolver::write_file(const char* name) {
 	return ;
 }
 
-void LinearSolver::getCoefObj(Vector& obj) const {
+void LinearSolver::get_coef_obj(Vector& obj) const {
 	//TODO
 	return;
 }
@@ -422,7 +422,7 @@ void  LinearSolver::get_lhs_rhs(IntervalVector& B) const{
 }
 
 
-void LinearSolver::getPrimalSol(Vector & solution_primal) const {
+void LinearSolver::get_primal_sol(Vector & solution_primal) const {
 
 	try {
 		if (status_prim == soplex::SPxSolver::OPTIMAL) {
@@ -437,7 +437,7 @@ void LinearSolver::getPrimalSol(Vector & solution_primal) const {
 	return ;
 }
 
-void LinearSolver::getDualSol(Vector & solution_dual) const {
+void LinearSolver::get_dual_sol(Vector & solution_dual) const {
 
 	try {
 		if (status_dual == soplex::SPxSolver::OPTIMAL) {
@@ -452,7 +452,7 @@ void LinearSolver::getDualSol(Vector & solution_dual) const {
 	return ;
 }
 
-void LinearSolver::getInfeasibleDir(Vector & sol) const {
+void LinearSolver::get_infeasible_dir(Vector & sol) const {
 
 	try {
 		soplex::SPxSolver::Status stat1;
@@ -513,7 +513,7 @@ void LinearSolver::cleanAll() {
 }
 
 
-void LinearSolver::setMaxIter(int max) {
+void LinearSolver::set_max_iter(int max) {
 
 	try {
 		mysoplex->setTerminationIter(max);
@@ -524,7 +524,7 @@ void LinearSolver::setMaxIter(int max) {
 	return ;
 }
 
-void LinearSolver::setMaxTimeOut(int time) {
+void LinearSolver::set_max_time_out(int time) {
 
 	try {
 		double t = time;
@@ -560,7 +560,7 @@ void setObj(const Vector& coef) {
 	// TODO
 }
 
-void LinearSolver::setObjVar(int var, double coef) {
+void LinearSolver::set_obj_var(int var, double coef) {
 
 	try {
 		mysoplex->changeObj(var, coef);
@@ -571,7 +571,7 @@ void LinearSolver::setObjVar(int var, double coef) {
 	return ;
 }
 
-void LinearSolver::setBounds(const IntervalVector& bounds) {
+void LinearSolver::set_bounds(const IntervalVector& bounds) {
 
 	try {
 		for (int j=0; j<nb_vars; j++){
@@ -586,7 +586,7 @@ void LinearSolver::setBounds(const IntervalVector& bounds) {
 	return ;
 }
 
-void LinearSolver::setBoundsVar(int var, const Interval& bound) {
+void LinearSolver::set_bounds_var(int var, const Interval& bound) {
 
 	try {
 		mysoplex->changeRange(var ,bound.lb(),bound.ub());
@@ -599,7 +599,7 @@ void LinearSolver::setBoundsVar(int var, const Interval& bound) {
 	return ;
 }
 
-void LinearSolver::setEpsilon(double eps) {
+void LinearSolver::set_epsilon(double eps) {
 
 	try {
 		mysoplex->setDelta(eps);
@@ -611,7 +611,7 @@ void LinearSolver::setEpsilon(double eps) {
 	return ;
 }
 
-void LinearSolver::addConstraint(const ibex::Vector& row, CmpOp sign, double rhs) {
+void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
 
 	try {
 		soplex::DSVector row1(nb_vars);
@@ -653,10 +653,9 @@ void LinearSolver::addConstraint(const ibex::Vector& row, CmpOp sign, double rhs
 
 LinearSolver::LinearSolver(int nb_vars1, int max_iter,
 		int max_time_out, double eps) :
-		nb_vars(nb_vars1), nb_rows(0), obj_value(0.0),
-		epsilon(eps),
-		primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
-		status_prim(-1), status_dual(-1), boundvar(nb_vars1),
+		nb_vars(nb_vars1), nb_rows(0), epsilon(eps), boundvar(nb_vars1),
+		 obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
+		status_prim(-1), status_dual(-1),
 		envcplex(NULL), lpcplex(NULL) {
 
 	int status;
@@ -936,7 +935,7 @@ void LinearSolver::write_file(const char* name) {
 }
 
 
-void LinearSolver::getCoefObj(Vector& obj) const {
+void LinearSolver::get_coef_obj(Vector& obj) const {
 	//TODO
 	return;
 }
@@ -1041,7 +1040,7 @@ void LinearSolver::get_lhs_rhs(IntervalVector& B) const {
 	return ;
 }
 
-void LinearSolver::getPrimalSol(Vector & primal) const {
+void LinearSolver::get_primal_sol(Vector & primal) const {
 
 	try {
 		if (status_prim == 0) {
@@ -1057,7 +1056,7 @@ void LinearSolver::getPrimalSol(Vector & primal) const {
 	return;
 }
 
-void LinearSolver::getDualSol(Vector & dual) const {
+void LinearSolver::get_dual_sol(Vector & dual) const {
 
 	try {
 		// the dual solution ; used by Neumaier Shcherbina test
@@ -1075,7 +1074,7 @@ void LinearSolver::getDualSol(Vector & dual) const {
 	return ;
 }
 
-void LinearSolver::getInfeasibleDir(Vector & sol) const {
+void LinearSolver::get_infeasible_dir(Vector & sol) const {
 
 	try {
 		double * solution_found = new double[nb_rows];
@@ -1116,23 +1115,11 @@ void LinearSolver::clean_ctrs() {
 	return ;
 
 }
-void LinearSolver::cleanAll() {
-
-	try {
-		status_prim = -1;
-		status_dual = -1;
-		int status = CPXdelrows (envcplex, lpcplex, 0,  nb_rows - 1);
-		nb_rows = 0;
-		obj_value = POS_INFINITY;
-		if (status) throw LPException();
-
-	} catch (...) {
-		throw LPException();
-	}
-	return ;
+void LinearSolver::clean_all() {
+// TODO
 }
 
-void LinearSolver::setMaxIter(int max) {
+void LinearSolver::set_max_iter(int max) {
 
 	try {
 		int status = CPXsetintparam(envcplex, CPX_PARAM_ITLIM, max);
@@ -1146,7 +1133,7 @@ void LinearSolver::setMaxIter(int max) {
 	return ;
 }
 
-void LinearSolver::setMaxTimeOut(int time) {
+void LinearSolver::set_max_time_out(int time) {
 
 	try {
 		double t = time;
@@ -1161,7 +1148,7 @@ void LinearSolver::setMaxTimeOut(int time) {
 	return ;
 }
 
-void LinearSolver::setSense(Sense s) {
+void LinearSolver::set_sense(Sense s) {
 
 	try {
 
@@ -1186,11 +1173,11 @@ void LinearSolver::setSense(Sense s) {
 	return ;
 }
 
-void setObj(const Vector& coef) {
+void set_obj(const Vector& coef) {
 	// TODO
 }
 
-void LinearSolver::setObjVar(int var, double coef) {
+void LinearSolver::set_obj_var(int var, double coef) {
 
 	try {
 
@@ -1206,7 +1193,7 @@ void LinearSolver::setObjVar(int var, double coef) {
 	return ;
 }
 
-void LinearSolver::setBounds(const IntervalVector& bounds) {
+void LinearSolver::set_bounds(const IntervalVector& bounds) {
 
 	try {
 		// Changement de la fonction objective = rhs du primal (car on est en formulation dual)
@@ -1231,7 +1218,7 @@ void LinearSolver::setBounds(const IntervalVector& bounds) {
 	return ;
 }
 
-void LinearSolver::setBoundsVar(int var, const Interval& bound) {
+void LinearSolver::set_bounds_var(int var, const Interval& bound) {
 
 	try {
 		int * ind = new int[2];
@@ -1253,7 +1240,7 @@ void LinearSolver::setBoundsVar(int var, const Interval& bound) {
 	return ;
 }
 
-void LinearSolver::setEpsilon(double eps) {
+void LinearSolver::set_epsilon(double eps) {
 
 	try {
 
@@ -1274,7 +1261,7 @@ void LinearSolver::setEpsilon(double eps) {
 
 }
 
-void LinearSolver::addConstraint(const ibex::Vector& row, CmpOp sign, double rhs) {
+void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
 
 	try {
 		char cc = 'L';
@@ -1320,9 +1307,9 @@ void LinearSolver::addConstraint(const ibex::Vector& row, CmpOp sign, double rhs
 
 
 LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
-			nb_vars(nb_vars1), nb_rows(0), obj_value(0.0), epsilon(eps),
-			primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
-			status_prim(0), status_dual(0), boundvar(nb_vars1)  {
+			nb_vars(nb_vars1), nb_rows(0), epsilon(eps), boundvar(nb_vars1),
+			obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
+			status_prim(0), status_dual(0)  {
 
 
 	myclp= new ClpSimplex();
@@ -1454,7 +1441,7 @@ void LinearSolver::write_file(const char* name) {
 }
 
 
-void LinearSolver::getCoefObj(Vector& obj) const {
+void LinearSolver::get_coef_obj(Vector& obj) const {
 	//TODO
 	return;
 }
@@ -1545,7 +1532,7 @@ void  LinearSolver::get_lhs_rhs(IntervalVector& B) const {
 }
 
 
-void LinearSolver::getPrimalSol(Vector & solution_primal) const {
+void LinearSolver::get_primal_sol(Vector & solution_primal) const {
 
 	try {
 		if (status_prim == 1) {
@@ -1560,7 +1547,7 @@ void LinearSolver::getPrimalSol(Vector & solution_primal) const {
 	return ;
 }
 
-void LinearSolver::getDualSol(Vector & solution_dual) const {
+void LinearSolver::get_dual_sol(Vector & solution_dual) const {
 
 	try {
 		if (status_dual == 1) {
@@ -1575,7 +1562,7 @@ void LinearSolver::getDualSol(Vector & solution_dual) const {
 	return ;
 }
 
-void LinearSolver::getInfeasibleDir(Vector & sol) const {
+void LinearSolver::get_infeasible_dir(Vector & sol) const {
 
 	try {
 
@@ -1623,23 +1610,13 @@ void LinearSolver::clean_ctrs() {
 
 }
 
-void LinearSolver::cleanAll() {
-
-	try {
-		status_prim = 0;
-		status_dual = 0;
-		myclp->resize(0,nb_vars);
-		nb_rows = 0;
-		obj_value = POS_INFINITY;
-	}
-	catch(...) {
-		throw LPException();
-	}
+void LinearSolver::clean_all() {
+	// TODO
 	return ;
 }
 
 
-void LinearSolver::setMaxIter(int max) {
+void LinearSolver::set_max_iter(int max) {
 
 	try {
 		myclp->setMaximumIterations(max);
@@ -1650,7 +1627,7 @@ void LinearSolver::setMaxIter(int max) {
 	return ;
 }
 
-void LinearSolver::setMaxTimeOut(int time) {
+void LinearSolver::set_max_time_out(int time) {
 
 	try {
 		myclp->setMaximumSeconds((double)time);
@@ -1661,7 +1638,7 @@ void LinearSolver::setMaxTimeOut(int time) {
 	return ;
 }
 
-void LinearSolver::setSense(Sense s) {
+void LinearSolver::set_sense(Sense s) {
 
 	try {
 			/// Direction of optimization (1 - minimize, -1 - maximize, 0 - ignore
@@ -1682,11 +1659,11 @@ void LinearSolver::setSense(Sense s) {
 }
 
 
-void setObj(const Vector& coef) {
+void set_obj(const Vector& coef) {
 	// TODO
 }
 
-void LinearSolver::setObjVar(int var, double coef) {
+void LinearSolver::set_obj_var(int var, double coef) {
 
 	try {
 		myclp->setObjectiveCoefficient(var, coef);
@@ -1697,7 +1674,7 @@ void LinearSolver::setObjVar(int var, double coef) {
 	return ;
 }
 
-void LinearSolver::setBounds(const IntervalVector& bounds) {
+void LinearSolver::set_bounds(const IntervalVector& bounds) {
 	try {
 		for (int j=0; j<nb_vars; j++){
 			// Change the LHS and RHS of each constraint associated to the bounds of the variable
@@ -1711,7 +1688,7 @@ void LinearSolver::setBounds(const IntervalVector& bounds) {
 	return ;
 }
 
-void LinearSolver::setBoundsVar(int var, const Interval& bound) {
+void LinearSolver::set_bounds_var(int var, const Interval& bound) {
 
 	try {
 		myclp->setRowBounds(var,bound.lb(),bound.ub());
@@ -1725,7 +1702,7 @@ void LinearSolver::setBoundsVar(int var, const Interval& bound) {
 	return ;
 }
 
-void LinearSolver::setEpsilon(double eps) {
+void LinearSolver::set_epsilon(double eps) {
 
 	try {
 		myclp->setPrimalTolerance(eps);
@@ -1737,7 +1714,7 @@ void LinearSolver::setEpsilon(double eps) {
 	return ;
 }
 
-void LinearSolver::addConstraint(const ibex::Vector& row, CmpOp sign, double rhs) {
+void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
 
 	try {
 		if (sign==LEQ || sign==LT) {
@@ -2298,15 +2275,15 @@ void LinearSolver::get_lhs_rhs(IntervalVector& B) {
 	throw LPException();
 }
 
-void LinearSolver::getPrimalSol(Vector& prim) {
+void LinearSolver::get_primal_sol(Vector& prim) {
 	throw LPException();
 }
 
-void LinearSolver::getDualSol(Vector& dual) {
+void LinearSolver::get_dual_sol(Vector& dual) {
 	throw LPException();
 }
 
-void LinearSolver::getInfeasibleDir(Vector& sol) {
+void LinearSolver::get_infeasible_dir(Vector& sol) {
 	throw LPException();
 }
 
@@ -2318,11 +2295,11 @@ void LinearSolver::cleanAll() {
 	throw LPException();
 }
 
-void LinearSolver::setMaxIter(int max) {
+void LinearSolver::set_max_iter(int max) {
 	throw LPException();
 }
 
-void LinearSolver::setMaxTimeOut(int time) {
+void LinearSolver::set_max_time_out(int time) {
 	throw LPException();
 }
 
@@ -2334,23 +2311,23 @@ void setObj(const Vector& coef) {
 	throw LPException();
 }
 
-void LinearSolver::setObjVar(int var, double coef) {
+void LinearSolver::set_obj_var(int var, double coef) {
 	throw LPException();
 }
 
-void LinearSolver::setBounds(const IntervalVector& bounds) {
+void LinearSolver::set_bounds(const IntervalVector& bounds) {
 	throw LPException();
 }
 
-void LinearSolver::setBoundsVar(int var, const Interval& bound) {
+void LinearSolver::set_bounds_var(int var, const Interval& bound) {
 	throw LPException();
 }
 
-void LinearSolver::setEpsilon(double eps) {
+void LinearSolver::set_epsilon(double eps) {
 	throw LPException();
 }
 
-void LinearSolver::addConstraint(const Vector& row, CmpOp sign, double rhs) {
+void LinearSolver::add_constraint(const Vector& row, CmpOp sign, double rhs) {
 	throw LPException();
 }
 

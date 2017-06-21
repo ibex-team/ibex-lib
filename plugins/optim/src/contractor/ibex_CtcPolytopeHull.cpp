@@ -105,7 +105,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 
 	// Update the bounds the variables
-	mylinearsolver->setBounds(box);
+	mylinearsolver->set_bounds(box);
 
 	for(int ii=0; ii<(2*nb_var); ii++) {  // at most 2*n calls
 
@@ -127,7 +127,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 				if(opt.lb() > box[i].lb()) {
 					box[i]=Interval(opt.lb(),box[i].ub());
-					mylinearsolver->setBoundsVar(i,box[i]);
+					mylinearsolver->set_bounds_var(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {
@@ -175,7 +175,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 				if (opt.ub() < box[i].ub()) {
 					box[i] =Interval( box[i].lb(), opt.ub());
-					mylinearsolver->setBoundsVar(i,box[i]);
+					mylinearsolver->set_bounds_var(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {
@@ -224,7 +224,7 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, in
 	try {
 		// the primal solution : used by choose_next_variable
 		Vector primal_solution(nb_var);
-		mylinearsolver->getPrimalSol(primal_solution);
+		mylinearsolver->get_primal_sol(primal_solution);
 		//cout << " primal " << primal_solution << endl;
 
 		// The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)

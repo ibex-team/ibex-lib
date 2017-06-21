@@ -176,10 +176,10 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	}
 
 	mylp->clean_ctrs();
-	mylp->setBounds(bound);
-	mylp->setObjVar(0,1.0); // set the objective
+	mylp->set_bounds(bound);
+	mylp->set_obj_var(0,1.0); // set the objective
 
-	mylp->addConstraint(row,LEQ,0.0); // add the constraint of the objective function
+	mylp->add_constraint(row,LEQ,0.0); // add the constraint of the objective function
 
 	row[0] = 0.0;
 	//The linear system is generated
@@ -210,7 +210,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 				else
 					row[j+1]=G[j].lb();
 			}
-			mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
+			mylp->add_constraint(row,LEQ, (-g_corner)[i].lb()-mylp->get_epsilon());  //  1e-10 ???  BNE
 			//mysoplex.addRow(LPRow(-infinity, row1, (-g_corner)[i].lb()-1e-10));    //  1e-10 ???  BNE
 		}
 	}
@@ -226,7 +226,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	if (stat == LinearSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
 		Vector prim(n+1);
-		mylp->getPrimalSol(prim);
+		mylp->get_primal_sol(prim);
 
 		IntervalVector tmpbox(n);
 

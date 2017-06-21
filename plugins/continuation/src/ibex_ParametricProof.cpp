@@ -160,15 +160,15 @@ bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& D
 
 	while (!over) {
 
-		linsolve.setBounds(param_box);
+		linsolve.set_bounds(param_box);
 
 		for (int i=0; i<k; i++) {
 			if (b[i])
 				//cout << "  add constraint: " << Jinf.row(i) << "*u>=" << (Jinf_pinf[i]-ginf[i].lb()) << endl;
-				linsolve.addConstraint(Jinf.row(i),GEQ,Jinf_pinf[i]-ginf[i].lb());
+				linsolve.add_constraint(Jinf.row(i),GEQ,Jinf_pinf[i]-ginf[i].lb());
 			else
 				//cout << "  add constraint: " << Jsup.row(i) << "*u<=" << (Jsup_pinf[i]-ginf[i].ub()) << endl;
-				linsolve.addConstraint(Jsup.row(i),LEQ,Jsup_pinf[i]-ginf[i].ub());
+				linsolve.add_constraint(Jsup.row(i),LEQ,Jsup_pinf[i]-ginf[i].ub());
 		}
 
 		// note : "-1" just to have a strict minorant of the objective

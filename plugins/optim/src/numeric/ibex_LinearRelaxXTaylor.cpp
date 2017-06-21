@@ -142,7 +142,7 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 			try {
 				//TODO TO CHECK
 				//lp_solver.addConstraint(row,op, -ev.lb());  //  1e-10 ???  BNE  JN CA NE MARCHE PAS AVEC SOPLEX SANS LA PRECISION
-				lp_solver.addConstraint(row,op, -ev.lb()-lp_solver.getEpsilon());  //  1e-10 ???  BNE
+				lp_solver.add_constraint(row,op, -ev.lb()-lp_solver.get_epsilon());  //  1e-10 ???  BNE
 				nb_add++;
 				//mysoplex.addRow(LPRow(-infinity, row1, (-g_corner)[i].lb()-1e-10));    //  1e-10 ???  BNE
 			} catch (LPException&) { }
@@ -517,14 +517,14 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 			if(tot_ev.lb()>(-ev).ub())
 				throw LinearRelaxXTaylorUnsatisfiability();  // the constraint is not satisfied
 			if((-ev).ub()<tot_ev.ub()) {    // otherwise the constraint is satisfied for any point in the box
-				lp_solver.addConstraint( row1, LEQ, (-ev).ub());
+				lp_solver.add_constraint( row1, LEQ, (-ev).ub());
 				added=true;
 			}
 		} else {
 			if(tot_ev.ub()<(-ev).lb())
 				throw LinearRelaxXTaylorUnsatisfiability();
 			if ((-ev).lb()>tot_ev.lb()) {
-				lp_solver.addConstraint( row1, GEQ, (-ev).lb() );
+				lp_solver.add_constraint( row1, GEQ, (-ev).lb() );
 				added=true;
 			}
 		}
