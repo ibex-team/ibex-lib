@@ -183,7 +183,7 @@ bool Solver::next(const Solution*& sol) {
 				// of uncaught timeout in this case (but this case is probably already
 				// an error case).
 			}
-			if (time_limit>0) Timer::check(time_limit)();
+			if (time_limit>0) Timer::check(time_limit);
 		}
 	}
 	catch (TimeOutException&) {
