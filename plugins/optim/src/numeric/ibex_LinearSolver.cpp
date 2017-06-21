@@ -526,7 +526,7 @@ void LinearSolver::set_max_time_out(int time) {
 	return ;
 }
 
-void LinearSolver::setSense(Sense s) {
+void LinearSolver::set_sense(Sense s) {
 
 	try {
 		if (s==LinearSolver::MINIMIZE) {
@@ -2083,7 +2083,7 @@ LinearSolver::Status LinearSolver::setMaxTimeOut(int time) {
 	return res;
 }
 
-LinearSolver::Status LinearSolver::setSense(Sense s) {
+LinearSolver::Status LinearSolver::set_sense(Sense s) {
 	LinearSolver::Status res = FAIL;
 	try {
 
@@ -2293,7 +2293,7 @@ void LinearSolver::set_max_time_out(int time) {
 	throw LPException();
 }
 
-void LinearSolver::setSense(Sense s) {
+void LinearSolver::set_sense(Sense s) {
 	throw LPException();
 }
 
