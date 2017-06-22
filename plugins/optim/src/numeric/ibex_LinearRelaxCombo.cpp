@@ -15,7 +15,7 @@ namespace ibex {
 // the constructor
 
 LinearRelaxCombo::LinearRelaxCombo(const System& sys1, linear_mode lmode1) :
-			LinearRelax(sys1),
+			LinearRelax(sys1.nb_var),
 			lmode(lmode1),
 			myxnewton(NULL)
 #ifdef _IBEX_WITH_AFFINE_
@@ -85,79 +85,6 @@ LinearRelaxCombo::~LinearRelaxCombo() {
 	cpoints.clear();
 	if (myxnewton!=NULL) delete myxnewton;
 }
-
-int LinearRelaxCombo::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
-	int cont=0;
-	switch (lmode) {
-	case XNEWTON:
-	case TAYLOR:
-	case HANSEN: {
-		cont= myxnewton->inlinearization(box,lp_solver);
-		break;
-	}
-
-#ifdef _IBEX_WITH_AFFINE_
-	case ART:
-	case AFFINE2: {
-		cont = myart->inlinearization(box,lp_solver);
-		break;
-	}
-	case COMPO: {
-		cont = myxnewton->inlinearization(box,lp_solver);
-		if (cont<0) 	cont = myart->inlinearization(box,lp_solver);
-		break;
-	}
-#else
-	case ART:
-		ibex_error("LinearRelaxCombo: ART mode requires \"--with-affine\" option");
-		break;
-	case AFFINE2:
-		ibex_error("LinearRelaxCombo: AFFINE2 mode requires \"--with-affine\" option");
-		break;
-	case COMPO:
-		ibex_error("LinearRelaxCombo: COMPO mode requires \"--with-affine\" option");
-		break;
-#endif
-	}
-	return cont;
-}
-
-//bool LinearRelaxCombo::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
-//	bool cont=false;
-//	switch (lmode) {
-//	case XNEWTON:
-//	case TAYLOR:
-//	case HANSEN: {
-//		cont= myxnewton->goal_linearization(box,lp_solver);
-//		break;
-//	}
-//
-//#ifdef _IBEX_WITH_AFFINE_
-//	case ART:
-//	case AFFINE2: {
-//		cont= myart->goal_linearization(box,lp_solver);
-//		break;
-//	}
-//	case COMPO: {
-//		cont = myxnewton->goal_linearization(box,lp_solver);
-//		if (!cont)	cont = myart->goal_linearization(box,lp_solver);
-//		break;
-//	}
-//#else
-//	case ART:
-//		ibex_error("LinearRelaxCombo: ART mode requires \"--with-affine\" option");
-//		break;
-//	case AFFINE2:
-//		ibex_error("LinearRelaxCombo: AFFINE2 mode requires \"--with-affine\" option");
-//		break;
-//	case COMPO:
-//		ibex_error("LinearRelaxCombo: COMPO mode requires \"--with-affine\" option");
-//		break;
-//#endif
-//	}
-//	return cont;
-//}
-
 
 /*********generation of the linearized system*********/
 int LinearRelaxCombo::linearization(const IntervalVector& box, LinearSolver& lp_solver) {

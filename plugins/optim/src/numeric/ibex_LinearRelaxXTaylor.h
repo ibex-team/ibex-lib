@@ -44,12 +44,8 @@ public:
 	 * INF_X - Lower-left corner
 	 * SUP_X - Upper-right corner
 	 * RANDOM - One random point
-	 * GREEDYx - *** deprecated **
-	 * BEST - *** deprecated **
-	 * MONO, NEGMONO *** deprecated **
-	 * K4 - Two random corners and their opposite (used?????)
 	 */
-	typedef enum  {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM, GREEDY1, GREEDY5, GREEDY6, BEST , MONO,NEGMONO, K4} corner_point;
+	typedef enum  {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM } corner_point;
 
 	/** Default max_diam_deriv value, set to 1e6  **/
 	static const double default_max_diam_deriv;
@@ -80,17 +76,8 @@ public:
 	 */
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
-	/**
-	 * \brief Generation of a linear approximation of the inner region
-	 *
-	 */
-	int inlinearization(const IntervalVector& box, LinearSolver& lp_solver);
 
-	/**
-	 * \brief Generation of a linear approximation of the linear objective function
-	 *
-	 */
-	bool goal_linearization(const IntervalVector& box, LinearSolver& lp_solver);
+	void set_inactive_ctr(const BitSet& inactive);
 
 private:
 
@@ -159,6 +146,13 @@ private:
 	bool choose_corner(const IntervalVector& box, IntervalVector& x_corner,	bool* corner);
 
 	/**
+	 * Check if the constraint is satisfied in the box : in this case, no linear relaxation is made.
+	 *
+	 * TODO: is this function redundant? --> replace with inactive bitset
+	 */
+	bool isInner(const IntervalVector& box, const System& sys, int j);
+
+	/**
 	 * \brief Symbolic Jacobian
 	 */
 	Function* df;
@@ -174,7 +168,12 @@ private:
 //	//finds the corner with the minimal evaluation of relation (4) in Taylorisation par intervalles convexe: premiers résultats, JFPC
 //	void best_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner);
 
+	const BitSet* inactive;
 };
+
+inline void LinearRelaxXTaylor::set_inactive_ctr(const BitSet& inactive) {
+	this->inactive = &inactive;
+}
 
 } // end namespace ibex
 

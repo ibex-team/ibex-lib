@@ -12,8 +12,9 @@
 #define __IBEX_CTC_POLYTOPE_HULL_H__
 
 #include "ibex_Ctc.h"
-#include "ibex_LinearRelax.h"
+#include "ibex_LinearFactory.h"
 #include "ibex_LinearSolver.h"
+#include "ibex_BitSet.h"
 
 namespace ibex {
 
@@ -27,14 +28,6 @@ class CtcPolytopeHull : public Ctc {
 public:
 
 	/**
-	 * \brief Contraction mode.
-	 *
-	 * States if all the variables or just the one corresponding
-	 * to the objective should be contracted.
-	 */
-	typedef enum  {  ONLY_Y, ALL_BOX } ctc_mode;
-
-	/**
 	 * \brief Creates the iteration
 	 *
 	 * \param lr         - The linear relaxation
@@ -46,7 +39,7 @@ public:
 	 * \param limit_diam - The contractor does nothing if the diameter does not respect these bounds
 	 */
 
-	CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode=ALL_BOX, int max_iter=LinearSolver::default_max_iter,
+	CtcPolytopeHull(LinearFactory& lr, int max_iter=LinearSolver::default_max_iter,
 			int time_out=LinearSolver::default_max_time_out, double eps=LinearSolver::default_eps,
 			Interval limit_diam=LinearSolver::default_limit_diam_box);
 
@@ -67,6 +60,17 @@ public:
 	 * \brief Contract the box.
 	 */
 	virtual void contract(IntervalVector& box);
+
+	/**
+	 * \brief Set the variable to be contracted.
+	 *
+	 * This allows, for example, to only contract the variable corresponding
+	 * to the objective in an extended system.
+	 *
+	 * TODO: allow to specify bounds. Update the optimizer so that
+	 * onlyt the lower bound of the goal variable is contracted.
+	 */
+	void set_contracted_vars(const BitSet& vars);
 
 	/**
 	 * \brief Delete this.
@@ -92,19 +96,7 @@ protected:
 	/**
 	 * \brief The linearization technique
 	 */
-	LinearRelax& lr;
-
-	/**
-	 * \brief Index of the variable corresponding to the objective function
-	 *
-	 * -1 if none (unconstrained problem). */
-	const int goal_var;
-
-	/**
-	 * \brief Indicates if in optimization only the objective is contracted
-	 * (cmode=ONLY_Y) or all the box (ALL_BOX)
-	 */
-	const ctc_mode cmode;
+	LinearFactory& lr;
 
 	/**
 	 * TODO: add comment
@@ -116,6 +108,11 @@ protected:
 	 * \brief  The linear solver that will be use
 	 */
 	LinearSolver *mylinearsolver;
+
+	/**
+	 * \brief Contracted variables (by default: all)
+	 */
+	BitSet contracted_vars;
 
 private:
 	bool own_lr;

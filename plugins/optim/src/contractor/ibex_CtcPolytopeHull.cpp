@@ -19,17 +19,19 @@ namespace {
 class PolytopeHullEmptyBoxException { };
 }
 
-CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam) :
-		Ctc(lr.nb_var()), lr(lr), goal_var(lr.goal_var()), cmode(cmode),
-		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(false) {
+CtcPolytopeHull::CtcPolytopeHull(LinearFactory& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
+		Ctc(lr.nb_var()), lr(lr),
+		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(false),
+		contracted_vars(BitSet::all(nb_var)) {
 
 	 mylinearsolver = new LinearSolver(nb_var, max_iter, time_out, eps);
 
 }
 
 CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
-		Ctc(A.nb_cols()), lr(*new LinearRelaxFixed(A,b)), goal_var(lr.goal_var()), cmode(ALL_BOX),
-		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(true) {
+		Ctc(A.nb_cols()), lr(*new LinearRelaxFixed(A,b)),
+		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(true),
+		contracted_vars(BitSet::all(nb_var)) {
 
 	 mylinearsolver = new LinearSolver(nb_var, max_iter, time_out, eps);
 
@@ -76,27 +78,26 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 }
 
+void CtcPolytopeHull::set_contracted_vars(const BitSet& vars) {
+	contracted_vars = vars;
+}
+
 void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 	Interval opt(0.0);
 	int* inf_bound = new int[nb_var]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted, call to simplex useless (cf Baharev)
 	int* sup_bound = new int[nb_var]; // indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
 
-	if (cmode==ONLY_Y) {
-		for (int i=0; i<nb_var; i++) {
-			// in the case of lower_bounding, only the left bound of y is contracted
+
+	for (int i=0; i<nb_var; i++) {
+
+		if (contracted_vars[i]) {
+			inf_bound[i]=0;
+			sup_bound[i]=0;
+		} else {
 			inf_bound[i]=1;
 			sup_bound[i]=1;
 		}
-		if (goal_var>-1) inf_bound[goal_var]=0;
-	}
-	else {
-		for (int i=0; i<nb_var; i++) {
-			// in case of optimization, the right bound of y is not contracted
-			inf_bound[i]=0;
-			sup_bound[i]=0;
-		}
-		if (goal_var>-1) sup_bound[goal_var]=1;
 	}
 
 	int nexti=-1;   // the next variable to be contracted

@@ -66,18 +66,6 @@ public:
   	 */
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
-	/**
-	 * \brief Generation of a linear approximation of the inner region
-	 *
-	 */
-	int inlinearization(const IntervalVector& box, LinearSolver& lp_solver);
-
-	/**
-	 * \brief Generation of a linear approximation of the linear objective function
-	 *
-	 */
-	bool goal_linearization(const IntervalVector& box, LinearSolver& lp_solver);
-
 private:
 
 	/**  AFFINE2 | TAYLOR | HANSEN | COMPO : the linear relaxation method */
