@@ -142,7 +142,9 @@ AmplInterface::AmplInterface(std::string nlfile) : asl(NULL), _nlfile(nlfile), _
 }
 
 AmplInterface::~AmplInterface() {
-	delete _x;
+	if (_x) delete _x;
+
+	var_data.clear();
 
 	if (asl) {
 		ASL_free(&asl);
@@ -556,78 +558,89 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 			int k = (expr_v *)e - VAR_E;
 			double coeff;
 			int index;
-			if( k >= n_var ) {
-				// This is a common expression. Find pointer to its root.
-				j = k - n_var;
-				if( j < ncom0 ) 	{
-					cexp *common = CEXPS +j;
-					// init with the nonlinear part
-					const ExprNode* body = &(nl2expr(common->e));
 
-					int nlin = common->nlin; // Number of linear terms
-					if( nlin > 0 ) {
-						linpart * L = common->L;
-						for(int i = 0; i < nlin; i++ ) {
-							if ((dynamic_cast<const ExprConstant*>(body))&&(((ExprConstant*)(body))->is_zero())) {
-								coeff = (L[i]).fac;
-								index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-								if (coeff==1) {
-									body = &((*_x)[index]);
-								} else if (coeff==-1) {
-									body = &( - (*_x)[index]);
-								} else if (coeff != 0) {
-									body = &(coeff * (*_x)[index]);
-								}
-							} else {
-								coeff = (L[i]).fac;
-								index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-								if (coeff==1) {
-									body = &(*body + (*_x)[index]);
-								} else if (coeff==-1) {
-									body = &(*body - (*_x)[index]);
-								} else if (coeff != 0) {
-									body = &(*body +coeff * (*_x)[index]);
-								}
-							}
-						}
-					}
-					return *body;
+			if( k >= n_var ) {
+				const ExprNode* body;
+				// This is a common expression. Find pointer to its root.
+
+				// Check if the common expression are already construct
+				if (var_data.find(k)!=var_data.end()) {
+					body = var_data[k];
 				}
 				else {
-					cexp1 *common = (CEXPS1 - ncom0) +j ;
-					// init with the nonlinear part
-					const ExprNode* body = &(nl2expr(common->e));
 
-					int nlin = common->nlin; // Number of linear terms
-					if( nlin > 0 ) {
-						linpart * L = common->L;
-						for(int i = 0; i < nlin; i++ ) {
-							if ((dynamic_cast<const ExprConstant*>(body))&&(((ExprConstant*)(body))->is_zero())) {
-								coeff = (L[i]).fac;
-								index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-								if (coeff==1) {
-									body = &( (*_x)[index]);
-								} else if (coeff==-1) {
-									body = &( - (*_x)[index]);
-								} else if (coeff != 0) {
-									body = &(coeff * (*_x)[index]);
-								}
-							} else {
-								coeff = (L[i]).fac;
-								index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-								if (coeff==1) {
-									body = &(*body + (*_x)[index]);
-								} else if (coeff==-1) {
-									body = &(*body - (*_x)[index]);
-								} else if (coeff != 0) {
-									body = &(*body +coeff * (*_x)[index]);
-								}
+					// Constract the common expression
+					j = k - n_var;
+					if( j < ncom0 ) 	{
+						cexp *common = CEXPS +j;
+						// init with the nonlinear part
+						body = &(nl2expr(common->e));
 
+						int nlin = common->nlin; // Number of linear terms
+						if( nlin > 0 ) {
+							linpart * L = common->L;
+							for(int i = 0; i < nlin; i++ ) {
+								if ((dynamic_cast<const ExprConstant*>(body))&&(((ExprConstant*)(body))->is_zero())) {
+									coeff = (L[i]).fac;
+									index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+									if (coeff==1) {
+										body = &((*_x)[index]);
+									} else if (coeff==-1) {
+										body = &( - (*_x)[index]);
+									} else if (coeff != 0) {
+										body = &(coeff * (*_x)[index]);
+									}
+								} else {
+									coeff = (L[i]).fac;
+									index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+									if (coeff==1) {
+										body = &(*body + (*_x)[index]);
+									} else if (coeff==-1) {
+										body = &(*body - (*_x)[index]);
+									} else if (coeff != 0) {
+										body = &(*body +coeff * (*_x)[index]);
+									}
+								}
 							}
 						}
 					}
-					return *body;
+					else {
+						cexp1 *common = (CEXPS1 - ncom0) +j ;
+						// init with the nonlinear part
+						const ExprNode* body = &(nl2expr(common->e));
+
+						int nlin = common->nlin; // Number of linear terms
+						if( nlin > 0 ) {
+							linpart * L = common->L;
+							for(int i = 0; i < nlin; i++ ) {
+								if ((dynamic_cast<const ExprConstant*>(body))&&(((ExprConstant*)(body))->is_zero())) {
+									coeff = (L[i]).fac;
+									index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+									if (coeff==1) {
+										body = &( (*_x)[index]);
+									} else if (coeff==-1) {
+										body = &( - (*_x)[index]);
+									} else if (coeff != 0) {
+										body = &(coeff * (*_x)[index]);
+									}
+								} else {
+									coeff = (L[i]).fac;
+									index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+									if (coeff==1) {
+										body = &(*body + (*_x)[index]);
+									} else if (coeff==-1) {
+										body = &(*body - (*_x)[index]);
+									} else if (coeff != 0) {
+										body = &(*body +coeff * (*_x)[index]);
+									}
+
+								}
+							}
+						}
+					}
+					var_data[k] = body;;
 				}
+				return *body;
 
 			} else {
 				ibex_error("Error AmplInterface: unknown defined variable \n");
