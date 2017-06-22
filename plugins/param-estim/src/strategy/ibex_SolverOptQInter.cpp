@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2014
-// Last Update : Jul 1, 2016
+// Last Update : May 31, 2017
 //============================================================================
 
 
@@ -285,9 +285,8 @@ namespace ibex {
     Vector newvalidpoint1 (ctcq.nb_var);
     newvalidpoint1= newvalidpoint(c);  // qvalid is computed by this procedure that returns the corresponding point
 
-    if //( qvalid >= ctcq.q) 
-      (qvalid > bestsolpointnumber) // a better solution has been found.
-      {//ctcq.q = qvalid+1;
+    if  (qvalid > bestsolpointnumber) // a better solution has been found.
+      {
 	if (ctcq.q < qvalid+epsobj)
 	  ctcq.q = qvalid+epsobj;
 	bestsolpoint=newvalidpoint1;
@@ -296,13 +295,10 @@ namespace ibex {
 	if (trace) {
 
 	  Timer::stop();
-
 	  time += Timer::VIRTUAL_TIMELAPSE();
-
-
 	  Timer::start();
 
-	  cout << "solution" << c.box << " psize " << psize << " qposs " << qposs << " qvalid " << qvalid << endl;
+	  cout << "solution" << c.box << " psize " << psize << " qmax " << qposs << " qvalid " << qvalid << endl;
 	  cout << " time " << time << endl;	    ;
 	  cout << " nb boxes " << nb_cells << endl;	    ;
 	  cout << " depth " << c.get<QInterPoints>().depth << endl;
@@ -313,7 +309,7 @@ namespace ibex {
 	  cout <<" qmax epsboxes " << str.qmax_epsboxes << endl;
 	}
 	if (qposs < qvalid+epsobj)  // stop condition  :  the
-       // maximum number of valid points is reached : no need of further bisections.
+       // no better solution possible with the given precision on the objective : no need of further bisections.
        // the box is set empty (need to store it anywhere ?) and will not be stored in the cell buffer.
 	  { if (qposs > qvalid) 
 	      {str.epsboxes_possiblesols++; 

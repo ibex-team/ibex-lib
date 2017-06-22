@@ -24,7 +24,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 /*
 
-//The system is overconstrained by using the combosition of the Taylor extension in two corner randomly chosen and the Affine Reformulation Technique
+//The system is overconstrained by using the composition of the Taylor extension in two corner randomly chosen and the Affine Reformulation Technique
 //Then the simplex algorithm is applied to obtain a new upper bound loup
 //If a new loup is found the method returns true
 
@@ -116,9 +116,9 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
   //  cout << " box simplex " << box << endl;
 	IntervalVector G(n); // vector to be used by the partial derivatives
-
+	
 	// boolean indicating which corner in direction i is used : true for inferior corner, false for superior one.
-    bool * corner = new bool[n]; 
+	bool * corner = new bool[n]; 
 	// random corner choice
 	for (int i=0; i<n ; i++)
 	  {if (RNG::rand()%2)

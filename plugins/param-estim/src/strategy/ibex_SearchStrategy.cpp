@@ -35,7 +35,7 @@ namespace ibex {
 
   int SearchStrategy::validate_value(const Cell& c){
     return    c.get<QInterPoints>().qmax;
-    //return ctcq.midactivepoints_count(c.box.mid());
+    //return ctcq->midactivepoints_count(c.box.mid());
   }
 
 
@@ -48,7 +48,6 @@ namespace ibex {
     Cell* c = buffer.top();
     points1 = c->get<QInterPoints>().points;
     points2 = c->get<QInterPoints>().points;
-     
     return buffer.pop();
   }
 
@@ -71,7 +70,6 @@ namespace ibex {
       else if 
       (with_oracle && !(c2.box.is_empty())&& c2.box.contains(*oracle))
       {
-
 	if (!(c1.box.is_empty())) buffer.push(&c1);
 	buffer.push(&c2);}
 
