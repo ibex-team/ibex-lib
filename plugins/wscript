@@ -44,3 +44,12 @@ def utest (tst):
 	# Plugin may not have tests so we add "mandatory = False"
 	plugins = tst.get_plugins ()
 	tst.recurse (plugins, mandatory = False)
+
+######################
+##### benchmarks #####
+######################
+def benchmarks (bch):
+	# Call "benchmarks" for each plugin (not all subdir, cf comments for
+	# configure). Plugin may not have benchmarks so we add "mandatory = False"
+	plugins = bch.get_plugins ()
+	bch.recurse (plugins, mandatory = False)

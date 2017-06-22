@@ -2,7 +2,12 @@ version: build{build}
 image: Visual Studio 2015
 
 platform:
-  - x86
+  - x64 
+  
+environment:
+  matrix:
+    - TEST_INTERVAL_LIB: "gaol"
+    - TEST_INTERVAL_LIB: "filib"
 
 install:
   - cmd: echo %Platform%
@@ -15,7 +20,7 @@ install:
   - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
 
 build_script:
-  - cmd: python -x %cd%\waf configure --prefix=%PREFIX%
+  - cmd: python -x %cd%\waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug 
   - cmd: python -x %cd%\waf build install clean
 
 test_script:
@@ -25,6 +30,6 @@ test_script:
   - cmd: python -x %cd%\waf utest
 
 on_failure:
-  - cmd: cat C:\projects\ibex-lib\__build__\config.log
-  - cmd: cat C:\projects\ibex-lib\__build__\utest_config.log
-  - cmd: cat C:\projects\ibex-lib\__build__\utest_run.log
+  - cmd: cat %cd%\__build__\config.log
+  - cmd: cat %cd%\__build__\utest_config.log
+  - cmd: cat %cd%\__build__\utest_run.log

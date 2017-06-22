@@ -29,6 +29,7 @@ def options (opt):
 	waflib.Tools.compiler_cxx.cxx_compiler["win32"].remove ("msvc")
 
 	opt.load ("compiler_cxx compiler_c javaw")
+	opt.load ("waf_benchmarks")
 
 	opt.add_option ("--enable-shared", action="store_true", dest="ENABLE_SHARED",
 			help = "build ibex as a shared library")
@@ -272,3 +273,22 @@ def utest (tst):
 class UTestContext (BuildContext):
 	cmd = "utest"
 	fun = "utest"
+
+######################
+##### benchmarks #####
+######################
+def benchmarks (bch):
+	'''run the benchmarks'''
+	logfile = os.path.join (bch.bldnode.abspath(), "benchmarks_config.log")
+	bch.logger = Logs.make_logger (logfile, "benchmarks_config")
+
+	bch.load ("waf_benchmarks")
+
+	bch.recurse ("benchmarks plugins", mandatory = False)
+
+	Logs.free_logger (bch.logger)
+	bch.logger = None
+
+class BenchmarksContext (BuildContext):
+	cmd = "benchmarks"
+	fun = "benchmarks"

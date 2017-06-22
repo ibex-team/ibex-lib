@@ -174,7 +174,7 @@ public:
 	/**
 	 * \brief Assign this IntervalVector to x.
 	 *
-	 * \pre Dimensions of this and x must match. 
+	 * \pre Dimensions of this and x must match.
 	 * \note Emptiness is overridden.
 	 */
 	IntervalVector& operator=(const IntervalVector& x);
@@ -485,7 +485,7 @@ public:
 	 * (a zero-sized array is illegal in ISO C++). In particular, you can used delete[] whatever
 	 * is the result of diff.
 	 */
-	int diff(const IntervalVector& y, IntervalVector*& result) const;
+	int diff(const IntervalVector& y, IntervalVector*& result, bool compactness = true) const;
 
 	/**
 	 * \brief Return the complementary of *this.
