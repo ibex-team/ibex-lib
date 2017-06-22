@@ -66,6 +66,20 @@ public:
 	bool empty() const;
 
 	/**
+	 * \brief Flush the buffer.
+	 *
+	 * All the remaining data will be *deleted*
+	 */
+	void flush();
+
+	/**
+	 * \brief Clear the buffer.
+	 *
+	 * All the remaining data will be *removed* without being *deleted*
+	 */
+	void clear();
+
+	/**
 	 * \brief Return the next box (but does not pop it).
 	 *
 	 * Complexity: o(1)
@@ -163,6 +177,9 @@ protected:
 	 */
 	HeapNode<T>* get_node(unsigned int i) const;
 
+
+	std::ostream& print(std::ostream& os) const;
+
 	/**
 	 * \brief Streams out the heap
 	 *
@@ -176,10 +193,25 @@ protected:
 	 */
 	bool heap_state();
 
+    /** copy constructor
+     *  Copy all the elements and the data
+     **/
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> deepcopy_sheap(int nb_crit);
+
+    /** copy constructor
+     *  Copy only the structure without the data
+     **/
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> copy_sheap(int nb_crit);
+
+
 private:
 
 	/** Used in the sort function (proceed by recursivity) */
 	void sort_rec(HeapNode<T>* node, SharedHeap<T>& heap);
+
+
+	void flush_subnodes(HeapNode<T>* node);
+	void clear_subnodes(HeapNode<T>* node);
 };
 
 
@@ -231,6 +263,10 @@ private:
 	template<class U>
 	friend std::ostream& operator<<(std::ostream& os, const SharedHeap<U>& heap);
 
+    /** Copy the heap **/
+    void copy_tree(HeapNode<T> * node,std::vector<HeapElt<T>*> * elm_vect,int heap_id,int nb_crit);
+    void deepcopy_tree(HeapNode<T> * node,std::vector<HeapElt<T>*> * elm_vect,int heap_id,int nb_crit);
+
 };
 
 /**
@@ -257,8 +293,17 @@ private:
 	/** Create an HeapElt with a data and two criteria */
 	explicit HeapElt(T* data, double crit_1, double crit_2);
 
+	explicit HeapElt(double* crit, HeapNode<T>** holder, T* data);
+
+    /** Copy constructor **/
+	HeapElt<T>*  copy(int nb_crit);
+	HeapElt<T>*  deepcopy(int nb_crit);
+
 	/** Delete the element */
 	~HeapElt() ;
+
+	/** Delete the data */
+	void flush() ;
 
 	/**
 	 * Compare the criterion of a given heap with the value d.
@@ -297,10 +342,87 @@ SharedHeap<T>::SharedHeap(CostFunc<T>& cost, bool update_cost, int id) : nb_node
 }
 
 template<class T>
-SharedHeap<T>::~SharedHeap() {
-	if (root) delete root; 	// warning: delete all sub-nodes
-	root = NULL;
+std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> SharedHeap<T>::deepcopy_sheap(int nb_crit){
+    SharedHeap<T>* new_heap = new SharedHeap(costf,update_cost_when_sorting,heap_id);
+    new_heap->nb_nodes = nb_nodes;
+    std::vector<HeapElt<T>*> * elm_vect = new std::vector<HeapElt<T>*>() ;
+    if(root != NULL) {
+        new_heap->root = new HeapNode<T>(root->elt->deepcopy(nb_crit));
+        new_heap->root->elt->holder[new_heap->heap_id] = new_heap->root;
+
+        elm_vect->push_back(new_heap->root->elt);
+        new_heap->root->deepcopy_tree(root,elm_vect,heap_id,nb_crit);
+    }
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> rtrn;
+    rtrn.first = new_heap;
+    rtrn.second = elm_vect;
+    return rtrn;
 }
+
+
+
+template<class T>
+std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> SharedHeap<T>::copy_sheap(int nb_crit){
+    SharedHeap<T>* new_heap = new SharedHeap(costf,update_cost_when_sorting,heap_id);
+    new_heap->nb_nodes = nb_nodes;
+    std::vector<HeapElt<T>*> * elm_vect = new std::vector<HeapElt<T>*>() ;
+    if(root != NULL) {
+        new_heap->root =  new HeapNode<T>(root->elt->copy(nb_crit));
+        new_heap->root->elt->holder[new_heap->heap_id] = new_heap->root;
+
+        elm_vect->push_back(new_heap->root->elt);
+        new_heap->root->copy_tree(root,elm_vect,heap_id,nb_crit);
+    }
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> rtrn;
+    rtrn.first = new_heap;
+    rtrn.second = elm_vect;
+    return rtrn;
+}
+
+template<class T>
+SharedHeap<T>::~SharedHeap() {
+	clear();
+}
+
+
+template<class T>
+void SharedHeap<T>::flush() {
+	if (nb_nodes>0) {
+		flush_subnodes(root);
+		nb_nodes=0;
+		root= NULL;
+	}
+}
+
+template<class T>
+void SharedHeap<T>::flush_subnodes(HeapNode<T>* node) {
+	if (node->left)	flush_subnodes(node->left);
+	if (node->right) flush_subnodes(node->right);
+	node->elt->flush();
+	delete node->elt;
+	delete node;
+}
+
+
+template<class T>
+void SharedHeap<T>::clear() {
+	if (nb_nodes>0) {
+		clear_subnodes(root);
+		nb_nodes=0;
+		root= NULL;
+	}
+}
+
+template<class T>
+void SharedHeap<T>::clear_subnodes(HeapNode<T>* node) {
+	if (node->left)	clear_subnodes(node->left);
+	if (node->right) clear_subnodes(node->right);
+	//node->elt->flush();
+	delete node->elt;
+	delete node;
+}
+
+
 
 template<class T>
 inline double SharedHeap<T>::minimum() const {
@@ -336,6 +458,7 @@ void SharedHeap<T>::sort() {
 	nb_nodes = heap_tmp->size();
 
 	heap_tmp->root = NULL;
+	heap_tmp->nb_nodes=0;
 	delete heap_tmp; 	// warning: delete all sub-nodes
 
 }
@@ -575,6 +698,44 @@ HeapNode<T>::HeapNode(HeapElt<T>* elt, HeapNode<T>* father): elt(elt), right(NUL
 //}
 
 template<class T>
+void HeapNode<T>::deepcopy_tree(HeapNode<T> * node,std::vector<HeapElt<T>*> * elm_vect,int heap_id,int nb_crit){
+    HeapElt<T>* elem;
+    if(node->left != NULL){
+    	elem = node->left->elt->deepcopy(nb_crit);//new HeapElt<T>(*(root->elt),nb_crit);
+        elm_vect->push_back(elem);
+        left = new HeapNode<T>(elem,this);
+        elem->holder[heap_id] = left;
+        left->deepcopy_tree(node->left,elm_vect,heap_id,nb_crit);
+    }
+    if(node->right != NULL){
+        elem = node->right->elt->deepcopy(nb_crit);//new HeapElt<T>(*(root->elt),nb_crit);
+        right = new HeapNode<T>(elem,this);
+        elm_vect->push_back(elem);
+        elem->holder[heap_id] = right;
+        right->deepcopy_tree(node->right,elm_vect,heap_id,nb_crit);
+    }
+}
+
+template<class T>
+void HeapNode<T>::copy_tree(HeapNode<T> * node,std::vector<HeapElt<T>*> * elm_vect,int heap_id,int nb_crit){
+    HeapElt<T>* elem;
+    if(node->left != NULL){
+        elem = node->left->elt->copy(nb_crit);
+        elm_vect->push_back(elem);
+        left = new HeapNode<T>(elem,this);
+        elem->holder[heap_id] = left;
+        left->copy_tree(node->left,elm_vect,heap_id,nb_crit);
+    }
+    if(node->right != NULL){
+        elem = node->right->elt->copy(nb_crit);
+        right = new HeapNode<T>(elem,this);
+        elm_vect->push_back(elem);
+        elem->holder[heap_id] = right;
+        right->copy_tree(node->right,elm_vect,heap_id,nb_crit);
+    }
+}
+
+template<class T>
 bool HeapNode<T>::is_sup(HeapNode<T>* node, int heap_id) const {
 	return elt->is_sup(node->elt->crit[heap_id],heap_id);
 }
@@ -606,6 +767,11 @@ void HeapNode<T>::switch_elt(HeapNode<T>* node, int heap_id) {
 //}
 
 template<class T>
+HeapElt<T>::HeapElt(double* crit, HeapNode<T>** holder, T* data): data(data), crit(crit), holder(holder) {
+
+}
+
+template<class T>
 HeapElt<T>::HeapElt(T* data, double crit_1) : data(data), /*nb_heaps(1),*/ crit(new double[1]), holder(new HeapNode<T>*[1]){
 	crit[0] = crit_1;
 	holder[0] = NULL;
@@ -620,10 +786,40 @@ HeapElt<T>::HeapElt(T* data, double crit_1, double crit_2) : data(data), /*nb_he
 }
 
 template<class T>
+HeapElt<T>*  HeapElt<T>::deepcopy(int nb_crit) {
+	double * copycrit = new double[nb_crit];
+	HeapNode<T>** copyholder = new HeapNode<T>*[nb_crit];
+    for(unsigned i=0;i<nb_crit;i++){
+        (copycrit[i]) = (this->crit)[i];
+        copyholder[i] = NULL;
+    }
+    T* copydata = new T(*(this->data));
+    return new HeapElt<T>(copycrit,copyholder,copydata);
+}
+
+template<class T>
+HeapElt<T>*  HeapElt<T>::copy(int nb_crit) {
+	double * copycrit = new double[nb_crit];
+	HeapNode<T>** copyholder = new HeapNode<T>*[nb_crit];
+    for(unsigned i=0;i<nb_crit;i++){
+        (copycrit[i]) = (this->crit)[i];
+        copyholder[i] = NULL;
+    }
+    T* copydata = this->data;
+    return new HeapElt<T>(copycrit,copyholder,copydata);
+}
+
+
+template<class T>
 HeapElt<T>::~HeapElt() {
-	if (data) 	delete data;
+	//if (data) 	delete data;
 	delete [] crit;
 	delete [] holder;
+}
+
+template<class T>
+void HeapElt<T>::flush() {
+	if (data) 	delete data;
 }
 
 template<class T>
@@ -647,15 +843,21 @@ std::ostream& operator<<(std::ostream& os, const HeapNode<T>& node) {
 
 template<class T>
 std::ostream& operator<<(std::ostream& os, const SharedHeap<T>& heap) {
-	if (!heap.root) return os << "(empty heap)";
+		return heap.print(os);
+}
+
+
+template<class T>
+std::ostream& SharedHeap<T>::print(std::ostream& os) const{
+	if (!root) return os << "(empty heap)";
 	os << std::endl;
 	std::stack<std::pair<HeapNode<T>*,int> > s;
-	s.push(std::pair<HeapNode<T>*,int>(heap.root,0));
+	s.push(std::pair<HeapNode<T>*,int>(root,0));
 	while (!s.empty()) {
 		std::pair<HeapNode<T>*,int> p=s.top();
 		s.pop();
 		for (int i=0; i<p.second; i++) os << "   ";
-		os  << (p.first->elt->crit[heap.heap_id]) << std::endl;
+		os  << (p.first->elt->crit[heap_id]) << std::endl;
 		if (p.first->right) s.push(std::pair<HeapNode<T>*,int>(p.first->right,p.second+1));
 		if (p.first->left) s.push(std::pair<HeapNode<T>*,int>(p.first->left,p.second+1));
 	}

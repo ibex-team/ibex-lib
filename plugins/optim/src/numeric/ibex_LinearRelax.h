@@ -61,7 +61,7 @@ public:
 	 *
 	 * It must be implemented in the subclasses.
 	 */
-	virtual bool goal_linearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
+	//virtual bool goal_linearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
 
 	/**
 	 * Check if the constraint is satisfied in the box : in this case, no linear relaxation is made.

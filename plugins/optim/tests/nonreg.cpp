@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <sstream>
 #include <stdlib.h>
+#include "ibex_Random.h"
 
 using namespace std;
 using namespace ibex;
@@ -82,15 +83,16 @@ int main (int argc, char** argv) {
 	cout << "measuring machine performance..." << endl;
 	cout << "\treference time=" << ref_perf << endl;
 
-	srand(1);
-	volatile double a=rand();
-	volatile double b=rand();
+	RNG::srand(1);
+	volatile double a=RNG::rand();
+	volatile double b=RNG::rand();
+	Timer::reset_time();
 	Timer::start();
 	for (int i=0; i<100000000; i++) {
 		a *= b;
 	}
 	Timer::stop();
-	current_perf = Timer::VIRTUAL_TIMELAPSE();
+	current_perf = Timer::get_time();
 
 	cout << "\tcurrent time=" << current_perf << endl;
 	double ratio_perf = current_perf/ref_perf;
@@ -137,7 +139,7 @@ int main (int argc, char** argv) {
 
 		Optimizer o(p.get_sys(), p.get_ctc(), p.get_bsc(), p.prec, p.goal_rel_prec, p.goal_abs_prec, p.sample_size, p.eq_eps);
 
-		Optimizer::Status status=o.optimize(p.get_sys().box);
+		Optimizer::Status status=o.optimize(p.get_sys().box_constraints);
 
 		double scaled_time = ratio_perf*time;
 		double time_gain_ratio = (o.time-scaled_time)/scaled_time;

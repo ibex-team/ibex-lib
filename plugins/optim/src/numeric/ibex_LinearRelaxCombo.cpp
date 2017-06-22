@@ -122,41 +122,41 @@ int LinearRelaxCombo::inlinearization(const IntervalVector& box, LinearSolver& l
 	return cont;
 }
 
-bool LinearRelaxCombo::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
-	bool cont=false;
-	switch (lmode) {
-	case XNEWTON:
-	case TAYLOR:
-	case HANSEN: {
-		cont= myxnewton->goal_linearization(box,lp_solver);
-		break;
-	}
-
-#ifdef _IBEX_WITH_AFFINE_
-	case ART:
-	case AFFINE2: {
-		cont= myart->goal_linearization(box,lp_solver);
-		break;
-	}
-	case COMPO: {
-		cont = myxnewton->goal_linearization(box,lp_solver);
-		if (!cont)	cont = myart->goal_linearization(box,lp_solver);
-		break;
-	}
-#else
-	case ART:
-		ibex_error("LinearRelaxCombo: ART mode requires \"--with-affine\" option");
-		break;
-	case AFFINE2:
-		ibex_error("LinearRelaxCombo: AFFINE2 mode requires \"--with-affine\" option");
-		break;
-	case COMPO:
-		ibex_error("LinearRelaxCombo: COMPO mode requires \"--with-affine\" option");
-		break;
-#endif
-	}
-	return cont;
-}
+//bool LinearRelaxCombo::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
+//	bool cont=false;
+//	switch (lmode) {
+//	case XNEWTON:
+//	case TAYLOR:
+//	case HANSEN: {
+//		cont= myxnewton->goal_linearization(box,lp_solver);
+//		break;
+//	}
+//
+//#ifdef _IBEX_WITH_AFFINE_
+//	case ART:
+//	case AFFINE2: {
+//		cont= myart->goal_linearization(box,lp_solver);
+//		break;
+//	}
+//	case COMPO: {
+//		cont = myxnewton->goal_linearization(box,lp_solver);
+//		if (!cont)	cont = myart->goal_linearization(box,lp_solver);
+//		break;
+//	}
+//#else
+//	case ART:
+//		ibex_error("LinearRelaxCombo: ART mode requires \"--with-affine\" option");
+//		break;
+//	case AFFINE2:
+//		ibex_error("LinearRelaxCombo: AFFINE2 mode requires \"--with-affine\" option");
+//		break;
+//	case COMPO:
+//		ibex_error("LinearRelaxCombo: COMPO mode requires \"--with-affine\" option");
+//		break;
+//#endif
+//	}
+//	return cont;
+//}
 
 
 /*********generation of the linearized system*********/

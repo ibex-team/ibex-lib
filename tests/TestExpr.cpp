@@ -87,6 +87,9 @@ void TestExpr::addxy02() {
 	CPPUNIT_ASSERT(e.dim==Dim::row_vec(3));
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::ROW_VECTOR);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 void TestExpr::addxy03() {
@@ -97,6 +100,9 @@ void TestExpr::addxy03() {
 	CPPUNIT_ASSERT(e.dim==Dim::col_vec(3));
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::COL_VECTOR);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 void TestExpr::addxy04() {
@@ -106,6 +112,9 @@ void TestExpr::addxy04() {
 	CPPUNIT_ASSERT(e.dim==Dim::matrix(2,3));
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::MATRIX);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 void TestExpr::addxx01() {
@@ -133,6 +142,9 @@ void TestExpr::mulxy01() {
 	CPPUNIT_ASSERT(e.dim==Dim::scalar());
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 
@@ -144,6 +156,9 @@ void TestExpr::mulxy02() {
 	CPPUNIT_ASSERT(e.dim==Dim::scalar());
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 // matrix * matrix
@@ -154,6 +169,9 @@ void TestExpr::mulxy03() {
 	CPPUNIT_ASSERT(e.dim==Dim::matrix(2,4));
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::MATRIX);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 // matrix * vector
@@ -164,6 +182,9 @@ void TestExpr::mulxy04() {
 	CPPUNIT_ASSERT(e.dim==Dim::col_vec(2));
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::COL_VECTOR);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 // scalar * matrix
@@ -174,6 +195,9 @@ void TestExpr::mulxy05() {
 	CPPUNIT_ASSERT(e.dim==Dim::matrix(2,3));
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::MATRIX);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 // scalar * vector
@@ -186,6 +210,9 @@ void TestExpr::mulxy06() {
 	CPPUNIT_ASSERT(e.type()==Dim::ROW_VECTOR);
 
 	CPPUNIT_ASSERT(sameExpr(e,"(x*y)"));
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 // vector * vector (outer product)
@@ -196,6 +223,9 @@ void TestExpr::mulxy07() {
 	CPPUNIT_ASSERT(e.dim==Dim::matrix(2,3));
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::MATRIX);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 // vector * matrix
@@ -206,6 +236,9 @@ void TestExpr::mulxy08() {
 	CPPUNIT_ASSERT(e.dim==Dim::row_vec(4));
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::ROW_VECTOR);
+	delete &x;
+	delete &y;
+	delete &e;
 }
 
 
@@ -279,6 +312,7 @@ void TestExpr::unaryOp() {
 	CPPUNIT_ASSERT(sameExpr(acosh(x),"acosh(x)"));
 	CPPUNIT_ASSERT(sameExpr(asinh(x),"asinh(x)"));
 	CPPUNIT_ASSERT(sameExpr(atanh(x),"atanh(x)"));
+	delete &x;
 }
 
 void TestExpr::binaryOp() {
@@ -290,7 +324,9 @@ void TestExpr::binaryOp() {
 	CPPUNIT_ASSERT(sameExpr(x/y,"(x/y)"));
 	CPPUNIT_ASSERT(sameExpr(max(x,y),"max(x,y)"));
 	CPPUNIT_ASSERT(sameExpr(min(x,y),"min(x,y)"));
-	CPPUNIT_ASSERT(sameExpr(atan2(y,x),"atan2(y,x)"));
+	CPPUNIT_ASSERT(sameExpr(atan2(x,y),"atan2(x,y)"));
+	delete &x;
+	delete &y;
 }
 
 void TestExpr::cst01() {
@@ -306,6 +342,8 @@ void TestExpr::cst01() {
 
 	const ExprConstant& z=ExprConstant::new_scalar(0);
 	CPPUNIT_ASSERT(z.is_zero());
+	delete &c;
+	delete &z;
 }
 
 void TestExpr::cst02() {
@@ -316,6 +354,7 @@ void TestExpr::cst02() {
 	CPPUNIT_ASSERT(!c1.is_zero());
 	CPPUNIT_ASSERT(c1.type()==Dim::COL_VECTOR);
 	CPPUNIT_ASSERT(c1.get_vector_value()==v);
+	delete &c1;
 }
 
 void TestExpr::cst03() {
@@ -326,6 +365,7 @@ void TestExpr::cst03() {
 	CPPUNIT_ASSERT(!c2.is_zero());
 	CPPUNIT_ASSERT(c2.type()==Dim::MATRIX);
 	CPPUNIT_ASSERT(c2.get_matrix_value()==M);
+	delete &c2;
 
 }
 
@@ -337,6 +377,7 @@ void TestExpr::cst04() {
 	CPPUNIT_ASSERT(!c1.is_zero());
 	CPPUNIT_ASSERT(c1.type()==Dim::ROW_VECTOR);
 	CPPUNIT_ASSERT(c1.get_vector_value()==v);
+	delete &c1;
 }
 
 void TestExpr::cst05() {
@@ -352,6 +393,8 @@ void TestExpr::cst05() {
 	const ExprConstant& z2=ExprConstant::new_matrix(M);
 	CPPUNIT_ASSERT(z1.is_zero());
 	CPPUNIT_ASSERT(z2.is_zero());
+	delete &z1;
+	delete &z2;
 }
 
 void TestExpr::vector01() {
@@ -389,6 +432,11 @@ void TestExpr::vector02() {
 	CPPUNIT_ASSERT(v.row_vector());
 	CPPUNIT_ASSERT(v.type()==Dim::MATRIX);
 	CPPUNIT_ASSERT(sameExpr(v,"(x,y,(x+y),(x+(x+y)))"));
+	delete &x;
+	delete &y;
+	delete &e1;
+	delete &e2;
+	delete &v;
 }
 
 void TestExpr::index01() {
@@ -443,6 +491,8 @@ void TestExpr::index03() {
 	CPPUNIT_ASSERT(p.first==&x);
 	bool mask[3][4]={{false,false,false,false},{false,false,false,false},{false,true,false,false}};
 	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
+	delete &x;
+	delete &e;
 }
 
 void TestExpr::index04() {
@@ -456,6 +506,9 @@ void TestExpr::index04() {
 			         {false,false, true, true},
 					 {false,false, true, true}};
 	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
+	delete &x;
+	delete &tmp;
+	delete &e;
 }
 
 
@@ -535,6 +588,7 @@ void TestExpr::subnodes01() {
 	CPPUNIT_ASSERT(&nodes[3]==&e1);
 	CPPUNIT_ASSERT((&nodes[5]==&x && &nodes[6]==&y) ||
 			    (&nodes[5]==&y && &nodes[6]==&x));
+
 }
 
 void TestExpr::subnodes02() {
@@ -559,6 +613,9 @@ void TestExpr::subnodes02() {
 	CPPUNIT_ASSERT(&nodes2[0]==&e2);
 	CPPUNIT_ASSERT(&nodes2[1]==&x1);
 	CPPUNIT_ASSERT(&nodes2[2]==&x2);
+	delete &x1;
+	delete &x2;
+	delete &y;
 
 }
 
@@ -582,6 +639,12 @@ void TestExpr::subnodes03() {
 	CPPUNIT_ASSERT(&nodes[6]==&x3);
 	CPPUNIT_ASSERT(&nodes[7]==&x4);
 	CPPUNIT_ASSERT(&nodes[8]==&x5);
+	delete &x1;
+	delete &x2;
+	delete &x3;
+	delete &x4;
+	delete &x5;
+	delete &y;
 }
 
 void TestExpr::subnodes04() {
@@ -605,6 +668,11 @@ void TestExpr::subnodes04() {
 	CPPUNIT_ASSERT(&nodes[4]==&two);
 	CPPUNIT_ASSERT(&nodes[5]==&x1);
 	CPPUNIT_ASSERT(&nodes[6]==&x2);
+	delete &x1;
+	delete &x2;
+	delete &one;
+	delete &two;
+	delete &y;
 }
 
 
@@ -613,6 +681,8 @@ void TestExpr::bug81() {
 	IntervalVector y(3);
 	const ExprNode& z=x+y;
 	CPPUNIT_ASSERT(z.dim == x.dim);
+	delete &x;
+	delete &z;
 }
 
 } // end namespace

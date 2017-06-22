@@ -16,7 +16,7 @@ using namespace std;
 namespace ibex {
 
 Paver::Paver(const Array<Ctc>& c, Bsc& b, CellBuffer& buffer) :
-		capacity(-1), ctc_loop(true), ctc(c), bsc(b), buffer(buffer) {
+		capacity(-1), timeout(3600), ctc_loop(true), trace(false), ctc(c), bsc(b), buffer(buffer) {
 
 	assert(ctc.size()>0);
 }
@@ -73,8 +73,7 @@ void Paver::contract(Cell& cell, SubPaving* paving) {
 
 void Paver::bisect(Cell& c) {
 
-	pair<IntervalVector,IntervalVector> boxes=bsc.bisect(c);
-	pair<Cell*,Cell*> new_cells=c.bisect(boxes.first,boxes.second);
+	pair<Cell*,Cell*> new_cells=bsc.bisect_cell(c);
 
 	delete buffer.pop();
 	buffer.push(new_cells.first);
@@ -83,6 +82,9 @@ void Paver::bisect(Cell& c) {
 
 SubPaving* Paver::pave(const IntervalVector& init_box) {
 
+
+	Timer::Time start_time=Timer::get_time();
+	Timer::start();
 	SubPaving* paving=new SubPaving[ctc.size()];
 
 	buffer.flush();
@@ -105,13 +107,13 @@ SubPaving* Paver::pave(const IntervalVector& init_box) {
 
 		contract(*c, paving);
 
-		Timer::check(timeout);
+		Timer::check(timeout+start_time);
 		check_capacity(paving);
 
 		if (c->box.is_empty()) delete buffer.pop();
 		else bisect(*c);
 	}
-
+	Timer::stop();
 	return paving;
 }
 

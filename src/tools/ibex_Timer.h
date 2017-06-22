@@ -61,17 +61,21 @@ class Timer {
    * (add by gch).
    */
   static void check(double timeout);
+  inline static void reset_time() { local_time =0; }
+  inline static Time get_time() { return local_time; }
 
   inline static Time REAL_TIMELAPSE() { return real_lapse; }
   inline static double RESIDENT_MEMORY() { return resident_memory; }
   /* not available yet under WIN32 platform */
   inline static Time VIRTUAL_TIMELAPSE() { return (virtual_ulapse + virtual_slapse); }
 
+
   static Time real_lapse;
   static Time virtual_ulapse;
   static Time virtual_slapse;
 
  private:
+  static Time local_time;
   static Time real_time;
   static Time virtual_utime;
   static Time virtual_stime;

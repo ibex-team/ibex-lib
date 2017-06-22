@@ -31,18 +31,18 @@ extern System* system;
 extern bool choco_start;
 }
 
-System::System() : nb_var(0), nb_ctr(0), box(1) /* tmp */ {
+System::System() : nb_var(0), nb_ctr(0), ops(NULL), box_constraints(1) /* tmp */ {
 
 }
 
-System::System(const char* filename) : nb_var(0), nb_ctr(0), box(1) /* tmp */ {
+System::System(const char* filename) : nb_var(0), nb_ctr(0), ops(NULL), box_constraints(1) /* tmp */ {
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
 	load(fd);
 }
 
 System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by parser) */
-		                                    nb_ctr(0), box(1) /* tmp */ {
+		                                    nb_ctr(0), ops(NULL), box_constraints(1) /* tmp */ {
 	try {
 		parser::choco_start=true;
 		parser::system=this;
@@ -54,7 +54,7 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 	}
 }
 
-System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0), box(1) {
+System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0), ops(NULL), box_constraints(1) {
 
 	switch(mode) {
 	case COPY :      init(SystemCopy(sys,COPY)); break;
@@ -64,7 +64,7 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 
 }
 
-System::System(const System& sys1, const System& sys2) : nb_var(0), nb_ctr(0), func(0), box(1) {
+System::System(const System& sys1, const System& sys2) : nb_var(0), nb_ctr(0), func(0), ops(NULL), box_constraints(1) {
 	init(SystemMerge(sys1,sys2));
 }
 
@@ -129,6 +129,8 @@ System::~System() {
 		// has never been created
 		for (int i=0; i<args.size(); i++) delete &args[i];
 	}
+
+	if (ops) delete[] ops;
 }
 
 } // end namespace ibex

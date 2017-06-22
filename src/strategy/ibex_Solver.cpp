@@ -57,7 +57,7 @@ void Solver::init(const System& sys, const BitSet* _params) {
 		if (sys.ctrs[i].op==EQ) nb_eq+=sys.ctrs[i].f.image_dim();
 	}
 
-	if (nb_eq==sys.f.image_dim())
+	if (nb_eq==sys.f_ctrs.image_dim())
 		eqs=&sys; // useless to create a new one
 	else {
 		ineqs=new System(sys,System::INEQ_ONLY);
@@ -69,7 +69,7 @@ void Solver::init(const System& sys, const BitSet* _params) {
 	}
 
 	n=sys.nb_var;
-	m=eqs? eqs->f.image_dim() : 0;
+	m=eqs? eqs->f_ctrs.image_dim() : 0;
 
 }
 
@@ -108,6 +108,7 @@ void Solver::start(const IntervalVector& init_box) {
 
 	IntervalVector tmpbox(ctc.nb_var);
 
+	Timer::reset_time();
 	Timer::start();
 
 }
@@ -157,8 +158,7 @@ bool Solver::next(const Solution*& sol) {
 
 			try {
 
-				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+				pair<Cell*,Cell*> new_cells=bsc.bisect_cell(*c);
 
 				delete buffer.pop();
 				buffer.push(new_cells.first);
@@ -183,7 +183,7 @@ bool Solver::next(const Solution*& sol) {
 				// of uncaught timeout in this case (but this case is probably already
 				// an error case).
 			}
-			time_limit_check();
+			if (time_limit>0) Timer::check(time_limit);
 		}
 	}
 	catch (TimeOutException&) {
@@ -194,7 +194,7 @@ bool Solver::next(const Solution*& sol) {
 	}
 
 	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	time = Timer::get_time();
 
 	return false;
 
@@ -207,12 +207,6 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 	return sols;
 }
 
-void Solver::time_limit_check () {
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	if (time_limit >0 &&  time >=time_limit) throw TimeOutException();
-	Timer::start();
-}
 
 bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 
@@ -227,9 +221,9 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 		else if (m<n) {
 			// ====== under-constrained =========
 			try {
-				VarSet varset=get_newton_vars(eqs->f,box.mid(),params? *params: BitSet::empty(n));
+				VarSet varset=get_newton_vars(eqs->f_ctrs,box.mid(),params? *params: BitSet::empty(n));
 
-				proved=inflating_newton(eqs->f, varset, box, sol._existence, *sol._unicity);
+				proved=inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity);
 
 				if (params && params->size()<n-m)
 					sol.varset = new VarSet(varset);
@@ -245,7 +239,7 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 			}
 		} else {
 			// ====== well-constrained =========
-			proved=inflating_newton(eqs->f, box.mid(), sol._existence, *sol._unicity);
+			proved=inflating_newton(eqs->f_ctrs, box.mid(), sol._existence, *sol._unicity);
 
 			if (!proved) {
 				sol._existence=box;

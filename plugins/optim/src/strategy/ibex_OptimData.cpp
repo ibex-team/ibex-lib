@@ -36,7 +36,7 @@ void OptimData::compute_pu(System& sys, const IntervalVector& box, const Entaile
 
 	for (int j=1; j<sys.nb_ctr;j++) {
 		if (entailed.normalized(j)) continue;
-		Interval eval=sys.f[j].eval(box);
+		Interval eval=sys.f_ctrs[j].eval(box);
 		double pui=1;
 		if (eval.diam()>0)
 			pui= -eval.lb()/eval.diam();

@@ -34,7 +34,7 @@ LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_po
 			df(NULL) {
 
 	try {
-		df = new Function(sys1.f,Function::DIFF);
+		df = new Function(sys1.f_ctrs,Function::DIFF);
 	} catch(Exception&) {
 		//TODO: replace with ExprDiffException.
 		// Currently, DimException is also sometimes raised.
@@ -61,7 +61,7 @@ void LinearRelaxXTaylor::init_linear_coeffs() {
 		linear[ctr] = new bool[sys.nb_var];
 
 		IntervalVector G(sys.nb_var);
-		sys.ctrs[ctr].f.gradient(sys.box,G);
+		sys.ctrs[ctr].f.gradient(sys.box_constraints,G);
 
 		// for testing if a function is linear (with scalar coefficients) w.r.t all its variables,
 		// we test the diameter of the gradient components.
@@ -111,7 +111,7 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 	if (sys.nb_ctr>0)
 	{
 		// the evaluation of the constraints in the corner x_corner
-		IntervalVector g_corner(sys.f.eval_vector(x_corner));
+		IntervalVector g_corner(sys.f_ctrs.eval_vector(x_corner));
 
 		for (int ctr=0; ctr<sys.nb_ctr; ctr++) {
 
@@ -121,7 +121,7 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 			sys.ctrs[ctr].f.gradient(box,G);               // gradient calculation
 
 			for (int ii =0; ii< n ; ii++) {
-				if (G[ii].diam() > 1e8) {
+				if (G[ii].diam() > 1e8) { // TODO: replace with max_diam_deriv (but default value is 1e6 or 1e8?)
 					delete [] corner;
 					return -1; //to avoid problems with LP solver
 				}
@@ -142,7 +142,7 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 			try {
 				//TODO TO CHECK
 				//lp_solver.addConstraint(row,op, -ev.lb());  //  1e-10 ???  BNE  JN CA NE MARCHE PAS AVEC SOPLEX SANS LA PRECISION
-				lp_solver.addConstraint(row,op, -ev.lb()-lp_solver.getEpsilon());  //  1e-10 ???  BNE
+				lp_solver.add_constraint(row,op, -ev.lb()-lp_solver.get_epsilon());  //  1e-10 ???  BNE
 				nb_add++;
 				//mysoplex.addRow(LPRow(-infinity, row1, (-g_corner)[i].lb()-1e-10));    //  1e-10 ???  BNE
 			} catch (LPException&) { }
@@ -154,31 +154,31 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 
 
 
-bool LinearRelaxXTaylor::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
-
-	int n =box.size();
-	IntervalVector G(n); // vector to be used by the partial derivatives
-
-	sys.goal->gradient(box.mid(),G);
-	for (int i =0; i< n ; i++)
-	  if (G[i].diam() > 1e8) return false;   //to avoid problems with the Linear Solver
-
-	// ============================================================
-	//   linearize the objective
-	// ============================================================
-	try {
-		for (int j=0; j<n; j++){
-			if (rand()%2)
-				lp_solver.setVarObj(j,G[j].ub());
-			else
-				lp_solver.setVarObj(j,G[j].lb());
-		}
-		return true;
-	} catch (LPException&) {
-		return false;
-	}
-
-}
+//bool LinearRelaxXTaylor::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
+//
+//	int n =box.size();
+//	IntervalVector G(n); // vector to be used by the partial derivatives
+//
+//	sys.goal->gradient(box.mid(),G);
+//	for (int i =0; i< n ; i++)
+//	  if (G[i].diam() > 1e8) return false;   //to avoid problems with the Linear Solver
+//
+//	// ============================================================
+//	//   linearize the objective
+//	// ============================================================
+//	try {
+//		for (int j=0; j<n; j++){
+//			if (rand()%2)
+//				lp_solver.setObjVar(j,G[j].ub());
+//			else
+//				lp_solver.setObjVar(j,G[j].lb());
+//		}
+//		return true;
+//	} catch (LPException&) {
+//		return false;
+//	}
+//
+//}
 
 bool LinearRelaxXTaylor::choose_corner(const IntervalVector& box, IntervalVector& x_corner,	bool* corner)  {
 	int n =box.size();
@@ -186,7 +186,7 @@ bool LinearRelaxXTaylor::choose_corner(const IntervalVector& box, IntervalVector
 
 	for (int i=0 ; i< n ; i++)	  {
 		// random corner choice
-		if (rand()%2) {
+		if (RNG::rand()%2) {
 			if (box[i].lb()>NEG_INFINITY) {
 				corner[i]=true;
 				x_corner[i]=box[i].lb() ;
@@ -308,7 +308,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 			  // get the partial derivative of ctr w.r.t. var n°j
 	    	  G[j]= df ? (*df)[ctr*n+j].eval(box) :
 	    			  //other alternative (numeric):
-	    			  sys.f[ctr].gradient(box)[j];
+	    			  sys.f_ctrs[ctr].gradient(box)[j];
 		  }
 	  }
 	  else
@@ -325,7 +325,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 	  else if (G[j].diam() > 1e-10)
 	    nonlinear_var++;
 
-	  bool inf_x;
+	  bool inf_x; // whether the jth variable is set to lower bound (true) or upper bound (false)
 
 		/*  for GREEDY heuristics :not implemented in v2
 		 IntervalVector save;
@@ -517,14 +517,14 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 			if(tot_ev.lb()>(-ev).ub())
 				throw LinearRelaxXTaylorUnsatisfiability();  // the constraint is not satisfied
 			if((-ev).ub()<tot_ev.ub()) {    // otherwise the constraint is satisfied for any point in the box
-				lp_solver.addConstraint( row1, LEQ, (-ev).ub());
+				lp_solver.add_constraint( row1, LEQ, (-ev).ub());
 				added=true;
 			}
 		} else {
 			if(tot_ev.ub()<(-ev).lb())
 				throw LinearRelaxXTaylorUnsatisfiability();
 			if ((-ev).lb()>tot_ev.lb()) {
-				lp_solver.addConstraint( row1, GEQ, (-ev).lb() );
+				lp_solver.add_constraint( row1, GEQ, (-ev).lb() );
 				added=true;
 			}
 		}

@@ -37,7 +37,7 @@ System* square_eq_sys(System& sys) {
 		if (sys.ctrs[i].op==EQ) nb_eq+=sys.ctrs[i].f.image_dim();
 
 	if (sys.nb_var==nb_eq)
-		if (nb_eq==sys.f.image_dim())
+		if (nb_eq==sys.f_ctrs.image_dim())
 			return &sys; // useless to create a new one
 		else {
 			return &rec(new System(sys,System::EQ_ONLY));
@@ -68,7 +68,7 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 	// if the system is a sqare system of equations, the third contractor is Newton
 	System* eqs=square_eq_sys(sys);
 	if (eqs) {
-		ctc_list.set_ref(index,rec(new CtcNewton(eqs->f,5e8,prec,1.e-4)));
+		ctc_list.set_ref(index,rec(new CtcNewton(eqs->f_ctrs,5e8,prec,1.e-4)));
 		index++;
 	}
 	// the last contractor is XNewton

@@ -38,6 +38,16 @@ public:
 
 	/**
 	 * \brief Strategies for selecting corner points.
+	 *
+	 * RANDOM_INV - One random corner and its opposite
+	 * NEG - Opposite of the previous point
+	 * INF_X - Lower-left corner
+	 * SUP_X - Upper-right corner
+	 * RANDOM - One random point
+	 * GREEDYx - *** deprecated **
+	 * BEST - *** deprecated **
+	 * MONO, NEGMONO *** deprecated **
+	 * K4 - Two random corners and their opposite (used?????)
 	 */
 	typedef enum  {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM, GREEDY1, GREEDY5, GREEDY6, BEST , MONO,NEGMONO, K4} corner_point;
 
@@ -129,11 +139,17 @@ private:
 	/**
 	 * \brief Tries to add a linearization in the model mysoplex.
 	 *
+	 * \param id_point - The corner number
+	 *
 	 * \return 0 only when the linearization is not performed
 	 */
 	int X_Linearization(const IntervalVector & box, int ctr, corner_point cpoint,  IntervalVector &G,
 			int id_point, int& non_linear_vars, LinearSolver& lp_solver);
 
+	/**
+	 * Normalize the constraints
+	 * \param id_point - The corner number
+	 */
 	int X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint, CmpOp op,
 			IntervalVector &G, int id_point, int& non_linear_vars, LinearSolver& lp_solver);
 

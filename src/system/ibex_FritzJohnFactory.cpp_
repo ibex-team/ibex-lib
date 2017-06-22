@@ -96,8 +96,8 @@ public:
 
 		// count the number of bound constraint
 		for (int j=0; j<n; j++) {
-			if (sys.box[j].lb() > -ACTIVE_BOUND_CEIL) k++;
-			if (sys.box[j].ub() <  ACTIVE_BOUND_CEIL) k++;
+			if (sys.box_constraints[j].lb() > -ACTIVE_BOUND_CEIL) k++;
+			if (sys.box_constraints[j].ub() <  ACTIVE_BOUND_CEIL) k++;
 		}
 		K=k;
 
@@ -107,11 +107,11 @@ public:
 		k=0;
 		// record which bound is a constraint
 		for (int j=0; j<n; j++) {
-			if (sys.box[j].lb() > -ACTIVE_BOUND_CEIL) {
+			if (sys.box_constraints[j].lb() > -ACTIVE_BOUND_CEIL) {
 				bound_ctr[k][0]=j;
 				bound_ctr[k++][1]=LB;
 			}
-			if (sys.box[j].ub() < ACTIVE_BOUND_CEIL)  {
+			if (sys.box_constraints[j].ub() < ACTIVE_BOUND_CEIL)  {
 				bound_ctr[k][0]=j;
 				bound_ctr[k++][1]=UB;
 			}
@@ -180,7 +180,7 @@ public:
 		// The linear dependency of the gradients
 		const ExprNode& df=ExprDiff().diff(sys.goal->args(), vars, sys.goal->expr());
 		const ExprNode* dg=NULL;
-		if (M>0 || R>0) dg=&ExprDiff().diff(sys.f.args(), vars, sys.f.expr());
+		if (M>0 || R>0) dg=&ExprDiff().diff(sys.f_ctrs.args(), vars, sys.f_ctrs.expr());
 
 		// to ease memory cleanup, we represent all
 		// constraints with a single multivalued function
@@ -285,9 +285,9 @@ public:
 			const ExprNode& xj=var_component(vars,j);
 			const ExprNode* bk;
 			if (bound_ctr[k][1]==LB)
-				bk = & ((*bmult)[k]*(sys.box[j].lb()-xj));
+				bk = & ((*bmult)[k]*(sys.box_constraints[j].lb()-xj));
 			else
-				bk = & ((*bmult)[k]*(xj-sys.box[j].ub()));
+				bk = & ((*bmult)[k]*(xj-sys.box_constraints[j].ub()));
 
 			add_ctr(ExprCtr(bk->simplify(),EQ));
 

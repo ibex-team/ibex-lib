@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 	// for solving f(x)=0 where f is
 	// a vector-valued function representing
 	// the system.
-	CtcNewton newton(sys.f);
+	CtcNewton newton(sys.f_ctrs);
 
 	// Build the main contractor:
 	// ---------------------------
@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 	//s.trace=true;
 
 	// Get the solutions
-	vector<IntervalVector> sols=s.solve(sys.box);
+	vector<IntervalVector> sols=s.solve(sys.box_constraints);
 
 	// Display the number of solutions
 	cout << "number of solutions=" << sols.size() << endl;

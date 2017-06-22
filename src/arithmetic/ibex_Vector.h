@@ -183,6 +183,11 @@ public:
 	 */
 	iterator end() { return &vec[n]; }
 
+	/*
+	 * \brief Convert to double*
+	 */
+	double* raw() { return vec; }
+
 private:
 	friend class Matrix;
 

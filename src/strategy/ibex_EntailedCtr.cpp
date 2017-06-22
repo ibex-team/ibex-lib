@@ -13,7 +13,8 @@
 
 namespace ibex {
 
-EntailedCtr::EntailedCtr() : orig_sys(NULL), norm_sys(NULL) {
+EntailedCtr::EntailedCtr() : orig_sys(NULL), norm_sys(NULL),
+						orig_entailed(NULL), norm_entailed(NULL) {
 
 }
 

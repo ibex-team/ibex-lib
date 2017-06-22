@@ -132,6 +132,7 @@ void System::init_f_from_ctrs() {
 		total_output_size += ctrs[j].f.image_dim();
 
 	Array<const ExprNode> image(total_output_size);
+	if (total_output_size>0) ops = new CmpOp[total_output_size];
 	int i=0;
 
 	// concatenate all the components of all the constraints function
@@ -167,17 +168,22 @@ void System::init_f_from_ctrs() {
 		const Dim& fjd=fj.expr().dim;
 		switch (fjd.type()) {
 		case Dim::SCALAR :
+			ops[i]=ctrs[j].op;
 			image.set_ref(i++,e);
 			break;
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:
-			for (int k=0; k<fjd.vec_size(); k++)
+			for (int k=0; k<fjd.vec_size(); k++) {
+				ops[i]=ctrs[j].op;
 				image.set_ref(i++,e[k]);
+			}
 			break;
 		case Dim::MATRIX:
 			for (int k=0; k<fjd.nb_rows(); k++)
-				for (int l=0; l<fjd.nb_cols(); l++)
+				for (int l=0; l<fjd.nb_cols(); l++) {
+					ops[i]=ctrs[j].op;
 					image.set_ref(i++,e[k][l]);
+				}
 			break;
 		default:
 			assert(false);
@@ -190,11 +196,11 @@ void System::init_f_from_ctrs() {
 
 	// TODO: we should probably homgenize; in the case of a scalar function
 	// a 1-sized vector should be created.
-	f.init(args, total_output_size>1? ExprVector::new_(image,false) : image[0]);
+	f_ctrs.init(args, total_output_size>1? ExprVector::new_(image,false) : image[0]);
 }
 
 
-System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0), box(1) {
+System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0), box_constraints(1) {
 	init(fac);
 }
 
@@ -220,8 +226,8 @@ void System::init(const SystemFactory& fac) {
 	args.resize(fac.nb_arg);
 	varcopy(*fac.args, args);
 
-	box.resize(nb_var);
-	box=fac.bound_init;
+	box_constraints.resize(nb_var);
+	box_constraints=fac.bound_init;
 
 	// =========== init ctrs ==============
 	ctrs.resize(nb_ctr);

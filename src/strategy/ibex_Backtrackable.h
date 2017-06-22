@@ -15,6 +15,8 @@
 
 namespace ibex {
 
+class Cell;
+
 /**
  * \ingroup strategy
  *
@@ -49,6 +51,15 @@ public:
 	 * \brief Delete *this.
 	 */
 	virtual ~Backtrackable() { }
+
+protected:
+	friend class Cell;
+
+	/**
+	 * \brief Create a copy
+	 */
+	virtual Backtrackable* copy() const =0;
+
 };
 
 } // end namespace ibex

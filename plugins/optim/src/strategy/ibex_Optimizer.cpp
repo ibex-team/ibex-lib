@@ -23,6 +23,7 @@
 //#include "ibex_Multipliers.h"
 #include "ibex_PdcFirstOrder.h"
 #include "ibex_OptimData.h"
+
 #include <float.h>
 #include <stdlib.h>
 #include "ibex_ActiveConstraintsFnc.h"
@@ -109,8 +110,8 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 #else
 	//lr = new LinearRelaxCombo(sys, LinearRelaxCombo::XNEWTON);
 	//mylp = new LinearSolver(sys.nb_var,sys.nb_ctr,niter);
-	lr = new LinearRelaxCombo(ext_sys, LinearRelaxCombo::XNEWTON); // *unused*
-	mylp = new LinearSolver(ext_sys.nb_var,ext_sys.nb_ctr,niter);
+	lr = new LinearRelaxCombo(ext_sys, LinearRelaxCombo::XNEWTON);
+	mylp = new LinearSolver(ext_sys.nb_var,niter);
 	//	cout << "sys " << sys << endl;
 #endif // _IBEX_WITH_NOLP_
 }
@@ -466,7 +467,10 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// TODO: no loup-point if handle_cell contracts everything
 	loup_point=init_box.mid();
 	time=0;
-	Timer::start();
+
+    Timer::reset_time();
+    Timer::start();
+
 	handle_cell(*root,init_box);
 
 	update_uplo();
@@ -482,9 +486,9 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			Cell *c = buffer.top();
 
 			try {
-				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-
-				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+				//pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+				//pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+				pair<Cell*,Cell*> new_cells=bsc.bisect_cell(*c);
 
 				buffer.pop();
 				delete c; // deletes the cell.
@@ -516,7 +520,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo<< endl;
 				}
 				update_uplo();
-				time_limit_check(); // TODO: not reentrant
+
+				Timer::check(timeout);//
 
 			}
 			catch (NoBisectableVariableException& ) {
@@ -530,12 +535,14 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 		}
 	}
 	catch (TimeOutException& ) {
+		Timer::stop();
+		time = Timer::get_time();
 		return TIME_OUT;
 	}
 
-	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
 
+	Timer::stop();
+	time = Timer::get_time();
 
 	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0)))
 		return INFEASIBLE;
@@ -644,11 +651,5 @@ void Optimizer::report_perf() {
 	cout <<  time << "  "<< endl ;
 }
 
-void Optimizer::time_limit_check () {
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	if (timeout >0 &&  time >=timeout ) throw TimeOutException();
-	Timer::start();
-}
 
 } // end namespace ibex

@@ -43,7 +43,7 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		if (e && e->original(j)) {
 			continue;
 		}
-		sys.f[j].gradient(box,J->row(j2++));
+		sys.f_ctrs[j].gradient(box,J->row(j2++));
 	}
 
 	int N=sys.nb_var; // final number of variables

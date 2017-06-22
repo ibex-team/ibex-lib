@@ -201,7 +201,7 @@ def configure (conf):
 		cplex_dir = conf.options.CPLEX_PATH
 		if cplex_dir:
 			cplex_include = os.path.join (cplex_dir, "include")
-			cplex_lib = os.path.join (cplex_dir, "lib")
+			cplex_lib = os.path.join (cplex_dir, "lib/x86-64_linux/static_pic/")
 			conf.env.append_unique ("INCLUDES_IBEX_DEPS", cplex_include)
 			conf.env.append_unique ("LIBPATH_IBEX_DEPS", cplex_lib)
 		else:
@@ -270,3 +270,17 @@ def configure (conf):
 ######################
 def build (bld):
 	pass # nothing to do, everything is done in the main src/wscript script
+
+######################
+##### benchmarks #####
+######################
+def benchmarks (bch):
+	# Build the benchmark program
+	bch.program (source = "benchmark_optim.cpp",
+	             target = "benchmark_optim",
+	             use = bch.USELIST,
+	            )
+
+	# Benchmarks on all files ending with .bch in the 'benchs' subdirectory
+	for f in bch.path.ant_glob ("benchs/**/*.bch"):
+		bch (source = f, bench_bin = "benchmark_optim")
