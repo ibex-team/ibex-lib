@@ -23,6 +23,7 @@ class LinearRelaxXTaylorUnsatisfiability { };
 
 }
 
+// TODO: merge with default_diam_limit
 const double LinearRelaxXTaylor::default_max_diam_deriv =1e6;
 
 LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_point>& cpoints1,
@@ -141,11 +142,10 @@ int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& l
 			// (the other will be overwritten)
 			G=linear_coef.row(ctr);
 		}
-		int nb_nonlinear_vars;
 
 		try {
 			for(unsigned int k=0; k<cpoints.size(); k++)
-				cont += X_Linearization(box, ctr, cpoints[k],  G, k, nb_nonlinear_vars,lp_solver);
+				cont += X_Linearization(box, ctr, cpoints[k],  G, k, lp_solver);
 		} catch(LinearRelaxXTaylorUnsatisfiability&) {
 			return -1;
 		}
@@ -164,9 +164,8 @@ bool LinearRelaxXTaylor::isInner(const IntervalVector & box, const System& sys, 
 		return true;
 }
 
-// TODO add comment: what "nb_nonlinear_vars" is used for?
 int LinearRelaxXTaylor::X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint,
-		IntervalVector& G, int id_point, int& nb_nonlinear_vars, LinearSolver& lp_solver) {
+		IntervalVector& G, int id_point, LinearSolver& lp_solver) {
 
 	CmpOp op= sys.ctrs[ctr].op;
 
@@ -175,21 +174,20 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& box, int ctr, corn
 	int cont=0;
 	if(ctr==goal_ctr) op = LEQ;
 	if(op==EQ) {
-		cont+=X_Linearization(box, ctr, cpoint, LEQ, G, id_point, nb_nonlinear_vars, lp_solver);
-		cont+=X_Linearization(box, ctr, cpoint, GEQ, G, id_point, nb_nonlinear_vars, lp_solver);
+		cont+=X_Linearization(box, ctr, cpoint, LEQ, G, id_point, lp_solver);
+		cont+=X_Linearization(box, ctr, cpoint, GEQ, G, id_point, lp_solver);
 	} else
-		cont+=X_Linearization(box, ctr, cpoint, op,  G, id_point, nb_nonlinear_vars, lp_solver);
+		cont+=X_Linearization(box, ctr, cpoint, op,  G, id_point, lp_solver);
 
 	return cont;
 }
 
 int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 		int ctr, corner_point cpoint, CmpOp op,
-		IntervalVector& G2, int id_point, int& nb_nonlinear_vars, LinearSolver& lp_solver) {
+		IntervalVector& G2, int id_point, LinearSolver& lp_solver) {
 
 	IntervalVector G = G2;
 	int n = sys.nb_var;
-	int nonlinear_var = 0;
 
 	if (id_point != 0 && linear_ctr[ctr])
 		return 0; // only one corner for a linear constraint
@@ -221,8 +219,6 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 
 	  if (linear[ctr][j])
 	    cpoint = INF_X;
-	  else if (G[j].diam() > 1e-10)
-	    nonlinear_var++;
 
 	  bool inf_x; // whether the jth variable is set to lower bound (true) or upper bound (false)
 
@@ -293,8 +289,6 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 	 */
 
 	ev+= sys.ctrs[ctr].f.eval(box);
-
-	if(id_point==0) nb_nonlinear_vars=nonlinear_var;
 
 	for(int j=0;j<n;j++)
 		tot_ev+=row1[j]*savebox[j]; //natural evaluation of the left side of the linear constraint

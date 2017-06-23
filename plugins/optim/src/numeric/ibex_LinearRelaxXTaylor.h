@@ -131,14 +131,14 @@ private:
 	 * \return 0 only when the linearization is not performed
 	 */
 	int X_Linearization(const IntervalVector & box, int ctr, corner_point cpoint,  IntervalVector &G,
-			int id_point, int& non_linear_vars, LinearSolver& lp_solver);
+			int id_point, LinearSolver& lp_solver);
 
 	/**
 	 * Normalize the constraints
 	 * \param id_point - The corner number
 	 */
 	int X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint, CmpOp op,
-			IntervalVector &G, int id_point, int& non_linear_vars, LinearSolver& lp_solver);
+			IntervalVector &G, int id_point, LinearSolver& lp_solver);
 
 	/**
 	 * \brief Random hoice of a corner
