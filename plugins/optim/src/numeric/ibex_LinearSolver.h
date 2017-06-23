@@ -98,6 +98,10 @@ public:
 
 	typedef enum  {MINIMIZE, MAXIMIZE} Sense;
 
+
+	/**
+	 * \param max_time_out - Control the number of iterations inside the linear solver
+	 */
 	LinearSolver(int nb_vars, int max_iter= default_max_iter,
 			int max_time_out= default_max_time_out, double eps=default_eps);
 

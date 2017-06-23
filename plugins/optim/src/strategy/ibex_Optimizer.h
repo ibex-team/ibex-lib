@@ -25,6 +25,7 @@
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_Random.h"
 #include "ibex_LinearRelaxCombo.h"
+#include "ibex_InXTaylor.h"
 
 namespace ibex {
 
@@ -203,6 +204,8 @@ public:
 	 * \brief Index of the goal variable y in the extended box.
 	 *
 	 */
+
+	InXTaylor in_x_taylor;
 
 	/** Precision (bisection control) */
 	const double prec;
@@ -481,7 +484,7 @@ protected:
 	 * \brief Update loup using inner linearizations.
 	 * return true if the loup has been modified.
 	 */
-	bool update_loup_simplex(const IntervalVector& box);
+//	bool update_loup_simplex(const IntervalVector& box);
 
 
 	/**
@@ -534,12 +537,6 @@ private:
 
 	/** Rigor mode (eps_equ==0) */
 	const bool rigor;
-
-	/** linear solver used in ibex_OptimSimplex.cpp_ */
-	LinearSolver *mylp;
-
-	// ** unused**
-	LinearRelaxCombo *lr;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;

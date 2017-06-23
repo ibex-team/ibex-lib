@@ -35,6 +35,12 @@ protected:
 	const NormalizedSystem& sys;
 
 	const BitSet* inactive;
+
+	/*
+	 * Boolean array indicating which corner in direction i is used :
+	 * true for inferior corner, false for superior one.
+	 */
+	bool* corner;
 };
 
 inline void LinearRestrictXTaylor::set_inactive_ctr(const BitSet& inactive) {

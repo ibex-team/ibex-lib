@@ -63,7 +63,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
                 				ext_sys(user_sys,equ_eps),
                 				ctc(ctc),bsc(bsc),
                 				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
-                				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
+                				in_x_taylor(sys), prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
                 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
                 				timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
@@ -94,26 +94,6 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 
 	if (trace) cout.precision(12);
 
-	//	objshaver= new CtcOptimShaving (*new CtcHC4 (ext_sys.ctrs,0.1,true),20,1,1.e-11);
-
-
-	/**
-	 * Control the number of iterations inside the linear solver
-	 */
-	int niter=100;
-	// int niter=1000;
-	if (niter < 3*n) niter=3*n;
-
-	//====================================
-#ifdef _IBEX_WITH_NOLP_
-	mylp = NULL;
-#else
-	//lr = new LinearRelaxCombo(sys, LinearRelaxCombo::XNEWTON);
-	//mylp = new LinearSolver(sys.nb_var,sys.nb_ctr,niter);
-	lr = new LinearRelaxCombo(ext_sys, LinearRelaxCombo::XNEWTON);
-	mylp = new LinearSolver(ext_sys.nb_var,niter);
-	//	cout << "sys " << sys << endl;
-#endif // _IBEX_WITH_NOLP_
 }
 
 Optimizer::~Optimizer() {
@@ -127,8 +107,6 @@ Optimizer::~Optimizer() {
 	buffer.flush();
 	if (equs) delete equs;
 	if (df) delete df;
-	delete mylp;
-	delete lr;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
 	//	delete &(objshaver->ctc);
@@ -218,14 +196,23 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 			loup_change |= update_real_loup();
 			old_pseudo_loup=pseudo_loup; // because has changed
 		}
-		if (update_loup_simplex(box)) { // && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
+		try {
+			pair<Vector,double> p=in_x_taylor.find(box,box.mid(),pseudo_loup);
+			loup_point = p.first;
+			pseudo_loup = p.second;
 			loup_change |= update_real_loup();
-		}
+		} catch(InXTaylor::NotFound&) { }
 	} else {
 		loup_change |= update_loup_probing(box); // update pseudo_loup
 		// the loup point is safe: the pseudo loup is the real loup.
 		loup=pseudo_loup;
-		loup_change |= update_loup_simplex(box);  // update pseudo_loup
+		try {
+			pair<Vector,double> p=in_x_taylor.find(box,box.mid(),loup);
+			loup_point = p.first;
+			pseudo_loup = p.second;
+			loup_change = true;
+		} catch(InXTaylor::NotFound&) { }
+
 		loup = pseudo_loup;
 	}
 	return loup_change;
