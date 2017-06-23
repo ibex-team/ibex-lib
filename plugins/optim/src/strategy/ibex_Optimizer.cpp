@@ -10,7 +10,6 @@
 #include "ibex_Optimizer.h"
 #include "ibex_Timer.h"
 #include "ibex_OptimProbing.cpp_"
-#include "ibex_OptimSimplex.cpp_"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcOptimShaving.h"
 #include "ibex_CtcHC4.h"
@@ -197,6 +196,7 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 			old_pseudo_loup=pseudo_loup; // because has changed
 		}
 		try {
+			in_x_taylor.set_inactive_ctr(entailed->norm_entailed);
 			pair<Vector,double> p=in_x_taylor.find(box,box.mid(),pseudo_loup);
 			loup_point = p.first;
 			pseudo_loup = p.second;
@@ -207,6 +207,7 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 		// the loup point is safe: the pseudo loup is the real loup.
 		loup=pseudo_loup;
 		try {
+			in_x_taylor.set_inactive_ctr(entailed->norm_entailed);
 			pair<Vector,double> p=in_x_taylor.find(box,box.mid(),loup);
 			loup_point = p.first;
 			pseudo_loup = p.second;

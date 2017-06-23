@@ -105,7 +105,7 @@ int LinearRestrictXTaylor::linearization(const IntervalVector& box, LinearSolver
 
 			for (int i=0; i<m; i++) {
 
-				if (inactive!=NULL && (*inactive)[i]) continue;
+				if (inactive!=NULL && inactive[i]) continue;
 				//if (sys.f_ctrs[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
 
 				sys.ctrs[i].f.gradient(box,g);                     // gradient calculation

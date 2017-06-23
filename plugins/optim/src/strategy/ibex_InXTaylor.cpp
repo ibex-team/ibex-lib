@@ -11,7 +11,7 @@ namespace ibex {
 
 InXTaylor::InXTaylor(const NormalizedSystem& sys) : sys(sys), lr(sys), lp_solver(sys.nb_var+1, std::max(sys.nb_var*3,LinearSolver::default_max_iter)) {
 
-	// TODO: warning, INXTaylor actually works on the extended system
+	// TODO: warning, INXTaylor actually works on the extended system!!
 }
 
 inline double InXTaylor::goal(const Vector& x) const {

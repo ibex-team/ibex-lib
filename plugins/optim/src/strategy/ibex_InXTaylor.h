@@ -5,8 +5,8 @@
  *      Author: gilles
  */
 
-#ifndef IBEX_INXTAYLOR_H_
-#define IBEX_INXTAYLOR_H_
+#ifndef __IBEX_IN_X_TAYLOR_H__
+#define __IBEX_IN_X_TAYLOR_H__
 
 #include "ibex_FeasiblePointFinder.h"
 #include "ibex_LinearRestrictXTaylor.h"
@@ -23,6 +23,8 @@ public:
 	 * \throws NotFound
 	 */
 	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& x0, double current_loup);
+
+	void set_inactive_ctr(const bool* inactive);
 
 	virtual ~InXTaylor();
 
@@ -43,6 +45,10 @@ protected:
 
 };
 
+inline void InXTaylor::set_inactive_ctr(const bool* inactive) {
+	lr.set_inactive_ctr(inactive);
+}
+
 } /* namespace ibex */
 
-#endif /* IBEX_INXTAYLOR_H_ */
+#endif /* __IBEX_IN_X_TAYLOR_H__ */

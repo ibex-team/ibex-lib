@@ -24,7 +24,7 @@ public:
 	 */
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
-	void set_inactive_ctr(const BitSet& inactive);
+	void set_inactive_ctr(const bool* inactive);
 
 	virtual ~LinearRestrictXTaylor();
 
@@ -34,7 +34,7 @@ protected:
 	 */
 	const NormalizedSystem& sys;
 
-	const BitSet* inactive;
+	const bool* inactive;
 
 	/*
 	 * Boolean array indicating which corner in direction i is used :
@@ -43,8 +43,8 @@ protected:
 	bool* corner;
 };
 
-inline void LinearRestrictXTaylor::set_inactive_ctr(const BitSet& inactive) {
-	this->inactive = &inactive;
+inline void LinearRestrictXTaylor::set_inactive_ctr(const bool* inactive) {
+	this->inactive = inactive;
 }
 
 } /* namespace ibex */
