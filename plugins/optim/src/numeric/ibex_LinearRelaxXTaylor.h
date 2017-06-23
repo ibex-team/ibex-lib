@@ -141,11 +141,6 @@ private:
 			IntervalVector &G, int id_point, LinearSolver& lp_solver);
 
 	/**
-	 * \brief Random hoice of a corner
-	 */
-	bool choose_corner(const IntervalVector& box, IntervalVector& x_corner,	bool* corner);
-
-	/**
 	 * Check if the constraint is satisfied in the box : in this case, no linear relaxation is made.
 	 *
 	 * TODO: is this function redundant? --> replace with inactive bitset

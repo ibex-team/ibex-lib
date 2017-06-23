@@ -15,7 +15,6 @@ namespace ibex {
 
 class InXTaylor : public FeasiblePointFinder {
 public:
-	class NotFound : Exception { };
 
 	InXTaylor(const NormalizedSystem& sys);
 

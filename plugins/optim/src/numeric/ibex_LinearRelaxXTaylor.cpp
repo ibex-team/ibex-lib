@@ -87,44 +87,6 @@ LinearRelaxXTaylor::~LinearRelaxXTaylor() {
 	if (df) delete df;
 }
 
-bool LinearRelaxXTaylor::choose_corner(const IntervalVector& box, IntervalVector& x_corner,	bool* corner)  {
-	int n =box.size();
-	// the corner used
-
-	for (int i=0 ; i< n ; i++)	  {
-		// random corner choice
-		if (rand()%2) {
-			if (box[i].lb()>NEG_INFINITY) {
-				corner[i]=true;
-				x_corner[i]=box[i].lb() ;
-			}
-			else if  (box[i].ub()<POS_INFINITY) {
-				corner[i]=false;
-				x_corner[i]=box[i].ub() ;
-			}
-			else {
-				return false; // infinity box
-			}
-		}
-		else {
-			if (box[i].ub()<POS_INFINITY) {
-				corner[i]=false;
-				x_corner[i]=box[i].ub() ;
-			}
-			else if  (box[i].lb()>NEG_INFINITY) {
-				corner[i]=true;
-				x_corner[i]=box[i].lb() ;
-			}
-			else {
-				return false; // infinity box
-			}
-		}
-	}
-	return true;
-}
-
-
-
 int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
 
 	int cont =0;

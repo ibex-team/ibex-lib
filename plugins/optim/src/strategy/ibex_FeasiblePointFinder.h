@@ -10,13 +10,18 @@
 
 #include <utility>
 #include "ibex_Vector.h"
+#include "ibex_Exception.h"
 
 namespace ibex {
 
 class FeasiblePointFinder {
 public:
+	class NotFound : Exception { };
+
 	FeasiblePointFinder();
 
+	//
+	// Note: x0 is the last loup, not necessarily inside the box.
 	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& x0, double current_loup)=0;
 
 	virtual ~FeasiblePointFinder();

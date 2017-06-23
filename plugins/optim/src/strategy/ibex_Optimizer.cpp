@@ -59,7 +59,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
-                				ext_sys(user_sys,equ_eps),
+                				ext_sys(user_sys,equ_eps), has_equality(false /* by default*/),
                 				ctc(ctc),bsc(bsc),
                 				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
                 				in_x_taylor(sys), prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
@@ -80,11 +80,12 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		df = NULL;
 	}
 
-	// ==== build the system of equalities only ====
-	equs= new System(user_sys,System::EQ_ONLY);
-	if (equs->nb_ctr==0) {
-		delete equs;
-		equs= NULL;
+	// ==== check if the system contains equalities ====
+	for (int i=0; i<user_sys.ctrs.size(); i++) {
+		if (user_sys.ctrs[i].op==EQ) {
+			has_equality = true;
+			break;
+		}
 	}
 
 	// ====== build the reversed inequalities g_i(x)>0 ===============
@@ -104,7 +105,6 @@ Optimizer::~Optimizer() {
 		delete is_inside;
 	}
 	buffer.flush();
-	if (equs) delete equs;
 	if (df) delete df;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
@@ -140,7 +140,7 @@ bool Optimizer::update_real_loup() {
 	//              call Hansen test in contracting mode.
 	// TODO: replace default_equ_eps by something else!
 	//	epsbox.inflate(default_equ_eps);
-	//	PdcHansenFeasibility pdc(equs->f, false);
+	//	PdcHansenFeasibility pdc(af, false);
 	// ====================================================
 
 	// ====================================================
@@ -188,7 +188,7 @@ bool Optimizer::update_real_loup() {
 
 bool Optimizer::update_loup(const IntervalVector& box) {
 	bool loup_change=false;
-	if (rigor && equs!=NULL) { // a loup point will not be safe (pseudo loup is not the real loup)
+	if (rigor && has_equality) { // a loup point will not be safe (pseudo loup is not the real loup)
 		double old_pseudo_loup=pseudo_loup;
 		if (update_loup_probing(box)) { // && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
 			// update pseudo_loup

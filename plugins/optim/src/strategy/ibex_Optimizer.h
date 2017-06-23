@@ -180,11 +180,9 @@ public:
 	ExtendedSystem ext_sys;
 
 	/**
-	 * \brief The equalities of the original system.
-	 *
-	 * NULL means no equality.
+	 * \brief True iff there is an equality.
 	 */
-	System* equs;
+	bool has_equality;
 
 	/** Contractor for the extended system
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
@@ -411,64 +409,11 @@ protected:
 	bool in_HC4(IntervalVector& box);
 
 	/**
-	 * \brief Try to reduce the "loup" with a candidate point.
-	 *
-	 * \param pt       - The candidate point.
-	 * \param is_inner - If true, the point is already known to be inner so there
-	 *                   is no need to check constraint satisfaction again. False
-	 *                   means "unknown" and a quick check (see
-	 *                   #is_inner(const IntervalVector&)) is performed.
-	 *
-	 * \note In rigorous mode, the equalities have to be checked anyway (even if
-	 *       is_inner==true) because the innership is only wrt the relaxed system.
-	 *       In this case, the resulting loup_point may be different than \a pt (the
-	 *		 procedure used to check satisfiability
-	 * \return true in case of success, i.e., if the loup has been decreased.
-	 */
-	bool check_candidate(const Vector& pt, bool is_inner);
-	bool check_candidate_extended(const Vector& pt, bool is_inner);
-
-	/**
 	 * Look for a loup box (in rigor mode) starting from a pseudo-loup.
 	 *
 	 * Start from the last loup point found in relaxed mode.
 	 */
 	bool update_real_loup();
-
-	/**
-	 * \brief First method for probing
-	 *
-	 * Take random points in any directions.
-	 *
-	 * \param box  the box in which a random point is searched for (the found inner box if is_inner i strue)
-	 * \param fullbox the box where an intensification is made (in the current version only in case of unconstrained optimization)
-	 * \param is_inner - If true, the box is already known to be an inner box so there
-	 *                   is no need to check constraints again.
-	 *
-	 * \return true in case of success, i.e., if the loup has been decreased.
-	 */
-
-	bool random_probing (const IntervalVector& box, const IntervalVector& fullbox, bool is_innner);
-
-	/**
-	 * \brief Perform a dichotomic search of a minimum in a line (see Hansen's book).
-	 *
-	 * The search is performed on the segment delimited by the current loup-point and \a end_point.
-	 *
-	 * If \a exit_if_above_loup is true, the search stops as soon as we fall on
-	 * a candidate x with f(x)>loup.
-	 */
-	bool dichotomic_line_search(const Vector& end_point, bool exit_if_above_loup);
-
-	/**
-	 * \brief Second method for probing
-	 *
-	 * Performs a dichotomic search between the current loup-point and its projection on the
-	 * facet of the input box in the opposite direction of its gradient.
-	 *
-	 * return true if the loup has been modified.
-	 */
-	bool line_probing(const IntervalVector& box);
 
 	/**
 	 * \brief Update loup either using line_probing or random_probing.
