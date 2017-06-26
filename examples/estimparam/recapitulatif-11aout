@@ -1,0 +1,81 @@
+Modélisation : matrice 3x3 (9 variables)   avec contraintes qui enlèvent 4 ddl. (norme=1; determinant=0, 9 contraintes de matrice essentielle )
+
+Les essais sont en profondeur d'abord avec un "oracle" à suivre (la solution de Ransac) et avec comme contracteurs :
+
+pour critère algébrique :
+hc4 sur système redondant, polytope hull (art) sur système réduit (3 contraintes) et contrainte de q-intersection
+avec projection supplémentaire.
+bissection Smearsumrel
+
+pour critère de Sampson;
+polytope hull (art) sur système réduit (3 contraintes) et contrainte de q-intersection
+avec projection supplémentaire pour système partiel avec 36  correspondances
+bissection RoundRobin
+
+
+Recherche de point faisable avec polytope intérieur  : 10 essais maximum avec arrêt dès premier polytope vide.
+
+
+Pour réduire le nombre de noeuds  et faire que l'algo termine, j'ai joué sur les relaxations ou "paris" suivants.
+
+1: mettre une précision entière p sur l'objectif : on ne cherche le nombre maximum d'inliers  qu'à p près.
+2: jouer sur la précision des boites : plus les "petites" boites sont grosses, leur nombre d'inliers possibles augmente
+3: faire un algo "incomplet" de plongée à partir d'une certaine profondeur dmax: par exemple, si on dépasse dmax, on ne s'autorise qu'une seule branche : quand on backtrackera,
+on remontera jusqu'à la profondeur dmax. (les noeuds abandonnés sont considérés comme des petites boîtes).
+
+On a dans tous les cas, quand l'algo termine, un encadrement exact du nombre maximum d'inliers.
+
+J'ai aussi essayé sur des "sous exemples" de l'exemple réel :  les 36 ou 65 premières correspondances.
+
+Les résultats les plus significatifs sont les suivants
+
+1/ exemple réel  582 correspondances
+
+critère algébrique  tolérance 0.01
+
+
+p=1 hc4+art precision 0.01   [516 525] en 10022s.
+p=1 hc4+art precision 0.005  [516 520] en 17580s.
+p=1 hc4+art precision 0.0025 [516 518] en 26353s.
+p=1 hc4+art precision 0.001  [516 517] en 46500s. ***meilleur encadrement***
+p=3 hc4+art precision 0.01   [515 525] en 7471s.
+p=5 hc4+art precision 0.01   [515 524] en 4567s.
+p=5 hc4+art precision 0.005  [515 521] en 5769s.
+
+
+critère de Sampson
+ne termine pas en 50000s :   solution 429 en 44mn
+
+
+2/ exemple partiel à 65 correspondances
+
+critère algébrique
+p=1  dmax=inf precision=0.01 [60 61] en 768s.
+p=1  dmax=50  precision=0.01 [60 61] en 702s.
+p=1  dmax=45  precision=0.01 [60 62] en 630s.
+p=1  dmax=inf precision=0.001 [60 61] en 3214s.
+p=1 dmax=50  precision=0.001  [60 61] en 823s.
+p=1  dmax=45  precision=0.001 [60 62] en 646s.
+p=1  dmax=inf precision=0.0001 ne termine pas en 10000s. [58 65]
+p=1 dmax=70  precision=0.0001 [60 61] en 8420s.
+p=1  dmax=50 precision=0.0001 [60 61] en 760s
+p=1 dmax=50 precision=0.00001  [60 61] en 649s  638800 boites
+p=1 dmax=50 precision=0.00005 [60 61] en 637s. 638796 boites
+p=2 dmax=50 precision=0.00001 [59 61] en 528s. 552016 boites
+
+critere de Sampson   
+
+p=5 dmax=60  precision 0.005 [53 61]  en 99968s. 49099706 boites
+
+3/ exemple partiel à 36 correspondances
+
+critère algébrique
+p=1  dmax=inf precision=0.0001 optimum 34 inliers prouvé en 1040s [34 34]
+p=1  dmax=50 precision=0.0001 optimum 34 inliers prouvé en  244s  [34 34]  *********
+
+critère de Sampson 
+p=3     dmax=inf precison=0.005 [30 33] 51514s.
+p=3     dmax=60 precison=0.005 [30 34]  51212s.
+p=2     dmax=inf precision=0.01  [29 33]  77102s
+p=2     dmax=65 precision=0.005 [31 33]  59780s.  ****meilleur encadrement*******
+p=1     dmax=inf precision=0.001 ne termine pas en 100000s. [31 36]

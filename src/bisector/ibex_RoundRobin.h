@@ -31,7 +31,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	RoundRobin(double prec, double ratio=Bsc::default_ratio());
+  RoundRobin(double prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Create a bisector with round-robin heuristic.
@@ -40,7 +40,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	RoundRobin(const Vector& prec, double ratio=Bsc::default_ratio());
+  RoundRobin(const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Bisect a box.
@@ -83,8 +83,53 @@ public:
 	 * interval.
 	 */
 	const double ratio;
+  protected :
+  int var_select(const IntervalVector& box, int n, int &last_var);
+  
 };
 
+
+
+class RoundRobinNvar : public RoundRobin {
+  public :
+  /**
+   * \brief Create a bisector with round-robin heuristic.on the first nbvars variables
+   *
+   * \param nbvars : number of variables to bisect ; the bisection will be done only on the first nbvars variables
+   * \param w - the minimum width (diameter) an interval must have to be bisected (see #w).
+   *            Default value is 1e-07.
+   * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
+   *            bisected interval. Default value is 0.45.
+   */
+
+
+  RoundRobinNvar (int nbvars, double prec, double ratio=Bsc::default_ratio())
+      : RoundRobin (prec,ratio), nbvars(nbvars) {;};
+
+  RoundRobinNvar (int nbvars,const Vector& prec, double ratio=Bsc::default_ratio())
+      : RoundRobin (prec,ratio), nbvars(nbvars) {;};
+    //    pair<IntervalVector,IntervalVector> bisect(Cell& cell);
+    virtual  std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box, int& last_var);
+ protected :
+    int nbvars;
+
+  };
+
+/*
+
+   
+class RoundRobinQInter : public RoundRobin {
+  public :
+ 
+    
+  RoundRobinQInter (double prec, double ratio=Bsc::default_ratio())
+      : RoundRobin ( prec,ratio) {;};
+
+  RoundRobinQInter (const Vector& prec, double ratio=Bsc::default_ratio())
+      : RoundRobin (prec,ratio) {;};
+  //  std::pair<IntervalVector,IntervalVector> bisect(Cell& cell);
+};
+*/
 } // end namespace ibex
 
 #endif // __IBEX_ROUND_ROBIN_H__

@@ -1,0 +1,7 @@
+
+function essential(v[3][3])
+   tm= v*v';
+   trace = tm[0][0]+tm[1][1]+tm[2][2];
+   tracem = trace * ((1,0,0);(0,1,0);(0,0,1));
+   return( (2*tm- tracem) *v);
+end

@@ -23,7 +23,7 @@ using namespace ibex;
 /*================== data =================*/
 const int seed=1111;					// seed for the random number generator
 const int N=2;							// problem dimension
-const int P=600;						// number of measurements
+const int P=100;						// number of measurements
 const int Q=P*0.8;						// number of consistent measurements
 const double L=10;						// the boxes are in the area [0,L]x[0,L]
 const double widthFactor=4.3;			// The sides of our boxes are picked at random in [0,widthFactor*L]
@@ -64,9 +64,11 @@ int main() {
 		
 		/* Randomize the box center */
 		for (int j=0; j<N; j++) {
-			c = RNG::rand(0,L); //((double) rand()/RAND_MAX)*L;
-			ext =  RNG::rand(0,widthFactor*L); //((double) rand()/RAND_MAX)*widthFactor*L;
-			(*b)[j] = c + ext*Interval(-0.5,0.5);
+		  c = RNG::rand(0,L); //
+		  //c= ((double) rand()/RAND_MAX)*L;
+		  ext =  RNG::rand(0,widthFactor*L); //
+		  //		  ext = ((double) rand()/RAND_MAX)*widthFactor*L;
+		  (*b)[j] = c + ext*Interval(-0.5,0.5);
 		}
 		
 		boxes.set_ref(i,*b);

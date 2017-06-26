@@ -1,0 +1,50 @@
+suite d'optim en prenat l'oracle précédent et en augmentant l'espace
+
+./estim_essentialmatsampsonaff essential_test4.txt 10 1 0.02 0.005 1.e-4 0 0 60 3 100000 1
+solution 26
+[26 31]
+0.01264265638778085 ; -0.1895172999999998 ; 0.02229930000000001 ; -0.1264550697036973 ; 0.001476000000000006 ; -0.6952441461702683 ; -0.0281015 ; 0.6804680057817976 ; 0.01359002895389031 ;
+Number of branches : 57420
+time used : 117.6020900001333
+
+autour solution 26
+./estim_essentialmatsampsonaff essential_test4.txt 10 1 0.02 0.005 1.e-4 0 0 60 3 100000 1
+solution 28
+[28 31]
+Number of branches : 18348
+time used : 42.50238200001626
+
+en augmentant l'espace autour solution 26
+./estim_essentialmatsampsonaff essential_test4.txt 10 1 0.04 0.005 1.e-4 0 0 60 3 100000 1
+solution 29 
+[29 32]
+Number of branches : 151562
+time used : 310.7645180009525
+0.004973299637651936 ; -0.2187495222726825 ; 0.007997978287603392 ; -0.1171908213207728 ; -0.001453396513006809 ; -0.6972671885067933 ; -0.01057296010348493 ; 0.6723133098774586 ; 0.003132584139120488 ;
+
+
+sans augmenter l'espace autour solution 29
+./estim_essentialmatsampsonaff essential_test4.txt 10 1 0.04 0.005 1.e-4 0 0 60 3 100000 1
+solution 30
+0.01020306302133181 ; -0.2587495222726824 ; 0.01746116737244741 ; -0.0915646544287189 ; -0.0004325784803910534 ; -0.7008592733270249 ; -0.01887494981197696 ; 0.6577118036361028 ; 0.00941189945563495 
+time 61.82101200003841
+ nb boxes 34920
+
+en augmentant l'espace autour solution 29
+./estim_essentialmatsampsonaff essential_test4.txt 10 1 0.08 0.005 1.e-4 0 0 60 3 100000 1
+solution 30
+[30 33]
+0.01064079179477381 ; -0.2644238712876459 ; 0.01799797828760341 ; -0.08483390380414423 ; -0.0004412470495029621 ; -0.7017328918319272 ; -0.0198493281129698 ; 0.6554107177707676 ; 0.009691811312245058 ;
+Number of branches : 117104
+time used : 200.0280340004356
+
+en augmentant l'espace autour solution 30
+./estim_essentialmatsampsonaff essential_test4.txt 10 1 0.16 0.005 1.e-4 0 0 60 3 100000 1
+[30 33]
+Number of branches : 500096
+time used : 819.0933300076716
+
+./estim_essentialmatsampsonaff essential_test4.txt 10 1 0.32 0.005 1.e-4 0 0 60 3 100000 1
+[30 33]
+Number of branches : 1919240
+time used : 3152.426607116188

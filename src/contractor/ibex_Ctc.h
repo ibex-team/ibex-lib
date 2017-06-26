@@ -114,6 +114,9 @@ public:
 	 */
 	enum {FIXPOINT, INACTIVE, NB_OUTPUT_FLAGS};
 
+	void enable_side_effects () ;
+        void disable_side_effects () ;
+        bool side_effects () ;
 
 protected:
 
@@ -130,11 +133,16 @@ protected:
 	 */
 	void set_flag(unsigned int);
 
+
+
+        
+
 protected:
 	/**
 	 * \brief Check if the size of all the contractor of the list is the same.
 	 */
 	static bool check_nb_var_ctc_list (const Array<Ctc>& l);
+	bool _side_effects;
 
 private:
 	const BitSet* _impact;

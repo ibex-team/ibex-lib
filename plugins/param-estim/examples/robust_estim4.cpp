@@ -30,8 +30,10 @@ const int Q=P*0.2;			  // number of consistent measurements
 const double L=10;      	  // the target & the beacons are in the area [0,L]x[0,L]
 double beacons[P][N];   	  // positions (x,y) of the P beacons
 double dist[P];				  // distance between the target and each beacon
-double BEACON_ERROR=0.1; 	  // the uncertainty on the beacon position
-double DIST_ERROR=0.1;   	  // the uncertainty on the distance
+//double BEACON_ERROR=0.1; 	  // the uncertainty on the beacon position
+double BEACON_ERROR=0.001; 	  // the uncertainty on the beacon position
+//double DIST_ERROR=0.1;   	  // the uncertainty on the distance
+double DIST_ERROR=0.001;   	  // the uncertainty on the distance
 double OUTLIERS_ERROR=L/2;    // average error on each dimension for outliers
 const double eps = 0.001;	  // Maximum diameter of the outputted boxes
 /*=========================================*/
@@ -103,9 +105,10 @@ int main() {
 		
 	IntervalVector box(N,_box);
 	
-	/* use CtcQInterProjF ctcq(m_ctc,Q)
+	/* use CtcQInter ctcq(m_ctc,Q)
 	 * for projective filtering */
-	CtcQInterCoreF ctcq(m_ctc,Q);
+	//	CtcQInter ctcq(N,m_ctc,Q,QINTERCORE);
+	CtcQInter ctcq(N,m_ctc,Q,QINTERPROJ);
 	CtcFixPoint fix(ctcq);
 	
 	list<IntervalVector> pendingList;
@@ -124,15 +127,15 @@ int main() {
 		counter++;
 		b = pendingList.front();
 		pendingList.pop_front();
-	
 		if (!qinteronly) {
-			fix.contract(b);
+		  fix.contract(b);
 		} else {
-			ctcq.contract(b);
-		}
-		
-		if (b.is_empty()) continue;
+		  ctcq.contract(b);
+		}		  
+		if (b.is_empty())
+		  continue;
 
+		
 		if (b.max_diam() > eps) {
 			assert(b.is_bisectable());
 			pair<IntervalVector, IntervalVector> pr = b.bisect(b.extr_diam_index(false),0.5);

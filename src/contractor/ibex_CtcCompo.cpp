@@ -208,7 +208,7 @@ void CtcCompo::contract(IntervalVector& box) {
 		} else {
 			list[i].contract(box);
 		}
-
+		//		std::cout << " i " << i << box << std::endl;
 		if (box.is_empty()) {
 			set_flag(FIXPOINT);
 			return;
