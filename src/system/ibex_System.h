@@ -112,6 +112,43 @@ public:
 	/** \brief Delete *this. */
 	virtual ~System();
 
+	/**
+	 * \brief The upper bound of the goal or +oo if the box is outside definition domain
+	 */
+	double goal_ub(const Vector& x) const;
+
+	Interval goal_eval(const IntervalVector& box) const;
+
+	IntervalVector goal_gradient(const IntervalVector& box) const;
+
+	void goal_gradient(const IntervalVector& box, IntervalVector& g) const;
+
+	IntervalVector ctrs_eval(const IntervalVector& box) const;
+
+	void ctrs_eval(const IntervalVector& box, IntervalVector& ev) const;
+
+	/**
+	 * \brief Get the jacobian matrix of the constraints.
+	 *
+	 * \note Can be cached if the box is a Systembox.
+	 */
+	IntervalMatrix ctrs_jacobian(const IntervalVector& box) const;
+
+	void ctrs_jacobian(const IntervalVector& box, IntervalMatrix& J) const;
+
+	BitSet active_ctrs(const IntervalVector& box) const;
+
+	/**
+	 * \brief True only if all the constraints are inactive
+	 */
+	bool is_inner(const IntervalVector& box) const;
+
+	IntervalVector active_ctrs_eval(const IntervalVector& box) const;
+
+	IntervalMatrix active_ctrs_jacobian(const IntervalVector& box) const;
+
+
+
 	/** Number of variables.
 	 *
 	 * \note This number is also sys.f_ctrs.nb_var() and box.size().
@@ -187,5 +224,15 @@ private:
 
 std::ostream& operator<<(std::ostream&, const System&);
 
+inline double System::goal_ub(const Vector& x) const {
+	Interval fx=goal->eval(x);
+	if (fx.is_empty())  // means: outside of the definition domain of the function
+		return POS_INFINITY;
+	else
+		return fx.ub();
+
+}
+
 } // end namespace ibex
+
 #endif // __IBEX_SYSTEM_H__
