@@ -93,6 +93,18 @@ public:
 	}
 
 	/**
+	 * \brief Push all integers of another agenda
+	 *
+	 * The ordering of a common subsequence of integers
+	 * is the one of "this" agenda.
+	 */
+	inline void push(const Agenda& a) {
+		for (int i=a.first(); i!=a.end(); i=a.next(i)) {
+			push(i);
+		}
+	}
+
+	/**
 	 * \brief Pop an integer from the beginning.
 	 *
 	 * \throw EmptyAgendaException if the agenda is empty.

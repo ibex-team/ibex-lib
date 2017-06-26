@@ -16,8 +16,29 @@
 
 namespace ibex {
 
-Eval::Eval(Function& f) : f(f), d(f) {
+Eval::Eval(Function& f) : f(f), d(f), fwd_agenda(NULL), bwd_agenda(NULL) {
+	int m=f.image_dim();
+	if (m>1) {
+		const ExprVector* vec=dynamic_cast<const ExprVector*>(&f.expr());
+		if (vec && m==vec->nb_args) {
+			fwd_agenda = new Agenda*[m];
+			for (int i=0; i<m; i++) {
+				bwd_agenda[i] = f.cf.agenda(f.nodes.rank(vec->arg(i)));
+				fwd_agenda[i] = new Agenda(*bwd_agenda[i],true); // true<=>swap
+			}
+		}
+	}
+}
 
+Eval::~Eval() {
+	if (fwd_agenda!=NULL) {
+		for (int i=0; i<f.image_dim(); i++) {
+			delete fwd_agenda[i];
+			delete bwd_agenda[i];
+		}
+		delete[] fwd_agenda;
+		delete[] bwd_agenda;
+	}
 }
 
 Domain& Eval::eval(const Array<const Domain>& d2) {
@@ -62,6 +83,38 @@ Domain& Eval::eval(const IntervalVector& box) {
 	return *d.top;
 }
 
+IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
+
+	d.write_arg_domains(box);
+
+	assert(fwd_agenda!=NULL);
+	assert(!components.empty());
+
+	int m=components.size();
+
+	// merge all the agendas
+	int c=components.min();
+	Agenda a((*fwd_agenda)[c]);
+	for (int i=1; i<m; i++) {
+		c = components.next(c);
+		a.push((*fwd_agenda)[c]);
+	}
+
+	try {
+		f.cf.forward<Eval>(*this,a);
+	} catch(EmptyBoxException&) {
+		d.top->set_empty();
+	}
+
+	IntervalVector res(m);
+
+	for (int i=1; i<m; i++) {
+		c = (i==0 ? components.min() : components.next(c));
+		res[i] = d.top->v()[c];
+	}
+
+	return res;
+}
 
 void Eval::idx_cp_fwd(int x, int y) {
 	assert(dynamic_cast<const ExprIndex*> (&f.node(y)));

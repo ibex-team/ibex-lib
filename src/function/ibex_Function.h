@@ -661,6 +661,13 @@ public:
 	virtual IntervalVector eval_vector(const IntervalVector& box) const;
 
 	/**
+	 * \brief Calculate some components of f using interval arithmetic.
+	 *
+	 * \pre f must be vector-valued.
+	 */
+	IntervalVector eval_vector(const IntervalVector& box, const BitSet& components) const;
+
+	/**
 	 * \brief Calculate f(x) using interval arithmetic.
 	 *
 	 * \pre f must be matrix-valued.
@@ -715,6 +722,13 @@ public:
 	 *\see #ibex::Fnc
 	 */
 	IntervalMatrix jacobian(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate some rows of the jacobian.
+	 *
+	 * \pre f must be vector-valued.
+	 */
+	IntervalMatrix jacobian(const IntervalVector& x, const BitSet& components) const;
 
 	/**
 	 *\see #ibex::Fnc
@@ -991,6 +1005,10 @@ inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
 	return expr().dim.is_scalar() ? IntervalVector(1,eval_domain(box).i()) : eval_domain(box).v();
 }
 
+inline IntervalVector Function::eval_vector(const IntervalVector& box, const BitSet& components) const {
+	return ((Function*) this)->_eval->eval(box,components);
+}
+
 inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	switch (expr().dim.type()) {
 	case Dim::SCALAR     :
@@ -1075,6 +1093,12 @@ inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const
 
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
 	return Fnc::jacobian(x);
+}
+
+inline IntervalMatrix Function::jacobian(const IntervalVector& x, const BitSet& components) const {
+	IntervalMatrix J(components.size(), nb_var());
+	_grad->jacobian(x,J,components);
+	return J;
 }
 
 inline void Function::jacobian(const IntervalVector& full_box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const {

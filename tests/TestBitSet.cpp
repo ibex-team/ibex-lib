@@ -136,6 +136,14 @@ void TestBitSet::fill01() {
 	CPPUNIT_ASSERT(!b.contain(10));
 }
 
+void TestBitSet::fill02() {
+	BitSet b(BitSet::empty(10));
+	b.fill();
+	for (int i=0; i<=9; i++)
+		CPPUNIT_ASSERT(b.contain(i));
+	CPPUNIT_ASSERT(!b.contain(10));
+}
+
 void TestBitSet::all_bits() {
 	BitSet b(BitSet::all(10));
 	for (int i=0; i<=9; i++)

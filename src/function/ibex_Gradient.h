@@ -56,6 +56,11 @@ public:
 	void jacobian(const IntervalVector& box, IntervalMatrix& J);
 
 	/**
+	 * \brief Calculate some components of the Jacobian of f on the box \a box and store the result in \a J.
+	 */
+	void jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet& components);
+
+	/**
 	 * \brief Calculate the Jacobian on the domains \a d and store the result in \a J.
 	 */
 	void jacobian(const Array<Domain>& d, IntervalMatrix& J);
@@ -167,8 +172,9 @@ public:
 	Eval& _eval;
 	ExprDomain& d;
 	ExprDomain  g;
-	Agenda** fwd_agenda; // one agenda for each component
-	Agenda** bwd_agenda; // one agenda for each component
+
+protected:
+	void jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet*);
 };
 
 } // namespace ibex

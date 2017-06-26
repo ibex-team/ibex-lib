@@ -16,31 +16,12 @@ using namespace std;
 
 namespace ibex {
 
-Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f), fwd_agenda(NULL), bwd_agenda(NULL) {
+Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f) {
 
-	int m=f.image_dim();
-	if (m>1) {
-		const ExprVector* vec=dynamic_cast<const ExprVector*>(&f.expr());
-		if (vec && m==vec->nb_args) {
-			fwd_agenda = new Agenda*[m];
-			bwd_agenda = new Agenda*[m];
-			for (int i=0; i<m; i++) {
-				bwd_agenda[i] = f.cf.agenda(f.nodes.rank(vec->arg(i)));
-				fwd_agenda[i] = new Agenda(*bwd_agenda[i],true); // true<=>swap
-			}
-		}
-	}
 }
 
 Gradient::~Gradient() {
-	if (fwd_agenda!=NULL) {
-		for (int i=0; i<f.image_dim(); i++) {
-			delete fwd_agenda[i];
-			delete bwd_agenda[i];
-		}
-		delete[] fwd_agenda;
-		delete[] bwd_agenda;
-	}
+
 }
 
 void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) {
@@ -88,23 +69,28 @@ void Gradient::gradient(const IntervalVector& box, IntervalVector& gbox) {
 	g.read_arg_domains(gbox);
 }
 
-void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
+
+void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet* components) {
 
 	int n=f.nb_var();
-	int m=f.image_dim();
+	int m=components==NULL ? f.image_dim() : components->size();
 
+	assert(m<=f.image_dim());
 	assert(J.nb_rows()==m);
 	assert(J.nb_cols()==n);
 	assert(box.size()==n);
+	assert(components==NULL || !components->empty());
 
 	if (f.expr().dim.is_matrix()) {
 		ibex_error("Cannot called \"jacobian\" on a matrix-valued function");
 	}
 
+	int c; // constraint number
+
 	if (m==1) {
 		gradient(box,J[0]);
 
-	} else if(fwd_agenda!=NULL) {
+	} else if(_eval.fwd_agenda!=NULL) {
 
 		// If f is just a vector of expressions, we avoid to generate
 		// all the components. This has two advantages:
@@ -120,21 +106,25 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
 		}
 
 		for (int i=0; i<m; i++) {
+
+			c=components==NULL? i : (i==0? components->min() : components->next(c));
+
 			J.row(i).clear();
 
 			g.write_arg_domains(J.row(i));
 
-			f.cf.forward<Gradient>(*this, *fwd_agenda[i]);
+			f.cf.forward<Gradient>(*this, *(_eval.fwd_agenda)[c]);
 
-			g[bwd_agenda[i]->first()].i() = 1.0;
+			g[_eval.bwd_agenda[c]->first()].i() = 1.0;
 
-			f.cf.backward<Gradient>(*this, *bwd_agenda[i]);
+			f.cf.backward<Gradient>(*this, *(_eval.bwd_agenda)[c]);
 
-			if (J[i].is_empty()) {
+			g.read_arg_domains(J.row(i));
+
+			if (J.row(i).is_empty()) {
 				J.set_empty();
 				return;
-			} else
-				g.read_arg_domains(J.row(i));
+			}
 		}
 	} else {
 
@@ -151,7 +141,9 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
 		// when f is a vector of expressions (the most frequent case).
 		// ======================== option 1 =============================
 		for (int i=0; i<m; i++) {
-			f[i].gradient(box,J[i]);
+			c=components==NULL? i : (i==0? components->min() : components->next(c));
+
+			f[c].gradient(box,J[i]);
 			if (J[i].is_empty()) {
 				J.set_empty();
 				return;
@@ -186,6 +178,13 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
 	}
 }
 
+void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
+	jacobian(box,J,NULL);
+}
+
+void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet& components) {
+	jacobian(box,J,&components);
+}
 
 void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) {
 

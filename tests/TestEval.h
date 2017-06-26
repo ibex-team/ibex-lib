@@ -33,6 +33,7 @@ public:
 	CPPUNIT_TEST(apply03);
 	CPPUNIT_TEST(apply04);
 	CPPUNIT_TEST(issue242);
+	CPPUNIT_TEST(eval_components);
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -47,6 +48,7 @@ public:
 	void apply04();
 
 	void issue242();
+	void eval_components();
 
 private:
 	void check_deco(Function& f, const ExprNode& e);
