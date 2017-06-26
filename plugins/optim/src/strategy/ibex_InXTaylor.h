@@ -25,12 +25,8 @@ public:
 
 	void set_inactive_ctr(const bool* inactive);
 
-	virtual ~InXTaylor();
-
 	bool is_inner(const IntervalVector& box);
 protected:
-
-	double goal(const Vector& x) const;
 
 	/**
 	 * \brief The system

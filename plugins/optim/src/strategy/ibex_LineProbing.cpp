@@ -28,19 +28,10 @@ bool LineProbing::is_inner(const IntervalVector& box) {
 	return true;
 }
 
-double LineProbing::goal(const Vector& x) const {
-	Interval fx=sys.goal->eval(x);
-	if (fx.is_empty())  // means: outside of the definition domain of the function
-		return POS_INFINITY;
-	else
-		return fx.ub();
-
-}
-
 bool LineProbing::check_candidate(const Vector& pt, bool _is_inner) {
 
 	// "res" will contain an upper bound of the criterion
-	double res = goal(pt);
+	double res = sys.goal_ub(pt);
 
 	// check if f(x) is below the "loup" (the current upper bound).
 	//
@@ -220,7 +211,7 @@ bool LineProbing::dichotomic_line_search(const Vector& end_point, bool exit_if_a
 	while (alpha2-alpha0>eps) {
 
 		Vector y1=loup_point+alpha1*seg;
-		double fy1=goal(y1);
+		double fy1=sys.goal_ub(y1);
 		if (fy1<fy0) {
 			if (is_inner(y1)) { // a better loup is found!
 				alpha0=alpha1;

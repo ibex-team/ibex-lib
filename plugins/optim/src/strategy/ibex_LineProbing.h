@@ -84,8 +84,6 @@ protected:
 	 */
 	bool check_candidate(const Vector& pt, bool is_inner);
 
-	double goal(const Vector& x) const;
-
 	bool is_inner(const IntervalVector& box);
 
 

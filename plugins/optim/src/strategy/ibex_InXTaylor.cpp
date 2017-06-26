@@ -14,14 +14,7 @@ InXTaylor::InXTaylor(const NormalizedSystem& sys) : sys(sys), lr(sys), lp_solver
 	// TODO: warning, INXTaylor actually works on the extended system!!
 }
 
-inline double InXTaylor::goal(const Vector& x) const {
-	Interval fx=sys.goal->eval(x);
-	if (fx.is_empty())  // means: outside of the definition domain of the function
-		return POS_INFINITY;
-	else
-		return fx.ub();
 
-}
 
 bool InXTaylor::is_inner(const IntervalVector& box) {
 	//	cout << " box " << box << endl;
@@ -60,7 +53,7 @@ std::pair<Vector, double> InXTaylor::find(const IntervalVector& box, const Vecto
 		if (!box.contains(loup_point)) throw NotFound();
 
 		// "res" will contain an upper bound of the criterion
-		double res = goal(loup_point);
+		double res = sys.goal_ub(loup_point);
 
 		// check if f(x) is below the "loup" (the current upper bound).
 		//
@@ -78,10 +71,6 @@ std::pair<Vector, double> InXTaylor::find(const IntervalVector& box, const Vecto
 	}
 
 	throw NotFound();
-}
-
-InXTaylor::~InXTaylor() {
-	// TODO Auto-generated destructor stub
 }
 
 } /* namespace ibex */
