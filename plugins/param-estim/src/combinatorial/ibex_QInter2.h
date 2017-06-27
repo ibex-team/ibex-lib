@@ -17,6 +17,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
+#include "ibex_QInter.h"
 #include "ibex_KCoreGraph.h"
 #include "ibex_Array.h"
 #include "ibex_IntStack.h"
@@ -36,13 +37,13 @@ IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q);
  * \brief Q-intersection - HEURISTIC - k-core filtering + greedy coloring
  */
 //IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q);
- IntervalVector qinter_coref(IntervalMatrix& _boxes, int q, int& p,list<int>* points , int& qmax, int n0);
+ IntervalVector qinter_coref(IntervalMatrix& _boxes, int q, int& p,std::list<int>* points , int& qmax, int n0);
 /**
  * \ingroup combinatorial
  * \brief Q-intersection - EXACT - QInter2 : Cliquer-based solver
  */
 IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q);
- IntervalVector qinter2(IntervalMatrix& _boxes, int q , int p, list<int>* points);
+ IntervalVector qinter2(IntervalMatrix& _boxes, int q , int p, std::list<int>* points);
 /**
  * \ingroup combinatorial
  * \brief Checks for nonempty Q-intersection (Cliquer)
