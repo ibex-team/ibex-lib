@@ -140,9 +140,6 @@ public:
 
 	void get_lhs_rhs(IntervalVector& lhs_rhs) const;
 
-	/**
-	 *
-	 */
 	void get_coef_obj(Vector& obj) const;
 
 	double get_epsilon() const;
@@ -154,10 +151,6 @@ public:
 
 	void get_dual_sol(Vector & dual) const;
 
-	/**
-	 * \throw LPExpcetion if not infeasible
-	 */
-	void get_infeasible_dir(Vector & sol) const;
 
 
 // SET
@@ -182,7 +175,7 @@ public:
 	 *
 	 * TODO
 	 */
-	void clean_obj() { }
+	void clean_obj();
 
 	/**
 	 * \brief Clean the LP
@@ -221,6 +214,12 @@ private:
 	/**  Call to linear solver to optimize one variable */
 	Status_Sol solve_var(Sense sense, int var, Interval & obj);
 
+
+	/**
+	 * \throw LPExpcetion if not infeasible
+	 */
+	void get_infeasible_dir(Vector & sol) const;
+
 	/**
 	 * Neumaier Shcherbina postprocessing in case of optimal solution found :
 	 * the result "obj_value" is made reliable.
@@ -242,7 +241,6 @@ private:
 	/** Definition of the LP */
 	int nb_vars;              // number of variables
 	int nb_rows;              // total number of rows
-	double epsilon;           // precision on the objective
 	IntervalVector boundvar;  // bound constraints
 
 	/** =================== Results of the last call to solve() ==================== */

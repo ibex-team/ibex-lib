@@ -19,7 +19,7 @@ namespace ibex {
 	const double LinearSolver::default_eps = 1e-10;
 #endif
 
-const double LinearSolver::default_max_bound = 1e20;
+const double LinearSolver::default_max_bound = 1e20; // max bound in CPLEX
 const int LinearSolver::default_max_time_out=100;
 const int LinearSolver::default_max_iter=100;
 const Interval LinearSolver::default_limit_diam_box = Interval(1.e-14,1.e6);
@@ -72,12 +72,7 @@ Interval LinearSolver::get_obj_value() const {
 	return obj_value;
 }
 
-/*
- * TODO: get the actual internal precision of the LP solver
- */
-double LinearSolver::get_epsilon() const {
-	return epsilon;
-}
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -186,7 +181,7 @@ Interval LinearSolver::neumaier_shcherbina_postprocessing() {
 		IntervalVector Lambda(dual);
 
 		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-		Rest -= obj; // TODO
+		Rest -= obj; // TODO to check carefully
 		return (Lambda * B - Rest * boundvar);
 
 
@@ -262,12 +257,27 @@ void LinearSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rh
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////TODO
+void LinearSolver::clean_bounds() {
+	set_bounds(IntervalVector(nb_vars));
+}
+
+void LinearSolver::clean_obj() {
+	set_obj(Vector::zeros(nb_vars));
+}
+
+
+void LinearSolver::clean_all() {
+	clean_ctrs();
+	clean_obj();
+	clean_bounds();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef _IBEX_WITH_SOPLEX_
 
 
 LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
-			nb_vars(nb_vars1), nb_rows(0), epsilon(eps), boundvar(nb_vars1) ,
+			nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1) ,
 			obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
 			status_prim(soplex::SPxSolver::UNKNOWN), status_dual(soplex::SPxSolver::UNKNOWN){
 
@@ -452,6 +462,7 @@ void LinearSolver::get_dual_sol(Vector & solution_dual) const {
 	return ;
 }
 
+
 void LinearSolver::get_infeasible_dir(Vector & sol) const {
 
 	try {
@@ -479,6 +490,15 @@ void LinearSolver::get_infeasible_dir(Vector & sol) const {
 	return ;
 }
 
+
+/*
+ * TODO: get the actual internal precision of the LP solver
+ */
+double LinearSolver::get_epsilon() const {
+	// TODO
+	return 1;
+}
+
 void LinearSolver::clean_ctrs() {
 
 	try {
@@ -496,10 +516,6 @@ void LinearSolver::clean_ctrs() {
 	}
 	return ;
 
-}
-void LinearSolver::clean_all() {
-	// TODO
-	return ;
 }
 
 
@@ -543,11 +559,6 @@ void LinearSolver::set_sense(Sense s) {
 		throw LPException();
 	}
 	return ;
-}
-
-
-void setObj(const Vector& coef) {
-	// TODO
 }
 
 void LinearSolver::set_obj_var(int var, double coef) {
@@ -638,12 +649,12 @@ void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rh
 
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////// TODO
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef _IBEX_WITH_CPLEX_
 
 LinearSolver::LinearSolver(int nb_vars1, int max_iter,
 		int max_time_out, double eps) :
-		nb_vars(nb_vars1), nb_rows(0), epsilon(eps), boundvar(nb_vars1),
+		nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1),
 		 obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
 		status_prim(-1), status_dual(-1),
 		envcplex(NULL), lpcplex(NULL) {
@@ -663,7 +674,7 @@ LinearSolver::LinearSolver(int nb_vars1, int max_iter,
 		delete[] errmsg;
 		throw LPException();
 	}
-
+	double epsilon;
 	if (epsilon <1.e-9) epsilon=1.e-9;
 	if (epsilon >1.e-1) epsilon=1.e-1;
 
@@ -888,8 +899,8 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 				status_prim =CPXgetx(envcplex, lpcplex, primal_solution.raw(), 0, nb_vars - 1);
 
 				dual_solution.resize(nb_rows);
-
 				status_dual = CPXgetpi(envcplex, lpcplex, dual_solution.raw(), 0, nb_rows - 1);
+
 				return OPTIMAL;
 			}
 			case (CPX_STAT_INFEASIBLE):
@@ -926,10 +937,20 @@ void LinearSolver::write_file(const char* name) {
 
 
 void LinearSolver::get_coef_obj(Vector& obj) const {
-	//TODO
-	return;
-}
 
+	try {
+
+		int status = CPXgetobj(envcplex, lpcplex, obj.raw(),0, nb_vars-1);
+		if (status) {
+			std::cerr<< "Error CPLEX: Could not get the objective function, error "<< status << std::endl;
+			throw LPException();
+		}
+
+	} catch (...) {
+		throw LPException();
+	}
+	return ;
+}
 
 void LinearSolver::get_rows(Matrix &A) const {
 	try {
@@ -1051,7 +1072,7 @@ void LinearSolver::get_dual_sol(Vector & dual) const {
 	try {
 		// the dual solution ; used by Neumaier Shcherbina test
 		if (status_dual == 0) {
-			for (int i = 0; i < nb_rows; i++) {
+			for (int i = 0; i < dual_solution.size(); i++) {
 				dual[i] = (dual_solution[i]< 0) ? dual_solution[i] : 0.0;
 				//dual[i] = dual_solution[i];
 			}
@@ -1105,9 +1126,25 @@ void LinearSolver::clean_ctrs() {
 	return ;
 
 }
-void LinearSolver::clean_all() {
-// TODO
+
+
+double LinearSolver::get_epsilon() const {
+	double epsilon;
+	try {
+
+		if (eps <1.e-9) eps=1.e-9;
+		if (eps >1.e-1) eps=1.e-1;
+		int status = CPXgetdblparam(envcplex, CPX_PARAM_EPOPT, &epsilon);
+		if (status) {
+			//std::cerr << "Error CPLEX: Could not get the precision, error "<< status << std::endl;
+			throw LPException();
+		}
+	} catch (...) {
+		throw LPException();
+	}
+	return epsilon;
 }
+
 
 void LinearSolver::set_max_iter(int max) {
 
@@ -1163,15 +1200,27 @@ void LinearSolver::set_sense(Sense s) {
 	return ;
 }
 
-void set_obj(const Vector& coef) {
-	// TODO
-}
-
 void LinearSolver::set_obj_var(int var, double coef) {
 
 	try {
 
 		int status = CPXchgobj(envcplex, lpcplex, 1, &var, &coef);
+		if (status) {
+			std::cerr<< "Error CPLEX: Could not change the objective function, error "<< status << std::endl;
+			throw LPException();
+		}
+
+	} catch (...) {
+		throw LPException();
+	}
+	return ;
+}
+
+void LinearSolver::set_obj(const Vector& coef) {
+
+	try {
+
+		int status = CPXchgobj(envcplex, lpcplex, nb_vars, indice, (coef.raw()));
 		if (status) {
 			std::cerr<< "Error CPLEX: Could not change the objective function, error "<< status << std::endl;
 			throw LPException();
@@ -1189,9 +1238,9 @@ void LinearSolver::set_bounds(const IntervalVector& bounds) {
 		// Changement de la fonction objective = rhs du primal (car on est en formulation dual)
 		// Change the LHS and RHS of each constraint associated to the bounds of the variable
 		for (int i = 0; i < nb_vars; i++)
-			tmp[i] = -bounds[i].lb();
+			tmp[i]			 = -bounds[i].lb();
 		for (int i = 0; i < nb_vars; i++)
-			tmp[nb_vars + i] = bounds[i].ub();
+			tmp[nb_vars + i] =  bounds[i].ub();
 
 		int status = CPXchgrhs(envcplex, lpcplex, (nb_vars * 2), indice, tmp);
 		boundvar = bounds;
@@ -1215,7 +1264,7 @@ void LinearSolver::set_bounds_var(int var, const Interval& bound) {
 		ind[0] = var;
 		ind[1] = var + nb_vars;
 		tmp[0] = -bound.lb();
-		tmp[1] = bound.ub();
+		tmp[1] =  bound.ub();
 		int status = CPXchgrhs(envcplex, lpcplex, 2, ind, tmp);
 		delete[] ind;
 		boundvar[var] = bound;
@@ -1233,16 +1282,14 @@ void LinearSolver::set_bounds_var(int var, const Interval& bound) {
 void LinearSolver::set_epsilon(double eps) {
 
 	try {
-
-		if (eps <1.e-9) eps=1.e-9;
-		if (eps >1.e-1) eps=1.e-1;
+		double epsilon= eps;
+		if (eps <1.e-9) epsilon=1.e-9;
+		if (eps >1.e-1) epsilon=1.e-1;
 
 		int status = CPXsetdblparam(envcplex, CPX_PARAM_EPOPT, epsilon);
 		if (status) {
 			//std::cerr << "Error CPLEX: Could not change the precision, error "<< status << std::endl;
 			throw LPException();
-		} else {
-			epsilon = eps;
 		}
 	} catch (...) {
 		throw LPException();
@@ -1292,7 +1339,7 @@ void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rh
 
 
 
-///////////////////////////////////////////////////////////////////////////// TODO
+/////////////////////////////////////////////////////////////////////////////
 #ifdef _IBEX_WITH_CLP_
 
 
@@ -1600,11 +1647,6 @@ void LinearSolver::clean_ctrs() {
 
 }
 
-void LinearSolver::clean_all() {
-	// TODO
-	return ;
-}
-
 
 void LinearSolver::set_max_iter(int max) {
 
@@ -1738,7 +1780,7 @@ void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rh
 
 
 /*
-////////////////////////////////////////////////////////////////////////////////////////////////////////// TODO
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef _IBEX_WITH_ILOCPLEX_
 
 LinearSolver::LinearSolver(int nb_vars1, int max_iter,
@@ -1860,7 +1902,7 @@ LinearSolver::Status LinearSolver::getCoefConstraint(Matrix &A) {
 
 		myenv->getV
 
-//  TODO
+//  TODO still a lot of work to continue....
 
 
 
