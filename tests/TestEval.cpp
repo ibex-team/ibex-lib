@@ -230,7 +230,9 @@ void TestEval::eval_components() {
 
 	Interval vx=Interval::ONE;
 	Interval vy=2*Interval::ONE;
-	IntervalVector box(3,v);
+	IntervalVector box(3);
+	box[0]=vx;
+	box[1]=vy;
 
 	BitSet components=BitSet::empty(4);
 	components.add(0);

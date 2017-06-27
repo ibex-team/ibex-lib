@@ -22,6 +22,7 @@ Eval::Eval(Function& f) : f(f), d(f), fwd_agenda(NULL), bwd_agenda(NULL) {
 		const ExprVector* vec=dynamic_cast<const ExprVector*>(&f.expr());
 		if (vec && m==vec->nb_args) {
 			fwd_agenda = new Agenda*[m];
+			bwd_agenda = new Agenda*[m];
 			for (int i=0; i<m; i++) {
 				bwd_agenda[i] = f.cf.agenda(f.nodes.rank(vec->arg(i)));
 				fwd_agenda[i] = new Agenda(*bwd_agenda[i],true); // true<=>swap

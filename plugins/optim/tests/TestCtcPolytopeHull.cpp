@@ -57,7 +57,7 @@ void TestCtcPolytopeHull::fixbug01() {
 	double _box[][2] = {{-100,100},{1,1}};
 	IntervalVector box(2,_box);
 	LinearRelaxCombo linear_relax(sys,LinearRelaxCombo::XNEWTON);
-	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
+	CtcPolytopeHull polytope(linear_relax);
 	polytope.contract(box);
 
 	double _box2[][2] = {{-100,0},{1,1}};
