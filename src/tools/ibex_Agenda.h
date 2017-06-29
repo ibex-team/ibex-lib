@@ -97,8 +97,13 @@ public:
 	 *
 	 * The ordering of a common subsequence of integers
 	 * is the one of "this" agenda.
+	 *
+	 * \pre The \"size\" of the agenda must be less or equal
+	 *      than the \"size\" of this.
 	 */
 	inline void push(const Agenda& a) {
+		assert(a.size<=size);
+		if (a.empty()) return;
 		for (int i=a.first(); i!=a.end(); i=a.next(i)) {
 			push(i);
 		}
@@ -163,8 +168,14 @@ public:
 		return _first==-1;
 	}
 
+	/**
+	 * \brief The size defining the range of the agenda.
+	 *
+	 * All elements must be inside [0,size-1].
+	 */
+	const int size;
+
 protected:
-	int size;
 	int _first, last;
 	int *table;
 };

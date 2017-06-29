@@ -110,11 +110,11 @@ void TestAgenda::push01() {
 	a.push(7);
 
 	Agenda a2(10);
-	a.push(2);
-	a.push(7);
-	a.push(3);
-	a.push(4);
-	a.push(6);
+	a2.push(2);
+	a2.push(7);
+	a2.push(3);
+	a2.push(4);
+	a2.push(6);
 
 	a.push(a2);
 	int i=a.first();
