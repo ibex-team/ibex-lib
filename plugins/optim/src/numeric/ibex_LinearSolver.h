@@ -165,15 +165,11 @@ public:
 
 	/**
 	 * \brief Delete the bound constraints
-	 *
-	 * TODO
 	 */
-	void clean_bounds() { }
+	void clean_bounds();
 
 	/**
 	 * \brief Set all the objective coefficients to 0.
-	 *
-	 * TODO
 	 */
 	void clean_obj();
 

@@ -188,6 +188,12 @@ public:
 	 */
 	double* raw() { return vec; }
 
+
+	/*
+	 * \brief Convert to double*
+	 */
+	double * raw_const() const { return vec; }
+
 private:
 	friend class Matrix;
 
