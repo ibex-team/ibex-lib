@@ -226,7 +226,7 @@ void TestEval::eval_components() {
 	const ExprNode& e2=y-2*x;
 	const ExprNode& e3=y+z;
 	const ExprNode& e4=e1*e2;
-	Function f(x,Return(e4+1,e2+3,e4-2,e4-4,false));
+	Function f(x,y,z,Return(e4+1,e2+3,e4-2,e4-4,false));
 
 	Interval vx=Interval::ONE;
 	Interval vy=2*Interval::ONE;

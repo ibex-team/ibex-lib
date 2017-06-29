@@ -118,13 +118,13 @@ void TestAgenda::push01() {
 
 	a.push(a2);
 	int i=a.first();
-
-	CPPUNIT_ASSERT((i=a.next(i))==1);
+	CPPUNIT_ASSERT((i==1));
 	CPPUNIT_ASSERT((i=a.next(i))==4);
 	CPPUNIT_ASSERT((i=a.next(i))==0);
 	CPPUNIT_ASSERT((i=a.next(i))==7);
 	CPPUNIT_ASSERT((i=a.next(i))==2);
 	CPPUNIT_ASSERT((i=a.next(i))==3);
 	CPPUNIT_ASSERT((i=a.next(i))==6);
+	CPPUNIT_ASSERT(((i=a.next(i))==a.end()));
 }
 

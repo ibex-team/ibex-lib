@@ -14,6 +14,8 @@
 
 #include <typeinfo>
 
+using namespace std;
+
 namespace ibex {
 
 Eval::Eval(Function& f) : f(f), d(f), fwd_agenda(NULL), bwd_agenda(NULL) {
@@ -94,11 +96,11 @@ IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
 	int m=components.size();
 
 	// merge all the agendas
-	int c=components.min();
-	Agenda a((*fwd_agenda)[c]);
-	for (int i=1; i<m; i++) {
-		c = components.next(c);
-		a.push((*fwd_agenda)[c]);
+	int c;
+	Agenda a(f.nodes.size()); // the global agenda initialized with the maximal possible value
+	for (int i=0; i<m; i++) {
+		c = (i==0 ? components.min() : components.next(c));
+		a.push(*(fwd_agenda[c]));
 	}
 
 	try {
@@ -109,9 +111,9 @@ IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
 
 	IntervalVector res(m);
 
-	for (int i=1; i<m; i++) {
+	for (int i=0; i<m; i++) {
 		c = (i==0 ? components.min() : components.next(c));
-		res[i] = d.top->v()[c];
+		res[i] = d[bwd_agenda[c]->first()].i();
 	}
 
 	return res;
