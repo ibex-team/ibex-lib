@@ -200,7 +200,7 @@ void System::init_f_from_ctrs() {
 }
 
 
-System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0), box_constraints(1) {
+System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0), ops(NULL), box_constraints(1) {
 	init(fac);
 }
 
