@@ -69,7 +69,7 @@ void SystemBox::update() const {
 		if (!included) {
 			// All the constraints are now
 			// marked as potentially active.
-			active.fill();
+			active.fill(0,sys.nb_ctr-1);
 		}
 
 		// note: if the box has changed but is included
