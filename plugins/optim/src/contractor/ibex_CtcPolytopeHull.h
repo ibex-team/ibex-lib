@@ -56,8 +56,12 @@ public:
 	CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter=LinearSolver::default_max_iter,
 			int time_out=LinearSolver::default_max_time_out, double eps=LinearSolver::default_eps,
 			Interval limit_diam=LinearSolver::default_limit_diam_box);
+
 	/**
 	 * \brief Contract the box.
+	 *
+	 * Linearize the system and performs 2n calls to Simplex in order to reduce
+	 * the 2 bounds of each variable
 	 */
 	virtual void contract(IntervalVector& box);
 

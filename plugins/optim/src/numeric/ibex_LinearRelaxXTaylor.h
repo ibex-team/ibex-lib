@@ -1,14 +1,14 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_LinearRelaxXTaylor.h
-// Author      : Ignacio Araya, Bertrand Neveu,
-//               Gilles Trombettoni, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : Jul 20, 2012
-// Last Update : Jul 02, 2013 (Gilles Chabert)
-//============================================================================
-
+/* ============================================================================
+ * I B E X - X-Taylor linear relaxation
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Ignacio Araya, Bertrand Neveu, Gilles Chabert
+ * Created     : July 01th, 2012
+ * Updated     : June 23th, 2017
+ * ---------------------------------------------------------------------------- */
 
 #ifndef __IBEX_LINEAR_RELAX_X_TAYLOR__
 #define __IBEX_LINEAR_RELAX_X_TAYLOR__
@@ -22,7 +22,8 @@ namespace ibex {
 
 /**
  * \ingroup numeric
- * \brief X_Taylor contractor
+ *
+ * \brief X-Taylor linear relaxation technique
  *
  * This class is an implementation of the X-Taylor algorithm
  */
@@ -32,7 +33,10 @@ class LinearRelaxXTaylor : public LinearRelax {
 public:
 
 	/**
-	 * TODO: add comment
+	 * \brief Slope matrices computation mode.
+	 *
+	 * TAYLOR: one gradient evaluation for all variables simultaneously (less accurate but faster)
+	 * HANSEN: recursive evaluation with successive variable instantiation (more accurate but longer)
 	 */
 	typedef enum  { TAYLOR, HANSEN } linear_mode;
 
@@ -69,15 +73,9 @@ public:
 
 
 	/**
-	 * \brief Generation of the linearized system
-	 *
-	 * Linearize the system and performs 2n calls to Simplex in order to reduce
-	 * the 2 bounds of each variable
+	 * \brief Generation of the linear inequalities
 	 */
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
-
-
-	void set_inactive_ctr(const BitSet& inactive);
 
 private:
 
@@ -92,6 +90,16 @@ private:
 	 * \brief The system
 	 */
 	const System& sys;
+
+	/**
+	 * \brier Number of variables
+	 */
+	int n;
+
+	/**
+	 * \brief Number of (real-valued) constraints
+	 */
+	int m;
 
 	/**
 	 * \brief Goal constraint (in case of extended system, -1 otherwise).
@@ -109,8 +117,6 @@ private:
 
 	/* For implementing RANDOM_INV one needs to store the last random corners */
 	int* last_rnd;
-
-	bool* base_coin;
 
 	/** Indicates if the constraint is linear wrt to each variable */
 	bool** linear;
@@ -141,34 +147,10 @@ private:
 			IntervalVector &G, int id_point, LinearSolver& lp_solver);
 
 	/**
-	 * Check if the constraint is satisfied in the box : in this case, no linear relaxation is made.
-	 *
-	 * TODO: is this function redundant? --> replace with inactive bitset
-	 */
-	bool isInner(const IntervalVector& box, const System& sys, int j);
-
-	/**
 	 * \brief Symbolic Jacobian
 	 */
 	Function* df;
-
-//	// used in greedy heuristics :  not implemented in v2.0
-//	inline double abs(double a){
-//		return (a>=0)? a:-a;
-//	}
-//
-//	//Evaluation of the corner by using relation (4) in Taylorisation par intervalles convexe: premiers résultats, JFPC
-//	double eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner);
-//
-//	//finds the corner with the minimal evaluation of relation (4) in Taylorisation par intervalles convexe: premiers résultats, JFPC
-//	void best_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner);
-
-	const BitSet* inactive;
 };
-
-inline void LinearRelaxXTaylor::set_inactive_ctr(const BitSet& inactive) {
-	this->inactive = &inactive;
-}
 
 } // end namespace ibex
 

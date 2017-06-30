@@ -1,12 +1,14 @@
-//============================================================================
-//                                  I B E X
-// File        : ibex_CtcXNewton.cpp
-// Author      : Ignacio Araya, Bertrand Neveu , Gilles Trombettoni
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : Jul 1, 2012
-// Last Update : Jul 02, 2013 (Gilles Chabert)
-//============================================================================
+/* ============================================================================
+ * I B E X - X-Taylor linear relaxation
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Ignacio Araya, Bertrand Neveu, Gilles Chabert
+ * Created     : July 01th, 2012
+ * Updated     : June 23th, 2017
+ * ---------------------------------------------------------------------------- */
 
 #include "ibex_LinearRelaxXTaylor.h"
 #include "ibex_ExtendedSystem.h"
@@ -28,10 +30,11 @@ const double LinearRelaxXTaylor::default_max_diam_deriv =1e6;
 
 LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_point>& cpoints1,
 		linear_mode lmode1, double max_diam_deriv1):
-			LinearRelax(sys1.nb_var), cpoints(cpoints1), sys(sys1), goal_ctr(-1),
+			LinearRelax(sys1.nb_var), cpoints(cpoints1), sys(sys1), n(sys.nb_var),
+			m(sys1.f_ctrs.image_dim()), goal_ctr(-1),
 			max_diam_deriv(max_diam_deriv1),
 			lmode(lmode1),
-			linear_coef(sys1.nb_ctr, sys1.nb_var),
+			linear_coef(m,n),
 			df(NULL) {
 
 	try {
@@ -52,36 +55,33 @@ LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_po
 
 void LinearRelaxXTaylor::init_linear_coeffs() {
 
-	last_rnd = new int[sys.nb_var];
-	base_coin = new bool[sys.nb_var];
-	linear = new bool*[sys.nb_ctr];
-	linear_ctr = new bool[sys.nb_ctr];
+	last_rnd = new int[n];
+	linear = new bool*[m];
+	linear_ctr = new bool[m];
 
-	for(int ctr=0; ctr<sys.nb_ctr; ctr++) {
+	IntervalMatrix J = sys.f_ctrs.jacobian(sys.box_constraints);
 
-		linear[ctr] = new bool[sys.nb_var];
+	for(int ctr=0; ctr<m; ctr++) {
 
-		IntervalVector G(sys.nb_var);
-		sys.ctrs[ctr].f.gradient(sys.box_constraints,G);
+		linear[ctr] = new bool[n];
 
 		// for testing if a function is linear (with scalar coefficients) w.r.t all its variables,
 		// we test the diameter of the gradient components.
 		linear_ctr[ctr]=true;
 
-		for(int i=0; i<sys.nb_var; i++) {
-			if (! (linear[ctr][i]=G[i].diam()<=1e-10)) // [gch]: TODO: 1e-10 should not be hard-coded
+		for(int i=0; i<n; i++) {
+			if (! (linear[ctr][i]=J[ctr][i].diam()<=1e-10)) // [gch]: TODO: 1e-10 should not be hard-coded
 				linear_ctr[ctr]=false;
 		}
 
-		linear_coef.row(ctr) = G;  // in case of a linear function, the coefficients are already computed.
+		linear_coef.row(ctr) = J[ctr];  // in case of a linear function, the coefficients are already computed.
 	}
 
 }
 
 LinearRelaxXTaylor::~LinearRelaxXTaylor() {
 	delete[] last_rnd;
-	delete[] base_coin;
-	for(int ctr=0; ctr<sys.nb_ctr; ctr++) delete[] linear[ctr];
+	for(int ctr=0; ctr<m; ctr++) delete[] linear[ctr];
 	delete[] linear;
 	delete[] linear_ctr;
 	if (df) delete df;
@@ -89,59 +89,56 @@ LinearRelaxXTaylor::~LinearRelaxXTaylor() {
 
 int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
 
-	int cont =0;
+	int nb_lin_ctr=0;
+
+	BitSet active=sys.active_ctrs(box);
+
+	int m2=active.size();
+	
+	IntervalMatrix J(m2,n);
+
+	if(lmode==TAYLOR) {                   // derivatives are computed once (Taylor)
+		J=sys.active_ctrs_jacobian(box);
+	}
+	else {
+		// to set all the constant derivatives that have been already computed
+		// (the other will be overwritten)
+		for(int i=0; i<m2; i++) {
+			int ctr=(i==0? active.min() : active.next(ctr));
+			J.row(i)=linear_coef.row(ctr);
+		}
+	}
 
 	// Create the linear relaxation of each constraint
-	for(int ctr=0; ctr<sys.nb_ctr; ctr++) {
-		//cout << "[LinearRelaxXTaylor] ctr n°" << ctr << endl;
-		IntervalVector G(sys.nb_var);
+	for(int i=0; i<m2; i++) {
 
-		if(lmode==TAYLOR) {                 // derivatives are computed once (Taylor)
-			sys.ctrs[ctr].f.gradient(box,G);
-		}
-		else {
-			// to set all the constant derivatives that have been already computed
-			// (the other will be overwritten)
-			G=linear_coef.row(ctr);
-		}
+		int ctr=(i==0? active.min() : active.next(ctr));
 
 		try {
 			for(unsigned int k=0; k<cpoints.size(); k++)
-				cont += X_Linearization(box, ctr, cpoints[k],  G, k, lp_solver);
+				nb_lin_ctr += X_Linearization(box, ctr, cpoints[k], J[i], k, lp_solver);
 		} catch(LinearRelaxXTaylorUnsatisfiability&) {
 			return -1;
 		}
 	}
-	return cont;
-}
-
-
-bool LinearRelaxXTaylor::isInner(const IntervalVector & box, const System& sys, int j) {
-	Interval eval=sys.ctrs[j].f.eval(box);
-
-	if((sys.ctrs[j].op==LEQ && eval.ub() > 0) || (sys.ctrs[j].op==LT && eval.ub() >= 0) ||
-			(sys.ctrs[j].op==GEQ && eval.lb() < 0) || (sys.ctrs[j].op==GT && eval.lb() <= 0))
-		return false;
-	else
-		return true;
+	return nb_lin_ctr;
 }
 
 int LinearRelaxXTaylor::X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint,
 		IntervalVector& G, int id_point, LinearSolver& lp_solver) {
 
-	CmpOp op= sys.ctrs[ctr].op;
+	CmpOp op= sys.ops[ctr];
 
-	if(op!=EQ && isInner(box, sys, ctr)) return 0; //the constraint is satisfied
+	int nb_lin_ctr=0;
 
-	int cont=0;
 	if(ctr==goal_ctr) op = LEQ;
 	if(op==EQ) {
-		cont+=X_Linearization(box, ctr, cpoint, LEQ, G, id_point, lp_solver);
-		cont+=X_Linearization(box, ctr, cpoint, GEQ, G, id_point, lp_solver);
+		nb_lin_ctr+=X_Linearization(box, ctr, cpoint, LEQ, G, id_point, lp_solver);
+		nb_lin_ctr+=X_Linearization(box, ctr, cpoint, GEQ, G, id_point, lp_solver);
 	} else
-		cont+=X_Linearization(box, ctr, cpoint, op,  G, id_point, lp_solver);
+		nb_lin_ctr+=X_Linearization(box, ctr, cpoint, op,  G, id_point, lp_solver);
 
-	return cont;
+	return nb_lin_ctr;
 }
 
 int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
@@ -149,7 +146,6 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 		IntervalVector& G2, int id_point, LinearSolver& lp_solver) {
 
 	IntervalVector G = G2;
-	int n = sys.nb_var;
 
 	if (id_point != 0 && linear_ctr[ctr])
 		return 0; // only one corner for a linear constraint
@@ -162,7 +158,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 
 	for (int j=0; j< n; j++) {
 		//cout << "[LinearRelaxXTaylor] variable n°" << j << endl;
-	  if (sys.ctrs[ctr].f.used(j)) {
+	  if (sys.f_ctrs[ctr].used(j)) {
 		  if (lmode == HANSEN && !linear[ctr][j]) {
 			  // get the partial derivative of ctr w.r.t. var n°j
 	    	  G[j]= df ? (*df)[ctr*n+j].eval(box) :
@@ -184,17 +180,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 
 	  bool inf_x; // whether the jth variable is set to lower bound (true) or upper bound (false)
 
-		/*  for GREEDY heuristics :not implemented in v2
-		 IntervalVector save;
-		 double fh_inf, fh_sup;
-		 double D;
-		 */
-
 	  switch (cpoint) {
-		/*
-		 case BEST:
-		 inf_x=corner[j]; last_rnd[j]=inf_x? 0:1;  break;
-		 */
 		case INF_X:
 			inf_x = true;
 			break;
@@ -246,11 +232,8 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 	}
 
 	//	cout << " ev  " << ev << endl;
-	/*  used in BEST not implemented in v2.0
-	if(corner) delete[] corner;
-	 */
 
-	ev+= sys.ctrs[ctr].f.eval(box);
+	ev+= sys.f_ctrs[ctr].eval(box);
 
 	for(int j=0;j<n;j++)
 		tot_ev+=row1[j]*savebox[j]; //natural evaluation of the left side of the linear constraint

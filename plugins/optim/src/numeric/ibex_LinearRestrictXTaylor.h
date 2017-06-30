@@ -16,6 +16,7 @@ namespace ibex {
 
 class LinearRestrictXTaylor : public LinearRestrict {
 public:
+
 	LinearRestrictXTaylor(const NormalizedSystem& sys);
 
 	/**
@@ -23,8 +24,6 @@ public:
 	 *
 	 */
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
-
-	void set_inactive_ctr(const bool* inactive);
 
 	virtual ~LinearRestrictXTaylor();
 
@@ -34,18 +33,12 @@ protected:
 	 */
 	const NormalizedSystem& sys;
 
-	const bool* inactive;
-
 	/*
 	 * Boolean array indicating which corner in direction i is used :
 	 * true for inferior corner, false for superior one.
 	 */
 	bool* corner;
 };
-
-inline void LinearRestrictXTaylor::set_inactive_ctr(const bool* inactive) {
-	this->inactive = inactive;
-}
 
 } /* namespace ibex */
 

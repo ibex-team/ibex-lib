@@ -14,7 +14,7 @@ using namespace std;
 
 namespace ibex {
 
-LinearRestrictXTaylor::LinearRestrictXTaylor(const NormalizedSystem& sys) : LinearRestrict(sys.nb_var), sys(sys), inactive(NULL) {
+LinearRestrictXTaylor::LinearRestrictXTaylor(const NormalizedSystem& sys) : LinearRestrict(sys.nb_var), sys(sys) {
 	corner = new bool[nb_var()];
 }
 
@@ -24,12 +24,15 @@ LinearRestrictXTaylor::~LinearRestrictXTaylor() {
 
 int LinearRestrictXTaylor::linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
 	int n=nb_var();
-	int m=sys.nb_ctr;
+
+	BitSet active=sys.active_ctrs(box);
+
+	int m=active.size();
+
 	int nb_lin_ctr=0;
 
 	try {
 		//cout << "[x-Taylor] box=" << box << endl;
-		IntervalVector g(n); // vector to be used by the partial derivatives
 
 		// random corner choice
 		for (int i=0; i<n ; i++) {
@@ -42,7 +45,7 @@ int LinearRestrictXTaylor::linearization(const IntervalVector& box, LinearSolver
 		// the corner used -> typed IntervalVector just to have guaranteed computations
 		IntervalVector x_corner(n);
 
-		for (int i=0 ; i< n ; i++)	  {
+		for (int i=0; i<n; i++)	  {
 			if (corner[i]) {
 				if (box[i].lb()>NEG_INFINITY)
 					x_corner[i]=box[i].lb() ;
@@ -64,7 +67,7 @@ int LinearRestrictXTaylor::linearization(const IntervalVector& box, LinearSolver
 		Vector row(n+1);
 		IntervalVector bound(n+1);
 
-		sys.goal->gradient(box.mid(), g);
+		IntervalVector g=sys.goal->gradient(box.mid());
 
 		for (int i=0; i<n; i++) {
 			if (g[i].diam() > lp_solver.default_limit_diam_box.ub())
@@ -98,17 +101,15 @@ int LinearRestrictXTaylor::linearization(const IntervalVector& box, LinearSolver
 		nb_lin_ctr++;
 
 		row[0] = 0.0;
+
 		//The linear system is generated
 		if (m>0) {
 			// the evaluation of the constraints in the corner x_corner
-			IntervalVector g_corner(sys.f_ctrs.eval_vector(x_corner));
+			IntervalVector g_corner(sys.f_ctrs.eval_vector(x_corner,active));
+
+			IntervalMatrix J=sys.active_ctrs_jacobian(box);
 
 			for (int i=0; i<m; i++) {
-
-				if (inactive!=NULL && inactive[i]) continue;
-				//if (sys.f_ctrs[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
-
-				sys.ctrs[i].f.gradient(box,g);                     // gradient calculation
 
 				for (int ii =0; ii< n ; ii++)
 					// TODO: replace with lp_solver.get_limit_diam_box()
@@ -120,7 +121,7 @@ int LinearRestrictXTaylor::linearization(const IntervalVector& box, LinearSolver
 				//The contraints i is generated:
 				// c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
 				for (int j=0; j<n; j++) {
-					row[j+1]=corner[j] ? g[j].ub() : g[j].lb();
+					row[j+1]=corner[j] ? J[i][j].ub() : J[i][j].lb();
 				}
 
 				subrow = row.subvector(1,n);

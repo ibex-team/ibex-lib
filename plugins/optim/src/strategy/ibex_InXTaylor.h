@@ -41,7 +41,7 @@ protected:
 };
 
 inline void InXTaylor::set_inactive_ctr(const bool* inactive) {
-	lr.set_inactive_ctr(inactive);
+//	lr.set_inactive_ctr(inactive);
 }
 
 } /* namespace ibex */
