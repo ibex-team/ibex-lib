@@ -209,45 +209,46 @@ void CompiledFunction::visit(const ExprAtanh& e) { visit(e,ATANH); }
 // for debug only
 const char* CompiledFunction::op(operation o) const {
 	switch (o) {
-	case IDX:   return "[]";
-	case VEC:   return "V";
-	case CST:   return "const";
-	case SYM:   return "symbl";
-	case APPLY: return "apply";
-	case CHI: return "chi";
+	case IDX:
+	case IDX_CP: return "[]";
+	case VEC:    return "V";
+	case CST:    return "const";
+	case SYM:    return "symbl";
+	case APPLY:  return "apply";
+	case CHI:    return "chi";
 	case ADD: case ADD_V: case ADD_M:
-		        return "+";
+		         return "+";
 	case MUL: case MUL_SV: case MUL_SM: case MUL_VV: case MUL_MV: case MUL_MM:  case MUL_VM:
-		        return "*";
+		         return "*";
 	case MINUS: case MINUS_V: case MINUS_M:
 	case SUB: case SUB_V: case SUB_M:
-		        return "-";
-	case DIV:   return "/";
-	case MAX:   return "max";
-	case MIN:   return "min";
-	case ATAN2: return "atan2";
+		         return "-";
+	case DIV:    return "/";
+	case MAX:    return "max";
+	case MIN:    return "min";
+	case ATAN2:  return "atan2";
 	case TRANS_V:
 	case TRANS_M:
-		        return "'";
-	case SIGN:  return "sign";
-	case ABS:   return "abs";
-	case POWER: return "pow";
-	case SQR:   return "sqr";
-	case SQRT:  return "sqrt";
-	case EXP:   return "exp";
-	case LOG:   return "log";
-	case COS:   return "cos";
-	case SIN:   return "sin";
-	case TAN:   return "tan";
-	case ACOS:  return "acos";
-	case ASIN:  return "asin";
-	case ATAN:  return "atan";
-	case COSH:  return "cosh";
-	case SINH:  return "sinh";
-	case TANH:  return "tanh";
-	case ACOSH: return "acosh";
-	case ASINH: return "asinh";
-	case ATANH: return "atanh";
+		         return "'";
+	case SIGN:   return "sign";
+	case ABS:    return "abs";
+	case POWER:  return "pow";
+	case SQR:    return "sqr";
+	case SQRT:   return "sqrt";
+	case EXP:    return "exp";
+	case LOG:    return "log";
+	case COS:    return "cos";
+	case SIN:    return "sin";
+	case TAN:    return "tan";
+	case ACOS:   return "acos";
+	case ASIN:   return "asin";
+	case ATAN:   return "atan";
+	case COSH:   return "cosh";
+	case SINH:   return "sinh";
+	case TANH:   return "tanh";
+	case ACOSH:  return "acosh";
+	case ASINH:  return "asinh";
+	case ATANH:  return "atanh";
 	default: assert(false); return "???";
 	}
 }

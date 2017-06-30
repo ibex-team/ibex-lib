@@ -90,10 +90,33 @@ IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
 
 	d.write_arg_domains(box);
 
-	assert(fwd_agenda!=NULL);
 	assert(!components.empty());
 
 	int m=components.size();
+
+	IntervalVector res(m);
+
+	if (fwd_agenda==NULL) {
+
+		assert(f.expr().dim.is_vector());
+
+		// The vector of expression is heterogeneous.
+		//
+		// We might be able in this case to use the DAG but
+		// - the algorithm is more complex
+		// - we might not benefit from possible symbolic simplification due
+		//   to the fact that only specific components are required (there is
+		//   no simple "on the fly" simplification as in the case of a vector
+		//   of homogeneous expressions)
+		// so we resort to the components functions f[i] --> symbolic copy+no DAG :(
+		int c;
+		for (int i=0; i<m; i++) {
+			c = (i==0 ? components.min() : components.next(c));
+			res[i] = f[c].eval(box);
+		}
+
+		return res;
+	}
 
 	// merge all the agendas
 	int c;
@@ -108,9 +131,6 @@ IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
 	} catch(EmptyBoxException&) {
 		d.top->set_empty();
 	}
-
-	IntervalVector res(m);
-
 	for (int i=0; i<m; i++) {
 		c = (i==0 ? components.min() : components.next(c));
 		res[i] = d[bwd_agenda[c]->first()].i();
