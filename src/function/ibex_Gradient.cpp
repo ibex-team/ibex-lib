@@ -87,7 +87,7 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitS
 
 	int c; // constraint number
 
-	if (m==1) {
+	if (f.image_dim()==1) {
 		gradient(box,J[0]);
 
 	} else if(_eval.fwd_agenda!=NULL) {

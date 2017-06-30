@@ -7,6 +7,8 @@
 
 #include "ibex_SystemBox.h"
 
+using namespace std;
+
 namespace ibex {
 
 double SystemBox::default_update_ratio = 0.01;
@@ -14,10 +16,10 @@ double SystemBox::default_update_ratio = 0.01;
 SystemBox::SystemBox(const System& sys, double update_ratio) : IntervalVector(sys.nb_var),
 		sys(sys), update_ratio(update_ratio), cache(IntervalVector::empty(sys.nb_var)),
 		goal_eval_updated(false), _goal_gradient(sys.nb_var), goal_gradient_updated(false),
-		_ctrs_eval(sys.nb_ctr>0? sys.nb_ctr : 1), ctr_eval_updated(false),
-		_ctrs_jacobian(sys.nb_ctr>0? sys.nb_ctr : 1, sys.nb_ctr>0? sys.nb_var : 1),
+		_ctrs_eval(sys.f_ctrs.image_dim()>0? sys.f_ctrs.image_dim() : 1), ctr_eval_updated(false),
+		_ctrs_jacobian(sys.f_ctrs.image_dim()>0? sys.f_ctrs.image_dim() : 1, sys.f_ctrs.image_dim()>0? sys.nb_var : 1),
 		ctr_jacobian_updated(false),
-		active(BitSet::empty(sys.nb_ctr)),
+		active(BitSet::empty(sys.f_ctrs.image_dim())),
 		active_ctr_updated(false), active_ctr_jacobian_updated(false) {
 
 }
@@ -60,7 +62,7 @@ void SystemBox::update() const {
 			goal_eval_updated=false;
 			goal_gradient_updated=false;
 		}
-		if (sys.nb_ctr>0) {
+		if (sys.f_ctrs.image_dim()>0) {
 			ctr_eval_updated=false;
 			ctr_jacobian_updated=false;
 			active_ctr_jacobian_updated=false;
@@ -69,7 +71,7 @@ void SystemBox::update() const {
 		if (!included) {
 			// All the constraints are now
 			// marked as potentially active.
-			active.fill(0,sys.nb_ctr-1);
+			active.fill(0,sys.f_ctrs.image_dim()-1);
 		}
 
 		// note: if the box has changed but is included
@@ -77,7 +79,7 @@ void SystemBox::update() const {
 		// as inactive.
 		active_ctr_updated=false;
 
-//		for (int i=0; i<sys.nb_ctr; i++) {
+//		for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 //			if (!included ||
 //					(!inactive_ctr[i] && !close))
 //
@@ -130,7 +132,7 @@ void System::goal_gradient(const IntervalVector& box, IntervalVector& g) const {
 
 IntervalVector System::ctrs_eval(const IntervalVector& box) const {
 
-	IntervalVector ev(nb_ctr);
+	IntervalVector ev(f_ctrs.image_dim());
 	ctrs_eval(box,ev);
 	return ev;
 }
@@ -143,6 +145,8 @@ void System::ctrs_eval(const IntervalVector& box, IntervalVector& ev) const {
 		sbox->update();
 
 		if (!sbox->ctr_eval_updated) {
+			// maybe, we could avoid evaluating active constraints
+			// here when they are up-to-date
 			sbox->_ctrs_eval = f_ctrs.eval_vector(sbox->cache);
 			sbox->ctr_eval_updated=true;
 		}
@@ -153,7 +157,7 @@ void System::ctrs_eval(const IntervalVector& box, IntervalVector& ev) const {
 }
 
 IntervalMatrix System::ctrs_jacobian(const IntervalVector& box) const {
-	IntervalMatrix J(nb_ctr, nb_var);
+	IntervalMatrix J(f_ctrs.image_dim(), nb_var);
 	ctrs_jacobian(box,J);
 	return J;
 }
@@ -202,8 +206,9 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 
 		sbox->update();
 
-		if (sbox->active_ctr_updated)
+		if (sbox->active_ctr_updated) {
 			return sbox->active;
+		}
 
 		if (sbox->cache.is_empty()) {
 			sbox->active.clear();
@@ -222,28 +227,29 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 			res = f_ctrs.eval_vector(sbox->cache, sbox->active);
 
 			int c;
-			for (int i=0; i<sbox->active.size(); i++) {
+			for (unsigned int i=0; i<sbox->active.size(); i++) {
 				c=(i==0? sbox->active.min() : sbox->active.next(c));
 				sbox->_ctrs_eval[c] = res[i];
 			}
 		}
 
-		int c;
-		for (int i=0; i<sbox->active.size(); i++) {
-			c=(i==0? sbox->active.min() : sbox->active.next(c));
-
-			if (__is_inactive(sbox->_ctrs_eval[c], ops[c])) sbox->active.remove(c);
+		// don't iterate over "sbox->active" directly because we
+		// remove elements inside the loop
+		for (int c=0; c<f_ctrs.image_dim(); c++) {
+			if (sbox->active[c] && __is_inactive(sbox->_ctrs_eval[c], ops[c])) {
+				sbox->active.remove(c);
+			}
 		}
 
 		sbox->active_ctr_updated=true;
 		return sbox->active;
 	} else {
 
-		BitSet active(BitSet::all(nb_ctr));
+		BitSet active(BitSet::all(f_ctrs.image_dim()));
 
 		IntervalVector res = f_ctrs.eval_vector(box);
 
-		for (int c=0; c<nb_ctr; c++) {
+		for (int c=0; c<f_ctrs.image_dim(); c++) {
 			if (__is_inactive(res[c],ops[c])) active.remove(c);
 		}
 
@@ -255,11 +261,13 @@ IntervalVector System::active_ctrs_eval(const IntervalVector& box) const {
 
 	BitSet b=active_ctrs(box);
 
+	assert(!b.empty());
+
 	const SystemBox* sbox=dynamic_cast<const SystemBox*>(&box);
 
 	IntervalVector ev(b.size());
 	int c;
-	for (int i=0; i<b.size(); i++) {
+	for (unsigned int i=0; i<b.size(); i++) {
 		c=(i==0? b.min() : b.next(c));
 		ev[i] = sbox ?
 				sbox->_ctrs_eval[c] // we now it has been updated by previous call to active_ctrs
@@ -273,20 +281,28 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 
 	BitSet b=active_ctrs(box);
 
+	assert(!b.empty());
+
 	const SystemBox* sbox=dynamic_cast<const SystemBox*>(&box);
 
 	IntervalMatrix J(b.size(),nb_var);
 
 	if (sbox) {
-		if (sbox->active_ctr_jacobian_updated) {
+		if (!sbox->active_ctr_jacobian_updated) {
+			J=f_ctrs.jacobian(box,b);
+
 			int c;
-			for (int i=0; i<b.size(); i++) {
+			for (unsigned int i=0; i<b.size(); i++) {
+				c=(i==0? b.min() : b.next(c));
+				sbox->_ctrs_jacobian[c] = J[i];
+			}
+			sbox->active_ctr_jacobian_updated=true;
+		} else {
+			int c;
+			for (unsigned int i=0; i<b.size(); i++) {
 				c=(i==0? b.min() : b.next(c));
 				J[i] = sbox->_ctrs_jacobian[c];
 			}
-		} else {
-			J=f_ctrs.jacobian(box,b);
-			sbox->active_ctr_jacobian_updated=true;
 		}
 	} else {
 		J=f_ctrs.jacobian(box,b);

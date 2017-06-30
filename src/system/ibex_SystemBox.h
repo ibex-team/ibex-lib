@@ -24,10 +24,10 @@ protected:
 
 	void update() const;
 
+	const System& sys;
+
 	static double default_update_ratio;
 	double update_ratio;
-
-	const System& sys;
 
 	/**
 	 * A stored box.
