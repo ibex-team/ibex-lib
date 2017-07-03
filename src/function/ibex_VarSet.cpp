@@ -160,7 +160,7 @@ void VarSet::init_bitset(Function& f, const Array<const ExprNode>& x, bool var) 
 		for (int r=0; r<symbol->dim.nb_rows(); r++) {
 			for (int c=0; c<symbol->dim.nb_cols(); c++) {
 				if (mask[r][c]) {
-					int k=f.symbol_index[j]+(r*symbol->dim.nb_cols())+c;
+					int k=f.symbol_index(j)+(r*symbol->dim.nb_cols())+c;
 					if (var)  {
 						is_var.add(k);  //  --> marked as a variable
 						((int&) nb_var)++;

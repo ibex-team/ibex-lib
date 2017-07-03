@@ -871,6 +871,11 @@ protected:
 	 */
 	void print_expr(std::ostream& os) const;
 
+	/**
+	 * \brief First variable index of a symbol argument
+	 */
+	int symbol_index(int arg) const;
+
 private:
 	friend class VarSet;
 
@@ -894,7 +899,7 @@ private:
 
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
-	int* symbol_index;                          // first variable index of a symbol
+	int* __symbol_index;                          // first variable index of a symbol
 
 	// if at some point, symbolic differentiation is needed for this function,
 	// we store the resulting function for future usage.
@@ -1154,6 +1159,13 @@ inline const int* Function::used_vars() const {
 inline std::ostream& operator<<(std::ostream& os, const Function& f) {
 	f.print(os);
 	return os;
+}
+
+inline int Function::symbol_index(int arg) const {
+	assert(arg>=0 && arg<nb_arg());
+	assert(__symbol_index);
+
+	return __symbol_index[arg];
 }
 
 // ============================================================================
