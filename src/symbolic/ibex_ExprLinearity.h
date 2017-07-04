@@ -38,7 +38,9 @@ public:
 	 * If e is not linear (or if it is not a subexpression of y), the
 	 * results is an empty interval vector.
 	 */
-	IntervalVector coeffs(const ExprNode& e) const;
+	IntervalVector coeff_vector(const ExprNode& e) const;
+
+	IntervalMatrix coeff_matrix(const ExprNode& e) const;
 
 	/**
 	 * \brief Delete this.

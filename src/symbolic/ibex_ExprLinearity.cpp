@@ -23,8 +23,11 @@ ExprLinearity::ExprLinearity(const Array<const ExprSymbol> x, const ExprNode& y)
 	for (int i=0; i<x.size(); i++)
 		n+=x[i].dim.size();
 
-	for (int i=0; i<x.size(); i++)
-		visit(x[i],i); // requires n to be known
+	int k=0;
+	for (int i=0; i<x.size(); i++) {
+		visit(x[i],k); // requires n to be known
+		k+=x[i].dim.size();
+	}
 
 	visit(y);
 }
@@ -40,18 +43,28 @@ ExprLinearity::~ExprLinearity() {
 	}
 }
 
-IntervalVector ExprLinearity::coeffs(const ExprNode& e) const {
+IntervalVector ExprLinearity::coeff_vector(const ExprNode& e) const {
 	IntervalVector c(n+1);
-//	cout << "n="<< n << endl;
-//	for (int i=0; i<_coeffs[e].first->size(); i++) {
-//		cout << (*_coeffs[e].first)[i].dim << endl;
-//	}
-//	cout << "==========\n";
+
 	if (!_coeffs.found(e))
 		c.set_empty();
 	else
 		load(c,*(_coeffs[e].first));
 	return c;
+}
+
+IntervalMatrix ExprLinearity::coeff_matrix(const ExprNode& e) const {
+
+	if (!_coeffs.found(e)) {
+		return IntervalMatrix::empty(e.dim.nb_rows(), n+1);
+	} else {
+		IntervalMatrix c(n+1, e.dim.nb_rows()); // the transpose of the result
+
+		for (int i=0; i<n+1; i++)
+			c.row(i)=(*(_coeffs[e].first))[i].v();
+
+		return c.transpose();
+	}
 }
 
 Array<Domain>* ExprLinearity::build_zero(const Dim& dim) const {
@@ -103,7 +116,7 @@ void ExprLinearity::visit(const ExprNode& e) {
 void ExprLinearity::visit(const ExprIndex& e) {
 	visit(e.expr);
 
-	if (!_coeffs.found(e)) return;
+	if (!_coeffs.found(e.expr)) return;
 
 	Array<Domain>& c=*(_coeffs[e.expr].first);
 
