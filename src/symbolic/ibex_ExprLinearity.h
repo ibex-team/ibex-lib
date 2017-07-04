@@ -33,13 +33,29 @@ public:
 	ExprLinearity(const Array<const ExprSymbol> x, const ExprNode& y);
 
 	/**
-	 * \brief Return the coefficients of a subexpression "e" of "y".
+	 * \brief True only if the expression "e" is linear.
+	 *
+	 */
+	bool is_linear(const ExprNode& e) const;
+
+	/**
+	 * \brief Return the coefficients of a scalar subexpression "e" of "y".
 	 *
 	 * If e is not linear (or if it is not a subexpression of y), the
 	 * results is an empty interval vector.
+	 *
+	 * \pre e must be scalar
 	 */
 	IntervalVector coeff_vector(const ExprNode& e) const;
 
+	/**
+	 * \brief Return the coefficients of a vector-valued subexpression "e" of "y".
+	 *
+	 * If e is not linear (or if it is not a subexpression of y), the
+	 * results is an empty interval matrix.
+	 *
+	 * \pre e must be vector-valued
+	 */
 	IntervalMatrix coeff_matrix(const ExprNode& e) const;
 
 	/**
@@ -108,6 +124,10 @@ protected:
 	 */
 	NodeMap<std::pair<Array<Domain>*, bool> > _coeffs;
 };
+
+inline bool ExprLinearity::is_linear(const ExprNode& e) const {
+	return _coeffs.found(e);
+}
 
 } /* namespace ibex */
 
