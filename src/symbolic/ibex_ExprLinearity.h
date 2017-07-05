@@ -24,6 +24,9 @@ namespace ibex {
  * \ingroup symbolic
  *
  * \brief Linearity Test for Expressions
+ *
+ * Note: should be faster (and more robust) than using symbolic differentiation.
+ *
  */
 class ExprLinearity : public virtual ExprVisitor {
 public:
@@ -102,27 +105,32 @@ protected:
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
 
+	typedef enum { CONSTANT, LINEAR, NONLINEAR } nodetype;
+
+	typedef std::pair<Array<Domain>*,nodetype> LinData;
+
 	Array<Domain>* build_zero(const Dim& dim) const;
-	std::pair<Array<Domain>*, bool> build_cst(const Domain& d) const;
+	LinData build_cst(const Domain& d) const;
 
 	void binary(const ExprBinaryOp& e, Domain (*fcst)(const Domain&,const Domain&), bool linear_op);
 	void unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), bool linear_op);
 
 	int n; // number of variables
 
+
 	/**
-	 * Domain** is a (n+1) array of domains.
+	 * Array<Domain>* is a (n+1) array of domains.
 	 * These domains are the vector of coefficients
 	 * if the node is a linear expression. The
 	 * last domain corresponds to the additive constant.
 	 *
-	 * coeffs[e] is NULL if e is not a
-	 * linear expression.
+	 * The non-linearity of a node with respect to a variable
+	 * is represented by an unbounded domain (-oo,oo).
 	 *
-	 * The boolean indicates if the expression is constant
-	 * or not.
+	 * The nodetype indicates if the whole subexpression is constant
+	 * linear or non-linear.
 	 */
-	NodeMap<std::pair<Array<Domain>*, bool> > _coeffs;
+	NodeMap<LinData> _coeffs;
 };
 
 inline bool ExprLinearity::is_linear(const ExprNode& e) const {
