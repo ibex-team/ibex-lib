@@ -189,6 +189,9 @@ public:
 	/** Return true if either 0, the null vector or the null matrix. */
 	bool is_zero() const;
 
+	/** Return true only if unbounded. */
+	bool is_unbounded() const;
+
 private:
 
 	TemplateDomain();
@@ -693,6 +696,16 @@ bool TemplateDomain<D>::is_zero() const {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: return v().is_zero(); break;
 	default:              return m().is_zero(); break;
+	}
+}
+
+template<class D>
+bool TemplateDomain<D>::is_unbounded() const {
+	switch(dim.type()) {
+	case Dim::SCALAR :     return i().is_unbounded(); break;
+	case Dim::ROW_VECTOR :
+	case Dim::COL_VECTOR : return v().is_unbounded(); break;
+	case Dim::MATRIX :     return m().is_unbounded(); break;
 	}
 }
 

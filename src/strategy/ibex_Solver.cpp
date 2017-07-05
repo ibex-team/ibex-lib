@@ -231,7 +231,7 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 
 				proved=inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity);
 
-				if (params && params->size()<n-m)
+				if (params && ((int) params->size())<n-m)
 					sol.varset = new VarSet(varset);
 
 			} catch(SingularMatrixException& e) {

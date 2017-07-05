@@ -21,8 +21,8 @@ class PolytopeHullEmptyBoxException { };
 
 CtcPolytopeHull::CtcPolytopeHull(LinearFactory& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(lr.nb_var()), lr(lr),
-		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(false),
-		contracted_vars(BitSet::all(nb_var)) {
+		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
+		contracted_vars(BitSet::all(nb_var)), own_lr(false) {
 
 	 mylinearsolver = new LinearSolver(nb_var, max_iter, time_out, eps);
 
@@ -30,8 +30,8 @@ CtcPolytopeHull::CtcPolytopeHull(LinearFactory& lr, int max_iter, int time_out, 
 
 CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(A.nb_cols()), lr(*new LinearRelaxFixed(A,b)),
-		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(true),
-		contracted_vars(BitSet::all(nb_var)) {
+		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
+		contracted_vars(BitSet::all(nb_var)), own_lr(true) {
 
 	 mylinearsolver = new LinearSolver(nb_var, max_iter, time_out, eps);
 
