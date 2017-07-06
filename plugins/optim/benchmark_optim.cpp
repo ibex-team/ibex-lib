@@ -7,6 +7,8 @@ using namespace ibex;
 #define MAX(a,b) ((a < b) ? b : a)
 #define MIN(a,b) ((a < b) ? a : b)
 
+double tot_time = 0.0;
+
 double
 double_from_arg (const char *argname, const char *str)
 {
@@ -51,6 +53,8 @@ do_one_bench (System &sys, double prec, double time_limit)
 	/* Report some information (computation time, etc.) */
 	std::cout << "BENCH: eps = " << prec << " ; time = " << DefOpt.time
 						<< std::endl;
+
+  tot_time += DefOpt.time;
 
 	return DefOpt.time >= time_limit;
 }
@@ -157,6 +161,7 @@ main (int argc, char *argv[])
 		    do_one_bench (sys, prec_max, time_limit);
 
     }
+    std::cout << "# Total time: " << tot_time << std::endl; 
 		return EXIT_SUCCESS;
 	}
 	catch (ibex::SyntaxError& e)
