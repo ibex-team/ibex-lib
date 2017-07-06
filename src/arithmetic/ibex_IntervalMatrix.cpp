@@ -190,7 +190,7 @@ bool IntervalMatrix::is_zero() const {
 }
 
 bool IntervalMatrix::is_unbounded() const {
-	return _is_unbounded(*this);
+	return _is_unboundedM(*this);
 }
 
 IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const {

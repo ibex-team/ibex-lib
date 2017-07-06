@@ -83,13 +83,14 @@ void TestExprLinearity::test05() {
 	Array<const ExprSymbol> args(x,y);
 	const ExprConstant& c=ExprConstant::new_scalar(0);
 	const ExprNode& e1=2*x;
-	const ExprNode& e=sin(x)*e1;
+	const ExprNode& e=sin(x)*e1+y;
 	ExprLinearity lin(args,e);
 
 	double _e1[][2]={{2,2},{0,0},{0,0}};
+	double _e[][2]={{NEG_INFINITY,POS_INFINITY},{1,1},{0,0}};
 
 	CPPUNIT_ASSERT(lin.coeff_vector(e1)==IntervalVector(3,_e1));
-	CPPUNIT_ASSERT(lin.coeff_vector(e)==IntervalVector::empty(3));
+	CPPUNIT_ASSERT(lin.coeff_vector(e)==IntervalVector(3,_e));
 	cleanup(e,true);
 }
 
@@ -177,6 +178,21 @@ void TestExprLinearity::test10() {
 	CPPUNIT_ASSERT(de.nb_rows()==2 && de.nb_cols()==4);
 	CPPUNIT_ASSERT(almost_eq(de.submatrix(0,1,0,2),(A+Matrix(2,3,_de1)),1e-10));
 	CPPUNIT_ASSERT(almost_eq(de.submatrix(0,1,3,3).col(0),b+Vector(2,_de2),1e-10));
+	cleanup(e,true);
+}
+
+void TestExprLinearity::test11() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	const ExprSymbol& y=ExprSymbol::new_();
+	Array<const ExprSymbol> args(x,y);
+	Array<const ExprNode> vec1(x,ExprConstant::new_scalar(0),2*y);
+	Array<const ExprNode> vec2(x,ExprConstant::new_scalar(0),ExprConstant::new_scalar(3));
+	const ExprNode& e=ExprVector::new_(vec1,true)*ExprVector::new_(vec2,false);
+	ExprLinearity lin(args,e);
+	IntervalVector de=lin.coeff_vector(e);
+
+	CPPUNIT_ASSERT(de[0]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(de[1]==6);
 	cleanup(e,true);
 
 }

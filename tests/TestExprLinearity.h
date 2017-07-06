@@ -34,6 +34,7 @@ public:
 	CPPUNIT_TEST(test08);
 	CPPUNIT_TEST(test09);
 	CPPUNIT_TEST(test10);
+	CPPUNIT_TEST(test11);
 	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
@@ -46,6 +47,7 @@ public:
 	void test08();
 	void test09();
 	void test10();
+	void test11();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestExprLinearity);

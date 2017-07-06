@@ -183,7 +183,7 @@ void ExprLinearity::visit(const ExprMul& e) {
 	nodetype left_type = _coeffs[e.left].second;
 	nodetype right_type = _coeffs[e.right].second;
 
-	for (int i=0; i<n; i++) {
+	for (int i=0; i<n+1; i++) {
 		d->set_ref(i,*new Domain(e.dim));
 		(*d)[i].clear();
 	}
@@ -193,12 +193,19 @@ void ExprLinearity::visit(const ExprMul& e) {
 	// can be in O(n^4) :-(
 	for (int i=0; i<n+1; i++) {
 		for (int j=0; j<n+1; j++) {
-			// we introduce the "non_linear" coefficient so that
-			// a non-null term x_i*x_j will have its corresponding
-			// entry set to [-oo,oo]
-			Domain prod=(i<n && j<n ? non_linear*l[i]*r[j] : l[i]*r[j]);
-			(*d)[i] = (*d)[i]+prod; //TODO: implement += in TemplateDomain
-			(*d)[j] = (*d)[i]+prod;
+
+			if (i<n && j<n) {
+				// we introduce the "non_linear" coefficient so that
+				// a non-null term x_i*x_j will have its corresponding
+				// entry set to [-oo,oo]
+				Domain prod=non_linear*l[i]*r[j];
+				(*d)[i] = (*d)[i]+prod; //TODO: implement += in TemplateDomain
+				(*d)[j] = (*d)[i]+prod;
+			} else {
+				if (i<n) (*d)[i] = l[i]*r[n];
+				else if (j<n) (*d)[j] = (*d)[j] + (l[n]*r[j]);
+				else (*d)[n] = l[n]*r[n];
+			}
 		}
 	}
 
