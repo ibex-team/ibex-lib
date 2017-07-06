@@ -24,7 +24,7 @@ namespace ibex {
 namespace { // to create anonymous functions
 
 template<class M>
-bool _is_unbounded(const M& m) {
+bool _is_unboundedM(const M& m) {
 	if (m.is_empty()) return false;
 	for (int i=0; i<m.nb_rows(); i++)
 		if (m[i].is_unbounded()) return true;
