@@ -40,7 +40,7 @@ bool
 do_one_bench (System &sys, double prec, double time_limit)
 {
 	/* Build the default optimizer */
-	DefaultOptimizer DefOpt (sys, prec, prec);
+	DefaultOptimizer DefOpt (sys, 0.0, prec);
 
 	/* Set the time limit */
 	DefOpt.timeout = time_limit;
