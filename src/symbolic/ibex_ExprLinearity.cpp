@@ -42,6 +42,9 @@ ExprLinearity::~ExprLinearity() {
 }
 
 IntervalVector ExprLinearity::coeff_vector(const ExprNode& e) const {
+
+	assert(e.dim.type()==Dim::SCALAR);
+
 	IntervalVector c(n+1);
 
 	if (!_coeffs.found(e))
@@ -52,6 +55,8 @@ IntervalVector ExprLinearity::coeff_vector(const ExprNode& e) const {
 }
 
 IntervalMatrix ExprLinearity::coeff_matrix(const ExprNode& e) const {
+
+	assert(e.dim.nb_cols()==1);
 
 	if (!_coeffs.found(e)) {
 		return IntervalMatrix::empty(e.dim.nb_rows(), n+1);

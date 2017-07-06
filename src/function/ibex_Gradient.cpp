@@ -11,17 +11,32 @@
 
 #include "ibex_Function.h"
 #include "ibex_Gradient.h"
+#include "ibex_ExprLinearity.h"
 
 using namespace std;
 
 namespace ibex {
 
-Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f) {
+Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f),
+		coeff_matrix(f.image_dim(),f.nb_var()+1), is_linear(new bool[f.image_dim()]) {
 
+	if (f.expr().dim.nb_cols()>1)
+		return; // class not called in this case
+
+	ExprLinearity el(f.args(),f.expr());
+
+	if (f.expr().dim.is_scalar())
+		coeff_matrix[0]=el.coeff_vector(f.expr());
+	else
+		coeff_matrix=el.coeff_matrix(f.expr());
+
+	for (int i=0; i<f.image_dim(); i++) {
+		is_linear[i]=!coeff_matrix[i].is_unbounded();
+	}
 }
 
 Gradient::~Gradient() {
-
+	delete[] is_linear;
 }
 
 void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) {
@@ -70,24 +85,49 @@ void Gradient::gradient(const IntervalVector& box, IntervalVector& gbox) {
 }
 
 
-void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet* components) {
+void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet& components, int v) {
 
 	int n=f.nb_var();
-	int m=components==NULL ? f.image_dim() : components->size();
+	int m=components.size();
 
 	assert(m<=f.image_dim());
 	assert(J.nb_rows()==m);
 	assert(J.nb_cols()==n);
 	assert(box.size()==n);
-	assert(components==NULL || !components->empty());
+	assert(!components.empty());
 
-	if (f.expr().dim.is_matrix()) {
+	if (f.expr().dim.nb_cols()>1) {
 		ibex_error("Cannot called \"jacobian\" on a matrix-valued function");
 	}
 
 	int c; // constraint number
 
+	// ============================================================================
+	// Detect the "nonlinear" components (those that requires gradient calculation)
+	BitSet nonlinear_components=BitSet::empty(f.image_dim());
+
+	for (int i=0; i<m; i++) {
+
+		c=(i==0? components.min() : components.next(c));
+
+		const IntervalVector& row=coeff_matrix[c];
+
+		if (is_linear[c])
+			if (v!=-1)
+				J[i][v]=row[v];
+			else
+				J[i]=row.subvector(0,n-1); // the row also contains the additive constant
+		else if (v!=-1 && row[v].is_unbounded()) // linearity w.r.t. to v is enough
+			J[i][v]=row[v];
+		else
+			nonlinear_components.add(c);
+	}
+
+	if (nonlinear_components.empty()) return;
+	// ============================================================================
+
 	if (f.image_dim()==1) {
+
 		gradient(box,J[0]);
 
 	} else if(_eval.fwd_agenda!=NULL) {
@@ -100,14 +140,17 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitS
 		//   forward phase (in the backward phase, each components are handled
 		//   separately so that shared subexpressions are treated as if they were separate).
 
-		if (_eval.eval(box).is_empty()) {
+		if (_eval.eval(box,nonlinear_components).is_empty()) {
 			// outside definition domain -> empty jacobian
-			J.set_empty(); return;
+			J.set_empty();
+			return;
 		}
 
 		for (int i=0; i<m; i++) {
 
-			c=components==NULL? i : (i==0? components->min() : components->next(c));
+			c=(i==0? components.min() : components.next(c));
+
+			if (!nonlinear_components[c]) continue;
 
 			J.row(i).clear();
 
@@ -141,9 +184,10 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitS
 		// when f is a vector of expressions (the most frequent case).
 		// ======================== option 1 =============================
 		for (int i=0; i<m; i++) {
-			c=components==NULL? i : (i==0? components->min() : components->next(c));
+			c=i==0? components.min() : components.next(c);
 
 			f[c].gradient(box,J[i]);
+
 			if (J[i].is_empty()) {
 				J.set_empty();
 				return;
@@ -178,12 +222,8 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitS
 	}
 }
 
-void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
-	jacobian(box,J,NULL);
-}
-
-void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet& components) {
-	jacobian(box,J,&components);
+void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, int v) {
+	jacobian(box,J, BitSet::all(f.image_dim()), v);
 }
 
 void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) {

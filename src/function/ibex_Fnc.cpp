@@ -41,6 +41,24 @@ void Fnc::jacobian(const IntervalVector& box, IntervalMatrix& J_var, IntervalMat
 	}
 }
 
+//void Fnc::jacobian(const IntervalVector& x, const BitSet& fi, const BitSet& xj, IntervalMatrix& J) const {
+//	IntervalMatrix Jfull(image_dim(),nb_var());
+//	assert(J.nb_rows()==((int) fi.size()));
+//	assert(J.nb_cols()==((int) xj.size()));
+//
+//	jacobian(x,J);
+//
+//	int c;
+//	for (unsigned int i=0; i<fi.size(); i++) {
+//		c=(i==0? fi.min() : fi.next(c));
+//		int v;
+//		for (unsigned int j=0; j<xj.size(); j++) {
+//			v=(j==0? xj.min() : xj.next(v));
+//			J[i][j] = Jfull[c][v];
+//		}
+//	}
+//}
+
 void Fnc::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, IntervalMatrix& H) const {
 	int n=nb_var();
 	int m=image_dim();

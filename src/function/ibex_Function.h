@@ -714,9 +714,9 @@ public:
 	 *
 	 * \param x - the input box
 	 * \param J - where the Jacobian matrix has to be stored (output parameter).
-	 *
+	 * \param v - Only update the vth column of J.
 	 */
-	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J, int v=-1) const;
 
 	/**
 	 *\see #ibex::Fnc
@@ -1092,8 +1092,8 @@ inline IntervalVector Function::gradient(const IntervalVector& x) const {
 	return g;
 }
 
-inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
-	_grad->jacobian(x,J);
+inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {
+	_grad->jacobian(x,J,v);
 }
 
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {

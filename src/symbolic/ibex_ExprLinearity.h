@@ -44,8 +44,9 @@ public:
 	/**
 	 * \brief Return the coefficients of a scalar subexpression "e" of "y".
 	 *
-	 * If e is not linear (or if it is not a subexpression of y), the
-	 * results is an empty interval vector.
+	 * If e is not linear with respect to a variable x_j, the
+	 * corresponding coefficient v_j in the returned vector v
+	 * is set to (-oo,oo).
 	 *
 	 * \pre e must be scalar
 	 */
@@ -54,10 +55,11 @@ public:
 	/**
 	 * \brief Return the coefficients of a vector-valued subexpression "e" of "y".
 	 *
-	 * If e is not linear (or if it is not a subexpression of y), the
-	 * results is an empty interval matrix.
+	 * If e_i is not linear with respect to a variable x_j, the
+	 * corresponding coefficient A_ij in the returned matrix A
+	 * is set to (-oo,oo).
 	 *
-	 * \pre e must be vector-valued
+	 * \pre e must be column-vector-valued
 	 */
 	IntervalMatrix coeff_matrix(const ExprNode& e) const;
 
@@ -134,7 +136,8 @@ protected:
 };
 
 inline bool ExprLinearity::is_linear(const ExprNode& e) const {
-	return _coeffs.found(e);
+	return _coeffs.found(e) &&
+			_coeffs[e].second<NONLINEAR;
 }
 
 } /* namespace ibex */

@@ -109,13 +109,26 @@ public:
 	IntervalVector gradient(const IntervalVector& x) const;
 
 	/**
-	 * \brief Calculate the Jacobian matrix of f
+	 * \brief Calculate the Jacobian matrix of f.
 	 *
 	 * \param x - the input box
 	 * \param J - where the Jacobian matrix has to be stored (output parameter).
-	 *
+	 * \param v - Only update (if faster) the vth column of J.
 	 */
-	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J, int v=-1) const;
+
+//	/**
+//	 * \brief Calculate a submatrix of the Jacobian of f.
+//	 *
+//	 * Default implementation (inefficient!): calculate the whole Jacobian and extract
+//	 * the submatrix.
+//	 *
+//	 * \param x -  the input box
+//	 * \param fi - the selected rows
+//	 * \param xj - the selected columns
+//	 * \param J -  where the Jacobian matrix has to be stored (output parameter).
+//	 */
+//	virtual void jacobian(const IntervalVector& x, const BitSet& fi, const BitSet& xj, IntervalMatrix& J) const;
 
 	/**
 	 * \brief Calculate the Jacobian matrix of f
@@ -212,7 +225,7 @@ inline void Fnc::gradient(const IntervalVector& x, IntervalVector& g) const {
 	g=IntervalVector(_image_dim.vec_size());
 }
 
-inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
+inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {
 	J=IntervalMatrix(_image_dim.nb_rows(), _image_dim.nb_cols());
 }
 
