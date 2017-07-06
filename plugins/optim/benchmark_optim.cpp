@@ -123,32 +123,40 @@ main (int argc, char *argv[])
 		if (!sys.goal)
 			ibex_error ("input file does not contains an optimization problem.");
 
-		/* always bench prec_min and prec_max */
-		do_one_bench (sys, prec_min, time_limit);
-		do_one_bench (sys, prec_max, time_limit);
+		/* always bench prec_min */
+		bool has_timeout = do_one_bench (sys, prec_min, time_limit);
+    if (!has_timeout)
+    {
+		  double prec_ndigits = 0.;
+		  for ( ; prec_ndigits < MIN (8., prec_ndigits_max); prec_ndigits += 1.)
+		  {
+			  if (prec_ndigits_min < prec_ndigits)
+			  {
+				  double prec = pow (10, -prec_ndigits);
+			    has_timeout = do_one_bench (sys, prec, time_limit);
+				  if (has_timeout)
+					  break;
+			  }
+		  }
+      prec_ndigits -= 0.9;
+		  for (unsigned int i = 1; i < 10; i++, prec_ndigits += 0.1)
+		  {
+        if (prec_ndigits <= prec_ndigits_min)
+          continue;
+        else if (prec_ndigits > prec_ndigits_max)
+          break;
+        else
+			  {
+				  double prec = pow (10, -prec_ndigits);
+				  has_timeout = do_one_bench (sys, prec, time_limit);
+				  if (has_timeout)
+					  break;
+			  }
+		  }
+      if (!has_timeout)
+		    do_one_bench (sys, prec_max, time_limit);
 
-		double prec_ndigits = 0.;
-		for ( ; prec_ndigits < MIN (8., prec_ndigits_max); prec_ndigits += 1.)
-		{
-			if (prec_ndigits_min < prec_ndigits)
-			{
-				double prec = pow (10, -prec_ndigits);
-				bool has_timeout = do_one_bench (sys, prec, time_limit);
-				if (has_timeout)
-					break;
-			}
-		}
-		prec_ndigits -= 0.9;
-		for (unsigned int i = 1; i < 10; i++, prec_ndigits += 0.1)
-		{
-			if (prec_ndigits_min < prec_ndigits)
-			{
-				double prec = pow (10, -prec_ndigits);
-				bool has_timeout = do_one_bench (sys, prec, time_limit);
-				if (has_timeout)
-					break;
-			}
-		}
+    }
 		return EXIT_SUCCESS;
 	}
 	catch (ibex::SyntaxError& e)
