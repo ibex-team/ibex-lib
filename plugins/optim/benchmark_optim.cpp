@@ -48,15 +48,20 @@ do_one_bench (System &sys, double prec, double time_limit)
 	DefOpt.timeout = time_limit;
 
 	/* Do the actual computation */
-	DefOpt.optimize (sys.box);
+	Optimizer::Status status = DefOpt.optimize (sys.box);
 
 	/* Report some information (computation time, etc.) */
-	std::cout << "BENCH: eps = " << prec << " ; time = " << DefOpt.time
-						<< std::endl;
+	std::cout << "BENCH: eps = " << prec
+	          << " ; status = " << status
+	          << " ; time = " << DefOpt.time
+	          << " ; nb_cells = " << DefOpt.nb_cells
+	          << " ; uplo = " << DefOpt.uplo
+	          << " ; loup = " << DefOpt.loup
+	          << std::endl;
 
-  tot_time += DefOpt.time;
+	tot_time += DefOpt.time;
 
-	return DefOpt.time >= time_limit;
+	return status == Optimizer::Status::TIME_OUT;
 }
 
 int
@@ -129,39 +134,38 @@ main (int argc, char *argv[])
 
 		/* always bench prec_min */
 		bool has_timeout = do_one_bench (sys, prec_min, time_limit);
-    if (!has_timeout)
-    {
-		  double prec_ndigits = 0.;
-		  for ( ; prec_ndigits < MIN (8., prec_ndigits_max); prec_ndigits += 1.)
-		  {
-			  if (prec_ndigits_min < prec_ndigits)
-			  {
-				  double prec = pow (10, -prec_ndigits);
-			    has_timeout = do_one_bench (sys, prec, time_limit);
-				  if (has_timeout)
-					  break;
-			  }
-		  }
-      prec_ndigits -= 0.9;
-		  for (unsigned int i = 1; i < 10; i++, prec_ndigits += 0.1)
-		  {
-        if (prec_ndigits <= prec_ndigits_min)
-          continue;
-        else if (prec_ndigits > prec_ndigits_max)
-          break;
-        else
-			  {
-				  double prec = pow (10, -prec_ndigits);
-				  has_timeout = do_one_bench (sys, prec, time_limit);
-				  if (has_timeout)
-					  break;
-			  }
-		  }
-      if (!has_timeout)
-		    do_one_bench (sys, prec_max, time_limit);
-
-    }
-    std::cout << "# Total time: " << tot_time << std::endl; 
+		if (!has_timeout)
+		{
+			double prec_ndigits = 0.;
+			for ( ; prec_ndigits < MIN (8., prec_ndigits_max); prec_ndigits += 1.)
+			{
+				if (prec_ndigits_min < prec_ndigits)
+				{
+					double prec = pow (10, -prec_ndigits);
+					has_timeout = do_one_bench (sys, prec, time_limit);
+					if (has_timeout)
+						break;
+				}
+			}
+			prec_ndigits -= 0.9;
+			for (unsigned int i = 1; i < 10; i++, prec_ndigits += 0.1)
+			{
+				if (prec_ndigits <= prec_ndigits_min)
+					continue;
+				else if (prec_ndigits > prec_ndigits_max)
+					break;
+				else
+				{
+					double prec = pow (10, -prec_ndigits);
+					has_timeout = do_one_bench (sys, prec, time_limit);
+					if (has_timeout)
+						break;
+				}
+			}
+			if (!has_timeout)
+				do_one_bench (sys, prec_max, time_limit);
+		}
+		std::cout << "# Total time: " << tot_time << std::endl;
 		return EXIT_SUCCESS;
 	}
 	catch (ibex::SyntaxError& e)

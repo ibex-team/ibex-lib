@@ -1,4 +1,4 @@
-import os, sys, re, math, shutil
+import os, sys, re, math, shutil, collections
 import ibexutils
 from waflib import TaskGen, Task, Logs, Utils, Errors
 benchlock = Utils.threading.Lock()
@@ -15,11 +15,33 @@ class Bench (Task.Task):
 	color = 'CYAN'
 	vars = []
 
-	RE_FP = r"[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?"
-	CAP_FP = "(%s)" % RE_FP
-	REGEXES = {"cap_fp" : CAP_FP}
-	RESULTS_PATTERN = "^BENCH: eps = {cap_fp} ; time = {cap_fp}\n$"
-	RESULTS_RE = re.compile (RESULTS_PATTERN.format(**REGEXES))
+	_RE_FP = r"[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?"
+	_CAP_FP = "(%s)" % _RE_FP
+	_REGEXES = {"cap_fp" : _CAP_FP}
+	KEYS_TYPE = collections.OrderedDict ()
+	KEYS_TYPE["eps"] = float
+	KEYS_TYPE["status"] = int
+	KEYS_TYPE["time"] = float
+	KEYS_TYPE["nb_cells"] = int
+	KEYS_TYPE["uplo"] = float
+	KEYS_TYPE["loup"] = float
+	PREFIX = "BENCH: "
+	RESULTS_PATTERN = "(%s) = (.*)" % "|".join(KEYS_TYPE.keys())
+	RESULTS_RE = re.compile (RESULTS_PATTERN)
+
+	@classmethod
+	def parse_bench_line (cls, line):
+		if line.startswith (cls.PREFIX):
+			D = {}
+			line = line[7:]
+			for part in line.split (" ; "):
+				m = cls.RESULTS_RE.match (part)
+				if m:
+					k = m.group(1)
+					D[k] = Bench.KEYS_TYPE[k](m.group(2))
+			return D
+		else:
+			return None
 
 	def runnable_status (self):
 		# for the moment always return true.
@@ -113,15 +135,15 @@ class Bench (Task.Task):
 		# Get the data and write the data file from the results_file
 		data = []
 		for l in ibexutils.to_unicode(self.results_node.read()).splitlines(True):
-			match = self.RESULTS_RE.match (l)
-			if match:
-				eps = float (match.group(1))
-				time = float (match.group(2))
-				data.append((eps, time))
-		data.sort (key=lambda x:-x[0])
+			D = self.parse_bench_line (l)
+			if not D is None:
+				data.append (D)
+		data.sort (key=lambda x:-x["eps"])
 
-		datastr = "# eps time" + os.linesep
-		datastr += os.linesep.join([ "%s %s" % (eps, time) for eps, time in data])
+		keys = self.KEYS_TYPE.keys()
+		datastr = "%s" % " ".join(keys) + os.linesep
+		datalines = (" ".join ("%s" % d.get (k, "NaN") for k in keys) for d in data)
+		datastr += os.linesep.join(datalines)
 		self.data_node.write (datastr + os.linesep)
 		return data
 
@@ -233,7 +255,9 @@ def benchmarks_format_output (bch):
 	def compute_score (data):
 		S = 0.0
 		prev_elt = None
-		for eps, time in data:
+		for d in data:
+			eps = d["eps"]
+			time = d["time"]
 			if not prev_elt is None:
 				prev_eps, prev_time = prev_elt
 				log10_eps = -math.log10(eps)
@@ -244,7 +268,8 @@ def benchmarks_format_output (bch):
 
 	def write_results (data):
 		for d in data:
-			bch.to_log ("BENCH: eps = %.12g ; time = %f" % d)
+			keys = Bench.KEYS_TYPE.keys()
+			bch.to_log (Bench.PREFIX + " ; ".join("%s = %s" % (k,d[k]) for k in keys))
 
 	def parse_results_file (filename):
 		measures_pattern = "^([0-9]+) measure[s]?, Score ="
@@ -255,19 +280,18 @@ def benchmarks_format_output (bch):
 		with open (filename, "r") as f:
 			for l in ibexutils.to_unicode(f.read()).splitlines(True):
 				match_measures = measures_re.match (l)
-				match_bench = Bench.RESULTS_RE.match (l)
 				if l.startswith ("FILE: "):
 					current_bchfile = str(l[6:-1])
 				elif match_measures:
 					assert (current_bchfile)
-					data.sort (key=lambda x:-x[0])
+					data.sort (key=lambda x:-x["eps"])
 					S = compute_score (data)
 					R[current_bchfile] = (S, data)
 					data = []
-				elif match_bench:
-					eps = float (match_bench.group(1))
-					time = float (match_bench.group(2))
-					data.append((eps, time))
+				else:
+					D = Bench.parse_bench_line (l)
+					if not D is None:
+						data.append (D)
 		return R
 
 	if bch.options.BENCHS_CMP_TO:
