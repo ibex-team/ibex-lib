@@ -3,7 +3,7 @@ import ibexutils
 from waflib import TaskGen, Task, Logs, Utils, Errors
 benchlock = Utils.threading.Lock()
 
-BENCHS_DEFAULT_ARGS = {"time_limit": 5, "prec_ndigits_max": "8",
+BENCHS_DEFAULT_ARGS = {"time_limit": 5, "prec_ndigits_max": "6",
                        "prec_ndigits_min": "1"}
 BENCHS_ARGS_NAME = BENCHS_DEFAULT_ARGS.keys()
 

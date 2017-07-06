@@ -12,7 +12,7 @@ set xtics 1e1
 set xtics add ("1" 1)
 set xtics nomirror
 set mxtics 5
-set xrange [1:1e-10]
+set xrange [1:1e-8]
 set xlabel "ε"
 
 set yrange [0:]
