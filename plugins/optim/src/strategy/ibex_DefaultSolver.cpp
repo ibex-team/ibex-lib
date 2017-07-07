@@ -76,8 +76,10 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 	//                                          new CtcHC4 (sys.ctrs,0.01),
 	//*(default_corners())));
 
+	System& norm_sys=rec(new NormalizedSystem(sys));
+
 	ctc_list.set_ref(index,rec(new CtcFixPoint(rec(new CtcCompo(
-			rec(new CtcPolytopeHull(rec(new LinearRelaxCombo(sys,LinearRelaxCombo::XNEWTON)))),
+			rec(new CtcPolytopeHull(rec(new LinearRelaxCombo(norm_sys,LinearRelaxCombo::XNEWTON)))),
 			rec(new CtcHC4 (sys.ctrs,0.01)))))));
 
 	ctc_list.resize(index+1); // in case the system is not square.

@@ -5,7 +5,7 @@
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Ignacio Araya, Bertrand Neveu, Gilles Chabert
+ * Author(s)   : Gilles Chabert, Ignacio Araya, Bertrand Neveu
  * Created     : July 01th, 2012
  * Updated     : June 23th, 2017
  * ---------------------------------------------------------------------------- */
@@ -13,7 +13,7 @@
 #ifndef __IBEX_LINEAR_RELAX_X_TAYLOR__
 #define __IBEX_LINEAR_RELAX_X_TAYLOR__
 
-#include "ibex_System.h"
+#include "ibex_NormalizedSystem.h"
 #include "ibex_LinearRelax.h"
 
 #include <vector>
@@ -43,13 +43,12 @@ public:
 	/**
 	 * \brief Strategies for selecting corner points.
 	 *
-	 * RANDOM_INV - One random corner and its opposite
-	 * NEG - Opposite of the previous point
 	 * INF_X - Lower-left corner
 	 * SUP_X - Upper-right corner
 	 * RANDOM - One random point
+	 * RANDOM_INV - The opposite of the random point (to be placed after)
 	 */
-	typedef enum  {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM } corner_point;
+	typedef enum  {INF_X, SUP_X, RANDOM, RANDOM_INV } corner_point;
 
 	/** Default max_diam_deriv value, set to 1e6  **/
 	static const double default_max_diam_deriv;
@@ -78,14 +77,6 @@ public:
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
 private:
-
-	/**
-	 * \brief The vector of corner selection in linearization
-	 *
-	 * Can be either X_INF, X_SUP, RANDOM, or RANDOM_INV.
-	 */
-	std::vector<corner_point> cpoints;
-
 	/**
 	 * \brief The system
 	 */
@@ -106,50 +97,37 @@ private:
 	 */
 	const int goal_ctr;
 
+	/**
+	 * \brief The vector of corner selection in linearization
+	 *
+	 * Can be either X_INF, X_SUP, RANDOM, or RANDOM_INV.
+	 */
+	std::vector<corner_point> cpoints;
+
 	/** Maximum diameter of the derivatives for calling linear solver (default value 1.e5) */
 	double max_diam_deriv;
 
 	/** TAYLOR | HANSEN : the linear relaxation method */
 	linear_mode lmode;
 
-	/** Stores the coefficients of linear constraints */
-	IntervalMatrix linear_coef;
-
-	/* For implementing RANDOM_INV one needs to store the last random corners */
-	int* last_rnd;
-
-	/** Indicates if the constraint is linear wrt to each variable */
-	bool** linear;
-
-	/** Indicates if the constraint is linear wrt to each variable */
-	bool* linear_ctr;
-
 	/**
-	 * Initialize the #linear and #linear_coef fields.
-	 */
-	void init_linear_coeffs();
-
-	/**
-	 * \brief Tries to add a linearization in the model mysoplex.
+	 * \brief Get the corner information "inf".
 	 *
-	 * \param id_point - The corner number
-	 *
-	 * \return 0 only when the linearization is not performed
+	 * \param inf - (output) whether the jth variable is set to lower bound (true)
+	 *              or upper bound (false)
 	 */
-	int X_Linearization(const IntervalVector & box, int ctr, corner_point cpoint,  IntervalVector &G,
-			int id_point, LinearSolver& lp_solver);
+	void get_corner(corner_point cpoint, bool* inf);
 
 	/**
-	 * Normalize the constraints
-	 * \param id_point - The corner number
+	 * \brief Get the point corresponding to "inf"
 	 */
-	int X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint, CmpOp op,
-			IntervalVector &G, int id_point, LinearSolver& lp_solver);
+	IntervalVector get_corner_point(const IntervalVector& box, bool* inf);
 
 	/**
-	 * \brief Symbolic Jacobian
+	 * \brief Add the constraint ax<=b in the LP solver.
 	 */
-	Function* df;
+	bool check_and_add_constraint(const IntervalVector& box, const Vector& a, double b, LinearSolver& lp_solver);
+
 };
 
 } // end namespace ibex

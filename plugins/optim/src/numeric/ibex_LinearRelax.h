@@ -24,6 +24,11 @@ namespace ibex {
 
 class LinearRelax : public LinearFactory {
 public:
+
+	/**
+	 * Return -1 if the underlying system is
+	 * infeasible.
+	 */
 	LinearRelax(int nb_var) : LinearFactory(nb_var) { }
 };
 

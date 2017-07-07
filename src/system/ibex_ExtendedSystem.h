@@ -38,7 +38,7 @@ public:
 	 *
 	 * To avoid confusion, the extended system has no goal (but it could be "y").
 	 */
-	ExtendedSystem(const System& sys, double eps=0);
+	explicit ExtendedSystem(const System& sys, double eps=0);
 
 	/**
 	 * \brief Name of the goal variable ("y").

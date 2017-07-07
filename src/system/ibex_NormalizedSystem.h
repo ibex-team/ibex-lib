@@ -42,7 +42,7 @@ public:
 	 *              inequalities: f<=eps and -f<=eps. If eps==0
 	 *              equalities are duplicated.
 	 */
-	NormalizedSystem(const System& sys, double eps=0);
+	explicit NormalizedSystem(const System& sys, double eps=0);
 
 	/**
 	 * \brief Delete this.

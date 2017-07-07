@@ -117,7 +117,7 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitS
 				J[i][v]=row[v];
 			else
 				J[i]=row.subvector(0,n-1); // the row also contains the additive constant
-		else if (v!=-1 && row[v].is_unbounded()) // linearity w.r.t. to v is enough
+		else if (v!=-1 && !row[v].is_unbounded()) // linearity w.r.t. to v is enough
 			J[i][v]=row[v];
 		else
 			nonlinear_components.add(c);
