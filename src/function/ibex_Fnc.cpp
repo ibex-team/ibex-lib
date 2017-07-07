@@ -77,8 +77,9 @@ void Fnc::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, Int
 
 	for (int var=0; var<n; var++) {
 		//var=tab[i];
+		if (x[var]==box[var]) continue;
 		x[var]=box[var];
-		jacobian(x,J);
+		jacobian(x,J,var);
 		if (J.is_empty()) {
 			H.set_empty();
 			return;

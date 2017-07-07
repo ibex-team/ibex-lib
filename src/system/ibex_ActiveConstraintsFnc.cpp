@@ -17,13 +17,21 @@ namespace ibex {
 
 ActiveConstraintsFnc::ActiveConstraintsFnc(const System& sys, const Vector& pt, double activation_threshold, bool trace) : sys(sys) {
 
-	activated.initialise(0,sys.ctrs.size()-1,BitSet::empt);
+	activated.initialise(0,sys.f_ctrs.image_dim()-1,BitSet::empt);
 
-	for (int i=0; i<sys.ctrs.size(); i++) {
-		if (sys.ctrs[i].op==EQ ||
-				sys.ctrs[i].f.eval(pt).mag() < activation_threshold) {
-			if (trace && sys.ctrs[i].op!=EQ) cout << " activate inequality n°" << i << endl;
-			activated.add(i);
+	BitSet ith=BitSet::empty(sys.f_ctrs.image_dim());
+
+	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
+		if (sys.ops[i]==EQ) activated.add(i);
+		else {
+			ith.add(i);
+
+			// call to eval_vector to avoid component generation
+			if (sys.f_ctrs.eval_vector(pt,ith)[0].mag() < activation_threshold) {
+				if (trace) cout << " activate inequality n°" << i << endl;
+				activated.add(i);
+			}
+			ith.remove(i);
 		}
 	}
 
@@ -37,24 +45,11 @@ ActiveConstraintsFnc::~ActiveConstraintsFnc() {
 }
 
 IntervalVector ActiveConstraintsFnc::eval_vector(const IntervalVector& x) const {
-	// TODO: use the DAG structure (needs to create a new "eval_vector" function in Function with Bitset argument?)
-	IntervalVector y(activated.size());
-	int c;
-	for (unsigned int i=0; i<activated.size(); i++) {
-		c = (i==0)? activated.min() : activated.next(c);
-		y[i]=sys.ctrs[c].f.eval(x);
-	}
-	return y;
+	return sys.f_ctrs.eval_vector(x,activated);
 }
 
 void ActiveConstraintsFnc::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
-	// TODO: use the DAG structure (needs to create a new "jacobian" function in Function with Bitset argument?)
-	//	IntervalMatrix J(activated.size(), x.size());
-	int c;
-	for (unsigned int i=0; i<activated.size(); i++) {
-		c = (i==0)? activated.min() : activated.next(c);
-		J[i]=sys.ctrs[c].f.gradient(x);
-	}
+	J=sys.f_ctrs.jacobian(x,activated);
 }
 
 } /* namespace ibex */
