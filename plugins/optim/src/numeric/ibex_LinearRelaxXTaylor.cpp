@@ -98,14 +98,14 @@ IntervalVector LinearRelaxXTaylor::get_corner_point(const IntervalVector& box, b
 
 bool LinearRelaxXTaylor::check_and_add_constraint(const IntervalVector& box, const Vector& a, double b, LinearSolver& lp_solver) {
 
-	Interval check=a*box; // for fast (in)feasibility check
+	Interval ax=a*box; // for fast (in)feasibility check
 
 	// ======= Quick (in)feasibility checks
 	//                 a*[x] <= rhs ?
-	if (check.lb()>b)
+	if (ax.lb()>b)
 		// the constraint is not satisfied
 		throw Unsatisfiability();
-	else if (check.ub()<=b)
+	else if (ax.ub()<=b)
 		// the (linear) constraint is satisfied for any point in the box
 		return false;
 	else {

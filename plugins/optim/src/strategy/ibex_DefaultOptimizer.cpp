@@ -19,8 +19,10 @@
 #include "ibex_CellStack.h"
 #include "ibex_Array.h"
 #include "ibex_Random.h"
-#include <vector>
 #include "ibex_DefaultStrategy.cpp_"
+#include "ibex_LoupFinderDefault.h"
+
+#include <vector>
 
 namespace ibex {
 
@@ -47,6 +49,7 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
 		Optimizer(_sys,
 			  ctc(_sys,get_ext_sys(_sys,default_equ_eps),prec), // warning: we don't know which argument is evaluated first
 			  rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),prec)),
+			  rec(new LoupFinderDefault(get_ext_sys(_sys,default_equ_eps))),
 			  prec, goal_prec, goal_prec, 1, default_equ_eps) {
   
 	RNG::srand(1);

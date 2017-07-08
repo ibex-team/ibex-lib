@@ -188,7 +188,9 @@ public:
 	BitSet active_ctrs(const IntervalVector& box) const;
 
 	/**
-	 * \brief True only if all the constraints are inactive
+	 * \brief Quick check that the box is inside g(x)<=0.
+	 *
+	 * \return True only if all the constraints are inactive
 	 *
 	 * \note Can be cached if box is actually a SystemBox.
 	 */

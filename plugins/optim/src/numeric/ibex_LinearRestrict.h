@@ -1,9 +1,11 @@
-/*
- * ibex_LinearRestrict.h
- *
- *  Created on: Jun 22, 2017
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_LinearRestrict.h
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Last Update : Jun 22, 2017
+//============================================================================
 
 #ifndef __IBEX_LINEAR_RESTRICT_H__
 #define __IBEX_LINEAR_RESTRICT_H__

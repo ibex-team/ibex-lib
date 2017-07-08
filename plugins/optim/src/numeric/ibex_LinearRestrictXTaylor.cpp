@@ -1,9 +1,11 @@
-/*
- * ibex_LinearRestrictXTaylor.cpp
- *
- *  Created on: Jun 22, 2017
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_LinearRestrictXTaylor.cpp
+// Author      : Gilles Chabert, Ignacio Araya, Bertrand Neveu
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Last Update : Jun 22, 2017
+//============================================================================
 
 #include "ibex_LinearRestrictXTaylor.h"
 #include "ibex_Random.h"
@@ -14,7 +16,10 @@ using namespace std;
 
 namespace ibex {
 
-LinearRestrictXTaylor::LinearRestrictXTaylor(const NormalizedSystem& sys) : LinearRestrict(sys.nb_var), sys(sys) {
+LinearRestrictXTaylor::LinearRestrictXTaylor(const /*Normalized*/System& sys) : LinearRestrict(sys.nb_var), sys(sys) {
+	if (!dynamic_cast<const NormalizedSystem*>(&sys)) {
+		not_implemented("LinearRestrictXTyalor with non-normalized systems");
+	}
 	corner = new bool[nb_var()];
 }
 

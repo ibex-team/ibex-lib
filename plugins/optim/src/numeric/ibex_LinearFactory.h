@@ -1,9 +1,11 @@
-/*
- * ibex_LinearFactory.h
- *
- *  Created on: Jun 22, 2017
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_LinearFactory.cpp
+// Author      : Gilles Chabert, Ignacio Araya, Bertrand Neveu
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : Jun 22, 2017
+//============================================================================
 
 #ifndef __IBEX_LINEAR_FACTORY_H__
 #define __IBEX_LINEAR_FACTORY_H__

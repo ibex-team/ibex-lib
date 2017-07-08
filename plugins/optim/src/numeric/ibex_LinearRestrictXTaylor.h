@@ -1,9 +1,11 @@
-/*
- * ibex_LinearRestrictXTaylor.h
- *
- *  Created on: Jun 22, 2017
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_LinearRestrictXTaylor.h
+// Author      : Gilles Chabert, Ignacio Araya, Bertrand Neveu
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Last Update : Jun 22, 2017
+//============================================================================
 
 #ifndef __IBEX_LINEAR_RESTRICT_X_TAYLOR_H__
 #define __IBEX_LINEAR_RESTRICT_X_TAYLOR_H__
@@ -17,7 +19,7 @@ namespace ibex {
 class LinearRestrictXTaylor : public LinearRestrict {
 public:
 
-	LinearRestrictXTaylor(const NormalizedSystem& sys);
+	LinearRestrictXTaylor(const /*Normalized*/System& sys);
 
 	/**
 	 * \brief Generation of a linear approximation of the inner region
@@ -31,7 +33,7 @@ protected:
 	/**
 	 * \brief The system
 	 */
-	const NormalizedSystem& sys;
+	const /*Normalized*/System& sys;
 
 	/*
 	 * Boolean array indicating which corner in direction i is used :

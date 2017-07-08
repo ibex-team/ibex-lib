@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_CtcLR.h
+// File        : ibex_LinearRelaxCombo.cpp
 // Author      : Ignacio Araya, Bertrand Neveu,
 //               Gilles Trombettoni
 // Copyright   : Ecole des Mines de Nantes (France)

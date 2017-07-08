@@ -11,6 +11,7 @@
 #ifndef __IBEX_OPTIMIZER_H__
 #define __IBEX_OPTIMIZER_H__
 
+#include "ibex_LoupFinder.h"
 #include "ibex_Bsc.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_Ctc3BCid.h"
@@ -25,7 +26,6 @@
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_Random.h"
 #include "ibex_LinearRelaxCombo.h"
-#include "ibex_InXTaylor.h"
 
 namespace ibex {
 
@@ -70,7 +70,7 @@ public:
 	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
-	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, double prec=default_prec,
+	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
 
@@ -191,19 +191,15 @@ public:
 	/** Bisector. */
 	Bsc& bsc;
 
+	/** Loup finder algorithm. */
+	LoupFinder& loup_finder;
+
 	/** Cell buffers.
 	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,
 	the second one to minimize another criterion (by default the maximum of the objective estimate).
 	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
 	 */
 	CellDoubleHeap buffer;
-
-	/**
-	 * \brief Index of the goal variable y in the extended box.
-	 *
-	 */
-
-	InXTaylor in_x_taylor;
 
 	/** Precision (bisection control) */
 	const double prec;
@@ -216,15 +212,6 @@ public:
 
 	/** Number of samples used to update the loup */
 	const int sample_size;
-
-	/** Flag for applying monotonicity analysis.
-	 * The value can be fixed by the user. By default: true. */
-	bool mono_analysis_flag;
-
-	/** Flag for applying inHC4.
-	 * If true, apply inHC4. Otherwise, apply is_inside.
-	 * The value can be fixed by the user. By default: true. */
-	bool in_HC4_flag;
 
 	/** Trace activation flag.
 	 * The value can be fixed by the user. By default: 0  nothing is printed
@@ -375,62 +362,11 @@ protected:
 	/*=======================================================================================================*/
 
 	/**
-	 * \brief Monotonicity analysis.
-	 *
-	 * When f is increasing (resp. decreasing) w.r.t. variable x_i, the interval [x_i]
-	 * is replaced by the lower bound (resp. upper bound) of [x_i].
-	 */
-	void monotonicity_analysis(IntervalVector& box, bool inner_found);
-
-	/**
-	 * \brief Quick check that the box is not infeasible.
-	 *
-	 * The box must be a sub-box of the current cells's box (because constraints marked as
-	 * entailed as skipped from the check)
-	 */
-	bool is_feasible(const IntervalVector& box);
-
-	/**
-	 * \brief Quick check that the box is inside g(x)<=0.
-	 *
-	 * The box must be a sub-box of the current cells's box (because constraints marked as
-	 * entailed as skipped from the check)
-	 */
-	bool is_inner(const IntervalVector& box);
-
-
-	/**
-	 * \brief Reduce the box to an inner box using inHC4 algorithm.
-	 *
-	 * \return true if the resulting box is proven to be inner, false otherwise.
-	 *
-	 * Note: even if the result is false, a new box is constructed.
-	 */
-	bool in_HC4(IntervalVector& box);
-
-	/**
 	 * Look for a loup box (in rigor mode) starting from a pseudo-loup.
 	 *
 	 * Start from the last loup point found in relaxed mode.
 	 */
 	bool update_real_loup();
-
-	/**
-	 * \brief Update loup either using line_probing or random_probing.
-	 *
-	 * Main function for probing ;
-	 * search for an inner box ;
-	 * call line_probing or random_probing. (in the current version, random probing is called)
-	 * return true if the loup has been modified.
-	 */
-	bool update_loup_probing(const IntervalVector& box);
-
-	/**
-	 * \brief Update loup using inner linearizations.
-	 * return true if the loup has been modified.
-	 */
-//	bool update_loup_simplex(const IntervalVector& box);
-
 
 	/**
 	 * \brief Display the loup (for debug)
@@ -475,32 +411,17 @@ protected:
 	 *
 	 */
 	double initial_loup;
-
-	Ctc3BCid* objshaver;
 	
 private:
 
 	/** Rigor mode (eps_equ==0) */
 	const bool rigor;
 
-	/** Inner contractor (for the negation of g) */
-	CtcUnion* is_inside;
-
 	/** Lower bound of the small boxes taken by the precision */
 	double uplo_of_epsboxes;
 
 	/** Currently entailed constraints */
 	EntailedCtr* entailed;
-
-	/** Miscellaneous   for statistics */
-	int nb_simplex;
-	int nb_rand;
-	double diam_simplex;
-	double diam_rand;
-	int nb_inhc4;
-	double diam_inhc4;
-
-
 };
 
 

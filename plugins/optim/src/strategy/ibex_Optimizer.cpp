@@ -9,7 +9,6 @@
 
 #include "ibex_Optimizer.h"
 #include "ibex_Timer.h"
-#include "ibex_OptimProbing.cpp_"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcOptimShaving.h"
 #include "ibex_CtcHC4.h"
@@ -54,16 +53,16 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 	}
 }
 
-Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
+Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
                 				ext_sys(user_sys,equ_eps), has_equality(false /* by default*/),
-                				ctc(ctc),bsc(bsc),
+                				ctc(ctc), bsc(bsc), loup_finder(finder),
                 				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
-                				in_x_taylor(sys), prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
-                				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
+                				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
+                				sample_size(sample_size), trace(false),
                 				timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), loup_box(n), nb_cells(0),
@@ -88,37 +87,25 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		}
 	}
 
-	// ====== build the reversed inequalities g_i(x)>0 ===============
-	is_inside=m>0? new CtcUnion(sys) : NULL;
-	// =============================================================
-
 	if (trace) cout.precision(12);
 
 }
 
 Optimizer::~Optimizer() {
-	if (is_inside) {
-		for (int i=0; i<m; i++) {
-			delete &(is_inside->list[i]);
-		}
-
-		delete is_inside;
-	}
 	buffer.flush();
 	if (df) delete df;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
-	//	delete &(objshaver->ctc);
-	//	delete objshaver;
 }
 
 // compute the value ymax (decreasing the loup with the precision)
 // the heap and the current box are contracted with y <= ymax
 double Optimizer::compute_ymax() {
-	double ymax= loup - goal_rel_prec*fabs(loup);
+	double ymax = loup - goal_rel_prec*fabs(loup);
 	if (loup - goal_abs_prec < ymax)
 		ymax = loup - goal_abs_prec;
-	return ymax;}
+	return ymax;
+}
 
 
 // launch Hansen test
@@ -188,36 +175,27 @@ bool Optimizer::update_real_loup() {
 
 bool Optimizer::update_loup(const IntervalVector& box) {
 	bool loup_change=false;
-	if (rigor && has_equality) { // a loup point will not be safe (pseudo loup is not the real loup)
-		double old_pseudo_loup=pseudo_loup;
-		if (update_loup_probing(box)) { // && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
-			// update pseudo_loup
-			loup_change |= update_real_loup();
-			old_pseudo_loup=pseudo_loup; // because has changed
-		}
-		try {
-			in_x_taylor.set_inactive_ctr(entailed->norm_entailed);
-			pair<Vector,double> p=in_x_taylor.find(box,box.mid(),pseudo_loup);
-			loup_point = p.first;
-			pseudo_loup = p.second;
-			loup_change |= update_real_loup();
-		} catch(InXTaylor::NotFound&) { }
-	} else {
-		loup_change |= update_loup_probing(box); // update pseudo_loup
-		// the loup point is safe: the pseudo loup is the real loup.
-		loup=pseudo_loup;
-		try {
-			in_x_taylor.set_inactive_ctr(entailed->norm_entailed);
-			pair<Vector,double> p=in_x_taylor.find(box,box.mid(),loup);
-			loup_point = p.first;
-			pseudo_loup = p.second;
+
+	try {
+		pair<Vector,double> p=loup_finder.find(box,loup_point,pseudo_loup);
+		loup_point = p.first;
+		pseudo_loup = p.second;
+
+		if (trace)
+			cout << setprecision (12) << " loup update=" << pseudo_loup << " loup point=" << loup_point << endl;
+
+		if (rigor && has_equality) {
+			// a loup point will not be safe (pseudo loup is not the real loup)
+			loup_change = update_real_loup();
+		} else {
+			// the loup point is safe: the pseudo loup is the real loup.
+			loup = pseudo_loup;
 			loup_change = true;
-		} catch(InXTaylor::NotFound&) { }
+		}
 
-		loup = pseudo_loup;
-	}
+	} catch(LoupFinder::NotFound&) { }
+
 	return loup_change;
-
 }
 
 bool Optimizer::update_entailed_ctr(const IntervalVector& box) {
@@ -253,10 +231,9 @@ void Optimizer::update_uplo() {
 			ibex_error("optimizer: new_uplo<uplo (please report bug)");
 		}
 
-		// TODO: replace with uplo = std::max(uplo, std::min(new_uplo, uplo_of_epsboxes)) ??
+		// uplo <- max(uplo, min(new_uplo, uplo_of_epsboxes))
 		if (new_uplo < uplo_of_epsboxes) {
 			if (new_uplo > uplo) {
-				//cout << "uplo update=" << uplo << endl;
 				uplo = new_uplo;
 			}
 		}
@@ -288,8 +265,6 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 	if (c.box.is_empty()) {
 		delete &c;
 	} else {
-		//       objshaver->contract(c.box);
-
 		// we know cost1() does not require OptimData
 		buffer.cost2().set_optim_data(c,sys);
 
@@ -314,7 +289,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	// ymax is slightly increased to favour subboxes of the loup
 	// TODO: useful with double heap??
 	else ymax= compute_ymax()+1.e-15;
-	//	else ymax= compute_ymax();
+
 	/*
 	if (!(y.ub() == ymax))
 		  y &= Interval(NEG_INFINITY,ymax+1.e-15);
@@ -426,10 +401,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	uplo_of_epsboxes=POS_INFINITY;
 
 	nb_cells=0;
-	nb_simplex=0;
-	diam_simplex=0;
-	nb_rand=0;
-	diam_rand=0;
 
 	buffer.flush();
 
@@ -595,12 +566,7 @@ void Optimizer::report() {
 		cout << " cpu time used " << time << "s." << endl;
 		cout << " number of cells " << nb_cells << endl;
 	}
-	/*   // statistics on upper bounding
-    if (trace) {
-      cout << " nbrand " << nb_rand << " nb_inhc4 " << nb_inhc4 << " nb simplex " << nb_simplex << endl;
-      cout << " diam_rand " << diam_rand << " diam_inhc4 " << diam_inhc4 << " diam_simplex " << diam_simplex << endl;
-    }
-	 */
+
 }
 /* minimal report for benchmarking */
 void Optimizer::time_cells_report() {

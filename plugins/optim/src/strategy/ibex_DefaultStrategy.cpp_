@@ -12,9 +12,9 @@
 #include "ibex_Ctc.h"
 #include "ibex_CellBuffer.h"
 #include "ibex_LinearRelax.h"
-
 #include <vector>
 #include <stdlib.h>
+#include "ibex_LoupFinder.h"
 
 using namespace std;
 
@@ -41,9 +41,10 @@ public:
 
 	Bsc* bsc;
 	CellBuffer* buffer;
+	LoupFinder* finder;
 	LinearRelax* relax;
 
-	Memory() : bsc(NULL), buffer(NULL), relax(NULL) {
+	Memory() : bsc(NULL), buffer(NULL), finder(NULL), relax(NULL) {
 		// A NULL pointer corresponds to unused data
 	}
 
@@ -55,6 +56,7 @@ public:
 
 		if (bsc) delete bsc;
 		if (buffer) delete buffer;
+		if (finder) delete finder;
 		if (relax) delete relax;
 		// warning! LinearRelaxXTaylor uses system in its destructor.
 		// delete it before systems.
@@ -90,8 +92,9 @@ System& rec(System* ptr) {
 	return *ptr;
 }
 
-LinearRelax& rec(LinearRelax* ptr)       { return *((*memory())->relax = ptr); }
 Bsc& rec(Bsc* ptr)                       { return *((*memory())->bsc = ptr); }
+LoupFinder& rec(LoupFinder* ptr)         { return *((*memory())->finder = ptr); }
+LinearRelax& rec(LinearRelax* ptr)       { return *((*memory())->relax = ptr); }
 CellBuffer& rec(CellBuffer* ptr)         { return *((*memory())->buffer = ptr); }
 
 } // end anonymous namespace

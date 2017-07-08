@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_LRiter.cpp
+// File        : ibex_LinearRelaxCombo.cpp
 // Author      : Ignacio Araya, Bertrand Neveu , Gilles Trombettoni, Jordan Ninin
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file

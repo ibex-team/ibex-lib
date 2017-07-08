@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_LinearRelaxation.h
+// File        : ibex_LinearRelax.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Oct 30, 2013
-// Last Update : Oct 30, 2013
+// Last Update : Jun 22, 2017
 //============================================================================
 
 #ifndef __IBEX_LINEAR_RELAXATION_H__

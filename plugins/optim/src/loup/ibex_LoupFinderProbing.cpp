@@ -1,73 +1,40 @@
-/*
- * ibex_LineProbing.cpp
- *
- *  Created on: Jun 23, 2017
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_LoupFinderProbing.cpp
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : May 14, 2012
+// Last Update : Jul 09, 2017
+//============================================================================
 
-#include "ibex_LineProbing.h"
+#include "ibex_LoupFinderProbing.h"
 
 namespace ibex {
 
-const int LineProbing::default_sample_size = 1;
+const int LoupFinderProbing::default_sample_size = 1;
 
-LineProbing::LineProbing(const NormalizedSystem& sys, int sample_size) : sys(sys), sample_size(sample_size), loup_point(sys.nb_var), loup(POS_INFINITY), inactive(NULL) {
+LoupFinderProbing::LoupFinderProbing(const System& sys, int sample_size) : sys(sys), sample_size(sample_size), loup_point(sys.nb_var), loup(POS_INFINITY) {
 
 }
 
-
-bool LineProbing::is_inner(const IntervalVector& box) {
-  //	cout << " box " << box << endl;
-	for (int j=0; j<sys.nb_ctr; j++) {
-		if (inactive!=NULL && inactive[j]) continue;
-		Interval ev=sys.ctrs[j].f.eval(box);
-		if (ev.is_empty()) return false;
-		if (ev.ub()>0) return false;
-
-	}
-	return true;
-}
-
-bool LineProbing::check_candidate(const Vector& pt, bool _is_inner) {
-
-	// "res" will contain an upper bound of the criterion
-	double res = sys.goal_ub(pt);
-
-	// check if f(x) is below the "loup" (the current upper bound).
-	//
-	// The "loup" and the corresponding "loup_point" (the current minimizer)
-	// will be updated if the constraints are satisfied.
-	// The test of the constraints is done only when the evaluation of the criterion
-	// is better than the loup (a cheaper test).
-
-	//        cout << " res " <<  res << " loup " <<  pseudo_loup <<  " is_inner " << _is_inner << endl;
-	if (res<loup) {
-		if (_is_inner || is_inner(pt)) {
-			loup = res;
-			loup_point = pt;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-std::pair<Vector, double> LineProbing::find(const IntervalVector& fullbox, const Vector& loup_point, double current_loup) {
+std::pair<Vector, double> LoupFinderProbing::find(const IntervalVector& box, const Vector& loup_point, double current_loup) {
 
 	int n=sys.nb_var;
-
 	this->loup_point  = loup_point;
 	this->loup        = current_loup;
 
-	IntervalVector box = fullbox; // TODO
-
 	Vector pt(n);
 	bool loup_changed=false;
+	bool _is_inner = sys.is_inner(box);
 
 	for(int i=0; i<sample_size; i++) {
 		pt = box.random();
 		//	cout << " box " << box << " pt " << pt << endl;
-		loup_changed |= check_candidate (pt, false /* TODO --> is_inner */);
+		if (check(sys, pt, loup, _is_inner)) {
+			loup_changed = true;
+			this->loup_point = pt;
+		}
 	}
 
 	/*=================== "intensification" =================== */
@@ -75,16 +42,16 @@ std::pair<Vector, double> LineProbing::find(const IntervalVector& fullbox, const
 
 	if (sys.nb_ctr==0) {
 		if (loup_changed)
-		// we activate line probing only if the starting point has improved the goal.
-		// we use the full box (not inbox)
-		line_probing(fullbox);
-	else
-		// Try Hansen dichotomy between the last candidate point (pt)
-		// and the loup (note: the segment goes outside of the box, this is on purpose).
-		//
-		// Possible improvement: chose the random point with the smallest criterion
-		// instead of the last one.
-		loup_changed = dichotomic_line_search(pt,true);
+			// we activate line probing only if the starting point has improved the goal.
+			// we use the full box (not inbox)
+			line_probing(box);
+		else
+			// Try Hansen dichotomy between the last candidate point (pt)
+			// and the loup (note: the segment goes outside of the box, this is on purpose).
+			//
+			// Possible improvement: chose the random point with the smallest criterion
+			// instead of the last one.
+			loup_changed = dichotomic_line_search(pt,true);
 	}
 
 	/*========================================================*/
@@ -95,7 +62,7 @@ std::pair<Vector, double> LineProbing::find(const IntervalVector& fullbox, const
 		throw NotFound();
 }
 
-bool LineProbing::line_probing(const IntervalVector& box) {
+bool LoupFinderProbing::line_probing(const IntervalVector& box) {
 
 	int n=sys.nb_var;
 
@@ -187,18 +154,7 @@ bool LineProbing::line_probing(const IntervalVector& box) {
 	return dichotomic_line_search(facet_point, false);
 }
 
-/* ====================== 3rd method: make a double gradient descent ===============================
- * TODO...........
- * It probably requires Hessian matrix.
- */
-
-
-/**
- * TODO: this function is *unsafe* if applied with equality
- *       constraints in rigorous mode (is_inner is used as
- *       a sat check).
- */
-bool LineProbing::dichotomic_line_search(const Vector& end_point, bool exit_if_above_loup) {
+bool LoupFinderProbing::dichotomic_line_search(const Vector& end_point, bool exit_if_above_loup) {
 	Vector seg=end_point-loup_point;
 
 	double eps=1.0/16.0;
@@ -211,17 +167,15 @@ bool LineProbing::dichotomic_line_search(const Vector& end_point, bool exit_if_a
 	while (alpha2-alpha0>eps) {
 
 		Vector y1=loup_point+alpha1*seg;
-		double fy1=sys.goal_ub(y1);
-		if (fy1<fy0) {
-			if (is_inner(y1)) { // a better loup is found!
-				alpha0=alpha1;
-				fy0=fy1;
-			} else {
-				alpha2=alpha1;
-			}
+
+		if (check(sys,y1,fy0,false)) { // a better loup is found!
+			// note: fy0 is updated
+			alpha0=alpha1;
 		} else {
-			if (exit_if_above_loup) break;
-			else alpha2=alpha1;
+			if (exit_if_above_loup && sys.goal_ub(y1)>=fy0)
+				break;
+			else
+				alpha2=alpha1;
 		}
 
 		alpha1=0.5*(alpha0+alpha2);
