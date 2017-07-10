@@ -12,18 +12,32 @@
 
 namespace ibex {
 
-LoupFinderXTaylor::LoupFinderXTaylor(const /*Normalized*/System& sys) : sys(sys), lr(sys), lp_solver(sys.nb_var+1, std::max(sys.nb_var*3,LinearSolver::default_max_iter)) {
+//TODO: remove this recipe for the argument of the max number of iterations of the LP solver
+LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys), lp_solver(sys.nb_var, std::max(sys.nb_var*3,LinearSolver::default_max_iter)) {
 //	nb_simplex=0;
 //	diam_simplex=0;
-
-	// TODO: warning, INXTaylor actually works on the extended system!!
 }
 
 std::pair<Vector, double> LoupFinderXTaylor::find(const IntervalVector& box, const Vector&, double current_loup) {
 
 	int n=sys.nb_var;
 
-	lr.linearization(box,lp_solver);
+	lp_solver.clean_ctrs();
+	lp_solver.set_bounds(box);
+
+	Vector g=sys.goal_gradient(box).mid();
+
+	// set the objective coefficient
+	// TODO: replace with lp_solver.set_obj(g) when implemented
+	for (int j=0; j<n; j++)
+		lp_solver.set_obj_var(j,g[j]);
+
+	int count = lr.linearization(box,lp_solver);
+
+	if (count==-1) {
+		lp_solver.clean_ctrs();
+		throw NotFound();
+	}
 
 	LinearSolver::Status_Sol stat = lp_solver.solve();
 
@@ -40,6 +54,7 @@ std::pair<Vector, double> LoupFinderXTaylor::find(const IntervalVector& box, con
 		if (!box.contains(loup_point)) throw NotFound();
 
 		double new_loup=current_loup;
+
 		if (check(sys,loup_point,new_loup,false)) {
 			return std::make_pair(loup_point,new_loup);
 		}

@@ -21,10 +21,11 @@
 //#include "ibex_Multipliers.h"
 #include "ibex_PdcFirstOrder.h"
 #include "ibex_OptimData.h"
+#include "ibex_LoupFinderDefault.h"
+#include "ibex_ActiveConstraintsFnc.h"
 
 #include <float.h>
 #include <stdlib.h>
-#include "ibex_ActiveConstraintsFnc.h"
 
 using namespace std;
 
@@ -53,13 +54,13 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 	}
 }
 
-Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, double prec,
+Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder,*/ double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
                 				ext_sys(user_sys,equ_eps), has_equality(false /* by default*/),
-                				ctc(ctc), bsc(bsc), loup_finder(finder),
+                				ctc(ctc), bsc(bsc), loup_finder(*new LoupFinderDefault(sys)),
                 				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
                 				sample_size(sample_size), trace(false),
@@ -94,6 +95,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, d
 Optimizer::~Optimizer() {
 	buffer.flush();
 	if (df) delete df;
+	delete &loup_finder;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
 }
@@ -320,11 +322,11 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	IntervalVector tmp_box(n);
 	read_ext_box(c.box,tmp_box);
 
-	entailed = &c.get<EntailedCtr>();
-	if (!update_entailed_ctr(tmp_box)) {
-		c.box.set_empty();
-		return;
-	}
+//	entailed = &c.get<EntailedCtr>();
+//	if (!update_entailed_ctr(tmp_box)) {
+//		c.box.set_empty();
+//		return;
+//	}
 
 	bool loup_ch=update_loup(tmp_box);
 
@@ -415,10 +417,10 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	buffer.cost2().add_backtrackable(*root);
 
 	// add data required by optimizer + Fritz John contractor
-	root->add<EntailedCtr>();
-	//root->add<Multipliers>();
-	entailed=&root->get<EntailedCtr>();
-	entailed->init_root(user_sys,sys);
+//	root->add<EntailedCtr>();
+//	//root->add<Multipliers>();
+//	entailed=&root->get<EntailedCtr>();
+//	entailed->init_root(user_sys,sys);
 
 	loup_changed=false;
 	initial_loup=obj_init_bound;

@@ -35,7 +35,7 @@ LinearRelaxXTaylor::LinearRelaxXTaylor(const System& _sys, std::vector<corner_po
 		linear_mode lmode1, double max_diam_deriv1):
 			LinearRelax(_sys.nb_var), sys(_sys), n(_sys.nb_var),
 			m(sys.f_ctrs.image_dim()), goal_ctr(-1 /*tmp*/), cpoints(cpoints1),
-			max_diam_deriv(max_diam_deriv1),
+			inf(new bool[n]), max_diam_deriv(max_diam_deriv1),
 			lmode(lmode1) {
 
 	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
@@ -49,7 +49,7 @@ LinearRelaxXTaylor::~LinearRelaxXTaylor() {
 
 }
 
-void LinearRelaxXTaylor::get_corner(corner_point cpoint, bool *inf) {
+void LinearRelaxXTaylor::get_corner(corner_point cpoint) {
 
 	for (int j=0; j<n; j++) {
 		switch (cpoint) {
@@ -72,7 +72,7 @@ void LinearRelaxXTaylor::get_corner(corner_point cpoint, bool *inf) {
 	}
 }
 
-IntervalVector LinearRelaxXTaylor::get_corner_point(const IntervalVector& box, bool* inf) {
+IntervalVector LinearRelaxXTaylor::get_corner_point(const IntervalVector& box) {
 	IntervalVector corner(n);
 
 	for (int j=0; j<n; j++) {
@@ -105,11 +105,12 @@ bool LinearRelaxXTaylor::check_and_add_constraint(const IntervalVector& box, con
 	if (ax.lb()>b)
 		// the constraint is not satisfied
 		throw Unsatisfiability();
-	else if (ax.ub()<=b)
+	else if (ax.ub()<=b) {
 		// the (linear) constraint is satisfied for any point in the box
 		return false;
-	else {
+	} else {
 		try {
+			cout << "add constraint " << a << "*x<=" << b << endl;
 			lp_solver.add_constraint(a, LEQ, b);
 			return true;
 		} catch (LPException&) {
@@ -128,14 +129,13 @@ int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& l
 	// TODO: requires sys.active_ctrs_hansen_matrix !!!
 	//	BitSet b=sys.active_ctrs(box);
 
-	BitSet b=BitSet::all(m); // tmp.................
+	BitSet active=BitSet::all(m); // tmp.................
 	// ------------------------------------------------
 
-	int ma=b.size();
+	int ma=active.size();
 
 	IntervalMatrix Df(ma,n); // derivatives over the box
 	Matrix coeffs(ma,n);     // coefficients for the LP
-	bool *inf = new bool[n]; // information about which corner it is
 
 	if (lmode == TAYLOR) // compute derivatives once for all
 		// ------------------------------------------------
@@ -150,9 +150,9 @@ int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& l
 			// TODO: only one corner for a linear constraint!
 
 			// ============ get the corner point =================
-			get_corner(cpoints[k],inf);
-			IntervalVector corner=get_corner_point(box,inf);
-
+			get_corner(cpoints[k]);
+			IntervalVector corner=get_corner_point(box);
+			//cout << "========== corner=" << corner << "=========" << endl;
 			// ========= update derivatives (Hansen mode) ========
 			if (lmode == HANSEN) {
 				sys.f_ctrs.hansen_matrix(box,corner,Df);
@@ -166,18 +166,26 @@ int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& l
 			}
 
 			// ========= compute right-hand side vector ===========
-			IntervalVector rhs=-sys.f_ctrs.eval_vector(corner,b) + coeffs*corner;
+			IntervalVector rhs=-sys.f_ctrs.eval_vector(corner,active) + coeffs*corner;
 
 			// ================== add constraints ==================
 			int c; // constraint number
 
 			for (int i=0; i<ma; i++) {
 
+				c=(i==0? active.min() : active.next(c));
+
+				//cout << " add ctr n°" << c << endl;
+				if (k>0 && sys.f_ctrs.deriv_calculator().is_linear[c]) {
+					//cout << "ctr " << c << " is linear!\n";
+					continue;
+				}
+
+				// only one corner for a linear constraint
 				if (Df[i].max_diam() > max_diam_deriv) {
 					continue; // To avoid problems with LP solvers (like SoPleX)
 				}
 
-				c=(i==0? b.min() : b.next(c));
 
 				count += check_and_add_constraint(box,coeffs[i],rhs[i].ub(),lp_solver);
 

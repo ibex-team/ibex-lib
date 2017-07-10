@@ -104,6 +104,12 @@ private:
 	 */
 	std::vector<corner_point> cpoints;
 
+	/*
+	 * Boolean array indicating which corner in direction i is used :
+	 * true for inferior corner, false for superior one.
+	 */
+	bool* inf;
+
 	/** Maximum diameter of the derivatives for calling linear solver (default value 1.e5) */
 	double max_diam_deriv;
 
@@ -116,12 +122,12 @@ private:
 	 * \param inf - (output) whether the jth variable is set to lower bound (true)
 	 *              or upper bound (false)
 	 */
-	void get_corner(corner_point cpoint, bool* inf);
+	void get_corner(corner_point cpoint);
 
 	/**
 	 * \brief Get the point corresponding to "inf"
 	 */
-	IntervalVector get_corner_point(const IntervalVector& box, bool* inf);
+	IntervalVector get_corner_point(const IntervalVector& box);
 
 	/**
 	 * \brief Add the constraint ax<=b in the LP solver.

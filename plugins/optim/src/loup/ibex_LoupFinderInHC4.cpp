@@ -11,6 +11,8 @@
 #include "ibex_LoupFinderInHC4.h"
 #include "ibex_LoupFinderProbing.h"
 
+using namespace std;
+
 namespace ibex {
 
 LoupFinderInHC4::LoupFinderInHC4(const System& sys) : sys(sys) {
@@ -62,6 +64,7 @@ std::pair<Vector, double> LoupFinderInHC4::find(const IntervalVector& box, const
 	}
 
 //	if (inner_found) {
+//		cout <<  " inner box found:" << inbox << endl;
 //		nb_inhc4++;
 //		diam_inhc4 = ((nb_inhc4-1) *diam_inhc4 + inbox.max_diam()) / nb_inhc4;
 //	} else {

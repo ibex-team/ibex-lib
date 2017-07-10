@@ -29,7 +29,7 @@ public:
 	 * \param inHC4 -  Flag for applying inHC4.
 	 * If true, apply inHC4. Otherwise, apply is_inside.
 	 * The value can be fixed by the user. By default: true. */
-	LoupFinderDefault(const /*Normalized*/System& sys, bool inHC4=false);
+	LoupFinderDefault(const System& sys, bool inHC4=true);
 
 	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& loup_point, double loup);
 

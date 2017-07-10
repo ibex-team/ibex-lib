@@ -70,7 +70,7 @@ public:
 	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
-	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, double prec=default_prec,
+	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder, */double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
 

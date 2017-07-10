@@ -19,7 +19,7 @@ namespace ibex {
 class LoupFinderXTaylor : public LoupFinder {
 public:
 
-	LoupFinderXTaylor(const /*Normalized*/System& sys);
+	LoupFinderXTaylor(const System& sys);
 
 	/**
 	 * \throws NotFound
@@ -29,7 +29,7 @@ public:
 	/**
 	 * \brief The system
 	 */
-	const /*Normalized*/System& sys;
+	const System& sys;
 
 protected:
 

@@ -18,11 +18,11 @@ LoupFinderProbing::LoupFinderProbing(const System& sys, int sample_size) : sys(s
 
 }
 
-std::pair<Vector, double> LoupFinderProbing::find(const IntervalVector& box, const Vector& loup_point, double current_loup) {
+std::pair<Vector, double> LoupFinderProbing::find(const IntervalVector& box, const Vector& current_loup_point, double current_loup) {
 
 	int n=sys.nb_var;
-	this->loup_point  = loup_point;
-	this->loup        = current_loup;
+	loup_point  = current_loup_point;
+	loup        = current_loup;
 
 	Vector pt(n);
 	bool loup_changed=false;
@@ -33,7 +33,7 @@ std::pair<Vector, double> LoupFinderProbing::find(const IntervalVector& box, con
 		//	cout << " box " << box << " pt " << pt << endl;
 		if (check(sys, pt, loup, _is_inner)) {
 			loup_changed = true;
-			this->loup_point = pt;
+			loup_point = pt;
 		}
 	}
 

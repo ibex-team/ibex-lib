@@ -16,6 +16,11 @@ namespace ibex {
 
 class LinearRestrict : public LinearFactory {
 public:
+
+	/**
+	 * Return -1 if the linearization is
+	 * infeasible (no interior)
+	 */
 	LinearRestrict(int nb_var);
 };
 
