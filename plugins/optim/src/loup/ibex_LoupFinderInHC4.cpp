@@ -57,7 +57,7 @@ std::pair<Vector, double> LoupFinderInHC4::find(const IntervalVector& box, const
 
 		sys.f_ctrs[c].ibwd(right_cst, inbox);
 
-		if (box.is_empty()) {
+		if (inbox.is_empty()) {
 			inner_found=false;
 			break;
 		}

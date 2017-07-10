@@ -46,7 +46,7 @@ LinearRelaxXTaylor::LinearRelaxXTaylor(const System& _sys, std::vector<corner_po
 }
 
 LinearRelaxXTaylor::~LinearRelaxXTaylor() {
-
+	delete[] inf;
 }
 
 void LinearRelaxXTaylor::get_corner(corner_point cpoint) {
@@ -110,7 +110,7 @@ bool LinearRelaxXTaylor::check_and_add_constraint(const IntervalVector& box, con
 		return false;
 	} else {
 		try {
-			cout << "add constraint " << a << "*x<=" << b << endl;
+			//cout << "add constraint " << a << "*x<=" << b << endl;
 			lp_solver.add_constraint(a, LEQ, b);
 			return true;
 		} catch (LPException&) {
@@ -200,8 +200,6 @@ int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& l
 	} catch(NoCornerPoint&) {
 		// impossible to linearize
 	}
-
-	delete[] inf;
 
 	return count;
 }

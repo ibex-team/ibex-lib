@@ -10,6 +10,8 @@
 
 #include "ibex_LoupFinderXTaylor.h"
 
+using namespace std;
+
 namespace ibex {
 
 //TODO: remove this recipe for the argument of the max number of iterations of the LP solver
@@ -25,7 +27,7 @@ std::pair<Vector, double> LoupFinderXTaylor::find(const IntervalVector& box, con
 	lp_solver.clean_ctrs();
 	lp_solver.set_bounds(box);
 
-	Vector g=sys.goal_gradient(box).mid();
+	Vector g=sys.goal_gradient(box.mid()).mid();
 
 	// set the objective coefficient
 	// TODO: replace with lp_solver.set_obj(g) when implemented
@@ -41,13 +43,10 @@ std::pair<Vector, double> LoupFinderXTaylor::find(const IntervalVector& box, con
 
 	LinearSolver::Status_Sol stat = lp_solver.solve();
 
-	//std::cout << " stat " << stat << std::endl;
 	if (stat == LinearSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
-		Vector prim(n+1);
-		lp_solver.get_primal_sol(prim);
-
-		Vector loup_point = prim.subvector(1,n);
+		Vector loup_point(n);
+		lp_solver.get_primal_sol(loup_point);
 
 		//std::cout << " simplex result " << prim[0] << " " << loup_point << std::endl;
 
