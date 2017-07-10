@@ -78,18 +78,20 @@ IntervalVector LinearRelaxXTaylor::get_corner_point(const IntervalVector& box) {
 	for (int j=0; j<n; j++) {
 		if (inf[j]) {
 			if (box[j].lb()>NEG_INFINITY)
-				corner[j]=box[j].lb() ;
-			else if (box[j].ub()<POS_INFINITY)
-				corner[j]=box[j].ub() ;
-			else
+				corner[j]=box[j].lb();
+			else if (box[j].ub()<POS_INFINITY) {
+				corner[j]=box[j].ub();
+				inf[j]=false; // force change
+			} else
 				throw NoCornerPoint();
 		}
 		else {
 			if (box[j].ub()<POS_INFINITY)
-				corner[j]=box[j].ub() ;
-			else if (box[j].lb()>NEG_INFINITY)
-				corner[j]=box[j].lb() ;
-			else
+				corner[j]=box[j].ub();
+			else if (box[j].lb()>NEG_INFINITY) {
+				inf[j]=true; // force change
+				corner[j]=box[j].lb();
+			} else
 				throw NoCornerPoint();
 		}
 	}
