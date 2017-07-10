@@ -205,9 +205,9 @@ void ExprLinearity::visit(const ExprMul& e) {
 				// entry set to [-oo,oo]
 				Domain prod=non_linear*l[i]*r[j];
 				(*d)[i] = (*d)[i]+prod; //TODO: implement += in TemplateDomain
-				(*d)[j] = (*d)[i]+prod;
+				(*d)[j] = (*d)[j]+prod;
 			} else {
-				if (i<n) (*d)[i] = l[i]*r[n];
+				if (i<n) (*d)[i] = (*d)[i] + l[i]*r[n];
 				else if (j<n) (*d)[j] = (*d)[j] + (l[n]*r[j]);
 				else (*d)[n] = l[n]*r[n];
 			}
