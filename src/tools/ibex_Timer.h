@@ -63,7 +63,9 @@ private:
  * \brief Timer.
  */
 class StaticTimer {
- //public:
+ public:
+  static void start();
+
  private:
   friend class Timer;
 
@@ -71,7 +73,6 @@ class StaticTimer {
 
   typedef enum type_timer {__REAL, VIRTUAL} TimerType;
 
-  static void start();
 
   static void stop(TimerType type=VIRTUAL);
 
