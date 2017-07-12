@@ -90,7 +90,6 @@ void Solver::start(const IntervalVector& init_box) {
 	solutions.clear();
 	solve_init_box = init_box;
 	nb_cells=0;
-	time=0;
 
 	assert(init_box.size()==ctc.nb_var);
 
@@ -108,9 +107,8 @@ void Solver::start(const IntervalVector& init_box) {
 
 	IntervalVector tmpbox(ctc.nb_var);
 
-	Timer::reset_time();
-	Timer::start();
-
+	time =0;
+	timer.restart();
 }
 
 bool Solver::next(const Solution*& sol) {
@@ -151,6 +149,7 @@ bool Solver::next(const Solution*& sol) {
 						delete buffer.pop();
 						store_sol(new_sol);
 						sol = &solutions.back();
+						time = timer.get_time();
 						return true;
 					}
 				} // otherwise: continue search...
@@ -173,6 +172,7 @@ bool Solver::next(const Solution*& sol) {
 				if (is_sol) {
 					store_sol(new_sol);
 					sol = &solutions.back();
+					time = timer.get_time();
 					return true;
 				}
 				// note that we skip time_limit_check() here.
@@ -183,7 +183,7 @@ bool Solver::next(const Solution*& sol) {
 				// of uncaught timeout in this case (but this case is probably already
 				// an error case).
 			}
-			if (time_limit>0) Timer::check(time_limit);
+			if (time_limit>0) timer.check(time_limit);
 		}
 	}
 	catch (TimeOutException&) {
@@ -193,8 +193,8 @@ bool Solver::next(const Solution*& sol) {
 		cout << "cell limit " << cell_limit << " reached " << endl;
 	}
 
-	Timer::stop();
-	time = Timer::get_time();
+	timer.stop();
+	time = timer.get_time();
 
 	return false;
 

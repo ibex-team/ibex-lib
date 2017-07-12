@@ -86,13 +86,13 @@ int main (int argc, char** argv) {
 	RNG::srand(1);
 	volatile double a=RNG::rand();
 	volatile double b=RNG::rand();
-	Timer::reset_time();
-	Timer::start();
+	Timer timer;
+	timer.restart();
 	for (int i=0; i<100000000; i++) {
 		a *= b;
 	}
-	Timer::stop();
-	current_perf = Timer::get_time();
+	timer.stop();
+	current_perf = timer.get_time();
 
 	cout << "\tcurrent time=" << current_perf << endl;
 	double ratio_perf = current_perf/ref_perf;

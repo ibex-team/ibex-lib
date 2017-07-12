@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_Timer.cpp
+// File        : ibex_StaticTimer.cpp
 // Author      : ???? and Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -14,8 +14,35 @@ namespace ibex {
 
 
 
+Timer::Timer(): start_time(0), active(false) {
+}
 
 
+void Timer::start(){
+	if (not(active)) {
+		active = true;
+		start_time = StaticTimer::get_time();
+	}
+}
+
+void Timer::stop(){
+	active = false;
+	start_time = (StaticTimer::get_time() - start_time);
+}
+void Timer::restart() {
+	start_time= StaticTimer::get_time();
+	active =true;
+}
+double Timer::get_time() {
+	if (active) {
+		return (StaticTimer::get_time() - start_time);
+	} else {
+		return start_time;
+	}
+}
+void Timer::check(double timeout) {
+	if (get_time() >= timeout) throw TimeOutException();
+}
 
 
 	/////////////////////////////////////////////////////////////////////
@@ -133,21 +160,21 @@ int gettimeofday(struct timeval* tv, struct timezone* tz)
 
 
 
-Timer::Time Timer::local_time = 0;
-Timer::Time Timer::real_lapse;
-Timer::Time Timer::virtual_ulapse;
-Timer::Time Timer::virtual_slapse;
-Timer::Time Timer::real_time;
-Timer::Time Timer::virtual_utime;
-Timer::Time Timer::virtual_stime;
-long Timer::resident_memory;
+StaticTimer::Time StaticTimer::local_time = 0;
+StaticTimer::Time StaticTimer::real_lapse;
+StaticTimer::Time StaticTimer::virtual_ulapse;
+StaticTimer::Time StaticTimer::virtual_slapse;
+StaticTimer::Time StaticTimer::real_time;
+StaticTimer::Time StaticTimer::virtual_utime;
+StaticTimer::Time StaticTimer::virtual_stime;
+long StaticTimer::resident_memory;
 
 #ifndef _WIN32
-//  std::clock_t Timer::res;
-struct rusage Timer::res;
+//  std::clock_t StaticTimer::res;
+struct rusage StaticTimer::res;
 #endif
 
-struct timeval Timer::tp;
+struct timeval StaticTimer::tp;
 
 /*
  *  The virtual time of day and the real time of day are calculated and
@@ -155,7 +182,7 @@ struct timeval Timer::tp;
  *  values from similar values obtained at a later time to allow the user
  *  to get the amount of time used by the backtracking routine.
  */
-void Timer::start()
+void StaticTimer::start()
 {
 #ifndef _WIN32
 	//    res = std::clock();
@@ -177,15 +204,13 @@ void Timer::start()
  *  Stop the stopwatch and return the time used in seconds (either
  *  REAL or VIRTUAL time, depending on ``type'').
  */
-void Timer::stop( TimerType type )
+void StaticTimer::stop( TimerType type )
 {
 	if (type == __REAL) {
 		gettimeofday( &tp, NULL );
 		real_lapse = (Time) tp.tv_sec +
 				(Time) tp.tv_usec / 1000000.0
-				-
-
-				real_time;
+				- real_time;
 	}
 	else {
 
@@ -201,22 +226,34 @@ void Timer::stop( TimerType type )
 		resident_memory = res.ru_ixrss;
 #endif
 	}
-	local_time += Timer::VIRTUAL_TIMELAPSE();
+	local_time += StaticTimer::VIRTUAL_TIMELAPSE();
+}
+//
+//void StaticTimer::check(double timeout) {
+//	//if (VIRTUAL_TIMELAPSE()>timeout) throw TimeOutException();
+//	StaticTimer::stop();
+//	if (local_time >= timeout) throw TimeOutException();
+//	StaticTimer::start();
+//
+//	/*
+//if (StaticTimer::RESIDENT_MEMORY() > 100000)
+//  {cout << "memory limit " << StaticTimer::RESIDENT_MEMORY() << endl;
+//    throw MemoryException();
+//  }
+//	 */
+//	//StaticTimer::start();
+//}
+
+
+StaticTimer::Time StaticTimer::get_time() {
+	StaticTimer::stop();
+	StaticTimer::start();
+	return local_time;
 }
 
-void Timer::check(double timeout) {
-	//if (VIRTUAL_TIMELAPSE()>timeout) throw TimeOutException();
-	Timer::stop();
-	if (local_time >= timeout) throw TimeOutException();
-	Timer::start();
 
-	/*
-if (Timer::RESIDENT_MEMORY() > 100000)
-  {cout << "memory limit " << Timer::RESIDENT_MEMORY() << endl;
-    throw MemoryException();
-  }
-	 */
-	//Timer::start();
-}
+
+static int ____IGNORE___ = (StaticTimer::start(), 0);
+
 
 } // end namespace ibex

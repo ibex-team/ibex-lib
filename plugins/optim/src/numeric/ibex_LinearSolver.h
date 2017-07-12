@@ -90,11 +90,11 @@ public:
     /** Default max_iter, set to 100 iterations */
     static const int default_max_iter;
 
-
 	/** Default max_diam_deriv value, set to 1e6  **/
 	static const Interval default_limit_diam_box;
 
 	typedef enum  {OPTIMAL=1, INFEASIBLE=2, OPTIMAL_PROVED=3, INFEASIBLE_PROVED=4, UNKNOWN=0, TIME_OUT=-1, MAX_ITER=-2} Status_Sol;
+
 
 	typedef enum  {MINIMIZE, MAXIMIZE} Sense;
 
@@ -104,7 +104,7 @@ public:
 	~LinearSolver();
 
 	/**
-	 * \brief Solve the LP.
+	 * \brief Solve the Linear Program.
 	 *
 	 * \return OPTIMAL, INFEASIBLE, UNKNOWN, TIME_OUT or MAX_ITER
 	 */
@@ -121,7 +121,7 @@ public:
 	Status_Sol solve_proved();
 
 
-	void write_file(const char* name="save_LP.lp");
+	void write_file(const char* name="IBEX_save_LP.lp");
 
 
 // GET
@@ -143,7 +143,6 @@ public:
 	void get_coef_obj(Vector& obj) const;
 
 	double get_epsilon() const;
-
 
 	Interval get_obj_value() const;
 
@@ -174,10 +173,10 @@ public:
 	void clean_obj();
 
 	/**
-	 * \brief Clean the LP
+	 * \brief Clean all the Linear Program
 	 *
 	 * Delete all constraints, including bound constraints
-	 * and set the coefficients of the objective to 0.
+	 * and set the coefficients of the objective function to 0.
 	 */
 	void clean_all();
 
@@ -186,7 +185,6 @@ public:
 	void set_max_time_out(int time);
 
 	void set_sense(Sense s);
-
 
 	void set_obj(const Vector& coef);
 

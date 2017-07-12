@@ -468,8 +468,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	loup_point=init_box.mid();
 	time=0;
 
-    Timer::reset_time();
-    Timer::start();
+	Timer timer;
+    timer.restart();
 
 	handle_cell(*root,init_box);
 
@@ -521,7 +521,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 				}
 				update_uplo();
 
-				Timer::check(timeout);//
+				timer.check(timeout);//
 
 			}
 			catch (NoBisectableVariableException& ) {
@@ -535,14 +535,14 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 		}
 	}
 	catch (TimeOutException& ) {
-		Timer::stop();
-		time = Timer::get_time();
+		timer.stop();
+		time = timer.get_time();
 		return TIME_OUT;
 	}
 
 
-	Timer::stop();
-	time = Timer::get_time();
+	timer.stop();
+	time = timer.get_time();
 
 	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0)))
 		return INFEASIBLE;

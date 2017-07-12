@@ -329,6 +329,8 @@ protected:
 	 */
 	const BitSet* params;
 
+private:
+	Timer timer;
 };
 
 /*============================================ inline implementation ============================================ */

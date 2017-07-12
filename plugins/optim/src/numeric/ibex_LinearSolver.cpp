@@ -64,6 +64,31 @@ std::ostream& operator<<(std::ostream& os, const LinearSolver::Status_Sol x){
 }
 
 
+LinearSolver::Status_Sol LinearSolver::solve_proved() {
+	LinearSolver::Status_Sol stat = solve();
+	switch (stat) {
+	case LinearSolver::OPTIMAL : {
+		// Neumaier - Shcherbina postprocessing
+		obj_value = neumaier_shcherbina_postprocessing();
+		stat = LinearSolver::OPTIMAL_PROVED;
+		break;
+	}
+	case  LinearSolver::INFEASIBLE: {
+		// infeasibility test  cf Neumaier Shcherbina paper
+		if (neumaier_shcherbina_infeasibilitytest()) {
+			stat = LinearSolver::INFEASIBLE_PROVED;
+		}
+		break;
+	}
+	default:
+		stat = LinearSolver::UNKNOWN;
+		break;
+	}
+	return stat;
+
+}
+
+
 int LinearSolver::get_nb_rows() const {
 	return nb_rows;
 }
@@ -72,7 +97,28 @@ Interval LinearSolver::get_obj_value() const {
 	return obj_value;
 }
 
+void LinearSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
+	for (int i=0; i<A.nb_rows(); i++) {
+		try {
+			add_constraint(A[i],sign,rhs[i]);
+		} catch (LPException&) { }
+	}
+}
 
+
+void LinearSolver::clean_bounds() {
+	set_bounds(IntervalVector(nb_vars));
+}
+
+void LinearSolver::clean_obj() {
+	set_obj(ibex::Vector::zeros(nb_vars));
+}
+
+void LinearSolver::clean_all() {
+	clean_ctrs();
+	clean_obj();
+	clean_bounds();
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -223,54 +269,7 @@ bool LinearSolver::neumaier_shcherbina_infeasibilitytest() {
 
 
 
-LinearSolver::Status_Sol LinearSolver::solve_proved() {
-	LinearSolver::Status_Sol stat = solve();
-	switch (stat) {
-	case LinearSolver::OPTIMAL : {
-		// Neumaier - Shcherbina postprocessing
-		obj_value = neumaier_shcherbina_postprocessing();
-		stat = LinearSolver::OPTIMAL_PROVED;
-		break;
-	}
-	case  LinearSolver::INFEASIBLE: {
-		// infeasibility test  cf Neumaier Shcherbina paper
-		if (neumaier_shcherbina_infeasibilitytest()) {
-			stat = LinearSolver::INFEASIBLE_PROVED;
-		}
-		break;
-	}
-	default:
-		stat = LinearSolver::UNKNOWN;
-		break;
-	}
-	return stat;
 
-}
-
-
-void LinearSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
-	for (int i=0; i<A.nb_rows(); i++) {
-		try {
-			add_constraint(A[i],sign,rhs[i]);
-		} catch (LPException&) { }
-	}
-}
-
-
-void LinearSolver::clean_bounds() {
-	set_bounds(IntervalVector(nb_vars));
-}
-
-void LinearSolver::clean_obj() {
-	set_obj(ibex::Vector::zeros(nb_vars));
-}
-
-
-void LinearSolver::clean_all() {
-	clean_ctrs();
-	clean_obj();
-	clean_bounds();
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef _IBEX_WITH_SOPLEX_
@@ -2316,7 +2315,7 @@ LinearSolver::Status LinearSolver::addConstraint(const ibex::Vector& row, CmpOp 
 
 LinearSolver::LinearSolver(int nb_vars, int max_iter,
 	int max_time_out, double eps):
-	nb_vars(0), nb_rows(0), obj_value(0.0), epsilon(0),
+	nb_vars(0), nb_rows(0), obj_value(POS_INFINITY),
 	primal_solution(1), dual_solution(1 /*tmp*/),
 	status_prim(0), status_dual(0), boundvar(1)
 {
@@ -2334,73 +2333,76 @@ void LinearSolver::write_file(const char* name) {
 	throw LPException();
 }
 
-void LinearSolver::get_rows(Matrix& A) {
+
+void LinearSolver::get_rows(Matrix& A) const{
 	throw LPException();
 }
 
-void LinearSolver::get_rows_trans(Matrix& A_trans) {
+void LinearSolver::get_rows_trans(Matrix& A_trans) const{
 	throw LPException();
 }
 
-void LinearSolver::get_lhs_rhs(IntervalVector& B) {
+void LinearSolver::get_lhs_rhs(IntervalVector& lhs_rhs) const{
 	throw LPException();
 }
 
-void LinearSolver::get_primal_sol(Vector& prim) {
+void LinearSolver::get_coef_obj(Vector& obj) const{
 	throw LPException();
 }
 
-void LinearSolver::get_dual_sol(Vector& dual) {
+double LinearSolver::get_epsilon() const{
 	throw LPException();
 }
 
-void LinearSolver::get_infeasible_dir(Vector& sol) {
+void LinearSolver::get_primal_sol(Vector & prim) const{
 	throw LPException();
 }
 
-void LinearSolver::clean_ctrs() {
+void LinearSolver::get_dual_sol(Vector & dual) const{
 	throw LPException();
 }
 
-void LinearSolver::clean_all() {
+void LinearSolver::clean_ctrs(){
 	throw LPException();
 }
 
-void LinearSolver::set_max_iter(int max) {
+void LinearSolver::set_max_iter(int max){
 	throw LPException();
 }
 
-void LinearSolver::set_max_time_out(int time) {
+void LinearSolver::set_max_time_out(int time){
 	throw LPException();
 }
 
-void LinearSolver::set_sense(Sense s) {
+void LinearSolver::set_sense(Sense s){
 	throw LPException();
 }
 
-void setObj(const Vector& coef) {
+void LinearSolver::set_obj(const Vector& coef){
 	throw LPException();
 }
 
-void LinearSolver::set_obj_var(int var, double coef) {
+void LinearSolver::set_obj_var(int var, double coef){
 	throw LPException();
 }
 
-void LinearSolver::set_bounds(const IntervalVector& bounds) {
+void LinearSolver::set_bounds(const IntervalVector& bounds){
 	throw LPException();
 }
 
-void LinearSolver::set_bounds_var(int var, const Interval& bound) {
+void LinearSolver::set_bounds_var(int var, const Interval& bound){
 	throw LPException();
 }
 
-void LinearSolver::set_epsilon(double eps) {
+void LinearSolver::set_epsilon(double eps){
 	throw LPException();
 }
 
-void LinearSolver::add_constraint(const Vector& row, CmpOp sign, double rhs) {
+void LinearSolver::add_constraint(const Vector & row, CmpOp sign, double rhs ){
 	throw LPException();
 }
+
+
 
 
 #endif //

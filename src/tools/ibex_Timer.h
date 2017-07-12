@@ -39,12 +39,32 @@ namespace ibex {
  */
 class TimeOutException : public Exception { };
 
+
 /** \ingroup tools
  *
  * \brief Timer.
  */
 class Timer {
  public:
+	Timer();
+
+	void start();
+	void stop();
+	void restart();
+	double get_time();
+	void check(double timeout);
+private:
+	  double start_time;
+	  bool active;
+};
+
+/** \ingroup tools
+ *
+ * \brief Timer.
+ */
+class StaticTimer {
+ //public:
+ private:
 
   typedef double Time;
 
@@ -62,7 +82,7 @@ class Timer {
    */
   static void check(double timeout);
   inline static void reset_time() { local_time =0; }
-  inline static Time get_time() { return local_time; }
+  static Time get_time();
 
   inline static Time REAL_TIMELAPSE() { return real_lapse; }
   inline static double RESIDENT_MEMORY() { return resident_memory; }
@@ -74,7 +94,7 @@ class Timer {
   static Time virtual_ulapse;
   static Time virtual_slapse;
 
- private:
+ //private:
   static Time local_time;
   static Time real_time;
   static Time virtual_utime;
