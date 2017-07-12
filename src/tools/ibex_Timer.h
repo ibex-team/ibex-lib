@@ -65,6 +65,7 @@ private:
 class StaticTimer {
  //public:
  private:
+  friend class Timer;
 
   typedef double Time;
 
