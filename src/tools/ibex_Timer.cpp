@@ -13,6 +13,8 @@
 namespace ibex {
 
 
+static int ____IGNORE___ = (StaticTimer::start(), 0);
+
 
 Timer::Timer(): start_time(0), active(false) {
 }
@@ -252,8 +254,6 @@ StaticTimer::Time StaticTimer::get_time() {
 }
 
 
-
-static int ____IGNORE___ = (StaticTimer::start(), 0);
 
 
 } // end namespace ibex

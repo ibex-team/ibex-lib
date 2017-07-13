@@ -63,7 +63,7 @@ int main() {
 		cout<< "Interval Arithmetic: " << timer.get_time() << " s" << endl;
 	}
 	{
-		timer::restart();
+		timer.restart();
 		AffineMain<AF_No> x[4];
 		for (int l=0; l<4;l++){
 			x[l]= AffineMain<AF_No>(4,l+1,Interval(4));
