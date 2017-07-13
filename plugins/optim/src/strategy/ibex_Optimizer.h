@@ -11,6 +11,7 @@
 #ifndef __IBEX_OPTIMIZER_H__
 #define __IBEX_OPTIMIZER_H__
 
+#include "ibex_LinearizerCombo.h"
 #include "ibex_LoupFinder.h"
 #include "ibex_Bsc.h"
 #include "ibex_CtcHC4.h"
@@ -25,7 +26,6 @@
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_Random.h"
-#include "ibex_LinearRelaxCombo.h"
 
 namespace ibex {
 

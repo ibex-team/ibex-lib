@@ -11,8 +11,8 @@
 #ifndef __IBEX_CTC_POLYTOPE_HULL_H__
 #define __IBEX_CTC_POLYTOPE_HULL_H__
 
+#include "ibex_Linearizer.h"
 #include "ibex_Ctc.h"
-#include "ibex_LinearFactory.h"
 #include "ibex_LinearSolver.h"
 #include "ibex_BitSet.h"
 
@@ -39,7 +39,7 @@ public:
 	 * \param limit_diam - The contractor does nothing if the diameter does not respect these bounds
 	 */
 
-	CtcPolytopeHull(LinearFactory& lr, int max_iter=LinearSolver::default_max_iter,
+	CtcPolytopeHull(Linearizer& lr, int max_iter=LinearSolver::default_max_iter,
 			int time_out=LinearSolver::default_max_time_out, double eps=LinearSolver::default_eps,
 			Interval limit_diam=LinearSolver::default_limit_diam_box);
 
@@ -100,7 +100,7 @@ protected:
 	/**
 	 * \brief The linearization technique
 	 */
-	LinearFactory& lr;
+	Linearizer& lr;
 
 	/**
 	 * TODO: add comment

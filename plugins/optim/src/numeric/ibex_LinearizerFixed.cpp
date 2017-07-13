@@ -7,13 +7,14 @@
 // Created     : Aug 22, 2014
 //============================================================================
 
-#include "ibex_LinearRelaxFixed.h"
+#include "ibex_LinearizerFixed.h"
+
 #include "ibex_Exception.h"
 namespace ibex {
 
-LinearRelaxFixed::LinearRelaxFixed(const Matrix& A, const Vector& b) : LinearFactory(A.nb_cols()), A(A), b(b) { }
+LinearizerFixed::LinearizerFixed(const Matrix& A, const Vector& b) : Linearizer(A.nb_cols()), A(A), b(b) { }
 
-int LinearRelaxFixed::linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
+int LinearizerFixed::linearize(const IntervalVector& box, LinearSolver& lp_solver)  {
 	int start = lp_solver.get_nb_rows();
 	lp_solver.add_constraint(A,LEQ,b);
 	return lp_solver.get_nb_rows() - start;

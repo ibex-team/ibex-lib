@@ -150,7 +150,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 
 
 /*********generation of the linearized system*********/
-int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
+int LinearRelaxAffine2::linearize(const IntervalVector& box, LinearSolver& lp_solver) {
 
 	Affine2 af2;
 	Vector rowconst(sys.nb_var);

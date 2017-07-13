@@ -12,7 +12,7 @@
 #define __IBEX_LOUP_FINDER_X_TAYLOR_H__
 
 #include "ibex_LoupFinder.h"
-#include "ibex_LinearRestrictXTaylor.h"
+#include "ibex_LinearizerXTaylor.h"
 
 namespace ibex {
 
@@ -33,7 +33,7 @@ public:
 
 protected:
 
-	LinearRestrictXTaylor lr;
+	LinearizerXTaylor lr;
 
 	/** linear solver */
 	LinearSolver lp_solver;

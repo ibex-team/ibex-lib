@@ -1,21 +1,22 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_LinearRestrict.cpp
-// Author      : Gilles Chabert
+// File        : ibex_Linearizer.cpp
+// Author      : Gilles Chabert, Ignacio Araya, Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Last Update : Jun 22, 2017
+// Created     : Jun 22, 2017
 //============================================================================
 
-#include "ibex_LinearRestrict.h"
+#include "ibex_Linearizer.h"
 
 namespace ibex {
 
-LinearRestrict::LinearRestrict(int nb_var) : LinearFactory(nb_var) {
+Linearizer::Linearizer(int n) : n(n) {
 
 }
 
-//LinearRestrict::~LinearRestrict() {
-//}
+Linearizer::~Linearizer() {
+
+}
 
 } /* namespace ibex */

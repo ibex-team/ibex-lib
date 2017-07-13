@@ -41,7 +41,7 @@ public:
 	 *
 	 *  Linearize the system and performs 2n calls to Simplex in order to reduce the 2 bounds of each variable
 	 */
-	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
+	int linearize(const IntervalVector& box, LinearSolver& lp_solver);
 
 	/**
 	 * \brief Generation of a linear approximation of the inner region

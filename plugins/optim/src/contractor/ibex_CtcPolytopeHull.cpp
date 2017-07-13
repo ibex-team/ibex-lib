@@ -9,7 +9,8 @@
 //============================================================================
 
 #include "ibex_CtcPolytopeHull.h"
-#include "ibex_LinearRelaxFixed.h"
+
+#include "ibex_LinearizerFixed.h"
 
 using namespace std;
 
@@ -19,7 +20,7 @@ namespace {
 class PolytopeHullEmptyBoxException { };
 }
 
-CtcPolytopeHull::CtcPolytopeHull(LinearFactory& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
+CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(lr.nb_var()), lr(lr),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
 		contracted_vars(BitSet::all(nb_var)), own_lr(false) {
@@ -29,7 +30,7 @@ CtcPolytopeHull::CtcPolytopeHull(LinearFactory& lr, int max_iter, int time_out, 
 }
 
 CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
-		Ctc(A.nb_cols()), lr(*new LinearRelaxFixed(A,b)),
+		Ctc(A.nb_cols()), lr(*new LinearizerFixed(A,b)),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
 		contracted_vars(BitSet::all(nb_var)), own_lr(true) {
 
@@ -53,7 +54,7 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 	try {
 
 		//returns the number of constraints in the linearized system
-		int cont = lr.linearization(box, *mylinearsolver);
+		int cont = lr.linearize(box, *mylinearsolver);
 
 		//cout << "[polytope-hull] end of LR" << endl;
 

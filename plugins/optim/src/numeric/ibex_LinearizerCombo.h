@@ -9,8 +9,8 @@
 // Last Update : March 19, 2013
 //============================================================================
 
-#ifndef __IBEX_LINEAR_RELAX_COMBO_H__
-#define __IBEX_LINEAR_RELAX_COMBO_H__
+#ifndef __IBEX_LINEARIZER_COMBO_H__
+#define __IBEX_LINEARIZER_COMBO_H__
 
 #include "ibex_Setting.h"
 
@@ -18,7 +18,7 @@
 #include "ibex_LinearRelaxAffine2.h"
 #endif
 
-#include "ibex_LinearRelaxXTaylor.h"
+#include "ibex_LinearizerXTaylor.h"
 
 namespace ibex {
 
@@ -31,7 +31,7 @@ namespace ibex {
  * \date February 2011
  */
 
-class LinearRelaxCombo : public LinearRelax {
+class LinearizerCombo : public Linearizer {
 
 public:
 
@@ -48,23 +48,23 @@ public:
 	 */
 
 #ifdef _IBEX_WITH_AFFINE_
-	LinearRelaxCombo(const System& sys, linear_mode lmode=COMPO);
+	LinearizerCombo(const System& sys, linear_mode lmode=COMPO);
 #else
-	LinearRelaxCombo(const System& sys, linear_mode lmode=XNEWTON);
+	LinearizerCombo(const System& sys, linear_mode lmode=XNEWTON);
 #endif
 
 
 	/**
 	 * \brief Deletes this instance.
 	 */
-	~LinearRelaxCombo();
+	~LinearizerCombo();
 
 	/**
 	 * \brief Linearization.
   	 *
   	 * Linearize the system.
   	 */
-	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
+	int linearize(const IntervalVector& box, LinearSolver& lp_solver);
 
 private:
 
@@ -72,18 +72,16 @@ private:
 	linear_mode lmode;
 
 	/** XNewton  object to linearize	 */
-	LinearRelaxXTaylor *myxnewton;
+	LinearizerXTaylor *myxnewton;
 
 #ifdef _IBEX_WITH_AFFINE_
 	/** ART object to linearize	 */
 	LinearRelaxAffine2 *myart;
 #endif
 
-	/** The vector of corner selection in linearization (RANDOM, RANDOM_INV) by default */
-	std::vector<LinearRelaxXTaylor::corner_point> cpoints;
 };
 
 }
 
-#endif // __IBEX_LINEAR_RELAX_COMBO_H__
+#endif // __IBEX_LINEARIZER_COMBO_H__
 

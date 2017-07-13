@@ -1,43 +1,44 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_LinearRelaxFixed.h
+// File        : ibex_LinearizerFixed.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 22, 2014
 //============================================================================
 
-#ifndef __IBEX_LINEAR_RELAX_FIXED_H__
-#define __IBEX_LINEAR_RELAX_FIXED_H__
+#ifndef __IBEX_LINEARIZER_FIXED_H__
+#define __IBEX_LINEARIZER_FIXED_H__
 
-#include "ibex_LinearFactory.h"
+#include "ibex_Linearizer.h"
 
 namespace ibex {
 
 /**
  * \ingroup numeric
+ *
  * \brief Fixed linear relaxation Ax<=b
  */
-class LinearRelaxFixed : public LinearFactory {
+class LinearizerFixed : public Linearizer {
 public:
 	/**
 	 * \brief Create the linear inequalities Ax<=b.
 	 */
-	LinearRelaxFixed(const Matrix& A, const Vector& b);
+	LinearizerFixed(const Matrix& A, const Vector& b);
 
 	/**
-	 * \brief Add the inequalities in the solver
+	 * \brief Add the inequalities in the LP solver.
 	 */
-	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
+	int linearize(const IntervalVector& box, LinearSolver& lp_solver);
 
-private:
+protected:
+
 	/** The matrix */
 	Matrix A;
+
 	/** The vector */
 	Vector b;
-
 };
-
 
 } // namespace ibex
 

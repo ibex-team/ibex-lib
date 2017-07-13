@@ -11,7 +11,7 @@
 #include "ibex_Bsc.h"
 #include "ibex_Ctc.h"
 #include "ibex_CellBuffer.h"
-#include "ibex_LinearRelax.h"
+#include "ibex_Linearizer.h"
 #include <vector>
 #include <stdlib.h>
 #include "ibex_LoupFinder.h"
@@ -42,7 +42,7 @@ public:
 	Bsc* bsc;
 	CellBuffer* buffer;
 	LoupFinder* finder;
-	LinearRelax* relax;
+	Linearizer* relax;
 
 	Memory() : bsc(NULL), buffer(NULL), finder(NULL), relax(NULL) {
 		// A NULL pointer corresponds to unused data
@@ -94,7 +94,7 @@ System& rec(System* ptr) {
 
 Bsc& rec(Bsc* ptr)                       { return *((*memory())->bsc = ptr); }
 LoupFinder& rec(LoupFinder* ptr)         { return *((*memory())->finder = ptr); }
-LinearRelax& rec(LinearRelax* ptr)       { return *((*memory())->relax = ptr); }
+Linearizer& rec(Linearizer* ptr)       { return *((*memory())->relax = ptr); }
 CellBuffer& rec(CellBuffer* ptr)         { return *((*memory())->buffer = ptr); }
 
 } // end anonymous namespace

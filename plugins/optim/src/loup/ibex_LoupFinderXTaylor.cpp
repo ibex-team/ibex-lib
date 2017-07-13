@@ -15,7 +15,7 @@ using namespace std;
 namespace ibex {
 
 //TODO: remove this recipe for the argument of the max number of iterations of the LP solver
-LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys), lp_solver(sys.nb_var, std::max(sys.nb_var*3,LinearSolver::default_max_iter)) {
+LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT), lp_solver(sys.nb_var, std::max(sys.nb_var*3,LinearSolver::default_max_iter)) {
 //	nb_simplex=0;
 //	diam_simplex=0;
 }
@@ -34,7 +34,7 @@ std::pair<Vector, double> LoupFinderXTaylor::find(const IntervalVector& box, con
 	for (int j=0; j<n; j++)
 		lp_solver.set_obj_var(j,g[j]);
 
-	int count = lr.linearization(box,lp_solver);
+	int count = lr.linearize(box,lp_solver);
 
 	if (count==-1) {
 		lp_solver.clean_ctrs();

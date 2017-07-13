@@ -9,12 +9,13 @@
 //============================================================================
 
 #include "TestCtcPolytopeHull.h"
+
 #include "Ponts30.h"
+#include "ibex_LinearizerCombo.h"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_SystemFactory.h"
 #include "ibex_System.h"
 #include "ibex_CtcPolytopeHull.h"
-#include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
 
 using namespace std;
@@ -56,7 +57,7 @@ void TestCtcPolytopeHull::fixbug01() {
 	// there is no more problem.
 	double _box[][2] = {{-100,100},{1,1}};
 	IntervalVector box(2,_box);
-	LinearRelaxCombo linear_relax(sys,LinearRelaxCombo::XNEWTON);
+	LinearizerCombo linear_relax(sys,LinearizerCombo::XNEWTON);
 	CtcPolytopeHull polytope(linear_relax);
 	polytope.contract(box);
 
