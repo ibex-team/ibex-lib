@@ -1,12 +1,12 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_LinearRelaxCombo.cpp
+// File        : ibex_LinearizerCombo.cpp
 // Author      : Ignacio Araya, Bertrand Neveu,
 //               Gilles Trombettoni
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 20, 2012
-// Last Update : March 19, 2013
+// Last Update : Jul 15, 2017
 //============================================================================
 
 #ifndef __IBEX_LINEARIZER_COMBO_H__
@@ -81,7 +81,7 @@ private:
 
 };
 
-}
+} // end namespace
 
 #endif // __IBEX_LINEARIZER_COMBO_H__
 

@@ -1,18 +1,16 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_LinearRelaxCombo.cpp
+// File        : ibex_LinearizerCombo.cpp
 // Author      : Ignacio Araya, Bertrand Neveu , Gilles Trombettoni, Jordan Ninin
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 1, 2012
-// Last Update : Nov 15, 2012
+// Last Update : Jul 15, 2017
 //============================================================================
 
 #include "ibex_LinearizerCombo.h"
 
 namespace ibex {
-
-// the constructor
 
 LinearizerCombo::LinearizerCombo(const System& sys1, linear_mode lmode1) :
 			Linearizer(sys1.nb_var),
@@ -26,38 +24,31 @@ LinearizerCombo::LinearizerCombo(const System& sys1, linear_mode lmode1) :
 	switch (lmode) {
 	case XNEWTON: {
 		// the default corner of XNewton linear relaxation
-		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN,
-										   LinearizerXTaylor::default_max_diam_deriv);
+		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
 		break;
 	}
 	case TAYLOR:{
 		// the default corner of XNewton linear relaxation
-		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::TAYLOR,
-										   LinearizerXTaylor::default_max_diam_deriv);
+		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::TAYLOR);
 		break;
 	}
 	case HANSEN: {
 		// the default corner of XNewton linear relaxation
-		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN,
-				LinearizerXTaylor::default_max_diam_deriv);
+		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
 		break;
 	}
 
 #ifdef _IBEX_WITH_AFFINE_
 	case ART:
 	case AFFINE2: {
-		myart =new LinearRelaxAffine2(sys1);
+		myart = new LinearRelaxAffine2(sys1);
 		break;
 	}
 	case COMPO: {
 
-		myart =new LinearRelaxAffine2(sys1);
+		myart = new LinearRelaxAffine2(sys1);
 		// the default corner of XNewton linear relaxation
-		cpoints.push_back(LinearizerXTaylor::RANDOM);
-		cpoints.push_back(LinearizerXTaylor::RANDOM_INV);
-		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN,
-				LinearizerXTaylor::default_max_diam_deriv);
-
+		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
 		break;
 	}
 #else
@@ -119,7 +110,4 @@ int LinearizerCombo::linearize(const IntervalVector& box, LinearSolver& lp_solve
 	return cont;
 }
 
-
-
-
-}
+} // end namespace

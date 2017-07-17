@@ -11,7 +11,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_ExtendedSystem.h"
-#include "ibex_ExprDiff.h"
+//#include "ibex_ExprDiff.h"
 #include "ibex_Random.h"
 #include "ibex_Exception.h"
 #include "ibex_LinearizerXTaylor.h"
@@ -31,15 +31,12 @@ class Unsatisfiability : public Exception { };
 
 }
 
-// TODO: merge with default_diam_limit
-const double LinearizerXTaylor::default_max_diam_deriv =1e6;
-
-LinearizerXTaylor::LinearizerXTaylor(const System& _sys, approx_mode mode, corner_policy policy,
-		linear_mode lmode1, double max_diam_deriv1):
+LinearizerXTaylor::LinearizerXTaylor(const System& _sys, approx_mode _mode, corner_policy policy,
+		slope_formula _slope):
 			Linearizer(_sys.nb_var), sys(_sys),
 			m(sys.f_ctrs.image_dim()), goal_ctr(-1 /*tmp*/),
-			mode(mode), lmode(lmode1),
-			inf(new bool[n]), max_diam_deriv(max_diam_deriv1) {
+			mode(_mode), slope(_slope),
+			inf(new bool[n]) {
 
 	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
 		((int&) goal_ctr)=((const ExtendedSystem&) sys).goal_ctr();
@@ -106,8 +103,8 @@ IntervalVector LinearizerXTaylor::get_corner_point(const IntervalVector& box) {
 			if (box[j].ub()<POS_INFINITY)
 				pt[j]=box[j].ub();
 			else if (box[j].lb()>NEG_INFINITY) {
-				inf[j]=true; // force change
 				pt[j]=box[j].lb();
+				inf[j]=true; // force change
 			} else
 				throw NoCornerPoint();
 		}
@@ -163,9 +160,9 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box, LinearSolver& lp_
 	IntervalMatrix Df(ma,n); // derivatives over the box
 	Matrix coeffs(ma,n);     // coefficients for the LP
 
-	if (lmode == TAYLOR) // compute derivatives once for all
+	if (slope == TAYLOR) // compute derivatives once for all
 		// ------------------------------------------------
-		// TODO: requires sys.active_ctrs_hansen_matrix !!!
+		// TODO: requires sys.f_ctrs_hansen_matrix(BitSet) !!!
 		//Df=sys.active_ctrs_jacobian(box);
 
 		Df=sys.f_ctrs.jacobian(box); // tmp................
@@ -182,7 +179,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box, LinearSolver& lp_
 
 			//cout << "========== corner=" << corner << "=========" << endl;
 			// ========= update derivatives (Hansen mode) ========
-			if (lmode == HANSEN) {
+			if (slope == HANSEN) {
 				sys.f_ctrs.hansen_matrix(box,corner,Df);
 			}
 			// ========= compute matrix of coefficients ===========
@@ -210,7 +207,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box, LinearSolver& lp_
 				}
 
 				// only one corner for a linear constraint
-				if (Df[i].max_diam() > max_diam_deriv) {
+				if (Df[i].max_diam() > lp_solver.default_limit_diam_box.ub()) {
 					continue; // To avoid problems with LP solvers (like SoPleX)
 				}
 

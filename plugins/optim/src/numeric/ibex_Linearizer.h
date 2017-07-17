@@ -31,7 +31,7 @@ public:
 	Linearizer(int nb_var);
 
 	/**
-	 * \brief Add constraints in the LP solver.
+	 * \brief Add constraints in a LP solver.
 	 *
 	 * The constraints correspond to a linearization of the
 	 * underlying system, on the given box.

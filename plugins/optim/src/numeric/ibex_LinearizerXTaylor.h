@@ -56,29 +56,26 @@ public:
 	typedef enum  {INF, SUP, RANDOM, RANDOM_OPP } corner_policy;
 
 	/**
-	 * \brief Slope matrices computation mode.
+	 * \brief Slope matrices computation formula.
 	 *
 	 * - TAYLOR: one gradient evaluation for all variables simultaneously
 	 *           (less accurate but faster)
 	 * - HANSEN: recursive evaluation with successive variable instantiation
 	 *           (more accurate but longer)
 	 */
-	typedef enum  { TAYLOR, HANSEN } linear_mode;
-
-	/** Default max_diam_deriv value, set to 1e6  **/
-	static const double default_max_diam_deriv;
+	typedef enum  { TAYLOR, HANSEN } slope_formula;
 
 	/**
 	 * \brief Creates the X_Taylor linearizer.
 	 *
 	 * \param sys             - The system (extended or not).
 	 * \param mode            - Approximation type (RELAX | RESTRICT)
-	 * \param policy          - Corner selection policy (X_INF | X_SUP | RANDOM | RANDOM_INV)
-	 * \param lmode           - Slope matrix formula (TAYLOR | HANSEN)
-	 * \param max_diam_deriv  - The maximum diameter of the box for for the linear solver (default value 1.e6).
+	 * \param corners         - Corner selection policy (INF | SUP | RANDOM | RANDOM_OPP)
+	 * \param slope           - Slope matrix formula (TAYLOR | HANSEN)
+	 * \param max_diam_deriv  - The maximum diameter of the box for the linear solver (default value 1.e6).
 	 * 	  				        Soplex may lose solutions when it is called with "big" domains.
 	 */
-	LinearizerXTaylor(const System& sys, approx_mode mode, corner_policy corner=RANDOM, linear_mode lmode=HANSEN, double max_diam_deriv=default_max_diam_deriv);
+	LinearizerXTaylor(const System& sys, approx_mode mode, corner_policy corners=RANDOM, slope_formula slope=HANSEN);
 
 	/**
 	 * \brief Deletes this.
@@ -98,15 +95,14 @@ private:
 	typedef enum  {INF_X, SUP_X, RANDOM_X, OPPOSITE } corner_id;
 
 	/**
-	 * \brief Set the corner information "inf".
+	 * \brief Set the corner information "inf" (see below).
 	 *
-	 * \param inf - (output) whether the jth variable is set to lower bound (true)
-	 *              or upper bound (false)
+	 * \param id - the chosen corner.
 	 */
 	void get_corner(corner_id id);
 
 	/**
-	 * \brief Get the point corresponding to "inf".
+	 * \brief Get the point corresponding to "inf" (see below).
 	 */
 	IntervalVector get_corner_point(const IntervalVector& box);
 
@@ -155,19 +151,14 @@ private:
 	/**
 	 * \brief Slope matrix formula.
 	 */
-	linear_mode lmode;
+	slope_formula slope;
 
 	/*
-	 * Boolean array indicating which corner in direction i is used :
-	 * true for inferior corner, false for superior one.
+	 * Boolean array indicating (for the current corner point)
+	 * whether the jth variable is set to lower bound (true)
+	 * or upper bound (false) of the box.
 	 */
 	bool* inf;
-
-	/**
-	 * Maximum diameter of the derivatives for calling linear solver
-	 * (default value 1.e6)
-	 */
-	double max_diam_deriv;
 
 };
 

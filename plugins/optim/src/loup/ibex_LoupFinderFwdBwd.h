@@ -43,4 +43,4 @@ public:
 
 } /* namespace ibex */
 
-#endif /* IBEX_INFWDBWDFINDER_H_ */
+#endif /* __IBEX_LOUP_FINDER_FWD_BWD__ */

@@ -72,11 +72,11 @@ int main(int argc, char** argv){
 
 		// The CtcXNewton contractor
 		// corner selection for linearizations : two corners are selected, a random one and its opposite
-		vector<LinearRelaxXTaylor::corner_point> cpoints;
-		cpoints.push_back(LinearRelaxXTaylor::RANDOM);
-		cpoints.push_back(LinearRelaxXTaylor::RANDOM_INV);
+		vector<LinearizerXTaylor::corner_point> cpoints;
+		cpoints.push_back(LinearizerXTaylor::RANDOM);
+		cpoints.push_back(LinearizerXTaylor::RANDOM_INV);
 
-		LinearRelax* lr= new LinearRelaxCombo(ext_sys,LinearRelaxCombo::ART);
+		LinearRelax* lr= new LinearizerCombo(ext_sys,LinearizerCombo::ART);
 
 		//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
 		// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
