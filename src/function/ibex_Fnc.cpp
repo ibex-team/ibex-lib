@@ -26,7 +26,6 @@ Fnc::~Fnc() {
 
 }
 
-
 void Fnc::jacobian(const IntervalVector& box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const {
 
 	assert(J_var.nb_cols()==set.nb_var);

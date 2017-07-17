@@ -710,30 +710,29 @@ public:
 	IntervalVector gradient(const IntervalVector& x) const;
 
 	/**
-	 * \brief Calculate the Jacobian matrix of f
-	 *
-	 * \param x - the input box
-	 * \param J - where the Jacobian matrix has to be stored (output parameter).
-	 * \param v - Only update the vth column of J.
-	 */
-	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J, int v=-1) const;
-
-	/**
 	 *\see #ibex::Fnc
 	 */
 	IntervalMatrix jacobian(const IntervalVector& x) const;
 
 	/**
-	 * \brief Calculate some rows of the jacobian.
-	 *
-	 * \pre f must be vector-valued.
+	 *\see #ibex::Fnc
 	 */
 	IntervalMatrix jacobian(const IntervalVector& x, const BitSet& components) const;
 
 	/**
 	 *\see #ibex::Fnc
 	 */
+	void jacobian(const IntervalVector& x, IntervalMatrix& J, int v=-1) const;
+
+	/**
+	 *\see #ibex::Fnc
+	 */
 	void jacobian(const IntervalVector& full_box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const;
+
+	/**
+	 *\see #ibex::Fnc
+	 */
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v=-1) const;
 
 	/**
 	 *\see #ibex::Fnc
@@ -1092,22 +1091,25 @@ inline IntervalVector Function::gradient(const IntervalVector& x) const {
 	return g;
 }
 
-inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {
-	_grad->jacobian(x,J,v);
-}
-
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
 	return Fnc::jacobian(x);
 }
 
 inline IntervalMatrix Function::jacobian(const IntervalVector& x, const BitSet& components) const {
-	IntervalMatrix J(components.size(), nb_var());
-	_grad->jacobian(x,J,components);
-	return J;
+	return Fnc::jacobian(x,components);
+}
+
+inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {
+	Fnc::jacobian(x,J,v);
+	// <=> 	_grad->jacobian(x,J,v);
 }
 
 inline void Function::jacobian(const IntervalVector& full_box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const {
-	Fnc::jacobian(full_box,J_var,J_param,set);
+	Fnc::jacobian(full_box,J_var,J_param, set);
+}
+
+inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
+	_grad->jacobian(x,J,components,v);
 }
 
 inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const {

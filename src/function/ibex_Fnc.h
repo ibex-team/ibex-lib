@@ -109,32 +109,26 @@ public:
 	IntervalVector gradient(const IntervalVector& x) const;
 
 	/**
+	 * \brief Calculate the Jacobian matrix of f
+	 * \pre f must be vector-valued
+	 */
+	IntervalMatrix jacobian(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate some rows of the jacobian.
+	 *
+	 * \pre f must be vector-valued.
+	 */
+	IntervalMatrix jacobian(const IntervalVector& x, const BitSet& components) const;
+
+	/**
 	 * \brief Calculate the Jacobian matrix of f.
 	 *
 	 * \param x - the input box
 	 * \param J - where the Jacobian matrix has to be stored (output parameter).
 	 * \param v - Only update (if faster) the vth column of J.
 	 */
-	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J, int v=-1) const;
-
-//	/**
-//	 * \brief Calculate a submatrix of the Jacobian of f.
-//	 *
-//	 * Default implementation (inefficient!): calculate the whole Jacobian and extract
-//	 * the submatrix.
-//	 *
-//	 * \param x -  the input box
-//	 * \param fi - the selected rows
-//	 * \param xj - the selected columns
-//	 * \param J -  where the Jacobian matrix has to be stored (output parameter).
-//	 */
-//	virtual void jacobian(const IntervalVector& x, const BitSet& fi, const BitSet& xj, IntervalMatrix& J) const;
-
-	/**
-	 * \brief Calculate the Jacobian matrix of f
-	 * \pre f must be vector-valued
-	 */
-	IntervalMatrix jacobian(const IntervalVector& x) const;
+	void jacobian(const IntervalVector& x, IntervalMatrix& J, int v=-1) const;
 
 	/**
 	 * \brief Calculate the Jacobian matrix of a restriction of f
@@ -146,6 +140,18 @@ public:
 	 * \param J_param - Jacobian w.r.t. parameters
 	 */
 	void jacobian(const IntervalVector& full_box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const;
+
+	/**
+	 * \brief Calculate a submatrix of the Jacobian matrix of f.
+	 *
+	 * Default implementation: does nothing (J unchanged).
+	 *
+	 * \param x - the input box
+	 * \param J - where the Jacobian matrix has to be stored (output parameter).
+	 * \param components - selected components f_i
+	 * \param v - Only update (if faster) the vth column of J.
+	 */
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v=-1) const;
 
 	/**
 	 * \brief Calculate the Hansen matrix of f.
@@ -225,14 +231,24 @@ inline void Fnc::gradient(const IntervalVector& x, IntervalVector& g) const {
 	g=IntervalVector(_image_dim.vec_size());
 }
 
-inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {
-	J=IntervalMatrix(_image_dim.nb_rows(), _image_dim.nb_cols());
-}
-
 inline IntervalMatrix Fnc::jacobian(const IntervalVector& x) const {
 	IntervalMatrix J(image_dim(),x.size());
 	jacobian(x,J);
 	return J;
+}
+
+inline IntervalMatrix Fnc::jacobian(const IntervalVector& x, const BitSet& components) const {
+	IntervalMatrix J(components.size(), nb_var());
+	jacobian(x,J,components);
+	return J;
+}
+
+inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {
+	jacobian(x, J, BitSet::all(image_dim()), v);
+}
+
+inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
+	// nothing done.
 }
 
 inline void Fnc::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {

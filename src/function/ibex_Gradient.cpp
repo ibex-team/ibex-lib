@@ -20,7 +20,7 @@ namespace ibex {
 Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f),
 		coeff_matrix(f.image_dim(),f.nb_var()+1), is_linear(new bool[f.image_dim()]) {
 
-	if (f.expr().dim.nb_cols()>1)
+	if (f.expr().dim.is_matrix())
 		return; // class not called in this case
 
 	ExprLinearity el(f.args(),f.expr());
@@ -90,15 +90,17 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitS
 	int n=f.nb_var();
 	int m=components.size();
 
+	if (f.expr().dim.is_matrix()) {
+		ibex_error("Cannot called \"jacobian\" on a matrix-valued function");
+	}
+
 	assert(m<=f.image_dim());
-	assert(J.nb_rows()==m);
+
+	assert(J.nb_rows()==f.expr().dim.vec_size());
 	assert(J.nb_cols()==n);
 	assert(box.size()==n);
 	assert(!components.empty());
 
-	if (f.expr().dim.nb_cols()>1) {
-		ibex_error("Cannot called \"jacobian\" on a matrix-valued function");
-	}
 
 	int c; // constraint number
 

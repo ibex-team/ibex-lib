@@ -56,12 +56,12 @@ IntervalVector ExprLinearity::coeff_vector(const ExprNode& e) const {
 
 IntervalMatrix ExprLinearity::coeff_matrix(const ExprNode& e) const {
 
-	assert(e.dim.nb_cols()==1);
+	assert(!e.dim.is_matrix());
 
 	if (!_coeffs.found(e)) {
-		return IntervalMatrix::empty(e.dim.nb_rows(), n+1);
+		return IntervalMatrix::empty(e.dim.vec_size(), n+1);
 	} else {
-		IntervalMatrix c(n+1, e.dim.nb_rows()); // the transpose of the result
+		IntervalMatrix c(n+1, e.dim.vec_size()); // the transpose of the result
 
 		for (int i=0; i<n+1; i++)
 			c.row(i)=(*(_coeffs[e].first))[i].v();
@@ -242,14 +242,25 @@ void ExprLinearity::visit(const ExprDiv& e) {
 		nodetype type=LINEAR; // by default
 
 		for (int i=0; i<n+1; i++) {
-			// the dividend must be constant
-			if ((i<n && l[i].is_unbounded()) || (!l[i].is_zero() && right_type!=CONSTANT)) {
-				d->set_ref(i,*new Domain(e.dim)); // (-oo,oo) means non-linear
-				type=NONLINEAR;
-			} else
-				d->set_ref(i,*new Domain(l[i] / r[n]));
-		}
+			d->set_ref(i,*new Domain(e.dim)); // (-oo,oo) means non-linear
 
+			if (i<n) {
+				if (l[i].is_zero())
+					if (r[i].is_zero())       // ex: 1/y  (assuming x is the ith var)
+						(*d)[i].clear();
+					else                      // ex: 1/x
+						type=NONLINEAR;
+				else if (!l[i].is_unbounded())
+					if (right_type==CONSTANT) // ex: x/2
+						(*d)[i]=l[i] / r[n];
+					else                      // ex: x/y
+						type=NONLINEAR;
+				else                          // ex: sin(x)/2
+						type=NONLINEAR;
+			} else {
+				(*d)[i]=l[n] / r[n];
+			}
+		}
 		_coeffs.insert(e, make_pair(d,type));
 	}
 }
@@ -268,20 +279,28 @@ void ExprLinearity::binary(const ExprBinaryOp& e, Domain (*fcst)(const Domain&,c
 		_coeffs.insert(e,build_cst(fcst(l[n],r[n])));
 	else {
 		Array<Domain>* d=new Array<Domain>(n+1);
-		nodetype type=LINEAR; // by default
+
+		// a non-linear operation requires each argument to be constant
+		// otherwise, the expression is not linear.
+		nodetype type=linear_op? CONSTANT : NONLINEAR;
 
 		for (int i=0; i<n+1; i++) {
-			if (i<n && !linear_op && !(l[i].is_zero() && r[i].is_zero())) {
-				// --- 'min', 'max' or 'atan2' ----
-				// a non-linear operation requires each argument to be constant
-				// otherwise, the entire expression is not linear.
-				d->set_ref(i,*new Domain(e.dim)); // (-oo,oo) means non-linear
-				type=NONLINEAR;
-			} else
+			if (linear_op) {
 				// --- '+' or '-' ------
 				// some unbounded components may be "inherited" from l or r.
 				// no risk of becoming bounded like with sin((-oo,+oo))=[-1,1]
 				d->set_ref(i,*new Domain(fcst(l[i],r[i])));
+				if (i<n) {
+					if (type==CONSTANT && !(*d)[i].is_zero()) type=LINEAR;
+					if (type==LINEAR && (*d)[i].is_unbounded()) type=NONLINEAR;
+				}
+			} else {
+				// --- 'min', 'max' or 'atan2' ----
+				// by default: (-oo,oo) means non-linear
+				d->set_ref(i,*new Domain(e.dim));
+
+				if (i<n && l[i].is_zero() && r[i].is_zero()) (*d)[i].clear();
+			}
 		}
 
 		_coeffs.insert(e, make_pair(d,type));
@@ -298,18 +317,25 @@ void ExprLinearity::unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), b
 		_coeffs.insert(e,build_cst(fcst(expr_d[n])));
 	else {
 		Array<Domain>* d=new Array<Domain>(n+1);
-		nodetype type=LINEAR; // by default
+
+		// a non-linear operation requires the argument to be constant
+		// otherwise, the expression is not linear.
+		nodetype type=linear_op? CONSTANT : NONLINEAR;
 
 		for (int i=0; i<n+1; i++) {
-			if (i<n && !linear_op && !expr_d[i].is_zero()) {
-				// a non-linear operation requires the argument to be constant
-				// otherwise, the expression is not linear.
-				d->set_ref(i,*new Domain(e.dim)); // (-oo,oo) means non-linear
-				type=NONLINEAR;
-			} else
+			if (linear_op) {
 				// ----- '-', 'transpose' -------
 				// possible unbounded domain here.
 				d->set_ref(i,*new Domain(fcst(expr_d[i])));
+				if (i<n) {
+					if (type==CONSTANT && !(*d)[i].is_zero()) type=LINEAR;
+					if (type==LINEAR && (*d)[i].is_unbounded()) type=NONLINEAR;
+				}
+			} else {
+				// by default: (-oo,oo) means non-linear
+				d->set_ref(i,*new Domain(e.dim));
+				if (i<n && expr_d[i].is_zero()) (*d)[i].clear();
+			}
 		}
 
 		_coeffs.insert(e, make_pair(d,type));
@@ -326,17 +352,15 @@ void ExprLinearity::visit(const ExprPower& e){
 		_coeffs.insert(e,build_cst(pow(expr_d[n],e.expon)));
 	else {
 		Array<Domain>* d=new Array<Domain>(n+1);
-		nodetype type=LINEAR; // by default
 
 		for (int i=0; i<n+1; i++) {
-			if (i<n && !expr_d[i].is_zero()) {
-				d->set_ref(i,*new Domain(e.dim)); // (-oo,oo) means non-linear
-				type=NONLINEAR;
-			} else
-				d->set_ref(i,*new Domain(pow(expr_d[i],e.expon)));
+			// by default: (-oo,oo) means non-linear
+			d->set_ref(i,*new Domain(e.dim));
+
+			if (i<n && expr_d[i].is_zero()) (*d)[i].clear();
 		}
 
-		_coeffs.insert(e, make_pair(d,type));
+		_coeffs.insert(e, make_pair(d,NONLINEAR));
 	}
 }
 
