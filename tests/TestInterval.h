@@ -180,6 +180,8 @@ public:
 	CPPUNIT_TEST(diff13);
 	CPPUNIT_TEST(diff14);
 	CPPUNIT_TEST(diff15);
+	CPPUNIT_TEST(diff16);
+	CPPUNIT_TEST(diff17);
 
 	CPPUNIT_TEST_SUITE_END();
 private:
@@ -411,6 +413,10 @@ private:
 	void diff14();
 	// [0,2] \ [-1,1]
 	void diff15();
+	// [0,2] \ [1,1]
+	void diff16();
+	// [0,2] \ [1,1]
+	void diff17();
 
 	void check_eq(const Interval& x, const Interval& y, bool);
 	void check_hull(const Interval& x, const Interval& z, const Interval& y_expected);

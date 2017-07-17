@@ -145,7 +145,7 @@ double IntervalVector::maxdelta(const IntervalVector& x) {
 	return max;
 }
 
-int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const {
+int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result, bool compactness) const {
 	const int nn=size();
 	IntervalVector x=*this;
 	IntervalVector *tmp = new IntervalVector[2*nn]; // in the worst case, there is 2n boxes
@@ -155,7 +155,7 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 
 	// check if in one dimension y is flat and x not,
 	// in which case the diff returns also x directly
-	if (!return_x) {
+	if (!return_x && compactness) {
 		for (int i=0; i<nn; i++) {
 			if (z[i].is_degenerated() && !x[i].is_degenerated()) { return_x=true; break; }
 		}
@@ -170,7 +170,7 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 	} else {
 		for (int var=0; var<nn; var++) {
 
-			x[var].diff(y[var],c1,c2);
+			x[var].diff(y[var],c1,c2, compactness);
 
 			//std::cout << x[var] << " diff " << y[var] << "=" << c1  << " and " << c2 << std::endl;
 			if (!c1.is_empty()) {
@@ -265,7 +265,7 @@ bool bwd_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 	for (int i=0; i<n; i++)
 		if (!bwd_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
 
-	delete[] sum; 
+	delete[] sum;
 	delete[] xy;
 	return true;
 }
@@ -318,4 +318,3 @@ std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ra
 IntervalVector  abs(const IntervalVector& v)                                      {	return _abs(v); }
 
 } // end namespace
-
