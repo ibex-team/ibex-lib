@@ -8,14 +8,15 @@
 // Last Update : Nov 15, 2012
 //============================================================================
 
-#include "ibex_LinearRelaxAffine2.h"
+#include "ibex_LinearizerAffine2.h"
+
 #include "ibex_Exception.h"
 
 namespace ibex {
 
 // the constructor
-LinearRelaxAffine2::LinearRelaxAffine2(const System& sys1) :
-				LinearRelax(sys1), sys(sys1),
+LinearizerAffine2::LinearizerAffine2(const System& sys1) :
+				Linearizer(sys1.nb_var), sys(sys1),
 				goal_af_evl(NULL),
 				ctr_af_evl(new AffineEval<AF_Default>*[sys1.nb_ctr]) {
 
@@ -28,14 +29,14 @@ LinearRelaxAffine2::LinearRelaxAffine2(const System& sys1) :
 	}
 }
 
-LinearRelaxAffine2::~LinearRelaxAffine2() {
+LinearizerAffine2::~LinearizerAffine2() {
 	for (int i = 0; i < sys.nb_ctr; i++) {
 		delete ctr_af_evl[i];
 	}
 	delete[] ctr_af_evl;
 }
 
-bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
+bool LinearizerAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// Linearization of the objective function by AF2
 
 	if (!sys.goal) {
@@ -75,7 +76,7 @@ bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSol
 }
 
 
-int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
+int LinearizerAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// TODO a verifier et finir
 
 	Affine2 af2;
@@ -150,7 +151,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 
 
 /*********generation of the linearized system*********/
-int LinearRelaxAffine2::linearize(const IntervalVector& box, LinearSolver& lp_solver) {
+int LinearizerAffine2::linearize(const IntervalVector& box, LinearSolver& lp_solver) {
 
 	Affine2 af2;
 	Vector rowconst(sys.nb_var);

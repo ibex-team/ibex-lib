@@ -15,7 +15,7 @@
 #include "ibex_Setting.h"
 
 #ifdef _IBEX_WITH_AFFINE_
-#include "ibex_LinearRelaxAffine2.h"
+#include "ibex_LinearizerAffine2.h"
 #endif
 
 #include "ibex_LinearizerXTaylor.h"
@@ -76,7 +76,7 @@ private:
 
 #ifdef _IBEX_WITH_AFFINE_
 	/** ART object to linearize	 */
-	LinearRelaxAffine2 *myart;
+	LinearizerAffine2 *myart;
 #endif
 
 };

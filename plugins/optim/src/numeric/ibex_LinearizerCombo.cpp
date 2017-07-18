@@ -41,12 +41,12 @@ LinearizerCombo::LinearizerCombo(const System& sys1, linear_mode lmode1) :
 #ifdef _IBEX_WITH_AFFINE_
 	case ART:
 	case AFFINE2: {
-		myart = new LinearRelaxAffine2(sys1);
+		myart = new LinearizerAffine2(sys1);
 		break;
 	}
 	case COMPO: {
 
-		myart = new LinearRelaxAffine2(sys1);
+		myart = new LinearizerAffine2(sys1);
 		// the default corner of XNewton linear relaxation
 		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
 		break;

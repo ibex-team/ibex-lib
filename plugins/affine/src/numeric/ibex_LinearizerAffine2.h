@@ -8,11 +8,11 @@
 //============================================================================
 
 
-#ifndef __IBEX_LINEAR_RELAX_AFFINE2_H__
-#define __IBEX_LINEAR_RELAX_AFFINE2_H__
+#ifndef __IBEX_LINEARIZER_AFFINE2_H__
+#define __IBEX_LINEARIZER_AFFINE2_H__
 
 #include "ibex_System.h"
-#include "ibex_LinearRelax.h"
+#include "ibex_Linearizer.h"
 #include "ibex_AffineEval.h"
 
 #include <vector>
@@ -28,20 +28,20 @@ namespace ibex {
  * \date May 2013
  */
 
-class LinearRelaxAffine2 : public LinearRelax {
+class LinearizerAffine2 : public Linearizer {
 
 public:
 
-	LinearRelaxAffine2 (const System& sys);
+	LinearizerAffine2 (const System& sys);
 
-	~LinearRelaxAffine2 ();
+	~LinearizerAffine2 ();
 
 	/**
 	 * \biref  ART iteration.
 	 *
 	 *  Linearize the system and performs 2n calls to Simplex in order to reduce the 2 bounds of each variable
 	 */
-	int linearize(const IntervalVector& box, LinearSolver& lp_solver);
+	virtual int linearize(const IntervalVector& box, LinearSolver& lp_solver);
 
 	/**
 	 * \brief Generation of a linear approximation of the inner region
