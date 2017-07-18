@@ -76,7 +76,14 @@ void Fnc::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, Int
 
 	for (int var=0; var<n; var++) {
 		//var=tab[i];
-		if (x[var]==box[var]) continue;
+
+		// Note: it is attempting to do this:
+		// ----------------------------------
+		//if (x[var]==box[var]) continue;
+		// ----------------------------------
+		// but since the call to jacobian(x,J,var) can be optimized
+		// so that only the var^th column of J is calculated, we can't.
+
 		x[var]=box[var];
 		jacobian(x,J,var);
 		if (J.is_empty()) {
