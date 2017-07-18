@@ -7,7 +7,7 @@
  *
  * Author(s)   : Gilles Chabert, Ignacio Araya, Bertrand Neveu
  * Created     : July 01th, 2012
- * Updated     : July 13th, 2017
+ * Updated     : July 18th, 2017
  * ---------------------------------------------------------------------------- */
 
 #ifndef __IBEX_LINEARIZER_X_TAYLOR__
@@ -95,6 +95,16 @@ private:
 	typedef enum  {INF_X, SUP_X, RANDOM_X, OPPOSITE } corner_id;
 
 	/**
+	 * \brief Linearization (RELAX mode)
+	 */
+	int linear_relax(const IntervalVector& box);
+
+	/**
+	 * \brief Linearization (RESTRICT mode)
+	 */
+	int linear_restrict(const IntervalVector& box);
+
+	/**
 	 * \brief Set the corner information "inf" (see below).
 	 *
 	 * \param id - the chosen corner.
@@ -107,19 +117,17 @@ private:
 	IntervalVector get_corner_point(const IntervalVector& box);
 
 	/**
+	 * \brief Linearize a constraint g(x)<=0 inside a box, from a given corner.
+	 *
+	 * \param dg_box:   dg([box])
+	 * \param g_corner: g(corner)
+	 */
+	int linearize_leq_corner(const IntervalVector& box, IntervalVector& corner, const IntervalVector& dg_box, const Interval& g_corner);
+
+	/**
 	 * \brief Add the constraint ax<=b in the LP solver.
 	 */
-	bool check_and_add_constraint(const IntervalVector& box, const Vector& a, double b, LinearSolver& lp_solver);
-
-	/**
-	 * \brief Linearization (RELAX mode)
-	 */
-	int linear_relax(const IntervalVector& box, LinearSolver& lp_solver);
-
-	/**
-	 * \brief Linearization (RESTRICT mode)
-	 */
-	int linear_restrict(const IntervalVector& box, LinearSolver& lp_solver);
+	int check_and_add_constraint(const IntervalVector& box, const Vector& a, double b);
 
 	/**
 	 * \brief The system
@@ -135,7 +143,6 @@ private:
 	 * \brief Goal constraint (in case of extended system, -1 otherwise).
 	 */
 	const int goal_ctr;
-
 
 	/**
 	 * \brief Approximation mode.
@@ -159,6 +166,11 @@ private:
 	 * or upper bound (false) of the box.
 	 */
 	bool* inf;
+
+	/**
+	 * Current LP solver
+	 */
+	LinearSolver* lp_solver;
 
 };
 

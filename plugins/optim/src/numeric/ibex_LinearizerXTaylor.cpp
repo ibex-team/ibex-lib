@@ -7,7 +7,7 @@
  *
  * Author(s)   : Gilles Chabert, Ignacio Araya, Bertrand Neveu
  * Created     : July 01th, 2012
- * Updated     : July 13th, 2017
+ * Updated     : July 18th, 2017
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_ExtendedSystem.h"
@@ -36,14 +36,11 @@ LinearizerXTaylor::LinearizerXTaylor(const System& _sys, approx_mode _mode, corn
 			Linearizer(_sys.nb_var), sys(_sys),
 			m(sys.f_ctrs.image_dim()), goal_ctr(-1 /*tmp*/),
 			mode(_mode), slope(_slope),
-			inf(new bool[n]) {
+			inf(new bool[n]), lp_solver(NULL) {
 
 	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
 		((int&) goal_ctr)=((const ExtendedSystem&) sys).goal_ctr();
-	} else if (!dynamic_cast<const NormalizedSystem*>(&sys)) {
-		not_implemented("LinearizerXTyalor with non-normalized systems");
 	}
-
 
 	switch(policy) {
 	case INF:    corners.push_back(INF_X); break;
@@ -61,6 +58,137 @@ LinearizerXTaylor::LinearizerXTaylor(const System& _sys, approx_mode _mode, corn
 
 LinearizerXTaylor::~LinearizerXTaylor() {
 	delete[] inf;
+}
+
+int LinearizerXTaylor::linearize(const IntervalVector& box, LinearSolver& _lp_solver)  {
+	lp_solver = &_lp_solver;
+
+	if (mode==RELAX)
+		return linear_relax(box);
+	else
+		return linear_restrict(box);
+}
+
+int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
+
+	int count=0; // total number of added constraint
+
+	// ========= get active constraints ===========
+
+	// ------------------------------------------------
+	// TODO: requires sys.active_ctrs_hansen_matrix !!!
+	//	BitSet b=sys.active_ctrs(box);
+
+	BitSet active=BitSet::all(m); // tmp.................
+	// ------------------------------------------------
+
+	if (active.empty()) return 0;
+
+	int ma=active.size();
+
+	IntervalMatrix Df(ma,n); // derivatives over the box
+
+	if (slope == TAYLOR) // compute derivatives once for all
+		// ------------------------------------------------
+		// TODO: requires sys.f_ctrs_hansen_matrix(BitSet) !!!
+		//Df=sys.active_ctrs_jacobian(box);
+
+		Df=sys.f_ctrs.jacobian(box); // tmp................
+
+	for(unsigned int k=0; k<corners.size(); k++) {
+
+		// ============ get the corner point =================
+		get_corner(corners[k]);
+
+		try {
+			IntervalVector corner=get_corner_point(box);
+
+			// the evaluation of the constraints in the corner x_corner
+			IntervalVector g_corner(sys.f_ctrs.eval_vector(corner,active));
+
+			//cout << "========== corner=" << corner << "=========" << endl;
+
+			// ========= update derivatives (Hansen mode) ========
+			if (slope == HANSEN) {
+				sys.f_ctrs.hansen_matrix(box,corner,Df);
+			}
+
+			int c; // constraint number
+
+			for (int i=0; i<active.size(); i++) {
+				c=(i==0? active.min() : active.next(c));
+
+				//cout << " add ctr n°" << c << endl;
+
+				// only one corner for a linear constraint
+				if (k>0 && sys.f_ctrs.deriv_calculator().is_linear[c]) {
+					//cout << "ctr " << c << " is linear!\n";
+					continue;
+				}
+
+				try {
+					if (sys.ops[c]==LEQ || sys.ops[c]==LT || sys.ops[c]==EQ)
+						count += linearize_leq_corner(box,corner,Df[i],g_corner[i]);
+
+					// note: in case of equality g(x)=0, we also add a linear relaxation for
+					// g(x)>=0, except if this is the "goal constraint" y=f(x).
+					if (sys.ops[c]==GEQ || sys.ops[c]==GT || (sys.ops[c]==EQ && c!=goal_ctr))
+						count += linearize_leq_corner(box,corner,-Df[i],-g_corner[i]);
+
+				} catch (LPException&) {
+					continue;  // just skip this constraint
+				} catch (Unsatisfiability&) {
+					return -1;
+				}
+			}
+		} catch(NoCornerPoint&) {
+			continue; // skip this corner
+		}
+	}
+
+	return count;
+}
+
+int LinearizerXTaylor::linear_restrict(const IntervalVector& box) {
+
+	BitSet active=sys.active_ctrs(box);
+
+	if (active.empty()) return 0;
+
+	get_corner(corners.back());
+
+	// the corner used -> typed IntervalVector just to have guaranteed computations
+	IntervalVector corner = get_corner_point(box);
+
+	IntervalMatrix J=sys.active_ctrs_jacobian(box);
+
+	// the evaluation of the constraints in the corner x_corner
+	IntervalVector g_corner(sys.f_ctrs.eval_vector(corner,active));
+
+	// total number of added constraint
+	// may be less than active.size() if
+	// a constraint was not detected as inactive
+	int count=0;
+	int c; // constraint number
+
+	for (int i=0; i<active.size(); i++) {
+		c=(i==0? active.min() : active.next(c));
+
+		try {
+			if (sys.ops[c]==EQ)
+				// in principle we could deal with linear constraints
+				return -1;
+			else if (sys.ops[c]==LEQ || sys.ops[c]==LT)
+				count += linearize_leq_corner(box,corner,J[i],g_corner[i]);
+			else
+				count += linearize_leq_corner(box,corner,-J[i],-g_corner[i]);
+		} catch (LPException&) {
+			return -1;
+		} catch (Unsatisfiability&) {
+			return -1;
+		}
+	}
+	return count;
 }
 
 void LinearizerXTaylor::get_corner(corner_id id) {
@@ -112,7 +240,35 @@ IntervalVector LinearizerXTaylor::get_corner_point(const IntervalVector& box) {
 	return pt;
 }
 
-bool LinearizerXTaylor::check_and_add_constraint(const IntervalVector& box, const Vector& a, double b, LinearSolver& lp_solver) {
+int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalVector& corner, const IntervalVector& dg_box, const Interval& g_corner) {
+	Vector a(n); // vector of coefficients
+
+	if (dg_box.max_diam() > lp_solver->default_limit_diam_box.ub()) {
+		throw LPException();
+	}
+
+	// ========= compute matrix of coefficients ===========
+	// Fix each coefficient to the lower/upper bound of the
+	// constraint gradient, depending on the position of the
+	// corresponding component of the corner and the
+	// linearization mode.
+	for (int j=0; j<n; j++) {
+		if ((mode==RELAX && !inf[j]) || (mode==RESTRICT && inf[j]))
+			a[j]=dg_box[j].ub();
+		else
+			a[j]=dg_box[j].lb();
+	}
+	// =====================================================
+
+	Interval rhs = -g_corner + a*corner;
+
+	double b = mode==RESTRICT? rhs.lb() - lp_solver->get_epsilon() : b = rhs.ub();
+
+	// may throw Unsatisfiability and LPException
+	return check_and_add_constraint(box,a,b);
+}
+
+int LinearizerXTaylor::check_and_add_constraint(const IntervalVector& box, const Vector& a, double b) {
 
 	Interval ax=a*box; // for fast (in)feasibility check
 
@@ -123,181 +279,12 @@ bool LinearizerXTaylor::check_and_add_constraint(const IntervalVector& box, cons
 		throw Unsatisfiability();
 	else if (ax.ub()<=b) {
 		// the (linear) constraint is satisfied for any point in the box
-		return false;
+		return 0;
 	} else {
-		try {
-			//cout << "add constraint " << a << "*x<=" << b << endl;
-			lp_solver.add_constraint(a, LEQ, b);
-			return true;
-		} catch (LPException&) {
-			return false;
-		}
+		//cout << "add constraint " << a << "*x<=" << b << endl;
+		lp_solver->add_constraint(a, LEQ, b); // note: may throw LPException
+		return 1;
 	}
-}
-
-int LinearizerXTaylor::linearize(const IntervalVector& box, LinearSolver& lp_solver)  {
-	if (mode==RELAX)
-		return linear_relax(box,lp_solver);
-	else
-		return linear_restrict(box,lp_solver);
-}
-
-int LinearizerXTaylor::linear_relax(const IntervalVector& box, LinearSolver& lp_solver)  {
-
-	int count=0; // total number of added constraint
-
-	// ========= get active constraints ===========
-
-	// ------------------------------------------------
-	// TODO: requires sys.active_ctrs_hansen_matrix !!!
-	//	BitSet b=sys.active_ctrs(box);
-
-	BitSet active=BitSet::all(m); // tmp.................
-	// ------------------------------------------------
-
-	int ma=active.size();
-
-	IntervalMatrix Df(ma,n); // derivatives over the box
-	Matrix coeffs(ma,n);     // coefficients for the LP
-
-	if (slope == TAYLOR) // compute derivatives once for all
-		// ------------------------------------------------
-		// TODO: requires sys.f_ctrs_hansen_matrix(BitSet) !!!
-		//Df=sys.active_ctrs_jacobian(box);
-
-		Df=sys.f_ctrs.jacobian(box); // tmp................
-
-	try {
-		for(unsigned int k=0; k<corners.size(); k++) {
-
-			// TODO: only one corner for a linear constraint!
-
-			// ============ get the corner point =================
-			get_corner(corners[k]);
-
-			IntervalVector corner=get_corner_point(box);
-
-			//cout << "========== corner=" << corner << "=========" << endl;
-			// ========= update derivatives (Hansen mode) ========
-			if (slope == HANSEN) {
-				sys.f_ctrs.hansen_matrix(box,corner,Df);
-			}
-			// ========= compute matrix of coefficients ===========
-			// Fix each column of the matrix to its lower/upper
-			// bound depending on the position of the corresponding
-			// component of the corner
-			for (int j=0; j<n; j++) {
-				coeffs.set_col(j, inf[j] ? Df.col(j).lb() : Df.col(j).ub());
-			}
-
-			// ========= compute right-hand side vector ===========
-			IntervalVector rhs=-sys.f_ctrs.eval_vector(corner,active) + coeffs*corner;
-
-			// ================== add constraints ==================
-			int c; // constraint number
-
-			for (int i=0; i<ma; i++) {
-
-				c=(i==0? active.min() : active.next(c));
-
-				//cout << " add ctr n°" << c << endl;
-				if (k>0 && sys.f_ctrs.deriv_calculator().is_linear[c]) {
-					//cout << "ctr " << c << " is linear!\n";
-					continue;
-				}
-
-				// only one corner for a linear constraint
-				if (Df[i].max_diam() > lp_solver.default_limit_diam_box.ub()) {
-					continue; // To avoid problems with LP solvers (like SoPleX)
-				}
-
-
-				count += check_and_add_constraint(box,coeffs[i],rhs[i].ub(),lp_solver);
-
-				// in case of equality g(x)=0, also add a linear relaxation for g(x)>=0
-				if (sys.ops[c]==EQ && c!=goal_ctr) {
-					count += check_and_add_constraint(box,-coeffs[i],-rhs[i].lb(),lp_solver);
-				}
-			}
-		}
-	} catch(Unsatisfiability&) {
-		return -1;
-	} catch(NoCornerPoint&) {
-		// impossible to linearize
-	}
-
-	return count;
-}
-
-int LinearizerXTaylor::linear_restrict(const IntervalVector& box, LinearSolver& lp_solver)  {
-	int count=0; // total number of added constraint
-
-	BitSet active=sys.active_ctrs(box);
-
-	int ma=(int) active.size();
-
-	if (ma==0) return 0; //The box is inner
-
-	//cout << "[x-Taylor] box=" << box << endl;
-
-	get_corner(corners.back());
-
-	// the corner used -> typed IntervalVector just to have guaranteed computations
-	IntervalVector corner = get_corner_point(box);
-
-	Vector row(n);
-
-	// the evaluation of the constraints in the corner x_corner
-	IntervalVector g_corner(sys.f_ctrs.eval_vector(corner,active));
-
-	IntervalMatrix J=sys.active_ctrs_jacobian(box);
-
-	int c; // constraint number
-
-	for (int i=0; i<ma; i++) {
-
-		// TODO: replace with lp_solver.get_limit_diam_box() ?
-		if (J[i].max_diam() > lp_solver.default_limit_diam_box.ub()) {
-			return -1;
-		}
-
-		c=(i==0? active.min() : active.next(c));
-
-		if (sys.ops[c]==EQ) {
-			// in principle we could deal with linear constraints
-			return -1;
-		}
-
-		bool leq=(sys.ops[c]==LEQ || sys.ops[c]==LT);
-
-		//The contraints i is generated:
-		// c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
-		for (int j=0; j<n; j++) {
-			if ((inf[j] && leq) || (!inf[j] && !leq))
-				row[j]=J[i][j].ub();
-			else
-				row[j]=J[i][j].lb();
-		}
-
-		double rhs = (-g_corner[i] + row*corner).lb();
-
-		try {
-			if (leq) {
-				rhs -= lp_solver.get_epsilon();
-				lp_solver.add_constraint(row,LEQ,rhs);
-			} else {
-				rhs += lp_solver.get_epsilon();
-				lp_solver.add_constraint(row,GEQ,rhs);
-			}
-			count++;
-		} catch (LPException&) {
-			return -1;
-		}
-	}
-
-	assert(count==ma);
-
-	return count;
 }
 
 } // end namespace
