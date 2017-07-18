@@ -737,12 +737,17 @@ public:
 	/**
 	 *\see #ibex::Fnc
 	 */
-	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+	void hansen_matrix(const IntervalVector& x, IntervalMatrix& H) const;
 
 	/**
 	 *\see #ibex::Fnc
 	 */
-	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& h) const;
+	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H) const;
+
+	/**
+	 *\see #ibex::Fnc
+	 */
+	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H, const BitSet& components) const;
 
 	/**
 	 *\see #ibex::Fnc
@@ -1100,32 +1105,36 @@ inline IntervalMatrix Function::jacobian(const IntervalVector& x, const BitSet& 
 }
 
 inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {
-	Fnc::jacobian(x,J,v);
+	Fnc::jacobian(x, J, v);
 	// <=> 	_grad->jacobian(x,J,v);
 }
 
 inline void Function::jacobian(const IntervalVector& full_box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const {
-	Fnc::jacobian(full_box,J_var,J_param, set);
+	Fnc::jacobian(full_box, J_var, J_param, set);
 }
 
 inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
-	_grad->jacobian(x,J,components,v);
+	_grad->jacobian(x, J, components, v);
 }
 
-inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const {
-	Fnc::hansen_matrix(x,h);
+inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& H) const {
+	Fnc::hansen_matrix(x, H);
 }
 
-inline void Function::hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& h) const {
-	Fnc::hansen_matrix(x,x0,h);
+inline void Function::hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H) const {
+	Fnc::hansen_matrix(x, x0, H);
+}
+
+inline void Function::hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H, const BitSet& components) const {
+	Fnc::hansen_matrix(x, x0, H, components);
 }
 
 inline void Function::hansen_matrix(const IntervalVector& full_box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
-	Fnc::hansen_matrix(full_box,H_var,J_param,set);
+	Fnc::hansen_matrix(full_box, H_var, J_param, set);
 }
 
 inline void Function::hansen_matrix(const IntervalVector& full_box, const IntervalVector& x0, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
-	Fnc::hansen_matrix(full_box,x0,H_var,J_param,set);
+	Fnc::hansen_matrix(full_box, x0, H_var, J_param,set);
 }
 
 inline Eval& Function::basic_evaluator() const {

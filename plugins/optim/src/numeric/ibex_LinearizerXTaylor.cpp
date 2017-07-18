@@ -74,13 +74,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 	int count=0; // total number of added constraint
 
 	// ========= get active constraints ===========
-
-	// ------------------------------------------------
-	// TODO: requires sys.active_ctrs_hansen_matrix !!!
-	//	BitSet b=sys.active_ctrs(box);
-
-	BitSet active=BitSet::all(m); // tmp.................
-	// ------------------------------------------------
+	BitSet active=sys.active_ctrs(box);
 
 	if (active.empty()) return 0;
 
@@ -89,11 +83,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 	IntervalMatrix Df(ma,n); // derivatives over the box
 
 	if (slope == TAYLOR) // compute derivatives once for all
-		// ------------------------------------------------
-		// TODO: requires sys.f_ctrs_hansen_matrix(BitSet) !!!
-		//Df=sys.active_ctrs_jacobian(box);
-
-		Df=sys.f_ctrs.jacobian(box); // tmp................
+		Df=sys.active_ctrs_jacobian(box);
 
 	for(unsigned int k=0; k<corners.size(); k++) {
 
@@ -110,7 +100,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 
 			// ========= update derivatives (Hansen mode) ========
 			if (slope == HANSEN) {
-				sys.f_ctrs.hansen_matrix(box,corner,Df);
+				sys.f_ctrs.hansen_matrix(box,corner,Df,active);
 			}
 
 			int c; // constraint number

@@ -58,9 +58,9 @@ void Fnc::jacobian(const IntervalVector& box, IntervalMatrix& J_var, IntervalMat
 //	}
 //}
 
-void Fnc::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, IntervalMatrix& H) const {
+void Fnc::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, IntervalMatrix& H, const BitSet& components) const {
 	int n=nb_var();
-	int m=image_dim();
+	int m=components.size();
 
 	assert(H.nb_cols()==n);
 	assert(box.size()==n);
@@ -85,7 +85,7 @@ void Fnc::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, Int
 		// so that only the var^th column of J is calculated, we can't.
 
 		x[var]=box[var];
-		jacobian(x,J,var);
+		jacobian(x,J,components,var);
 		if (J.is_empty()) {
 			H.set_empty();
 			return;

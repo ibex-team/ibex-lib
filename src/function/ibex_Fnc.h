@@ -158,7 +158,7 @@ public:
 	 *
 	 * The expansion point is the center of x.
 	 */
-	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+	void hansen_matrix(const IntervalVector& x, IntervalMatrix& H) const;
 
 	/**
 	 * \brief Calculate the Hansen matrix of f for a given (set of) expansion point x0.
@@ -166,7 +166,14 @@ public:
 	 * \note If the expansion point x0 is set to x, the Hansen matrix is equal to the Jacobian
 	 *       matrix (but computation is much slower).
 	 */
-	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& h) const;
+	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H) const;
+
+	/**
+	 * \brief Hansen matrix of selected components of f, and for a a given expansion point x0.
+	 *
+	 * \see above
+	 */
+	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H, const BitSet& components) const;
 
 	/**
 	 * \brief Calculate the Hansen matrix of a restriction of f
@@ -253,6 +260,10 @@ inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitS
 
 inline void Fnc::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
 	hansen_matrix(box, box.mid(), H);
+}
+
+inline void Fnc::hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H) const {
+	hansen_matrix(x, x0, H, BitSet::all(image_dim()));
 }
 
 inline void Fnc::hansen_matrix(const IntervalVector& box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
