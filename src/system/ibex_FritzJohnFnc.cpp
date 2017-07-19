@@ -52,7 +52,7 @@ namespace ibex {
 //}
 
 
-FritzJohnFnc::FritzJohnFnc(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const EntailedCtr& entailed) :
+FritzJohnFnc::FritzJohnFnc(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const BitSet& active) :
 								Fnc(1,1), nb_mult(0), // **tmp**
 								n(sys.nb_var), // **tmp**
 								sys(sys), df(df), dg(dg),
@@ -64,7 +64,7 @@ FritzJohnFnc::FritzJohnFnc(const NormalizedSystem& sys, Function* df, Function**
 	int l=1; // lambda0
 
 	for (int i=0; i<sys.nb_ctr; i++) {
-		if (entailed.normalized(i)) {
+		if (!active[i]) {
 			continue;
 		}
 		else {

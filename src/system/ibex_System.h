@@ -261,7 +261,7 @@ public:
 
 	/** Box Constraint on the variable
 	 * (not only "initial": may be used as input by CHOCO) */
-	IntervalVector box_constraints;
+	IntervalVector box;
 
 	/**
 	 * Constraints.

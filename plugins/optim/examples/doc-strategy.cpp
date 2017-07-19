@@ -56,7 +56,7 @@ int main() {
 
 	// Create a partition of the initial box into two subboxes,
 	// by bisecting any variable (here, n°4)
-	pair<IntervalVector,IntervalVector> pair=sys1.box_constraints.bisect(4);
+	pair<IntervalVector,IntervalVector> pair=sys1.box.bisect(4);
 
 	// Create a vector of solutions for each solver
 	vector<IntervalVector> sols1, sols2;

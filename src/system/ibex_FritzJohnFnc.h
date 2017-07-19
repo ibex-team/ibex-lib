@@ -44,7 +44,7 @@ private:
 class FritzJohnFnc : public Fnc {
 public:
 
-	FritzJohnFnc(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const EntailedCtr& entailed);
+	FritzJohnFnc(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const BitSet& active);
 
 	virtual IntervalVector eval_vector(const IntervalVector& x_lambda) const;
 

@@ -42,7 +42,7 @@ int main(int argc, char** argv){
 		cout.precision(12);
 		// Get the solutions
 
-		vector<IntervalVector> sols=s.solve(sys.box_constraints);
+		vector<IntervalVector> sols=s.solve(sys.box);
 		cout << "number of solutions=" << sols.size() << endl;
 
 		cout << "cpu time used=" << s.time << "s."<< endl;

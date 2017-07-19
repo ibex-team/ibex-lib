@@ -82,7 +82,7 @@ void TestSystem::factory01() {
 	CPPUNIT_ASSERT(sys.args[2].dim==Dim::scalar());
 	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x(2)))"));
 
-	CPPUNIT_ASSERT(sys.box_constraints.size()==13);
+	CPPUNIT_ASSERT(sys.box.size()==13);
 
 	CPPUNIT_ASSERT(sys.ctrs.size()==2);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
@@ -126,7 +126,7 @@ void TestSystem::copy01() {
 	CPPUNIT_ASSERT(sys.args[2].dim==Dim::scalar());
 	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x(2)))"));
 
-	CPPUNIT_ASSERT(sys.box_constraints.size()==13);
+	CPPUNIT_ASSERT(sys.box.size()==13);
 
 	CPPUNIT_ASSERT(sys.ctrs.size()==2);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
@@ -202,7 +202,7 @@ void TestSystem::extend01() {
 	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"__goal__"));
 	//CPPUNIT_ASSERT(sys.goal==NULL);
 
-	CPPUNIT_ASSERT(sys.box_constraints.size()==5);
+	CPPUNIT_ASSERT(sys.box.size()==5);
 
 	CPPUNIT_ASSERT(sys.ctrs.size()==4);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);

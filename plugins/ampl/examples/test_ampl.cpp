@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 	cout<<"creation ok"<< endl;
 	System sys(interface);
 	cout<<"Bound_sys"<< endl;
-	cout<<sys.box_constraints<<endl;
+	cout<<sys.box<<endl;
 	cout<<sys<<endl;
 
 /*
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 */
 	System sys2(argv[2]);
 	cout<<"Bound_sys"<< endl;
-	cout<<sys2.box_constraints<<endl;
+	cout<<sys2.box<<endl;
 	cout<<sys2<<endl;
 
 /*

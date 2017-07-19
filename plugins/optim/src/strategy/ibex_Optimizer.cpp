@@ -117,8 +117,6 @@ Optimizer::~Optimizer() {
 	if (df) delete df;
 	delete &loup_finder;
 	if (sys.nb_ctr>0) delete[] dg;
-	delete mylp;
-	delete lr;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
 }
@@ -168,7 +166,7 @@ bool Optimizer::update_real_loup() {
 	//       but maybe we should use random
 
 	if (pdc.test(epsbox)==YES) {
-		Interval resI = sys.goal->eval(pdc.solution());
+		Interval resI = user_sys.goal->eval(pdc.solution());
 		if (!resI.is_empty()) {
 			double res=resI.ub();
 			if (res<loup) {
@@ -235,11 +233,6 @@ bool Optimizer::update_entailed_ctr(const IntervalVector& box) {
 		}
 	}
 	return true;
-}
-
-double minimum (double a, double b) {
-	if(a<=b) return a;
-	else return b;
 }
 
 void Optimizer::update_uplo() {
@@ -383,7 +376,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 //	if (df)
 //		firstorder_contract(tmp_box,init_box);
 
-	fritz_john_contract(tmp_box);
+//	fritz_john_contract(tmp_box);
 
 	if (tmp_box.is_empty()) {
 		c.box.set_empty();
@@ -398,7 +391,7 @@ void Optimizer::fritz_john_contract(IntervalVector& box) {
 	//if (box.max_diam()>1e-1) return;
 	// =========================================================================================
 
-	FritzJohnFnc fjf(normalized_user_sys,df,dg,box,*entailed);
+	FritzJohnFnc fjf(normalized_user_sys,df,dg,box,BitSet::all(normalized_user_sys.nb_ctr));
 
 	// we consider that Newton will not succeed if there are more
 	// than n active constraints.

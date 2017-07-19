@@ -131,7 +131,7 @@ int main(int argc, char** argv){
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	Optimizer o(sys,*ctcxn,*bs,prec,goalprec,goalprec,samplesize,eqeps);
 
-	cout << " sys.box " << sys.box_constraints << endl;
+	cout << " sys.box " << sys.box << endl;
 
 	// the trace 
 	o.trace=1;
@@ -140,7 +140,7 @@ int main(int argc, char** argv){
 	o.timeout=timelimit;
 
 	// the search itself 
-	o.optimize(sys.box_constraints);
+	o.optimize(sys.box);
 
 	// printing the results     
 	o.report();

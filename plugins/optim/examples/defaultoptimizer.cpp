@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 		cout.precision(12);
 
 		// Search for the optimum
-		o.optimize(sys.box_constraints);
+		o.optimize(sys.box);
 
 		// Report some information (computation time, etc.)
 		o.report();

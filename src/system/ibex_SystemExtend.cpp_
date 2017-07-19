@@ -35,8 +35,8 @@ public:
 
 		// do not initialize variables with sys.f_ctrs.args
 		// since f may be uninitialized (unconstrained problem)
-		add_var(sys.args,sys.box_constraints);
-		add_var(y,IntervalVector(1,sys.goal->eval(sys.box_constraints)));
+		add_var(sys.args,sys.box);
+		add_var(y,IntervalVector(1,sys.goal->eval(sys.box)));
 
 		// first, add goal(x)<=y.
 		if (sys.goal)  {

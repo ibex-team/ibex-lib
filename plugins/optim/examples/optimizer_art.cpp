@@ -99,7 +99,7 @@ int main(int argc, char** argv){
 		o.timeout=timelimit;
 
 		// the search itself
-		o.optimize(sys.box_constraints);
+		o.optimize(sys.box);
 
 		// printing the results
 		o.report_perf();
