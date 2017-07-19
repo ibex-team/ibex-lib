@@ -15,9 +15,7 @@ using namespace std;
 
 namespace ibex {
 
-ActiveConstraintsFnc::ActiveConstraintsFnc(const System& sys, const Vector& pt, double activation_threshold, bool trace) : sys(sys) {
-
-	activated.initialise(0,sys.f_ctrs.image_dim()-1,BitSet::empt);
+ActiveConstraintsFnc::ActiveConstraintsFnc(const System& sys, const Vector& pt, double activation_threshold, bool trace) : sys(sys), activated(sys.f_ctrs.image_dim()) {
 
 	BitSet ith=BitSet::empty(sys.f_ctrs.image_dim());
 
@@ -48,8 +46,8 @@ IntervalVector ActiveConstraintsFnc::eval_vector(const IntervalVector& x) const 
 	return sys.f_ctrs.eval_vector(x,activated);
 }
 
-void ActiveConstraintsFnc::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
-	J=sys.f_ctrs.jacobian(x,activated);
+void ActiveConstraintsFnc::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
+	sys.f_ctrs.jacobian(x,J,activated.compose(components),v);
 }
 
 } /* namespace ibex */

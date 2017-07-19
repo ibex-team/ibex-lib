@@ -144,7 +144,7 @@ public:
 	/**
 	 * \brief Calculate a submatrix of the Jacobian matrix of f.
 	 *
-	 * Default implementation: does nothing (J unchanged).
+	 * Default implementation: program exit with error.
 	 *
 	 * \param x - the input box
 	 * \param J - where the Jacobian matrix has to be stored (output parameter).
@@ -255,7 +255,7 @@ inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) con
 }
 
 inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
-	// nothing done.
+	ibex_error("Fnc: 'jacobian' called with no implementation.");
 }
 
 inline void Fnc::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {

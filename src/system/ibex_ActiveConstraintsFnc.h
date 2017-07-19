@@ -47,7 +47,7 @@ public:
 	/**
 	 * \brief Jacobian matrix of the function.
 	 */
-	virtual void jacobian(const IntervalVector& x_lambda, IntervalMatrix& J) const;
+	virtual void jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const;
 
 protected:
 	const System& sys;
