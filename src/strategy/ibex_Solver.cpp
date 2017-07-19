@@ -48,8 +48,7 @@ void Solver::init(const System& sys, const BitSet* _params) {
 	int nb_eq=0;
 
 	if (_params) {
-		this->params=new BitSet();
-		((BitSet*) this->params)->clone(*_params);
+		this->params=new BitSet(*_params);
 	}
 
 	// count the dimension of equalities

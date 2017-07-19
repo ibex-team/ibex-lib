@@ -15,72 +15,72 @@ using namespace std;
 
 namespace ibex {
 
-VarSet::VarSet(Function& f, const ExprNode& x1, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3,x4),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3,x4,x5),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8,x9),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, const ExprNode& x12, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, const ExprNode& x12, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12),var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const Array<const ExprNode>& y, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const Array<const ExprNode>& y, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, y, var);
 	init_arrays();
 }
 
-VarSet::VarSet(Function& f, const Array<const ExprSymbol>& y, bool var) : nb_var(-1), nb_param(-1) {
+VarSet::VarSet(Function& f, const Array<const ExprSymbol>& y, bool var) : nb_var(-1), nb_param(-1), is_var(f.nb_var()) {
 	init_bitset(f, (const Array<const ExprNode>&) y, var);
 	init_arrays();
 }
@@ -91,12 +91,11 @@ VarSet::VarSet(int total, const BitSet& x, bool var) :
 				is_var    (var? x                   : BitSet::all(total)) {
 
 	if (!var)
-		((BitSet&) is_var).setminus_with(x);
+		((BitSet&) is_var).diff(x);
 	init_arrays();
 }
 
-VarSet::VarSet(const VarSet& v) : nb_var(v.nb_var), nb_param(v.nb_param) {
-	((BitSet&) is_var).clone(v.is_var);
+VarSet::VarSet(const VarSet& v) : nb_var(v.nb_var), nb_param(v.nb_param), is_var(v.is_var) {
 	init_arrays();
 }
 
@@ -119,8 +118,6 @@ void VarSet::init_bitset(Function& f, const Array<const ExprNode>& x, bool var) 
 	assert(x.size()>0);
 	assert(f.nb_var()>x.size());
 	BitSet& is_var = ((BitSet&) this->is_var);
-
-	is_var.initialise(0,f.nb_var()-1,BitSet::empt);
 
 	if (var) {
 		// by default, all are parameters
