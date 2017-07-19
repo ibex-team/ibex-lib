@@ -26,6 +26,7 @@
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_Random.h"
+#include "ibex_FritzJohnCond.h"
 
 namespace ibex {
 
@@ -154,6 +155,8 @@ public:
 	 * \warning kept by reference.
 	 */
 	System& user_sys;
+
+	NormalizedSystem normalized_user_sys;
 
 	/**
 	 * \brief The normalized system
@@ -426,6 +429,14 @@ private:
 
 	/** Currently entailed constraints */
 	EntailedCtr* entailed;
+
+	void fritz_john_contract(IntervalVector& box);
+
+	//!! warning: sys.box should be properly set before call to constructor !!
+	//FritzJohnCond fjc;
+
+	Function** dg;
+
 };
 
 } // end namespace ibex
