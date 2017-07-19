@@ -110,16 +110,23 @@ public:
 
 	/**
 	 * \brief Calculate the Jacobian matrix of f
+	 *
+	 * \param x - the input box
+	 * \param v - Only calculate (if faster) the vth column (the other columns are undetermined).
 	 * \pre f must be vector-valued
 	 */
-	IntervalMatrix jacobian(const IntervalVector& x) const;
+	IntervalMatrix jacobian(const IntervalVector& x, int v=-1) const;
 
 	/**
 	 * \brief Calculate some rows of the jacobian.
 	 *
+	 * \param x - the input box
+	 * \param components - selected components f_i
+	 * \param v - Only calculate (if faster) the vth column (the other columns are undetermined).
+	 *
 	 * \pre f must be vector-valued.
 	 */
-	IntervalMatrix jacobian(const IntervalVector& x, const BitSet& components) const;
+	IntervalMatrix jacobian(const IntervalVector& x, const BitSet& components, int v=-1) const;
 
 	/**
 	 * \brief Calculate the Jacobian matrix of f.
@@ -238,15 +245,15 @@ inline void Fnc::gradient(const IntervalVector& x, IntervalVector& g) const {
 	g=IntervalVector(_image_dim.vec_size());
 }
 
-inline IntervalMatrix Fnc::jacobian(const IntervalVector& x) const {
+inline IntervalMatrix Fnc::jacobian(const IntervalVector& x, int v) const {
 	IntervalMatrix J(image_dim(),x.size());
-	jacobian(x,J);
+	jacobian(x,J,v);
 	return J;
 }
 
-inline IntervalMatrix Fnc::jacobian(const IntervalVector& x, const BitSet& components) const {
+inline IntervalMatrix Fnc::jacobian(const IntervalVector& x, const BitSet& components, int v) const {
 	IntervalMatrix J(components.size(), nb_var());
-	jacobian(x,J,components);
+	jacobian(x,J,components,v);
 	return J;
 }
 

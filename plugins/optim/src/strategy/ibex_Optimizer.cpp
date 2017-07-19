@@ -10,22 +10,14 @@
 #include "ibex_Optimizer.h"
 #include "ibex_Timer.h"
 #include "ibex_CtcFwdBwd.h"
-#include "ibex_CtcOptimShaving.h"
-#include "ibex_CtcHC4.h"
-#include "ibex_Random.h"
-
-#include "ibex_ExprCopy.h"
 #include "ibex_ExprDiff.h"
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
-//#include "ibex_Multipliers.h"
-#include "ibex_Linear.h"
-#include "ibex_PdcFirstOrder.h"
 #include "ibex_OptimData.h"
 #include "ibex_LoupFinderDefault.h"
 #include "ibex_ActiveConstraintsFnc.h"
-#include "ibex_CtcNewton.h"
-#include "ibex_FritzJohnFnc.h"
+#include "ibex_PdcHansenFeasibility.h"
+
 #include <float.h>
 #include <stdlib.h>
 
@@ -36,17 +28,7 @@ namespace ibex {
 const double Optimizer::default_prec = 1e-07;
 const double Optimizer::default_goal_rel_prec = 1e-07;
 const double Optimizer::default_goal_abs_prec = 1e-07;
-const int    Optimizer::default_sample_size = 10;
 const double Optimizer::default_equ_eps = 1e-08;
-const double Optimizer::default_loup_tolerance = 0.1;
-
-static int newton_OK_preproc_OK=0;
-static int newton_OK_preproc_KO=0;
-static int newton_KO_preproc_OK=0;
-static int newton_KO_preproc_KO=0;
-static int too_many_active=0;
-static int lu_OK=0;
-static int precond_OK=0;
 
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;
@@ -65,20 +47,20 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 }
 
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder,*/ double prec,
-		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
+		double goal_rel_prec, double goal_abs_prec, double equ_eps,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
-                				user_sys(user_sys), normalized_user_sys(user_sys,0), sys(user_sys,equ_eps),
-                				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
+                				user_sys(user_sys), normalized_user_sys(user_sys,0),
+                				n(user_sys.nb_var),
                 				ext_sys(user_sys,equ_eps), has_equality(false /* by default*/),
-                				ctc(ctc), bsc(bsc), loup_finder(*new LoupFinderDefault(sys)),
+                				ctc(ctc), bsc(bsc), loup_finder(*new LoupFinderDefault(user_sys)),
                 				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
-                				sample_size(sample_size), trace(false),
+                				trace(false),
                 				timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), loup_box(n), nb_cells(0),
                 				df(NULL), loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
-                				uplo_of_epsboxes(POS_INFINITY) {
+                				uplo_of_epsboxes(POS_INFINITY), kkt(normalized_user_sys) {
 
 
 	try {
@@ -99,24 +81,12 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder,
 	}
 
 	if (trace) cout.precision(12);
-
-	if (sys.nb_ctr==0) return;
-
-	dg = new Function*[normalized_user_sys.nb_ctr];
-
-	for (int i=0; i<normalized_user_sys.nb_ctr; i++) {
-		if (!normalized_user_sys.ctrs[i].f.expr().dim.is_scalar())
-			not_implemented("Fritz-John conditions with vector/matrix constraints.");
-
-		dg[i] = new Function(normalized_user_sys.ctrs[i].f,Function::DIFF);
-	}
 }
 
 Optimizer::~Optimizer() {
 	buffer.flush();
 	if (df) delete df;
 	delete &loup_finder;
-	if (sys.nb_ctr>0) delete[] dg;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
 }
@@ -142,7 +112,7 @@ bool Optimizer::update_real_loup() {
 		loup_box = loup_point;
 		return true;
 	}
-
+	cout << "#active=" << af.image_dim() << endl;
 	IntervalVector epsbox(loup_point);
 
 	// ====================================================
@@ -174,7 +144,7 @@ bool Optimizer::update_real_loup() {
 				// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
 				bool satisfy_inequalities=true;
 				for (int j=0; j<user_sys.nb_ctr; j++) {
-					if (user_sys.ctrs[j].op!=EQ && !entailed->original(j) &&
+					if (user_sys.ctrs[j].op!=EQ /* TODO: && !entailed->original(j)*/ &&
 						user_sys.ctrs[j].f.eval(pdc.solution()).ub()>0) {
 						satisfy_inequalities=false;
 						break;
@@ -221,19 +191,19 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 	return loup_change;
 }
 
-bool Optimizer::update_entailed_ctr(const IntervalVector& box) {
-	for (int j=0; j<m; j++) {
-		if (entailed->normalized(j)) {
-			continue;
-		}
-		Interval y=sys.ctrs[j].f.eval(box);
-		if (y.lb()>0) return false;
-		else if (y.ub()<=0) {
-			entailed->set_normalized_entailed(j);
-		}
-	}
-	return true;
-}
+//bool Optimizer::update_entailed_ctr(const IntervalVector& box) {
+//	for (int j=0; j<m; j++) {
+//		if (entailed->normalized(j)) {
+//			continue;
+//		}
+//		Interval y=sys.ctrs[j].f.eval(box);
+//		if (y.lb()>0) return false;
+//		else if (y.ub()<=0) {
+//			entailed->set_normalized_entailed(j);
+//		}
+//	}
+//	return true;
+//}
 
 void Optimizer::update_uplo() {
 	double new_uplo=POS_INFINITY;
@@ -284,7 +254,7 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		delete &c;
 	} else {
 		// we know cost1() does not require OptimData
-		buffer.cost2().set_optim_data(c,sys);
+		buffer.cost2().set_optim_data(c,normalized_user_sys);
 
 		// the cell is put into the 2 heaps
 		buffer.push(&c);
@@ -376,7 +346,9 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 //	if (df)
 //		firstorder_contract(tmp_box,init_box);
 
-//	fritz_john_contract(tmp_box);
+	//fritz_john_contract(tmp_box);
+
+	kkt.contract(tmp_box);
 
 	if (tmp_box.is_empty()) {
 		c.box.set_empty();
@@ -385,153 +357,28 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 		write_ext_box(tmp_box,c.box);
 	}
 }
-
-void Optimizer::fritz_john_contract(IntervalVector& box) {
-
-	//if (box.max_diam()>1e-1) return;
-	// =========================================================================================
-
-	FritzJohnFnc fjf(normalized_user_sys,df,dg,box,BitSet::all(normalized_user_sys.nb_ctr));
-
-	// we consider that Newton will not succeed if there are more
-	// than n active constraints.
-	if ((fjf.eq.empty() && fjf.nb_mult > normalized_user_sys.nb_var+1) ||
-		(!fjf.eq.empty() && fjf.nb_mult > normalized_user_sys.nb_var)) {
-		//cout << fjf.nb_mult << endl;
-		too_many_active++;
-		return;
-	}
-
-	IntervalVector lambda=fjf.multiplier_domain();
-
-	IntervalVector old_lambda(lambda);
-
-	int *pr;
-	int *pc=new int[fjf.nb_mult];
-	IntervalMatrix A(fjf.eq.empty() ? normalized_user_sys.nb_var+1 : sys.nb_var, fjf.nb_mult);
-
-	if (fjf.eq.empty()) {
-		A.put(0,0, fjf.gradients(box));
-		A.put(sys.nb_var, 0, Vector::ones(fjf.nb_mult), true); // normalization equation
-		pr = new int[normalized_user_sys.nb_var+1]; // selected rows
-	} else {
-		A = fjf.gradients(box);
-		pr = new int[normalized_user_sys.nb_var]; // selected rows
-	}
-
-	IntervalMatrix LU(A);
-
-
-	bool preprocess_success=false;
-
-	try {
-		IntervalMatrix A2(fjf.nb_mult, fjf.nb_mult);
-
-//		if (A.nb_rows()>A.nb_cols()) {
-		//cout << "A=" << A << endl;
-		interval_LU(A,LU,pr,pc);
-		lu_OK++;
-		//cout << "LU success\n";
-
-//		} else
-//			cout << "bypass LU\n";
-
-		Vector b2=Vector::zeros(fjf.nb_mult);
-
-		for (int i=0; i<fjf.nb_mult; i++) {
-			A2.set_row(i, A.row(pr[i]));
-			if (pr[i]==normalized_user_sys.nb_var) // right-hand side of normalization is 1
-				b2[i]=1;
-		}
-		//cout << "\n\nA2=" << A2 << endl;
-		precond(A2);
-		//cout << "precond success\n";
-		precond_OK++;
-		gauss_seidel(A2,b2,lambda);
-
-		double maxdiam=0;
-		for (int i=0; i<A.nb_rows(); i++) {
-			double d=A.row(i).max_diam();
-			if (d>maxdiam) maxdiam=d;
-		}
-
-		if (old_lambda.rel_distance(lambda)>0.1
-			//&& maxdiam<10 && lambda[1].lb()>0
-		) {
-			preprocess_success=true;
-		}
-
-		if (lambda.is_empty()) {
-			box.set_empty();
-			return;
-		}
-
-	} catch(SingularMatrixException&) {
-	}
-
-	delete[] pr;
-	delete[] pc;
-
-	if (!preprocess_success) return;
-
-	CtcNewton newton(fjf,1);
-	IntervalVector full_box = cart_prod(box, lambda);
-
-
-	// =========================================================================================
-//	CtcNewton newton(fjc.f,1);
-//
-//	IntervalVector full_box = cart_prod(box, IntervalVector(fjc.M+fjc.R+fjc.K+1,Interval(0,1)));
-//
-//	full_box.put(fjc.n+fjc.M+fjc.R+1,IntervalVector(fjc.K,Interval::ZERO));
-	// =========================================================================================
-
-	IntervalVector save(full_box);
-
-	newton.contract(full_box);
-
-	if (full_box.is_empty()) {
-		if (preprocess_success) newton_OK_preproc_OK++;
-		else newton_OK_preproc_KO++;
-		box.set_empty();
-	}
-	else {
-		if (save.subvector(0,sys.nb_var-1)!=full_box.subvector(0,sys.nb_var-1)) {
-			if (preprocess_success) newton_OK_preproc_OK++;
-			else newton_OK_preproc_KO++;
-			box = full_box.subvector(0,n-1);
-		} else {
-			if (preprocess_success) {
-				newton_KO_preproc_OK++;
-			}
-			else newton_KO_preproc_KO++;
-		}
-	}
-	// =========================================================================================
-}
-
 // called with the box without the objective
 void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& init_box) {
-	if (m==0) {
-		// for unconstrained optimization  contraction with gradient=0
-		if (box.is_strict_interior_subset(init_box)) {
-			if (n==1)
-				df->backward(Interval::ZERO,box);
-			else
-				df->backward(IntervalVector(n,Interval::ZERO),box);
+		if (user_sys.nb_ctr==0) {
+			// for unconstrained optimization  contraction with gradient=0
+			if (box.is_strict_interior_subset(init_box)) {
+				if (n==1)
+					df->backward(Interval::ZERO,box);
+				else
+					df->backward(IntervalVector(n,Interval::ZERO),box);
+			}
 		}
-	}
 
-//	else {
-//
-//		PdcFirstOrder p(user_sys,init_box);
-//
-//		p.set_entailed(entailed);
-//		if (p.test(box)==NO) {
-//			box.set_empty();
-//		}
-//	}
-}
+	//	else {
+	//
+	//		PdcFirstOrder p(user_sys,init_box);
+	//
+	//		p.set_entailed(entailed);
+	//		if (p.test(box)==NO) {
+	//			box.set_empty();
+	//		}
+	//	}
+	}
 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
@@ -709,13 +556,6 @@ void Optimizer::report() {
 
 		cout << " cpu time used " << time << "s." << endl;
 		cout << " number of cells " << nb_cells << endl;
-		cout << " newton OK preproc OK=" << newton_OK_preproc_OK << endl;
-		cout << " newton OK preproc KO=" << newton_OK_preproc_KO << endl;
-		cout << " newton KO preproc OK=" << newton_KO_preproc_OK << endl;
-		cout << " newton KO preproc KO=" << newton_KO_preproc_KO << endl;
-		cout << " too many active=" << too_many_active << endl;
-		cout << " lu_OK=" << lu_OK << endl;
-		cout << " precond_OK" << precond_OK << endl;
 	}
 
 }

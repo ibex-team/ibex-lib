@@ -712,12 +712,12 @@ public:
 	/**
 	 *\see #ibex::Fnc
 	 */
-	IntervalMatrix jacobian(const IntervalVector& x) const;
+	IntervalMatrix jacobian(const IntervalVector& x, int v=-1) const;
 
 	/**
 	 *\see #ibex::Fnc
 	 */
-	IntervalMatrix jacobian(const IntervalVector& x, const BitSet& components) const;
+	IntervalMatrix jacobian(const IntervalVector& x, const BitSet& components, int v=-1) const;
 
 	/**
 	 *\see #ibex::Fnc
@@ -1096,12 +1096,12 @@ inline IntervalVector Function::gradient(const IntervalVector& x) const {
 	return g;
 }
 
-inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
-	return Fnc::jacobian(x);
+inline IntervalMatrix Function::jacobian(const IntervalVector& x, int v) const {
+	return Fnc::jacobian(x, v);
 }
 
-inline IntervalMatrix Function::jacobian(const IntervalVector& x, const BitSet& components) const {
-	return Fnc::jacobian(x,components);
+inline IntervalMatrix Function::jacobian(const IntervalVector& x, const BitSet& components, int v) const {
+	return Fnc::jacobian(x, components, v);
 }
 
 inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {

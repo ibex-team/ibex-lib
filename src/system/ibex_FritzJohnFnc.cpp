@@ -228,7 +228,13 @@ IntervalVector FritzJohnFnc::eval_vector(const IntervalVector& x_lambda) const {
 	return res;
 }
 
-void FritzJohnFnc::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J) const {
+void FritzJohnFnc::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const {
+
+	if (components.size()!=n+nb_mult) {
+		not_implemented("FritzJohnFnc: 'jacobian' for selected components");
+		//J.resize(n+nb_mult,n+nb_mult);
+	}
+
 	IntervalVector x=x_lambda.subvector(0,n-1);
 
 	int lambda0=n;	// The index of lambda0 in the box x_lambda is nb_var.
@@ -236,8 +242,8 @@ void FritzJohnFnc::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J) c
 	int mult=lambda0; // mutipliers indices counter. The first multiplier is lambda0.
 
 	// matrix corresponding to the "Hessian expression" lambda_0*d^2f+lambda_1*d^2g_1+...=0
-	IntervalMatrix hessian=x_lambda[mult] * df->jacobian(x); // init
-	J.put(0, mult, df->eval_vector(x), false);
+	IntervalMatrix hessian=x_lambda[mult] * df->jacobian(x,v<n? v : -1); // init
+	if (v==-1 || v==mult) J.put(0, mult, df->eval_vector(x), false);
 
 	mult++;
 
@@ -251,7 +257,7 @@ void FritzJohnFnc::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J) c
 		int c;
 		for (int i=0; i<ineq.size(); i++) {
 			c = (i==0)? ineq.min() : ineq.next(c);
-			hessian += x_lambda[mult] * dg[c]->jacobian(x);
+			hessian += x_lambda[mult] * dg[c]->jacobian(x,v<n? v : -1);
 			dgi=dg[c]->eval_vector(x);
 			J.put(0, mult, dgi, false);
 
@@ -269,7 +275,7 @@ void FritzJohnFnc::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J) c
 		int c;
 		for (int i=0; i<eq.size(); i++) {
 			c = (i==0)? eq.min() : eq.next(c);
-			hessian += x_lambda[mult] * dg[c]->jacobian(x);
+			hessian += x_lambda[mult] * dg[c]->jacobian(x,v<n? v : -1);
 			dgi=dg[c]->eval_vector(x);
 			J.put(0, mult, dgi, false);
 
@@ -321,6 +327,7 @@ void FritzJohnFnc::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J) c
 	assert(mult==nb_mult+n);
 
 	J.put(0,0,hessian);
+
 }
 
 

@@ -23,9 +23,9 @@ namespace ibex {
 class FritzJohnFncFactory {
 public:
 
-	/*
-	 * \warning You should not modify sys.box once this constructor has been called.
-	 *
+	//
+	// \warning You should not modify sys.box once this constructor has been called.
+	//
 	FritzJohnFncFactory(const System& sys);
 
 	FritzJohnFnc build(const IntervalVector& box, const EntailedCtr& entailed);
@@ -48,7 +48,7 @@ public:
 
 	virtual IntervalVector eval_vector(const IntervalVector& x_lambda) const;
 
-	virtual void jacobian(const IntervalVector& x_lambda, IntervalMatrix& J) const;
+	virtual void jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const;
 
 	/**
 	 * Return the matrix where the first column is the gradient of f

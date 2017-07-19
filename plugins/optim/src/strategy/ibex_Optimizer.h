@@ -24,7 +24,7 @@
 #include "ibex_ExtendedSystem.h"
 #include "ibex_EntailedCtr.h"
 #include "ibex_LinearSolver.h"
-#include "ibex_PdcHansenFeasibility.h"
+#include "ibex_CtcKhunTucker.h"
 #include "ibex_Random.h"
 #include "ibex_FritzJohnCond.h"
 
@@ -77,7 +77,7 @@ public:
 	 */
 	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder, */double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
+			double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
 
 	/**
 	 * \brief Delete *this.
@@ -158,19 +158,8 @@ public:
 
 	NormalizedSystem normalized_user_sys;
 
-	/**
-	 * \brief The normalized system
-	 *
-	 * Corresponds to the system (see constructor) with all inequalities
-	 * under the form g_i(x)<=0.
-	 */
-	NormalizedSystem sys;
-
 	/** Number of variables. */
 	const int n;
-
-	/** Number of constraints. */
-	const int m;
 
 	/**
 	 * \brief The extended system
@@ -217,9 +206,6 @@ public:
 	/** Absolute precision on the objective */
 	const double goal_abs_prec;
 
-	/** Number of samples used to update the loup */
-	const int sample_size;
-
 	/** Trace activation flag.
 	 * The value can be fixed by the user. By default: 0  nothing is printed
 	 1 for printing each better found feasible point
@@ -246,23 +232,12 @@ public:
 	/** Default goal relative precision */
 	static const double default_goal_rel_prec;
 
-
-
-
-
-
-
 	/** Default goal absolute precision */
 	static const double default_goal_abs_prec;
-
-	/** Default sample size */
-	static const int default_sample_size;
 
 	/** Default epsilon applied to equations */
 	static const double default_equ_eps;
 
-	/** Default tolerance increase ratio for the pseudo-loup. */
-	static const double default_loup_tolerance;
 	/**
 	 * \brief The "loup" (lowest upper bound of the criterion)
 	 *
@@ -290,19 +265,6 @@ public:
 	int nb_cells;
 
 protected:
-	/**
-	 * \brief Return an upper bound of f(x).
-	 *
-	 * Return +oo if x is outside the definition domain of f.
-	 */
-	inline double goal(const Vector& x) const {
-		Interval fx=sys.goal->eval(x);
-		if (fx.is_empty())  // means: outside of the definition domain of the function
-			return POS_INFINITY;
-		else
-			return fx.ub();
-		
-	}
 
 	/**
 	 * \brief Main procedure for processing a box.
@@ -345,7 +307,7 @@ protected:
 	 *
 	 * \return false if unsatisfiability is detected, true otherwise.
 	 */
-	bool update_entailed_ctr(const IntervalVector& box);
+	//bool update_entailed_ctr(const IntervalVector& box);
 
 	/**
 	 * \brief Update the uplo of non bisectable boxes
@@ -428,15 +390,12 @@ private:
 	double uplo_of_epsboxes;
 
 	/** Currently entailed constraints */
-	EntailedCtr* entailed;
+	//EntailedCtr* entailed;
 
-	void fritz_john_contract(IntervalVector& box);
+	//void fritz_john_contract(IntervalVector& box);
 
 	//!! warning: sys.box should be properly set before call to constructor !!
-	//FritzJohnCond fjc;
-
-	Function** dg;
-
+	CtcKhunTucker kkt;
 };
 
 } // end namespace ibex

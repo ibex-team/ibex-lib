@@ -6,6 +6,9 @@
  */
 
 #include "ibex_CtcKhunTucker.h"
+#include "ibex_FritzJohnFnc.h"
+#include "ibex_Linear.h"
+#include "ibex_CtcNewton.h"
 
 using namespace std;
 
@@ -19,7 +22,7 @@ static int precond_OK=0;
 
 namespace ibex {
 
-CtcKhunTucker::CtcKhunTucker(const NormalizedSystem& sys) : normalized_user_sys(sys) {
+CtcKhunTucker::CtcKhunTucker(const NormalizedSystem& sys) : Ctc(sys.nb_var), normalized_user_sys(sys) {
 	try {
 		df = new Function(*sys.goal,Function::DIFF);
 	} catch(Exception&) {
@@ -29,18 +32,30 @@ CtcKhunTucker::CtcKhunTucker(const NormalizedSystem& sys) : normalized_user_sys(
 		df = NULL;
 	}
 
-	dg = new Function*[normalized_user_sys.nb_ctr];
+	if (normalized_user_sys.nb_ctr>0) {
+		dg = new Function*[normalized_user_sys.nb_ctr];
 
-	for (int i=0; i<normalized_user_sys.nb_ctr; i++) {
-		if (!normalized_user_sys.ctrs[i].f.expr().dim.is_scalar())
-			not_implemented("Khun-Tucker conditions with vector/matrix constraints.");
+		for (int i=0; i<normalized_user_sys.nb_ctr; i++) {
+			if (!normalized_user_sys.ctrs[i].f.expr().dim.is_scalar())
+				not_implemented("Khun-Tucker conditions with vector/matrix constraints.");
 
-		dg[i] = new Function(normalized_user_sys.ctrs[i].f,Function::DIFF);
+			dg[i] = new Function(normalized_user_sys.ctrs[i].f,Function::DIFF);
+		}
+	} else {
+		dg = NULL;
 	}
 }
 
 CtcKhunTucker::~CtcKhunTucker() {
-	// TODO Auto-generated destructor stub
+	cout << " newton OK preproc OK=" << newton_OK_preproc_OK << endl;
+	cout << " newton OK preproc KO=" << newton_OK_preproc_KO << endl;
+	cout << " newton KO preproc OK=" << newton_KO_preproc_OK << endl;
+	cout << " newton KO preproc KO=" << newton_KO_preproc_KO << endl;
+	cout << " too many active=" << too_many_active << endl;
+	cout << " lu_OK=" << lu_OK << endl;
+	cout << " precond_OK" << precond_OK << endl;
+
+	if (dg!=NULL) delete[] dg;
 }
 
 void CtcKhunTucker::contract(IntervalVector& box) {
@@ -49,7 +64,7 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 	// =========================================================================================
 	BitSet active=normalized_user_sys.active_ctrs(box);
 
-	FritzJohnFnc fjf(normalized_user_sys,df,dg,box,active);
+	FritzJohnFnc fjf(normalized_user_sys,df,dg,box,BitSet::all(normalized_user_sys.nb_ctr)); //active);
 
 	// we consider that Newton will not succeed if there are more
 	// than n active constraints.
@@ -157,7 +172,7 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 		if (save.subvector(0,normalized_user_sys.nb_var-1)!=full_box.subvector(0,normalized_user_sys.nb_var-1)) {
 			if (preprocess_success) newton_OK_preproc_OK++;
 			else newton_OK_preproc_KO++;
-			box = full_box.subvector(0,n-1);
+			box = full_box.subvector(0,normalized_user_sys.nb_var-1);
 		} else {
 			if (preprocess_success) {
 				newton_KO_preproc_OK++;
