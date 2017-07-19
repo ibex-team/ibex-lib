@@ -283,6 +283,8 @@ def benchmarks (bch):
 
 	gnuplotnode = bch.path.make_node ("benchmark_optim.gnuplot")
 	# Benchmarks on all files ending with .bch in the 'benchs' subdirectory
-	for f in bch.path.ant_glob ("benchs/%s/**/*.bch" % bch.options.BENCHS_CAT):
-		bch (source = f, bench_bin = "benchmark_optim",
-		     graph_scriptfile = gnuplotnode.abspath())
+	for category in bch.categories:
+		bchfiles = bch.path.ant_glob ("benchs/%s/**/*.bch" % category)
+		name = "optim_serie1_" + str(category)
+		bch.benchmarks (source = bchfiles, bench_bin = "benchmark_optim",
+		                graph_scriptfile = gnuplotnode.abspath(), name = name)
