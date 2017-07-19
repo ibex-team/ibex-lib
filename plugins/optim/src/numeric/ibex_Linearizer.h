@@ -55,6 +55,9 @@ public:
 
 protected:
 
+	/**
+	 * Number of variables
+	 */
 	const int n;
 };
 

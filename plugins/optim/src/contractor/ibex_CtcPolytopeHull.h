@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_CtcPolytopeHull.h
 // Authors     : Jordan Ninin, Bertrand Neveu, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 31, 2013
 // Last Update : Oct 31, 2013
@@ -31,8 +31,6 @@ public:
 	 * \brief Creates the iteration
 	 *
 	 * \param lr         - The linear relaxation
-	 * \param cmode      - ALL_BOX (contracts all variables in the box) | ONLY_Y (in optimization :only improves
-	 *                     the left bound of the objective)
 	 * \param max_iter   - The maximum number of iterations of the linear solver (default value 100)
 	 * \param timeout    - The timeout of the linear solver at each iteration    (default value 100 second)
 	 * \param eps        - The accuracy required on the resolution of the linear program (default value 1e-10)
@@ -72,7 +70,7 @@ public:
 	 * to the objective in an extended system.
 	 *
 	 * TODO: allow to specify bounds. Update the optimizer so that
-	 * onlyt the lower bound of the goal variable is contracted.
+	 * only the lower bound of the goal variable is contracted.
 	 */
 	void set_contracted_vars(const BitSet& vars);
 
@@ -107,9 +105,8 @@ protected:
 	 */
 	const Interval limit_diam_box;
 
-
 	/**
-	 * \brief  The linear solver that will be use
+	 * \brief  The linear solver that will be used
 	 */
 	LinearSolver *mylinearsolver;
 
@@ -119,9 +116,9 @@ protected:
 	BitSet contracted_vars;
 
 private:
-	bool own_lr;
-
+	bool own_lr; // for memory cleanup
 };
 
 } // end namespace ibex
+
 #endif // __IBEX_CTC_POLYTOPE_HULL_H__

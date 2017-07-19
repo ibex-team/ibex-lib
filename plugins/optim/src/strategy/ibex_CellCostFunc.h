@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_CellCostFunc.h
 // Author      : Jordan Ninin, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Last Update : Mar 04, 2015
 //============================================================================

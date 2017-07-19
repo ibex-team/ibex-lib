@@ -1,8 +1,8 @@
- //============================================================================
+//============================================================================
 //                                  I B E X                                   
 // File        : ibex_CellDoubleHeap.h
 // Author      : Gilles Chabert, Jordan Ninin
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Sep 12, 2014
 //============================================================================

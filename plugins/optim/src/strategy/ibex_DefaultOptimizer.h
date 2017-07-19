@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_DefaultOptimizer.h
 // Author      : Gilles Chabert, Bertrand Neveu
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
 // Last Update : Jul 06, 2014
@@ -17,7 +17,8 @@
 namespace ibex {
 
 /**
- * \ingroup strategy
+ * \ingroup optim
+ *
  * \brief Default optimizer.
  */
 class DefaultOptimizer : public Optimizer {
@@ -37,10 +38,11 @@ public:
     ~DefaultOptimizer();
 
 private:
+
     /**
      * The contractor: hc4 + acid(hc4) + xnewton
      */
-	Ctc&  ctc(System& sys, System& ext_sys,double prec);
+	Ctc& ctc(System& sys, System& ext_sys, double prec);
 
 	//	std::vector<CtcXNewton::corner_point>* default_corners ();
 

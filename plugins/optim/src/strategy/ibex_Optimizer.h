@@ -2,7 +2,7 @@
 //                                  I B E X
 // File        : ibex_Optimizer.h
 // Author      : Gilles Chabert, Bertrand Neveu
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
 // Last Update : May 14, 2012
@@ -30,7 +30,11 @@
 namespace ibex {
 
 /**
- * \ingroup strategy
+ * \defgroup optim IbexOpt
+ */
+
+/**
+ * \ingroup optim
  *
  * \brief Global Optimizer.
  *
@@ -424,6 +428,6 @@ private:
 	EntailedCtr* entailed;
 };
 
-
 } // end namespace ibex
+
 #endif // __IBEX_OPTIMIZER_H__

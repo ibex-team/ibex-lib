@@ -2,6 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_OptimData.h
 // Author      : Jordan Ninin, Gilles Chabert
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 18, 2014
 //============================================================================
@@ -72,4 +73,5 @@ protected:
 };
 
 } // end namespace ibex
+
 #endif // __IBEX_OPTIM_DATA_H__

@@ -24,7 +24,8 @@ namespace ibex {
 
 /**
  * \ingroup numeric
- * \brief LR relaxation
+ *
+ * \brief LR relaxation based on XTaylor and affine arithmetic.
  *
  * This class is an implementation of the LR algorithm
  * \author Ignacio Araya, Gilles Trombettoni, Jordan Ninin, Bertrand Neveu
