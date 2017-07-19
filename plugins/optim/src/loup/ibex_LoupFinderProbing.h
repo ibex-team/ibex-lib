@@ -17,45 +17,55 @@
 namespace ibex {
 
 /**
+ * \ingroup optim
  *
- * \brief "Loup" search based on simple probing (unused)
+ * \brief Upper-bounding algorithm based on simple sampling and probing.
  *
- * Only works with inequality constraints.
+ * The algorithm has two steps:
+ * 1- random search: pick random points in any directions.
+ * 2- intensification (in the current version of the code, only in case
+ *    of unconstrained optimization): perform a line probling search.
+ *
+ * Note: Only works with inequality constraints.
  *
  */
 class LoupFinderProbing : public LoupFinder {
 public:
+
+	/**
+	 * \brief Create the algorithm for a given system.
+	 *
+	 * \param sys         - The NLP problem.
+	 * \param sample_size - Number of sample points inside the box.
+	 */
 	LoupFinderProbing(const System& sys, int sample_size=default_sample_size);
 
 	/**
-	 * \brief First method for probing
+	 * \brief Find a new loup in a given box.
 	 *
-	 * Take random points in any directions.
-	 *
-	 * \param box  the box in which a random point is searched for (the found inner box if is_inner i strue)
-	 * \param fullbox the box where an intensification is made (in the current version only in case of unconstrained optimization)
-	 * \param is_inner - If true, the box is already known to be an inner box so there
-	 *                   is no need to check constraints again.
-	 *
-	 * \return true in case of success, i.e., if the loup has been decreased.
+	 * \see comments in LoupFinder.
 	 */
 	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& loup_point, double loup);
 
-	/** Default sample size */
+	/**
+	 * Default sample size
+	 */
 	static const int default_sample_size;
 
 	/**
-	 * \brief The system
+	 * \brief The NLP problem.
 	 */
 	const System& sys;
 
-	/** Number of samples used to update the loup */
+	/**
+	 * Number of samples used to update the loup
+	 */
 	const int sample_size;
 
 protected:
 
 	/**
-	 * \brief Second method for probing
+	 * \brief Second method (line probing).
 	 *
 	 * Performs a dichotomic search between the current loup-point and its projection on the
 	 * facet of the input box in the opposite direction of its gradient.
@@ -74,8 +84,14 @@ protected:
 	 */
 	bool dichotomic_line_search(const Vector& end_point, bool exit_if_above_loup);
 
+	/**
+	 * Current loup-point
+	 */
 	Vector loup_point;
 
+	/**
+	 * Current loup
+	 */
 	double loup;
 };
 

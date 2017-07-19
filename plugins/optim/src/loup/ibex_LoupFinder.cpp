@@ -13,11 +13,6 @@ using namespace std;
 
 namespace ibex {
 
-LoupFinder::LoupFinder() {
-
-
-}
-
 LoupFinder::~LoupFinder() {
 
 }
@@ -45,23 +40,24 @@ bool LoupFinder::check(const System& sys, const Vector& pt, double& loup, bool _
 	return false;
 }
 
-void LoupFinder::monotonicity_analysis(const System& sys, IntervalVector& box, bool inner_found) {
+void LoupFinder::monotonicity_analysis(const System& sys, IntervalVector& box, bool is_inner) {
 
 	int n=sys.nb_var;
 
-	if (!inner_found && sys.f_ctrs.nb_used_vars()==n)
+	if (!is_inner && sys.f_ctrs.nb_used_vars()==n)
 		// if there is no inner box and all the variables appear
 		// in the constraints, nothing can be done
 		return;
 
 	IntervalVector g(n);
 	sys.goal->gradient(box,g);
+
 	for (int j=0; j<n; j++) {
-		//TODO: if box is unbounded, we have a problem here.
-		if (inner_found || !sys.f_ctrs.used(j)) {
+		if (is_inner || !sys.f_ctrs.used(j)) {
 			if (g[j].lb()>=0 && box[j].lb()!=NEG_INFINITY) box[j]=box[j].lb();
 			if (g[j].ub()<=0 && box[j].ub()!=POS_INFINITY) box[j]=box[j].ub();
 		}
 	}
 }
-} /* namespace ibex */
+
+} // namespace ibex

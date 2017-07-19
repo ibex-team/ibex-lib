@@ -18,45 +18,78 @@
 
 namespace ibex {
 
+/**
+ * \ingroup optim
+ *
+ * \brief Upper-bounding algorithm.
+ *
+ * A LoupFinder object is an algorithm that looks for a
+ * new "loup", that is, a feasible point x{k+1} such that f(x{k+1})
+ * becomes the current *LO*west *UP*per bound for f*, the
+ * minimum.
+ *
+ */
 class LoupFinder {
 public:
+
+	/**
+	 * \brief Raised when no loup is found.
+	 */
 	class NotFound : Exception { };
 
-	LoupFinder();
-
-	//
-	// Note: x0 is the last loup, not necessarily inside the box.
+	/**
+	 * \brief Find a new loup in a given box.
+	 *
+	 * This function is abstract and has to be implemented in the subclass.
+	 *
+	 * The function takes as parameter the last loup-point (x{k}) and
+	 * loup value (f(x{k})) found by the optimizer and returns the new
+	 * loup-point (x{k+1}) and its value (f(x{k+1}))
+	 * Note that xk is not necessarily inside the box.
+	 *
+	 * \param box        - the box where x{k+1} is searched
+	 * \param loup_point - x{k}
+	 * \param loup       - f(x{k})
+	 * \return             <x{k+1},f(x{k+1})>
+	 * \throws             NotFound in case of failure.
+	 */
 	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& loup_point, double loup)=0;
 
+	/**
+	 * \brief Delete this.
+	 */
 	virtual ~LoupFinder();
 
-
 protected:
+
+	/**
+	 * \brief Try to reduce the "loup" with a candidate point.
+	 *
+	 * \param sys      - The NLP problem.
+	 * \param pt       - The candidate point.
+	 * \param loup     - (input/output). Current loup (updated upon success).
+	 * \param is_inner - If true, the point is already known to be inner so there
+	 *                   is no need to check constraint satisfaction again. False
+	 *                   means "unknown" and a quick check (see
+	 *                   #System::is_inner(const IntervalVector&)) is performed.
+	 *
+	 * \return true in case of success, i.e., if the loup has been decreased.
+	 */
+	bool check(const System& sys, const Vector& pt, double& loup, bool is_inner);
 
 	/**
 	 * \brief Monotonicity analysis.
 	 *
 	 * When f is increasing (resp. decreasing) w.r.t. variable x_i, the interval [x_i]
 	 * is replaced by the lower bound (resp. upper bound) of [x_i].
+	 *
+	 * \param sys      - The NLP problem.
+	 * \param pt       - (input/output) The box given to LoupFinder.
+	 * \param is_inner - If true, all points in the box are feasible.
+	 *
 	 */
-	void monotonicity_analysis(const System& sys, IntervalVector& box, bool inner_found);
+	void monotonicity_analysis(const System& sys, IntervalVector& box, bool is_inner);
 
-	/**
-	 * \brief Try to reduce the "loup" with a candidate point.
-	 *
-	 * \param pt       - The candidate point.
-	 * \param is_inner - If true, the point is already known to be inner so there
-	 *                   is no need to check constraint satisfaction again. False
-	 *                   means "unknown" and a quick check (see
-	 *                   #is_inner(const IntervalVector&)) is performed.
-	 *
-	 * \note In rigorous mode, the equalities have to be checked anyway (even if
-	 *       is_inner==true) because the innership is only wrt the relaxed system.
-	 *       In this case, the resulting loup_point may be different than \a pt (the
-	 *		 procedure used to check satisfiability
-	 * \return true in case of success, i.e., if the loup has been decreased.
-	 */
-	bool check(const System& sys, const Vector& pt, double& loup, bool is_inner);
 };
 
 } /* namespace ibex */

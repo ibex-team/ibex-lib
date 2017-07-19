@@ -16,28 +16,52 @@
 
 namespace ibex {
 
+/**
+ * \ingroup optim
+ *
+ * \brief Default upper-bounding algorithm.
+ *
+ * The algorithm uses two upperbounding techniques:
+ * - one based on inner box: simple sampling/line probing or in-HC4
+ * - one based on inner polytope: XTaylor restriction.
+ *
+ * Note: currently, line probing is disabled unless there is
+ * a constraint-free NLP problem (a simple sampling is done).
+ */
 class LoupFinderDefault : public LoupFinder {
 public:
 	/**
-	 * \brief Update loup either using line_probing or random_probing.
+	 * \brief Create the algorithm for a given system.
 	 *
-	 * Main function for probing ;
-	 * search for an inner box ;
-	 * call line_probing or random_probing. (in the current version, random probing is called)
-	 * return true if the loup has been modified.
-	 *
-	 * \param inHC4 -  Flag for applying inHC4.
-	 * If true, apply inHC4. Otherwise, apply is_inside.
-	 * The value can be fixed by the user. By default: true. */
+	 * \param sys   - The NLP problem.
+	 * \param inHC4 - Flag for building inner boxes. If true, apply inHC4 (inner arithmetic).
+	 *                Otherwise, use forward/backward contractor on reversed inequalities.
+	 *                By default: true.
+	 */
 	LoupFinderDefault(const System& sys, bool inHC4=true);
 
+	/**
+	 * \brief Find a new loup in a given box.
+	 *
+	 * \see comments in LoupFinder.
+	 */
 	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& loup_point, double loup);
 
+	/**
+	 * \brief Delete this.
+	 */
 	virtual ~LoupFinderDefault();
 
-	// either HC4 or FwdBwd
+	/*
+	 * Loup finder using inner boxes.
+	 *
+	 * Either HC4 or CtcUnion (of CtcFwdBwd).
+	 */
 	LoupFinder& finder_probing;
 
+	/**
+	 * Loup finder using inner polytopes.
+	 */
 	LoupFinderXTaylor finder_x_taylor;
 };
 

@@ -15,30 +15,63 @@
 
 namespace ibex {
 
+/**
+ * \ingroup optim
+ *
+ * \brief Contractor-based upper-bounding algorithm.
+ *
+ * This loup finder first builds an inner box using
+ * forward-backward contractors on reversed inequalities
+ * and, in case of success, looks for a point inside
+ * the inner box with a #LoupFinderProbing algorithm.
+ *
+ */
 class LoupFinderFwdBwd : public LoupFinder {
 public:
+
+	/**
+	 * \brief Create the algorithm for a given system.
+	 *
+	 * \param sys   - The NLP problem.
+	 */
 	LoupFinderFwdBwd(const System& sys);
 
+	/**
+	 * \brief Find a new loup in a given box.
+	 *
+	 * \see comments in LoupFinder.
+	 */
 	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& loup_point, double loup);
 
+	/**
+	 * \brief Delete this.
+	 */
 	virtual ~LoupFinderFwdBwd();
 
 	/**
-	 * \brief The system g(x)<=0
+	 * \brief The NLP problem (min f(x) s.t. g(x)<=0)
 	 */
 	const System& sys;
 
 	/**
+	 * Flag for applying "monotonicity analysis".
+	 *
+	 * The value can be fixed by the user.
+	 * By default: true.
+	 */
+	bool mono_analysis_flag;
+
+protected:
+
+	/**
 	 * \brief Codimension of g (0 if no constraint).
 	 */
-	int m;
+	const int m;
 
-	/** Inner contractor (for the negation of g<=0) */
+	/*
+	 * Inner contractor (for the negation of g<=0)
+	 */
 	CtcUnion* is_inside;
-
-	/** Flag for applying monotonicity analysis.
-	 * The value can be fixed by the user. By default: true. */
-	bool mono_analysis_flag;
 };
 
 } /* namespace ibex */

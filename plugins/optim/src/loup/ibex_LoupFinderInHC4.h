@@ -15,19 +15,31 @@
 #include "ibex_System.h"
 
 namespace ibex {
-
+/**
+ * \ingroup optim
+ *
+ * \brief Upper-bounding algorithm based on inner arithmetic.
+ *
+ * This loup finder first builds an inner box using the
+ * inHC4 algorithm and, in case of success, looks for a point inside
+ * the inner box with a #LoupFinderProbing algorithm.
+ *
+ */
 class LoupFinderInHC4 : public LoupFinder {
 public:
-	/**
-	 * \brief Reduce the box to an inner box using inHC4 algorithm.
-	 *
-	 * \return true if the resulting box is proven to be inner, false otherwise.
-	 *
-	 * Note: even if the result is false, a new box is constructed.
-	 */
 
+	/**
+	 * \brief Create the algorithm for a given system.
+	 *
+	 * \param sys   - The NLP problem.
+	 */
 	LoupFinderInHC4(const System& sys);
 
+	/**
+	 * \brief Find a new loup in a given box.
+	 *
+	 * \see comments in LoupFinder.
+	 */
 	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& loup_point, double loup);
 
 	// statistics on upper bounding
@@ -38,8 +50,12 @@ public:
 	 */
 	const System& sys;
 
-	/** Flag for applying monotonicity analysis.
-	 * The value can be fixed by the user. By default: true. */
+	/**
+	 * Flag for applying "monotonicity analysis".
+	 *
+	 * The value can be fixed by the user.
+	 * By default: true.
+	 */
 	bool mono_analysis_flag;
 
 	/** Miscellaneous   for statistics */
@@ -51,4 +67,4 @@ public:
 
 } /* namespace ibex */
 
-#endif /* IBEX_INHC4FINDER_H_ */
+#endif /* __IBEX_LOUP_FINDER_IN_HC4__ */

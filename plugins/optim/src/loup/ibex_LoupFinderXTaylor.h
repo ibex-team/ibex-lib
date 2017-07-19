@@ -15,24 +15,43 @@
 #include "ibex_LinearizerXTaylor.h"
 
 namespace ibex {
-
+/**
+ * \ingroup optim
+ *
+ * \brief Upper-bounding algorithm based on XTaylor restriction.
+ *
+ * The algorithm builds an inner (feasible) polytope inside the
+ * current box (see #LinearizerXTaylor) and then minimizes a
+ * linear approximation of the goal function on this polytope via
+ * a LP solver. The resulting point is verified a posteriori to
+ * be feasible (wrt nonlinear constraint) and a new "loup".
+ *
+ */
 class LoupFinderXTaylor : public LoupFinder {
 public:
 
+	/**
+	 * \brief Create the algorithm for a given system.
+	 *
+	 * \param sys         - The NLP problem.
+	 */
 	LoupFinderXTaylor(const System& sys);
 
 	/**
-	 * \throws NotFound
+	 * \brief Find a new loup in a given box.
+	 *
+	 * \see comments in LoupFinder.
 	 */
 	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& x0, double current_loup);
 
 	/**
-	 * \brief The system
+	 * \brief The NLP problem.
 	 */
 	const System& sys;
 
 protected:
 
+	/** Linearization technique. */
 	LinearizerXTaylor lr;
 
 	/** linear solver */
