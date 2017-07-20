@@ -5,10 +5,9 @@
  *      Author: gilles
  */
 
-#include "ibex_FritzJohnFnc.h"
-
 #include <stdlib.h>
 #include <cassert>
+#include "ibex_KhunTuckerFnc.h"
 
 using namespace std;
 
@@ -52,7 +51,7 @@ namespace ibex {
 //}
 
 
-FritzJohnFnc::FritzJohnFnc(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const BitSet& active) :
+KhunTuckerFnc::KhunTuckerFnc(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const BitSet& active) :
 								Fnc(1,1), nb_mult(0), // **tmp**
 								n(sys.nb_var), // **tmp**
 								sys(sys), df(df), dg(dg),
@@ -99,15 +98,16 @@ FritzJohnFnc::FritzJohnFnc(const NormalizedSystem& sys, Function* df, Function**
 
 }
 
-IntervalVector FritzJohnFnc::multiplier_domain() const {
+IntervalVector KhunTuckerFnc::multiplier_domain() const {
 	IntervalVector box(nb_mult, Interval(0,1));
 
-	box.put(ineq.size()+1,IntervalVector(eq.size(),Interval(-1,1)));
+	if (!eq.empty())
+		box.put(ineq.size()+1,IntervalVector(eq.size(),Interval(-1,1)));
 
 	return box;
 }
 
-IntervalMatrix FritzJohnFnc::gradients(const IntervalVector& x) const {
+IntervalMatrix KhunTuckerFnc::gradients(const IntervalVector& x) const {
 
 	IntervalMatrix A=Matrix::zeros(n, nb_mult);
 
@@ -156,7 +156,7 @@ IntervalMatrix FritzJohnFnc::gradients(const IntervalVector& x) const {
 	return A;
 }
 
-IntervalVector FritzJohnFnc::eval_vector(const IntervalVector& x_lambda) const {
+IntervalVector KhunTuckerFnc::eval_vector(const IntervalVector& x_lambda) const {
 
 	IntervalVector res(n+nb_mult);
 
@@ -228,7 +228,7 @@ IntervalVector FritzJohnFnc::eval_vector(const IntervalVector& x_lambda) const {
 	return res;
 }
 
-void FritzJohnFnc::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const {
+void KhunTuckerFnc::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const {
 
 	if (components.size()!=n+nb_mult) {
 		not_implemented("FritzJohnFnc: 'jacobian' for selected components");

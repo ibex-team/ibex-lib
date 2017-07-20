@@ -1,3 +1,12 @@
+//============================================================================
+//                                  I B E X
+// File        : ibex_BitSet.h
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : Jul 20, 2017
+//============================================================================
+
 #ifndef __IBEX_BITSET_H__
 #define __IBEX_BITSET_H__
 
@@ -97,6 +106,14 @@ public:
 	int min() const;
 
 	/**
+	 * \brief The maximum of the list.
+	 *
+	 * E.g, max(1,2,3)=3.
+	 *
+	 */
+	int max() const;
+
+	/**
 	 * \brief Remove an integer from the list.
 	 */
 	void remove(const int elt);
@@ -158,6 +175,8 @@ private:
 
 };
 
+std::ostream& operator<<(std::ostream& os, const BitSet& b);
+
 /*================================== inline implementations ========================================*/
 
 inline BitSet::BitSet(int n) : bitset(0,n-1,Mistral::BitSet::empt) { }
@@ -174,18 +193,6 @@ inline BitSet BitSet::all(int n) {
 	return b;
 }
 
-inline BitSet BitSet::compose(const BitSet& b) const {
-	assert(b.bitset.max() < size());
-
-	BitSet b2(size());
-	int c;
-	for (int i=0; i<size(); i++) {
-		c = i==0? min() : next(c);
-		if (b[i]) b2.add(c);
-	}
-	return b2;
-}
-
 inline bool BitSet::operator==(const BitSet& b) { return bitset==b.bitset; }
 
 inline bool BitSet::operator!=(const BitSet& b) { return bitset!=b.bitset; }
@@ -195,6 +202,8 @@ inline BitSet& BitSet::operator=(const BitSet& b) { bitset=b.bitset; return *thi
 inline BitSet& BitSet::operator|=(const BitSet& b) { bitset.union_with(b.bitset); return *this; }
 
 inline int BitSet::min() const { return bitset.min(); }
+
+inline int BitSet::max() const { return bitset.max(); }
 
 inline void BitSet::remove(const int elt) { bitset.fast_remove(elt); }
 

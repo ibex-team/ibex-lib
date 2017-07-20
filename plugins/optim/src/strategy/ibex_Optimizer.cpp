@@ -9,8 +9,6 @@
 
 #include "ibex_Optimizer.h"
 #include "ibex_Timer.h"
-#include "ibex_CtcFwdBwd.h"
-#include "ibex_ExprDiff.h"
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_OptimData.h"
@@ -59,18 +57,9 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder,
                 				timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), loup_box(n), nb_cells(0),
-                				df(NULL), loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
+                				loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
                 				uplo_of_epsboxes(POS_INFINITY), kkt(normalized_user_sys) {
 
-
-	try {
-		df = new Function(*user_sys.goal,Function::DIFF);
-	} catch(Exception&) {
-		//TODO: replace with ExprDiffException.
-		// Currently, DimException is also sometimes raised.
-		cerr << "Warning: symbolic differentiation of the goal function has failed ==> first-order contraction disabled" << endl;
-		df = NULL;
-	}
 
 	// ==== check if the system contains equalities ====
 	for (int i=0; i<user_sys.ctrs.size(); i++) {
@@ -85,7 +74,6 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder,
 
 Optimizer::~Optimizer() {
 	buffer.flush();
-	if (df) delete df;
 	delete &loup_finder;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
@@ -339,15 +327,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 		return;
 	}
 
-	//gradient=0 contraction for unconstrained optimization ; 
-	//first order test for constrained optimization (useful only when there are no equations replaced by inequalities) 
-	//works with the box without the objective (tmp_box)
 	// ** important: ** must be done after upper-bounding
-//	if (df)
-//		firstorder_contract(tmp_box,init_box);
-
-	//fritz_john_contract(tmp_box);
-
 	kkt.contract(tmp_box);
 
 	if (tmp_box.is_empty()) {
@@ -357,28 +337,6 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 		write_ext_box(tmp_box,c.box);
 	}
 }
-// called with the box without the objective
-void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& init_box) {
-		if (user_sys.nb_ctr==0) {
-			// for unconstrained optimization  contraction with gradient=0
-			if (box.is_strict_interior_subset(init_box)) {
-				if (n==1)
-					df->backward(Interval::ZERO,box);
-				else
-					df->backward(IntervalVector(n,Interval::ZERO),box);
-			}
-		}
-
-	//	else {
-	//
-	//		PdcFirstOrder p(user_sys,init_box);
-	//
-	//		p.set_entailed(entailed);
-	//		if (p.test(box)==NO) {
-	//			box.set_empty();
-	//		}
-	//	}
-	}
 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;

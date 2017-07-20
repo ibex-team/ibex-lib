@@ -98,9 +98,9 @@ IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
 
 	if (fwd_agenda==NULL) {
 
-		assert(f.expr().dim.is_vector());
+		assert(!f.expr().dim.is_matrix());
 
-		// The vector of expression is heterogeneous.
+		// The vector of expression is heterogeneous (or the expression is scalar).
 		//
 		// We might be able in this case to use the DAG but
 		// - the algorithm is more complex

@@ -32,34 +32,36 @@ LoupFinderInHC4::LoupFinderInHC4(const System& sys) : sys(sys) {
 
 std::pair<Vector, double> LoupFinderInHC4::find(const IntervalVector& box, const Vector& loup_point, double loup) {
 
-	BitSet active=sys.active_ctrs(box);
-
-	IntervalVector gx = sys.active_ctrs_eval(box);
-
 	IntervalVector inbox=box;
-
-	int c;
 	bool inner_found=true;
-	for (unsigned int i=0; i<active.size(); i++) {
-		c=(i==0? active.min() : active.next(c));
 
-		// Quick infeasibility check
-		if (gx[i].lb()>0) throw NotFound();
+	if (sys.nb_ctr>0) {
+		BitSet active=sys.active_ctrs(box);
 
-		Interval right_cst;
-		switch(sys.ops[c]) {
-		case LT :
-		case LEQ : right_cst=Interval::NEG_REALS; break;
-		case EQ  : right_cst=Interval::ZERO;      break;
-		case GEQ :
-		case GT : right_cst=Interval::POS_REALS;  break;
-		}
+		IntervalVector gx = sys.active_ctrs_eval(box);
 
-		sys.f_ctrs[c].ibwd(right_cst, inbox);
+		int c;
+		for (unsigned int i=0; i<active.size(); i++) {
+			c=(i==0? active.min() : active.next(c));
 
-		if (inbox.is_empty()) {
-			inner_found=false;
-			break;
+			// Quick infeasibility check
+			if (gx[i].lb()>0) throw NotFound();
+
+			Interval right_cst;
+			switch(sys.ops[c]) {
+			case LT :
+			case LEQ : right_cst=Interval::NEG_REALS; break;
+			case EQ  : right_cst=Interval::ZERO;      break;
+			case GEQ :
+			case GT : right_cst=Interval::POS_REALS;  break;
+			}
+
+			sys.f_ctrs[c].ibwd(right_cst, inbox);
+
+			if (inbox.is_empty()) {
+				inner_found=false;
+				break;
+			}
 		}
 	}
 

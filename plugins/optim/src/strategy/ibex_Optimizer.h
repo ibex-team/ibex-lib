@@ -291,18 +291,6 @@ protected:
 	void contract_and_bound(Cell& c, const IntervalVector& init_box);
 
 	/**
-	 * \brief First order contraction procedure for processing a box.
-	 *
-	 * <ul>
-	 * <li>  gradient=0 contraction for unconstrained optimization ;
-	 * <li>  first order test for constrained optimization (useful only when there are no equations replaced by inequalities)
-	 * </ul>
-	 *
-	 */
-
-	virtual void firstorder_contract ( IntervalVector& box, const IntervalVector& init_box);
-
-	/**
 	 * \brief Update the entailed constraint for the current box
 	 *
 	 * \return false if unsatisfiability is detected, true otherwise.
@@ -360,11 +348,6 @@ protected:
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
 	/**
-	 * \brief Symbolic gradient of the objective
-	 */
-	Function* df;
-
-	/**
 	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
 	 * the heap and the current box are actually contracted with y <= ymax
 	 *
@@ -391,8 +374,6 @@ private:
 
 	/** Currently entailed constraints */
 	//EntailedCtr* entailed;
-
-	//void fritz_john_contract(IntervalVector& box);
 
 	//!! warning: sys.box should be properly set before call to constructor !!
 	CtcKhunTucker kkt;

@@ -15,27 +15,52 @@
 
 namespace ibex {
 
+/**
+ * \ingroup contractor
+ *
+ * \brief Contractor based on first-order (KKT) conditions (for NLP)
+ */
 class CtcKhunTucker : public Ctc {
 public:
 
+	/**
+	 * \brief Build the contractor for a given NLP problem.
+	 *
+	 * \warning: building this object is **costly** in both time and memory!
+	 *           Don't build this contractor on-the-fly.
+	 *
+	 * \warning: sys.box should be properly set before calling this constructor.
+	 *           In particular, this field **should not change** once this
+	 *           contractor is built (the box gives rise to bound constraints
+	 *           that are set once for all and not dynamically updated).
+	 */
 	CtcKhunTucker(const NormalizedSystem& sys);
 
+	/**
+	 * \see #Ctc
+	 */
 	virtual void contract(IntervalVector& box);
 
+	/**
+	 * \brief Delete this.
+	 */
 	virtual ~CtcKhunTucker();
 
 protected:
 
-	const NormalizedSystem& normalized_user_sys;
+	/**
+	 * \brief The (normalized) NLP problem.
+	 */
+	const NormalizedSystem& sys;
 
 	/**
-	 * \brief Symbolic gradient of the objective
+	 * \brief Symbolic gradient of the objective.
 	 */
 	Function* df;
 
-	//!! warning: sys.box should be properly set before call to constructor !!
-	//FritzJohnCond fjc;
-
+	/**
+	 * \brief Symbolic gradient of constraints.
+	 */
 	Function** dg;
 };
 

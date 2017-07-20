@@ -227,7 +227,7 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 			res = f_ctrs.eval_vector(sbox->cache, sbox->active);
 
 			int c;
-			for (unsigned int i=0; i<sbox->active.size(); i++) {
+			for (int i=0; i<sbox->active.size(); i++) {
 				c=(i==0? sbox->active.min() : sbox->active.next(c));
 				sbox->_ctrs_eval[c] = res[i];
 			}
@@ -244,6 +244,8 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 		sbox->active_ctr_updated=true;
 		return sbox->active;
 	} else {
+
+		if (nb_ctr==0) return BitSet(0);
 
 		BitSet active(BitSet::all(f_ctrs.image_dim()));
 
@@ -267,7 +269,7 @@ IntervalVector System::active_ctrs_eval(const IntervalVector& box) const {
 
 	IntervalVector ev(b.size());
 	int c;
-	for (unsigned int i=0; i<b.size(); i++) {
+	for (int i=0; i<b.size(); i++) {
 		c=(i==0? b.min() : b.next(c));
 		ev[i] = sbox ?
 				sbox->_ctrs_eval[c] // we now it has been updated by previous call to active_ctrs
@@ -292,19 +294,20 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 			J=f_ctrs.jacobian(box,b);
 
 			int c;
-			for (unsigned int i=0; i<b.size(); i++) {
+			for (int i=0; i<b.size(); i++) {
 				c=(i==0? b.min() : b.next(c));
 				sbox->_ctrs_jacobian[c] = J[i];
 			}
 			sbox->active_ctr_jacobian_updated=true;
 		} else {
 			int c;
-			for (unsigned int i=0; i<b.size(); i++) {
+			for (int i=0; i<b.size(); i++) {
 				c=(i==0? b.min() : b.next(c));
 				J[i] = sbox->_ctrs_jacobian[c];
 			}
 		}
 	} else {
+		cout << *this << endl;
 		J=f_ctrs.jacobian(box,b);
 	}
 

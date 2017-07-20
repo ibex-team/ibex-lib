@@ -5,8 +5,8 @@
  *      Author: gilles
  */
 
-#ifndef __IBEX_FRITZ_JOHN_FNC_H__
-#define __IBEX_FRITZ_JOHN_FNC_H__
+#ifndef __IBEX_KHUN_TUCKER_FNC_H__
+#define __IBEX_KHUN_TUCKER_FNC_H__
 
 #include "ibex_System.h"
 #include "ibex_EntailedCtr.h"
@@ -41,10 +41,16 @@ private:
 };*/
 
 
-class FritzJohnFnc : public Fnc {
+class KhunTuckerFnc : public Fnc {
 public:
 
-	FritzJohnFnc(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const BitSet& active);
+	/**
+	 * \param dg - NULL if unconstrained problem.
+	 *
+	 * \param df - Symbolic gradient of the objective
+	 *
+	 */
+	KhunTuckerFnc(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const BitSet& active);
 
 	virtual IntervalVector eval_vector(const IntervalVector& x_lambda) const;
 
