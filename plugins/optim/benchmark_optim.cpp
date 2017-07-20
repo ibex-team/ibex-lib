@@ -61,7 +61,7 @@ do_one_bench (System &sys, double prec, double time_limit)
 
 	tot_time += DefOpt.time;
 
-	return status == Optimizer::Status::TIME_OUT;
+	return status == Optimizer::TIME_OUT;
 }
 
 int
