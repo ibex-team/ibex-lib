@@ -307,7 +307,6 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 			}
 		}
 	} else {
-		cout << *this << endl;
 		J=f_ctrs.jacobian(box,b);
 	}
 
