@@ -12,9 +12,6 @@
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_OptimData.h"
-#include "ibex_LoupFinderDefault.h"
-#include "ibex_ActiveConstraintsFnc.h"
-#include "ibex_PdcHansenFeasibility.h"
 
 #include <float.h>
 #include <stdlib.h>
@@ -44,21 +41,20 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 	}
 }
 
-Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder,*/ double prec,
+Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, double prec,
 		double goal_rel_prec, double goal_abs_prec, double equ_eps,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
                 				user_sys(user_sys), normalized_user_sys(user_sys,0),
                 				n(user_sys.nb_var),
                 				ext_sys(user_sys,equ_eps), has_equality(false /* by default*/),
-                				ctc(ctc), bsc(bsc), loup_finder(*new LoupFinderDefault(user_sys)),
+                				ctc(ctc), bsc(bsc), loup_finder(finder), loup_correc(user_sys,trace),
                 				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
-                				trace(false),
-                				timeout(1e08),
+                				trace(false), timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), loup_box(n), nb_cells(0),
-                				loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
-                				uplo_of_epsboxes(POS_INFINITY), kkt(normalized_user_sys) {
+                				loup_changed(false), initial_loup(POS_INFINITY), rigor(rigor),
+                				uplo_of_epsboxes(POS_INFINITY) /*, kkt(normalized_user_sys)*/ {
 
 
 	// ==== check if the system contains equalities ====
@@ -74,7 +70,6 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder,
 
 Optimizer::~Optimizer() {
 	buffer.flush();
-	delete &loup_finder;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
 }
@@ -88,73 +83,13 @@ double Optimizer::compute_ymax() {
 	return ymax;
 }
 
-
 // launch Hansen test
-bool Optimizer::update_real_loup() {
 
-	// todo : change hard-coded value
-	ActiveConstraintsFnc af(user_sys,loup_point,1e-8,trace);
-
-	if (af.image_dim()==0) {
-		loup = pseudo_loup;
-		loup_box = loup_point;
-		return true;
-	}
-	cout << "#active=" << af.image_dim() << endl;
-	IntervalVector epsbox(loup_point);
-
-	// ====================================================
-	// solution #1: we inflate the loup-point and
-	//              call Hansen test in contracting mode.
-	// TODO: replace default_equ_eps by something else!
-	//	epsbox.inflate(default_equ_eps);
-	//	PdcHansenFeasibility pdc(af, false);
-	// ====================================================
-
-	// ====================================================
-	// solution #2: we call Hansen test in inflating mode.
-	PdcHansenFeasibility pdc(af, true);
-	// ====================================================
-
-	// TODO: maybe we should check first if the epsbox is inner...
-	// otherwise the probability to get a feasible point is
-	// perhaps too small?
-
-	// TODO: HansenFeasibility uses midpoint
-	//       but maybe we should use random
-
-	if (pdc.test(epsbox)==YES) {
-		Interval resI = user_sys.goal->eval(pdc.solution());
-		if (!resI.is_empty()) {
-			double res=resI.ub();
-			if (res<loup) {
-				//note: don't call is_inner because it would check again all equalities (which is useless
-				// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
-				bool satisfy_inequalities=true;
-				for (int j=0; j<user_sys.nb_ctr; j++) {
-					if (user_sys.ctrs[j].op!=EQ /* TODO: && !entailed->original(j)*/ &&
-						user_sys.ctrs[j].f.eval(pdc.solution()).ub()>0) {
-						satisfy_inequalities=false;
-						break;
-					}
-				}
-				if (satisfy_inequalities) {
-					loup = res;
-					loup_box = pdc.solution();
-					if (trace)
-						cout << setprecision (12) << " *real* loup update " << loup  << " loup box: " << loup_box << endl;
-					return true;
-				}
-			}
-		}
-	}
-	//===========================================================
-	return false;
-}
 
 // 2 methods for searching a better feasible point and a better loup
 
 bool Optimizer::update_loup(const IntervalVector& box) {
+
 	bool loup_change=false;
 
 	try {
@@ -167,7 +102,18 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 
 		if (rigor && has_equality) {
 			// a loup point will not be safe (pseudo loup is not the real loup)
-			loup_change = update_real_loup();
+			try {
+				pair<IntervalVector,double> p_corr=loup_correc.find(loup,loup_point,pseudo_loup);
+				loup_box = p_corr.first;
+				loup = p_corr.second;
+
+				if (trace)
+					cout << setprecision (12) << " *real* loup update " << loup  << " loup box: " << loup_box << endl;
+
+				loup_change = true;
+
+			} catch(LoupCorrection::NotFound&) { }
+
 		} else {
 			// the loup point is safe: the pseudo loup is the real loup.
 			loup = pseudo_loup;
@@ -228,7 +174,21 @@ void Optimizer::update_uplo() {
 
 }
 
+void Optimizer::update_uplo_of_epsboxes(double ymin) {
 
+	// the current box cannot be bisected.  ymin is a lower bound of the objective on this box
+	// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo,
+	//that indicates a lowerbound for the objective in all the small boxes
+	// found by the precision criterion
+	assert (uplo_of_epsboxes >= uplo);
+	assert(ymin >= uplo);
+	if (uplo_of_epsboxes > ymin) {
+		uplo_of_epsboxes = ymin;
+		if (trace) {
+			cout << "uplo_of_epsboxes:" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
+		}
+	}
+}
 
 /* contract the box of the cell c , try to find a new loup ;
      push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell.
@@ -288,7 +248,6 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 	//cout << " [contract]  x after=" << c.box << endl;
 	//cout << " [contract]  y after=" << y << endl;
-	// TODO: no more cell in argument here (just a box). Does it matter?
 	/*====================================================================*/
 
 	/*========================= update loup =============================*/
@@ -328,7 +287,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	}
 
 	// ** important: ** must be done after upper-bounding
-	kkt.contract(tmp_box);
+	//kkt.contract(tmp_box);
 
 	if (tmp_box.is_empty()) {
 		c.box.set_empty();
@@ -363,7 +322,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// add data "pu" and "pf" (if required)
 	buffer.cost2().add_backtrackable(*root);
 
-	// add data required by optimizer + Fritz John contractor
+	// add data required by optimizer + KKT contractor
 //	root->add<EntailedCtr>();
 //	//root->add<Multipliers>();
 //	entailed=&root->get<EntailedCtr>();
@@ -453,22 +412,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 		return UNBOUNDED_OBJ;
 	else
 		return SUCCESS;
-}
-
-void Optimizer::update_uplo_of_epsboxes(double ymin) {
-
-	// the current box cannot be bisected.  ymin is a lower bound of the objective on this box
-	// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo,
-	//that indicates a lowerbound for the objective in all the small boxes
-	// found by the precision criterion
-	assert (uplo_of_epsboxes >= uplo);
-	assert(ymin >= uplo);
-	if (uplo_of_epsboxes > ymin) {
-		uplo_of_epsboxes = ymin;
-		if (trace) {
-			cout << "uplo_of_epsboxes:" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
-		}
-	}
 }
 
 

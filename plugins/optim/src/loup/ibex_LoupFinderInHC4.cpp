@@ -41,7 +41,7 @@ std::pair<Vector, double> LoupFinderInHC4::find(const IntervalVector& box, const
 		IntervalVector gx = sys.active_ctrs_eval(box);
 
 		int c;
-		for (unsigned int i=0; i<active.size(); i++) {
+		for (int i=0; i<active.size(); i++) {
 			c=(i==0? active.min() : active.next(c));
 
 			// Quick infeasibility check

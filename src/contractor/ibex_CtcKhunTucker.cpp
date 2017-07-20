@@ -8,7 +8,8 @@
 //============================================================================
 
 #include "ibex_CtcKhunTucker.h"
-#include "ibex_KhunTuckerFnc.h"
+
+#include "ibex_FncKhunTucker.h"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_ExprDiff.h"
 #include "ibex_Linear.h"
@@ -85,7 +86,7 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 	// =========================================================================================
 	BitSet active=sys.active_ctrs(box);
 
-	KhunTuckerFnc fjf(sys,df,dg,box,BitSet::all(sys.nb_ctr)); //active);
+	FncKhunTucker fjf(sys,df,dg,box,BitSet::all(sys.nb_ctr)); //active);
 
 	// we consider that Newton will not succeed if there are more
 	// than n active constraints.

@@ -13,20 +13,16 @@
 
 #include "ibex_LinearizerCombo.h"
 #include "ibex_LoupFinder.h"
+#include "ibex_LoupCorrection.h"
 #include "ibex_Bsc.h"
-#include "ibex_CtcHC4.h"
-#include "ibex_Ctc3BCid.h"
-#include "ibex_CtcUnion.h"
 #include "ibex_Backtrackable.h"
 #include "ibex_CellCostFunc.h"
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_NormalizedSystem.h"
 #include "ibex_ExtendedSystem.h"
-#include "ibex_EntailedCtr.h"
-#include "ibex_LinearSolver.h"
+//#include "ibex_EntailedCtr.h"
 #include "ibex_CtcKhunTucker.h"
 #include "ibex_Random.h"
-#include "ibex_FritzJohnCond.h"
 
 namespace ibex {
 
@@ -75,7 +71,7 @@ public:
 	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
-	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, /*LoupFinder& finder, */double prec=default_prec,
+	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
 
@@ -189,6 +185,9 @@ public:
 
 	/** Loup finder algorithm. */
 	LoupFinder& loup_finder;
+
+	/** Loup correction (certification) algorithm. */
+	LoupCorrection loup_correc;
 
 	/** Cell buffers.
 	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,
@@ -376,7 +375,7 @@ private:
 	//EntailedCtr* entailed;
 
 	//!! warning: sys.box should be properly set before call to constructor !!
-	CtcKhunTucker kkt;
+	//CtcKhunTucker kkt;
 };
 
 } // end namespace ibex

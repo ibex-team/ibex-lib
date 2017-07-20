@@ -7,51 +7,14 @@
 
 #include <stdlib.h>
 #include <cassert>
-#include "ibex_KhunTuckerFnc.h"
+
+#include "ibex_FncKhunTucker.h"
 
 using namespace std;
 
 namespace ibex {
 
-//FritzJohnFncFactory::FritzJohnFncFactory(const System& sys) : sys(sys), df(NULL), dg(NULL),
-//		eq(BitSet::empty(sys.nb_ctr)),
-//		ineq_LEQ(BitSet::empty(sys.nb_ctr)),
-//		ineq_GEQ(BitSet::empty(sys.nb_ctr)),
-//		bound_left(BitSet::empty(sys.nb_var)),
-//		bound_right(BitSet::empty(sys.nb_var)) {
-//
-//	if (!sys.goal) {
-//		ibex_error("Fritz-John conditions required a system with goal function.");
-//	}
-//
-//	df = new Function(sys.goal, Function::DIFF);
-//
-//	if (sys.nb_ctr==0) return;
-//
-//	dg = new Function*[sys.nb_ctr];
-//
-//	for (int i=0; i<sys.nb_ctr; i++) {
-//		if (!sys.ctrs[i].f.expr().dim.is_scalar())
-//			not_implemented("Fritz-John conditions with vector/matrix constraints.");
-//
-//		dg[i] = new Function(sys.ctrs[i].f,Function::DIFF);
-//
-//		if (sys.ctrs[i].op==EQ) eq.add(i); // once for all.
-//	}
-//}
-//
-//
-//FritzJohnFncFactory::~FritzJohnFncFactory() {
-//	delete df;
-//
-//	for (int i=0; i<sys.nb_ctr; i++) {
-//		delete dg[i];
-//	}
-//	if (sys.nb_ctr>0) delete[] dg;
-//}
-
-
-KhunTuckerFnc::KhunTuckerFnc(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const BitSet& active) :
+FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const BitSet& active) :
 								Fnc(1,1), nb_mult(0), // **tmp**
 								n(sys.nb_var), // **tmp**
 								sys(sys), df(df), dg(dg),
@@ -98,7 +61,7 @@ KhunTuckerFnc::KhunTuckerFnc(const NormalizedSystem& sys, Function* df, Function
 
 }
 
-IntervalVector KhunTuckerFnc::multiplier_domain() const {
+IntervalVector FncKhunTucker::multiplier_domain() const {
 	IntervalVector box(nb_mult, Interval(0,1));
 
 	if (!eq.empty())
@@ -107,7 +70,7 @@ IntervalVector KhunTuckerFnc::multiplier_domain() const {
 	return box;
 }
 
-IntervalMatrix KhunTuckerFnc::gradients(const IntervalVector& x) const {
+IntervalMatrix FncKhunTucker::gradients(const IntervalVector& x) const {
 
 	IntervalMatrix A=Matrix::zeros(n, nb_mult);
 
@@ -156,7 +119,7 @@ IntervalMatrix KhunTuckerFnc::gradients(const IntervalVector& x) const {
 	return A;
 }
 
-IntervalVector KhunTuckerFnc::eval_vector(const IntervalVector& x_lambda) const {
+IntervalVector FncKhunTucker::eval_vector(const IntervalVector& x_lambda) const {
 
 	IntervalVector res(n+nb_mult);
 
@@ -228,7 +191,7 @@ IntervalVector KhunTuckerFnc::eval_vector(const IntervalVector& x_lambda) const 
 	return res;
 }
 
-void KhunTuckerFnc::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const {
+void FncKhunTucker::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const {
 
 	if (components.size()!=n+nb_mult) {
 		not_implemented("FritzJohnFnc: 'jacobian' for selected components");

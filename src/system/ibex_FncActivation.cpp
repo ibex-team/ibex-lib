@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - ibex_ActiveConstraintsFnc.cpp
+ * I B E X - ibex_FncActivation.cpp
  * ============================================================================
  * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -9,13 +9,13 @@
  * Created     : Jun, 16 2017
  * ---------------------------------------------------------------------------- */
 
-#include "ibex_ActiveConstraintsFnc.h"
+#include "ibex_FncActivation.h"
 
 using namespace std;
 
 namespace ibex {
 
-ActiveConstraintsFnc::ActiveConstraintsFnc(const System& sys, const Vector& pt, double activation_threshold, bool trace) : sys(sys), activated(sys.f_ctrs.image_dim()) {
+FncActivation::FncActivation(const System& sys, const Vector& pt, double activation_threshold, bool trace) : sys(sys), activated(sys.f_ctrs.image_dim()) {
 
 	BitSet ith=BitSet::empty(sys.f_ctrs.image_dim());
 
@@ -38,15 +38,15 @@ ActiveConstraintsFnc::ActiveConstraintsFnc(const System& sys, const Vector& pt, 
 }
 
 
-ActiveConstraintsFnc::~ActiveConstraintsFnc() {
+FncActivation::~FncActivation() {
 
 }
 
-IntervalVector ActiveConstraintsFnc::eval_vector(const IntervalVector& x) const {
+IntervalVector FncActivation::eval_vector(const IntervalVector& x) const {
 	return sys.f_ctrs.eval_vector(x,activated);
 }
 
-void ActiveConstraintsFnc::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
+void FncActivation::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
 	sys.f_ctrs.jacobian(x,J,activated.compose(components),v);
 }
 

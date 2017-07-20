@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_DefaultOptimizer.cpp
-// Author      : Gilles Chabert , Bertrand Neveu
+// Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Jul 06, 2014
+// Last Update : Jul 20, 2017
 //============================================================================
 
 #include "ibex_DefaultOptimizer.h"
@@ -49,7 +49,7 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
 		Optimizer(_sys,
 			  ctc(_sys,get_ext_sys(_sys,default_equ_eps),prec), // warning: we don't know which argument is evaluated first
 			  rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),prec)),
-			  /*rec(new LoupFinderDefault(get_ext_sys(_sys,default_equ_eps))), */
+			  rec(new LoupFinderDefault(_sys)),
 			  prec, goal_prec, goal_prec, default_equ_eps,true) {
   
 	RNG::srand(1);
@@ -58,15 +58,6 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
 
 	*memory() = NULL; // reset (for next DefaultOptimizer to be created)
 }
-
-// the corners for CtcXNewtonIter : one random orner and its opposite
-/*vector<CtcXNewton::corner_point>*  DefaultOptimizer::default_corners () {
-	vector<CtcXNewton::corner_point>* x;
-	x= new vector<CtcXNewton::corner_point>;
-	x->push_back(CtcXNewton::RANDOM);
-	x->push_back(CtcXNewton::RANDOM_INV);
-	return x;
-}*/
 
 Ctc&  DefaultOptimizer::ctc(System& sys, System& ext_sys, double prec) {
 	Array<Ctc> ctc_list(3);

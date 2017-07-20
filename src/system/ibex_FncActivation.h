@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - ibex_ActiveConstraintsFnc.h
+ * I B E X - ibex_FncActivation.h
  * ============================================================================
  * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -9,8 +9,8 @@
  * Created     : Jun, 16 2017
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_ACTIVE_CONSTRAINTS_FNC_H__
-#define __IBEX_ACTIVE_CONSTRAINTS_FNC_H__
+#ifndef __IBEX_FNC_ACTIVATION_H__
+#define __IBEX_FNC_ACTIVATION_H__
 
 #include "ibex_System.h"
 #include "ibex_BitSet.h"
@@ -22,7 +22,7 @@ namespace ibex {
  *
  * \brief Components of a system function that correspond to activate constraints.
  */
-class ActiveConstraintsFnc : public Fnc {
+class FncActivation : public Fnc {
 public:
 	/**
 	 * \brief Build the function.
@@ -32,12 +32,12 @@ public:
 	 *
 	 * \param trace - if true, activation of inequalities is displayed
 	 */
-	ActiveConstraintsFnc(const System& sys, const Vector& pt, double activation_threshold=1e-6, bool trace=false);
+	FncActivation(const System& sys, const Vector& pt, double activation_threshold=1e-6, bool trace=false);
 
 	/**
 	 * \brief Delete this.
 	 */
-	virtual ~ActiveConstraintsFnc();
+	virtual ~FncActivation();
 
 	/**
 	 * \brief Evaluation of the function.
@@ -56,4 +56,4 @@ protected:
 
 } /* namespace ibex */
 
-#endif /* __IBEX_ACTIVE_CONSTRAINTS_FNC_H__ */
+#endif /* __IBEX_FNC_ACTIVATION_H__ */
