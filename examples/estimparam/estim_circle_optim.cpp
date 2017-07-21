@@ -107,8 +107,8 @@ int main(int argc, char** argv) {
 	int gaplimit= atoi(argv[6]);
 	int nbrand= atoi(argv[7]);
 	string bisect = argv[8];
-	srand(1);
-		//int nsup=0;
+
+
 	
 	// les points supplémentaires pour le problème C2
 	for (int i = 0; i< nsup; i++)
@@ -206,8 +206,11 @@ int main(int argc, char** argv) {
 	cout << "apres ctcq " << endl;
 
 
-	//	CellStack buff;
-	CellHeapQInter buff;
+	CellStack buff;
+	DepthFirstSearch str (buff);
+	//CellHeapQInter buff;
+	//	BeamSearch str(buff);
+	//	BestFirstSearch str (buff);
 	Bsc * bs;
 	if (bisect=="rr")
 	  bs = new RoundRobin(prec, 0.5);
@@ -219,7 +222,7 @@ int main(int argc, char** argv) {
 	//	RoundRobinNvar  bs (2,prec,0.5);
 
 	//LargestFirst bs (prec,0.5);
-	/* Main optimization loop */
+	/* Main optmimization loop */
 	clock_t start, end;
 	start = clock();
 
@@ -230,28 +233,25 @@ int main(int argc, char** argv) {
        	else
 	  ctcs=&ctcq;
 	cout << "avant resolution " << endl;
-	//SolverOptQInter s(*ctcs,*bs,buff,ctcq,1);
 	//SolverQInter s(*ctcs,*bs,buff,ctcq);
 	//	OptimQInter s(*ctcs,*bs,buff,ctcq);
 	//OptimizerQInter s(*ctcs,*bs,buff,ctcq);
 	//	Solver s(*ctcs,*bs,buff);
-	SolverOptBSQInter s (ctcq,*bs,buff,ctcq);
+	//	SolverOptQInter s (*ctcs,*bs,str,ctcq,2);
+	SolverOptQInter s (*ctcs,*bs,str,ctcq,1);
 	s.time_limit = 3600;
 	s.trace=1;
 	s.nbr=nbrand;
 	s.gaplimit=gaplimit;
-	s.with_storage=true;
-	//	srand(2);
-	vector<IntervalVector> res=s.solve(box);
+	s.str.with_storage=true;
+	s.str.with_oracle=0;
+
+	IntervalVector res=s.solve(box);
 
 	/* output the box */
 	//	printOutput(x, y, res);
 
-	/*
-	s.report_maximal_solutions(res);
-	vector <int> maxsolinliers;
-	s.keep_one_solution_pergroup(res,maxsolinliers );
-	*/
+
 
 	s.report_possible_inliers();
 	end = clock();

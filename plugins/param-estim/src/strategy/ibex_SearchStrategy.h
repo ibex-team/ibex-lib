@@ -79,6 +79,8 @@ class BestFirstSearch : public SearchStrategy{
 public:
   BestFirstSearch (CellBuffer & buffer);
   Cell* pop_cell();
+  void push_cell(Cell&c1);
+  void push_cells(Cell&c1,Cell&c2);
 void contract_buffer();
 };
 

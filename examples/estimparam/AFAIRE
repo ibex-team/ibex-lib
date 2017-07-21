@@ -90,3 +90,9 @@ algo avec contraintes , sous classe de l'algo sans contraintes
 rendre orthogonal   stratégie et stockage des possibles   -> généralisation du with_storage
 fait : classe  SearchStrategy pour un objet intermédiaire entre SolveOptQInter et CellBuffer.
 
+------------------------------------------------------------------------------------------------
+
+pour article JOGO : 
+point pas clair  valid :  satisfying the constraints
+validCS ? -> inliers :  pourquoi valid inliers  : validated inliers ?  
+consensus set  CS  vs inliers

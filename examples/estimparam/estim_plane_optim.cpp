@@ -375,11 +375,11 @@ int main(int argc, char** argv) {
 	    proba[0]=0.33;
 	    proba[1]=0.33;
 	    proba[2]=0.34;
-	    //CellStack buff;
-	    CellHeapQInter buff;
-	    BeamSearch str(buff);
-	    //BestFirstSearch str (buff);
-	    //	    DepthFirstSearch str (buff);
+	     CellStack buff;
+	     //CellHeapQInter buff;
+	    //   BeamSearch str(buff);
+	     //	    BestFirstSearch str (buff);
+	     DepthFirstSearch str (buff);
 	    Bsc * bs;
 	    if (bisect=="rr")
 	      bs = new RoundRobin(prec, 0.5);
@@ -448,9 +448,9 @@ int main(int argc, char** argv) {
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
 
-	    //SolverOptQInter s(*ctcs,*bs,str,*ctcq,1);
+	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,1);
 	    
-	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,2);
+	    //	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,2);
 	    s.str.with_oracle=0;
 	    s.str.with_storage=true;
 	    //s.str.with_storage=false;

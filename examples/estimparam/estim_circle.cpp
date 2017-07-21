@@ -244,11 +244,12 @@ int main(int argc, char** argv) {
 	/* output the box */
 	//	printOutput(x, y, res);
 
-	/*
+	
 	s.report_maximal_solutions(res);
 	vector <int> maxsolinliers;
 	s.keep_one_solution_pergroup(res,maxsolinliers );
-	*/
+
+	
 
 	s.report_possible_inliers();
 	end = clock();

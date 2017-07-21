@@ -309,7 +309,7 @@ int main(int argc, char** argv) {
 	    //CtcFixPoint ctcf(ctcqf0, 0.1);
 	    //CtcFixPoint ctcf(ctcid,0.1);
 
-	    int optim=1;
+	    int optim=0;
 	    SolverQInter s(ctcf,*bs,buff,*ctcq);
 	    //	    SolverOptQInter s(ctcf,*bs,buff,*ctcq,optim);
 	    //	    OptimQInter s(ctcf,*bs,buff,ctcq);

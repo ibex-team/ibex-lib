@@ -19,21 +19,6 @@ using namespace ibex;
  */
 
 
-
-
-bool  max_dist (IntervalVector& v1, IntervalVector& v2, Vector& prec)
-{double d;
-  for (int i=0; i< v1.size(); i++)
-    { if (v1[i].lb() > v2[i].ub()) 
-	d= v1[i].lb() - v2[i].ub();
-      else
-	if (v2[i].lb() > v1[i].ub())
-	  d= v2[i].lb() - v1[i].ub();
-      if (d > 10* prec[i]) return false;
-    }
-  
-  return true;
-}
 	 
 int main(int argc, char** argv) {
 	
@@ -85,8 +70,6 @@ int main(int argc, char** argv) {
 	for (int i=0;i<p;i++) {if ((*z)[i] >=2.79 && (*z)[i] <3) nz++;      }
 	cout << "nz " << nz << endl;
 	  
-
-
 
 	//	int Q2= Q*Qprop;
 	int Q1=27;
@@ -251,12 +234,7 @@ int main(int argc, char** argv) {
 
 
 	    Vector prec(3);
-	    /*
-	    prec[0]=0.0005;
-	    prec[1]=0.0005;
-	    prec[2]=0.005;
-	    */
-	    
+	   
 	    prec[0]=precbc;
 	    prec[1]=precbc;
 	    prec[2]=precd;
@@ -273,15 +251,18 @@ int main(int argc, char** argv) {
 	    proba[0]=0.33;
 	    proba[1]=0.33;
 	    proba[2]=0.34;
-	    //	    CellStack buff;
-	    CellHeapQInter buff;
+	    CellStack buff;
+	    DepthFirstSearch str (buff);
+	    // CellHeapQInter buff;
+	    //	    BeamSearch str(buff);
+	    //	    BestFirstSearch str(buff);
 	    //RoundRobin bs (prec,0.5);
 	    RoundRobinNvar bs (2,prec,0.5);
 	    //  RoundRobinQInter bs (2,prec,0.5);
 	    //	ProbaBisect bs (prec, proba, 0.45);
 	    //LargestFirst bs (prec,0.45);
 	    /* Main optimization loop */
-	    int flist=2;
+
 	    //CtcQInterProjF ctcq(3,m_ctc1,Q);
 	    //	CtcQInterProjF ctcq(3,m_ctc1,K,m_fun,Q);
 	    
@@ -299,23 +280,21 @@ int main(int argc, char** argv) {
 
 
 	    
-	    //	    SolverOptQInter s(ctcf,bs,buff,ctcq,1);
-	    SolverOptBSQInter s(ctcf,bs,buff,ctcq);
-	    //	    Solver s(ctcf,bs,buff);
-	    //	    s.onesol_permaximalset=true;
+	    SolverOptQInter s(ctcf,bs,str,ctcq,1);
+	    //	    SolverOptQInter s(ctcf,bs,str,ctcq,2);
 
-	    s.with_oracle=false;
-	    s.with_storage=true;
+	    s.str.with_oracle=false;
+	    s.str.with_storage=true;
 	    s.time_limit = 3600;
 	    s.trace=1;
 	    s.gaplimit=gap;
 	    s.nbr=nbrand;
-	    //	    s.greedy=false;
+
 	    s.bestsolpointnumber=Qoct;
 	    s.bestsolpoint=bestsol;
 	    cout << " avant resolution " << endl;
 
-	vector<IntervalVector> res=s.solve(box);
+	   IntervalVector res=s.solve(box);
 
 	cout << "Number of branches : " << s.nb_cells << endl;
 	nb_cells +=s.nb_cells;
@@ -324,7 +303,7 @@ int main(int argc, char** argv) {
 	bestsol=s.bestsolpoint;
 	s.report_possible_inliers();
 	//	s.report_solution();
-	//	cout << " nb sols " << res.size() << endl;   
+
 
   
 

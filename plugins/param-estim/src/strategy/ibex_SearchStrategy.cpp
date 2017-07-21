@@ -124,12 +124,36 @@ namespace ibex {
   
   Cell* BestFirstSearch::pop_cell() {
     Cell* c = buffer.top();
+    if (with_storage){
+      points1 = c->get<QInterPoints>().points;
+      points2 = c->get<QInterPoints>().points;
+    }
+    else{
     points1 = points0;
     points2 = points0;
-     
+    }
     return buffer.pop();
   }
 
+void BestFirstSearch::push_cells(Cell&c1, Cell& c2){
+  if (! (c1.box.is_empty())) {
+    buffer.push(&c1);
+    if (with_storage) c1.get<QInterPoints>().points=points1;
+  }
+  
+  if (! (c2.box.is_empty())) {
+    buffer.push(&c2);
+    if (with_storage) c2.get<QInterPoints>().points=points2;
+  }
+
+}
+
+void BestFirstSearch::push_cell(Cell&c1){
+   if (! (c1.box.is_empty())) {
+    buffer.push(&c1);
+    if (with_storage) c1.get<QInterPoints>().points=*(ctcq->points);
+   }
+}
   void BestFirstSearch::contract_buffer()
   { cout << " buffer size before " << buffer.size() << " q " << ctcq->q << endl;
 	(dynamic_cast<CellHeapQInter*> (&buffer))->contract_heap(-(ctcq->q));
