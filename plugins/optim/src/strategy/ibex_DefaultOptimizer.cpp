@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Jul 20, 2017
+// Last Update : Jul 21, 2017
 //============================================================================
 
 #include "ibex_DefaultOptimizer.h"
@@ -20,8 +20,6 @@
 #include "ibex_Random.h"
 #include "ibex_DefaultStrategy.cpp_"
 #include "ibex_LoupFinderDefault.h"
-
-#include <vector>
 #include "ibex_LinearizerCombo.h"
 
 namespace ibex {
@@ -36,30 +34,26 @@ const double default_relax_ratio = 0.2;
 // the extended system "ext_sys" to build
 // two arguments of the base class constructor (ctc and bsc)
 // and we don't know which argument is evaluated first
-ExtendedSystem& get_ext_sys(System& sys, double eq_prec) {
+ExtendedSystem& get_ext_sys(const System& sys, double eq_prec) {
 	if (!(*memory())->sys.empty()) return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
 	else return rec(new ExtendedSystem(sys,eq_prec));
 }
 
 }
 
-// the defaultoptimizer constructor  1 point for sample_size
-// the equality constraints are relaxed with goal_prec
-DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) :
+DefaultOptimizer::DefaultOptimizer(const System& _sys, double eps_x, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor) :
 		Optimizer(_sys,
-			  ctc(_sys,get_ext_sys(_sys,default_equ_eps),prec), // warning: we don't know which argument is evaluated first
-			  rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),prec)),
+			  ctc(_sys,get_ext_sys(_sys,default_equ_eps),eps_x), // warning: we don't know which argument is evaluated first
+			  rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),eps_x)),
 			  rec(new LoupFinderDefault(_sys)),
-			  prec, goal_prec, goal_prec, default_equ_eps,true) {
+			  eps_x, rel_eps_f, abs_eps_f, eps_h, rigor) {
   
-	RNG::srand(1);
-
 	data = *memory(); // keep track of my data
 
 	*memory() = NULL; // reset (for next DefaultOptimizer to be created)
 }
 
-Ctc&  DefaultOptimizer::ctc(System& sys, System& ext_sys, double prec) {
+Ctc&  DefaultOptimizer::ctc(const System& sys, const System& ext_sys, double prec) {
 	Array<Ctc> ctc_list(3);
 
 	// first contractor on ext_sys : incremental hc4  ratio propag 0.01
@@ -79,8 +73,6 @@ Ctc&  DefaultOptimizer::ctc(System& sys, System& ext_sys, double prec) {
 	return rec(new CtcCompo(ctc_list));
 }
 
-
-// deletion of all dynamically created objects
 DefaultOptimizer::~DefaultOptimizer() {
 	// delete all objects dynamically created in the constructor
 	delete (Memory*) data;

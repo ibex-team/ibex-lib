@@ -71,9 +71,14 @@ public:
 	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
-	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, double prec=default_prec,
-			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
+	Optimizer(const System& sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
+			double prec=default_prec,
+			double goal_rel_prec=default_goal_rel_prec,
+			double goal_abs_prec=default_goal_abs_prec,
+			double equ_eps=default_equ_eps,
+			bool rigor=false,
+			int critpr=50,
+			CellCostFunc::criterion crit= CellCostFunc::UB);
 
 	/**
 	 * \brief Delete *this.
@@ -150,7 +155,7 @@ public:
 	 *
 	 * \warning kept by reference.
 	 */
-	System& user_sys;
+	const System& user_sys;
 
 	NormalizedSystem normalized_user_sys;
 
@@ -174,7 +179,7 @@ public:
 	/**
 	 * \brief True iff there is an equality.
 	 */
-	bool has_equality;
+	const bool has_equality;
 
 	/** Contractor for the extended system
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
@@ -220,22 +225,37 @@ public:
 	 */
 	double timeout;
 
+	/**
+	 * \brief Random seed.
+	 *
+	 * The sequence of random numbers is reinitialized with
+	 * this seed at the beginning of optimize().
+	 *
+	 * Can be set by the user, for reproducibility.
+	 *
+	 * Set by default to 1.0.
+	 */
+	double random_seed;
+
 	/* Remember running time of the last exploration */
 	double time;
 
 	void time_limit_check();
 
-	/** Default bisection precision: 1e-07 */
+	/** Default bisection precision: 0. */
 	static const double default_prec;
 
-	/** Default goal relative precision */
+	/** Default goal relative precision: 1e-3. */
 	static const double default_goal_rel_prec;
 
-	/** Default goal absolute precision */
+	/** Default goal absolute precision: 1e-7. */
 	static const double default_goal_abs_prec;
 
-	/** Default epsilon applied to equations */
+	/** Default epsilon applied to equations: 1e-8. */
 	static const double default_equ_eps;
+
+	/** Default random seed: 1.0. */
+	static const double default_random_seed;
 
 	/**
 	 * \brief The "loup" (lowest upper bound of the criterion)

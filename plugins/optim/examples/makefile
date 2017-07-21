@@ -6,7 +6,7 @@ LIBS	 := $(shell pkg-config --libs  ibex)
 
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-CXXFLAGS := $(CXXFLAGS) -I../../../examples
+CXXFLAGS := $(CXXFLAGS) -std=c++11 -I../../../examples
 CXXFLAGS := $(CXXFLAGS) -DIBEX_BENCHS_DIR=\"${ROOT_DIR}/../../../benchs\"
 
 ifeq ($(DEBUG), yes)

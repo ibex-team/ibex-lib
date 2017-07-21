@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Jul 06, 2014
+// Last Update : Jul 21, 2017
 //============================================================================
 
 #ifndef __IBEX_DEFAULT_OPTIMIZER_H__
@@ -26,11 +26,17 @@ public:
 	/**
 	 * \brief Create a default optimizer.
 	 *
-	 * \param sys       - The system to optimize
-	 * \param prec      - Stopping criterion for box splitting (absolute precision)
-	 * \param goal_prec - Stopping criterion for the objective (relative precision)
+	 * \param sys        - The system to optimize
+	 * \param eps_x      - Stopping criterion for box splitting (absolute precision)
+	 * \param rel_eps_f  - Relative precision on the objective
+	 * \param abs_eps_f  - Absolute precision on the objective
 	 */
-    DefaultOptimizer(System& sys, double prec, double goal_prec);
+    DefaultOptimizer(const System& sys,
+    		double eps_x=Optimizer::default_prec,
+    		double rel_eps_f=Optimizer::default_goal_rel_prec,
+			double abs_eps_f=Optimizer::default_goal_abs_prec,
+			double eps_h=Optimizer::default_equ_eps,
+			bool rigor=false);
 
 	/**
 	 * \brief Delete *this.
@@ -40,13 +46,11 @@ public:
 private:
 
     /**
-     * The contractor: hc4 + acid(hc4) + xnewton
+     * The contractor: HC4 + acid(HC4) + X-Newton
      */
-	Ctc& ctc(System& sys, System& ext_sys, double prec);
+	Ctc& ctc(const System& sys, const System& ext_sys, double prec);
 
-	//	std::vector<CtcXNewton::corner_point>* default_corners ();
-
-	void* data;
+	void* data; // keep track of data, for memory cleanup
 };
 
 } // end namespace ibex

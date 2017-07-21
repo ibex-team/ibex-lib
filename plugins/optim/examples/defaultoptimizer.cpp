@@ -9,9 +9,9 @@
 //============================================================================
 
 #include "ibex.h"
+#include "args.hxx"
 
 #include <sstream>
-#include "args.hxx"
 
 #ifndef _IBEX_WITH_OPTIM_
 #error "You need the IbexOpt plugin to run this program."
@@ -20,23 +20,29 @@
 using namespace std;
 using namespace ibex;
 
-const double default_timeout=60;
-
 int main(int argc, char** argv) {
+
+	stringstream _rel_eps_f, _abs_eps_f, _eps_h, _random_seed, _eps_x;
+	_rel_eps_f << "Relative precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_goal_rel_prec)) << ".";
+	_abs_eps_f << "Absolute precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_goal_abs_prec)) << ".";
+	_eps_h << "Equality relaxation value. Default value is 1e" << round(::log10(Optimizer::default_equ_eps)) << ".";
+	_random_seed << "Random seed (useful for reproducibility). Default value is " << Optimizer::default_random_seed << ".";
+	_eps_x << "Precision on the variable (**Deprecated**). Default value is 0.";
+
 	args::ArgumentParser parser("********* IbexOpt (defaultoptimizer) *********.", "Solve a Minibex file.");
 	args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
-	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is 60s.", {'t', "timeout"});
-	args::ValueFlag<double> rel_epsf(parser, "float", "Relative precision on the objective. Default value is 1e-3.", {'r', "rel-epsf"});
-	args::ValueFlag<double> abs_epsf(parser, "float", "Absolute precision on the objective. Default value is 1e-3.", {'a', "abs-epsf"});
-	args::ValueFlag<double> epsh(parser, "float", "Equality relaxation value. Default value is 1e-8", {"epsh"});
-	args::ValueFlag<double> rand_seed(parser, "float", "Random seed. Default value is 1.", {"random-seed"});
-	args::Flag rigor(parser, "rigor", "Activate rigor mode", {"rigor"});
+	args::ValueFlag<double> rel_eps_f(parser, "float", _rel_eps_f.str(), {'r', "rel-eps-f"});
+	args::ValueFlag<double> abs_eps_f(parser, "float", _abs_eps_f.str(), {'a', "abs-eps-f"});
+	args::ValueFlag<double> eps_h(parser, "float", _eps_h.str(), {"eps-h"});
+	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo.", {'t', "timeout"});
+	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
+	args::ValueFlag<double> eps_x(parser, "float", _eps_x.str(), {"eps-x"});
+
+	args::Flag rigor(parser, "rigor", "Activate rigor mode (certify feasibility of equalities).", {"rigor"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
-	args::Flag verbose(parser, "verbose", "Report results in a more human-readable way.", {"verbose"});
-//	args::ValueFlagList<char> characters(parser, "characters", "The character flag", {'c'});
+	args::Flag quiet(parser, "quiet", "Print no message and display minimal information (for automatic output processing): first line: uplo loup, second line: x*, third line: time.", {'q',"quiet"});
 
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
-//	args::PositionalList<double> numbers(parser, "numbers", "The numbers position list");
 
 	try
 	{
@@ -70,22 +76,73 @@ int main(int argc, char** argv) {
 		// Load a system of equations
 		System sys(filename.Get().c_str());
 
-		cout << "load file " << argv[1] << "." << endl;
-
 		if (!sys.goal) {
 			ibex_error(" input file has not goal (it is not an optimization problem).");
 		}
 
+		if (!quiet) {
+			cout << endl << "************************ setup ************************" << endl;
+			cout << "  file loaded:\t" << filename.Get() << endl;
+		}
+
+		if (rel_eps_f) {
+			if (!quiet)
+				cout << "  rel-eps-f:\t" << rel_eps_f.Get() << "\t(relative precision on objective)" << endl;
+		}
+
+		if (abs_eps_f) {
+			if (!quiet)
+				cout << "  abs-eps-f:\t" << abs_eps_f.Get() << "\t(absolute precision on objective)" << endl;
+		}
+
+		if (eps_h) {
+			if (!quiet)
+				cout << "  eps-h:\t" << eps_h.Get() << "\t(equality thickening)" << endl;
+		}
+
+		if (eps_x) {
+			if (!quiet)
+				cout << "  eps-x:\t" << eps_x.Get() << "\t(precision on variables domain)" << endl;
+		}
+
+		// This option certifies feasibility with equalities
+		if (rigor) {
+			if (!quiet)
+				cout << "  rigor mode:\tON\t(feasibility of equalities certified)" << endl;
+		}
+
 		// Build the default optimizer
-		DefaultOptimizer o(sys,0.0,rel_epsf.Get());
+		DefaultOptimizer o(sys,
+				eps_x ?    eps_x.Get() :     Optimizer::default_prec,
+				rel_eps_f? rel_eps_f.Get() : Optimizer::default_goal_rel_prec,
+				abs_eps_f? abs_eps_f.Get() : Optimizer::default_goal_abs_prec,
+				eps_h ?    eps_h.Get() :     Optimizer::default_equ_eps,
+				rigor
+				);
 
 		// This option limits the search time
-		if (timeout)
+		if (timeout) {
+			if (!quiet)
+				cout << "  timeout:\t" << timeout.Get() << "s" << endl;
 			o.timeout=timeout.Get();
+		}
 
 		// This option prints each better feasible point when it is found
-		if (trace)
+		if (trace) {
+			if (!quiet)
+				cout << "  trace:\tON" << endl;
 			o.trace=trace.Get();
+		}
+
+		// Fix the random seed for reproducibility.
+		if (random_seed) {
+			if (!quiet)
+				cout << "  random seed:\t" << random_seed.Get() << endl;
+			o.random_seed = random_seed.Get();
+		}
+		if (!quiet) {
+			cout << "*******************************************************" << endl << endl;
+		}
 
 		// display solutions with up to 12 decimals
 		cout.precision(12);
@@ -93,9 +150,19 @@ int main(int argc, char** argv) {
 		// Search for the optimum
 		o.optimize(sys.box);
 
-		// Report some information (computation time, etc.)
-		o.report();
+		if (trace) cout << endl;
 
+		// Report some information (computation time, etc.)
+		if (!quiet)
+			o.report();
+		else  {
+			cout << o.uplo << ' ' << o.loup << endl;
+			for (int i=0; i<sys.nb_var; i++) {
+				if (i>0) cout << ' ';
+				cout << o.loup_point[i];
+			}
+			cout << endl << o.time << endl;
+		}
 		return 0;
 
 	}

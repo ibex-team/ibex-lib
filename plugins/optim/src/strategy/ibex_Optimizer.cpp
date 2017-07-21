@@ -20,10 +20,11 @@ using namespace std;
 
 namespace ibex {
 
-const double Optimizer::default_prec = 1e-07;
-const double Optimizer::default_goal_rel_prec = 1e-07;
+const double Optimizer::default_prec = 0;
+const double Optimizer::default_goal_rel_prec = 1e-03;
 const double Optimizer::default_goal_abs_prec = 1e-07;
 const double Optimizer::default_equ_eps = 1e-08;
+const double Optimizer::default_random_seed = 1.0;
 
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;
@@ -41,7 +42,7 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 	}
 }
 
-Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, double prec,
+Optimizer::Optimizer(const System& user_sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, double prec,
 		double goal_rel_prec, double goal_abs_prec, double equ_eps,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
                 				user_sys(user_sys), normalized_user_sys(user_sys,0),
@@ -60,7 +61,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder, d
 	// ==== check if the system contains equalities ====
 	for (int i=0; i<user_sys.ctrs.size(); i++) {
 		if (user_sys.ctrs[i].op==EQ) {
-			has_equality = true;
+			(bool&) has_equality = true;
 			break;
 		}
 	}
@@ -298,6 +299,9 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 }
 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
+
+	RNG::srand(random_seed);
+
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
 
