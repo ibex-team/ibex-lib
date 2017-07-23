@@ -57,11 +57,18 @@ pair<IntervalVector, double> LoupCorrection::find(double loup, const Vector& lou
 				// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
 				bool satisfy_inequalities=true;
 				for (int j=0; j<sys.nb_ctr; j++) {
-					if (sys.ctrs[j].op!=EQ /* TODO: && !entailed->original(j)*/ &&
-						sys.ctrs[j].f.eval(pdc.solution()).ub()>0) {
-						satisfy_inequalities=false;
-						break;
-					}
+					if (!af.activated()[j])
+						if (((sys.ops[j]==LEQ || sys.ops[j]==LT)
+							  && sys.ctrs[j].f.eval(pdc.solution()).ub()>0)
+								||
+							((sys.ops[j]==GEQ || sys.ops[j]==GT)
+							  && sys.ctrs[j].f.eval(pdc.solution()).lb()<0)) {
+
+						/* TODO: && !entailed->original(j)*/
+
+							satisfy_inequalities=false;
+							break;
+						}
 				}
 				if (satisfy_inequalities) {
 					return make_pair(pdc.solution(), res);

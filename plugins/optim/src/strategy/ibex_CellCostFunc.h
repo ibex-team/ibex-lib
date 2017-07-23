@@ -68,7 +68,7 @@ public:
 	 *
 	 * Does nothing (by default).
 	 */
-       virtual void set_optim_data(Cell& /*c*/, System& /*sys*/) { }
+       virtual void set_optim_data(Cell& c, const System& sys) { }
 
 	/**
 	 * If the cost depends on the loup.
@@ -149,7 +149,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 private:
 
 	/** the lower upper bound. */
@@ -186,7 +186,7 @@ public:
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 private:
 
 	/** the lower upper bound. */
@@ -221,7 +221,7 @@ public:
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 private:
 
 	/** the lower upper bound. */
@@ -248,7 +248,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 };
 
 
@@ -264,7 +264,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -286,7 +286,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;

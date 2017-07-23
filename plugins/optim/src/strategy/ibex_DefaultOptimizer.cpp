@@ -43,9 +43,10 @@ ExtendedSystem& get_ext_sys(const System& sys, double eq_prec) {
 
 DefaultOptimizer::DefaultOptimizer(const System& _sys, double eps_x, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor) :
 		Optimizer(_sys,
-			  ctc(_sys,get_ext_sys(_sys,default_equ_eps),eps_x), // warning: we don't know which argument is evaluated first
-			  rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),eps_x)),
-			  rec(new LoupFinderDefault(_sys)),
+			  ctc(_sys,get_ext_sys(_sys,NormalizedSystem::default_eps_h),eps_x), // warning: we don't know which argument is evaluated first
+			  rec(new SmearSumRelative(get_ext_sys(_sys,NormalizedSystem::default_eps_h),eps_x)),
+			  rec(new LoupFinderDefault(*new NormalizedSystem(_sys,eps_h))), //get_ext_sys(_sys,default_eps_h))),
+			  get_ext_sys(_sys,NormalizedSystem::default_eps_h).goal_var(),
 			  eps_x, rel_eps_f, abs_eps_f, eps_h, rigor) {
   
 	data = *memory(); // keep track of my data

@@ -58,6 +58,13 @@ public:
 	 */
 	bool mono_analysis_flag;
 
+protected:
+
+	/**
+	 * \brief Goal constraint (in case of extended system, -1 otherwise).
+	 */
+	const int goal_ctr;
+
 	/** Miscellaneous   for statistics */
 //	int nb_inhc4;
 //	double diam_inhc4;

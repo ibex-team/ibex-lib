@@ -17,6 +17,8 @@ using namespace std;
 
 namespace ibex {
 
+const double NormalizedSystem::default_eps_h = 1e-08;
+
 namespace {
 
 class SystemNormalize : public SystemFactory {

@@ -54,6 +54,9 @@ public:
 	 */
 	int original_index(int i) const;
 
+	/** Default epsilon applied to equations: 1e-8. */
+	static const double default_eps_h;
+
 protected:
 	int* _orig_index;
 };

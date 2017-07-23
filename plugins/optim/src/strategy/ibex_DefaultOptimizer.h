@@ -32,10 +32,10 @@ public:
 	 * \param abs_eps_f  - Absolute precision on the objective
 	 */
     DefaultOptimizer(const System& sys,
-    		double eps_x=Optimizer::default_prec,
-    		double rel_eps_f=Optimizer::default_goal_rel_prec,
-			double abs_eps_f=Optimizer::default_goal_abs_prec,
-			double eps_h=Optimizer::default_equ_eps,
+    		double eps_x=Optimizer::default_eps_x,
+    		double rel_eps_f=Optimizer::default_rel_eps_f,
+			double abs_eps_f=Optimizer::default_abs_eps_f,
+			double eps_h=NormalizedSystem::default_eps_h,
 			bool rigor=false);
 
 	/**

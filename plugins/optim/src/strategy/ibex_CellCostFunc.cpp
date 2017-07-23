@@ -71,7 +71,7 @@ void CellCostC3::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostC3::set_optim_data(Cell& c, System& sys) {
+void CellCostC3::set_optim_data(Cell& c, const System& sys) {
 	c.get<OptimData>().compute_pf(*sys.goal,c.box);
 }
 
@@ -94,7 +94,7 @@ void CellCostC5::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostC5::set_optim_data(Cell& c, System& sys) {
+void CellCostC5::set_optim_data(Cell& c, const System& sys) {
 	OptimData& data=c.get<OptimData>();
 	data.compute_pu(sys,c.box,c.get<EntailedCtr>());
 	data.compute_pf(*sys.goal,c.box);
@@ -119,7 +119,7 @@ void CellCostC7::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostC7::set_optim_data(Cell& c, System& sys) {
+void CellCostC7::set_optim_data(Cell& c, const System& sys) {
 	OptimData& data=c.get<OptimData>();
 	data.compute_pu(sys,c.box,c.get<EntailedCtr>());
 	data.compute_pf(*sys.goal,c.box);
@@ -144,7 +144,7 @@ void CellCostPU::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostPU::set_optim_data(Cell& c, System& sys) {
+void CellCostPU::set_optim_data(Cell& c, const System& sys) {
 
 	c.get<OptimData>().compute_pu(sys,c.box,c.get<EntailedCtr>());
 }
@@ -159,7 +159,7 @@ void CellCostPFlb::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostPFlb::set_optim_data(Cell& c, System& sys) {
+void CellCostPFlb::set_optim_data(Cell& c, const System& sys) {
 	c.get<OptimData>().compute_pf(*sys.goal,c.box);
 }
 
@@ -182,7 +182,7 @@ void CellCostPFub::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostPFub::set_optim_data(Cell& c, System& sys) {
+void CellCostPFub::set_optim_data(Cell& c, const System& sys) {
 	c.get<OptimData>().compute_pf(*sys.goal,c.box);
 }
 

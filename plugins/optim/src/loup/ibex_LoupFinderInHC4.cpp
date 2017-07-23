@@ -10,17 +10,23 @@
 
 #include "ibex_LoupFinderInHC4.h"
 #include "ibex_LoupFinderProbing.h"
+#include "ibex_ExtendedSystem.h"
 
 using namespace std;
 
 namespace ibex {
 
-LoupFinderInHC4::LoupFinderInHC4(const System& sys) : sys(sys) {
+LoupFinderInHC4::LoupFinderInHC4(const System& sys) : sys(sys), goal_ctr(-1) {
 	mono_analysis_flag=true;
 //	nb_inhc4=0;
 //	diam_inhc4=0;
 //	nb_rand=0;
 //	diam_rand=0;
+
+	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
+		((int&) goal_ctr)=((const ExtendedSystem&) sys).goal_ctr();
+	}
+
 }
 
 //void LoupFinderInHC4::report() {
@@ -44,17 +50,21 @@ std::pair<Vector, double> LoupFinderInHC4::find(const IntervalVector& box, const
 		for (int i=0; i<active.size(); i++) {
 			c=(i==0? active.min() : active.next(c));
 
-			// Quick infeasibility check
-			if (gx[i].lb()>0) throw NotFound();
-
 			Interval right_cst;
 			switch(sys.ops[c]) {
 			case LT :
 			case LEQ : right_cst=Interval::NEG_REALS; break;
-			case EQ  : right_cst=Interval::ZERO;      break;
+			case EQ  :
+				if (c==goal_ctr) // ---> f(x)<=y
+					right_cst=Interval::NEG_REALS;
+				else
+					right_cst=Interval::ZERO;      break;
 			case GEQ :
 			case GT : right_cst=Interval::POS_REALS;  break;
 			}
+
+			// Quick infeasibility check
+			if (gx[i].is_disjoint(right_cst)) throw NotFound();
 
 			sys.f_ctrs[c].ibwd(right_cst, inbox);
 

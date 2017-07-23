@@ -165,10 +165,10 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box) {
 		c=(i==0? active.min() : active.next(c));
 
 		try {
-			if (sys.ops[c]==EQ)
+			if (sys.ops[c]==EQ && c!=goal_ctr)
 				// in principle we could deal with linear constraints
 				return -1;
-			else if (sys.ops[c]==LEQ || sys.ops[c]==LT)
+			else if (c==goal_ctr || sys.ops[c]==LEQ || sys.ops[c]==LT)
 				count += linearize_leq_corner(box,corner,J[i],g_corner[i]);
 			else
 				count += linearize_leq_corner(box,corner,-J[i],-g_corner[i]);

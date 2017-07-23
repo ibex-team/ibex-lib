@@ -31,7 +31,7 @@ public:
 
 	LoupCorrection(const System& sys, bool trace);
 
-	std::pair<IntervalVector, double> find(double loup, const Vector& pesudo_loup_point, double pseudo_loup);
+	std::pair<IntervalVector, double> find(double loup, const Vector& pseudo_loup_point, double pseudo_loup);
 
 protected:
 

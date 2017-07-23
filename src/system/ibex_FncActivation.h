@@ -49,10 +49,19 @@ public:
 	 */
 	virtual void jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const;
 
+	/**
+	 * \brief Get the activated constraints
+	 */
+	const BitSet& activated() const;
+
 protected:
 	const System& sys;
-	BitSet activated;
+	BitSet _activated;
 };
+
+inline const BitSet& FncActivation::activated() const {
+	return _activated;
+}
 
 } /* namespace ibex */
 

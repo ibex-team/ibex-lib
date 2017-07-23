@@ -23,9 +23,9 @@ using namespace ibex;
 int main(int argc, char** argv) {
 
 	stringstream _rel_eps_f, _abs_eps_f, _eps_h, _random_seed, _eps_x;
-	_rel_eps_f << "Relative precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_goal_rel_prec)) << ".";
-	_abs_eps_f << "Absolute precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_goal_abs_prec)) << ".";
-	_eps_h << "Equality relaxation value. Default value is 1e" << round(::log10(Optimizer::default_equ_eps)) << ".";
+	_rel_eps_f << "Relative precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_rel_eps_f)) << ".";
+	_abs_eps_f << "Absolute precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_abs_eps_f)) << ".";
+	_eps_h << "Equality relaxation value. Default value is 1e" << round(::log10(NormalizedSystem::default_eps_h)) << ".";
 	_random_seed << "Random seed (useful for reproducibility). Default value is " << Optimizer::default_random_seed << ".";
 	_eps_x << "Precision on the variable (**Deprecated**). Default value is 0.";
 
@@ -40,7 +40,14 @@ int main(int argc, char** argv) {
 
 	args::Flag rigor(parser, "rigor", "Activate rigor mode (certify feasibility of equalities).", {"rigor"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
-	args::Flag quiet(parser, "quiet", "Print no message and display minimal information (for automatic output processing): first line: uplo loup, second line: x*, third line: time.", {'q',"quiet"});
+	args::Flag quiet(parser, "quiet", "Print no message and display minimal information "
+			"(for automatic output processing): "
+			"\nline 1: status\n"
+			"- 0=success\n     - 1=infeasible problem\n     - 2=no feasible point found\n"
+			"- 3=unbounded objective\n     - 4=time out\n"
+			"line 2: uplo loup\n"
+			"line 3: x* (n values)\n"
+			"line 4:time (in seconds) number of cells.", {'q',"quiet"});
 
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
@@ -113,10 +120,10 @@ int main(int argc, char** argv) {
 
 		// Build the default optimizer
 		DefaultOptimizer o(sys,
-				eps_x ?    eps_x.Get() :     Optimizer::default_prec,
-				rel_eps_f? rel_eps_f.Get() : Optimizer::default_goal_rel_prec,
-				abs_eps_f? abs_eps_f.Get() : Optimizer::default_goal_abs_prec,
-				eps_h ?    eps_h.Get() :     Optimizer::default_equ_eps,
+				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x,
+				rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f,
+				abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f,
+				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
 				rigor
 				);
 
@@ -147,22 +154,18 @@ int main(int argc, char** argv) {
 		// display solutions with up to 12 decimals
 		cout.precision(12);
 
+		if (!quiet)
+			cout << "running............" << endl << endl;
+
 		// Search for the optimum
 		o.optimize(sys.box);
 
 		if (trace) cout << endl;
 
 		// Report some information (computation time, etc.)
-		if (!quiet)
-			o.report();
-		else  {
-			cout << o.uplo << ' ' << o.loup << endl;
-			for (int i=0; i<sys.nb_var; i++) {
-				if (i>0) cout << ' ';
-				cout << o.loup_point[i];
-			}
-			cout << endl << o.time << endl;
-		}
+
+		o.report(!quiet);
+
 		return 0;
 
 	}
