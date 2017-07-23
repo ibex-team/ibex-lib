@@ -13,20 +13,33 @@ namespace ibex {
 
 using namespace std;
 
-LoupCorrection::LoupCorrection(const System& sys, bool trace) : sys(sys), trace(trace) {
-
+LoupCorrection::LoupCorrection(const System& sys, LoupFinder& finder, bool trace) : sys(sys), has_equality(false), finder(finder), trace(trace) {
+	// ==== check if the system contains equalities ====
+	for (int i=0; i<sys.ctrs.size(); i++) {
+		if (sys.ctrs[i].op==EQ) {
+			(bool&) has_equality = true;
+			break;
+		}
+	}
 }
 
-pair<IntervalVector, double> LoupCorrection::find(double loup, const Vector& loup_point, double pseudo_loup) {
+//pair<IntervalVector, double> LoupCorrection::find(double loup, const Vector& loup_point, double pseudo_loup) {
+std::pair<IntervalVector, double> LoupCorrection::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
+
+	// may throw NotFound
+	pair<IntervalVector,double> p=finder.find(box,loup_point,loup);
+
+	if (!has_equality)
+		return p;
 
 	// todo : change hard-coded value
-	FncActivation af(sys,loup_point,1e-8,trace);
+	FncActivation af(sys,p.first.lb(),1e-8,trace);
 
 	if (af.image_dim()==0) {
-		return make_pair(loup_point, pseudo_loup);
+		return p;
 	}
 
-	IntervalVector epsbox(loup_point);
+	IntervalVector epsbox(p.first);
 
 	// ====================================================
 	// solution #1: we inflate the loup-point and

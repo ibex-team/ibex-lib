@@ -20,7 +20,7 @@ LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,Linea
 //	diam_simplex=0;
 }
 
-std::pair<Vector, double> LoupFinderXTaylor::find(const IntervalVector& box, const Vector&, double current_loup) {
+std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup) {
 
 	int n=sys.nb_var;
 

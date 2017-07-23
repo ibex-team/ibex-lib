@@ -53,7 +53,7 @@ public:
 	 * \return             <x{k+1},f(x{k+1})>
 	 * \throws             NotFound in case of failure.
 	 */
-	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& loup_point, double loup)=0;
+	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup)=0;
 
 	/**
 	 * \brief Delete this.

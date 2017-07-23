@@ -30,7 +30,7 @@ LoupFinderFwdBwd::~LoupFinderFwdBwd() {
 	}
 }
 
-std::pair<Vector, double> LoupFinderFwdBwd::find(const IntervalVector& box, const Vector& loup_point, double loup) {
+std::pair<IntervalVector, double> LoupFinderFwdBwd::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
 
 	IntervalVector inbox=box;
 

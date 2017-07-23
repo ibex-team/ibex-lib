@@ -89,7 +89,6 @@ public:
 			double eps_x=default_eps_x,
 			double rel_eps_f=default_rel_eps_f,
 			double abs_eps_f=default_abs_eps_f,
-			bool rigor=false,
 			int critpr=50,
 			CellCostFunc::criterion crit= CellCostFunc::UB);
 
@@ -153,10 +152,6 @@ public:
 
 	const int goal_var;
 
-	/**
-	 * \brief True iff there is an equality.
-	 */
-	const bool has_equality;
 
 	/** Contractor for the extended system
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
@@ -167,9 +162,6 @@ public:
 
 	/** Loup finder algorithm. */
 	LoupFinder& loup_finder;
-
-	/** Loup correction (certification) algorithm. */
-	LoupCorrection loup_correc;
 
 	/** Cell buffers.
 	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,
@@ -256,16 +248,13 @@ public:
 	 * \see #get_loup_box() const.
 	 *
 	 * \return the argmin of the last call to optimize(...).
-	 */
-	const Vector& get_loup_point() const;
-
-	/**
+	*
 	 * \brief Get a (rigorous) enclosure of the argmin x*.
 	 *
 	 * \warning only set in rigor mode (undefined otherwise).
+	 *
 	 */
-	const IntervalVector& get_loup_box() const;
-
+	const IntervalVector& get_loup_point() const;
 
 	/** Get CPU time of last call to optimize(...) */
 	double get_time() const;
@@ -385,7 +374,7 @@ private:
 	//CtcKhunTucker kkt;
 
 	/** Rigor mode. */
-	const bool rigor;
+	//const bool rigor;
 
 	/* Remember return status of the last optimization. */
 	Status status;
@@ -399,19 +388,15 @@ private:
 	/**
 	 * \brief The "loup".
 	 *
+	* The current loup.
 	 *
 	 * In rigor mode, represents the real-loup (not the pseudo-loup).
 	 */
 	double loup;
 
-	/** The current loup. */
-	double pseudo_loup;
-
 	/** The point satisfying the constraints corresponding to the loup. */
-	Vector loup_point;
-
 	/** Rigor mode: the box satisfying the constraints corresponding to the loup. */
-	IntervalVector loup_box;
+	IntervalVector loup_point;
 
 	/**
 	 * \brief The bound on the objective given by the user, +oo otherwise.
@@ -437,9 +422,7 @@ inline double Optimizer::get_uplo() const { return uplo; }
 
 inline double Optimizer::get_loup() const { return loup; }
 
-inline const Vector& Optimizer::get_loup_point() const { return loup_point; }
-
-inline const IntervalVector& Optimizer::get_loup_box() const { return loup_box; }
+inline const IntervalVector& Optimizer::get_loup_point() const { return loup_point; }
 
 inline double Optimizer::get_time() const { return time; }
 

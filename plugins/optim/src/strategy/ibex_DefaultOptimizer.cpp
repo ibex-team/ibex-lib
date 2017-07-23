@@ -20,6 +20,7 @@
 #include "ibex_Random.h"
 #include "ibex_DefaultStrategy.cpp_"
 #include "ibex_LoupFinderDefault.h"
+#include "ibex_LoupCorrection.h"
 #include "ibex_LinearizerCombo.h"
 
 namespace ibex {
@@ -45,9 +46,14 @@ DefaultOptimizer::DefaultOptimizer(const System& _sys, double eps_x, double rel_
 		Optimizer(_sys,
 			  ctc(_sys,get_ext_sys(_sys,NormalizedSystem::default_eps_h),eps_x), // warning: we don't know which argument is evaluated first
 			  rec(new SmearSumRelative(get_ext_sys(_sys,NormalizedSystem::default_eps_h),eps_x)),
-			  rec(new LoupFinderDefault(*new NormalizedSystem(_sys,eps_h))), //get_ext_sys(_sys,default_eps_h))),
+			  rec(
+					  rigor?
+							  (LoupFinder*) new LoupCorrection(_sys,*new LoupFinderDefault(*new NormalizedSystem(_sys,eps_h))) :
+
+							  (LoupFinder*) new LoupFinderDefault(*new NormalizedSystem(_sys,eps_h))
+			  ), //get_ext_sys(_sys,default_eps_h))),
 			  get_ext_sys(_sys,NormalizedSystem::default_eps_h).goal_var(),
-			  eps_x, rel_eps_f, abs_eps_f, eps_h, rigor) {
+			  eps_x, rel_eps_f, abs_eps_f, eps_h) {
   
 	data = *memory(); // keep track of my data
 

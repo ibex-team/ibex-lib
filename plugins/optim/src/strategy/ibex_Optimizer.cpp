@@ -43,25 +43,17 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 Optimizer::Optimizer(const System& user_sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 		int goal_var, double eps_x, double rel_eps_f, double abs_eps_f,
-		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
+		int critpr,CellCostFunc::criterion crit2) :
                 				user_sys(user_sys),
-                				n(user_sys.nb_var), goal_var(goal_var), has_equality(false /* by default*/),
-                				ctc(ctc), bsc(bsc), loup_finder(finder), loup_correc(user_sys,trace),
+                				n(user_sys.nb_var), goal_var(goal_var),
+                				ctc(ctc), bsc(bsc), loup_finder(finder),
                 				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
                 				eps_x(eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
                 				trace(false), timeout(-1),
-                				rigor(rigor), status(SUCCESS),
+                				status(SUCCESS),
                 				//kkt(normalized_user_sys),
-								uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY), pseudo_loup(POS_INFINITY),
-                				loup_point(n), loup_box(n), initial_loup(POS_INFINITY), loup_changed(false), nb_cells(0), time(0) {
-
-	// ==== check if the system contains equalities ====
-	for (int i=0; i<user_sys.ctrs.size(); i++) {
-		if (user_sys.ctrs[i].op==EQ) {
-			(bool&) has_equality = true;
-			break;
-		}
-	}
+								uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
+                				loup_point(n), initial_loup(POS_INFINITY), loup_changed(false), nb_cells(0), time(0) {
 
 	if (trace) cout.precision(12);
 }
@@ -83,39 +75,18 @@ double Optimizer::compute_ymax() {
 
 bool Optimizer::update_loup(const IntervalVector& box) {
 
-	bool loup_change=false;
-
 	try {
-		pair<Vector,double> p=loup_finder.find(box,loup_point,pseudo_loup);
+		pair<IntervalVector,double> p=loup_finder.find(box,loup_point,loup);
 		loup_point = p.first;
-		pseudo_loup = p.second;
+		loup = p.second;
 
 		if (trace)
-			cout << setprecision (12) << " loup update=" << pseudo_loup << " loup point=" << loup_point << endl;
+			cout << setprecision (12) << " loup update=" << loup << " loup point=" << loup_point << endl;
+		return true;
 
-		if (rigor && has_equality) {
-			// a loup point will not be safe (pseudo loup is not the real loup)
-			try {
-				pair<IntervalVector,double> p_corr=loup_correc.find(loup,loup_point,pseudo_loup);
-				loup_box = p_corr.first;
-				loup = p_corr.second;
-
-				if (trace)
-					cout << setprecision (12) << " *real* loup update " << loup  << " loup box: " << loup_box << endl;
-
-				loup_change = true;
-
-			} catch(LoupCorrection::NotFound&) { }
-
-		} else {
-			// the loup point is safe: the pseudo loup is the real loup.
-			loup = pseudo_loup;
-			loup_change = true;
-		}
-
-	} catch(LoupFinder::NotFound&) { }
-
-	return loup_change;
+	} catch(LoupFinder::NotFound&) {
+		return false;
+	}
 }
 
 //bool Optimizer::update_entailed_ctr(const IntervalVector& box) {
@@ -284,7 +255,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	RNG::srand(random_seed);
 
 	loup=obj_init_bound;
-	pseudo_loup=obj_init_bound;
 
 	// Just to initialize the "loup" for the buffer
 	// TODO: replace with a set_loup function
@@ -317,7 +287,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	initial_loup=obj_init_bound;
 
 	// TODO: no loup-point if handle_cell contracts everything
-	loup_point=init_box.mid();
+	loup_point=init_box;
 	time=0;
 	Timer::start();
 	handle_cell(*root,init_box);

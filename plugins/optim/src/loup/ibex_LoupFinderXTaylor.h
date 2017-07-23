@@ -42,7 +42,7 @@ public:
 	 *
 	 * \see comments in LoupFinder.
 	 */
-	virtual std::pair<Vector, double> find(const IntervalVector& box, const Vector& x0, double current_loup);
+	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& x0, double current_loup);
 
 	/**
 	 * \brief The NLP problem.

@@ -36,7 +36,7 @@ LoupFinderInHC4::LoupFinderInHC4(const System& sys) : sys(sys), goal_ctr(-1) {
 //    }
 //}
 
-std::pair<Vector, double> LoupFinderInHC4::find(const IntervalVector& box, const Vector& loup_point, double loup) {
+std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
 
 	IntervalVector inbox=box;
 	bool inner_found=true;

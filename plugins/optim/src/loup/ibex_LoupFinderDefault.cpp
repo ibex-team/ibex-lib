@@ -21,9 +21,9 @@ LoupFinderDefault::LoupFinderDefault(const System& sys, bool inHC4) :
 
 }
 
-std::pair<Vector, double> LoupFinderDefault::find(const IntervalVector& box, const Vector& old_loup_point, double old_loup) {
+std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& box, const IntervalVector& old_loup_point, double old_loup) {
 
-	pair<Vector,double> p=make_pair(old_loup_point, old_loup);
+	pair<IntervalVector,double> p=make_pair(old_loup_point, old_loup);
 
 	bool found=false;
 
