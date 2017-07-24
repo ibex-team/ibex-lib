@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
 	_rel_eps_f << "Relative precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_rel_eps_f)) << ".";
 	_abs_eps_f << "Absolute precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_abs_eps_f)) << ".";
 	_eps_h << "Equality relaxation value. Default value is 1e" << round(::log10(NormalizedSystem::default_eps_h)) << ".";
-	_random_seed << "Random seed (useful for reproducibility). Default value is " << Optimizer::default_random_seed << ".";
+	_random_seed << "Random seed (useful for reproducibility). Default value is " << DefaultOptimizer::default_random_seed << ".";
 	_eps_x << "Precision on the variable (**Deprecated**). Default value is 0.";
 
 	args::ArgumentParser parser("********* IbexOpt (defaultoptimizer) *********.", "Solve a Minibex file.");
@@ -118,13 +118,20 @@ int main(int argc, char** argv) {
 				cout << "  rigor mode:\tON\t(feasibility of equalities certified)" << endl;
 		}
 
+		// Fix the random seed for reproducibility.
+		if (random_seed) {
+			if (!quiet)
+				cout << "  random seed:\t" << random_seed.Get() << endl;
+		}
+
 		// Build the default optimizer
 		DefaultOptimizer o(sys,
 				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x,
 				rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f,
 				abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f,
 				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
-				rigor
+				rigor,
+				random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed
 				);
 
 		// This option limits the search time
@@ -141,12 +148,6 @@ int main(int argc, char** argv) {
 			o.trace=trace.Get();
 		}
 
-		// Fix the random seed for reproducibility.
-		if (random_seed) {
-			if (!quiet)
-				cout << "  random seed:\t" << random_seed.Get() << endl;
-			o.random_seed = random_seed.Get();
-		}
 		if (!quiet) {
 			cout << "*******************************************************" << endl << endl;
 		}

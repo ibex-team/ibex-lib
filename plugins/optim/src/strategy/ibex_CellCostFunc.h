@@ -47,7 +47,7 @@ public:
 	 *
 	 * Does nothing (by default).
 	 */
-       virtual void set_loup(double /*lb*/) { }
+	virtual void set_loup(double lb) { }
 
 	/**
 	 * \brief Add backtrackable data required by this cost function
@@ -57,7 +57,7 @@ public:
 	 *
 	 * Does nothing by default.
 	 */
-       virtual void add_backtrackable(Cell& /*root*/) { }
+	virtual void add_backtrackable(Cell& root) { }
 
 	/**
 	 * \brief Set data in OptimData in the cell
@@ -68,13 +68,12 @@ public:
 	 *
 	 * Does nothing (by default).
 	 */
-       virtual void set_optim_data(Cell& c, const System& sys) { }
+	virtual void set_optim_data(Cell& c, const System& sys) { }
 
 	/**
 	 * If the cost depends on the loup.
 	 */
 	bool depends_on_loup;
-
 };
 
 /**

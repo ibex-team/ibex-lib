@@ -26,6 +26,7 @@ namespace ibex {
  * a LP solver. The resulting point is verified a posteriori to
  * be feasible (wrt nonlinear constraint) and a new "loup".
  *
+ * \note Only works with inequality constraints.
  */
 class LoupFinderXTaylor : public LoupFinder {
 public:

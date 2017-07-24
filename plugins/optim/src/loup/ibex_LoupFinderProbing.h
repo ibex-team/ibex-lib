@@ -26,7 +26,7 @@ namespace ibex {
  * 2- intensification (in the current version of the code, only in case
  *    of unconstrained optimization): perform a line probling search.
  *
- * Note: Only works with inequality constraints.
+ * \note Only works with inequality constraints.
  *
  */
 class LoupFinderProbing : public LoupFinder {

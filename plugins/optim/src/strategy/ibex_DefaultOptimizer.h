@@ -30,18 +30,29 @@ public:
 	 * \param eps_x      - Stopping criterion for box splitting (absolute precision)
 	 * \param rel_eps_f  - Relative precision on the objective
 	 * \param abs_eps_f  - Absolute precision on the objective
+	 * \brief Set the random seed.
+	 *
+	 * The sequence of random numbers is reinitialized with
+	 * this seed.
+	 *
+	 * Should be set before a call to optimize(), for reproducibility.
+	 *
+	 * Set by default to #default_random_seed.
 	 */
     DefaultOptimizer(const System& sys,
     		double eps_x=Optimizer::default_eps_x,
     		double rel_eps_f=Optimizer::default_rel_eps_f,
 			double abs_eps_f=Optimizer::default_abs_eps_f,
 			double eps_h=NormalizedSystem::default_eps_h,
-			bool rigor=false);
+			bool rigor=false, double random_seed=default_random_seed);
 
 	/**
 	 * \brief Delete *this.
 	 */
     ~DefaultOptimizer();
+
+	/** Default random seed: 1.0. */
+	static const double default_random_seed;
 
 private:
 

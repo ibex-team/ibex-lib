@@ -24,6 +24,7 @@ namespace ibex {
  * inHC4 algorithm and, in case of success, looks for a point inside
  * the inner box with a #LoupFinderProbing algorithm.
  *
+ * \note Only works with inequality constraints.
  */
 class LoupFinderInHC4 : public LoupFinder {
 public:

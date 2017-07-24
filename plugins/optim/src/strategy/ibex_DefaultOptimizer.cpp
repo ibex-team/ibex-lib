@@ -9,23 +9,26 @@
 //============================================================================
 
 #include "ibex_DefaultOptimizer.h"
-#include "ibex_SmearFunction.h"
+
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcFixPoint.h"
 #include "ibex_CtcPolytopeHull.h"
-#include "ibex_CellStack.h"
+#include "ibex_CellDoubleHeap.h"
+#include "ibex_SmearFunction.h"
+#include "ibex_LoupFinderDefault.h"
+#include "ibex_LoupFinderCertify.h"
+#include "ibex_LinearizerCombo.h"
 #include "ibex_Array.h"
 #include "ibex_Random.h"
 #include "ibex_DefaultStrategy.cpp_"
-#include "ibex_LoupFinderDefault.h"
-#include "ibex_LoupCorrection.h"
-#include "ibex_LinearizerCombo.h"
+
+using namespace std;
 
 namespace ibex {
 
-using namespace std;
+const double DefaultOptimizer::default_random_seed = 1.0;
 
 namespace {
 
@@ -42,20 +45,23 @@ ExtendedSystem& get_ext_sys(const System& sys, double eq_prec) {
 
 }
 
-DefaultOptimizer::DefaultOptimizer(const System& _sys, double eps_x, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor) :
-		Optimizer(_sys,
+DefaultOptimizer::DefaultOptimizer(const System& _sys, double eps_x, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, double random_seed) :
+		Optimizer(_sys.nb_var,
 			  ctc(_sys,get_ext_sys(_sys,NormalizedSystem::default_eps_h),eps_x), // warning: we don't know which argument is evaluated first
 			  rec(new SmearSumRelative(get_ext_sys(_sys,NormalizedSystem::default_eps_h),eps_x)),
 			  rec(
 					  rigor?
-							  (LoupFinder*) new LoupCorrection(_sys,*new LoupFinderDefault(*new NormalizedSystem(_sys,eps_h))) :
+							  (LoupFinder*) new LoupFinderCertify(_sys,*new LoupFinderDefault(*new NormalizedSystem(_sys,eps_h))) :
 
 							  (LoupFinder*) new LoupFinderDefault(*new NormalizedSystem(_sys,eps_h))
 			  ), //get_ext_sys(_sys,default_eps_h))),
+			  *new CellDoubleHeap(_sys),
 			  get_ext_sys(_sys,NormalizedSystem::default_eps_h).goal_var(),
-			  eps_x, rel_eps_f, abs_eps_f, eps_h) {
+			  eps_x, rel_eps_f, abs_eps_f) {
   
 	data = *memory(); // keep track of my data
+
+	RNG::srand(random_seed);
 
 	*memory() = NULL; // reset (for next DefaultOptimizer to be created)
 }

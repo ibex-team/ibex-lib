@@ -25,6 +25,8 @@ namespace ibex {
  * and, in case of success, looks for a point inside
  * the inner box with a #LoupFinderProbing algorithm.
  *
+ * \note Only works with inequality constraints.
+ *
  */
 class LoupFinderFwdBwd : public LoupFinder {
 public:

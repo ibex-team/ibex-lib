@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_CtcPolytopeHull.h"
-
 #include "ibex_LinearizerFixed.h"
 
 using namespace std;
@@ -17,33 +16,32 @@ using namespace std;
 namespace ibex {
 
 namespace {
+
 class PolytopeHullEmptyBoxException { };
+
 }
+
+#ifndef  _IBEX_WITH_NOLP_
 
 CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(lr.nb_var()), lr(lr),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
+		mylinearsolver(nb_var, max_iter, time_out, eps),
 		contracted_vars(BitSet::all(nb_var)), own_lr(false) {
-
-	 mylinearsolver = new LinearSolver(nb_var, max_iter, time_out, eps);
 
 }
 
 CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(A.nb_cols()), lr(*new LinearizerFixed(A,b)),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
+		mylinearsolver(nb_var, max_iter, time_out, eps),
 		contracted_vars(BitSet::all(nb_var)), own_lr(true) {
-
-	 mylinearsolver = new LinearSolver(nb_var, max_iter, time_out, eps);
 
 }
 
 CtcPolytopeHull::~CtcPolytopeHull() {
-	if (mylinearsolver!=NULL) delete mylinearsolver;
 	if (own_lr) delete &lr;
 }
-
-#ifndef  _IBEX_WITH_NOLP_
 
 void CtcPolytopeHull::contract(IntervalVector& box) {
 
@@ -54,7 +52,7 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 	try {
 
 		//returns the number of constraints in the linearized system
-		int cont = lr.linearize(box, *mylinearsolver);
+		int cont = lr.linearize(box, mylinearsolver);
 
 		//cout << "[polytope-hull] end of LR" << endl;
 
@@ -64,19 +62,18 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 		optimizer(box);
 
-		//mylinearsolver->writeFile("LP.lp");
+		//mylinearsolver.writeFile("LP.lp");
 		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
-		mylinearsolver->clean_ctrs();
+		mylinearsolver.clean_ctrs();
 	}
 	catch(LPException&) {
-		mylinearsolver->clean_ctrs();
+		mylinearsolver.clean_ctrs();
 	}
 	catch(PolytopeHullEmptyBoxException& e) {
 		box.set_empty(); // empty the box before exiting
-		mylinearsolver->clean_ctrs();
+		mylinearsolver.clean_ctrs();
 	}
-
 }
 
 void CtcPolytopeHull::set_contracted_vars(const BitSet& vars) {
@@ -88,7 +85,6 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 	Interval opt(0.0);
 	int* inf_bound = new int[nb_var]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted, call to simplex useless (cf Baharev)
 	int* sup_bound = new int[nb_var]; // indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
-
 
 	for (int i=0; i<nb_var; i++) {
 
@@ -105,9 +101,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 	int infnexti=0; // the bound to be contracted contract  infnexti=0 for the lower bound, infnexti=1 for the upper bound
 	LinearSolver::Status_Sol stat=LinearSolver::UNKNOWN;
 
-
 	// Update the bounds the variables
-	mylinearsolver->set_bounds(box);
+	mylinearsolver.set_bounds(box);
 
 	for(int ii=0; ii<(2*nb_var); ii++) {  // at most 2*n calls
 
@@ -118,7 +113,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{
 			inf_bound[i]=1;
-			stat = mylinearsolver->solve_var(LinearSolver::MINIMIZE, i, opt);
+			stat = mylinearsolver.solve_var(LinearSolver::MINIMIZE, i, opt);
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
 			if (stat == LinearSolver::OPTIMAL_PROVED) {
 				if(opt.lb()>box[i].ub()) {
@@ -129,7 +124,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 				if(opt.lb() > box[i].lb()) {
 					box[i]=Interval(opt.lb(),box[i].ub());
-					mylinearsolver->set_bounds_var(i,box[i]);
+					mylinearsolver.set_bounds_var(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {
@@ -166,7 +161,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		}
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
-			stat= mylinearsolver->solve_var(LinearSolver::MAXIMIZE, i, opt);
+			stat= mylinearsolver.solve_var(LinearSolver::MAXIMIZE, i, opt);
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << " opt=" << opt << endl;
 			if( stat == LinearSolver::OPTIMAL_PROVED) {
 				if(opt.ub() <box[i].lb()) {
@@ -177,7 +172,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 				if (opt.ub() < box[i].ub()) {
 					box[i] =Interval( box[i].lb(), opt.ub());
-					mylinearsolver->set_bounds_var(i,box[i]);
+					mylinearsolver.set_bounds_var(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {
@@ -214,10 +209,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 	}
 	delete[] inf_bound;
 	delete[] sup_bound;
-
-
 }
-
 
 bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, int & infnexti, int* inf_bound, int* sup_bound) {
 
@@ -226,14 +218,14 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, in
 	try {
 		// the primal solution : used by choose_next_variable
 		Vector primal_solution(nb_var);
-		mylinearsolver->get_primal_sol(primal_solution);
+		mylinearsolver.get_primal_sol(primal_solution);
 		//cout << " primal " << primal_solution << endl;
 
 		// The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
 		// and updating the indicators if a bound has been found feasible (with the precision prec_bound)
 		// called only when a primal solution is found by the LP solver (use of primal_solution)
 
-		// double prec_bound = mylinearsolver->getEpsilon(); // relative precision for the indicators TODO change with the precision of the optimizer ??
+		// double prec_bound = mylinearsolver.getEpsilon(); // relative precision for the indicators TODO change with the precision of the optimizer ??
 		double prec_bound = 1.e-8; // relative precision for the indicators      :  compatibility for testing  BNE
 		double delta=1.e100;
 		double deltaj=delta;
@@ -281,14 +273,21 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, in
 		}
 	}
 	return found;
-
 }
 
-#else /// end _IBEX_WITH_NOLP_
+#else
 
+CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
+		Ctc(lr.nb_var()) { }
+
+CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
+		Ctc(A.nb_cols()) { }
+
+CtcPolytopeHull::~CtcPolytopeHull() { }
+
+void CtcPolytopeHull::set_contracted_vars(const BitSet& vars) { }
 
 void CtcPolytopeHull::contract(IntervalVector& box) { }
-
 
 #endif /// end _IBEX_WITH_NOLP_
 

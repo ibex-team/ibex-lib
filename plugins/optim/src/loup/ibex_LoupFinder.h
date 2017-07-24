@@ -21,7 +21,7 @@ namespace ibex {
 /**
  * \ingroup optim
  *
- * \brief Upper-bounding algorithm.
+ * \brief Root class of all upper-bounding algorithms.
  *
  * A LoupFinder object is an algorithm that looks for a
  * new "loup", that is, a feasible point x{k+1} such that f(x{k+1})
@@ -48,8 +48,8 @@ public:
 	 * Note that xk is not necessarily inside the box.
 	 *
 	 * \param box        - the box where x{k+1} is searched
-	 * \param loup_point - x{k}
-	 * \param loup       - f(x{k})
+	 * \param loup_point - an enclosure of x{k}
+	 * \param loup       - (an upper bound of) f(x{k})
 	 * \return             <x{k+1},f(x{k+1})>
 	 * \throws             NotFound in case of failure.
 	 */

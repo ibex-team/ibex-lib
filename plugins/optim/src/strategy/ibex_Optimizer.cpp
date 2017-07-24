@@ -11,10 +11,12 @@
 #include "ibex_Timer.h"
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
+#include "ibex_Backtrackable.h"
 #include "ibex_OptimData.h"
 
 #include <float.h>
 #include <stdlib.h>
+#include <iomanip>
 
 using namespace std;
 
@@ -23,7 +25,6 @@ namespace ibex {
 const double Optimizer::default_eps_x = 0;
 const double Optimizer::default_rel_eps_f = 1e-03;
 const double Optimizer::default_abs_eps_f = 1e-07;
-const double Optimizer::default_random_seed = 1.0;
 
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;
@@ -41,27 +42,24 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 	}
 }
 
-Optimizer::Optimizer(const System& user_sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
-		int goal_var, double eps_x, double rel_eps_f, double abs_eps_f,
-		int critpr,CellCostFunc::criterion crit2) :
-                				user_sys(user_sys),
-                				n(user_sys.nb_var), goal_var(goal_var),
-                				ctc(ctc), bsc(bsc), loup_finder(finder),
-                				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
+Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
+		CellBufferOptim& buffer,
+		int goal_var, double eps_x, double rel_eps_f, double abs_eps_f) :
+                				n(n), goal_var(goal_var),
+                				ctc(ctc), bsc(bsc), loup_finder(finder), buffer(buffer),
                 				eps_x(eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
                 				trace(false), timeout(-1),
                 				status(SUCCESS),
                 				//kkt(normalized_user_sys),
 								uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
-                				loup_point(n), initial_loup(POS_INFINITY), loup_changed(false), nb_cells(0), time(0) {
+                				loup_point(n), initial_loup(POS_INFINITY), loup_changed(false),
+								nb_cells(0), time(0) {
 
 	if (trace) cout.precision(12);
 }
 
 Optimizer::~Optimizer() {
-	buffer.flush();
-	delete &buffer.cost1();
-	delete &buffer.cost2();
+
 }
 
 // compute the value ymax (decreasing the loup with the precision)
@@ -123,7 +121,7 @@ void Optimizer::update_uplo() {
 				uplo = new_uplo;
 			}
 		}
-		else uplo= uplo_of_epsboxes;
+		else uplo = uplo_of_epsboxes;
 	}
 	else if (buffer.empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
@@ -149,7 +147,7 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 	if (uplo_of_epsboxes > ymin) {
 		uplo_of_epsboxes = ymin;
 		if (trace) {
-			cout << "uplo_of_epsboxes:" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
+			cout << " unprocessable tiny box: now uplo<=" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
 		}
 	}
 }
@@ -161,10 +159,6 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 	if (c.box.is_empty()) {
 		delete &c;
 	} else {
-		// we know cost1() does not require OptimData
-		buffer.cost2().set_optim_data(c,user_sys);
-
-		// the cell is put into the 2 heaps
 		buffer.push(&c);
 
 		nb_cells++;
@@ -252,8 +246,6 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 
-	RNG::srand(random_seed);
-
 	loup=obj_init_bound;
 
 	// Just to initialize the "loup" for the buffer
@@ -274,8 +266,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);
 
-	// add data "pu" and "pf" (if required)
-	buffer.cost2().add_backtrackable(*root);
+	// add data required by the buffer
+	buffer.add_backtrackable(*root);
 
 	// add data required by optimizer + KKT contractor
 //	root->add<EntailedCtr>();
@@ -297,7 +289,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	try {
 		while (!buffer.empty()) {
 		  //			if (trace >= 2) cout << " buffer " << buffer << endl;
-		  if (trace >= 2) buffer.print(cout);
+		  if (trace >= 2) cout << buffer;
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 
 			loup_changed=false;

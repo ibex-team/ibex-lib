@@ -7,8 +7,8 @@
 // Created     : Jul 20, 2017
 //============================================================================
 
-#ifndef __IBEX_LOUP_CORRECTION_H__
-#define __IBEX_LOUP_CORRECTION_H__
+#ifndef __IBEX_LOUP_FINDER_CERTIFY_H__
+#define __IBEX_LOUP_FINDER_CERTIFY_H__
 
 #include "ibex_LoupFinder.h"
 #include "ibex_Exception.h"
@@ -18,22 +18,29 @@
 namespace ibex {
 
 /**
- * \brief Find a certified point
+ * \brief Certify a loup point.
  *
- * a loup point will not be safe (pseudo loup is not the real loup)
-
-	* Loup correction (certification) algorithm.
+ * This finder works like a post-processing: it first runs an unsafe
+ * finder working on relaxed equalities. The "pseudo" loup found
+ * is then made rigorous by running a Newton-inflation algorithm.
  *
+ * This results in a box that rigorously includes a feasible
+ * point.
  */
-class LoupCorrection : public LoupFinder {
+class LoupFinderCertify : public LoupFinder {
 public:
+
 	/**
-	 * \brief Raised when no loup is found.
+	 * \param sys    - The real system (that is, without relaxation).
+	 * \param finder - A loup finder for the relaxed system.
 	 */
-	class NotFound : Exception { };
+	LoupFinderCertify(const System& sys, LoupFinder& finder);
 
-	LoupCorrection(const System& sys, LoupFinder& finder, bool trace=false);
-
+	/**
+	 * \brief Find a new loup in a given box.
+	 *
+	 * \see comments in LoupFinder.
+	 */
 	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
 
 protected:
@@ -48,11 +55,12 @@ protected:
 	 */
 	const bool has_equality;
 
+	/**
+	 * \brief Finder for the relaxed system.
+	 */
 	LoupFinder& finder;
-
-	bool trace;
 };
 
 } /* namespace ibex */
 
-#endif /* __IBEX_LOUP_CORRECTION_H__ */
+#endif /* __IBEX_LOUP_FINDER_CERTIFY_H__ */

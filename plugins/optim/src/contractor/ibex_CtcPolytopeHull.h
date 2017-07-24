@@ -56,6 +56,11 @@ public:
 			Interval limit_diam=LinearSolver::default_limit_diam_box);
 
 	/**
+	 * \brief Delete this.
+	 */
+	virtual ~CtcPolytopeHull();
+
+	/**
 	 * \brief Contract the box.
 	 *
 	 * Linearize the system and performs 2n calls to Simplex in order to reduce
@@ -69,31 +74,25 @@ public:
 	 * This allows, for example, to only contract the variable corresponding
 	 * to the objective in an extended system.
 	 *
-	 * TODO: allow to specify bounds. Update the optimizer so that
-	 * only the lower bound of the goal variable is contracted.
+	 * TODO: allow to specify (left/right) bounds and update the default
+	 * optimizer contractor strategy so that only the lower bound of the
+	 * goal variable is contracted.
 	 */
 	void set_contracted_vars(const BitSet& vars);
 
-	/**
-	 * \brief Delete this.
-	 */
-	virtual ~CtcPolytopeHull();
+#ifndef _IBEX_WITH_NOLP_
 
 protected:
 
-#ifndef _IBEX_WITH_NOLP_
 	/**
 	 * Achterberg heuristic for choosing the next variable  and which bound to optimize
 	 */
 	bool choose_next_variable(IntervalVector &box,  int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
 
 	/**
-	 * TODO: add comment
+	 * TODO: add comment.
 	 */
 	void optimizer(IntervalVector &box);
-
-
-#endif /// end _IBEX_WITH_NOLP_
 
 	/**
 	 * \brief The linearization technique
@@ -108,7 +107,7 @@ protected:
 	/**
 	 * \brief  The linear solver that will be used
 	 */
-	LinearSolver *mylinearsolver;
+	LinearSolver mylinearsolver;
 
 	/**
 	 * \brief Contracted variables (by default: all)
@@ -117,6 +116,8 @@ protected:
 
 private:
 	bool own_lr; // for memory cleanup
+
+#endif /// end _IBEX_WITH_NOLP_
 };
 
 } // end namespace ibex

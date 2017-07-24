@@ -5,15 +5,16 @@
  *      Author: gilles
  */
 
-#include "ibex_LoupCorrection.h"
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_FncActivation.h"
+#include "ibex_LoupFinderCertify.h"
+#include "ibex_NormalizedSystem.h"
 
 namespace ibex {
 
 using namespace std;
 
-LoupCorrection::LoupCorrection(const System& sys, LoupFinder& finder, bool trace) : sys(sys), has_equality(false), finder(finder), trace(trace) {
+LoupFinderCertify::LoupFinderCertify(const System& sys, LoupFinder& finder) : sys(sys), has_equality(false), finder(finder) {
 	// ==== check if the system contains equalities ====
 	for (int i=0; i<sys.ctrs.size(); i++) {
 		if (sys.ctrs[i].op==EQ) {
@@ -24,7 +25,7 @@ LoupCorrection::LoupCorrection(const System& sys, LoupFinder& finder, bool trace
 }
 
 //pair<IntervalVector, double> LoupCorrection::find(double loup, const Vector& loup_point, double pseudo_loup) {
-std::pair<IntervalVector, double> LoupCorrection::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
+std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
 
 	// may throw NotFound
 	pair<IntervalVector,double> p=finder.find(box,loup_point,loup);
@@ -32,8 +33,9 @@ std::pair<IntervalVector, double> LoupCorrection::find(const IntervalVector& box
 	if (!has_equality)
 		return p;
 
-	// todo : change hard-coded value
-	FncActivation af(sys,p.first.lb(),1e-8,trace);
+	// TODO : how to fix detection threshold in a more adaptative way?
+	//        maybe, we should replace eps_h by something else!
+	FncActivation af(sys,p.first.lb(),NormalizedSystem::default_eps_h);
 
 	if (af.image_dim()==0) {
 		return p;
@@ -44,8 +46,7 @@ std::pair<IntervalVector, double> LoupCorrection::find(const IntervalVector& box
 	// ====================================================
 	// solution #1: we inflate the loup-point and
 	//              call Hansen test in contracting mode.
-	// TODO: replace default_equ_eps by something else!
-	//	epsbox.inflate(default_equ_eps);
+	//	epsbox.inflate(NormalizedSystem::default_eps_h);
 	//	PdcHansenFeasibility pdc(af, false);
 	// ====================================================
 

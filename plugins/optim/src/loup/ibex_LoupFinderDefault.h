@@ -19,14 +19,19 @@ namespace ibex {
 /**
  * \ingroup optim
  *
- * \brief Default upper-bounding algorithm.
+ * \brief Default upper-bounding algorithm (for inequalities only).
  *
- * The algorithm uses two upperbounding techniques:
- * - one based on inner box: simple sampling/line probing or in-HC4
- * - one based on inner polytope: XTaylor restriction.
+ * The algorithm uses two upper-bounding techniques:
+ * - one based on the search of an inner box:
+ *      simple sampling/line probing or in-HC4
+ * - one based on the search of an inner polytope:
+ *      XTaylor restriction.
  *
  * Note: currently, line probing is disabled unless there is
- * a constraint-free NLP problem (a simple sampling is done).
+ * a constraint-free NLP problem (a simple sampling is done
+ * otherwise).
+ *
+ * \note Only works with inequality constraints.
  */
 class LoupFinderDefault : public LoupFinder {
 public:

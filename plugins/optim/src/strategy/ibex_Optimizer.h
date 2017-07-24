@@ -5,23 +5,18 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
-// Last Update : May 14, 2012
+// Last Update : Jul 24, 2017
 //============================================================================
 
 #ifndef __IBEX_OPTIMIZER_H__
 #define __IBEX_OPTIMIZER_H__
 
-#include "ibex_LinearizerCombo.h"
-#include "ibex_LoupFinder.h"
-#include "ibex_LoupCorrection.h"
+#include "ibex_Ctc.h"
 #include "ibex_Bsc.h"
-#include "ibex_Backtrackable.h"
-#include "ibex_CellCostFunc.h"
-#include "ibex_CellDoubleHeap.h"
-#include "ibex_NormalizedSystem.h"
+#include "ibex_LoupFinder.h"
+#include "ibex_CellBufferOptim.h"
 //#include "ibex_EntailedCtr.h"
 #include "ibex_CtcKhunTucker.h"
-#include "ibex_Random.h"
 
 namespace ibex {
 
@@ -34,7 +29,7 @@ namespace ibex {
  *
  * \brief Global Optimizer.
  *
- * This class is an implementation of the global optimization algorithm described
+ * This class is an (improved) implementation of the global optimization algorithm described
  * in the AAAI'11 paper <i>Inner Regions and Interval Linearizations for Global Optimization</i>
  * by Trombettoni et al.
  *
@@ -42,7 +37,15 @@ namespace ibex {
  * and "uplo" means "uppermost lower bound" of the criterion.
  */
 class Optimizer {
+
 public:
+
+	/**
+	 * \brief Return status of the optimizer
+	 */
+	typedef enum {SUCCESS, INFEASIBLE, NO_FEASIBLE_FOUND, UNBOUNDED_OBJ, TIME_OUT, UNREACHED_PREC} Status;
+
+
 	/**
 	 *  \brief Create an optimizer.
 	 *
@@ -57,8 +60,6 @@ public:
 	 *   \pram  abs_eps_f     - absolute precision of the objective (the optimizer stops once reached).
 	 *   \param eps_h         - thickness of equations when relaxed to inequalities
 	 *   \param rigor         - look for points that strictly satisfy equalities. By default: false
-	 *   \param critpr        - probability to choose the second criterion in node selection; integer in [0,100]. By default 50
-	 *   \param crit          - second criterion in node selection (the first criterion is the minimum of the objective estimate). default value CellHeapOPtim::UB
 	 *
 *
 	*
@@ -84,23 +85,16 @@ public:
 	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
-	Optimizer(const System& sys, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
+	Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder, CellBufferOptim& buffer,
 			int goal_var,
 			double eps_x=default_eps_x,
 			double rel_eps_f=default_rel_eps_f,
-			double abs_eps_f=default_abs_eps_f,
-			int critpr=50,
-			CellCostFunc::criterion crit= CellCostFunc::UB);
+			double abs_eps_f=default_abs_eps_f);
 
 	/**
 	 * \brief Delete *this.
 	 */
 	virtual ~Optimizer();
-
-	/**
-	 * \brief Return status of the optimizer
-	 */
-	typedef enum {SUCCESS, INFEASIBLE, NO_FEASIBLE_FOUND, UNBOUNDED_OBJ, TIME_OUT, UNREACHED_PREC} Status;
 
 	/**
 	 * \brief Run the optimization.
@@ -128,6 +122,8 @@ public:
 	 */
 	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
+	/* =========================== Output ============================= */
+
 	/**
 	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
 	 *
@@ -140,84 +136,6 @@ public:
 	 */
 	void report(bool verbose=true);
 	
-	/**
-	 * \brief The original system
-	 *
-	 * \warning kept by reference.
-	 */
-	const System& user_sys;
-
-	/** Number of variables. */
-	const int n;
-
-	const int goal_var;
-
-
-	/** Contractor for the extended system
-	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
-	Ctc& ctc;
-
-	/** Bisector. */
-	Bsc& bsc;
-
-	/** Loup finder algorithm. */
-	LoupFinder& loup_finder;
-
-	/** Cell buffers.
-	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,
-	the second one to minimize another criterion (by default the maximum of the objective estimate).
-	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
-	 */
-	CellDoubleHeap buffer;
-
-	/** Precision (bisection control) */
-	const double eps_x;
-
-	/** Relative precision on the objective */
-	const double rel_eps_f;
-
-	/** Absolute precision on the objective */
-	const double abs_eps_f;
-
-	/** Trace activation flag.
-	 * The value can be fixed by the user. By default: 0  nothing is printed
-	 1 for printing each better found feasible point
-	  2 for printing each handled node */
-	int trace;
-
-	/**
-	 * \brief Time limit.
-	 *
-	 * Maximum CPU time used by the strategy.
-	 * This parameter allows to bound time consumption.
-	 * The value can be fixed by the user.
-	 */
-	double timeout;
-
-	/**
-	 * \brief Random seed.
-	 *
-	 * The sequence of random numbers is reinitialized with
-	 * this seed at the beginning of optimize().
-	 *
-	 * Can be set by the user, for reproducibility.
-	 *
-	 * Set by default to 1.0.
-	 */
-	double random_seed;
-
-	/** Default bisection precision: 0. */
-	static const double default_eps_x;
-
-	/** Default goal relative precision: 1e-3. */
-	static const double default_rel_eps_f;
-
-	/** Default goal absolute precision: 1e-7. */
-	static const double default_abs_eps_f;
-
-	/** Default random seed: 1.0. */
-	static const double default_random_seed;
-
 	/** Get return status of last call to optimize(...) */
 	Status get_status() const;
 
@@ -276,6 +194,72 @@ public:
 	 */
 	double get_obj_abs_prec() const;
 
+	/** Number of variables. */
+	const int n;
+
+	/** Index of the variable corresponding to the objective. */
+	const int goal_var;
+
+	/**
+	 * Contractor for the extended system
+	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0).
+	 */
+	Ctc& ctc;
+
+	/**
+	 * Bisector.
+	 *
+	 * Must work on extended boxes.
+	 */
+	Bsc& bsc;
+
+	/**
+	 * Loup finder algorithm.
+	 *
+	 * Must work on the original system.
+	 */
+	LoupFinder& loup_finder;
+
+	/**
+	 * Cell buffer.
+	 */
+	CellBufferOptim& buffer;
+
+	/* =========================== Settings ============================= */
+	/** Precision (bisection control) */
+	const double eps_x;
+
+	/** Default bisection precision: 0. */
+	static const double default_eps_x;
+
+	/** Relative precision on the objective */
+	const double rel_eps_f;
+
+	/** Default goal relative precision: 1e-3. */
+	static const double default_rel_eps_f;
+
+	/** Absolute precision on the objective */
+	const double abs_eps_f;
+
+	/** Default goal absolute precision: 1e-7. */
+	static const double default_abs_eps_f;
+
+	/** Trace activation flag.
+	 * The value can be fixed by the user. By default: 0  nothing is printed
+	 1 for printing each better found feasible point
+	  2 for printing each handled node */
+	int trace;
+
+	/**
+	 * \brief Time limit.
+	 *
+	 * Maximum CPU time used by the strategy.
+	 * This parameter allows to bound time consumption.
+	 * The value can be fixed by the user.
+	 */
+	double timeout;
+
+
 protected:
 
 	/**
@@ -319,23 +303,10 @@ protected:
 	 */
 	void update_uplo();
 
-
 	/**
 	 * \brief Main procedure for updating the loup.
 	 */
 	bool update_loup(const IntervalVector& box);
-
-
-	/*=======================================================================================================*/
-	/*             Functions to update the loup (see ibex_OptimProbing and ibex_OptimSimplex)                */
-	/*=======================================================================================================*/
-
-	/**
-	 * Look for a loup box (in rigor mode) starting from a pseudo-loup.
-	 *
-	 * Start from the last loup point found in relaxed mode.
-	 */
-	bool update_real_loup();
 
 	/*=======================================================================================================*/
 	/*                                Functions to manage the extended CSP                                   */
@@ -372,9 +343,6 @@ private:
 
 	//!! warning: sys.box should be properly set before call to constructor !!
 	//CtcKhunTucker kkt;
-
-	/** Rigor mode. */
-	//const bool rigor;
 
 	/* Remember return status of the last optimization. */
 	Status status;
