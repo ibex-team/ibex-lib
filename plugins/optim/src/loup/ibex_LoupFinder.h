@@ -56,6 +56,17 @@ public:
 	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup)=0;
 
 	/**
+	 * \brief True if equalities are accepted.
+	 *
+	 * This function is abstract and may be overriden in the subclass.
+	 *
+	 * By default: return false.
+	 */
+	virtual bool rigorous() const {
+		return false;
+	}
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~LoupFinder();

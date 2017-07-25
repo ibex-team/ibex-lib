@@ -96,7 +96,7 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitS
 
 	assert(m<=f.image_dim());
 
-	assert(J.nb_rows()==f.expr().dim.vec_size());
+	assert(J.nb_rows()==components.size());
 	assert(J.nb_cols()==n);
 	assert(box.size()==n);
 	assert(!components.empty());

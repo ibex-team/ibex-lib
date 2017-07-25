@@ -46,16 +46,16 @@ public:
 	LoupFinderDefault(const System& sys, bool inHC4=true);
 
 	/**
+	 * \brief Delete this.
+	 */
+	virtual ~LoupFinderDefault();
+
+	/**
 	 * \brief Find a new loup in a given box.
 	 *
 	 * \see comments in LoupFinder.
 	 */
 	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
-
-	/**
-	 * \brief Delete this.
-	 */
-	virtual ~LoupFinderDefault();
 
 	/*
 	 * Loup finder using inner boxes.

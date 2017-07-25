@@ -18,6 +18,8 @@
 namespace ibex {
 
 /**
+ * \ingroup optim
+ *
  * \brief Certify a loup point.
  *
  * This finder works like a post-processing: it first runs an unsafe
@@ -42,6 +44,13 @@ public:
 	 * \see comments in LoupFinder.
 	 */
 	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
+
+	/**
+	 * \brief Return true.
+	 */
+	virtual bool rigorous() const {
+		return true;
+	}
 
 protected:
 

@@ -78,8 +78,15 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 		loup_point = p.first;
 		loup = p.second;
 
-		if (trace)
-			cout << setprecision (12) << " loup update=" << loup << " loup point=" << loup_point << endl;
+		if (trace) {
+			cout << "                    ";
+			cout << "\033[32m loup= " << loup << "\033[0m" << endl;
+//			cout << " loup point=";
+//			if (loup_finder.rigorous())
+//				cout << loup_point << endl;
+//			else
+//				cout << loup_point.lb() << endl;
+		}
 		return true;
 
 	} catch(LoupFinder::NotFound&) {
@@ -119,6 +126,9 @@ void Optimizer::update_uplo() {
 		if (new_uplo < uplo_of_epsboxes) {
 			if (new_uplo > uplo) {
 				uplo = new_uplo;
+
+				if (trace)
+					cout << "\033[33m uplo= " << uplo << "\033[0m" << endl;
 			}
 		}
 		else uplo = uplo_of_epsboxes;
@@ -288,9 +298,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	try {
 		while (!buffer.empty()) {
-		  //			if (trace >= 2) cout << " buffer " << buffer << endl;
+
 		  if (trace >= 2) cout << buffer;
-			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 
 			loup_changed=false;
 
@@ -328,7 +337,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 						if (trace) cout << " infinite value for the minimum " << endl;
 						break;
 					}
-					if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo<< endl;
 				}
 				update_uplo();
 				time_limit_check(); // TODO: not reentrant
@@ -338,7 +346,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 				update_uplo_of_epsboxes((c->box)[goal_var].lb());
 				buffer.pop();
 				delete c; // deletes the cell.
-				//if (trace>=1) cout << "epsilon-box found: uplo cannot exceed " << uplo_of_epsboxes << endl;
 				update_uplo(); // the heap has changed -> recalculate the uplo (eg: if not in best-first search)
 
 			}
@@ -413,7 +420,12 @@ void Optimizer::report(bool verbose) {
 		if (loup==initial_loup)
 			cout << " no feasible point found " << endl;
 		else
-			cout << " best feasible point: " << loup_point << endl;
+			cout << " best feasible point: ";
+
+		if (loup_finder.rigorous())
+			cout << loup_point << endl;
+		else
+			cout << loup_point.lb() << endl;
 
 	}
 	cout << " cpu time used: " << time << "s." << endl;

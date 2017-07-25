@@ -17,14 +17,14 @@ namespace ibex {
 /**
  * \ingroup optim
  *
- * \brief Default cell buffer used for optimization.
+ * \brief Cell buffer for optimization.
  *
- * This is a double-heap buffer where the first heap criterion
- * is LB (lower bound of the objective domain) and the second
- * heap criterion is set by the user (default is UB).
+ * This specialized cell buffer has a "cost" function
+ * concept, associated to each cell. It can therefore
+ * return the best cell (minimum cost) and contracts
+ * the buffer (remove all the cells) which cost is
+ * greater than a given value (upper bounding).
  *
- * The second one is chosen at each node with a probability
- * crit2_pr/100 (default value is crit2_pr=50).
  */
 class CellBufferOptim : public CellBuffer {
 public:
@@ -39,8 +39,7 @@ public:
 	 * \brief Contract the heap
 	 *
 	 * Removes (and deletes) from the heap all the cells
-	 * with a cost (according to the cost function of the
-	 * first heap) greater than \a loup.
+	 * with a cost greater than \a loup.
 	 */
 	virtual void contract(double loup)=0;
 

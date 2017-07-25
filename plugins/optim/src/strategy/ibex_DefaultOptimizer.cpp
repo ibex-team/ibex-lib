@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Jul 21, 2017
+// Last Update : Jul 25, 2017
 //============================================================================
 
 #include "ibex_DefaultOptimizer.h"
@@ -34,48 +34,65 @@ namespace {
 
 const double default_relax_ratio = 0.2;
 
-// This function is necessary because we need
-// the extended system "ext_sys" to build
-// two arguments of the base class constructor (ctc and bsc)
+int extended_system = -1;   // index in memory (-1=none)
+int normalized_system = -1; // index in memory (-1=none)
+
+// The two next functions are necessary because we need
+// the normalized and extended system to build
+// arguments of the base class constructor (ctc, bsc, loup finder, etc.)
 // and we don't know which argument is evaluated first
-ExtendedSystem& get_ext_sys(const System& sys, double eq_prec) {
-	if (!(*memory())->sys.empty()) return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
-	else return rec(new ExtendedSystem(sys,eq_prec));
+
+NormalizedSystem& get_norm_sys(const System& sys, double eps_h) {
+	if (normalized_system>0)
+		return (NormalizedSystem&) *((*memory())->sys[normalized_system]); // already built and recorded
+	else {
+		normalized_system = (*memory())->sys.size();
+		return rec(new NormalizedSystem(sys,eps_h));
+	}
+}
+
+ExtendedSystem& get_ext_sys(const System& sys, double eps_h) {
+	if (extended_system>0)
+		return (ExtendedSystem&) *((*memory())->sys[extended_system]); // already built and recorded
+	else {
+		extended_system = (*memory())->sys.size();
+		return rec(new ExtendedSystem(sys,eps_h));
+	}
 }
 
 }
 
-DefaultOptimizer::DefaultOptimizer(const System& _sys, double eps_x, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, double random_seed) :
-		Optimizer(_sys.nb_var,
-			  ctc(_sys,get_ext_sys(_sys,NormalizedSystem::default_eps_h),eps_x), // warning: we don't know which argument is evaluated first
-			  rec(new SmearSumRelative(get_ext_sys(_sys,NormalizedSystem::default_eps_h),eps_x)),
-			  rec(
-					  rigor?
-							  (LoupFinder*) new LoupFinderCertify(_sys,*new LoupFinderDefault(*new NormalizedSystem(_sys,eps_h))) :
-
-							  (LoupFinder*) new LoupFinderDefault(*new NormalizedSystem(_sys,eps_h))
-			  ), //get_ext_sys(_sys,default_eps_h))),
-			  *new CellDoubleHeap(_sys),
-			  get_ext_sys(_sys,NormalizedSystem::default_eps_h).goal_var(),
-			  eps_x, rel_eps_f, abs_eps_f) {
+DefaultOptimizer::DefaultOptimizer(const System& sys, double eps_x, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, double random_seed) :
+		Optimizer(sys.nb_var,
+			  ctc(get_ext_sys(sys,eps_h)), // warning: we don't know which argument is evaluated first
+			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x)),
+			  rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(get_norm_sys(sys,eps_h)))) :
+						 (LoupFinder*) new LoupFinderDefault(get_norm_sys(sys,eps_h))),
+			  (CellBufferOptim&) rec(new CellDoubleHeap(sys)),
+			  get_ext_sys(sys,eps_h).goal_var(),
+			  eps_x,
+			  rel_eps_f,
+			  abs_eps_f) {
   
 	data = *memory(); // keep track of my data
 
 	RNG::srand(random_seed);
 
-	*memory() = NULL; // reset (for next DefaultOptimizer to be created)
+	/* reset (for next DefaultOptimizer to be created) */
+	*memory() = NULL;
+	extended_system = -1;
+	normalized_system = -1;
 }
 
-Ctc&  DefaultOptimizer::ctc(const System& sys, const System& ext_sys, double prec) {
+Ctc&  DefaultOptimizer::ctc(const System& ext_sys) {
 	Array<Ctc> ctc_list(3);
 
-	// first contractor on ext_sys : incremental hc4  ratio propag 0.01
+	// first contractor on ext_sys : incremental HC4 (propag ratio=0.01)
 	ctc_list.set_ref(0, rec(new CtcHC4 (ext_sys.ctrs,0.01,true)));
-	// second contractor on ext_sys : acid (hc4)   with incremental hc4  ratio propag 0.1
+	// second contractor on ext_sys : "Acid" with incremental HC4 (propag ratio=0.1)
 	ctc_list.set_ref(1, rec(new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys.ctrs,0.1,true)),true)));
-	// the last contractor is CtcXNewtonIter  with rfp=0.2 and rfp2=0.2
-	// the limits for calling soplex are the default values 1e6 for the derivatives and 1e6 for the domains : no error found with these bounds
-	if (sys.nb_ctr > 0) {
+	// the last contractor is "XNewton"
+	if (ext_sys.nb_ctr > 1) {
 		ctc_list.set_ref(2,rec(new CtcFixPoint
 				(rec(new CtcCompo(
 						rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))),

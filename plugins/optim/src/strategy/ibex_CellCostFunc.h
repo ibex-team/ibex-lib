@@ -19,7 +19,7 @@ namespace ibex {
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 /**
- * \ingroup strategy
+ * \ingroup optim
  *
  * \brief Root class of cell cost functions
  */

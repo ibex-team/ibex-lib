@@ -33,6 +33,26 @@ namespace ibex {
  * in the AAAI'11 paper <i>Inner Regions and Interval Linearizations for Global Optimization</i>
  * by Trombettoni et al.
  *
+ * The optimizer uses the extended system
+ *
+ * Corresponds to the normalized system with the goal f(x)
+ * represented as a variable "y" and with the additional constraint
+ * y=f(x). The domain of y in an extended box stores the interval [ylb,yub] where
+ * "ylb" is the lower bound of f(x) in the box and "yub" its
+ * upper bound.  (y is contracted with y <= ymax : see compute_ymax)
+ *
+ * The index of y is ext_sys.nb_var.
+ * See #ibex::ExtendedSystem::goal_var.
+ *
+ *
+ * <ul> The extended system (see ExtendedSystem constructor) contains:
+ * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
+ * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
+ * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
+ * </ul>
+ *
+ *
+ *
  * \remark In all the comments of this class, "loup" means "lowest upper bound" of the criterion f
  * and "uplo" means "uppermost lower bound" of the criterion.
  */
@@ -42,47 +62,30 @@ public:
 
 	/**
 	 * \brief Return status of the optimizer
+	 *
+	 * See comments for optimize(...) below.
 	 */
 	typedef enum {SUCCESS, INFEASIBLE, NO_FEASIBLE_FOUND, UNBOUNDED_OBJ, TIME_OUT, UNREACHED_PREC} Status;
-
 
 	/**
 	 *  \brief Create an optimizer.
 	 *
-	 *   \param sys    - the system to optimize
-	 *   \param ctc    - contractor for the <b>extended system</b> (see below)
-	 *   \param bsc    - bisector for extended boxes
-	 *   \param finder - upper-bounding procedure
+	 * Inputs:
+	 *   \param n        - number of variables or the <b>original system</b>
+	 *   \param ctc      - contractor for <b>extended<b> boxes (of size n+1)
+	 *   \param bsc      - bisector for <b>extended<b> boxes (of size n+1)
+	 *   \param finder   - upper-bounding procedure for the original system (n-sized boxes)
+	 *   \param buffer   - buffer for <b>extended<b> boxes (of size n+1)
+	 *   \param goal_var - index of the goal variable in an extended box.
 	 *
 	 * And optionally:
 	 *   \param eps_x         - absolute precision for the boxes (bisection control)
 	 *   \param rel_eps_f     - relative precision of the objective (the optimizer stops once reached).
 	 *   \pram  abs_eps_f     - absolute precision of the objective (the optimizer stops once reached).
-	 *   \param eps_h         - thickness of equations when relaxed to inequalities
-	 *   \param rigor         - look for points that strictly satisfy equalities. By default: false
 	 *
-*
-	*
-	 * \brief The extended system
-	 *
-	 * Corresponds to the normalized system with the goal f(x)
-	 * represented as a variable "y" and with the additional constraint
-	 * y=f(x). The domain of y in an extended box stores the interval [ylb,yub] where
-	 * "ylb" is the lower bound of f(x) in the box and "yub" its
-	 * upper bound.  (y is contracted with y <= ymax : see compute_ymax)
-	 *
-	 * The index of y is ext_sys.nb_var.
-	 * See #ibex::ExtendedSystem::goal_var.
-	 *
-*
-	 * <ul> The extended system (see ExtendedSystem constructor) contains:
-	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
-	 * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
-	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
-	 * </ul>
-	 *
-	 * \warning The optimizer relies on the contractor \a ctc to contract the domain of the goal variable and increase the uplo.
-	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
+	 * \warning The optimizer relies on the contractor \a ctc to contract the domain of the goal variable
+	 *          and increase the uplo. If this contractor never contracts this goal variable,
+	 *          the optimizer will only rely on the evaluation of f and will be very slow.
 	 *
 	 */
 	Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder, CellBufferOptim& buffer,
@@ -104,39 +107,51 @@ public:
 	 *                             This bound can be obtained, e.g., by a local solver. This is equivalent to (but more practical
 	 *                             than) adding a constraint f(x)<=obj_init_bound.
 	 *
-	 * \return SUCCESS             If the global minimum (with respect to the precision required) has been found.
-	 *                             In particular, at least one feasible point has been found, less than obj_init_bound, and in the time limit.
+	 * \return SUCCESS             if the global minimum (with respect to the precision required) has been found.
+	 *                             In particular, at least one feasible point has been found, less than obj_init_bound, and in the
+	 *                             time limit.
 	 *
 	 *         INFEASIBLE          if no feasible point exist less than obj_init_bound. In particular, the function returns INFEASIBLE
 	 *                             if the initial bound "obj_init_bound" is LESS than the true minimum (this case is only possible if
 	 *                             goal_abs_prec and goal_rel_prec are 0). In the latter case, there may exist feasible points.
 	 *
 	 *         NO_FEASIBLE_FOUND   if no feasible point could be found less than obj_init_bound. Contrary to INFEASIBLE,
-	 *                             infeasibility is not proven here. Warning: this return value is sensitive to the goal_abs_prec and
-	 *                             goal_rel_prec parameters. The upperbounding makes the optimizer only looking for points less than
-	 *                             min { (1-goal_rel_prec)*obj_init_bound, obj_init_bound - goal_abs_prec }.
+	 *                             infeasibility is not proven here. Warning: this return value is sensitive to the abs_eps_f and
+	 *                             rel_eps_f parameters. The upperbounding makes the optimizer only looking for points less than
+	 *                             min { (1-rel_eps_f)*obj_init_bound, obj_init_bound - abs_eps_f }.
 	 *
-	 *         UNBOUNDED_OBJ       the objective function seems unbounded (tends to -oo).
+	 *         UNBOUNDED_OBJ       if the objective function seems unbounded (tends to -oo).
 	 *
-	 *         TIMEOUT             time is out.
+	 *         TIMEOUT             if time is out.
+	 *
+	 *         UNREACHED_PREC      if the search is over but the resulting interval [uplo,loup] does not satisfy the precision
+	 *                             requirements. There are several possible reasons: the goal function may be too pessimistic
+	 *                             or the constraints function may be too pessimistic with respect to the precision requirement
+	 *                             (which can be too stringent). This results in tiny boxes that can neither be contracted nor
+	 *                             used as new loup candidates. Finally, the eps_x parameter may be too large.
+	 *
 	 */
 	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
 	/* =========================== Output ============================= */
 
 	/**
-	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
+	 * \brief Displays on standard output a report of the last call to optimize(...).
 	 *
 	 * Information provided:
 	 * <ul><li> interval of the cost  [uplo,loup]
 	 *     <li> the best feasible point found
-	 *     <li>total running time
-	 *     <li>total number of cells created during the exploration
+	 *     <li> total running time
+	 *     <li> total number of cells (~boxes) created during the exploration
 	 * </ul>
 	 */
 	void report(bool verbose=true);
 	
-	/** Get return status of last call to optimize(...) */
+	/**
+	 * \brief Get the status.
+	 *
+	 * \return the status of last call to optimize(...).
+	 */
 	Status get_status() const;
 
 	/**
@@ -160,21 +175,18 @@ public:
 	/**
 	 * \brief Get x* (== argmin).
 	 *
-	 * \note In rigor mode, this point is only the argmin of the
-	 *       eps-h-relaxed problem.
-	 *
-	 * \see #get_loup_box() const.
+	 * \note If the loup-finder is not rigorous, this point is only the
+	 *       argmin of the eps-h-relaxed problem. See #LoupFinder.
 	 *
 	 * \return the argmin of the last call to optimize(...).
-	*
-	 * \brief Get a (rigorous) enclosure of the argmin x*.
-	 *
-	 * \warning only set in rigor mode (undefined otherwise).
-	 *
 	 */
 	const IntervalVector& get_loup_point() const;
 
-	/** Get CPU time of last call to optimize(...) */
+	/**
+	 * \brief Get the time spent.
+	 *
+	 * \return the total CPU time of last call to optimize(...)
+	 */
 	double get_time() const;
 
 	/**
@@ -194,27 +206,37 @@ public:
 	 */
 	double get_obj_abs_prec() const;
 
-	/** Number of variables. */
+	/* =========================== Settings ============================= */
+
+	/**
+	 * \brief Number of variables.
+	 */
 	const int n;
 
-	/** Index of the variable corresponding to the objective. */
+	/**
+	 * \brief Index of the goal variable.
+	 *
+	 * See #ExtendedSystem.goal_var().
+	 */
 	const int goal_var;
 
 	/**
-	 * Contractor for the extended system
+	 * \brief Contractor for the extended system.
+	 *
+	 * The extended system:
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0).
 	 */
 	Ctc& ctc;
 
 	/**
-	 * Bisector.
+	 * \brief Bisector.
 	 *
 	 * Must work on extended boxes.
 	 */
 	Bsc& bsc;
 
 	/**
-	 * Loup finder algorithm.
+	 * \brief Loup finder algorithm.
 	 *
 	 * Must work on the original system.
 	 */
@@ -225,7 +247,6 @@ public:
 	 */
 	CellBufferOptim& buffer;
 
-	/* =========================== Settings ============================= */
 	/** Precision (bisection control) */
 	const double eps_x;
 
@@ -244,10 +265,15 @@ public:
 	/** Default goal absolute precision: 1e-7. */
 	static const double default_abs_eps_f;
 
-	/** Trace activation flag.
-	 * The value can be fixed by the user. By default: 0  nothing is printed
-	 1 for printing each better found feasible point
-	  2 for printing each handled node */
+	/**
+	 * \brief Trace activation flag.
+	 *
+	 * The value can be fixed by the user.
+	 * - 0 (by default): nothing is printed
+	 * - 1:              prints every loup/uplo update.
+	 * - 2:              prints also each handled node (warning: can generate very
+	 *                   long trace).
+	 */
 	int trace;
 
 	/**
@@ -267,7 +293,7 @@ protected:
 	 *
 	 * <ul>
 	 * <li> contract the cell box and try to find a new loup (see contract_and_bound)
-	 * <li> push the cell onto the (double) heap or delete the cell in case of empty box detected
+	 * <li> push the cell into the buffer or delete the cell in case of empty box detected.
 	 * </ul>
 	 *
 	 */
@@ -280,7 +306,7 @@ protected:
 	 * <li> contract the cell's box w.r.t the "loup",
 	 * <li> contract with the contractor ctc,
 	 * <li> search for a new loup,
-	 * <li> call the first order contractor
+	 * <li> (optional) call the first order contractor
 	 * </ul>
 	 *
 	 */
@@ -294,7 +320,7 @@ protected:
 	//bool update_entailed_ctr(const IntervalVector& box);
 
 	/**
-	 * \brief Update the uplo of non bisectable boxes
+	 * \brief Update the uplo of tiny (ex: non-bisectable) boxes.
 	 */
 	void update_uplo_of_epsboxes(double ymin);
 
@@ -307,6 +333,18 @@ protected:
 	 * \brief Main procedure for updating the loup.
 	 */
 	bool update_loup(const IntervalVector& box);
+
+	/**
+	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
+	 * the heap and the current box are actually contracted with y <= ymax
+	 *
+	 */
+	double compute_ymax ();
+
+	/**
+	 * \brief Check time is not out.
+	 */
+	void time_limit_check();
 
 	/*=======================================================================================================*/
 	/*                                Functions to manage the extended CSP                                   */
@@ -326,16 +364,6 @@ protected:
 	 */
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
-	/**
-	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
-	 * the heap and the current box are actually contracted with y <= ymax
-	 *
-	 */
-	double compute_ymax ();
-
-
-	void time_limit_check();
-
 private:
 
 	/** Currently entailed constraints */
@@ -353,17 +381,13 @@ private:
 	/** Lower bound of the small boxes taken by the precision. */
 	double uplo_of_epsboxes;
 
-	/**
-	 * \brief The "loup".
-	 *
-	* The current loup.
-	 *
-	 * In rigor mode, represents the real-loup (not the pseudo-loup).
-	 */
+	/** The current loup. */
 	double loup;
 
-	/** The point satisfying the constraints corresponding to the loup. */
-	/** Rigor mode: the box satisfying the constraints corresponding to the loup. */
+	/**
+	 * The point satisfying the constraints corresponding to the loup.
+	 * If the loup-finder is rigorous, this point is a (non-degenerated) box.
+	 */
 	IntervalVector loup_point;
 
 	/**

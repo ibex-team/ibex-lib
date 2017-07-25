@@ -60,6 +60,8 @@
 namespace ibex {
 
 /**
+ * \ingroup numeric
+ *
  * \brief LP solver.
  *
  * Solve a linear problem

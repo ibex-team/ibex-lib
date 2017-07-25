@@ -20,6 +20,7 @@ namespace ibex {
 
 /**
  * \ingroup strategy
+ *
  * \brief Default solver.
  */
 class DefaultSolver : public Solver {

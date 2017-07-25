@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Jul 21, 2017
+// Last Update : Jul 25, 2017
 //============================================================================
 
 #ifndef __IBEX_DEFAULT_OPTIMIZER_H__
@@ -26,18 +26,16 @@ public:
 	/**
 	 * \brief Create a default optimizer.
 	 *
-	 * \param sys        - The system to optimize
-	 * \param eps_x      - Stopping criterion for box splitting (absolute precision)
-	 * \param rel_eps_f  - Relative precision on the objective
-	 * \param abs_eps_f  - Absolute precision on the objective
-	 * \brief Set the random seed.
-	 *
-	 * The sequence of random numbers is reinitialized with
-	 * this seed.
-	 *
-	 * Should be set before a call to optimize(), for reproducibility.
-	 *
-	 * Set by default to #default_random_seed.
+	 * \param sys         - The system to optimize.
+	 * \param eps_x       - Stopping criterion for box splitting (absolute precision).
+	 * \param rel_eps_f   - Relative precision on the objective.
+	 * \param abs_eps_f   - Absolute precision on the objective.
+	 * \param eps_h       - Equality thickness.
+	 * \param rigor       - If true, feasibility of equalities is certified. By default:
+	 *                      false.
+	 * \param random_seed - The sequence of random numbers is reinitialized with
+	 *                      this seed before calling optimize(..) (useful for
+	 *                      reproducibility). Set by default to #default_random_seed.
 	 */
     DefaultOptimizer(const System& sys,
     		double eps_x=Optimizer::default_eps_x,
@@ -59,7 +57,7 @@ private:
     /**
      * The contractor: HC4 + acid(HC4) + X-Newton
      */
-	Ctc& ctc(const System& sys, const System& ext_sys, double prec);
+	Ctc& ctc(const System& ext_sys);
 
 	void* data; // keep track of data, for memory cleanup
 };
