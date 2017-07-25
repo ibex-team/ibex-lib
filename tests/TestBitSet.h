@@ -36,6 +36,7 @@ public:
 		CPPUNIT_TEST(clear);
 		CPPUNIT_TEST(remove);
 		CPPUNIT_TEST(fill01);
+		CPPUNIT_TEST(fill02);
 		CPPUNIT_TEST(all_bits);
 		CPPUNIT_TEST(set_minus_with01);
 		CPPUNIT_TEST(set_minus_with02);
@@ -53,6 +54,7 @@ private:
 	void clear();
 	void remove();
 	void fill01();
+	void fill02();
 	void all_bits();
 	void set_minus_with01();
 	void set_minus_with02();

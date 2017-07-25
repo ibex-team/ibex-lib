@@ -126,7 +126,7 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 	 * numbers from 0 to n-1.
 	 */
 
-	int nb_ctr=system.f.image_dim(); //system.ctrs.size();
+	int nb_ctr=system.f_ctrs.image_dim(); //system.ctrs.size();
 
 	if (smearorder.size()!=0) smearorder.clear();
 
@@ -137,7 +137,7 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 
 	IntervalMatrix J(nb_ctr, nb_var);
 
-	system.f.jacobian(box,J);
+	system.f_ctrs.jacobian(box,J);
 
 
 	double* sum_smear=new double[nb_var];

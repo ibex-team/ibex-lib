@@ -52,7 +52,7 @@ Function::~Function() {
 
 	if (name!=NULL) { // name==NULL if init/build_from_string was never called.
 		free((char*) name);
-		delete[] symbol_index;
+		delete[] __symbol_index;
 	}
 
 	if (_eval!=NULL) {

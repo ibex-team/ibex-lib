@@ -8,14 +8,15 @@
 // Last Update : Nov 15, 2012
 //============================================================================
 
-#include "ibex_LinearRelaxAffine2.h"
+#include "ibex_LinearizerAffine2.h"
+
 #include "ibex_Exception.h"
 
 namespace ibex {
 
 // the constructor
-LinearRelaxAffine2::LinearRelaxAffine2(const System& sys1) :
-				LinearRelax(sys1), sys(sys1),
+LinearizerAffine2::LinearizerAffine2(const System& sys1) :
+				Linearizer(sys1.nb_var), sys(sys1),
 				goal_af_evl(NULL),
 				ctr_af_evl(new AffineEval<AF_Default>*[sys1.nb_ctr]) {
 
@@ -28,14 +29,14 @@ LinearRelaxAffine2::LinearRelaxAffine2(const System& sys1) :
 	}
 }
 
-LinearRelaxAffine2::~LinearRelaxAffine2() {
+LinearizerAffine2::~LinearizerAffine2() {
 	for (int i = 0; i < sys.nb_ctr; i++) {
 		delete ctr_af_evl[i];
 	}
 	delete[] ctr_af_evl;
 }
 
-bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
+bool LinearizerAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// Linearization of the objective function by AF2
 
 	if (!sys.goal) {
@@ -55,12 +56,12 @@ bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSol
 				tmp = box[i].rad();
 				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
 					if (af2.val(i+1)==0)
-						lp_solver.setVarObj(i, 0);
+						lp_solver.set_obj_var(i, 0);
 					else {
 						return false; // sensible case to avoid
 					}
 				} else {
-					lp_solver.setVarObj(i, af2.val(i+1) / tmp);
+					lp_solver.set_obj_var(i, af2.val(i+1) / tmp);
 				}
 			}
 		}
@@ -75,7 +76,7 @@ bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSol
 }
 
 
-int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
+int LinearizerAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// TODO a verifier et finir
 
 	Affine2 af2;
@@ -118,7 +119,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 				case LT: {
 					if (0.0 < ev.ub()) {
 						try {// TODO TO CHECK
-							lp_solver.addConstraint(rowconst, LEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+							lp_solver.add_constraint(rowconst, LEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
 							cont++;
 						} catch (LPException&) { }
 					}
@@ -128,7 +129,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 				case GT: {
 					if (ev.lb() < 0.0) {
 						try {// TODO TO CHECK
-							lp_solver.addConstraint(rowconst, GEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+							lp_solver.add_constraint(rowconst, GEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
 							cont++;
 						} catch (LPException&) { }
 					}
@@ -150,7 +151,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 
 
 /*********generation of the linearized system*********/
-int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
+int LinearizerAffine2::linearize(const IntervalVector& box, LinearSolver& lp_solver) {
 
 	Affine2 af2;
 	Vector rowconst(sys.nb_var);
@@ -200,7 +201,7 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 					if (0.0 < ev.lb()) return -1;
 					else if (0.0 < ev.ub()) {
 						try {
-							lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+							lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
 							cont++;
 						} catch (LPException&) { }
 					}
@@ -211,7 +212,7 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 					if (ev.ub() < 0.0) return -1;
 					else if (ev.lb() < 0.0) {
 						try {
-							lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+							lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
 							cont++;
 						} catch (LPException&) { }
 					}
@@ -219,11 +220,11 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 				case EQ:
 					if (!ev.contains(0.0)) return -1;
 					else {
-						if (ev.diam()>2*lp_solver.getEpsilon()) {
+						if (ev.diam()>2*lp_solver.get_epsilon()) {
 							try {
-								lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+								lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
 								cont++;
-								lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+								lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
 								cont++;
 							} catch (LPException&) { }
 						}

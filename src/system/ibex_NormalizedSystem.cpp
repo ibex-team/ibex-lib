@@ -17,6 +17,8 @@ using namespace std;
 
 namespace ibex {
 
+const double NormalizedSystem::default_eps_h = 1e-08;
+
 namespace {
 
 class SystemNormalize : public SystemFactory {
@@ -25,7 +27,7 @@ class SystemNormalize : public SystemFactory {
 
 	SystemNormalize(const System& sys, double eps) {
 
-		// do not initialize variables with sys.f.args
+		// do not initialize variables with sys.f_ctrs.args
 		// since f may be uninitialized (unconstrained problem)
 		add_var(sys.args,sys.box);
 

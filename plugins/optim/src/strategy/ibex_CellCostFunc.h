@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_CellCostFunc.h
 // Author      : Jordan Ninin, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Last Update : Mar 04, 2015
 //============================================================================
@@ -19,7 +19,7 @@ namespace ibex {
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 /**
- * \ingroup strategy
+ * \ingroup optim
  *
  * \brief Root class of cell cost functions
  */
@@ -47,7 +47,7 @@ public:
 	 *
 	 * Does nothing (by default).
 	 */
-       virtual void set_loup(double /*lb*/) { }
+	virtual void set_loup(double lb) { }
 
 	/**
 	 * \brief Add backtrackable data required by this cost function
@@ -57,7 +57,7 @@ public:
 	 *
 	 * Does nothing by default.
 	 */
-       virtual void add_backtrackable(Cell& /*root*/) { }
+	virtual void add_backtrackable(Cell& root) { }
 
 	/**
 	 * \brief Set data in OptimData in the cell
@@ -68,13 +68,12 @@ public:
 	 *
 	 * Does nothing (by default).
 	 */
-       virtual void set_optim_data(Cell& /*c*/, System& /*sys*/) { }
+	virtual void set_optim_data(Cell& c, const System& sys) { }
 
 	/**
 	 * If the cost depends on the loup.
 	 */
 	bool depends_on_loup;
-
 };
 
 /**
@@ -149,7 +148,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 private:
 
 	/** the lower upper bound. */
@@ -186,7 +185,7 @@ public:
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 private:
 
 	/** the lower upper bound. */
@@ -221,7 +220,7 @@ public:
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 private:
 
 	/** the lower upper bound. */
@@ -248,7 +247,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 };
 
 
@@ -264,7 +263,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -286,7 +285,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c, const System& sys);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;

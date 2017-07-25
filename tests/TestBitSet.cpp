@@ -26,8 +26,7 @@ BitSet bitset3(4, _bitset3);
 }
 
 void TestBitSet::initialise() {
-	BitSet b;
-	b.initialise(0,9,BitSet::empt);
+	BitSet b(10);
 	b.add(3);
 	b.add(7);
 	b.add(9);
@@ -35,17 +34,17 @@ void TestBitSet::initialise() {
 }
 
 void TestBitSet::contains01() {
-	CPPUNIT_ASSERT(!bitset1.contain(0));
-	CPPUNIT_ASSERT(!bitset1.contain(1));
-	CPPUNIT_ASSERT(!bitset1.contain(2));
-	CPPUNIT_ASSERT(bitset1.contain(3));
-	CPPUNIT_ASSERT(!bitset1.contain(4));
-	CPPUNIT_ASSERT(!bitset1.contain(5));
-	CPPUNIT_ASSERT(!bitset1.contain(6));
-	CPPUNIT_ASSERT(bitset1.contain(7));
-	CPPUNIT_ASSERT(!bitset1.contain(8));
-	CPPUNIT_ASSERT(bitset1.contain(9));
-	CPPUNIT_ASSERT(!bitset1.contain(10));
+	CPPUNIT_ASSERT(!bitset1[0]);
+	CPPUNIT_ASSERT(!bitset1[1]);
+	CPPUNIT_ASSERT(!bitset1[2]);
+	CPPUNIT_ASSERT(bitset1[3]);
+	CPPUNIT_ASSERT(!bitset1[4]);
+	CPPUNIT_ASSERT(!bitset1[5]);
+	CPPUNIT_ASSERT(!bitset1[6]);
+	CPPUNIT_ASSERT(bitset1[7]);
+	CPPUNIT_ASSERT(!bitset1[8]);
+	CPPUNIT_ASSERT(bitset1[9]);
+	CPPUNIT_ASSERT(!bitset1[10]);
 }
 
 void TestBitSet::add01() {
@@ -91,14 +90,14 @@ void TestBitSet::size02() {
 
 void TestBitSet::union01() {
 	BitSet b(bitset1);
-	b.union_with(bitset2);
+	b|=bitset2;
 	CPPUNIT_ASSERT(b==bitset3);
 }
 
 void TestBitSet::union02() {
 	BitSet b(bitset1);
 	BitSet b2(BitSet::empty(10));
-	b.union_with(b2);
+	b|=b2;
 	CPPUNIT_ASSERT(b==bitset1);
 }
 
@@ -130,37 +129,45 @@ void TestBitSet::fill01() {
 	b.add(3); // something already here
 
 	b.fill(1,9);
-	CPPUNIT_ASSERT(!b.contain(0));
+	CPPUNIT_ASSERT(!b[0]);
 	for (int i=1; i<=9; i++)
-		CPPUNIT_ASSERT(b.contain(i));
-	CPPUNIT_ASSERT(!b.contain(10));
+		CPPUNIT_ASSERT(b[i]);
+	CPPUNIT_ASSERT(!b[10]);
+}
+
+void TestBitSet::fill02() {
+	BitSet b(BitSet::empty(10));
+	b.fill(0,9);
+	for (int i=0; i<=9; i++)
+		CPPUNIT_ASSERT(b[i]);
+	CPPUNIT_ASSERT(!b[10]);
 }
 
 void TestBitSet::all_bits() {
 	BitSet b(BitSet::all(10));
 	for (int i=0; i<=9; i++)
-		CPPUNIT_ASSERT(b.contain(i));
-	CPPUNIT_ASSERT(!b.contain(10));
+		CPPUNIT_ASSERT(b[i]);
+	CPPUNIT_ASSERT(!b[10]);
 }
 
 void TestBitSet::set_minus_with01() {
 	BitSet b(bitset1);
-	b.setminus_with(bitset2);
+	b.diff(bitset2);
 	for (int i=0; i<10; i++) {
 		if (i==3 || i==9) {
-			CPPUNIT_ASSERT(b.contain(i));
+			CPPUNIT_ASSERT(b[i]);
 		} else
-			CPPUNIT_ASSERT(!b.contain(i));
+			CPPUNIT_ASSERT(!b[i]);
 	}
 }
 
 void TestBitSet::set_minus_with02() {
 	BitSet b(bitset3);
-	b.setminus_with(bitset1);
+	b.diff(bitset1);
 	for (int i=0; i<10; i++) {
 		if (i==4) {
-			CPPUNIT_ASSERT(b.contain(i));
+			CPPUNIT_ASSERT(b[i]);
 		} else
-			CPPUNIT_ASSERT(!b.contain(i));
+			CPPUNIT_ASSERT(!b[i]);
 	}
 }

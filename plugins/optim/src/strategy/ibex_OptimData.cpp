@@ -26,17 +26,17 @@ OptimData::~OptimData() {
 
 }
 
-void OptimData::compute_pf(Function& goal, const IntervalVector& box) {
+void OptimData::compute_pf(const Function& goal, const IntervalVector& box) {
 	pf=goal.eval(box);
 }
 
 
-void OptimData::compute_pu(System& sys, const IntervalVector& box, const EntailedCtr& entailed) {
+void OptimData::compute_pu(const System& sys, const IntervalVector& box, const EntailedCtr& entailed) {
 	double pu=1;
 
 	for (int j=1; j<sys.nb_ctr;j++) {
 		if (entailed.normalized(j)) continue;
-		Interval eval=sys.f[j].eval(box);
+		Interval eval=sys.f_ctrs[j].eval(box);
 		double pui=1;
 		if (eval.diam()>0)
 			pui= -eval.lb()/eval.diam();

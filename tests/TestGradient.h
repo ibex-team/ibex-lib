@@ -24,25 +24,27 @@ class TestGradient : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestGradient);
-	
-		CPPUNIT_TEST(deco01);
-		CPPUNIT_TEST(deco02);
 
-		CPPUNIT_TEST(add01);
-		CPPUNIT_TEST(add02);
-		CPPUNIT_TEST(add03);
-		CPPUNIT_TEST(add04);
-		//CPPUNIT_TEST(add05);
-		CPPUNIT_TEST(dist);
-		CPPUNIT_TEST(jac01);
-		CPPUNIT_TEST(jac02);
-		CPPUNIT_TEST(jac03);
-		CPPUNIT_TEST(hansen01);
-		CPPUNIT_TEST(mulVV);
-		CPPUNIT_TEST(transpose01);
-		CPPUNIT_TEST(mulMV01);
-		CPPUNIT_TEST(mulVM01);
-		CPPUNIT_TEST(mulVM02);
+	CPPUNIT_TEST(deco01);
+	CPPUNIT_TEST(deco02);
+
+	CPPUNIT_TEST(add01);
+	CPPUNIT_TEST(add02);
+	CPPUNIT_TEST(add03);
+	CPPUNIT_TEST(add04);
+	//CPPUNIT_TEST(add05);
+	CPPUNIT_TEST(dist);
+	CPPUNIT_TEST(jac01);
+	CPPUNIT_TEST(jac02);
+	CPPUNIT_TEST(jac03);
+	CPPUNIT_TEST(hansen01);
+	CPPUNIT_TEST(mulVV);
+	CPPUNIT_TEST(transpose01);
+	CPPUNIT_TEST(mulMV01);
+	CPPUNIT_TEST(mulVM01);
+	CPPUNIT_TEST(mulVM02);
+	CPPUNIT_TEST(jacobian_components01);
+	CPPUNIT_TEST(jacobian_components02);
 	CPPUNIT_TEST_SUITE_END();
 
 	void deco01();
@@ -65,6 +67,9 @@ public:
 	void mulMV01();
 	void mulVM01();
 	void mulVM02();
+
+	void jacobian_components01();
+	void jacobian_components02();
 private:
 	void check_deco(const ExprNode& e);
 };

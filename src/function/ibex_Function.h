@@ -661,6 +661,13 @@ public:
 	virtual IntervalVector eval_vector(const IntervalVector& box) const;
 
 	/**
+	 * \brief Calculate some components of f using interval arithmetic.
+	 *
+	 * \pre f must be vector-valued.
+	 */
+	IntervalVector eval_vector(const IntervalVector& box, const BitSet& components) const;
+
+	/**
 	 * \brief Calculate f(x) using interval arithmetic.
 	 *
 	 * \pre f must be matrix-valued.
@@ -703,18 +710,19 @@ public:
 	IntervalVector gradient(const IntervalVector& x) const;
 
 	/**
-	 * \brief Calculate the Jacobian matrix of f
-	 *
-	 * \param x - the input box
-	 * \param J - where the Jacobian matrix has to be stored (output parameter).
-	 *
+	 *\see #ibex::Fnc
 	 */
-	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
+	IntervalMatrix jacobian(const IntervalVector& x, int v=-1) const;
 
 	/**
 	 *\see #ibex::Fnc
 	 */
-	IntervalMatrix jacobian(const IntervalVector& x) const;
+	IntervalMatrix jacobian(const IntervalVector& x, const BitSet& components, int v=-1) const;
+
+	/**
+	 *\see #ibex::Fnc
+	 */
+	void jacobian(const IntervalVector& x, IntervalMatrix& J, int v=-1) const;
 
 	/**
 	 *\see #ibex::Fnc
@@ -724,12 +732,22 @@ public:
 	/**
 	 *\see #ibex::Fnc
 	 */
-	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v=-1) const;
 
 	/**
 	 *\see #ibex::Fnc
 	 */
-	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& h) const;
+	void hansen_matrix(const IntervalVector& x, IntervalMatrix& H) const;
+
+	/**
+	 *\see #ibex::Fnc
+	 */
+	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H) const;
+
+	/**
+	 *\see #ibex::Fnc
+	 */
+	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H, const BitSet& components) const;
 
 	/**
 	 *\see #ibex::Fnc
@@ -857,6 +875,11 @@ protected:
 	 */
 	void print_expr(std::ostream& os) const;
 
+	/**
+	 * \brief First variable index of a symbol argument
+	 */
+	int symbol_index(int arg) const;
+
 private:
 	friend class VarSet;
 
@@ -880,7 +903,7 @@ private:
 
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
-	int* symbol_index;                          // first variable index of a symbol
+	int* __symbol_index;                          // first variable index of a symbol
 
 	// if at some point, symbolic differentiation is needed for this function,
 	// we store the resulting function for future usage.
@@ -991,6 +1014,10 @@ inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
 	return expr().dim.is_scalar() ? IntervalVector(1,eval_domain(box).i()) : eval_domain(box).v();
 }
 
+inline IntervalVector Function::eval_vector(const IntervalVector& box, const BitSet& components) const {
+	return ((Function*) this)->_eval->eval(box,components);
+}
+
 inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	switch (expr().dim.type()) {
 	case Dim::SCALAR     :
@@ -1069,32 +1096,45 @@ inline IntervalVector Function::gradient(const IntervalVector& x) const {
 	return g;
 }
 
-inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
-	_grad->jacobian(x,J);
+inline IntervalMatrix Function::jacobian(const IntervalVector& x, int v) const {
+	return Fnc::jacobian(x, v);
 }
 
-inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
-	return Fnc::jacobian(x);
+inline IntervalMatrix Function::jacobian(const IntervalVector& x, const BitSet& components, int v) const {
+	return Fnc::jacobian(x, components, v);
+}
+
+inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {
+	Fnc::jacobian(x, J, v);
+	// <=> 	_grad->jacobian(x,J,v);
 }
 
 inline void Function::jacobian(const IntervalVector& full_box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const {
-	Fnc::jacobian(full_box,J_var,J_param,set);
+	Fnc::jacobian(full_box, J_var, J_param, set);
 }
 
-inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const {
-	Fnc::hansen_matrix(x,h);
+inline void Function::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
+	_grad->jacobian(x, J, components, v);
 }
 
-inline void Function::hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& h) const {
-	Fnc::hansen_matrix(x,x0,h);
+inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& H) const {
+	Fnc::hansen_matrix(x, H);
+}
+
+inline void Function::hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H) const {
+	Fnc::hansen_matrix(x, x0, H);
+}
+
+inline void Function::hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H, const BitSet& components) const {
+	Fnc::hansen_matrix(x, x0, H, components);
 }
 
 inline void Function::hansen_matrix(const IntervalVector& full_box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
-	Fnc::hansen_matrix(full_box,H_var,J_param,set);
+	Fnc::hansen_matrix(full_box, H_var, J_param, set);
 }
 
 inline void Function::hansen_matrix(const IntervalVector& full_box, const IntervalVector& x0, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {
-	Fnc::hansen_matrix(full_box,x0,H_var,J_param,set);
+	Fnc::hansen_matrix(full_box, x0, H_var, J_param,set);
 }
 
 inline Eval& Function::basic_evaluator() const {
@@ -1130,6 +1170,13 @@ inline const int* Function::used_vars() const {
 inline std::ostream& operator<<(std::ostream& os, const Function& f) {
 	f.print(os);
 	return os;
+}
+
+inline int Function::symbol_index(int arg) const {
+	assert(arg>=0 && arg<nb_arg());
+	assert(__symbol_index);
+
+	return __symbol_index[arg];
 }
 
 // ============================================================================

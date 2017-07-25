@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_Multipliers.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Apr 18, 2013
 //============================================================================
@@ -67,4 +67,5 @@ inline Interval& Multipliers::operator[](int i) {
 }
 
 } // end namespace ibex
+
 #endif // __IBEX_MULTIPLIERS_H__

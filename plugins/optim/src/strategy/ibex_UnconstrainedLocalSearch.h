@@ -2,7 +2,7 @@
 //                                  I B E X
 // File        : ibex_UnconstrainedLocalSearch.h
 // Author      : Jordan Ninin, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Mar 19, 2014
 // Last Update : Mar 19, 2014

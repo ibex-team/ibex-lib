@@ -14,10 +14,34 @@
 
 #include <typeinfo>
 
+using namespace std;
+
 namespace ibex {
 
-Eval::Eval(Function& f) : f(f), d(f) {
+Eval::Eval(Function& f) : f(f), d(f), fwd_agenda(NULL), bwd_agenda(NULL) {
+	int m=f.image_dim();
+	if (m>1) {
+		const ExprVector* vec=dynamic_cast<const ExprVector*>(&f.expr());
+		if (vec && m==vec->nb_args) {
+			fwd_agenda = new Agenda*[m];
+			bwd_agenda = new Agenda*[m];
+			for (int i=0; i<m; i++) {
+				bwd_agenda[i] = f.cf.agenda(f.nodes.rank(vec->arg(i)));
+				fwd_agenda[i] = new Agenda(*bwd_agenda[i],true); // true<=>swap
+			}
+		}
+	}
+}
 
+Eval::~Eval() {
+	if (fwd_agenda!=NULL) {
+		for (int i=0; i<f.image_dim(); i++) {
+			delete fwd_agenda[i];
+			delete bwd_agenda[i];
+		}
+		delete[] fwd_agenda;
+		delete[] bwd_agenda;
+	}
 }
 
 Domain& Eval::eval(const Array<const Domain>& d2) {
@@ -62,6 +86,58 @@ Domain& Eval::eval(const IntervalVector& box) {
 	return *d.top;
 }
 
+IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
+
+	d.write_arg_domains(box);
+
+	assert(!components.empty());
+
+	int m=components.size();
+
+	IntervalVector res(m);
+
+	if (fwd_agenda==NULL) {
+
+		assert(!f.expr().dim.is_matrix());
+
+		// The vector of expression is heterogeneous (or the expression is scalar).
+		//
+		// We might be able in this case to use the DAG but
+		// - the algorithm is more complex
+		// - we might not benefit from possible symbolic simplification due
+		//   to the fact that only specific components are required (there is
+		//   no simple "on the fly" simplification as in the case of a vector
+		//   of homogeneous expressions)
+		// so we resort to the components functions f[i] --> symbolic copy+no DAG :(
+		int c;
+		for (int i=0; i<m; i++) {
+			c = (i==0 ? components.min() : components.next(c));
+			res[i] = f[c].eval(box);
+		}
+
+		return res;
+	}
+
+	// merge all the agendas
+	int c;
+	Agenda a(f.nodes.size()); // the global agenda initialized with the maximal possible value
+	for (int i=0; i<m; i++) {
+		c = (i==0 ? components.min() : components.next(c));
+		a.push(*(fwd_agenda[c]));
+	}
+
+	try {
+		f.cf.forward<Eval>(*this,a);
+	} catch(EmptyBoxException&) {
+		d.top->set_empty();
+	}
+	for (int i=0; i<m; i++) {
+		c = (i==0 ? components.min() : components.next(c));
+		res[i] = d[bwd_agenda[c]->first()].i();
+	}
+
+	return res;
+}
 
 void Eval::idx_cp_fwd(int x, int y) {
 	assert(dynamic_cast<const ExprIndex*> (&f.node(y)));

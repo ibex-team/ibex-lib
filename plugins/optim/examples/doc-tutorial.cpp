@@ -653,9 +653,9 @@ int main() {
 
 	CtcAcid acid(system, hc4_2);
 
-	CtcNewton newton(system.f, 5e+08, prec, 1e-04);
+	CtcNewton newton(system.f_ctrs, 5e+08, prec, 1e-04);
 
-	LinearRelaxCombo linear_relax(system,LinearRelaxCombo::XNEWTON);
+	LinearizerCombo linear_relax(system,LinearizerCombo::XNEWTON);
 
 	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
 
@@ -705,7 +705,7 @@ int main() {
 
 	CtcAcid acid(ext_sys, hc4_2);
 
-	LinearRelaxCombo linear_relax(ext_sys,LinearRelaxCombo::XNEWTON);
+	LinearizerCombo linear_relax(ext_sys,LinearizerCombo::XNEWTON);
 
 	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
 

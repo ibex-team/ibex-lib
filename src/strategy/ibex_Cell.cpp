@@ -15,7 +15,7 @@ namespace ibex {
 
 namespace {
 
-int id_count=0;
+unsigned long id_count=0;
 }
 
  Cell::Cell(const IntervalVector& box) : box(box), id(id_count++) {

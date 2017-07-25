@@ -16,14 +16,15 @@
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcNewton.h"
 #include "ibex_CtcFixPoint.h"
-#include "ibex_LinearRelaxXTaylor.h"
-#include "ibex_LinearRelaxCombo.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_LargestFirst.h"
 #include "ibex_Random.h"
 
 #include <sstream>
 #include <vector>
+
+#include "ibex_LinearizerCombo.h"
+#include "ibex_LinearizerXTaylor.h"
 
 using namespace std;
 
@@ -71,7 +72,7 @@ Ctc& StrategyParam::get_ctc() {
 	Ctc* ctcnewton= NULL;
 
 	if (filtering == "acidhc4n" || filtering=="hc4n" || filtering=="3bcidhc4n")
-	  ctcnewton= &rec(new CtcNewton(get_sys().f, NEWTON_CEIL, prec, GAUSS_SEIDEL_RATIO));
+	  ctcnewton= &rec(new CtcNewton(get_sys().f_ctrs, NEWTON_CEIL, prec, GAUSS_SEIDEL_RATIO));
 
 	if (filtering=="hc4" || filtering=="hc4n") {
 		ctc = (!ctcnewton)?
@@ -108,19 +109,14 @@ Ctc& StrategyParam::get_ctc() {
 
 	// The CtcXNewton contractor
 
-	// corner selection for linearizations : two corners are selected, a random one and its opposite
-	vector<LinearRelaxXTaylor::corner_point> cpoints;
-	cpoints.push_back(LinearRelaxXTaylor::RANDOM);
-	cpoints.push_back(LinearRelaxXTaylor::RANDOM_INV);
-
-	LinearRelax* lr;
+	Linearizer* lr;
 
 	if (lin_relax=="art")
-		lr = &rec(new LinearRelaxCombo(ext_sys,LinearRelaxCombo::ART));
+		lr = &rec(new LinearizerCombo(ext_sys,LinearizerCombo::ART));
 	else if  (lin_relax=="compo")
-		lr = &rec(new LinearRelaxCombo(ext_sys,LinearRelaxCombo::COMPO));
+		lr = &rec(new LinearizerCombo(ext_sys,LinearizerCombo::COMPO));
 	else if (lin_relax=="xn")
-		lr = &rec(new LinearRelaxXTaylor(ext_sys,cpoints));
+		lr = &rec(new LinearizerXTaylor(ext_sys,LinearizerXTaylor::RELAX,LinearizerXTaylor::RANDOM_OPP));
 	else
 		ibex_error("StrategyParam: unknown liner relaxation mode");
 
@@ -129,7 +125,7 @@ Ctc& StrategyParam::get_ctc() {
 	if (lin_relax=="compo" || lin_relax=="art"|| lin_relax=="xn") {
 
 		//cxn = new CtcLinearRelaxation (*lr, hc44xn);
-		Ctc& cxn_poly = rec(new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX));
+		Ctc& cxn_poly = rec(new CtcPolytopeHull(*lr));
 
 		// hc4 inside xnewton loop
 		Ctc& hc44xn = rec(new CtcHC4(ext_sys.ctrs,ratio_propag,false));

@@ -217,4 +217,57 @@ void TestEval::issue242() {
 	IntervalVector x(3,Interval::ONE);
 	CPPUNIT_ASSERT(almost_eq(f.eval_vector(x),-x,0));
 }
+
+void TestEval::eval_components01() {
+	const ExprSymbol& x = ExprSymbol::new_("x");
+	const ExprSymbol& y = ExprSymbol::new_("y");
+	const ExprSymbol& z = ExprSymbol::new_("z");
+	const ExprNode& e1=x+3*y;
+	const ExprNode& e2=y-2*x;
+	const ExprNode& e3=y+z;
+	const ExprNode& e4=e1*e2;
+	Function f(x,y,z,Return(e4+1,e2+3,e4-2,e4-4,false));
+
+	Interval vx=Interval::ONE;
+	Interval vy=2*Interval::ONE;
+	IntervalVector box(3);
+	box[0]=vx;
+	box[1]=vy;
+
+	BitSet components=BitSet::empty(4);
+	components.add(0);
+	components.add(2);
+
+	IntervalVector res=f.eval_vector(box,components);
+
+	CPPUNIT_ASSERT(res.size()==2);
+	CPPUNIT_ASSERT(res[0]==(vx+3*vy)*(vy-2*vx)+1);
+	CPPUNIT_ASSERT(res[1]==(vx+3*vy)*(vy-2*vx)-2);
+}
+
+void TestEval::eval_components02() {
+	Dim d=Dim::matrix(3,3);
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim::col_vec(2));
+	const ExprSymbol& y = ExprSymbol::new_("y",d);
+	const ExprSymbol& z = ExprSymbol::new_("z",d);
+
+	Function f(x,y,z,Return(x[1],transpose(y[DoubleIndex::one_row(d,1)]),z[DoubleIndex::one_col(d,2)],false));
+
+	IntervalVector box(20);
+	for (int i=0; i<20; i++) box[i]=Interval(i,i);
+
+	BitSet components=BitSet::empty(9);
+	components.add(0);
+	components.add(2);
+	components.add(4);
+	components.add(6);
+	IntervalVector res=f.eval_vector(box,components);
+
+	CPPUNIT_ASSERT(res.size()==4);
+	CPPUNIT_ASSERT(res[0]==1);
+	CPPUNIT_ASSERT(res[1]==6);
+	CPPUNIT_ASSERT(res[2]==13);
+	CPPUNIT_ASSERT(res[3]==19);
+}
+
 }

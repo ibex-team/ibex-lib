@@ -2,9 +2,15 @@
 # encoding: utf-8
 
 import os
-from waflib import Logs, Errors, Utils
+from waflib import Logs, Errors, Utils, TaskGen
 from waflib.Tools import waf_unit_test
 import ibexutils
+
+@TaskGen.feature('test')
+@TaskGen.after_method('make_test')
+def always_run_test (self):
+	for t in self.tasks:
+		t.always_run = True
 
 # function called after the tests are run for pretty printing the results
 def utest_format_output (tst):
@@ -178,6 +184,5 @@ def utest (tst):
 			kwargs["source"] = f
 			kwargs["target"] = "utest_" + name
 			tst.program (**kwargs)
-
 	else:
 		tst.fatal ("Cannot run the tests without cppunit (not found at configure)")

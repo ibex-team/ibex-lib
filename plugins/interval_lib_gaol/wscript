@@ -128,7 +128,7 @@ def configure (conf):
 		else:
 			args = "--with-mathlib-include=%s" % mathlib_include
 			args += " --with-mathlib-lib=%s" % mathlib_lib
-		args += " --disable-preserve-rounding --enable-optimize"
+		args += " --disable-preserve-rounding --enable-optimize --disable-verbose-mode"
 		gaol_ret = conf.configure_3rd_party_with_autotools (gaol_archive,
 				conf_args = args)
 		_, gaol_include, gaol_lib = gaol_ret

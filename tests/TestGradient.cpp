@@ -588,5 +588,82 @@ void TestGradient::hansen01() {
 
 }
 
+void TestGradient::jacobian_components01() {
+	const ExprSymbol& x = ExprSymbol::new_("x");
+	const ExprSymbol& y = ExprSymbol::new_("y");
+	const ExprSymbol& z = ExprSymbol::new_("z");
+	const ExprNode& e1=x*y;
+	const ExprNode& e2=y*z;
+	const ExprNode& e3=e1*e2;
+
+	Function f(x,y,z,Return(e3+x,e3+y,e3+z));
+
+	double vx=1.0;
+	double vy=2.0;
+	double vz=3.0;
+	IntervalVector box(3);
+	box[0]=vx;
+	box[1]=vy;
+	box[2]=vz;
+
+	BitSet components=BitSet::empty(3);
+	components.add(0);
+	components.add(2);
+
+	IntervalMatrix res=f.jacobian(box,components);
+
+	CPPUNIT_ASSERT(res.nb_rows()==2);
+	CPPUNIT_ASSERT(res[0][0]==vy*vy*vz+1);
+	CPPUNIT_ASSERT(res[0][1]==2*vx*vy*vz);
+	CPPUNIT_ASSERT(res[0][2]==vx*vy*vy);
+	CPPUNIT_ASSERT(res[1][0]==vy*vy*vz);
+	CPPUNIT_ASSERT(res[1][1]==2*vx*vy*vz);
+	CPPUNIT_ASSERT(res[1][2]==vx*vy*vy+1);
+}
+
+void TestGradient::jacobian_components02() {
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim::col_vec(3));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim::col_vec(3));
+	const ExprSymbol& z = ExprSymbol::new_("z",Dim::col_vec(3));
+	Function f(x,y,z,Return(x+y,x+z,y+z));
+	double vx=1.0;
+	double vy=2.0;
+	double vz=3.0;
+	IntervalVector box(9);
+	for (int i=0; i<9; i++) box[i]=Interval(i,i);
+
+	BitSet components=BitSet::empty(3);
+	components.add(0);
+	components.add(2);
+	components.add(4);
+	components.add(6);
+	components.add(8);
+
+	IntervalMatrix res=f.jacobian(box,components);
+
+	CPPUNIT_ASSERT(res.nb_rows()==5);
+
+	for (int i=0; i<9; i++) {
+		CPPUNIT_ASSERT(res[0][i]==(i==0 || i==3));
+	}
+
+	for (int i=0; i<9; i++) {
+		CPPUNIT_ASSERT(res[1][i]==(i==2 || i==5));
+	}
+
+	for (int i=0; i<9; i++) {
+		CPPUNIT_ASSERT(res[2][i]==(i==1 || i==7));
+	}
+
+	for (int i=0; i<9; i++) {
+		CPPUNIT_ASSERT(res[3][i]==(i==3 || i==6));
+	}
+
+	for (int i=0; i<9; i++) {
+		CPPUNIT_ASSERT(res[4][i]==(i==5 || i==8));
+	}
+
+}
+
 } // end namespace
 

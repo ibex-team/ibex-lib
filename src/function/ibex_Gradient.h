@@ -52,8 +52,19 @@ public:
 
 	/**
 	 * \brief Calculate the Jacobian of f on the box \a box and store the result in \a J.
+	 *
+	 * \param v - only update the vth column of J (useful for Hansen's scheme). Default value is -1
+	 *            (means: update all the columns).
 	 */
-	void jacobian(const IntervalVector& box, IntervalMatrix& J);
+	void jacobian(const IntervalVector& box, IntervalMatrix& J, int v=-1);
+
+	/**
+	 * \brief Calculate some components of the Jacobian of f on the box \a box and store the result in \a J.
+	 *
+	 * \param v - only update the vth column of J (useful for Hansen's scheme). Default value is -1
+	 *            (means: update all the columns).
+	 */
+	void jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet& components, int v=-1);
 
 	/**
 	 * \brief Calculate the Jacobian on the domains \a d and store the result in \a J.
@@ -167,8 +178,11 @@ public:
 	Eval& _eval;
 	ExprDomain& d;
 	ExprDomain  g;
-	Agenda** fwd_agenda; // one agenda for each component
-	Agenda** bwd_agenda; // one agenda for each component
+	// Store the "linear part" of f so
+	// that these coefficients are only calculated once.
+	IntervalMatrix coeff_matrix;
+	// True if the ith component is linear (wrt all variables)
+	bool *is_linear;
 };
 
 } // namespace ibex

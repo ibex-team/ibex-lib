@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_DefaultSolver.h
 // Author      : Bertrand Neveu
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Sep 27, 2012
 // Last Update : Jul 06, 2014
@@ -20,6 +20,7 @@ namespace ibex {
 
 /**
  * \ingroup strategy
+ *
  * \brief Default solver.
  */
 class DefaultSolver : public Solver {
@@ -48,6 +49,7 @@ public:
 
 	System & sys;
 private:
+
 	/**
 	 * The contractor: hc4 + acid(hc4) + newton (if the system is square) + xnewton
 	 */
@@ -59,4 +61,5 @@ private:
 };
 
 } // end namespace ibex
+
 #endif // __IBEX_DEFAULT_SOLVER_H__

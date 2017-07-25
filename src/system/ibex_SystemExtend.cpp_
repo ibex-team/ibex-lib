@@ -33,7 +33,7 @@ public:
 		//		varcopy(sys.args,sys.args);
 		//		sys.args.set_ref(sys.args.size(),y);
 
-		// do not initialize variables with sys.f.args
+		// do not initialize variables with sys.f_ctrs.args
 		// since f may be uninitialized (unconstrained problem)
 		add_var(sys.args,sys.box);
 		add_var(y,IntervalVector(1,sys.goal->eval(sys.box)));

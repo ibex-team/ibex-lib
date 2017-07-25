@@ -86,7 +86,7 @@ public:
 	//const int n;
 
 
-protected:
+//protected:
 	const System* orig_sys;
 	const NormalizedSystem* norm_sys;
 
