@@ -33,25 +33,13 @@ namespace ibex {
  * in the AAAI'11 paper <i>Inner Regions and Interval Linearizations for Global Optimization</i>
  * by Trombettoni et al.
  *
- * The optimizer uses the extended system
+ * The optimizer uses operators that either work on the *original* or *extended* system.
  *
- * Corresponds to the normalized system with the goal f(x)
- * represented as a variable "y" and with the additional constraint
- * y=f(x). The domain of y in an extended box stores the interval [ylb,yub] where
- * "ylb" is the lower bound of f(x) in the box and "yub" its
- * upper bound.  (y is contracted with y <= ymax : see compute_ymax)
- *
- * The index of y is ext_sys.nb_var.
- * See #ibex::ExtendedSystem::goal_var.
- *
- *
- * <ul> The extended system (see ExtendedSystem constructor) contains:
- * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
- * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
- * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
- * </ul>
- *
- *
+ * The extended system corresponds to the normalized system (inequalities are all "<=")
+ * with the goal f(x) represented as a variable "y" and with the additional constraint
+ * y=f(x). An *extended* box stores the domain [ylb,yub] where "ylb" is the lower bound
+ * of f(x) in the box and "yub" its upper bound. (note: y is contracted with y <= ymax :
+ * see #compute_ymax())
  *
  * \remark In all the comments of this class, "loup" means "lowest upper bound" of the criterion f
  * and "uplo" means "uppermost lower bound" of the criterion.

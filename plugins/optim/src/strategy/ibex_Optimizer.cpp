@@ -53,7 +53,7 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
                 				//kkt(normalized_user_sys),
 								uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
                 				loup_point(n), initial_loup(POS_INFINITY), loup_changed(false),
-								nb_cells(0), time(0) {
+								time(0), nb_cells(0) {
 
 	if (trace) cout.precision(12);
 }

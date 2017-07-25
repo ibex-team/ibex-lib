@@ -106,7 +106,7 @@ def configure (conf):
 	# Optimised compilation flags
 	if conf.options.DEBUG:
 		Logs.info("Enabling debug mode")
-		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable"
+		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
 		flags += " -fmessage-length=0"
 		conf.define ("DEBUG", 1)
 	else:

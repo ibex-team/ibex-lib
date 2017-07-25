@@ -707,6 +707,7 @@ bool TemplateDomain<D>::is_unbounded() const {
 	case Dim::COL_VECTOR : return v().is_unbounded(); break;
 	case Dim::MATRIX :     return m().is_unbounded(); break;
 	}
+	return false;
 }
 
 template<class D>
