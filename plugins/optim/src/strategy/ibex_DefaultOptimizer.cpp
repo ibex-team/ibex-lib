@@ -68,7 +68,7 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double eps_x, double rel_e
 			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x)),
 			  rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(get_norm_sys(sys,eps_h)))) :
 						 (LoupFinder*) new LoupFinderDefault(get_norm_sys(sys,eps_h))),
-			  (CellBufferOptim&) rec(new CellDoubleHeap(sys)),
+			  (CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h))),
 			  get_ext_sys(sys,eps_h).goal_var(),
 			  eps_x,
 			  rel_eps_f,

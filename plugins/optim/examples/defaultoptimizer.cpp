@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo.", {'t', "timeout"});
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
 	args::ValueFlag<double> eps_x(parser, "float", _eps_x.str(), {"eps-x"});
-
+	args::ValueFlag<double> initial_loup(parser, "float", "Intial \"loup\" (a priori known upper bound).", {"initial-loup"});
 	args::Flag rigor(parser, "rigor", "Activate rigor mode (certify feasibility of equalities).", {"rigor"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
 	args::Flag quiet(parser, "quiet", "Print no message and display minimal information "
@@ -118,6 +118,11 @@ int main(int argc, char** argv) {
 				cout << "  rigor mode:\tON\t(feasibility of equalities certified)" << endl;
 		}
 
+		if (initial_loup) {
+			if (!quiet)
+				cout << "  initial loup:\t" << initial_loup.Get() << " (a priori upper bound of the minimum)" << endl;
+		}
+
 		// Fix the random seed for reproducibility.
 		if (random_seed) {
 			if (!quiet)
@@ -159,7 +164,10 @@ int main(int argc, char** argv) {
 			cout << "running............" << endl << endl;
 
 		// Search for the optimum
-		o.optimize(sys.box);
+		if (initial_loup)
+			o.optimize(sys.box, initial_loup.Get());
+		else
+			o.optimize(sys.box);
 
 		if (trace) cout << endl;
 

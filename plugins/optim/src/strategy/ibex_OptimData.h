@@ -12,7 +12,6 @@
 
 #include "ibex_Backtrackable.h"
 #include "ibex_Interval.h"
-#include "ibex_EntailedCtr.h"
 #include "ibex_System.h"
 
 namespace ibex {
@@ -51,7 +50,7 @@ public:
 	 *
 	 * \see #pu
 	 */
-	void compute_pu(const System& sys, const IntervalVector& box, const EntailedCtr& entailed);
+	void compute_pu(const System& sys, const IntervalVector& box);
 
 	/**
 	 * \brief Casado criterion

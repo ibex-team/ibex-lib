@@ -71,7 +71,7 @@ void CellCostC3::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostC3::set_optim_data(Cell& c, const System& sys) {
+void CellCostC3::set_optim_data(Cell& c, const ExtendedSystem& sys) {
 	c.get<OptimData>().compute_pf(*sys.goal,c.box);
 }
 
@@ -94,9 +94,9 @@ void CellCostC5::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostC5::set_optim_data(Cell& c, const System& sys) {
+void CellCostC5::set_optim_data(Cell& c, const ExtendedSystem& sys) {
 	OptimData& data=c.get<OptimData>();
-	data.compute_pu(sys,c.box,c.get<EntailedCtr>());
+	data.compute_pu(sys,c.box);
 	data.compute_pf(*sys.goal,c.box);
 }
 
@@ -119,9 +119,9 @@ void CellCostC7::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostC7::set_optim_data(Cell& c, const System& sys) {
+void CellCostC7::set_optim_data(Cell& c, const ExtendedSystem& sys) {
 	OptimData& data=c.get<OptimData>();
-	data.compute_pu(sys,c.box,c.get<EntailedCtr>());
+	data.compute_pu(sys,c.box);
 	data.compute_pf(*sys.goal,c.box);
 }
 
@@ -144,9 +144,9 @@ void CellCostPU::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostPU::set_optim_data(Cell& c, const System& sys) {
+void CellCostPU::set_optim_data(Cell& c, const ExtendedSystem& sys) {
 
-	c.get<OptimData>().compute_pu(sys,c.box,c.get<EntailedCtr>());
+	c.get<OptimData>().compute_pu(sys,c.box);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -159,7 +159,7 @@ void CellCostPFlb::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostPFlb::set_optim_data(Cell& c, const System& sys) {
+void CellCostPFlb::set_optim_data(Cell& c, const ExtendedSystem& sys) {
 	c.get<OptimData>().compute_pf(*sys.goal,c.box);
 }
 
@@ -182,14 +182,14 @@ void CellCostPFub::add_backtrackable(Cell& root) {
 	root.add<OptimData>();
 }
 
-void CellCostPFub::set_optim_data(Cell& c, const System& sys) {
+void CellCostPFub::set_optim_data(Cell& c, const ExtendedSystem& sys) {
 	c.get<OptimData>().compute_pf(*sys.goal,c.box);
 }
 
 double CellCostPFub::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
-		return  data->pf.ub();
+		return data->pf.ub();
 	} else {
 		ibex_error("CellCostPFub::cost : invalid cost"); return POS_INFINITY;
 	}

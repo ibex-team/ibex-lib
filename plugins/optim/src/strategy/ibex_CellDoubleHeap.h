@@ -13,6 +13,7 @@
 #include "ibex_DoubleHeap.h"
 #include "ibex_CellCostFunc.h"
 #include "ibex_CellBufferOptim.h"
+#include "ibex_ExtendedSystem.h"
 
 namespace ibex {
 
@@ -38,7 +39,8 @@ public:
 	/**
 	 * \brief Create the buffer.
 	 *
-	 * \param sys    - the original (not extended) system to optimize
+	 * \param sys      - the original (not extended) system to optimize
+	 * \param goal_var - the goal variable in the extended system
 	 * \param critpr - probability to choose the second criterion in node selection;
 	 *                 integer in [0,100]. By default 50. The value 0 corresponds to
 	 *                 use a single criterion for node selection (the classical one :
@@ -48,7 +50,7 @@ public:
 	 * \param crit   - second criterion in node selection (the first criterion is the
 	 *                 minimum of the objective estimate). default value CellHeapOPtim::UB.
 	 */
-	CellDoubleHeap(const System& sys, int crit2_pr=50,
+	CellDoubleHeap(const ExtendedSystem& sys, /*int goal_var, */int crit2_pr=50,
 			CellCostFunc::criterion crit2=CellCostFunc::UB);
 
     /**
@@ -116,18 +118,14 @@ protected:
 	/**
 	 * The system
 	 */
-	const System& sys;
+	const ExtendedSystem& sys;
 };
 
 /*================================== inline implementations ========================================*/
 
-//inline CellDoubleHeap::CellDoubleHeap(CellCostFunc& cost1, CellCostFunc& cost2, int critpr) :
-//		DoubleHeap<Cell>(cost1,cost1.depends_on_loup,cost2,cost2.depends_on_loup, critpr) { }
-//
-
-inline CellDoubleHeap::CellDoubleHeap(const System& sys, int crit2_pr, CellCostFunc::criterion crit2) :
-		DoubleHeap<Cell>(*new CellCostVarLB(sys.nb_var), true /**TMP TMP**/,
-				*CellCostFunc::get_cost(crit2, sys.nb_var), true /**TMP TMP**/, crit2_pr),
+inline CellDoubleHeap::CellDoubleHeap(const ExtendedSystem& sys, /*int goal_var, */int crit2_pr, CellCostFunc::criterion crit2) :
+		DoubleHeap<Cell>(*new CellCostVarLB(sys.goal_var()), false,
+				*CellCostFunc::get_cost(crit2, sys.goal_var()), true /**TMP TMP**/, crit2_pr),
 		sys(sys) {
 }
 

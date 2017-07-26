@@ -10,7 +10,7 @@
 #ifndef __IBEX_CELL_COST_FUNC__
 #define __IBEX_CELL_COST_FUNC__
 
-#include "ibex_System.h"
+#include "ibex_ExtendedSystem.h"
 #include "ibex_SharedHeap.h"
 #include "ibex_Cell.h"
 
@@ -68,7 +68,7 @@ public:
 	 *
 	 * Does nothing (by default).
 	 */
-	virtual void set_optim_data(Cell& c, const System& sys) { }
+	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys) { }
 
 	/**
 	 * If the cost depends on the loup.
@@ -148,7 +148,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const System& sys);
+	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
 private:
 
 	/** the lower upper bound. */
@@ -185,7 +185,7 @@ public:
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const System& sys);
+	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
 private:
 
 	/** the lower upper bound. */
@@ -220,7 +220,7 @@ public:
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const System& sys);
+	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
 private:
 
 	/** the lower upper bound. */
@@ -247,7 +247,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const System& sys);
+	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
 };
 
 
@@ -263,7 +263,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const System& sys);
+	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -285,7 +285,7 @@ public:
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const System& sys);
+	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;

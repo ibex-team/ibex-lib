@@ -419,14 +419,14 @@ void Optimizer::report(bool verbose) {
 
 		if (loup==initial_loup)
 			cout << " no feasible point found " << endl;
-		else
+		else {
 			cout << " best feasible point: ";
 
-		if (loup_finder.rigorous())
-			cout << loup_point << endl;
-		else
-			cout << loup_point.lb() << endl;
-
+			if (loup_finder.rigorous())
+				cout << loup_point << endl;
+			else
+				cout << loup_point.lb() << endl;
+		}
 	}
 	cout << " cpu time used: " << time << "s." << endl;
 	cout << " number of cells: " << nb_cells << endl;
