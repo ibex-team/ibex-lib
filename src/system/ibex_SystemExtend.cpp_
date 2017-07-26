@@ -52,8 +52,7 @@ public:
 
 
 		// TODO: factorize code with SystemNormalize
-		// note: sys.ctrs.size()<>sys.nb_ctr in general but
-		// with EXTEND, they actually match (only scalar constraints).
+
 		for (int i=0; i<sys.ctrs.size(); i++) {
 
 			if (sys.ctrs[i].op==EQ) {
@@ -64,8 +63,11 @@ public:
 					f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub());
 					f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - (-p.second->lb()));
 				} else {
-					f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
-					f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
+					Domain deps(sys.ctrs[i].f.expr().dim);
+					Array<Domain> a(deps);
+					load(a,IntervalVector(deps.dim.size(),eps));
+					f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - ExprConstant::new_(deps));
+					f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - ExprConstant::new_(deps));
 				}
 				add_ctr(ExprCtr(*f_1,LEQ));
 				cleanup(*f_1, false);

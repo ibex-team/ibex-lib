@@ -40,7 +40,6 @@ public:
 	 * \brief Create the buffer.
 	 *
 	 * \param sys      - the original (not extended) system to optimize
-	 * \param goal_var - the goal variable in the extended system
 	 * \param critpr - probability to choose the second criterion in node selection;
 	 *                 integer in [0,100]. By default 50. The value 0 corresponds to
 	 *                 use a single criterion for node selection (the classical one :
@@ -50,7 +49,7 @@ public:
 	 * \param crit   - second criterion in node selection (the first criterion is the
 	 *                 minimum of the objective estimate). default value CellHeapOPtim::UB.
 	 */
-	CellDoubleHeap(const ExtendedSystem& sys, /*int goal_var, */int crit2_pr=50,
+	CellDoubleHeap(const ExtendedSystem& sys, int crit2_pr=50,
 			CellCostFunc::criterion crit2=CellCostFunc::UB);
 
     /**
@@ -123,9 +122,9 @@ protected:
 
 /*================================== inline implementations ========================================*/
 
-inline CellDoubleHeap::CellDoubleHeap(const ExtendedSystem& sys, /*int goal_var, */int crit2_pr, CellCostFunc::criterion crit2) :
+inline CellDoubleHeap::CellDoubleHeap(const ExtendedSystem& sys, int crit2_pr, CellCostFunc::criterion crit2) :
 		DoubleHeap<Cell>(*new CellCostVarLB(sys.goal_var()), false,
-				*CellCostFunc::get_cost(crit2, sys.goal_var()), true /**TMP TMP**/, crit2_pr),
+				*CellCostFunc::get_cost(crit2, sys.goal_var()), true /* TODO: give right value */, crit2_pr),
 		sys(sys) {
 }
 
@@ -146,9 +145,6 @@ inline unsigned int CellDoubleHeap::size() const  { return DoubleHeap<Cell>::siz
 
 inline bool CellDoubleHeap::empty() const         { return DoubleHeap<Cell>::empty(); }
 
-//inline void CellDoubleHeap::push(Cell* cell)      { DoubleHeap<Cell>::push(cell); }
-
-/** Push a new cell on the stack. */
 inline void CellDoubleHeap::push(Cell* cell) {
 	// we know cost1() does not require OptimData
 	cost2().set_optim_data(*cell,sys);

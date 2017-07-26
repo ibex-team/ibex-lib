@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-LoupFinderFwdBwd::LoupFinderFwdBwd(const System& sys) : sys(sys), m(sys.nb_ctr==0? 0 : sys.f_ctrs.image_dim()) {
+LoupFinderFwdBwd::LoupFinderFwdBwd(const System& sys) : sys(sys), m(sys.nb_ctr) {
 
 	// ====== build the reversed inequalities g_i(x)>0 ===============
 	is_inside=m>0? new CtcUnion(sys) : NULL;

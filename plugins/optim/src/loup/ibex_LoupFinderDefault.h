@@ -41,9 +41,12 @@ public:
 	 * \param sys   - The NLP problem.
 	 * \param inHC4 - Flag for building inner boxes. If true, apply inHC4 (inner arithmetic).
 	 *                Otherwise, use forward/backward contractor on reversed inequalities.
-	 *                By default: true.
+	 *                By default: false because the current implement of inHC4:
+	 *                1/ does not work with vector/matrix constraints
+	 *                2/ generates symbolically components of the main function (heavy)
+	 *                3/ seem not to bring substantial gain in performance anymore
 	 */
-	LoupFinderDefault(const System& sys, bool inHC4=true);
+	LoupFinderDefault(const System& sys, bool inHC4=false);
 
 	/**
 	 * \brief Delete this.
