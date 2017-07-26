@@ -213,7 +213,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 //	entailed = &c.get<EntailedCtr>();
 //	if (!update_entailed_ctr(tmp_box)) {
 //		c.box.set_empty();
-//		return;
+	//		return;
 //	}
 
 	bool loup_ch=update_loup(tmp_box);
@@ -238,6 +238,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	//   and "goal_abs_prec" for the goal variable)
 	// - the extended box has no bisectable domains (if prec=0 or <1 ulp)
 	if ((tmp_box.max_diam()<=eps_x && y.diam() <=abs_eps_f) || !c.box.is_bisectable()) {
+		cout << "here. y.lb=" << y.lb() << endl;
 		update_uplo_of_epsboxes(y.lb());
 		c.box.set_empty();
 		return;
@@ -299,7 +300,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	try {
 		while (!buffer.empty()) {
 
-		  if (trace >= 2) cout << buffer;
+		  //if (trace >= 2)
+			  cout << buffer;
 
 			loup_changed=false;
 

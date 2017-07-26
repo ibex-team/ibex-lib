@@ -44,33 +44,36 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 	if (sys.nb_ctr>0) {
 		BitSet active=sys.active_ctrs(box);
 
-		IntervalVector gx = sys.active_ctrs_eval(box);
+		if (!active.empty()) {
 
-		int c;
-		for (int i=0; i<active.size(); i++) {
-			c=(i==0? active.min() : active.next(c));
+			IntervalVector gx = sys.active_ctrs_eval(box);
 
-			Interval right_cst;
-			switch(sys.ops[c]) {
-			case LT :
-			case LEQ : right_cst=Interval::NEG_REALS; break;
-			case EQ  :
-				if (c==goal_ctr) // ---> f(x)<=y
-					right_cst=Interval::NEG_REALS;
-				else
-					right_cst=Interval::ZERO;      break;
-			case GEQ :
-			case GT : right_cst=Interval::POS_REALS;  break;
-			}
+			int c;
+			for (int i=0; i<active.size(); i++) {
+				c=(i==0? active.min() : active.next(c));
 
-			// Quick infeasibility check
-			if (gx[i].is_disjoint(right_cst)) throw NotFound();
+				Interval right_cst;
+				switch(sys.ops[c]) {
+				case LT :
+				case LEQ : right_cst=Interval::NEG_REALS; break;
+				case EQ  :
+					if (c==goal_ctr) // ---> f(x)<=y
+						right_cst=Interval::NEG_REALS;
+					else
+						right_cst=Interval::ZERO;      break;
+				case GEQ :
+				case GT : right_cst=Interval::POS_REALS;  break;
+				}
 
-			sys.f_ctrs[c].ibwd(right_cst, inbox);
+				// Quick infeasibility check
+				if (gx[i].is_disjoint(right_cst)) throw NotFound();
 
-			if (inbox.is_empty()) {
-				inner_found=false;
-				break;
+				sys.f_ctrs[c].ibwd(right_cst, inbox);
+
+				if (inbox.is_empty()) {
+					inner_found=false;
+					break;
+				}
 			}
 		}
 	}

@@ -409,13 +409,17 @@ inline double Optimizer::get_time() const { return time; }
 inline double Optimizer::get_nb_cells() const { return nb_cells; }
 
 inline double Optimizer::get_obj_rel_prec() const {
-	// TODO: why -1e-15???
-	return loup==POS_INFINITY ? POS_INFINITY :
-			(loup-uplo)/(fabs(loup))-1.e-15;
+	if (loup==POS_INFINITY)
+		return POS_INFINITY;
+	else if (loup==0)
+		if (uplo<0) return POS_INFINITY;
+		else return 0;
+	else
+		return (loup-uplo)/(fabs(loup));
 }
 
 inline double Optimizer::get_obj_abs_prec() const {
-	return loup-uplo-1.e-15;
+	return loup-uplo;
 }
 
 } // end namespace ibex
