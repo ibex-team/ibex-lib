@@ -82,8 +82,10 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 
 	IntervalMatrix Df(ma,n); // derivatives over the box
 
-	if (slope == TAYLOR) // compute derivatives once for all
+	if (slope == TAYLOR) { // compute derivatives once for all
 		Df=sys.active_ctrs_jacobian(box);
+		if (Df.is_empty()) return -1;
+	}
 
 	for(unsigned int k=0; k<corners.size(); k++) {
 
@@ -96,11 +98,14 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 			// the evaluation of the constraints in the corner x_corner
 			IntervalVector g_corner(sys.f_ctrs.eval_vector(corner,active));
 
+			if (g_corner.is_empty()) continue; // skip this corner
+
 			//cout << "========== corner=" << corner << "=========" << endl;
 
 			// ========= update derivatives (Hansen mode) ========
 			if (slope == HANSEN) {
 				sys.f_ctrs.hansen_matrix(box,corner,Df,active);
+				if (Df.is_empty()) continue; // skip this corner
 			}
 
 			int c; // constraint number
@@ -151,9 +156,11 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box) {
 	IntervalVector corner = get_corner_point(box);
 
 	IntervalMatrix J=sys.active_ctrs_jacobian(box);
+	if (J.is_empty()) return -1; // note: no way to inform that the box is actually infeasible
 
 	// the evaluation of the constraints in the corner x_corner
 	IntervalVector g_corner(sys.f_ctrs.eval_vector(corner,active));
+	if (g_corner.is_empty()) return -1;
 
 	// total number of added constraint
 	// may be less than active.size() if
