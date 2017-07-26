@@ -257,8 +257,6 @@ void ExprLinearity::visit(const ExprDiv& e) {
 						type=NONLINEAR;
 				else                          // ex: sin(x)/2
 						type=NONLINEAR;
-			} else {
-				(*d)[i]=l[n] / r[n];
 			}
 		}
 		_coeffs.insert(e, make_pair(d,type));

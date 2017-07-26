@@ -109,15 +109,17 @@ inline void _put(M& m, int row_start_index, int col_start_index, const V& v, boo
 
 template<class M>
 inline M _transpose(const M& m) {
-	assert(!___is_empty(m));
-
 	M m2(m.nb_cols(), m.nb_rows());
 
-	for (int i=0; i<m.nb_rows(); i++) {
-		for (int j=0; j<m.nb_cols(); j++) {
-			m2[j][i]=m[i][j];
+	if (___is_empty(m))
+		___set_empty(m2);
+	else
+		for (int i=0; i<m.nb_rows(); i++) {
+			for (int j=0; j<m.nb_cols(); j++) {
+				m2[j][i]=m[i][j];
+			}
 		}
-	}
+
 	return m2;
 }
 

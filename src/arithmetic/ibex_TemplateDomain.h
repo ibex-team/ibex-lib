@@ -800,7 +800,7 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 		switch (dim.type()) {
 		case Dim::SCALAR:
 			if (nb_used==-1 || i==used[u]) {
-				x[i]=d[s].i();
+				if ((x[i]=d[s].i()).is_empty()) { x.set_empty(); return; }
 				u++; // if nb_used==-1, u is incremented for nothing
 				if (u==nb_used) return; // otherwise next test "i==used[u]" is a memory fault
 			}
@@ -812,7 +812,7 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 			const typename D::VECTOR& v=d[s].v();
 			for (int j=0; j<dim.vec_size(); j++) {
 				if (nb_used==-1 || i==used[u]) {
-					x[i]=v[j];
+					if ((x[i]=v[j]).is_empty()) { x.set_empty(); return; }
 					u++;
 					if (u==nb_used) return;
 				}
@@ -827,7 +827,7 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 			for (int k=0; k<dim.nb_rows(); k++)
 				for (int j=0; j<dim.nb_cols(); j++) {
 					if (nb_used==-1 || i==used[u]) {
-						x[i]=M[k][j];
+						if ((x[i]=M[k][j]).is_empty()) { x.set_empty(); return; }
 						u++;
 						if (u==nb_used) return;
 					}
