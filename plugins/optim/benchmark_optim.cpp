@@ -42,7 +42,7 @@ bool
 do_one_bench (System &sys, double prec, double time_limit)
 {
 	/* Build the default optimizer */
-	DefaultOptimizer DefOpt (sys, 0.0, prec);
+	DefaultOptimizer DefOpt (sys, 0.0, prec, prec);
 
 	/* Set the time limit */
 	DefOpt.timeout = time_limit;
@@ -52,14 +52,14 @@ do_one_bench (System &sys, double prec, double time_limit)
 
 	/* Report some information (computation time, etc.) */
 	std::cout << "BENCH: eps = " << prec
-	          << " ; status = " << status
-	          << " ; time = " << DefOpt.time
-	          << " ; nb_cells = " << DefOpt.nb_cells
-	          << " ; uplo = " << DefOpt.uplo
-	          << " ; loup = " << DefOpt.loup
+	          << " ; status = " << DefOpt.get_status()
+	          << " ; time = " << DefOpt.get_time()
+	          << " ; nb_cells = " << DefOpt.get_nb_cells()
+	          << " ; uplo = " << DefOpt.get_uplo()
+	          << " ; loup = " << DefOpt.get_loup()
 	          << std::endl;
 
-	tot_time += DefOpt.time;
+	tot_time += DefOpt.get_time();
 
 	return status == Optimizer::TIME_OUT;
 }

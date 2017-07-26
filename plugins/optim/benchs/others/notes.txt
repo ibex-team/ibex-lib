@@ -3,3 +3,12 @@
 Probably need to desactivate symbolic differentation:
 	dualc1
 	polygon25
+
+
+Very instable:
+  ex14_1_6. May be solved in less than 1s or ...
+  
+  
+  
+ex8_4_5-1.bch: 
+raise an ibex::Exception with release 2.5
