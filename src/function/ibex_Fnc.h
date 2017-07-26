@@ -68,20 +68,36 @@ public:
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.
 	 *
-	 * Default implementation: return [-oo,oo]
+	 * Must be implemented in the subclass if called.
 	 *
 	 * \pre f must be real-valued
 	 */
 	virtual Interval eval(const IntervalVector& box) const;
 
 	/**
-	 * \brief Calculate f(box) using interval arithmetic.
+	 * \brief Calculate f_i(box) using interval arithmetic.
 	 *
-	 * Default implementation: return [-oo,oo]x...x[-oo,oo].
+	 * Return the ith component of f(box).
 	 *
 	 * \pre f must be vector-valued
 	 */
-	virtual IntervalVector eval_vector(const IntervalVector& box) const;
+	Interval eval(int i, const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
+	 *
+	 * \pre f must be vector-valued
+	 */
+	IntervalVector eval_vector(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate some components of f(box) using interval arithmetic.
+	 *
+	 * Must be implemented in the subclass if called.
+	 *
+	 * \pre f must be vector-valued
+	 */
+	virtual IntervalVector eval_vector(const IntervalVector& box, const BitSet& components) const;
 
 	/**
 	 * \brief Calculate f(x) using interval arithmetic.
@@ -230,15 +246,36 @@ inline int Fnc::image_dim() const {
 }
 
 inline Interval Fnc::eval(const IntervalVector& box) const {
+	ibex_error("Fnc: 'eval' called with no implementation.");
 	return Interval();
 }
 
+inline Interval Fnc::eval(int i, const IntervalVector& box) const {
+	return _image_dim.is_scalar() ?
+			eval(box) :
+			eval_vector(box, BitSet::singleton(image_dim(),i))[0];
+}
+
 inline IntervalVector Fnc::eval_vector(const IntervalVector& box) const {
+	return _image_dim.is_scalar() ?
+			IntervalVector(1,eval(box)) :
+			eval_vector(box, BitSet::all(image_dim()));
+}
+
+inline IntervalVector Fnc::eval_vector(const IntervalVector& box, const BitSet& components) const {
+	ibex_error("Fnc: 'eval_vector' called with no implementation.");
 	return IntervalVector(_image_dim.vec_size());
 }
 
 inline IntervalMatrix Fnc::eval_matrix(const IntervalVector& box) const {
-	return IntervalMatrix(_image_dim.nb_rows(), _image_dim.nb_cols());
+	IntervalMatrix M(_image_dim.nb_rows(), _image_dim.nb_cols());
+	switch(_image_dim.type()) {
+	case Dim::SCALAR:     M[0][0]=eval(box); break;
+	case Dim::ROW_VECTOR: M[0]=eval_vector(box); break;
+	case Dim::COL_VECTOR: M.set_col(0,eval_vector(box)); break;
+	default: ibex_error("Fnc: 'eval_matrix' called with no implementation.");
+	}
+	return M;
 }
 
 inline void Fnc::gradient(const IntervalVector& x, IntervalVector& g) const {

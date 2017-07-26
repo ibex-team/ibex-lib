@@ -68,6 +68,9 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 				// Quick infeasibility check
 				if (gx[i].is_disjoint(right_cst)) throw NotFound();
 
+				// *******
+				// Warning: generates components of f_ctrs!!
+				// *******
 				sys.f_ctrs[c].ibwd(right_cst, inbox);
 
 				if (inbox.is_empty()) {

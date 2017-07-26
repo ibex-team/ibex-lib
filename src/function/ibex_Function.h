@@ -654,18 +654,21 @@ public:
 	virtual Interval eval(const IntervalVector& box) const;
 
 	/**
-	 * \brief Calculate f(box) using interval arithmetic.
-	 *
-	 * \pre f must be vector-valued.
+	 *\see #ibex::Fnc
 	 */
-	virtual IntervalVector eval_vector(const IntervalVector& box) const;
+	Interval eval(int i, const IntervalVector& box) const;
+
+	/**
+	 *\see #ibex::Fnc
+	 */
+	IntervalVector eval_vector(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate some components of f using interval arithmetic.
 	 *
 	 * \pre f must be vector-valued.
 	 */
-	IntervalVector eval_vector(const IntervalVector& box, const BitSet& components) const;
+	virtual IntervalVector eval_vector(const IntervalVector& box, const BitSet& components) const;
 
 	/**
 	 * \brief Calculate f(x) using interval arithmetic.
@@ -1010,8 +1013,12 @@ inline Interval Function::eval(const IntervalVector& box) const {
 	return eval_domain(box).i();
 }
 
+inline Interval Function::eval(int i, const IntervalVector& box) const {
+	return Fnc::eval(i, box);
+}
+
 inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
-	return expr().dim.is_scalar() ? IntervalVector(1,eval_domain(box).i()) : eval_domain(box).v();
+	return Fnc::eval_vector(box);
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box, const BitSet& components) const {

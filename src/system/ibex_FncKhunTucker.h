@@ -1,9 +1,12 @@
-/*
- * ibex_FritzJohnFnc.h
- *
- *  Created on: Apr 26, 2017
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_FncKhunTucker.h
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : Apr 26, 2017
+// Last Update : Jul 26, 2017
+//============================================================================
 
 #ifndef __IBEX_FNC_KHUN_TUCKER_H__
 #define __IBEX_FNC_KHUN_TUCKER_H__
@@ -48,7 +51,7 @@ public:
 	/**
 	 *\see #ibex::Fnc
 	 */
-	virtual IntervalVector eval_vector(const IntervalVector& x_lambda) const;
+	virtual IntervalVector eval_vector(const IntervalVector& x_lambda, const BitSet& components) const;
 
 	/**
 	 *\see #ibex::Fnc

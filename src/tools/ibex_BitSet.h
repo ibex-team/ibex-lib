@@ -71,6 +71,11 @@ public:
 	static BitSet all(int n);
 
 	/**
+	 * \brief Create {i} (a bitset of capacity n with one element: i).
+	 */
+	static BitSet singleton(int n, int i);
+
+	/**
 	 * \brief Compose two bitsets.
 	 *
 	 * E.g. if b1 is (1,2,5,8,9) and b2 is (1,3) then
@@ -190,6 +195,12 @@ inline BitSet BitSet::empty(int n) { return BitSet(n); }
 inline BitSet BitSet::all(int n) {
 	BitSet b(n);
 	b.bitset.fill(0,n-1);
+	return b;
+}
+
+inline BitSet BitSet::singleton(int n, int i) {
+	BitSet b=empty(n);
+	b.add(i);
 	return b;
 }
 

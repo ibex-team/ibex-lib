@@ -1,9 +1,12 @@
-/*
- * ibex_FritzJohnFnc.cpp
- *
- *  Created on: Apr 26, 2017
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_FncKhunTucker.cpp
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : Apr 26, 2017
+// Last Update : Jul 26, 2017
+//============================================================================
 
 #include <stdlib.h>
 #include <cassert>
@@ -119,7 +122,12 @@ IntervalMatrix FncKhunTucker::gradients(const IntervalVector& x) const {
 	return A;
 }
 
-IntervalVector FncKhunTucker::eval_vector(const IntervalVector& x_lambda) const {
+IntervalVector FncKhunTucker::eval_vector(const IntervalVector& x_lambda, const BitSet& components) const {
+
+	if (components.size()!=n+nb_mult) {
+		not_implemented("FncKhunTucker: 'eval_vector' for selected components");
+		//J.resize(n+nb_mult,n+nb_mult);
+	}
 
 	IntervalVector res(n+nb_mult);
 
@@ -194,7 +202,7 @@ IntervalVector FncKhunTucker::eval_vector(const IntervalVector& x_lambda) const 
 void FncKhunTucker::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const {
 
 	if (components.size()!=n+nb_mult) {
-		not_implemented("FritzJohnFnc: 'jacobian' for selected components");
+		not_implemented("FncKhunTucker: 'jacobian' for selected components");
 		//J.resize(n+nb_mult,n+nb_mult);
 	}
 

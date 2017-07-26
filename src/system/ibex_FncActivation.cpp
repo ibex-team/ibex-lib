@@ -42,12 +42,12 @@ FncActivation::~FncActivation() {
 
 }
 
-IntervalVector FncActivation::eval_vector(const IntervalVector& x) const {
-	return sys.f_ctrs.eval_vector(x,_activated);
+IntervalVector FncActivation::eval_vector(const IntervalVector& x, const BitSet& components) const {
+	return sys.f_ctrs.eval_vector(x, _activated.compose(components));
 }
 
 void FncActivation::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
-	sys.f_ctrs.jacobian(x,J,_activated.compose(components),v);
+	sys.f_ctrs.jacobian(x, J, _activated.compose(components),v);
 }
 
 } /* namespace ibex */

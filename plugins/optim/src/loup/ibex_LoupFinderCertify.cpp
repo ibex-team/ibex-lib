@@ -15,13 +15,15 @@ namespace ibex {
 using namespace std;
 
 LoupFinderCertify::LoupFinderCertify(const System& sys, LoupFinder& finder) : sys(sys), has_equality(false), finder(finder) {
-	// ==== check if the system contains equalities ====
-	for (int i=0; i<sys.ctrs.size(); i++) {
-		if (sys.ctrs[i].op==EQ) {
-			(bool&) has_equality = true;
-			break;
+
+	if (sys.nb_ctr>0)
+		// ==== check if the system contains equalities ====
+		for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
+			if (sys.ops[i]==EQ) {
+				(bool&) has_equality = true;
+				break;
+			}
 		}
-	}
 }
 
 //pair<IntervalVector, double> LoupCorrection::find(double loup, const Vector& loup_point, double pseudo_loup) {
@@ -70,13 +72,13 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 				//note: don't call is_inner because it would check again all equalities (which is useless
 				// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
 				bool satisfy_inequalities=true;
-				for (int j=0; j<sys.nb_ctr; j++) {
+				for (int j=0; j<sys.f_ctrs.image_dim(); j++) {
 					if (!af.activated()[j])
 						if (((sys.ops[j]==LEQ || sys.ops[j]==LT)
-							  && sys.ctrs[j].f.eval(pdc.solution()).ub()>0)
+							  && sys.f_ctrs.eval(j,pdc.solution()).ub()>0)
 								||
 							((sys.ops[j]==GEQ || sys.ops[j]==GT)
-							  && sys.ctrs[j].f.eval(pdc.solution()).lb()<0)) {
+							  && sys.f_ctrs.eval(j,pdc.solution()).lb()<0)) {
 
 						/* TODO: && !entailed->original(j)*/
 

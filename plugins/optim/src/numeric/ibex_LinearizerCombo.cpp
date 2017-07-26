@@ -12,8 +12,8 @@
 
 namespace ibex {
 
-LinearizerCombo::LinearizerCombo(const System& sys1, linear_mode lmode1) :
-			Linearizer(sys1.nb_var),
+LinearizerCombo::LinearizerCombo(const System& sys, linear_mode lmode1) :
+			Linearizer(sys.nb_var),
 			lmode(lmode1),
 			myxnewton(NULL)
 #ifdef _IBEX_WITH_AFFINE_
@@ -24,31 +24,31 @@ LinearizerCombo::LinearizerCombo(const System& sys1, linear_mode lmode1) :
 	switch (lmode) {
 	case XNEWTON: {
 		// the default corner of XNewton linear relaxation
-		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
+		myxnewton = new LinearizerXTaylor(sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
 		break;
 	}
 	case TAYLOR:{
 		// the default corner of XNewton linear relaxation
-		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::TAYLOR);
+		myxnewton = new LinearizerXTaylor(sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::TAYLOR);
 		break;
 	}
 	case HANSEN: {
 		// the default corner of XNewton linear relaxation
-		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
+		myxnewton = new LinearizerXTaylor(sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
 		break;
 	}
 
 #ifdef _IBEX_WITH_AFFINE_
 	case ART:
 	case AFFINE2: {
-		myart = new LinearizerAffine2(sys1);
+		myart = new LinearizerAffine2(sys);
 		break;
 	}
 	case COMPO: {
 
-		myart = new LinearizerAffine2(sys1);
+		myart = new LinearizerAffine2(sys);
 		// the default corner of XNewton linear relaxation
-		myxnewton = new LinearizerXTaylor(sys1, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
+		myxnewton = new LinearizerXTaylor(sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
 		break;
 	}
 #else

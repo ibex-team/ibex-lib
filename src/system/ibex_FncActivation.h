@@ -42,7 +42,7 @@ public:
 	/**
 	 * \brief Evaluation of the function.
 	 */
-	virtual IntervalVector eval_vector(const IntervalVector& x) const;
+	virtual IntervalVector eval_vector(const IntervalVector& x, const BitSet& components) const;
 
 	/**
 	 * \brief Jacobian matrix of the function.
