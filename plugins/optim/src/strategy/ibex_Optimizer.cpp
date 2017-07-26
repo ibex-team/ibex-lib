@@ -380,7 +380,9 @@ void Optimizer::report(bool verbose) {
 		cout << get_uplo() << ' ' << get_loup() << endl;
 		for (int i=0; i<n; i++) {
 			if (i>0) cout << ' ';
-			cout << get_loup_point()[i];
+			cout << get_loup_point()[i].lb();
+			if (loup_finder.rigorous())
+				cout << ' ' << get_loup_point()[i].ub();
 		}
 		cout << endl << get_time() << " " << get_nb_cells() << endl;
 		return;

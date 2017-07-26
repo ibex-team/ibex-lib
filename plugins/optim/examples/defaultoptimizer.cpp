@@ -45,8 +45,9 @@ int main(int argc, char** argv) {
 			"\nline 1: status\n"
 			"- 0=success\n     - 1=infeasible problem\n     - 2=no feasible point found\n"
 			"- 3=unbounded objective\n     - 4=time out\n"
+			"- 5=unreached precision.\n"
 			"line 2: uplo loup\n"
-			"line 3: x* (n values)\n"
+			"line 3: x* (n values or 2*n in rigor mode: lb(x1),ub(x1),...,ub(xn))\n"
 			"line 4:time (in seconds) number of cells.", {'q',"quiet"});
 
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
