@@ -134,21 +134,21 @@ public:
 	 */
 	int get_nb_rows() const;
 
-	void get_rows(Matrix& A) const;
+	ibex::Matrix get_rows() const;
 
-	void get_rows_trans(Matrix& A_trans) const;
+	ibex::Matrix get_rows_trans() const;
 
-	void get_lhs_rhs(IntervalVector& lhs_rhs) const;
+	IntervalVector get_lhs_rhs() const;
 
-	void get_coef_obj(Vector& obj) const;
+	ibex::Vector get_coef_obj() const;
 
 	double get_epsilon() const;
 
 	Interval get_obj_value() const;
 
-	void get_primal_sol(Vector & prim) const;
+	ibex::Vector get_primal_sol() const;
 
-	void get_dual_sol(Vector & dual) const;
+	ibex::Vector get_dual_sol() const;
 
 
 
@@ -212,7 +212,7 @@ private:
 	/**
 	 * \throw LPExpcetion if not infeasible
 	 */
-	void get_infeasible_dir(Vector & sol) const;
+	ibex::Vector get_infeasible_dir() const;
 
 	/**
 	 * Neumaier Shcherbina postprocessing in case of optimal solution found :
@@ -239,8 +239,8 @@ private:
 
 	/** =================== Results of the last call to solve() ==================== */
 	Interval obj_value;       // (certified or not) enclosure of the minimum
-	Vector primal_solution;
-	Vector dual_solution;
+	ibex::Vector primal_solution;
+	ibex::Vector dual_solution;
 	int status_prim; // return status of the primal solving (implementation-specific)
 	int status_dual; // return status of the dual solving (implementation-specific)
 	/**===============================================================================*/

@@ -225,8 +225,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	//	std::cout << " stat " << stat << std::endl;
 	if (stat == LinearSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
-		Vector prim(n+1);
-		mylp->get_primal_sol(prim);
+		Vector prim = mylp->get_primal_sol();
 
 		IntervalVector tmpbox(n);
 

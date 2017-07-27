@@ -103,6 +103,20 @@ bool almost_eq(const IntervalVector& y_actual, const IntervalVector& y_expected,
 	return true;
 }
 
+bool almost_eq(double y_actual, double y_expected, double err) {
+	return ( fabs(y_actual-y_expected) <= err );
+}
+
+bool almost_eq(const Vector& y_actual, const Vector& y_expected, double err) {
+	if (y_actual.size()!=y_actual.size()) return false;
+
+	for (int i=0; i<y_actual.size(); i++) {
+		if (!almost_eq(y_actual[i], y_expected[i],err)) return false;
+	}
+
+	return true;
+}
+
 bool almost_eq(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected, double err) {
 	if (y_actual.nb_rows()!=y_actual.nb_rows()) return false;
 	if (y_actual.nb_cols()!=y_actual.nb_cols()) return false;

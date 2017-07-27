@@ -69,7 +69,8 @@ LinearSolver::Status_Sol LinearSolver::solve_proved() {
 	switch (stat) {
 	case LinearSolver::OPTIMAL : {
 		// Neumaier - Shcherbina postprocessing
-		obj_value = neumaier_shcherbina_postprocessing();
+		Interval obj = neumaier_shcherbina_postprocessing();
+		obj_value = Interval(obj.lb(),obj_value.ub());
 		stat = LinearSolver::OPTIMAL_PROVED;
 		break;
 	}
@@ -134,14 +135,15 @@ LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int 
 		else
 			set_obj_var(var, -1.0);
 
-		//	mylinearsolver->writeFile("coucou.lp");
+		//	mylinearsolver->write_file("coucou.lp");
 		//	system("cat coucou.lp");
 		stat = solve();
 		// std::cout << "[polytope-hull]->[run_simplex] solver returns " << stat << std::endl;
 		switch (stat) {
 		case LinearSolver::OPTIMAL : {
 			// Neumaier - Shcherbina postprocessing
-			obj_value = neumaier_shcherbina_postprocessing_var(var, sense);
+			Interval obj_tmp = neumaier_shcherbina_postprocessing_var(var, sense);
+			obj_value = Interval(obj_tmp.lb(),obj_value.ub());
 			obj = obj_value;
 			stat = LinearSolver::OPTIMAL_PROVED;
 			break;
@@ -173,14 +175,11 @@ LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int 
 Interval LinearSolver::neumaier_shcherbina_postprocessing_var (int var, LinearSolver::Sense sense) {
 	try {
 		// the dual solution : used to compute the bound
-		ibex::Vector dual(nb_rows);
-		get_dual_sol(dual);
+		ibex::Vector dual = get_dual_sol();
 
-		ibex::Matrix A_trans (nb_vars,nb_rows) ;
-		get_rows_trans(A_trans);
+		ibex::Matrix A_trans = get_rows_trans();
 
-		IntervalVector B(nb_rows);
-		get_lhs_rhs(B);
+		IntervalVector B = get_lhs_rhs();
 
 		//cout <<" BOUND_test "<< endl;
 		IntervalVector Rest(nb_vars);
@@ -210,27 +209,21 @@ Interval LinearSolver::neumaier_shcherbina_postprocessing_var (int var, LinearSo
 Interval LinearSolver::neumaier_shcherbina_postprocessing() {
 	try {
 		// the dual solution : used to compute the bound
-		ibex::Vector dual(nb_rows);
-		get_dual_sol(dual);
+		ibex::Vector dual =	get_dual_sol();
 
-		ibex::Matrix A_trans (nb_vars,nb_rows) ;
-		get_rows_trans(A_trans);
+		ibex::Matrix A_trans = get_rows_trans();
 
-		IntervalVector B(nb_rows);
-		get_lhs_rhs(B);
+		IntervalVector B = get_lhs_rhs();
 
-		ibex::Vector obj(nb_vars);
-		get_coef_obj(obj);
+		ibex::Vector obj = get_coef_obj();
 
 		//cout <<" BOUND_test "<< endl;
 		IntervalVector Rest(nb_vars);
 		IntervalVector Lambda(dual);
 
-		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-		Rest -= obj; // TODO to check carefully
+		Rest = A_trans * Lambda ;
+		Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
 		return (Lambda * B - Rest * boundvar);
-
-
 
 	} catch (...) {
 		throw LPException();
@@ -239,14 +232,11 @@ Interval LinearSolver::neumaier_shcherbina_postprocessing() {
 
 bool LinearSolver::neumaier_shcherbina_infeasibilitytest() {
 	try {
-		ibex::Vector infeasible_dir(nb_rows);
-		get_infeasible_dir(infeasible_dir);
+		ibex::Vector infeasible_dir = get_infeasible_dir();
 
-		ibex::Matrix A_trans (nb_vars,nb_rows) ;
-		get_rows_trans(A_trans);
+		ibex::Matrix A_trans = get_rows_trans();
 
-		IntervalVector B(nb_rows);
-		get_lhs_rhs(B);
+		IntervalVector B = get_lhs_rhs();
 
 		IntervalVector Lambda(infeasible_dir);
 
@@ -311,6 +301,7 @@ LinearSolver::~LinearSolver() {
 }
 
 LinearSolver::Status_Sol LinearSolver::solve() {
+	obj_value = Interval::ALL_REALS;
 
 	soplex::SPxSolver::Status stat = soplex::SPxSolver::UNKNOWN;
 
@@ -372,8 +363,8 @@ void LinearSolver::write_file(const char* name) {
 	return ;
 }
 
-void LinearSolver::get_coef_obj(ibex::Vector& obj) const {
-
+ibex::Vector LinearSolver::get_coef_obj() const {
+	ibex::Vector obj(nb_vars);
 	try {
 		soplex::DVector newobj(nb_vars);
 		mysoplex->getObj(newobj);
@@ -384,11 +375,11 @@ void LinearSolver::get_coef_obj(ibex::Vector& obj) const {
 	catch(...) {
 		throw LPException();
 	}
-	return;
+	return obj;
 }
 
-void LinearSolver::get_rows(ibex::Matrix &A) const {
-
+ibex::Matrix LinearSolver::get_rows() const {
+	ibex::Matrix A(nb_rows, nb_vars);
 	try {
 		for (int i=0;i<nb_rows; i++){
 			for (int j=0;j<nb_vars; j++){
@@ -399,11 +390,11 @@ void LinearSolver::get_rows(ibex::Matrix &A) const {
 	catch(...) {
 		throw LPException();
 	}
-	return ;
+	return A;
 }
 
-void LinearSolver::get_rows_trans(ibex::Matrix &A_trans) const {
-
+ibex::Matrix LinearSolver::get_rows_trans() const {
+	ibex::Matrix A_trans(nb_vars,nb_rows);
 	try {
 		for (int i=0;i<nb_rows; i++){
 			for (int j=0;j<nb_vars; j++){
@@ -414,89 +405,96 @@ void LinearSolver::get_rows_trans(ibex::Matrix &A_trans) const {
 	catch(...) {
 		throw LPException();
 	}
-	return ;
+	return A_trans;
 }
 
-void  LinearSolver::get_lhs_rhs(IntervalVector& B) const{
-
+IntervalVector  LinearSolver::get_lhs_rhs() const{
+	IntervalVector B(nb_rows);
 	try {
-		// Get the bounds of the variables
-		for (int i=0;i<nb_vars; i++){
+		for (int i=0;i<nb_rows; i++){
 			B[i]=Interval( mysoplex->lhs(i) , mysoplex->rhs(i) );
 		}
-
-		// Get the bounds of the constraints
-		for (int i=nb_vars;i<nb_rows; i++){
-			B[i]=Interval( 	(mysoplex->lhs(i)>-default_max_bound)? mysoplex->lhs(i):-default_max_bound,
-					        (mysoplex->rhs(i)< default_max_bound)? mysoplex->rhs(i): default_max_bound   );
-			//	B[i]=Interval( 	mysoplex->lhs(i),mysoplex->rhs(i));
-			//Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA
-			//           cout << B(i+1) << endl;
-		}
+//		// Get the bounds of the variables
+//		for (int i=0;i<nb_vars; i++){
+//			B[i]=Interval( mysoplex->lhs(i) , mysoplex->rhs(i) );
+//		}
+//
+//		// Get the bounds of the constraints
+//		for (int i=nb_vars;i<nb_rows; i++){
+//			B[i]=Interval( 	(mysoplex->lhs(i)>-default_max_bound)? mysoplex->lhs(i):-default_max_bound,
+//					        (mysoplex->rhs(i)< default_max_bound)? mysoplex->rhs(i): default_max_bound   );
+//			//	B[i]=Interval( 	mysoplex->lhs(i),mysoplex->rhs(i));
+//			//Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA
+//			//           cout << B(i+1) << endl;
+//		}
 	}
 	catch(...) {
 		throw LPException();
 	}
-	return ;
+	return B;
 }
 
 
-void LinearSolver::get_primal_sol(ibex::Vector & solution_primal) const {
-
+ibex::Vector LinearSolver::get_primal_sol() const {
 	try {
 		if (status_prim == soplex::SPxSolver::OPTIMAL) {
-			for (int i=0; i< nb_vars ; i++) {
-				solution_primal[i] = primal_solution[i];
-			}
-		}
+//			for (int i=0; i< nb_vars ; i++) {
+//				solution_primal[i] = primal_solution[i];
+//			}
+			return primal_solution;
+		} else
+			throw LPException();
 	}
 	catch(...) {
 		throw LPException();
 	}
-	return ;
 }
 
-void LinearSolver::get_dual_sol(ibex::Vector & solution_dual) const {
+ibex::Vector LinearSolver::get_dual_sol() const {
 
 	try {
 		if (status_dual == soplex::SPxSolver::OPTIMAL) {
-			for (int i=0; i<nb_rows; i++) {
-				solution_dual[i] = dual_solution[i];
-			}
-		}
+//			for (int i=0; i<nb_rows; i++) {
+//				solution_dual[i] = dual_solution[i];
+//			}
+			return dual_solution;
+		} else
+			throw LPException();
 	}
 	catch(...) {
 		throw LPException();
 	}
-	return ;
 }
 
 
-void LinearSolver::get_infeasible_dir(ibex::Vector & sol) const {
+ibex::Vector LinearSolver::get_infeasible_dir() const {
 
 	try {
+		ibex::Vector sol(nb_rows);
 		soplex::SPxSolver::Status stat1;
 		soplex::DVector sol_found(nb_rows);
 		mysoplex->getDualfarkas(sol_found);
 		//stat1 = mysoplex->getDualfarkas(sol_found);
 		// if (stat1==soplex::SPxSolver::OPTIMAL) // TODO I'm not sure of the value that return getDualfarkas : this condition does not work BNE
-
-		for (int i=0; i<nb_rows; i++) {
-			if (((mysoplex->lhs(i) <= -default_max_bound) && (sol_found[i]>=0))||
-				((mysoplex->rhs(i) >=  default_max_bound) && (sol_found[i]<=0))	) {
-				sol[i]=0.0;
-				}
-			else {
-				sol[i]=sol_found[i];
-			}
-		}
+//		for (int i=0; i<nb_rows; i++) {
+//			if (((mysoplex->lhs(i) <= -default_max_bound) && (sol_found[i]>=0))||
+//				((mysoplex->rhs(i) >=  default_max_bound) && (sol_found[i]<=0))	) {
+//				sol[i]=0.0;
+//				}
+//			else {
+//				sol[i]=sol_found[i];
+//			}
+//		}
 		//	else	res = FAIL; this condition does not work BNE
+
+		for(int i=0; i<nb_rows; i++) {
+			sol[i]=sol_found[i];
+		}
+		return sol;
 	}
 	catch(...) {
 		throw LPException();
 	}
-
-	return ;
 }
 
 double LinearSolver::get_epsilon() const {
@@ -690,9 +688,9 @@ LinearSolver::LinearSolver(int nb_vars1, int max_iter,
 		delete[] errmsg;
 		throw LPException();
 	}
-	double epsilon;
-	if (epsilon <1.e-9) epsilon=1.e-9;
-	if (epsilon >1.e-1) epsilon=1.e-1;
+	double epsilon=eps;
+	if (eps <1.e-9) epsilon=1.e-9;
+	if (eps >1.e-1) epsilon=1.e-1;
 
 
 	status = CPXsetdblparam(envcplex, CPX_PARAM_EPOPT, epsilon);
@@ -893,6 +891,7 @@ LinearSolver::~LinearSolver() {
 }
 
 LinearSolver::Status_Sol LinearSolver::solve() {
+	obj_value = Interval::ALL_REALS;
 
 	try {
 		// Optimize the problem and obtain solution.
@@ -952,8 +951,8 @@ void LinearSolver::write_file(const char* name) {
 }
 
 
-void LinearSolver::get_coef_obj(Vector& obj) const {
-
+ibex::Vector LinearSolver::get_coef_obj() const {
+	ibex::Vector obj(nb_vars);
 	try {
 
 		int status = CPXgetobj(envcplex, lpcplex, obj.raw(),0, nb_vars-1);
@@ -965,10 +964,11 @@ void LinearSolver::get_coef_obj(Vector& obj) const {
 	} catch (...) {
 		throw LPException();
 	}
-	return ;
+	return obj;
 }
 
-void LinearSolver::get_rows(Matrix &A) const {
+Matrix LinearSolver::get_rows() const {
+	Matrix A(nb_rows, nb_vars);
 	try {
 		int surplus = 0, nzcnt = 0;
 		int * t_Rmatbeg = new int[nb_rows];
@@ -1003,11 +1003,11 @@ void LinearSolver::get_rows(Matrix &A) const {
 	} catch (...) {
 		throw LPException();
 	}
-	return;
+	return A;
 }
 
-void LinearSolver::get_rows_trans(Matrix &A_trans) const {
-
+Matrix LinearSolver::get_rows_trans() const {
+	Matrix A_trans(nb_vars, nb_rows);
 	try {
 		int surplus = 0, nzcnt = 0;
 		int * t_cmatbeg = new int[nb_vars];
@@ -1045,10 +1045,11 @@ void LinearSolver::get_rows_trans(Matrix &A_trans) const {
 	} catch (...) {
 		throw LPException();
 	}
-	return ;
+	return A_trans;
 }
 
-void LinearSolver::get_lhs_rhs(IntervalVector& B) const {
+IntervalVector LinearSolver::get_lhs_rhs() const {
+	IntervalVector B(nb_rows);
 	try {
 		// Get the bounds of the variables
 		double * rhs = new double[nb_rows];
@@ -1064,63 +1065,54 @@ void LinearSolver::get_lhs_rhs(IntervalVector& B) const {
 	} catch (...) {
 		throw LPException();
 	}
-	return ;
+	return B;
 }
 
-void LinearSolver::get_primal_sol(Vector & primal) const {
-
+Vector LinearSolver::get_primal_sol() const {
 	try {
 		if (status_prim == 0) {
-			for (int i = 0; i < nb_vars; i++) {
-				primal[i] = primal_solution[i];
-			}
+			return primal_solution;
 		} else
 			throw LPException();
 
 	} catch (...) {
 		throw LPException();
 	}
-	return;
 }
 
-void LinearSolver::get_dual_sol(Vector & dual) const {
-
+Vector LinearSolver::get_dual_sol() const {
 	try {
 		// the dual solution ; used by Neumaier Shcherbina test
 		if (status_dual == 0) {
-			for (int i = 0; i < dual_solution.size(); i++) {
-				dual[i] = (dual_solution[i]< 0) ? dual_solution[i] : 0.0;
-				//dual[i] = dual_solution[i];
-			}
+//			for (int i = 0; i < dual_solution.size(); i++) {
+//				dual[i] = (dual_solution[i]< 0) ? dual_solution[i] : 0.0; // TODO why??
+//				//dual[i] = dual_solution[i];
+//			}
+			return dual_solution;
 		} else
 			throw LPException();
 
 	} catch (...) {
 		throw LPException();
 	}
-	return ;
 }
 
-void LinearSolver::get_infeasible_dir(Vector & sol) const {
-
+Vector LinearSolver::get_infeasible_dir() const {
 	try {
-		double * solution_found = new double[nb_rows];
-
-		int status = CPXdualfarkas(envcplex, lpcplex, solution_found,NULL);
+		Vector sol(nb_rows);
+		int status = CPXdualfarkas(envcplex, lpcplex, sol.raw(),NULL);
 		if (status == 0) {
-			for (int i = 0; i < nb_rows; i++) {
-				sol[i] = (solution_found[i]< 0) ? solution_found[i] : 0.0;
-			}
+//			for (int i = 0; i < nb_rows; i++) {
+//				sol[i] = (solution_found[i]< 0) ? solution_found[i] : 0.0; // TODO why?? need to test
+//			}
+			return sol;
 		}
-		delete[] solution_found;
-
-		if (status) 	throw LPException();
+		else
+			throw LPException();
 
 	} catch (...) {
 		throw LPException();
 	}
-
-	return;
 }
 
 void LinearSolver::clean_ctrs() {
@@ -1250,13 +1242,16 @@ void LinearSolver::set_bounds(const IntervalVector& bounds) {
 	try {
 		// Changement de la fonction objective = rhs du primal (car on est en formulation dual)
 		// Change the LHS and RHS of each constraint associated to the bounds of the variable
+		IntervalVector tmp_bound (bounds.size(),Interval(-default_max_bound,default_max_bound));
+		tmp_bound &= bounds;
+
 		for (int i = 0; i < nb_vars; i++)
-			tmp[i]			 = -bounds[i].lb();
+			tmp[i]			 = -tmp_bound[i].lb();
 		for (int i = 0; i < nb_vars; i++)
-			tmp[nb_vars + i] =  bounds[i].ub();
+			tmp[nb_vars + i] =  tmp_bound[i].ub();
 
 		int status = CPXchgrhs(envcplex, lpcplex, (nb_vars * 2), indice, tmp);
-		boundvar = bounds;
+		boundvar = tmp_bound;
 
 		if (status) {
 			std::cerr<< "Error CPLEX: Could not change the LHS and RHS of each constraint associated to the bounds of the variable, error "
@@ -1423,7 +1418,7 @@ LinearSolver::~LinearSolver() {
 }
 
 LinearSolver::Status_Sol LinearSolver::solve() {
-
+	obj_value = Interval::ALL_REALS;
 	//int stat = -1;
 
 	try{
@@ -1501,7 +1496,8 @@ double LinearSolver::get_epsilon() const {
 }
 
 
-void LinearSolver::get_coef_obj(Vector& obj) const {
+Vector LinearSolver::get_coef_obj() const {
+	Vector obj(nb_vars);
 	try  {
 		const double * newobj =  myclp->getObjCoefficients();
 		for (int i=0; i< nb_vars ; i++) {
@@ -1511,15 +1507,16 @@ void LinearSolver::get_coef_obj(Vector& obj) const {
 	catch(...) {
 		throw LPException();
 	}
-	return;
+	return obj;
 }
 
 
-void LinearSolver::get_rows(Matrix &A) const {
+Matrix LinearSolver::get_rows() const {
+	Matrix A(nb_rows,nb_vars);
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
 		// see mat.getCorefficient()
-		A = Matrix::zeros(nb_rows,nb_vars);
+		//A = Matrix::zeros(nb_rows,nb_vars);
 		if (mat->isColOrdered()) {
 			for (int cc=0;cc<nb_vars; cc++){
 				CoinBigIndex j;
@@ -1541,15 +1538,15 @@ void LinearSolver::get_rows(Matrix &A) const {
 	} catch(...) {
 		throw LPException();
 	}
-	return ;
+	return A;
 }
 
-void LinearSolver::get_rows_trans(Matrix &A_trans) const {
-
+Matrix LinearSolver::get_rows_trans() const {
+	Matrix A_trans(nb_vars,nb_rows);
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
 		// see mat.getCorefficient()
-		A_trans = Matrix::zeros(nb_vars,nb_rows);
+		//A_trans = Matrix::zeros(nb_vars,nb_rows);
 		if (mat->isColOrdered()) {
 			for (int cc=0;cc<nb_vars; cc++){
 				CoinBigIndex j;
@@ -1573,11 +1570,11 @@ void LinearSolver::get_rows_trans(Matrix &A_trans) const {
 	catch(...) {
 		throw LPException();
 	}
-	return ;
+	return A_trans;
 }
 
-void  LinearSolver::get_lhs_rhs(IntervalVector& B) const {
-
+IntervalVector  LinearSolver::get_lhs_rhs() const {
+	IntervalVector B(nb_rows);
 	try {
 		// Get the bounds of the variables
 		for (int i=0;i<nb_vars; i++){
@@ -1586,9 +1583,9 @@ void  LinearSolver::get_lhs_rhs(IntervalVector& B) const {
 
 		// Get the bounds of the constraints
 		for (int i=nb_vars;i<nb_rows; i++){
-			B[i]=Interval( 	(myclp->getRowLower()[i]>-default_max_bound)? myclp->getRowLower()[i]:-default_max_bound,
-					        (myclp->getRowUpper()[i]< default_max_bound)? myclp->getRowUpper()[i]: default_max_bound   );
-			//	B[i]=Interval( 	mysoplex->lhs(i),mysoplex->rhs(i));
+//			B[i]=Interval( 	(myclp->getRowLower()[i]>-default_max_bound)? myclp->getRowLower()[i]:-default_max_bound,
+//	TODO why				        (myclp->getRowUpper()[i]< default_max_bound)? myclp->getRowUpper()[i]: default_max_bound   );
+			B[i]=Interval(myclp->getRowLower()[i],myclp->getRowUpper()[i]);
 			//Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA
 			//           cout << B(i+1) << endl;
 		}
@@ -1596,71 +1593,69 @@ void  LinearSolver::get_lhs_rhs(IntervalVector& B) const {
 	catch(...) {
 		throw LPException();
 	}
-	return ;
+	return B;
 }
 
 
-void LinearSolver::get_primal_sol(Vector & solution_primal) const {
-
+Vector LinearSolver::get_primal_sol() const {
 	try {
 		if (status_prim == 1) {
-			for (int i=0; i< nb_vars ; i++) {
-				solution_primal[i] = primal_solution[i];
-			}
-		}
+//			for (int i=0; i< nb_vars ; i++) {
+//				solution_primal[i] = primal_solution[i];
+//			}
+			return primal_solution;
+		} else
+			throw LPException();
 	}
 	catch(...) {
 		throw LPException();
 	}
-	return ;
 }
 
-void LinearSolver::get_dual_sol(Vector & solution_dual) const {
-
+Vector LinearSolver::get_dual_sol() const {
 	try {
 		if (status_dual == 1) {
-			for (int i=0; i<nb_rows; i++) {
-				solution_dual[i] = dual_solution[i];
-			}
-		}
+//			for (int i=0; i<nb_rows; i++) {
+//				solution_dual[i] = dual_solution[i];
+//			}
+			return dual_solution;
+		} else
+			throw LPException();
 	}
 	catch(...) {
 		throw LPException();
 	}
-	return ;
 }
 
-void LinearSolver::get_infeasible_dir(Vector & sol) const {
-
+Vector LinearSolver::get_infeasible_dir() const {
+	Vector sol(nb_rows);
 	try {
 
 		double * sol_found = myclp->infeasibilityRay();
 		if (sol_found) {
 			for (int i=0; i<nb_rows; i++) {
-				if (((myclp->getRowLower()[i] <= -default_max_bound) && (sol_found[i]>=0))||
-						(( myclp->getRowUpper()[i] >=  default_max_bound) && (sol_found[i]<=0))	) {
-					sol[i]=0.0;
-				}
-				else {
-					sol[i]=sol_found[i];
-				}
+//				if (((myclp->getRowLower()[i] <= -default_max_bound) && (sol_found[i]>=0))||
+//						(( myclp->getRowUpper()[i] >=  default_max_bound) && (sol_found[i]<=0))	) {
+//					sol[i]=0.0;
+//				}
+//				else {
+//					sol[i]=sol_found[i];
+//				} //TODO why
+				sol[i]=sol_found[i];
 			}
 			delete [] sol_found;
 		}  else	{
 			delete [] sol_found;
 			throw LPException();
 		}
-
 	}
 	catch(...) {
 		throw LPException();
 	}
-
-	return ;
+	return sol;
 }
 
 void LinearSolver::clean_ctrs() {
-
 	try {
 		status_prim = 0;
 		status_dual = 0;
@@ -1887,6 +1882,7 @@ LinearSolver::~LinearSolver() {
 }
 
 LinearSolver::Status_Sol LinearSolver::solve() {
+	obj_value = Interval::ALL_REALS;
 
 	LinearSolver::Status_Sol res = UNKNOWN;
 	try {
