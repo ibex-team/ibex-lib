@@ -2,6 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_OptimData.h
 // Author      : Jordan Ninin, Gilles Chabert
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 18, 2014
 //============================================================================
@@ -11,7 +12,6 @@
 
 #include "ibex_Backtrackable.h"
 #include "ibex_Interval.h"
-#include "ibex_EntailedCtr.h"
 #include "ibex_System.h"
 
 namespace ibex {
@@ -43,14 +43,14 @@ public:
 	 *
 	 * \see #pf
 	 */
-	void compute_pf(Function& goal, const IntervalVector& box);
+	void compute_pf(const Function& goal, const IntervalVector& box);
 
 	/**
 	 * \brief Initialize the value of "pu"
 	 *
 	 * \see #pu
 	 */
-	void compute_pu(System& sys, const IntervalVector& box, const EntailedCtr& entailed);
+	void compute_pu(const System& sys, const IntervalVector& box);
 
 	/**
 	 * \brief Casado criterion
@@ -72,4 +72,5 @@ protected:
 };
 
 } // end namespace ibex
+
 #endif // __IBEX_OPTIM_DATA_H__

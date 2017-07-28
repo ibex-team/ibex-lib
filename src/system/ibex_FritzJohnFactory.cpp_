@@ -180,7 +180,7 @@ public:
 		// The linear dependency of the gradients
 		const ExprNode& df=ExprDiff().diff(sys.goal->args(), vars, sys.goal->expr());
 		const ExprNode* dg=NULL;
-		if (M>0 || R>0) dg=&ExprDiff().diff(sys.f.args(), vars, sys.f.expr());
+		if (M>0 || R>0) dg=&ExprDiff().diff(sys.f_ctrs.args(), vars, sys.f_ctrs.expr());
 
 		// to ease memory cleanup, we represent all
 		// constraints with a single multivalued function

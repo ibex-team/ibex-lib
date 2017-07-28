@@ -33,9 +33,9 @@ void TestParser::var01() {
 	CPPUNIT_ASSERT(sys.sybs.empty());
 	CPPUNIT_ASSERT(sys.box.size()==1);
 	CPPUNIT_ASSERT(sys.box[0]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(sys.f.nb_arg()==1);
-	CPPUNIT_ASSERT(&sys.f.arg(0) == &sys.args[0]);
-	CPPUNIT_ASSERT(sameExpr(sys.f.expr(),"x"));
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==1);
+	CPPUNIT_ASSERT(&sys.f_ctrs.arg(0) == &sys.args[0]);
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"x"));
 	CPPUNIT_ASSERT(sys.ctrs.size()==1);
 	CPPUNIT_ASSERT(sys.ctrs[0].f.nb_arg()==1);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"x"));
@@ -217,18 +217,18 @@ void TestParser::ponts() {
 	for (int i=0; i<30; i++) {
 		CPPUNIT_ASSERT(strcmp(sys.args[i].name,sys2.f->arg_name(i))==0);
 		CPPUNIT_ASSERT(sys.args[0].dim.is_scalar());
-		CPPUNIT_ASSERT(&sys.f.arg(i) == &sys.args[i]);
+		CPPUNIT_ASSERT(&sys.f_ctrs.arg(i) == &sys.args[i]);
 	}
 	CPPUNIT_ASSERT(sys.eprs.empty());
 	CPPUNIT_ASSERT(sys.sybs.empty());
 	CPPUNIT_ASSERT(sys.box.size()==30);
 	CPPUNIT_ASSERT(almost_eq(sys.box, sys2.init_box,1e-12));
-	CPPUNIT_ASSERT(sys.f.nb_arg()==30);
-	CPPUNIT_ASSERT(sameExpr(sys.f.expr(),sys2.f->expr()));
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==30);
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),sys2.f->expr()));
 	CPPUNIT_ASSERT(sys.ctrs.size()==30);
 
 	for (int i=0; i<30; i++) {
-		Function* fi=dynamic_cast<Function*>(&(sys.f[i]));
+		Function* fi=dynamic_cast<Function*>(&(sys.f_ctrs[i]));
 		CPPUNIT_ASSERT(fi!=NULL);
 		CPPUNIT_ASSERT(sameExpr(sys.ctrs[i].f.expr(),fi->expr()));
 		CPPUNIT_ASSERT(sys.ctrs[i].op==EQ);
@@ -244,10 +244,10 @@ void TestParser::choco01() {
 	CPPUNIT_ASSERT(sys.eprs.empty());
 	CPPUNIT_ASSERT(sys.sybs.empty());
 	CPPUNIT_ASSERT(sys.box.size()==2);
-	CPPUNIT_ASSERT(sys.f.nb_arg()==2);
-	CPPUNIT_ASSERT(sameExpr(sys.f.expr(),"({1}+{0})"));
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==2);
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"({1}+{0})"));
 	CPPUNIT_ASSERT(sys.ctrs.size()==1);
-	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f.expr()));
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f_ctrs.expr()));
 }
 
 void TestParser::loop01() {

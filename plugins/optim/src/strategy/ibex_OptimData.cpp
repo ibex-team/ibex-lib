@@ -26,20 +26,22 @@ OptimData::~OptimData() {
 
 }
 
-void OptimData::compute_pf(Function& goal, const IntervalVector& box) {
+void OptimData::compute_pf(const Function& goal, const IntervalVector& box) {
 	pf=goal.eval(box);
 }
 
 
-void OptimData::compute_pu(System& sys, const IntervalVector& box, const EntailedCtr& entailed) {
+void OptimData::compute_pu(const System& sys, const IntervalVector& box) {
 	double pu=1;
 
-	for (int j=1; j<sys.nb_ctr;j++) {
-		if (entailed.normalized(j)) continue;
-		Interval eval=sys.f[j].eval(box);
+	if (sys.active_ctrs(box).empty()) return;
+
+	IntervalVector e=sys.active_ctrs_eval(box);
+
+	for (int j=1; j<e.size();j++) {
 		double pui=1;
-		if (eval.diam()>0)
-			pui= -eval.lb()/eval.diam();
+		if (e[j].diam()>0)
+			pui= -e[j].lb()/e[j].diam();
 		pu=pu*pui;
 	}
 }

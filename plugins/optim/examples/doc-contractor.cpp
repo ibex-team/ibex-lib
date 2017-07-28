@@ -78,7 +78,7 @@ public:
 	 */
 	MyLinearRelax(const Matrix& A, const Vector& b) : LinearRelax(2,2), A(A), b(b) { }
 
-	virtual int linearization(const IntervalVector & box, LinearSolver& lp_solver)  {
+	virtual int linearize(const IntervalVector & box, LinearSolver& lp_solver)  {
 		for (int i=0; i<A.nb_rows(); i++)
 			// add the constraint in the LP solver
 			lp_solver.addConstraint(A[i],LEQ,b[i]);
@@ -414,7 +414,7 @@ int main() {
 	Vector b=Vector::zeros(2);
 
 	// create the linear system (with fixed matrix/vector)
-	LinearRelaxFixed lin(A,b);
+	LinearizerFixed lin(A,b);
 
 	// create the contractor w.r.t the linear system
 	CtcPolytopeHull ctc(lin);

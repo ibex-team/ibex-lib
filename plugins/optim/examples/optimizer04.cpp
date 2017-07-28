@@ -101,19 +101,13 @@ int main(int argc, char** argv){
 	  ctc= &hc43bcidhc4;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
-	// The CtcXNewton contractor
-	// corner selection for linearizations : two corners are selected, a random one and its opposite
-	vector<LinearRelaxXTaylor::corner_point> cpoints;
-	cpoints.push_back(LinearRelaxXTaylor::RANDOM);
-	cpoints.push_back(LinearRelaxXTaylor::RANDOM_INV);
-
-	LinearRelax* lr;
+	Linearizer* lr;
 	if (linearrelaxation=="art")
-	  lr= new LinearRelaxCombo(ext_sys,LinearRelaxCombo::ART);
+	  lr= new LinearizerCombo(ext_sys,LinearizerCombo::ART);
 	else if  (linearrelaxation=="compo")
-	  lr= new LinearRelaxCombo(ext_sys,LinearRelaxCombo::COMPO);
+	  lr= new LinearizerCombo(ext_sys,LinearizerCombo::COMPO);
 	else if (linearrelaxation=="xn")
-	  lr= new LinearRelaxXTaylor (ext_sys,cpoints);
+	  lr= new LinearizerXTaylor (ext_sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP);
 	//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
 	CtcFixPoint* cxn;
@@ -121,7 +115,7 @@ int main(int argc, char** argv){
 	CtcCompo* cxn_compo;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
           {
-		cxn_poly = new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX);
+		cxn_poly = new CtcPolytopeHull(*lr);
 		cxn_compo =new CtcCompo(*cxn_poly, hc44xn);
 		cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 	  }

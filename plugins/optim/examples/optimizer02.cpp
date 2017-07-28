@@ -35,7 +35,7 @@ int main(int argc, char** argv){
 
 	System sys(argv[1]);
 
-	RoundRobin rr(Optimizer::default_prec);
+	RoundRobin rr(Optimizer::default_eps_x);
 
 	ExtendedSystem ext(sys);
 

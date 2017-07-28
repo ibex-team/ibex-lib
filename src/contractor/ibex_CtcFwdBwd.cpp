@@ -56,8 +56,8 @@ CtcFwdBwd::~CtcFwdBwd() {
 
 void CtcFwdBwd::init() {
 
-	input = new BitSet(0,nb_var-1,BitSet::empt);
-	output = new BitSet(0,nb_var-1,BitSet::empt);
+	input = new BitSet(nb_var);
+	output = new BitSet(nb_var);
 
 	int v;
 	for (int i=0; i<f.nb_used_vars(); i++) {

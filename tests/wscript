@@ -19,28 +19,14 @@ def utest_format_output (tst):
 	logfile = os.path.join (tst.bldnode.abspath(), "utest_run.log")
 	tst.logger = Logs.make_logger (logfile, "utest_run")
 
-	def to_unicode (s):
-		r = None
-		if isinstance (s, unicode):
-			r = s
-		else:
-			for f in [ 'ascii', 'cp1251', 'cp1252', 'latin1', 'utf-8' ] :
-				try:
-					r = s.decode(f)
-					break
-				except UnicodeDecodeError:
-					continue
-		assert (not r is None)
-		return r
-
 	def format_out (stream, name):
 		s = name + ":" + os.linesep
-		for l in to_unicode(stream).splitlines(True):
+		for l in ibexutils.to_unicode(stream).splitlines(True):
 			s += "  " + l
 		return s
 
 	def parse_output (stream):
-		for l in to_unicode(stream).splitlines(True):
+		for l in ibexutils.to_unicode(stream).splitlines(True):
 			if l.startswith ("Run"):
 				data = l.split()
 				return (int(data[1]), int(data[3]) + int(data[5]))

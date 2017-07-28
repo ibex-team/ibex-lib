@@ -68,20 +68,36 @@ public:
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.
 	 *
-	 * Default implementation: return [-oo,oo]
+	 * Must be implemented in the subclass if called.
 	 *
 	 * \pre f must be real-valued
 	 */
 	virtual Interval eval(const IntervalVector& box) const;
 
 	/**
-	 * \brief Calculate f(box) using interval arithmetic.
+	 * \brief Calculate f_i(box) using interval arithmetic.
 	 *
-	 * Default implementation: return [-oo,oo]x...x[-oo,oo].
+	 * Return the ith component of f(box).
 	 *
 	 * \pre f must be vector-valued
 	 */
-	virtual IntervalVector eval_vector(const IntervalVector& box) const;
+	Interval eval(int i, const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
+	 *
+	 * \pre f must be vector-valued
+	 */
+	IntervalVector eval_vector(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate some components of f(box) using interval arithmetic.
+	 *
+	 * Must be implemented in the subclass if called.
+	 *
+	 * \pre f must be vector-valued
+	 */
+	virtual IntervalVector eval_vector(const IntervalVector& box, const BitSet& components) const;
 
 	/**
 	 * \brief Calculate f(x) using interval arithmetic.
@@ -112,16 +128,30 @@ public:
 	 * \brief Calculate the Jacobian matrix of f
 	 *
 	 * \param x - the input box
-	 * \param J - where the Jacobian matrix has to be stored (output parameter).
-	 *
-	 */
-	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
-
-	/**
-	 * \brief Calculate the Jacobian matrix of f
+	 * \param v - Only calculate (if faster) the vth column (the other columns are undetermined).
 	 * \pre f must be vector-valued
 	 */
-	IntervalMatrix jacobian(const IntervalVector& x) const;
+	IntervalMatrix jacobian(const IntervalVector& x, int v=-1) const;
+
+	/**
+	 * \brief Calculate some rows of the jacobian.
+	 *
+	 * \param x - the input box
+	 * \param components - selected components f_i
+	 * \param v - Only calculate (if faster) the vth column (the other columns are undetermined).
+	 *
+	 * \pre f must be vector-valued.
+	 */
+	IntervalMatrix jacobian(const IntervalVector& x, const BitSet& components, int v=-1) const;
+
+	/**
+	 * \brief Calculate the Jacobian matrix of f.
+	 *
+	 * \param x - the input box
+	 * \param J - where the Jacobian matrix has to be stored (output parameter).
+	 * \param v - Only update (if faster) the vth column of J.
+	 */
+	void jacobian(const IntervalVector& x, IntervalMatrix& J, int v=-1) const;
 
 	/**
 	 * \brief Calculate the Jacobian matrix of a restriction of f
@@ -135,11 +165,23 @@ public:
 	void jacobian(const IntervalVector& full_box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const;
 
 	/**
+	 * \brief Calculate a submatrix of the Jacobian matrix of f.
+	 *
+	 * Default implementation: program exit with error.
+	 *
+	 * \param x - the input box
+	 * \param J - where the Jacobian matrix has to be stored (output parameter).
+	 * \param components - selected components f_i
+	 * \param v - Only update (if faster) the vth column of J.
+	 */
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v=-1) const;
+
+	/**
 	 * \brief Calculate the Hansen matrix of f.
 	 *
 	 * The expansion point is the center of x.
 	 */
-	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+	void hansen_matrix(const IntervalVector& x, IntervalMatrix& H) const;
 
 	/**
 	 * \brief Calculate the Hansen matrix of f for a given (set of) expansion point x0.
@@ -147,7 +189,14 @@ public:
 	 * \note If the expansion point x0 is set to x, the Hansen matrix is equal to the Jacobian
 	 *       matrix (but computation is much slower).
 	 */
-	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& h) const;
+	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H) const;
+
+	/**
+	 * \brief Hansen matrix of selected components of f, and for a a given expansion point x0.
+	 *
+	 * \see above
+	 */
+	void hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H, const BitSet& components) const;
 
 	/**
 	 * \brief Calculate the Hansen matrix of a restriction of f
@@ -197,33 +246,68 @@ inline int Fnc::image_dim() const {
 }
 
 inline Interval Fnc::eval(const IntervalVector& box) const {
+	ibex_error("Fnc: 'eval' called with no implementation.");
 	return Interval();
 }
 
+inline Interval Fnc::eval(int i, const IntervalVector& box) const {
+	return _image_dim.is_scalar() ?
+			eval(box) :
+			eval_vector(box, BitSet::singleton(image_dim(),i))[0];
+}
+
 inline IntervalVector Fnc::eval_vector(const IntervalVector& box) const {
+	return _image_dim.is_scalar() ?
+			IntervalVector(1,eval(box)) :
+			eval_vector(box, BitSet::all(image_dim()));
+}
+
+inline IntervalVector Fnc::eval_vector(const IntervalVector& box, const BitSet& components) const {
+	ibex_error("Fnc: 'eval_vector' called with no implementation.");
 	return IntervalVector(_image_dim.vec_size());
 }
 
 inline IntervalMatrix Fnc::eval_matrix(const IntervalVector& box) const {
-	return IntervalMatrix(_image_dim.nb_rows(), _image_dim.nb_cols());
+	IntervalMatrix M(_image_dim.nb_rows(), _image_dim.nb_cols());
+	switch(_image_dim.type()) {
+	case Dim::SCALAR:     M[0][0]=eval(box); break;
+	case Dim::ROW_VECTOR: M[0]=eval_vector(box); break;
+	case Dim::COL_VECTOR: M.set_col(0,eval_vector(box)); break;
+	default: ibex_error("Fnc: 'eval_matrix' called with no implementation.");
+	}
+	return M;
 }
 
 inline void Fnc::gradient(const IntervalVector& x, IntervalVector& g) const {
 	g=IntervalVector(_image_dim.vec_size());
 }
 
-inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
-	J=IntervalMatrix(_image_dim.nb_rows(), _image_dim.nb_cols());
+inline IntervalMatrix Fnc::jacobian(const IntervalVector& x, int v) const {
+	IntervalMatrix J(image_dim(),x.size());
+	jacobian(x,J,v);
+	return J;
 }
 
-inline IntervalMatrix Fnc::jacobian(const IntervalVector& x) const {
-	IntervalMatrix J(image_dim(),x.size());
-	jacobian(x,J);
+inline IntervalMatrix Fnc::jacobian(const IntervalVector& x, const BitSet& components, int v) const {
+	IntervalMatrix J(components.size(), nb_var());
+	jacobian(x,J,components,v);
 	return J;
+}
+
+inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J, int v) const {
+	jacobian(x, J, BitSet::all(image_dim()), v);
+}
+
+inline void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
+	ibex_error("Fnc: 'jacobian' called with no implementation.");
 }
 
 inline void Fnc::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
 	hansen_matrix(box, box.mid(), H);
+}
+
+inline void Fnc::hansen_matrix(const IntervalVector& x, const IntervalVector& x0, IntervalMatrix& H) const {
+	hansen_matrix(x, x0, H, BitSet::all(image_dim()));
 }
 
 inline void Fnc::hansen_matrix(const IntervalVector& box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const {

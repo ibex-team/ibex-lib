@@ -491,7 +491,7 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 	__all_symbols_scalar=true; // by default
 
 	symbs.resize(x.size());
-	symbol_index = new int[x.size()];
+	__symbol_index = new int[x.size()];
 	int index=0;
 
 	for (int i=0; i<x.size(); i++) {
@@ -499,7 +499,7 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 		((ExprSymbol&) x[i]).key = i;
 		__all_symbols_scalar &= x[i].dim.is_scalar();
 
-		symbol_index[i]=index;
+		__symbol_index[i]=index;
 		for (int j=0; j<x[i].dim.size(); j++) {
 			index++;
 		}
@@ -513,7 +513,7 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 //	}
 
 
-	FindInputsUsed fsu(x, y, symbol_index, is_used);
+	FindInputsUsed fsu(x, y, __symbol_index, is_used);
 
 	(int&) _nb_var = is_used.size();
 

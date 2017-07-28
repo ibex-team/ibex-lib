@@ -85,13 +85,18 @@ void TestSystem::factory01() {
 	CPPUNIT_ASSERT(sys.box.size()==13);
 
 	CPPUNIT_ASSERT(sys.ctrs.size()==2);
-	CPPUNIT_ASSERT(sys.f.nb_arg()==3);
-	CPPUNIT_ASSERT(sys.f.nb_var()==13);
-	CPPUNIT_ASSERT(sys.f.image_dim()==4);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==13);
+	CPPUNIT_ASSERT(sys.f_ctrs.image_dim()==4);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(A*x)"));
 	CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x(1))"));
 	CPPUNIT_ASSERT(sys.ctrs[1].op==GEQ);
+
+	CPPUNIT_ASSERT(sys.ops[0]==EQ);
+	CPPUNIT_ASSERT(sys.ops[1]==EQ);
+	CPPUNIT_ASSERT(sys.ops[2]==EQ);
+	CPPUNIT_ASSERT(sys.ops[3]==GEQ);
 
 	delete &sys;
 }
@@ -124,9 +129,9 @@ void TestSystem::copy01() {
 	CPPUNIT_ASSERT(sys.box.size()==13);
 
 	CPPUNIT_ASSERT(sys.ctrs.size()==2);
-	CPPUNIT_ASSERT(sys.f.nb_arg()==3);
-	CPPUNIT_ASSERT(sys.f.nb_var()==13);
-	CPPUNIT_ASSERT(sys.f.image_dim()==4);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==13);
+	CPPUNIT_ASSERT(sys.f_ctrs.image_dim()==4);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(A*x)"));
 	CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x(1))"));
@@ -152,9 +157,9 @@ void TestSystem::ineq_only01() {
 	CPPUNIT_ASSERT(sys.nb_var==2);
 	CPPUNIT_ASSERT(sys.goal==NULL);
 	CPPUNIT_ASSERT(sys.ctrs.size()==2);
-	CPPUNIT_ASSERT(sys.f.nb_arg()==2);
-	CPPUNIT_ASSERT(sys.f.nb_var()==2);
-	CPPUNIT_ASSERT(sys.f.image_dim()==2);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==2);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==2);
+	CPPUNIT_ASSERT(sys.f_ctrs.image_dim()==2);
 
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x-y)-1)"));
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((x-y)--1)"));
@@ -171,9 +176,9 @@ void TestSystem::eq_only01() {
 	CPPUNIT_ASSERT(sys.nb_var==2);
 	CPPUNIT_ASSERT(sys.goal==NULL);
 	CPPUNIT_ASSERT(sys.ctrs.size()==2);
-	CPPUNIT_ASSERT(sys.f.nb_arg()==2);
-	CPPUNIT_ASSERT(sys.f.nb_var()==2);
-	CPPUNIT_ASSERT(sys.f.image_dim()==2);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==2);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==2);
+	CPPUNIT_ASSERT(sys.f_ctrs.image_dim()==2);
 
 	stringstream expr0;
 	expr0 << "((x+y)-" << Interval(-1,1) << ")"; // the way the interval is printed depends on the library
@@ -200,9 +205,9 @@ void TestSystem::extend01() {
 	CPPUNIT_ASSERT(sys.box.size()==5);
 
 	CPPUNIT_ASSERT(sys.ctrs.size()==4);
-	CPPUNIT_ASSERT(sys.f.nb_arg()==3);
-	CPPUNIT_ASSERT(sys.f.nb_var()==5);
-	CPPUNIT_ASSERT(sys.f.image_dim()==4);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==5);
+	CPPUNIT_ASSERT(sys.f_ctrs.image_dim()==4);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((y-cos(x(2)))-__goal__)"));
 	CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(-(x(1)+x(2)))"));
@@ -222,9 +227,9 @@ void TestSystem::extend02() {
 	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"__goal__"));
 	//CPPUNIT_ASSERT(sys.goal==NULL);
 	CPPUNIT_ASSERT(sys.ctrs.size()==1);
-	CPPUNIT_ASSERT(sys.f.nb_arg()==3);
-	CPPUNIT_ASSERT(sys.f.nb_var()==3);
-	CPPUNIT_ASSERT(sys.f.image_dim()==1);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==3);
+	CPPUNIT_ASSERT(sys.f_ctrs.image_dim()==1);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x+y)-__goal__)"));
 	CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
 }
@@ -238,9 +243,9 @@ void TestSystem::normalize01() {
 	CPPUNIT_ASSERT(sys.nb_var==2);
 	CPPUNIT_ASSERT(sys.goal==NULL);
 	CPPUNIT_ASSERT(sys.ctrs.size()==6);
-	CPPUNIT_ASSERT(sys.f.nb_arg()==2);
-	CPPUNIT_ASSERT(sys.f.nb_var()==2);
-	CPPUNIT_ASSERT(sys.f.image_dim()==6);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==2);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==2);
+	CPPUNIT_ASSERT(sys.f_ctrs.image_dim()==6);
 
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x+y)-1)"));
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((-(x+y))-1)"));
@@ -351,8 +356,8 @@ void TestSystem::merge03() {
 
 
 void TestSystem::merge04() {
-	System sys1(SRCDIR_TESTS "/../benchs/benchs-optim/coconutbenchmark-library1/bearing.bch");
-	System sys2(SRCDIR_TESTS "/../benchs/benchs-satisfaction/benchs-coprin/I5.bch");
+	System sys1(SRCDIR_TESTS "/minibex/bearing.bch");
+	System sys2(SRCDIR_TESTS "/minibex/I5.bch");
 	System sys3(sys1,sys2);
 	CPPUNIT_ASSERT(strcmp(sys3.args[0].name,"x1")==0);
 	CPPUNIT_ASSERT(strcmp(sys3.args[4].name,"x6")==0);

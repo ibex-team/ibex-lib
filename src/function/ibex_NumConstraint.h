@@ -251,6 +251,8 @@ public:
 	 *
 	 * Note: an inequality g(x)<=[a,b] is not considered as
 	 * a thick equality, although it could...
+	 *
+	 * TODO: extend to vector/matrix constraints.
 	 */
 	std::pair<const ExprNode*, const Interval*> is_thick_equality() const;
 

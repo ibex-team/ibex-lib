@@ -18,6 +18,35 @@
 const double default_relax_ratio = 0.2;
 using namespace std;
 using namespace ibex;
+
+/**
+ * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
+ *
+ * Information provided:
+ * <ul><li> interval of the cost  [uplo,loup]
+ *     <li>total running time
+ * </ul>
+ */
+
+void report_perf(Optimizer& o) {
+
+	double rel_prec=o.get_obj_rel_prec();
+	double abs_prec=o.get_obj_abs_prec();
+	double uplo=o.get_uplo();
+	double loup=o.get_loup();
+
+//	cout << (	((rel_prec <= o.rel_eps_f)||
+//			(abs_prec <= o.abs_eps_f)||
+//			((o.buffer.empty() && o.uplo_of_epsboxes == POS_INFINITY && loup==POS_INFINITY))||
+//			(uplo<-1.e300)
+//	)? " T & " : " F & " );
+
+	cout << o.get_status() << endl;
+
+	cout << uplo << " & " << loup << " & ";
+	cout <<  time << "  "<< endl ;
+}
+
 int main(int argc, char** argv){
 
 
@@ -72,11 +101,11 @@ int main(int argc, char** argv){
 
 		// The CtcXNewton contractor
 		// corner selection for linearizations : two corners are selected, a random one and its opposite
-		vector<LinearRelaxXTaylor::corner_point> cpoints;
-		cpoints.push_back(LinearRelaxXTaylor::RANDOM);
-		cpoints.push_back(LinearRelaxXTaylor::RANDOM_INV);
+		vector<LinearizerXTaylor::corner_point> cpoints;
+		cpoints.push_back(LinearizerXTaylor::RANDOM);
+		cpoints.push_back(LinearizerXTaylor::RANDOM_INV);
 
-		LinearRelax* lr= new LinearRelaxCombo(ext_sys,LinearRelaxCombo::ART);
+		LinearRelax* lr= new LinearizerCombo(ext_sys,LinearizerCombo::ART);
 
 		//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
 		// fixpoint linear relaxation , hc4  with default fix point ratio 0.2

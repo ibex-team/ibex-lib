@@ -17,6 +17,8 @@ using namespace std;
 
 namespace ibex {
 
+const double NormalizedSystem::default_eps_h = 1e-08;
+
 namespace {
 
 class SystemNormalize : public SystemFactory {
@@ -25,18 +27,14 @@ class SystemNormalize : public SystemFactory {
 
 	SystemNormalize(const System& sys, double eps) {
 
-		// do not initialize variables with sys.f.args
+		// do not initialize variables with sys.f_ctrs.args
 		// since f may be uninitialized (unconstrained problem)
 		add_var(sys.args,sys.box);
 
 		if (sys.goal!=NULL) add_goal(*sys.goal);
 
 		// TODO: factorize code with SystemExtend
-		// note: sys.ctrs.size()<>sys.nb_ctr in general but
-		// with NORMALIZE, they have to match (only scalar constraints).
-		if(sys.ctrs.size()!=sys.nb_ctr) {
-			not_implemented("normalization with vector equations");
-		}
+		// and be more smart! (make DAGs!)
 		for (int i=0; i<sys.ctrs.size(); i++) {
 
 			Function& fi=sys.ctrs[i].f;
@@ -50,8 +48,11 @@ class SystemNormalize : public SystemFactory {
 						f_1=&( ExprCopy().copy(fi.args(), sys.args, *p.first) - p.second->ub());
 						f_2=&(-ExprCopy().copy(fi.args(), sys.args, *p.first) - (-p.second->lb()));
 					} else {
-						f_1=&( ExprCopy().copy(fi.args(), sys.args, fi.expr()) - eps);
-						f_2=&(-ExprCopy().copy(fi.args(), sys.args, fi.expr()) - eps);
+						Domain deps(fi.expr().dim);
+						Array<Domain> a(deps);
+						load(a,IntervalVector(deps.dim.size(),eps));
+						f_1=&( ExprCopy().copy(fi.args(), sys.args, fi.expr()) - ExprConstant::new_(deps));
+						f_2=&(-ExprCopy().copy(fi.args(), sys.args, fi.expr()) - ExprConstant::new_(deps));
 					}
 					add_ctr(ExprCtr(*f_1,LEQ));
 					cleanup(*f_1, false);

@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 	// for solving f(x)=0 where f is
 	// a vector-valued function representing
 	// the system.
-	CtcNewton newton(sys.f);
+	CtcNewton newton(sys.f_ctrs);
 
 	// Build the main contractor:
 	// ---------------------------

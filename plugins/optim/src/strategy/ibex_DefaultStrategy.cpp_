@@ -7,11 +7,13 @@
 // Created     : Jul 05, 2014
 //============================================================================
 
+#include "ibex_NormalizedSystem.h"
 #include "ibex_ExtendedSystem.h"
 #include "ibex_Bsc.h"
 #include "ibex_Ctc.h"
 #include "ibex_CellBuffer.h"
-#include "ibex_LinearRelax.h"
+#include "ibex_Linearizer.h"
+#include "ibex_LoupFinder.h"
 
 #include <vector>
 #include <stdlib.h>
@@ -27,21 +29,31 @@ namespace {
  * by default strategies (DefaultSolver, DefaultOptimizer), to
  * ease disallocation.
  *
+ * It implements a kind of smart pointer with class scope.
+ *
  * Typical data include contractors, a bisector, etc.
+ *
+ * Note: if we had a root class IbexObject for all classes (Ctc, Bsc,
+ * etc.) the implementation would be much more direct (a single
+ * vector<IbexObject*> with one template-based record/getter function.
+ * Unfortunately, using void* is impossible (the "delete" operator requires
+ * static type cast).
  */
 class Memory {
 public:
+	// The recorded systems can correspond to different things:
+	// - default optimizer: the normalized and extended systems used for
+	//   building operators (contractor, etc.) expected by Optimizer.
+	// - default solver: the sub-system of equations for Newton contractor
+	std::vector<System*> sys;
+
 	std::vector<Ctc*> ctc;
 
-	// The recorded systems can correspond to different things:
-	// - default optimizer: the extended system as expected by Optimizer
-	// - default solver: the sub-system of equations for Newton contractor
-	// - optimizer (constructor with string[]) : system and extended system
-	std::vector<System*> sys;
+	std::vector<LoupFinder*> finder;
 
 	Bsc* bsc;
 	CellBuffer* buffer;
-	LinearRelax* relax;
+	Linearizer* relax;
 
 	Memory() : bsc(NULL), buffer(NULL), relax(NULL) {
 		// A NULL pointer corresponds to unused data
@@ -53,18 +65,22 @@ public:
 		}
 		ctc.clear();
 
+		for (vector<LoupFinder*>::iterator it=finder.begin(); it!=finder.end(); it++) {
+			delete *it;
+		}
+		finder.clear();
+
 		if (bsc) delete bsc;
 		if (buffer) delete buffer;
 		if (relax) delete relax;
-		// warning! LinearRelaxXTaylor uses system in its destructor.
-		// delete it before systems.
+
+		// It is safer to delete systems at the end, in case an object
+		// destructor would depend on a system.
 
 		for (vector<System*>::iterator it=sys.begin(); it!=sys.end(); it++) {
 			delete *it;
 		}
 		sys.clear();
-
-
 	}
 
 };
@@ -75,8 +91,13 @@ Memory** memory() { // construct-on-first-use idiom
 	return &memory;
 }
 
-Ctc& rec(Ctc* ptr) {
-	(*memory())->ctc.push_back(ptr);
+System& rec(System* ptr) {
+	(*memory())->sys.push_back(ptr);
+	return *ptr;
+}
+
+NormalizedSystem& rec(NormalizedSystem* ptr) {
+	(*memory())->sys.push_back(ptr);
 	return *ptr;
 }
 
@@ -85,14 +106,20 @@ ExtendedSystem& rec(ExtendedSystem* ptr) {
 	return *ptr;
 }
 
-System& rec(System* ptr) {
-	(*memory())->sys.push_back(ptr);
+
+Ctc& rec(Ctc* ptr) {
+	(*memory())->ctc.push_back(ptr);
 	return *ptr;
 }
 
-LinearRelax& rec(LinearRelax* ptr)       { return *((*memory())->relax = ptr); }
-Bsc& rec(Bsc* ptr)                       { return *((*memory())->bsc = ptr); }
-CellBuffer& rec(CellBuffer* ptr)         { return *((*memory())->buffer = ptr); }
+LoupFinder& rec(LoupFinder* ptr) {
+	(*memory())->finder.push_back(ptr);
+	return *ptr;
+}
+
+Bsc& rec(Bsc* ptr)               { return *((*memory())->bsc = ptr); }
+Linearizer& rec(Linearizer* ptr) { return *((*memory())->relax = ptr); }
+CellBuffer& rec(CellBuffer* ptr) { return *((*memory())->buffer = ptr); }
 
 } // end anonymous namespace
 
