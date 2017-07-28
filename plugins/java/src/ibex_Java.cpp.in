@@ -228,8 +228,8 @@ JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_init(JNIEnv* env, jobject obj,
 	jfieldID _id = env->GetFieldID(clazz, "id", "I");
 	env->SetIntField(obj ,_id, ibex_instances.size());
 
-	BitSet b;
-	b.initialise(0,size-1,BitSet::empt);
+	BitSet b(size);
+	
 	for (int i=0; i<size; i++) {
 		if (int_vars[i]==1) b.add(i);
 	}
