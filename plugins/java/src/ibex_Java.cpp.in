@@ -452,7 +452,7 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_start_1solve(JNIEnv* env, jobj
 	}
 
 	for (int i=0; i<inst.nb_var; i++) {
-		if (inst.params.contain(i) && !box[i].is_degenerated()) {
+		if (inst.params[i] && !box[i].is_degenerated()) {
 			return DISCRETE_NOT_INSTANCIATED;
 		}
 	}
