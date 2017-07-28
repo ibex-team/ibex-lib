@@ -13,6 +13,7 @@
 #include "ibex_ParametricProof.h"
 #include "ibex_ContCell.h"
 #include "ibex_LinearException.h"
+#include "ibex_Newton.h"
 
 using namespace std;
 
@@ -27,48 +28,48 @@ void TestParametricProof::get_vars01() {
 
 	BitSet forced(BitSet::empty(3));
 
-	VarSet v=get_vars(f,x,forced);
+	VarSet v=get_newton_vars(f,x,forced);
 	CPPUNIT_ASSERT(v.nb_var==1);
 
 	//cout << "with forced parameter 0: ";
 	forced.add(0);
-	v=get_vars(f,x,forced);
+	v=get_newton_vars(f,x,forced);
 	CPPUNIT_ASSERT(v.nb_var==1 && !v.is_var[0]);
 
 	//cout << "with forced parameter 1: ";
 	forced.remove(0);
 	forced.add(1);
-	v=get_vars(f,x,forced);
+	v=get_newton_vars(f,x,forced);
 	CPPUNIT_ASSERT(v.nb_var==1 && !v.is_var[1]);
 
 	//cout << "with forced parameter 2: ";
 	forced.remove(1);
 	forced.add(2);
-	v=get_vars(f,x,forced);
+	v=get_newton_vars(f,x,forced);
 	CPPUNIT_ASSERT(v.nb_var==1 && !v.is_var[2]);
 
 	//cout << "with forced parameter 0 and 1: ";
 	forced.remove(2);
 	forced.add(0);
 	forced.add(1);
-	v=get_vars(f,x,forced);
+	v=get_newton_vars(f,x,forced);
 	CPPUNIT_ASSERT(v.nb_var==1 && v.is_var[2]);
 
 	//cout << "with forced parameter 0 and 2: ";
 	forced.remove(1);
 	forced.add(2);
-	v=get_vars(f,x,forced);
+	v=get_newton_vars(f,x,forced);
 	CPPUNIT_ASSERT(v.nb_var==1 && v.is_var[1]);
 
 	//cout << "with forced parameter 1 and 2: ";
 	forced.remove(0);
 	forced.add(1);
-	v=get_vars(f,x,forced);
+	v=get_newton_vars(f,x,forced);
 	CPPUNIT_ASSERT(v.nb_var==1 && v.is_var[0]);
 
 	//cout << "with forced parameters O, 1 and 2: ";
 	forced.add(0);
-	CPPUNIT_ASSERT_THROW(get_vars(f,x,forced),SingularMatrixException);
+	CPPUNIT_ASSERT_THROW(get_newton_vars(f,x,forced),SingularMatrixException);
 
 }
 
