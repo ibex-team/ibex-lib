@@ -127,7 +127,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 
 					// note: in case of equality g(x)=0, we also add a linear relaxation for
 					// g(x)>=0, except if this is the "goal constraint" y=f(x).
-					if (sys.ops[c]==GEQ || sys.ops[c]==GT || (sys.ops[c]==EQ && c!=goal_ctr))
+					if (sys.ops[c]==GEQ || sys.ops[c]==GT || sys.ops[c]==EQ) // && c!=goal_ctr))
 						count += linearize_leq_corner(box,corner,-Df[i],-g_corner[i]);
 
 				} catch (LPException&) {
@@ -152,40 +152,45 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box) {
 
 	get_corner(corners.back());
 
-	// the corner used -> typed IntervalVector just to have guaranteed computations
-	IntervalVector corner = get_corner_point(box);
+	try {
+		// the corner used -> typed IntervalVector just to have guaranteed computations
+		IntervalVector corner = get_corner_point(box);
 
-	IntervalMatrix J=sys.active_ctrs_jacobian(box);
-	if (J.is_empty()) return -1; // note: no way to inform that the box is actually infeasible
+		IntervalMatrix J=sys.active_ctrs_jacobian(box);
+		if (J.is_empty()) return -1; // note: no way to inform that the box is actually infeasible
 
-	// the evaluation of the constraints in the corner x_corner
-	IntervalVector g_corner(sys.f_ctrs.eval_vector(corner,active));
-	if (g_corner.is_empty()) return -1;
+		// the evaluation of the constraints in the corner x_corner
+		IntervalVector g_corner(sys.f_ctrs.eval_vector(corner,active));
+		if (g_corner.is_empty()) return -1;
 
-	// total number of added constraint
-	// may be less than active.size() if
-	// a constraint was not detected as inactive
-	int count=0;
-	int c; // constraint number
+		// total number of added constraint
+		// may be less than active.size() if
+		// a constraint was not detected as inactive
+		int count=0;
+		int c; // constraint number
 
-	for (int i=0; i<active.size(); i++) {
-		c=(i==0? active.min() : active.next(c));
+		for (int i=0; i<active.size(); i++) {
+			c=(i==0? active.min() : active.next(c));
 
-		try {
-			if (sys.ops[c]==EQ && c!=goal_ctr)
-				// in principle we could deal with linear constraints
+			try {
+				if (sys.ops[c]==EQ && c!=goal_ctr)
+					// in principle we could deal with linear constraints
+					return -1;
+				else if (c==goal_ctr || sys.ops[c]==LEQ || sys.ops[c]==LT)
+					count += linearize_leq_corner(box,corner,J[i],g_corner[i]);
+				else
+					count += linearize_leq_corner(box,corner,-J[i],-g_corner[i]);
+			} catch (LPException&) {
 				return -1;
-			else if (c==goal_ctr || sys.ops[c]==LEQ || sys.ops[c]==LT)
-				count += linearize_leq_corner(box,corner,J[i],g_corner[i]);
-			else
-				count += linearize_leq_corner(box,corner,-J[i],-g_corner[i]);
-		} catch (LPException&) {
-			return -1;
-		} catch (Unsatisfiability&) {
-			return -1;
+			} catch (Unsatisfiability&) {
+				return -1;
+			}
 		}
+		return count;
+	} catch(NoCornerPoint&) {
+		return -1;
 	}
-	return count;
+
 }
 
 void LinearizerXTaylor::get_corner(corner_id id) {
@@ -215,6 +220,7 @@ IntervalVector LinearizerXTaylor::get_corner_point(const IntervalVector& box) {
 	IntervalVector pt(n);
 
 	for (int j=0; j<n; j++) {
+
 		if (inf[j]) {
 			if (box[j].lb()>NEG_INFINITY)
 				pt[j]=box[j].lb();
@@ -241,6 +247,7 @@ int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalV
 	Vector a(n); // vector of coefficients
 
 	if (dg_box.max_diam() > lp_solver->default_limit_diam_box.ub()) {
+		// we also also avoid this way to deal with infinite bounds (see below)
 		throw LPException();
 	}
 

@@ -22,6 +22,9 @@ LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,Linea
 
 std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup) {
 
+	if (!(lp_solver.default_limit_diam_box.contains(box.max_diam())))
+		throw NotFound();
+
 	int n=sys.nb_var;
 
 	lp_solver.clean_ctrs();

@@ -130,13 +130,19 @@ int main(int argc, char** argv) {
 				cout << "  random seed:\t" << random_seed.Get() << endl;
 		}
 
+		bool inHC4=true;
+
+		if (sys.nb_ctr<sys.f_ctrs.image_dim()) {
+			inHC4=false;
+		}
+
 		// Build the default optimizer
 		DefaultOptimizer o(sys,
 				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x,
 				rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f,
 				abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f,
 				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
-				rigor,
+				rigor, inHC4,
 				random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed
 				);
 
@@ -152,6 +158,10 @@ int main(int argc, char** argv) {
 			if (!quiet)
 				cout << "  trace:\tON" << endl;
 			o.trace=trace.Get();
+		}
+
+		if (!inHC4) {
+			cerr << "\n  \033[33mwarning: inHC4 disabled\033[0m (does not support vector/matrix operations)" << endl;
 		}
 
 		if (!quiet) {

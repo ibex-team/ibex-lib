@@ -33,6 +33,7 @@ public:
 	 * \param eps_h       - Equality thickness.
 	 * \param rigor       - If true, feasibility of equalities is certified. By default:
 	 *                      false.
+	 * \param inHC4       - If true, feasibility is also tried with LoupFinderInHC4.
 	 * \param random_seed - The sequence of random numbers is reinitialized with
 	 *                      this seed before calling optimize(..) (useful for
 	 *                      reproducibility). Set by default to #default_random_seed.
@@ -42,7 +43,8 @@ public:
     		double rel_eps_f=Optimizer::default_rel_eps_f,
 			double abs_eps_f=Optimizer::default_abs_eps_f,
 			double eps_h=NormalizedSystem::default_eps_h,
-			bool rigor=false, double random_seed=default_random_seed);
+			bool rigor=false, bool inHC4=true,
+			double random_seed=default_random_seed);
 
 	/**
 	 * \brief Delete *this.

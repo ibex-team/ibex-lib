@@ -60,10 +60,10 @@ public:
 	 *
 	 * Inputs:
 	 *   \param n        - number of variables or the <b>original system</b>
-	 *   \param ctc      - contractor for extended boxes (of size n+1)
-	 *   \param bsc      - bisector for extended boxes (of size n+1)
-	 *   \param finder   - upper-bounding procedure for extended boxes (of size n+1)
-	 *   \param buffer   - buffer for extended boxes (of size n+1)
+	 *   \param ctc      - contractor for <b>extended<b> boxes (of size n+1)
+	 *   \param bsc      - bisector for <b>extended<b> boxes (of size n+1)
+	 *   \param finder   - upper-bounding procedure for the original system (n-sized boxes)
+	 *   \param buffer   - buffer for <b>extended<b> boxes (of size n+1)
 	 *   \param goal_var - index of the goal variable in an extended box.
 	 *
 	 * And optionally:
