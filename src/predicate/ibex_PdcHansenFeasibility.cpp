@@ -15,7 +15,7 @@
 
 namespace ibex {
 
-PdcHansenFeasibility::PdcHansenFeasibility(Function& f, bool inflating) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()), _unicity_box_ignored(f.nb_var()), inflating(inflating) {
+PdcHansenFeasibility::PdcHansenFeasibility(Fnc& f, bool inflating) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()), _unicity_box_ignored(f.nb_var()), inflating(inflating) {
 
 }
 

@@ -332,18 +332,25 @@ inline Interval atan(const Interval& x) {
 }
 
 inline Interval cosh(const Interval& x) {
+	Interval res;
 	if (x.is_unbounded()) 
-		return Interval(gaol::cosh(x.itv).left(),POS_INFINITY);
+		res=Interval(gaol::cosh(x.itv).left(),POS_INFINITY);
 	else
-		return gaol::cosh(x.itv);
+		res=gaol::cosh(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval sinh(const Interval& x) {
-	return gaol::sinh(x.itv);
+	Interval res = gaol::sinh(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval tanh(const Interval& x) {
-	return gaol::tanh(x.itv);
+	Interval res = gaol::tanh(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval acosh(const Interval& x) {
