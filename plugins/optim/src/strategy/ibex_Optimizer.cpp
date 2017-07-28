@@ -1,7 +1,7 @@
 //                                  I B E X                                   
 // File        : ibex_Optimizer.cpp
 // Author      : Gilles Chabert, Bertrand Neveu
-// Copyright   : IMT Atlantique (France)
+// Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
 // Last Update : December 24, 2012
@@ -52,7 +52,7 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
                 				status(SUCCESS),
                 				//kkt(normalized_user_sys),
 								uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
-                				loup_point(n+1), initial_loup(POS_INFINITY), loup_changed(false),
+                				loup_point(n), initial_loup(POS_INFINITY), loup_changed(false),
 								time(0), nb_cells(0) {
 
 	if (trace) cout.precision(12);
@@ -207,13 +207,16 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 	/*========================= update loup =============================*/
 
+	IntervalVector tmp_box(n);
+	read_ext_box(c.box,tmp_box);
+
 //	entailed = &c.get<EntailedCtr>();
 //	if (!update_entailed_ctr(tmp_box)) {
 //		c.box.set_empty();
 	//		return;
 //	}
 
-	bool loup_ch=update_loup(c.box);
+	bool loup_ch=update_loup(tmp_box);
 
 	// update of the upper bound of y in case of a new loup found
 	if (loup_ch) y &= Interval(NEG_INFINITY,compute_ymax());
@@ -227,8 +230,6 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 		return;
 	}
 
-	IntervalVector tmp_box(n);
-	read_ext_box(c.box,tmp_box);
 	/*====================================================================*/
 	// Note: there are three different cases of "epsilon" box,
 	// - NoBisectableVariableException raised by the bisector (---> see optimize(...)) which
@@ -243,14 +244,14 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	}
 
 	// ** important: ** must be done after upper-bounding
-//	kkt.contract(tmp_box);
-//
-//	if (tmp_box.is_empty()) {
-//		c.box.set_empty();
-//	} else {
-//		// the current extended box in the cell is updated
-//		write_ext_box(tmp_box,c.box);
-//	}
+	//kkt.contract(tmp_box);
+
+	if (tmp_box.is_empty()) {
+		c.box.set_empty();
+	} else {
+		// the current extended box in the cell is updated
+		write_ext_box(tmp_box,c.box);
+	}
 }
 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
@@ -424,9 +425,9 @@ void Optimizer::report(bool verbose) {
 			cout << " best feasible point: ";
 
 			if (loup_finder.rigorous())
-				cout << loup_point.subvector(0,n-1) << endl;
+				cout << loup_point << endl;
 			else
-				cout << loup_point.lb().subvector(0,n-1) << endl;
+				cout << loup_point.lb() << endl;
 		}
 	}
 	cout << " cpu time used: " << time << "s." << endl;
