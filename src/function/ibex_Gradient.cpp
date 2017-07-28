@@ -405,8 +405,8 @@ void Gradient::sign_bwd(int x, int y) {
 }
 
 void Gradient::abs_bwd (int x, int y) {
-	if (d[x].i().lb()>=0) g[x].i() += 1.0*g[y].i();
-	else if (d[x].i().ub()<=0) g[x].i() += -1.0*g[y].i();
+	if (d[x].i().lb()>0) g[x].i() += 1.0*g[y].i();
+	else if (d[x].i().ub()<0) g[x].i() += -1.0*g[y].i();
 	else g[x].i() += Interval(-1,1)*g[y].i();
 }
 
