@@ -22,7 +22,6 @@ void TestTimer::test01() {
 	Timer timer;
 	CPPUNIT_ASSERT(timer.get_time()==0);
 	timer.start();
-	cout<< timer.get_time()<<endl;
 	CPPUNIT_ASSERT(timer.get_time()>=0);
 	timer.stop();
 	double tmp = timer.get_time();
@@ -47,7 +46,9 @@ void TestTimer::test02() {
 	t1.start();
 
 	Timer t2;
-	for (int kk=1;kk<3;kk++) {
+	int m=4;
+	double toto=0;
+	for (int kk=1;kk<m;kk++) {
 		t2.restart();
 		for (int k =0; k<n; k++){
 			f= 0;
@@ -63,15 +64,16 @@ void TestTimer::test02() {
 		t2.stop();
 		tmp= t2.get_time();
 		CPPUNIT_ASSERT(t2.get_time()>0);
+		toto += tmp;
 	}
 	t1.stop();
 	CPPUNIT_ASSERT(t1.get_time()>t2.get_time());
 	CPPUNIT_ASSERT(t1.get_time()>tmp);
+	CPPUNIT_ASSERT(t1.get_time() >= toto);
 	CPPUNIT_ASSERT(t2.get_time()==tmp);
 }
 
 void TestTimer::test03() {
-	int n= 1.e6;
 	double a[5][4]= { {4,4,4,4}, {1,1,1,1}, {8,8,8,8}, {6,6,6,6}, { 3,7,3,7}};
 	double c[5] = {0.1, 0.2, 0.2, 0.4, 0.4};
 
@@ -80,7 +82,8 @@ void TestTimer::test03() {
 	t0.start();
 
 	Timer t1;
-	t1.restart();
+	t1.start();
+	int n= 1.e6;
 	double f, z;
 	for (int k =0; k<n; k++){
 		f= 0;
@@ -94,9 +97,9 @@ void TestTimer::test03() {
 	}
 	t1.stop();
 
-	n =1.e5;
 	Timer t2;
-	t2.restart();
+	t2.start();
+	n =7.e5;
 	IntervalVector x(4,Interval(4));
 	Interval fi, zi;
 	for (int k =0; k<n; k++){
