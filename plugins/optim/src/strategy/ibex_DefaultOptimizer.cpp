@@ -62,12 +62,12 @@ ExtendedSystem& get_ext_sys(const System& sys, double eps_h) {
 
 }
 
-DefaultOptimizer::DefaultOptimizer(const System& sys, double eps_x, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, double random_seed) :
+DefaultOptimizer::DefaultOptimizer(const System& sys, double eps_x, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed) :
 		Optimizer(sys.nb_var,
 			  ctc(get_ext_sys(sys,eps_h)), // warning: we don't know which argument is evaluated first
 			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x)),
-			  rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(get_norm_sys(sys,eps_h)))) :
-						 (LoupFinder*) new LoupFinderDefault(get_norm_sys(sys,eps_h))),
+			  rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(get_norm_sys(sys,eps_h),inHC4))) :
+						 (LoupFinder*) new LoupFinderDefault(get_norm_sys(sys,eps_h),inHC4)),
 			  (CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h))),
 			  get_ext_sys(sys,eps_h).goal_var(),
 			  eps_x,

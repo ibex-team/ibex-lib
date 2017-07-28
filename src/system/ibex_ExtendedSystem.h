@@ -23,7 +23,7 @@ namespace ibex {
  * <ul> The extended system contains:
  * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
  * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
- * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
+ * <li> (m+1) constraints: y>=f(x), g_1(x)<=0, ..., g_m(x)<=0.
  * </ul>
  */
 class ExtendedSystem : public System {
