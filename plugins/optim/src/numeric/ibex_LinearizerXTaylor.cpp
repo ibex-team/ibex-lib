@@ -83,7 +83,9 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 	IntervalMatrix Df(ma,n); // derivatives over the box
 
 	if (slope == TAYLOR) { // compute derivatives once for all
-		Df=sys.active_ctrs_jacobian(box);
+		Df=sys.f_ctrs.jacobian(box,active);
+		//Df=sys.active_ctrs_jacobian(box);  // --> better with SystemBox
+
 		if (Df.is_empty()) return -1;
 	}
 
@@ -156,7 +158,9 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box) {
 		// the corner used -> typed IntervalVector just to have guaranteed computations
 		IntervalVector corner = get_corner_point(box);
 
-		IntervalMatrix J=sys.active_ctrs_jacobian(box);
+		IntervalMatrix J=sys.f_ctrs.jacobian(box,active);
+		//IntervalMatrix J=sys.active_ctrs_jacobian(box);  // --> better with SystemBox
+
 		if (J.is_empty()) return -1; // note: no way to inform that the box is actually infeasible
 
 		// the evaluation of the constraints in the corner x_corner
