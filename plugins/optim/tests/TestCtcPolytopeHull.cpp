@@ -39,6 +39,7 @@ void TestCtcPolytopeHull::lp01() {
 
 	// contract it
 	ctc.contract(box);
+	cout << box <<endl;
 	check(box[0],Interval(-1,0));
 	check(box[1],Interval(-1,1));
 	CPPUNIT_ASSERT(box[0].is_superset(Interval(-1,0)));

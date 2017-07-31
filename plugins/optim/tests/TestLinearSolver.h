@@ -23,12 +23,22 @@ class TestLinearSolver : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestLinearSolver);
+	CPPUNIT_TEST(test01);
 	CPPUNIT_TEST(kleemin3);
-	//CPPUNIT_TEST(test02);
+	CPPUNIT_TEST(kleemin6);
+	CPPUNIT_TEST(kleemin8);
+	CPPUNIT_TEST(kleemin30);
 	CPPUNIT_TEST_SUITE_END();
 
-	void kleemin3();
-	//void test02();
+	void test01();
+
+
+	void kleemin(int n);
+
+	void kleemin3() {kleemin(3);};
+	void kleemin6() {kleemin(6);};
+	void kleemin8() {kleemin(8);};
+	void kleemin30();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestLinearSolver);

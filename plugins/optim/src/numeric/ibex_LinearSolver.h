@@ -236,13 +236,14 @@ private:
 	int nb_vars;              // number of variables
 	int nb_rows;              // total number of rows
 	IntervalVector boundvar;  // bound constraints
+	Sense sense;			  // Minimize or maximize
 
 	/** =================== Results of the last call to solve() ==================== */
 	Interval obj_value;       // (certified or not) enclosure of the minimum
 	ibex::Vector primal_solution;
 	ibex::Vector dual_solution;
-	int status_prim; // return status of the primal solving (implementation-specific)
-	int status_dual; // return status of the dual solving (implementation-specific)
+	bool status_prim; // return status of the primal solving (implementation-specific)
+	bool status_dual; // return status of the dual solving (implementation-specific)
 	/**===============================================================================*/
 
 #ifdef _IBEX_WITH_SOPLEX_
@@ -268,7 +269,6 @@ private:
 
 #ifdef _IBEX_WITH_CLP_
 	ClpSimplex 	*myclp;
-	int * _which;
 	int * _col1Index;
 #endif
 

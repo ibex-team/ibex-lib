@@ -13,12 +13,7 @@
 
 namespace ibex {
 
-#ifdef _IBEX_WITH_CPLEX_
-	const double LinearSolver::default_eps = 1e-9;
-#else
-	const double LinearSolver::default_eps = 1e-10;
-#endif
-
+const double LinearSolver::default_eps = 1e-9;
 const double LinearSolver::default_max_bound = 1e20; // max bound in CPLEX
 const int LinearSolver::default_max_time_out=100;
 const int LinearSolver::default_max_iter=100;
@@ -121,16 +116,41 @@ void LinearSolver::clean_all() {
 	clean_bounds();
 }
 
+Vector LinearSolver::get_primal_sol() const {
+	try {
+		if (status_prim) {
+			return primal_solution;
+		} else
+			throw LPException();
+	}
+	catch(...) {
+		throw LPException();
+	}
+}
+
+Vector LinearSolver::get_dual_sol() const {
+	try {
+		if (status_dual) {
+			return dual_solution;
+		} else
+			throw LPException();
+	}
+	catch(...) {
+		throw LPException();
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 
-LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int var, Interval& obj) {
+LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense s, int var, Interval& obj) {
 	assert((0<=var)&&(var<=nb_vars));
 
 	LinearSolver::Status_Sol stat = LinearSolver::UNKNOWN;
+	set_sense(LinearSolver::MINIMIZE);
 
 	try {
 		// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
-		if(sense==LinearSolver::MINIMIZE)
+		if(s==LinearSolver::MINIMIZE)
 			set_obj_var(var, 1.0);
 		else
 			set_obj_var(var, -1.0);
@@ -138,12 +158,12 @@ LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int 
 		//	mylinearsolver->write_file("coucou.lp");
 		//	system("cat coucou.lp");
 		stat = solve();
-		// std::cout << "[polytope-hull]->[run_simplex] solver returns " << stat << std::endl;
+		//std::cout << "[polytope-hull]->[solve_var] solver returns " << stat << std::endl;
 		switch (stat) {
 		case LinearSolver::OPTIMAL : {
 			// Neumaier - Shcherbina postprocessing
-			Interval obj_tmp = neumaier_shcherbina_postprocessing_var(var, sense);
-			obj_value = Interval(obj_tmp.lb(),obj_value.ub());
+			obj_value = neumaier_shcherbina_postprocessing_var(var, s);
+			//std::cout << "[polytope-hull]->[solve_var] obj return " << obj_value << std::endl;
 			obj = obj_value;
 			stat = LinearSolver::OPTIMAL_PROVED;
 			break;
@@ -172,7 +192,7 @@ LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int 
 
 }
 
-Interval LinearSolver::neumaier_shcherbina_postprocessing_var (int var, LinearSolver::Sense sense) {
+Interval LinearSolver::neumaier_shcherbina_postprocessing_var (int var, LinearSolver::Sense s) {
 	try {
 		// the dual solution : used to compute the bound
 		ibex::Vector dual = get_dual_sol();
@@ -185,20 +205,21 @@ Interval LinearSolver::neumaier_shcherbina_postprocessing_var (int var, LinearSo
 		IntervalVector Rest(nb_vars);
 		IntervalVector Lambda(dual);
 
+
+		//		std::cout << " A_t " << A_trans << std::endl;
+		//		std::cout << " B " << B << std::endl;
+		//		std::cout << " dual " << Lambda << std::endl;
+		//		std::cout << " box " << boundvar << std::endl;
+		//		std::cout << " dual B " << Lambda * B << std::endl;
+
 		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-		if (sense==LinearSolver::MINIMIZE) {
+		if (s==LinearSolver::MINIMIZE) {
 			Rest[var] -=1; // because C is a vector of zero except for the coef "var"
 			return (Lambda * B - Rest * boundvar);
 		} else {
 			Rest[var] +=1;
 			return -(Lambda * B - Rest * boundvar);
 		}
-
-		//cout << " Rest " << Rest << endl;
-		//cout << " dual " << Lambda << endl;
-		//cout << " dual B " << Lambda * B << endl;
-		//cout << " rest box " << Rest * box  << endl;
-
 
 	} catch (...) {
 		throw LPException();
@@ -224,6 +245,15 @@ Interval LinearSolver::neumaier_shcherbina_postprocessing() {
 		Rest = A_trans * Lambda ;
 		Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
 		return (Lambda * B - Rest * boundvar);
+
+		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
+		if (sense==LinearSolver::MINIMIZE) {
+			Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
+			return (Lambda * B - Rest * boundvar);
+		} else {
+			Rest += obj;   // Rest = Transpose(As) * Lambda - obj
+			return -(Lambda * B - Rest * boundvar);
+		}
 
 	} catch (...) {
 		throw LPException();
@@ -266,9 +296,9 @@ bool LinearSolver::neumaier_shcherbina_infeasibilitytest() {
 
 
 LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
-			nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1) ,
+			nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1) , sense(LinearSolver::MINIMIZE),
 			obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
-			status_prim(soplex::SPxSolver::UNKNOWN), status_dual(soplex::SPxSolver::UNKNOWN){
+			status_prim(false), status_dual(false){
 
 
 	mysoplex= new soplex::SoPlex();
@@ -306,6 +336,8 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	soplex::SPxSolver::Status stat = soplex::SPxSolver::UNKNOWN;
 
 	try{
+		status_prim = false;
+		status_dual = false;
 		stat = mysoplex->solve();
 		switch (stat) {
 		case (soplex::SPxSolver::OPTIMAL) : {
@@ -313,7 +345,8 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 
 			// the primal solution : used by choose_next_variable
 			soplex::DVector primal(nb_vars);
-			status_prim = mysoplex->getPrimal(primal);
+			mysoplex->getPrimal(primal);
+			status_prim = true;
 			for (int i=0; i< nb_vars ; i++) {
 				primal_solution[i]=primal[i];
 			}
@@ -322,7 +355,8 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 
 			dual_solution.resize(nb_rows);
 
-			status_dual = mysoplex->getDual(dual);
+			mysoplex->getDual(dual);
+			status_dual = true;
 			for (int i=0; i<nb_rows; i++) {
 				if 	( ((mysoplex->rhs(i) >=  default_max_bound) && (dual[i]<=0)) ||
 						((mysoplex->lhs(i) <= -default_max_bound) && (dual[i]>=0))   ) {
@@ -434,39 +468,6 @@ IntervalVector  LinearSolver::get_lhs_rhs() const{
 	return B;
 }
 
-
-ibex::Vector LinearSolver::get_primal_sol() const {
-	try {
-		if (status_prim == soplex::SPxSolver::OPTIMAL) {
-//			for (int i=0; i< nb_vars ; i++) {
-//				solution_primal[i] = primal_solution[i];
-//			}
-			return primal_solution;
-		} else
-			throw LPException();
-	}
-	catch(...) {
-		throw LPException();
-	}
-}
-
-ibex::Vector LinearSolver::get_dual_sol() const {
-
-	try {
-		if (status_dual == soplex::SPxSolver::OPTIMAL) {
-//			for (int i=0; i<nb_rows; i++) {
-//				solution_dual[i] = dual_solution[i];
-//			}
-			return dual_solution;
-		} else
-			throw LPException();
-	}
-	catch(...) {
-		throw LPException();
-	}
-}
-
-
 ibex::Vector LinearSolver::get_infeasible_dir() const {
 
 	try {
@@ -504,9 +505,8 @@ double LinearSolver::get_epsilon() const {
 void LinearSolver::clean_ctrs() {
 
 	try {
-		status_prim = soplex::SPxSolver::UNKNOWN;
-		status_dual = soplex::SPxSolver::UNKNOWN;
-		int status=0;
+		status_prim = false;
+		status_dual = false;
 		if ((nb_vars)<=  (nb_rows - 1))  {
 			mysoplex->removeRowRange(nb_vars, nb_rows-1);
 		}
@@ -549,9 +549,11 @@ void LinearSolver::set_sense(Sense s) {
 	try {
 		if (s==LinearSolver::MINIMIZE) {
 			mysoplex->changeSense(soplex::SPxLP::MINIMIZE);
+			sense = LinearSolver::MINIMIZE;
 		}
 		else if (s==LinearSolver::MAXIMIZE) {
 			mysoplex->changeSense(soplex::SPxLP::MAXIMIZE);
+			sense = LinearSolver::MAXIMIZE;
 		}
 		else
 			throw LPException();
@@ -666,11 +668,10 @@ void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rh
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef _IBEX_WITH_CPLEX_
 
-LinearSolver::LinearSolver(int nb_vars1, int max_iter,
-		int max_time_out, double eps) :
-		nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1),
+LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
+		nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1), sense(LinearSolver::MINIMIZE),
 		 obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
-		status_prim(-1), status_dual(-1),
+		status_prim(false), status_dual(false),
 		envcplex(NULL), lpcplex(NULL) {
 
 	int status;
@@ -899,6 +900,9 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 		int status = CPXlpopt(envcplex, lpcplex);
 
 		if (status == 0) {
+
+			status_prim = false;
+			status_dual = false;
 			int solstat = CPXgetstat(envcplex, lpcplex);
 
 			switch (solstat) {
@@ -911,11 +915,11 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 					std::cerr << "LinearSolver: Failed to get the objective value." << std::endl;
 					throw LPException();
 				}
-				status_prim =CPXgetx(envcplex, lpcplex, primal_solution.raw(), 0, nb_vars - 1);
-
+				CPXgetx(envcplex, lpcplex, primal_solution.raw(), 0, nb_vars - 1);
+				status_prim = true;
 				dual_solution.resize(nb_rows);
-				status_dual = CPXgetpi(envcplex, lpcplex, dual_solution.raw(), 0, nb_rows - 1);
-
+				CPXgetpi(envcplex, lpcplex, dual_solution.raw(), 0, nb_rows - 1);
+				status_dual = true;
 				return OPTIMAL;
 			}
 			case (CPX_STAT_INFEASIBLE):
@@ -1068,35 +1072,6 @@ IntervalVector LinearSolver::get_lhs_rhs() const {
 	return B;
 }
 
-Vector LinearSolver::get_primal_sol() const {
-	try {
-		if (status_prim == 0) {
-			return primal_solution;
-		} else
-			throw LPException();
-
-	} catch (...) {
-		throw LPException();
-	}
-}
-
-Vector LinearSolver::get_dual_sol() const {
-	try {
-		// the dual solution ; used by Neumaier Shcherbina test
-		if (status_dual == 0) {
-//			for (int i = 0; i < dual_solution.size(); i++) {
-//				dual[i] = (dual_solution[i]< 0) ? dual_solution[i] : 0.0; // TODO why??
-//				//dual[i] = dual_solution[i];
-//			}
-			return dual_solution;
-		} else
-			throw LPException();
-
-	} catch (...) {
-		throw LPException();
-	}
-}
-
 Vector LinearSolver::get_infeasible_dir() const {
 	try {
 		Vector sol(nb_rows);
@@ -1118,8 +1093,8 @@ Vector LinearSolver::get_infeasible_dir() const {
 void LinearSolver::clean_ctrs() {
 
 	try {
-		status_prim = -1;
-		status_dual = -1;
+		status_prim = false;
+		status_dual = false;
 		int status=0;
 		if ((2*nb_vars)<=  (nb_rows - 1))  {
 			status = CPXdelrows (envcplex, lpcplex, 2*nb_vars,  nb_rows - 1);
@@ -1190,12 +1165,14 @@ void LinearSolver::set_sense(Sense s) {
 				std::cerr<< "Error CPLEX: Could not change the sense, error "<< status << std::endl;
 				throw LPException();
 			}
+			else  sense = LinearSolver::MINIMIZE;
 		} else if (s == LinearSolver::MAXIMIZE) {
 			int status = CPXchgobjsen(envcplex, lpcplex, CPX_MAX); //Problem is maximisation
 			if (status) {
 				std::cerr<< "Error CPLEX: Could not change the sense, error "<< status << std::endl;
 				throw LPException();
 			}
+			else sense = LinearSolver::MAXIMIZE;
 		} else
 			throw LPException();
 
@@ -1352,9 +1329,9 @@ void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rh
 
 
 LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
-			nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1),
+			nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1), sense(LinearSolver::MINIMIZE),
 			obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
-			status_prim(0), status_dual(0)  {
+			status_prim(false), status_dual(false)  {
 
 
 	myclp= new ClpSimplex();
@@ -1399,10 +1376,10 @@ LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double 
 
 	nb_rows = nb_vars;
 
-	_which =new int[10*nb_rows];
-	for (int i=0;i<(10*nb_rows);i++) {
-		_which[i]=i+nb_vars;
-	}
+//	_which =new int[10*nb_rows];
+//	for (int i=0;i<(10*nb_rows);i++) {
+//		_which[i]=i+nb_vars;
+//	}
 
 	_col1Index = new int[nb_vars];
 	for (int i=0;i<nb_vars;i++) {
@@ -1413,7 +1390,6 @@ LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double 
 
 LinearSolver::~LinearSolver() {
 	delete myclp;
-	delete [] _which;
 	delete [] _col1Index;
 }
 
@@ -1422,11 +1398,14 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	//int stat = -1;
 
 	try{
+		status_prim = false;
+		status_dual = false;
+
 		myclp->dual();
 		//stat = myclp->status();
 		myclp->status();
 
-    	     /** Status of problem:
+		/** Status of problem:
     	         -1 - unknown e.g. before solve or if postSolve says not optimal
     	         0 - optimal
     	         1 - primal infeasible
@@ -1443,7 +1422,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 			for (int i=0; i< nb_vars ; i++) {
 				primal_solution[i]=primal[i];
 			}
-			status_prim = 1;
+			status_prim = true;
 
 			// the dual solution ; used by Neumaier Shcherbina test
 			double * dual = myclp->dualRowSolution();
@@ -1459,13 +1438,17 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 					dual_solution[i]=dual[i];
 				}
 			}
-			status_dual = 1;
+			status_dual = true;
 			return OPTIMAL;
 		}
 		else if (myclp->isProvenPrimalInfeasible())
 			return INFEASIBLE;
-		else if (myclp->isIterationLimitReached())
-			return MAX_ITER;
+		else if (myclp->isIterationLimitReached()){
+			if (myclp->secondaryStatus()==9) {
+				return TIME_OUT;
+			}
+			else return MAX_ITER;
+			}
 		else
 			return UNKNOWN;
 
@@ -1577,18 +1560,17 @@ IntervalVector  LinearSolver::get_lhs_rhs() const {
 	IntervalVector B(nb_rows);
 	try {
 		// Get the bounds of the variables
-		for (int i=0;i<nb_vars; i++){
+		for (int i=0;i<nb_rows; i++){
 			B[i]=Interval( myclp->getRowLower()[i] , myclp->getRowUpper()[i] );
 		}
 
 		// Get the bounds of the constraints
-		for (int i=nb_vars;i<nb_rows; i++){
+//		for (int i=nb_vars;i<nb_rows; i++){
 //			B[i]=Interval( 	(myclp->getRowLower()[i]>-default_max_bound)? myclp->getRowLower()[i]:-default_max_bound,
 //	TODO why				        (myclp->getRowUpper()[i]< default_max_bound)? myclp->getRowUpper()[i]: default_max_bound   );
-			B[i]=Interval(myclp->getRowLower()[i],myclp->getRowUpper()[i]);
 			//Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA
 			//           cout << B(i+1) << endl;
-		}
+//		}
 	}
 	catch(...) {
 		throw LPException();
@@ -1597,35 +1579,7 @@ IntervalVector  LinearSolver::get_lhs_rhs() const {
 }
 
 
-Vector LinearSolver::get_primal_sol() const {
-	try {
-		if (status_prim == 1) {
-//			for (int i=0; i< nb_vars ; i++) {
-//				solution_primal[i] = primal_solution[i];
-//			}
-			return primal_solution;
-		} else
-			throw LPException();
-	}
-	catch(...) {
-		throw LPException();
-	}
-}
 
-Vector LinearSolver::get_dual_sol() const {
-	try {
-		if (status_dual == 1) {
-//			for (int i=0; i<nb_rows; i++) {
-//				solution_dual[i] = dual_solution[i];
-//			}
-			return dual_solution;
-		} else
-			throw LPException();
-	}
-	catch(...) {
-		throw LPException();
-	}
-}
 
 Vector LinearSolver::get_infeasible_dir() const {
 	Vector sol(nb_rows);
@@ -1657,11 +1611,11 @@ Vector LinearSolver::get_infeasible_dir() const {
 
 void LinearSolver::clean_ctrs() {
 	try {
-		status_prim = 0;
-		status_dual = 0;
-		int status=0;
+		status_prim = false;
+		status_dual = false;
 		if (nb_vars<=(nb_rows - 1))  {
-			myclp->deleteRows(nb_rows -nb_vars,_which);
+			//myclp->deleteRows(nb_rows -nb_vars,_which);
+			myclp->resize(nb_vars,nb_vars);
 		}
 		nb_rows = nb_vars;
 		obj_value = POS_INFINITY;
@@ -1702,9 +1656,11 @@ void LinearSolver::set_sense(Sense s) {
 			/// Direction of optimization (1 - minimize, -1 - maximize, 0 - ignore
 		if (s==LinearSolver::MINIMIZE) {
 			myclp->setOptimizationDirection(1);
+			sense = LinearSolver::MINIMIZE;
 		}
 		else if (s==LinearSolver::MAXIMIZE) {
 			myclp->setOptimizationDirection(-1);
+			sense = LinearSolver::MAXIMIZE;
 		}
 		else
 			throw LPException();
@@ -2311,9 +2267,9 @@ LinearSolver::Status LinearSolver::addConstraint(const ibex::Vector& row, CmpOp 
 
 LinearSolver::LinearSolver(int nb_vars, int max_iter,
 	int max_time_out, double eps):
-	nb_vars(0), nb_rows(0), obj_value(POS_INFINITY),
+	nb_vars(0), nb_rows(0), obj_value(POS_INFINITY), sense(LinearSolver::MINIMIZE),
 	primal_solution(1), dual_solution(1 /*tmp*/),
-	status_prim(0), status_dual(0), boundvar(1)
+	status_prim(false), status_dual(false), boundvar(1)
 {
 	ibex_warning("No Linear Solver available.");
 }
@@ -2347,14 +2303,6 @@ void LinearSolver::get_coef_obj(Vector& obj) const{
 }
 
 double LinearSolver::get_epsilon() const{
-	throw LPException();
-}
-
-void LinearSolver::get_primal_sol(Vector & prim) const{
-	throw LPException();
-}
-
-void LinearSolver::get_dual_sol(Vector & dual) const{
 	throw LPException();
 }
 

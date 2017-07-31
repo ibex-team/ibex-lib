@@ -11,7 +11,7 @@
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_LinearRelaxFixed.h"
 
-using namespace std;
+//using namespace std;
 
 namespace ibex {
 
@@ -61,7 +61,7 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 		optimizer(box);
 
-		//mylinearsolver->writeFile("LP.lp");
+		//mylinearsolver->write_file("LP.lp");
 		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
 		mylinearsolver->clean_ctrs();
@@ -116,6 +116,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{
 			inf_bound[i]=1;
+			opt = Interval::ALL_REALS;
 			stat = mylinearsolver->solve_var(LinearSolver::MINIMIZE, i, opt);
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
 			if (stat == LinearSolver::OPTIMAL_PROVED) {
@@ -164,6 +165,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		}
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
+			opt = Interval::ALL_REALS;
 			stat= mylinearsolver->solve_var(LinearSolver::MAXIMIZE, i, opt);
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << " opt=" << opt << endl;
 			if( stat == LinearSolver::OPTIMAL_PROVED) {
