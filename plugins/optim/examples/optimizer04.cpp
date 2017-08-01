@@ -46,7 +46,9 @@ int main(int argc, char** argv){
 
 	// the extended system 
 	ExtendedSystem ext_sys(sys,eqeps);
-
+	NormalizedSystem norm_sys(sys,eqeps);
+	LoupFinderDefault loupfinder (norm_sys,true);
+	CellDoubleHeap  buffer (ext_sys);
 
         cout << "file " << argv[1] << endl;
 
@@ -129,12 +131,13 @@ int main(int argc, char** argv){
 	int samplesize=1;
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	Optimizer o(sys,*ctcxn,*bs,prec,goalprec,goalprec,samplesize,eqeps);
+	//	Optimizer o(sys.nb_var,*ctcxn,*bs,loupfinder,prec,goalprec,goalprec,samplesize,eqeps);
+	Optimizer o(sys.nb_var,*ctcxn,*bs,loupfinder,buffer,ext_sys.goal_var(),prec,goalprec,goalprec);
 
 	cout << " sys.box " << sys.box << endl;
 
 	// the trace 
-	o.trace=1;
+	o.trace=0;
 
 	// the allowed time for search
 	o.timeout=timelimit;
