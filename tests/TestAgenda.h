@@ -26,6 +26,7 @@ public:
 	CPPUNIT_TEST(test01);
 	CPPUNIT_TEST(copy);
 	CPPUNIT_TEST(swap);
+	CPPUNIT_TEST(push01);
 	CPPUNIT_TEST(pop01);
 	CPPUNIT_TEST_SUITE_END();
 private:
@@ -33,6 +34,7 @@ private:
 	void test01();
 	void copy();
 	void swap();
+	void push01();
 	void pop01();
 };
 

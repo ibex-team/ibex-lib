@@ -3,14 +3,14 @@
 // File        : ibex_3BCID.h
 // Author      : Ignacio Araya, Gilles Chabert,
 //               Bertrand Neveu, Gilles Trombettoni
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 1, 2012
 // Last Update : Jul 1, 2012
 //============================================================================
 
-#ifndef __IBEX_CTC_OPTIMSHAVING_H__
-#define __IBEX_CTC_OPTIMSHAVING_H__
+#ifndef __IBEX_CTC_OPTIM_SHAVING_H__
+#define __IBEX_CTC_OPTIM_SHAVING_H__
 
 #include "ibex_Ctc3BCid.h"
 
@@ -34,4 +34,4 @@ namespace ibex {
   
 	
 } // end namespace ibex
-#endif // __IBEX_CTC_OPTIMSAHVING_H__
+#endif // __IBEX_CTC_OPTIM_SHAVING_H__

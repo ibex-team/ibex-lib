@@ -12,6 +12,8 @@
 #include "TestCellHeap.h"
 #include "ibex_OptimData.h"
 #include "ibex_CellDoubleHeap.h"
+#include "ibex_System.h"
+#include "ibex_SystemFactory.h"
 
 using namespace std;
 
@@ -149,11 +151,20 @@ void TestCellHeap::test05() {
 }
 
 void TestCellHeap::test_D00() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_goal(x);
+	System _sys(fac);
+	ExtendedSystem sys(_sys);
+	cleanup(x,true);
 
 	int nb=10;
-	CellCostVarLB cost_lb(0);
-	CellCostVarUB cost_ub(0);
-	CellDoubleHeap h1(cost_lb, cost_ub);
+//	CellCostVarLB cost_lb(0);
+//	CellCostVarUB cost_ub(0);
+//	CellDoubleHeap h1(cost_lb, cost_ub);
+
+	CellDoubleHeap h1(sys, 50, CellCostFunc::UB);
 
 	double _box[][2] = {{5,15},  {15,25}};
 	IntervalVector box(2,_box);
@@ -171,11 +182,22 @@ void TestCellHeap::test_D00() {
 
 
 void TestCellHeap::test_D01() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_goal(x);
+	System _sys(fac);
+	ExtendedSystem sys(_sys);
+	cleanup(x,true);
 
 	int nb=10;
-	CellCostVarLB cost_lb(1);
-	CellCostC5 cost_c5;
-	CellDoubleHeap h1(cost_lb,cost_c5,50);
+//	CellCostVarLB cost_lb(1);
+//	CellCostC5 cost_c5;
+//	CellDoubleHeap h1(cost_lb,cost_c5,50);
+//	CellDoubleHeap h1(sys, 50, CellCostFunc::UB);
+
+	CellDoubleHeap h1(sys, 50, CellCostFunc::C5);
+
 	h1.contract(100);
 
 
@@ -199,11 +221,20 @@ void TestCellHeap::test_D01() {
 
 
 void TestCellHeap::test_D03() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_goal(x);
+	System _sys(fac);
+	ExtendedSystem sys(_sys);
+	cleanup(x,true);
 
 	int nb=10;
-	CellCostVarLB cost_lb(1);
-	CellCostC5 cost_c5;
-	CellDoubleHeap h1(cost_lb,cost_c5,50);
+//	CellCostVarLB cost_lb(1);
+//	CellCostC5 cost_c5;
+//	CellDoubleHeap h1(cost_lb,cost_c5,50);
+
+	CellDoubleHeap h1(sys, 50, CellCostFunc::C5);
 
 	h1.contract(100);
 
@@ -225,12 +256,20 @@ void TestCellHeap::test_D03() {
 
 
 void TestCellHeap::test_D04() {
-
+	const ExprSymbol& x=ExprSymbol::new_();
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_goal(x);
+	System _sys(fac);
+	ExtendedSystem sys(_sys);
+	cleanup(x,true);
 
 	int nb=10;
-	CellCostVarLB cost_lb(1);
-	CellCostC5 cost_c5;
-	CellDoubleHeap h1(cost_lb,cost_c5,50);
+//	CellCostVarLB cost_lb(1);
+//	CellCostC5 cost_c5;
+//	CellDoubleHeap h1(cost_lb,cost_c5,50);
+
+	CellDoubleHeap h1(sys, 50, CellCostFunc::UB);
 
 	h1.contract(10);
 
@@ -255,13 +294,23 @@ void TestCellHeap::test_D04() {
 
 
 void TestCellHeap::test_D05() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_goal(x);
+	System _sys(fac);
+	ExtendedSystem sys(_sys);
+	cleanup(x,true);
 
 	int nb=10;
 
-	CellCostVarLB cost_lb(0);
-	CellCostC5 cost_c5;
-	CellDoubleHeap h1(cost_lb,cost_c5,50);
-	CellDoubleHeap h2(cost_lb,cost_c5,50);
+//	CellCostVarLB cost_lb(0);
+//	CellCostC5 cost_c5;
+//	CellDoubleHeap h1(cost_lb,cost_c5,50);
+//	CellDoubleHeap h2(cost_lb,cost_c5,50);
+
+	CellDoubleHeap h1(sys, 50, CellCostFunc::UB);
+	CellDoubleHeap h2(sys, 50, CellCostFunc::UB);
 
 	h1.contract(100);
 	h2.contract(100);

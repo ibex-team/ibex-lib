@@ -88,11 +88,6 @@ public:
 	//const int n;
 
 
-protected:
-	/**
-	 * \brief Constructor by copy.
-	 */
-	explicit EntailedCtr( const EntailedCtr& e);
 
 	const System* orig_sys;
 	const NormalizedSystem* norm_sys;
@@ -103,6 +98,14 @@ protected:
 	 */
 	bool *orig_entailed;
 	bool *norm_entailed;
+
+
+
+protected:
+	/**
+	 * \brief Constructor by copy.
+	 */
+	explicit EntailedCtr( const EntailedCtr& e);
 
 	friend std::ostream& operator<<(std::ostream& os, const EntailedCtr&);
 

@@ -294,8 +294,7 @@ protected:
 	 */
 	void store_sol(const Solution& sol);
 
-	void time_limit_check();
-
+	Timer timer;
 
 	BitSet impact;
 
@@ -329,8 +328,6 @@ protected:
 	 */
 	const BitSet* params;
 
-private:
-	Timer timer;
 };
 
 /*============================================ inline implementation ============================================ */

@@ -189,6 +189,9 @@ bool IntervalMatrix::is_zero() const {
 	return true;
 }
 
+bool IntervalMatrix::is_unbounded() const {
+	return _is_unboundedM(*this);
+}
 
 IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const {
 	return _submatrix(*this, row_start_index, row_end_index, col_start_index, col_end_index);

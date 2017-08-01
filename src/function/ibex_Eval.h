@@ -35,6 +35,11 @@ public:
 	Eval(Function &f);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~Eval();
+
+	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
 	Domain& eval(const Array<const Domain>& d);
@@ -48,6 +53,16 @@ public:
 	 * \brief Run the forward algorithm with an input box.
 	 */
 	Domain& eval(const IntervalVector& box);
+
+	/**
+	 * \brief Evaluate a subset of components.
+	 *
+	 * (Specific for vector-valued functions).
+	 *
+	 * \pre components must be non empty and contain indices in
+	 *      [0,f.image_dim()-1].
+	 */
+	IntervalVector eval(const IntervalVector& box, const BitSet& components);
 
 protected:
 	/**
@@ -110,6 +125,8 @@ public: // because called from CompiledFunction
 
 	Function& f;
 	ExprDomain d;
+	Agenda** fwd_agenda; // one agenda for each component
+	Agenda** bwd_agenda; // one agenda for each component
 };
 
 /* ============================================================================

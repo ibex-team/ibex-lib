@@ -201,6 +201,13 @@ public:
 	Matrix diam() const;
 
 	/**
+	 * \brief true iff this interval matrix contains an infinite bound.
+	 *
+	 * \note An empty interval matrix is always bounded.
+	 */
+	bool is_unbounded() const;
+
+	/**
 	 * \brief True iff this interval matrix is a subset of \a x.
 	 *
 	 * \pre Dimension of \a x must be equal to the dimension of this matrix.

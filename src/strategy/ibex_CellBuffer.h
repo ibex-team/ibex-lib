@@ -54,6 +54,16 @@ class CellBuffer {
 	/** Delete *this. */
 	virtual ~CellBuffer();
 
+	/**
+	 * \brief Add backtrackable data required by this buffer.
+	 *
+	 * This function is called for the root cell (before a
+	 * strategy is executed).
+	 *
+	 * Does nothing by default.
+	 */
+	virtual void add_backtrackable(Cell& root) { }
+
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
 	virtual void flush()=0;

@@ -112,6 +112,108 @@ public:
 	/** \brief Delete *this. */
 	virtual ~System();
 
+	/**
+	 * \brief The upper bound of the goal.
+	 *
+	 * \note Return +oo if the box is outside definition domain
+	 */
+	double goal_ub(const Vector& x) const;
+
+	/**
+	 * \brief Interval evaluation of the goal.
+	 *
+	 * \note Can be cached if box is actually a SystemBox.
+	 */
+	Interval goal_eval(const IntervalVector& box) const;
+
+	/**
+	 * \brief Interval gradient of the goal.
+	 *
+	 * \note Can be cached if box is actually a SystemBox.
+	 */
+	IntervalVector goal_gradient(const IntervalVector& box) const;
+
+	/**
+	 * \brief Interval gradient of the goal.
+	 *
+	 * See comments above.
+	 */
+	void goal_gradient(const IntervalVector& box, IntervalVector& g) const;
+
+	/**
+	 * \brief Interval evaluation of the constraint functions.
+	 *
+	 * E.g. if there are two constraints x<=0 and y+x>=0, the
+	 * function returns ([x],[y]+[x]).
+	 * Usually, this function is called either on a system containing
+	 * only equalities or a normalized system (see NormalizedSystem).
+	 *
+	 * \note Can be cached if box is actually a SystemBox.
+	 */
+
+	IntervalVector ctrs_eval(const IntervalVector& box) const;
+
+	/**
+	 * \brief Interval evaluation of the constraint functions.
+	 *
+	 * See comments above.
+	 */
+	void ctrs_eval(const IntervalVector& box, IntervalVector& ev) const;
+
+	/**
+	 * \brief Get the jacobian matrix of the constraints.
+	 *
+	 * \note Can be cached if box is actually a SystemBox.
+	 */
+	IntervalMatrix ctrs_jacobian(const IntervalVector& box) const;
+
+	/**
+	 * \brief Get the jacobian matrix of the constraints.
+	 *
+	 * See comments above.
+	 */
+	void ctrs_jacobian(const IntervalVector& box, IntervalMatrix& J) const;
+
+	/**
+	 * \brief Get the (potentially) active constraints.
+	 *
+	 * A constraint which is not in the bitset is proven to be inactive.
+	 *
+	 * \warning A "constraint" here corresponds to a component of "f_ctrs"
+	 *          **not** a constraint in the "ctrs" array (this is different
+	 *          in the case of vector/matrix constraints).
+	 *
+	 * \note Can be cached if box is actually a SystemBox.
+	 */
+	BitSet active_ctrs(const IntervalVector& box) const;
+
+	/**
+	 * \brief Quick check that the box is inside g(x)<=0.
+	 *
+	 * \return True only if all the constraints are inactive
+	 *
+	 * \note Can be cached if box is actually a SystemBox.
+	 */
+	bool is_inner(const IntervalVector& box) const;
+
+	/**
+	 * \brief Interval evaluation of the active constraints.
+	 *
+	 * \pre The number of (potentially) active constraints must be >0
+	 *
+	 * \note Can be cached if box is actually a SystemBox.
+	 */
+	IntervalVector active_ctrs_eval(const IntervalVector& box) const;
+
+	/**
+	 * \brief Interval jacobian matrix of the active constraints.
+	 *
+	 * * \pre The number of (potentially) active constraints must be >0
+	 *
+	 * \note Can be cached if box is actually a SystemBox.
+	 */
+	IntervalMatrix active_ctrs_jacobian(const IntervalVector& box) const;
+
 	/** Number of variables.
 	 *
 	 * \note This number is also sys.f_ctrs.nb_var() and box.size().
@@ -159,9 +261,10 @@ public:
 
 	/** Box Constraint on the variable
 	 * (not only "initial": may be used as input by CHOCO) */
-	IntervalVector box_constraints;
+	IntervalVector box;
 
-	/** Constraints.
+	/**
+	 * Constraints.
 	 *
 	 * If this system represents an unconstrained optimization problem,
 	 * this array is zero-sized. */
@@ -187,5 +290,15 @@ private:
 
 std::ostream& operator<<(std::ostream&, const System&);
 
+inline double System::goal_ub(const Vector& x) const {
+	Interval fx=goal->eval(x);
+	if (fx.is_empty())  // means: outside of the definition domain of the function
+		return POS_INFINITY;
+	else
+		return fx.ub();
+
+}
+
 } // end namespace ibex
+
 #endif // __IBEX_SYSTEM_H__

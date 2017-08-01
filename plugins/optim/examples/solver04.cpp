@@ -64,21 +64,14 @@ int main(int argc, char** argv) {
 	// The LR contractor
 
 
-	// The CtcXNewton contractor (if linearrelaxation=="xn")
-	// corner selection for linearizations : two corners are selected, a random one and its opposite
-	vector<LinearRelaxXTaylor::corner_point> cpoints;
-	cpoints.push_back(LinearRelaxXTaylor::RANDOM);
-	cpoints.push_back(LinearRelaxXTaylor::RANDOM_INV);
-
-
 	// the linear relaxation contractor 
-	LinearRelax* lr=NULL;
+	Linearizer* lr=NULL;
 	if (linearrelaxation=="art")
-	  lr = new LinearRelaxCombo(sys, LinearRelaxCombo::ART);
+	  lr = new LinearizerCombo(sys, LinearizerCombo::ART);
 	else if (linearrelaxation=="compo")
-	  lr = new LinearRelaxCombo(sys, LinearRelaxCombo::COMPO);
+	  lr = new LinearizerCombo(sys, LinearizerCombo::COMPO);
 	else   if (linearrelaxation=="xn") 
-	  lr = new LinearRelaxXTaylor (sys,cpoints);
+	  lr = new LinearizerXTaylor (sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP);
 
 	// linearrelaxation is optional and only used if the linearrelaxation parameter is xn, art or compo
 	// we build a fixpoint linear relaxation with ctclr and hc44xn  with default fix point ratio 0.2
@@ -88,7 +81,7 @@ int main(int argc, char** argv) {
 
 	CtcFixPoint* ctclr=NULL;
 	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
-	  ctclr= (new CtcFixPoint (*new CtcCompo(* new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX), hc44xn)));
+	  ctclr= (new CtcFixPoint (*new CtcCompo(* new CtcPolytopeHull(*lr), hc44xn)));
 
    
 
@@ -153,7 +146,7 @@ int main(int argc, char** argv) {
 	s.trace=1;  // solutions are printed as soon as found when trace=1
 
 	// Solve the system and get the solutions
-	vector<IntervalVector> sols=s.solve(sys.box_constraints);
+	vector<IntervalVector> sols=s.solve(sys.box);
 
 	// Display the number of solutions
 	cout << "number of solutions=" << sols.size() << endl;

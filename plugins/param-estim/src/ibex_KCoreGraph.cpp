@@ -1,6 +1,9 @@
 #include "ibex_KCoreGraph.h"
 #include "cliquer/graph.h"
 
+#include "ibex_mistral_Bitset.h"
+#define BitSet Mistral::BitSet
+
 using namespace std;
 
 namespace ibex {

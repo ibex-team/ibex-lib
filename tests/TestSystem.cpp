@@ -82,7 +82,7 @@ void TestSystem::factory01() {
 	CPPUNIT_ASSERT(sys.args[2].dim==Dim::scalar());
 	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x(2)))"));
 
-	CPPUNIT_ASSERT(sys.box_constraints.size()==13);
+	CPPUNIT_ASSERT(sys.box.size()==13);
 
 	CPPUNIT_ASSERT(sys.ctrs.size()==2);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
@@ -126,7 +126,7 @@ void TestSystem::copy01() {
 	CPPUNIT_ASSERT(sys.args[2].dim==Dim::scalar());
 	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x(2)))"));
 
-	CPPUNIT_ASSERT(sys.box_constraints.size()==13);
+	CPPUNIT_ASSERT(sys.box.size()==13);
 
 	CPPUNIT_ASSERT(sys.ctrs.size()==2);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
@@ -202,7 +202,7 @@ void TestSystem::extend01() {
 	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"__goal__"));
 	//CPPUNIT_ASSERT(sys.goal==NULL);
 
-	CPPUNIT_ASSERT(sys.box_constraints.size()==5);
+	CPPUNIT_ASSERT(sys.box.size()==5);
 
 	CPPUNIT_ASSERT(sys.ctrs.size()==4);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
@@ -356,8 +356,8 @@ void TestSystem::merge03() {
 
 
 void TestSystem::merge04() {
-	System sys1(SRCDIR_TESTS "/../benchs/benchs-optim/coconutbenchmark-library1/bearing.bch");
-	System sys2(SRCDIR_TESTS "/../benchs/benchs-satisfaction/benchs-coprin/I5.bch");
+	System sys1(SRCDIR_TESTS "/minibex/bearing.bch");
+	System sys2(SRCDIR_TESTS "/minibex/I5.bch");
 	System sys3(sys1,sys2);
 	CPPUNIT_ASSERT(strcmp(sys3.args[0].name,"x1")==0);
 	CPPUNIT_ASSERT(strcmp(sys3.args[4].name,"x6")==0);

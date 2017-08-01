@@ -36,7 +36,7 @@ int main() {
 	/* Build a default solver for the system and with a precision set to 1e-07 */
 	DefaultSolver solver(system,1e-07);
 
-	vector<IntervalVector> solutions = solver.solve(system.box_constraints); // Run the solver
+	vector<IntervalVector> solutions = solver.solve(system.box); // Run the solver
 
 	/* Display the solutions. */
 	for (unsigned int i=0; i<solutions.size(); i++) {
@@ -53,7 +53,7 @@ int main() {
 	/* Build a default optimizer with a precision set to 1e-07 for both x and f(x) */
 	DefaultOptimizer o(sys,1e-07,1e-07);
 
-	o.optimize(sys.box_constraints);// Run the optimizer
+	o.optimize(sys.box);// Run the optimizer
 
 	/* Display the result. */
 	cout << "interval for the minimum: " << Interval(o.uplo,o.loup) << endl;
@@ -655,7 +655,7 @@ int main() {
 
 	CtcNewton newton(system.f_ctrs, 5e+08, prec, 1e-04);
 
-	LinearRelaxCombo linear_relax(system,LinearRelaxCombo::XNEWTON);
+	LinearizerCombo linear_relax(system,LinearizerCombo::XNEWTON);
 
 	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
 
@@ -676,7 +676,7 @@ int main() {
 	Solver s(compo, bisector, buff);
 
 	/* Run the solver */
-	vector<IntervalVector> sols=s.solve(system.box_constraints);
+	vector<IntervalVector> sols=s.solve(system.box);
 
 	/* Display the solutions */
 	for (unsigned int i=0; i<sols.size(); i++)
@@ -705,7 +705,7 @@ int main() {
 
 	CtcAcid acid(ext_sys, hc4_2);
 
-	LinearRelaxCombo linear_relax(ext_sys,LinearRelaxCombo::XNEWTON);
+	LinearizerCombo linear_relax(ext_sys,LinearizerCombo::XNEWTON);
 
 	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
 
@@ -723,7 +723,7 @@ int main() {
 	Optimizer o(system, compo, bisector);
 
 	/* Run the optimizer */
-	o.optimize(system.box_constraints,prec);
+	o.optimize(system.box,prec);
 
 	/* Display a safe enclosure of the minimum */
 	cout << "f* in " << Interval(o.uplo,o.loup) << endl;

@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_StrategyParam.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 11, 2014
 //============================================================================

@@ -77,8 +77,8 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 	}
 
 	//================= set the domains =====================
-	sys.box_constraints.resize(sys.nb_var);
-	load(sys.box_constraints, scopes().top().var_domains());
+	sys.box.resize(sys.nb_var);
+	load(sys.box, scopes().top().var_domains());
 
 	//================= add the external functions ===========
 	sys.func.resize(source.func.size());

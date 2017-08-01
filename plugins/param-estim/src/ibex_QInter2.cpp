@@ -9,11 +9,13 @@
 //============================================================================
 
 #include "ibex_QInter2.h"
-#include "ibex_BitSet.h"
 #include "ibex_Exception.h"
 #include "ibex_KCoreGraph.h"
 
 #include <algorithm>
+
+#include "ibex_mistral_Bitset.h"
+#define BitSet Mistral::BitSet
 
 using namespace std;
 

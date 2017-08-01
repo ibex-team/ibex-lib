@@ -11,36 +11,32 @@
 
 #include "ibex_Function.h"
 #include "ibex_Gradient.h"
+#include "ibex_ExprLinearity.h"
 
 using namespace std;
 
 namespace ibex {
 
-Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f), fwd_agenda(NULL), bwd_agenda(NULL) {
+Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f),
+		coeff_matrix(f.image_dim(),f.nb_var()+1), is_linear(new bool[f.image_dim()]) {
 
-	int m=f.image_dim();
-	if (m>1) {
-		const ExprVector* vec=dynamic_cast<const ExprVector*>(&f.expr());
-		if (vec && m==vec->nb_args) {
-			fwd_agenda = new Agenda*[m];
-			bwd_agenda = new Agenda*[m];
-			for (int i=0; i<m; i++) {
-				bwd_agenda[i] = f.cf.agenda(f.nodes.rank(vec->arg(i)));
-				fwd_agenda[i] = new Agenda(*bwd_agenda[i],true); // true<=>swap
-			}
-		}
+	if (f.expr().dim.is_matrix())
+		return; // class not called in this case
+
+	ExprLinearity el(f.args(),f.expr());
+
+	if (f.expr().dim.is_scalar())
+		coeff_matrix[0]=el.coeff_vector(f.expr());
+	else
+		coeff_matrix=el.coeff_matrix(f.expr());
+
+	for (int i=0; i<f.image_dim(); i++) {
+		is_linear[i]=!coeff_matrix[i].is_unbounded();
 	}
 }
 
 Gradient::~Gradient() {
-	if (fwd_agenda!=NULL) {
-		for (int i=0; i<f.image_dim(); i++) {
-			delete fwd_agenda[i];
-			delete bwd_agenda[i];
-		}
-		delete[] fwd_agenda;
-		delete[] bwd_agenda;
-	}
+	delete[] is_linear;
 }
 
 void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) {
@@ -88,23 +84,55 @@ void Gradient::gradient(const IntervalVector& box, IntervalVector& gbox) {
 	g.read_arg_domains(gbox);
 }
 
-void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
+
+void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet& components, int v) {
 
 	int n=f.nb_var();
-	int m=f.image_dim();
-
-	assert(J.nb_rows()==m);
-	assert(J.nb_cols()==n);
-	assert(box.size()==n);
+	int m=components.size();
 
 	if (f.expr().dim.is_matrix()) {
 		ibex_error("Cannot called \"jacobian\" on a matrix-valued function");
 	}
 
-	if (m==1) {
+	assert(m<=f.image_dim());
+
+	assert(J.nb_rows()==components.size());
+	assert(J.nb_cols()==n);
+	assert(box.size()==n);
+	assert(!components.empty());
+
+
+	int c; // constraint number
+
+	// ============================================================================
+	// Detect the "nonlinear" components (those that requires gradient calculation)
+	BitSet nonlinear_components=BitSet::empty(f.image_dim());
+
+	for (int i=0; i<m; i++) {
+
+		c=(i==0? components.min() : components.next(c));
+
+		const IntervalVector& row=coeff_matrix[c];
+
+		if (is_linear[c])
+			if (v!=-1)
+				J[i][v]=row[v];
+			else
+				J[i]=row.subvector(0,n-1); // the row also contains the additive constant
+		else if (v!=-1 && !row[v].is_unbounded()) // linearity w.r.t. to v is enough
+			J[i][v]=row[v];
+		else
+			nonlinear_components.add(c);
+	}
+
+	if (nonlinear_components.empty()) return;
+	// ============================================================================
+
+	if (f.image_dim()==1) {
+
 		gradient(box,J[0]);
 
-	} else if(fwd_agenda!=NULL) {
+	} else if(_eval.fwd_agenda!=NULL) {
 
 		// If f is just a vector of expressions, we avoid to generate
 		// all the components. This has two advantages:
@@ -114,27 +142,34 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
 		//   forward phase (in the backward phase, each components are handled
 		//   separately so that shared subexpressions are treated as if they were separate).
 
-		if (_eval.eval(box).is_empty()) {
+		if (_eval.eval(box,nonlinear_components).is_empty()) {
 			// outside definition domain -> empty jacobian
-			J.set_empty(); return;
+			J.set_empty();
+			return;
 		}
 
 		for (int i=0; i<m; i++) {
+
+			c=(i==0? components.min() : components.next(c));
+
+			if (!nonlinear_components[c]) continue;
+
 			J.row(i).clear();
 
 			g.write_arg_domains(J.row(i));
 
-			f.cf.forward<Gradient>(*this, *fwd_agenda[i]);
+			f.cf.forward<Gradient>(*this, *(_eval.fwd_agenda)[c]);
 
-			g[bwd_agenda[i]->first()].i() = 1.0;
+			g[_eval.bwd_agenda[c]->first()].i() = 1.0;
 
-			f.cf.backward<Gradient>(*this, *bwd_agenda[i]);
+			f.cf.backward<Gradient>(*this, *(_eval.bwd_agenda)[c]);
 
-			if (J[i].is_empty()) {
+			g.read_arg_domains(J.row(i));
+
+			if (J.row(i).is_empty()) {
 				J.set_empty();
 				return;
-			} else
-				g.read_arg_domains(J.row(i));
+			}
 		}
 	} else {
 
@@ -151,7 +186,10 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
 		// when f is a vector of expressions (the most frequent case).
 		// ======================== option 1 =============================
 		for (int i=0; i<m; i++) {
-			f[i].gradient(box,J[i]);
+			c=i==0? components.min() : components.next(c);
+
+			f[c].gradient(box,J[i]);
+
 			if (J[i].is_empty()) {
 				J.set_empty();
 				return;
@@ -186,6 +224,9 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J) {
 	}
 }
 
+void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, int v) {
+	jacobian(box,J, BitSet::all(f.image_dim()), v);
+}
 
 void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) {
 
@@ -405,8 +446,8 @@ void Gradient::sign_bwd(int x, int y) {
 }
 
 void Gradient::abs_bwd (int x, int y) {
-	if (d[x].i().lb()>=0) g[x].i() += 1.0*g[y].i();
-	else if (d[x].i().ub()<=0) g[x].i() += -1.0*g[y].i();
+	if (d[x].i().lb()>0) g[x].i() += 1.0*g[y].i();
+	else if (d[x].i().ub()<0) g[x].i() += -1.0*g[y].i();
 	else g[x].i() += Interval(-1,1)*g[y].i();
 }
 

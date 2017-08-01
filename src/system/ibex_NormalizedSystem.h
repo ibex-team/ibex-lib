@@ -42,7 +42,7 @@ public:
 	 *              inequalities: f<=eps and -f<=eps. If eps==0
 	 *              equalities are duplicated.
 	 */
-	NormalizedSystem(const System& sys, double eps=0);
+	explicit NormalizedSystem(const System& sys, double eps=0);
 
 	/**
 	 * \brief Delete this.
@@ -53,6 +53,9 @@ public:
 	 * \brief Get the original index of a constraint.
 	 */
 	int original_index(int i) const;
+
+	/** Default epsilon applied to equations: 1e-8. */
+	static const double default_eps_h;
 
 protected:
 	int* _orig_index;

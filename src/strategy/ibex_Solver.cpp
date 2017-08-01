@@ -48,8 +48,7 @@ void Solver::init(const System& sys, const BitSet* _params) {
 	int nb_eq=0;
 
 	if (_params) {
-		this->params=new BitSet();
-		((BitSet*) this->params)->clone(*_params);
+		this->params=new BitSet(*_params);
 	}
 
 	// count the dimension of equalities
@@ -90,6 +89,8 @@ void Solver::start(const IntervalVector& init_box) {
 	solutions.clear();
 	solve_init_box = init_box;
 	nb_cells=0;
+	time=0;
+
 
 	assert(init_box.size()==ctc.nb_var);
 
@@ -107,8 +108,8 @@ void Solver::start(const IntervalVector& init_box) {
 
 	IntervalVector tmpbox(ctc.nb_var);
 
-	time =0;
-	timer.restart();
+	timer.start();
+
 }
 
 bool Solver::next(const Solution*& sol) {
@@ -149,7 +150,6 @@ bool Solver::next(const Solution*& sol) {
 						delete buffer.pop();
 						store_sol(new_sol);
 						sol = &solutions.back();
-						time = timer.get_time();
 						return true;
 					}
 				} // otherwise: continue search...
@@ -172,7 +172,6 @@ bool Solver::next(const Solution*& sol) {
 				if (is_sol) {
 					store_sol(new_sol);
 					sol = &solutions.back();
-					time = timer.get_time();
 					return true;
 				}
 				// note that we skip time_limit_check() here.
@@ -183,7 +182,8 @@ bool Solver::next(const Solution*& sol) {
 				// of uncaught timeout in this case (but this case is probably already
 				// an error case).
 			}
-			if (time_limit>0) timer.check(time_limit);
+			if (time_limit >0) timer.check(time_limit);
+			time = timer.get_time();
 		}
 	}
 	catch (TimeOutException&) {
@@ -207,7 +207,6 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 	return sols;
 }
 
-
 bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 
 	bool proved=true;
@@ -225,7 +224,7 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 
 				proved=inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity);
 
-				if (params && params->size()<n-m)
+				if (params && ((int) params->size())<n-m)
 					sol.varset = new VarSet(varset);
 
 			} catch(SingularMatrixException& e) {

@@ -200,7 +200,7 @@ void System::init_f_from_ctrs() {
 }
 
 
-System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0), box_constraints(1) {
+System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0), ops(NULL), box(1) {
 	init(fac);
 }
 
@@ -226,8 +226,8 @@ void System::init(const SystemFactory& fac) {
 	args.resize(fac.nb_arg);
 	varcopy(*fac.args, args);
 
-	box_constraints.resize(nb_var);
-	box_constraints=fac.bound_init;
+	box.resize(nb_var);
+	box=fac.bound_init;
 
 	// =========== init ctrs ==============
 	ctrs.resize(nb_ctr);

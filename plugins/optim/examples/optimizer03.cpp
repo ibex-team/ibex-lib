@@ -82,14 +82,14 @@ int main(int argc, char** argv){
 
 		Optimizer o(sys,*ctc,*bs,prec,goalprec,goalprec,1);
 
-		ext_sys.box_constraints[sys.nb_var]= sys.goal->eval(sys.box_constraints);
-		cout << " y init " << ext_sys.box_constraints[sys.nb_var] << endl;
+		ext_sys.box[sys.nb_var]= sys.goal->eval(sys.box);
+		cout << " y init " << ext_sys.box[sys.nb_var] << endl;
 
 		//o.in_HC4_flag=false;
 		o.mono_analysis_flag=false;
 		o.trace=true;
 		o.timeout=1000.0;
-		o.optimize(sys.box_constraints);
+		o.optimize(sys.box);
 
 		o.report();
 

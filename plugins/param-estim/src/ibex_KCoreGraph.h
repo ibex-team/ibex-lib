@@ -2,7 +2,7 @@
 #define __IBEX_K_CORE_GRAPH_H__
 
 #include "ibex_IntStack.h"
-#include "ibex_BitSet.h"
+#include "ibex_mistral_Bitset.h"
 
 #include <list>
 #include <vector>
@@ -79,7 +79,7 @@ private:
 	
 	/* Coloring structures */
 	int* colors;
-	BitSet *used;
+	Mistral::BitSet *used;
 	
 	/* Used to avoid recursive calls when removing vertices */
 	IntStack *tbr;

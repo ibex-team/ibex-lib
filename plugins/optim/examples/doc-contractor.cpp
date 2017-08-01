@@ -78,7 +78,7 @@ public:
 	 */
 	MyLinearRelax(const Matrix& A, const Vector& b) : LinearRelax(2,2), A(A), b(b) { }
 
-	virtual int linearization(const IntervalVector & box, LinearSolver& lp_solver)  {
+	virtual int linearize(const IntervalVector & box, LinearSolver& lp_solver)  {
 		for (int i=0; i<A.nb_rows(); i++)
 			// add the constraint in the LP solver
 			lp_solver.addConstraint(A[i],LEQ,b[i]);
@@ -288,7 +288,7 @@ int main() {
 	CtcCompo compo(ctc);          // make the composition of all contractors
 	CtcFixPoint fix(compo,prec);  // make the fixpoint
 
-	IntervalVector box=sys.box_constraints;   // tested box (load domains written in the file)
+	IntervalVector box=sys.box;   // tested box (load domains written in the file)
 
 	fix.contract(box);
 
@@ -301,7 +301,7 @@ int main() {
 
 	CtcPropag propag(ctc, prec);   // Propagation of all contractors
 
-	IntervalVector box2=sys.box_constraints;               // tested box (load domains written in the file)
+	IntervalVector box2=sys.box;               // tested box (load domains written in the file)
 
 	propag.contract(box2);
 
@@ -339,7 +339,7 @@ int main() {
 
 	CtcPropag propag(ctc, prec);   // Propagation of all contractors
 
-	IntervalVector box2=sys.box_constraints;               // tested box (load domains written in the file)
+	IntervalVector box2=sys.box;               // tested box (load domains written in the file)
 
 	propag.contract(box2);
 
@@ -357,7 +357,7 @@ int main() {
 	CtcHC4 hc4(sys);
 
 	// Test the contraction
-	IntervalVector box(sys.box_constraints);
+	IntervalVector box(sys.box);
 	output << " Box before HC4:" << box << endl;
 	hc4.contract(box);
 	output << " Box after HC4:" << box << endl;
@@ -414,7 +414,7 @@ int main() {
 	Vector b=Vector::zeros(2);
 
 	// create the linear system (with fixed matrix/vector)
-	LinearRelaxFixed lin(A,b);
+	LinearizerFixed lin(A,b);
 
 	// create the contractor w.r.t the linear system
 	CtcPolytopeHull ctc(lin);

@@ -189,6 +189,9 @@ public:
 	/** Return true if either 0, the null vector or the null matrix. */
 	bool is_zero() const;
 
+	/** Return true only if unbounded. */
+	bool is_unbounded() const;
+
 private:
 
 	TemplateDomain();
@@ -697,6 +700,17 @@ bool TemplateDomain<D>::is_zero() const {
 }
 
 template<class D>
+bool TemplateDomain<D>::is_unbounded() const {
+	switch(dim.type()) {
+	case Dim::SCALAR :     return i().is_unbounded(); break;
+	case Dim::ROW_VECTOR :
+	case Dim::COL_VECTOR : return v().is_unbounded(); break;
+	case Dim::MATRIX :     return m().is_unbounded(); break;
+	}
+	return false;
+}
+
+template<class D>
 std::ostream& operator<<(std::ostream& os,const TemplateDomain<D>& d) {
 	switch (d.dim.type()) {
 		case Dim::SCALAR:       os << d.i(); break;
@@ -786,7 +800,7 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 		switch (dim.type()) {
 		case Dim::SCALAR:
 			if (nb_used==-1 || i==used[u]) {
-				x[i]=d[s].i();
+				if ((x[i]=d[s].i()).is_empty()) { x.set_empty(); return; }
 				u++; // if nb_used==-1, u is incremented for nothing
 				if (u==nb_used) return; // otherwise next test "i==used[u]" is a memory fault
 			}
@@ -798,7 +812,7 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 			const typename D::VECTOR& v=d[s].v();
 			for (int j=0; j<dim.vec_size(); j++) {
 				if (nb_used==-1 || i==used[u]) {
-					x[i]=v[j];
+					if ((x[i]=v[j]).is_empty()) { x.set_empty(); return; }
 					u++;
 					if (u==nb_used) return;
 				}
@@ -813,7 +827,7 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 			for (int k=0; k<dim.nb_rows(); k++)
 				for (int j=0; j<dim.nb_cols(); j++) {
 					if (nb_used==-1 || i==used[u]) {
-						x[i]=M[k][j];
+						if ((x[i]=M[k][j]).is_empty()) { x.set_empty(); return; }
 						u++;
 						if (u==nb_used) return;
 					}

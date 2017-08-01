@@ -19,6 +19,12 @@ namespace ibex {
  * \ingroup system
  *
  * \brief System where a goal is encoded as a constraint.
+ *
+ * <ul> The extended system contains:
+ * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
+ * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
+ * <li> (m+1) constraints: y>=f(x), g_1(x)<=0, ..., g_m(x)<=0.
+ * </ul>
  */
 class ExtendedSystem : public System {
 public:
@@ -38,7 +44,7 @@ public:
 	 *
 	 * To avoid confusion, the extended system has no goal (but it could be "y").
 	 */
-	ExtendedSystem(const System& sys, double eps=0);
+	explicit ExtendedSystem(const System& sys, double eps=0);
 
 	/**
 	 * \brief Name of the goal variable ("y").

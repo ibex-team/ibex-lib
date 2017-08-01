@@ -2,7 +2,7 @@
 //                                  I B E X
 // File        : ibex_LineSearch.h
 // Author      : Jordan Ninin, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Mar 20, 2014
 // Last Update : Mar 20, 2014
@@ -162,6 +162,6 @@ inline bool LineSearch::next_activated(int i) {
 //	return alpha1==0;
 //}
 
-
 } /* namespace ibex */
+
 #endif /* __IBEX_LINE_SEARCH_H__ */

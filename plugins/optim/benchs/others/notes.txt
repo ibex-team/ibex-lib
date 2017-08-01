@@ -1,0 +1,18 @@
+
+
+Probably need to desactivate symbolic differentation:
+	dualc1
+	polygon25
+
+
+Very instable:
+  ex14_1_6. May be solved in less than 1s or ...
+  
+  
+  
+ex8_4_5-1.bch: 
+raise an ibex::Exception with release 2.5
+
+test_infinity3:
+problem has unbounded objective and unbounded variable domain (which is not supposed to be really supported)
+release 2.5 terminates instantaneously or never depending on random seed (test with 1.0 and 2.0)

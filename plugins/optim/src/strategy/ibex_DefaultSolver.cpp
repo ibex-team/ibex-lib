@@ -9,6 +9,8 @@
 //============================================================================
 
 #include "ibex_DefaultSolver.h"
+
+#include "ibex_LinearizerCombo.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
@@ -17,10 +19,10 @@
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcFixPoint.h"
 #include "ibex_CellStack.h"
-#include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
 #include "ibex_DefaultStrategy.cpp_"
 #include "ibex_Random.h"
+#include "ibex_NormalizedSystem.h"
 
 using namespace std;
 
@@ -76,8 +78,10 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 	//                                          new CtcHC4 (sys.ctrs,0.01),
 	//*(default_corners())));
 
+	System& norm_sys=rec(new NormalizedSystem(sys));
+
 	ctc_list.set_ref(index,rec(new CtcFixPoint(rec(new CtcCompo(
-			rec(new CtcPolytopeHull(rec(new LinearRelaxCombo(sys,LinearRelaxCombo::XNEWTON)),CtcPolytopeHull::ALL_BOX)),
+			rec(new CtcPolytopeHull(rec(new LinearizerCombo(norm_sys,LinearizerCombo::XNEWTON)))),
 			rec(new CtcHC4 (sys.ctrs,0.01)))))));
 
 	ctc_list.resize(index+1); // in case the system is not square.
