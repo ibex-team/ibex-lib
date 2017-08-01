@@ -119,8 +119,7 @@ void TestTimer::test03() {
 	CPPUNIT_ASSERT(t2.get_time()> t1.get_time());
 	CPPUNIT_ASSERT(t0.get_time()> t1.get_time());
 	CPPUNIT_ASSERT(t0.get_time()> t2.get_time());
-	double tt = fabs(t0.get_time()- ( t1.get_time()+t2.get_time()));
-	CPPUNIT_ASSERT(tt <=1.e-14);
+	check_relatif(t0.get_time() , ( t1.get_time()+t2.get_time()));
 }
 
 } // end namespace

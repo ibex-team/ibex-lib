@@ -113,7 +113,7 @@ void TestLinearSolver::kleemin30() {
 	);
 	switch (res) {
 		case (LinearSolver::INFEASIBLE):
-		case (LinearSolver::UNKNOWN):
+		case (LinearSolver::UNKNOWN): {
 			CPPUNIT_ASSERT_THROW(
 			Vector dualsol = lp.get_dual_sol(),
 			LPException
@@ -123,8 +123,9 @@ void TestLinearSolver::kleemin30() {
 			LPException
 			);
 			break;
+		}
 		case (LinearSolver::OPTIMAL):
-		case (LinearSolver::OPTIMAL_PROVED):
+		case (LinearSolver::OPTIMAL_PROVED): {
 			CPPUNIT_ASSERT_ASSERTION_PASS(
 			Vector dualsol = lp.get_dual_sol()
 			);
@@ -136,6 +137,9 @@ void TestLinearSolver::kleemin30() {
 			vrai[n-1] = ::pow(10,n-1);
 			check_relatif(vrai,primalsol,1.e-9);
 			break;
+		}
+		default:
+			CPPUNIT_ASSERT(false);
 	}
 
 }
