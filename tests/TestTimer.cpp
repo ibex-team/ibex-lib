@@ -83,7 +83,7 @@ void TestTimer::test03() {
 
 	Timer t1;
 	t1.start();
-	int n= 1.e6;
+	int n= 1.e5;
 	double f, z;
 	for (int k =0; k<n; k++){
 		f= 0;
@@ -99,7 +99,7 @@ void TestTimer::test03() {
 
 	Timer t2;
 	t2.start();
-	n =7.e5;
+	n =1.e5;
 	IntervalVector x(4,Interval(4));
 	Interval fi, zi;
 	for (int k =0; k<n; k++){
@@ -119,7 +119,8 @@ void TestTimer::test03() {
 	CPPUNIT_ASSERT(t2.get_time()> t1.get_time());
 	CPPUNIT_ASSERT(t0.get_time()> t1.get_time());
 	CPPUNIT_ASSERT(t0.get_time()> t2.get_time());
-	check_relatif(t0.get_time() , ( t1.get_time()+t2.get_time()));
+	CPPUNIT_ASSERT(t0.get_time() >= ( t1.get_time()+t2.get_time()));
+	check_relatif(t0.get_time() , ( t1.get_time()+t2.get_time()), 1.e-2);
 }
 
 } // end namespace
