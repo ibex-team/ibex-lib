@@ -13,22 +13,20 @@
 
 #include "ibex_Exception.h"
 
-#ifndef _MSC_VER
+#ifndef _WIN32
 #include <sys/time.h>
-#endif // _MSC_VER
-
-
-#ifdef _WIN32
-//#include <ctime>
-#else
 #include <sys/resource.h>
-#endif
-
-#ifndef _MSC_VER
 #include <unistd.h>
+
+#else
+/* A time value that is accurate to the nearest
+   microsecond but also has a range of years.  */
+struct mytimeval
+  {
+	long int tv_sec;		/* Seconds.  */
+	long int tv_usec;	/* Microseconds.  */
+  };
 #endif // _MSC_VER
-
-
 
 namespace ibex {
 
@@ -83,12 +81,11 @@ class StaticTimer {
   static Time virtual_utime;
   static Time virtual_stime;
   static long resident_memory;
-
 #ifndef _WIN32
   //  static std::clock_t res;
   static struct rusage res;
 #else
-  static struct timeval tp;
+  static struct mytimeval tp;
 #endif
 };
 

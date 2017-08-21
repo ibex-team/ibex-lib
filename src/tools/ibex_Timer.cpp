@@ -51,8 +51,7 @@ void Timer::check(double timeout) {
 
 #ifdef _WIN32  //_MSC_VER
 // To get struct timeval.
-#include <winsock2.h>
-#include <sys/time.h>
+#include <windows.h>
 
 //#define DELTA_EPOCH_IN_MICROSECS 11644473600000000ui64
 //#define DELTA_EPOCH_IN_MICROSECS 11644473600000000ULL
@@ -155,7 +154,7 @@ int gettimeofday(struct timeval* tv, struct timezone* tz)
 //	return 0;
 //}
 
-int mygettimeofday(struct timeval* tv)
+int mygettimeofday(struct mytimeval* tv)
 {
 	FILETIME ft; // Will contain a 64-bit value representing the number of 100-nanosecond
 	// intervals since January 1, 1601 (UTC).
@@ -198,11 +197,6 @@ StaticTimer::Time StaticTimer::virtual_utime;
 StaticTimer::Time StaticTimer::virtual_stime;
 long StaticTimer::resident_memory;
 
-#ifndef _WIN32
-struct rusage StaticTimer::res;
-#else
-struct timeval StaticTimer::tp;
-#endif
 /*
  *  The virtual time of day and the real time of day are calculated and
  *  stored for future use.  The future use consists of subtracting these
@@ -243,10 +237,8 @@ StaticTimer::Time StaticTimer::get_time() {
 	resident_memory = res.ru_ixrss;
 	if (resident_memory > 100000) ibex_error(" Timer: memory limit, out of resident memory "  );
 
-	virtual_utime = (Time) res.ru_utime.tv_sec +
-			(Time) res.ru_utime.tv_usec / 1000000.0;
-	virtual_stime = (Time) res.ru_stime.tv_sec +
-			(Time) res.ru_stime.tv_usec / 1000000.0;
+	virtual_utime =virtual_ulapse ;
+	virtual_stime =virtual_slapse ;
 
 
 	local_time += (virtual_ulapse + virtual_slapse);
@@ -257,8 +249,7 @@ StaticTimer::Time StaticTimer::get_time() {
 			(Time) tp.tv_usec / 1000000.0
 			- real_time;
 
-	real_time =    (Time) tp.tv_sec +
-			(Time) tp.tv_usec / 1000000.0;
+	real_time = real_lapse;
 
 	local_time += real_time;
 
