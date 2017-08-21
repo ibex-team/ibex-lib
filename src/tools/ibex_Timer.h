@@ -71,26 +71,7 @@ class StaticTimer {
 
   typedef double Time;
 
-  typedef enum type_timer {__REAL, VIRTUAL} TimerType;
-
-
-  static void stop(TimerType type=VIRTUAL);
-
-  /**
-   * \brief Check the timer and throw a #ibex::TimeOutException
-   * if the time elapsed exceeds #timeout.
-   *
-   * (add by gch).
-   */
-  static void check(double timeout);
-  inline static void reset_time() { local_time =0; }
   static Time get_time();
-
-  inline static Time REAL_TIMELAPSE() { return real_lapse; }
-  inline static double RESIDENT_MEMORY() { return resident_memory; }
-  /* not available yet under WIN32 platform */
-  inline static Time VIRTUAL_TIMELAPSE() { return (virtual_ulapse + virtual_slapse); }
-
 
   static Time real_lapse;
   static Time virtual_ulapse;
@@ -106,8 +87,9 @@ class StaticTimer {
 #ifndef _WIN32
   //  static std::clock_t res;
   static struct rusage res;
-#endif
+#else
   static struct timeval tp;
+#endif
 };
 
 } // end namespace ibex
