@@ -61,6 +61,7 @@ void TestTimer::test02() {
 			}
 		}
 		CPPUNIT_ASSERT(t2.get_time()>0);
+		cout << "iter = "<< m<<"  t2.get_time() = "<< t2.get_time()<< endl;
 		t2.stop();
 		tmp= t2.get_time();
 		CPPUNIT_ASSERT(t2.get_time()>0);
@@ -115,12 +116,14 @@ void TestTimer::test03() {
 	t2.stop();
 
 	t0.stop();
-	//cout << t0.get_time()<< "   "<<t1.get_time()<<"  "<<t2.get_time()<<endl;
+	cout<<endl << " t0.get_time() = "<< t0.get_time()<< " /  t1.get_time() =   "<<t1.get_time()<<" /  t2.get_time() = "<<t2.get_time();
+	cout  << " / t1 + t2 = " <<( t1.get_time()+t2.get_time()) << endl;
 	CPPUNIT_ASSERT(t2.get_time()> t1.get_time());
 	CPPUNIT_ASSERT(t0.get_time()> t1.get_time());
 	CPPUNIT_ASSERT(t0.get_time()> t2.get_time());
 	CPPUNIT_ASSERT(t0.get_time() >= ( t1.get_time()+t2.get_time()));
 	check_relatif(t0.get_time() , ( t1.get_time()+t2.get_time()), 1.e-2);
+
 }
 
 } // end namespace

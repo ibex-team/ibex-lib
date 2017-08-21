@@ -16,7 +16,7 @@ namespace ibex {
 static int ____IGNORE___ = (StaticTimer::start(), 0);
 
 
-Timer::Timer(): start_time(0), active(false) {
+Timer::Timer(): start_time(0.0), active(false) {
 }
 
 
