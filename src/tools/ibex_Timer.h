@@ -82,7 +82,6 @@ class StaticTimer {
   static Time virtual_stime;
   static long resident_memory;
 #ifndef _WIN32
-  //  static std::clock_t res;
   static struct rusage res;
 #else
   static struct mytimeval tp;

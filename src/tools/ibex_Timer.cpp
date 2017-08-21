@@ -197,6 +197,14 @@ StaticTimer::Time StaticTimer::virtual_utime;
 StaticTimer::Time StaticTimer::virtual_stime;
 long StaticTimer::resident_memory;
 
+
+#ifndef _WIN32
+//  std::clock_t Timer::res;
+struct rusage StaticTimer::res;
+#else
+struct timeval StaticTimer::tp;
+#endif
+
 /*
  *  The virtual time of day and the real time of day are calculated and
  *  stored for future use.  The future use consists of subtracting these
