@@ -241,7 +241,7 @@ StaticTimer::Time StaticTimer::get_time() {
 			(Time) res.ru_stime.tv_usec / 1000000.0
 			- virtual_stime;
 	resident_memory = res.ru_ixrss;
-	if (resident_memory > 100000) throw Exception("memory limit : " + resident_memory );
+	if (resident_memory > 100000) ibex_error(" Timer: memory limit, out of resident memory "  );
 
 	virtual_utime = (Time) res.ru_utime.tv_sec +
 			(Time) res.ru_utime.tv_usec / 1000000.0;
