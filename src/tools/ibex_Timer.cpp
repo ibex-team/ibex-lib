@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_StaticTimer.cpp
-// Author      : ???? and Gilles Chabert
+// Author      : Jordan Ninin and Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
@@ -202,7 +202,7 @@ long StaticTimer::resident_memory;
 //  std::clock_t Timer::res;
 struct rusage StaticTimer::res;
 #else
-struct timeval StaticTimer::tp;
+struct mytimeval StaticTimer::tp;
 #endif
 
 /*

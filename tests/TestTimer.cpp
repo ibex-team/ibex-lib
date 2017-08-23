@@ -70,8 +70,8 @@ void TestTimer::test02() {
 	t1.stop();
 	CPPUNIT_ASSERT(t1.get_time()>t2.get_time());
 	CPPUNIT_ASSERT(t1.get_time()>tmp);
-	CPPUNIT_ASSERT(t1.get_time() >= toto);
-	CPPUNIT_ASSERT(t2.get_time()==tmp);
+	check_relatif(t1.get_time() , toto, 1.e-1);
+	check(t2.get_time() , tmp);
 }
 
 void TestTimer::test03() {
