@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_StaticTimer.cpp
-// Author      : ???? and Gilles Chabert
+// Author      : Jordan Ninin and Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
@@ -206,9 +206,6 @@ StaticTimer::Time StaticTimer::virtual_stime = 0;
 long StaticTimer::resident_memory = 0;
 
 #endif // _WIN32     _MSC_VER
-
-
-
 
 
 /*
