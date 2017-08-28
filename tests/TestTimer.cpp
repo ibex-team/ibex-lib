@@ -50,10 +50,10 @@ void TestTimer::test02() {
 	double toto=0;
 	tmp = 0.1;
 	for (int kk=1;kk<m;kk++) {
-//		cout << "debut iter = "<< kk<<"  t2.get_time() = "<< t2.get_time()<< endl;
+		cout << "debut iter = "<< kk<<"  t2.get_time() = "<< t2.get_time()<< endl;
 		t2.restart();
 		CPPUNIT_ASSERT(t2.get_time()<tmp);
-//		cout << "debut iter = "<< kk<<"  t2.get_time() = "<< t2.get_time()<< endl;
+		cout << "debut iter = "<< kk<<"  t2.get_time() = "<< t2.get_time()<< endl;
 
 		for (int k =0; k<n; k++){
 			f= 0;
@@ -66,7 +66,7 @@ void TestTimer::test02() {
 			}
 		}
 		CPPUNIT_ASSERT(t2.get_time()>0);
-//		cout << "fin iter = "<< kk <<"  t2.get_time() = "<< t2.get_time()<< "  "<< f << endl;
+		cout << "fin iter = "<< kk <<"  t2.get_time() = "<< t2.get_time()<< "  "<< f << endl;
 		t2.stop();
 		tmp= t2.get_time();
 		CPPUNIT_ASSERT(t2.get_time()>0);
@@ -77,6 +77,7 @@ void TestTimer::test02() {
 	CPPUNIT_ASSERT(t1.get_time()>tmp);
 	check_relatif(t1.get_time() , toto, 1.e-1);
 	check(t2.get_time() , tmp);
+	CPPUNIT_ASSERT(false);
 }
 
 void TestTimer::test03() {
@@ -121,8 +122,8 @@ void TestTimer::test03() {
 	t2.stop();
 
 	t0.stop();
-//	cout<<endl << " t0.get_time() = "<< t0.get_time()<< " /  t1.get_time() =   "<<t1.get_time()<<" /  t2.get_time() = "<<t2.get_time();
-//	cout  << " / t1 + t2 = " <<( t1.get_time()+t2.get_time()) << endl;
+	cout<<endl << " t0.get_time() = "<< t0.get_time()<< " /  t1.get_time() =   "<<t1.get_time()<<" /  t2.get_time() = "<<t2.get_time();
+	cout  << " / t1 + t2 = " <<( t1.get_time()+t2.get_time()) << endl;
 	CPPUNIT_ASSERT(t2.get_time()> t1.get_time());
 	CPPUNIT_ASSERT(t0.get_time()> t1.get_time());
 	CPPUNIT_ASSERT(t0.get_time()> t2.get_time());

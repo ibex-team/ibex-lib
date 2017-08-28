@@ -270,6 +270,7 @@ StaticTimer::Time StaticTimer::get_localtime () {
 
 #endif
 	std::cout << "  TIMER  : "<< local_time << std::endl;
+
 	return local_time;
 }
 
