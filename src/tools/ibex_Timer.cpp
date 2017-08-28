@@ -269,7 +269,7 @@ StaticTimer::Time StaticTimer::get_localtime () {
 	local_time = real_lapse;
 
 #endif
-	std::cout << "  TIMER  : "<< local_time << std::endl;
+	//std::cout << "  TIMER  : "<< local_time << std::endl;
 
 	return local_time;
 }
