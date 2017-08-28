@@ -16,34 +16,38 @@ namespace ibex {
 static int ____IGNORE___ = (StaticTimer::start(), 0);
 
 
+StaticTimer::Time StaticTimer::local_time = 0;
+
 Timer::Timer(): start_time(0.0), active(false) {
 }
 
 
+
+
 void Timer::start(){
-	if (not(active)) {
+	if (active==false) {
 		active = true;
-		start_time = StaticTimer::get_time();
+		start_time = StaticTimer::get_localtime();
 	}
 }
 
 void Timer::stop(){
 	active = false;
-	start_time = (StaticTimer::get_time() - start_time);
+	start_time = (StaticTimer::get_localtime() - start_time);
 }
 void Timer::restart() {
-	start_time= StaticTimer::get_time();
+	start_time= StaticTimer::get_localtime();
 	active =true;
 }
 double Timer::get_time() {
 	if (active) {
-		return (StaticTimer::get_time() - start_time);
+		return (StaticTimer::get_localtime() - start_time);
 	} else {
 		return start_time;
 	}
 }
 void Timer::check(double timeout) {
-	if (get_time() >= timeout) throw TimeOutException();
+	if (Timer::get_time() >= timeout) throw TimeOutException();
 }
 
 
@@ -183,27 +187,29 @@ int mygettimeofday(struct mytimeval* tv)
 	return EXIT_SUCCESS;
 }
 
-#endif // _WIN32     _MSC_VER
 
 	/////////////////////////////////////////////////////////////////////
 
 
-StaticTimer::Time StaticTimer::local_time = 0;
-StaticTimer::Time StaticTimer::real_lapse;
-StaticTimer::Time StaticTimer::virtual_ulapse;
-StaticTimer::Time StaticTimer::virtual_slapse;
-StaticTimer::Time StaticTimer::real_time;
-StaticTimer::Time StaticTimer::virtual_utime;
-StaticTimer::Time StaticTimer::virtual_stime;
-long StaticTimer::resident_memory;
+struct mytimeval StaticTimer::tp;
+StaticTimer::Time StaticTimer::real_lapse = 0;
+StaticTimer::Time StaticTimer::real_time = 0;
 
 
-#ifndef _WIN32
-//  std::clock_t Timer::res;
-struct rusage StaticTimer::res;
 #else
-struct timeval StaticTimer::tp;
-#endif
+
+struct rusage StaticTimer::res;
+StaticTimer::Time StaticTimer::virtual_ulapse = 0;
+StaticTimer::Time StaticTimer::virtual_slapse = 0;
+StaticTimer::Time StaticTimer::virtual_utime = 0;
+StaticTimer::Time StaticTimer::virtual_stime = 0;
+long StaticTimer::resident_memory = 0;
+
+#endif // _WIN32     _MSC_VER
+
+
+
+
 
 /*
  *  The virtual time of day and the real time of day are calculated and
@@ -231,9 +237,12 @@ void StaticTimer::start() {
 }
 
 
-StaticTimer::Time StaticTimer::get_time() {
+StaticTimer::Time StaticTimer::get_localtime () {
 
 #ifndef _WIN32
+
+
+
 
 	getrusage( RUSAGE_SELF, &res );
 	virtual_ulapse = (Time) res.ru_utime.tv_sec +
@@ -243,13 +252,14 @@ StaticTimer::Time StaticTimer::get_time() {
 			(Time) res.ru_stime.tv_usec / 1000000.0
 			- virtual_stime;
 	resident_memory = res.ru_ixrss;
+
 	if (resident_memory > 100000) ibex_error(" Timer: memory limit, out of resident memory "  );
 
-	virtual_utime =virtual_ulapse ;
-	virtual_stime =virtual_slapse ;
+	//virtual_utime =virtual_ulapse ;
+	//virtual_stime =virtual_slapse ;
+	//local_time += (virtual_ulapse + virtual_slapse);
 
-
-	local_time += (virtual_ulapse + virtual_slapse);
+	local_time = (virtual_ulapse + virtual_slapse);
 
 #else
 	mygettimeofday( &tp);
@@ -257,11 +267,12 @@ StaticTimer::Time StaticTimer::get_time() {
 			(Time) tp.tv_usec / 1000000.0
 			- real_time;
 
-	real_time = real_lapse;
-
-	local_time += real_time;
+	//real_time = real_lapse;
+	//local_time += real_lapse;
+	local_time = real_lapse;
 
 #endif
+	std::cout << "  TIMER  : "<< local_time << std::endl;
 	return local_time;
 }
 

@@ -69,22 +69,22 @@ class StaticTimer {
 
   typedef double Time;
 
-  static Time get_time();
+  static Time get_localtime();
 
+  static Time local_time;
+
+#ifdef _WIN32
+  static struct mytimeval tp;
   static Time real_lapse;
+  static Time real_time;
+
+#else
+  static struct rusage res;
   static Time virtual_ulapse;
   static Time virtual_slapse;
-
- //private:
-  static Time local_time;
-  static Time real_time;
   static Time virtual_utime;
   static Time virtual_stime;
   static long resident_memory;
-#ifndef _WIN32
-  static struct rusage res;
-#else
-  static struct mytimeval tp;
 #endif
 };
 
