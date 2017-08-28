@@ -253,14 +253,15 @@ Interval matrixtrace (IntervalMatrix& M){
 
 	
 	
-	
+	/*
 	vector<LinearRelaxXTaylor::corner_point> cpoints;
 	cpoints.push_back(LinearRelaxXTaylor::RANDOM);
 	cpoints.push_back(LinearRelaxXTaylor::RANDOM_INV);
-	
+	LinearRelaxXTaylor lr (sys,cpoints);
+	*/
 	//	LinearRelaxCombo lr (sys,LinearRelaxCombo::COMPO);
 	LinearRelaxCombo lr (sys,LinearRelaxCombo::ART);
-	//   LinearRelaxXTaylor lr (sys,cpoints);
+	
 	CtcPolytopeHull lphull (lr, CtcPolytopeHull::ALL_BOX);
 
 
@@ -540,11 +541,11 @@ Interval matrixtrace (IntervalMatrix& M){
 	}
 
 
-	SmearSumRelative bs(sys,prec,0.5);
+	//SmearSumRelative bs(sys,prec,0.5);
 	//	SmearMaxRelative  bs(sys,prec,0.5);
        	//RoundRobin bs (prec,0.5);
 	//	RoundRobinQInter bs (prec,0.5);
-	//LargestFirst bs(prec,0.5);
+	LargestFirst bs(prec,0.5);
 	// RoundRobinNvar bs (8,prec,0.5);
 	cout << " Q " << Q << endl;
 	//	CtcQInterAff ctcq(9,m_ctc,Q,m_fun);
@@ -557,10 +558,10 @@ Interval matrixtrace (IntervalMatrix& M){
 	//	CtcCompo ctcqf0(*ctcnorm,*cdet,c_essential, lphull, ctcq);
         //	CtcCompo ctcqf0(*ctcnorm,*cdet,c_essential,  ctcq);
 
-	//	CtcHC4 hc44cid(sys0,0.005,true);
+
 	CtcHC4 hc44cid(sys0,0.005,true);
 	//	CtcHC4 hc44cid(sys0,10,false);
-	
+	//	CtcHC4 hc44cid(sys0,0.001,true);
 
 	CtcAcid acidhc4(sys0,hc44cid,true);
 	//	CtcCompo ctcqf0(lphull,  ctcq);

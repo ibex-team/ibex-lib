@@ -34,7 +34,10 @@ namespace ibex {
   bool SearchStrategy::empty_buffer() {return buffer.empty();}
 
   int SearchStrategy::validate_value(const Cell& c){
-    return    c.get<QInterPoints>().qmax;
+
+      return    c.get<QInterPoints>().qmax;
+      //  return    c.get<QInterPoints>().qmidbox;
+
     //return ctcq->midactivepoints_count(c.box.mid());
   }
 
@@ -217,7 +220,7 @@ void BestFirstSearch::push_cell(Cell&c1){
       {
 	if (!(c1.box.is_empty())) buffer.push(&c1);
 	c2.get<QInterPoints>().points=points2;stackbuffer.push(&c2);}
-
+  /*
     else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
       {
 	int val1= validate_value (c1);
@@ -228,7 +231,30 @@ void BestFirstSearch::push_cell(Cell&c1){
 	  if (with_storage) c1.get<QInterPoints>().points=points1;
 	}
       }
+  */
+    else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
+      {
+	if (c2.get<QInterPoints>().depth >= depthmax){
+	  int val1= validate_value (c1);
+	  int val2= validate_value (c2);
+	  if (val1 >= val2) {
+	    buffer.push(&c2);  if (with_storage) c2.get<QInterPoints>().points=points2;
+	    //	    c2.get<QInterPoints>().points=points2; stackbuffer.push(&c2);
+	    c1.get<QInterPoints>().points=points1; stackbuffer.push(&c1);
+	  }
+	  else  {
+	    buffer.push(&c1); if (with_storage) c1.get<QInterPoints>().points=points1;
+	    //      c1.get<QInterPoints>().points=points1; stackbuffer.push(&c1);
+	    c2.get<QInterPoints>().points=points2; stackbuffer.push(&c2); 
 
+	  }
+	}
+	else { 
+	  buffer.push(&c2);
+	  buffer.push(&c1); 
+	  if (with_storage) {c2.get<QInterPoints>().points=points2; c1.get<QInterPoints>().points=points1;}
+	}
+      }
     else if (!(c1.box.is_empty())) {c1.get<QInterPoints>().points=points1;stackbuffer.push(&c1);}
     else if (!(c2.box.is_empty())) {c2.get<QInterPoints>().points=points2;stackbuffer.push(&c2);}
   }

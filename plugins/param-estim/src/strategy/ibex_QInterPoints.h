@@ -26,6 +26,7 @@ class QInterPoints : public Backtrackable {
 public:
   list<int> points;
   int qmax; // the maximum number of inliers in the node  (used for best first search)
+  int qmidbox;
   int depth;
   QInterPoints();
   ~QInterPoints();

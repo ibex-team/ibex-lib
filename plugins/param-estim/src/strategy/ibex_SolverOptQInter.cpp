@@ -114,7 +114,9 @@ namespace ibex {
 
   void SolverOptQInter::update_cell_info(Cell& c){
     //    c.var_biss= ctcq.var_biss;
+
     c.get<QInterPoints>().qmax=ctcq.qmax;
+    //    c.get<QInterPoints>().qmidbox=ctcq.midactivepoints_count(c.box.mid());
   }
 
   void SolverOptQInter::update_buffer_info (Cell& c) {
@@ -284,7 +286,7 @@ namespace ibex {
 
     Vector newvalidpoint1 (ctcq.nb_var);
     newvalidpoint1= newvalidpoint(c);  // qvalid is computed by this procedure that returns the corresponding point
-
+    //    if (qvalid >  c.get<QInterPoints>().qmidbox) c.get<QInterPoints>().qmidbox=qvalid;
     if  (qvalid > bestsolpointnumber) // a better solution has been found.
       {
 	if (ctcq.q < qvalid+epsobj)
@@ -304,7 +306,7 @@ namespace ibex {
 	  cout << " depth " << c.get<QInterPoints>().depth << endl;
 	  if (optimbuffer==2 && !(str.buffer.empty()))
 	    cout << " qmax " << str.buffer.top()->get<QInterPoints>().qmax << endl;
-	  cout << " valid point " << newvalidpoint1 << endl;
+	  //	  cout << " valid point " << newvalidpoint1 << endl;
 	  cout << " best sol point " << bestsolpoint << endl;
 	  cout <<" qmax epsboxes " << str.qmax_epsboxes << endl;
 	}

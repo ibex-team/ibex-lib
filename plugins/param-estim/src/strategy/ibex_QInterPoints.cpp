@@ -25,6 +25,7 @@ pair<Backtrackable*,Backtrackable*> QInterPoints::down() {
 
   QInterPoints::QInterPoints (const QInterPoints& qp) {
     qmax=qp.qmax;
+    qmidbox=qp.qmidbox;
     depth=qp.depth+1;
   }
 }
