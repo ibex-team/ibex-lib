@@ -44,14 +44,37 @@ def configure (conf):
 	conf.check_cxx (lib = "prim", libpath = filib_lib,
 		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
 
-	# XXX: Why are these flags necessary ?
+	# XXX: Why are these flags necessary ? 
+    # It is necessary to use filib, to avoid problem with x80 processor
+#==============================================================================
+#        This option prevents undesirable excess precision on machines such
+#        as the 68000 where the floating registers (of the 68881) keep more
+#        precision than a "double" is supposed to have.  Similarly for the
+#        x86 architecture.  For most programs, the excess precision does
+#        only good, but a few programs rely on the precise definition of
+#        IEEE floating point.  Use -ffloat-store for such programs, after
+#        modifying them to store all pertinent intermediate computations
+#        into variables.
+#==============================================================================
 	for f in ["-frounding-math", "-ffloat-store"]:
 		conf.check_cxx (cxxflags = f, uselib_store = "ITV_LIB")
 
-	# Add SSE2 flags if not explicitly disabled and if supported
-	if not conf.options.DISABLE_SSE2:
-		f = ["-msse2", "-mfpmath=sse"]
-		conf.check_cxx (cxxflags = f, uselib_store = "ITV_LIB", mandatory = False)
+
+	# Looking for filib headers and library.
+	# We also test if we need to add sse2 or sse3 flags.
+	D = {"header_name": "interval/interval.hpp", "mandatory": False, "errmsg": "no",
+				"includes": filib_include, "use": [ "IBEX", "ITV_LIB" ],
+				"uselib_store": "ITV_LIB"}
+    
+	D["cxxflags"] = "-msse3"
+	D["msg"] = "Checking for header "+D["header_name"]+" with "+D["cxxflags"]
+	ret = conf.check_cxx (**D)
+	if not ret:
+		D["cxxflags"] = "-msse2"
+		D["msg"] = "Checking for header "+D["header_name"]+" with "+D["cxxflags"]
+		ret = conf.check_cxx (**D)
+	if not ret:
+		conf.fatal ("Cannot find C++ flags SSE to add to use Filib")
 
 	# Define needed variables
 	cpp_wrapper_node = conf.path.make_node ("wrapper.cpp")

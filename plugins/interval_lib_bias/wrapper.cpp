@@ -1,4 +1,3 @@
-#include <iomanip>
 
 extern void BiasInit ();
 extern void BiasFuncInit ();
