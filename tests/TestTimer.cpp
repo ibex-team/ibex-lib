@@ -68,9 +68,10 @@ void TestTimer::test02() {
 		CPPUNIT_ASSERT(t2.get_time()>0);
 //		cout << "fin iter = "<< kk <<"  t2.get_time() = "<< t2.get_time()<< "  "<< f << endl;
 		t2.stop();
-		if (kk>1) check(t2.get_time(),tmp, 0.01);
+		if (kk>1) check(t2.get_time(),tmp, 0.1);
 
 		tmp= t2.get_time();
+		CPPUNIT_ASSERT(t2.get_time()<10);
 		CPPUNIT_ASSERT(t2.get_time()>0);
 		toto += tmp;
 	}

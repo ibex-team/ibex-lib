@@ -5,7 +5,7 @@
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Jordan Ninin
+ * Author(s)   : Gilles Chabert
  * Created     : Jan 10, 2013
  * ---------------------------------------------------------------------------- */
 
