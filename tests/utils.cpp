@@ -14,6 +14,8 @@
 #include <math.h>
 #include <sstream>
 
+using namespace std;
+
 double ERROR = 1e-10;
 
 bool sameExpr(const ExprNode& node, const char* expr) {
