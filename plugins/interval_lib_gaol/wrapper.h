@@ -1,7 +1,7 @@
 #include "ibex_Exception.h"
 
 #ifdef _WIN32
-#include <math.h>
+#include <float.h>
 #endif
 
 namespace ibex {
