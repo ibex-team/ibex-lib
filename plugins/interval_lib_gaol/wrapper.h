@@ -69,13 +69,31 @@ inline Interval& Interval::operator/=(double d) {
 }
 
 inline Interval& Interval::operator+=(const Interval& x) {
+#ifndef _WIN32
 	itv+=x.itv;
 	return *this;
+#else
+	if (x.lb() + lb() > DBL_MAX) {
+		 return Interval(DBL_MAX, POS_INFINITY);
+	} else {
+		itv+=x.itv;
+		return *this;
+	}
+#endif
 }
 
 inline Interval& Interval::operator-=(const Interval& x) {
+#ifndef _WIN32
 	itv-=x.itv;
 	return *this;
+#else
+	if (x.ub() - ub() < -DBL_MAX) {
+		 return Interval(NEG_INFINITY, -DBL_MAX);
+	} else {
+		itv-=x.itv;
+		return *this;
+	}
+#endif
 }
 
 inline Interval& Interval::operator*=(const Interval& x) {

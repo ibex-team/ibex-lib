@@ -62,6 +62,7 @@ public:
 		CPPUNIT_TEST(add16);
 		CPPUNIT_TEST(add17);
 		CPPUNIT_TEST(add18);
+		CPPUNIT_TEST(add19);
 
 		CPPUNIT_TEST(mul01);
 		CPPUNIT_TEST(mul02);
@@ -407,6 +408,7 @@ private:
 	void add16();
 	void add17();
 	void add18();
+	void add19();
 
 	/* test:
 	 * =======
