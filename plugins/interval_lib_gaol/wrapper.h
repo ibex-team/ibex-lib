@@ -75,29 +75,27 @@ inline Interval& Interval::operator/=(double d) {
 inline Interval& Interval::operator+=(const Interval& x) {
 #ifndef _WIN32
 	itv+=x.itv;
-	return *this;
 #else
 	if (x.lb() + lb() >= POS_INFINITY) {
-		return Interval(DBL_MAX, POS_INFINITY);
+		*this = Interval(DBL_MAX, POS_INFINITY);
 	} else {
 		itv+=x.itv;
-		return *this;
 	}
 #endif
+	return *this;
 }
 
 inline Interval& Interval::operator-=(const Interval& x) {
 #ifndef _WIN32
 	itv-=x.itv;
-	return *this;
 #else
 	if (x.ub() - ub() <= NEG_INFINITY) {
-		 return Interval(NEG_INFINITY, -DBL_MAX);
+		*this = Interval(NEG_INFINITY, -DBL_MAX);
 	} else {
 		itv-=x.itv;
-		return *this;
 	}
 #endif
+	return *this;
 }
 
 inline Interval& Interval::operator*=(const Interval& x) {
