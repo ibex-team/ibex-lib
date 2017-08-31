@@ -77,8 +77,8 @@ inline Interval& Interval::operator+=(const Interval& x) {
 	itv+=x.itv;
 	return *this;
 #else
-	if (x.lb() + lb() > DBL_MAX) {
-		 return Interval(DBL_MAX, POS_INFINITY);
+	if (x.lb() + lb() >= POS_INFINITY) {
+		return Interval(DBL_MAX, POS_INFINITY);
 	} else {
 		itv+=x.itv;
 		return *this;
@@ -91,7 +91,7 @@ inline Interval& Interval::operator-=(const Interval& x) {
 	itv-=x.itv;
 	return *this;
 #else
-	if (x.ub() - ub() < -DBL_MAX) {
+	if (x.ub() - ub() <= NEG_INFINITY) {
 		 return Interval(NEG_INFINITY, -DBL_MAX);
 	} else {
 		itv-=x.itv;
