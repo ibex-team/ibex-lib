@@ -76,7 +76,7 @@ inline Interval& Interval::operator+=(const Interval& x) {
 #ifndef _WIN32
 	itv+=x.itv;
 #else
-	if (x.lb() + lb() >= POS_INFINITY) {
+	if ((x.lb() + this->lb()) >= POS_INFINITY) {
 		*this = Interval(DBL_MAX, POS_INFINITY);
 	} else {
 		itv+=x.itv;
@@ -89,7 +89,7 @@ inline Interval& Interval::operator-=(const Interval& x) {
 #ifndef _WIN32
 	itv-=x.itv;
 #else
-	if (x.ub() - ub() <= NEG_INFINITY) {
+	if ((this->ub() - x.ub()) <= NEG_INFINITY) {
 		*this = Interval(NEG_INFINITY, -DBL_MAX);
 	} else {
 		itv-=x.itv;
