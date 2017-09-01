@@ -70,7 +70,7 @@ def configure (conf):
     ampl_cflags = " ".join(flags_list) 
     
     if Utils.is_win32:
-        cmd_conf = "set CFLAGS=\"%s\" &&  ./configurehere" % ampl_cflags 
+        cmd_conf = "set CFLAGS=\'%s\' &&  ./configurehere" % ampl_cflags 
     else:
         cmd_conf = "CFLAGS=\"%s\" ./configurehere" % ampl_cflags
     
