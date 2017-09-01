@@ -15,6 +15,7 @@
 #include "ibex_RoundRobin.h"
 #include "ibex_CellStack.h"
 #include "ibex_CtcHC4.h"
+#include "math.h"
 
 using namespace std;
 
@@ -23,39 +24,48 @@ namespace ibex {
 void TestSolver::circle1() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
-
+cout << "1"<< endl;
 	SystemFactory f;
 	f.add_var(x);
 	f.add_var(y);
+	cout << "2"<< endl;
 	f.add_ctr(sqr(x)+sqr(y)=1);
 	f.add_ctr(sqr(x-1)+sqr(y)=1);
+	cout << "3"<< endl;
 	double cospi6=0.5;
 	double sinpi6=::sqrt(3)/2;
+	cout << "4"<< endl;
 	double _sol1[]={cospi6,sinpi6};
 	double _sol2[]={cospi6,-sinpi6};
+	cout << "5"<< endl;
 
 	Vector sol1(2,_sol1);
 	Vector sol2(2,_sol2);
 	System sys(f);
+	cout << "6"<< endl;
 	RoundRobin rr(1e-3);
 	CellStack stack;
 	CtcHC4 hc4(sys);
 
+	cout << "7"<< endl;
 	Solver solver(sys,hc4,rr,stack);
 	solver.start(IntervalVector(2,Interval(-10,10)));
 	const Solver::Solution* sol;
 	bool res;
+	cout << "8"<< endl;
 
 	res=solver.next(sol);
 	CPPUNIT_ASSERT(res==true);
 	CPPUNIT_ASSERT(sol->existence().is_superset(sol1));
 	CPPUNIT_ASSERT(sol->status==Solver::SOLUTION);
+	cout << "9"<< endl;
 
 	res=solver.next(sol);
 	CPPUNIT_ASSERT(res==true);
 	CPPUNIT_ASSERT(sol->existence().is_superset(sol2));
 	CPPUNIT_ASSERT(sol->status==Solver::SOLUTION);
 
+	cout << "10"<< endl;
 	res=solver.next(sol);
 	CPPUNIT_ASSERT(res==false);
 }

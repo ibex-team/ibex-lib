@@ -24,8 +24,8 @@ class TestSolver : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestSolver);
-	//CPPUNIT_TEST(circle1);
-	CPPUNIT_TEST(circle2);
+	CPPUNIT_TEST(circle1);
+	//CPPUNIT_TEST(circle2);
 	//CPPUNIT_TEST(circle3);
 	//CPPUNIT_TEST(circle4);
 	CPPUNIT_TEST_SUITE_END();
