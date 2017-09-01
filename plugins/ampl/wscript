@@ -27,8 +27,8 @@ def configure (conf):
 	conf.end_msg ("enabled")
 	
 	# AMPL plugin is not compatible with Windows
-	if (conf.env.DEST_OS == "win32"):
-		conf.fatal ("The AMPL plugin is not compatible with Windows")
+	#if (conf.env.DEST_OS == "win32"):
+	#	conf.fatal ("The AMPL plugin is not compatible with Windows")
 
 	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "AMPL")
 
@@ -65,8 +65,8 @@ def configure (conf):
 	flags_list = [ "-O" ]
 	if conf.env.ENABLE_SHARED:
 		flags_list += conf.env.CFLAGS_cshlib
-	if conf.env.INTERVAL_LIB == "GAOL":
-		flags_list += [ "-DNo_dtoa" ]
+	if (conf.env["INTERVAL_LIB"] == "GAOL"):
+		flags_list += [ "-DNo_dtoa"]
 	ampl_cflags = " ".join(flags_list)
 
 	cmd_conf = "CFLAGS=\"%s\" ./configurehere" % ampl_cflags
@@ -84,11 +84,11 @@ def configure (conf):
 						dest = os.path.join (ampl_incdir, f.name)
 					shutil.copyfile (src, dest)
 			else:
-				out = conf.cmd_and_log (cmd, cwd=ampl_srcdir, env=os.environ)
+				conf.cmd_and_log (cmd, cwd=ampl_srcdir, env=os.environ)
 			conf.end_msg("done")
 		except Errors.WafError as e:
 			conf.end_msg("failed", color="RED")
-			print e
+			print(e)
 			conf.fatal ("failed to %s %s (%s)" % (stage, ampl_name, cmd))
 
 	conf.to_log ((" Installation of %s: done " % ampl_name).center (80, "="))
