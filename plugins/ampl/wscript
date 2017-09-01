@@ -73,19 +73,24 @@ def configure (conf):
         cmd_cflags = "set CFLAGS=\"%s\" " % ampl_cflags 
         cmd_conf = destnode+"/configurehere"
         cmd_make = conf.env.MAKE + [ "-j%d" % conf.options.jobs ]
-        stages = [ (cmd_cflags, "cflags"), (cmd_conf, "configure"),  (cmd_make, "make"), (None, "install") ]
+        stages = [ (cmd_cflags, "cflags"), (cmd_conf, "configure"),  (cmd_make, "make") ]
     else:
         cmd_conf = "CFLAGS=\"%s\" " % ampl_cflags
         cmd_conf += ampl_srcdir+"/configurehere "
-    
         cmd_make = conf.env.MAKE + [ "-j%d" % conf.options.jobs ]
-        stages = [ (cmd_conf, "configure"),  (cmd_make, "make"), (None, "install") ]
+        stages = [ (cmd_conf, "configure"),  (cmd_make, "make") ]
+    
+    if conf.env.ENABLE_SHARED:
+        cmd_shared = conf.env.MAKE + ["shared"]
+        stages += [ (cmd_shared, "make shared library") ]
+        
+    stages += [(None, "install")]
     
     for cmd, stage in stages:
         conf.start_msg("Calling %s" % stage)
         try: 
             if stage == "install":
-                for f in ampl_srcnode.ant_glob ("*.h *.hd lib*.a"):
+                for f in ampl_srcnode.ant_glob ("*.h *.hd lib*.a lib*.so"):
                     src = os.path.join (ampl_srcdir, f.name)
                     if f.name.startswith ("lib"):
                         dest = os.path.join (ampl_libdir, f.name)
@@ -103,7 +108,7 @@ def configure (conf):
     conf.to_log ((" Installation of %s: done " % ampl_name).center (80, "="))
 
     conf.env.INSTALL_3RD = True
-    conf.env.append_unique ("LIB_3RD_LIST", "amplsolvers")
+    conf.env.append_unique ("LIB_3RD_LIST", "amplsolver")
 
 
     for h in [ "asl.h", "nlp.h", "getstub.h", "opcode.hd", "r_opn.hd" ]:
