@@ -67,7 +67,9 @@ cout << "1"<< endl;
 
 	cout << "10"<< endl;
 	res=solver.next(sol);
+	cout << "11"<< endl;
 	CPPUNIT_ASSERT(res==false);
+	cout << "12"<< endl;
 }
 
 void TestSolver::circle2() {
