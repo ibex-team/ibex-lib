@@ -71,7 +71,7 @@ def configure (conf):
     
     if Utils.is_win32:
         cmd_conf = "set CFLAGS=\"%s\" " % ampl_cflags 
-        cmd_conf2 = "./configurehere"
+        cmd_conf2 = "configurehere"
         cmd_make = conf.env.MAKE + [ "-j%d" % conf.options.jobs ]
         stages = [ (cmd_conf, "configure"), (cmd_conf2, "configure"),  (cmd_make, "make"), (None, "install") ]
     else:
