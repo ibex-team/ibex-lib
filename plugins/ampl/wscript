@@ -70,12 +70,16 @@ def configure (conf):
     ampl_cflags = " ".join(flags_list) 
     
     if Utils.is_win32:
-        cmd_conf = "set CFLAGS=\'%s\' \n   ./configurehere" % ampl_cflags 
+        cmd_conf = "set CFLAGS=\"%s\" " % ampl_cflags 
+        cmd_conf2 = "./configurehere"
+        cmd_make = conf.env.MAKE + [ "-j%d" % conf.options.jobs ]
+        stages = [ (cmd_conf, "configure"), (cmd_conf2, "configure"),  (cmd_make, "make"), (None, "install") ]
     else:
         cmd_conf = "CFLAGS=\"%s\" ./configurehere" % ampl_cflags
     
-    cmd_make = conf.env.MAKE + [ "-j%d" % conf.options.jobs ]
-    stages = [ (cmd_conf, "configure"),  (cmd_make, "make"), (None, "install") ]
+        cmd_make = conf.env.MAKE + [ "-j%d" % conf.options.jobs ]
+        stages = [ (cmd_conf, "configure"),  (cmd_make, "make"), (None, "install") ]
+    
     for cmd, stage in stages:
         conf.start_msg("Calling %s" % stage)
         try: 
