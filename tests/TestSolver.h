@@ -30,10 +30,10 @@ public:
 	//CPPUNIT_TEST(circle4);
 	CPPUNIT_TEST_SUITE_END();
 
-	//void circle1();
+	void circle1();
 	void circle2();
-	//void circle3();
-	//void circle4();
+	void circle3();
+	void circle4();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestSolver);
