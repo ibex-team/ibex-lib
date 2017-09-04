@@ -363,15 +363,30 @@ def options (opt):
 	"""
 
 	categories = [ "easy", "medium", "hard", "blowup", "others", "unsolved" ]
+	cat_default = "medium"
 	cat_help = "Possible values: " + ", ".join(categories)
+	cat_help += " [ default: %s ]" % cat_default
+
+	def parse_cat_callback (option, opt_str, value, parser, *args, **kwargs):
+		choices = categories,
+		L = value.replace ("+", ",").split(",")
+		for cat in L:
+			if not cat in categories:
+				import optparse
+				fmt = "option %s: invalid choice: '%s' (choose from %s)"
+				h = ", ".join ("'%s'" % c for c in categories)
+				raise optparse.OptionValueError(fmt % (option, cat, h))
+		setattr(parser.values, option.dest, L)
+
 
 	grp = opt.add_option_group ("Options for benchmarks")
 	for n, v in BENCHS_DEFAULT_ARGS.items():
 		optname = "--benchs-" + n.replace("_", "-")
 		grp.add_option (optname, action="store", dest = "BENCHS_" + n.upper(),
 		                help = "Override default %s (default is %s)" % (n, v))
-	grp.add_option ("--benchs-categories", action = "append", help = cat_help,
-									choices = categories, dest = "BENCHS_CATEGORIES")
+	grp.add_option ("--benchs-categories", help = cat_help, action = "callback",
+	                callback = parse_cat_callback, type = str,
+	                default = [cat_default], dest = "BENCHS_CATEGORIES")
 	grp.add_option ("--benchs-save", action = "store", dest = "BENCHS_SAVE",
 	                help = "Save the results of the benchmarks in the given file")
 	grp.add_option ("--benchs-cmp-to", action = "append", dest = "BENCHS_CMP_TO",
@@ -407,8 +422,6 @@ def benchmarks (bch):
 	# Read list of categories from command line arguments
 	if bch.options.BENCHS_CATEGORIES:
 		bch.categories = bch.options.BENCHS_CATEGORIES
-	else: # default
-		bch.categories = ["medium"]
 
 	# Do not overwrite file with --benchs-save option
 	if bch.options.BENCHS_SAVE:
