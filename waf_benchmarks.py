@@ -429,6 +429,8 @@ def benchmarks (bch):
 		if os.path.exists (f):
 			bch.fatal ("Benchmarks: '%s' already exists, will not overwrite it." % f)
 		bch.savefile = f
+	else:
+		bch.savefile = None
 
 	# Check that option --benchs-cmp-to (if given) is a list of existing files
 	bch.cmp_to_data = {}
