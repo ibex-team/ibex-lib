@@ -6,44 +6,44 @@ import shutil, os
 from waflib import TaskGen
 
 def configure (conf):
-	# Add all subdirectories of the 'src' directory in srcnode and bldnode in the
-	# includes
-	subdir = ibexutils.get_dirlist (conf.path)
-	snode = conf.srcnode.make_node ("src")
-	bnode = conf.bldnode.make_node ("src")
-	for p in subdir:
-		conf.env.append_unique ("INCLUDES_IBEX", snode.make_node(p).abspath())
-		conf.env.append_unique ("INCLUDES_IBEX", bnode.make_node(p).abspath())
+    # Add all subdirectories of the 'src' directory in srcnode and bldnode in the
+    # includes
+    subdir = ibexutils.get_dirlist (conf.path)
+    snode = conf.srcnode.make_node ("src")
+    bnode = conf.bldnode.make_node ("src")
+    for p in subdir:
+        conf.env.append_unique ("INCLUDES_IBEX", snode.make_node(p).abspath())
+        conf.env.append_unique ("INCLUDES_IBEX", bnode.make_node(p).abspath())
 
-	# Set env variable containing the list of all ibex source files (by looking
-	# recursively for all files ending with '.cpp' or '.yc' o '.l')
-	ibex_src = conf.path.ant_glob ("**/*.(cpp|yc|l) **/*.(cpp|yc|l).in")
-	ibex_src =[ f.path_from (conf.path) for f in ibex_src ]
-	conf.env.append_unique ('IBEX_SRC', ibex_src)
+    # Set env variable containing the list of all ibex source files (by looking
+    # recursively for all files ending with '.cpp' or '.yc' o '.l')
+    ibex_src = conf.path.ant_glob ("**/*.(cpp|yc|l) **/*.(cpp|yc|l).in")
+    ibex_src =[ f.path_from (conf.path) for f in ibex_src ]
+    conf.env.append_unique ('IBEX_SRC', ibex_src)
 
-	# Set env variable containing the list of all ibex headers (by looking
-	# recursively for all files starting with 'ibex_' and ending with '.h' or with
-	# '.h.in')
-	ibex_hdr = conf.path.ant_glob ("**/ibex_*.h **/ibex_*.h.in")
-	ibex_hdr =[ f.path_from (conf.path) for f in ibex_hdr ]
-	conf.env.append_unique ('IBEX_HDR', ibex_hdr)
+    # Set env variable containing the list of all ibex headers (by looking
+    # recursively for all files starting with 'ibex_' and ending with '.h' or with
+    # '.h.in')
+    ibex_hdr = conf.path.ant_glob ("**/ibex_*.h **/ibex_*.h.in")
+    ibex_hdr =[ f.path_from (conf.path) for f in ibex_hdr ]
+    conf.env.append_unique ('IBEX_HDR', ibex_hdr)
 
 def build (bld):
-	# Do substitution in files ending with .in
-	for f in bld.env.IBEX_SRC + bld.env.IBEX_HDR:
-		if f.endswith(".in"):
-			fnode = bld.path.find_node (f)
-			t = fnode.change_ext ("", ".in"),
-			tsk = bld (features = "subst", source = fnode, target = t)
+    # Do substitution in files ending with .in
+    for f in bld.env.IBEX_SRC + bld.env.IBEX_HDR:
+        if f.endswith(".in"):
+            fnode = bld.path.find_node (f)
+            t = fnode.change_ext ("", ".in"),
+            tsk = bld (features = "subst", source = fnode, target = t)
 
-	# c++ compilation of main lib
-	tg_ibex = (bld.shlib if bld.env.ENABLE_SHARED else bld.stlib) (
-		target = "ibex",
-		use = [ "IBEX", "ITV_LIB" ] + bld.env.IBEX_PLUGIN_USE_LIST,
-		source = [ f[:-3] if f.endswith(".in") else f for f in bld.env.IBEX_SRC ],
-		install_path = bld.env.LIBDIR,
-	)
+    # c++ compilation of main lib
+    tg_ibex = (bld.shlib if bld.env.ENABLE_SHARED else bld.stlib) (
+        target = "ibex",
+        use = [ "IBEX", "ITV_LIB" ] + bld.env.IBEX_PLUGIN_USE_LIST,
+        source = [ f[:-3] if f.endswith(".in") else f for f in bld.env.IBEX_SRC ],
+        install_path = bld.env.LIBDIR,
+    )
 
-	# install headers
-	ibex_hdr = [ f[:-3] if f.endswith(".in") else f for f in bld.env.IBEX_HDR ]
-	bld.install_files (bld.env.INCDIR_HDR, ibex_hdr)
+    # install headers
+    ibex_hdr = [ f[:-3] if f.endswith(".in") else f for f in bld.env.IBEX_HDR ]
+    bld.install_files (bld.env.INCDIR_HDR, ibex_hdr)

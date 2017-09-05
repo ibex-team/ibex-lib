@@ -136,7 +136,7 @@ def path_pc (conf, path):
 
 @conf
 def configure_3rd_party_with_autotools (conf, archive_name,
-			without_configure=False, without_make_install=False, conf_args = ""):
+			without_configure=False, without_make_install=False, conf_args = "", cflags_args = ""):
 	name = archive_name_without_suffix (archive_name)
 	Logs.pprint ("BLUE", "Starting installation of %s"%name)
 	conf.to_log ((" Starting installation of %s " % name).center (80, "="))
@@ -163,7 +163,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 	if conf.env.ENABLE_SHARED:
 		cflags = os.getenv("CFLAGS", "")
 		cxxflags = os.getenv("CXXFLAGS", "")
-		os.environ["CFLAGS"] = cflags + " ".join(conf.env.CFLAGS_cshlib)
+		os.environ["CFLAGS"] = cflags + " " + cflags_args +" ".join(conf.env.CFLAGS_cshlib)
 		os.environ["CXXFLAGS"] = cxxflags+" "+" ".join(conf.env.CXXFLAGS_cxxshlib)
 
 	if Utils.is_win32:
@@ -175,7 +175,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 		conf_args += " --prefix=%s" % destnode.abspath ()
 		cmd_conf = "./configure %s" % (conf_args)
 		cmd_make = conf.env.MAKE + ["-j%d"%conf.options.jobs]
-	cmd_install = conf.env.MAKE + ["install"]
+	cmd_install = conf.env.MAKE + ["install"] 
 
 	stages = []
 	if not without_configure:
@@ -190,7 +190,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 			conf.end_msg("done")
 		except Errors.WafError as e:
 			conf.end_msg("failed", color="RED")
-			print e
+			print(e)
 			conf.fatal ("failed to %s %s (%s)" % (stage, name, cmd))
 
 	conf.to_log ((" Installation of %s: done " % name).center (80, "="))

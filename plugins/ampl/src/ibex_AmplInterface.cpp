@@ -11,10 +11,10 @@
 #include "ibex_AmplInterface.h"
 #include "ibex_Exception.h"
 
-#include "asl.h"
-#include "nlp.h"
-#include "getstub.h"
-#include "opcode.hd"
+#include "amplsolvers/asl.h"
+#include "amplsolvers/nlp.h"
+#include "amplsolvers/getstub.h"
+#include "amplsolvers/opcode.hd"
 #include <stdint.h>
 
 
@@ -25,7 +25,7 @@
 #define CEXPS1 ((const ASL_fg *) asl) -> I.cexps1_
 #define CEXPS ((const ASL_fg *) asl) -> I.cexps_
 
-#include "r_opn.hd" /* for N_OPS */
+#include "amplsolvers/r_opn.hd" /* for N_OPS */
 
 static fint timing = 0;
 
