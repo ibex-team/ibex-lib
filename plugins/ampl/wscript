@@ -51,13 +51,13 @@ def configure (conf):
         conf.check_cxx (header_name = h, includes = ampl_include,
                         use = [ "IBEX", "AMPL" ], uselib_store= "AMPL")
 
-    for l in [ "dl", "amplsolvers" ]:
+    for l in [ "amplsolvers" ]:
         conf.check_cxx (lib = l, libpath = ampl_lib,
                         use = [ "IBEX", "AMPL" ], uselib_store = "AMPL")
 
     # Put every _AMPL variables in _IBEX_DEPS (for ibex.pc)
-    new_inc = os.path.join (conf.env.INCDIR_3RD, "amplsolvers")
-    conf.env.append_unique ("INCLUDES_IBEX_DEPS", new_inc)
+#    new_inc = os.path.join (conf.env.INCDIR_3RD, "amplsolvers")
+#    conf.env.append_unique ("INCLUDES_IBEX_DEPS", new_inc)
     if conf.env.ENABLE_SHARED:
         # if shared lib is used, 3rd party libs are compiled as static lib with
         # -fPIC and are contained in libibex
