@@ -163,13 +163,13 @@ def configure_3rd_party_with_autotools (conf, archive_name,
     if conf.env.ENABLE_SHARED:
         cflags = os.getenv("CFLAGS", "")
         cxxflags = os.getenv("CXXFLAGS", "")
-        os.environ["CFLAGS"] = cflags + " " + cflags_args +" ".join(conf.env.CFLAGS_cshlib)
-        os.environ["CXXFLAGS"] = cxxflags+" ".join(conf.env.CXXFLAGS_cxxshlib)
+        os.environ["CFLAGS"] = cflags + " " + cflags_args +"  ".join(conf.env.CFLAGS_cshlib)
+        os.environ["CXXFLAGS"] = cxxflags+" " + " ".join(conf.env.CXXFLAGS_cxxshlib)
     else:
         cflags = os.getenv("CFLAGS", "")
         cxxflags = os.getenv("CXXFLAGS", "")
         os.environ["CFLAGS"] = cflags + " " + cflags_args 
-        os.environ["CXXFLAGS"] = cxxflags
+        os.environ["CXXFLAGS"] = cxxflags+" "
         
 
     if Utils.is_win32:
