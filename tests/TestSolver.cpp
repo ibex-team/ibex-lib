@@ -73,33 +73,45 @@ cout << "1"<< endl;
 }
 
 void TestSolver::circle2() {
+	cout << "1"<< endl;
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
+	cout << "2"<< endl;
 
 	SystemFactory f;
 	f.add_var(x);
 	f.add_var(y);
 	f.add_ctr(sqr(x)+sqr(y)=1);
 	f.add_ctr(sqr(x-2)+sqr(y)=1);
+	cout << "3"<< endl;
 	double _sol1[]={1,0};
 	Vector sol1(2,_sol1);
 	System sys(f);
 	RoundRobin rr(1e-3);
 	CellStack stack;
 	CtcHC4 hc4(sys);
+	cout << "4"<< endl;
 	Solver solver(sys,hc4,rr,stack);
+	cout << "5"<< endl;
 
 	solver.start(IntervalVector(2,Interval(-10,10)));
 	const Solver::Solution* sol;
 	bool res;
+	cout << "6"<< endl;
 
 	res=solver.next(sol);
+	cout << "7"<< endl;
 	CPPUNIT_ASSERT(res==true);
+	cout << "8"<< endl;
 	CPPUNIT_ASSERT(sol->existence().is_superset(sol1));
+	cout << "9"<< endl;
 	CPPUNIT_ASSERT(sol->status==Solver::UNKNOWN);
+	cout << "10"<< endl;
 
 	res=solver.next(sol);
+	cout << "11"<< endl;
 	CPPUNIT_ASSERT(res==false);
+	cout << "12"<< endl;
 }
 
 void TestSolver::circle3() {
