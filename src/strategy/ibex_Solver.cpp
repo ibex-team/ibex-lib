@@ -182,15 +182,15 @@ bool Solver::next(const Solution*& sol) {
 				// of uncaught timeout in this case (but this case is probably already
 				// an error case).
 			}
-			if (time_limit >0) timer.check(time_limit);
 			time = timer.get_time();
+			if (time_limit >0) timer.check(time_limit);
 		}
 	}
 	catch (TimeOutException&) {
-		cout << "time limit " << time_limit << "s. reached " << endl;
+		if (trace==2) cout << "time limit " << time_limit << "s. reached " << endl;
 	}
 	catch (CellLimitException&) {
-		cout << "cell limit " << cell_limit << " reached " << endl;
+		if (trace==2) cout << "cell limit " << cell_limit << " reached " << endl;
 	}
 
 	timer.stop();
