@@ -66,6 +66,36 @@ def configure (conf):
                 conf.env.append_unique ("LIB_IBEX_DEPS", lib)
     else:
         conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_AMPL)
+        
+    
+    # add AMPL plugin include directory
+    for f in conf.path.ant_glob ("src/**", dir = True, src = False):
+        conf.env.append_unique("INCLUDES_AMPL", f.abspath())
+
+    # The build and install steps will be run from the main src/wscript script so
+    # we need to give path relative to the main src directory
+    mainsrc = conf.srcnode.make_node ("src")
+
+    # add AMPL headers
+    for f in conf.path.ant_glob ("src/**/ibex_*.h"):
+        conf.env.append_unique ("IBEX_HDR", f.path_from (mainsrc))
+
+    # add AMPL source files
+    for f in conf.path.ant_glob ("src/**/ibex_*.cpp"):
+        conf.env.append_unique ("IBEX_SRC", f.path_from (mainsrc))
+        
+    
+    # The utest step will be run from the main tests/wscript script so we need to
+    # give path relative to the main tests directory
+    maintests = conf.srcnode.make_node ("tests")
+
+    # add AMPL test files
+    for f in conf.path.ant_glob ("tests/**/*.cpp"):
+        conf.env.append_unique ('TEST_SRC', f.path_from (maintests))
+
+    # Add ampl/tests directory to list of INCLUDES for TESTS
+    testsnode = conf.path.make_node ("tests")
+    conf.env.append_unique ("INCLUDES_TESTS", testsnode.abspath ())
 ######################
 ####### build ########
 ######################

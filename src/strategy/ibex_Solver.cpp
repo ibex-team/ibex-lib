@@ -133,6 +133,7 @@ bool Solver::next(const Solution*& sol) {
 				delete buffer.pop();
 				//impact.remove(v); // note: in case of the root node, we should clear the bitset
 				// instead but since the search is over, the impact is not used anymore.
+				// JN: that make a bug with Mingw
 				if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
 					impact.remove(v);
 				else                                // root node : impact set to 1 for all variables
