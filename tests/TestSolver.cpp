@@ -71,6 +71,9 @@ cout << "1.1"<< endl;
 	cout << "1.11"<< endl;
 	CPPUNIT_ASSERT(res==false);
 	cout << "1.12"<< endl;
+
+	delete &x;
+	delete &y;
 } catch (Exception& e) {
 	cout << typeid(e).name() << endl;
 
@@ -119,6 +122,8 @@ void TestSolver::circle2() {
 	CPPUNIT_ASSERT(res==false);
 	cout << "2.12"<< endl;
 
+	delete &x;
+	delete &y;
 } catch (Exception& e) {
 	cout << typeid(e).name() << endl;
 
@@ -180,6 +185,8 @@ void TestSolver::circle3() {
 	res=solver.next(sol);
 	CPPUNIT_ASSERT(res==false);
 	cout << "3.13"<< endl;
+	delete &x;
+	delete &y;
 } catch (Exception& e) {
 	cout << typeid(e).name() << endl;
 
@@ -251,6 +258,9 @@ void TestSolver::circle4() {
 	res=solver.next(sol);
 	CPPUNIT_ASSERT(res==false);
 	cout << "4.14"<< endl;
+	delete &x;
+	delete &y;
+	delete &r2;
 } catch (Exception& e) {
 	cout << typeid(e).name() << endl;
 
