@@ -22,6 +22,7 @@ using namespace std;
 namespace ibex {
 
 void TestSolver::circle1() {
+	try {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
 cout << "1.1"<< endl;
@@ -70,9 +71,14 @@ cout << "1.1"<< endl;
 	cout << "1.11"<< endl;
 	CPPUNIT_ASSERT(res==false);
 	cout << "1.12"<< endl;
+} catch (Exception& e) {
+	cout << typeid(e).name() << endl;
+
+}
 }
 
 void TestSolver::circle2() {
+	try {
 	cout << "2.1"<< endl;
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
@@ -112,9 +118,15 @@ void TestSolver::circle2() {
 	cout << "2.11"<< endl;
 	CPPUNIT_ASSERT(res==false);
 	cout << "2.12"<< endl;
+
+} catch (Exception& e) {
+	cout << typeid(e).name() << endl;
+
+}
 }
 
 void TestSolver::circle3() {
+	try {
 	cout << "3.1"<< endl;
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
@@ -168,9 +180,14 @@ void TestSolver::circle3() {
 	res=solver.next(sol);
 	CPPUNIT_ASSERT(res==false);
 	cout << "3.13"<< endl;
+} catch (Exception& e) {
+	cout << typeid(e).name() << endl;
+
+}
 }
 
 void TestSolver::circle4() {
+	try {
 	cout << "4.1"<< endl;
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
@@ -234,6 +251,10 @@ void TestSolver::circle4() {
 	res=solver.next(sol);
 	CPPUNIT_ASSERT(res==false);
 	cout << "4.14"<< endl;
+} catch (Exception& e) {
+	cout << typeid(e).name() << endl;
+
+}
 }
 
 
