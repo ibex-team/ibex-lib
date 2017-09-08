@@ -68,6 +68,9 @@ LinearizerCombo::LinearizerCombo(const System& sys, linear_mode lmode1) :
 
 LinearizerCombo::~LinearizerCombo() {
 	if (myxnewton!=NULL) delete myxnewton;
+#ifdef _IBEX_WITH_AFFINE_
+	if (myart!=NULL) delete myart;
+#endif
 }
 
 /*********generation of the linearized system*********/

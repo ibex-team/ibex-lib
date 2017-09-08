@@ -23,6 +23,10 @@
 #include "ibex_Array.h"
 #include "ibex_Random.h"
 #include "ibex_DefaultStrategy.cpp_"
+#include "ibex_CellBeamSearch.h"
+#include "ibex_CellHeap.h"
+
+
 
 using namespace std;
 
@@ -68,7 +72,11 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double eps_x, double rel_e
 			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x)),
 			  rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(get_norm_sys(sys,eps_h),inHC4))) :
 						 (LoupFinder*) new LoupFinderDefault(get_norm_sys(sys,eps_h),inHC4)),
-			  (CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h))),
+			  //(CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h))),
+			  (CellBufferOptim&) rec (new  CellBeamSearch (
+								       (CellHeap&) rec (new CellHeap (get_ext_sys(sys,eps_h))), 
+								       (CellHeap&) rec (new CellHeap (get_ext_sys(sys,eps_h))), 
+								       get_ext_sys(sys,eps_h))),
 			  get_ext_sys(sys,eps_h).goal_var(),
 			  eps_x,
 			  rel_eps_f,
@@ -84,6 +92,13 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double eps_x, double rel_e
 	normalized_system = -1;
 }
 
+
+
+
+
+
+
+
 Ctc&  DefaultOptimizer::ctc(const System& ext_sys) {
 	Array<Ctc> ctc_list(3);
 
@@ -91,14 +106,14 @@ Ctc&  DefaultOptimizer::ctc(const System& ext_sys) {
 	ctc_list.set_ref(0, rec(new CtcHC4 (ext_sys.ctrs,0.01,true)));
 	// second contractor on ext_sys : "Acid" with incremental HC4 (propag ratio=0.1)
 	ctc_list.set_ref(1, rec(new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys.ctrs,0.1,true)),true)));
-	// the last contractor is "XNewton"
+	// the last contractor is "Compo (ART+XNewton)"
 	if (ext_sys.nb_ctr > 1) {
 		ctc_list.set_ref(2,rec(new CtcFixPoint
 				(rec(new CtcCompo(
-						rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))),
+						rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::COMPO)))),
 								rec(new CtcHC4(ext_sys.ctrs,0.01)))), default_relax_ratio)));
 	} else {
-		ctc_list.set_ref(2,rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))));
+		ctc_list.set_ref(2,rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::COMPO)))));
 	}
 	return rec(new CtcCompo(ctc_list));
 }

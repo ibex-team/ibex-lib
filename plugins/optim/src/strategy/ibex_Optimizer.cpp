@@ -48,12 +48,12 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
                 				n(n), goal_var(goal_var),
                 				ctc(ctc), bsc(bsc), loup_finder(finder), buffer(buffer),
                 				eps_x(eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
-                				trace(false), timeout(-1),
+                				trace(0), timeout(-1),
                 				status(SUCCESS),
                 				//kkt(normalized_user_sys),
-								uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
+						uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
                 				loup_point(n), initial_loup(POS_INFINITY), loup_changed(false),
-								time(0), nb_cells(0) {
+                                                time(0), nb_cells(0) {
 
 	if (trace) cout.precision(12);
 }
@@ -80,7 +80,8 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 
 		if (trace) {
 			cout << "                    ";
-			cout << "\033[32m loup= " << loup << "\033[0m" << endl;
+			cout << " loup= " << loup << " " 
+			     << " uplo= " << uplo << " " << endl;
 //			cout << " loup point=";
 //			if (loup_finder.rigorous())
 //				cout << loup_point << endl;
@@ -127,8 +128,8 @@ void Optimizer::update_uplo() {
 			if (new_uplo > uplo) {
 				uplo = new_uplo;
 
-				if (trace)
-					cout << "\033[33m uplo= " << uplo << "\033[0m" << endl;
+				if (trace >=2)
+					cout << " uplo= " << uplo << " " << endl;
 			}
 		}
 		else uplo = uplo_of_epsboxes;
@@ -170,11 +171,9 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		delete &c;
 	} else {
 		buffer.push(&c);
-
-		nb_cells++;
 	}
 }
-
+  
 void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 	/*======================== contract y with y<=loup ========================*/
@@ -293,29 +292,31 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	time=0;
 	Timer::start();
 	handle_cell(*root,init_box);
-
+	
 	update_uplo();
 
 	try {
-		while (!buffer.empty()) {
-
-		  if (trace >= 2) cout << buffer;
-
+	     while (!buffer.empty()) {
+		  
 			loup_changed=false;
-
-			Cell *c = buffer.top();
+			// for double heap , choose randomly the buffer : top  has to be called before pop
+			Cell *c = buffer.top(); 
+			if (trace >= 2) cout << " current box " << c->box << endl;
 
 			try {
+
 				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 
 				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 
-				buffer.pop();
+				buffer.pop(); 
 				delete c; // deletes the cell.
 
+				nb_cells+=2;  // counting the cells handled ( in previous versions nb_cells was the number of cells put into the buffer after being handled)
+                
 				handle_cell(*new_cells.first, init_box);
 				handle_cell(*new_cells.second, init_box);
-
+		
 				if (uplo_of_epsboxes == NEG_INFINITY) {
 					cout << " possible infinite minimum " << endl;
 					break;
@@ -328,8 +329,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					// older version of the code (before revision 284).
 
 					double ymax=compute_ymax();
-
 					buffer.contract(ymax);
+				
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
 					// TODO: check if happens. What is the return code in this case?
@@ -345,7 +346,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			catch (NoBisectableVariableException& ) {
 				update_uplo_of_epsboxes((c->box)[goal_var].lb());
 				buffer.pop();
-				delete c; // deletes the cell.
+				delete c; 
 				update_uplo(); // the heap has changed -> recalculate the uplo (eg: if not in best-first search)
 
 			}
