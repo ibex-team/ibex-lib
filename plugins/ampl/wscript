@@ -24,12 +24,22 @@ def configure (conf):
         return
 
     conf.end_msg ("enabled")
-    
-    # AMPL plugin is not compatible with Windows
-    #if (conf.env.DEST_OS == "win32"):
-    #    conf.fatal ("The AMPL plugin is not compatible with Windows")
 
     conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "AMPL")
+    
+    if (conf.env.DEST_OS == "win32"):
+        # need to compile dlfcn           
+        conf.msg ("Using library dl from", "3rd/ subdirectory")
+        dl_archive = "dlfcn-win32-master.zip"
+        dl_ret = conf.configure_3rd_party_with_autotools (dl_archive, False, False)
+        _, dl_include, dl_lib = dl_ret
+        conf.env.INSTALL_3RD = True
+        conf.env.append_unique ("LIB_3RD_LIST", "dl" )
+        
+        # Looking for dlfcn header and library (called in amplsolvers)
+        conf.check_cxx (header_name = "dlfcn.h", includes = dl_include,
+                            use = [ "IBEX", "AMPL" ], uselib_store= "AMPL")
+        
 
     # Add information in ibex_Setting
     conf.setting_define ("WITH_AMPL", 1)
@@ -51,11 +61,11 @@ def configure (conf):
         conf.check_cxx (header_name = h, includes = ampl_include,
                         use = [ "IBEX", "AMPL" ], uselib_store= "AMPL")
 
-    for l in [ "amplsolvers" ]:
+    for l in [ "dl", "amplsolvers" ]:
         conf.check_cxx (lib = l, libpath = ampl_lib,
                         use = [ "IBEX", "AMPL" ], uselib_store = "AMPL")
-
-    # Put every _AMPL variables in _IBEX_DEPS (for ibex.pc)
+        
+    # Put every _AMPL variables in _IBEX_DEPS (for ibex.pc) ## no need anymore
 #    new_inc = os.path.join (conf.env.INCDIR_3RD, "amplsolvers")
 #    conf.env.append_unique ("INCLUDES_IBEX_DEPS", new_inc)
     if conf.env.ENABLE_SHARED:
