@@ -23,8 +23,9 @@ using namespace std;
 namespace ibex {
 
 const double Optimizer::default_eps_x = 0;
-const double Optimizer::default_rel_eps_f = 1e-03;
-const double Optimizer::default_abs_eps_f = 1e-07;
+  // BN : for consistency and to avoid threshold effect, relative and absolute precision should have the same default value
+const double Optimizer::default_rel_eps_f = 1e-06;
+const double Optimizer::default_abs_eps_f = 1e-06;
 
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;

@@ -37,7 +37,7 @@ namespace ibex {
   class CellBeamSearch: public CellHeap {
   public :
    
-    CellBeamSearch (CellHeap& currentbuffer, CellHeap& futurebuffer, const ExtendedSystem & sys, unsigned int beamsize =1) ;
+    CellBeamSearch (CellHeap& currentbuffer, CellHeap& futurebuffer, const ExtendedSystem & sys, unsigned int beamsize =default_beamsize) ;
 
     ~CellBeamSearch();
 
@@ -67,6 +67,9 @@ namespace ibex {
     
     /** \brief : remove the cells with a LB greater than new_loup */
     void contract (double new_loup);	
+
+    /** \brief  the default value for the maximum beam size */
+    static const unsigned int default_beamsize;
 
   protected :
     /** \brief Return the cost of a cell*/

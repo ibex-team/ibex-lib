@@ -13,6 +13,10 @@
 using namespace std;
 
 namespace ibex {
+
+  const double CellBeamSearch::default_beamsize= 1;
+
+
   CellBeamSearch::CellBeamSearch (CellHeap& currentbuffer, CellHeap& futurebuffer, const ExtendedSystem & sys, unsigned int beamsize) : CellHeap (sys) , currentbuffer(currentbuffer), futurebuffer (futurebuffer), beamsize(beamsize) {}
 
 
