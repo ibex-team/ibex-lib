@@ -167,7 +167,7 @@ int main(int argc, char** argv){
 	o.optimize(sys.box);
 
 	// printing the results     
-	//	o.report();
+		o.report();
         cout << o.get_time() << "  " << o.get_nb_cells() << endl;
 
 	//	if (filtering == "acidhc4"  )

@@ -99,7 +99,9 @@ int LSmear::var_to_bisect(IntervalMatrix & J,const IntervalVector& box) const {
 	//Linearization
 	LinearSolver::Status_Sol stat = LinearSolver::UNKNOWN;
 
-     if(lsmode==BASIC_JMID){ //compute the Jacobian in the midpoint
+	Vector dual_solution(1);
+
+     if(lsmode==LSMEAR_MG){ //compute the Jacobian in the midpoint
 	   IntervalMatrix J2(sys.f_ctrs.image_dim(), sys.nb_var);
 	   IntervalVector box2(IntervalVector(box.mid()).inflate(1e-8));
 	   box2 &= box;
@@ -107,8 +109,7 @@ int LSmear::var_to_bisect(IntervalMatrix & J,const IntervalVector& box) const {
 	   sys.f_ctrs.jacobian(box2,J2);
        stat = getdual(J2, box, dual_solution);
 
-	}else if(lsmode==BASIC){
-	//	 std::cout << J.mid() << std::endl;
+	}else if(lsmode==LSMEAR){
 	    stat = getdual(J, box, dual_solution);
 	}
 
@@ -116,7 +117,7 @@ int LSmear::var_to_bisect(IntervalMatrix & J,const IntervalVector& box) const {
     int lvar = -1;
     int goal_var=dynamic_cast<ExtendedSystem*> (&sys)->goal_var();
 
-	if(stat == LinearSolver::OPTIMAL && dual_solution.size()>1 /* ?? */){
+	if(stat == LinearSolver::OPTIMAL){
 		double max_Lmagn = 0.0;
 		int k=0;
 
@@ -147,7 +148,6 @@ int LSmear::var_to_bisect(IntervalMatrix & J,const IntervalVector& box) const {
     if(lvar==-1){
         lvar=SmearSumRelative::var_to_bisect(J, box);
     }
-
 
 	return lvar;
 }
