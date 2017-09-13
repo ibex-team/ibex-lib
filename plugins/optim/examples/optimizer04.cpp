@@ -29,26 +29,50 @@ int main(int argc, char** argv){
 	try {
 
 	if (argc<8) {
-		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection prec goal_prec timelimit "  << endl;
+		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection strategy prec goal_prec timelimit "  << endl;
 		exit(1);
 	}
 
-	System sys(argv[1]);
+
+	//System sys(argv[1]);
+
+
+    AmplInterface *interface = NULL;
+    std::size_t found = string(argv[1]).find(".nl");
+	if (found!=std::string::npos)
+	       interface = new AmplInterface(argv[1]);
+
+	System& sys = (interface)? *new System(*interface): *new System(argv[1]);
+
+
 	string filtering = argv[2];
 	string linearrelaxation= argv[3];
 	string bisection= argv[4];
-	double prec= atof(argv[5]);
-	double goalprec= atof (argv[6]);
-	double timelimit = atof(argv[7]);
+	string strategy= argv[5];
+	int nbinput=5;
+	int beamsize;
+	//if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[6]); nbinput++;}
+
+	double prec= atof(argv[nbinput+1]);
+	double goalprec= atof (argv[nbinput+2]);
+	double timelimit = atof(argv[nbinput+3]);
 	double eqeps= 1.e-8;
 
-	RNG::srand(1);
+	RNG::srand(atoi(argv[nbinput+4]));
 
 	// the extended system 
 	ExtendedSystem ext_sys(sys,eqeps);
+	NormalizedSystem norm_sys(sys,eqeps);
+	LoupFinderDefault loupfinder (norm_sys,true);
+	//LoupFinderDefault loupfinder (norm_sys,false);
 
+	CellBufferOptim* buffer;
+	//if(strategy=="diving")
+	//	buffer = new CellFeasibleDiving(ext_sys);
+	//else
+		buffer = new CellDoubleHeap  (ext_sys);
 
-        cout << "file " << argv[1] << endl;
+	//        cout << "file " << argv[1] << endl;
 
 	// Build the bisection heuristic
 	// --------------------------
@@ -67,6 +91,8 @@ int main(int argc, char** argv){
 	  bs = new SmearSumRelative(ext_sys,prec);
 	else if (bisection=="smearmaxrel")
 	  bs = new SmearMaxRelative(ext_sys,prec);
+	else if (bisection=="lsmear")
+	  bs = new LSmear(ext_sys,prec);
 	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
 
 	// The contractors
@@ -125,16 +151,14 @@ int main(int argc, char** argv){
           ctcxn= new CtcCompo  (*ctc, *cxn); 
 	else
 	  ctcxn = ctc;
-	// one point probed when looking for a new feasible point (updating the loup)
-	int samplesize=1;
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	Optimizer o(sys,*ctcxn,*bs,prec,goalprec,goalprec,samplesize,eqeps);
+	Optimizer o(sys.nb_var,*ctcxn,*bs,loupfinder,*buffer,ext_sys.goal_var(),prec,goalprec,goalprec);
 
-	cout << " sys.box " << sys.box << endl;
+	//	cout << " sys.box " << sys.box << endl;
 
 	// the trace 
-	o.trace=1;
+	o.trace=0;
 
 	// the allowed time for search
 	o.timeout=timelimit;
@@ -143,13 +167,14 @@ int main(int argc, char** argv){
 	o.optimize(sys.box);
 
 	// printing the results     
-	o.report();
-
+	//	o.report();
+        cout << o.get_time() << "  " << o.get_nb_cells() << endl;
 
 	//	if (filtering == "acidhc4"  )
 	//cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;
 
 	delete bs;
+	delete buffer;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn") {
 		delete lr;
 	    delete ctcxn;
