@@ -74,7 +74,7 @@ public:
 	bool writeSolution(double* sol, bool found);
 
 
-	static const double default_max_bound;
+	//static const double default_max_bound;
 
 };
 

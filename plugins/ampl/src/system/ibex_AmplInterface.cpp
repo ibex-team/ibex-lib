@@ -126,7 +126,7 @@ size_t getOperator (efunc *f) {
 
 namespace ibex {
 
-const double AmplInterface::default_max_bound= 1.e20;
+//const double AmplInterface::default_max_bound= 1.e20;
 
 
 AmplInterface::AmplInterface(std::string nlfile) : asl(NULL), _nlfile(nlfile), _x(NULL){
@@ -231,13 +231,15 @@ bool AmplInterface::readnl() {
 			// LUv is the variable lower bound if Uvx!=0, and the variable lower and upper bound if Uvx == 0
 			if (!Uvx_copy)
 				for (int i=0; i<n_var; i++) {
-					bound[i] = Interval(  ((LUv[2*i] <= -default_max_bound) ? -default_max_bound : LUv[2*i] ),
-												((LUv[2*i+1] >= default_max_bound) ? default_max_bound : LUv[2*i+1]) );
+					//bound[i] = Interval(  ((LUv[2*i] <= -default_max_bound) ? -default_max_bound : LUv[2*i] ),
+						//						((LUv[2*i+1] >= default_max_bound) ? default_max_bound : LUv[2*i+1]) );
+					bound[i] = Interval( LUv[2*i], LUv[2*i+1]);
 				}
 			else
 				for (int i=n_var; i--;) {
-					bound[i] = Interval(	(LUv [i] <= -default_max_bound ? -default_max_bound : LUv[i] ),
-												(Uvx_copy [i] >= default_max_bound ? default_max_bound : Uvx_copy[i]) );
+					//bound[i] = Interval(	(LUv [i] <= -default_max_bound ? -default_max_bound : LUv[i] ),
+						//						(Uvx_copy [i] >= default_max_bound ? default_max_bound : Uvx_copy[i]) );
+					bound[i] = Interval( LUv[i], Uvx_copy[i]);
 				}
 		} // else it is [-oo,+oo]
 		add_var(*_x, bound);
