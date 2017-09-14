@@ -1,5 +1,5 @@
 g3 0 1 0	# problem ex5
- 2 3 1 0 0	# vars, constraints, objectives, ranges, eqns
+ 2 3 1 0 1	# vars, constraints, objectives, ranges, eqns
  1 1	# nonlinear constraints, objectives
  0 0	# network constraints: nonlinear, linear
  2 2 2	# nonlinear vars in constraints, objectives, both
@@ -13,7 +13,7 @@ b
 3
 r
 1 0
-1 0
+4 0
 2 0
 V2 2 0
 0 1

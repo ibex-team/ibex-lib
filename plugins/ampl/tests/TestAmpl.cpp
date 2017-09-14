@@ -94,7 +94,7 @@ void TestAmpl::factory01() {
 	CPPUNIT_ASSERT(sys.nb_var==13);
 	CPPUNIT_ASSERT(sys.args.size()==1);
 	CPPUNIT_ASSERT(sys.args[0].dim==Dim::col_vec(13));
-	CPPUNIT_ASSERT(sys.goal->eval(IntervalVector(13,Interval(0)))==Interval(-1));
+	check(sys.goal->eval(IntervalVector(13,Interval(0))),Interval(-1));
 	//CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x(2)))"));
 
 	CPPUNIT_ASSERT(sys.box.size()==13);
@@ -229,14 +229,30 @@ void TestAmpl::variable1() {
 void TestAmpl::variable2() {
 	AmplInterface inter(SRCDIR_TESTS "/../plugins/ampl/tests/ex_ampl/ex5.nl" );
 	System sys(inter);
-	cout << sys << endl;
-	CPPUNIT_ASSERT(false);
+	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"(((x(1)+x(2))*(x(1)+x(2)))+x(2))"));
+	CPPUNIT_ASSERT(sys.ctrs.size()==3);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==1);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==2);
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[0].expr(),"((x(1)+x(2))*(x(1)+x(2)))"));
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[1].expr(),"(x(1)+x(2))"));
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[2].expr(),"(-x(2))"));
+	CPPUNIT_ASSERT(sys.ops[0]==LEQ);
+	CPPUNIT_ASSERT(sys.ops[1]==EQ);
+	CPPUNIT_ASSERT(sys.ops[2]==GEQ);
 }
 
 void TestAmpl::variable3() {
 	AmplInterface inter(SRCDIR_TESTS "/../plugins/ampl/tests/ex_ampl/ex6.nl" );
 	System sys(inter);
-	cout << sys << endl;
-	CPPUNIT_ASSERT(false);
+	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"((((x(1)+x(2))*(((((x(1)+x(2))*(x(1)+x(2)))+((x(1)+x(2))*(x(1)+x(2))))-x(1))+x(2)))+((((((x(1)+x(2))*(x(1)+x(2)))+((x(1)+x(2))*(x(1)+x(2))))-x(1))+x(2))*(((x(1)+x(2))*(x(1)+x(2)))+x(2))))-x(1))"));
+	CPPUNIT_ASSERT(sys.ctrs.size()==3);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==1);
+	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==2);
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[0].expr(),"((x(1)+x(2))*(x(1)+x(2)))"));
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[1].expr(),"(((-(((x(1)+x(2))*(x(1)+x(2)))+((x(1)+x(2))*(x(1)+x(2)))))+(2*x(1)))-x(2))"));
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[2].expr(),"(x(1)+x(2))"));
+	CPPUNIT_ASSERT(sys.ops[0]==LEQ);
+	CPPUNIT_ASSERT(sys.ops[1]==GEQ);
+	CPPUNIT_ASSERT(sys.ops[2]==LEQ);
 }
 } // end namespace

@@ -609,7 +609,7 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 					else {
 						cexp1 *common = (CEXPS1 - ncom0) +j ;
 						// init with the nonlinear part
-						const ExprNode* body = &(nl2expr(common->e));
+						body = &(nl2expr(common->e));
 
 						int nlin = common->nlin; // Number of linear terms
 						if( nlin > 0 ) {
