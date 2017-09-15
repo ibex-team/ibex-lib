@@ -4,7 +4,7 @@ from waflib import TaskGen, Task, Utils, Configure, Build, Logs
 benchlock = Utils.threading.Lock()
 
 BENCHS_DEFAULT_ARGS = {"time_limit": "5", "prec_ndigits_max": "6",
-                       "prec_ndigits_min": "1"}
+                       "prec_ndigits_min": "1", "iter": "3"}
 BENCHS_ARGS_NAME = BENCHS_DEFAULT_ARGS.keys()
 BENCHS_ARGS_PATTERN = " ; ".join("%s = (?P<%s>.+?)" % (k, k) for k in BENCHS_ARGS_NAME)
 BENCHS_ARGS_FORMAT = " ; ".join("%s = {BCH_%s}" % (k,k.upper()) for k in BENCHS_ARGS_NAME)
@@ -35,6 +35,7 @@ class BenchData (Bench):
 	KEYS_TYPE["nb_cells"] = int
 	KEYS_TYPE["uplo"] = float
 	KEYS_TYPE["loup"] = float
+	KEYS_TYPE["random_seed"] = float
 	PREFIX = "BENCH: "
 	RESULTS_PATTERN = "(%s) = (.*)" % "|".join(KEYS_TYPE.keys())
 	RESULTS_RE = re.compile (RESULTS_PATTERN)
@@ -136,13 +137,11 @@ class BenchSummary (BenchData):
 # Class for the task that generates the scatter plot for comparison
 class BenchScatterPlotData (Bench):
 	def get_time (self, L):
-		T = [ l for l in L if abs(l["eps"]-self.eps) <= 1e-5 ]
+		T = [ l for l in L if abs(l["eps"]-self.eps) <= 1e-6 ]
 		if len(T) == 0:
 			return self.env.BCH_TIME_LIMIT
-		elif len(T) > 1:
-			pass
 		else:
-			return T[0]["time"]
+			return max(t["time"] for t in T)
 
 	def run (self):
 		serie = self.generator.name
