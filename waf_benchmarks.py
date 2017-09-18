@@ -150,15 +150,43 @@ class BenchScatterPlotData (Bench):
 		outstr = "benchfile current previous" + os.linesep
 		for f, fdata in self.generator.bld.bench_results[serie].items():
 			if f in self.data:
-				tc = self.get_time (fdata)
-				tp = self.get_time (self.data[f])
-				if tc > tp * BENCHS_MAX_REGRESSION:
-					err_msg = "bench %s from %s is too long (%f > %d * %f)" % (f, serie, tc, BENCHS_MAX_REGRESSION, tp)
+				tc = self.get_time (fdata) # timing of current bench
+				tp = self.get_time (self.data[f]) # timing from previous bench
+				outstr += "%s %s %s" % (f, tc, tp) + os.linesep
+
+				if tc > tp * BENCHS_MAX_REGRESSION: # check for non regression
+					err_fmt = "bench %s from %s is too long (%f > %d * %f)"
+					err_data = (f, serie, tc, BENCHS_MAX_REGRESSION, tp)
 					if not hasattr (self.generator.bld, "bench_errors"):
 						self.generator.bld.bench_errors = []
-					self.generator.bld.bench_errors.append (err_msg)
-				outstr += "%s %s %s" % (f, tc, tp) + os.linesep
+					self.generator.bld.bench_errors.append (err_fmt % err_data)
+
+		# Write data in output file
 		self.outputs[0].write (outstr)
+
+		# check intersection of [uplo, loup]
+		for f, fdata in self.generator.bld.bench_results[serie].items():
+			uplo = float("-inf")
+			loup = float("+inf")
+			for d in fdata:
+				uplo = max (uplo, d["uplo"])
+				loup = min (loup, d["loup"])
+			print uplo, loup
+			if uplo > loup:
+				err_fmt = "bench %s from %s: intersection of [uplo, loup] is empty"
+				err_data = (f, serie)
+				if not hasattr (self.generator.bld, "bench_errors"):
+					self.generator.bld.bench_errors = []
+				self.generator.bld.bench_errors.append (err_fmt % err_data)
+
+			if f in self.data:
+				for d in self.data[f]:
+					if uplo > d["loup"] or d["uplo"] > loup:
+						err_fmt = "bench %s from %s: [uplo, loup] does not intersect with results from '%s'"
+						err_data = (f, serie, self.cmp_ref)
+						if not hasattr (self.generator.bld, "bench_errors"):
+							self.generator.bld.bench_errors = []
+						self.generator.bld.bench_errors.append (err_fmt % err_data)
 
 	def keyword (self):
 		return "Writing scatter plot data into"
