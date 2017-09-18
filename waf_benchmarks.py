@@ -9,6 +9,8 @@ BENCHS_ARGS_NAME = BENCHS_DEFAULT_ARGS.keys()
 BENCHS_ARGS_PATTERN = " ; ".join("%s = (?P<%s>.+?)" % (k, k) for k in BENCHS_ARGS_NAME)
 BENCHS_ARGS_FORMAT = " ; ".join("%s = {BCH_%s}" % (k,k.upper()) for k in BENCHS_ARGS_NAME)
 
+BENCHS_MAX_REGRESSION = 10
+
 # Base class for all bench classes
 class Bench (Task.Task):
 	color = 'CYAN'
@@ -150,6 +152,11 @@ class BenchScatterPlotData (Bench):
 			if f in self.data:
 				tc = self.get_time (fdata)
 				tp = self.get_time (self.data[f])
+				if tc > tp * BENCHS_MAX_REGRESSION:
+					err_msg = "bench %s from %s is too long (%f > %d * %f)" % (f, serie, tc, BENCHS_MAX_REGRESSION, tp)
+					if not hasattr (self.generator.bld, "bench_errors"):
+						self.generator.bld.bench_errors = []
+					self.generator.bld.bench_errors.append (err_msg)
 				outstr += "%s %s %s" % (f, tc, tp) + os.linesep
 		self.outputs[0].write (outstr)
 
@@ -352,6 +359,10 @@ def benchmarks_format_output (bch):
 				else:
 					color = "YELLOW"
 			bch.end_msg (msg, color = color)
+
+	if hasattr (bch, "bench_errors"):
+		sep = os.linesep + "  - "
+		bch.fatal (sep.join (["Benchmarks errors:"] + bch.bench_errors))
 
 ######################
 ###### options #######
