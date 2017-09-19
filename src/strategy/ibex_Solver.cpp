@@ -89,9 +89,10 @@ Solver::~Solver() {
 void Solver::start(const IntervalVector& init_box) {
 	buffer.flush();
 	solutions.clear();
+	nb_certified = 0;
 	solve_init_box = init_box;
-	nb_cells=0;
-	time=0;
+	nb_cells = 0;
+	time = 0;
 
 	assert(init_box.size()==ctc.nb_var);
 
@@ -110,7 +111,6 @@ void Solver::start(const IntervalVector& init_box) {
 	IntervalVector tmpbox(ctc.nb_var);
 
 	Timer::start();
-
 }
 
 Solver::Status Solver::next(const Solution*& sol) {
@@ -151,6 +151,7 @@ Solver::Status Solver::next(const Solution*& sol) {
 						delete buffer.pop();
 						store_sol(new_sol);
 						sol = &solutions.back();
+						nb_certified++;
 						return SUCCESS;
 					}
 				} // otherwise: continue search...
@@ -175,6 +176,8 @@ Solver::Status Solver::next(const Solution*& sol) {
 				if (is_sol) {
 					store_sol(new_sol);
 					sol = &solutions.back();
+					if (sol->status == Solution::SOLUTION)
+						nb_certified++;
 					return sol->status == Solution::SOLUTION ? SUCCESS : NOT_ALL_CERTIFIED;
 				}
 				// note that we skip time_limit_check() here.
@@ -363,7 +366,7 @@ void Solver::report(bool verbose, bool print_sols) {
 	break;
 	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
 	break;
-	case NOT_ALL_CERTIFIED: cout << "\033[31m" << " done! but some solutions have not been certified" << endl;
+	case NOT_ALL_CERTIFIED: cout << "\033[31m" << " done! but some boxes have 'unknown' status." << endl;
 	break;
 	case TIME_OUT: cout << "\033[31m" << " time limit " << time_limit << "s. reached " << endl;
 	break;
@@ -372,7 +375,8 @@ void Solver::report(bool verbose, bool print_sols) {
 
 	cout << "\033[0m" << endl;
 
-	cout << " number of solutions=" << solutions.size() << endl;
+	cout << " number of solutions : " << nb_certified << " (certified boxes)" << endl;
+	cout << " number of unknown boxes: " << (solutions.size()-nb_certified) << endl;
 	cout << " cpu time used: " << time << "s." << endl;
 	cout << " number of cells: " << nb_cells << endl;
 

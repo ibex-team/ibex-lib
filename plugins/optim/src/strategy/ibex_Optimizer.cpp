@@ -393,7 +393,7 @@ void Optimizer::report(bool verbose) {
 	break;
 	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
 	break;
-	case NO_FEASIBLE_FOUND: cout << "\033[31m" << " no feasible point found (the problem may be infesible)" << endl;
+	case NO_FEASIBLE_FOUND: cout << "\033[31m" << " no feasible point found (the problem may be infeasible)" << endl;
 	break;
 	case UNBOUNDED_OBJ: cout << "\033[31m" << " possibly unbounded objective (f*=-oo)" << endl;
 	break;

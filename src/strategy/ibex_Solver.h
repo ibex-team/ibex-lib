@@ -283,6 +283,11 @@ protected:
 	 */
 	std::vector<Solution> solutions;
 
+	/**
+	 * \brief Number of certified solutions
+	 */
+	unsigned int nb_certified;
+
 	/* CPU running time of the current solving. */
 	double time;
 
