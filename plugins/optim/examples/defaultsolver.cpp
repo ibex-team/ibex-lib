@@ -150,6 +150,9 @@ int main(int argc, char** argv) {
 //		}
 
 	}
+	catch(ibex::UnknownFileException& e) {
+		cerr << "Error: cannot read file '" << filename.Get() << "'" << endl;
+	}
 	catch(ibex::SyntaxError& e) {
 		cout << e << endl;
 	}
