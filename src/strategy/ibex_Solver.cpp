@@ -349,10 +349,17 @@ void Solver::report(bool verbose, bool print_sols) {
 					cout << box[i].lb() << ' ' << box[i].ub() << ' ';
 				}
 				cout << it->status << ' ';
-				if (it->varset) {
-					for (int i=0; i<it->varset->nb_param; i++) {
-						if (i>0) cout << ' ';
-						cout << it->varset->param(i);
+				if (m>0 && m<n) {
+					if (it->status==Solution::SOLUTION && it->varset!=NULL) {
+						for (int i=0; i<it->varset->nb_param; i++) {
+							if (i>0) cout << ' ';
+							cout << (it->varset->param(i)) + 1;
+						}
+					} else {
+						for (int i=0; i<n-m; i++) {
+							if (i>0) cout << ' ';
+							cout << '0';
+						}
 					}
 				}
 				cout << endl;

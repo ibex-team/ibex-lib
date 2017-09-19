@@ -26,12 +26,12 @@ ostream& operator<<(ostream& os, const Solution& sol) {
 		cout << " ";
 		for (int i=0; i<sol.varset->nb_param; i++) {
 			if (i>0) cout << ',';
-			cout << sol.varset->param(i);
+			cout << sol.varset->param(i) +1;
 		}
 		cout << "->";
 		for (int i=0; i<sol.varset->nb_var; i++) {
 			if (i>0) cout << ',';
-			cout << sol.varset->var(i);
+			cout << sol.varset->var(i) +1;
 		}
 	}
 	cout << ']';

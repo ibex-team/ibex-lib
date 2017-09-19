@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
 	args::ValueFlag<double> eps_x(parser, "float", _eps_x.str(), {'e', "eps-x"});
 	args::Flag trace(parser, "trace", "Activate trace. Solutions are displayed as and when they are found.", {"trace"});
-	args::Flag sols(parser, "sols", "Display the solutions found (in the final report)", {'s',"sols"});
+	args::Flag sols(parser, "sols", "Display the solutions found (in the final report).", {'s',"sols"});
 	args::Flag format(parser, "format", "Display the output format in quiet mode", {"format"});
 	args::Flag quiet(parser, "quiet", "Print no message and display minimal information (for automatic output processing). See --format.",{'q',"quiet"});
 
@@ -73,16 +73,17 @@ int main(int argc, char** argv) {
 		"\t\t* 3=time out\n"
 		"\t\t* 4=cell overflow\n"
 		"[line 2] - 2 values: number of certified solutions and number of 'unknown' boxes.\n"
-		"[line 3] - 1 value: time (in seconds)\n"
-		"\t - 1 value: number of cells.\n"
+		"[line 3] - 2 values: time (in seconds) and number of cells.\n"
 		"\n[lines 4-...] If --sols is enabled, the subsequent lines describe the solutions.\n"
 		"\t Each line corresponds to one solution and contains the following information:\n"
 		"\t - 2*n values: lb(x1), ub(x1),...,ub(x1), ub(xn)\n"
 		"\t - 1 value:\n"
 		"\t\t* 1 the solution is certified\n"
-		"\t\t* 0 otherwise\n"
+		"\t\t* 0 otherwise ('unknown box')\n"
 		"\t - (n-m) values where n=#variables and m=#equalities: the indices of the variables\n"
-		"\t   considered as parameters in the parametric proof. Only displayed if 0<m<n.\n\n";
+		"\t   considered as parameters in the parametric proof. Indices start from 1 and if the\n"
+		"\t   box is 'unknown', a sequence of n-m zeros are displayed. Nothing is displayed if\n"
+		"\t   m=0 or m=n.\n\n";
 		exit(0);
 	}
 
