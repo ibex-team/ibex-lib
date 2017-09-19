@@ -340,7 +340,7 @@ void Solver::store_sol(const Solution& sol) {
 void Solver::report(bool verbose, bool print_sols) {
 	if (!verbose) {
 		cout << status << endl;
-		cout << solutions.size() << endl;
+		cout << nb_certified << ' ' << (solutions.size()-nb_certified) << endl;
 		cout << get_time() << " " << get_nb_cells() << endl;
 		if (print_sols) {
 			for (vector<Solution>::const_iterator it=solutions.begin(); it!=solutions.end(); it++) {

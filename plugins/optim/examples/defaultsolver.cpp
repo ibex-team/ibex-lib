@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 		"\t\t* 2=search complete but not all solutions certified\n"
 		"\t\t* 3=time out\n"
 		"\t\t* 4=cell overflow\n"
-		"[line 2] - 1 value: number of solutions.\n"
+		"[line 2] - 2 values: number of certified solutions and number of 'unknown' boxes.\n"
 		"[line 3] - 1 value: time (in seconds)\n"
 		"\t - 1 value: number of cells.\n"
 		"\n[lines 4-...] If --sols is enabled, the subsequent lines describe the solutions.\n"
