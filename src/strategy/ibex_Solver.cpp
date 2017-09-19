@@ -19,6 +19,8 @@ using namespace std;
 
 namespace ibex {
 
+const double Solver::default_eps_x = 1e-6;
+
 Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
 		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL) {
@@ -111,7 +113,7 @@ void Solver::start(const IntervalVector& init_box) {
 
 }
 
-bool Solver::next(const Solution*& sol) {
+Solver::Status Solver::next(const Solution*& sol) {
 	try  {
 		while (!buffer.empty()) {
 
@@ -145,11 +147,11 @@ bool Solver::next(const Solution*& sol) {
 			if (certification() && m<n) {
 				Solution new_sol(n);
 				if (check_sol(c->box, new_sol)) {
-					if (new_sol.status==SOLUTION) {
+					if (new_sol.status==Solution::SOLUTION) {
 						delete buffer.pop();
 						store_sol(new_sol);
 						sol = &solutions.back();
-						return true;
+						return SUCCESS;
 					}
 				} // otherwise: continue search...
 			}
@@ -163,7 +165,8 @@ bool Solver::next(const Solution*& sol) {
 				buffer.push(new_cells.first);
 				buffer.push(new_cells.second);
 				nb_cells+=2;
-				if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
+				if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();
+			}
 
 			catch (NoBisectableVariableException&) {
 				Solution new_sol(n);
@@ -172,7 +175,7 @@ bool Solver::next(const Solution*& sol) {
 				if (is_sol) {
 					store_sol(new_sol);
 					sol = &solutions.back();
-					return true;
+					return sol->status == Solution::SOLUTION ? SUCCESS : NOT_ALL_CERTIFIED;
 				}
 				// note that we skip time_limit_check() here.
 				// In the case where "next" is called by "solve",
@@ -186,24 +189,46 @@ bool Solver::next(const Solution*& sol) {
 		}
 	}
 	catch (TimeOutException&) {
-		cout << "time limit " << time_limit << "s. reached " << endl;
+		sol = NULL;
+		return TIME_OUT;
 	}
 	catch (CellLimitException&) {
-		cout << "cell limit " << cell_limit << " reached " << endl;
+		sol = NULL;
+		return CELL_OVERFLOW;
 	}
 
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
 
-	return false;
-
+	sol = NULL;
+	return INFEASIBLE;
 }
 
-vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
-	vector<IntervalVector> sols;
+Solver::Status Solver::solve(const IntervalVector& init_box) {
 	start(init_box);
-	while (next(sols)) { }
-	return sols;
+
+	status=INFEASIBLE; // by default
+
+	const Solution* sol; //unused
+
+	while (true) {
+		switch(next(sol)) {
+		case SUCCESS :
+			if (status==INFEASIBLE) status=SUCCESS;
+			break;
+		case INFEASIBLE:
+			return status;
+		case NOT_ALL_CERTIFIED :
+			status = NOT_ALL_CERTIFIED;
+			break;
+		case TIME_OUT :
+			status = TIME_OUT;
+			return status;
+		case CELL_OVERFLOW:
+			status = CELL_OVERFLOW;
+			return status;
+		}
+	}
 }
 
 void Solver::time_limit_check () {
@@ -221,16 +246,20 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 
 		sol._unicity=new IntervalVector(n);
 
-		if (m>n)
-			not_implemented("Solver: certification of over-constrained systems");
-		else if (m<n) {
+		if (m>n) {
+			ibex_warning("Certification not implemented for over-constrained systems ");
+			sol._existence=box;
+			delete sol._unicity;
+			sol._unicity=NULL;
+			proved=false;
+		} else if (m<n) {
 			// ====== under-constrained =========
 			try {
 				VarSet varset=get_newton_vars(eqs->f_ctrs,box.mid(),params? *params: BitSet::empty(n));
 
 				proved=inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity);
 
-				if (params && ((int) params->size())<n-m)
+				if (!params || ((int) params->size())<n-m)
 					sol.varset = new VarSet(varset);
 
 			} catch(SingularMatrixException& e) {
@@ -293,25 +322,69 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 		}
 	}
 
-	(sol_status&) sol.status = (certification() && proved)? SOLUTION : UNKNOWN;
+	(Solution::sol_status&) sol.status = (certification() && proved)? Solution::SOLUTION : Solution::UNKNOWN;
 
 	return true;
 }
 
-void Solver::store_sol(const Solver::Solution& sol) {
+void Solver::store_sol(const Solution& sol) {
 
 	solutions.push_back(sol);
 
-	cout.precision(12);
+	if (trace >=1) cout << sol << endl;
+}
 
-	if (trace >=1) {
-		cout << " sol n°" << solutions.size() << " = " << solutions.back().existence() << " ";
-		switch(sol.status) {
-		case SOLUTION :   cout << "[certified]"; break;
-		case UNKNOWN :    cout << "[unknown]"; break;
+void Solver::report(bool verbose, bool print_sols) {
+	if (!verbose) {
+		cout << status << endl;
+		cout << solutions.size() << endl;
+		cout << get_time() << " " << get_nb_cells() << endl;
+		if (print_sols) {
+			for (vector<Solution>::const_iterator it=solutions.begin(); it!=solutions.end(); it++) {
+				const IntervalVector& box=(*it);
+				for (int i=0; i<n; i++) {
+					cout << box[i].lb() << ' ' << box[i].ub() << ' ';
+				}
+				cout << it->status << ' ';
+				if (it->varset) {
+					for (int i=0; i<it->varset->nb_param; i++) {
+						if (i>0) cout << ' ';
+						cout << it->varset->param(i);
+					}
+				}
+				cout << endl;
+			}
 		}
-		cout << endl;
+		return;
 	}
+
+	switch(status) {
+	case SUCCESS: cout << "\033[32m" << " solving successful!" << endl;
+	break;
+	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
+	break;
+	case NOT_ALL_CERTIFIED: cout << "\033[31m" << " done! but some solutions have not been certified" << endl;
+	break;
+	case TIME_OUT: cout << "\033[31m" << " time limit " << time_limit << "s. reached " << endl;
+	break;
+	case CELL_OVERFLOW: cout << "\033[31m" << " cell overflow" << endl;
+	}
+
+	cout << "\033[0m" << endl;
+
+	cout << " number of solutions=" << solutions.size() << endl;
+	cout << " cpu time used: " << time << "s." << endl;
+	cout << " number of cells: " << nb_cells << endl;
+
+	cout << endl;
+
+	if (print_sols) {
+		int i=0;
+		for (vector<Solution>::const_iterator it=solutions.begin(); it!=solutions.end(); it++) {
+			cout << " sol n°" << (i++) << " = " << *it << endl;
+		}
+	}
+
 }
 
 } // end namespace ibex

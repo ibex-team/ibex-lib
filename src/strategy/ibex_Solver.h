@@ -18,6 +18,7 @@
 #include "ibex_SubPaving.h"
 #include "ibex_Timer.h"
 #include "ibex_Exception.h"
+#include "ibex_Solution.h"
 
 #include <vector>
 
@@ -37,97 +38,11 @@ class CellLimitException : public Exception {} ;
 class Solver {
 public:
 	/**
-	 * Solution type.
+	 * \brief Return status of the solver
 	 *
-	 * Return type for the next(...) function.
-	 *
-	 * \see #next(std::vector<IntervalVector>&).
+	 * See comments for solve(...) below.
 	 */
-	typedef enum { UNKNOWN=0, SOLUTION=1 } sol_status;
-
-	/**
-	 * \brief Solution of a system.
-	 *
-	 * When the system is well-constrained, a "solution" is a box [x] such that
-	 * there exists x in [x] f(x)=0 and g(x)<=0.
-	 *
-	 * The status is SOLUTION if the previous property is proven, UNKNOWN otherwise.
-	 *
-	 * When the system is under-constrained, a "solution" is a box ([x],[p]) such that
-	 * for all p in [p] there exists x in f(x,p)=0 and g(x,p)<=0. It may be a large box
-	 * (compared to the precision). The "varset" structure indicates which components
-	 * correspond to x and p. It is NULL in case of well-constrained systems (no
-	 * parameters) or if m=0 (all parameters).
-	 *
-	 * The status is SOLUTION if the previous property is proven, UNKNOWN otherwise.
-	 *
-	 * If certification is not required, the status of the solution is always UNKNOWN.
-	 */
-	class Solution {
-	public:
-		 /*
-		  * \brief Status of the "solution".
-		  *
-		  * SOLUTION: The box is proven to contain a solution.
-		  * UNKNOWN:  The box may contain a solution.
-		 */
-		const sol_status status;
-
-		/**
-		 * \brief Existence box.
-		 *
-		 * If the status is SOLUTION, represents the smallest box found
-		 * enclosing a solution.
-		 * Otherwise, represents the "unknown" box.
-		 */
-		const IntervalVector& existence() const;
-
-		/**
-		 * \brief Unicity box.
-		 *
-		 * If the status is SOLUTION, represents the largest superset
-		 * of existence() found such that the solution enclosed is unique.
-		 * Otherwise, represents the "unknown" box.
-		 */
-		const IntervalVector& unicity() const;
-
-		/**
-		 * \brief Variable/Parameter structure.
-		 *
-		 * Structure used to certify the box.
-		 *
-		 * This field is NULL in the following cases:
-		 *   - the system is well-constrained (all are variables)
-		 *   - the system has no equalities (all are parameters)
-		 *   - the set of parameters has been fixed by the user
-		 *     (same parameters for all solutions)
-		 *   - the status is UNKNOWN
-		 */
-		const VarSet* varset;
-
-		/**
-		 * \brief Duplicate the solution
-		 */
-		Solution(const Solution& sol);
-
-		/**
-		 * \brief Assignment
-		 */
-		Solution& operator=(const Solution&);
-
-		/**
-		 * \brief Destructor.
-		 */
-		~Solution();
-
-	private:
-		friend class Solver;
-
-		Solution(int n);
-
-		IntervalVector _existence;
-		IntervalVector* _unicity; // NULL if status=UNKNOWN or m=0
-	};
+	typedef enum {SUCCESS, INFEASIBLE, NOT_ALL_CERTIFIED, TIME_OUT, CELL_OVERFLOW} Status;
 
 	/**
 	 * \brief Build a solver.
@@ -167,11 +82,14 @@ public:
 	/**
 	 * \brief Solve the system (non-interactive mode).
 	 *
+	 * The vector of solutions (small boxes with the required precision) found by the solver
+	 * are retrieved with #get_solutions().
+
 	 * \param init_box - the initial box (the search space)
+	 * \param sols - the output vector of solutions (will be populated by the solver)
 	 * 
-	 * Return :the vector of solutions (small boxes with the required precision) found by the solver.
 	 */
-	std::vector<IntervalVector> solve(const IntervalVector& init_box);
+	Status solve(const IntervalVector& init_box);
 
 	/**
 	 * \brief Start solving (interactive mode).
@@ -181,24 +99,63 @@ public:
 	void start(const IntervalVector& init_box);
 
 	/**
-	 * \brief Continue solving (interactive mode).
-	 *
-	 * Look for the next solution and push it into the vector.
-	 *
-	 * \return true iff a new solution has been found (false means that the search is over).
-	 */
-	bool next(std::vector<IntervalVector>& sols);
-
-	/**
-	 * \brief Find the next solution.
+	 * \brief Find the next solution (interactive mode).
 	 *
 	 * \param sol - (output argument) pointer to the new solution (if found). This
 	 *              is just the address of the last element in the "solutions" vector.
-	 *              Set to NULL if search is over.
+	 *              Set to NULL if search is over, time is out or the number of cells
+	 *              exceeds the limit.
 	 *
-	 * \return true iff a new solution has been found (false means that the search is over).
+	 * \return true iff a new solution has been found.
 	 */
-	bool next(const Solution*& sol);
+	Status next(const Solution*& sol);
+
+	/**
+	 * \brief Displays on standard output a report of the last call to solve(...).
+	 *
+	 * Information provided:
+	 * <ul><li> number of solutions
+	 *     <li> solution #1
+	 *     <li> ...
+	 *     <li> solution #n
+	 *     <li> total running time
+	 *     <li> total number of cells (~boxes) created during the exploration
+	 * </ul>
+	 */
+	void report(bool verbose=true, bool print_sols=false);
+
+	/**
+	 * \brief Get the status.
+	 *
+	 * \return the status of last call to solve(...).
+	 */
+	Status get_status() const;
+
+	/**
+	 * \brief Get the solutions
+	 *
+	 * \return the solutions of the last call to solve(...).
+	 */
+	const std::vector<Solution>& get_solutions() const;
+
+	/**
+	 * \brief Get the time spent.
+	 *
+	 * \return the total CPU time of last call to solve(...).
+	 */
+	double get_time() const;
+
+	/**
+	 * \brief Get the number of cells.
+	 *
+	 * \return the number of cells generated by the last call to solve(...).
+	 */
+	double get_nb_cells() const;
+
+	/**
+	 * Default bisection precision: 1e-6.
+	 */
+	static const double default_eps_x;
 
 	/**
 	 * \brief The contractor.
@@ -250,20 +207,6 @@ public:
 	 */
 	int trace;
 
-	/**
-	 * \brief Number of nodes in the current search.
-	 */
-	int nb_cells;
-
-	/**
-	 * \brief Running time of the current search.
-	 */
-	double time;
-
-	/*
-	 * \brief Solutions found in the current search.
-	 */
-	std::vector<Solution> solutions;
 
 protected:
 
@@ -294,6 +237,9 @@ protected:
 	 */
 	void store_sol(const Solution& sol);
 
+	/**
+	 * Check if time is out.
+	 */
 	void time_limit_check();
 
 
@@ -329,53 +275,34 @@ protected:
 	 */
 	const BitSet* params;
 
+	/* Return status of the last solving. */
+	Status status;
+
+	/*
+	 * \brief Solutions found in the current search.
+	 */
+	std::vector<Solution> solutions;
+
+	/* CPU running time of the current solving. */
+	double time;
+
+	/** Number of cells of the current solving. */
+	int nb_cells;
 };
 
 /*============================================ inline implementation ============================================ */
-
-inline Solver::Solution::Solution(int n) : status(UNKNOWN), varset(NULL), _existence(n), _unicity(NULL) {
-
-}
-
-inline Solver::Solution::Solution(const Solution& sol) : status(sol.status),
-		varset(sol.varset? new VarSet(*sol.varset) : NULL), _existence(sol._existence),
-		_unicity(sol._unicity? new IntervalVector(*sol._unicity) : NULL) {
-
-}
-
-inline Solver::Solution& Solver::Solution::operator=(const Solution& sol) {
-	(sol_status&) status=sol.status;
-	if (varset) delete varset;
-	varset=sol.varset? new VarSet(*sol.varset) : NULL;
-	_existence=sol._existence;
-	if (_unicity) delete _unicity;
-	_unicity=sol._unicity? new IntervalVector(*sol._unicity) : NULL;
-	return *this;
-}
-
-inline Solver::Solution::~Solution() {
-	if (_unicity) delete _unicity;
-	if (varset) delete varset;
-}
-
-inline const IntervalVector& Solver::Solution::existence() const {
-	return _existence;
-}
-
-inline const IntervalVector& Solver::Solution::unicity() const {
-	return _unicity? *_unicity : _existence;
-}
 
 inline bool Solver::certification() {
 	return m!=-1;
 }
 
-inline bool Solver::next(std::vector<IntervalVector>& sols) {
-	const Solution* sol;
-	bool res=next(sol);
-	if (res) sols.push_back(sol->existence());
-	return res;
-}
+inline Solver::Status Solver::get_status() const { return status; }
+
+inline const std::vector<Solution>& Solver::get_solutions() const { return solutions; }
+
+inline double Solver::get_time() const { return time; }
+
+inline double Solver::get_nb_cells() const { return nb_cells; }
 
 } // end namespace ibex
 

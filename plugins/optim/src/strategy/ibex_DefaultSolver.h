@@ -31,7 +31,7 @@ public:
 	 * \param sys  - The system to solve
 	 * \param prec - Stopping criterion for box splitting (absolute precision)
 	 */
-    DefaultSolver(System& sys, double prec);
+    DefaultSolver(System& sys, double prec, double random_seed=default_random_seed);
 
 	/**
 	 * \brief Create a default solver.
@@ -40,12 +40,15 @@ public:
 	 * \param prec - Stopping criterion for box splitting (vector of absolute precisions,
 	 *               one for each variable)
 	 */
-    DefaultSolver(System& sys, const Vector& prec);
+    DefaultSolver(System& sys, const Vector& prec, double random_seed=default_random_seed);
 
     /**
 	 * \brief Delete *this.
 	 */
 	~DefaultSolver();
+
+	/** Default random seed: 1.0. */
+	static const double default_random_seed;
 
 	System & sys;
 private:

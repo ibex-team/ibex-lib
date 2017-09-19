@@ -5,7 +5,7 @@
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : Jul 09, 2017
+// Last Update : Jul 09, 2017
 //============================================================================
 
 #include "ibex.h"
@@ -40,15 +40,8 @@ int main(int argc, char** argv) {
 	args::ValueFlag<double> initial_loup(parser, "float", "Intial \"loup\" (a priori known upper bound).", {"initial-loup"});
 	args::Flag rigor(parser, "rigor", "Activate rigor mode (certify feasibility of equalities).", {"rigor"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
-	args::Flag quiet(parser, "quiet", "Print no message and display minimal information "
-			"(for automatic output processing): "
-			"\nline 1: status\n"
-			"- 0=success\n     - 1=infeasible problem\n     - 2=no feasible point found\n"
-			"- 3=unbounded objective\n     - 4=time out\n"
-			"- 5=unreached precision.\n"
-			"line 2: uplo loup\n"
-			"line 3: x* (n values or 2*n in rigor mode: lb(x1),ub(x1),...,ub(xn))\n"
-			"line 4:time (in seconds) number of cells.", {'q',"quiet"});
+	args::Flag format(parser, "format", "Display the output format in quiet mode", {"format"});
+	args::Flag quiet(parser, "quiet", "Print no message and display minimal information (for automatic output processing). See --format.",{'q',"quiet"});
 
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
@@ -72,6 +65,31 @@ int main(int argc, char** argv) {
 		std::cerr << e.what() << std::endl;
 		std::cerr << parser;
 		return 1;
+	}
+
+	if (format) {
+		cout <<
+		"\n"
+		"-------------------------------------------------------------\n"
+		"Output format with --quiet (for automatic output processing):\n"
+		"-------------------------------------------------------------\n"
+		"[line 1] - 1 value: the status of the optimization. Possible values are:\n"
+		"\t\t* 0=success\n"
+		"\t\t* 1=infeasible problem\n"
+		"\t\t* 2=no feasible point found\n"
+		"\t\t* 3=possibly unbounded objective (-oo)\n"
+		"\t\t* 4=time out\n"
+		"\t\t* 5=unreached precision.\n"
+		"[line 2] - 2 values: \'uplo\', the uppest lower bound of the objective and \n"
+		"\t   \'loup\', the lowest upper bound of the objective. We have\n\n"
+		"\t\t\t uplo<= f* <=loup\n\n"
+		"[line 3] In standard mode:\n"
+		"\t - n values: x1*, ... xn* (where x* is a minimizer).\n"
+		"\t In rigor mode (--rigor):\n"
+		"\t - 2*n values: lb(x1*), ub(x1*),..., lb(xn*), ub(xn*) (box containing a minimizer)\n"
+		"[line 4] - 2 values: time (in seconds) and number of cells.\n\n";
+
+		exit(0);
 	}
 
 	if (filename.Get()=="") {

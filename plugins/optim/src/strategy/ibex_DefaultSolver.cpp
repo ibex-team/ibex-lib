@@ -28,6 +28,8 @@ using namespace std;
 
 namespace ibex {
 
+const double DefaultSolver::default_random_seed = 1.0;
+
 namespace {
 
 System* square_eq_sys(System& sys) {
@@ -90,12 +92,12 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 }
 
 
-DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(sys, rec(ctc(sys,prec)),
+DefaultSolver::DefaultSolver(System& sys, double prec, double random_seed) : Solver(sys, rec(ctc(sys,prec)),
 		rec(new SmearSumRelative(sys, prec)),
 		rec(new CellStack())),
 		sys(sys) {
 
-	RNG::srand(1);
+	RNG::srand(random_seed);
 
 	data = *memory(); // keep track of my data
 
@@ -103,12 +105,12 @@ DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(sys, rec(ctc(sys
 }
 
 // Note: we set the precision for Newton to the minimum of the precisions.
-DefaultSolver::DefaultSolver(System& sys, const Vector& prec) : Solver(rec(ctc(sys,prec.min())),
+DefaultSolver::DefaultSolver(System& sys, const Vector& prec, double random_seed) : Solver(rec(ctc(sys,prec.min())),
 		rec(new SmearSumRelative(sys, prec)),
 		rec(new CellStack())),
 		sys(sys) {
 
-	RNG::srand(1);
+	RNG::srand(random_seed);
 
 	data = *memory(); // keep track of my data
 
