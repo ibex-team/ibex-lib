@@ -47,7 +47,7 @@ matrix:
       env:
         - TEST_INTERVAL_LIB=filib
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=clp --clp-path=\" \" "
+        - PLUGINS="--with-optim --optim-lib=clp --clp-path=/bidon "
 
 # only works on linux
 addons:
