@@ -2093,16 +2093,27 @@ inline AffineMain<T>& AffineMain<T>::Aroot(int n, const Interval& itv) {
 	if (is_empty()) return *this;
 	else if (n==0)  return *this = Interval::ONE;
 	else if (n==1)  return *this;
-	else if (is_degenerated()) return *this = pow(Interval(mid()),1.0/n);
+	else if (is_degenerated()) {
+		return *this = pow(Interval(mid()),1.0/n);
+	}
 	else if (n<0) {
 		this->Aroot(-n,itv);
-		return *this->Ainv(root(itv,-n));
+		this->Ainv(root(itv,-n));
+		return *this;
 	}
-	else if (n % 2 == 0) return *this->Apow(Interval::ONE/n,itv); // the negative part of x should be removed
-	else if (0 <= itv.lb()) return  *this->Apow(Interval::ONE/n,itv);
+	else if (n % 2 == 0) {
+		this->Apow(Interval::ONE/n,itv);
+		return *this; // the negative part of x should be removed
+	}
+	else if (0 <= itv.lb()) {
+		this->Apow(Interval::ONE/n,itv);
+		return  *this;
+	}
 	else if (itv.ub() <= 0) {
+		this->Aneg();
 		this->Apow(Interval::ONE/n,-itv);
-		return  *this->Aneg();
+		this->Aneg();
+		return  *this;
 	}
 	else {
 		// TODO do the root when x contains ZERO more properly

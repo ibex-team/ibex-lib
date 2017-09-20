@@ -7,32 +7,32 @@ matrix:
       env:
         - TEST_INTERVAL_LIB=gaol
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=soplex"
+        - PLUGINS="--with-optim --optim-lib=soplex --with-affine "
     - os: linux
       compiler: gcc
       env:
         - TEST_INTERVAL_LIB=gaol
         - STATIC_OR_SHARED=--enable-shared
-        - PLUGINS=
+        - PLUGINS= " --with-affine "
     - os: linux
       compiler: gcc
       env:
         - TEST_INTERVAL_LIB=filib
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=soplex"
+        - PLUGINS="--with-optim --optim-lib=soplex --with-affine "
     - os: linux
       compiler: gcc
       env:
         - TEST_INTERVAL_LIB=filib
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=clp"
+        - PLUGINS="--with-optim --optim-lib=clp --with-affine "
     - os: osx
       compiler: clang
       osx_image: xcode8.3
       env:
         - TEST_INTERVAL_LIB=gaol
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=soplex"
+        - PLUGINS="--with-optim --optim-lib=soplex --with-affine "
         - CXXFLAGS=-std=c++11
     - os: osx
       compiler: clang
@@ -40,14 +40,8 @@ matrix:
       env:
         - TEST_INTERVAL_LIB=gaol
         - STATIC_OR_SHARED=--enable-shared
-        - PLUGINS=
+        - PLUGINS= " --with-affine "
         - CXXFLAGS=-std=c++11
-    - os: linux
-      compiler: gcc
-      env:
-        - TEST_INTERVAL_LIB=filib
-        - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=clp --clp-path=/bidon "
 
 # only works on linux
 addons:

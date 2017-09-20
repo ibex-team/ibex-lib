@@ -95,8 +95,10 @@ _elt	(0.0, std::list<std::pair<int,double> >(), Interval(0.0)) {
 	} else {
 		if (d>0) {
 			_n = -3;
+			_elt._center = d;
 		} else {
 			_n = -4;
+			_elt._center = d;
 		}
 	}
 }
