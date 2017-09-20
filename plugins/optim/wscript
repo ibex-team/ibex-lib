@@ -83,7 +83,7 @@ def configure (conf):
 
 			clp_kwargs["mandatory"] = mandatory
 			has_clp = conf.check_cfg (**clp_kwargs)
-
+			print(conf.env)
 			if has_clp: # Clp was found
 				if from_3rd:
 					conf.env.append_unique ("LIB_3RD_LIST", conf.env.LIB_OPTIM)
@@ -99,8 +99,7 @@ def configure (conf):
 				conf.env.INSTALL_3RD = True
 				from_3rd = True
 				# Cpl install everything in coin directory
-				conf.env.append_unique ("INCLUDES_IBEX_DEPS",
-																os.path.join (conf.env.INCDIR_3RD, "coin"))
+				conf.env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.INCDIR_3RD, "coin"))
 
 		conf.env.env = env_env_bak
 

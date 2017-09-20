@@ -42,6 +42,12 @@ matrix:
         - STATIC_OR_SHARED=--enable-shared
         - PLUGINS=
         - CXXFLAGS=-std=c++11
+    - os: linux
+      compiler: gcc
+      env:
+        - TEST_INTERVAL_LIB=filib
+        - STATIC_OR_SHARED=
+        - PLUGINS="--with-optim --optim-lib=clp"
 
 # only works on linux
 addons:
@@ -67,6 +73,7 @@ install:
 # TODO: add nonreg tests
 script:  
   - ./waf utest
+  - cat $HOME/share/pkgconfig/ibex.pc
 #  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
 
 after_failure:
