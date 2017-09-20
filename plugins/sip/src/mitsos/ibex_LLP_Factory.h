@@ -12,10 +12,10 @@
 #ifndef __IBEX_LLP_FACTORY_H__
 #define __IBEX_LLP_FACTORY_H__
 
-namespace ibex {
-
 #include "ibex_SystemFactory.h"
 #include "ibex_MitsosSIP.h"
+
+namespace ibex {
 
 /**
  * \ingroup sip

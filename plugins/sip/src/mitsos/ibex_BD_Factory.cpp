@@ -12,6 +12,7 @@
 #include <list>
 
 #include "ibex_BD_Factory.h"
+#include "ibex_ExprCopy.h"
 
 using namespace std;
 

@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_LLP_Factory.h"
+#include "ibex_ExprCopy.h"
 
 namespace ibex {
 

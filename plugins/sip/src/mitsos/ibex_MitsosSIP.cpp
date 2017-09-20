@@ -12,6 +12,7 @@
 #include "ibex_MitsosSIP.h"
 #include "ibex_BD_Factory.h"
 #include "ibex_LLP_Factory.h"
+#include "ibex_DefaultOptimizer.h"
 
 using namespace std;
 
@@ -44,6 +45,103 @@ MitsosSIP::~MitsosSIP() {
 	delete[] UBD_samples;
 }
 
+void MitsosSIP::optimize(double eps_f) {
+	Vector x_LBD(sys.nb_var);
+	Vector x_UBD(sys.nb_var);
+	Vector x_opt(sys.nb_var);
+
+	double f_LBD=NEG_INFINITY;
+	double f_UBD=POS_INFINITY;
+	double LBD_uplo, LBD_loup, UBD_uplo, UBD_loup;
+	double eps_g=0.1;
+	double r_g=1.5;
+	double r_LLP=1.5;
+	double eps_LBD=eps_f/10;
+	double eps_UBD=eps_f/10;
+	double eps_LBD_LLP=eps_f/10;
+	double eps_UBD_LLP=eps_f/10;
+
+	//double eps_ibex=1e-5;
+	int iteration = 0;
+	clock_t start = clock();
+	double last_iter_time = 0;
+
+	while (f_UBD - f_LBD > eps_f) {
+		cout << "=========================" << endl;
+		clock_t iter_start = clock();
+		iteration++;
+		cout << "ITERATION : " << iteration << endl;
+
+		if (!solve_LBD(eps_LBD, x_LBD, LBD_uplo, LBD_loup)) {
+			cout << "infeasible problem";
+			exit(0);
+		}
+
+		if (LBD_uplo < f_LBD) {
+			cout << "   uplo=" << f_LBD << "  LBD_uplo=" << LBD_uplo << endl;
+			ibex_warning("uplo is decreasing");
+
+			// note: in this case, do we really have to solve LLP?
+			// this may add useless parameter values
+			// (the optimum x* being less "good")
+			//				eps_ibex = eps_ibex/2.0;
+			//				cout << "eps_ibex=" << eps_ibex << endl;
+		} else {
+
+			if (LBD_uplo > f_LBD) {
+				f_LBD = LBD_uplo;
+				cout << "f_LBD = " << f_LBD << endl;
+			} else {
+				// new in Djelassi & Mitsos, JOGO 2016:
+				//eps_LBD_LLP =
+			}
+
+		}
+
+		if (solve_LLP(true, x_LBD, eps_LBD_LLP)) {
+			//cout << " found feasible x_LBD!! --->";
+			if (LBD_loup < f_UBD) {
+				//cout << " decreases loup!\n";
+				f_UBD=LBD_loup;
+				x_opt=x_LBD;
+			} else {
+				//cout << " don't decrease loup...\n";
+				//						eps_ibex = eps_ibex/2.0;
+			}
+		}
+
+		if (solve_UBD(eps_g, eps_UBD_LLP, x_UBD, UBD_uplo, UBD_loup)) {
+
+			if (solve_LLP(false, x_UBD, eps_ibex/10)) {
+				// x_UBD is feasible: update the loup
+				if (UBD_loup < f_UBD) {
+					f_UBD=UBD_loup;
+					cout << "f_UBD = " << f_UBD << endl;
+					x_opt=x_UBD;
+				}
+				eps_g = eps_g/r_g;
+				cout << " eps_g=" << eps_g << endl;
+			} else {
+				// ....
+			}
+		} else {
+			// if UBD is infeasible
+			eps_g = eps_g/r_g;
+			cout << "Infeasible" << endl;
+			cout << " eps_g=" << eps_g << endl;
+		}
+		last_iter_time = (clock() - iter_start)/(double) CLOCKS_PER_SEC;
+	}
+	double time = (clock() - start)/(double) CLOCKS_PER_SEC;
+
+	cout << endl << endl << "f* in [" << f_LBD << "," << f_UBD << "]" << endl;
+	cout << endl << endl << "x*=" << x_opt << endl << endl;
+	cout << endl << endl << iteration << " iterations" << endl;
+	cout << time << "s (real time)" << endl;
+	cout << time/iteration << "s per iteration" << endl;
+	cout << "Last iteration time: " << last_iter_time << endl;
+}
+
 bool MitsosSIP::solve_BD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup) {
 
     //if (eps_g>0)
@@ -57,7 +155,8 @@ bool MitsosSIP::solve_BD(double eps_g, double eps, Vector& x_opt, double& uplo, 
 
 	//cout << sub_sys << endl;
 
-	DefaultOptimizer o(sub_sys,eps,eps);
+	//DefaultOptimizer o(sub_sys,eps,eps);
+	DefaultOptimizer o(sub_sys,0,eps,0);
 
 	Optimizer::Status status=o.optimize(sys.box);
 
@@ -65,9 +164,9 @@ bool MitsosSIP::solve_BD(double eps_g, double eps, Vector& x_opt, double& uplo, 
 		ibex_error("lower bounding failed");
 	}
 
-	uplo = o.uplo;
-	loup = o.loup;
-	x_opt=o.loup_point.subvector(0,sub_sys.nb_var-1);
+	uplo = o.get_uplo();
+	loup = o.get_loup();
+	x_opt = o.get_loup_point().lb().subvector(0,sub_sys.nb_var-1);
 
     //if (status==Optimizer::SUCCESS)
         //cout << "x*=" << x_opt << " " << "f*=" << uplo << endl;
@@ -115,10 +214,10 @@ bool MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 				ibex_error("LLP failed");
 			}
 
-			if (o.uplo>0) continue; // satisfied constraint
+			if (o.get_uplo()>0) continue; // satisfied constraint
 			else all_satisfied=false;
 
-			Vector y_opt=o.loup_point.subvector(0,max_sys.nb_var-1);
+			Vector y_opt=o.get_loup_point().lb().subvector(0,max_sys.nb_var-1);
 			int j2=0;
 			for (int j=0; j<p; j++) {
 				if (lpp_fac.param_LLP_var[j]) {

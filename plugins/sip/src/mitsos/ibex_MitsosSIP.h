@@ -23,7 +23,7 @@ class MitsosSIP : public SIP {
 public:
 
 	/**
-	 * Build a SIP instance.
+	 * \brief Build a SIP instance.
 	 *
 	 * \param sys    - The system "min f(x) s.t. g(x,y)<=0"
 	 * \param vars   - Symbols corresponding to x (variables)
@@ -31,20 +31,46 @@ public:
 	 */
 	MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  const std::vector<const ExprSymbol*>& params, const BitSet& is_param);
 
+	/**
+	 * \brief Delete this.
+	 */
 	virtual ~MitsosSIP();
 
 	/**
-	 * Solve the LBD or UBD problem.
+	 * \brief Run the optimization
+	 */
+	void optimize(double epsf);
+
+protected:
+
+	/**
+	 * \brief Solve the LBD or UBD problem.
 	 *
 	 * Return true if the problem is feasible, false otherwise.
 	 *
 	 * If true, set the optimum x* in "x_opt" and f* in the interval [uplo,loup].
 	 *
 	 */
+	bool solve_LBD(double eps, Vector& x_opt, double& uplo, double& loup);
+
+	/**
+	 * \brief Solve the LBD or UBD problem.
+	 *
+	 * Return true if the problem is feasible, false otherwise.
+	 *
+	 * If true, set the optimum x* in "x_opt" and f* in the interval [uplo,loup].
+	 *
+	 */
+	bool solve_UBD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup);
+
+	/**
+	 * \brief Solve the LBD or UBD problem.
+	 *
+	 */
 	bool solve_BD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup);
 
 	/**
-	 * Solve the LLP problem.
+	 * \brief Solve the LLP problem.
 	 *
 	 * Return true if the LLP problems have all negative maximum.
 	 * This means that x_opt is feasible. Return false otherwise.
@@ -54,6 +80,9 @@ public:
 	 */
 	bool solve_LLP(bool LBD, const Vector& x_opt, double eps);
 
+	friend class BD_Factory;
+	friend class LLP_Factory;
+
 	// A temporary domain that will be filled with sampled values.
 	// These values change with duplications of the same constraint
 	mutable Array<Domain> p_domain;
@@ -61,6 +90,16 @@ public:
 	mutable std::vector<double>* LBD_samples;      // sampled values for each parameter, for the LBD problem
 	mutable std::vector<double>* UBD_samples;      // sampled values for each parameter, for the UBD problem
 };
+
+/*================================== inline implementations ========================================*/
+
+inline bool MitsosSIP::solve_LBD(double eps, Vector& x_opt, double& uplo, double& loup) {
+	return solve_BD(0, eps, x_opt, uplo, loup);
+}
+
+inline bool MitsosSIP::solve_UBD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup) {
+	return solve_BD(eps_g, eps, x_opt, uplo, loup);
+}
 
 } // namespace ibex
 
