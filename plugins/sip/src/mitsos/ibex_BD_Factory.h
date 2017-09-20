@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - ibex_BoundingProblem.h
+ * I B E X - ibex_BD_Factory.h
  * ============================================================================
  * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -9,8 +9,8 @@
  * Created     : Sep 18, 2017
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_BOUNDING_PROBLEM_H__
-#define __IBEX_BOUNDING_PROBLEM_H__
+#ifndef __IBEX_BD_FACTORY_H__
+#define __IBEX_BD_FACTORY_H__
 
 #include "ibex_SystemFactory.h"
 #include "ibex_MitsosSIP.h"
@@ -22,20 +22,20 @@ namespace ibex {
  *
  * \brief Factory for either the LBD or UBD problem
  */
-class BoundingProblemFactory  : public SystemFactory {
+class BD_Factory  : public SystemFactory {
 public:
 	/**
 		 * \param sip   - The SIP problem
 		 * \param eps_g - if eps_g>0 ---> UBD
 		 *                   eps_g=0 ---> LBD
 		 */
-	BoundingProblemFactory(const MitsosSIP& sip, double eps_g);
+	BD_Factory(const MitsosSIP& sip, double eps_g);
 
-	virtual ~BoundingProblemFactory();
+	virtual ~BD_Factory();
 
 	Array<const ExprSymbol> new_vars;
 };
 
 } // namespace ibex
 
-#endif /* __IBEX_BOUNDING_PROBLEM_H__ */
+#endif /* __IBEX_BD_FACTORY_H__ */

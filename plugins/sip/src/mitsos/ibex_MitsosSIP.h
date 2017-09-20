@@ -33,6 +33,27 @@ public:
 
 	virtual ~MitsosSIP();
 
+	/**
+	 * Solve the LBD or UBD problem.
+	 *
+	 * Return true if the problem is feasible, false otherwise.
+	 *
+	 * If true, set the optimum x* in "x_opt" and f* in the interval [uplo,loup].
+	 *
+	 */
+	bool solve_BD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup);
+
+	/**
+	 * Solve the LLP problem.
+	 *
+	 * Return true if the LLP problems have all negative maximum.
+	 * This means that x_opt is feasible. Return false otherwise.
+	 *
+	 * If return false, update the LBD/UBD_samples (adding one
+	 * sample value for each parameter involved in the constraint).
+	 */
+	bool solve_LLP(bool LBD, const Vector& x_opt, double eps);
+
 	// A temporary domain that will be filled with sampled values.
 	// These values change with duplications of the same constraint
 	mutable Array<Domain> p_domain;

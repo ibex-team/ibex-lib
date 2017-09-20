@@ -1,18 +1,23 @@
-/*
- * ibex_BoundingProblem.cpp
+/* ============================================================================
+ * I B E X - ibex_BD_Factory.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
  *
- *  Created on: Sep 19, 2017
- *      Author: gilles
- */
+ * Author(s)   : Gilles Chabert
+ * Created     : Sep 20, 2017
+ * ---------------------------------------------------------------------------- */
 
-#include "ibex_BoundingProblem.h"
 #include <list>
+
+#include "ibex_BD_Factory.h"
 
 using namespace std;
 
 namespace ibex {
 
-BoundingProblemFactory::BoundingProblemFactory(const MitsosSIP& sip, double eps_g) : new_vars(sip.n_arg) {
+BD_Factory::BD_Factory(const MitsosSIP& sip, double eps_g) : new_vars(sip.n_arg) {
 
 	varcopy(sip.vars,new_vars);
 
@@ -136,7 +141,7 @@ BoundingProblemFactory::BoundingProblemFactory(const MitsosSIP& sip, double eps_
 };
 
 
-BoundingProblemFactory::~BoundingProblemFactory() {
+BD_Factory::~BD_Factory() {
 	// cleanup
 	for (int I=0; I<new_vars.size(); I++)
 		delete &new_vars[I];
