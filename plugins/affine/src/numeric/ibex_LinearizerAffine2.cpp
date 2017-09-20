@@ -18,24 +18,25 @@ namespace ibex {
 LinearizerAffine2::LinearizerAffine2(const System& sys1) :
 				Linearizer(sys1.nb_var), sys(sys1),
 				goal_af_evl(NULL),
-				ctr_af_evl(new AffineEval<AF_Default>*[sys1.nb_ctr]) {
+				ctr_af_evl(new AffineEval<AF_Default>*[sys1.f_ctrs.image_dim()]) {
 
 	if (sys1.goal) {
 		goal_af_evl = new AffineEval<AF_Default>(*sys1.goal);
 	}
 
 	for (int i = 0; i < sys.nb_ctr; i++) {
-		ctr_af_evl[i] = new AffineEval<AF_Default>(sys.ctrs[i].f);
+		ctr_af_evl[i] = new AffineEval<AF_Default>(sys.f_ctrs[i]);
 	}
 }
 
 LinearizerAffine2::~LinearizerAffine2() {
-	for (int i = 0; i < sys.nb_ctr; i++) {
+	for (int i = 0; i < sys.f_ctrs.image_dim(); i++) {
 		delete ctr_af_evl[i];
 	}
 	delete[] ctr_af_evl;
 }
 
+/*
 bool LinearizerAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// Linearization of the objective function by AF2
 
@@ -149,7 +150,7 @@ int LinearizerAffine2::inlinearization(const IntervalVector& box, LinearSolver& 
 	return -1;
 }
 
-
+*/
 /*********generation of the linearized system*********/
 int LinearizerAffine2::linearize(const IntervalVector& box, LinearSolver& lp_solver) {
 
