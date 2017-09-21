@@ -19,6 +19,7 @@
 #include "ibex_Timer.h"
 #include "ibex_Exception.h"
 #include "ibex_SolverOutputBox.h"
+#include "ibex_Linear.h"
 
 #include <vector>
 
@@ -170,7 +171,6 @@ public:
 	 */
 	double get_nb_cells() const;
 
-
 	/**
 	 * \brief The contractor.
 	 *
@@ -183,8 +183,6 @@ public:
 
 	/**
 	 * \brief The bisector.
-	 *
-	 * Tests also precision of boxes.
 	 */
 	Bsc& bsc;
 
@@ -204,9 +202,9 @@ public:
 	const Vector eps_x_max;
 
 	/**
-	 * \brief Maximum cpu time used by the solver.
+	 * \brief Maximum CPU time used by the solver.
 	 *
-	 * This parameter allows to bound time complexity.
+	 * This parameter allows to bound running time.
 	 * The value can be fixed by the user. By default, it is -1 (no limit).
 	 */
 
@@ -235,35 +233,46 @@ public:
 protected:
 
 	/**
-	 * Called by constructors.
+	 * \brief Called by constructors.
 	 */
 	void init(const System& sys, const BitSet* params);
 
 	/*
-	 * Return true if the box "x" may contain a new solution, false otherwise.
+	 * \brief Return a new "output box" that potentially contains solutions.
+	 * \throw An exception otherwise (no solution inside).
 	 *
-	 * \param x   - (input) Candidate box
-	 * \param sol - (output) Solution. Only built if return value is true.
+	 * \param box - input box
+	 * \param sol - output box.
 	 *
-	 * If it returns true and the status of "sol" is SOLUTION, the box "x" may have
-	 * slightly changed (due to inflating Newton) and the actual solution
-	 * is stored as the existence box of "sol".
+	 * If the status of the return box is INNER, the box may have
+	 * slightly changed (due to inflating Newton) and the actual "solution"
+	 * is stored in the existence box of the output.
 	 */
 	SolverOutputBox check_sol(const IntervalVector& box);
 
+	/**
+	 * \brief Check if the box is "BOUNDARY"
+	 * \see SolverOutputBox.
+	 */
 	bool is_boundary(const IntervalVector& box);
 
+	/**
+	 * \brief True if width(box)>eps_x_max.
+	 */
 	bool is_too_large(const IntervalVector& box);
 
+	/**
+	 * \brief True if width(box)>eps_x_min.
+	 */
 	bool is_too_small(const IntervalVector& box);
 
 	/**
-	 * Store the solution in "solutions" and print it (if trace>=0).
+	 * \brief Store the solution in "solutions" and print it (if trace>=0).
 	 */
 	void store_sol(const SolverOutputBox& sol);
 
 	/**
-	 * Check if time is out.
+	 * \brief Check if time is out.
 	 */
 	void time_limit_check();
 
@@ -271,32 +280,32 @@ protected:
 	BitSet impact;
 
 	/*
-	 * Initial box of the current search.
+	 * \brief Initial box of the current search.
 	 */
 	IntervalVector solve_init_box;
 
 	/**
-	 * Number of variables
+	 * \brief Number of variables
 	 */
 	int n;
 
 	/**
-	 * Number of equalities.
+	 * \brief Number of equalities.
 	 */
 	int m;
 
 	/*
-	 * The equalities to be solved.
+	 * \brief The equalities to be solved (NULL if none).
 	 */
 	const System* eqs;
 
 	/*
-	 * The inequalities to be solved.
+	 * \brief The inequalities to be solved (NULL if none).
 	 */
 	const System* ineqs;
 
 	/**
-	 * The forced parameters (if any).
+	 * \brief The forced parameters (if any, NULL otherwise).
 	 */
 	const BitSet* params;
 

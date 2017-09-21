@@ -26,8 +26,9 @@ namespace {
 Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		const Vector& eps_x_min, const Vector& eps_x_max) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
-		  time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL) {
+		  time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
+		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL),
+		  nb_inner(0), nb_boundary(0), nb_unknown(0), time(0), nb_cells(0) {
 
 	init(sys, NULL);
 
@@ -36,8 +37,9 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 Solver::Solver(const System& sys, const BitSet& _params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		const Vector& eps_x_min, const Vector& eps_x_max) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
-		  time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL) {
+		  time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
+		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL),
+		  nb_inner(0), nb_boundary(0), nb_unknown(0), time(0), nb_cells(0) {
 
 	init(sys,&_params);
 
@@ -346,7 +348,7 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 		// the case of under-constrained systems (m<n).
 
 		for (vector<SolverOutputBox>::iterator it=solutions.begin(); it!=solutions.end(); it++) {
-			if (it->unicity().is_superset(sol._existence))
+			if (it->status==SolverOutputBox::INSIDE && it->unicity().is_superset(sol._existence))
 				throw EmptyBoxException();
 		}
 	}
@@ -355,7 +357,38 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 }
 
 bool Solver::is_boundary(const IntervalVector& box) {
-	return true;
+
+	// get active boundary constraints
+	BitSet bound(n);
+	for (int i=0; i<n; i++) {
+		if (solve_init_box[i].lb()>=box[i].lb()) bound.add(i);
+		if (solve_init_box[i].ub()<=box[i].ub()) {
+			if (bound[i]) return false;
+			else bound.add(i);
+		}
+	}
+
+	// get active inequalities
+	BitSet ineq_active=ineqs? ineqs->active_ctrs(box) : BitSet::empty(n);
+
+	int size = bound.size() + m + ineq_active.size();
+
+	IntervalMatrix J(size, n);
+	int i=0;
+	int v;
+	for (; i<bound.size(); i++) {
+		J[i].clear();
+		v=(i==0? bound.min() : bound.next(v));
+		J[i][v]=1.0;
+	}
+	if (m>0) {
+		J.put(i,0,eqs->f_ctrs.jacobian(box));
+		i+=m;
+	}
+	if (ineqs!=NULL) {
+		J.put(i,0,ineqs->f_ctrs.jacobian(box,ineq_active));
+	}
+	return full_rank(J);
 }
 
 bool Solver::is_too_small(const IntervalVector& box) {

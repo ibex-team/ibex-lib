@@ -16,45 +16,56 @@
 namespace ibex {
 
 /**
+ * \ingroup strategy
+ *
  * \brief Output box of the Solver.
  *
- * When the system is well-constrained, a "solution" is a box [x] such that
- * there exists x in [x] f(x)=0 and g(x)<=0.
+ * Given a system of m equalities f(x)=0 and inequalities g(x)<=0:
  *
- * The status is CERTIFIED if the previous property is proven, UNKNOWN otherwise.
+ * An output box ([p],[x]) is INNER only if
  *
- * When the system is under-constrained, a "solution" is a box ([x],[p]) such that
- * for all p in [p] there exists x in f(x,p)=0 and g(x,p)<=0. It may be a large box
- * (compared to the precision). The "varset" structure indicates which components
- * correspond to x and p. It is NULL in case of well-constrained systems (no
- * parameters) or if m=0 (all parameters).
+ *     for all x in [x], for all p in [p]
+ *     g(x,p)<=0                                      (1)
  *
- * The status is CERTIFIED if the previous property is proven, UNKNOWN otherwise.
+ *     for all p in [p] there exists x in [x]
+ *     f(x,p)=0                                       (2)
  *
- * If certification is not required, the status of the solution is always UNKNOWN.
+ * When the system is well-constrained (m=n), (2) boils down to:
+ *
+ *     there exists x in [x], f(x)=0
+ *
+ * so that the output box is a box containing a solution, according
+ * to the usual meaning.
+ *
+ *
+ * An output box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
+ * f=0 crosses the inequalities in a "regular" way. In the current release,
+ * "regular" just means that the gradients of all constraints (equalities and
+ * potentially activated inequalities) are linearly independent.
+ * This criterion could be refined in future releases (ex:the intersection of
+ * the box and the solution set is homeomorphic to a half-ball of R^n).
+ *
+ * When the system is under-constrained, the "solution" box ([x],[p])" may be a
+ * large box (compared to eps-min). The "varset" structure indicates which
+ * components correspond to x and p. It is NULL in case of well-constrained
+ * systems (no parameters) or if m=0 (all parameters).
+
+ * The status is UNKNOWN if nothing could be proven.
+ *
  */
 class SolverOutputBox {
 public:
 	/**
-	 * Solution type.
+	 * \brief Possible status of an output box.
 	 *
-	 * Return type for the next(...) function.
-	 *
-	 * \see #next(std::vector<IntervalVector>&).
+	 * See above.
 	 */
 	typedef enum { INSIDE, BOUNDARY, UNKNOWN } sol_status;
 
-	 /*
-	  * \brief Status of the "solution" w.r.t. equalities
-	  *
-	  * CERTIFIED: The box is proven to contain, for each value
-	  *            of the parameters, a point that satisfies the equalities.
-	 * INSIDE:  All the points inside the box are proven to
-	 *          satisfy the inequalities
-	 * BOUNDARY: The box crosses the inequalites and the intersection
-	 *           of the box and the inequalities is homeomorphic to
-	 *           a half-ball (not used yet).
-	 * UNKNOWN:   Nothing is proven.
+	/*
+	 * \brief Status of the output box
+	 *
+	 * See above.
 	 */
 	const sol_status status;
 
@@ -68,8 +79,8 @@ public:
 	/**
 	 * \brief Existence box.
 	 *
-	 * If the status is CERTIFIED, represents the smallest box found
-	 * enclosing a solution.
+	 * If the status is INNER/BOUNDARY, represents the smallest box found
+	 * enclosing the manifold.
 	 * Otherwise, represents the "unknown" box.
 	 */
 	const IntervalVector& existence() const;
@@ -77,7 +88,7 @@ public:
 	/**
 	 * \brief Unicity box.
 	 *
-	 * If the status is CERTIFIED, represents the largest superset
+	 * If the status is INNER/BOUNDARY, represents the largest superset
 	 * of existence() found such that the solution enclosed is unique.
 	 * Otherwise, represents the "unknown" box.
 	 */
@@ -122,10 +133,9 @@ private:
 };
 
 /**
- * \brief Print the solution
+ * \brief Print the output box
  *
- * Print its status and the parameters/variables
- * selected.
+ * Print its status and the parameters/variables structure.
  */
 std::ostream& operator<<(std::ostream& os, const SolverOutputBox& sol);
 

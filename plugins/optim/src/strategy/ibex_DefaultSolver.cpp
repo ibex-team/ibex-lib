@@ -41,7 +41,7 @@ namespace {
 int square_eq_system = -1;
 
 System* get_square_eq_sys(System& sys) {
-	if (square_eq_system>0)
+	if (square_eq_system>=0)
 		return (*memory())->sys[square_eq_system]; // already built and recorded
 	else if (square_eq_system==-1) {
 		int nb_eq=0;
@@ -134,6 +134,8 @@ DefaultSolver::DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_
 	data = *memory(); // keep track of my data
 
 	*memory() = NULL; // reset (for next DefaultSolver to be created)
+
+	square_eq_system = -1;
 }
 
 DefaultSolver::~DefaultSolver() {
