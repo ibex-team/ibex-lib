@@ -19,26 +19,24 @@ using namespace std;
 
 namespace ibex {
 
-const double Solver::default_eps_x = 1e-6;
-
-Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
-		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL) {
-
-	n=ctc.nb_var;
-	m=-1;
+namespace {
+	class EmptyBoxException : Exception { };
 }
 
-Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
-		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
+Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
+		const Vector& eps_x_min, const Vector& eps_x_max) :
+		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
+		  time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
 		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL) {
 
 	init(sys, NULL);
 
 }
 
-Solver::Solver(const System& sys, const BitSet& _params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
-		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
+Solver::Solver(const System& sys, const BitSet& _params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
+		const Vector& eps_x_min, const Vector& eps_x_max) :
+		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
+		  time_limit(-1), cell_limit(-1), trace(0), nb_cells(0), time(0), impact(BitSet::all(ctc.nb_var)),
 		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL) {
 
 	init(sys,&_params);
@@ -89,7 +87,11 @@ Solver::~Solver() {
 void Solver::start(const IntervalVector& init_box) {
 	buffer.flush();
 	solutions.clear();
-	nb_certified = 0;
+
+	nb_inner = 0;
+	nb_boundary = 0;
+	nb_unknown = 0;
+
 	solve_init_box = init_box;
 	nb_cells = 0;
 	time = 0;
@@ -113,7 +115,7 @@ void Solver::start(const IntervalVector& init_box) {
 	Timer::start();
 }
 
-Solver::Status Solver::next(const Solution*& sol) {
+Solver::Status Solver::next(const SolverOutputBox*& sol) {
 	try  {
 		while (!buffer.empty()) {
 
@@ -128,65 +130,85 @@ Solver::Status Solver::next(const Solution*& sol) {
 			else                                // root node : impact set to 1 for all variables
 				impact.fill(0,ctc.nb_var-1);
 
-			ctc.contract(c->box,impact);
+			try {
+				ctc.contract(c->box,impact);
 
-			if (c->box.is_empty()) {
+				if (c->box.is_empty()) throw EmptyBoxException();
+
+				if (v!=-1)
+					impact.remove(v);
+				else                              // root node : impact set to 0 for all variables after contraction
+					impact.clear();
+
+				// certification is performed at each intermediate step
+				// if the system is under constrained
+				if (!c->box.is_empty() && m<n) {
+					SolverOutputBox new_sol=check_sol(c->box);
+					if (new_sol.status!=SolverOutputBox::UNKNOWN) {
+						if ((m==0 && new_sol.status==SolverOutputBox::INSIDE) ||
+								!is_too_large(new_sol.existence())) {
+							delete buffer.pop();
+							store_sol(new_sol);
+							sol = &solutions.back();
+							if (new_sol.status==SolverOutputBox::INSIDE) nb_inner++;
+							else nb_boundary++;
+							return SUCCESS;
+						} else {
+							// otherwise: continue search...
+						}
+					}
+					else {
+						// otherwise: continue search...
+					}
+				}
+
+				try {
+					if (is_too_small(c->box))
+						throw NoBisectableVariableException();
+
+					// next line may also throw NoBisectableVariableException
+					pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+
+					pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+
+					delete buffer.pop();
+					buffer.push(new_cells.first);
+					buffer.push(new_cells.second);
+					nb_cells+=2;
+					if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();
+				}
+
+				catch (NoBisectableVariableException&) {
+					SolverOutputBox new_sol=check_sol(c->box);
+					delete buffer.pop();
+					store_sol(new_sol);
+					sol = &solutions.back();
+
+					switch (sol->status) {
+					case SolverOutputBox::INSIDE:
+						nb_inner++;
+						return SUCCESS;
+					case SolverOutputBox::BOUNDARY:
+						nb_boundary++;
+						return SUCCESS;
+					case SolverOutputBox::UNKNOWN:
+						nb_unknown++;
+						return NOT_ALL_VALIDATED;
+					}
+					// note that we skip time_limit_check() here.
+					// In the case where "next" is called by "solve",
+					// and if time has exceeded, the exception will be raised by the
+					// very next call to "next" anyway. This holds, unless "next" finds
+					// new solutions again and again endlessly. So there is a little risk
+					// of uncaught timeout in this case (but this case is probably already
+					// an error case).
+				}
+			}
+			catch (EmptyBoxException&) {
 				delete buffer.pop();
 				impact.remove(v); // note: in case of the root node, we should clear the bitset
 				// instead but since the search is over, the impact is not used anymore.
 				continue;
-			}
-
-			if (v!=-1)
-				impact.remove(v);
-			else                              // root node : impact set to 0 for all variables after contraction
-				impact.clear();
-
-			// certification is performed at each intermediate step
-			// if the system is under constrained
-			if (certification() && m<n) {
-				Solution new_sol(n);
-				if (check_sol(c->box, new_sol)) {
-					if (new_sol.status==Solution::SOLUTION) {
-						delete buffer.pop();
-						store_sol(new_sol);
-						sol = &solutions.back();
-						nb_certified++;
-						return SUCCESS;
-					}
-				} // otherwise: continue search...
-			}
-
-			try {
-
-				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
-
-				delete buffer.pop();
-				buffer.push(new_cells.first);
-				buffer.push(new_cells.second);
-				nb_cells+=2;
-				if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();
-			}
-
-			catch (NoBisectableVariableException&) {
-				Solution new_sol(n);
-				bool is_sol=check_sol(c->box,new_sol);
-				delete buffer.pop();
-				if (is_sol) {
-					store_sol(new_sol);
-					sol = &solutions.back();
-					if (sol->status == Solution::SOLUTION)
-						nb_certified++;
-					return sol->status == Solution::SOLUTION ? SUCCESS : NOT_ALL_CERTIFIED;
-				}
-				// note that we skip time_limit_check() here.
-				// In the case where "next" is called by "solve",
-				// and if time has exceeded, the exception will be raised by the
-				// very next call to "next" anyway. This holds, unless "next" finds
-				// new solutions again and again endlessly. So there is a little risk
-				// of uncaught timeout in this case (but this case is probably already
-				// an error case).
 			}
 			time_limit_check();
 		}
@@ -212,7 +234,7 @@ Solver::Status Solver::solve(const IntervalVector& init_box) {
 
 	status=INFEASIBLE; // by default
 
-	const Solution* sol; //unused
+	const SolverOutputBox* sol; //unused
 
 	while (true) {
 		switch(next(sol)) {
@@ -221,8 +243,8 @@ Solver::Status Solver::solve(const IntervalVector& init_box) {
 			break;
 		case INFEASIBLE:
 			return status;
-		case NOT_ALL_CERTIFIED :
-			status = NOT_ALL_CERTIFIED;
+		case NOT_ALL_VALIDATED :
+			status = NOT_ALL_VALIDATED;
 			break;
 		case TIME_OUT :
 			status = TIME_OUT;
@@ -241,9 +263,11 @@ void Solver::time_limit_check () {
 	Timer::start();
 }
 
-bool Solver::check_sol(IntervalVector& box, Solution& sol) {
+SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 
-	bool proved=true;
+	SolverOutputBox sol(n);
+
+	(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::INSIDE; // by default
 
 	if (eqs) {
 
@@ -251,37 +275,25 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 
 		if (m>n) {
 			ibex_warning("Certification not implemented for over-constrained systems ");
-			sol._existence=box;
-			delete sol._unicity;
-			sol._unicity=NULL;
-			proved=false;
+			(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
 		} else if (m<n) {
 			// ====== under-constrained =========
 			try {
 				VarSet varset=get_newton_vars(eqs->f_ctrs,box.mid(),params? *params: BitSet::empty(n));
 
-				proved=inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity);
-
-				if (!params || ((int) params->size())<n-m)
-					sol.varset = new VarSet(varset);
+				if (inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity)) {
+					if (!params || ((int) params->size())<n-m)
+						sol.varset = new VarSet(varset);
+				} else
+					(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
 
 			} catch(SingularMatrixException& e) {
-				proved=false;
-			}
-
-			if (!proved) {
-				sol._existence=box;
-				delete sol._unicity;
-				sol._unicity=NULL;
+				(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
 			}
 		} else {
 			// ====== well-constrained =========
-			proved=inflating_newton(eqs->f_ctrs, box.mid(), sol._existence, *sol._unicity);
-
-			if (!proved) {
-				sol._existence=box;
-				delete sol._unicity;
-				sol._unicity=NULL;
+			if (!inflating_newton(eqs->f_ctrs, box.mid(), sol._existence, *sol._unicity)) {
+				(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
 			}
 		}
 	} else {
@@ -289,29 +301,43 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 		sol._unicity=NULL;
 	}
 
+	if (sol.status==SolverOutputBox::UNKNOWN) {
+		sol._existence=box;
+		if (sol._unicity!=NULL) delete sol._unicity;
+		sol._unicity=NULL;
+	} else {
+		// The inflating Newton may cause the existence box to be disjoint from the input box.
+
+		// Note that the following line also tests the case of an existence box outside
+		// the initial box of the search
+		if (box.is_disjoint(sol.existence())) {
+			throw EmptyBoxException();
+		}
+	}
+
+	if (sol.status==SolverOutputBox::INSIDE && !sol.existence().is_subset(solve_init_box))
+		// BOUNDARY by default: will be verified later
+		(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::BOUNDARY;
+
 	if (ineqs) {
 		Interval y,r;
 		for (int i=0; i<ineqs->nb_ctr; i++) {
 			NumConstraint& c=ineqs->ctrs[i];
 			assert(c.f.image_dim()==1);
-			y=c.f.eval(sol._existence);
+			y=c.f.eval(sol.existence());
 			r=c.right_hand_side().i();
-			if (y.is_disjoint(r)) return false;
-			if (proved && !y.is_subset(r)) proved=false;
+			if (y.is_disjoint(r)) throw EmptyBoxException();
+			if (sol.status==SolverOutputBox::INSIDE && !y.is_subset(r)) {
+				// BOUNDARY by default: will be verified later
+				(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::BOUNDARY;
+			}
 		}
 	}
 
-	if (proved) {
-		// the following cases can only happen if proved==true because only the inflating
-		// Newton may cause a box produced by the search to be outside the initial box
+	if (sol.status==SolverOutputBox::BOUNDARY) {
+		if (!is_boundary(sol.existence()))
+			(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
 
-		if (solve_init_box.is_disjoint(sol._existence)) {
-			return false;
-		}
-
-		if (!solve_init_box.is_superset(sol._existence)) {
-			proved=false; // don't return now, the box may be be discarded later
-		}
 	}
 
 	if (eqs && n==m) {
@@ -319,38 +345,81 @@ bool Solver::check_sol(IntervalVector& box, Solution& sol) {
 		// box of a previously found solution. For efficiency reason, this test is not performed in
 		// the case of under-constrained systems (m<n).
 
-		for (vector<Solution>::iterator it=solutions.begin(); it!=solutions.end(); it++) {
+		for (vector<SolverOutputBox>::iterator it=solutions.begin(); it!=solutions.end(); it++) {
 			if (it->unicity().is_superset(sol._existence))
-				return false;
+				throw EmptyBoxException();
 		}
 	}
 
-	(Solution::sol_status&) sol.status = (certification() && proved)? Solution::SOLUTION : Solution::UNKNOWN;
+	return sol;
+}
 
+bool Solver::is_boundary(const IntervalVector& box) {
 	return true;
 }
 
-void Solver::store_sol(const Solution& sol) {
+bool Solver::is_too_small(const IntervalVector& box) {
+	for (int i=0; i<n; i++)
+		if (box[i].diam()>eps_x_min[i]) return false;
+	return true;
+}
+
+bool Solver::is_too_large(const IntervalVector& box) {
+	for (int i=0; i<n; i++)
+		if (box[i].diam()>eps_x_max[i]) return true;
+	return false;
+}
+
+void Solver::store_sol(const SolverOutputBox& sol) {
 
 	solutions.push_back(sol);
 
 	if (trace >=1) cout << sol << endl;
 }
 
+std::string Solver::format() {
+	return
+	"\n"
+	"-------------------------------------------------------------\n"
+	"Output format with --quiet (for automatic output processing):\n"
+	"-------------------------------------------------------------\n"
+	"[line 1] - 3 values: number of variables, number of equalities, number of inequalities (excluding initial box)\n"
+	"[line 2] - 1 value: the status of the search. Possible values are:\n"
+	"\t\t* 0=complete search:   all solutions found and all output boxes validated\n"
+	"\t\t* 1=complete search:   infeasible problem\n"
+	"\t\t* 2=incomplete search: minimal width (--eps-min) reached\n"
+	"\t\t* 3=incomplete search: time out\n"
+	"\t\t* 4=incomplete search: cell overflow\n"
+	"[line 3] - 3 values: number of inner, boundary and unknown boxes\n"
+	"[line 4] - 2 values: time (in seconds) and number of cells.\n"
+	"\n[lines 5-...] If --sols is enabled, the subsequent lines describe the \"solutions\" (output boxes).\n"
+	"\t Each line corresponds to one box and contains the following information:\n"
+	"\t - 2*n values: lb(x1), ub(x1),...,ub(x1), ub(xn)\n"
+	"\t - 1 value:\n"
+	"\t\t* 0 the box is 'inner'\n"
+	"\t\t* 1 the box is 'boundary'\n"
+	"\t\t* 2 the box is 'unknown'\n"
+	"\t - (n-m) values where n=#variables and m=#equalities: the indices of the variables\n"
+	"\t   considered as parameters in the parametric proof. Indices start from 1 and if the\n"
+	"\t   box is 'unknown', a sequence of n-m zeros are displayed. Nothing is displayed if\n"
+	"\t   m=0 or m=n.\n\n";
+}
+
 void Solver::report(bool verbose, bool print_sols) {
 	if (!verbose) {
+		cout << n << " " << m << " " << (ineqs? ineqs->nb_ctr : 0) << endl;
 		cout << status << endl;
-		cout << nb_certified << ' ' << (solutions.size()-nb_certified) << endl;
+		cout << nb_inner << ' ' << nb_boundary << ' ' << nb_unknown << endl;
 		cout << get_time() << " " << get_nb_cells() << endl;
 		if (print_sols) {
-			for (vector<Solution>::const_iterator it=solutions.begin(); it!=solutions.end(); it++) {
+			for (vector<SolverOutputBox>::const_iterator it=solutions.begin(); it!=solutions.end(); it++) {
 				const IntervalVector& box=(*it);
 				for (int i=0; i<n; i++) {
 					cout << box[i].lb() << ' ' << box[i].ub() << ' ';
 				}
 				cout << it->status << ' ';
 				if (m>0 && m<n) {
-					if (it->status==Solution::SOLUTION && it->varset!=NULL) {
+					if (it->status!=SolverOutputBox::UNKNOWN && it->varset!=NULL) {
 						for (int i=0; i<it->varset->nb_param; i++) {
 							if (i>0) cout << ' ';
 							cout << (it->varset->param(i)) + 1;
@@ -373,7 +442,7 @@ void Solver::report(bool verbose, bool print_sols) {
 	break;
 	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
 	break;
-	case NOT_ALL_CERTIFIED: cout << "\033[31m" << " done! but some boxes have 'unknown' status." << endl;
+	case NOT_ALL_VALIDATED: cout << "\033[31m" << " done! but some boxes have 'unknown' status." << endl;
 	break;
 	case TIME_OUT: cout << "\033[31m" << " time limit " << time_limit << "s. reached " << endl;
 	break;
@@ -382,8 +451,9 @@ void Solver::report(bool verbose, bool print_sols) {
 
 	cout << "\033[0m" << endl;
 
-	cout << " number of solutions : " << nb_certified << " (certified boxes)" << endl;
-	cout << " number of unknown boxes: " << (solutions.size()-nb_certified) << endl;
+	cout << " number of inner boxes : " << nb_inner << endl;
+	cout << " number of boundary boxes : " << nb_boundary << endl;
+	cout << " number of unknown boxes: " << nb_unknown << endl;
 	cout << " cpu time used: " << time << "s." << endl;
 	cout << " number of cells: " << nb_cells << endl;
 
@@ -391,7 +461,7 @@ void Solver::report(bool verbose, bool print_sols) {
 
 	if (print_sols) {
 		int i=0;
-		for (vector<Solution>::const_iterator it=solutions.begin(); it!=solutions.end(); it++) {
+		for (vector<SolverOutputBox>::const_iterator it=solutions.begin(); it!=solutions.end(); it++) {
 			cout << " sol n°" << (i++) << " = " << *it << endl;
 		}
 	}

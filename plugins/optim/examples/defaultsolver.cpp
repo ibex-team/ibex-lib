@@ -22,17 +22,22 @@ using namespace ibex;
 
 int main(int argc, char** argv) {
 
-	stringstream _random_seed, _eps_x;
+	stringstream _random_seed, _eps_x_min, _eps_x_max;
 	_random_seed << "Random seed (useful for reproducibility). Default value is " << DefaultSolver::default_random_seed << ".";
-	_eps_x << "Precision on the variable. Default value is 1e-6.";
+	_eps_x_min << "Minimal width of output boxes. This is a criterion to _stop_ bisection: a "
+			"non-validated box will not be larger than 'eps-min'. Default value is 1e" << round(::log10(DefaultSolver::default_eps_x_min)) << ".";
+	_eps_x_max << "Maximal width of output boxes. This is a criterion to _force_ bisection: a "
+			"validated box will not be larger than 'eps-max' (unless there is no equality and it is fully inside inequalities)."
+			" Default value is +oo (none)";
 
 	args::ArgumentParser parser("********* IbexSolve (defaultsolver) *********.", "Solve a Minibex file.");
 	args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
-	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo.", {'t', "timeout"});
+	args::ValueFlag<double> eps_x_min(parser, "float", _eps_x_min.str(), {'e', "eps-min"});
+	args::ValueFlag<double> eps_x_max(parser, "float", _eps_x_max.str(), {'E', "eps-max"});
+	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo (none).", {'t', "timeout"});
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
-	args::ValueFlag<double> eps_x(parser, "float", _eps_x.str(), {'e', "eps-x"});
-	args::Flag trace(parser, "trace", "Activate trace. Solutions are displayed as and when they are found.", {"trace"});
-	args::Flag sols(parser, "sols", "Display the solutions found (in the final report).", {'s',"sols"});
+	args::Flag trace(parser, "trace", "Activate trace. \"Solutions\" (output boxes) are displayed as and when they are found.", {"trace"});
+	args::Flag sols(parser, "sols", "Display the output boxes in the final report.", {'s',"sols"});
 	args::Flag format(parser, "format", "Display the output format in quiet mode", {"format"});
 	args::Flag quiet(parser, "quiet", "Print no message and display minimal information (for automatic output processing). See --format.",{'q',"quiet"});
 
@@ -61,29 +66,7 @@ int main(int argc, char** argv) {
 	}
 
 	if (format) {
-		cout <<
-		"\n"
-		"-------------------------------------------------------------\n"
-		"Output format with --quiet (for automatic output processing):\n"
-		"-------------------------------------------------------------\n"
-		"[line 1] - 1 value: the status of the search. Possible values are:\n"
-		"\t\t* 0=success (all solutions found and certified)\n"
-		"\t\t* 1=infeasible problem (no solution found)\n"
-		"\t\t* 2=search complete but not all solutions certified\n"
-		"\t\t* 3=time out\n"
-		"\t\t* 4=cell overflow\n"
-		"[line 2] - 2 values: number of certified solutions and number of 'unknown' boxes.\n"
-		"[line 3] - 2 values: time (in seconds) and number of cells.\n"
-		"\n[lines 4-...] If --sols is enabled, the subsequent lines describe the solutions.\n"
-		"\t Each line corresponds to one solution and contains the following information:\n"
-		"\t - 2*n values: lb(x1), ub(x1),...,ub(x1), ub(xn)\n"
-		"\t - 1 value:\n"
-		"\t\t* 1 the solution is certified\n"
-		"\t\t* 0 otherwise ('unknown box')\n"
-		"\t - (n-m) values where n=#variables and m=#equalities: the indices of the variables\n"
-		"\t   considered as parameters in the parametric proof. Indices start from 1 and if the\n"
-		"\t   box is 'unknown', a sequence of n-m zeros are displayed. Nothing is displayed if\n"
-		"\t   m=0 or m=n.\n\n";
+		cout << Solver::format() << endl;
 		exit(0);
 	}
 
@@ -102,9 +85,9 @@ int main(int argc, char** argv) {
 			cout << "  file loaded:\t" << filename.Get() << endl;
 		}
 
-		if (eps_x) {
+		if (eps_x_min) {
 			if (!quiet)
-				cout << "  eps-x:\t" << eps_x.Get() << "\t(precision on variables domain)" << endl;
+				cout << "  eps-x:\t" << eps_x_min.Get() << "\t(precision on variables domain)" << endl;
 		}
 
 		// Fix the random seed for reproducibility.
@@ -115,7 +98,8 @@ int main(int argc, char** argv) {
 
 		// Build the default solver
 		DefaultSolver s(sys,
-				eps_x ? eps_x.Get() : Solver::default_eps_x,
+				eps_x_min ? eps_x_min.Get() : DefaultSolver::default_eps_x_min,
+				eps_x_max ? eps_x_max.Get() : DefaultSolver::default_eps_x_max,
 				random_seed? random_seed.Get() : DefaultSolver::default_random_seed);
 
 		// This option limits the search time

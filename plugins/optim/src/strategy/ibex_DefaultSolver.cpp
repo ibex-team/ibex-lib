@@ -28,29 +28,42 @@ using namespace std;
 
 namespace ibex {
 
+const double DefaultSolver::default_eps_x_min = 1e-6;
+const double DefaultSolver::default_eps_x_max = POS_INFINITY;
 const double DefaultSolver::default_random_seed = 1.0;
 
 namespace {
 
-System* square_eq_sys(System& sys) {
+// index in memory
+//   -1=none (not built yet)
+//   -2=no square sub-system of equations
 
-	int nb_eq=0;
+int square_eq_system = -1;
 
-	// count the number of equalities
-	for (int i=0; i<sys.nb_ctr; i++)
-		if (sys.ctrs[i].op==EQ) nb_eq+=sys.ctrs[i].f.image_dim();
+System* get_square_eq_sys(System& sys) {
+	if (square_eq_system>0)
+		return (*memory())->sys[square_eq_system]; // already built and recorded
+	else if (square_eq_system==-1) {
+		int nb_eq=0;
 
-	if (sys.nb_var==nb_eq)
-		if (nb_eq==sys.f_ctrs.image_dim())
-			return &sys; // useless to create a new one
-		else {
+		// count the number of equalities
+		for (int i=0; i<sys.nb_ctr; i++)
+			if (sys.ctrs[i].op==EQ) nb_eq+=sys.ctrs[i].f.image_dim();
+
+		if (sys.nb_var==nb_eq) {
+			square_eq_system = (*memory())->sys.size();
+
 			return &rec(new System(sys,System::EQ_ONLY));
 		}
-	else
-		return NULL; // not square
+		else {
+			square_eq_system=-2;
+			return NULL; // not square
+		}
+	} else
+		return NULL;
 }
 
-}
+} // end namespace
 
 // the corners for  Xnewton
 /*std::vector<CtcXNewton::corner_point>*  DefaultSolver::default_corners () {
@@ -70,7 +83,7 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 	ctc_list.set_ref(1, rec(new CtcAcid (sys, rec(new CtcHC4 (sys.ctrs,0.1,true)))));
 	int index=2;
 	// if the system is a sqare system of equations, the third contractor is Newton
-	System* eqs=square_eq_sys(sys);
+	System* eqs=get_square_eq_sys(sys);
 	if (eqs) {
 		ctc_list.set_ref(index,rec(new CtcNewton(eqs->f_ctrs,5e8,prec,1.e-4)));
 		index++;
@@ -92,9 +105,11 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 }
 
 
-DefaultSolver::DefaultSolver(System& sys, double prec, double random_seed) : Solver(sys, rec(ctc(sys,prec)),
-		rec(new SmearSumRelative(sys, prec)),
-		rec(new CellStack())),
+DefaultSolver::DefaultSolver(System& sys, double eps_x_min, double eps_x_max, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min)),
+		get_square_eq_sys(sys)!=NULL?
+				rec(new SmearSumRelative(*get_square_eq_sys(sys), eps_x_min)) :
+				rec(new RoundRobin(eps_x_min)),
+		rec(new CellStack()), Vector(sys.nb_var,eps_x_min), Vector(sys.nb_var,eps_x_max)),
 		sys(sys) {
 
 	RNG::srand(random_seed);
@@ -102,12 +117,16 @@ DefaultSolver::DefaultSolver(System& sys, double prec, double random_seed) : Sol
 	data = *memory(); // keep track of my data
 
 	*memory() = NULL; // reset (for next DefaultSolver to be created)
+
+	square_eq_system = -1;
 }
 
 // Note: we set the precision for Newton to the minimum of the precisions.
-DefaultSolver::DefaultSolver(System& sys, const Vector& prec, double random_seed) : Solver(rec(ctc(sys,prec.min())),
-		rec(new SmearSumRelative(sys, prec)),
-		rec(new CellStack())),
+DefaultSolver::DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min.min())),
+		get_square_eq_sys(sys)!=NULL?
+				rec(new SmearSumRelative(*get_square_eq_sys(sys), eps_x_min)) :
+				rec(new RoundRobin(eps_x_min)),
+		rec(new CellStack()), eps_x_min, Vector(sys.nb_var,eps_x_max)),
 		sys(sys) {
 
 	RNG::srand(random_seed);
