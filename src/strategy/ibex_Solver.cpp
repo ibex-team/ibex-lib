@@ -464,10 +464,10 @@ void Solver::report(report_mode mode, bool print_sols) {
 		cout << nb_inner << s << nb_boundary << s << nb_unknown;
 		if (mode==MMA) cout << "},{"; else cout << '\n';
 		cout << get_time() << s << get_nb_cells();
-		if (mode==MMA) cout << "},"; else cout << '\n';
+		if (mode==MMA) cout << "}"; else cout << '\n';
 
 		if (print_sols) {
-			if (mode==MMA) cout << "{";
+			if (mode==MMA) cout << ",{";
 			for (vector<SolverOutputBox>::const_iterator it=solutions.begin(); it!=solutions.end(); it++) {
 				if (it!=solutions.begin() && mode==MMA) cout << ',';
 				if (mode==MMA) cout << "{{";
