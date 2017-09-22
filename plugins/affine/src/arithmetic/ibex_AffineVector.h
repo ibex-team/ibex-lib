@@ -705,13 +705,13 @@ AffineMain<T> operator*(const AffineMainVector<T>& v1, const AffineMainVector<T>
 	assert(v1.size()==v2.size());
 
 	int n=v1.size();
-	AffineMain<T> y(0);
+	AffineMain<T> y;
 
 	if (v1.is_empty() || v2.is_empty()) {
 		y.set_empty();
 		return y;
 	}
-
+	y = 0;
 	for (int i=0; i<n; i++) {
 		y+=v1[i] * v2[i];
 	}

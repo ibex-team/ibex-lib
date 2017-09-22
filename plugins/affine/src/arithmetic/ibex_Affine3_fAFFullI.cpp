@@ -81,11 +81,10 @@ _n 		(1),
 _elt	(0.0, std::list<std::pair<int,double> >(), Interval(0.0))
 {
 	assert((n>=0) && (m>=0));
-	// std::cout << "not implemented" << std::endl;
 	*this = itv;
 }
 
-
+/*
 template<>
 AffineMain<AF_fAFFullI>::AffineMain(const double d) :
 _n 		(1),
@@ -102,7 +101,7 @@ _elt	(0.0, std::list<std::pair<int,double> >(), Interval(0.0)) {
 		}
 	}
 }
-
+*/
 
 template<>
 AffineMain<AF_fAFFullI>::AffineMain(const Interval & itv):
@@ -248,8 +247,10 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator=(double d) {
 	} else {
 		if (d>0) {
 			_n = -3;
+			_elt._center = d;
 		} else {
 			_n = -4;
+			_elt._center = d;
 		}
 	}
 
@@ -531,7 +532,9 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator*=(const Interval& y) 
 		*this = itv()*y;
 
 	} else {
-		*this *= AffineMain<AF_fAFFullI>(y);
+		 AffineMain<AF_fAFFullI> tmp;
+		 tmp = y;
+		*this *= tmp;
 	}
 	return *this;
 }
@@ -546,7 +549,9 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(const Interval& y) 
 
 	} else {
 		//std::cout << "+=(y)" << y << std::endl;
-		*this += AffineMain<AF_fAFFullI>(y);
+		 AffineMain<AF_fAFFullI> tmp;
+		 tmp = y;
+		*this += tmp;
 
 	}
 
@@ -613,5 +618,7 @@ void AffineMain<AF_fAFFullI>::compact(double tol){
 	return;
 }
 
+template<>
+void AffineMain<AF_fAFFullI>::resize(int n) { }
 
 }// end namespace ibex

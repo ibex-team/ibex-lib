@@ -536,6 +536,7 @@ private:
 	void check_add(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_add(const Interval& x, double z, const Interval& y_expected);
 	void check_add(const AffineMain<T>& x, const AffineMain<T>& z, const Interval& y_expected);
+	void check_add(const AffineMain<T>& x, const Interval& z, const Interval& y_expected);
 	void check_mul_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_mul(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_mul(const AffineMain<T>& x, const AffineMain<T>& z, const Interval& y_expected);

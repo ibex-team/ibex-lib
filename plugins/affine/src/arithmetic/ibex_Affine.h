@@ -33,8 +33,14 @@
 
 namespace ibex {
 
+template<class T>  class AffineVariableMain;
+template<class T>  class AffineMain;
 template<class T> class AffineMainVector;
 template<class T> class AffineMainMatrix;
+
+
+//template<class T> class TestAffineBase;
+//template<class T> class TestAffineArih;
 
 /**
  * \ingroup arithmetic
@@ -52,23 +58,17 @@ typedef AF_fAF2  AF_Default;
 //typedef AF_No  AF_Default;
 typedef AF_fAFFullI AF_Other;
 
+
 typedef AffineMain<AF_Default> Affine2;
 typedef AffineMain<AF_Other>  Affine3;
 
 
 template<class T=AF_Default>
 class AffineMain {
-public:
-
-	typedef enum {
-		AF_Default, AF_Chebyshev, AF_MinRange
-	} Affine_Mode; // ...etc...
-
-
-	static void change_mode(Affine_Mode tt=AF_Default);
 
 private:
-
+	friend class AffineMainVector<T>;
+	friend class AffineMainMatrix<T>;
 
 
 	/** \brief tolerance for default compact procedure  */
@@ -78,6 +78,7 @@ private:
 	static const double AF_EE;
 
 	static bool mode;
+    static int _counter;
 
 	/**
 	 * Code for the particular case:
@@ -94,21 +95,32 @@ private:
 
 	T _elt;			// core of the affine2 form
 
+	/** \brief Create an affine form with n variables and  initialized val[0] with d. */
+	//explicit AffineMain(double d);
+
+	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv. */
+	AffineMain(int n, int m, const Interval& itv);
+
+	/**
+	 * \brief Change the number of affine variables
+	 */
+	void resize(int n);
 
 public:
 
+	typedef enum {
+		AF_Default=0, AF_Chebyshev=1, AF_MinRange=2
+	} Affine_Mode; // ...etc...
 
-	/** \brief Create an empty affine form. */
-	AffineMain();
-
-	/** \brief Create an affine form with n variables and  initialized val[0] with d. */
-	explicit AffineMain(double d);
+	/** \brief change the linearisation approximation of all the affine form: Chebyshev (by default), or Min-Range	 */
+	static void change_mode(Affine_Mode tt=AF_Default);
 
 	/** \brief Create an affine form with n variables and  initialized val[0] with  itv. */
 	explicit AffineMain(const Interval& itv);
 
-	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv. */
-	AffineMain(int n, int m, const Interval& itv);
+
+	/** \brief Create an empty affine form. */
+	AffineMain();
 
 	/** \brief Create an affine form with n variables, initialized with x  */
 	AffineMain(const AffineMain& x);
@@ -162,11 +174,6 @@ public:
 	 * Return a reference to *this.
 	 */
 	AffineMain& inflate(double radd);
-
-	/**
-	 * \brief Change the number
-	 */
-	//	void resize(int n);
 
 	/**
 	 * \brief number of variable represented
@@ -583,6 +590,7 @@ template<class T> const double AffineMain<T>::AF_EM = __builtin_powi(2.0, -51);
 template<class T> const double AffineMain<T>::AF_EC = __builtin_powi(2.0, -55);
 template<class T> const double AffineMain<T>::AF_EE = 2.0;
 template<class T> bool AffineMain<T>::mode=true;
+template<class T> int AffineMain<T>::_counter = 1;
 
 
 
@@ -833,7 +841,9 @@ inline AffineMain<T> operator/(const AffineMain<T>& x, double d){
 
 template<class T>
 inline AffineMain<T> operator/(double d, const AffineMain<T>& x){
-	return AffineMain<T>(d) *= (AffineMain<T>(x).Ainv(x.itv()));
+	AffineMain<T> out;
+	out = d;
+	return out *= (AffineMain<T>(x).Ainv(x.itv()));
 }
 
 template<class T>
@@ -1031,7 +1041,9 @@ inline AffineMain<T> chi(const Interval&  a,const AffineMain<T>&  b,const Affine
 	} else if (a.lb()>0) {
 		return AffineMain<T>(c);
 	} else {
-		return  AffineMain<T>(b|c);
+		AffineMain<T> out;
+		out = b|c;
+		return  out;
 	}
 }
 
