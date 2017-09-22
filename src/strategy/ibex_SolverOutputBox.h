@@ -37,13 +37,10 @@ namespace ibex {
  * so that the output box is a box containing a solution, according
  * to the usual meaning.
  *
- *
  * An output box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
- * f=0 crosses the inequalities in a "regular" way. In the current release,
- * "regular" just means that the gradients of all constraints (equalities and
- * potentially activated inequalities) are linearly independent.
- * This criterion could be refined in future releases (ex:the intersection of
- * the box and the solution set is homeomorphic to a half-ball of R^n).
+ * f=0 crosses the inequalities in a "regular" way, the exact definition
+ * of "regular" depending on the boundary_test flag of the Solver.
+ * See #Solver::boundary_test_strength.
  *
  * When the system is under-constrained, the "solution" box ([x],[p])" may be a
  * large box (compared to eps-min). The "varset" structure indicates which
@@ -60,7 +57,7 @@ public:
 	 *
 	 * See above.
 	 */
-	typedef enum { INSIDE, BOUNDARY, UNKNOWN } sol_status;
+	typedef enum { INNER, BOUNDARY, UNKNOWN } sol_status;
 
 	/*
 	 * \brief Status of the output box

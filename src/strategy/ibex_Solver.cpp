@@ -26,7 +26,7 @@ namespace {
 Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		const Vector& eps_x_min, const Vector& eps_x_max) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
-		  time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
+		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
 		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL),
 		  nb_inner(0), nb_boundary(0), nb_unknown(0), time(0), nb_cells(0) {
 
@@ -37,7 +37,7 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 Solver::Solver(const System& sys, const BitSet& _params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		const Vector& eps_x_min, const Vector& eps_x_max) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
-		  time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
+		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
 		  solve_init_box(IntervalVector::empty(ctc.nb_var)), eqs(NULL), ineqs(NULL), params(NULL),
 		  nb_inner(0), nb_boundary(0), nb_unknown(0), time(0), nb_cells(0) {
 
@@ -72,6 +72,8 @@ void Solver::init(const System& sys, const BitSet* _params) {
 	n=sys.nb_var;
 	m=eqs? eqs->f_ctrs.image_dim() : 0;
 
+	if (m==0 || m==n)
+		boundary_test=ALL_FALSE;
 }
 
 Solver::~Solver() {
@@ -147,12 +149,12 @@ Solver::Status Solver::next(const SolverOutputBox*& sol) {
 				if (!c->box.is_empty() && m<n) {
 					SolverOutputBox new_sol=check_sol(c->box);
 					if (new_sol.status!=SolverOutputBox::UNKNOWN) {
-						if ((m==0 && new_sol.status==SolverOutputBox::INSIDE) ||
+						if ((m==0 && new_sol.status==SolverOutputBox::INNER) ||
 								!is_too_large(new_sol.existence())) {
 							delete buffer.pop();
 							store_sol(new_sol);
 							sol = &solutions.back();
-							if (new_sol.status==SolverOutputBox::INSIDE) nb_inner++;
+							if (new_sol.status==SolverOutputBox::INNER) nb_inner++;
 							else nb_boundary++;
 							return SUCCESS;
 						} else {
@@ -187,7 +189,7 @@ Solver::Status Solver::next(const SolverOutputBox*& sol) {
 					sol = &solutions.back();
 
 					switch (sol->status) {
-					case SolverOutputBox::INSIDE:
+					case SolverOutputBox::INNER:
 						nb_inner++;
 						return SUCCESS;
 					case SolverOutputBox::BOUNDARY:
@@ -269,7 +271,7 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 
 	SolverOutputBox sol(n);
 
-	(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::INSIDE; // by default
+	(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::INNER; // by default
 
 	if (eqs) {
 
@@ -317,7 +319,7 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 		}
 	}
 
-	if (sol.status==SolverOutputBox::INSIDE && !sol.existence().is_subset(solve_init_box))
+	if (sol.status==SolverOutputBox::INNER && !sol.existence().is_subset(solve_init_box))
 		// BOUNDARY by default: will be verified later
 		(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::BOUNDARY;
 
@@ -329,7 +331,7 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 			y=c.f.eval(sol.existence());
 			r=c.right_hand_side().i();
 			if (y.is_disjoint(r)) throw EmptyBoxException();
-			if (sol.status==SolverOutputBox::INSIDE && !y.is_subset(r)) {
+			if (sol.status==SolverOutputBox::INNER && !y.is_subset(r)) {
 				// BOUNDARY by default: will be verified later
 				(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::BOUNDARY;
 			}
@@ -348,7 +350,7 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 		// the case of under-constrained systems (m<n).
 
 		for (vector<SolverOutputBox>::iterator it=solutions.begin(); it!=solutions.end(); it++) {
-			if (it->status==SolverOutputBox::INSIDE && it->unicity().is_superset(sol._existence))
+			if (it->status==SolverOutputBox::INNER && it->unicity().is_superset(sol._existence))
 				throw EmptyBoxException();
 		}
 	}
@@ -358,37 +360,46 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 
 bool Solver::is_boundary(const IntervalVector& box) {
 
-	// get active boundary constraints
-	BitSet bound(n);
-	for (int i=0; i<n; i++) {
-		if (solve_init_box[i].lb()>=box[i].lb()) bound.add(i);
-		if (solve_init_box[i].ub()<=box[i].ub()) {
-			if (bound[i]) return false;
-			else bound.add(i);
+	switch (boundary_test) {
+	case ALL_TRUE : return true;
+	case ALL_FALSE : return false;
+	case FULL_RANK : {
+		// get active boundary constraints
+		BitSet bound(n);
+		for (int i=0; i<n; i++) {
+			if (solve_init_box[i].lb()>=box[i].lb()) bound.add(i);
+			if (solve_init_box[i].ub()<=box[i].ub()) {
+				if (bound[i]) return false;
+				else bound.add(i);
+			}
 		}
-	}
 
-	// get active inequalities
-	BitSet ineq_active=ineqs? ineqs->active_ctrs(box) : BitSet::empty(n);
+		// get active inequalities
+		BitSet ineq_active=ineqs? ineqs->active_ctrs(box) : BitSet::empty(n);
 
-	int size = bound.size() + m + ineq_active.size();
+		int size = bound.size() + m + ineq_active.size();
 
-	IntervalMatrix J(size, n);
-	int i=0;
-	int v;
-	for (; i<bound.size(); i++) {
-		J[i].clear();
-		v=(i==0? bound.min() : bound.next(v));
-		J[i][v]=1.0;
+		IntervalMatrix J(size, n);
+		int i=0;
+		int v;
+		for (; i<bound.size(); i++) {
+			J[i].clear();
+			v=(i==0? bound.min() : bound.next(v));
+			J[i][v]=1.0;
+		}
+		if (m>0) {
+			J.put(i,0,eqs->f_ctrs.jacobian(box));
+			i+=m;
+		}
+		if (ineqs!=NULL) {
+			J.put(i,0,ineqs->f_ctrs.jacobian(box,ineq_active));
+		}
+		return full_rank(J);
 	}
-	if (m>0) {
-		J.put(i,0,eqs->f_ctrs.jacobian(box));
-		i+=m;
+	case HALF_BALL:
+		not_implemented("\"half-ball\" boundary test");
+		return false;
 	}
-	if (ineqs!=NULL) {
-		J.put(i,0,ineqs->f_ctrs.jacobian(box,ineq_active));
-	}
-	return full_rank(J);
 }
 
 bool Solver::is_too_small(const IntervalVector& box) {
@@ -438,35 +449,58 @@ std::string Solver::format() {
 	"\t   m=0 or m=n.\n\n";
 }
 
-void Solver::report(bool verbose, bool print_sols) {
-	if (!verbose) {
-		cout << n << " " << m << " " << (ineqs? ineqs->nb_ctr : 0) << endl;
-		cout << status << endl;
-		cout << nb_inner << ' ' << nb_boundary << ' ' << nb_unknown << endl;
-		cout << get_time() << " " << get_nb_cells() << endl;
+void Solver::report(report_mode mode, bool print_sols) {
+	if (mode!=VERBOSE) {
+		// character to separate elements in a list
+		char s=mode==MMA? ',' : ' ';
+		// character that ends a list
+		//char e=mode==MMA? ' ' : '}';
+
+		if (mode==MMA) cout << "{{";
+		cout << n << s << m << s << (ineqs? ineqs->nb_ctr : 0);
+		if (mode==MMA) cout << "},"; else cout << '\n';
+		cout << status;
+		if (mode==MMA) cout << ",{"; else cout << '\n';
+		cout << nb_inner << s << nb_boundary << s << nb_unknown;
+		if (mode==MMA) cout << "},{"; else cout << '\n';
+		cout << get_time() << s << get_nb_cells();
+		if (mode==MMA) cout << "},"; else cout << '\n';
+
 		if (print_sols) {
+			if (mode==MMA) cout << "{";
 			for (vector<SolverOutputBox>::const_iterator it=solutions.begin(); it!=solutions.end(); it++) {
+				if (it!=solutions.begin() && mode==MMA) cout << ',';
+				if (mode==MMA) cout << "{{";
 				const IntervalVector& box=(*it);
 				for (int i=0; i<n; i++) {
-					cout << box[i].lb() << ' ' << box[i].ub() << ' ';
+					if (i>0) cout << s;
+					if (mode==MMA) cout << '{';
+					cout << box[i].lb() << s << box[i].ub();
+					if (mode==MMA) cout << '}';
 				}
-				cout << it->status << ' ';
+				if (mode==MMA) cout << '}';
+				cout << s << it->status;
 				if (m>0 && m<n) {
+					cout << s;
+					if (mode==MMA) cout << '{';
 					if (it->status!=SolverOutputBox::UNKNOWN && it->varset!=NULL) {
 						for (int i=0; i<it->varset->nb_param; i++) {
-							if (i>0) cout << ' ';
+							if (i>0) cout << s;
 							cout << (it->varset->param(i)) + 1;
 						}
 					} else {
 						for (int i=0; i<n-m; i++) {
-							if (i>0) cout << ' ';
+							if (i>0) cout << s;
 							cout << '0';
 						}
 					}
+					if (mode==MMA) cout << "},";
 				}
-				cout << endl;
+				if (mode==MMA) cout << "}"; else cout << endl;
 			}
+			if (mode==MMA) cout << '}';
 		}
+		if (mode==MMA) cout << "}\n";
 		return;
 	}
 

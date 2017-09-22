@@ -47,6 +47,18 @@ public:
 	typedef enum {SUCCESS, INFEASIBLE, NOT_ALL_VALIDATED, TIME_OUT, CELL_OVERFLOW} Status;
 
 	/**
+	 * \brief Boundary test strength
+	 *
+	 * ALL_TRUE:  by default for under constrained problems (0<m<n).
+	 * FULL_RANK: the gradients of all constraints (equalities and
+	 *            potentially activated inequalities) must be linearly independent.
+	 * HALF_BALL: **not implemented yet** the intersection of the box and the
+	 *            solution set is homeomorphic to a half-ball of R^n
+	 * ALL_FALSE: by default if m=0 or m=n (inequalities only/square systems)
+	 */
+	typedef enum { ALL_TRUE, FULL_RANK, HALF_BALL, ALL_FALSE } boundary_test_strength;
+
+	/**
 	 * \brief Build a solver with certification.
 	 *
 	 * \param sys     - The system to be solved
@@ -132,11 +144,20 @@ public:
 	Status next(const SolverOutputBox*& sol);
 
 	/**
+	 * \brief Report modes.
+	 *
+	 *  VERBOSE: human-readable
+	 *  RAW:     minimal information for automatic processing
+	 *  MMA:     Mathematica list
+	 */
+	typedef enum { VERBOSE, RAW, MMA } report_mode;
+
+	/**
 	 * \brief Displays on standard output a report of the last call to solve(...).
 	 *
 	 * See #format()
 	 */
-	void report(bool verbose=true, bool print_sols=false);
+	void report(report_mode mode, bool print_sols=false);
 
 	/**
 	 * \brief Return the format of the report.
@@ -200,6 +221,12 @@ public:
 	 * \brief Maximal width of boxes (criterion to force bisection)
 	 */
 	const Vector eps_x_max;
+
+
+	/**
+	 * \brief Boundary test strength
+	 */
+	boundary_test_strength boundary_test;
 
 	/**
 	 * \brief Maximum CPU time used by the solver.

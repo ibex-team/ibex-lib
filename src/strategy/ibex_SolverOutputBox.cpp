@@ -24,7 +24,7 @@ ostream& operator<<(ostream& os, const SolverOutputBox& sol) {
 		os << "[unknown]";
 		return os; // stop here
 		break;
-	case SolverOutputBox::INSIDE:
+	case SolverOutputBox::INNER:
 		os << "[inner";
 		break;
 	case SolverOutputBox::BOUNDARY:
