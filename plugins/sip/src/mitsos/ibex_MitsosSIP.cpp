@@ -52,6 +52,7 @@ void MitsosSIP::optimize(double eps_f) {
 
 	double f_LBD=NEG_INFINITY;
 	double f_UBD=POS_INFINITY;
+	double f_RES=POS_INFINITY;
 	double LBD_uplo, LBD_loup, UBD_uplo, UBD_loup;
 	double eps_g=0.1;
 	double r_g=1.5;
@@ -92,13 +93,12 @@ void MitsosSIP::optimize(double eps_f) {
 				f_LBD = LBD_uplo;
 				cout << "f_LBD = " << f_LBD << endl;
 			} else {
-				// new in Djelassi & Mitsos, JOGO 2016:
-				//eps_LBD_LLP =
+
 			}
 
 		}
 
-		if (solve_LLP(true, x_LBD, eps_LBD_LLP)) {
+		if (solve_LLP(true, x_LBD, eps_LBD_LLP)<=0) {
 			//cout << " found feasible x_LBD!! --->";
 			if (LBD_loup < f_UBD) {
 				//cout << " decreases loup!\n";
@@ -110,9 +110,9 @@ void MitsosSIP::optimize(double eps_f) {
 			}
 		}
 
-		if (solve_UBD(eps_g, eps_UBD_LLP, x_UBD, UBD_uplo, UBD_loup)) {
+		if (solve_UBD(eps_g, eps_UBD, x_UBD, UBD_uplo, UBD_loup)) {
 
-			if (solve_LLP(false, x_UBD, eps_ibex/10)) {
+			if (solve_LLP(false, x_UBD, eps_UBD_LLP)<=0) {
 				// x_UBD is feasible: update the loup
 				if (UBD_loup < f_UBD) {
 					f_UBD=UBD_loup;
@@ -179,20 +179,21 @@ bool MitsosSIP::solve_BD(double eps_g, double eps, Vector& x_opt, double& uplo, 
 /**
  * Solve the LLP problem.
  *
- * Return true if the LLP problems have all negative maximum.
- * This means that x_opt is feasible. Return false otherwise.
+ * Return the maximum of all the LLP problems. If this maximum
+ * is negative, then x_opt is SIP-feasible.
  *
- * If return false, update the LBD/UBD_samples (adding one
+ * Otherwise, the function update the LBD/UBD_samples (adding one
  * sample value for each parameter involved in the constraint).
  */
-bool MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
+double MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 
     //if (LBD)
         //cout << "===== LLP(LBD) ======" << endl;
     //else
         //cout << "===== LLP(UBD) ======" << endl;
 
-	bool all_satisfied=true; // by default
+	double result=NEG_INFINITY;
+
 	for (int c=0; c<sys.nb_ctr; c++) {
 		try {
 			LLP_Factory lpp_fac(*this,c,x_opt);
@@ -214,8 +215,11 @@ bool MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 				ibex_error("LLP failed");
 			}
 
+			// Note: LLP is min -g_i(x)
+			if (-o.get_uplo()>result)
+				result=-o.get_uplo();
+
 			if (o.get_uplo()>0) continue; // satisfied constraint
-			else all_satisfied=false;
 
 			Vector y_opt=o.get_loup_point().lb().subvector(0,max_sys.nb_var-1);
 			int j2=0;
@@ -246,7 +250,7 @@ bool MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 //		}
 //		cout << "]\n";
 //	}
-	return all_satisfied;
+	return result;
 }
 
 } // namespace ibex

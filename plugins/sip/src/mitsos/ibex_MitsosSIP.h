@@ -78,7 +78,7 @@ protected:
 	 * If return false, update the LBD/UBD_samples (adding one
 	 * sample value for each parameter involved in the constraint).
 	 */
-	bool solve_LLP(bool LBD, const Vector& x_opt, double eps);
+	double solve_LLP(bool LBD, const Vector& x_opt, double eps);
 
 	friend class BD_Factory;
 	friend class LLP_Factory;
