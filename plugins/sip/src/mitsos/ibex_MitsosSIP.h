@@ -25,11 +25,13 @@ public:
 	/**
 	 * \brief Build a SIP instance.
 	 *
-	 * \param sys    - The system "min f(x) s.t. g(x,y)<=0"
-	 * \param vars   - Symbols corresponding to x (variables)
-	 * \param params - Symbols corresponding to y (parameters)
+	 * \param sys       - The system "min f(x) s.t. g(x,y)<=0"
+	 * \param vars      - Symbols corresponding to x (variables)
+	 * \param params    - Symbols corresponding to y (parameters)
+	 * \param shared_.. - If true, the same sample points are shared
+	 *                    by LBD/UBD/ORA problems.
 	 */
-	MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  const std::vector<const ExprSymbol*>& params, const BitSet& is_param);
+	MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  const std::vector<const ExprSymbol*>& params, const BitSet& is_param, bool shared_discretization=true);
 
 	/**
 	 * \brief Delete this.
@@ -64,10 +66,18 @@ protected:
 	bool solve_UBD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup);
 
 	/**
-	 * \brief Solve the LBD or UBD problem.
+	 * \brief Solve the ORA problem.
 	 *
+	 * Return true if the problem is feasible, false otherwise.
+	 *
+	 * If true, set the optimum x* in "x_opt" and f* in the interval [uplo,loup].
 	 */
-	bool solve_BD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup);
+	bool solve_ORA(double f_RES, double eps, Vector& x_opt, double& uplo, double& loup);
+
+	/**
+	 * \brief Solve an optimization problem.
+	 */
+	bool solve(const System& sys, double eps, Vector& x_opt, double& uplo, double& loup);
 
 	/**
 	 * Solve the LLP problem.
@@ -98,17 +108,13 @@ protected:
 
 	mutable std::vector<double>* LBD_samples;      // sampled values for each parameter, for the LBD problem
 	mutable std::vector<double>* UBD_samples;      // sampled values for each parameter, for the UBD problem
+	mutable std::vector<double>* ORA_samples;      // sampled values for each parameter, for the ORA problem
+
+	const bool shared_discretization;
 };
 
 /*================================== inline implementations ========================================*/
 
-inline bool MitsosSIP::solve_LBD(double eps, Vector& x_opt, double& uplo, double& loup) {
-	return solve_BD(0, eps, x_opt, uplo, loup);
-}
-
-inline bool MitsosSIP::solve_UBD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup) {
-	return solve_BD(eps_g, eps, x_opt, uplo, loup);
-}
 
 } // namespace ibex
 

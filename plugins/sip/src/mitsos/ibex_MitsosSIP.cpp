@@ -18,10 +18,12 @@ using namespace std;
 
 namespace ibex {
 
-MitsosSIP::MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  const std::vector<const ExprSymbol*>& params, const BitSet& is_param) :
+MitsosSIP::MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  const std::vector<const ExprSymbol*>& params, const BitSet& is_param, bool shared_discretization) :
 			SIP(sys, vars, params, is_param), p_domain(p_arg),
 			LBD_samples(new vector<double>[p]),
-			UBD_samples(new vector<double>[p]) {
+			UBD_samples(shared_discretization? LBD_samples : new vector<double>[p]),
+			ORA_samples(shared_discretization? LBD_samples : new vector<double>[p]),
+			shared_discretization(shared_discretization) {
 
 	// Initialize the domains of parameters
 	for (int J=0; J<p_arg; J++) {
@@ -31,7 +33,10 @@ MitsosSIP::MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  c
 	// =========== initial sample values ==================
 	for (int j=0; j<p; j++) {
 		LBD_samples[j].push_back(param_init_domain[j].mid());
-		UBD_samples[j].push_back(param_init_domain[j].mid());
+		if (!shared_discretization) {
+			UBD_samples[j].push_back(param_init_domain[j].mid());
+			ORA_samples[j].push_back(param_init_domain[j].mid());
+		}
 	}
 
 }
@@ -42,26 +47,38 @@ MitsosSIP::~MitsosSIP() {
 	}
 
 	delete[] LBD_samples;
-	delete[] UBD_samples;
+
+	if (!shared_discretization) {
+		delete[] UBD_samples;
+		delete[] ORA_samples;
+	}
 }
 
 void MitsosSIP::optimize(double eps_f) {
 	Vector x_LBD(sys.nb_var);
 	Vector x_UBD(sys.nb_var);
 	Vector x_opt(sys.nb_var);
+	Vector x_ORA(sys.nb_var+1);
 
 	double f_LBD=NEG_INFINITY;
 	double f_UBD=POS_INFINITY;
 	double f_RES=POS_INFINITY;
-	double LBD_uplo, LBD_loup, UBD_uplo, UBD_loup;
+
+	double LBD_uplo, LBD_loup;
+	double UBD_uplo, UBD_loup;
+	double ORA_uplo, ORA_loup;
+
 	double eps_g=0.1;
 	double r_g=1.5;
 	double r_LLP=1.5;
 
 	// Note: we must have eps_f >> eps_LBD + eps_UBD,
 	//       see Theorem 1 in Djelassi & Mitsos, 2016
-	double eps_LBD=eps_f/10;
-	double eps_UBD=eps_f/10;
+	double eps_NLP=eps_f/10;
+	double eps_LBD=eps_NLP;
+	double eps_UBD=eps_NLP;
+	double eps_ORA=eps_NLP;
+
 	double eps_LBD_LLP=0.01; //eps_f/10;
 	cout << " eps_LBD_LLP=" << eps_LBD_LLP << endl;
 	double eps_UBD_LLP=0.01; //eps_f/10;
@@ -77,6 +94,8 @@ void MitsosSIP::optimize(double eps_f) {
 		clock_t iter_start = clock();
 		iteration++;
 		cout << "ITERATION : " << iteration << endl;
+
+		// ============================== LBD ==============================
 
 		if (!solve_LBD(eps_LBD, x_LBD, LBD_uplo, LBD_loup)) {
 			cout << "infeasible problem";
@@ -121,9 +140,12 @@ void MitsosSIP::optimize(double eps_f) {
 			cout << " eps_LBD_LLP=" << eps_LBD_LLP << endl;
 		}
 
-		bool UBD_changed;
 
-		do {
+		// ============================== UBD ==============================
+		bool UBD_changed=true ;
+
+		while (UBD_changed) {
+
 			UBD_changed=false;
 
 			if (solve_UBD(eps_g, eps_UBD, x_UBD, UBD_uplo, UBD_loup)) {
@@ -145,25 +167,74 @@ void MitsosSIP::optimize(double eps_f) {
 					}
 					eps_g = eps_g/r_g;
 					cout << " eps_g=" << eps_g << endl;
-				} else
+				} else {
 					// ====== added by chabs =============
 					if (g_max_UBD.lb()<=0) {
 						eps_UBD_LLP = g_max_UBD.diam() / r_LLP;
 						cout << " eps_UBD_LLP=" << eps_LBD_LLP << endl;
 					}
-
+				}
 			} else {
 				// if UBD is infeasible
 				eps_g = eps_g/r_g;
 				cout << "Infeasible" << endl;
 				cout << " eps_g=" << eps_g << endl;
 			}
-		} while (UBD_changed);
 
+			// ============================== ORA ==============================
+			bool LBD_changed=true;
 
-		// ============== Oracle ========================
-		if (f_UBD - f_LBD > eps_f) {
+			while (LBD_changed && (f_UBD - f_LBD > eps_f)) {
 
+				LBD_changed=false;
+
+				double f_RES=0.5*(f_UBD - f_LBD);
+
+				if (!solve_ORA(f_RES, eps_ORA, x_ORA, ORA_uplo, ORA_loup)) {
+					// if happens => bug
+					ibex_error("[SIP]: the oracle problem is infeasible");
+				}
+
+				double eta_lb=-ORA_loup;
+				double eta_ub=-ORA_uplo;
+
+				if (eta_ub<0) {
+					f_LBD = f_RES;
+					LBD_changed = true;
+					continue;
+				}
+
+				if (eta_lb<=0) break;
+
+				// *** eta_lb>0 ***
+
+				Interval g_max_UBD=solve_LLP(false, x_ORA, eps_UBD_LLP);
+
+				if (g_max_UBD.ub()<=0) {
+					// x_UBD is feasible: update the loup
+					if (UBD_loup > f_UBD) {
+						// if happens => bug
+						ibex_error("[SIP]: the oracle problem found a SIP-feasible point above the loup.");
+					}
+
+					if (eta_ub/r_g < eps_g) {
+						eps_g = eta_ub/r_g;
+						cout << " eps_g=" << eps_g << endl;
+					}
+
+					f_UBD = UBD_loup;
+					cout << " f_UBD = " << f_UBD << endl;
+					x_opt = x_UBD;
+					UBD_changed=true;
+
+				} else {
+					// ====== added by chabs =============
+					if (g_max_UBD.lb()<=0) {
+						eps_UBD_LLP = g_max_UBD.diam() / r_LLP;
+						cout << " eps_UBD_LLP=" << eps_LBD_LLP << endl;
+					}
+				}
+			}
 		}
 
 		last_iter_time = (clock() - iter_start)/(double) CLOCKS_PER_SEC;
@@ -178,18 +249,25 @@ void MitsosSIP::optimize(double eps_f) {
 	cout << "Last iteration time: " << last_iter_time << endl;
 }
 
-bool MitsosSIP::solve_BD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup) {
+bool MitsosSIP::solve_LBD(double eps, Vector& x_opt, double& uplo, double& loup) {
+	//cout << " ===== LBD ======" << endl;
+	System LBD_sys(LBD_Factory(*this));
+	return solve(LBD_sys, eps, x_opt, uplo, loup);
+}
 
-    //if (eps_g>0)
-        //cout << "===== UBD ======" << endl;
-    //else
-        //cout << "===== LBD ======" << endl;
+bool MitsosSIP::solve_UBD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup) {
+	//cout << " ===== UBD ======" << endl;
+	System UBD_sys(UBD_Factory(*this,eps_g));
+	return solve(UBD_sys, eps, x_opt, uplo, loup);
+}
 
-	BD_Factory fac(*this, eps_g);
+bool MitsosSIP::solve_ORA(double f_RES, double eps, Vector& x_opt, double& uplo, double& loup) {
+	//cout << " ===== ORA ======" << endl;
+	System ORA_sys(ORA_Factory(*this,f_RES));
+	return solve(ORA_sys, eps, x_opt, uplo, loup);
+}
 
-	System sub_sys(fac);
-
-	//cout << sub_sys << endl;
+bool MitsosSIP::solve(const System& sub_sys, double eps, Vector& x_opt, double& uplo, double& loup) {
 
 	//DefaultOptimizer o(sub_sys,eps,eps);
 	DefaultOptimizer o(sub_sys,0,0,eps);

@@ -18,11 +18,27 @@ using namespace std;
 
 namespace ibex {
 
-BD_Factory::BD_Factory(const MitsosSIP& sip, double eps_g) : new_vars(sip.n_arg) {
+BD_Factory::BD_Factory(const MitsosSIP& sip, BD_Factory::problem_type problem) :
+		sip(sip), problem(problem), new_vars(problem==ORA? sip.n_arg +1 : sip.n_arg) {
 
+	// add "x" variable
 	varcopy(sip.vars,new_vars);
 
+	if (problem==ORA)
+		// add "eta" variable
+		new_vars.set_ref(sip.n_arg, ExprSymbol::new_("eta",Dim::scalar()));
+
 	add_var(new_vars);
+};
+
+void BD_Factory::add_discretized_ctr(double eps_g) {
+
+	std::vector<double>* samples;
+	switch (problem) {
+	case LBD : samples = sip.LBD_samples; break;
+	case UBD : samples = sip.UBD_samples; break;
+	case ORA : samples = sip.ORA_samples; break;
+	}
 
 	// For each constraint (even non-quantified)
 	for (int c=0; c<sip.sys.nb_ctr; c++) {
@@ -34,7 +50,7 @@ BD_Factory::BD_Factory(const MitsosSIP& sip, double eps_g) : new_vars(sip.n_arg)
 		Vector p_box(sip.p);
 
 		for (int j=0; j<sip.p; j++)
-			p_box[j]=eps_g>0? sip.UBD_samples[j].front() : sip.LBD_samples[j].front();
+			p_box[j]=samples[j].front();
 
 		// push this initial combination in a list
 		list<Vector> p_boxes;
@@ -53,18 +69,10 @@ BD_Factory::BD_Factory(const MitsosSIP& sip, double eps_g) : new_vars(sip.n_arg)
 					p_box=*it2;
 					// ... we instantiate the domain of the parameter to each of its current
 					// sampled values
-					if (eps_g>0) {
-						for (vector<double>::iterator it=sip.UBD_samples[j].begin(); it!=sip.UBD_samples[j].end(); it++) {
-							p_box[j]=*it;
-							p_boxes.push_front(p_box); // pushed at the beginning -> no impact for the enclosing loop
-							//cout << "  add p_box:" << p_box << endl;
-						}
-					} else {
-						for (vector<double>::iterator it=sip.LBD_samples[j].begin(); it!=sip.LBD_samples[j].end(); it++) {
-							p_box[j]=*it;
-							p_boxes.push_front(p_box); // pushed at the beginning -> no impact for the enclosing loop
-							//cout << "  add p_box:" << p_box << endl;
-						}
+					for (vector<double>::iterator it=samples[j].begin(); it!=samples[j].end(); it++) {
+						p_box[j]=*it;
+						p_boxes.push_front(p_box); // pushed at the beginning -> no impact for the enclosing loop
+						//cout << "  add p_box:" << p_box << endl;
 					}
 				}
 			} else {
@@ -88,18 +96,24 @@ BD_Factory::BD_Factory(const MitsosSIP& sip, double eps_g) : new_vars(sip.n_arg)
 					// the LBD/UBD problem
 					new_args.set_ref(K,new_vars[I++]);
 				else
-					// a parameter because a constant
+					// a parameter becomes a constant
 					new_args.set_ref(K,ExprConstant::new_(sip.p_domain[J++],true));
 			}
 			const ExprNode* expr_ctr_tmp=&sip.sys.ctrs[c].f(new_args);
 
-			// In the UBD problem, shift the constraint with eps_g
-			if (eps_g>0) {
+			if (problem==UBD) {
+				// In the UBD problem, shift the constraint with eps_g
 				const ExprConstant& eps_node=ExprConstant::new_scalar(sip.sys.ctrs[c].op==LEQ ? eps_g : -eps_g);
 				expr_ctr_tmp = & (*expr_ctr_tmp + eps_node);
+			} else if (problem==ORA) {
+				// in the ORA problem, shift the constraint with eta
+				const ExprNode& eta=new_vars[sip.n_arg];
+				const ExprNode& eta_node=sip.sys.ctrs[c].op==LEQ ? eta : -eta;
+				expr_ctr_tmp = & (*expr_ctr_tmp + eta_node);
 			}
 
-			// cleanup
+			// cleanup the constants created which
+			// do not appear in the constraint expression
 			for (int K=0; K<sip.n_arg+sip.p_arg; K++) {
 				if (sip.is_param[K] && new_args[K].fathers.is_empty()) delete &new_args[K];
 			}
@@ -114,8 +128,9 @@ BD_Factory::BD_Factory(const MitsosSIP& sip, double eps_g) : new_vars(sip.n_arg)
 		}
 		//cout << endl;
 	}
+}
 
-
+void BD_Factory::add_gaol(double f_RES) {
 	Array<const ExprNode> new_args(sip.n_arg+sip.p_arg);
 	int I=0;
 	int J=0;
@@ -128,7 +143,14 @@ BD_Factory::BD_Factory(const MitsosSIP& sip, double eps_g) : new_vars(sip.n_arg)
 	}
 	const ExprNode& goal_node=(*sip.sys.goal)(new_args);
 
-	add_goal(goal_node);
+	if (problem==ORA) {
+		const ExprConstant& f_RES_node=ExprConstant::new_scalar(f_RES);
+		add_ctr(goal_node <= f_RES);
+		const ExprNode& eta=new_vars[sip.n_arg];
+		add_goal(-eta);
+	} else {
+		add_goal(goal_node);
+	}
 
 	// cleanup
 	for (int K=0; K<sip.n_arg+sip.p_arg; K++) {
@@ -139,8 +161,7 @@ BD_Factory::BD_Factory(const MitsosSIP& sip, double eps_g) : new_vars(sip.n_arg)
 		}
 	}
 	cleanup(goal_node,false);
-};
-
+}
 
 BD_Factory::~BD_Factory() {
 	// cleanup
@@ -148,5 +169,20 @@ BD_Factory::~BD_Factory() {
 		delete &new_vars[I];
 }
 
+
+LBD_Factory::LBD_Factory(const MitsosSIP& sip) : BD_Factory(sip, LBD) {
+	add_discretized_ctr(0 /*ignored*/);
+	add_gaol(0 /*ignored*/);
+}
+
+UBD_Factory::UBD_Factory(const MitsosSIP& sip, double eps_g) : BD_Factory(sip, UBD) {
+	add_discretized_ctr(eps_g);
+	add_gaol(0 /*ignored*/);
+}
+
+ORA_Factory::ORA_Factory(const MitsosSIP& sip, double f_RES) : BD_Factory(sip, ORA) {
+	add_gaol(f_RES);
+	add_discretized_ctr(0 /*ignored*/);
+}
 
 } // namespace ibex
