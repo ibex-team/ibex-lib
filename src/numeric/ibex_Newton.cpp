@@ -167,13 +167,17 @@ bool inflating_newton(const Fnc& f, const VarSet* vars, const IntervalVector& fu
 	IntervalVector Fmid(n);      // Evaluation of f at the midpoint
 	IntervalMatrix J(n, n);	     // Hansen matrix of f % variables
 
-//	IntervalVector* p=NULL;      // Parameter box
-//	IntervalVector* midp=NULL;   // Parameter box midpoint
+	// Following variables are introduced just to use a
+	// centered-form on parameters when evaluating Fmid
+	IntervalVector* p=NULL;      // Parameter box
+	IntervalVector* midp=NULL;   // Parameter box midpoint
+	// -------------------------------------------------
+
 	IntervalMatrix* Jp=NULL;     // Jacobian % parameters
 //
 	if (vars) {
-//		p=new IntervalVector(vars->param_box(full_box));
-//		midp=new IntervalVector(p->mid());
+		p=new IntervalVector(vars->param_box(full_box));
+		midp=new IntervalVector(p->mid());
 		Jp=new IntervalMatrix(n,vars->nb_param);
 	}
 
@@ -216,9 +220,9 @@ bool inflating_newton(const Fnc& f, const VarSet* vars, const IntervalVector& fu
 
 		// Use the jacobian % parameters to calculate
 		// a mean-value form for Fmid
-//		if (vars) {
-//			Fmid &= f.eval_vector(vars->full_box(mid,*midp))+(*Jp)*(*p-*midp);
-//		}
+		if (vars) {
+			Fmid &= f.eval_vector(vars->full_box(mid,*midp))+(*Jp)*(*p-*midp);
+		}
 
 		y = mid-box;
 		//if (y==y1) break; <--- allowed in Newton inflation
@@ -296,8 +300,8 @@ bool inflating_newton(const Fnc& f, const VarSet* vars, const IntervalVector& fu
 	}
 
 	if (vars) {
-//		delete p;
-//		delete midp;
+		delete p;
+		delete midp;
 		delete Jp;
 		delete &full_mid;
 	}
