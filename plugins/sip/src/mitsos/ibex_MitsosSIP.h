@@ -70,15 +70,24 @@ protected:
 	bool solve_BD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup);
 
 	/**
-	 * \brief Solve the LLP problem.
+	 * Solve the LLP problem.
 	 *
-	 * Return true if the LLP problems have all negative maximum.
-	 * This means that x_opt is feasible. Return false otherwise.
+	 * Return an enclosure [lb,ub] of
 	 *
-	 * If return false, update the LBD/UBD_samples (adding one
-	 * sample value for each parameter involved in the constraint).
+	 *   g(x_opt) = max_i max_y g_i(x_opt, y).
+	 *
+	 * with relative precision less or equal to "eps".
+	 *
+	 * --> If ub<=0, then x_opt is SIP-feasible.
+	 *
+	 * --> Otherwise, for all SIC n°i such that max_y g_i(x_opt, y)>0
+	 * the LBD/UBD_samples are updated (adding one sample value y_j* for each
+	 * parameter involved in the constraint, y_j being the maximizer).
+	 *
+	 * --> If ub>0 and lb<=0 then nothing happens and the precision "eps"
+	 *     has to be decreased (see #optimize(..))
 	 */
-	double solve_LLP(bool LBD, const Vector& x_opt, double eps);
+	Interval solve_LLP(bool LBD, const Vector& x_opt, double eps);
 
 	friend class BD_Factory;
 	friend class LLP_Factory;
