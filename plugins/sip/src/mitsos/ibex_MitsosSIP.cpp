@@ -1,4 +1,4 @@
-/* ============================================================================
+	/* ============================================================================
  * I B E X - ibex_MitsosSIP.cpp
  * ============================================================================
  * Copyright   : IMT Atlantique (FRANCE)
@@ -14,13 +14,15 @@
 #include "ibex_LLP_Factory.h"
 #include "ibex_DefaultOptimizer.h"
 
+#include <sstream>
+
 using namespace std;
 
 namespace ibex {
 
 MitsosSIP::MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  const std::vector<const ExprSymbol*>& params, const BitSet& is_param, bool shared_discretization) :
 			SIP(sys, vars, params, is_param), p_domain(p_arg),
-			LBD_samples(new vector<double>[p]),
+			trace(1), l_max(20), LBD_samples(new vector<double>[p]),
 			UBD_samples(shared_discretization? LBD_samples : new vector<double>[p]),
 			ORA_samples(shared_discretization? LBD_samples : new vector<double>[p]),
 			shared_discretization(shared_discretization) {
@@ -69,6 +71,7 @@ void MitsosSIP::optimize(double eps_f) {
 	double ORA_uplo, ORA_loup;
 
 	double eps_g=0.1;
+
 	double r_g=1.5;
 	double r_LLP=1.5;
 
@@ -79,32 +82,46 @@ void MitsosSIP::optimize(double eps_f) {
 	double eps_UBD=eps_NLP;
 	double eps_ORA=eps_NLP;
 
-	double eps_LBD_LLP=0.01; //eps_f/10;
-	cout << " eps_LBD_LLP=" << eps_LBD_LLP << endl;
-	double eps_UBD_LLP=0.01; //eps_f/10;
-	cout << " eps_UBD_LLP=" << eps_UBD_LLP << endl;
+	double eps_LLP=eps_NLP;
 
-	//double eps_ibex=1e-5;
+	// Enclosure of max g_i(x_UBD).
+	// the upper bound will be used in the ORA problem
+	// for the domain of the objective (eta)
+	Interval g_max_UBD=Interval::ALL_REALS;
+
+	if (trace>=1) {
+		cout << "=========================" << endl;
+		cout << "INIT : " << endl;
+		cout << " eps_g=" << eps_g << endl;
+		if (trace>=1) {
+			cout << " eps_LLP=" << eps_LLP << endl;
+		}
+	}
+
 	int iteration = 0;
 	clock_t start = clock();
 	double last_iter_time = 0;
 
 	while (f_UBD - f_LBD > eps_f) {
-		cout << "=========================" << endl;
 		clock_t iter_start = clock();
 		iteration++;
-		cout << "ITERATION : " << iteration << endl;
 
 		// ============================== LBD ==============================
+		if (trace>=1) {
+			cout << "=========================" << endl;
+			cout << "ITERATION : " << iteration << endl;
+			cout << " * LBD" << endl;
+		}
 
 		if (!solve_LBD(eps_LBD, x_LBD, LBD_uplo, LBD_loup)) {
-			cout << "infeasible problem";
+			cout << "   infeasible problem";
 			exit(0);
 		}
 
 		if (LBD_uplo < f_LBD) {
-			cout << "   uplo=" << f_LBD << "  LBD_uplo=" << LBD_uplo << endl;
-			ibex_warning("uplo is decreasing");
+			stringstream msg;
+			msg << "[SIP]: uplo is decreasing (uplo=" << f_LBD << "  LBD_uplo=" << LBD_uplo << ")";
+			ibex_warning(msg.str());
 
 			// note: in this case, do we really have to solve LLP?
 			// this may add useless parameter values
@@ -115,14 +132,13 @@ void MitsosSIP::optimize(double eps_f) {
 
 			if (LBD_uplo > f_LBD) {
 				f_LBD = LBD_uplo;
-				cout << " f_LBD = " << f_LBD << endl;
+				if (trace>=1) cout << "\033[33m   f_LBD = " << f_LBD << "\033[0m" << endl;
 			} else {
 
 			}
-
 		}
 
-		Interval g_max_LBD=solve_LLP(true, x_LBD, eps_LBD_LLP);
+		Interval g_max_LBD=solve_LLP(true, x_LBD, eps_LLP);
 
 		if (g_max_LBD.ub()<=0) {
 			//cout << " found feasible x_LBD!! --->";
@@ -131,13 +147,13 @@ void MitsosSIP::optimize(double eps_f) {
 				f_UBD=LBD_loup;
 				x_opt=x_LBD;
 			} else {
-				ibex_warning("LBD finds a SIP-feasible point that does not decrease the UB!");
+				ibex_warning("[SIP]: LBD finds a SIP-feasible point that does not decrease the UB!");
 				//cout << " don't decrease loup...\n";
-				//						eps_ibex = eps_ibex/2.0;
+				//eps_ibex = eps_ibex/2.0;
 			}
 		} else if (g_max_LBD.lb()<=0) {
-			eps_LBD_LLP = g_max_LBD.diam() / r_LLP;
-			cout << " eps_LBD_LLP=" << eps_LBD_LLP << endl;
+			eps_LLP = g_max_LBD.diam() / r_LLP;
+			if (trace>=1) cout << "   eps_LLP=" << eps_LLP << endl;
 		}
 
 
@@ -146,51 +162,67 @@ void MitsosSIP::optimize(double eps_f) {
 
 		while (UBD_changed) {
 
-			UBD_changed=false;
+			if (trace>=1) cout << " * UBD" << endl;
+			while (UBD_changed) {
 
-			if (solve_UBD(eps_g, eps_UBD, x_UBD, UBD_uplo, UBD_loup)) {
+				UBD_changed=false;
 
-				if (eps_UBD_LLP > eps_g) {
-					eps_UBD_LLP = eps_g/r_g;
-					cout << " eps_UBD_LLP=" << eps_UBD_LLP << endl;
-				}
+				if (solve_UBD(eps_g, eps_UBD, x_UBD, UBD_uplo, UBD_loup)) {
 
-				Interval g_max_UBD=solve_LLP(false, x_UBD, eps_UBD_LLP);
-
-				if (g_max_UBD.ub()<=0) {
-					// x_UBD is feasible: update the loup
-					if (UBD_loup < f_UBD) {
-						f_UBD=UBD_loup;
-						cout << " f_UBD = " << f_UBD << endl;
-						x_opt=x_UBD;
-						UBD_changed=true;
+					if (eps_LLP > eps_g) {
+						eps_LLP = eps_g/r_g;
+						if (trace>=1) cout << "   eps_LLP=" << eps_LLP << endl;
 					}
-					eps_g = eps_g/r_g;
-					cout << " eps_g=" << eps_g << endl;
+
+					g_max_UBD=solve_LLP(false, x_UBD, eps_LLP);
+
+					if (g_max_UBD.ub()<=0) {
+						// x_UBD is feasible: update the loup
+						if (UBD_loup < f_UBD) {
+							f_UBD=UBD_loup;
+							if (trace>=1) cout << "\033[32m   f_UBD = " << f_UBD << "\033[0m" << endl;
+							x_opt=x_UBD;
+							UBD_changed=true;
+						}
+						eps_g = eps_g/r_g;
+						if (trace>=1) cout << "   eps_g=" << eps_g << endl;
+					} else {
+						// ====== added by chabs =============
+						if (g_max_UBD.lb()<=0) {
+							eps_LLP = g_max_UBD.diam() / r_LLP;
+							if (trace>=1) cout << "   eps_LLP=" << eps_LLP << endl;
+						}
+					}
 				} else {
-					// ====== added by chabs =============
-					if (g_max_UBD.lb()<=0) {
-						eps_UBD_LLP = g_max_UBD.diam() / r_LLP;
-						cout << " eps_UBD_LLP=" << eps_LBD_LLP << endl;
-					}
+					// if UBD is infeasible
+					eps_g = eps_g/r_g;
+					if (trace>=1) cout << "   infeasible" << endl;
+					if (trace>=1) cout << "   eps_g=" << eps_g << endl;
 				}
-			} else {
-				// if UBD is infeasible
-				eps_g = eps_g/r_g;
-				cout << "Infeasible" << endl;
-				cout << " eps_g=" << eps_g << endl;
 			}
 
 			// ============================== ORA ==============================
+			if (f_LBD==NEG_INFINITY || f_UBD==POS_INFINITY) break;
+
+			if (trace>=1) cout << " * ORA" << endl;
+
 			bool LBD_changed=true;
+			int l=0;
 
-			while (LBD_changed && (f_UBD - f_LBD > eps_f)) {
+			while ((l<l_max) && LBD_changed && (f_UBD - f_LBD > eps_f)) {
 
+				l++;
 				LBD_changed=false;
 
-				double f_RES=0.5*(f_UBD - f_LBD);
+				double f_RES=0.5*(f_UBD + f_LBD);
 
-				if (!solve_ORA(f_RES, eps_ORA, x_ORA, ORA_uplo, ORA_loup)) {
+				// note: the oracle is called several times
+				// consecutively only if the lower bound has changed
+				// so x_UBD does actually correspond to the last LLP
+				// program solved (the SIP-feasibility of x_ORA has not
+				// been called yet), and g_max_UBD.ub() is a valid upper
+				// bound for eta.
+				if (!solve_ORA(f_RES, x_LBD, -g_max_UBD.ub(), eps_ORA, x_ORA, ORA_uplo, ORA_loup)) {
 					// if happens => bug
 					ibex_error("[SIP]: the oracle problem is infeasible");
 				}
@@ -200,15 +232,17 @@ void MitsosSIP::optimize(double eps_f) {
 
 				if (eta_ub<0) {
 					f_LBD = f_RES;
+					x_LBD = x_ORA;
 					LBD_changed = true;
+					if (trace>=1) cout << "\033[33m   f_LBD = " << f_LBD << "\033[0m" << endl;
 					continue;
 				}
 
 				if (eta_lb<=0) break;
 
 				// *** eta_lb>0 ***
-
-				Interval g_max_UBD=solve_LLP(false, x_ORA, eps_UBD_LLP);
+				// SIP-feasibility test of x_ORA
+				Interval g_max_ORA=solve_LLP(false, x_ORA, eps_LLP);
 
 				if (g_max_UBD.ub()<=0) {
 					// x_UBD is feasible: update the loup
@@ -219,19 +253,19 @@ void MitsosSIP::optimize(double eps_f) {
 
 					if (eta_ub/r_g < eps_g) {
 						eps_g = eta_ub/r_g;
-						cout << " eps_g=" << eps_g << endl;
+						if (trace>=1) cout << "   eps_g=" << eps_g << endl;
 					}
 
 					f_UBD = UBD_loup;
-					cout << " f_UBD = " << f_UBD << endl;
+					if (trace>=1) cout << "   f_UBD = " << f_UBD << endl;
 					x_opt = x_UBD;
 					UBD_changed=true;
 
 				} else {
 					// ====== added by chabs =============
 					if (g_max_UBD.lb()<=0) {
-						eps_UBD_LLP = g_max_UBD.diam() / r_LLP;
-						cout << " eps_UBD_LLP=" << eps_LBD_LLP << endl;
+						eps_LLP = g_max_UBD.diam() / r_LLP;
+						if (trace>=1) cout << "   eps_LLP=" << eps_LLP << endl;
 					}
 				}
 			}
@@ -250,52 +284,60 @@ void MitsosSIP::optimize(double eps_f) {
 }
 
 bool MitsosSIP::solve_LBD(double eps, Vector& x_opt, double& uplo, double& loup) {
-	//cout << " ===== LBD ======" << endl;
 	System LBD_sys(LBD_Factory(*this));
 	return solve(LBD_sys, eps, x_opt, uplo, loup);
 }
 
 bool MitsosSIP::solve_UBD(double eps_g, double eps, Vector& x_opt, double& uplo, double& loup) {
-	//cout << " ===== UBD ======" << endl;
 	System UBD_sys(UBD_Factory(*this,eps_g));
 	return solve(UBD_sys, eps, x_opt, uplo, loup);
 }
 
-bool MitsosSIP::solve_ORA(double f_RES, double eps, Vector& x_opt, double& uplo, double& loup) {
-	//cout << " ===== ORA ======" << endl;
+bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eta_ub, double eps, Vector& x_opt, double& uplo, double& loup) {
 	System ORA_sys(ORA_Factory(*this,f_RES));
+
+	// compute initial domain of eta
+	IntervalVector g_x_LBD = ORA_sys.f_ctrs.eval_vector(x_LBD);
+	double eta_lb=-(g_x_LBD[0].ub());
+	for (int i=1; i<g_x_LBD.size(); i++)
+		eta_lb=std::min(eta_lb, -g_x_LBD[i].ub());
+
+	Interval eta_domain(eta_lb, eta_ub);
+
+	if (eta_domain.is_unbounded()) {
+		eta_domain = Interval(-1e8,1e8);
+		ibex_warning("[SIP] unbounded domain for objective variable in the \"oracle\" problem (replaced by [-1e8,1e8])");
+	}
+
 	return solve(ORA_sys, eps, x_opt, uplo, loup);
 }
 
 bool MitsosSIP::solve(const System& sub_sys, double eps, Vector& x_opt, double& uplo, double& loup) {
 
 	//DefaultOptimizer o(sub_sys,eps,eps);
-	DefaultOptimizer o(sub_sys,0,0,eps);
+	DefaultOptimizer o(sub_sys,0,eps,eps);
 
-	Optimizer::Status status=o.optimize(sys.box);
+	Optimizer::Status status=o.optimize(sub_sys.box);
+
+	//o.report();
 
 	if (status!=Optimizer::SUCCESS && status!=Optimizer::INFEASIBLE) {
-		ibex_error("lower bounding failed");
+		ibex_error("[SIP] system solving failed");
 	}
 
 	uplo = o.get_uplo();
 	loup = o.get_loup();
 	x_opt = o.get_loup_point().lb().subvector(0,sub_sys.nb_var-1);
 
-    //if (status==Optimizer::SUCCESS)
-        //cout << "x*=" << x_opt << " " << "f*=" << uplo << endl;
-    //else
-        //cout << "(infeasible)" << endl;
-
 	return status==Optimizer::SUCCESS;
 }
 
 Interval MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 
-    //if (LBD)
-        //cout << "===== LLP(LBD) ======" << endl;
-    //else
-        //cout << "===== LLP(UBD) ======" << endl;
+    if (LBD)
+        cout << "   LLP: ";
+    else
+        cout << "   LLP: ";
 
 	double lb=NEG_INFINITY;
 	double ub=NEG_INFINITY;
@@ -348,18 +390,18 @@ Interval MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 		}
 	}
 
-    //cout << (LBD? "  y_LBD" : "  y_UBD");
-//
-//	if (all_satisfied)
-//		cout << " SAT!" << endl;
-//	else {
-//		cout << " size=[";
-//		for (int j=0; j<p; j++) {
-//			if (j>0) cout << ' ';
-//			cout << (LBD? LBD_samples[j].size() : UBD_samples[j].size());
-//		}
-//		cout << "]\n";
-//	}
+	if (trace>=1) {
+		if (ub<=0)
+			cout << " SIP-feasible!" << endl;
+		else {
+			cout << " samples size=[";
+			for (int j=0; j<p; j++) {
+				if (j>0) cout << ' ';
+				cout << (LBD? LBD_samples[j].size() : UBD_samples[j].size());
+			}
+			cout << "]\n";
+		}
+	}
 	return Interval(lb,ub);
 }
 

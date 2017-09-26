@@ -83,6 +83,8 @@ int main(int argc, char** argv) {
 
 		MitsosSIP sip(sys, vars, params, is_param);
 
+		sip.trace = 1;
+
 		sip.optimize(eps_f);
 	}
 	catch(ibex::SyntaxError& e) {

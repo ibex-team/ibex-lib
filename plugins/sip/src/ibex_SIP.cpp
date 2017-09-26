@@ -18,7 +18,8 @@ namespace ibex {
 SIP::SIP(System& sys, const vector<const ExprSymbol*>& vars,  const vector<const ExprSymbol*>& params, const BitSet& is_param) :
 	sys(sys), vars(vars), params(params), is_param(is_param), n_arg(vars.size()), p_arg(params.size()),
 	varset(sys.f_ctrs,Array<const ExprSymbol>(params),false), n(varset.nb_var), p(varset.nb_param),
-	param_init_domain(varset.param_box(sys.box)), nodes(new ExprSubNodes*[sys.nb_ctr]) {
+	var_init_domain(varset.var_box(sys.box)), param_init_domain(varset.param_box(sys.box)),
+	nodes(new ExprSubNodes*[sys.nb_ctr]) {
 
 	assert(n_arg+p_arg==sys.f_ctrs.nb_arg());
 

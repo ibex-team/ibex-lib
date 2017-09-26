@@ -63,6 +63,7 @@ public:
 	const VarSet varset;                           // which components in a box are parameter
 	const int n;                                   // number of components corresponding to variables
 	const int p;                                   // number of components corresponding to parameters
+	const IntervalVector var_init_domain;          // domain of variables
 	const IntervalVector param_init_domain;        // domain of parameters
 
 

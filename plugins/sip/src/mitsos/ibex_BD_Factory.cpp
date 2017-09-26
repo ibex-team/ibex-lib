@@ -24,11 +24,17 @@ BD_Factory::BD_Factory(const MitsosSIP& sip, BD_Factory::problem_type problem) :
 	// add "x" variable
 	varcopy(sip.vars,new_vars);
 
-	if (problem==ORA)
+	if (problem==ORA) {
 		// add "eta" variable
 		new_vars.set_ref(sip.n_arg, ExprSymbol::new_("eta",Dim::scalar()));
 
-	add_var(new_vars);
+		// initial domain of eta is computed dynamically
+		// see solve_ORA(...)
+
+		add_var(new_vars, cart_prod(sip.var_init_domain, IntervalVector(1)));
+	} else {
+		add_var(new_vars, sip.var_init_domain);
+	}
 };
 
 void BD_Factory::add_discretized_ctr(double eps_g) {
