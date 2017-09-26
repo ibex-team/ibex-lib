@@ -252,9 +252,11 @@ Solver::Status Solver::solve(const IntervalVector& init_box) {
 			break;
 		case TIME_OUT :
 			status = TIME_OUT;
+			flush();
 			return status;
 		case CELL_OVERFLOW:
 			status = CELL_OVERFLOW;
+			flush();
 			return status;
 		}
 	}
@@ -419,6 +421,19 @@ void Solver::store_sol(const SolverOutputBox& sol) {
 	solutions.push_back(sol);
 
 	if (trace >=1) cout << sol << endl;
+}
+
+void Solver::flush() {
+	while (!buffer.empty()) {
+		Cell* cell=buffer.top();
+		SolverOutputBox sol(n);
+		(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
+		sol._existence=cell->box;
+		sol._unicity=NULL;
+		solutions.push_back(sol);
+		nb_unknown++;
+		delete buffer.pop();
+	}
 }
 
 std::string Solver::format() {

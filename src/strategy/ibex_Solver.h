@@ -303,6 +303,10 @@ protected:
 	 */
 	void time_limit_check();
 
+	/**
+	 * \brief Flush
+	 */
+	void flush();
 
 	BitSet impact;
 
