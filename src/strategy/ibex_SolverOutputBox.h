@@ -122,6 +122,7 @@ public:
 
 private:
 	friend class Solver;
+	friend class Manifold;
 
 	SolverOutputBox(int n);
 
