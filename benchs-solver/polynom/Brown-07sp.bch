@@ -1,0 +1,20 @@
+//Time of Generation:0.032
+Variables
+
+x[7] in [-1e8,1e8];
+
+SE[1] in [-1e10,1e10];
+
+Constraints
+//Original System
+-8 + x(1) + SE(1) = 0;
+-8 + x(2) + SE(1) = 0;
+-8 + x(3) + SE(1) = 0;
+-8 + x(4) + SE(1) = 0;
+-8 + x(5) + SE(1) = 0;
+-8 + x(6) + SE(1) = 0;
+-1 + x(1)*x(2)*x(3)*x(4)*x(5)*x(6)*x(7) = 0;
+SE(1)= x(1) + x(2) + x(3) + x(4) + x(5) + x(6) + x(7);
+end
+
+
