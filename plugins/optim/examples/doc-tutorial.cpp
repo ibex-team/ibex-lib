@@ -16,7 +16,7 @@
 #endif
 
 #ifndef IBEX_BENCHS_DIR
-  #define IBEX_BENCHS_DIR "../../../benchs"
+  #define IBEX_BENCHS_DIR "../../../benchs-solver"
 #endif
 
 using namespace std;
