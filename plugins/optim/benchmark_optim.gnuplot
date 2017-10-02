@@ -26,4 +26,5 @@ set arrow from prec_max, graph 0 to prec_max, graph 1 as 1
 set arrow from prec_min, graph 0 to prec_min, graph 1 as 1
 set arrow from graph 0, time_limit to graph 1, time_limit as 1
 
-plot datafile using "eps":"time" with lp ps 0.5 lc rgb "red" notitle
+plot datafile using "eps":"time" with points ps 0.5 lc rgb "red" notitle,\
+     datafile using "eps":"time" smooth unique lc rgb "orange" notitle
