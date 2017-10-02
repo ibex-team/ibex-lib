@@ -8,8 +8,8 @@
 // Last Update : May 15, 2013
 //============================================================================
 
-#include "ibex_LinearSolver.h"
 #include  <cfloat>
+#include "ibex_LPSolver.h"
 
 namespace ibex {
 

@@ -13,7 +13,7 @@
 
 #include "ibex_Linearizer.h"
 #include "ibex_Ctc.h"
-#include "ibex_LinearSolver.h"
+#include "ibex_LPSolver.h"
 #include "ibex_BitSet.h"
 
 namespace ibex {

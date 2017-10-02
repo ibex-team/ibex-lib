@@ -15,7 +15,7 @@
 
 #include "ibex_Newton.h"
 #include "ibex_Linear.h"
-#include "ibex_LinearSolver.h"
+#include "ibex_LPSolver.h"
 #include "ibex_CtcFwdBwd.h"
 
 #include <iomanip>
