@@ -50,14 +50,16 @@ public class Ibex {
 	 * An IBEX (and only one) object has to be created for each different CSP.
 	 * The IBEX object gathers all the constraints.
 	 *
-	 * @param vars - An array of n booleans (where n is the total number of variables of the CSP).
-	 *               Each boolean indicates whether a variable is integral or not. 
-	 *               int_var[i]==true <=> the ith variable is integral.
+	 * @param prec - An array of n double (where n is the total number of variables of the CSP).
+	 *               Each double indicates whether a variable is integral or not, and in the
+	 *               case of a real variable, the precision required. More precisely:
+	 *                  
+	 *               _prec[i]==-1 => the ith variable is integral. 
+	 *                prec[i]>=0  => the ith variable is real and the precision is prec[i].
 	 *               
-	 * @param prec - The precision required on real variables.
-    */
-    public Ibex(int[] vars, double prec) {
-       init(vars, prec);
+     */
+    public Ibex(double[] prec) {
+       init(prec);
     }
 
 	/**
@@ -224,7 +226,7 @@ public class Ibex {
 	 *
 	 * This method is automatically called by the constructor.
 	 */
-	private native void init(int[] vars, double prec);
+	private native void init(double[] prec);
 	
 	// Internal: do not modify!
 	private int id;
