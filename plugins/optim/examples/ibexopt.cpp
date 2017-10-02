@@ -1,6 +1,9 @@
 //============================================================================
 //                                  I B E X
-//               Default optimizer
+//
+//                               ************
+//                                  IbexOpt
+//                               ************
 //
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
@@ -93,7 +96,7 @@ int main(int argc, char** argv) {
 	}
 
 	if (filename.Get()=="") {
-		ibex_error("no input file (try defaultoptimizer --help)");
+		ibex_error("no input file (try ibexopt --help)");
 		exit(1);
 	}
 

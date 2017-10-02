@@ -1,9 +1,8 @@
 //============================================================================
 //                                  I B E X
+//
 //                               ************
 //                                 IbexSolve
-//
-//                            The default solver
 //                               ************
 //
 // Author      : Gilles Chabert
@@ -87,7 +86,7 @@ int main(int argc, char** argv) {
 	}
 
 	if (filename.Get()=="") {
-		ibex_error("no input file (try defaultsolver --help)");
+		ibex_error("no input file (try ibexsolve --help)");
 		exit(1);
 	}
 
@@ -130,7 +129,7 @@ int main(int argc, char** argv) {
 			if (file.is_open()) {
 				overwitten = true;
 				stringstream ss;
-				ss << filename_no_ext << "~.mnf";
+				ss << filename.Get().c_str() << "~";
 				manifold_copy=ss.str();
 				// got from stackoverflow.com:
 				ofstream dest(manifold_copy, ios::binary);
