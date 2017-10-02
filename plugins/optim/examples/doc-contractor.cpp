@@ -71,17 +71,17 @@ public:
 /**
  * My own linear relaxation of a system
  */
-class MyLinearRelax : public LinearRelax {
+class MyLinearRelax : public Linearizer {
 public:
 	/**
 	 * We actually only accept linear systems Ax<=b :)
 	 */
-	MyLinearRelax(const Matrix& A, const Vector& b) : LinearRelax(2,2), A(A), b(b) { }
+	MyLinearRelax(const Matrix& A, const Vector& b) : Linearizer(2), A(A), b(b) { }
 
 	virtual int linearize(const IntervalVector & box, LinearSolver& lp_solver)  {
 		for (int i=0; i<A.nb_rows(); i++)
 			// add the constraint in the LP solver
-			lp_solver.addConstraint(A[i],LEQ,b[i]);
+			lp_solver.add_constraint(A[i],LEQ,b[i]);
 
 		// we return the number of constraints
 		return A.nb_rows();
@@ -513,11 +513,10 @@ int main() {
 
 		// Creates the bitset structure that indicates which
 		// component are "quantified". The indices vary
-		// from 0 to 1 (2 variables only). These are the
-		// two first arguments. The bitset is initially empty
-		// which means that, by default, all the variables
-		// are parameters.
-		BitSet vars(0,1,BitSet::empt);
+		// from 0 to 1 (2 variables only). The bitset is
+		// initially empty which means that, by default,
+		// all the variables are parameters.
+		BitSet vars(2);
 
 		// Add "x" as variable.
 		vars.add(0);

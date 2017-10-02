@@ -58,29 +58,27 @@ int main() {
 	// by bisecting any variable (here, n°4)
 	pair<IntervalVector,IntervalVector> pair=sys1.box.bisect(4);
 
-	// Create a vector of solutions for each solver
-	vector<IntervalVector> sols1, sols2;
-
 	// =======================================================
 	// Run the solvers in parallel
 	// =======================================================
 #pragma omp parallel sections
 	{
-		sols1=solver1.solve(pair.first);
+		solver1.solve(pair.first);
 #pragma omp section
-		sols2=solver2.solve(pair.second);
+		solver2.solve(pair.second);
 	}
 	// =======================================================
 
-
-	cout << "solver #1 found " << sols1.size() << endl;
-	cout << "solver #2 found " << sols2.size() << endl;
+	cout << "solver #1 found " << solver1.get_manifold().size() << endl;
+	cout << "solver #2 found " << solver2.get_manifold().size() << endl;
 	//! [solver-parallel-C-1]
 
 	{
 	//! [solver-parallel-C-2]
-	Solver solver1(*new CtcCompo(*new CtcHC4(sys1),*new CtcNewton(sys1.f_ctrs)), *new RoundRobin(prec), *new CellStack());
-	Solver solver2(*new CtcCompo(*new CtcHC4(sys2),*new CtcNewton(sys2.f_ctrs)), *new RoundRobin(prec), *new CellStack());
+	Vector eps_min(sys1.nb_var,prec);
+	Vector eps_max(sys1.nb_var,POS_INFINITY);
+	Solver solver1(sys1,*new CtcCompo(*new CtcHC4(sys1),*new CtcNewton(sys1.f_ctrs)), *new RoundRobin(prec), *new CellStack(), eps_min, eps_max);
+	Solver solver2(sys2,*new CtcCompo(*new CtcHC4(sys2),*new CtcNewton(sys2.f_ctrs)), *new RoundRobin(prec), *new CellStack(), eps_min, eps_max);
 	//! [solver-parallel-C-2]
 	}
 
