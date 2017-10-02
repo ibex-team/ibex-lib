@@ -18,7 +18,7 @@
 #endif
 
 #ifndef IBEX_BENCHS_DIR
-  #define IBEX_BENCHS_DIR "../../../benchs"
+  #define IBEX_BENCHS_DIR "../../../benchs-solver"
 #endif
 
 using namespace std;
@@ -266,7 +266,7 @@ int main() {
 	//! [ctc-propag-2-C]
 
 	// Load a system of constraints
-	System sys(IBEX_BENCHS_DIR "/benchs-satisfaction/benchs-coprin/DiscreteBoundary-0100.bch");
+	System sys(IBEX_BENCHS_DIR "/polynom/DiscreteBoundary-0100.bch");
 
 	// The array of contractors we will use
 	Array<Ctc> ctc(sys.nb_ctr);
@@ -318,7 +318,7 @@ int main() {
 	{
 	output << "! [ctc-input-output-O]" << endl;
 	// Load a system of constraints
-	System sys(IBEX_BENCHS_DIR "/benchs-satisfaction/benchs-coprin/DiscreteBoundary-0100.bch");
+	System sys(IBEX_BENCHS_DIR "/polynom/DiscreteBoundary-0100.bch");
 
 	// The array of contractors we will use
 	Array<Ctc> ctc(sys.nb_ctr);
@@ -352,7 +352,7 @@ int main() {
 	//! [ctc-hc4-C]
 
 	// Load a system of equations
-	System sys(IBEX_BENCHS_DIR "/benchs-satisfaction/benchlib2/hayes1.bch");
+	System sys(IBEX_BENCHS_DIR "/others/hayes1.bch");
 	// Create the HC4 propagation loop with this system
 	CtcHC4 hc4(sys);
 
