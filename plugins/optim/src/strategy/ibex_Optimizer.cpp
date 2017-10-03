@@ -138,7 +138,7 @@ void Optimizer::update_uplo() {
 		new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
 		//    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
 
-		double m = minimum(new_uplo, uplo_of_epsboxes);
+		double m = std::min(new_uplo, uplo_of_epsboxes);
 		if (uplo < m) uplo = m; // warning: hides the field "m" of the class
 		// note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
 		// ymax is strictly lower than the loup.
@@ -393,7 +393,7 @@ void Optimizer::report(bool verbose) {
 	break;
 	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
 	break;
-	case NO_FEASIBLE_FOUND: cout << "\033[31m" << " no feasible point found (the problem may be infesible)" << endl;
+	case NO_FEASIBLE_FOUND: cout << "\033[31m" << " no feasible point found (the problem may be infeasible)" << endl;
 	break;
 	case UNBOUNDED_OBJ: cout << "\033[31m" << " possibly unbounded objective (f*=-oo)" << endl;
 	break;

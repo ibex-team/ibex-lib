@@ -29,25 +29,39 @@ public:
 	 * \brief Create a default solver.
 	 *
 	 * \param sys  - The system to solve
-	 * \param prec - Stopping criterion for box splitting (absolute precision)
+	 * \param eps_x_min - Stopping criterion for box splitting (absolute precision)
 	 */
-    DefaultSolver(System& sys, double prec);
+    DefaultSolver(System& sys, double eps_x_min=default_eps_x_min, double eps_x_max=default_eps_x_max, double random_seed=default_random_seed);
 
-	/**
+    /**
 	 * \brief Create a default solver.
 	 *
 	 * \param sys  - The system to solve
-	 * \param prec - Stopping criterion for box splitting (vector of absolute precisions,
+	 * \param eps_x_min - Stopping criterion for box splitting (vector of absolute precisions,
 	 *               one for each variable)
 	 */
-    DefaultSolver(System& sys, const Vector& prec);
+    DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max=default_eps_x_max, double random_seed=default_random_seed);
 
     /**
 	 * \brief Delete *this.
 	 */
 	~DefaultSolver();
 
+	/**
+	 * \brief Default minimal width: 1e-6.
+	 */
+	static const double default_eps_x_min;
+
+	/**
+	 * \brief Default maximal width: +oo.
+	 */
+	static const double default_eps_x_max;
+
+	/** Default random seed: 1.0. */
+	static const double default_random_seed;
+
 	System & sys;
+
 private:
 
 	/**

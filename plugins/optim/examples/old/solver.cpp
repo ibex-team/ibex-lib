@@ -73,19 +73,9 @@ int main(int argc, char** argv) {
 		s.trace=1;  // solutions are printed as soon as found when trace=1
 
 		// Solve the system and get the solutions
-		vector<IntervalVector> sols=s.solve(p.get_sys().box);
+		s.solve(p.get_sys().box);
 
-		// Display the number of solutions
-		cout << "number of solutions=" << sols.size() << endl;
-		// Display the solutions : they are already displayed when s.trace=1, otherwise the following lines can be used.
-		//	for (int i=0; i< sols.size() ; i++)
-		//	  cout << " sol  "<< i+1 << " : " << sols[i] << endl;
-
-		// Display the number of boxes (called "cells")
-		// generated during the search
-		cout << "number of cells=" << s.nb_cells << endl;
-		// Display the cpu time used
-		cout << "cpu time used=" << s.time << "s."<< endl;
+		s.report();
 
 	}
 

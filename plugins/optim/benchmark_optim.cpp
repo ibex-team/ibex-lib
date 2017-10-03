@@ -23,6 +23,20 @@ double_from_arg (const char *argname, const char *str)
 	return val;
 }
 
+unsigned int
+uint_from_arg (const char *argname, const char *str)
+{
+	char *endptr = NULL;
+	unsigned int val = (unsigned int) strtoul (str, &endptr, 10);
+	if (endptr != str + strlen(str))
+	{
+		stringstream s;
+		s << "\"" << argname << "\" must be a real number";
+		ibex_error (s.str().c_str());
+	}
+	return val;
+}
+
 void
 usage (const char *errmsg)
 {
@@ -33,35 +47,47 @@ usage (const char *errmsg)
 	  << "  --bench-file <file>   file containing the problem" << std::endl
 	  << "  --time-limit <t>      optimizer will stop after <t> seconds" << std::endl
 	  << "  --prec-ndigits-min <d>        " << std::endl
-	  << "  --prec-ndigits-max <d>        " << std::endl;
+	  << "  --prec-ndigits-max <d>        " << std::endl
+	  << "  --iter <i>        " << std::endl;
 	ibex_error (s.str().c_str());
 }
 
-/* return true if timeout was reached, false */
+/* Return true if timeout was reached for at least one of the #iter run(s).
+ * Return false otherwise.
+ */
 bool
-do_one_bench (System &sys, double prec, double time_limit)
+do_benchs_iter (System &sys, double prec, double time_limit, unsigned int iter)
 {
-	/* Build the default optimizer */
-	DefaultOptimizer DefOpt (sys, 0.0, prec, prec);
+	bool timeout = false;
 
-	/* Set the time limit */
-	DefOpt.timeout = time_limit;
+	for (unsigned int i = 0; i < iter; i++)
+	{
+		/* Build the default optimizer */
+		double random_seed = DefaultOptimizer::default_random_seed + (double) i;
+		DefaultOptimizer DefOpt (sys, 0.0, prec, prec,
+		       NormalizedSystem::default_eps_h, false, true, random_seed);
 
-	/* Do the actual computation */
-	Optimizer::Status status = DefOpt.optimize (sys.box);
+		/* Set the time limit */
+		DefOpt.timeout = time_limit;
 
-	/* Report some information (computation time, etc.) */
-	std::cout << "BENCH: eps = " << prec
-	          << " ; status = " << DefOpt.get_status()
-	          << " ; time = " << DefOpt.get_time()
-	          << " ; nb_cells = " << DefOpt.get_nb_cells()
-	          << " ; uplo = " << DefOpt.get_uplo()
-	          << " ; loup = " << DefOpt.get_loup()
-	          << std::endl;
+		/* Do the actual computation */
+		Optimizer::Status status = DefOpt.optimize (sys.box);
 
-	tot_time += DefOpt.get_time();
+		/* Report some information (computation time, etc.) */
+		std::cout << "BENCH: eps = " << prec
+	            << " ; status = " << DefOpt.get_status()
+	            << " ; time = " << DefOpt.get_time()
+	            << " ; nb_cells = " << DefOpt.get_nb_cells()
+	            << " ; uplo = " << DefOpt.get_uplo()
+	            << " ; loup = " << DefOpt.get_loup()
+	            << " ; random_seed = " << random_seed
+	            << std::endl;
 
-	return status == Optimizer::TIME_OUT;
+		tot_time += DefOpt.get_time();
+		timeout |= status == Optimizer::TIME_OUT;
+	}
+
+	return timeout;
 }
 
 int
@@ -72,6 +98,7 @@ main (int argc, char *argv[])
 		const char *benchfile = NULL;
 		double prec_ndigits_max = NAN, prec_ndigits_min = NAN, time_limit = NAN;
 		double prec_min = NAN, prec_max = NAN;
+    unsigned int iter = 0;
 
 		argc--; argv++; /* skip argv[0] = binary name */
 
@@ -80,6 +107,11 @@ main (int argc, char *argv[])
 			if (strcmp (argv[0], "--bench-file") == 0)
 			{
 				benchfile = argv[1];
+				argc-=2; argv+=2;
+			}
+			else if (strcmp (argv[0], "--iter") == 0)
+			{
+				iter = uint_from_arg ("--iter", argv[1]);
 				argc-=2; argv+=2;
 			}
 			else if (strcmp (argv[0], "--time-limit") == 0)
@@ -133,7 +165,7 @@ main (int argc, char *argv[])
 			ibex_error ("input file does not contains an optimization problem.");
 
 		/* always bench prec_min */
-		bool has_timeout = do_one_bench (sys, prec_min, time_limit);
+		bool has_timeout = do_benchs_iter (sys, prec_min, time_limit, iter);
 		if (!has_timeout)
 		{
 			double prec_ndigits = 0.;
@@ -142,7 +174,7 @@ main (int argc, char *argv[])
 				if (prec_ndigits_min < prec_ndigits)
 				{
 					double prec = pow (10, -prec_ndigits);
-					has_timeout = do_one_bench (sys, prec, time_limit);
+					has_timeout = do_benchs_iter (sys, prec, time_limit, iter);
 					if (has_timeout)
 						break;
 				}
@@ -157,13 +189,13 @@ main (int argc, char *argv[])
 				else
 				{
 					double prec = pow (10, -prec_ndigits);
-					has_timeout = do_one_bench (sys, prec, time_limit);
+					has_timeout = do_benchs_iter (sys, prec, time_limit, iter);
 					if (has_timeout)
 						break;
 				}
 			}
 			if (!has_timeout)
-				do_one_bench (sys, prec_max, time_limit);
+				do_benchs_iter (sys, prec_max, time_limit, iter);
 		}
 		std::cout << "# Total time: " << tot_time << std::endl;
 		return EXIT_SUCCESS;

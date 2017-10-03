@@ -43,7 +43,7 @@ int normalized_system = -1; // index in memory (-1=none)
 // and we don't know which argument is evaluated first
 
 NormalizedSystem& get_norm_sys(const System& sys, double eps_h) {
-	if (normalized_system>0)
+	if (normalized_system>=0)
 		return (NormalizedSystem&) *((*memory())->sys[normalized_system]); // already built and recorded
 	else {
 		normalized_system = (*memory())->sys.size();
@@ -52,7 +52,7 @@ NormalizedSystem& get_norm_sys(const System& sys, double eps_h) {
 }
 
 ExtendedSystem& get_ext_sys(const System& sys, double eps_h) {
-	if (extended_system>0)
+	if (extended_system>=0)
 		return (ExtendedSystem&) *((*memory())->sys[extended_system]); // already built and recorded
 	else {
 		extended_system = (*memory())->sys.size();
