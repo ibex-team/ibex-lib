@@ -23,9 +23,8 @@ using namespace std;
 namespace ibex {
 
 const double Optimizer::default_eps_x = 0;
-  // BN : for consistency and to avoid threshold effect, relative and absolute precision should have the same default value
-const double Optimizer::default_rel_eps_f = 1e-06;
-const double Optimizer::default_abs_eps_f = 1e-06;
+const double Optimizer::default_rel_eps_f = 1e-03;
+const double Optimizer::default_abs_eps_f = 1e-07;
 
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;
@@ -81,8 +80,7 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 
 		if (trace) {
 			cout << "                    ";
-			cout << " loup= " << loup << " " 
-			     << " uplo= " << uplo << " " << endl;
+			cout << "\033[32m loup= " << loup << "\033[0m" << endl;
 //			cout << " loup point=";
 //			if (loup_finder.rigorous())
 //				cout << loup_point << endl;
@@ -129,8 +127,8 @@ void Optimizer::update_uplo() {
 			if (new_uplo > uplo) {
 				uplo = new_uplo;
 
-				if (trace >=2)
-					cout << " uplo= " << uplo << " " << endl;
+				if (trace)
+					cout << "\033[33m uplo= " << uplo << "\033[0m" << endl;
 			}
 		}
 		else uplo = uplo_of_epsboxes;
@@ -174,7 +172,7 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		buffer.push(&c);
 	}
 }
-  
+
 void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 	/*======================== contract y with y<=loup ========================*/
@@ -310,14 +308,14 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 
-				buffer.pop(); 
+				buffer.pop();
 				delete c; // deletes the cell.
 
 				nb_cells+=2;  // counting the cells handled ( in previous versions nb_cells was the number of cells put into the buffer after being handled)
                 
 				handle_cell(*new_cells.first, init_box);
 				handle_cell(*new_cells.second, init_box);
-		
+
 				if (uplo_of_epsboxes == NEG_INFINITY) {
 					cout << " possible infinite minimum " << endl;
 					break;
@@ -330,6 +328,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					// older version of the code (before revision 284).
 
 					double ymax=compute_ymax();
+
 					buffer.contract(ymax);
 				
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
@@ -347,7 +346,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			catch (NoBisectableVariableException& ) {
 				update_uplo_of_epsboxes((c->box)[goal_var].lb());
 				buffer.pop();
-				delete c; 
+				delete c; // deletes the cell.
 				update_uplo(); // the heap has changed -> recalculate the uplo (eg: if not in best-first search)
 
 			}
