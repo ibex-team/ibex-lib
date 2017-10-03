@@ -11,7 +11,7 @@
 #define __IBEX_LINEARIZER_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_LinearSolver.h"
+#include "ibex_LPSolver.h"
 
 namespace ibex {
 

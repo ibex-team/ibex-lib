@@ -71,7 +71,7 @@ int main() {
 	t.inflate(tdelta);
 
 	// Used to represent which variables are "quantified"
-	BitSet vars(0,2,BitSet::empt);
+	BitSet vars=BitSet::empty(3);
 	// add "p1" as variable
 	vars.add(0);
 	// add "p2" as variable

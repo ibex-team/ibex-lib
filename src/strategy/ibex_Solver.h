@@ -2,10 +2,10 @@
 //                                  I B E X                                   
 // File        : ibex_Solver.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
-// Last Update : Feb 02, 2017
+// Last Update : Oct 01, 2017
 //============================================================================
 
 #ifndef __IBEX_SOLVER_H__
@@ -18,6 +18,8 @@
 #include "ibex_SubPaving.h"
 #include "ibex_Timer.h"
 #include "ibex_Exception.h"
+#include "ibex_Linear.h"
+#include "ibex_SolverOutputBox.h"
 
 #include <vector>
 
@@ -26,138 +28,64 @@ namespace ibex {
 /**
  * \ingroup strategy
  *
- * \brief  Solver.
+ * \brief Solver.
  *
- * This class implements an branch and prune algorithm that finds all the solutions of a systems of equations (the system may contain additional inequalities).
+ * This class implements a branch and prune algorithm that looks for
+ * all the solutions of a systems of equalities and/or inequalities.
  *
  */
 
 class CellLimitException : public Exception {} ;
 
+class Manifold;
+
 class Solver {
 public:
 	/**
-	 * Solution type.
+	 * \brief Return status of the solver
 	 *
-	 * Return type for the next(...) function.
-	 *
-	 * \see #next(std::vector<IntervalVector>&).
+	 * See comments for solve(...) below.
 	 */
-	typedef enum { UNKNOWN=0, SOLUTION=1 } sol_status;
+	typedef enum { SUCCESS, INFEASIBLE, NOT_ALL_VALIDATED, TIME_OUT, CELL_OVERFLOW } Status;
 
 	/**
-	 * \brief Solution of a system.
+	 * \brief Boundary test strength
 	 *
-	 * When the system is well-constrained, a "solution" is a box [x] such that
-	 * there exists x in [x] f(x)=0 and g(x)<=0.
-	 *
-	 * The status is SOLUTION if the previous property is proven, UNKNOWN otherwise.
-	 *
-	 * When the system is under-constrained, a "solution" is a box ([x],[p]) such that
-	 * for all p in [p] there exists x in f(x,p)=0 and g(x,p)<=0. It may be a large box
-	 * (compared to the precision). The "varset" structure indicates which components
-	 * correspond to x and p. It is NULL in case of well-constrained systems (no
-	 * parameters) or if m=0 (all parameters).
-	 *
-	 * The status is SOLUTION if the previous property is proven, UNKNOWN otherwise.
-	 *
-	 * If certification is not required, the status of the solution is always UNKNOWN.
+	 * ALL_TRUE:  by default for under constrained problems (0<m<n).
+	 * FULL_RANK: the gradients of all constraints (equalities and
+	 *            potentially activated inequalities) must be linearly independent.
+	 * HALF_BALL: **not implemented yet** the intersection of the box and the
+	 *            solution set is homeomorphic to a half-ball of R^n
+	 * ALL_FALSE: by default if m=0 or m=n (inequalities only/square systems)
 	 */
-	class Solution {
-	public:
-		 /*
-		  * \brief Status of the "solution".
-		  *
-		  * SOLUTION: The box is proven to contain a solution.
-		  * UNKNOWN:  The box may contain a solution.
-		 */
-		const sol_status status;
-
-		/**
-		 * \brief Existence box.
-		 *
-		 * If the status is SOLUTION, represents the smallest box found
-		 * enclosing a solution.
-		 * Otherwise, represents the "unknown" box.
-		 */
-		const IntervalVector& existence() const;
-
-		/**
-		 * \brief Unicity box.
-		 *
-		 * If the status is SOLUTION, represents the largest superset
-		 * of existence() found such that the solution enclosed is unique.
-		 * Otherwise, represents the "unknown" box.
-		 */
-		const IntervalVector& unicity() const;
-
-		/**
-		 * \brief Variable/Parameter structure.
-		 *
-		 * Structure used to certify the box.
-		 *
-		 * This field is NULL in the following cases:
-		 *   - the system is well-constrained (all are variables)
-		 *   - the system has no equalities (all are parameters)
-		 *   - the set of parameters has been fixed by the user
-		 *     (same parameters for all solutions)
-		 *   - the status is UNKNOWN
-		 */
-		const VarSet* varset;
-
-		/**
-		 * \brief Duplicate the solution
-		 */
-		Solution(const Solution& sol);
-
-		/**
-		 * \brief Assignment
-		 */
-		Solution& operator=(const Solution&);
-
-		/**
-		 * \brief Destructor.
-		 */
-		~Solution();
-
-	private:
-		friend class Solver;
-
-		Solution(int n);
-
-		IntervalVector _existence;
-		IntervalVector* _unicity; // NULL if status=UNKNOWN or m=0
-	};
-
-	/**
-	 * \brief Build a solver.
-	 *
-	 * \param ctc    - The contractor (for contracting each node of the search tree)
-	 * \param bsc    - The bisector   (for branching). Contains the stop criterion.
-	 * \param buffer - The cell buffer (a CellStack in a depth first search strategy)
-	 */
-	Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer);
+	typedef enum { ALL_TRUE, FULL_RANK, HALF_BALL, ALL_FALSE } boundary_test_strength;
 
 	/**
 	 * \brief Build a solver with certification.
 	 *
-	 * \param sys    - The system to be solved
-	 * \param ctc    - The contractor (for contracting each node of the search tree)
-	 * \param bsc    - The bisector   (for branching). Contains the stop criterion.
-	 * \param buffer - The cell buffer (a CellStack in a depth first search strategy)
+	 * \param sys     - The system to be solved
+	 * \param ctc     - The contractor (for contracting each node of the search tree)
+	 * \param bsc     - The bisector   (for branching).
+	 * \param buffer  - The cell buffer (a CellStack in a depth first search strategy)
+	 * \param eps_min - Criterion to stop bisection
+	 * \param eps_max - Criterion to force bisection
 	 */
-	Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer);
+	Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
+			const Vector& eps_min, const Vector& eps_max);
 
 	/**
 	 * \brief Build a solver with certification.
 	 *
-	 * \param sys    - The system to be solved
-	 * \param params - Force which dimensions correspond to parameters
-	 * \param ctc    - The contractor (for contracting each node of the search tree)
-	 * \param bsc    - The bisector   (for branching). Contains the stop criterion.
-	 * \param buffer - The cell buffer (a CellStack in a depth first search strategy)
+	 * \param sys     - The system to be solved
+	 * \param params  - Force which dimensions correspond to parameters (in automatic proof)
+	 * \param ctc     - The contractor (for contracting each node of the search tree)
+	 * \param bsc     - The bisector   (for branching). Contains the stop criterion.
+	 * \param buffer  - The cell buffer (a CellStack in a depth first search strategy)
+	 * \param eps_min - Criterion to stop bisection
+	 * \param eps_max - Criterion to force bisection
 	 */
-	Solver(const System& sys, const BitSet& params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer);
+	Solver(const System& sys, const BitSet& params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
+			const Vector& eps_min, const Vector& eps_max);
 
 	/**
 	 * \brief Destructor.
@@ -169,9 +97,37 @@ public:
 	 *
 	 * \param init_box - the initial box (the search space)
 	 * 
-	 * Return :the vector of solutions (small boxes with the required precision) found by the solver.
+	 * \return Possible values:
+	 *
+	 *   SUCCESS:           (complete search) all solutions found and all
+	 *                      output boxes validated.
+	 *
+	 *   INFEASIBLE:        (complete search) infeasible problem.
+	 *
+	 *   NOT_ALL_VALIDATED: (incomplete search) minimal width (eps-min)
+	 *                      reached
+	 *   TIME_OUT:          (incomplete search) time out
+	 *
+	 *   CELL_OVERFLOW:     (incomplete search) cell overflow
+	 *
+	 * The vector of "solutions" (output boxes) found by the solver
+	 * are retrieved with #get_solutions().
 	 */
-	std::vector<IntervalVector> solve(const IntervalVector& init_box);
+	Status solve(const IntervalVector& init_box);
+
+	/**
+	 * \brief Continue solving of the system.
+	 *
+	 * \param filename - Name of the file containing the input paving;
+	 */
+	Status solve(const char* filename);
+
+	/**
+	 * \brief Solve the system
+	 *
+	 * Continue exploration from an initial paving.
+	 */
+	//Status solve(const char* init_paving);
 
 	/**
 	 * \brief Start solving (interactive mode).
@@ -180,26 +136,57 @@ public:
 	 */
 	void start(const IntervalVector& init_box);
 
-	/**
-	 * \brief Continue solving (interactive mode).
-	 *
-	 * Look for the next solution and push it into the vector.
-	 *
-	 * \return true iff a new solution has been found (false means that the search is over).
-	 */
-	bool next(std::vector<IntervalVector>& sols);
+
+	void start(const char* input_paving);
 
 	/**
-	 * \brief Find the next solution.
+	 * \brief Find the next solution (interactive mode).
 	 *
 	 * \param sol - (output argument) pointer to the new solution (if found). This
 	 *              is just the address of the last element in the "solutions" vector.
-	 *              Set to NULL if search is over.
+	 *              Set to NULL if search is over, time is out or the number of cells
+	 *              exceeds the limit.
 	 *
-	 * \return true iff a new solution has been found (false means that the search is over).
+	 * \return Possible values. For commodity, the same return type is used for next(..)
+	 *         and solve(..) but the interpretation slightly differs:
+	 *
+	 *   SUCCESS:           a new validated solution has been found.
+	 *
+	 *   INFEASIBLE:        no more solution (search over).
+	 *
+	 *   NOT_ALL_VALIDATED: a non-validated box reaching the minimal width (eps-min)
+	 *                      has been found.
+	 *   TIME_OUT:          time is out
+	 *
+	 *   CELL_OVERFLOW:     the number of cell has exceeded the limit.
 	 */
-	bool next(const Solution*& sol);
+	bool next();
 
+	/**
+	 * \brief Displays on standard output a report of the last call to solve(...).
+	 */
+	void report();
+
+	/**
+	 * \brief Get the "solutions" (output boxes).
+	 *
+	 * \return the output boxes of the last call to solve(...).
+	 */
+	const Manifold& get_manifold() const;
+
+	/**
+	 * \brief Get the time spent.
+	 *
+	 * \return the total CPU time of last call to solve(...).
+	 */
+	double get_time() const;
+
+	/**
+	 * \brief Get the number of cells.
+	 *
+	 * \return the number of cells generated by the last call to solve(...).
+	 */
+	double get_nb_cells() const;
 	/**
 	 * \brief The contractor.
 	 *
@@ -212,8 +199,6 @@ public:
 
 	/**
 	 * \brief The bisector.
-	 *
-	 * Tests also precision of boxes.
 	 */
 	Bsc& bsc;
 
@@ -223,9 +208,24 @@ public:
 	CellBuffer& buffer;
 
 	/**
-	 * \brief Maximum cpu time used by the solver.
+	 * \brief Minimal width of boxes (criterion to stop bisection)
+	 */
+	const Vector eps_x_min;
+
+	/**
+	 * \brief Maximal width of boxes (criterion to force bisection)
+	 */
+	const Vector eps_x_max;
+
+	/**
+	 * \brief Boundary test strength
+	 */
+	boundary_test_strength boundary_test;
+
+	/**
+	 * \brief Maximum CPU time used by the solver.
 	 *
-	 * This parameter allows to bound time complexity.
+	 * This parameter allows to bound running time.
 	 * The value can be fixed by the user. By default, it is -1 (no limit).
 	 */
 
@@ -244,138 +244,124 @@ public:
 	 *
 	 *  Possible values:
 	 *  0  - No trace  (default value)
-	 *  1  - Each time a new solution is found, it is printed;
+	 *  1  - Each time a new "solution" is found, it is printed;
 	 *  2  - At each node of the search, the current box is printed and
 	 *       each time a new solution is found, it is printed.
 	 */
 	int trace;
 
-	/**
-	 * \brief Number of nodes in the current search.
-	 */
-	int nb_cells;
-
-	/**
-	 * \brief Running time of the current search.
-	 */
-	double time;
-
-	/*
-	 * \brief Solutions found in the current search.
-	 */
-	std::vector<Solution> solutions;
 
 protected:
 
 	/**
-	 * Whether certification is required or not.
-	 */
-	bool certification();
-
-	/**
-	 * Called by constructors.
+	 * \brief Called by constructors.
 	 */
 	void init(const System& sys, const BitSet* params);
 
-	/*
-	 * Return true if the box "x" may contain a new solution, false otherwise.
-	 *
-	 * \param x   - (input) Candidate box
-	 * \param sol - (output) Solution. Only built if return value is true.
-	 *
-	 * If it returns true and the status of "sol" is SOLUTION, the box "x" may have
-	 * slightly changed (due to inflating Newton) and the actual solution
-	 * is stored as the existence box of "sol".
+	/**
+	 * \brief Call "next" until search is over.
 	 */
-	bool check_sol(IntervalVector& x, Solution& sol);
+	Status solve();
+
+	/*
+	 * \brief Return a new "output box" that potentially contains solutions.
+	 * \throw An exception otherwise (no solution inside).
+	 *
+	 * \param box - input box
+	 * \param sol - output box.
+	 *
+	 * If the status of the return box is INNER, the box may have
+	 * slightly changed (due to inflating Newton) and the actual "solution"
+	 * is stored in the existence box of the output.
+	 */
+	SolverOutputBox check_sol(const IntervalVector& box);
 
 	/**
-	 * Store the solution in "solutions" and print it (if trace>=0).
+	 * \brief Check if the box is "BOUNDARY"
+	 * \see SolverOutputBox.
 	 */
-	void store_sol(const Solution& sol);
+	bool is_boundary(const IntervalVector& box);
 
+	/**
+	 * \brief True if width(box)>eps_x_max.
+	 */
+	bool is_too_large(const IntervalVector& box);
+
+	/**
+	 * \brief True if width(box)>eps_x_min.
+	 */
+	bool is_too_small(const IntervalVector& box);
+
+	/**
+	 * \brief Store the solution in "solutions" and print it (if trace>=0).
+	 */
+	void store_sol(const SolverOutputBox& sol);
+
+	/**
+	 * \brief Check if time is out.
+	 */
 	void time_limit_check();
 
+	/**
+	 * \brief Flush
+	 */
+	void flush();
 
 	BitSet impact;
 
 	/*
-	 * Initial box of the current search.
+	 * \brief Initial box of the current search.
 	 */
 	IntervalVector solve_init_box;
 
 	/**
-	 * Number of variables
+	 * \brief Number of variables
 	 */
 	int n;
 
 	/**
-	 * Number of equalities. Only used if certification required (-1 otherwise)
+	 * \brief Number of equalities.
 	 */
 	int m;
 
+	/**
+	 * \brief Number of inequalities.
+	 */
+	int nb_ineq;
+
 	/*
-	 * The equalities to be solved. Only used if certification required.
+	 * \brief The equalities to be solved (NULL if none).
 	 */
 	const System* eqs;
 
 	/*
-	 * The inequalities to be solved. Only used if certification required.
+	 * \brief The inequalities to be solved (NULL if none).
 	 */
 	const System* ineqs;
 
 	/**
-	 * The forced parameters (if any). Only used if certification required.
+	 * \brief The forced parameters (if any, NULL otherwise).
 	 */
 	const BitSet* params;
 
+	/*
+	 * \brief Solutions found in the current search.
+	 */
+	Manifold* manif;
+
+	/*
+	 * \brief CPU running time used to obtain this manifold.
+	 */
+	double time;
+
+	/**
+	 * \brief Number of cells used to obtain this manifold.
+	 */
+	unsigned int nb_cells;
 };
 
 /*============================================ inline implementation ============================================ */
 
-inline Solver::Solution::Solution(int n) : status(UNKNOWN), varset(NULL), _existence(n), _unicity(NULL) {
-
-}
-
-inline Solver::Solution::Solution(const Solution& sol) : status(sol.status),
-		varset(sol.varset? new VarSet(*sol.varset) : NULL), _existence(sol._existence),
-		_unicity(sol._unicity? new IntervalVector(*sol._unicity) : NULL) {
-
-}
-
-inline Solver::Solution& Solver::Solution::operator=(const Solution& sol) {
-	(sol_status&) status=sol.status;
-	if (varset) delete varset;
-	varset=sol.varset? new VarSet(*sol.varset) : NULL;
-	_existence=sol._existence;
-	if (_unicity) delete _unicity;
-	_unicity=sol._unicity? new IntervalVector(*sol._unicity) : NULL;
-	return *this;
-}
-
-inline Solver::Solution::~Solution() {
-	if (_unicity) delete _unicity;
-	if (varset) delete varset;
-}
-
-inline const IntervalVector& Solver::Solution::existence() const {
-	return _existence;
-}
-
-inline const IntervalVector& Solver::Solution::unicity() const {
-	return _unicity? *_unicity : _existence;
-}
-
-inline bool Solver::certification() {
-	return m!=-1;
-}
-
-inline bool Solver::next(std::vector<IntervalVector>& sols) {
-	const Solution* sol;
-	bool res=next(sol);
-	if (res) sols.push_back(sol->existence());
-	return res;
-}
 
 } // end namespace ibex
 

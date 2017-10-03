@@ -362,9 +362,29 @@ void ExprLinearity::visit(const ExprPower& e){
 	}
 }
 
+void ExprLinearity::visit(const ExprChi& e) {
+	Array<Domain>* d=new Array<Domain>(n+1);
+
+	visit(e.arg(0));
+	visit(e.arg(1));
+	visit(e.arg(2));
+
+	Array<Domain>& d_a=*(_coeffs[e.arg(0)].first);
+	Array<Domain>& d_b=*(_coeffs[e.arg(1)].first);
+	Array<Domain>& d_c=*(_coeffs[e.arg(2)].first);
+
+	for (int i=0; i<n+1; i++) {
+		d->set_ref(i,*new Domain(Dim::scalar()));
+
+		if (i<n && d_a[i].is_zero() && d_b[i].is_zero() && d_c[i].is_zero())
+			(*d)[i].clear();
+	}
+
+	_coeffs.insert(e, make_pair(d,NONLINEAR));
+}
+
 void ExprLinearity::visit(const ExprSymbol& e) { assert(false); }
 void ExprLinearity::visit(const ExprApply& a)  { assert(false); /* deprecated */}
-void ExprLinearity::visit(const ExprChi& a)    { /* not linear */ }
 
 void ExprLinearity::visit(const ExprAdd& e)    { binary(e,operator+,true); }
 void ExprLinearity::visit(const ExprSub& e)    { binary(e,operator-,true); }

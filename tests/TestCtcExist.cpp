@@ -32,25 +32,43 @@ void TestCtcExist::test01() {
 
 	IntervalVector box(1,Interval(-10,10));
 
-	RoundRobin rr(1e-03);
-	CellStack stack;
-	vector<IntervalVector> sols;
-
 	double right_bound=+0.3872983346072957;
 
-	Solver sx(exist_y,rr,stack);
-	sx.start(box);
-	sx.next(sols);
+	stack<IntervalVector> stack;
+	stack.push(box);
+	IntervalVector sol=box;
+	while (!stack.empty() && sol.max_diam()>1e-03) {
+		sol=stack.top();
+		stack.pop();
+		exist_y.contract(sol);
+		if (!sol.is_empty()) {
+			pair<IntervalVector,IntervalVector> p=sol.bisect(0);
+			stack.push(p.first);
+			stack.push(p.second);
+		}
+	}
+
 	// note: we use the fact that the solver always explores the right
 	// branch first
-	CPPUNIT_ASSERT(sols.back()[0].contains(right_bound));
+	CPPUNIT_ASSERT(sol[0].contains(right_bound));
 
-	sols.clear();
-	Solver sy(exist_x,rr,stack);
-	sy.start(box);
-	sy.next(sols);
+	while (!stack.empty()) stack.pop();
+
+	stack.push(box);
+
+	sol=box;
+	while (!stack.empty() && sol.max_diam()>1e-03) {
+		sol=stack.top();
+		stack.pop();
+		exist_x.contract(sol);
+		if (!sol.is_empty()) {
+			pair<IntervalVector,IntervalVector> p=sol.bisect(0);
+			stack.push(p.first);
+			stack.push(p.second);
+		}
+	}
 	// note: we use the fact that the constraint is symmetric in x/y
-	CPPUNIT_ASSERT(sols.back()[0].contains(right_bound));
+	CPPUNIT_ASSERT(sol[0].contains(right_bound));
 
 }
 
