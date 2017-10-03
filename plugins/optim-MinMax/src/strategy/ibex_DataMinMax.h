@@ -13,10 +13,23 @@
 #include "ibex_Interval.h"
 #include "ibex_DoubleHeap.h"
 #include "ibex_CellCostFunc.h"
+#include <list>
+#include <stdio.h>
 
 namespace ibex {
 
 
+
+
+class feasible_point {
+public:
+    feasible_point(Vector point,Interval eval);
+    ~feasible_point();
+
+
+    Vector point;
+    Interval eval;
+};
 
 
 /**
@@ -37,6 +50,16 @@ public:
 	 * \brief Delete *this.
 	 */
 	~DataMinMax();
+
+        /**
+     * @brief clear list of feasible by deleting contained pointer on feasible_point object, call only when x_cell discard because not solution. /!\ not when x_cell bissected
+     */
+    void clear_fsbl_list();
+
+    /*
+     * remove pointers from fsbl_point_list that point is not contained in x_box, object pointed at is also deleted if strong_del is true
+     * */
+    void clear_notin_point(const IntervalVector& x_box,bool strong_del);
 
 	/**
 	 * \brief Duplicate the structure into the left/right nodes
@@ -60,6 +83,8 @@ public:
 	 * y_heap inherited from father of box
 	 */
     DoubleHeap<Cell>* y_heap;
+
+    std::vector<feasible_point*> fsbl_pt_list;
 
 
 	/**

@@ -17,6 +17,7 @@
 #include "ibex_LightOptimMinMax.h"
 #include "ibex_Bsc.h"
 #include "ibex_Optim.h"
+#include "ibex_LightLocalSolver.h"
 
 namespace ibex {
 
@@ -104,27 +105,44 @@ public:
     double min_perc_coef_csp; // used to compute y_prec allowed when run the light solver, see compute_min_prec function for formula
     int critpr_csp; // probability to choose second heap in light_solver
     int local_iter_csp; // number of local solver run
-
     bool only_csp; // solve a csp problem, no objective function.
+
+    // light local solver param
+    double nb_sols;
+    double min_acpt_diam;
+    int nb_sivia_iter;
+    int nb_optim_iter;
+    double y_sol_radius;
+    double reg_acpt_error;
 
 
     bool monitor; // create log file if true
     bool monitor_csp; // create a "paver.txt" file that contains boxes plus a value which indicates whether constraints are respected or not
     // each line of paver.txt corresponds to: x[0].lb x[0].ub x[1].lb ... x[n].ub val, val=0 -> constraint not respected, val=1 -> maybe, val=2 -> constraint respected
 
+    int heap_prob;// probability between 0 and 100 to choose heap 2 over 1 in the main B&B, heap 1 is sorted from the lower lb to the greatest, heap 2 from the greatest ub to the lowest
+
+    bool visit_all;// if true force to visit all leaves of slave heap in max optim
+    bool visit_all_csp;// if true force to visit all leaves of slave heap in max optim of csp solver
+
+    int nb_point; // number of point evaluation in current box x (use to compute uplo)
+
 private:
 
     Ctc& x_ctc; // contractor w.r.t constraint on x
     NormalizedSystem& x_sys; // contains cst on x and objective function
     LightOptimMinMax lsolve;
+    LightLocalSolver loc_solve;
     Bsc* bsc;
     double prec_y;
     bool fa_y_cst; // indicates if there is for all y constraints
-    Function* minus_goal;
-    Function* minus_goal_csp;
+    Function* minus_goal_y_at_x; // goal function f becomes -f to solve a minimization problem over y at a fixed x
     UnconstrainedLocalSearch * local_search;
-    UnconstrainedLocalSearch * local_search_csp;
 
+
+    void init_lsolve();
+    void init_fa_lsolve();
+    void init_loc_solve();
     double compute_min_prec( const IntervalVector& x_box,bool csp);
     int choose_nbiter(bool midpoint_eval,bool csp);
     int compute_heap_max_size(int y_heap_size,bool csp);
@@ -134,19 +152,34 @@ private:
     int check_fa_ctr(Cell * x_cell,bool midp);
     bool handle_cell(Cell * x_cell);
 
+
     // Fa cst variables
     double prec_fa_y;
     LightOptimMinMax fa_lsolve;
+    Function* minus_goal_csp_y_at_x;// goal csp function g becomes -g to solve a minimization problem over y at a fixed x
+    UnconstrainedLocalSearch * local_search_csp;
+    LightLocalSolver fa_loc_solve;
 
 
 
-    //Objectif function default parameters for light solver
+    //Default parameters for light optim min max solver
     static const int default_list_rate;
     static const int default_list_elem_absolute_max;
     static const int default_iter;
     static const double default_min_perc_coef;
     static const int default_prob_heap;
     static const int default_local_iter;
+    static const bool default_visit_all;
+    static const int default_nb_point;
+
+    //Default parameters for light local solver
+
+    static const double default_nb_sols;
+    static const double default_min_acpt_diam;
+    static const int default_nb_sivia_iter;
+    static const int default_nb_optim_iter;
+    static const double default_y_sol_radius;
+    static const double default_reg_acpt_error;
 
     //Csp fa function default parameters for light solver
     static const int default_list_rate_csp;
@@ -155,6 +188,7 @@ private:
     static const double default_min_perc_coef_csp;
     static const int default_prob_heap_csp;
     static const int default_local_iter_csp;
+    static const bool default_visit_all_csp;
 
 
 };

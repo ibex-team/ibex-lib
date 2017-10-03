@@ -22,6 +22,9 @@
 #include <string>
 #include "ibex_CtcIdentity.h"
 #include "ibex_UnconstrainedLocalSearch.h"
+#include "ibex_AffineEval.h"
+#include "ibex_LargestFirst.h"
+
 
 namespace ibex {
 
@@ -68,18 +71,24 @@ public:
     double prec_y;
     bool monitor;
     int local_search_iter;
+    bool visit_all;
     NormalizedSystem& xy_sys; // contains constraints on x and y
+    double goal_abs_prec; // absolute precision on goal evaluation, stop maximization when reached
 
 private:
     friend class OptimMinMax;
+    Affine2Eval* affine_goal;
     Ctc& ctc_xy; //contractor for constraints on xy
     UnconstrainedLocalSearch *local_solver;
     //double abs_min_prec; // absolute minimum prec bissection on y
     Bsc* bsc; // bissector
     std::vector<Cell*> heap_save;
+    Interval eval_all(Function* f,const IntervalVector& box);
     bool found_point;
     double time;
     bool csp_actif;
+    IntervalVector best_point_eval;
+
 
     double save_heap_ub;
 
@@ -90,7 +99,7 @@ private:
     /* return true if the stop criterion is reached
      */
 
-    bool stop_crit_reached(int current_iter,DoubleHeap<Cell> * y_heap);
+    bool stop_crit_reached(int current_iter,DoubleHeap<Cell> * y_heap,const Interval& fmax);
 
 
     /* return a feasible point in y_box w.r.t constraints on xy
@@ -103,7 +112,8 @@ private:
 
     bool handle_cstfree(IntervalVector& xy_box,Cell * y_cell);
 
-    bool handle_cell( Cell* x_cell, Cell* y_cell,double loup);
+    bool handle_cell( Cell* x_cell, Cell* y_cell,double loup,bool no_stack = false);
+    // no stack needed for visit all leaves.
 
     bool handle_constraint(OptimData  *data_y, IntervalVector& xy_box,IntervalVector& y_box);
 
@@ -126,6 +136,8 @@ private:
 
     IntervalVector xy_box_hull(const IntervalVector& x_box);
 
+    void set_y_sol(Vector& start_point);
+
     /* add elements of Heap_save into y_heap
      * */
     void fill_y_heap(DoubleHeap<Cell>& y_heap);
@@ -133,10 +145,7 @@ private:
 
 	/** Default timeout: 60 */
 	static const double default_timeout;
-        static const double default_prec_y;
-        static const double default_list_elem_max;
-        static const int default_nb_iter;
-        static const int default_local_search_iter;
+    static const double default_goal_abs_prec;
 
 
 };

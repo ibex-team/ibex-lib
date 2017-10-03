@@ -11,6 +11,12 @@
 namespace ibex {
 
 
+feasible_point::feasible_point(Vector box,Interval eval) : point(box), eval(eval) {
+}
+
+feasible_point::~feasible_point() {
+}
+
 CellCostMaxPFub DataMinMax::y_heap_costf1;
 CellCostPFlb DataMinMax::y_heap_costf2;
 
@@ -18,7 +24,7 @@ DataMinMax::DataMinMax() : fmax(), pu(0), y_heap(new DoubleHeap<Cell>(y_heap_cos
 
 }
 
-DataMinMax::DataMinMax(const DataMinMax& e) : fmax(e.fmax), pu(e.pu),y_heap(e.y_heap->deepcopy()) {
+DataMinMax::DataMinMax(const DataMinMax& e) : fmax(e.fmax), pu(e.pu),y_heap(e.y_heap->deepcopy()),fsbl_pt_list(e.fsbl_pt_list) {
 }
 
 std::pair<Backtrackable*,Backtrackable*> DataMinMax::down() {
@@ -28,6 +34,41 @@ std::pair<Backtrackable*,Backtrackable*> DataMinMax::down() {
 DataMinMax::~DataMinMax() {
 	y_heap->flush();
 	delete y_heap;
+}
+
+void DataMinMax::clear_fsbl_list() {
+//    std::cout<<"delete fsbl list of size"<<fsbl_pt_list.size()<<std::endl;
+    feasible_point * fp;
+    while(!fsbl_pt_list.empty()) {
+        fp = fsbl_pt_list.back();
+//        std::cout<<"fp point: "<<fp->point<<std::endl;
+        delete fp;
+        fsbl_pt_list.pop_back();
+    }
+//    std::cout<<"clear done"<<std::endl;
+}
+
+void DataMinMax::clear_notin_point(const IntervalVector& x_box,bool strong_del) {
+    int size = fsbl_pt_list.size();
+    std::vector<feasible_point*> save_vect;
+//    std::cout<<"======================= "<<std::endl;
+//    std::cout<<" check in box: "<<x_box<<std::endl;
+    for(int i=0;i<size;i++) {
+        feasible_point * pt = fsbl_pt_list.back();
+        fsbl_pt_list.pop_back();
+//        std::cout<<" feas pt "<<pt->point<<std::endl;
+        if(! (x_box.contains(pt->point.subvector(0,x_box.size()-1)))) {
+            if(strong_del)
+                delete pt;
+//            std::cout<<"      is deleted"<<std::endl;
+        }
+        else {
+//            std::cout<<"      is NOT deleted"<<std::endl;
+            save_vect.push_back(pt);
+        }
+    }
+    fsbl_pt_list = save_vect;
+//    std::cout<<"***********************"<<std::endl;
 }
 
 /* Cost functions for DataMinMax class */
