@@ -9,7 +9,7 @@
 #define IBEX_LSMEAR
 
 #include "ibex_SmearFunction.h"
-#include "ibex_LinearSolver.h"
+#include "ibex_LPSolver.h"
 
 namespace ibex {
 
