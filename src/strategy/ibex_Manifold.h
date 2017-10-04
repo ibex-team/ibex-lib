@@ -61,7 +61,7 @@ public:
 	/**
 	 * \brief Total number of boxes
 	 *
-	 * size = #inner + #boundary + #unknown.
+	 * size = #inner + #boundary + #unknown + #pending
 	 */
 	int size() const;
 
@@ -108,6 +108,11 @@ public:
 	std::vector<SolverOutputBox> unknown;
 
 	/*
+	 * \brief Pending boxes
+	 */
+	std::vector<SolverOutputBox> pending;
+
+	/*
 	 * \brief CPU running time used to obtain this manifold.
 	 */
 	double time;
@@ -150,7 +155,7 @@ inline double Solver::get_time() const { return time; }
 inline double Solver::get_nb_cells() const { return nb_cells; }
 
 inline int Manifold::size() const {
-	return inner.size()+boundary.size()+unknown.size();
+	return inner.size() + boundary.size() + unknown.size() + pending.size();
 }
 
 

@@ -47,7 +47,11 @@ namespace ibex {
  * components correspond to x and p. It is NULL in case of well-constrained
  * systems (no parameters) or if m=0 (all parameters).
 
- * The status is UNKNOWN if nothing could be proven.
+ * The status is UNKNOWN if the box has been processed (precision eps-min reached)
+ * but nothing could be proven.
+ *
+ * The status is PENDING if the box has not been processed (the solver has been
+ * interrupted because of a timeout/memory overflow).
  *
  */
 class SolverOutputBox {
@@ -57,7 +61,7 @@ public:
 	 *
 	 * See above.
 	 */
-	typedef enum { INNER, BOUNDARY, UNKNOWN } sol_status;
+	typedef enum { INNER, BOUNDARY, UNKNOWN, PENDING } sol_status;
 
 	/*
 	 * \brief Status of the output box
@@ -101,7 +105,7 @@ public:
 	 *   - the system has no equalities (all are parameters)
 	 *   - the set of parameters has been fixed by the user
 	 *     (same parameters for all solutions)
-	 *   - the status is UNKNOWN
+	 *   - the status is UNKNOWN or PENDING
 	 */
 	const VarSet* varset;
 
@@ -127,7 +131,7 @@ private:
 	SolverOutputBox(int n);
 
 	IntervalVector _existence;
-	IntervalVector* _unicity; // NULL if status=UNKNOWN or m=0
+	IntervalVector* _unicity; // NULL if status=UNKNOWN/PENDING or m=0
 };
 
 /**
@@ -140,7 +144,7 @@ std::ostream& operator<<(std::ostream& os, const SolverOutputBox& sol);
 
 /*============================================ inline implementation ============================================ */
 
-inline SolverOutputBox::SolverOutputBox(int n) : status(UNKNOWN), varset(NULL), _existence(n), _unicity(NULL) {
+inline SolverOutputBox::SolverOutputBox(int n) : status(PENDING), varset(NULL), _existence(n), _unicity(NULL) {
 
 }
 

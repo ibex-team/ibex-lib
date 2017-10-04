@@ -190,7 +190,7 @@ public :
 	 *
 	 * \param J the jacobian matrix J
 	 */
-	int var_to_bisect(IntervalMatrix & J, const IntervalVector& box ) const;
+	virtual int var_to_bisect(IntervalMatrix & J, const IntervalVector& box ) const;
 };
 
 
