@@ -38,14 +38,14 @@ LinearSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector
 			row1[j] = J[i][j].mid();
 			ev -= Interval(row1[j])*box[j].mid();
 		}
-		ev+= sys.ctrs[i].f.eval(box.mid()).mid();
+		ev+= sys.f_ctrs.eval(i,box.mid()).mid();
 
 		nb_lctrs[i]=1;
 		if (i!=goal_ctr) {
-			if (sys.ctrs[i].op == LEQ || sys.ctrs[i].op == LT)
-				mylinearsolver->add_constraint( row1, sys.ctrs[i].op, (-ev).ub());
-			else if (sys.ctrs[i].op == GEQ || sys.ctrs[i].op == GT)
-				mylinearsolver->add_constraint( row1, sys.ctrs[i].op, (-ev).lb());
+			if (sys.ops[i] == LEQ || sys.ops[i] == LT)
+				mylinearsolver->add_constraint( row1, sys.ops[i], (-ev).ub());
+			else if (sys.ops[i] == GEQ || sys.ops[i] == GT)
+				mylinearsolver->add_constraint( row1, sys.ops[i], (-ev).lb());
 			else { //op=EQ
 				mylinearsolver->add_constraint( row1, LT, (-ev).ub());
 				mylinearsolver->add_constraint( row1, GT, (-ev).lb());
@@ -64,7 +64,6 @@ LinearSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector
 
 		stat = mylinearsolver->solve();
 
-
 		if (stat == LinearSolver::OPTIMAL) {
 			// the dual solution : used to compute the bound
 			dual.resize(mylinearsolver->get_nb_rows());
@@ -73,7 +72,7 @@ LinearSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector
 			int ii=0;
 
 
-			for (int i=0; i<sys.nb_ctr; i++) {
+			for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 				if (nb_lctrs[i]==2) {
 					dual[sys.nb_var+i]=dual[sys.nb_var+ii]+dual[sys.nb_var+ii+1]; ii+=2;
 				} else {
@@ -119,13 +118,12 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 		double max_Lmagn = 0.0;
 		int k=0;
 
-
 		for (int j=0; j<nbvars; j++) {
 			Interval lsmear=Interval(0.0);
 			if ((!too_small(box,j)) && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= prec(j))){
 				lsmear=dual_solution[j];
 
-				for (int i=0; i<sys.nb_ctr; i++)
+				for (int i=0; i<sys.f_ctrs.image_dim(); i++)
 					lsmear += dual_solution[sys.nb_var+i] * J[i][j];
 			}
 
