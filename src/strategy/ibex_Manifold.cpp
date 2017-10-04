@@ -34,6 +34,7 @@ void Manifold::clear() {
 	inner.clear();
 	boundary.clear();
 	unknown.clear();
+	pending.clear();
 	time = 0;
 	nb_cells = 0;
 }
@@ -72,7 +73,7 @@ SolverOutputBox Manifold::read_output_box(ifstream& f) {
 	}
 
 	int _status=read_int(f);
-	if (_status<0 || _status>=3) {
+	if (_status<0 || _status>=4) {
 		ibex_error("[manifold]: bad input file (bad status code).");
 	}
 
@@ -82,12 +83,13 @@ SolverOutputBox Manifold::read_output_box(ifstream& f) {
 	case 0: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::INNER; break;
 	case 1: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::BOUNDARY; break;
 	case 2: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN; break;
+	case 3: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::PENDING; break;
 	}
 
 	sol._existence = box;
 
 	if (m<n) {
-		if (sol.status!=SolverOutputBox::UNKNOWN) {
+		if (_status<=1) {
 			BitSet params(n);
 			for (int j=0; j<n-m; j++) {
 				int v=read_int(f);
@@ -150,7 +152,8 @@ void Manifold::load(const char* filename) {
 	int nb_inner = read_int(f);
 	int nb_boundary = read_int(f);
 	int nb_unknown = read_int(f);
-	int nb_sols = nb_inner + nb_boundary + nb_unknown;
+	int nb_pending = read_int(f);
+	int nb_sols = nb_inner + nb_boundary + nb_unknown + nb_pending;
 
 	time = read_double(f);
 	nb_cells = read_int(f);
@@ -163,6 +166,7 @@ void Manifold::load(const char* filename) {
 		case 0: inner.push_back(sol); break;
 		case 1: boundary.push_back(sol); break;
 		case 2: unknown.push_back(sol); break;
+		case 3: pending.push_back(sol); break;
 		}
 	}
 }
@@ -183,6 +187,7 @@ void Manifold::write(const char* filename) const {
 	write_int(f,inner.size());
 	write_int(f,boundary.size());
 	write_int(f,unknown.size());
+	write_int(f,pending.size());
 	write_double(f,time);
 	write_int(f,nb_cells);
 
@@ -193,6 +198,9 @@ void Manifold::write(const char* filename) const {
 		write_output_box(f,*it);
 
 	for (vector<SolverOutputBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++)
+		write_output_box(f,*it);
+
+	for (vector<SolverOutputBox>::const_iterator it=pending.begin(); it!=pending.end(); it++)
 		write_output_box(f,*it);
 
 	f.close();
@@ -211,7 +219,7 @@ string Manifold::format() {
 	"\t\t* 2=incomplete search: minimal width (--eps-min) reached\n"
 	"\t\t* 3=incomplete search: time out\n"
 	"\t\t* 4=incomplete search: cell overflow\n"
-	"[line 3] - 3 values: number of inner, boundary and unknown boxes\n"
+	"[line 3] - 4 values: number of inner, boundary, unknown and pending boxes\n"
 	"[line 4] - 2 values: time (in seconds) and number of cells.\n"
 	"\n[lines 5-...] The subsequent lines describe the \"solutions\" (output boxes).\n"
 	"\t Each line corresponds to one box and contains the following information:\n"
@@ -220,10 +228,11 @@ string Manifold::format() {
 	"\t\t* 0 the box is 'inner'\n"
 	"\t\t* 1 the box is 'boundary'\n"
 	"\t\t* 2 the box is 'unknown'\n"
+	"\t\t* 3 the box is 'pending'\n"
 	"\t - (n-m) values where n=#variables and m=#equalities: the indices of the variables\n"
 	"\t   considered as parameters in the parametric proof. Indices start from 1 and if the\n"
-	"\t   box is 'unknown', a sequence of n-m zeros are displayed. Nothing is displayed if\n"
-	"\t   m=0 or m=n.\n\n";
+	"\t   box is 'unknown' or 'pending', a sequence of n-m zeros are displayed. Nothing is "
+	"\t   displayed if m=0 or m=n.\n\n";
 }
 
 void Manifold::write_txt(ofstream& file, const SolverOutputBox& sol, bool MMA) const {
@@ -241,7 +250,7 @@ void Manifold::write_txt(ofstream& file, const SolverOutputBox& sol, bool MMA) c
 	if (m>0 && m<n) {
 		file << s;
 		if (MMA) file << '{';
-		if (sol.status!=SolverOutputBox::UNKNOWN && sol.varset!=NULL) {
+		if (sol.varset!=NULL) {
 			for (int i=0; i<sol.varset->nb_param; i++) {
 				if (i>0) file << s;
 				file << (sol.varset->param(i)) + 1;
@@ -275,7 +284,7 @@ void Manifold::write_txt(const char* filename, bool MMA) const {
 	if (MMA) file << "},"; else file << '\n';
 	file << status;
 	if (MMA) file << ",{"; else file << '\n';
-	file << inner.size() << s << boundary.size() << s << unknown.size();
+	file << inner.size() << s << boundary.size() << s << unknown.size() << s << pending.size();
 	if (MMA) file << "},{"; else file << '\n';
 	file << time << s << nb_cells;
 	if (MMA) file << "}"; else file << '\n';
@@ -291,6 +300,10 @@ void Manifold::write_txt(const char* filename, bool MMA) const {
 		write_txt(file,*it,MMA);
 	}
 	for (vector<SolverOutputBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++) {
+		if (!first_sol && MMA) file << ','; else first_sol=false;
+		write_txt(file,*it,MMA);
+	}
+	for (vector<SolverOutputBox>::const_iterator it=pending.begin(); it!=pending.end(); it++) {
 		if (!first_sol && MMA) file << ','; else first_sol=false;
 		write_txt(file,*it,MMA);
 	}
@@ -312,6 +325,9 @@ ostream& operator<<(ostream& os, const Manifold& manif) {
 		cout << " sol n°" << (i++) << " = " << *it << endl;
 	}
 	for (vector<SolverOutputBox>::const_iterator it=manif.unknown.begin(); it!=manif.unknown.end(); it++) {
+		cout << " sol n°" << (i++) << " = " << *it << endl;
+	}
+	for (vector<SolverOutputBox>::const_iterator it=manif.pending.begin(); it!=manif.pending.end(); it++) {
 		cout << " sol n°" << (i++) << " = " << *it << endl;
 	}
 	return os;
