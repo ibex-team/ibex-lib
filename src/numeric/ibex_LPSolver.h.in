@@ -25,37 +25,7 @@
 #include "ibex_Exception.h"
 #include "ibex_LPException.h"
 
-#ifdef _IBEX_WITH_SOPLEX_
-	#ifdef DEBUG
-		#undef DEBUG
-		#ifndef DEBUGGING
-			#define DEBUGGING
-		#endif
-		#include "soplex.h"
-		#define DEBUG
-	#else
-		#include "soplex.h"
-	#endif
-#else
-#ifdef _IBEX_WITH_CPLEX_
-#include "ilcplex/cplex.h"
-
-#else
-#ifdef _IBEX_WITH_CLP_
-// pourquoi enlever "coin/" dans le chemin?
-#include "coin/ClpSimplex.hpp"
-#else
-#ifdef _IBEX_WITH_ILOCPLEX_
-#include <ilcplex/ilocplex.h>
-// TODO not finish yet
-#else
-#ifdef _IBEX_WITH_NOLP_
-// nothing
-#endif
-#endif
-#endif
-#endif
-#endif
+@IBEX_LP_LIB_INCLUDES@
 
 namespace ibex {
 
@@ -259,32 +229,7 @@ private:
 	int status_dual; // return status of the dual solving (implementation-specific)
 	/**===============================================================================*/
 
-#ifdef _IBEX_WITH_SOPLEX_
-	soplex::SoPlex *mysoplex;
-#endif
-
-#ifdef _IBEX_WITH_CPLEX_
-	CPXENVptr  envcplex;
-	CPXLPptr lpcplex;
-	int * indice;
-	double * 	tmp;
-	int *  		r_matbeg;
-	double *  	r_matval;
-	int * 		r_matind;
-#endif
-
-#ifdef _IBEX_WITH_ILOCPLEX_
-	IloEnv		*myenv;
-    IloModel 	*mymodel;
-	IloCplex	*mycplex;
-#endif
-
-
-#ifdef _IBEX_WITH_CLP_
-	ClpSimplex 	*myclp;
-	int * _which;
-	int * _col1Index;
-#endif
+	@IBEX_LP_LIB_EXTRA_ATTRIBUTES@
 
 };
 

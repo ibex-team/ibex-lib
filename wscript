@@ -63,6 +63,8 @@ def options (opt):
 									choices = list_of_interval_lib_plugin,
 									default = default_interval_lib, help = help_string)
 
+	ibexutils.lp_lib_options (opt)
+
 	# recurse on plugins directory
 	opt.recurse("plugins")
 
@@ -165,6 +167,9 @@ def configure (conf):
 	# Add info on the interval library used to the settings
 	conf.setting_define("INTERVAL_LIB", conf.env["INTERVAL_LIB"])
 
+	# Configure LP library
+	conf.lp_lib ()
+
 	# recurse
 	Logs.pprint ("BLUE", "Configuration of the plugins")
 	conf.recurse ("plugins")
@@ -252,6 +257,7 @@ def dist (ctx):
 	files_patterns = "wscript benchs/** src/** examples/** waf"
 	files_patterns += " COPYING.LESSER LICENSE ibexutils.py"
 	files_patterns += " plugins/wscript plugins/interval_lib_gaol/"
+	files_patterns += " plugins/lp_lib_none/"
 	ctx.files = ctx.path.ant_glob(files_patterns)
 
 ######################

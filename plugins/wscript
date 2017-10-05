@@ -8,7 +8,9 @@ from waflib import Configure
 @Configure.conf
 def get_plugins (conf):
 	plugins = ibexutils.get_dirlist (conf.path)
-	return [p for p in plugins if not p.startswith(conf.env.ITVLIB_PLUGIN_PREFIX)]
+	is_plugin = lambda p: not p.startswith (conf.env.ITVLIB_PLUGIN_PREFIX) \
+	                  and not p.startswith (conf.env.LPLIB_PLUGIN_PREFIX)
+	return [ p for p in plugins if is_plugin (p) ]
 
 ######################
 ###### options #######

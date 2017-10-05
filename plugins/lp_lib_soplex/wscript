@@ -1,0 +1,120 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import os, shutil
+
+######################
+###### options #######
+######################
+def options (opt):
+	grp_name = "soplex options (when --lp-lib=soplex is used)"
+	grp = opt.add_option_group (grp_name)
+	grp.add_option ("--soplex-path", action="store", type="string",
+									dest="SOPLEX_PATH", default = "",
+	                help = "location of the soplex lib and include directories \
+	                        (by default use the one in 3rd directory)")
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	if conf.env["LP_LIB"]:
+		conf.fatal ("Trying to configure a second library for LP")
+	conf.env["LP_LIB"] = "SOPLEX"
+
+	soplex_dir = conf.options.SOPLEX_PATH
+	if soplex_dir:
+		# depending on how it is installed, the headers of soplex can be installed
+		# in a directory called "include" or "src"
+		soplex_include=[os.path.join (soplex_dir, d) for d in ["include", "src"]]
+		soplex_lib = os.path.join (soplex_dir, "lib")
+		conf.env.append_unique ("INCLUDES_IBEX_DEPS", soplex_include)
+		conf.env.append_unique ("LIBPATH_IBEX_DEPS", soplex_lib)
+	else:
+		soplex_include = ""
+		soplex_lib = ""
+
+	soplex_h_kwargs = { "header_name": "soplex.h", "use": ["IBEX", "LP_LIB"],
+				"uselib_store": "LP_LIB" }
+	lib_with_z = [ "soplex", "z" ]
+	lib_without_z = "soplex"
+	soplex_lib_kwargs = { "lib": lib_with_z, "use": ["IBEX", "LP_LIB"],
+				"uselib_store": "LP_LIB" }
+
+	from_3rd = False # boolean, does soplex comes from 3rd subdirectory
+
+	# In the source code of soplex, DEBUG is used in an enum (in spxout.h) which
+	# causes the compilation to failed when the macro DEBUG is used.
+	if conf.options.DEBUG:
+		conf.undefine ("DEBUG")
+		conf.define ("DEBUGGING", 1)
+
+	# If --soplex-path is given, we run the loop only one time with
+	# mandatory=true because we must find the header and library for soplex. If
+	# the option is not given, we run the loop twice: the first time we try to
+	# find soplex on the system, if we find it, we continue without doing the
+	# second loop, if not we install it from 3rd subdirectory and do the loop
+	# again to check that the installation worked.
+	for mandatory in ([ False, True ] if not soplex_dir else [True]):
+		if soplex_include:
+			soplex_h_kwargs["includes"] = soplex_include
+		if soplex_lib:
+			soplex_lib_kwargs["libpath"] = soplex_lib
+
+		soplex_h_kwargs["mandatory"] = mandatory
+		has_h_soplex = conf.check_cxx (**soplex_h_kwargs)
+
+		soplex_lib_kwargs["mandatory"] = False
+		has_lib_soplex = conf.check_cxx (**soplex_lib_kwargs)
+		if not has_lib_soplex: # Try again without libz
+			soplex_lib_kwargs["mandatory"] = mandatory
+			soplex_lib_kwargs["lib"] = lib_without_z
+			has_lib_soplex = conf.check_cxx (**soplex_lib_kwargs)
+			soplex_lib_kwargs["lib"] = lib_with_z
+
+		if has_h_soplex and has_lib_soplex: # soplex was found
+			if from_3rd:
+				conf.env.append_unique ("LIB_3RD_LIST", "soplex")
+		else:
+			# We necessarily have mandatory = False, or else conf.check_cxx () would
+			# have failed.
+			conf.msg ("Using library Soplex from", "3rd/ subdirectory")
+			soplex_archive = "soplex-1.7.1.tar"
+			soplex_ret = conf.configure_3rd_party_with_autotools (soplex_archive,
+					without_configure = True, without_make_install = True)
+			soplex_srcdir, soplex_include, soplex_lib = soplex_ret
+			conf.env.INSTALL_3RD = True
+			from_3rd = True
+			# The 'make install' of soplex 1.7.1 is buggy, we do it ourself
+			if not os.path.exists (soplex_include):
+				os.makedirs (soplex_include)
+			if not os.path.exists (soplex_lib):
+				os.makedirs (soplex_lib)
+			conf.start_msg("Installing soplex")
+			for filename in os.listdir (os.path.join (soplex_srcdir, "lib")):
+				fullpath = os.path.join (soplex_srcdir, "lib", filename)
+				if filename.startswith ("lib") and os.path.isfile (fullpath):
+					shutil.copy2 (fullpath, soplex_lib)
+			for filename in os.listdir (os.path.join (soplex_srcdir, "src")):
+				fullpath = os.path.join (soplex_srcdir, "src", filename)
+				if filename.endswith (".h") and os.path.isfile (fullpath):
+					shutil.copy2 (fullpath, soplex_include)
+			conf.end_msg("done")
+
+	if conf.options.DEBUG:
+		conf.define ("DEBUG", 1) # restore DEBUG
+
+	conf.env.IBEX_LP_LIB_INCLUDES = """
+#ifdef DEBUG
+	#undef DEBUG
+	#ifndef DEBUGGING
+		#define DEBUGGING
+	#endif
+	#include "soplex.h"
+	#define DEBUG
+#else
+	#include "soplex.h"
+#endif
+"""
+	conf.env.IBEX_LP_LIB_EXTRA_ATTRIBUTES = "soplex::SoPlex *mysoplex;"
+	conf.env.IBEX_LP_LIB_DEFAULT_EPS = "1e-10"
