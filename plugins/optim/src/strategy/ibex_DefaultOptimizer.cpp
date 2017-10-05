@@ -17,6 +17,7 @@
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_SmearFunction.h"
+#include "ibex_LSmear.h"
 #include "ibex_LoupFinderDefault.h"
 #include "ibex_LoupFinderCertify.h"
 #include "ibex_LinearizerCombo.h"
@@ -43,7 +44,7 @@ int normalized_system = -1; // index in memory (-1=none)
 // and we don't know which argument is evaluated first
 
 NormalizedSystem& get_norm_sys(const System& sys, double eps_h) {
-	if (normalized_system>0)
+	if (normalized_system>=0)
 		return (NormalizedSystem&) *((*memory())->sys[normalized_system]); // already built and recorded
 	else {
 		normalized_system = (*memory())->sys.size();
@@ -52,7 +53,7 @@ NormalizedSystem& get_norm_sys(const System& sys, double eps_h) {
 }
 
 ExtendedSystem& get_ext_sys(const System& sys, double eps_h) {
-	if (extended_system>0)
+	if (extended_system>=0)
 		return (ExtendedSystem&) *((*memory())->sys[extended_system]); // already built and recorded
 	else {
 		extended_system = (*memory())->sys.size();
@@ -66,6 +67,7 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double eps_x, double rel_e
 		Optimizer(sys.nb_var,
 			  ctc(get_ext_sys(sys,eps_h)), // warning: we don't know which argument is evaluated first
 			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x)),
+			  //rec(new LSmear(get_ext_sys(sys,eps_h),eps_x)),
 			  rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(get_norm_sys(sys,eps_h),inHC4))) :
 						 (LoupFinder*) new LoupFinderDefault(get_norm_sys(sys,eps_h),inHC4)),
 			  (CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h))),

@@ -59,47 +59,52 @@ const int SAMPLE_SIZE = 1;
 const double EQ_EPS= 1.e-8;
 
 int main(int argc, char** argv) {
+//
+//  deprecated.
+//
 
-	if (argc<8) {
-		cerr << "usage: optimizer filename filtering linear_relaxation bisection prec goal_prec timelimit "  << endl;
-		exit(1);
-	}
 
-	try {
-		OptimizerParam p(
-				argv[1],                     // filename
-				argv[2],                     // contractor
-				argv[3],                     // linear_relaxation
-				argv[4],                     // bisector
-				_2dbl("prec",argv[5]),       // precision
-				_2int("timelimit", argv[7]), // time limit
-				HC4_INCREMENTAL,             // hc4 incremental?
-				PROPAG_RATIO,                // propagation ratio
-				FIXPOINT_RATIO,              // fixpoint ratio
-				_2dbl("rel_prec", argv[6]),  // goal relative precision
-				_2dbl("rel_prec", argv[6]),  // goal absolute precision (= relative)
-				SAMPLE_SIZE,                 // sample size
-				EQ_EPS                       // thickness of equation
-				);
-
-		Optimizer o(p.get_sys(), p.get_ctc(), p.get_bsc(), p.prec, p.goal_rel_prec, p.goal_abs_prec, p.sample_size, p.eq_eps);
-
-		o.timeout = p.time_limit;
-
-		// the trace
-		o.trace=1;
-
-		// the search itself
-		Optimizer::Status result=o.optimize(p.get_sys().box);
-
-		// printing the results
-		o.report();
-
-		return (result==Optimizer::SUCCESS? 0 : -1);
-
-	}
-
-	catch(ibex::SyntaxError& e) {
-		cout << e << endl;
-	}
+//
+//	if (argc<8) {
+//		cerr << "usage: optimizer filename filtering linear_relaxation bisection prec goal_prec timelimit "  << endl;
+//		exit(1);
+//	}
+//
+//	try {
+//		OptimizerParam p(
+//				argv[1],                     // filename
+//				argv[2],                     // contractor
+//				argv[3],                     // linear_relaxation
+//				argv[4],                     // bisector
+//				_2dbl("prec",argv[5]),       // precision
+//				_2int("timelimit", argv[7]), // time limit
+//				HC4_INCREMENTAL,             // hc4 incremental?
+//				PROPAG_RATIO,                // propagation ratio
+//				FIXPOINT_RATIO,              // fixpoint ratio
+//				_2dbl("rel_prec", argv[6]),  // goal relative precision
+//				_2dbl("rel_prec", argv[6]),  // goal absolute precision (= relative)
+//				SAMPLE_SIZE,                 // sample size
+//				EQ_EPS                       // thickness of equation
+//				);
+//
+//		Optimizer o(p.get_sys(), p.get_ctc(), p.get_bsc(), p.prec, p.goal_rel_prec, p.goal_abs_prec, p.sample_size, p.eq_eps);
+//
+//		o.timeout = p.time_limit;
+//
+//		// the trace
+//		o.trace=1;
+//
+//		// the search itself
+//		Optimizer::Status result=o.optimize(p.get_sys().box);
+//
+//		// printing the results
+//		o.report();
+//
+//		return (result==Optimizer::SUCCESS? 0 : -1);
+//
+//	}
+//
+//	catch(ibex::SyntaxError& e) {
+//		cout << e << endl;
+//	}
 }

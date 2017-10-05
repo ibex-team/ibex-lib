@@ -16,7 +16,7 @@
 #endif
 
 #ifndef IBEX_BENCHS_DIR
-  #define IBEX_BENCHS_DIR "../../../benchs"
+  #define IBEX_BENCHS_DIR "../../../benchs-solver"
 #endif
 
 using namespace std;
@@ -36,12 +36,10 @@ int main() {
 	/* Build a default solver for the system and with a precision set to 1e-07 */
 	DefaultSolver solver(system,1e-07);
 
-	vector<IntervalVector> solutions = solver.solve(system.box); // Run the solver
+	solver.solve(system.box); // Run the solver
 
 	/* Display the solutions. */
-	for (unsigned int i=0; i<solutions.size(); i++) {
-		cout << "solution n°" << i << ": " << solutions[i] << endl;
-	}
+	cout << solver.get_manifold() << endl;
 	//! [start-call-solver]
 	}
 
@@ -56,8 +54,8 @@ int main() {
 	o.optimize(sys.box);// Run the optimizer
 
 	/* Display the result. */
-	cout << "interval for the minimum: " << Interval(o.uplo,o.loup) << endl;
-	cout << "minimizer: " << o.loup_point << endl;
+	cout << "interval for the minimum: " << Interval(o.get_uplo(),o.get_loup()) << endl;
+	cout << "minimizer: " << o.get_loup_point() << endl;
 	//! [start-call-optim]
 	}
 
@@ -606,6 +604,13 @@ int main() {
 	Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-d,
 		                  sqrt(sqr(x-1.0)+sqr(y))-d));
 
+	SystemFactory factory;
+	factory.add_var(x);
+	factory.add_var(y);
+	factory.add_ctr(f(x,y)=0);
+
+	System system(factory);
+
 	double init_box[][2] = { {-10,10},{-10,10} };
 	IntervalVector box(2,init_box);
 
@@ -626,15 +631,17 @@ int main() {
 	 * performing a depth-first search. */
 	CellStack buff;
 
+	/* Vector precisions required on variables */
+	Vector prec(2, 1e-07);
+
 	/* Create a solver with the previous objects */
-	Solver s(compo,bisector,buff);
+	Solver s(system, compo, bisector, buff, prec, prec);
 
 	/* Run the solver */
-	vector<IntervalVector> sols=s.solve(box);
+	s.solve(box);
 
 	/* Display the solutions */
-	for (unsigned int i=0; i<sols.size(); i++)
-		cout << "solution n°" << i << "=\t" << sols[i] << endl;
+	cout << s.get_manifold() << endl;
 	//! [strat-basic-solver]
 	}
 
@@ -644,8 +651,6 @@ int main() {
 
 	System system(IBEX_BENCHS_DIR "/benchs-satisfaction/benchlib2/kolev36.bch");
 
-	double prec=1e-7; // precision
-
 	/* ============================ building contractors ========================= */
 	CtcHC4 hc4(system,0.01);
 
@@ -653,11 +658,11 @@ int main() {
 
 	CtcAcid acid(system, hc4_2);
 
-	CtcNewton newton(system.f_ctrs, 5e+08, prec, 1e-04);
+	CtcNewton newton(system.f_ctrs, 5e+08, 1e-07, 1e-04);
 
 	LinearizerCombo linear_relax(system,LinearizerCombo::XNEWTON);
 
-	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
+	CtcPolytopeHull polytope(linear_relax);
 
 	CtcCompo polytope_hc4(polytope, hc4);
 
@@ -667,24 +672,26 @@ int main() {
 	/* =========================================================================== */
 
 	/* Create a smear-function bisection heuristic. */
-	SmearSumRelative bisector(system, prec);
+	SmearSumRelative bisector(system, 1e-07);
 
 	/* Create a "stack of boxes" (CellStack) (depth-first search). */
 	CellStack buff;
 
+	/* Vector precisions required on variables */
+	Vector prec(2, 1e-07);
+
 	/* Create a solver with the previous objects */
-	Solver s(compo, bisector, buff);
+	Solver s(system, compo, bisector, buff, prec, prec);
 
 	/* Run the solver */
-	vector<IntervalVector> sols=s.solve(system.box);
+	s.solve(system.box);
 
 	/* Display the solutions */
-	for (unsigned int i=0; i<sols.size(); i++)
-		cout << "solution n°" << i << "=\t" << sols[i] << endl;
+	cout << s.get_manifold() << endl;
 
 	/* Report performances */
-	cout << "cpu time used=" << s.time << "s."<< endl;
-	cout << "number of cells=" << s.nb_cells << endl;
+	cout << "cpu time used=" << s.get_time() << "s."<< endl;
+	cout << "number of cells=" << s.get_nb_cells() << endl;
 
 	//! [strat-default-solver]
 	}
@@ -696,7 +703,11 @@ int main() {
 
 	double prec=1e-7; // precision
 
-	ExtendedSystem ext_sys(system); // extended system (the objective is transformed to a constraint y=f(x))
+	// normalized system (all inequalities are "<=")
+	NormalizedSystem norm_sys(system);
+
+	// extended system (the objective is transformed to a constraint y=f(x))
+	ExtendedSystem ext_sys(system);
 
 	/* ============================ building contractors ========================= */
 	CtcHC4 hc4(ext_sys,0.01);
@@ -707,7 +718,7 @@ int main() {
 
 	LinearizerCombo linear_relax(ext_sys,LinearizerCombo::XNEWTON);
 
-	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
+	CtcPolytopeHull polytope(linear_relax);
 
 	CtcCompo polytope_hc4(polytope, hc4);
 
@@ -719,18 +730,24 @@ int main() {
 	/* Create a smear-function bisection heuristic. */
 	SmearSumRelative bisector(ext_sys, prec);
 
+	/** Create cell buffer (fix exploration ordering) */
+	CellDoubleHeap buffer(ext_sys);
+
+	/** Create a "loup" finder (find feasible points) */
+	LoupFinderDefault loup_finder(norm_sys);
+
 	/* Create a solver with the previous objects */
-	Optimizer o(system, compo, bisector);
+	Optimizer o(system.nb_var, compo, bisector, loup_finder, buffer, ext_sys.goal_var());
 
 	/* Run the optimizer */
 	o.optimize(system.box,prec);
 
 	/* Display a safe enclosure of the minimum */
-	cout << "f* in " << Interval(o.uplo,o.loup) << endl;
+	cout << "f* in " << Interval(o.get_uplo(),o.get_loup()) << endl;
 
 	/* Report performances */
-	cout << "cpu time used=" << o.time << "s."<< endl;
-	cout << "number of cells=" << o.nb_cells << endl;
+	cout << "cpu time used=" << o.get_time() << "s."<< endl;
+	cout << "number of cells=" << o.get_nb_cells() << endl;
 
 	//! [strat-default-optimizer]
 	}
