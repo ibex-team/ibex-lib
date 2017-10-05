@@ -16,7 +16,7 @@
 #endif
 
 #ifndef IBEX_BENCHS_DIR
-  #define IBEX_BENCHS_DIR "../../../benchs"
+  #define IBEX_BENCHS_DIR "../../../benchs-solver"
 #endif
 
 using namespace std;
@@ -42,7 +42,7 @@ int main() {
 	//! [solver-parallel-C-1]
 
 	// Get the system
-	System sys1(IBEX_BENCHS_DIR "/benchs-satisfaction/benchs-IBB/ponts-geo.bch");
+	System sys1(IBEX_BENCHS_DIR "/polynom/ponts-geo.bch");
 
 	// Create a copy for the second solver
 	System sys2(sys1,System::COPY);

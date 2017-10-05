@@ -15,9 +15,11 @@
 #error "You need the plugin Optim to run this example."
 #endif
 
-#ifndef IBEX_BENCHS_DIR
-  #define IBEX_BENCHS_DIR "../../../benchs-solver"
+#ifndef IBEX_SOLVER_BENCHS_DIR
+  #define IBEX_SOLVER_BENCHS_DIR "../../../benchs-solver"
 #endif
+
+#define IBEX_OPTIM_BENCHS_DIR "../benchs"
 
 using namespace std;
 using namespace ibex;
@@ -31,7 +33,7 @@ int main() {
 	{
 	//! [start-call-solver]
 	/* Build a system of equations from the file */
-	System system(IBEX_BENCHS_DIR "/benchs-satisfaction/benchlib2/kolev36.bch");
+	System system(IBEX_SOLVER_BENCHS_DIR "/others/kolev36.bch");
 
 	/* Build a default solver for the system and with a precision set to 1e-07 */
 	DefaultSolver solver(system,1e-07);
@@ -46,7 +48,7 @@ int main() {
 	{
 	//! [start-call-optim]
 	/* Build a constrained optimization problem from the file */
-	System sys(IBEX_BENCHS_DIR "/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");
+	System sys(IBEX_OPTIM_BENCHS_DIR "/easy/ex3_1_3.bch");
 
 	/* Build a default optimizer with a precision set to 1e-07 for both x and f(x) */
 	DefaultOptimizer o(sys,1e-07,1e-07);
@@ -649,7 +651,7 @@ int main() {
 	{
 	//! [strat-default-solver]
 
-	System system(IBEX_BENCHS_DIR "/benchs-satisfaction/benchlib2/kolev36.bch");
+	System system(IBEX_SOLVER_BENCHS_DIR "/others/kolev36.bch");
 
 	/* ============================ building contractors ========================= */
 	CtcHC4 hc4(system,0.01);
@@ -699,7 +701,7 @@ int main() {
 	{
 	//! [strat-default-optimizer]
 
-	System system(IBEX_BENCHS_DIR "/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");
+	System system(IBEX_OPTIM_BENCHS_DIR "/easy/ex3_1_3.bch");
 
 	double prec=1e-7; // precision
 
