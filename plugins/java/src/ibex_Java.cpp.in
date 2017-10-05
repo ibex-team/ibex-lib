@@ -78,7 +78,7 @@ class Instance {
 public:
 	int nb_var;
 	BitSet params;
-	double prec;
+	Vector prec;
 	vector<char*> ctrs_syntax;
 
 	System* sys;       // all the constraints
@@ -89,7 +89,7 @@ public:
 	CellStack* stack;       // cell buffer for the solver
 	Solver* solver;         // the solver
 
-	Instance(int n, const BitSet& _params, double prec) : nb_var(n), params(_params), prec(prec), sys(NULL),
+	Instance(int n, const BitSet& _params, const Vector& prec) : nb_var(n), params(_params), prec(prec), sys(NULL),
 			ctc(NULL), neg(NULL), bis(NULL), stack(NULL), solver(NULL) {
 
 	}
@@ -220,23 +220,28 @@ const double EPS_CONTRACT=0.01;
 
 }
 
-JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_init(JNIEnv* env, jobject obj, jintArray _int_vars, jdouble prec) {
-	jint size  = env->GetArrayLength(_int_vars);
-	jint* int_vars = env->GetIntArrayElements(_int_vars, 0);
-
+JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_init(JNIEnv* env, jobject obj, jdoubleArray _prec) {
+	jint size  = env->GetArrayLength(_prec);
+	jdouble* prec = env->GetDoubleArrayElements(_prec, 0);
+	
 	jclass clazz = env->GetObjectClass(obj);
 	jfieldID _id = env->GetFieldID(clazz, "id", "I");
 	env->SetIntField(obj ,_id, ibex_instances.size());
 
 	BitSet b(size);
+	Vector prec_vec(size);
 	
 	for (int i=0; i<size; i++) {
-		if (int_vars[i]==1) b.add(i);
+		if (prec[i]<0) {
+			b.add(i);
+			prec_vec[i]=1e-20;
+		} else
+			prec_vec[i]=prec[i];
 	}
 
-	ibex_instances.push_back(new Instance(size, b, prec));
+	ibex_instances.push_back(new Instance(size, b, prec_vec));
 
-	env->ReleaseIntArrayElements(_int_vars, int_vars, 0);
+	env->ReleaseDoubleArrayElements(_prec, prec, 0);
 }
 
 JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_add_1ctr(JNIEnv* env, jobject obj, jstring _syntax) {
