@@ -126,6 +126,11 @@ void Solver::start(const char* input_paving) {
 
 	// the unknown and pending boxes have to be processed
 	while (it!=manif->pending.end()) {
+		if (it==manif->unknown.end())
+			it=manif->pending.begin();
+		if (it==manif->pending.end())
+			break;
+
 		Cell* cell=new Cell(it->existence());
 
 		// add data required by this solver
@@ -137,8 +142,6 @@ void Solver::start(const char* input_paving) {
 		buffer.push(cell);
 
 		it++;
-		if (it==manif->unknown.end())
-			it=manif->pending.begin();
 	}
 
 	nb_cells=0; // no new cell created!
@@ -149,7 +152,7 @@ void Solver::start(const char* input_paving) {
 	Timer::start();
 }
 
-bool Solver::next() {
+SolverOutputBox* Solver::next() {
 	while (!buffer.empty()) {
 
 		time_limit_check();
@@ -184,8 +187,7 @@ bool Solver::next() {
 					if ((m==0 && new_sol.status==SolverOutputBox::INNER) ||
 							!is_too_large(new_sol.existence())) {
 						delete buffer.pop();
-						store_sol(new_sol);
-						return true;
+						return &store_sol(new_sol);
 					} else {
 						// otherwise: continue search...
 					}
@@ -214,8 +216,7 @@ bool Solver::next() {
 			catch (NoBisectableVariableException&) {
 				SolverOutputBox new_sol=check_sol(c->box);
 				delete buffer.pop();
-				store_sol(new_sol);
-				return true;
+				return &store_sol(new_sol);
 			}
 		}
 		catch (EmptyBoxException&) {
@@ -226,7 +227,7 @@ bool Solver::next() {
 		}
 	}
 
-	return false;
+	return NULL;
 }
 
 Solver::Status Solver::solve(const IntervalVector& init_box) {
@@ -243,7 +244,7 @@ Solver::Status Solver::solve() {
 
 	try {
 
-		while (next()) { }
+		while (next()!=NULL) { }
 
 		if (manif->unknown.size()>0)
 			manif->status = NOT_ALL_VALIDATED;
@@ -424,24 +425,29 @@ bool Solver::is_too_large(const IntervalVector& box) {
 	return false;
 }
 
-void Solver::store_sol(const SolverOutputBox& sol) {
+SolverOutputBox& Solver::store_sol(const SolverOutputBox& sol) {
+
+	if (trace >=1) cout << sol << endl;
 
 	switch (sol.status) {
 	case SolverOutputBox::INNER    :
 		manif->inner.push_back(sol);
+		return manif->inner.back();
 		break;
 	case SolverOutputBox::BOUNDARY :
 		manif->boundary.push_back(sol);
+		return manif->boundary.back();
 		break;
 	case SolverOutputBox::UNKNOWN  :
 		manif->unknown.push_back(sol);
+		return manif->unknown.back();
 		break;
 	case SolverOutputBox::PENDING :
 		manif->pending.push_back(sol);
+		return manif->pending.back();
 		break;
 	}
 
-	if (trace >=1) cout << sol << endl;
 }
 
 void Solver::flush() {
