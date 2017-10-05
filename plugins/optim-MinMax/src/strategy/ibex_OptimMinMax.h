@@ -126,6 +126,7 @@ public:
     bool visit_all_csp;// if true force to visit all leaves of slave heap in max optim of csp solver
 
     int nb_point; // number of point evaluation in current box x (use to compute uplo)
+    double perf_thresh; // cell is spawn from loc_solve csp list if its perf_csp is lower than perf_thresh
 
 private:
 
@@ -151,6 +152,7 @@ private:
     int check_regular_ctr(const IntervalVector& box);
     int check_fa_ctr(Cell * x_cell,bool midp);
     bool handle_cell(Cell * x_cell);
+    bool spawn(Cell* x_cell); // spawn a cell into subcells from the csp list of loc_solve if perf crit is lower than spawn_thresh
 
 
     // Fa cst variables
@@ -171,6 +173,7 @@ private:
     static const int default_local_iter;
     static const bool default_visit_all;
     static const int default_nb_point;
+    static const double default_perf_thresh;
 
     //Default parameters for light local solver
 

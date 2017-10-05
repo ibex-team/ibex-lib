@@ -16,6 +16,7 @@
 #include "ibex_CellCostFunc.h"
 #include "ibex_LargestFirst.h"
 #include "ibex_Linear.h"
+#include "ibex_Ctc.h"
 
 namespace ibex {
 
@@ -24,10 +25,10 @@ namespace ibex {
 class LightLocalSolver
 {
 public:
-    LightLocalSolver(NormalizedSystem& y_sys,UnconstrainedLocalSearch* local_solver_over_x,UnconstrainedLocalSearch* local_solver_over_y,int x_dim,int y_dim,bool csp_actif);
+    LightLocalSolver(NormalizedSystem& y_sys,UnconstrainedLocalSearch* local_solver_over_x,UnconstrainedLocalSearch* local_solver_over_y,Ctc& x_ctc,int x_dim,int y_dim,bool csp_actif);
     ~LightLocalSolver();
 
-    bool compute_supy_lb(Cell* x_cell,double loup,Function* minus_goal);
+    bool compute_supy_lb(Cell* x_cell,double uplo,double loup,Function* minus_goal);
 
     double min_acpt_diam;  // min max_diam of local supy sols to consider it as unique point (no regression needed)
 
@@ -44,6 +45,12 @@ public:
     double y_sol_radius;
 
     double reg_acpt_error;
+
+    Ctc& x_ctc;
+
+    std::queue< std::pair<IntervalVector,Interval> > csp_queue;
+
+    double perf_ctc_coef; // performance of <loup csp between 0 and 1
 
 
 private:
@@ -67,13 +74,13 @@ private:
 
     void reject_far_y_sol(const Vector& global_sol);
 
-    std::queue<IntervalVector> sivia_x_bsct(Cell* x_cell,const Matrix& y_param,double loup) ;
+    std::queue<std::pair<IntervalVector,Interval> > sivia_x_bsct(Cell* x_cell,const Matrix& y_param,double loup) ;
 
-    IntervalVector list_hull_box(std::queue<IntervalVector> list);
+    IntervalVector list_hull_box(std::queue<std::pair<IntervalVector,Interval> > list);
 
-    double list_volume(std::queue<IntervalVector> list);
+    double list_volume(std::queue<std::pair<IntervalVector,Interval> > list);
 
-    double compute_lb(std::queue<IntervalVector> x_list,const Matrix& y_param,Cell* x_cell,double loup);
+    double compute_lb(std::queue<std::pair<IntervalVector,Interval> > x_list,const Matrix& y_param,Cell* x_cell,double loup);
 
     IntervalVector set_x_box_y_vect(const IntervalVector& x_box, const Vector& y_vect);
 

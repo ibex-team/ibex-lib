@@ -9,11 +9,11 @@ namespace ibex {
 
 CellCostPFlb LightLocalSolver::x_heap_costf;
 
-LightLocalSolver::LightLocalSolver(NormalizedSystem& y_sys,UnconstrainedLocalSearch* local_solver_over_x,UnconstrainedLocalSearch* local_solver_over_y,int x_dim, int y_dim,bool csp_actif) :
-                        xy_sys(y_sys),local_solver_over_x(local_solver_over_x),local_solver_over_y(local_solver_over_y),nb_sols(0),
+LightLocalSolver::LightLocalSolver(NormalizedSystem& y_sys,UnconstrainedLocalSearch* local_solver_over_x,UnconstrainedLocalSearch* local_solver_over_y,Ctc& x_ctc,int x_dim, int y_dim,bool csp_actif) :
+                        xy_sys(y_sys),local_solver_over_x(local_solver_over_x),local_solver_over_y(local_solver_over_y),nb_sols(0),x_ctc(x_ctc),
                         min_acpt_diam(0),x_dim(x_dim),y_dim(y_dim),csp_actif(csp_actif),
                         nb_sivia_iter(0),nb_optim_iter(0),y_sol_radius(0),
-                        reg_acpt_error(0),x_heap(new Heap<Cell>(x_heap_costf))
+                        reg_acpt_error(0),x_heap(new Heap<Cell>(x_heap_costf)),perf_ctc_coef(1)
 {
 //    Cell *x_cell = new Cell(IntervalVector(x_dim));
 //    x_cell->add<OptimData>();
@@ -25,7 +25,8 @@ LightLocalSolver::~LightLocalSolver() {
 }
 
 
-bool LightLocalSolver::compute_supy_lb(Cell* x_cell,double loup,Function* minus_goal = NULL) {
+bool LightLocalSolver::compute_supy_lb(Cell* x_cell,double uplo,double loup,Function* minus_goal = NULL) {
+    perf_ctc_coef = 1;
     local_sols.clear();
 //    std::cout<<"nb sols: "<<nb_sols<<std::endl;
     DataMinMax *data_x;
@@ -58,6 +59,8 @@ bool LightLocalSolver::compute_supy_lb(Cell* x_cell,double loup,Function* minus_
 //        std::cout<<"      LghtLoc: set search box at "<<search_box<<std::endl;
         local_solver_over_y->set_box(search_box);
         local_solver_over_y->minimize(strt_pt,global_xy_sol,1e-3);
+        if(xy_sys.goal->eval(global_xy_sol).ub()<uplo)
+            return true;
 //        std::cout<<"      LghtLoc: final box: "<<global_xy_sol<<std::endl;
     }
 
@@ -77,10 +80,12 @@ bool LightLocalSolver::compute_supy_lb(Cell* x_cell,double loup,Function* minus_
         IntervalVector x_box_y_sol(set_x_box_y_vect(x_cell->box,hullb.mid()));
         std::cout<<"      LghtLoc: eval funtion at "<<x_box_y_sol<<std::endl;
         Interval ev = xy_sys.goal->eval(x_box_y_sol);
-        std::cout<<"      LghtLoc: value "<<ev<<std::endl;
+        std::cout<<"      LghtLoc: value "<<ev<<" loup: "<<loup<<std::endl;
 
         if (ev.lb()>loup) // E y such as f([x],y) > loup => prune [x]
             return false;
+        else if(ev.ub()<uplo) // no chance to improve
+            return true;
         else {
             data_x->fmax &= Interval(ev.lb(),POS_INFINITY);
             xy_sys.goal->backward(Interval(NEG_INFINITY,loup),x_box_y_sol);
@@ -112,6 +117,8 @@ bool LightLocalSolver::compute_supy_lb(Cell* x_cell,double loup,Function* minus_
             if(hullb[i].diam()<min_acpt_diam){
                 y_param.set_row(i,Vector(x_dim+1));
                 y_param[i][x_dim] = hullb[i].mid();
+                reg.second[i] = 0;
+
             }
         }
         std::cout<<"      LghtLoc:  regression error: "<<reg.second.max()<<std::endl;
@@ -122,10 +129,10 @@ bool LightLocalSolver::compute_supy_lb(Cell* x_cell,double loup,Function* minus_
 //        }
         IntervalVector reg_y_box = y_param.submatrix(0,y_dim-1,0,x_dim-1)*x_cell->box+y_param.col(x_dim);
 //        std::cout<<"reg y box: "<<reg_y_box<<std::endl<<" subset of "<<xy_sys.box.subvector(x_dim,x_dim+y_dim-1)<<" ? "<<reg_y_box.is_subset(xy_sys.box.subvector(x_dim,x_dim+y_dim-1))<<std::endl;
-//        std::cout<<"max of error: "<<reg.second.max()<<std::endl;
+//        std::cout<<"max of error: "<<reg.second.max()<<" acpt reg error: "<<reg_acpt_error<<std::endl;
         if(reg.second.max()>reg_acpt_error || !(reg_y_box.is_subset(xy_sys.box.subvector(x_dim,x_dim+y_dim-1)))) // regression error too large or alpha*[x] + beta not contained in [y].
         {
-            std::cout<<" regression error too large or out of y bound"<<std::endl;
+//            std::cout<<" regression error too large or out of y bound"<<std::endl;
             return true;
         }
 
@@ -134,28 +141,42 @@ bool LightLocalSolver::compute_supy_lb(Cell* x_cell,double loup,Function* minus_
 //        std::cout<<"       LghtLoc: start sivia"<<std::endl;
 //    if(regress)
 //    {
-        std::queue<IntervalVector> csp_lower_loup_boxes = sivia_x_bsct( x_cell,y_param,loup);
-        if(csp_lower_loup_boxes.empty())
-            return false;
-        //        std::cout<<"      LghtLoc: compute volume of list..."<<std::endl;
-        double list_vol = list_volume(csp_lower_loup_boxes);
-        std::cout<<"      LghtLoc: init x_cell box volume: "<<x_cell->box.volume()<<std::endl
-                <<"            volume after sivia: "<<list_vol<<std::endl<<"              size of csp list: "<<csp_lower_loup_boxes.size()<<std::endl;
-        IntervalVector ctc_x_box = list_hull_box(csp_lower_loup_boxes);
-        if(ctc_x_box == x_cell->box)
-            std::cout<<"      LghtLoc: hull of sivia reamains not contracted "<<std::endl;
-        else
-            std::cout<<"      LghtLoc: hull of sivia reamains: "<<list_hull_box(csp_lower_loup_boxes)<<std::endl;
-        x_cell->box = ctc_x_box;
+        std::queue< std::pair<IntervalVector,Interval> > csp_lower_loup_boxes;
+        if(nb_sivia_iter>0)
+        {
+            csp_lower_loup_boxes = sivia_x_bsct( x_cell,y_param,loup);
+            if(csp_lower_loup_boxes.empty())
+                return false;
+//                    std::cout<<"      LghtLoc: compute volume of list..."<<std::endl;
+            double list_vol = list_volume(csp_lower_loup_boxes);
+            std::cout<<"      LghtLoc: init x_cell box volume: "<<x_cell->box.volume()<<std::endl
+                    <<"            volume after sivia: "<<list_vol<<std::endl<<"              size of csp list: "<<csp_lower_loup_boxes.size()<<std::endl;
+            IntervalVector ctc_x_box = list_hull_box(csp_lower_loup_boxes);
+            std::cout<<"      LghtLoc: vol of hullbox: "<<ctc_x_box.volume()<<std::endl;
+            x_cell->box = ctc_x_box;
+            csp_queue = csp_lower_loup_boxes;
+            perf_ctc_coef = list_vol/x_cell->box.volume()*csp_queue.size()/(2*nb_sivia_iter); // contraction volume gain times ratio number of elements upon max list elem
+        }
+        else {
+            DataMinMax *data_x;
+            if (csp_actif )
+                data_x = &(x_cell->get<DataMinMaxCsp>());
+            else
+                data_x = &(x_cell->get<DataMinMaxOpti>());
+            csp_lower_loup_boxes.push(std::pair<IntervalVector,Interval>(x_cell->box,data_x->fmax));
+        }
 
         // run global optim over x at the y of global_xy_sol to upper the lower bound lb:  fy(x)> lb for all x in [x]
-        std::cout<<"      LghtLoc: compute lb"<<std::endl;
-        double global_lb_at_y = compute_lb(csp_lower_loup_boxes,y_param,x_cell,loup);
-        std::cout<<"      LghtLoc: lower bound at y_sol after global optim: "<<global_lb_at_y<<std::endl;
-        if (global_lb_at_y>loup) // E y such as f([x],y) > loup => prune [x]
-            return false;
-        else {
-            data_x->fmax &= Interval(global_lb_at_y,POS_INFINITY);
+        if(nb_optim_iter>0)
+        {
+            std::cout<<"      LghtLoc: compute lb"<<std::endl;
+            double global_lb_at_y = compute_lb(csp_lower_loup_boxes,y_param,x_cell,loup);
+            std::cout<<"      LghtLoc: lower bound at y_sol after global optim: "<<global_lb_at_y<<std::endl;
+            if (global_lb_at_y>loup) // E y such as f([x],y) > loup => prune [x]
+                return false;
+            else {
+                data_x->fmax &= Interval(global_lb_at_y,POS_INFINITY);
+            }
         }
 //    }
 
@@ -283,16 +304,21 @@ void LightLocalSolver::reject_far_y_sol(const Vector& global_sol) {
 }
 
 
-std::queue<IntervalVector> LightLocalSolver::sivia_x_bsct(Cell* x_cell,const Matrix& y_param,double loup) {
-    std::queue<IntervalVector> x_queue;
-    std::queue<IntervalVector> csp_satisfy_list;
-    x_queue.push(x_cell->box);
+std::queue<std::pair<IntervalVector,Interval> > LightLocalSolver::sivia_x_bsct(Cell* x_cell,const Matrix& y_param,double loup) {
+    std::queue<std::pair<IntervalVector,Interval> > x_queue;
+    std::queue<std::pair<IntervalVector,Interval> > csp_satisfy_list;
+    DataMinMax *data_x;
+    if (csp_actif )
+        data_x = &(x_cell->get<DataMinMaxCsp>());
+    else
+        data_x = &(x_cell->get<DataMinMaxOpti>());
+    x_queue.push(std::pair<IntervalVector,Interval>(x_cell->box,data_x->fmax));
     Bsc* bsc = new LargestFirst();
     int iter = 0;
     while (iter<nb_sivia_iter && !x_queue.empty()) {
         iter++;
 //        std::cout<<"        LghtLoc:  SIVIA: iter nb "<<iter<<std::endl;
-        IntervalVector current_x_box = x_queue.front();
+         IntervalVector current_x_box = x_queue.front().first;
 //        std::cout<<"        LghtLoc:  SIVIA: x_box:  "<<current_x_box<<std::endl;
         x_queue.pop();
         try
@@ -303,41 +329,48 @@ std::queue<IntervalVector> LightLocalSolver::sivia_x_bsct(Cell* x_cell,const Mat
 //                    std::cout<<"        LghtLoc:  SIVIA: bisection done "<<std::endl;
 
             // handle first cell
-            IntervalVector y_box = y_param.submatrix(0,y_dim-1,0,x_dim-1)*cur_boxes.first+y_param.col(x_dim); // y = alpha*x + beta
-            IntervalVector current_xy_box = set_x_box_y_box(cur_boxes.first,y_box);
-            //        std::cout<<"        LghtLoc:  SIVIA: first box to eval: "<<current_xy_box<<std::endl;
-            Interval eval = xy_sys.goal->eval(current_xy_box);
-            //        std::cout<<"        LghtLoc:  SIVIA: eval box"<<current_xy_box<<"res: "<<eval<<std::endl;
-            if(eval.ub()<=loup) // is lower than best current solution, nothing to do anymore with this box
-                csp_satisfy_list.push(IntervalVector(cur_boxes.first));
-            else if(eval.lb()<loup) { // loup in [eval], put in list to bisect again
-                xy_sys.goal->backward(Interval(NEG_INFINITY,loup),current_xy_box);
-                if(!current_xy_box.is_empty()) {
-                    cur_boxes.first = current_xy_box.subvector(0,x_dim-1);
-                    x_queue.push(cur_boxes.first);
+            x_ctc.contract(cur_boxes.first);
+            if(!cur_boxes.first.is_empty())
+            {
+                IntervalVector y_box = y_param.submatrix(0,y_dim-1,0,x_dim-1)*cur_boxes.first+y_param.col(x_dim); // y = alpha*x + beta
+                IntervalVector current_xy_box = set_x_box_y_box(cur_boxes.first,y_box);
+                //        std::cout<<"        LghtLoc:  SIVIA: first box to eval: "<<current_xy_box<<std::endl;
+                Interval eval = xy_sys.goal->eval(current_xy_box);
+                //        std::cout<<"        LghtLoc:  SIVIA: eval box"<<current_xy_box<<"res: "<<eval<<std::endl;
+                if(eval.ub()<=loup) // is lower than best current solution, nothing to do anymore with this box
+                    csp_satisfy_list.push(std::pair<IntervalVector,Interval>(cur_boxes.first,eval));
+                else if(eval.lb()<loup) { // loup in [eval], put in list to bisect again
+                    xy_sys.goal->backward(Interval(NEG_INFINITY,loup),current_xy_box);
+                    if(!current_xy_box.is_empty()) {
+                        cur_boxes.first = current_xy_box.subvector(0,x_dim-1);
+                        x_queue.push(std::pair<IntervalVector,Interval>(cur_boxes.first,eval));
+                    }
                 }
             }
 
 
 
-            // handle second cell
-            y_box = y_param.submatrix(0,y_dim-1,0,x_dim-1)*cur_boxes.second+y_param.col(x_dim); // y = alpha*x + beta
-            current_xy_box = set_x_box_y_box(cur_boxes.second,y_box);
-            //        std::cout<<"        LghtLoc:  SIVIA: eval box"<<current_xy_box<<"res: "<<eval<<std::endl;
-            eval = xy_sys.goal->eval(current_xy_box);
-            if(eval.ub()<=loup)
-                csp_satisfy_list.push(IntervalVector(cur_boxes.second));
-            else if(eval.lb()<loup) { // loup in [eval], put in list to bisect again
-                xy_sys.goal->backward(Interval(NEG_INFINITY,loup),current_xy_box);
-                if(!current_xy_box.is_empty()) {
-                    cur_boxes.second = current_xy_box.subvector(0,x_dim-1);
-                    x_queue.push(cur_boxes.second);
+            x_ctc.contract(cur_boxes.second);
+            if(!cur_boxes.second.is_empty()){
+                // handle second cell
+                IntervalVector y_box = y_param.submatrix(0,y_dim-1,0,x_dim-1)*cur_boxes.second+y_param.col(x_dim); // y = alpha*x + beta
+                IntervalVector current_xy_box = set_x_box_y_box(cur_boxes.second,y_box);
+                //        std::cout<<"        LghtLoc:  SIVIA: eval box"<<current_xy_box<<"res: "<<eval<<std::endl;
+                Interval eval = xy_sys.goal->eval(current_xy_box);
+                if(eval.ub()<=loup)
+                    csp_satisfy_list.push(std::pair<IntervalVector,Interval>(cur_boxes.second,eval));
+                else if(eval.lb()<loup) { // loup in [eval], put in list to bisect again
+                    xy_sys.goal->backward(Interval(NEG_INFINITY,loup),current_xy_box);
+                    if(!current_xy_box.is_empty()) {
+                        cur_boxes.second = current_xy_box.subvector(0,x_dim-1);
+                        x_queue.push(std::pair<IntervalVector,Interval>(cur_boxes.second,eval));
+                    }
                 }
             }
         }
         catch (NoBisectableVariableException& ) {
 //            std::cout<<"        LghtLoc:  SIVIA: not bisectable caught "<<std::endl;
-            csp_satisfy_list.push(current_x_box);
+            csp_satisfy_list.push(std::pair<IntervalVector,Interval>(current_x_box,xy_sys.goal->eval(current_x_box)));
         }
 
 //        std::cout<<"        LghtLoc:  SIVIA: second box eval res: "<<eval<<std::endl;
@@ -353,36 +386,36 @@ std::queue<IntervalVector> LightLocalSolver::sivia_x_bsct(Cell* x_cell,const Mat
 
 }
 
-IntervalVector LightLocalSolver::list_hull_box(std::queue<IntervalVector> list) {
+IntervalVector LightLocalSolver::list_hull_box(std::queue<std::pair<IntervalVector,Interval> > list) {
     if(list.empty()) {
         return IntervalVector(x_dim);
     }
-    IntervalVector hull_box = list.front();
+    IntervalVector hull_box = list.front().first;
     list.pop();
     while(!list.empty()) {
-        hull_box |= list.front();
+        hull_box |= list.front().first;
         list.pop();
     }
     return hull_box;
 }
 
-double LightLocalSolver::list_volume(std::queue<IntervalVector> list) {
+double LightLocalSolver::list_volume(std::queue<std::pair<IntervalVector,Interval> > list) {
     double volume = 0;
     for(int i=0;i<list.size();i++) {
-        volume += list.front().volume();
+        volume += list.front().first.volume();
         list.push(list.front());
         list.pop();
     }
     return volume;
 }
 
-double LightLocalSolver::compute_lb(std::queue<IntervalVector> x_list,const Matrix& y_param,Cell* x_cell,double loup) {
+double LightLocalSolver::compute_lb(std::queue<std::pair<IntervalVector,Interval> > x_list,const Matrix& y_param,Cell* x_cell,double loup) {
     if(x_list.empty())
         return NEG_INFINITY;
     Bsc* bsc(new LargestFirst());
     Cell * subx_cell;
     for(int i=0;i<x_list.size();i++) {
-        subx_cell = new Cell(x_list.front());
+        subx_cell = new Cell(x_list.front().first);
         subx_cell->add<OptimData>();
         x_heap->push(subx_cell);
         x_list.pop();
