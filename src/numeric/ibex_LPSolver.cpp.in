@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X
 // Interface with the linear solver
-// File        : ibex_LinearSolver.cpp
+// File        : ibex_LPSolver.cpp
 // Author      : Jordan Ninin
 // License     : See the LICENSE file
 // Created     : May 15, 2013
@@ -13,44 +13,44 @@
 
 namespace ibex {
 
-const double LinearSolver::default_eps = @IBEX_LP_LIB_DEFAULT_EPS@;
+const double LPSolver::default_eps = @IBEX_LP_LIB_DEFAULT_EPS@;
 
-const double LinearSolver::default_max_bound = 1e20;
-const int LinearSolver::default_max_time_out=100;
-const int LinearSolver::default_max_iter=100;
-const Interval LinearSolver::default_limit_diam_box = Interval(1.e-14,1.e6);
+const double LPSolver::default_max_bound = 1e20;
+const int LPSolver::default_max_time_out=100;
+const int LPSolver::default_max_iter=100;
+const Interval LPSolver::default_limit_diam_box = Interval(1.e-14,1.e6);
 
 
 
 /** \brief Stream out \a x. */
-std::ostream& operator<<(std::ostream& os, const LinearSolver::Status_Sol x){
+std::ostream& operator<<(std::ostream& os, const LPSolver::Status_Sol x){
 
 	switch(x) {
-	case(LinearSolver::OPTIMAL) :{
+	case(LPSolver::OPTIMAL) :{
 			os << "OPTIMAL";
 			break;
 	}
-	case(LinearSolver::INFEASIBLE) :{
+	case(LPSolver::INFEASIBLE) :{
 			os << "INFEASIBLE";
 			break;
 	}
-	case(LinearSolver::OPTIMAL_PROVED) :{
+	case(LPSolver::OPTIMAL_PROVED) :{
 			os << "OPTIMAL_PROVED";
 			break;
 	}
-	case(LinearSolver::INFEASIBLE_PROVED) :{
+	case(LPSolver::INFEASIBLE_PROVED) :{
 			os << "INFEASIBLE_PROVED";
 			break;
 	}
-	case(LinearSolver::TIME_OUT) :{
+	case(LPSolver::TIME_OUT) :{
 			os << "TIME_OUT";
 			break;
 	}
-	case(LinearSolver::MAX_ITER) :{
+	case(LPSolver::MAX_ITER) :{
 			os << "MAX_ITER";
 			break;
 	}
-	case(LinearSolver::UNKNOWN) :{
+	case(LPSolver::UNKNOWN) :{
 		os << "UNKNOWN";
 		break;
 	}
@@ -60,31 +60,31 @@ std::ostream& operator<<(std::ostream& os, const LinearSolver::Status_Sol x){
 }
 
 
-int LinearSolver::get_nb_rows() const {
+int LPSolver::get_nb_rows() const {
 	return nb_rows;
 }
 
-Interval LinearSolver::get_obj_value() const {
+Interval LPSolver::get_obj_value() const {
 	return obj_value;
 }
 
 /*
  * TODO: get the actual internal precision of the LP solver
  */
-double LinearSolver::get_epsilon() const {
+double LPSolver::get_epsilon() const {
 	return epsilon;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int var, Interval& obj) {
+LPSolver::Status_Sol LPSolver::solve_var(LPSolver::Sense sense, int var, Interval& obj) {
 	assert((0<=var)&&(var<=nb_vars));
 
-	LinearSolver::Status_Sol stat = LinearSolver::UNKNOWN;
+	LPSolver::Status_Sol stat = LPSolver::UNKNOWN;
 
 	try {
 		// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
-		if(sense==LinearSolver::MINIMIZE)
+		if(sense==LPSolver::MINIMIZE)
 			set_obj_var(var, 1.0);
 		else
 			set_obj_var(var, -1.0);
@@ -94,29 +94,29 @@ LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int 
 		stat = solve();
 		// std::cout << "[polytope-hull]->[run_simplex] solver returns " << stat << std::endl;
 		switch (stat) {
-		case LinearSolver::OPTIMAL : {
+		case LPSolver::OPTIMAL : {
 			// Neumaier - Shcherbina postprocessing
 			obj_value = neumaier_shcherbina_postprocessing_var(var, sense);
 			obj = obj_value;
-			stat = LinearSolver::OPTIMAL_PROVED;
+			stat = LPSolver::OPTIMAL_PROVED;
 			break;
 		}
-		case  LinearSolver::INFEASIBLE: {
+		case  LPSolver::INFEASIBLE: {
 			// infeasibility test  cf Neumaier Shcherbina paper
 			if (neumaier_shcherbina_infeasibilitytest()) {
-				stat = LinearSolver::INFEASIBLE_PROVED;
+				stat = LPSolver::INFEASIBLE_PROVED;
 			}
 			break;
 		}
 		default:
-			stat = LinearSolver::UNKNOWN;
+			stat = LPSolver::UNKNOWN;
 			break;
 		}
 		// Reset the objective of the LP solver
 		set_obj_var(var, 0.0);
 	}
 	catch (LPException&) {
-		stat = LinearSolver::UNKNOWN;
+		stat = LPSolver::UNKNOWN;
 		// Reset the objective of the LP solver
 		set_obj_var(var, 0.0);
 	}
@@ -125,7 +125,7 @@ LinearSolver::Status_Sol LinearSolver::solve_var(LinearSolver::Sense sense, int 
 
 }
 
-Interval LinearSolver::neumaier_shcherbina_postprocessing_var (int var, LinearSolver::Sense sense) {
+Interval LPSolver::neumaier_shcherbina_postprocessing_var (int var, LPSolver::Sense sense) {
 	try {
 		// the dual solution : used to compute the bound
 		Vector dual(nb_rows);
@@ -142,7 +142,7 @@ Interval LinearSolver::neumaier_shcherbina_postprocessing_var (int var, LinearSo
 		IntervalVector Lambda(dual);
 
 		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-		if (sense==LinearSolver::MINIMIZE) {
+		if (sense==LPSolver::MINIMIZE) {
 			Rest[var] -=1; // because C is a vector of zero except for the coef "var"
 			return (Lambda * B - Rest * boundvar);
 		} else {
@@ -162,7 +162,7 @@ Interval LinearSolver::neumaier_shcherbina_postprocessing_var (int var, LinearSo
 }
 
 
-Interval LinearSolver::neumaier_shcherbina_postprocessing() {
+Interval LPSolver::neumaier_shcherbina_postprocessing() {
 	try {
 		// the dual solution : used to compute the bound
 		Vector dual(nb_rows);
@@ -192,7 +192,7 @@ Interval LinearSolver::neumaier_shcherbina_postprocessing() {
 	}
 }
 
-bool LinearSolver::neumaier_shcherbina_infeasibilitytest() {
+bool LPSolver::neumaier_shcherbina_infeasibilitytest() {
 	try {
 		Vector infeasible_dir(nb_rows);
 		get_infeasible_dir(infeasible_dir);
@@ -224,24 +224,24 @@ bool LinearSolver::neumaier_shcherbina_infeasibilitytest() {
 
 
 
-LinearSolver::Status_Sol LinearSolver::solve_proved() {
-	LinearSolver::Status_Sol stat = solve();
+LPSolver::Status_Sol LPSolver::solve_proved() {
+	LPSolver::Status_Sol stat = solve();
 	switch (stat) {
-	case LinearSolver::OPTIMAL : {
+	case LPSolver::OPTIMAL : {
 		// Neumaier - Shcherbina postprocessing
 		obj_value = neumaier_shcherbina_postprocessing();
-		stat = LinearSolver::OPTIMAL_PROVED;
+		stat = LPSolver::OPTIMAL_PROVED;
 		break;
 	}
-	case  LinearSolver::INFEASIBLE: {
+	case  LPSolver::INFEASIBLE: {
 		// infeasibility test  cf Neumaier Shcherbina paper
 		if (neumaier_shcherbina_infeasibilitytest()) {
-			stat = LinearSolver::INFEASIBLE_PROVED;
+			stat = LPSolver::INFEASIBLE_PROVED;
 		}
 		break;
 	}
 	default:
-		stat = LinearSolver::UNKNOWN;
+		stat = LPSolver::UNKNOWN;
 		break;
 	}
 	return stat;
@@ -249,7 +249,7 @@ LinearSolver::Status_Sol LinearSolver::solve_proved() {
 }
 
 
-void LinearSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
+void LPSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
 	for (int i=0; i<A.nb_rows(); i++) {
 		try {
 			add_constraint(A[i],sign,rhs[i]);

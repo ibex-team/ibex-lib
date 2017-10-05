@@ -11,8 +11,8 @@
 #ifndef __IBEX_LOUP_FINDER_X_TAYLOR_H__
 #define __IBEX_LOUP_FINDER_X_TAYLOR_H__
 
-#include "ibex_LoupFinder.h"
 #include "ibex_LinearizerXTaylor.h"
+#include "ibex_LoupFinder.h"
 
 namespace ibex {
 /**
@@ -56,7 +56,7 @@ protected:
 	LinearizerXTaylor lr;
 
 	/** linear solver */
-	LinearSolver lp_solver;
+	LPSolver lp_solver;
 
 	/** Miscellaneous   for statistics */
 //	int nb_simplex;

@@ -1,4 +1,4 @@
-LinearSolver::LinearSolver(int nb_vars1, int max_iter,
+LPSolver::LPSolver(int nb_vars1, int max_iter,
 		int max_time_out, double eps) :
 		nb_vars(nb_vars1), nb_rows(0), epsilon(eps), boundvar(nb_vars1),
 		 obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
@@ -186,7 +186,7 @@ LinearSolver::LinearSolver(int nb_vars1, int max_iter,
 	return;
 }
 
-LinearSolver::~LinearSolver() {
+LPSolver::~LPSolver() {
 	int status;
 
 	// Free up the problem as allocated by CPXcreateprob, if necessary
@@ -222,7 +222,7 @@ LinearSolver::~LinearSolver() {
 	delete[] r_matind;
 }
 
-LinearSolver::Status_Sol LinearSolver::solve() {
+LPSolver::Status_Sol LPSolver::solve() {
 
 	try {
 		// Optimize the problem and obtain solution.
@@ -239,7 +239,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 				obj_value = tmp;
 
 				if (status) {
-					std::cerr << "LinearSolver: Failed to get the objective value." << std::endl;
+					std::cerr << "LPSolver: Failed to get the objective value." << std::endl;
 					throw LPException();
 				}
 				status_prim =CPXgetx(envcplex, lpcplex, primal_solution.raw(), 0, nb_vars - 1);
@@ -268,7 +268,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 
 }
 
-void LinearSolver::write_file(const char* name) {
+void LPSolver::write_file(const char* name) {
 	try {
 		int status = CPXwriteprob(envcplex, lpcplex, name, NULL);
 		if (status) {
@@ -282,13 +282,13 @@ void LinearSolver::write_file(const char* name) {
 }
 
 
-void LinearSolver::get_coef_obj(Vector& obj) const {
+void LPSolver::get_coef_obj(Vector& obj) const {
 	//TODO
 	return;
 }
 
 
-void LinearSolver::get_rows(Matrix &A) const {
+void LPSolver::get_rows(Matrix &A) const {
 	try {
 		int surplus = 0, nzcnt = 0;
 		int * t_Rmatbeg = new int[nb_rows];
@@ -326,7 +326,7 @@ void LinearSolver::get_rows(Matrix &A) const {
 	return;
 }
 
-void LinearSolver::get_rows_trans(Matrix &A_trans) const {
+void LPSolver::get_rows_trans(Matrix &A_trans) const {
 
 	try {
 		int surplus = 0, nzcnt = 0;
@@ -368,7 +368,7 @@ void LinearSolver::get_rows_trans(Matrix &A_trans) const {
 	return ;
 }
 
-void LinearSolver::get_lhs_rhs(IntervalVector& B) const {
+void LPSolver::get_lhs_rhs(IntervalVector& B) const {
 	try {
 		// Get the bounds of the variables
 		double * rhs = new double[nb_rows];
@@ -387,7 +387,7 @@ void LinearSolver::get_lhs_rhs(IntervalVector& B) const {
 	return ;
 }
 
-void LinearSolver::get_primal_sol(Vector & primal) const {
+void LPSolver::get_primal_sol(Vector & primal) const {
 
 	try {
 		if (status_prim == 0) {
@@ -403,7 +403,7 @@ void LinearSolver::get_primal_sol(Vector & primal) const {
 	return;
 }
 
-void LinearSolver::get_dual_sol(Vector & dual) const {
+void LPSolver::get_dual_sol(Vector & dual) const {
 
 	try {
 		// the dual solution ; used by Neumaier Shcherbina test
@@ -421,7 +421,7 @@ void LinearSolver::get_dual_sol(Vector & dual) const {
 	return ;
 }
 
-void LinearSolver::get_infeasible_dir(Vector & sol) const {
+void LPSolver::get_infeasible_dir(Vector & sol) const {
 
 	try {
 		double * solution_found = new double[nb_rows];
@@ -443,7 +443,7 @@ void LinearSolver::get_infeasible_dir(Vector & sol) const {
 	return;
 }
 
-void LinearSolver::clean_ctrs() {
+void LPSolver::clean_ctrs() {
 
 	try {
 		status_prim = -1;
@@ -462,11 +462,11 @@ void LinearSolver::clean_ctrs() {
 	return ;
 
 }
-void LinearSolver::clean_all() {
+void LPSolver::clean_all() {
 // TODO
 }
 
-void LinearSolver::set_max_iter(int max) {
+void LPSolver::set_max_iter(int max) {
 
 	try {
 		int status = CPXsetintparam(envcplex, CPX_PARAM_ITLIM, max);
@@ -480,7 +480,7 @@ void LinearSolver::set_max_iter(int max) {
 	return ;
 }
 
-void LinearSolver::set_max_time_out(int time) {
+void LPSolver::set_max_time_out(int time) {
 
 	try {
 		double t = time;
@@ -495,17 +495,17 @@ void LinearSolver::set_max_time_out(int time) {
 	return ;
 }
 
-void LinearSolver::set_sense(Sense s) {
+void LPSolver::set_sense(Sense s) {
 
 	try {
 
-		if (s == LinearSolver::MINIMIZE) {
+		if (s == LPSolver::MINIMIZE) {
 			int status = CPXchgobjsen(envcplex, lpcplex, CPX_MIN); // Problem is minimization
 			if (status) {
 				std::cerr<< "Error CPLEX: Could not change the sense, error "<< status << std::endl;
 				throw LPException();
 			}
-		} else if (s == LinearSolver::MAXIMIZE) {
+		} else if (s == LPSolver::MAXIMIZE) {
 			int status = CPXchgobjsen(envcplex, lpcplex, CPX_MAX); //Problem is maximisation
 			if (status) {
 				std::cerr<< "Error CPLEX: Could not change the sense, error "<< status << std::endl;
@@ -524,7 +524,7 @@ void set_obj(const Vector& coef) {
 	// TODO
 }
 
-void LinearSolver::set_obj_var(int var, double coef) {
+void LPSolver::set_obj_var(int var, double coef) {
 
 	try {
 
@@ -540,7 +540,7 @@ void LinearSolver::set_obj_var(int var, double coef) {
 	return ;
 }
 
-void LinearSolver::set_bounds(const IntervalVector& bounds) {
+void LPSolver::set_bounds(const IntervalVector& bounds) {
 
 	try {
 		// Changement de la fonction objective = rhs du primal (car on est en formulation dual)
@@ -565,7 +565,7 @@ void LinearSolver::set_bounds(const IntervalVector& bounds) {
 	return ;
 }
 
-void LinearSolver::set_bounds_var(int var, const Interval& bound) {
+void LPSolver::set_bounds_var(int var, const Interval& bound) {
 
 	try {
 		int * ind = new int[2];
@@ -587,7 +587,7 @@ void LinearSolver::set_bounds_var(int var, const Interval& bound) {
 	return ;
 }
 
-void LinearSolver::set_epsilon(double eps) {
+void LPSolver::set_epsilon(double eps) {
 
 	try {
 
@@ -608,7 +608,7 @@ void LinearSolver::set_epsilon(double eps) {
 
 }
 
-void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
+void LPSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
 
 	try {
 		char cc = 'L';

@@ -13,7 +13,7 @@ using std::pair;
 
 namespace ibex {
 
-LinearSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector& box, Vector& dual) const {
+LPSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector& box, Vector& dual) const {
 	int goal_ctr=-1, goal_var=rand()%box.size();
 	bool minimize=rand()%2;
 
@@ -58,13 +58,13 @@ LinearSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector
 
 
 	//the linear system is solved
-	LinearSolver::Status_Sol stat=LinearSolver::UNKNOWN;
+	LPSolver::Status_Sol stat=LPSolver::UNKNOWN;
 	try {
 		mylinearsolver->set_obj_var(goal_var, (minimize)? 1.0:-1.0);
 
 		stat = mylinearsolver->solve();
 
-		if (stat == LinearSolver::OPTIMAL) {
+		if (stat == LPSolver::OPTIMAL) {
 			// the dual solution : used to compute the bound
 			dual.resize(mylinearsolver->get_nb_rows());
 			mylinearsolver->get_dual_sol(dual);
@@ -82,10 +82,10 @@ LinearSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector
 				if (std::abs(dual[sys.nb_var+i])>1e-10) k++;
 			}
 
-			if(k<2) { stat = LinearSolver::UNKNOWN; }
+			if(k<2) { stat = LPSolver::UNKNOWN; }
 		}
 	} catch (LPException&) {
-		stat = LinearSolver::UNKNOWN;
+		stat = LPSolver::UNKNOWN;
 	}
 
 	return stat;
@@ -94,7 +94,7 @@ LinearSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector
 int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 
 	//Linearization
-	LinearSolver::Status_Sol stat = LinearSolver::UNKNOWN;
+	LPSolver::Status_Sol stat = LPSolver::UNKNOWN;
 
 	Vector dual_solution(1);
 
@@ -114,7 +114,7 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 	int lvar = -1;
 	int goal_var=dynamic_cast<ExtendedSystem*> (&sys)->goal_var();
 
-	if (stat == LinearSolver::OPTIMAL) {
+	if (stat == LPSolver::OPTIMAL) {
 		double max_Lmagn = 0.0;
 		int k=0;
 

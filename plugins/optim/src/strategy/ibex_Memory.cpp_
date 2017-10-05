@@ -1,22 +1,23 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_DefaultStrategy.cpp_
+// File        : ibex_Memory.cpp_
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 05, 2014
 //============================================================================
-
+/*
 #include "ibex_NormalizedSystem.h"
 #include "ibex_ExtendedSystem.h"
 #include "ibex_Bsc.h"
 #include "ibex_Ctc.h"
 #include "ibex_CellBuffer.h"
-#include "ibex_Linearizer.h"
 #include "ibex_LoupFinder.h"
 
 #include <vector>
 #include <stdlib.h>
+#include "ibex_Linearizer.h"
+*/
 
 using namespace std;
 

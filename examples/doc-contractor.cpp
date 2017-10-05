@@ -13,12 +13,12 @@
 #include "vibes.cpp"
 #include <fstream>
 
-#ifndef _IBEX_WITH_OPTIM_
-#error "You need the plugin Optim to run this example."
+#ifndef _IBEX_WITH_SOLVER_
+#error "You need to install the IbexSolve plugin (--with-solver)."
 #endif
 
 #ifndef IBEX_BENCHS_DIR
-  #define IBEX_BENCHS_DIR "../../../benchs-solver"
+  #define IBEX_BENCHS_DIR "../plugins/solver/benchs"
 #endif
 
 using namespace std;
@@ -78,7 +78,7 @@ public:
 	 */
 	MyLinearRelax(const Matrix& A, const Vector& b) : Linearizer(2), A(A), b(b) { }
 
-	virtual int linearize(const IntervalVector & box, LinearSolver& lp_solver)  {
+	virtual int linearize(const IntervalVector & box, LPSolver& lp_solver)  {
 		for (int i=0; i<A.nb_rows(); i++)
 			// add the constraint in the LP solver
 			lp_solver.add_constraint(A[i],LEQ,b[i]);

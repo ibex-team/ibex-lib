@@ -10,7 +10,7 @@
 
 #include "ibex_DefaultSolver.h"
 
-#include "ibex_LinearizerCombo.h"
+#include "ibex_LinearizerXTaylor.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
@@ -21,7 +21,7 @@
 #include "ibex_CellStack.h"
 #include "ibex_CellList.h"
 #include "ibex_Array.h"
-#include "ibex_DefaultStrategy.cpp_"
+#include "ibex_Memory.cpp_"
 #include "ibex_Random.h"
 #include "ibex_NormalizedSystem.h"
 
@@ -89,15 +89,11 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 		ctc_list.set_ref(index,rec(new CtcNewton(eqs->f_ctrs,5e8,prec,1.e-4)));
 		index++;
 	}
-	// the last contractor is XNewton
-	//	ctc_list.set_ref(index,*new CtcXNewtonIter(sys,
-	//                                          new CtcHC4 (sys.ctrs,0.01),
-	//*(default_corners())));
 
-	System& norm_sys=rec(new NormalizedSystem(sys));
+	//System& norm_sys=rec(new NormalizedSystem(sys));
 
 	ctc_list.set_ref(index,rec(new CtcFixPoint(rec(new CtcCompo(
-			rec(new CtcPolytopeHull(rec(new LinearizerCombo(norm_sys,LinearizerCombo::XNEWTON)))),
+			rec(new CtcPolytopeHull(rec(new LinearizerXTaylor(sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN)))),
 			rec(new CtcHC4 (sys.ctrs,0.01)))))));
 
 	ctc_list.resize(index+1); // in case the system is not square.

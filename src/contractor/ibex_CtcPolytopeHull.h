@@ -37,9 +37,9 @@ public:
 	 * \param limit_diam - The contractor does nothing if the diameter does not respect these bounds
 	 */
 
-	CtcPolytopeHull(Linearizer& lr, int max_iter=LinearSolver::default_max_iter,
-			int time_out=LinearSolver::default_max_time_out, double eps=LinearSolver::default_eps,
-			Interval limit_diam=LinearSolver::default_limit_diam_box);
+	CtcPolytopeHull(Linearizer& lr, int max_iter=LPSolver::default_max_iter,
+			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
+			Interval limit_diam=LPSolver::default_limit_diam_box);
 
 	/**
 	 * \brief Creates the contractor w.r.t. Ax<=b
@@ -51,9 +51,9 @@ public:
 	 * \param eps      - The accuracy required on the resolution of the linear program (default value 1e-10)
 	 * \param limit_diam - The contractor does nothing if the diameter does not respect these bounds
 	 */
-	CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter=LinearSolver::default_max_iter,
-			int time_out=LinearSolver::default_max_time_out, double eps=LinearSolver::default_eps,
-			Interval limit_diam=LinearSolver::default_limit_diam_box);
+	CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter=LPSolver::default_max_iter,
+			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
+			Interval limit_diam=LPSolver::default_limit_diam_box);
 
 	/**
 	 * \brief Delete this.
@@ -107,7 +107,7 @@ protected:
 	/**
 	 * \brief  The linear solver that will be used
 	 */
-	LinearSolver mylinearsolver;
+	LPSolver mylinearsolver;
 
 	/**
 	 * \brief Contracted variables (by default: all)

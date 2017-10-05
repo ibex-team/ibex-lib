@@ -1,15 +1,15 @@
 //============================================================================
 //                                  I B E X
 // Interface with the linear solver
-// File        : ibex_LinearSolver.h
+// File        : ibex_LPSolver.h
 // Author      : Jordan Ninin
 // License     : See the LICENSE file
 // Created     : May 15, 2013
 // Last Update : May 15, 2013
 //============================================================================
 
-#ifndef __IBEX_LINEAR_SOLVER_H__
-#define __IBEX_LINEAR_SOLVER_H__
+#ifndef __IBEX_LP_SOLVER_H__
+#define __IBEX_LP_SOLVER_H__
 
 #include "ibex_Setting.h"
 
@@ -46,7 +46,7 @@ namespace ibex {
  *
  */
 
-class LinearSolver {
+class LPSolver {
 
 public:
 
@@ -74,10 +74,10 @@ public:
 	/**
 	 * \param max_time_out - Control the number of iterations inside the linear solver
 	 */
-	LinearSolver(int nb_vars, int max_iter= default_max_iter,
+	LPSolver(int nb_vars, int max_iter= default_max_iter,
 			int max_time_out= default_max_time_out, double eps=default_eps);
 
-	~LinearSolver();
+	~LPSolver();
 
 	/**
 	 * \brief Solve the LP.
@@ -234,9 +234,9 @@ private:
 };
 
 /** \brief Stream out \a x. */
-std::ostream& operator<<(std::ostream& os, const LinearSolver::Status_Sol x);
+std::ostream& operator<<(std::ostream& os, const LPSolver::Status_Sol x);
 
 
 } // end namespace ibex
 
-#endif /* __IBEX_LINEAR_SOLVER_H__ */
+#endif /* __IBEX_LP_SOLVER_H__ */

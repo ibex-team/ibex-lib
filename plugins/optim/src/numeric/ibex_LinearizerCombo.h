@@ -65,7 +65,7 @@ public:
   	 *
   	 * Linearize the system.
   	 */
-	int linearize(const IntervalVector& box, LinearSolver& lp_solver);
+	int linearize(const IntervalVector& box, LPSolver& lp_solver);
 
 private:
 

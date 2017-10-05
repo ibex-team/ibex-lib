@@ -1,4 +1,4 @@
-LinearSolver::LinearSolver(int nb_vars, int max_iter,
+LPSolver::LPSolver(int nb_vars, int max_iter,
 	int max_time_out, double eps):
 	nb_vars(0), nb_rows(0), obj_value(0.0), epsilon(0),
 	primal_solution(1), dual_solution(1 /*tmp*/),
@@ -7,58 +7,58 @@ LinearSolver::LinearSolver(int nb_vars, int max_iter,
 	ibex_warning("No Linear Solver available.");
 }
 
-LinearSolver::~LinearSolver() {
+LPSolver::~LPSolver() {
 }
 
-LinearSolver::Status_Sol LinearSolver::solve() {
-	return LinearSolver::UNKNOWN;
+LPSolver::Status_Sol LPSolver::solve() {
+	return LPSolver::UNKNOWN;
 }
 
-void LinearSolver::write_file(const char* name) {
+void LPSolver::write_file(const char* name) {
 	throw LPException();
 }
 
-void LinearSolver::get_rows(Matrix& A) const {
+void LPSolver::get_rows(Matrix& A) const {
 	throw LPException();
 }
 
-void LinearSolver::get_rows_trans(Matrix& A_trans) const {
+void LPSolver::get_rows_trans(Matrix& A_trans) const {
 	throw LPException();
 }
 
-void LinearSolver::get_lhs_rhs(IntervalVector& B) const {
+void LPSolver::get_lhs_rhs(IntervalVector& B) const {
 	throw LPException();
 }
 
-void LinearSolver::get_primal_sol(Vector& prim) const {
+void LPSolver::get_primal_sol(Vector& prim) const {
 	throw LPException();
 }
 
-void LinearSolver::get_dual_sol(Vector& dual) const {
+void LPSolver::get_dual_sol(Vector& dual) const {
 	throw LPException();
 }
 
-void LinearSolver::get_infeasible_dir(Vector& sol) const {
+void LPSolver::get_infeasible_dir(Vector& sol) const {
 	throw LPException();
 }
 
-void LinearSolver::clean_ctrs() {
+void LPSolver::clean_ctrs() {
 	throw LPException();
 }
 
-void LinearSolver::clean_all() {
+void LPSolver::clean_all() {
 	throw LPException();
 }
 
-void LinearSolver::set_max_iter(int max) {
+void LPSolver::set_max_iter(int max) {
 	throw LPException();
 }
 
-void LinearSolver::set_max_time_out(int time) {
+void LPSolver::set_max_time_out(int time) {
 	throw LPException();
 }
 
-void LinearSolver::set_sense(Sense s) {
+void LPSolver::set_sense(Sense s) {
 	throw LPException();
 }
 
@@ -66,22 +66,22 @@ void setObj(const Vector& coef) {
 	throw LPException();
 }
 
-void LinearSolver::set_obj_var(int var, double coef) {
+void LPSolver::set_obj_var(int var, double coef) {
 	throw LPException();
 }
 
-void LinearSolver::set_bounds(const IntervalVector& bounds) {
+void LPSolver::set_bounds(const IntervalVector& bounds) {
 	throw LPException();
 }
 
-void LinearSolver::set_bounds_var(int var, const Interval& bound) {
+void LPSolver::set_bounds_var(int var, const Interval& bound) {
 	throw LPException();
 }
 
-void LinearSolver::set_epsilon(double eps) {
+void LPSolver::set_epsilon(double eps) {
 	throw LPException();
 }
 
-void LinearSolver::add_constraint(const Vector& row, CmpOp sign, double rhs) {
+void LPSolver::add_constraint(const Vector& row, CmpOp sign, double rhs) {
 	throw LPException();
 }

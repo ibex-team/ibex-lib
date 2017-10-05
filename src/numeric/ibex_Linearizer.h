@@ -41,7 +41,7 @@ public:
 	 * \return the number of constraints (possibly 0) or -1 if the linear system is
 	 *         infeasible.
 	 */
-	virtual int linearize(const IntervalVector& box, LinearSolver& lp_solver)=0;
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver)=0;
 
 	/**
 	 * \brief Delete this.

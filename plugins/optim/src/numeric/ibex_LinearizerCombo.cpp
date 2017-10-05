@@ -71,7 +71,7 @@ LinearizerCombo::~LinearizerCombo() {
 }
 
 /*********generation of the linearized system*********/
-int LinearizerCombo::linearize(const IntervalVector& box, LinearSolver& lp_solver) {
+int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver) {
 
 	int cont = 0;
 

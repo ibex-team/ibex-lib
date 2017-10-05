@@ -16,8 +16,8 @@
 
 #include <sstream>
 
-#ifndef _IBEX_WITH_OPTIM_
-#error "You need the plugin Optim to run this example."
+#ifndef _IBEX_WITH_SOLVER_
+#error "You need to install the IbexSolve plugin (--with-solver)."
 #endif
 
 using namespace std;

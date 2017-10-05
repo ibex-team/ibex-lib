@@ -17,7 +17,7 @@
 #include <sstream>
 
 #ifndef _IBEX_WITH_OPTIM_
-#error "You need the IbexOpt plugin to run this program."
+#error "You need to install the IbexOpt plugin (--with-optim)."
 #endif
 
 using namespace std;

@@ -1,4 +1,4 @@
-LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
+LPSolver::LPSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
 			nb_vars(nb_vars1), nb_rows(0), epsilon(eps), boundvar(nb_vars1),
 			obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
 			status_prim(0), status_dual(0)  {
@@ -58,13 +58,13 @@ LinearSolver::LinearSolver(int nb_vars1, int max_iter, int max_time_out, double 
 
 }
 
-LinearSolver::~LinearSolver() {
+LPSolver::~LPSolver() {
 	delete myclp;
 	delete [] _which;
 	delete [] _col1Index;
 }
 
-LinearSolver::Status_Sol LinearSolver::solve() {
+LPSolver::Status_Sol LPSolver::solve() {
 
 	//int stat = -1;
 
@@ -122,7 +122,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 
 }
 
-void LinearSolver::write_file(const char* name) {
+void LPSolver::write_file(const char* name) {
 	try {
 		myclp->writeMps(name);
 	}
@@ -133,13 +133,13 @@ void LinearSolver::write_file(const char* name) {
 }
 
 
-void LinearSolver::get_coef_obj(Vector& obj) const {
+void LPSolver::get_coef_obj(Vector& obj) const {
 	//TODO
 	return;
 }
 
 
-void LinearSolver::get_rows(Matrix &A) const {
+void LPSolver::get_rows(Matrix &A) const {
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
 		// see mat.getCorefficient()
@@ -168,7 +168,7 @@ void LinearSolver::get_rows(Matrix &A) const {
 	return ;
 }
 
-void LinearSolver::get_rows_trans(Matrix &A_trans) const {
+void LPSolver::get_rows_trans(Matrix &A_trans) const {
 
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
@@ -200,7 +200,7 @@ void LinearSolver::get_rows_trans(Matrix &A_trans) const {
 	return ;
 }
 
-void  LinearSolver::get_lhs_rhs(IntervalVector& B) const {
+void  LPSolver::get_lhs_rhs(IntervalVector& B) const {
 
 	try {
 		// Get the bounds of the variables
@@ -224,7 +224,7 @@ void  LinearSolver::get_lhs_rhs(IntervalVector& B) const {
 }
 
 
-void LinearSolver::get_primal_sol(Vector & solution_primal) const {
+void LPSolver::get_primal_sol(Vector & solution_primal) const {
 
 	try {
 		if (status_prim == 1) {
@@ -239,7 +239,7 @@ void LinearSolver::get_primal_sol(Vector & solution_primal) const {
 	return ;
 }
 
-void LinearSolver::get_dual_sol(Vector & solution_dual) const {
+void LPSolver::get_dual_sol(Vector & solution_dual) const {
 
 	try {
 		if (status_dual == 1) {
@@ -254,7 +254,7 @@ void LinearSolver::get_dual_sol(Vector & solution_dual) const {
 	return ;
 }
 
-void LinearSolver::get_infeasible_dir(Vector & sol) const {
+void LPSolver::get_infeasible_dir(Vector & sol) const {
 
 	try {
 
@@ -283,7 +283,7 @@ void LinearSolver::get_infeasible_dir(Vector & sol) const {
 	return ;
 }
 
-void LinearSolver::clean_ctrs() {
+void LPSolver::clean_ctrs() {
 
 	try {
 		status_prim = 0;
@@ -302,13 +302,13 @@ void LinearSolver::clean_ctrs() {
 
 }
 
-void LinearSolver::clean_all() {
+void LPSolver::clean_all() {
 	// TODO
 	return ;
 }
 
 
-void LinearSolver::set_max_iter(int max) {
+void LPSolver::set_max_iter(int max) {
 
 	try {
 		myclp->setMaximumIterations(max);
@@ -319,7 +319,7 @@ void LinearSolver::set_max_iter(int max) {
 	return ;
 }
 
-void LinearSolver::set_max_time_out(int time) {
+void LPSolver::set_max_time_out(int time) {
 
 	try {
 		myclp->setMaximumSeconds((double)time);
@@ -330,14 +330,14 @@ void LinearSolver::set_max_time_out(int time) {
 	return ;
 }
 
-void LinearSolver::set_sense(Sense s) {
+void LPSolver::set_sense(Sense s) {
 
 	try {
 			/// Direction of optimization (1 - minimize, -1 - maximize, 0 - ignore
-		if (s==LinearSolver::MINIMIZE) {
+		if (s==LPSolver::MINIMIZE) {
 			myclp->setOptimizationDirection(1);
 		}
-		else if (s==LinearSolver::MAXIMIZE) {
+		else if (s==LPSolver::MAXIMIZE) {
 			myclp->setOptimizationDirection(-1);
 		}
 		else
@@ -355,7 +355,7 @@ void set_obj(const Vector& coef) {
 	// TODO
 }
 
-void LinearSolver::set_obj_var(int var, double coef) {
+void LPSolver::set_obj_var(int var, double coef) {
 
 	try {
 		myclp->setObjectiveCoefficient(var, coef);
@@ -366,7 +366,7 @@ void LinearSolver::set_obj_var(int var, double coef) {
 	return ;
 }
 
-void LinearSolver::set_bounds(const IntervalVector& bounds) {
+void LPSolver::set_bounds(const IntervalVector& bounds) {
 	try {
 		for (int j=0; j<nb_vars; j++){
 			// Change the LHS and RHS of each constraint associated to the bounds of the variable
@@ -380,7 +380,7 @@ void LinearSolver::set_bounds(const IntervalVector& bounds) {
 	return ;
 }
 
-void LinearSolver::set_bounds_var(int var, const Interval& bound) {
+void LPSolver::set_bounds_var(int var, const Interval& bound) {
 
 	try {
 		myclp->setRowBounds(var,bound.lb(),bound.ub());
@@ -394,7 +394,7 @@ void LinearSolver::set_bounds_var(int var, const Interval& bound) {
 	return ;
 }
 
-void LinearSolver::set_epsilon(double eps) {
+void LPSolver::set_epsilon(double eps) {
 
 	try {
 		myclp->setPrimalTolerance(eps);
@@ -406,7 +406,7 @@ void LinearSolver::set_epsilon(double eps) {
 	return ;
 }
 
-void LinearSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
+void LPSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
 
 	try {
 		if (sign==LEQ || sign==LT) {

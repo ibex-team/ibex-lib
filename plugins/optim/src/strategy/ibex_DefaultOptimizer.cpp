@@ -22,8 +22,8 @@
 #include "ibex_LoupFinderCertify.h"
 #include "ibex_LinearizerCombo.h"
 #include "ibex_Array.h"
+#include "ibex_Memory.cpp_"
 #include "ibex_Random.h"
-#include "ibex_DefaultStrategy.cpp_"
 
 using namespace std;
 

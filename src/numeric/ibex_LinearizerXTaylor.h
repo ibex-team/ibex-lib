@@ -85,7 +85,7 @@ public:
 	/**
 	 * \brief Generation of the linear inequalities
 	 */
-	virtual int linearize(const IntervalVector& box, LinearSolver& lp_solver);
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
 
 private:
 
@@ -170,7 +170,7 @@ private:
 	/**
 	 * Current LP solver
 	 */
-	LinearSolver* lp_solver;
+	LPSolver* lp_solver;
 
 };
 

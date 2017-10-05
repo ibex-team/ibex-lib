@@ -62,12 +62,12 @@ public :
 	 * \param x 	- the current box
 	 * \param dual 	- the dual solution that will be returned
 	 */
-	LinearSolver::Status_Sol getdual(IntervalMatrix& J,const IntervalVector& x, Vector& dual) const;
+	LPSolver::Status_Sol getdual(IntervalMatrix& J,const IntervalVector& x, Vector& dual) const;
 
 	/**
 	 * \brief The linear solver
 	 */
-	LinearSolver* mylinearsolver;
+	LPSolver* mylinearsolver;
 
 	/**
 	 * \brief The lsmear variant (LSMEAR or LSMEAR_MG)
@@ -81,13 +81,13 @@ public :
 
 inline LSmear::LSmear(System& sys,  double prec, double ratio, lsmear_mode lsmode) : SmearSumRelative(sys,prec,ratio),
 		lsmode(lsmode) {
-	mylinearsolver = new LinearSolver(sys.nb_var);
+	mylinearsolver = new LPSolver(sys.nb_var);
 
 }
 
 inline LSmear::LSmear(System& sys, const Vector& prec, double ratio,lsmear_mode lsmode) : SmearSumRelative(sys,prec,ratio),
 		lsmode(lsmode) {
-	mylinearsolver = new LinearSolver(sys.nb_var);
+	mylinearsolver = new LPSolver(sys.nb_var);
 }
 
 } /* namespace ibex */

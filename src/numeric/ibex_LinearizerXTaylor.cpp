@@ -10,11 +10,10 @@
  * Updated     : July 18th, 2017
  * ---------------------------------------------------------------------------- */
 
+#include "ibex_LinearizerXTaylor.h"
 #include "ibex_ExtendedSystem.h"
-//#include "ibex_ExprDiff.h"
 #include "ibex_Random.h"
 #include "ibex_Exception.h"
-#include "ibex_LinearizerXTaylor.h"
 #include "ibex_NormalizedSystem.h"
 
 #include <vector>
@@ -60,7 +59,7 @@ LinearizerXTaylor::~LinearizerXTaylor() {
 	delete[] inf;
 }
 
-int LinearizerXTaylor::linearize(const IntervalVector& box, LinearSolver& _lp_solver)  {
+int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver)  {
 	lp_solver = &_lp_solver;
 
 	if (mode==RELAX)
