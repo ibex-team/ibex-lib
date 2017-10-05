@@ -160,7 +160,7 @@ public:
 	 *
 	 *   CELL_OVERFLOW:     the number of cell has exceeded the limit.
 	 */
-	bool next();
+	SolverOutputBox* next();
 
 	/**
 	 * \brief Displays on standard output a report of the last call to solve(...).
@@ -295,7 +295,7 @@ protected:
 	/**
 	 * \brief Store the solution in "solutions" and print it (if trace>=0).
 	 */
-	void store_sol(const SolverOutputBox& sol);
+	SolverOutputBox& store_sol(const SolverOutputBox& sol);
 
 	/**
 	 * \brief Check if time is out.

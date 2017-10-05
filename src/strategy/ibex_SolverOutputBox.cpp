@@ -20,15 +20,18 @@ ostream& operator<<(ostream& os, const SolverOutputBox& sol) {
 	os << sol.existence() << " ";
 	switch(sol.status) {
 
-	case SolverOutputBox::UNKNOWN :
-		os << "[unknown]";
-		return os; // stop here
-		break;
 	case SolverOutputBox::INNER:
 		os << "[inner";
 		break;
 	case SolverOutputBox::BOUNDARY:
 		os << "[boundary";
+		break;
+	case SolverOutputBox::UNKNOWN :
+		os << "[unknown]";
+		return os; // stop here
+		break;
+	case SolverOutputBox::PENDING:
+		os << "[pending]";
 		break;
 	}
 

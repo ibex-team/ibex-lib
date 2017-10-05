@@ -29,18 +29,22 @@ public:
 	 * \brief Create a default solver.
 	 *
 	 * \param sys  - The system to solve
-	 * \param eps_x_min - Stopping criterion for box splitting (absolute precision)
+	 * \param eps_x_min - Criterion for stopping bisection (absolute precision)
+	 * \param eps_x_max - Criterion for forcing bisection  (absolute precision)
+	 * \param dfs       - true: depth-first search. false: breadth-first search
 	 */
-    DefaultSolver(System& sys, double eps_x_min=default_eps_x_min, double eps_x_max=default_eps_x_max, double random_seed=default_random_seed);
+    DefaultSolver(System& sys, double eps_x_min=default_eps_x_min, double eps_x_max=default_eps_x_max, bool dfs=true, double random_seed=default_random_seed);
 
     /**
 	 * \brief Create a default solver.
 	 *
 	 * \param sys  - The system to solve
-	 * \param eps_x_min - Stopping criterion for box splitting (vector of absolute precisions,
-	 *               one for each variable)
+	 * \param eps_x_min - Criterion for stopping bisection (vector of absolute
+	 *                    precisions, one for each variable)
+	 * \param eps_x_max - Criterion for forcing bisection  (absolute precision)
+	 * \param dfs       - true: depth-first search. false: breadth-first search
 	 */
-    DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max=default_eps_x_max, double random_seed=default_random_seed);
+    DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max=default_eps_x_max, bool dfs=true, double random_seed=default_random_seed);
 
     /**
 	 * \brief Delete *this.

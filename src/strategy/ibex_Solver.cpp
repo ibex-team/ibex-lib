@@ -122,7 +122,15 @@ void Solver::start(const char* input_paving) {
 	manif = new Manifold(n,m,nb_ineq);
 	manif->load(input_paving);
 
-	for (vector<SolverOutputBox>::const_iterator it=manif->unknown.begin(); it!=manif->unknown.end(); it++) {
+	vector<SolverOutputBox>::const_iterator it=manif->unknown.begin();
+
+	// the unknown and pending boxes have to be processed
+	while (it!=manif->pending.end()) {
+		if (it==manif->unknown.end())
+			it=manif->pending.begin();
+		if (it==manif->pending.end())
+			break;
+
 		Cell* cell=new Cell(it->existence());
 
 		// add data required by this solver
@@ -132,16 +140,19 @@ void Solver::start(const char* input_paving) {
 		bsc.add_backtrackable(*cell);
 
 		buffer.push(cell);
+
+		it++;
 	}
 
 	nb_cells=0; // no new cell created!
 
 	manif->unknown.clear();
+	manif->pending.clear();
 
 	Timer::start();
 }
 
-bool Solver::next() {
+SolverOutputBox* Solver::next() {
 	while (!buffer.empty()) {
 
 		time_limit_check();
@@ -170,13 +181,13 @@ bool Solver::next() {
 			// certification is performed at each intermediate step
 			// if the system is under constrained
 			if (!c->box.is_empty() && m<n) {
+				// note: cannot return PENDING status
 				SolverOutputBox new_sol=check_sol(c->box);
 				if (new_sol.status!=SolverOutputBox::UNKNOWN) {
 					if ((m==0 && new_sol.status==SolverOutputBox::INNER) ||
 							!is_too_large(new_sol.existence())) {
 						delete buffer.pop();
-						store_sol(new_sol);
-						return true;
+						return &store_sol(new_sol);
 					} else {
 						// otherwise: continue search...
 					}
@@ -205,8 +216,7 @@ bool Solver::next() {
 			catch (NoBisectableVariableException&) {
 				SolverOutputBox new_sol=check_sol(c->box);
 				delete buffer.pop();
-				store_sol(new_sol);
-				return true;
+				return &store_sol(new_sol);
 			}
 		}
 		catch (EmptyBoxException&) {
@@ -217,7 +227,7 @@ bool Solver::next() {
 		}
 	}
 
-	return false;
+	return NULL;
 }
 
 Solver::Status Solver::solve(const IntervalVector& init_box) {
@@ -234,7 +244,7 @@ Solver::Status Solver::solve() {
 
 	try {
 
-		while (next()) { }
+		while (next()!=NULL) { }
 
 		if (manif->unknown.size()>0)
 			manif->status = NOT_ALL_VALIDATED;
@@ -415,31 +425,39 @@ bool Solver::is_too_large(const IntervalVector& box) {
 	return false;
 }
 
-void Solver::store_sol(const SolverOutputBox& sol) {
+SolverOutputBox& Solver::store_sol(const SolverOutputBox& sol) {
+
+	if (trace >=1) cout << sol << endl;
 
 	switch (sol.status) {
 	case SolverOutputBox::INNER    :
 		manif->inner.push_back(sol);
+		return manif->inner.back();
 		break;
 	case SolverOutputBox::BOUNDARY :
 		manif->boundary.push_back(sol);
+		return manif->boundary.back();
 		break;
 	case SolverOutputBox::UNKNOWN  :
 		manif->unknown.push_back(sol);
+		return manif->unknown.back();
+		break;
+	case SolverOutputBox::PENDING :
+		manif->pending.push_back(sol);
+		return manif->pending.back();
 		break;
 	}
 
-	if (trace >=1) cout << sol << endl;
 }
 
 void Solver::flush() {
 	while (!buffer.empty()) {
 		Cell* cell=buffer.top();
 		SolverOutputBox sol(n);
-		(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
+		(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::PENDING;
 		sol._existence=cell->box;
 		sol._unicity=NULL;
-		manif->unknown.push_back(sol);
+		store_sol(sol);
 		delete buffer.pop();
 	}
 }
@@ -463,6 +481,7 @@ void Solver::report() {
 	cout << " number of inner boxes:\t\t" << manif->inner.size() << endl;
 	cout << " number of boundary boxes:\t" << manif->boundary.size() << endl;
 	cout << " number of unknown boxes:\t" << manif->unknown.size() << endl;
+	cout << " number of pending boxes:\t" << manif->pending.size() << endl;
 	cout << " cpu time used:\t\t\t" << time << "s";
 	if (manif->time!=time)
 		cout << " [total=" << manif->time << "]";

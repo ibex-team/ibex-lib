@@ -43,8 +43,9 @@ int main(int argc, char** argv) {
 	args::ValueFlag<string> output_file(parser, "filename", "Manifold output file. The file will contain the "
 			"description of the manifold with boxes in the MNF (binary) format.", {'o',"output"});
 	args::Flag format(parser, "format", "Show the output text format", {"format"});
+	args::Flag bfs(parser, "bfs", "Perform breadth-first search (instead of depth-first search, by default)", {"bfs"});
 	args::Flag txt(parser, "txt", "Write the output manifold in a easy-to-parse text file. See --format", {"txt"});
-	args::Flag mma(parser, "mma", "Write the output manifold as a Mathematica list.", {"mma"});
+	//args::Flag mma(parser, "mma", "Write the output manifold as a Mathematica list.", {"mma"});
 	args::Flag trace(parser, "trace", "Activate trace. \"Solutions\" (output boxes) are displayed as and when they are found.", {"trace"});
 	args::ValueFlag<string> boundary_test_arg(parser, "true|full-rank|half-ball|false", "Boundary test strength. Possible values are:\n"
 			"\t\t* true:\talways satisfied. Set by default for under constrained problems (0<m<n).\n"
@@ -110,6 +111,8 @@ int main(int argc, char** argv) {
 			if (random_seed)
 				cout << "  random seed:\t\t" << random_seed.Get() << endl;
 
+			if (bfs)
+				cout << "  bfs:\t\t\tON" << endl;
 		}
 
 		if (output_file) {
@@ -144,9 +147,10 @@ int main(int argc, char** argv) {
 
 		if (!quiet) {
 			cout << "  output file:\t\t" << output_manifold_file << "\n";
-			if (mma)
-				cout << "  output format:\tMMA" << endl;
-			else if (txt)
+//			if (mma)
+//				cout << "  output format:\tMMA" << endl;
+//			else
+			if (txt)
 				cout << "  output format:\tTXT" << endl;
 		}
 
@@ -154,6 +158,7 @@ int main(int argc, char** argv) {
 		DefaultSolver s(sys,
 				eps_x_min ? eps_x_min.Get() : DefaultSolver::default_eps_x_min,
 				eps_x_max ? eps_x_max.Get() : DefaultSolver::default_eps_x_max,
+				!bfs,
 				random_seed? random_seed.Get() : DefaultSolver::default_random_seed);
 
 		if (boundary_test_arg) {
@@ -208,8 +213,8 @@ int main(int argc, char** argv) {
 
 		if (sols) cout << s.get_manifold() << endl;
 
-		if (txt || mma)
-			s.get_manifold().write_txt(output_manifold_file.c_str(), mma);
+		if (txt) // || mma)
+			s.get_manifold().write_txt(output_manifold_file.c_str(), false); //mma);
 		else
 			s.get_manifold().write(output_manifold_file.c_str());
 

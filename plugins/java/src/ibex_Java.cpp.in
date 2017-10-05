@@ -22,6 +22,7 @@
 #include "ibex_VarSet.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_Solver.h"
+#include "ibex_SolverOutputBox.h"
 #include "ibex_CellStack.h"
 
 #include <stdio.h>
@@ -120,7 +121,9 @@ public:
 
 		bis=new SmearSumRelative(*sys, prec);
 		stack=new CellStack();
-		solver = new Solver(*sys, params, *ctc, *bis, *stack);
+		
+		Vector eps_max(nb_var,POS_INFINITY);
+		solver = new Solver(*sys, params, *ctc, *bis, *stack, prec, eps_max);
 	}
 
 	IntervalVector read_box(JNIEnv *env, const jdouble* d, int size) {
@@ -485,11 +488,12 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_next_1solution(JNIEnv* env, jo
 		return BAD_DOMAIN;
 	}
 
-	const Solver::Solution* sol;
+	const SolverOutputBox* sol;
 
-	if (inst.solver->next(sol)) {
+	sol=inst.solver->next();
+	if (sol!=NULL) {
 		inst.write_box(env,sol->existence(),d);
-		result = sol->status==Solver::UNKNOWN? UNKNOWN : SOLUTION;
+		result = sol->status==SolverOutputBox::UNKNOWN? UNKNOWN : SOLUTION;
 	} else {
 		result = SEARCH_OVER;
 	}

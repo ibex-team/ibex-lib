@@ -19,6 +19,7 @@
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcFixPoint.h"
 #include "ibex_CellStack.h"
+#include "ibex_CellList.h"
 #include "ibex_Array.h"
 #include "ibex_DefaultStrategy.cpp_"
 #include "ibex_Random.h"
@@ -105,11 +106,13 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 }
 
 
-DefaultSolver::DefaultSolver(System& sys, double eps_x_min, double eps_x_max, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min)),
+DefaultSolver::DefaultSolver(System& sys, double eps_x_min, double eps_x_max,
+		bool dfs, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min)),
 		get_square_eq_sys(sys)!=NULL?
 				rec(new SmearSumRelative(*get_square_eq_sys(sys), eps_x_min)) :
 				rec(new RoundRobin(eps_x_min)),
-		rec(new CellStack()), Vector(sys.nb_var,eps_x_min), Vector(sys.nb_var,eps_x_max)),
+				rec(dfs? (CellBuffer*) new CellStack() : (CellBuffer*) new CellList()),
+				Vector(sys.nb_var,eps_x_min), Vector(sys.nb_var,eps_x_max)),
 		sys(sys) {
 
 	RNG::srand(random_seed);
@@ -122,11 +125,13 @@ DefaultSolver::DefaultSolver(System& sys, double eps_x_min, double eps_x_max, do
 }
 
 // Note: we set the precision for Newton to the minimum of the precisions.
-DefaultSolver::DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min.min())),
+DefaultSolver::DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max,
+		bool dfs, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min.min())),
 		get_square_eq_sys(sys)!=NULL?
 				rec(new SmearSumRelative(*get_square_eq_sys(sys), eps_x_min)) :
 				rec(new RoundRobin(eps_x_min)),
-		rec(new CellStack()), eps_x_min, Vector(sys.nb_var,eps_x_max)),
+		rec(dfs? (CellBuffer*) new CellStack() : (CellBuffer*) new CellList()),
+		eps_x_min, Vector(sys.nb_var,eps_x_max)),
 		sys(sys) {
 
 	RNG::srand(random_seed);
