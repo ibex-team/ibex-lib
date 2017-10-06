@@ -379,7 +379,7 @@ is :math:`[0,+\infty)`.
 
 
 The output is:
-
+ 
 .. literalinclude:: ../examples/doc-arithmetic.txt
    :start-after: itv-compl-O
    :end-before: itv-compl-O

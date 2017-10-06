@@ -189,6 +189,12 @@ The following example shows how to combine separator for finding the union and i
 Separator for a Polygon
 -------------------------------
 
+
+.. note::  
+
+   This separator is avalaible in the ENSTA Robotics plugin (--with-ensta-robotics).
+   
+
 **(under construction)**
 
 Contractor for a Segment
@@ -291,10 +297,10 @@ The following snippet shows how to build the associated separator and make opera
 	walls_xa2.push_back(-3); walls_ya2.push_back(-3);   walls_xb2.push_back(-2);  walls_yb2.push_back(3);
 
 	SepPolygon S2(walls_xa2, walls_ya2, walls_xb2, walls_yb2);
-    SepNot S3(S2);
-
-    // Separator for the polygon with a hole in it
-    SepInter S(S1, S3);
+	SepNot S3(S2);
+	
+	// Separator for the polygon with a hole in it
+	SepInter S(S1, S3);
 
 Using a paver, the previous separator will produce the following figure :
 

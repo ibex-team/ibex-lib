@@ -29,11 +29,23 @@ The Core Library
    reference
    example-slam
    lab
+
+.. _solver-plugin:
+
+-------------------
+IbexSolve
+-------------------
+
+.. toctree::
+   :maxdepth: 2
+   
+   solver-install
+   solver-tutorial
    
 .. _optim-plugin:
 
 -------------------
-IbexOpt Plugin
+IbexOpt
 -------------------
 
 .. toctree::

@@ -560,59 +560,58 @@ In case of a non-linear system, it is also possible to call the ``CtcPolytopeHul
 .. _ctc-linear-relax:
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Linear Relaxations
+Linearizations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Linearization procedures in Ibex are embbeded in a class inheriting the ``LinearRelax`` interface.
+Linearization procedures in Ibex are embbeded in a class inheriting the ``Linearizer`` interface.
 
 There exists some built-in linearization techniques, namely:
 
-- ``LinearRelaxXTaylor``: a corner-based Taylor relaxation :ref:`[Araya & al., 2012] <Araya12>`.
-- ``LinearRelaxAffine2``: a relaxation based on affine arithmetic :ref:`[Ninin & Messine, 2009] <Ninin09>`.
-- ``LinearRelaxCombo``: a combination of the two previous techniques (the polytope is basically the intersection of the polytopes
+- ``LinearizerXTaylor``: a corner-based Taylor relaxation :ref:`[Araya & al., 2012] <Araya12>`.
+- ``LinearizerAffine2``: a relaxation based on affine arithmetic :ref:`[Ninin & Messine, 2009] <Ninin09>`.
+- ``LinearizerCombo``: a combination of the two previous techniques (the polytope is basically the intersection of the polytopes
   calculated by each technique)
-- ``LinearRelaxFixed``: a fixed linear system (as shown in the example above)
+- ``LinearizerFixed``: a fixed linear system (as shown in the example above)
 
-This ``LinearRelax`` interface only imposes to implement a virtual function called ``linearization``:
+This ``Linearizer`` interface only imposes to implement a virtual function called ``linearize``:
 
 .. code-block:: cpp
 
-   class LinearRelax {
+   class Linearizer {
    public:
-	/**
-	 * Build a relaxation for a system.
-	 *
-	 * The system is only used by this constructor to get the number
-	 * of variables and constraints.
-	 */
-	LinearRelax(const System& sys);
 
 	/**
-	 * Build a relaxation of nb_ctr constraints on nb_var variables.
+	 * Build a linearization procedure on nb_var variables.
 	 */
-	LinearRelax(int nb_ctr, int nb_var);
+	Linearizer(int nb_var);
 
 	/**
-	 * The linearization technique.
+	 * Add constraints in a LP solver.
 	 *
-	 * It must be implemented in the subclasses.
+	 * The constraints correspond to a linearization of the
+	 * underlying system, on the given box.
+	 *
+	 * This function must be implemented in the subclasses.
+	 *
+	 * \return the number of constraints (possibly 0) or -1 if the linear system is
+	 *         infeasible.
 	 */
-	virtual int linearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
+	virtual int linearize(const IntervalVector& box, LinearSolver& lp_solver)=0;
    };
 
-The ``linearization`` takes as argument a box because, most of the time, the way you linearize a nonlinear system depends on the domain of the variables. In other words, adding the 2*n bound constraints that represent the box to the system allow to build a far smaller polytope.
+The ``linearizer`` takes as argument a box because, most of the time, the way you linearize a nonlinear system depends on the domain of the variables. In other words, adding the 2*n bound constraints that represent the box to the system allow to build a far smaller polytope.
 
 The second argument is the linear solver. This is only for efficiency reason: instead of building a matrix A and a vector b, the function directly enters the constraints in the linear solver. Let us now give an example.
 
 Giving an algorithm to linearize a non-linear system is beyond the scope of this documentation so we shall here artificially *linearize a linear system*. The algorithm becomes trivial but this is enough to show you how to implement this interface.
-So let us take the same linear system as above and replace the ``LinearRelaxFixed`` instace by an instance of a home-made class:
+So let us take the same linear system as above and replace the ``LinearizerFixed`` instace by an instance of a home-made class:
 
 .. literalinclude:: ../examples/doc-contractor.cpp
    :language: cpp
    :start-after: ctc-polytope-2-C
    :end-before:  ctc-polytope-2-C
 
-Replacing the ``LinearRelaxFixed`` instance by an instance of ``MyLinearRelax`` gives exactly the same result.
+Replacing the ``LinearizerFixed`` instance by an instance of ``MyLinearizer`` gives exactly the same result.
 
 .. _ctc-quantif:
 

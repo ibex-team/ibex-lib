@@ -23,7 +23,7 @@ a unique black-box strategy (whatever the input problem is) and with a very limi
 number of parameters. Needless to say, this strategy is a kind of compromise and not the 
 best one for a given problem.
 
-Note that Ibex also supplies a :ref:`generic solver <tuto-generic-solver>` that is much more customizable.
+Note that Ibex also supplies a :ref:`generic solver <generic-solver>` that is much more customizable.
 
 You can directly apply this default solver on one of the benchmark problems 
 distributed with Ibex. 
