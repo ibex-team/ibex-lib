@@ -39,8 +39,7 @@ IbexSolve
 .. toctree::
    :maxdepth: 2
    
-   solver-install
-   solver-tutorial
+   solver
    
 .. _optim-plugin:
 
@@ -51,8 +50,7 @@ IbexOpt
 .. toctree::
    :maxdepth: 2
    
-   optim-install
-   optim-tutorial
+   optim
    
 .. _java-plugin:
 

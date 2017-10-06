@@ -326,4 +326,13 @@ Does it mean that Ibex is not properly installed?
 
 **Answer:** No, this mesage simply indicates that gaol was not found on your system and that it will be automatically extracted from the bundle. It is not an error message.
         
+--------------------------------------------
+Linking problem with CoinOR
+--------------------------------------------
+
+If the linker fails with undefined reference to dgetrf and dgetrs, it is probably because you have installed Lapack. You can either:
+
+    try to adapt the makefile to link with Lapack.
+    Remove Lapack, reinstall Ibex and reinstall Lapack (in this order).
+
 

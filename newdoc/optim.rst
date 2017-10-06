@@ -2,67 +2,23 @@
 .. _ibex-opt: 
 
 **************************************
-              Tutorial (IbexOpt)
+              IbexOpt
 **************************************
 
+==============================
+Compiling and running programs
+==============================
 
-=================
-Getting started
-=================
+To compile and run the default optimizer::
 
-----------------------
-Run the default solver
-----------------------
+	~/Ibex/ibex-2.6.0/$ cd plugins/optim/examples
+	~/Ibex/ibex-2.6.0/plugins/optim/$ export PKG_CONFIG_PATH=[ibex-path]/share/pkgconfig
+	~/Ibex/ibex-2.6.0/plugins/optim/$ make defaultsolver
+	~/Ibex/ibex-2.6.0/plugins/optim/$ ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10
 
-A couple of example programs are installed with Ibex under the ``plugins/optim/examples/`` subfolder.
+The ``PKG_CONFIG_PATH`` variable is only necessary if you have installed Ibex with ``--prefix``.
 
-One of them is the *default solver* that solves a system of nonlinear equations rigorously
-(that is, it does not lose any solution and return each solution under the form of a 
-small box enclosing the true value). It is called the "default" solver because is resorts to
-a unique black-box strategy (whatever the input problem is) and with a very limited 
-number of parameters. Needless to say, this strategy is a kind of compromise and not the 
-best one for a given problem.
-
-Note that Ibex also supplies a :ref:`generic solver <generic-solver>` that is much more customizable.
-
-You can directly apply this default solver on one of the benchmark problems 
-distributed with Ibex. 
-The benchmarks are all written in the `Minibex syntax`_ and stored in an arborescence under ``benchs/``.
-
-.. _Minibex syntax: #func-minibex
-
-Open a terminal, move to the examples subfolder and compile the default solver::
-
-  ~/Ibex/ibex-2.0/$ cd examples
-  ~/Ibex/ibex-2.0/__build__/examples/$ make defaultsolver
-
-**Note**: If you have installed Ibex in a local folder, you have to first set the ``PKG_CONFIG_PATH`` variable.
-See :ref:`install-compiling-running`.
-
-Now, run the default solver with, for example, the problem named kolev36 located at the specified path::
-
-  ~/Ibex/ibex-2.0/__build__/examples/$./defaultsolver ../../benchs/benchs-satisfaction/benchlib2/kolev36.bch 1e-07 10
-
-The second argument is the precision required on solution (1e-07). The third and last argument is the time limit in seconds (10 seconds).
-
-The following result should be displayed::
-
-  load file ../../benchs/benchs-satisfaction/benchlib2/kolev36.bch.
-  sol 1 nb_cells 6 ([0.1173165676349034, 0.1173165676349242] ;
-                    [0.4999999999996189, 0.5000000000003763] ;
-                    [0.8826834323643938, 0.8826834323657756] ;
-                    [-0.2071067811866001, -0.2071067811865033] ;
-                    [1.207106781186472, 1.207106781186622] ;
-                    [-2.000000000000119, -1.999999999999871])
-  number of solutions=1
-  cpu time used=0.036s.
-  number of cells=4
-
-The first simply says that the file has been successfuly loaded.
-The second line (broken here into 6 lines for clarity) details the first solution found. There are 6 variables so 6 intervals are displayed.
-
-The third line is the total number of solutions found (there is just one here).
-The two last lines report the CPU time and the number of hypothesis (bisections) that was required to solve the problem.
+The default solver solves the systems of equations in argument (cyclohexan3D) with a precision less than 1e-05 and within a time limit of 10 seconds.
 
 ------------------------------ 
 Run the default optimizer
