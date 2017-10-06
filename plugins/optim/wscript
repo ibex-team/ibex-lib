@@ -28,7 +28,7 @@ def configure (conf):
 	# check that conf.env.LP_LIB is not set to NONE (i.e., we need a LP library
 	# for the optim plugin).
 	if conf.env.LP_LIB == "NONE":
-		conf.fatal ("optim plugin needs a LP library")
+		conf.fatal ("Optim plugin requires a LP library (--lp-lib)")
 
 	# Add information in ibex_Setting
 	conf.setting_define ("WITH_OPTIM", 1)
