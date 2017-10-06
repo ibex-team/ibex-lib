@@ -30,6 +30,9 @@ def configure (conf):
 	if conf.env.LP_LIB == "NONE":
 		conf.fatal ("solver plugin needs a LP library")
 
+	# We need -std=c++11 to compile ibexsolver
+	conf.check_cxx(cxxflags = "-std=c++11", uselib_store="IBEXSOLVER")
+
 	# Add information in ibex_Setting
 	conf.setting_define ("WITH_SOLVER", 1)
 
@@ -68,7 +71,7 @@ def build (bld):
 	# build solver binary
 	bld.program (
 	  target = "ibexsolve",
-	  use = "ibex", # add dependency on ibex library
+	  use = [ "ibex", "IBEXSOLVER" ], # add dependency on ibex library
 	  source = bld.path.ant_glob ("main/**/*.cpp"),
 	  install_path = bld.env.BINDIR,
 	)
