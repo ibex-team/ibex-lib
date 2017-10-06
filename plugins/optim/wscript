@@ -68,13 +68,15 @@ def configure (conf):
 ####### build ########
 ######################
 def build (bld):
-	# build optim binary
-	bld.program (
-	  target = "ibexopt",
-	  use = [ "ibex", "IBEXOPT" ], # add dependency on ibex library
-	  source = bld.path.ant_glob ("main/**/*.cpp"),
-	  install_path = bld.env.BINDIR,
-	)
+	
+	if bld.env.WITH_OPTIM:
+		# build optim binary
+		bld.program (
+		target = "ibexopt",
+		use = [ "ibex", "IBEXOPT" ], # add dependency on ibex library
+		source = bld.path.ant_glob ("main/**/*.cpp"),
+		install_path = bld.env.BINDIR,
+		)
 
 ######################
 ##### benchmarks #####

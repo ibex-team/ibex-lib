@@ -4,7 +4,7 @@ LPSolver::LPSolver(int nb_vars, int max_iter,
 	primal_solution(1), dual_solution(1 /*tmp*/),
 	status_prim(0), status_dual(0), boundvar(1)
 {
-	ibex_warning("No Linear Solver available.");
+	ibex_warning("No LP Solver available (use --lp-lib).");
 }
 
 LPSolver::~LPSolver() {
@@ -15,6 +15,10 @@ LPSolver::Status_Sol LPSolver::solve() {
 }
 
 void LPSolver::write_file(const char* name) {
+	throw LPException();
+}
+
+void LPSolver::get_coef_obj(Vector& obj) const {
 	throw LPException();
 }
 
