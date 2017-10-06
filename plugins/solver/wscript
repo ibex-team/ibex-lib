@@ -34,7 +34,7 @@ def configure (conf):
 	conf.setting_define ("WITH_SOLVER", 1)
 
 	# add SOLVER plugin include directory
-	for f in conf.path.ant_glob ("src/**", dir = True, src = False):
+	for f in conf.path.ant_glob ("src/** src", dir = True, src = False):
 		conf.env.append_unique("INCLUDES_SOLVER", f.abspath())
 
 	# The build and install steps will be run from the main src/wscript script so
@@ -65,4 +65,10 @@ def configure (conf):
 ####### build ########
 ######################
 def build (bld):
-	pass # nothing to do, everything is done in the main src/wscript script
+	# build solver binary
+	bld.program (
+	  target = "ibexsolve",
+	  use = "ibex", # add dependency on ibex library
+	  source = bld.path.ant_glob ("main/**/*.cpp"),
+	  install_path = bld.env.BINDIR,
+	)
