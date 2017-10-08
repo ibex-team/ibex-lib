@@ -1,7 +1,22 @@
 
 ****************************************************
-Installation (Java Plugin for Choco with Ibex 2.4)
+ Java Plugin (for Choco)
 ****************************************************
+
+.. _Choco: http://www.emn.fr/z-info/choco-solver
+
+
+   +-----------------------------+---------------------+------------------------------+
+   | .. image:: images/ibex.jpg  |                     |  .. image:: images/choco.png |
+   |    :width: 200 px           |                     |     :width: 200 px           |
+   +-----------------------------+---------------------+------------------------------+
+   
+The Java plugin of Ibex allows to use Ibex with `Choco`_, for solving mixed integer-continuous CSP
+(constraint satisfaction problems).
+
+===============================
+Installation (with Ibex 2.6)
+===============================
 
 .. note::
 
@@ -14,23 +29,19 @@ Installation (Java Plugin for Choco with Ibex 2.4)
    
 The installation of the plugin will generate, in addition to the Ibex library, the libibex-java library that contains the glue code between C++ and Java.
 
-==========================
-Standard install
-==========================
-
 .. Note:: 
 
    Under Windows, Ibex is compiled as a 32-bit library although the platform is 64 bits (this is mainly because the MinGW environment is 32-bits). Hence, Java will fail in loading Ibex unless you have a 32-bits JVM.
 
    The following instructions must be typed in the shell of MinGW.
 
-Uncompress the archive ibex-2.4.0.tar.gz in some Ibex folder::
+Uncompress the archive ibex-2.6.0.tar.gz in some Ibex folder::
 
-	~/Ibex/$ tar xvfz ibex-2.4.0.tar.gz
+	~/Ibex/$ tar xvfz ibex-2.6.0.tar.gz
 
 Uncompress the archive ibex-java.tar.gz in the plugin folder::
 
-	~/Ibex/$ tar xvfz ibex-java.tar.gz --directory=ibex-2.4.0/plugins
+	~/Ibex/$ tar xvfz ibex-java.tar.gz --directory=ibex-2.6.0/plugins
 
 Set the environment variable ``JAVA_HOME``. Typical paths are ``/Library/Java/Home`` (MacOS) or ``/usr/lib/jvm/java-7-openjdk-i38`` (Linux). Example::
 
@@ -46,11 +57,11 @@ Under MinGW, the variable must be set in Liux-style (don't use backslash ("\\") 
 
 Then configure Ibex as follows::
 
-	~/Ibex/$ cd ibex-2.4.0
-	~/Ibex/ibex-2.4.0/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
+	~/Ibex/$ cd ibex-2.6.0
+	~/Ibex/ibex-2.6.0/$ ./waf configure [...] --enable-shared --with-solver --with-jni --java-package-name=org.chocosolver.solver.constraints.real
 
-**Note**: the ``--enable-shared`` option is mandatory.
-
+**Note**: the ``--enable-shared`` option is mandatory. The ``-with-solver`` option can be ommited as this plugin
+is automatically installed (with Release 2.6.0). 
 
 
 ============================

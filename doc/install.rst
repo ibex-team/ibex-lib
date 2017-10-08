@@ -12,7 +12,6 @@ Installation (Release 2.6)
 .. _Cplex: http://www.ibm.com/software/commerce/optimization/cplex-optimizer
 .. _Soplex 1.7.x: http://soplex.zib.de
 .. _CLP: https://projects.coin-or.org/Clp
-.. _Choco: http://www.emn.fr/z-info/choco-solver
 .. _ZIB: http://scip.zib.de/academic.txt
 
 ===================================
