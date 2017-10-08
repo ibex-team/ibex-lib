@@ -1,71 +1,96 @@
 
-.. _ibex-opt: 
+.. _optim: 
 
 **************************************
               IbexOpt
 **************************************
 
-==============================
-Compiling and running programs
-==============================
+This page describes IbexOpt, the plugin installed with the ``--with-optim`` option.
 
-To compile and run the default optimizer::
+.. _optim-run-default:
 
-	~/Ibex/ibex-2.6.0/$ cd plugins/optim/examples
-	~/Ibex/ibex-2.6.0/plugins/optim/$ export PKG_CONFIG_PATH=[ibex-path]/share/pkgconfig
-	~/Ibex/ibex-2.6.0/plugins/optim/$ make defaultsolver
-	~/Ibex/ibex-2.6.0/plugins/optim/$ ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10
+=================
+Getting started
+=================
 
-The ``PKG_CONFIG_PATH`` variable is only necessary if you have installed Ibex with ``--prefix``.
+IbexOpt is a end-user program that solves a NLP problem (non-linear programming).
+It minimizes a (nonlinear) objective function under (nonlinear) inequality and equality constraints.
+It resorts to
+a unique black-box strategy (whatever the input problem is) and with a very limited 
+number of parameters. Needless to say, this strategy is a kind of compromise and not the 
+best one for a given problem.
 
-The default solver solves the systems of equations in argument (cyclohexan3D) with a precision less than 1e-05 and within a time limit of 10 seconds.
+Note that this program is based on the :ref:`generic optimizer <optim-generic>`, a C++ class
+that allows to build a more customizable optimizer.
 
------------------------------- 
-Run the default optimizer
------------------------------- 
+You can directly apply this optimizer on one of the benchmark problems 
+distributed with Ibex. 
+The benchmarks are all written in the `Minibex syntax`_ and stored in an arborescence under ``plugins/optim/benchs/``.
+If you compare the Minibex syntax of these files with the ones given to IbexSolve, you will see that a "minimize"
+keyword has appeared.
 
-Similarly to the default solver, a default optimizer is installed with Ibex.
-This program minimizes a (nonlinear) objective function under (nonlinear) inequality constraints.
-Let us execute this optimizer with the problem ex3_1_3 got from the Coconut library. If you compare
-the Minibex syntax of this benchmark with that of the previous example, you will see that a "minimize"
-keyword has appeared.::
+.. _Minibex syntax: #func-minibex
 
-  ~/Ibex/ibex-2.0/__build__/examples/$./defaultoptimizer ../../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch 1e-07 1e-07 10
+Open a terminal, move to the ``bin`` subfolder and run IbexSolve with, for example, the problem named ex3_1_3 located at the specified path::
 
-As you see, the optimizer requires 3 arguments, besides the name of the benchmark.
-The extra argument corresponds to the precision on the objective (both relative and absolute). Here, this precision is also set to 1e-07.
-
+  ~/ibex-2.6.0$ cd bin
+  ~/ibex-2.6.0/bin$ ./ibexopt ../plugins/optim/benchs/easy/ex3_1_3.bch
+	
 The following result should be displayed::
 
-  best bound in: [-310.000030984,-309.999999984]
-  Relative precision obtained on objective function: 9.9999998936e-08  [passed]  1e-07
-  Absolute precision obtained on objective function: 3.09999999776e-05  [failed]  1e-07
-  best feasible point (4.9999999999 ; 1 ; 5 ; 1.00000119296e-10 ; 5 ; 10)
-  cpu time used 0.012s.
-  number of cells 5
 
-The program has proved that the minimum of the objective lies in [-310,-309.999999984]. It also gives
-a point (4.9999999999 ; 1 ; 5 ; 1.00000119296e-10 ; 5 ; 10) which satisfies the constraints and for which
-the value taken by the objective function is inside this interval.
+ ************************ setup ************************
+   file loaded:	../plugins/optim/benchs/easy/ex3_1_3.bch
+ *******************************************************
 
---------------------------------
-Call the default solver from C++
---------------------------------
+ running............
 
-You can call the default solver and get the solutions from C++.
-Two objects must be built: the first represents the problem (or "system"), the second
-the solver itself. Then, we just run the solver. Here is a simple example:
+  optimization successful!
 
-.. literalinclude:: ../examples/doc-tutorial.cpp
-   :language: cpp
-   :start-after: start-call-solver
-   :end-before: start-call-solver
- 
-----------------------------------------------------
-Call the default optimizer from C++
-----------------------------------------------------
+  best bound in: [-310.309999984,-309.999999984]
+  relative precision obtained on objective function: 0.001  [passed]
+  absolute precision obtained on objective function: 0.309999999985  [failed]
+  best feasible point: (4.9999999999 ; 1 ; 5 ; 0 ; 5 ; 10)
+  cpu time used: 0.00400000000001s.
+  number of cells: 1
 
-Calling the default optimizer is as simple as for the default solver.
+The program has proved that the minimum of the objective lies in a small interval enclosing -310. It also gives
+a point close to (5 ; 1 ; 5 ; 0 ; 5 ; 10) which satisfies the constraints and for which
+the value taken by the objective function is inside this interval. The process took less than 0.005 seconds.
+
+.. _optim-options:
+
+================== 
+Options
+================== 
+
++--------------------------------------+------------------------------------------------------------------------------+
+| -r<*float*>, --rel-eps-f=<*float*>   |  Relative precision on the objective. Default value is 1e-3.                 |
++--------------------------------------+------------------------------------------------------------------------------+                                        
+| -a<*float*>, --abs-eps-f=<*float*>   | Absolute precision on the objective. Default value is 1e-7.                  |
++--------------------------------------+------------------------------------------------------------------------------+
+| --eps-h=<*float*>                    | Equality relaxation value. Default value is 1e-8.                            |
++--------------------------------------+------------------------------------------------------------------------------+
+| -t<*float*>, --timeout=<*float*>     | Timeout (time in seconds). Default value is +oo.                             |
++--------------------------------------+------------------------------------------------------------------------------+
+| --random-seed=<*float*>              | Random seed (useful for reproducibility). Default value is 1.                |
++--------------------------------------+------------------------------------------------------------------------------+
+| --eps-x=<*float*>                    | Precision on the variable (**Deprecated**). Default value is 0.              |
++--------------------------------------+------------------------------------------------------------------------------+
+| --initial-loup=<*float*>             | Intial "loup" (a priori known upper bound).                                  |
++--------------------------------------+------------------------------------------------------------------------------+
+| --rigor                              | Activate rigor mode (certify feasibility of equalities).                     |
++--------------------------------------+------------------------------------------------------------------------------+
+| --trace                              | Activate trace. Updates of loup/uplo are printed while minimizing.           |
++--------------------------------------+------------------------------------------------------------------------------+
+
+.. _optim-call-default:
+
+==================================== 
+Calling IbexOpt from C++
+==================================== 
+
+Calling the default optimizer is as simple as for the :ref:`default solver <solver>`.
 The loaded system must simply correspond to an optimization problem. The default optimizer
 is an object of the class ``DefaultOptimizer``.
 
@@ -78,149 +103,64 @@ where f is the objective:
 
 Example:
 
-.. literalinclude:: ../examples/doc-tutorial.cpp 
+.. literalinclude:: ../examples/doc-optim.cpp 
    :language: cpp
-   :start-after: start-call-optim
-   :end-before: start-call-optim
+   :start-after: optim-call-default-C
+   :end-before:  optim-call-default-C
 
+The output is:
 
-==========================
-Solver
-==========================
+.. literalinclude:: ../examples/doc-optim.txt
+   :start-after: optim-call-default-O
+   :end-before:  optim-call-default-O
 
-
-   
-
-
-.. _tuto-strat-default-solver:
-
---------------------------------
-Implementing the default solver
---------------------------------
-
-The default solver is an instance of the generic solver with (almost) all parameters set by default.
-
-We already showed how to `Call the default solver from C++`_.
-To give a further insight into the generic solver and its possible settings, we explain now how to re-create the default solver 
-by yourself.
-
-The contractor of the default solver is obtained with the following receipe.
-This is a :ref:`composition <tuto-inter-union-compo>` of
-
-#. :ref:`ctc-HC4`
-#. :ref:`ACID <ctc-acid>`
-#. :ref:`Interval Newton <tuto-newton>` (only if it is a square system of equations)
-#. A :ref:`fixpoint <tuto-fixpoint>` of the :ref:`ctc-polytope-hull` of two linear relaxations combined:
-    - the relaxation called X-Taylor;
-    - the relaxation generated by affine arithmetic. See :ref:`ctc-linear-relax`.
-   
-The bisector is based on the :ref:`strategy-smear-function` with maximal relative impact.
-
-So the following program exactly reproduces the default solver.
-
-.. literalinclude:: ../examples/doc-tutorial.cpp 
-   :language: cpp
-   :start-after: strat-default-solver
-   :end-before: strat-default-solver
-   
-.. _solver-parallel:
-
-----------------------------------------
-Parallelizing search
-----------------------------------------
-
-It is possible to parallelize the search by running (in parallel) solvers for different subboxes of the initial box.
-
-Be aware however that Ibex has not been designed (so far) to be parallelized and the following lines only reports our preliminary
-experiments.
-
-Here are the important observations:
-
-- The sub-library gaol is **not** thread-safe. You must compile Ibex with **filib** which seems to be OK. Ibex is automatically
-  compiled with Filib on 64 bits platforms (on 32 bits platforms, see :ref:`install-custom`).
-- The linear solver Soplex (we have not tested yet with Cplex) seems to be thread-safe but sometimes generates error messages on the
-  console like::
-
-    ISOLVE56 stop: 0, basis status: PRIMAL (2), solver status: RUNNING (-1)
-
-  So, calling Soplex several times simultaneously seems not to be allowed, but Soplex at least manages the case properly, that is,
-  stops. As far as we have observed, we don't lose solutions even when this kind of message appear. 
-- Ibex objects are not thread-safe which means that the solvers run in parallel must share no information. In particular,
-  each solver must have its **own copy** of the system.
-
-Here is an example:
-
-.. literalinclude:: ../examples/doc-strategy.cpp
-   :language: cpp
-   :start-after: solver-parallel-C-1
-   :end-before:  solver-parallel-C-1
-
-If I remove the ``#pragma`` the program displays::
-
-  solver #1 found 64
-  solver #2 found 64
-
-  real	0m5.121s        // <-------- total time
-  user	0m5.088s
-
-With the ``#pragma``, I obtain::
-
-  solver #1 found 64
-  solver #2 found 64
-
-  real	0m2.902s        // <-------- total time
-  user	0m5.468s
-
-**Note:** It is pure luck that by bisecting the 4th variable, we obtain exactly half of the solutions on each sub-box.
-Also, looking for the 64 first solutions takes here around the same time than looking for the 64 subsequent ones, which
-is particular to this example. So, contrary to what this example seems to prove, splitting the box in two subboxes does 
-not divide the running time by two in general. Of course :)
-
-If you are afraid about the messages of the linear solver, you can replace the ``DefaultSolver`` by your own dedicated solver
-that does not resort to the simplex, ex:
-
-.. literalinclude:: ../examples/doc-strategy.cpp
-   :language: cpp
-   :start-after: solver-parallel-C-2
-   :end-before:  solver-parallel-C-2
-
-
-==========================
-Global Optimizer
-==========================
-
-------------------------------
+.. _optim-generic:
+  
+==================================== 
 The generic optimizer
-------------------------------
+==================================== 
 
-The generic optimizer is still under active development (at release |release|) and it is not yet
-as "generic" as the generic solver. There are some limitations, namely:
+Just like the :ref:`generic solver <solver-generic>`, the generic optimizer is the main C++ class 
+(named ``Optimizer``) behind the implementation of IbexOpt. 
+It takes as the solver:
+ 
+- a **contractor**
+- a **bisector**
+- a **cell buffer**
 
-- many actions performed by the optimizer are hard-coded. In particular, the *goal upper bounding* 
-  step cannot yet be controlled by the user. We use a strategy described in :ref:`[Araya et al. 2014] <Araya14>` and 
-  :ref:`[Trombettoni et al. 2011] <Trombettoni11>`, based on *inner region extraction*. The basic idea is to create a continuum of feasible points
-  (a box or a polyhedron) where the goal function can be evaluated quickly, that is, without checking for
-  constraints satisfaction.
-	
-- the optimizer only works for scalar (real-valued) constraints. E.g., you cannot
-  enter a matrix-vector multiplication constraint like ``A*x=0``. You have to decompose
-  such constraint into n scalar constraints. 
+but also requires an extra operator:
 
-However, two key steps are generic: the contraction and bisection.
-Note that contrary to the generic solver, the cell buffer cannot be chosen. It is a sorted heap that
-allows to get in priority boxes minimizing the objective (see :ref:`strategy-cell-heap`).
+- a **loup finder**. A loup finder is in charge of the *goal upper bounding* step of the optimizer.
 
--------------------------------------
-Implementing the default optimizer
--------------------------------------
+We show below how to re-implement the default optimizer from the generic ``Optimizer`` class.
+
+.. _optim-implem-default:
+
+=============================================
+Implementing IbexOpt (the default optimizer)
+=============================================
+
 The contraction performed by the default optimizer is the same as the default solver 
-(see :ref:`tuto-strat-default-solver`) except that it is not applied on the system 
+(see :ref:`solver-implem-default`) except that it is not applied on the system 
 itself but the :ref:`mod-sys-transfo-extend`.
 
-.. literalinclude:: ../examples/doc-tutorial.cpp 
+The loup finder (``LoupFinderDefault``) is a mix of differents strategies. The basic idea is to 
+create a continuum of feasible points (a box or a polyhedron) where the goal function can be evaluated quickly, 
+that is, without checking for constraints satisfaction.
+The polyhedron (built by a ``LinearizerXTaylor`` object) corresponds to a :ref:`linerization technique <ctc-linear-relax>` described in 
+:ref:`[Araya et al. 2014] <Araya14>` and :ref:`[Trombettoni et al. 2011] <Trombettoni11>`, based on *inner region extraction*. 
+It also resorts to the linerization offered by affine arithmetic (a ``LinearizerAffine`` object) if the affine plugin is installed.
+The box (built by a ``LoupFinderInHC4`` object) is a technique based on :ref:`inner arithmeric <itv-inner-arith>` also described in 
+the aforementionned articles. 
+
+Finally, by default, the cell buffer (``CellDoubleHeap``) is basically a sorted heap that allows to get in priority boxes minimizing 
+either the lower or upper bound of the objective enclosure (see :ref:`strategy-cell-heap`).
+
+
+.. literalinclude:: ../examples/doc-optim.cpp 
    :language: cpp
-   :start-after: strat-default-optimizer
-   :end-before: strat-default-optimizer
+   :start-after: optim-implem-default-C
+   :end-before:  optim-implem-default-C
 
 
 

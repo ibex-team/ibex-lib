@@ -30,36 +30,6 @@ using namespace ibex;
 
 int main() {
 
-	{
-	//! [start-call-solver]
-	/* Build a system of equations from the file */
-	System system(IBEX_BENCHS_DIR "/others/kolev36.bch");
-
-	/* Build a default solver for the system and with a precision set to 1e-07 */
-	DefaultSolver solver(system,1e-07);
-
-	solver.solve(system.box); // Run the solver
-
-	/* Display the solutions. */
-	cout << solver.get_manifold() << endl;
-	//! [start-call-solver]
-	}
-
-	{
-	//! [start-call-optim]
-	/* Build a constrained optimization problem from the file */
-	System sys(IBEX_OPTIM_BENCHS_DIR "/easy/ex3_1_3.bch");
-
-	/* Build a default optimizer with a precision set to 1e-07 for both x and f(x) */
-	DefaultOptimizer o(sys,1e-07,1e-07);
-
-	o.optimize(sys.box);// Run the optimizer
-
-	/* Display the result. */
-	cout << "interval for the minimum: " << Interval(o.get_uplo(),o.get_loup()) << endl;
-	cout << "minimizer: " << o.get_loup_point() << endl;
-	//! [start-call-optim]
-	}
 
 	{
 	//! [basic-create-itv]
@@ -582,63 +552,6 @@ int main() {
 	cout << x << endl;// ([0.4999999999999999, 0.5000000000000001], ...
 	//! [ctc-own3]
 	}
-
-	{
-	//! [strat-default-optimizer]
-
-	System system(IBEX_OPTIM_BENCHS_DIR "/easy/ex3_1_3.bch");
-
-	double prec=1e-7; // precision
-
-	// normalized system (all inequalities are "<=")
-	NormalizedSystem norm_sys(system);
-
-	// extended system (the objective is transformed to a constraint y=f(x))
-	ExtendedSystem ext_sys(system);
-
-	/* ============================ building contractors ========================= */
-	CtcHC4 hc4(ext_sys,0.01);
-
-	CtcHC4 hc4_2(ext_sys,0.1,true);
-
-	CtcAcid acid(ext_sys, hc4_2);
-
-	LinearizerCombo linear_relax(ext_sys,LinearizerCombo::XNEWTON);
-
-	CtcPolytopeHull polytope(linear_relax);
-
-	CtcCompo polytope_hc4(polytope, hc4);
-
-	CtcFixPoint fixpoint(polytope_hc4);
-
-	CtcCompo compo(hc4,acid,fixpoint);
-	/* =========================================================================== */
-
-	/* Create a smear-function bisection heuristic. */
-	SmearSumRelative bisector(ext_sys, prec);
-
-	/** Create cell buffer (fix exploration ordering) */
-	CellDoubleHeap buffer(ext_sys);
-
-	/** Create a "loup" finder (find feasible points) */
-	LoupFinderDefault loup_finder(norm_sys);
-
-	/* Create a solver with the previous objects */
-	Optimizer o(system.nb_var, compo, bisector, loup_finder, buffer, ext_sys.goal_var());
-
-	/* Run the optimizer */
-	o.optimize(system.box,prec);
-
-	/* Display a safe enclosure of the minimum */
-	cout << "f* in " << Interval(o.get_uplo(),o.get_loup()) << endl;
-
-	/* Report performances */
-	cout << "cpu time used=" << o.get_time() << "s."<< endl;
-	cout << "number of cells=" << o.get_nb_cells() << endl;
-
-	//! [strat-default-optimizer]
-	}
-
 
 	return 0;
 }

@@ -882,6 +882,8 @@ like :ref:`ctc-fwd-bwd` that do both contractions (on [x] and [y]).
 +  bwd_max(y,x1,x2)        |:math:`y=\max(x_1,x_2)`            |
 +--------------------------+-----------------------------------+
 
+.. _itv-inner-arith:
+
 ====================
 Inner arithmetic
 ====================

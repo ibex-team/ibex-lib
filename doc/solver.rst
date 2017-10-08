@@ -1,15 +1,13 @@
 
-.. _ibex-solve: 
+.. _solver: 
 
 **************************************
              IbexSolve
 **************************************
 
-This page describes the IbexSolve, the plugin installed with the ``--with-solver`` option.
+This page describes IbexSolve, the plugin installed with the ``--with-solver`` option.
 
-
-**The documentation is under construction.**
-
+.. _solver-run-default:
 
 =================
 Getting started
@@ -22,7 +20,7 @@ a unique black-box strategy (whatever the input problem is) and with a very limi
 number of parameters. Needless to say, this strategy is a kind of compromise and not the 
 best one for a given problem.
 
-Note that this program is based on the :ref:`generic solver <generic-solver>`, a C++ class
+Note that this program is based on the :ref:`generic solver <solver-generic>`, a C++ class
 that allows to build a more customizable solver.
 
 You can directly apply this solver on one of the benchmark problems 
@@ -60,7 +58,7 @@ The number of "inner boxes" correspond to the number of solutions found (there i
 
 In the report, the "number of cells" correspond to the number of hypothesis (bisections) that was required to solve the problem.
 
-.. _generic-solver:
+.. _solver-options:
 
 ================== 
 Options
@@ -116,22 +114,49 @@ Options
 |                                      |                                                                              |
 +--------------------------------------+------------------------------------------------------------------------------+
 
-================== 
+.. _solver-call-default:
+
+==================================== 
+Calling IbexSolve from C++
+==================================== 
+
+You can call IbexSolve (the default solver) and get the solutions from C++.
+
+Two objects must be built: the first represents the problem (namely, a :ref:`system <mod-sys>`), the second
+the solver itself. Then, we just run the solver. Here is a simple example:
+
+.. literalinclude:: ../examples/doc-solver.cpp
+   :language: cpp
+   :start-after: solver-call-default-C
+   :end-before: solver-call-default-C
+ 
+The output is:
+
+.. literalinclude:: ../examples/doc-solver.txt
+   :start-after: solver-call-default-O
+   :end-before: solver-call-default-O
+
+.. _solver-generic:
+  
+==================================== 
 The generic solver
-================== 
+==================================== 
 
 The generic solver is the main C++ class behind the implementation of ``ibexsolve``.
 It is a classical branch and prune algorithm that interleaves contraction and branching (bisection) until
 boxes get sufficiently small. However, it performs a more general task that just finding solution points of square
-systems of equations: it also knows how to deal with under-constrained systems and handle manifolds. The documentation
-about under-constrained systems will be available soon.
+systems of equations: it also knows how to deal with under-constrained systems and handle manifolds. 
+
+.. note::
+   A more detailed documentation about under-constrained systems will be available soon.
 
 Compared to ``ibexsolve``, the generic solver allows the following additional operators as inputs:
 
 #. a **contractor** 
        
     Operator that contracts boxes by removing non-solution points. The contraction operator must be compatible with the 
-    system given (equations/inequalities). The solver performs no check (it is the user responsability).
+    system given (equations/inequalities). The solver performs no check (it is the user responsability). See
+    :ref:`ctc`.
 
 #. a **bisector**           
 
@@ -165,14 +190,104 @@ Finally, the cell buffer is a stack, which leads to a depth-first search.
 
 .. literalinclude:: ../examples/doc-solver.cpp 
    :language: cpp
-   :start-after: basic-solver-C
-   :end-before: basic-solver-C
+   :start-after: solver-solver-generic-C
+   :end-before: solver-solver-generic-C
 
 The output is:
 
 .. literalinclude:: ../examples/doc-solver.txt 
    :language: cpp
-   :start-after: basic-solver-O
-   :end-before: basic-solver-O
+   :start-after: solver-generic-O
+   :end-before: solver-solver-generic-O
 
-=================
+.. _solver-implem-default:
+
+=============================================
+Implementing IbexSolve (the default solver)
+=============================================
+
+IbexSolve is an instance of the generic solver with (almost) all parameters set by default.
+
+We already showed how to `Calling IbexSolve from C++`_.
+To give a further insight into the generic solver and its possible settings, we explain now how to re-create the default solver 
+by yourself.
+
+The contractor of the default solver is obtained with the following receipe.
+This is a :ref:`composition <tuto-inter-union-compo>` of
+
+#. :ref:`ctc-HC4`
+#. :ref:`ACID <ctc-acid>`
+#. :ref:`Interval Newton <tuto-newton>` (only if it is a square system of equations)
+#. A :ref:`fixpoint <tuto-fixpoint>` of the :ref:`ctc-polytope-hull` of two linear relaxations combined:
+    - the relaxation called X-Taylor;
+    - the relaxation generated by affine arithmetic. See :ref:`ctc-linear-relax`.
+   
+The bisector is based on the :ref:`strategy-smear-function` with maximal relative impact.
+
+So the following program exactly reproduces the default solver.
+
+.. literalinclude:: ../examples/doc-solver.cpp 
+   :language: cpp
+   :start-after: solver-implem-default-C
+   :end-before: solver-implem-default-C
+   
+.. _solver-parallel:
+
+=============================================
+Parallelizing search
+=============================================
+
+It is possible to parallelize the search by running (in parallel) solvers for different subboxes of the initial box.
+
+Be aware however that Ibex has not been designed (so far) to be parallelized and the following lines only reports our preliminary
+experiments.
+
+Here are the important observations:
+
+- The sub-library gaol is **not** thread-safe. You must compile Ibex with **filib** which seems to be OK (see :ref:`install-options`).
+- The linear solver Soplex (we have not tested yet with Cplex) seems to be thread-safe but sometimes generates error messages on the
+  console like::
+
+	    ISOLVE56 stop: 0, basis status: PRIMAL (2), solver status: RUNNING (-1)
+
+  So, calling Soplex several times simultaneously seems not to be allowed, but Soplex at least manages the case properly, that is,
+  stops. As far as we have observed, we don't lose solutions even when this kind of message appear. 
+- Ibex objects are not thread-safe which means that the solvers run in parallel must share no information. In particular,
+  each solver must have its **own copy** of the system.
+
+Here is an example:
+
+.. literalinclude:: ../examples/doc-solver.cpp
+   :language: cpp
+   :start-after: solver-parallel-C-1
+   :end-before:  solver-parallel-C-1
+
+If I remove the ``#pragma`` the program displays::
+
+  solver #1 found 64
+  solver #2 found 64
+
+  real	0m5.121s        // <-------- total time
+  user	0m5.088s
+
+With the ``#pragma``, I obtain::
+
+  solver #1 found 64
+  solver #2 found 64
+
+  real	0m2.902s        // <-------- total time
+  user	0m5.468s
+
+**Note:** It is pure luck that by bisecting the 4th variable, we obtain exactly half of the solutions on each sub-box.
+Also, looking for the 64 first solutions takes here around the same time than looking for the 64 subsequent ones, which
+is particular to this example. So, contrary to what this example seems to prove, splitting the box in two subboxes does 
+not divide the running time by two in general. Of course :)
+
+If you are afraid about the messages of the linear solver, you can replace the ``DefaultSolver`` by your own dedicated solver
+that does not resort to the simplex, ex:
+
+.. literalinclude:: ../examples/doc-solver.cpp
+   :language: cpp
+   :start-after: solver-parallel-C-2
+   :end-before:  solver-parallel-C-2
+

@@ -109,6 +109,8 @@ On Ubuntu, you can install all you need with::
 
   ~$ sudo apt-get install -y python2.7 flex bison gcc g++ make pkg-config
   
+.. _install-options:
+
 ==============================
 Configuration options
 ==============================	

@@ -10,7 +10,7 @@
 
    This tutorial is for the Ibex core library.
    If you just want to solve **equations** or an **optimization problem**,
-   jump to the documentation of the :ref:`IbexSolve <ibex-solve>` or :ref:`IbexOpt <ibex-opt>` plugins.
+   jump to the documentation of the :ref:`IbexSolve <solver>` or :ref:`IbexOpt <optim>` plugins.
 
 |
 
