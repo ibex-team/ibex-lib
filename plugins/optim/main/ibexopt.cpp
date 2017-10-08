@@ -159,12 +159,12 @@ int main(int argc, char** argv) {
 
 		// Build the default optimizer
 		DefaultOptimizer o(sys,
-				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x,
 				rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f,
 				abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f,
 				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
 				rigor, inHC4,
-				random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed
+				random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed,
+				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x
 				);
 
 		// This option limits the search time
