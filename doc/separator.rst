@@ -304,7 +304,7 @@ The following snippet shows how to build the associated separator and make opera
 
 Using a paver, the previous separator will produce the following figure :
 
-.. figure:: Poly.png
+.. figure:: images/Poly.png
    :width: 400 px
    :align: center
 
