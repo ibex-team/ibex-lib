@@ -319,7 +319,6 @@ With a propagation:
 The display is:
 
 .. literalinclude:: ../examples/doc-contractor.txt
-   :language: cpp
    :start-after:  ctc-propag-O
    :end-before:   ctc-propag-O
 

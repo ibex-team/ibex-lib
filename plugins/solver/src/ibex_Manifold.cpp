@@ -319,16 +319,16 @@ ostream& operator<<(ostream& os, const Manifold& manif) {
 	int i=0;
 
 	for (vector<SolverOutputBox>::const_iterator it=manif.inner.begin(); it!=manif.inner.end(); it++) {
-		cout << " sol n°" << (i++) << " = " << *it << endl;
+		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
 	for (vector<SolverOutputBox>::const_iterator it=manif.boundary.begin(); it!=manif.boundary.end(); it++) {
-		cout << " sol n°" << (i++) << " = " << *it << endl;
+		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
 	for (vector<SolverOutputBox>::const_iterator it=manif.unknown.begin(); it!=manif.unknown.end(); it++) {
-		cout << " sol n°" << (i++) << " = " << *it << endl;
+		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
 	for (vector<SolverOutputBox>::const_iterator it=manif.pending.begin(); it!=manif.pending.end(); it++) {
-		cout << " sol n°" << (i++) << " = " << *it << endl;
+		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
 	return os;
 }
