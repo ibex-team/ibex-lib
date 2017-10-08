@@ -107,12 +107,12 @@ Compare the result with n=15, n=80 and n=500.
 You should obtain the following pictures:
 
 
-   +--------------------------+------------------------+--------------------------+
-   | .. image:: lab1-15.png   | .. image:: lab1-80.png | .. image:: lab1-500.png  |
-   |    :scale: 30%           |    :scale: 30%         |    :scale: 30%           |
-   +--------------------------+------------------------+--------------------------+
-   | n=15                     | n=80                   | n=500                    |
-   +--------------------------+------------------------+--------------------------+
+   +---------------------------------+-------------------------------+---------------------------------+
+   | .. image:: images/lab1-15.png   | .. image:: images/lab1-80.png | .. image:: images/lab1-500.png  |
+   |    :scale: 30%                  |    :scale: 30%                |    :scale: 30%                  |
+   +---------------------------------+-------------------------------+---------------------------------+
+   | n=15                            | n=80                          | n=500                           |
+   +---------------------------------+-------------------------------+---------------------------------+
    
 =====================
 Set inversion (basic)
@@ -129,7 +129,7 @@ representing a set E defined implicitely as the preimage of an interval [z] by a
 .. math::
    E:=\{(x,y)\in\mathbb{R}^2, \ f(x,y)\in[z] \}.
 
-.. figure:: sivia-basic.png
+.. figure:: images/sivia-basic.png
    :width: 300 px
    :align: center
    
@@ -318,7 +318,7 @@ in which case the contracted part will be painted in green.
 
 Given a contractor c, the contracted part is also called the *trace* of the contraction and is defined as :math:`[x]\backslash c([x])`.
 
-.. figure:: sivia-full.png
+.. figure:: images/sivia-full.png
    :width: 300 px
    :align: center
    
@@ -589,7 +589,7 @@ The system must contain the 10 constraints that represent each measurements and 
 Calculate the parameter values using set inversion (see :ref:`lab n°4 <lab_set_inversion_sets>`).
 You should obtain the following picture:
 
-.. figure:: param-estim.png
+.. figure:: images/param-estim.png
    :width: 300 px
    :align: center
 
@@ -701,13 +701,13 @@ The pictures below show the results obtained for increasing values of ``deltat``
 As expected, the larger the error on input, the smaller the set of feasible
 parameters.
 
-+-------------------------------+-------------------------------+-------------------------------+-------------------------------+
-| .. figure:: param-estim-1.png | .. figure:: param-estim-2.png | .. figure:: param-estim-3.png | .. figure:: param-estim-4.png |
-|   :width: 200 px              |   :width: 200 px              |   :width: 200 px              |   :width: 200 px              |
-|   :align: center              |   :align: center              |   :align: center              |   :align: center              |
-+-------------------------------+-------------------------------+-------------------------------+-------------------------------+
-| deltat=0                      | deltat=0.1                    | deltat=0.2                    | deltat=0.3                    |
-+-------------------------------+-------------------------------+-------------------------------+-------------------------------+
++--------------------------------------+--------------------------------------+--------------------------------------+--------------------------------------+
+| .. figure:: images/param-estim-1.png | .. figure:: images/param-estim-2.png | .. figure:: images/param-estim-3.png | .. figure:: images/param-estim-4.png |
+|   :width: 200 px                     |   :width: 200 px                     |   :width: 200 px                     |   :width: 200 px                     |
+|   :align: center                     |   :align: center                     |   :align: center                     |   :align: center                     |
++--------------------------------------+--------------------------------------+--------------------------------------+--------------------------------------+
+| deltat=0                             | deltat=0.1                           | deltat=0.2                           | deltat=0.3                           |
++--------------------------------------+--------------------------------------+--------------------------------------+--------------------------------------+
    
 
 .. hidden-code-block:: cpp
@@ -738,7 +738,7 @@ where a and b are two unknown parameters.
 
 Our goal is to find the set of couples (a,b) that makes the origin y=0 stable. It is depicted in the figure:
 
-.. figure:: stability.png
+.. figure:: images/stability.png
    :width: 300 px
    :align: center
    
@@ -797,7 +797,7 @@ You can first copy-paste the data:
    :start-after: lab8-data
    :end-before:  lab8-data
 
-.. figure:: mapping.png
+.. figure:: images/mapping.png
    :width: 300 px
    :align: center
    

@@ -253,13 +253,13 @@ Let us take a polygon :math:`\mathcal{P}` with vertices's :math:`V_1, V_2, \dots
 	\mathbf{wn}(\mathbf{m},P) = \frac{1}{2\pi}\sum_{i=1}^{n}\theta_i = \frac{1}{2\pi}\sum_{i=1}^{n} \arccos\left(\frac{(V_i - 	\mathbf{m}).(V_{i+1}-\mathbf{m})}{\| (V_i - \mathbf{m})\| \|(V_{i+1} - \mathbf{m})\|}\right)
 
 
-+-------------------------------+-----------------------------------+
-| *m is inside P*               |  *m is outside P*                 |
-|                               |                                   |
-| .. image:: T_PointInPoly.png  |  .. image:: T_PointOutPoly.png    |
-|    :width: 300 px             |     :width: 300 px                |
-|                               |                                   |
-+-------------------------------+-----------------------------------+
++--------------------------------------+------------------------------------------+
+| *m is inside P*                      |  *m is outside P*                        |
+|                                      |                                          |
+| .. image:: images/T_PointInPoly.png  |  .. image:: images/T_PointOutPoly.png    |
+|    :width: 300 px                    |     :width: 300 px                       |
+|                                      |                                          |
++--------------------------------------+------------------------------------------+
 
 So, if m is outside P we will have :math:`\mathbf{wn}(\mathbf{m},P) = 0`, otherwise if :math:`\mathbf{m}` is inside, :math:`\mathbf{wn}(\mathbf{m},P) = 1`.
 

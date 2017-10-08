@@ -19,7 +19,7 @@ the box is inside the set, outside the set or potentially crossing the boundary 
 The status is a boolean interval (``BoolInterval``) which possible values are either ``YES`` (*inside*), ``NO`` (*outside*)
 or ``MAYBE`` (*boundary*). This is depicted in the figure below:
 
-.. figure:: set.png
+.. figure:: images/set.png
    :width: 450 px
    :align: center
    
@@ -120,7 +120,7 @@ constraint.
 
 The result is the following picture, obtained with Vibes. We explain how we have generated this picture in the next section.
 
-.. figure:: set-sep.png
+.. figure:: images/set-sep.png
    :width: 300 px
    :align: center
    
@@ -158,13 +158,13 @@ Now the following code :ref:`load a set <set-file>` from a file an list all the 
    
 The result is:
 
-+----------------------------------------------------+--------------------------------------+
-| .. literalinclude:: ../examples/doc-set.txt        | .. figure:: set-visit.png            |
-|   :start-after:  set-visit-2-O                     |    :width: 300 px                    |
-|   :end-before:   set-visit-2-O                     |    :align: center                    |
-+----------------------------------------------------+--------------------------------------+
-+  **Visiting the set with** ``ToPlot``              | **Visiting the set with** ``ToVibes``|
-+----------------------------------------------------+--------------------------------------+
++----------------------------------------------------+---------------------------------------------+
+| .. literalinclude:: ../examples/doc-set.txt        | .. figure:: images/set-visit.png            |
+|   :start-after:  set-visit-2-O                     |    :width: 300 px                           |
+|   :end-before:   set-visit-2-O                     |    :align: center                           |
++----------------------------------------------------+---------------------------------------------+
++  **Visiting the set with** ``ToPlot``              | **Visiting the set with** ``ToVibes``       |
++----------------------------------------------------+---------------------------------------------+
 
 .. _set-plot:
 
@@ -233,7 +233,7 @@ the other being the complementary of a circle of radius 4. The result of the int
 
 The result is the following picture.
 
-.. figure:: set-inter.png
+.. figure:: images/set-inter.png
    :width: 300 px
    :align: center
 
@@ -257,7 +257,7 @@ Then we perform the union of the two sets.
 The result is the following picture.
 
 
-.. figure:: set-union.png
+.. figure:: images/set-union.png
    :width: 300 px
    :align: center
 
@@ -344,6 +344,6 @@ class as above for producing the picture below.
    :end-before: set-interval-C
 
 
-.. figure:: set-interval.png
+.. figure:: images/set-interval.png
    :width: 300 px
    :align: center

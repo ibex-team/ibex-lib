@@ -60,7 +60,7 @@ Problem description
 The goal is to charaterize the trajectory of an autonomous robot by enclosing in a box its position x[t]
 for each time step t=0...T.
 
-.. image:: loc.png
+.. image:: images/loc.png
    :width: 400 px
 
 We have no direct information on its position (including the initial one) but the robot measures 

@@ -89,7 +89,7 @@ Options
                                          contain the description of the manifold
                                          with boxes in the MNF (binary) format.
       
-      --format  Show the output text format.
+      --format                           Show the output text format.
       
       --bfs                              Perform breadth-first search (instead of
                                          depth-first search, by default)

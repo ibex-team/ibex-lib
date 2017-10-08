@@ -582,11 +582,11 @@ Allowed symbols
 
 The following symbols are allowed in expressions:
 
-sign, min, max,
+**sign, min, max,
 sqr, sqrt, exp, log, pow, 
 cos, sin, tan, acos, asin, atan,
 cosh, sinh, tanh, acosh, asinh, atanh
-atan2
+atan2.**
 
 
 Power symbols ``^`` are not allowed. You must

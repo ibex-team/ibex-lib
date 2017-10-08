@@ -17,7 +17,7 @@ It can be used to solve a variety of problems that can roughly be formulated as:
 - model parameter uncertainty
 - measurement noise
 
-.. image:: prob02.png
+.. image:: images/prob02.png
    :width: 300 px
 
 **Example of problem**: Given a set of nonlinear inequalities :math:`f_1\leq0,\ldots,f_n\leq0`, find two sets of boxes S\ :sub:`1` and S\ :sub:`2` such that

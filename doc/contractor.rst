@@ -25,7 +25,7 @@ This relation means that:
 
 This illustrated in the next picture. The constraint c (i.e., the set of points satisfying c) is represented by a green shape.
 
-.. figure:: filtering.png
+.. figure:: images/filtering.png
    :width: 300 px
    :align: center
 
@@ -43,7 +43,7 @@ algorithm :ref:`[Hansen & Sengupta 1980] <Hansen80>`.
 Another important example is in picture processing, where there exist algorithms able to reduce the size of a picture to some *region of interest*.
 This kind of alorithm is today implemented in almost every digital cameras, for an automatic focus adjustment.
 
-.. figure:: ladybug.png
+.. figure:: images/ladybug.png
    :width: 400 px
    :align: center
 
@@ -133,7 +133,7 @@ the leaves of the expression (variable domains) upto the root node.
 
 This is illustrated in the next picture with the constraint :math:`(x-y)^2-z=0` with :math:`x\in[0,10], \ y\in[0,4]` and :math:`z\in[9,16]`:
 
-.. figure:: fwd.png
+.. figure:: images/fwd.png
    :width: 400 px
    :align: center
    
@@ -141,7 +141,7 @@ This is illustrated in the next picture with the constraint :math:`(x-y)^2-z=0` 
 
 The **backward step** sets the interval associated to the root node to [0,0] (imposes constraint satisfaction) and, then, apply :ref:`itv-bwd-arith` from the root downto the leaves:
 
-.. figure:: bwd.png
+.. figure:: images/bwd.png
    :width: 400 px
    :align: center
  
@@ -185,7 +185,7 @@ two contractors are used to build a :ref:`set <set>`).
    :start-after: ctc-compo-1-C
    :end-before:  ctc-compo-1-C
 
-.. figure:: ctc-compo.png
+.. figure:: images/ctc-compo.png
    :width: 400 px
    :align: center
    
@@ -492,15 +492,15 @@ sub-contractor C was :ref:`ctc-HC4`.
 **(to be completed)**
 
 
-+-------------------------+--------------------------+-------------------------+--------------------------+
-| .. image:: shaving0.png |  .. image:: shaving1.png | .. image:: shaving2.png |  .. image:: shaving3.png |
-|                         |                          |                         |                          |
-|initial box              |                          |                         |                          |
-+-------------------------+--------------------------+-------------------------+--------------------------+
-| .. image:: shaving4.png | .. image:: shaving5.png  | .. image:: shaving6.png | .. image:: shaving7.png  |
-+-------------------------+--------------------------+-------------------------+--------------------------+
++--------------------------------+---------------------------------+--------------------------------+---------------------------------+
+| .. image:: images/shaving0.png |  .. image:: images/shaving1.png | .. image:: images/shaving2.png |  .. image:: images/shaving3.png |
+|                                |                                 |                                |                                 |
+|initial box                     |                                 |                                |                                 |
++--------------------------------+---------------------------------+--------------------------------+---------------------------------+
+| .. image:: images/shaving4.png | .. image:: images/shaving5.png  | .. image:: images/shaving6.png | .. image:: images/shaving7.png  |
++--------------------------------+---------------------------------+--------------------------------+---------------------------------+
 
-.. image:: shaving8.png
+.. image:: images/shaving8.png
    :align: center
 
 .. _ctc-acid:
@@ -537,7 +537,7 @@ where [x] is the box to be contracted. Consider for instance
 
 Let [x] be [-1,1]x[-1,1]. The following picture depicts the polytope (which is rather a polyhedron in this case) in green, the initial box and the result of the contraction (dashed box).
 
-.. figure:: polytope.png
+.. figure:: images/polytope.png
    :width: 300 px
    :align: center
 
@@ -647,7 +647,7 @@ It is important to notice that the contractor ``CtcExist``/``CtcForAll`` expects
 The contractors work as depicted on the following pictures (which illustrate the principles of the algorithms, but the actual implementation is a little more clever).
 
 +-----------------------------------------+-----------------------------------------------+
-| .. image:: ctcquantif1.png              |  .. image:: ctcquantif3.png                   |
+| .. image:: images/ctcquantif1.png       |  .. image:: images/ctcquantif3.png            |
 |    :width: 350 px                       |     :width: 350 px                            |
 |                                         |                                               |
 | **CtcExist. (a)** The domain of y is    | **CtcExist. (b)** each box is contracted with |
@@ -657,7 +657,7 @@ The contractors work as depicted on the following pictures (which illustrate the
 +-----------------------------------------+-----------------------------------------------+
 
 +------------------------------------------+------------------------------------------------+
-| .. image:: ctcquantif4.png               |  .. image:: ctcquantif5.png                    |
+| .. image:: images/ctcquantif4.png        |  .. image:: images/ctcquantif5.png             |
 |    :width: 350 px                        |     :width: 350 px                             |
 |                                          |                                                |
 | **CtcForAll. (a)** The domain of y is    | **CtcForAll. (b)** each box is contracted with |
@@ -697,7 +697,7 @@ To create a more interesting example (where optimiality of a single contraction 
 
 The set of solutions is the segment depicted in the figure below.
 
-.. figure:: ctcquantif6.png
+.. figure:: images/ctcquantif6.png
    :width: 200 px
    :align: center
 
