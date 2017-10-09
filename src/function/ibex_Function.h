@@ -874,6 +874,11 @@ public:
 	 */
 	bool all_args_scalar() const;
 
+    Interval eval_centered(const IntervalVector& box);
+
+    Interval eval_baumann(const IntervalVector& box);
+
+
 protected:
 	friend std::ostream& operator<<(std::ostream& os, const Function& f);
 
@@ -1167,6 +1172,28 @@ inline const int* Function::used_vars() const {
 inline std::ostream& operator<<(std::ostream& os, const Function& f) {
 	f.print(os);
 	return os;
+}
+
+
+inline Interval Function::eval_centered(const IntervalVector& box){
+    return this->eval(box.mid()) + this->diff().eval_vector(box)*(box-box.mid());
+}
+
+inline Interval Function::eval_baumann(const IntervalVector& box){
+    IntervalVector diff_ev = this->diff().eval_vector(box);
+    if (diff_ev[diff_ev.extr_diam_index(false)] == Interval::ALL_REALS) {
+        return Interval::ALL_REALS;
+    }
+    Vector bmnom = hadamard_product(diff_ev.ub(),box.lb())-hadamard_product(diff_ev.lb(),box.ub());
+    Vector bm(bmnom);
+    Vector b_diff = diff_ev.ub()-diff_ev.lb();
+    for(int i=0; i<bm.size();i++){
+        bm[i] = bmnom[i]/b_diff[i]; }
+    Vector bp = 2*box.mid()-bm;
+    Interval fbm = this->eval(bm) + diff_ev*(box-bm);
+    Interval fbp = this->eval(bp) + diff_ev*(box-bp);
+//    return Interval(fbm.lb(),fbp.ub());
+    return fbm;
 }
 
 // ============================================================================
