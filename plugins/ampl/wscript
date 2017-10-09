@@ -101,7 +101,7 @@ def configure (conf):
 		conf.check_cxx (header_name = h, includes = ampl_incdir,
 		                use = [ "IBEX", "AMPL" ], uselib_store= "AMPL")
 
-	for l in [ "dl", "amplsolver" ]:
+	for l in [ "amplsolver", "dl" ]:
 		conf.check_cxx (lib = l, libpath = ampl_libdir,
 		                use = [ "IBEX", "AMPL" ], uselib_store = "AMPL")
 

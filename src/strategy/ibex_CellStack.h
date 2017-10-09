@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_CellStack.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 12, 2012
 // Last Update : May 12, 2012
@@ -49,4 +49,4 @@ class CellStack : public CellBuffer {
 };
 
 } // end namespace ibex
-#endif // __IBEX_CELLSTACK_H__
+#endif // __IBEX_CELL_STACK_H__

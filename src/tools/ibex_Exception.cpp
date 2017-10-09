@@ -25,7 +25,7 @@ void ibex_error(const char* message) {
 }
 
 void ibex_warning(const char* message) {
-	cerr << "warning: " << message << endl;
+	cerr << "\033[33mwarning: " << message << "\033[0m" << endl;
 }
 
 void not_implemented(const char* feature) {

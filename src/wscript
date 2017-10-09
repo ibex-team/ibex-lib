@@ -39,7 +39,7 @@ def build (bld):
 	# c++ compilation of main lib
 	tg_ibex = (bld.shlib if bld.env.ENABLE_SHARED else bld.stlib) (
 		target = "ibex",
-		use = [ "IBEX", "ITV_LIB" ] + bld.env.IBEX_PLUGIN_USE_LIST,
+		use = [ "IBEX", "ITV_LIB", "LP_LIB" ] + bld.env.IBEX_PLUGIN_USE_LIST,
 		source = [ f[:-3] if f.endswith(".in") else f for f in bld.env.IBEX_SRC ],
 		install_path = bld.env.LIBDIR,
 	)

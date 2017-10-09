@@ -27,7 +27,6 @@ public:
 	 * \brief Create a default optimizer.
 	 *
 	 * \param sys         - The system to optimize.
-	 * \param eps_x       - Stopping criterion for box splitting (absolute precision).
 	 * \param rel_eps_f   - Relative precision on the objective.
 	 * \param abs_eps_f   - Absolute precision on the objective.
 	 * \param eps_h       - Equality thickness.
@@ -37,14 +36,16 @@ public:
 	 * \param random_seed - The sequence of random numbers is reinitialized with
 	 *                      this seed before calling optimize(..) (useful for
 	 *                      reproducibility). Set by default to #default_random_seed.
+	 * \param eps_x       - Stopping criterion for box splitting (absolute precision).
+	 *                      (**deprecated**).
 	 */
     DefaultOptimizer(const System& sys,
-    		double eps_x=Optimizer::default_eps_x,
     		double rel_eps_f=Optimizer::default_rel_eps_f,
 			double abs_eps_f=Optimizer::default_abs_eps_f,
 			double eps_h=NormalizedSystem::default_eps_h,
 			bool rigor=false, bool inHC4=true,
-			double random_seed=default_random_seed);
+			double random_seed=default_random_seed,
+    		double eps_x=Optimizer::default_eps_x);
 
 	/**
 	 * \brief Delete *this.

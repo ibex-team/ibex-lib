@@ -4,10 +4,12 @@ from waflib import TaskGen, Task, Utils, Configure, Build, Logs
 benchlock = Utils.threading.Lock()
 
 BENCHS_DEFAULT_ARGS = {"time_limit": "5", "prec_ndigits_max": "6",
-                       "prec_ndigits_min": "1"}
+                       "prec_ndigits_min": "1", "iter": "3"}
 BENCHS_ARGS_NAME = BENCHS_DEFAULT_ARGS.keys()
 BENCHS_ARGS_PATTERN = " ; ".join("%s = (?P<%s>.+?)" % (k, k) for k in BENCHS_ARGS_NAME)
 BENCHS_ARGS_FORMAT = " ; ".join("%s = {BCH_%s}" % (k,k.upper()) for k in BENCHS_ARGS_NAME)
+
+BENCHS_MAX_REGRESSION = 10
 
 # Base class for all bench classes
 class Bench (Task.Task):
@@ -35,6 +37,7 @@ class BenchData (Bench):
 	KEYS_TYPE["nb_cells"] = int
 	KEYS_TYPE["uplo"] = float
 	KEYS_TYPE["loup"] = float
+	KEYS_TYPE["random_seed"] = float
 	PREFIX = "BENCH: "
 	RESULTS_PATTERN = "(%s) = (.*)" % "|".join(KEYS_TYPE.keys())
 	RESULTS_RE = re.compile (RESULTS_PATTERN)
@@ -136,23 +139,54 @@ class BenchSummary (BenchData):
 # Class for the task that generates the scatter plot for comparison
 class BenchScatterPlotData (Bench):
 	def get_time (self, L):
-		T = [ l for l in L if abs(l["eps"]-self.eps) <= 1e-5 ]
+		T = [ l for l in L if abs(l["eps"]-self.eps) <= 1e-6 ]
 		if len(T) == 0:
 			return self.env.BCH_TIME_LIMIT
-		elif len(T) > 1:
-			pass
 		else:
-			return T[0]["time"]
+			return max(t["time"] for t in T)
 
 	def run (self):
 		serie = self.generator.name
 		outstr = "benchfile current previous" + os.linesep
 		for f, fdata in self.generator.bld.bench_results[serie].items():
 			if f in self.data:
-				tc = self.get_time (fdata)
-				tp = self.get_time (self.data[f])
+				tc = self.get_time (fdata) # timing of current bench
+				tp = self.get_time (self.data[f]) # timing from previous bench
 				outstr += "%s %s %s" % (f, tc, tp) + os.linesep
+
+				if tc > tp * BENCHS_MAX_REGRESSION: # check for non regression
+					err_fmt = "bench %s from %s is too long (%f > %d * %f)"
+					err_data = (f, serie, tc, BENCHS_MAX_REGRESSION, tp)
+					if not hasattr (self.generator.bld, "bench_errors"):
+						self.generator.bld.bench_errors = []
+					self.generator.bld.bench_errors.append (err_fmt % err_data)
+
+		# Write data in output file
 		self.outputs[0].write (outstr)
+
+		# check intersection of [uplo, loup]
+		for f, fdata in self.generator.bld.bench_results[serie].items():
+			uplo = float("-inf")
+			loup = float("+inf")
+			for d in fdata:
+				uplo = max (uplo, d["uplo"])
+				loup = min (loup, d["loup"])
+			print uplo, loup
+			if uplo > loup:
+				err_fmt = "bench %s from %s: intersection of [uplo, loup] is empty"
+				err_data = (f, serie)
+				if not hasattr (self.generator.bld, "bench_errors"):
+					self.generator.bld.bench_errors = []
+				self.generator.bld.bench_errors.append (err_fmt % err_data)
+
+			if f in self.data:
+				for d in self.data[f]:
+					if uplo > d["loup"] or d["uplo"] > loup:
+						err_fmt = "bench %s from %s: [uplo, loup] does not intersect with results from '%s'"
+						err_data = (f, serie, self.cmp_ref)
+						if not hasattr (self.generator.bld, "bench_errors"):
+							self.generator.bld.bench_errors = []
+						self.generator.bld.bench_errors.append (err_fmt % err_data)
 
 	def keyword (self):
 		return "Writing scatter plot data into"
@@ -354,6 +388,10 @@ def benchmarks_format_output (bch):
 					color = "YELLOW"
 			bch.end_msg (msg, color = color)
 
+	if hasattr (bch, "bench_errors"):
+		sep = os.linesep + "  - "
+		bch.fatal (sep.join (["Benchmarks errors:"] + bch.bench_errors))
+
 ######################
 ###### options #######
 ######################
@@ -363,15 +401,30 @@ def options (opt):
 	"""
 
 	categories = [ "easy", "medium", "hard", "blowup", "others", "unsolved" ]
+	cat_default = "medium"
 	cat_help = "Possible values: " + ", ".join(categories)
+	cat_help += " [ default: %s ]" % cat_default
+
+	def parse_cat_callback (option, opt_str, value, parser, *args, **kwargs):
+		choices = categories,
+		L = value.replace ("+", ",").split(",")
+		for cat in L:
+			if not cat in categories:
+				import optparse
+				fmt = "option %s: invalid choice: '%s' (choose from %s)"
+				h = ", ".join ("'%s'" % c for c in categories)
+				raise optparse.OptionValueError(fmt % (option, cat, h))
+		setattr(parser.values, option.dest, L)
+
 
 	grp = opt.add_option_group ("Options for benchmarks")
 	for n, v in BENCHS_DEFAULT_ARGS.items():
 		optname = "--benchs-" + n.replace("_", "-")
 		grp.add_option (optname, action="store", dest = "BENCHS_" + n.upper(),
 		                help = "Override default %s (default is %s)" % (n, v))
-	grp.add_option ("--benchs-categories", action = "append", help = cat_help,
-									choices = categories, dest = "BENCHS_CATEGORIES")
+	grp.add_option ("--benchs-categories", help = cat_help, action = "callback",
+	                callback = parse_cat_callback, type = str,
+	                default = [cat_default], dest = "BENCHS_CATEGORIES")
 	grp.add_option ("--benchs-save", action = "store", dest = "BENCHS_SAVE",
 	                help = "Save the results of the benchmarks in the given file")
 	grp.add_option ("--benchs-cmp-to", action = "append", dest = "BENCHS_CMP_TO",
@@ -407,8 +460,6 @@ def benchmarks (bch):
 	# Read list of categories from command line arguments
 	if bch.options.BENCHS_CATEGORIES:
 		bch.categories = bch.options.BENCHS_CATEGORIES
-	else: # default
-		bch.categories = ["medium"]
 
 	# Do not overwrite file with --benchs-save option
 	if bch.options.BENCHS_SAVE:
@@ -416,6 +467,8 @@ def benchmarks (bch):
 		if os.path.exists (f):
 			bch.fatal ("Benchmarks: '%s' already exists, will not overwrite it." % f)
 		bch.savefile = f
+	else:
+		bch.savefile = None
 
 	# Check that option --benchs-cmp-to (if given) is a list of existing files
 	bch.cmp_to_data = {}
