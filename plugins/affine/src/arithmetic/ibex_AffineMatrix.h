@@ -233,6 +233,32 @@ public:
 	 */
 	void set_col(int col, const AffineMainVector<T>& v);
 
+	/**
+	 * \brief Insert a submatrix at some position
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const Matrix& M);
+
+	/**
+	 * \brief Insert a submatrix at some position
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const AffineMainMatrix<T>& M);
+
+	/**
+	 * \brief Insert a subvecvtor at some position
+	 * \param row_vec true if the vector is a row vector
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const Vector& V, bool row_vec);
+
+	/**
+	 * \brief Insert a subvecvtor at some position
+	 * \param row_vec true if the vector is a row vector
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const AffineMainVector<T>& V, bool row_vec);
+
 
     /**
      * \brief (*this)+=m.
@@ -677,6 +703,27 @@ template<class T>
 AffineMainMatrix<T> AffineMainMatrix<T>::submatrix(int row_start_index, int row_end_index,	int col_start_index, int col_end_index) {
 	return _submatrix(*this,row_start_index,row_end_index,col_start_index,col_end_index);
 }
+
+template<class T>
+void AffineMainMatrix<T>::put(int row_start_index, int col_start_index, const Matrix& sub) {
+	_put<AffineMainMatrix<T>,Matrix>(*this, row_start_index, col_start_index, sub);
+}
+
+template<class T>
+void AffineMainMatrix<T>::put(int row_start_index, int col_start_index, const AffineMainMatrix<T>& sub) {
+	_put<AffineMainMatrix<T>,AffineMainMatrix<T> >(*this, row_start_index, col_start_index, sub);
+}
+
+template<class T>
+void AffineMainMatrix<T>::put(int row_start_index, int col_start_index, const Vector& sub, bool row_vec) {
+	_put<AffineMainMatrix<T>,Vector>(*this, row_start_index, col_start_index, sub, row_vec);
+}
+
+template<class T>
+void AffineMainMatrix<T>::put(int row_start_index, int col_start_index, const AffineMainVector<T>& sub, bool row_vec) {
+	_put<AffineMainMatrix<T>,AffineMainVector<T> >(*this, row_start_index, col_start_index, sub, row_vec);
+}
+
 
 template<class T>
 AffineMainMatrix<T> AffineMainMatrix<T>::transpose() const {

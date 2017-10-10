@@ -29,7 +29,7 @@ public:
 	 * For memory saving, the gradient is built from an
 	 * already existing evaluator "e".
 	 */
-	HC4Revise(Eval& e);
+	HC4Revise(Evaluator& e);
 
 	/**
 	 * \brief Project f(x)=y onto x (forward/backward algorithm)
@@ -78,8 +78,8 @@ protected:
 	 */
 	bool backward(const Domain& y);
 
-	Function& f;
-	Eval& eval;
+	const Function& f;
+	Evaluator& eval;
 	ExprDomain& d;
 
 public: // because called from CompiledFunction

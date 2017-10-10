@@ -13,7 +13,9 @@
 #define __IBEX_AFFINE_DOMAIN_H__
 
 #include <stdexcept>
-#include "ibex_TemplateDomain.h"
+#include "ibex_Affine.h"
+#include "ibex_AffineVector.h"
+#include "ibex_AffineMatrix.h"
 
 namespace ibex {
 
@@ -33,6 +35,68 @@ namespace ibex {
 typedef TemplateDomain<Affine2> Affine2Domain;
 typedef TemplateDomain<Affine3> Affine3Domain;
 
+template<class T>
+Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<Domain>& d) {
+	const Array<const Domain>* d2 =(const Array<const Domain>*) (&d);
+	return convert_to_affinedomain<T>(*d2);
+}
+
+
+template<class T>
+Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<const Domain>& d) {
+	Array< TemplateDomain< AffineMain<T> > > out(d.size());
+
+	int n=0;
+	for (int i =0; i<=d.size(); i++) {
+		n += d[i].dim.size();
+	}
+
+	int var = 1;
+	for (int i =0; i<=d.size(); i++) {
+
+		switch (d[i].dim.type()) {
+		case Dim::SCALAR: {
+			AffineMain<T> tmp(n, var, d[i].i());
+			out.set_ref(i, *new TemplateDomain< AffineMain<T> >(tmp));
+			var++;
+			break;
+		}
+		case Dim::ROW_VECTOR: {
+			AffineMainVector<T> vec(d[i].dim.size());
+			for (int k = 0; k < d[i].dim.size(); k++) {
+				vec[k] = AffineMain<T>(n, var, (d[i].v())[k]);
+				var++;
+			}
+
+			out.set_ref(i, *new TemplateDomain< AffineMain<T> >(vec,true));
+			break;
+		}
+		case Dim::COL_VECTOR: {
+			AffineMainVector<T> vec(d[i].dim.size());
+			for (int k = 0; k < d[i].dim.size(); k++) {
+				vec[k] = AffineMain<T>(n, var, (d[i].v())[k]);
+				var++;
+			}
+			out.set_ref(i, *new TemplateDomain< AffineMain<T> >(vec,false));
+			break;
+		}
+		case Dim::MATRIX: {
+			AffineMainMatrix<T> mat(d[i].dim.nb_rows(),d[i].dim.nb_cols());
+			for (int k = 0; k < d[i].dim.nb_rows(); k++) {
+				for (int p = 0; p < d[i].dim.nb_cols(); p++) {
+					mat[k][p] = AffineMain<T>(n, var, (d[i].m())[k][p]);
+					var++;
+				}
+			}
+			out.set_ref(i, *new TemplateDomain< AffineMain<T> >(mat));
+			break;
+		}
+		}
+	}
+
+	return out;
+
+}
 
 template<>
 inline TemplateDomain<Affine2>& TemplateDomain<Affine2>::operator&=(const TemplateDomain<Affine2>& ) {

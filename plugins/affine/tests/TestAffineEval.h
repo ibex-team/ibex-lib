@@ -1,81 +1,60 @@
 /* ============================================================================
- * I B E X - Affine2 Test
+ * I B E X - Eval Tests
  * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Jordan Ninin
- * Created     : April 08, 2013
+ * Author(s)   : Gilles Chabert
+ * Created     : Apr 02, 2012
  * ---------------------------------------------------------------------------- */
 
-
-#ifndef __TEST_AFFINE2_H__
-#define __TEST_AFFINE2_H__
+#ifndef __TEST_EVAL_H__
+#define __TEST_EVAL_H__
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "ibex_Affine.h"
 #include "utils.h"
+#include "ibex_Expr.h"
+#include "ibex_AffineEval.h"
 
-using namespace ibex;
+namespace ibex {
 
-template<class T>
+template <class T>
 class TestAffineEval : public CppUnit::TestFixture {
+
 public:
+
 	CPPUNIT_TEST_SUITE(TestAffineEval<T>);
-	CPPUNIT_TEST(test_sqrt);
-	CPPUNIT_TEST(test_exp);
-	CPPUNIT_TEST(test_log);
-	CPPUNIT_TEST(test_inv);
-	CPPUNIT_TEST(test_cos);
-	CPPUNIT_TEST(test_sin);
-	CPPUNIT_TEST(test_tan);
-	CPPUNIT_TEST(test_abs);
-	CPPUNIT_TEST(test_acos);
-	CPPUNIT_TEST(test_asin);
-	CPPUNIT_TEST(test_atan);
-	CPPUNIT_TEST(test_cosh);
-	CPPUNIT_TEST(test_sinh);
-	CPPUNIT_TEST(test_tanh);
+	
+
+	CPPUNIT_TEST(dist01);
+	CPPUNIT_TEST(apply01);
+	CPPUNIT_TEST(apply02);
+	CPPUNIT_TEST(apply03);
+	CPPUNIT_TEST(apply04);
+	CPPUNIT_TEST(issue242);
+	CPPUNIT_TEST(eval_components01);
+	CPPUNIT_TEST(eval_components02);
+
 	CPPUNIT_TEST_SUITE_END();
 
 
-	bool check_af2 (Function& f, IntervalVector& I);
-	bool check_af2 (Function& f, Interval& I);
+	void dist01();
 
-	//	void test_root2();
-	//	void test_root4();
-	//	void test_root5();
-	void test_pow2();
-	void test_pow4();
-	void test_pow5();
-	void test_powINT1();
-	void test_powINT2();
+	void apply01();
+	void apply02();
+	void apply03();
+	void apply04();
 
-
-	void test_sqrt();
-	void test_exp();
-	void test_log();
-	void test_inv();
-	void test_cos();
-	void test_sin();
-	void test_tan();
-	void test_abs();
-	void test_acos();
-	void test_asin();
-	void test_atan();
-	void test_cosh();
-	void test_sinh();
-	void test_tanh();
-
-
-	void test01();
-	void test02();
+	void issue242();
+	void eval_components01();
+	void eval_components02();
 
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_Default>);
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_Other>);
+//CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_Other>);
 
 
 
@@ -90,6 +69,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_sAF>);
 
 #endif
 
-//#include "TestAffineEval.cpp"
 
-#endif
+} // end namespace
+
+#endif /* __TEST_EVAL_H__ */

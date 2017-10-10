@@ -20,19 +20,68 @@ namespace ibex {
 
 class Function;
 
+
 /**
  * \ingroup symbolic
  *
  * \brief Function evaluator.
  *
  */
-class Eval : public FwdAlgorithm {
+class Evaluator   {
+public:
+	/**
+	 * \brief Build the evaluator for the function f.
+	 */
+	Evaluator(const Function &f);
+
+	/**
+	 * \brief Delete this.
+	 */
+	virtual ~Evaluator() {};
+
+	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
+	virtual Domain& eval(const Array<const Domain>& d)=0;
+
+	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
+	virtual Domain& eval(const Array<Domain>& d)=0;
+
+	/**
+	 * \brief Run the forward algorithm with an input box.
+	 */
+	virtual Domain& eval(const IntervalVector& box)=0;
+
+	/**
+	 * \brief Evaluate a subset of components.
+	 *
+	 * (Specific for vector-valued functions).
+	 *
+	 * \pre components must be non empty and contain indices in
+	 *      [0,f.image_dim()-1].
+	 */
+	virtual IntervalVector eval(const IntervalVector& box, const BitSet& components)=0;
+
+
+	const Function& f;
+	ExprDomain d;
+};
+
+/**
+ * \ingroup symbolic
+ *
+ * \brief Function evaluator.
+ *
+ */
+class Eval : public FwdAlgorithm , public Evaluator {
 
 public:
 	/**
 	 * \brief Build the evaluator for the function f.
 	 */
-	Eval(Function &f);
+	Eval(const Function &f);
 
 	/**
 	 * \brief Delete this.
@@ -123,8 +172,7 @@ public: // because called from CompiledFunction
 	inline void sub_V_fwd  (int x1, int x2, int y);
 	inline void sub_M_fwd  (int x1, int x2, int y);
 
-	Function& f;
-	ExprDomain d;
+
 	Agenda** fwd_agenda; // one agenda for each component
 	Agenda** bwd_agenda; // one agenda for each component
 };

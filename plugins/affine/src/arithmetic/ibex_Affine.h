@@ -16,6 +16,9 @@
 #include <math.h>
 #include <cassert>
 #include "ibex_Exception.h"
+#include "ibex_Array.h"
+#include "ibex_TemplateDomain.h"
+#include "ibex_Domain.h"
 
 
 #include "ibex_Affine2_fAF2.h"
@@ -63,12 +66,20 @@ typedef AffineMain<AF_Default> Affine2;
 typedef AffineMain<AF_Other>  Affine3;
 
 
+template<class T>
+Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<Domain>& d);
+template<class T>
+Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<const Domain>& d);
+
+
 template<class T=AF_Default>
 class AffineMain {
 
 private:
 	friend class AffineMainVector<T>;
 	friend class AffineMainMatrix<T>;
+	friend 	Array< TemplateDomain< AffineMain > > convert_to_affinedomain<T>(const Array<Domain>& d);
+	friend 	Array< TemplateDomain< AffineMain > > convert_to_affinedomain<T>(const Array<const Domain>& d);
 
 
 	/** \brief tolerance for default compact procedure  */
@@ -78,7 +89,7 @@ private:
 	static const double AF_EE;
 
 	static bool mode;
-    static int _counter;
+    static int _count;
 
 	/**
 	 * Code for the particular case:
@@ -90,7 +101,6 @@ private:
 	 * if the set is ]-oo, a] , _n = -4 and _err = ]-oo, a]
 	 *
 	 */
-
 	int _n; 		// dimension (size of val)-1  , ie number of variable
 
 	T _elt;			// core of the affine2 form
@@ -115,9 +125,9 @@ public:
 	/** \brief change the linearisation approximation of all the affine form: Chebyshev (by default), or Min-Range	 */
 	static void change_mode(Affine_Mode tt=AF_Default);
 
+
 	/** \brief Create an affine form with n variables and  initialized val[0] with  itv. */
 	explicit AffineMain(const Interval& itv);
-
 
 	/** \brief Create an empty affine form. */
 	AffineMain();
@@ -163,10 +173,10 @@ public:
 	 */
 	/** \brief Intersection of *this and x.
 	 * \param x - the interval to compute the intersection with.*/
-	//	Affine2Main& operator&=(const Affine2Main& x);
+	//	AffineMain& operator&=(const AffineMain& x);
 	/** \brief Union of *this and I.
 	 * \param x - the interval to compute the hull with.*/
-	//	Affine2Main& operator|=(const Affine2Main& x);
+	//	AffineMain& operator|=(const AffineMain& x);
 
 	/**
 	 * \brief Add [-rad,+rad] to *this.
@@ -174,6 +184,53 @@ public:
 	 * Return a reference to *this.
 	 */
 	AffineMain& inflate(double radd);
+
+    /** \brief Lower bound.
+     *
+     * Return the lower bound of *this. */
+    double lb() const;
+
+    /** \brief Upper bound.
+     *
+     * Return the upper bound of *this. */
+    double ub() const;
+
+    /** \brief Midpoint.
+     *
+     * Returns the midpoint of *this.*/
+    double mid() const;
+
+    /**
+     * \brief Radius.
+     *
+     * Return the diameter of *this.
+     * By convention, 0 if *this is empty.*/
+    double rad() const;
+
+    /**
+     * \brief Diameter.
+     *
+     * Return the diameter of *this.
+     * By convention, 0 if *this is empty.*/
+    double diam() const;
+
+    /**
+     * \brief Mignitude.
+	 *
+     * Returns the mignitude of *this:
+     * <lu>
+     * <li> +(lower bound)  if *this > 0
+     * <li> -(upper bound) if *this < 0
+     * <li> 0 otherwise.
+     * </lu> */
+    double mig() const;
+
+    /**
+     * \brief Magnitude.
+	 *
+     * Returns the magnitude of *this:
+     * mag(*this)=max(|lower bound|, |upper bound|). */
+    double mag() const;
 
 	/**
 	 * \brief number of variable represented
@@ -215,11 +272,6 @@ public:
 	 * \note An empty affine form is always bounded.
 	 */
 	bool is_unbounded() const;
-
-	/**
-	 * \brief the middle of *this
-	 */
-	double mid() const;
 
 	/**
 	 * \brief reduce the number of noise variable if the value is inferior to \param tol
@@ -303,6 +355,8 @@ public:
 	typedef AffineMainVector<T> VECTOR;
 	typedef AffineMainMatrix<T> MATRIX;
 
+
+
 };
 
 // the following functions are
@@ -318,6 +372,23 @@ template<class T> inline void ___set_empty(AffineMain<T>& x)               { x.s
 template<class T>
 std::ostream& operator<<(std::ostream& os, const AffineMain<T>&  x);
 
+template<class T>
+inline double AffineMain<T>::lb() const { return this->itv().lb(); }
+
+template<class T>
+inline double AffineMain<T>::ub() const { return this->itv().ub(); }
+
+template<class T>
+inline double AffineMain<T>::rad() const { return this->itv().rad(); }
+
+template<class T>
+inline double AffineMain<T>::diam() const { return this->itv().diam(); }
+
+template<class T>
+inline double AffineMain<T>::mig() const { return this->itv().mig(); }
+
+template<class T>
+inline double AffineMain<T>::mag() const { return this->itv().mag(); }
 
 
 /** \brief Return (-x) */
@@ -590,7 +661,7 @@ template<class T> const double AffineMain<T>::AF_EM = __builtin_powi(2.0, -51);
 template<class T> const double AffineMain<T>::AF_EC = __builtin_powi(2.0, -55);
 template<class T> const double AffineMain<T>::AF_EE = 2.0;
 template<class T> bool AffineMain<T>::mode=true;
-template<class T> int AffineMain<T>::_counter = 1;
+template<class T> int AffineMain<T>::_count = 1;
 
 
 

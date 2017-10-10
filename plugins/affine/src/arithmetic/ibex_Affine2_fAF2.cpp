@@ -90,18 +90,18 @@ AffineMain<AF_fAF2>::AffineMain(int n, int m, const Interval& itv) :
 
 template<>
 AffineMain<AF_fAF2>::AffineMain(const Interval & itv) :
-			_n 		(_counter),
+			_n 		(_count),
 			_elt	(NULL,0.0)
 {
 	if (!(itv.is_unbounded()||itv.is_empty())) {
-		_elt._val	=new double[_counter + 1];
+		_elt._val	=new double[_count + 1];
 		_elt._val[0] = itv.mid();
-		for (int i = 1; i <= _counter; i++){
+		for (int i = 1; i <= _count; i++){
 			_elt._val[i] = 0.0;
 		}
-		_elt._val[_counter] = itv.rad();
+		_elt._val[_count] = itv.rad();
 
-		_counter++;
+		_count++;
 	} else {
 		*this = itv;
 	}

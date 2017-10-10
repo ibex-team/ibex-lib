@@ -18,7 +18,10 @@ using namespace std;
 
 namespace ibex {
 
-Eval::Eval(Function& f) : f(f), d(f), fwd_agenda(NULL), bwd_agenda(NULL) {
+Evaluator::Evaluator(const Function& f) : f(f), d(f) { }
+
+
+Eval::Eval(const Function& f) : Evaluator(f), fwd_agenda(NULL), bwd_agenda(NULL) {
 	int m=f.image_dim();
 	if (m>1) {
 		const ExprVector* vec=dynamic_cast<const ExprVector*>(&f.expr());

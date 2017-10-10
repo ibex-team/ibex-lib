@@ -12,6 +12,7 @@
 #define __IBEX_AFFINE_EVAL_H__
 
 #include "ibex_Function.h"
+#include "ibex_Eval.h"
 #include "ibex_AffineMatrix.h"
 #include "ibex_AffineDomain.h"
 #include "ibex_FwdAlgorithm.h"
@@ -20,13 +21,20 @@
 
 namespace ibex {
 
+
+
+template<class T>  class AffineEval;
+typedef AffineEval<AF_Default> Affine2Eval;
+typedef AffineEval<AF_Other>  Affine3Eval;
+
+
 /**
  * \ingroup symbolic
  *
  * \brief Evaluate a function with affine form.
  */
-template<class T>
-class AffineEval : public FwdAlgorithm {
+template<class T=AF_Default>
+class AffineEval : public FwdAlgorithm, public Evaluator {
 
 public:
 	/**
@@ -43,6 +51,26 @@ public:
 	 * \brief Run the forward algorithm on the box \a box and return the result as an interval domain.
 	 */
 	Domain& eval(const IntervalVector& box);
+
+	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
+	Domain& eval(const Array<const Domain>& d);
+
+	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
+	Domain& eval(const Array<Domain>& d);
+
+	/**
+	 * \brief Evaluate a subset of components.
+	 *
+	 * (Specific for vector-valued functions).
+	 *
+	 * \pre components must be non empty and contain indices in
+	 *      [0,f.image_dim()-1].
+	 */
+	IntervalVector eval(const IntervalVector& box, const BitSet& components);
 
 	/**
 	 * \brief Run the forward algorithm on the box \a box and return the result as an Affine2 domain.
@@ -99,21 +127,14 @@ public:
 	void sub_V_fwd  (int x1, int x2, int y);
 	void sub_M_fwd  (int x1, int x2, int y);
 
-	const Function& f;
-	ExprDomain d;
 	ExprTemplateDomain<AffineMain<T> > af2;
 
 protected:
-
 	/**
-	 * \brief Run the forward algorithm on the box \a box.
+	 * Class used internally to interrupt the
+	 * backward procedure when an empty domain occurs.
 	 */
-	void forward(const IntervalVector& box);
-
-	/**
-	 * \brief Run the forward algorithm on the box \a box.
-	 */
-	void forward(const AffineMainVector<T>& box);
+	class EmptyBoxException { };
 
 	/**
 	 * \brief Run the forward algorithm with input domains.
@@ -136,7 +157,7 @@ typedef AffineEval<AF_Other>  Affine3Eval;
   ============================================================================*/
 
 template<class T>
-inline AffineEval<T>::AffineEval(const Function& f) : f(f), d(f), af2(f) {
+inline AffineEval<T>::AffineEval(const Function& f) : Evaluator(f), af2(f) {
 
 }
 
@@ -146,17 +167,136 @@ inline AffineEval<T>::~AffineEval() {
 	for (typename IBEX_NODE_MAP(AffineEval<T>*)::iterator it=apply_eval.begin(); it!=apply_eval.end(); it++) {
 		delete it->second;
 	}
+
+}
+
+
+template<class T>
+Domain& AffineEval<T>::eval(const Array<const Domain>& d2) {
+
+	d.write_arg_domains(d2);
+	af2.write_arg_domains(convert_to_affinedomain<T>(d2));
+
+	//------------- for debug
+	//	cout << "Function " << f.name << ", domains before eval:" << endl;
+	//	for (int i=0; i<f.nb_arg(); i++) {
+	//		cout << "arg[" << i << "]=" << f.arg_domains[i] << endl;
+	//	}
+	try {
+		f.forward<AffineEval<T> >(*this);
+	} catch(EmptyBoxException&) {
+		d.top->set_empty();
+		af2.top->set_empty();
+	}
+	return *d.top;
 }
 
 template<class T>
+Domain& AffineEval<T>::eval(const Array<Domain>& d2) {
+
+	d.write_arg_domains(d2);
+	af2.write_arg_domains(convert_to_affinedomain<T>(d2));
+
+	try {
+		f.forward<AffineEval<T> >(*this);
+	} catch(EmptyBoxException&) {
+		d.top->set_empty();
+		af2.top->set_empty();
+	}
+	return *d.top;
+}
+
+
+template<class T>
+IntervalVector AffineEval<T>::eval(const IntervalVector& box, const BitSet& components) {
+
+	d.write_arg_domains(box);
+	af2.write_arg_domains(AffineMainVector<T>(box));
+
+	assert(!components.empty());
+
+	int m=components.size();
+
+	IntervalVector res(m);
+
+	//if (fwd_agenda==NULL) {
+
+		assert(!f.expr().dim.is_matrix());
+
+		// The vector of expression is heterogeneous (or the expression is scalar).
+		//
+		// We might be able in this case to use the DAG but
+		// - the algorithm is more complex
+		// - we might not benefit from possible symbolic simplification due
+		//   to the fact that only specific components are required (there is
+		//   no simple "on the fly" simplification as in the case of a vector
+		//   of homogeneous expressions)
+		// so we resort to the components functions f[i] --> symbolic copy+no DAG :(
+		try {
+			f.forward<AffineEval<T> >(*this);
+			int c;
+			for (int i=0; i<m; i++) {
+				c = (i==0 ? components.min() : components.next(c));
+				res[i] = (d.top->v())[c];
+			}
+		} catch(EmptyBoxException&) {
+			d.top->set_empty();
+			af2.top->set_empty();
+			res.set_empty();
+		}
+		return res;
+		//}
+// not ready...
+//	// merge all the agendas
+//	int c;
+//	Agenda a(f.nodes.size()); // the global agenda initialized with the maximal possible value
+//	for (int i=0; i<m; i++) {
+//		c = (i==0 ? components.min() : components.next(c));
+//		a.push(*(fwd_agenda[c]));
+//	}
+//
+//	try {
+//		f.cf.forward<Eval>(*this,a);
+//	} catch(EmptyBoxException&) {
+//		d.top->set_empty();
+//	}
+//	for (int i=0; i<m; i++) {
+//		c = (i==0 ? components.min() : components.next(c));
+//		res[i] = d[bwd_agenda[c]->first()].i();
+//	}
+//
+//	return res;
+
+}
+
+
+
+template<class T>
 inline Domain& AffineEval<T>::eval(const IntervalVector& box) {
-	forward(box);
+	d.write_arg_domains(box);
+	af2.write_arg_domains(AffineMainVector<T>(box));
+
+
+	try {
+		f.forward<AffineEval<T> >(*this);
+	} catch(EmptyBoxException&) {
+		d.top->set_empty();
+		af2.top->set_empty();
+	}
 	return *d.top;
 }
 
 template<class T>
 inline TemplateDomain<AffineMain<T> >& AffineEval<T>::eval(const AffineMainVector<T>& box) {
-	forward(box);
+	d.write_arg_domains(box.itv());
+	af2.write_arg_domains(box);
+
+	try {
+		f.forward<AffineEval<T> >(*this);
+	} catch(EmptyBoxException&) {
+		d.top->set_empty();
+		af2.top->set_empty();
+	}
 	return *af2.top;
 }
 
@@ -171,26 +311,12 @@ inline void AffineEval<T>::forward(const Array<const Domain>& argD, const Array<
 //		for (int i=0; i<f.nb_arg(); i++) {
 //			std::cout << "arg[" << i << "]=" << f.arg_domains[i] << std::endl;
 //		}
-
-	f.forward<AffineEval<T> >(*this);
-}
-
-template<class T>
-inline void AffineEval<T>::forward(const IntervalVector& box) {
-	d.write_arg_domains(box);
-	af2.write_arg_domains(AffineMainVector<T>(box));
-
-	// TODO: should manage empty result! (see Eval.cpp)
-	f.forward<AffineEval<T> >(*this);
-}
-
-template<class T>
-inline void AffineEval<T>::forward(const AffineMainVector<T>& box) {
-
-	d.write_arg_domains(box.itv());
-	af2.write_arg_domains(box);
-
-	f.forward<AffineEval<T> >(*this);
+	try {
+		f.forward<AffineEval<T> >(*this);
+	} catch(EmptyBoxException&) {
+		d.top->set_empty();
+		af2.top->set_empty();
+	}
 }
 
 template<class T>
@@ -330,6 +456,7 @@ template<class T>
 inline void AffineEval<T>::sqrt_fwd(int x, int y) {
 	af2[y].i()=AffineMain<T>(af2[x].i()).Asqrt(d[x].i());
 	d[y].i()=(af2[y].i().itv() & sqrt(d[x].i()));
+	if ((d[y].i()).is_empty()) throw EmptyBoxException();
 }
 
 template<class T>
@@ -342,6 +469,7 @@ template<class T>
 inline void AffineEval<T>::log_fwd(int x, int y) {
 	af2[y].i()=AffineMain<T>(af2[x].i()).Alog(d[x].i());
 	d[y].i()=(af2[y].i().itv() & log(d[x].i()));
+	if ((d[y].i()).is_empty()) throw EmptyBoxException();
 }
 
 template<class T>
@@ -360,6 +488,7 @@ template<class T>
 inline void AffineEval<T>::tan_fwd(int x, int y) {
 	af2[y].i()=AffineMain<T>(af2[x].i()).Atan(d[x].i());
 	d[y].i()=(af2[y].i().itv() & tan(d[x].i()));
+	if ((d[y].i()).is_empty()) throw EmptyBoxException();
 }
 
 template<class T>
@@ -384,12 +513,14 @@ template<class T>
 inline void AffineEval<T>::acos_fwd(int x, int y) {
 	af2[y].i()=AffineMain<T>(af2[x].i()).Aacos(d[x].i());
 	d[y].i()=(af2[y].i().itv() & acos(d[x].i()));
+	if ((d[y].i()).is_empty()) throw EmptyBoxException();
 }
 
 template<class T>
 inline void AffineEval<T>::asin_fwd(int x, int y) {
 	af2[y].i()=AffineMain<T>(af2[x].i()).Aasin(d[x].i());
 	d[y].i()=(af2[y].i().itv() & asin(d[x].i()));
+	if ((d[y].i()).is_empty()) throw EmptyBoxException();
 }
 
 template<class T>
@@ -402,6 +533,7 @@ template<class T>
 inline void AffineEval<T>::acosh_fwd(int x, int y) {
 	d[y].i()=acosh(d[x].i());
 	af2[y].i()= d[y].i(); // not yet implemented in Affine Arithmetic
+	if ((d[y].i()).is_empty()) throw EmptyBoxException();
 }
 
 template<class T>
@@ -414,6 +546,7 @@ template<class T>
 inline void AffineEval<T>::atanh_fwd(int x, int y) {
 	d[y].i()=atanh(d[x].i());
 	af2[y].i()= d[y].i(); // not yet implemented in Affine Arithmetic
+	if ((d[y].i()).is_empty()) throw EmptyBoxException();
 }
 
 template<class T>
@@ -522,33 +655,64 @@ inline void AffineEval<T>::apply_fwd(int* x, int y) {
 	af2[y] = *func_eval->af2.top;
 }
 
+
 template<class T>
-inline void AffineEval<T>::vector_fwd(int *x, int y) {
+inline void AffineEval<T>::vector_fwd(int* x, int y) {
 	assert(dynamic_cast<const ExprVector*>(&(f.node(y))));
 
 	const ExprVector& v = (const ExprVector&) f.node(y);
 
 	assert(v.type()!=Dim::SCALAR);
 
+	int j=0;
+
 	if (v.dim.is_vector()) {
-		for (int i=0; i<v.length(); i++)  {
-			af2[y].v()[i]=af2[x[i]].i();
-			d[y].v()[i]=d[x[i]].i();
+		for (int i=0; i<v.length(); i++) {
+			if (v.arg(i).dim.is_vector()) {
+				af2[y].v().put(j,af2[x[i]].v());
+				d[y].v().put(j,d[x[i]].v());
+				j+=v.arg(i).dim.vec_size();
+			} else {
+				af2[y].v()[j]=af2[x[i]].i();
+				d[y].v()[j]=d[x[i]].i();
+				j++;
+			}
 		}
+
+		assert(j==v.dim.vec_size());
 	}
 	else {
-		if (v.row_vector())
+		if (v.row_vector()) {
 			for (int i=0; i<v.length(); i++) {
-				af2[y].m().set_col(i,af2[x[i]].v());
-				d[y].m().set_col(i,d[x[i]].v());
+				if (v.arg(i).dim.is_matrix()) {
+					af2[y].m().put(0,j,af2[x[i]].m());
+					d[y].m().put(0,j,d[x[i]].m());
+					j+=v.arg(i).dim.nb_cols();
+				} else if (v.arg(i).dim.is_vector()) {
+					af2[y].m().set_col(j,af2[x[i]].v());
+					d[y].m().set_col(j,d[x[i]].v());
+					j++;
+				}
 			}
-		else
+		} else {
 			for (int i=0; i<v.length(); i++) {
-				af2[y].m().set_row(i,af2[x[i]].v());
-				d[y].m().set_row(i,d[x[i]].v());
+				if (v.arg(i).dim.is_matrix()) {
+					af2[y].m().put(j,0,af2[x[i]].m());
+					d[y].m().put(j,0,d[x[i]].m());
+					j+=v.arg(i).dim.nb_rows();
+				} else if (v.arg(i).dim.is_vector()) {
+					af2[y].m().set_row(j,af2[x[i]].v());
+					d[y].m().set_row(j,d[x[i]].v());
+					j++;
+				}
 			}
+		}
+
+		assert((v.row_vector() && j==v.dim.nb_cols()) || (!v.row_vector() && j==v.dim.nb_rows()));
 	}
+
 }
+
 } // namespace ibex
 
 
