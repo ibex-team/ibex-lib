@@ -24,6 +24,7 @@ namespace ibex {
 class feasible_point {
 public:
     feasible_point(Vector point,Interval eval);
+    feasible_point(const feasible_point& pt);
     ~feasible_point();
 
 
@@ -84,7 +85,7 @@ public:
 	 */
     DoubleHeap<Cell>* y_heap;
 
-    std::vector<feasible_point*> fsbl_pt_list;
+    std::vector<feasible_point> fsbl_pt_list;
 
 
 	/**

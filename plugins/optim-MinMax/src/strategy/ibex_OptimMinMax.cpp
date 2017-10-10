@@ -23,7 +23,7 @@ const int OptimMinMax::default_list_rate = 0;
 const double OptimMinMax::default_min_perc_coef = 10;
 const int OptimMinMax::default_list_elem_absolute_max = 500;
 const int OptimMinMax::default_prob_heap = 10; //10% to pop second heap in light_solver
-const int OptimMinMax::default_local_iter = 0; //10% to pop second heap in light_solver
+const int OptimMinMax::default_local_iter = 0;
 const bool OptimMinMax::default_visit_all = false;
 
 //********* Default parameters for light local solver ************
@@ -300,7 +300,9 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 			loup_changed=false;
 
-            Cell *c = buffer->pop1();
+            cout<<" get cell "<<endl;
+
+            Cell *c = buffer->pop();
                         if(monitor) {
                             DataMinMax * data_x = &(c->get<DataMinMaxOpti>());
                             nbel_count -= data_x->y_heap->size();
@@ -308,10 +310,13 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
             DataMinMax * data_x = &(c->get<DataMinMaxOpti>());
 //            cout<<"******************************"<<endl;
-//            cout<<"initial cell, box: "<<c->box<<endl<<"         fmax: "<<data_x->fmax<<endl;
+            cout<<"initial cell, box: "<<c->box<<endl<<"         fmax: "<<data_x->fmax<<endl;
 			try {
+                cout<<"bisect cell "<<endl;
 				pair<Cell*,Cell*> new_cells=bsc->bisect_cell(*c);
+                cout<<"delete cell "<<endl;
 				delete c; // deletes the cell.
+//                cout<<"deleted"<<endl;
 
 //                DataMinMax * data_x1 = &((new_cells.first)->get<DataMinMaxOpti>());
 //                cout<<" init first cell box: "<<new_cells.first->box<<endl;
@@ -330,7 +335,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
                 if(handle_res1) {
                     bool spwn = spawn(new_cells.first);
-//                    cout<<" spawn cell res: "<<spwn<<endl;
+//                    cout<<" spawn cell res first: "<<spwn<<endl;
 
                 }
 
@@ -349,7 +354,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
                 if(handle_res2) {
                     bool spwn = spawn(new_cells.second);
-//                    cout<<" spawn cell res: "<<spwn<<endl;
+//                    cout<<" spawn cell res nd: "<<spwn<<endl;
 
                 }
 
@@ -377,6 +382,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 					}
 					if (trace) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  ymax=" << ymax << ",  uplo= " <<  uplo<< endl;
 				}
+//                std::cout<<"update uplo"<<std::endl;
 				update_uplo();
 
 				if(monitor)
@@ -432,7 +438,8 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 //        cout<<"handle cell of box: "<<x_cell->box<<endl<<"      fmax: "<<data_x->fmax<<endl<<"      proven true (1): "<<data_x->pu<<endl;
 
         //clear points of fsbl_point_list inherited from mother box that do not belong to this box.
-        data_x->clear_notin_point(x_cell->box,false); // light deletion: only erase pointers from fsbl_point_list, not the object since needed in brother cell.
+//        cout<<" clear point "<<endl;
+       data_x->clear_notin_point(x_cell->box,true);
 
         ofstream out;
         if(monitor_csp) {
@@ -495,8 +502,6 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
                  */
         }
         //clear points of fsbl_point_list inherited from mother box that do not belong to this box.
-        data_x->clear_notin_point(x_cell->box,true); //strong delete: delete feasible_point and erase list elem since points are no more in box due to contraction, not because of bissection.
-
 
 //        cout<<"done"<<endl;
 //        cout<<"midpoint evaluation... "<<endl;
@@ -526,7 +531,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
                     }
                     else {
                         Interval ev = x_copy->get<DataMinMaxOpti>().fmax;
-                        IntervalVector ysol = x_copy->get<DataMinMaxOpti>().y_heap->top1()->box;
+                        IntervalVector ysol = x_copy->get<DataMinMaxOpti>().y_heap->top()->box;
 //                        cout<<" point eval at: "<<x_copy->box<<endl<<"         res: "<<ev<<endl<<"         at: "<<ysol<<endl<<"         at: "<<lsolve.best_point_eval<<endl;
                         Vector sol = lsolve.best_point_eval.mid();
 
@@ -568,11 +573,15 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 //                    cout<<"            init fmax: "<<data_x->fmax<<endl;
 //                    cout<<"            init x_box: "<<x_cell->box<<endl;
 
-//            cout<<"current x box: "<<x_cell->box<<endl;
+            cout<<"current x box: "<<x_cell->box<<endl;
 //            bool res(true);
             bool res =lsolve.optimize(x_cell,loup);
 //            cout<<"res : "<<res<<endl;
-//            cout<<"fmax after lightoptimMinMax: "<<data_x->fmax<<endl;
+            cout<<"fmax after lightoptimMinMax: "<<data_x->fmax<<endl;
+            if(res) {
+                OptimData* ydata = &(data_x->y_heap->top1()->get<OptimData>());
+                cout<< "top 1 pf: "<<ydata->pf<<endl;
+            }
 //            cout<<"             x_box after lightoptimMinMax: "<<x_cell->box<<endl;
             if (res)
                 res &= loc_solve.compute_supy_lb(x_cell,uplo,loup,minus_goal_y_at_x);
@@ -819,7 +828,7 @@ bool OptimMinMax::spawn(Cell * x_cell) {
             Cell* spawn_cell = new Cell(*x_cell);
             spawn_cell->box = loc_solve.csp_queue.front().first;
             DataMinMaxOpti * data_opt = &(spawn_cell->get<DataMinMaxOpti>());
-//            data_opt->fmax &= Interval(loc_solve.csp_queue.front().second.lb(),POS_INFINITY);
+            data_opt->fmax &= Interval(loc_solve.csp_queue.front().second.lb(),POS_INFINITY);
             bool res = true;
 //            bool res =lsolve.optimize(spawn_cell,loup);
             if(!res)

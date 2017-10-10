@@ -52,41 +52,51 @@ public:
 
     double perf_ctc_coef; // performance of <loup csp between 0 and 1
 
+    int nb_rdm_candidates;
+
 
 private:
     friend class OptimMinMax;
 
-    void supy_local_sols(const Vector& global_xy_sol,Cell* x_cell);
+    std::vector<Vector> supy_local_sols(const Vector& global_xy_sol,Cell* x_cell);
 
-    IntervalVector seach_box_over_y(const Vector& xy_start_point);
+    IntervalVector search_box_over_y(const Vector& xy_start_point);
 
-    IntervalVector seach_box_over_x(const Vector& xy_start_point,Cell* x_cell);
+    IntervalVector search_box_over_x(const Vector& xy_start_point,Cell* x_cell);
 
-    IntervalVector seach_box_over_xy(Cell* x_cell);
+    IntervalVector search_box_over_xy(Cell* x_cell);
 
     Vector xy_stpt(const Vector& global_xy_sol,Cell* x_cell);
 
-    IntervalVector hull_ysol_box(const Vector& global_xy_sol);
+    IntervalVector hull_ysol_box(const Vector& global_xy_sol, std::vector<Vector> local_sols);
 
-    Vector sols_std_dev();
+    Vector sols_std_dev(const std::vector<Vector>& local_sols);
 
-    Vector sols_mean();
+    Vector sols_mean(const std::vector<Vector>& local_sols);
 
-    void reject_far_y_sol(const Vector& global_sol);
+    std::vector<Vector> reject_far_y_sol(const Vector& global_sol,std::vector<Vector> local_sols);
 
-    std::queue<std::pair<IntervalVector,Interval> > sivia_x_bsct(Cell* x_cell,const Matrix& y_param,double loup) ;
+    std::queue<std::pair<IntervalVector,Interval> > sivia_x_bsct(Cell* x_cell,const std::pair<std::vector<Matrix>,std::vector<Vector> >& local_solutions, double loup) ;
 
     IntervalVector list_hull_box(std::queue<std::pair<IntervalVector,Interval> > list);
 
     double list_volume(std::queue<std::pair<IntervalVector,Interval> > list);
 
-    double compute_lb(std::queue<std::pair<IntervalVector,Interval> > x_list,const Matrix& y_param,Cell* x_cell,double loup);
+    double compute_lb(std::queue<std::pair<IntervalVector,Interval> > x_list,const std::pair<std::vector<Matrix>,std::vector<Vector> >& local_solutions,Cell* x_cell,double loup);
 
     IntervalVector set_x_box_y_vect(const IntervalVector& x_box, const Vector& y_vect);
 
     IntervalVector set_x_box_y_box(const IntervalVector& x_box, const IntervalVector& y_vect);
 
-    std::pair<Matrix,Vector> affine_regression();
+    std::pair<Matrix,Vector> affine_regression(const std::vector<Vector>& local_sols);
+
+    std::vector<Vector> find_max_candidates(double uplo,Cell* x_cell);
+
+    bool check_twins(const Vector& v,const std::vector<Vector>& list);
+
+    std::pair<std::vector<Matrix>,std::vector<Vector> > get_local_solutions(std::vector<Vector> candidates,double loup,Cell* x_cell);
+
+    Interval eval_backward_max_solutions(const std::pair<std::vector<Matrix>,std::vector<Vector> >& local_solutions,IntervalVector x_box,double loup);
 
 
     Heap<Cell> *x_heap;
@@ -95,7 +105,9 @@ private:
     UnconstrainedLocalSearch *local_solver_over_x;
     bool csp_actif;
 
-    std::vector<Vector> local_sols;
+//    std::vector<Vector> local_sols;
+//    std::vector<Matrix> regression_matrix;
+//    std::vector<Vector> point_solution;
     NormalizedSystem& xy_sys; // contains constraints on x and y
 
     static CellCostPFlb x_heap_costf;
@@ -110,6 +122,8 @@ private:
 
 
 };
+
+std::pair<Vector,double> fit_line(std::queue<double>& observ);
 
 //std::pair<Matrix,Matrix> lu_decompose(Matrix sqr_matrix);
 //Matrix pivotize(const Matrix& M);
