@@ -111,5 +111,5 @@ System solving and global optimization
 --------------------------------------
 
 Finally, Ibex proposes various plugins. In particular, the IbexSolve and IbexOpt plugins are dedicated to system solving and optimization, and come both
-with a default black-box solver and global optimizer for immediate usage. See the :ref:`IbexOpt documentation <ibex-opt>`.
+with a default black-box solver and global optimizer for immediate usage. See the :ref:`IbexSolve <solver>` and :ref:`IbexOpt <optim>` documentations.
 
