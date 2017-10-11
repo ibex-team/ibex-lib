@@ -34,7 +34,7 @@ def configure (conf):
 	conf.check_cxx(cxxflags = "-std=c++11", uselib_store="IBEXOPT")
 
 	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
-	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEXSOLVER")
+	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEXOPT")
 	
 	# Add information in ibex_Setting
 	conf.setting_define ("WITH_OPTIM", 1)

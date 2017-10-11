@@ -223,7 +223,7 @@ string Manifold::format() {
 	"[line 4] - 2 values: time (in seconds) and number of cells.\n"
 	"\n[lines 5-...] The subsequent lines describe the \"solutions\" (output boxes).\n"
 	"\t Each line corresponds to one box and contains the following information:\n"
-	"\t - 2*n values: lb(x1), ub(x1),...,ub(x1), ub(xn)\n"
+	"\t - 2*n values: lb(x1), ub(x1),...,lb(xn), ub(xn) where n=#variables\n"
 	"\t - 1 value:\n"
 	"\t\t* 0 the box is 'inner'\n"
 	"\t\t* 1 the box is 'boundary'\n"
