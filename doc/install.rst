@@ -193,7 +193,7 @@ In particular, ``waf`` ``configure`` supports the following options:
                         
                         .. 	Warning::
                         
-                        The current release of Ibex is not compatible with Soplex 2.0.
+                            The current release of Ibex is not compatible with Soplex 2.0.
 
 
 --soplex-path=PATH      Set the (absolute) path of Soplex to PATH (to be used with ``--lp-lib=soplex``). The plugin archive contains 

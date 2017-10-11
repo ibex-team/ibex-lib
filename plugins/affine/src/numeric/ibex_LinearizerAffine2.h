@@ -41,19 +41,19 @@ public:
 	 *
 	 *  Linearize the system and performs 2n calls to Simplex in order to reduce the 2 bounds of each variable
 	 */
-	virtual int linearize(const IntervalVector& box, LinearSolver& lp_solver);
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
 
 	/**
 	 * \brief Generation of a linear approximation of the inner region
 	 *
 	 */
-	int inlinearization(const IntervalVector& box, LinearSolver& lp_solver);
+	int inlinearization(const IntervalVector& box, LPSolver& lp_solver);
 
 	/**
 	 * \brief Generation of a linear approximation of the linear objective function
 	 *
 	 */
-	bool goal_linearization(const IntervalVector& box, LinearSolver& lp_solver);
+	bool goal_linearization(const IntervalVector& box, LPSolver& lp_solver);
 
 private:
 	/**
