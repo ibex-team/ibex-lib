@@ -47,10 +47,10 @@ bool LightLocalSolver::compute_supy_lb(Cell* x_cell,double uplo,double loup,Func
 
     if(!local_solutions.first.empty()) { // check if one point_solutions gave a lower bound greater than the loup, meaning that the global solution is not in x_box
         if(local_solutions.first.back().nb_cols() == 0)
-            return false;
+            return true;
     }
     else if(local_solutions.second.empty()) // no local solution found
-        return false;
+        return true;
 
 //        std::cout<<"       LghtLoc: start sivia"<<std::endl;
 //    if(regress)
