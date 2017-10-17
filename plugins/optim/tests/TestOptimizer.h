@@ -23,14 +23,20 @@ class TestOptimizer : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestOptimizer);
-	
 #ifndef _IBEX_WITH_NOLP_
-		CPPUNIT_TEST(issue50_1);
-		CPPUNIT_TEST(issue50_2);
-		CPPUNIT_TEST(issue50_3);
-		CPPUNIT_TEST(issue50_4);
+	CPPUNIT_TEST(vec_problem01);
+	CPPUNIT_TEST(vec_problem02);
+	CPPUNIT_TEST(issue50_1);
+	CPPUNIT_TEST(issue50_2);
+	CPPUNIT_TEST(issue50_3);
+	CPPUNIT_TEST(issue50_4);
 #endif
 	CPPUNIT_TEST_SUITE_END();
+
+	// problem with vector variables
+	void vec_problem01();
+	// vector variables and vector constraints
+	void vec_problem02();
 
 	// upperbounding with goal_prec=10% will remove everything (initial loup > true minimum) --> NO_FEASIBLE_FOUND
 	void issue50_1();
@@ -44,6 +50,6 @@ public:
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestOptimizer);
 
-
 } // namespace ibex
+
 #endif // __TEST_OPTIMIZER_H__
