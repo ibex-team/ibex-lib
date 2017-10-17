@@ -24,29 +24,22 @@ namespace ibex {
  * \brief cell Heap buffer (for global optimization)
  *  This is a simple-heap buffer where the heap criterion
  * is LB (lower bound of the objective domain)
- *
- *
- *
  */
-
-  class CellHeap : public Heap<Cell>, public CellBufferOptim {
+class CellHeap : public Heap<Cell>, public CellBufferOptim {
 
 public:
-  
+
 	/**
 	 * \brief Create the buffer.
 	 *
-	 * \param sys      - the extended system to optimize
-	 *
+	 * \param sys - The extended system to optimize.
 	 */
-        CellHeap(const ExtendedSystem& sys);
+	CellHeap(const ExtendedSystem& sys);
 
-
-         /**
+	/**
 	 * \brief Delete *this.
 	 */
-	~CellHeap();
-
+	virtual ~CellHeap();
 
 	/**
 	 * \brief Flush the buffer.
@@ -56,7 +49,7 @@ public:
 	virtual void flush();
 
 	/** \brief Return the size of the buffer. */
-  	virtual unsigned int size() const;
+	virtual unsigned int size() const;
 
 	/** \brief Return true if the buffer is empty. */
 	virtual bool empty() const;
@@ -69,7 +62,6 @@ public:
 
 	/** \brief Return the top cell (but does not pop it).*/
 	virtual Cell* top() const;
-
 
 	virtual std::ostream& print(std::ostream& os) const;
 
@@ -93,8 +85,6 @@ public:
 	 */
 	CellCostFunc& cost();
 
-
-
 protected:
 
 	/**
@@ -103,8 +93,6 @@ protected:
 	const ExtendedSystem& sys;
 
 };
-
-
 
 }
 

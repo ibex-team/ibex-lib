@@ -4,7 +4,8 @@
 // Author      : Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : Sep 12, 2014
+// Created     : Aug 29, 2017
+// Modified    : Sep 07, 2017
 //============================================================================
 
 #ifndef __IBEX_CELL_BEAM_SEARCH_H__
@@ -17,6 +18,7 @@
 #include "ibex_Cell.h"
 
 namespace ibex {
+
 /**
  * \ingroup optim
  *
@@ -29,66 +31,78 @@ namespace ibex {
  * - The future heap , where the handled nodes are stored (after contraction , search for loup )  (member futureheap)
  * 
  *  When beamsize=1, we have FeasibleDiving strategy ("best strategy in JOGO 14 
- *  "Node selection strategies in interval Branch and Bound algorithms"  article by Neveu Trombettoni Araya)
+ *  "Node selection strategies in interval Branch and Bound algorithms"  article by B. Neveu, G. Trombettoni and I. Araya)
  * 
  */
+class CellBeamSearch: public CellHeap {
+public :
 
- 
-  class CellBeamSearch: public CellHeap {
-  public :
-   
-    CellBeamSearch (CellHeap& currentbuffer, CellHeap& futurebuffer, const ExtendedSystem & sys, unsigned int beamsize =default_beamsize) ;
+	/**
+	 * \brief Create the global buffer from two heaps.
+	 */
+	CellBeamSearch (CellHeap& currentbuffer, CellHeap& futurebuffer, const ExtendedSystem & sys, unsigned int beamsize =default_beamsize) ;
 
-    ~CellBeamSearch();
+	/**
+	 * \brief Delete this.
+	 */
+	virtual ~CellBeamSearch();
 
-    unsigned int size() const;
+	/** \brief Size of the global buffer. */
+	virtual unsigned int size() const;
 
-    void flush();
+	/** \brief Flush the buffer. */
+	virtual void flush();
 
+	/** \brief Return true if the buffer is empty. */
+	virtual bool empty() const;
 
-    /** \brief Return true if the buffer is empty. */
-    bool empty() const;
+	/** \brief Push a new cell on the futurebuffer heap. */
+	virtual void push(Cell* cell);
 
-    /** \brief Push a new cell on the futurebuffer heap. */
-    void push(Cell* cell);
+	/**
+	 * \brief Pop a cell from the BeamSearch buffer.
+	 *
+	 * \note if the currentbuffer is not empty, pop a cell from the currentbuffer
+	 * else pop a cell from the future buffer, empties the future buffer
+	 * (beamsize-1 cells put into the current buffer 	and  the remaining into the global buffer
+	 */
+	virtual Cell* pop();
 
-    /** \brief Pop a cell from the BeamSearch buffer.
-    
-     * \note if the currentbuffer is not empty, pop a cell from the currentbuffer
-	else pop a cell from the future buffer, empties the future buffer 
-	(beamsize-1 cells put into the current buffer 	and  the remaining into the global buffer */
-    Cell* pop();
+	/** \brief Return the next cell (but does not pop it).*/
+	virtual Cell* top() const;
 
-    /** \brief Return the next cell (but does not pop it).*/
-    Cell* top() const;
+	/** \brief Returns the minimum LB of all 3 buffers (global , current and future). */
+	virtual double minimum() const;
 
-    /** \brief  returns the minimum LB of all 3 buffers (global , current and future) */
-    double minimum() const;
-    
-    /** \brief : remove the cells with a LB greater than new_loup */
-    void contract (double new_loup);	
+	/** \brief Remove the cells with a LB greater than new_loup */
+	virtual void contract (double new_loup);
 
-    /** \brief  the default value for the maximum beam size */
-    static const unsigned int default_beamsize;
+	/** \brief The default value for the maximum beam size */
+	static const unsigned int default_beamsize;
 
-  protected :
-    /** \brief Return the cost of a cell*/
-    double cell_cost (const Cell& cell) const ;
-    /** \brief The maximum size of "currentbuffer " (the beam) */
-    unsigned  int   beamsize;
+protected :
+	/**
+	 * \brief Return the cost of a cell
+	 *
+	 * LB criterion.
+	 */
+	double cell_cost (const Cell& cell) const;
 
-    /** \brief empties the future buffer and distribute the cells between the current buffer and the global buffer*/
-    void move_buffers();
+	/** \brief The maximum size of "currentbuffer " (the beam) */
+	unsigned  int   beamsize;
 
-    /** \brief the current buffer, actual beam of limited size */
-    CellHeap&  currentbuffer;
+	/** \brief Empties the future buffer and distribute the cells between the current buffer and the global buffer*/
+	void move_buffers();
 
-    /**  \brief  the nodes sons of a node from the current buffer */
-    CellHeap&  futurebuffer;    
+	/** \brief The current buffer, actual beam of limited size */
+	CellHeap&  currentbuffer;
 
-  };
+	/** \brief The nodes sons of a node from the current buffer */
+	CellHeap&  futurebuffer;
+
+};
 
 } // namespace ibex
 
 #endif // __IBEX_CELL_BEAM_SEARCH_H__
- 
+
