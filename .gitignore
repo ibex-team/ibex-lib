@@ -38,7 +38,7 @@ lib
 include
 share
 bin
-newdoc/_build
+doc/_build
 
 *~
 

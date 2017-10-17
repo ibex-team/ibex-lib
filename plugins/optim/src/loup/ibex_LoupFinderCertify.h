@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_LoupCorrection.h
+// File        : ibex_LoupFinderCertify.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file

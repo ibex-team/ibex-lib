@@ -104,7 +104,7 @@ void NumConstraint::build_from_system(const System& sys) {
 	varcopy(c0.f.args(),x);
 	const ExprNode& y=ExprCopy().copy(c0.f.args(),x,c0.f.expr());
 
-	f.init(x,y);
+	((Function&) f).init(x,y);
 
 	(CmpOp&) op = c0.op;
 }

@@ -311,6 +311,12 @@ Function::Function(const char* x1,  const char* x2,  const char* x3,  const char
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20),y);
 }
 
+Function::Function(int n, const char** x, const char* y) {
+	Array<const char*> a(n);
+	for (int i=0; i<n; i++) a.set_ref(i,x[i]);
+	build_from_string(a,y);
+}
+
 void Function::build_from_string(const Array<const char*>& x, const char* y, const char* name) {
 
 	stringstream s;

@@ -17,12 +17,13 @@
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_SmearFunction.h"
+#include "ibex_LSmear.h"
 #include "ibex_LoupFinderDefault.h"
 #include "ibex_LoupFinderCertify.h"
 #include "ibex_LinearizerCombo.h"
 #include "ibex_Array.h"
+#include "ibex_Memory.cpp_"
 #include "ibex_Random.h"
-#include "ibex_DefaultStrategy.cpp_"
 #include "ibex_CellBeamSearch.h"
 #include "ibex_CellHeap.h"
 
@@ -66,12 +67,14 @@ ExtendedSystem& get_ext_sys(const System& sys, double eps_h) {
 
 }
 
-DefaultOptimizer::DefaultOptimizer(const System& sys, double eps_x, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed) :
+DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed, double eps_x) :
 		Optimizer(sys.nb_var,
 			  ctc(get_ext_sys(sys,eps_h)), // warning: we don't know which argument is evaluated first
 			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x)),
+			  //rec(new LSmear(get_ext_sys(sys,eps_h),eps_x)),
 			  rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(get_norm_sys(sys,eps_h),inHC4))) :
 						 (LoupFinder*) new LoupFinderDefault(get_norm_sys(sys,eps_h),inHC4)),
+//			  (CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h))),
 			  //(CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h))),
 			  (CellBufferOptim&) rec (new  CellBeamSearch (
 								       (CellHeap&) rec (new CellHeap (get_ext_sys(sys,eps_h))), 
@@ -92,13 +95,6 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double eps_x, double rel_e
 	normalized_system = -1;
 }
 
-
-
-
-
-
-
-
 Ctc&  DefaultOptimizer::ctc(const System& ext_sys) {
 	Array<Ctc> ctc_list(3);
 
@@ -106,14 +102,14 @@ Ctc&  DefaultOptimizer::ctc(const System& ext_sys) {
 	ctc_list.set_ref(0, rec(new CtcHC4 (ext_sys.ctrs,0.01,true)));
 	// second contractor on ext_sys : "Acid" with incremental HC4 (propag ratio=0.1)
 	ctc_list.set_ref(1, rec(new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys.ctrs,0.1,true)),true)));
-	// the last contractor is "Compo (ART+XNewton)"
+	// the last contractor is "XNewton"
 	if (ext_sys.nb_ctr > 1) {
 		ctc_list.set_ref(2,rec(new CtcFixPoint
 				(rec(new CtcCompo(
-						rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::COMPO)))),
+						rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))),
 								rec(new CtcHC4(ext_sys.ctrs,0.01)))), default_relax_ratio)));
 	} else {
-		ctc_list.set_ref(2,rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::COMPO)))));
+		ctc_list.set_ref(2,rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))));
 	}
 	return rec(new CtcCompo(ctc_list));
 }

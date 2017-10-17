@@ -36,7 +36,7 @@ LinearizerAffine2::~LinearizerAffine2() {
 	delete[] ctr_af_evl;
 }
 
-bool LinearizerAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
+bool LinearizerAffine2::goal_linearization(const IntervalVector& box, LPSolver& lp_solver) {
 	// Linearization of the objective function by AF2
 
 	if (!sys.goal) {
@@ -76,7 +76,7 @@ bool LinearizerAffine2::goal_linearization(const IntervalVector& box, LinearSolv
 }
 
 
-int LinearizerAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
+int LinearizerAffine2::inlinearization(const IntervalVector& box, LPSolver& lp_solver) {
 	// TODO a verifier et finir
 
 	Affine2 af2;
@@ -151,7 +151,7 @@ int LinearizerAffine2::inlinearization(const IntervalVector& box, LinearSolver& 
 
 
 /*********generation of the linearized system*********/
-int LinearizerAffine2::linearize(const IntervalVector& box, LinearSolver& lp_solver) {
+int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver) {
 
 	Affine2 af2;
 	Vector rowconst(sys.nb_var);

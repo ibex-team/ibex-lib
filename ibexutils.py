@@ -222,3 +222,76 @@ def verbose_post_recurse (f):
 	return fun
 
 ConfigurationContext.post_recurse = verbose_post_recurse (ConfigurationContext.post_recurse)
+
+# functions that handle lp library
+
+LPLIB_PLUGIN_PREFIX = "lp_lib_"
+
+def lp_lib_options (opt):
+	plugin_node = opt.path.find_node ("plugins")
+
+	# get the list of all possible lp library
+	libdir = plugin_node.ant_glob (LPLIB_PLUGIN_PREFIX + "*", dir=True, src=False)
+	libdir = [ os.path.basename (str (d)) for d in libdir ]
+	list_of_lp_lib_plugin = [ d[len (LPLIB_PLUGIN_PREFIX):] for d in libdir ]
+	default_lp_lib = "none" if "none" in list_of_lp_lib_plugin else None
+	# if the none plugin does not exist, it will create a error during configure
+
+	# help string for --lp-lib command line option
+	help_string = "Possible values: " + ", ".join (list_of_lp_lib_plugin)
+	help_string += " [default: " + str(default_lp_lib) + "]"
+
+	# add the option --lp-lib
+	opt.add_option ("--lp-lib", action="store", dest="LP_LIB",
+									choices = list_of_lp_lib_plugin,
+									default = default_lp_lib, help = help_string)
+
+@conf
+def lp_lib (conf):
+	# Set env variable with the prefix of plugins which handle lp
+	conf.env.LPLIB_PLUGIN_PREFIX = LPLIB_PLUGIN_PREFIX
+
+	Logs.pprint ("BLUE", "Configuration of the library for LP")
+
+	if conf.options.LP_LIB is None:
+		conf.fatal ("The lp_lib_none plugin is not available.")
+
+	conf.msg ("Library for LP", conf.options.LP_LIB)
+	lplib_dirname = LPLIB_PLUGIN_PREFIX + conf.options.LP_LIB
+	plugin_node = conf.path.find_node ("plugins")
+	lplib_node = plugin_node.find_node (lplib_dirname)
+
+	# Recurse on the plugin
+	conf.recurse (os.path.join ("plugins", lplib_dirname))
+
+	# Add lplib_dir to INCLUDES
+	conf.env.append_unique ("INCLUDES_LP_LIB", lplib_node.abspath())
+
+	# check that mandatory files exist
+	for f in [ "ibex_LPWrapper.cpp" ]:
+		if lplib_node.find_node (f) is None:
+			conf.fatal ("A LP plugin must contain a file named %s" % f)
+
+	# The following variables must be defined in env by the plugin called to
+	# handle the LP library.
+	for var in [ "LP_LIB", "IBEX_LP_LIB_INCLUDES", "IBEX_LP_LIB_DEFAULT_EPS",
+	             "IBEX_LP_LIB_EXTRA_ATTRIBUTES" ]:
+		if not var in conf.env:
+			err = "%s must be defined in env by the plugin %s" % (var, lplib_dirname)
+			conf.fatal (err)
+
+	# Copy in _IBEX_DEPS some important variables from _LP_LIB
+	# The plugin must use the store LP_LIB (uselib_store argument with
+	# conf.check* functions).
+	conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", conf.env.CXXFLAGS_LP_LIB)
+	if conf.env.ENABLE_SHARED:
+		# if shared lib is used, 3rd party libs are compiled as static lib with
+		# -fPIC and are contained in libibex
+		for lib in conf.env.LIB_LP_LIB:
+			if not lib in conf.env.LIB_3RD_LIST:
+				conf.env.append_unique ("LIB_IBEX_DEPS", lib)
+	else:
+		conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_LP_LIB)
+
+	# Add info on the LP library used to the settings
+	conf.setting_define ("LP_LIB", conf.env["LP_LIB"])

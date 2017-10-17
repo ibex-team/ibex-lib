@@ -8,7 +8,6 @@
 //============================================================================
 
 #include "ibex_StrategyParam.h"
-#include "ibex_DefaultStrategy.cpp_"
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_Ctc3BCid.h"
@@ -19,12 +18,16 @@
 #include "ibex_SmearFunction.h"
 #include "ibex_LargestFirst.h"
 #include "ibex_Random.h"
+#include "ibex_CellBuffer.h"
+#include "ibex_NormalizedSystem.h"
 
 #include <sstream>
 #include <vector>
 
-#include "ibex_LinearizerCombo.h"
 #include "ibex_LinearizerXTaylor.h"
+#include "ibex_LinearizerCombo.h"
+#include "ibex_LoupFinder.h"
+#include "ibex_Memory.cpp_"
 
 using namespace std;
 

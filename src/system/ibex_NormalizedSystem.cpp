@@ -37,7 +37,7 @@ class SystemNormalize : public SystemFactory {
 		// and be more smart! (make DAGs!)
 		for (int i=0; i<sys.ctrs.size(); i++) {
 
-			Function& fi=sys.ctrs[i].f;
+			const Function& fi=sys.ctrs[i].f;
 
 			if (sys.ctrs[i].op==EQ) {
 				pair<const ExprNode*, const Interval*> p=sys.ctrs[i].is_thick_equality();

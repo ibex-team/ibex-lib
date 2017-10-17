@@ -64,8 +64,8 @@ do_benchs_iter (System &sys, double prec, double time_limit, unsigned int iter)
 	{
 		/* Build the default optimizer */
 		double random_seed = DefaultOptimizer::default_random_seed + (double) i;
-		DefaultOptimizer DefOpt (sys, 0.0, prec, prec,
-		       NormalizedSystem::default_eps_h, false, true, random_seed);
+		DefaultOptimizer DefOpt (sys, prec, prec,
+		       NormalizedSystem::default_eps_h, false, true, random_seed, 0.0);
 
 		/* Set the time limit */
 		DefOpt.timeout = time_limit;

@@ -137,7 +137,7 @@ void System::init_f_from_ctrs() {
 
 	// concatenate all the components of all the constraints function
 	for (int j=0; j<ctrs.size(); j++) {
-		Function& fj=ctrs[j].f;
+		const Function& fj=ctrs[j].f;
 
 		/*========= 1st variant ===============
 		 * will have the disadvantage that the DAG structure

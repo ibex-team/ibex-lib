@@ -33,83 +33,83 @@ public:
 	 * \param var indicates whether x1 is a variable (and other symbols parameters)
 	 *            (case var==true) or the contrary.
 	 */
-	VarSet(Function& f, const ExprNode& x1, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,x2}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,x2,x3}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,...,x4}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,...,x5}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,...,x6}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,...,x7}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,...,x8}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,...,x9}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,...,x10}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,...,x11}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) {x1,...,x12}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, const ExprNode& x12, bool var=true);
+	VarSet(const Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, const ExprNode& x12, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) x[0],...
 	 */
-	VarSet(Function& f, const Array<const ExprNode>& x, bool var=true);
+	VarSet(const Function& f, const Array<const ExprNode>& x, bool var=true);
 
 	/**
 	 * \brief Create the set of variables (or parameters) x[0],...
 	 */
-	VarSet(Function& f, const Array<const ExprSymbol>& x, bool var=true);
+	VarSet(const Function& f, const Array<const ExprSymbol>& x, bool var=true);
 
 	/**
 	 * \brief Create a set of variables (or parameters) from a bitset
@@ -222,7 +222,7 @@ protected:
 	int* params;
 
 	// Init is_var
-	void init_bitset(Function& f, const Array<const ExprNode>& x, bool var);
+	void init_bitset(const Function& f, const Array<const ExprNode>& x, bool var);
 
 	// Init vars & params
 	// (to be called after init_bitset)

@@ -162,7 +162,7 @@ int main() {
 
 	const ExprNode* e=&(sqr(x[0]));
 	for (int i=1; i<N; i++)
-	e = & (*e + sqr(x[i]));
+		e = & (*e + sqr(x[i]));
 
 	Function f(x,*e,"f");
 

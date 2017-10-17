@@ -31,27 +31,27 @@ public:
 	 * \param op: by default: EQ.
 	 *
 	 */
-	CtcFwdBwd(Function& f, CmpOp op=EQ);
+	CtcFwdBwd(const Function& f, CmpOp op=EQ);
 
 	/**
 	 * \brief Build the contractor for "f(x) in [y]".
 	 */
-	CtcFwdBwd(Function& f, const Domain& y);
+	CtcFwdBwd(const Function& f, const Domain& y);
 
 	/**
 	 * \brief Build the contractor for "f(x) in [y]".
 	 */
-	CtcFwdBwd(Function& f, const Interval& y);
+	CtcFwdBwd(const Function& f, const Interval& y);
 
 	/**
 	 * \brief Build the contractor for "f(x) in [y]".
 	 */
-	CtcFwdBwd(Function& f, const IntervalVector& y);
+	CtcFwdBwd(const Function& f, const IntervalVector& y);
 
 	/**
 	 * \brief Build the contractor for "f(x) in [y]".
 	 */
-	CtcFwdBwd(Function& f, const IntervalMatrix& y);
+	CtcFwdBwd(const Function& f, const IntervalMatrix& y);
 
 	/**
 	 * \remark ctr is not kept by reference.

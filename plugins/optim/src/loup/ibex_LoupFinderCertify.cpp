@@ -1,9 +1,11 @@
-/*
- * ibex_LoupCorrection.cpp
- *
- *  Created on: Jul 20, 2017
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_LoupFinderCertify.cpp
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : Jul 20, 2017
+//============================================================================
 
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_FncActivation.h"
