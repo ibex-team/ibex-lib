@@ -78,7 +78,7 @@ Function* Cont::merge(Function &f, Function& g) {
 
 	x.add(y);
 
-	return new Function(x,ExprVector::new_(fg,false));
+	return new Function(x,ExprVector::new_col(fg));
 }
 
 Cont::Cont(Function &f, Function &g, double h_min, double alpha, double beta) : dfs(false), full_diff(true), n(f.nb_var()+g.image_dim()), m(f.image_dim()+g.image_dim()), f(*merge(f,g)), g(&g), domain(this->f.nb_var()), h_min(h_min), alpha(alpha), beta(beta) {

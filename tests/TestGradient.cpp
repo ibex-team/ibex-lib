@@ -41,7 +41,7 @@ void TestGradient::add01() {
 
 void TestGradient::add02() {
 	Variable x,y;
-	Function f(x,y,ExprVector::new_(sqr(x)-y,x*y,false));
+	Function f(x,y,ExprVector::new_col(sqr(x)-y,x*y));
 
 	IntervalVector box(2);
 	box[0]=Interval(1,2);
@@ -115,13 +115,13 @@ void TestGradient::mulVM02() {
 	Variable x;
 	Array<const ExprNode> _row1(x,ExprConstant::new_scalar(1));
 	Array<const ExprNode> _row2(ExprConstant::new_scalar(0),x);
-	const ExprVector& row1=ExprVector::new_(_row1,true);
-	const ExprVector& row2=ExprVector::new_(_row2,true);
+	const ExprVector& row1=ExprVector::new_row(_row1);
+	const ExprVector& row2=ExprVector::new_row(_row2);
 	Array<const ExprNode> _M(row1,row2);
-	const ExprVector& M=ExprVector::new_(_M,false);
+	const ExprVector& M=ExprVector::new_col(_M);
 
 	Array<const ExprNode> _v(x,-x);
-	const ExprVector& v=ExprVector::new_(_v,true);
+	const ExprVector& v=ExprVector::new_row(_v);
 
 	Function f(x,v*M);
 	IntervalVector box(1,Interval(3.0));

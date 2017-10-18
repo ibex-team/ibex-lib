@@ -162,16 +162,8 @@ static Array<const Dim> dims(const Array<const ExprNode>& comp) {
 	return a;
 }
 
-const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, bool in_row) {
-	return *new ExprVector(Array<const ExprNode>(e1,e2), in_row);
-}
-
-const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, bool in_rows) {
-	return *new ExprVector(components,in_rows);
-}
-
-ExprVector::ExprVector(const Array<const ExprNode>& comp, bool in_row) :
-		ExprNAryOp(comp, vec_dim(dims(comp),in_row)), in_row(in_row) {
+ExprVector::ExprVector(const Array<const ExprNode>& comp, ExprVector::Orientation o) :
+		ExprNAryOp(comp, vec_dim(dims(comp),o==ROW)), orient(o) {
 }
 
 const ExprChi& ExprChi::new_(const Array<const ExprNode>& args) {

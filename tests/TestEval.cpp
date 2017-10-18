@@ -226,7 +226,7 @@ void TestEval::eval_components01() {
 	const ExprNode& e2=y-2*x;
 	const ExprNode& e3=y+z;
 	const ExprNode& e4=e1*e2;
-	Function f(x,y,z,Return(e4+1,e2+3,e4-2,e4-4,false));
+	Function f(x,y,z,Return(e4+1,e2+3,e4-2,e4-4));
 
 	Interval vx=Interval::ONE;
 	Interval vy=2*Interval::ONE;
@@ -251,7 +251,7 @@ void TestEval::eval_components02() {
 	const ExprSymbol& y = ExprSymbol::new_("y",d);
 	const ExprSymbol& z = ExprSymbol::new_("z",d);
 
-	Function f(x,y,z,Return(x[1],transpose(y[DoubleIndex::one_row(d,1)]),z[DoubleIndex::one_col(d,2)],false));
+	Function f(x,y,z,Return(x[1],transpose(y[DoubleIndex::one_row(d,1)]),z[DoubleIndex::one_col(d,2)]));
 
 	IntervalVector box(20);
 	for (int i=0; i<20; i++) box[i]=Interval(i,i);

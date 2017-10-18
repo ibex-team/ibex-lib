@@ -120,7 +120,7 @@ void TestExprLinearity::test07() {
 	const ExprSymbol& y=ExprSymbol::new_();
 	Array<const ExprSymbol> args(x,y);
 	Array<const ExprNode> array(A*x,y,b);
-	const ExprVector& e=ExprVector::new_(array,false);
+	const ExprVector& e=ExprVector::new_(array,ExprVector::COL);
 	ExprLinearity lin(args,e);
 	IntervalMatrix de=lin.coeff_matrix(e);
 	CPPUNIT_ASSERT(de.nb_rows()==6 && de.nb_cols()==5);
@@ -154,7 +154,7 @@ void TestExprLinearity::test08() {
 void TestExprLinearity::test09() {
 	const ExprSymbol& x=ExprSymbol::new_(Dim::col_vec(3));
 	Array<const ExprNode> array(3*x[0]+4*x[1]-2*x[2]+1,-x[0]+2*x[1]-x[2]-2);
-	const ExprVector& e=ExprVector::new_(array,false);
+	const ExprVector& e=ExprVector::new_(array,ExprVector::COL);
 	ExprLinearity lin(x,e);
 	IntervalMatrix de=lin.coeff_matrix(e);
 
@@ -169,7 +169,7 @@ void TestExprLinearity::test10() {
 	Array<const ExprNode> array(3*x[0]+4*x[1]-2*x[2]+1,-x[0]+2*x[1]-x[2]-2);
 	Matrix A=Matrix::rand(2,3);
 	Vector b=A.col(1);
-	const ExprNode& e=A*x + ExprVector::new_(array,false) + b;
+	const ExprNode& e=A*x + ExprVector::new_(array,ExprVector::COL) + b;
 	ExprLinearity lin(x,e);
 	IntervalMatrix de=lin.coeff_matrix(e);
 
@@ -187,7 +187,7 @@ void TestExprLinearity::test11() {
 	Array<const ExprSymbol> args(x,y);
 	Array<const ExprNode> vec1(x,ExprConstant::new_scalar(0),2*y);
 	Array<const ExprNode> vec2(x,ExprConstant::new_scalar(0),ExprConstant::new_scalar(3));
-	const ExprNode& e=ExprVector::new_(vec1,true)*ExprVector::new_(vec2,false);
+	const ExprNode& e=ExprVector::new_row(vec1)*ExprVector::new_col(vec2);
 	ExprLinearity lin(args,e);
 	IntervalVector de=lin.coeff_vector(e);
 

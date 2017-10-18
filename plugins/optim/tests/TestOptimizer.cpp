@@ -45,7 +45,7 @@ void TestOptimizer::vec_problem02() {
 	const ExprSymbol& alpha=ExprSymbol::new_();
 	const ExprSymbol& x=ExprSymbol::new_(Dim::col_vec(2));
 
-	const ExprNode& R=Return(Return(cos(alpha),-sin(alpha),true), Return(sin(alpha),cos(alpha),true), false);
+	const ExprNode& R=Return(Return(cos(alpha),-sin(alpha),ExprVector::ROW), Return(sin(alpha),cos(alpha),ExprVector::ROW), ExprVector::COL);
 
 	Vector v=Vector::ones(2);
 
