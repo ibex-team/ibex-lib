@@ -60,7 +60,7 @@ before_install:
 
 # TODO add --affine when tests are fixed
 install: 
-  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${TEST_INTERVAL_LIB} ${PLUGINS} || cat __build__/*.log
+  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${TEST_INTERVAL_LIB} ${PLUGINS} --with-ampl || cat __build__/*.log
   - ./waf build install clean
 
 # command to run tests
