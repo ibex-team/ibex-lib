@@ -144,7 +144,9 @@ void TestArith::add13() { check_add(Interval(DBL_MAX,POS_INFINITY), -1, Interval
 void TestArith::add14() { check_add(Interval(DBL_MAX,POS_INFINITY), Interval(DBL_MAX,POS_INFINITY), Interval(DBL_MAX,POS_INFINITY)); }
 void TestArith::add15() { check_add(Interval(DBL_MAX,POS_INFINITY), NEG_INFINITY, Interval::EMPTY_SET); }
 void TestArith::add16() { check_add(Interval(DBL_MAX,POS_INFINITY), POS_INFINITY, Interval::EMPTY_SET); }
-void TestArith::add17() { check_add(Interval(NEG_INFINITY,-DBL_MAX), 1, Interval(NEG_INFINITY,ibex::next_float(-DBL_MAX))); }
+void TestArith::add17() { check_add(Interval(NEG_INFINITY,-DBL_MAX),  1, Interval(NEG_INFINITY,ibex::next_float(-DBL_MAX))); }
+void TestArith::add18() { check_add(Interval(NEG_INFINITY,-DBL_MAX), -1, Interval(NEG_INFINITY,-DBL_MAX)); }
+void TestArith::add19() { check_add(Interval(NEG_INFINITY,-DBL_MAX),  Interval(NEG_INFINITY,-DBL_MAX), Interval(NEG_INFINITY,-DBL_MAX)); }
 
 
 void TestArith::mul01() { check_mul(Interval::EMPTY_SET,         Interval(0,1),               Interval::EMPTY_SET); }

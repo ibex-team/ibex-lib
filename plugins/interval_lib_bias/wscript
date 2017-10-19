@@ -40,6 +40,20 @@ def configure (conf):
 	conf.check_cxx (lib = biaslibs, libpath = bias_lib,
 		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
 
+    # It is necessary to use filib, to avoid problem with x80 processor
+#==============================================================================
+#        This option prevents undesirable excess precision on machines such
+#        as the 68000 where the floating registers (of the 68881) keep more
+#        precision than a "double" is supposed to have.  Similarly for the
+#        x86 architecture.  For most programs, the excess precision does
+#        only good, but a few programs rely on the precise definition of
+#        IEEE floating point.  Use -ffloat-store for such programs, after
+#        modifying them to store all pertinent intermediate computations
+#        into variables.
+#==============================================================================
+	conf.check_cxx (cxxflags = "-ffloat-store", use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
+    
+    
 	# Define needed variables
 	cpp_wrapper_node = conf.path.make_node ("wrapper.cpp")
 	h_wrapper_node = conf.path.make_node ("wrapper.h")

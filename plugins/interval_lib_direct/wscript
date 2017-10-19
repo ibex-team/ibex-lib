@@ -26,6 +26,17 @@ def configure (conf):
 	conf.check_cxx (cxxflags = "-ffloat-store", use = [ "IBEX", "ITV_LIB" ],
 			uselib_store = "ITV_LIB")
 
+
+	# Looking for filib headers and library.
+	# We also test if we need to add sse2 or sse3 flags.
+	D = {"mandatory": False, "errmsg": "no", "use": [ "IBEX", "ITV_LIB" ], "uselib_store": "ITV_LIB"}
+	D["cxxflags"] = "-msse3"
+	ret = conf.check_cxx (**D)
+	if not ret:
+		D["cxxflags"] = "-msse2"
+		conf.check_cxx (**D)
+
+
 	# Define needed variables
 	cpp_wrapper_node = conf.path.make_node ("wrapper.cpp")
 	h_wrapper_node = conf.path.make_node ("wrapper.h")

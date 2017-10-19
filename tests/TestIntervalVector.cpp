@@ -240,7 +240,7 @@ void TestIntervalVector::eq04() {
 
 void TestIntervalVector::mid01() {
 	IntervalVector x(3,_x);
-	IntervalVector m=x.mid();
+	Vector m=x.mid();
 	check(m[0],0.5);
 	check(m[1],2.5);
 	check(m[2],4.5);
