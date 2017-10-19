@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_ExtendedSystem.h"
-#include "ibex_SystemExtend.cpp_"
 
 namespace ibex {
 
@@ -18,8 +17,8 @@ const char* ExtendedSystem::goal_name() {
 	return _goal_name;
 }
 
-ExtendedSystem::ExtendedSystem(const System& sys, double eps) /*: original_goal(*sys.goal)*/ {
-	init(SystemExtend(sys,eps));
+ExtendedSystem::ExtendedSystem(const System& sys, double eps) :/*: original_goal(*sys.goal)*/
+	NormalizedSystem(sys,eps,true) {
 }
 
 } // end namespace ibex

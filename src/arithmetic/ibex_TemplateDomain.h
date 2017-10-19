@@ -947,7 +947,9 @@ TemplateDomain<D> operator+(const TemplateDomain<D>& d1, const TemplateDomain<D>
 template<class D>
 TemplateDomain<D> operator*(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2) {
 
-	TemplateDomain<D> d(mul_dim(d1.dim,d2.dim));
+	assert(!d1.dim.cst_vec);
+
+	TemplateDomain<D> d(mul_dim((Dim&) d1.dim,d2.dim));
 
 	if (d1.dim.is_scalar()) {
 		switch(d2.dim.type()) {

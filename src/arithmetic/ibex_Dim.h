@@ -214,7 +214,7 @@ Dim add_dim(Dim& l, Dim& r);
 /**
  * \brief Return the dimension of a product (left*right).
  */
-Dim mul_dim(const Dim& l, const Dim& r);
+Dim mul_dim(Dim& l, const Dim& r);
 
 /**
  * \brief Return the dimension of a vector.

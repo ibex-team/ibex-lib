@@ -30,8 +30,6 @@ namespace ibex {
  * Note that the number of constraints of the resulting system
  * in this case is greater than the number or the original one.
  *
- * The index of a constraint in the original system can be retreived
- * via original_index(int).
  */
 class NormalizedSystem : public System {
 public:
@@ -42,32 +40,11 @@ public:
 	 *              inequalities: f<=eps and -f<=eps. If eps==0
 	 *              equalities are duplicated.
 	 */
-	explicit NormalizedSystem(const System& sys, double eps=0);
-
-	/**
-	 * \brief Delete this.
-	 */
-	virtual ~NormalizedSystem();
-
-	/**
-	 * \brief Get the original index of a constraint.
-	 */
-	int original_index(int i) const;
+	explicit NormalizedSystem(const System& sys, double eps=0, bool extended=false);
 
 	/** Default epsilon applied to equations: 1e-8. */
 	static const double default_eps_h;
-
-protected:
-	int* _orig_index;
 };
-
-
-/*============================================ inline implementation ============================================ */
-
-inline int NormalizedSystem::original_index(int i) const {
-	assert(i<nb_ctr);
-	return _orig_index[i];
-}
 
 } // end namespace ibex
 #endif // __IBEX_NORMALIZED_SYSTEM_H__

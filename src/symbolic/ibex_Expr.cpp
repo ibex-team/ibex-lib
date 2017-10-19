@@ -350,7 +350,7 @@ ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
 }
 
 ExprMul::ExprMul(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,mul_dim(left.dim,right.dim)) {
+				ExprBinaryOp(left,right,mul_dim((Dim&) left.dim,right.dim)) {
 }
 
 ExprSub::ExprSub(const ExprNode& left, const ExprNode& right) :

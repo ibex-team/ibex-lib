@@ -254,7 +254,7 @@ public:
 	 *
 	 * TODO: extend to vector/matrix constraints.
 	 */
-	std::pair<const ExprNode*, const Interval*> is_thick_equality() const;
+//	std::pair<const ExprNode*, const Interval*> is_thick_equality() const;
 
 private:
 

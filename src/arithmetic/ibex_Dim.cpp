@@ -56,13 +56,20 @@ Dim add_dim(Dim& l, Dim& r) {
 	}
 }
 
-Dim mul_dim(const Dim& l, const Dim& r) {
+Dim mul_dim(Dim& l, const Dim& r) {
 	if (l.type()==Dim::SCALAR) // scalar multiplication.
 		return r; // cst_vec is maintained.
 	else {
 		if (l.nb_cols()!=r.nb_rows()) {
-			if (l.nb_rows()==r.nb_rows() && l.nb_cols()==1 && r.nb_cols()==1) return Dim::scalar(); // dot product of row vectors
-			if (l.nb_cols()==r.nb_cols() && l.nb_rows()==1 && r.nb_rows()==1) return Dim::scalar(); // dot product of column vectors
+			if (l.cst_vec && l.nb_rows()==r.nb_rows() && l.nb_cols()==1) {
+				l=l.transpose_dim();
+				std::cout << "now l=" << l << std::endl;
+				l.cst_vec=false;
+				return Dim::scalar(); // dot product of row vectors
+			}
+			// should not happen:
+			//if (l.nb_cols()==r.nb_cols() && l.nb_rows()==1 && r.nb_rows()==1)
+			// return Dim::scalar(); // dot product of column vectors
 
 			throw DimException("mismatched dimensions in matrix multiplication");
 		} else {

@@ -15,39 +15,28 @@ using namespace std;
 
 namespace ibex {
 
-PdcFirstOrder::PdcFirstOrder(const System& sys, const IntervalVector& init_box) : Pdc(sys.nb_var), sys(sys), init_box(init_box), e(NULL) { }
+PdcFirstOrder::PdcFirstOrder(const System& sys, const IntervalVector& init_box) : Pdc(sys.nb_var), sys(sys), init_box(init_box) { }
 
 BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
-
 
 	BoolInterval res;
 	int n=sys.nb_var;
 
-	// by default, all the constraints are activated
-	int M=sys.nb_ctr;
-
 	// count the number of active constraints
-	// in the original system
-	for (int j=0; j<sys.nb_ctr; j++) {
-		if (e && e->original(j)) M--;
-	}
+	// in the system
+	int M=sys.active_ctrs(box).size();
 
 	if (M>n) { return MAYBE; } // cannot be full rank
 
-	int j2=0;
 	IntervalMatrix* J=new IntervalMatrix(M+1,n); // +1 because we add the gradient of f
 
-	sys.goal->gradient(box,J->row(j2++));
+	sys.goal->gradient(box,J->row(0));
 
-	for (int j=0; j<sys.nb_ctr; j++) {
-		if (e && e->original(j)) {
-			continue;
-		}
-		sys.f_ctrs[j].gradient(box,J->row(j2++));
-	}
+	J->put(1,0,sys.active_ctrs_jacobian(box));
 
 	int N=sys.nb_var; // final number of variables
-	// check the active bouding constraints
+
+	// check the active bounding constraints
 	for (int i=0; i<sys.nb_var; i++) {
 		// if the ith bounding constraint is active
 		// we will remove the ith column in the matrix J2
@@ -62,7 +51,7 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		}
 	}
 
-	IntervalMatrix* J2=J;
+	IntervalMatrix* J2;
 	if (N==n) J2=J; // useless to build J a second time.
 	else if (M+1>N) { // cannot be full rank
 		delete J;
