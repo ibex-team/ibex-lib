@@ -42,6 +42,25 @@ int max_height(const Array<const ExprNode>& args) {
 	return max;
 }
 
+/**
+ * Just to allow writing a dot product as x*x...
+ * We insert a transpose operator in this case.
+ */
+const ExprNode& mul_left(const ExprNode& left, const ExprNode& right) {
+	if (left.dim.type()==Dim::COL_VECTOR && right.dim.nb_rows()>1)
+		return transpose(left);
+	else
+		return left;
+}
+
+Dim mul_left_dim(const ExprNode& left, const ExprNode& right) {
+	if (left.dim.type()==Dim::COL_VECTOR && right.dim.nb_rows()>1)
+		return left.dim.transpose_dim();
+	else
+		return left.dim;
+}
+
+
 } // end anonymous namespace
 
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
@@ -291,18 +310,6 @@ ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
 	value.v() = v;
 }
 
-Vector::operator const ExprConstant&() const {
-	const ExprConstant& e=ExprConstant::new_vector(*this,false);
-	((Dim&) e.dim).cst_vec = true;
-	return e;
-}
-
-IntervalVector::operator const ExprConstant&() const {
-	const ExprConstant& e=ExprConstant::new_vector(*this,false);
-	((Dim&) e.dim).cst_vec = true;
-	return e;
-}
-
 ExprConstant::ExprConstant(const IntervalMatrix& m)
   : ExprLeaf(Dim::matrix(m.nb_rows(),m.nb_cols())),
     value(Dim::matrix(m.nb_rows(),m.nb_cols())) {
@@ -345,16 +352,15 @@ ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Di
 }
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,add_dim((Dim&) left.dim, (Dim&) right.dim)) {
-
+				ExprBinaryOp(left,right,add_dim(left.dim, right.dim)) {
 }
 
 ExprMul::ExprMul(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,mul_dim((Dim&) left.dim,right.dim)) {
+				ExprBinaryOp(mul_left(left,right),right,mul_dim(mul_left_dim(left,right),right.dim)) {
 }
 
 ExprSub::ExprSub(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,add_dim((Dim&) left.dim, (Dim&) right.dim)) {
+				ExprBinaryOp(left,right,add_dim(left.dim, right.dim)) {
 }
 
 ExprDiv::ExprDiv(const ExprNode& left, const ExprNode& right) :
