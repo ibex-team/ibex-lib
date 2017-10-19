@@ -30,8 +30,8 @@ const bool OptimMinMax::default_visit_all = false;
 
 const double OptimMinMax::default_nb_sols = 15;
 const double OptimMinMax::default_min_acpt_diam=1e-2;
-const int OptimMinMax::default_nb_sivia_iter=100;
-const int OptimMinMax::default_nb_optim_iter=100;
+const int OptimMinMax::default_nb_sivia_iter=0;
+const int OptimMinMax::default_nb_optim_iter=0;
 const double OptimMinMax::default_y_sol_radius = 0.15;
 const double OptimMinMax::default_reg_acpt_error = 1e-1;
 
@@ -578,7 +578,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
             bool res =lsolve.optimize(x_cell,loup);
 //            cout<<"res : "<<res<<endl;
             cout<<"fmax after lightoptimMinMax: "<<data_x->fmax<<endl;
-            if(res) {
+            if(res && (nb_optim_iter>0 || nb_sivia_iter>0)) {
                 OptimData* ydata = &(data_x->y_heap->top1()->get<OptimData>());
                 cout<< "top 1 pf: "<<ydata->pf<<endl;
             }
