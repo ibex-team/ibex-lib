@@ -133,7 +133,7 @@ protected:
 	static const int  SIGNATURE_LENGTH;
 	static const char* SIGNATURE;
 
-	int read_int(std::ifstream& f);
+	unsigned int read_int(std::ifstream& f);
 	double read_double(std::ifstream& f);
 	void read_signature(std::ifstream& f);
 	SolverOutputBox read_output_box(std::ifstream& f);

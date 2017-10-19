@@ -408,6 +408,7 @@ bool Solver::is_boundary(const IntervalVector& box) {
 		return full_rank(J);
 	}
 	case HALF_BALL:
+	default:
 		not_implemented("\"half-ball\" boundary test");
 		return false;
 	}
@@ -443,11 +444,11 @@ SolverOutputBox& Solver::store_sol(const SolverOutputBox& sol) {
 		return manif->unknown.back();
 		break;
 	case SolverOutputBox::PENDING :
+	default:
 		manif->pending.push_back(sol);
 		return manif->pending.back();
 		break;
 	}
-
 }
 
 void Solver::flush() {

@@ -40,7 +40,7 @@ void Manifold::clear() {
 	nb_cells = 0;
 }
 
-int Manifold::read_int(ifstream& f) {
+unsigned int Manifold::read_int(ifstream& f) {
 	uint32_t x;
 	f.read((char*) &x, sizeof(x)); //f >> x;
 	if (f.eof()) ibex_error("[manifold]: unexpected end of file.");
@@ -69,7 +69,7 @@ SolverOutputBox Manifold::read_output_box(ifstream& f) {
 
 	IntervalVector box(n);
 
-	for (int j=0; j<n; j++) {
+	for (unsigned int j=0; j<n; j++) {
 		double lb=read_double(f);
 		double ub=read_double(f);
 		box[j]=Interval(lb,ub);
@@ -93,8 +93,8 @@ SolverOutputBox Manifold::read_output_box(ifstream& f) {
 
 	if (m>0 && m<n && _status<=1) {
 		BitSet params(n);
-		for (int j=0; j<n-m; j++) {
-			int v=read_int(f);
+		for (unsigned int j=0; j<n-m; j++) {
+			unsigned int v=read_int(f);
 			if (v<1 || v>n) {
 				ibex_error("[manifold]: bad input file (bad parameter index)");
 			}
@@ -250,7 +250,7 @@ string Manifold::format() {
 void Manifold::write_txt(ofstream& file, const SolverOutputBox& sol) const {
 	char s=' ';
 	const IntervalVector& box=sol;
-	for (int i=0; i<n; i++) {
+	for (unsigned int i=0; i<n; i++) {
 		if (i>0) file << s;
 		file << box[i].lb() << s << box[i].ub();
 	}
