@@ -156,17 +156,6 @@ private:
 	 */
 	int dim3;
 
-public:
-	/**
-	 * \brief True if *this is the dimension of a constant vector.
-	 *
-	 * The dimension of a constant vector (IntervalVector) is a column
-	 * vector by default. This means that it may be automatically
-	 * transposed to a row vector if necessary.
-	 *
-	 * This field is always set to false by default.
-	 */
-	bool cst_vec;
 };
 
 /**
@@ -197,19 +186,8 @@ std::ostream& operator<< (std::ostream& os, const DimException& e);
 
 /**
  * \brief Return the dimension of a sum.
- *
- * This is not as simple as "l" or "r" because
- * constant vectors (IntervalVector) are always
- * column vector by default. So they have to be
- * transformed into row vectors when added to row
- * vectors (so this function can modify "cst_vec" in
- * l or r).
- *
- * If l and r are both cst_vec (possible with expressions
- * built from the parser)
- * then the result is also a cst_vec.
  */
-Dim add_dim(Dim& l, Dim& r);
+Dim add_dim(const Dim& l, const Dim& r);
 
 /**
  * \brief Return the dimension of a product (left*right).
@@ -230,7 +208,7 @@ std::ostream& operator<<(std::ostream&, const Dim&);
 
 /*================================== inline implementations ========================================*/
 
-inline Dim::Dim() : dim2(1), dim3(1), cst_vec(false) {
+inline Dim::Dim() : dim2(1), dim3(1) {
 
 }
 

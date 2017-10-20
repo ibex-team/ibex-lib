@@ -145,3 +145,67 @@ bool almost_eq(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected,
 }
 
 
+
+void check_relatif(double y_actual, double y_expected, double err) {
+	CPPUNIT_ASSERT(!isnan(y_expected));
+	if (y_expected==POS_INFINITY) { CPPUNIT_ASSERT(y_actual==POS_INFINITY); }
+	else if (y_expected==NEG_INFINITY) { CPPUNIT_ASSERT(y_actual==NEG_INFINITY); }
+	else {
+		CPPUNIT_ASSERT(y_actual!=POS_INFINITY);
+		CPPUNIT_ASSERT(y_actual!=NEG_INFINITY);
+		if (fabs(y_expected)<1)
+			CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected,y_actual,err);
+		else
+			CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected,y_actual,err*fabs(y_expected));
+	}
+}
+
+void check_relatif(const Interval& y_actual, const Interval& y_expected, double err) {
+	//std::cout << "check:    " << y_expected << " (expected)        " << y_actual << " (actual)"<< std::endl;
+	if (y_expected.is_empty()) { CPPUNIT_ASSERT(y_actual.is_empty()); return; }
+
+	CPPUNIT_ASSERT(!y_actual.is_empty());
+	CPPUNIT_ASSERT(!isnan(y_actual.lb()));
+	CPPUNIT_ASSERT(!isnan(y_actual.ub()));
+	if (fabs(y_expected.lb())<1)
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.lb(),y_actual.lb(),err);
+	else
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.lb(),y_actual.lb(),err*fabs(y_expected.lb()));
+	if (fabs(y_expected.ub())<1)
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.ub(),y_actual.ub(),err);
+	else
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.ub(),y_actual.ub(),err*fabs(y_expected.ub()));
+}
+
+void check_relatif(const IntervalVector& y_actual, const IntervalVector& y_expected, double err) {
+	CPPUNIT_ASSERT(y_actual.size()==y_expected.size());
+	if (y_actual.is_empty() && y_expected.is_empty()) { CPPUNIT_ASSERT(true); return; }
+	for (int i=0; i<y_actual.size(); i++)
+		check_relatif(y_actual[i],y_expected[i], err);
+}
+
+
+
+void check_relatif(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected, double err) {
+	CPPUNIT_ASSERT(y_actual.nb_rows()!=y_actual.nb_rows());
+	CPPUNIT_ASSERT(y_actual.nb_cols()!=y_actual.nb_cols());
+	if (y_actual.is_empty() && y_expected.is_empty()) { CPPUNIT_ASSERT(true); return; }
+	for (int i=0; i<y_actual.nb_rows(); i++) {
+		check_relatif(y_actual.row(i), y_expected.row(i),err);
+	}
+}
+
+
+void check_relatif(const Vector& y_actual, const Vector& y_expected, double err) {
+	CPPUNIT_ASSERT(y_actual.size()==y_expected.size());
+	for (int i=0; i<y_actual.size(); i++)
+		check_relatif(y_actual[i],y_expected[i],err);
+}
+
+void check_relatif(const Matrix& y_actual, const Matrix& y_expected, double err) {
+	CPPUNIT_ASSERT(y_actual.nb_rows()!=y_actual.nb_rows());
+	CPPUNIT_ASSERT(y_actual.nb_cols()!=y_actual.nb_cols());
+	for (int i=0; i<y_actual.nb_rows(); i++) {
+		check_relatif(y_actual.row(i), y_expected.row(i),err);
+	}
+}

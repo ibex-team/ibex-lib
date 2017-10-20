@@ -673,7 +673,7 @@ void TestExpr::subnodes04() {
 void TestExpr::bug81() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::row_vec(3));
 	IntervalVector y(3);
-	const ExprNode& z=x+y;
+	const ExprNode& z=x+transpose(y);
 	CPPUNIT_ASSERT(z.dim == x.dim);
 	delete &x;
 	delete &z;

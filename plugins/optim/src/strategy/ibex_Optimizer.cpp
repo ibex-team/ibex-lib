@@ -138,7 +138,7 @@ void Optimizer::update_uplo() {
 		new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
 		//    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
 
-		double m = std::min(new_uplo, uplo_of_epsboxes);
+		double m = (new_uplo < uplo_of_epsboxes) ? new_uplo :  uplo_of_epsboxes;
 		if (uplo < m) uplo = m; // warning: hides the field "m" of the class
 		// note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
 		// ymax is strictly lower than the loup.
@@ -289,7 +289,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// TODO: no loup-point if handle_cell contracts everything
 	loup_point=init_box;
 	time=0;
-	Timer::start();
+	Timer timer;
+	timer.start();
 	handle_cell(*root,init_box);
 	
 	update_uplo();
@@ -340,7 +341,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					}
 				}
 				update_uplo();
-				time_limit_check(); // TODO: not reentrant
+				if (timeout>0) timer.check(timeout); // TODO: not reentrant, JN: done
+				time = timer.get_time();
 
 			}
 			catch (NoBisectableVariableException& ) {
@@ -357,8 +359,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 		return status;
 	}
 
-	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	timer.stop();
+	time = timer.get_time();
 
 	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && abs_eps_f==0 && rel_eps_f==0)))
 		status=INFEASIBLE;
@@ -435,12 +437,6 @@ void Optimizer::report(bool verbose) {
 	cout << " number of cells: " << nb_cells << endl;
 }
 
-void Optimizer::time_limit_check () {
-	if (timeout<=0) return;
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	if (time >=timeout ) throw TimeOutException();
-	Timer::start();
-}
+
 
 } // end namespace ibex

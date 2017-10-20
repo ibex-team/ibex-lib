@@ -136,32 +136,31 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 	find_time=0;
 	diff_time=0;
     neighborhood_time=0;
+	Timer timer;
 
 	do {
 
 		try {
 			//cout << "solution=" << x << endl;
-			Timer::start();
+			timer.restart();
 			// Build a cell around the current solution x
 			ContCell* new_cell=choose(p.second,x,h);
 			//cout << "new cell:" << new_cell.box << endl;
-			Timer::stop();
-			choose_time+=Timer::VIRTUAL_TIMELAPSE();
+			timer.stop();
+			choose_time += timer.get_time();
             
             // Update neighborhoods
-            Timer::start();
+            timer.restart();
             add_to_neighbors(new_cell);
-            Timer::stop();
-            neighborhood_time+=Timer::VIRTUAL_TIMELAPSE();
+            timer.stop();
+            neighborhood_time+= timer.get_time();
 
 			// Intersects the list of existing cells
 			// with the current cell and vice-versa
-			Timer::start();
-
+			timer.restart();
 			diff(new_cell);
-
-			Timer::stop();
-			diff_time+=Timer::VIRTUAL_TIMELAPSE();
+			timer.stop();
+			diff_time+=timer.get_time();
 
 			// assert
 			if (full_diff)
@@ -180,10 +179,10 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		// cell in turn and search in all its facets.
 		// Some facets may be discarded and some cells may be moved
 		// to l_empty_facets or l_solution_find_fail_facets.
-		Timer::start();
+		timer.restart();
 		p=find_solution_in_cells(x);
-		Timer::stop();
-		find_time+=Timer::VIRTUAL_TIMELAPSE();
+		timer.stop();
+		find_time+= timer.get_time();
 
 		// In case of success, the value of h for the next "choose" is set
 		// to the parameter width of the cell where the solution has been

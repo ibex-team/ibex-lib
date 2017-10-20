@@ -11,8 +11,7 @@
 #ifndef __IBEX_FNC_KHUN_TUCKER_H__
 #define __IBEX_FNC_KHUN_TUCKER_H__
 
-#include "ibex_System.h"
-#include "ibex_EntailedCtr.h"
+#include "ibex_NormalizedSystem.h"
 
 namespace ibex {
 

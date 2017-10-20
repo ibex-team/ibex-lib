@@ -1733,6 +1733,14 @@ inline const ExprExp& pow(double value, const ExprNode& right) {
 	return exp(right*log(ExprConstant::new_scalar(value)));
 }
 
+inline Vector::operator const ExprConstant&() const {
+	return ExprConstant::new_vector(*this,false);
+}
+
+inline IntervalVector::operator const ExprConstant&() const {
+	return ExprConstant::new_vector(*this,false);
+}
+
 } // end namespace ibex
 
 #endif // end _IBEX_EXPR_H

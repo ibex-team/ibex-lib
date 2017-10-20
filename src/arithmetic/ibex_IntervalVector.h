@@ -33,6 +33,15 @@ class IntervalMatrix; // declared only for friendship
  * By convention an empty vector has a dimension. A vector becomes empty
  * when one of its component becomes empty and all the components
  * are set to the empty Interval.
+ *
+ * An IntervalVector is always a column vector.
+ * If you want to insert a row vector in an
+ * expression, use the transpose(...) operator.
+ * Example:
+ *
+ *    const ExprSymbol& x=ExprSymbol::new_(Dim::col_vec(2));
+ *    IntervalVector v=Vector::ones(2);
+ *    const ExprNode& e=transpose(v)*x;
  */
 class IntervalVector {
 

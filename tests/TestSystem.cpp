@@ -261,6 +261,25 @@ void TestSystem::normalize01() {
 	CPPUNIT_ASSERT(sys.ctrs[5].op==LEQ);
 }
 
+
+void TestSystem::normalize02() {
+	  const ExprSymbol& x=ExprSymbol::new_("x");
+	  const ExprSymbol& y=ExprSymbol::new_("y");
+
+	  SystemFactory fac;
+	  fac.add_var(x);
+	  fac.add_var(y);
+	  const ExprNode& e=x+y;
+	  Vector v(2);
+	  v[0]=1; v[1]=2;
+	  fac.add_ctr(((const ExprNode&) ExprVector::new_col(e,e))=ExprConstant::new_vector(v,false));
+	  System sys(fac);
+	  NormalizedSystem nsys(sys,1);
+	  CPPUNIT_ASSERT(sys.f_ctrs.expr().size==12); // the DAG structure must be kept!
+	  CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(((x+y);(x+y))+(-2 ; -3))"));
+	  CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((-((x+y);(x+y)))+(0 ; 1))"));
+}
+
 void TestSystem::merge01() {
 	SystemFactory fac1;
 	{

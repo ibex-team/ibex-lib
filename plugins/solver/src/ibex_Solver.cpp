@@ -112,7 +112,7 @@ void Solver::start(const IntervalVector& init_box) {
 
 	time = 0;
 
-	Timer::start();
+	timer.restart();
 }
 
 void Solver::start(const char* input_paving) {
@@ -149,13 +149,12 @@ void Solver::start(const char* input_paving) {
 	manif->unknown.clear();
 	manif->pending.clear();
 
-	Timer::start();
+	timer.restart();
 }
 
 SolverOutputBox* Solver::next() {
 	while (!buffer.empty()) {
-
-		time_limit_check();
+		if (time_limit >0) timer.check(time_limit);
 
 		if (trace==2) cout << buffer << endl;
 
@@ -268,8 +267,8 @@ Solver::Status Solver::solve() {
 		manif->status = CELL_OVERFLOW;
 	}
 
-	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	timer.stop();
+	time = timer.get_time();
 
 	manif->time += time;
 	manif->nb_cells += nb_cells;
@@ -277,12 +276,6 @@ Solver::Status Solver::solve() {
 	return manif->status;
 }
 
-void Solver::time_limit_check () {
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	if (time_limit >0 &&  time >=time_limit) throw TimeOutException();
-	Timer::start();
-}
 
 SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 
@@ -413,7 +406,7 @@ bool Solver::is_boundary(const IntervalVector& box) {
 		}
 		return full_rank(J);
 	}
-	case HALF_BALL: {
+	case HALF_BALL:
 		not_implemented("\"half-ball\" boundary test");
 		return false;
 	}
@@ -452,7 +445,6 @@ SolverOutputBox& Solver::store_sol(const SolverOutputBox& sol) {
 		manif->pending.push_back(sol);
 		return manif->pending.back();
 	}
-
 }
 
 void Solver::flush() {

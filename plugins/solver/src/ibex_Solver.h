@@ -353,6 +353,7 @@ protected:
 	 * \brief CPU running time used to obtain this manifold.
 	 */
 	double time;
+	Timer timer;
 
 	/**
 	 * \brief Number of cells used to obtain this manifold.
