@@ -292,5 +292,26 @@ public:
 
 };
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+
+class CellCostMaxPFub: public CellCostFunc {
+public:
+	CellCostMaxPFub();
+
+	/**
+	 * \brief Add OptimData
+	 */
+	virtual void add_backtrackable(Cell& root);
+
+	/**
+	 * \brief Set "pf" in OptimData in the cell
+	 */
+	virtual void set_optim_data(Cell& c, System& sys);
+
+	/** The "cost" of a element. */
+	virtual	double cost(const Cell& c) const;
+
+};
 } // end namespace ibex
 #endif // __IBEX_CELL_COST_FUNC__

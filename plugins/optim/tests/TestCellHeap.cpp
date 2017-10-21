@@ -56,7 +56,7 @@ void TestCellHeap::test02() {
 
 		h2.push(cell);
 	}
-	h2.pop(); h2.pop();
+	delete h2.pop(); delete h2.pop();
 
 	CPPUNIT_ASSERT(h2.size()==nb-2);
 }
@@ -251,6 +251,7 @@ void TestCellHeap::test_D03() {
 	delete h1.pop(); delete h1.pop();
 
 	CPPUNIT_ASSERT(h1.size()==((unsigned int)(nb-2)));
+	h1.flush();
 }
 
 
@@ -282,11 +283,11 @@ void TestCellHeap::test_D04() {
 		cell1->get<OptimData>().pf = box[0]*box[1];
 		h1.push(cell1);
 	}
-	delete h1.pop();
-	delete h1.pop();
+	delete h1.pop1();
+	delete h1.pop2();
 	h1.contract(100);
-	delete h1.pop();
-	delete h1.pop();
+	delete h1.pop1();
+	delete h1.pop2();
 
 	h1.flush();
 }
@@ -320,27 +321,34 @@ void TestCellHeap::test_D05() {
 	for (int i=0; i<nb ;i++) {
 		cell1 = new Cell((pow(-1,i)*i)*box);
 		cell1->add<OptimData>();
-		cell1->get<OptimData>().pu=0.2;
+		cell1->get<OptimData>().pu=0.2*i;
 		cell1->get<OptimData>().pf = box[0]*box[1];
 		cell2 = new Cell((pow(-1,i)*i)*box);
 		cell2->add<OptimData>();
-		cell2->get<OptimData>().pu=0.2;
+		cell2->get<OptimData>().pu=0.2*i;
 		cell2->get<OptimData>().pf = box[0]*box[1];
 		h1.push(cell1);
 		h2.push(cell2);
 	}
-	delete h1.pop(); delete h1.pop();
-	delete h2.pop(); delete h2.pop();
+	delete h1.pop1(); delete h1.pop1();
+	delete h2.pop1(); delete h2.pop1();
+
+	check(h1.top1()->box,h2.top1()->box);
+	check(h1.top2()->box,h2.top2()->box);
+	check(h1.size(),h2.size());
 //	h1.sort();
 //	h2.sort();
-	delete h1.pop(); delete h1.pop();
-	delete h2.pop(); delete h2.pop();
+	delete h1.pop2(); delete h1.pop2();
+	delete h2.pop2(); delete h2.pop2();
 
-	check(h1.top()->box,h2.top()->box);
+	check(h1.top1()->box,h2.top1()->box);
+	check(h1.top2()->box,h2.top2()->box);
 	check(h1.size(),h2.size());
 
 	h1.flush();
 	CPPUNIT_ASSERT(h1.size()==0);
+	h2.flush();
+	CPPUNIT_ASSERT(h2.size()==0);
 }
 
 

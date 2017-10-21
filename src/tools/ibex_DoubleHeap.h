@@ -35,12 +35,24 @@ public:
 	 */
 	DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, CostFunc<T>& cost2, bool update_cost2_when_sorting, int critpr=50);
 
+    /** copy constructor **/
+    explicit DoubleHeap(const DoubleHeap& dhcp);
+
+    DoubleHeap<T>* deepcopy() const;
+
 	/**
 	 * \brief Flush the buffer.
 	 *
 	 * All the remaining data will be *deleted*
 	 */
 	void flush();
+
+	/**
+	 * \brief Clear the buffer.
+	 *
+	 * All the remaining data will be *removed* without being *deleted*
+	 */
+	void clear();
 
 	/** \brief Return the size of the buffer. */
 	unsigned int size() const;
@@ -139,6 +151,7 @@ protected:
 	 */
 	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool percolate);
 
+private:
 	/**
 	 * Erase all the subnodes of node (including itself) in the first heap
 	 * and manage the impact on the second heap.
@@ -153,6 +166,12 @@ protected:
 	void erase_subnodes(HeapNode<T>* node, bool percolate);
 
 	std::ostream& print(std::ostream& os) const;
+
+	// for deepcopy only
+	explicit DoubleHeap(int critproba);
+
+	void delete_subnodes1(HeapNode<T>* node) ;
+
 };
 
 
@@ -167,20 +186,79 @@ DoubleHeap<T>::DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, Co
 }
 
 template<class T>
+DoubleHeap<T>::DoubleHeap(int critproba) : nb_nodes(0), heap1(NULL), heap2(NULL), critpr(critproba), current_heap_id(0) {
+
+}
+
+template<class T>
+DoubleHeap<T>* DoubleHeap<T>::deepcopy() const {
+	DoubleHeap<T>* copy =new DoubleHeap(this->critpr);
+    copy->nb_nodes=this->nb_nodes;
+    copy->current_heap_id= this->current_heap_id;
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> p = this->heap1->deepcopy_sheap(2);
+    copy->heap1 = p.first;
+    copy->heap2 = new SharedHeap<T>(this->heap2->costf,this->heap2->update_cost_when_sorting,this->heap2->heap_id);
+    while(!p.second->empty()) {
+        copy->heap2->push_elt(p.second->back());
+        p.second->pop_back();
+    }
+    delete p.second;
+    return copy;
+}
+
+template<class T>
+DoubleHeap<T>::DoubleHeap(const DoubleHeap &dhcp):nb_nodes(dhcp.nb_nodes),heap1(NULL),heap2(NULL),critpr(dhcp.critpr),current_heap_id(dhcp.current_heap_id) {
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> p;
+    p= dhcp.heap1->copy_sheap(2);
+    heap1 = p.first;
+    heap2 = new SharedHeap<T>(dhcp.heap2->costf,dhcp.heap2->update_cost_when_sorting,dhcp.heap2->heap_id);
+    while(!p.second->empty()) {
+        heap2->push_elt(p.second->back());
+        p.second->pop_back();
+    }
+    delete p.second;
+}
+
+template<class T>
 DoubleHeap<T>::~DoubleHeap() {
+	clear();
 	if (heap1) delete heap1;
 	if (heap2) delete heap2;
+
 }
 
 template<class T>
 void DoubleHeap<T>::flush() {
 	if (nb_nodes>0) {
-		erase_subnodes(heap1->root,false);
+		delete_subnodes1(heap1->root);
 		heap1->nb_nodes=0;
 		heap1->root=NULL;
+
+		heap2->flush();
 		nb_nodes=0;
 	}
 }
+
+template<class T>
+void DoubleHeap<T>::delete_subnodes1(HeapNode<T>* node) {
+	if (node->left)	delete_subnodes1(node->left);
+	if (node->right)delete_subnodes1(node->right);
+	delete node;
+}
+
+
+template<class T>
+void DoubleHeap<T>::clear() {
+	if (nb_nodes>0) {
+		delete_subnodes1(heap1->root);
+		heap1->nb_nodes=0;
+		heap1->root=NULL;
+
+		heap2->clear();
+		nb_nodes=0;
+	}
+}
+
 
 template<class T>
 unsigned int DoubleHeap<T>::size() const {
@@ -200,7 +278,8 @@ void DoubleHeap<T>::contract(double new_loup1) {
 	heap1->root = copy1->root;
 	heap1->nb_nodes = copy1->size();
 	nb_nodes = copy1->size();
-	copy1->root = NULL; // avoid to delete heap1 with copy1
+	copy1->root = NULL;
+	copy1->nb_nodes=0;// avoid to delete heap1 with copy1
 	delete copy1;
 
 	if (heap2->update_cost_when_sorting) heap2->sort();
@@ -241,6 +320,7 @@ void DoubleHeap<T>::erase_subnodes(HeapNode<T>* node, bool percolate) {
 	else
 		heap2->erase_node(node->elt->holder[1]);
 
+	node->elt->flush();
 	delete node->elt;
 	delete node;
 }
@@ -290,6 +370,15 @@ T* DoubleHeap<T>::pop() {
 
 	assert(heap1->heap_state());
 	assert(!heap2 || heap2->heap_state());
+
+
+	// select the heap
+	if (RNG::rand() % 100 >= static_cast<unsigned>(critpr)) {
+		current_heap_id=0;
+	}
+	else {
+		current_heap_id=1;
+	}
 
 	return data;
 }

@@ -68,7 +68,16 @@ public:
 
 protected:
 
-	OptimData(const OptimData&);
+	/**
+	 * \brief Constructor by copy.
+	 */
+	explicit OptimData(const OptimData& e);
+
+	/**
+	 * \brief Create a copy
+	 */
+	Backtrackable* copy() const { return new OptimData(*this);};
+
 };
 
 } // end namespace ibex

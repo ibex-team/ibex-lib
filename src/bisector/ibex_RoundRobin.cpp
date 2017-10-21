@@ -48,12 +48,14 @@ pair<IntervalVector,IntervalVector> RoundRobin::bisect(const IntervalVector& box
 	return bisect(box,i);
 }
 
-pair<IntervalVector,IntervalVector> RoundRobin::bisect(Cell& cell) {
+pair<Cell*,Cell*> RoundRobin::bisect(Cell& cell) {
 	BisectedVar& v=cell.get<BisectedVar>();
 
 	// the following instruction will update v.var
 	// and the new value of v.var will be copied to child nodes
-	return bisect(cell.box,v.var);
+
+	pair<IntervalVector,IntervalVector> boxes=this->bisect(cell.box, v.var);
+	return cell.bisect(boxes.first,boxes.second);
 }
 
 void RoundRobin::add_backtrackable(Cell& root) {

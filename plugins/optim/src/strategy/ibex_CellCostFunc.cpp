@@ -195,4 +195,27 @@ double CellCostPFub::cost(const Cell& c) const {
 	}
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+CellCostMaxPFub::CellCostMaxPFub() :  CellCostFunc(false) {
+
+}
+
+void CellCostMaxPFub::add_backtrackable(Cell& root) {
+	root.add<OptimData>();
+}
+
+void CellCostMaxPFub::set_optim_data(Cell& c, System& sys) {
+	c.get<OptimData>().compute_pf(*sys.goal,c.box);
+}
+
+double CellCostMaxPFub::cost(const Cell& c) const {
+	const OptimData *data = &(c.get<OptimData>());
+	if (data) {
+		return  -data->pf.ub();
+	} else {
+		ibex_error("CellCostMaxPFub::cost : invalid cost"); return POS_INFINITY;
+	}
+}
+
 }  // end namespace ibex
