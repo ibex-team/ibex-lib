@@ -37,6 +37,9 @@ void TestCell::test01() {
 	delete c;
 
 	check(new_cells.first->box|new_cells.second->box,copy->box);
+	delete copy;
+	delete new_cells.first;
+	delete new_cells.second;
 
 }
 
@@ -58,57 +61,48 @@ void TestCell::test02() {
     fac.add_ctr(c2);
     NormalizedSystem sys(fac);
 
-/* Need more test
-	root->add<EntailedCtr>();
-	EntailedCtr * entailed = &root->get<EntailedCtr>();
-	entailed->init_root(sys,sys);
-	entailed->original(1) = true;
-	entailed->normalized(0) = true;
-*/
+    root->add<EssaiBacktracable>();
+    EssaiBacktracable * back = &root->get<EssaiBacktracable>();
+    back->n = 100;
+	CPPUNIT_ASSERT(back->n == 100);
 	Cell * copy =new Cell(*root);
-	check(copy->box,root->box);
-/*	CPPUNIT_ASSERT(entailed->original(1));
-	CPPUNIT_ASSERT(entailed->normalized(0));
-	CPPUNIT_ASSERT(copy->get<EntailedCtr>().original(1));
-	CPPUNIT_ASSERT(copy->get<EntailedCtr>().normalized(0));
-	CPPUNIT_ASSERT(!copy->get<EntailedCtr>().original(0));
-	CPPUNIT_ASSERT(!copy->get<EntailedCtr>().normalized(1));
-*/
+	CPPUNIT_ASSERT(almost_eq(copy->box,root->box));
+
+    EssaiBacktracable * back_copy = &copy->get<EssaiBacktracable>();
+	CPPUNIT_ASSERT(back_copy->n == 100);
+	back_copy->n = 1;
+	CPPUNIT_ASSERT(back->n == 100);
+	CPPUNIT_ASSERT(back_copy->n == 1);
+
 	LargestFirst bsc;
 	std::pair<Cell*, Cell*> new_cells = bsc.bisect_cell(*root);
+	CPPUNIT_ASSERT(almost_eq(new_cells.first->box|new_cells.second->box,root->box));
 
-/*
-	CPPUNIT_ASSERT(new_cells.first->get<EntailedCtr>().original(1));
-	CPPUNIT_ASSERT(new_cells.first->get<EntailedCtr>().normalized(0));
-	CPPUNIT_ASSERT(!new_cells.first->get<EntailedCtr>().original(0));
-	CPPUNIT_ASSERT(!new_cells.first->get<EntailedCtr>().normalized(1));
+    EssaiBacktracable * back_1 = &new_cells.first->get<EssaiBacktracable>();
+    EssaiBacktracable * back_2 = &new_cells.second->get<EssaiBacktracable>();
 
-	CPPUNIT_ASSERT(new_cells.second->get<EntailedCtr>().original(1));
-	CPPUNIT_ASSERT(new_cells.second->get<EntailedCtr>().normalized(0));
-	CPPUNIT_ASSERT(!new_cells.second->get<EntailedCtr>().original(0));
-	CPPUNIT_ASSERT(!new_cells.second->get<EntailedCtr>().normalized(1));
-*/
+	CPPUNIT_ASSERT(back_1->n == 100);
+	CPPUNIT_ASSERT(back_2->n == 100);
+	CPPUNIT_ASSERT(back->n == 100);
+	CPPUNIT_ASSERT(back_copy->n == 1);
+	back_1->n = 10;
+	back_2->n = 20;
 
-	check(new_cells.first->box|new_cells.second->box,root->box);
+	CPPUNIT_ASSERT(back_1->n == 10);
+	CPPUNIT_ASSERT(back_2->n == 20);
+	CPPUNIT_ASSERT(back->n == 100);
+	CPPUNIT_ASSERT(back_copy->n == 1);
+
 	delete root;
 
-/*
-	CPPUNIT_ASSERT(new_cells.first->get<EntailedCtr>().original(1));
-	CPPUNIT_ASSERT(new_cells.first->get<EntailedCtr>().normalized(0));
-	CPPUNIT_ASSERT(!new_cells.first->get<EntailedCtr>().original(0));
-	CPPUNIT_ASSERT(!new_cells.first->get<EntailedCtr>().normalized(1));
+	CPPUNIT_ASSERT(back_1->n == 10);
+	CPPUNIT_ASSERT(back_2->n == 20);
+	CPPUNIT_ASSERT(back_copy->n == 1);
 
-	CPPUNIT_ASSERT(new_cells.second->get<EntailedCtr>().original(1));
-	CPPUNIT_ASSERT(new_cells.second->get<EntailedCtr>().normalized(0));
-	CPPUNIT_ASSERT(!new_cells.second->get<EntailedCtr>().original(0));
-	CPPUNIT_ASSERT(!new_cells.second->get<EntailedCtr>().normalized(1));
-
-	CPPUNIT_ASSERT(copy->get<EntailedCtr>().original(1));
-	CPPUNIT_ASSERT(copy->get<EntailedCtr>().normalized(0));
-	CPPUNIT_ASSERT(!copy->get<EntailedCtr>().original(0));
-	CPPUNIT_ASSERT(!copy->get<EntailedCtr>().normalized(1));
-*/
 	delete copy;
+	CPPUNIT_ASSERT(back_1->n == 10);
+	CPPUNIT_ASSERT(back_2->n == 20);
+
 	delete new_cells.first;
 	delete new_cells.second;
 

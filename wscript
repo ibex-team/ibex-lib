@@ -110,9 +110,11 @@ def configure (conf):
 		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
 		flags += " -fmessage-length=0"
 		conf.define ("DEBUG", 1)
+		conf.env.DEBUG = True
 	else:
 		flags = "-O3"
 		conf.define ("NDEBUG", 1)
+		conf.env.DEBUG = false
 	for f in flags.split():
 		conf.check_cxx(cxxflags=f, use="IBEX", mandatory=False, uselib_store="IBEX")
 

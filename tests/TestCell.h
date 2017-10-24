@@ -14,10 +14,34 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-
+#include "ibex_Backtrackable.h"
 #include "utils.h"
 
 namespace ibex {
+
+class EssaiBacktracable:  public Backtrackable {
+public:
+	EssaiBacktracable(): n(10) { };
+	~EssaiBacktracable() { };
+
+
+	std::pair<Backtrackable*,Backtrackable*> down(){
+		return std::pair<Backtrackable*,Backtrackable*>(new EssaiBacktracable(*this),new EssaiBacktracable(*this));
+	}
+
+	int n;
+
+protected:
+	/**
+	 * \brief Constructor by copy.
+	 */
+	explicit EssaiBacktracable(const EssaiBacktracable& e): n(e.n) { };
+
+	/**
+	 * \brief Create a copy
+	 */
+	Backtrackable* copy() const { return new EssaiBacktracable(*this);};
+};
 
 class TestCell : public CppUnit::TestFixture {
 
