@@ -68,10 +68,13 @@ LinearizerCombo::LinearizerCombo(const System& sys, linear_mode lmode1) :
 
 LinearizerCombo::~LinearizerCombo() {
 	if (myxnewton!=NULL) delete myxnewton;
+#ifdef _IBEX_WITH_AFFINE_
+	if (myart!=NULL) delete myart;
+#endif
 }
 
 /*********generation of the linearized system*********/
-int LinearizerCombo::linearize(const IntervalVector& box, LinearSolver& lp_solver) {
+int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver) {
 
 	int cont = 0;
 

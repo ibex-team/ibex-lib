@@ -18,15 +18,25 @@
 
 using namespace ibex;
 
+extern double ERROR;
 bool sameExpr(const ExprNode& node, const char* expr);
 bool sameExpr(const ExprNode& node, const ExprNode& node2);
-void check(double y_actual, double y_expected);
-void check(const Interval& y_actual, const Interval& y_expected);
-void check(const IntervalVector& y_actual, const IntervalVector& y_expected);
-bool almost_eq(const Interval& y_actual, const Interval& y_expected, double err);
-bool almost_eq(const IntervalVector& y_actual, const IntervalVector& y_expected, double err);
-bool almost_eq(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected, double err);
+void check(double y_actual, double y_expected, double err = ERROR);
+void check(const Vector& y_actual, const Vector& y_expected, double err = ERROR);
+void check(const Matrix& y_actual, const Matrix& y_expected, double err = ERROR);
+void check(const Interval& y_actual, const Interval& y_expected, double err = ERROR);
+void check(const IntervalVector& y_actual, const IntervalVector& y_expected, double err = ERROR);
+void check(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected, double err = ERROR);
+bool almost_eq(const Interval& y_actual, const Interval& y_expected, double err = ERROR);
+bool almost_eq(const IntervalVector& y_actual, const IntervalVector& y_expected, double err = ERROR);
+bool almost_eq(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected, double err = ERROR);
 
-extern double ERROR;
+void check_relatif(double y_actual, double y_expected, double err = ERROR);
+void check_relatif(const Vector& y_actual, const Vector& y_expected, double err = ERROR);
+void check_relatif(const Matrix& y_actual, const Matrix& y_expected, double err = ERROR);
+void check_relatif(const Interval& y_actual, const Interval& y_expected, double err = ERROR);
+void check_relatif(const IntervalVector& y_actual, const IntervalVector& y_expected, double err = ERROR);
+void check_relatif(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected, double err = ERROR);
+
 
 #endif // __UTILS_H__

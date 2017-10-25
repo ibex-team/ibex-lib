@@ -31,34 +31,51 @@ void TestCtcForAll::test01() {
 	IntervalVector parambox(1,Interval(-0.01,0.01));
 	//IntervalVector y_init(1,Interval(-0.1,0.1));
 
-	CtcForAll ForAll_y(c, y, parambox, prec);
-	CtcForAll ForAll_x(c, x, parambox, prec);
+	CtcForAll forall_y(c, y, parambox, prec);
+	CtcForAll forall_x(c, x, parambox, prec);
 
 	IntervalVector box(1,Interval(-10,10));
-
-	RoundRobin rr(1e-03);
-	CellStack stack;
-	vector<IntervalVector> sols;
 
 	double right_bound=+0.3616933019201018; // the positive one such that f(x,-0.01)=0
 	//double right_bound=+0.3194335081419453; // the positive one such that f(x,-0.1)=0
 
-	Solver sx(ForAll_y,rr,stack);
-	sx.start(box);
-	sx.next(sols);
+	stack<IntervalVector> stack;
+	stack.push(box);
+	IntervalVector sol=box;
+	while (!stack.empty() && sol.max_diam()>1e-03) {
+		sol=stack.top();
+		stack.pop();
+		forall_y.contract(sol);
+		if (!sol.is_empty()) {
+			pair<IntervalVector,IntervalVector> p=sol.bisect(0);
+			stack.push(p.first);
+			stack.push(p.second);
+		}
+	}
+
 	// note: we use the fact that the solver always explores the right
 	// branch first
-	CPPUNIT_ASSERT(!sols.empty());
-	CPPUNIT_ASSERT(sols.back()[0].contains(right_bound));
-	sols.clear();
+	CPPUNIT_ASSERT(!stack.empty());
+	CPPUNIT_ASSERT(sol[0].contains(right_bound));
 
-	Solver sy(ForAll_x,rr,stack);
-	sy.start(box);
-	sy.next(sols);
+	while (!stack.empty()) stack.pop();
+
+	stack.push(box);
+	sol=box;
+	while (!stack.empty() && sol.max_diam()>1e-03) {
+		sol=stack.top();
+		stack.pop();
+		forall_x.contract(sol);
+		if (!sol.is_empty()) {
+			pair<IntervalVector,IntervalVector> p=sol.bisect(0);
+			stack.push(p.first);
+			stack.push(p.second);
+		}
+	}
+
 	// note: we use the fact that the constraint is symmetric in x/y
-	CPPUNIT_ASSERT(!sols.empty());
-	CPPUNIT_ASSERT(sols.back()[0].contains(right_bound));
-
+	CPPUNIT_ASSERT(!stack.empty());
+	CPPUNIT_ASSERT(sol[0].contains(right_bound));
 }
 
 } // end namespace

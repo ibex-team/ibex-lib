@@ -22,6 +22,7 @@
 #include "ibex_VarSet.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_Solver.h"
+#include "ibex_SolverOutputBox.h"
 #include "ibex_CellStack.h"
 
 #include <stdio.h>
@@ -78,7 +79,7 @@ class Instance {
 public:
 	int nb_var;
 	BitSet params;
-	double prec;
+	Vector prec;
 	vector<char*> ctrs_syntax;
 
 	System* sys;       // all the constraints
@@ -89,7 +90,7 @@ public:
 	CellStack* stack;       // cell buffer for the solver
 	Solver* solver;         // the solver
 
-	Instance(int n, const BitSet& _params, double prec) : nb_var(n), params(_params), prec(prec), sys(NULL),
+	Instance(int n, const BitSet& _params, const Vector& prec) : nb_var(n), params(_params), prec(prec), sys(NULL),
 			ctc(NULL), neg(NULL), bis(NULL), stack(NULL), solver(NULL) {
 
 	}
@@ -120,7 +121,9 @@ public:
 
 		bis=new SmearSumRelative(*sys, prec);
 		stack=new CellStack();
-		solver = new Solver(*sys, params, *ctc, *bis, *stack);
+		
+		Vector eps_max(nb_var,POS_INFINITY);
+		solver = new Solver(*sys, params, *ctc, *bis, *stack, prec, eps_max);
 	}
 
 	IntervalVector read_box(JNIEnv *env, const jdouble* d, int size) {
@@ -220,23 +223,28 @@ const double EPS_CONTRACT=0.01;
 
 }
 
-JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_init(JNIEnv* env, jobject obj, jintArray _int_vars, jdouble prec) {
-	jint size  = env->GetArrayLength(_int_vars);
-	jint* int_vars = env->GetIntArrayElements(_int_vars, 0);
-
+JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_init(JNIEnv* env, jobject obj, jdoubleArray _prec) {
+	jint size  = env->GetArrayLength(_prec);
+	jdouble* prec = env->GetDoubleArrayElements(_prec, 0);
+	
 	jclass clazz = env->GetObjectClass(obj);
 	jfieldID _id = env->GetFieldID(clazz, "id", "I");
 	env->SetIntField(obj ,_id, ibex_instances.size());
 
 	BitSet b(size);
+	Vector prec_vec(size);
 	
 	for (int i=0; i<size; i++) {
-		if (int_vars[i]==1) b.add(i);
+		if (prec[i]<0) {
+			b.add(i);
+			prec_vec[i]=1e-20;
+		} else
+			prec_vec[i]=prec[i];
 	}
 
-	ibex_instances.push_back(new Instance(size, b, prec));
+	ibex_instances.push_back(new Instance(size, b, prec_vec));
 
-	env->ReleaseIntArrayElements(_int_vars, int_vars, 0);
+	env->ReleaseDoubleArrayElements(_prec, prec, 0);
 }
 
 JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_add_1ctr(JNIEnv* env, jobject obj, jstring _syntax) {
@@ -480,11 +488,12 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_next_1solution(JNIEnv* env, jo
 		return BAD_DOMAIN;
 	}
 
-	const Solver::Solution* sol;
+	const SolverOutputBox* sol;
 
-	if (inst.solver->next(sol)) {
+	sol=inst.solver->next();
+	if (sol!=NULL) {
 		inst.write_box(env,sol->existence(),d);
-		result = sol->status==Solver::UNKNOWN? UNKNOWN : SOLUTION;
+		result = sol->status==SolverOutputBox::UNKNOWN? UNKNOWN : SOLUTION;
 	} else {
 		result = SEARCH_OVER;
 	}

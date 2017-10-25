@@ -24,6 +24,8 @@ class ExprConstant;
  *
  * \brief Vector of reals
  *
+ * Note: a Vector is always a column vector.
+ * (see #IntervalVector)
  */
 class Vector {
 public:

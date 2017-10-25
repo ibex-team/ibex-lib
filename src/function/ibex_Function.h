@@ -307,6 +307,11 @@ public:
 	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* x14, const char* x15, const char* x16, const char* x17, const char* x18, const char* x19, const char* x20, const char* y);
 
 	/**
+	 * \brief Creates a function y=f(x1,...,xn)
+	 */
+	Function(int n, const char** x, const char* y);
+
+	/**
 	 * \brief Load a function from a file.
 	 */
 	Function(const char* filename);

@@ -93,7 +93,7 @@ private:
 	 */
 	class InvalidPointException { };
 
-	const Function f;   // function
+	const Function& f;  // function
 	IntervalVector box; // bounding box;
 	int n;              // number of variables
 

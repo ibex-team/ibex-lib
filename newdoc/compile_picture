@@ -1,9 +1,0 @@
-#!/bin/sh
-
-svgs=`ls -1 *.svg`
-
-for x in $svgs
-do
-  inkscape -D -e `echo $x | cut -d. -f1`.png $x
-done   
-

@@ -322,8 +322,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::IDX_RANGE:
 		case P_ExprNode::IDX_ALL:
 		case P_ExprNode::EXPR_WITH_IDX: assert(false); /* impossible */ break;
-		case P_ExprNode::ROW_VEC:node=&ExprVector::new_(arg_node,true); break;
-		case P_ExprNode::COL_VEC:node=&ExprVector::new_(arg_node,false); break;
+		case P_ExprNode::ROW_VEC:node=&ExprVector::new_row(arg_node); break;
+		case P_ExprNode::COL_VEC:node=&ExprVector::new_col(arg_node); break;
 		case P_ExprNode::APPLY:  node=&(((const P_ExprApply&) e).f)(arg_node); break;
 		case P_ExprNode::CHI:    node=&chi(arg_node[0], arg_node[1], arg_node[2]); break;
 		case P_ExprNode::ADD:    node=&(arg_node[0] + arg_node[1]); break;

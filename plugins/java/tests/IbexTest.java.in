@@ -31,7 +31,7 @@ public class IbexTest {
 	@Test
 	public void contract1() {
 
-        Ibex ibex = new Ibex(new int[]{0,0}, 1e-2);
+        Ibex ibex = new Ibex(new double[]{1e-2,1e-2});
 
         ibex.add_ctr("{0}+{1}=3");
 
@@ -48,7 +48,7 @@ public class IbexTest {
 	
 	@Test
     public void test_contract2() {
-        Ibex ibex = new Ibex(new int[]{0,0}, 1e-2);
+        Ibex ibex = new Ibex(new double[]{1e-2,1e-2});
         
         ibex.add_ctr("{0}^2+{1}^2<=1");
 
@@ -85,7 +85,7 @@ public class IbexTest {
 	
 	@Test
     public void test_inflate() {
-        Ibex ibex = new Ibex(new int[]{0,0}, 1e-2);
+        Ibex ibex = new Ibex(new double[]{1e-2,1e-2});
         
         ibex.add_ctr("{0}^2+{1}^2<=1");
 
@@ -113,7 +113,7 @@ public class IbexTest {
     
 	@Test
 	public void test_start_solve1() {
-		Ibex ibex=new Ibex(new int[]{0,0,1}, 1e-2);
+		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+{1}^2={2}^2");
 		double domains[]={-3,3,-3,3,1,2};
@@ -125,7 +125,7 @@ public class IbexTest {
 	
 	@Test
 	public void test_start_solve2() {
-		Ibex ibex=new Ibex(new int[]{0,0,1}, 1e-2);
+		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+1}^2={2}^2");
 		double domains[]={-3,3,-3,3,1,2};
@@ -137,7 +137,7 @@ public class IbexTest {
 
 	@Test
 	public void test_start_solve3() {
-		Ibex ibex=new Ibex(new int[]{0,0,1}, 1e-2);
+		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+{1}^2={2}^2");
 		double domains[]={-3,3,-3,3};
@@ -149,7 +149,7 @@ public class IbexTest {
 	
 	@Test
 	public void test_next_01() {
-		Ibex ibex=new Ibex(new int[]{0,0,1}, 1e-2);
+		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+{1}^2={2}^2");
 		double domains[]={-3,3,-3,3,1,1};
@@ -175,7 +175,7 @@ public class IbexTest {
 	
 	@Test
 	public void test_next_02() {
-		Ibex ibex=new Ibex(new int[]{0,0,1}, 1e-2);
+		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-2)^2+{1}^2={2}^2");
 		double domains[]={-3,3,-3,3,1,1};
@@ -194,7 +194,7 @@ public class IbexTest {
 	
 	@Test
 	public void test_next_03() {
-		Ibex ibex=new Ibex(new int[]{0,0,1}, 1e-2);
+		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+{1}^2={2}^2");
 		ibex.add_ctr("{1}<=0");

@@ -137,7 +137,7 @@ void System::init_f_from_ctrs() {
 
 	// concatenate all the components of all the constraints function
 	for (int j=0; j<ctrs.size(); j++) {
-		Function& fj=ctrs[j].f;
+		const Function& fj=ctrs[j].f;
 
 		/*========= 1st variant ===============
 		 * will have the disadvantage that the DAG structure
@@ -194,9 +194,7 @@ void System::init_f_from_ctrs() {
 	}
 	assert(i==total_output_size);
 
-	// TODO: we should probably homgenize; in the case of a scalar function
-	// a 1-sized vector should be created.
-	f_ctrs.init(args, total_output_size>1? ExprVector::new_(image,false) : image[0]);
+	f_ctrs.init(args, total_output_size>1? ExprVector::new_col(image) : image[0]);
 }
 
 

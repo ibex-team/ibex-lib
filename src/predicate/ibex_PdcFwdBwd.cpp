@@ -17,7 +17,7 @@ namespace {
 
 }
 
-PdcFwdBwd::PdcFwdBwd(Function& f, CmpOp op) : PdcCleared(*new CtcFwdBwd(f,!op)){
+PdcFwdBwd::PdcFwdBwd(const Function& f, CmpOp op) : PdcCleared(*new CtcFwdBwd(f,!op)){
 
 }
 

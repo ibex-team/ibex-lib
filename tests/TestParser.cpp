@@ -29,8 +29,6 @@ void TestParser::var01() {
 	CPPUNIT_ASSERT(sys.args.size()==1);
 	CPPUNIT_ASSERT(strcmp(sys.args[0].name,"x")==0);
 	CPPUNIT_ASSERT(sys.args[0].dim.is_scalar());
-	CPPUNIT_ASSERT(sys.eprs.empty());
-	CPPUNIT_ASSERT(sys.sybs.empty());
 	CPPUNIT_ASSERT(sys.box.size()==1);
 	CPPUNIT_ASSERT(sys.box[0]==Interval::ALL_REALS);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==1);
@@ -219,8 +217,6 @@ void TestParser::ponts() {
 		CPPUNIT_ASSERT(sys.args[0].dim.is_scalar());
 		CPPUNIT_ASSERT(&sys.f_ctrs.arg(i) == &sys.args[i]);
 	}
-	CPPUNIT_ASSERT(sys.eprs.empty());
-	CPPUNIT_ASSERT(sys.sybs.empty());
 	CPPUNIT_ASSERT(sys.box.size()==30);
 	CPPUNIT_ASSERT(almost_eq(sys.box, sys2.init_box,1e-12));
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==30);
@@ -241,8 +237,6 @@ void TestParser::choco01() {
 	CPPUNIT_ASSERT(sys.args.size()==2);
 	CPPUNIT_ASSERT(strcmp(sys.args[0].name,"{0}")==0);
 	CPPUNIT_ASSERT(strcmp(sys.args[1].name,"{1}")==0);
-	CPPUNIT_ASSERT(sys.eprs.empty());
-	CPPUNIT_ASSERT(sys.sybs.empty());
 	CPPUNIT_ASSERT(sys.box.size()==2);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==2);
 	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"({1}+{0})"));

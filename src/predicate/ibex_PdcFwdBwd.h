@@ -30,7 +30,7 @@ public:
 	 * Based on HC4Revise.
 	 * \param op - either LT, LEQ, GT or GEQ (<b>not</b> EQ).
 	 */
-	PdcFwdBwd(Function& f, CmpOp op);
+	PdcFwdBwd(const Function& f, CmpOp op);
 
 	/**
 	 * \remark ctr is not kept by reference.

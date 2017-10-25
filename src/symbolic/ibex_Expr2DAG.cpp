@@ -112,7 +112,7 @@ void Expr2DAG::visit(const ExprUnaryOp& e)  { e.acceptVisitor(*this); } // (usel
 void Expr2DAG::visit(const ExprSymbol& x)   { assert(false); }
 void Expr2DAG::visit(const ExprConstant& c) { assert(false); }
 
-void Expr2DAG::visit(const ExprVector& e) { peer.insert(e,&ExprVector::new_(comps(e),e.row_vector())); }
+void Expr2DAG::visit(const ExprVector& e) { peer.insert(e,&ExprVector::new_(comps(e),e.orient)); }
 void Expr2DAG::visit(const ExprApply& e)  { peer.insert(e,&ExprApply::new_(e.func,comps(e))); }
 void Expr2DAG::visit(const ExprChi& e)    { peer.insert(e,&ExprChi::new_(comps(e))); }
 void Expr2DAG::visit(const ExprAdd& e)    { visit_binary(e); }

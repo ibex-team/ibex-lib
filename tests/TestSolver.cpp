@@ -15,6 +15,7 @@
 #include "ibex_RoundRobin.h"
 #include "ibex_CellStack.h"
 #include "ibex_CtcHC4.h"
+#include "ibex_Manifold.h"
 
 using namespace std;
 
@@ -40,23 +41,24 @@ void TestSolver::circle1() {
 	RoundRobin rr(1e-3);
 	CellStack stack;
 	CtcHC4 hc4(sys);
+	Vector prec(2,1e-3);
 
-	Solver solver(sys,hc4,rr,stack);
+	Solver solver(sys,hc4,rr,stack,prec,prec);
 	solver.start(IntervalVector(2,Interval(-10,10)));
-	const Solver::Solution* sol;
+
 	bool res;
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(sol->existence().is_superset(sol1));
-	CPPUNIT_ASSERT(sol->status==Solver::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol1));
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(sol->existence().is_superset(sol2));
-	CPPUNIT_ASSERT(sol->status==Solver::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==2);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol2));
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==false);
 }
 
@@ -75,18 +77,19 @@ void TestSolver::circle2() {
 	RoundRobin rr(1e-3);
 	CellStack stack;
 	CtcHC4 hc4(sys);
-	Solver solver(sys,hc4,rr,stack);
+	Vector prec(2,1e-3);
+	Solver solver(sys,hc4,rr,stack,prec,prec);
 
 	solver.start(IntervalVector(2,Interval(-10,10)));
-	const Solver::Solution* sol;
+
 	bool res;
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(sol->existence().is_superset(sol1));
-	CPPUNIT_ASSERT(sol->status==Solver::UNKNOWN);
+	CPPUNIT_ASSERT(solver.get_manifold().unknown.size()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().unknown.back().existence().is_superset(sol1));
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==false);
 }
 
@@ -113,23 +116,24 @@ void TestSolver::circle3() {
 	RoundRobin rr(1e-3);
 	CellStack stack;
 	CtcHC4 hc4(sys);
-	Solver solver(sys,hc4,rr,stack);
+	Vector prec(2,1e-3);
+	Solver solver(sys,hc4,rr,stack,prec,prec);
 
 	solver.start(IntervalVector(2,Interval(-10,10)));
-	const Solver::Solution* sol;
+
 	bool res;
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(sol->existence().is_superset(sol1));
-	CPPUNIT_ASSERT(sol->status==Solver::UNKNOWN);
+	CPPUNIT_ASSERT(solver.get_manifold().unknown.size()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().unknown.back().existence().is_superset(sol1));
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(sol->existence().is_superset(sol2));
-	CPPUNIT_ASSERT(sol->status==Solver::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol2));
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==false);
 }
 
@@ -161,27 +165,27 @@ void TestSolver::circle4() {
 
 	BitSet params(BitSet::empty(3));
 	params.add(2);
-	Solver solver(sys,params,hc4,rr,stack);
+	Vector prec(3,1e-3);
+	Solver solver(sys,params,hc4,rr,stack,prec,prec);
 
 	IntervalVector box(3);
 	box[0]=Interval(-10,10);
 	box[1]=Interval(-10,10);
 	box[2]=Interval(1,1);
 	solver.start(box);
-	const Solver::Solution* sol;
 	bool res;
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(sol->existence().is_superset(sol1));
-	CPPUNIT_ASSERT(sol->status==Solver::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol1));
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(sol->existence().is_superset(sol2));
-	CPPUNIT_ASSERT(sol->status==Solver::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==2);
+	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol2));
 
-	res=solver.next(sol);
+	res=solver.next();
 	CPPUNIT_ASSERT(res==false);
 }
 

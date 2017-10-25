@@ -13,35 +13,35 @@
 
 namespace ibex {
 
-CtcFwdBwd::CtcFwdBwd(Function& f, const Domain& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const Domain& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim) {
 	assert(f.expr().dim==y.dim);
 	d = y;
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(Function& f, const Interval& y) : Ctc(f.nb_var()), f(f), d(Dim()) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const Interval& y) : Ctc(f.nb_var()), f(f), d(Dim()) {
 	assert(f.expr().dim==d.dim);
 	d.i() = y;
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim) {
 	assert(f.expr().dim.is_vector() && f.expr().dim.vec_size()==y.size());
 	d.v() = y;
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim) {
 	assert(f.expr().dim==Dim::matrix(y.nb_rows(),y.nb_cols()));
 	d.m() = y;
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op) : Ctc(f.nb_var()), f(f), d(NumConstraint(f,op).right_hand_side())  {
+CtcFwdBwd::CtcFwdBwd(const Function& f, CmpOp op) : Ctc(f.nb_var()), f(f), d(NumConstraint(f,op).right_hand_side())  {
 	init();
 }
 

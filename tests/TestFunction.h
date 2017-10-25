@@ -120,6 +120,8 @@ public:
 	// without problem (the case happens when
 	// the parser returns prematurely)
 	void build01();
+	// constructor with string arguments (char**)
+	void build02();
 
 	void add_symbol();
 

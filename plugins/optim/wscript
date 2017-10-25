@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import os, sys, shutil, ibexutils
 from waflib import Logs, ConfigSet
 
 ######################
@@ -11,24 +10,11 @@ def options (opt):
 	opt.add_option ("--with-optim", action="store_true", dest="WITH_OPTIM",
 			help = "install IbexOptim plugin")
 
-	grp = opt.add_option_group ("Options for the plugin Optim")
-	lp_lib_list = [ "clp", "soplex", "cplex", "none" ]
-	def_lib = lp_lib_list[0]
-	grp.add_option ("--optim-lib", action="store", dest="OPTIM_LIB",
-		choices = lp_lib_list, default = def_lib,
-		help = "Possible values: %s [default: %s]"%(", ".join(lp_lib_list),def_lib))
-	for l in lp_lib_list[:-1]:
-		opt = "%s_PATH" % l.upper()
-		grp.add_option ("--%s-path"%l, action="store", type="string", dest=opt,
-			default = "", help = "location of %s lib and include directories"%l)
-
-
 ######################
 ##### configure ######
 ######################
 def configure (conf):
 	conf.env.WITH_OPTIM = conf.options.WITH_OPTIM
-	conf.env.OPTIM_LIB = conf.options.OPTIM_LIB
 
 	conf.start_msg ("plugin IbexOpt")
 	if not conf.env.WITH_OPTIM:
@@ -39,203 +25,19 @@ def configure (conf):
 
 	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "OPTIM")
 
+	# check that conf.env.LP_LIB is not set to NONE (i.e., we need a LP library
+	# for the optim plugin).
+	if conf.env.LP_LIB == "NONE":
+		conf.fatal ("Optim plugin requires a LP library (--lp-lib)")
+
+	# We need -std=c++11 to compile ibexopt
+	conf.check_cxx(cxxflags = "-std=c++11", uselib_store="IBEXOPT")
+
+	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
+	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEXOPT")
+	
 	# Add information in ibex_Setting
 	conf.setting_define ("WITH_OPTIM", 1)
-
-	conf.msg ("Library for linear solver for IbexOpt", conf.env.OPTIM_LIB)
-
-	#######################################################################
-	if conf.env.OPTIM_LIB == "clp":
-		clp_dir = conf.options.CLP_PATH
-		if clp_dir:
-			clp_include = os.path.join (clp_dir, "include")
-			# Cpl install everything in coin directory
-			coin_include = os.path.join (clp_include, "coin")
-			clp_lib = os.path.join (clp_dir, "lib")
-			conf.env.append_unique ("INCLUDES_IBEX_DEPS", clp_include)
-			conf.env.append_unique ("INCLUDES_IBEX_DEPS", coin_include)
-			conf.env.append_unique ("LIBPATH_IBEX_DEPS", clp_lib)
-		else:
-			clp_include = ""
-			clp_lib = ""
-
-		# Using pkg-config to retrieve info on Clp
-		clp_kwargs = { "package": "clp", "args": "--cflags --libs",
-				"uselib_store": "OPTIM" }
-
-		env_env_bak = conf.env.env
-
-		from_3rd = False # boolean, does clp comes from 3rd subdirectory
-
-		# If --clp-path is given, we run the loop only one time with mandatory=true
-		# because we must find the header and library for clp. If the option is not
-		# given, we run the loop twice: the first time we try to find clp on the
-		# system, if we find it, we continue without doing the second loop, if not
-		# we install it from 3rd subdirectory and do the loop again to check that
-		# the installation worked.
-		for mandatory in ([ False, True ] if not clp_dir else [True]):
-			if clp_lib:
-				## add to the environnement the path where clp.pc should be
-				clp_pc_install_path = os.path.join (clp_lib, "pkgconfig")
-				if conf.env.env == []:
-					conf.env.env = {}
-				conf.env.env["PKG_CONFIG_PATH"] = clp_pc_install_path
-
-			clp_kwargs["mandatory"] = mandatory
-			has_clp = conf.check_cfg (**clp_kwargs)
-
-			if has_clp: # Clp was found
-				if from_3rd:
-					conf.env.append_unique ("LIB_3RD_LIST", conf.env.LIB_OPTIM)
-			else:
-				# We necessarily have mandatory = False, or else conf.check_cfg () would
-				# have failed.
-				conf.msg ("Using library CLP from", "3rd/ subdirectory")
-				clp_archive = "Clp-1.15.6.tgz"
-				args = "--disable-zlib --disable-bzlib --without-lapack --without-blas"
-				clp_ret = conf.configure_3rd_party_with_autotools (clp_archive,
-							conf_args = args)
-				_, clp_include, clp_lib = clp_ret
-				conf.env.INSTALL_3RD = True
-				from_3rd = True
-				# Cpl install everything in coin directory
-				conf.env.append_unique ("INCLUDES_IBEX_DEPS",
-																os.path.join (conf.env.INCDIR_3RD, "coin"))
-
-		conf.env.env = env_env_bak
-
-		# Add info on the linear solver library used to the settings
-		conf.setting_define("WITH_CLP", 1)
-		conf.setting_define("OPTIM_LP_SOLVER", "CLP")
-
-	#######################################################################
-	elif conf.env.OPTIM_LIB == "soplex":
-		soplex_dir = conf.options.SOPLEX_PATH
-		if soplex_dir:
-			# depending on how it is installed, the headers of soplex can be installed
-			# in a directory called "include" or "src"
-			soplex_include=[os.path.join (soplex_dir, d) for d in ["include", "src"]]
-			soplex_lib = os.path.join (soplex_dir, "lib")
-			conf.env.append_unique ("INCLUDES_IBEX_DEPS", soplex_include)
-			conf.env.append_unique ("LIBPATH_IBEX_DEPS", soplex_lib)
-		else:
-			soplex_include = ""
-			soplex_lib = ""
-
-		soplex_h_kwargs = { "header_name": "soplex.h", "use": ["IBEX", "OPTIM"],
-					"uselib_store": "OPTIM" }
-		lib_with_z = [ "soplex", "z" ]
-		lib_without_z = "soplex"
-		soplex_lib_kwargs = { "lib": lib_with_z, "use": ["IBEX", "OPTIM"],
-					"uselib_store": "OPTIM" }
-
-		from_3rd = False # boolean, does soplex comes from 3rd subdirectory
-
-		# In the source code of soplex, DEBUG is used in an enum (in spxout.h) which
-		# causes the compilation to failed when the macro DEBUG is used.
-		if conf.options.DEBUG:
-			conf.undefine ("DEBUG")
-			conf.define ("DEBUGGING", 1)
-
-		# If --soplex-path is given, we run the loop only one time with
-		# mandatory=true because we must find the header and library for soplex. If
-		# the option is not given, we run the loop twice: the first time we try to
-		# find soplex on the system, if we find it, we continue without doing the
-		# second loop, if not we install it from 3rd subdirectory and do the loop
-		# again to check that the installation worked.
-		for mandatory in ([ False, True ] if not soplex_dir else [True]):
-			if soplex_include:
-				soplex_h_kwargs["includes"] = soplex_include
-			if soplex_lib:
-				soplex_lib_kwargs["libpath"] = soplex_lib
-
-			soplex_h_kwargs["mandatory"] = mandatory
-			has_h_soplex = conf.check_cxx (**soplex_h_kwargs)
-
-			soplex_lib_kwargs["mandatory"] = False
-			has_lib_soplex = conf.check_cxx (**soplex_lib_kwargs)
-			if not has_lib_soplex: # Try again without libz
-				soplex_lib_kwargs["mandatory"] = mandatory
-				soplex_lib_kwargs["lib"] = lib_without_z
-				has_lib_soplex = conf.check_cxx (**soplex_lib_kwargs)
-				soplex_lib_kwargs["lib"] = lib_with_z
-
-			if has_h_soplex and has_lib_soplex: # soplex was found
-				if from_3rd:
-					conf.env.append_unique ("LIB_3RD_LIST", conf.env.LIB_OPTIM)
-			else:
-				# We necessarily have mandatory = False, or else conf.check_cxx () would
-				# have failed.
-				conf.msg ("Using library Soplex from", "3rd/ subdirectory")
-				soplex_archive = "soplex-1.7.1.tar"
-				soplex_ret = conf.configure_3rd_party_with_autotools (soplex_archive,
-						without_configure = True, without_make_install = True)
-				soplex_srcdir, soplex_include, soplex_lib = soplex_ret
-				conf.env.INSTALL_3RD = True
-				from_3rd = True
-				# The 'make install' of soplex 1.7.1 is buggy, we do it ourself
-				if not os.path.exists (soplex_include):
-					os.makedirs (soplex_include)
-				if not os.path.exists (soplex_lib):
-					os.makedirs (soplex_lib)
-				conf.start_msg("Installing soplex")
-				for filename in os.listdir (os.path.join (soplex_srcdir, "lib")):
-					fullpath = os.path.join (soplex_srcdir, "lib", filename)
-					if filename.startswith ("lib") and os.path.isfile (fullpath):
-						shutil.copy2 (fullpath, soplex_lib)
-				for filename in os.listdir (os.path.join (soplex_srcdir, "src")):
-					fullpath = os.path.join (soplex_srcdir, "src", filename)
-					if filename.endswith (".h") and os.path.isfile (fullpath):
-						shutil.copy2 (fullpath, soplex_include)
-				conf.end_msg("done")
-
-		if conf.options.DEBUG:
-			conf.define ("DEBUG", 1) # restore DEBUG
-
-		# Add info on the linear solver library used to the settings
-		conf.setting_define("WITH_SOPLEX", 1)
-		conf.setting_define("OPTIM_LP_SOLVER", "SOPLEX")
-
-	#######################################################################
-	elif conf.env.OPTIM_LIB == "cplex":
-		cplex_dir = conf.options.CPLEX_PATH
-		if cplex_dir:
-			cplex_include = os.path.join (cplex_dir, "include")
-			cplex_lib = os.path.join (cplex_dir, "lib/x86-64_linux/static_pic/")
-			conf.env.append_unique ("INCLUDES_IBEX_DEPS", cplex_include)
-			conf.env.append_unique ("LIBPATH_IBEX_DEPS", cplex_lib)
-		else:
-			cplex_include = ""
-			cplex_lib = ""
-
-		conf.check_cxx (header_name	= "ilcplex/cplex.h", includes = cplex_include,
-				use = ["IBEX", "OPTIM"], uselib_store = "OPTIM")
-		conf.check_cxx (lib = ["cplex", "pthread"], libpath = cplex_lib,
-				use = ["IBEX", "OPTIM"], uselib_store = "OPTIM")
-
-		# Add info on the linear solver library used to the settings
-		conf.setting_define("WITH_CPLEX", 1)
-		conf.setting_define("OPTIM_LP_SOLVER", "CPLEX")
-
-	#######################################################################
-	else: # No LP solver
-		# Add info on the linear solver library used to the settings
-		conf.setting_define("WITH_NOLP", 1)
-		conf.setting_define("OPTIM_LP_SOLVER", "none")
-
-
-
-	# Put every _OPTIM variables in _IBEX_DEPS (for ibex.pc)
-	conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", conf.env.CXXFLAGS_OPTIM)
-	if conf.env.ENABLE_SHARED:
-		# if shared lib is used, 3rd party libs are compiled as static lib with
-		# -fPIC and are contained in libibex
-		for lib in conf.env.LIB_OPTIM:
-			if not lib in conf.env.LIB_3RD_LIST:
-				conf.env.append_unique ("LIB_IBEX_DEPS", lib)
-	else:
-		conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_OPTIM)
-
 
 	# add OPTIM plugin include directory
 	for f in conf.path.ant_glob ("src/**", dir = True, src = False):
@@ -269,7 +71,15 @@ def configure (conf):
 ####### build ########
 ######################
 def build (bld):
-	pass # nothing to do, everything is done in the main src/wscript script
+	
+	if bld.env.WITH_OPTIM:
+		# build optim binary
+		bld.program (
+		target = "ibexopt",
+		use = [ "ibex", "IBEXOPT" ], # add dependency on ibex library
+		source = bld.path.ant_glob ("main/**/*.cpp"),
+		install_path = bld.env.BINDIR,
+		)
 
 ######################
 ##### benchmarks #####

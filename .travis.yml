@@ -7,7 +7,7 @@ matrix:
       env:
         - TEST_INTERVAL_LIB=gaol
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=soplex"
+        - PLUGINS="--with-optim --lp-lib=soplex"
     - os: linux
       compiler: gcc
       env:
@@ -19,20 +19,20 @@ matrix:
       env:
         - TEST_INTERVAL_LIB=filib
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=soplex"
+        - PLUGINS="--with-optim --lp-lib=soplex"
     - os: linux
       compiler: gcc
       env:
         - TEST_INTERVAL_LIB=filib
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=clp"
+        - PLUGINS="--with-optim --lp-lib=clp"
     - os: osx
       compiler: clang
       osx_image: xcode8.3
       env:
         - TEST_INTERVAL_LIB=gaol
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --optim-lib=soplex"
+        - PLUGINS="--with-optim --lp-lib=soplex"
         - CXXFLAGS=-std=c++11
     - os: osx
       compiler: clang
@@ -60,7 +60,7 @@ before_install:
 
 # TODO add --affine when tests are fixed
 install: 
-  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${TEST_INTERVAL_LIB} ${PLUGINS} || cat __build__/*.log
+  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${TEST_INTERVAL_LIB} ${PLUGINS} --with-ampl || cat __build__/*.log
   - ./waf build install clean
 
 # command to run tests

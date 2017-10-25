@@ -364,7 +364,7 @@ void TestExpr::vector01() {
 
 	Array<const ExprNode> c(x,y,e1,e2);
 
-	const ExprVector& v=ExprVector::new_(c,false);
+	const ExprVector& v=ExprVector::new_col(c);
 	CPPUNIT_ASSERT(v.f==NULL);
 	CPPUNIT_ASSERT(v.dim==Dim::matrix(4,3));
 	CPPUNIT_ASSERT(v.height==3);
@@ -384,7 +384,7 @@ void TestExpr::vector02() {
 
 	Array<const ExprNode> c(x,y,e1,e2);
 
-	const ExprVector& v=ExprVector::new_(c,true);
+	const ExprVector& v=ExprVector::new_row(c);
 	CPPUNIT_ASSERT(v.dim==Dim::matrix(3,4));
 	CPPUNIT_ASSERT(v.row_vector());
 	CPPUNIT_ASSERT(v.type()==Dim::MATRIX);
@@ -611,7 +611,7 @@ void TestExpr::subnodes04() {
 void TestExpr::bug81() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::row_vec(3));
 	IntervalVector y(3);
-	const ExprNode& z=x+y;
+	const ExprNode& z=x+transpose(y);
 	CPPUNIT_ASSERT(z.dim == x.dim);
 }
 

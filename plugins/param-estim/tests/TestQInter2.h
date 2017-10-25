@@ -14,7 +14,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "../../../tests/utils.h"
+#include "utils.h"
 
 namespace ibex {
 

@@ -1,0 +1,82 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+from waflib import Logs, ConfigSet
+
+######################
+###### options #######
+######################
+def options (opt):
+	opt.add_option ("--with-solver", action="store_true", dest="WITH_SOLVER",
+			help = "install IbexSolve plugin")
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	conf.env.WITH_SOLVER = conf.options.WITH_SOLVER
+
+	conf.start_msg ("plugin IbexSolve")
+	if not conf.env.WITH_SOLVER:
+		conf.end_msg ("not used")
+		return
+
+	conf.end_msg ("enabled")
+
+	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "SOLVER")
+
+	# check that conf.env.LP_LIB is not set to NONE (i.e., we need a LP library
+	# for the solver plugin).
+	#if conf.env.LP_LIB == "NONE":
+	#	conf.fatal ("solver plugin needs a LP library")
+
+	# We need -std=c++11 to compile ibexsolver
+	conf.check_cxx(cxxflags = "-std=c++11", uselib_store="IBEXSOLVER")
+
+	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
+	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEXSOLVER")
+
+	# Add information in ibex_Setting
+	conf.setting_define ("WITH_SOLVER", 1)
+
+	# add SOLVER plugin include directory
+	for f in conf.path.ant_glob ("src/** src", dir = True, src = False):
+		conf.env.append_unique("INCLUDES_SOLVER", f.abspath())
+
+	# The build and install steps will be run from the main src/wscript script so
+	# we need to give path relative to the main src directory
+	mainsrc = conf.srcnode.make_node ("src")
+
+	# add SOLVER headers
+	for f in conf.path.ant_glob ("src/**/ibex_*.h"):
+		conf.env.append_unique ("IBEX_HDR", f.path_from (mainsrc))
+
+	# add SOLVER source files
+	for f in conf.path.ant_glob ("src/**/ibex_*.cpp"):
+		conf.env.append_unique ("IBEX_SRC", f.path_from (mainsrc))
+
+	# The utest step will be run from the main tests/wscript script so we need to
+	# give path relative to the main tests directory
+	maintests = conf.srcnode.make_node ("tests")
+
+	# add SOLVER test files
+	for f in conf.path.ant_glob ("tests/**/Test*.cpp"):
+		conf.env.append_unique ('TEST_SRC', f.path_from (maintests))
+
+	# Add solver/tests directory to list of INCLUDES for TESTS
+	testsnode = conf.path.make_node ("tests")
+	conf.env.append_unique ("INCLUDES_TESTS", testsnode.abspath ())
+
+######################
+####### build ########
+######################
+def build (bld):
+	
+	if bld.env.WITH_SOLVER:
+		# build solver binary
+		bld.program (
+		target = "ibexsolve",
+		use = [ "ibex", "IBEXSOLVER" ], # add dependency on ibex library
+		source = bld.path.ant_glob ("main/**/*.cpp"),
+		install_path = bld.env.BINDIR,
+		)
