@@ -315,7 +315,7 @@ bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eta_ub, doub
 bool MitsosSIP::solve(const System& sub_sys, double eps, Vector& x_opt, double& uplo, double& loup) {
 
 	//DefaultOptimizer o(sub_sys,eps,eps);
-	DefaultOptimizer o(sub_sys,0,eps,eps);
+	DefaultOptimizer o(sub_sys,eps,eps);
 
 	Optimizer::Status status=o.optimize(sub_sys.box);
 
@@ -350,7 +350,7 @@ Interval MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
             //cout << max_sys << endl;
 
 			// Mitsos algorithm works with absolute precision
-			DefaultOptimizer o(max_sys,0,0,eps);
+			DefaultOptimizer o(max_sys,0,eps);
 
 			VarSet param_LLP_var(p, lpp_fac.param_LLP_var);
 
@@ -359,6 +359,7 @@ Interval MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 			//cout << "param box=" << param_box << endl;
 
 			Optimizer::Status status=o.optimize(param_box);
+			o.report();
 
 			if (status!=Optimizer::SUCCESS) {
 				ibex_error("LLP failed");
