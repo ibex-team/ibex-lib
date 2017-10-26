@@ -1,0 +1,13 @@
+Variables
+    x1 in [-1000, 1000];
+    x2 in [-1000, 1000];
+    y in [0, 1];
+
+Minimize
+    x1^2/3 + x2^2 + x1/2;
+
+Constraints
+    (1-x1^2*y^2)^2 - x1*y^2 - x2^2 + x2 <= 0;
+end
+
+
