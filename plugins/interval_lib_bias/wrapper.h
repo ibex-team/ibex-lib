@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Implementation of the Interval class based on filib
+ * I B E X - Implementation of the Interval class based on Profil/Bias
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.

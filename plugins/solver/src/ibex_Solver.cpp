@@ -407,10 +407,9 @@ bool Solver::is_boundary(const IntervalVector& box) {
 		return full_rank(J);
 	}
 	case HALF_BALL:
+	default:
 		not_implemented("\"half-ball\" boundary test");
 		return false;
-	}
-	default: return false;
 	}
 }
 
