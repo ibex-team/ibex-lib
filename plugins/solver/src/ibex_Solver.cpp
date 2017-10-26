@@ -220,8 +220,14 @@ SolverOutputBox* Solver::next() {
 		}
 		catch (EmptyBoxException&) {
 			delete buffer.pop();
-			impact.remove(v); // note: in case of the root node, we should clear the bitset
+			//impact.remove(v); // note: in case of the root node, we should clear the bitset
 			// instead but since the search is over, the impact is not used anymore.
+			// JN: that make a bug with Mingw
+			if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
+				impact.remove(v);
+			else                                // root node : impact set to 1 for all variables
+				impact.clear();
+
 			continue;
 		}
 	}
@@ -401,9 +407,10 @@ bool Solver::is_boundary(const IntervalVector& box) {
 		return full_rank(J);
 	}
 	case HALF_BALL:
-	default:
 		not_implemented("\"half-ball\" boundary test");
 		return false;
+	}
+	default: return false;
 	}
 }
 
@@ -427,20 +434,16 @@ SolverOutputBox& Solver::store_sol(const SolverOutputBox& sol) {
 	case SolverOutputBox::INNER    :
 		manif->inner.push_back(sol);
 		return manif->inner.back();
-		break;
 	case SolverOutputBox::BOUNDARY :
 		manif->boundary.push_back(sol);
 		return manif->boundary.back();
-		break;
 	case SolverOutputBox::UNKNOWN  :
 		manif->unknown.push_back(sol);
 		return manif->unknown.back();
-		break;
 	case SolverOutputBox::PENDING :
 	default:
 		manif->pending.push_back(sol);
 		return manif->pending.back();
-		break;
 	}
 }
 

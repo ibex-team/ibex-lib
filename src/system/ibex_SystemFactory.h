@@ -38,6 +38,7 @@ public:
 	 * 	until the system is built.
 	 */
 	void add_var(const ExprSymbol& v);
+	void add_var(const ExprSymbol& v, const Interval& init_box);
 	void add_var(const ExprSymbol& v, const IntervalVector& init_box);
 
 	/**

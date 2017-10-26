@@ -83,6 +83,10 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 	}
 	os << endl;
 
+	os << "box: " << endl << "  ";
+	os << sys.box << endl;
+
+
 	os << "goal: " << endl;
 	if (sys.goal!=NULL)
 	    os << "  " << sys.goal->expr() << endl;
