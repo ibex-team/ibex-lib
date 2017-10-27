@@ -19,7 +19,7 @@ namespace ibex {
 
 const int Manifold::SIGNATURE_LENGTH = 20;
 const char* Manifold::SIGNATURE = "IBEX MANIFOLD FILE ";
-const int Manifold::FORMAT_VERSION = 1;
+const int Manifold::FORMAT_VERSION = 2;
 
 Manifold::Manifold(int n, int m, int nb_ineq) : n(n), m(m), nb_ineq(nb_ineq),
 		status(Solver::INFEASIBLE), time(0), nb_cells(0) {
@@ -131,6 +131,9 @@ void Manifold::write_output_box(ofstream& f, const SolverOutputBox& sol) const {
 		for (int i=0; i<sol.varset->nb_param; i++) {
 			write_int(f,(sol.varset->param(i)) + 1);
 		}
+	} else {
+		for (int i=0; i<sol.varset->nb_param; i++)
+			write_int(f,0);
 	}
 }
 
@@ -212,7 +215,7 @@ string Manifold::format() {
 	return
 	"\n"
 	"--------------------------------------------------------------------------------\n"
-	"                          Manifold format v1\n"
+	"                          Manifold format v2\n"
 	"\n"
 	"The manifold text format (obtained with --txt) is described below.\n"
 	"The manifold binary format (.mnf) is exactly the same except that:\n"
@@ -242,12 +245,13 @@ string Manifold::format() {
 	"\t\t* 1 the box is 'boundary'\n"
 	"\t\t* 2 the box is 'unknown'\n"
 	"\t\t* 3 the box is 'pending'\n"
-	"\t - (n-m) values: the indices of the variables considered as parameters in\n"
-	"\t   the parametric proof. Indices start from 1. Nothing is displayed if \n"
-	"\t   either the status is 'unknown', the status is 'pending', m=0 or m=n.\n\n";
+	"\t - (n-m) values [only if 0<m<n]: the indices of the variables considered as parameters in\n"
+	"\t   the parametric proof. Indices start from 1. If no proof was achieved,\n"
+	"\t   a sequence of n-m zeros is displayed (e.g., if the status is 'pending').\n"
+	"\t   Nothing is displayed if m=0 or m=n.\n\n";
 }
 
-void Manifold::write_txt(ofstream& file, const SolverOutputBox& sol) const {
+void Manifold::write_output_box_txt(ofstream& file, const SolverOutputBox& sol) const {
 	char s=' ';
 	const IntervalVector& box=sol;
 	for (unsigned int i=0; i<n; i++) {
@@ -261,6 +265,11 @@ void Manifold::write_txt(ofstream& file, const SolverOutputBox& sol) const {
 			for (int i=0; i<sol.varset->nb_param; i++) {
 				if (i>0) file << s;
 				file << (sol.varset->param(i)) + 1;
+			}
+		} else {
+			for (int i=0; i<n-m; i++) {
+				if (i>0) file << s;
+				file << 0;
 			}
 		}
 	}
@@ -285,16 +294,16 @@ void Manifold::write_txt(const char* filename) const {
 
 	bool first_sol=true;
 	for (vector<SolverOutputBox>::const_iterator it=inner.begin(); it!=inner.end(); it++) {
-		write_txt(file,*it);
+		write_output_box_txt(file,*it);
 	}
 	for (vector<SolverOutputBox>::const_iterator it=boundary.begin(); it!=boundary.end(); it++) {
-		write_txt(file,*it);
+		write_output_box_txt(file,*it);
 	}
 	for (vector<SolverOutputBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++) {
-		write_txt(file,*it);
+		write_output_box_txt(file,*it);
 	}
 	for (vector<SolverOutputBox>::const_iterator it=pending.begin(); it!=pending.end(); it++) {
-		write_txt(file,*it);
+		write_output_box_txt(file,*it);
 	}
 
 	file.close();

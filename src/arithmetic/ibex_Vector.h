@@ -189,7 +189,11 @@ public:
 	 * \brief Convert to double*
 	 */
 	double* raw() { return vec; }
-	double* raw_const() const { return vec; }
+
+	/*
+	 * \brief Convert to double*
+	 */
+	const double* raw() const { return vec; }
 
 private:
 	friend class Matrix;
