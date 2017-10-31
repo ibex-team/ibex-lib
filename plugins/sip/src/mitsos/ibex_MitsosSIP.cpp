@@ -244,10 +244,12 @@ void MitsosSIP::optimize(double eps_f) {
 				// SIP-feasibility test of x_ORA
 				Interval g_max_ORA=solve_LLP(false, x_ORA, eps_LLP);
 
-				if (g_max_UBD.ub()<=0) {
-					// x_UBD is feasible: update the loup
+				if (g_max_ORA.ub()<=0) {
+					UBD_loup = sys.goal_ub(x_ORA);
+					// x_ORA is feasible: update the loup
 					if (UBD_loup > f_UBD) {
 						// if happens => bug
+						cout << "UBD_loup=" << UBD_loup;
 						ibex_error("[SIP]: the oracle problem found a SIP-feasible point above the loup.");
 					}
 
@@ -258,13 +260,13 @@ void MitsosSIP::optimize(double eps_f) {
 
 					f_UBD = UBD_loup;
 					if (trace>=1) cout << "   f_UBD = " << f_UBD << endl;
-					x_opt = x_UBD;
+					x_opt = x_ORA;
 					UBD_changed=true;
 
 				} else {
 					// ====== added by chabs =============
-					if (g_max_UBD.lb()<=0) {
-						eps_LLP = g_max_UBD.diam() / r_LLP;
+					if (g_max_ORA.lb()<=0) {
+						eps_LLP = g_max_ORA.diam() / r_LLP;
 						if (trace>=1) cout << "   eps_LLP=" << eps_LLP << endl;
 					}
 				}
@@ -334,10 +336,7 @@ bool MitsosSIP::solve(const System& sub_sys, double eps, Vector& x_opt, double& 
 
 Interval MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 
-    if (LBD)
-        cout << "   LLP: ";
-    else
-        cout << "   LLP: ";
+	cout << "   LLP: ";
 
 	double lb=NEG_INFINITY;
 	double ub=NEG_INFINITY;
@@ -359,7 +358,7 @@ Interval MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 			//cout << "param box=" << param_box << endl;
 
 			Optimizer::Status status=o.optimize(param_box);
-			o.report();
+			//o.report();
 
 			if (status!=Optimizer::SUCCESS) {
 				ibex_error("LLP failed");
