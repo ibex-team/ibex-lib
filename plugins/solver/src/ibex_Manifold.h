@@ -142,7 +142,7 @@ protected:
 	void write_double(std::ofstream& f, double x) const;
 	void write_signature(std::ofstream& f) const;
 	void write_output_box(std::ofstream& f, const SolverOutputBox& sol) const;
-	void write_txt(std::ofstream& file, const SolverOutputBox& sol) const;
+	void write_output_box_txt(std::ofstream& file, const SolverOutputBox& sol) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const Manifold& manif);

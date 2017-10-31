@@ -1,5 +1,9 @@
 #include "ibex_Exception.h"
 
+#ifdef _WIN32
+#include <float.h>
+#endif
+
 namespace ibex {
 
 inline void fpu_round_down() {
