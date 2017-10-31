@@ -280,7 +280,7 @@ IntervalVector cart_prod(const Array<const IntervalVector>& x) {
 	}
 
 	IntervalVector z(size);
-	std::cout << "size=" << size << " z=" << z << std::endl;
+//	std::cout << "size=" << size << " z=" << z << std::endl;
 
 	for (int i=0, j=0; i<x.size(); j+=x[i].size(), i++) {
 		if (x[i].is_empty()) {
