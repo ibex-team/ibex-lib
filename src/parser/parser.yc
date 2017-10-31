@@ -93,16 +93,16 @@ program       :                                 { begin(); }
                 TK_CHOCO choco_ctr              { end_choco(); }
               ; 
 
-system_or_func:                                 { begin_system(); }         
-                system                          { end_system(); } 
-              |                                 { begin_function(); }
-                function                        { end_function(); }        
-              ;
-              
-system        : TK_VARS decl_var_list ';'   
-                decl_fnc_list
+system_or_func: function decl_opt_fncs
+                TK_VARS decl_var_list ';'   
+                decl_opt_fncs
                 decl_opt_goal
-	            decl_opt_ctrs                          
+                decl_opt_ctrs                   { end_system(); }
+              | TK_VARS decl_var_list ';'   
+                decl_opt_fncs
+                decl_opt_goal
+                decl_opt_ctrs                   { end_system(); }
+              | function                        { end_function(); }
               ;
               
 choco_ctr     : ctr_blk_list                    
@@ -157,7 +157,7 @@ interval      : '[' expr ',' expr ']'           { $$=new Interval($2->_2dbl(), $
 /*                                                FUNCTIONS                                                           */
 /**********************************************************************************************************************/
 
-decl_fnc_list : decl_fnc_list function 
+decl_opt_fncs : decl_opt_fncs function 
               | 
               ;
 
