@@ -259,7 +259,7 @@ void MitsosSIP::optimize(double eps_f) {
 					}
 
 					f_UBD = UBD_loup;
-					if (trace>=1) cout << "   f_UBD = " << f_UBD << endl;
+					if (trace>=1) cout << "\033[32m   f_UBD = " << f_UBD << "\033[0m" << endl;
 					x_opt = x_ORA;
 					UBD_changed=true;
 
