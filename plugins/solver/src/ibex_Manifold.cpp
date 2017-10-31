@@ -132,7 +132,7 @@ void Manifold::write_output_box(ofstream& f, const SolverOutputBox& sol) const {
 			write_int(f,(sol.varset->param(i)) + 1);
 		}
 	} else {
-		for (int i=0; i<sol.varset->nb_param; i++)
+		for (unsigned int i=0; i<n-m; i++)
 			write_int(f,0);
 	}
 }
@@ -267,7 +267,7 @@ void Manifold::write_output_box_txt(ofstream& file, const SolverOutputBox& sol) 
 				file << (sol.varset->param(i)) + 1;
 			}
 		} else {
-			for (int i=0; i<n-m; i++) {
+			for (unsigned int i=0; i<n-m; i++) {
 				if (i>0) file << s;
 				file << 0;
 			}
