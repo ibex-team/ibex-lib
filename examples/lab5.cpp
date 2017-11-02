@@ -76,7 +76,7 @@ int main() {
 //	for (int i=0; i<n; i++)
 //		y.set_ref(i, f(p1,p2,Interval(t[i])));
 //
-//	Function fn(p1,p2,ExprVector::new_(y,false));
+//	Function fn(p1,p2,ExprVector::new_(y,ExprVector::COL));
 //
 //	SepFwdBwd sep(fn,y);
 	// ==============================================================================

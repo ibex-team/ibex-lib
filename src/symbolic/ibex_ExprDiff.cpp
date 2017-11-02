@@ -56,7 +56,7 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 			a.set_ref(i,gradient(old_x,new_x,argi));
 			delete &argi;
 		}
-		result=&ExprVector::new_(a,false);
+		result=&ExprVector::new_col(a);
 	} else {
 		throw ExprDiffException("differentiation of matrix-valued functions");
 	}
@@ -151,7 +151,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 //	cout << ")" << endl;
 
     // dX.size()==1 is the univariate case (the node df must be scalar)
-	const ExprNode& df=dX.size()==1? dX[0] : ExprVector::new_(dX,true);
+	const ExprNode& df=dX.size()==1? dX[0] : ExprVector::new_(dX,ExprVector::ROW);
 
 	// Note: it is better to proceed in this way: (1) differentiate
 	// and (2) copy the expression for two reasons
@@ -235,7 +235,7 @@ void ExprDiff::visit(const ExprIndex& i) {
 		assert(i.index.all_rows());
 		row_vec.push_back(col_vec.back());
 	} else {
-		row_vec.push_back(&ExprVector::new_(col_vec,false));
+		row_vec.push_back(&ExprVector::new_(col_vec,ExprVector::COL));
 	}
 
 	n=i.expr.dim.nb_rows();
@@ -248,7 +248,7 @@ void ExprDiff::visit(const ExprIndex& i) {
 		assert(i.index.all_cols());
 		add_grad_expr(i.expr,*row_vec.back());
 	} else {
-		add_grad_expr(i.expr, ExprVector::new_(row_vec,true));
+		add_grad_expr(i.expr, ExprVector::new_(row_vec,ExprVector::ROW));
 	}
 }
 
@@ -299,7 +299,7 @@ void ExprDiff::visit(const ExprApply& e) {
 			int n=e.arg(i).dim.vec_size();
 			Array<const ExprNode> tab(n);
 			for (int j=0; j<n; j++) tab.set_ref(j,gradf[k++]*(*grad[e]));
-			add_grad_expr(e.arg(i), ExprVector::new_(tab,e.arg(i).dim.type()==Dim::ROW_VECTOR));
+			add_grad_expr(e.arg(i), ExprVector::new_(tab,e.arg(i).dim.type()==Dim::ROW_VECTOR? ExprVector::ROW : ExprVector::COL));
 		}
 		break;
 		case Dim::MATRIX:
@@ -319,9 +319,9 @@ void ExprDiff::visit(const ExprApply& e) {
 //				for (int i=0; i<m; i++) {
 //					Array<const ExprNode> col(n);
 //					for (int j=0; j<n; j++) col.set_ref(j,gradf[k++]*grad[e]);
-//					rows.set_ref(i, ExprVector::new_(col,false));
+//					rows.set_ref(i, ExprVector::new_(col,ExprVector::COL));
 //				}
-//				add_grad_expr(e.arg(i), ExprVector::new_(rows,true));
+//				add_grad_expr(e.arg(i), ExprVector::new_(rows,ExprVector::ROW));
 //			}
 		}
 		break;

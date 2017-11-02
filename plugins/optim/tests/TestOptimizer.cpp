@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Optimizer Tests
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Mar 2, 2012
+ * Last update : Oct 17, 2017
  * ---------------------------------------------------------------------------- */
 
 #include "TestOptimizer.h"
@@ -17,6 +18,61 @@
 using namespace std;
 
 namespace ibex {
+
+void TestOptimizer::vec_problem01() {
+
+	const ExprSymbol& x=ExprSymbol::new_(Dim::col_vec(3));
+
+	SystemFactory f;
+	f.add_var(x);
+	f.add_ctr(x[0]*x[1]*x[2]>=1);
+	f.add_goal(x*x);
+	System sys(f);
+
+	double prec=1e-3;
+	DefaultOptimizer o(sys,
+			Optimizer::default_rel_eps_f,
+			Optimizer::default_abs_eps_f,
+			NormalizedSystem::default_eps_h, false, false); // no INHC4
+	Optimizer::Status status=o.optimize(IntervalVector(3,Interval(0,10)));
+
+	CPPUNIT_ASSERT(status==Optimizer::SUCCESS);
+	CPPUNIT_ASSERT(o.get_loup()>=3 && o.get_uplo()<=3);
+	CPPUNIT_ASSERT(almost_eq(o.get_loup_point(),Vector::ones(3),0.1));
+}
+
+void TestOptimizer::vec_problem02() {
+	const ExprSymbol& alpha=ExprSymbol::new_();
+	const ExprSymbol& x=ExprSymbol::new_(Dim::col_vec(2));
+
+	const ExprNode& R=Return(Return(cos(alpha),-sin(alpha),ExprVector::ROW), Return(sin(alpha),cos(alpha),ExprVector::ROW), ExprVector::COL);
+
+	Vector v=Vector::ones(2);
+
+	SystemFactory f;
+	f.add_var(alpha);
+	f.add_var(x);
+	f.add_ctr(R*x=-x);
+	f.add_goal(v*x);
+	System sys(f);
+
+	double prec=1e-3;
+	DefaultOptimizer o(sys,
+			Optimizer::default_rel_eps_f,
+			Optimizer::default_abs_eps_f,
+			NormalizedSystem::default_eps_h, false, false); // no INHC4
+
+	IntervalVector box=cart_prod(Interval(-1,1)*Interval::PI, Interval(-10,10), Interval(-10,10));
+	Optimizer::Status status=o.optimize(box);
+	o.report();
+
+	CPPUNIT_ASSERT(status==Optimizer::SUCCESS);
+	CPPUNIT_ASSERT(o.get_loup()>=-20 && o.get_uplo()<=-20);
+	Vector sol=o.get_loup_point().mid();
+	CPPUNIT_ASSERT(almost_eq(fabs(sol[0]),Interval::PI.mid(),1e-3));
+	CPPUNIT_ASSERT(almost_eq(sol[1],-10,1e-3));
+	CPPUNIT_ASSERT(almost_eq(sol[2],-10,1e-3));
+}
 
 // true minimum is 0.
 Optimizer::Status issue50(double init_loup, double prec) {

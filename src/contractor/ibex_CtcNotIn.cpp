@@ -15,7 +15,7 @@
 
 namespace ibex {
 
-CtcNotIn::CtcNotIn(Function& f, const Domain& y) : Ctc(f.nb_var()), f(f) {
+CtcNotIn::CtcNotIn(const Function& f, const Domain& y) : Ctc(f.nb_var()), f(f) {
 	switch(y.dim.type()) {
 	case Dim::SCALAR:       init(y.i()); break;
 	case Dim::ROW_VECTOR:
@@ -24,15 +24,15 @@ CtcNotIn::CtcNotIn(Function& f, const Domain& y) : Ctc(f.nb_var()), f(f) {
 	}
 }
 
-CtcNotIn::CtcNotIn(Function& f, const Interval& y) : Ctc(f.nb_var()), f(f) {
+CtcNotIn::CtcNotIn(const Function& f, const Interval& y) : Ctc(f.nb_var()), f(f) {
 	init(y);
 }
 
-CtcNotIn::CtcNotIn(Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f) {
+CtcNotIn::CtcNotIn(const Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f) {
 	init(y);
 }
 
-CtcNotIn::CtcNotIn(Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f) {
+CtcNotIn::CtcNotIn(const Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f) {
 	init(y);
 }
 

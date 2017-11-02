@@ -48,12 +48,12 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
                 				n(n), goal_var(goal_var),
                 				ctc(ctc), bsc(bsc), loup_finder(finder), buffer(buffer),
                 				eps_x(eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
-                				trace(false), timeout(-1),
+                				trace(0), timeout(-1),
                 				status(SUCCESS),
                 				//kkt(normalized_user_sys),
-								uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
+						uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
                 				loup_point(n), initial_loup(POS_INFINITY), loup_changed(false),
-								time(0), nb_cells(0) {
+                                                time(0), nb_cells(0) {
 
 	if (trace) cout.precision(12);
 }
@@ -138,7 +138,7 @@ void Optimizer::update_uplo() {
 		new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
 		//    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
 
-		double m = std::min(new_uplo, uplo_of_epsboxes);
+		double m = (new_uplo < uplo_of_epsboxes) ? new_uplo :  uplo_of_epsboxes;
 		if (uplo < m) uplo = m; // warning: hides the field "m" of the class
 		// note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
 		// ymax is strictly lower than the loup.
@@ -170,8 +170,6 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		delete &c;
 	} else {
 		buffer.push(&c);
-
-		nb_cells++;
 	}
 }
 
@@ -291,21 +289,22 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// TODO: no loup-point if handle_cell contracts everything
 	loup_point=init_box;
 	time=0;
-	Timer::start();
+	Timer timer;
+	timer.start();
 	handle_cell(*root,init_box);
-
+	
 	update_uplo();
 
 	try {
-		while (!buffer.empty()) {
-
-		  if (trace >= 2) cout << buffer;
-
+	     while (!buffer.empty()) {
+		  
 			loup_changed=false;
-
-			Cell *c = buffer.top();
+			// for double heap , choose randomly the buffer : top  has to be called before pop
+			Cell *c = buffer.top(); 
+			if (trace >= 2) cout << " current box " << c->box << endl;
 
 			try {
+
 				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 
 				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
@@ -313,6 +312,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 				buffer.pop();
 				delete c; // deletes the cell.
 
+				nb_cells+=2;  // counting the cells handled ( in previous versions nb_cells was the number of cells put into the buffer after being handled)
+                
 				handle_cell(*new_cells.first, init_box);
 				handle_cell(*new_cells.second, init_box);
 
@@ -330,6 +331,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					double ymax=compute_ymax();
 
 					buffer.contract(ymax);
+				
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
 					// TODO: check if happens. What is the return code in this case?
@@ -339,7 +341,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					}
 				}
 				update_uplo();
-				time_limit_check(); // TODO: not reentrant
+				if (timeout>0) timer.check(timeout); // TODO: not reentrant, JN: done
+				time = timer.get_time();
 
 			}
 			catch (NoBisectableVariableException& ) {
@@ -356,8 +359,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 		return status;
 	}
 
-	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	timer.stop();
+	time = timer.get_time();
 
 	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && abs_eps_f==0 && rel_eps_f==0)))
 		status=INFEASIBLE;
@@ -434,12 +437,6 @@ void Optimizer::report(bool verbose) {
 	cout << " number of cells: " << nb_cells << endl;
 }
 
-void Optimizer::time_limit_check () {
-	if (timeout<=0) return;
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	if (time >=timeout ) throw TimeOutException();
-	Timer::start();
-}
+
 
 } // end namespace ibex

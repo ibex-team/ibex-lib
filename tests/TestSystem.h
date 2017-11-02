@@ -34,7 +34,7 @@ public:
 		CPPUNIT_TEST(copy02);
 		CPPUNIT_TEST(ineq_only01);
 		CPPUNIT_TEST(eq_only01);
-		CPPUNIT_TEST(normalize01);
+//		CPPUNIT_TEST(normalize01);
 //		CPPUNIT_TEST(normalize02);
 		CPPUNIT_TEST(extend01);
 		CPPUNIT_TEST(extend02);
@@ -52,7 +52,7 @@ public:
 	void ineq_only01();
 	void eq_only01();
 	void normalize01();
-//	void normalize02();
+	void normalize02();
 	void extend01();
 	void extend02();
 //	void extend02();

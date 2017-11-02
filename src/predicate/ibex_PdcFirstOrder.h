@@ -13,7 +13,6 @@
 
 #include "ibex_System.h"
 #include "ibex_Pdc.h"
-#include "ibex_EntailedCtr.h"
 
 namespace ibex {
 
@@ -37,13 +36,6 @@ public:
 	PdcFirstOrder(const System& sys, const IntervalVector& init_box);
 
 	/**
-	 * \brief Set the entailed (inactive) constraints
-	 *
-	 * Avoid useless computations
-	 */
-	void set_entailed(EntailedCtr* e);
-
-	/**
 	 * \brief Test a box.
 	 */
 	BoolInterval test(const IntervalVector& box);
@@ -57,15 +49,8 @@ public:
 	 * \brief The bounding constraints
 	 */
 	const IntervalVector& init_box;
-
-protected:
-
-	EntailedCtr* e;
 };
 
-inline void PdcFirstOrder::set_entailed(EntailedCtr* e) {
-	this->e = e;
-}
-
 } // end namespace ibex
+
 #endif // __IBEX_PDC_FIRST_ORDER_H__

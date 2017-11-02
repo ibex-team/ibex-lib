@@ -33,6 +33,15 @@ class IntervalMatrix; // declared only for friendship
  * By convention an empty vector has a dimension. A vector becomes empty
  * when one of its component becomes empty and all the components
  * are set to the empty Interval.
+ *
+ * An IntervalVector is always a column vector.
+ * If you want to insert a row vector in an
+ * expression, use the transpose(...) operator.
+ * Example:
+ *
+ *    const ExprSymbol& x=ExprSymbol::new_(Dim::col_vec(2));
+ *    IntervalVector v=Vector::ones(2);
+ *    const ExprNode& e=transpose(v)*x;
  */
 class IntervalVector {
 
@@ -72,6 +81,12 @@ public:
 	 *
 	 */
 	IntervalVector(const Vector& x);
+
+	/**
+	 * \brief Create the one-dimensional IntervalVector x
+	 *
+	 */
+	IntervalVector(const Interval& x);
 
 	/**
 	 * \brief Create [empty; ...; empty]
@@ -738,9 +753,44 @@ bool bwd_mul(const Interval& y, IntervalVector& x1, IntervalVector& x2);
 std::ostream& operator<<(std::ostream& os, const IntervalVector& x);
 
 /**
- * \brief Cartesian product of x and y.
+ * \brief Cartesian product of x1 and x2.
  */
-IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y);
+IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2);
+
+/**
+ * \brief Cartesian product of x1, x2, x3.
+ */
+IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3);
+
+/**
+ * \brief Cartesian product of x1, x2, x3, x4.
+ */
+IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4);
+
+/**
+ * \brief Cartesian product of x1, x2, x3, x4, x5.
+ */
+IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4, const IntervalVector& x5);
+
+/**
+ * \brief Cartesian product of x1, x2, x3, x4, x5, x6.
+ */
+IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4, const IntervalVector& x5, const IntervalVector& x6);
+
+/**
+ * \brief Cartesian product of x1, x2, x3, x4, x5, x6, x7.
+ */
+IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4, const IntervalVector& x5, const IntervalVector& x6, const IntervalVector& x7);
+
+/**
+ * \brief Cartesian product of x1, x2, x3, x4, x5, x6, x7, x8.
+ */
+IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4, const IntervalVector& x5, const IntervalVector& x6, const IntervalVector& x7, const IntervalVector& x8);
+
+/**
+ * \brief Cartesian product of an arbitrary number of arguments.
+ */
+IntervalVector cart_prod(const Array<const IntervalVector>& x);
 
 /*@}*/
 
@@ -823,17 +873,6 @@ inline double IntervalVector::max_diam() const {
 
 inline double IntervalVector::min_diam() const {
 	return (*this)[extr_diam_index(true)].diam();
-}
-
-inline IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y) {
-	IntervalVector z(x.size()+y.size());
-	if (x.is_empty() || y.is_empty())
-		z.set_empty();
-	else {
-		z.put(0,x);
-		z.put(x.size(),y);
-	}
-	return z;
 }
 
 inline IntervalVector& IntervalVector::operator+=(const Vector& x) {
@@ -930,6 +969,34 @@ inline IntervalVector operator*(const Matrix& m, const IntervalVector& v) {
 
 inline IntervalVector operator*(const IntervalVector& v, const Matrix& m) {
 	return mulVM<IntervalVector,Matrix,IntervalVector>(v,m);
+}
+
+inline IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2) {
+	return cart_prod(Array<const IntervalVector>(x1,x2));
+}
+
+inline IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3) {
+	return cart_prod(Array<const IntervalVector>(x1,x2,x3));
+}
+
+inline IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4) {
+	return cart_prod(Array<const IntervalVector>(x1,x2,x3,x4));
+}
+
+inline IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4, const IntervalVector& x5) {
+	return cart_prod(Array<const IntervalVector>(x1,x2,x3,x4,x5));
+}
+
+inline IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4, const IntervalVector& x5, const IntervalVector& x6) {
+	return cart_prod(Array<const IntervalVector>(x1,x2,x3,x4,x5,x6));
+}
+
+inline IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4, const IntervalVector& x5, const IntervalVector& x6, const IntervalVector& x7) {
+	return cart_prod(Array<const IntervalVector>(x1,x2,x3,x4,x5,x6,x7));
+}
+
+inline IntervalVector cart_prod(const IntervalVector& x1, const IntervalVector& x2, const IntervalVector& x3, const IntervalVector& x4, const IntervalVector& x5, const IntervalVector& x6, const IntervalVector& x7, const IntervalVector& x8) {
+	return cart_prod(Array<const IntervalVector>(x1,x2,x3,x4,x5,x6,x7,x8));
 }
 
 } // end namespace

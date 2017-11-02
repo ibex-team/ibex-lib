@@ -39,7 +39,7 @@ public:
 	/**
 	 * \brief Create the buffer.
 	 *
-	 * \param sys      - the original (not extended) system to optimize
+	 * \param sys    - the extended system to optimize
 	 * \param critpr - probability to choose the second criterion in node selection;
 	 *                 integer in [0,100]. By default 50. The value 0 corresponds to
 	 *                 use a single criterion for node selection (the classical one :
@@ -134,40 +134,6 @@ inline CellDoubleHeap::~CellDoubleHeap() {
 	delete &cost2();
 }
 
-inline void CellDoubleHeap::add_backtrackable(Cell& root) {
-	// add data "pu" and "pf" (if required)
-	cost2().add_backtrackable(root);
-}
-
-inline void CellDoubleHeap::flush()               { DoubleHeap<Cell>::flush(); }
-
-inline unsigned int CellDoubleHeap::size() const  { return DoubleHeap<Cell>::size(); }
-
-inline bool CellDoubleHeap::empty() const         { return DoubleHeap<Cell>::empty(); }
-
-inline void CellDoubleHeap::push(Cell* cell) {
-	// we know cost1() does not require OptimData
-	cost2().set_optim_data(*cell,sys);
-
-	// the cell is put into the 2 heaps
-	DoubleHeap<Cell>::push(cell);
-}
-
-inline Cell* CellDoubleHeap::pop()                { return DoubleHeap<Cell>::pop(); }
-
-inline Cell* CellDoubleHeap::top() const          { return DoubleHeap<Cell>::top(); }
-
-inline double CellDoubleHeap::minimum() const     { return DoubleHeap<Cell>::minimum(); }
-
- inline std::ostream& CellDoubleHeap::print(std::ostream& os) const
- {	os << "==============================================================================\n";
-   os << " first heap " << " size " << heap1->size() << " top " << heap1->top()->box << std::endl;
-     os << " second heap " << " size " << heap2->size() << " top " << heap2->top()->box ;
-     return  os << std::endl;
- }
-
- //{return DoubleHeap<Cell>::print( os);}
-
 inline void CellDoubleHeap::contract(double new_loup) {
 
 	// DoubleHeap::contract requires the costs of
@@ -184,6 +150,40 @@ inline void CellDoubleHeap::contract(double new_loup) {
 inline CellCostFunc& CellDoubleHeap::cost1()      { return (CellCostFunc&) heap1->costf; }
 
 inline CellCostFunc& CellDoubleHeap::cost2()      { return (CellCostFunc&) heap2->costf; }
+
+inline void CellDoubleHeap::add_backtrackable(Cell& root) {
+      // add data "pu" and "pf" (if required)
+       cost2().add_backtrackable(root);
+}
+
+inline void CellDoubleHeap::flush()               { DoubleHeap<Cell>::flush(); }
+
+inline unsigned int CellDoubleHeap::size() const  { return DoubleHeap<Cell>::size(); }
+
+inline bool CellDoubleHeap::empty() const         { return DoubleHeap<Cell>::empty(); }
+
+inline void CellDoubleHeap::push(Cell* cell) {
+       // we know cost1() does not require OptimData
+       cost2().set_optim_data(*cell,sys);
+
+       // the cell is put into the 2 heaps
+       DoubleHeap<Cell>::push(cell);
+
+
+}
+
+
+inline Cell* CellDoubleHeap::pop()                { return DoubleHeap<Cell>::pop(); }
+inline Cell* CellDoubleHeap::top() const          { return DoubleHeap<Cell>::top(); }
+
+inline double CellDoubleHeap::minimum() const     { return DoubleHeap<Cell>::minimum(); }
+
+ inline std::ostream& CellDoubleHeap::print(std::ostream& os) const
+ {    os << "==============================================================================\n";
+      os << " first heap " << " size " << heap1->size() << " top " << heap1->top()->box << std::endl;
+      os << " second heap " << " size " << heap2->size() << " top " << heap2->top()->box ;
+     return  os << std::endl;
+ }
 
 
 } // namespace ibex

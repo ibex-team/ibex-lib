@@ -101,7 +101,7 @@ void ExprCopy::visit(const ExprVector& e) {
 		visit(e.arg(i));
 		args2.set_ref(i,ARG(i));
 	}
-	clone.insert(e, &ExprVector::new_(args2,e.row_vector()));
+	clone.insert(e, &ExprVector::new_(args2,e.orient));
 }
 
 void ExprCopy::visit(const ExprApply& e) {

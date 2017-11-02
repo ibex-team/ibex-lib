@@ -11,7 +11,7 @@
 #ifndef __IBEX_EXTENDED_SYSTEM_H__
 #define __IBEX_EXTENDED_SYSTEM_H__
 
-#include "ibex_System.h"
+#include "ibex_NormalizedSystem.h"
 
 namespace ibex {
 
@@ -26,7 +26,7 @@ namespace ibex {
  * <li> (m+1) constraints: y>=f(x), g_1(x)<=0, ..., g_m(x)<=0.
  * </ul>
  */
-class ExtendedSystem : public System {
+class ExtendedSystem : public NormalizedSystem {
 public:
 
 	/**

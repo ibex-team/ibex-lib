@@ -465,7 +465,7 @@ void TestInnerArith::mul_div_mono07() {
 	Interval x(0.5,2);
 	Interval y(0.5,2);
 	ibwd_mul(1,x,y);
-	CPPUNIT_ASSERT(x.is_empty() || (x*y==1));
+	CPPUNIT_ASSERT(x.is_empty() || (fabs(x.lb()*y.lb()-1.0)<error && fabs(x.ub()*y.ub()-1.0)<error));
 }
 
 void TestInnerArith::mul08() {

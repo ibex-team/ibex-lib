@@ -251,14 +251,6 @@ public:
 	/** All the arguments */
 	Array<const ExprSymbol> args;
 
-	/** Indices of arguments to be considered as constants
-	 * (not contracted nor bisected) */
-	std::vector<int> sybs;
-
-	/** Indices of arguments to be considered as parameters
-	 * (contracted but not bisected) */
-	std::vector<int> eprs;
-
 	/** Box Constraint on the variable
 	 * (not only "initial": may be used as input by CHOCO) */
 	IntervalVector box;
