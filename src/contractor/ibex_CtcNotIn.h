@@ -27,22 +27,22 @@ public:
 	/**
 	 * \brief Build the contractor for "f(x) not-in [y]".
 	 */
-	CtcNotIn(Function& f, const Domain& y);
+	CtcNotIn(const Function& f, const Domain& y);
 
 	/**
 	 * \brief Build the contractor for "f(x) not-in [y]".
 	 */
-	CtcNotIn(Function& f, const Interval& y);
+	CtcNotIn(const Function& f, const Interval& y);
 
 	/**
 	 * \brief Build the contractor for "f(x) not-in [y]".
 	 */
-	CtcNotIn(Function& f, const IntervalVector& y);
+	CtcNotIn(const Function& f, const IntervalVector& y);
 
 	/**
 	 * \brief Build the contractor for "f(x) not-in [y]".
 	 */
-	CtcNotIn(Function& f, const IntervalMatrix& y);
+	CtcNotIn(const Function& f, const IntervalMatrix& y);
 
 	/**
 	 * \brief Delete this.
@@ -55,7 +55,7 @@ public:
 	virtual void contract(IntervalVector& box);
 
 protected:
-	Function& f;
+	const Function& f;
 
 	/**
 	 * The size of the complementary of y
