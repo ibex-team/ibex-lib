@@ -95,16 +95,17 @@ SolverOutputBox Manifold::read_output_box(ifstream& f) {
 		BitSet params(n);
 		for (unsigned int j=0; j<n-m; j++) {
 			unsigned int v=read_int(f);
-			if (v<0 || v>n) {
+			if (v>n) {
 				ibex_error("[manifold]: bad input file (bad parameter index)");
 			}
 			if (v!=0) params.add(v-1); // index starting from 1 in the raw format
 		}
-		if (!params.empty())
+		if (!params.empty()) {
 			if (params.size()!=n-m)
 				ibex_error("[manifold]: bad input file (bad number of parameters)");
 			else
 				sol.varset = new VarSet(n,params,false);
+		}
 	}
 
 	return sol;

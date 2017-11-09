@@ -79,7 +79,7 @@ void SystemFactory::init_arg_bound() {
 
 	bound_init.resize(nb_var);
 	int i=0;
-	for (typename std::vector<IntervalVector>::const_iterator it=tmp_bound.begin(); it!=tmp_bound.end(); it++) {
+	for (std::vector<IntervalVector>::const_iterator it=tmp_bound.begin(); it!=tmp_bound.end(); it++) {
 		bound_init.put(i,*it);
 		i+=(*it).size();
 	}
