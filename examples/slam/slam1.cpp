@@ -42,7 +42,7 @@ int main() {
     if (t<T-1) {
       // Push the contractor corresponding to
       // the speed measurement at time t
-      NumConstraint* c=new NumConstraint(x,x[t+1]-x[t]=v[t]);
+      NumConstraint* c=new NumConstraint(x,x[t+1]-x[t]=transpose(v[t]));
       ctc.push_back(new CtcFwdBwd(*c));
     }
   }
