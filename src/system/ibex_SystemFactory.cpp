@@ -28,6 +28,10 @@ void SystemFactory::add_var(const ExprSymbol& v) {
 	add_var(v,IntervalVector(v.dim.size()));
 }
 
+void SystemFactory::add_var(const ExprSymbol& v, const Interval& init_box) {
+	add_var(v,IntervalVector(v.dim.size(),init_box));
+}
+
 void SystemFactory::add_var(const ExprSymbol& v,  const IntervalVector& init_box ) {
 	assert(v.dim.size()==init_box.size());
 	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
@@ -61,8 +65,12 @@ void SystemFactory::add_var(const Array<const ExprSymbol>& a, const IntervalVect
 void SystemFactory::add_var(const Array<const ExprSymbol>& a, const Array<const IntervalVector>& init_boxes) {
 	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
 
-	for (int i=0; i<a.size(); i++)
-		add_var(a[i],init_boxes[i]);
+	for (int i=0; i<a.size(); i++) {
+		tmp_args.push_back(&a[i]);
+		nb_arg++;
+		nb_var+= a[i].dim.size();
+		tmp_bound.push_back(init_boxes[i]);
+	}
 }
 */
 
@@ -71,7 +79,7 @@ void SystemFactory::init_arg_bound() {
 
 	bound_init.resize(nb_var);
 	int i=0;
-	for (typename std::vector<IntervalVector>::const_iterator it=tmp_bound.begin(); it!=tmp_bound.end(); it++) {
+	for (std::vector<IntervalVector>::const_iterator it=tmp_bound.begin(); it!=tmp_bound.end(); it++) {
 		bound_init.put(i,*it);
 		i+=(*it).size();
 	}

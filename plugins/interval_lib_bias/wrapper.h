@@ -1,7 +1,22 @@
+/* ============================================================================
+ * I B E X - Implementation of the Interval class based on Profil/Bias
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Gilles Chabert
+ * Created     : Jan 10, 2013
+ * ---------------------------------------------------------------------------- */
+
+#ifndef _IBEX_BIAS_INTERVAL_H_
+#define _IBEX_BIAS_INTERVAL_H_
+
+#include "BIAS/BiasF.h"
 #include "Functions.h"
 #include <float.h>
 #include <cassert>
-#include "BIAS/BiasF.h"
+#include <iostream>
 #include <climits>
 
 namespace ibex {
@@ -19,11 +34,13 @@ inline void fpu_round_near() {
 }
 
 inline double previous_float(double x) {
-	return Pred(x);
+    if (x==POS_INFINITY) return DBL_MAX;
+	else return Pred(x);
 }
 
 inline double next_float(double x) {
-	return Succ(x);
+    if (x==NEG_INFINITY) return -DBL_MAX;
+	else return Succ(x);
 }
 
 inline Interval::Interval(const INTERVAL& x) : itv(x) {
@@ -870,3 +887,8 @@ inline bool bwd_abs(const Interval& y,  Interval& x) {
 	x &= x1 | x2;
 	return !x.is_empty();
 }
+
+
+} // end namespace ibex
+
+#endif // _IBEX_BIAS_INTERVAL_H_

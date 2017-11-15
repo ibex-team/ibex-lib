@@ -85,12 +85,6 @@ void begin() {
 	// TODO: it seems that this first scope is not popped during this call to the parser (but the next one)
 }
 
-void begin_system() {
-	if (system==NULL) { // someone tries to load a Function from a file containing a system
-		throw SyntaxError("unexpected (global) variable declaration for a function.");
-	}
-}
-
 void begin_choco() {
 	if (system==NULL) { // someone tries to load a Function from a file with CHOCO constraint syntax
 		throw SyntaxError("unexpected constraints declaration for a function.");
@@ -108,13 +102,10 @@ void begin_choco() {
 	// ------------------------------------------
 }
 
-void begin_function() {
-	if (function==NULL) { // someone tries to load a system from a file containing a function only
-		throw SyntaxError("a system requires declaration of variables.");
-	}
-}
-
 void end_system() {
+	if (system==NULL) { // someone tries to load a Function from a file containing a system
+		throw SyntaxError("unexpected (global) variable declaration for a function.");
+	}
 	MainGenerator().generate(source(),*system);
 	source().cleanup();
 	// TODO: we have to cleanup the data in case of Syntax Error
@@ -129,6 +120,9 @@ void end_choco() {
 }
 
 void end_function() {
+	if (function==NULL) { // someone tries to load a system from a file containing a function only
+		throw SyntaxError("a system requires declaration of variables.");
+	}
 	if (source().func.empty()) {
 		throw SyntaxError("no function declared in file");
 	}

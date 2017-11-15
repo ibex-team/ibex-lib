@@ -1,0 +1,10 @@
+--- soplex-1.7.1/Makefile	2017-10-16 14:17:56.199106035 +0200
++++ soplex-1.7.1/Makefile	2017-11-09 11:01:43.057823761 +0100
+@@ -200,6 +200,7 @@
+ ifeq ($(ZLIB_LDFLAGS),)
+ ZLIB		=	false
+ endif
++ZLIB		=	false # no ZLIB with win32
+ ifeq ($(ZLIB),true)
+ CPPFLAGS	+=	-DWITH_ZLIB $(ZLIB_FLAGS)
+ LDFLAGS		+=	$(ZLIB_LDFLAGS)

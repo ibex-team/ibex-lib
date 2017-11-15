@@ -33,12 +33,20 @@ public:
 		 * are actually not appended because they are not necessary) */
 		std::vector<const ExprSymbol*> vars2;
 
+		std::vector<IntervalVector> bound;
+		int n=0; // number of variables
+
 		for (int i=0; i<sys1.args.size(); i++) {
 			map.insert_new(sys1.args[i].name,&sys1.args[i]);
 			vars1.push_back(&sys1.args[i]);
 		}
+		bound.push_back(sys1.box);
+		n = sys1.box.size();
 
+		int kk=0; // indice  in sys.box
+		int ff = 0;
 		for (int i=0; i<sys2.args.size(); i++) {
+			ff = kk+(sys2.args[i].size);
 			if (map.used(sys2.args[i].name)) {
 				const ExprSymbol* x=map[sys2.args[i].name];
 				if (x->dim!=sys2.args[i].dim) {
@@ -49,13 +57,25 @@ public:
 			} else {
 				map.insert_new(sys2.args[i].name,&sys2.args[i]);
 				vars1.push_back(&sys2.args[i]);
+
+				bound.push_back(sys2.box.subvector(kk, ff-1));
+				n += (sys2.args[i].size);
 			}
 			vars2.push_back(map[sys2.args[i].name]);
+			kk = ff;
 		}
 
+		// FIXME: the merge of two sys.box is not clean. If a variable exist in sys1 and sys2, we keep only those of sys1
 		Array<const ExprSymbol> newvars(vars1);
+		IntervalVector newbound(n);
+		int i=0;
+		for (std::vector<IntervalVector>::const_iterator it=bound.begin(); it!=bound.end(); it++) {
+			newbound.put(i,*it);
+			i+=(*it).size();
+		}
 
-		add_var(newvars);
+
+		add_var(newvars,newbound);
 
 		// -------------  Add goal (if any) -----------
 		if (sys1.goal!=NULL) {

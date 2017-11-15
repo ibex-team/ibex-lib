@@ -51,7 +51,7 @@ int main() {
 	// ![inv]
 
     if (t<T-1) {
-      NumConstraint* c=new NumConstraint(x,x[t+1]-x[t]=v[t]);
+      NumConstraint* c=new NumConstraint(x,x[t+1]-x[t]=transpose(v[t]));
       ctc.push_back(new CtcFwdBwd(*c));
     }
   }

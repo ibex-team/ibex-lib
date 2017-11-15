@@ -28,7 +28,6 @@ ostream& operator<<(ostream& os, const SolverOutputBox& sol) {
 		break;
 	case SolverOutputBox::UNKNOWN :
 		os << "[unknown]";
-		return os; // stop here
 		break;
 	case SolverOutputBox::PENDING:
 		os << "[pending]";
