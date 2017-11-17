@@ -213,7 +213,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	fac.add_ctr(fessential1);
         fac.add_ctr(fessential2);
 	fac.add_ctr(fessential3);
-	//        fac.add_ctr(fessential4);
+	//	fac.add_ctr(fessential4);
 	//        fac.add_ctr(fessential5);
 	//        fac.add_ctr(fessential6);
 	//        fac.add_ctr(fessential7);
@@ -546,11 +546,13 @@ Interval matrixtrace (IntervalMatrix& M){
        	//RoundRobin bs (prec,0.5);
 	//	RoundRobinQInter bs (prec,0.5);
 	LargestFirst bs(prec,0.5);
+        //  LSmear bs(prec,0.5);
 	// RoundRobinNvar bs (8,prec,0.5);
 	cout << " Q " << Q << endl;
 	//	CtcQInterAff ctcq(9,m_ctc,Q,m_fun);
 	//	CtcQInter ctcq(9,m_ctc,Q);
 	CtcQInterAffLinear ctcq(9,m_ctc,linfun,epseq,Q);
+	CtcFixPoint ctcqfp(ctcq,0.2);
 	//	CtcQInterAffLinear ctcq(9,m_ctc,linfun,epseq,Q,QINTERCORE);
 	//	CtcCompo ctcqf0(*cdet,c_essential, ctcq);
 	//	CtcCompo ctcqf1(*ctcnorm,*cdet,c_essential);
@@ -569,7 +571,9 @@ Interval matrixtrace (IntervalMatrix& M){
 
 	//	CtcCompo ctcqf0(hc44cid, acidhc4,lphull,ctcq);
 	CtcCompo ctcqf0(hc44cid, lphull,  ctcq);
-	//CtcCompo ctcqf0(acidhc4, lphull,  ctcq);
+	//	CtcCompo ctcqf0(lphull,  ctcq);
+	//	CtcCompo ctcqf0(hc44cid, lphull,  ctcq, hc44cid, lphull);
+	//	CtcCompo ctcqf0(acidhc4, lphull,  ctcq);
 	//	CtcCompo ctcqf0(hc44cid,  ctcq);
 	//	CtcCompo ctcqf1(*ctcnorm,*cdet,c_essential, lphull);
 	//	CtcFixPoint ctcf0(ctcqf1, 0.1);
@@ -590,7 +594,7 @@ Interval matrixtrace (IntervalMatrix& M){
         int m = ctcq.activepoints_contract_count(box);
 	cout << " nb inliers " << m << endl;
 
-	SolverOptQInter* s;
+	SolverOptConstrainedQInter* s;
 
 	//SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,1);
 	//	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,2);
@@ -609,6 +613,8 @@ Interval matrixtrace (IntervalMatrix& M){
 	s->epsobj=eobj;
 	s->str.depthmax=dmax;
 	s->gaplimit=gaplimit;
+	//	s->tolerance_constraints_number=5;
+	s->tolerance_constraints_number=10000;
 	//	s->oracle=fundmat;
 	//	s->oracle=oraclemat;
 	s->str.with_oracle=0;

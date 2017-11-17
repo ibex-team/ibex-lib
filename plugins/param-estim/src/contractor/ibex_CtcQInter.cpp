@@ -19,14 +19,16 @@ using namespace std;
 
 namespace ibex {
 
-  CtcQInter::CtcQInter(int n, int nb_obs,const Array<Ctc>& ctc_list, int q, qintermethod meth, int kfun) : Ctc(n),nb_obs(nb_obs),ctc_list(ctc_list),  q(q), meth(meth), kfun(kfun){
+  CtcQInter::CtcQInter(int n, int nb_obs,const Array<Ctc>& ctc_list, int q, qintermethod meth, int kfun) : Ctc(n),nb_obs(nb_obs),ctc_list(ctc_list),   q(q), meth(meth), kfun(kfun){
         init();
   }
-  CtcQInter::CtcQInter(int n, const Array<Ctc>& ctc_list, int q, qintermethod meth, int kfun) : Ctc(n),nb_obs(ctc_list.size()),ctc_list(ctc_list),  q(q), meth(meth), kfun(kfun){
+  CtcQInter::CtcQInter(int n, const Array<Ctc>& ctc_list, int q, qintermethod meth, int kfun) : Ctc(n),nb_obs(ctc_list.size()),ctc_list(ctc_list),  q(q),  meth(meth), kfun(kfun){
         init();
   }
   
-  
+  double CtcQInter::get_epseq() {return 0;}
+  double CtcQInter::lincoeff(int i, int j) {return 0;}
+
   //  void CtcQInter::contract_pairs (IntervalVector & box) {;}
   /*
   void CtcQInter::init ()
@@ -148,7 +150,11 @@ int CtcQInter::activepoints_count(IntervalVector& box){
 
   /* computation on a single point (no interval) */
 int CtcQInter::midactivepoints_count(const Vector& vec){
-    int p=0;
+  return feasible_points(vec).size();}
+
+  vector<int> CtcQInter::feasible_points(const Vector& vec){
+    //    int p=0;
+    vector<int> vecpt;
     //    cout << " points size active count " << points->size() << " box " << box <<endl;
     list<int>::iterator iter = points->begin() ;
     int kk= points->size();
@@ -158,13 +164,14 @@ int CtcQInter::midactivepoints_count(const Vector& vec){
       point_contract(box1,*iter);
       //      point_contract_exact(box1,*iter);
       //      cout << *iter << " " << box1 << endl;
-      if (!(box1.is_empty()))  p++;
+      if (!(box1.is_empty()))  //p++;
+	vecpt.push_back(*iter);
 
       iter++;
     }
 
 
-    return p;
+    return vecpt;
  }
 
 
@@ -522,6 +529,9 @@ IntervalVector CtcQInter::randomvalidpoint(IntervalVector & box) {
     return vec;}
 
   int CtcQInter::original_obs(int k) {return k;}
+  
+
+    
 
 } // end namespace ibex
 

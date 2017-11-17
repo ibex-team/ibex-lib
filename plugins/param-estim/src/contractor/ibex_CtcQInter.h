@@ -37,7 +37,7 @@ public:
    * The list itself is not kept by reference.
    */
   
-  CtcQInter(int n, const Array<Ctc>& ctc_list, int q, qintermethod meth=QINTERPROJ, int kfun=1);
+  CtcQInter(int n, const Array<Ctc>& ctc_list,  int q, qintermethod meth=QINTERPROJ, int kfun=1);
   CtcQInter(int n, int nb_obs, const Array<Ctc>& ctc_list, int q, qintermethod meth=QINTERPROJ, int kfun=1);
   ~CtcQInter();
 	
@@ -84,7 +84,7 @@ public:
 	int q;
 	int qmax;
 	int varbiss;
-        
+        virtual double get_epseq() ;
 	list<int>* points;  // the list of current compatible measurements : initialized to all measures and managed by solver when the QInter constraint is used in a parameter estimation solver.
 
         bool points_to_delete;  //to manage shared pointer  points
@@ -95,6 +95,8 @@ public:
 	//	virtual void contract_pairs (IntervalVector & box);
 	virtual vector<int> initial_observations (int i);
 	virtual int original_obs(int k);
+	virtual vector<int> feasible_points(const Vector& vec);
+	virtual double lincoeff(int i, int k);
 
 protected:
 

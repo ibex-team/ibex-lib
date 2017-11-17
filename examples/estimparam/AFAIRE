@@ -96,3 +96,11 @@ pour article JOGO :
 point pas clair  valid :  satisfying the constraints
 validCS ? -> inliers :  pourquoi valid inliers  : validated inliers ?  
 consensus set  CS  vs inliers
+
+_________________________________________________________________________________________________
+
+
+bug  dans exemple corridor : 
+solution à 58  non trouvée dans 
+
+à débugguer

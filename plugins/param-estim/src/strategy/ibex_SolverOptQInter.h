@@ -89,7 +89,7 @@ Q-intersection contractors.
    void postsolution ();
    virtual Vector newvalidpoint (Cell& c);
    
- };
+  };
 
 /**
  * \ingroup strategy
@@ -109,18 +109,20 @@ A linear solver is used for finding a feasible point.
 
    SolverOptConstrainedQInter(System& sys, Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq, double eps_cont, int optimbuffer=1);
    ~SolverOptConstrainedQInter();
+   int tolerance_constraints_number;
  protected:
    LinearSolver* mylp;  // linear solver for finding a feasible point
-
+   LinearSolver* mylp1;  // linear solver for finding a feasible point
    Vector newvalidpoint (Cell& c);
    Vector feasiblepoint (const IntervalVector & box, bool & res, Vector & feasiblepoint2);
    Vector feasiblepoint (const IntervalVector & box, bool & res);
    double epscont;
    NormalizedSystem normsys;
+
  };
 
 
 
 
-} // end namespace ibex
+}// end namespace ibex
 #endif // __IBEX_SOLVEROPTQINTER_H__

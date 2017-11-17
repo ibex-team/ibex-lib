@@ -33,6 +33,7 @@ public:
   void point_contract_exact(IntervalVector& box,int iter); 
   double *** linfun;
   double epseq;
+  double get_epseq();
   Interval eps;
   bool constraint_check (IntervalVector& box, double epscont);
   //  int points_count(IntervalVector& box);        
@@ -65,6 +66,8 @@ public:
 
     void point_contract(IntervalVector& box,int iter); 
    int midactivepoints_count(const Vector& vec);
+   vector<int> feasible_points(const Vector& vec);
+   double lincoeff(int i, int k);
  
  protected :
 

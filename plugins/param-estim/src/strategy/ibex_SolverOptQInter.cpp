@@ -125,14 +125,12 @@ namespace ibex {
 
   }
 
-  
   void SolverOptQInter::precontract(Cell& c) {
     //    cout << "qmax avant contract " << c.get<QInterPoints>().qmax  << "  " << ctcq.qmax <<  endl;
     if (c.get<QInterPoints>().qmax < ctcq.q) {c.box.set_empty();}
     manage_cell_info(c);
     ctc.enable_side_effects();
     ctcq.enable_side_effects();   // allows points list to be updated during the contraction 
-   
   }
 
   void SolverOptQInter::postcontract(Cell& c) {
@@ -474,11 +472,11 @@ namespace ibex {
     //The linear variables are generated
     //0 <= xl_j <= diam([x_j])
       if (corner[j])    {
-	bound[j] = Interval(0,box[j].diam());
+	bound[j] = Interval(mylp->getEpsilon() ,box[j].diam() - mylp->getEpsilon());
 	row[j]=0;
 	  }
       else   {
-	bound[j] = Interval(-box[j].diam(),0);
+	bound[j] = Interval(-box[j].diam() + mylp->getEpsilon(),- mylp->getEpsilon());
 	row[j] = 0;
       }
     }
@@ -520,7 +518,7 @@ namespace ibex {
 	  row[j]=G[j].lb();
       }
 		  
-      mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
+      mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  
 	  
     }
     
@@ -532,7 +530,7 @@ namespace ibex {
     */
     LinearSolver::Status_Sol stat = mylp->solve();
 	
-     delete [] corner;
+    //     delete [] corner;
     //    std::cout << " stat solver " << stat << std::endl;
     if (stat == LinearSolver::OPTIMAL) {
       //the linear solution is mapped to intervals and evaluated
@@ -540,38 +538,147 @@ namespace ibex {
       mylp->getPrimalSol(prim);
 
       IntervalVector tmpbox(n);
-
+      
       for (int j=0; j<n; j++)
 	tmpbox[j]=x_corner[j]+prim[j];
-      //		std::cout << " simplex result " << tmpbox << std::endl;
-		
+      //		std::cout << " simplex result " << tmpbox << std::endl;		
       Vector tmpvec= tmpbox.mid();
       res= box.contains(tmpvec) ;
-      //      cout << " stat " << stat <<  " res " << res << endl;
+
+      //      cout << " stat  1er appel " << stat <<  " res " << res << endl;
       if (res) {
 	feasiblepoint = tmpvec;
-	/*
-		  if (trace)
-		    { 
-		      int prec=std::cout.precision();
-		      std::cout.precision(12);
-		    std:cout << "feasible point found " << feasiblepoint << endl;
-		      std::cout.precision(prec);
-		    }
-	*/
+	vector<int> feasible_points = ctcq.feasible_points(feasiblepoint);
+	int feasiblepoints_size =  feasible_points.size();
+       	if (feasible_points.size() < tolerance_constraints_number) {delete  [] corner;return feasiblepoint;}
+	//	if (feasible_points.size() >= 0) {delete  [] corner;return feasiblepoint;}
+	
 
-		}
+	//  2nd call tolerance minimization 
+	Vector row(n+1);
+	IntervalVector bound(n+1);
+	for (int j=0; j<n; j++){
+    //The linear variables are generated
+    //0 <= xl_j <= diam([x_j])
+	  if (corner[j])    {
+	    bound[j] = Interval(mylp->getEpsilon(),box[j].diam()) - mylp->getEpsilon();
+	    row[j]=0;
+	  }
+	  else   {
+	    bound[j] = Interval(-box[j].diam()+ mylp->getEpsilon() ,- mylp->getEpsilon());
+	    row[j] = 0;
+	  }
+	}
+	//	bound[n]= Interval (-ctcq.get_epseq(), ctcq.get_epseq());
+	bound[n]= Interval (0, ctcq.get_epseq());
 
-      return feasiblepoint;
+	mylp1->cleanConst();
+	mylp1->initBoundVar(bound);
+	for (int i=0; i< n ;i++)
+	  mylp1->setVarObj(i,0);
+        mylp1->setVarObj(n,1);
+    
+    //The linear system is generated
+    // the evaluation of the constraints in the corner x_corner
+	IntervalVector g_corner(normsys.f.eval_vector(x_corner));
+
+	for (int i=0; i<m; i++) {
+
+	
+	  //The contraints i is generated:
+	  // c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
+	  
+	  for (int j=0; j<n; j++) {
+	    
+	    if (corner[j])
+	      row[j]=G[j].ub();
+	    else
+	      row[j]=G[j].lb();
+	  }
+	  row[n]=0;
+	  mylp1->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
+	  
+	}
+    
+	for (int i=0; i<tolerance_constraints_number; i++){
+	  int k= feasible_points[rand()%feasible_points.size()];
+	  double varshiftres=0;
+      
+	  for (int j=0; j<n; j++){
+	    row[j]=ctcq.lincoeff(k,j);
+	    varshiftres+=row[j]*x_corner[j].mid();
+	  }
+	  row[n]= -1;  
+	  Vector row1(n+1);
+	  for (int i=0; i< n; i++)
+	    row1[i]=-row[i];
+	  row1[n]=-1;
+
+
+	  mylp1->addConstraint(row,LEQ,ctcq.lincoeff(k,n)+varshiftres-mylp->getEpsilon());
+	  mylp1->addConstraint(row1,LEQ,-(ctcq.lincoeff(k,n)+varshiftres)-mylp->getEpsilon());
+
+      
+      
+	}
+      
+    /*
+	if (nb_cells < 10) {mylp->writeFile("dump.lp");
+	system ("cat dump.lp");
+	}
+    */
+	LinearSolver::Status_Sol stat = mylp1->solve();
+	//	std::cout << " stat solver lp1 " << stat << std::endl;
+
+    
+	if (stat == LinearSolver::OPTIMAL) {
+      //the linear solution is mapped to intervals and evaluated
+	  Vector prim(n+1);
+	  mylp1->getPrimalSol(prim);
+
+	  IntervalVector tmpbox(n);
+
+	  for (int j=0; j<n; j++)
+	    tmpbox[j]=x_corner[j]+prim[j];
+      //		std::cout << " simplex result " << tmpbox << std::endl;
+	  Vector tmpvec= tmpbox.mid();
+	  int res1= box.contains(tmpvec) ;
+	  //	  cout << " stat 2eme appel " << stat <<  " res1 " << res1 << " tau " << prim[n] << endl;
+	  int qvalid1 = ctcq.feasible_points(tmpvec).size();
+	  if (res1 && qvalid1 >  feasiblepoints_size) {
+	    //cout << " meilleur 2eme appel " << stat <<  " res " << res << " qvalid " << qvalid1 <<  endl;
+	    feasiblepoint = tmpvec;
+
+	  }
+	  if (qvalid1 > bestsolpointnumber)
+	    cout << " meilleur 2eme appel " << stat <<  "res1 " << res1 << " qvalid " << qvalid1 <<  endl;
+	//
+	//
+	    /*
+	    if (trace)
+	      { 
+		int prec=std::cout.precision();
+		std::cout.precision(12);
+	      std:cout << "feasible point found " << feasiblepoint << endl;
+		std::cout.precision(prec);
+	      }
+	    */
+	  
+
+	  delete[] corner; return feasiblepoint;
+
+	}
+      }
+      
     }
     if (trace) {
       if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
       //  if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
     }
-    return feasiblepoint;
-	}
+    delete[] corner;  return feasiblepoint;
+ }
 
-
+  
   
   Vector SolverOptConstrainedQInter::feasiblepoint (const IntervalVector& box, bool & res, Vector & feasiblepoint2) {
     res=0;
@@ -745,10 +852,12 @@ namespace ibex {
 
   /* in case of constraints, the system is transformed in a normalized system  */
   SolverOptConstrainedQInter::SolverOptConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq,  double epscont, int optim)  : SolverOptQInter (ctc,bsc, str, ctcq, optim),  epscont(epscont), normsys(sys,epscont), sys(sys)
-  {    mylp=new LinearSolver(sys.nb_var,sys.nb_ctr,100);}
+  {    mylp=new LinearSolver(sys.nb_var,sys.nb_ctr,100);
+    mylp1=new LinearSolver(sys.nb_var+1,sys.nb_ctr,100);}
 
   SolverOptConstrainedQInter::~SolverOptConstrainedQInter() {
     delete mylp;
+    delete mylp1;
   }
 
   // returns the valid point (if any) and qvalid the greatest number of valid measures computed by any call to counting the valid measurements 
@@ -838,8 +947,9 @@ Vector SolverOptConstrainedQInter::newvalidpoint (Cell & c){
 
       if (qvalid2>qvalid){
 	qvalid=qvalid2;
-
+	
 	newvalidpoint=newvalidpoint2;
+	//	cout << " essai " << kk << " qvalid " << qvalid << " qvalid2 " << qvalid2 << endl;
       }
     }
 

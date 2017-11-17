@@ -10,7 +10,7 @@
 
 #include "ibex_QInter.h"
 #include <algorithm>
-#include "ibex_QInter2.h"
+//#include "ibex_QInter2.h"
 using namespace std;
 
 namespace ibex {

@@ -23,6 +23,8 @@ Interval norm(IntervalVector & box){
       norm+= sqr(box[i]);
     return norm;
   } 
+
+ 
   /*
 Interval CtcQInterLinear::fwd(IntervalVector & box, int iter)
   {
@@ -39,6 +41,8 @@ Interval CtcQInterLinear::fwd(IntervalVector & box, int iter)
   // to check if the iterth measurement is valid (0 must be in the returned interval)
   // algebraic evaluation (call eval_dist)  or Sampson evaluation  (call eval_sampson)
   
+  double CtcQInterLinear::get_epseq() {return epseq;}
+
   Interval CtcQInterLinear::eval_ctc(IntervalVector & box, int iter, int k){
     return (eval_dist(box,iter,k) & eps);
   }
@@ -255,7 +259,8 @@ void CtcQInterLinear::fwd(IntervalVector & box, int iter, int k){
   CtcQInterLinear::CtcQInterLinear(int n, const Array<Ctc>& ctc_list, double*** linfun, 
 				 double epseq, int q, qintermethod meth, int K ) : 
     CtcQInter(n,ctc_list,q,meth,K),linfun(linfun),
-    epseq(epseq) {eps= Interval(-epseq,epseq); 
+    epseq(epseq) 
+  {eps= Interval(-epseq,epseq); 
     init();
   }
   /*
@@ -341,6 +346,7 @@ CtcQInterAffLinear::CtcQInterAffLinear(int n, const Array<Ctc>& ctc_list, double
  // {return (fabs( epseq * linfun[iter][0][k]));}
  {return  epseq ;}
   
+   
 double CtcQInterAffLinear::valmean_compute(int iter, int k, IntervalVector& box, Affine2& af)
 { int nbvar=nb_var;
      double valmean = linfun[iter][0][k];
@@ -389,8 +395,15 @@ void CtcQInterAffLinear::fwd(IntervalVector & box, int iter, int k){
     if (eval[nbvar].is_empty())
       box.set_empty(); 
 }
+  
 
- 
+  double CtcQInterAffLinear::lincoeff(int iter, int i){
+    int nbvar=9;
+    if (i<nbvar)
+      return linfun[iter][i+1][0];
+    if (i==nbvar)
+      return linfun[iter][0][0];
+  }
 
 
   double  CtcQInterAffLinear::slope_compute(int iter, int j , int k , IntervalVector& box,Affine2& af2)
@@ -447,7 +460,13 @@ void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter)
     //avec retrait des mesures telles que Ep2 < epsilon ou p1Et < epsilon 
 
  int CtcQInterAffLinear::midactivepoints_count(const Vector& vec){
-    int p=0;
+    return   feasible_points(vec).size();
+ }
+
+
+ vector<int> CtcQInterAffLinear::feasible_points(const Vector& vec) {
+   vector<int> feasiblepoints;
+   //    int p=0;
     //    cout << " points size active count " << points->size() << " box " << box <<endl;
     list<int>::iterator iter = points->begin() ;
     
@@ -495,13 +514,15 @@ void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter)
       
       if (!(box1.is_empty())) {
 	//	cout << *iter << "  "  ;
-	p++;};
+	//	p++;
+	feasiblepoints.push_back(*iter);
+      };
 
       iter++;
     }
     //cout << endl;
 
-    return p;
+    return feasiblepoints;
  }
   /*
 int CtcQInterAffLinear::midactivepoints_count(const Vector& vec){
