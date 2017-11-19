@@ -553,10 +553,10 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
                             if (trace) cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
                             //cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
                         }
+			delete x_copy; // delete copy of the heap, no more use and it was not delete in light optim since res1 = 1
                     }
                 }
-		delete x_copy; // delete copy of the heap, no more use and it was not delete in light optim since res1 = 1
- 
+		 
             }
 //            cout<<"end midpoint eval"<<endl;
 //            cout<<" evaluation of objectif... "<<endl;
@@ -813,6 +813,8 @@ int OptimMinMax::check_constraints(Cell * x_cell,bool midp) {
 //        cout<<"     check fa ctr..."<<endl;
         if(fa_y_cst)
             res_factr = check_fa_ctr(x_cell,midp);
+	if(fa_y_cst==0)
+	    delete x_cell;
 //        cout<<"     done, res_factr = "<<res_factr<<endl;
 //        cout<<"res_factr: "<<res_factr<<endl;
         if(res_rctr == 2 &&  res_factr == 2) // all ctr satisfied
