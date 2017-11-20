@@ -114,7 +114,7 @@ def configure (conf):
 	else:
 		flags = "-O3"
 		conf.define ("NDEBUG", 1)
-		conf.env.DEBUG = false
+		conf.env.DEBUG = False
 	for f in flags.split():
 		conf.check_cxx(cxxflags=f, use="IBEX", mandatory=False, uselib_store="IBEX")
 

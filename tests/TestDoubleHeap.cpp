@@ -178,6 +178,8 @@ void TestDoubleHeap::test03() {
     DoubleHeap<Interval> newh(h);
 
     while (h.size() > 0) {
+        CPPUNIT_ASSERT(*h.top1() == *newh.top1());
+        CPPUNIT_ASSERT(*h.top2() == *newh.top2());
         CPPUNIT_ASSERT(h.top1() == newh.top1());
         CPPUNIT_ASSERT(h.top2() == newh.top2());
         h.pop1();
@@ -201,16 +203,15 @@ void TestDoubleHeap::test04() {
             else h.push(new Interval(i,20*i));
     }
 
-    DoubleHeap<Interval> *newh = h.deepcopy();
+    DoubleHeap<Interval> newh(h,true); // deep_copy
 
     while (h.size() > 0) {
-        CPPUNIT_ASSERT(*h.top1() == *newh->top1());
-        CPPUNIT_ASSERT(*h.top2() == *newh->top2());
+        CPPUNIT_ASSERT(*h.top1() == *newh.top1());
+        CPPUNIT_ASSERT(*h.top2() == *newh.top2());
         delete h.pop1();
-        delete newh->pop1();
+        delete newh.pop1();
 
     }
-    delete newh;
 
 }
 

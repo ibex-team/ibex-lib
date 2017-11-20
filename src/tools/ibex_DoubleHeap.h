@@ -36,9 +36,9 @@ public:
 	DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, CostFunc<T>& cost2, bool update_cost2_when_sorting, int critpr=50);
 
     /** copy constructor **/
-    explicit DoubleHeap(const DoubleHeap& dhcp);
+    explicit DoubleHeap(const DoubleHeap& dhcp, bool deep_copy=false);
 
-    DoubleHeap<T>* deepcopy() const;
+    //DoubleHeap<T>* deepcopy() const;
 
 	/**
 	 * \brief Flush the buffer.
@@ -190,33 +190,31 @@ DoubleHeap<T>::DoubleHeap(int critproba) : nb_nodes(0), heap1(NULL), heap2(NULL)
 
 }
 
-template<class T>
-DoubleHeap<T>* DoubleHeap<T>::deepcopy() const {
-	DoubleHeap<T>* copy =new DoubleHeap(this->critpr);
-    copy->nb_nodes=this->nb_nodes;
-    copy->current_heap_id= this->current_heap_id;
-    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> p = this->heap1->deepcopy_sheap(2);
-    copy->heap1 = p.first;
-    copy->heap2 = new SharedHeap<T>(this->heap2->costf,this->heap2->update_cost_when_sorting,this->heap2->heap_id);
-    while(!p.second->empty()) {
-        copy->heap2->push_elt(p.second->back());
-        p.second->pop_back();
-    }
-    delete p.second;
-    return copy;
-}
+//template<class T>
+//DoubleHeap<T>* DoubleHeap<T>::deepcopy() const {
+//	DoubleHeap<T>* copy =new DoubleHeap(this->critpr);
+//    copy->nb_nodes=this->nb_nodes;
+//    copy->current_heap_id= this->current_heap_id;
+//    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> p = this->heap1->deepcopy_sheap(2);
+//    copy->heap1 = p.first;
+//    copy->heap2 = new SharedHeap<T>(this->heap2->costf,this->heap2->update_cost_when_sorting,this->heap2->heap_id);
+//    while(!p.second->empty()) {
+//        copy->heap2->push_elt(p.second->back());
+//        p.second->pop_back();
+//    }
+//    delete p.second;
+//    return copy;
+//}
 
 template<class T>
-DoubleHeap<T>::DoubleHeap(const DoubleHeap &dhcp):nb_nodes(dhcp.nb_nodes),heap1(NULL),heap2(NULL),critpr(dhcp.critpr),current_heap_id(dhcp.current_heap_id) {
-    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> p;
-    p= dhcp.heap1->copy_sheap(2);
-    heap1 = p.first;
+DoubleHeap<T>::DoubleHeap(const DoubleHeap &dhcp, bool deep_copy):nb_nodes(dhcp.nb_nodes),heap1(NULL),heap2(NULL),critpr(dhcp.critpr),current_heap_id(dhcp.current_heap_id) {
+    heap1= new SharedHeap<T>(*dhcp.heap1,2,deep_copy);
+    std::vector<HeapElt<T>*>  p =heap1->elt();
     heap2 = new SharedHeap<T>(dhcp.heap2->costf,dhcp.heap2->update_cost_when_sorting,dhcp.heap2->heap_id);
-    while(!p.second->empty()) {
-        heap2->push_elt(p.second->back());
-        p.second->pop_back();
+    while(!p.empty()) {
+        heap2->push_elt(p.back());
+        p.pop_back();
     }
-    delete p.second;
 }
 
 template<class T>
