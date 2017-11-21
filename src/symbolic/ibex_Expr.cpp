@@ -21,6 +21,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <set>
+#include <atomic>
 
 using namespace std;
 
@@ -28,7 +29,7 @@ namespace ibex {
 
 namespace {
 
-int id_count=0;
+atomic_long id_count(0);
 
 int max_height(const ExprNode& n1, const ExprNode& n2) {
 	if (n1.height>n2.height) return n1.height;
@@ -60,6 +61,13 @@ Dim mul_left_dim(const ExprNode& left, const ExprNode& right) {
 		return left.dim;
 }
 
+Array<const Dim> dims(const Array<const ExprNode>& comp) {
+	Array<const Dim> a(comp.size());
+	for (int i=0; i<comp.size(); i++) {
+		a.set_ref(i,comp[i].dim);
+	}
+	return a;
+}
 
 } // end anonymous namespace
 
@@ -173,14 +181,6 @@ ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
 	}
 }
 
-static Array<const Dim> dims(const Array<const ExprNode>& comp) {
-	Array<const Dim> a(comp.size());
-	for (int i=0; i<comp.size(); i++) {
-		a.set_ref(i,comp[i].dim);
-	}
-	return a;
-}
-
 ExprVector::ExprVector(const Array<const ExprNode>& comp, ExprVector::Orientation o) :
 		ExprNAryOp(comp, vec_dim(dims(comp),o==ROW)), orient(o) {
 }
@@ -232,12 +232,16 @@ NodeMap<const Variable*>& variables() {
 }
 
 ExprSymbol::ExprSymbol(const Dim& dim) : ExprLeaf(dim),
-		name(strdup(next_generated_var_name())), key(-1) {
+		name(next_generated_var_name()), key(-1) {
+}
+
+ExprSymbol::ExprSymbol(const char* name, const Dim& dim) : ExprLeaf(dim),
+		name(strdup(name)), key(-1) {
+
 }
 
 const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
-	return new_(next_generated_var_name(), dim);
-	//return new_(generated_name_buff, dim);
+	return *new ExprSymbol(dim);
 }
 
 const ExprSymbol& ExprSymbol::new_(const char* name, const Dim& dim) {
