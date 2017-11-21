@@ -22,10 +22,15 @@
 #include "ibex_String.h"
 #include "ibex_UnknownFileException.h"
 #include "ibex_SyntaxError.h"
-
-extern void ibexparse_string(const char* syntax);
+#include <mutex>
 
 using namespace std;
+
+namespace {
+mutex mtx;
+}
+
+extern void ibexparse_string(const char* syntax);
 
 namespace ibex {
 
@@ -335,6 +340,8 @@ void Function::build_from_string(const Array<const char*>& x, const char* y, con
 	free((char*) name_copy);
 
 	char* syntax = strdup(s.str().c_str());
+
+	mtx.lock();
 	try {
 		parser::function=this;
 		ibexparse_string(syntax);
@@ -343,13 +350,19 @@ void Function::build_from_string(const Array<const char*>& x, const char* y, con
 	} catch(SyntaxError& e) {
 		parser::function=NULL;
 		free(syntax);
+		mtx.unlock();
 		throw e;
 	}
+	mtx.unlock();
 }
 
 Function::Function(const char* filename) {
+
+	mtx.lock();
+
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
+
 	ibexin = fd;
 
 	try {
@@ -361,13 +374,18 @@ Function::Function(const char* filename) {
 		parser::function=NULL;
 		fclose(fd);
 		ibexrestart(ibexin);
+		mtx.unlock();
 		throw e;
 	}
 
 	fclose(fd);
+	mtx.unlock();
 }
 
 Function::Function(FILE* fd) {
+
+	mtx.lock();
+
 	ibexin = fd;
 
 	try {
@@ -378,8 +396,10 @@ Function::Function(FILE* fd) {
 	catch(SyntaxError& e) {
 		parser::function=NULL;
 		ibexrestart(ibexin);
+		mtx.unlock();
 		throw e;
 	}
+	mtx.unlock();
 }
 
 

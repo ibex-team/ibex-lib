@@ -14,10 +14,15 @@
 #include "ibex_ExprCopy.h"
 
 #include <sstream>
-
-extern void ibexparse_string(const char* syntax);
+#include <mutex>
 
 using namespace std;
+
+namespace {
+mutex mtx;
+}
+
+extern void ibexparse_string(const char* syntax);
 
 namespace ibex {
 
@@ -78,6 +83,8 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 	System* sys=new System(); // temporary system
 
 	char* syntax = strdup(s.str().c_str());
+
+	mtx.lock();
 	try {
 		parser::system=sys;
 		ibexparse_string(syntax);
@@ -86,8 +93,10 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 	} catch(SyntaxError& e) {
 		parser::system=NULL;
 		free(syntax);
+		mtx.unlock();
 		throw e;
 	}
+	mtx.unlock();
 
 	build_from_system(*sys);
 	delete sys;

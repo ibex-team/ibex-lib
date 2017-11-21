@@ -15,7 +15,11 @@
 #include "ibex_Bsc.h"
 #include "ibex_Ctc.h"
 #include "ibex_CellBuffer.h"
+
+#ifdef _IBEX_WITH_OPTIM_ // TODO make Memory::Object more generic
 #include "ibex_LoupFinder.h"
+#endif
+
 #include "ibex_Linearizer.h"
 
 #include <stdlib.h>
@@ -64,9 +68,12 @@ public:
 		Object(const Ctc* obj) : data(obj), type(CTC) { }
 		Object(const Bsc* obj) : data(obj), type(BSC) { }
 		Object(const System* obj) : data(obj), type(SYSTEM) { }
+#ifdef _IBEX_WITH_OPTIM_
 		Object(const LoupFinder* obj) : data(obj), type(LOUP_FINDER) { }
+#endif
 		Object(const CellBuffer* obj) : data(obj), type(CELL_BUFFER) { }
 		Object(const Linearizer* obj) : data(obj), type(LINEARIZER) { }
+
 		~Object();
 	};
 
