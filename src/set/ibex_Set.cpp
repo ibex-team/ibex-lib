@@ -225,9 +225,6 @@ std::ostream& operator<<(std::ostream& os, const Set& set) {
 	return os;
 }
 
-//namespace {
-
-
 class NodeAndDist : public Backtrackable {
 public:
 	NodeAndDist() : node(NULL), dist(-1) { }
