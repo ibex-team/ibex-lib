@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Jul 25, 2017
+// Last Update : Nov 21, 2017
 //============================================================================
 
 #include "ibex_DefaultOptimizer.h"
@@ -22,12 +22,9 @@
 #include "ibex_LoupFinderCertify.h"
 #include "ibex_LinearizerCombo.h"
 #include "ibex_Array.h"
-#include "ibex_Memory.cpp_"
 #include "ibex_Random.h"
 #include "ibex_CellBeamSearch.h"
 #include "ibex_CellHeap.h"
-
-
 
 using namespace std;
 
@@ -35,36 +32,30 @@ namespace ibex {
 
 const double DefaultOptimizer::default_random_seed = 1.0;
 
-namespace {
+#define NORMALIZED_SYSTEM_TAG 1
+#define EXTENDED_SYSTEM_TAG 2
 
-const double default_relax_ratio = 0.2;
-
-int extended_system = -1;   // index in memory (-1=none)
-int normalized_system = -1; // index in memory (-1=none)
+#define default_relax_ratio 0.2
 
 // The two next functions are necessary because we need
 // the normalized and extended system to build
 // arguments of the base class constructor (ctc, bsc, loup finder, etc.)
 // and we don't know which argument is evaluated first
 
-NormalizedSystem& get_norm_sys(const System& sys, double eps_h) {
-	if (normalized_system>=0)
-		return (NormalizedSystem&) *((*memory())->sys[normalized_system]); // already built and recorded
-	else {
-		normalized_system = (*memory())->sys.size();
-		return rec(new NormalizedSystem(sys,eps_h));
+NormalizedSystem& DefaultOptimizer::get_norm_sys(const System& sys, double eps_h) {
+	if (found(NORMALIZED_SYSTEM_TAG)) {
+		return get<NormalizedSystem>(NORMALIZED_SYSTEM_TAG);
+	} else {
+		return rec(new NormalizedSystem(sys,eps_h), NORMALIZED_SYSTEM_TAG);
 	}
 }
 
-ExtendedSystem& get_ext_sys(const System& sys, double eps_h) {
-	if (extended_system>=0)
-		return (ExtendedSystem&) *((*memory())->sys[extended_system]); // already built and recorded
-	else {
-		extended_system = (*memory())->sys.size();
-		return rec(new ExtendedSystem(sys,eps_h));
+ExtendedSystem& DefaultOptimizer::get_ext_sys(const System& sys, double eps_h) {
+	if (found(EXTENDED_SYSTEM_TAG)) {
+		return get<ExtendedSystem>(EXTENDED_SYSTEM_TAG);
+	} else {
+		return rec(new ExtendedSystem(sys,eps_h), EXTENDED_SYSTEM_TAG);
 	}
-}
-
 }
 
 DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed, double eps_x) :
@@ -84,14 +75,9 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double a
 			  rel_eps_f,
 			  abs_eps_f) {
   
-	data = *memory(); // keep track of my data
 
 	RNG::srand(random_seed);
 
-	/* reset (for next DefaultOptimizer to be created) */
-	*memory() = NULL;
-	extended_system = -1;
-	normalized_system = -1;
 }
 
 Ctc&  DefaultOptimizer::ctc(const System& ext_sys) {
@@ -111,11 +97,6 @@ Ctc&  DefaultOptimizer::ctc(const System& ext_sys) {
 		ctc_list.set_ref(2,rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))));
 	}
 	return rec(new CtcCompo(ctc_list));
-}
-
-DefaultOptimizer::~DefaultOptimizer() {
-	// delete all objects dynamically created in the constructor
-	delete (Memory*) data;
 }
 
 } // end namespace ibex

@@ -91,17 +91,21 @@ SolverOutputBox Manifold::read_output_box(ifstream& f) {
 
 	sol._existence = box;
 
-	if (m>0 && m<n && _status<=1) {
+	if (m>0 && m<n) {
 		BitSet params(n);
 		for (unsigned int j=0; j<n-m; j++) {
 			unsigned int v=read_int(f);
-			if (v<1 || v>n) {
+			if (v>n) {
 				ibex_error("[manifold]: bad input file (bad parameter index)");
 			}
-			params.add(v-1); // index starting from 1 in the raw format
+			if (v!=0) params.add(v-1); // index starting from 1 in the raw format
 		}
-
-		sol.varset = new VarSet(n,params,false);
+		if (!params.empty()) {
+			if (params.size()!=n-m)
+				ibex_error("[manifold]: bad input file (bad number of parameters)");
+			else
+				sol.varset = new VarSet(n,params,false);
+		}
 	}
 
 	return sol;
@@ -127,13 +131,16 @@ void Manifold::write_output_box(ofstream& f, const SolverOutputBox& sol) const {
 		write_double(f,box[i].ub());
 	}
 	write_int(f,sol.status);
-	if (sol.varset!=NULL) {
-		for (int i=0; i<sol.varset->nb_param; i++) {
-			write_int(f,(sol.varset->param(i)) + 1);
+
+	if (m>0 && m<n) {
+		if (sol.varset!=NULL) {
+			for (int i=0; i<sol.varset->nb_param; i++) {
+				write_int(f,(sol.varset->param(i)) + 1);
+			}
+		} else {
+			for (unsigned int i=0; i<n-m; i++)
+				write_int(f,0);
 		}
-	} else {
-		for (unsigned int i=0; i<n-m; i++)
-			write_int(f,0);
 	}
 }
 

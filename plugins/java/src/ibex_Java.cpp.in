@@ -172,10 +172,11 @@ public:
 	}
 };
 
-int get_id(JNIEnv* env, jobject obj) {
+Instance* get_instance(JNIEnv* env, jobject obj) {
 	jclass clazz = env->GetObjectClass(obj);
-	jfieldID _id = env->GetFieldID(clazz, "id", "I");
-	return env->GetIntField(obj ,_id);
+	jfieldID _data = env->GetFieldID(clazz, "data", "J"); // J stands for "long" (64 bits)
+	jlong address = env->GetLongField(obj ,_data);
+	return (Instance*) address;
 }
 
 // either return BAD_POINT, UNKNOWN_POINT or INFLATE (the latter case also corresponds to the NOT_SIGNIFICANT case)
@@ -214,13 +215,7 @@ jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, j
 	return result;
 }
 
-
-/* ====================================== static variables =============================== */
-
-vector<Instance*> ibex_instances;
-
-const double EPS_CONTRACT=0.01;
-/* ======================================================================================= */
+#define EPS_CONTRACT 0.01
 
 }
 
@@ -228,9 +223,6 @@ JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_init(JNIEnv* env, jobject obj,
 	jint size  = env->GetArrayLength(_prec);
 	jdouble* prec = env->GetDoubleArrayElements(_prec, 0);
 
-	jclass clazz = env->GetObjectClass(obj);
-	jfieldID _id = env->GetFieldID(clazz, "id", "I");
-	env->SetIntField(obj ,_id, ibex_instances.size());
 
 	BitSet b(size);
 	Vector prec_vec(size);
@@ -243,14 +235,16 @@ JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_init(JNIEnv* env, jobject obj,
 			prec_vec[i]=prec[i];
 	}
 
-	ibex_instances.push_back(new Instance(size, b, prec_vec));
+	jclass clazz = env->GetObjectClass(obj);
+	jfieldID _data = env->GetFieldID(clazz, "data", "J");
+	env->SetLongField(obj ,_data, (jlong) new Instance(size, b, prec_vec));
 
 	env->ReleaseDoubleArrayElements(_prec, prec, 0);
 }
 
 JNIEXPORT jboolean JNICALL Java_@JAVA_SIGNATURE@_Ibex_add_1ctr(JNIEnv* env, jobject obj, jstring _syntax) {
 
-	Instance& inst = *ibex_instances[get_id(env, obj)];
+	Instance& inst = *get_instance(env,obj);
 
 	if (inst.sys!=NULL) return false;
 	
@@ -265,7 +259,7 @@ JNIEXPORT jboolean JNICALL Java_@JAVA_SIGNATURE@_Ibex_add_1ctr(JNIEnv* env, jobj
 
 JNIEXPORT jboolean JNICALL Java_@JAVA_SIGNATURE@_Ibex_build(JNIEnv* env, jobject obj) {
 
-	Instance& inst = *ibex_instances[get_id(env, obj)];
+	Instance& inst = *get_instance(env,obj);
 
 	if (inst.sys==NULL) {
 		try {
@@ -281,7 +275,7 @@ JNIEXPORT jboolean JNICALL Java_@JAVA_SIGNATURE@_Ibex_build(JNIEnv* env, jobject
 
 JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DI(JNIEnv* env, jobject obj, jint n, jdoubleArray _d, jint reif) {
 
-	Instance& inst = *ibex_instances[get_id(env, obj)];
+	Instance& inst = *get_instance(env,obj);
 
 	if (inst.sys==NULL) {
 		return NOT_BUILT;
@@ -365,7 +359,7 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3D(JNIEnv* env, jo
 
 JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_inflate(JNIEnv* env, jobject obj, jint n, jdoubleArray _din, jdoubleArray _d, jboolean in) {
 
-	Instance& inst = *ibex_instances[get_id(env, obj)];
+	Instance& inst = *get_instance(env,obj);
 
 	if (inst.sys==NULL) {
 		return NOT_BUILT;
@@ -455,7 +449,7 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_inflate(JNIEnv* env, jobject o
 
 JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_start_1solve(JNIEnv* env, jobject obj, jdoubleArray _d) {
 
-	Instance& inst = *ibex_instances[get_id(env, obj)];
+	Instance& inst = *get_instance(env,obj);
 
 	if (inst.sys==NULL) {
 		return NOT_BUILT;
@@ -482,7 +476,7 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_start_1solve(JNIEnv* env, jobj
 }
 
 JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_next_1solution(JNIEnv* env, jobject obj, jdoubleArray _d) {
-	Instance& inst = *ibex_instances[get_id(env, obj)];
+	Instance& inst = *get_instance(env,obj);
 
 	if (inst.sys==NULL) {
 		return NOT_BUILT;
@@ -513,5 +507,5 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_next_1solution(JNIEnv* env, jo
 }
 
 JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_release(JNIEnv* env, jobject obj) {
-	delete ibex_instances[get_id(env, obj)];
+	delete get_instance(env,obj);
 }

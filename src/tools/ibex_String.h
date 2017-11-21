@@ -2,18 +2,14 @@
 //                                  I B E X                                   
 // File        : ibex_String.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 18, 2012
-// Last Update : Jul 18, 2012
+// Last Update : Nov 21, 2017
 //============================================================================
 
-#ifndef __IBEX_STRING_H_
-#define __IBEX_STRING_H_
-
-#include <cassert>
-#include <string.h>
-#include <stdio.h>
+#ifndef __IBEX_STRING_H__
+#define __IBEX_STRING_H__
 
 namespace ibex {
 
@@ -32,13 +28,19 @@ char* append_index(const char* base, char lbracket, char rbracket, int index);
 
 /**
  * \brief Generate a variable name (_x_i).
+ *
+ * Note: needs to be disallocated.
  */
 char* next_generated_var_name();
 
 /**
  * \brief Generate a function name (_f_i).
+ *
+ * Note: needs to be disallocated.
+ *
  */
 char* next_generated_func_name();
 
 } // end namespace ibex
+
 #endif // __IBEX_STRING_H__

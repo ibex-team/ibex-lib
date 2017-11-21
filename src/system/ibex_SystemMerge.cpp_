@@ -69,7 +69,7 @@ public:
 		Array<const ExprSymbol> newvars(vars1);
 		IntervalVector newbound(n);
 		int i=0;
-		for (typename std::vector<IntervalVector>::const_iterator it=bound.begin(); it!=bound.end(); it++) {
+		for (std::vector<IntervalVector>::const_iterator it=bound.begin(); it!=bound.end(); it++) {
 			newbound.put(i,*it);
 			i+=(*it).size();
 		}

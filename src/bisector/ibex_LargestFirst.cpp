@@ -51,8 +51,4 @@ pair<IntervalVector,IntervalVector> LargestFirst::bisect(const IntervalVector& b
 
 }
 
-
-
-
-
 } // end namespace ibex

@@ -15,6 +15,7 @@
 #include "ibex_System.h"
 #include "ibex_CellBuffer.h"
 #include "ibex_CtcCompo.h"
+#include "ibex_Memory.h"
 
 namespace ibex {
 
@@ -23,7 +24,7 @@ namespace ibex {
  *
  * \brief Default solver.
  */
-class DefaultSolver : public Solver {
+class DefaultSolver : private Memory, public Solver {
 public:
 	/**
 	 * \brief Create a default solver.
@@ -45,11 +46,6 @@ public:
 	 * \param dfs       - true: depth-first search. false: breadth-first search
 	 */
     DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max=default_eps_x_max, bool dfs=true, double random_seed=default_random_seed);
-
-    /**
-	 * \brief Delete *this.
-	 */
-	~DefaultSolver();
 
 	/**
 	 * \brief Default minimal width: 1e-6.
@@ -75,7 +71,6 @@ private:
 
 //	std::vector<CtcXNewton::corner_point>* default_corners ();
 
-	void* data;
 };
 
 } // end namespace ibex

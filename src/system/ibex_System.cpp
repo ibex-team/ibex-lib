@@ -14,7 +14,9 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_SystemCopy.cpp_"
 #include "ibex_SystemMerge.cpp_"
+
 #include <stdio.h>
+#include <mutex>
 
 extern int ibexparse();
 extern void ibexparse_string(const char* syntax);
@@ -24,7 +26,12 @@ extern FILE* ibexin;
 
 using namespace std;
 
+namespace {
+ mutex mtx;      // --> load(...) is not thread safe.
+}
+
 namespace ibex {
+
 
 namespace parser {
 extern System* system;
@@ -43,6 +50,7 @@ System::System(const char* filename) : nb_var(0), nb_ctr(0), ops(NULL), box(1) /
 
 System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by parser) */
 		                                    nb_ctr(0), ops(NULL), box(1) /* tmp */ {
+	mtx.lock();
 	try {
 		parser::choco_start=true;
 		parser::system=this;
@@ -50,8 +58,10 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 		parser::system=NULL;
 	} catch(SyntaxError& e) {
 		parser::system=NULL;
+		mtx.unlock();
 		throw e;
 	}
+	mtx.unlock();
 }
 
 System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0), ops(NULL), box(1) {
@@ -101,6 +111,9 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 }
 
 void System::load(FILE* fd) {
+
+	mtx.lock();
+
 	ibexin = fd;
 
 	try {
@@ -113,10 +126,13 @@ void System::load(FILE* fd) {
 		parser::system=NULL;
 		fclose(fd);
 		ibexrestart(ibexin);
+		mtx.unlock();
 		throw e;
 	}
 
 	fclose(fd);
+
+	mtx.unlock();
 }
 
 System::~System() {
