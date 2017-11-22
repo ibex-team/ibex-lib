@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Functions
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Jan 5, 2012
+ * Last Update : Nov 22, 2017
  * ---------------------------------------------------------------------------- */
 
 #include <sstream>
@@ -22,13 +23,21 @@
 #include "ibex_String.h"
 #include "ibex_UnknownFileException.h"
 #include "ibex_SyntaxError.h"
+
+#ifndef _WIN32 // MinGW does not support mutex
 #include <mutex>
+namespace {
+std::mutex mtx;
+}
+#define LOCK mtx.lock()
+#define UNLOCK mtx.unlock()
+#else
+#define LOCK
+#define UNLOCK
+#endif
 
 using namespace std;
 
-namespace {
-mutex mtx;
-}
 
 extern void ibexparse_string(const char* syntax);
 
@@ -341,7 +350,7 @@ void Function::build_from_string(const Array<const char*>& x, const char* y, con
 
 	char* syntax = strdup(s.str().c_str());
 
-	mtx.lock();
+	LOCK;
 	try {
 		parser::function=this;
 		ibexparse_string(syntax);
@@ -350,15 +359,15 @@ void Function::build_from_string(const Array<const char*>& x, const char* y, con
 	} catch(SyntaxError& e) {
 		parser::function=NULL;
 		free(syntax);
-		mtx.unlock();
+		UNLOCK;
 		throw e;
 	}
-	mtx.unlock();
+	UNLOCK;
 }
 
 Function::Function(const char* filename) {
 
-	mtx.lock();
+	LOCK;
 
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
@@ -374,17 +383,17 @@ Function::Function(const char* filename) {
 		parser::function=NULL;
 		fclose(fd);
 		ibexrestart(ibexin);
-		mtx.unlock();
+		UNLOCK;
 		throw e;
 	}
 
 	fclose(fd);
-	mtx.unlock();
+	UNLOCK;
 }
 
 Function::Function(FILE* fd) {
 
-	mtx.lock();
+	LOCK;
 
 	ibexin = fd;
 
@@ -396,10 +405,10 @@ Function::Function(FILE* fd) {
 	catch(SyntaxError& e) {
 		parser::function=NULL;
 		ibexrestart(ibexin);
-		mtx.unlock();
+		UNLOCK;
 		throw e;
 	}
-	mtx.unlock();
+	UNLOCK;
 }
 
 

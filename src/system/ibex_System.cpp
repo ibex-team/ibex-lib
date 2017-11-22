@@ -2,10 +2,10 @@
 //                                  I B E X                                   
 // File        : ibex_System.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Jun 12, 2012
+// Last Update : Nov 22, 2017
 //============================================================================
 
 #include "ibex_System.h"
@@ -16,7 +16,18 @@
 #include "ibex_SystemMerge.cpp_"
 
 #include <stdio.h>
+
+#ifndef _WIN32 // MinGW does not support mutex
 #include <mutex>
+namespace {
+std::mutex mtx;
+}
+#define LOCK mtx.lock()
+#define UNLOCK mtx.unlock()
+#else
+#define LOCK
+#define UNLOCK
+#endif
 
 extern int ibexparse();
 extern void ibexparse_string(const char* syntax);
@@ -25,10 +36,6 @@ extern void ibexrestart(FILE *);
 extern FILE* ibexin;
 
 using namespace std;
-
-namespace {
- mutex mtx;      // --> load(...) is not thread safe.
-}
 
 namespace ibex {
 
@@ -50,7 +57,7 @@ System::System(const char* filename) : nb_var(0), nb_ctr(0), ops(NULL), box(1) /
 
 System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by parser) */
 		                                    nb_ctr(0), ops(NULL), box(1) /* tmp */ {
-	mtx.lock();
+	LOCK;
 	try {
 		parser::choco_start=true;
 		parser::system=this;
@@ -58,10 +65,10 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 		parser::system=NULL;
 	} catch(SyntaxError& e) {
 		parser::system=NULL;
-		mtx.unlock();
+		UNLOCK;
 		throw e;
 	}
-	mtx.unlock();
+	UNLOCK;
 }
 
 System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0), ops(NULL), box(1) {
@@ -112,7 +119,7 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 
 void System::load(FILE* fd) {
 
-	mtx.lock();
+	LOCK;
 
 	ibexin = fd;
 
@@ -126,13 +133,13 @@ void System::load(FILE* fd) {
 		parser::system=NULL;
 		fclose(fd);
 		ibexrestart(ibexin);
-		mtx.unlock();
+		UNLOCK;
 		throw e;
 	}
 
 	fclose(fd);
 
-	mtx.unlock();
+	UNLOCK;
 }
 
 System::~System() {

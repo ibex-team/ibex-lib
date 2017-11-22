@@ -16,11 +16,19 @@
 #include <sstream>
 #include <mutex>
 
-using namespace std;
-
+#ifndef _WIN32 // MinGW does not support mutex
+#include <mutex>
 namespace {
-mutex mtx;
+std::mutex mtx;
 }
+#define LOCK mtx.lock()
+#define UNLOCK mtx.unlock()
+#else
+#define LOCK
+#define UNLOCK
+#endif
+
+using namespace std;
 
 extern void ibexparse_string(const char* syntax);
 
@@ -84,7 +92,7 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 
 	char* syntax = strdup(s.str().c_str());
 
-	mtx.lock();
+	LOCK;
 	try {
 		parser::system=sys;
 		ibexparse_string(syntax);
@@ -93,10 +101,10 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 	} catch(SyntaxError& e) {
 		parser::system=NULL;
 		free(syntax);
-		mtx.unlock();
+		UNLOCK;
 		throw e;
 	}
-	mtx.unlock();
+	UNLOCK;
 
 	build_from_system(*sys);
 	delete sys;

@@ -115,6 +115,9 @@ def configure (conf):
 		conf.define ("NDEBUG", 1)
 	for f in flags.split():
 		conf.check_cxx(cxxflags=f, use="IBEX", mandatory=False, uselib_store="IBEX")
+	
+	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
+	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEX")
 
 	# Build as shared lib is asked
 	conf.start_msg ("Ibex will be built as a")
