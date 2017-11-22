@@ -107,14 +107,17 @@ def configure (conf):
 	# Optimised compilation flags
 	if conf.options.DEBUG:
 		Logs.info("Enabling debug mode")
-		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
+		flags = "-std=c++11 -O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
 		flags += " -fmessage-length=0"
 		conf.define ("DEBUG", 1)
 	else:
-		flags = "-O3"
+		flags = "-std=c++11 -O3"
 		conf.define ("NDEBUG", 1)
 	for f in flags.split():
 		conf.check_cxx(cxxflags=f, use="IBEX", mandatory=False, uselib_store="IBEX")
+	
+	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
+	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEX")
 
 	# Build as shared lib is asked
 	conf.start_msg ("Ibex will be built as a")

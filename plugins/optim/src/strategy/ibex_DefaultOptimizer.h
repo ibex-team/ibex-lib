@@ -13,6 +13,9 @@
 
 #include "ibex_Optimizer.h"
 #include "ibex_CtcCompo.h"
+#include "ibex_Memory.h"
+#include "ibex_NormalizedSystem.h"
+#include "ibex_ExtendedSystem.h"
 
 namespace ibex {
 
@@ -21,7 +24,7 @@ namespace ibex {
  *
  * \brief Default optimizer.
  */
-class DefaultOptimizer : public Optimizer {
+class DefaultOptimizer : private Memory, public Optimizer {
 public:
 	/**
 	 * \brief Create a default optimizer.
@@ -47,11 +50,6 @@ public:
 			double random_seed=default_random_seed,
     		double eps_x=Optimizer::default_eps_x);
 
-	/**
-	 * \brief Delete *this.
-	 */
-    ~DefaultOptimizer();
-
 	/** Default random seed: 1.0. */
 	static const double default_random_seed;
 
@@ -62,7 +60,10 @@ private:
      */
 	Ctc& ctc(const System& ext_sys);
 
-	void* data; // keep track of data, for memory cleanup
+	NormalizedSystem& get_norm_sys(const System& sys, double eps_h);
+
+	ExtendedSystem& get_ext_sys(const System& sys, double eps_h);
+
 };
 
 } // end namespace ibex

@@ -27,7 +27,7 @@
 #include "ibex_LinearizerXTaylor.h"
 #include "ibex_LinearizerCombo.h"
 #include "ibex_LoupFinder.h"
-#include "ibex_Memory.cpp_"
+
 
 using namespace std;
 
@@ -36,11 +36,16 @@ const double GAUSS_SEIDEL_RATIO=1e-04;
 
 namespace ibex {
 
+#define SYSTEM_TAG 1
+
+#define EXTENDED_SYSTEM_TAG 2
+
 System& StrategyParam::get_sys() {
-	if (!(*memory())->sys.empty()) {
-		return *((*memory())->sys.front()); // already built and recorded
+	if (found(SYSTEM_TAG))
+		return get<System>(SYSTEM_TAG);
+	else {
+		return rec<System>(new System(filename.c_str()), SYSTEM_TAG);
 	}
-	else return rec(new System(filename.c_str()));
 }
 
 System& StrategyParam::get_ext_sys() {
@@ -48,10 +53,11 @@ System& StrategyParam::get_ext_sys() {
 }
 
 System& OptimizerParam::get_ext_sys() {
-	if ((*memory())->sys.size()==2) {
-		return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
+	if (found(EXTENDED_SYSTEM_TAG))
+		return get<System>(EXTENDED_SYSTEM_TAG);
+	else {
+		return rec<System>(new ExtendedSystem(get_sys(),eq_eps), EXTENDED_SYSTEM_TAG);
 	}
-	else return rec(new ExtendedSystem(get_sys(),eq_eps));
 }
 
 /*
@@ -179,8 +185,6 @@ StrategyParam::StrategyParam(const char* filename, const char* filtering, const 
 		bisection(bisection), hc4_incremental(hc4_incremental), ratio_propag(ratio_propag),
 		fixpoint_ratio(fixpoint_ratio), optim(optim) {
 
-	data = *memory(); // keep track of my data
-
 	//	cout << "system                   " << get_sys(args) << endl;
 	//	cout << "precision:               " << prec << endl;
 	//	cout << "goal relative precision: " << goal_rel_prec << endl;
@@ -189,7 +193,6 @@ StrategyParam::StrategyParam(const char* filename, const char* filtering, const 
 	//	cout << "equation thickness:      " << args[EQ_EPS] << endl;
 	//	cout << "time out:                " << timeout << endl;
 
-	*memory() = NULL; // reset (for next DefaultOptimizer to be created)
 
 }
 

@@ -2,14 +2,22 @@
 //                                  I B E X                                   
 // File        : ibex_String.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 18, 2012
-// Last Update : Jul 18, 2012
+// Last Update : Nov 21, 2017
 //============================================================================
 
 #include "ibex_String.h"
+
 #include <stdlib.h>
+#include <cassert>
+#include <string.h>
+#include <stdio.h>
+#include <sstream>
+#include <atomic>
+
+using namespace std;
 
 namespace ibex {
 
@@ -40,23 +48,20 @@ char* append_index(const char* buff, char lbracket, char rbracket, int index) {
 #define BASE_VAR_NAME "_x_"
 #define BASE_FUNC_NAME "_f_"
 
-
 static char* next_generated_name(const char* base, int num) {
-	static char generated_name_buff[MAX_NAME_SIZE];
-	sprintf(generated_name_buff,"%s", base);
-	SNPRINTF(&generated_name_buff[strlen(base)], MAX_NAME_SIZE-strlen(base), "%d", num);
-	return generated_name_buff;
+	stringstream s;
+	s << base << num;
+	return strdup(s.str().c_str());
 }
 
 char* next_generated_var_name() {
-	static int generated_var_count=0;
+	static atomic_uint generated_var_count(0);
 	return next_generated_name(BASE_VAR_NAME,generated_var_count++);
 }
 
 char* next_generated_func_name() {
-	static int generated_func_count=0;
+	static atomic_uint generated_func_count(0);
 	return next_generated_name(BASE_FUNC_NAME,generated_func_count++);
 }
-
 
 } // end namespace ibex

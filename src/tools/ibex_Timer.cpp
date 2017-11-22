@@ -1,8 +1,8 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_StaticTimer.cpp
-// Author      : Jordan Ninin and Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Author      : Jordan Ninin
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
 // Last Update : May 13, 2012

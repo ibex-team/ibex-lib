@@ -13,6 +13,10 @@ using std::pair;
 
 namespace ibex {
 
+LSmear::~LSmear() {
+	delete mylinearsolver;
+}
+
 LPSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector& box, Vector& dual) const {
 	int goal_ctr=-1, goal_var=rand()%box.size();
 	bool minimize=rand()%2;

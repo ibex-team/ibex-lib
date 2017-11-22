@@ -37,6 +37,12 @@ public class IbexTest {
 
         double domains[] = {1.0, 10.0, 1.0, 10.0};
      
+        Assert.assertEquals(Ibex.NOT_BUILT, ibex.contract(0, domains));
+        
+        Assert.assertTrue(ibex.build());
+        		
+        Assert.assertFalse(ibex.add_ctr("{0}=0")); // already built
+        
         int result = ibex.contract(0, domains);
         
         Assert.assertEquals(Ibex.CONTRACT, result);
@@ -51,6 +57,8 @@ public class IbexTest {
         Ibex ibex = new Ibex(new double[]{1e-2,1e-2});
         
         ibex.add_ctr("{0}^2+{1}^2<=1");
+
+        Assert.assertTrue(ibex.build());
 
         double[] domains;
         double vv = Math.sqrt(2.) / 2.;
@@ -89,6 +97,8 @@ public class IbexTest {
         
         ibex.add_ctr("{0}^2+{1}^2<=1");
 
+        Assert.assertTrue(ibex.build());
+
         double[] domains;
 
         domains = new double[]{0., 1., 0., 1.};
@@ -116,6 +126,9 @@ public class IbexTest {
 		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+{1}^2={2}^2");
+
+		Assert.assertTrue(ibex.build());
+
 		double domains[]={-3,3,-3,3,1,2};
 		int result=ibex.start_solve(domains);
 		Assert.assertEquals(Ibex.DISCRETE_NOT_INSTANCIATED,result);
@@ -128,9 +141,8 @@ public class IbexTest {
 		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+1}^2={2}^2");
-		double domains[]={-3,3,-3,3,1,2};
-		int result=ibex.start_solve(domains);
-		Assert.assertEquals(Ibex.SYNTAX_ERROR,result);
+		
+        Assert.assertFalse(ibex.build());
 		
 		ibex.release();
 	}
@@ -140,7 +152,10 @@ public class IbexTest {
 		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+{1}^2={2}^2");
-		double domains[]={-3,3,-3,3};
+		
+        Assert.assertTrue(ibex.build());
+
+        double domains[]={-3,3,-3,3};
 		int result=ibex.start_solve(domains);
 		Assert.assertEquals(Ibex.BAD_DOMAIN,result);
 
@@ -152,7 +167,10 @@ public class IbexTest {
 		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+{1}^2={2}^2");
-		double domains[]={-3,3,-3,3,1,1};
+		
+        Assert.assertTrue(ibex.build());
+
+        double domains[]={-3,3,-3,3,1,1};
 		int result=ibex.start_solve(domains);
 		Assert.assertEquals(Ibex.STARTED,result);
 		
@@ -178,7 +196,10 @@ public class IbexTest {
 		Ibex ibex = new Ibex(new double[]{1e-2,1e-2,-1});
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-2)^2+{1}^2={2}^2");
-		double domains[]={-3,3,-3,3,1,1};
+		
+        Assert.assertTrue(ibex.build());
+
+        double domains[]={-3,3,-3,3,1,1};
 		int result=ibex.start_solve(domains);
 		Assert.assertEquals(Ibex.STARTED,result);
 			
@@ -198,7 +219,10 @@ public class IbexTest {
 		ibex.add_ctr("{0}^2+{1}^2={2}^2");
 		ibex.add_ctr("({0}-1)^2+{1}^2={2}^2");
 		ibex.add_ctr("{1}<=0");
-		double domains[]={-3,3,-3,3,1,1};
+		
+        Assert.assertTrue(ibex.build());
+
+        double domains[]={-3,3,-3,3,1,1};
 		int result=ibex.start_solve(domains);
 		Assert.assertEquals(Ibex.STARTED,result);
 		

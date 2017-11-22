@@ -13,14 +13,7 @@
 
 namespace ibex {
 
-namespace {
-
-unsigned long id_count=0;
-}
-
- Cell::Cell(const IntervalVector& box) : box(box), id(id_count++) {
-	 assert(id_count<ULONG_MAX);
-}
+ Cell::Cell(const IntervalVector& box) : box(box) { }
 
 std::pair<Cell*,Cell*> Cell::bisect(const IntervalVector& left, const IntervalVector& right) {
 	Cell* cleft = new Cell(left);
