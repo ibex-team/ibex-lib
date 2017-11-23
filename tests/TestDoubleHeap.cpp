@@ -208,6 +208,8 @@ void TestDoubleHeap::test04() {
     while (h.size() > 0) {
         CPPUNIT_ASSERT(*h.top1() == *newh.top1());
         CPPUNIT_ASSERT(*h.top2() == *newh.top2());
+        CPPUNIT_ASSERT(h.top1() != newh.top1());
+        CPPUNIT_ASSERT(h.top2() != newh.top2());
         delete h.pop1();
         delete newh.pop1();
 
@@ -215,6 +217,33 @@ void TestDoubleHeap::test04() {
 
 }
 
+
+void TestDoubleHeap::test05() {
+
+    int nb= 10;
+    TestCostFunc2 costf2;
+    TestCostFunc3 costf3;
+
+    DoubleHeap<Interval> h(costf2,false,costf3,true,50);
+
+    for (int i=1; i<=nb ;i++) {
+            if ((i%2)==1) h.push(new Interval(i,2*i));
+            else h.push(new Interval(i,20*i));
+    }
+
+    DoubleHeap<Interval> newh(h,true); // deep_copy
+
+    while (h.size() > 0) {
+        CPPUNIT_ASSERT(*h.top1() == *newh.top1());
+        CPPUNIT_ASSERT(*h.top2() == *newh.top2());
+        CPPUNIT_ASSERT(h.top1() != newh.top1());
+        CPPUNIT_ASSERT(h.top2() != newh.top2());
+        delete h.pop2();
+        delete newh.pop2();
+
+    }
+
+}
 
 
 } // end namespace

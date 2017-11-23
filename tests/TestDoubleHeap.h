@@ -29,12 +29,14 @@ public:
 	CPPUNIT_TEST(test02);
 	CPPUNIT_TEST(test03);
 	CPPUNIT_TEST(test04);
+	CPPUNIT_TEST(test05);
 	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 	void test02();
 	void test03();
 	void test04();
+	void test05();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestDoubleHeap);

@@ -15,7 +15,7 @@ namespace ibex {
 
  Cell::Cell(const IntervalVector& box) : box(box) { }
 
- Cell::Cell(const Cell& e) : box(e.box), id(id_count++)  {
+ Cell::Cell(const Cell& e) : box(e.box) {
  	for ( IBEXMAP(Backtrackable*)::const_iterator it=e.data.begin(); it!=e.data.end(); it++) {
  		data.insert_new(it->first, it->second->copy());
  	}
