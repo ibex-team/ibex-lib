@@ -49,6 +49,11 @@ public :
 			lsmear_mode lsmode=LSMEAR_MG);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~LSmear();
+
+	/**
 	 * \brief Returns the variable to bisect.
 	 */
 	virtual int var_to_bisect(IntervalMatrix& J,const IntervalVector& box) const;
@@ -78,11 +83,9 @@ public :
 
 /*============================================ inline implementation ============================================ */
 
-
 inline LSmear::LSmear(System& sys,  double prec, double ratio, lsmear_mode lsmode) : SmearSumRelative(sys,prec,ratio),
 		lsmode(lsmode) {
 	mylinearsolver = new LPSolver(sys.nb_var);
-
 }
 
 inline LSmear::LSmear(System& sys, const Vector& prec, double ratio,lsmear_mode lsmode) : SmearSumRelative(sys,prec,ratio),

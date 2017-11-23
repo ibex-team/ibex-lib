@@ -517,8 +517,7 @@ private:
 	ExprSymbol(const Dim& dim);
 
 	/** Create a symbol. */
-	ExprSymbol(const char* name, const Dim& dim) : ExprLeaf(dim), name(strdup(name)), key(-1) {
-	}
+	ExprSymbol(const char* name, const Dim& dim);
 
 	/** Duplicate this symbol: forbidden. */
 	ExprSymbol(const ExprSymbol&);

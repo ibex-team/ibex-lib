@@ -14,10 +14,11 @@
 #include "ibex_Bsc.h"
 #include "ibex_System.h"
 #include "ibex_ExtendedSystem.h"
+#include "ibex_Memory.h"
 
 namespace ibex {
 
-class StrategyParam {
+class StrategyParam : protected Memory {
 public:
 
 	StrategyParam(const char* filename, const char* ctc, const char* lin_relax,

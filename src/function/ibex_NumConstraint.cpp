@@ -14,10 +14,23 @@
 #include "ibex_ExprCopy.h"
 
 #include <sstream>
+#include <mutex>
 
-extern void ibexparse_string(const char* syntax);
+#ifndef _WIN32 // MinGW does not support mutex
+#include <mutex>
+namespace {
+std::mutex mtx;
+}
+#define LOCK mtx.lock()
+#define UNLOCK mtx.unlock()
+#else
+#define LOCK
+#define UNLOCK
+#endif
 
 using namespace std;
+
+extern void ibexparse_string(const char* syntax);
 
 namespace ibex {
 
@@ -78,6 +91,8 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 	System* sys=new System(); // temporary system
 
 	char* syntax = strdup(s.str().c_str());
+
+	LOCK;
 	try {
 		parser::system=sys;
 		ibexparse_string(syntax);
@@ -86,8 +101,10 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 	} catch(SyntaxError& e) {
 		parser::system=NULL;
 		free(syntax);
+		UNLOCK;
 		throw e;
 	}
+	UNLOCK;
 
 	build_from_system(*sys);
 	delete sys;

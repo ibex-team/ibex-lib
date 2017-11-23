@@ -13,10 +13,6 @@
 
 namespace ibex {
 
-namespace {
-
-}
-
 PdcFwdBwd::PdcFwdBwd(const Function& f, CmpOp op) : PdcCleared(*new CtcFwdBwd(f,!op)){
 
 }

@@ -120,11 +120,6 @@ public:
 	 */
 	SymbolMap<Backtrackable*> data;
 
-	/**
-	 * Cell unique identifier
-	 */
-	unsigned long id;
-
 private:
 	/* A constant to be used when no variable has been split yet (root cell). */
 	//static const int ROOT_CELL;

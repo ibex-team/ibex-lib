@@ -232,7 +232,7 @@ string Manifold::format() {
 	"  - real values are 64 bits double\n"
 	"--------------------------------------------------------------------------------\n"
     "[line 1] - the signature: the null-terminated sequence of 20 \n"
-    "           characters \"IBEX MANIFOLD FILE \" (mind the leading space)\n"
+    "           characters \"IBEX MANIFOLD FILE \" (mind the space at the end)\n"
     "         - and the format version number: 1\n"
 	"[line 2] - 3 values: n=the number of variables, m=number of equalities,\n"
 	"           number of inequalities (excluding initial box)\n"

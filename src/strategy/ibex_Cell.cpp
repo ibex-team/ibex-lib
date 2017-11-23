@@ -13,14 +13,7 @@
 
 namespace ibex {
 
-namespace {
-
-unsigned long id_count=0;
-}
-
- Cell::Cell(const IntervalVector& box) : box(box), id(id_count++) {
-	 assert(id_count<ULONG_MAX);
-}
+ Cell::Cell(const IntervalVector& box) : box(box) { }
 
  Cell::Cell(const Cell& e) : box(e.box), id(id_count++)  {
  	for ( IBEXMAP(Backtrackable*)::const_iterator it=e.data.begin(); it!=e.data.end(); it++) {
