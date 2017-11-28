@@ -9,7 +9,7 @@
  * Created     : Mar 2, 2017
  * ---------------------------------------------------------------------------- */
 
-#include "TestLinearSolver.h"
+#include "TestLPSolver.h"
 #include "ibex_LPSolver.h"
 
 using namespace std;

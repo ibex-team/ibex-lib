@@ -281,7 +281,7 @@ def lp_lib (conf):
 
     # The following variables must be defined in env by the plugin called to
     # handle the LP library.
-    for var in [ "LP_LIB", "IBEX_LP_LIB_INCLUDES", "IBEX_LP_LIB_DEFAULT_EPS",
+    for var in [ "LP_LIB", "IBEX_LP_LIB_INCLUDES",
                  "IBEX_LP_LIB_EXTRA_ATTRIBUTES" ]:
         if not var in conf.env:
             err = "%s must be defined in env by the plugin %s" % (var, lplib_dirname)

@@ -15,7 +15,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
-#include "ibex_LinearSolver.h"
+#include "ibex_LPSolver.h"
 
 namespace ibex {
 

@@ -130,7 +130,7 @@ public:
 	/**
 	 * \throw LPExpcetion if not infeasible
 	 */
-	void get_infeasible_dir(Vector & sol) const;
+	ibex::Vector  get_infeasible_dir() const;
 
 
 // SET

@@ -19,4 +19,3 @@ def configure (conf):
 
 	conf.env.IBEX_LP_LIB_INCLUDES = ""
 	conf.env.IBEX_LP_LIB_EXTRA_ATTRIBUTES = ""
-	conf.env.IBEX_LP_LIB_DEFAULT_EPS = "1e-10"
