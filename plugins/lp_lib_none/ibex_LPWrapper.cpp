@@ -1,9 +1,8 @@
 
-LPSolver::LPSolver(int nb_vars, int max_iter,
-	int max_time_out, double eps):
-	nb_vars(0), nb_rows(0), obj_value(POS_INFINITY), sense(LPSolver::MINIMIZE),
-	primal_solution(1), dual_solution(1 /*tmp*/),
-	status_prim(false), status_dual(false), boundvar(1)
+LPSolver::LPSolver(int nb_vars, int max_iter, int max_time_out, double eps):
+	nb_vars(0), nb_rows(0), boundvar(1), sense(LPSolver::MINIMIZE),
+	obj_value(POS_INFINITY), primal_solution(1), dual_solution(1 /*tmp*/),
+	status_prim(false), status_dual(false)
 {
 	ibex_warning("No LP Solver available (use --lp-lib option in waf configure). ");
 }
@@ -19,20 +18,23 @@ void LPSolver::write_file(const char* name) {
 	throw LPException();
 }
 
-
-void LPSolver::get_rows(Matrix& A) const{
+Vector LPSolver::get_infeasible_dir() const {
 	throw LPException();
 }
 
-void LPSolver::get_rows_trans(Matrix& A_trans) const{
+Matrix LPSolver::get_rows() const{
 	throw LPException();
 }
 
-void LPSolver::get_lhs_rhs(IntervalVector& lhs_rhs) const{
+Matrix LPSolver::get_rows_trans() const{
 	throw LPException();
 }
 
-void LPSolver::get_coef_obj(Vector& obj) const{
+IntervalVector LPSolver::get_lhs_rhs() const{
+	throw LPException();
+}
+
+Vector LPSolver::get_coef_obj() const{
 	throw LPException();
 }
 
