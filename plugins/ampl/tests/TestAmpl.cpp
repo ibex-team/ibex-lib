@@ -187,7 +187,7 @@ void TestAmpl::normalize() {
 	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[2].expr(),"((x(1)-x(2))-1)"));
 	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[3].expr(),"(-((x(1)-x(2))+1))"));
 	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[4].expr(),"((x(1)-x(2))-0.5)"));
-	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[5].expr(),"((-(x(1)-x(2)))-0.5)"));
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs[5].expr(),"((-(x(1)-x(2)))+-0.5)"));
 	CPPUNIT_ASSERT(sys.ctrs[0].op==LEQ);
 	CPPUNIT_ASSERT(sys.ctrs[1].op==LEQ);
 	CPPUNIT_ASSERT(sys.ctrs[2].op==LEQ);

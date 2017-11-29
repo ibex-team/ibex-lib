@@ -274,8 +274,9 @@ void LPSolver::set_sense(Sense s) {
 void LPSolver::set_obj(const ibex::Vector& coef) {
 
 	try {
-		soplex::Vector newobj(nb_vars, coef.raw());
-		mysoplex->changeObj(newobj);
+		for (int i=0;i< nb_vars; i++) {
+			mysoplex->changeObj(i,coef[i]);
+		}
 	}
 	catch(...) {
 		throw LPException();

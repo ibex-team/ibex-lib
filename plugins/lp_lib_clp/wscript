@@ -83,6 +83,5 @@ def configure (conf):
     conf.env.IBEX_LP_LIB_INCLUDES = '#include "coin/ClpSimplex.hpp"'
     conf.env.IBEX_LP_LIB_EXTRA_ATTRIBUTES = """
     ClpSimplex *myclp;
-    int * _which;
     int * _col1Index;
     """

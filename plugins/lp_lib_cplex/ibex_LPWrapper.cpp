@@ -533,7 +533,7 @@ void LPSolver::set_obj(const Vector& coef) {
 
 	try {
 
-		int status = CPXchgobj(envcplex, lpcplex, nb_vars, indice, (coef.raw_const()));
+		int status = CPXchgobj(envcplex, lpcplex, nb_vars, indice, (coef.raw()));
 		if (status) {
 			std::cerr<< "Error CPLEX: Could not change the objective function, error "<< status << std::endl;
 			throw LPException();

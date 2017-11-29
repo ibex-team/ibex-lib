@@ -170,7 +170,7 @@ public:
 	void set_sense(Sense s);
 
 
-	void set_obj(const Vector& coef);
+	void set_obj(const ibex::Vector& coef);
 
 	void set_obj_var(int var, double coef);
 
@@ -180,9 +180,9 @@ public:
 
 	void set_epsilon(double eps);
 
-	void add_constraint(const Vector & row, CmpOp sign, double rhs );
+	void add_constraint(const ibex::Vector & row, CmpOp sign, double rhs );
 
-	void add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs );
+	void add_constraint(const ibex::Matrix & A, CmpOp sign, const ibex::Vector& rhs );
 
 
 private:
