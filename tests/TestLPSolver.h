@@ -24,7 +24,7 @@ public:
 	CPPUNIT_TEST_SUITE(TestLinearSolver);
 
 
-#ifdef __IBEX_NO_LP_SOLVER__
+#ifndef __IBEX_NO_LP_SOLVER__
 	CPPUNIT_TEST(test01);
 	CPPUNIT_TEST(kleemin3);
 	CPPUNIT_TEST(kleemin6);
