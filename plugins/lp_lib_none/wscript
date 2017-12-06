@@ -17,6 +17,5 @@ def configure (conf):
 		conf.fatal ("Trying to configure a second library for LP")
 	conf.env["LP_LIB"] = "NONE"
 
-	conf.env.IBEX_LP_LIB_INCLUDES = ""
+	conf.env.IBEX_LP_LIB_INCLUDES = "#define __IBEX_NO_LP_SOLVER__"
 	conf.env.IBEX_LP_LIB_EXTRA_ATTRIBUTES = ""
-	conf.env.IBEX_LP_LIB_DEFAULT_EPS = "1e-10"

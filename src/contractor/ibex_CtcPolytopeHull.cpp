@@ -218,8 +218,7 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, in
 
 	try {
 		// the primal solution : used by choose_next_variable
-		Vector primal_solution(nb_var);
-		mylinearsolver.get_primal_sol(primal_solution);
+		Vector primal_solution = mylinearsolver.get_primal_sol();
 		//cout << " primal " << primal_solution << endl;
 
 		// The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
