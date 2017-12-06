@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 	try {
 		if (argc<3) {
 			cout << "error: missing parameters" << endl;
-			cout << "usage: ./mitsos <filename> <precision> [param-name] ... [param-name]" << endl;
+			cout << "usage: ./ibexsip <filename> <precision> [param-name] ... [param-name]" << endl;
 			exit(0);
 		}
 

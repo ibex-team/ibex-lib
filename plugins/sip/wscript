@@ -61,4 +61,12 @@ def configure (conf):
 ####### build ########
 ######################
 def build (bld):
-	pass # nothing to do, everything is done in the main src/wscript script
+	
+	if bld.env.WITH_SIP:
+		# build solver binary
+		bld.program (
+		target = "ibexsip",
+		use = [ "ibex" ], # add dependency on ibex library
+		source = bld.path.ant_glob ("main/**/*.cpp"),
+		install_path = bld.env.BINDIR,
+		)
