@@ -52,8 +52,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 
 	if (stat == LPSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
-		Vector loup_point(n);
-		lp_solver.get_primal_sol(loup_point);
+		Vector loup_point = lp_solver.get_primal_sol();
 
 		//std::cout << " simplex result " << prim[0] << " " << loup_point << std::endl;
 

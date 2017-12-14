@@ -201,9 +201,7 @@ SolverOutputBox* Solver::next() {
 					throw NoBisectableVariableException();
 
 				// next line may also throw NoBisectableVariableException
-				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-
-				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+				pair<Cell*,Cell*> new_cells=bsc.bisect_cell(*c);
 
 				delete buffer.pop();
 				buffer.push(new_cells.first);

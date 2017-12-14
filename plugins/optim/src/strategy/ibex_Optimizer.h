@@ -422,6 +422,33 @@ inline double Optimizer::get_obj_abs_prec() const {
 	return loup-uplo;
 }
 
+inline std::ostream& operator<<(std::ostream& os, const Optimizer::Status s) {
+	switch (s) {
+	case Optimizer::SUCCESS:
+		return os << "SUCCESS";
+		break;
+	case Optimizer::INFEASIBLE:
+		return os << "INFEASIBLE";
+		break;
+	case Optimizer::NO_FEASIBLE_FOUND:
+		return os << "NO_FEASIBLE_FOUND";
+		break;
+	case Optimizer::UNBOUNDED_OBJ:
+		return os << "UNBOUNDED_OBJ";
+		break;
+	case Optimizer::TIME_OUT:
+		return os << "TIME_OUT";
+		break;
+	case Optimizer::UNREACHED_PREC:
+		return os << "UNREACHED_PREC";
+		break;
+	default:
+		break;
+	}
+	return os;
+}
+
+
 } // end namespace ibex
 
 #endif // __IBEX_OPTIMIZER_H__

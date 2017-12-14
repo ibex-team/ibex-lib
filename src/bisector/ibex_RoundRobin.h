@@ -63,15 +63,6 @@ public:
 	virtual std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box);
 
 	/**
-	 * \brief Bisect a cell.
-	 *
-	 * The #ibex::BisectedVar information of \a cell is set to the
-	 * bisected variable and this information is copied to
-	 * the subcells data.
-	 */
-	virtual std::pair<IntervalVector,IntervalVector> bisect(Cell& cell);
-
-	/**
 	 * \brief Add an instance of #ibex::BisectedVar to the backtrackle data of the root cell.
 	 */
 	void add_backtrackable(Cell& root);
