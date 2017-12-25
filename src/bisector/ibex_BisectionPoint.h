@@ -25,7 +25,7 @@ public:
 	/**
 	 * \brief Build a bisection point.
 	 */
-	BisectionPoint(unsigned int var, int pos, bool rel_pos);
+	BisectionPoint(unsigned int var, double pos, bool rel_pos);
 
 	/**
 	 * \brief Which variable is selected.
@@ -55,7 +55,7 @@ public:
 
 /*============================================ inline implementation ============================================ */
 
-inline BisectionPoint::BisectionPoint(unsigned int var, int pos, bool rel_pos) :
+inline BisectionPoint::BisectionPoint(unsigned int var, double pos, bool rel_pos) :
 		var(var), pos(pos), rel_pos(rel_pos) { }
 
 } // end namespace ibex
