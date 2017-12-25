@@ -212,9 +212,10 @@ void CellCostMaxPFub::set_optim_data(Cell& c, System& sys) {
 double CellCostMaxPFub::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
-		return  -data->pf.ub();
+		return -data->pf.ub();
 	} else {
-		ibex_error("CellCostMaxPFub::cost : invalid cost"); return POS_INFINITY;
+		ibex_error("CellCostMaxPFub::cost : invalid cost");
+		return POS_INFINITY;
 	}
 }
 

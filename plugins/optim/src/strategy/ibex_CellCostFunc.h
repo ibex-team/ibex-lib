@@ -313,5 +313,7 @@ public:
 	virtual	double cost(const Cell& c) const;
 
 };
+
 } // end namespace ibex
+
 #endif // __IBEX_CELL_COST_FUNC__

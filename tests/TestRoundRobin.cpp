@@ -45,7 +45,7 @@ void TestRoundRobin::test01() {
 }
 
 void TestRoundRobin::test02() {
-	RoundRobin rr(0.9);
+	RoundRobin rr(0.9,0.5);
 	IntervalVector box(10,Interval(0,1));
 	box[1]=box[3]=box[5]=box[7]=box[9]=Interval::ZERO;
 

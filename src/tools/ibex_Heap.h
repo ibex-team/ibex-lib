@@ -2,9 +2,10 @@
 //                                  I B E X                                   
 // File        : ibex_Heap.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 23, 2014
+// Last Update : Dec 25, 2017
 //============================================================================
 
 #ifndef __IBEX_HEAP_H__
@@ -53,23 +54,31 @@ template<class T>
 class Heap  {
 public:
 
+	/** Create an empty heap. */
 	Heap(CostFunc<T>& costf);
 
-	Heap(const Heap& original_heap);
-
-	~Heap() { flush(); }
 	/**
-	 * \brief Flush the buffer.
+	 * Deep copy of another heap.
+	 *
+	 * Precondition: class T has a copy constructor.
+	 */
+	Heap(const Heap& heap);
+
+	/** Delete the heap. */
+	~Heap() { flush(); }
+
+	/**
+	 * \brief Flush the heap.
 	 *
 	 * All the remaining elements will be *deleted*
 	 * (with a call to the destructor of class T).
 	 */
 	void flush();
 
-	/** Return the size of the buffer. */
+	/** Return the size of the heap. */
 	int size() const;
 
-	/** Return true if the buffer is empty. */
+	/** Return true if the heap is empty. */
 	bool empty() const;
 
 	/** push a new element on the stack. */
@@ -135,14 +144,10 @@ Heap<T>::Heap(CostFunc<T>& costf) : costf(costf) {
 }
 
 template<class T>
-Heap<T>::Heap(const Heap& original_heap) : costf(original_heap.costf) {
-    for(unsigned i=0;i<original_heap.l.size();i++) {
-        T * elem = new T(*(original_heap.l.at(i).first));
-        std::pair<T*,double> p;
-        p.first = elem;
-        p.second = original_heap.l.at(i).second;
-        l.push_back(p);
-    }
+Heap<T>::Heap(const Heap& heap) : costf(heap.costf) {
+	for(typename std::vector<std::pair<T*,double> >::const_iterator it=heap.l.begin(); it!=heap.l.end(); it++) {
+		l.push_back(make_pair(new T(*(it->first)), it->second));
+	}
 }
 
 template<class T>
