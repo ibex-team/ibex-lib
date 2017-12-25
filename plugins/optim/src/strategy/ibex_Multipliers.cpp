@@ -37,6 +37,10 @@ Multipliers::Multipliers(const Multipliers& e) : lambda(e.lambda) {
 
 }
 
+Backtrackable* Multipliers::copy() const {
+	return new Multipliers(*this);
+}
+
 std::pair<Backtrackable*,Backtrackable*> Multipliers::down(const BisectionPoint&) {
 	return std::pair<Backtrackable*,Backtrackable*>(new Multipliers(*this),new Multipliers(*this));
 }

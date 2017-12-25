@@ -75,10 +75,6 @@ inline Interval& Multipliers::operator[](int i) {
 	return lambda[i];
 }
 
-Backtrackable* Backtrackable::copy() const {
-	return new Multipliers(*this);
-}
-
 } // end namespace ibex
 
 #endif // __IBEX_MULTIPLIERS_H__
