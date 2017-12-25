@@ -25,7 +25,7 @@ public:
 	~EssaiBacktracable() { };
 
 
-	std::pair<Backtrackable*,Backtrackable*> down(){
+	std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&){
 		return std::pair<Backtrackable*,Backtrackable*>(new EssaiBacktracable(*this),new EssaiBacktracable(*this));
 	}
 

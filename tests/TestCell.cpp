@@ -30,7 +30,7 @@ void TestCell::test01() {
 	check(copy->box,c->box);
 
 	LargestFirst bsc;
-	std::pair<Cell*, Cell*> new_cells = bsc.bisect_cell(*c);
+	std::pair<Cell*, Cell*> new_cells = bsc.bisect(*c);
 
 
 	check(new_cells.first->box|new_cells.second->box,c->box);
@@ -75,7 +75,7 @@ void TestCell::test02() {
 	CPPUNIT_ASSERT(back_copy->n == 1);
 
 	LargestFirst bsc;
-	std::pair<Cell*, Cell*> new_cells = bsc.bisect_cell(*root);
+	std::pair<Cell*, Cell*> new_cells = bsc.bisect(*root);
 	CPPUNIT_ASSERT(almost_eq(new_cells.first->box|new_cells.second->box,root->box));
 
     EssaiBacktracable * back_1 = &new_cells.first->get<EssaiBacktracable>();

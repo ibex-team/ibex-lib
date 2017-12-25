@@ -51,7 +51,7 @@ public:
 	/**
 	 * \brief Duplicate the structure into the left/right nodes
 	 */
-	std::pair<Backtrackable*,Backtrackable*> down();
+	std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&);
 
 	IntervalVector lambda;
 
@@ -64,7 +64,7 @@ protected:
 	/**
 	 * \brief Create a copy
 	 */
-	Backtrackable* copy() const { return new Multipliers(*this);};
+	Backtrackable* copy() const;
 
 };
 
@@ -73,6 +73,10 @@ protected:
 
 inline Interval& Multipliers::operator[](int i) {
 	return lambda[i];
+}
+
+Backtrackable* Backtrackable::copy() const {
+	return new Multipliers(*this);
 }
 
 } // end namespace ibex

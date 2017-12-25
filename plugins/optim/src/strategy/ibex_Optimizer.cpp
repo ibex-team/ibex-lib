@@ -306,7 +306,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			try {
 
 
-				pair<Cell*,Cell*> new_cells=bsc.bisect_cell(*c);
+				pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 				buffer.pop();
 				delete c; // deletes the cell.
 

@@ -36,7 +36,7 @@ public:
 	/**
 	 * \brief Duplicate the structure into the left/right nodes
 	 */
-	std::pair<Backtrackable*,Backtrackable*> down();
+	std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&);
 
 	/**
 	 * \brief Initialize the value of "pf"

@@ -1,17 +1,18 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : Bisector
+// File        : ibex_Bsc.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 8, 2012
-// Last Update : May 8, 2012
+// Last Update : Dec 25, 2017
 //============================================================================
 
 #ifndef __IBEX_BISECTOR_H__
 #define __IBEX_BISECTOR_H__
 
 #include "ibex_Cell.h"
+
 #include <utility>
 
 namespace ibex {
@@ -76,18 +77,28 @@ public:
 	 * Implementation is <b>optional</b>. By default, this function call bisect(cell.box).
 	 * See #bisect(const IntervalVector&).
 	 */
-	std::pair<Cell*,Cell*> bisect_cell(const Cell& cell);
+	std::pair<Cell*,Cell*> bisect(const Cell& cell);
 
 	/**
-	 * \brief Bisect the current box and return the result.
+	 * \brief Bisect a box and return the result.
 	 */
-	virtual std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box)=0;
+	std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box);
+
+	/**
+	 * \brief Return next variable to be bisected.
+	 *
+	 * To be implemented by the subclass.
+	 */
+	virtual BisectionPoint choose_var(const Cell& cell) = 0;
 
 	/**
 	 * Allows to add the backtrackable data required
 	 * by this bisector to the root cell before a
 	 * strategy is executed.<br>
-	 * By default: add information on the last bisected variable. See #ibex::BisectedVar.
+	 *
+	 * By default: add information on the last bisected variable.
+	 *
+	 * See #ibex::BisectedVar.
 	 */
 	virtual void add_backtrackable(Cell& root);
 
@@ -123,38 +134,29 @@ private:
 	const Vector _prec;
 };
 
-
 /** \ingroup bisector
  *
  * \brief Last bisected variable (used by RoundRobin, CtcPropag, etc.)
  */
 class BisectedVar : public Backtrackable {
 public:
-	BisectedVar() : var(-1) { }
+	BisectedVar();
 
-	BisectedVar(int x) : var(x) { }
+	BisectedVar(int x);
 
-	std::pair<Backtrackable*,Backtrackable*> down() {
-		return std::pair<Backtrackable*,Backtrackable*>(new BisectedVar(var),new BisectedVar(var));
-	}
+	Backtrackable* copy() const;
 
+	std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint& b);
+
+	/** -1 if root cell */
 	int var;
 
 protected:
-
-	explicit BisectedVar(const BisectedVar& e) : var(e.var) { }
-	Backtrackable* copy() const { return new BisectedVar(*this);};
-
+	explicit BisectedVar(const BisectedVar& e);
 };
 
 
 /*============================================ inline implementation ============================================ */
-
-
-inline std::pair<Cell*,Cell*> Bsc::bisect_cell(const Cell& cell) {
-	std::pair<IntervalVector,IntervalVector> boxes=this->bisect(cell.box);
-	return cell.bisect(boxes.first,boxes.second);
-}
 
 inline bool Bsc::uniform_prec() const {
 	return _prec.size()==1;
@@ -171,5 +173,28 @@ inline bool Bsc::too_small(const IntervalVector& box, int i) const {
 		   );
 }
 
+inline std::pair<Cell*,Cell*> Bsc::bisect(const Cell& cell) {
+	return cell.subcells(choose_var(cell));
+}
+
+inline BisectedVar::BisectedVar() : var(-1) {
+
+}
+
+inline BisectedVar::BisectedVar(int x) : var(x) {
+
+}
+
+inline Backtrackable* BisectedVar::copy() const {
+	return new BisectedVar(*this);
+}
+
+inline std::pair<Backtrackable*,Backtrackable*> BisectedVar::down(const BisectionPoint& b) {
+	return std::pair<Backtrackable*,Backtrackable*>(new BisectedVar(b.var),new BisectedVar(b.var));
+}
+
+inline BisectedVar::BisectedVar(const BisectedVar& e) : var(e.var) { }
+
 } // end namespace ibex
+
 #endif // __IBEX_BISECTOR_H__

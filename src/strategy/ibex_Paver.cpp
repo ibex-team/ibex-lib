@@ -73,7 +73,7 @@ void Paver::contract(Cell& cell, SubPaving* paving) {
 
 void Paver::bisect(Cell& c) {
 
-	pair<Cell*,Cell*> new_cells=bsc.bisect_cell(c);
+	pair<Cell*,Cell*> new_cells=bsc.bisect(c);
 
 	delete buffer.pop();
 	buffer.push(new_cells.first);
