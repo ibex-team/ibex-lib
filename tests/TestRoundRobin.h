@@ -22,8 +22,8 @@ class TestRoundRobin : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestRoundRobin);
-//	CPPUNIT_TEST(test01);
-//	CPPUNIT_TEST(test02);
+	CPPUNIT_TEST(test01);
+	CPPUNIT_TEST(test02);
 	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
