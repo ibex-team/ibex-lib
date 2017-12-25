@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : Smear Function bisectors
 // Author      : Bertrand Neveu
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : July 19, 2012
 // Last Update : July 19, 2012
@@ -24,7 +24,7 @@ namespace ibex {
  * \brief bisector with Smear function heuristic (abstract class)
  *
  */
-class SmearFunction : public RoundRobin {
+class SmearFunction : public Bsc {
 public:
 
 	/**
@@ -51,13 +51,14 @@ public:
 	SmearFunction(System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
-	 * \brief Bisect the box.
+	 * \brief Return next variable to be bisected.
 	 *
-	 * \param last_var - the last component that has been bisected.
+	 * called by Bsc::bisect(...)
+	 *
 	 * In case the jacobian matrix could not be computed correctly, the box is split
-	 * with the \link ibex::RoundRobin::bisect(int) const round-robin strategy \endlink.
+	 * with the \link ibex::RoundRobin::choose_var((const Cell&) round-robin strategy \endlink.
 	 */
-	virtual  std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box, int& last_var);
+	virtual BisectionPoint choose_var(const Cell& cell);
 
 	/**
 	 * \brief Returns the variable to bisect.
@@ -68,7 +69,13 @@ public:
 	 */
 	virtual int var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const=0;
 
+	/**
+	 * \brief Add backtrackable data required by round robin.
+	 */
+	virtual void add_backtrackable(Cell& root);
+
 protected :
+	RoundRobin rr; // by default when smear function strategy does not apply.
 	int nbvars;
 	System& sys;
 };
@@ -227,11 +234,11 @@ public :
 
 /*============================================ inline implementation ============================================ */
 
-inline SmearFunction::SmearFunction(System& sys, double prec, double ratio) : RoundRobin(prec, ratio), sys(sys) {
+inline SmearFunction::SmearFunction(System& sys, double prec, double ratio) : Bsc(prec), rr(prec, ratio), sys(sys) {
 	nbvars=sys.nb_var;
 }
 
-inline SmearFunction::SmearFunction(System& sys, const Vector& prec, double ratio) : RoundRobin(prec, ratio), sys(sys) {
+inline SmearFunction::SmearFunction(System& sys, const Vector& prec, double ratio) : Bsc(prec), rr(prec, ratio), sys(sys) {
 	nbvars=sys.nb_var;
 }
 
