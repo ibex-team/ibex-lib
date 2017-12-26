@@ -2,15 +2,16 @@
 //                                  I B E X                                   
 // File        : ibex_RoundRobin.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 8, 2012
-// Last Update : May 8, 2012
+// Last Update : Dec 25, 2017
 //============================================================================
 
 #include "ibex_RoundRobin.h"
 #include "ibex_NoBisectableVariableException.h"
-using std::pair;
+
+using namespace std;
 
 namespace ibex {
 
@@ -22,38 +23,27 @@ RoundRobin::RoundRobin(const Vector& prec, double ratio) : Bsc(prec), ratio(rati
 
 }
 
-pair<IntervalVector,IntervalVector> RoundRobin::bisect(const IntervalVector& box, int& last_var) {
+BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 
-  int n = box.size();
+	int last_var=cell.get<BisectedVar>().var;
 
-  if (last_var == -1) last_var = n-1;
+	const IntervalVector& box=cell.box;
 
-  int var = (last_var+1)%n;
+	int n = box.size();
 
+	if (last_var == -1) last_var = n-1;
 
-  while (var != last_var && too_small(box,var))
-    var = (var + 1)%n;  
+	int var = (last_var+1)%n;
 
-  // if no variable can be bisected an exception is thrown
-  if (var==last_var && too_small(box,var))
-	  throw NoBisectableVariableException();
+	while (var != last_var && too_small(box,var))
+		var = (var + 1)%n;
 
-  last_var = var; // output
+	// if no variable can be bisected an exception is thrown
+	if (var==last_var && too_small(box,var))
+		throw NoBisectableVariableException();
 
-  return box.bisect(var,ratio);
-}
-
-pair<IntervalVector,IntervalVector> RoundRobin::bisect(const IntervalVector& box) {
-	int i=-1;
-	return bisect(box,i);
-}
-
-pair<IntervalVector,IntervalVector> RoundRobin::bisect(Cell& cell) {
-	BisectedVar& v=cell.get<BisectedVar>();
-
-	// the following instruction will update v.var
-	// and the new value of v.var will be copied to child nodes
-	return bisect(cell.box,v.var);
+	else
+		return BisectionPoint(var,ratio,true); // output
 }
 
 void RoundRobin::add_backtrackable(Cell& root) {

@@ -97,8 +97,8 @@ Ctc* DefaultSolver::ctc (System& sys, double prec) {
 DefaultSolver::DefaultSolver(System& sys, double eps_x_min, double eps_x_max,
 		bool dfs, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min)),
 		get_square_eq_sys(*this, sys)!=NULL?
-				rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :
-				rec(new RoundRobin(eps_x_min)),
+				(Bsc&) rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :
+				(Bsc&) rec(new RoundRobin(eps_x_min)),
 				rec(dfs? (CellBuffer*) new CellStack() : (CellBuffer*) new CellList()),
 				Vector(sys.nb_var,eps_x_min), Vector(sys.nb_var,eps_x_max)),
 		sys(sys) {
@@ -111,8 +111,8 @@ DefaultSolver::DefaultSolver(System& sys, double eps_x_min, double eps_x_max,
 DefaultSolver::DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max,
 		bool dfs, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min.min())),
 		get_square_eq_sys(*this, sys)!=NULL?
-				rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :
-				rec(new RoundRobin(eps_x_min)),
+				(Bsc&) rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :
+				(Bsc&) rec(new RoundRobin(eps_x_min)),
 		rec(dfs? (CellBuffer*) new CellStack() : (CellBuffer*) new CellList()),
 		eps_x_min, Vector(sys.nb_var,eps_x_max)),
 		sys(sys) {

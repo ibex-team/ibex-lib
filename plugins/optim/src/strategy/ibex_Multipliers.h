@@ -51,12 +51,21 @@ public:
 	/**
 	 * \brief Duplicate the structure into the left/right nodes
 	 */
-	std::pair<Backtrackable*,Backtrackable*> down();
+	std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&);
 
 	IntervalVector lambda;
-protected:
 
-	Multipliers(const Multipliers&);
+protected:
+	/**
+	 * \brief Constructor by copy.
+	 */
+	explicit Multipliers(const Multipliers& e);
+
+	/**
+	 * \brief Create a copy
+	 */
+	Backtrackable* copy() const;
+
 };
 
 
