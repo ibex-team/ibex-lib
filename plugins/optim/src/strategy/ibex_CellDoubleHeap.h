@@ -172,18 +172,21 @@ inline void CellDoubleHeap::push(Cell* cell) {
 
 }
 
-
 inline Cell* CellDoubleHeap::pop()                { return DoubleHeap<Cell>::pop(); }
 inline Cell* CellDoubleHeap::top() const          { return DoubleHeap<Cell>::top(); }
 
 inline double CellDoubleHeap::minimum() const     { return DoubleHeap<Cell>::minimum(); }
 
- inline std::ostream& CellDoubleHeap::print(std::ostream& os) const
- {    os << "==============================================================================\n";
-      os << " first heap " << " size " << heap1->size() << " top " << heap1->top()->box << std::endl;
-      os << " second heap " << " size " << heap2->size() << " top " << heap2->top()->box ;
-     return  os << std::endl;
- }
+inline std::ostream& CellDoubleHeap::print(std::ostream& os) const {
+	os << "==============================================================================\n";
+	if (empty()) {
+		return os << " EMPTY heap" << std::endl;
+	} else {
+		os << " first heap " << " size " << heap1->size() << " top " << heap1->top()->box << std::endl;
+		os << " second heap " << " size " << heap2->size() << " top " << heap2->top()->box ;
+		return  os << std::endl;
+	}
+}
 
 
 } // namespace ibex
