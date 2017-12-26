@@ -13,9 +13,9 @@
 
 namespace ibex {
 
-const double LPSolver::default_eps = @IBEX_LP_LIB_DEFAULT_EPS@;
-
-const double LPSolver::default_max_bound = 1e20;
+//const double LPSolver::default_eps = @IBEX_LP_LIB_DEFAULT_EPS@;
+const double LPSolver::default_eps = 1e-9;
+const double LPSolver::default_max_bound = 1e20; // max bound in CPLEX
 const int LPSolver::default_max_time_out=100;
 const int LPSolver::default_max_iter=100;
 const Interval LPSolver::default_limit_diam_box = Interval(1.e-14,1.e6);
@@ -59,6 +59,30 @@ std::ostream& operator<<(std::ostream& os, const LPSolver::Status_Sol x){
 
 }
 
+LPSolver::Status_Sol LPSolver::solve_proved() {
+	LPSolver::Status_Sol stat = solve();
+	switch (stat) {
+	case LPSolver::OPTIMAL : {
+		// Neumaier - Shcherbina postprocessing
+		Interval obj = neumaier_shcherbina_postprocessing();
+		obj_value = Interval(obj.lb(),obj_value.ub());
+		stat = LPSolver::OPTIMAL_PROVED;
+		break;
+	}
+	case  LPSolver::INFEASIBLE: {
+		// infeasibility test  cf Neumaier Shcherbina paper
+		if (neumaier_shcherbina_infeasibilitytest()) {
+			stat = LPSolver::INFEASIBLE_PROVED;
+		}
+		break;
+	}
+	default:
+		stat = LPSolver::UNKNOWN;
+		break;
+	}
+	return stat;
+
+}
 
 int LPSolver::get_nb_rows() const {
 	return nb_rows;
@@ -68,35 +92,77 @@ Interval LPSolver::get_obj_value() const {
 	return obj_value;
 }
 
-/*
- * TODO: get the actual internal precision of the LP solver
- */
-double LPSolver::get_epsilon() const {
-	return epsilon;
+void LPSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
+	for (int i=0; i<A.nb_rows(); i++) {
+		try {
+			add_constraint(A[i],sign,rhs[i]);
+		} catch (LPException&) { }
+	}
+}
+
+
+void LPSolver::clean_bounds() {
+	set_bounds(IntervalVector(nb_vars));
+}
+
+void LPSolver::clean_obj() {
+	set_obj(ibex::Vector::zeros(nb_vars));
+}
+
+void LPSolver::clean_all() {
+	clean_ctrs();
+	clean_obj();
+	clean_bounds();
+}
+
+ibex::Vector LPSolver::get_primal_sol() const {
+	try {
+		if (status_prim) {
+			return primal_solution;
+		} else
+			throw LPException();
+	}
+	catch(...) {
+		throw LPException();
+	}
+}
+
+ibex::Vector LPSolver::get_dual_sol() const {
+	try {
+		if (status_dual) {
+			return dual_solution;
+		} else
+			throw LPException();
+	}
+	catch(...) {
+		throw LPException();
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-LPSolver::Status_Sol LPSolver::solve_var(LPSolver::Sense sense, int var, Interval& obj) {
+LPSolver::Status_Sol LPSolver::solve_var(LPSolver::Sense s, int var, Interval& obj) {
 	assert((0<=var)&&(var<=nb_vars));
 
-	LPSolver::Status_Sol stat = LPSolver::UNKNOWN;
+	LPSolver::Status_Sol stat = LPSolver::UNKNOWN;	
+	set_sense(LPSolver::MINIMIZE);
+
 
 	try {
 		// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
-		if(sense==LPSolver::MINIMIZE)
+		if(s==LPSolver::MINIMIZE)
 			set_obj_var(var, 1.0);
 		else
 			set_obj_var(var, -1.0);
 
-		//	mylinearsolver->writeFile("coucou.lp");
+		//	mylinearsolver->write_file("coucou.lp");
 		//	system("cat coucou.lp");
 		stat = solve();
 		// std::cout << "[polytope-hull]->[run_simplex] solver returns " << stat << std::endl;
 		switch (stat) {
 		case LPSolver::OPTIMAL : {
 			// Neumaier - Shcherbina postprocessing
-			obj_value = neumaier_shcherbina_postprocessing_var(var, sense);
+			obj_value = neumaier_shcherbina_postprocessing_var(var, s);
 			obj = obj_value;
 			stat = LPSolver::OPTIMAL_PROVED;
 			break;
@@ -125,24 +191,28 @@ LPSolver::Status_Sol LPSolver::solve_var(LPSolver::Sense sense, int var, Interva
 
 }
 
-Interval LPSolver::neumaier_shcherbina_postprocessing_var (int var, LPSolver::Sense sense) {
+Interval LPSolver::neumaier_shcherbina_postprocessing_var (int var, LPSolver::Sense s) {
 	try {
 		// the dual solution : used to compute the bound
-		Vector dual(nb_rows);
-		get_dual_sol(dual);
+		ibex::Vector dual = get_dual_sol();
 
-		Matrix A_trans (nb_vars,nb_rows) ;
-		get_rows_trans(A_trans);
+		ibex::Matrix A_trans = get_rows_trans();
 
-		IntervalVector B(nb_rows);
-		get_lhs_rhs(B);
+		IntervalVector B = get_lhs_rhs();
+
 
 		//cout <<" BOUND_test "<< endl;
 		IntervalVector Rest(nb_vars);
 		IntervalVector Lambda(dual);
+		//		std::cout << " A_t " << A_trans << std::endl;
+		//		std::cout << " B " << B << std::endl;
+		//		std::cout << " dual " << Lambda << std::endl;
+		//		std::cout << " box " << boundvar << std::endl;
+		//		std::cout << " dual B " << Lambda * B << std::endl;
+
 
 		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-		if (sense==LPSolver::MINIMIZE) {
+		if (s==LPSolver::MINIMIZE) {
 			Rest[var] -=1; // because C is a vector of zero except for the coef "var"
 			return (Lambda * B - Rest * boundvar);
 		} else {
@@ -165,43 +235,44 @@ Interval LPSolver::neumaier_shcherbina_postprocessing_var (int var, LPSolver::Se
 Interval LPSolver::neumaier_shcherbina_postprocessing() {
 	try {
 		// the dual solution : used to compute the bound
-		Vector dual(nb_rows);
-		get_dual_sol(dual);
+		ibex::Vector dual = get_dual_sol();
 
-		Matrix A_trans (nb_vars,nb_rows) ;
-		get_rows_trans(A_trans);
+		ibex::Matrix A_trans = get_rows_trans();
 
-		IntervalVector B(nb_rows);
-		get_lhs_rhs(B);
+		IntervalVector B = get_lhs_rhs();
 
-		Vector obj(nb_vars);
-		get_coef_obj(obj);
+		ibex::Vector obj = get_coef_obj();
+
 
 		//cout <<" BOUND_test "<< endl;
 		IntervalVector Rest(nb_vars);
 		IntervalVector Lambda(dual);
-
-		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-		Rest -= obj; // TODO
+		Rest = A_trans * Lambda ;
+		Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
 		return (Lambda * B - Rest * boundvar);
 
-
+		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
+		if (sense==LPSolver::MINIMIZE) {
+			Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
+			return (Lambda * B - Rest * boundvar);
+		} else {
+			Rest += obj;   // Rest = Transpose(As) * Lambda - obj
+			return -(Lambda * B - Rest * boundvar);
+		}
 
 	} catch (...) {
 		throw LPException();
 	}
 }
 
+
 bool LPSolver::neumaier_shcherbina_infeasibilitytest() {
 	try {
-		Vector infeasible_dir(nb_rows);
-		get_infeasible_dir(infeasible_dir);
+		ibex::Vector infeasible_dir = get_infeasible_dir();
 
-		Matrix A_trans (nb_vars,nb_rows) ;
-		get_rows_trans(A_trans);
+		ibex::Matrix A_trans = get_rows_trans();
 
-		IntervalVector B(nb_rows);
-		get_lhs_rhs(B);
+		IntervalVector B = get_lhs_rhs();
 
 		IntervalVector Lambda(infeasible_dir);
 
@@ -222,40 +293,6 @@ bool LPSolver::neumaier_shcherbina_infeasibilitytest() {
 
 }
 
-
-
-LPSolver::Status_Sol LPSolver::solve_proved() {
-	LPSolver::Status_Sol stat = solve();
-	switch (stat) {
-	case LPSolver::OPTIMAL : {
-		// Neumaier - Shcherbina postprocessing
-		obj_value = neumaier_shcherbina_postprocessing();
-		stat = LPSolver::OPTIMAL_PROVED;
-		break;
-	}
-	case  LPSolver::INFEASIBLE: {
-		// infeasibility test  cf Neumaier Shcherbina paper
-		if (neumaier_shcherbina_infeasibilitytest()) {
-			stat = LPSolver::INFEASIBLE_PROVED;
-		}
-		break;
-	}
-	default:
-		stat = LPSolver::UNKNOWN;
-		break;
-	}
-	return stat;
-
-}
-
-
-void LPSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
-	for (int i=0; i<A.nb_rows(); i++) {
-		try {
-			add_constraint(A[i],sign,rhs[i]);
-		} catch (LPException&) { }
-	}
-}
 
 #include "ibex_LPWrapper.cpp"
 }
