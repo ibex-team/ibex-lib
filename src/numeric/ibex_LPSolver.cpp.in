@@ -13,6 +13,7 @@
 
 namespace ibex {
 
+//const double LPSolver::default_eps = @IBEX_LP_LIB_DEFAULT_EPS@;
 const double LPSolver::default_eps = 1e-9;
 const double LPSolver::default_max_bound = 1e20; // max bound in CPLEX
 const int LPSolver::default_max_time_out=100;
