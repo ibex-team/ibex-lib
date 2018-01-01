@@ -330,7 +330,6 @@ T* DoubleHeap<T>::pop() {
 	assert(heap1->heap_state());
 	assert(!heap2 || heap2->heap_state());
 
-
 	// select the heap
 	if (RNG::rand() % 100 >= static_cast<unsigned>(critpr)) {
 		current_heap_id=0;
@@ -361,15 +360,11 @@ template<class T>
 T* DoubleHeap<T>::top() const {
 	assert(size()>0);
 
-	// select the heap
-	if (RNG::rand() % 100 >= static_cast<unsigned>(critpr)) {
-		// the first heap is used
-		current_heap_id=0;
+	if (current_heap_id==0) {
 		return heap1->top();
 	}
 	else {
 		// the second heap is used
-		current_heap_id=1;
 		return heap2->top();
 	}
 }
