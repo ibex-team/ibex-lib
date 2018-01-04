@@ -37,6 +37,7 @@
 namespace ibex {
 
 template<class T>  class AffineVariableMain;
+template<class T>  class AffineVarMain;
 template<class T>  class AffineMain;
 template<class T> class AffineMainVector;
 template<class T> class AffineMainMatrix;
@@ -65,6 +66,9 @@ typedef AF_fAFFullI AF_Other;
 typedef AffineMain<AF_Default> Affine2;
 typedef AffineMain<AF_Other>  Affine3;
 
+typedef AffineVarMain<AF_Default> Affine2Var;
+typedef AffineVarMain<AF_Other>  Affine3Var;
+
 
 template<class T>
 Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<Domain>& d);
@@ -72,10 +76,33 @@ template<class T>
 Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<const Domain>& d);
 
 
+
+template<class T=AF_Default>
+class AffineVarMain : public AffineMain<T> {
+
+private:
+    static int _count;
+
+    const int var;
+public:
+	/** \brief Create an affine form with n variables and  initialized val[0] with d. */
+	explicit AffineVarMain(double d);
+
+
+	/** \brief Create an affine form with n variables and  initialized val[0] with  itv. */
+	explicit AffineVarMain(const Interval& itv);
+
+	/** \brief Set *this to itv.
+	 */
+	AffineVarMain& operator=(const Interval& itv);
+	AffineVarMain& operator=(const AffineMain<T>& itv);
+};
+
 template<class T=AF_Default>
 class AffineMain {
 
-private:
+protected:
+	friend class AffineVarMain<T>;
 	friend class AffineMainVector<T>;
 	friend class AffineMainMatrix<T>;
 	friend 	Array< TemplateDomain< AffineMain > > convert_to_affinedomain<T>(const Array<Domain>& d);
@@ -89,7 +116,6 @@ private:
 	static const double AF_EE;
 
 	static bool mode;
-    static int _count;
 
 	/**
 	 * Code for the particular case:
@@ -124,10 +150,6 @@ public:
 
 	/** \brief change the linearisation approximation of all the affine form: Chebyshev (by default), or Min-Range	 */
 	static void change_mode(Affine_Mode tt=AF_Default);
-
-
-	/** \brief Create an affine form with n variables and  initialized val[0] with  itv. */
-	explicit AffineMain(const Interval& itv);
 
 	/** \brief Create an empty affine form. */
 	AffineMain();
@@ -166,7 +188,7 @@ public:
 
 	/** \brief Set *this to itv.
 	 */
-	AffineMain& operator=(const Interval& itv);
+	virtual AffineMain& operator=(const Interval& itv);
 
 	/* Union and Intersection of two Affine2 form must not be implemented
 	 * That could produce to much confusion.
@@ -656,12 +678,12 @@ AffineMain<T> chi(const AffineMain<T>&  a,const AffineMain<T>&  b,const Interval
 namespace ibex {
 
 
+template<class T> int AffineVarMain<T>::_count = 1;
 template<class T> const double AffineMain<T>::AF_COMPAC_Tol = 1.e-6;
 template<class T> const double AffineMain<T>::AF_EM = __builtin_powi(2.0, -51);
 template<class T> const double AffineMain<T>::AF_EC = __builtin_powi(2.0, -55);
 template<class T> const double AffineMain<T>::AF_EE = 2.0;
 template<class T> bool AffineMain<T>::mode=true;
-template<class T> int AffineMain<T>::_count = 1;
 
 
 

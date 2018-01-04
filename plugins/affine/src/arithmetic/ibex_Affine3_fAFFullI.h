@@ -20,10 +20,12 @@
 namespace ibex {
 
 template<class T>  class AffineMain;
+template<class T>  class AffineVarMain;
 
   class AF_fAFFullI {
 
 
+    friend class AffineVarMain<AF_fAFFullI>;
     friend class AffineMain<AF_fAFFullI>;
     //    friend std::ostream& operator<<(std::ostream& os, const Affine2Main<AF_fAFFullI>&  x);
 

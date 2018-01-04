@@ -268,19 +268,19 @@ inline void AffineEval<T>::div_fwd(int x1, int x2, int y) {
 template<class T>
 inline void AffineEval<T>::max_fwd(int x1, int x2, int y) {
 	d[y].i()= max(d[x1].i(),d[x2].i());
-	af2[y].i() = AffineMain<T>(d[y].i());
+	af2[y].i() = (d[y].i()); // Not implemented in Affine Arithmetic
 }
 
 template<class T>
 inline void AffineEval<T>::min_fwd(int x1, int x2, int y) {
 	d[y].i() = min(d[x1].i(),d[x2].i());
-	af2[y].i()= AffineMain<T>( d[y].i());
+	af2[y].i()= ( d[y].i()); // Not implemented in Affine Arithmetic
 }
 
 template<class T>
 inline void AffineEval<T>::atan2_fwd(int x1, int x2, int y) {
 	d[y].i() = atan2(d[x1].i(),d[x2].i());
-	af2[y].i()= AffineMain<T>(d[y].i());
+	af2[y].i()= (d[y].i()); // Not implemented in Affine Arithmetic
 }
 
 template<class T>
@@ -401,19 +401,19 @@ inline void AffineEval<T>::atan_fwd(int x, int y) {
 template<class T>
 inline void AffineEval<T>::acosh_fwd(int x, int y) {
 	d[y].i()=acosh(d[x].i());
-	af2[y].i()= AffineMain<T>(d[y].i());
+	af2[y].i()= (d[y].i()); // Not implemented in Affine Arithmetic
 }
 
 template<class T>
 inline void AffineEval<T>::asinh_fwd(int x, int y) {
 	d[y].i()=asinh(d[x].i());
-	af2[y].i()= AffineMain<T>(d[y].i());
+	af2[y].i()= (d[y].i()); // Not implemented in Affine Arithmetic
 }
 
 template<class T>
 inline void AffineEval<T>::atanh_fwd(int x, int y) {
 	d[y].i()=atanh(d[x].i());
-	af2[y].i()= AffineMain<T>(d[y].i());
+	af2[y].i()= (d[y].i()); // Not implemented in Affine Arithmetic
 }
 
 template<class T>

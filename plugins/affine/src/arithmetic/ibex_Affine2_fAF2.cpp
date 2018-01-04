@@ -15,6 +15,12 @@
 namespace ibex {
 
 
+template<>
+AffineMain<AF_fAF2>::AffineMain() :
+		 _n		(-2		),
+		 _elt	(NULL	,POS_INFINITY)	{
+ }
+
 
 template<>
 AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator=(const Interval& x) {
@@ -59,11 +65,6 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator=(const Interval& x) {
 
 
 
-template<>
-AffineMain<AF_fAF2>::AffineMain() :
-		 _n		(-2		),
-		 _elt	(NULL	,POS_INFINITY)	{
- }
 
 template<>
 AffineMain<AF_fAF2>::AffineMain(int n, int m, const Interval& itv) :
@@ -88,41 +89,72 @@ AffineMain<AF_fAF2>::AffineMain(int n, int m, const Interval& itv) :
 	}
 }
 
+
 template<>
-AffineMain<AF_fAF2>::AffineMain(const Interval & itv) :
-			_n 		(_count),
-			_elt	(NULL,0.0)
-{
-	if (!(itv.is_unbounded()||itv.is_empty())) {
-		_elt._val	=new double[_count + 1];
-		_elt._val[0] = itv.mid();
-		for (int i = 1; i <= _count; i++){
-			_elt._val[i] = 0.0;
+AffineVarMain<AF_fAF2>& AffineVarMain<AF_fAF2>::operator=(const Interval& x) {
+
+	if (x.is_empty()) {
+		_n = -1;
+		_elt._err = 0.0;
+		if (_elt._val != NULL) {
+			delete[] _elt._val;
+			_elt._val = NULL;
 		}
-		_elt._val[_count] = itv.rad();
-
-		_count++;
-	} else {
-		*this = itv;
+	} else if (x.ub()>= POS_INFINITY && x.lb()<= NEG_INFINITY ) {
+		_n = -2;
+		_elt._err = 0.0;
+		if (_elt._val != NULL) {
+			delete[] _elt._val;
+			_elt._val = NULL;
+		}
+	} else if (x.ub()>= POS_INFINITY ) {
+		_n = -3;
+		_elt._err = x.lb();
+		if (_elt._val != NULL) {
+			delete[] _elt._val;
+			_elt._val = NULL;
+		}
+	} else if (x.lb()<= NEG_INFINITY ) {
+		_n = -4;
+		_elt._err = x.ub();
+		if (_elt._val != NULL) {
+			delete[] _elt._val;
+			_elt._val = NULL;
+		}
+	} else  {
+		if (_elt._val && _n > var) {
+			_elt._val[0] = x.mid();
+			_elt._val[var]	= x.rad();
+		} else {
+			delete[] _elt._val;
+			_n = var;
+			_elt._val	= new double[var+1];
+			_elt._val[0] = x.mid();
+			_elt._val[var]	= x.rad();
+		}
 	}
+	return *this;
+
 }
 
-/* OLD version
+
 template<>
-AffineMain<AF_fAF2>::AffineMain(const double d) :
-			_n 		(0),
-			_elt	(NULL,0.0) {
-	if (fabs(d)<POS_INFINITY) {
-		_elt._val = new double[1];
-		_elt._err = 0.0; //abs(d)*AF_EE;
-		_elt._val[0] = d;
-	} else {
-		_n=-1;
-		_elt._err = d;
-	}
+AffineVarMain<AF_fAF2>::AffineVarMain(const Interval & itv) :
+		AffineMain<AF_fAF2>(_count, _count, itv),
+		var		(_count) {
+	_count++;
+}
+
+template<>
+AffineVarMain<AF_fAF2>::AffineVarMain(double d) :
+		AffineMain<AF_fAF2>(_count, _count, Interval(d)),
+		var		(_count) {
+	_count++;
 }
 
 
+
+/*
 template<>
 AffineMain<AF_fAF2>::AffineMain(const Interval & itv):
 			_n 		(0),
@@ -204,6 +236,32 @@ double AffineMain<AF_fAF2>::mid() const{
 }
 
 
+
+template<>
+AffineVarMain<AF_fAF2>& AffineVarMain<AF_fAF2>::operator=(const AffineMain<AF_fAF2>& x) {
+	if (this != &x) {
+		_elt._err = x._elt._err;
+		if (x.is_actif()) {
+			if (_n!=x.size()) {
+				_n =x.size();
+				if (_elt._val!=NULL) { delete[] _elt._val; }
+				_elt._val = new double[_n+1];
+			}
+			if (_elt._val==NULL) _elt._val = new double[_n+1];
+
+			for (int i = 0; i <= x.size(); i++) {
+				_elt._val[i] = x._elt._val[i];
+			}
+		} else {
+			_n = x._n;
+			if (_elt._val != NULL) {
+				delete[] _elt._val;
+				_elt._val = NULL;
+			}
+		}
+	}
+	return *this;
+}
 
 template<>
 AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator=(const AffineMain<AF_fAF2>& x) {

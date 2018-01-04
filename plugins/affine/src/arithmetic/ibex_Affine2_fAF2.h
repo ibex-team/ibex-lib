@@ -35,9 +35,11 @@
 namespace ibex {
 
 template<class T>  class AffineMain;
+template<class T>  class AffineVarMain;
 
 class AF_fAF2 {
 
+	friend class AffineVarMain<AF_fAF2>;
 	friend class AffineMain<AF_fAF2>;
 
 private:
