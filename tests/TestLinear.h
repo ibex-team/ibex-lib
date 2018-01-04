@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_TestLinear.h
+// File        : TestLinear.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 03, 2013
-// Last Update : Oct 03, 2013
+// Last Update : Dec 28, 2017
 //============================================================================
 
 #ifndef __TEST_LINEAR_H__
@@ -24,6 +24,9 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestLinear);
 	CPPUNIT_TEST(lu_partial_underctr);
+	CPPUNIT_TEST(gauss_seidel01);
+	CPPUNIT_TEST(gauss_seidel02);
+	CPPUNIT_TEST(gauss_seidel03);
 	CPPUNIT_TEST(inflating_gauss_seidel01);
 	CPPUNIT_TEST(inflating_gauss_seidel02);
 	CPPUNIT_TEST(inflating_gauss_seidel03);
@@ -38,6 +41,12 @@ public:
 	void lu_complete_underctr();
 	void lu_complete_overctr();
 
+	// m==n (square case)
+	void gauss_seidel01();
+	// m<n (under-constrained)
+	void gauss_seidel02();
+	// m>n (over-constrained)
+	void gauss_seidel03();
 	// convergence, start with degenerated vector
 	void inflating_gauss_seidel01();
 	// convergence, start with thick vector

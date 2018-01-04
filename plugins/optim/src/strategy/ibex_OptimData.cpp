@@ -18,7 +18,7 @@ OptimData::OptimData(const OptimData& e) : pf(e.pf), pu(e.pu) {
 
 }
 
-std::pair<Backtrackable*,Backtrackable*> OptimData::down() {
+std::pair<Backtrackable*,Backtrackable*> OptimData::down(const BisectionPoint&) {
 	return std::pair<Backtrackable*,Backtrackable*>(new OptimData(*this),new OptimData(*this));
 }
 

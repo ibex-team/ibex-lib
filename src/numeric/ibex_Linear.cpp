@@ -333,21 +333,24 @@ void precond(IntervalMatrix& A, IntervalVector& b) {
 }
 
 void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio) {
-	int n=(A.nb_rows());
-	assert(n == (A.nb_cols())); // throw NotSquareMatrixException();
-	assert(n == (x.size()) && n == (b.size()));
+	int m=(A.nb_rows());
+	int n=(A.nb_cols());
+	assert(x.size()==n);
+	assert(b.size()==m);
 
 	double red;
 	Interval old, proj, tmp;
+	int i;
 
 	do {
 		red = 0;
-		for (int i=0; i<n; i++) {
+		for (int r=0; r<m; r++) {
+			i=r % n; // in case m>n
 			old = x[i];
-			proj = b[i];
+			proj = b[r];
 
-			for (int j=0; j<n; j++)	if (j!=i) proj -= A[i][j]*x[j];
-			tmp=A[i][i];
+			for (int j=0; j<n; j++)	if (j!=i) proj -= A[r][j]*x[j];
+			tmp=A[r][i];
 
 			bwd_mul(proj,tmp,x[i]);
 

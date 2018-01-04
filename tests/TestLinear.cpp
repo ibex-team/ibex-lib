@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_TestLinear.cpp
+// File        : TestLinear.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 03, 2013
-// Last Update : Oct 03, 2013
+// Last Update : Dec 28, 2017
 //============================================================================
 
 #include "TestLinear.h"
@@ -42,6 +42,100 @@ void TestLinear::lu_partial_underctr() {
 void TestLinear::lu_complete_underctr() {
 
 }
+
+void TestLinear::gauss_seidel01() {
+	int n=4;
+	double eps=0.01;
+
+	double _A[] = {
+			0,0,1,0,
+		    0,1,0,0,
+			1,0,0,0,
+			0,0,0,1
+		};
+	IntervalMatrix A=Matrix(n,n,_A)+Interval(-eps,eps)*Matrix::ones(n);
+	Vector b=Vector::ones(n);
+	IntervalVector x(n,Interval(-10,10));
+	gauss_seidel(A,b,x,0.001);
+
+	// the domain [l,u] of x2 and x4 satisfies the fixpoint equation:
+	// l = 1/(1+eps)*(1-(n-2)*10*eps-eps*u)
+	// u=  1/(1-eps)*(1+(n-2)*10*eps+eps*u)
+	// so that
+	// u=((1+(n-2)*10*eps)/(1-eps))/(1-(1+eps)/(1-eps))
+	// and
+	// l is then found with the first equation
+	double u=((1+(n-2)*10*eps)/(1-eps)) / (1-(eps/(1-eps)));
+	double l=1.0/(1+eps)*(1-(n-2)*10*eps-eps*u);
+	Interval fxpt(l,u);
+
+	CPPUNIT_ASSERT(x[0]==Interval(-10,10));
+	CPPUNIT_ASSERT(almost_eq(x[1], fxpt, 1e-6));
+	CPPUNIT_ASSERT(x[2]==Interval(-10,10));
+	CPPUNIT_ASSERT(almost_eq(x[3], fxpt, 1e-6));
+}
+
+void TestLinear::gauss_seidel02() {
+	int m=4;
+	int n=8;
+	double eps=0.01;
+
+	double _A[] = {
+			0,0,1,0,0,0,0,0,
+		    0,1,0,0,0,0,0,0,
+			1,0,0,0,0,0,0,0,
+			0,0,0,1,0,0,0,0
+		};
+
+	IntervalMatrix A=Matrix(m,n,_A)+Interval(-eps,eps)*Matrix::ones(m,n);
+	Vector b=Vector::ones(m);
+	IntervalVector x(n,Interval(-10,10));
+
+	gauss_seidel(A,b,x,0.001);
+
+	// see comment in gauss_seidel01
+	double u=((1+(n-2)*10*eps)/(1-eps)) / (1-(eps/(1-eps)));
+	double l=1.0/(1+eps)*(1-(n-2)*10*eps-eps*u);
+	Interval fxpt(l,u);
+
+	CPPUNIT_ASSERT(x[0]==Interval(-10,10));
+	CPPUNIT_ASSERT(almost_eq(x[1], fxpt, 1e-6));
+	CPPUNIT_ASSERT(x[2]==Interval(-10,10));
+	CPPUNIT_ASSERT(almost_eq(x[3], fxpt, 1e-6));
+}
+
+void TestLinear::gauss_seidel03() {
+	int m=8;
+	int n=3;
+	double eps=0.01;
+
+	double _A[] = {
+			0,0,1,
+		    1,0,0,
+			0,0,1,
+			1,0,0,
+		    0,0,1,
+			0,1,0,
+			0,0,1,
+		    0,1,0,
+		    };
+
+	IntervalMatrix A=Matrix(m,n,_A)+Interval(-eps,eps)*Matrix::ones(m,n);
+	Vector b=Vector::ones(m);
+	IntervalVector x(n,Interval(-10,10));
+
+	gauss_seidel(A,b,x,0.001);
+
+	// see comment in gauss_seidel01
+	double u=(1/(1-eps)) / (1-((n-1)*eps/(1-eps)));
+	double l=1.0/(1+eps)*(1-(n-1)*eps*u);
+	Interval fxpt(l,u);
+
+	CPPUNIT_ASSERT(almost_eq(x[0],fxpt, 1e-6));
+	CPPUNIT_ASSERT(almost_eq(x[1],fxpt, 1e-6));
+	CPPUNIT_ASSERT(almost_eq(x[2],fxpt, 1e-6));
+}
+
 
 void TestLinear::inflating_gauss_seidel01() {
 	int n=4;

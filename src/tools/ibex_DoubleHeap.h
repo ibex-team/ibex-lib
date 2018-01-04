@@ -2,9 +2,10 @@
 //                                  I B E X                                   
 // File        : ibex_DoubleHeap.h
 // Author      : Gilles Chabert, Jordan Ninin
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Sep 12, 2014
+// Last Update : Dec 25, 2017
 //============================================================================
 
 #ifndef __IBEX_DOUBLE_HEAP_H__
@@ -36,11 +37,23 @@ public:
 	DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, CostFunc<T>& cost2, bool update_cost2_when_sorting, int critpr=50);
 
 	/**
-	 * \brief Flush the buffer.
+ 		 * \brief Copy constructor.
+	 */
+	explicit DoubleHeap(const DoubleHeap& dhcp, bool deep_copy=false);
+
+	/**
+	 * \brief Flush the heap.
 	 *
-	 * All the remaining data will be *deleted*
+	 * All the remaining data will be *deleted*.
 	 */
 	void flush();
+
+	/**
+	 * \brief Clear the heap.
+	 *
+	 * All the remaining data will be *removed* without being *deleted*.
+	 */
+	void clear();
 
 	/** \brief Return the size of the buffer. */
 	unsigned int size() const;
@@ -139,6 +152,7 @@ protected:
 	 */
 	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool percolate);
 
+private:
 	/**
 	 * Erase all the subnodes of node (including itself) in the first heap
 	 * and manage the impact on the second heap.
@@ -167,17 +181,40 @@ DoubleHeap<T>::DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, Co
 }
 
 template<class T>
+DoubleHeap<T>::DoubleHeap(const DoubleHeap &dhcp, bool deep_copy) :
+nb_nodes(dhcp.nb_nodes), heap1(NULL), heap2(NULL), critpr(dhcp.critpr), current_heap_id(dhcp.current_heap_id) {
+	heap1 = new SharedHeap<T>(*dhcp.heap1, 2, deep_copy);
+	std::vector<HeapElt<T>*> p = heap1->elt();
+	heap2 = new SharedHeap<T>(dhcp.heap2->costf, dhcp.heap2->update_cost_when_sorting, dhcp.heap2->heap_id);
+
+	while(!p.empty()) {
+		heap2->push_elt(p.back());
+		p.pop_back();
+	}
+}
+
+template<class T>
 DoubleHeap<T>::~DoubleHeap() {
+	clear(); // what for?
 	if (heap1) delete heap1;
 	if (heap2) delete heap2;
+
 }
 
 template<class T>
 void DoubleHeap<T>::flush() {
 	if (nb_nodes>0) {
-		erase_subnodes(heap1->root,false);
-		heap1->nb_nodes=0;
-		heap1->root=NULL;
+		heap1->clear(SharedHeap<T>::NODE);
+		heap2->clear(SharedHeap<T>::NODE_ELT_DATA);
+		nb_nodes=0;
+	}
+}
+
+template<class T>
+void DoubleHeap<T>::clear() {
+	if (nb_nodes>0) {
+		heap1->clear(SharedHeap<T>::NODE);
+		heap2->clear(SharedHeap<T>::NODE_ELT);
 		nb_nodes=0;
 	}
 }
@@ -200,7 +237,8 @@ void DoubleHeap<T>::contract(double new_loup1) {
 	heap1->root = copy1->root;
 	heap1->nb_nodes = copy1->size();
 	nb_nodes = copy1->size();
-	copy1->root = NULL; // avoid to delete heap1 with copy1
+	copy1->root = NULL;
+	copy1->nb_nodes=0;// avoid to delete heap1 with copy1
 	delete copy1;
 
 	if (heap2->update_cost_when_sorting) heap2->sort();
@@ -241,6 +279,7 @@ void DoubleHeap<T>::erase_subnodes(HeapNode<T>* node, bool percolate) {
 	else
 		heap2->erase_node(node->elt->holder[1]);
 
+	if (node->elt->data) delete node->elt->data;
 	delete node->elt;
 	delete node;
 }
@@ -291,6 +330,14 @@ T* DoubleHeap<T>::pop() {
 	assert(heap1->heap_state());
 	assert(!heap2 || heap2->heap_state());
 
+	// select the heap
+	if (RNG::rand() % 100 >= static_cast<unsigned>(critpr)) {
+		current_heap_id=0;
+	}
+	else {
+		current_heap_id=1;
+	}
+
 	return data;
 }
 
@@ -313,15 +360,11 @@ template<class T>
 T* DoubleHeap<T>::top() const {
 	assert(size()>0);
 
-	// select the heap
-	if (RNG::rand() % 100 >= static_cast<unsigned>(critpr)) {
-		// the first heap is used
-		current_heap_id=0;
+	if (current_heap_id==0) {
 		return heap1->top();
 	}
 	else {
 		// the second heap is used
-		current_heap_id=1;
 		return heap2->top();
 	}
 }

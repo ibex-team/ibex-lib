@@ -171,7 +171,7 @@ class BenchScatterPlotData (Bench):
 			for d in fdata:
 				uplo = max (uplo, d["uplo"])
 				loup = min (loup, d["loup"])
-			print uplo, loup
+			print (uplo, loup)
 			if uplo > loup:
 				err_fmt = "bench %s from %s: intersection of [uplo, loup] is empty"
 				err_data = (f, serie)

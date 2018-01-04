@@ -1,7 +1,8 @@
+
 LPSolver::LPSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
-			nb_vars(nb_vars1), nb_rows(0), epsilon(eps), boundvar(nb_vars1),
+			nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1), sense(LPSolver::MINIMIZE),
 			obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
-			status_prim(0), status_dual(0)  {
+			status_prim(false), status_dual(false)  {
 
 
 	myclp= new ClpSimplex();
@@ -18,8 +19,8 @@ LPSolver::LPSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
 	myclp->setOptimizationDirection(1);
 	myclp->setMaximumIterations(max_iter);
 	myclp->setMaximumSeconds(max_time_out);
-	myclp->setPrimalTolerance(epsilon);
-    myclp->setDualTolerance(epsilon);
+	myclp->setPrimalTolerance(eps);
+    myclp->setDualTolerance(eps);
 
 	// no log
 	myclp->setLogLevel(0);
@@ -46,10 +47,10 @@ LPSolver::LPSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
 
 	nb_rows = nb_vars;
 
-	_which =new int[10*nb_rows];
-	for (int i=0;i<(10*nb_rows);i++) {
-		_which[i]=i+nb_vars;
-	}
+//	_which =new int[10*nb_rows];
+//	for (int i=0;i<(10*nb_rows);i++) {
+//		_which[i]=i+nb_vars;
+//	}
 
 	_col1Index = new int[nb_vars];
 	for (int i=0;i<nb_vars;i++) {
@@ -60,20 +61,22 @@ LPSolver::LPSolver(int nb_vars1, int max_iter, int max_time_out, double eps) :
 
 LPSolver::~LPSolver() {
 	delete myclp;
-	delete [] _which;
 	delete [] _col1Index;
 }
 
 LPSolver::Status_Sol LPSolver::solve() {
-
+	obj_value = Interval::ALL_REALS;
 	//int stat = -1;
 
 	try{
+		status_prim = false;
+		status_dual = false;
+
 		myclp->dual();
 		//stat = myclp->status();
 		myclp->status();
 
-    	     /** Status of problem:
+		/** Status of problem:
     	         -1 - unknown e.g. before solve or if postSolve says not optimal
     	         0 - optimal
     	         1 - primal infeasible
@@ -90,7 +93,7 @@ LPSolver::Status_Sol LPSolver::solve() {
 			for (int i=0; i< nb_vars ; i++) {
 				primal_solution[i]=primal[i];
 			}
-			status_prim = 1;
+			status_prim = true;
 
 			// the dual solution ; used by Neumaier Shcherbina test
 			double * dual = myclp->dualRowSolution();
@@ -106,13 +109,17 @@ LPSolver::Status_Sol LPSolver::solve() {
 					dual_solution[i]=dual[i];
 				}
 			}
-			status_dual = 1;
+			status_dual = true;
 			return OPTIMAL;
 		}
 		else if (myclp->isProvenPrimalInfeasible())
 			return INFEASIBLE;
-		else if (myclp->isIterationLimitReached())
-			return MAX_ITER;
+		else if (myclp->isIterationLimitReached()){
+			if (myclp->secondaryStatus()==9) {
+				return TIME_OUT;
+			}
+			else return MAX_ITER;
+			}
 		else
 			return UNKNOWN;
 
@@ -133,17 +140,37 @@ void LPSolver::write_file(const char* name) {
 }
 
 
-void LPSolver::get_coef_obj(Vector& obj) const {
-	//TODO
-	return;
+double LPSolver::get_epsilon() const {
+	try  {
+		return myclp->primalTolerance();
+	}
+	catch(...) {
+		throw LPException();
+	}
 }
 
 
-void LPSolver::get_rows(Matrix &A) const {
+Vector LPSolver::get_coef_obj() const {
+	Vector obj(nb_vars);
+	try  {
+		const double * newobj =  myclp->getObjCoefficients();
+		for (int i=0; i< nb_vars ; i++) {
+			obj[i] = newobj[i];
+		}
+	}
+	catch(...) {
+		throw LPException();
+	}
+	return obj;
+}
+
+
+Matrix LPSolver::get_rows() const {
+	Matrix A(nb_rows,nb_vars);
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
 		// see mat.getCorefficient()
-		A = Matrix::zeros(nb_rows,nb_vars);
+		//A = Matrix::zeros(nb_rows,nb_vars);
 		if (mat->isColOrdered()) {
 			for (int cc=0;cc<nb_vars; cc++){
 				CoinBigIndex j;
@@ -165,15 +192,15 @@ void LPSolver::get_rows(Matrix &A) const {
 	} catch(...) {
 		throw LPException();
 	}
-	return ;
+	return A;
 }
 
-void LPSolver::get_rows_trans(Matrix &A_trans) const {
-
+Matrix LPSolver::get_rows_trans() const {
+	Matrix A_trans(nb_vars,nb_rows);
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
 		// see mat.getCorefficient()
-		A_trans = Matrix::zeros(nb_vars,nb_rows);
+		//A_trans = Matrix::zeros(nb_vars,nb_rows);
 		if (mat->isColOrdered()) {
 			for (int cc=0;cc<nb_vars; cc++){
 				CoinBigIndex j;
@@ -197,100 +224,69 @@ void LPSolver::get_rows_trans(Matrix &A_trans) const {
 	catch(...) {
 		throw LPException();
 	}
-	return ;
+	return A_trans;
 }
 
-void  LPSolver::get_lhs_rhs(IntervalVector& B) const {
-
+IntervalVector  LPSolver::get_lhs_rhs() const {
+	IntervalVector B(nb_rows);
 	try {
 		// Get the bounds of the variables
-		for (int i=0;i<nb_vars; i++){
+		for (int i=0;i<nb_rows; i++){
 			B[i]=Interval( myclp->getRowLower()[i] , myclp->getRowUpper()[i] );
 		}
 
 		// Get the bounds of the constraints
-		for (int i=nb_vars;i<nb_rows; i++){
-			B[i]=Interval( 	(myclp->getRowLower()[i]>-default_max_bound)? myclp->getRowLower()[i]:-default_max_bound,
-					        (myclp->getRowUpper()[i]< default_max_bound)? myclp->getRowUpper()[i]: default_max_bound   );
-			//	B[i]=Interval( 	mysoplex->lhs(i),mysoplex->rhs(i));
+//		for (int i=nb_vars;i<nb_rows; i++){
+//			B[i]=Interval( 	(myclp->getRowLower()[i]>-default_max_bound)? myclp->getRowLower()[i]:-default_max_bound,
+//	TODO why				        (myclp->getRowUpper()[i]< default_max_bound)? myclp->getRowUpper()[i]: default_max_bound   );
 			//Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA
 			//           cout << B(i+1) << endl;
-		}
+//		}
 	}
 	catch(...) {
 		throw LPException();
 	}
-	return ;
+	return B;
 }
 
 
-void LPSolver::get_primal_sol(Vector & solution_primal) const {
 
-	try {
-		if (status_prim == 1) {
-			for (int i=0; i< nb_vars ; i++) {
-				solution_primal[i] = primal_solution[i];
-			}
-		}
-	}
-	catch(...) {
-		throw LPException();
-	}
-	return ;
-}
 
-void LPSolver::get_dual_sol(Vector & solution_dual) const {
-
-	try {
-		if (status_dual == 1) {
-			for (int i=0; i<nb_rows; i++) {
-				solution_dual[i] = dual_solution[i];
-			}
-		}
-	}
-	catch(...) {
-		throw LPException();
-	}
-	return ;
-}
-
-void LPSolver::get_infeasible_dir(Vector & sol) const {
-
+Vector LPSolver::get_infeasible_dir() const {
+	Vector sol(nb_rows);
 	try {
 
 		double * sol_found = myclp->infeasibilityRay();
 		if (sol_found) {
 			for (int i=0; i<nb_rows; i++) {
-				if (((myclp->getRowLower()[i] <= -default_max_bound) && (sol_found[i]>=0))||
-						(( myclp->getRowUpper()[i] >=  default_max_bound) && (sol_found[i]<=0))	) {
-					sol[i]=0.0;
-				}
-				else {
-					sol[i]=sol_found[i];
-				}
+//				if (((myclp->getRowLower()[i] <= -default_max_bound) && (sol_found[i]>=0))||
+//						(( myclp->getRowUpper()[i] >=  default_max_bound) && (sol_found[i]<=0))	) {
+//					sol[i]=0.0;
+//				}
+//				else {
+//					sol[i]=sol_found[i];
+//				} //TODO why
+				sol[i]=sol_found[i];
 			}
 			delete [] sol_found;
 		}  else	{
 			delete [] sol_found;
 			throw LPException();
 		}
-
 	}
 	catch(...) {
 		throw LPException();
 	}
-
-	return ;
+	return sol;
 }
 
 void LPSolver::clean_ctrs() {
-
 	try {
-		status_prim = 0;
-		status_dual = 0;
-		int status=0;
+		status_prim = false;
+		status_dual = false;
 		if (nb_vars<=(nb_rows - 1))  {
-			myclp->deleteRows(nb_rows -nb_vars,_which);
+			//myclp->deleteRows(nb_rows -nb_vars,_which);
+			myclp->resize(nb_vars,nb_vars);
 		}
 		nb_rows = nb_vars;
 		obj_value = POS_INFINITY;
@@ -300,11 +296,6 @@ void LPSolver::clean_ctrs() {
 	}
 	return ;
 
-}
-
-void LPSolver::clean_all() {
-	// TODO
-	return ;
 }
 
 
@@ -336,9 +327,11 @@ void LPSolver::set_sense(Sense s) {
 			/// Direction of optimization (1 - minimize, -1 - maximize, 0 - ignore
 		if (s==LPSolver::MINIMIZE) {
 			myclp->setOptimizationDirection(1);
+			sense = LPSolver::MINIMIZE;
 		}
 		else if (s==LPSolver::MAXIMIZE) {
 			myclp->setOptimizationDirection(-1);
+			sense = LPSolver::MAXIMIZE;
 		}
 		else
 			throw LPException();
@@ -351,8 +344,16 @@ void LPSolver::set_sense(Sense s) {
 }
 
 
-void set_obj(const Vector& coef) {
-	// TODO
+void LPSolver::set_obj(const Vector& coef) {
+
+	try {
+		for (int i =0; i< nb_vars; i++)
+			myclp->setObjectiveCoefficient(i, coef[i]);
+	}
+	catch(...) {
+		throw LPException();
+	}
+	return ;
 }
 
 void LPSolver::set_obj_var(int var, double coef) {
@@ -398,7 +399,6 @@ void LPSolver::set_epsilon(double eps) {
 
 	try {
 		myclp->setPrimalTolerance(eps);
-		epsilon = eps;
 	}
 	catch(...) {
 		throw LPException();
@@ -426,3 +426,8 @@ void LPSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
 
 	return ;
 }
+
+
+
+
+
