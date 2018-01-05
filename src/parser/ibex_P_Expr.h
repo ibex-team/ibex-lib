@@ -295,7 +295,7 @@ inline const P_ExprNode* col_vec(const std::vector<const P_ExprNode*>* args) {
 	return new P_ExprNode(P_ExprNode::COL_VEC,*args);
 }
 
-inline const P_ExprNode* infinity() {
+inline const P_ExprNode* dbl_infinity() {
 	return new P_ExprNode(P_ExprNode::INFTY);
 }
 
