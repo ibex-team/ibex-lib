@@ -37,15 +37,16 @@ using namespace ibex;
 
 namespace {
 
-bool gaol = strcmp(_IBEX_INTERVAL_LIB_,"GAOL")==0;
-
 // Restore the environement of Ibex
 // (rounding mode for Gaol)
 // see issue #307
 void ibex_restore() {
-	if (gaol) 
-		gaol::round_upward();
+// note: cannot replace with if (strcmp(_IBEX_INTERVAL_LIB_,"GAOL")==0)
+// because we need this at preprocessing
+#ifdef __gaol__
+	gaol::round_upward();
 	// Q°: do we need to set round-to-nearest in return?
+#endif
 }
 
 enum {
