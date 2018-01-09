@@ -37,6 +37,17 @@ using namespace ibex;
 
 namespace {
 
+bool gaol = strcmp(_IBEX_INTERVAL_LIB_,"GAOL")==0;
+
+// Restore the environement of Ibex
+// (rounding mode for Gaol)
+// see issue #307
+void ibex_restore() {
+	if (gaol) 
+		gaol::round_upward();
+	// Q°: do we need to set round-to-nearest in return?
+}
+
 enum {
 	FAIL     = 0,
 	ENTAILED = 1,
@@ -100,7 +111,7 @@ public:
 		//cout << " [ibex] new constraint:" << _syntax << " nb var=" << nb_var << " option=" << option << endl;
 
 		stringstream s;
-		for (int i=0; i<ctrs_syntax.size(); i++) {
+		for (size_t i=0; i<ctrs_syntax.size(); i++) {
 			if (i>0) s << ';';
 			s << ctrs_syntax[i];
 		}
@@ -167,7 +178,7 @@ public:
 			delete solver;
 		}
 
-		for (int i=0; i<ctrs_syntax.size(); i++)
+		for (size_t i=0; i<ctrs_syntax.size(); i++)
 			free(ctrs_syntax[i]);
 	}
 };
@@ -181,6 +192,9 @@ Instance* get_instance(JNIEnv* env, jobject obj) {
 
 // either return BAD_POINT, UNKNOWN_POINT or INFLATE (the latter case also corresponds to the NOT_SIGNIFICANT case)
 jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, jboolean in) {
+
+	ibex_restore(); 
+			
 	jint result;
 
 	Interval yin=ctr.f.eval(xin);
@@ -243,7 +257,7 @@ JNIEXPORT void JNICALL Java_@JAVA_SIGNATURE@_Ibex_init(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL Java_@JAVA_SIGNATURE@_Ibex_add_1ctr(JNIEnv* env, jobject obj, jstring _syntax) {
-
+	
 	Instance& inst = *get_instance(env,obj);
 
 	if (inst.sys!=NULL) return false;
@@ -261,6 +275,8 @@ JNIEXPORT jboolean JNICALL Java_@JAVA_SIGNATURE@_Ibex_build(JNIEnv* env, jobject
 
 	Instance& inst = *get_instance(env,obj);
 
+	ibex_restore(); // required as the parser may perform interval ops
+
 	if (inst.sys==NULL) {
 		try {
 			inst.build();
@@ -275,12 +291,15 @@ JNIEXPORT jboolean JNICALL Java_@JAVA_SIGNATURE@_Ibex_build(JNIEnv* env, jobject
 
 JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DI(JNIEnv* env, jobject obj, jint n, jdoubleArray _d, jint reif) {
 
+	
 	Instance& inst = *get_instance(env,obj);
 
 	if (inst.sys==NULL) {
 		return NOT_BUILT;
 	}
 
+	ibex_restore();
+		
 	jint result = NOTHING; // by default
 
 	jdouble* d = env->GetDoubleArrayElements(_d, 0);
@@ -291,6 +310,7 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DI(JNIEnv* env, j
 	}
 
 	IntervalVector savebox(box);
+	
 	//cout << " [ibex] contract n°" << n << " with box=" << box << endl;
 	if (reif==TRUE_ || reif==FALSE_OR_TRUE) {
 
@@ -365,6 +385,8 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_inflate(JNIEnv* env, jobject o
 		return NOT_BUILT;
 	}
 
+	ibex_restore();
+		
 	jint result;
 
 	jdouble* d = env->GetDoubleArrayElements(_d, 0);
@@ -455,6 +477,8 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_start_1solve(JNIEnv* env, jobj
 		return NOT_BUILT;
 	}
 
+	ibex_restore();
+		
 	jdouble* d = env->GetDoubleArrayElements(_d, 0);
 
 	IntervalVector box=inst.read_box(env,d,env->GetArrayLength(_d));
@@ -482,6 +506,8 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_next_1solution(JNIEnv* env, jo
 		return NOT_BUILT;
 	}
 
+	ibex_restore();
+		
 	jint result;
 
 	jdouble* d = env->GetDoubleArrayElements(_d, 0);
