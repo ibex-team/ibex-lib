@@ -81,7 +81,6 @@ using namespace ibex::parser;
 "asinh"                          { return TK_ASINH; }
 "atanh"                          { return TK_ATANH; }
 "chi"                            { return TK_CHI; }
-
 "in"                             { return TK_IN;  }
 "inf"                            { return TK_INF; }
 "mid"                            { return TK_MID; }
@@ -94,6 +93,7 @@ using namespace ibex::parser;
 
 "constraints"|"Constraints"|"CONSTRAINTS" { return TK_CTRS; }
 
+"pi"							 { return TK_PI; }
 "oo"                             { return TK_INFINITY; }
 "\""[^\n\r]*"\""                 { ibexlval.str = (char*) malloc(strlen(ibextext)-1);
                                    /* copy while removing quotes */
