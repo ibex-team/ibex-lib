@@ -13,6 +13,9 @@ class UTestContext (Build.BuildContext):
 class BenchmarksContext (Build.BuildContext):
     cmd = "benchmarks"
     fun = "benchmarks"
+    bench_results = {}
+    bench_cmp = {}
+    bench_errors = []
 
 # not @Configure.conf because, the function is also called by 'options'
 def get_dirlist (node):
