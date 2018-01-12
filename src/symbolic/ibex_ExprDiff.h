@@ -49,9 +49,8 @@ public:
 	 * \brief Differentiation of expressions.
 	 *
 	 * \warning: used this way, nodes of the original expression
-	 * ("y" below) will be involved in the resulting expression and,
-	 * since the latter is simplified, the node y itself may be
-	 * destroyed (see ExprSimplify).
+	 * ("y" below) that do not appear in the resulting expression are
+	 * destroyed (see ExprSimplify), which may include the node y itself.
 	 */
 	ExprDiff();
 
@@ -134,13 +133,13 @@ protected:
 	NodeMap<const ExprNode*> grad;
 
 	// ======== Information for cleanup only =========
-	// Leaves of the expression calculated **before simplification**
-	// This includes the "grad" node of symbols with respect to which
+	// Roots of the expression calculated **before simplification**
+	// This also includes the "grad" node of symbols w.r.t. which
 	// we are calculating derivative and that do not appear in the
 	// original expression (they are part of the resulting DAG) and also
-	// "grad" node of constants of the original expression
-	// (not in the resulting DAG).
-	std::vector<const ExprNode*> leaves;
+	// "grad" node of constants of the original expression, or symbols
+	// wrt which we are not differentiating (not in the resulting DAG).
+	std::vector<const ExprNode*> groots;
 };
 
 } // end namespace ibex

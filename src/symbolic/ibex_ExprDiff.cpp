@@ -75,7 +75,7 @@ const ExprNode& ExprDiff::diff(const ExprNode& y, const Array<const ExprSymbol>&
 const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymbol>& x) {
 
 	grad.clean();
-	leaves.clear();
+	groots.clear();
 
 	ExprSubNodes nodes(y);
 	//cout << "y =" << y;
@@ -92,28 +92,16 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 		visit(nodes[i]);
 	}
 
-	// ====== for cleanup =====================================
-	// note:** the following comment seems obsolete***
-	// we cannot build a (artificial) big ExprVector gathering
-	// all the leaves' gradients and use ExprSubNodes on
-	// this vector to get all the nodes because the gradients
-	// are of heterogeneous dimensions when we use
-	// vector or matrix variables.
-	NodeMap<bool> other_nodes;
-	// =========================================================
-
 	Array<const ExprNode> dX(nb_var);
 
-	{   // =============== set null derivative for missing variables ===================
-		// note: we have to make the association with grad[old_x[i]] because this map is
-		// cleared after.
-		for (int i=0; i<x.size(); i++) {
+	// =============== set null derivative for missing variables ===================
+	// note: we have to make the association with grad[old_x[i]] because this map is
+	// cleared after.
+	for (int i=0; i<x.size(); i++) {
 
-			if (grad.found(x[i])) continue;
-
+		if (!grad.found(x[i]))
 			// this symbol does not appear in the expression -> null derivative
 			grad.insert(x[i], &ExprConstant::new_matrix(Matrix::zeros(x[i].dim.nb_rows(),x[i].dim.nb_cols())));
-		}
 	}
 
 	{   // =============== build dX ===================
@@ -126,7 +114,7 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 			switch (d.type()) {
 			case Dim::SCALAR:
 				dX.set_ref(k,*grad[x[i]]);
-				leaves.push_back(&dX[k]);
+				groots.push_back(&dX[k]);
 				k++;
 				break;
 			case Dim::ROW_VECTOR:
@@ -134,7 +122,7 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 				{
 					for (int j=0; j<d.vec_size(); j++) {
 						dX.set_ref(k,(*grad[x[i]])[j]);
-						leaves.push_back(&dX[k]);
+						groots.push_back(&dX[k]);
 						k++;
 					}
 				}
@@ -144,7 +132,7 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 			    	for (int j=0; j<d.nb_rows(); j++)
 			    		for (int j2=0; j2<d.nb_cols(); j2++) {
 			    			dX.set_ref(k,(*grad[x[i]])[DoubleIndex::one_elt(d,j,j2)]);
-			    			leaves.push_back(&dX[k]);
+			    			groots.push_back(&dX[k]);
 			    			k++;
 			    		}
 			    }
@@ -160,6 +148,10 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 
     // dX.size()==1 is the univariate case (the node df must be scalar)
 	const ExprNode& df=dX.size()==1? dX[0] : ExprVector::new_(dX,ExprVector::ROW);
+
+	// ====== for cleanup =====================================
+	NodeMap<bool> leaks;
+	// =========================================================
 
 	if (new_symbols!=NULL) {
 		// Note: it is better to proceed in this way: (1) differentiate
@@ -180,20 +172,17 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 		//	for (int i=0; i<n; i++)
 		//	  delete grad[*nodes[i]];
 
+		ExprSubNodes gnodes(groots);
 
-		for (unsigned int i=0; i<leaves.size(); i++) {
-			ExprSubNodes gnodes(*leaves[i]);
-			for (int i=0; i<gnodes.size(); i++) {
-				if (!nodes.found(gnodes[i])       // if it is not in the original expression
-						&&
-						!other_nodes.found(gnodes[i]) // and not yet collected
-				) {
-					other_nodes.insert(gnodes[i],true);
-				}
+		for (int i=0; i<gnodes.size(); i++) {
+			if (!nodes.found(gnodes[i])        // if it is not in the expression
+					&& !leaks.found(gnodes[i]) // and not yet collected
+			) {
+				leaks.insert(gnodes[i],true);
 			}
 		}
 
-		for (IBEX_NODE_MAP(bool)::const_iterator it=other_nodes.begin(); it!=other_nodes.end(); it++) {
+		for (IBEX_NODE_MAP(bool)::const_iterator it=leaks.begin(); it!=leaks.end(); it++) {
 			delete it->first;
 		}
 
@@ -204,19 +193,25 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 	} else {
 		ExprSubNodes df_nodes(df);
 
-		for (unsigned int i=0; i<leaves.size(); i++) {
-			ExprSubNodes gnodes(*leaves[i]);
-			for (int i=0; i<gnodes.size(); i++) {
-				if (!nodes.found(gnodes[i]) // if it neither in the original expression
-						&& !df_nodes.found(gnodes[i])    // nor the result of differentiation
-						&& !other_nodes.found(gnodes[i]) // and not yet collected
-				) {
-					other_nodes.insert(gnodes[i],true);
-				}
+		// Destroy also the leaking nodes of the original expression.
+		// Note: since the original expression will anyway be partly destroyed
+		// (as some nodes belong to df which is going to be simplified) it is safer
+		// to destroy all the leaking nodes.
+		groots.push_back(&y);
+
+		ExprSubNodes gnodes(groots);
+
+		// Destroy the dead branches (nodes created by
+		// the diff process, but unused) + leaking nodes of "y"
+		for (int i=0; i<gnodes.size(); i++) {
+			if (!df_nodes.found(gnodes[i])           // if it not in the result of differentiation
+					&& !leaks.found(gnodes[i]) // and not yet collected
+			) {
+				leaks.insert(gnodes[i],true);
 			}
 		}
 
-		for (IBEX_NODE_MAP(bool)::const_iterator it=other_nodes.begin(); it!=other_nodes.end(); it++) {
+		for (IBEX_NODE_MAP(bool)::const_iterator it=leaks.begin(); it!=leaks.end(); it++) {
 			delete it->first;
 		}
 
@@ -283,13 +278,17 @@ void ExprDiff::visit(const ExprIndex& i) {
 }
 
 void ExprDiff::visit(const ExprSymbol& x) {
-	// note: the gradients are pushed in
-	// the "leaves" array in the main
-	// gradient(...) function
+	// note: if x is a vector/matrix, grad[x]
+	// will not be a root (only the gradients
+	// of its components will), unless it
+	// is not a symbol in "x" (a symbol we
+	// diff). So, to simplify, we add it in the
+	// root array.
+	groots.push_back(grad[x]);
 }
 
 void ExprDiff::visit(const ExprConstant& c) {
-	leaves.push_back(grad[c]);
+	groots.push_back(grad[c]);
 }
 
 void ExprDiff::visit(const ExprVector& e) {
