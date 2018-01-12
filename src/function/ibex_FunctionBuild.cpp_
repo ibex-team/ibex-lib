@@ -433,7 +433,7 @@ Function::Function(const Function& f, copy_mode mode) {
 		char* name = (char*) malloc(strlen(f.name)+strlen(DIFF_PREFIX)+1); // +1 for null character
 		strcpy((char*) name,DIFF_PREFIX);
 		strcat((char*) name,f.name);
-		y= & ExprDiff().diff(f.symbs,x,f.expr());
+		y= & ExprDiff(f.symbs,x).diff(f.expr(),f.symbs);
 		init(x,*y,name);
 		free(name);
 	}

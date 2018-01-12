@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_VarSet.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Sep 1, 2015
 //============================================================================
@@ -114,7 +114,8 @@ public:
 	/**
 	 * \brief Create a set of variables (or parameters) from a bitset
 	 *
-	 * \param total - The number of variables and parameters (sum)
+	 * \param total - The number of variables and parameters (sum of the number
+	 *                of variable and parameter components (not the number of symbols)).
 	 *
 	 * x[i]==true <=> the ith component is a variable (if var is "true") or a parameter (if var is "false")
 	 */
@@ -208,7 +209,7 @@ public:
 	const int nb_param;
 
 	/**
-	 * vars[i]==true <=> the ith component is a variable
+	 * is_var[i]==true <=> the ith component is a variable
 	 * Otherwise, the ith component is a parameter
 	 */
 	const BitSet is_var;
