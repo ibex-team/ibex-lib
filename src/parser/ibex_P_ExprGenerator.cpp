@@ -12,6 +12,7 @@
 #include "ibex_SyntaxError.h"
 #include "ibex_Exception.h"
 #include "ibex_Expr.h"
+#include "ibex_ExprDiff.h"
 
 #include <sstream>
 
@@ -285,6 +286,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::ACOSH:   e.lab=new LabelConst(acosh(arg_cst[0])); break;
 			case P_ExprNode::ASINH:   e.lab=new LabelConst(asinh(arg_cst[0])); break;
 			case P_ExprNode::ATANH:   e.lab=new LabelConst(atanh(arg_cst[0])); break;
+			case P_ExprNode::DIFF:
+				throw SyntaxError("\"diff\" cannot be applied to constants"); break;
 			case P_ExprNode::INF:
 				if (!arg_cst[0].dim.is_scalar()) throw DimException("\"inf\" expects an interval as argument");
 				e.lab=new LabelConst(arg_cst[0].i().lb()); break;
@@ -354,6 +357,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::ACOSH:  node=&acosh(arg_node[0]); break;
 		case P_ExprNode::ASINH:  node=&asinh(arg_node[0]); break;
 		case P_ExprNode::ATANH:  node=&atanh(arg_node[0]); break;
+		case P_ExprNode::DIFF:   node=&diff (arg_node); break;
 		case P_ExprNode::INF:    throw SyntaxError("\"inf\" operator requires constant interval"); break;
 		case P_ExprNode::MID:    throw SyntaxError("\"mid\" operator requires constant interval"); break;
 		case P_ExprNode::SUP:    throw SyntaxError("\"sup\" operator requires constant interval"); break;
@@ -541,6 +545,24 @@ void ExprGenerator::visit(const P_ExprWithIndex& e) {
 	}
 }
 
+const ExprNode& ExprGenerator::diff(const Array<const ExprNode>& args) {
+	assert(args.size()>1);
+
+	// get "y"
+	const ExprNode& y=args[0];
+
+	// get the expressions "x"
+	// (removing the first node, which is "y")
+	Array<const ExprSymbol> x(args.size()-1);
+	for (int i=0; i<args.size()-1; i++) {
+		const ExprSymbol* xi=dynamic_cast<const ExprSymbol*>(&args[i+1]);
+		if (!xi) {
+			throw SyntaxError("\"diff\" can only be applied to symbols");
+		}
+		x.set_ref(i,*xi);
+	}
+	return ExprDiff().diff(y,x);
+}
 
 } // end namespace parser
 } // end namespace ibex

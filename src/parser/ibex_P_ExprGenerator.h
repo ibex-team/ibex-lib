@@ -40,8 +40,11 @@ protected:
 	void generate();
 
 	void visit(const P_ExprNode&);
+
+	// some nodes require more specific code:
 	void visit(const P_ExprWithIndex&);
 	void visit(const P_ExprPower&);
+	const ExprNode& diff(const Array<const ExprNode>& args);
 
 	std::pair<int,int> visit_index_tmp(const Dim& dim, const P_ExprNode& idx, bool matlab_style);
 	DoubleIndex visit_index(const Dim& dim, const P_ExprNode& idx1, bool matlab_style);

@@ -230,4 +230,7 @@ int main(int argc, char** argv) {
 	catch(ibex::SyntaxError& e) {
 		cout << e << endl;
 	}
+	catch(ibex::DimException& e) {
+		cout << e << endl;
+	}
 }

@@ -60,6 +60,8 @@ using namespace ibex::parser;
 "parameters"|"Parameters"|"PARAMETERS"	 { return TK_PARAM; }
 "function"|"Function"|"FUNCTION"         { return TK_FUNCTION; }
 "minimize"|"Minimize"|"MINIMIZE"         { return TK_MINIMIZE; }
+
+"diff"                           { return TK_DIFF; }
 "max"                            { return TK_MAX; }
 "min"                            { return TK_MIN; }
 "atan2"                          { return TK_ATAN2; }
