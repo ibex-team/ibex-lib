@@ -105,7 +105,12 @@ public:
 
 	int _2int() const;
 
-	double _2dbl() const;
+	/*
+	 * Convert the expression to a double and, if necessary,
+	 * either round it downward (round_downward=true)
+	 * or upward (round_downard=false).
+	 */
+	double _2dbl(bool round_downward) const;
 
 	Domain _2domain() const;
 

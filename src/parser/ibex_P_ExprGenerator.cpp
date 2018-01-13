@@ -121,14 +121,16 @@ int to_integer(const Domain& d) {
 	return (int)x;
 }
 
-double to_double(const Domain& d) {
+double to_double(const Domain& d, bool round_downward) {
 	assert(d.dim.is_scalar());
-	// WARNING: this is quite unsafe. But
-	// requiring d.i().is_degenerated() is wrong,
+	// Note: requiring d.i().is_degenerated() is wrong,
 	// the result of a calculus with degenerated intervals
-	// may not be degenerated (and large)... Still, we could
-	// give some warning if, say, the diameter here was > 1e-10.
-	return d.i().mid();
+	// may not be degenerated (and large).
+	// Second, one may use Minibex interval constant like "pi"
+	// in a bound of an interval, ex:
+	// variables
+	//     x in [0,pi].
+	return round_downward? d.i().lb() : d.i().ub();
 }
 
 ExprGenerator::ExprGenerator() : scope(scopes().top()) {
@@ -150,7 +152,7 @@ int ExprGenerator::generate_int(const P_ExprNode& y) {
 	return to_integer(generate_cst(y));
 }
 
-double ExprGenerator::generate_dbl(const P_ExprNode& y) {
+double ExprGenerator::generate_dbl(const P_ExprNode& y, bool round_downward) {
 	visit(y);
 	const Domain& d=y.lab->domain();
 	double value;
@@ -163,7 +165,7 @@ double ExprGenerator::generate_dbl(const P_ExprNode& y) {
 		value=POS_INFINITY;
 		break;
 	default:
-		value=to_double(d);
+		value=to_double(d, round_downward);
 	}
 	y.cleanup();
 	return value;

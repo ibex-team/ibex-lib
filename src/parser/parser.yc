@@ -149,7 +149,7 @@ dimension     :                                 { $$=new Dim(); }
                                                   delete $2; delete $5; }
 	          ;
 
-interval      : '[' expr ',' expr ']'           { $$=new Interval($2->_2dbl(), $4->_2dbl()); 
+interval      : '[' expr ',' expr ']'           { $$=new Interval($2->_2dbl(true), $4->_2dbl(false)); 
                                                   delete $2; delete $4; }
               ;
 
@@ -276,7 +276,7 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
                                                 { $$ = chi($3,$5,$7); }
               | '+' expr                        { $$ = $2; }
               | '(' expr ')'		            { $$ = $2; }
-              | '<' expr ',' expr '>'           { $$ = new P_ExprConstant(ball($2->_2domain(),$4->_2dbl())); }
+              | '<' expr ',' expr '>'           { $$ = new P_ExprConstant(ball($2->_2domain(),$4->_2dbl(false))); }
               | expr '^' expr	                { $$ = pow($1, $3); }
               | expr '[' expr_index ']'         { $$ = expr_with_index($1,$3,false);  }
               | expr '(' expr_index ')'         { $$ = expr_with_index($1,$3,true); }

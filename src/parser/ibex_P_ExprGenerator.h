@@ -32,7 +32,7 @@ public:
 
 	int generate_int(const P_ExprNode& y);
 
-	double generate_dbl(const P_ExprNode& y);
+	double generate_dbl(const P_ExprNode& y, bool round_downward);
 
 	const ExprNode& generate(const P_ExprNode& y);
 
