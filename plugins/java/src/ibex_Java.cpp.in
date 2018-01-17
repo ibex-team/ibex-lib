@@ -137,7 +137,7 @@ public:
 
 		Vector eps_max(nb_var,POS_INFINITY);
 		solver = new Solver(*sys, *ctc, *bis, *stack, prec, eps_max);
-		solver->set_params(VarSet(sys->nb_var, _params, false);
+		solver->set_params(VarSet(sys->nb_var, params, false));
 	}
 
 	IntervalVector read_box(JNIEnv *env, const jdouble* d, int size) {
