@@ -74,18 +74,11 @@ public:
 			const Vector& eps_min, const Vector& eps_max);
 
 	/**
-	 * \brief Build a solver with certification.
+	 * \brief Force some dimensions to be parameters in the automatic proof.
 	 *
-	 * \param sys     - The system to be solved
-	 * \param params  - Force which dimensions correspond to parameters (in automatic proof)
-	 * \param ctc     - The contractor (for contracting each node of the search tree)
-	 * \param bsc     - The bisector   (for branching). Contains the stop criterion.
-	 * \param buffer  - The cell buffer (a CellStack in a depth first search strategy)
-	 * \param eps_min - Criterion to stop bisection
-	 * \param eps_max - Criterion to force bisection
+	 * Note: not necessarily n-m bits have to be set.
 	 */
-	Solver(const System& sys, const BitSet& params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
-			const Vector& eps_min, const Vector& eps_max);
+	void set_params(const VarSet& params);
 
 	/**
 	 * \brief Destructor.
@@ -256,7 +249,7 @@ protected:
 	/**
 	 * \brief Called by constructors.
 	 */
-	void init(const System& sys, const BitSet* params);
+	void init(const System& sys);
 
 	/**
 	 * \brief Call "next" until search is over.
@@ -342,7 +335,7 @@ protected:
 	/**
 	 * \brief The forced parameters (if any, NULL otherwise).
 	 */
-	const BitSet* params;
+	VarSet params;
 
 	/*
 	 * \brief Solutions found in the current search.

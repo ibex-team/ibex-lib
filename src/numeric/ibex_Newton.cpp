@@ -322,13 +322,13 @@ bool inflating_newton(const Fnc& f, const VarSet& vars, const IntervalVector& fu
 	return inflating_newton(f,&vars,full_box,box_existence,box_unicity,k_max,mu_max,delta,chi);
 }
 
-VarSet get_newton_vars(const Fnc& f, const Vector& pt, const BitSet& forced_params) {
+VarSet get_newton_vars(const Fnc& f, const Vector& pt, const VarSet& forced_params) {
 	int n=f.nb_var();
 	int m=f.image_dim();
 
-	if (forced_params.size()==n-m)
+	if (forced_params.nb_param==n-m)
 		// no need to find parameters: they are given
-		return VarSet(n,forced_params,false);
+		return VarSet(forced_params);
 
 	Matrix A=f.jacobian(pt).mid();
 	Matrix LU(m,n);
@@ -339,7 +339,7 @@ VarSet get_newton_vars(const Fnc& f, const Vector& pt, const BitSet& forced_para
 	// the "forced" parameters, we fill their respective
 	// column with zeros
 	for (int i=0; i<n; i++) {
-		if (forced_params[i]) {
+		if (!forced_params.is_var[i]) {
 			A.set_col(i,Vector::zeros(m));
 		}
 	}
@@ -362,7 +362,7 @@ VarSet get_newton_vars(const Fnc& f, const Vector& pt, const BitSet& forced_para
 	}
 
 	for (int j=0; j<n; j++) {
-		assert(!(forced_params[j] && _vars[j]));
+		assert(!(!forced_params.is_var[j] && _vars[j]));
 	}
 
 	delete [] pr;
