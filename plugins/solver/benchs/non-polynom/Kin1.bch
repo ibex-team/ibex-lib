@@ -1,6 +1,4 @@
 //Time of Generation:0.078
-Constants
-pi in 3.14159265358979323846264338328;
 Variables
 
 t1 in [0,2*pi];
