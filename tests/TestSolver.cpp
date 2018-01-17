@@ -163,8 +163,7 @@ void TestSolver::circle4() {
 	CellStack stack;
 	CtcHC4 hc4(sys);
 
-	BitSet params(BitSet::empty(3));
-	params.add(2);
+	VarSet params(sys.f_ctrs,sys.args[2],false);
 	Vector prec(3,1e-3);
 	Solver solver(sys,hc4,rr,stack,prec,prec);
 	solver.set_params(params);
