@@ -261,7 +261,7 @@ void Cont::diff(ContCell* new_cell) {
 		l.push_back(new_cell);
 }
 
-bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params) {
+bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet& vars, const VarSet& forced_params) {
 	// We check the rows of the jacobian matrix of the implicit function.
 	// The rows that correspond to variables that "should be parameters"
 	// must have no component with 0.
@@ -280,7 +280,7 @@ bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet
 	int v=0;  // index of the ith variable
 	for (int i=0; i<n; i++) {
 		if (vars.is_var[i]) {
-			if (forced_params[i]) {
+			if (!forced_params.is_var[i]) {
 				for (int j=0; j<n-m; j++) {
 					if (J_implicit[v][j].contains(0)) return false;
 				}
@@ -377,7 +377,7 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
     return flag;
 }
 
-bool Cont::is_valid_cell_2(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params) {
+bool Cont::is_valid_cell_2(const IntervalVector& box_existence, const VarSet& vars, const VarSet& forced_params) {
 
 	bool valid_cell=true;
 
@@ -426,7 +426,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 	IntervalVector box(n);
 	IntervalVector box_unicity(n);
 	IntervalVector box_existence(n);
-	VarSet vars=get_newton_vars(f, x.mid(), BitSet::empty(n));
+	VarSet vars=get_newton_vars(f, x.mid(), VarSet(n,BitSet::empty(n),false));
 
 	x_box=vars.var_box(x);
 	p_box=vars.param_box(x);
