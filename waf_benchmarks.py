@@ -8,6 +8,9 @@ BENCHS_DEFAULT_ARGS = {"time_limit": "5", "prec_ndigits_max": "6",
 BENCHS_ARGS_NAME = BENCHS_DEFAULT_ARGS.keys()
 BENCHS_ARGS_PATTERN = " ; ".join("%s = (?P<%s>.+?)" % (k, k) for k in BENCHS_ARGS_NAME)
 BENCHS_ARGS_FORMAT = " ; ".join("%s = {%s}" % (k, k) for k in BENCHS_ARGS_NAME)
+BENCHS_INSTABLE_FACTOR = 2
+BENCHS_CMP_REGRESSION_FACTOR = 1.05
+BENCHS_CMP_IMPROVMENT_FACTOR = 1/BENCHS_CMP_REGRESSION_FACTOR
 
 class BenchRef (object):
 	def __init__ (self, string, hash_salt):
@@ -379,8 +382,8 @@ def benchmarks_gather_data (self):
 			Logs.info ("No data for group '%s' in file '%s'" % (self.name, cmp_key))
 
 	for k0, k1 in ((k0,k1) for k0 in cmp_key_set for k1 in cmp_key_set if k0<k1):
-		if k1 == BenchCurrentRef():
-			k0, k1 = k1, k0 # swap in order to have BenchCurrentRef as k0 if exists
+		if k0 == BenchCurrentRef():
+			k0, k1 = k1, k0 # swap in order to have BenchCurrentRef as k1 if exists
 		args0 = self.bld.bench_results[k0][self.name]["args"]
 		args1 = self.bld.bench_results[k1][self.name]["args"]
 		if all (args0[k] == args1[k] for k in BENCHS_ARGS_NAME):
@@ -463,23 +466,31 @@ def benchmarks_format_output (bch):
 					m = min (eps_data)
 					M = max (eps_data)
 					av = sum (eps_data)/len(eps_data)
-					# TODO color
-					bch.msg ("  eps = %.1e" % eps, "%.2e %.2e %.2e" % (m, av, M), color = "CYAN")
+					if M/m > BENCHS_INSTABLE_FACTOR:
+						c = "YELLOW"
+					else:
+						c = "NORMAL"
+					bch.msg ("  eps = %.1e" % eps, "%.2e %.2e %.2e" % (m, av, M), color=c)
 
 	for k, D in bch.bench_cmp.items():
 		bch.msg ("", "", color="NORMAL")
 		bch.msg ("##### Comparison #####", "##########", color = "NORMAL")
-		bch.msg ("data0", str(k[0]), color = "NORMAL")
-		bch.msg ("data1", str(k[1]), color = "NORMAL")
+		bch.msg ("reference", str(k[0]), color = "NORMAL")
+		bch.msg ("compare with", str(k[1]), color = "NORMAL")
 		for groupname, groupdict in sorted(D.items(), key = lambda x:x[0]):
 			bch.msg ("===== %s =====" % groupname, "==========", color = "NORMAL")
 			for f, data in sorted(groupdict.items(), key = lambda x:x[0]):
 				bch.msg (f, "rm1M0 rM1m0", color = "CYAN")
 				for eps_data in data:
-					bch.start_msg ("  eps = %.1e" % eps_data["eps"])
-					# TODO check for regression and improvment
-					# TODO color
-					bch.end_msg (" %.2f  %.2f" % (eps_data["rm1M0"], eps_data["rM1m0"]), color = "CYAN")
+					msg_s = "  eps = %.1e" % eps_data["eps"]
+					msg_e = " %.2f  %.2f" % (eps_data["rm1M0"], eps_data["rM1m0"])
+					if eps_data["rM1m0"] <= BENCHS_CMP_IMPROVMENT_FACTOR:
+						c = "GREEN"
+					elif eps_data["rm1M0"] >= BENCHS_CMP_REGRESSION_FACTOR:
+						c = "RED"
+					else:
+						c = "NORMAL"
+					bch.msg (msg_s, msg_e, color = c)
 
 	if bch.bench_errors:
 		sep = os.linesep + "  - "
@@ -556,6 +567,7 @@ def benchmarks (bch):
 	# Read list of categories from command line arguments
 	if bch.options.BENCHS_CATEGORIES:
 		bch.categories = bch.options.BENCHS_CATEGORIES
+	bch.categories = [ "dev", "dev2" ]
 
 	# Do not overwrite file with --benchs-save option
 	if bch.options.BENCHS_SAVE:
