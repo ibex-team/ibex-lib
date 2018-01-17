@@ -129,7 +129,7 @@ inline DoubleIndex::DoubleIndex(const Dim& d, int i1, int i2, int j1, int j2) :
 	if (i2>=d.nb_rows() || j2>=d.nb_cols())
 		throw DimException("DoubleIndex: index out of bounds");
 	if (i1<0 || i1>i2 || j1<0 || j1>j2)
-		ibex_error("DoubleIndex: malformed indices");
+		throw DimException("DoubleIndex: malformed indices");
 }
 
 inline DoubleIndex::DoubleIndex(const DoubleIndex& idx) :

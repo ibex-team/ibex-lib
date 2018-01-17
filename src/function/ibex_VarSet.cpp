@@ -116,7 +116,7 @@ VarSet& VarSet::operator=(const VarSet& v) {
 
 void VarSet::init_bitset(const Function& f, const Array<const ExprNode>& x, bool var) {
 	assert(x.size()>0);
-	assert(f.nb_var()>x.size());
+	assert(f.nb_var()>=x.size());
 	BitSet& is_var = ((BitSet&) this->is_var);
 
 	if (var) {
