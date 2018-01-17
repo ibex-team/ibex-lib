@@ -5,11 +5,14 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 18, 2012
-// Last Update : Nov 21, 2017
+// Last Update : Jan 17, 2018
 //============================================================================
 
 #ifndef __IBEX_STRING_H__
 #define __IBEX_STRING_H__
+
+#include "ibex_SymbolMap.h"
+#include "ibex_Expr.h"
 
 namespace ibex {
 
@@ -40,6 +43,33 @@ char* next_generated_var_name();
  *
  */
 char* next_generated_func_name();
+
+/**
+ * \brief Convert a string to int or throw a SyntaxError exception.
+ */
+int parse_integer(const std::string& str);
+
+/**
+ * \brief Parse an indexed symbol.
+ *
+ * Example: "x[1]" (string) ---> x[1] (node).
+ *
+ * \warning Not all possible Minibex expressions for indexed symbols
+ *          are allowed!  Examples:
+ *          x(1:2)  ok
+ *          x(:)    ok
+ *          x(1+1)  *refused*  --> use x(2)
+ *          x(1)(2) *refused*  --> use x(1,2)
+ *
+ * \param symbols - The symbols in a map structure
+ * \param str     - The string to parse.
+ *
+ * \note If the resulting node is an indexed symbol, it has
+ *       to be freed (call "cleanup(...,false)").
+ *
+ * Throw SyntaxError if "str" is invalid.
+ */
+const ExprNode& parse_indexed_symbol(const SymbolMap<const ExprSymbol*>& symbols, const std::string& str);
 
 } // end namespace ibex
 
