@@ -567,7 +567,6 @@ def benchmarks (bch):
 	# Read list of categories from command line arguments
 	if bch.options.BENCHS_CATEGORIES:
 		bch.categories = bch.options.BENCHS_CATEGORIES
-	bch.categories = [ "dev", "dev2" ]
 
 	# Do not overwrite file with --benchs-save option
 	if bch.options.BENCHS_SAVE:
