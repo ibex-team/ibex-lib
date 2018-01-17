@@ -194,7 +194,7 @@ main (int argc, char *argv[])
 						break;
 				}
 			}
-			if (!has_timeout)
+			if (!has_timeout && prec_ndigits_max != prec_ndigits_min)
 				do_benchs_iter (sys, prec_max, time_limit, iter);
 		}
 		std::cout << "# Total time: " << tot_time << std::endl;

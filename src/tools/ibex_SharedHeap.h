@@ -716,7 +716,7 @@ HeapElt<T>::HeapElt(T* data, double crit_1, double crit_2) : data(data), /*nb_he
 
 template<class T>
 HeapElt<T>::HeapElt(const HeapElt<T>& elt, int nb_crit, bool deep) : data(NULL), crit(new double[nb_crit]), holder(new HeapNode<T>*[nb_crit]) {
-	for(unsigned i=0; i<nb_crit; i++) {
+	for(int i=0; i<nb_crit; i++) {
         crit[i] = elt.crit[i];
         holder[i] = NULL;
     }

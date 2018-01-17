@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
 	args::Flag sols(parser, "sols", "Display the \"solutions\" (output boxes) on the standard output.", {'s',"sols"});
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
-
+	args::ValueFlag<string> forced_params(parser, "vars","Force some variables to be parameters in the parametric proofs.",{"forced-params"});
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
 	try
@@ -176,6 +176,33 @@ int main(int argc, char** argv) {
 				cout << "  boundary test:\t\t" << boundary_test_arg.Get() << endl;
 		}
 
+		if (forced_params) {
+			SymbolMap<const ExprSymbol*> symbols;
+			for (int i=0; i<sys.args.size(); i++)
+				symbols.insert_new(sys.args[i].name, &sys.args[i]);
+
+			string vars=args::get(forced_params);
+
+			vector<const ExprNode*> params;
+			int j;
+			do {
+				j=vars.find("+");
+				if (j!=-1) {
+					params.push_back(&parse_indexed_symbol(symbols,vars.substr(0,j)));
+					vars=vars.substr(j+1,vars.size()-j-1);
+ 				} else {
+ 					params.push_back(&parse_indexed_symbol(symbols,vars));
+ 				}
+			} while (j!=-1);
+
+			if (!params.empty()) {
+				s.set_params(VarSet(sys.f_ctrs,params,false)); //Array<const ExprNode>(params)));
+				for (vector<const ExprNode*>::iterator it=params.begin(); it!=params.end(); it++) {
+					cleanup(**it,false);
+				}
+			}
+		}
+
 		// This option limits the search time
 		if (timeout) {
 			if (!quiet)
@@ -228,6 +255,9 @@ int main(int argc, char** argv) {
 		cerr << "Error: cannot read file '" << filename.Get() << "'" << endl;
 	}
 	catch(ibex::SyntaxError& e) {
+		cout << e << endl;
+	}
+	catch(ibex::DimException& e) {
 		cout << e << endl;
 	}
 }

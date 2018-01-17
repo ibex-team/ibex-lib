@@ -1,6 +1,3 @@
-Constants
-pi = 3.1415926535;
-
 Variables
 x[50] in [1e-8,2*pi - 1e-8];
 

@@ -166,8 +166,8 @@ void TestSolver::circle4() {
 	BitSet params(BitSet::empty(3));
 	params.add(2);
 	Vector prec(3,1e-3);
-	Solver solver(sys,params,hc4,rr,stack,prec,prec);
-
+	Solver solver(sys,hc4,rr,stack,prec,prec);
+	solver.set_params(params);
 	IntervalVector box(3);
 	box[0]=Interval(-10,10);
 	box[1]=Interval(-10,10);

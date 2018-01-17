@@ -28,31 +28,13 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		const Vector& eps_x_min, const Vector& eps_x_max) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
 		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL), params(NULL), manif(NULL) {
-
-	init(sys, NULL);
-
-}
-
-Solver::Solver(const System& sys, const BitSet& _params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
-		const Vector& eps_x_min, const Vector& eps_x_max) :
-		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
-		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL), params(NULL), manif(NULL) {
-
-	init(sys,&_params);
-
-}
-
-void Solver::init(const System& sys, const BitSet* _params) {
+		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL),
+		  params(sys.nb_var,BitSet::empty(sys.nb_var),false) /* no forced parameter by default */,
+		  manif(NULL), time(0), nb_cells(0) {
 
 	assert(sys.box.size()==ctc.nb_var);
 
 	int nb_eq=0;
-
-	if (_params) {
-		this->params=new BitSet(*_params);
-	}
 
 	// count the dimension of equalities
 	for (int i=0; i<sys.nb_ctr; i++) {
@@ -80,16 +62,19 @@ void Solver::init(const System& sys, const BitSet* _params) {
 	manif = new Manifold(n,m,nb_ineq);
 }
 
-Solver::~Solver() {
-	if (params)
-		delete params;
+void Solver::set_params(const VarSet& _params) {
+	params=_params;
+}
 
+Solver::~Solver() {
 	if (ineqs) {
 		delete ineqs;
 		if (eqs) {
 			delete eqs;
 		}
 	}
+
+	if (manif) delete manif;
 }
 
 void Solver::start(const IntervalVector& init_box) {
@@ -291,10 +276,10 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 		} else if (m<n) {
 			// ====== under-constrained =========
 			try {
-				VarSet varset=get_newton_vars(eqs->f_ctrs,box.mid(),params? *params: BitSet::empty(n));
+				VarSet varset=get_newton_vars(eqs->f_ctrs,box.mid(),params);
 
 				if (inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity)) {
-					if (!params || ((int) params->size())<n-m)
+					if (params.nb_param<n-m)
 						sol.varset = new VarSet(varset);
 				} else
 					(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
