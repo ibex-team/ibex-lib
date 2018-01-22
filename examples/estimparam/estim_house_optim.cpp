@@ -251,10 +251,10 @@ int main(int argc, char** argv) {
 	    proba[0]=0.33;
 	    proba[1]=0.33;
 	    proba[2]=0.34;
-	    CellStack buff;
-	    DepthFirstSearch str (buff);
-	    // CellHeapQInter buff;
-	    //	    BeamSearch str(buff);
+	    //	    CellStack buff;
+	    // DepthFirstSearch str (buff);
+	    CellHeapQInter buff;
+	    BeamSearch str(buff);
 	    //	    BestFirstSearch str(buff);
 	    //RoundRobin bs (prec,0.5);
 	    RoundRobinNvar bs (2,prec,0.5);

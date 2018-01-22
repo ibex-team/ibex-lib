@@ -267,10 +267,10 @@ namespace ibex {
     int psize = ctcq.points->size();
     qposs= psize;
 
-    if (trace && ( nb_cells % 100000 ==0))
+    if (trace && ( nb_cells % 10000 ==0))
       {// cout << "optimbuffer " << optimbuffer << endl;
-      if (optimbuffer==2 && !(str.buffer.empty()))
-	cout << " qmax " << str.buffer.top()->get<QInterPoints>().qmax << endl;
+      if (optimbuffer ==2 && !(str.empty_buffer()))
+	cout << " qmax " << str.top_cell()->get<QInterPoints>().qmax << endl;
       }
     //    cout << " validate : qposs " <<  qposs << "box " <<  c.box << endl;
        //in optimization ctcq.qmax can be used as qposs for the stopping criterion
@@ -302,8 +302,8 @@ namespace ibex {
 	  cout << " time " << time << endl;	    ;
 	  cout << " nb boxes " << nb_cells << endl;	    ;
 	  cout << " depth " << c.get<QInterPoints>().depth << endl;
-	  if (optimbuffer==2 && !(str.buffer.empty()))
-	    cout << " qmax " << str.buffer.top()->get<QInterPoints>().qmax << endl;
+	  if (optimbuffer ==2  && !(str.empty_buffer()))
+	    cout << " qmax " << str.top_cell()->get<QInterPoints>().qmax << endl;
 	  //	  cout << " valid point " << newvalidpoint1 << endl;
 	  cout << " best sol point " << bestsolpoint << endl;
 	  cout <<" qmax epsboxes " << str.qmax_epsboxes << endl;
@@ -402,8 +402,8 @@ namespace ibex {
       }
 
     cout << " max possible inliers in open nodes ";
-    if (optimbuffer==2 && !(str.buffer.empty()))  // qmax managed by bfs and beamsearch
-      cout << str.buffer.top()->get<QInterPoints>().qmax << endl;
+    if (optimbuffer==2 && !(str.empty_buffer()))  // qmax managed by bfs and beamsearch
+      cout << str.top_cell()->get<QInterPoints>().qmax << endl;
     else 
     cout <<  possin << endl;
     

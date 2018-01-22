@@ -375,16 +375,18 @@ int main(int argc, char** argv) {
 	    proba[0]=0.33;
 	    proba[1]=0.33;
 	    proba[2]=0.34;
-	     CellStack buff;
-	     //CellHeapQInter buff;
-	    //   BeamSearch str(buff);
+	    //CellStack buff;
+	     CellHeapQInter buff;
+	     BeamSearch str(buff);
 	     //	    BestFirstSearch str (buff);
-	     DepthFirstSearch str (buff);
+	     //	     DepthFirstSearch str (buff);
 	    Bsc * bs;
 	    if (bisect=="rr")
 	      bs = new RoundRobin(prec, 0.5);
 	    else if (bisect =="rr2")
 	      bs= new RoundRobinNvar(2,prec,0.5);
+	    else if (bisect=="lf")
+	      bs = new LargestFirst(prec,0.5);
 	    
 	    // RoundRobinQInter bs (2,prec,0.5);
 	    //	ProbaBisect bs (prec, proba, 0.45);
@@ -398,8 +400,8 @@ int main(int argc, char** argv) {
 	    if (flist==1)
 	      ctcq = new CtcQInterAffPlane (n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ,K);
 	    else
-	      ctcq= new  CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ,K);
-	    
+	      //  ctcq= new  CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ,K);
+	      ctcq= new  CtcQInter (n,m_ctc1,Qoct,QINTERPROJ,K);
 	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
 	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERCORE,K);
 	    //	    CtcQInterPlane  ctcq(n,m_ctc1,linfun,epseq,Q, QINTERCORE,K );
@@ -448,19 +450,22 @@ int main(int argc, char** argv) {
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
 
-	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,1);
+	    //SolverOptQInter s(*ctcs,*bs,str,*ctcq,1);
 	    
-	    //	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,2);
+	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,2);
 	    s.str.with_oracle=0;
-	    s.str.with_storage=true;
-	    //s.str.with_storage=false;
+	    //
+	    if (flist==1)
+	      s.str.with_storage=true;
+	    else
+	      s.str.with_storage=false;
 	    //SolverQInter s(*ctcs,*bs,buff,*ctcq);
 	    //	    OptimQInter s(*ctcs,*bs,buff,*ctcq);
 		    //	    cout << "ctcq.qmax" << ctcq->qmax << endl;
 	    //OptimizerQInter s(*ctcs,*bs,buff,*ctcq);
 
 	    //Solver s(ctcqf0,bs,buff);
-	    s.time_limit = 1000;
+	    s.time_limit = 3600;
 	    s.epsobj=1;
 	    s.trace=1;
 	    s.nbr=nbrand;

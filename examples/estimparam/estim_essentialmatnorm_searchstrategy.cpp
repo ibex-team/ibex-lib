@@ -613,8 +613,8 @@ Interval matrixtrace (IntervalMatrix& M){
 	s->epsobj=eobj;
 	s->str.depthmax=dmax;
 	s->gaplimit=gaplimit;
-	//	s->tolerance_constraints_number=5;
-	s->tolerance_constraints_number=10000;
+	s->tolerance_constraints_number=5;
+	//	s->tolerance_constraints_number=10000;  // no second call for feasible point 
 	//	s->oracle=fundmat;
 	//	s->oracle=oraclemat;
 	s->str.with_oracle=0;

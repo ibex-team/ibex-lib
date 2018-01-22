@@ -512,8 +512,7 @@ int main(int argc, char** argv) {
 	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
 	      //	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERCORE,K);
 	    else
-	      ctcq= new  
-		CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
+	      ctcq= new  CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
 		//    	    CtcQInterPlane (n,m_ctc1,linfun,epseq,Q,QINTERCORE,K);	    
 		//		CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERFULL, K);
 
@@ -566,6 +565,7 @@ int main(int argc, char** argv) {
 	    //	    Solver s(ctcqf0,*bs,buff);
 	    //	    ctcq->disable_side_effects();
 	    //	    ctcqf0.disable_side_effects();
+
 	    s.time_limit = 1000;
 	    s.trace=0;
 	    s.nbr=nbrand;
@@ -577,6 +577,9 @@ int main(int argc, char** argv) {
 
 	    cout << "Number of branches : " << s.nb_cells << endl;
 	    cout << "Number of solutions : " << res.size() << endl;
+
+
+	    
 	    nb_cells +=s.nb_cells;
 	    cputime += s.time;
 

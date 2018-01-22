@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 	int nbrand= atoi(argv[7]);
 	string bisect = argv[8];
 	srand(1);
-		//int nsup=0;
+	
 	
 	// les points supplémentaires pour le problème C2
 	for (int i = 0; i< nsup; i++)
