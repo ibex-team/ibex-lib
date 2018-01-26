@@ -180,9 +180,10 @@ SetNode* SetBisect::contract_no_diff(BoolInterval status, const IntervalVector& 
 }
 
 void SetBisect::visit(const IntervalVector& nodebox, SetVisitor& visitor) const {
-	visitor.visit_node(nodebox);
-	left->visit(left_box(nodebox),visitor);
-	right->visit(right_box(nodebox),visitor);
+	if(visitor.visit_node(nodebox)){
+		left->visit(left_box(nodebox),visitor);
+		right->visit(right_box(nodebox),visitor);
+	}
 }
 
 void SetBisect::print(ostream& os, const IntervalVector& nodebox, int shift) const {
