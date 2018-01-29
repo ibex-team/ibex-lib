@@ -62,6 +62,7 @@ namespace ibex {
 		static double rand(double a, double b){return a+((double)(b-a)*RNG::rand())/UINT32_MAX;}
 		
 	private:
+		static const uint32_t x0,y0,z0;
 		static uint32_t x,y,z;
 	};
 }

@@ -45,6 +45,9 @@
 
 namespace ibex {
 //** Default values for the random number seed  */
+const uint32_t RNG::x0 = 123456789;
+const uint32_t RNG::y0 = 362436069;
+const uint32_t RNG::z0 = 521288629;
 uint32_t RNG::x = 123456789;
 uint32_t RNG::y = 362436069;
 uint32_t RNG::z = 521288629;
@@ -62,7 +65,7 @@ bool RNG::srand()
 		return true;
 	}
 	else {
-		x  = 123456789; // the default value
+		x  = x0; // the default value
 		return false;
 	}
 }
@@ -75,6 +78,8 @@ bool RNG::srand(unsigned long s)
 	if(s<=UINT32_MAX)
 	{
 		x=s;
+		y=y0;
+		z=z0;
 		return true;
 	}
 	else 
@@ -94,7 +99,7 @@ uint32_t RNG::rand () { //period 2^96-1
 	x = y;
 	y = z;
 	z = t ^ x ^ y;      
-	
+
 	return z;
 }
 
