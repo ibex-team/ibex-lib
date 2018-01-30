@@ -8,6 +8,7 @@
 
 #include "ibex_LSmear.h"
 #include "ibex_ExtendedSystem.h"
+#include "ibex_Random.h"
 
 using std::pair;
 
@@ -18,8 +19,8 @@ LSmear::~LSmear() {
 }
 
 LPSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector& box, Vector& dual) const {
-	int goal_ctr=-1, goal_var=rand()%box.size();
-	bool minimize=rand()%2;
+	int goal_ctr=-1, goal_var=RNG::rand()%box.size();
+	bool minimize=RNG::rand()%2;
 
 	if (dynamic_cast<ExtendedSystem*> (&sys)) {
 		goal_ctr= dynamic_cast<ExtendedSystem*> (&sys)->goal_ctr();

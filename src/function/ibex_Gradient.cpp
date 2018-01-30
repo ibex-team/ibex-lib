@@ -166,6 +166,13 @@ void Gradient::jacobian(const IntervalVector& box, IntervalMatrix& J, const BitS
 
 			g.read_arg_domains(J.row(i));
 
+			// // uncomment this to inspect the previous computation:
+//
+//			const Agenda& a=*(_eval.bwd_agenda[c]);
+//			for (int z=a.first(); z!=a.end(); z=a.next(z)) {
+//				cout << "  " << d[z] << '\t' << g[z] << '\t' << f.node(z) << endl;
+//			}
+
 			if (J.row(i).is_empty()) {
 				J.set_empty();
 				return;

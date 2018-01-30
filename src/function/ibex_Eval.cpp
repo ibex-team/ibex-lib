@@ -128,12 +128,14 @@ IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
 
 	try {
 		f.cf.forward<Eval>(*this,a);
+
+		for (int i=0; i<m; i++) {
+			c = (i==0 ? components.min() : components.next(c));
+			res[i] = d[bwd_agenda[c]->first()].i();
+		}
 	} catch(EmptyBoxException&) {
 		d.top->set_empty();
-	}
-	for (int i=0; i<m; i++) {
-		c = (i==0 ? components.min() : components.next(c));
-		res[i] = d[bwd_agenda[c]->first()].i();
+		res.set_empty();
 	}
 
 	return res;
