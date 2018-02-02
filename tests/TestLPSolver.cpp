@@ -106,10 +106,9 @@ void TestLinearSolver::kleemin30() {
 	CPPUNIT_ASSERT_ASSERTION_PASS(
 	lp.write_file("coucou.lp")
 	);
-	double eps = 0;
 
 	CPPUNIT_ASSERT_ASSERTION_PASS(
-	eps = lp.get_epsilon()
+	double eps = lp.get_epsilon()
 	);
 	switch (res) {
 		case (LPSolver::INFEASIBLE):
