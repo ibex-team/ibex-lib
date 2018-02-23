@@ -492,14 +492,15 @@ namespace ibex {
     
     //The linear system is generated
     // the evaluation of the constraints in the corner x_corner
+
     IntervalVector g_corner(normsys.f.eval_vector(x_corner));
 
     for (int i=0; i<m; i++) {
 
 	  
       if (normsys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
-      
-      normsys.ctrs[i].f.gradient(box,G);                     // gradient calculation
+      normsys.ctrs[i].f.gradient(box,G);                     // gradient calculation      
+
 		  
       for (int ii =0; ii< n ; ii++)
 	if (G[ii].diam() > 1e8) {
@@ -547,6 +548,10 @@ namespace ibex {
 
       //      cout << " stat  1er appel " << stat <<  " res " << res << endl;
       if (res) {
+	/*
+	for (int i =0; i<m; i++)
+	      cout << " eval ct1 " << i << "  " <<  normsys.f[i].eval(tmpbox)  << endl;
+	*/
 	feasiblepoint = tmpvec;
 	vector<int> feasible_points = ctcq.feasible_points(feasiblepoint);
 	int feasiblepoints_size =  feasible_points.size();
@@ -583,8 +588,8 @@ namespace ibex {
 	IntervalVector g_corner(normsys.f.eval_vector(x_corner));
 
 	for (int i=0; i<m; i++) {
-
-	
+	  if (normsys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+	  normsys.ctrs[i].f.gradient(box,G);                     // gradient calculation
 	  //The contraints i is generated:
 	  // c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
 	  
@@ -596,7 +601,7 @@ namespace ibex {
 	      row[j]=G[j].lb();
 	  }
 	  row[n]=0;
-	  mylp1->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
+	  mylp1->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp1->getEpsilon());  //  1e-10 ???  BNE
 	  
 	}
     
@@ -622,11 +627,12 @@ namespace ibex {
       
 	}
       
-    /*
-	if (nb_cells < 10) {mylp->writeFile("dump.lp");
-	system ("cat dump.lp");
-	}
-    */
+    
+	//	if (nb_cells < 10) 
+	//	mylp1->writeFile("dump1.lp");
+	//	system ("cat dump1.lp >> dump.lp ");
+	
+    
 	LinearSolver::Status_Sol stat = mylp1->solve();
 	//	std::cout << " stat solver lp1 " << stat << std::endl;
 
@@ -648,6 +654,12 @@ namespace ibex {
 	  if (res1 && qvalid1 >  feasiblepoints_size) {
 	    //cout << " meilleur 2eme appel " << stat <<  " res " << res << " qvalid " << qvalid1 <<  endl;
 	    feasiblepoint = tmpvec;
+	    /*
+	    for (int i =0; i<m; i++)
+	      cout << " eval ct " << i << "  " <<  normsys.f[i].eval(tmpbox)  << endl;
+	    */
+
+
 
 	  }
 	  if (qvalid1 > bestsolpointnumber)

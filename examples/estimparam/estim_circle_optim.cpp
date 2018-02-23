@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
 	
 
 	//	CtcQInter ctcq(3,m_ctc,Q);
-	//	CtcQInter ctcq(3,m_ctc,Q,QINTERPROJ);
+	//      CtcQInter ctcq(3,m_ctc,Q,QINTERPROJ);
 	//	CtcQInterAff ctcq(3,m_ctc,Q,m_fun,QINTERPROJ,K);
 	CtcQInterAffCircle2 ctcq(3,m_ctc,measure,epseq,Q,QINTERPROJ,K);
 	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,QINTERPROJ,K);
@@ -206,10 +206,10 @@ int main(int argc, char** argv) {
 	cout << "apres ctcq " << endl;
 
 
-	CellStack buff;
-	DepthFirstSearch str (buff);
-	//CellHeapQInter buff;
-	//	BeamSearch str(buff);
+	//	CellStack buff;
+	//	DepthFirstSearch str (buff);
+	CellHeapQInter buff;
+	BeamSearch str(buff);
 	//	BestFirstSearch str (buff);
 	Bsc * bs;
 	if (bisect=="rr")

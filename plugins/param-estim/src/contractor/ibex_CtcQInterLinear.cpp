@@ -11,6 +11,8 @@
 using namespace std;
 #include "ibex_CtcQInterLinear.h"
 #include "ibex_Affine2.h"
+#include<math.h>
+
 
 // can be used for parameter estimation with a linear criterion   abs (sum_i=1..n ( ai *xi) ) < epseq
 
@@ -472,16 +474,31 @@ void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter)
     
     Matrix msol (3,3);
     Matrix msolt (3,3);
+    Matrix EtE (3,3);
     Vector pt1 (3);
     Vector pt2 (3);
     Vector res1(3);
     Vector res2(3);
     double epsilon=0.05;
+    double vnorm;
+    for (int i=0;i<9;i++)
+      vnorm+= vec[i]*vec[i];
+    vnorm=std::sqrt(vnorm);
+    epsilon=epsilon/vnorm;
     for (int i=0;i<3;i++)
       for (int j=0;j<3;j++)
 	{ msol[i][j]=vec[3*i+j];
 	  msolt[j][i]=vec[3*i+j];
 	}
+    /*
+    EtE=msolt*msol;
+    double B= EtE[0][0]+EtE[1][1]+EtE[2][2];
+    B= (B/2);
+    B=B*B;
+    double A= EtE[0][0]*EtE[1][1]-EtE[0][1]*EtE[1][0] +EtE[0][0]*EtE[2][2]-EtE[0][2]*EtE[2][0] + 
+      EtE[1][1]*EtE[2][2]-EtE[2][1]*EtE[1][2];
+    cout << " A " << A <<  " B " << B << endl;
+    */
     
     while (iter != points->end()){
     
@@ -498,6 +515,7 @@ void CtcQInterAffLinear::point_contract(IntervalVector & box, int iter)
       pt2[2]=1;
 	
       res2 = msol * pt2;
+
 
       if ((fabs(res1[0]) < epsilon && fabs(res1[1]) < epsilon && fabs(res1[2]) < epsilon)
 	  ||

@@ -55,7 +55,8 @@ vector<int> *readFile(string filename) {
 	
 	while (line[0] != '}') {
 		input.getline(line, max_line_length);
-		c->push_back(atof(line));
+	.
+	c->push_back(atof(line));
 	}
 		
 	input.close();

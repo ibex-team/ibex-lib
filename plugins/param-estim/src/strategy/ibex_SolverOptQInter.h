@@ -98,6 +98,7 @@ Q-intersection contractors.
  *
  * This class implements a branch and bound algorithm for the parameter estimation using the
 Qintersection contractors and other constraints.
+The constraints are in the system sys.
 A linear solver is used for finding a feasible point.
  */
 

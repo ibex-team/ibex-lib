@@ -125,6 +125,7 @@ Interval matrixtrace (IntervalMatrix& M){
 
 	int n=9;
         Variable v(3,3);
+	
         SystemFactory fac;
 	SystemFactory fac0;
         SystemFactory fac1;
@@ -132,6 +133,18 @@ Interval matrixtrace (IntervalMatrix& M){
 	fac0.add_var(v);
 	fac1.add_var(v);
 	Interval eps2 (-epscont,epscont);
+
+	Function EtE (v, transpose(v)*v);
+	Function fess(v, sqr((EtE(v)[0][0] +EtE(v)[1][1]+EtE(v)[2][2])/2) -
+
+		      (EtE(v)[0][0]*EtE(v)[1][1]-EtE(v)[0][1]*EtE(v)[1][0] +EtE(v)[0][0]*EtE(v)[2][2]-EtE(v)[0][2]*EtE(v)[2][0] +
+		       EtE(v)[1][1]*EtE(v)[2][2]-EtE(v)[2][1]*EtE(v)[1][2]));
+
+	Function fess1(v, sqr((EtE(v)[0][0] +EtE(v)[1][1]+EtE(v)[2][2])/2) -
+
+		      (EtE(v)[0][0]*EtE(v)[1][1]-EtE(v)[0][1]*EtE(v)[1][0] +EtE(v)[0][0]*EtE(v)[2][2]-EtE(v)[0][2]*EtE(v)[2][0] +
+		       EtE(v)[1][1]*EtE(v)[2][2]-EtE(v)[2][1]*EtE(v)[1][2]) + eps2);
+
 
 	Function fessential1 (v, v[0][0]*(sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2]) + sqr(v[1][0])  + sqr(v[2][0]) -( sqr(v[1][1])+sqr(v[1][2])+ sqr(v[2][1])+sqr(v[2][2]))) + 2* (v[1][0]*v[0][1]*v[1][1] + v[1][0]*v[0][2]*v[1][2]  + v[0][1]*v[2][0]*v[2][1] + v[0][2]*v[2][0]*v[2][2]) + eps2);
 	Function fessential2(v, v[0][1]*(sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2]) + sqr(v[1][1])+sqr(v[2][1]) - (sqr(v[1][0]) + sqr(v[1][2])+ sqr(v[2][0])+ sqr(v[2][2]))) + 2*(v[0][0]*v[1][0]*v[1][1] + v[1][1]*v[0][2]*v[1][2] + v[0][0]*v[2][0]*v[2][1] + v[0][2]*v[2][1]*v[2][2])+eps2);
@@ -198,7 +211,9 @@ Interval matrixtrace (IntervalMatrix& M){
 
         Function* m_norm = new Function (v, sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2])+ sqr(v[1][0]) + sqr(v[1][1]) + sqr(v[1][2]) + sqr(v[2][0]) + sqr(v[2][1])+sqr(v[2][2]) -1 + eps2);
 	Function* m_norm1 = new Function (v, sqr(v[0][0])+sqr(v[0][1])+sqr(v[0][2])+ sqr(v[1][0]) + sqr(v[1][1]) + sqr(v[1][2]) + sqr(v[2][0]) + sqr(v[2][1])+sqr(v[2][2]) -1 );
-
+	
+	NumConstraint* c_norm = new NumConstraint(*m_norm, GEQ);
+	NumConstraint* c_norm1 = new NumConstraint(*m_norm1, GEQ);
 	ctcnorm = new CtcFwdBwd(*m_norm);
 	
 	//	m_det = new Function (v, v[0]*(v[4]-v[7]*v[5]) - v[3]*(v[1] - v[2]*v[7] ) + v[6]*(v[1]*v[5]-v[2]*v[4]));
@@ -213,39 +228,48 @@ Interval matrixtrace (IntervalMatrix& M){
 	fac.add_ctr(fessential1);
         fac.add_ctr(fessential2);
 	fac.add_ctr(fessential3);
+	
+	//	fac.add_ctr(fess);
 	//	fac.add_ctr(fessential4);
 	//        fac.add_ctr(fessential5);
 	//        fac.add_ctr(fessential6);
 	//        fac.add_ctr(fessential7);
 	//        fac.add_ctr(fessential8);
 	//        fac.add_ctr(fessential9);
-	fac.add_ctr(*m_norm);
+	fac.add_ctr(*m_norm);	
+	//fac.add_ctr(*c_norm);
 	fac.add_ctr(*m_det);
 	
 	fac0.add_ctr(fessential1);
         fac0.add_ctr(fessential2);
 	fac0.add_ctr(fessential3);
+	
 	fac0.add_ctr(fessential4);
 	fac0.add_ctr(fessential5);
 	fac0.add_ctr(fessential6);
 	fac0.add_ctr(fessential7);
 	fac0.add_ctr(fessential8);
 	fac0.add_ctr(fessential9);
-	fac0.add_ctr(*m_norm);
-	fac0.add_ctr(*m_det);
-	
 
+	fac0.add_ctr(*m_norm);
+	//fac0.add_ctr(*c_norm);
+	fac0.add_ctr(*m_det);
+	//	fac0.add_ctr(fess);
 	fac1.add_ctr(fessential11);
-        fac1.add_ctr(fessential12);
-        fac1.add_ctr(fessential13);
+	fac1.add_ctr(fessential12);
+	fac1.add_ctr(fessential13);
 	fac1.add_ctr(fessential14);
 	fac1.add_ctr(fessential15);
 	fac1.add_ctr(fessential16);
 	fac1.add_ctr(fessential17);
 	fac1.add_ctr(fessential18);
 	fac1.add_ctr(fessential19);
+	
+	//	fac1.add_ctr(fess1);
 	fac1.add_ctr(*m_det1);
 	fac1.add_ctr(*m_norm1);
+
+	//fac1.add_ctr(*c_norm1);
 
 	System sys (fac);
 	System sys0 (fac0);
@@ -601,6 +625,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	if (optim ==0)
 	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,1);
 	else if (optim==1)
+	  //	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);
 	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);
 	else 
 	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);  //BFS
@@ -613,8 +638,8 @@ Interval matrixtrace (IntervalMatrix& M){
 	s->epsobj=eobj;
 	s->str.depthmax=dmax;
 	s->gaplimit=gaplimit;
-	s->tolerance_constraints_number=5;
-	//	s->tolerance_constraints_number=10000;  // no second call for feasible point 
+	//s->tolerance_constraints_number=5;
+	s->tolerance_constraints_number=10000;  // no second call for feasible point 
 	//	s->oracle=fundmat;
 	//	s->oracle=oraclemat;
 	s->str.with_oracle=0;
@@ -690,6 +715,16 @@ Interval matrixtrace (IntervalMatrix& M){
 	
 	cout << endl;
 	cout << "essential " << m_essential1.eval_matrix(bestsolbox) << endl;
+	cout << "essential11" << fessential11.eval_matrix(bestsolbox) << endl;
+	cout << "essential12" << fessential12.eval_matrix(bestsolbox) << endl;
+	cout << "essential13" << fessential13.eval_matrix(bestsolbox) << endl;
+	cout << "essential14" << fessential11.eval_matrix(bestsolbox) << endl;
+	cout << "essential15" << fessential12.eval_matrix(bestsolbox) << endl;
+	cout << "essential16" << fessential13.eval_matrix(bestsolbox) << endl;
+	cout << "essential17" << fessential11.eval_matrix(bestsolbox) << endl;
+	cout << "essential18" << fessential12.eval_matrix(bestsolbox) << endl;
+	cout << "essential19" << fessential13.eval_matrix(bestsolbox) << endl;
+	cout << "fess" << fess.eval_matrix(bestsolbox) << endl;
 	cout << "determinant " << m_det->eval(bestsolbox);
        
 	for (int i=0; i<p; i++)
