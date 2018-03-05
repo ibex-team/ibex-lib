@@ -231,6 +231,12 @@ void real_inverse(const Matrix& A, Matrix& invA) {
 	delete[] p;
 }
 
+Matrix real_inverse(const Matrix& A) {
+	Matrix Minv(A.nb_rows(), A.nb_cols());
+	real_inverse(A,Minv);
+	return Minv;
+}
+
 void neumaier_inverse(const IntervalMatrix& A, IntervalMatrix& invA) {
     int n = A.nb_rows();
     if (n != A.nb_cols()) throw NotSquareMatrixException();

@@ -114,6 +114,14 @@ void real_LU_solve(const Matrix &LU, const int* p, const Vector& b, Vector& x);
 void real_inverse(const Matrix& A, Matrix& invA);
 
 /**
+ * \brief Returns an (approximate) inverse of a real matrix.
+ *
+ * \throw SingularMatrixException if either the matrix is singular or too large values appear
+ * during computations.
+ */
+Matrix real_inverse(const Matrix& A);
+
+/**
  * \brief Computes an enclosure of the inverse of an interval matrix.
  * See "Interval Methods for Systems of Equations", A. Neumaier, 1990, p 123, theorem 4.1.11.
  *
