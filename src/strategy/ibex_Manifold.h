@@ -5,6 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 01, 2017
+// Last Update : Mar 15, 2018
 //============================================================================
 
 #ifndef __IBEX_MANIFOLD_H__
@@ -30,10 +31,14 @@ namespace ibex {
 class Manifold {
 public:
 
+	/**
+	 * \brief Create an empty manifold with n variables,
+	 * m equations and nb_ineq inequalities.
+	 */
 	Manifold(int n, int m, int nb_ineq);
 
 	/**
-	 * Delete this.
+	 * \brief Delete this.
 	 */
 	virtual ~Manifold();
 
@@ -71,8 +76,6 @@ public:
 	 */
 	static std::string format();
 
-	//Status status() const;
-
 	/**
 	 * \brief Number of variables
 	 */
@@ -82,6 +85,13 @@ public:
 	 * \brief Number of equalities.
 	 */
 	unsigned int m;
+
+	/**
+	 * \brief Names of the variables.
+	 *
+	 * By default: empty strings.
+	 */
+	std::string *var_names;
 
 	/**
 	 * \brief Number of inequalities.
@@ -94,22 +104,22 @@ public:
 	Solver::Status status;
 
 	/*
-	 * \brief Inner boxes
+	 * \brief Inner boxes.
 	 */
 	std::vector<QualifiedBox> inner;
 
 	/*
-	 * \brief Boundary boxes
+	 * \brief Boundary boxes.
 	 */
 	std::vector<QualifiedBox> boundary;
 
 	/*
-	 * \brief Boundary boxes
+	 * \brief Boundary boxes.
 	 */
 	std::vector<QualifiedBox> unknown;
 
 	/*
-	 * \brief Pending boxes
+	 * \brief Pending boxes.
 	 */
 	std::vector<QualifiedBox> pending;
 
@@ -133,13 +143,20 @@ protected:
 	static const int  SIGNATURE_LENGTH;
 	static const char* SIGNATURE;
 
+	/* read a int value (32 bits unsigned if binary file) */
 	unsigned int read_int(std::ifstream& f);
+	/* read a double value (64 bits if binary file) */
 	double read_double(std::ifstream& f);
-	void read_signature(std::ifstream& f);
+	/* read the variable names */
+	void read_vars(std::ifstream& f);
+	/* check the signature and return the format version of the file. */
+	int read_signature(std::ifstream& f);
+
 	QualifiedBox read_output_box(std::ifstream& f);
 
 	void write_int(std::ofstream& f, uint32_t x) const;
 	void write_double(std::ofstream& f, double x) const;
+	void write_vars(std::ofstream& f) const;
 	void write_signature(std::ofstream& f) const;
 	void write_output_box(std::ofstream& f, const QualifiedBox& sol) const;
 	void write_output_box_txt(std::ofstream& file, const QualifiedBox& sol) const;

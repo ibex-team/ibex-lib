@@ -23,10 +23,10 @@ QualifiedBox::QualifiedBox(const IntervalVector& box, QualifiedBox::sol_status s
 
 }
 
-ostream& operator<<(ostream& os, const QualifiedBox& sol) {
+ostream& operator<<(ostream& os, const QualifiedBox& qbox) {
 	os.precision(12);
-	os << sol.existence() << " ";
-	switch(sol.status) {
+	os << qbox.existence() << " ";
+	switch(qbox.status) {
 
 	case QualifiedBox::INNER:
 		os << "[inner";
@@ -42,16 +42,16 @@ ostream& operator<<(ostream& os, const QualifiedBox& sol) {
 		break;
 	}
 
-	if (sol.varset!=NULL) {
+	if (qbox.varset!=NULL) {
 		os << " ";
-		for (int i=0; i<sol.varset->nb_param; i++) {
+		for (int i=0; i<qbox.varset->nb_param; i++) {
 			if (i>0) os << ',';
-			os << sol.varset->param(i) +1;
+			os << qbox.varset->param(i) +1;
 		}
 		os << "->";
-		for (int i=0; i<sol.varset->nb_var; i++) {
+		for (int i=0; i<qbox.varset->nb_var; i++) {
 			if (i>0) os << ',';
-			os << sol.varset->var(i) +1;
+			os << qbox.varset->var(i) +1;
 		}
 	}
 	os << "]";

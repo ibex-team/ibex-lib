@@ -20,7 +20,7 @@
 #include "ibex_Exception.h"
 #include "ibex_Linear.h"
 #include <vector>
-#include "ibex_SolverOutputBox.h"
+#include "ibex_QualifiedBox.h"
 
 namespace ibex {
 
@@ -246,9 +246,9 @@ public:
 protected:
 
 	/**
-	 * \brief Called by constructors.
+	 * \brief Set variable names in the manifold structure.
 	 */
-	void init(const System& sys);
+	void set_var_names();
 
 	/**
 	 * \brief Call "next" until search is over.

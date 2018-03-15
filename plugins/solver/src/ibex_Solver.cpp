@@ -57,8 +57,32 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 
 	if (m==0 || m==n)
 		boundary_test=ALL_FALSE;
+}
 
-	manif = new Manifold(n,m,nb_ineq);
+void Solver::set_var_names() {
+
+	const System& sys=eqs? *eqs : *ineqs;
+
+	int v=0;
+	for (int s=0; s<sys.args.size(); s++) {
+		const ExprSymbol& x=sys.args[s];
+		switch (x.dim.type()) {
+		case Dim::SCALAR:
+			manif->var_names[v++].assign(x.name);
+			break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:
+			for (int i=0; i<x.dim.vec_size(); i++)
+				manif->var_names[v++].assign(string(x.name)+'('+to_string(i+1)+')');
+			break;
+		default: // MATRIX
+			for (int i=0; i<x.dim.nb_rows(); i++)
+				for (int j=0; j<x.dim.nb_cols(); j++)
+					manif->var_names[v++].assign(string(x.name)+'('+to_string(i+1)+','+to_string(j+1)+')');
+			break;
+		}
+	}
+	assert(v==sys.nb_var);
 }
 
 void Solver::set_params(const VarSet& _params) {
@@ -77,11 +101,14 @@ Solver::~Solver() {
 }
 
 void Solver::start(const IntervalVector& init_box) {
+
 	buffer.flush();
 
 	if (manif) delete manif;
 
 	manif = new Manifold(n,m,nb_ineq);
+
+	set_var_names();
 
 	Cell* root=new Cell(init_box);
 
@@ -105,6 +132,10 @@ void Solver::start(const char* input_paving) {
 	if (manif) delete manif;
 	manif = new Manifold(n,m,nb_ineq);
 	manif->load(input_paving);
+
+	// may erase former variable names if the input paving was actually
+	// not calculated with the same minibex file.
+	set_var_names();
 
 	vector<QualifiedBox>::const_iterator it=manif->unknown.begin();
 
@@ -261,78 +292,78 @@ Solver::Status Solver::solve() {
 
 QualifiedBox Solver::check_sol(const IntervalVector& box) {
 
-	QualifiedBox sol(n);
-
-	(QualifiedBox::sol_status&) sol.status = QualifiedBox::INNER; // by default
+	//QualifiedBox sol(n);
+	QualifiedBox::sol_status status = QualifiedBox::INNER; // by default
+	IntervalVector existence(box);
+	IntervalVector* unicity = NULL;
+	VarSet* varset = NULL;
 
 	if (eqs) {
 
-		sol._unicity=new IntervalVector(n);
-
 		if (m>n) {
 			ibex_warning("Certification not implemented for over-constrained systems ");
-			(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
+			status = QualifiedBox::UNKNOWN;
 		} else if (m<n) {
 			// ====== under-constrained =========
 			try {
-				VarSet varset=get_newton_vars(eqs->f_ctrs,box.mid(),params);
 
-				if (inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity)) {
+				unicity = new IntervalVector(n);
+
+				VarSet _varset=get_newton_vars(eqs->f_ctrs,box.mid(),params);
+
+				if (inflating_newton(eqs->f_ctrs, _varset, box, existence, *unicity)) {
 					if (params.nb_param<n-m)
-						sol.varset = new VarSet(varset);
+						varset = new VarSet(_varset);
 				} else
-					(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
+					status = QualifiedBox::UNKNOWN;
 
 			} catch(SingularMatrixException& e) {
-				(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
+				status = QualifiedBox::UNKNOWN;
 			}
 		} else {
 			// ====== well-constrained =========
-			if (!inflating_newton(eqs->f_ctrs, box.mid(), sol._existence, *sol._unicity)) {
-				(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
+			if (!inflating_newton(eqs->f_ctrs, box.mid(), existence, *unicity)) {
+				status = QualifiedBox::UNKNOWN;
 			}
 		}
-	} else {
-		sol._existence=box;
-		sol._unicity=NULL;
 	}
 
-	if (sol.status==QualifiedBox::UNKNOWN) {
-		sol._existence=box;
-		if (sol._unicity!=NULL) delete sol._unicity;
-		sol._unicity=NULL;
+	if (status==QualifiedBox::UNKNOWN) {
+		existence = box;
+		if (unicity!=NULL) delete unicity;
+		unicity=NULL;
 	} else {
 		// The inflating Newton may cause the existence box to be disjoint from the input box.
 
 		// Note that the following line also tests the case of an existence box outside
 		// the initial box of the search
-		if (box.is_disjoint(sol.existence())) {
+		if (box.is_disjoint(existence)) {
 			throw EmptyBoxException();
 		}
 	}
 
-	if (sol.status==QualifiedBox::INNER && !sol.existence().is_subset(solve_init_box))
+	if (status==QualifiedBox::INNER && !existence.is_subset(solve_init_box))
 		// BOUNDARY by default: will be verified later
-		(QualifiedBox::sol_status&) sol.status = QualifiedBox::BOUNDARY;
+		status = QualifiedBox::BOUNDARY;
 
 	if (ineqs) {
 		Interval y,r;
 		for (int i=0; i<ineqs->nb_ctr; i++) {
 			NumConstraint& c=ineqs->ctrs[i];
 			assert(c.f.image_dim()==1);
-			y=c.f.eval(sol.existence());
+			y=c.f.eval(existence);
 			r=c.right_hand_side().i();
 			if (y.is_disjoint(r)) throw EmptyBoxException();
-			if (sol.status==QualifiedBox::INNER && !y.is_subset(r)) {
+			if (status==QualifiedBox::INNER && !y.is_subset(r)) {
 				// BOUNDARY by default: will be verified later
-				(QualifiedBox::sol_status&) sol.status = QualifiedBox::BOUNDARY;
+				status = QualifiedBox::BOUNDARY;
 			}
 		}
 	}
 
-	if (sol.status==QualifiedBox::BOUNDARY) {
-		if (!is_boundary(sol.existence()))
-			(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
+	if (status==QualifiedBox::BOUNDARY) {
+		if (!is_boundary(existence))
+			status = QualifiedBox::UNKNOWN;
 
 	}
 
@@ -342,12 +373,12 @@ QualifiedBox Solver::check_sol(const IntervalVector& box) {
 		// the case of under-constrained systems (m<n).
 
 		for (vector<QualifiedBox>::iterator it=manif->inner.begin(); it!=manif->inner.end(); it++) {
-			if (it->unicity().is_superset(sol._existence))
+			if (it->unicity().is_superset(existence))
 				throw EmptyBoxException();
 		}
 	}
 
-	return sol;
+	return QualifiedBox(existence,status,unicity,varset);
 }
 
 bool Solver::is_boundary(const IntervalVector& box) {
@@ -431,10 +462,7 @@ QualifiedBox& Solver::store_sol(const QualifiedBox& sol) {
 void Solver::flush() {
 	while (!buffer.empty()) {
 		Cell* cell=buffer.top();
-		QualifiedBox sol(n);
-		(QualifiedBox::sol_status&) sol.status = QualifiedBox::PENDING;
-		sol._existence=cell->box;
-		sol._unicity=NULL;
+		QualifiedBox sol(cell->box,QualifiedBox::PENDING);
 		store_sol(sol);
 		delete buffer.pop();
 	}

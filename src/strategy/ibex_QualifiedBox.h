@@ -8,8 +8,8 @@
 // Last update : Mar 15, 2018
 //============================================================================
 
-#ifndef __IBEX_SOLVER_OUTPUT_BOX_H__
-#define __IBEX_SOLVER_OUTPUT_BOX_H__
+#ifndef __IBEX_QUALIFIED_BOX_H__
+#define __IBEX_QUALIFIED_BOX_H__
 
 #include "ibex_IntervalVector.h"
 #include "ibex_VarSet.h"
@@ -19,11 +19,11 @@ namespace ibex {
 /**
  * \ingroup strategy
  *
- * \brief Output box of the Solver.
+ * \brief Qualified box (calculated by strategies like ibexsolve/ibexopt).
  *
  * Given a system of m equalities f(x)=0 and inequalities g(x)<=0:
  *
- * An output box ([p],[x]) is INNER only if
+ * A qualified box ([p],[x]) is INNER only if
  *
  *     for all x in [x], for all p in [p]
  *     g(x,p)<=0                                      (1)
@@ -35,12 +35,12 @@ namespace ibex {
  *
  *     there exists x in [x], f(x)=0
  *
- * so that the output box is a box containing a solution, according
+ * so that the qualified box is a box containing a solution, according
  * to the usual meaning.
  *
- * An output box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
+ * A qualified box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
  * f=0 crosses the inequalities in a "regular" way, the exact definition
- * of "regular" depending on the boundary_test flag of the Solver.
+ * of "regular" depending on the boundary_test flag of the solver.
  * See #Solver::boundary_test_strength.
  *
  * When the system is under-constrained, the "solution" box ([x],[p])" may be a
@@ -51,33 +51,33 @@ namespace ibex {
  * The status is UNKNOWN if the box has been processed (precision eps-min reached)
  * but nothing could be proven.
  *
- * The status is PENDING if the box has not been processed (the solver has been
+ * The status is PENDING if the box has not been processed (the search has been
  * interrupted because of a timeout/memory overflow).
  *
  */
 class QualifiedBox {
 public:
 	/**
-	 * \brief Possible status of an output box.
+	 * \brief Possible status of a qualified box.
 	 *
 	 * See above.
 	 */
 	typedef enum { INNER, BOUNDARY, UNKNOWN, PENDING } sol_status;
 
 	/**
-	 * \brief Create a box
+	 * \brief Create a qualified box.
 	 */
 	QualifiedBox(const IntervalVector& box, sol_status status=PENDING, const IntervalVector* unicity=NULL, const VarSet* varset=NULL);
 
 	/**
-	 * \brief Duplicate the solution
+	 * \brief Duplicate the qualified box.
 	 */
-	QualifiedBox(const QualifiedBox& sol);
+	QualifiedBox(const QualifiedBox& qbox);
 
 	/**
-	 * \brief Assignment
+	 * \brief Assignment.
 	 */
-	QualifiedBox& operator=(const QualifiedBox&);
+	QualifiedBox& operator=(const QualifiedBox& qbox);
 
 	/**
 	 * \brief Destructor.
@@ -85,14 +85,14 @@ public:
 	~QualifiedBox();
 
 	/*
-	 * \brief Status of the output box
+	 * \brief Status of the qualified box.
 	 *
 	 * See above.
 	 */
 	const sol_status status;
 
 	/**
-	 * \brief Get the solution box.
+	 * \brief Cast the qualified box as a simple box.
 	 *
 	 * Corresponds to the existence box.
 	 */
@@ -138,28 +138,27 @@ private:
 
 
 /**
- * \brief Print the output box
+ * \brief Print the qualified box
  *
  * Print its status and the parameters/variables structure.
  */
-std::ostream& operator<<(std::ostream& os, const QualifiedBox& sol);
-
+std::ostream& operator<<(std::ostream& os, const QualifiedBox& qbox);
 
 /*============================================ inline implementation ============================================ */
 
-inline QualifiedBox::QualifiedBox(const QualifiedBox& sol) : status(sol.status),
-		varset(sol.varset? new VarSet(*sol.varset) : NULL), _existence(sol._existence),
-		_unicity(sol._unicity? new IntervalVector(*sol._unicity) : NULL) {
+inline QualifiedBox::QualifiedBox(const QualifiedBox& qbox) : status(qbox.status),
+		varset(qbox.varset? new VarSet(*qbox.varset) : NULL), _existence(qbox._existence),
+		_unicity(qbox._unicity? new IntervalVector(*qbox._unicity) : NULL) {
 
 }
 
-inline QualifiedBox& QualifiedBox::operator=(const QualifiedBox& sol) {
-	(sol_status&) status=sol.status;
+inline QualifiedBox& QualifiedBox::operator=(const QualifiedBox& qbox) {
+	(sol_status&) status=qbox.status;
 	if (varset) delete varset;
-	varset=sol.varset? new VarSet(*sol.varset) : NULL;
-	_existence=sol._existence;
+	varset=qbox.varset? new VarSet(*qbox.varset) : NULL;
+	_existence=qbox._existence;
 	if (_unicity) delete _unicity;
-	_unicity=sol._unicity? new IntervalVector(*sol._unicity) : NULL;
+	_unicity=qbox._unicity? new IntervalVector(*qbox._unicity) : NULL;
 	return *this;
 }
 
@@ -182,4 +181,4 @@ inline const IntervalVector& QualifiedBox::unicity() const {
 
 } /* namespace ibex */
 
-#endif /* __IBEX_SOLVER_OUTPUT_BOX_H__ */
+#endif /* __IBEX_QUALIFIED_BOX_H__ */
