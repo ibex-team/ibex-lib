@@ -54,7 +54,7 @@ namespace ibex {
  * interrupted because of a timeout/memory overflow).
  *
  */
-class SolverOutputBox {
+class QualifiedBox {
 public:
 	/**
 	 * \brief Possible status of an output box.
@@ -112,23 +112,23 @@ public:
 	/**
 	 * \brief Duplicate the solution
 	 */
-	SolverOutputBox(const SolverOutputBox& sol);
+	QualifiedBox(const QualifiedBox& sol);
 
 	/**
 	 * \brief Assignment
 	 */
-	SolverOutputBox& operator=(const SolverOutputBox&);
+	QualifiedBox& operator=(const QualifiedBox&);
 
 	/**
 	 * \brief Destructor.
 	 */
-	~SolverOutputBox();
+	~QualifiedBox();
 
 private:
 	friend class Solver;
 	friend class Manifold;
 
-	SolverOutputBox(int n);
+	QualifiedBox(int n);
 
 	IntervalVector _existence;
 	IntervalVector* _unicity; // NULL if status=UNKNOWN/PENDING or m=0
@@ -139,22 +139,22 @@ private:
  *
  * Print its status and the parameters/variables structure.
  */
-std::ostream& operator<<(std::ostream& os, const SolverOutputBox& sol);
+std::ostream& operator<<(std::ostream& os, const QualifiedBox& sol);
 
 
 /*============================================ inline implementation ============================================ */
 
-inline SolverOutputBox::SolverOutputBox(int n) : status(PENDING), varset(NULL), _existence(n), _unicity(NULL) {
+inline QualifiedBox::QualifiedBox(int n) : status(PENDING), varset(NULL), _existence(n), _unicity(NULL) {
 
 }
 
-inline SolverOutputBox::SolverOutputBox(const SolverOutputBox& sol) : status(sol.status),
+inline QualifiedBox::QualifiedBox(const QualifiedBox& sol) : status(sol.status),
 		varset(sol.varset? new VarSet(*sol.varset) : NULL), _existence(sol._existence),
 		_unicity(sol._unicity? new IntervalVector(*sol._unicity) : NULL) {
 
 }
 
-inline SolverOutputBox& SolverOutputBox::operator=(const SolverOutputBox& sol) {
+inline QualifiedBox& QualifiedBox::operator=(const QualifiedBox& sol) {
 	(sol_status&) status=sol.status;
 	if (varset) delete varset;
 	varset=sol.varset? new VarSet(*sol.varset) : NULL;
@@ -164,20 +164,20 @@ inline SolverOutputBox& SolverOutputBox::operator=(const SolverOutputBox& sol) {
 	return *this;
 }
 
-inline SolverOutputBox::~SolverOutputBox() {
+inline QualifiedBox::~QualifiedBox() {
 	if (_unicity) delete _unicity;
 	if (varset) delete varset;
 }
 
-inline SolverOutputBox::operator const IntervalVector&() const {
+inline QualifiedBox::operator const IntervalVector&() const {
 	return existence();
 }
 
-inline const IntervalVector& SolverOutputBox::existence() const {
+inline const IntervalVector& QualifiedBox::existence() const {
 	return _existence;
 }
 
-inline const IntervalVector& SolverOutputBox::unicity() const {
+inline const IntervalVector& QualifiedBox::unicity() const {
 	return _unicity? *_unicity : _existence;
 }
 

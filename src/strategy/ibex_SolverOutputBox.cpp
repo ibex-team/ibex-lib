@@ -15,21 +15,21 @@ using namespace std;
 
 namespace ibex {
 
-ostream& operator<<(ostream& os, const SolverOutputBox& sol) {
+ostream& operator<<(ostream& os, const QualifiedBox& sol) {
 	os.precision(12);
 	os << sol.existence() << " ";
 	switch(sol.status) {
 
-	case SolverOutputBox::INNER:
+	case QualifiedBox::INNER:
 		os << "[inner";
 		break;
-	case SolverOutputBox::BOUNDARY:
+	case QualifiedBox::BOUNDARY:
 		os << "[boundary";
 		break;
-	case SolverOutputBox::UNKNOWN :
+	case QualifiedBox::UNKNOWN :
 		os << "[unknown]";
 		break;
-	case SolverOutputBox::PENDING:
+	case QualifiedBox::PENDING:
 		os << "[pending]";
 		break;
 	}

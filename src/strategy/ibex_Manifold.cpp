@@ -65,7 +65,7 @@ void Manifold::read_signature(ifstream& f) {
 		ibex_error("[Manifold]: wrong format version");
 }
 
-SolverOutputBox Manifold::read_output_box(ifstream& f) {
+QualifiedBox Manifold::read_output_box(ifstream& f) {
 
 	IntervalVector box(n);
 
@@ -80,13 +80,13 @@ SolverOutputBox Manifold::read_output_box(ifstream& f) {
 		ibex_error("[manifold]: bad input file (bad status code).");
 	}
 
-	SolverOutputBox sol(n);
+	QualifiedBox sol(n);
 
 	switch(_status) {
-	case 0: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::INNER; break;
-	case 1: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::BOUNDARY; break;
-	case 2: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN; break;
-	case 3: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::PENDING; break;
+	case 0: (QualifiedBox::sol_status&) sol.status = QualifiedBox::INNER; break;
+	case 1: (QualifiedBox::sol_status&) sol.status = QualifiedBox::BOUNDARY; break;
+	case 2: (QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN; break;
+	case 3: (QualifiedBox::sol_status&) sol.status = QualifiedBox::PENDING; break;
 	}
 
 	sol._existence = box;
@@ -124,7 +124,7 @@ void Manifold::write_signature(ofstream& f) const {
 	write_int(f, FORMAT_VERSION);
 }
 
-void Manifold::write_output_box(ofstream& f, const SolverOutputBox& sol) const {
+void Manifold::write_output_box(ofstream& f, const QualifiedBox& sol) const {
 	const IntervalVector& box=(sol);
 	for (int i=0; i<sol.existence().size(); i++) {
 		write_double(f,box[i].lb());
@@ -172,7 +172,7 @@ void Manifold::load(const char* filename) {
 
 	IntervalVector box(n);
 	for (int i=0; i<nb_sols; i++) {
-		SolverOutputBox sol = read_output_box(f);
+		QualifiedBox sol = read_output_box(f);
 
 		switch(sol.status) {
 		case 0: inner.push_back(sol); break;
@@ -203,16 +203,16 @@ void Manifold::write(const char* filename) const {
 	write_double(f,time);
 	write_int(f,nb_cells);
 
-	for (vector<SolverOutputBox>::const_iterator it=inner.begin(); it!=inner.end(); it++)
+	for (vector<QualifiedBox>::const_iterator it=inner.begin(); it!=inner.end(); it++)
 		write_output_box(f,*it);
 
-	for (vector<SolverOutputBox>::const_iterator it=boundary.begin(); it!=boundary.end(); it++)
+	for (vector<QualifiedBox>::const_iterator it=boundary.begin(); it!=boundary.end(); it++)
 		write_output_box(f,*it);
 
-	for (vector<SolverOutputBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++)
+	for (vector<QualifiedBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++)
 		write_output_box(f,*it);
 
-	for (vector<SolverOutputBox>::const_iterator it=pending.begin(); it!=pending.end(); it++)
+	for (vector<QualifiedBox>::const_iterator it=pending.begin(); it!=pending.end(); it++)
 		write_output_box(f,*it);
 
 	f.close();
@@ -258,7 +258,7 @@ string Manifold::format() {
 	"\t   Nothing is displayed if m=0 or m=n.\n\n";
 }
 
-void Manifold::write_output_box_txt(ofstream& file, const SolverOutputBox& sol) const {
+void Manifold::write_output_box_txt(ofstream& file, const QualifiedBox& sol) const {
 	char s=' ';
 	const IntervalVector& box=sol;
 	for (unsigned int i=0; i<n; i++) {
@@ -300,16 +300,16 @@ void Manifold::write_txt(const char* filename) const {
 	file << time << s << nb_cells << '\n';
 
 	bool first_sol=true;
-	for (vector<SolverOutputBox>::const_iterator it=inner.begin(); it!=inner.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=inner.begin(); it!=inner.end(); it++) {
 		write_output_box_txt(file,*it);
 	}
-	for (vector<SolverOutputBox>::const_iterator it=boundary.begin(); it!=boundary.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=boundary.begin(); it!=boundary.end(); it++) {
 		write_output_box_txt(file,*it);
 	}
-	for (vector<SolverOutputBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++) {
 		write_output_box_txt(file,*it);
 	}
-	for (vector<SolverOutputBox>::const_iterator it=pending.begin(); it!=pending.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=pending.begin(); it!=pending.end(); it++) {
 		write_output_box_txt(file,*it);
 	}
 
@@ -320,16 +320,16 @@ ostream& operator<<(ostream& os, const Manifold& manif) {
 
 	int i=0;
 
-	for (vector<SolverOutputBox>::const_iterator it=manif.inner.begin(); it!=manif.inner.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=manif.inner.begin(); it!=manif.inner.end(); it++) {
 		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
-	for (vector<SolverOutputBox>::const_iterator it=manif.boundary.begin(); it!=manif.boundary.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=manif.boundary.begin(); it!=manif.boundary.end(); it++) {
 		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
-	for (vector<SolverOutputBox>::const_iterator it=manif.unknown.begin(); it!=manif.unknown.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=manif.unknown.begin(); it!=manif.unknown.end(); it++) {
 		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
-	for (vector<SolverOutputBox>::const_iterator it=manif.pending.begin(); it!=manif.pending.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=manif.pending.begin(); it!=manif.pending.end(); it++) {
 		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
 	return os;

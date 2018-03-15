@@ -96,22 +96,22 @@ public:
 	/*
 	 * \brief Inner boxes
 	 */
-	std::vector<SolverOutputBox> inner;
+	std::vector<QualifiedBox> inner;
 
 	/*
 	 * \brief Boundary boxes
 	 */
-	std::vector<SolverOutputBox> boundary;
+	std::vector<QualifiedBox> boundary;
 
 	/*
 	 * \brief Boundary boxes
 	 */
-	std::vector<SolverOutputBox> unknown;
+	std::vector<QualifiedBox> unknown;
 
 	/*
 	 * \brief Pending boxes
 	 */
-	std::vector<SolverOutputBox> pending;
+	std::vector<QualifiedBox> pending;
 
 	/*
 	 * \brief CPU running time used to obtain this manifold.
@@ -136,13 +136,13 @@ protected:
 	unsigned int read_int(std::ifstream& f);
 	double read_double(std::ifstream& f);
 	void read_signature(std::ifstream& f);
-	SolverOutputBox read_output_box(std::ifstream& f);
+	QualifiedBox read_output_box(std::ifstream& f);
 
 	void write_int(std::ofstream& f, uint32_t x) const;
 	void write_double(std::ofstream& f, double x) const;
 	void write_signature(std::ofstream& f) const;
-	void write_output_box(std::ofstream& f, const SolverOutputBox& sol) const;
-	void write_output_box_txt(std::ofstream& file, const SolverOutputBox& sol) const;
+	void write_output_box(std::ofstream& f, const QualifiedBox& sol) const;
+	void write_output_box_txt(std::ofstream& file, const QualifiedBox& sol) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const Manifold& manif);

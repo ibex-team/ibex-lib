@@ -12,9 +12,8 @@
 #include "ibex_Newton.h"
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_LinearException.h"
-#include "ibex_Manifold.h"
-
 #include <cassert>
+#include "ibex_Manifold.h"
 
 using namespace std;
 
@@ -107,7 +106,7 @@ void Solver::start(const char* input_paving) {
 	manif = new Manifold(n,m,nb_ineq);
 	manif->load(input_paving);
 
-	vector<SolverOutputBox>::const_iterator it=manif->unknown.begin();
+	vector<QualifiedBox>::const_iterator it=manif->unknown.begin();
 
 	// the unknown and pending boxes have to be processed
 	while (it!=manif->pending.end()) {
@@ -137,7 +136,7 @@ void Solver::start(const char* input_paving) {
 	timer.restart();
 }
 
-SolverOutputBox* Solver::next() {
+QualifiedBox* Solver::next() {
 	while (!buffer.empty()) {
 		if (time_limit >0) timer.check(time_limit);
 
@@ -166,9 +165,9 @@ SolverOutputBox* Solver::next() {
 			// if the system is under constrained
 			if (!c->box.is_empty() && m<n) {
 				// note: cannot return PENDING status
-				SolverOutputBox new_sol=check_sol(c->box);
-				if (new_sol.status!=SolverOutputBox::UNKNOWN) {
-					if ((m==0 && new_sol.status==SolverOutputBox::INNER) ||
+				QualifiedBox new_sol=check_sol(c->box);
+				if (new_sol.status!=QualifiedBox::UNKNOWN) {
+					if ((m==0 && new_sol.status==QualifiedBox::INNER) ||
 							!is_too_large(new_sol.existence())) {
 						delete buffer.pop();
 						return &store_sol(new_sol);
@@ -196,7 +195,7 @@ SolverOutputBox* Solver::next() {
 			}
 
 			catch (NoBisectableVariableException&) {
-				SolverOutputBox new_sol=check_sol(c->box);
+				QualifiedBox new_sol=check_sol(c->box);
 				delete buffer.pop();
 				return &store_sol(new_sol);
 			}
@@ -260,11 +259,11 @@ Solver::Status Solver::solve() {
 }
 
 
-SolverOutputBox Solver::check_sol(const IntervalVector& box) {
+QualifiedBox Solver::check_sol(const IntervalVector& box) {
 
-	SolverOutputBox sol(n);
+	QualifiedBox sol(n);
 
-	(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::INNER; // by default
+	(QualifiedBox::sol_status&) sol.status = QualifiedBox::INNER; // by default
 
 	if (eqs) {
 
@@ -272,7 +271,7 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 
 		if (m>n) {
 			ibex_warning("Certification not implemented for over-constrained systems ");
-			(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
+			(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
 		} else if (m<n) {
 			// ====== under-constrained =========
 			try {
@@ -282,15 +281,15 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 					if (params.nb_param<n-m)
 						sol.varset = new VarSet(varset);
 				} else
-					(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
+					(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
 
 			} catch(SingularMatrixException& e) {
-				(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
+				(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
 			}
 		} else {
 			// ====== well-constrained =========
 			if (!inflating_newton(eqs->f_ctrs, box.mid(), sol._existence, *sol._unicity)) {
-				(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
+				(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
 			}
 		}
 	} else {
@@ -298,7 +297,7 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 		sol._unicity=NULL;
 	}
 
-	if (sol.status==SolverOutputBox::UNKNOWN) {
+	if (sol.status==QualifiedBox::UNKNOWN) {
 		sol._existence=box;
 		if (sol._unicity!=NULL) delete sol._unicity;
 		sol._unicity=NULL;
@@ -312,9 +311,9 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 		}
 	}
 
-	if (sol.status==SolverOutputBox::INNER && !sol.existence().is_subset(solve_init_box))
+	if (sol.status==QualifiedBox::INNER && !sol.existence().is_subset(solve_init_box))
 		// BOUNDARY by default: will be verified later
-		(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::BOUNDARY;
+		(QualifiedBox::sol_status&) sol.status = QualifiedBox::BOUNDARY;
 
 	if (ineqs) {
 		Interval y,r;
@@ -324,16 +323,16 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 			y=c.f.eval(sol.existence());
 			r=c.right_hand_side().i();
 			if (y.is_disjoint(r)) throw EmptyBoxException();
-			if (sol.status==SolverOutputBox::INNER && !y.is_subset(r)) {
+			if (sol.status==QualifiedBox::INNER && !y.is_subset(r)) {
 				// BOUNDARY by default: will be verified later
-				(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::BOUNDARY;
+				(QualifiedBox::sol_status&) sol.status = QualifiedBox::BOUNDARY;
 			}
 		}
 	}
 
-	if (sol.status==SolverOutputBox::BOUNDARY) {
+	if (sol.status==QualifiedBox::BOUNDARY) {
 		if (!is_boundary(sol.existence()))
-			(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
+			(QualifiedBox::sol_status&) sol.status = QualifiedBox::UNKNOWN;
 
 	}
 
@@ -342,7 +341,7 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 		// box of a previously found solution. For efficiency reason, this test is not performed in
 		// the case of under-constrained systems (m<n).
 
-		for (vector<SolverOutputBox>::iterator it=manif->inner.begin(); it!=manif->inner.end(); it++) {
+		for (vector<QualifiedBox>::iterator it=manif->inner.begin(); it!=manif->inner.end(); it++) {
 			if (it->unicity().is_superset(sol._existence))
 				throw EmptyBoxException();
 		}
@@ -408,21 +407,21 @@ bool Solver::is_too_large(const IntervalVector& box) {
 	return false;
 }
 
-SolverOutputBox& Solver::store_sol(const SolverOutputBox& sol) {
+QualifiedBox& Solver::store_sol(const QualifiedBox& sol) {
 
 	if (trace >=1) cout << sol << endl;
 
 	switch (sol.status) {
-	case SolverOutputBox::INNER    :
+	case QualifiedBox::INNER    :
 		manif->inner.push_back(sol);
 		return manif->inner.back();
-	case SolverOutputBox::BOUNDARY :
+	case QualifiedBox::BOUNDARY :
 		manif->boundary.push_back(sol);
 		return manif->boundary.back();
-	case SolverOutputBox::UNKNOWN  :
+	case QualifiedBox::UNKNOWN  :
 		manif->unknown.push_back(sol);
 		return manif->unknown.back();
-	case SolverOutputBox::PENDING :
+	case QualifiedBox::PENDING :
 	default:
 		manif->pending.push_back(sol);
 		return manif->pending.back();
@@ -432,8 +431,8 @@ SolverOutputBox& Solver::store_sol(const SolverOutputBox& sol) {
 void Solver::flush() {
 	while (!buffer.empty()) {
 		Cell* cell=buffer.top();
-		SolverOutputBox sol(n);
-		(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::PENDING;
+		QualifiedBox sol(n);
+		(QualifiedBox::sol_status&) sol.status = QualifiedBox::PENDING;
 		sol._existence=cell->box;
 		sol._unicity=NULL;
 		store_sol(sol);

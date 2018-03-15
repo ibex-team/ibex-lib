@@ -19,9 +19,8 @@
 #include "ibex_Timer.h"
 #include "ibex_Exception.h"
 #include "ibex_Linear.h"
-#include "ibex_SolverOutputBox.h"
-
 #include <vector>
+#include "ibex_SolverOutputBox.h"
 
 namespace ibex {
 
@@ -153,7 +152,7 @@ public:
 	 *
 	 *   CELL_OVERFLOW:     the number of cell has exceeded the limit.
 	 */
-	SolverOutputBox* next();
+	QualifiedBox* next();
 
 	/**
 	 * \brief Displays on standard output a report of the last call to solve(...).
@@ -267,7 +266,7 @@ protected:
 	 * slightly changed (due to inflating Newton) and the actual "solution"
 	 * is stored in the existence box of the output.
 	 */
-	SolverOutputBox check_sol(const IntervalVector& box);
+	QualifiedBox check_sol(const IntervalVector& box);
 
 	/**
 	 * \brief Check if the box is "BOUNDARY"
@@ -288,7 +287,7 @@ protected:
 	/**
 	 * \brief Store the solution in "solutions" and print it (if trace>=0).
 	 */
-	SolverOutputBox& store_sol(const SolverOutputBox& sol);
+	QualifiedBox& store_sol(const QualifiedBox& sol);
 
 	/**
 	 * \brief Check if time is out.
