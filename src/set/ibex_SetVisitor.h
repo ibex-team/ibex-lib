@@ -35,6 +35,20 @@ public:
 	 */
 	virtual void visit_leaf(const IntervalVector& box, BoolInterval status)=0;
 
+	/**
+	 * \brief Do some stuff before visiting the Set
+	 *
+	 * By default, does nothing
+	 */
+	virtual void pre_visit(){ };
+
+	/**
+	 * \brief Do some stuff after visiting the Set
+	 *
+	 * By default, does nothing
+	 */
+	virtual void post_visit(){ };
+
 };
 
 } // namespace ibex

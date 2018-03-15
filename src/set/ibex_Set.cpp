@@ -217,7 +217,9 @@ void Set::load(const char* filename) {
 }
 
 void Set::visit(SetVisitor& visitor) const {
+	visitor.pre_visit();
 	root->visit(Rn,visitor);
+	visitor.post_visit();
 }
 
 std::ostream& operator<<(std::ostream& os, const Set& set) {
