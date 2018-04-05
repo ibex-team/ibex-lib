@@ -23,7 +23,7 @@ public:
 	 *
 	 */
 
-  CtcQInterCircle2(int n, const Array<Ctc>& ctc_list,double*** measure, double epseq, int q, qintermethod QINTERPROJ, int K=1);
+  CtcQInterCircle2(int n, const Array<Ctc>& ctc_list,double*** measure, double epseq, int q, qintermethod QINTERPROJ);
   void point_contract(IntervalVector& box,int iter); 
 	double *** measure;
 	double epseq;
@@ -52,14 +52,15 @@ public:
  class CtcQInterAffCircle2 : virtual public CtcQInter, public CtcQInterCircle2, public CtcQInterAff {
 
    public :
- CtcQInterAffCircle2(int n, const Array<Ctc>& ctc_list,double*** measure, double epseq, int q,  qintermethod QINTERPROJ, int K=1);
+ CtcQInterAffCircle2(int n, const Array<Ctc>& ctc_list,double*** measure, double epseq, int q,  qintermethod QINTERPROJ);
 
    protected : 
-   double slope_compute(int iter, int j, int k, IntervalVector& box, Affine2& af);
-	 double err_compute( int iter, int k, IntervalVector& box,Affine2& af);
-	 double	valmean_compute(int iter, int k, IntervalVector& box, Affine2& af);
+   double slope_compute(int iter, int j, int k, const IntervalVector& box, Affine2& af);
+	 double err_compute( int iter, int k, const IntervalVector& box,Affine2& af);
+	 double	valmean_compute(int iter, int k, const IntervalVector& box, Affine2& af);
 	 void compute_affine_evaluation (int i , int iter, Affine2& af, Interval & af2);
 	 int affine_threshold();
+	 double max_diam_threshold(const IntervalVector& box);
 	 //	 void bwd1 (IntervalVector & box, int iter);
  };
 

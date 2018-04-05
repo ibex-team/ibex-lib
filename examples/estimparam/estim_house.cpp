@@ -318,7 +318,7 @@ int main(int argc, char** argv) {
 	    //	    Solver s(ctcf,*bs,buff);
 	    //	    s.onesol_permaximalset=true;
 	    //	    s.qvalid=Qvalid;
-	    s.time_limit = 3600;
+	    s.time_limit = 10000;
             s.trace=0;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;

@@ -1,7 +1,7 @@
 //============================================================================
 
 //                                  I B E X                                   
-// File        : Q-intersection contractor specialized for plane detection 
+// File        : Q-intersection contractor specialized for linear observations
 // Author      : Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -20,18 +20,13 @@ namespace ibex {
 
 class CtcQInterLinear : virtual public CtcQInter {
 public:
-	/**
-	 * \brief q-intersection on a list of contractors.
-	 *
-	 * The list itself is not kept by reference.
-	 */
 
-  CtcQInterLinear(int n, const Array<Ctc>& ctc_list,double*** linfun, 
-		   double epseq, int q,  qintermethod meth=QINTERPROJ, int K=1);
+  CtcQInterLinear(int n, const Array<Ctc>& ctc_list,double** linfun, 
+		  double epseq, int q,  qintermethod meth=QINTERPROJ);
   double compute_err_iter(IntervalVector & box, int iter);
   void point_contract(IntervalVector& box,int iter); 
   void point_contract_exact(IntervalVector& box,int iter); 
-  double *** linfun;
+  double ** linfun;
   double epseq;
   double get_epseq();
   Interval eps;
@@ -43,49 +38,57 @@ public:
   
 
  protected :
-  virtual void fwdbwd(IntervalVector & box, int iter, int k);
-  virtual void fwd(IntervalVector & box, int iter, int k);
-  Interval sumlin(IntervalVector & box, int iter, int j, int k);
+  virtual void fwdbwd(IntervalVector & box, int iter);
+  virtual void fwd(IntervalVector & box, int iter);
+  Interval sumlin(IntervalVector & box, int iter, int j);
   //        void fwd(IntervalVector & box, int iter);
-  virtual   Interval eval_ctc(IntervalVector & box, int iter, int k);
-  virtual   Interval eval_dist(IntervalVector & box, int iter, int k);
+  virtual   Interval eval_ctc(IntervalVector & box, int iter);
+  virtual   Interval eval_dist(IntervalVector & box, int iter);
   void point_fwdbwd(IntervalVector & box, int iter);
   int effective_size(const IntervalVector &box) ;
-  //  double max_diam_threshold(const IntervalVector& box);
+  double max_diam_threshold(const IntervalVector& box);
 };
 
+/* class implementing a CtcQInterLinear contractor using the projection in the supplementary direction
+multiple inheritance :  CtcQInterLinear and CtcQInterAff
+ */
 
  class CtcQInterAffLinear :
    virtual public CtcQInter, 
    public CtcQInterLinear, public CtcQInterAff {
-
    public :
 
-   CtcQInterAffLinear(int n, const Array<Ctc>& ctc_list,double*** linfun, 
-		     double epseq, int q,  qintermethod meth=QINTERPROJ, int K=1);
+   CtcQInterAffLinear(int n, const Array<Ctc>& ctc_list,double** linfun, 
+		     double epseq, int q,  qintermethod meth=QINTERPROJ);
 
-    void point_contract(IntervalVector& box,int iter); 
+   void point_contract(IntervalVector& box,IntervalMatrix & msol, IntervalMatrix & msolt, int iter); 
    int midactivepoints_count(const Vector& vec);
    vector<int> feasible_points(const Vector& vec);
    double lincoeff(int i, int k);
- 
+   int activepoints_contract_count(IntervalVector& box);        
+   void ctc_contract_all(IntervalVector& box);
+
  protected :
 
-   double valmean_compute(int iter, int i, IntervalVector& box, Affine2& af);
-   double slope_compute(int iter, int j, int i , IntervalVector& box,Affine2& af);
-   double err_compute( int iter, int k, IntervalVector& box,Affine2& af);
+   int ctc_contract (IntervalVector & box);
+   double valmean_compute(int iter, int i, const IntervalVector& box, Affine2& af);
+   double slope_compute(int iter, int j, int i , const IntervalVector& box,Affine2& af);
+   double err_compute( int iter, int k, const IntervalVector& box,Affine2& af);
    void compute_affine_evaluation( int i, int iter,  Affine2& af , Interval& af2);
-   Interval eval_ctc(IntervalVector & box, int iter, int k);
-   Interval eval_dist(IntervalVector & box, int iter, int k);
-   void fwdbwd(IntervalVector & box, int iter, int k);
-   void fwd(IntervalVector & box, int iter, int k);
-   Interval sumlin(IntervalVector & box, int iter, int j, int k);
-   Interval sumlin0(IntervalVector & box, int iter, int j, int k);
+   Interval eval_ctc(IntervalVector & box, int iter);
+   Interval eval_dist(IntervalVector & box, int iter);
+   void fwdbwd(IntervalVector & box, int iter);
+   void fwd(IntervalVector & box, int iter);
+   Interval sumlin(IntervalVector & box, int iter, int j);
+   Interval sumlin0(IntervalVector & box, int iter, int j);
    void bwd1(IntervalVector & box, int iter);
    int effective_size(const IntervalVector &box) ;
    int affine_threshold();
 
-   void point_verif_prod(IntervalVector & box, int iter);
+   void point_epipole_check(IntervalVector & box, const IntervalMatrix & msol, const IntervalMatrix & msolt, int iter);
+   double epipole_epsilon;
+   double norm_epipole_epsilon;
+   
 };
 
 

@@ -93,7 +93,7 @@ public:
   Cell* pop_cell();
   Cell* top_cell();
   bool empty_buffer();
-void contract_buffer();
+  void contract_buffer();
 };
 
 }// end namespace ibex

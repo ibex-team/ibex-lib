@@ -59,7 +59,7 @@ public:
   //  int midbox_activepoints_number(IntervalVector& box);
   //  int midbox_activepoints_contract_count(IntervalVector& box);
   //	int activepoints_number(IntervalVector& box);
-  virtual int activepoints_count(IntervalVector& box);
+  virtual int activepoints_count(const IntervalVector& box);
   int activepoints_count2(IntervalVector& box);
   virtual int activepoints_contract_count(IntervalVector& box);
   double compute_err_sol(Vector & mod);

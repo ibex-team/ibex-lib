@@ -28,10 +28,10 @@ public:
 	 */
 
   // CtcQInterSampson(int n, const Array<Ctc>& ctc_list,double*** linfun, double** linfun1,
-  //		   double epseq, int q,  qintermethod meth=QINTERPROJ, int K=1);
+  //		   double epseq, int q,  qintermethod meth=QINTERPROJ);
 
-  CtcQInterSampson(int n, const Array<Ctc>& ctc_list, double*** linfun, double** linfun1, double epseq, int q, qintermethod meth=QINTERPROJ, int K=1);
-  //  CtcQInterSampson(int n, const Array<Ctc>& ctc_list, double*** linfun, double epseq, int q, qintermethod meth=QINTERPROJ, int K=1);
+  CtcQInterSampson(int n, const Array<Ctc>& ctc_list, double*** linfun, double** linfun1, double epseq, int q, qintermethod meth=QINTERPROJ);
+  //  CtcQInterSampson(int n, const Array<Ctc>& ctc_list, double*** linfun, double epseq, int q, qintermethod meth=QINTERPROJ);
 
   double compute_err_iter(IntervalVector & box, int iter);
   void point_contract(IntervalVector& box,int iter); 
@@ -68,7 +68,7 @@ public:
    public CtcQInterSampson, public CtcQInterAff {
 
  public :
-   CtcQInterAffSampson(int n, const Array<Ctc>& ctc_list, double*** linfun, double** linfun1, Function *** mfun, double epseq, int q, qintermethod meth=QINTERPROJ, int K=1);
+   CtcQInterAffSampson(int n, const Array<Ctc>& ctc_list, double*** linfun, double** linfun1, Function *** mfun, double epseq, int q, qintermethod meth=QINTERPROJ);
 
 
  protected :

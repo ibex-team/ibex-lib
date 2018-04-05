@@ -163,7 +163,7 @@ void BestFirstSearch::push_cell(Cell&c1){
 	cout << " buffer size after " << buffer.size()  << endl;
       }
 
-  BeamSearch::BeamSearch (CellBuffer& buffer) : SearchStrategy(buffer), stackbuffer() { with_storage=false;};
+  BeamSearch::BeamSearch (CellBuffer& buffer) : SearchStrategy(buffer), stackbuffer() { with_storage=false;}
   
   void BeamSearch::push_cell(Cell&c1){
     if (!(c1.box.is_empty())) {
@@ -210,8 +210,7 @@ void BestFirstSearch::push_cell(Cell&c1){
   bool BeamSearch::empty_buffer () {return (buffer.empty() && stackbuffer.empty());}
 
   void BeamSearch::push_cells(Cell&c1, Cell& c2){
-  
-  if (with_oracle && (!(c1.box.is_empty())&& c1.box.contains(*oracle)))
+    if (with_oracle && (!(c1.box.is_empty())&& c1.box.contains(*oracle)))
       {
 	if  (!(c2.box.is_empty())) buffer.push(&c2);
         c1.get<QInterPoints>().points=points1; stackbuffer.push(&c1);}
@@ -220,8 +219,8 @@ void BestFirstSearch::push_cell(Cell&c1){
       {
 	if (!(c1.box.is_empty())) buffer.push(&c1);
 	c2.get<QInterPoints>().points=points2;stackbuffer.push(&c2);}
-  /*
-    else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
+    
+    else if (!(c1.box.is_empty()) && !(c2.box.is_empty())) // 2 nodes -> the best is put in stackbuffer, the other in buffer
       {
 	int val1= validate_value (c1);
 	int val2= validate_value (c2);
@@ -231,33 +230,12 @@ void BestFirstSearch::push_cell(Cell&c1){
 	  if (with_storage) c1.get<QInterPoints>().points=points1;
 	}
       }
-  */
-    else if (!(c1.box.is_empty()) && !(c2.box.is_empty()))
-      {
-	if (c2.get<QInterPoints>().depth >= depthmax){
-	  int val1= validate_value (c1);
-	  int val2= validate_value (c2);
-	  if (val1 >= val2) {
-	    buffer.push(&c2);  if (with_storage) c2.get<QInterPoints>().points=points2;
-	    //	    c2.get<QInterPoints>().points=points2; stackbuffer.push(&c2);
-	    c1.get<QInterPoints>().points=points1; stackbuffer.push(&c1);
-	  }
-	  else  {
-	    buffer.push(&c1); if (with_storage) c1.get<QInterPoints>().points=points1;
-	    //      c1.get<QInterPoints>().points=points1; stackbuffer.push(&c1);
-	    c2.get<QInterPoints>().points=points2; stackbuffer.push(&c2); 
-
-	  }
-	}
-	else { 
-	  buffer.push(&c2);
-	  buffer.push(&c1); 
-	  if (with_storage) {c2.get<QInterPoints>().points=points2; c1.get<QInterPoints>().points=points1;}
-	}
-      }
+    
+    
     else if (!(c1.box.is_empty())) {c1.get<QInterPoints>().points=points1;stackbuffer.push(&c1);}
     else if (!(c2.box.is_empty())) {c2.get<QInterPoints>().points=points2;stackbuffer.push(&c2);}
   }
   
   
-}
+  }
+  

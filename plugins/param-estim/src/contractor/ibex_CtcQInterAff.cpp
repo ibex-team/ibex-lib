@@ -21,7 +21,7 @@ using namespace std;
 #include<algorithm>
 
 namespace ibex {
-  CtcQInterAff::CtcQInterAff(int n, const Array<Ctc>& ctc_list, int q,  qintermethod meth, int K) : CtcQInter(n,ctc_list,q,meth,K) {
+  CtcQInterAff::CtcQInterAff(int n, const Array<Ctc>& ctc_list, int q,  qintermethod meth) : CtcQInter(n,ctc_list,q,meth) {
       for(int i=0;i<nb_var-1;i++) aff_dir.push_back(0);
       pmax=ctc_list.size();
 
@@ -30,22 +30,16 @@ namespace ibex {
   }
 
 
-  CtcQInterAff::CtcQInterAff(int n, int nb_obs1, const Array<Ctc>& ctc_list, int q,  qintermethod meth, int K) : CtcQInter(n,nb_obs1,ctc_list,q,meth,K) {
+  CtcQInterAff::CtcQInterAff(int n, int nb_obs1, const Array<Ctc>& ctc_list, int q,  qintermethod meth) : CtcQInter(n,nb_obs1,ctc_list,q,meth) {
       for(int i=0;i<nb_var-1;i++) aff_dir.push_back(0);
       pmax=nb_obs1;
       init_interaff(false);
     
   }
 
-  /*
-  CtcQInterAff::CtcQInterAff(int n, const Array<Ctc>& ctc_list,int pmax, int q,  qintermethod meth, int K) : CtcQInter(n,ctc_list,q,meth,K),  pmax(pmax){
-      for(int i=0;i<nb_var-1;i++) aff_dir.push_back(0);
-      init_interaff();
-    
-  }
-  */
+ 
 
-  CtcQInterAff::CtcQInterAff(int n, const Array<Ctc>& ctc_list, int q, Function*** funlist, qintermethod meth, int K) :  CtcQInter(n,ctc_list,q,meth,K),  function_list(funlist) {	for(int i=0;i<nb_var-1;i++) aff_dir.push_back(0);
+  CtcQInterAff::CtcQInterAff(int n, const Array<Ctc>& ctc_list, int q, Function*** funlist, qintermethod meth ) :  CtcQInter(n,ctc_list,q,meth),  function_list(funlist) {	for(int i=0;i<nb_var-1;i++) aff_dir.push_back(0);
     pmax=ctc_list.size(); init_interaff(true); }
   
   void CtcQInterAff::init_interaff(bool fun){
@@ -106,20 +100,19 @@ namespace ibex {
   }
 
   
-  double CtcQInterAff::slope_compute(int iter, int j , int k, IntervalVector& box,  Affine2& af)
+  double CtcQInterAff::slope_compute(int iter, int j , int k, const IntervalVector& box,  Affine2& af)
   { return 2*af.val(j+1)/box[j].diam();}
-  double CtcQInterAff::valmean_compute(int iter, int k, IntervalVector& box,  Affine2& af)
+  double CtcQInterAff::valmean_compute(int iter, int k, const IntervalVector& box,  Affine2& af)
   {return af.mid();}
-  double CtcQInterAff::err_compute( int iter, int k, IntervalVector& box, Affine2& af)
+  double CtcQInterAff::err_compute( int iter, int k, const IntervalVector& box, Affine2& af)
   {return af.err();}
 
  // compute the boxes corresponding to a projection in a direction computed as the average (or median)  of the coefficients of the affine 
   // formula  giving the last variable of box in function of the  others
   // This formula is computed by an affine evaluation .
   // This is also useful by adding a nth+1 variable in case of an implicit constraint f(x1,...,xn) =0
+  // the last variable of each measurement box (*boxes)[iter][nb_var-1] is replaced by this projection
 
-
-  //  void  CtcQInterAff::affine_projection(IntervalVector& box, int& pp)  {
 
   void  CtcQInterAff::affine_projection(int& pp)  {
     for (int j=0; j<nb_var-1; j++) aff_dir[j]=0;
@@ -129,7 +122,7 @@ namespace ibex {
     //    vector<double> affineslope[n-1];   // variante médiane
     list<int>::iterator iter = points->begin() ; 
     int p1=0;
-    //    Interval af2 (0.0,0.0);
+
     Interval af2 (0.0,1.0);
     while (iter != points->end()){
       //      (*boxes)[*iter] &=box;  // ne sert à rien.
@@ -266,37 +259,27 @@ void CtcQInterAff::contract(IntervalVector& box) {
   if (box.is_empty()) return;
   if (p<q) {box.set_empty();return;}
 
- // qinter on the directions of the original box only if p-q < gap
+  // qinter on the directions of the original box only if p-q < gap
   //    cout << " avant direct proj " << box << endl;
   if (p-q < gap || !(side_effects())) { direct_qintercontract(p, box);} 
 
-  //direct_qintercontract(p, box);
   //    cout << " apres direct proj " << box << endl;
   if (box.is_empty()) return;
-
-
 
   int  p0=p;
 
   // la projection affine n'est appelée que par la contraction directe (pas dans 3bcid)
-  //
   
   if (
-
       side_effects()  
-
       )
-  
      {
-  
-
-       //       cout << " avant proj affine " << " p " << p <<  "  box " << box << endl;
+     
     try {
-      //    affine_projection (box,p);
-    affine_projection (p);
+
+      affine_projection (p);
 
 
-    //    cout << " apres proj affine " << " p " << p <<  "  box " << box << endl;
     //    p0=p;
     //    int res2=1;
 
@@ -305,37 +288,37 @@ void CtcQInterAff::contract(IntervalVector& box) {
     // res2=0;
     // p updated by previous call to qinter_projf
     //    cout << " iter proj affine " << p << endl;
-    int n0=nb_var-1;
-    int n1=nb_var;
-    IntervalVector box1 = qinter_contract(p,n0,n1);
+      int n0=nb_var-1;
+      int n1=nb_var;
+      IntervalVector box1 = qinter_contract(p,n0,n1);
     //    cout << " apres 2me proj" << " p " << p << " " << box << "   " << box1 << endl;
-    if (box1.is_empty()) {box.set_empty();return;}
-    for (int i=n0; i<n1;i++) {if (box1[i].is_empty()) {box.set_empty(); return;}}
-    if (p<q) {box.set_empty();return;}
+      if (box1.is_empty()) {box.set_empty();return;}
+      for (int i=n0; i<n1;i++) {if (box1[i].is_empty()) {box.set_empty(); return;}}
+      if (p<q) {box.set_empty();return;}
     //    cout << box1[0].lb() << " " << box1[0].ub() << "  " << box1[1].mid() <<  " "<<  0 << " " << box1[1].diam() << endl;
-    Interval res1;
-    Interval resi(0,0);
+      Interval res1;
+      Interval resi(0,0);
       // the n-1 first directions
-    for (int i=n0; i<nb_var-1;i++)
+      for (int i=n0; i<nb_var-1;i++)
 	box[i]&=box1[i];
-    // projecting the result of the new nth direction (the mean gradient) on the old nth direction 
-    for (int i=0;i<nb_var-1;i++)
-      resi+=aff_dir[i]*box[i];
-    res1=box1[nb_var-1] + resi;
+      // projecting the result of the new nth direction (the mean gradient) on the old nth direction 
+      for (int i=0;i<nb_var-1;i++)
+	resi+=aff_dir[i]*box[i];
+      res1=box1[nb_var-1] + resi;
       //      IntervalVector initbox(n);
       //      initbox=box;
       //    cout << box[0].lb() << " " << box[0].ub() << "  " << res1.mid() <<  " "<<  0 << " " << res1.diam() << endl;
-    box[nb_var-1]&=res1;
-    for (int i=n0; i<nb_var;i++) {
-      if (box[i].is_empty())  { box.set_empty(); return;}
-    }
+      box[nb_var-1]&=res1;
+      for (int i=n0; i<nb_var;i++) {
+	if (box[i].is_empty())  { box.set_empty(); return;}
+      }
       
     //      if (initbox.rel_distance(box) > 0.1) res2=1;
       
     // updating points only in case of direct contraction call (not in  cid) using  side_effects
       
 
-    if ( p<p0 &&   side_effects ()) 
+      if ( p<p0 &&   side_effects ()) 
 	//	updateinterpoints(box1);  // inutile ?
 	updatepoints();
 

@@ -99,6 +99,19 @@ for n=2,3,4 */
 	    {box.set_empty();return;}
 	}
   }
+
+void CtcQInterLine::point_contract_exact(IntervalVector & box, int iter)
+ {
+    if (kfun > 1) box &= (*boxesini)[iter];
+    if (box.is_empty()) return;
+    for (int k=0; k<kfun; k++)
+	{ 
+	  box[nb_var-1]&=eval_ctc(box, iter, k);
+	  if  (box[nb_var-1].is_empty())
+	    {box.set_empty();return;}
+	}
+  }
+  
   
   /*
   int CtcQInterLine::ctc_contract(IntervalVector & box){
@@ -140,18 +153,7 @@ for n=2,3,4 */
   */
 
 
- void CtcQInterLine::point_contract_exact(IntervalVector & box, int iter)
- {
-    if (kfun > 1) box &= (*boxesini)[iter];
-    if (box.is_empty()) return;
-    for (int k=0; k<kfun; k++)
-	{ 
-	  box[nb_var-1]&=eval_ctc(box, iter, k);
-	  if  (box[nb_var-1].is_empty())
-	    {box.set_empty();return;}
-	}
-  }
-  
+ 
 
 
  
@@ -172,14 +174,14 @@ void CtcQInterLine::init ()
 
 
   CtcQInterLine::CtcQInterLine(int n,  const Array<Ctc>& ctc_list, double*** linfun, 
-				 double epseq, int q, qintermethod meth, int K ) : 
-    CtcQInter(n,ctc_list,q,meth,K),linfun(linfun),nb_obs(ctc_list.size()),
+				 double epseq, int q, qintermethod meth) : 
+    CtcQInter(n,ctc_list,q,meth),linfun(linfun),nb_obs(ctc_list.size()),
     epseq(epseq) {eps= Interval(-epseq,epseq); init();
   }
 
   CtcQInterLine::CtcQInterLine(int n, int nb_obs, const Array<Ctc>& ctc_list, double*** linfun, int** index, IntervalMatrix * boxesini,
-				 double epseq, int q, qintermethod meth, int K ) : 
-    CtcQInter(n,ctc_list,q,meth,K),linfun(linfun), nb_obs(nb_obs),
+				 double epseq, int q, qintermethod meth) : 
+    CtcQInter(n,ctc_list,q,meth),linfun(linfun), nb_obs(nb_obs),
     epseq (epseq), boxesini(boxesini), index(index) {eps= Interval(-epseq,epseq); init();
   }
 
@@ -420,25 +422,25 @@ IntervalVector CtcQInterLine::boxintersection( IntervalVector box, int* iter){
 
 
   CtcQInterAffLine::CtcQInterAffLine(int n, const Array<Ctc>& ctc_list, double*** linfun, 
-				     double epseq, int q,  qintermethod meth, int K ) : 
+				     double epseq, int q,  qintermethod meth) : 
 
-  CtcQInter(n,ctc_list,q,meth,K),
-  CtcQInterLine (n, ctc_list,linfun,epseq,q,meth,K),
-  CtcQInterAff(n,ctc_list.size(),ctc_list,q,meth,K)
+  CtcQInter(n,ctc_list,q,meth),
+  CtcQInterLine (n, ctc_list,linfun,epseq,q,meth),
+  CtcQInterAff(n,ctc_list.size(),ctc_list,q,meth)
         {
 	}
 
 
   CtcQInterAffLine::CtcQInterAffLine(int n, int nb_obs,const Array<Ctc>& ctc_list, double*** linfun,
 				     int** index,IntervalMatrix* boxes,
-				     double epseq, int q,  qintermethod meth, int K ) : 
-  CtcQInter(n,ctc_list,q,meth,K),
-  CtcQInterLine (n,nb_obs,ctc_list,linfun,index,boxes,epseq,q,meth,K),
-  CtcQInterAff(n,nb_obs,ctc_list,q,meth,K)
+				     double epseq, int q,  qintermethod meth) : 
+  CtcQInter(n,ctc_list,q,meth),
+  CtcQInterLine (n,nb_obs,ctc_list,linfun,index,boxes,epseq,q,meth),
+  CtcQInterAff(n,nb_obs,ctc_list,q,meth)
         {
 	}
 
- double CtcQInterAffLine::err_compute( int iter, int k,Affine2& af)
+ double CtcQInterAffLine::err_compute( int iter, int k, const IntervalVector& box,Affine2& af)
   {return epseq;}
 
   /*
@@ -449,7 +451,7 @@ IntervalVector CtcQInterLine::boxintersection( IntervalVector box, int* iter){
     return valmean;}
   */
 
- double CtcQInterAffLine::valmean_compute(int iter, int k, IntervalVector& box, Affine2& af)
+ double CtcQInterAffLine::valmean_compute(int iter, int k, const IntervalVector& box, Affine2& af)
   { 
     if (kfun==2){
    double valmean = linfun[index[iter][k]][0][0];
@@ -471,7 +473,7 @@ IntervalVector CtcQInterLine::boxintersection( IntervalVector box, int* iter){
        return linfun[iter][j+1][k];
   }
   */
-  double  CtcQInterAffLine::slope_compute(int iter, int j , int k , IntervalVector& box,Affine2& af2)
+  double  CtcQInterAffLine::slope_compute(int iter, int j , int k , const IntervalVector& box,Affine2& af2)
   {  
     
     if (kfun==2)

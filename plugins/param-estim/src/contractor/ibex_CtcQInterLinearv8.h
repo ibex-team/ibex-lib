@@ -27,7 +27,7 @@ public:
 	 */
 
   CtcQInterLinearv8(int n, const Array<Ctc>& ctc_list,double*** linfun, 
-		   double epseq, int q,  qintermethod meth=QINTERPROJ, int K=1);
+		   double epseq, int q,  qintermethod meth=QINTERPROJ);
   double compute_err_iter(IntervalVector & box, int iter);
   void point_contract(IntervalVector& box,int iter); 
   //  void point_contract_exact(IntervalVector& box,int iter); 
@@ -60,16 +60,16 @@ public:
    public :
 
    CtcQInterAffLinearv8(int n, const Array<Ctc>& ctc_list,double*** linfun, 
-		     double epseq, int q,  qintermethod meth=QINTERPROJ, int K=1);
+		     double epseq, int q,  qintermethod meth=QINTERPROJ);
 
     void point_contract(IntervalVector& box,int iter); 
 
  
  protected :
 
-   double valmean_compute(int iter, int i, IntervalVector& box, Affine2& af);
-   double slope_compute(int iter, int j, int i , IntervalVector& box,Affine2& af);
-   double err_compute( int iter, int k, IntervalVector& box,Affine2& af);
+   double valmean_compute(int iter, int i, const IntervalVector& box, Affine2& af);
+   double slope_compute(int iter, int j, int i , const IntervalVector& box,Affine2& af);
+   double err_compute( int iter, int k, const IntervalVector& box,Affine2& af);
    void compute_affine_evaluation( int i, int iter,  Affine2& af , Interval& af2);
    Interval eval_ctc(IntervalVector & box, int iter, int k);
    Interval eval_dist(IntervalVector & box, int iter, int k);

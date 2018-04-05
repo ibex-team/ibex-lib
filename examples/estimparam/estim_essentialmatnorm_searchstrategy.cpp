@@ -16,6 +16,42 @@ Interval matrixtrace (IntervalMatrix& M){
   return inter;
 }
 
+void correspondences_read(ifstream & input, vector<double>& x11,  vector<double>& y11, vector<double> & x22, vector<double> & y22){
+  double in;
+  input >> in;
+  x11.push_back(in);
+  	    cout << in << " " ;
+  input >> in;
+  y11.push_back(in);
+  	    cout << in << " " ;
+  input >> in;
+  x22.push_back(in);
+  	    cout << in << " " ;
+  input >> in;
+  y22.push_back(in);
+  	    cout << in << " " << endl;
+}
+
+// reading correspondences data for corridor and Valbonne 
+void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector<double>& y11, vector<double> & x22, vector<double> & y22)
+ {double in;
+	    input >> in;
+	    y11.push_back(in);
+	    //	    cout << in << " " ;
+	    input >> in;
+	    x11.push_back(in);
+	    //	    cout << in << " " ;
+	    input >> in;
+	    input >> in;
+	    input >> in;
+            y22.push_back(in);
+	    //	    cout << in << " " ;
+            input >> in;
+            x22.push_back(in);
+	    input >> in;
+	    input >> in;
+	    //	    cout << in << " " << endl;
+	  }
 
  int main(int argc, char** argv) {
 
@@ -23,71 +59,80 @@ Interval matrixtrace (IntervalMatrix& M){
    vector<double> x1;
    vector<double> y1;
    vector<double> x2;
-	vector<double> y2;
-	 vector<double> x11;
+   vector<double> y2;
+   vector<double> x11;
    vector<double> y11;
    vector<double> x22;
-	vector<double> y22;
-	string input_file_name=argv[1];
-	int nbp = atoi(argv[2]);
-	string calib_file_name=argv[3];
-	//	string oracle_file_name=argv[4];
+   vector<double> y22;
+   string input_file_name=argv[1];
+   bool corridor= atoi(argv[2]);
+   
+   int nbp = atoi(argv[3]);
+   cout << " corridor " << corridor << endl;
+   cout << " nbp " << nbp << endl;
+   string calib_file_name=argv[4];
+   //	string oracle_file_name=argv[4];
 	
 	
-	int Q = atoi(argv[4]);
-	double epseq = atof(argv[5]);
-        double eps1 = atof(argv[6]);
-	double prec0= atof(argv[7]);
-	double epscont= atof(argv[8]);
-	int gaplimit = atoi (argv[9]);
-	int nbr = atoi (argv[10]);
+   int Q = atoi(argv[5]);
+   double epseq = atof(argv[6]);
+   double eps1 = atof(argv[7]);
+   double prec0= atof(argv[8]);
+   double epscont= atof(argv[9]);
+   int gaplimit = atoi (argv[10]);
+   int nbr = atoi (argv[11]);
 
 
-	int dmax= atoi (argv[11]);
-	int eobj= atoi (argv[12]);
+   int dmax= atoi (argv[12]);
+   int eobj= atoi (argv[13]);
 
-	int optim = atoi(argv[13]);
-	double time0= atof(argv[14]);
-	srand (atoi(argv[15]));
+   int optim = atoi(argv[14]);
+   double time0= atof(argv[15]);
 
-	cout << input_file_name << endl;
-	ifstream input(input_file_name.c_str());
-	int nb_pairs;
-	input >> nb_pairs;
-	cout << "nb_pairs" << nb_pairs << endl;
-	while (!input.eof())
-	  {double in;
-	    input >> in;
-	    x11.push_back(in);
-	    //	    cout << in << " " ;
-	    input >> in;
-	    y11.push_back(in);
-	    //	    cout << in << " " ;
-	    input >> in;
-            x22.push_back(in);
-	    //	    cout << in << " " ;
-            input >> in;
-            y22.push_back(in);
-	    //	    cout << in << " " << endl;
-	  }
-	x11.pop_back();y11.pop_back();x22.pop_back();y22.pop_back();
-	for (int i=0; i< x11.size() ; i++){
-	  int present=0;
-	  for (int j=0; j<i; j++)
-	    if (x11[i]==x11[j] && y11[i]==y11[j]&& x22[i]==x22[j] &&  y22[i]==y22[j]){
-	      present=1; break;}
-	  if (present==0){
-	    x1.push_back(x11[i]); 
-	    y1.push_back(y11[i]); 
-            x2.push_back(x22[i]); 
-	    y2.push_back(y22[i]);
-	  }
-	}
-	
-	cout << "nb points sans doublons" << x1.size() << endl;
+   cout << " Q " << Q << endl;
+   cout << " epseq " << epseq << endl;
+   cout << " eps1 " << eps1 << endl;
+   cout << " prec0 " << eps1 << endl;
+   cout << " epscont " << epscont << endl;
 
 
-	cout << " fin lecture points " << endl;
+   cout << " dmax " << dmax << endl;
+   cout << " eobj " << eobj << endl;
+   cout << " temps limite " << time0 << endl;
+   srand (atoi(argv[16]));
+
+   cout << input_file_name << endl;
+   ifstream input(input_file_name.c_str());
+   int nb_pairs;
+   if (corridor==0){
+     input >> nb_pairs;
+     cout << "nb_pairs" << nb_pairs << endl;
+   }
+   cout << " corridor " << corridor << endl;
+   while (!input.eof()){
+     if (corridor)
+       correspondences_read_corridor(input, x11,y11,x22,y22);
+     else
+       correspondences_read(input, x11,y11,x22,y22);
+   }
+   x11.pop_back();y11.pop_back();x22.pop_back();y22.pop_back();
+   for (int i=0; i< x11.size() ; i++){
+     int present=0;
+     for (int j=0; j<i; j++)
+       if (x11[i]==x11[j] && y11[i]==y11[j]&& x22[i]==x22[j] &&  y22[i]==y22[j]){
+	 present=1; break;}
+     if (present==0){
+       x1.push_back(x11[i]); 
+       y1.push_back(y11[i]); 
+       x2.push_back(x22[i]); 
+       y2.push_back(y22[i]);
+     }
+   }
+   
+   cout << "nb points sans doublons" << x1.size() << endl;
+
+
+   cout << " fin lecture points " << endl;
 	cout << calib_file_name << endl;
 	ifstream calib(calib_file_name.c_str());
 	double b1,b2,b3,b5,b6;
@@ -184,23 +229,20 @@ Interval matrixtrace (IntervalMatrix& M){
 	if (nbp>0) p=nbp;
 	else
 	  p=x1.size();
-	int K=1;
-    	double *** linfun;
-	linfun = new double**[p];
+
+    	double ** linfun;
+	linfun = new double*[p];
 	for (int i=0; i<p; i++)
-	  {  linfun[i] = new double*[n+1];
-	    for (int j=0; j<n+1; j++)
-	      linfun[i][j]= new double[K];
+	  {  linfun[i] = new double[n+1];
+	   
 	  }
 
 
 	Array<Ctc> m_ctc(p);
 
 	Function* m_func[p] ;	
-	Function *** m_fun;
-	m_fun=new Function **[K];
-	for (int i=0; i<K; i++)
-	  m_fun[i]=new Function*[p];
+	Function ** m_fun;
+	m_fun=new Function *[p];
 
 	Ctc* ctcnorm;
 
@@ -216,7 +258,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	NumConstraint* c_norm1 = new NumConstraint(*m_norm1, GEQ);
 	ctcnorm = new CtcFwdBwd(*m_norm);
 	
-	//	m_det = new Function (v, v[0]*(v[4]-v[7]*v[5]) - v[3]*(v[1] - v[2]*v[7] ) + v[6]*(v[1]*v[5]-v[2]*v[4]));
+
 	m_det = new Function (v, v[0][0]*(v[1][1]*v[2][2]-v[2][1]*v[1][2]) - v[1][0]*(v[0][1]*v[2][2] - v[0][2]*v[2][1] ) + v[2][0]*(v[0][1]*v[1][2]-v[0][2]*v[1][1]) + eps2 );
 	m_det1 = new Function (v, v[0][0]*(v[1][1]*v[2][2]-v[2][1]*v[1][2]) - v[1][0]*(v[0][1]*v[2][2] - v[0][2]*v[2][1] ) + v[2][0]*(v[0][1]*v[1][2]-v[0][2]*v[1][1]) );
 	cdet = new CtcFwdBwd(*m_det);
@@ -293,8 +335,6 @@ Interval matrixtrace (IntervalMatrix& M){
 	try {
        	Function m_essential("essentialmatrix.txt");
 	IntervalMatrix eps (3, 3, eps2);
-	//	IntervalMatrix eps (3, 3, Interval(-1.e-8,1.e-8));
-	//	IntervalMatrix eps (3, 3, Interval(0,0));
 	Function m_essential1(v, m_essential(v) + eps);
 
 	Function m_id(v, v );
@@ -386,7 +426,8 @@ Interval matrixtrace (IntervalMatrix& M){
 				      +Interval(-epseq,epseq)
 				      ));
 
-	  m_fun[0][i]=new Function (v,(-(v[0][0]* (x1.at(i) * x2.at(i) * a1*a11  + x1.at(i) * a1 * a13 + x2.at(i) *a11* a3 + a3*a13 ) 
+
+	  m_fun[i]=new Function (v,(-(v[0][0]* (x1.at(i) * x2.at(i) * a1*a11  + x1.at(i) * a1 * a13 + x2.at(i) *a11* a3 + a3*a13 ) 
 					 +  v[0][1] * (x1.at(i)*y2.at(i)*a1*a15 + x1.at(i)* a1* a16 + y2.at(i)*a3*a15 + a3*a16)
 					 +  v[0][2]*(x1.at(i) * a1 + a3) 
 					 +  v[1][0]*(x2.at(i) *  y1.at(i) * a11*a5 + x2.at(i)* a11*a6 + y1.at(i) * a13*a5 + a6*a13)
@@ -397,27 +438,31 @@ Interval matrixtrace (IntervalMatrix& M){
 					 +  v[2][1] * ( y2.at(i)* a15 + a16)) +Interval(-epseq,epseq)));
 
 	  /*
-	  linfun[i][0][0]=1;
-          linfun[i][1][0]=x1.at(i) * x2.at(i);
-          linfun[i][2][0]=x1.at(i) * y2.at(i);
-          linfun[i][3][0]=x1.at(i) ;
-          linfun[i][4][0]=x2.at(i) * y1.at(i);
-          linfun[i][5][0]=y1.at(i) * y2.at(i);
-          linfun[i][6][0]=y1.at(i);
-          linfun[i][7][0]=x2.at(i) ;
-          linfun[i][8][0]=y2.at(i) ;
+	  linfun[i][0]=1;
+          linfun[i][1]=x1.at(i) * x2.at(i);
+          linfun[i][2]=x1.at(i) * y2.at(i);
+          linfun[i][3]=x1.at(i) ;
+          linfun[i][4]=x2.at(i) * y1.at(i);
+          linfun[i][5]=y1.at(i) * y2.at(i);
+          linfun[i][6]=y1.at(i);
+          linfun[i][7]=x2.at(i) ;
+          linfun[i][8]=y2.at(i) ;
 	  */
-// 
-	linfun[i][0][0]=0;
-	linfun[i][1][0]= -(x1.at(i) * x2.at(i) * a1*a11 + x1.at(i) * a1 * a13 + x2.at(i) * a11* a3 + a3*a13);
-	linfun[i][2][0]=-(x1.at(i)*y2.at(i)*a1*a15 + x1.at(i)* a1* a16 + y2.at(i)*a3*a15 + a3*a16);
-	linfun[i][3][0]=-(x1.at(i) * a1 + a3);
-	linfun[i][4][0]=-(x2.at(i) *  y1.at(i) * a11*a5 + x2.at(i)* a11*a6 + y1.at(i) * a13*a5 + a6*a13);
-	linfun[i][5][0]=-( y1.at(i) * y2.at(i) * a5*a15 +  y1.at(i) * a5 * a16 + y2.at(i)* a15 * a6 + a6*a16);
-	linfun[i][6][0]=-(y1.at(i)* a5 + a6);
-	linfun[i][7][0]=-(x2.at(i)*a11 +a13);
-	linfun[i][8][0]=-(y2.at(i)* a15 + a16) ;
-	linfun[i][9][0]=-1;
+
+
+/* for AffLinear, explicit function v[2][2] of the other variables */
+
+
+	linfun[i][0]=0;
+	linfun[i][1]= -(x1.at(i) * x2.at(i) * a1*a11 + x1.at(i) * a1 * a13 + x2.at(i) * a11* a3 + a3*a13);
+	linfun[i][2]=-(x1.at(i)*y2.at(i)*a1*a15 + x1.at(i)* a1* a16 + y2.at(i)*a3*a15 + a3*a16);
+	linfun[i][3]=-(x1.at(i) * a1 + a3);
+	linfun[i][4]=-(x2.at(i) *  y1.at(i) * a11*a5 + x2.at(i)* a11*a6 + y1.at(i) * a13*a5 + a6*a13);
+	linfun[i][5]=-( y1.at(i) * y2.at(i) * a5*a15 +  y1.at(i) * a5 * a16 + y2.at(i)* a15 * a6 + a6*a16);
+	linfun[i][6]=-(y1.at(i)* a5 + a6);
+	linfun[i][7]=-(x2.at(i)*a11 +a13);
+	linfun[i][8]=-(y2.at(i)* a15 + a16) ;
+	linfun[i][9]=-1;
 	
 	m_ctc.set_ref(i,(*new CtcFwdBwd(*m_func[i])));
 	}
@@ -431,77 +476,9 @@ Interval matrixtrace (IntervalMatrix& M){
 	}
 	
 
-
 	
-
-
-
-	Vector fundmat(9);
+	//  possibilité d'ajouter un oracle :  inutile en BeamSearch	
 	
-	fundmat[0]=0.0;
-	fundmat[1]=0.0;
-        fundmat[2]= 0.0;
-        fundmat[3]=0.0;
-        fundmat[4]=0.0;
-        fundmat[5]= 0.0;
-        fundmat[6]= 0.0;
-        fundmat[7]= 0.0;
-	fundmat[8]= 0.0 ;
-	
-	
-	
-	
-	/*	
-	
-	fundmat[0]=0.0;
-	fundmat[1]= -0.5;
-        fundmat[2]= 0.0;
-        fundmat[3]= -0.5;
-        fundmat[4]=0.0;
-        fundmat[5]=-0.5;;
-        fundmat[6]= 0.;
-        fundmat[7]= 0.5;
-	fundmat[8]= 0.0 ;
-	
-	*/
-
-
-	
-	/*
-	fundmat[0]=G[0][0];
-	fundmat[1]= G[0][1];
-        fundmat[2]= G[0][2];
-        fundmat[3]= G[1][0];
-        fundmat[4]= G[1][1];
-        fundmat[5]= G[1][2];
-        fundmat[6]= G[2][0];
-        fundmat[7]= G[2][1];
-	fundmat[8]= G[2][2];
-	*/
-	/*
-	fundmat[0]=G[0][0]/G[2][2];
-	fundmat[1]= G[0][1]/G[2][2];
-        fundmat[2]= G[0][2]/G[2][2];
-        fundmat[3]= G[1][0]/G[2][2];
-        fundmat[4]= G[1][1]/G[2][2];
-        fundmat[5]= G[1][2]/G[2][2];
-        fundmat[6]= G[2][0]/G[2][2];
-        fundmat[7]= G[2][1]/G[2][2];
-	fundmat[8]= 1;
-	*/
-	/*
-	for (int i=0; i< 8; i++)
-	  {_box[i][0]= fundmat[i]/fundmat[8] - eps1;
-	    _box[i][1]= fundmat[i]/fundmat[8] + eps1;
-	  }
-	*/
-	/*
-	for (int i=0; i< 9; i++)
-	  {_box[i][0]= fundmat[i] - eps1;
-	    _box[i][1]= fundmat[i]+ eps1;
-	  }
-
-	*/	
 	Vector  oraclemat(9);
 	for (int i=0; i<9; i++) oraclemat[i]=0;
 
@@ -515,31 +492,10 @@ Interval matrixtrace (IntervalMatrix& M){
 	  if (_box[i][1] > 1/sqrt(2) ) _box[i][1]=1/sqrt(2);
 	}
 
-	//	if (_box[0][0] <0 &&_box[0][1] >0) {_box[0][0]=0;}
+	//	if (_box[0][0] <0 &&_box[0][1] >0) {_box[0][0]=0;}  
 	if (_box[1][0] <0 &&_box[1][1] >0) {_box[1][1]=0;}
-	/*
-	_box[8][0]=1-1.e-8;
-	_box[8][1]=1+1.e-8;
-	*/
-	/*	
-	for (int i=0; i< 9; i++)
-	  {_box[i][0]= - eps1;
-	    _box[i][1]= eps1;
-	  }
-	*/
-	// solution ransac
-	/*
-	fundmat[0]=0.0212236;
-	fundmat[1]=-0.4939788;
-	fundmat[2]=0.0420022;
-	fundmat[3]=0.1820916 ;
-	fundmat[4]=-0.0056804;
-	fundmat[5]=-0.6818421;
-	fundmat[6]=-0.0376943;
-        fundmat[7]=0.5039347 ;
-	fundmat[8]=0.0173491;
-	*/
-	
+
+
 
 	IntervalVector box(9,_box);
 
@@ -580,7 +536,7 @@ Interval matrixtrace (IntervalMatrix& M){
 	//	CtcQInterAffLinear ctcq(9,m_ctc,linfun,epseq,Q,QINTERCORE);
 	//	CtcCompo ctcqf0(*cdet,c_essential, ctcq);
 	//	CtcCompo ctcqf1(*ctcnorm,*cdet,c_essential);
-		//		CtcCompo ctcqf0(ctcqf1,lphull);
+	//	CtcCompo ctcqf0(ctcqf1,lphull);
 	//	CtcCompo ctcqf0(*ctcnorm,*cdet,c_essential, lphull, ctcq);
         //	CtcCompo ctcqf0(*ctcnorm,*cdet,c_essential,  ctcq);
 
@@ -593,7 +549,6 @@ Interval matrixtrace (IntervalMatrix& M){
 	//	CtcCompo ctcqf0(lphull,  ctcq);
 	//	CtcCompo ctcqf0(hc44cid,  acidhc4,lphull,ctcq);
 
-	//	CtcCompo ctcqf0(hc44cid, acidhc4,lphull,ctcq);
 	CtcCompo ctcqf0(hc44cid, lphull,  ctcq);
 	//	CtcCompo ctcqf0(lphull,  ctcq);
 	//	CtcCompo ctcqf0(hc44cid, lphull,  ctcq, hc44cid, lphull);
@@ -603,9 +558,9 @@ Interval matrixtrace (IntervalMatrix& M){
 	//	CtcFixPoint ctcf0(ctcqf1, 0.1);
 	//	CtcCompo ctcqf0(ctcf0, ctcq);
 	//	CtcCompo ctcqf0(*ctcnorm,*cdet,c_essential, ctcq);
-	//CtcCompo ctcqf0(*cdet, c_essential,  ctcq);
+	//      CtcCompo ctcqf0(*cdet, c_essential,  ctcq);
 
-	//CtcCompo ctcqf0(*cdet,  ctcq);
+	//       CtcCompo ctcqf0(*cdet,  ctcq);
 	CtcFixPoint ctcf(ctcqf0,0.2);
 
 
@@ -614,9 +569,10 @@ Interval matrixtrace (IntervalMatrix& M){
 	cout << " avant solver " << endl;
 
 
-
+	/*
         int m = ctcq.activepoints_contract_count(box);
 	cout << " nb inliers " << m << endl;
+	*/
 
 	SolverOptConstrainedQInter* s;
 
@@ -640,7 +596,6 @@ Interval matrixtrace (IntervalMatrix& M){
 	s->gaplimit=gaplimit;
 	//s->tolerance_constraints_number=5;
 	s->tolerance_constraints_number=10000;  // no second call for feasible point 
-	//	s->oracle=fundmat;
 	//	s->oracle=oraclemat;
 	s->str.with_oracle=0;
 	//	cout << " oracle " << oraclemat << endl;
@@ -670,6 +625,8 @@ Interval matrixtrace (IntervalMatrix& M){
 
 	CtcQInterAffLinear ctcq2(9,m_ctc,linfun,epseq,Q);
 	int nb= ctcq2.activepoints_contract_count(bestsolbox);
+
+	//int nb=ctcq2.midactivepoints_count(s->bestsolpoint);
 	cout << " nb inliers " << nb << " " << ctcq2.points->size() << endl;
 	
 	Matrix msol (3,3);

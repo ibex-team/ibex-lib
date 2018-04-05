@@ -29,10 +29,10 @@ class CtcQInterAff : virtual public CtcQInter {
 
  public:
 
-  CtcQInterAff(int n, const Array<Ctc>& ctc_list, int q, qintermethod meth=QINTERPROJ,  int kfun=1);
-  //  CtcQInterAff(int n, const Array<Ctc>& ctc_list, int pmax, int q,  qintermethod meth=QINTERPROJ,  int kfun=1);
- CtcQInterAff(int n, const Array<Ctc>& ctc_list, int q, Function*** funlist,qintermethod meth=QINTERPROJ,  int kfun=1 );
- CtcQInterAff(int n, int nb_obs1, const Array<Ctc>& ctc_list, int q,  qintermethod meth=QINTERPROJ, int kfun=1);
+  CtcQInterAff(int n, const Array<Ctc>& ctc_list, int q, qintermethod meth=QINTERPROJ);
+
+ CtcQInterAff(int n, const Array<Ctc>& ctc_list, int q, Function*** funlist,qintermethod meth=QINTERPROJ);
+ CtcQInterAff(int n, int nb_obs1, const Array<Ctc>& ctc_list, int q,  qintermethod meth=QINTERPROJ);
    ~CtcQInterAff();
 
 
@@ -52,11 +52,10 @@ class CtcQInterAff : virtual public CtcQInter {
         void init_interaff(bool fun);
 	Interval* interaf;
 	virtual void compute_affine_evaluation( int i, int iter,  Affine2& af, Interval& af2);
-	virtual double slope_compute(int iter, int j, int k , IntervalVector& box, Affine2& af);
+	virtual double slope_compute(int iter, int j, int k , const IntervalVector& box, Affine2& af);
 	vector<double> aff_dir; 
-	virtual double err_compute( int iter, int k,  IntervalVector& box,Affine2& af);
-	virtual double	valmean_compute(int iter, int i, IntervalVector& box, Affine2& af);
-	//	void affine_projection (IntervalVector& box, int& p);
+	virtual double err_compute( int iter, int k,  const IntervalVector& box,Affine2& af);
+	virtual double	valmean_compute(int iter, int i, const IntervalVector& box, Affine2& af);
 	void affine_projection (int& p);
 	virtual int affine_threshold();
 

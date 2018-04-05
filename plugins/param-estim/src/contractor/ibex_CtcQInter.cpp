@@ -128,7 +128,7 @@ void CtcQInter::init ()
   */
 
 
-int CtcQInter::activepoints_count(IntervalVector& box){
+int CtcQInter::activepoints_count(const IntervalVector& box){
     int p=0;
     //    cout << " points size active count " << points->size() << " box " << box <<endl;
     list<int>::iterator iter = points->begin() ;
@@ -197,15 +197,9 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
     //    cout << " box  contract count " << box << endl;
     while (iter != points->end()){
       IntervalVector box1=box;
-      /*
-      if (points->size() < 30)
-	cout << " iter " << *iter << " box " << box ;
-      */
+      
       //      point_contract_exact(box1,*iter); 
-      /*
-      if (points->size() < 30)
-	cout  << " box1 " << box1 << endl ;
-      */
+     
       point_contract(box1,*iter); 
       if (box1.is_empty())
 	iter=points->erase(iter);
@@ -274,9 +268,13 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
     return box;
   }
 
+  // contraction : 
+  // 1 ctc_contract computes the number p of non empty observations in the current box
+  // 2 if p >= q , the q-intersection algorithm is called
+
   void CtcQInter::contract(IntervalVector& box) {
-    //    cout << " debut contract " << endl;
-// p is the number of non empty contract results
+    //    cout << " appel contract " << endl;
+    // p is the number of non empty contract results
     int p=ctc_contract(box);
 
     if (box.is_empty()) return;
@@ -284,13 +282,12 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
 
     direct_qintercontract (p, box);
     if (p< qmax) qmax=p;
-    //    cout << " fin  contract " << endl;
   }
 
   int CtcQInter::effective_size(const IntervalVector &box) {return box.size();} 
 
-
-
+  //  call the q-intersection algorithm an all dimensions of box
+  //  if the box diam is under diam_threshold  (default values box_maxdiam=0 and diam_threshold=0.1)
   void CtcQInter::direct_qintercontract (int& p, IntervalVector & box){
     int p0=p;
     //    cout << " avant qinter contract " << " p " << p << " max_diam  " << box_maxdiam << box << endl;
@@ -355,17 +352,17 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
     return p;
   }
 
+
   double  CtcQInter::max_diam_threshold(const IntervalVector& box) {return 0.0;}
 
-int  CtcQInter::ctc_contract(IntervalVector& box)
-{  int p=0;
-  box_maxdiam=max_diam_threshold(box);
-  //   box_maxdiam=0;
-   list<int>::iterator iter = points->begin() ;
-   //   cout << " nb points  " << points->size() <<  " box max diam " << box_maxdiam << endl;
-  while (iter != points->end())
+  // computes the number of non empty observations (side effect, removes these observations from the  list points )
+  int  CtcQInter::ctc_contract(IntervalVector& box){ 
+    int p=0;
+    box_maxdiam=max_diam_threshold(box);
     
-    { 
+    list<int>::iterator iter = points->begin() ;
+    //   cout << " nb points  " << points->size() <<  " box max diam " << box_maxdiam << endl;
+    while (iter != points->end()) { 
 
       (*boxes)[*iter]=box;
       //	cout << *iter <<  " box " << box << " p " << p << endl;;
@@ -385,8 +382,9 @@ int  CtcQInter::ctc_contract(IntervalVector& box)
 	    iter++;
 	}
     }
-  return p;
-}
+    return p;
+  }
+
 
   void CtcQInter:: point_fwdbwd(IntervalVector& box, int iter)
   {CtcQInter::point_contract (box,iter);
@@ -446,8 +444,8 @@ void CtcQInter::ctc_contract_all(IntervalVector& box)
 
       iter++;
       if (box1.is_empty()) {
-	outliers++; 
-	if (outliers== gap+1) 
+	outliers++;   // in this subset of measurements, there is an outlier
+	if (outliers== gap+1) // the maximum number of outliers is passed; the function returns true
 	  return true;
 	else  box1=box;
 	}

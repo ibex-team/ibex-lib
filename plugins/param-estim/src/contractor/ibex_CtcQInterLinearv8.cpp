@@ -179,8 +179,8 @@ void CtcQInterLinearv8::fwdbwd(IntervalVector & box, int iter, int k){
 
 
   CtcQInterLinearv8::CtcQInterLinearv8(int n, const Array<Ctc>& ctc_list, double*** linfun, 
-				 double epseq, int q, qintermethod meth, int K ) : 
-    CtcQInter(n,ctc_list,q,meth,K),linfun(linfun),
+				 double epseq, int q, qintermethod meth) : 
+    CtcQInter(n,ctc_list,q,meth),linfun(linfun),
     epseq(epseq) {eps= Interval(-epseq,epseq); init();
   }
   /*
@@ -251,19 +251,19 @@ int CtcQInterLinearv8::activepoints_contract_count(IntervalVector& box){
 
 
 CtcQInterAffLinearv8::CtcQInterAffLinearv8(int n, const Array<Ctc>& ctc_list, double*** linfun, 
-				 double epseq, int q,  qintermethod meth, int K ) : 
-  CtcQInter(n,ctc_list,q,meth,K),
-  CtcQInterLinearv8 (n,ctc_list,linfun,epseq,q,meth,K),
-  CtcQInterAff(n,ctc_list,q,meth,K)
+				 double epseq, int q,  qintermethod meth ) : 
+  CtcQInter(n,ctc_list,q,meth),
+  CtcQInterLinearv8 (n,ctc_list,linfun,epseq,q,meth),
+  CtcQInterAff(n,ctc_list,q,meth)
         {
 	}
 
 
- double CtcQInterAffLinearv8::err_compute( int iter, int k, IntervalVector& box,Affine2& af)
+ double CtcQInterAffLinearv8::err_compute( int iter, int k, const IntervalVector& box,Affine2& af)
  {return (fabs( epseq * linfun[iter][0][k]));}
 
   
-double CtcQInterAffLinearv8::valmean_compute(int iter, int k, IntervalVector& box, Affine2& af)
+double CtcQInterAffLinearv8::valmean_compute(int iter, int k, const IntervalVector& box, Affine2& af)
 { int nbvar=nb_var;
      double valmean = linfun[iter][0][k];
     for (int j =0; j< nbvar-1; j++)
@@ -272,7 +272,7 @@ double CtcQInterAffLinearv8::valmean_compute(int iter, int k, IntervalVector& bo
 
 
 
-  double  CtcQInterAffLinearv8::slope_compute(int iter, int j , int k , IntervalVector& box,Affine2& af2)
+  double  CtcQInterAffLinearv8::slope_compute(int iter, int j , int k , const IntervalVector& box,Affine2& af2)
   {    return linfun[iter][j+1][k];
   }
 
@@ -442,9 +442,9 @@ void CtcQInterLinearv8::fwdbwd(IntervalVector & box, int iter, int k){
 
   /*
   CtcQInterLinearSampson::CtcQInterLinearSampson(int n, const Array<Ctc>& ctc_list, double*** linfun, 
-				 double epseq, int q, qintermethod meth, int K ) : 
-    CtcQInter(n,ctc_list,q,meth,K),
-    CtcQInterLinear (n,ctc_list,linfun,epseq,q,meth,K) {
+				 double epseq, int q, qintermethod meth ) : 
+    CtcQInter(n,ctc_list,q,meth),
+    CtcQInterLinear (n,ctc_list,linfun,epseq,q,meth) {
   }
 
 Interval CtcQInterLinearSampson::eval_ctc(IntervalVector & box, int iter, int k){

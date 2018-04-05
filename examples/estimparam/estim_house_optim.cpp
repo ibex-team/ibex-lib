@@ -280,8 +280,8 @@ int main(int argc, char** argv) {
 
 
 	    
-	    SolverOptQInter s(ctcf,bs,str,ctcq,1);
-	    //	    SolverOptQInter s(ctcf,bs,str,ctcq,2);
+	    //	    SolverOptQInter s(ctcf,bs,str,ctcq,1);
+	    SolverOptQInter s(ctcf,bs,str,ctcq,2);
 
 	    s.str.with_oracle=false;
 	    s.str.with_storage=true;

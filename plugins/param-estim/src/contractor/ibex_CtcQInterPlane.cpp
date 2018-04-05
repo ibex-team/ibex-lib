@@ -123,11 +123,6 @@ double CtcQInterPlane::eval_dist_mid(Vector & vec, int iter, int k)
   }
 
 
-
-  /* fwd  evaluation of the linear constraint  box[n]= linfun[iter][1][k]* box[0] + linfun[iter][2][k]* box[1]  + ...  
-for n=2,3,4 */
-  //  void CtcQInterPlane::fwd(IntervalVector & box, int iter)
-
   // for Plane constraint, simple forward evaluation of the constraint (fwdbwd too expensive)  
   void CtcQInterPlane::point_contract(IntervalVector & box, int iter)
   {
@@ -286,15 +281,15 @@ void CtcQInterPlane::init ()
 
 
   CtcQInterPlane::CtcQInterPlane(int n,int nb_obs, const Array<Ctc>& ctc_list, double** linfun, 
-				 double epseq, int q, qintermethod meth, int K ) : 
-    CtcQInter(n,nb_obs,ctc_list,q,meth,K),linfun(linfun),
+				 double epseq, int q, qintermethod meth) : 
+    CtcQInter(n,nb_obs,ctc_list,q,meth),linfun(linfun),
     epseq(epseq) {eps= Interval(-epseq,epseq);
     // init();
   }
 
   CtcQInterPlane::CtcQInterPlane(int n, int nb_obs, const Array<Ctc>& ctc_list, double** linfun, int** index, IntervalMatrix * boxesini,
-				 double epseq, int q, qintermethod meth, int K ) : 
-    CtcQInter(n,nb_obs,ctc_list,q,meth,K),linfun(linfun),
+				 double epseq, int q, qintermethod meth) : 
+    CtcQInter(n,nb_obs,ctc_list,q,meth),linfun(linfun),
     epseq(epseq), boxesini(boxesini), index(index) {eps= Interval(-epseq,epseq);
     // init();
   }
@@ -774,26 +769,25 @@ int CtcQInterPlane::activepoints_contract_count(IntervalVector& box){
 
 
   CtcQInterAffPlane::CtcQInterAffPlane(int n, int nb_obs, const Array<Ctc>& ctc_list, double** linfun, 
-				 double epseq, int q,  qintermethod meth, int K ) : 
-  CtcQInter(n,ctc_list,q,meth,K),
-  CtcQInterPlane (n,nb_obs,ctc_list,linfun,epseq,q,meth,K),
-  CtcQInterAff(n,ctc_list,q,meth,K)
+				 double epseq, int q,  qintermethod meth) : 
+  CtcQInter(n,ctc_list,q,meth),
+  CtcQInterPlane (n,nb_obs,ctc_list,linfun,epseq,q,meth),
+  CtcQInterAff(n,ctc_list,q,meth)
         {
 	}
 
 
-  CtcQInterAffPlane::CtcQInterAffPlane(int n, int nb_obs,const Array<Ctc>& ctc_list, double** linfun, int** index, IntervalMatrix* boxes,
-				 double epseq, int q,  qintermethod meth, int K ) : 
-  CtcQInter(n,ctc_list,q,meth,K),
-    CtcQInterPlane (n,nb_obs,ctc_list,linfun,index,boxes,epseq,q,meth,K),
-    CtcQInterAff(n,nb_obs,ctc_list,q,meth,K)
+  CtcQInterAffPlane::CtcQInterAffPlane(int n, int nb_obs,const Array<Ctc>& ctc_list, double** linfun, int** index, IntervalMatrix* boxes, double epseq, int q,  qintermethod meth) : 
+  CtcQInter(n,ctc_list,q,meth),
+    CtcQInterPlane (n,nb_obs,ctc_list,linfun,index,boxes,epseq,q,meth),
+    CtcQInterAff(n,nb_obs,ctc_list,q,meth)
         {
 	}
 
-  double CtcQInterAffPlane::err_compute( int iter, int k, IntervalVector& box,Affine2& af)
+  double CtcQInterAffPlane::err_compute( int iter, int k, const IntervalVector& box,Affine2& af)
   {return epseq;}
 
- double CtcQInterAffPlane::valmean_compute(int iter, int k, IntervalVector& box, Affine2& af){
+ double CtcQInterAffPlane::valmean_compute(int iter, int k, const IntervalVector& box, Affine2& af){
    if (kfun==3){
      double valmean = linfun[index[iter][k]][0];
      for (int j =0; j< nb_var-1; j++)
@@ -811,11 +805,8 @@ int CtcQInterPlane::activepoints_contract_count(IntervalVector& box){
 
 
 
-  double  CtcQInterAffPlane::slope_compute(int iter, int j , int k , IntervalVector & box, Affine2& af2)
+  double  CtcQInterAffPlane::slope_compute(int iter, int j , int k , const IntervalVector & box, Affine2& af2)
   {  
-    if (kfun==3)
-      return linfun[index[iter][k]][j+1];
-    else
       return linfun[iter][j+1];
   }
 
@@ -835,9 +826,9 @@ int CtcQInterPlane::activepoints_contract_count(IntervalVector& box){
   void CtcQInterAffPlane::compute_affine_evaluation( int i, int iter,  Affine2& af, Interval& af2) {
    ; }
   
-  // the qinter in initial directions is not called  if the gap between the number of posiblr and Q is greater than the threshold 
-    int CtcQInterAffPlane::affine_threshold(){return 10;}
-  //  int CtcQInterAffPlane::affine_threshold(){return INT_MAX;}
+  // the qinter in initial directions is not called  if the gap between the number of possible and Q is greater than the affine threshold 
+  //int CtcQInterAffPlane::affine_threshold(){return 10;}
+    int CtcQInterAffPlane::affine_threshold(){return INT_MAX;}
 
 
   // the qinter in initial directions is not called  if the threshold is > 0.1

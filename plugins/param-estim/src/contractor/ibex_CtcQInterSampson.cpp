@@ -20,8 +20,8 @@ namespace ibex {
 
   
   CtcQInterSampson::CtcQInterSampson(int n, const Array<Ctc>& ctc_list, double*** linfun,double** mfun1,
-				   double epseq, int q, qintermethod meth, int K ) : 
-    CtcQInter(n,ctc_list,q,meth,K),linfun(linfun),mfun1(mfun1),
+				   double epseq, int q, qintermethod meth) : 
+    CtcQInter(n,ctc_list,q,meth),linfun(linfun),mfun1(mfun1),
     epseq(epseq) {eps= Interval(-epseq,epseq); eps0=Interval(0,epseq);
     init();
   }
@@ -179,10 +179,10 @@ double CtcQInterSampson::mideval_sampson(const Vector & box, int i, int k){
  }
   */
 
-  CtcQInterAffSampson::CtcQInterAffSampson(int n, const Array<Ctc>& ctc_list, double*** linfun, double** linfun1, Function *** mfun, double epseq, int q, qintermethod meth , int K) :
-    CtcQInter(n,ctc_list,q,meth,K),
-    CtcQInterSampson (n,ctc_list,linfun,linfun1,epseq,q,meth,K),
-    CtcQInterAff(n,ctc_list,q,mfun,meth,K)
+  CtcQInterAffSampson::CtcQInterAffSampson(int n, const Array<Ctc>& ctc_list, double*** linfun, double** linfun1, Function *** mfun, double epseq, int q, qintermethod meth ) :
+    CtcQInter(n,ctc_list,q,meth),
+    CtcQInterSampson (n,ctc_list,linfun,linfun1,epseq,q,meth),
+    CtcQInterAff(n,ctc_list,q,mfun,meth)
     {}
 
   int CtcQInterAffSampson::effective_size(const IntervalVector & box)

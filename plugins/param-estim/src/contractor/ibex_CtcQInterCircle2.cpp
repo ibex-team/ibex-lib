@@ -188,7 +188,7 @@ IntervalVector CtcQInterCircle2::boxintersection( IntervalVector& box, int iter1
    return (boxintersection( box, iter[0], iter[1], iter[2]));
  }
 
-  CtcQInterCircle2::CtcQInterCircle2(int n, const Array<Ctc>& ctc_list, double*** measure, double epseq, int q, qintermethod meth, int K ) : CtcQInter(n,ctc_list,q,meth,K),measure(measure),epseq(epseq) {CtcQInter::init();}
+  CtcQInterCircle2::CtcQInterCircle2(int n, const Array<Ctc>& ctc_list, double*** measure, double epseq, int q, qintermethod meth) : CtcQInter(n,ctc_list,q,meth),measure(measure),epseq(epseq) {CtcQInter::init();}
 
 
  bool  CtcQInterCircle2::contract_with_outliers (IntervalVector& box, int gap)  {
@@ -275,7 +275,7 @@ void CtcQInterCircle2::ctc_contract_all(IntervalVector& box){
    //   fwd(box,iter);
 }
 
-  double CtcQInterAffCircle2::err_compute(int iter, int k, IntervalVector& box, Affine2& af)
+  double CtcQInterAffCircle2::err_compute(int iter, int k, const IntervalVector& box, Affine2& af)
   {
 
     double err1=0;
@@ -285,7 +285,7 @@ void CtcQInterCircle2::ctc_contract_all(IntervalVector& box){
     return epseq + err1 ;
   }
 
-  double CtcQInterAffCircle2::valmean_compute(int iter, int k, IntervalVector& box, Affine2& af)
+  double CtcQInterAffCircle2::valmean_compute(int iter, int k, const IntervalVector& box, Affine2& af)
   { double valmean = 0;
     for (int j =0; j< nb_var-1; j++)
       {
@@ -296,7 +296,7 @@ void CtcQInterCircle2::ctc_contract_all(IntervalVector& box){
     return valmean;
   }
  
-  double CtcQInterAffCircle2::slope_compute(int iter, int j, int k, IntervalVector& box, Affine2& af)
+  double CtcQInterAffCircle2::slope_compute(int iter, int j, int k, const IntervalVector& box, Affine2& af)
   {  return (
 	     (std::pow(box[j].ub()-measure[iter][j][k],2) - std::pow(box[j].lb()-measure[iter][j][k],2)) / box[j].diam() 
 	     );
@@ -306,13 +306,16 @@ void CtcQInterCircle2::ctc_contract_all(IntervalVector& box){
   {;}
 
 
- CtcQInterAffCircle2::CtcQInterAffCircle2(int n, const Array<Ctc>& ctc_list, double*** measure, double epseq, int q,  qintermethod meth, int K ) :
-   CtcQInter(n,ctc_list,q,meth,K),
-   CtcQInterCircle2(n,ctc_list,measure,epseq, q,meth,K),
-   CtcQInterAff(n,ctc_list,q,meth,K) {;}
+ CtcQInterAffCircle2::CtcQInterAffCircle2(int n, const Array<Ctc>& ctc_list, double*** measure, double epseq, int q,  qintermethod meth) :
+   CtcQInter(n,ctc_list,q,meth),
+   CtcQInterCircle2(n,ctc_list,measure,epseq, q,meth),
+   CtcQInterAff(n,ctc_list,q,meth) {;}
 
   //  int  CtcQInterAffCircle2::affine_threshold ()  {return 10;}
   int  CtcQInterAffCircle2::affine_threshold ()  {return INT_MAX;}
+
+  double  CtcQInterAffCircle2::max_diam_threshold (const IntervalVector& box)  {return 1.0;}
+  //  int  CtcQInterAffCircle2::max_diam_threshold ()  {return 0.0;}
 
 
   /*

@@ -28,9 +28,9 @@ public:
 	 */
 
   CtcQInterPlane(int n, int nb_obs, const Array<Ctc>& ctc_list,double** linfun, 
-		   double epseq, int q,  qintermethod QINTERPROJ, int K=1);
+		   double epseq, int q,  qintermethod QINTERPROJ);
   CtcQInterPlane(int n, int nb_obs,const Array<Ctc>& ctc_list,double** linfun, int**index, IntervalMatrix * boxes,
-		   double epseq, int q,  qintermethod QINTERPROJ, int K=1);
+		   double epseq, int q,  qintermethod QINTERPROJ);
   double compute_err_iter (Vector & mid, int iter);
   void point_contract(IntervalVector& box,int iter); 
   void point_contract_exact(IntervalVector& box,int iter); 
@@ -81,15 +81,15 @@ public:
    public :
 
    CtcQInterAffPlane(int n, int nb_obs, const Array<Ctc>& ctc_list,double** linfun, 
-		     double epseq, int q,  qintermethod QINTERPROJ, int K=1);
+		     double epseq, int q,  qintermethod QINTERPROJ);
    CtcQInterAffPlane(int n, int nb_obs, const Array<Ctc>& ctc_list,double** linfun, int** index,IntervalMatrix* boxes,
-		     double epseq, int q,  qintermethod QINTERPROJ, int K=1);
+		     double epseq, int q,  qintermethod QINTERPROJ);
 
 
  protected :
-   double valmean_compute(int iter, int i, IntervalVector& box, Affine2& af);
-   double slope_compute(int iter, int j, int i , IntervalVector & box, Affine2& af);
-   double err_compute( int iter, int k, IntervalVector & box,Affine2& af);
+   double valmean_compute(int iter, int i, const IntervalVector& box, Affine2& af);
+   double slope_compute(int iter, int j, int i , const IntervalVector & box, Affine2& af);
+   double err_compute( int iter, int k, const IntervalVector & box,Affine2& af);
    void compute_affine_evaluation( int i, int iter,  Affine2& af , Interval& af2);
    int affine_threshold();
    double max_diam_threshold(const IntervalVector& box);

@@ -22,26 +22,11 @@ using namespace ibex;
 
 
 
-
-const double epseq=0.001;                                        // epsilon on plane constraint
+const double epseq=0.001;             // epsilon on plane constraint
 
 /*===========================================*/
 
 
-
-bool  max_dist (IntervalVector& v1, IntervalVector& v2, Vector& prec)
-{double d;
-  for (int i=0; i< v1.size(); i++)
-    { if (v1[i].lb() > v2[i].ub()) 
-	d= v1[i].lb() - v2[i].ub();
-      else
-	if (v2[i].lb() > v1[i].ub())
-	  d= v2[i].lb() - v1[i].ub();
-      if (d > 10* prec[i]) return false;
-    }
-  
-  return true;
-}
 	 
 int main(int argc, char** argv) {
 
@@ -58,10 +43,10 @@ int main(int argc, char** argv) {
 	int gaplimit= atoi(argv[5]);
 	int nbrand= atoi(argv[6]);
 	string bisect = argv[7];
+
 	int Qi;
 	switch(pb)
 	  {case 1 : {Qi=0.1001*NP;break;}
-	  //	  {case 1 : {Qi=0.099*NP;break;}
 	  case 2 : {Qi=0.0501*NP;break;}
 	  case 3 : {Qi=0.0401*NP;break;}
 	  case 4 : {Qi=0.0201*NP;break;}
@@ -184,11 +169,11 @@ int main(int argc, char** argv) {
 	
 	  if (pb==6)	for (int j=0; j< NP/2;j++) x->push_back(rand()%256);
 	}
-	srand(atoi(argv[10]));
+
 
 	//	cout << " nb points " << x->size() <<  " " << y->size() << " " << z->size() << endl;
 	//	for (int i=0; i< x->size(); i++) cout << (*x)[i] <<  " " << (*y)[i] << " " << (*z)[i] <<endl;
-	
+	srand(atoi(argv[10])); // graine ici pour que la variation de la graine ne joue que sur l'execution.	
 	int n=3;
 	
 	Variable u(3);
@@ -225,18 +210,6 @@ int main(int argc, char** argv) {
 	  }
 	
 	
-	/*
-	double *** linfun1;
-
-	linfun1 = new double**[p];
-	    for (int i=0; i<p; i++)
-	      {  linfun1[i] = new double*[n];
-		for (int j=0; j<n; j++)
-       	  linfun1[i][j]= new double[1];
-	      }	   
-	*/
-	//	IntervalVector** boxes = new IntervalVector* [np];
-
 
 
 	Function* m_f0;
@@ -251,27 +224,7 @@ int main(int argc, char** argv) {
 	start0= clock();
 	int Q0=Q;
 
-	//	int* index2 = new int [np];
-	//	int* index3= new int [np];
 	
-	/*
-	if (K==3)
-	  for (int nt=0; nt<NT2;nt++)
-	    for (int i=0; i<p; i++) {
-	      int j = rand() % (p-1);
-	      int k = rand() % (p-2);
-	      if (j>=i) j=j+1;
-	      if (k >=j && k >= i) k=k+2;
-	      else
-		{if (k >=j || k>=i ) k=k+1;
-		  if (k==i || k==j) k=k+1;
-		}
-	      index2[i+p*nt]=j;
-	      index3[i+p*nt]=k;
-	    }
-	*/
-
-
 
 	int Qoct=Q;
 	Vector bestsol (3);
@@ -300,12 +253,12 @@ int main(int argc, char** argv) {
 	    IntervalVector box(3,_box);
 	    
 	    m_f0= new Function(v, (diry*v[0]+dirz*v[1]-1));
+	
+	    ctc0=new CtcFwdBwd(*m_f0,LEQ);
 
-            ctc0=new CtcFwdBwd(*m_f0,LEQ);
 	    for (int i=0; i<p; i++) {
 	 
-	  //	  Function fi (v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-v[2]-Interval(-epseq,epseq)));
-
+	  
 	      m_func[i] = new Function(v,(x->at(i) +v[0]*(y->at(i)- diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-v[2]-Interval(-epseq,epseq)));
 
 	      m_ctc.set_ref(i,(*new CtcFwdBwd(*m_func[i])));
@@ -346,14 +299,7 @@ int main(int argc, char** argv) {
 
 	    Vector prec(3);
 
-	    /*	    
-	    prec[0]=0.001;
-	    prec[1]=0.001;
-	    prec[2]=0.005;
-	    */
-	    
-
-	    // les precisions dans l'article soumis
+	    // les precisions dans l'article   ICTAI
 
 
 	    /*
@@ -376,8 +322,8 @@ int main(int argc, char** argv) {
 	    proba[1]=0.33;
 	    proba[2]=0.34;
 	    //CellStack buff;
-	     CellHeapQInter buff;
-	     BeamSearch str(buff);
+	    CellHeapQInter buff;
+	    BeamSearch str(buff);
 	     //	    BestFirstSearch str (buff);
 	     //	     DepthFirstSearch str (buff);
 	    Bsc * bs;
@@ -390,18 +336,16 @@ int main(int argc, char** argv) {
 	    
 	    // RoundRobinQInter bs (2,prec,0.5);
 	    //	ProbaBisect bs (prec, proba, 0.45);
-	    // LargestFirst bs (prec,0.5);
-
 
             CtcQInter* ctcq;	    
 	    //	    CtcQInter ctcq(3,m_ctc1,Q);
 	    //	    ctcq = new CtcQInterAff (3,m_ctc1,Q,m_fun,QINTERPROJ,K);
 	    
 	    if (flist==1)
-	      ctcq = new CtcQInterAffPlane (n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ,K);
+	      ctcq = new CtcQInterAffPlane (n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ);
 	    else
 	      //  ctcq= new  CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ,K);
-	      ctcq= new  CtcQInter (n,m_ctc1,Qoct,QINTERPROJ,K);
+	      ctcq= new  CtcQInter (n,m_ctc1,Qoct,QINTERPROJ);
 	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
 	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERCORE,K);
 	    //	    CtcQInterPlane  ctcq(n,m_ctc1,linfun,epseq,Q, QINTERCORE,K );
@@ -414,43 +358,15 @@ int main(int argc, char** argv) {
 	    //	    CtcCompo ctcqf0(*ctc0,ctcid);
 
 
-	    //	    CtcFixPoint ctcf(ctcqf0,0.1);
-	    CtcFixPoint ctcf(ctcid,0.1);
+	    CtcFixPoint ctcf(ctcqf0,0.1);
+	    //CtcFixPoint ctcf(ctcid,0.1);
 
-	    // Ctc3BCid cid(ctcqf0,5,1,3); 	    
-	    /*
-	   K=1;
-	    
-	    for (int i=0; i<p; i++)  {
-
-	      //		m_ctc1.set_ref(i,m_ctc[i]);
-
-	//		m_fun[0][i]= new Function(v,(x->at(i) +v[0]*(y->at(i)-diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-Interval(-epseq,epseq)));
-		linfun1[i][0][0]=x->at(i);
-		linfun1[i][1][0]=y->at(i)-diry*x->at(i);
-		linfun1[i][2][0]=z->at(i)-dirz*x->at(i);
-	      }
-	    Q=40;
-	    intf list=0;
-	    CtcQInterPlane ctcq(n,m_ctc,linfun1,boxes,epseq,Qf,list,QINTERPROJ,K);
-	    cout << " apres contracteur " << endl;
-	    for (int i=0 ; i<np; i++)
-	      {int count =0;
-		if (!(boxes[i]->is_empty()))
-		  {//cout << i << " " << *(boxes[i])  << endl;
-		    countc=ctcq.points_count(*(boxes[i]));
-		    if (count >= Q) 
-		      cout << i << " " << *(boxes[i])  << " " << count << endl;
-		  }
-	      }
-	    cout << " apres comptage " << endl;
-	    K=3;
-	    */
+	  
 	    Ctc* ctcs;
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
 
-	    //SolverOptQInter s(*ctcs,*bs,str,*ctcq,1);
+	    //	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,1);
 	    
 	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,2);
 	    s.str.with_oracle=0;
@@ -459,12 +375,7 @@ int main(int argc, char** argv) {
 	      s.str.with_storage=true;
 	    else
 	      s.str.with_storage=false;
-	    //SolverQInter s(*ctcs,*bs,buff,*ctcq);
-	    //	    OptimQInter s(*ctcs,*bs,buff,*ctcq);
-		    //	    cout << "ctcq.qmax" << ctcq->qmax << endl;
-	    //OptimizerQInter s(*ctcs,*bs,buff,*ctcq);
 
-	    //Solver s(ctcqf0,bs,buff);
 	    s.time_limit = 3600;
 	    s.epsobj=1;
 	    s.trace=1;
@@ -501,6 +412,10 @@ int main(int argc, char** argv) {
 	end = clock();
 	totaltime += ((double)(end)-(double)(start))/CLOCKS_PER_SEC;
 	start= clock();
+	delete m_f0;
+	delete ctc0;
+	delete ctcq;
+	delete bs;
 	  }
 	  				       
 	end=clock();
@@ -515,21 +430,7 @@ int main(int argc, char** argv) {
 	
 	delete [] m_func;
 	
-	/*
-	for (int i=0; i<p; i++)
-	  {for (int j=0; j<n; j++)
-	      delete [] linfun1[i][j];
-	    
-	    delete [] linfun1[i];
-	  }
 
-	delete [] linfun1;
-
-
-	
-	delete[] index2;
-	delete[] index3;
-	*/	
 };
 
 
