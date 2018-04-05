@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Functions
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Jan 5, 2012
+ * Last Update : Nov 22, 2017
  * ---------------------------------------------------------------------------- */
 
 #include <sstream>
@@ -23,9 +24,22 @@
 #include "ibex_UnknownFileException.h"
 #include "ibex_SyntaxError.h"
 
-extern void ibexparse_string(const char* syntax);
+#ifndef _WIN32 // MinGW does not support mutex
+#include <mutex>
+namespace {
+std::mutex mtx;
+}
+#define LOCK mtx.lock()
+#define UNLOCK mtx.unlock()
+#else
+#define LOCK
+#define UNLOCK
+#endif
 
 using namespace std;
+
+
+extern void ibexparse_string(const char* syntax);
 
 namespace ibex {
 
@@ -124,7 +138,7 @@ public:
 
 const char* duplicate_or_generate(const char* name) {
 	if (name) return strdup(name);
-	else return strdup(ibex::next_generated_func_name());
+	else return ibex::next_generated_func_name();
 }
 
 }
@@ -311,6 +325,12 @@ Function::Function(const char* x1,  const char* x2,  const char* x3,  const char
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20),y);
 }
 
+Function::Function(int n, const char** x, const char* y) {
+	Array<const char*> a(n);
+	for (int i=0; i<n; i++) a.set_ref(i,x[i]);
+	build_from_string(a,y);
+}
+
 void Function::build_from_string(const Array<const char*>& x, const char* y, const char* name) {
 
 	stringstream s;
@@ -329,6 +349,8 @@ void Function::build_from_string(const Array<const char*>& x, const char* y, con
 	free((char*) name_copy);
 
 	char* syntax = strdup(s.str().c_str());
+
+	LOCK;
 	try {
 		parser::function=this;
 		ibexparse_string(syntax);
@@ -337,13 +359,19 @@ void Function::build_from_string(const Array<const char*>& x, const char* y, con
 	} catch(SyntaxError& e) {
 		parser::function=NULL;
 		free(syntax);
+		UNLOCK;
 		throw e;
 	}
+	UNLOCK;
 }
 
 Function::Function(const char* filename) {
+
+	LOCK;
+
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
+
 	ibexin = fd;
 
 	try {
@@ -355,13 +383,18 @@ Function::Function(const char* filename) {
 		parser::function=NULL;
 		fclose(fd);
 		ibexrestart(ibexin);
+		UNLOCK;
 		throw e;
 	}
 
 	fclose(fd);
+	UNLOCK;
 }
 
 Function::Function(FILE* fd) {
+
+	LOCK;
+
 	ibexin = fd;
 
 	try {
@@ -372,8 +405,10 @@ Function::Function(FILE* fd) {
 	catch(SyntaxError& e) {
 		parser::function=NULL;
 		ibexrestart(ibexin);
+		UNLOCK;
 		throw e;
 	}
+	UNLOCK;
 }
 
 
@@ -398,7 +433,7 @@ Function::Function(const Function& f, copy_mode mode) {
 		char* name = (char*) malloc(strlen(f.name)+strlen(DIFF_PREFIX)+1); // +1 for null character
 		strcpy((char*) name,DIFF_PREFIX);
 		strcat((char*) name,f.name);
-		y= & ExprDiff().diff(f.symbs,x,f.expr());
+		y= & ExprDiff(f.symbs,x).diff(f.expr(),f.symbs);
 		init(x,*y,name);
 		free(name);
 	}

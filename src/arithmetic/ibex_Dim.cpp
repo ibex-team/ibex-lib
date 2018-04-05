@@ -20,50 +20,28 @@ using std::stringstream;
 namespace ibex {
 
 /** Build the three-dimensional structure. */
-Dim::Dim(int dim2_, int dim3_) : dim2(dim2_), dim3(dim3_), cst_vec(false) {
-
+Dim::Dim(int dim2_, int dim3_) : dim2(dim2_), dim3(dim3_) {
 	assert(dim2_>0 && dim3_>0);
 }
 
-Dim add_dim(Dim& l, Dim& r) {
-	if (l==r) {
-		if (!l.cst_vec || !r.cst_vec) { // either l or r "fixes" the dimension of the other
-			l.cst_vec=false;
-			r.cst_vec=false;
-		}
-
-		return l; // so the result has cst_vec==true if l and r are cst_vec.
-	}
-
-	if (l.is_scalar())
+Dim add_dim(const Dim& l, const Dim& r) {
+	if (l==r)
+		return l;
+	else if (l.is_scalar() || r.is_scalar())
 		throw DimException("cannot add a scalar to a vector/matrix");
-	else if (l.is_vector()) {
-		if (l.nb_rows()==1 && r.cst_vec && l.nb_cols()==r.nb_rows()) {  // row vector + constant vector
-			assert(r.is_vector());
-			r = l;                     // transpose
-			r.cst_vec=false;
-			return l;
-		} else if (r.nb_rows()==1 && l.cst_vec && r.nb_cols()==l.nb_rows()) {
-			assert(l.is_vector());
-			l = r;                     // transpose
-			r.cst_vec=false;
-			return l;
-		} else
-			throw DimException("mismatched dimensions in vector addition/subtraction");
-	} else {
-		assert(l.is_matrix());
+	else if (l.is_vector() && r.is_vector())
+		throw DimException("mismatched dimensions in vector addition/subtraction");
+	else if (l.is_vector() || r.is_vector())
+		throw DimException("cannot add a vector to a matrix");
+	else
 		throw DimException("mismatched dimensions in matrix addition/subtraction");
-	}
 }
 
 Dim mul_dim(const Dim& l, const Dim& r) {
 	if (l.type()==Dim::SCALAR) // scalar multiplication.
-		return r; // cst_vec is maintained.
+		return r;
 	else {
 		if (l.nb_cols()!=r.nb_rows()) {
-			if (l.nb_rows()==r.nb_rows() && l.nb_cols()==1 && r.nb_cols()==1) return Dim::scalar(); // dot product of row vectors
-			if (l.nb_cols()==r.nb_cols() && l.nb_rows()==1 && r.nb_rows()==1) return Dim::scalar(); // dot product of column vectors
-
 			throw DimException("mismatched dimensions in matrix multiplication");
 		} else {
 			if (l.nb_rows()==1)

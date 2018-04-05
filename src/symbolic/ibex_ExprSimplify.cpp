@@ -1,9 +1,11 @@
-/*
- * ibex_ExprSimplify.cpp
- *
- *  Created on: May 19, 2016
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_ExprSimplify.cpp
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : May 19, 2016
+//============================================================================
 
 #include "ibex_ExprSimplify.h"
 #include "ibex_Expr.h"
@@ -204,7 +206,7 @@ void ExprSimplify::visit(const ExprVector& e) {
 	} else if (((int) res.size())==e.nb_args && all_same)
 		insert(e, e);
 	else
-		insert(e, ExprVector::new_(res,e.row_vector()));
+		insert(e, ExprVector::new_(res,e.orient));
 }
 
 void ExprSimplify::visit(const ExprIndex& e) {

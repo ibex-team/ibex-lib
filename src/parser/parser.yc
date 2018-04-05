@@ -43,16 +43,16 @@
 %token <str> TK_STRING
 %token <itg> TK_INTEGER
 %token <real> TK_FLOAT
-%token TK_INFINITY
+%token TK_PI TK_INFINITY
 %token <_bool> TK_BOOL
 
 %token TK_PARAM TK_CONST TK_VARS TK_FUNCTION 
+%token TK_DIFF
 %token TK_MIN TK_MAX TK_INF TK_MID TK_SUP TK_SIGN TK_ABS
 %token TK_SQRT TK_EXPO  TK_LOG 
 %token TK_COS  TK_SIN   TK_TAN  TK_ACOS  TK_ASIN  TK_ATAN TK_ATAN2
 %token TK_COSH TK_SINH  TK_TANH TK_ACOSH TK_ASINH TK_ATANH
 %token TK_LEQ  TK_GEQ   TK_EQU  TK_ASSIGN TK_CHI
-
 %token TK_BEGIN TK_END TK_FOR TK_FROM TK_TO TK_RETURN
 %token TK_CTRS TK_MINIMIZE
 
@@ -93,16 +93,16 @@ program       :                                 { begin(); }
                 TK_CHOCO choco_ctr              { end_choco(); }
               ; 
 
-system_or_func:                                 { begin_system(); }         
-                system                          { end_system(); } 
-              |                                 { begin_function(); }
-                function                        { end_function(); }        
-              ;
-              
-system        : TK_VARS decl_var_list ';'   
-                decl_fnc_list
+system_or_func: function decl_opt_fncs
+                TK_VARS decl_var_list ';'   
+                decl_opt_fncs
                 decl_opt_goal
-	            decl_opt_ctrs                          
+                decl_opt_ctrs                   { end_system(); }
+              | TK_VARS decl_var_list ';'   
+                decl_opt_fncs
+                decl_opt_goal
+                decl_opt_ctrs                   { end_system(); }
+              | function                        { end_function(); }
               ;
               
 choco_ctr     : ctr_blk_list                    
@@ -149,7 +149,7 @@ dimension     :                                 { $$=new Dim(); }
                                                   delete $2; delete $5; }
 	          ;
 
-interval      : '[' expr ',' expr ']'           { $$=new Interval($2->_2dbl(), $4->_2dbl()); 
+interval      : '[' expr ',' expr ']'           { $$=new Interval($2->_2dbl(true), $4->_2dbl(false)); 
                                                   delete $2; delete $4; }
               ;
 
@@ -157,7 +157,7 @@ interval      : '[' expr ',' expr ']'           { $$=new Interval($2->_2dbl(), $
 /*                                                FUNCTIONS                                                           */
 /**********************************************************************************************************************/
 
-decl_fnc_list : decl_fnc_list function 
+decl_opt_fncs : decl_opt_fncs function 
               | 
               ;
 
@@ -276,7 +276,7 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
                                                 { $$ = chi($3,$5,$7); }
               | '+' expr                        { $$ = $2; }
               | '(' expr ')'		            { $$ = $2; }
-              | '<' expr ',' expr '>'           { $$ = new P_ExprConstant(ball($2->_2domain(),$4->_2dbl())); }
+              | '<' expr ',' expr '>'           { $$ = new P_ExprConstant(ball($2->_2domain(),$4->_2dbl(false))); }
               | expr '^' expr	                { $$ = pow($1, $3); }
               | expr '[' expr_index ']'         { $$ = expr_with_index($1,$3,false);  }
               | expr '(' expr_index ')'         { $$ = expr_with_index($1,$3,true); }
@@ -293,12 +293,14 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | TK_FUNC_SYMBOL '(' expr_row ')' { $$ = apply(scopes().top().get_func($1), *$3); free($1); delete $3; }
               | TK_NEW_SYMBOL                   { ibexerror("unknown symbol"); }
               | TK_FLOAT                        { $$ = new P_ExprConstant($1); }
-              | TK_INFINITY                     { $$ = infinity(); }              
+              | TK_PI                           { $$ = new P_ExprConstant(Interval::PI); }
+              | TK_INFINITY                     { $$ = dbl_infinity(); }              
               | TK_INTEGER                      { $$ = new P_ExprConstant($1); }
               | interval                        { $$ = new P_ExprConstant(*$1); delete $1; }
               | TK_INF '(' expr ')'             { $$ = inf($3); }
               | TK_MID '(' expr ')'             { $$ = mid($3); }
               | TK_SUP '(' expr ')'             { $$ = sup($3); }
+              | TK_DIFF '(' expr_row ')'        { $$ = diff($3); }
               ;
 	      
 expr_row      : expr_row  ',' expr              { $1->push_back($3); $$=$1; }

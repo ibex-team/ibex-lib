@@ -28,6 +28,10 @@ void ibex_warning(const char* message) {
 	cerr << "\033[33mwarning: " << message << "\033[0m" << endl;
 }
 
+void ibex_warning(const std::string& message) {
+	cerr << "warning: " << message << endl;
+}
+
 void not_implemented(const char* feature) {
 	cerr << "***********************************************************************" << endl;
 	cerr << "IBEX has crashed because the following feature is not implemented yet:" << endl;

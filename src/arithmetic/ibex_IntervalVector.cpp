@@ -50,11 +50,14 @@ IntervalVector::IntervalVector(const Vector& x) : n(x.size()), vec(new Interval[
 	for (int i=0; i<n; i++) vec[i]=x[i];
 }
 
+IntervalVector::IntervalVector(const Interval& x) : n(1), vec(new Interval[1]) {
+	vec[0]=x;
+}
+
 void IntervalVector::init(const Interval& x) {
 	for (int i=0; i<size(); i++)
 		(*this)[i]=x;
 }
-
 
 void IntervalVector::resize(int n2) {
 	assert(n2>=1);
@@ -109,20 +112,34 @@ IntervalVector& IntervalVector::operator|=(const IntervalVector& x)  {
 
 namespace {
 
-const IntervalVector* tmp;
-bool diam_lt(const int& i, const int& j) {
-	return (*tmp)[i].diam()<(*tmp)[j].diam();
-}
-bool diam_gt(const int& i, const int& j) {
-	return (*tmp)[i].diam()>(*tmp)[j].diam();
-}
+class DiamLT {
+	public:
+	DiamLT(const IntervalVector& box) : box(box) { }
+
+	bool operator()(const int& i, const int& j) {
+		return box[i].diam()<box[j].diam();
+	}
+	const IntervalVector& box;
+};
+
+class DiamGT {
+	public:
+	DiamGT(const IntervalVector& box) : box(box) { }
+
+	bool operator()(const int& i, const int& j) {
+		return box[i].diam()>box[j].diam();
+	}
+	const IntervalVector& box;
+};
 
 } // end anonymous namespace
 
 void IntervalVector::sort_indices(bool min, int tab[]) const {
 	for (int i=0; i<n; i++) tab[i]=i;
-	tmp=this;
-	std::sort(tab,tab+n,min? diam_lt:diam_gt);
+	if (min)
+		std::sort(tab,tab+n,DiamLT(*this));
+	else
+		std::sort(tab,tab+n,DiamGT(*this));
 }
 
 double distance(const IntervalVector& x1, const IntervalVector& x2) {
@@ -268,6 +285,26 @@ bool bwd_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 	delete[] sum;
 	delete[] xy;
 	return true;
+}
+
+IntervalVector cart_prod(const Array<const IntervalVector>& x) {
+	int size=0;
+	for (int i=0; i<x.size(); i++) {
+		size+=x[i].size();
+	}
+
+	IntervalVector z(size);
+//	std::cout << "size=" << size << " z=" << z << std::endl;
+
+	for (int i=0, j=0; i<x.size(); j+=x[i].size(), i++) {
+		if (x[i].is_empty()) {
+			z.set_empty();
+			return z;
+		} else {
+			z.put(j,x[i]);
+		}
+	}
+	return z;
 }
 
 IntervalVector& IntervalVector::inflate(double delta, double chi) {

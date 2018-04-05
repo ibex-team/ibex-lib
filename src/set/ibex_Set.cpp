@@ -225,9 +225,6 @@ std::ostream& operator<<(std::ostream& os, const Set& set) {
 	return os;
 }
 
-//namespace {
-
-
 class NodeAndDist : public Backtrackable {
 public:
 	NodeAndDist() : node(NULL), dist(-1) { }
@@ -248,7 +245,11 @@ public:
 		dist=d.lb();
 	}
 
-	virtual std::pair<Backtrackable*,Backtrackable*> down() {
+	virtual Backtrackable* copy() const {
+		return new NodeAndDist(*this);
+	}
+
+	virtual std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&) {
 		assert(!node->is_leaf());
 
 		SetBisect& b=*((SetBisect*) node);
@@ -258,6 +259,11 @@ public:
 
 	SetNode* node;
 	double dist;
+
+protected:
+
+	explicit NodeAndDist(const NodeAndDist& e) : node(e.node), dist(e.dist) { }
+
 };
 
 /**
@@ -305,16 +311,14 @@ double Set::dist(const Vector& pt, bool inside) const {
 		} else if (!node->is_leaf()) {
 			SetBisect& b= *((SetBisect*) node);
 
-			IntervalVector left=b.left_box(c->box);
-			IntervalVector right=b.right_box(c->box);
+            // the box is bisected twice: could be avoided.
+			std::pair<Cell*,Cell*> p=c->subcells(BisectionPoint(b.var,b.pt,false));
 
-			std::pair<Cell*,Cell*> p=c->bisect(left,right);
-
-			p.first->get<NodeAndDist>().set_dist(left,pt);
+			p.first->get<NodeAndDist>().set_dist(p.first->box,pt);
 			//count++;
 			if (p.first->get<NodeAndDist>().dist<=lb) heap.push(p.first);
 
-			p.second->get<NodeAndDist>().set_dist(right,pt);
+			p.second->get<NodeAndDist>().set_dist(p.second->box,pt);
 			//count++;
 			if (p.second->get<NodeAndDist>().dist<=lb) heap.push(p.second);
 		}

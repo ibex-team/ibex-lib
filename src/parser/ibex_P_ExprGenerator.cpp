@@ -12,6 +12,7 @@
 #include "ibex_SyntaxError.h"
 #include "ibex_Exception.h"
 #include "ibex_Expr.h"
+#include "ibex_ExprDiff.h"
 
 #include <sstream>
 
@@ -120,14 +121,16 @@ int to_integer(const Domain& d) {
 	return (int)x;
 }
 
-double to_double(const Domain& d) {
+double to_double(const Domain& d, bool round_downward) {
 	assert(d.dim.is_scalar());
-	// WARNING: this is quite unsafe. But
-	// requiring d.i().is_degenerated() is wrong,
+	// Note: requiring d.i().is_degenerated() is wrong,
 	// the result of a calculus with degenerated intervals
-	// may not be degenerated (and large)... Still, we could
-	// give some warning if, say, the diameter here was > 1e-10.
-	return d.i().mid();
+	// may not be degenerated (and large).
+	// Second, one may use Minibex interval constant like "pi"
+	// in a bound of an interval, ex:
+	// variables
+	//     x in [0,pi].
+	return round_downward? d.i().lb() : d.i().ub();
 }
 
 ExprGenerator::ExprGenerator() : scope(scopes().top()) {
@@ -149,7 +152,7 @@ int ExprGenerator::generate_int(const P_ExprNode& y) {
 	return to_integer(generate_cst(y));
 }
 
-double ExprGenerator::generate_dbl(const P_ExprNode& y) {
+double ExprGenerator::generate_dbl(const P_ExprNode& y, bool round_downward) {
 	visit(y);
 	const Domain& d=y.lab->domain();
 	double value;
@@ -162,7 +165,7 @@ double ExprGenerator::generate_dbl(const P_ExprNode& y) {
 		value=POS_INFINITY;
 		break;
 	default:
-		value=to_double(d);
+		value=to_double(d, round_downward);
 	}
 	y.cleanup();
 	return value;
@@ -285,6 +288,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::ACOSH:   e.lab=new LabelConst(acosh(arg_cst[0])); break;
 			case P_ExprNode::ASINH:   e.lab=new LabelConst(asinh(arg_cst[0])); break;
 			case P_ExprNode::ATANH:   e.lab=new LabelConst(atanh(arg_cst[0])); break;
+			case P_ExprNode::DIFF:
+				throw SyntaxError("\"diff\" cannot be applied to constants"); break;
 			case P_ExprNode::INF:
 				if (!arg_cst[0].dim.is_scalar()) throw DimException("\"inf\" expects an interval as argument");
 				e.lab=new LabelConst(arg_cst[0].i().lb()); break;
@@ -322,8 +327,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::IDX_RANGE:
 		case P_ExprNode::IDX_ALL:
 		case P_ExprNode::EXPR_WITH_IDX: assert(false); /* impossible */ break;
-		case P_ExprNode::ROW_VEC:node=&ExprVector::new_(arg_node,true); break;
-		case P_ExprNode::COL_VEC:node=&ExprVector::new_(arg_node,false); break;
+		case P_ExprNode::ROW_VEC:node=&ExprVector::new_row(arg_node); break;
+		case P_ExprNode::COL_VEC:node=&ExprVector::new_col(arg_node); break;
 		case P_ExprNode::APPLY:  node=&(((const P_ExprApply&) e).f)(arg_node); break;
 		case P_ExprNode::CHI:    node=&chi(arg_node[0], arg_node[1], arg_node[2]); break;
 		case P_ExprNode::ADD:    node=&(arg_node[0] + arg_node[1]); break;
@@ -354,6 +359,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::ACOSH:  node=&acosh(arg_node[0]); break;
 		case P_ExprNode::ASINH:  node=&asinh(arg_node[0]); break;
 		case P_ExprNode::ATANH:  node=&atanh(arg_node[0]); break;
+		case P_ExprNode::DIFF:   node=&diff (arg_node); break;
 		case P_ExprNode::INF:    throw SyntaxError("\"inf\" operator requires constant interval"); break;
 		case P_ExprNode::MID:    throw SyntaxError("\"mid\" operator requires constant interval"); break;
 		case P_ExprNode::SUP:    throw SyntaxError("\"sup\" operator requires constant interval"); break;
@@ -541,6 +547,24 @@ void ExprGenerator::visit(const P_ExprWithIndex& e) {
 	}
 }
 
+const ExprNode& ExprGenerator::diff(const Array<const ExprNode>& args) {
+	assert(args.size()>1);
+
+	// get "y"
+	const ExprNode& y=args[0];
+
+	// get the expressions "x"
+	// (removing the first node, which is "y")
+	Array<const ExprSymbol> x(args.size()-1);
+	for (int i=0; i<args.size()-1; i++) {
+		const ExprSymbol* xi=dynamic_cast<const ExprSymbol*>(&args[i+1]);
+		if (!xi) {
+			throw SyntaxError("\"diff\" can only be applied to symbols");
+		}
+		x.set_ref(i,*xi);
+	}
+	return ExprDiff().diff(y,x);
+}
 
 } // end namespace parser
 } // end namespace ibex

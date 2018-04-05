@@ -15,6 +15,7 @@
 
 #include <fstream>
 #include <vector>
+#include <stdint.h>
 
 namespace ibex {
 
@@ -51,7 +52,7 @@ public:
 	 *
 	 * See #format().
 	 */
-	void write_txt(const char* filename, bool MMA) const;
+	void write_txt(const char* filename) const;
 
 	/**
 	 * \brief Clear all.
@@ -132,16 +133,16 @@ protected:
 	static const int  SIGNATURE_LENGTH;
 	static const char* SIGNATURE;
 
-	int read_int(std::ifstream& f);
+	unsigned int read_int(std::ifstream& f);
 	double read_double(std::ifstream& f);
 	void read_signature(std::ifstream& f);
 	SolverOutputBox read_output_box(std::ifstream& f);
 
-	void write_int(std::ofstream& f, int x) const;
+	void write_int(std::ofstream& f, uint32_t x) const;
 	void write_double(std::ofstream& f, double x) const;
 	void write_signature(std::ofstream& f) const;
 	void write_output_box(std::ofstream& f, const SolverOutputBox& sol) const;
-	void write_txt(std::ofstream& file, const SolverOutputBox& sol, bool MMA) const;
+	void write_output_box_txt(std::ofstream& file, const SolverOutputBox& sol) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const Manifold& manif);

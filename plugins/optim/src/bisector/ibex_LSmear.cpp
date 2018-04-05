@@ -13,6 +13,10 @@ using std::pair;
 
 namespace ibex {
 
+LSmear::~LSmear() {
+	delete mylinearsolver;
+}
+
 LPSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector& box, Vector& dual) const {
 	int goal_ctr=-1, goal_var=rand()%box.size();
 	bool minimize=rand()%2;
@@ -67,7 +71,7 @@ LPSolver::Status_Sol LSmear::getdual(IntervalMatrix& J, const IntervalVector& bo
 		if (stat == LPSolver::OPTIMAL) {
 			// the dual solution : used to compute the bound
 			dual.resize(mylinearsolver->get_nb_rows());
-			mylinearsolver->get_dual_sol(dual);
+			dual = mylinearsolver->get_dual_sol();
 			int k=0; //number of multipliers != 0
 			int ii=0;
 

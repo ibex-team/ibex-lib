@@ -264,20 +264,46 @@ protected:
  */
 class ExprVector : public ExprNAryOp {
 public:
+
+	/**
+	 * \brief Vector orientation values
+	 */
+	typedef enum { ROW, COL} Orientation;
+
 	/**
 	 * \brief Accept an #ibex::ExprVisitor visitor.
 	 */
 	void acceptVisitor(ExprVisitor& v) const { v.visit(*this); }
 
 	/**
+	 * \brief Create a column vector of expressions.
+	 */
+	static const ExprVector& new_col(const Array<const ExprNode>& components);
+
+	/**
+	 * \brief Create a row vector of expressions.
+	 */
+	static const ExprVector& new_row(const Array<const ExprNode>& components);
+
+	/**
 	 * \brief Create a vector of expressions.
 	 */
-	static const ExprVector& new_(const Array<const ExprNode>& components, bool in_rows);
+	static const ExprVector& new_(const Array<const ExprNode>& components, Orientation o);
+
+	/**
+	 * \brief Create a column vector of two expressions.
+	 */
+	static const ExprVector& new_col(const ExprNode& e1, const ExprNode& e2);
+
+	/**
+	 * \brief Create a column vector of two expressions.
+	 */
+	static const ExprVector& new_row(const ExprNode& e1, const ExprNode& e2);
 
 	/**
 	 * \brief Create a vector of two expressions.
 	 */
-	static const ExprVector& new_(const ExprNode& e1, const ExprNode& e2, bool in_rows);
+	static const ExprVector& new_(const ExprNode& e1, const ExprNode& e2, Orientation o);
 
 	/** \brief It the vector structured as a row or a column?
 	 *
@@ -307,10 +333,14 @@ public:
 	 */
 	int length() const { return nb_args; }
 
-private:
-	bool in_row;
+	/**
+	 * \brief Vector orientation
+	 */
+	const Orientation orient;
 
-	ExprVector(const Array<const ExprNode>&, bool in_row);
+private:
+
+	ExprVector(const Array<const ExprNode>&, Orientation o);
 
 };
 
@@ -319,18 +349,18 @@ private:
  */
 class Return {
 public:
-	Return(const ExprNode& f1, const ExprNode& f2, bool in_rows=false) :
-		vec(ExprVector::new_(f1,f2,in_rows)) { }
-	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, bool in_rows=false) :
-		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3),in_rows)) { }
-	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, bool in_rows=false) :
-		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4),in_rows)) { }
-	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, bool in_rows=false) :
-		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5),in_rows)) { }
-	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, const ExprNode& f6, bool in_rows=false) :
-		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5,f6),in_rows)) { }
-    Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, const ExprNode& f6, const ExprNode& f7, bool in_rows=false) :
-    vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5,f6,f7),in_rows)) { }
+	Return(const ExprNode& f1, const ExprNode& f2, ExprVector::Orientation o=ExprVector::COL) :
+		vec(ExprVector::new_(f1,f2,o)) { }
+	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, ExprVector::Orientation o=ExprVector::COL) :
+		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3),o)) { }
+	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, ExprVector::Orientation o=ExprVector::COL) :
+		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4),o)) { }
+	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, ExprVector::Orientation o=ExprVector::COL) :
+		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5),o)) { }
+	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, const ExprNode& f6, ExprVector::Orientation o=ExprVector::COL) :
+		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5,f6),o)) { }
+    Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, const ExprNode& f6, const ExprNode& f7, ExprVector::Orientation o=ExprVector::COL) :
+    vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5,f6,f7),o)) { }
 
 	operator const ExprVector&() const { return vec; }
 
@@ -487,8 +517,7 @@ private:
 	ExprSymbol(const Dim& dim);
 
 	/** Create a symbol. */
-	ExprSymbol(const char* name, const Dim& dim) : ExprLeaf(dim), name(strdup(name)), key(-1) {
-	}
+	ExprSymbol(const char* name, const Dim& dim);
 
 	/** Duplicate this symbol: forbidden. */
 	ExprSymbol(const ExprSymbol&);
@@ -1420,8 +1449,32 @@ inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, const DoubleInd
 	return *new ExprIndex(subexpr,index);
 }
 
+inline const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, ExprVector::Orientation o) {
+	return *new ExprVector(Array<const ExprNode>(e1,e2), o);
+}
+
+inline const ExprVector& ExprVector::new_col(const ExprNode& e1, const ExprNode& e2) {
+	return new_(e1,e2, COL);
+}
+
+inline const ExprVector& ExprVector::new_row(const ExprNode& e1, const ExprNode& e2) {
+	return new_(e1,e2, ROW);
+}
+
+inline const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, ExprVector::Orientation o) {
+	return *new ExprVector(components, o);
+}
+
+inline const ExprVector& ExprVector::new_col(const Array<const ExprNode>& components) {
+	return new_(components, COL);
+}
+
+inline const ExprVector& ExprVector::new_row(const Array<const ExprNode>& components) {
+	return new_(components, ROW);
+}
+
 inline bool ExprVector::row_vector() const {
-	return in_row;
+	return orient==ROW;
 }
 
 inline ExprLeaf::ExprLeaf(const Dim& dim) : ExprNode(0,1,dim) {
@@ -1677,6 +1730,14 @@ inline const ExprExp& pow(const ExprNode& left, double value) {
 /** Constant raised to the power of an expression */
 inline const ExprExp& pow(double value, const ExprNode& right) {
 	return exp(right*log(ExprConstant::new_scalar(value)));
+}
+
+inline Vector::operator const ExprConstant&() const {
+	return ExprConstant::new_vector(*this,false);
+}
+
+inline IntervalVector::operator const ExprConstant&() const {
+	return ExprConstant::new_vector(*this,false);
 }
 
 } // end namespace ibex

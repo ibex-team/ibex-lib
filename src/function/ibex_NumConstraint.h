@@ -36,7 +36,7 @@ public:
 	/**
 	 * \brief Build a constraint.
 	 */
-	NumConstraint(Function& f, CmpOp op=EQ, bool own_f=false);
+	NumConstraint(const Function& f, CmpOp op=EQ, bool own_f=false);
 
 	/**
 	 * \brief Build a constraint c(x).
@@ -231,7 +231,7 @@ public:
 	/**
 	 * \brief The function.
 	 */
-	Function& f;
+	const Function& f;
 
 	/**
 	 * \brief The comparison operator.
@@ -254,7 +254,7 @@ public:
 	 *
 	 * TODO: extend to vector/matrix constraints.
 	 */
-	std::pair<const ExprNode*, const Interval*> is_thick_equality() const;
+//	std::pair<const ExprNode*, const Interval*> is_thick_equality() const;
 
 private:
 
@@ -272,7 +272,7 @@ std::ostream& operator<<(std::ostream&, const NumConstraint&);
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
-inline NumConstraint::NumConstraint(Function& f, CmpOp op, bool own_f) : f(f), op(op), own_f(own_f) { }
+inline NumConstraint::NumConstraint(const Function& f, CmpOp op, bool own_f) : f(f), op(op), own_f(own_f) { }
 
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprCtr& c) : f(*new Function(x1,c.e)), op(c.op), own_f(true) { }
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprCtr& c): f(*new Function(x1,x2,c.e)), op(c.op), own_f(true) { }

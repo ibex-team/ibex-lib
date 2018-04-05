@@ -1,0 +1,13 @@
+Variables
+    x1 in [-1000, 1000];
+    x2 in [-1000, 1000];
+    x3 in [-1000, 1000];
+    y in [0, 1];
+
+Minimize
+    exp(x1) + exp(x2) + exp(x3);
+
+Constraints
+    1/(1+y^2) - x1 - x2*y - x3*y^2 <= 0;
+end
+

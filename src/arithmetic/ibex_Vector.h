@@ -24,6 +24,8 @@ class ExprConstant;
  *
  * \brief Vector of reals
  *
+ * Note: a Vector is always a column vector.
+ * (see #IntervalVector)
  */
 class Vector {
 public:
@@ -187,6 +189,11 @@ public:
 	 * \brief Convert to double*
 	 */
 	double* raw() { return vec; }
+
+	/*
+	 * \brief Convert to double*
+	 */
+	const double* raw() const { return vec; }
 
 private:
 	friend class Matrix;

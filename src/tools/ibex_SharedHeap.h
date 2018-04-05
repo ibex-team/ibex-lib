@@ -1,10 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_SharedHeap.h
-// Author      : Gilles Chabert, Jordan Ninin
-// Copyright   : Ecole des Mines de Nantes (France)
+// Author      : Gilles Chabert, Jordan Ninin, Dominique Monnet
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 23, 2014
+// Last Update : Dec 25, 2017
 //============================================================================
 
 #ifndef __IBEX_SHARED_HEAP_H__
@@ -56,14 +57,30 @@ public:
 	 */
 	SharedHeap(CostFunc<T>& cost, bool update_cost_when_sorting, int id);
 
-	/** \brief Delete this. */
-	virtual  ~SharedHeap();
+	/** Constructor by copy */
+	SharedHeap(const SharedHeap<T>& heap, int nb_crit, bool deep_copy);
+
+	/** \brief Delete this.
+	 *
+	 * Data is not deleted. Call #clear(NODE_ELT_DATA) before. */
+	virtual ~SharedHeap();
 
 	/** \brief Return the size of the buffer. */
 	unsigned int size() const;
 
 	/** \brief Return true if the buffer is empty. */
 	bool empty() const;
+
+	typedef enum { NODE, NODE_ELT, NODE_ELT_DATA } clear_mode;
+
+	/**
+	 * \brief Clear the heap.
+	 *
+	 * NODE:          only nodes are deleted
+	 * NODE_ELT:      nodes and elements are deleted
+	 * NODE_ELT_DATA: nodes, elements and data are deleted
+	 */
+	void clear(clear_mode mode=NODE_ELT_DATA);
 
 	/**
 	 * \brief Return the next box (but does not pop it).
@@ -176,10 +193,17 @@ protected:
 	 */
 	bool heap_state();
 
+	/** Return a list of all the elements */
+	std::vector<HeapElt<T>*> elt();
+
 private:
 
 	/** Used in the sort function (proceed by recursivity) */
 	void sort_rec(HeapNode<T>* node, SharedHeap<T>& heap);
+
+	void elt_rec(HeapNode<T>* cur, std::vector<HeapElt<T>*>& elm_vect);
+
+	void clear_subnodes(HeapNode<T>* node, clear_mode mode);
 };
 
 
@@ -199,7 +223,10 @@ private:
 	friend class DoubleHeap<T>;
 
 	/** Create a node from an element and the father node. */
-	explicit HeapNode(HeapElt<T>* elt, HeapNode<T>* father=NULL);
+	explicit HeapNode(HeapElt<T>* elt, int heap_id, HeapNode<T>* father);
+
+	/** Constructor by copy. */
+	explicit HeapNode(const HeapNode& node, HeapNode<T>* father, int heap_id, int nb_crit, bool deep_copy);
 
 	/** Delete the node and all its sons */
 	//~HeapNode() ;
@@ -257,7 +284,10 @@ private:
 	/** Create an HeapElt with a data and two criteria */
 	explicit HeapElt(T* data, double crit_1, double crit_2);
 
-	/** Delete the element */
+    /** Copy constructor (not holders) **/
+	explicit HeapElt(const HeapElt<T>& elt, int nb_crit, bool deep_copy);
+
+	/** Delete the element (*not the data*) */
 	~HeapElt() ;
 
 	/**
@@ -297,9 +327,56 @@ SharedHeap<T>::SharedHeap(CostFunc<T>& cost, bool update_cost, int id) : nb_node
 }
 
 template<class T>
+SharedHeap<T>::SharedHeap(const SharedHeap<T>& heap, int nb_crit, bool deep_copy) :
+ nb_nodes(heap.nb_nodes), costf(heap.costf), heap_id(heap.heap_id), root(NULL), update_cost_when_sorting(heap.update_cost_when_sorting) {
+	if (heap.root != NULL)
+		root = new HeapNode<T>(*(heap.root), NULL, heap_id, nb_crit, deep_copy);
+}
+
+template<class T>
+std::vector<HeapElt<T>*> SharedHeap<T>::elt() {
+    std::vector<HeapElt<T>*> elm_vect;
+    elt_rec(root, elm_vect);
+    return elm_vect;
+}
+
+template<class T>
+void SharedHeap<T>::elt_rec(HeapNode<T>* cur, std::vector<HeapElt<T>*> &elm_vect) {
+    if(cur != NULL) {
+    	elm_vect.push_back(cur->elt);
+        elt_rec(cur->right, elm_vect);
+        elt_rec(cur->left, elm_vect);
+    }
+}
+
+template<class T>
 SharedHeap<T>::~SharedHeap() {
-	if (root) delete root; 	// warning: delete all sub-nodes
-	root = NULL;
+	clear(NODE_ELT);
+}
+
+template<class T>
+void SharedHeap<T>::clear(clear_mode mode) {
+	if (nb_nodes>0) {
+		clear_subnodes(root, mode);
+		nb_nodes=0;
+		root=NULL;
+	}
+}
+
+template<class T>
+void SharedHeap<T>::clear_subnodes(HeapNode<T>* node, clear_mode mode) {
+	if (node->left)	clear_subnodes(node->left, mode);
+	if (node->right) clear_subnodes(node->right, mode);
+
+	if (mode==NODE_ELT)
+		delete node->elt;
+	else if (mode==NODE_ELT_DATA) {
+		if (node->elt->data)
+			delete node->elt->data;
+		delete node->elt;
+	}
+
+	delete node;
 }
 
 template<class T>
@@ -336,6 +413,7 @@ void SharedHeap<T>::sort() {
 	nb_nodes = heap_tmp->size();
 
 	heap_tmp->root = NULL;
+	heap_tmp->nb_nodes=0;
 	delete heap_tmp; 	// warning: delete all sub-nodes
 
 }
@@ -362,8 +440,7 @@ template<class T>
 void SharedHeap<T>::push_elt(HeapElt<T>* elt) {
 
 	if (nb_nodes==0) {
-		root = new HeapNode<T>(elt,NULL);
-		root->elt->holder[heap_id] = root;
+		root = new HeapNode<T>(elt,heap_id,NULL);
 		nb_nodes++;
 	} else {
 		nb_nodes++;
@@ -381,10 +458,9 @@ void SharedHeap<T>::push_elt(HeapElt<T>* elt) {
 				pt = pt->left;
 			}
 		}
-		HeapNode<T>* tmp= new HeapNode<T>(elt,pt);
-		tmp->elt->holder[heap_id] = tmp;
-		if (nb_nodes%2==0)	{ pt->left =tmp; }
-		else 				{ pt->right=tmp; }
+		HeapNode<T>* tmp= new HeapNode<T>(elt,heap_id,pt);
+		if (nb_nodes%2==0) { pt->left =tmp; }
+		else               { pt->right=tmp; }
 
 		percolate_up(tmp);
 	}
@@ -435,7 +511,7 @@ void SharedHeap<T>::erase_node(HeapNode<T>* node) {
 	}
 }
 
-// erase a node and update the order
+// erase a node without updating the order
 template<class T>
 HeapNode<T>* SharedHeap<T>::erase_node_no_percolate(HeapNode<T>* node) {
 	assert(nb_nodes>0);
@@ -553,7 +629,26 @@ bool SharedHeap<T>::heap_state() {
 }
 
 template<class T>
-HeapNode<T>::HeapNode(HeapElt<T>* elt, HeapNode<T>* father): elt(elt), right(NULL), left(NULL), father(father) { }
+HeapNode<T>::HeapNode(HeapElt<T>* elt, int heap_id, HeapNode<T>* father): elt(elt), right(NULL), left(NULL), father(father) {
+	elt->holder[heap_id] = this;
+}
+
+
+
+template<class T>
+HeapNode<T>::HeapNode(const HeapNode& node, HeapNode<T>* father, int heap_id, int nb_crit, bool deep_copy) :
+	elt(new HeapElt<T>(*(node.elt), nb_crit, deep_copy)),
+	right(NULL), left(NULL), father(father) {
+
+	elt->holder[heap_id] = this;
+
+	if (node.right != NULL) {
+		right = new HeapNode(*(node.right), this, heap_id, nb_crit, deep_copy);
+	}
+	if (node.left != NULL) {
+		left = new HeapNode(*(node.left), this, heap_id, nb_crit, deep_copy);
+	}
+}
 
 //template<class T>
 //HeapNode<T>::~HeapNode() {
@@ -620,8 +715,20 @@ HeapElt<T>::HeapElt(T* data, double crit_1, double crit_2) : data(data), /*nb_he
 }
 
 template<class T>
+HeapElt<T>::HeapElt(const HeapElt<T>& elt, int nb_crit, bool deep) : data(NULL), crit(new double[nb_crit]), holder(new HeapNode<T>*[nb_crit]) {
+	for(int i=0; i<nb_crit; i++) {
+        crit[i] = elt.crit[i];
+        holder[i] = NULL;
+    }
+    if (deep) {
+    	data = new T(*(elt.data));
+    } else {
+    	data = elt.data;
+    }
+}
+
+template<class T>
 HeapElt<T>::~HeapElt() {
-	if (data) 	delete data;
 	delete [] crit;
 	delete [] holder;
 }

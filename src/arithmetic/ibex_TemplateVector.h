@@ -24,9 +24,9 @@ namespace ibex {
 namespace { // to create anonymous functions
 
 template<class V>
-inline V& _inflate(V& v, double rad1) {
+inline V& _inflate(V& v, double rad) {
 	if (v.is_empty()) return v;
-	Interval r(-rad1,rad1);
+	Interval r(-rad,rad);
 	// little optim: we do not call (*this)[i].inflate(rad)
 	// because this would create n times
 	// the interval [-rad,rad]

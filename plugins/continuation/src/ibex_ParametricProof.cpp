@@ -111,7 +111,7 @@ IntervalVector find_solution(Function& f, IntervalVector& facet, const VarSet& v
 					s.push(_pair.first);
 					s.push(_pair.second);
 //				} else {
-//					s.push(_pair#include "ibex_LinearSolver.h".second);
+//					s.push(_pair#include "ibex_LPSolver.h".second);
 //					s.push(_pair.first);
 //				}
 			}
@@ -150,7 +150,7 @@ bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& D
 	Matrix Jsup=Dg.ub();
 	Vector Jsup_pinf= Jsup * pinf;
 
-	LinearSolver linsolve(p, k);
+	LPSolver linsolve(p, k);
 
 	Interval opt(0.0); // store the optimum (unused)
 
@@ -174,12 +174,12 @@ bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& D
 		linsolve.set_obj_var(0,1);
 		
 		// note : "-1" just to have a strict minorant of the objective
-		LinearSolver::Status_Sol stat = linsolve.solve(); //run_simplex(LinearSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
+		LPSolver::Status_Sol stat = linsolve.solve(); //run_simplex(LPSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
 		//cout << "  status=" << stat << endl;
 
 		linsolve.clean_ctrs();
 
-		if (stat != LinearSolver::OPTIMAL) {
+		if (stat != LPSolver::OPTIMAL) {
 			result=false;
 			break;
 		}

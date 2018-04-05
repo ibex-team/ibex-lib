@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : Largest First bisector
-// Author      : Bertrand Neveu
-// Copyright   : Ecole des Mines de Nantes (France)
+// Author      : Bertrand Neveu, Gilles Chabert
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : July 19, 2012
-// Last Update : July 19, 2012
+// Created     : Jul 19, 2012
+// Last Update : Dec 25, 2017
 //============================================================================
 
 #ifndef __IBEX_LARGEST_FIRST_H__
@@ -26,7 +26,7 @@ class LargestFirst : public Bsc {
 public:
 
 	/**
-	 * \brief Create a bisector with largest first heuristic.
+	 * \brief Create a bisector with largest-first heuristic.
 	 *
 	 * \param prec             - see #Bsc::Bsc(double). By default, 0 which means an endless uniform bisection process.
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
@@ -44,23 +44,19 @@ public:
 	LargestFirst(const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
-	 * \brief Bisect the largest box.
+	 * \brief Return next variable to be bisected.
 	 *
-	 * called by Bsc::bisect
+	 * called by Bsc::bisect(...)
 	 */
-	virtual std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box);
-
-
+	virtual BisectionPoint choose_var(const Cell& cell);
 
 	/**
-	 * \brief Ratio to chose the split point.
+	 * \brief Ratio to choose the split point.
 	 *
 	 * Ratio between the diameters of the left and right parts of a bisected
 	 * interval.
 	 */
 	const double ratio;
-
-
 };
 
 } // end namespace ibex

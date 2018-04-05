@@ -46,8 +46,8 @@ int P_ExprNode::_2int() const {
 	return ExprGenerator().generate_int(*this);
 }
 
-double P_ExprNode::_2dbl() const {
-	return ExprGenerator().generate_dbl(*this);
+double P_ExprNode::_2dbl(bool round_downward) const {
+	return ExprGenerator().generate_dbl(*this, round_downward);
 }
 
 Domain P_ExprNode::_2domain() const {

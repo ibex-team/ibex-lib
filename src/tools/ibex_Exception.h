@@ -27,7 +27,11 @@ void not_implemented(const char*);
 #else
 
 void ibex_error(const char*) __attribute__ ((noreturn));
+
 void ibex_warning(const char*);
+
+void ibex_warning(const std::string&);
+
 void not_implemented(const char*) __attribute__ ((noreturn));
 
 #endif // _MSC_VER

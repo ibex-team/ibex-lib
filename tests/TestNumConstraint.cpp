@@ -80,38 +80,38 @@ void TestNumConstraint::build_from_file02() {
 
 	remove(TMP_FILE_NAME);
 }
-
-void TestNumConstraint::is_thick_eq01() {
-	Variable x,y;
-	// a subtraction with no constant term is not a thick equality
-	Function f1(x,y,x-y);
-	NumConstraint c1(f1,EQ);
-	pair<const ExprNode*,const Interval*> p=c1.is_thick_equality();
-
-	CPPUNIT_ASSERT(p.first==NULL);
-
-	// a "good" subtraction but with LEQ is not a thick equality
-	Function f2(x,x-Interval::ZERO);
-	NumConstraint c2(f2,LEQ);
-	p=c2.is_thick_equality();
-	CPPUNIT_ASSERT(p.first==NULL);
-}
-
-void TestNumConstraint::is_thick_eq02() {
-	Variable x("x"),y("y");
-	NumConstraint c1(x,y,x-y=Interval(0,1));
-	pair<const ExprNode*,const Interval*> p=c1.is_thick_equality();
-	CPPUNIT_ASSERT(p.first!=NULL);
-	CPPUNIT_ASSERT(sameExpr(*p.first,"(x-y)"));
-	CPPUNIT_ASSERT(*p.second==Interval(0,1));
-
-	const ExprNode& cst=ExprConstant::new_scalar(Interval(0,1));
-	NumConstraint c2(x,y,cst=x-y);
-	p=c2.is_thick_equality();
-	CPPUNIT_ASSERT(p.first!=NULL);
-	CPPUNIT_ASSERT(sameExpr(*p.first,"(x-y)"));
-	CPPUNIT_ASSERT(*p.second==Interval(0,1));
-}
+//
+//void TestNumConstraint::is_thick_eq01() {
+//	Variable x,y;
+//	// a subtraction with no constant term is not a thick equality
+//	Function f1(x,y,x-y);
+//	NumConstraint c1(f1,EQ);
+//	pair<const ExprNode*,const Interval*> p=c1.is_thick_equality();
+//
+//	CPPUNIT_ASSERT(p.first==NULL);
+//
+//	// a "good" subtraction but with LEQ is not a thick equality
+//	Function f2(x,x-Interval::ZERO);
+//	NumConstraint c2(f2,LEQ);
+//	p=c2.is_thick_equality();
+//	CPPUNIT_ASSERT(p.first==NULL);
+//}
+//
+//void TestNumConstraint::is_thick_eq02() {
+//	Variable x("x"),y("y");
+//	NumConstraint c1(x,y,x-y=Interval(0,1));
+//	pair<const ExprNode*,const Interval*> p=c1.is_thick_equality();
+//	CPPUNIT_ASSERT(p.first!=NULL);
+//	CPPUNIT_ASSERT(sameExpr(*p.first,"(x-y)"));
+//	CPPUNIT_ASSERT(*p.second==Interval(0,1));
+//
+//	const ExprNode& cst=ExprConstant::new_scalar(Interval(0,1));
+//	NumConstraint c2(x,y,cst=x-y);
+//	p=c2.is_thick_equality();
+//	CPPUNIT_ASSERT(p.first!=NULL);
+//	CPPUNIT_ASSERT(sameExpr(*p.first,"(x-y)"));
+//	CPPUNIT_ASSERT(*p.second==Interval(0,1));
+//}
 
 
 } // end namespace

@@ -245,6 +245,15 @@ void TestFunction::build01() {
 	CPPUNIT_ASSERT(true);
 }
 
+void TestFunction::build02() {
+	const char* x[3]={"x","y","z" };
+	Function f(3, x,"(x+y)+z");
+	CPPUNIT_ASSERT(strcmp(f.arg_name(0),x[0])==0);
+	CPPUNIT_ASSERT(strcmp(f.arg_name(1),x[1])==0);
+	CPPUNIT_ASSERT(strcmp(f.arg_name(2),x[2])==0);
+	CPPUNIT_ASSERT(sameExpr(f.expr(),"((x+y)+z)"));
+}
+
 void TestFunction::add_symbol() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
@@ -298,7 +307,7 @@ void TestFunction::generate_comp01() {
 	const ExprNode& e3=y-z;
 	Array<const ExprNode> v(e1, e2, e3);
 
-	const ExprVector& e=ExprVector::new_(v, false);
+	const ExprVector& e=ExprVector::new_col(v);
 
 	Function f(x,y,z,e);
 
@@ -321,7 +330,7 @@ void TestFunction::generate_comp02() {
 
 	Array<const ExprNode> v(e1, e2, e3);
 
-	const ExprVector& e=ExprVector::new_(v, false);
+	const ExprVector& e=ExprVector::new_col(v);
 
 	Function f(x,e);
 
@@ -343,7 +352,7 @@ void TestFunction::used() {
 	const ExprNode& e3=y-z;
 	Array<const ExprNode> v(e1, e2, e3);
 
-	const ExprVector& e=ExprVector::new_(v, false);
+	const ExprVector& e=ExprVector::new_col(v);
 
 	Function f(x,y,z,e);
 

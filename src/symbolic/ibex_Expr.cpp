@@ -21,6 +21,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <set>
+#include <atomic>
 
 using namespace std;
 
@@ -28,7 +29,7 @@ namespace ibex {
 
 namespace {
 
-int id_count=0;
+atomic_long id_count(0);
 
 int max_height(const ExprNode& n1, const ExprNode& n2) {
 	if (n1.height>n2.height) return n1.height;
@@ -40,6 +41,32 @@ int max_height(const Array<const ExprNode>& args) {
 	for (int i=0; i<args.size(); i++)
 		if (args[i].height > max) max = args[i].height;
 	return max;
+}
+
+/**
+ * Just to allow writing a dot product as x*x...
+ * We insert a transpose operator in this case.
+ */
+const ExprNode& mul_left(const ExprNode& left, const ExprNode& right) {
+	if (left.dim.type()==Dim::COL_VECTOR && right.dim.nb_rows()>1)
+		return transpose(left);
+	else
+		return left;
+}
+
+Dim mul_left_dim(const ExprNode& left, const ExprNode& right) {
+	if (left.dim.type()==Dim::COL_VECTOR && right.dim.nb_rows()>1)
+		return left.dim.transpose_dim();
+	else
+		return left.dim;
+}
+
+Array<const Dim> dims(const Array<const ExprNode>& comp) {
+	Array<const Dim> a(comp.size());
+	for (int i=0; i<comp.size(); i++) {
+		a.set_ref(i,comp[i].dim);
+	}
+	return a;
 }
 
 } // end anonymous namespace
@@ -154,24 +181,8 @@ ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
 	}
 }
 
-static Array<const Dim> dims(const Array<const ExprNode>& comp) {
-	Array<const Dim> a(comp.size());
-	for (int i=0; i<comp.size(); i++) {
-		a.set_ref(i,comp[i].dim);
-	}
-	return a;
-}
-
-const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, bool in_row) {
-	return *new ExprVector(Array<const ExprNode>(e1,e2), in_row);
-}
-
-const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, bool in_rows) {
-	return *new ExprVector(components,in_rows);
-}
-
-ExprVector::ExprVector(const Array<const ExprNode>& comp, bool in_row) :
-		ExprNAryOp(comp, vec_dim(dims(comp),in_row)), in_row(in_row) {
+ExprVector::ExprVector(const Array<const ExprNode>& comp, ExprVector::Orientation o) :
+		ExprNAryOp(comp, vec_dim(dims(comp),o==ROW)), orient(o) {
 }
 
 const ExprChi& ExprChi::new_(const Array<const ExprNode>& args) {
@@ -221,12 +232,16 @@ NodeMap<const Variable*>& variables() {
 }
 
 ExprSymbol::ExprSymbol(const Dim& dim) : ExprLeaf(dim),
-		name(strdup(next_generated_var_name())), key(-1) {
+		name(next_generated_var_name()), key(-1) {
+}
+
+ExprSymbol::ExprSymbol(const char* name, const Dim& dim) : ExprLeaf(dim),
+		name(strdup(name)), key(-1) {
+
 }
 
 const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
-	return new_(next_generated_var_name(), dim);
-	//return new_(generated_name_buff, dim);
+	return *new ExprSymbol(dim);
 }
 
 const ExprSymbol& ExprSymbol::new_(const char* name, const Dim& dim) {
@@ -299,18 +314,6 @@ ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
 	value.v() = v;
 }
 
-Vector::operator const ExprConstant&() const {
-	const ExprConstant& e=ExprConstant::new_vector(*this,false);
-	((Dim&) e.dim).cst_vec = true;
-	return e;
-}
-
-IntervalVector::operator const ExprConstant&() const {
-	const ExprConstant& e=ExprConstant::new_vector(*this,false);
-	((Dim&) e.dim).cst_vec = true;
-	return e;
-}
-
 ExprConstant::ExprConstant(const IntervalMatrix& m)
   : ExprLeaf(Dim::matrix(m.nb_rows(),m.nb_cols())),
     value(Dim::matrix(m.nb_rows(),m.nb_cols())) {
@@ -353,16 +356,15 @@ ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Di
 }
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,add_dim((Dim&) left.dim, (Dim&) right.dim)) {
-
+				ExprBinaryOp(left,right,add_dim(left.dim, right.dim)) {
 }
 
 ExprMul::ExprMul(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,mul_dim(left.dim,right.dim)) {
+				ExprBinaryOp(mul_left(left,right),right,mul_dim(mul_left_dim(left,right),right.dim)) {
 }
 
 ExprSub::ExprSub(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,add_dim((Dim&) left.dim, (Dim&) right.dim)) {
+				ExprBinaryOp(left,right,add_dim(left.dim, right.dim)) {
 }
 
 ExprDiv::ExprDiv(const ExprNode& left, const ExprNode& right) :

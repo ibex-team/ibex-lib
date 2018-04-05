@@ -178,9 +178,9 @@ public:
 
 		// -------------  Main constraint -------------------------------------------
 		// The linear dependency of the gradients
-		const ExprNode& df=ExprDiff().diff(sys.goal->args(), vars, sys.goal->expr());
+		const ExprNode& df=ExprDiff(sys.goal->args(), vars).diff(sys.goal->expr(), sys.goal->args());
 		const ExprNode* dg=NULL;
-		if (M>0 || R>0) dg=&ExprDiff().diff(sys.f_ctrs.args(), vars, sys.f_ctrs.expr());
+		if (M>0 || R>0) dg=&ExprDiff(sys.f_ctrs.args(), vars).diff(sys.f_ctrs.expr(), sys.f_ctrs.args());
 
 		// to ease memory cleanup, we represent all
 		// constraints with a single multivalued function

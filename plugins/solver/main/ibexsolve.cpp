@@ -45,7 +45,6 @@ int main(int argc, char** argv) {
 	args::Flag format(parser, "format", "Show the output text format", {"format"});
 	args::Flag bfs(parser, "bfs", "Perform breadth-first search (instead of depth-first search, by default)", {"bfs"});
 	args::Flag txt(parser, "txt", "Write the output manifold in a easy-to-parse text file. See --format", {"txt"});
-	//args::Flag mma(parser, "mma", "Write the output manifold as a Mathematica list.", {"mma"});
 	args::Flag trace(parser, "trace", "Activate trace. \"Solutions\" (output boxes) are displayed as and when they are found.", {"trace"});
 	args::ValueFlag<string> boundary_test_arg(parser, "true|full-rank|half-ball|false", "Boundary test strength. Possible values are:\n"
 			"\t\t* true:\talways satisfied. Set by default for under constrained problems (0<m<n).\n"
@@ -56,7 +55,7 @@ int main(int argc, char** argv) {
 	args::Flag sols(parser, "sols", "Display the \"solutions\" (output boxes) on the standard output.", {'s',"sols"});
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
-
+	args::ValueFlag<string> forced_params(parser, "vars","Force some variables to be parameters in the parametric proofs.",{"forced-params"});
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
 	try
@@ -132,7 +131,7 @@ int main(int argc, char** argv) {
 			if (file.is_open()) {
 				overwitten = true;
 				stringstream ss;
-				ss << filename.Get().c_str() << "~";
+				ss << output_manifold_file << "~";
 				manifold_copy=ss.str();
 				// got from stackoverflow.com:
 				ofstream dest(manifold_copy, ios::binary);
@@ -147,9 +146,6 @@ int main(int argc, char** argv) {
 
 		if (!quiet) {
 			cout << "  output file:\t\t" << output_manifold_file << "\n";
-//			if (mma)
-//				cout << "  output format:\tMMA" << endl;
-//			else
 			if (txt)
 				cout << "  output format:\tTXT" << endl;
 		}
@@ -178,6 +174,33 @@ int main(int argc, char** argv) {
 
 			if (!quiet)
 				cout << "  boundary test:\t\t" << boundary_test_arg.Get() << endl;
+		}
+
+		if (forced_params) {
+			SymbolMap<const ExprSymbol*> symbols;
+			for (int i=0; i<sys.args.size(); i++)
+				symbols.insert_new(sys.args[i].name, &sys.args[i]);
+
+			string vars=args::get(forced_params);
+
+			vector<const ExprNode*> params;
+			int j;
+			do {
+				j=vars.find("+");
+				if (j!=-1) {
+					params.push_back(&parse_indexed_symbol(symbols,vars.substr(0,j)));
+					vars=vars.substr(j+1,vars.size()-j-1);
+ 				} else {
+ 					params.push_back(&parse_indexed_symbol(symbols,vars));
+ 				}
+			} while (j!=-1);
+
+			if (!params.empty()) {
+				s.set_params(VarSet(sys.f_ctrs,params,false)); //Array<const ExprNode>(params)));
+				for (vector<const ExprNode*>::iterator it=params.begin(); it!=params.end(); it++) {
+					cleanup(**it,false);
+				}
+			}
 		}
 
 		// This option limits the search time
@@ -213,8 +236,8 @@ int main(int argc, char** argv) {
 
 		if (sols) cout << s.get_manifold() << endl;
 
-		if (txt) // || mma)
-			s.get_manifold().write_txt(output_manifold_file.c_str(), false); //mma);
+		if (txt)
+			s.get_manifold().write_txt(output_manifold_file.c_str());
 		else
 			s.get_manifold().write(output_manifold_file.c_str());
 
@@ -232,6 +255,9 @@ int main(int argc, char** argv) {
 		cerr << "Error: cannot read file '" << filename.Get() << "'" << endl;
 	}
 	catch(ibex::SyntaxError& e) {
+		cout << e << endl;
+	}
+	catch(ibex::DimException& e) {
 		cout << e << endl;
 	}
 }

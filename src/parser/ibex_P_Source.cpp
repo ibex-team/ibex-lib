@@ -30,7 +30,10 @@ void P_Source::cleanup() {
 
 	// important! re-init to NULL for the next file to be parsed:
 
-	func.clear(); // Auxiliary functions are not destroyed!
+	// Note: Now that there is no more application nodes (ExprApply),
+	// we could copy auxiliary functions in MainGenerator
+	// and safely destroy them here.
+	func.clear();
 
 	goal=NULL;
 	ctrs=NULL;

@@ -78,7 +78,7 @@ Function* Cont::merge(Function &f, Function& g) {
 
 	x.add(y);
 
-	return new Function(x,ExprVector::new_(fg,false));
+	return new Function(x,ExprVector::new_col(fg));
 }
 
 Cont::Cont(Function &f, Function &g, double h_min, double alpha, double beta) : dfs(false), full_diff(true), n(f.nb_var()+g.image_dim()), m(f.image_dim()+g.image_dim()), f(*merge(f,g)), g(&g), domain(this->f.nb_var()), h_min(h_min), alpha(alpha), beta(beta) {
@@ -136,32 +136,31 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 	find_time=0;
 	diff_time=0;
     neighborhood_time=0;
+	Timer timer;
 
 	do {
 
 		try {
 			//cout << "solution=" << x << endl;
-			Timer::start();
+			timer.restart();
 			// Build a cell around the current solution x
 			ContCell* new_cell=choose(p.second,x,h);
 			//cout << "new cell:" << new_cell.box << endl;
-			Timer::stop();
-			choose_time+=Timer::VIRTUAL_TIMELAPSE();
+			timer.stop();
+			choose_time += timer.get_time();
             
             // Update neighborhoods
-            Timer::start();
+            timer.restart();
             add_to_neighbors(new_cell);
-            Timer::stop();
-            neighborhood_time+=Timer::VIRTUAL_TIMELAPSE();
+            timer.stop();
+            neighborhood_time+= timer.get_time();
 
 			// Intersects the list of existing cells
 			// with the current cell and vice-versa
-			Timer::start();
-
+			timer.restart();
 			diff(new_cell);
-
-			Timer::stop();
-			diff_time+=Timer::VIRTUAL_TIMELAPSE();
+			timer.stop();
+			diff_time+=timer.get_time();
 
 			// assert
 			if (full_diff)
@@ -180,10 +179,10 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		// cell in turn and search in all its facets.
 		// Some facets may be discarded and some cells may be moved
 		// to l_empty_facets or l_solution_find_fail_facets.
-		Timer::start();
+		timer.restart();
 		p=find_solution_in_cells(x);
-		Timer::stop();
-		find_time+=Timer::VIRTUAL_TIMELAPSE();
+		timer.stop();
+		find_time+= timer.get_time();
 
 		// In case of success, the value of h for the next "choose" is set
 		// to the parameter width of the cell where the solution has been
@@ -262,7 +261,7 @@ void Cont::diff(ContCell* new_cell) {
 		l.push_back(new_cell);
 }
 
-bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params) {
+bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet& vars, const VarSet& forced_params) {
 	// We check the rows of the jacobian matrix of the implicit function.
 	// The rows that correspond to variables that "should be parameters"
 	// must have no component with 0.
@@ -281,7 +280,7 @@ bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet
 	int v=0;  // index of the ith variable
 	for (int i=0; i<n; i++) {
 		if (vars.is_var[i]) {
-			if (forced_params[i]) {
+			if (!forced_params.is_var[i]) {
 				for (int j=0; j<n-m; j++) {
 					if (J_implicit[v][j].contains(0)) return false;
 				}
@@ -378,7 +377,7 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
     return flag;
 }
 
-bool Cont::is_valid_cell_2(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params) {
+bool Cont::is_valid_cell_2(const IntervalVector& box_existence, const VarSet& vars, const VarSet& forced_params) {
 
 	bool valid_cell=true;
 
@@ -427,7 +426,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 	IntervalVector box(n);
 	IntervalVector box_unicity(n);
 	IntervalVector box_existence(n);
-	VarSet vars=get_newton_vars(f, x.mid(), BitSet::empty(n));
+	VarSet vars=get_newton_vars(f, x.mid(), VarSet(n,BitSet::empty(n),false));
 
 	x_box=vars.var_box(x);
 	p_box=vars.param_box(x);

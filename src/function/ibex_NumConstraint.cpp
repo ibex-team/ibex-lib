@@ -14,10 +14,23 @@
 #include "ibex_ExprCopy.h"
 
 #include <sstream>
+#include <mutex>
 
-extern void ibexparse_string(const char* syntax);
+#ifndef _WIN32 // MinGW does not support mutex
+#include <mutex>
+namespace {
+std::mutex mtx;
+}
+#define LOCK mtx.lock()
+#define UNLOCK mtx.unlock()
+#else
+#define LOCK
+#define UNLOCK
+#endif
 
 using namespace std;
+
+extern void ibexparse_string(const char* syntax);
 
 namespace ibex {
 
@@ -78,6 +91,8 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 	System* sys=new System(); // temporary system
 
 	char* syntax = strdup(s.str().c_str());
+
+	LOCK;
 	try {
 		parser::system=sys;
 		ibexparse_string(syntax);
@@ -86,8 +101,10 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 	} catch(SyntaxError& e) {
 		parser::system=NULL;
 		free(syntax);
+		UNLOCK;
 		throw e;
 	}
+	UNLOCK;
 
 	build_from_system(*sys);
 	delete sys;
@@ -104,41 +121,41 @@ void NumConstraint::build_from_system(const System& sys) {
 	varcopy(c0.f.args(),x);
 	const ExprNode& y=ExprCopy().copy(c0.f.args(),x,c0.f.expr());
 
-	f.init(x,y);
+	((Function&) f).init(x,y);
 
 	(CmpOp&) op = c0.op;
 }
 
 #define RETURN(a,b) return pair<const ExprNode*, const Interval*>(a,b)
 
-pair<const ExprNode*, const Interval*> NumConstraint::is_thick_equality() const {
-
-	// an inequality g(x)<=[a,b] is not considered as
-	// a thick equality, although it could...
-	if (op!=EQ) RETURN(NULL,NULL);
-
-	const ExprSub* sub=dynamic_cast<const ExprSub* >(&f.expr());
-
-	if (sub) {
-
-		const ExprConstant* cst=dynamic_cast<const ExprConstant* >(&sub->right);
-
-		if (cst) {
-			if (cst->dim.is_scalar() && cst->get_value().diam()>0)
-				RETURN(&sub->left, &cst->get_value());
-		} else {
-
-			cst=dynamic_cast<const ExprConstant* >(&sub->left);
-
-			if (cst) {
-				if (cst->dim.is_scalar() && cst->get_value().diam()>0)
-					RETURN(&sub->right, &cst->get_value());
-			}
-		}
-	}
-
-	RETURN(NULL,NULL);
-}
+//pair<const ExprNode*, const Interval*> NumConstraint::is_thick_equality() const {
+//
+//	// an inequality g(x)<=[a,b] is not considered as
+//	// a thick equality, although it could...
+//	if (op!=EQ) RETURN(NULL,NULL);
+//
+//	const ExprSub* sub=dynamic_cast<const ExprSub* >(&f.expr());
+//
+//	if (sub) {
+//
+//		const ExprConstant* cst=dynamic_cast<const ExprConstant* >(&sub->right);
+//
+//		if (cst) {
+//			if (cst->dim.is_scalar() && cst->get_value().diam()>0)
+//				RETURN(&sub->left, &cst->get_value());
+//		} else {
+//
+//			cst=dynamic_cast<const ExprConstant* >(&sub->left);
+//
+//			if (cst) {
+//				if (cst->dim.is_scalar() && cst->get_value().diam()>0)
+//					RETURN(&sub->right, &cst->get_value());
+//			}
+//		}
+//	}
+//
+//	RETURN(NULL,NULL);
+//}
 
 Domain NumConstraint::right_hand_side() const {
 	Domain d(f.expr().dim);

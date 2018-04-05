@@ -28,31 +28,13 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		const Vector& eps_x_min, const Vector& eps_x_max) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
 		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL), params(NULL), manif(NULL) {
-
-	init(sys, NULL);
-
-}
-
-Solver::Solver(const System& sys, const BitSet& _params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
-		const Vector& eps_x_min, const Vector& eps_x_max) :
-		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
-		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
-		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL), params(NULL), manif(NULL) {
-
-	init(sys,&_params);
-
-}
-
-void Solver::init(const System& sys, const BitSet* _params) {
+		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL),
+		  params(sys.nb_var,BitSet::empty(sys.nb_var),false) /* no forced parameter by default */,
+		  manif(NULL), time(0), nb_cells(0) {
 
 	assert(sys.box.size()==ctc.nb_var);
 
 	int nb_eq=0;
-
-	if (_params) {
-		this->params=new BitSet(*_params);
-	}
 
 	// count the dimension of equalities
 	for (int i=0; i<sys.nb_ctr; i++) {
@@ -80,16 +62,19 @@ void Solver::init(const System& sys, const BitSet* _params) {
 	manif = new Manifold(n,m,nb_ineq);
 }
 
-Solver::~Solver() {
-	if (params)
-		delete params;
+void Solver::set_params(const VarSet& _params) {
+	params=_params;
+}
 
+Solver::~Solver() {
 	if (ineqs) {
 		delete ineqs;
 		if (eqs) {
 			delete eqs;
 		}
 	}
+
+	if (manif) delete manif;
 }
 
 void Solver::start(const IntervalVector& init_box) {
@@ -112,7 +97,7 @@ void Solver::start(const IntervalVector& init_box) {
 
 	time = 0;
 
-	Timer::start();
+	timer.restart();
 }
 
 void Solver::start(const char* input_paving) {
@@ -149,13 +134,12 @@ void Solver::start(const char* input_paving) {
 	manif->unknown.clear();
 	manif->pending.clear();
 
-	Timer::start();
+	timer.restart();
 }
 
 SolverOutputBox* Solver::next() {
 	while (!buffer.empty()) {
-
-		time_limit_check();
+		if (time_limit >0) timer.check(time_limit);
 
 		if (trace==2) cout << buffer << endl;
 
@@ -202,9 +186,7 @@ SolverOutputBox* Solver::next() {
 					throw NoBisectableVariableException();
 
 				// next line may also throw NoBisectableVariableException
-				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-
-				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+				pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 
 				delete buffer.pop();
 				buffer.push(new_cells.first);
@@ -221,8 +203,14 @@ SolverOutputBox* Solver::next() {
 		}
 		catch (EmptyBoxException&) {
 			delete buffer.pop();
-			impact.remove(v); // note: in case of the root node, we should clear the bitset
+			//impact.remove(v); // note: in case of the root node, we should clear the bitset
 			// instead but since the search is over, the impact is not used anymore.
+			// JN: that make a bug with Mingw
+			if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
+				impact.remove(v);
+			else                                // root node : impact set to 1 for all variables
+				impact.clear();
+
 			continue;
 		}
 	}
@@ -262,8 +250,8 @@ Solver::Status Solver::solve() {
 		manif->status = CELL_OVERFLOW;
 	}
 
-	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	timer.stop();
+	time = timer.get_time();
 
 	manif->time += time;
 	manif->nb_cells += nb_cells;
@@ -271,12 +259,6 @@ Solver::Status Solver::solve() {
 	return manif->status;
 }
 
-void Solver::time_limit_check () {
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	if (time_limit >0 &&  time >=time_limit) throw TimeOutException();
-	Timer::start();
-}
 
 SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 
@@ -294,10 +276,10 @@ SolverOutputBox Solver::check_sol(const IntervalVector& box) {
 		} else if (m<n) {
 			// ====== under-constrained =========
 			try {
-				VarSet varset=get_newton_vars(eqs->f_ctrs,box.mid(),params? *params: BitSet::empty(n));
+				VarSet varset=get_newton_vars(eqs->f_ctrs,box.mid(),params);
 
 				if (inflating_newton(eqs->f_ctrs, varset, box, sol._existence, *sol._unicity)) {
-					if (!params || ((int) params->size())<n-m)
+					if (params.nb_param<n-m)
 						sol.varset = new VarSet(varset);
 				} else
 					(SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN;
@@ -408,6 +390,7 @@ bool Solver::is_boundary(const IntervalVector& box) {
 		return full_rank(J);
 	}
 	case HALF_BALL:
+	default:
 		not_implemented("\"half-ball\" boundary test");
 		return false;
 	}
@@ -433,21 +416,17 @@ SolverOutputBox& Solver::store_sol(const SolverOutputBox& sol) {
 	case SolverOutputBox::INNER    :
 		manif->inner.push_back(sol);
 		return manif->inner.back();
-		break;
 	case SolverOutputBox::BOUNDARY :
 		manif->boundary.push_back(sol);
 		return manif->boundary.back();
-		break;
 	case SolverOutputBox::UNKNOWN  :
 		manif->unknown.push_back(sol);
 		return manif->unknown.back();
-		break;
 	case SolverOutputBox::PENDING :
+	default:
 		manif->pending.push_back(sol);
 		return manif->pending.back();
-		break;
 	}
-
 }
 
 void Solver::flush() {

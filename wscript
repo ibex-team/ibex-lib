@@ -28,7 +28,7 @@ def options (opt):
 	waflib.Tools.compiler_cxx.cxx_compiler["win32"].remove ("msvc")
 
 	opt.load ("compiler_cxx compiler_c javaw")
-	opt.load ("waf_benchmarks")
+	opt.load ("waf_benchmarks", tooldir='.')
 
 	opt.add_option ("--enable-shared", action="store_true", dest="ENABLE_SHARED",
 			help = "build ibex as a shared library")
@@ -107,14 +107,19 @@ def configure (conf):
 	# Optimised compilation flags
 	if conf.options.DEBUG:
 		Logs.info("Enabling debug mode")
-		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
+		flags = "-std=c++11 -O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
 		flags += " -fmessage-length=0"
 		conf.define ("DEBUG", 1)
+		conf.env.DEBUG = True
 	else:
-		flags = "-O3"
+		flags = "-std=c++11 -O3"
 		conf.define ("NDEBUG", 1)
+		conf.env.DEBUG = False
 	for f in flags.split():
 		conf.check_cxx(cxxflags=f, use="IBEX", mandatory=False, uselib_store="IBEX")
+	
+	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
+	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEX")
 
 	# Build as shared lib is asked
 	conf.start_msg ("Ibex will be built as a")
@@ -243,12 +248,12 @@ def build (bld):
 
 	if bld.env.INSTALL_3RD:
 		incnode = bld.bldnode.find_node("3rd").find_node("include")
-		incfiles = incnode.ant_glob ("**")
+		incfiles = incnode.ant_glob ("**", quiet=True)
 		bld.install_files (bld.env.INCDIR_3RD, incfiles, cwd = incnode,
 			relative_trick = True)
 
 		libnode = bld.bldnode.find_node("3rd").find_node("lib")
-		libfiles = libnode.ant_glob ("**")
+		libfiles = libnode.ant_glob ("**", quiet=True)
 		bld.install_files (bld.env.LIBDIR_3RD, libfiles, cwd = libnode,
 			relative_trick = True)
 

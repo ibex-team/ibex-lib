@@ -1,8 +1,8 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_Timer.h
-// Author      : ????
-// Copyright   : Ecole des Mines de Nantes (France)
+// Author      : Jordan Ninin
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
 // Last Update : May 13, 2012
@@ -13,22 +13,20 @@
 
 #include "ibex_Exception.h"
 
-#ifndef _MSC_VER
+#ifndef _WIN32
 #include <sys/time.h>
-#endif // _MSC_VER
-
-
-#ifdef _WIN32
-//#include <ctime>
-#else
 #include <sys/resource.h>
-#endif
-
-#ifndef _MSC_VER
 #include <unistd.h>
+
+#else
+/* A time value that is accurate to the nearest
+   microsecond but also has a range of years.  */
+struct mytimeval
+  {
+	long int tv_sec;		/* Seconds.  */
+	long int tv_usec;	/* Microseconds.  */
+  };
 #endif // _MSC_VER
-
-
 
 namespace ibex {
 
@@ -39,49 +37,55 @@ namespace ibex {
  */
 class TimeOutException : public Exception { };
 
+
 /** \ingroup tools
  *
  * \brief Timer.
  */
 class Timer {
  public:
+	Timer();
+
+	void start();
+	void stop();
+	void restart();
+	double get_time();
+	void check(double timeout);
+private:
+	  double start_time;
+	  bool active;
+};
+
+/** \ingroup tools
+ *
+ * \brief Timer.
+ */
+class StaticTimer {
+ public:
+  static void start();
+
+ private:
+  friend class Timer;
 
   typedef double Time;
 
-  typedef enum type_timer {__REAL, VIRTUAL} TimerType;
+  static Time get_localtime();
 
-  static void start();
+  static Time local_time;
 
-  static void stop(TimerType type=VIRTUAL);
-
-  /**
-   * \brief Check the timer and throw a #ibex::TimeOutException
-   * if the time elapsed exceeds #timeout.
-   *
-   * (add by gch).
-   */
-  static void check(double timeout);
-
-  inline static Time REAL_TIMELAPSE() { return real_lapse; }
-  inline static double RESIDENT_MEMORY() { return resident_memory; }
-  /* not available yet under WIN32 platform */
-  inline static Time VIRTUAL_TIMELAPSE() { return (virtual_ulapse + virtual_slapse); }
-
+#ifdef _WIN32
+  static struct mytimeval tp;
   static Time real_lapse;
+  static Time real_time;
+
+#else
+  static struct rusage res;
   static Time virtual_ulapse;
   static Time virtual_slapse;
-
- private:
-  static Time real_time;
   static Time virtual_utime;
   static Time virtual_stime;
   static long resident_memory;
-
-#ifndef _WIN32
-  //  static std::clock_t res;
-  static struct rusage res;
 #endif
-  static struct timeval tp;
 };
 
 } // end namespace ibex
