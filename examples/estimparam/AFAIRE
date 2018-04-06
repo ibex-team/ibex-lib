@@ -1,0 +1,106 @@
+
+optim.
+
+pour l'optimiseur  remplacer le 1.e-15  dans ymax 
+(vérifier que c'est mieux)
+
+-  mettre la branche dans le plugin 
+
+code Ignacio 
+
+
+- lsmear ?
+- feasible diving :  passage dans le plugin optim ?
+
+
+----------------------------------------------------------------------------
+
+optimisation gestion  liste points   (1 seul new et delete)  : peut être un peu compliqué.
+
+
+branche courante : finir intégration des différentes méthodes  
+en particulier dans le plugin param-estim   y mettre projF
+
+
+tout mettre dans le plugin  estim-param 
+     stratégies
+     contracteurs
+     combinatoire 
+
+
+
+
+
+
+code Qinter :  l'industrialiser un minimum ...
+question sur solver ?
+     paramétré pour la qinter 
+     duplication de code  ou   modification du solver de base ??
+
+
+
+explications des fichiers ...
+
+idem pour estimparam.
+
+a faire:
+pour les plans, 
+  - separation création des modèles et résolution 
+    -> base de modèles  " nuages de points " 
+
+modèles aléatoires ?
+
+
+pour les cercles : revoir les 2 modélisations Circle et Circle2
+
+_______________________________________e_________________________________________________
+
+terminer le plugin , 
+
+pour que ça continue à tourner sans le plugin 
+(avec la vieille projection)
+
+
+__________________________________________________________________________
+
+verifier les appels au simplexe 
+
+
+____________________________________________________________________________
+
+Supprimer  valstack[] (utile en DFS ?)
+
+
+_______________________________________________________________________
+
+commenter code estim_essentialmatnorm.cpp  : 3 systèmes 
+
+simplifier (retrait ce qui est inutile ?)
+
+____________________________________________________________________________
+
+Mettre a plat les 3 stratégies   BFS DFS et beamsearch.
+-> mettre les buffers dans cet objet stratégie
+
+algo ne connait que la stratégie, pas les buffers.
+algo avec contraintes , sous classe de l'algo sans contraintes
+
+
+
+rendre orthogonal   stratégie et stockage des possibles   -> généralisation du with_storage
+fait : classe  SearchStrategy pour un objet intermédiaire entre SolveOptQInter et CellBuffer.
+
+------------------------------------------------------------------------------------------------
+
+pour article JOGO : 
+point pas clair  valid :  satisfying the constraints
+validCS ? -> inliers :  pourquoi valid inliers  : validated inliers ?  
+consensus set  CS  vs inliers
+
+_________________________________________________________________________________________________
+
+
+bug  dans exemple corridor : 
+solution à 58  non trouvée dans 
+
+à débugguer

@@ -1,0 +1,642 @@
+\documentclass{article}
+\usepackage[boxed,lined]{algorithm2e}
+\usepackage{algorithm2e-cgf}
+
+\title {Estimation de param\`etres ;  nouveaut\'es apr\`es ICTAI 15}
+\author{Bertrand Neveu}
+\begin{document}
+\maketitle
+
+Voici les principaux changements par rapport \`a la version de l'article d'ICTAI
+
+\section{Condition d'arr\^et}
+
+
+{\bf Arr\^et d'une branche dans version ICTAI}
+   Condition d'arr\^et pour la branche courante (pas de bissection) dans ICTAI : pr\'ecision atteinte ou possibles = valides.
+ La gestion des solutions partageant des observations valides a lieu dans le post-traitement et on ne garde
+que les solutions maximales, ne partageant pas plus de la moiti\'e de leurs observations avec une autre solution maximale.(cf partie 8)
+
+{\bf Nouvelle condition d'arr\^et}
+   Nouvelle condition :  on s'arr\^ete quand il ne reste pas plus de Q/2 points possibles non valid\'es : 
+   toute autre solution dans la bo\^ite courante partagerait plus de la moiti\'e de ses points valides avec la solution trouv\'ee.
+
+   
+Avantage : on s'arr\^ete plus t\^ot dans l'arbre de recherche, surtout quand il y a des plans avec des nombres
+de mesures diff\'erentes.
+
+Inconv\'enient : on n'a plus les solutions optimales en ensemble de points valides
+   et on ne sait plus caract\'eriser les solutions rendues par le post-traitement (cf partie 8), cet ensemble
+de solutions apr\`es post-traitement  d\'ependant alors de l'ordre dans lequel ces solutions ont \'et\'e trouv\'ees.
+
+La seule chose que l'on sait est que les solutions non recherch\'ees sont proches des solutions
+trouv\'ees, dans le sens qu'elles auraient partag\'e avant posttraitement la moiti\'e de leurs mesures
+avec une solution trouv\'ee.
+
+Cette nouvelle condition est actuellement optionnelle.
+
+\section{Recherche d'outliers}
+
+  cf mail du Chili  11/12
+
+   La recherche est lanc\'ee si   possibles -Q  est inf\'erieur \`a un seuil.
+
+   La recherche des ouliers s'effectue en prenant des triplets d'observations disjoints et en cherchant si la solution correspondante \`a un triplet donn\'e a une intersection  vide avec la bo\^ite courante, auquel cas on a trouv\'e qu'il y a un outlier dans ce triplet (mais on ne
+sait pas de quelle observation il s'agit).
+   On rejette la bo\^ite courante si on a trouv\'e plus d'outliers que la diff\'erence entre le nombre de mesures possibles et  Q. 
+   Ce seuil est un  param\`etre de l'algorithme : dans les exemples, on a essay\'e de le mettre entre 0 et 20.
+   La  diminution du nombre de boites assez sensible (20 \%), mais le temps de r\'esolution varie peu.
+   L'algo ICTAI est obtenu en mettant ce param\`etre seuil = -1. (on n'effectue aucun test).
+
+\section{Recherche de points valides}
+\label{ptvalide}
+\subsection{Limitation recherche point valide}
+Par ailleurs, on a limit\'e le lancement de la recherche du point valide en accord avec la condition d'arr\^et:
+ on ne lance cette recherche que si on a une possibilit\'e d'obtenir la condition d'arr\^et.
+   
+
+\subsection{Mini ransac}
+  cf mail du Chili  11/12
+    Au lieu de rechercher \`a valider les observations sur le point milieu de la bo\^ite courante, on essaye \`a partir de $k$ triplets
+tir\'es al\'eatoirement. $k$, le nombre de triplets  est un param\`etre de l'algorithme.
+
+\begin {itemize}
+\item point milieu (k=0)  : calcul des mesures valides au point milieu de la bo\^ite courante  (algo ICTAI)
+\item k :  chaque point pour la validation des observations est le milieu de l'intersection  de la boite courante avec la solution
+	  de l'intersection de 3 mesures choisies al\'eatoirement (mini-ransac)
+\end{itemize}     
+Les meilleurs r\'esultats sont obtenus avec $k$ =1 , mais ils varient assez peu pour $k <= 3$.  Au del\`a, cette recherche est trop
+ch\`ere.
+
+\subsection{Limitation recherche point valide}
+\label{limite-validation}
+Par ailleurs, on a limit\'e le lancement de la recherche du point valide en accord avec la condition d'arr\^et:
+ on ne lance cette recherche que si on a une possibilit\'e d'obtenir la condition d'arr\^et.
+   
+
+\section {Limitation des q-intersections}
+\label{limite-qinter}
+  (cf mail 24/12)
+   Quand on choisit de faire des q-intersections dans la direction suppl\'ementaire, un
+seuil est mis pour le lancement de la q-intersection sur les directions de la boite courante.
+Ce seuil est determin\'e par :   possibles - Q.
+Dans la version courante, le seuil est fix\'e \`a 10 pour les plans, c.\`a.d les q-intersections dans 
+les directions de la bo\^ite courante ne sont faites qu'en bas de l'arbre de recherche quand   possibles - Q $<=$ seuil.
+
+
+
+\section{Optimisation}
+Noux avons ajout\'e un algorithme d'optimisation (maximisation) sur le nombre de mesures valides ({\it inliers}). C'est un algorithme
+de type Branch and Bound avec plusieurs strat\'egies possibles : 
+\begin{itemize}
+\item une strat\'egie  en profondeur d'abord simple sans  choix du meilleur des 2 fils
+
+\item une strat\'egie  en profondeur d'abord simple avec  choix du meilleur des 2 fils : 
+ le crit\`ere de choix peut \^etre  le plus grand nombre d'observations valides ou la borne sup des observations de la boite 
+
+\item une strat\'egie en meilleur d'abord.
+\end{itemize}
+La strat\'egie en meilleur d'abord cause assez rapidement des explosions m\'emoire dans les essais sur la matrice fondamentale, ainsi que le deuxi\`eme exemple de sc\`ene r\'eelle avec 3611 points (house44).
+
+
+Un algo de type IbexOpt (contraction des fils et recherche point faisable  avant mise dans le tas) a \'et\'e implant\'e.
+
+Pour les plans, cette strat\'egie en profondeur d'abord avec  choix du meilleur fils est la plus rapide, dans l'implantation
+de type IbexOpt.
+
+Autres strat\'egies ou autres crit\`eres \`a \'etudier ?  
+\paragraph{Bornes}
+Pour chaque bo\^ite, le majorant qmax du nombre d'inliers est calcul\'e par l'algorithme de q-intersection par projections comme le plus grand nombre de possibles sur un intervalle projet\'e contenant au moins q observations possibles. Ce majorant peut \^etre
+plus petit que le nombre de possibles dans la bo\^ite courante (en particulier s'il y a plusieurs solutions dans la bo\^ite
+courante).
+
+Si ce majorant est plus petit que q, la branche est abandonn\'ee.
+
+Le minorant est le nombre de valides.
+La condition d'arr\^et de la branche courante est :  $qmax = valid$  ou pr\'ecision atteinte.
+
+Le crit\`ere \`a optimiser \'etant un entier, quand on a trouv\'e une solution avec k inliers, on recherche par la
+suite une solution avec au moins q=k+1 inliers.   (eps-sol de IbexOpt=1).
+
+   Pas de post-traitement :  on obtient directement la meilleure solution et une valeur de la borne sup possible sur les petites 
+boites ($qsb$).  (\'equivalent \`a uplo-of-epsboxes dans Ibexopt). Si cette borne est in\'erieure ou \'egale \`a la valeur de la meilleure solution, l'optimum est prouv\'e.
+
+   Param\`etre de l'algorithme : pr\'ecision de bissection :  si elle est assez petite, on n'obtiendra pas de petites bo\^ites
+avec de meilleures solutions potentielles et l'optimum obtenu sera prouv\'e, mais le temps de calcul risque d'\^etre grand.
+
+   En cas d'arr\^et en limite de temps : on a une borne sup\'erieure sur les boites restantes.  (\'equivalent \`a uplo de Ibexopt), mais en profondeur d'abord, cette valeur est grande  : on ne fait rien pour la descendre.
+Ce point n'est pas explicit\'e dans le pseudo-code.
+
+   Cet algorithme d'optimisation marche bien sur les plans et les cercles : les optimums trouv\'es sont prouv\'es sur tous les exemples artificiels et sur les deux sc\`enes r\'eelles.
+
+Tol\'erance sur l'objectif : au lieu d'une solution entière optimale , on peut rechercher l'optimum avec une tol\'erance entière epsobj donn\'ee (\'equivalent de $eps_{sol}$ de Ibexopt).
+
+Limite des branchements : au delà d'une certaine profondeur, on ne poursuit qu'une branche, l'autre (si elle existe) est consid\'er\'ee comme une petite 
+boîte et n'est pas mise dans le tas:  paramètre de l'algo : profondeur max pour 2 branches
+choix de la branche : actuellement qmax .
+peut-on faire mieux ?
+
+\begin{algorithm}[htb]
+\SetVline
+{\small
+\Algo { {\tt QinterOptim} ($box$, $observations$, $q$,
+  $\epsilon_{sol}$, $\tau$) }
+{
+$solution$ $\gets \emptyset$ \;
+$qsb=0$;
+$node$ $\gets$ {\tt new} $Node$ \;
+$node.box$ $\gets$ $box$ \;
+$node.possibleCS$ $\gets$ $observations$ \;
+$node.validCS$ $\gets \emptyset$ \;
+$nodeStack$ $\gets$ $\{node\}$ \;
+
+\While {$nodeStack$ $\ne \emptyset$} {
+   $node$ $\gets$ {\tt pop} ($nodeStack$) \;
+   $box$ $\gets$ $node.box$ \;
+  {\tt bisect}  ($box$, $box_1$, $box_2$)  /* split the box */\;
+  $node_1$ $\gets$ {\tt quasiCopy} ($node$, $box_1$) \; 
+  $node_2$ $\gets$ {\tt quasiCopy} ($node$, $box_2$) \; 
+
+  {\tt handleNode}($node_1$, $q$,
+  $\epsilon_{sol}$, $\tau$ , $solution$, $qsb$) \;
+  {\tt handleNode}($node_2$, $q$,
+  $\epsilon_{sol}$, $\tau$ , $solution$, $qsb$) \;
+  \eIf {$node_1$.isLeaf $=$ false {\tt and} $node_2$.isLeaf $=$ false}
+{
+  {\tt push} ($nodeStack$, worst($node_1$,$node_2$)) \; 
+  {\tt push} ($nodeStack$, best($node_1$,$node_2$))
+}
+{ \eIf {$node_1$.isLeaf $=$ false}
+  {{\tt push} ($nodeStack$,$node_1$)}
+  {\If {$node_2$.isLeaf $=$ false}
+  {{\tt push} ($nodeStack$,$node_2$)}
+}
+}
+}
+ % end while
+\Return (solution, qsb)
+}
+}
+
+
+
+\caption{Algorithme d'optimisation donnant une solution contenant le nombre maximum d'inliers : variante en profondeur d'abord avec choix du meilleur fils}
+\label{algo:qinterestim}
+\end{algorithm}
+
+
+
+\begin{algorithm}[htb]
+\SetVline
+{\small
+\Algo { {\tt handleNode} ($node$,  $q$,
+  $\epsilon_{sol}$, $\tau$ , $solution$, $qsb$)}
+{
+  $node$.isLeaf $\gets$ false\;
+$box$ $\gets$ $node.box$ \;
+   
+   {\tt contAndQinter} ($box$, $\tau$, $q$, $node.possibleCS$, $node.maxpossibles$ ) \;
+   % contract the box and updates the compatible measurements for box.
+                                    
+   \eIf  {$box$ $\ne \emptyset$}
+  % the current box is empty if qinter eliminates it or if the compatible measurements has a size
+  % less than q 
+    {
+       {\tt validateBox} ($box$, $node$, $\tau$, $node.possibleCS$, $node.validCS$) \;
+
+       \If  { $|node.validCS|$  $>=q$}
+            { $solution$ $\gets$  $node$ \;
+              $q$ $\gets$ $|node.validCS| +1$\;
+              }\;
+            \If {width($box$) $< \epsilon_{sol}$  {\bf or}  $|node.validCS|$ $=$ $node.maxpossibles$ }
+                {
+            \If {$node.maxpossibles$  $> |node.validCS|$}
+            {$qsb$  $\gets$ max ($qsb$, $node.maxpossibles$)}
+                
+               $node$.isLeaf $\gets$ true
+                }         
+    }
+     {$node$.isLeaf $\gets$ true}
+
+}
+}
+
+
+\caption{Traitement d'un noeud : contraction, calcul des valides et test feuille}
+\label{algo:qinterestim}
+\end{algorithm}
+
+
+
+\subsection {Questions ?}
+
+
+Le branch and bound est classique. 
+Les points originaux sont la d\'etermination du majorant de chaque bo\^ite par l'algo de q-intersection, m\'ethode g\'en\'erique ind\'ependante
+de l'application.
+
+et du point faisable par des ``mini-ransac''   (mais qui n'am\'eliore qu'\`a la marge la solution avec la validation sur le point milieu).
+
+
+Les conclusions sur les am\'eliorations sont les m\^emes : les seules am\'eliorations vraiment gagnantes sont celles de la section \ref{limite-qinter} et celles de la section \ref{limite-validation}, qui suppriment des calculs inutiles.
+
+Il faudrait de nouveaux exemples artificiels (plus r\'ealistes ?)   et r\'eels   pour \^etre convaincu de l'int\'er\^et de l'approche.
+  
+   Essais sur la matrice fondamentale avec 2 crit\`eres ( alg\'ebrique  et Sampson). On a des
+   difficult\'es dues \`a la combinatoire (7 ddl): on n'arrive qu'\`a optimiser sur des petites boites autour d'une solution trouv\'ee par RANSAC : on am\'eliore localement cette solution.
+
+
+Pour les probl\`emes avec contraintes, la recherche d'un point faisable se fait en construisant un polytope int\'erieur
+(comme Ibexopt).  Question : que minimiser sur ce polytope dans un simplexe pour avoir le plus de points valides ??
+
+
+\subsection {Travaux li\'es}
+
+2 articles de ECCV 2014 qui r\'ealisation une maximisation de l'ensemble des inliers par branch and bound en vision.
+\begin{itemize}
+\item {rotation et distance focale  (dimension 4)} : 
+Globally Optimal Inlier Set Maximization
+With Unknown Rotation and Focal Length\\
+Jean-Charles Bazin, Yongduek Seo, Richard Hartley, Marc Pollefeys   4DDL
+\item {Matrice essentielle (dimension 5) } :
+Optimal Essential Matrix Estimation via
+Inlier-Set Maximization  \\
+  Yang , Li, Jia ECCV 2014  
+
+\end{itemize}
+
+
+
+
+\section {Nouveaux exemples artificiels de plans }
+
+\begin{itemize}
+
+   \item points compl\`etement al\'eatoires (que du bruit)
+     permet de v\'erifier que l'algorithme a, \`a Q fix\'e, un comportement en $m^3$ , et que la complexit\'e
+diminue avec Q.
+
+  \item  nouveaux exemples avec 25 plans
+\begin{itemize}
+      \item     sans coordonn\'ees enti\`eres : (les exemples ICTAI avaient malencontreusement les coordonn\'ees al\'eatoires enti\`eres)   plus de petites boites avec strat\'egie round robin
+
+      \item sans plans parall\`eles ni coordonn\'ees enti\`eres : la recherche de points valides sur ces exemples
+permet de s'affranchir de la pr\'ecision.  il n'y a plus de petites boites (avec strat\'egie round robin ou sp\'ecifique rr2)
+\end{itemize}
+   
+\end{itemize}
+
+\section {Triplets de mesures}
+
+    R\'esolution avec tous les triplets :  complexit\'e $m^3$ en temps et en m\'emoire 
+due \`a la phase de construction des boites pour tous les triplets.  
+    Cette phase est constante \`a $m$ donn\'e (ind\'ependante de Q) et rend cet algorithme peu efficace.
+    Contrairement \`a l'algorithme d'ICTAI, il ne peut tirer partie du seuil Q.
+
+    
+
+
+    
+\section  {Propri\'et\'es des solutions}
+
+Suivant la condition d'arr\^et utilis\'ee, on a les propri\'et\'es suivantes sur les solutions obtenues.
+
+
+\subsection {Condition d'arr\^et : pr\'ecision ou possibles==valides}
+       solutions : solutions trouv\'ees maximales dans la boite courante (valides $\geq Q$ et valides=possibles) 
+       $\cup$  solutions trouv\'ees  non prouv\'ees maximales dans la boite courante (petites boites avec possibles $\geq Q$ et valides $\geq Q$  possibles)
+       $cup$  solutions potentielles (petites bo\^ites avec  possibles $\geq Q$  et valides $< Q$)
+
+
+       Le posttraitement ne porte que les solutions trouv\'ees. Parmi celles-ci:
+\begin{itemize}
+\item{ On garde les solutions maximales}.
+
+\item si 2 solutions partagent la moiti\'e de leurs points , on  garde la meilleure  (ordre total)
+             crit\`ere principal ; nombre d'inliers 
+             crit\`ere secondaire somme des valeurs absolues de la fonction $f$ (compatibilit\'e des observations).
+       
+\end{itemize}
+Propri\'et\'e des solutions gard\'ees : elles sont maximales parmi les solutions trouv\'ees.
+
+Propri\'ete garantie des solutions retir\'ees : elles  partagent la moiti\'e des points avec une solution gard\'ee.
+En triant les solutions selon le crit\`ere ci-dessus, l'algo de retrait garantit cette propri\'et\'e.
+
+
+ \subsection {Condition d'arr\^et :  pr\'ecision ou   possibles-valides < q/2}
+
+       solutions = solutions trouv\'ees  $\cup$ solutions potentielles (petites boites) \\
+                                       $\cup$ solutions potentielles partageant 1/2 des solutions trouv\'ees.
+
+       Les solutions trouv\'ees ne comprennent plus les solutions optimales m\^eme quand il n'y a pas
+de petites boites.
+
+       Mais on est s\^ur que pour chaque solution trouv\'ee, les solutions potentielles dans les sous-boites de la
+       boite de la solution trouv\'ee partagent  au moins la moiti\'e des points de cette solution.
+
+
+      m\^eme post-traitement sur les solutions trouv\'ees.
+
+
+\section{R\'esultats exp\'erimentaux}
+
+
+\subsection{Plans et cercles}
+On a compar\'e les r\'esultats obtenus avec les diverses modifications avec ceux d'ICTAI.
+
+\paragraph{Toutes solutions}
+Les tests ont \'et\'e les suivants :
+
+\begin{itemize}
+\item{ibex}  : algo ICTAI dans nouvelle version Ibex.  Cette nouvelle version est utilis\'ee dans la suite.
+\item{m3.1} : limitation de la recherche de points valides; 
+cette limitation est ensuite appliqu\'ee \`a tous les autres tests.
+\item{m4} : limitation dans les appels \`a la q-intersection
+\item{m14} : limitation dans les appels \`a la q-intersection et nouvelle condition d'arr\^et.
+
+\item{m2(10)34}  : recherche outliers (seuil 10) , limitation dans les appels \`a la q-intersection, 1 appel \`a mini-ransac
+\item{m2(0)34}  : recherche outliers (seuil 0) , limitation dans les appels \`a la q-intersection, 1 appel \`a mini-ransac
+\item{m2(10)34b}:recherche outliers (seuil 10) , qintersection aff uniquement, 1 appel \`a mini-ransac
+\end{itemize}
+
+
+
+
+
+
+
+
+\begin{table*}[htb]
+\caption{Recherche de solutions : Temps cpu}
+\begin{center}
+%{\scriptsize
+\begin{tabular}{|l||r|r|r|r|r|r|r|r|r|r||r|r|}
+\hline
+Test case & $P_1$ & $P_2$ & $P_3$ & $P_4$ & $P_5$ & $P_6$ & $P_7$ & $P_8$ & $P_9$ & $H_{40}$ & $C_1$ & $C_2$\\
+\hline
+ICTAI &1.1& 2.4   & 3.8  &18.3 & 36.4 &107.5&   53.7  &  92.5 &   221.4 & 24.5 &2.3 &6.0\\
+ibex & 1.0 & 2.5 & 4.1 & 19.6 & 38.6 & 113.6 & 59.1 &103.2 & 245.2 & 24.5 & 2.2 & 5.9 \\
+m3.1 & 1.0 & 2.3 & 3.7 & 17.5 & 34.5 & 102.0 & 53.4 & 92.4 & 221.3 & 23.1 & 2.1 & 5.7\\
+m4  & 0.8  & 1.7 & 2.8 & 13.5 & 26.5 & 79.1 & 37.9 & 65.6 & 156.1 & 20.8 & 2.0& 5.4\\
+m14&0.7 & 1.7 & 2.7 & 13.5 & 26.5 & 79.4 & 38.0 & 65.3 & 157.2 & 17.9 & 1.7 & 5.2 \\
+m2(10)34 & 0.8 & 1.7 &  2.7 & 13.4 & 26.2 & 78.0 & 38.0 & 65.0 & 155.0 & 21.3 & 2.0 & 5.4 \\
+m2(0)34 &    0.8 & 1.7 &  2.7 & 13.5 & 26.7 & 79.3 & 38.1 & 65.5 & 157.2 & 20.9 & 1.6 & 5.0  \\
+m2(10)34b & 0.8&  1.7&   2.7  &  13.3 & 26.0 & 77.3 & 38.0 & 65.9 & 156.7 & 21.7 & 2.1  & 5.7 \\
+\hline
+\end{tabular}
+%}
+\end{center}
+\label{planeresults}
+\end{table*}
+
+\begin{table*}[htb]
+\caption{Recherche de solutions : Nombre de noeuds}
+\begin{center}
+{\tiny
+\begin{tabular}{|l||r|r|r|r|r|r|r|r|r|r||r|r|}
+\hline
+Test case & $P_1$ & $P_2$ & $P_3$ & $P_4$ & $P_5$ & $P_6$ & $P_7$ & $P_8$ & $P_9$ & $H_{40}$ & $C_1$ & $C_2$\\
+\hline
+
+ICTAI & 4,786  &11,626& 20,334  &122,590  &285,898 & 1,226,748 &   61,786  &  111,558  & 293,834 &646,694&30,344 &  40,600\\
+ibex & 4,786 & 11,626 &20,334 & 122,558 &285,838 & 1,226,652 & 61,766 & 111,528 & & 646,694 &  26,838 &37,096 \\
+m3.1 & 4,786  &11,626& 20,334  &122,590 &285,890 &  1,226,728 & 61,786 &111,558&293,834 &646,694 & 26,838 & 37,096\\
+m4 & 5,262& 12,038 & 21,034 & 134,280 & 313,314 &1,353,368 & 63,918 & 115,822 &307,124 & 659,772 &27,264 & 39,366 \\
+m14&4,136 & 11,332 &20,376 & 133,968 & 312,738 & 1,352,362 & 63,652 & 115,494 & 306,554& 544,412 & 22,860 & 34,962  \\
+m2(0)34 & 5,250 & 11,794 &20,606  &124,510   & 283,040  &1,136,310   &63,062 & 113,202 &296,856 &636,978  & 16518  & 28306 \\
+m2(10)34 & 5,164 & 11,136 & 19,502 & 109,872 & 252,276 & 1,023,700 &60,780 & 106,776 &273, 244 &630,556 & 16,304 & 27,530 \\
+m2(10)34b &5,372 & 11,418 & 19,906 &111,110 &254,060 & 1,027,526 & 61,680 &107,832 &  274,404 & 693,372 & 26,838 &  37,096 \\
+\hline
+\end{tabular}
+}
+\end{center}
+\label{noderesults}
+\end{table*}
+
+\paragraph{Optimization}
+
+Les exp\'erimentations suivantes ont \'et\'e r\'ealis\'ees :
+
+\begin{itemize}
+\item{ibex} : algo optimisation dans nouvelle version ibex , sans am\'eliorations post-ictai
+\item{m3.1} : limitation calcul points valides
+\item {m3.1m4} : limitation calcul points valides + limitation q-intersection
+\item {m3.1m4m2(10)}: recherche outliers (seuil 10) , limitation dans les appels \`a la q-intersection et points validess , 1 appel \`a mini-ransac
+\item {ibexopt bs m3.1} profondeur meilleur fils et toutes am\'eliorations
+\item {ibexopt bs no3.1} profondeur meilleur fils et toutes am\'eliorations sauf limitation points valides
+\item{bfs no3.1} : strat\'egie meilleur d'abord  et toutes am\'eliorations sauf limitation points valides
+\item{bfs m3.1} : strat\'egie meilleur d'abord et  toutes am\'eliorations 
+\end{itemize}
+
+\begin{table*}[htb]
+\caption{Optimisation : Temps cpu}
+\begin{center}
+{\scriptsize
+\begin{tabular}{|l||r|r|r|r|r|r|r|r|r|r||r|r|r|}
+\hline
+Test case & $P_1$ & $P_2$ & $P_3$ & $P_4$ & $P_5$ & $P_6$ & $P_7$ & $P_8$ & $P_9$ & $H_{40}$ & $H_{44}$ &  $C_1$ & $C_2$\\
+\hline
+ibex &0.3& 0.9   & 1.1 &11.0 & 16.9 &35.8& 43.2 & 65.8 &  132.2 & 1.7 & 454.3& 0.9& 4.5 \\
+m3.1  & 0.3 & 0.8& 1.0 & 9.9 & 15.2 & 32.4 & 39.4 & 60.3 & 121.4&  1.5 & 412.6 & 0.8 & 4.4 \\
+m3.1m4&0.3 &0.7 & 0.9 &9.0 & 14.1 &30.2 &32.8 &49.8 &100.9 &1.3 &322.4 &0.8 & 4.4 \\
+m3.1 m4 m2(10)&0.2 &0.7 &0.8 &7.7 & 12.1 &26.1 &28.5 &43.3 &88.0 &1.1 & 252.4 & 0.8 & 4.4 \\
+ibexopt bs no3.1&0.2  &0.5 & 0.7 & 6.4 &9.1 &18.1 &26.6 &39.0 &75.5 &1.2 &142.5 &0.7& 4.5 \\
+ibexopt bs m3.1& 0.2 & 0.5 & 0.7 & 6.3 & 8.8 & 17.8 & 26.1  &38.6  & 73.2 &1.2  &140.6 &0.7 &4.1 \\
+bfs no3.1 & 0.2  & 0.5 & 0.5 & 7.9 & 12.0 & 28.5 & 29.7 & 45.3 & 91.8 & 1.0 & 193.9& 0.7& 4.6\\
+bfs m3.1& 0.2  & 0.4 & 0.4 & 7.8 & 12.0 & 28.5 & 29.5 & 45.9 & 91.3 & 1.0 & MO & 0.7& 4.2\\
+
+\hline
+\end{tabular}
+}
+\end{center}
+\label{optimresults}
+\end{table*}
+
+Pour les maisons H40 et H44, en optimisation, une pr\'ecision à 0.0001 permet d'obtenir l'optimum sans avoir de petites boîtes.  optimum à 38 inliers pour H40 et 171 inliers pour H44 avec une tol\'erance de 0.001.
+
+probl\`eme r\'esolu en 1.2s pour H40 et 166s pour H44  avec ibexopt profondeur ( ibexopt bs no3.1)
+
+\subsection{Matrice fondamentale}
+
+Crit\`ere alg\'ebrique. Essais avec une bo\^ite initiale autour de la solution  144    (solution Ransac 146).
+Mod\'elisation \`a 8 variables (v(3,3)=1), tol\'erance 0.001, points normalis\'es.
+
+Essais suivants r\'ealis\'es avant la mise en place du polytope int\'erieur pour la contrainte de d\'eterminant
+qui semble allonger un peu le temps de calcul (25\% sur un exemple) 
+
+
+Par ailleurs, une solution avec Ransac \`a 153 a \'et\'e trouv\'ee.
+\begin {itemize}
+\item {petites boites}\\
+        taille  0.000003  144  prouv\'e en 16s prec 0.0000005       BF  0.46s \\
+        taille  0.000004  145   prouv\'e en 87s  prec 0.0000005        BF 1.4s    NBF 0.44s 1246 \\
+        taille 0.000012   146   prouv\'e en 164s.  prec 0.0000005     BF  436s. 60M   NBF 166s. \\
+        taille 0.000013   146   prouv\'e en 536s   prec 0.0000002\\
+        taille 0.000015   147   prouv\'e en 2149s  prec 0.0000005 \\
+        taille 0.000018   147   prouv\'e en 84s (91s)   prec 0.0000005    NBF 45s  117148 noeuds \\
+        taille 0.00002    147   prouv\'e en 149s   prec 0.0000005         NBF 102s 265984 noeuds  \\
+        taille 0.000025   147   prouv\'e en 691s   prec 0.0000005         NBF 711s 1700732 noeuds \\
+        taille 0.00003    146   non prouv\'e en 10000s.\  NBF 147  prouv\'e en 2343s.  5870534 noeuds \\
+        taille 0.00004    146   non prouv\'e en 10000s.
+
+\item {taille  0.001   }
+           prec 0.001  118 valides      200 possibles    27s  \\
+           prec 0.0008 126 valides      197 possibles    53s  \\
+           prec 0.0007 131 valides      196 possibles    57s  \\
+           prec 0.0006 135 valides      195 possibles    62s  \\
+           prec 0.0005 145 valides      187 possibles   1963s  \\
+           prec 0.00049 147 valides     185 possibles   2958s  \\
+           prec 0.00048 147 valides     185 possibles   2983s  \\
+           prec 0.00045 147 valides     185 possibles   3003s  \\
+           prec 0.0004  147 valides     185 possibles   3475s  \\
+           prec 0.0003  148 valides     185 possibles   4211s  \\
+           prec 0.0002  148 valides   non prouv\'e       10000s      NBF 152 puis MO \\
+
+
+\item {taille 0.002}
+          prec 0.001   142 valides      210 possibles  2741s.  \\
+          prec 0.0006  140 valides      198 possibles   4597s. \\
+
+\item{taille 0.01}
+         prec 0.01     27 valides      356 possibles   17s  \\
+         prec 0.009    40 valides      334 possibles  185s  \\
+         prec 0.008    40 valides      334 possibles  195s. \\
+         prec 0.007    46 valides      329 possibles  250s. \\
+         prec 0.006    46 valides      329 possibles  299s.  \\
+         prec 0.005    81 valides      314 possibles 5639s. \\
+         prec 0.004    78 valides      $>$ 10000s    \\
+         prec 0.003    79 valides      $>$ 10000s   NBF 68 en 2mn , puis 81 en 7m , puis 82   \\
+         prec 0.002   108 valides      $>$ 10000s\\
+
+\item{taille 0.02}
+         prec 0.01     43 valides       364 possibles 7860s.   
+
+         prec 0.001    NBF 83 valides   MO \\
+
+\item{taille 0.05}
+         prec 0.01      22 valides       NBF 77 valides  MO\\
+
+\end{itemize}
+
+\subsection{Matrice essentielle}
+
+Mod\'elisation 9 variables avec contraintes de matrice essentielle (2 ddl) , de norme (1 ddl) , de d\'eterminant (1 ddl)
+
+\subsubsection {Optimisation sous contraintes}
+
+R\'ealisation d'un optimiseur en profondeur d'abord guid\'e par un oracle. (solution de RANSAC).
+
+
+\begin{itemize}
+\item {Propagation des contraintes de matrice essentielle} :  relaxation lin\'eaire (polytope hull) avec 3 contraintes de matrice essentielle sur 9, la norme et le d\'eterminant et lin\'earisation avec arithm\'etique affine. 
+
+\item{Recherche de point valide} : polytope int\'erieur  coin al\'eatoire pour chaque contrainte et  minimisation al\'eatoire d'une direction. Au maximum 10 essais par noeud  (tant que la zone faisable est non vide).
+
+\end{itemize}
+
+
+\subsubsection{Q-inter}
+
+2 crit\`eres  :  alg\'ebrique et Sampson
+
+\paragraph{Crit\`ere alg\'ebrique} 
+
+La  r\'esolution termine sur l'exemple test2 de usac,  avec une tol\'erance de 0.01, on obtient les r\'esultats suivants :
+on utilise la projection  suppl\'ementaire.
+\begin{itemize}
+\item  pr\'ecision 0.005  [516 520] en  21886s.
+
+\item pr\'ecision 0.01  [516 524] en  14026s.
+
+\item pr\'ecision 0.02  [514 528] en 11390s.
+
+\end{itemize}
+
+avec hc4 sur les contraintes , y compris les contraintes redondantes, la bissection smearsumrel,  on 
+obtient les r\'esultats suivants 
+
+
+\begin{itemize}
+\item pr\'ecision  0.001  [516 517] en 46500s
+
+\item pr\'ecision  0.0025  [516 518] en 26352s
+
+\item  pr\'ecision 0.005  [516 520] en  17580s.
+
+\item pr\'ecision 0.01  [516 525] en  10022s.
+\item pr\'ecision 0.01  1 branche prof 48 [515 530] en  9231s.
+\item pr\'ecision 0.01  1 branche prof 48 [515 537] en  6968s.  3930566 branches
+\item pr\'ecision 0.01  1 branche prof 40 [514 544] en  4630s.  2643136 branches
+
+\item pr\'ecision 0.01  1 branche prof 40 [513 521] en  5689s.  2982596 branches  critère valides-pt milieu
+
+\item pr\'ecision 0.02  [514 528] en 11390s.
+
+borne sup fausse
+\item pr\'ecision 0.0005  [515 516] en 5158s.  2626202 branches  prof 40 critère valides-pt milieu
+\item pr\'ecision 0.001  [515 516] en 5560s.  2619290 branches  prof 40 critère valides-pt milieu
+\item pr\'ecision 0.002  [514 515] en 5504s.  2790810 branches  prof 40 critère valides-pt milieu
+\item pr\'ecision 0.0002  [514 515] en 5473s.  2795200 branches  prof 40 critère valides-pt milieu
+
+
+\end{itemize}
+
+avec une precision de 5 sur l'objectif
+\begin{itemize}
+\item  pr\'ecision 0.005  [515 521] en  5768s.
+
+
+\item pr\'ecision 0.01  [515 524] en  4567s.
+\item pr\'ecision 0.01 1 branche prof 40 [512 544] en 3633s.
+\item pr\'ecision 0.01 crit\`ere milieu 1 branche prof 40 [512 521] en 4412s et  2324468 branches
+
+
+\item pr\'ecision 0.02  [512 528] en 6786s.
+
+\end{itemize}
+
+
+
+
+estim_essentialmatnorm essential_test2.txt 10 0.001 2 0.015 1.e-4 0 0 100000 2 
+avec une tol\'erance 0.001, c'est plus long.
+
+
+\paragraph{Crit\`ere de Sampson}
+
+Pour Sampson, mise en place 
+sur exemple test2 de usac (582 correspondances),  on trouve une solution autour de 424 - 431  inliers  avec une tol\'erance de 1.
+
+plus ou moins rapidement selon l'oracle de d\'epart  (solution RANSAC)
+
+avec oracle 279 inliers, on trouve rapidement (4mn) une solution \`a 330-340 inliers , puis la solution \`a 420 - 430 inliers en 50000s
+avec pr\'ecision 0.01
+
+Mise en place d'un seuil sur la q-inter et fwdbwd
+avant seuil ($>$ 0.1)  fwd uniquement , apr\`es seuil  fwdbwd + q-inter
+m\^emes r\'esultats : solution 424 en 12h.
+
+
+Mise en place de la projection affine : cela ne semble pas rentable (co\^ut trop important  de l'arithm\'etique affine)  : 316 en 20mn,
+pas mieux en 12h. seuil \`a envisager ??
+
+
+
+
+
+
+
+
+avec prec0.02  solution 388 en 12h.
+
+
+
+
+sur petit problème (36 mesures), la projection affine semble rentable :  solution à 29 trouvée avec epsobj5 avec domaine total en 3600s.
+
+(pb fermé en [28 36] avec epsobj6  sans proj affine en 14689s.)
+pb fermé en [30 34] avec epsobj3  prec 0.005 , limite bissection profondeur 60, avec proj affine en 48595s.
+
+
+
+\end{document}

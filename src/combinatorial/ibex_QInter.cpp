@@ -10,28 +10,62 @@
 
 #include "ibex_QInter.h"
 #include <algorithm>
-
+//#include "ibex_QInter2.h"
 using namespace std;
 
 namespace ibex {
 
+ IntervalVector qintermeth(const Array<IntervalVector>& _boxes, int q, qintermethod meth){
+
+   int p= _boxes.size();
+   int n = _boxes[0].size();
+   IntervalMatrix boxes(p,n);
+   for (int i=0; i<p; i++)
+     for(int j=0; j<n; j++)
+       boxes[i][j]=_boxes[i][j];
+
+
+   IntervalVector hull_qinter(n);
+   list<int>* points = new list<int> () ;
+   for (int i=0; i<p; i++) points->push_back(i);
+   int qmax= points->size();
+   //   int varbis=-1;
+  switch (meth)
+    //    {case QINTERPROJ : hull_qinter=  qinter_projf(boxes,q,qmax,p,varbis, points,0); break;
+    {case QINTERPROJ : hull_qinter=  qinter_projf(boxes,q,qmax,p,points,0,n); break;
+	//    case QINTERCORE :  hull_qinter = qinter_coref(boxes,q,p, points,0); break;
+	//    case QINTERFULL :  hull_qinter= qinter2(boxes,q,p, points); break;
+    case QINTERGRID : hull_qinter= qinter(boxes,q,p,points); break;
+    default : ibex_error("Qinter method : unknown method");
+      }
+
+   delete points;
+   return hull_qinter;
+  }
+
+
+
 IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
-	assert(_boxes.size()>0);
+    return qintermeth( _boxes,q,QINTERGRID);
+  }
+
+
+
+IntervalVector qinter(IntervalMatrix& _boxes, int q,  int p,list<int>* points ) {
+
 	int n=_boxes[0].size();
 
-	// ====== remove the empty boxes from the list ====
-	int p=0; // count the number of non-empty boxes
-	for (int i=0; i<_boxes.size(); i++) {
-		if (!_boxes[i].is_empty()) p++;
+        p=0;
+	for (list<int>::iterator it = points->begin() ; it != points->end(); it++) {
+	  if (!_boxes[*it].is_empty()) p++;
 	}
-
-	if (p==0) return IntervalVector::empty(n);
 
 	Array<IntervalVector> boxes(p);
 	int j=0;
-	for (int i=0; i<_boxes.size(); i++) {
-		if (!_boxes[i].is_empty()) boxes.set_ref(j++,_boxes[i]);
+	for (list<int>::iterator it = points->begin() ; it != points->end(); it++) {
+	  if (!_boxes[*it].is_empty()) boxes.set_ref(j++,_boxes[*it]);
 	}
+
 
 	// ================================================
 
@@ -70,9 +104,9 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 			size[i]=1;
 		}
 
-		// cout << "i=" << i << endl;
-		// for (int j=0; j<=size[i]; j++) cout << x[i][j] << " ";
-		// cout << endl << endl;
+		//		cout << "i=" << i << endl;
+		//		for (int j=0; j<=size[i]; j++) cout << x[i][j] << " ";
+		//		cout << endl << endl;
 
 	}
 
