@@ -326,9 +326,9 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 	LinearRelaxXTaylor lr (sys,cpoints);
 	*/
 	//	LinearRelaxCombo lr (sys,LinearRelaxCombo::COMPO);
-	LinearRelaxCombo lr (sys,LinearRelaxCombo::ART);
+	LinearizerCombo lr (sys,LinearizerCombo::ART);
 	
-	CtcPolytopeHull lphull (lr, CtcPolytopeHull::ALL_BOX);
+	CtcPolytopeHull lphull (lr);
 
 
 	cout << " avant lecture " << endl;
@@ -588,7 +588,7 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 
 	//	SolverOptQInter s(ctcf,bs,buff,ctcq,1);
 	cout << " apres solver " << endl;
-	s->time_limit = time0;
+	s->timeout = time0;
 	s->trace=1;
 	s->nbr=nbr;
 	s->epsobj=eobj;
@@ -688,7 +688,7 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 	  {delete m_func[i];
 	    delete &m_ctc[i];
 	  }
-	Timer::stop();
+
 	cout <<  " time used " << s->time << "  "<< endl ;
 	cout <<" total branch number " << s->nb_cells << endl;
 	delete buff;

@@ -11,7 +11,7 @@
 #ifndef __IBEX_CELL_HEAP_QINTER_H__
 #define __IBEX_CELL_HEAP_QINTER_H__
 
-#include "ibex_CellHeap.h"
+#include "ibex_CellHeapGen.h"
 
 namespace ibex {
 
@@ -26,7 +26,7 @@ namespace ibex {
  *
  * \see #CellHeap, #CellBuffer
  */
-class CellHeapQInter : public CellHeap {
+class CellHeapQInter : public CellHeapGen {
 public:
 	/**
 	 * \brief Build a cell heap for optimization.
@@ -46,7 +46,7 @@ public:
 	 *
 	 * \param y - the index of the variable "y" that contains the criterion (typically, f(x)) in each cell's box.
 	 */
-	CellHeapQInter(const ExtendedSystem& sys);
+	CellHeapQInter();
 
 
 

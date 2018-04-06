@@ -9,12 +9,11 @@
 //============================================================================
 
 #include "ibex_CellHeapQInter.h"
-#include "ibex_CellHeapQInter.h"
 #include "ibex_QInterPoints.h"
 
 namespace ibex {
 
-  CellHeapQInter::CellHeapQInter(const ExtendedSystem& sys) : CellHeap(sys)  {
+  CellHeapQInter::CellHeapQInter() : CellHeapGen()  {
 
 }
 

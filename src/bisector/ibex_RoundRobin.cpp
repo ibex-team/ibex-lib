@@ -26,7 +26,7 @@ RoundRobin::RoundRobin(const Vector& prec, double ratio) : Bsc(prec), ratio(rati
 
 BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 
-
+  //  cout << " appel choose var RR " ;
 	int last_var=cell.get<BisectedVar>().var;
 
 	const IntervalVector& box=cell.box;
@@ -42,6 +42,7 @@ BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 		var = (var + 1)%n;
 
 	// if no variable can be bisected an exception is thrown
+
 	if (var==last_var && too_small(box,var))
 		throw NoBisectableVariableException();
 
@@ -55,20 +56,20 @@ void RoundRobin::add_backtrackable(Cell& root) {
 
 
 BisectionPoint RoundRobinNvar::choose_var(const Cell& cell) {
-int last_var=cell.get<BisectedVar>().var;
+  int last_var=cell.get<BisectedVar>().var;
 
 	const IntervalVector& box=cell.box;
 
 	int n = nbvars;
 
-	if (last_var == -1) last_var = n-1;
+	if (last_var == -1 || last_var >=n ) last_var = n-1;
 
 
 	int var = (last_var+1)%n;
-
+	//	cout << " av " << var << " " << last_var <<  " nbvars " << nbvars << endl;
 	while (var != last_var && too_small(box,var))
 		var = (var + 1)%n;
-
+	//	cout << " ap " << var << " " << last_var <<  " nbvars " << nbvars << endl;
 	// if no variable can be bisected an exception is thrown
 	if (var==last_var && too_small(box,var))
 	  return RoundRobin::choose_var(cell);
