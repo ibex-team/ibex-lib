@@ -5,11 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 8, 2012
-<<<<<<< HEAD
 // Last Update : Dec 25, 2017
-=======
-// Last Update : January 8, 2015
->>>>>>> qinter
 //============================================================================
 
 #include "ibex_RoundRobin.h"
@@ -55,6 +51,29 @@ BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 
 void RoundRobin::add_backtrackable(Cell& root) {
 	root.add<BisectedVar>();
+}
+
+
+BisectionPoint RoundRobinNvar::choose_var(const Cell& cell) {
+int last_var=cell.get<BisectedVar>().var;
+
+	const IntervalVector& box=cell.box;
+
+	int n = nbvars;
+
+	if (last_var == -1) last_var = n-1;
+
+
+	int var = (last_var+1)%n;
+
+	while (var != last_var && too_small(box,var))
+		var = (var + 1)%n;
+
+	// if no variable can be bisected an exception is thrown
+	if (var==last_var && too_small(box,var))
+	  return RoundRobin::choose_var(cell);
+	else
+	  return BisectionPoint(var,ratio,true); // output
 }
 
 

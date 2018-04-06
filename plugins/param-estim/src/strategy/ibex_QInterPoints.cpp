@@ -15,7 +15,7 @@
 using namespace std;
 
 namespace ibex {
-pair<Backtrackable*,Backtrackable*> QInterPoints::down() {
+pair<Backtrackable*,Backtrackable*> QInterPoints::down(const BisectionPoint& b) {
 	return pair<Backtrackable*,Backtrackable*> (new QInterPoints(*this),new QInterPoints(*this));
 }
   QInterPoints::QInterPoints() {;};
@@ -27,5 +27,9 @@ pair<Backtrackable*,Backtrackable*> QInterPoints::down() {
     qmax=qp.qmax;
     qmidbox=qp.qmidbox;
     depth=qp.depth+1;
+  }
+
+  Backtrackable* QInterPoints::copy() const{
+    return new QInterPoints(*this);
   }
 }

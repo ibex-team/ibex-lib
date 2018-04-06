@@ -18,7 +18,7 @@
 #include "ibex_CellStack.h"
 #include "ibex_CtcQInter.h"
 #include "ibex_QInterPoints.h"
-#include "ibex_LinearSolver.h"
+#include "ibex_LPSolver.h"
 #include "ibex_NormalizedSystem.h"
 
 
@@ -112,8 +112,8 @@ A linear solver is used for finding a feasible point.
    ~SolverOptConstrainedQInter();
    int tolerance_constraints_number;
  protected:
-   LinearSolver* mylp;  // linear solver for finding a feasible point
-   LinearSolver* mylp1;  // linear solver for finding a feasible point
+   LPSolver* mylp;  // linear solver for finding a feasible point
+   LPSolver* mylp1;  // linear solver for finding a feasible point
    Vector newvalidpoint (Cell& c);
    Vector feasiblepoint (const IntervalVector & box, bool & res, Vector & feasiblepoint2);
    Vector feasiblepoint (const IntervalVector & box, bool & res);

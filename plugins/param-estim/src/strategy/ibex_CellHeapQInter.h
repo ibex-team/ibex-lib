@@ -46,7 +46,7 @@ public:
 	 *
 	 * \param y - the index of the variable "y" that contains the criterion (typically, f(x)) in each cell's box.
 	 */
-	CellHeapQInter();
+	CellHeapQInter(const ExtendedSystem& sys);
 
 
 

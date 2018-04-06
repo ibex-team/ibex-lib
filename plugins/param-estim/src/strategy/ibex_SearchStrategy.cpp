@@ -159,7 +159,7 @@ void BestFirstSearch::push_cell(Cell&c1){
 }
   void BestFirstSearch::contract_buffer()
   { cout << " buffer size before " << buffer.size() << " q " << ctcq->q << endl;
-	(dynamic_cast<CellHeapQInter*> (&buffer))->contract_heap(-(ctcq->q));
+	(dynamic_cast<CellHeapQInter*> (&buffer))->contract(-(ctcq->q));
 	cout << " buffer size after " << buffer.size()  << endl;
       }
 
@@ -203,7 +203,7 @@ void BestFirstSearch::push_cell(Cell&c1){
 
   void BeamSearch::contract_buffer()
   { cout << " buffer size before " << buffer.size() << " q " << ctcq->q << endl;
-	(dynamic_cast<CellHeapQInter*> (&buffer))->contract_heap(-(ctcq->q));
+	(dynamic_cast<CellHeapQInter*> (&buffer))->contract(-(ctcq->q));
 	cout << " buffer size after " << buffer.size()  << endl;
       }
 

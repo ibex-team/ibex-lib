@@ -294,12 +294,14 @@ namespace ibex {
 	postsolution();
 	if (trace) {
 
+	  /*
 	  Timer::stop();
 	  time += Timer::VIRTUAL_TIMELAPSE();
 	  Timer::start();
-
+	  */
+	  //	  time=timer.get_time();
 	  cout << "solution" << c.box << " psize " << psize << " qmax " << qposs << " qvalid " << qvalid << endl;
-	  cout << " time " << time << endl;	    ;
+	  //	  cout << " time " << time << endl;	    ;
 	  cout << " nb boxes " << nb_cells << endl;	    ;
 	  cout << " depth " << c.get<QInterPoints>().depth << endl;
 	  if (optimbuffer ==2  && !(str.empty_buffer()))
@@ -472,39 +474,41 @@ namespace ibex {
     //The linear variables are generated
     //0 <= xl_j <= diam([x_j])
       if (corner[j])    {
-	bound[j] = Interval(mylp->getEpsilon() ,box[j].diam() - mylp->getEpsilon());
+	bound[j] = Interval(mylp->get_epsilon() ,box[j].diam() - mylp->get_epsilon());
 	row[j]=0;
 	  }
       else   {
-	bound[j] = Interval(-box[j].diam() + mylp->getEpsilon(),- mylp->getEpsilon());
+	bound[j] = Interval(-box[j].diam() + mylp->get_epsilon(),- mylp->get_epsilon());
 	row[j] = 0;
       }
     }
-    mylp->cleanConst();
-    mylp->initBoundVar(bound);
+    //    mylp->cleanConst();
+    mylp->clean_all();
+    mylp->set_bounds(bound);
     for (int i=0; i< n ;i++)
-      mylp->setVarObj(i,0);
+      mylp->set_obj_var(i,0);
     int rr=rand();
     double sig=0.0;
     if (rr%2) sig=1.0;
     else sig=-1.0;
-    mylp->setVarObj(rr%n,sig); // random objective and random direction
+    mylp->set_obj_var(rr%n,sig); // random objective and random direction
     
     //The linear system is generated
     // the evaluation of the constraints in the corner x_corner
 
-    IntervalVector g_corner(normsys.f.eval_vector(x_corner));
+    IntervalVector g_corner(normsys.f_ctrs.eval_vector(x_corner));
 
     for (int i=0; i<m; i++) {
 
 	  
-      if (normsys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+      if (normsys.f_ctrs[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
       normsys.ctrs[i].f.gradient(box,G);                     // gradient calculation      
 
 		  
       for (int ii =0; ii< n ; ii++)
 	if (G[ii].diam() > 1e8) {
-	  mylp->cleanConst();
+	  //	  mylp->cleanConst();
+	  mylp->clean_all();
 	  return feasiblepoint; //to avoid problems with SoPleX
 	}
 	
@@ -519,7 +523,7 @@ namespace ibex {
 	  row[j]=G[j].lb();
       }
 		  
-      mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  
+      mylp->add_constraint(row,LEQ, (-g_corner)[i].lb()-mylp->get_epsilon());  
 	  
     }
     
@@ -529,14 +533,14 @@ namespace ibex {
 	system ("cat dump.lp");
 	}
     */
-    LinearSolver::Status_Sol stat = mylp->solve();
+    LPSolver::Status_Sol stat = mylp->solve();
 	
     //     delete [] corner;
     //    std::cout << " stat solver " << stat << std::endl;
-    if (stat == LinearSolver::OPTIMAL) {
+    if (stat == LPSolver::OPTIMAL) {
       //the linear solution is mapped to intervals and evaluated
       Vector prim(n);
-      mylp->getPrimalSol(prim);
+      prim = mylp->get_primal_sol();
 
       IntervalVector tmpbox(n);
       
@@ -566,29 +570,29 @@ namespace ibex {
     //The linear variables are generated
     //0 <= xl_j <= diam([x_j])
 	  if (corner[j])    {
-	    bound[j] = Interval(mylp->getEpsilon(),box[j].diam()) - mylp->getEpsilon();
+	    bound[j] = Interval(mylp->get_epsilon(),box[j].diam()) - mylp->get_epsilon();
 	    row[j]=0;
 	  }
 	  else   {
-	    bound[j] = Interval(-box[j].diam()+ mylp->getEpsilon() ,- mylp->getEpsilon());
+	    bound[j] = Interval(-box[j].diam()+ mylp->get_epsilon() ,- mylp->get_epsilon());
 	    row[j] = 0;
 	  }
 	}
 	//	bound[n]= Interval (-ctcq.get_epseq(), ctcq.get_epseq());
 	bound[n]= Interval (0, ctcq.get_epseq());
 
-	mylp1->cleanConst();
-	mylp1->initBoundVar(bound);
+	mylp1->clean_all();
+	mylp1->set_bounds(bound);
 	for (int i=0; i< n ;i++)
-	  mylp1->setVarObj(i,0);
-        mylp1->setVarObj(n,1);
+	  mylp1->set_obj_var(i,0);
+        mylp1->set_obj_var(n,1);
     
     //The linear system is generated
     // the evaluation of the constraints in the corner x_corner
-	IntervalVector g_corner(normsys.f.eval_vector(x_corner));
+	IntervalVector g_corner(normsys.f_ctrs.eval_vector(x_corner));
 
 	for (int i=0; i<m; i++) {
-	  if (normsys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+	  if (normsys.f_ctrs[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
 	  normsys.ctrs[i].f.gradient(box,G);                     // gradient calculation
 	  //The contraints i is generated:
 	  // c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
@@ -601,7 +605,7 @@ namespace ibex {
 	      row[j]=G[j].lb();
 	  }
 	  row[n]=0;
-	  mylp1->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp1->getEpsilon());  //  1e-10 ???  BNE
+	  mylp1->add_constraint(row,LEQ, (-g_corner)[i].lb()-mylp1->get_epsilon());  //  1e-10 ???  BNE
 	  
 	}
     
@@ -620,8 +624,8 @@ namespace ibex {
 	  row1[n]=-1;
 
 
-	  mylp1->addConstraint(row,LEQ,ctcq.lincoeff(k,n)+varshiftres-mylp->getEpsilon());
-	  mylp1->addConstraint(row1,LEQ,-(ctcq.lincoeff(k,n)+varshiftres)-mylp->getEpsilon());
+	  mylp1->add_constraint(row,LEQ,ctcq.lincoeff(k,n)+varshiftres-mylp->get_epsilon());
+	  mylp1->add_constraint(row1,LEQ,-(ctcq.lincoeff(k,n)+varshiftres)-mylp->get_epsilon());
 
       
       
@@ -633,14 +637,14 @@ namespace ibex {
 	//	system ("cat dump1.lp >> dump.lp ");
 	
     
-	LinearSolver::Status_Sol stat = mylp1->solve();
+	LPSolver::Status_Sol stat = mylp1->solve();
 	//	std::cout << " stat solver lp1 " << stat << std::endl;
 
     
-	if (stat == LinearSolver::OPTIMAL) {
+	if (stat == LPSolver::OPTIMAL) {
       //the linear solution is mapped to intervals and evaluated
 	  Vector prim(n+1);
-	  mylp1->getPrimalSol(prim);
+	  prim = mylp1->get_primal_sol();
 
 	  IntervalVector tmpbox(n);
 
@@ -684,8 +688,8 @@ namespace ibex {
       
     }
     if (trace) {
-      if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
-      //  if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
+      if(stat == LPSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
+      //  if(stat == LPSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
     }
     delete[] corner;  return feasiblepoint;
  }
@@ -757,25 +761,27 @@ namespace ibex {
     if (m>0)
       {
 	// the evaluation of the constraints in the corner x_corner
-	IntervalVector g_corner(normsys.f.eval_vector(x_corner));
+	IntervalVector g_corner(normsys.f_ctrs.eval_vector(x_corner));
 	int rr=rand();
 	for (int k=0;k<2;k++){
-	  mylp->cleanConst();
+	  //	  mylp->cleanConst();
+	  mylp->clean_all();
 	  for (int i=0; i< n ;i++)
-	    mylp->setVarObj(i,0);
+	    mylp->set_obj_var(i,0);
 	  //	  mylp->cleanAll();
-	  mylp->initBoundVar(bound);
+	  mylp->set_bounds(bound);
 	  double sig=0.0;
 
 	  if (k==0) sig=1.0;
 	  else sig=-1.0;
-	  mylp->setVarObj(rr%n,sig); // random objective and random direction
+	  mylp->set_obj_var(rr%n,sig); // random objective and random direction
 	  for (int i=0; i<m; i++) {
-	    if (normsys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+	    if (normsys.f_ctrs[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
 	    normsys.ctrs[i].f.gradient(box,G);                     // gradient calculation
 	    for (int ii =0; ii< n ; ii++)
 	      if (G[ii].diam() > 1e8) {
-		mylp->cleanConst();
+		//		mylp->cleanConst();
+		mylp->clean_all();
 		return feasiblepoint; //to avoid problems with SoPleX
 	      }
 	    for (int j=0; j<n; j++) {
@@ -787,7 +793,7 @@ namespace ibex {
 	    }
 
 
-	    mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
+	    mylp->add_constraint(row,LEQ, (-g_corner)[i].lb()-mylp->get_epsilon());  //  1e-10 ???  BNE
       
       //The contraints i is generated:
 	  // c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
@@ -803,14 +809,14 @@ namespace ibex {
 	    system ("cat dump.lp");
 	  }
 	  */
-	  LinearSolver::Status_Sol stat = mylp->solve();
+	  LPSolver::Status_Sol stat = mylp->solve();
 	
     
 	  //	  std::cout << " stat solver " << stat << std::endl;
-	  if (stat == LinearSolver::OPTIMAL) {
+	  if (stat == LPSolver::OPTIMAL) {
 	    //the linear solution is mapped to intervals and evaluated
 	    Vector prim(n);
-	    mylp->getPrimalSol(prim);
+	    prim = mylp->get_primal_sol();
 
 	    IntervalVector tmpbox(n);
 
@@ -842,8 +848,8 @@ namespace ibex {
 	  }
 	  else {res=0; delete [] corner; return feasiblepoint;}
 	  if (trace) {
-	    if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
-      //  if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
+	    if(stat == LPSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
+      //  if(stat == LPSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
 	  }
 	}
 	delete [] corner;
@@ -864,8 +870,8 @@ namespace ibex {
 
   /* in case of constraints, the system is transformed in a normalized system  */
   SolverOptConstrainedQInter::SolverOptConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq,  double epscont, int optim)  : SolverOptQInter (ctc,bsc, str, ctcq, optim),  epscont(epscont), normsys(sys,epscont), sys(sys)
-  {    mylp=new LinearSolver(sys.nb_var,sys.nb_ctr,100);
-    mylp1=new LinearSolver(sys.nb_var+1,sys.nb_ctr,100);}
+  {    mylp=new LPSolver(sys.nb_var,sys.nb_ctr,100);
+    mylp1=new LPSolver(sys.nb_var+1,sys.nb_ctr,100);}
 
   SolverOptConstrainedQInter::~SolverOptConstrainedQInter() {
     delete mylp;

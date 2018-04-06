@@ -29,8 +29,9 @@ public:
   
   QInterPointsL();
   ~QInterPointsL();
-  pair<Backtrackable*,Backtrackable*> down();
+  pair<Backtrackable*,Backtrackable*> down(const BisectionPoint& b);
   QInterPointsL(const QInterPointsL&);
+  Backtrackable* copy() const;
 };
 
 

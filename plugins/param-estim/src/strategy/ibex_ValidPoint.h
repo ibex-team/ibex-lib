@@ -39,8 +39,9 @@ public:
   
   ValidPoint();
   ~ValidPoint();
-  pair<Backtrackable*,Backtrackable*> down();
+  pair<Backtrackable*,Backtrackable*> down(const BisectionPoint& b);
   ValidPoint(const ValidPoint&);
+  Backtrackable* copy() const;
 };
 
 

@@ -376,7 +376,7 @@ int main(int argc, char** argv) {
 	    else
 	      s.str.with_storage=false;
 
-	    s.time_limit = 3600;
+	    s.timeout = 3600;
 	    s.epsobj=1;
 	    s.trace=1;
 	    s.nbr=nbrand;

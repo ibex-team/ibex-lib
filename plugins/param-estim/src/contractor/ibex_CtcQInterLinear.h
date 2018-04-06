@@ -15,7 +15,7 @@
 #include "ibex_CtcQInterAff.h"
 #include "ibex_System.h"
 #include "ibex_CtcPolytopeHull.h"
-#include "ibex_LinearRelaxXTaylor.h"
+//#include "ibex_LinearRelaxXTaylor.h"
 namespace ibex {
 
 class CtcQInterLinear : virtual public CtcQInter {

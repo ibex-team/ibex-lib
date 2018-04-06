@@ -30,8 +30,9 @@ public:
   int depth;
   QInterPoints();
   ~QInterPoints();
-  pair<Backtrackable*,Backtrackable*> down();
+  pair<Backtrackable*,Backtrackable*> down(const BisectionPoint& b);
   QInterPoints(const QInterPoints&);
+  Backtrackable* copy() const;
 };
 
 

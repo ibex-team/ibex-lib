@@ -14,7 +14,7 @@
 
 namespace ibex {
 
-CellHeapQInter::CellHeapQInter()  {
+  CellHeapQInter::CellHeapQInter(const ExtendedSystem& sys) : CellHeap(sys)  {
 
 }
 

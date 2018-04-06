@@ -70,9 +70,10 @@ public:
 	 * interval.
 	 */
 	const double ratio;
+	/*
   protected :
   int var_select(const IntervalVector& box, int n, int &last_var);
-  
+	*/
 };
 
 
@@ -95,9 +96,13 @@ class RoundRobinNvar : public RoundRobin {
 
   RoundRobinNvar (int nbvars,const Vector& prec, double ratio=Bsc::default_ratio())
       : RoundRobin (prec,ratio), nbvars(nbvars) {;};
+
+  BisectionPoint choose_var(const Cell& cell);
     //    pair<IntervalVector,IntervalVector> bisect(Cell& cell);
+  /*
     virtual  std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box, int& last_var);
  protected :
+  */
     int nbvars;
 
   };
@@ -120,3 +125,5 @@ class RoundRobinQInter : public RoundRobin {
 } // end namespace ibex
 
 #endif // __IBEX_ROUND_ROBIN_H__
+
+

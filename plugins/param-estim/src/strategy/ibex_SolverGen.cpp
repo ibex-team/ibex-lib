@@ -21,7 +21,7 @@ using namespace std;
 namespace ibex {
 
 SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
-  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), time(0), impact(BitSet::all(ctc.nb_var))  {
+  ctc(ctc), bsc(bsc), buffer(buffer), timeout(-1), cell_limit(-1), trace(0), time(0), impact(BitSet::all(ctc.nb_var))  {
 	nb_cells=0;
 }
 
@@ -43,13 +43,15 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 	init_buffer_info(*root);
 
 
-	Timer::start();
+	//	Timer::start();
 
 }
 
+  /*
   pair<Cell*,Cell*> SolverGen::bisect(Cell& c,IntervalVector&box1, IntervalVector&box2){
     return c.bisect(box1,box2);
   }
+  */
 
   void SolverGen::push_cells (pair<Cell*,Cell*> & new_cells){
     buffer.push(new_cells.first);
@@ -58,6 +60,8 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
     
 
   bool SolverGen::next(std::vector<IntervalVector>& sols) {
+    Timer timer;
+    timer.start();
 	try  {
 		while (!buffer.empty()) {
 
@@ -97,11 +101,13 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 			try {
 			  prebisect(*c);
 
+			  /*
 			  pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 			  //			  cout << "box1 " << boxes.first << endl;
 			  //			  cout << "box2 " << boxes.second << endl;
 			  pair<Cell*,Cell*> new_cells = bisect(*c,boxes.first,boxes.second);
-					//	pair<Cell*,Cell*> new_cells = c->bisect(boxes.first,boxes.second);
+			  //	pair<Cell*,Cell*> new_cells = c->bisect(boxes.first,boxes.second);*/
+			  pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 
 					update_buffer_info(*c);	
 					buffer.pop();
@@ -131,7 +137,9 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 				  // of uncaught timeout in this case (but this case is probably already
 				  // an error case).
 				}
-				time_limit_check();
+			if (timeout>0) timer.check(timeout); 
+			time = timer.get_time();
+			//				time_limit_check();
 			}
 			
 		}
@@ -142,9 +150,10 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 	catch (CellLimitException&) {
 		cout << "cell limit " << cell_limit << " reached " << endl;
 	}
-
-	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	timer.stop();
+	time = timer.get_time();
+	//	Timer::stop();
+	//time+= Timer::VIRTUAL_TIMELAPSE();
 
 	return false;
 
@@ -157,6 +166,7 @@ vector<IntervalVector> SolverGen::solve(const IntervalVector& init_box) {
 	return sols;
 }
 
+  /*
 void SolverGen::time_limit_check () {
 	Timer::stop();
 	time += Timer::VIRTUAL_TIMELAPSE();
@@ -164,7 +174,7 @@ void SolverGen::time_limit_check () {
 	if (time_limit >0 &&  time >=time_limit) throw TimeOutException();
 	Timer::start();
 }
-
+  */
 
 void SolverGen::new_sol (vector<IntervalVector> & sols, IntervalVector & box) {
 	sols.push_back(box);
@@ -176,7 +186,7 @@ void SolverGen::new_sol (vector<IntervalVector> & sols, IntervalVector & box) {
 }
 
 void SolverGen::report_time_limit()
-{cout << "time limit " << time_limit << "s. reached " << endl;}
+{cout << "time limit " << timeout << "s. reached " << endl;}
 
 
  

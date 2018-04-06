@@ -15,15 +15,21 @@
 using namespace std;
 
 namespace ibex {
-pair<Backtrackable*,Backtrackable*> ValidPoint::down() {
+pair<Backtrackable*,Backtrackable*> ValidPoint::down(const BisectionPoint& b) {
 	return pair<Backtrackable*,Backtrackable*> (new ValidPoint(*this),new ValidPoint(*this));
 }
   ValidPoint::ValidPoint():  validpoints_number(0){};
+  
+
 
   ValidPoint::~ValidPoint() {delete point;}
 
   ValidPoint::ValidPoint (const ValidPoint& qp) {
     point= new Vector (*(qp.point));
     validpoints_number=qp.validpoints_number;
+  }
+
+  Backtrackable*  ValidPoint::copy() const{
+    return new ValidPoint(*this);
   }
 }

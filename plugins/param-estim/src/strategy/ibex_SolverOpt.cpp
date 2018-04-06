@@ -20,7 +20,7 @@ using namespace std;
 namespace ibex {
 
 SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
-  ctc(ctc), bsc(bsc), str(str), time_limit(-1), cell_limit(-1), trace(0), time(0), bestsolpoint(ctc.nb_var)  {
+  ctc(ctc), bsc(bsc), str(str), timeout(-1), cell_limit(-1), trace(0), time(0), bestsolpoint(ctc.nb_var)  {
 	nb_cells=0;
 }
 
@@ -45,14 +45,15 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
         str.push_cell(*root);
 	init_buffer_info(*root);
 
-	Timer::start();
+	//	Timer::start();
 
 }
 
+  /*
   pair<Cell*,Cell*> SolverOpt::bisect(Cell& c,IntervalVector&box1, IntervalVector&box2){
     return c.bisect(box1,box2);
   }
-
+  */
  
 
   void SolverOpt::handle_cell (Cell & c){
@@ -76,6 +77,8 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 
 
   bool SolverOpt::optimize() {
+    Timer timer;
+    timer.start();
 	try  {
 	  while (! (str.empty_buffer())) {
 
@@ -84,11 +87,13 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 			Cell* c=str.top_cell();
 
 			try {
-
+			  /*
 			  pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 			  //			  cout << "box1 " << boxes.first << endl;
 			  //			  cout << "box2 " << boxes.second << endl;
 			  pair<Cell*,Cell*> new_cells = bisect(*c,boxes.first,boxes.second);
+			  */
+			  pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 
 			  update_buffer_info(*c);	
 			  str.pop_cell();
@@ -121,7 +126,10 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 			  //			  return !str.buffer.empty();
 				  
 			}
-			time_limit_check();
+			if (timeout>0) timer.check(timeout); 
+				time = timer.get_time();
+
+				//			time_limit_check();
 		}
 			
 	}
@@ -134,8 +142,9 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 		return false;
 	}
 
-	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	timer.stop();
+	time = timer.get_time();
+	//	time+= Timer::VIRTUAL_TIMELAPSE();
 
 	return true;
 
@@ -151,6 +160,7 @@ IntervalVector SolverOpt::solve(const IntervalVector& init_box) {
 	return bestsolpoint;
 }
 
+  /*
 void SolverOpt::time_limit_check () {
 	Timer::stop();
 
@@ -159,12 +169,12 @@ void SolverOpt::time_limit_check () {
 	if (time_limit >0 &&  time >=time_limit) throw TimeOutException();
 	Timer::start();
 }
-
+  */
 
 
 
 void SolverOpt::report_time_limit()
-{cout << "time limit " << time_limit << "s. reached " << endl;}
+{cout << "time limit " << timeout << "s. reached " << endl;}
 
 
  
