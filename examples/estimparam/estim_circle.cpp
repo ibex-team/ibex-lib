@@ -55,7 +55,7 @@ vector<int> *readFile(string filename) {
 	
 	while (line[0] != '}') {
 		input.getline(line, max_line_length);
-	.
+	
 	c->push_back(atof(line));
 	}
 		
@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
 	//	CtcQInter ctcq(3,m_ctc,Q);
 	//	CtcQInter ctcq(3,m_ctc,Q,QINTERPROJ);
 	//	CtcQInterAff ctcq(3,m_ctc,Q,m_fun,QINTERPROJ,K);
-	CtcQInterAffCircle2 ctcq(3,m_ctc,measure,epseq,Q,QINTERPROJ,K);
+	CtcQInterAffCircle2 ctcq(3,m_ctc,measure,epseq,Q,QINTERPROJ);
 	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,QINTERPROJ,K);
 	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,flist,QINTERCORE,K);
 	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,m_fun,QINTERPROJ,K);
@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
 	//	OptimQInter s(*ctcs,*bs,buff,ctcq);
 	//OptimizerQInter s(*ctcs,*bs,buff,ctcq);
 	//	Solver s(*ctcs,*bs,buff);
-	s.time_limit = 3600;
+	s.timeout = 3600;
 	s.trace=1;
 	//	s.nbr=nbrand;
 	//	s.gaplimit=gaplimit;
@@ -255,8 +255,7 @@ int main(int argc, char** argv) {
 	s.report_possible_inliers();
 	end = clock();
 
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
+
 	cout <<  " time used " << s.time << "  "<< endl ;
 	cout << "Shape extraction : OK. Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
 	cout << "Number of branches : " << s.nb_cells << endl;

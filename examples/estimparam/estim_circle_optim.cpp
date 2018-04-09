@@ -194,13 +194,12 @@ int main(int argc, char** argv) {
 	//	CtcQInter ctcq(3,m_ctc,Q);
 	//      CtcQInter ctcq(3,m_ctc,Q,QINTERPROJ);
 	//	CtcQInterAff ctcq(3,m_ctc,Q,m_fun,QINTERPROJ,K);
-	CtcQInterAffCircle2 ctcq(3,m_ctc,measure,epseq,Q,QINTERPROJ,K);
-	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,QINTERPROJ,K);
-	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,flist,QINTERCORE,K);
-	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,m_fun,QINTERPROJ,K);
-	//		CtcQInterAff ctcq(3,m_ctc,Q,m_fun,QINTERCORE,K);
-	//	CtcQInterAff ctcq(3,m_ctc,Q,m_fun,QINTERFULL,K);
-	//	CtcQInterAff ctcq(3,m_ctc,Q,m_fun,CtcQInter::GRID,K);
+	CtcQInterAffCircle2 ctcq(3,m_ctc,measure,epseq,Q,QINTERPROJ);
+	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,QINTERPROJ);
+	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,flist,QINTERCORE);
+	//	CtcQInterCircle2 ctcq(3,m_ctc,measure,epseq,Q,m_fun,QINTERPROJ);
+	//		CtcQInterAff ctcq(3,m_ctc,Q,m_fun,QINTERCORE);
+	//	CtcQInterAff ctcq(3,m_ctc,Q,m_fun,QINTERFULL);
 	CtcFixPoint ctcf(ctcq,0.1);
 
 	cout << "apres ctcq " << endl;
@@ -239,7 +238,7 @@ int main(int argc, char** argv) {
 	//	Solver s(*ctcs,*bs,buff);
 	//	SolverOptQInter s (*ctcs,*bs,str,ctcq,2);
 	SolverOptQInter s (*ctcs,*bs,str,ctcq,1);
-	s.time_limit = 3600;
+	s.timeout = 3600;
 	s.trace=1;
 	s.nbr=nbrand;
 	s.gaplimit=gaplimit;
@@ -256,8 +255,7 @@ int main(int argc, char** argv) {
 	s.report_possible_inliers();
 	end = clock();
 
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
+
 	cout <<  " time used " << s.time << "  "<< endl ;
 	cout << "Shape extraction : OK. Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
 	cout << "Number of branches : " << s.nb_cells << endl;

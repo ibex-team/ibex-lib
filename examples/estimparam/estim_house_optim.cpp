@@ -266,11 +266,11 @@ int main(int argc, char** argv) {
 	    //CtcQInterProjF ctcq(3,m_ctc1,Q);
 	    //	CtcQInterProjF ctcq(3,m_ctc1,K,m_fun,Q);
 	    
-	    //	    CtcQInterAff ctcq(3,m_ctc1,Q,m_fun,QINTERPROJ,K);
-	    CtcQInterAffPlane ctcq(n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ,K);
+	    //	    CtcQInterAff ctcq(3,m_ctc1,Q,m_fun,QINTERPROJ);
+	    CtcQInterAffPlane ctcq(n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ);
 	    	    
 	    // CtcQInter2Plane ctcq(n,m_ctc1,linfun,epseq,Q);
-	    Ctc3BCid cid(3,ctcq,5,1,1);
+	    Ctc3BCid cid(ctcq,5,1,1);
 	    CtcCompo ctcid(ctcq ,cid);
             CtcCompo ctcqf0(*ctc0,ctcq);
 
@@ -285,7 +285,7 @@ int main(int argc, char** argv) {
 
 	    s.str.with_oracle=false;
 	    s.str.with_storage=true;
-	    s.time_limit = 3600;
+	    s.timeout = 3600;
 	    s.trace=1;
 	    s.gaplimit=gap;
 	    s.nbr=nbrand;

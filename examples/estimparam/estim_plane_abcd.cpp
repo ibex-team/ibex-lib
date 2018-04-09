@@ -365,13 +365,13 @@ int main(int argc, char** argv) {
 	    /* Main optimization loop */
 
 	    //   CtcQInter ctcq(4,m_ctc1,Q);
-	    //CtcQInterAff ctcq(4,m_ctc1,Q,m_fun,QINTERPROJ,K);
+	    //CtcQInterAff ctcq(4,m_ctc1,Q,m_fun,QINTERPROJ);
 	    //	    CtcQInterAff ctcq(4,m_ctc1,Q,flist,K,QINTERPROJ);
 	    CtcQInter* ctcq;	 
 	    if (flist==1)
-	      ctcq = new CtcQInterAffPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
+	      ctcq = new CtcQInterAffPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ);
 	    else
-	      ctcq= new  CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
+	      ctcq= new  CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ);
 
 	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,flist,QINTERPROJ,K);
 	    //	    CtcQInterPlane  ctcq(n,m_ctc1,linfun,epseq,Q,flist, QINTERCORE,K );
@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
 	    //	    SolverQInter s(ctcf,*bs,buff,ctcq);
 	    SolverQInter s(ctcqf0,*bs,buff,*ctcq);
 	    //Solver s (*ctcs,*bs,buff);
-	    s.time_limit = 10000;
+	    s.timeout = 10000;
 	    s.trace=0;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
@@ -479,8 +479,6 @@ int main(int argc, char** argv) {
 	  
 	  				       
 	end = clock();
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
 	cout <<  " time used " << s.time << "  "<< endl ;
 	cout << "Shape extraction : OK. Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
 	cout <<" total branch number " << nb_cells << endl;

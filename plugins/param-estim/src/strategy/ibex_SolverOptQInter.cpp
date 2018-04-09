@@ -116,7 +116,6 @@ namespace ibex {
     //    c.var_biss= ctcq.var_biss;
 
     c.get<QInterPoints>().qmax=ctcq.qmax;
-    //    c.get<QInterPoints>().qmidbox=ctcq.midactivepoints_count(c.box.mid());
   }
 
   void SolverOptQInter::update_buffer_info (Cell& c) {
@@ -294,15 +293,10 @@ namespace ibex {
 	postsolution();
 	if (trace) {
 
-	  /*
-	  Timer::stop();
-	  time += Timer::VIRTUAL_TIMELAPSE();
-	  Timer::start();
-	  */
-	  //	  time=timer.get_time();
+	 
 	  cout << "solution" << c.box << " psize " << psize << " qmax " << qposs << " qvalid " << qvalid << endl;
-	  //	  cout << " time " << time << endl;	    ;
-	  cout << " nb boxes " << nb_cells << endl;	    ;
+	  cout << " time " << time << endl; 
+	  cout << " nb boxes " << nb_cells << endl;
 	  cout << " depth " << c.get<QInterPoints>().depth << endl;
 	  if (optimbuffer ==2  && !(str.empty_buffer()))
 	    cout << " qmax " << str.top_cell()->get<QInterPoints>().qmax << endl;

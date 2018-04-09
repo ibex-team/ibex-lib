@@ -123,7 +123,7 @@ namespace ibex {
 
  protected :
 	int second_cell;
-	//        std::pair<Cell*,Cell*> 	bisect(Cell& c, IntervalVector& box1, IntervalVector& box2);
+
 	virtual Cell* root_cell(const IntervalVector& box);
         virtual int validate_value(Cell & cell);
 
@@ -132,13 +132,12 @@ namespace ibex {
         virtual void validate (Cell& c){;};
         virtual void small_box (Cell& c){;};
 	virtual void other_checks(Cell& c){;};
-	//	void time_limit_check();
+
 	virtual void handle_small_box(Cell& c) {;};
 
 	virtual void report_time_limit();
 	virtual void init_buffer_info(Cell& c) {};
 	virtual void update_buffer_info(Cell & c) {};
-	
 
         void handle_cell(Cell & cell);
 };

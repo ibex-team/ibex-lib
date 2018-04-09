@@ -301,10 +301,11 @@ int main(int argc, char** argv) {
 	    for (int i=0; i<p; i++) {
 	 
 	  //	  Function fi (v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-v[2]-Interval(-epseq,epseq)));
+	      
+	      	      m_func[i] = new Function(v,(x->at(i) +v[0]*(y->at(i)- diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-v[2]-Interval(-epseq,epseq)));
 
-	      m_func[i] = new Function(v,(x->at(i) +v[0]*(y->at(i)- diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-v[2]-Interval(-epseq,epseq)));
-
-	      m_ctc.set_ref(i,(*new CtcFwdBwd(*m_func[i])));
+	      	      m_ctc.set_ref(i,(*new CtcFwdBwd(*m_func[i])));
+	      
 
 	      //	      m_ctc.set_ref(i,*new Ctc3BCid(3,* new  CtcFwdBwd(*m_func[i]),5,1,3));  	  
 
@@ -506,15 +507,15 @@ int main(int argc, char** argv) {
 
             CtcQInter* ctcq;	    
 	    //	    CtcQInter ctcq(3,m_ctc1,Q);
-	    //	    ctcq = new CtcQInterAff (3,m_ctc1,Q,m_fun,QINTERPROJ,K);
+	    //	    ctcq = new CtcQInterAff (3,m_ctc1,Q,m_fun,QINTERPROJ);
 	    
 	    if (flist==1)
-	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
-	      //	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERCORE,K);
+	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ);
+	      //	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERCORE,);
 	    else
-	      ctcq= new  CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
-		//    	    CtcQInterPlane (n,m_ctc1,linfun,epseq,Q,QINTERCORE,K);	    
-		//		CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERFULL, K);
+	      ctcq= new  CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ);
+		//    	    CtcQInterPlane (n,m_ctc1,linfun,epseq,Q,QINTERCORE);	    
+		//		CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERFULL);
 
 	    CtcCompo ctcqf0 (*ctc0,*ctcq);
 	    //	    Ctc3BCid cid(*ctcq,10,1,3);
@@ -566,7 +567,7 @@ int main(int argc, char** argv) {
 	    //	    ctcq->disable_side_effects();
 	    //	    ctcqf0.disable_side_effects();
 
-	    s.time_limit = 1000;
+	    s.timeout = 1000;
 	    s.trace=0;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
@@ -655,7 +656,7 @@ int main(int argc, char** argv) {
 	
 	
 	for (int i=0; i<p; i++)
-	  { delete m_func[i];
+	  {delete m_func[i];
 	       delete &m_ctc[i];
 	  }
 

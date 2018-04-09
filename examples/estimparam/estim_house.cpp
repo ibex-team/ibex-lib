@@ -291,17 +291,17 @@ int main(int argc, char** argv) {
 	    //CtcQInterProjF ctcq(3,m_ctc1,Q);
 	    //	CtcQInterProjF ctcq(3,m_ctc1,K,m_fun,Q);
 	    
-	    //	    CtcQInterAff ctcq(3,m_ctc1,Q,m_fun,QINTERPROJ,K);
-	    //CtcQInterAffPlane ctcq(n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
-	    //CtcQInterPlane ctcq(n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
+	    //	    CtcQInterAff ctcq(3,m_ctc1,Q,m_fun,QINTERPROJ,);
+	    //CtcQInterAffPlane ctcq(n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ);
+	    //CtcQInterPlane ctcq(n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ);
 
 	    cout << " flist " << flist << endl;
 	    if (flist==1)
-	      ctcq = new CtcQInterAffPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
+	      ctcq = new CtcQInterAffPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ);
 	    else
-	      ctcq= new  CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
+	      ctcq= new  CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERPROJ);
 
-	    Ctc3BCid cid(3,*ctcq,5,1,1);
+	    Ctc3BCid cid(*ctcq,5,1,1);
 	    CtcCompo ctcid(*ctcq ,cid);
             CtcCompo ctcqf0(*ctc0,*ctcq);
 
@@ -318,7 +318,7 @@ int main(int argc, char** argv) {
 	    //	    Solver s(ctcf,*bs,buff);
 	    //	    s.onesol_permaximalset=true;
 	    //	    s.qvalid=Qvalid;
-	    s.time_limit = 10000;
+	    s.timeout = 10000;
             s.trace=0;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;

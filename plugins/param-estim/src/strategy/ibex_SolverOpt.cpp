@@ -127,9 +127,8 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 				  
 			}
 			if (timeout>0) timer.check(timeout); 
-				time = timer.get_time();
+			time = timer.get_time();
 
-				//			time_limit_check();
 		}
 			
 	}
@@ -144,7 +143,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 
 	timer.stop();
 	time = timer.get_time();
-	//	time+= Timer::VIRTUAL_TIMELAPSE();
+
 
 	return true;
 

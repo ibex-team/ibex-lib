@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include <ctime>
 #include <fstream>
 #include <set>
 using namespace std;
@@ -86,18 +85,18 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
    int dmax= atoi (argv[12]);
    int eobj= atoi (argv[13]);
 
-   int optim = atoi(argv[14]);
+   int searchstrategy = atoi(argv[14]); // 0 DFS  1 BeamSearch 2 BFS
    double time0= atof(argv[15]);
 
    cout << " Q " << Q << endl;
-   cout << " epseq " << epseq << endl;
-   cout << " eps1 " << eps1 << endl;
-   cout << " prec0 " << eps1 << endl;
+   cout << " tolerance " << epseq << endl;
+   cout << " initboxsize " << eps1 << endl;
+   cout << " epsbox" << prec0 << endl;
    cout << " epscont " << epscont << endl;
 
 
    cout << " dmax " << dmax << endl;
-   cout << " eobj " << eobj << endl;
+   cout << " deltaobj " << eobj << endl;
    cout << " temps limite " << time0 << endl;
    srand (atoi(argv[16]));
 
@@ -506,12 +505,12 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 
 	CellBuffer * buff;
 	SearchStrategy* str;
-	if (optim==0)
+	if (searchstrategy==0)
 	  {
 	    buff = new CellStack();
 	    str = new DepthFirstSearch(*buff);
 	  }
-	else if (optim==1){
+	else if (searchstrategy==1){
 	  buff = new CellHeapQInter();
 	  str = new BeamSearch(*buff);
 	}
@@ -522,9 +521,8 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 
 
 	//SmearSumRelative bs(sys,prec,0.5);
-	//	SmearMaxRelative  bs(sys,prec,0.5);
+	//SmearMaxRelative  bs(sys,prec,0.5);
        	//RoundRobin bs (prec,0.5);
-	//	RoundRobinQInter bs (prec,0.5);
 	LargestFirst bs(prec,0.5);
         //  LSmear bs(prec,0.5);
 	// RoundRobinNvar bs (8,prec,0.5);
@@ -576,29 +574,27 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 
 	SolverOptConstrainedQInter* s;
 
-	//SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,1);
-	//	SolverOptConstrainedQInter s(sys1,ctcqf0,bs,buff,ctcq,epscont,2);
-	if (optim ==0)
+	if (searchstrategy ==0)
 	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,1);
-	else if (optim==1)
-	  //	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);
+	else if (searchstrategy==1)
 	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);
 	else 
 	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);  //BFS
 
 	//	SolverOptQInter s(ctcf,bs,buff,ctcq,1);
-	cout << " apres solver " << endl;
+	//	cout << " apres solver " << endl;
 	s->timeout = time0;
 	s->trace=1;
-	s->nbr=nbr;
+	s->nbr=nbr;  // useless
 	s->epsobj=eobj;
 	s->str.depthmax=dmax;
 	s->gaplimit=gaplimit;
 	//s->tolerance_constraints_number=5;
 	s->tolerance_constraints_number=10000;  // no second call for feasible point 
 	//	s->oracle=oraclemat;
-	s->str.with_oracle=0;
 	//	cout << " oracle " << oraclemat << endl;
+	s->str.with_oracle=0;
+
 	cout << "box init " << box << endl;
 
 	cout << "essential " << m_essential1.eval_matrix(box) << endl;
@@ -692,6 +688,7 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 	cout <<  " time used " << s->time << "  "<< endl ;
 	cout <<" total branch number " << s->nb_cells << endl;
 	delete buff;
+	delete str;
 	delete s;
 	}
 	catch (SyntaxError e)
