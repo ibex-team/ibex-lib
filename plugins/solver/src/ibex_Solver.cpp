@@ -322,6 +322,8 @@ QualifiedBox Solver::check_sol(const IntervalVector& box) {
 			}
 		} else {
 			// ====== well-constrained =========
+			unicity = new IntervalVector(n);
+
 			if (!inflating_newton(eqs->f_ctrs, box.mid(), existence, *unicity)) {
 				status = QualifiedBox::UNKNOWN;
 			}
@@ -332,12 +334,15 @@ QualifiedBox Solver::check_sol(const IntervalVector& box) {
 		existence = box;
 		if (unicity!=NULL) delete unicity;
 		unicity=NULL;
+		assert(varset==NULL);
 	} else {
 		// The inflating Newton may cause the existence box to be disjoint from the input box.
 
 		// Note that the following line also tests the case of an existence box outside
 		// the initial box of the search
 		if (box.is_disjoint(existence)) {
+			if (unicity) delete unicity;
+			if (varset) delete varset;
 			throw EmptyBoxException();
 		}
 	}
@@ -353,7 +358,13 @@ QualifiedBox Solver::check_sol(const IntervalVector& box) {
 			assert(c.f.image_dim()==1);
 			y=c.f.eval(existence);
 			r=c.right_hand_side().i();
-			if (y.is_disjoint(r)) throw EmptyBoxException();
+
+			if (y.is_disjoint(r)) {
+				if (unicity) delete unicity;
+				if (varset) delete varset;
+				throw EmptyBoxException();
+			}
+
 			if (status==QualifiedBox::INNER && !y.is_subset(r)) {
 				// BOUNDARY by default: will be verified later
 				status = QualifiedBox::BOUNDARY;
@@ -373,8 +384,11 @@ QualifiedBox Solver::check_sol(const IntervalVector& box) {
 		// the case of under-constrained systems (m<n).
 
 		for (vector<QualifiedBox>::iterator it=manif->inner.begin(); it!=manif->inner.end(); it++) {
-			if (it->unicity().is_superset(existence))
+			if (it->unicity().is_superset(existence)) {
+				if (unicity) delete unicity;
+				if (varset) delete varset;
 				throw EmptyBoxException();
+			}
 		}
 	}
 
