@@ -18,7 +18,7 @@ extern int TK_CONSTANT;
 
 extern const int TK_FUNC_SYMBOL;
 extern const int TK_FUNC_RET_SYMBOL;
-extern const int TK_FUNC_TMP_SYMBOL;
+extern const int TK_EXPR_TMP_SYMBOL;
 
 extern const int TK_ENTITY;
 extern const int TK_ITERATOR;
@@ -83,15 +83,15 @@ public:
 	Function* f;
 };
 
-class Scope::S_FuncTmp : public Scope::S_Object {
+class Scope::S_ExprTmp : public Scope::S_Object {
 public:
-	S_FuncTmp(const P_ExprNode* expr) : expr(expr) { }
+	S_ExprTmp(const P_ExprNode* expr) : expr(expr) { }
 
-	S_Object* copy() const { return new S_FuncTmp(expr); }
+	S_Object* copy() const { return new S_ExprTmp(expr); }
 
-	int token() const { return TK_FUNC_TMP_SYMBOL; }
+	int token() const { return TK_EXPR_TMP_SYMBOL; }
 
-	void print(ostream& os) const { os << "function tmp " << *expr; }
+	void print(ostream& os) const { os << "expression tmp " << *expr; }
 
 	const P_ExprNode* expr;
 };
@@ -188,8 +188,8 @@ void Scope::add_func(const char* id, Function* f) {
 	//cout << "[parser] add function " << *f << endl;
 }
 
-void Scope::add_func_tmp_symbol(const char* id, const P_ExprNode* expr) {
-	tab.insert_new(id, new S_FuncTmp(expr));
+void Scope::add_expr_tmp_symbol(const char* id, const P_ExprNode* expr) {
+	tab.insert_new(id, new S_ExprTmp(expr));
 }
 
 void Scope::add_var(const char* id, const Dim* dim) {
@@ -224,10 +224,10 @@ Function& Scope::get_func(const char* id) {
 	return *((const S_Func&) s).f;
 }
 
-const P_ExprNode& Scope::get_func_tmp_expr(const char* id) const {
+const P_ExprNode& Scope::get_expr_tmp_expr(const char* id) const {
 	const S_Object& s=*tab[id];
-	assert(s.token()==TK_FUNC_TMP_SYMBOL);
-	return *((const S_FuncTmp&) s).expr;
+	assert(s.token()==TK_EXPR_TMP_SYMBOL);
+	return *((const S_ExprTmp&) s).expr;
 }
 
 std::pair<const ExprSymbol*,const Domain*> Scope::get_var(const char* id) const {
