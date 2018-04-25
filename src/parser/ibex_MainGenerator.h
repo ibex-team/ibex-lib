@@ -24,8 +24,9 @@ public:
 
 private:
 	// to cleanup all expressions (that are copied by the factory)
-	// we store them in a garbage. Note: they shared variables *and*
-	// symbolic constants, whence this structure.
+	// we store them in a garbage. Note: they shared variables,
+	// **symbolic constants**, and all expressions represented by
+	// temporary symbols, whence this structure.
 	void add_garbage(NodeMap<bool>& garbage, const ExprNode& e);
 };
 
