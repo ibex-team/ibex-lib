@@ -57,9 +57,7 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 		vector<ExprCtr*> ctrs = CtrGenerator().generate(*source.ctrs);
 
 		for (vector<ExprCtr*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
-			cout << "add " << **it<< endl;
 			fac.add_ctr(**it); // by copy so...
-			cout << "-----------------\n";
 			add_garbage(garbage,(*it)->e);
 			delete *it;
 		}
