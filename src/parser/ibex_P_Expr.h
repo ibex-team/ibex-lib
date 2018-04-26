@@ -114,6 +114,8 @@ public:
 
 	Domain _2domain() const;
 
+	Interval _2itv() const;
+
 	operation op;
 	Array<const P_ExprNode> arg;
 	mutable Label* lab;

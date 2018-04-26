@@ -246,6 +246,7 @@ ctr           : expr TK_EQU expr                { $$ = new P_OneConstraint($1,EQ
               | expr TK_GEQ expr                { $$ = new P_OneConstraint($1,GEQ,$3); }
               | expr   '<'  expr                { $$ = new P_OneConstraint($1,LT,$3); }
               | expr   '>'  expr                { $$ = new P_OneConstraint($1,GT,$3); }
+              | expr TK_IN  expr                { $$ = new P_ThickEquality($1,$3->_2itv()); delete $3; }
               | '(' ctr ')'                     { $$ = $2; }
               ; 
               

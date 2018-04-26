@@ -92,6 +92,16 @@ void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	scopes().pop();
 }
 
+void CtrGenerator::visit(const P_ThickEquality& eq) {
+	try {
+		const ExprNode& e=eq.expr.generate();
+		//cout << "[parser] generated ctr: " << *e << endl;
+		ctrs.push_back(new ExprCtr(e-eq.d.lb(),GEQ));
+		ctrs.push_back(new ExprCtr(e-eq.d.ub(),LEQ));
+	} catch(DimException& e) {
+		throw SyntaxError(e.message(),NULL,eq.expr.line);
+	}
+}
 
 } // end namespace parser
 } // end namespace ibex

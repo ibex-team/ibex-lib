@@ -57,7 +57,7 @@ double Manifold::read_double(ifstream& f) {
 
 void Manifold::read_vars(ifstream& f) {
 	char x;
-	for (int i=0; i<n; i++) {
+	for (unsigned int i=0; i<n; i++) {
 		stringstream s;
 		do {
 			f.read(&x, sizeof(char));
@@ -117,7 +117,7 @@ QualifiedBox Manifold::read_output_box(ifstream& f) {
 			if (v!=0) params.add(v-1); // index starting from 1 in the raw format
 		}
 		if (!params.empty()) {
-			if (params.size()!=n-m)
+			if (((unsigned int) params.size())!=n-m)
 				ibex_error("[manifold]: bad input file (bad number of parameters)");
 			else
 				varset = new VarSet(n,params,false);
@@ -140,7 +140,7 @@ void Manifold::write_double(ofstream& f, double x) const {
 }
 
 void Manifold::write_vars(ofstream& f) const {
-	for (int i=0; i<n; i++) {
+	for (unsigned int i=0; i<n; i++) {
 		f.write(var_names[i].c_str(),var_names[i].size()*sizeof(char));
 		f.put(' ');
 	}
@@ -328,7 +328,7 @@ void Manifold::write_txt(const char* filename) const {
 	char s=' ';
 	file << SIGNATURE << s << FORMAT_VERSION << '\n';
 	file << n << s << m << s << nb_ineq << '\n';
-	for (int i=0; i<n; i++)
+	for (unsigned int i=0; i<n; i++)
 		file << var_names[i] << ' ';
 	file << '\n';
 	file << status << '\n';
