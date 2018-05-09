@@ -19,9 +19,8 @@
 #include "ibex_Timer.h"
 #include "ibex_Exception.h"
 #include "ibex_Linear.h"
-#include "ibex_SolverOutputBox.h"
-
 #include <vector>
+#include "ibex_QualifiedBox.h"
 
 namespace ibex {
 
@@ -74,18 +73,11 @@ public:
 			const Vector& eps_min, const Vector& eps_max);
 
 	/**
-	 * \brief Build a solver with certification.
+	 * \brief Force some dimensions to be parameters in the automatic proof.
 	 *
-	 * \param sys     - The system to be solved
-	 * \param params  - Force which dimensions correspond to parameters (in automatic proof)
-	 * \param ctc     - The contractor (for contracting each node of the search tree)
-	 * \param bsc     - The bisector   (for branching). Contains the stop criterion.
-	 * \param buffer  - The cell buffer (a CellStack in a depth first search strategy)
-	 * \param eps_min - Criterion to stop bisection
-	 * \param eps_max - Criterion to force bisection
+	 * Note: not necessarily n-m bits have to be set.
 	 */
-	Solver(const System& sys, const BitSet& params, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
-			const Vector& eps_min, const Vector& eps_max);
+	void set_params(const VarSet& params);
 
 	/**
 	 * \brief Destructor.
@@ -160,7 +152,7 @@ public:
 	 *
 	 *   CELL_OVERFLOW:     the number of cell has exceeded the limit.
 	 */
-	SolverOutputBox* next();
+	QualifiedBox* next();
 
 	/**
 	 * \brief Displays on standard output a report of the last call to solve(...).
@@ -254,9 +246,9 @@ public:
 protected:
 
 	/**
-	 * \brief Called by constructors.
+	 * \brief Set variable names in the manifold structure.
 	 */
-	void init(const System& sys, const BitSet* params);
+	void set_var_names();
 
 	/**
 	 * \brief Call "next" until search is over.
@@ -274,7 +266,7 @@ protected:
 	 * slightly changed (due to inflating Newton) and the actual "solution"
 	 * is stored in the existence box of the output.
 	 */
-	SolverOutputBox check_sol(const IntervalVector& box);
+	QualifiedBox check_sol(const IntervalVector& box);
 
 	/**
 	 * \brief Check if the box is "BOUNDARY"
@@ -295,7 +287,7 @@ protected:
 	/**
 	 * \brief Store the solution in "solutions" and print it (if trace>=0).
 	 */
-	SolverOutputBox& store_sol(const SolverOutputBox& sol);
+	QualifiedBox& store_sol(const QualifiedBox& sol);
 
 	/**
 	 * \brief Check if time is out.
@@ -342,7 +334,7 @@ protected:
 	/**
 	 * \brief The forced parameters (if any, NULL otherwise).
 	 */
-	const BitSet* params;
+	VarSet params;
 
 	/*
 	 * \brief Solutions found in the current search.

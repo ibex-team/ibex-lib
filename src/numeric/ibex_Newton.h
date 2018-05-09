@@ -111,8 +111,11 @@ bool inflating_newton(const Fnc& f, const VarSet& vars, const IntervalVector& bo
  * Parameters are chosen according to Hansen's strategy: they
  * are the "most influencing" variable obtained by the pivoting
  * of Gauss elimination.
+ *
+ * \param forced_params - A varset whose parameters must be in the
+ *                        parameters of the returned varset.
  */
-VarSet get_newton_vars(const Fnc& f, const Vector& pt, const BitSet& forced_params);
+VarSet get_newton_vars(const Fnc& f, const Vector& pt, const VarSet& forced_params);
 
 } // end namespace ibex
 #endif // __IBEX_NEWTON_H__

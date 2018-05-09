@@ -54,13 +54,14 @@ const ExprNode& var_component(const Array<const ExprSymbol>& args, int i) {
 	ibex_error("var_component: index exceeds size.");
 }
 
-const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y) {
+const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, bool shared) {
 
-	clone.clean();
+	if (!shared) clone.clean();
 
 	assert(new_x.size()>=old_x.size());
 
 	for (int i=0; i<old_x.size(); i++) {
+		if (shared && clone.found(old_x[i])) continue;
 		clone.insert(old_x[i],&new_x[i]);
 	}
 

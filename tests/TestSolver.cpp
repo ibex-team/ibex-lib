@@ -163,11 +163,10 @@ void TestSolver::circle4() {
 	CellStack stack;
 	CtcHC4 hc4(sys);
 
-	BitSet params(BitSet::empty(3));
-	params.add(2);
+	VarSet params(sys.f_ctrs,sys.args[2],false);
 	Vector prec(3,1e-3);
-	Solver solver(sys,params,hc4,rr,stack,prec,prec);
-
+	Solver solver(sys,hc4,rr,stack,prec,prec);
+	solver.set_params(params);
 	IntervalVector box(3);
 	box[0]=Interval(-10,10);
 	box[1]=Interval(-10,10);

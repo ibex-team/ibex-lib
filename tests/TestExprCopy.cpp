@@ -63,4 +63,17 @@ void TestExprCopy::var_component01() {
 	CPPUNIT_ASSERT(sameExpr(var_component(symbols,18),k[1][1]));
 }
 
+void TestExprCopy::share() {
+	ExprCopy c;
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	const ExprSymbol& y=ExprSymbol::new_("y");
+	const ExprNode& e=x+1;
+	Array<const ExprNode> a(3);
+	a.set_ref(0,c.copy(x,Array<const ExprSymbol>(y),e+2,true));
+	a.set_ref(1,c.copy(x,Array<const ExprSymbol>(y),e+3,true));
+	a.set_ref(2,c.copy(x,Array<const ExprSymbol>(y),e+4,true));
+	const ExprNode& e2=ExprVector::new_col(a);
+	CPPUNIT_ASSERT(sameExpr(e2,"(((y+1)+2);((y+1)+3);((y+1)+4))"));
+	CPPUNIT_ASSERT(e2.size==10);
+}
 } // end namespace

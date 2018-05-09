@@ -46,12 +46,19 @@ int P_ExprNode::_2int() const {
 	return ExprGenerator().generate_int(*this);
 }
 
-double P_ExprNode::_2dbl() const {
-	return ExprGenerator().generate_dbl(*this);
+double P_ExprNode::_2dbl(bool round_downward) const {
+	return ExprGenerator().generate_dbl(*this, round_downward);
 }
 
 Domain P_ExprNode::_2domain() const {
 	return ExprGenerator().generate_cst(*this);
+}
+
+Interval P_ExprNode::_2itv() const {
+	Domain d=_2domain();
+	if (d.dim.type()!=Dim::SCALAR)
+		ibexerror("interval expected");
+	return d.i();
 }
 
 ostream& operator<<(ostream& os, const P_ExprNode& e) {

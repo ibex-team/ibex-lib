@@ -13,6 +13,9 @@ class UTestContext (Build.BuildContext):
 class BenchmarksContext (Build.BuildContext):
     cmd = "benchmarks"
     fun = "benchmarks"
+    bench_results = {}
+    bench_cmp = {}
+    bench_errors = []
 
 # not @Configure.conf because, the function is also called by 'options'
 def get_dirlist (node):
@@ -275,7 +278,7 @@ def lp_lib (conf):
     conf.env.append_unique ("INCLUDES_LP_LIB", lplib_node.abspath())
 
     # check that mandatory files exist
-    for f in [ "ibex_LPWrapper.cpp" ]:
+    for f in [ "ibex_LPWrapper.cpp_" ]:
         if lplib_node.find_node (f) is None:
             conf.fatal ("A LP plugin must contain a file named %s" % f)
 

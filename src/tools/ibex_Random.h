@@ -56,13 +56,41 @@ namespace ibex {
 		
 	public:
 
-		static bool srand();
-		static bool srand(unsigned long s);
+		/** \brief Set seed with random number
+		 *  This function sets the seed for random number generation \c
+		 *  \return A boolean if the seed is acceptable, that is in [0,UINT32_MAX].
+		 */
+		static void srand();
+
+		/** \brief Set seed
+		 *  This function sets the seed for random number generation \c
+		 *  \return A boolean if the seed is acceptable, that is in [0,UINT32_MAX].
+		 */
+		static void srand(int s);
+
+		/** \brief Get a random integer as uint32
+		 * This function serves to obtain a random number \c
+		 * \return An integer in the interval [0,UINT32_MAX].
+		 */
 		static uint32_t rand();
+
+		/** \brief Get a random number having a normal distribution as double
+         * \param a Lower bound  -- \b IN.
+         * \param b Upper bound  -- \b IN.
+         * \return A double in the interval [a,b].
+		 */
 		static double rand(double a, double b){return a+((double)(b-a)*RNG::rand())/UINT32_MAX;}
 		
+		/** \brief  Get a random number approaching a normal distribution ( N(Mean,Var) ) as double
+         * \param mean : Mean of the target normal distribution		-- \b IN.
+         * \param var :	Variance of the target normal distribution	-- \b IN.
+         * \return A random number.
+		 */
+        static double normal_rand( double mean=0 , double var=1 ) ;
+
 	private:
-		static uint32_t x,y,z;
+		static const uint32_t x0,y0,z0;
+		static uint32_t x,y,z,seed;
 	};
 }
 

@@ -28,6 +28,8 @@ namespace parser {
 extern stack<Scope>& scopes();
 
 CtrGenerator::CtrGenerator() {
+	// probably not anymore useful since commit:
+
 	for (vector<const char*>::iterator it=scopes().top().cst.begin(); it!=scopes().top().cst.end(); it++) {
 		s.lock.insert(scopes().top().get_cst(*it),true);
 	}
@@ -56,8 +58,10 @@ void CtrGenerator::visit(const P_OneConstraint& c) {
 //	ctrs->push_back(new NumConstraint(dest_vars2, ExprCtr(e2,c.op)));
 
 	try {
-
-		ExprCtr* e=new ExprCtr(s.simplify(c.expr.generate()),c.op);
+		// do not simplify the expression here because some ExprNode
+		// may be shared between different generated constraints
+		// (use of temporary expressions + symbolic constants?)
+		ExprCtr* e=new ExprCtr(c.expr.generate(),c.op);
 		//cout << "[parser] generated ctr: " << *e << endl;
 		ctrs.push_back(e);
 	} catch(DimException& e) {
@@ -88,6 +92,16 @@ void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	scopes().pop();
 }
 
+void CtrGenerator::visit(const P_ThickEquality& eq) {
+	try {
+		const ExprNode& e=eq.expr.generate();
+		//cout << "[parser] generated ctr: " << *e << endl;
+		ctrs.push_back(new ExprCtr(e-eq.d.lb(),GEQ));
+		ctrs.push_back(new ExprCtr(e-eq.d.ub(),LEQ));
+	} catch(DimException& e) {
+		throw SyntaxError(e.message(),NULL,eq.expr.line);
+	}
+}
 
 } // end namespace parser
 } // end namespace ibex

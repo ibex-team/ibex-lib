@@ -1,7 +1,4 @@
-constants
-pi = [3.14159265,3.14159266];
-
-variables
+	variables
 
 x1 in [-10,10];
 x2 in [-10,10];

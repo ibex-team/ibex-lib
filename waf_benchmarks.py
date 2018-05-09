@@ -1,15 +1,51 @@
 import os, sys, re, math, shutil, collections, logging, math
 import ibexutils
-from waflib import TaskGen, Task, Utils, Configure, Build, Logs
+from waflib import TaskGen, Task, Utils, Configure, Build, Logs, Errors
 benchlock = Utils.threading.Lock()
 
 BENCHS_DEFAULT_ARGS = {"time_limit": "5", "prec_ndigits_max": "6",
                        "prec_ndigits_min": "1", "iter": "3"}
 BENCHS_ARGS_NAME = BENCHS_DEFAULT_ARGS.keys()
 BENCHS_ARGS_PATTERN = " ; ".join("%s = (?P<%s>.+?)" % (k, k) for k in BENCHS_ARGS_NAME)
-BENCHS_ARGS_FORMAT = " ; ".join("%s = {BCH_%s}" % (k,k.upper()) for k in BENCHS_ARGS_NAME)
+BENCHS_ARGS_FORMAT = " ; ".join("%s = {%s}" % (k, k) for k in BENCHS_ARGS_NAME)
+BENCHS_INSTABLE_FACTOR = 2
+BENCHS_CMP_REGRESSION_FACTOR = 1.05
+BENCHS_CMP_IMPROVMENT_FACTOR = 1/BENCHS_CMP_REGRESSION_FACTOR
 
-BENCHS_MAX_REGRESSION = 10
+class BenchRef (object):
+	def __init__ (self, string, hash_salt):
+		self.string = string
+		self.hash_salt = hash_salt
+
+	def __str__ (self):
+		return self.string
+
+	def slugify (self):
+		f = lambda s: "".join (x if (x.isalnum() or x in "._-") else "_" for x in s)
+		if self.hash_salt:
+			return "%s_%s" % (f (self.hash_salt), f (self.string))
+		else:
+			return f (self.string)
+
+	def __eq__ (self, other):
+		return self.string == other.string and self.hash_salt == other.hash_salt
+
+	def __hash__ (self):
+		return hash ((self.string, self.hash_salt))
+
+class BenchFileRef (BenchRef):
+	def __init__ (self, filename):
+		super(BenchFileRef, self).__init__ (filename, "file")
+
+class BenchCurrentRef (BenchRef):
+	__instance = None
+	def __new__ (cls):
+		if BenchCurrentRef.__instance is None:
+			BenchCurrentRef.__instance = BenchRef.__new__ (cls)
+		return BenchCurrentRef.__instance
+
+	def __init__ (self):
+		super(BenchCurrentRef, self).__init__ ("current benchmarks", None)
 
 # Base class for all bench classes
 class Bench (Task.Task):
@@ -72,18 +108,12 @@ class BenchData (Bench):
 		datastr += os.linesep.join(datalines)
 		self.outputs[0].write (datastr + os.linesep)
 
-		res = (self.inputs[0].change_ext(''), data)
 		benchlock.acquire()
 		try:
-			bld = self.generator.bld
-			k1 = self.generator.name
-			k2 = self.inputs[0].change_ext('').relpath()
-
-			if not hasattr (bld, "bench_results"):
-				bld.bench_results = {}
-			if not k1 in bld.bench_results:
-				bld.bench_results[k1] = {}
-			bld.bench_results[k1][k2] = data
+			# Add the result of the current bench file
+			cur_bench_results = self.generator.bld.bench_results[BenchCurrentRef()]
+			k = self.inputs[0].change_ext('').relpath()
+			cur_bench_results[self.generator.name]["data"][k] = data
 		finally:
 			benchlock.release()
 
@@ -108,24 +138,39 @@ class BenchGraph (Bench):
 
 class BenchSummary (BenchData):
 	def run (self):
-		if not hasattr (self.generator.bld, "bench_results"):
-			self.err_msg = "In" + repr (self) + "\nself.generator.bld does not have a"
-			self.err_msg += " bench_results attribute, no results to write"
+		groupname = self.generator.name
+		try:
+			cur_bench_res = self.generator.bld.bench_results[BenchCurrentRef()]
+		except KeyError:
+			self.err_msg = "In" + repr (self) + "\nNo '%s' " % BenchCurrentRef()
+			self.err_msg += "key in bench_results dictionary, no results to write"
 			return 1
-		if not self.generator.name in self.generator.bld.bench_results:
-			self.err_msg = "In" + repr (self) + "\nself.generator.bld.bench_results "
-			self.err_msg += "does not have a " + self.generator.name + " key, "
+
+		try:
+			results = cur_bench_res[groupname]
+		except KeyError:
+			self.err_msg = "In" + repr (self) + "\nNo '" + groupname + "' key in "
+			self.err_msg += "bench_results[\"%s\"] dictionary, " % BenchCurrentRef()
 			self.err_msg += "no results to write"
 			return 1
 
-		results = self.generator.bld.bench_results[self.generator.name]
-
-		strargs = BENCHS_ARGS_FORMAT.format (**self.env)
-		lst = [ "##### Serie: %s [ %s ]" % (self.generator.name, strargs) ]
-		for k, d in results.items():
+		strargs = BENCHS_ARGS_FORMAT.format (**results["args"])
+		lst = [ "##### Group: %s [ %s ]" % (groupname, strargs) ]
+		for k, d in results["data"].items():
 			lst.append("### File: %s" % k)
 			for m in d:
 				lst.append (self.RESULTS_FORMAT.format (**m))
+			# check [uplo, loup] interval
+			uplo = max (d["uplo"] for d in d)
+			loup = min (d["loup"] for d in d)
+			if uplo > loup:
+				err_fmt = "empty [uplo, loup] interval for %s:" + os.linesep
+				err_fmt += "    * group '%s'" + os.linesep
+				err_fmt += "    * bench '%s'" + os.linesep
+				err_fmt += "    * [uplo, loup] = [%s, %s]" + os.linesep
+				err_data = (BenchCurrentRef(), groupname, k, uplo, loup)
+				self.generator.bld.bench_errors.append (err_fmt % err_data)
+
 		outstr = os.linesep.join(lst) + os.linesep
 
 		self.outputs[0].write (outstr)
@@ -135,6 +180,65 @@ class BenchSummary (BenchData):
 
 	def keyword (self):
 		return "Writing summary of '%s' into" % self.generator.name
+
+# Class for the task that does the comparison between benchmarks
+class BenchCmp (Bench):
+	KEYS_TYPE = collections.OrderedDict ()
+	KEYS_TYPE["eps"] = float
+	KEYS_TYPE["rm1M0"] = float
+	KEYS_TYPE["rM1m0"] = float
+	PREFIX = "CMP: "
+	CMP_FORMAT = PREFIX + " ; ".join("%s = {%s}" % (k,k) for k in KEYS_TYPE.keys())
+	def run (self):
+		if not (self.k0, self.k1) in self.generator.bld.bench_cmp:
+			self.generator.bld.bench_cmp[(self.k0, self.k1)] = {}
+		bench_cmp = self.generator.bld.bench_cmp[(self.k0, self.k1)]
+
+		groupname = self.generator.name
+		if not groupname in bench_cmp:
+			bench_cmp[groupname] = {}
+
+		outstr = "####### data0 from %s" % self.k0 + os.linesep
+		outstr += "####### data1 from %s" % self.k1 + os.linesep
+		outstr += "##### Group: %s" % self.generator.name + os.linesep
+		for f in set(self.data0.keys()) & set(self.data1.keys()):
+			data = []
+			outstr += "### File: %s" % f + os.linesep
+			fdata0 = self.data0[f]
+			fdata1 = self.data1[f]
+			eps0 = set(d["eps"] for d in fdata0)
+			eps1 = set(d["eps"] for d in fdata1)
+			for eps in reversed(sorted(eps0 | eps1)):
+				time0 = set (d["time"] for d in fdata0 if d["eps"] == eps)
+				time1 = set (d["time"] for d in fdata1 if d["eps"] == eps)
+				rm1M0 = min(time1)/max(time0)
+				rM1m0 = max(time1)/min(time0)
+				# we always have rm1M0 < rM1m0
+				data.append ( { "eps": eps, "rm1M0": rm1M0, "rM1m0": rM1m0 } )
+
+			outstr += os.linesep.join (self.CMP_FORMAT.format (**d) for d in data)
+			outstr += os.linesep
+			bench_cmp[groupname][f] = data
+
+			# check intersection of [uplo, loup]
+			uplo0 = max (d["uplo"] for d in fdata0)
+			loup0 = min (d["loup"] for d in fdata0)
+			uplo1 = max (d["uplo"] for d in fdata1)
+			loup1 = min (d["loup"] for d in fdata1)
+			if uplo1 > loup0 or uplo0 > loup1:
+				err_fmt = "[uplo, loup] intervals do not intersect:" + os.linesep
+				err_fmt += "    * group '%s'" + os.linesep
+				err_fmt += "    * bench '%s'" + os.linesep
+				err_fmt += "    * [uplo, loup] = [%s, %s] in %s" + os.linesep
+				err_fmt += "    * [uplo, loup] = [%s, %s] in %s" + os.linesep
+				err_data = (f, groupname, uplo0, loup0, self.k0, uplo1, loup1, self.k1)
+				self.generator.bld.bench_errors.append (err_fmt % err_data)
+
+		# Write data in output file
+		self.outputs[0].write (outstr)
+
+	def keyword (self):
+		return "Writing comparison data into"
 
 # Class for the task that generates the scatter plot for comparison
 class BenchScatterPlotData (Bench):
@@ -146,47 +250,15 @@ class BenchScatterPlotData (Bench):
 			return max(t["time"] for t in T)
 
 	def run (self):
-		serie = self.generator.name
-		outstr = "benchfile current previous" + os.linesep
-		for f, fdata in self.generator.bld.bench_results[serie].items():
-			if f in self.data:
-				tc = self.get_time (fdata) # timing of current bench
-				tp = self.get_time (self.data[f]) # timing from previous bench
-				outstr += "%s %s %s" % (f, tc, tp) + os.linesep
-
-				if tc > tp * BENCHS_MAX_REGRESSION: # check for non regression
-					err_fmt = "bench %s from %s is too long (%f > %d * %f)"
-					err_data = (f, serie, tc, BENCHS_MAX_REGRESSION, tp)
-					if not hasattr (self.generator.bld, "bench_errors"):
-						self.generator.bld.bench_errors = []
-					self.generator.bld.bench_errors.append (err_fmt % err_data)
-
-		# Write data in output file
+		groupname = self.generator.name
+		outstr = "benchfile %s %s" % (self.k0, self.k1) + os.linesep
+		for f in set(self.data0.keys()) & set(self.data1.keys()):
+			fdata0 = self.data0[f]
+			fdata1 = self.data1[f]
+			t0 = self.get_time (fdata0)
+			t1 = self.get_time (fdata1)
+			outstr += "%s %s %s" % (f, t0, t1) + os.linesep
 		self.outputs[0].write (outstr)
-
-		# check intersection of [uplo, loup]
-		for f, fdata in self.generator.bld.bench_results[serie].items():
-			uplo = float("-inf")
-			loup = float("+inf")
-			for d in fdata:
-				uplo = max (uplo, d["uplo"])
-				loup = min (loup, d["loup"])
-			print (uplo, loup)
-			if uplo > loup:
-				err_fmt = "bench %s from %s: intersection of [uplo, loup] is empty"
-				err_data = (f, serie)
-				if not hasattr (self.generator.bld, "bench_errors"):
-					self.generator.bld.bench_errors = []
-				self.generator.bld.bench_errors.append (err_fmt % err_data)
-
-			if f in self.data:
-				for d in self.data[f]:
-					if uplo > d["loup"] or d["uplo"] > loup:
-						err_fmt = "bench %s from %s: [uplo, loup] does not intersect with results from '%s'"
-						err_data = (f, serie, self.cmp_ref)
-						if not hasattr (self.generator.bld, "bench_errors"):
-							self.generator.bld.bench_errors = []
-						self.generator.bld.bench_errors.append (err_fmt % err_data)
 
 	def keyword (self):
 		return "Writing scatter plot data into"
@@ -199,10 +271,11 @@ class BenchScatterPlotGraph (BenchGraph):
 		L = [
 		  "datafile='%s'" % self.inputs[0],
 			"outputfile='%s'" % self.outputs[0],
-			"cmp_ref='%s'" % self.cmp_ref
+			"ref0='%s'" % self.k0,
+			"ref1='%s'" % self.k1,
 		]
 		L.extend("%s='%s'"%(k,self.env["BCH_"+k.upper()]) for k in BENCHS_ARGS_NAME)
-		return ";".join (L)
+		return (";".join (L)).replace (" ", "\_") # spaces break the command line
 
 @Configure.conf
 def parse_summary_file (bch, filename):
@@ -213,27 +286,27 @@ def parse_summary_file (bch, filename):
 	bch.start_msg ("Parsing results from '%s' for comparison" % filename)
 
 	data = {}
-	seriematch = re.compile("^##### Serie: (.+?) \[ %s \]$" % BENCHS_ARGS_PATTERN)
+	groupmatch = re.compile("^##### Group: (.+?) \[ %s \]$" % BENCHS_ARGS_PATTERN)
 	filematch = re.compile("^### File: (.+)$")
 	try:
 		with open (filename, "r") as f:
 			for l in ibexutils.to_unicode(f.read()).splitlines():
-				ms = seriematch.match (l)
+				ms = groupmatch.match (l)
 				mf = filematch.match (l)
 				if ms:
-					curserie = str(ms.group(1))
-					data[curserie] = {"args": {}, "data": {}}
+					curgroup = str(ms.group(1))
+					data[curgroup] = {"args": {}, "data": {}}
 					for k, v in ms.groupdict().items():
-						data[curserie]["args"][str(k)] = str(v)
+						data[curgroup]["args"][str(k)] = str(v)
 				elif mf:
 					curfile = str(mf.group(1))
-					data[curserie]["data"][curfile] = []
+					data[curgroup]["data"][curfile] = []
 				else:
-					data[curserie]["data"][curfile].append (BenchData.parse_bench_line(l))
+					data[curgroup]["data"][curfile].append (BenchData.parse_bench_line(l))
 	except UnboundLocalError:
 		bch.end_msg ("error, the file is not correctly formatted", color="RED")
 		return 1
-	bch.cmp_to_data[filename] = data
+	bch.bench_results[BenchFileRef(filename)] = data
 	bch.end_msg ("done")
 	bch.logger = None
 	return 0
@@ -253,11 +326,22 @@ def benchmarks_process_options (self):
 
 	# Get attribute: time_limit, min_prec, max_prec, ...
 	# First try options, then task attributes, else use default values
+	args = {}
 	for k in BENCHS_ARGS_NAME:
 		v = getattr (self.bld.options, "BENCHS_" + k.upper(), None) # cmdline
 		if v is None:
 			v = getattr (self, k, BENCHS_DEFAULT_ARGS[k]) # task or default
 		setattr (self.env, "BCH_" + k.upper(), v)
+		args[k] = v
+
+	if not self.bld.cmp_only:
+		# First group of benchmarks => create BenchCurrentRef entry in the dict
+		if not BenchCurrentRef() in self.bld.bench_results:
+			self.bld.bench_results[BenchCurrentRef()] = {}
+
+		# Create the dict for the current group
+		group_dict = { "args": args, "data": {} }
+		self.bld.bench_results[BenchCurrentRef()][self.name] = group_dict
 
 	# Get the name of the binary used for benchmarking: this is given by the
 	# 'bench_bin' attribute.
@@ -277,48 +361,67 @@ def benchmarks_process_options (self):
 def benchmarks_gather_data (self):
 	filenameformat = "benchmarks.%s.%s.%s"
 
-	# Create output node
-	logfiledata = (self.name, "summary", "log")
-	lognode = self.bld.bldnode.make_node (filenameformat % logfiledata)
+	# Summary
+	if not self.bld.cmp_only:
+		# Create output node
+		logfiledata = (self.name, "summary", "log")
+		lognode = self.bld.bldnode.make_node (filenameformat % logfiledata)
 
-	# Create summary task
-	prev_tasks = self.tasks[:]
-	tsk = self.create_task ('BenchSummary', [], lognode)
-	for t in prev_tasks:
-		tsk.set_run_after (t)
-	
-	for cmp_ref, Data in self.bld.cmp_to_data.items():
-		if self.name in Data:
-			rn = cmp_ref.replace ("/", "_")
-			args = Data[self.name]["args"]
-			data = Data[self.name]["data"]
-			if all (v == self.env["BCH_" + k.upper()] for k, v in args.items()):
-				dataname = filenameformat % (self.name, "scatter_plot_%s" % rn, "data")
-				graphname = filenameformat % (self.name, "scatter_plot_%s" % rn, "pdf")
-				datanode = self.bld.bldnode.make_node (dataname)
-				graphnode = self.bld.bldnode.make_node (graphname)
+		# Create summary task
+		prev_tasks = self.tasks[:]
+		tsk = self.create_task ('BenchSummary', [], lognode)
+		for t in prev_tasks:
+			tsk.set_run_after (t)
 
-				dm = float(self.env["BCH_PREC_NDIGITS_MIN"])
-				dM = float(self.env["BCH_PREC_NDIGITS_MAX"])
-				eps = math.pow (10.0, -math.floor((dm+dM)/2.0))
-				kw = {"data": data, "eps": eps, "cmp_ref": cmp_ref}
-				tsk = self.create_task ('BenchScatterPlotData', [], datanode, **kw)
-				for t in self.tasks:
-					if type(t) is BenchData:
-						tsk.set_run_after (t)
-
-				if self.bld.with_graphs:
-					self.create_task ('BenchScatterPlotGraph', datanode, graphnode, **kw)
-			else:
-				info = "Could not compare current serie '%s' " % self.name
-				info += "to data from %s, some arguments differ:" % cmp_ref
-				for k, v in args.items():
-					vf = self.env["BCH_" + k.upper()]
-					if v != vf:
-						info += "\n  - for '%s' got '%s', expected '%s'" % (k, vf ,v)
-				Logs.info (info)
+	# Comparison
+	cmp_key_set = set()
+	for cmp_key, cmp_data in self.bld.bench_results.items():
+		if self.name in cmp_data:
+			cmp_key_set.add (cmp_key)
 		else:
-			Logs.info ("No data for serie '%s' in file '%s'" % (self.name, cmp_ref))
+			Logs.info ("No data for group '%s' in file '%s'" % (self.name, cmp_key))
+
+	for k0, k1 in ((k0,k1) for k0 in cmp_key_set for k1 in cmp_key_set if k0<k1):
+		if k0 == BenchCurrentRef():
+			k0, k1 = k1, k0 # swap in order to have BenchCurrentRef as k1 if exists
+		args0 = self.bld.bench_results[k0][self.name]["args"]
+		args1 = self.bld.bench_results[k1][self.name]["args"]
+		if all (args0[k] == args1[k] for k in BENCHS_ARGS_NAME):
+			vs = "%s_VS_%s" % (k0.slugify(), k1.slugify())
+			cmpname = filenameformat % (self.name, "cmp.%s" % vs, "summary.log")
+			spdataname = filenameformat % (self.name, "scatter_plot.%s" % vs, "data")
+			graphname = filenameformat % (self.name, "scatter_plot.%s" % vs, "pdf")
+			cmpnode = self.bld.bldnode.make_node (cmpname)
+			spdatanode = self.bld.bldnode.make_node (spdataname)
+			graphnode = self.bld.bldnode.make_node (graphname)
+
+			data0 = self.bld.bench_results[k0][self.name]["data"]
+			data1 = self.bld.bench_results[k1][self.name]["data"]
+
+			kw = { "k0": k0, "data0": data0, "k1": k1, "data1": data1 }
+			tsk = self.create_task ('BenchCmp', [], cmpnode, **kw)
+
+			dm = float(args0["prec_ndigits_min"]) # same value in args1
+			dM = float(args0["prec_ndigits_max"]) # same value in args1
+			kw["eps"] = math.pow (10.0, -math.floor((dm+dM)/2.0))
+			tsk2 = self.create_task ('BenchScatterPlotData', [], spdatanode, **kw)
+
+			if self.bld.with_graphs:
+				self.create_task ('BenchScatterPlotGraph', spdatanode, graphnode, **kw)
+
+			for t in self.tasks:
+				if type(t) is BenchData:
+					tsk.set_run_after (t)
+					tsk2.set_run_after (t)
+		else:
+			info = "For group '%s', could not compare " % self.name
+			info += "'%s' and '%s', some arguments differ:" % (k0, k1)
+			for k in BENCHS_ARGS_NAME:
+				v0 = args0[k]
+				v1 = args1[k]
+				if v0 != v1:
+					info += "\n  - for '%s' got '%s' and '%s'" % (k, v0 ,v1)
+			Logs.info (info)
 
 # This function create the task (from the class bench) that handle one .bch file
 # The decorator TaskGen.extension(".bch") is here so that this function is
@@ -328,67 +431,68 @@ def add_bch (self, node):
 	if not "benchmarks" in self.features:
 		self.bld.fatal ("The feature 'benchmarks' is needed to process .bch files")
 
-	# Create the task that run the bench
-	resnode = node.change_ext ('.bench_result', '.bch')
-	self.create_task ('BenchRun', [self.bintask.outputs[0], node], resnode)
+	if not self.bld.cmp_only:
+		# Create the task that run the bench
+		resnode = node.change_ext ('.bench_result', '.bch')
+		self.create_task ('BenchRun', [self.bintask.outputs[0], node], resnode)
 
-	# Create the task that parse the result
-	datanode = node.change_ext ('.data', '.bch')
-	self.create_task ('BenchData', resnode, datanode)
+		# Create the task that parse the result
+		datanode = node.change_ext ('.data', '.bch')
+		self.create_task ('BenchData', resnode, datanode)
 
-	# Set output nodes
-	if self.bld.with_graphs:
-		fignode = node.change_ext ('.pdf', '.bch')
-		self.create_task ('BenchGraph', datanode, fignode)
+		# Set output nodes
+		if self.bld.with_graphs:
+			fignode = node.change_ext ('.pdf', '.bch')
+			self.create_task ('BenchGraph', datanode, fignode)
 
-# Format the output of benchmarks, using the list bench_results
-# Assume that for each result, data are already sorted
+# Format the output of benchmarks, using the dict bench_results and bench_cmp
 def benchmarks_format_output (bch):
 	from waflib import Logs
 	logfile = os.path.join (bch.bldnode.abspath(), "benchmarks.log")
 	bch.logger = Logs.make_logger (logfile, "benchmarks")
 
-	def compute_score (data):
-		S = 0.0
-		prev_elt = None
-		for d in data:
-			eps = d["eps"]
-			time = d["time"]
-			if not prev_elt is None:
-				prev_eps, prev_time = prev_elt
-				log10_eps = -math.log10(eps)
-				prev_log10_eps = -math.log10(prev_eps)
-				S += (log10_eps-prev_log10_eps)*(time+prev_time)/2
-			prev_elt = (eps, time)
-		return S
+	if not bch.cmp_only:
+		bch.msg ("", "", color="NORMAL")
+		bch.msg ("##### %s #####" % BenchCurrentRef(), "##########", color="NORMAL")
+		D = bch.bench_results[BenchCurrentRef()]
+		for groupname, groupdict in sorted(D.items(), key = lambda x:x[0]):
+			bch.msg ("===== %s =====" % groupname, "==========", color = "NORMAL")
+			for k,v in groupdict["args"].items():
+				bch.msg ("args: %s" % k, v, color = "NORMAL")
+			for f, data in sorted(groupdict["data"].items(), key = lambda x:x[0]):
+				bch.msg (f, "  min      av      max", color = "CYAN")
+				for eps in reversed(sorted(set(d["eps"] for d in data))):
+					eps_data = set (d["time"] for d in data if d["eps"] == eps)
+					m = min (eps_data)
+					M = max (eps_data)
+					av = sum (eps_data)/len(eps_data)
+					if M/m > BENCHS_INSTABLE_FACTOR:
+						c = "YELLOW"
+					else:
+						c = "NORMAL"
+					bch.msg ("  eps = %.1e" % eps, "%.2e %.2e %.2e" % (m, av, M), color=c)
 
-	#if bch.options.BENCHS_CMP_TO:
-	#	cmpdata = parse_results_file (bch.options.BENCHS_CMP_TO)
+	for k, D in bch.bench_cmp.items():
+		bch.msg ("", "", color="NORMAL")
+		bch.msg ("##### Comparison #####", "##########", color = "NORMAL")
+		bch.msg ("reference", str(k[0]), color = "NORMAL")
+		bch.msg ("compare with", str(k[1]), color = "NORMAL")
+		for groupname, groupdict in sorted(D.items(), key = lambda x:x[0]):
+			bch.msg ("===== %s =====" % groupname, "==========", color = "NORMAL")
+			for f, data in sorted(groupdict.items(), key = lambda x:x[0]):
+				bch.msg (f, "rm1M0 rM1m0", color = "CYAN")
+				for eps_data in data:
+					msg_s = "  eps = %.1e" % eps_data["eps"]
+					msg_e = " %.2f  %.2f" % (eps_data["rm1M0"], eps_data["rM1m0"])
+					if eps_data["rM1m0"] <= BENCHS_CMP_IMPROVMENT_FACTOR:
+						c = "GREEN"
+					elif eps_data["rm1M0"] >= BENCHS_CMP_REGRESSION_FACTOR:
+						c = "RED"
+					else:
+						c = "NORMAL"
+					bch.msg (msg_s, msg_e, color = c)
 
-	cmpdata = {}
-
-	D = getattr (bch, 'bench_results', {})
-	for benchs_name, benchs_data_dict in sorted(D.items(), key = lambda x:x[0]):
-		bch.msg ("===== %s =====" % benchs_name, "==========", color = "NORMAL")
-		for f, data in sorted(benchs_data_dict.items(), key = lambda x:x[0]):
-			bch.start_msg (f)
-			n = len (data)
-			S = compute_score (data)
-			msg = "%d measure%s, Score = %g" % (n, "s" if n > 1 else "", S)
-			color = "CYAN"
-			cmpS, _ = cmpdata.get (f, (None, None))
-			if cmpS:
-				percent = 100.*(S/cmpS-1.)
-				msg += " (%0.2f%%)" % percent
-				if percent <= 0:
-					color = "GREEN"
-				elif percent >= 2.5:
-					color = "RED"
-				else:
-					color = "YELLOW"
-			bch.end_msg (msg, color = color)
-
-	if hasattr (bch, "bench_errors"):
+	if bch.bench_errors:
 		sep = os.linesep + "  - "
 		bch.fatal (sep.join (["Benchmarks errors:"] + bch.bench_errors))
 
@@ -429,6 +533,9 @@ def options (opt):
 	                help = "Save the results of the benchmarks in the given file")
 	grp.add_option ("--benchs-cmp-to", action = "append", dest = "BENCHS_CMP_TO",
 	                help = "Compare to previously saved benchmarks")
+	grp.add_option ("--benchs-cmp-only", action = "store_true",
+	                help = "No benchmarks run, only comparisons are performed",
+									dest = "BENCHS_CMP_ONLY")
 	grp.add_option ("--benchs-with-graphs", action = "store_true",
 	                help = "Generate graphics from benchs (when available)",
 	                dest = "BENCHS_WITH_GRAPHS")
@@ -471,20 +578,23 @@ def benchmarks (bch):
 		bch.savefile = None
 
 	# Check that option --benchs-cmp-to (if given) is a list of existing files
-	bch.cmp_to_data = {}
 	bch.env.BCH_SCATTERPLOT_GRAPHFILE = "../benchs/scatter_plot.gnuplot"
 	if bch.options.BENCHS_CMP_TO:
 		for f in bch.options.BENCHS_CMP_TO:
 			if not os.path.isfile (f):
 				bch.fatal ("Benchmarks: cannot compare to %s: not a file." % f)
-			else:
-				ret = bch.parse_summary_file (f)
-				if ret != 0:
-					bch.fatal ("Error while parsing %s" % f)
+			elif bch.parse_summary_file (f) != 0:
+				bch.fatal ("Error while parsing %s" % f)
 
 	# Handle --benchs-precmd option
 	if bch.options.BENCHS_PRECMD:
 		bch.env.BCH_PRECMD = bch.options.BENCHS_PRECMD
+
+	# Handle --benchs-cmp-only option
+	if bch.options.BENCHS_CMP_ONLY:
+		bch.cmp_only = bch.options.BENCHS_CMP_ONLY
+	else:
+		bch.cmp_only = False
 
 	# Handle --benchs-with-graphs option
 	if bch.options.BENCHS_WITH_GRAPHS:

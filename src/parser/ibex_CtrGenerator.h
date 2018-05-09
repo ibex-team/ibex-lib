@@ -29,6 +29,7 @@ class P_NumConstraint;
 class P_OneConstraint;
 class P_ConstraintList;
 class P_ConstraintLoop;
+class P_ThickEquality;
 class P_Source;
 
 class CtrGenerator {
@@ -41,6 +42,7 @@ public:
 	void visit(const P_OneConstraint& c);
 	void visit(const P_ConstraintList& l);
 	void visit(const P_ConstraintLoop& l);
+	void visit(const P_ThickEquality& e);
 
 protected:
 	ExprSimplify s;

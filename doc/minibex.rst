@@ -181,6 +181,8 @@ bound is open). Here are some examples:
 
   [1.01e-02,1.02e-02]
 
+There is a predefined interval constant ``pi`` representing :math:`\pi`.
+
 .. _mod-minibex-constants:
 
 ------------------------------
@@ -192,19 +194,18 @@ started with the ``Constants`` keyword. This block is always optionnal.
 A constant value can depends on other (previously defined) constants value. Example::
 
   Constants
-    pi=3.14159;
+    e=0.5772156649;
     y=-1.0;
     z=sin(pi*y);
 
 You can give a constant an interval enclosure rather than a single fixed value.
 This interval will be embedded in all subsequent computations.
-Following the previous example, we can give ``pi`` a valid enclosure as below.
+Following the previous example, we can give ``e`` a valid enclosure as below.
 We just have to replace "=" by "in"::
 
   Constants
-    pi in [3.14159,3.14160];
-    y=-1.0;
-    z=sin(pi*y);
+    e in [0.577215664,0.577215665];
+    y=e+1;
 
 Constants can also be vectors, matrices or array of matrices.
 You need to specify the dimensions of the constant in square brackets.

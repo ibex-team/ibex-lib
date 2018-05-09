@@ -294,6 +294,6 @@ bool LPSolver::neumaier_shcherbina_infeasibilitytest() {
 }
 
 
-#include "ibex_LPWrapper.cpp"
+#include "ibex_LPWrapper.cpp_"
 }
  // end namespace ibex
