@@ -57,6 +57,9 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 
 	if (m==0 || m==n)
 		boundary_test=ALL_FALSE;
+
+	if (m>n)
+		ibex_warning("Certification not implemented for over-constrained systems ");
 }
 
 void Solver::set_var_names() {
@@ -301,7 +304,7 @@ QualifiedBox Solver::check_sol(const IntervalVector& box) {
 	if (eqs) {
 
 		if (m>n) {
-			ibex_warning("Certification not implemented for over-constrained systems ");
+			// Certification not implemented for over-constrained systems
 			status = QualifiedBox::UNKNOWN;
 		} else if (m<n) {
 			// ====== under-constrained =========

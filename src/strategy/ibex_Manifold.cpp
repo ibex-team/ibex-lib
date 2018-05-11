@@ -178,15 +178,17 @@ void Manifold::load(const char* filename) {
 
 	if (f.fail()) ibex_error("[manifold]: cannot open input file.\n");
 
-	if (read_signature(f)>=3) {
-		read_vars(f);
-	}
+	int input_format_version = read_signature(f);
 
 	if (read_int(f)!=n) ibex_error("[manifold]: bad input file (number of variables does not match).");
 
 	if (read_int(f)!=m) ibex_error("[manifold]: bad input file (number of equalities does not match).");
 
 	if (read_int(f)!=nb_ineq) ibex_error("[manifold]: bad input file (number of inequalities does not match).");
+
+	if (input_format_version>=3) {
+		read_vars(f);
+	}
 
 	read_int(f); // status
 
@@ -221,10 +223,10 @@ void Manifold::write(const char* filename) const {
 		ibex_error("[manifold]: cannot create output file.\n");
 
 	write_signature(f);
-	write_vars(f);
 	write_int(f,n);
 	write_int(f,m);
 	write_int(f,nb_ineq);
+	write_vars(f);
 	write_int(f,status);
 	write_int(f,inner.size());
 	write_int(f,boundary.size());
