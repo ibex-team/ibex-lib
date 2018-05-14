@@ -1,0 +1,107 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_CtcBlankenship.cpp
+// Author      : Antoine Marendet, Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : May 4, 2018
+// Last Update : May 4, 2018
+//============================================================================
+
+#include "ibex_CtcBlankenship.h"
+
+#include "system/ibex_SIConstraint.h"
+#include "system/ibex_SIConstraintCache.h"
+
+#include "ibex_Array.h"
+#include "ibex_Cell.h"
+#include "ibex_Expr.h"
+#include "ibex_Function.h"
+#include "ibex_Interval.h"
+#include "ibex_UnconstrainedLocalSearch.h"
+
+#include <list>
+#include <vector>
+
+namespace ibex {
+
+CtcBlankenship::CtcBlankenship(SIPSystem& system, double eps, int max_iter) :
+		CellCtc(system.ext_nb_var), cell_(nullptr), system_(system), eps_(eps), max_iter_(max_iter), relax_(system,
+				RelaxationLinearizerSIP::CornerPolicy::random, false), lp_solver_(system.ext_nb_var, 10000, 10000) {
+
+}
+
+CtcBlankenship::~CtcBlankenship() {
+}
+
+void CtcBlankenship::contractCell(Cell& cell) {
+	cell_ = &cell;
+	lp_solver_.clean_ctrs();
+	lp_solver_.set_bounds(cell.box);
+	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
+	lp_solver_.set_sense(LPSolver::MINIMIZE);
+	relax_.linearize(cell.box, lp_solver_);
+	auto return_code = lp_solver_.solve();
+	if (return_code != LPSolver::Status_Sol::OPTIMAL) {
+		return;
+	}
+	//Vector sol(cell.box.mid());
+	Vector sol = lp_solver_.get_primal_sol();
+	for (int i = 0; i < system_.sic_constraints_.size(); ++i) {
+		maximizeSIC(i, sol);
+	}
+}
+
+bool CtcBlankenship::maximizeSIC(int sic_index, const Vector& uplo_point) {
+	auto& node_data = cell_->get<NodeData>();
+	auto& cache = node_data.sic_constraints_caches[sic_index];
+	const auto& constraint = system_.sic_constraints_[sic_index];
+	const int max_blankenship_list_size = 2 * constraint.variable_count_;
+	IntervalVector parameter_search_space = IntervalVector::empty(constraint.parameter_count_);
+	Vector x0(constraint.parameter_count_);
+	double x0_value = NEG_INFINITY;
+	for (const auto& mem_box : cache.parameter_caches_) {
+		parameter_search_space |= mem_box.parameter_box;
+		if(mem_box.evaluation.ub() > x0_value) {
+			x0_value = mem_box.evaluation.ub();
+			x0 = mem_box.parameter_box.mid();
+		}
+	}
+	if (parameter_search_space.is_empty()) {
+		return false;
+	}
+
+	Array<const ExprNode> args;
+	Array<const ExprSymbol> symbols;
+	for (int i = 0; i < constraint.variable_count_; ++i) {
+		const ExprConstant& constant = ExprConstant::new_scalar(uplo_point[i]);
+		args.add(constant);
+	}
+	for (int i = constraint.variable_count_; i < constraint.function_->nb_var(); ++i) {
+		const ExprSymbol& symbol = ExprSymbol::new_();
+		args.add(symbol);
+		symbols.add(symbol);
+	}
+	Function f(symbols, -(*constraint.function_)(args));
+
+	UnconstrainedLocalSearch local_search(f, parameter_search_space);
+	Vector x_min(constraint.parameter_count_);
+	auto status = local_search.minimize(x0, x_min, eps_, max_iter_);
+	if (status == UnconstrainedLocalSearch::ReturnCode::SUCCESS) {
+		//double eval = f.eval(x_min).ub();
+		cache.best_blankenship_points_.emplace_back(x_min);
+		if (cache.best_blankenship_points_.size() > max_blankenship_list_size) {
+			cache.best_blankenship_points_.pop_front();
+		}
+		return true;
+	}
+	return false;
+}
+
+ParameterEvaluationsCache CtcBlankenship::_createNewCache(const SIConstraint& constraint,
+		const IntervalVector& box, const IntervalVector& parameter_box) {
+	return ParameterEvaluationsCache(parameter_box, constraint.evaluate(box, parameter_box),
+			constraint.gradient(box, parameter_box));
+}
+
+} // end namespace ibex
