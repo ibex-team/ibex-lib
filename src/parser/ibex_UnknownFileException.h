@@ -13,6 +13,8 @@
 
 #include "ibex_Exception.h"
 
+#include <string.h>
+
 namespace ibex {
 /**
  * \brief Unknown file exception.
