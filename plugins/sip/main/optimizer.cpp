@@ -43,8 +43,9 @@
 using namespace std;
 using namespace ibex;
 
+namespace args {
 template<>
-struct args::ValueReader<std::regex> {
+struct ValueReader<std::regex> {
 	bool operator()(const std::string& name, const std::string& value, std::regex& dest) {
 		try {
 			dest = std::regex(value, std::regex_constants::egrep);
@@ -54,6 +55,7 @@ struct args::ValueReader<std::regex> {
 		return true;
 	}
 };
+}
 
 int main(int argc, const char ** argv) {
 	const long default_random_seed = 0L;

@@ -46,8 +46,9 @@ struct VectorHelper {
 	ibex::Vector value = ibex::Vector(1, 0.0);
 };
 
+namespace args {
 template<>
-struct args::ValueReader<VectorHelper> {
+struct ValueReader<VectorHelper> {
 	bool operator()(const std::string& name, const std::string& value, VectorHelper& dest) {
 		std::vector<double> numbers;
 		if (value[0] != '(' || value[value.size() - 1] != ')') {
@@ -73,7 +74,7 @@ struct args::ValueReader<VectorHelper> {
 };
 
 template<>
-struct args::ValueReader<std::regex> {
+struct ValueReader<std::regex> {
 	bool operator()(const std::string& name, const std::string& value, std::regex& dest) {
 		try {
 			dest = std::regex(value, std::regex_constants::egrep);
@@ -83,6 +84,7 @@ struct args::ValueReader<std::regex> {
 		return true;
 	}
 };
+}
 
 /*
  ibex::Vector parseVector(const string& str) {
