@@ -144,7 +144,7 @@ int main(int argc, const char ** argv) {
 	}
 
 	if (filename.Get() == "") {
-		ibex::ibex_error("no input file (try ibexopt --help)");
+		ibex::ibex_error("no input file (try sipopt --help)");
 		exit(1);
 	}
 
