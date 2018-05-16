@@ -15,9 +15,9 @@
 #include "contractors/ibex_CtcHC4SIP.h"
 #include "contractors/ibex_GoldsztejnSICBisector.h"
 #include "contractors/ibex_IbexCtcWrapper.h"
-#include "loup/ibex_LoupFinderDefault.h"
 #include "loup/ibex_LoupFinderLineSearch.h"
 #include "loup/ibex_LoupFinderRestrictionsRelax.h"
+#include "loup/ibex_LoupFinderSIPDefault.h"
 #include "main/ibex_CellDoubleHeapSIP.h"
 #include "main/ibex_MinibexOptionsParser.h"
 #include "main/ibex_SIPOptimizer.h"
@@ -268,7 +268,7 @@ int main(int argc, const char ** argv) {
 					RestrictionLinearizerSIP::CornerPolicy::random);
 			loup_finder = new LoupFinderRestrictionsRelax(sys, *restrictions);
 		} else {
-			loup_finder = new LoupFinderDefault(sys);
+			loup_finder = new LoupFinderSIPDefault(sys);
 		}
 		LoupFinderLineSearch *loup_finder2 = nullptr;
 		if (!no_line_search) {

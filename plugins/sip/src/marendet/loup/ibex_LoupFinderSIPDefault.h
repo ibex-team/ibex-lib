@@ -21,13 +21,13 @@
 #include <utility>
 
 namespace ibex {
-class LoupFinderDefault: public LoupFinderSIP {
+class LoupFinderSIPDefault: public LoupFinderSIP {
 	const SIPSystem& system_;
 public:
-	LoupFinderDefault(const SIPSystem& system);
+	LoupFinderSIPDefault(const SIPSystem& system);
 	virtual std::pair<IntervalVector, double> find(const Cell& cell,
 			const IntervalVector& loup_point, double loup);
-	virtual ~LoupFinderDefault();
+	virtual ~LoupFinderSIPDefault();
 };
 
 } // end namespace ibex

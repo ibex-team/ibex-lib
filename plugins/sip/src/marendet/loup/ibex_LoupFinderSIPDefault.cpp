@@ -8,9 +8,8 @@
 // Last Update : May 4, 2018
 //============================================================================
 
-#include "ibex_LoupFinderDefault.h"
-
 #include "ibex_Cell.h"
+#include "ibex_LoupFinderSIPDefault.h"
 #include "ibex_Vector.h"
 
 
@@ -18,15 +17,15 @@ using namespace std;
 
 namespace ibex {
 
-LoupFinderDefault::LoupFinderDefault(
+LoupFinderSIPDefault::LoupFinderSIPDefault(
 		const SIPSystem& system) :
 		system_(system) {
 }
 
-LoupFinderDefault::~LoupFinderDefault() {
+LoupFinderSIPDefault::~LoupFinderSIPDefault() {
 }
 
-std::pair<IntervalVector, double> LoupFinderDefault::find(
+std::pair<IntervalVector, double> LoupFinderSIPDefault::find(
 		const Cell& cell, const IntervalVector& loup_point,
 		double loup) {
     Vector loup_point_plus_goal(cell.box.mid());
