@@ -20,7 +20,7 @@ namespace ibex {
 
 const int Manifold::SIGNATURE_LENGTH = 20;
 const char* Manifold::SIGNATURE = "IBEX MANIFOLD FILE ";
-const int Manifold::FORMAT_VERSION = 3;
+const int Manifold::FORMAT_VERSION = 4;
 
 Manifold::Manifold(int n, int m, int nb_ineq) : n(n), m(m), var_names(new string[n]), nb_ineq(nb_ineq),
 		status(Solver::INFEASIBLE), time(0), nb_cells(0) {
@@ -62,8 +62,8 @@ void Manifold::read_vars(ifstream& f) {
 		do {
 			f.read(&x, sizeof(char));
 			if (f.eof()) ibex_error("[manifold]: unexpected end of file.");
-			if (x!=' ') s << x;
-		} while(x!=' ');
+			if (x!='\0') s << x;
+		} while(x!='\0');
 		var_names[i]=s.str();
 	}
 }
@@ -142,7 +142,7 @@ void Manifold::write_double(ofstream& f, double x) const {
 void Manifold::write_vars(ofstream& f) const {
 	for (unsigned int i=0; i<n; i++) {
 		f.write(var_names[i].c_str(),var_names[i].size()*sizeof(char));
-		f.put(' ');
+		f.put('\0');
 	}
 }
 
@@ -254,23 +254,22 @@ string Manifold::format() {
 	return
 	"\n"
 	"--------------------------------------------------------------------------------\n"
-	"                          Manifold format v3\n"
+	"                          Manifold format v4\n"
 	"\n"
 	"The manifold text format (obtained with --txt) is described below.\n"
 	"The manifold binary format (.mnf) is exactly the same except that:\n"
 	"  - all separating characters (space, line return) are removed except\n"
-	"    those inside the signature and the list of variable names (lines\n"
-	"    1 and 3 in text format)\n"
+	"    those inside the signature (line 1 in text format)\n"
 	"  - integer values are unsigned 32 bits integer (uint32_t)\n"
 	"  - real values are 64 bits double\n"
 	"--------------------------------------------------------------------------------\n"
     "[line 1] - the signature: the null-terminated sequence of 20 \n"
     "           characters \"IBEX MANIFOLD FILE \" (mind the space at the end)\n"
-    "         - and the format version number: 3\n"
+    "         - and the format version number: 4\n"
 	"[line 2] - 3 values: n=the number of variables, m=number of equalities,\n"
 	"           number of inequalities (excluding initial box)\n"
-	"[line 3] - n strings representing the names of variables, separated by space character\n"
-	"           (including the last one, so there is an ending space).\n"
+	"[line 3] - n strings representing the names of variables.\n"
+	"           In the binary format, each string is terminated by the null character \'0\'.\n"
 	"[line 4] - 1 value: the status of the search. Possible values are:\n"
 	"\t\t* 0=complete search:   all output boxes are validated\n"
 	"\t\t* 1=complete search:   infeasible problem\n"
