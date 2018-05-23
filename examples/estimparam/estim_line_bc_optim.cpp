@@ -10,7 +10,8 @@ using namespace ibex;
  
 /*
  * 
- Detects  lines in noisy pictures using q-intersection. 
+ * Finds the optimal  line (maximizing the number of inliers)
+in noisy pictures using q-intersection. 
  *
  * 
  * 
@@ -26,19 +27,7 @@ using namespace ibex;
 const double MIN1 = -1+0.0005;								//Minimum value for x,y,r
 const double MAX1 = 1;	
 
-bool  max_dist (IntervalVector& v1, IntervalVector& v2, Vector& prec)
-{double d;
-  for (int i=0; i< v1.size(); i++)
-    { if (v1[i].lb() > v2[i].ub()) 
-	d= v1[i].lb() - v2[i].ub();
-      else
-	if (v2[i].lb() > v1[i].ub())
-	  d= v2[i].lb() - v1[i].ub();
-      if (d > 10* prec[i]) return false;
-    }
-  
-  return true;
-}
+
 	 
 int main(int argc, char** argv) {
 	
@@ -79,7 +68,7 @@ int main(int argc, char** argv) {
 	
 
 	cout << " nb points " << x->size() << endl;
-	for (int i=0; i< x->size(); i++) cout << (*x)[i] <<  " " << (*y)[i] << endl;
+	// for (int i=0; i< x->size(); i++) cout << (*x)[i] <<  " " << (*y)[i] << endl;
 
 	double cputime=0;
 	double totaltime=0;
@@ -126,6 +115,12 @@ int main(int argc, char** argv) {
 	start = clock();
 
 	start0= clock();
+	
+      
+	int Qoct=Q;
+	Vector bestsol (2);
+	int bestsolval=0;
+
 	for (int qua=0; qua <2; qua++){
 	  int dir= pow(-1,qua%2);
 
@@ -195,16 +190,17 @@ int main(int argc, char** argv) {
 	prec[1]=1.e-6;
 	
 
-	CellStack buff;
+	CellHeapQInter buff;
+        BeamSearch str(buff);
 	//	RoundRobin bs (prec,0.5);
 		    
 	RoundRobinNvar bs (1,prec,0.5);
 
 	CtcQInter* ctcq;	 
 	if (flist==1)
-	  ctcq = new CtcQInterAffLine (n,m_ctc1,linfun,epseq,Q,QINTERPROJ);
+	  ctcq = new CtcQInterAffLine (n,m_ctc1,linfun,epseq,Qoct,QINTERPROJ);
 	else
-	  ctcq= new  CtcQInterLine (n,m_ctc1,linfun,epseq,Q,QINTERPROJ);	    
+	  ctcq= new  CtcQInterLine (n,m_ctc1,linfun,epseq,Qoct,QINTERPROJ);	    
 	    /* Main optimization loop */
 
 
@@ -219,90 +215,42 @@ int main(int argc, char** argv) {
 	    
 	    //	    SolverQInter s(*ctcs,bs,buff,ctcq);
 	    //	    SolverQInter s(ctcf,bs,buff,ctcq);
-	    SolverQInter s(*ctcs,bs,buff,*ctcq);
+	    SolverOptQInter s(*ctcs,bs,str,*ctcq,2);
 	    //Solver s (*ctcs,bs,buff);
 	    s.timeout = 1000;
-	    s.trace=0;
+	    s.str.with_oracle=0;
+	    if (flist==1)
+	      s.str.with_storage=true;
+	    else
+	      s.str.with_storage=false;
+	    s.trace=1;
+	    s.epsobj=1;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
+	    s.bestsolpointnumber=bestsolval;
+	    s.bestsolpoint=bestsol;
 
 	    cout << " avant resolution " <<  box << endl;
 
-	    vector<IntervalVector> res=s.solve(box);
+	    IntervalVector res=s.solve(box);
 
 	    cout << "Number of branches : " << s.nb_cells << endl;
 	    cout << "time used : " << s.time << endl;
 	    nb_cells +=s.nb_cells;
 	    cputime += s.time;
-	    cout << "nb_sols " << s.nb_sols;
+	    if (s.bestsolpointnumber > Qoct) Qoct=s.bestsolpointnumber;
+	    bestsolval=s.bestsolpointnumber;
+	    bestsol=s.bestsolpoint;
+	    cout << " bestsol " << bestsol << endl;
 	    //	    cout << " remaining small boxes  " << s.possiblesols;
 	    //	    if (s.possiblesols)    cout << " max possible inliers in small boxes " << s.qmax_epsboxes;
 	    cout << endl;
 	    
-	    
-	    s.report_maximal_solutions(res);
-	    vector <int> maxsolinliers;
-	    s.keep_one_solution_pergroup(res,maxsolinliers );
-	    
-
-	/* output the box */
-	  /*
-	if (res.size() >1)
-	  {	resgroup.push_back(res[0]);
-
-	for (int i=0; i<res.size(); i++)
-	  {if (max_dist (res[i],resgroup.back(),  prec))
-	      resgroup[resgroup.size()-1]= res[i]|resgroup.back();
-	    else
-	      resgroup.push_back(res[i]);
-	  }
-	cout << "regroupement  solutions " << endl;
-	for (int i=0; i<resgroup.size(); i++)
-	  {	  cout << resgroup[i] << " "  << endl;
-	    int k=0;
-	    for (int j=0; j<p; j++)
-	      { Interval evalctc= m_func[j]->eval(resgroup[i]);
-		if (evalctc.contains(0)) {k++; 
-		  //		  cout << j << (*x)[j] << " " << (*y)[j] <<  " " << (*z)[j] <<  " " <<
-		  //		    m_func[j]->eval(resgroup[i]) << endl;
-		}
-	      }
-
-	    cout << "nb points " << k <<endl;
-	  }
-
-
-	vector<IntervalVector> resgroup2;
-
-	if (resgroup.size() >1)
-	  {	cout << "regroupement  solutions 2" << endl;
-	    resgroup2.push_back(resgroup[0]);
-	    for (int i=0; i<resgroup.size(); i++)
-	  {if (max_dist (resgroup[i],resgroup2.back(), prec))
-	      resgroup2[resgroup2.size()-1]= resgroup[i]|resgroup2.back();
-	    else
-	      resgroup2.push_back(resgroup[i]);
-	  }
-
-
-	for (int i=0; i<resgroup2.size(); i++)
-	  {	  cout << resgroup2[i] << " "  << endl;
-	    int k=0;
-	    for (int j=0; j<p; j++)
-	      { Interval evalctc= m_func[j]->eval(resgroup2[i]);
-		if (evalctc.contains(0)) {k++; 
-		  //		  cout << j << (*x)[j] << " " << (*y)[j] <<  " " << (*z)[j] <<  " " <<
-		  //		    m_func[j]->eval(resgroup[i]) << endl;
-		}
-	      }
-
-	    cout << "nb points " << k <<endl;
-	    //  Q0=k+1;
-	  }
+	    s.report_possible_inliers();
+	    s.report_solution();
 	  
-	  }
-	  }
-	  */
+
+	
 
 	
 	for (int i=0; i<p; i++)

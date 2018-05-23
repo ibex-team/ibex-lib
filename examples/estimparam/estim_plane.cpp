@@ -299,7 +299,7 @@ int main(int argc, char** argv) {
 
             ctc0=new CtcFwdBwd(*m_f0,LEQ);
 	    for (int i=0; i<p; i++) {
-	 
+	      
 	  //	  Function fi (v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-v[2]-Interval(-epseq,epseq)));
 	      
 	      	      m_func[i] = new Function(v,(x->at(i) +v[0]*(y->at(i)- diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-v[2]-Interval(-epseq,epseq)));

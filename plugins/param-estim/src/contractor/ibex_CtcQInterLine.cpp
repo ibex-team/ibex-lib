@@ -44,10 +44,15 @@ Interval CtcQInterLine::fwd(IntervalVector & box, int iter)
   
   Interval CtcQInterLine::eval_dist(IntervalVector & box, int iter, int k)
   {
+    //    cout << " k " << k << endl;
     if (kfun ==1) {
     Interval evald (linfun[iter][0][k]);
-    for (int j=0;j<nb_var-1;j++)
+    //    cout << " evald 0 " << evald << endl;
+    for (int j=0;j<nb_var-1;j++){
       evald+=linfun[iter][j+1][k]*box[j];
+      //      cout << " j " << evald << endl;
+    }
+    //    cout << " iter " << iter << " evald " << evald << endl;
     return evald; }
     else{
       Interval evald (linfun[index[iter][k]][0][0]);
@@ -460,9 +465,12 @@ IntervalVector CtcQInterLine::boxintersection( IntervalVector box, int* iter){
     return valmean;
     }
     else{
+
       double valmean = linfun[iter][0][k];
+      //  cout << iter << " valmean 0 " << valmean;
       for (int j =0; j< nb_var-1; j++)
 	valmean+=linfun[iter][j+1][k]*box[j].mid();
+      //      cout << " valmean 1 " << valmean << endl;
       return valmean;
     }
   }

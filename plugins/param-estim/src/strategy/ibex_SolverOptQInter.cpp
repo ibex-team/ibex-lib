@@ -284,10 +284,13 @@ namespace ibex {
     Vector newvalidpoint1 (ctcq.nb_var);
     newvalidpoint1= newvalidpoint(c);  // qvalid is computed by this procedure that returns the corresponding point
     //    if (qvalid >  c.get<QInterPoints>().qmidbox) c.get<QInterPoints>().qmidbox=qvalid;
-    if  (qvalid > bestsolpointnumber) // a better solution has been found.
+    if  (bestsolpointnumber > 0 && qvalid > bestsolpointnumber  // a better solution has been found.
+	 ||
+	 bestsolpointnumber==0 && qvalid >= ctcq.q) // first solution - at least ctcq.q
       {
 	if (ctcq.q < qvalid+epsobj)
 	  ctcq.q = qvalid+epsobj;
+	cout << " updating bestsolpointnumber " << endl;
 	bestsolpoint=newvalidpoint1;
 	bestsolpointnumber=qvalid;
 	postsolution();
@@ -370,18 +373,21 @@ namespace ibex {
   }
 
   void SolverOptQInter::report_solution(){
-    cout << " best sol with " << bestsolpointnumber  << " inliers " << endl;
-  cout << " " <<   bestsolpoint << endl;
-  if (epsobj > 1){
-    cout << " possible discarded solutions  with " ;
-    if ((bestsolpointnumber + epsobj -1) < measure_nb) 
-      cout <<    (bestsolpointnumber + epsobj -1) << "  ";
-    else
-      cout << measure_nb <<  " ";
-    cout << "inliers." << endl;
+    if (bestsolpointnumber){
+      cout << " best sol with " << bestsolpointnumber  << " inliers " << endl;
+      cout << " " <<   bestsolpoint << endl;
+      if (epsobj > 1){
+	cout << " possible discarded solutions  with " ;
+	if ((bestsolpointnumber + epsobj -1) < measure_nb) 
+	  cout <<    (bestsolpointnumber + epsobj -1) << "  ";
+	else
+	  cout << measure_nb <<  " ";
+	cout << "inliers." << endl;
+      }
+    }
+    else 
+      cout << "no solution " << endl;
   }
-  }
-
   double SolverOptQInter::compute_err_sol(Vector& vec){
     return ctcq.compute_err_sol(vec);
   }

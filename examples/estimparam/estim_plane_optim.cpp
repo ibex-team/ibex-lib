@@ -222,8 +222,6 @@ int main(int argc, char** argv) {
 	int nb_cells=0;
 	start = clock();
 	start0= clock();
-	int Q0=Q;
-
 	
 
 	int Qoct=Q;
@@ -389,7 +387,7 @@ int main(int argc, char** argv) {
 
 
 	    cout << "Number of branches : " << s.nb_cells << endl;
-
+	    cout << " bestsol " << s.bestsolpoint << endl;
 	    nb_cells +=s.nb_cells;
 	    cputime += s.time;
             Qoct=s.bestsolpointnumber;

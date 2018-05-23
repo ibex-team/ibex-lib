@@ -30,13 +30,13 @@ const string output_scriptfile = "data/out.plt";	//GNUPLOT script to see the res
 
 /*===============parameters==================*/
 //const double POS_ERROR = 0.4;						//Uncertainty of the pixels positions
-//const double POS_ERROR = 0.001;						//Uncertainty of the pixels positions
+//const double POS_ERROR = 0.001;					//Uncertainty of the pixels positions
 const double POS_ERROR = 0.0;						//Uncertainty of the pixels positions
 const double MIN = 0;								//Minimum value for x,y,r
 const double MAX = 256;								//Maximum value for x,y,r
-const double eps= 0.2;					//Maximum diameter of the outputted boxes (for QInterEstim)
-//const double eps= 0.05;					//Maximum diameter of the outputted boxes (for QInterEstim)
-//const double eps= 2.0;				//Maximum diameter of the outputted boxes  (for Jaulin)
+const double eps= 0.2;					//Maximum diameter of the output boxes (for QInterEstim)
+//const double eps= 0.05;				//Maximum diameter of the output boxes (for QInterEstim)
+//const double eps= 2.0;				//Maximum diameter of the output boxes  (for Jaulin)
 
 /*===========================================*/
 

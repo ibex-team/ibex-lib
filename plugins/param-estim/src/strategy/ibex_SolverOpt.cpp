@@ -154,7 +154,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 IntervalVector SolverOpt::solve(const IntervalVector& init_box) {
 
 	start(init_box);
-	
+	cout << " solve : bestsolpointnumber " << endl;
 	optimize();
 	return bestsolpoint;
 }

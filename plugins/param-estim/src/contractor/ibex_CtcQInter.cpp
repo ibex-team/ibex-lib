@@ -201,6 +201,7 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
       //      point_contract_exact(box1,*iter); 
      
       point_contract(box1,*iter); 
+      //      cout << *iter << "   " << box1 << endl;
       if (box1.is_empty())
 	iter=points->erase(iter);
       else {
