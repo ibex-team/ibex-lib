@@ -11,8 +11,8 @@
 #ifndef __SIP_IBEX_RESTRICTIONLINEARIZERSIP_H__
 #define __SIP_IBEX_RESTRICTIONLINEARIZERSIP_H__
 
-#include "system/ibex_NLConstraint.h"
-#include "system/ibex_SIPSystem.h"
+#include "ibex_NLConstraint.h"
+#include "ibex_SIPSystem.h"
 
 #include "ibex_IntervalVector.h"
 #include "ibex_Linearizer.h"

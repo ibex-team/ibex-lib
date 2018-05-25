@@ -11,8 +11,8 @@
 #ifndef __SIP_IBEX_SIPOPTIMIZER_H__
 #define __SIP_IBEX_SIPOPTIMIZER_H__
 
-#include "contractors/ibex_CellCtc.h"
-#include "loup/ibex_LoupFinderSIP.h"
+#include "ibex_CellCtc.h"
+#include "ibex_LoupFinderSIP.h"
 
 #include "ibex_Bsc.h"
 #include "ibex_Cell.h"

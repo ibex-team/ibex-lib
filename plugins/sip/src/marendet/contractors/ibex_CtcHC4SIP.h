@@ -11,9 +11,9 @@
 #ifndef __SIP_IBEX_CTCHC4SIP_H__
 #define __SIP_IBEX_CTCHC4SIP_H__
 
-#include "system/ibex_NLConstraint.h"
-#include "system/ibex_SIConstraint.h"
-#include "system/ibex_SIPSystem.h"
+#include "ibex_NLConstraint.h"
+#include "ibex_SIConstraint.h"
+#include "ibex_SIPSystem.h"
 
 #include "ibex_CellCtc.h"
 #include "ibex_CtcFwdBwdNLC.h"

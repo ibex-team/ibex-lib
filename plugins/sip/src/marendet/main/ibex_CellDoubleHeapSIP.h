@@ -11,7 +11,7 @@
 #ifndef __SIP_IBEX_CELLDOUBLEHEAPSIP_H__
 #define __SIP_IBEX_CELLDOUBLEHEAPSIP_H__
 
-#include "system/ibex_SIPSystem.h"
+#include "ibex_SIPSystem.h"
 
 #include "ibex_Cell.h"
 #include "ibex_CellBufferOptim.h"
