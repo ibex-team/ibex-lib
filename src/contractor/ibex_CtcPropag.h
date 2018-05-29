@@ -47,6 +47,11 @@ public:
 	CtcPropag(const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
 
 	/**
+	 * \brief Contract a box.
+	 */
+	void contract(IntervalVector& box);
+
+	/**
 	 * \brief Enforces propagation (e.g.: HC4 or BOX) fitering.
 	 *
 	 * Call #contract(IntervalVector&, const BitSet&) with the mask
@@ -57,7 +62,7 @@ public:
 	 * \see #contract(IntervalVector&, const BitSet&).
 	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
 	 */
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box, CtcContext& context);
 
 	/** The list of contractors to propagate */
 	Array<Ctc> list;

@@ -22,9 +22,14 @@ CtcFixPoint::~CtcFixPoint(){
 }
 
 void CtcFixPoint::contract(IntervalVector& box) {
+	CtcContext context;
+	contract(box,context);
+}
+
+void CtcFixPoint::contract(IntervalVector& box, CtcContext& context) {
 	IntervalVector init_box(box);
 	IntervalVector old_box(box);
-	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
+	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
 	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
 
 	do {
@@ -33,14 +38,14 @@ void CtcFixPoint::contract(IntervalVector& box) {
 		ctc.contract(box,impact,flags);
 
 		if (box.is_empty()) {
-			set_flag(FIXPOINT);
+			context.set_flag(CtcContext::FIXPOINT);
 			return;
 		}
 
-	} while (!flags[FIXPOINT] && !flags[INACTIVE] && old_box.rel_distance(box)>ratio);
+	} while (!flags[CtcContext::FIXPOINT] && !flags[CtcContext::INACTIVE] && old_box.rel_distance(box)>ratio);
 
-	if (flags[FIXPOINT]) set_flag(FIXPOINT);
-	if (flags[INACTIVE] && init_box==box) set_flag(INACTIVE);
+	if (flags[CtcContext::FIXPOINT]) context.set_flag(CtcContext::FIXPOINT);
+	if (flags[CtcContext::INACTIVE] && init_box==box) context.set_flag(CtcContext::INACTIVE);
 }
 
 } // end namespace ibex

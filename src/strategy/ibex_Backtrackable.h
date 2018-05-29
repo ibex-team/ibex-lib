@@ -52,12 +52,28 @@ public:
 	 */
 	virtual std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&)=0;
 
+//	virtual void sync_change(const IntervalVector& new_box, const BitSet& impact) { }
+//
+//	void sync_change(const IntervalVector& new_box);
+//
+//	virtual void sync_contract(const IntervalVector& new_box, const BitSet& impact) { }
+//
+//	void sync_contract(const IntervalVector& new_box);
+
 	/**
 	 * \brief Delete *this.
 	 */
 	virtual ~Backtrackable() { }
 
 };
+
+//void Backtrackable::sync_change(const IntervalVector& new_box) {
+//	sync_change(new_box, BitSet::all(new_box.size()));
+//}
+//
+//void sync_contract(const IntervalVector& new_box) {
+//	sync_contract(new_box, BitSet::all(new_box.size()));
+//}
 
 } // end namespace ibex
 

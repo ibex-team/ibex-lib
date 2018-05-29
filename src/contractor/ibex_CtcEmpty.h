@@ -44,7 +44,12 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	virtual void contract(IntervalVector& box);
+	void contract(IntervalVector& box);
+
+	/**
+	 * \brief Contract a box.
+	 */
+	virtual void contract(IntervalVector& box, CtcContext& context);
 
 	/**
 	 * \brief Delete this.

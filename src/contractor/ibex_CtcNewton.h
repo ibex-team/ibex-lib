@@ -46,7 +46,12 @@ public:
 			double prec=default_newton_prec,
 			double ratio=default_gauss_seidel_ratio);
 
+	/**
+	 * \brief Contract a box.
+	 */
 	void contract(IntervalVector& box);
+
+	void contract(IntervalVector& box, CtcContext& context);
 
 	/** The function. */
 	const Fnc& f;

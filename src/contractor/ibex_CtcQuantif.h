@@ -81,7 +81,6 @@ protected:
 	 * \brief temporary variable to detect inactivity
 	 */
 	BitSet flags;
-	const BitSet impact;
 
 	/**
 	 * \brief The Contractor.

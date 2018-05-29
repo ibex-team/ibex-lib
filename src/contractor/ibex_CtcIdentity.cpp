@@ -15,8 +15,13 @@ namespace ibex {
 CtcIdentity::CtcIdentity(int n) : Ctc(n) { }
 
 void CtcIdentity::contract(IntervalVector& box) {
-	set_flag(FIXPOINT);
-	set_flag(INACTIVE);
+	CtcContext context;
+	contract(box,context);
+}
+
+void CtcIdentity::contract(IntervalVector& box, CtcContext& context) {
+	context.set_flag(CtcContext::FIXPOINT);
+	context.set_flag(CtcContext::INACTIVE);
 }
 
 } // end namespace ibex

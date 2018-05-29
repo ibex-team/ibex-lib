@@ -26,10 +26,6 @@ void CtcCompo::init_impacts() {
 //	}
 }
 
-
-
-
-
 CtcCompo::CtcCompo(const Array<Ctc>& list, bool incremental, double ratio) :
 		Ctc(list), list(list), incremental(incremental), ratio(ratio) {
 	assert(check_nb_var_ctc_list(list));
@@ -176,8 +172,12 @@ CtcCompo::~CtcCompo() {
 //	delete[] impacts;
 }
 
-
 void CtcCompo::contract(IntervalVector& box) {
+	CtcContext context;
+	contract(box,context);
+}
+
+void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 
 	// TODO: wrong algorithm here
 //	if (incremental) {
@@ -196,7 +196,7 @@ void CtcCompo::contract(IntervalVector& box) {
 //		return;
 //	}
 	bool inactive= true;
-	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
+	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
 
 	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
 
@@ -204,18 +204,18 @@ void CtcCompo::contract(IntervalVector& box) {
 		if (inactive) {
 			flags.clear();
 			list[i].contract(box,impact,flags);
-			if (!flags[INACTIVE]) inactive=false;
+			if (!flags[CtcContext::INACTIVE]) inactive=false;
 		} else {
 			list[i].contract(box);
 		}
 
 		if (box.is_empty()) {
-			set_flag(FIXPOINT);
+			context.set_flag(CtcContext::FIXPOINT);
 			return;
 		}
 	}
 
-	if (inactive) set_flag(INACTIVE);
+	if (inactive) context.set_flag(CtcContext::INACTIVE);
 }
 
 } // end namespace ibex

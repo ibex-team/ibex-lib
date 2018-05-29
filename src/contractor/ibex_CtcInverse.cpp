@@ -23,6 +23,11 @@ CtcInverse::~CtcInverse() {
 }
 
 void CtcInverse::contract(IntervalVector& box) {
+	CtcContext context;
+	contract(box,context);
+}
+
+void CtcInverse::contract(IntervalVector& box, CtcContext& context) {
 
 	assert(box.size()==f.nb_var());
 
@@ -30,7 +35,7 @@ void CtcInverse::contract(IntervalVector& box) {
 	y.init(Interval::ALL_REALS);
 	id->backward(fx,y);
 
-	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
+	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
 
 	BitSet impact(BitSet::all(nb_var));
 
@@ -39,19 +44,19 @@ void CtcInverse::contract(IntervalVector& box) {
 
 	if (y.is_empty()) {
 		box.set_empty();
-		set_flag(FIXPOINT);
+		context.set_flag(CtcContext::FIXPOINT);
 		return;
 	}
 
-	if (flags[INACTIVE]) {
-		set_flag(INACTIVE);
+	if (flags[CtcContext::INACTIVE]) {
+		context.set_flag(CtcContext::INACTIVE);
 	} else {
 		fx=id->eval_domain(y);
 
 		f.backward(fx,box);
 
 		if (box.is_empty()) {
-			set_flag(FIXPOINT);
+			context.set_flag(CtcContext::FIXPOINT);
 		}
 	}
 

@@ -47,11 +47,11 @@ void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_ina
 		l.push(y);
 	} else {
 
-		if (is_inactive && flags[INACTIVE]) {
+		if (is_inactive && flags[CtcContext::INACTIVE]) {
 			// try to prove the constraint is inactive for all y in [y]
 			y_tmp = y;
 			CtcQuantif::contract(x, y_tmp);
-			is_inactive = flags[INACTIVE];
+			is_inactive = flags[CtcContext::INACTIVE];
 		} else {
 			is_inactive = false;
 		}
@@ -59,6 +59,11 @@ void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_ina
 }
 
 void CtcForAll::contract(IntervalVector& box) {
+	CtcContext context;
+	contract(box,context);
+}
+
+void CtcForAll::contract(IntervalVector& box, CtcContext& context) {
 	assert(box.size()==vars.nb_var);
 
 	assert(l.empty()); // old?--> when an exception is thrown by this function, l is flushed.
@@ -88,11 +93,11 @@ void CtcForAll::contract(IntervalVector& box) {
 
 		while (!l.empty()) l.pop();
 
-		set_flag(FIXPOINT);
+		context.set_flag(CtcContext::FIXPOINT);
 		return;
 	}
 
-	if (is_inactive) set_flag(INACTIVE);
+	if (is_inactive) context.set_flag(CtcContext::INACTIVE);
 
 }
 

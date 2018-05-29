@@ -100,6 +100,10 @@ class Ctc3BCid : public Ctc {
 	Ctc3BCid(Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
 			int vhandled=-1, double var_min_width=default_var_min_width);
 
+	/**
+	 * \brief Contract a box.
+	 */
+	void contract(IntervalVector& box);
 
 	/**
 	 * \brief Apply contraction.
@@ -111,7 +115,7 @@ class Ctc3BCid : public Ctc {
 	 * specific variable, then #var3BCID is called with the specified variable.
 	 * Otherwise, 3BCID will be performed.
 	 */
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box, CtcContext& context);
 
 	/** The variables to which var3BCID is applied **/
 	BitSet cid_vars;

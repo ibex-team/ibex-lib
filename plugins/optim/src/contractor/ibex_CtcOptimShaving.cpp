@@ -19,8 +19,12 @@ CtcOptimShaving::CtcOptimShaving(Ctc& ctc, int s3b, int scid, int vhandled, doub
 			Ctc3BCid (ctc,s3b,scid,vhandled,var_min_width) {
 }
 
-
 void CtcOptimShaving::contract(IntervalVector& box) {
+	CtcContext context;
+	contract(box,context);
+}
+
+void CtcOptimShaving::contract(IntervalVector& box, CtcContext& context) {
 	int	var_obj=start_var;
 	impact.clear();                                // [gch]
 	impact.add(var_obj);                           // [gch]
@@ -28,7 +32,7 @@ void CtcOptimShaving::contract(IntervalVector& box) {
 	impact.remove(var_obj);                        // [gch]
 
 	if (box.is_empty()) {
-		set_flag(FIXPOINT);
+		context.set_flag(CtcContext::FIXPOINT);
 	}
 }
 

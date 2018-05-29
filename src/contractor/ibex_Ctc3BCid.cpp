@@ -56,6 +56,11 @@ bool Ctc3BCid::equalBoxes (int var, IntervalVector &box1, IntervalVector &box2) 
 }
 
 void Ctc3BCid::contract(IntervalVector& box) {
+	CtcContext context;
+	contract(box,context);
+}
+
+void Ctc3BCid::contract(IntervalVector& box, CtcContext& context) {
 	int var;                                           // [gch] variable to be carCIDed
 
 	start_var=nb_var-1;                                //  patch pour l'optim  A RETIRER ??
@@ -69,7 +74,7 @@ void Ctc3BCid::contract(IntervalVector& box) {
 		impact.remove(var);                           // [gch]
 
 		if(box.is_empty()) {
-			set_flag(FIXPOINT);
+			context.set_flag(CtcContext::FIXPOINT);
 			return;
 		}
 	}

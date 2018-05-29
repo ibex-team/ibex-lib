@@ -67,19 +67,25 @@ void CtcFwdBwd::init() {
 	}
 }
 
+
 void CtcFwdBwd::contract(IntervalVector& box) {
+	CtcContext context;
+	contract(box,context);
+}
+
+void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 
 	assert(box.size()==f.nb_var());
 
 	//std::cout << " hc4 of " << f << "=" << d << " with box=" << box << std::endl;
 	if (f.backward(d,box)) {
-		set_flag(INACTIVE);
-		set_flag(FIXPOINT);
+		context.set_flag(CtcContext::INACTIVE);
+		context.set_flag(CtcContext::FIXPOINT);
 	}
 	//std::cout << " ---> " << box << std::endl;
 
 	if (box.is_empty()) {
-		set_flag(FIXPOINT);
+		context.set_flag(CtcContext::FIXPOINT);
 	}
 
 	// Note: setting the FIXPOINT flag is incorrect when there

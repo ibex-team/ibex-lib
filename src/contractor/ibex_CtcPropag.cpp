@@ -24,7 +24,7 @@ namespace ibex {
 CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  Ctc(cl), list(cl), ratio(ratio), incremental(incremental),
 		  accumulate(false), g(cl.size(), nb_var), agenda(cl.size()),
-		  _impact(BitSet::empty(nb_var)), flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), active(BitSet::empty(cl.size())) {
+		  _impact(BitSet::empty(nb_var)), flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS)), active(BitSet::empty(cl.size())) {
 
 	assert(check_nb_var_ctc_list(cl));
 
@@ -37,8 +37,12 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 	//cout << g << endl;
 }
 
-
 void CtcPropag::contract(IntervalVector& box) {
+	CtcContext context;
+	contract(box,context);
+}
+
+void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 
 	assert(box.size()==nb_var);
 
@@ -69,7 +73,7 @@ void CtcPropag::contract(IntervalVector& box) {
 		 */
 
 		for (int i=0; i<nb_var; i++) {
-			if (!impact() || (*impact())[i]) {
+			if (!context.impact() || (*context.impact())[i]) {
 				set<int> ctrs=g.output_ctrs(i);
 				for (set<int>::iterator c=ctrs.begin(); c!=ctrs.end(); c++)
 					agenda.push(*c);
@@ -122,7 +126,7 @@ void CtcPropag::contract(IntervalVector& box) {
 			return;
 		}
 
-		if (flags[INACTIVE]) {
+		if (flags[CtcContext::INACTIVE]) {
 			active.remove(c);
 		}
 
@@ -133,7 +137,7 @@ void CtcPropag::contract(IntervalVector& box) {
 			if (old_box[v].ratiodelta(box[v])>=ratio) {
 				set<int> ctrs=g.output_ctrs(v);
 				for (set<int>::iterator c2=ctrs.begin(); c2!=ctrs.end(); c2++) {
-					if ((c!=*c2 && active[*c2]) || (c==*c2 && !flags[FIXPOINT]))
+					if ((c!=*c2 && active[*c2]) || (c==*c2 && !flags[CtcContext::FIXPOINT]))
 						agenda.push(*c2);
 				}
 				// ===================== coarse propagation =========================
@@ -156,7 +160,7 @@ void CtcPropag::contract(IntervalVector& box) {
 	 * small w.r.t the ratio here. */
 	//   if (!reducted) box = propbox; // restore domains
 
-	if (active.empty()) set_flag(INACTIVE);
+	if (active.empty()) context.set_flag(CtcContext::INACTIVE);
 
 }
 

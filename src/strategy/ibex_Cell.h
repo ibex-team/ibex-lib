@@ -65,6 +65,10 @@ public:
 	 */
 	std::pair<Cell*,Cell*> subcells(const BisectionPoint& b) const;
 
+//	void sync_contract(const BitSet& impact);
+//
+//	void sync_change();
+
 	/**
 	 * \brief Delete *this.
 	 */
