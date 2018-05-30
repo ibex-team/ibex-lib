@@ -1,0 +1,43 @@
+parameter estimation examples
+
+line     estim_line_bc.cpp         (model with 2 quadrants)
+         estim_line_abc.cpp	   (model with norm constraint : a^2+b^2=1)
+plane :  ICTAI 2015 examples 
+         estim_plane.cpp            (model with 4 octants)
+	 estim_plane_abcd.cpp       (model with norm constraint : a^2+b^2+c^2 = 1)
+	 estim_house.cpp
+circle   estim_circle.cpp
+	 
+         
+
+
+
+
+
+optimization :   estim_line_bc_optim.cpp
+                 estim_line_abc_optim.cpp	
+                 estim_plane_optim.cpp
+                 estim_plane_abcd_optim.cpp	
+		 estim_house_optim.cpp
+                 estim_circle_optim.cpp
+
+                 estim_essentialmatnorm_searchstrategy.cpp :  essential matrix
+
+
+ICTAI examples
+
+./estim_plane 
+ex1           ./estim_plane 1 1000 1 0 0 0 rr2 0.000007 0.0007 1
+ex2           ./estim_plane 2 1000 1 0 0 0 rr2 0.000007 0.0007 1
+ex3           ./estim_plane 3 1000 1 0 0 0 rr2 0.000007 0.0007 1
+ex4           ./estim_plane 4 1000 1 0 0 0 rr2 0.000007 0.0007 1
+ex5           ./estim_plane 5 1000 1 0 0 0 rr2 0.000007 0.0007 1
+ex6           ./estim_plane 6 1000 1 0 0 0 rr2 0.000007 0.0007 1
+ex7           ./estim_plane 4 4000 1 0 0 0 rr2 0.000007 0.0007 1
+ex8           ./estim_plane 5 4000 1 0 0 0 rr2 0.000007 0.0007 1
+ex9           ./estim_plane 6 4000 1 0 0 0 rr2 0.000007 0.0007 1
+
+circle1       ./estim_circle 0 11 57 1 0 0 0 rr2
+circle2       ./estim_circle 1 11 57 1 0 0 0 rr2
+
+

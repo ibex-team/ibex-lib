@@ -314,7 +314,8 @@ void CtcQInterCircle2::ctc_contract_all(IntervalVector& box){
   //  int  CtcQInterAffCircle2::affine_threshold ()  {return 10;}
   int  CtcQInterAffCircle2::affine_threshold ()  {return INT_MAX;}
 
-  double  CtcQInterAffCircle2::max_diam_threshold (const IntervalVector& box)  {return 1.0;}
+  //  double  CtcQInterAffCircle2::max_diam_threshold (const IntervalVector& box)  {return 1.0;}
+  double  CtcQInterAffCircle2::max_diam_threshold (const IntervalVector& box)  {return 0.0;}
   //  int  CtcQInterAffCircle2::max_diam_threshold ()  {return 0.0;}
 
 

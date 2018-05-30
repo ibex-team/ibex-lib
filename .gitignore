@@ -44,6 +44,14 @@ doc/_build
 
 # files in examples
 **/examples/*
+!**/examples/estimparam
+**/examples/estimparam/*
+!**/examples/estimparam/README
+!**/examples/estimparam/house40
+!**/examples/estimparam/house44
+!**/examples/estimparam/data/*
+
+
 !**/examples/*cpp
 !**/examples/makefile
 

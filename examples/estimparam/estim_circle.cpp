@@ -236,7 +236,7 @@ int main(int argc, char** argv) {
 	//OptimizerQInter s(*ctcs,*bs,buff,ctcq);
 	//	Solver s(*ctcs,*bs,buff);
 	s.timeout = 3600;
-	s.trace=1;
+	s.trace=0;
 	//	s.nbr=nbrand;
 	//	s.gaplimit=gaplimit;
 	//	srand(2);
