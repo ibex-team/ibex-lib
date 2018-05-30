@@ -300,11 +300,10 @@ int main(int argc, char** argv) {
             ctc0=new CtcFwdBwd(*m_f0,LEQ);
 	    for (int i=0; i<p; i++) {
 	      
-	  //	  Function fi (v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-v[2]-Interval(-epseq,epseq)));
 	      
-	      	      m_func[i] = new Function(v,(x->at(i) +v[0]*(y->at(i)- diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-v[2]-Interval(-epseq,epseq)));
+	      m_func[i] = new Function(v,(x->at(i) +v[0]*(y->at(i)- diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-v[2]-Interval(-epseq,epseq)));
 
-	      	      m_ctc.set_ref(i,(*new CtcFwdBwd(*m_func[i])));
+	      m_ctc.set_ref(i,(*new CtcFwdBwd(*m_func[i])));
 	      
 
 	      //	      m_ctc.set_ref(i,*new Ctc3BCid(3,* new  CtcFwdBwd(*m_func[i]),5,1,3));  	  
@@ -337,128 +336,7 @@ int main(int argc, char** argv) {
 	      }
 	      cout << " apres linfun " << endl;
 	    }
-	    /*
-	    else if(K==2)
-	      {
-		for (int nt=0; nt<NT1;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = rand() % (p-1);
-		    if (j>=i) j=j+1;
-
-		    vector<LinearRelaxXTaylor::corner_point> cpoints;
-		    cpoints.push_back(LinearRelaxXTaylor::RANDOM);
-		    SystemFactory fac;
-		    fac.add_var(v);
-		    fac.add_ctr(*m_func[i]);
-		    fac.add_ctr(*m_func[j]);
-                    System* sys = new System(fac);
-		    LinearRelaxXTaylor* lrt= new LinearRelaxXTaylor(*sys,cpoints);
-		    //LinearRelaxCombo* lrt= new LinearRelaxCombo(*sys,LinearRelaxCombo::ART);
-		    CtcPolytopeHull* poly=new CtcPolytopeHull( lrt);
-		    systemlr[p*nt+i]=sys;
-		    lrtaylor[p*nt+i]=lrt;
-		    polytopeh[p*nt+i]= poly;
-		    //    m_ctc1.set_ref(p*nt+i,*new CtcFixPoint (* new CtcCompo (m_ctc[i],m_ctc[j]),0.1));
-
-		    //		    m_ctc1.set_ref(p*nt+i,* poly);
-		    //m_ctc1.set_ref(p*nt+i,* new CtcCompo (m_ctc[i],m_ctc[j]));
-		    //m_fun[0][p*nt+i]=new Function(v,(x->at(i)  +v[0]*(y->at(i)-diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-Interval(-epseq,epseq)));
-		    
-		    linfun[p*nt+i][0][0]=x->at(i);
-		    linfun[p*nt+i][1][0]=y->at(i)-diry*x->at(i);
-		    linfun[p*nt+i][2][0]=z->at(i)-dirz*x->at(i);
-
-
-		    // m_fun[1][p*nt+i]=new Function(v,(x->at(j) +v[0]*(y->at(j)-diry*x->at(j))+v[1]*(z->at(j)-dirz*x->at(j))-Interval(-epseq,epseq)));
-		    linfun[p*nt+i][0][1]=x->at(j);
-		    linfun[p*nt+i][1][1]=y->at(j)-diry*x->at(j);
-		    linfun[p*nt+i][2][1]=z->at(j)-dirz*x->at(j);
-
-		  }
-	      }
-	    */
-	    /*
-	    else if(K==3)
-	      {
-		for (int nt=0; nt<NT2;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = index2[nt*p+i];
-                    int k=  index3[nt*p+i];
-		  
-
-                    Interval a1,a2,a3,b1,b2,b3,d1,d2,d3;
-                    a1=y->at(i)-diry*x->at(i);
-                    a2=y->at(j)-diry*x->at(j);
-                    a3=y->at(k)-diry*x->at(k);
-                    b1=z->at(i)-dirz*x->at(i);
-                    b2=z->at(j)-dirz*x->at(j);
-                    b3=z->at(k)-dirz*x->at(k);
-                    d1=Interval(-epseq,epseq)+x->at(i);
-                    d2=Interval(-epseq,epseq)+x->at(j);
-                    d3=Interval(-epseq,epseq)+x->at(k);
-
-
-                    Interval x1,y1,z1;
-                    x1= ((d1-d2)*(b1-b3) - (d1-d3)*(b1-b2) )/ ((a1-a2) *(b1-b3) - (a1-a3)* (b1-b2));
-                    y1= ( (d1-d3)*(a1-a2) -(d1-d2)*(a1-a3)  )/ ((a1-a2) *(b1-b3) - (a1-a3)* (b1-b2));
-		    //                    x1&=((d1-d3)*(b1-b2) - (d1-d2)*(b1-b3) )/ ((a1-a3) *(b1-b2) - (a1-a2)* (b1-b3));
-		    //                    y1&=( (d1-d2)*(a1-a3) -(d1-d3)*(a1-a2)  )/ ((a1-a3)*(b1-b2) - (a1-a2)* (b1-b3));
-		    //		    x1&= ((d2-d1)*(b2-b3) - (d2-d3)*(b2-b1) )/ ((a2-a1) *(b2-b3) - (a2-a3)* (b2-b1));
-		    //                    y1&= ( (d2-d3)*(a2-a1) -(d2-d1)*(a2-a3)  )/ ((a2-a1) *(b2-b3) - (a2-a3)* (b2-b1));
-		    z1=d1 - a1*x1 - b1*y1;
-		    //		    z1&=d2 - a2*x1 - b2*y1;
-		    //		    z1&=d3 - a3*x1 - b3*y1;
-
-
-		    //		    cout << x1 << " " << y1 << " " << "" <<  z1 << endl;
-
-                    
-		    IntervalVector* box1= new IntervalVector(box);
-		    //		    cout << "box avant inter " << x1 << " " << y1 << " " << -z1 << endl;
-		    
-                    (*box1)[0]&=-x1;
-                    (*box1)[1]&=-y1;
-		    (*box1)[2]&=z1;
-		    
-		    if ((*box1)[0].is_empty()) box1->set_empty();
-		    else if ((*box1)[1].is_empty()) box1->set_empty();
-		    else if ((*box1)[2].is_empty()) box1->set_empty();
-		    else if (((*box1)[0]*diry+(*box1)[1]*dirz).lb()>1) box1->set_empty();
-		    boxes[p*nt+i]= box1;
-		    if (!(box1->is_empty())) pmax++;
-		
-
-		    //		    cout << "box apres inter " << *box1 << endl;
-		    //		    delete sys;
-		    //		    delete lrt;
-		    //		    delete poly; 
-
-		    //		    m_ctc1.set_ref(p*nt+i,* poly);
-		    m_ctc1.set_ref(p*nt+i,*new CtcCompo (m_ctc[i],m_ctc[j],m_ctc[k]));
-
-
- 
-		    //		    m_fun[0][p*nt+i]= new Function(v,(x->at(i) +v[0]*(y->at(i)-diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-Interval(-epseq,epseq)));
-		    //		    m_fun[1][p*nt+i]= new Function(v,(x->at(j) +v[0]*(y->at(j)-diry*x->at(j))+v[1]*(z->at(j)-dirz*x->at(j))-Interval(-epseq,epseq)));
-		    //		    m_fun[2][p*nt+i]= new Function(v,(x->at(k) +v[0]*(y->at(k)-diry*x->at(k))+v[1]*(z->at(k)-dirz*x->at(k))-Interval(-epseq,epseq)));
-	
-		    linfun[p*nt+i][0][0]=x->at(i);
-		    linfun[p*nt+i][1][0]=y->at(i)-diry*x->at(i);
-		    linfun[p*nt+i][2][0]=z->at(i)-dirz*x->at(i);
-
-		    linfun[p*nt+i][0][1]=x->at(j);
-		    linfun[p*nt+i][1][1]=y->at(j)-diry*x->at(j);
-		    linfun[p*nt+i][2][1]=z->at(j)-dirz*x->at(j);
-
-		    linfun[p*nt+i][0][2]=x->at(k);
-		    linfun[p*nt+i][1][2]=y->at(k)-diry*x->at(k);
-		    linfun[p*nt+i][2][2]=z->at(k)-dirz*x->at(k);
-	
-		  }
-
-	      }
-	    */
-
+	   
 	    vector<IntervalVector> resgroup;
 
 
@@ -528,34 +406,7 @@ int main(int argc, char** argv) {
 	    //	    CtcFixPoint ctcf(ctcid,0.1);
 
 	    // Ctc3BCid cid(ctcqf0,5,1,3); 	    
-	    /*
-	   K=1;
-	    
-	    for (int i=0; i<p; i++)  {
-
-	      //		m_ctc1.set_ref(i,m_ctc[i]);
-
-	//		m_fun[0][i]= new Function(v,(x->at(i) +v[0]*(y->at(i)-diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-Interval(-epseq,epseq)));
-		linfun1[i][0][0]=x->at(i);
-		linfun1[i][1][0]=y->at(i)-diry*x->at(i);
-		linfun1[i][2][0]=z->at(i)-dirz*x->at(i);
-	      }
-	    Q=40;
-	    intf list=0;
-	    CtcQInterPlane ctcq(n,m_ctc,linfun1,boxes,epseq,Qf,list,QINTERPROJ,K);
-	    cout << " apres contracteur " << endl;
-	    for (int i=0 ; i<np; i++)
-	      {int count =0;
-		if (!(boxes[i]->is_empty()))
-		  {//cout << i << " " << *(boxes[i])  << endl;
-		    countc=ctcq.points_count(*(boxes[i]));
-		    if (count >= Q) 
-		      cout << i << " " << *(boxes[i])  << " " << count << endl;
-		  }
-	      }
-	    cout << " apres comptage " << endl;
-	    K=3;
-	    */
+	  
 	    Ctc* ctcs;
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
@@ -593,64 +444,6 @@ int main(int argc, char** argv) {
 	    s.keep_one_solution_pergroup(res,maxsolinliers );
 
 	    
-	  /*
-	if (res.size() >1)
-	  {	resgroup.push_back(res[0]);
-
-	for (int i=0; i<res.size(); i++)
-	  {if (max_dist (res[i],resgroup.back(),  prec))
-	      resgroup[resgroup.size()-1]= res[i]|resgroup.back();
-	    else
-	      resgroup.push_back(res[i]);
-	      }
-	cout << "regroupement  solutions " << endl;
-	for (int i=0; i<resgroup.size(); i++)
-	  {	  cout << resgroup[i] << " "  << endl;
-	    int k=0;
-	    for (int j=0; j<p; j++)
-	      { Interval evalctc= m_func[j]->eval(resgroup[i]);
-		if (evalctc.contains(0)) {k++; 
-		  //		  cout << j << (*x)[j] << " " << (*y)[j] <<  " " << (*z)[j] <<  " " <<
-		  //		    m_func[j]->eval(resgroup[i]) << endl;
-		}
-	      }
-
-	    cout << "nb points " << k <<endl;
-	  }
-
-
-	vector<IntervalVector> resgroup2;
-
-	if (resgroup.size() >1)
-	  {	cout << "regroupement  solutions 2" << endl;
-	    resgroup2.push_back(resgroup[0]);
-	    for (int i=0; i<resgroup.size(); i++)
-	  {if (max_dist (resgroup[i],resgroup2.back(), prec))
-	      resgroup2[resgroup2.size()-1]= resgroup[i]|resgroup2.back();
-	    else
-	      resgroup2.push_back(resgroup[i]);
-	  }
-
-
-	for (int i=0; i<resgroup2.size(); i++)
-	  {	  cout << resgroup2[i] << " "  << endl;
-	    int k=0;
-	    for (int j=0; j<p; j++)
-	      { Interval evalctc= m_func[j]->eval(resgroup2[i]);
-		if (evalctc.contains(0)) {k++; 
-		  //		  cout << j << (*x)[j] << " " << (*y)[j] <<  " " << (*z)[j] <<  " " <<
-		  //		    m_func[j]->eval(resgroup[i]) << endl;
-		}
-	      }
-
-	    cout << "nb points " << k <<endl;
-	    //  Q0=k+1;
-	  }
-	  
-	  }
-	  }
-	  */
-	  
 
 		
 	
@@ -678,21 +471,7 @@ int main(int argc, char** argv) {
 	delete [] linfun;
 	
 
-	/*
-	for (int i=0; i<p; i++)
-	  {for (int j=0; j<n; j++)
-	      delete [] linfun1[i][j];
-	    
-	    delete [] linfun1[i];
-	  }
 
-	delete [] linfun1;
-
-	delete [] m_func;
-	
-	delete[] index2;
-	delete[] index3;
-	*/	
 };
 
 

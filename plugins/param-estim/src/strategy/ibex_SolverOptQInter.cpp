@@ -326,7 +326,7 @@ namespace ibex {
     QInterPoints* qinterpoints=&root->get<QInterPoints>();
 
     //    qinterpoints->points= ctcq.points; 
-    cout << " point size " << ctcq.points->size() << endl;
+    //    cout << " point size " << ctcq.points->size() << endl;
     qinterpoints->qmax=ctcq.points->size();
     Vector* mid = new Vector(init_box.mid());
 

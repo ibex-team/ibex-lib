@@ -29,7 +29,6 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 
   void SolverOpt::start(const IntervalVector& init_box) {
 	str.buffer.flush();
-	cout << " avant init box" << endl;
 
 	Cell* root= root_cell(init_box); 
 
@@ -45,7 +44,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
         str.push_cell(*root);
 	init_buffer_info(*root);
 
-	//	Timer::start();
+
 
 }
 
@@ -154,21 +153,11 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 IntervalVector SolverOpt::solve(const IntervalVector& init_box) {
 
 	start(init_box);
-	cout << " solve : bestsolpointnumber " << endl;
 	optimize();
 	return bestsolpoint;
 }
 
-  /*
-void SolverOpt::time_limit_check () {
-	Timer::stop();
 
-	time += Timer::VIRTUAL_TIMELAPSE();
-
-	if (time_limit >0 &&  time >=time_limit) throw TimeOutException();
-	Timer::start();
-}
-  */
 
 
 

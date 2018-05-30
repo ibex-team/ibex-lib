@@ -364,15 +364,15 @@ void SolverQInter::other_checks(Cell& c){
 	  q2=ctcq.activepoints_contract_count(vec);
 
 	}
-	cout << " q " << ctcq.q << " q1 " << q1 << " q2 " << q2 <<  " qvalid " << qvalid <<  endl;
+	//	cout << " q " << ctcq.q << " q1 " << q1 << " q2 " << q2 <<  " qvalid " << qvalid <<  endl;
 
         if (q2 >= qvalid) {
-	  cout << "ctcq.points "  << ctcq.points->size() << endl;
+	  //	  cout << "ctcq.points "  << ctcq.points->size() << endl;
 	  set<int>* validpoints = new set<int>;
 	  iter = ctcq.points->begin() ;
 	  while (iter != ctcq.points->end())
 	    {validpoints->insert(*iter); iter++;}
-	  cout << "validpoints "  << validpoints->size() << endl;
+	  //cout << "validpoints "  << validpoints->size() << endl;
 	  manage_solutions (compatiblepoints, validpoints,c);
 	  if (ctcq.qmax > q2) {
 	    //	    cout << " qmax " <<  ctcq.qmax << " q2 " << q2 << endl;

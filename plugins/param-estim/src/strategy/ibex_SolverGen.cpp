@@ -42,9 +42,6 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 	buffer.push(root);
 	init_buffer_info(*root);
 
-
-	//	Timer::start();
-
 }
 
   /*
@@ -152,8 +149,6 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 	}
 	timer.stop();
 	time = timer.get_time();
-	//	Timer::stop();
-	//time+= Timer::VIRTUAL_TIMELAPSE();
 
 	return false;
 
@@ -166,15 +161,7 @@ vector<IntervalVector> SolverGen::solve(const IntervalVector& init_box) {
 	return sols;
 }
 
-  /*
-void SolverGen::time_limit_check () {
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	//	cout << " temps " << time << endl;
-	if (time_limit >0 &&  time >=time_limit) throw TimeOutException();
-	Timer::start();
-}
-  */
+
 
 void SolverGen::new_sol (vector<IntervalVector> & sols, IntervalVector & box) {
 	sols.push_back(box);
