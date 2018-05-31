@@ -29,19 +29,16 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
   Cell* SolverGen::root_cell(const IntervalVector& init_box) {return (new Cell(init_box));}
 
   void SolverGen::start(const IntervalVector& init_box) {
+    //    cout << " debut start " << endl;
 	buffer.flush();
 
 	Cell* root= root_cell(init_box); 
-
 	// add data required by this solver
-	root->add<BisectedVar>();
-
+	//	root->add<BisectedVar>();
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);
-
 	buffer.push(root);
 	init_buffer_info(*root);
-
 }
 
   /*
@@ -157,6 +154,7 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 vector<IntervalVector> SolverGen::solve(const IntervalVector& init_box) {
 	vector<IntervalVector> sols;
 	start(init_box);
+	cout << "apres start " << endl;
 	while (next(sols)) { }
 	return sols;
 }

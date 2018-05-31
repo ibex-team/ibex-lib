@@ -33,7 +33,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 	Cell* root= root_cell(init_box); 
 
 	// add data required by this solver
-	root->add<BisectedVar>();
+	//	root->add<BisectedVar>();
 
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);

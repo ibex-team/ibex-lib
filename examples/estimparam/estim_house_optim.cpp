@@ -34,8 +34,10 @@ int main(int argc, char** argv) {
 	int Q= atoi(argv[3]);
 	double precbc= atof(argv[4]);
 	double precd=atof(argv[5]);
-	int gap= atoi(argv[6]);
-	int nbrand = atoi(argv[7]);
+	int flist = atoi(argv[6]);
+	int gaplimit= atoi(argv[7]);
+	int nbrand= atoi(argv[8]);
+	string bisect = argv[9];
 
 	cout << input_file_name << endl;
 	ifstream input(input_file_name.c_str());
@@ -124,6 +126,7 @@ int main(int argc, char** argv) {
 	int Qvalid=Q;
 	cout << np << "  " << Q0 << " " << Qvalid << " " << epseq << endl;
 
+	int bestsolpointnumber=0;
 	int Qoct=Q;
 	Vector bestsol (3);
 	for (int oct=0; oct <4; oct++)
@@ -257,9 +260,13 @@ int main(int argc, char** argv) {
 	    BeamSearch str(buff);
 	    //	    BestFirstSearch str(buff);
 	    //RoundRobin bs (prec,0.5);
-	    RoundRobinNvar bs (2,prec,0.5);
-	    //  RoundRobinQInter bs (2,prec,0.5);
-	    //	ProbaBisect bs (prec, proba, 0.45);
+	    Bsc * bs;
+	    if (bisect=="rr")
+	      bs = new RoundRobin(prec, 0.5);
+	    else if (bisect=="rr2")
+	      bs= new RoundRobinNvar(2,prec,0.5);
+
+
 	    //LargestFirst bs (prec,0.45);
 	    /* Main optimization loop */
 
@@ -281,35 +288,34 @@ int main(int argc, char** argv) {
 
 	    
 	    //	    SolverOptQInter s(ctcf,bs,str,ctcq,1);
-	    SolverOptQInter s(ctcf,bs,str,ctcq,2);
+	    SolverOptQInter s(ctcf,*bs,str,ctcq,2);
 
 	    s.str.with_oracle=false;
 	    s.str.with_storage=true;
 	    s.timeout = 3600;
 	    s.trace=1;
-	    s.gaplimit=gap;
+	    s.gaplimit=gaplimit;
 	    s.nbr=nbrand;
 
-	    s.bestsolpointnumber=Qoct;
+	    s.bestsolpointnumber=bestsolpointnumber;
 	    s.bestsolpoint=bestsol;
 	    cout << " avant resolution " << endl;
-
+	    cout << " q " << ctcq.q << endl;
 	   IntervalVector res=s.solve(box);
 
 	cout << "Number of branches : " << s.nb_cells << endl;
 	nb_cells +=s.nb_cells;
 	cputime += s.time;
-	Qoct=s.bestsolpointnumber;
-	bestsol=s.bestsolpoint;
+	if (s.bestsolpointnumber) {
+	  Qoct=s.bestsolpointnumber+s.epsobj;
+	  bestsol=s.bestsolpoint;
+	  bestsolpointnumber=s.bestsolpointnumber;
+	}
 	s.report_possible_inliers();
-	//	s.report_solution();
+	s.report_solution();
 
 
   
-
-
-	
-
 	end = clock();
 	totaltime += ((double)(end)-(double)(start))/CLOCKS_PER_SEC;
 	start= clock();

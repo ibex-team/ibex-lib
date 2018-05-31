@@ -239,8 +239,9 @@ int main(int argc, char** argv) {
 	    prec[1]=0.001;
 	    prec[2]=0.001;
 	    */
-	   
-	    CellStack buff;
+	    CellHeapQInter buff;
+	    BeamSearch str(buff);
+	    //CellStack buff;
 	    Bsc * bs;
 	    if (bisect=="rr")
 	      bs = new RoundRobin(prec, 0.5);
@@ -269,64 +270,29 @@ int main(int argc, char** argv) {
 	    //CtcFixPoint ctcf(ctcid,0.1);
 
 
-	    SolverQInter s(ctcf,*bs,buff,ctcq);
+	    SolverOptQInter s(ctcf,*bs,str,ctcq,2);
 	    //	    Solver s(ctcf,*bs,buff);
 	    //	    s.onesol_permaximalset=true;
-
+	    s.str.with_oracle=false;
+	    s.str.with_storage=true;
 	    s.timeout = 3600;
-	    s.trace=0;
+	    s.trace=1;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
 
-	    cout << " avant resolution " << endl;
+	    IntervalVector res=s.solve(box);
 
-	vector<IntervalVector> res=s.solve(box);
-
-	cout << "Number of branches : " << s.nb_cells << endl;
-	nb_cells +=s.nb_cells;
-	cputime += s.time;
-	cout << " nb sols " << res.size() << endl;   
+	    cout << "Number of branches : " << s.nb_cells << endl;
+	    nb_cells +=s.nb_cells;
+	    cputime += s.time;
+	    cout << " nb sols " << res.size() << endl;   
 
   
-	/* output the box */
-	int kk=0;
-	/*
-	list<set<int>* >::iterator itersol= s.valid_sol_points.begin();
-	list<set<int>* >::iterator compatitersol= s.compatible_sol_points.begin();
-
-	for (int i=0; i<res.size(); i++)
-	  
-          { 
-	    if (s.maximal_sol[i])
-
-	      {if ((*itersol)->size()>= Qvalid)
-
-		  { kk++; cout << "Sol " << kk << " " << i+1 << " " <<  res[i] << " " << (*compatitersol)->size() << "  compatible measurements " 
-			       << (*itersol)->size() << " valid measurements " << endl;
 
 
-		
-		set<int>::iterator iter= (*itersol)->begin();
-	
-		while (iter !=(*itersol)->end())
-		  {cout << *iter << " ";
-		   
-                    IntervalVector mid (res[i].mid());
-		    // if (s.ctcq.validpoint (mid,*iter)) q22++;
-		     iter++;}
-		cout << endl;
-		//		cout << " " << q22 << " valid measures at midpoint" << endl;
-		  }
-	       itersol++;
-	       compatitersol++;
-	      }
+	    s.report_possible_inliers();
+	    s.report_solution();
 
-	  }
-	*/
-	//	s.report_possible_inliers();
-
-	vector <int> maxsolinliers;
-	s.keep_one_solution_pergroup(res,maxsolinliers );
 	
 	
 

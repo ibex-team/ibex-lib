@@ -29,6 +29,7 @@ namespace ibex {
  
 
   void  SolverQInter::init() {
+    cout << " debut init " << endl;
     nbr=0;
     gaplimit=-1;
     epsboxes_possiblesols=0;
@@ -41,7 +42,7 @@ namespace ibex {
     for (int i=0; i< measure_nb+1; i++)
       valstack[i]=0;
     nb_sols=0;
-    //    cout << " fin init " << endl;
+    cout << " fin init " << endl;
   }
  
   /* the backtrackable  list of active points is put from the cell into the qinter constraint : shared pointer */

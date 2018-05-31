@@ -135,8 +135,8 @@ int main(int argc, char** argv) {
         Function* m_f0;
 	Ctc* ctc0;
 	Variable v(3);
-	double R[p];
-	double alpha[p];
+	//	double R[p];
+	//	double alpha[p];
 	clock_t start, start0, end;
 	int nb_cells=0;
 	start = clock();

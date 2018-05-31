@@ -1,4 +1,6 @@
-parameter estimation examples
+parameter estimation examples  for shape recognition : all the examples run in the ICTAI 2015 paper.
+
+source files :
 
 line     estim_line_bc.cpp         (model with 2 quadrants)
          estim_line_abc.cpp	   (model with norm constraint : a^2+b^2=1)
@@ -24,7 +26,7 @@ optimization :   estim_line_bc_optim.cpp
                  estim_essentialmatnorm_searchstrategy.cpp :  essential matrix
 
 
-ICTAI examples
+ICTAI examples : parameters for obtaining all solutions
 
 ./estim_plane 
 ex1           ./estim_plane 1 1000 1 0 0 0 rr2 0.000007 0.0007 1
@@ -40,4 +42,12 @@ ex9           ./estim_plane 6 4000 1 0 0 0 rr2 0.000007 0.0007 1
 circle1       ./estim_circle 0 11 57 1 0 0 0 rr2
 circle2       ./estim_circle 1 11 57 1 0 0 0 rr2
 
+house40      ./estim_house house40 1.e-3 21 1.e-3 1.e-2 1 0 0 rr2
+house44      ./estim_house house40 1.e-3 75 1.e-4 1.e-2 1 0 0 rr2
+(the number of solutions found depends on the tolerance and precision parameters)
 
+
+find the solution optimizing the number of inliers
+house40       ./estim_house_optim house40 1.e-3 21 1.e-4 1.e-2 1 0 0 rr2   (38 inliers)
+house44       ./estim_house_optim house44 1.e-3 75 1.e-4 1.e-2 1 0 0 rr2   (171 inliers in 178s.)
+house44       ./estim_house_abcd_optim house44 1.e-3 75 1.e-4 1.e-2 1 0 0 rr2 (171 inliers in 114s.)
