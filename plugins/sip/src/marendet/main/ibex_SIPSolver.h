@@ -11,8 +11,8 @@
 #ifndef __SIP_IBEX_SIPSOLVER_H__
 #define __SIP_IBEX_SIPSOLVER_H__
 
-#include "contractors/ibex_CellCtc.h"
-#include "system/ibex_SIPSystem.h"
+#include "ibex_CellCtc.h"
+#include "ibex_SIPSystem.h"
 
 #include "ibex_BitSet.h"
 #include "ibex_Bsc.h"

@@ -11,7 +11,7 @@
 #ifndef __SIP_IBEX_CTCFILTERSICPARAMETERS_H__
 #define __SIP_IBEX_CTCFILTERSICPARAMETERS_H__
 
-#include "system/ibex_SIPSystem.h"
+#include "ibex_SIPSystem.h"
 
 #include "ibex_CellCtc.h"
 #include "ibex_IntervalVector.h"

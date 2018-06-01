@@ -11,8 +11,8 @@
 #ifndef __SIP_IBEX_CTCBLANKENSHIP_H__
 #define __SIP_IBEX_CTCBLANKENSHIP_H__
 
-#include "numeric/ibex_RelaxationLinearizerSIP.h"
-#include "system/ibex_SIPSystem.h"
+#include "ibex_RelaxationLinearizerSIP.h"
+#include "ibex_SIPSystem.h"
 
 #include "ibex_CellCtc.h"
 #include "ibex_IntervalVector.h"

@@ -11,7 +11,7 @@
 #ifndef __SIP_IBEX_CTCFWDBWDNLC_H__
 #define __SIP_IBEX_CTCFWDBWDNLC_H__
 
-#include "system/ibex_NLConstraint.h"
+#include "ibex_NLConstraint.h"
 
 #include "ibex_Ctc.h"
 #include "ibex_Interval.h"
