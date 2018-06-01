@@ -8,12 +8,14 @@ plane :  ICTAI 2015 examples
          estim_plane.cpp            (model with 4 octants)
 	 estim_plane_abcd.cpp       (model with norm constraint : a^2+b^2+c^2 = 1)
 	 estim_house.cpp
+         estim_house_abcd.cpp
 circle   estim_circle.cpp
 	 
          
 
 
-
+For each model, there exists an optimization variant , searching for the solution maximizing the
+number of inliers.
 
 
 optimization :   estim_line_bc_optim.cpp
@@ -21,23 +23,25 @@ optimization :   estim_line_bc_optim.cpp
                  estim_plane_optim.cpp
                  estim_plane_abcd_optim.cpp	
 		 estim_house_optim.cpp
+                 estim_house_abcd_optim.cpp
                  estim_circle_optim.cpp
 
                  estim_essentialmatnorm_searchstrategy.cpp :  essential matrix
 
-
-ICTAI examples : parameters for obtaining all solutions
+____________________________________________________________________________________
+ICTAI examples : parameters for obtaining all solutions 
+with the linear model with 4 octants  and the specialized bisection heuristics (cf paper)
 
 ./estim_plane 
-ex1           ./estim_plane 1 1000 1 0 0 0 rr2 0.000007 0.0007 1
-ex2           ./estim_plane 2 1000 1 0 0 0 rr2 0.000007 0.0007 1
-ex3           ./estim_plane 3 1000 1 0 0 0 rr2 0.000007 0.0007 1
-ex4           ./estim_plane 4 1000 1 0 0 0 rr2 0.000007 0.0007 1
-ex5           ./estim_plane 5 1000 1 0 0 0 rr2 0.000007 0.0007 1
-ex6           ./estim_plane 6 1000 1 0 0 0 rr2 0.000007 0.0007 1
-ex7           ./estim_plane 4 4000 1 0 0 0 rr2 0.000007 0.0007 1
-ex8           ./estim_plane 5 4000 1 0 0 0 rr2 0.000007 0.0007 1
-ex9           ./estim_plane 6 4000 1 0 0 0 rr2 0.000007 0.0007 1
+ex1           ./estim_plane 1 1000 1 0 0 0 rr2 0.000007 0.0007 1  (4 planes)
+ex2           ./estim_plane 2 1000 1 0 0 0 rr2 0.000007 0.0007 1  (4 planes)
+ex3           ./estim_plane 3 1000 1 0 0 0 rr2 0.000007 0.0007 1  (4 planes)
+ex4           ./estim_plane 4 1000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
+ex5           ./estim_plane 5 1000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
+ex6           ./estim_plane 6 1000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
+ex7           ./estim_plane 4 4000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
+ex8           ./estim_plane 5 4000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
+ex9           ./estim_plane 6 4000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
 
 circle1       ./estim_circle 0 11 57 1 0 0 0 rr2
 circle2       ./estim_circle 1 11 57 1 0 0 0 rr2
@@ -47,7 +51,12 @@ house44      ./estim_house house40 1.e-3 75 1.e-4 1.e-2 1 0 0 rr2
 (the number of solutions found depends on the tolerance and precision parameters)
 
 
+
+
 find the solution optimizing the number of inliers
-house40       ./estim_house_optim house40 1.e-3 21 1.e-4 1.e-2 1 0 0 rr2   (38 inliers)
-house44       ./estim_house_optim house44 1.e-3 75 1.e-4 1.e-2 1 0 0 rr2   (171 inliers in 178s.)
-house44       ./estim_house_abcd_optim house44 1.e-3 75 1.e-4 1.e-2 1 0 0 rr2 (171 inliers in 114s.)
+the strategy is Feasible Diving (can be changed in the source file)
+
+house40       ./estim_house_optim house40 1.e-3 21 1.e-4 1.e-4 1 0 0 rr2   (38 inliers en 1.4s)
+house44       ./estim_house_optim house44 1.e-3 75 1.e-4 1.e-4 1 0 0 rr2   (171 inliers in 191s.)
+house40       ./estim_house_abcd_optim house40 1.e-3 21 1.e-4 1.e-4 1 0 0 rr2 (38 inliers en 17s)
+house44       ./estim_house_abcd_optim house44 1.e-3 75 1.e-4 1.e-4 1 0 0 rr2 (171 inliers in 188s.)
