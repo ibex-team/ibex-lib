@@ -290,7 +290,7 @@ namespace ibex {
       {
 	if (ctcq.q < qvalid+epsobj)
 	  ctcq.q = qvalid+epsobj;
-	cout << " updating bestsolpointnumber " << endl;
+	//	cout << " updating bestsolpointnumber " << endl;
 	bestsolpoint=newvalidpoint1;
 	bestsolpointnumber=qvalid;
 	postsolution();
@@ -667,7 +667,8 @@ namespace ibex {
 
 	  }
 	  if (qvalid1 > bestsolpointnumber)
-	    cout << " meilleur 2eme appel " << stat <<  "res1 " << res1 << " qvalid " << qvalid1 <<  endl;
+	    if (trace)
+	      cout << " meilleur 2eme appel " << stat <<  "res1 " << res1 << " qvalid " << qvalid1 <<  endl;
 	//
 	//
 	    /*

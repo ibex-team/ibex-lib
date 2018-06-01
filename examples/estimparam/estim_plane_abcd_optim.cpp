@@ -237,7 +237,15 @@ int main(int argc, char** argv) {
 	int nb_cells=0;
 	start = clock();
 	int Q0=Q;
-	CtcFwdBwd* ctcnorm = new CtcFwdBwd(*new Function(v,sqr(v[0])+sqr(v[1])+sqr(v[2]) -1));
+	SystemFactory fac;
+	fac.add_var(v);
+
+
+	Function* fnorm = new Function(v,sqr(v[0])+sqr(v[1])+sqr(v[2]) -1);
+	CtcFwdBwd* ctcnorm = new CtcFwdBwd(*fnorm);
+	fac.add_ctr(*fnorm);
+	System sys(fac);
+	//	CtcFwdBwd* ctcnorm = new CtcFwdBwd(*new Function(v,sqr(v[0])+sqr(v[1])+sqr(v[2]) -1));
         cout << " avant contraintes " << endl;
 	for (int i=0; i<p; i++) {
 	  /*		
@@ -387,16 +395,14 @@ int main(int argc, char** argv) {
 	    Ctc* ctcs;
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
-	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,1);
-	    //	    SolverQInter s(*ctcs,*bs,buff,ctcq);
-	    //	    SolverQInter s(ctcf,*bs,buff,ctcq);
-	    //	    SolverQInter s(ctcqf0,*bs,buff,*ctcq);
-
-	    //Solver s (*ctcs,*bs,buff);
+	    double epscont =1.e-4;
+	    SolverOptConstrainedQInter s(sys,ctcqf0,*bs,str,*ctcq,epscont, 2);
+	    
 	    s.timeout = 10000;
-	    s.trace=0;
+	    s.trace=1;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
+	    s.tolerance_constraints_number=10000;  // no second call for feasible point 
 	    cout << " avant resolution " << endl;
 
 	    IntervalVector res=s.solve(box);
@@ -404,13 +410,9 @@ int main(int argc, char** argv) {
 	    cout << "Number of branches : " << s.nb_cells << endl;
 	    cout << "time used : " << s.time << endl;
 	    nb_cells +=s.nb_cells;
-	    /*
-	     s.report_maximal_solutions(res);
-	     vector <int> maxsolinliers;
-	     s.keep_one_solution_pergroup(res,maxsolinliers );
-	    */
+	    s.report_possible_inliers();
   
-
+	    s.report_solution();
 	
 	for (int i=0; i<p; i++)
 	  {delete m_func[i];

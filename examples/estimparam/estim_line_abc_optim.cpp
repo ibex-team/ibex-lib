@@ -215,14 +215,15 @@ int main(int argc, char** argv) {
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
 	    
-	    
-	    SolverOptConstrainedQInter s(sys,ctcqf0,bs,str,*ctcq,2);
+	    double epscont =1.e-4;
+	    SolverOptConstrainedQInter s(sys,ctcqf0,bs,str,*ctcq,epscont, 2);
 	    
 	    s.timeout = 1000;
 	    s.trace=1;
 	    s.str.with_oracle=0;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
+	    //s.tolerance_constraints_number=10000;  // no second call for feasible point 
 	    if (flist==1)
 	      s.str.with_storage=true;
 	    else

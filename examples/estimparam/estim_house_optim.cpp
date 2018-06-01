@@ -73,27 +73,10 @@ int main(int argc, char** argv) {
 	cout << "nz " << nz << endl;
 	  
 
-	//	int Q2= Q*Qprop;
-	int Q1=27;
-	//	int Q1=9;
-	//	int Q2= 4;
-	int Q2= 3;
-	//	int NT2= 5.01 / (p * (pow (Qprop,3)));
-	//	int NT2= 4.5 / (p * (pow (Qprop,3))) + 1;
-	int NT1=3;
-	int NT2=5;
-	//	int NT1= 12.01 / (p * (pow (Qprop,2)));
-	//int NT1= 9.01 / (p * (pow (Qprop,2)));
+
 	int K=1;
-	int np;
+	int np=p;
 
-	if (K==1)np=p;
-	else if (K==2) {np=NT1*p;Q=Q1;}
-	else {np=NT2*p;Q=Q2;}
-
-
-
-	Function ***m_fun;
 
 	double ** linfun;
 
@@ -110,13 +93,14 @@ int main(int argc, char** argv) {
 
 	Array<Ctc> m_ctc(p);
 	Array<Ctc> m_ctc1(np);
-
 	Function* m_func[p] ;	
         Function* m_f0;
 	Ctc* ctc0;
 	Variable v(3);
+	/*
 	double R[p];
 	double alpha[p];
+	*/
 	clock_t start, start0, end;
 	int nb_cells=0;
 	start = clock();
@@ -154,71 +138,16 @@ int main(int argc, char** argv) {
 	    }
 
 
-	    if (K==1) {
-	      for (int i=0; i<p; i++)  {
+	    for (int i=0; i<p; i++)  {
 	    /* We must be on the plane defined by v */
 		m_ctc1.set_ref(i,m_ctc[i]);
-		//		m_fun[0][i]= new Function(v,(x->at(i) +v[0]*(y->at(i)- diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-Interval(-epseq,epseq)));
+	
 		linfun[i][0]=x->at(i);
 		linfun[i][1]=y->at(i)-diry*x->at(i);
 		linfun[i][2]=z->at(i)-dirz*x->at(i);
 	      }
-	    }
-	    /*
-	    else if(K==2)
-	      {
-		for (int nt=0; nt<NT1;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = rand() % (p-1);
-		    if (j>=i) j=j+1;
-		    m_ctc1.set_ref(p*nt+i,*new CtcFixPoint (* new CtcCompo (m_ctc[i],m_ctc[j]),0.1));
-		//		m_fun[0][p*nt+i]=new Function(v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-Interval(-epseq,epseq)));
-		    
-		    linfun[p*nt+i][0][0]=x->at(i);
-		    linfun[p*nt+i][1][0]=y->at(i)-diry*x->at(i);
-		    linfun[p*nt+i][2][0]=z->at(i)-dirz*x->at(i);
 
-		//		m_fun[1][p*nt+i]=new Function(v,(x->at(j) +diry*v[0]*(y->at(j)-x->at(j))+dirz*v[1]*(z->at(j)-x->at(j))-Interval(-epseq,epseq)));	 
-		    
-		    linfun[p*nt+i][0][1]=x->at(j);
-		    linfun[p*nt+i][1][1]=y->at(j)-diry*x->at(j);
-		    linfun[p*nt+i][2][1]=z->at(j)-dirz*x->at(j);
-		  }
-	      }
-	    else if(K==3)
-	      {
-		for (int nt=0; nt<NT2;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = rand() % (p-1);
-		    int k = rand() % (p-2);
-		    if (j>=i) j=j+1;
-		    if (k >=j && k >= i) k=k+2;
-		    else
-		      {if (k >=j || k>=i ) k=k+1;
-			if (k==i || k==j) k=k+1;
-		      }
-		    m_ctc1.set_ref(p*nt+i,*new CtcFixPoint (* new CtcCompo (m_ctc[i],m_ctc[j],m_ctc[k]),0.1));
-		  //		  m_fun[0][p*nt+i]= new Function(v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-Interval(-epseq,epseq)));
-		  //		  m_fun[1][p*nt+i]= new Function(v,(x->at(j) +diry*v[0]*(y->at(j)-x->at(j))+dirz*v[1]*(z->at(j)-x->at(j))-Interval(-epseq,epseq)));
-		  //		  m_fun[2][p*nt+i]= new Function(v,(x->at(k) +diry*v[0]*(y->at(k)-x->at(k))+dirz*v[1]*(z->at(k)-x->at(k))-Interval(-epseq,epseq)));
-
-		    
-		    linfun[p*nt+i][0][0]=x->at(i);
-		    linfun[p*nt+i][1][0]=y->at(i)-diry*x->at(i);
-		    linfun[p*nt+i][2][0]=z->at(i)-dirz*x->at(i);
-
-		    linfun[p*nt+i][0][1]=x->at(j);
-		    linfun[p*nt+i][1][1]=y->at(j)-diry*x->at(j);
-		    linfun[p*nt+i][2][1]=z->at(j)-dirz*x->at(j);
-
-		    linfun[p*nt+i][0][2]=x->at(k);
-		    linfun[p*nt+i][1][2]=y->at(k)-diry*x->at(k);
-		    linfun[p*nt+i][2][2]=z->at(k)-dirz*x->at(k);
-		  }
-
-	      }
-	    */
-
+	    
 	    double _box[3][2];
 
 	    if (diry==1) {_box[0][0] = 0;
@@ -232,8 +161,6 @@ int main(int argc, char** argv) {
 	    _box[2][1]=100;
 	
 	    IntervalVector box(3,_box);
-
-	    vector<IntervalVector> resgroup;
 
 
 	    Vector prec(3);
@@ -259,7 +186,7 @@ int main(int argc, char** argv) {
 	    CellHeapQInter buff;
 	    BeamSearch str(buff);
 	    //	    BestFirstSearch str(buff);
-	    //RoundRobin bs (prec,0.5);
+
 	    Bsc * bs;
 	    if (bisect=="rr")
 	      bs = new RoundRobin(prec, 0.5);
@@ -267,18 +194,13 @@ int main(int argc, char** argv) {
 	      bs= new RoundRobinNvar(2,prec,0.5);
 
 
-	    //LargestFirst bs (prec,0.45);
+	    //bs = new LargestFirst (prec,0.5);
 	    /* Main optimization loop */
 
-	    //CtcQInterProjF ctcq(3,m_ctc1,Q);
-	    //	CtcQInterProjF ctcq(3,m_ctc1,K,m_fun,Q);
-	    
-	    //	    CtcQInterAff ctcq(3,m_ctc1,Q,m_fun,QINTERPROJ);
 	    CtcQInterAffPlane ctcq(n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ);
 	    	    
-	    // CtcQInter2Plane ctcq(n,m_ctc1,linfun,epseq,Q);
-	    Ctc3BCid cid(ctcq,5,1,1);
-	    CtcCompo ctcid(ctcq ,cid);
+	    //	    Ctc3BCid cid(ctcq,5,1,1);
+	    //	    CtcCompo ctcid(ctcq ,cid);
             CtcCompo ctcqf0(*ctc0,ctcq);
 
 	    CtcFixPoint ctcf(ctcqf0, 1);
@@ -319,7 +241,7 @@ int main(int argc, char** argv) {
 	end = clock();
 	totaltime += ((double)(end)-(double)(start))/CLOCKS_PER_SEC;
 	start= clock();
-
+	delete bs;
 	  }
 
 	

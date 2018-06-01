@@ -13,6 +13,7 @@ using namespace ibex;
 /*
  * 
  * Detects plan in real 3d point clouds using q-intersection. 
+ * with internal constraint  a^2+b^2+c^2=1
  * 
  * 
  * 
@@ -89,32 +90,14 @@ int main(int argc, char** argv) {
 	  
 
 
-
-	//	int Q2= Q*Qprop;
-	int Q1=27;
-	//	int Q1=9;
-	//	int Q2= 4;
-	int Q2= 3;
-	//	int NT2= 5.01 / (p * (pow (Qprop,3)));
-	//	int NT2= 4.5 / (p * (pow (Qprop,3))) + 1;
-	int NT1=3;
-	int NT2=5;
-	//	int NT1= 12.01 / (p * (pow (Qprop,2)));
-	//int NT1= 9.01 / (p * (pow (Qprop,2)));
 	int K=1;
 	int np;
 
 	if (K==1)np=p;
-	else if (K==2) {np=NT1*p;Q=Q1;}
-	else {np=NT2*p;Q=Q2;}
 
 
-
-	Function ***m_fun;
 	double ** linfun;
-        m_fun=new Function **[K];
-	for (int i=0; i<K; i++)
-	  m_fun[i]=new Function*[np];
+       
 
 	linfun = new double*[p];
 	for (int i=0; i<p; i++)
@@ -141,15 +124,19 @@ int main(int argc, char** argv) {
 
 	int Qvalid=Q;
 	cout << np << "  " << Q0 << " " << Qvalid << " " << epseq << endl;
-	CtcFwdBwd* ctcnorm = new CtcFwdBwd(*new Function(v,sqr(v[0])+sqr(v[1])+sqr(v[2]) -1));
-        cout << " avant contraintes " << endl;
+	Function* fnorm = new Function(v,sqr(v[0])+sqr(v[1])+sqr(v[2]) -1);
+	CtcFwdBwd* ctcnorm = new CtcFwdBwd(*fnorm);
+	SystemFactory fac;
+	fac.add_var(v);
+	fac.add_ctr(*fnorm);
+	System sys(fac);
 	for (int i=0; i<p; i++) {
 	       m_func[i] = new Function(v,(v[0]*x->at(i)
 				      +v[1]*y->at(i)+v[2]*z->at(i)-v[3]-Interval(-epseq,epseq)));
 
 	       m_ctc.set_ref(i,(*new CtcFwdBwd(*m_func[i])));
 
-	    if (K==1) {
+	   
 	      for (int i=0; i<p; i++)  {
 	    /* We must be on the plane defined by v */
 		m_ctc1.set_ref(i,m_ctc[i]);
@@ -161,46 +148,9 @@ int main(int argc, char** argv) {
 		linfun[i][2]=y->at(i);
 		linfun[i][3]=z->at(i);
 	      }
-	    }
-	    else if(K==2)
-	      {
-		for (int nt=0; nt<NT1;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = rand() % (p-1);
-		    if (j>=i) j=j+1;
-		    m_ctc1.set_ref(p*nt+i,*new CtcFixPoint (* new CtcCompo (m_ctc[i],m_ctc[j]),0.1));
-		//		m_fun[0][p*nt+i]=new Function(v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-Interval(-epseq,epseq)));
-		    
-		    
-		//		m_fun[1][p*nt+i]=new Function(v,(x->at(j) +diry*v[0]*(y->at(j)-x->at(j))+dirz*v[1]*(z->at(j)-x->at(j))-Interval(-epseq,epseq)));	 
-		    
-		    
-		  }
-	      }
-	    else if(K==3)
-	      {
-		for (int nt=0; nt<NT2;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = rand() % (p-1);
-		    int k = rand() % (p-2);
-		    if (j>=i) j=j+1;
-		    if (k >=j && k >= i) k=k+2;
-		    else
-		      {if (k >=j || k>=i ) k=k+1;
-			if (k==i || k==j) k=k+1;
-		      }
-		    m_ctc1.set_ref(p*nt+i,*new CtcFixPoint (* new CtcCompo (m_ctc[i],m_ctc[j],m_ctc[k]),0.1));
-		  //		  m_fun[0][p*nt+i]= new Function(v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-Interval(-epseq,epseq)));
-		  //		  m_fun[1][p*nt+i]= new Function(v,(x->at(j) +diry*v[0]*(y->at(j)-x->at(j))+dirz*v[1]*(z->at(j)-x->at(j))-Interval(-epseq,epseq)));
-		  //		  m_fun[2][p*nt+i]= new Function(v,(x->at(k) +diry*v[0]*(y->at(k)-x->at(k))+dirz*v[1]*(z->at(k)-x->at(k))-Interval(-epseq,epseq)));
-
-		    
-		    
-		  }
-
-	      }
 	}
-	    
+	   
+	 
 
 	    double _box[4][2];
 	    for (int j=0; j<3; j++) {
@@ -223,7 +173,8 @@ int main(int argc, char** argv) {
 	    /*
 	    prec[0]=0.0005;
 	    prec[1]=0.0005;
-	    prec[2]=0.005;
+	    prec[2]=0.0005;
+	    prec[3]=0.005;
 	    */
 	    
 	    prec[0]=precbc;
@@ -234,11 +185,7 @@ int main(int argc, char** argv) {
 
 
 	    cout << "precision bissection " <<  prec[0] << " " << prec[1] << " " << prec[2] << " " << prec[3] <<  endl;
-	    /*
-	    prec[0]=0.001;
-	    prec[1]=0.001;
-	    prec[2]=0.001;
-	    */
+	    
 	    CellHeapQInter buff;
 	    BeamSearch str(buff);
 	    //CellStack buff;
@@ -256,9 +203,9 @@ int main(int argc, char** argv) {
 	    //CtcQInterProjF ctcq(3,m_ctc1,Q);
 	    //	CtcQInterProjF ctcq(3,m_ctc1,K,m_fun,Q);
 	    
-	    //	    CtcQInterAff ctcq(3,m_ctc1,Q,m_fun,QINTERPROJ,K);
+
 	    CtcQInterAffPlane ctcq(n,p,m_ctc1,linfun,epseq,Q0,QINTERPROJ);
-	    //CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q0,QINTERPROJ,K);
+
 	    	    
 
 	    //	    Ctc3BCid cid(n,ctcq,5,1,1);
@@ -269,17 +216,16 @@ int main(int argc, char** argv) {
 	    //CtcFixPoint ctcf(ctcqf0, 0.1);
 	    //CtcFixPoint ctcf(ctcid,0.1);
 
+	    double epscont =1.e-4;
+	    SolverOptConstrainedQInter s(sys,ctcf,*bs,str,ctcq,epscont,2);
 
-	    SolverOptQInter s(ctcf,*bs,str,ctcq,2);
-	    //	    Solver s(ctcf,*bs,buff);
-	    //	    s.onesol_permaximalset=true;
 	    s.str.with_oracle=false;
 	    s.str.with_storage=true;
 	    s.timeout = 3600;
 	    s.trace=1;
 	    s.nbr=nbrand;
 	    s.gaplimit=gaplimit;
-
+	    s.tolerance_constraints_number=10000;  // no second call for feasible point 
 	    IntervalVector res=s.solve(box);
 
 	    cout << "Number of branches : " << s.nb_cells << endl;
@@ -315,7 +261,7 @@ int main(int argc, char** argv) {
 	cout << " cpu time " << cputime << endl;
 	cout <<" total branch mumber " << nb_cells << endl;
 
-	  				       
+	delete bs;
 	for (int i=0; i<p; i++)
 	      delete [] linfun[i];
 	delete [] linfun;
