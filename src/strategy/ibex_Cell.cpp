@@ -48,6 +48,13 @@ pair<Cell*,Cell*> Cell::subcells(const BisectionPoint& b) const {
 		cleft->data.insert_new(it->first,child_data.first);
 		cright->data.insert_new(it->first,child_data.second);
 	}
+
+	for (IBEXMAP(DomainData*)::const_iterator it=box_data.begin(); it!=box_data.end(); it++) {
+		std::pair<DomainData*,DomainData*> child_data=it->second->down(b);
+		cleft->box_data.insert_new(it->first,child_data.first);
+		cright->box_data.insert_new(it->first,child_data.second);
+	}
+
 	return pair<Cell*,Cell*>(cleft,cright);
 }
 

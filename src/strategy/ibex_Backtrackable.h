@@ -52,14 +52,6 @@ public:
 	 */
 	virtual std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&)=0;
 
-//	virtual void sync_change(const IntervalVector& new_box, const BitSet& impact) { }
-//
-//	void sync_change(const IntervalVector& new_box);
-//
-//	virtual void sync_contract(const IntervalVector& new_box, const BitSet& impact) { }
-//
-//	void sync_contract(const IntervalVector& new_box);
-
 	/**
 	 * \brief Delete *this.
 	 */
