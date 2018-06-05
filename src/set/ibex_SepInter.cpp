@@ -24,8 +24,15 @@ SepInter::SepInter(Sep& s1, Sep& s2, Sep& s3) : Sep(s1.nb_var), list(Array<Sep>(
 
 }
 
-SepInter::SepInter(Sep &s1, Sep &s2, Sep &s3, Sep &s4) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3,s4))
-{
+SepInter::SepInter(Sep &s1, Sep &s2, Sep &s3, Sep &s4) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3,s4)) {
+
+}
+
+SepInter::SepInter(Sep &s1, Sep &s2, Sep &s3, Sep &s4, Sep& s5) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3,s4,s5)) {
+
+}
+
+SepInter::SepInter(Sep &s1, Sep &s2, Sep &s3, Sep &s4, Sep& s5, Sep& s6) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3,s4,s5,s6)) {
 
 }
 

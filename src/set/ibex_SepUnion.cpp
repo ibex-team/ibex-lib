@@ -25,6 +25,20 @@ SepUnion::SepUnion(Sep& s1, Sep& s2, Sep& s3) : Sep(s1.nb_var), list(Array<Sep>(
 
 }
 
+SepUnion::SepUnion(Sep& s1, Sep& s2, Sep& s3, Sep& s4) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3,s4)) {
+
+}
+
+
+SepUnion::SepUnion(Sep& s1, Sep& s2, Sep& s3, Sep& s4, Sep& s5) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3,s4,s5)) {
+
+}
+
+
+SepUnion::SepUnion(Sep& s1, Sep& s2, Sep& s3, Sep& s4, Sep& s5, Sep& s6) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3,s4,s5,s6)) {
+
+}
+
 void SepUnion::separate(IntervalVector &x_in, IntervalVector &x_out){
 	assert(x_in==x_out);
 	IntervalVector result_x_out(IntervalVector::empty(x_out.size()));

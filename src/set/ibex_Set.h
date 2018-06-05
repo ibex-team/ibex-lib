@@ -113,6 +113,14 @@ public:
 	double dist(const Vector& pt, bool inside) const;
 
 	/**
+	 * \brief Find a point inside the domain "near" the point "pt_in"
+	 */
+	Vector move_inside(const Vector& pt_in) const;
+
+
+	BoolInterval contains(const Vector& pt) const;
+
+	/**
 	 * \brief The leaves organized by connected components.
 	 *
 	 * Two leaves belong to the same connected component if there exists

@@ -329,6 +329,71 @@ double Set::dist(const Vector& pt, bool inside) const {
 }
 
 
+Vector Set::move_inside(const Vector& pt_in) const {
+	Vector pt(pt_in);
+
+	SetNode* node = root;
+	IntervalVector v(Rn);
+
+	while (!node->is_leaf()) {
+
+		SetBisect& b= *((SetBisect*) node);
+
+		if (pt[b.var] < b.pt) {
+			// gauche
+			if (b.left->is_leaf() && ((SetLeaf*) b.left)->status==NO) {
+				// il faut aller a droite
+				double pourcentage = (b.pt-pt[b.var])/(b.pt-v[b.var].lb());
+				v[b.var] =Interval(b.pt,v[b.var].ub());
+				pt[b.var] = b.pt + pourcentage*(v[b.var].ub()- b.pt);
+				node = b.right;
+
+			} else {
+				// on va a gauche
+				v[b.var] =Interval(v[b.var].lb(),b.pt);
+				node = b.left;
+			}
+		} else {
+			// droite
+			if (b.right->is_leaf() && ((SetLeaf*) b.right)->status==NO) {
+				// il faut aller a gauche
+				double pourcentage = (pt[b.var]-b.pt)/(v[b.var].ub()-b.pt);
+				v[b.var] =Interval(v[b.var].lb(),b.pt);
+				pt[b.var] = b.pt - pourcentage*(b.pt-v[b.var].lb());
+				node = b.left;
+
+			} else {
+				// on va a droite
+				v[b.var] =Interval(b.pt,v[b.var].ub());
+				node = b.right;
+			}
+		}
+	}
+	return pt;
+}
+
+
+
+BoolInterval Set::contains(const Vector& pt) const {
+	SetNode* node = root;
+	IntervalVector v(Rn);
+	while (!node->is_leaf()) {
+		SetBisect& b= *((SetBisect*) node);
+
+		if (pt[b.var] < b.pt) {
+			// gauche
+			v[b.var] =Interval(v[b.var].lb(),b.pt);
+			node = b.left;
+		} else {
+			// on va a droite
+			v[b.var] =Interval(b.pt,v[b.var].ub());
+			node = b.right;
+		}
+	}
+	return ((SetLeaf*) node)->status;
+}
+
+
 IntervalVector Set::node_box(const SetNode* node) const {
 
 	// the first field is an ancestor
