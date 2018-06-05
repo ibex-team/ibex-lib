@@ -60,3 +60,24 @@ house40       ./estim_house_optim house40 1.e-3 21 1.e-4 1.e-4 1 0 0 rr2   (38 i
 house44       ./estim_house_optim house44 1.e-3 75 1.e-4 1.e-4 1 0 0 rr2   (171 inliers in 191s.)
 house40       ./estim_house_abcd_optim house40 1.e-3 21 1.e-4 1.e-4 1 0 0 rr2 (38 inliers en 17s)
 house44       ./estim_house_abcd_optim house44 1.e-3 75 1.e-4 1.e-4 1 0 0 rr2 (171 inliers in 188s.)
+
+______________________________________________________________________
+
+ESSENTIAL MATRIX EXAMPLE
+
+test2  FD
+../estim_essentialmatnorm_searchstrategy orig_pts.txt 0 40 calib_matrices.txt 10 0.002 2 0.0001 0.0001 0 0 0 2 1 1000 1
+result : [35 36] time used 508.27 total branch number 678592
+ best sol with 35 inliers 
+ (0.009378751559348156 ; -0.2596407702169354 ; 0.01500440077763294 ; -0.08838834664831837 ; -9.999999443961737e-10 ; -0.7013007852596286 ; -0.01777975593112469 ; 0.657406221535742 ; 0.008554807645722651)
+
+test2 BFS 
+../estim_essentialmatnorm_searchstrategy orig_pts.txt 0 40 calib_matrices.txt 10 0.002 2 0.0001 0.0001 0 0 0 2 2 1000 1
+result [35 36] time used 654.743371  total branch number 746002
+ best sol with 35 inliers 
+ (0.009569517175088257 ; -0.2625545098628871 ; 0.01657281618405977 ; -0.1008179600363631 ; -0.001369630657514475 ; -0.6996501478652437 ; -0.01649447393936802 ; 0.6561923868005642 ; 0.007965118782285366)
+
+test2 DFS depthlimit 40
+../estim_essentialmatnorm_searchstrategy orig_pts.txt 0 40 calib_matrices.txt 10 0.002 2 0.0001 0.0001 0 0 40 2 0 1000 1
+result [35 37]  time used 486.7480  total branch number 693534
+ (0.01084900751602938 ; -0.2611652450463707 ; 0.01686764659042575 ; -0.09432748984065703 ; -9.999999443961737e-10 ; -0.7005066061409219 ; -0.02025762149894849 ; 0.6566948222358425 ; 0.01001515301997218)

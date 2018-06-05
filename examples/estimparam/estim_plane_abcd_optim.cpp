@@ -396,8 +396,11 @@ int main(int argc, char** argv) {
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
 	    double epscont =1.e-4;
-	    SolverOptConstrainedQInter s(sys,ctcqf0,*bs,str,*ctcq,epscont, 2);
+	    SolverOptConstrainedQInter s(sys,ctcqf0,*bs,str,*ctcq,epscont);
 	    
+	    if (flist==1)
+	      s.str.with_storage=true;
+
 	    s.timeout = 10000;
 	    s.trace=1;
 	    s.nbr=nbrand;

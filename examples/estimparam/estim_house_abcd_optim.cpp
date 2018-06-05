@@ -1,5 +1,4 @@
 #include "ibex.h"
-
 #include <iostream>
 #include <stdlib.h>
 #include <ctime>
@@ -217,7 +216,7 @@ int main(int argc, char** argv) {
 	    //CtcFixPoint ctcf(ctcid,0.1);
 
 	    double epscont =1.e-4;
-	    SolverOptConstrainedQInter s(sys,ctcf,*bs,str,ctcq,epscont,2);
+	    SolverOptConstrainedQInter s(sys,ctcf,*bs,str,ctcq,epscont);
 
 	    s.str.with_oracle=false;
 	    s.str.with_storage=true;

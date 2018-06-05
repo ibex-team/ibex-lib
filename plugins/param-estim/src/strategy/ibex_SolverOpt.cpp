@@ -29,9 +29,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 
   void SolverOpt::start(const IntervalVector& init_box) {
 	str.buffer.flush();
-
 	Cell* root= root_cell(init_box); 
-
 	// add data required by this solver
 	//	root->add<BisectedVar>();
 
@@ -40,7 +38,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 	second_cell=0;
 
 	handle_cell(*root);
-
+	cout << "init box " << root->box << endl;
         str.push_cell(*root);
 	init_buffer_info(*root);
 
@@ -58,14 +56,10 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
   void SolverOpt::handle_cell (Cell & c){
     
     precontract(c);
-
     if (! (c.box.is_empty())) {ctc.contract(c.box);
       postcontract(c);}
-   
     if (!(c.box.is_empty()))  other_checks(c);
-
     if (!(c.box.is_empty()))  validate(c);
-
   }
 	  
 	  
@@ -78,13 +72,14 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
   bool SolverOpt::optimize() {
     Timer timer;
     timer.start();
+    cout << " trace " << trace <<  " nb_cells " << nb_cells << endl;
 	try  {
 	  while (! (str.empty_buffer())) {
 
 		  if (trace==2 && nb_cells > 0) {cout << str.buffer << endl; cout <<str.buffer.top()->box << endl;}
 
 			Cell* c=str.top_cell();
-
+			//	cout << " box " << c->box << endl;
 			try {
 			  /*
 			  pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
@@ -93,6 +88,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 			  pair<Cell*,Cell*> new_cells = bisect(*c,boxes.first,boxes.second);
 			  */
 			  pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
+
 
 			  update_buffer_info(*c);	
 			  str.pop_cell();
@@ -104,7 +100,9 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 			  Cell* c2= new_cells.second;
 			  second_cell=1;
 			  handle_cell(*c2);
+ 
 			  str.push_cells(*c1,*c2);
+
 			  if (c1->box.is_empty()) delete c1;
 			  if (c2->box.is_empty()) delete c2;
 			  delete c;
@@ -122,9 +120,9 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 			  
 			  delete str.pop_cell();
 			  
-			  //			  return !str.buffer.empty();
-				  
+
 			}
+
 			if (timeout>0) timer.check(timeout); 
 			time = timer.get_time();
 
@@ -151,7 +149,6 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 
 
 IntervalVector SolverOpt::solve(const IntervalVector& init_box) {
-
 	start(init_box);
 	optimize();
 	return bestsolpoint;

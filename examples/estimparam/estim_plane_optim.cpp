@@ -10,7 +10,7 @@ using namespace ibex;
  
 /*
  * 
- * Detects plan in noisy pictures using q-intersection. 
+ * Detects plan with maximal number of inliers in noisy pictures using q-intersection. 
  *
  * 
  * 
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 	  case 6 : {Qi=0.0101*NP;break;}
 	  }
 
-	//	cout << " pb " << pb << " nb points " << NP << " Q " << Qi << endl;
+	cout << " pb " << pb << " nb points " << NP << " Q " << Qi << endl;
 	for (int i=0;i<NP;i++)
 	  z->push_back(rand()%256);
         if (pb <=3)
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 	    x->push_back(35- y->at(65*i+14)  + z-> at(65*i+14)+ (((double)rand()/(double)RAND_MAX)*0.001));
 	    x->push_back(40- y->at(65*i+15)  + z-> at(65*i+15)+ (((double)rand()/(double)RAND_MAX)*0.001));
 
-	     x->push_back(350- y->at(65*i+16) - z-> at(65*i+16)+ (((double)rand()/(double)RAND_MAX)*0.001));
+	    x->push_back(350- y->at(65*i+16) - z-> at(65*i+16)+ (((double)rand()/(double)RAND_MAX)*0.001));
 	    x->push_back(3- y->at(65*i+17)  + z-> at(65*i+17)+ (((double)rand()/(double)RAND_MAX)*0.001));	
 	    x->push_back(-220+ y->at(65*i+18)  + z-> at(65*i+18)+ (((double)rand()/(double)RAND_MAX)*0.001));	
 	    x->push_back( 12 + y->at(65*i+19)  - z-> at(65*i+19)+ (((double)rand()/(double)RAND_MAX)*0.001));	
@@ -197,12 +197,12 @@ int main(int argc, char** argv) {
 	else {np=NT2*p;Q=Q2;}
 	cout << np << "  " << Q << endl;
 
-	
+	/*
 	Function ***m_fun;
         m_fun=new Function **[K];
 	for (int i=0; i<K; i++)
 	  m_fun[i]=new Function*[np];
-	
+	*/
 	double ** linfun;
         linfun = new double*[p];
 	for (int i=0; i<p; i++)
@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
 
 	  { 
 
-	    //	    int pmax=0;
+
 	    Array<Ctc> m_ctc(p);
 	    Array<Ctc> m_ctc1(np);
 	    
@@ -290,11 +290,8 @@ int main(int argc, char** argv) {
 		linfun[i][1]=y->at(i)-diry*x->at(i);
 		linfun[i][2]=z->at(i)-dirz*x->at(i);
 	      }
-	      cout << " apres linfun " << endl;
 	    }
 	  
-	    vector<IntervalVector> resgroup;
-
 
 	    Vector prec(3);
 
@@ -320,11 +317,11 @@ int main(int argc, char** argv) {
 	    proba[0]=0.33;
 	    proba[1]=0.33;
 	    proba[2]=0.34;
-	    //CellStack buff;
+	    //	    CellStack buff;
 	    CellHeapQInter buff;
 	    BeamSearch str(buff);
 	     //	    BestFirstSearch str (buff);
-	     //	     DepthFirstSearch str (buff);
+	    //	    DepthFirstSearch str (buff);
 	    Bsc * bs;
 	    if (bisect=="rr")
 	      bs = new RoundRobin(prec, 0.5);
@@ -333,8 +330,6 @@ int main(int argc, char** argv) {
 	    else if (bisect=="lf")
 	      bs = new LargestFirst(prec,0.5);
 	    
-	    // RoundRobinQInter bs (2,prec,0.5);
-	    //	ProbaBisect bs (prec, proba, 0.45);
 
             CtcQInter* ctcq;	    
 	    //	    CtcQInter ctcq(3,m_ctc1,Q);
@@ -365,9 +360,7 @@ int main(int argc, char** argv) {
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
 
-	    //	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,1);
-	    
-	    SolverOptQInter s(*ctcs,*bs,str,*ctcq,2);
+	    SolverOptQInter s(*ctcs,*bs,str,*ctcq);
 	    s.str.with_oracle=0;
 	    //
 	    if (flist==1)
@@ -408,7 +401,7 @@ int main(int argc, char** argv) {
 
 	m_ctc.clear();
 	m_ctc1.clear();
-	cout << " fin quadrant " << endl;
+	cout << " end of octant " << endl;
 	end = clock();
 	totaltime += ((double)(end)-(double)(start))/CLOCKS_PER_SEC;
 	start= clock();

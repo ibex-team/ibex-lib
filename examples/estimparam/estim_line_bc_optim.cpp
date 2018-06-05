@@ -213,9 +213,8 @@ int main(int argc, char** argv) {
 	    if (fixpoint==0) ctcs=ctcq;
 	    else ctcs=&ctcf;
 	    
-	    //	    SolverQInter s(*ctcs,bs,buff,ctcq);
-	    //	    SolverQInter s(ctcf,bs,buff,ctcq);
-	    SolverOptQInter s(*ctcs,bs,str,*ctcq,2);
+
+	    SolverOptQInter s(*ctcs,bs,str,*ctcq);
 	    //Solver s (*ctcs,bs,buff);
 	    s.timeout = 1000;
 	    s.str.with_oracle=0;

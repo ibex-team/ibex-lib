@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
-// Last Update : Jan 8, 2016
+// Last Update : Jun 4, 2018
 //============================================================================
 
 #ifndef __IBEX_SOLVEROPTQINTER_H__
@@ -41,8 +41,8 @@ Q-intersection contractors.
   class SolverOptQInter : public SolverOpt {
   public :
       
-    SolverOptQInter (Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq, int optimbuffer);
-    ~SolverOptQInter();
+    SolverOptQInter (Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq);
+
     CtcQInter& ctcq ;  // the QInter contractor
  
 
@@ -61,8 +61,7 @@ Q-intersection contractors.
   protected :
   
    IntervalVector initbox;
-   int* valstack;   
-   int optimbuffer;  // 1 dfs, 2 bfs or beamsearch
+
    void init();
    int qposs;
    int qvalid;  
@@ -108,7 +107,7 @@ A linear solver is used for finding a feasible point.
 
    System & sys;
 
-   SolverOptConstrainedQInter(System& sys, Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq, double eps_cont, int optimbuffer=1);
+   SolverOptConstrainedQInter(System& sys, Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq, double eps_cont);
    ~SolverOptConstrainedQInter();
    int tolerance_constraints_number;
  protected:

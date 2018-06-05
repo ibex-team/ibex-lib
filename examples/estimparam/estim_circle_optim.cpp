@@ -232,18 +232,14 @@ int main(int argc, char** argv) {
        	else
 	  ctcs=&ctcq;
 	cout << "avant resolution " << endl;
-	//SolverQInter s(*ctcs,*bs,buff,ctcq);
-	//	OptimQInter s(*ctcs,*bs,buff,ctcq);
-	//OptimizerQInter s(*ctcs,*bs,buff,ctcq);
-	//	Solver s(*ctcs,*bs,buff);
-	//	SolverOptQInter s (*ctcs,*bs,str,ctcq,2);
-	SolverOptQInter s (*ctcs,*bs,str,ctcq,1);
+
+	SolverOptQInter s (*ctcs,*bs,str,ctcq);
 	s.timeout = 3600;
 	s.trace=1;
 	s.nbr=nbrand;
 	s.gaplimit=gaplimit;
 	s.str.with_storage=true;
-	s.str.with_oracle=0;
+	s.str.with_oracle=false;
 
 	IntervalVector res=s.solve(box);
 

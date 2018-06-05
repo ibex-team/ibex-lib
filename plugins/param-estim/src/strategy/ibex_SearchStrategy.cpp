@@ -16,7 +16,7 @@ using namespace std;
 
 namespace ibex {
 
-  SearchStrategy::SearchStrategy (CellBuffer& buffer) : buffer(buffer) {}
+  SearchStrategy::SearchStrategy (CellBuffer& buffer) : buffer(buffer) {with_oracle=false; with_storage=false; max_val_freq=10000;}
   
   void SearchStrategy::push_cells(Cell&c1, Cell& c2){
     if (! (c1.box.is_empty())) buffer.push(&c1);
@@ -40,19 +40,44 @@ namespace ibex {
 
     //return ctcq->midactivepoints_count(c.box.mid());
   }
-
+  void SearchStrategy::print_max_val() {;}
+  void SearchStrategy::init_valstack(int n) {;}
+  void SearchStrategy::increment_valstack(int k, int n){;}
+  void SearchStrategy::decrement_valstack(int k, int n){;}
+  void SearchStrategy::set_valstack(int k, int n){;}
 
   void SearchStrategy::contract_buffer ()
   {;}
 
   DepthFirstSearch::DepthFirstSearch (CellBuffer& buffer) : SearchStrategy(buffer) {};
-
+  DepthFirstSearch::~DepthFirstSearch () {delete [] valstack;}
   Cell* DepthFirstSearch::pop_cell() {
     Cell* c = buffer.top();
     points1 = c->get<QInterPoints>().points;
     points2 = c->get<QInterPoints>().points;
     return buffer.pop();
   }
+
+  void DepthFirstSearch:: init_valstack(int n){
+    measure_nb=n;
+    valstack = new int [n];
+
+  for (int i=0; i< n; i++)
+    valstack[i]=0;
+  }
+  void DepthFirstSearch::print_max_val(){
+    int possin =0;
+    for (int i = measure_nb;  i >0; i--)
+      if (valstack[i]) {possin=i; 
+	break;
+      }
+    cout << "qmax " << possin << endl;
+	
+  }
+
+  void DepthFirstSearch::increment_valstack(int k, int n){ valstack[k]+=n;}  
+  void DepthFirstSearch::decrement_valstack(int k, int n){ valstack[k]-=n;}
+  void DepthFirstSearch::set_valstack(int k, int n){valstack[k]=n;}
 
   void DepthFirstSearch::push_cell(Cell&c1){
     if (!(c1.box.is_empty())) {
@@ -163,6 +188,11 @@ void BestFirstSearch::push_cell(Cell&c1){
 	cout << " buffer size after " << buffer.size()  << endl;
       }
 
+  void BestFirstSearch::print_max_val() {
+    if (!(buffer.empty()))
+      cout << " qmax " << top_cell()->get<QInterPoints>().qmax << endl;
+  }
+
   BeamSearch::BeamSearch (CellBuffer& buffer) : SearchStrategy(buffer), stackbuffer() { with_storage=false;}
   
   void BeamSearch::push_cell(Cell&c1){
@@ -172,7 +202,10 @@ void BestFirstSearch::push_cell(Cell&c1){
       stackbuffer.push(&c1);
   }
 
-
+ void BeamSearch::print_max_val() {
+   if (!(buffer.empty()))
+      cout << " qmax " << top_cell()->get<QInterPoints>().qmax << endl;
+  }
   Cell*  BeamSearch::top_cell() {
     if (!(stackbuffer.empty()))
       return stackbuffer.top();
@@ -200,6 +233,7 @@ void BestFirstSearch::push_cell(Cell&c1){
        return buffer.pop();
      }
    }
+
 
   void BeamSearch::contract_buffer()
   { cout << " buffer size before " << buffer.size() << " q " << ctcq->q << endl;

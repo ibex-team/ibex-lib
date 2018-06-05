@@ -46,6 +46,9 @@ SearchStrategy( CellBuffer& buffer);
     virtual Cell* top_cell();
     virtual bool empty_buffer();
     virtual void contract_buffer();
+    virtual void print_max_val();
+    int max_val_freq;
+    virtual void init_valstack(int n);
     list<int> points0; 
     list<int> points1;
     list<int> points2;
@@ -57,20 +60,32 @@ SearchStrategy( CellBuffer& buffer);
     int qmax_epsboxes;
     int epsboxes_possiblesols;
     int depthmax;
+    virtual void  set_valstack(int k , int n);
+    virtual void  increment_valstack(int k , int n=1);
+    virtual  void  decrement_valstack(int k , int n=1);
 protected :
-int validate_value (const Cell& c);
+    int validate_value (const Cell& c);
   };
 
 
 class DepthFirstSearch : public SearchStrategy{
 public :
   DepthFirstSearch (CellBuffer & buffer);
+  ~DepthFirstSearch();
   void push_cell(Cell&c1);
   void push_cells(Cell&c1,Cell&c2);
   Cell* pop_cell();
+  void print_max_val();
+  int max_val_freq;
+  void init_valstack(int n);
+  void  set_valstack(int k , int n);
+  void  increment_valstack(int k , int n=1);
+  void  decrement_valstack(int k , int n=1);
+
 protected :
   void push_cells_depth(Cell&c1,Cell&c2);
-
+  int* valstack;
+  int measure_nb;
 
 };
 
@@ -81,7 +96,8 @@ public:
   Cell* pop_cell();
   void push_cell(Cell&c1);
   void push_cells(Cell&c1,Cell&c2);
-void contract_buffer();
+  void print_max_val();
+  void contract_buffer();
 };
 
 class BeamSearch : public SearchStrategy{
@@ -92,6 +108,8 @@ public:
   void push_cells(Cell&c1,Cell&c2);
   Cell* pop_cell();
   Cell* top_cell();
+  
+void print_max_val();
   bool empty_buffer();
   void contract_buffer();
 };

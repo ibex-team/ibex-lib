@@ -19,16 +19,16 @@ void correspondences_read(ifstream & input, vector<double>& x11,  vector<double>
   double in;
   input >> in;
   x11.push_back(in);
-  	    cout << in << " " ;
+  //  	    cout << in << " " ;
   input >> in;
   y11.push_back(in);
-  	    cout << in << " " ;
+  //	    cout << in << " " ;
   input >> in;
   x22.push_back(in);
-  	    cout << in << " " ;
+  // 	    cout << in << " " ;
   input >> in;
   y22.push_back(in);
-  	    cout << in << " " << endl;
+  //	    cout << in << " " << endl;
 }
 
 // reading correspondences data for corridor and Valbonne 
@@ -64,29 +64,29 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
    vector<double> x22;
    vector<double> y22;
    string input_file_name=argv[1];
-   bool corridor= atoi(argv[2]);
+   bool corridor= atoi(argv[2]);  // 0 for USAC , 1 for Valbonne Church and Oxford Corridor
    
    int nbp = atoi(argv[3]);
-   cout << " corridor " << corridor << endl;
+   cout << " corridor " << corridor << endl; 
    cout << " nbp " << nbp << endl;
    string calib_file_name=argv[4];
-   //	string oracle_file_name=argv[4];
+   //	string oracle_file_name=argv[4];  // not used in DFS
 	
 	
-   int Q = atoi(argv[5]);
-   double epseq = atof(argv[6]);
-   double eps1 = atof(argv[7]);
-   double prec0= atof(argv[8]);
-   double epscont= atof(argv[9]);
-   int gaplimit = atoi (argv[10]);
-   int nbr = atoi (argv[11]);
+   int Q = atoi(argv[5]);        // minimum Q value for a solution (initial value for Q-inter algorithm)
+   double epseq = atof(argv[6]); // tolerance
+   double eps1 = atof(argv[7]);  // width of initial box (2 for a complete domain : will be restricted to -1/sqrt(2), 1/sqrt(2)) 
+   double prec0= atof(argv[8]);  // epsbox 
+   double epscont= atof(argv[9]); // tolerance for the internal constraints
+   int gaplimit = atoi (argv[10]); // for checking set of ouliers when qmax - qmin <= gap
+   int nbr = atoi (argv[11]);     // not used
 
 
-   int dmax= atoi (argv[12]);
-   int eobj= atoi (argv[13]);
+   int dmax= atoi (argv[12]);  // used for Depth First Search only : only one branch hen depth > dmax
+   int eobj= atoi (argv[13]);  // precision on the objective : 1 for the maximum precision (one integer), k for coarser precision.
 
    int searchstrategy = atoi(argv[14]); // 0 DFS  1 BeamSearch 2 BFS
-   double time0= atof(argv[15]);
+   double time0= atof(argv[15]);     // timeout
 
    cout << " Q " << Q << endl;
    cout << " tolerance " << epseq << endl;
@@ -97,13 +97,13 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 
    cout << " dmax " << dmax << endl;
    cout << " deltaobj " << eobj << endl;
-   cout << " temps limite " << time0 << endl;
+   cout << " timeout " << time0 << endl;
    srand (atoi(argv[16]));
 
    cout << input_file_name << endl;
    ifstream input(input_file_name.c_str());
    int nb_pairs;
-   if (corridor==0){
+   if (corridor==0){   // correspondences read : file format depending on corridor parameter
      input >> nb_pairs;
      cout << "nb_pairs" << nb_pairs << endl;
    }
@@ -115,6 +115,8 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
        correspondences_read(input, x11,y11,x22,y22);
    }
    x11.pop_back();y11.pop_back();x22.pop_back();y22.pop_back();
+
+   // the correspondences with multiple instances are reduced to one instance
    for (int i=0; i< x11.size() ; i++){
      int present=0;
      for (int j=0; j<i; j++)
@@ -128,14 +130,14 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
      }
    }
    
-   cout << "nb points sans doublons" << x1.size() << endl;
+   cout << "nb of single correspondences " << x1.size() << endl;
 
 
-   cout << " fin lecture points " << endl;
-	cout << calib_file_name << endl;
-	ifstream calib(calib_file_name.c_str());
-	double b1,b2,b3,b5,b6;
-	double b11,b12,b13,b15,b16;
+   cout << " end of correspondences reading " << endl;
+   cout << calib_file_name << endl;
+   ifstream calib(calib_file_name.c_str());
+   double b1,b2,b3,b5,b6;
+   double b11,b12,b13,b15,b16;
 	while (!calib.eof())
 	  {calib >> b1;
 	    calib >> b2;
@@ -337,7 +339,7 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 	Function m_essential1(v, m_essential(v) + eps);
 
 	Function m_id(v, v );
-	cout << " apres lecture " << endl;
+	//	cout << " apres lecture " << endl;
 
 	
 	double a1=1/b1;
@@ -466,7 +468,7 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 	m_ctc.set_ref(i,(*new CtcFwdBwd(*m_func[i])));
 	}
 
-	cout << " apres contraintes " << endl;
+	//	cout << " apres contraintes " << endl;
 	double _box[9][2];
 	
 	for (int j=0; j<9; j++){
@@ -499,12 +501,15 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 	IntervalVector box(9,_box);
 
 	cout << " box " << box << endl;
+
 	Vector prec(9);
         for (int j=0; j<9; j++)
 	  prec[j]=prec0;
 
 	CellBuffer * buff;
 	SearchStrategy* str;
+	cout << " searchstrategy " << searchstrategy << endl;
+
 	if (searchstrategy==0)
 	  {
 	    buff = new CellStack();
@@ -574,18 +579,14 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 
 	SolverOptConstrainedQInter* s;
 
-	if (searchstrategy ==0)
-	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,1);
-	else if (searchstrategy==1)
-	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);
-	else 
-	  s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont,2);  //BFS
+	s= new SolverOptConstrainedQInter (sys1,ctcqf0,bs,*str,ctcq,epscont);
+
 
 	//	SolverOptQInter s(ctcf,bs,buff,ctcq,1);
 	//	cout << " apres solver " << endl;
 	s->timeout = time0;
 	s->trace=1;
-	s->nbr=nbr;  // useless
+	s->nbr=nbr;  // useless  for SolverOptConstrainedQInter
 	s->epsobj=eobj;
 	s->str.depthmax=dmax;
 	s->gaplimit=gaplimit;
@@ -593,16 +594,17 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 	s->tolerance_constraints_number=10000;  // no second call for feasible point 
 	//	s->oracle=oraclemat;
 	//	cout << " oracle " << oraclemat << endl;
-	s->str.with_oracle=0;
+	s->str.with_oracle=false;
+	s->str.with_storage=false;
 
 	cout << "box init " << box << endl;
 
 	cout << "essential " << m_essential1.eval_matrix(box) << endl;
 	c_essential.contract(box);
-	cout << " box apres essential  " << box << endl;
+	cout << " box after essential  " << box << endl;
 	ctcnorm->contract(box);
-	cout << " box apres ctcnorm  " << box << endl;
-	cout << "essential apres contract " << m_essential1.eval_matrix(box) << endl;
+	cout << " box after ctcnorm  " << box << endl;
+	cout << "essential after contract " << m_essential1.eval_matrix(box) << endl;
 
 
 	cout << "determinant " << m_det->eval(box);

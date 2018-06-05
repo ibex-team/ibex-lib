@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2014
-// Last Update : May 31, 2017
+// Last Update : Jun 05, 2018
 //============================================================================
 
 
@@ -22,7 +22,7 @@ using namespace std;
 namespace ibex {
 
   
-  SolverOptQInter::SolverOptQInter ( Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq,  int optimbuffer)  : SolverOpt (ctc,bsc,str), ctcq(ctcq) , optimbuffer(optimbuffer),  initbox(ctcq.nb_var)
+  SolverOptQInter::SolverOptQInter ( Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq)  : SolverOpt (ctc,bsc,str), ctcq(ctcq) ,  initbox(ctcq.nb_var)
  { init();}
   
   /* utilitaires sur les matrices : non utilisé dans version courante
@@ -53,25 +53,7 @@ namespace ibex {
     return true;}
   */
  
-  // a mettre dans CtcQInterLinear
-
-  /*
-    if ((norm(newvalidpoint)+Interval(-epscont,epscont)).contains(1.0))
-      {IntervalMatrix mx  = func->eval_matrix(newvalidpoint);
-	return (matrix_contains(mx,0));}
-    return false;
-  */
-
-  /*	  
-
-    IntervalMatrix mx  = func->eval_matrix(newvalidpoint);
-    //    cout << " valid point " << newvalidpoint << endl;
-
-    //    cout << " check essential matrix" << mx << endl;
-    //    cout << " norm  " << norm(box) << endl;
-    return (matrix_contains(mx, 0) && norm(box).contains(1.0));
-  }
-  */
+ 
 
 
 
@@ -84,9 +66,7 @@ namespace ibex {
     str.epsboxes_possiblesols=0;
     str.qmax_epsboxes=0;
     measure_nb=ctcq.ctc_list.size() ;
-    valstack = new int [measure_nb+1];
-    for (int i=0; i< measure_nb+1; i++)
-      valstack[i]=0;
+    str.init_valstack(measure_nb+1);  // for DepthFirstSearch
     str.points0=*(ctcq.points);
     str.points1=str.points0;    
     str.points2=str.points0;
@@ -102,11 +82,11 @@ namespace ibex {
       ctcq.points=&(str.points1);
     ctcq.qmax=c.get<QInterPoints>().qmax;
     ctcq.varbiss=c.get<BisectedVar>().var;  //useless ??
-    valstack[ctcq.qmax]--;  // number of cells in stack with ctcq.qmax
+    str.decrement_valstack(ctcq.qmax);// number of cells in stack with ctcq.qmax
   }
 
   void SolverOptQInter::init_buffer_info(Cell& c){
-    valstack[ctcq.points->size()]=1;
+    str.set_valstack(ctcq.points->size(),1);
     c.get<QInterPoints>().depth=0;
   }
 
@@ -119,13 +99,13 @@ namespace ibex {
   }
 
   void SolverOptQInter::update_buffer_info (Cell& c) {
-    valstack[c.get<QInterPoints>().qmax]+=2;
+    str.increment_valstack(c.get<QInterPoints>().qmax, 2);
    
 
   }
 
   void SolverOptQInter::precontract(Cell& c) {
-    //    cout << "qmax avant contract " << c.get<QInterPoints>().qmax  << "  " << ctcq.qmax <<  endl;
+    //    cout << "qmax before contract " << c.get<QInterPoints>().qmax  << "  " << ctcq.qmax <<  endl;
     if (c.get<QInterPoints>().qmax < ctcq.q) {c.box.set_empty();}
     manage_cell_info(c);
     ctc.enable_side_effects();
@@ -133,7 +113,7 @@ namespace ibex {
   }
 
   void SolverOptQInter::postcontract(Cell& c) {
-    //    cout << "qmax apres contract " << c.get<QInterPoints>().qmax  << "  " << ctcq.qmax <<  endl;
+    //    cout << "qmax after contract " << c.get<QInterPoints>().qmax  << "  " << ctcq.qmax <<  endl;
     update_cell_info(c);
     ctcq.disable_side_effects();
     ctc.disable_side_effects();
@@ -266,11 +246,9 @@ namespace ibex {
     int psize = ctcq.points->size();
     qposs= psize;
 
-    if (trace && ( nb_cells % 10000 ==0))
-      {// cout << "optimbuffer " << optimbuffer << endl;
-      if (optimbuffer ==2 && !(str.empty_buffer()))
-	cout << " qmax " << str.top_cell()->get<QInterPoints>().qmax << endl;
-      }
+    if (trace && ( nb_cells % str.max_val_freq ==0))
+      {str.print_max_val();}
+
     //    cout << " validate : qposs " <<  qposs << "box " <<  c.box << endl;
        //in optimization ctcq.qmax can be used as qposs for the stopping criterion
     if (ctcq.qmax < qposs) {
@@ -301,8 +279,8 @@ namespace ibex {
 	  cout << " time " << time << endl; 
 	  cout << " nb boxes " << nb_cells << endl;
 	  cout << " depth " << c.get<QInterPoints>().depth << endl;
-	  if (optimbuffer ==2  && !(str.empty_buffer()))
-	    cout << " qmax " << str.top_cell()->get<QInterPoints>().qmax << endl;
+	  str.print_max_val();
+	 
 	  //	  cout << " valid point " << newvalidpoint1 << endl;
 	  cout << " best sol point " << bestsolpoint << endl;
 	  cout <<" qmax epsboxes " << str.qmax_epsboxes << endl;
@@ -354,12 +332,6 @@ namespace ibex {
 
 
  
-  // destructor : the sets  valid_sol_points and compatible_sol_points are deleted
-  SolverOptQInter::~SolverOptQInter() {
-    delete [] valstack;
-  }
-
-
     
 
  // the number of small boxes and their upper bound.
@@ -396,18 +368,12 @@ namespace ibex {
 
     SolverOpt::report_time_limit();
     
-    int possin =0;
-
-    for (int i = measure_nb;  i >0; i--)
-      if (valstack[i]) {possin=i; 
-	break;
-      }
+    
 
     cout << " max possible inliers in open nodes ";
-    if (optimbuffer==2 && !(str.empty_buffer()))  // qmax managed by bfs and beamsearch
-      cout << str.top_cell()->get<QInterPoints>().qmax << endl;
-    else 
-    cout <<  possin << endl;
+    str.print_max_val();
+   
+    //  cout <<  possin << endl;
     
   }    
 
@@ -605,7 +571,7 @@ namespace ibex {
 	      row[j]=G[j].lb();
 	  }
 	  row[n]=0;
-	  mylp1->add_constraint(row,LEQ, (-g_corner)[i].lb()-mylp1->get_epsilon());  //  1e-10 ???  BNE
+	  mylp1->add_constraint(row,LEQ, (-g_corner)[i].lb()-mylp1->get_epsilon());  //  
 	  
 	}
     
@@ -704,7 +670,6 @@ namespace ibex {
   
     Vector feasiblepoint(n);
     Vector feasiblepoint1(n);
-    //    Vector feasiblepoint2(n);
   
     //  cout << " box simplex " << box << endl;
     IntervalVector G(n); // vector to be used by the partial derivatives
@@ -794,7 +759,7 @@ namespace ibex {
 	    }
 
 
-	    mylp->add_constraint(row,LEQ, (-g_corner)[i].lb()-mylp->get_epsilon());  //  1e-10 ???  BNE
+	    mylp->add_constraint(row,LEQ, (-g_corner)[i].lb()-mylp->get_epsilon()); 
       
       //The contraints i is generated:
 	  // c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
@@ -805,10 +770,8 @@ namespace ibex {
     
 	  //	  cout << " nb_cells " << nb_cells << endl;
 	  /*
-	  if (nb_cells < 10){
 	    mylp->writeFile("dump.lp");
 	    system ("cat dump.lp");
-	  }
 	  */
 	  LPSolver::Status_Sol stat = mylp->solve();
 	
@@ -841,7 +804,6 @@ namespace ibex {
 	*/
 
 
-
 	      if (k==0) feasiblepoint1= feasiblepoint;
 	      else feasiblepoint2=feasiblepoint;
 	    }
@@ -870,7 +832,7 @@ namespace ibex {
 
 
   /* in case of constraints, the system is transformed in a normalized system  */
-  SolverOptConstrainedQInter::SolverOptConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq,  double epscont, int optim)  : SolverOptQInter (ctc,bsc, str, ctcq, optim),  epscont(epscont), normsys(sys,epscont), sys(sys)
+  SolverOptConstrainedQInter::SolverOptConstrainedQInter (System & sys, Ctc& ctc, Bsc& bsc, SearchStrategy& str, CtcQInter& ctcq,  double epscont)  : SolverOptQInter (ctc,bsc, str, ctcq),  epscont(epscont), normsys(sys,epscont), sys(sys)
   {    mylp=new LPSolver(sys.nb_var,sys.nb_ctr,100);
     mylp1=new LPSolver(sys.nb_var+1,sys.nb_ctr,100);}
 
@@ -880,7 +842,7 @@ namespace ibex {
   }
 
   // returns the valid point (if any) and qvalid the greatest number of valid measures computed by any call to counting the valid measurements 
-  // of the correspinding valid point
+  // of the corresponding valid point
   //  if qvalid remains 0 , no valid point has been found.
   // at most nsimpl (here fixed to 10) calls to "feasiblepoint" are performed.
   // the search stops when a polytope built by feasiblepoint is empty (res=0).

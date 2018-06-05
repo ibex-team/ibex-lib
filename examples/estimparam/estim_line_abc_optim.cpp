@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
 	    else ctcs=&ctcf;
 	    
 	    double epscont =1.e-4;
-	    SolverOptConstrainedQInter s(sys,ctcqf0,bs,str,*ctcq,epscont, 2);
+	    SolverOptConstrainedQInter s(sys,ctcqf0,bs,str,*ctcq,epscont);
 	    
 	    s.timeout = 1000;
 	    s.trace=1;

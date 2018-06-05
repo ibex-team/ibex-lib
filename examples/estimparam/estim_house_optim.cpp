@@ -205,12 +205,8 @@ int main(int argc, char** argv) {
 
 	    CtcFixPoint ctcf(ctcqf0, 1);
 	    //CtcFixPoint ctcf(ctcqf0, 0.1);
-	    //CtcFixPoint ctcf(ctcid,0.1);
 
-
-	    
-	    //	    SolverOptQInter s(ctcf,bs,str,ctcq,1);
-	    SolverOptQInter s(ctcf,*bs,str,ctcq,2);
+	    SolverOptQInter s(ctcf,*bs,str,ctcq);
 
 	    s.str.with_oracle=false;
 	    s.str.with_storage=true;
