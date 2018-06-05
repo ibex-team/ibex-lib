@@ -70,10 +70,10 @@ typedef AffineVarMain<AF_Default> Affine2Var;
 typedef AffineVarMain<AF_Other>  Affine3Var;
 
 
-template<class T>
-Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<Domain>& d);
-template<class T>
-Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<const Domain>& d);
+//template<class T>
+//Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<Domain>& d);
+//template<class T>
+//Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<const Domain>& d);
 
 
 
@@ -96,6 +96,13 @@ public:
 	 */
 	AffineVarMain& operator=(const Interval& itv);
 	AffineVarMain& operator=(const AffineMain<T>& itv);
+
+private:
+	friend class AffineMainVector<T>;
+	friend class AffineMainMatrix<T>;
+
+	/** \brief Create an affine form with at most \size variables and  initialized the \var^th variable with  itv. */
+	AffineVarMain(int size, int var, const Interval& itv);
 };
 
 template<class T=AF_Default>
@@ -103,11 +110,10 @@ class AffineMain {
 
 protected:
 	friend class AffineVarMain<T>;
-	friend class AffineMainVector<T>;
-	friend class AffineMainMatrix<T>;
-	friend 	Array< TemplateDomain< AffineMain > > convert_to_affinedomain<T>(const Array<Domain>& d);
-	friend 	Array< TemplateDomain< AffineMain > > convert_to_affinedomain<T>(const Array<const Domain>& d);
-
+//	friend class AffineMainVector<T>;
+//	friend class AffineMainMatrix<T>;
+//	friend 	Array< TemplateDomain< AffineMain > > convert_to_affinedomain<T>(const Array<Domain>& d);
+//	friend 	Array< TemplateDomain< AffineMain > > convert_to_affinedomain<T>(const Array<const Domain>& d);
 
 	/** \brief tolerance for default compact procedure  */
 	static const double AF_COMPAC_Tol;
@@ -129,13 +135,13 @@ protected:
 	 */
 	int _n; 		// dimension (size of val)-1  , ie number of variable
 
-	T _elt;			// core of the affine2 form
+	T _elt;			// core of the affine form
 
 	/** \brief Create an affine form with n variables and  initialized val[0] with d. */
 	//explicit AffineMain(double d);
 
 	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv. */
-	AffineMain(int n, int m, const Interval& itv);
+	AffineMain(int size, int var, const Interval& itv);
 
 	/**
 	 * \brief Change the number of affine variables
@@ -678,7 +684,7 @@ AffineMain<T> chi(const AffineMain<T>&  a,const AffineMain<T>&  b,const Interval
 namespace ibex {
 
 
-template<class T> int AffineVarMain<T>::_count = 1;
+template<class T> int AffineVarMain<T>::_count = 0;
 template<class T> const double AffineMain<T>::AF_COMPAC_Tol = 1.e-6;
 template<class T> const double AffineMain<T>::AF_EM = __builtin_powi(2.0, -51);
 template<class T> const double AffineMain<T>::AF_EC = __builtin_powi(2.0, -55);
@@ -1145,8 +1151,8 @@ inline std::ostream& operator<<(std::ostream& os, const AffineMain<T>& x) {
 	{
 		os << x.itv() << " : ";
 		if (x.is_actif()) {
-			os << x.val(0);
-			for (int i = 1; i <= x.size(); i++) {
+			os << x.mid();
+			for (int i = 0; i < x.size(); i++) {
 				os << " + " << x.val(i) << " eps_" << i;
 			}
 			os << " + " << x.err() << " [-1,1] ";

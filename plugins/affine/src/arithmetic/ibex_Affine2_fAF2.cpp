@@ -67,23 +67,20 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator=(const Interval& x) {
 
 
 template<>
-AffineMain<AF_fAF2>::AffineMain(int n, int m, const Interval& itv) :
-			_n 		(n),
+AffineMain<AF_fAF2>::AffineMain(int size, int var, const Interval& itv) :
+			_n 		(size),
 			_elt	(NULL,0.0)
 {
-	assert((n>=0) && (m>=0) && (m<=n));
+	assert((size>=0) && (var>=0) && (var<=size));
 	if (!(itv.is_unbounded()||itv.is_empty())) {
-		_elt._val	=new double[n + 1];
+		_elt._val	=new double[size + 1];
 		_elt._val[0] = itv.mid();
-		for (int i = 1; i <= n; i++){
+		for (int i = 1; i <= size; i++){
 			_elt._val[i] = 0.0;
 		}
 
-		if (m == 0) {
-			_elt._err = itv.rad();
-		} else {
-			_elt._val[m] = itv.rad();
-		}
+		_elt._val[var+1] = itv.rad();
+
 	} else {
 		*this = itv;
 	}
@@ -124,13 +121,13 @@ AffineVarMain<AF_fAF2>& AffineVarMain<AF_fAF2>::operator=(const Interval& x) {
 	} else  {
 		if (_elt._val && _n > var) {
 			_elt._val[0] = x.mid();
-			_elt._val[var]	= x.rad();
+			_elt._val[var+1]	= x.rad();
 		} else {
 			delete[] _elt._val;
 			_n = var;
 			_elt._val	= new double[var+1];
 			_elt._val[0] = x.mid();
-			_elt._val[var]	= x.rad();
+			_elt._val[var+1]	= x.rad();
 		}
 	}
 	return *this;
@@ -150,6 +147,13 @@ AffineVarMain<AF_fAF2>::AffineVarMain(double d) :
 		AffineMain<AF_fAF2>(_count, _count, Interval(d)),
 		var		(_count) {
 	_count++;
+}
+
+
+template<>
+AffineVarMain<AF_fAF2>::AffineVarMain(int size, int var1, const Interval& itv) :
+		AffineMain<AF_fAF2>(size, var1, itv),
+		var		(var1) {
 }
 
 
@@ -196,7 +200,7 @@ AffineMain<AF_fAF2>::AffineMain(const AffineMain<AF_fAF2>& x) :
 template<>
 double AffineMain<AF_fAF2>::val(int i) const{
 	assert((0<=i) && (i<=_n));
-	return _elt._val[i];
+	return _elt._val[i+1];
 }
 
 template<>
@@ -691,9 +695,10 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(const Interval& y) {
 			y.is_empty()||
 			y.is_unbounded() ) {
 		*this = itv()*y;
-
 	} else {
-		*this *= AffineMain<AF_fAF2>(size(),0,y);
+		AffineMain<AF_fAF2> tmp(1,0,y.mid()); // to check if it is the best way to do it
+		tmp.inflate(y.rad());
+		*this *= tmp;
 	}
 	return *this;
 }

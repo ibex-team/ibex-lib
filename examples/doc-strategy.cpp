@@ -38,8 +38,4 @@ int main() {
 	//! [bsc-different-prec]
 	}
 
-
-	}
-
-
 }

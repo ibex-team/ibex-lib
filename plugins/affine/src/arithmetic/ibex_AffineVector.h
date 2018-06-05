@@ -489,7 +489,7 @@ AffineMainVector<T>::AffineMainVector(int n, const Interval& x) :
 		_vec(new AffineMain<T>[n]) {
 	assert(n>=1);
 	for (int i = 0; i < n; i++) {
-		_vec[i] = AffineMain<T>(n, i + 1, x);
+		_vec[i] = AffineVarMain<T>(n, i + 1, x);
 	}
 
 }
@@ -527,7 +527,7 @@ AffineMainVector<T>::AffineMainVector(int n, double bounds[][2]) :
 	}
 	else {
 		for (int i = 0; i < n; i++){
-			_vec[i] =  AffineMain<T>(n, i + 1, Interval(bounds[i][0], bounds[i][1]));
+			_vec[i] =  AffineVarMain<T>(n, i + 1, Interval(bounds[i][0], bounds[i][1]));
 		}
 
 	}
@@ -539,7 +539,7 @@ AffineMainVector<T>::AffineMainVector(const IntervalVector& x) :
 		_vec(new AffineMain<T>[x.size()]) {
 
 	for (int i = 0; i < x.size(); i++) {
-		_vec[i] = AffineMain<T>(x.size(), i + 1, x[i]);
+		_vec[i] = AffineVarMain<T>(x.size(), i + 1, x[i]);
 	}
 }
 
@@ -548,21 +548,21 @@ AffineMainVector<T>::AffineMainVector(const Vector& x) :
 		_n(x.size()),
 		_vec(new AffineMain<T>[x.size()]) {
 	for (int i = 0; i < _n; i++){
-		_vec[i] = AffineMain<T>(x[i]);
+		_vec[i] = AffineVarMain<T>(x.size(), i+1, x[i]);
 	}
 }
 
 template<class T>
 void AffineMainVector<T>::init(const Interval& x) {
 	for (int i = 0; i < size(); i++) {
-		(*this)[i] = AffineMain<T>(size(),i+1,x);
+		(*this)[i] = AffineVarMain<T>(size(),i+1,x);
 	}
 }
 
 template<class T>
 void AffineMainVector<T>::init(const IntervalVector& x) {
 	for (int i = 0; i < size(); i++) {
-		(*this)[i] = AffineMain<T>(size(),i+1,x[i]);
+		(*this)[i] = AffineVarMain<T>(size(),i+1,x[i]);
 	}
 }
 

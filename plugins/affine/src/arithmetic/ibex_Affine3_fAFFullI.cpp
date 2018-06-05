@@ -17,7 +17,7 @@ namespace ibex {
 
 double maTol = 2.5e-15;
 
-unsigned long int AF_fAFFullI::_counter = 1;
+unsigned long int AF_fAFFullI::_counter = 0;
 
 bool noise_null (const std::pair<int,double> value) { return (value.second >= 0)&&(value.second <= 0.0); }
 
@@ -151,6 +151,14 @@ AffineVarMain<AF_fAFFullI>::AffineVarMain(double d) :
 }
 
 
+template<>
+AffineVarMain<AF_fAFFullI>::AffineVarMain(int size, int var1, const Interval& itv) :
+		AffineMain<AF_fAFFullI>(),
+		var		(var1) {
+	*this = itv;
+}
+
+
 
 /*
 template<>
@@ -196,7 +204,6 @@ _elt	(x._elt._center, std::list<std::pair<int,double> >(),x._elt._garbage) {
 template<>
 double AffineMain<AF_fAFFullI>::val(int i) const{
 	assert((0<=i) && (((unsigned int)i)<=AF_fAFFullI::_counter));
-	if (i == 0) return _elt._center;
 	if (!_elt._rays.empty()) {
 		std::list<std::pair<int,double> >::const_iterator iter = _elt._rays.begin();
 		for (; iter != _elt._rays.end(); ++iter) {
@@ -264,18 +271,27 @@ template<>
 std::ostream& operator<<(std::ostream& os, const AffineMain<AF_fAFFullI>& x) {
 	os << std::setprecision(15) << x.itv() << " : ";
 	if (x.is_actif()) {
-		os << x.val(0);
-		for (int i = 1; i <= x.size(); i++) {
+		os << x.mid();
+
+//		if (!x._elt._rays.empty()) {
+//			std::list<std::pair<int,double> >::const_iterator iter = x._elt._rays.begin();
+//			for (; iter != x._elt._rays.end(); ++iter) {
+//				double v = iter -> second;
+//				if (v!=0)
+//					os << std::setprecision(15) <<" + " << v  << " eps_" << iter -> first;
+//			}
+//		}
+
+		for (int i = 0; i < x.size(); i++) {
 			double v = x.val(i);
 			if (v!=0)
 			{
 				os << std::setprecision(15) <<" + " << v << " eps_" << i;
 			}
 		}
-		// Check that err() is a centered intervall
 		os << " + " << x.err() << "[-1,1]";
 	} else {
-		os << "Affine3 form not Activate ";
+		os << "Affine3 Form not activate ";
 	}
 	return os;
 }
@@ -289,8 +305,7 @@ AffineVarMain<AF_fAFFullI>& AffineVarMain<AF_fAFFullI>::operator=(const AffineMa
 		_elt._garbage = x._elt._garbage;
 		_elt._rays.clear();
 
-		if (!x._elt._rays.empty())
-		{
+		if (!x._elt._rays.empty())	{
 			std::list<std::pair<int,double> >::const_iterator it = x._elt._rays.begin();
 			for (; it != x._elt._rays.end(); ++it) {
 				_elt._rays.push_back(std::pair<int,double>(it->first,it->second));

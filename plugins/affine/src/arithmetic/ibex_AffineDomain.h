@@ -35,6 +35,8 @@ namespace ibex {
 typedef TemplateDomain<Affine2> Affine2Domain;
 typedef TemplateDomain<Affine3> Affine3Domain;
 
+
+/*
 template<class T>
 Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<Domain>& d) {
 	const Array<const Domain>* d2 =(const Array<const Domain>*) (&d);
@@ -97,6 +99,8 @@ Array< TemplateDomain< AffineMain<T> > > convert_to_affinedomain(const Array<con
 	return out;
 
 }
+*/
+
 
 template<>
 inline TemplateDomain<Affine2>& TemplateDomain<Affine2>::operator&=(const TemplateDomain<Affine2>& ) {
