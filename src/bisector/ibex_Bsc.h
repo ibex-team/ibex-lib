@@ -12,6 +12,7 @@
 #define __IBEX_BISECTOR_H__
 
 #include "ibex_Cell.h"
+#include "ibex_SearchNodeProperty.h"
 
 #include <utility>
 
@@ -138,18 +139,20 @@ private:
  *
  * \brief Last bisected variable (used by RoundRobin, CtcPropag, etc.)
  */
-class BisectedVar : public Backtrackable {
+class BisectedVar : public SearchNodeProperty {
 public:
 	BisectedVar();
 
 	BisectedVar(int x);
 
-	Backtrackable* copy() const;
+	SearchNodeProperty* copy() const;
 
-	std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint& b);
+	std::pair<SearchNodeProperty*,SearchNodeProperty*> update_children(const BisectionPoint& b);
 
 	/** -1 if root cell */
 	int var;
+
+	static const char* prop_key;
 
 protected:
 	explicit BisectedVar(const BisectedVar& e);
@@ -185,12 +188,12 @@ inline BisectedVar::BisectedVar(int x) : var(x) {
 
 }
 
-inline Backtrackable* BisectedVar::copy() const {
+inline SearchNodeProperty* BisectedVar::copy() const {
 	return new BisectedVar(*this);
 }
 
-inline std::pair<Backtrackable*,Backtrackable*> BisectedVar::down(const BisectionPoint& b) {
-	return std::pair<Backtrackable*,Backtrackable*>(new BisectedVar(b.var),new BisectedVar(b.var));
+inline std::pair<SearchNodeProperty*,SearchNodeProperty*> BisectedVar::update_children(const BisectionPoint& b) {
+	return std::pair<SearchNodeProperty*,SearchNodeProperty*>(new BisectedVar(b.var),new BisectedVar(b.var));
 }
 
 inline BisectedVar::BisectedVar(const BisectedVar& e) : var(e.var) { }

@@ -5,17 +5,18 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 10, 2012
-// Last Update : Jun 2, 2018
+// Last Update : Jun 07, 2018
 //============================================================================
 
 #ifndef __IBEX_CELL_H__
 #define __IBEX_CELL_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_DomainData.h"
 #include "ibex_SymbolMap.h"
 
 #include <typeinfo>
+
+#include "ibex_BoxProperty.h"
 
 namespace ibex {
 
@@ -75,45 +76,6 @@ public:
 	virtual ~Cell();
 
 	/**
-	 * \brief Retrieve backtrackable data from this cell.
-	 *
-	 * The data is identified by its classname.
-	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
-	 */
-	template<typename T>
-	T& get();
-
-	/**
-	 * \brief Retrieve backtrackable data from this cell.
-	 *
-	 * The data is identified by its classname.
-	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
-	 */
-	template<typename T>
-	const T& get() const;
-
-	/**
-	 * \brief Add backtrackable data into this cell.
-	 *
-	 * The data is identified by its classname.
-	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
-	 */
-	template<typename T>
-	void add(T* root_data);
-
-	/**
-	 * \brief Add backtrackable data into this cell.
-	 *
-	 * The default constructor of T is called.
-	 *
-	 * The data is identified by its classname.
-	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
-	 */
-
-	template<typename T>
-	void add();
-
-	/**
 	 * \brief The box
 	 */
 	IntervalVector box;
@@ -122,52 +84,10 @@ public:
 	 * \brief Data bound to the box.
 	 * This data is visible by all operators, including contractors.
 	 */
-	SymbolMap<DomainData*> box_data;
-
-	/**
-	 * \brief Other data.
-	 * This data is visible by bisectors only.
-	 */
-	SymbolMap<Backtrackable*> data;
+	SymbolMap<Property*> prop;
 };
 
 std::ostream& operator<<(std::ostream& os, const Cell& c);
-
-/*================================== inline implementations ========================================*/
-
-template<typename T>
-inline T& Cell::get() {
-	const char* id=typeid(T).name();
-	if (box_data.used(id))
-		return (T&) box_data[id];
-	else
-		return (T&) *data[id];
-}
-
-template<typename T>
-inline const T& Cell::get() const {
-	const char* id=typeid(T).name();
-	if (box_data.used(id))
-		return (T&) box_data[id];
-	else
-		return (T&) *data[id];
-}
-
-template<typename T>
-inline void Cell::add() {
-	add(new T());
-}
-
-template<typename T>
-inline void Cell::add(T* root_data) {
-	const char* id=typeid(T).name();
-	DomainData* root_domain_data=dynamic_cast<DomainData*>(root_data);
-	if (root_domain_data!=NULL) {
-		if (!box_data.used(id)) box_data.insert_new(id,root_domain_data);
-	} else
-		if (!data.used(id)) data.insert_new(id,new T());
-
-}
 
 } // end namespace ibex
 

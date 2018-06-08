@@ -200,10 +200,16 @@ void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 
 	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
 
+	CtcContext sub_context;
+	sub_context.set_impact(impact);
+	sub_context.set_output_flags(flags);
+	if (context.data())
+		sub_context.set_data(*context.data(), true);
+
 	for (int i=0; i<list.size(); i++) {
+		flags.clear();
+		list[i].contract(box,sub_context);
 		if (inactive) {
-			flags.clear();
-			list[i].contract(box,impact,flags);
 			if (!flags[CtcContext::INACTIVE]) inactive=false;
 		} else {
 			list[i].contract(box);

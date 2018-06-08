@@ -12,7 +12,6 @@
 #define __IBEX_LARGEST_FIRST_H__
 
 #include "ibex_Bsc.h"
-#include "ibex_Backtrackable.h"
 
 namespace ibex {
 

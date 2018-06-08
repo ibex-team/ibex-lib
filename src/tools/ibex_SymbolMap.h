@@ -18,6 +18,8 @@
 #include <cassert>
 #include <functional>
 
+#include "ibex_Exception.h"
+
 namespace ibex {
 
 struct hash_string {
@@ -75,6 +77,18 @@ namespace ibex {
 template <typename T>
 class SymbolMap {
 public:
+
+	/**
+	 * Thrown when we try to get the value associated
+	 * to a key that does not exist
+	 */
+	class SymbolNotFound : public Exception {
+	public:
+		SymbolNotFound(const char* symbol) : symbol(symbol) { }
+		// std::string("Unknown symbol \"")+id+"\"";
+		const char* symbol;
+	};
+
 	/**
 	 * \brief Create a new empty map.
 	 */
@@ -163,7 +177,7 @@ public:
 	 * \pre - an element with key \a id must exist. */
 	const T& operator[](const char* id) const {
 		typename IBEXMAP(T)::const_iterator it = map.find (id);
-		assert(it != map.end()); //throw NonRecoverableException(std::string("Unknown symbol \"")+id+"\"");
+		if (it == map.end()) throw SymbolNotFound(id);
 		return it->second;
 	}
 

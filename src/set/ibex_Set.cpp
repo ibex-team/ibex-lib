@@ -14,6 +14,9 @@
 #include "ibex_CellStack.h"
 #include "ibex_SetConnectedComponents.cpp_"
 #include "ibex_SepFwdBwd.h"
+#include "ibex_BoxProperty.h"
+#include "ibex_String.h"
+
 #include <stack>
 #include <fstream>
 
@@ -225,7 +228,7 @@ std::ostream& operator<<(std::ostream& os, const Set& set) {
 	return os;
 }
 
-class NodeAndDist : public Backtrackable {
+class NodeAndDist : public BoxProperty {
 public:
 	NodeAndDist() : node(NULL), dist(-1) { }
 
@@ -245,11 +248,11 @@ public:
 		dist=d.lb();
 	}
 
-	virtual Backtrackable* copy() const {
+	virtual BoxProperty* copy() const {
 		return new NodeAndDist(*this);
 	}
 
-	virtual std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&) {
+	virtual std::pair<BoxProperty*,BoxProperty*> update_bisect(const BisectionPoint&) {
 		assert(!node->is_leaf());
 
 		SetBisect& b=*((SetBisect*) node);
@@ -272,22 +275,30 @@ protected:
 class CellHeapDist : public CostFunc<Cell> {
 
 public:
+	CellHeapDist(const char* prop_key) : key(prop_key) { }
+
 	/** The "cost" of a element. */
-	virtual	double cost(const Cell& c) const { return c.get<NodeAndDist>().dist; }
+	virtual	double cost(const Cell& c) const {
+		return ((NodeAndDist*) c.prop[key])->dist;
+	}
+
+	const char* key;
 };
 
 
 double Set::dist(const Vector& pt, bool inside) const {
 
- 	CellHeapDist costf;
+	char* key = random_alphanum_string(10);
+	CellHeapDist costf(key);
 	Heap<Cell> heap(costf);
 
 	//int count=0; // for stats
 
 	Cell* root_cell =new Cell(Rn);
-	root_cell->add<NodeAndDist>();
-	root_cell->get<NodeAndDist>().node = root;
-	root_cell->get<NodeAndDist>().set_dist(Rn,pt);
+	NodeAndDist* nad=new NodeAndDist();
+	root_cell->prop.insert_new(key,nad);
+	nad->node = root;
+	nad->set_dist(Rn,pt);
 	//count++;
 
 	heap.push(root_cell);
@@ -297,13 +308,13 @@ double Set::dist(const Vector& pt, bool inside) const {
 	while (!heap.empty()) {
 
 		Cell* c = heap.pop();
-
-		SetNode* node = c->get<NodeAndDist>().node;
+		NodeAndDist* nad=(NodeAndDist*) c->prop[key];
+		SetNode* node = nad->node;
 
 		assert(node!=NULL);
 
 		if (node->is_leaf() && ((SetLeaf*) node)->status==(inside? YES : NO)) {
-			double d=c->get<NodeAndDist>().dist;
+			double d=nad->dist;
 			if (d<lb) {
 				lb=d;
 				heap.contract(lb);
@@ -314,13 +325,16 @@ double Set::dist(const Vector& pt, bool inside) const {
             // the box is bisected twice: could be avoided.
 			std::pair<Cell*,Cell*> p=c->subcells(BisectionPoint(b.var,b.pt,false));
 
-			p.first->get<NodeAndDist>().set_dist(p.first->box,pt);
-			//count++;
-			if (p.first->get<NodeAndDist>().dist<=lb) heap.push(p.first);
+			NodeAndDist* nad1=(NodeAndDist*) p.first->prop[key];
+			NodeAndDist* nad2=(NodeAndDist*) p.second->prop[key];
 
-			p.second->get<NodeAndDist>().set_dist(p.second->box,pt);
+			nad1->set_dist(p.first->box,pt);
 			//count++;
-			if (p.second->get<NodeAndDist>().dist<=lb) heap.push(p.second);
+			if (nad1->dist<=lb) heap.push(p.first);
+
+			nad2->set_dist(p.second->box,pt);
+			//count++;
+			if (nad2->dist<=lb) heap.push(p.second);
 		}
 		delete c;
 	}

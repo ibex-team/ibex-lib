@@ -194,5 +194,19 @@ const ExprNode& parse_indexed_symbol(const SymbolMap<const ExprSymbol*>& symbols
 	}
 }
 
+char* random_alphanum_string(int len) {
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
+    char* s = new char[len+1];
+    for (int i = 0; i < len; ++i) {
+        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+
+    s[len] = 0;
+    return s;
+}
 
 } // end namespace ibex

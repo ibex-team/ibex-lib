@@ -7,7 +7,7 @@
 // Created     : Jun 2, 2018
 //============================================================================
 
-#include "ibex_DomainData.h"
+#include "ibex_BoxProperty.h"
 
 namespace ibex {
 

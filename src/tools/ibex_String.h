@@ -71,6 +71,15 @@ int parse_integer(const std::string& str);
  */
 const ExprNode& parse_indexed_symbol(const SymbolMap<const ExprSymbol*>& symbols, const std::string& str);
 
+
+/**
+ * \brief Alpha-numeric random string
+ *
+ * \param len - length of the string. A null
+ *              character is added after the last.
+ */
+char* random_alphanum_string(int len);
+
 } // end namespace ibex
 
 #endif // __IBEX_STRING_H__

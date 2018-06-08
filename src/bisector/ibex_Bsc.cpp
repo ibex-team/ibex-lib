@@ -15,6 +15,8 @@ using namespace std;
 
 namespace ibex {
 
+const char* BisectedVar::prop_key = "bisected_var";
+
 double Bsc::default_ratio() {
 	return 0.45;
 }
@@ -30,7 +32,8 @@ Bsc::Bsc(const Vector& prec) : _prec(prec) {
 }
 
 void Bsc::add_backtrackable(Cell& root) {
-	root.add<BisectedVar>();
+	if (!root.prop.used(BisectedVar::prop_key))
+		root.prop.insert_new(BisectedVar::prop_key,new BisectedVar());
 }
 
 pair<IntervalVector,IntervalVector> Bsc::bisect(const IntervalVector& box) {

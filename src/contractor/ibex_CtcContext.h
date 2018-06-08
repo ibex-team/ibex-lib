@@ -8,8 +8,8 @@
 #ifndef __IBEX_CTC_CONTEXT_H__
 #define __IBEX_CTC_CONTEXT_H__
 
-#include "ibex_Backtrackable.h"
 #include "ibex_SymbolMap.h"
+#include "ibex_BoxProperty.h"
 #include "ibex_BitSet.h"
 
 namespace ibex {
@@ -49,7 +49,7 @@ public:
 
 	void set_output_flags(BitSet& flags);
 
-	void set_data(SymbolMap<Backtrackable*>& data, bool update);
+	void set_data(SymbolMap<BoxProperty*>& data, bool update);
 
 	/**
 	 * \brief Return the current impact (NULL pointer if none).
@@ -64,7 +64,7 @@ public:
 	/**
 	 * \brief Return the current backtrackable data (NULL pointer if none).
 	 */
-	SymbolMap<Backtrackable*>* data();
+	SymbolMap<BoxProperty*>* data();
 
 	/**
 	 * Set an output flag.
@@ -76,7 +76,7 @@ public:
 private:
 	const BitSet* _impact;
 	BitSet* _output_flags;
-	SymbolMap<Backtrackable*>* _data;
+	SymbolMap<BoxProperty*>* _data;
 };
 
 
@@ -89,13 +89,13 @@ inline void CtcContext::set_impact(const BitSet& impact) { _impact = &impact; }
 
 inline void CtcContext::set_output_flags(BitSet& flags) { _output_flags = &flags; }
 
-inline void CtcContext::set_data(SymbolMap<Backtrackable*>& data, bool update) { _data = &data; update_data = update; }
+inline void CtcContext::set_data(SymbolMap<BoxProperty*>& data, bool update) { _data = &data; update_data = update; }
 
 inline const BitSet* CtcContext::impact() { return _impact; }
 
 inline BitSet* CtcContext::output_flags() { return _output_flags; }
 
-inline SymbolMap<Backtrackable*>* CtcContext::data() { return _data; }
+inline SymbolMap<BoxProperty*>* CtcContext::data() { return _data; }
 
 inline void CtcContext::set_flag(unsigned int f) {
 	assert(f<Ctc::NB_OUTPUT_FLAGS);

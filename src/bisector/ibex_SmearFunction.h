@@ -12,7 +12,6 @@
 #define __IBEX_SMEAR_FUNCTION_H__
 
 #include "ibex_Bsc.h"
-#include "ibex_Backtrackable.h"
 #include "ibex_RoundRobin.h"
 #include "ibex_System.h"
 

@@ -5,12 +5,13 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Apr 18, 2013
+// Last update : Jun 07, 2018
 //============================================================================
 
 #ifndef __IBEX_MULTIPLIERS_H__
 #define __IBEX_MULTIPLIERS_H__
 
-#include "ibex_Backtrackable.h"
+#include "ibex_BoxProperty.h"
 #include "ibex_IntervalVector.h"
 
 namespace ibex {
@@ -19,7 +20,7 @@ namespace ibex {
  *
  * \brief Lagrange Multipliers
  */
-class Multipliers : public Backtrackable {
+class Multipliers : public BoxProperty {
 public:
 	/**
 	 * \brief Constructor for the root node (followed by a call to init_root).
@@ -51,7 +52,7 @@ public:
 	/**
 	 * \brief Duplicate the structure into the left/right nodes
 	 */
-	std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&);
+	std::pair<BoxProperty*,BoxProperty*> update_bisect(const BisectionPoint&);
 
 	IntervalVector lambda;
 

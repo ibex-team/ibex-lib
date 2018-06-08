@@ -94,6 +94,8 @@ public:
 	 */
 	void contract(Set& set, double eps);
 
+	virtual void add_property(SymbolMap<BoxProperty*>& map);
+
 	/**
 	 * \brief The number of variables this contractor works with.
 	 */

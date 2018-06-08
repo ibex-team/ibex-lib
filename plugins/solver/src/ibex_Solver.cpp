@@ -116,7 +116,7 @@ void Solver::start(const IntervalVector& init_box) {
 	Cell* root=new Cell(init_box);
 
 	// add data required by this solver
-	root->add<BisectedVar>();
+	root->prop.insert_new(BisectedVar::prop_key, new BisectedVar());
 
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);
@@ -152,7 +152,7 @@ void Solver::start(const char* input_paving) {
 		Cell* cell=new Cell(it->existence());
 
 		// add data required by this solver
-		cell->add<BisectedVar>();
+		cell->prop.insert_new(BisectedVar::prop_key, new BisectedVar());
 
 		// add data required by the bisector
 		bsc.add_backtrackable(*cell);
@@ -178,7 +178,7 @@ QualifiedBox* Solver::next() {
 
 		Cell* c=buffer.top();
 
-		int v=c->get<BisectedVar>().var;      // last bisected var.
+		int v=((BisectedVar*) c->prop[BisectedVar::prop_key])->var; // last bisected var.
 
 		if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
 			impact.add(v);

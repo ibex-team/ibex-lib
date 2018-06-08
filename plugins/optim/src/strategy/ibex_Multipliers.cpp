@@ -5,6 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Apr 18, 2013
+// Last update : Jun 07, 2018
 //============================================================================
 
 #include "ibex_Multipliers.h"
@@ -40,9 +41,8 @@ Multipliers::Multipliers(const Multipliers& e) : lambda(e.lambda) {
 Backtrackable* Multipliers::copy() const {
 	return new Multipliers(*this);
 }
-
-std::pair<Backtrackable*,Backtrackable*> Multipliers::down(const BisectionPoint&) {
-	return std::pair<Backtrackable*,Backtrackable*>(new Multipliers(*this),new Multipliers(*this));
+std::pair<BoxProperty*,BoxProperty*> Multipliers::update_bisect(const BisectionPoint&) {
+	return std::pair<BoxProperty*,BoxProperty*>(new Multipliers(*this),new Multipliers(*this));
 }
 
 Multipliers::~Multipliers() {

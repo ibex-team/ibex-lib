@@ -44,6 +44,9 @@ void CtcPropag::contract(IntervalVector& box) {
 
 void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 
+	CtcContext c_context;
+	c_context.set_impact(_impact);
+
 	assert(box.size()==nb_var);
 
 	/*
