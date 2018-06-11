@@ -12,30 +12,14 @@ plane :  ICTAI 2015 examples
 circle   estim_circle.cpp
 	 
          
-
-
-For each model, there exists an optimization variant , searching for the solution maximizing the
-number of inliers.
-
-
-optimization :   estim_line_bc_optim.cpp
-                 estim_line_abc_optim.cpp	
-                 estim_plane_optim.cpp
-                 estim_plane_abcd_optim.cpp	
-		 estim_house_optim.cpp
-                 estim_house_abcd_optim.cpp
-                 estim_circle_optim.cpp
-
-                 estim_essentialmatnorm_searchstrategy.cpp :  essential matrix
-
 ____________________________________________________________________________________
 ICTAI examples : parameters for obtaining all solutions 
 with the linear model with 4 octants  and the specialized bisection heuristics (cf paper)
 
 ./estim_plane 
-ex1           ./estim_plane 1 1000 1 0 0 0 rr2 0.000007 0.0007 1  (4 planes)
-ex2           ./estim_plane 2 1000 1 0 0 0 rr2 0.000007 0.0007 1  (4 planes)
-ex3           ./estim_plane 3 1000 1 0 0 0 rr2 0.000007 0.0007 1  (4 planes)
+ex1           ./estim_plane 1 1000 1 0 0 0 rr2 0.000007 0.0007 1  (4x4 planes)   
+ex2           ./estim_plane 2 1000 1 0 0 0 rr2 0.000007 0.0007 1  (4x4 planes)
+ex3           ./estim_plane 3 1000 1 0 0 0 rr2 0.000007 0.0007 1  (4x4 planes)
 ex4           ./estim_plane 4 1000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
 ex5           ./estim_plane 5 1000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
 ex6           ./estim_plane 6 1000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
@@ -46,38 +30,56 @@ ex9           ./estim_plane 6 4000 1 0 0 0 rr2 0.000007 0.0007 1   (25 planes)
 circle1       ./estim_circle 0 11 57 1 0 0 0 rr2
 circle2       ./estim_circle 1 11 57 1 0 0 0 rr2
 
-house40      ./estim_house house40 1.e-3 21 1.e-3 1.e-2 1 0 0 rr2
-house44      ./estim_house house40 1.e-3 75 1.e-4 1.e-2 1 0 0 rr2
+house40      ./estim_house house40 1.e-3 21 1.e-3 1.e-2 1 0 0 rr2 
+house44      ./estim_house house40 1.e-3 75 1.e-4 1.e-2 1 0 0 rr2 
 (the number of solutions found depends on the tolerance and precision parameters)
 
+----------------------------------------------------------------------------------------------
+For each model, there exists an optimization variant, searching for the solution maximizing the
+number of inliers. 
 
+
+optimization :   estim_line_bc_optim.cpp
+                 estim_line_abc_optim.cpp	
+                 estim_plane_optim.cpp
+                 estim_plane_abcd_optim.cpp	
+		 estim_house_optim.cpp
+                 estim_house_abcd_optim.cpp
+                 estim_circle_optim.cpp
 
 
 find the solution optimizing the number of inliers
 the strategy is Feasible Diving (can be changed in the source file)
 
-house40       ./estim_house_optim house40 1.e-3 21 1.e-4 1.e-4 1 0 0 rr2   (38 inliers en 1.4s)
-house44       ./estim_house_optim house44 1.e-3 75 1.e-4 1.e-4 1 0 0 rr2   (171 inliers in 191s.)
-house40       ./estim_house_abcd_optim house40 1.e-3 21 1.e-4 1.e-4 1 0 0 rr2 (38 inliers en 17s)
+house40       ./estim_house_optim house40 1.e-3 21 1.e-4 1.e-4 1 0 0 rr2 1  (38 inliers in 1.4s)
+house44       ./estim_house_optim house44 1.e-3 75 1.e-4 1.e-4 1 0 0 rr2 1  (171 inliers in 191s.)
+house44       ./estim_house_optim house44 1.e-3 21 1.e-5 1.e-4 1 1 1 rr2 1  (171 inliers in 158s.)
+house40       ./estim_house_abcd_optim house40 1.e-3 21 1.e-4 1.e-4 1 0 0 rr2 1 (38 inliers en 17s)
 house44       ./estim_house_abcd_optim house44 1.e-3 75 1.e-4 1.e-4 1 0 0 rr2 (171 inliers in 188s.)
 
 ______________________________________________________________________
+essential matrix :
+source file                  estim_essentialmatnorm_searchstrategy.cpp 
+ESSENTIAL MATRIX EXAMPLES  : 6 usac test examples + Valbonne church + Oxford corridor
 
-ESSENTIAL MATRIX EXAMPLE
+test example :
+subset of test2 (40 correspondences)  run in test2 directory with the 3 search strategies 
+      Feasible diving (FD) , Best First Search(BFS) , Depth First Search (DFS).
 
-test2  FD
-../estim_essentialmatnorm_searchstrategy orig_pts.txt 0 40 calib_matrices.txt 10 0.002 2 0.0001 0.0001 0 0 0 2 1 1000 1
+
+testé FD
+../estim_essentialmatnorm_searchstrategy orig_pts.txt 0 40 calib_matrices.txt 10 0.002 2 0.0001 0.0001 0 10 0 2 1 1000 1
 result : [35 36] time used 508.27 total branch number 678592
  best sol with 35 inliers 
  (0.009378751559348156 ; -0.2596407702169354 ; 0.01500440077763294 ; -0.08838834664831837 ; -9.999999443961737e-10 ; -0.7013007852596286 ; -0.01777975593112469 ; 0.657406221535742 ; 0.008554807645722651)
 
 test2 BFS 
-../estim_essentialmatnorm_searchstrategy orig_pts.txt 0 40 calib_matrices.txt 10 0.002 2 0.0001 0.0001 0 0 0 2 2 1000 1
+../estim_essentialmatnorm_searchstrategy orig_pts.txt 0 40 calib_matrices.txt 10 0.002 2 0.0001 0.0001 0 10 0 2 2 1000 1
 result [35 36] time used 654.743371  total branch number 746002
  best sol with 35 inliers 
  (0.009569517175088257 ; -0.2625545098628871 ; 0.01657281618405977 ; -0.1008179600363631 ; -0.001369630657514475 ; -0.6996501478652437 ; -0.01649447393936802 ; 0.6561923868005642 ; 0.007965118782285366)
 
 test2 DFS depthlimit 40
-../estim_essentialmatnorm_searchstrategy orig_pts.txt 0 40 calib_matrices.txt 10 0.002 2 0.0001 0.0001 0 0 40 2 0 1000 1
+../estim_essentialmatnorm_searchstrategy orig_pts.txt 0 40 calib_matrices.txt 10 0.002 2 0.0001 0.0001 0 10 40 2 0 1000 1
 result [35 37]  time used 486.7480  total branch number 693534
  (0.01084900751602938 ; -0.2611652450463707 ; 0.01686764659042575 ; -0.09432748984065703 ; -9.999999443961737e-10 ; -0.7005066061409219 ; -0.02025762149894849 ; 0.6566948222358425 ; 0.01001515301997218)

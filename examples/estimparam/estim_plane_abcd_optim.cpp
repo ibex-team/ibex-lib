@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
 	
 	  if (pb==6)	for (int j=0; j< NP/2;j++) x->push_back(rand()%256);
 	}
-	srand(1);
+	srand(atoi(argv[10]));
 
 	cout << " nb points " << x->size() << endl;
 	//	for (int i=0; i< x->size(); i++) cout << (*x)[i] <<  " " << (*y)[i] << " " << (*z)[i] <<endl;
@@ -351,12 +351,20 @@ int main(int argc, char** argv) {
 	    prec[1]=0.001;
 	    prec[2]=0.001;
 	    prec[3]=0.005;
-	    */
+	    
 	    
 	    prec[0]=0.000007;
 	    prec[1]=0.000007;
 	    prec[2]=0.000007;
 	    prec[3]=0.0007;
+	    */
+
+	      prec[0]=atof(argv[8]);
+	    prec[1]=atof(argv[8]);
+	    prec[2]=atof(argv[8]);
+	    prec[3]=atof(argv[9]);
+
+
 	    CellHeapQInter buff;
 	    BeamSearch str(buff);
 	    //   CellStack buff;
@@ -396,16 +404,17 @@ int main(int argc, char** argv) {
 	    if (fixpoint==0) ctcs=&ctcqf0;
 	    else ctcs=&ctcf;
 	    double epscont =1.e-4;
-	    SolverOptConstrainedQInter s(sys,ctcqf0,*bs,str,*ctcq,epscont);
+	    //	    SolverOptConstrainedQInter s(sys,ctcqf0,*bs,str,*ctcq,epscont)
+	    SolverOptQInter s(ctcqf0,*bs,str,*ctcq);
 	    
 	    if (flist==1)
 	      s.str.with_storage=true;
 
 	    s.timeout = 10000;
 	    s.trace=1;
-	    s.nbr=nbrand;
+	    s.feasible_tries=nbrand;
 	    s.gaplimit=gaplimit;
-	    s.tolerance_constraints_number=10000;  // no second call for feasible point 
+	    //	    s.tolerance_constraints_number=10000;  // no second call for feasible point 
 	    cout << " avant resolution " << endl;
 
 	    IntervalVector res=s.solve(box);

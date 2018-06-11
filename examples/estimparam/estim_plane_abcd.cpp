@@ -262,8 +262,8 @@ int main(int argc, char** argv) {
 	  //					 *new Ctc3BCid(3, * new CtcFwdBwd(*m_func[i]),5,1,3)));
 	    }
 
-	if (K==1) {
-	      for (int i=0; i<p; i++)  {
+	
+	for (int i=0; i<p; i++)  {
 	    /* We must be on the plane defined by v */
 		m_ctc1.set_ref(i,m_ctc[i]);
 
@@ -274,51 +274,10 @@ int main(int argc, char** argv) {
 		linfun[i][2]=y->at(i);
 		linfun[i][3]=z->at(i);
 
-	      }
-	    }
-	/*
-	    else if(K==2)
-	      {
-		for (int nt=0; nt<NT1;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = rand() % (p-1);
-		    if (j>=i) j=j+1;
-		    //		    m_ctc1.set_ref(p*nt+i,*new CtcFixPoint (* new CtcCompo (m_ctc[i],m_ctc[j]),0.1));
-		    m_ctc1.set_ref(p*nt+i,* new CtcCompo (m_ctc[i],m_ctc[j]));
-		    //  m_fun[0][p*nt+i]=new Function(v,(x->at(i)  +v[0]*(y->at(i)-diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-Interval(-epseq,epseq)));
-
-
-
-		    // m_fun[1][p*nt+i]=new Function(v,(x->at(j) +v[0]*(y->at(j)-diry*x->at(j))+v[1]*(z->at(j)-dirz*x->at(j))-Interval(-epseq,epseq)));
-
-
-		  }
-	      }
-	    else if(K==3)
-	      {
-		for (int nt=0; nt<NT2;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = rand() % (p-1);
-		    int k = rand() % (p-2);
-		    if (j>=i) j=j+1;
-		    if (k >=j && k >= i) k=k+2;
-		    else
-		      {if (k >=j || k>=i ) k=k+1;
-			if (k==i || k==j) k=k+1;
-		      }
-		    m_ctc1.set_ref(p*nt+i,*new CtcFixPoint (* new CtcCompo (m_ctc[i],m_ctc[j],m_ctc[k]),0.1));
-
-
-		    //		    m_fun[0][p*nt+i]= new Function(v,(x->at(i) +v[0]*(y->at(i)-diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-Interval(-epseq,epseq)));
-		    //		    m_fun[1][p*nt+i]= new Function(v,(x->at(j) +v[0]*(y->at(j)-diry*x->at(j))+v[1]*(z->at(j)-dirz*x->at(j))-Interval(-epseq,epseq)));
-		    //		    m_fun[2][p*nt+i]= new Function(v,(x->at(k) +v[0]*(y->at(k)-diry*x->at(k))+v[1]*(z->at(k)-dirz*x->at(k))-Interval(-epseq,epseq)));
-
-
-		  }
-
-	      }
-	*/
-	cout << " avant box " << endl;
+	}
+	
+	
+	
 
 	    double _box[4][2];
 
@@ -393,7 +352,7 @@ int main(int argc, char** argv) {
 	    //Solver s (*ctcs,*bs,buff);
 	    s.timeout = 10000;
 	    s.trace=0;
-	    s.nbr=nbrand;
+	    s.feasible_tries=nbrand;
 	    s.gaplimit=gaplimit;
 	    cout << " avant resolution " << endl;
 
@@ -407,64 +366,6 @@ int main(int argc, char** argv) {
 	     vector <int> maxsolinliers;
 	     s.keep_one_solution_pergroup(res,maxsolinliers );
 
-	/* output the box */
-	  /*
-	if (res.size() >1)
-	  {	resgroup.push_back(res[0]);
-
-	for (int i=0; i<res.size(); i++)
-	  {if (max_dist (res[i],resgroup.back(),  prec))
-	      resgroup[resgroup.size()-1]= res[i]|resgroup.back();
-	    else
-	      resgroup.push_back(res[i]);
-	  }
-	cout << "regroupement  solutions " << endl;
-	for (int i=0; i<resgroup.size(); i++)
-	  {	  cout << resgroup[i] << " "  << endl;
-	    int k=0;
-	    for (int j=0; j<p; j++)
-	      { Interval evalctc= m_func[j]->eval(resgroup[i]);
-		if (evalctc.contains(0)) {k++; 
-		  //		  cout << j << (*x)[j] << " " << (*y)[j] <<  " " << (*z)[j] <<  " " <<
-		  //		    m_func[j]->eval(resgroup[i]) << endl;
-		}
-	      }
-
-	    cout << "nb points " << k <<endl;
-	  }
-
-
-	vector<IntervalVector> resgroup2;
-
-	if (resgroup.size() >1)
-	  {	cout << "regroupement  solutions 2" << endl;
-	    resgroup2.push_back(resgroup[0]);
-	    for (int i=0; i<resgroup.size(); i++)
-	  {if (max_dist (resgroup[i],resgroup2.back(), prec))
-	      resgroup2[resgroup2.size()-1]= resgroup[i]|resgroup2.back();
-	    else
-	      resgroup2.push_back(resgroup[i]);
-	  }
-
-
-	for (int i=0; i<resgroup2.size(); i++)
-	  {	  cout << resgroup2[i] << " "  << endl;
-	    int k=0;
-	    for (int j=0; j<p; j++)
-	      { Interval evalctc= m_func[j]->eval(resgroup2[i]);
-		if (evalctc.contains(0)) {k++; 
-		  //		  cout << j << (*x)[j] << " " << (*y)[j] <<  " " << (*z)[j] <<  " " <<
-		  //		    m_func[j]->eval(resgroup[i]) << endl;
-		}
-	      }
-
-	    cout << "nb points " << k <<endl;
-	    //  Q0=k+1;
-	  }
-	  
-	  }
-	  }
-	  */
 
 	  
 

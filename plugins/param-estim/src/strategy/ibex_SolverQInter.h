@@ -52,33 +52,35 @@ Qintersection contractors.
 
    ~SolverQInter();
    CtcQInter& ctcq ;
-   /* boolean indicating if a solution found is maximal */
-   vector<bool> maximal_sol;   
+  
+
    vector<double> err_sol;
- /* list of the valid measures for a maximal solution */
-   list < set<int>*  > valid_sol_points ;
-   list < set<int>*  > compatible_sol_points ;
+
+
    Vector bestsolpoint;
    int bestsolpointnumber;
-   IntervalVector new_validpoint(Cell& c);
+
    void report_maximal_solutions (vector<IntervalVector> & res);
    void other_checks(Cell & c);
    void report_possible_inliers();
    void  keep_one_solution_pergroup (vector<IntervalVector> & res , vector<int> & bestsol);
-   int qmax_epsboxes;
-   int qmax_stopboxes;
-   int nbr;
+   
+   int feasible_tries;
    int gaplimit;
    IntervalVector initbox;
-   int nb_sols;
    int epsboxes_possiblesols;
    int stopboxes_possiblesols;
-   double epscont;
 
  protected :
-   
+   int qmax_epsboxes;
+   int qmax_stopboxes;
    int* valstack;   
-
+   IntervalVector new_validpoint(Cell& c);
+ /* boolean indicating if a solution found is maximal */
+   vector<bool> maximal_sol;   
+ /* list of the valid measures for a maximal solution */
+   list < set<int>*  > valid_sol_points ;
+   list < set<int>*  > compatible_sol_points ;
    void init();
    int q1;
    int q2;  
@@ -93,13 +95,12 @@ Qintersection contractors.
    void init_buffer_info(Cell& c);
    void update_buffer_info(Cell& c);
    bool solution_test(Cell& cell);
-   bool solution_test0(Cell& cell);
    virtual   void manage_solutions(set<int>* compatiblepoints, set<int>* validpoints, Cell& c);
    double compute_err_sol(Vector& vec);
    Cell* root_cell(const IntervalVector& box);
-   /*stores the solutions maximal when they are found (maybe not maximal at the end) */
+   /*stores the solutions that are maximal when they are found (maybe not maximal at the end) */
    void new_sol(std::vector<IntervalVector> & sols, IntervalVector & box);
-   //   bool  neighbors (IntervalVector& v1, IntervalVector& v2);
+
    bool sol_intersection(set<int>& solution1,  set<int>& solution2);
    bool sol_intersection1(set<int>& solution1,  set<int>& solution2);
    void report_time_limit();

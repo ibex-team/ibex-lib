@@ -10,7 +10,7 @@ using namespace ibex;
  
 /*
  * 
- * Detects plan in noisy pictures using q-intersection. 
+ * Detects plans in noisy pictures using q-intersection. 
  *
  * 
  * 
@@ -64,7 +64,6 @@ int main(int argc, char** argv) {
 	  case 2 : {Qi=0.0501*NP;break;}
 	  case 3 : {Qi=0.0401*NP;break;}
 	  case 4 : {Qi=0.0201*NP;break;}
-	    //case 4 : {Qi=0.0401*NP;break;}
 	  case 5 : {Qi=0.0151*NP;break;}
 	  case 6 : {Qi=0.0101*NP;break;}
 	  }
@@ -203,20 +202,12 @@ int main(int argc, char** argv) {
 	int p = NP;
 	int Q = Qi;
 
-	//	Q=atoi(argv[8]);
-	int Q1=17;
-
-	int Q2= 4;
-
-	int NT1=3;
-	int NT2=6;
-
+	
 	int K=1;
 	int np;
 
 	if (K==1)np=p;
-	else if (K==2) {np=NT1*p;Q=Q1;}
-	else {np=NT2*p;Q=Q2;}
+
 	cout << np << "  " << Q << endl;
 
 	
@@ -248,27 +239,6 @@ int main(int argc, char** argv) {
 	start0= clock();
 	int Q0=Q;
 
-	//	int* index2 = new int [np];
-	//	int* index3= new int [np];
-	
-	/*
-	if (K==3)
-	  for (int nt=0; nt<NT2;nt++)
-	    for (int i=0; i<p; i++) {
-	      int j = rand() % (p-1);
-	      int k = rand() % (p-2);
-	      if (j>=i) j=j+1;
-	      if (k >=j && k >= i) k=k+2;
-	      else
-		{if (k >=j || k>=i ) k=k+1;
-		  if (k==i || k==j) k=k+1;
-		}
-	      index2[i+p*nt]=j;
-	      index3[i+p*nt]=k;
-	    }
-	*/
-
-
 
 
 	for (int oct=0; oct <4; oct++)
@@ -276,7 +246,6 @@ int main(int argc, char** argv) {
 	  { 
 	    //	    int pmax=0;
 
-	    Array<Ctc> m_ctc1(np);
 
 	    Array<Ctc> m_ctc(p);	    
 	    int diry= pow(-1,oct%2);
@@ -325,31 +294,23 @@ int main(int argc, char** argv) {
 	    cout << " K " << K << endl;
 
 
-	    if (K==1) {
+
 	      for (int i=0; i<p; i++)  {
 	    /* We must be on the plane defined by v */
-		m_ctc1.set_ref(i,m_ctc[i]);
+		m_ctc.set_ref(i,m_ctc[i]);
 		m_fun[0][i]= new Function(v,(x->at(i) +v[0]*(y->at(i)-diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-Interval(-epseq,epseq)));
 		linfun[i][0]=x->at(i);
 		linfun[i][1]=y->at(i)-diry*x->at(i);
 		linfun[i][2]=z->at(i)-dirz*x->at(i);
 	      }
-	      cout << " apres linfun " << endl;
-	    }
 	   
 	    vector<IntervalVector> resgroup;
 
 
 	    Vector prec(3);
 
-	    /*
-	    prec[0]=0.00001;
-	    prec[1]=0.00001;
-	    prec[2]=0.00001;
-	    */
-	    
-
-	    // les precisions dans l'article soumis
+	  
+	    // les precisions dans l'article ICTAI
 	    
 	    
 	    /*
@@ -365,12 +326,7 @@ int main(int argc, char** argv) {
 	    prec[2]=atof(argv[9]);
 	    
 
-	    /*
-	    Vector proba(3);
-	    proba[0]=0.33;
-	    proba[1]=0.33;
-	    proba[2]=0.34;
-	    */
+	   
 	    CellStack buff;
 	    Bsc * bs;
 	    if (bisect=="rr")
@@ -379,21 +335,20 @@ int main(int argc, char** argv) {
 	      bs= new RoundRobinNvar(2,prec,0.5);
 	    
 	    // RoundRobinQInter bs (2,prec,0.5);
-	    //	ProbaBisect bs (prec, proba, 0.45);
 	    // LargestFirst bs (prec,0.5);
 
 
             CtcQInter* ctcq;	    
-	    //	    CtcQInter ctcq(3,m_ctc1,Q);
-	    //	    ctcq = new CtcQInterAff (3,m_ctc1,Q,m_fun,QINTERPROJ);
+	    //	    CtcQInter ctcq(3,m_ctc,Q);
+	    //	    ctcq = new CtcQInterAff (3,m_ctc,Q,m_fun,QINTERPROJ);
 	    
 	    if (flist==1)
 	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ);
 	      //	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERCORE,);
 	    else
 	      ctcq= new  CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ);
-		//    	    CtcQInterPlane (n,m_ctc1,linfun,epseq,Q,QINTERCORE);	    
-		//		CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERFULL);
+		//    	    CtcQInterPlane (n,m_ctc,linfun,epseq,Q,QINTERCORE);	    
+		//		CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERFULL);
 
 	    CtcCompo ctcqf0 (*ctc0,*ctcq);
 	    //	    Ctc3BCid cid(*ctcq,10,1,3);
@@ -420,7 +375,7 @@ int main(int argc, char** argv) {
 
 	    s.timeout = 1000;
 	    s.trace=0;
-	    s.nbr=nbrand;
+	    s.feasible_tries=nbrand;
 	    s.gaplimit=gaplimit;
 	    cout << " avant resolution " << endl;
 
@@ -437,7 +392,6 @@ int main(int argc, char** argv) {
 
 
 	// cout << " nb sols " << res.size() << endl;   
-	//	  cout << " nb active sols " << s.maximal_sol.size() << endl;   
 
 	    s.report_maximal_solutions(res);
 	    vector <int> maxsolinliers;
@@ -454,7 +408,6 @@ int main(int argc, char** argv) {
 	  }
 
 	m_ctc.clear();
-	//	m_ctc1.clear();
 	cout << " fin quadrant " << endl;
 	end = clock();
 	totaltime += ((double)(end)-(double)(start))/CLOCKS_PER_SEC;

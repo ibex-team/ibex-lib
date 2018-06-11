@@ -233,7 +233,6 @@ int main(int argc, char** argv) {
 
 
 	    Array<Ctc> m_ctc(p);
-	    Array<Ctc> m_ctc1(np);
 	    
 	    int diry= pow(-1,oct%2);
 	    int dirz= pow(-1,oct/2);
@@ -284,7 +283,7 @@ int main(int argc, char** argv) {
 	    if (K==1) {
 	      for (int i=0; i<p; i++)  {
 	    /* We must be on the plane defined by v */
-		m_ctc1.set_ref(i,m_ctc[i]);
+		m_ctc.set_ref(i,m_ctc[i]);
 		//		m_fun[0][i]= new Function(v,(x->at(i) +v[0]*(y->at(i)-diry*x->at(i))+v[1]*(z->at(i)-dirz*x->at(i))-Interval(-epseq,epseq)));
 		linfun[i][0]=x->at(i);
 		linfun[i][1]=y->at(i)-diry*x->at(i);
@@ -304,11 +303,7 @@ int main(int argc, char** argv) {
 	    prec[2]=0.0007;
 	    */
 
-	    /*
-	    prec[0]=0.000001;
-	    prec[1]=0.000001;
-	    prec[2]=0.00001;
-	    */
+	  
 	    prec[0]=atof(argv[8]);
 	    prec[1]=atof(argv[8]);
 	    prec[2]=atof(argv[9]);
@@ -317,7 +312,7 @@ int main(int argc, char** argv) {
 	    proba[0]=0.33;
 	    proba[1]=0.33;
 	    proba[2]=0.34;
-	    //	    CellStack buff;
+	    //CellStack buff;
 	    CellHeapQInter buff;
 	    BeamSearch str(buff);
 	     //	    BestFirstSearch str (buff);
@@ -332,18 +327,18 @@ int main(int argc, char** argv) {
 	    
 
             CtcQInter* ctcq;	    
-	    //	    CtcQInter ctcq(3,m_ctc1,Q);
-	    //	    ctcq = new CtcQInterAff (3,m_ctc1,Q,m_fun,QINTERPROJ,K);
+	    //	    CtcQInter ctcq(3,m_ctc,Q);
+	    //	    ctcq = new CtcQInterAff (3,m_ctc,Q,m_fun,QINTERPROJ,K);
 	    
 	    if (flist==1)
-	      ctcq = new CtcQInterAffPlane (n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ);
+	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Qoct,QINTERPROJ);
 	    else
-	      //  ctcq= new  CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Qoct,QINTERPROJ,K);
-	      ctcq= new  CtcQInter (n,m_ctc1,Qoct,QINTERPROJ);
-	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
-	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERCORE,K);
-	    //	    CtcQInterPlane  ctcq(n,m_ctc1,linfun,epseq,Q, QINTERCORE,K );
-	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERFULL, K);
+	      //  ctcq= new  CtcQInterPlane (n,p,m_ctc,linfun,epseq,Qoct,QINTERPROJ,K);
+	      ctcq= new  CtcQInter (n,m_ctc,Qoct,QINTERPROJ);
+	    //	    CtcQInterPlane ctcq(n,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
+	    //	    CtcQInterPlane ctcq(n,m_ctc,linfun,epseq,Q,QINTERCORE,K);
+	    //	    CtcQInterPlane  ctcq(n,m_ctc,linfun,epseq,Q, QINTERCORE,K );
+	    //	    CtcQInterPlane ctcq(n,m_ctc,linfun,epseq,Q,QINTERFULL, K);
 
 	    CtcCompo ctcqf0 (*ctc0,*ctcq);
 	    Ctc3BCid cid(*ctcq,10,1,3);
@@ -363,15 +358,18 @@ int main(int argc, char** argv) {
 	    SolverOptQInter s(*ctcs,*bs,str,*ctcq);
 	    s.str.with_oracle=0;
 	    //
+	    
 	    if (flist==1)
 	      s.str.with_storage=true;
 	    else
 	      s.str.with_storage=false;
+	    
 
+	    s.str.with_storage=false;
 	    s.timeout = 3600;
 	    s.epsobj=1;
 	    s.trace=1;
-	    s.nbr=nbrand;
+	    s.feasible_tries=nbrand;
 	    s.gaplimit=gaplimit;
 	    s.bestsolpointnumber=bestsolpointnumber;
 	    s.bestsolpoint=bestsol;
@@ -400,7 +398,7 @@ int main(int argc, char** argv) {
 	  }
 
 	m_ctc.clear();
-	m_ctc1.clear();
+
 	cout << " end of octant " << endl;
 	end = clock();
 	totaltime += ((double)(end)-(double)(start))/CLOCKS_PER_SEC;

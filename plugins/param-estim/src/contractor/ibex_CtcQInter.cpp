@@ -29,37 +29,15 @@ namespace ibex {
   double CtcQInter::get_epseq() {return 0;}
   double CtcQInter::lincoeff(int i, int j) {return 0;}
 
-  //  void CtcQInter::contract_pairs (IntervalVector & box) {;}
-  /*
-  void CtcQInter::init ()
-  {
-    
-    cout << " qinter init " << ctc_list.size() << endl;
-    points= new list<int> (); 
-    boxes= new IntervalMatrix(ctc_list.size(),nb_var);
-    for(int i=0;i<ctc_list.size();i++) {points->push_back(i);}
-    _side_effects=false;
-    points_to_delete=true;
-    qmax=ctc_list.size();
-    dim=nb_var;
-
-  }
-  */
-
+  
+  
 void CtcQInter::init ()
   {
-    cout << " debut init " << endl;
+    // cout << " debut init " << endl;
     points= new list<int> (); 
 
     boxes= new IntervalMatrix(nb_obs,nb_var);
-    /*
-    points0.clear();
-    for(int i=0;i<nb_obs;i++) {points0.push_back(i);}
-    cout << "nb_obs " << points0.size();
-    points1=points0;
-    cout << "  points 1 " << points1.size() << endl;
-    points=&points1;
-    */
+   
     for(int i=0;i<nb_obs;i++) {points->push_back(i);}
     cout << " points " << points-> size() << endl;
     _side_effects=false;
@@ -186,8 +164,8 @@ int CtcQInter::midactivepoints_count(const Vector& vec){
 
 
 
-void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
-{CtcQInter::point_contract (box,iter);}
+void CtcQInter::point_contract_exact(IntervalVector & box, int iter){ 
+  CtcQInter::point_contract (box,iter);}
 
  /* set the measures to box, contract them ; update the points list ; return the number of active measures in box*/
  int CtcQInter::activepoints_contract_count(IntervalVector& box){
@@ -324,12 +302,14 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
 
   // contract box with the iterth  measurement : uses the contractor of the measurement  (virtual function , can be redefined if a more simple computation exists
  void  CtcQInter::point_contract(IntervalVector& box, int iter)
- {//  cout << "iter " << iter << " box " << box  << endl;
-    ctc_list[iter].contract(box);}
+ {  //cout << " before " << "iter " << iter << " box " << box  << endl;
+    ctc_list[iter].contract(box);
+    //    cout << " after " << "iter " << iter << " box " << box  << endl;
+}
 
 
 
-
+  /*
   // returns the number of compatible measurements (no empty box after contraction) : the measurements with empty boxes are removed from points.
 
   int  CtcQInter::fwdbwdcount(IntervalVector& box){
@@ -352,7 +332,7 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
       }
     return p;
   }
-
+  */
 
   double  CtcQInter::max_diam_threshold(const IntervalVector& box) {return 0.0;}
 
@@ -388,13 +368,13 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
 
 
   void CtcQInter:: point_fwdbwd(IntervalVector& box, int iter)
-  {CtcQInter::point_contract (box,iter);
+  {//cout << " point_fwdbwd " << endl;
+   CtcQInter::point_contract (box,iter);
   }
 
 
 void CtcQInter::ctc_contract_all(IntervalVector& box)
 {
-  //  cout << " appel contract_all" << endl;
   list<int>::iterator iter = points->begin() ;
 
   while (iter != points->end())
@@ -457,9 +437,9 @@ void CtcQInter::ctc_contract_all(IntervalVector& box)
 
  
 
-  /* search for a point intersection of random n measurements */
+  /* search for a point intersection of random n distinct measurements */
  
-IntervalVector CtcQInter::randomvalidpoint(IntervalVector & box) {
+IntervalVector CtcQInter::randomvalidpoint(const IntervalVector & box) {
   int index[dim];
       int p=points->size();
       if (p> dim) 
@@ -499,26 +479,29 @@ IntervalVector CtcQInter::randomvalidpoint(IntervalVector & box) {
 
 
 
-  IntervalVector CtcQInter::boxintersection( IntervalVector& box, int* iter){
- IntervalVector box1 (box);
-   for (int i =0; i< dim; i++)
-     {
-       //       cout << i << " " << iter[i] << " box1 " << box1 << endl;
-     CtcQInter::point_contract(box1,iter[i]) ;
-     }
- return box1;
+  IntervalVector CtcQInter::boxintersection( const IntervalVector& box, int* iter){
+    IntervalVector box1 (box);
+    for (int i =0; i< dim; i++)
+      {
+	//       cout << i << " " << iter[i] << " box1 " << box1 << endl;
+	CtcQInter::point_contract(box1,iter[i]) ;
+      }
+    return box1;
   }
 
 
 
 
-  IntervalVector CtcQInter::pointintersection(IntervalVector & box, int* iter){
+  IntervalVector CtcQInter::pointintersection(const IntervalVector & box, int* iter){
     IntervalVector box1 (dim);
-    for (int i =0; i< dim; i++)
-     {
-     CtcQInter::point_contract(box1,iter[i]) ;
-     }
-    //   cout << " box1 " << box1 << endl;
+
+    //    cout << " point intersection " << endl;
+    box1=box;
+      for (int i =0; i< dim; i++)
+	{
+	  CtcQInter::point_contract(box1,iter[i]) ;
+	}
+      //    cout << " box1 " << box1 << endl;
     return box1;
   }
 

@@ -9,11 +9,10 @@
 //============================================================================
 
 #include "ibex_SolverGen.h"
-#include "ibex_Solver.h"
-
-
+#include "ibex_Solver.h" // useful for  CellLimitException
 
 #include "ibex_NoBisectableVariableException.h"
+
 #include <cassert>
 
 using namespace std;
@@ -41,11 +40,7 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 	init_buffer_info(*root);
 }
 
-  /*
-  pair<Cell*,Cell*> SolverGen::bisect(Cell& c,IntervalVector&box1, IntervalVector&box2){
-    return c.bisect(box1,box2);
-  }
-  */
+ 
 
   void SolverGen::push_cells (pair<Cell*,Cell*> & new_cells){
     buffer.push(new_cells.first);
@@ -84,35 +79,30 @@ SolverGen::SolverGen(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 			}
                         else {
 			
-			postcontract(*c);
-			if (v!=-1)
-			  impact.remove(v);
-			else                              // root node : impact set to 0 for all variables after contraction
-			  impact.clear();
+			  postcontract(*c);
+			  if (v!=-1)
+			    impact.remove(v);
+			  else                              // root node : impact set to 0 for all variables after contraction
+			    impact.clear();
 
 				
 
-			try {
-			  prebisect(*c);
+			  try {
+			    prebisect(*c);
 
-			  /*
-			  pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-			  //			  cout << "box1 " << boxes.first << endl;
-			  //			  cout << "box2 " << boxes.second << endl;
-			  pair<Cell*,Cell*> new_cells = bisect(*c,boxes.first,boxes.second);
-			  //	pair<Cell*,Cell*> new_cells = c->bisect(boxes.first,boxes.second);*/
-			  pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
+			 
+			    pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 
-					update_buffer_info(*c);	
-					buffer.pop();
-					push_cells (new_cells);
-					delete c;
+			    update_buffer_info(*c);	
+			    buffer.pop();
+			    push_cells (new_cells);
+			    delete c;
 					
 						
-					nb_cells+=2;
-					if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
+			    nb_cells+=2;
+			    if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
 
-			catch (NoBisectableVariableException&) {
+			  catch (NoBisectableVariableException&) {
 				  
 				  int sol_found=0;
 				  if (!(c->box.is_empty()) && solution_test (*c))

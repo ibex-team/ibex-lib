@@ -45,7 +45,6 @@ public:
   //  int activepoints_contract_count(IntervalVector& box);        
 
   IntervalVector validpoint( IntervalVector & box);
-  void contract_pairs (IntervalVector & box);
   int nb_obs;
   vector<int> initial_observations (int i)  ;
  protected :

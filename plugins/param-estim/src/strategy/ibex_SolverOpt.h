@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_SolverOpt.h
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
@@ -86,7 +86,7 @@ namespace ibex {
 	/** Bisector (tests also precision of boxes). */
 	Bsc& bsc;
 
-	/** Search Strategy*/
+	/** Search Strategy (BFS, DFS, BeamSearch) */
 	SearchStrategy& str;
 
 	/** Maximum cpu time used by the solver.

@@ -261,19 +261,7 @@ void CtcQInterLine::init ()
  }
 
 
-  void CtcQInterLine::contract_pairs (IntervalVector& box){
-    if (kfun==2){
-      //      IntervalVector box1 (box);
-      list<int>::iterator iter = points->begin() ;
-      while (iter != points->end()){
-	box &= (*boxesini)[*iter];
-	iter++;
-	
-      }
-      // if (!(box1==box)) cout << " diff " << box << " " << box1 << endl;
-    }
-  }
-    
+ 
     
 
 

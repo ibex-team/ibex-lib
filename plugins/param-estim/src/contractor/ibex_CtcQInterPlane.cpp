@@ -433,6 +433,7 @@ void CtcQInterPlane::init ()
   void CtcQInterPlane::ctc_contract_all(IntervalVector& box){
     
     if (nb_var==3) {
+      //      cout << " contract_all " << endl;
       int nbp = points->size();
 
       list<int>::iterator iter = points->begin() ;

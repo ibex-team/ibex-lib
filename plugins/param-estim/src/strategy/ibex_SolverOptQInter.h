@@ -52,7 +52,7 @@ Q-intersection contractors.
     void report_possible_inliers();
     void report_solution();
 
-    int nbr;
+    int feasible_tries;
     int gaplimit;
     
     int epsboxes_possiblesols;
@@ -62,7 +62,7 @@ Q-intersection contractors.
   
    IntervalVector initbox;
 
-   void init();
+   virtual void init();
    int qposs;
    int qvalid;  
    int measure_nb;
@@ -97,8 +97,8 @@ Q-intersection contractors.
  *
  * This class implements a branch and bound algorithm for the parameter estimation using the
 Qintersection contractors and other constraints.
-The constraints are in the system sys.
-A linear solver is used for finding a feasible point.
+The contraction use the contractor ctc ( QIntersection and other constraints)
+A linear solver is used for finding a feasible point, using the constraints  in the system sys.
  */
 
 
@@ -112,9 +112,10 @@ A linear solver is used for finding a feasible point.
    int tolerance_constraints_number;
  protected:
    LPSolver* mylp;  // linear solver for finding a feasible point
-   LPSolver* mylp1;  // linear solver for finding a feasible point
+   LPSolver* mylp1;  // linear solver for a second call finding a feasible point using tolerance minimzation
+   void init();
    Vector newvalidpoint (Cell& c);
-   Vector feasiblepoint (const IntervalVector & box, bool & res, Vector & feasiblepoint2);
+   Vector feasiblepoint (const IntervalVector & box, bool & res, Vector & feasiblepoint2); // variant not used
    Vector feasiblepoint (const IntervalVector & box, bool & res);
    double epscont;
    NormalizedSystem normsys;

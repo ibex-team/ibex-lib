@@ -58,7 +58,7 @@ namespace ibex {
 
 
   void  SolverOptQInter::init() {
-    nbr=0;
+    feasible_tries=10;
     epsobj=1;
     gaplimit=-1;
     str.depthmax=INT_MAX;
@@ -184,15 +184,14 @@ namespace ibex {
 
 
 /* qvalid is computed by this procedure */
-  Vector SolverOptQInter::newvalidpoint(Cell& c)
-  {
+  Vector SolverOptQInter::newvalidpoint(Cell& c)  {
     IntervalVector newvalidpoint(ctcq.nb_var);
-    if (nbr==0)
+    if (feasible_tries==0)
 	{ newvalidpoint= ctcq.validpoint(c.box);
 	  qvalid = ctcq.midactivepoints_count(newvalidpoint.mid()); 
 	}
-    else { // nbr random points in the current box, found by a mini RANSAC like procedure
-      for (int i=0; i < nbr; i++) {
+    else { // feasible_tries random points in the current box, found by a mini RANSAC like procedure
+      for (int i=0; i < feasible_tries; i++) {
 
        IntervalVector randompoint = ctcq.randomvalidpoint(initbox);
 
@@ -203,15 +202,17 @@ namespace ibex {
        randompoint &= c.box;
 
        if (! (randompoint.is_empty())) {
-
+	 
 	 IntervalVector randomvalidpoint= ctcq.validpoint(randompoint);
 	 if (!(randomvalidpoint.is_empty())){
 	   qres= ctcq.midactivepoints_count(randomvalidpoint.mid()); 
-	   	    
-       	   //	   cout << " qres " << qres << endl;
+	 
+	   //qres= ctcq.midactivepoints_count(randompoint.mid()); 
+	 //	 cout << " qres " << qres << endl;
 	 }
-	 //	 else cout << " randomvalidpoint not found " << endl;
+	 // else cout << " randomvalidpoint not found " << endl;
 	 if (qres > qvalid) {qvalid=qres;  newvalidpoint=randomvalidpoint;}
+	 //	 if (qres > qvalid) {qvalid=qres;  newvalidpoint=randompoint;}
 	 
        }
       
@@ -245,10 +246,10 @@ namespace ibex {
   { 
     int psize = ctcq.points->size();
     qposs= psize;
-
+    // cout << " max_val_freq " <<str.max_val_freq << endl;
     if (trace && ( nb_cells % str.max_val_freq ==0))
       {str.print_max_val();}
-
+    // cout << " max_val_freq  after " <<str.max_val_freq << endl;
     //    cout << " validate : qposs " <<  qposs << "box " <<  c.box << endl;
        //in optimization ctcq.qmax can be used as qposs for the stopping criterion
     if (ctcq.qmax < qposs) {
@@ -261,7 +262,6 @@ namespace ibex {
 
     Vector newvalidpoint1 (ctcq.nb_var);
     newvalidpoint1= newvalidpoint(c);  // qvalid is computed by this procedure that returns the corresponding point
-    //    if (qvalid >  c.get<QInterPoints>().qmidbox) c.get<QInterPoints>().qmidbox=qvalid;
     if  (bestsolpointnumber > 0 && qvalid > bestsolpointnumber  // a better solution has been found.
 	 ||
 	 bestsolpointnumber==0 && qvalid >= ctcq.q) // first solution - at least ctcq.q
@@ -662,7 +662,7 @@ namespace ibex {
  }
 
   
-  
+  // variant 
   Vector SolverOptConstrainedQInter::feasiblepoint (const IntervalVector& box, bool & res, Vector & feasiblepoint2) {
     res=0;
     int n = normsys.nb_var;
@@ -840,24 +840,30 @@ namespace ibex {
     delete mylp;
     delete mylp1;
   }
+  void  SolverOptConstrainedQInter::init() { 
+    SolverOptQInter::init(); 
+    feasible_tries=10;
+  }
+    
+
 
   // returns the valid point (if any) and qvalid the greatest number of valid measures computed by any call to counting the valid measurements 
   // of the corresponding valid point
   //  if qvalid remains 0 , no valid point has been found.
-  // at most nsimpl (here fixed to 10) calls to "feasiblepoint" are performed.
+  // at most feasible_tries calls to "feasiblepoint" are performed.
   // the search stops when a polytope built by feasiblepoint is empty (res=0).
 
   // version avec 2 appels au simplexe : une direction et son opposée
   /*
   Vector SolverOptConstrainedQInter::newvalidpoint (Cell & c){
     Vector newvalidpoint(ctcq.nb_var);
-    int nbsimpl=10;   // the maximum number of tries 
+
     Vector newvalidpoint1(ctcq.nb_var);
     Vector newvalidpoint2 (ctcq.nb_var);
     Vector newvalidpoint3 (ctcq.nb_var);
     bool res=false;
 	//	int fail=0;
-    for (int kk=0;kk<nbsimpl;kk++){
+    for (int kk=0;kk<feasible_tries;kk++){
       int qvalid1=0;
       int qvalid2=0;
       int qvalid3=0;
@@ -902,11 +908,12 @@ namespace ibex {
   //version avec un seul appel au simplexe par système de contraintes (1 direction)
 Vector SolverOptConstrainedQInter::newvalidpoint (Cell & c){
     Vector newvalidpoint(ctcq.nb_var);
-    int nbsimpl=10;   // the maximum number of tries 
+
     Vector newvalidpoint2(ctcq.nb_var);
     bool res=false;
-	//	int fail=0;
-    for (int kk=0;kk<nbsimpl;kk++){
+    //	int fail=0;
+    if (feasible_tries <=1) feasible_tries=1;
+    for (int kk=0;kk<feasible_tries;kk++){
       int qvalid2=0;
 
       newvalidpoint2=feasiblepoint(c.box,res);

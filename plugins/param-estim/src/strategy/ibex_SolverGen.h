@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_SolverGen.h
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
@@ -20,6 +20,8 @@
 #include "ibex_SubPaving.h"
 #include "ibex_Timer.h"
 #include "ibex_Exception.h"
+#include "ibex_Linear.h"
+#include "ibex_SolverOutputBox.h"
 
 
 #include <vector>
@@ -29,7 +31,9 @@
 
 using namespace std;
 
+
 namespace ibex {
+
 
 /**
  * \ingroup strategy
@@ -37,6 +41,7 @@ namespace ibex {
  * \brief  SolverGen.
  *
  * This class implements a branch and prune algorithm that finds all the solutions of a well constrained systems of equations (the system may contain additional inequalities).
+   This a variant of Solver in solver plugin with handles to write a specific solver like SolverQInter.cpp
  */
 
 

@@ -237,8 +237,8 @@ int main(int argc, char** argv) {
 	//	Solver s(*ctcs,*bs,buff);
 	s.timeout = 3600;
 	s.trace=0;
-	//	s.nbr=nbrand;
-	//	s.gaplimit=gaplimit;
+	s.feasible_tries=nbrand;
+	s.gaplimit=gaplimit;
 	//	srand(2);
 	vector<IntervalVector> res=s.solve(box);
 

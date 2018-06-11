@@ -31,7 +31,7 @@ void correspondences_read(ifstream & input, vector<double>& x11,  vector<double>
   //	    cout << in << " " << endl;
 }
 
-// reading correspondences data for corridor and Valbonne 
+// reading correspondences data for Oxford corridor and Valbonne church
 void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector<double>& y11, vector<double> & x22, vector<double> & y22)
  {double in;
 	    input >> in;
@@ -79,7 +79,7 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
    double prec0= atof(argv[8]);  // epsbox 
    double epscont= atof(argv[9]); // tolerance for the internal constraints
    int gaplimit = atoi (argv[10]); // for checking set of ouliers when qmax - qmin <= gap
-   int nbr = atoi (argv[11]);     // not used
+   int nbr = atoi (argv[11]);     // number of tries for searching a feasible point
 
 
    int dmax= atoi (argv[12]);  // used for Depth First Search only : only one branch hen depth > dmax
@@ -494,7 +494,7 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 	}
 
 	//	if (_box[0][0] <0 &&_box[0][1] >0) {_box[0][0]=0;}  
-	if (_box[1][0] <0 &&_box[1][1] >0) {_box[1][1]=0;}
+	if (_box[1][0] <0 &&_box[1][1] >0) {_box[1][1]=0;}                  //symmetry 
 
 
 
@@ -586,7 +586,7 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 	//	cout << " apres solver " << endl;
 	s->timeout = time0;
 	s->trace=1;
-	s->nbr=nbr;  // useless  for SolverOptConstrainedQInter
+	s->feasible_tries=nbr;  
 	s->epsobj=eobj;
 	s->str.depthmax=dmax;
 	s->gaplimit=gaplimit;
@@ -601,9 +601,9 @@ void correspondences_read_corridor(ifstream& input, vector<double>& x11,  vector
 
 	cout << "essential " << m_essential1.eval_matrix(box) << endl;
 	c_essential.contract(box);
-	cout << " box after essential  " << box << endl;
+	cout << " box after essential contract " << box << endl;
 	ctcnorm->contract(box);
-	cout << " box after ctcnorm  " << box << endl;
+	cout << " box after ctcnorm  contract " << box << endl;
 	cout << "essential after contract " << m_essential1.eval_matrix(box) << endl;
 
 

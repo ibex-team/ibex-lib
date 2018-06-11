@@ -54,7 +54,7 @@ public:
   virtual int ctc_contract(IntervalVector& box);
   virtual void ctc_contract_all(IntervalVector& box);
   void ctc_contract_observ(IntervalVector& box, list<int> & observ);
-  int fwdbwdcount(IntervalVector& box);
+  //int fwdbwdcount(IntervalVector& box);
 
   //  int midbox_activepoints_number(IntervalVector& box);
   //  int midbox_activepoints_contract_count(IntervalVector& box);
@@ -89,10 +89,9 @@ public:
 
         bool points_to_delete;  //to manage shared pointer  points
 
-	virtual IntervalVector randomvalidpoint(IntervalVector& box);
+	virtual IntervalVector randomvalidpoint(const IntervalVector& box);
 	
 	virtual IntervalVector validpoint (IntervalVector & box);
-	//	virtual void contract_pairs (IntervalVector & box);
 	virtual vector<int> initial_observations (int i);
 	virtual int original_obs(int k);
 	virtual vector<int> feasible_points(const Vector& vec);
@@ -107,8 +106,8 @@ protected:
 	virtual void init();
 	IntervalMatrix* boxes; // store boxes for each contraction
 	void direct_qintercontract (int &p , IntervalVector & box);
-	virtual IntervalVector boxintersection( IntervalVector& box, int* iter);
-	virtual IntervalVector pointintersection( IntervalVector& box,int* iter);
+	virtual IntervalVector boxintersection(const IntervalVector& box, int* iter);
+	virtual IntervalVector pointintersection(const IntervalVector& box,int* iter);
 	virtual  IntervalVector qinter_contract(int & p,int n0, int n1) ;
         virtual double max_diam_threshold(const IntervalVector &box);
 	void updatepoints();

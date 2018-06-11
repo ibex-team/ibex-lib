@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
 	int gaplimit= atoi(argv[7]);
 	int nbrand= atoi(argv[8]);
 	string bisect = argv[9];
-
+        srand (atoi (argv[10]));
 	cout << input_file_name << endl;
 	ifstream input(input_file_name.c_str());
 	while (!input.eof())
@@ -216,15 +216,16 @@ int main(int argc, char** argv) {
 	    //CtcFixPoint ctcf(ctcid,0.1);
 
 	    double epscont =1.e-4;
-	    SolverOptConstrainedQInter s(sys,ctcf,*bs,str,ctcq,epscont);
+	    //	    SolverOptConstrainedQInter s(sys,ctcf,*bs,str,ctcq,epscont);
+	    SolverOptQInter s(ctcf,*bs,str,ctcq);
 
 	    s.str.with_oracle=false;
 	    s.str.with_storage=true;
 	    s.timeout = 3600;
 	    s.trace=1;
-	    s.nbr=nbrand;
+	    s.feasible_tries=nbrand;
 	    s.gaplimit=gaplimit;
-	    s.tolerance_constraints_number=10000;  // no second call for feasible point 
+	    //	    s.tolerance_constraints_number=10000;  // no second call for feasible point  for SolverOptConstrainedQInter
 	    IntervalVector res=s.solve(box);
 
 	    cout << "Number of branches : " << s.nb_cells << endl;
@@ -258,7 +259,7 @@ int main(int argc, char** argv) {
 	cout << "Shape extraction : OK. Time : " << ((double)(end)-(double)(start0))/CLOCKS_PER_SEC << " seconds" << endl;
 	cout << " total time " << totaltime << endl;
 	cout << " cpu time " << cputime << endl;
-	cout <<" total branch mumber " << nb_cells << endl;
+	cout <<" total branch number " << nb_cells << endl;
 
 	delete bs;
 	for (int i=0; i<p; i++)

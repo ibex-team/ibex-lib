@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
             
 	  }
 	x->pop_back();y->pop_back();z->pop_back();
-	srand(atoi(argv[8]));
+	srand(atoi(argv[10]));
 
 	cout << " nb points " << x->size() << endl;
 	//	for (int i=0; i< x->size(); i++) cout << (*x)[i] <<  " " << (*y)[i] << " " << (*z)[i] <<endl;
@@ -213,7 +213,7 @@ int main(int argc, char** argv) {
 	    s.timeout = 3600;
 	    s.trace=1;
 	    s.gaplimit=gaplimit;
-	    s.nbr=nbrand;
+	    s.feasible_tries=nbrand;
 
 	    s.bestsolpointnumber=bestsolpointnumber;
 	    s.bestsolpoint=bestsol;
@@ -251,7 +251,7 @@ int main(int argc, char** argv) {
 	cout << "Shape extraction : OK. Time : " << ((double)(end)-(double)(start0))/CLOCKS_PER_SEC << " seconds" << endl;
 	cout << " total time " << totaltime << endl;
 	cout << " cpu time " << cputime << endl;
-	cout <<" total branch mumber " << nb_cells << endl;
+	cout <<" total branch number " << nb_cells << endl;
 
 	  				       
 	for (int i=0; i<p; i++)

@@ -30,6 +30,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
   void SolverOpt::start(const IntervalVector& init_box) {
 	str.buffer.flush();
 	Cell* root= root_cell(init_box); 
+	cout << "init box " << root->box << endl;
 	// add data required by this solver
 	//	root->add<BisectedVar>();
 
@@ -38,7 +39,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 	second_cell=0;
 
 	handle_cell(*root);
-	cout << "init box " << root->box << endl;
+
         str.push_cell(*root);
 	init_buffer_info(*root);
 
@@ -46,12 +47,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 
 }
 
-  /*
-  pair<Cell*,Cell*> SolverOpt::bisect(Cell& c,IntervalVector&box1, IntervalVector&box2){
-    return c.bisect(box1,box2);
-  }
-  */
- 
+
 
   void SolverOpt::handle_cell (Cell & c){
     
@@ -72,7 +68,6 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
   bool SolverOpt::optimize() {
     Timer timer;
     timer.start();
-    cout << " trace " << trace <<  " nb_cells " << nb_cells << endl;
 	try  {
 	  while (! (str.empty_buffer())) {
 
@@ -81,12 +76,7 @@ SolverOpt::SolverOpt(Ctc& ctc, Bsc& bsc, SearchStrategy& str) :
 			Cell* c=str.top_cell();
 			//	cout << " box " << c->box << endl;
 			try {
-			  /*
-			  pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-			  //			  cout << "box1 " << boxes.first << endl;
-			  //			  cout << "box2 " << boxes.second << endl;
-			  pair<Cell*,Cell*> new_cells = bisect(*c,boxes.first,boxes.second);
-			  */
+			 
 			  pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 
 

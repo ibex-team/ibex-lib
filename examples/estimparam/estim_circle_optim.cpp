@@ -236,7 +236,7 @@ int main(int argc, char** argv) {
 	SolverOptQInter s (*ctcs,*bs,str,ctcq);
 	s.timeout = 3600;
 	s.trace=1;
-	s.nbr=nbrand;
+	s.feasible_tries=nbrand;
 	s.gaplimit=gaplimit;
 	s.str.with_storage=true;
 	s.str.with_oracle=false;

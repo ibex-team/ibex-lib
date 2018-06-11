@@ -180,59 +180,7 @@ int main(int argc, char** argv) {
 		linfun[i][2]=z->at(i)-dirz*x->at(i);
 	      }
 	    }
-	    /*
-	    else if(K==2)
-	      {
-		for (int nt=0; nt<NT1;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = rand() % (p-1);
-		    if (j>=i) j=j+1;
-		    m_ctc1.set_ref(p*nt+i,*new CtcFixPoint (* new CtcCompo (m_ctc[i],m_ctc[j]),0.1));
-		//		m_fun[0][p*nt+i]=new Function(v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-Interval(-epseq,epseq)));
-		    
-		    linfun[p*nt+i][0]=x->at(i);
-		    linfun[p*nt+i][1]=y->at(i)-diry*x->at(i);
-		    linfun[p*nt+i][2]=z->at(i)-dirz*x->at(i);
-
-		//		m_fun[1][p*nt+i]=new Function(v,(x->at(j) +diry*v[0]*(y->at(j)-x->at(j))+dirz*v[1]*(z->at(j)-x->at(j))-Interval(-epseq,epseq)));	 
-		    
-		    linfun[p*nt+i][0][1]=x->at(j);
-		    linfun[p*nt+i][1][1]=y->at(j)-diry*x->at(j);
-		    linfun[p*nt+i][2][1]=z->at(j)-dirz*x->at(j);
-		  }
-	      }
-	    else if(K==3)
-	      {
-		for (int nt=0; nt<NT2;nt++)
-		  for (int i=0; i<p; i++) {
-		    int j = rand() % (p-1);
-		    int k = rand() % (p-2);
-		    if (j>=i) j=j+1;
-		    if (k >=j && k >= i) k=k+2;
-		    else
-		      {if (k >=j || k>=i ) k=k+1;
-			if (k==i || k==j) k=k+1;
-		      }
-		    m_ctc1.set_ref(p*nt+i,*new CtcFixPoint (* new CtcCompo (m_ctc[i],m_ctc[j],m_ctc[k]),0.1));
-		  //		  m_fun[0][p*nt+i]= new Function(v,(x->at(i) +diry*v[0]*(y->at(i)-x->at(i))+dirz*v[1]*(z->at(i)-x->at(i))-Interval(-epseq,epseq)));
-		  //		  m_fun[1][p*nt+i]= new Function(v,(x->at(j) +diry*v[0]*(y->at(j)-x->at(j))+dirz*v[1]*(z->at(j)-x->at(j))-Interval(-epseq,epseq)));
-		  //		  m_fun[2][p*nt+i]= new Function(v,(x->at(k) +diry*v[0]*(y->at(k)-x->at(k))+dirz*v[1]*(z->at(k)-x->at(k))-Interval(-epseq,epseq)));
-
-		    
-		    linfun[p*nt+i][0][0]=x->at(i);
-		    linfun[p*nt+i][1][0]=y->at(i)-diry*x->at(i);
-		    linfun[p*nt+i][2][0]=z->at(i)-dirz*x->at(i);
-
-		    linfun[p*nt+i][0][1]=x->at(j);
-		    linfun[p*nt+i][1][1]=y->at(j)-diry*x->at(j);
-		    linfun[p*nt+i][2][1]=z->at(j)-dirz*x->at(j);
-
-		    linfun[p*nt+i][0][2]=x->at(k);
-		    linfun[p*nt+i][1][2]=y->at(k)-diry*x->at(k);
-		    linfun[p*nt+i][2][2]=z->at(k)-dirz*x->at(k);
-		  }
-	    */
-	  
+	   
 
 
 	    double _box[3][2];
@@ -309,21 +257,19 @@ int main(int argc, char** argv) {
 	    //CtcFixPoint ctcf(ctcqf0, 0.1);
 	    //CtcFixPoint ctcf(ctcid,0.1);
 
-	    int optim=0;
+
 	    SolverQInter s(ctcf,*bs,buff,*ctcq);
-	    //	    SolverOptQInter s(ctcf,*bs,buff,*ctcq,optim);
-	    //	    OptimQInter s(ctcf,*bs,buff,ctcq);
 	    
-	    //OptimizerQInter s(ctcf,*bs,buff,ctcq);
+
 	    //	    Solver s(ctcf,*bs,buff);
 	    //	    s.onesol_permaximalset=true;
 	    //	    s.qvalid=Qvalid;
 	    s.timeout = 10000;
             s.trace=0;
-	    s.nbr=nbrand;
+	    s.feasible_tries=nbrand;
 	    s.gaplimit=gaplimit;
 
-	    cout << "nbr" <<  nbrand << " gaplimit " << gaplimit << endl;
+	    cout << "feasible_tries" <<  nbrand << " gaplimit " << gaplimit << endl;
 
 	    vector<IntervalVector> res=s.solve(box);
 	    
@@ -332,151 +278,14 @@ int main(int argc, char** argv) {
 	    cputime += s.time;
 	    cout << " nb sols " << res.size() << endl;   
 
+	    s.report_possible_inliers();
 	    vector <int> maxsolinliers;
 	    s.keep_one_solution_pergroup(res,maxsolinliers );
-	    // output the planes 
-	    /*
-	    int kk=0;
-
-	    list<set<int>* >::iterator itersol= s.valid_sol_points.begin();
-	    list<set<int>* >::iterator compatitersol= s.compatible_sol_points.begin();
-
-	    for (int i=0; i<res.size(); i++)
-	  
-	      { 
-	    if (s.maximal_sol[i])
-
-	      {if ((*itersol)->size()>= Qvalid)
-
-		  { kk++; cout << "Sol " << kk << " " << i+1 << " " <<  res[i] << " " << (*compatitersol)->size() << "  compatible measurements " 
-			       << (*itersol)->size() << " valid measurements " << endl;
-
-
-		double aa= 1- diry*res[i][0].mid() - dirz * res[i][1].mid();
-		double norm= sqrt( pow(aa,2)+ pow(res[i][0].mid(),2) + pow(res[i][1].mid(),2));
-		cout << " norm sol " << aa/norm << " " << res[i][0].mid()/norm << " " << res[i][1].mid()/norm << " " << res[i][2].mid()/norm << endl;
-		//		int q22=0;
-		set<int>::iterator iter= (*itersol)->begin();
-	
-		while (iter !=(*itersol)->end())
-		  {cout << *iter << " ";
-		    // cout << *iter << "  " << x->at(*iter) << " " << y->at(*iter) << " " <<  z->at(*iter) << endl;
-		    //		    cout << x->at(*iter)*aa/norm+y->at(*iter)*res[i][0].mid()/norm + z->at(*iter)*res[i][1].mid()/norm - res[i][2].mid()/norm<< endl;
-                    IntervalVector mid (res[i].mid());
-		    // if (s.ctcq.validpoint (mid,*iter)) q22++;
-		     iter++;}
-		cout << endl;
-		//		cout << " " << q22 << " valid measures at midpoint" << endl;
-		  }
-	       itersol++;
-	       compatitersol++;
-	      }
-
-	  }
-	    */
-	    if (optim)
-	      {
-		s.report_possible_inliers();
-		Q=ctcq->q;
-	      }
-	    /*
-	    else{
-	    s.report_maximal_solutions(res);
-	    vector <int> maxsolinliers;
-	    s.keep_one_solution_pergroup(res,maxsolinliers );
-	    }
-	    */
-	/*
-	if (res.size() >1)
-	  {	resgroup.push_back(res[0]);
-
-	    for (int i=0; i<res.size(); i++)
-	      { 
 	    
-		if (max_dist (res[i],resgroup.back(),  prec))
-	      resgroup[resgroup.size()-1]= res[i]|resgroup.back();
-	    else
-	      resgroup.push_back(res[i]);
-	  }
-	*/
-
-	    /*
-	cout << "regroupement  solutions " << endl;
-	cout << " nb sols " << resgroup.size() << endl;
-	for (int i=0; i<resgroup.size(); i++)
-	  {
-	    int k=0;
-	    for (int j=0;j<p;j++){
-	      Interval evalctc= m_func[j]->eval(resgroup[i]);
-	      IntervalVector box= resgroup[i];
-	      try {m_ctc[j].contract(box);
-		if (evalctc.contains(0)) {k++; 
-		  //		  cout << " " << j  <<  " " ;
-		
-		  //		  cout << j << (*x)[j] << " " << (*y)[j] <<  " " << (*z)[j] <<  " " <<
-		  }
-		}
-		catch (EmptyBoxException&) {continue;}
-
-
-
-		  //		  cout << j << (*x)[j] << " " << (*y)[j] <<  " " << (*z)[j] <<  " " <<
-		  //		    m_func[j]->eval(resgroup[i]) << endl;
-	    }
-	 
-	    //	    cout << endl;
-	    //	    cout << "nb points " << k <<endl;
-	  }
+	    end = clock();
+	    totaltime += ((double)(end)-(double)(start))/CLOCKS_PER_SEC;
+	    start= clock();
 	    
-	  }
-
-
-	vector<IntervalVector> resgroup2;
-
-	if (resgroup.size() >0)
-	  {
-	    cout << "regroupement  solutions 2" << endl;
-	    resgroup2.push_back(resgroup[0]);
-	    for (int i=0; i<resgroup.size(); i++)
-	  {if (max_dist (resgroup[i],resgroup2.back(), prec))
-	      resgroup2[resgroup2.size()-1]= resgroup[i]|resgroup2.back();
-	    else
-	      resgroup2.push_back(resgroup[i]);
-	  }
-
-	  
-	    for (int i=0; i<resgroup2.size(); i++)
-	  {	  cout << resgroup2[i] << " "  << endl;
-	    double aa= 1- diry*resgroup2[i][0].mid() - dirz * resgroup2[i][1].mid();
-	    double norm= sqrt( pow(aa,2)+ pow(resgroup2[i][0].mid(),2) + pow(resgroup2[i][1].mid(),2));
-	    cout << " norm sol " << aa/norm << " " << resgroup2[i][0].mid()/norm << " " << resgroup2[i][1].mid()/norm << " " << resgroup2[i][2].mid()/norm << endl;
-	    int k=0;
-	    for (int j=0; j<p; j++)
-	      { Interval evalctc= m_func[j]->eval(resgroup2[i]);
-		IntervalVector box= resgroup2[i];
-		try {m_ctc[j].contract(box);
-		  if (evalctc.contains(0)) {k++; 
-		    cout << " " << j ;
-		
-		    //		    cout << (*x)[j] << " " << (*y)[j] <<  " " << (*z)[j] <<   endl;
-		  }
-		}
-		catch (EmptyBoxException&) {continue;}
-	      }
-	    	    cout << endl;
-	    cout << "nb points " << k <<endl;
-	    //  Q0=k+1;
-	  }
-
-	  }
-
-	   
-	    */
-
-	end = clock();
-	totaltime += ((double)(end)-(double)(start))/CLOCKS_PER_SEC;
-	start= clock();
-
 	  }
 
 	
