@@ -64,7 +64,7 @@ public:
 	 */
 	virtual void contract(IntervalVector& box, CtcContext& context);
 
-	virtual void add_property(SymbolMap<BoxProperty*>& map);
+	//virtual void add_property(SymbolMap<BoxProperty*>& map);
 
 	/** The list of contractors to propagate */
 	Array<Ctc> list;

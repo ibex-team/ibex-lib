@@ -137,12 +137,16 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	IntervalVector result(IntervalVector::empty(box.size()));
 	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
 	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
+	CtcContext c_context;
+	c_context.set_impact(impact);
+	c_context.set_output_flags(flags);
+	c_context.set_data(*context.data(), false);
 
 	for (int i=0; i<list.size(); i++) {
 		if (i>0) box=savebox;
 
 		flags.clear();
-		list[i].contract(box,impact,flags);
+		list[i].contract(box,c_context);
 		result |= box;
 
 		if (flags[CtcContext::INACTIVE]) {
@@ -152,6 +156,12 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	}
 
 	box = result;
+	if (context.data() && context.update_data) {
+		for (IBEXMAP(BoxProperty*)::const_iterator it=context.data()->begin(); it!=context.data()->end(); it++) {
+			it->second->update_contract(box);
+		}
+	}
+
 } // end namespace ibex
 
 }

@@ -46,6 +46,8 @@ void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 
 	CtcContext c_context;
 	c_context.set_impact(_impact);
+	c_context.set_output_flags(flags);
+	c_context.set_data(*context.data(), true);
 
 	assert(box.size()==nb_var);
 
@@ -119,8 +121,9 @@ void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 
 		//cout << "Contraction with " << c << endl;
 
+		flags.clear();
 
-		list[c].contract(box, _impact, flags);
+		list[c].contract(box, c_context);
 
 		if (box.is_empty()) {
 			agenda.flush();
