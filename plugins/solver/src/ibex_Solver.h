@@ -302,6 +302,11 @@ protected:
 	BitSet impact;
 
 	/*
+	 * Context for the contractor
+	 */
+	CtcContext context;
+
+	/*
 	 * \brief Initial box of the current search.
 	 */
 	IntervalVector solve_init_box;

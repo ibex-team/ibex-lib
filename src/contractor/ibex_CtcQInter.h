@@ -37,6 +37,11 @@ public:
 	virtual void contract(IntervalVector& box);
 
 	/**
+	 * \brief Add sub-contractors properties to the map
+	 */
+	virtual void add_property(Map<Property>& map);
+
+	/**
 	 * List of contractors
 	 */
 	Array<Ctc> list;

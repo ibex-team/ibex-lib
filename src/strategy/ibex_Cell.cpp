@@ -10,6 +10,8 @@
 
 #include "ibex_Cell.h"
 #include "ibex_Bsc.h"
+#include "ibex_BoxProp.h"
+#include "ibex_SearchNodeProp.h"
 
 #include <limits.h>
 
@@ -20,7 +22,7 @@ namespace ibex {
 Cell::Cell(const IntervalVector& box) : box(box) { }
 
 Cell::Cell(const Cell& e) : box(e.box) {
-	for (IBEXMAP(Property*)::const_iterator it=e.prop.begin(); it!=e.prop.end(); it++) {
+	for (Map<Property>::const_iterator it=e.prop.begin(); it!=e.prop.end(); it++) {
 		prop.insert_new(it->first, it->second->copy());
 	}
 }
@@ -43,16 +45,16 @@ pair<Cell*,Cell*> Cell::subcells(const BisectionPoint& b) const {
 		cright = new Cell(b2);
 	}
 
-	for (IBEXMAP(Property*)::const_iterator it=prop.begin(); it!=prop.end(); it++) {
-		SearchNodeProperty* snp = dynamic_cast<SearchNodeProperty*>(it->second);
+	for (Map<Property>::const_iterator it=prop.begin(); it!=prop.end(); it++) {
+		SearchNodeProp* snp = dynamic_cast<SearchNodeProp*>(it->second);
 		if (snp) {
-			std::pair<SearchNodeProperty*,SearchNodeProperty*> child_data=snp->update_children(b);
+			std::pair<SearchNodeProp*,SearchNodeProp*> child_data=snp->update_bisect(b);
 			cleft->prop.insert_new(it->first,child_data.first);
 			cright->prop.insert_new(it->first,child_data.second);
 		} else {
-			BoxProperty* bp = dynamic_cast<BoxProperty*>(it->second);
+			BoxProp* bp = dynamic_cast<BoxProp*>(it->second);
 			if (bp) {
-				std::pair<BoxProperty*,BoxProperty*> child_data=bp->update_bisect(b);
+				std::pair<BoxProp*,BoxProp*> child_data=bp->update_bisect(b);
 				cleft->prop.insert_new(it->first,child_data.first);
 				cright->prop.insert_new(it->first,child_data.second);
 			} else
@@ -64,7 +66,7 @@ pair<Cell*,Cell*> Cell::subcells(const BisectionPoint& b) const {
 }
 
 Cell::~Cell() {
-	for (IBEXMAP(Property*)::iterator it=prop.begin(); it!=prop.end(); it++)
+	for (Map<Property>::iterator it=prop.begin(); it!=prop.end(); it++)
 		delete it->second;
 }
 

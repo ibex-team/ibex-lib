@@ -14,8 +14,9 @@
 #include "ibex_CellStack.h"
 #include "ibex_SetConnectedComponents.cpp_"
 #include "ibex_SepFwdBwd.h"
-#include "ibex_BoxProperty.h"
 #include "ibex_String.h"
+#include "ibex_BoxProp.h"
+#include "ibex_Id.h"
 
 #include <stack>
 #include <fstream>
@@ -228,7 +229,7 @@ std::ostream& operator<<(std::ostream& os, const Set& set) {
 	return os;
 }
 
-class NodeAndDist : public BoxProperty {
+class NodeAndDist : public BoxProp {
 public:
 	NodeAndDist() : node(NULL), dist(-1) { }
 
@@ -248,11 +249,11 @@ public:
 		dist=d.lb();
 	}
 
-	virtual BoxProperty* copy() const {
+	virtual BoxProp* copy() const {
 		return new NodeAndDist(*this);
 	}
 
-	virtual std::pair<BoxProperty*,BoxProperty*> update_bisect(const BisectionPoint&) {
+	virtual std::pair<BoxProp*,BoxProp*> update_bisect(const BisectionPoint&) {
 		assert(!node->is_leaf());
 
 		SetBisect& b=*((SetBisect*) node);
@@ -275,22 +276,21 @@ protected:
 class CellHeapDist : public CostFunc<Cell> {
 
 public:
-	CellHeapDist(const char* prop_key) : key(prop_key) { }
+	CellHeapDist(long prop_key) : key(prop_key) { }
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const {
 		return ((NodeAndDist*) c.prop[key])->dist;
 	}
 
-	const char* key;
+	long key;
 };
 
 
 double Set::dist(const Vector& pt, bool inside) const {
 
-	char* key = random_alphanum_string(10);
-	CellHeapDist costf(key);
-	Heap<Cell> heap(costf);
+	long key = next_id();
+
 
 	//int count=0; // for stats
 
@@ -300,7 +300,9 @@ double Set::dist(const Vector& pt, bool inside) const {
 	nad->node = root;
 	nad->set_dist(Rn,pt);
 	//count++;
+	CellHeapDist costf(key);
 
+	Heap<Cell> heap(costf);
 	heap.push(root_cell);
 
 	double lb = POS_INFINITY;

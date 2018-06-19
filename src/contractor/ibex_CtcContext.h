@@ -8,8 +8,8 @@
 #ifndef __IBEX_CTC_CONTEXT_H__
 #define __IBEX_CTC_CONTEXT_H__
 
-#include "ibex_SymbolMap.h"
-#include "ibex_BoxProperty.h"
+#include "ibex_Map.h"
+#include "ibex_BoxProp.h"
 #include "ibex_BitSet.h"
 
 namespace ibex {
@@ -45,11 +45,11 @@ public:
 	 * The \a impact specifies the variables that have been
 	 * modified since the last call to this contractor.
 	 */
-	void set_impact(const BitSet& impact);
+	void set_impact(const BitSet* impact);
 
-	void set_output_flags(BitSet& flags);
+	void set_output_flags(BitSet* flags);
 
-	void set_data(SymbolMap<BoxProperty*>& data, bool update);
+	void set_data(Map<BoxProp>* data, bool update);
 
 	/**
 	 * \brief Return the current impact (NULL pointer if none).
@@ -64,7 +64,7 @@ public:
 	/**
 	 * \brief Return the current backtrackable data (NULL pointer if none).
 	 */
-	SymbolMap<BoxProperty*>* data();
+	Map<BoxProp>* data();
 
 	/**
 	 * Set an output flag.
@@ -76,7 +76,7 @@ public:
 private:
 	const BitSet* _impact;
 	BitSet* _output_flags;
-	SymbolMap<BoxProperty*>* _data;
+	Map<BoxProp>* _data;
 };
 
 
@@ -85,20 +85,20 @@ private:
  ============================================================================*/
 inline CtcContext::CtcContext() : _impact(NULL), _output_flags(NULL), _data(NULL), update_data(false) { }
 
-inline void CtcContext::set_impact(const BitSet& impact) { _impact = &impact; }
+inline void CtcContext::set_impact(const BitSet* impact) { _impact = impact; }
 
-inline void CtcContext::set_output_flags(BitSet& flags) { _output_flags = &flags; }
+inline void CtcContext::set_output_flags(BitSet* flags) { _output_flags = flags; }
 
-inline void CtcContext::set_data(SymbolMap<BoxProperty*>& data, bool update) { _data = &data; update_data = update; }
+inline void CtcContext::set_data(Map<BoxProp>* data, bool update) { _data = data; update_data = update; }
 
 inline const BitSet* CtcContext::impact() { return _impact; }
 
 inline BitSet* CtcContext::output_flags() { return _output_flags; }
 
-inline SymbolMap<BoxProperty*>* CtcContext::data() { return _data; }
+inline Map<BoxProp>* CtcContext::data() { return _data; }
 
 inline void CtcContext::set_flag(unsigned int f) {
-	assert(f<Ctc::NB_OUTPUT_FLAGS);
+	assert(f<CtcContext::NB_OUTPUT_FLAGS);
 	if (output_flags())
 		output_flags()->add(f);
 }

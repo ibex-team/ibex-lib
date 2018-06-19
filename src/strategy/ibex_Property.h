@@ -12,12 +12,17 @@ namespace ibex {
 
 class Property {
 public:
+	Property() { }
+
 	virtual ~Property() { }
 
 	/**
 	 * \brief Create a copy.
+	 *
+	 * The copy must have the same id.
 	 */
 	virtual Property* copy() const=0;
+
 };
 
 } /* namespace ibex */

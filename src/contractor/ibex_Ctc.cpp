@@ -30,8 +30,5 @@ void Ctc::contract(Set& set, double eps) {
 	sep.contract(set,eps);
 }
 
-void Ctc::add_property(SymbolMap<BoxProperty*>& map) {
-
-}
 
 } // namespace ibex

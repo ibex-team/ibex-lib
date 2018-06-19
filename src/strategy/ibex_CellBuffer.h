@@ -62,7 +62,7 @@ class CellBuffer {
 	 *
 	 * Does nothing by default.
 	 */
-	virtual void add_backtrackable(Cell& root) { }
+	virtual void add_property(Map<Property>& map);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -99,5 +99,12 @@ protected:
 
 std::ostream& operator<<(std::ostream& os, const CellBuffer& h);
 
+/*================================== inline implementations ========================================*/
+
+inline void CellBuffer::add_property(Map<Property>& map) {
+
+}
+
 } // end namespace ibex
+
 #endif // __IBEX_CELL_BUFFER_H__

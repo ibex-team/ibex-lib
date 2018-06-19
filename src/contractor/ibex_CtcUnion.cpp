@@ -123,6 +123,11 @@ CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 	assert(check_nb_var_ctc_list(list));
 }
 
+void CtcUnion::add_property(Map<Property>& map) {
+	for (int i=0; i<list.size(); i++)
+		list[i].add_property(map);
+}
+
 CtcUnion::~CtcUnion() {
 	if (own_sys) delete own_sys;
 }
@@ -138,9 +143,9 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
 	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
 	CtcContext c_context;
-	c_context.set_impact(impact);
-	c_context.set_output_flags(flags);
-	c_context.set_data(*context.data(), false);
+	c_context.set_impact(&impact);
+	c_context.set_output_flags(&flags);
+	c_context.set_data(context.data(), false);
 
 	for (int i=0; i<list.size(); i++) {
 		if (i>0) box=savebox;
@@ -156,9 +161,10 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	}
 
 	box = result;
+
 	if (context.data() && context.update_data) {
-		for (IBEXMAP(BoxProperty*)::const_iterator it=context.data()->begin(); it!=context.data()->end(); it++) {
-			it->second->update_contract(box);
+		for (Map<BoxProp>::const_iterator it=context.data()->begin(); it!=context.data()->end(); it++) {
+			((BoxProp*) it->second)->update_contract(box);
 		}
 	}
 

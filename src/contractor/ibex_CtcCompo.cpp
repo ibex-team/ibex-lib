@@ -167,6 +167,10 @@ CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 	init_impacts();
 }
 
+void CtcCompo::add_property(Map<Property>& map) {
+	for (int i=0; i<list.size(); i++)
+		list[i].add_property(map);
+}
 
 CtcCompo::~CtcCompo() {
 //	delete[] impacts;
@@ -198,21 +202,22 @@ void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 	bool inactive= true;
 	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
 
-	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
-
 	CtcContext sub_context;
-	sub_context.set_impact(impact);
-	sub_context.set_output_flags(flags);
+	sub_context.set_output_flags(&flags);
 	if (context.data())
-		sub_context.set_data(*context.data(), true);
+		sub_context.set_data(context.data(), true);
 
 	for (int i=0; i<list.size(); i++) {
-		flags.clear();
-		list[i].contract(box,sub_context);
+
 		if (inactive) {
-			if (!flags[CtcContext::INACTIVE]) inactive=false;
+			flags.clear();
+			list[i].contract(box,sub_context);
+			if (!flags[CtcContext::INACTIVE]) {
+				inactive=false;
+				sub_context.set_output_flags(NULL);
+			}
 		} else {
-			list[i].contract(box);
+			list[i].contract(box,sub_context);
 		}
 
 		if (box.is_empty()) {

@@ -14,8 +14,8 @@ using namespace std;
 
 namespace ibex {
 
-void SmearFunction::add_backtrackable(Cell& root) {
-	rr.add_backtrackable(root);
+void SmearFunction::add_property(Map<Property>& map) {
+	rr.add_property(map);
 }
 
 BisectionPoint SmearFunction::choose_var(const Cell& cell) {

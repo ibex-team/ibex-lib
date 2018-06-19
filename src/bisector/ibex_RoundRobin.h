@@ -60,7 +60,7 @@ public:
 	/**
 	 * \brief Add an instance of #ibex::BisectedVar to the backtrackable data of the root cell.
 	 */
-	void add_backtrackable(Cell& root);
+	void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Ratio to choose the split point.

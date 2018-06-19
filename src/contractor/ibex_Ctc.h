@@ -13,11 +13,13 @@
 #ifndef __IBEX_CONTRACTOR_H__
 #define __IBEX_CONTRACTOR_H__
 
+#include "ibex_Map.h"
 #include "ibex_IntervalVector.h"
 #include "ibex_BitSet.h"
 #include "ibex_Array.h"
 #include "ibex_Set.h"
 #include "ibex_CtcContext.h"
+#include "ibex_Property.h"
 
 namespace ibex {
 
@@ -94,7 +96,7 @@ public:
 	 */
 	void contract(Set& set, double eps);
 
-	virtual void add_property(SymbolMap<BoxProperty*>& map);
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief The number of variables this contractor works with.
@@ -140,15 +142,19 @@ inline void Ctc::contract(IntervalVector& box, CtcContext& context) {
 
 inline void Ctc::contract(IntervalVector& box, const BitSet& impact) {
 	CtcContext context;
-	context.set_impact(impact);
+	context.set_impact(&impact);
 	contract(box,context);
 }
 
 inline void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& flags) {
 	CtcContext context;
-	context.set_impact(impact);
-	context.set_output_flags(flags);
+	context.set_impact(&impact);
+	context.set_output_flags(&flags);
 	contract(box,context);
+}
+
+inline void Ctc::add_property(Map<Property>& map) {
+
 }
 
 } // namespace ibex

@@ -50,7 +50,7 @@ void CtcQuantif::contract(IntervalVector& x, IntervalVector& y) {
 	flags.clear();
 
 	CtcContext context;
-	context.set_output_flags(flags);
+	context.set_output_flags(&flags);
 	ctc->contract(fullbox, context);
 
 	x=vars.var_box(fullbox);

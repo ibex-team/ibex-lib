@@ -16,6 +16,18 @@ CellCostFunc::CellCostFunc(bool depends_on_loup) : depends_on_loup(depends_on_lo
 
 }
 
+void CellCostFunc::set_loup(double lb) {
+
+}
+
+void CellCostFunc::add_property(Map<Property>& map) {
+
+}
+
+void CellCostFunc::set_optim_data(Cell& c, const ExtendedSystem& sys) {
+
+}
+
 CellCostFunc* CellCostFunc::get_cost(criterion crit, int goal_var) {
 	switch (crit) {
 	case LB :    return new CellCostVarLB(goal_var); break;
@@ -58,7 +70,7 @@ CellCostC3::CellCostC3(double lb) : CellCostFunc(true), loup(lb) {
 }
 
 double CellCostC3::cost(const Cell& c) const {
-	const OptimData *data = &(c.get<OptimData>());
+	const OptimData *data = (OptimData*) c.prop[OptimData::prop_id];
 	if (data) {
 		return -((loup - data->pf.lb()) / data->pf.diam() );
 	} else {
@@ -67,12 +79,13 @@ double CellCostC3::cost(const Cell& c) const {
 	}
 }
 
-void CellCostC3::add_backtrackable(Cell& root) {
-	root.add<OptimData>();
+void CellCostC3::add_property(Map<Property>& map) {
+	if (!map.found(OptimData::prop_id))
+		map.insert_new(OptimData::prop_id, new OptimData());
 }
 
 void CellCostC3::set_optim_data(Cell& c, const ExtendedSystem& sys) {
-	c.get<OptimData>().compute_pf(*sys.goal,c.box);
+	((OptimData*) c.prop[OptimData::prop_id])->compute_pf(*sys.goal,c.box);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -82,7 +95,7 @@ CellCostC5::CellCostC5(double lb) : CellCostFunc(true), loup(lb) {
 }
 
 double CellCostC5::cost(const Cell& c) const {
-	const OptimData *data = &(c.get<OptimData>());
+	const OptimData *data = (OptimData*) c.prop[OptimData::prop_id];
 	if (data) {
 		return (-(data->pu * (loup - data->pf.lb()) / data->pf.diam()));
 	} else {
@@ -90,14 +103,15 @@ double CellCostC5::cost(const Cell& c) const {
 	}
 }
 
-void CellCostC5::add_backtrackable(Cell& root) {
-	root.add<OptimData>();
+void CellCostC5::add_property(Map<Property>& map) {
+	if (!map.found(OptimData::prop_id))
+		map.insert_new(OptimData::prop_id, new OptimData());
 }
 
 void CellCostC5::set_optim_data(Cell& c, const ExtendedSystem& sys) {
-	OptimData& data=c.get<OptimData>();
-	data.compute_pu(sys,c.box);
-	data.compute_pf(*sys.goal,c.box);
+	OptimData *data = (OptimData*) c.prop[OptimData::prop_id];
+	data->compute_pu(sys,c.box);
+	data->compute_pf(*sys.goal,c.box);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -107,7 +121,7 @@ CellCostC7::CellCostC7(int ind_var, double lb) : CellCostFunc(true), loup(lb), g
 }
 
 double CellCostC7::cost(const Cell& c) const {
-	const OptimData *data = &(c.get<OptimData>());
+	const OptimData *data = (OptimData*) c.prop[OptimData::prop_id];
 	if (data) {
 		return c.box[goal_var].lb()/(data->pu*(loup-data->pf.lb())/data->pf.diam());
 	} else {
@@ -115,14 +129,15 @@ double CellCostC7::cost(const Cell& c) const {
 	}
 }
 
-void CellCostC7::add_backtrackable(Cell& root) {
-	root.add<OptimData>();
+void CellCostC7::add_property(Map<Property>& map) {
+	if (!map.found(OptimData::prop_id))
+		map.insert_new(OptimData::prop_id, new OptimData());
 }
 
 void CellCostC7::set_optim_data(Cell& c, const ExtendedSystem& sys) {
-	OptimData& data=c.get<OptimData>();
-	data.compute_pu(sys,c.box);
-	data.compute_pf(*sys.goal,c.box);
+	OptimData *data = (OptimData*) c.prop[OptimData::prop_id];
+	data->compute_pu(sys,c.box);
+	data->compute_pf(*sys.goal,c.box);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -132,7 +147,7 @@ CellCostPU::CellCostPU() :  CellCostFunc(false) {
 }
 
 double CellCostPU::cost(const Cell& c) const {
-	const OptimData *data = &(c.get<OptimData>());
+	const OptimData *data = (OptimData*) c.prop[OptimData::prop_id];
 	if (data) {
 		return  -data->pu;
 	} else {
@@ -140,13 +155,14 @@ double CellCostPU::cost(const Cell& c) const {
 	}
 }
 
-void CellCostPU::add_backtrackable(Cell& root) {
-	root.add<OptimData>();
+void CellCostPU::add_property(Map<Property>& map) {
+	if (!map.found(OptimData::prop_id))
+		map.insert_new(OptimData::prop_id, new OptimData());
 }
 
 void CellCostPU::set_optim_data(Cell& c, const ExtendedSystem& sys) {
 
-	c.get<OptimData>().compute_pu(sys,c.box);
+	((OptimData*) c.prop[OptimData::prop_id])->compute_pu(sys,c.box);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -155,16 +171,17 @@ CellCostPFlb::CellCostPFlb() :  CellCostFunc(false) {
 
 }
 
-void CellCostPFlb::add_backtrackable(Cell& root) {
-	root.add<OptimData>();
+void CellCostPFlb::add_property(Map<Property>& map) {
+	if (!map.found(OptimData::prop_id))
+		map.insert_new(OptimData::prop_id, new OptimData());
 }
 
 void CellCostPFlb::set_optim_data(Cell& c, const ExtendedSystem& sys) {
-	c.get<OptimData>().compute_pf(*sys.goal,c.box);
+	((OptimData*) c.prop[OptimData::prop_id])->compute_pf(*sys.goal,c.box);
 }
 
 double CellCostPFlb::cost(const Cell& c) const {
-	const OptimData *data = &(c.get<OptimData>());
+	const OptimData *data = (OptimData*) c.prop[OptimData::prop_id];
 	if (data) {
 		return  data->pf.lb();
 	} else {
@@ -178,16 +195,17 @@ CellCostPFub::CellCostPFub() :  CellCostFunc(false) {
 
 }
 
-void CellCostPFub::add_backtrackable(Cell& root) {
-	root.add<OptimData>();
+void CellCostPFub::add_property(Map<Property>& map) {
+	if (!map.found(OptimData::prop_id))
+		map.insert_new(OptimData::prop_id, new OptimData());
 }
 
 void CellCostPFub::set_optim_data(Cell& c, const ExtendedSystem& sys) {
-	c.get<OptimData>().compute_pf(*sys.goal,c.box);
+	((OptimData*) c.prop[OptimData::prop_id])->compute_pf(*sys.goal,c.box);
 }
 
 double CellCostPFub::cost(const Cell& c) const {
-	const OptimData *data = &(c.get<OptimData>());
+	const OptimData *data = (OptimData*) c.prop[OptimData::prop_id];
 	if (data) {
 		return data->pf.ub();
 	} else {
@@ -201,16 +219,17 @@ CellCostMaxPFub::CellCostMaxPFub() :  CellCostFunc(false) {
 
 }
 
-void CellCostMaxPFub::add_backtrackable(Cell& root) {
-	root.add<OptimData>();
+void CellCostMaxPFub::add_property(Map<Property>& map) {
+	if (!map.found(OptimData::prop_id))
+		map.insert_new(OptimData::prop_id, new OptimData());
 }
 
 void CellCostMaxPFub::set_optim_data(Cell& c, System& sys) {
-	c.get<OptimData>().compute_pf(*sys.goal,c.box);
+	((OptimData*) c.prop[OptimData::prop_id])->compute_pf(*sys.goal,c.box);
 }
 
 double CellCostMaxPFub::cost(const Cell& c) const {
-	const OptimData *data = &(c.get<OptimData>());
+	const OptimData *data = (OptimData*) c.prop[OptimData::prop_id];
 	if (data) {
 		return -data->pf.ub();
 	} else {

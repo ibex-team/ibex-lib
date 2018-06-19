@@ -10,7 +10,7 @@
 #ifndef __IBEX_OPTIM_DATA_H__
 #define __IBEX_OPTIM_DATA_H__
 
-#include "ibex_Backtrackable.h"
+#include "ibex_BoxProp.h"
 #include "ibex_Interval.h"
 #include "ibex_System.h"
 
@@ -21,7 +21,7 @@ namespace ibex {
  *
  * \brief Data required for the Optimizer
  */
-class OptimData : public Backtrackable {
+class OptimData : public BoxProp {
 public:
 	/**
 	 * \brief Constructor for the root node (followed by a call to init_root).
@@ -34,9 +34,9 @@ public:
 	~OptimData();
 
 	/**
-	 * \brief Duplicate the structure into the left/right nodes
+	 * \brief Create a copy
 	 */
-	std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&);
+	virtual BoxProp* copy() const;
 
 	/**
 	 * \brief Initialize the value of "pf"
@@ -66,6 +66,8 @@ public:
 	 */
 	double pu;
 
+	static const long prop_id;
+
 protected:
 
 	/**
@@ -73,12 +75,14 @@ protected:
 	 */
 	explicit OptimData(const OptimData& e);
 
-	/**
-	 * \brief Create a copy
-	 */
-	Backtrackable* copy() const { return new OptimData(*this);};
 
 };
+
+/*================================== inline implementations ========================================*/
+
+inline BoxProp* OptimData::copy() const {
+	return new OptimData(*this);
+}
 
 } // end namespace ibex
 

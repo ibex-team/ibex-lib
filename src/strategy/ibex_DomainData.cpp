@@ -7,7 +7,7 @@
 // Created     : Jun 2, 2018
 //============================================================================
 
-#include "ibex_BoxProperty.h"
+#include "ibex_BoxProp.h"
 
 namespace ibex {
 

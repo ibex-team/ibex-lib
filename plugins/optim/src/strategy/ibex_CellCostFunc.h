@@ -47,7 +47,7 @@ public:
 	 *
 	 * Does nothing (by default).
 	 */
-	virtual void set_loup(double lb) { }
+	virtual void set_loup(double lb);
 
 	/**
 	 * \brief Add backtrackable data required by this cost function
@@ -57,7 +57,7 @@ public:
 	 *
 	 * Does nothing by default.
 	 */
-	virtual void add_backtrackable(Cell& root) { }
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Set data in OptimData in the cell
@@ -68,7 +68,7 @@ public:
 	 *
 	 * Does nothing (by default).
 	 */
-	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys) { }
+	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
 
 	/**
 	 * If the cost depends on the loup.
@@ -143,7 +143,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
@@ -180,7 +180,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
@@ -215,7 +215,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
@@ -242,7 +242,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
@@ -258,7 +258,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
@@ -280,7 +280,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
@@ -302,7 +302,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell

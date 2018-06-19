@@ -58,9 +58,9 @@ public:
 	~CellDoubleHeap();
 
 	/**
-	 * \brief Add backtrackable data required by this buffer.
+	 * \brief Add properties data required by this buffer.
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief Flush the buffer.
@@ -151,9 +151,9 @@ inline CellCostFunc& CellDoubleHeap::cost1()      { return (CellCostFunc&) heap1
 
 inline CellCostFunc& CellDoubleHeap::cost2()      { return (CellCostFunc&) heap2->costf; }
 
-inline void CellDoubleHeap::add_backtrackable(Cell& root) {
+inline void CellDoubleHeap::add_property(Map<Property>& map) {
       // add data "pu" and "pf" (if required)
-       cost2().add_backtrackable(root);
+       cost2().add_property(map);
 }
 
 inline void CellDoubleHeap::flush()               { DoubleHeap<Cell>::flush(); }

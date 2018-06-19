@@ -5,8 +5,8 @@
  *      Author: gilles
  */
 
-#ifndef IBEX_SEARCHNODEPROPERTY_H_
-#define IBEX_SEARCHNODEPROPERTY_H_
+#ifndef IBEX_SEARCHNODEPROP_H_
+#define IBEX_SEARCHNODEPROP_H_
 
 #include "ibex_Property.h"
 #include "ibex_BisectionPoint.h"
@@ -28,20 +28,26 @@ namespace ibex {
  *
  * This class is an interface to be implemented by any operator data class associated to a cell.
  */
-class SearchNodeProperty: public Property {
+class SearchNodeProp: public Property {
 public:
-	SearchNodeProperty();
-
-	virtual SearchNodeProperty* copy() const=0;
+	virtual SearchNodeProp* copy() const=0;
 
 	/**
 	 * \brief Create data associated to child cells.
 	 */
-	virtual std::pair<SearchNodeProperty*,SearchNodeProperty*> update_children(const BisectionPoint&)=0;
+	virtual std::pair<SearchNodeProp*,SearchNodeProp*> update_bisect(const BisectionPoint&);
 
-	virtual ~SearchNodeProperty();
+	virtual ~SearchNodeProp();
 };
+
+inline std::pair<SearchNodeProp*,SearchNodeProp*> SearchNodeProp::update_bisect(const BisectionPoint&) {
+	return std::make_pair(copy(),copy());
+}
+
+inline SearchNodeProp::~SearchNodeProp() {
+
+}
 
 } /* namespace ibex */
 
-#endif /* IBEX_SEARCHNODEPROPERTY_H_ */
+#endif /* IBEX_SEARCHNODEPROP_H_ */

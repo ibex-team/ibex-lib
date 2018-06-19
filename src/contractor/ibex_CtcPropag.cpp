@@ -37,6 +37,11 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 	//cout << g << endl;
 }
 
+void CtcPropag::add_property(Map<Property>& map) {
+	for (int i=0; i<list.size(); i++)
+		list[i].add_property(map);
+}
+
 void CtcPropag::contract(IntervalVector& box) {
 	CtcContext context;
 	contract(box,context);
@@ -45,9 +50,9 @@ void CtcPropag::contract(IntervalVector& box) {
 void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 
 	CtcContext c_context;
-	c_context.set_impact(_impact);
-	c_context.set_output_flags(flags);
-	c_context.set_data(*context.data(), true);
+	c_context.set_impact(&_impact);
+	c_context.set_output_flags(&flags);
+	c_context.set_data(context.data(), true);
 
 	assert(box.size()==nb_var);
 

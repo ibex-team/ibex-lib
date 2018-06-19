@@ -17,40 +17,59 @@
 
 namespace ibex {
 
-class BoxProperty : public Property {
+class BoxProp : public Property {
 public:
+
+	BoxProp();
+
 	/**
 	 * \brief Create a copy.
 	 */
-	virtual BoxProperty* copy() const =0;
+	virtual BoxProp* copy() const=0;
 
 	/**
 	 * \brief Create data associated to child cells.
+	 *
+	 * Default implementation: create a pair of copies.
 	 */
-	virtual std::pair<BoxProperty*,BoxProperty*> update_bisect(const BisectionPoint&)=0;
+	virtual std::pair<BoxProp*,BoxProp*> update_bisect(const BisectionPoint&);
 
 	void update_contract(const IntervalVector& new_box);
 
-	virtual void update_contract(const IntervalVector& new_box, const BitSet& impact) { }
+	/*
+	 * Default implementation: does nothing.
+	 */
+	virtual void update_contract(const IntervalVector& new_box, const BitSet& impact);
 
 	void update_change(const IntervalVector& new_box);
 
 	virtual void update_change(const IntervalVector& new_box, const BitSet& impact) { }
 
-	virtual ~BoxProperty();
+	virtual ~BoxProp();
 };
 
 /*================================== inline implementations ========================================*/
 
-inline void BoxProperty::update_contract(const IntervalVector& new_box) {
+inline BoxProp::BoxProp() {
+}
+
+inline std::pair<BoxProp*,BoxProp*> BoxProp::update_bisect(const BisectionPoint&) {
+	return std::make_pair(copy(),copy());
+}
+
+inline void BoxProp::update_contract(const IntervalVector& new_box, const BitSet& impact) {
+
+}
+
+inline void BoxProp::update_contract(const IntervalVector& new_box) {
 	update_contract(new_box, BitSet::all(new_box.size()));
 }
 
-inline void BoxProperty::update_change(const IntervalVector& new_box) {
+inline void BoxProp::update_change(const IntervalVector& new_box) {
 	update_change(new_box, BitSet::all(new_box.size()));
 }
 
-inline BoxProperty::~BoxProperty() {
+inline BoxProp::~BoxProp() {
 }
 
 } /* namespace ibex */

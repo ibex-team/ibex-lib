@@ -60,6 +60,8 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 
 	if (m>n)
 		ibex_warning("Certification not implemented for over-constrained systems ");
+
+	context.set_impact(&impact);
 }
 
 void Solver::set_var_names() {
@@ -116,10 +118,15 @@ void Solver::start(const IntervalVector& init_box) {
 	Cell* root=new Cell(init_box);
 
 	// add data required by this solver
-	root->prop.insert_new(BisectedVar::prop_key, new BisectedVar());
+	root->prop.insert_new(BisectedVar::prop_id, new BisectedVar());
 
 	// add data required by the bisector
-	bsc.add_backtrackable(*root);
+	bsc.add_property(root->prop);
+
+	// add data required by the contractor
+	ctc.add_property(root->prop);
+
+	buffer.add_property(root->prop);
 
 	buffer.push(root);
 	nb_cells = 1;
@@ -152,10 +159,10 @@ void Solver::start(const char* input_paving) {
 		Cell* cell=new Cell(it->existence());
 
 		// add data required by this solver
-		cell->prop.insert_new(BisectedVar::prop_key, new BisectedVar());
+		cell->prop.insert_new(BisectedVar::prop_id, new BisectedVar());
 
 		// add data required by the bisector
-		bsc.add_backtrackable(*cell);
+		bsc.add_property(cell->prop);
 
 		buffer.push(cell);
 
@@ -178,7 +185,7 @@ QualifiedBox* Solver::next() {
 
 		Cell* c=buffer.top();
 
-		int v=((BisectedVar*) c->prop[BisectedVar::prop_key])->var; // last bisected var.
+		int v=((BisectedVar*) c->prop[BisectedVar::prop_id])->var; // last bisected var.
 
 		if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
 			impact.add(v);
@@ -186,7 +193,16 @@ QualifiedBox* Solver::next() {
 			impact.fill(0,ctc.nb_var-1);
 
 		try {
-			ctc.contract(c->box,impact);
+
+			// Transmit the box properties to the contractor
+			Map<BoxProp> ctc_prop;
+			for (Map<Property>::const_iterator it=c->prop.begin(); it!=c->prop.end(); it++) {
+				BoxProp* p = dynamic_cast<BoxProp*>(it->second);
+				if (p) ctc_prop.insert_new(it->first,p);
+			}
+			context.set_data(&ctc_prop,true);
+
+			ctc.contract(c->box,context);
 
 			if (c->box.is_empty()) throw EmptyBoxException();
 

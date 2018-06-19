@@ -87,6 +87,10 @@ public:
 	 */
 	virtual void contract(IntervalVector& box, CtcContext& context);
 
+	/**
+	 * \brief Add sub-contractors properties to the map
+	 */
+	virtual void add_property(Map<Property>& map);
 
 	/** The list of sub-contractors */
 	Array<Ctc> list;

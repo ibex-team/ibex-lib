@@ -12,11 +12,9 @@
 #define __IBEX_CELL_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_SymbolMap.h"
-
-#include <typeinfo>
-
-#include "ibex_BoxProperty.h"
+#include "ibex_Property.h"
+#include "ibex_BisectionPoint.h"
+#include "ibex_Map.h"
 
 namespace ibex {
 
@@ -82,9 +80,14 @@ public:
 
 	/**
 	 * \brief Data bound to the box.
-	 * This data is visible by all operators, including contractors.
+	 *
+	 * Includes search node properties (SearchNodeProp) and
+	 * box properties (BoxProp).
+	 *
+	 * Box properties are visible by all operators, including contractors.
+	 * Search node properties are not visible by contractors.
 	 */
-	SymbolMap<Property*> prop;
+	Map<Property> prop;
 };
 
 std::ostream& operator<<(std::ostream& os, const Cell& c);

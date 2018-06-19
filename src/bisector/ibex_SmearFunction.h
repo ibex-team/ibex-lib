@@ -71,7 +71,7 @@ public:
 	/**
 	 * \brief Add backtrackable data required by round robin.
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(Map<Property>& map);
 
 protected :
 	RoundRobin rr; // by default when smear function strategy does not apply.

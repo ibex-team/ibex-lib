@@ -25,7 +25,7 @@ RoundRobin::RoundRobin(const Vector& prec, double ratio) : Bsc(prec), ratio(rati
 
 BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 
-	int last_var=((BisectedVar*) cell.prop[BisectedVar::prop_key])->var;
+	int last_var=((BisectedVar*) cell.prop[BisectedVar::prop_id])->var;
 
 	const IntervalVector& box=cell.box;
 
@@ -46,9 +46,9 @@ BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 		return BisectionPoint(var,ratio,true); // output
 }
 
-void RoundRobin::add_backtrackable(Cell& root) {
-	if (!root.prop.used(BisectedVar::prop_key))
-		root.prop.insert_new(BisectedVar::prop_key,new BisectedVar());
+void RoundRobin::add_property(Map<Property>& map) {
+	if (!map.found(BisectedVar::prop_id))
+		map.insert_new(BisectedVar::prop_id,new BisectedVar());
 }
 
 } // end namespace ibex

@@ -73,6 +73,9 @@ public:
 	 */
 	virtual void contract(IntervalVector& box, CtcContext& context);
 
+	virtual void add_property(Map<Property>& map);
+
+	const long active_prop_id;
 	/*
 	 * \brief Whether this contractor is idempotent (optional)
 	 */

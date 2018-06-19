@@ -11,7 +11,7 @@
 #ifndef __IBEX_MULTIPLIERS_H__
 #define __IBEX_MULTIPLIERS_H__
 
-#include "ibex_BoxProperty.h"
+#include "ibex_BoxProp.h"
 #include "ibex_IntervalVector.h"
 
 namespace ibex {
@@ -20,12 +20,17 @@ namespace ibex {
  *
  * \brief Lagrange Multipliers
  */
-class Multipliers : public BoxProperty {
+class Multipliers : public BoxProp {
 public:
 	/**
 	 * \brief Constructor for the root node (followed by a call to init_root).
 	 */
 	Multipliers();
+
+	/**
+	 * \brief Create a copy.
+	 */
+	virtual BoxProp* copy() const;
 
 	/**
 	 * \brief Set the number of Lagrange Multiplier to 1+m+r+k
@@ -39,20 +44,10 @@ public:
 	void init_root(int m, int r, int k);
 
 	/**
-	 * \brief Delete *this.
-	 */
-	~Multipliers();
-
-	/**
 	 * \brief The ith multiplier.
 	 *
 	 */
 	Interval& operator[](int i);
-
-	/**
-	 * \brief Duplicate the structure into the left/right nodes
-	 */
-	std::pair<BoxProperty*,BoxProperty*> update_bisect(const BisectionPoint&);
 
 	IntervalVector lambda;
 
@@ -61,12 +56,6 @@ protected:
 	 * \brief Constructor by copy.
 	 */
 	explicit Multipliers(const Multipliers& e);
-
-	/**
-	 * \brief Create a copy
-	 */
-	Backtrackable* copy() const;
-
 };
 
 

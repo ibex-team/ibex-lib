@@ -131,7 +131,7 @@ public:
 	 */
 	CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7, Ctc& c8, Ctc& c9, Ctc& c10, Ctc& c11, Ctc& c12, Ctc& c13, Ctc& c14, Ctc& c15, Ctc& c16, Ctc& c17, Ctc& c18, Ctc& c19, Ctc& c20);
 
-	/**
+	/**virtual void add_property(Map& map);
 	 * \brief Delete this
 	 */
 	~CtcUnion();
@@ -145,6 +145,11 @@ public:
 	 * \brief Contract a box.
 	 */
 	virtual void contract(IntervalVector& box, CtcContext& context);
+
+	/**
+	 * \brief Add sub-contractors properties to the map
+	 */
+	virtual void add_property(Map<Property>& map);
 
 	/**
 	 * \brief The list of sub-contractors.

@@ -24,7 +24,7 @@ void TestRoundRobin::test01() {
 	pair<IntervalVector,IntervalVector> boxes2=boxes.second.bisect(1,rr.ratio);
 
 	Cell c(box);
-	rr.add_backtrackable(c);
+	rr.add_property(c);
 	pair<Cell*,Cell*> p=rr.bisect(c);
 	CPPUNIT_ASSERT(p.first->get<BisectedVar>().var==0);
 	CPPUNIT_ASSERT(p.second->get<BisectedVar>().var==0);
@@ -50,7 +50,7 @@ void TestRoundRobin::test02() {
 	box[1]=box[3]=box[5]=box[7]=box[9]=Interval::ZERO;
 
 	Cell c(box);
-	rr.add_backtrackable(c);
+	rr.add_property(c);
 
 	pair<Cell*,Cell*> p=rr.bisect(c);
 	CPPUNIT_ASSERT(p.first->get<BisectedVar>().var==0);

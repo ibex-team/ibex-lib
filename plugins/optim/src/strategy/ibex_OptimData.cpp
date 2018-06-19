@@ -7,8 +7,11 @@
 //============================================================================
 
 #include "ibex_OptimData.h"
+#include "ibex_Id.h"
 
 namespace ibex {
+
+const long OptimData::prop_id = next_id();
 
 OptimData::OptimData() : pf(), pu(0) {
 
@@ -16,10 +19,6 @@ OptimData::OptimData() : pf(), pu(0) {
 
 OptimData::OptimData(const OptimData& e) : pf(e.pf), pu(e.pu) {
 
-}
-
-std::pair<Backtrackable*,Backtrackable*> OptimData::down(const BisectionPoint&) {
-	return std::pair<Backtrackable*,Backtrackable*>(new OptimData(*this),new OptimData(*this));
 }
 
 OptimData::~OptimData() {

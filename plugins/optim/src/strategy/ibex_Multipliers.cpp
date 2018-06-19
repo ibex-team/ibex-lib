@@ -38,15 +38,8 @@ Multipliers::Multipliers(const Multipliers& e) : lambda(e.lambda) {
 
 }
 
-Backtrackable* Multipliers::copy() const {
+BoxProp* Multipliers::copy() const {
 	return new Multipliers(*this);
-}
-std::pair<BoxProperty*,BoxProperty*> Multipliers::update_bisect(const BisectionPoint&) {
-	return std::pair<BoxProperty*,BoxProperty*>(new Multipliers(*this),new Multipliers(*this));
-}
-
-Multipliers::~Multipliers() {
-
 }
 
 } // end namespace ibex

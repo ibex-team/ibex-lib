@@ -11,7 +11,6 @@
 #include "ibex_Timer.h"
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
-#include "ibex_Backtrackable.h"
 #include "ibex_OptimData.h"
 
 #include <float.h>
@@ -272,10 +271,10 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	write_ext_box(init_box,root->box);
 
 	// add data required by the bisector
-	bsc.add_backtrackable(*root);
+	bsc.add_property(root->prop);
 
 	// add data required by the buffer
-	buffer.add_backtrackable(*root);
+	buffer.add_property(root->prop);
 
 	// add data required by optimizer + KKT contractor
 //	root->add<EntailedCtr>();
