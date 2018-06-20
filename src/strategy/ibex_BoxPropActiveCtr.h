@@ -22,6 +22,7 @@ public:
 
 	virtual void update_change(const IntervalVector& new_box, const BitSet& impact);
 
+	// true=possibly active, false=inactive
 	bool active;
 };
 

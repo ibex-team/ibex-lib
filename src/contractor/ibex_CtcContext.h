@@ -62,7 +62,7 @@ public:
 	BitSet* output_flags();
 
 	/**
-	 * \brief Return the current backtrackable data (NULL pointer if none).
+	 * \brief Return the current properties of the box (NULL pointer if none).
 	 */
 	Map<BoxProp>* data();
 
