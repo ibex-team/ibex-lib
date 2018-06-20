@@ -103,7 +103,7 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 	// may be non-optimal in backward mode.
 }
 
-void CtcFwdBwd::add_property(Map<Property>& map) {
+void CtcFwdBwd::add_property(Map<BoxProp>& map) {
 	if (!map.found(active_prop_id))
 		map.insert_new(active_prop_id, new BoxPropActiveCtr());
 }

@@ -149,7 +149,7 @@ public:
 	/**
 	 * \brief Add sub-contractors properties to the map
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<BoxProp>& map);
 
 	/**
 	 * \brief The list of sub-contractors.

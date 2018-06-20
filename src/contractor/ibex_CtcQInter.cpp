@@ -15,7 +15,7 @@ namespace ibex {
 
 CtcQInter::CtcQInter(const Array<Ctc>& list, int q) : Ctc(list), list(list), q(q), boxes(list.size(), nb_var) { }
 
-void CtcQInter::add_property(Map<Property>& map) {
+void CtcQInter::add_property(Map<BoxProp>& map) {
 	for (int i=0; i<list.size(); i++)
 		list[i].add_property(map);
 }

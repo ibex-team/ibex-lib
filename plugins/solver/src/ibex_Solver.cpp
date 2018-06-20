@@ -12,8 +12,10 @@
 #include "ibex_Newton.h"
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_LinearException.h"
-#include <cassert>
 #include "ibex_Manifold.h"
+#include "ibex_BisectedVar.h"
+
+#include <cassert>
 
 using namespace std;
 
@@ -124,7 +126,7 @@ void Solver::start(const IntervalVector& init_box) {
 	bsc.add_property(root->prop);
 
 	// add data required by the contractor
-	ctc.add_property(root->prop);
+	ctc.add_property((Map<BoxProp>&) root->prop);
 
 	buffer.add_property(root->prop);
 
@@ -196,7 +198,7 @@ QualifiedBox* Solver::next() {
 
 			// Transmit the box properties to the contractor
 			Map<BoxProp> ctc_prop;
-			for (Map<Property>::const_iterator it=c->prop.begin(); it!=c->prop.end(); it++) {
+			for (Map<SearchNodeProp>::const_iterator it=c->prop.begin(); it!=c->prop.end(); it++) {
 				BoxProp* p = dynamic_cast<BoxProp*>(it->second);
 				if (p) ctc_prop.insert_new(it->first,p);
 			}

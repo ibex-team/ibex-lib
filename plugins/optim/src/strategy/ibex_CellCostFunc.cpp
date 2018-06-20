@@ -20,7 +20,7 @@ void CellCostFunc::set_loup(double lb) {
 
 }
 
-void CellCostFunc::add_property(Map<Property>& map) {
+void CellCostFunc::add_property(Map<SearchNodeProp>& map) {
 
 }
 
@@ -79,7 +79,7 @@ double CellCostC3::cost(const Cell& c) const {
 	}
 }
 
-void CellCostC3::add_property(Map<Property>& map) {
+void CellCostC3::add_property(Map<SearchNodeProp>& map) {
 	if (!map.found(OptimData::prop_id))
 		map.insert_new(OptimData::prop_id, new OptimData());
 }
@@ -103,7 +103,7 @@ double CellCostC5::cost(const Cell& c) const {
 	}
 }
 
-void CellCostC5::add_property(Map<Property>& map) {
+void CellCostC5::add_property(Map<SearchNodeProp>& map) {
 	if (!map.found(OptimData::prop_id))
 		map.insert_new(OptimData::prop_id, new OptimData());
 }
@@ -129,7 +129,7 @@ double CellCostC7::cost(const Cell& c) const {
 	}
 }
 
-void CellCostC7::add_property(Map<Property>& map) {
+void CellCostC7::add_property(Map<SearchNodeProp>& map) {
 	if (!map.found(OptimData::prop_id))
 		map.insert_new(OptimData::prop_id, new OptimData());
 }
@@ -155,7 +155,7 @@ double CellCostPU::cost(const Cell& c) const {
 	}
 }
 
-void CellCostPU::add_property(Map<Property>& map) {
+void CellCostPU::add_property(Map<SearchNodeProp>& map) {
 	if (!map.found(OptimData::prop_id))
 		map.insert_new(OptimData::prop_id, new OptimData());
 }
@@ -171,7 +171,7 @@ CellCostPFlb::CellCostPFlb() :  CellCostFunc(false) {
 
 }
 
-void CellCostPFlb::add_property(Map<Property>& map) {
+void CellCostPFlb::add_property(Map<SearchNodeProp>& map) {
 	if (!map.found(OptimData::prop_id))
 		map.insert_new(OptimData::prop_id, new OptimData());
 }
@@ -195,7 +195,7 @@ CellCostPFub::CellCostPFub() :  CellCostFunc(false) {
 
 }
 
-void CellCostPFub::add_property(Map<Property>& map) {
+void CellCostPFub::add_property(Map<SearchNodeProp>& map) {
 	if (!map.found(OptimData::prop_id))
 		map.insert_new(OptimData::prop_id, new OptimData());
 }
@@ -219,7 +219,7 @@ CellCostMaxPFub::CellCostMaxPFub() :  CellCostFunc(false) {
 
 }
 
-void CellCostMaxPFub::add_property(Map<Property>& map) {
+void CellCostMaxPFub::add_property(Map<SearchNodeProp>& map) {
 	if (!map.found(OptimData::prop_id))
 		map.insert_new(OptimData::prop_id, new OptimData());
 }

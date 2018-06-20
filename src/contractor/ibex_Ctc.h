@@ -96,7 +96,7 @@ public:
 	 */
 	void contract(Set& set, double eps);
 
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<BoxProp>& map);
 
 	/**
 	 * \brief The number of variables this contractor works with.
@@ -153,7 +153,7 @@ inline void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& fla
 	contract(box,context);
 }
 
-inline void Ctc::add_property(Map<Property>& map) {
+inline void Ctc::add_property(Map<BoxProp>& map) {
 
 }
 

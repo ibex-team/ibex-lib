@@ -123,7 +123,7 @@ CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 	assert(check_nb_var_ctc_list(list));
 }
 
-void CtcUnion::add_property(Map<Property>& map) {
+void CtcUnion::add_property(Map<BoxProp>& map) {
 	for (int i=0; i<list.size(); i++)
 		list[i].add_property(map);
 }

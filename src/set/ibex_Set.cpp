@@ -253,7 +253,7 @@ public:
 		return new NodeAndDist(*this);
 	}
 
-	virtual std::pair<BoxProp*,BoxProp*> update_bisect(const BisectionPoint&) {
+	virtual std::pair<SearchNodeProp*,SearchNodeProp*> update_bisect(const BisectionPoint&) {
 		assert(!node->is_leaf());
 
 		SetBisect& b=*((SetBisect*) node);

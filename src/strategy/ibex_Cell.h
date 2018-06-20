@@ -12,7 +12,7 @@
 #define __IBEX_CELL_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_Property.h"
+#include "ibex_SearchNodeProp.h"
 #include "ibex_BisectionPoint.h"
 #include "ibex_Map.h"
 
@@ -87,7 +87,7 @@ public:
 	 * Box properties are visible by all operators, including contractors.
 	 * Search node properties are not visible by contractors.
 	 */
-	Map<Property> prop;
+	Map<SearchNodeProp> prop;
 };
 
 std::ostream& operator<<(std::ostream& os, const Cell& c);

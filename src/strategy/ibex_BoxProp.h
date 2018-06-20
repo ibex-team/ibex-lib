@@ -8,7 +8,7 @@
 //============================================================================
 
 #include "ibex_IntervalVector.h"
-#include "ibex_Property.h"
+#include "ibex_SearchNodeProp.h"
 #include "ibex_BitSet.h"
 #include "ibex_BisectionPoint.h"
 
@@ -17,7 +17,7 @@
 
 namespace ibex {
 
-class BoxProp : public Property {
+class BoxProp : public SearchNodeProp {
 public:
 
 	BoxProp();
@@ -26,13 +26,6 @@ public:
 	 * \brief Create a copy.
 	 */
 	virtual BoxProp* copy() const=0;
-
-	/**
-	 * \brief Create data associated to child cells.
-	 *
-	 * Default implementation: create a pair of copies.
-	 */
-	virtual std::pair<BoxProp*,BoxProp*> update_bisect(const BisectionPoint&);
 
 	void update_contract(const IntervalVector& new_box);
 
@@ -51,10 +44,6 @@ public:
 /*================================== inline implementations ========================================*/
 
 inline BoxProp::BoxProp() {
-}
-
-inline std::pair<BoxProp*,BoxProp*> BoxProp::update_bisect(const BisectionPoint&) {
-	return std::make_pair(copy(),copy());
 }
 
 inline void BoxProp::update_contract(const IntervalVector& new_box, const BitSet& impact) {

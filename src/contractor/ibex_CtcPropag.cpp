@@ -37,7 +37,7 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 	//cout << g << endl;
 }
 
-void CtcPropag::add_property(Map<Property>& map) {
+void CtcPropag::add_property(Map<BoxProp>& map) {
 	for (int i=0; i<list.size(); i++)
 		list[i].add_property(map);
 }

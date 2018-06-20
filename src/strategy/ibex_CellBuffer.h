@@ -62,7 +62,7 @@ class CellBuffer {
 	 *
 	 * Does nothing by default.
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -101,7 +101,7 @@ std::ostream& operator<<(std::ostream& os, const CellBuffer& h);
 
 /*================================== inline implementations ========================================*/
 
-inline void CellBuffer::add_property(Map<Property>& map) {
+inline void CellBuffer::add_property(Map<SearchNodeProp>& map) {
 
 }
 

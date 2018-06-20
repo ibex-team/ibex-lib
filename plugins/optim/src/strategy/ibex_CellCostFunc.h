@@ -57,7 +57,7 @@ public:
 	 *
 	 * Does nothing by default.
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/**
 	 * \brief Set data in OptimData in the cell
@@ -143,7 +143,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
@@ -180,7 +180,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
@@ -215,7 +215,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
@@ -242,7 +242,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
@@ -258,7 +258,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
@@ -280,7 +280,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
@@ -302,7 +302,7 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell

@@ -101,7 +101,7 @@ public:
 	 *
 	 * See #ibex::BisectedVar.
 	 */
-	virtual void add_property(Map<Property>& map);
+	virtual void add_property(Map<SearchNodeProp>& map);
 
 	/**
 	 * \brief Default ratio (0.45)
@@ -135,30 +135,6 @@ private:
 	const Vector _prec;
 };
 
-/** \ingroup bisector
- *
- * \brief Last bisected variable (used by RoundRobin, CtcPropag, etc.)
- */
-class BisectedVar : public SearchNodeProp {
-public:
-	BisectedVar();
-
-	BisectedVar(int x);
-
-	SearchNodeProp* copy() const;
-
-	std::pair<SearchNodeProp*,SearchNodeProp*> update_bisect(const BisectionPoint& b);
-
-	/** -1 if root cell */
-	int var;
-
-	static const long prop_id;
-
-protected:
-	explicit BisectedVar(const BisectedVar& e);
-};
-
-
 /*============================================ inline implementation ============================================ */
 
 inline bool Bsc::uniform_prec() const {
@@ -179,24 +155,6 @@ inline bool Bsc::too_small(const IntervalVector& box, int i) const {
 inline std::pair<Cell*,Cell*> Bsc::bisect(const Cell& cell) {
 	return cell.subcells(choose_var(cell));
 }
-
-inline BisectedVar::BisectedVar() : var(-1) {
-
-}
-
-inline BisectedVar::BisectedVar(int x) : var(x) {
-
-}
-
-inline SearchNodeProp* BisectedVar::copy() const {
-	return new BisectedVar(*this);
-}
-
-inline std::pair<SearchNodeProp*,SearchNodeProp*> BisectedVar::update_bisect(const BisectionPoint& b) {
-	return std::pair<SearchNodeProp*,SearchNodeProp*>(new BisectedVar(b.var),new BisectedVar(b.var));
-}
-
-inline BisectedVar::BisectedVar(const BisectedVar& e) : var(e.var) { }
 
 } // end namespace ibex
 

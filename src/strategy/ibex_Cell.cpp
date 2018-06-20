@@ -22,7 +22,7 @@ namespace ibex {
 Cell::Cell(const IntervalVector& box) : box(box) { }
 
 Cell::Cell(const Cell& e) : box(e.box) {
-	for (Map<Property>::const_iterator it=e.prop.begin(); it!=e.prop.end(); it++) {
+	for (Map<SearchNodeProp>::const_iterator it=e.prop.begin(); it!=e.prop.end(); it++) {
 		prop.insert_new(it->first, it->second->copy());
 	}
 }
@@ -45,28 +45,17 @@ pair<Cell*,Cell*> Cell::subcells(const BisectionPoint& b) const {
 		cright = new Cell(b2);
 	}
 
-	for (Map<Property>::const_iterator it=prop.begin(); it!=prop.end(); it++) {
-		SearchNodeProp* snp = dynamic_cast<SearchNodeProp*>(it->second);
-		if (snp) {
-			std::pair<SearchNodeProp*,SearchNodeProp*> child_data=snp->update_bisect(b);
-			cleft->prop.insert_new(it->first,child_data.first);
-			cright->prop.insert_new(it->first,child_data.second);
-		} else {
-			BoxProp* bp = dynamic_cast<BoxProp*>(it->second);
-			if (bp) {
-				std::pair<BoxProp*,BoxProp*> child_data=bp->update_bisect(b);
-				cleft->prop.insert_new(it->first,child_data.first);
-				cright->prop.insert_new(it->first,child_data.second);
-			} else
-				ibex_error("[Cell]: unexpected property");
-		}
+	for (Map<SearchNodeProp>::const_iterator it=prop.begin(); it!=prop.end(); it++) {
+		std::pair<SearchNodeProp*,SearchNodeProp*> child_data=it->second->update_bisect(b);
+		cleft->prop.insert_new(it->first,child_data.first);
+		cright->prop.insert_new(it->first,child_data.second);
 	}
 
 	return pair<Cell*,Cell*>(cleft,cright);
 }
 
 Cell::~Cell() {
-	for (Map<Property>::iterator it=prop.begin(); it!=prop.end(); it++)
+	for (Map<SearchNodeProp>::iterator it=prop.begin(); it!=prop.end(); it++)
 		delete it->second;
 }
 
