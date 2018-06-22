@@ -59,7 +59,7 @@ Arguments versus variables
 ------------------------------
 
 A (mathematical) variable does not necessarily represent a single real value.
-It can also be a vector, a matrix or an array-of-matrices.
+It can also be a vector or a matrix.
 One can, e.g., build the following function 
 
 .. math::
@@ -655,7 +655,13 @@ The display is:
    :start-after: func-apply-array-O
    :end-before: func-apply-array-O
 
+You can also use this construct with vector/matrix variables and mix functions declared with different style:
 
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: func-apply-array-2-C
+   :end-before: func-apply-array-2-C
+   
 --------------------------------------
 Symbolic differentiation
 --------------------------------------
