@@ -229,12 +229,13 @@ std::ostream& operator<<(std::ostream& os, const Set& set) {
 	return os;
 }
 
-class NodeAndDist : public BoxProp {
+class BxpNodeAndDist : public Bxp {
 public:
-	NodeAndDist() : node(NULL), dist(-1) { }
+	BxpNodeAndDist(SetNode* _node) : Bxp(next_id()), node(_node), dist(-1) { }
 
-	NodeAndDist(SetNode* _node) : node(_node), dist(-1) { }
+	BxpNodeAndDist(long id, SetNode* _node) : Bxp(id), node(_node), dist(-1) { }
 
+	explicit BxpNodeAndDist(const BxpNodeAndDist& p) : Bxp(p.id), node(p.node), dist(p.dist) { }
 	/**
 	 * calculate the square of the distance to pt
 	 * for the box of the current cell (box given in argument)
@@ -249,24 +250,22 @@ public:
 		dist=d.lb();
 	}
 
-	virtual BoxProp* copy() const {
-		return new NodeAndDist(*this);
+	virtual Bxp* copy() const {
+		return new BxpNodeAndDist(*this);
 	}
 
-	virtual std::pair<SearchNodeProp*,SearchNodeProp*> update_bisect(const BisectionPoint&) {
+	virtual std::pair<Bxp*,Bxp*> update_bisect(const BisectionPoint&) {
 		assert(!node->is_leaf());
 
 		SetBisect& b=*((SetBisect*) node);
-		return std::pair<NodeAndDist*,NodeAndDist*>(new NodeAndDist(b.left),
-													  new NodeAndDist(b.right));
+		return std::pair<BxpNodeAndDist*,BxpNodeAndDist*>(new BxpNodeAndDist(id,b.left),
+													  new BxpNodeAndDist(id,b.right));
 	}
 
 	SetNode* node;
 	double dist;
 
 protected:
-
-	explicit NodeAndDist(const NodeAndDist& e) : node(e.node), dist(e.dist) { }
 
 };
 
@@ -280,7 +279,7 @@ public:
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const {
-		return ((NodeAndDist*) c.prop[key])->dist;
+		return ((BxpNodeAndDist*) c.prop[key])->dist;
 	}
 
 	long key;
@@ -295,9 +294,9 @@ double Set::dist(const Vector& pt, bool inside) const {
 	//int count=0; // for stats
 
 	Cell* root_cell =new Cell(Rn);
-	NodeAndDist* nad=new NodeAndDist();
+	BxpNodeAndDist* nad=new BxpNodeAndDist(root);
 	root_cell->prop.insert_new(key,nad);
-	nad->node = root;
+
 	nad->set_dist(Rn,pt);
 	//count++;
 	CellHeapDist costf(key);
@@ -310,7 +309,7 @@ double Set::dist(const Vector& pt, bool inside) const {
 	while (!heap.empty()) {
 
 		Cell* c = heap.pop();
-		NodeAndDist* nad=(NodeAndDist*) c->prop[key];
+		BxpNodeAndDist* nad=(BxpNodeAndDist*) c->prop[key];
 		SetNode* node = nad->node;
 
 		assert(node!=NULL);
@@ -327,8 +326,8 @@ double Set::dist(const Vector& pt, bool inside) const {
             // the box is bisected twice: could be avoided.
 			std::pair<Cell*,Cell*> p=c->subcells(BisectionPoint(b.var,b.pt,false));
 
-			NodeAndDist* nad1=(NodeAndDist*) p.first->prop[key];
-			NodeAndDist* nad2=(NodeAndDist*) p.second->prop[key];
+			BxpNodeAndDist* nad1=(BxpNodeAndDist*) p.first->prop[key];
+			BxpNodeAndDist* nad2=(BxpNodeAndDist*) p.second->prop[key];
 
 			nad1->set_dist(p.first->box,pt);
 			//count++;

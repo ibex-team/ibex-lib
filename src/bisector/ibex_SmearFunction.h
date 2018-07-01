@@ -71,7 +71,7 @@ public:
 	/**
 	 * \brief Add backtrackable data required by round robin.
 	 */
-	virtual void add_property(Map<SearchNodeProp>& map);
+	virtual void add_property(Map<Bxp>& map);
 
 protected :
 	RoundRobin rr; // by default when smear function strategy does not apply.

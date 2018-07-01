@@ -13,7 +13,6 @@
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_LinearException.h"
 #include "ibex_Manifold.h"
-#include "ibex_BisectedVar.h"
 
 #include <cassert>
 
@@ -119,14 +118,11 @@ void Solver::start(const IntervalVector& init_box) {
 
 	Cell* root=new Cell(init_box);
 
-	// add data required by this solver
-	root->prop.insert_new(BisectedVar::prop_id, new BisectedVar());
-
 	// add data required by the bisector
 	bsc.add_property(root->prop);
 
 	// add data required by the contractor
-	ctc.add_property((Map<BoxProp>&) root->prop);
+	ctc.add_property((Map<Bxp>&) root->prop);
 
 	buffer.add_property(root->prop);
 
@@ -160,9 +156,6 @@ void Solver::start(const char* input_paving) {
 
 		Cell* cell=new Cell(it->existence());
 
-		// add data required by this solver
-		cell->prop.insert_new(BisectedVar::prop_id, new BisectedVar());
-
 		// add data required by the bisector
 		bsc.add_property(cell->prop);
 
@@ -187,7 +180,7 @@ QualifiedBox* Solver::next() {
 
 		Cell* c=buffer.top();
 
-		int v=((BisectedVar*) c->prop[BisectedVar::prop_id])->var; // last bisected var.
+		int v=c->bisected_var; // last bisected var.
 
 		if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
 			impact.add(v);
@@ -197,12 +190,12 @@ QualifiedBox* Solver::next() {
 		try {
 
 			// Transmit the box properties to the contractor
-			Map<BoxProp> ctc_prop;
-			for (Map<SearchNodeProp>::const_iterator it=c->prop.begin(); it!=c->prop.end(); it++) {
-				BoxProp* p = dynamic_cast<BoxProp*>(it->second);
+			Map<Bxp> ctc_prop;
+			for (Map<Bxp>::const_iterator it=c->prop.begin(); it!=c->prop.end(); it++) {
+				Bxp* p = dynamic_cast<Bxp*>(it->second);
 				if (p) ctc_prop.insert_new(it->first,p);
 			}
-			context.set_data(&ctc_prop,true);
+			context.set_properties(&ctc_prop,true);
 
 			ctc.contract(c->box,context);
 

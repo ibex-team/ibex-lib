@@ -13,11 +13,11 @@
 
 namespace ibex {
 
-Multipliers::Multipliers(): lambda(1) {
+BxpMultipliers::BxpMultipliers(): lambda(1) {
 
 }
 
-void Multipliers::init_root(int M, int R, int K) {
+void BxpMultipliers::init_root(int M, int R, int K) {
 
 	lambda.resize(1+M+R+K);
 
@@ -34,12 +34,12 @@ void Multipliers::init_root(int M, int R, int K) {
 }
 
 
-Multipliers::Multipliers(const Multipliers& e) : lambda(e.lambda) {
+BxpMultipliers::BxpMultipliers(const BxpMultipliers& e) : lambda(e.lambda) {
 
 }
 
-BoxProp* Multipliers::copy() const {
-	return new Multipliers(*this);
+Bxp* BxpMultipliers::copy() const {
+	return new BxpMultipliers(*this);
 }
 
 } // end namespace ibex

@@ -1,17 +1,27 @@
-/*
- * ibex_Id.h
- *
- *  Created on: Jun 18, 2018
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_Id.h
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : Jun 18, 2018
+//============================================================================
 
-#ifndef IBEX_ID_H_
-#define IBEX_ID_H_
+#ifndef __IBEX_ID_H__
+#define __IBEX_ID_H__
 
 namespace ibex {
 
+/**
+ * \ingroup tools
+ *
+ * \brief Generate an identifier.
+ *
+ * This function returns a unique number in the
+ * execution of the program.
+ */
 long next_id();
 
 }
 
-#endif /* IBEX_ID_H_ */
+#endif /* __IBEX_ID_H__ */

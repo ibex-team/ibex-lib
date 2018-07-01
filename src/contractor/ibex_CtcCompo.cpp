@@ -167,7 +167,7 @@ CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 	init_impacts();
 }
 
-void CtcCompo::add_property(Map<BoxProp>& map) {
+void CtcCompo::add_property(Map<Bxp>& map) {
 	for (int i=0; i<list.size(); i++)
 		list[i].add_property(map);
 }
@@ -205,7 +205,7 @@ void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 	CtcContext sub_context;
 	sub_context.set_output_flags(&flags);
 	if (context.data())
-		sub_context.set_data(context.data(), true);
+		sub_context.set_properties(context.data(), true);
 
 	for (int i=0; i<list.size(); i++) {
 

@@ -78,7 +78,7 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 
 	assert(box.size()==f.nb_var());
 
-	BoxPropActiveCtr* p=context.data() ? (BoxPropActiveCtr*) (*context.data())[active_prop_id] : NULL;
+	BxpActiveCtr* p=context.data() ? (BxpActiveCtr*) (*context.data())[active_prop_id] : NULL;
 
 	if (p && !p->active) {
 		context.set_flag(CtcContext::INACTIVE);
@@ -103,9 +103,9 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 	// may be non-optimal in backward mode.
 }
 
-void CtcFwdBwd::add_property(Map<BoxProp>& map) {
+void CtcFwdBwd::add_property(Map<Bxp>& map) {
 	if (!map.found(active_prop_id))
-		map.insert_new(active_prop_id, new BoxPropActiveCtr());
+		map.insert_new(active_prop_id, new BxpActiveCtr());
 }
 
 } // namespace ibex

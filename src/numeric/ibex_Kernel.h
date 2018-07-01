@@ -19,10 +19,10 @@ namespace ibex {
  * \brief Orthogonalizes the rows of the matrix A.
  *
  * Rows are reordered. Rows whose norm is less than eps after orthogonalization
- * are considered linearly dependant to the previously orthogonalized rows; they
+ * are considered linearly dependent to the previously orthogonalized rows; they
  * are rounded to zero in the output.
  *
- * Returns the number of detected linearly independant rows, i.e., the number of
+ * Returns the number of detected linearly independent rows, i.e., the number of
  * non-zero rows in the output.
  */
 

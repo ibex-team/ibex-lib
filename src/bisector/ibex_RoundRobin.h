@@ -58,11 +58,6 @@ public:
 	virtual BisectionPoint choose_var(const Cell& cell);
 
 	/**
-	 * \brief Add an instance of #ibex::BisectedVar to the backtrackable data of the root cell.
-	 */
-	void add_property(Map<SearchNodeProp>& map);
-
-	/**
 	 * \brief Ratio to choose the split point.
 	 *
 	 * Ratio between the diameters of the left and right parts of a bisected

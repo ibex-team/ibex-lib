@@ -123,7 +123,7 @@ CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 	assert(check_nb_var_ctc_list(list));
 }
 
-void CtcUnion::add_property(Map<BoxProp>& map) {
+void CtcUnion::add_property(Map<Bxp>& map) {
 	for (int i=0; i<list.size(); i++)
 		list[i].add_property(map);
 }
@@ -145,7 +145,7 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	CtcContext c_context;
 	c_context.set_impact(&impact);
 	c_context.set_output_flags(&flags);
-	c_context.set_data(context.data(), false);
+	c_context.set_properties(context.data(), false);
 
 	for (int i=0; i<list.size(); i++) {
 		if (i>0) box=savebox;
@@ -163,8 +163,8 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	box = result;
 
 	if (context.data() && context.update_data) {
-		for (Map<BoxProp>::const_iterator it=context.data()->begin(); it!=context.data()->end(); it++) {
-			((BoxProp*) it->second)->update_contract(box);
+		for (Map<Bxp>::const_iterator it=context.data()->begin(); it!=context.data()->end(); it++) {
+			((Bxp*) it->second)->update_contract(box);
 		}
 	}
 

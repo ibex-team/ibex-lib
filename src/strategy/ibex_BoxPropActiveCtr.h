@@ -12,36 +12,42 @@
 
 namespace ibex {
 
-class BoxPropActiveCtr : public BoxProp {
+class BxpActiveCtr : public Bxp {
 public:
-	BoxPropActiveCtr();
+	BxpActiveCtr(const NumConstraint& ctr, bool active);
 
-	BoxPropActiveCtr(bool active);
+	virtual BxpActiveCtr* copy() const;
 
-	virtual BoxPropActiveCtr* copy() const;
+	virtual void update(const IntervalVector& new_box, bool contract, const BitSet& impact, const BoxProperties& prop);
 
-	virtual void update_change(const IntervalVector& new_box, const BitSet& impact);
+	const NumConstraint& ctr;
 
 	// true=possibly active, false=inactive
 	bool active;
 };
 
 /*================================== inline implementations ========================================*/
-inline BoxPropActiveCtr::BoxPropActiveCtr() : active(true) {
+inline BxpActiveCtr::BxpActiveCtr(const NumConstraint& ctr, bool active) : Bxp(ctr.active_prop_id), ctr(ctr), active(active) {
 
 }
 
-inline BoxPropActiveCtr::BoxPropActiveCtr(bool active) : active(active) {
-
+inline BxpActiveCtr* BxpActiveCtr::copy() const {
+	return new BxpActiveCtr(ctr, active);
 }
 
-inline BoxPropActiveCtr* BoxPropActiveCtr::copy() const {
-	return new BoxPropActiveCtr(active);
+inline void BxpActiveCtr::update(const IntervalVector& new_box, bool contract, const BitSet& impact, const BoxProperties& prop) {
+
+	if (active || !contract) {
+		Domain y=ctr.right_hand_side();
+		switch (y.dim.type()) {
+		case Dim::SCALAR:       active = !(ctr.f.eval(new_box).is_subset(y.i())); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   active = !(ctr.f.eval_vector(new_box).is_subset(y.v())); break;
+		case Dim::MATRIX:       active = !(ctr.f.eval_matrix(new_box).is_subset(y.m())); break;
+		}
+	}
 }
 
-inline void BoxPropActiveCtr::update_change(const IntervalVector& new_box, const BitSet& impact) {
-	active=true;
-}
 
 } /* namespace ibex */
 

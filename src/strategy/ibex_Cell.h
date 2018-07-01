@@ -12,7 +12,7 @@
 #define __IBEX_CELL_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_SearchNodeProp.h"
+#include "ibex_BoxProperties.h"
 #include "ibex_BisectionPoint.h"
 #include "ibex_Map.h"
 
@@ -44,7 +44,7 @@ public:
 	 *
 	 * \param box - Box (passed by copy).
 	 */
-	explicit Cell(const IntervalVector& box);
+	explicit Cell(const IntervalVector& box, int bisected_var=-1);
 
 	/**
 	 * \brief Constructor by copy.
@@ -87,7 +87,12 @@ public:
 	 * Box properties are visible by all operators, including contractors.
 	 * Search node properties are not visible by contractors.
 	 */
-	Map<SearchNodeProp> prop;
+	BoxProperties prop;
+
+	/**
+	 * Last bisected variable (-1 if root node).
+	 */
+	int bisected_var;
 };
 
 std::ostream& operator<<(std::ostream& os, const Cell& c);

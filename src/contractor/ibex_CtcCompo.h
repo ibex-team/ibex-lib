@@ -90,7 +90,7 @@ public:
 	/**
 	 * \brief Add sub-contractors properties to the map
 	 */
-	virtual void add_property(Map<BoxProp>& map);
+	virtual void add_property(Map<Bxp>& map);
 
 	/** The list of sub-contractors */
 	Array<Ctc> list;

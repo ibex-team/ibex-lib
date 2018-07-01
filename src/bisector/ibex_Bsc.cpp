@@ -11,7 +11,6 @@
 #include "ibex_Bsc.h"
 #include "ibex_Exception.h"
 #include "ibex_Id.h"
-#include "ibex_BisectedVar.h"
 
 using namespace std;
 
@@ -31,9 +30,8 @@ Bsc::Bsc(const Vector& prec) : _prec(prec) {
 		if (prec[i]<=0) ibex_error("precision must be a nonnegative number");
 }
 
-void Bsc::add_property(Map<SearchNodeProp>& map) {
-	if (!map.found(BisectedVar::prop_id))
-		map.insert_new(BisectedVar::prop_id,new BisectedVar());
+void Bsc::add_property(Map<Bxp>& map) {
+
 }
 
 pair<IntervalVector,IntervalVector> Bsc::bisect(const IntervalVector& box) {
@@ -45,7 +43,5 @@ pair<IntervalVector,IntervalVector> Bsc::bisect(const IntervalVector& box) {
 	delete p.second;
 	return boxes;
 }
-
-const long BisectedVar::prop_id = next_id();
 
 } // end namespace ibex

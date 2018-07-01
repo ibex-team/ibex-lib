@@ -11,26 +11,26 @@
 
 namespace ibex {
 
-const long OptimData::prop_id = next_id();
+const long BxpOptimData::prop_id = next_id();
 
-OptimData::OptimData() : pf(), pu(0) {
-
-}
-
-OptimData::OptimData(const OptimData& e) : pf(e.pf), pu(e.pu) {
+BxpOptimData::BxpOptimData() : pf(), pu(0) {
 
 }
 
-OptimData::~OptimData() {
+BxpOptimData::BxpOptimData(const BxpOptimData& e) : pf(e.pf), pu(e.pu) {
 
 }
 
-void OptimData::compute_pf(const Function& goal, const IntervalVector& box) {
+BxpOptimData::~BxpOptimData() {
+
+}
+
+void BxpOptimData::compute_pf(const Function& goal, const IntervalVector& box) {
 	pf=goal.eval(box);
 }
 
 
-void OptimData::compute_pu(const System& sys, const IntervalVector& box) {
+void BxpOptimData::compute_pu(const System& sys, const IntervalVector& box) {
 	double pu=1;
 
 	if (sys.active_ctrs(box).empty()) return;

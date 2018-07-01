@@ -21,22 +21,22 @@ namespace ibex {
  *
  * \brief Data required for the Optimizer
  */
-class OptimData : public BoxProp {
+class BxpOptimData : public Bxp {
 public:
 	/**
 	 * \brief Constructor for the root node (followed by a call to init_root).
 	 */
-	OptimData();
+	BxpOptimData();
 
 	/**
 	 * \brief Delete *this.
 	 */
-	~OptimData();
+	~BxpOptimData();
 
 	/**
 	 * \brief Create a copy
 	 */
-	virtual BoxProp* copy() const;
+	virtual Bxp* copy() const;
 
 	/**
 	 * \brief Initialize the value of "pf"
@@ -73,15 +73,15 @@ protected:
 	/**
 	 * \brief Constructor by copy.
 	 */
-	explicit OptimData(const OptimData& e);
+	explicit BxpOptimData(const BxpOptimData& e);
 
 
 };
 
 /*================================== inline implementations ========================================*/
 
-inline BoxProp* OptimData::copy() const {
-	return new OptimData(*this);
+inline Bxp* BxpOptimData::copy() const {
+	return new BxpOptimData(*this);
 }
 
 } // end namespace ibex

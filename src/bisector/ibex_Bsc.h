@@ -12,7 +12,6 @@
 #define __IBEX_BISECTOR_H__
 
 #include "ibex_Cell.h"
-#include "ibex_SearchNodeProp.h"
 
 #include <utility>
 
@@ -101,7 +100,7 @@ public:
 	 *
 	 * See #ibex::BisectedVar.
 	 */
-	virtual void add_property(Map<SearchNodeProp>& map);
+	virtual void add_property(Map<Bxp>& map);
 
 	/**
 	 * \brief Default ratio (0.45)

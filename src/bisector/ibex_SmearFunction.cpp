@@ -14,7 +14,7 @@ using namespace std;
 
 namespace ibex {
 
-void SmearFunction::add_property(Map<SearchNodeProp>& map) {
+void SmearFunction::add_property(Map<Bxp>& map) {
 	rr.add_property(map);
 }
 

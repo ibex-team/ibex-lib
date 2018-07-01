@@ -10,7 +10,6 @@
 
 #include "ibex_RoundRobin.h"
 #include "ibex_NoBisectableVariableException.h"
-#include "ibex_BisectedVar.h"
 
 using namespace std;
 
@@ -26,7 +25,7 @@ RoundRobin::RoundRobin(const Vector& prec, double ratio) : Bsc(prec), ratio(rati
 
 BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 
-	int last_var=((BisectedVar*) cell.prop[BisectedVar::prop_id])->var;
+	int last_var=cell.bisected_var;
 
 	const IntervalVector& box=cell.box;
 
@@ -45,11 +44,6 @@ BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 
 	else
 		return BisectionPoint(var,ratio,true); // output
-}
-
-void RoundRobin::add_property(Map<SearchNodeProp>& map) {
-	if (!map.found(BisectedVar::prop_id))
-		map.insert_new(BisectedVar::prop_id,new BisectedVar());
 }
 
 } // end namespace ibex

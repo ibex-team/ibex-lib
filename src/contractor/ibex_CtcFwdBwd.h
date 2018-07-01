@@ -73,7 +73,7 @@ public:
 	 */
 	virtual void contract(IntervalVector& box, CtcContext& context);
 
-	virtual void add_property(Map<BoxProp>& map);
+	virtual void add_property(Map<Bxp>& map);
 
 	const long active_prop_id;
 	/*

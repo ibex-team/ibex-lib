@@ -20,17 +20,17 @@ namespace ibex {
  *
  * \brief Lagrange Multipliers
  */
-class Multipliers : public BoxProp {
+class BxpMultipliers : public Bxp {
 public:
 	/**
 	 * \brief Constructor for the root node (followed by a call to init_root).
 	 */
-	Multipliers();
+	BxpMultipliers();
 
 	/**
 	 * \brief Create a copy.
 	 */
-	virtual BoxProp* copy() const;
+	virtual Bxp* copy() const;
 
 	/**
 	 * \brief Set the number of Lagrange Multiplier to 1+m+r+k
@@ -55,13 +55,13 @@ protected:
 	/**
 	 * \brief Constructor by copy.
 	 */
-	explicit Multipliers(const Multipliers& e);
+	explicit BxpMultipliers(const BxpMultipliers& e);
 };
 
 
 /*============================================ inline implementation ============================================ */
 
-inline Interval& Multipliers::operator[](int i) {
+inline Interval& BxpMultipliers::operator[](int i) {
 	return lambda[i];
 }
 
