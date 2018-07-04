@@ -18,14 +18,14 @@ namespace ibex {
 LinearizerAffine2::LinearizerAffine2(const System& sys1) :
 				Linearizer(sys1.nb_var), sys(sys1),
 				goal_af_evl(NULL),
-				ctr_af_evl(new AffineEval<AF_Default>*[sys1.nb_ctr]) {
+				ctr_af_evl(new Affine2Eval*[sys1.nb_ctr]) {
 
 	if (sys1.goal) {
-		goal_af_evl = new AffineEval<AF_Default>(*sys1.goal);
+		goal_af_evl = new Affine2Eval(*sys1.goal);
 	}
 
 	for (int i = 0; i < sys.nb_ctr; i++) {
-		ctr_af_evl[i] = new AffineEval<AF_Default>(sys.ctrs[i].f);
+		ctr_af_evl[i] = new Affine2Eval(sys.f_ctrs[i]);
 	}
 }
 
@@ -36,6 +36,7 @@ LinearizerAffine2::~LinearizerAffine2() {
 	delete[] ctr_af_evl;
 }
 
+/*
 bool LinearizerAffine2::goal_linearization(const IntervalVector& box, LPSolver& lp_solver) {
 	// Linearization of the objective function by AF2
 
@@ -148,7 +149,7 @@ int LinearizerAffine2::inlinearization(const IntervalVector& box, LPSolver& lp_s
 
 	return -1;
 }
-
+*/
 
 /*********generation of the linearized system*********/
 int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver) {
@@ -164,7 +165,7 @@ int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver)
 	// Create the linear relaxation of each constraint
 	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
 
-		op  = sys.ctrs[ctr].op;
+		op  = sys.ops[ctr];
 		ev  = ctr_af_evl[ctr]->eval(box).i();
 		af2 = ctr_af_evl[ctr]->af2.top->i();
 
@@ -182,13 +183,13 @@ int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver)
 			for (int i =0;(!b_abort) &&(i <sys.nb_var); i++) {
 				tmp = box[i].rad();
 				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
-					if (af2.val(i+1)==0)
+					if (af2.val(i)==0)
 						rowconst[i]=0;
 					else {
 						b_abort =true;
 					}
 				} else {
-					rowconst[i] =af2.val(i+1) / tmp;
+					rowconst[i] =af2.val(i) / tmp;
 					center += rowconst[i]*box[i].mid();
 					err += fabs(rowconst[i])*  pow(2,-50);
 				}
@@ -201,7 +202,7 @@ int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver)
 					if (0.0 < ev.lb()) return -1;
 					else if (0.0 < ev.ub()) {
 						try {
-							lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+							lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.mid()-center)).ub());
 							cont++;
 						} catch (LPException&) { }
 					}
@@ -212,7 +213,7 @@ int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver)
 					if (ev.ub() < 0.0) return -1;
 					else if (ev.lb() < 0.0) {
 						try {
-							lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+							lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.mid()-center)).lb());
 							cont++;
 						} catch (LPException&) { }
 					}
@@ -222,9 +223,9 @@ int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver)
 					else {
 						if (ev.diam()>2*lp_solver.get_epsilon()) {
 							try {
-								lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+								lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.mid()-center)).lb());
 								cont++;
-								lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+								lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.mid()-center)).ub());
 								cont++;
 							} catch (LPException&) { }
 						}

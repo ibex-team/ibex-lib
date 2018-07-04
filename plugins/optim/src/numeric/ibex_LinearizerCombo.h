@@ -39,7 +39,7 @@ public:
 	/**
 	 * TODO: add comment
 	 */
-	typedef enum { XNEWTON, TAYLOR, HANSEN, ART, AFFINE2, COMPO } linear_mode;
+	typedef enum { XNEWTON, TAYLOR, HANSEN, ART, AFFINE2, COMPO, COMBO } linear_mode;
 
 	/**
 	 * \brief Creates the combination

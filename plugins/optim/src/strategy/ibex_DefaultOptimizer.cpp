@@ -91,10 +91,10 @@ Ctc&  DefaultOptimizer::ctc(const System& ext_sys) {
 	if (ext_sys.nb_ctr > 1) {
 		ctc_list.set_ref(2,rec(new CtcFixPoint
 				(rec(new CtcCompo(
-						rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))),
+						rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::COMBO)))),
 								rec(new CtcHC4(ext_sys.ctrs,0.01)))), default_relax_ratio)));
 	} else {
-		ctc_list.set_ref(2,rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))));
+		ctc_list.set_ref(2,rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::COMBO)))));
 	}
 	return rec(new CtcCompo(ctc_list));
 }

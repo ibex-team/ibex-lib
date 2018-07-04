@@ -44,6 +44,7 @@ LinearizerCombo::LinearizerCombo(const System& sys, linear_mode lmode1) :
 		myart = new LinearizerAffine2(sys);
 		break;
 	}
+	case COMBO:
 	case COMPO: {
 
 		myart = new LinearizerAffine2(sys);
@@ -59,7 +60,9 @@ LinearizerCombo::LinearizerCombo(const System& sys, linear_mode lmode1) :
 		ibex_error("LinearRelaxCombo: AFFINE2 mode requires \"--with-affine\" option");
 		break;
 	case COMPO:
-		ibex_error("LinearRelaxCombo: COMPO mode requires \"--with-affine\" option");
+	case COMBO:
+		// the default corner of XNewton linear relaxation
+		myxnewton = new LinearizerXTaylor(sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
 		break;
 #endif
 	}
@@ -90,7 +93,8 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver) {
 	case AFFINE2:
 		cont = myart->linearize(box,lp_solver);
 		break;
-	case COMPO: {
+	case COMPO:
+	case COMBO: {
 		cont = myxnewton->linearize(box,lp_solver);
 		if (cont!=-1) {
 			int cont2 = myart->linearize(box,lp_solver);
@@ -105,8 +109,9 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver) {
 	case AFFINE2:
 		ibex_error("LinearRelaxCombo: AFFINE2 mode requires \"--with-affine\" option");
 		break;
+	case COMBO:
 	case COMPO:
-		ibex_error("LinearRelaxCombo: COMPO mode requires \"--with-affine\" option");
+		cont = myxnewton->linearize(box,lp_solver);
 		break;
 #endif
 	}

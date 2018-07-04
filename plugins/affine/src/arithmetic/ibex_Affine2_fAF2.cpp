@@ -137,14 +137,14 @@ AffineVarMain<AF_fAF2>& AffineVarMain<AF_fAF2>::operator=(const Interval& x) {
 
 template<>
 AffineVarMain<AF_fAF2>::AffineVarMain(const Interval & itv) :
-		AffineMain<AF_fAF2>(_count, _count, itv),
+		AffineMain<AF_fAF2>(_count+1, _count, itv),
 		var		(_count) {
 	_count++;
 }
 
 template<>
 AffineVarMain<AF_fAF2>::AffineVarMain(double d) :
-		AffineMain<AF_fAF2>(_count, _count, Interval(d)),
+		AffineMain<AF_fAF2>(_count+1, _count, Interval(d)),
 		var		(_count) {
 	_count++;
 }
@@ -199,7 +199,7 @@ AffineMain<AF_fAF2>::AffineMain(const AffineMain<AF_fAF2>& x) :
 
 template<>
 double AffineMain<AF_fAF2>::val(int i) const{
-	assert((0<=i) && (i<=_n));
+	assert((0<=i) && (i<_n));
 	return _elt._val[i+1];
 }
 
@@ -696,7 +696,8 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(const Interval& y) {
 			y.is_unbounded() ) {
 		*this = itv()*y;
 	} else {
-		AffineMain<AF_fAF2> tmp(1,0,y.mid()); // to check if it is the best way to do it
+		AffineMain<AF_fAF2> tmp;
+		tmp= y.mid();	 // to check if it is the best way to do it
 		tmp.inflate(y.rad());
 		*this *= tmp;
 	}

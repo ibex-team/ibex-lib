@@ -1134,8 +1134,8 @@ bool TestAffineEval<T>::check_af2 (Function& f, Interval& I){
 
 			if (!(itv2.is_subset(faa.itv())))
 			{
-				std::cout  << " DEP = "<< ii<< "  "  << f<< std::endl;
-				std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
+				//std::cout  << " DEP = "<< ii<< "  "  << f<< std::endl;
+				//std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
 				//		std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
 
 				return false;

@@ -47,13 +47,13 @@ public:
 	 * \brief Generation of a linear approximation of the inner region
 	 *
 	 */
-	int inlinearization(const IntervalVector& box, LPSolver& lp_solver);
+	//int inlinearization(const IntervalVector& box, LPSolver& lp_solver);
 
 	/**
 	 * \brief Generation of a linear approximation of the linear objective function
 	 *
 	 */
-	bool goal_linearization(const IntervalVector& box, LPSolver& lp_solver);
+	//bool goal_linearization(const IntervalVector& box, LPSolver& lp_solver);
 
 private:
 	/**
@@ -69,7 +69,7 @@ private:
 	/**
 	 * \brief Affine evaluators for the constraints functions
 	 */
-	AffineEval<AF_Default>** ctr_af_evl;
+	Affine2Eval** ctr_af_evl;
 };
 
 } // end namespace ibex
