@@ -40,7 +40,7 @@ public:
 	 * \param vars   - Symbols corresponding to x (variables)
 	 * \param params - Symbols corresponding to y (parameters)
 	 */
-	SIP(System& sys, const std::vector<const ExprSymbol*>& vars,  const std::vector<const ExprSymbol*>& params, const BitSet& is_param);
+	SIP(System& sys, const Array<const ExprSymbol>& vars, const Array<const ExprSymbol>& params, const BitSet& is_param);
 
 	virtual ~SIP();
 
@@ -54,8 +54,8 @@ public:
 	//=================================================================================================
 
 	const System& sys;                             // original IBEX system
-	const std::vector<const ExprSymbol*>& vars;    // variable symbols ("x")
-	const std::vector<const ExprSymbol*>& params;  // parameter symbols ("y")
+	const Array<const ExprSymbol>& vars;           // variable symbols ("x")
+	const Array<const ExprSymbol>& params;         // parameter symbols ("y")
 	const BitSet& is_param;                        // whether the ith symbol is a parameter
 	const int n_arg;                               // number of variable symbols "x"
 	const int p_arg;                               // number of parameter symbols "y"

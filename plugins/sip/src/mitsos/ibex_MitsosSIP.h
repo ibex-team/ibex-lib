@@ -31,7 +31,7 @@ public:
 	 * \param shared_.. - If true, the same sample points are shared
 	 *                    by LBD/UBD/ORA problems.
 	 */
-	MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  const std::vector<const ExprSymbol*>& params, const BitSet& is_param, bool shared_discretization=true);
+	MitsosSIP(System& sys, const Array<const ExprSymbol>& vars, const Array<const ExprSymbol>& params, const BitSet& is_param, bool shared_discretization=true);
 
 	/**
 	 * \brief Delete this.
@@ -54,6 +54,11 @@ public:
 	 * By default: 20
 	 */
 	int l_max;
+
+	/**
+	 * \brief Random seed given to the underyling optimizer
+	 */
+	long random_seed;
 
 protected:
 

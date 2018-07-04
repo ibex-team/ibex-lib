@@ -15,7 +15,7 @@ using namespace std;
 
 namespace ibex {
 
-SIP::SIP(System& sys, const vector<const ExprSymbol*>& vars,  const vector<const ExprSymbol*>& params, const BitSet& is_param) :
+SIP::SIP(System& sys, const Array<const ExprSymbol>& vars, const Array<const ExprSymbol>& params, const BitSet& is_param) :
 	sys(sys), vars(vars), params(params), is_param(is_param), n_arg(vars.size()), p_arg(params.size()),
 	varset(sys.f_ctrs,Array<const ExprSymbol>(params),false), n(varset.nb_var), p(varset.nb_param),
 	var_init_domain(varset.var_box(sys.box)), param_init_domain(varset.param_box(sys.box)),
