@@ -214,6 +214,11 @@ public:
 	 */
 	IntervalMatrix active_ctrs_jacobian(const IntervalVector& box) const;
 
+	/**
+	 * \brief Identifying number.
+	 */
+	const long id;
+
 	/** Number of variables.
 	 *
 	 * \note This number is also sys.f_ctrs.nb_var() and box.size().

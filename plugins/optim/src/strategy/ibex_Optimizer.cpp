@@ -11,7 +11,7 @@
 #include "ibex_Timer.h"
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
-#include "ibex_OptimData.h"
+#include "ibex_BxpOptimData.h"
 
 #include <float.h>
 #include <stdlib.h>

@@ -8,12 +8,12 @@
 // Last update : Jun 07, 2018
 //============================================================================
 
-#include "ibex_Multipliers.h"
 #include <stdlib.h>
+#include "ibex_BxpMultipliers.h"
 
 namespace ibex {
 
-BxpMultipliers::BxpMultipliers(): lambda(1) {
+/*BxpMultipliers::BxpMultipliers(): lambda(1) {
 
 }
 
@@ -41,5 +41,5 @@ BxpMultipliers::BxpMultipliers(const BxpMultipliers& e) : lambda(e.lambda) {
 Bxp* BxpMultipliers::copy() const {
 	return new BxpMultipliers(*this);
 }
-
+*/
 } // end namespace ibex

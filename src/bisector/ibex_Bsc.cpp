@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 8, 2012
-// Last Update : Dec 25, 2017
+// Last Update : Jul 6, 2018
 //============================================================================
 
 #include "ibex_Bsc.h"
@@ -30,7 +30,7 @@ Bsc::Bsc(const Vector& prec) : _prec(prec) {
 		if (prec[i]<=0) ibex_error("precision must be a nonnegative number");
 }
 
-void Bsc::add_property(Map<Bxp>& map) {
+void Bsc::add_property(BoxProperties& map) {
 
 }
 

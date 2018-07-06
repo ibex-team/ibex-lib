@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_BoxProp.h
+// File        : ibex_Bxp.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -36,12 +36,14 @@ class Bxp {
 public:
 
 	/**
-	 * All the sibling properties must have the same id.
+	 * All the sibling Bxp instances must have the same id.
 	 */
 	Bxp(long id);
 
 	/**
 	 * \brief Create a copy.
+	 *
+	 * The copy must have the same id.
 	 */
 	virtual Bxp* copy() const=0;
 
@@ -69,24 +71,38 @@ public:
 	 *
 	 * The two property instances must have the same id as this.
 	 */
-	virtual std::pair<Bxp*,Bxp*> update_bisect(const BisectionPoint&, const BoxProperties& prop);
+	virtual std::pair<Bxp*,Bxp*> update_bisect(const BisectionPoint& bp, const IntervalVector& left, const IntervalVector& right, const BoxProperties& prop);
 
+	/**
+	 * \brief Delete this.
+	 */
 	virtual ~Bxp();
 
+	/**
+	 * \brief Identifying number.
+	 */
 	const long id;
 
+	/**
+	 * \brief Dependencies.
+	 *
+	 * The identifying numbers of all the other properties required
+	 * by this property.
+	 */
 	std::vector<long> dependencies;
 };
 
 /*================================== inline implementations ========================================*/
-
-//#include "ibex_Id.h"
 
 inline Bxp::Bxp(long id) : id(id) {
 }
 
 inline void Bxp::update(const IntervalVector& new_box, bool contract, const BoxProperties& prop) {
 	update(new_box, contract, BitSet::all(new_box.size()), prop);
+}
+
+inline std::pair<Bxp*,Bxp*> Bxp::update_bisect(const BisectionPoint& bp, const IntervalVector& left, const IntervalVector& right, const BoxProperties& prop) {
+	return std::make_pair(copy(),copy());
 }
 
 inline Bxp::~Bxp() {

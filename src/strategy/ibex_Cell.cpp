@@ -10,10 +10,9 @@
 
 #include "ibex_Cell.h"
 #include "ibex_Bsc.h"
-#include "ibex_BoxProp.h"
-#include "ibex_BoxProp.h"
-
 #include <limits.h>
+#include "ibex_Bxp.h"
+#include "ibex_Bxp.h"
 
 using namespace std;
 
@@ -27,7 +26,7 @@ Cell::Cell(const Cell& e) : box(e.box), bisected_var(e.bisected_var) {
 	e.prop.update_copy(prop);
 }
 
-pair<Cell*,Cell*> Cell::subcells(const BisectionPoint& b) const {
+pair<Cell*,Cell*> Cell::bisect(const BisectionPoint& b) const {
 
 	Cell* cleft;
 	Cell* cright;
@@ -45,7 +44,7 @@ pair<Cell*,Cell*> Cell::subcells(const BisectionPoint& b) const {
 		cright = new Cell(b2, b.var);
 	}
 
-	prop.update_bisect(b,cleft->prop,cright->prop);
+	prop.update_bisect(b, cleft->box, cright->box, cleft->prop, cright->prop);
 
 	return pair<Cell*,Cell*>(cleft,cright);
 }

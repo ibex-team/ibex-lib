@@ -42,7 +42,7 @@ public:
 	 *
 	 * \param eps   Transforms an equation f=0 into two inequalities: f<=eps and -f<=eps.
 	 *
-	 * To avoid confusion, the extended system has no goal (but it could be "y").
+	 * The goal of the extended system is "y".
 	 */
 	explicit ExtendedSystem(const System& sys, double eps=0);
 

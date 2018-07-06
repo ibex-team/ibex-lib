@@ -7,7 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Feb 27, 2012
- * Last update : May 29, 2018
+ * Last update : Jul 06, 2018
  * ---------------------------------------------------------------------------- */
 
 #ifndef __IBEX_CONTRACTOR_H__
@@ -95,7 +95,10 @@ public:
 	 */
 	void contract(Set& set, double eps);
 
-	virtual void add_property(Map<Bxp>& map);
+	/**
+	 * \brief Add properties required by this contractor.
+	 */
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief The number of variables this contractor works with.
@@ -137,6 +140,12 @@ inline void Ctc::contract(IntervalVector& box) {
 
 inline void Ctc::contract(IntervalVector& box, CtcContext& context) {
 	contract(box);
+	if (context.data()) {
+		// TODO: the input impact of update is the "output" impact
+		// of the previous call to contract. Such a field does not
+		// exist yet in Context --> set temporarily to "all".
+		context.data()->update(box,true,BitSet::all(box.size()));
+	}
 }
 
 inline void Ctc::contract(IntervalVector& box, const BitSet& impact) {
@@ -152,7 +161,7 @@ inline void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& fla
 	contract(box,context);
 }
 
-inline void Ctc::add_property(Map<Bxp>& map) {
+inline void Ctc::add_property(BoxProperties& map) {
 
 }
 

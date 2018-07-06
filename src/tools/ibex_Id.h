@@ -18,7 +18,7 @@ namespace ibex {
  * \brief Generate an identifier.
  *
  * This function returns a unique number in the
- * execution of the program.
+ * whole execution of the program.
  */
 long next_id();
 

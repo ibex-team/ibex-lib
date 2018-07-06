@@ -1,23 +1,27 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_OptimData.cpp
-// Author      : Jordan Ninin
+// File        : ibex_BxpOptimData.cpp
+// Author      : Jordan Ninin, Gilles Chabert
 // License     : See the LICENSE file
 // Created     : Oct 18, 2014
+// Last Update : Jul 05, 2018
 //============================================================================
 
-#include "ibex_OptimData.h"
+#include "ibex_BxpOptimData.h"
 #include "ibex_Id.h"
 
 namespace ibex {
 
 const long BxpOptimData::prop_id = next_id();
 
-BxpOptimData::BxpOptimData() : pf(), pu(0) {
+Map<long,false> BxpOptimData::ids;
+
+
+BxpOptimData::BxpOptimData(const ExtendedSystem& sys) : Bxp(get_id(sys)), sys(sys), pf(), pu(0) {
 
 }
 
-BxpOptimData::BxpOptimData(const BxpOptimData& e) : pf(e.pf), pu(e.pu) {
+BxpOptimData::BxpOptimData(const BxpOptimData& e) : Bxp(e.id), sys(e.sys), pf(e.pf), pu(e.pu) {
 
 }
 
@@ -25,12 +29,22 @@ BxpOptimData::~BxpOptimData() {
 
 }
 
+long BxpOptimData::get_id(const ExtendedSystem& sys) {
+	try {
+		return ids[sys.id];
+	} catch(Map<long,false>::NotFound&) {
+		long new_id=next_id();
+		ids.insert_new(sys.id, new_id);
+		return new_id;
+	}
+}
+
 void BxpOptimData::compute_pf(const Function& goal, const IntervalVector& box) {
 	pf=goal.eval(box);
 }
 
 
-void BxpOptimData::compute_pu(const System& sys, const IntervalVector& box) {
+void BxpOptimData::compute_pu(const ExtendedSystem& sys, const IntervalVector& box) {
 	double pu=1;
 
 	if (sys.active_ctrs(box).empty()) return;
@@ -44,4 +58,5 @@ void BxpOptimData::compute_pu(const System& sys, const IntervalVector& box) {
 		pu=pu*pui;
 	}
 }
+
 } // end namespace ibex

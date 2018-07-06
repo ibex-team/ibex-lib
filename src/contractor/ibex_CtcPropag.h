@@ -67,7 +67,7 @@ public:
 	/**
 	 * \brief Add sub-contractors properties to the map
 	 */
-	virtual void add_property(Map<Bxp>& map);
+	virtual void add_property(BoxProperties& map);
 
 	//virtual void add_property(SymbolMap<BoxProperty*>& map);
 

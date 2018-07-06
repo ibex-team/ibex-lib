@@ -10,49 +10,57 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_CtcFwdBwd.h"
-#include "ibex_BoxPropActiveCtr.h"
+#include "ibex_BxpActiveCtr.h"
+#include "ibex_ExprCopy.h"
 
 namespace ibex {
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, const Domain& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim), active_prop_id(next_id()) {
+namespace {
+
+NumConstraint& build_ctr(const Function& f, const Domain& y) {
+	Array<const ExprSymbol> x(f.nb_arg());
+	varcopy(f.args(),x);
+	return *new NumConstraint(x,f((Array<const ExprNode>&) x)=ExprConstant::new_(y));
+}
+
+}
+
+CtcFwdBwd::CtcFwdBwd(const Function& f, const Domain& y) : Ctc(f.nb_var()), ctr(build_ctr(f,y)), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
 	assert(f.expr().dim==y.dim);
-	d = y;
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, const Interval& y) : Ctc(f.nb_var()), f(f), d(Dim()), active_prop_id(next_id()) {
-	assert(f.expr().dim==d.dim);
-	d.i() = y;
+CtcFwdBwd::CtcFwdBwd(const Function& f, const Interval& y) : Ctc(f.nb_var()), ctr(build_ctr(f,Domain((Interval&) y))), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
+	assert(f.expr().dim==Dim::scalar());
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim), active_prop_id(next_id()) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalVector& y) : Ctc(f.nb_var()), ctr(build_ctr(f,Domain((IntervalVector&) y,f.expr().dim.type()==Dim::ROW_VECTOR))), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
 	assert(f.expr().dim.is_vector() && f.expr().dim.vec_size()==y.size());
-	d.v() = y;
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f), d(f.expr().dim), active_prop_id(next_id()) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), ctr(build_ctr(f,Domain((IntervalMatrix&) y))), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
 	assert(f.expr().dim==Dim::matrix(y.nb_rows(),y.nb_cols()));
-	d.m() = y;
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, CmpOp op) : Ctc(f.nb_var()), f(f), d(NumConstraint(f,op).right_hand_side()), active_prop_id(next_id()) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, CmpOp op) : Ctc(f.nb_var()), ctr(*new NumConstraint(f,op)), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), f(ctr.f), d(ctr.right_hand_side()), active_prop_id(ctr.active_prop_id) {
+CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), ctr(ctr), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(false) {
 	init();
 }
 
 CtcFwdBwd::~CtcFwdBwd() {
 	delete input;
 	delete output;
+	if (own_ctr) delete &ctr;
 }
 
 void CtcFwdBwd::init() {
@@ -61,13 +69,17 @@ void CtcFwdBwd::init() {
 	output = new BitSet(nb_var);
 
 	int v;
-	for (int i=0; i<f.nb_used_vars(); i++) {
-		v=f.used_var(i);
+	for (int i=0; i<ctr.f.nb_used_vars(); i++) {
+		v=ctr.f.used_var(i);
 		output->add(v);
 		input->add(v);
 	}
 }
 
+void CtcFwdBwd::add_property(BoxProperties& map) {
+	if (!map[active_prop_id])
+		map.add(new BxpActiveCtr(ctr));
+}
 
 void CtcFwdBwd::contract(IntervalVector& box) {
 	CtcContext context;
@@ -87,7 +99,7 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 	}
 
 	//std::cout << " hc4 of " << f << "=" << d << " with box=" << box << std::endl;
-	if (f.backward(d,box)) {
+	if (ctr.f.backward(d,box)) {
 		if (p) p->active=false;
 		context.set_flag(CtcContext::INACTIVE);
 		context.set_flag(CtcContext::FIXPOINT);
@@ -103,9 +115,5 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 	// may be non-optimal in backward mode.
 }
 
-void CtcFwdBwd::add_property(Map<Bxp>& map) {
-	if (!map.found(active_prop_id))
-		map.insert_new(active_prop_id, new BxpActiveCtr());
-}
 
 } // namespace ibex

@@ -16,9 +16,15 @@ namespace ibex {
 const double CtcFixPoint::default_ratio = 0.1;
 
 CtcFixPoint::CtcFixPoint(Ctc& ctc, double ratio) : Ctc(ctc.nb_var), ctc(ctc), ratio(ratio) {
+
 }
 
 CtcFixPoint::~CtcFixPoint(){
+
+}
+
+void CtcFixPoint::add_property(BoxProperties& map) {
+	ctc.add_property(map);
 }
 
 void CtcFixPoint::contract(IntervalVector& box) {

@@ -10,7 +10,8 @@
  * ---------------------------------------------------------------------------- */
 
 #include "TestCellHeap.h"
-#include "ibex_OptimData.h"
+
+#include "ibex_BxpOptimData.h"
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_System.h"
 #include "ibex_SystemFactory.h"
@@ -73,9 +74,9 @@ void TestCellHeap::test03() {
 	Cell *cell1 ;
 	for (int i=0; i<nb ;i++) {
 		cell1 = new Cell((pow(-1,i)*i)*box);
-		cell1->add<OptimData>();
-		cell1->get<OptimData>().pu=0.2;
-		cell1->get<OptimData>().pf = box[0]*box[1];
+		cell1->add<BxpOptimData>();
+		cell1->get<BxpOptimData>().pu=0.2;
+		cell1->get<BxpOptimData>().pf = box[0]*box[1];
 
 		h2.push(cell1);
 	}
@@ -96,9 +97,9 @@ void TestCellHeap::test04() {
 	Cell *cell1;
 	for (int i=0; i<nb ;i++) {
 		cell1 = new Cell((pow(-1,i)*i)*box);
-		cell1->add<OptimData>();
-		cell1->get<OptimData>().pu=0.2;
-		cell1->get<OptimData>().pf = box[0]*box[1];
+		cell1->add<BxpOptimData>();
+		cell1->get<BxpOptimData>().pu=0.2;
+		cell1->get<BxpOptimData>().pf = box[0]*box[1];
 
 		h2.push(cell1);
 	}
@@ -126,13 +127,13 @@ void TestCellHeap::test05() {
 	Cell *cell1 ,*cell2;
 	for (int i=0; i<nb ;i++) {
 		cell1 = new Cell((pow(-1,i)*i)*box);
-		cell1->add<OptimData>();
-		cell1->get<OptimData>().pu=0.2;
-		cell1->get<OptimData>().pf = box[0]*box[1];
+		cell1->add<BxpOptimData>();
+		cell1->get<BxpOptimData>().pu=0.2;
+		cell1->get<BxpOptimData>().pf = box[0]*box[1];
 		cell2 = new Cell((pow(-1,i)*i)*box);
-		cell2->add<OptimData>();
-		cell2->get<OptimData>().pu=0.2;
-		cell2->get<OptimData>().pf = box[0]*box[1];
+		cell2->add<BxpOptimData>();
+		cell2->get<BxpOptimData>().pu=0.2;
+		cell2->get<BxpOptimData>().pf = box[0]*box[1];
 		h1.push(cell1);
 		h2.push(cell2);
 	}
@@ -206,9 +207,9 @@ void TestCellHeap::test_D01() {
 	Cell *cell;
 	for (int i=0; i<nb ;i++) {
 		cell = new Cell((pow(-1,i)*i)*box);
-		cell->add<OptimData>();
-		cell->get<OptimData>().pu=0.2;
-		cell->get<OptimData>().pf = box[0]*box[1];
+		cell->add<BxpOptimData>();
+		cell->get<BxpOptimData>().pu=0.2;
+		cell->get<BxpOptimData>().pf = box[0]*box[1];
 		h1.push(cell);
 	}
 	for (int i=0; i<nb ;i++) {
@@ -243,9 +244,9 @@ void TestCellHeap::test_D03() {
 	Cell *cell1 ;
 	for (int i=0; i<nb ;i++) {
 		cell1 = new Cell((pow(-1,i)*i)*box);
-		cell1->add<OptimData>();
-		cell1->get<OptimData>().pu=0.2;
-		cell1->get<OptimData>().pf = box[0]*box[1];
+		cell1->add<BxpOptimData>();
+		cell1->get<BxpOptimData>().pu=0.2;
+		cell1->get<BxpOptimData>().pf = box[0]*box[1];
 		h1.push(cell1);
 	}
 	delete h1.pop(); delete h1.pop();
@@ -278,9 +279,9 @@ void TestCellHeap::test_D04() {
 	Cell *cell1 ;
 	for (int i=0; i<nb ;i++) {
 		cell1 = new Cell((pow(-1,i)*i)*box);
-		cell1->add<OptimData>();
-		cell1->get<OptimData>().pu=0.2;
-		cell1->get<OptimData>().pf = box[0]*box[1];
+		cell1->add<BxpOptimData>();
+		cell1->get<BxpOptimData>().pu=0.2;
+		cell1->get<BxpOptimData>().pf = box[0]*box[1];
 		h1.push(cell1);
 	}
 	delete h1.pop1();
@@ -320,13 +321,13 @@ void TestCellHeap::test_D05() {
 	Cell *cell1 ,*cell2;
 	for (int i=0; i<nb ;i++) {
 		cell1 = new Cell((pow(-1,i)*i)*box);
-		cell1->add<OptimData>();
-		cell1->get<OptimData>().pu=0.2*i;
-		cell1->get<OptimData>().pf = box[0]*box[1];
+		cell1->add<BxpOptimData>();
+		cell1->get<BxpOptimData>().pu=0.2*i;
+		cell1->get<BxpOptimData>().pf = box[0]*box[1];
 		cell2 = new Cell((pow(-1,i)*i)*box);
-		cell2->add<OptimData>();
-		cell2->get<OptimData>().pu=0.2*i;
-		cell2->get<OptimData>().pf = box[0]*box[1];
+		cell2->add<BxpOptimData>();
+		cell2->get<BxpOptimData>().pu=0.2*i;
+		cell2->get<BxpOptimData>().pf = box[0]*box[1];
 		h1.push(cell1);
 		h2.push(cell2);
 	}

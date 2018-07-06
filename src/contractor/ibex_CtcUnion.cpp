@@ -123,7 +123,7 @@ CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 	assert(check_nb_var_ctc_list(list));
 }
 
-void CtcUnion::add_property(Map<Bxp>& map) {
+void CtcUnion::add_property(BoxProperties& map) {
 	for (int i=0; i<list.size(); i++)
 		list[i].add_property(map);
 }
@@ -163,9 +163,7 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	box = result;
 
 	if (context.data() && context.update_data) {
-		for (Map<Bxp>::const_iterator it=context.data()->begin(); it!=context.data()->end(); it++) {
-			((Bxp*) it->second)->update_contract(box);
-		}
+		context.data()->update(box,true,BitSet::all(nb_var));
 	}
 
 } // end namespace ibex

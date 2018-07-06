@@ -82,7 +82,7 @@ SIPOptimizer::Status SIPOptimizer::minimize(const IntervalVector& box, double ob
             BisectionPoint bisection_point = bisector_.choose_var(*cell);
 			//auto boxes = bisector_.bisect(*cell);
 			//auto new_cells = cell->bisect(boxes.first, boxes.second);
-            auto new_cells = cell->subcells(bisection_point);
+            auto new_cells = cell->bisect(bisection_point);
 			buffer_.pop();
 			delete cell;
 			nb_cells_ += 2;

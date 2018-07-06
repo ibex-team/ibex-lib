@@ -8,7 +8,7 @@
 //============================================================================
 
 #include "ibex_CellCostFunc.h"
-#include "ibex_OptimData.h"
+#include "ibex_BxpOptimData.h"
 
 namespace ibex {
 
@@ -20,7 +20,7 @@ void CellCostFunc::set_loup(double lb) {
 
 }
 
-void CellCostFunc::add_property(Map<Bxp>& map) {
+void CellCostFunc::add_property(const ExtendedSystem& sys, BoxProperties& map) {
 
 }
 
@@ -79,9 +79,9 @@ double CellCostC3::cost(const Cell& c) const {
 	}
 }
 
-void CellCostC3::add_property(Map<Bxp>& map) {
-	if (!map.found(BxpOptimData::prop_id))
-		map.insert_new(BxpOptimData::prop_id, new BxpOptimData());
+void CellCostC3::add_property(const ExtendedSystem& sys, BoxProperties& map) {
+	if (!map[BxpOptimData::get_id(sys)])
+		map.add(new BxpOptimData(sys));
 }
 
 void CellCostC3::set_optim_data(Cell& c, const ExtendedSystem& sys) {
@@ -103,9 +103,9 @@ double CellCostC5::cost(const Cell& c) const {
 	}
 }
 
-void CellCostC5::add_property(Map<Bxp>& map) {
-	if (!map.found(BxpOptimData::prop_id))
-		map.insert_new(BxpOptimData::prop_id, new BxpOptimData());
+void CellCostC5::add_property(const ExtendedSystem& sys, BoxProperties& map) {
+	if (!map[BxpOptimData::get_id(sys)])
+		map.add(new BxpOptimData(sys));
 }
 
 void CellCostC5::set_optim_data(Cell& c, const ExtendedSystem& sys) {
@@ -129,9 +129,9 @@ double CellCostC7::cost(const Cell& c) const {
 	}
 }
 
-void CellCostC7::add_property(Map<Bxp>& map) {
-	if (!map.found(BxpOptimData::prop_id))
-		map.insert_new(BxpOptimData::prop_id, new BxpOptimData());
+void CellCostC7::add_property(const ExtendedSystem& sys, BoxProperties& map) {
+	if (!map[BxpOptimData::get_id(sys)])
+		map.add(new BxpOptimData(sys));
 }
 
 void CellCostC7::set_optim_data(Cell& c, const ExtendedSystem& sys) {
@@ -155,9 +155,9 @@ double CellCostPU::cost(const Cell& c) const {
 	}
 }
 
-void CellCostPU::add_property(Map<Bxp>& map) {
-	if (!map.found(BxpOptimData::prop_id))
-		map.insert_new(BxpOptimData::prop_id, new BxpOptimData());
+void CellCostPU::add_property(const ExtendedSystem& sys, BoxProperties& map) {
+	if (!map[BxpOptimData::get_id(sys)])
+		map.add(new BxpOptimData(sys));
 }
 
 void CellCostPU::set_optim_data(Cell& c, const ExtendedSystem& sys) {
@@ -171,9 +171,9 @@ CellCostPFlb::CellCostPFlb() :  CellCostFunc(false) {
 
 }
 
-void CellCostPFlb::add_property(Map<Bxp>& map) {
-	if (!map.found(BxpOptimData::prop_id))
-		map.insert_new(BxpOptimData::prop_id, new BxpOptimData());
+void CellCostPFlb::add_property(const ExtendedSystem& sys, BoxProperties& map) {
+	if (!map[BxpOptimData::get_id(sys)])
+		map.add(new BxpOptimData(sys));
 }
 
 void CellCostPFlb::set_optim_data(Cell& c, const ExtendedSystem& sys) {
@@ -195,9 +195,9 @@ CellCostPFub::CellCostPFub() :  CellCostFunc(false) {
 
 }
 
-void CellCostPFub::add_property(Map<Bxp>& map) {
-	if (!map.found(BxpOptimData::prop_id))
-		map.insert_new(BxpOptimData::prop_id, new BxpOptimData());
+void CellCostPFub::add_property(const ExtendedSystem& sys, BoxProperties& map) {
+	if (!map[BxpOptimData::get_id(sys)])
+		map.add(new BxpOptimData(sys));
 }
 
 void CellCostPFub::set_optim_data(Cell& c, const ExtendedSystem& sys) {
@@ -219,9 +219,9 @@ CellCostMaxPFub::CellCostMaxPFub() :  CellCostFunc(false) {
 
 }
 
-void CellCostMaxPFub::add_property(Map<Bxp>& map) {
-	if (!map.found(BxpOptimData::prop_id))
-		map.insert_new(BxpOptimData::prop_id, new BxpOptimData());
+void CellCostMaxPFub::add_property(const ExtendedSystem& sys, BoxProperties& map) {
+	if (!map[BxpOptimData::get_id(sys)])
+		map.add(new BxpOptimData(sys));
 }
 
 void CellCostMaxPFub::set_optim_data(Cell& c, System& sys) {

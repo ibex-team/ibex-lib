@@ -10,22 +10,24 @@
 #ifndef __IBEX_MAP_H__
 #define __IBEX_MAP_H__
 
+#include "ibex_Exception.h"
+
 #ifdef __GNUC__
 #include <ciso646> // just to initialize _LIBCPP_VERSION
 #ifdef _LIBCPP_VERSION
 #include <unordered_map>
-#define __ibex_map__(T) std::unordered_map<long, T*>
+#define __ibex_map__(T) std::unordered_map<long, T>
 #else
 #include <tr1/unordered_map>
-#define __ibex_map__(T) std::tr1::unordered_map<long, T*>
+#define __ibex_map__(T) std::tr1::unordered_map<long, T>
 #endif
 #else
 #if (_MSC_VER >= 1600)
 #include <unordered_map>
-#define __ibex_map__(T) std::unordered_map<long, T*>
+#define __ibex_map__(T) std::unordered_map<long, T>
 #else
 #include <unordered_map>
-#define __ibex_map__(T) std::tr1::unordered_map<long, T*>
+#define __ibex_map__(T) std::tr1::unordered_map<long, T>
 #endif // (_MSC_VER >= 1600)
 #endif
 
@@ -49,11 +51,30 @@ template<class T, bool REF=true>
 class Map {
 public:
 	// T& -> by reference or T -> by copy
-	typedef typename std::conditional<REF,T&,T>::type ValueType;
+	typedef typename std::conditional<REF,T&,T>::type RefOrCopy;
 	typedef typename std::conditional<REF,T*,T>::type StorageType;
+
+	/**
+	 * \brief Iterator
+	 *
+	 * If REF==true, the iterator points to a pair <long,T*>
+	 * If REF==false, the iterator points to a pair <long,T>
+	 */
+	typedef typename __ibex_map__(StorageType)::iterator iterator;
+
+	/**
+	 * \brief Const iterator.
+	 *
+	 * If REF==true, the iterator points to a pair <long,T*>
+	 * If REF==false, the iterator points to a pair <long,T>
+	 */
+	typedef typename __ibex_map__(StorageType)::const_iterator const_iterator;
 
 	__ibex_map__(StorageType) map;
 
+	/**
+	 * \brief Thrown when the identifier does not exist.
+	 */
 	class NotFound : Exception { };
 
 	/**
@@ -65,58 +86,82 @@ public:
 
 	/**
 	 * \brief Insert a new pair <id,p>.
+	 *
+	 * If REF==true, p is passed by reference (T&).
+	 * If REF==false, p is passed by copy (T).
 	 */
-	void insert_new(long id, ValueType p) {
+	void insert_new(long id, RefOrCopy p) {
 		assert(!found(id));
 
 		map.insert(std::make_pair(id,
-				pointer_or_copy(p, typename std::conditional<REF,std::true_type,std::false_type>::type())));
+				pointer_or_ref(p, typename std::conditional<REF,std::true_type,std::false_type>::type())));
 	}
 
 	/**
-	 * \brief Return the data associated to the key \a id.
+	 * \brief Return a reference to the data associated to the key \a id.
 	 *
 	 * \throw - A NotFound exception if no element with \id exists.
 	 */
-	const ValueType operator[](long id) const {
-		typename __ibex_map__(T)::const_iterator it = map.find (id);
+	const T& operator[](long id) const {
+		const_iterator it = map.find (id);
 		if (it == map.end()) throw NotFound();
-		return *it->second;
+		return deref_or_ref(it->second, typename std::conditional<REF,std::true_type,std::false_type>::type());
 	}
 
 	/**
-	 * \brief Return the data associated to the key \a id.
+	 * \brief Return a reference to the data associated to the key \a id.
 	 *
 	 * \throw - A NotFound exception if no element with \id exists.
 	 */
-	ValueType operator[](long id) {
-		return (ValueType&) ((const Map*) this)->operator[](id);
+	T& operator[](long id) {
+		return (RefOrCopy&) ((const Map*) this)->operator[](id);
 	}
 
-	typename __ibex_map__(T)::iterator begin() {
+	/**
+	 * \brief Iterator pointing to the first pair <key,T&>.
+	 */
+	iterator begin() {
 		return map.begin();
 	}
 
-	typename __ibex_map__(T)::iterator end() {
+	/**
+	 * \brief Iterator pointing to past-the-end element.
+	 */
+	iterator end() {
 		return map.end();
 	}
 
-	typename __ibex_map__(T)::const_iterator begin() const {
+	/**
+	 * \brief Const iterator pointing to the first pair <key,T&>.
+	 */
+	const_iterator begin() const {
 		return map.begin();
 	}
 
-	typename __ibex_map__(T)::const_iterator end() const {
+	/**
+	 * \brief Const iterator pointing to past-the-end element.
+	 */
+	const_iterator end() const {
 		return map.end();
 	}
 
 private:
-	T* pointer_or_copy(T& x, std::true_type) { // called when REF=true
+	T* pointer_or_ref(T& x, std::true_type) { // called when REF=true
 		return &x;
 	}
 
-	T& pointer_or_copy(T& x, std::false_type) { // called when REF=false
+	T& pointer_or_ref(T& x, std::false_type) { // called when REF=false
 		return x;
 	}
+
+	const T& deref_or_ref(const T* x, std::true_type) const { // called when REF=true
+		return *x;
+	}
+
+	const T& deref_or_ref(const T& x, std::false_type) const { // called when REF=false
+		return x;
+	}
+
 };
 
 } /* namespace ibex */

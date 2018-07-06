@@ -1,9 +1,12 @@
-/*
- * ibex_BoxProperties.cpp
- *
- *  Created on: Jul 1, 2018
- *      Author: gilles
- */
+//============================================================================
+//                                  I B E X
+// File        : ibex_BoxProperties.cpp
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : Jul 01, 2018
+// Last Update : Jul 06, 2018
+//============================================================================
 
 #include "ibex_BoxProperties.h"
 
@@ -28,7 +31,7 @@ struct DepComparator {
 
 } // end anonymous namespace
 
-int BoxProperties::topo_sort_rec(const Bxp& el, Map<int,false>& level) {
+int BoxProperties::topo_sort_rec(const Bxp& el, Map<int,false>& level) const {
 	int l;
 	try {
 		l = level[el.id];
@@ -41,7 +44,7 @@ int BoxProperties::topo_sort_rec(const Bxp& el, Map<int,false>& level) {
 			try {
 				int l2=topo_sort_rec(map[*it], level);
 				if (l2>=l) l=l2+1;
-			} catch(Map<std::pair<int, Bxp> >::NotFound&) {
+			} catch(Map<Bxp>::NotFound&) {
 				throw PropertyNotFound();
 			}
 		}
@@ -50,10 +53,10 @@ int BoxProperties::topo_sort_rec(const Bxp& el, Map<int,false>& level) {
 	return l;
 }
 
-void BoxProperties::topo_sort() {
+void BoxProperties::topo_sort() const {
 	dep.clear();
 
-	Map<int> level;
+	Map<int,false> level;
 
 	for (Map<Bxp>::const_iterator it=map.begin(); it!=map.end(); it++) {
 		// push the property in the dependency array
@@ -80,7 +83,7 @@ const Bxp* BoxProperties::operator[](long id) const {
 	try {
 		return &map[id];
 	} catch(Map<std::pair<int, Bxp> >::NotFound&) {
-		throw NotFound();
+		return NULL; //throw PropertyNotFound();
 	}
 }
 
@@ -92,8 +95,8 @@ void BoxProperties::update(const IntervalVector& new_box, bool contract, const B
 	// We could also create each time a new property map with
 	// the required properties only. But we have shared
 	// memory to avoid copies -> not very safe
-	for (vector<std::pair<Bxp*, int> >::iterator it=dep.begin(); it!=dep.end(); it++) {
-		it->first->update(new_box,contract,impact,*this);
+	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
+		(*it)->update(new_box,contract,impact,*this);
 	}
 }
 
@@ -101,20 +104,20 @@ void BoxProperties::update_copy(BoxProperties& copy) const {
 	if (!_dep_up2date) topo_sort();
 
 	// Duplicate properties respecting dependencies
-	for (vector<std::pair<Bxp*, int> >::iterator it=dep.begin(); it!=dep.end(); it++) {
-		copy.add(it->first->copy());
+	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
+		copy.add((*it)->copy());
 	}
 }
 
-void BoxProperties::update_bisect(const BisectionPoint& pt, BoxProperties& left, BoxProperties& right) const {
+void BoxProperties::update_bisect(const BisectionPoint& pt, const IntervalVector& lbox, const IntervalVector& rbox, BoxProperties& lprop, BoxProperties& rprop) const {
 
 	if (!_dep_up2date) topo_sort();
 
 	// Duplicate properties respecting dependencies
-	for (vector<std::pair<Bxp*, int> >::iterator it=dep.begin(); it!=dep.end(); it++) {
-		pair<Bxp*,Bxp*> p = it->first->update_bisect(pt,*this);
-		left.add(p.first);
-		right.add(p.second);
+	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
+		pair<Bxp*,Bxp*> p = (*it)->update_bisect(pt,lbox,rbox,*this);
+		lprop.add(p.first);
+		rprop.add(p.second);
 	}
 }
 
@@ -124,7 +127,7 @@ BoxProperties::BoxProperties() : _dep_up2date(true) {
 
 BoxProperties::~BoxProperties() {
 	for (Map<Bxp>::iterator it=map.begin(); it!=map.end(); it++)
-		delete &it->second;
+		delete it->second;
 }
 
 } /* namespace ibex */

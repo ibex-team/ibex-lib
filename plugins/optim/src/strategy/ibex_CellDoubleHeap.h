@@ -60,7 +60,7 @@ public:
 	/**
 	 * \brief Add properties data required by this buffer.
 	 */
-	virtual void add_property(Map<Bxp>& map);
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Flush the buffer.
@@ -151,9 +151,9 @@ inline CellCostFunc& CellDoubleHeap::cost1()      { return (CellCostFunc&) heap1
 
 inline CellCostFunc& CellDoubleHeap::cost2()      { return (CellCostFunc&) heap2->costf; }
 
-inline void CellDoubleHeap::add_property(Map<Bxp>& map) {
+inline void CellDoubleHeap::add_property(BoxProperties& map) {
       // add data "pu" and "pf" (if required)
-       cost2().add_property(map);
+       cost2().add_property(sys,map);
 }
 
 inline void CellDoubleHeap::flush()               { DoubleHeap<Cell>::flush(); }

@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 8, 2012
-// Last Update : Dec 25, 2017
+// Last Update : Jul 6, 2018
 //============================================================================
 
 #ifndef __IBEX_BISECTOR_H__
@@ -92,15 +92,13 @@ public:
 	virtual BisectionPoint choose_var(const Cell& cell) = 0;
 
 	/**
-	 * Allows to add the backtrackable data required
+	 * Allows to add the properties required
 	 * by this bisector to the root cell before a
 	 * strategy is executed.<br>
 	 *
-	 * By default: add information on the last bisected variable.
-	 *
-	 * See #ibex::BisectedVar.
+	 * By default: does nothing.
 	 */
-	virtual void add_property(Map<Bxp>& map);
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Default ratio (0.45)
@@ -152,7 +150,7 @@ inline bool Bsc::too_small(const IntervalVector& box, int i) const {
 }
 
 inline std::pair<Cell*,Cell*> Bsc::bisect(const Cell& cell) {
-	return cell.subcells(choose_var(cell));
+	return cell.bisect(choose_var(cell));
 }
 
 } // end namespace ibex

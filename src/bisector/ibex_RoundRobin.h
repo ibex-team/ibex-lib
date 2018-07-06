@@ -4,8 +4,8 @@
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : May 8, 2012
-// Last Update : Dec 25, 2017
+// Created     : May 08, 2012
+// Last Update : Jun 29, 2018
 //============================================================================
 
 #ifndef __IBEX_ROUND_ROBIN_H__

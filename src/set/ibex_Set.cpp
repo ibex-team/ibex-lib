@@ -15,8 +15,8 @@
 #include "ibex_SetConnectedComponents.cpp_"
 #include "ibex_SepFwdBwd.h"
 #include "ibex_String.h"
-#include "ibex_BoxProp.h"
 #include "ibex_Id.h"
+#include "ibex_Bxp.h"
 
 #include <stack>
 #include <fstream>
@@ -231,11 +231,39 @@ std::ostream& operator<<(std::ostream& os, const Set& set) {
 
 class BxpNodeAndDist : public Bxp {
 public:
-	BxpNodeAndDist(SetNode* _node) : Bxp(next_id()), node(_node), dist(-1) { }
+	BxpNodeAndDist(const IntervalVector& root_box, const Vector& pt, SetNode* _node) : Bxp(next_id()), pt(pt), node(_node) {
+		set_dist(root_box,pt);
+	}
 
-	BxpNodeAndDist(long id, SetNode* _node) : Bxp(id), node(_node), dist(-1) { }
+	BxpNodeAndDist(long id, const IntervalVector& box, const Vector& pt, SetNode* _node) : Bxp(id), pt(pt), node(_node) {
+		set_dist(box,pt);
+	}
 
-	explicit BxpNodeAndDist(const BxpNodeAndDist& p) : Bxp(p.id), node(p.node), dist(p.dist) { }
+	BxpNodeAndDist(const BxpNodeAndDist& p) : Bxp(p.id), pt(p.pt), node(p.node), dist(p.dist) { }
+
+	virtual Bxp* copy() const {
+		return new BxpNodeAndDist(*this);
+	}
+
+	virtual void update(const IntervalVector& new_box, bool contract, const BitSet& impact, const BoxProperties& prop) {
+		set_dist(new_box,pt); // actually never called by Set::dist(...)
+	}
+
+	virtual std::pair<Bxp*,Bxp*> update_bisect(const BisectionPoint&, const IntervalVector& left, const IntervalVector& right, const BoxProperties& prop) {
+		assert(!node->is_leaf());
+
+		SetBisect& b=*((SetBisect*) node);
+		BxpNodeAndDist* l=new BxpNodeAndDist(id,left,pt,b.left);
+		BxpNodeAndDist* r=new BxpNodeAndDist(id,right,pt,b.right);
+
+		return make_pair(l,r);
+	}
+
+	SetNode* node;
+	const Vector& pt;
+	double dist;
+
+protected:
 	/**
 	 * calculate the square of the distance to pt
 	 * for the box of the current cell (box given in argument)
@@ -249,24 +277,6 @@ public:
 		}
 		dist=d.lb();
 	}
-
-	virtual Bxp* copy() const {
-		return new BxpNodeAndDist(*this);
-	}
-
-	virtual std::pair<Bxp*,Bxp*> update_bisect(const BisectionPoint&) {
-		assert(!node->is_leaf());
-
-		SetBisect& b=*((SetBisect*) node);
-		return std::pair<BxpNodeAndDist*,BxpNodeAndDist*>(new BxpNodeAndDist(id,b.left),
-													  new BxpNodeAndDist(id,b.right));
-	}
-
-	SetNode* node;
-	double dist;
-
-protected:
-
 };
 
 /**
@@ -294,10 +304,9 @@ double Set::dist(const Vector& pt, bool inside) const {
 	//int count=0; // for stats
 
 	Cell* root_cell =new Cell(Rn);
-	BxpNodeAndDist* nad=new BxpNodeAndDist(root);
-	root_cell->prop.insert_new(key,nad);
+	BxpNodeAndDist* nad=new BxpNodeAndDist(Rn,pt,root);
+	root_cell->prop.add(nad);
 
-	nad->set_dist(Rn,pt);
 	//count++;
 	CellHeapDist costf(key);
 
@@ -324,16 +333,13 @@ double Set::dist(const Vector& pt, bool inside) const {
 			SetBisect& b= *((SetBisect*) node);
 
             // the box is bisected twice: could be avoided.
-			std::pair<Cell*,Cell*> p=c->subcells(BisectionPoint(b.var,b.pt,false));
+			std::pair<Cell*,Cell*> p=c->bisect(BisectionPoint(b.var,b.pt,false));
 
 			BxpNodeAndDist* nad1=(BxpNodeAndDist*) p.first->prop[key];
 			BxpNodeAndDist* nad2=(BxpNodeAndDist*) p.second->prop[key];
 
-			nad1->set_dist(p.first->box,pt);
 			//count++;
 			if (nad1->dist<=lb) heap.push(p.first);
-
-			nad2->set_dist(p.second->box,pt);
 			//count++;
 			if (nad2->dist<=lb) heap.push(p.second);
 		}

@@ -167,13 +167,13 @@ CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 	init_impacts();
 }
 
-void CtcCompo::add_property(Map<Bxp>& map) {
-	for (int i=0; i<list.size(); i++)
-		list[i].add_property(map);
-}
-
 CtcCompo::~CtcCompo() {
 //	delete[] impacts;
+}
+
+void CtcCompo::add_property(BoxProperties& map) {
+	for (int i=0; i<list.size(); i++)
+		list[i].add_property(map);
 }
 
 void CtcCompo::contract(IntervalVector& box) {

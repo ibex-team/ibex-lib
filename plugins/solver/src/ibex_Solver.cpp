@@ -122,7 +122,7 @@ void Solver::start(const IntervalVector& init_box) {
 	bsc.add_property(root->prop);
 
 	// add data required by the contractor
-	ctc.add_property((Map<Bxp>&) root->prop);
+	ctc.add_property(root->prop);
 
 	buffer.add_property(root->prop);
 
@@ -189,13 +189,7 @@ QualifiedBox* Solver::next() {
 
 		try {
 
-			// Transmit the box properties to the contractor
-			Map<Bxp> ctc_prop;
-			for (Map<Bxp>::const_iterator it=c->prop.begin(); it!=c->prop.end(); it++) {
-				Bxp* p = dynamic_cast<Bxp*>(it->second);
-				if (p) ctc_prop.insert_new(it->first,p);
-			}
-			context.set_properties(&ctc_prop,true);
+			context.set_properties(&c->prop,true);
 
 			ctc.contract(c->box,context);
 

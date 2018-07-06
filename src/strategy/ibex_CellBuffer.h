@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_CellBuffer.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 12, 2012
 // Last Update : May 12, 2012
@@ -62,7 +62,7 @@ class CellBuffer {
 	 *
 	 * Does nothing by default.
 	 */
-	virtual void add_property(Map<Bxp>& map);
+	virtual void add_property(BoxProperties& map);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -101,7 +101,7 @@ std::ostream& operator<<(std::ostream& os, const CellBuffer& h);
 
 /*================================== inline implementations ========================================*/
 
-inline void CellBuffer::add_property(Map<Bxp>& map) {
+inline void CellBuffer::add_property(BoxProperties& map) {
 
 }
 

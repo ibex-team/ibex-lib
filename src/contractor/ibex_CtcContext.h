@@ -9,7 +9,7 @@
 #define __IBEX_CTC_CONTEXT_H__
 
 #include "ibex_Map.h"
-#include "ibex_BoxProp.h"
+#include "ibex_BoxProperties.h"
 #include "ibex_BitSet.h"
 
 namespace ibex {
@@ -49,7 +49,7 @@ public:
 
 	void set_output_flags(BitSet* flags);
 
-	void set_properties(Map<Bxp>* data, bool update);
+	void set_properties(BoxProperties* data, bool update);
 
 	/**
 	 * \brief Return the current impact (NULL pointer if none).
@@ -64,7 +64,7 @@ public:
 	/**
 	 * \brief Return the current properties of the box (NULL pointer if none).
 	 */
-	Map<Bxp>* data();
+	BoxProperties* data();
 
 	/**
 	 * Set an output flag.
@@ -76,7 +76,7 @@ public:
 private:
 	const BitSet* _impact;
 	BitSet* _output_flags;
-	Map<Bxp>* _data;
+	BoxProperties* _data;
 };
 
 
@@ -89,13 +89,13 @@ inline void CtcContext::set_impact(const BitSet* impact) { _impact = impact; }
 
 inline void CtcContext::set_output_flags(BitSet* flags) { _output_flags = flags; }
 
-inline void CtcContext::set_properties(Map<Bxp>* data, bool update) { _data = data; update_data = update; }
+inline void CtcContext::set_properties(BoxProperties* data, bool update) { _data = data; update_data = update; }
 
 inline const BitSet* CtcContext::impact() { return _impact; }
 
 inline BitSet* CtcContext::output_flags() { return _output_flags; }
 
-inline Map<Bxp>* CtcContext::data() { return _data; }
+inline BoxProperties* CtcContext::data() { return _data; }
 
 inline void CtcContext::set_flag(unsigned int f) {
 	assert(f<CtcContext::NB_OUTPUT_FLAGS);

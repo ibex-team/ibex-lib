@@ -226,7 +226,7 @@ void System::init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs) {
 }
 
 
-System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0), ops(NULL), box(1) {
+System::System(const SystemFactory& fac) : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) {
 	init(fac);
 }
 

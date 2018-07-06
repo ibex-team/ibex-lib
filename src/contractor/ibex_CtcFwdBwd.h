@@ -73,9 +73,11 @@ public:
 	 */
 	virtual void contract(IntervalVector& box, CtcContext& context);
 
-	virtual void add_property(Map<Bxp>& map);
+	/**
+	 * \brief Add BxpActiveCtr.
+	 */
+	virtual void add_property(BoxProperties& map);
 
-	const long active_prop_id;
 	/*
 	 * \brief Whether this contractor is idempotent (optional)
 	 */
@@ -83,14 +85,20 @@ public:
 	// bool idempotent();
 	//
 
-	/** The function "f". */
-	const Function& f;
-
-	/** The domain "y". */
-	Domain d;
+	/** The constraint. */
+	const NumConstraint& ctr;
 
 protected:
 	void init();
+
+	/* Right-hand side of the constraint */
+	Domain d;
+
+	/* Identifier of the property */
+	const long active_prop_id;
+
+	/* Just to avoid a copy when ctr is given to the constructor. */
+	bool own_ctr;
 };
 
 } // namespace ibex

@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : Cells
+// File        : ibex_Cell.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -22,19 +22,21 @@ namespace ibex {
  * \defgroup strategy Strategies
  */
 
-/** \ingroup strategy
+/**
+ * \ingroup strategy
  *
  * \brief Node in an interval exploration binary tree.
  *
- * This representation includes default data (current box) and data related to
- * user-defined operators (like bisectors). A different cell is associated to each
- * node and cell construction/inheritance can be controlled (see #ibex::Backtrackable).
+ * This representation includes default data (current box) and data required by
+ * specific operators (contractors, bisectors, cell buffers, ...), stored in
+ * a "property list" (see #ibex::BoxProperties). A different cell is associated
+ * to each node and the way the properties are inherited from a cell to its children
+ * can be controlled thanks to the "update_bisect" function of Bxp. (see #ibex::Bxp).
  *
  * The cell on its own contains the minimum of information associated to the actual
- * search space: the current box (other fields might be added with future releases).
+ * search space: the current box and the last bisected variable. Other fields might
+ * be added with future releases.
  *
- * The amount of information contained in a cell can be arbitrarily augmented thanks
- * to the "data registration" technique (see #ibex::Backtrackable).
  */
 class Cell {
 public:
@@ -55,18 +57,14 @@ public:
 	 * \brief Bisect this cell.
 	 *
 	 * The box of the first (resp. second) cell is \a left (resp. \a right).
-	 * Each subcell inherits from the data of this cell via the
-	 * \link #ibex::Backtrackable::down(const BisectionPoint&) down \endlink
+	 * Each sub-cell inherits from the properties of this cell via the
+	 * \link #ibex::Bxp::update(const BisectionPoint& bp, const IntervalVector& left, const IntervalVector& right, const BoxProperties& prop) update_bisect \endlink
 	 * function.
 	 *
 	 * <p>
-	 * This function is called by the bisector.
+	 * This function is called by the bisector of boxes (see #ibex::Bsc).
 	 */
-	std::pair<Cell*,Cell*> subcells(const BisectionPoint& b) const;
-
-//	void sync_contract(const BitSet& impact);
-//
-//	void sync_change();
+	std::pair<Cell*,Cell*> bisect(const BisectionPoint& b) const;
 
 	/**
 	 * \brief Delete *this.
@@ -79,13 +77,10 @@ public:
 	IntervalVector box;
 
 	/**
-	 * \brief Data bound to the box.
+	 * \brief Properties bound to the box.
 	 *
-	 * Includes search node properties (SearchNodeProp) and
-	 * box properties (BoxProp).
-	 *
-	 * Box properties are visible by all operators, including contractors.
-	 * Search node properties are not visible by contractors.
+	 * Box properties are transmitted to operators (contractors, etc.)
+	 * through the "trust chain" principle (see documentation).
 	 */
 	BoxProperties prop;
 
@@ -95,6 +90,9 @@ public:
 	int bisected_var;
 };
 
+/**
+ * \brief Print the cell.
+ */
 std::ostream& operator<<(std::ostream& os, const Cell& c);
 
 } // end namespace ibex
