@@ -26,7 +26,7 @@ namespace ibex {
 class BxpOptimData : public Bxp {
 public:
 	/**
-	 * \brief Constructor for the root node (followed by a call to init_root).
+	 * \brief Constructor for the root node.
 	 */
 	BxpOptimData(const ExtendedSystem& sys);
 
@@ -36,17 +36,15 @@ public:
 	~BxpOptimData();
 
 	/**
-	 * \brief Create a copyBXP_
+	 * \brief Create a copy.
 	 */
-	virtual Bxp* copy() const;
+	virtual Bxp* update_copy(const BoxProperties& prop) const;
 
 	/**
 	 * \brief Update the property upon box modification.
 	 *
-	 * \see Bxp::update(const IntervalVector& new_box, bool contract, const BoxProperties& prop).
-	 *
 	 */
-	void update(const IntervalVector& new_box, bool contract, const BitSet& impact, const BoxProperties& prop);
+	void update(const BoxEvent& event, const BoxProperties& prop);
 
 	/**
 	 * \brief Initialize the value of "pf"
@@ -100,11 +98,11 @@ protected:
 
 /*================================== inline implementations ========================================*/
 
-inline Bxp* BxpOptimData::copy() const {
+inline Bxp* BxpOptimData::update_copy(const BoxProperties& prop) const {
 	return new BxpOptimData(*this);
 }
 
-inline void BxpOptimData::update(const IntervalVector& new_box, bool contract, const BitSet& impact, const BoxProperties& prop) {
+inline void BxpOptimData::update(const BoxEvent& event, const BoxProperties& prop) {
 	// TODO: we should call compute_pf and compute_pu here.
 	// This is actually done from the CellCostFunc classes
 	// and makes no problem so far as this property is not used elsewhere.

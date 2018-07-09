@@ -5,11 +5,13 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 01, 2018
+// Last update : Jul 09, 2018
 //============================================================================
 
 #include "ibex_IntervalVector.h"
 #include "ibex_BitSet.h"
-#include "ibex_BisectionPoint.h"
+#include "ibex_Bisection.h"
+#include "ibex_BoxEvent.h"
 
 #ifndef __IBEX_BOX_PROPERTY_H__
 #define __IBEX_BOX_PROPERTY_H__
@@ -21,57 +23,57 @@ class BoxProperties;
 /**
  * \ingroup strategy
  *
- * \brief Operator-specific backtrackable data.
+ * \brief Box property.
  *
- * A <i>backtrackable</i> is a structure propagated through the search tree. It is therefore
- * only used by strategies. Each node in the search tree has its own structure, this
- * structure being inherited from the father node. The mechanism of inheritance can be controlled
- * thanks to the \link #Backtrackable::down(const BisectionPoint&) down \endlink function.
- * For the moment, control can only be made downward: there is no way of updating a node structure
- * by aggregating children node structures when backtracking (this might be done in a future release).
+ * This interface allows to extend the simple IntervalVector data structure and to make this extension
+ * being propagated through a search tree. The extended box is then visible by all operators defining
+ * the search strategy (contractors, bisectors, cell buffers, etc.). See #ibex::Cell.
  *
- * This class is an interface to be implemented by any operator data class associated to a cell.
+ * A box property is a set of instances of a Bxp subclass, sharing the same identifier (#id).
+ * To avoid confusion, we call "property value" an instance of the same property. Example: the
+ * width of a box is a property. One can create a class BxpWidth extending Bxp. Then, BxpWidth is
+ * a property and the instances of BxpWidh are property values.
+ *
+ * The initial value is built for the root box (typically, by an operator requiring this property)
+ * and the way the property value is updated through the search tree is controlled by the three virtual
+ * functions update(...), update_copy() and update_bisect(...). In particular, update_bisect(...)
+ * allows to make a node inherits its property values from its father node. Note, however, that control
+ * can only be made downward for the moment (e.g., there is no way of updating the properties of a
+ * right branch after backtracking from the left branch).
+ *
+ * At each node of the tree, the value of a property required by an operator is retrieved by its
+ * identifier.
  */
 class Bxp {
 public:
 
 	/**
-	 * All the sibling Bxp instances must have the same id.
+	 * \brief Create a property value.
+	 *
+	 * All the instances corresponding to values of the same property must have the same id.
 	 */
 	Bxp(long id);
+
+	/**
+	 * \brief Update the property upon box modification.
+	 *
+	 * \param event  - the box modification
+	 */
+	virtual void update(const BoxEvent& event, const BoxProperties& prop)=0;
 
 	/**
 	 * \brief Create a copy.
 	 *
 	 * The copy must have the same id.
 	 */
-	virtual Bxp* copy() const=0;
-
-	/**
-	 * \brief Update the property upon box modification.
-	 *
-	 * \param new_box  - the box after modification.
-	 * \param contract - true only if new_box is new_box is
-	 *                   a subset of the current box.
-	 */
-	void update(const IntervalVector& new_box, bool contract, const BoxProperties& prop);
-
-	/**
-	 * \brief Update the property upon box modification.
-	 *
-	 * \param new_box  - the box after modification
-	 * \param contract - true only if new_box is new_box is
-	 *                   a subset of the current box
-	 * \param impact   - the modified variables.
-	 */
-	virtual void update(const IntervalVector& new_box, bool contract, const BitSet& impact, const BoxProperties& prop)=0;
+	virtual Bxp* update_copy(const BoxProperties& prop) const=0;
 
 	/**
 	 * \brief Create data associated to child cells.
 	 *
-	 * The two property instances must have the same id as this.
+	 * The two property values in return must have the same id as this one.
 	 */
-	virtual std::pair<Bxp*,Bxp*> update_bisect(const BisectionPoint& bp, const IntervalVector& left, const IntervalVector& right, const BoxProperties& prop);
+	virtual std::pair<Bxp*,Bxp*> update_bisect(const Bisection& b, const BoxProperties& l, const BoxProperties& r);
 
 	/**
 	 * \brief Delete this.
@@ -97,12 +99,8 @@ public:
 inline Bxp::Bxp(long id) : id(id) {
 }
 
-inline void Bxp::update(const IntervalVector& new_box, bool contract, const BoxProperties& prop) {
-	update(new_box, contract, BitSet::all(new_box.size()), prop);
-}
-
-inline std::pair<Bxp*,Bxp*> Bxp::update_bisect(const BisectionPoint& bp, const IntervalVector& left, const IntervalVector& right, const BoxProperties& prop) {
-	return std::make_pair(copy(),copy());
+inline std::pair<Bxp*,Bxp*> Bxp::update_bisect(const Bisection& b, const BoxProperties& l, const BoxProperties& r) {
+	return std::make_pair(update_copy(l),update_copy(r));
 }
 
 inline Bxp::~Bxp() {

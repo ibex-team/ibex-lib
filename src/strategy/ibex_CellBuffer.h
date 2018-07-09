@@ -55,7 +55,7 @@ class CellBuffer {
 	virtual ~CellBuffer();
 
 	/**
-	 * \brief Add backtrackable data required by this buffer.
+	 * \brief Add properties required by this buffer.
 	 *
 	 * This function is called for the root cell (before a
 	 * strategy is executed).

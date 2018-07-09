@@ -5,6 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 18, 2018
+// Last update : Jul 09, 2018
 //============================================================================
 
 #ifndef __IBEX_BXP_ACTIVE_CTR_H__
@@ -28,7 +29,7 @@ namespace ibex {
 class BxpActiveCtr : public Bxp {
 public:
 	/**
-	 * \brief Build an instance of the property, associated to a constraint.
+	 * \brief Build the property value, associated to a constraint.
 	 *
 	 * \param ctr    - The constraint
 	 * \param active - Default activity value
@@ -38,13 +39,13 @@ public:
 	/**
 	 * \brief Copy the property
 	 */
-	virtual BxpActiveCtr* copy() const;
+	virtual BxpActiveCtr* update_copy(const BoxProperties& prop) const;
 
 	/**
 	 * \brief Update the property after box modification.
 	 * \see Bxp::update(...).
 	 */
-	virtual void update(const IntervalVector& new_box, bool contract, const BitSet& impact, const BoxProperties& prop);
+	virtual void update(const BoxEvent& event, const BoxProperties& prop);
 
 	/**
 	 * \brief The associated constraint.
@@ -68,7 +69,6 @@ protected:
 };
 
 /*================================== inline implementations ========================================*/
-
 
 } /* namespace ibex */
 

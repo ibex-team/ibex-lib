@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 01, 2018
-// Last Update : Jul 06, 2018
+// Last Update : Jul 09, 2018
 //============================================================================
 
 #include "ibex_BoxProperties.h"
@@ -87,7 +87,7 @@ const Bxp* BoxProperties::operator[](long id) const {
 	}
 }
 
-void BoxProperties::update(const IntervalVector& new_box, bool contract, const BitSet& impact) {
+void BoxProperties::update(const BoxEvent& e) {
 
 	if (!_dep_up2date) topo_sort();
 
@@ -96,7 +96,7 @@ void BoxProperties::update(const IntervalVector& new_box, bool contract, const B
 	// the required properties only. But we have shared
 	// memory to avoid copies -> not very safe
 	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
-		(*it)->update(new_box,contract,impact,*this);
+		(*it)->update(e,*this);
 	}
 }
 
@@ -105,17 +105,17 @@ void BoxProperties::update_copy(BoxProperties& copy) const {
 
 	// Duplicate properties respecting dependencies
 	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
-		copy.add((*it)->copy());
+		copy.add((*it)->update_copy(copy));
 	}
 }
 
-void BoxProperties::update_bisect(const BisectionPoint& pt, const IntervalVector& lbox, const IntervalVector& rbox, BoxProperties& lprop, BoxProperties& rprop) const {
+void BoxProperties::update_bisect(const Bisection& b, BoxProperties& lprop, BoxProperties& rprop) const {
 
 	if (!_dep_up2date) topo_sort();
 
 	// Duplicate properties respecting dependencies
 	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
-		pair<Bxp*,Bxp*> p = (*it)->update_bisect(pt,lbox,rbox,*this);
+		pair<Bxp*,Bxp*> p = (*it)->update_bisect(b,lprop,rprop);
 		lprop.add(p.first);
 		rprop.add(p.second);
 	}

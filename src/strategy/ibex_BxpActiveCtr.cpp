@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_BoxPropActiveCtr.cpp
+// File        : ibex_BxpActiveCtr.cpp
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -18,20 +18,20 @@ BxpActiveCtr::BxpActiveCtr(const NumConstraint& ctr, bool active) : Bxp(get_id(c
 
 }
 
-BxpActiveCtr* BxpActiveCtr::copy() const {
+BxpActiveCtr* BxpActiveCtr::update_copy(const BoxProperties& prop) const {
 	return new BxpActiveCtr(ctr, active);
 }
 
-void BxpActiveCtr::update(const IntervalVector& new_box, bool contract, const BitSet& impact, const BoxProperties& prop) {
-	if (active || !contract) {
+void BxpActiveCtr::update(const BoxEvent& e, const BoxProperties& prop) {
+	if (active || e.type!=BoxEvent::CONTRACT) {
 		// TODO: if the impact contains no variable involved in the constraint
 		// we can avoid evaluation
 		Domain y=ctr.right_hand_side();
 		switch (y.dim.type()) {
-		case Dim::SCALAR:       active = !(ctr.f.eval(new_box).is_subset(y.i())); break;
+		case Dim::SCALAR:       active = !(ctr.f.eval(e.box).is_subset(y.i())); break;
 		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   active = !(ctr.f.eval_vector(new_box).is_subset(y.v())); break;
-		case Dim::MATRIX:       active = !(ctr.f.eval_matrix(new_box).is_subset(y.m())); break;
+		case Dim::COL_VECTOR:   active = !(ctr.f.eval_vector(e.box).is_subset(y.v())); break;
+		case Dim::MATRIX:       active = !(ctr.f.eval_matrix(e.box).is_subset(y.m())); break;
 		}
 	}
 }

@@ -36,7 +36,6 @@ void Bsc::add_property(BoxProperties& map) {
 
 pair<IntervalVector,IntervalVector> Bsc::bisect(const IntervalVector& box) {
 	Cell cell(box);
-	add_property(cell.prop);
 	pair<Cell*,Cell*> p=bisect(cell);
 	pair<IntervalVector,IntervalVector> boxes=make_pair(p.first->box,p.second->box);
 	delete p.first;

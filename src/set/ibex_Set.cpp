@@ -241,20 +241,20 @@ public:
 
 	BxpNodeAndDist(const BxpNodeAndDist& p) : Bxp(p.id), pt(p.pt), node(p.node), dist(p.dist) { }
 
-	virtual Bxp* copy() const {
+	virtual Bxp* update_copy(const BoxProperties&) const {
 		return new BxpNodeAndDist(*this);
 	}
 
-	virtual void update(const IntervalVector& new_box, bool contract, const BitSet& impact, const BoxProperties& prop) {
-		set_dist(new_box,pt); // actually never called by Set::dist(...)
+	virtual void update(const BoxEvent& e, const BoxProperties& p) {
+		set_dist(e.box,pt); // actually never called by Set::dist(...)
 	}
 
-	virtual std::pair<Bxp*,Bxp*> update_bisect(const BisectionPoint&, const IntervalVector& left, const IntervalVector& right, const BoxProperties& prop) {
+	virtual std::pair<Bxp*,Bxp*> update_bisect(const Bisection& b, const BoxProperties&, const BoxProperties&) {
 		assert(!node->is_leaf());
 
-		SetBisect& b=*((SetBisect*) node);
-		BxpNodeAndDist* l=new BxpNodeAndDist(id,left,pt,b.left);
-		BxpNodeAndDist* r=new BxpNodeAndDist(id,right,pt,b.right);
+		SetBisect& sb=*((SetBisect*) node);
+		BxpNodeAndDist* l=new BxpNodeAndDist(id,b.left,pt,sb.left);
+		BxpNodeAndDist* r=new BxpNodeAndDist(id,b.right,pt,sb.right);
 
 		return make_pair(l,r);
 	}

@@ -26,25 +26,25 @@ Cell::Cell(const Cell& e) : box(e.box), bisected_var(e.bisected_var) {
 	e.prop.update_copy(prop);
 }
 
-pair<Cell*,Cell*> Cell::bisect(const BisectionPoint& b) const {
+pair<Cell*,Cell*> Cell::bisect(const BisectionPoint& pt) const {
 
 	Cell* cleft;
 	Cell* cright;
 
-	if (b.rel_pos) {
-		pair<IntervalVector,IntervalVector> boxes=box.bisect(b.var,b.pos);
-		cleft = new Cell(boxes.first, b.var);
-		cright = new Cell(boxes.second, b.var);
+	if (pt.rel_pos) {
+		pair<IntervalVector,IntervalVector> boxes=box.bisect(pt.var,pt.pos);
+		cleft = new Cell(boxes.first, pt.var);
+		cright = new Cell(boxes.second, pt.var);
 	} else {
 		IntervalVector b1(box);
 		IntervalVector b2(box);
-		b1[b.var]=Interval(box[b.var].lb(), b.pos);
-		b2[b.var]=Interval(b.pos, box[b.var].ub());
-		cleft = new Cell(b1, b.var);
-		cright = new Cell(b2, b.var);
+		b1[pt.var]=Interval(box[pt.var].lb(), pt.pos);
+		b2[pt.var]=Interval(pt.pos, box[pt.var].ub());
+		cleft = new Cell(b1, pt.var);
+		cright = new Cell(b2, pt.var);
 	}
 
-	prop.update_bisect(b, cleft->box, cright->box, cleft->prop, cright->prop);
+	prop.update_bisect(Bisection(pt, cleft->box, cright->box), cleft->prop, cright->prop);
 
 	return pair<Cell*,Cell*>(cleft,cright);
 }

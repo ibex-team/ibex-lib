@@ -144,7 +144,7 @@ inline void Ctc::contract(IntervalVector& box, CtcContext& context) {
 		// TODO: the input impact of update is the "output" impact
 		// of the previous call to contract. Such a field does not
 		// exist yet in Context --> set temporarily to "all".
-		context.data()->update(box,true,BitSet::all(box.size()));
+		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 }
 

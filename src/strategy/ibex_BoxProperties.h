@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 01, 2018
-// Last Update : Jul 06, 2018
+// Last Update : Jul 09, 2018
 //============================================================================
 
 #ifndef __IBEX_BOX_PROPERTIES_H__
@@ -33,11 +33,6 @@ public:
 	 * \brief Thrown if there is a circular dependency between 2 properties.
 	 */
 	class CircualDependency : Exception { };
-
-	/**
-	 * \brief
-	 */
-	class PropertyNotFound : Exception { };
 
 	/**
 	 * \brief Buid a new property map.
@@ -81,12 +76,9 @@ public:
 	 *
 	 * The order properties are updated with respect dependencies.
 	 *
-	 * \param new_box  - the new box after modification
-	 * \param contract - whether the new box is a subset of the old one
-	 * \param impact   - which components have potentially been changed
-	 *
+	 * \param event  - The box modification
 	 */
-	void update(const IntervalVector& new_box, bool contract, const BitSet& impact);
+	void update(const BoxEvent& event);
 
 	/**
 	 * \brief Update all the properties after box copy.
@@ -100,13 +92,18 @@ public:
 	 *
 	 * The order properties are updated with respect dependencies.
 	 *
-	 * \param pt   - The bisection point
-	 * \param lbox - The left box after bisection
-	 * \param rbox - The right box after bisection
+	 * \param b     - The bisection
+	 * \param lprop - The properties associated to the left box after bisection
+	 * \param rprop - The properties associated to the right box after bisection
 	 */
-	void update_bisect(const BisectionPoint& pt, const IntervalVector& lbox, const IntervalVector& rbox, BoxProperties& lprop, BoxProperties& rprop) const;
+	void update_bisect(const Bisection& b, BoxProperties& lprop, BoxProperties& rprop) const;
 
 protected:
+	/*
+	 * internal (so far).
+	 */
+	class PropertyNotFound  : Exception { };
+
 	/*
 	 * Recursively called by topo_sort()
 	 */

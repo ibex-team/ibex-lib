@@ -58,7 +58,7 @@ public:
 	 *
 	 * The box of the first (resp. second) cell is \a left (resp. \a right).
 	 * Each sub-cell inherits from the properties of this cell via the
-	 * \link #ibex::Bxp::update(const BisectionPoint& bp, const IntervalVector& left, const IntervalVector& right, const BoxProperties& prop) update_bisect \endlink
+	 * \link #ibex::Bxp::update(const Bisection&, const BoxProperties&) update_bisect \endlink
 	 * function.
 	 *
 	 * <p>

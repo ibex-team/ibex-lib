@@ -163,7 +163,7 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	box = result;
 
 	if (context.data() && context.update_data) {
-		context.data()->update(box,true,BitSet::all(nb_var));
+		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 
 } // end namespace ibex

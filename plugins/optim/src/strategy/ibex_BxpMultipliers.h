@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_Multipliers.h
+// File        : ibex_BxpMultipliers.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -8,8 +8,8 @@
 // Last update : Jun 07, 2018
 //============================================================================
 
-#ifndef __IBEX_MULTIPLIERS_H__
-#define __IBEX_MULTIPLIERS_H__
+#ifndef __IBEX_BXP_MULTIPLIERS_H__
+#define __IBEX_BXP_MULTIPLIERS_H__
 
 #include "ibex_Bxp.h"
 #include "ibex_IntervalVector.h"
@@ -68,4 +68,4 @@ namespace ibex {
 
 } // end namespace ibex
 
-#endif // __IBEX_MULTIPLIERS_H__
+#endif // __IBEX_BXP_MULTIPLIERS_H__
