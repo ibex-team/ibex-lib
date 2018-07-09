@@ -23,7 +23,7 @@ Cell::Cell(const IntervalVector& box, int var) : box(box), bisected_var(var) {
 }
 
 Cell::Cell(const Cell& e) : box(e.box), bisected_var(e.bisected_var) {
-	e.prop.update_copy(prop);
+	e.prop.update_copy(e.box, prop);
 }
 
 pair<Cell*,Cell*> Cell::bisect(const BisectionPoint& pt) const {
@@ -44,7 +44,7 @@ pair<Cell*,Cell*> Cell::bisect(const BisectionPoint& pt) const {
 		cright = new Cell(b2, pt.var);
 	}
 
-	prop.update_bisect(Bisection(pt, cleft->box, cright->box), cleft->prop, cright->prop);
+	prop.update_bisect(Bisection(box, pt, cleft->box, cright->box), cleft->prop, cright->prop);
 
 	return pair<Cell*,Cell*>(cleft,cright);
 }

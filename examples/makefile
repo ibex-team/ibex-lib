@@ -10,7 +10,7 @@ else
 CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG 
 endif
 
-CXXFLAGS := $(CXXFLAGS) -DIBEX_BENCHS_DIR=\"${ROOT_DIR}../plugins/solver/benchs\"
+CXXFLAGS := $(CXXFLAGS) -std=c++11 -DIBEX_BENCHS_DIR=\"${ROOT_DIR}../plugins/solver/benchs\"
 
 DOC_OUT_TXT=doc-arithmetic.txt doc-modeling.txt doc-separator.txt doc-set.txt 
 DOC_SET_OUT=set-sep set-example set-inter set-union set-contract set-interval

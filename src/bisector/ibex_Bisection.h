@@ -22,7 +22,10 @@ namespace ibex {
  */
 class Bisection {
 public:
-	Bisection(const BisectionPoint& pt,	const IntervalVector& left, const IntervalVector& right);
+	Bisection(const IntervalVector& box, const BisectionPoint& pt, const IntervalVector& left, const IntervalVector& right);
+
+	/** The box before bisection. */
+	const IntervalVector& box;
 
 	/** The bisection point. */
 	const BisectionPoint& pt;
@@ -34,8 +37,8 @@ public:
 	const IntervalVector& right;
 };
 
-inline Bisection::Bisection(const BisectionPoint& pt, const IntervalVector& left, const IntervalVector& right) :
-		pt(pt), left(left), right(right) {
+inline Bisection::Bisection(const IntervalVector& box, const BisectionPoint& pt, const IntervalVector& left, const IntervalVector& right) :
+		box(box), pt(pt), left(left), right(right) {
 
 }
 

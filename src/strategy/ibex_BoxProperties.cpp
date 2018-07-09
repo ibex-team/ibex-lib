@@ -100,12 +100,12 @@ void BoxProperties::update(const BoxEvent& e) {
 	}
 }
 
-void BoxProperties::update_copy(BoxProperties& copy) const {
+void BoxProperties::update_copy(const IntervalVector& box, BoxProperties& copy) const {
 	if (!_dep_up2date) topo_sort();
 
 	// Duplicate properties respecting dependencies
 	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
-		copy.add((*it)->update_copy(copy));
+		copy.add((*it)->update_copy(box, copy));
 	}
 }
 

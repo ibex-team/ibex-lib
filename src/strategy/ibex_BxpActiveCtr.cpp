@@ -18,7 +18,7 @@ BxpActiveCtr::BxpActiveCtr(const NumConstraint& ctr, bool active) : Bxp(get_id(c
 
 }
 
-BxpActiveCtr* BxpActiveCtr::update_copy(const BoxProperties& prop) const {
+BxpActiveCtr* BxpActiveCtr::update_copy(const IntervalVector& box, const BoxProperties& prop) const {
 	return new BxpActiveCtr(ctr, active);
 }
 

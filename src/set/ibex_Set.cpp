@@ -241,7 +241,7 @@ public:
 
 	BxpNodeAndDist(const BxpNodeAndDist& p) : Bxp(p.id), pt(p.pt), node(p.node), dist(p.dist) { }
 
-	virtual Bxp* update_copy(const BoxProperties&) const {
+	virtual Bxp* update_copy(const IntervalVector& box, const BoxProperties&) const {
 		return new BxpNodeAndDist(*this);
 	}
 
