@@ -67,9 +67,7 @@ public:
 	/**
 	 * \brief Add sub-contractors properties to the map
 	 */
-	virtual void add_property(BoxProperties& map);
-
-	//virtual void add_property(SymbolMap<BoxProperty*>& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/** The list of contractors to propagate */
 	Array<Ctc> list;

@@ -58,9 +58,9 @@ public:
 	~CellDoubleHeap();
 
 	/**
-	 * \brief Add properties data required by this buffer.
+	 * \brief Add properties required by this buffer.
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/**
 	 * \brief Flush the buffer.
@@ -151,7 +151,7 @@ inline CellCostFunc& CellDoubleHeap::cost1()      { return (CellCostFunc&) heap1
 
 inline CellCostFunc& CellDoubleHeap::cost2()      { return (CellCostFunc&) heap2->costf; }
 
-inline void CellDoubleHeap::add_property(BoxProperties& map) {
+inline void CellDoubleHeap::add_property(const IntervalVector& init_box, BoxProperties& map) {
       // add data "pu" and "pf" (if required)
        cost2().add_property(sys,map);
 }

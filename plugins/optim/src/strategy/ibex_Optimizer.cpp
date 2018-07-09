@@ -268,13 +268,13 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	Cell* root=new Cell(IntervalVector(n+1));
 
-	write_ext_box(init_box,root->box);
+	write_ext_box(init_box, root->box);
 
 	// add data required by the bisector
-	bsc.add_property(root->prop);
+	bsc.add_property(init_box, root->prop);
 
 	// add data required by the buffer
-	buffer.add_property(root->prop);
+	buffer.add_property(init_box, root->prop);
 
 	// add data required by optimizer + KKT contractor
 //	root->add<EntailedCtr>();

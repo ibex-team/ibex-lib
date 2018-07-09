@@ -76,7 +76,7 @@ void CtcFwdBwd::init() {
 	}
 }
 
-void CtcFwdBwd::add_property(BoxProperties& map) {
+void CtcFwdBwd::add_property(const IntervalVector& init_box, BoxProperties& map) {
 	if (!map[active_prop_id])
 		map.add(new BxpActiveCtr(ctr));
 }

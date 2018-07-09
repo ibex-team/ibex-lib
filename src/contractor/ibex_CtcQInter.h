@@ -39,7 +39,7 @@ public:
 	/**
 	 * \brief Add sub-contractors properties to the map
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/**
 	 * List of contractors

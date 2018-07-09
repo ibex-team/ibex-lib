@@ -76,7 +76,7 @@ public:
 	/**
 	 * \brief Add BxpActiveCtr.
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/*
 	 * \brief Whether this contractor is idempotent (optional)

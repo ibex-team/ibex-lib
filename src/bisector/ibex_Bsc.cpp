@@ -30,7 +30,7 @@ Bsc::Bsc(const Vector& prec) : _prec(prec) {
 		if (prec[i]<=0) ibex_error("precision must be a nonnegative number");
 }
 
-void Bsc::add_property(BoxProperties& map) {
+void Bsc::add_property(const IntervalVector& init_box, BoxProperties& map) {
 
 }
 

@@ -119,12 +119,12 @@ void Solver::start(const IntervalVector& init_box) {
 	Cell* root=new Cell(init_box);
 
 	// add data required by the bisector
-	bsc.add_property(root->prop);
+	bsc.add_property(init_box, root->prop);
 
 	// add data required by the contractor
-	ctc.add_property(root->prop);
+	ctc.add_property(init_box, root->prop);
 
-	buffer.add_property(root->prop);
+	buffer.add_property(init_box, root->prop);
 
 	buffer.push(root);
 	nb_cells = 1;
@@ -156,8 +156,13 @@ void Solver::start(const char* input_paving) {
 
 		Cell* cell=new Cell(it->existence());
 
+		buffer.add_property(it->existence(), cell->prop);
+
 		// add data required by the bisector
-		bsc.add_property(cell->prop);
+		bsc.add_property(it->existence(), cell->prop);
+
+		// add data required by the contractor
+		ctc.add_property(it->existence(), cell->prop);
 
 		buffer.push(cell);
 

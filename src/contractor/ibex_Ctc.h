@@ -98,7 +98,7 @@ public:
 	/**
 	 * \brief Add properties required by this contractor.
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
 
 	/**
 	 * \brief The number of variables this contractor works with.
@@ -161,7 +161,7 @@ inline void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& fla
 	contract(box,context);
 }
 
-inline void Ctc::add_property(BoxProperties& map) {
+inline void Ctc::add_property(const IntervalVector&, BoxProperties&) {
 
 }
 

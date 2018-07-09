@@ -98,7 +98,7 @@ public:
 	 *
 	 * By default: does nothing.
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/**
 	 * \brief Default ratio (0.45)

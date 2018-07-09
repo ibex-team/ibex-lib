@@ -37,9 +37,9 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 	//cout << g << endl;
 }
 
-void CtcPropag::add_property(BoxProperties& map) {
+void CtcPropag::add_property(const IntervalVector& init_box, BoxProperties& map) {
 	for (int i=0; i<list.size(); i++)
-		list[i].add_property(map);
+		list[i].add_property(init_box, map);
 }
 
 void CtcPropag::contract(IntervalVector& box) {

@@ -62,7 +62,7 @@ class CellBuffer {
 	 *
 	 * Does nothing by default.
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -101,7 +101,7 @@ std::ostream& operator<<(std::ostream& os, const CellBuffer& h);
 
 /*================================== inline implementations ========================================*/
 
-inline void CellBuffer::add_property(BoxProperties& map) {
+inline void CellBuffer::add_property(const IntervalVector& init_box, BoxProperties& map) {
 
 }
 

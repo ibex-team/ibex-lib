@@ -23,8 +23,8 @@ CtcFixPoint::~CtcFixPoint(){
 
 }
 
-void CtcFixPoint::add_property(BoxProperties& map) {
-	ctc.add_property(map);
+void CtcFixPoint::add_property(const IntervalVector& init_box, BoxProperties& map) {
+	ctc.add_property(init_box, map);
 }
 
 void CtcFixPoint::contract(IntervalVector& box) {

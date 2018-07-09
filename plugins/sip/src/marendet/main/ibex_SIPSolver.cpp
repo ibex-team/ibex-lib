@@ -127,7 +127,7 @@ void SIPSolver::start(const IntervalVector& init_box)
     root->add<NodeData>();
 
     // add data required by the bisector
-    bsc.add_property(root->prop);
+    bsc.add_property(initial_box, root->prop);
 
     buffer.push(root);
     nb_cells = 1;
@@ -162,7 +162,7 @@ void SIPSolver::start(const char* input_paving)
         cell->add<NodeData>(); // Not efficient...
 
         // add data required by the bisector
-        bsc.add_property(cell->prop);
+        bsc.add_property(initial_box, cell->prop);
 
         buffer.push(cell);
 

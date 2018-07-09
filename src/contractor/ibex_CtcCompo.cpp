@@ -171,9 +171,9 @@ CtcCompo::~CtcCompo() {
 //	delete[] impacts;
 }
 
-void CtcCompo::add_property(BoxProperties& map) {
+void CtcCompo::add_property(const IntervalVector& init_box, BoxProperties& map) {
 	for (int i=0; i<list.size(); i++)
-		list[i].add_property(map);
+		list[i].add_property(init_box, map);
 }
 
 void CtcCompo::contract(IntervalVector& box) {
