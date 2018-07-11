@@ -208,6 +208,25 @@ int main() {
 	output << "![func-apply-array-O]" << endl;
 	}
 
+{
+	// ![func-apply-array-2-C]
+	
+	// Here is a function that performs a matrix-vector multiplication,
+	// declared in the usual way (with a list of arguments):
+	Variable R(3,3);
+	Variable x(3);
+	Function f(R,x,R*x); 
+
+	// Here is a function declared in the generic way (with an array of symbols)
+	// that applies the function 'f' to the array:
+	Array<const ExprSymbol> vars(2);
+	vars.set_ref(0,ExprSymbol::new_("R",Dim::matrix(3,3))); // note: giving "R" is optional
+	vars.set_ref(1,ExprSymbol::new_("x",Dim::col_vec(3)));
+	
+	Function g(vars,f(vars[0],vars[1]),"g");
+    // ![func-apply-array-2-C]
+	}
+
 
 	{
 	output << "![func-diff-O]" << endl;
