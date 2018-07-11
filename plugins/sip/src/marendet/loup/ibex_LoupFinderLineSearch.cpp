@@ -12,7 +12,7 @@
 
 #include "system/ibex_SIConstraint.h"
 #include "system/ibex_SIConstraintCache.h"
-
+#include "main/ibex_utils.h"
 #include "ibex_Cell.h"
 #include "ibex_Interval.h"
 #include "ibex_Linear.h"
@@ -39,7 +39,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
 	linearizer_.linearize(cell.box, lp_solver_);
-	lp_solver_.write_file();
+	//lp_solver_.write_file();
 
 	auto return_code = lp_solver_.solve();
 	if (return_code != LPSolver::Status_Sol::OPTIMAL) {
@@ -47,6 +47,8 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 	}
 	//Vector sol(cell.box.mid());
 	Vector sol = lp_solver_.get_primal_sol();
+	//cout << "sol=" << print_mma(sol) << endl;
+	//cout << "g(sol)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(sol) << std::endl;
 	Vector sol_without_goal = sol.subvector(0, system_.nb_var - 1);
 	//Vector dual(lp_solver_.get_nb_rows());
 	Vector dual = lp_solver_.get_dual_sol();
@@ -97,7 +99,27 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 	 real_inverse(G, invG);
 	 Vector eps(invG.nb_cols(), 1);
 	 Vector direction = invG*eps;¨*/
+	//cout << G << endl;
 
+	LPSolver dir_solver(system_.nb_var + 1, 10000, 10000);
+	for(int i = 0; i < G.nb_cols(); ++i) {
+		Vector row(system_.nb_var + 1);
+		row.put(0, G.col(i));
+		row[system_.nb_var] = -1;
+		dir_solver.add_constraint(row, CmpOp::LEQ, 0);
+	}
+	IntervalVector bounds(system_.nb_var + 1, Interval(-1, 1));
+	bounds[system_.nb_var] = Interval::ALL_REALS;
+	dir_solver.set_bounds(bounds);
+
+	dir_solver.set_obj_var(system_.nb_var, 1);
+
+	LPSolver::Status_Sol dir_solver_status = dir_solver.solve();
+
+	//if(dir_solver_status == LPSolver::Status_Sol::)
+	Vector direction = dir_solver.get_primal_sol().subvector(0, system_.nb_var-1);
+
+	/*
 	Matrix GtG = G.transpose() * G;
 	int* pr = new int[GtG.nb_rows()];
 	int* pc = new int[GtG.nb_cols()];
@@ -110,19 +132,23 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 //				<< "Node::_getImprovingVectorFromOuterLinearizations: real_LU fail"
 //				<< std::endl;
 		throw NotFound();
-	}
+	}*/
 	double best_loup = POS_INFINITY;
 	Vector best_loup_point(system_.nb_var);
 	bool loup_found = false;
-	for (int i = 0; i < 10; ++i) {
-		Vector rhs = -eps_box.random();
+	for (int i = 0; i < 1; ++i) {
+		/*Vector rhs = -eps_box.random();
 		Vector u(GtG.nb_rows());
 		try {
 			real_LU_solve(LU, pr, rhs, u);
 		} catch (SingularMatrixException &e) {
 			continue;
 		}
-		Vector direction = G * u;
+		Vector direction = G*real_inverse(G.transpose()*G)*rhs;
+		//double direction_array[] = { 1,1,1,1,1,1 };
+		//Vector direction = Vector(6, direction_array);
+		direction = 1./norm(direction)*direction;
+		*/
 		//cout << "direction=" << direction << endl;
 		//cout << "point=" << sol << endl;
 		Interval t = Interval::POS_REALS;
@@ -130,10 +156,11 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 			const auto& cache = constraint.cache_->parameter_caches_;
 			for (const auto& mem_box : cache) {
 				Interval eval = constraint.evaluate(sol, mem_box.parameter_box);
-				/*IntervalVector gradient_x = constraint.gradient(cell.box, mem_box.parameter_box).subvector(0,
-						system_.nb_var - 1);*/
-				IntervalVector gradient_x = mem_box.full_gradient.subvector(0, system_.nb_var-1);
+				IntervalVector gradient_x = constraint.gradient(cell.box, mem_box.parameter_box).subvector(0,
+						system_.nb_var - 1);
+				//IntervalVector gradient_x = mem_box.full_gradient.subvector(0, system_.nb_var-1);
 				t &= (Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub();
+				//cout << "t=" << ((Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub()) << "   dg(" << mem_box.parameter_box << ")= " << (gradient_x*direction) << "  g =" << eval.ub() << endl;
 
 			}
 		}
@@ -143,14 +170,43 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 			IntervalVector gradient_x = constraint.gradient(cell.box).subvector(0, system_.nb_var - 1);
 			t &= (Interval::NEG_REALS - constraint.evaluate(sol).ub()) / (gradient_x * direction).ub();
 		}
-
+		//cout << "t=" << t << endl;
 		if (!t.is_empty()) {
 			Vector point = sol + t.lb() * direction;
+			//cout << "g(point)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
 			Vector point_plus_goal(system_.ext_nb_var);
 			point_plus_goal.put(0, point);
-			if (cell.box.contains(point_plus_goal)) {
+			point_plus_goal[system_.ext_nb_var-1] = system_.goal_ub(point);
+			//cout << print_mma(point_plus_goal) << endl;
+			if (true || cell.box.contains(point_plus_goal)) {
 				double new_loup = loup;
 				if (check(system_, point, new_loup, true) && new_loup < best_loup) {
+					best_loup_point = point;
+					best_loup = new_loup;
+					loup_found = true;
+				}
+				Vector left = sol;
+				Vector right = point;
+				for(int i = 0; i < 10; ++i) {
+					Vector middle = 0.5*(left + right);
+					//cout << "middle=" << middle.subvector(0,system_.nb_var-1) << endl;
+					//cout << "g(middle)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
+					if(system_.is_inner(middle)) {
+						//cout << "g(middle_inner)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
+						//cout << "goal_ub(middle)=" << system_.goal_ub(middle.subvector(0,system_.nb_var-1)) << endl;
+						right = middle;
+					} else {
+						left = middle;
+					}
+				}
+				point = right;
+				point_plus_goal.put(0, point);
+				point_plus_goal[system_.ext_nb_var-1] = system_.goal_ub(point);
+				//cout << "point=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
+				//cout << "line search=" <<  point_plus_goal << endl;
+				new_loup = loup;
+				if (cell.box.contains(point_plus_goal) && check(system_, point, new_loup, true) && new_loup < best_loup) {
+					std::cout << "lf22" << std::endl;
 					best_loup_point = point;
 					best_loup = new_loup;
 					loup_found = true;

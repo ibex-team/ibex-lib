@@ -37,11 +37,12 @@ public:
 
 	static const double default_rel_eps_f;
 	static const double default_abs_eps_f;
+	static const double default_lf_loop_ratio;
 
 
 	SIPOptimizer(CellCtc& ctc, Bsc& bisector,
 			LoupFinderSIP& loup_finder, LoupFinderSIP* loup_finder2, CellBufferOptim& buffer,
-			double abs_eps, double rel_eps, double timeout = -1, double eps_x = 0, int maxiter_ = -1);
+			double abs_eps, double rel_eps, double timeout = -1, double eps_x = 0, int maxiter_ = -1, double lf_loop_ratio=default_lf_loop_ratio);
 
 	SIPOptimizer::Status minimize(const IntervalVector& box, double obj_init_bound =
 	POS_INFINITY);
@@ -78,6 +79,7 @@ private:
 	const double obj_abs_prec_f_;
 	double eps_x_;
 	int maxiter_;
+	double lf_loop_ratio_;
 
 	SIPOptimizer::Status status_ = SIPOptimizer::Status::success;
 	double uplo_ = NEG_INFINITY;

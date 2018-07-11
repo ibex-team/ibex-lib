@@ -33,19 +33,19 @@ void SIConstraintCache::update_cache(const Function &function, const IntervalVec
 	}
 
 	// Reinitialize cache
+	const int x_dim = new_box_.size();
 	eval_cache_ = Interval::EMPTY_SET;
-	gradient_cache_ = IntervalVector::empty(function.nb_var());
+	gradient_cache_ = IntervalVector::empty(x_dim);
 	IntervalVector full_box(function.nb_var());
 
 	// Prepare IntervalVector to save instantiating a new IV for each computation
 	full_box.put(0, new_box_);
-	const int x_dim = new_box_.size();
 	for (auto& cache_cell : parameter_caches_) {
 		full_box.put(x_dim, cache_cell.parameter_box);
 		cache_cell.evaluation = centeredFormEval(function, full_box);
 		cache_cell.full_gradient = function.gradient(full_box);
 		eval_cache_ |= cache_cell.evaluation;
-		gradient_cache_ |= cache_cell.full_gradient;
+		gradient_cache_ |= cache_cell.full_gradient.subvector(0, x_dim-1);
 	}
 }
 } // end namespace ibex

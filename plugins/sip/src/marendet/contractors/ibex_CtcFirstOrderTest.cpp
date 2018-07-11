@@ -34,6 +34,7 @@ CtcFirstOrderTest::~CtcFirstOrderTest() {
 
 void CtcFirstOrderTest::contractCell(Cell& cell) {
 	vector<IntervalVector> gradients;
+	// TODO unconstrained problems
 	for (int i = 0; i < system_.normal_constraints_.size() - 1; ++i) {
 		if (!system_.normal_constraints_[i].isSatisfied(cell.box)) {
 			gradients.push_back(system_.normal_constraints_[i].gradient(cell.box));

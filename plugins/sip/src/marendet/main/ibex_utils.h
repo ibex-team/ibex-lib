@@ -22,6 +22,8 @@ Interval centeredFormEval(const Function& function, const IntervalVector& arg);
 std::vector<IntervalVector> bisectAllDim(const IntervalVector& iv);
 
 bool isfinite(const Vector& v);
+
+std::string print_mma(const Vector& iv);
 } // end namespace ibex
 
 #endif // __SIP_IBEX_UTILS_H__
