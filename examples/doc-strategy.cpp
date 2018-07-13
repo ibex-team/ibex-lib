@@ -16,7 +16,7 @@
 #endif
 
 #ifndef IBEX_BENCHS_DIR
-  #define IBEX_BENCHS_DIR "../plugins/solver/benchs"
+#define IBEX_BENCHS_DIR "../plugins/solver/benchs"
 #endif
 
 using namespace std;
@@ -27,75 +27,75 @@ using namespace ibex;
  */
 
 namespace prop1 {
+Function f("x","x");
 //! [prop-ctc-1]
 
 // A contractor
 class MyCtc : public Ctc {
 public:
   void contract(IntervalVector& box) {
-    if (box.max_diam()>0.1) {
-      // do something
-    } else {
-      // do something else
-    }
+    Interval y = f.eval(box); // this line is assumed to be expensive
+    // ...
   }
 };
 //! [prop-ctc-1]
 
 //! [prop-class-name]
-class BxpIsSmall : public Bxp {
+class BxpImage : public Bxp {
 public:
   // to be completed...
 
-  bool is_small; // true if width<0.1
+  Interval image;
 };
 //! [prop-class-name]
 }
 
 namespace prop2 {
+
+Function f("x","x");
+
 //! [prop-id]
-class BxpIsSmall : public Bxp {
+class BxpImage : public Bxp {
 public:
-  BxpIsSmall(const IntervalVector& box) : Bxp(id), is_small(box.max_diam()<0.1) { }
+  BxpImage(const IntervalVector& box) :
+    Bxp(id), image(f.eval(box)) { }
 
   // to be completed...
 
-  bool is_small;
+  Interval image;
   static const long id;
 };
 
-const long BxpIsSmall::id = next_id();
+const long BxpImage::id = next_id();
 //! [prop-id]
 }
 
 
 namespace prop3 {
-//! [prop-update]
-class BxpIsSmall : public Bxp {
-public:
-  BxpIsSmall(const IntervalVector& box) : Bxp(id), is_small(box.max_diam()<0.1) { }
 
+Function f("x","x");
+
+class BxpImage : public Bxp {
+public:
+  BxpImage(const IntervalVector& box) : Bxp(id), image(f.eval(box)) { }
+
+  //! [prop-update]
   void update(const BoxEvent& event, const BoxProperties& prop) {
-  // if the event is a contraction and the width is already
-  // less than 0.1, we don't recalculate it!
-    if (!is_small || event.type!=BoxEvent::CONTRACT) {
-      is_small = event.box.max_diam() < 0.1;
-    }
+    image = f.eval(event.box);
   }
   //! [prop-update]
 
   //! [prop-copy]
   Bxp* update_copy(const IntervalVector& box, const BoxProperties& prop) const {
-    return new BxpIsSmall(*this); // implicit copy constructor is fine
+    return new BxpImage(*this); // implicit copy constructor is fine
   }
   //! [prop-copy]
 
-  bool is_small;
+  Interval image;
   static const long id;
 };
-//! [prop-update]
 
-const long BxpIsSmall::id = next_id();
+const long BxpImage::id = next_id();
 
 //! [prop-ctc-2]
 
@@ -106,22 +106,27 @@ public:
    * (This function is automatically called by the search). */
   void add_property(IntervalVector& box, BoxProperties& prop) {
     // if the property is not already in the list
-    if (!prop[BxpIsSmall::id])
+    // (which is possible since another operator requiring it may
+    // have already added it)
+    if (!prop[BxpImage::id])
       // create an initial property value, and add it
-      prop.add(new BxpIsSmall(box));
+      prop.add(new BxpImage(box));
   }
 
   /* Contract a box with associated properties. */
   void contract(IntervalVector& box, BoxProperties& prop) {
     // Get the desired property from the map, by its id
     // (a cast is necessary because all properties are typed Bxp*)
-    BxpIsSmall* bxp=(BxpIsSmall*) prop[BxpIsSmall::id];
+    BxpImage* bxp=(BxpImage*) prop[BxpImage::id];
 
-    // ... and make directly the right choice without recalculating the width!
-    if (bxp->is_small) {
-      // do something
+    if (bxp==NULL) {
+      // This happens if the property is not present.
+      // It is much more safe to handle this case
+      // ...
     } else {
-      // do something else
+      // Obtain directly the image (without recalculating it)
+      Interval y=bxp->image;
+      // .....
     }
   }
 };
@@ -129,68 +134,90 @@ public:
 }
 
 namespace prop4 {
-//! [prop-ctc-3]
-class MyCtc : public Ctc {
+Function f("x","x");
+
+//! [prop-lazy-update]
+class BxpImage : public Bxp {
 public:
-  void contract(IntervalVector& box) {
-    if (box.max_diam()>0.1) {
-    	if (box.perimeter()>0.1) {
-    		// do something
-    	} else {
-    		// do something else
-    	}
-    } else {
-    	// do still something else
-    }
-  }
-};
-//! [prop-ctc-3]
-}
-
-namespace prop5 {
-
-using prop3::BxpIsSmall;
-
-//! [prop-update]
-class BxpPerimeter : public Bxp {
-public:
-  BxpPerimeter(const IntervalVector& box) : Bxp(id), is_small(box.max_diam()<0.1) { }
+  // The class contains 2 new fields:
+  // box: a reference to the box needs to be stored
+  // to perform the evaluation at any time.
+  // up2date: memorize whether the image is up to date.
+  BxpImage(const IntervalVector& box) : Bxp(id), box(box), up2date(false) { }
 
   void update(const BoxEvent& event, const BoxProperties& prop) {
-	  BxpIsSmall* bxp=(BxpIsSmall*) prop[BxpIsSmall::id];
-
-	  if (bxp && bxp->is_small)
-	  // if the event is a contraction and the width is already
-	  // less than 0.1, we don't recalculate it!
-	  if (!is_small || event.type!=BoxEvent::CONTRACT) {
-		  is_small = event.box.max_diam() < 0.1;
-	  }
+    // do nothing for the moment!
+    up2date=false;
   }
-  //! [prop-update]
 
-  //! [prop-copy]
   Bxp* update_copy(const IntervalVector& box, const BoxProperties& prop) const {
-    return new BxpIsSmall(*this); // implicit copy constructor is fine
+    // The box in argument is the box after copy (not the original one).
+    // This is the one we give to the copy constructor.
+    return new BxpImage(box,image,up2date);
   }
-  //! [prop-copy]
 
-  bool is_small;
+  // Return the image of f.
+  const Interval& get() {
+    if (!up2date) {
+      image = f.eval(box);
+      up2date=true;
+    }
+    return image;
+  }
+
+  static const long id;
+
+protected:
+  BxpImage(const IntervalVector& box, const Interval& image, bool up2date) :
+    Bxp(id), box(box), image(image), up2date(up2date) { }
+
+  BxpImage(const BxpImage&); // forbidden !
+
+  const IntervalVector& box;
+  Interval image;
+  bool up2date;
+};
+//! [prop-lazy-update]
+
+const long BxpImage::id = next_id();
+
+//! [prop-dependencies]
+class BxpImageWidth : public Bxp {
+public:
+  BxpImageWidth(const IntervalVector& box) : Bxp(id), w(box.max_diam()) {
+  // dependencies is a field inherited from Bxp
+    dependencies.push_back(BxpImage::id);
+  }
+
+  void update(const BoxEvent& event, const BoxProperties& prop) {
+    BxpImage* bxp=(BxpImage*) prop[BxpImage::id];
+
+    if (bxp==NULL) {
+      // This happens if the property is not present.
+      // It is much more safe to handle this case
+      // ...
+    } else {
+     // note: we lose laziness here
+      w=bxp->get().diam();
+    }
+  }
+
+  double w; // the width
   static const long id;
 };
-//! [prop-update]
-
-const long BxpIsSmall::id = next_id();
+//! [prop-dependencies]
+}
 
 int main() {
 
   {
-  //! [bsc-different-prec]
-  double _prec[]={1e-8,1e-8,1e-4,1};
+    //! [bsc-different-prec]
+    double _prec[]={1e-8,1e-8,1e-4,1};
 
-  Vector prec(4,_prec);
+    Vector prec(4,_prec);
 
-  RoundRobin rr(prec);
-  //! [bsc-different-prec]
+    RoundRobin rr(prec);
+    //! [bsc-different-prec]
   }
 
 }

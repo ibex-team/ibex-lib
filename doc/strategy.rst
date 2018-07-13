@@ -125,54 +125,57 @@ Cell Heap
 
 *(to be completed)*
 
+.. _bxp:
 
 ==================
 Box Properties
 ==================
 
-**Release 2.7**
+**(In release 2.7)**
 
 The box (``IntervalVector`` class) is the central concept in Ibex and often this structure is too simple
 and required to be extended.
 
-We give here a caricaturated example, for the sake of clarity. 
-
-Consider a search tree, such as the one performed by ibexsolve.
-Assume you have designed two contractors that need to calculate at some
-point the width (i.e., the maximal diameter) of the input box in order to make the right decision.
-E.g., if the box width is greater than 0.1, the contractor makes some coarse filtering; If it less than 0.1, it makes a finer filtering. Your code would roughly look like:
+Consider for example a search tree, such as the one performed by ibexsolve.
+Assume you have several contractors involved in this search that need to calculate at some
+point the image of the current box by a function ``f``. 
+Imagine also that this function has quite a long expression so that calculating an image takes significant time:
 
 .. literalinclude:: ../examples/doc-strategy.cpp 
    :language: cpp
    :start-after: prop-ctc-1
    :end-before: prop-ctc-1
 
-Imagine now that the ``max_diam()`` function takes a long time to be executed.
-It is clear that recalculating the width each time the contractor is called represents a waste of time once
-the box width has been proven to be less than 0.1 upstream in the search tree.
-One would like to store this information in the box. This is precisely what ''box properties'' allow to do.
+**Note:** For simplicity, we assume from now on that ``f`` is a fixed object that has been declared somewhere in the context 
+(it could also be given in argument of all objects).
+
+Recalculating this image each time a contractor is called represents a waste of time if
+the box hasn't changed meanwhile. One would like to store this information in the box. 
+This is precisely what ''box properties'' allow to do.
 
 All is based on the ``Bxp`` interface. This ``Bxp`` interface allows to extend the simple ``IntervalVector`` data structure and to make this extension being propagated through a search tree. The extended box is then visible by all operators involved in the strategy (contractors, bisectors, cell buffers, etc.).
 
 Note that the name of this interface is a trigram (like ``Ctc`` or ``Bsc``) 
 just to encourage programers to prefix subclasses by ``Bxp`` (this is a recommended usage).
-A box property, such as whether the box is small engouh, has to be a subclass of ``Bxp`` so let us name it ``BxpIsSmall``:
+A box property, such as the image of the box by a given function, has to be a subclass of ``Bxp`` so let us name it ``BxpImage``:
 
 .. literalinclude:: ../examples/doc-strategy.cpp 
    :language: cpp
    :start-after: prop-class-name
    :end-before: prop-class-name
 
-Of course, this class contains a field named ``is_small`` that will store the information.
+Of course, this class contains a field named ``image`` that will store the information.
 We could also add whatever data needed.
+
+.. _bxp_construct:
 
 ----------------------------------------
 Constructor
 ----------------------------------------
 
-It is natural to ask the constructor of ``BxpIsSmall`` to take a box in argument and to set the ``is_small`` field appropriately.
+It is natural to ask the constructor of ``BxpImage`` to take a box in argument and to set the ``image`` field appropriately.
 
-The constructor of the mother class ``Bxp`` also requires an identifying number. Here is why. A box property is actually a set of *instances* of the ``Bxp`` interface: if the solver handles 1000 boxes at a given time, every box has it own width, hence its specific instance of ``BxpIsSmall``. These 1000 instances represent the same ''property'' and since there may be other properties attached to the boxes at the same time, we can retreive a given property thanks to its ``id`` field.
+The constructor of the mother class ``Bxp`` also requires an identifying number. Here is why. A box property is actually a set of *instances* of the ``Bxp`` interface: if the solver handles 1000 boxes at a given time, every box has it own width, hence its specific instance of ``BxpImage``. These 1000 instances represent the same ''property'' and since there may be other properties attached to the boxes at the same time, we can retreive a given property thanks to its ``id`` field.
 You can simply fix this identifier to any random ``long`` number or use the ``next_id()`` function of Ibex as follows:
 
 .. literalinclude:: ../examples/doc-strategy.cpp 
@@ -180,7 +183,9 @@ You can simply fix this identifier to any random ``long`` number or use the ``ne
    :start-after: prop-id
    :end-before: prop-id
 
-To avoid confusion, we call for now "property value" an instance of the same property. So, ``BxpIsSmall`` is a property and the instances of ``BxpIsSmall`` are property values.
+To avoid confusion, we call for now "property value" an instance of the same property. So, ``BxpImage`` is a property and the instances of ``BxpImage`` are property values.
+
+.. _bxp_update:
 
 ----------------------------------------
 Property update
@@ -196,6 +201,7 @@ to be explained further.
    :start-after: prop-update
    :end-before: prop-update
  
+Note that a :ref:`smarter implementation <bxp_lazy>` is often desired.
 This is however not enough. You also have to state how the property is transformed
 when the box is copied (a copy of a box may occur in a search, e.g., to perform some
 temporary computations). This is done by implementing the ``update_copy(...)`` function:
@@ -205,6 +211,7 @@ temporary computations). This is done by implementing the ``update_copy(...)`` f
    :start-after: prop-copy
    :end-before: prop-copy
  
+.. _bxp_using:
 
 ----------------------------------------
 Using properties
@@ -216,37 +223,60 @@ First, we have to override the ``add_property`` function of the ``Ctc`` interfac
 This function is called by the search at initialization.
 This function takes as argument the initial box (of the search) and a set of properties
 which is an instance of ``BoxProperties``. This object basically just stores pointers to ``Bxp*``,
-except that it can handle inter-dependencies (see below).
+except that it can handle :ref:`inter-dependencies <bxp_dependencies>`.
 
 Second, we have to override a variant of the ``contract`` function,
-which takes in argument not only the box, but again, the current set of property values. The latter object 
-is an instance of ``BoxProperties`` and also works like a simple map. By using the bracket operator ``[...]`` 
+which takes in argument not only the box, but also the current set of property values (an instance of ``BoxProperties``).
+The ``BoxProperties`` class works like a simple map: by using the bracket operator ``[...]`` 
 with the property id inside the brackets, you get the corresponding property value associated to the box:
 
 .. literalinclude:: ../examples/doc-strategy.cpp 
    :language: cpp
    :start-after: prop-ctc-2
    :end-before: prop-ctc-2
+
+.. _bxp_lazy:
  
 ----------------------------------------
-Inter-dependencies
+Lazy update
 ----------------------------------------
 
-It may happen that a property is based on another one.
-To illustrate, let us refine the behaviour of our contractor.
-Assume now that we need to calculate the perimeter of the input box when its width is greater than 0.1 and, as before,
-we imagine that this call to ``perimeter'' represents a piece of code you don't want to execute again and again. 
-The ''naive'' implementation would be:
+So far, we have centralized in a unique place the result of the image computation which is already good but
+not optimal at all. Worse, the computation time of our program will likely be longer than without
+introducing this property! Indeed, the ``update'' function will be called basically whenever an operator
+change the box, which means that the funtion f will be evaluated again and again!
+
+This event-oriented design of a property can be sometimes interesting but, clearly, it does not fit well here.
+
+What we actually want is the function to postpone the evaluation at the latest time, that is, when someone requires it.
+This is called laziness. This principle can be simply applied here as follows:
 
 .. literalinclude:: ../examples/doc-strategy.cpp 
    :language: cpp
-   :start-after: prop-ctc-3
-   :end-before: prop-ctc-3
+   :start-after: prop-lazy
+   :end-before: prop-lazy
 
-We can create two properties, ``BxpIsSmall`` (the same as before) and ``BxpPerimeter`` (that stores the perimeter).
-However, it is useless to spend time updating the perimeter if the box is small. So the ``BxpPerimeter`` class
-need to "see" the ``BxpIsSmall`` property in the ``update_xxx(...)`` function. This is why there is also a BoxProperties
-the argument of these functions. However, note that the ``BxpPerimer`` value of a small box (with width less than 0.1)
-will not represent its perimeter anymore.
+It is easy to adapt this code so that an update is performed only when the box modification is significant (e.g., when
+a contraction removes more than 1% of a component width).
 
+.. _bxp_dependencies:
 
+----------------------------------------
+Dependencies
+----------------------------------------
+
+It may happen that a property is based on another one.
+Imagine that you want to create a property that stores the width of the function image 
+(of course, this example is caricatural as the width is not something you really need to store).
+You can extend the ``BxpImage`` class but you can also create a separate property, say ``BxpImageWidth``.
+
+The ``BxpImageWidth`` need to "see" the ``BxpImage`` property in the ``update_xxx(...)`` function. This is why there is also a ``BoxProperties`` map in the argument of these functions. 
+Furthermore, we must be sure that the ``BxpImage`` is updated before ``BxpImageWidth``. To this end, we simply have to add the
+identifier of ``BxpImage`` in the *dependencies* of ``BxpImageWidth``. This must be done in the constructor of ``BxpImageWidth`` as shown in the following code.
+
+.. literalinclude:: ../examples/doc-strategy.cpp 
+   :language: cpp
+   :start-after: prop-dependencies
+   :end-before: prop-dependencies
+
+For the sake of concision, we haven't used laziness in this code. A lazy variant is necessary here.

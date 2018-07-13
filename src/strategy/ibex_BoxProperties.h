@@ -84,7 +84,7 @@ public:
 	 * \brief Update all the properties after box copy.
 	 *
 	 * The order properties are updated with respect dependencies.
-	 * \param box  - the copied box
+	 * \param box  - the new box (after copy)
 	 * \param copy - the properties associated to the copy
 	 */
 	void update_copy(const IntervalVector& box, BoxProperties& copy) const;

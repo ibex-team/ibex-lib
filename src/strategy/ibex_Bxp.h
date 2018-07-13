@@ -57,7 +57,8 @@ public:
 	/**
 	 * \brief Update the property upon box modification.
 	 *
-	 * \param event  - the box modification
+	 * \param event - the box modification
+	 * \param prop  - the properties (dependencies are up to date)
 	 */
 	virtual void update(const BoxEvent& event, const BoxProperties& prop)=0;
 
@@ -65,6 +66,9 @@ public:
 	 * \brief Create a copy.
 	 *
 	 * The copy must have the same id.
+	 *
+	 * \param box  - the new box (after copy)
+	 * \param prop - the properties (dependencies are up to date)
 	 */
 	virtual Bxp* update_copy(const IntervalVector& box, const BoxProperties& prop) const=0;
 
@@ -72,6 +76,9 @@ public:
 	 * \brief Create data associated to child cells.
 	 *
 	 * The two property values in return must have the same id as this one.
+	 *
+	 * \param b    - the bisection
+	 * \param prop - the properties (dependencies are up to date)
 	 */
 	virtual std::pair<Bxp*,Bxp*> update_bisect(const Bisection& b, const BoxProperties& l, const BoxProperties& r);
 
