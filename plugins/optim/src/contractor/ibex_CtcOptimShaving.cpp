@@ -31,14 +31,9 @@ void CtcOptimShaving::contract(IntervalVector& box, CtcContext& context) {
 		impact = *context.impact();
 	else
 		impact.fill(0,nb_var-1);
-	subcontext.set_impact(&impact);
 
-	BoxProperties* old_prop = context.data();
-	BoxProperties new_prop;
-	if (context.data()) {
-		context.data()->update_copy(box, new_prop);
-		subcontext.set_properties(&new_prop,false);
-	}
+	subcontext.set_impact(&impact);
+	subcontext.set_properties(context.data());
 	// ------------------------------------------------
 
 	int	var_obj=start_var;
@@ -102,7 +97,7 @@ bool CtcOptimShaving::var3BCID_slices(IntervalVector& box, int var, int locs3b, 
 		dom = Interval(inf_k, sup_k);
 
 		// Try to refute this slice
-		update_and_contract(box);
+		update_and_contract(box, var);
 
 		if (box.is_empty()) {
 			//leftBound = sup_k;

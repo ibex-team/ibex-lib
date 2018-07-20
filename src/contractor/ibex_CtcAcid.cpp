@@ -44,13 +44,7 @@ void CtcAcid::contract(IntervalVector& box, CtcContext& context) {
 	else
 		impact.fill(0,nb_var-1);
 	subcontext.set_impact(&impact);
-
-	BoxProperties* old_prop = context.data();
-	BoxProperties new_prop;
-	if (context.data()) {
-		context.data()->update_copy(box, new_prop);
-		subcontext.set_properties(&new_prop,false);
-	}
+	subcontext.set_properties(context.data());
 	// ------------------------------------------------
 
 	int nb_CID_var=cid_vars.size();                    // [gch]
@@ -131,6 +125,10 @@ void CtcAcid::contract(IntervalVector& box, CtcContext& context) {
 	}
 
 	delete [] ctstat;
+
+	if (context.data()) {
+		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
+	}
 }
 
 // en optim, l'objectif est placé en 1er
@@ -172,12 +170,13 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		ctrjsum[i]=0;
 		for (int j=0; j<nb_var ; j++) {
 			// [bne]  in case of infinite derivatives , natural ordering
-			if (J[i][j].mag()==POS_INFINITY || box[j].diam()==POS_INFINITY)
-			{for (int i1=0;i1 < nb_var; i1++)
+			if (J[i][j].mag()==POS_INFINITY || box[j].diam()==POS_INFINITY) {
+				for (int i1=0;i1 < nb_var; i1++)
 				smearorder.push_back(varorder2[i1]);
-			delete [] sum_smear;
-			delete [] ctrjsum;
-			return;}
+				delete [] sum_smear;
+				delete [] ctrjsum;
+				return;
+			}
 			if (cid_vars[j])                           // [gch] (only varCIDed variables considered?)
 				ctrjsum[i]+= J[i][j].mag() * box[j].diam();
 		}

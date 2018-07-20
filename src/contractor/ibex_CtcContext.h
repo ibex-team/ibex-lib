@@ -51,7 +51,7 @@ public:
 
 	void set_output_flags(BitSet* flags);
 
-	void set_properties(BoxProperties* data, bool update);
+	void set_properties(BoxProperties* data);
 
 	/**
 	 * \brief Return the current impact (NULL pointer if none).
@@ -73,8 +73,6 @@ public:
 	 */
 	void set_flag(unsigned int);
 
-	bool update_data;
-
 private:
 	BitSet* _impact;
 	BitSet* _output_flags;
@@ -85,7 +83,7 @@ private:
 /*============================================================================
  	 	 	 	 	 	 	 inline implementation
  ============================================================================*/
-inline CtcContext::CtcContext() : update_data(false), _impact(NULL), _output_flags(NULL), _data(NULL) { }
+inline CtcContext::CtcContext() : _impact(NULL), _output_flags(NULL), _data(NULL) { }
 
 inline void CtcContext::set_impact(BitSet* impact) { _impact = impact; }
 
@@ -93,7 +91,7 @@ inline void CtcContext::set_impact(const BitSet* impact) { _impact = (BitSet*) i
 
 inline void CtcContext::set_output_flags(BitSet* flags) { _output_flags = flags; }
 
-inline void CtcContext::set_properties(BoxProperties* data, bool update) { _data = data; update_data = update; }
+inline void CtcContext::set_properties(BoxProperties* data) { _data = data; }
 
 inline BitSet* CtcContext::impact() { return _impact; }
 

@@ -214,7 +214,7 @@ protected:
 	 */
 	bool varCID(int var, IntervalVector& box, IntervalVector& newbox);
 
-	void update_and_contract(IntervalVector& box);
+	void update_and_contract(IntervalVector& box, int var);
 
 	/**
 	 * Returns true iff \a box1 and \a box2 are equal, excepting the current interval (\a var )

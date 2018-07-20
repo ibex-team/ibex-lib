@@ -145,7 +145,7 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	CtcContext c_context;
 	c_context.set_impact(&impact);
 	c_context.set_output_flags(&flags);
-	c_context.set_properties(context.data(), false);
+	c_context.set_properties(context.data());
 
 	for (int i=0; i<list.size(); i++) {
 		if (i>0) box=savebox;
@@ -162,7 +162,7 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 
 	box = result;
 
-	if (context.data() && context.update_data) {
+	if (context.data()) {
 		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 
