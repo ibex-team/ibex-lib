@@ -63,13 +63,13 @@ void TestCell::test02() {
     NormalizedSystem sys(fac);
 
     root->prop.add(new BxpTest());
-    BxpTest * back = (BxpTest*) root->prop[BxpTest::id];
+    BxpTest* back = (BxpTest*) root->prop[BxpTest::id];
     back->n = 100;
 	CPPUNIT_ASSERT(back->n == 100);
-	Cell * copy =new Cell(*root);
-	CPPUNIT_ASSERT(almost_eq(copy->box,root->box));
+	Cell* copy =new Cell(*root);
+	CPPUNIT_ASSERT(copy->box == root->box);
 
-    BxpTest * back_copy = (BxpTest*) copy->prop[BxpTest::id];
+    BxpTest* back_copy = (BxpTest*) copy->prop[BxpTest::id];
 	CPPUNIT_ASSERT(back_copy->n == 100);
 	back_copy->n = 1;
 	CPPUNIT_ASSERT(back->n == 100);
@@ -79,8 +79,8 @@ void TestCell::test02() {
 	std::pair<Cell*, Cell*> new_cells = bsc.bisect(*root);
 	CPPUNIT_ASSERT(almost_eq(new_cells.first->box|new_cells.second->box,root->box));
 
-    BxpTest * back_1 = (BxpTest*) new_cells.first->prop[BxpTest::id];
-    BxpTest * back_2 = (BxpTest*) new_cells.second->prop[BxpTest::id];
+    BxpTest* back_1 = (BxpTest*) new_cells.first->prop[BxpTest::id];
+    BxpTest* back_2 = (BxpTest*) new_cells.second->prop[BxpTest::id];
 
 	CPPUNIT_ASSERT(back_1->n == 100);
 	CPPUNIT_ASSERT(back_2->n == 100);

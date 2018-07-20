@@ -37,7 +37,7 @@ int BoxProperties::topo_sort_rec(const Bxp& el, Map<int,false>& level) const {
 		l = level[el.id];
 		if (l==-1) // means: father node
 			throw CircualDependency();
-	} catch(Map<int>::NotFound&) {
+	} catch(Map<int,false>::NotFound&) {
 		l=0;
 		level.insert_new(el.id, -1); // -1 means: in visit
 		for (std::vector<long>::const_iterator it=el.dependencies.begin(); it!=el.dependencies.end(); it++) {
@@ -71,11 +71,14 @@ void BoxProperties::topo_sort() const {
 	_dep_up2date = true;
 }
 
-void BoxProperties::add(const Bxp* prop) {
+void BoxProperties::add(Bxp* prop) {
 
 	if (map.found(prop->id)) return;
 
-	// forced to create a pointer to a pair because this is the way Map works	map.insert_new(prop.id, *new std::pair<Bxp*,std::vector<long> >(&prop,dependencies));
+	// forced to create a pointer to a pair because this is the way Map works
+
+	map.insert_new(prop->id, *prop);
+
 	_dep_up2date=false;
 }
 
@@ -134,4 +137,13 @@ BoxProperties::~BoxProperties() {
 		delete it->second;
 }
 
+ostream& operator<<(ostream& os, const BoxProperties& p) {
+	os << "{";
+	for (Map<Bxp>::const_iterator it=p.map.begin(); it!=p.map.end(); it++) {
+		if (it!=p.map.begin()) os << ' ';
+		os << it->first;
+	}
+	os << "}";
+	return os;
+}
 } /* namespace ibex */

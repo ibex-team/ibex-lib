@@ -58,7 +58,7 @@ public:
 	 * The dependencies, i.e., the other properties required by prop
 	 * have to be set in prop->dependencies before calling update(...).
 	 */
-	void add(const Bxp* prop);
+	void add(Bxp* prop);
 
 	/**
 	 * \brief Return the property of identifier \a id.
@@ -136,7 +136,14 @@ protected:
 	 * Whether the topological sort is up to date.
 	 */
 	mutable bool _dep_up2date;
+
+	friend std::ostream& operator<<(std::ostream& os, const BoxProperties&);
 };
+
+/*
+ * \brief Print the property ids in the map
+ */
+std::ostream& operator<<(std::ostream& os, const BoxProperties&);
 
 } /* namespace ibex */
 
