@@ -1,12 +1,12 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_3BCID.h
+// File        : ibex_Ctc3BCID.h
 // Author      : Ignacio Araya, Gilles Chabert,
 //               Bertrand Neveu, Gilles Trombettoni
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 1, 2012
-// Last Update : Jul 1, 2012
+// Last Update : Jul 20, 2018
 //============================================================================
 
 #ifndef __IBEX_CTC_3B_CID_H__
@@ -101,6 +101,11 @@ public:
 			int vhandled=-1, double var_min_width=default_var_min_width);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~Ctc3BCid();
+
+	/**
 	 * \brief Contract a box.
 	 */
 	void contract(IntervalVector& box);
@@ -115,9 +120,6 @@ public:
 	 * specific variable, then #var3BCID is called with the specified variable.
 	 * Otherwise, 3BCID will be performed.
 	 *
-	 * Used to pass the impact (+ the shaved variable) to the sub-contractor.
-	 * Allow to benefit from the incrementality of the sub-contractor.
-	 * Also use to transmit the properties.
 	 */
 	virtual void contract(IntervalVector& box, CtcContext& context);
 
@@ -148,7 +150,7 @@ protected:
 	 * taking into account the size limit #var_min_width.
 	 * Decides the shaving mode : dichotomy or slices
 	 */
-	bool var3BCID(IntervalVector& box, int var, CtcContext& context);
+	bool var3BCID(IntervalVector& box, int var);
 
 	/**
 	 * Applies 3BCID contraction on the variable var with a dichotomic 3B algorithm
@@ -156,7 +158,7 @@ protected:
 	 * Call the right, left (3B) and central (CID) contractions, the right and left
 	 * shavings being done in a dichotomic way : returns true if a contraction is done
 	 */
-	virtual bool var3BCID_dicho(IntervalVector& box, int var, double wv, CtcContext& context);
+	virtual bool var3BCID_dicho(IntervalVector& box, int var, double wv);
 
 	/**
 	 * Applies 3BCID contraction on the variable var with a linear 3B algorithm
@@ -181,7 +183,7 @@ protected:
 	 * CID process. In var3BCID_slices, newbox=([B_left] | [B_right])
 	 * is transmitted to the method varCID (var3Bcid_box=newbox).
 	 */
-	virtual bool var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval& dom, CtcContext& context);
+	virtual bool var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval& dom);
 
 	/**
 	 * Left or right shaving in a dichotomic way.
@@ -191,7 +193,7 @@ protected:
 	 *
 	 * \return what?? TODO
 	 */
-	bool shave_bound_dicho(IntervalVector& box, int var, double wv, bool left, CtcContext& context);
+	bool shave_bound_dicho(IntervalVector& box, int var, double wv, bool left);
 
 	/**
 	 * Contracts with CID \a box slicing the variable \a var.
@@ -210,7 +212,9 @@ protected:
 	 * \param newbox  The resulting contracted box
 	 * \return        true iff varCID was useful
 	 */
-	bool varCID(int var, IntervalVector& box, IntervalVector& newbox, CtcContext& context);
+	bool varCID(int var, IntervalVector& box, IntervalVector& newbox);
+
+	void update_and_contract(IntervalVector& box);
 
 	/**
 	 * Returns true iff \a box1 and \a box2 are equal, excepting the current interval (\a var )
@@ -231,6 +235,14 @@ protected:
 
 	/** First variable to varCID in the next call to the #contract() method **/
 	int start_var;
+
+	/**
+	 * Sub-context
+	 * Used to pass the impact (+ the shaved variable) to the sub-contractor.
+	 * Allow to benefit from the incrementality of the sub-contractor.
+	 * Also use to transmit the properties.
+	 */
+	CtcContext subcontext;
 
 	virtual int limitCIDDichotomy();
 };

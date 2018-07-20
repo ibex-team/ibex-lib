@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 1, 2012
-// Last Update : Jul 1, 2012
+// Last Update : Jul 20, 2018
 //============================================================================
 
 #include "ibex_CtcAcid.h"
@@ -36,6 +36,22 @@ void CtcAcid::contract(IntervalVector& box) {
 }
 
 void CtcAcid::contract(IntervalVector& box, CtcContext& context) {
+
+	// --------------------- context ------------------
+	BitSet impact(nb_var);
+	if (context.impact())
+		impact = *context.impact();
+	else
+		impact.fill(0,nb_var-1);
+	subcontext.set_impact(&impact);
+
+	BoxProperties* old_prop = context.data();
+	BoxProperties new_prop;
+	if (context.data()) {
+		context.data()->update_copy(box, new_prop);
+		subcontext.set_properties(&new_prop,false);
+	}
+	// ------------------------------------------------
 
 	int nb_CID_var=cid_vars.size();                    // [gch]
 	int nbvarmax=5*nb_CID_var;                         //  au plus 5*nbvar
@@ -69,18 +85,15 @@ void CtcAcid::contract(IntervalVector& box, CtcContext& context) {
 		int v2=smearorder[v1];
 
 		// [gch]: impact handling:
-		bool was_impacted_var = true; // was v2 initially in the impact?
-		if (context.impact()) {
-			was_impacted_var = (*context.impact())[v2];
-			context.impact()->add(v2);
-		}
+		bool was_impacted_var = impact[v2];           // was v2 initially in the impact?
+		impact.add(v2);
 
-		var3BCID(box, v2, context);                    // appel 3BCID sur la variable v2
+		var3BCID(box, v2);                             // appel 3BCID sur la variable v2
 
 		if (!was_impacted_var)
-			context.impact()->remove(v2);              // [gch]
+			impact.remove(v2);                        // restore [gch]
 
-		if(box.is_empty()) return;
+		if (box.is_empty()) return;
 
 		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
 			for (int i=0; i<initbox.size(); i++) {

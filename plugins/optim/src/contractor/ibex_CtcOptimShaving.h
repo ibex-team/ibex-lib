@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_3BCID.h
+// File        : ibex_CtcOptimShaving.h
 // Author      : Ignacio Araya, Gilles Chabert,
 //               Bertrand Neveu, Gilles Trombettoni
 // Copyright   : IMT Atlantique (France)
@@ -30,10 +30,11 @@ public:
 	virtual void contract(IntervalVector& box, CtcContext& context);
 
 	static const int LimitCIDDichotomy;
+
 protected:
-	virtual bool var3BCID_dicho(IntervalVector& box, int var, double wv, CtcContext& context);
-	virtual bool var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval& dom, CtcContext& context);
-	virtual int limitCIDDichotomy () ;
+	virtual bool var3BCID_dicho(IntervalVector& box, int var, double wv);
+	virtual bool var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval& dom);
+	virtual int limitCIDDichotomy();
 };
 
 } // end namespace ibex

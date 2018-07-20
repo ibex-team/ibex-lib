@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ACID.h
+// File        : ibex_CtcACID.h
 // Author      : Bertrand Neveu , Gilles Trombettoni
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 1, 2012
-// Last Update : Jul 1, 2012
+// Last Update : Jul 20, 2018
 //============================================================================
 
 #ifndef __IBEX_CTC_ACID_H__
@@ -111,4 +111,5 @@ protected :
 };
 
 } // end namespace ibex
+
 #endif // __IBEX_CTC_ACID_H__

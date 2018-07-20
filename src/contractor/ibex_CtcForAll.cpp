@@ -38,6 +38,7 @@ void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_ina
 
 	IntervalVector y_tmp = y.mid();
 
+	// TODO: handle impact!
 	CtcQuantif::contract(x, y_tmp);
 
 	if (x.is_empty()) throw ForAllEmptyBox();
