@@ -45,7 +45,7 @@ void CtcFixPoint::contract(IntervalVector& box, CtcContext& context) {
 	subcontext.set_impact(&impact);
 	BitSet flags(nb_var);
 	subcontext.set_output_flags(&flags);
-	subcontext.set_properties(context.data(),true);
+	subcontext.set_properties(context.data());
 
 	do {
 		old_box=box;

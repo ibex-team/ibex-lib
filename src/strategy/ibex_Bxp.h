@@ -67,10 +67,9 @@ public:
 	 *
 	 * The copy must have the same id.
 	 *
-	 * \param box  - the new box (after copy)
 	 * \param prop - the properties (dependencies are up to date)
 	 */
-	virtual Bxp* update_copy(const IntervalVector& box, const BoxProperties& prop) const=0;
+	virtual Bxp* update_copy(const BoxProperties& prop) const=0;
 
 	/**
 	 * \brief Create data associated to child cells.
@@ -107,7 +106,7 @@ inline Bxp::Bxp(long id) : id(id) {
 }
 
 inline std::pair<Bxp*,Bxp*> Bxp::update_bisect(const Bisection& b, const BoxProperties& l, const BoxProperties& r) {
-	return std::make_pair(update_copy(b.box,l), update_copy(b.box,r));
+	return std::make_pair(update_copy(l), update_copy(r));
 }
 
 inline Bxp::~Bxp() {

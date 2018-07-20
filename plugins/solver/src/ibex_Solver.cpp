@@ -194,7 +194,7 @@ QualifiedBox* Solver::next() {
 
 		try {
 
-			context.set_properties(&c->prop,true);
+			context.set_properties(&c->prop);
 
 			ctc.contract(c->box,context);
 

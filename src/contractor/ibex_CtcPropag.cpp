@@ -52,7 +52,7 @@ void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 	CtcContext c_context;
 	c_context.set_impact(&_impact);
 	c_context.set_output_flags(&flags);
-	c_context.set_properties(context.data(), true);
+	c_context.set_properties(context.data());
 
 	assert(box.size()==nb_var);
 
@@ -71,10 +71,10 @@ void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 
 	if (incremental) {
 		/**
-		 * impact() is the impact in input (given to CtcPropag).
+		 * context.impact() is the impact in input (given to CtcPropag).
 		 * Not to be confused with _impact.
 		 *
-		 * Note: when impact() is NULL, we can
+		 * Note: when context.impact() is NULL, we can
 		 * also push all the contractors in a simple loop,
 		 * as in the "else" part below.
 		 * But the order in the agenda is different
@@ -171,8 +171,10 @@ void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 	 * small w.r.t the ratio here. */
 	//   if (!reducted) box = propbox; // restore domains
 
-	if (active.empty()) context.set_flag(CtcContext::INACTIVE);
-
+	if (active.empty())
+		// TODO: does not respect the current definition of INACTIVE
+		// which imposes that the contractor is inactive before contraction
+		context.set_flag(CtcContext::INACTIVE);
 }
 
 const double CtcPropag::default_ratio = __IBEX_DEFAULT_RATIO_PROPAG;

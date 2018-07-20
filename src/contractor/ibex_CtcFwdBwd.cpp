@@ -113,6 +113,11 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 	// Note: setting the FIXPOINT flag is incorrect when there
 	// is no multiple occurrence because some operators
 	// may be non-optimal in backward mode.
+
+	if (context.data()) {
+		//TODO: set used_vars in impact
+		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
+	}
 }
 
 

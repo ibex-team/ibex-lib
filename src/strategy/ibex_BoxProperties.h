@@ -40,6 +40,11 @@ public:
 	BoxProperties();
 
 	/**
+	 * \brief Copy constructor.
+	 */
+	BoxProperties(const BoxProperties&);
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~BoxProperties();
@@ -84,10 +89,9 @@ public:
 	 * \brief Update all the properties after box copy.
 	 *
 	 * The order properties are updated with respect dependencies.
-	 * \param box  - the new box (after copy)
 	 * \param copy - the properties associated to the copy
 	 */
-	void update_copy(const IntervalVector& box, BoxProperties& copy) const;
+	void update_copy(BoxProperties& copy) const;
 
 	/**
 	 * \brief Update all the properties after box bisection.

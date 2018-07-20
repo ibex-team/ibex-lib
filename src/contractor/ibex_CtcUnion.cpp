@@ -140,19 +140,26 @@ void CtcUnion::contract(IntervalVector& box) {
 void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 	IntervalVector savebox(box);
 	IntervalVector result(IntervalVector::empty(box.size()));
-	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
-	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
+
+	// --------------------- context ------------------
 	CtcContext c_context;
-	c_context.set_impact(&impact);
+	c_context.set_impact(context.impact());
+	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
 	c_context.set_output_flags(&flags);
-	c_context.set_properties(context.data());
+	// ------------------------------------------------
 
 	for (int i=0; i<list.size(); i++) {
 		if (i>0) box=savebox;
 
+		if (context.data())
+			c_context.set_properties(new BoxProperties(*context.data()));
+
 		flags.clear();
 		list[i].contract(box,c_context);
 		result |= box;
+
+		if (context.data())
+			delete c_context.data();
 
 		if (flags[CtcContext::INACTIVE]) {
 			context.set_flag(CtcContext::INACTIVE);
@@ -162,7 +169,7 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 
 	box = result;
 
-	if (context.data()) {
+	if (context.data() && !flags[CtcContext::INACTIVE]) {
 		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 
