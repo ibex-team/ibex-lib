@@ -88,7 +88,7 @@ void CtcFwdBwd::contract(IntervalVector& box) {
 
 void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 
-	assert(box.size()==f.nb_var());
+	assert(box.size()==ctr.f.nb_var());
 
 	BxpActiveCtr* p=context.data() ? (BxpActiveCtr*) (*context.data())[active_prop_id] : NULL;
 

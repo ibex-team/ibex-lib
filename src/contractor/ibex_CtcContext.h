@@ -45,6 +45,8 @@ public:
 	 * The \a impact specifies the variables that have been
 	 * modified since the last call to this contractor.
 	 */
+	void set_impact(BitSet* impact);
+
 	void set_impact(const BitSet* impact);
 
 	void set_output_flags(BitSet* flags);
@@ -57,7 +59,7 @@ public:
 	 * \return if NULL, it does not mean that there is no impact but that the information on
 	 * the impact is not provided.
 	 */
-	const BitSet* impact();
+	BitSet* impact();
 
 	BitSet* output_flags();
 
@@ -74,7 +76,7 @@ public:
 	bool update_data;
 
 private:
-	const BitSet* _impact;
+	BitSet* _impact;
 	BitSet* _output_flags;
 	BoxProperties* _data;
 };
@@ -83,15 +85,17 @@ private:
 /*============================================================================
  	 	 	 	 	 	 	 inline implementation
  ============================================================================*/
-inline CtcContext::CtcContext() : _impact(NULL), _output_flags(NULL), _data(NULL), update_data(false) { }
+inline CtcContext::CtcContext() : update_data(false), _impact(NULL), _output_flags(NULL), _data(NULL) { }
 
-inline void CtcContext::set_impact(const BitSet* impact) { _impact = impact; }
+inline void CtcContext::set_impact(BitSet* impact) { _impact = impact; }
+
+inline void CtcContext::set_impact(const BitSet* impact) { _impact = (BitSet*) impact; }
 
 inline void CtcContext::set_output_flags(BitSet* flags) { _output_flags = flags; }
 
 inline void CtcContext::set_properties(BoxProperties* data, bool update) { _data = data; update_data = update; }
 
-inline const BitSet* CtcContext::impact() { return _impact; }
+inline BitSet* CtcContext::impact() { return _impact; }
 
 inline BitSet* CtcContext::output_flags() { return _output_flags; }
 

@@ -20,23 +20,23 @@ const double Ctc3BCid::default_var_min_width = 1.e-11;
 const int Ctc3BCid::LimitCIDDichotomy=16;
 
 Ctc3BCid::Ctc3BCid(const BitSet& cid_vars, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
-							Ctc(ctc.nb_var), cid_vars(cid_vars), ctc(ctc), s3b(s3b), scid(scid),
-							vhandled(vhandled<=0? cid_vars.size():vhandled),
-							var_min_width(var_min_width), start_var(0), impact(BitSet::empty(nb_var)) {
+									Ctc(ctc.nb_var), cid_vars(cid_vars), ctc(ctc), s3b(s3b), scid(scid),
+									vhandled(vhandled<=0? cid_vars.size():vhandled),
+									var_min_width(var_min_width), start_var(0) {
 	assert(ctc.nb_var>0);
-//	if (ctc.nb_var<=0)
-//		ibex_error("Ctc3BCID : the contractor is non-dimensional, Please specify the dimension with: \n Ctc3BCid(int nb_var, const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width);");
+	//	if (ctc.nb_var<=0)
+	//		ibex_error("Ctc3BCID : the contractor is non-dimensional, Please specify the dimension with: \n Ctc3BCid(int nb_var, const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width);");
 }
 
 
 Ctc3BCid::Ctc3BCid(Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
-                    		Ctc(ctc.nb_var), cid_vars(BitSet::all(nb_var)), ctc(ctc), s3b(s3b), scid(scid),
-                    		vhandled(vhandled<=0? nb_var : vhandled),
-                    		var_min_width(var_min_width), start_var(0), impact(BitSet::empty(nb_var)) {
+                    				Ctc(ctc.nb_var), cid_vars(BitSet::all(nb_var)), ctc(ctc), s3b(s3b), scid(scid),
+									vhandled(vhandled<=0? nb_var : vhandled),
+									var_min_width(var_min_width), start_var(0) {
 
 	assert(ctc.nb_var>0);
-//	if (ctc.nb_var<=0)
-//		ibex_error("Ctc3BCID : the contractor is non-dimensional, Please specify the dimension with: \n Ctc3BCid(int nb_var, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width);");
+	//	if (ctc.nb_var<=0)
+	//		ibex_error("Ctc3BCID : the contractor is non-dimensional, Please specify the dimension with: \n Ctc3BCid(int nb_var, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width);");
 }
 
 
@@ -48,7 +48,7 @@ int Ctc3BCid::limitCIDDichotomy ()  {
 bool Ctc3BCid::equalBoxes (int var, IntervalVector &box1, IntervalVector &box2) {
 	int nb_var = box1.size();
 
-	for(int j=0; j<nb_var; j++){
+	for(int j=0; j<nb_var; j++) {
 		if(j!=var && box1[j]!=box2[j]) return false;
 	}
 
@@ -63,15 +63,24 @@ void Ctc3BCid::contract(IntervalVector& box) {
 void Ctc3BCid::contract(IntervalVector& box, CtcContext& context) {
 	int var;                                           // [gch] variable to be carCIDed
 
-	start_var=nb_var-1;                                //  patch pour l'optim  A RETIRER ??
-	impact.clear();                                    // [gch]
+	start_var=nb_var-1;
+	//  patch pour l'optim  A RETIRER ??
+
 	for (int k=0; k<vhandled; k++) {                   // [gch] k counts the number of varCIDed variables [gch]
 
 		var=(start_var+k)%nb_var;
 
-		impact.add(var);                              // [gch]
-		var3BCID(box,var);
-		impact.remove(var);                           // [gch]
+		// [gch]: impact handling:
+		bool was_impacted_var = true; // was var initially in the impact?
+		if (context.impact()) {
+			was_impacted_var = (*context.impact())[var];
+			context.impact()->add(var);
+		}
+
+		var3BCID(box, var, context);
+
+		if (!was_impacted_var)
+			context.impact()->remove(var);             // [gch]
 
 		if(box.is_empty()) {
 			context.set_flag(CtcContext::FIXPOINT);
@@ -83,7 +92,7 @@ void Ctc3BCid::contract(IntervalVector& box, CtcContext& context) {
 }
 
 
-bool Ctc3BCid::var3BCID(IntervalVector& box, int var) {
+bool Ctc3BCid::var3BCID(IntervalVector& box, int var, CtcContext& context) {
 
 	Interval& dom(box[var]);
 
@@ -103,26 +112,27 @@ bool Ctc3BCid::var3BCID(IntervalVector& box, int var) {
 
 	// depending of the actual number of slices, calls the 3BCID contractor with a dichotomic or a linear shaving.
 	if (locs3b > limitCIDDichotomy())
-		return var3BCID_dicho(box, var, w_DC);
+		return var3BCID_dicho(box, var, w_DC, context);
 	else
-		return var3BCID_slices(box, var, locs3b, w_DC, dom);
+		return var3BCID_slices(box, var, locs3b, w_DC, dom, context);
 }
 
-bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
+bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b, CtcContext& context) {
 	IntervalVector initbox = box;
 
-	bool r0= shave_bound_dicho(box, var, w3b, true);    // left shaving , after box contains the left slide
+	// left shaving, after box contains the left slice
+	bool r0= shave_bound_dicho(box, var, w3b, true, context);
 
-        if (box.is_empty()) return true;
+	if (box.is_empty()) return true;
 	if (box[var].ub() == initbox[var].ub())
-		return true;                                   // the left slide reaches the right bound : nothing more to do
+		return true;                                   // the left slice reaches the right bound : nothing more to do
 
 	IntervalVector leftbox=box;
 	box=initbox;
 	box[var]= Interval(leftbox[var].lb(),initbox[var].ub());
 	bool r1=false;
 
-	r1= shave_bound_dicho (box, var,  w3b, false); // may result in an empty box
+	r1= shave_bound_dicho (box, var,  w3b, false, context); // may result in an empty box
 
 	if (box.is_empty()) {                 // in case of empty box in the right shaving,
 		box=leftbox;                      // the contracted box becomes the left box
@@ -134,7 +144,8 @@ bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 	box[var]= Interval(leftbox[var].ub(),rightbox[var].lb()); // the central part
 	IntervalVector savebox=box;
 	IntervalVector newbox= leftbox | rightbox;         // the hull
-	if(varCID(var,savebox,newbox)) {
+
+	if (varCID(var,savebox,newbox,context)) {
 		box = newbox; return true;                     // the contracted box is in newbox
 	}
 	else {                                             // VarCID was useless : one returns the result of only 3B:
@@ -146,7 +157,7 @@ bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 
 
 
-bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool left) {
+bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var, double wv, bool left, CtcContext& context) {
 
 	IntervalVector initbox = box;
 	Interval& x(box[var]);
@@ -167,10 +178,10 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 		double rb  = sup;                              // right bound of the border (should decrease even when shaving
 		// left, thanks to the "bound" test -not yet-)
 		while (1) {
-		  //		        cout << " left  inf=" << inf << " lb=" << lb << " rb=" << rb << " sup=" << sup << endl;
+			//		        cout << " left  inf=" << inf << " lb=" << lb << " rb=" << rb << " sup=" << sup << endl;
 			box[var] = Interval(inf,lb);
 
-			ctc.contract(box,impact);              // [gch] only "var" is set in "impact".
+			ctc.contract(box,context);                 // "var" is in the impact.
 
 			if (!box.is_empty()) {
 				inf=box[var].lb();
@@ -183,10 +194,9 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 			} else {                                   // the current slice has been cut off
 				//	cout << "      slice removed.\n";
 				if (inf==lb) {                         // border is degenerated and current=border
-					if (inf==sup)                      // current=border=the whole interval itself:
-					  {//cout << " inf = sup " ; 
-					    box.set_empty() ; return true;                   //   in this case the box must remain entirely emptied
-					  }
+					if (inf==sup) {                    // current=border=the whole interval itself:
+						box.set_empty() ; return true; //   in this case the box must remain entirely emptied
+					}
 					else break;                        // return anyway (no more to do).
 				}
 				tmp = inf;                             // current value of inf is used two lines below, save it
@@ -204,10 +214,10 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 		double lb  = inf;                              // left bound of the border (should increase even when shaving
 		// right, thanks to the "bound" test -not yet-)
 		while (1) {
-		  //			     cout << " right  inf=" << inf << " lb=" << lb << " rb=" << rb << " sup=" << sup << endl;
+			//			     cout << " right  inf=" << inf << " lb=" << lb << " rb=" << rb << " sup=" << sup << endl;
 			box[var] = Interval(rb,sup);
 
-			ctc.contract(box,impact);              // [gch] only "var" is set in "impact".
+			ctc.contract(box,context);                // "var" is in the impact.
 
 			if (!box.is_empty()) {
 				sup=box[var].ub();
@@ -237,7 +247,7 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 	else return true;
 }
 
-bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval& dom) {
+bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval& dom, CtcContext& context) {
 
 	IntervalVector savebox(box);
 
@@ -261,7 +271,7 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 
 		// Try to refute this slice
 
-		ctc.contract(box,impact);                  // [gch] only "var" is set in "impact".
+		ctc.contract(box,context);                  // "var" is in the impact.
 
 		if (box.is_empty()) {
 			leftBound = sup_k;
@@ -304,7 +314,7 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 
 			// Try to refute the slice
 
-			ctc.contract(box,impact);                  // [gch] only "var" is set in "impact".
+			ctc.contract(box,context);                  // "var" is set in impact.
 
 			if (box.is_empty()) {
 				rightBound = sup_k;
@@ -337,7 +347,7 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 				newbox = newbox | box;
 				savebox[var]=Interval(leftCID, lastInf_k);
 
-				if(varCID(var,savebox,newbox)) {       // Call to the central CID contraction
+				if(varCID(var,savebox,newbox,context)) { // Call to the central CID contraction
 					box = newbox;
 				} else {                               // VarCID was useless : one returns the result of only 3B
 					box = savebox;
@@ -351,7 +361,7 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 }
 
 
-bool Ctc3BCid::varCID(int var, IntervalVector &varcid_box, IntervalVector &var3Bcid_box) {
+bool Ctc3BCid::varCID(int var, IntervalVector &varcid_box, IntervalVector &var3Bcid_box, CtcContext& context) {
 
 	if(scid==0 || equalBoxes (var, varcid_box, var3Bcid_box)) return false;
 
@@ -367,7 +377,7 @@ bool Ctc3BCid::varCID(int var, IntervalVector &varcid_box, IntervalVector &var3B
 		if (sup_k > dom.ub() || (k == scid-1 && sup_k < dom.ub())) sup_k = dom.ub();
 		dom = Interval(inf_k, sup_k);
 
-		ctc.contract(box,impact);                  // [gch] only "var" is set in "impact".
+		ctc.contract(box,context);                  // "var" is in the impact.
 
 		if (box.is_empty()) {
 			continue;                                  // the current slice is infeasible : nothing to add to the hull

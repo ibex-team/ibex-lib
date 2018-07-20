@@ -259,8 +259,8 @@ public:
 		return make_pair(l,r);
 	}
 
-	SetNode* node;
 	const Vector& pt;
+	SetNode* node;
 	double dist;
 
 protected:

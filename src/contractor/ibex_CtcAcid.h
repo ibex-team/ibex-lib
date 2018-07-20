@@ -30,7 +30,7 @@ namespace ibex {
  *      in the next running phase is computed at the end of the tuning phase.
  *
  * <li> large running phases (during e.g. 950 nodes)
- *      where 3BCID is called with the  number of variables determined during the last tunig phase.
+ *      where 3BCID is called with the  number of variables determined during the last tuning phase.
  */
 
 class CtcAcid : public Ctc3BCid {
@@ -78,6 +78,8 @@ public :
 	 *  the average gain (on all the dimensions of the current box) is less  than ct_ratio:
 	 *  this average number of variables (during the tuning phase) will become nbcidvar.
 	 */
+	virtual void contract(IntervalVector& box, CtcContext& context);
+
 	virtual void contract(IntervalVector& box);
 
 	double nbvar_stat();
