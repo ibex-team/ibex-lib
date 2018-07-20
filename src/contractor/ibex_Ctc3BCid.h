@@ -111,6 +111,11 @@ public:
 	void contract(IntervalVector& box);
 
 	/**
+	 * \brief Add sub-contractor properties to the map
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
+
+	/**
 	 * \brief Apply contraction.
 	 *
 	 * Applies 3BCID contraction on #vhandled variables of #cid_vars, starting

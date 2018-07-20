@@ -85,7 +85,7 @@ void BoxProperties::add(Bxp* prop) {
 const Bxp* BoxProperties::operator[](long id) const {
 	try {
 		return &map[id];
-	} catch(Map<std::pair<int, Bxp> >::NotFound&) {
+	} catch(Map<Bxp>::NotFound&) {
 		return NULL; //throw PropertyNotFound();
 	}
 }

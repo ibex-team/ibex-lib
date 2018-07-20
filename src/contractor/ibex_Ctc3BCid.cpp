@@ -43,6 +43,10 @@ Ctc3BCid::~Ctc3BCid() {
 
 }
 
+void Ctc3BCid::add_property(const IntervalVector& init_box, BoxProperties& map) {
+	ctc.add_property(init_box, map);
+}
+
 int Ctc3BCid::limitCIDDichotomy ()  {
 	return LimitCIDDichotomy;
 }
