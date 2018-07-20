@@ -29,6 +29,7 @@ CtcExist::CtcExist(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box,
 bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y, CtcContext& context) {
 	IntervalVector x = x_current;
 
+	// TODO: handle impact!
 	CtcQuantif::contract(x, y);
 
 	if (x.is_empty()) {

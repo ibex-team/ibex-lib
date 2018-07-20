@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_CtcEmpty.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Feb 18, 2013
 // Last Update : Jul 18, 2013

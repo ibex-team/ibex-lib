@@ -82,7 +82,7 @@ void Ctc3BCid::contract(IntervalVector& box, CtcContext& context) {
 		if (!was_impacted_var)
 			context.impact()->remove(var);             // [gch]
 
-		if(box.is_empty()) {
+		if (box.is_empty()) {
 			context.set_flag(CtcContext::FIXPOINT);
 			return;
 		}

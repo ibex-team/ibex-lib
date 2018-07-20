@@ -35,17 +35,34 @@ void CtcFixPoint::contract(IntervalVector& box) {
 void CtcFixPoint::contract(IntervalVector& box, CtcContext& context) {
 	IntervalVector init_box(box);
 	IntervalVector old_box(box);
-	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
-	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
+
+	CtcContext subcontext;
+	BitSet impact(nb_var);
+	if (context.impact())
+		impact = *context.impact();
+	else
+		impact.fill(0,nb_var-1);
+	subcontext.set_impact(&impact);
+	BitSet flags(nb_var);
+	subcontext.set_output_flags(&flags);
+	subcontext.set_properties(context.data(),true);
 
 	do {
 		old_box=box;
 
-		ctc.contract(box,impact,flags);
+		flags.clear();
+
+		ctc.contract(box,subcontext);
 
 		if (box.is_empty()) {
 			context.set_flag(CtcContext::FIXPOINT);
 			return;
+		}
+
+		// calculate impact for next call
+		impact.clear();
+		for (int i=0; i<nb_var; i++) {
+			if (box[i]!=old_box[i]) impact.add(i);
 		}
 
 	} while (!flags[CtcContext::FIXPOINT] && !flags[CtcContext::INACTIVE] && old_box.rel_distance(box)>ratio);

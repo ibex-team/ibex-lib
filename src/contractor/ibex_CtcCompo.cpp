@@ -183,50 +183,44 @@ void CtcCompo::contract(IntervalVector& box) {
 
 void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 
-	// TODO: wrong algorithm here
-//	if (incremental) {
-//		for (int i=0; i<list.size(); i++) {
-//			IntervalVector old_box(box);
-//			impacts[i] |= impact;
-//
-//			list[i].contract(box);
-//
-//			for (int j=0; j<nb_var; j++) {
-//				if (old_box[j].rel_distance(box[j])>ratio)
-//					for (int i2=0; i2<list.size(); i2++)
-//						if (i2!=i) impacts[i2].set(j);
-//			}
-//		}
-//		return;
-//	}
-	bool inactive= true;
-	BitSet flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS));
+	bool inactive = true;
 
-	CtcContext sub_context;
-	sub_context.set_output_flags(&flags);
-	if (context.data())
-		sub_context.set_properties(context.data(), true);
+	BitSet* flags = context.output_flags();
 
+	// TODO: a more clever impact handling could be
+	// done here
 	for (int i=0; i<list.size(); i++) {
 
-		if (inactive) {
-			flags.clear();
-			list[i].contract(box,sub_context);
-			if (!flags[CtcContext::INACTIVE]) {
+		if (flags && inactive) {
+
+			flags->clear();
+
+			list[i].contract(box, context);
+
+			if (!(*flags)[CtcContext::INACTIVE]) {
 				inactive=false;
-				sub_context.set_output_flags(NULL);
+				// now, no need for asking sub-contractors
+				// to calculate the impact:
+				context.set_output_flags(NULL);
 			}
 		} else {
-			list[i].contract(box,sub_context);
+			list[i].contract(box, context);
 		}
 
 		if (box.is_empty()) {
-			context.set_flag(CtcContext::FIXPOINT);
+			if (flags) {
+				flags->clear();
+				flags->add(CtcContext::FIXPOINT);
+				context.set_output_flags(flags); // restore!
+			}
 			return;
 		}
 	}
 
-	if (inactive) context.set_flag(CtcContext::INACTIVE);
+	if (flags) {
+		if (inactive) flags->add(CtcContext::INACTIVE);
+		context.set_output_flags(flags); // restore!
+	}
 }
 
 } // end namespace ibex
