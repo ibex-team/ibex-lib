@@ -153,7 +153,7 @@ Recalculating this image each time a contractor is called represents a waste of 
 the box hasn't changed meanwhile. One would like to store this information in the box. 
 This is precisely what ''box properties'' allow to do.
 
-All is based on the ``Bxp`` interface. This ``Bxp`` interface allows to extend the simple ``IntervalVector`` data structure and to make this extension being propagated through a search tree. The extended box is then visible by all operators involved in the strategy (contractors, bisectors, cell buffers, etc.).
+All is based on the ``Bxp`` interface. This ``Bxp`` interface allows to extend the simple ``IntervalVector`` data structure and to make this extension being propagated through a strategy (search tree). The extended box is then visible by all operators involved in the strategy (contractors, bisectors, cell buffers, etc.).
 
 Note that the name of this interface is a trigram (like ``Ctc`` or ``Bsc``) 
 just to encourage programers to prefix subclasses by ``Bxp`` (this is a recommended usage).
@@ -175,7 +175,7 @@ Constructor
 
 It is natural to ask the constructor of ``BxpImage`` to take a box in argument and to set the ``image`` field appropriately.
 
-The constructor of the mother class ``Bxp`` also requires an identifying number. Here is why. A box property is actually a set of *instances* of the ``Bxp`` interface: if the solver handles 1000 boxes at a given time, every box has it own width, hence its specific instance of ``BxpImage``. These 1000 instances represent the same ''property'' and since there may be other properties attached to the boxes at the same time, we can retreive a given property thanks to its ``id`` field.
+The constructor of the mother class ``Bxp`` also requires an identifying number. Here is why. A box property is actually a set of *instances* of the ``Bxp`` interface: if the solver handles 1000 boxes at a given time, every box has it own image, hence its specific instance of ``BxpImage``. These 1000 instances represent the same ''property'' and since there may be other properties attached to the boxes at the same time, we can retreive a given property thanks to its ``id`` field.
 You can simply fix this identifier to any random ``long`` number or use the ``next_id()`` function of Ibex as follows:
 
 .. literalinclude:: ../examples/doc-strategy.cpp 
@@ -193,7 +193,7 @@ Property update
 
 The next step is to specify how property values are updated when the box is modified.
 This amounts to implement an ``update(...)`` function as follows. This function will 
-be called at different points of the search process, through the *trust chain* principle
+be called at different points of the stragegy, through the *trust chain* principle
 to be explained further.
 
 .. literalinclude:: ../examples/doc-strategy.cpp 
@@ -203,8 +203,8 @@ to be explained further.
  
 Note that a :ref:`smarter implementation <bxp_lazy>` is often desired.
 This is however not enough. You also have to state how the property is transformed
-when the box is copied (a copy of a box may occur in a search, e.g., to perform some
-temporary computations). This is done by implementing the ``update_copy(...)`` function:
+when the box is copied (copies occur in a search each time a box is bisected
+or, e.g., to perform some temporary computations). This is done by implementing the ``copy()`` function:
 
 .. literalinclude:: ../examples/doc-strategy.cpp 
    :language: cpp
@@ -220,7 +220,7 @@ Using properties
 Now, let us modify the implementation of our contractor.
 To take benefit of properties, two steps are required.
 First, we have to override the ``add_property`` function of the ``Ctc`` interface.
-This function is called by the search at initialization.
+This function is called by all strategies at initialization.
 This function takes as argument the initial box (of the search) and a set of properties
 which is an instance of ``BoxProperties``. This object basically just stores pointers to ``Bxp*``,
 except that it can handle :ref:`inter-dependencies <bxp_dependencies>`.
@@ -242,8 +242,8 @@ Lazy update
 ----------------------------------------
 
 So far, we have centralized in a unique place the result of the image computation which is already good but
-not optimal at all. Worse, the computation time of our program will likely be longer than without
-introducing this property! Indeed, the ``update'' function will be called basically whenever an operator
+not optimal at all. Worse, the running time of our program will likely be longer than without
+introducing this property! Indeed, the ``update`` function will be called basically whenever an operator
 change the box, which means that the funtion f will be evaluated again and again!
 
 This event-oriented design of a property can be sometimes interesting but, clearly, it does not fit well here.

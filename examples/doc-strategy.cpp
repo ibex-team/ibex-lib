@@ -86,7 +86,7 @@ public:
   //! [prop-update]
 
   //! [prop-copy]
-  Bxp* update_copy(const IntervalVector& box, const BoxProperties& prop) const {
+  Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const {
     return new BxpImage(*this); // implicit copy constructor is fine
   }
   //! [prop-copy]
@@ -150,9 +150,7 @@ public:
     up2date=false;
   }
 
-  Bxp* update_copy(const IntervalVector& box, const BoxProperties& prop) const {
-    // The box in argument is the box after copy (not the original one).
-    // This is the one we give to the copy constructor.
+  Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const {
     return new BxpImage(box,image,up2date);
   }
 
@@ -170,8 +168,6 @@ public:
 protected:
   BxpImage(const IntervalVector& box, const Interval& image, bool up2date) :
     Bxp(id), box(box), image(image), up2date(up2date) { }
-
-  BxpImage(const BxpImage&); // forbidden !
 
   const IntervalVector& box;
   Interval image;
