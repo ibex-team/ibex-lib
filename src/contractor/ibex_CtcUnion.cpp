@@ -152,7 +152,7 @@ void CtcUnion::contract(IntervalVector& box, CtcContext& context) {
 		if (i>0) box=savebox;
 
 		if (context.data())
-			c_context.set_properties(new BoxProperties(*context.data()));
+			c_context.set_properties(new BoxProperties(box, *context.data()));
 
 		flags.clear();
 		list[i].contract(box,c_context);

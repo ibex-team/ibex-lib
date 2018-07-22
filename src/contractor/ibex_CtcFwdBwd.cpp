@@ -78,7 +78,7 @@ void CtcFwdBwd::init() {
 
 void CtcFwdBwd::add_property(const IntervalVector& init_box, BoxProperties& map) {
 	if (!map[active_prop_id])
-		map.add(new BxpActiveCtr(ctr));
+		map.add(new BxpActiveCtr(init_box, ctr));
 }
 
 void CtcFwdBwd::contract(IntervalVector& box) {
@@ -92,7 +92,7 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 
 	BxpActiveCtr* p=context.data() ? (BxpActiveCtr*) (*context.data())[active_prop_id] : NULL;
 
-	if (p && !p->active) {
+	if (p && !p->active()) {
 		context.set_flag(CtcContext::INACTIVE);
 		context.set_flag(CtcContext::FIXPOINT);
 		return;
@@ -100,7 +100,7 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 
 	//std::cout << " hc4 of " << f << "=" << d << " with box=" << box << std::endl;
 	if (ctr.f.backward(d,box)) {
-		if (p) p->active=false;
+		if (p) p->set_inactive();
 		context.set_flag(CtcContext::INACTIVE);
 		context.set_flag(CtcContext::FIXPOINT);
 	}

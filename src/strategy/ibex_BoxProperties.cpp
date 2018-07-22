@@ -109,10 +109,10 @@ void BoxProperties::update_bisect(const Bisection& b, BoxProperties& lprop, BoxP
 
 	// Duplicate properties respecting dependencies
 	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
-		Bxp* p1 = (*it)->copy();
+		Bxp* p1 = (*it)->copy(b.left, lprop);
 		p1->update(BoxEvent(b.left,BoxEvent::CONTRACT,BitSet::singleton(b.box.size(), b.pt.var)), lprop);
 
-		Bxp* p2 = (*it)->copy();
+		Bxp* p2 = (*it)->copy(b.right, rprop);
 		p2->update(BoxEvent(b.right,BoxEvent::CONTRACT,BitSet::singleton(b.box.size(), b.pt.var)), rprop);
 
 		lprop.add(p1);
@@ -124,9 +124,13 @@ BoxProperties::BoxProperties() : _dep_up2date(true) {
 
 }
 
-BoxProperties::BoxProperties(const BoxProperties& p) : _dep_up2date(p._dep_up2date) {
-	for (Map<Bxp>::const_iterator it=p.map.begin(); it!=p.map.end(); it++) {
-		add(it->second->copy());
+BoxProperties::BoxProperties(const IntervalVector& box, const BoxProperties& p) : _dep_up2date(p._dep_up2date) {
+
+	if (!p._dep_up2date) p.topo_sort();
+
+	// Duplicate properties respecting dependencies
+	for (vector<Bxp*>::iterator it=p.dep.begin(); it!=p.dep.end(); it++) {
+		add((*it)->copy(box, *this));
 	}
 }
 

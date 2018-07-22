@@ -14,25 +14,26 @@ namespace ibex {
 
 Map<long,false> BxpActiveCtr::ids;
 
-BxpActiveCtr::BxpActiveCtr(const NumConstraint& ctr, bool active) : Bxp(get_id(ctr)), ctr(ctr), active(active) {
-
-}
-
-BxpActiveCtr* BxpActiveCtr::copy() const {
-	return new BxpActiveCtr(ctr, active);
-}
-
-void BxpActiveCtr::update(const BoxEvent& e, const BoxProperties& prop) {
-	if (active || e.type!=BoxEvent::CONTRACT) {
+void BxpActiveCtr::check() {
+	if (!up2date) {
+		assert(_active);
 		// TODO: if the impact contains no variable involved in the constraint
 		// we can avoid evaluation
 		Domain y=ctr.right_hand_side();
 		switch (y.dim.type()) {
-		case Dim::SCALAR:       active = !(ctr.f.eval(e.box).is_subset(y.i())); break;
+		case Dim::SCALAR:       _active = !(ctr.f.eval(box).is_subset(y.i())); break;
 		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   active = !(ctr.f.eval_vector(e.box).is_subset(y.v())); break;
-		case Dim::MATRIX:       active = !(ctr.f.eval_matrix(e.box).is_subset(y.m())); break;
+		case Dim::COL_VECTOR:   _active = !(ctr.f.eval_vector(box).is_subset(y.v())); break;
+		case Dim::MATRIX:       _active = !(ctr.f.eval_matrix(box).is_subset(y.m())); break;
 		}
+	}
+	up2date=true;
+}
+
+void BxpActiveCtr::update(const BoxEvent& e, const BoxProperties& prop) {
+	if (_active || e.type!=BoxEvent::CONTRACT) {
+		_active=true;
+		up2date=false;
 	}
 }
 

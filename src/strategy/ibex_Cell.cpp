@@ -22,7 +22,7 @@ Cell::Cell(const IntervalVector& box, int var) : box(box), bisected_var(var) {
 
 }
 
-Cell::Cell(const Cell& e) : box(e.box), bisected_var(e.bisected_var), prop(e.prop) {
+Cell::Cell(const Cell& e) : box(e.box), bisected_var(e.bisected_var), prop(e.box, e.prop) {
 
 }
 

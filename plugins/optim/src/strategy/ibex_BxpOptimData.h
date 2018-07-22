@@ -38,7 +38,7 @@ public:
 	/**
 	 * \brief Create a copy.
 	 */
-	virtual Bxp* copy() const;
+	virtual Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const;
 
 	/**
 	 * \brief Update the property upon box modification.
@@ -96,12 +96,13 @@ protected:
 
 /*================================== inline implementations ========================================*/
 
-inline Bxp* BxpOptimData::copy() const {
+inline Bxp* BxpOptimData::copy(const IntervalVector& box, const BoxProperties& prop) const {
 	return new BxpOptimData(*this);
 }
 
 inline void BxpOptimData::update(const BoxEvent& event, const BoxProperties& prop) {
-	// TODO: we should call compute_pf and compute_pu here.
+	// TODO: we should call compute_pf and compute_pu here or create some
+	// "is_up_to_date" flag.
 	// This is actually done from the CellCostFunc classes
 	// and makes no problem so far as this property is not used elsewhere.
 }

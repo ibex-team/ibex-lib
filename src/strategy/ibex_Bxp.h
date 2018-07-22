@@ -54,6 +54,7 @@ public:
 	 */
 	Bxp(long id);
 
+
 	/**
 	 * \brief Create a copy.
 	 *
@@ -61,7 +62,7 @@ public:
 	 *
 	 * \param prop - the properties (dependencies are up to date)
 	 */
-	virtual Bxp* copy() const=0;
+	virtual Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const=0;
 
 	/**
 	 * \brief Update the property upon box modification.

@@ -37,7 +37,7 @@ void CtcQInter::contract(IntervalVector& box, CtcContext& context) {
 		boxes[i]=box;
 
 		if (context.data())
-				c_context.set_properties(new BoxProperties(*context.data()));
+			c_context.set_properties(new BoxProperties(boxes[i], *context.data()));
 
 		list[i].contract(boxes[i], c_context);
 

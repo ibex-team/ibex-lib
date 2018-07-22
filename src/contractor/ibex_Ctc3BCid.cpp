@@ -179,7 +179,7 @@ void Ctc3BCid::update_and_contract(IntervalVector& box, int var) {
 	BoxProperties* new_prop;
 
 	if (old_prop) {
-		new_prop = new BoxProperties(*	old_prop);
+		new_prop = new BoxProperties(box, *old_prop);
 		// By creating a "slice", we have contracted only the domain of
 		// a single variable:
 		BoxEvent event(box, BoxEvent::CONTRACT, BitSet::singleton(nb_var,var));

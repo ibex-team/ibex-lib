@@ -34,18 +34,28 @@ public:
 	 * \param ctr    - The constraint
 	 * \param active - Default activity value
 	 */
-	BxpActiveCtr(const NumConstraint& ctr, bool active=true);
+	BxpActiveCtr(const IntervalVector& box, const NumConstraint& ctr, bool active=true, bool up2date=false);
 
 	/**
 	 * \brief Copy the property
 	 */
-	virtual BxpActiveCtr* copy() const;
+	virtual BxpActiveCtr* copy(const IntervalVector& box, const BoxProperties& prop) const;
 
 	/**
 	 * \brief Update the property after box modification.
+	 *
+	 * Lazy variant. Does not actually calculate the image
+	 * of the function if active=true. Use check() instead.
 	 * \see Bxp::update(...).
 	 */
 	virtual void update(const BoxEvent& event, const BoxProperties& prop);
+
+	/**
+	 * \brief Check if the constraint is inactive
+	 *
+	 * Force function evaluation.
+	 */
+	void check();
 
 	/**
 	 * \brief The associated constraint.
@@ -55,20 +65,48 @@ public:
 	/**
 	 * \brief Activity flag.
 	 *
-	 * true=possibly active, false=inactive
+	 * true=possibly active, false=inactive.
+	 *
+	 * To force constraint evaluation, use check().
 	 */
-	bool active;
+	bool active() const;
 
 	/**
-	 * \brief Get the BxpActiveCtr id of a constraint.
+	 * \brief Mark the constraint as inactive.
+	 */
+	void set_inactive();
+
+	/**
+	 * \brieBxpActiveCtrf Get the BxpActiveCtr id of a constraint.
 	 */
 	static long get_id(const NumConstraint&);
 
 protected:
+	const IntervalVector& box;
+	bool _active;
+	bool up2date;
 	static Map<long,false> ids;
 };
 
 /*================================== inline implementations ========================================*/
+
+inline BxpActiveCtr::BxpActiveCtr(const IntervalVector& box, const NumConstraint& ctr, bool active, bool up2date) :
+		Bxp(get_id(ctr)), ctr(ctr), box(box), _active(active), up2date(up2date) {
+
+}
+
+inline BxpActiveCtr* BxpActiveCtr::copy(const IntervalVector& box, const BoxProperties& prop) const {
+	return new BxpActiveCtr(box, ctr, _active, up2date);
+}
+
+inline bool BxpActiveCtr::active() const {
+	return _active;
+}
+
+inline void BxpActiveCtr::set_inactive() {
+	_active=false;
+	up2date=true;
+}
 
 } /* namespace ibex */
 

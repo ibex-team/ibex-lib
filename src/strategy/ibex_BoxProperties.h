@@ -42,9 +42,9 @@ public:
 	/**
 	 * \brief Copy constructor.
 	 *
-	 * Duplicate all properties.
+	 * Duplicate all properties for the new box.
 	 */
-	BoxProperties(const BoxProperties&);
+	BoxProperties(const IntervalVector& box, const BoxProperties&);
 
 	/**
 	 * \brief Delete this.
