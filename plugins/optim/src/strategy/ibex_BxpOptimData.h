@@ -84,8 +84,6 @@ public:
 	 */
 	double pu;
 
-	static const long prop_id;
-
 protected:
 
 	/**

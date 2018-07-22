@@ -22,9 +22,16 @@ using namespace std;
 namespace ibex {
 
 void TestCellHeap::test01() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_goal(x);
+	System _sys(fac);
+	ExtendedSystem sys(_sys);
+	cleanup(x,true);
 
 	int nb=10;
-	CellCostVarLB costf(1);
+	CellCostVarLB costf(sys, 1);
 	Heap<Cell> h1(costf);
 
 	double _box[][2] = {{5,15},  {15,25}};
@@ -44,9 +51,16 @@ void TestCellHeap::test01() {
 
 
 void TestCellHeap::test02() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_goal(x);
+	System _sys(fac);
+	ExtendedSystem sys(_sys);
+	cleanup(x,true);
 
 	int nb=10;
-	CellCostVarUB costf(1);
+	CellCostVarUB costf(sys, 1);
 	Heap<Cell> h2(costf);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
@@ -73,7 +87,7 @@ void TestCellHeap::test03() {
 	cleanup(x,true);
 
 	int nb=10;
-	CellCostC5 costf(100);
+	CellCostC5 costf(sys,100);
 	Heap<Cell> h2(costf);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
@@ -103,7 +117,7 @@ void TestCellHeap::test04() {
 	cleanup(x,true);
 
 	int nb=10;
-	CellCostVarLB costf(1);
+	CellCostVarLB costf(sys,1);
 	Heap<Cell> h2(costf);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
@@ -135,8 +149,8 @@ void TestCellHeap::test05() {
 
 	int nb=10;
 
-	CellCostC5 cost1(0);
-	CellCostC5 cost2(0);
+	CellCostC5 cost1(sys,0);
+	CellCostC5 cost2(sys,0);
 	Heap<Cell> h1(cost1);
 	Heap<Cell> h2(cost2);
 

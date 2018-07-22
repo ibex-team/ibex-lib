@@ -12,8 +12,6 @@
 
 namespace ibex {
 
-const long BxpOptimData::prop_id = next_id();
-
 Map<long,false> BxpOptimData::ids;
 
 

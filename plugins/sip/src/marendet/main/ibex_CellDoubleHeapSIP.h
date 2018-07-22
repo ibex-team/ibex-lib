@@ -131,8 +131,8 @@ protected:
 
 inline CellDoubleHeapSIP::CellDoubleHeapSIP(const SIPSystem& sys, int crit2_pr,
 		CellCostFunc::criterion crit2) :
-		DoubleHeap<Cell>(*new CellCostVarLB(sys.ext_nb_var-1),
-				false, *CellCostFunc::get_cost(crit2, sys.ext_nb_var-1),
+		DoubleHeap<Cell>(*new CellCostVarLB(*(ExtendedSystem*)sys.ibex_system_, sys.ext_nb_var-1),
+				false, *CellCostFunc::get_cost(*(ExtendedSystem*)sys.ibex_system_, crit2, sys.ext_nb_var-1),
 				true /* TODO: give right value */, crit2_pr), sys(sys) {
 }
 
@@ -183,7 +183,7 @@ inline bool CellDoubleHeapSIP::empty() const {
 inline void CellDoubleHeapSIP::push(Cell* cell) {
 	// we know cost1() does not require OptimData
 	//cost2().set_optim_data(*cell,sys);
-	cost2().set_optim_data(*cell, *(ExtendedSystem*)sys.ibex_system_);
+	cost2().set_optim_data(*cell);
 	//cell->get<OptimData>().compute_pf(*sys.goal_function_, cell->box);
 	// the cell is put into the 2 heaps
 	DoubleHeap<Cell>::push(cell);
