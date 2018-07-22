@@ -38,7 +38,7 @@ public:
 	/**
 	 * \brief Create a copy.
 	 */
-	virtual Bxp* update_copy(const BoxProperties& prop) const;
+	virtual Bxp* copy() const;
 
 	/**
 	 * \brief Update the property upon box modification.
@@ -96,7 +96,7 @@ protected:
 
 /*================================== inline implementations ========================================*/
 
-inline Bxp* BxpOptimData::update_copy(const BoxProperties& prop) const {
+inline Bxp* BxpOptimData::copy() const {
 	return new BxpOptimData(*this);
 }
 

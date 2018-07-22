@@ -241,22 +241,12 @@ public:
 
 	BxpNodeAndDist(const BxpNodeAndDist& p) : Bxp(p.id), pt(p.pt), node(p.node), dist(p.dist) { }
 
-	virtual Bxp* update_copy(const BoxProperties&) const {
+	virtual Bxp* copy() const {
 		return new BxpNodeAndDist(*this);
 	}
 
 	virtual void update(const BoxEvent& e, const BoxProperties& p) {
 		set_dist(e.box,pt); // actually never called by Set::dist(...)
-	}
-
-	virtual std::pair<Bxp*,Bxp*> update_bisect(const Bisection& b, const BoxProperties&, const BoxProperties&) {
-		assert(!node->is_leaf());
-
-		SetBisect& sb=*((SetBisect*) node);
-		BxpNodeAndDist* l=new BxpNodeAndDist(id,b.left,pt,sb.left);
-		BxpNodeAndDist* r=new BxpNodeAndDist(id,b.right,pt,sb.right);
-
-		return make_pair(l,r);
 	}
 
 	const Vector& pt;
@@ -337,6 +327,9 @@ double Set::dist(const Vector& pt, bool inside) const {
 
 			BxpNodeAndDist* nad1=(BxpNodeAndDist*) p.first->prop[key];
 			BxpNodeAndDist* nad2=(BxpNodeAndDist*) p.second->prop[key];
+
+			nad1->node = b.left;
+			nad2->node = b.right;
 
 			//count++;
 			if (nad1->dist<=lb) heap.push(p.first);

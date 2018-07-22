@@ -103,24 +103,20 @@ void BoxProperties::update(const BoxEvent& e) {
 	}
 }
 
-void BoxProperties::update_copy(BoxProperties& copy) const {
-	if (!_dep_up2date) topo_sort();
-
-	// Duplicate properties respecting dependencies
-	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
-		copy.add((*it)->update_copy(copy));
-	}
-}
-
 void BoxProperties::update_bisect(const Bisection& b, BoxProperties& lprop, BoxProperties& rprop) const {
 
 	if (!_dep_up2date) topo_sort();
 
 	// Duplicate properties respecting dependencies
 	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
-		pair<Bxp*,Bxp*> p = (*it)->update_bisect(b,lprop,rprop);
-		lprop.add(p.first);
-		rprop.add(p.second);
+		Bxp* p1 = (*it)->copy();
+		p1->update(BoxEvent(b.left,BoxEvent::CONTRACT,BitSet::singleton(b.box.size(), b.pt.var)), lprop);
+
+		Bxp* p2 = (*it)->copy();
+		p2->update(BoxEvent(b.right,BoxEvent::CONTRACT,BitSet::singleton(b.box.size(), b.pt.var)), rprop);
+
+		lprop.add(p1);
+		rprop.add(p2);
 	}
 }
 
@@ -129,7 +125,9 @@ BoxProperties::BoxProperties() : _dep_up2date(true) {
 }
 
 BoxProperties::BoxProperties(const BoxProperties& p) : _dep_up2date(p._dep_up2date) {
-	p.update_copy(*this);
+	for (Map<Bxp>::const_iterator it=p.map.begin(); it!=p.map.end(); it++) {
+		add(it->second->copy());
+	}
 }
 
 BoxProperties::~BoxProperties() {

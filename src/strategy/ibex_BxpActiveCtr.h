@@ -39,7 +39,7 @@ public:
 	/**
 	 * \brief Copy the property
 	 */
-	virtual BxpActiveCtr* update_copy(const BoxProperties& prop) const;
+	virtual BxpActiveCtr* copy() const;
 
 	/**
 	 * \brief Update the property after box modification.

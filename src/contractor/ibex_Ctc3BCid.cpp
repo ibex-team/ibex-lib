@@ -176,21 +176,23 @@ bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 void Ctc3BCid::update_and_contract(IntervalVector& box, int var) {
 
 	BoxProperties* old_prop = subcontext.data();
-	BoxProperties new_prop;
+	BoxProperties* new_prop;
 
 	if (old_prop) {
-		old_prop->update_copy(new_prop);
+		new_prop = new BoxProperties(*	old_prop);
 		// By creating a "slice", we have contracted only the domain of
 		// a single variable:
 		BoxEvent event(box, BoxEvent::CONTRACT, BitSet::singleton(nb_var,var));
-		new_prop.update(event);
-		subcontext.set_properties(&new_prop);
+		new_prop->update(event);
+		subcontext.set_properties(new_prop);
 	}
 
 	ctc.contract(box,subcontext); // note: var is already in the impact (see contract(...))
 
-	if (old_prop)
+	if (old_prop) {
+		delete new_prop;
 		subcontext.set_properties(old_prop);
+	}
 }
 
 bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var, double wv, bool left) {

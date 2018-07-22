@@ -23,13 +23,9 @@ class BxpTest:  public Bxp {
 public:
 	BxpTest(): Bxp(id), n(10) { };
 
-	Bxp* update_copy(const BoxProperties& prop) const {
-		return new BxpTest(*this);
-	};
+	Bxp* copy() const { return new BxpTest(*this); };
 
-	void update(const BoxEvent& event, const BoxProperties& prop) {
-
-	}
+	void update(const BoxEvent& event, const BoxProperties& prop) { }
 
 	int n;
 	static long id;

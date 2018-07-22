@@ -41,6 +41,8 @@ public:
 
 	/**
 	 * \brief Copy constructor.
+	 *
+	 * Duplicate all properties.
 	 */
 	BoxProperties(const BoxProperties&);
 
@@ -84,14 +86,6 @@ public:
 	 * \param event  - The box modification
 	 */
 	void update(const BoxEvent& event);
-
-	/**
-	 * \brief Update all the properties after box copy.
-	 *
-	 * The order properties are updated with respect dependencies.
-	 * \param copy - the properties associated to the copy
-	 */
-	void update_copy(BoxProperties& copy) const;
 
 	/**
 	 * \brief Update all the properties after box bisection.

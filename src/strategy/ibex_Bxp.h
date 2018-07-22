@@ -55,31 +55,21 @@ public:
 	Bxp(long id);
 
 	/**
-	 * \brief Update the property upon box modification.
-	 *
-	 * \param event - the box modification
-	 * \param prop  - the properties (dependencies are up to date)
-	 */
-	virtual void update(const BoxEvent& event, const BoxProperties& prop)=0;
-
-	/**
 	 * \brief Create a copy.
 	 *
 	 * The copy must have the same id.
 	 *
 	 * \param prop - the properties (dependencies are up to date)
 	 */
-	virtual Bxp* update_copy(const BoxProperties& prop) const=0;
+	virtual Bxp* copy() const=0;
 
 	/**
-	 * \brief Create data associated to child cells.
+	 * \brief Update the property upon box modification.
 	 *
-	 * The two property values in return must have the same id as this one.
-	 *
-	 * \param b    - the bisection
-	 * \param prop - the properties (dependencies are up to date)
+	 * \param event - the box modification
+	 * \param prop  - the properties (dependencies are up to date)
 	 */
-	virtual std::pair<Bxp*,Bxp*> update_bisect(const Bisection& b, const BoxProperties& l, const BoxProperties& r);
+	virtual void update(const BoxEvent& event, const BoxProperties& prop)=0;
 
 	/**
 	 * \brief Delete this.
@@ -103,10 +93,6 @@ public:
 /*================================== inline implementations ========================================*/
 
 inline Bxp::Bxp(long id) : id(id) {
-}
-
-inline std::pair<Bxp*,Bxp*> Bxp::update_bisect(const Bisection& b, const BoxProperties& l, const BoxProperties& r) {
-	return std::make_pair(update_copy(l), update_copy(r));
 }
 
 inline Bxp::~Bxp() {
