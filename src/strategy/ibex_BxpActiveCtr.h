@@ -77,7 +77,7 @@ public:
 	void set_inactive();
 
 	/**
-	 * \brieBxpActiveCtrf Get the BxpActiveCtr id of a constraint.
+	 * \brie Get the BxpActiveCtr id of a constraint.
 	 */
 	static long get_id(const NumConstraint&);
 
