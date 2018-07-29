@@ -320,7 +320,7 @@ protected:
 	/**
 	 * \brief Main procedure for updating the loup.
 	 */
-	bool update_loup(const IntervalVector& box);
+	bool update_loup(const IntervalVector& box, BoxProperties& prop);
 
 	/**
 	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)

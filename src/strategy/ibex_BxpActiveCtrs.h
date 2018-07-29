@@ -47,6 +47,13 @@ public:
 	virtual void update(const BoxEvent& event, const BoxProperties& prop);
 
 	/**
+	 * \brief To string
+	 *
+	 * By default: the id.
+	 */
+	virtual std::string to_string() const;
+
+	/**
 	 * \brief Check activity of constraints
 	 *
 	 * Force functions evaluation.

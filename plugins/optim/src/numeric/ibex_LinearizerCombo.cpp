@@ -80,8 +80,12 @@ void LinearizerCombo::add_property(const IntervalVector& init_box, BoxProperties
 #endif
 }
 
-/*********generation of the linearized system*********/
 int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver) {
+	BoxProperties prop;
+	return linearize(box, lp_solver, prop);
+}
+
+int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) {
 
 	int cont = 0;
 
@@ -89,18 +93,18 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver) {
 	case XNEWTON:
 	case TAYLOR:
 	case HANSEN:
-		cont = myxnewton->linearize(box,lp_solver);
+		cont = myxnewton->linearize(box,lp_solver,prop);
 		break;
 
 #ifdef _IBEX_WITH_AFFINE_
 	case ART:
 	case AFFINE2:
-		cont = myart->linearize(box,lp_solver);
+		cont = myart->linearize(box,lp_solver,prop);
 		break;
 	case COMPO: {
-		cont = myxnewton->linearize(box,lp_solver);
+		cont = myxnewton->linearize(box,lp_solver,prop);
 		if (cont!=-1) {
-			int cont2 = myart->linearize(box,lp_solver);
+			int cont2 = myart->linearize(box,lp_solver,prop);
 			if (cont2==-1) cont=-1;
 			else cont+=cont2;
 		}

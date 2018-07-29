@@ -13,6 +13,8 @@
 #include "ibex_Bisection.h"
 #include "ibex_BoxEvent.h"
 
+#include <sstream>
+
 #ifndef __IBEX_BOX_PROPERTY_H__
 #define __IBEX_BOX_PROPERTY_H__
 
@@ -73,6 +75,13 @@ public:
 	virtual void update(const BoxEvent& event, const BoxProperties& prop)=0;
 
 	/**
+	 * \brief To string
+	 *
+	 * By default: the id.
+	 */
+	virtual std::string to_string() const;
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~Bxp();
@@ -97,6 +106,12 @@ inline Bxp::Bxp(long id) : id(id) {
 }
 
 inline Bxp::~Bxp() {
+}
+
+inline std::string Bxp::to_string() const {
+	std::stringstream ss;
+	ss << '[' << id << ']';
+	return ss.str();
 }
 
 } /* namespace ibex */

@@ -21,21 +21,26 @@ LoupFinderDefault::LoupFinderDefault(const System& sys, bool inHC4) :
 
 }
 
-std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& box, const IntervalVector& old_loup_point, double old_loup) {
+void LoupFinderDefault::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+	finder_probing.add_property(init_box,prop);
+	finder_x_taylor.add_property(init_box,prop);
+}
+
+std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& box, const IntervalVector& old_loup_point, double old_loup, BoxProperties& prop) {
 
 	pair<IntervalVector,double> p=make_pair(old_loup_point, old_loup);
 
 	bool found=false;
 
 	try {
-		p=finder_probing.find(box,p.first,p.second);
+		p=finder_probing.find(box,p.first,p.second,prop);
 		found=true;
 	} catch(NotFound&) { }
 
 	try {
 		// TODO
 		// in_x_taylor.set_inactive_ctr(entailed->norm_entailed);
-		p=finder_x_taylor.find(box,p.first,p.second);
+		p=finder_x_taylor.find(box,p.first,p.second,prop);
 		found=true;
 	} catch(NotFound&) { }
 

@@ -44,7 +44,16 @@ CtcPolytopeHull::~CtcPolytopeHull() {
 	if (own_lr) delete &lr;
 }
 
+void CtcPolytopeHull::add_property(const IntervalVector& init_box, BoxProperties& map) {
+	lr.add_property(init_box, map);
+}
+
 void CtcPolytopeHull::contract(IntervalVector& box) {
+	CtcContext context;
+	contract(box,context);
+}
+
+void CtcPolytopeHull::contract(IntervalVector& box, CtcContext& context) {
 
 	if (!(limit_diam_box.contains(box.max_diam()))) return;
 	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
@@ -53,7 +62,9 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 	try {
 
 		//returns the number of constraints in the linearized system
-		int cont = lr.linearize(box, mylinearsolver);
+		int cont = context.data() ?
+				lr.linearize(box, mylinearsolver, *context.data()) :
+				lr.linearize(box, mylinearsolver);
 
 		//cout << "[polytope-hull] end of LR" << endl;
 

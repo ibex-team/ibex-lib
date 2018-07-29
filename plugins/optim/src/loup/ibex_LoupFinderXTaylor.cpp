@@ -24,7 +24,7 @@ void LoupFinderXTaylor::add_property(const IntervalVector& init_box, BoxProperti
 	lr.add_property(init_box,prop);
 }
 
-std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup) {
+std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup, BoxProperties& prop) {
 
 	if (!(lp_solver.default_limit_diam_box.contains(box.max_diam())))
 		throw NotFound();
@@ -45,7 +45,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 	for (int j=0; j<n; j++)
 		lp_solver.set_obj_var(j,g[j]);
 
-	int count = lr.linearize(box,lp_solver);
+	int count = lr.linearize(box,lp_solver,prop);
 
 	if (count==-1) {
 		lp_solver.clean_ctrs();

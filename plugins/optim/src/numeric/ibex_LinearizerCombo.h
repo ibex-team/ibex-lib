@@ -61,11 +61,16 @@ public:
 	~LinearizerCombo();
 
 	/**
-	 * \brief Linearization.
+	 * \brief Generation of the linear inequalities
   	 *
   	 * Linearize the system.
   	 */
 	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
+
+	/**
+	 * \brief Generation of the linear inequalities
+	 */
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
 
 	/**
 	 * \brief Add properties required by either linearizer.

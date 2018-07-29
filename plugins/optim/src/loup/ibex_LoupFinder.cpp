@@ -17,6 +17,10 @@ LoupFinder::~LoupFinder() {
 
 }
 
+void LoupFinder::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+
+}
+
 bool LoupFinder::check(const System& sys, const Vector& pt, double& loup, bool _is_inner) {
 
 	// "res" will contain an upper bound of the criterion

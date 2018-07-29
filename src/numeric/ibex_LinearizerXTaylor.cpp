@@ -62,7 +62,13 @@ LinearizerXTaylor::~LinearizerXTaylor() {
 
 void LinearizerXTaylor::add_property(const IntervalVector& init_box, BoxProperties& prop) {
 	long id = BxpActiveCtrs::get_id(sys);
+
 	if (!prop[id]) {
+		for (int i=0; i<sys.nb_ctr; i++) {
+			if (sys.ctrs[i].op==EQ) continue;
+			long ctr_id = BxpActiveCtr::get_id(sys.ctrs[i]);
+			if (!prop[ctr_id]) prop.add(new BxpActiveCtr(init_box, sys.ctrs[i]));
+		}
 		prop.add(new BxpActiveCtrs(sys));
 	}
 }
@@ -79,7 +85,12 @@ int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver
 	BitSet* active;
 	BxpActiveCtrs* p=(BxpActiveCtrs*) prop[BxpActiveCtrs::get_id(sys)];
 	if (p!=NULL) {
+		p->check(prop);
+		prop.propagate(*p);
 		active = &p->active;
+//		if (active->size()<box.size()) {
+//			cout << "[xtaylor] inactive constraint!\n";
+//		}
 	} else {
 		active = new BitSet(sys.active_ctrs(box));
 	}

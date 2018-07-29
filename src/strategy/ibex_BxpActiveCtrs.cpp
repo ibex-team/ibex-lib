@@ -50,7 +50,13 @@ void BxpActiveCtrs::_update(const BoxProperties& prop) {
 	BitSet::const_iterator c=ineq.begin(); // constraint number
 
 	for (vector<long>::const_iterator it=dependencies.begin(); it!=dependencies.end(); ++it) {
-		if (((const BxpActiveCtr*) prop[*it])->active())
+		const BxpActiveCtr* p=(const BxpActiveCtr*) prop[*it];
+		if (!p) {
+			stringstream ss;
+			ss << "[BxpActiveCtrs] missing property n°" << *it;
+			ibex_error(ss.str().c_str());
+		}
+		if (p->active())
 			active.add(c);
 		else
 			active.remove(c);
@@ -68,4 +74,13 @@ long BxpActiveCtrs::get_id(const System& sys) {
 	}
 }
 
+std::string BxpActiveCtrs::to_string() const {
+	stringstream ss;
+	ss << '[' << id << "] BxpActiveCtrs System n°" << sys.id;
+	ss << " --> ";
+	for (vector<long>::const_iterator it=dependencies.begin(); it!=dependencies.end(); ++it) {
+		ss << *it << ' ';
+	}
+	return ss.str();
+}
 } // end namespace ibex

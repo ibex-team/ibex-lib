@@ -70,10 +70,10 @@ double Optimizer::compute_ymax() {
 	return ymax;
 }
 
-bool Optimizer::update_loup(const IntervalVector& box) {
+bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 
 	try {
-		pair<IntervalVector,double> p=loup_finder.find(box,loup_point,loup);
+		pair<IntervalVector,double> p=loup_finder.find(box,loup_point,loup,prop);
 		loup_point = p.first;
 		loup = p.second;
 
@@ -222,7 +222,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	//		return;
 //	}
 
-	bool loup_ch=update_loup(tmp_box);
+	bool loup_ch=update_loup(tmp_box, c.prop);
 
 	// update of the upper bound of y in case of a new loup found
 	if (loup_ch) y &= Interval(NEG_INFINITY,compute_ymax());
@@ -287,6 +287,11 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	// add data required by the buffer
 	buffer.add_property(init_box, root->prop);
+
+	// add data required by the loup finder
+	loup_finder.add_property(init_box, root->prop);
+
+	///cout << "**** Properties ****\n" << root->prop << endl;
 
 	loup_changed=false;
 	initial_loup=obj_init_bound;

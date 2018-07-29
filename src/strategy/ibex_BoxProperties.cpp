@@ -23,7 +23,7 @@ struct DepComparator {
 	DepComparator(const Map<int,false>& level) : level(level) { }
 
 	bool operator()(Bxp* x, Bxp* y) {
-		return level[x->id] > level[y->id];
+		return level[x->id] < level[y->id];
 	}
 
 	const Map<int,false>& level;
@@ -98,9 +98,21 @@ void BoxProperties::update(const BoxEvent& e) {
 	// We could also create each time a new property map with
 	// the required properties only. But we have shared
 	// memory to avoid copies -> not very safe
-	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); it++) {
+	for (vector<Bxp*>::iterator it=dep.begin(); it!=dep.end(); ++it) {
 		(*it)->update(e,*this);
 	}
+}
+
+void BoxProperties::propagate(const Bxp& p) {
+//	// TODO: something more clever of course.. !!
+//
+//	vector<Bxp*>::iterator it;
+//	for (it=dep.begin(); it!=dep.end() && (*it)->id != p.id; ++it) { }
+//	if (it==dep.end())
+//		ibex_error("[BoxProperties]: unknown property in propagate");
+//	for (; it!=dep.end(); ++it) {
+//		(*it)->update(e,*this);
+//	}
 }
 
 void BoxProperties::update_bisect(const Bisection& b, BoxProperties& lprop, BoxProperties& rprop) const {
@@ -140,10 +152,9 @@ BoxProperties::~BoxProperties() {
 }
 
 ostream& operator<<(ostream& os, const BoxProperties& p) {
-	os << "{";
+	os << "{\n";
 	for (Map<Bxp>::const_iterator it=p.map.begin(); it!=p.map.end(); it++) {
-		if (it!=p.map.begin()) os << ' ';
-		os << it->first;
+		os << "  " << it->second->to_string() << endl;
 	}
 	os << "}";
 	return os;

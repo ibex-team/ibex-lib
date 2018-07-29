@@ -69,6 +69,16 @@ public:
 	virtual void contract(IntervalVector& box);
 
 	/**
+	 * \brief Contract the box.
+	 */
+	virtual void contract(IntervalVector& box, CtcContext& context);
+
+	/**
+	 * \brief Add linearizer properties to the map
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
+
+	/**
 	 * \brief Set the variable to be contracted.
 	 *
 	 * This allows, for example, to only contract the variable corresponding

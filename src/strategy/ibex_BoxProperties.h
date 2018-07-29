@@ -87,6 +87,15 @@ public:
 	 */
 	void update(const BoxEvent& event);
 
+	/*
+	 * \brief Incremental update.
+	 *
+	 * When a box has not been changed but a property "p" has
+	 * been updated, this function allows to call update(...)
+	 * only on properties that depend on "p".
+	 */
+	void propagate(const Bxp& p);
+
 	/**
 	 * \brief Update all the properties after box bisection.
 	 *

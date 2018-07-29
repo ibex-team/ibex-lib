@@ -57,6 +57,13 @@ public:
 	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup)=0;
 
 	/**
+	 * \brief Find a new loup in a given box.
+	 *
+	 * Default implementation: call find(...).
+	 */
+	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop);
+
+	/**
 	 * \brief True if equalities are accepted.
 	 *
 	 * This function is abstract and may be overriden in the subclass.
@@ -113,8 +120,8 @@ protected:
 
 /*================================== inline implementations ========================================*/
 
-inline void LoupFinder::add_property(const IntervalVector& init_box, BoxProperties& prop) {
-
+inline std::pair<IntervalVector, double> LoupFinder::find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop) {
+	return find(box,loup_point,loup);
 }
 
 } /* namespace ibex */

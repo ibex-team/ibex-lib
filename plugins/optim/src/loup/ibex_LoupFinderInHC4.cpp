@@ -11,6 +11,7 @@
 #include "ibex_LoupFinderInHC4.h"
 #include "ibex_LoupFinderProbing.h"
 #include "ibex_ExtendedSystem.h"
+#include "ibex_BxpActiveCtrs.h"
 
 using namespace std;
 
@@ -36,21 +37,47 @@ LoupFinderInHC4::LoupFinderInHC4(const System& sys) : sys(sys), goal_ctr(-1) {
 //    }
 //}
 
-std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
+void LoupFinderInHC4::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+	long id = BxpActiveCtrs::get_id(sys);
+	if (!prop[id]) {
+		for (int i=0; i<sys.nb_ctr; i++) {
+			if (sys.ctrs[i].op==EQ) continue;
+			long ctr_id = BxpActiveCtr::get_id(sys.ctrs[i]);
+			if (!prop[ctr_id]) prop.add(new BxpActiveCtr(init_box, sys.ctrs[i]));
+		}
+		prop.add(new BxpActiveCtrs(sys));
+	}
+}
+std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop) {
 
 	IntervalVector inbox=box;
 	bool inner_found=true;
 
 	if (sys.nb_ctr>0) {
-		BitSet active=sys.active_ctrs(box);
 
-		if (!active.empty()) {
+		// ========= get active constraints ===========
+		BitSet* active;
+		BxpActiveCtrs* p=(BxpActiveCtrs*) prop[BxpActiveCtrs::get_id(sys)];
+		if (p!=NULL) {
+			p->check(prop);
+			prop.propagate(*p);
+			active = &p->active;
+//			if (active->size()<box.size()) {
+//				cout << "[inhc4] inactive constraint!\n";
+//			}
+		} else {
+			active = new BitSet(sys.active_ctrs(box));
+		}
+		// ============================================
 
-			IntervalVector gx = sys.active_ctrs_eval(box);
+		if (!active->empty()) {
+
+			//IntervalVector gx = sys.active_ctrs_eval(box);
+			IntervalVector gx = sys.f_ctrs.eval_vector(box,*active);
 
 			int c;
-			for (int i=0; i<active.size(); i++) {
-				c=(i==0? active.min() : active.next(c));
+			for (int i=0; i<active->size(); i++) {
+				c=(i==0? active->min() : active->next(c));
 
 				Interval right_cst;
 				switch(sys.ops[c]) {
@@ -79,6 +106,8 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 				}
 			}
 		}
+		if (!p)
+			delete active;
 	}
 
 //	if (inner_found) {
@@ -94,8 +123,7 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 	if (mono_analysis_flag)
 		monotonicity_analysis(sys, inbox, inner_found);
 
-	return LoupFinderProbing(sys).find(inner_found? inbox : box,loup_point,loup);
-
+	return LoupFinderProbing(sys).find(inner_found? inbox : box, loup_point, loup);
 }
 
 } /* namespace ibex */
