@@ -264,10 +264,10 @@ void TestFunction::add_symbol() {
 	CPPUNIT_ASSERT(f.nb_arg()==2);
 	CPPUNIT_ASSERT(strcmp(f.arg_name(0),"x")==0);
 	CPPUNIT_ASSERT(strcmp(f.arg_name(1),"y")==0);
-	CPPUNIT_ASSERT(f.used(0));
-	CPPUNIT_ASSERT(f.used(0));
-	CPPUNIT_ASSERT(!f.used(1));
-	CPPUNIT_ASSERT(!f.used(1));
+	CPPUNIT_ASSERT(f.used_vars[0]);
+	CPPUNIT_ASSERT(f.used_vars[0]);
+	CPPUNIT_ASSERT(!f.used_vars[1]);
+	CPPUNIT_ASSERT(!f.used_vars[1]);
 	CPPUNIT_ASSERT(&f.node(0)==&x);
 	CPPUNIT_ASSERT(&f.node(1)==&y);
 }
@@ -356,18 +356,18 @@ void TestFunction::used() {
 
 	Function f(x,y,z,e);
 
-	CPPUNIT_ASSERT(f[0].nb_used_vars()==3);
-	CPPUNIT_ASSERT(f[0].used_var(0)==0);
-	CPPUNIT_ASSERT(f[0].used_var(1)==1);
-	CPPUNIT_ASSERT(f[0].used_var(2)==2);
+	CPPUNIT_ASSERT(f[0].used_vars.size()==3);
+	CPPUNIT_ASSERT(f[0].used_vars[0]);
+	CPPUNIT_ASSERT(f[0].used_vars[1]);
+	CPPUNIT_ASSERT(f[0].used_vars[2]);
 
-	CPPUNIT_ASSERT(f[1].nb_used_vars()==2);
-	CPPUNIT_ASSERT(f[1].used_var(0)==0);
-	CPPUNIT_ASSERT(f[1].used_var(1)==2);
+	CPPUNIT_ASSERT(f[1].used_vars.size()==2);
+	CPPUNIT_ASSERT(f[1].used_vars[0]);
+	CPPUNIT_ASSERT(f[1].used_vars[2]);
 
-	CPPUNIT_ASSERT(f[2].nb_used_vars()==2);
-	CPPUNIT_ASSERT(f[2].used_var(0)==1);
-	CPPUNIT_ASSERT(f[2].used_var(1)==2);
+	CPPUNIT_ASSERT(f[2].used_vars.size()==2);
+	CPPUNIT_ASSERT(f[2].used_vars[1]);
+	CPPUNIT_ASSERT(f[2].used_vars[2]);
 }
 
 void TestFunction::used02() {
@@ -376,17 +376,17 @@ void TestFunction::used02() {
 
 	Function f(x,y,x[0]+x[2]-(y[1][1]*y[1][2]));
 
-	CPPUNIT_ASSERT(f.used(0));
-	CPPUNIT_ASSERT(!f.used(1));
-	CPPUNIT_ASSERT(f.used(2));
+	CPPUNIT_ASSERT(f.used_vars[0]);
+	CPPUNIT_ASSERT(!f.used_vars[1]);
+	CPPUNIT_ASSERT(f.used_vars[2]);
 
-	CPPUNIT_ASSERT(!f.used(3));
-	CPPUNIT_ASSERT(!f.used(4));
-	CPPUNIT_ASSERT(!f.used(5));
+	CPPUNIT_ASSERT(!f.used_vars[3]);
+	CPPUNIT_ASSERT(!f.used_vars[4]);
+	CPPUNIT_ASSERT(!f.used_vars[5]);
 
-	CPPUNIT_ASSERT(!f.used(6));
-	CPPUNIT_ASSERT(f.used(7));
-	CPPUNIT_ASSERT(f.used(8));
+	CPPUNIT_ASSERT(!f.used_vars[6]);
+	CPPUNIT_ASSERT(f.used_vars[7]);
+	CPPUNIT_ASSERT(f.used_vars[8]);
 
 }
 

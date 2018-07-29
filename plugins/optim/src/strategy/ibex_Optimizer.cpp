@@ -282,17 +282,11 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// add data required by the bisector
 	bsc.add_property(init_box, root->prop);
 
-	// add data required by the bisector
+	// add data required by the contractor
 	ctc.add_property(init_box, root->prop);
 
 	// add data required by the buffer
 	buffer.add_property(init_box, root->prop);
-
-	// add data required by optimizer + KKT contractor
-//	root->add<EntailedCtr>();
-//	//root->add<Multipliers>();
-//	entailed=&root->get<EntailedCtr>();
-//	entailed->init_root(user_sys,sys);
 
 	loup_changed=false;
 	initial_loup=obj_init_bound;

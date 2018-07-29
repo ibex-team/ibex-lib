@@ -31,6 +31,10 @@ void BxpActiveCtr::check() {
 }
 
 void BxpActiveCtr::update(const BoxEvent& e, const BoxProperties& prop) {
+
+	if ((e.impact & ctr.f.used_vars).empty())
+		return;
+
 	if (_active || e.type!=BoxEvent::CONTRACT) {
 		_active=true;
 		up2date=false;

@@ -13,6 +13,7 @@
 #include "ibex_mistral_Bitset.h"
 
 #include <cassert>
+#include <climits>
 
 namespace ibex {
 
@@ -57,6 +58,11 @@ public:
 	BitSet(const int n, const int* l);
 
 	/**
+	 * \brief Change the capacity
+	 */
+	void resize(int n);
+
+	/**
 	 * \brief Create an "empty" bitset () of capacity n.
 	 *
 	 * The bitset contains n bits, indexed from 0 to n-1, all set to "false".
@@ -92,6 +98,15 @@ public:
 	 * \brief Set this to another.
 	 */
 	BitSet& operator=(const BitSet& b);
+
+	/**
+	 * \brief Set this list to the intersection with another.
+	 *
+	 * E.g. if b1=(1,2,5,8) and b2=(1,5) then b1 &= b2 gives
+	 *
+	 *      b1 = (1,5)
+	 */
+	BitSet& operator&=(const BitSet& b);
 
 	/**
 	 * \brief Set this list to the union with another.
@@ -175,11 +190,59 @@ public:
 	 */
 	void diff(const BitSet& b);
 
+	/**
+	 * \brief Bitset iterator
+	 *
+	 * Iterates over the sorted list of integer
+	 */
+	class iterator {
+	public:
+		iterator(const BitSet& b, bool min=true);
+
+		iterator& operator++();
+
+		iterator operator++(int);
+
+		operator int() const;
+
+		const BitSet* b;
+		int el; // ==INT_MIN if past-the-end
+	};
+
+	/**
+	 * \brief Bitset const iterator
+	 */
+	typedef iterator const_iterator;
+
+	/**
+	 * \brief First iterator
+	 */
+	iterator begin() const;
+
+	/**
+	 * \brief Past-the-end iterator
+	 */
+	iterator end() const;
+
+
 private:
 	Mistral::BitSet bitset;
 
 };
 
+/**
+ * \brief The intersection of two bitsets
+ */
+BitSet operator&(const BitSet& b1, const BitSet& b2);
+
+/**
+ * \brief The union of two bitsets
+ */
+BitSet operator|(const BitSet& b1, const BitSet& b2);
+
+/**
+ * \brief Stream out the bitset
+ */
 std::ostream& operator<<(std::ostream& os, const BitSet& b);
 
 /*================================== inline implementations ========================================*/
@@ -210,6 +273,8 @@ inline bool BitSet::operator!=(const BitSet& b) { return bitset!=b.bitset; }
 
 inline BitSet& BitSet::operator=(const BitSet& b) { bitset=b.bitset; return *this; }
 
+inline BitSet& BitSet::operator&=(const BitSet& b) { bitset.intersect_with(b.bitset); return *this; }
+
 inline BitSet& BitSet::operator|=(const BitSet& b) { bitset.union_with(b.bitset); return *this; }
 
 inline int BitSet::min() const { return bitset.min(); }
@@ -233,6 +298,32 @@ inline void BitSet::clear() { bitset.clear(); }
 inline bool BitSet::operator[](const int i) const { return bitset.fast_contain(i); }
 
 inline void BitSet::diff(const BitSet& b) { bitset.setminus_with(b.bitset); }
+
+inline BitSet operator&(const BitSet& b1, const BitSet& b2) { return BitSet(b1)&=b2; }
+
+inline BitSet operator|(const BitSet& b1, const BitSet& b2) { return BitSet(b1)|=b2; }
+
+inline BitSet::iterator BitSet::begin() const { return iterator(*this); }
+
+inline BitSet::iterator BitSet::end() const { return iterator(*this,false); }
+
+inline BitSet::iterator::iterator(const BitSet& b, bool min) : b(&b), el(min && !b.empty()? b.min():INT_MIN) { }
+
+inline BitSet::iterator& BitSet::iterator::operator++() {
+	if (el==b->max()) el=INT_MIN;
+	else el=b->next(el);
+	return *this;
+}
+
+inline BitSet::iterator BitSet::iterator::operator++(int) {
+	BitSet::iterator it(*this);
+	++(*this);
+	return it;
+}
+
+inline BitSet::iterator::operator int() const {
+	return el;
+}
 
 } // end namespace ibex
   

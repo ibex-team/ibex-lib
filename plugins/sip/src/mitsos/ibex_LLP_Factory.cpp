@@ -75,7 +75,7 @@ LLP_Factory::LLP_Factory(const MitsosSIP& sip, int c, const Vector& xopt) : new_
 
 	// TODO: not the cleanest way!!
 	for (int j=0; j<sip.p; j++) {
-		if (sip.sys.ctrs[c].f.used(sip.varset.param(j))) {
+		if (sip.sys.ctrs[c].f.used_vars[sip.varset.param(j)]) {
 			param_LLP_var.add(j);
 		}
 	}

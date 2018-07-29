@@ -64,20 +64,12 @@ CtcFwdBwd::~CtcFwdBwd() {
 }
 
 void CtcFwdBwd::init() {
-
-	input = new BitSet(nb_var);
-	output = new BitSet(nb_var);
-
-	int v;
-	for (int i=0; i<ctr.f.nb_used_vars(); i++) {
-		v=ctr.f.used_var(i);
-		output->add(v);
-		input->add(v);
-	}
+	input = new BitSet(ctr.f.used_vars);
+	output = new BitSet(ctr.f.used_vars);
 }
 
 void CtcFwdBwd::add_property(const IntervalVector& init_box, BoxProperties& map) {
-	if (!map[active_prop_id])
+	if (ctr.op!=EQ && !map[active_prop_id])
 		map.add(new BxpActiveCtr(init_box, ctr));
 }
 
@@ -103,6 +95,7 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 		if (p) p->set_inactive();
 		context.set_flag(CtcContext::INACTIVE);
 		context.set_flag(CtcContext::FIXPOINT);
+		return;
 	}
 	//std::cout << " ---> " << box << std::endl;
 

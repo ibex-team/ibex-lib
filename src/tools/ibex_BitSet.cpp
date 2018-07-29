@@ -13,6 +13,13 @@ using namespace std;
 
 namespace ibex {
 
+void BitSet::resize(int n) {
+	BitSet b(*this);
+	bitset.destroy();
+	bitset.initialise(n,0);
+	(*this) |= b;
+}
+
 BitSet BitSet::compose(const BitSet& b) const {
 	assert(b.bitset.max() < size());
 

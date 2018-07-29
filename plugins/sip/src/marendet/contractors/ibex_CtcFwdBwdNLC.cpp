@@ -28,14 +28,8 @@ CtcFwdBwdNLC::~CtcFwdBwdNLC() {
 }
 
 void CtcFwdBwdNLC::init() {
-    input = new BitSet(nb_var);
-    output = new BitSet(nb_var);
-    int v;
-    for (int i=0; i<function_->nb_used_vars(); i++) {
-        v=function_->used_var(i);
-        output->add(v);
-        input->add(v);
-    }
+	input = new BitSet(function_->used_vars);
+	output = new BitSet(function_->used_vars);
 }
 
 void CtcFwdBwdNLC::contract(IntervalVector &box) {

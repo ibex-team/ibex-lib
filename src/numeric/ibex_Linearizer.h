@@ -53,6 +53,11 @@ public:
 	 */
 	int nb_var() const;
 
+	/**
+	 * \brief Identifying number.
+	 */
+	const long id;
+
 protected:
 
 	/**

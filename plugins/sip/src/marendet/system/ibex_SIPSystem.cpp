@@ -190,7 +190,7 @@ Function* SIPSystem::copyGoal() {
 Array<const ExprSymbol> SIPSystem::getUsedParamSymbols(const Function* fun) {
 	Array<const ExprSymbol> paramSymbols;
 	for (int i = 0; i < fun->nb_arg(); ++i) {
-		//if (fun->arg_name(i)[0] == 'p' && fun->arg_name(i)[1] == '_' && fun->used(i)) {
+		//if (fun->arg_name(i)[0] == 'p' && fun->arg_name(i)[1] == '_' && fun->used_vars[i]) {
 		string name = fun->arg_name(i);
 		if(regex_match(name.begin(), name.end(), quantified_regex_)) {
 			paramSymbols.add(fun->arg(i));
