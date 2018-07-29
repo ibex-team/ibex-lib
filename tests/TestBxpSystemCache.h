@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - System Box Tests
+ * I B E X - System Cache Tests
  * ============================================================================
  * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -9,8 +9,8 @@
  * Created     : June 30th, 2017
  * ---------------------------------------------------------------------------- */
 
-#ifndef __TEST_SYSTEM_BOX_H__
-#define __TEST_SYSTEM_BOX_H__
+#ifndef __TEST_BXP_SYSTEM_CACHE_H__
+#define __TEST_BXP_SYSTEM_CACHE_H__
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -19,11 +19,11 @@
 
 namespace ibex {
 
-class TestSystemBox : public CppUnit::TestFixture {
+class TestBxpSystemCache : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestSystemBox);
+	CPPUNIT_TEST_SUITE(TestBxpSystemCache);
 	CPPUNIT_TEST(goal_eval01);
 	CPPUNIT_TEST(goal_gradient01);
 	CPPUNIT_TEST(ctrs_eval);
@@ -45,9 +45,9 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestSystemBox);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestBxpSystemCache);
 
 
 } // end namespace
 
-#endif // __TEST_SYSTEM_BOX_H__
+#endif // __TEST_BXP_SYSTEM_CACHE_H__
