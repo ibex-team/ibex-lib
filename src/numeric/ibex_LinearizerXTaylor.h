@@ -87,6 +87,16 @@ public:
 	 */
 	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
 
+	/**
+	 * \brief Generation of the linear inequalities
+	 */
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
+
+	/**
+	 * \brief Add BxpActiveCtrs
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+
 private:
 
 	/**
@@ -97,12 +107,12 @@ private:
 	/**
 	 * \brief Linearization (RELAX mode)
 	 */
-	int linear_relax(const IntervalVector& box);
+	int linear_relax(const IntervalVector& box, const BitSet& active);
 
 	/**
 	 * \brief Linearization (RESTRICT mode)
 	 */
-	int linear_restrict(const IntervalVector& box);
+	int linear_restrict(const IntervalVector& box, const BitSet& active);
 
 	/**
 	 * \brief Set the corner information "inf" (see below).

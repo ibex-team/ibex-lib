@@ -65,7 +65,12 @@ public:
   	 *
   	 * Linearize the system.
   	 */
-	int linearize(const IntervalVector& box, LPSolver& lp_solver);
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
+
+	/**
+	 * \brief Add properties required by either linearizer.
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
 
 private:
 

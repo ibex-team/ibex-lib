@@ -73,6 +73,13 @@ LinearizerCombo::~LinearizerCombo() {
 #endif
 }
 
+void LinearizerCombo::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+	if (myxnewton!=NULL) myxnewton->add_property(init_box,prop);
+#ifdef _IBEX_WITH_AFFINE_
+	if (myart!=NULL) myart->add_property(init_box,prop);
+#endif
+}
+
 /*********generation of the linearized system*********/
 int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver) {
 

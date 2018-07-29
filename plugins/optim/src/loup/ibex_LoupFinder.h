@@ -13,6 +13,7 @@
 #include "ibex_Vector.h"
 #include "ibex_Exception.h"
 #include "ibex_System.h"
+#include "ibex_BoxProperties.h"
 
 #include <utility>
 
@@ -67,6 +68,13 @@ public:
 	}
 
 	/**
+	 * \brief Add properties required by this loup finder.
+	 *
+	 * By default: add nothing.
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~LoupFinder();
@@ -102,6 +110,12 @@ protected:
 	void monotonicity_analysis(const System& sys, IntervalVector& box, bool is_inner);
 
 };
+
+/*================================== inline implementations ========================================*/
+
+inline void LoupFinder::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+
+}
 
 } /* namespace ibex */
 

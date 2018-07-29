@@ -14,7 +14,7 @@ using namespace std;
 
 namespace ibex {
 
-Map<long,false> BxpActiveCtr::ids;
+Map<long,false> BxpActiveCtrs::ids;
 
 BxpActiveCtrs::BxpActiveCtrs(const System& sys) :
 		Bxp(get_id(sys)), sys(sys), active(sys.nb_ctr), ineq(sys.nb_ctr) {
@@ -34,7 +34,7 @@ BxpActiveCtrs* BxpActiveCtrs::copy(const IntervalVector& box, const BoxPropertie
 }
 
 void BxpActiveCtrs::check(BoxProperties& prop) {
-	for (vector<long>::iterator it=dependencies.begin(); it!=dependencies.end(); it++) {
+	for (vector<long>::iterator it=dependencies.begin(); it!=dependencies.end(); ++it) {
 		((BxpActiveCtr*) prop[*it])->check();
 	}
 	_update(prop);
@@ -47,14 +47,14 @@ void BxpActiveCtrs::update(const BoxEvent& e, const BoxProperties& prop) {
 void BxpActiveCtrs::_update(const BoxProperties& prop) {
 	if (ineq.empty()) return;
 
-	int c; // constraint number
+	BitSet::const_iterator c=ineq.begin(); // constraint number
 
-	for (vector<long>::const_iterator it=dependencies.begin(); it!=dependencies.end(); it++) {
-		c= it==dependencies.begin() ? ineq.min() : ineq.next(c);
+	for (vector<long>::const_iterator it=dependencies.begin(); it!=dependencies.end(); ++it) {
 		if (((const BxpActiveCtr*) prop[*it])->active())
 			active.add(c);
 		else
 			active.remove(c);
+		++c;
 	}
 }
 

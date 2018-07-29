@@ -46,6 +46,11 @@ public:
 	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& x0, double current_loup);
 
 	/**
+	 * \brief Add properties required by this loup finder.
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+
+	/**
 	 * \brief The NLP problem.
 	 */
 	const System& sys;

@@ -20,6 +20,10 @@ LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,Linea
 //	diam_simplex=0;
 }
 
+void LoupFinderXTaylor::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+	lr.add_property(init_box,prop);
+}
+
 std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup) {
 
 	if (!(lp_solver.default_limit_diam_box.contains(box.max_diam())))

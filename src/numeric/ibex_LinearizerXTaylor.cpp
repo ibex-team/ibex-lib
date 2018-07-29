@@ -15,6 +15,7 @@
 #include "ibex_Random.h"
 #include "ibex_Exception.h"
 #include "ibex_NormalizedSystem.h"
+#include "ibex_BxpActiveCtrs.h"
 
 #include <vector>
 
@@ -59,21 +60,40 @@ LinearizerXTaylor::~LinearizerXTaylor() {
 	delete[] inf;
 }
 
-int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver)  {
-	lp_solver = &_lp_solver;
-
-	if (mode==RELAX)
-		return linear_relax(box);
-	else
-		return linear_restrict(box);
+void LinearizerXTaylor::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+	long id = BxpActiveCtrs::get_id(sys);
+	if (!prop[id]) {
+		prop.add(new BxpActiveCtrs(sys));
+	}
 }
 
-int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
+int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver)  {
+	BoxProperties prop;
+	return linearize(box, _lp_solver, prop);
+}
 
-	int count=0; // total number of added constraint
+int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver, BoxProperties& prop) {
+	lp_solver = &_lp_solver;
 
 	// ========= get active constraints ===========
-	BitSet active=sys.active_ctrs(box);
+	BitSet* active;
+	BxpActiveCtrs* p=(BxpActiveCtrs*) prop[BxpActiveCtrs::get_id(sys)];
+	if (p!=NULL) {
+		active = &p->active;
+	} else {
+		active = new BitSet(sys.active_ctrs(box));
+	}
+	// ============================================
+
+	int n = mode==RELAX ? linear_relax(box,*active) : linear_restrict(box,*active);
+
+	if (p==NULL) delete active;
+	return n;
+}
+
+int LinearizerXTaylor::linear_relax(const IntervalVector& box, const BitSet& active)  {
+
+	int count=0; // total number of added constraint
 
 	if (active.empty()) return 0;
 
@@ -145,9 +165,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 	return count;
 }
 
-int LinearizerXTaylor::linear_restrict(const IntervalVector& box) {
-
-	BitSet active=sys.active_ctrs(box);
+int LinearizerXTaylor::linear_restrict(const IntervalVector& box, const BitSet& active) {
 
 	if (active.empty()) return 0;
 

@@ -47,7 +47,7 @@ public:
 	virtual void update(const BoxEvent& event, const BoxProperties& prop);
 
 	/**
-	 * \brief Check if the constraint is inactive
+	 * \brief Check activity of constraints
 	 *
 	 * Force functions evaluation.
 	 */

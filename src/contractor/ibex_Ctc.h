@@ -55,7 +55,7 @@ public:
 	/**
 	 * \brief Contraction.
 	 */
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box)=0;
 
 	/*
 	 * Contract a box with a context.
@@ -132,11 +132,6 @@ inline Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL) { }
 inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(NULL) { }
 
 inline Ctc::~Ctc() { }
-
-inline void Ctc::contract(IntervalVector& box) {
-	CtcContext context;
-	contract(box,context);
-}
 
 inline void Ctc::contract(IntervalVector& box, CtcContext& context) {
 	contract(box);

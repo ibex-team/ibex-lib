@@ -12,6 +12,7 @@
 
 #include "ibex_IntervalVector.h"
 #include "ibex_LPSolver.h"
+#include "ibex_BoxProperties.h"
 
 namespace ibex {
 
@@ -44,6 +45,20 @@ public:
 	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver)=0;
 
 	/**
+	 * \brief Add constraints in a LP solver.
+	 *
+	 * By default, call linearize(box, lp_solver).
+	 */
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
+
+	/**
+	 * \brief Add properties required by this loup finder.
+	 *
+	 * By default: add nothing.
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~Linearizer();
@@ -70,6 +85,14 @@ protected:
 
 inline int Linearizer::nb_var() const {
 	return n;
+}
+
+inline void Linearizer::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+
+}
+
+inline int Linearizer::linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) {
+	return linearize(box, lp_solver);
 }
 
 } /* namespace ibex */
