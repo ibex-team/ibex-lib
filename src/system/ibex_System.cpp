@@ -160,4 +160,72 @@ System::~System() {
 	if (ops) delete[] ops;
 }
 
+
+namespace {
+
+bool __is_inactive(const Interval& gx, CmpOp op) {
+	bool inactive;
+	switch (op) {
+	case LT:  inactive=gx.ub()<0; break;
+	case LEQ: inactive=gx.ub()<=0; break;
+	case EQ:  inactive=(gx==Interval::ZERO); break;
+	case GEQ: inactive=gx.lb()>=0; break;
+	case GT:  inactive=gx.lb()>0; break;
+	}
+	return inactive;
+}
+
+}
+
+//TODO: improvement: don't create a bitset in return when not necessary?
+
+BitSet System::active_ctrs(const IntervalVector& box) const {
+
+	if (nb_ctr==0) return BitSet(0);
+
+	BitSet active(BitSet::all(f_ctrs.image_dim()));
+
+	IntervalVector res = f_ctrs.eval_vector(box);
+
+	for (int c=0; c<f_ctrs.image_dim(); c++) {
+		if (__is_inactive(res[c],ops[c])) active.remove(c);
+	}
+
+	return active;
+}
+
+IntervalVector System::active_ctrs_eval(const IntervalVector& box) const {
+
+	BitSet b=active_ctrs(box);
+
+	assert(!b.empty());
+
+	IntervalVector ev(b.size());
+	int c;
+	for (int i=0; i<b.size(); i++) {
+		c=(i==0? b.min() : b.next(c));
+		ev[i] = f_ctrs[c].eval(box); // not: a call to f_ctrs.eval_vector would benefit from the DAG...
+	}
+	return ev;
+}
+
+IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
+
+	BitSet b=active_ctrs(box);
+
+	assert(!b.empty());
+
+	IntervalMatrix J(b.size(),nb_var);
+
+	J=f_ctrs.jacobian(box,b);
+
+	return J;
+}
+
+bool System::is_inner(const IntervalVector& box) const {
+
+	return active_ctrs(box).empty();
+
+}
+
 } // end namespace ibex

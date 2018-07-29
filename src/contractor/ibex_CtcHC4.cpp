@@ -21,6 +21,14 @@ Array<Ctc> convert(const Array<NumConstraint>& csp) {
 	}
 	return vec;
 }
+
+Array<Ctc> convert(const System& sys) {
+	std::vector<Ctc*> vec;
+	for (int i=0; i<sys.nb_ctr; i++) {
+		vec.push_back(new CtcFwdBwd(sys,i));
+	}
+	return vec;
+}
 }
 
 CtcHC4::CtcHC4(const Array<NumConstraint>& csp, double ratio, bool incremental) :

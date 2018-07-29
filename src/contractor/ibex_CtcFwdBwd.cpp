@@ -25,35 +25,39 @@ NumConstraint& build_ctr(const Function& f, const Domain& y) {
 
 }
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, const Domain& y) : Ctc(f.nb_var()), ctr(build_ctr(f,y)), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const Domain& y) : Ctc(f.nb_var()), ctr(build_ctr(f,y)), d(ctr.right_hand_side()), ctr_num(-1), active_prop_id(BxpActiveCtr::get_id(ctr)), system_cache_id(-1), own_ctr(true) {
 	assert(f.expr().dim==y.dim);
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, const Interval& y) : Ctc(f.nb_var()), ctr(build_ctr(f,Domain((Interval&) y))), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const Interval& y) : Ctc(f.nb_var()), ctr(build_ctr(f,Domain((Interval&) y))), d(ctr.right_hand_side()), ctr_num(-1), active_prop_id(BxpActiveCtr::get_id(ctr)), system_cache_id(-1), own_ctr(true) {
 	assert(f.expr().dim==Dim::scalar());
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalVector& y) : Ctc(f.nb_var()), ctr(build_ctr(f,Domain((IntervalVector&) y,f.expr().dim.type()==Dim::ROW_VECTOR))), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalVector& y) : Ctc(f.nb_var()), ctr(build_ctr(f,Domain((IntervalVector&) y,f.expr().dim.type()==Dim::ROW_VECTOR))), d(ctr.right_hand_side()), ctr_num(-1), active_prop_id(BxpActiveCtr::get_id(ctr)), system_cache_id(-1), own_ctr(true) {
 	assert(f.expr().dim.is_vector() && f.expr().dim.vec_size()==y.size());
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), ctr(build_ctr(f,Domain((IntervalMatrix&) y))), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), ctr(build_ctr(f,Domain((IntervalMatrix&) y))), d(ctr.right_hand_side()), ctr_num(-1), active_prop_id(BxpActiveCtr::get_id(ctr)), system_cache_id(-1), own_ctr(true) {
 	assert(f.expr().dim==Dim::matrix(y.nb_rows(),y.nb_cols()));
 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const Function& f, CmpOp op) : Ctc(f.nb_var()), ctr(*new NumConstraint(f,op)), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(true) {
+CtcFwdBwd::CtcFwdBwd(const Function& f, CmpOp op) : Ctc(f.nb_var()), ctr(*new NumConstraint(f,op)), d(ctr.right_hand_side()), ctr_num(-1), active_prop_id(BxpActiveCtr::get_id(ctr)), system_cache_id(-1), own_ctr(true) {
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), ctr(ctr), d(ctr.right_hand_side()), active_prop_id(BxpActiveCtr::get_id(ctr)), own_ctr(false) {
+CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), ctr(ctr), d(ctr.right_hand_side()), ctr_num(-1), active_prop_id(BxpActiveCtr::get_id(ctr)), system_cache_id(-1), own_ctr(false) {
+	init();
+}
+
+CtcFwdBwd::CtcFwdBwd(const System& sys, int i) : Ctc(ctr.f.nb_var()), ctr(sys.ctrs[i]), d(ctr.right_hand_side()), ctr_num(i), active_prop_id(-1), system_cache_id(BxpSystemCache::get_id(sys)), own_ctr(false) {
 	init();
 }
 
@@ -69,8 +73,12 @@ void CtcFwdBwd::init() {
 }
 
 void CtcFwdBwd::add_property(const IntervalVector& init_box, BoxProperties& map) {
-	if (ctr.op!=EQ && !map[active_prop_id])
+	if (ctr_num==-1) {
+		if (ctr.op!=EQ && !map[active_prop_id])
 		map.add(new BxpActiveCtr(init_box, ctr));
+	} else {
+		// the system cache is added at higher level
+	}
 }
 
 void CtcFwdBwd::contract(IntervalVector& box) {
@@ -82,9 +90,17 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 
 	assert(box.size()==ctr.f.nb_var());
 
-	BxpActiveCtr* p=context.data() ? (BxpActiveCtr*) (*context.data())[active_prop_id] : NULL;
+	BxpActiveCtr* p=NULL;
+	BxpSystemCache* sp=NULL;
 
-	if (p && !p->active()) {
+	if (context.data()) {
+		if (ctr_num==-1)
+			p=(BxpActiveCtr*) (*context.data())[active_prop_id];
+		else
+			sp=(BxpSystemCache*) (*context.data())[system_cache_id];
+	}
+
+	if ((p && !p->active()) || (sp && !(sp->active_ctrs()[ctr_num]))) {
 		context.set_flag(CtcContext::INACTIVE);
 		context.set_flag(CtcContext::FIXPOINT);
 		return;
@@ -93,6 +109,7 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 	//std::cout << " hc4 of " << f << "=" << d << " with box=" << box << std::endl;
 	if (ctr.f.backward(d,box)) {
 		if (p) p->set_inactive();
+		if (sp) sp->active_ctrs().remove(ctr_num);
 		context.set_flag(CtcContext::INACTIVE);
 		context.set_flag(CtcContext::FIXPOINT);
 		return;

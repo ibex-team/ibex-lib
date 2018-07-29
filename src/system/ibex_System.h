@@ -121,15 +121,11 @@ public:
 
 	/**
 	 * \brief Interval evaluation of the goal.
-	 *
-	 * \note Can be cached if box is actually a SystemBox.
 	 */
 	Interval goal_eval(const IntervalVector& box) const;
 
 	/**
 	 * \brief Interval gradient of the goal.
-	 *
-	 * \note Can be cached if box is actually a SystemBox.
 	 */
 	IntervalVector goal_gradient(const IntervalVector& box) const;
 
@@ -147,8 +143,6 @@ public:
 	 * function returns ([x],[y]+[x]).
 	 * Usually, this function is called either on a system containing
 	 * only equalities or a normalized system (see NormalizedSystem).
-	 *
-	 * \note Can be cached if box is actually a SystemBox.
 	 */
 
 	IntervalVector ctrs_eval(const IntervalVector& box) const;
@@ -162,8 +156,6 @@ public:
 
 	/**
 	 * \brief Get the jacobian matrix of the constraints.
-	 *
-	 * \note Can be cached if box is actually a SystemBox.
 	 */
 	IntervalMatrix ctrs_jacobian(const IntervalVector& box) const;
 
@@ -182,8 +174,6 @@ public:
 	 * \warning A "constraint" here corresponds to a component of "f_ctrs"
 	 *          **not** a constraint in the "ctrs" array (this is different
 	 *          in the case of vector/matrix constraints).
-	 *
-	 * \note Can be cached if box is actually a SystemBox.
 	 */
 	BitSet active_ctrs(const IntervalVector& box) const;
 
@@ -191,8 +181,6 @@ public:
 	 * \brief Quick check that the box is inside g(x)<=0.
 	 *
 	 * \return True only if all the constraints are inactive
-	 *
-	 * \note Can be cached if box is actually a SystemBox.
 	 */
 	bool is_inner(const IntervalVector& box) const;
 
@@ -200,8 +188,6 @@ public:
 	 * \brief Interval evaluation of the active constraints.
 	 *
 	 * \pre The number of (potentially) active constraints must be >0
-	 *
-	 * \note Can be cached if box is actually a SystemBox.
 	 */
 	IntervalVector active_ctrs_eval(const IntervalVector& box) const;
 
@@ -209,8 +195,6 @@ public:
 	 * \brief Interval jacobian matrix of the active constraints.
 	 *
 	 * * \pre The number of (potentially) active constraints must be >0
-	 *
-	 * \note Can be cached if box is actually a SystemBox.
 	 */
 	IntervalMatrix active_ctrs_jacobian(const IntervalVector& box) const;
 
