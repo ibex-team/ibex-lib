@@ -34,7 +34,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 	lp_solver.clean_ctrs();
 	lp_solver.set_bounds(box);
 
-	IntervalVector ig=sys.goal_gradient(box.mid());
+	IntervalVector ig=sys.goal->gradient(box.mid());
 	if (ig.is_empty()) // unfortunately, at the midpoint the function is not differentiable
 		throw NotFound(); // not a big deal: wait for another box...
 

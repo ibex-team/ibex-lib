@@ -11,6 +11,7 @@
 
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_BxpActiveCtr.h"
+#include "ibex_BxpSystemCache.h"
 #include "ibex_ExprCopy.h"
 
 namespace ibex {

@@ -11,7 +11,7 @@
 #include "ibex_LoupFinderInHC4.h"
 #include "ibex_LoupFinderProbing.h"
 #include "ibex_ExtendedSystem.h"
-#include "ibex_BxpActiveCtrs.h"
+#include "ibex_BxpSystemCache.h"
 
 using namespace std;
 
@@ -38,16 +38,11 @@ LoupFinderInHC4::LoupFinderInHC4(const System& sys) : sys(sys), goal_ctr(-1) {
 //}
 
 void LoupFinderInHC4::add_property(const IntervalVector& init_box, BoxProperties& prop) {
-	long id = BxpActiveCtrs::get_id(sys);
-	if (!prop[id]) {
-		for (int i=0; i<sys.nb_ctr; i++) {
-			if (sys.ctrs[i].op==EQ) continue;
-			long ctr_id = BxpActiveCtr::get_id(sys.ctrs[i]);
-			if (!prop[ctr_id]) prop.add(new BxpActiveCtr(init_box, sys.ctrs[i]));
-		}
-		prop.add(new BxpActiveCtrs(sys));
+	if (!prop[BxpSystemCache::get_id(sys)]) {
+		prop.add(new BxpSystemCache(sys,BxpSystemCache::default_update_ratio));
 	}
 }
+
 std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop) {
 
 	IntervalVector inbox=box;
@@ -57,11 +52,9 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 
 		// ========= get active constraints ===========
 		BitSet* active;
-		BxpActiveCtrs* p=(BxpActiveCtrs*) prop[BxpActiveCtrs::get_id(sys)];
+		BxpSystemCache* p=(BxpSystemCache*) prop[BxpSystemCache::get_id(sys)];
 		if (p!=NULL) {
-			p->check(prop);
-			prop.propagate(*p);
-			active = &p->active;
+			active = &p->active_ctrs();
 //			if (active->size()<box.size()) {
 //				cout << "[inhc4] inactive constraint!\n";
 //			}
