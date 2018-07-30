@@ -36,13 +36,15 @@ void CtcAcid::contract(IntervalVector& box) {
 }
 
 void CtcAcid::contract(IntervalVector& box, CtcContext& context) {
+	// this initial contraction allows to set, after, the impact
+	// to only one variable (in the slicing process)!
+	// note: we can transmit here the input impact to the contractor
+	// as it is strictly less contracting that ACID (TODO: check that)
+	ctc.contract(box, context);
+	if (box.is_empty()) return;
 
 	// --------------------- context ------------------
-	BitSet impact(nb_var);
-	if (context.impact())
-		impact = *context.impact();
-	else
-		impact.fill(0,nb_var-1);
+	BitSet impact(nb_var); // can be empty!
 	subcontext.set_impact(&impact);
 	subcontext.set_properties(context.data());
 	// ------------------------------------------------
