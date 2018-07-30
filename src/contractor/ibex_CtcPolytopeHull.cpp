@@ -86,6 +86,10 @@ void CtcPolytopeHull::contract(IntervalVector& box, CtcContext& context) {
 		box.set_empty(); // empty the box before exiting
 		mylinearsolver.clean_ctrs();
 	}
+
+	if (context.data()) {
+		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
+	}
 }
 
 void CtcPolytopeHull::set_contracted_vars(const BitSet& vars) {

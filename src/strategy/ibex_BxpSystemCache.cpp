@@ -65,7 +65,7 @@ void BxpSystemCache::update(const BoxEvent& e, const BoxProperties& prop) {
 	// ------------------------ HACK -----------------------
 	IntervalVector box(nb_var);
 	if (e.box.size()>nb_var) {
-		for (int i=0; i<nb_var-1; i++) { // skip goal variable
+		for (int i=0; i<nb_var; i++) { // skip goal variable
 			box[i]=e.box[i];
 		}
 	} else {

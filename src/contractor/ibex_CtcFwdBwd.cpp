@@ -113,13 +113,11 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 		if (sp) sp->active_ctrs().remove(ctr_num);
 		context.set_flag(CtcContext::INACTIVE);
 		context.set_flag(CtcContext::FIXPOINT);
-		return;
 	}
-	//std::cout << " ---> " << box << std::endl;
-
-	if (box.is_empty()) {
+	else if (box.is_empty()) {
 		context.set_flag(CtcContext::FIXPOINT);
 	}
+	//std::cout << " ---> " << box << std::endl;
 
 	// Note: setting the FIXPOINT flag is incorrect when there
 	// is no multiple occurrence because some operators

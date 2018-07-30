@@ -73,6 +73,7 @@ double Optimizer::compute_ymax() {
 bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 
 	try {
+
 		pair<IntervalVector,double> p=loup_finder.find(box,loup_point,loup,prop);
 		loup_point = p.first;
 		loup = p.second;
@@ -188,6 +189,8 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	if (y.is_empty()) {
 		c.box.set_empty();
 		return;
+	} else {
+		c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
 	}
 
 	/*================ contract x with f(x)=y and g(x)<=0 ================*/
@@ -216,16 +219,15 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	IntervalVector tmp_box(n);
 	read_ext_box(c.box,tmp_box);
 
-//	entailed = &c.get<EntailedCtr>();
-//	if (!update_entailed_ctr(tmp_box)) {
-//		c.box.set_empty();
-	//		return;
-//	}
+	c.prop.update(BoxEvent(c.box,BoxEvent::CHANGE));
 
 	bool loup_ch=update_loup(tmp_box, c.prop);
 
 	// update of the upper bound of y in case of a new loup found
-	if (loup_ch) y &= Interval(NEG_INFINITY,compute_ymax());
+	if (loup_ch) {
+		y &= Interval(NEG_INFINITY,compute_ymax());
+		c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
+	}
 
 	//TODO: should we propagate constraints again?
 
