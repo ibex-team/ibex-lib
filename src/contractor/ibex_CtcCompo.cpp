@@ -187,6 +187,11 @@ void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 
 	BitSet* flags = context.output_flags();
 
+	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
+
+	BitSet* input_impact = context.impact();
+	context.set_impact(&impact);
+
 	// TODO: a more clever impact handling could be
 	// done here
 	for (int i=0; i<list.size(); i++) {
@@ -213,6 +218,7 @@ void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 				flags->add(CtcContext::FIXPOINT);
 				context.set_output_flags(flags); // restore!
 			}
+			context.set_impact(input_impact); // restore!
 			return;
 		}
 	}
@@ -221,6 +227,7 @@ void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 		if (inactive) flags->add(CtcContext::INACTIVE);
 		context.set_output_flags(flags); // restore!
 	}
+	context.set_impact(input_impact); // restore!
 }
 
 } // end namespace ibex
