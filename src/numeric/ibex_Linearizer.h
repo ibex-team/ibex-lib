@@ -22,7 +22,7 @@ namespace ibex {
  * \brief Linearization method.
  *
  * This in an abstract class for all linear approximations
- * (relaxations or restrictions) of nonlinear systems.
+ * (relaxations or restrictions) of nonlin, int goal_varear systems.
  */
 class Linearizer {
 public:
@@ -52,7 +52,7 @@ public:
 	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
 
 	/**
-	 * \brief Add properties required by this loup finder.
+	 * \brief Add properties required by this linearizer.
 	 *
 	 * By default: add nothing.
 	 */

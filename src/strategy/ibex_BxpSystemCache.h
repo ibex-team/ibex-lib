@@ -44,6 +44,7 @@ public:
 	 *                       the 0 value means "as soon as the box has changed" and the
 	 *                       extreme other value 1 means "when one interval is reduced
 	 *                       to a single point". See Interval::rel_distance(...).
+	 *
 	 */
 	BxpSystemCache(const System& sys, double update_ratio);
 
@@ -57,6 +58,10 @@ public:
 	 *
 	 *  Check if something has changed and udpdate the
 	 *  flags accordingly.
+	 *
+	 * TODO: If the box size is n+1 where n is the number of
+	 * variables of the system, it means that the box actually
+	 * corresponds to the extended system! Fixed so far by a hack.
 	 */
 	virtual void update(const BoxEvent& event, const BoxProperties& prop);
 
@@ -153,6 +158,7 @@ public:
 	static double default_update_ratio;
 
 protected:
+
 	/**
 	 * Number of variables of the system
 	 */
@@ -188,6 +194,10 @@ protected:
 	mutable bool active_ctr_updated;
 
 	mutable bool active_ctr_jacobian_updated;
+
+	// If <>-1 then the box will be extended but the system is not.
+	// Note: Not very clean. To be fixed at some point...
+	int goal_var;
 
 	static Map<long,false> ids;
 };

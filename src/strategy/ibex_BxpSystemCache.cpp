@@ -11,6 +11,8 @@
 #include "ibex_BxpSystemCache.h"
 #include "ibex_Id.h"
 
+#include <cassert>
+
 using namespace std;
 
 namespace ibex {
@@ -19,7 +21,7 @@ double BxpSystemCache::default_update_ratio = 0.01;
 
 Map<long,false> BxpSystemCache::ids;
 
-BxpSystemCache::BxpSystemCache(const System& sys, double update_ratio) :
+BxpSystemCache::BxpSystemCache(const System& sys, double update_ratio/*, int goal_var*/) :
 		Bxp(get_id(sys)), sys(sys), nb_var(sys.nb_var),
 		update_ratio(update_ratio), cache(IntervalVector::empty(sys.nb_var)),
 		goal_eval_updated(false), _goal_gradient(sys.nb_var), goal_gradient_updated(false),
@@ -27,8 +29,9 @@ BxpSystemCache::BxpSystemCache(const System& sys, double update_ratio) :
 		_ctrs_jacobian(sys.f_ctrs.image_dim()>0? sys.f_ctrs.image_dim() : 1, sys.f_ctrs.image_dim()>0? sys.nb_var : 1),
 		ctr_jacobian_updated(false),
 		active(BitSet::empty(sys.f_ctrs.image_dim())),
-		active_ctr_updated(false), active_ctr_jacobian_updated(false) {
+		active_ctr_updated(false), active_ctr_jacobian_updated(false) /*, goal_var(goal_var) */ {
 
+	//assert((goal_var==-1 && init_box.size()==sys.nb_var) || (goal_var!=-1 && init_box.size()==sys.nb_var+1));
 }
 
 BxpSystemCache* BxpSystemCache::copy(const IntervalVector& box, const BoxProperties& prop) const {
@@ -56,29 +59,43 @@ void BxpSystemCache::update(const BoxEvent& e, const BoxProperties& prop) {
 	bool close = true;     // is the new box close to the cache?
 	bool included = true;  // is the new box included in the cache?
 
-	if (e.box.is_empty()) {
+	// TODO:
+	// Should be fixed by making loup finders working on the
+	// extended box directly?
+	// ------------------------ HACK -----------------------
+	IntervalVector box(nb_var);
+	if (e.box.size()>nb_var) {
+		for (int i=0; i<nb_var-1; i++) { // skip goal variable
+			box[i]=e.box[i];
+		}
+	} else {
+		box=e.box;
+	}
+	// -----------------------------------------------------
+
+	if (box.is_empty()) {
 		if (!cache.is_empty()) close=false;
 	} else if (cache.is_empty()) {
-		if (!e.box.is_empty()) included=false;
+		if (!box.is_empty()) included=false;
 	} else {
 
 		for (int j=0; j<nb_var; j++) {
 
-			if (e.type!=BoxEvent::CONTRACT && !e.box[j].is_subset(cache[j])) {
+			if (e.type!=BoxEvent::CONTRACT && !box[j].is_subset(cache[j])) {
 				included=false;
 				break;
 			}
 
 			if (close) // we test closeness only if necessary
-				if ((update_ratio==0 && cache[j]!=e.box[j])
-						|| cache[j].rel_distance(e.box[j])>update_ratio)
+				if ((update_ratio==0 && cache[j]!=box[j])
+						|| cache[j].rel_distance(box[j])>update_ratio)
 					close = false;
 		}
 	}
 
 	if (!close || !included) {
 
-		cache = e.box;
+		cache = box;
 
 		// mark interval computations as "to be updated"
 		if (sys.goal) {

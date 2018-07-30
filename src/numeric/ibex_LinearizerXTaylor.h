@@ -15,6 +15,7 @@
 
 #include "ibex_Linearizer.h"
 #include "ibex_System.h"
+#include "ibex_BxpSystemCache.h"
 
 namespace ibex {
 
@@ -182,6 +183,10 @@ private:
 	 */
 	LPSolver* lp_solver;
 
+	/**
+	 * Current system cache (NULL if none)
+	 */
+	BxpSystemCache* cache;
 };
 
 } // end namespace ibex

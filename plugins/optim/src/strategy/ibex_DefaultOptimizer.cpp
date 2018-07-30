@@ -84,15 +84,15 @@ Ctc&  DefaultOptimizer::ctc(const System& ext_sys) {
 	Array<Ctc> ctc_list(3);
 
 	// first contractor on ext_sys : incremental HC4 (propag ratio=0.01)
-	ctc_list.set_ref(0, rec(new CtcHC4 (ext_sys.ctrs,0.01,true)));
+	ctc_list.set_ref(0, rec(new CtcHC4 (ext_sys,0.01,true)));
 	// second contractor on ext_sys : "Acid" with incremental HC4 (propag ratio=0.1)
-	ctc_list.set_ref(1, rec(new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys.ctrs,0.1,true)),true)));
+	ctc_list.set_ref(1, rec(new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys,0.1,true)),true)));
 	// the last contractor is "XNewton"
 	if (ext_sys.nb_ctr > 1) {
 		ctc_list.set_ref(2,rec(new CtcFixPoint
 				(rec(new CtcCompo(
 						rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))),
-								rec(new CtcHC4(ext_sys.ctrs,0.01)))), default_relax_ratio)));
+								rec(new CtcHC4(ext_sys,0.01)))), default_relax_ratio)));
 	} else {
 		ctc_list.set_ref(2,rec(new CtcPolytopeHull(rec(new LinearizerCombo (ext_sys,LinearizerCombo::XNEWTON)))));
 	}

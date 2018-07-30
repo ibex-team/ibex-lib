@@ -58,7 +58,7 @@ CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), ctr(ctr), 
 	init();
 }
 
-CtcFwdBwd::CtcFwdBwd(const System& sys, int i) : Ctc(ctr.f.nb_var()), ctr(sys.ctrs[i]), d(ctr.right_hand_side()), ctr_num(i), active_prop_id(-1), system_cache_id(BxpSystemCache::get_id(sys)), own_ctr(false) {
+CtcFwdBwd::CtcFwdBwd(const System& sys, int i) : Ctc(sys.nb_var), ctr(sys.ctrs[i]), d(ctr.right_hand_side()), ctr_num(i), active_prop_id(-1), system_cache_id(BxpSystemCache::get_id(sys)), own_ctr(false) {
 	init();
 }
 

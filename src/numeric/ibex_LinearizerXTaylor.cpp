@@ -36,7 +36,7 @@ LinearizerXTaylor::LinearizerXTaylor(const System& _sys, approx_mode _mode, corn
 			Linearizer(_sys.nb_var), sys(_sys),
 			m(sys.f_ctrs.image_dim()), goal_ctr(-1 /*tmp*/),
 			mode(_mode), slope(_slope),
-			inf(new bool[n]), lp_solver(NULL) {
+			inf(new bool[n]), lp_solver(NULL), cache(NULL) {
 
 	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
 		((int&) goal_ctr)=((const ExtendedSystem&) sys).goal_ctr();
@@ -76,9 +76,10 @@ int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver
 
 	// ========= get active constraints ===========
 	BitSet* active;
-	BxpSystemCache* p=(BxpSystemCache*) prop[BxpSystemCache::get_id(sys)];
-	if (p!=NULL) {
-		active = &p->active_ctrs();
+	cache=(BxpSystemCache*) prop[BxpSystemCache::get_id(sys)];
+
+	if (cache!=NULL) {
+		active = &cache->active_ctrs();
 //			if (active->size()<box.size()) {
 //				cout << "[xtaylor] inactive constraint!\n";
 //			}
@@ -89,7 +90,7 @@ int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver
 
 	int n = mode==RELAX ? linear_relax(box,*active) : linear_restrict(box,*active);
 
-	if (p==NULL) delete active;
+	if (cache==NULL) delete active;
 	return n;
 }
 
@@ -104,7 +105,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box, const BitSet& act
 	IntervalMatrix Df(ma,n); // derivatives over the box
 
 	if (slope == TAYLOR) { // compute derivatives once for all
-		Df=sys.f_ctrs.jacobian(box,active);
+		Df=cache? cache->active_ctrs_jacobian() : sys.f_ctrs.jacobian(box,active);
 		//Df=sys.active_ctrs_jacobian(box);  // --> better with SystemBox
 
 		if (Df.is_empty()) return -1;
@@ -177,7 +178,7 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box, const BitSet& 
 		// the corner used -> typed IntervalVector just to have guaranteed computations
 		IntervalVector corner = get_corner_point(box);
 
-		IntervalMatrix J=sys.f_ctrs.jacobian(box,active);
+		IntervalMatrix J=cache? cache->active_ctrs_jacobian() : sys.f_ctrs.jacobian(box,active);
 		//IntervalMatrix J=sys.active_ctrs_jacobian(box);  // --> better with SystemBox
 
 		if (J.is_empty()) return -1; // note: no way to inform that the box is actually infeasible

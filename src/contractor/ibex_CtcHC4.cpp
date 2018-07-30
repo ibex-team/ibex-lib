@@ -36,7 +36,7 @@ CtcHC4::CtcHC4(const Array<NumConstraint>& csp, double ratio, bool incremental) 
 }
 
 CtcHC4::CtcHC4(const System& sys, double ratio, bool incremental) :
-				CtcPropag(convert(sys.ctrs), ratio, incremental) {
+				CtcPropag(convert(sys), ratio, incremental) {
 
 }
 

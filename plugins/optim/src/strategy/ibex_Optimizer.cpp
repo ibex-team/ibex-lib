@@ -291,7 +291,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// add data required by the loup finder
 	loup_finder.add_property(init_box, root->prop);
 
-	///cout << "**** Properties ****\n" << root->prop << endl;
+	//cout << "**** Properties ****\n" << root->prop << endl;
 
 	loup_changed=false;
 	initial_loup=obj_init_bound;

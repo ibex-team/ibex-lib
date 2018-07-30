@@ -66,7 +66,7 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 		if (!active->empty()) {
 
 			//IntervalVector gx = sys.active_ctrs_eval(box);
-			IntervalVector gx = sys.f_ctrs.eval_vector(box,*active);
+			IntervalVector gx = p? p->active_ctrs_eval() : sys.f_ctrs.eval_vector(box,*active);
 
 			int c;
 			for (int i=0; i<active->size(); i++) {
