@@ -19,6 +19,7 @@
 #include "ibex_Function.h"
 #include "ibex_Interval.h"
 #include "ibex_UnconstrainedLocalSearch.h"
+#include "ibex_utils.h"
 
 #include <list>
 #include <vector>
@@ -47,6 +48,7 @@ void CtcBlankenship::contractCell(Cell& cell) {
 	}
 	//Vector sol(cell.box.mid());
 	Vector sol = lp_solver_.get_primal_sol();
+	//std::cout << "xlin(ls)=" << sol << std::endl;
 	for (int i = 0; i < system_.sic_constraints_.size(); ++i) {
 		maximizeSIC(i, sol);
 	}
@@ -56,7 +58,7 @@ bool CtcBlankenship::maximizeSIC(int sic_index, const Vector& uplo_point) {
 	auto& node_data = cell_->get<NodeData>();
 	auto& cache = node_data.sic_constraints_caches[sic_index];
 	const auto& constraint = system_.sic_constraints_[sic_index];
-	const int max_blankenship_list_size = 2 * constraint.variable_count_;
+	const int max_blankenship_list_size = 10 * constraint.variable_count_;
 	IntervalVector parameter_search_space = IntervalVector::empty(constraint.parameter_count_);
 	Vector x0(constraint.parameter_count_);
 	double x0_value = NEG_INFINITY;
@@ -86,9 +88,18 @@ bool CtcBlankenship::maximizeSIC(int sic_index, const Vector& uplo_point) {
 
 	UnconstrainedLocalSearch local_search(f, parameter_search_space);
 	Vector x_min(constraint.parameter_count_);
+	/*std::cout << std::setprecision(12) << std::endl;
+	std::cout << "uplo=" << print_mma(uplo_point) << std::endl;
+	std::cout << "{";
+	for(int i = 0; i < uplo_point.size()-1; ++i) {
+		std::cout << uplo_point[i] << ", ";
+	}
+	std::cout << uplo_point[uplo_point.size()-1] << "}" << std::endl;
+	std::cout << "x0=" << x0 << std::endl;*/
 	auto status = local_search.minimize(x0, x_min, eps_, max_iter_);
-	if (status == UnconstrainedLocalSearch::ReturnCode::SUCCESS) {
+	if (status == UnconstrainedLocalSearch::ReturnCode::SUCCESS && (std::find(cache.best_blankenship_points_.begin(), cache.best_blankenship_points_.end(), x_min) == cache.best_blankenship_points_.end())) {
 		//double eval = f.eval(x_min).ub();
+		//std::cout << "ls=" << x_min << std::endl;
 		cache.best_blankenship_points_.emplace_back(x_min);
 		if (cache.best_blankenship_points_.size() > max_blankenship_list_size) {
 			cache.best_blankenship_points_.pop_front();

@@ -52,6 +52,15 @@ std::string print_mma(const Vector& iv) {
 	return res;
 }
 
+std::string print_mma(const IntervalVector& iv) {
+	std::string res = "{";
+	for(int i = 0; i < iv.size()-1; ++i) {
+		res += "{" + std::to_string(iv[i].lb()) + ", " + std::to_string(iv[i].ub()) + "}, ";
+	}
+	res += "{" + std::to_string(iv[iv.size()-1].lb()) + ", " + std::to_string(iv[iv.size()-1].ub()) + "}}";
+	return res;
+}
+
 bool isfinite(const Vector& v) {
 	for (int i = 0; i < v.size(); ++i) {
 		if (!std::isfinite(v[i]))

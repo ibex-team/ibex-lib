@@ -64,10 +64,17 @@ void CtcFwdBwdSIC::contract(IntervalVector &box) {
 			}
 			if (full_box.is_empty())
 				break;
+			/*if (!constraint_.function_->backward(backward_domain_, full_box)) {
+				fixpoint = false;
+			}
+			if (full_box.is_empty())
+				break;*/
 		}
 	}
 
 	box = full_box.subvector(0, nb_var - 1);
+	//if(full_box.is_empty())
+	//	box.set_empty();
 	if (fixpoint) {
 		set_flag(FIXPOINT);
 		set_flag(INACTIVE);

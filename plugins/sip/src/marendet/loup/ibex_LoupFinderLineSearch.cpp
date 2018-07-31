@@ -19,6 +19,7 @@
 #include "ibex_LinearException.h"
 #include "ibex_Matrix.h"
 #include "ibex_Vector.h"
+#include "ibex_SICPaving.h"
 
 #include <vector>
 
@@ -58,6 +59,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 	Matrix A = lp_solver_.get_rows();
 	vector<Vector> active_constraints;
 
+	blankenship(sol);
 	// After variables and linearized goal
 	for (int i = system_.ext_nb_var + 1; i < A.nb_rows(); ++i) {
 		if (!Interval(dual[i]).inflate(1e-10).contains(0)) {
@@ -90,16 +92,6 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 	for(int i = 0; i < active_constraints.size(); ++i) {
 		G.set_col(i, active_constraints[i]);
 	}
-	/*cout << "box=" << cell.box << endl;
-	cout << "sol=" << sol << endl;
-	cout << "dual=" << dual << endl;
-	cout << G.nb_cols() << endl;*/
-	/*cout << G << endl;
-	 Matrix invG(G.nb_cols(), G.nb_rows());
-	 real_inverse(G, invG);
-	 Vector eps(invG.nb_cols(), 1);
-	 Vector direction = invG*eps;¨*/
-	//cout << G << endl;
 
 	LPSolver dir_solver(system_.nb_var + 1, 10000, 10000);
 	for(int i = 0; i < G.nb_cols(); ++i) {
@@ -116,101 +108,71 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 
 	LPSolver::Status_Sol dir_solver_status = dir_solver.solve();
 
-	//if(dir_solver_status == LPSolver::Status_Sol::)
 	Vector direction = dir_solver.get_primal_sol().subvector(0, system_.nb_var-1);
 
-	/*
-	Matrix GtG = G.transpose() * G;
-	int* pr = new int[GtG.nb_rows()];
-	int* pc = new int[GtG.nb_cols()];
-	Matrix LU(GtG.nb_rows(), GtG.nb_rows());
-	IntervalVector eps_box(GtG.nb_rows(), Interval(0, 1));
-	try {
-		real_LU(GtG, LU, pr, pc);
-	} catch (SingularMatrixException &e) {
-//		std::cerr
-//				<< "Node::_getImprovingVectorFromOuterLinearizations: real_LU fail"
-//				<< std::endl;
-		throw NotFound();
-	}*/
 	double best_loup = POS_INFINITY;
 	Vector best_loup_point(system_.nb_var);
 	bool loup_found = false;
-	for (int i = 0; i < 1; ++i) {
-		/*Vector rhs = -eps_box.random();
-		Vector u(GtG.nb_rows());
-		try {
-			real_LU_solve(LU, pr, rhs, u);
-		} catch (SingularMatrixException &e) {
-			continue;
-		}
-		Vector direction = G*real_inverse(G.transpose()*G)*rhs;
-		//double direction_array[] = { 1,1,1,1,1,1 };
-		//Vector direction = Vector(6, direction_array);
-		direction = 1./norm(direction)*direction;
-		*/
-		//cout << "direction=" << direction << endl;
-		//cout << "point=" << sol << endl;
-		Interval t = Interval::POS_REALS;
-		for (const auto& constraint : system_.sic_constraints_) {
-			const auto& cache = constraint.cache_->parameter_caches_;
-			for (const auto& mem_box : cache) {
-				Interval eval = constraint.evaluate(sol, mem_box.parameter_box);
-				IntervalVector gradient_x = constraint.gradient(cell.box, mem_box.parameter_box).subvector(0,
-						system_.nb_var - 1);
-				//IntervalVector gradient_x = mem_box.full_gradient.subvector(0, system_.nb_var-1);
-				t &= (Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub();
-				//cout << "t=" << ((Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub()) << "   dg(" << mem_box.parameter_box << ")= " << (gradient_x*direction) << "  g =" << eval.ub() << endl;
+	Interval t = Interval::POS_REALS;
+	for (const auto& constraint : system_.sic_constraints_) {
+		const auto& cache = constraint.cache_->parameter_caches_;
+		for (const auto& mem_box : cache) {
+			Interval eval = constraint.evaluate(sol, mem_box.parameter_box);
+			IntervalVector gradient_x = constraint.gradient(cell.box, mem_box.parameter_box).subvector(0,
+					system_.nb_var - 1);
+			//IntervalVector gradient_x = mem_box.full_gradient.subvector(0, system_.nb_var-1);
+			t &= (Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub();
+			//cout << "t=" << ((Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub()) << "   dg(" << mem_box.parameter_box << ")= " << (gradient_x*direction) << "  g =" << eval.ub() << endl;
 
+		}
+	}
+	// -1 to exclude goal
+	for (int i = 0; i < system_.normal_constraints_.size() - 1; ++i) {
+		const auto& constraint = system_.normal_constraints_[i];
+		IntervalVector gradient_x = constraint.gradient(cell.box).subvector(0, system_.nb_var - 1);
+		t &= (Interval::NEG_REALS - constraint.evaluate(sol).ub()) / (gradient_x * direction).ub();
+	}
+	//cout << "t=" << t << endl;
+	if (!t.is_empty()) {
+		Vector point = sol + t.lb() * direction;
+		//cout << "g(point)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
+		Vector point_plus_goal(system_.ext_nb_var);
+		point_plus_goal.put(0, point);
+		point_plus_goal[system_.ext_nb_var-1] = system_.goal_ub(point);
+		//cout << print_mma(point_plus_goal) << endl;
+		if (cell.box.subvector(0, system_.nb_var-1).contains(point)) {
+			double new_loup = loup;
+			if (check(system_, point, new_loup, true) && new_loup < best_loup) {
+				best_loup_point = point;
+				best_loup = new_loup;
+				loup_found = true;
 			}
-		}
-		// -1 to exclude goal
-		for (int i = 0; i < system_.normal_constraints_.size() - 1; ++i) {
-			const auto& constraint = system_.normal_constraints_[i];
-			IntervalVector gradient_x = constraint.gradient(cell.box).subvector(0, system_.nb_var - 1);
-			t &= (Interval::NEG_REALS - constraint.evaluate(sol).ub()) / (gradient_x * direction).ub();
-		}
-		//cout << "t=" << t << endl;
-		if (!t.is_empty()) {
-			Vector point = sol + t.lb() * direction;
-			//cout << "g(point)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
-			Vector point_plus_goal(system_.ext_nb_var);
+			Vector left = sol;
+			Vector right = point;
+			for(int i = 0; i < 10; ++i) {
+				Vector middle = 0.5*(left + right);
+				//cout << "middle=" << middle.subvector(0,system_.nb_var-1) << endl;
+				//cout << "g(middle)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
+				if(is_inner_with_paving_simplification(middle)) {
+				//if(system_.is_inner(middle)) {
+					//cout << "g(middle_inner)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
+					//cout << "goal_ub(middle)=" << system_.goal_ub(middle.subvector(0,system_.nb_var-1)) << endl;
+					right = middle;
+				} else {
+					left = middle;
+				}
+			}
+			point = right;
 			point_plus_goal.put(0, point);
 			point_plus_goal[system_.ext_nb_var-1] = system_.goal_ub(point);
-			//cout << print_mma(point_plus_goal) << endl;
-			if (true || cell.box.contains(point_plus_goal)) {
-				double new_loup = loup;
-				if (check(system_, point, new_loup, true) && new_loup < best_loup) {
-					best_loup_point = point;
-					best_loup = new_loup;
-					loup_found = true;
-				}
-				Vector left = sol;
-				Vector right = point;
-				for(int i = 0; i < 10; ++i) {
-					Vector middle = 0.5*(left + right);
-					//cout << "middle=" << middle.subvector(0,system_.nb_var-1) << endl;
-					//cout << "g(middle)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
-					if(system_.is_inner(middle)) {
-						//cout << "g(middle_inner)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
-						//cout << "goal_ub(middle)=" << system_.goal_ub(middle.subvector(0,system_.nb_var-1)) << endl;
-						right = middle;
-					} else {
-						left = middle;
-					}
-				}
-				point = right;
-				point_plus_goal.put(0, point);
-				point_plus_goal[system_.ext_nb_var-1] = system_.goal_ub(point);
-				//cout << "point=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
-				//cout << "line search=" <<  point_plus_goal << endl;
-				new_loup = loup;
-				if (cell.box.contains(point_plus_goal) && check(system_, point, new_loup, true) && new_loup < best_loup) {
-					std::cout << "lf22" << std::endl;
-					best_loup_point = point;
-					best_loup = new_loup;
-					loup_found = true;
-				}
+			//cout << "point=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
+			//cout << "line search=" <<  point_plus_goal << endl;
+			new_loup = loup;
+			if (cell.box.contains(point_plus_goal) && check(system_, point, new_loup, true) && new_loup < best_loup) {
+				//std::cout << "lf22" << std::endl;
+				best_loup_point = point;
+				best_loup = new_loup;
+				loup_found = true;
 			}
 		}
 	}
@@ -228,6 +190,76 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const Cell& cell,
 	 return std::make_pair(loup_point, new_loup);
 	 }*/
 	throw NotFound();
+}
+
+bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVector& box) {
+	for(int i = 0; i < system_.normal_constraints_.size()-1; ++i) {
+		if(!system_.normal_constraints_[i].isSatisfied(box)) {
+			return false;
+		}
+	}
+
+	NodeData node_data_copy = NodeData(*system_.node_data_);
+
+	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
+		const auto& sic = system_.sic_constraints_[cst_index];
+		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
+		simplify_paving(system_.sic_constraints_[cst_index], cache, box, true);
+	}
+	const int MAX_ITERATIONS = 4;
+	for(int i = 0; i < MAX_ITERATIONS; ++i) {
+		for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
+			const auto& sic = system_.sic_constraints_[cst_index];
+			auto& cache = node_data_copy.sic_constraints_caches[cst_index];
+			bisect_paving(cache);
+			simplify_paving(system_.sic_constraints_[cst_index], cache, box, true);
+		}
+	}
+	
+	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
+		const auto& sic = system_.sic_constraints_[cst_index];
+		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
+		if(!is_feasible_with_paving(sic, cache, box)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+void LoupFinderLineSearch::blankenship(const IntervalVector& box) {
+	//std::cout << "xlin(blankenship)=" << print_mma(box.mid()) << std::endl;
+	NodeData node_data_copy = NodeData(*system_.node_data_);
+	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
+		const auto& sic = system_.sic_constraints_[cst_index];
+		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
+		simplify_paving(system_.sic_constraints_[cst_index], cache, box, true);
+	}
+	const int MAX_ITERATIONS = 4;
+	for(int i = 0; i < MAX_ITERATIONS; ++i) {
+		for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
+			const auto& sic = system_.sic_constraints_[cst_index];
+			auto& cache = node_data_copy.sic_constraints_caches[cst_index];
+			bisect_paving(cache);
+			simplify_paving(system_.sic_constraints_[cst_index], cache, box, true);
+		}
+	}
+	//std::cout << "NEW ITER" << std::endl << std::endl;
+	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
+		const auto& sic = system_.sic_constraints_[cst_index];
+		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
+		const int max_blankenship_list_size = 10 * sic.variable_count_;
+		auto& blankenship_list = system_.node_data_->sic_constraints_caches[cst_index].best_blankenship_points_;
+		for(const auto& param_box : cache.parameter_caches_) {
+			if(std::find(blankenship_list.begin(), blankenship_list.end(), param_box.parameter_box.mid()) == blankenship_list.end()) {
+				//std::cout << "blankenship=" <<param_box.parameter_box.mid() << std::endl;
+				blankenship_list.emplace_back(param_box.parameter_box.mid());
+				//blankenship_list.emplace_back(param_box.parameter_box.mid());
+			}
+		}
+		while(blankenship_list.size() > max_blankenship_list_size) {
+			blankenship_list.pop_front();
+		}
+	}
 }
 
 LoupFinderLineSearch::~LoupFinderLineSearch() {

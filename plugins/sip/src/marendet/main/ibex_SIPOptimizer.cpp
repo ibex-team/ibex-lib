@@ -139,9 +139,9 @@ SIPOptimizer::Status SIPOptimizer::minimize(const IntervalVector& box, double ob
 void SIPOptimizer::handleCell(Cell& cell) {
 	// LOAD THE NEW CACHE!
 	NodeData::sip_system->loadNodeData(&cell.get<NodeData>());
-	/*cout << "before : " << cell.box << endl;
-	const auto& list = cell.get<NodeData>().sic_constraints_caches[0].parameter_caches_;
-	cout << "{";
+	//cout << "before : " << cell.box << endl;
+	//const auto& list = cell.get<NodeData>().sic_constraints_caches[0].parameter_caches_;
+	/*cout << "{";
 	for(const auto& param_cache : list) {
 		cout << "{";;
 		cout << "{" << param_cache.parameter_box[0].lb() << "," << param_cache.parameter_box[0].ub() << "}";
@@ -151,8 +151,12 @@ void SIPOptimizer::handleCell(Cell& cell) {
 		cout << "},";
 		//cout << param_cache.parameter_box << " eval=" << param_cache.evaluation <<  endl;
 	}
-	cout << "}" << endl;
-	cout << "paramsize=" << list.size() << endl;*/
+	cout << "}" << endl;*/
+	//cout << "paramsize=" << list.size() << endl;
+	/*for(int i = 0; i < 1; ++i) {
+		const auto& list = cell.get<NodeData>().sic_constraints_caches[i].parameter_caches_;
+		cout << "paramsize[" << i << "]=" << list.size() << endl;
+	}*/
 	//cout << endl << endl;
 	// =============== Contract y with y <= loup
 	Interval& y = cell.box[n - 1];
@@ -188,7 +192,7 @@ void SIPOptimizer::handleCell(Cell& cell) {
 			}
 		}
 		loop = (old_loup - loup_)/loup_ > lf_loop_ratio_;
-		break;
+		//break;
 	}
 
 
