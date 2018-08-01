@@ -24,7 +24,7 @@ namespace ibex {
  * The algorithm has two steps:
  * 1- random search: pick random points in any directions.
  * 2- intensification (in the current version of the code, only in case
- *    of unconstrained optimization): perform a line probling search.
+ *    of unconstrained optimization): perform a line probing search.
  *
  * \note Only works with inequality constraints.
  *
@@ -48,6 +48,26 @@ public:
 	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
 
 	/**
+	 * \brief Second method (line probing).
+	 *
+	 * Performs a dichotomic search between the current loup-point and its projection on the
+	 * facet of the input box in the opposite direction of its gradient.
+	 *
+	 * return true if the loup has been modified.
+	 */
+	bool line_probing(Vector& loup_point, double& loup, const IntervalVector& box);
+
+	/**
+	 * \brief Perform a dichotomic search of a minimum in a line (see Hansen's book).
+	 *
+	 * The search is performed on the segment delimited by the current loup-point and \a end_point.
+	 *
+	 * If \a exit_if_above_loup is true, the search stops as soon as we fall on
+	 * a candidate x with f(x)>loup.
+	 */
+	bool dichotomic_line_search(Vector& loup_point, double& loup, const Vector& end_point, bool exit_if_above_loup);
+
+	/**
 	 * Default sample size
 	 */
 	static const int default_sample_size;
@@ -63,36 +83,16 @@ public:
 	const int sample_size;
 
 protected:
-
-	/**
-	 * \brief Second method (line probing).
-	 *
-	 * Performs a dichotomic search between the current loup-point and its projection on the
-	 * facet of the input box in the opposite direction of its gradient.
-	 *
-	 * return true if the loup has been modified.
-	 */
-	bool line_probing(const IntervalVector& box);
-
-	/**
-	 * \brief Perform a dichotomic search of a minimum in a line (see Hansen's book).
-	 *
-	 * The search is performed on the segment delimited by the current loup-point and \a end_point.
-	 *
-	 * If \a exit_if_above_loup is true, the search stops as soon as we fall on
-	 * a candidate x with f(x)>loup.
-	 */
-	bool dichotomic_line_search(const Vector& end_point, bool exit_if_above_loup);
-
-	/**
-	 * Current loup-point
-	 */
-	Vector loup_point;
-
-	/**
-	 * Current loup
-	 */
-	double loup;
+//
+//	/**
+//	 * Current loup-point
+//	 */
+//	Vector loup_point;
+//
+//	/**
+//	 * Current loup
+//	 */
+//	double loup;
 };
 
 } /* namespace ibex */

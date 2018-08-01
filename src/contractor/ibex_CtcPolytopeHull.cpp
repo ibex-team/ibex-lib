@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Oct 31, 2013
-// Last Update : Oct 31, 2013
+// Last update : Aug 01, 2018
 //============================================================================
 
 #include "ibex_CtcPolytopeHull.h"
@@ -28,7 +28,8 @@ CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, dou
 		Ctc(lr.nb_var()), lr(lr),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
 		mylinearsolver(nb_var, max_iter, time_out, eps),
-		contracted_vars(BitSet::all(nb_var)), own_lr(false) {
+		contracted_vars(BitSet::all(nb_var)), own_lr(false), primal_sols(2*nb_var, nb_var),
+		primal_sol_found(2*nb_var) {
 
 }
 
@@ -36,7 +37,8 @@ CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter,
 		Ctc(A.nb_cols()), lr(*new LinearizerFixed(A,b)),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
 		mylinearsolver(nb_var, max_iter, time_out, eps),
-		contracted_vars(BitSet::all(nb_var)), own_lr(true) {
+		contracted_vars(BitSet::all(nb_var)), own_lr(true), primal_sols(nb_var, nb_var),
+		primal_sol_found(2*nb_var) {
 
 }
 
@@ -54,6 +56,7 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 }
 
 void CtcPolytopeHull::contract(IntervalVector& box, CtcContext& context) {
+	primal_sol_found.clear();
 
 	if (!(limit_diam_box.contains(box.max_diam()))) return;
 	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
@@ -137,6 +140,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 					delete[] sup_bound;
 					throw PolytopeHullEmptyBoxException();
 				}
+				primal_sols[2*i]=mylinearsolver.get_primal_sol();
+				primal_sol_found.add(2*i);
 
 				if(opt.lb() > box[i].lb()) {
 					box[i]=Interval(opt.lb(),box[i].ub());
@@ -185,6 +190,9 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 					delete[] sup_bound;
 					throw PolytopeHullEmptyBoxException();
 				}
+
+				primal_sols[2*i+1]=mylinearsolver.get_primal_sol();
+				primal_sol_found.add(2*i+1);
 
 				if (opt.ub() < box[i].ub()) {
 					box[i] =Interval( box[i].lb(), opt.ub());

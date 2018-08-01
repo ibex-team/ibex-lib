@@ -44,6 +44,11 @@ public:
 
 	/** Default epsilon applied to equations: 1e-8. */
 	static const double default_eps_h;
+
+	/**
+	 * \brief Id of the original system
+	 */
+	const long original_sys_id;
 };
 
 } // end namespace ibex

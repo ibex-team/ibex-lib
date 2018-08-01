@@ -59,7 +59,7 @@ CmpOp norm(CmpOp op) {
 
 } // end namespace
 
-NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended) {
+NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended) : original_sys_id(sys.id) {
 
 	int nb_arg;
 	int k=0; // index of components of sys.f_ctrs
