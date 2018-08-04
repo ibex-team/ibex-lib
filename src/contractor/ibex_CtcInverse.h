@@ -26,7 +26,7 @@ public:
 	 */
 	void contract(IntervalVector& box);
 
-	virtual void contract(IntervalVector& box, CtcContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	Ctc& c;
 	Function& f;

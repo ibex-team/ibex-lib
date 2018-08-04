@@ -24,7 +24,7 @@ namespace ibex {
 CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  Ctc(cl), list(cl), ratio(ratio), incremental(incremental),
 		  accumulate(false), g(cl.size(), nb_var), agenda(cl.size()),
-		  _impact(BitSet::empty(nb_var)), flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS)), active(BitSet::empty(cl.size())) {
+		  _impact(BitSet::empty(nb_var)), flags(BitSet::empty(ContractContext::NB_OUTPUT_FLAGS)), active(BitSet::empty(cl.size())) {
 
 	assert(check_nb_var_ctc_list(cl));
 
@@ -43,16 +43,16 @@ void CtcPropag::add_property(const IntervalVector& init_box, BoxProperties& map)
 }
 
 void CtcPropag::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
+void CtcPropag::contract(IntervalVector& box, ContractContext& context) {
 
-	CtcContext c_context;
+	ContractContext c_context;
 	c_context.set_impact(&_impact);
 	c_context.set_output_flags(&flags);
-	c_context.set_properties(context.data());
+	c_context.set_properties(context.prop());
 
 	assert(box.size()==nb_var);
 
@@ -137,7 +137,7 @@ void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 			return;
 		}
 
-		if (flags[CtcContext::INACTIVE]) {
+		if (flags[ContractContext::INACTIVE]) {
 			active.remove(c);
 		}
 
@@ -148,7 +148,7 @@ void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 			if (old_box[v].ratiodelta(box[v])>=ratio) {
 				set<int> ctrs=g.output_ctrs(v);
 				for (set<int>::iterator c2=ctrs.begin(); c2!=ctrs.end(); c2++) {
-					if ((c!=*c2 && active[*c2]) || (c==*c2 && !flags[CtcContext::FIXPOINT]))
+					if ((c!=*c2 && active[*c2]) || (c==*c2 && !flags[ContractContext::FIXPOINT]))
 						agenda.push(*c2);
 				}
 				// ===================== coarse propagation =========================
@@ -174,7 +174,7 @@ void CtcPropag::contract(IntervalVector& box, CtcContext& context) {
 	if (active.empty())
 		// TODO: does not respect the current definition of INACTIVE
 		// which imposes that the contractor is inactive before contraction
-		context.set_flag(CtcContext::INACTIVE);
+		context.set_flag(ContractContext::INACTIVE);
 }
 
 const double CtcPropag::default_ratio = __IBEX_DEFAULT_RATIO_PROPAG;

@@ -51,7 +51,7 @@ public:
 	 */
 	void contract(IntervalVector& box);
 
-	void contract(IntervalVector& box, CtcContext& context);
+	void contract(IntervalVector& box, ContractContext& context);
 
 	/** The function. */
 	const Fnc& f;

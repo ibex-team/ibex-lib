@@ -21,36 +21,36 @@ void CtcQInter::add_property(const IntervalVector& init_box, BoxProperties& map)
 }
 
 void CtcQInter::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void CtcQInter::contract(IntervalVector& box, CtcContext& context) {
+void CtcQInter::contract(IntervalVector& box, ContractContext& context) {
 	Array<IntervalVector> refs(list.size());
 
 	// --------------------- context ------------------
-	CtcContext c_context;
+	ContractContext c_context;
 	c_context.set_impact(context.impact());
 	// ------------------------------------------------
 
 	for (int i=0; i<list.size(); i++) {
 		boxes[i]=box;
 
-		if (context.data())
-			c_context.set_properties(new BoxProperties(boxes[i], *context.data()));
+		if (context.prop())
+			c_context.set_properties(new BoxProperties(boxes[i], *context.prop()));
 
 		list[i].contract(boxes[i], c_context);
 
 		refs.set_ref(i,boxes[i]);
 
-		if (context.data())
-			delete c_context.data();
+		if (context.prop())
+			delete c_context.prop();
 	}
 
 	box = qinter(refs,q);
 
-	if (context.data()) {
-		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
+	if (context.prop()) {
+		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 }
 

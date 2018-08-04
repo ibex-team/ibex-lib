@@ -47,7 +47,7 @@ public:
 	 * \note When the FIXPOINT output flag is set, this means a stronger
 	 *       property (the fixpoint is reached for a null ratio).
 	 */
-	virtual void contract(IntervalVector& box, CtcContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	/**
 	 * \brief Add sub-contractor properties to the map

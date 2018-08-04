@@ -51,11 +51,11 @@ void CtcPolytopeHull::add_property(const IntervalVector& init_box, BoxProperties
 }
 
 void CtcPolytopeHull::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void CtcPolytopeHull::contract(IntervalVector& box, CtcContext& context) {
+void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 	primal_sol_found.clear();
 
 	if (!(limit_diam_box.contains(box.max_diam()))) return;
@@ -65,8 +65,8 @@ void CtcPolytopeHull::contract(IntervalVector& box, CtcContext& context) {
 	try {
 
 		//returns the number of constraints in the linearized system
-		int cont = context.data() ?
-				lr.linearize(box, mylinearsolver, *context.data()) :
+		int cont = context.prop() ?
+				lr.linearize(box, mylinearsolver, *context.prop()) :
 				lr.linearize(box, mylinearsolver);
 
 		//cout << "[polytope-hull] end of LR" << endl;
@@ -90,8 +90,8 @@ void CtcPolytopeHull::contract(IntervalVector& box, CtcContext& context) {
 		mylinearsolver.clean_ctrs();
 	}
 
-	if (context.data()) {
-		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
+	if (context.prop()) {
+		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 }
 

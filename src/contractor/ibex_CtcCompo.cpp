@@ -177,11 +177,11 @@ void CtcCompo::add_property(const IntervalVector& init_box, BoxProperties& map) 
 }
 
 void CtcCompo::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
+void CtcCompo::contract(IntervalVector& box, ContractContext& context) {
 
 	bool inactive = true;
 
@@ -202,7 +202,7 @@ void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 
 			list[i].contract(box, context);
 
-			if (!(*flags)[CtcContext::INACTIVE]) {
+			if (!(*flags)[ContractContext::INACTIVE]) {
 				inactive=false;
 				// now, no need for asking sub-contractors
 				// to calculate the impact:
@@ -215,7 +215,7 @@ void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 		if (box.is_empty()) {
 			if (flags) {
 				flags->clear();
-				flags->add(CtcContext::FIXPOINT);
+				flags->add(ContractContext::FIXPOINT);
 				context.set_output_flags(flags); // restore!
 			}
 			context.set_impact(input_impact); // restore!
@@ -224,7 +224,7 @@ void CtcCompo::contract(IntervalVector& box, CtcContext& context) {
 	}
 
 	if (flags) {
-		if (inactive) flags->add(CtcContext::INACTIVE);
+		if (inactive) flags->add(ContractContext::INACTIVE);
 		context.set_output_flags(flags); // restore!
 	}
 	context.set_impact(input_impact); // restore!

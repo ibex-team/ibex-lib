@@ -26,11 +26,11 @@ CtcInteger::CtcInteger(int nb_var, const BitSet& is_int) : Ctc(nb_var), is_int(i
 }
 
 void CtcInteger::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void CtcInteger::contract(IntervalVector& box, CtcContext& context) {
+void CtcInteger::contract(IntervalVector& box, ContractContext& context) {
 
 	assert(box.size()==nb_var);
 
@@ -38,7 +38,7 @@ void CtcInteger::contract(IntervalVector& box, CtcContext& context) {
 		if (is_int[i] && (!context.impact() || (*context.impact())[i])) {
 			if (!bwd_integer(box[i])) {
 				box.set_empty();
-				context.set_flag(CtcContext::FIXPOINT);
+				context.set_flag(ContractContext::FIXPOINT);
 				return;
 			}
 		}

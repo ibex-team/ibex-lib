@@ -126,7 +126,7 @@ public:
 	 * Otherwise, 3BCID will be performed.
 	 *
 	 */
-	virtual void contract(IntervalVector& box, CtcContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	/** The variables to which var3BCID is applied **/
 	BitSet cid_vars;
@@ -247,7 +247,7 @@ protected:
 	 * Allow to benefit from the incrementality of the sub-contractor.
 	 * Also use to transmit the properties.
 	 */
-	CtcContext subcontext;
+	ContractContext subcontext;
 
 	virtual int limitCIDDichotomy();
 };

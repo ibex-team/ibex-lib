@@ -27,7 +27,7 @@ public:
 	 * \brief Contract a box.
 	 */
 	void contract(IntervalVector& box);
-	virtual void contract(IntervalVector& box, CtcContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	static const int LimitCIDDichotomy;
 

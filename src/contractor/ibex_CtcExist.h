@@ -60,7 +60,7 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	virtual void contract(IntervalVector& x, CtcContext& context);
+	virtual void contract(IntervalVector& x, ContractContext& context);
 
 private:
 	/**
@@ -74,7 +74,7 @@ private:
 	 *                   of the contraction
 	 * \param y:         the current box "y"
 	 */
-	bool proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y, CtcContext& context);
+	bool proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y, ContractContext& context);
 
 	/**
 	 * Stack of pairs (x,y)

@@ -304,7 +304,7 @@ protected:
 	/*
 	 * Context for the contractor
 	 */
-	CtcContext context;
+	ContractContext context;
 
 	/*
 	 * \brief Initial box of the current search.

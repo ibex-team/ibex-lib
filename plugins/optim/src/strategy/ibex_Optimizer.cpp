@@ -196,7 +196,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	/*================ contract x with f(x)=y and g(x)<=0 ================*/
 	//cout << " [contract]  x before=" << c.box << endl;
 	//cout << " [contract]  y before=" << y << endl;
-	CtcContext context;
+	ContractContext context;
 	BitSet impact(n+1);
 	if (c.bisected_var==-1) {
 		impact.fill(0,n);

@@ -17,8 +17,8 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_BitSet.h"
 #include "ibex_Array.h"
+#include "ibex_ContractContext.h"
 #include "ibex_Set.h"
-#include "ibex_CtcContext.h"
 
 namespace ibex {
 
@@ -65,7 +65,7 @@ public:
 	 *
 	 * \see #contract(IntervalVector&).
 	 */
-	virtual void contract(IntervalVector& box, CtcContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	/**
 	 * \brief Contraction with specified impact.
@@ -133,24 +133,24 @@ inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(
 
 inline Ctc::~Ctc() { }
 
-inline void Ctc::contract(IntervalVector& box, CtcContext& context) {
+inline void Ctc::contract(IntervalVector& box, ContractContext& context) {
 	contract(box);
-	if (context.data()) {
+	if (context.prop()) {
 		// TODO: the input impact of update is the "output" impact
 		// of the previous call to contract. Such a field does not
 		// exist yet in Context --> set temporarily to "all".
-		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
+		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 }
 
 inline void Ctc::contract(IntervalVector& box, const BitSet& impact) {
-	CtcContext context;
+	ContractContext context;
 	context.set_impact(&impact);
 	contract(box,context);
 }
 
 inline void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& flags) {
-	CtcContext context;
+	ContractContext context;
 	context.set_impact(&impact);
 	context.set_output_flags(&flags);
 	contract(box,context);

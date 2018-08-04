@@ -17,7 +17,7 @@ namespace ibex {
 
 CtcQuantif::CtcQuantif(const NumConstraint& ctr, const VarSet& _vars, const IntervalVector& init_box, double prec) :
 				Ctc(_vars.nb_var), y_init(init_box),
-				flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS)),
+				flags(BitSet::empty(ContractContext::NB_OUTPUT_FLAGS)),
 				ctc(new CtcFwdBwd(ctr)), bsc(new LargestFirst(prec)),
 				vars(_vars), prec(prec), _own_ctc(true) {
 
@@ -29,7 +29,7 @@ CtcQuantif::CtcQuantif(const NumConstraint& ctr, const VarSet& _vars, const Inte
 
 CtcQuantif::CtcQuantif(Ctc& ctc, const VarSet& _vars, const IntervalVector& init_box, double prec, bool own_ctc) :
 			   Ctc(_vars.nb_var), y_init(init_box),
-			   flags(BitSet::empty(CtcContext::NB_OUTPUT_FLAGS)),
+			   flags(BitSet::empty(ContractContext::NB_OUTPUT_FLAGS)),
 			   ctc(&ctc), bsc(new LargestFirst(prec)),
 			   vars(_vars), prec(prec), _own_ctc(own_ctc) {
 
@@ -49,7 +49,7 @@ void CtcQuantif::contract(IntervalVector& x, IntervalVector& y) {
 
 	flags.clear();
 
-	CtcContext context;
+	ContractContext context;
 	context.set_output_flags(&flags);
 	ctc->contract(fullbox, context);
 

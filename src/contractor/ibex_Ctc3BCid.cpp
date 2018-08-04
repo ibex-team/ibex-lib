@@ -63,11 +63,11 @@ bool Ctc3BCid::equalBoxes (int var, IntervalVector &box1, IntervalVector &box2) 
 }
 
 void Ctc3BCid::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void Ctc3BCid::contract(IntervalVector& box, CtcContext& context) {
+void Ctc3BCid::contract(IntervalVector& box, ContractContext& context) {
 	int var;                                           // [gch] variable to be carCIDed
 
 	start_var=nb_var-1;
@@ -81,7 +81,7 @@ void Ctc3BCid::contract(IntervalVector& box, CtcContext& context) {
 		impact.fill(0,nb_var-1);
 
 	subcontext.set_impact(&impact);
-	subcontext.set_properties(context.data());
+	subcontext.set_properties(context.prop());
 	// ------------------------------------------------
 
 	for (int k=0; k<vhandled; k++) {                   // [gch] k counts the number of varCIDed variables [gch]
@@ -98,13 +98,13 @@ void Ctc3BCid::contract(IntervalVector& box, CtcContext& context) {
 			impact.remove(var);                        // restore [gch]
 
 		if (box.is_empty()) {
-			context.set_flag(CtcContext::FIXPOINT);
+			context.set_flag(ContractContext::FIXPOINT);
 			return;
 		}
 	}
 
-	if (context.data()) {
-		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
+	if (context.prop()) {
+		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 	//	start_var=(start_var+vhandled)%nb_var;             //  en contradiction avec le patch pour l'optim
 }
@@ -175,7 +175,7 @@ bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 
 void Ctc3BCid::update_and_contract(IntervalVector& box, int var) {
 
-	BoxProperties* old_prop = subcontext.data();
+	BoxProperties* old_prop = subcontext.prop();
 	BoxProperties* new_prop;
 
 	if (old_prop) {

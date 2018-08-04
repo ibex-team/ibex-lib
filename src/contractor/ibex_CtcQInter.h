@@ -39,7 +39,7 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	virtual void contract(IntervalVector& box, CtcContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	/**
 	 * \brief Add sub-contractors properties to the map

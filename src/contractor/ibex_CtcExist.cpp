@@ -26,7 +26,7 @@ CtcExist::CtcExist(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box,
 	CtcQuantif(ctc, VarSet(ctc.nb_var,vars,true), init_box, prec, own_ctc) {
 }
 
-bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y, CtcContext& context) {
+bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y, ContractContext& context) {
 	IntervalVector x = x_current;
 
 	// TODO: handle impact!
@@ -37,11 +37,11 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 	}
 
 	// if the contractor for c(x,y) is inactive on [x]*[y]
-	if (flags[CtcContext::INACTIVE]) {
+	if (flags[ContractContext::INACTIVE]) {
 		// ... the contractor for \exists y\in[yinit] c(x) is inactive on [x]
 		if (x==x_init) {
 			x_res =x_init;
-			context.set_flag(CtcContext::INACTIVE);
+			context.set_flag(ContractContext::INACTIVE);
 			return true;
 		} else {
 			x_res |= x;
@@ -70,8 +70,8 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 
 				x_res |= x;
 
-				if ((flags[CtcContext::INACTIVE]) && (x==x_init)) {
-					context.set_flag(CtcContext::INACTIVE);
+				if ((flags[ContractContext::INACTIVE]) && (x==x_init)) {
+					context.set_flag(ContractContext::INACTIVE);
 					return true;
 				}
 
@@ -86,11 +86,11 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 }
 
 void CtcExist::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void CtcExist::contract(IntervalVector& box, CtcContext& context) {
+void CtcExist::contract(IntervalVector& box, ContractContext& context) {
 	assert(box.size()==vars.nb_var);
 
 	// the returned box, initially empty
@@ -127,7 +127,7 @@ void CtcExist::contract(IntervalVector& box, CtcContext& context) {
 	box &= res;
 
 	if (box.is_empty()) {
-		context.set_flag(CtcContext::FIXPOINT);
+		context.set_flag(ContractContext::FIXPOINT);
 	}
 
 }

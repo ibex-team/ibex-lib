@@ -18,16 +18,16 @@ CtcEmpty::CtcEmpty(int n) : Ctc(n), pdc(*new PdcYes(n)), own_pdc(true) { }
 CtcEmpty::CtcEmpty(Pdc& pdc, bool own) : Ctc(pdc.nb_var), pdc(pdc), own_pdc(own){ }
 
 void CtcEmpty::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void CtcEmpty::contract(IntervalVector& box, CtcContext& context) {
+void CtcEmpty::contract(IntervalVector& box, ContractContext& context) {
 	BoolInterval t= pdc.test(box);
 	switch (t) {
 	case YES:
 		box.set_empty();
-		context.set_flag(CtcContext::FIXPOINT);
+		context.set_flag(ContractContext::FIXPOINT);
 		break;
 	case NO:
 		// The constraint is inactive only if

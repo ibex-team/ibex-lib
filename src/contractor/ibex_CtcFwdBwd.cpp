@@ -83,27 +83,27 @@ void CtcFwdBwd::add_property(const IntervalVector& init_box, BoxProperties& map)
 }
 
 void CtcFwdBwd::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
+void CtcFwdBwd::contract(IntervalVector& box, ContractContext& context) {
 
 	assert(box.size()==ctr.f.nb_var());
 
 	BxpActiveCtr* p=NULL;
 	BxpSystemCache* sp=NULL;
 
-	if (context.data()) {
+	if (context.prop()) {
 		if (ctr_num==-1)
-			p=(BxpActiveCtr*) (*context.data())[active_prop_id];
+			p=(BxpActiveCtr*) (*context.prop())[active_prop_id];
 		else
-			sp=(BxpSystemCache*) (*context.data())[system_cache_id];
+			sp=(BxpSystemCache*) (*context.prop())[system_cache_id];
 	}
 
 	if ((p && !p->active()) || (sp && !(sp->active_ctrs()[ctr_num]))) {
-		context.set_flag(CtcContext::INACTIVE);
-		context.set_flag(CtcContext::FIXPOINT);
+		context.set_flag(ContractContext::INACTIVE);
+		context.set_flag(ContractContext::FIXPOINT);
 		return;
 	}
 
@@ -111,11 +111,11 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 	if (ctr.f.backward(d,box)) {
 		if (p) p->set_inactive();
 		if (sp) sp->active_ctrs().remove(ctr_num);
-		context.set_flag(CtcContext::INACTIVE);
-		context.set_flag(CtcContext::FIXPOINT);
+		context.set_flag(ContractContext::INACTIVE);
+		context.set_flag(ContractContext::FIXPOINT);
 	}
 	else if (box.is_empty()) {
-		context.set_flag(CtcContext::FIXPOINT);
+		context.set_flag(ContractContext::FIXPOINT);
 	}
 	//std::cout << " ---> " << box << std::endl;
 
@@ -123,9 +123,9 @@ void CtcFwdBwd::contract(IntervalVector& box, CtcContext& context) {
 	// is no multiple occurrence because some operators
 	// may be non-optimal in backward mode.
 
-	if (context.data()) {
+	if (context.prop()) {
 		//TODO: set used_vars in impact
-		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
+		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 }
 

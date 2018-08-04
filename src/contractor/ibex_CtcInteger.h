@@ -40,7 +40,7 @@ public:
 	 */
 	void contract(IntervalVector& box);
 
-	virtual void contract(IntervalVector& box, CtcContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 //	virtual void contract(IntervalVector& box, const BitSet& impact);
 

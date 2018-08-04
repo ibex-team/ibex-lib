@@ -31,11 +31,11 @@ CtcAcid::CtcAcid(const System& sys, Ctc& ctc, bool optim, int s3b, int scid,
 }
 
 void CtcAcid::contract(IntervalVector& box) {
-	CtcContext context;
+	ContractContext context;
 	contract(box,context);
 }
 
-void CtcAcid::contract(IntervalVector& box, CtcContext& context) {
+void CtcAcid::contract(IntervalVector& box, ContractContext& context) {
 	// this initial contraction allows to set, after, the impact
 	// to only one variable (in the slicing process)!
 	// note: we can transmit here the input impact to the contractor
@@ -46,7 +46,7 @@ void CtcAcid::contract(IntervalVector& box, CtcContext& context) {
 	// --------------------- context ------------------
 	BitSet impact(nb_var); // can be empty!
 	subcontext.set_impact(&impact);
-	subcontext.set_properties(context.data());
+	subcontext.set_properties(context.prop());
 	// ------------------------------------------------
 
 	int nb_CID_var=cid_vars.size();                    // [gch]
@@ -128,8 +128,8 @@ void CtcAcid::contract(IntervalVector& box, CtcContext& context) {
 
 	delete [] ctstat;
 
-	if (context.data()) {
-		context.data()->update(BoxEvent(box,BoxEvent::CONTRACT));
+	if (context.prop()) {
+		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 }
 

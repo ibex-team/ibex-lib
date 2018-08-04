@@ -59,7 +59,7 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	virtual void contract(IntervalVector& x, CtcContext& context);
+	virtual void contract(IntervalVector& x, ContractContext& context);
 
 private:
 	/**

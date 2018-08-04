@@ -46,7 +46,7 @@ public:
 	/**
 	 * \brief Contract the box.
 	 */
-	virtual void contract(IntervalVector& box, CtcContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	/**
 	 * \brief Add linearizer properties to the map + argmin of the linearization
