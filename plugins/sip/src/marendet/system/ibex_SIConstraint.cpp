@@ -72,4 +72,18 @@ IntervalVector SIConstraint::gradient(const IntervalVector& box,
 bool SIConstraint::isSatisfied(const IntervalVector& box) const {
 	return evaluate(box).ub() <= 0;
 }
+
+bool SIConstraint::isSatisfiedWithoutCachedValues(const IntervalVector& box) const {
+	IntervalVector full_box(function_->nb_var());
+	full_box.put(0, box);
+	const int x_dim = box.size();
+	for (auto& cache_cell : cache_->parameter_caches_) {
+		full_box.put(x_dim, cache_cell.parameter_box);
+		if(centeredFormEval(*function_, full_box).ub() > 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
 } // end namespace ibex

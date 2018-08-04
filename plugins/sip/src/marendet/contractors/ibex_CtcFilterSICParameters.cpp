@@ -15,6 +15,7 @@
 #include "ibex_Cell.h"
 #include "ibex_Function.h"
 #include "ibex_Interval.h"
+#include "ibex_SICPaving.h"
 
 #include <algorithm>
 #include <iterator>
@@ -33,8 +34,9 @@ CtcFilterSICParameters::~CtcFilterSICParameters() {
 void CtcFilterSICParameters::contractCell(Cell& cell) {
 	NodeData& node_data = cell.get<NodeData>();
 	for (int i = 0; i < system_.sic_constraints_.size(); ++i) {
-		node_data.sic_constraints_caches[i].update_cache(*system_.sic_constraints_[i].function_, cell.box);
-		contractOneConstraint(i, node_data, cell.box);
+		//node_data.sic_constraints_caches[i].update_cache(*system_.sic_constraints_[i].function_, cell.box);
+		//contractOneConstraint(i, node_data, cell.box);
+		simplify_paving(system_.sic_constraints_[i], node_data.sic_constraints_caches[i], cell.box, true);
 	}
 }
 

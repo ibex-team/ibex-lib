@@ -89,13 +89,11 @@ int RelaxationLinearizerSIP::linearizeSIC(const SIConstraint& constraint, std::v
 			added_count += 1;
 			lhs.emplace_back(lhs_param);
 			rhs.emplace_back(rhs_param);
-			//cout << lhs_param << " <= " << rhs_param << endl;
 		}
 		for (const auto& parameter_point : constraint.cache_->best_blankenship_points_) {
 			Interval function_value = constraint.evaluate(corners_[i], parameter_point);
 			IntervalVector gradient = constraint.gradient(box_, parameter_point);
 			double rhs_param = -function_value.lb();
-			//std::cout << function_value << std::endl;
 			Vector lhs_param(nb_var());
 			for (int j = 0; j < nb_var(); ++j) {
 				lhs_param[j] = alphas_[i][j] == 0 ? gradient[j].lb() : gradient[j].ub();

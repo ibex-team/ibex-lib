@@ -31,6 +31,8 @@ public:
 
 	virtual ~LoupFinderLineSearch();
 
+	bool is_inner_with_paving_simplification(const IntervalVector& box);
+	void blankenship(const IntervalVector& box);
 private:
 	SIPSystem& system_;
 	RelaxationLinearizerSIP linearizer_;

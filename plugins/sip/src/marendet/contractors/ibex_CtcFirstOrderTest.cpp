@@ -33,6 +33,9 @@ CtcFirstOrderTest::~CtcFirstOrderTest() {
 }
 
 void CtcFirstOrderTest::contractCell(Cell& cell) {
+	if(cell.box.size() == 2) {
+		return;
+	}
 	vector<IntervalVector> gradients;
 	for (int i = 0; i < system_.normal_constraints_.size() - 1; ++i) {
 		if (!system_.normal_constraints_[i].isSatisfied(cell.box)) {
@@ -51,7 +54,6 @@ void CtcFirstOrderTest::contractCell(Cell& cell) {
 	for (int i = 0; i < gradients.size(); ++i) {
 		matrix.set_col(i + 1, gradients[i].subvector(0, nb_var - 2));
 	}
-
 	bool testfailed = true;
 	if (matrix.nb_cols() == 1) {
 		if (matrix.col(0).contains(Vector::zeros(nb_var - 2))) {

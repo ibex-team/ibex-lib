@@ -47,6 +47,8 @@ public:
 	IntervalVector gradient(const IntervalVector& box,
 			const IntervalVector& parameter_box) const;
 	bool isSatisfied(const IntervalVector& box) const;
+	bool isSatisfiedWithoutCachedValues(const IntervalVector& box) const;
+
 };
 
 } // end namespace ibex
