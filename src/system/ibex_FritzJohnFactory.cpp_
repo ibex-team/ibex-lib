@@ -304,8 +304,8 @@ public:
 	~FritzJohnFactory() {
 		delete[] bound_ctr;
 
-		for (int i=0; i<args->size(); i++)
-			delete &(*args)[i];
+		for (int i=0; i<input_args.size(); i++)
+			delete &(input_args[i]);
 	}
 };
 

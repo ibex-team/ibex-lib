@@ -12,6 +12,7 @@
 #define __IBEX_SYSTEM_FACTORY_H__
 
 #include "ibex_System.h"
+#include "ibex_ExprCopy.h"
 
 namespace ibex {
 
@@ -94,22 +95,28 @@ protected:
 	// total number of variables
 	int nb_var;
 
+	// Domains of arguments
+	std::vector<IntervalVector> boxes;
+	// temporary arguments (until last call to add_var)
+	std::vector<const ExprSymbol*> tmp_input_args;
+	// arguments of the input expressions
+	Array<const ExprSymbol> input_args;
+
+	// arguments of the output system
+	Array<const ExprSymbol> sys_args;
+	// gaol function of the output system
 	Function* goal;
-
-	// initial bound of the variable
-	IntervalVector 	bound_init;
-	std::vector<IntervalVector> tmp_bound;
-
-	// temporary arguments
-	std::vector<const ExprSymbol*> tmp_args;
-	// definitive arguments
-	Array<const ExprSymbol>* args;
-
+	// constraints of the output system
 	std::vector<NumConstraint*> ctrs;
+	// expression of the global function sys.f_ctrs
+	ExprCopy f_ctrs_copy;
+	std::vector<const ExprNode*> f_ctrs;
+
+	mutable bool system_built; // for cleanup
 
 private:
 
-	void init_arg_bound();
+	void init_args();
 };
 
 

@@ -133,8 +133,9 @@ Set Exploration
 The internal structure of sets is not intended to be handled directly by users (and may actually change with time).
 If you want to explore a set, you can use the ``SetVisitor`` class (following the
 `visitor design pattern`_) . This class must implement a ``visit_leaf``
-function that will be automatically called for every leaf of the set (it can also optionnaly implement a ``visit_node``
-function that is called for every intermediate node in the tree).
+function that will be automatically called for every leaf of the set. It can also optionnaly implement a ``visit_node``
+function that is called for every intermediate node in the tree, and tell wether or not to visit children of the current
+node by returning true (default) or false.
 
 .. _visitor design pattern : http://en.wikipedia.org/wiki/Visitor_pattern
 

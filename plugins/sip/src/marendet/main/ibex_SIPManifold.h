@@ -1,24 +1,23 @@
 //============================================================================
-//                                  I B E X
-// File        : ibex_Manifold.h
-// Author      : Gilles Chabert
-// Copyright   : IMT Atlantique (France)
+//                                  I B E X                                   
+// File        : ibex_SIPManifold.h
+// Author      : Antoine Marendet, Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Oct 01, 2017
+// Created     : May 4, 2018
+// Last Update : May 4, 2018
 //============================================================================
 
-#ifndef __IBEX_MANIFOLD_H__
-#define __IBEX_MANIFOLD_H__
+#ifndef __SIP_IBEX_SIPMANIFOLD_H__
+#define __SIP_IBEX_SIPMANIFOLD_H__
 
-#include "ibex_IntervalVector.h"
-#include "ibex_Solver.h"
+#include "ibex_SIPSolver.h"
+#include "ibex_SIPSolverOutputBox.h"
 
 #include <fstream>
 #include <vector>
-#include <stdint.h>
 
 namespace ibex {
-
 /**
  * \ingroup strategy
  *
@@ -27,15 +26,15 @@ namespace ibex {
  * Contrary to a paving, boxes may overlap in a "manifold"
  * (more than just on their boundaries).
  */
-class Manifold {
+class SIPManifold {
 public:
 
-	Manifold(int n, int m, int nb_ineq);
+	SIPManifold(int n, int m, int nb_ineq);
 
 	/**
 	 * Delete this.
 	 */
-	virtual ~Manifold();
+	virtual ~SIPManifold();
 
 	/**
 	 * \brief Load a manifold from a file.
@@ -91,27 +90,27 @@ public:
 	/*
 	 * \brief Return status of the last solving.
 	 */
-	Solver::Status status;
+	SIPSolver::Status status;
 
 	/*
 	 * \brief Inner boxes
 	 */
-	std::vector<SolverOutputBox> inner;
+	std::vector<SIPSolverOutputBox> inner;
 
 	/*
 	 * \brief Boundary boxes
 	 */
-	std::vector<SolverOutputBox> boundary;
+	std::vector<SIPSolverOutputBox> boundary;
 
 	/*
 	 * \brief Boundary boxes
 	 */
-	std::vector<SolverOutputBox> unknown;
+	std::vector<SIPSolverOutputBox> unknown;
 
 	/*
 	 * \brief Pending boxes
 	 */
-	std::vector<SolverOutputBox> pending;
+	std::vector<SIPSolverOutputBox> pending;
 
 	/*
 	 * \brief CPU running time used to obtain this manifold.
@@ -136,30 +135,29 @@ protected:
 	unsigned int read_int(std::ifstream& f);
 	double read_double(std::ifstream& f);
 	void read_signature(std::ifstream& f);
-	SolverOutputBox read_output_box(std::ifstream& f);
+	SIPSolverOutputBox read_output_box(std::ifstream& f);
 
 	void write_int(std::ofstream& f, uint32_t x) const;
 	void write_double(std::ofstream& f, double x) const;
 	void write_signature(std::ofstream& f) const;
-	void write_output_box(std::ofstream& f, const SolverOutputBox& sol) const;
-	void write_output_box_txt(std::ofstream& file, const SolverOutputBox& sol) const;
+	void write_output_box(std::ofstream& f, const SIPSolverOutputBox& sol) const;
+	void write_output_box_txt(std::ofstream& file, const SIPSolverOutputBox& sol) const;
 };
 
-std::ostream& operator<<(std::ostream& os, const Manifold& manif);
+std::ostream& operator<<(std::ostream& os, const SIPManifold& manif);
 
 /*============================================ inline implementation ============================================ */
 
-inline const Manifold& Solver::get_manifold() const { return *manif; }
+inline const SIPManifold& SIPSolver::get_manifold() const { return *manif; }
 
-inline double Solver::get_time() const { return time; }
+inline double SIPSolver::get_time() const { return time; }
 
-inline double Solver::get_nb_cells() const { return nb_cells; }
+inline double SIPSolver::get_nb_cells() const { return nb_cells; }
 
-inline int Manifold::size() const {
+inline int SIPManifold::size() const {
 	return inner.size() + boundary.size() + unknown.size() + pending.size();
 }
 
+} // end namespace ibex
 
-} /* namespace ibex */
-
-#endif /* __IBEX_MANIFOLD_H__ */
+#endif // __SIP_IBEX_SIPMANIFOLD_H__

@@ -192,6 +192,12 @@ public:
 	/** Return true only if unbounded. */
 	bool is_unbounded() const;
 
+	/** Return the lower bound */
+	TemplateDomain<D> lb() const;
+
+	/** Return the upper bound */
+	TemplateDomain<D> ub() const;
+
 private:
 
 	TemplateDomain();
@@ -708,6 +714,30 @@ bool TemplateDomain<D>::is_unbounded() const {
 	case Dim::MATRIX :     return m().is_unbounded(); break;
 	}
 	return false;
+}
+
+template<class D>
+TemplateDomain<D> TemplateDomain<D>::lb() const {
+	TemplateDomain<D> res(dim);
+	switch (dim.type()) {
+	case Dim::SCALAR:       res.i()=i().lb(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   res.v()=v().lb(); break;
+	case Dim::MATRIX:       res.m()=m().lb(); break;
+	}
+	return res;
+}
+
+template<class D>
+TemplateDomain<D> TemplateDomain<D>::ub() const {
+	TemplateDomain<D> res(dim);
+	switch (dim.type()) {
+	case Dim::SCALAR:       res.i()=i().ub(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   res.v()=v().ub(); break;
+	case Dim::MATRIX:       res.m()=m().ub(); break;
+	}
+	return res;
 }
 
 template<class D>

@@ -237,7 +237,7 @@ int main() {
     {
 	//! [func-mat-value-2]
 	Variable x("x");
-	Function f(x,Return(Return(2*x,x,true),Return(-x,3*x,true)));
+	Function f(x,Return(Return(2*x,x,ExprVector::ROW),Return(-x,3*x,ExprVector::ROW)));
 	//! [func-mat-value-2]
 	}
 

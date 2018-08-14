@@ -11,6 +11,7 @@
 #include "ibex_Manifold.h"
 
 #include <cassert>
+#include <sstream>
 #include <fstream>
 
 using namespace std;
@@ -19,15 +20,15 @@ namespace ibex {
 
 const int Manifold::SIGNATURE_LENGTH = 20;
 const char* Manifold::SIGNATURE = "IBEX MANIFOLD FILE ";
-const int Manifold::FORMAT_VERSION = 2;
+const int Manifold::FORMAT_VERSION = 4;
 
-Manifold::Manifold(int n, int m, int nb_ineq) : n(n), m(m), nb_ineq(nb_ineq),
+Manifold::Manifold(int n, int m, int nb_ineq) : n(n), m(m), var_names(new string[n]), nb_ineq(nb_ineq),
 		status(Solver::INFEASIBLE), time(0), nb_cells(0) {
 
 }
 
 Manifold::~Manifold() {
-
+	delete[] var_names;
 }
 
 void Manifold::clear() {
@@ -54,18 +55,33 @@ double Manifold::read_double(ifstream& f) {
 	return x;
 }
 
-void Manifold::read_signature(ifstream& f) {
+void Manifold::read_vars(ifstream& f) {
+	char x;
+	for (unsigned int i=0; i<n; i++) {
+		stringstream s;
+		do {
+			f.read(&x, sizeof(char));
+			if (f.eof()) ibex_error("[manifold]: unexpected end of file.");
+			if (x!='\0') s << x;
+		} while(x!='\0');
+		var_names[i]=s.str();
+	}
+}
+
+int Manifold::read_signature(ifstream& f) {
 	char* sig=new char[SIGNATURE_LENGTH];
 	f.read(sig, SIGNATURE_LENGTH*sizeof(char));
 	if (f.eof()) ibex_error("[manifold]: unexpected end of file.");
 	if (strcmp(sig,SIGNATURE)!=0)
 	ibex_error("[manifold]: not a \"manifold\" file.");
 	int format_version=read_int(f); // manifold version
-	if (format_version!=FORMAT_VERSION)
+	if (format_version>FORMAT_VERSION)
 		ibex_error("[Manifold]: wrong format version");
+	else
+		return format_version;
 }
 
-SolverOutputBox Manifold::read_output_box(ifstream& f) {
+QualifiedBox Manifold::read_output_box(ifstream& f) {
 
 	IntervalVector box(n);
 
@@ -80,16 +96,16 @@ SolverOutputBox Manifold::read_output_box(ifstream& f) {
 		ibex_error("[manifold]: bad input file (bad status code).");
 	}
 
-	SolverOutputBox sol(n);
+	QualifiedBox::sol_status status;
 
 	switch(_status) {
-	case 0: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::INNER; break;
-	case 1: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::BOUNDARY; break;
-	case 2: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::UNKNOWN; break;
-	case 3: (SolverOutputBox::sol_status&) sol.status = SolverOutputBox::PENDING; break;
+	case 0: (QualifiedBox::sol_status&) status = QualifiedBox::INNER; break;
+	case 1: (QualifiedBox::sol_status&) status = QualifiedBox::BOUNDARY; break;
+	case 2: (QualifiedBox::sol_status&) status = QualifiedBox::UNKNOWN; break;
+	case 3: (QualifiedBox::sol_status&) status = QualifiedBox::PENDING; break;
 	}
 
-	sol._existence = box;
+	VarSet* varset;
 
 	if (m>0 && m<n) {
 		BitSet params(n);
@@ -101,14 +117,18 @@ SolverOutputBox Manifold::read_output_box(ifstream& f) {
 			if (v!=0) params.add(v-1); // index starting from 1 in the raw format
 		}
 		if (!params.empty()) {
-			if (params.size()!=n-m)
+			if (((unsigned int) params.size())!=n-m)
 				ibex_error("[manifold]: bad input file (bad number of parameters)");
 			else
-				sol.varset = new VarSet(n,params,false);
-		}
-	}
+				varset = new VarSet(n,params,false);
+		} else
+			varset=NULL;
+	} else
+		varset=NULL;
 
-	return sol;
+
+	// NOTE: unicity boxes are currently lost by I/O operations
+	return QualifiedBox(box,status,NULL,varset);
 }
 
 void Manifold::write_int(ofstream& f, uint32_t x) const {
@@ -119,12 +139,19 @@ void Manifold::write_double(ofstream& f, double x) const {
 	f.write((char*) &x, sizeof(x));
 }
 
+void Manifold::write_vars(ofstream& f) const {
+	for (unsigned int i=0; i<n; i++) {
+		f.write(var_names[i].c_str(),var_names[i].size()*sizeof(char));
+		f.put('\0');
+	}
+}
+
 void Manifold::write_signature(ofstream& f) const {
 	f.write(SIGNATURE, SIGNATURE_LENGTH*sizeof(char));
 	write_int(f, FORMAT_VERSION);
 }
 
-void Manifold::write_output_box(ofstream& f, const SolverOutputBox& sol) const {
+void Manifold::write_output_box(ofstream& f, const QualifiedBox& sol) const {
 	const IntervalVector& box=(sol);
 	for (int i=0; i<sol.existence().size(); i++) {
 		write_double(f,box[i].lb());
@@ -151,13 +178,17 @@ void Manifold::load(const char* filename) {
 
 	if (f.fail()) ibex_error("[manifold]: cannot open input file.\n");
 
-	read_signature(f);
+	int input_format_version = read_signature(f);
 
 	if (read_int(f)!=n) ibex_error("[manifold]: bad input file (number of variables does not match).");
 
 	if (read_int(f)!=m) ibex_error("[manifold]: bad input file (number of equalities does not match).");
 
 	if (read_int(f)!=nb_ineq) ibex_error("[manifold]: bad input file (number of inequalities does not match).");
+
+	if (input_format_version>=3) {
+		read_vars(f);
+	}
 
 	read_int(f); // status
 
@@ -172,7 +203,7 @@ void Manifold::load(const char* filename) {
 
 	IntervalVector box(n);
 	for (int i=0; i<nb_sols; i++) {
-		SolverOutputBox sol = read_output_box(f);
+		QualifiedBox sol = read_output_box(f);
 
 		switch(sol.status) {
 		case 0: inner.push_back(sol); break;
@@ -195,6 +226,7 @@ void Manifold::write(const char* filename) const {
 	write_int(f,n);
 	write_int(f,m);
 	write_int(f,nb_ineq);
+	write_vars(f);
 	write_int(f,status);
 	write_int(f,inner.size());
 	write_int(f,boundary.size());
@@ -203,16 +235,16 @@ void Manifold::write(const char* filename) const {
 	write_double(f,time);
 	write_int(f,nb_cells);
 
-	for (vector<SolverOutputBox>::const_iterator it=inner.begin(); it!=inner.end(); it++)
+	for (vector<QualifiedBox>::const_iterator it=inner.begin(); it!=inner.end(); it++)
 		write_output_box(f,*it);
 
-	for (vector<SolverOutputBox>::const_iterator it=boundary.begin(); it!=boundary.end(); it++)
+	for (vector<QualifiedBox>::const_iterator it=boundary.begin(); it!=boundary.end(); it++)
 		write_output_box(f,*it);
 
-	for (vector<SolverOutputBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++)
+	for (vector<QualifiedBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++)
 		write_output_box(f,*it);
 
-	for (vector<SolverOutputBox>::const_iterator it=pending.begin(); it!=pending.end(); it++)
+	for (vector<QualifiedBox>::const_iterator it=pending.begin(); it!=pending.end(); it++)
 		write_output_box(f,*it);
 
 	f.close();
@@ -222,29 +254,31 @@ string Manifold::format() {
 	return
 	"\n"
 	"--------------------------------------------------------------------------------\n"
-	"                          Manifold format v2\n"
+	"                          Manifold format v4\n"
 	"\n"
 	"The manifold text format (obtained with --txt) is described below.\n"
 	"The manifold binary format (.mnf) is exactly the same except that:\n"
-	"  - all separating characters (space, line return) are removed (except\n"
-	"    those inside the signature)\n"
+	"  - all separating characters (space, line return) are removed except\n"
+	"    those inside the signature (line 1 in text format)\n"
 	"  - integer values are unsigned 32 bits integer (uint32_t)\n"
 	"  - real values are 64 bits double\n"
 	"--------------------------------------------------------------------------------\n"
     "[line 1] - the signature: the null-terminated sequence of 20 \n"
     "           characters \"IBEX MANIFOLD FILE \" (mind the space at the end)\n"
-    "         - and the format version number: 1\n"
+    "         - and the format version number: 4\n"
 	"[line 2] - 3 values: n=the number of variables, m=number of equalities,\n"
 	"           number of inequalities (excluding initial box)\n"
-	"[line 3] - 1 value: the status of the search. Possible values are:\n"
+	"[line 3] - n strings representing the names of variables.\n"
+	"           In the binary format, each string is terminated by the null character \'0\'.\n"
+	"[line 4] - 1 value: the status of the search. Possible values are:\n"
 	"\t\t* 0=complete search:   all output boxes are validated\n"
 	"\t\t* 1=complete search:   infeasible problem\n"
 	"\t\t* 2=incomplete search: minimal width (--eps-min) reached\n"
 	"\t\t* 3=incomplete search: time out\n"
 	"\t\t* 4=incomplete search: buffer overflow\n"
-	"[line 4] - 4 values: number of inner, boundary, unknown and pending boxes\n"
-	"[line 5] - 2 values: time (in seconds) and number of cells.\n"
-	"\n[lines 6-...] The subsequent lines describe the \"solutions\" (output boxes).\n"
+	"[line 5] - 4 values: number of inner, boundary, unknown and pending boxes\n"
+	"[line 6] - 2 values: time (in seconds) and number of cells.\n"
+	"\n[lines 7-...] The subsequent lines describe the \"solutions\" (output boxes).\n"
 	"\t Each line corresponds to one box and contains the following information:\n"
 	"\t - 2*n values: lb(x1), ub(x1),...,lb(xn), ub(xn)\n"
 	"\t - 1 value: the status of the box. Possible values are:\n"
@@ -258,7 +292,7 @@ string Manifold::format() {
 	"\t   Nothing is displayed if m=0 or m=n.\n\n";
 }
 
-void Manifold::write_output_box_txt(ofstream& file, const SolverOutputBox& sol) const {
+void Manifold::write_output_box_txt(ofstream& file, const QualifiedBox& sol) const {
 	char s=' ';
 	const IntervalVector& box=sol;
 	for (unsigned int i=0; i<n; i++) {
@@ -295,21 +329,24 @@ void Manifold::write_txt(const char* filename) const {
 	char s=' ';
 	file << SIGNATURE << s << FORMAT_VERSION << '\n';
 	file << n << s << m << s << nb_ineq << '\n';
+	for (unsigned int i=0; i<n; i++)
+		file << var_names[i] << ' ';
+	file << '\n';
 	file << status << '\n';
 	file << inner.size() << s << boundary.size() << s << unknown.size() << s << pending.size() << '\n';
 	file << time << s << nb_cells << '\n';
 
 	bool first_sol=true;
-	for (vector<SolverOutputBox>::const_iterator it=inner.begin(); it!=inner.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=inner.begin(); it!=inner.end(); it++) {
 		write_output_box_txt(file,*it);
 	}
-	for (vector<SolverOutputBox>::const_iterator it=boundary.begin(); it!=boundary.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=boundary.begin(); it!=boundary.end(); it++) {
 		write_output_box_txt(file,*it);
 	}
-	for (vector<SolverOutputBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=unknown.begin(); it!=unknown.end(); it++) {
 		write_output_box_txt(file,*it);
 	}
-	for (vector<SolverOutputBox>::const_iterator it=pending.begin(); it!=pending.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=pending.begin(); it!=pending.end(); it++) {
 		write_output_box_txt(file,*it);
 	}
 
@@ -320,16 +357,16 @@ ostream& operator<<(ostream& os, const Manifold& manif) {
 
 	int i=0;
 
-	for (vector<SolverOutputBox>::const_iterator it=manif.inner.begin(); it!=manif.inner.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=manif.inner.begin(); it!=manif.inner.end(); it++) {
 		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
-	for (vector<SolverOutputBox>::const_iterator it=manif.boundary.begin(); it!=manif.boundary.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=manif.boundary.begin(); it!=manif.boundary.end(); it++) {
 		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
-	for (vector<SolverOutputBox>::const_iterator it=manif.unknown.begin(); it!=manif.unknown.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=manif.unknown.begin(); it!=manif.unknown.end(); it++) {
 		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
-	for (vector<SolverOutputBox>::const_iterator it=manif.pending.begin(); it!=manif.pending.end(); it++) {
+	for (vector<QualifiedBox>::const_iterator it=manif.pending.begin(); it!=manif.pending.end(); it++) {
 		os << " sol n°" << (i++) << " = " << *it << endl;
 	}
 	return os;

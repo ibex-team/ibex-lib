@@ -20,7 +20,7 @@ using namespace std;
 
 namespace ibex {
 
-MitsosSIP::MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  const std::vector<const ExprSymbol*>& params, const BitSet& is_param, bool shared_discretization) :
+MitsosSIP::MitsosSIP(System& sys, const Array<const ExprSymbol>& vars, const Array<const ExprSymbol>& params, const BitSet& is_param, bool shared_discretization) :
 			SIP(sys, vars, params, is_param), p_domain(p_arg),
 			trace(1), l_max(20), LBD_samples(new vector<double>[p]),
 			UBD_samples(shared_discretization? LBD_samples : new vector<double>[p]),
@@ -29,7 +29,7 @@ MitsosSIP::MitsosSIP(System& sys, const std::vector<const ExprSymbol*>& vars,  c
 
 	// Initialize the domains of parameters
 	for (int J=0; J<p_arg; J++) {
-		p_domain.set_ref(J,*new Domain(params[J]->dim));
+		p_domain.set_ref(J,*new Domain(params[J].dim));
 	}
 
 	// =========== initial sample values ==================
@@ -92,9 +92,9 @@ void MitsosSIP::optimize(double eps_f) {
 	if (trace>=1) {
 		cout << "=========================" << endl;
 		cout << "INIT : " << endl;
-		cout << " eps_g=" << eps_g << endl;
+		cout << "    eps_g=" << eps_g << endl;
 		if (trace>=1) {
-			cout << " eps_LLP=" << eps_LLP << endl;
+			cout << "     eps_LLP=" << eps_LLP << endl;
 		}
 	}
 
@@ -317,7 +317,9 @@ bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eta_ub, doub
 bool MitsosSIP::solve(const System& sub_sys, double eps, Vector& x_opt, double& uplo, double& loup) {
 
 	//DefaultOptimizer o(sub_sys,eps,eps);
-	DefaultOptimizer o(sub_sys,eps,eps);
+	DefaultOptimizer o(sub_sys,eps,eps,
+			NormalizedSystem::default_eps_h,
+			false,true,random_seed);
 
 	Optimizer::Status status=o.optimize(sub_sys.box);
 
@@ -336,7 +338,7 @@ bool MitsosSIP::solve(const System& sub_sys, double eps, Vector& x_opt, double& 
 
 Interval MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 
-	cout << "   LLP: ";
+	if (trace>=1) cout << "   LLP: ";
 
 	double lb=NEG_INFINITY;
 	double ub=NEG_INFINITY;
@@ -349,7 +351,9 @@ Interval MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
             //cout << max_sys << endl;
 
 			// Mitsos algorithm works with absolute precision
-			DefaultOptimizer o(max_sys,0,eps);
+			DefaultOptimizer o(max_sys,0,eps,
+					NormalizedSystem::default_eps_h,
+					false,true,random_seed);
 
 			VarSet param_LLP_var(p, lpp_fac.param_LLP_var);
 

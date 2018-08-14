@@ -54,6 +54,13 @@ Domain P_ExprNode::_2domain() const {
 	return ExprGenerator().generate_cst(*this);
 }
 
+Interval P_ExprNode::_2itv() const {
+	Domain d=_2domain();
+	if (d.dim.type()!=Dim::SCALAR)
+		ibexerror("interval expected");
+	return d.i();
+}
+
 ostream& operator<<(ostream& os, const P_ExprNode& e) {
 	P_ExprPrinter p(os,e);
 	return os;

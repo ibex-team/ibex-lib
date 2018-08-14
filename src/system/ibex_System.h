@@ -275,9 +275,9 @@ private:
 
 	void load(FILE* file);
 
-	// initialize f from the constraints in ctrs,
+	// initialize f and ops from the constraints in ctrs,
 	// once *all* the other fields are set (including args and nb_ctr).
-	void init_f_from_ctrs();
+	void init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs);
 };
 
 std::ostream& operator<<(std::ostream&, const System&);

@@ -51,5 +51,14 @@ P_ConstraintLoop::~P_ConstraintLoop() {
 	delete &last_value;
 }
 
+P_ThickEquality::P_ThickEquality(const P_ExprNode* expr, const Interval& d) : expr(*expr), d(d) {
+
+}
+
+P_ThickEquality::~P_ThickEquality() {
+	delete &expr;
+}
+
+
 } // end namespace parser
 } // end namespace ibex

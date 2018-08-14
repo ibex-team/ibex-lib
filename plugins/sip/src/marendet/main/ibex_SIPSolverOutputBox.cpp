@@ -1,35 +1,34 @@
 //============================================================================
-//                                  I B E X
-// File        : ibex_Solution.cpp
-// Author      : Gilles Chabert
-// Copyright   : IMT Atlantique (France)
+//                                  I B E X                                   
+// File        : ibex_SIPSolverOutputBox.cpp
+// Author      : Antoine Marendet, Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Last update : Sep 19, 2017
+// Created     : May 4, 2018
+// Last Update : May 4, 2018
 //============================================================================
 
-#include "ibex_SolverOutputBox.h"
-
-#include <stdlib.h>
+#include "ibex_SIPSolverOutputBox.h"
 
 using namespace std;
 
 namespace ibex {
 
-ostream& operator<<(ostream& os, const SolverOutputBox& sol) {
+ostream& operator<<(ostream& os, const SIPSolverOutputBox& sol) {
 	os.precision(12);
 	os << sol.existence() << " ";
 	switch(sol.status) {
 
-	case SolverOutputBox::INNER:
+	case SIPSolverOutputBox::INNER:
 		os << "[inner";
 		break;
-	case SolverOutputBox::BOUNDARY:
+	case SIPSolverOutputBox::BOUNDARY:
 		os << "[boundary";
 		break;
-	case SolverOutputBox::UNKNOWN :
+	case SIPSolverOutputBox::UNKNOWN :
 		os << "[unknown]";
 		break;
-	case SolverOutputBox::PENDING:
+	case SIPSolverOutputBox::PENDING:
 		os << "[pending]";
 		break;
 	}
@@ -50,5 +49,4 @@ ostream& operator<<(ostream& os, const SolverOutputBox& sol) {
 
 	return os;
 }
-
-} /* namespace ibex */
+} // end namespace ibex

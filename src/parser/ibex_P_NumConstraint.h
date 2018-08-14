@@ -82,6 +82,28 @@ public:
 	P_ConstraintList ctrs;
 };
 
+
+/**
+ * A thick equality g(x) in [..,...]
+ * (to be transformed into two inequalities)
+ */
+class P_ThickEquality : public P_NumConstraint {
+public:
+	P_ThickEquality(const P_ExprNode* expr, const Interval& d);
+
+	/**
+	 * delete all the nodes of the expression *excepted symbols*
+	 */
+	~P_ThickEquality();
+
+	void acceptVisitor(CtrGenerator& g) const {
+		g.visit(*this);
+	}
+
+	const P_ExprNode& expr;
+	Interval d;
+};
+
 } // end namespace parser
 } // end namespace ibex
 

@@ -245,7 +245,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::CST_SYMBOL: e.lab=new LabelConst(scope.get_cst(((P_ExprCstSymbol&) e).name)); break;
 			case P_ExprNode::TMP_SYMBOL:
 				{
-					const P_ExprNode& e2=scope.get_func_tmp_expr(((P_ExprTmpSymbol&) e).name);
+					const P_ExprNode& e2=scope.get_expr_tmp_expr(((P_ExprTmpSymbol&) e).name);
 					visit(e2);
 					e.lab = new LabelNode(&e2.lab->node());
 				}

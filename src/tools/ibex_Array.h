@@ -60,6 +60,11 @@ public:
 	void add(const Array<T>& a);
 
 	/**
+	 * \brief Concatenate with another array (increments the size)
+	 */
+	void add(const std::vector<T*>& vec);
+
+	/**
 	 * \brief Set the ith reference to the object \a obj.
 	 */
 	void set_ref(int i, T& obj);
@@ -277,8 +282,21 @@ template<class T>
 void Array<T>::add(const Array<T>& a) {
 	int n=size();
 	resize(n+a.size());
+
 	for (int i=0; i<a.size(); i++)
 		set_ref(n+i,a[i]);
+}
+
+template<class T>
+void Array<T>::add(const std::vector<T*>& vec) {
+	int n=size();
+	resize(n+vec.size());
+
+	int i=0;
+	for (typename std::vector<T*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
+		set_ref(n+i, **it);
+		i++;
+	}
 }
 
 template<class T>
