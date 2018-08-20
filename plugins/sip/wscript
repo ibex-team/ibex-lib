@@ -71,13 +71,13 @@ def build (bld):
 		install_path = bld.env.BINDIR,
 		)
 		bld.program (
-		target = "sipopt",
+		target = "ibexopt-sip",
 		use = [ "ibex" ], # add dependency on ibex library
 		source = bld.path.ant_glob ("main/optimizer.cpp"),
 		install_path = bld.env.BINDIR,
 		)
 		bld.program (
-		target = "sipsolve",
+		target = "ibexsolve-sip",
 		use = [ "ibex" ], # add dependency on ibex library
 		source = bld.path.ant_glob ("main/solver.cpp"),
 		install_path = bld.env.BINDIR,
