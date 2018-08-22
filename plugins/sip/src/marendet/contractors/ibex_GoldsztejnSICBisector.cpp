@@ -45,7 +45,7 @@ ParameterEvaluationsCache _createNewCache(const SIConstraint& constraint, const 
 
 void GoldsztejnSICBisector::contractCell(Cell& cell) {
 	LargestFirst bisector;
-	NodeData& node_data = cell.get<NodeData>();
+	NodeData& node_data = *((NodeData*) cell.prop[NodeData::id]);
 	for (int cst_index = 0; cst_index < node_data.sic_constraints_caches.size(); ++cst_index) {
 		node_data.sic_constraints_caches[cst_index].update_cache(*system_.sic_constraints_[cst_index].function_,
 				cell.box, true);
@@ -57,7 +57,9 @@ void GoldsztejnSICBisector::contractCell(Cell& cell) {
 					return p1.evaluation.ub() > p2.evaluation.ub();
 				});
 		const SIConstraint& constraint = system_.sic_constraints_[cst_index];
-		for (int i = 0; i < cacheList.size(); ++i) {
+		const int bisection_limit = 50;
+		int bisections = 0;
+		for (int i = 0; i < cacheList.size() /*&& bisections < bisection_limit*/; ++i) {
 			if (!cacheList[i].parameter_box.is_bisectable())
 				continue;
 			auto bisectList = bisectAllDim(cacheList[i].parameter_box);
@@ -67,6 +69,7 @@ void GoldsztejnSICBisector::contractCell(Cell& cell) {
 				return newz.diam()/z.diam() <= ratio_;
 			})) {
 				hasBisected = true;
+				bisections++;
 				cacheList[i] = _createNewCache(constraint, cell.box, bisectList[0]);
 				for (int j = 1; j < bisectList.size(); ++j)
 					cacheList.emplace_back(_createNewCache(constraint, cell.box, bisectList[j]));

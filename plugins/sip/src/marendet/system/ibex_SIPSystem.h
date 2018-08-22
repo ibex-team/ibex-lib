@@ -12,13 +12,13 @@
 #define __SIP_IBEX_SIPSYSTEM_H__
 
 #include "ibex_Array.h"
-#include "ibex_Backtrackable.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 #include "ibex_IntervalVector.h"
 #include "ibex_NLConstraint.h"
 #include "ibex_SIConstraint.h"
 #include "ibex_SIConstraintCache.h"
+#include "ibex_Bxp.h"
 
 #include <iostream>
 #include <utility>
@@ -67,13 +67,15 @@ private:
 	std::regex quantified_regex_;
 };
 
-class NodeData: public Backtrackable {
+class NodeData: public Bxp {
 public:
 	static SIPSystem* sip_system;
+	static long id;
 	NodeData();
 	NodeData(const std::vector<SIConstraintCache>& caches);
-	std::pair<Backtrackable*, Backtrackable*> down(const BisectionPoint&);
-    Backtrackable* copy() const;
+	virtual Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const;
+	virtual void update(const BoxEvent& event, const BoxProperties& prop);
+	virtual std::string to_string() const;
 
 	std::vector<SIConstraintCache> sic_constraints_caches;
 };

@@ -10,6 +10,7 @@
 #include "contractors/ibex_CtcCompoSIP.h"
 #include "contractors/ibex_CtcEvaluation.h"
 #include "contractors/ibex_CtcFilterSICParameters.h"
+#include "contractors/ibex_CtcBisectActiveParameters.h"
 #include "contractors/ibex_CtcFirstOrderTest.h"
 #include "contractors/ibex_CtcFixPointSIP.h"
 #include "contractors/ibex_CtcHC4SIP.h"
@@ -257,7 +258,7 @@ int main(int argc, const char ** argv) {
 
 		NodeData::sip_system = &sys;
 
-		CellDoubleHeapSIP buffer = CellDoubleHeapSIP(sys, 0);
+		CellDoubleHeapSIP buffer = CellDoubleHeapSIP(sys, 20);
 		ibex::RoundRobin bisector = ibex::RoundRobin(0);
 		/*ibex::Vector prec(system.ext_nb_var, 1e-20);
 		 prec[system.ext_nb_var - 1] = POS_INFINITY;
@@ -291,6 +292,7 @@ int main(int argc, const char ** argv) {
 		 */
 
 		GoldsztejnSICBisector* sic_bisector = new GoldsztejnSICBisector(sys);
+		CtcBisectActiveParameters* ctc_bisect_active = new CtcBisectActiveParameters(sys);
 		CtcFilterSICParameters* sic_filter = new CtcFilterSICParameters(sys);
 		GoldsztejnSICBisector* sic_bisector2 = new GoldsztejnSICBisector(sys);
 		CtcFilterSICParameters* sic_filter2 = new CtcFilterSICParameters(sys);
@@ -310,18 +312,19 @@ int main(int argc, const char ** argv) {
 		}
 		fixpoint_list.emplace_back(sic_bisector2);
 		fixpoint_list.emplace_back(sic_filter2);
+		//fixpoint_list.emplace_back(ctc_bisect_active);
 		if (!no_blankenship) {
 			CtcBlankenship* blankenship = new CtcBlankenship(sys, 0.1, 1000);
 			fixpoint_list.emplace_back(blankenship);
 		}
 		CtcCompoSIP* compo = new CtcCompoSIP(fixpoint_list);
-		CtcFixPointSIP* fixpoint = new CtcFixPointSIP(*compo, POS_INFINITY); // Best: 0.1
+		CtcFixPointSIP* fixpoint = new CtcFixPointSIP(*compo, 0.1); // Best: 0.1
 
 		vector<CellCtc*> ctc_list;
 		ctc_list.emplace_back(sic_bisector);
 		ctc_list.emplace_back(sic_filter);
 		if (!no_propag) {
-			CtcHC4SIP* hc4 = new CtcHC4SIP(sys, 0.01, true);
+			CtcHC4SIP* hc4 = new CtcHC4SIP(sys, 0.1, true);
 			ctc_list.emplace_back(hc4);
 		}
 		ctc_list.emplace_back(fixpoint);

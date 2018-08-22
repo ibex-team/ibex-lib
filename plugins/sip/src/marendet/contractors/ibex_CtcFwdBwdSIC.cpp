@@ -32,14 +32,13 @@ CtcFwdBwdSIC::~CtcFwdBwdSIC() {
 }
 
 void CtcFwdBwdSIC::init() {
+
 	input = new BitSet(nb_var);
 	output = new BitSet(nb_var);
-	int v;
-	for (int i = 0; i < constraint_.function_->nb_used_vars(); i++) {
-		v = constraint_.function_->used_var(i);
-		if (v < nb_var) {
-			output->add(v);
-			input->add(v);
+	for (BitSet::const_iterator it=constraint_.function_->used_vars.begin(); it!=constraint_.function_->used_vars.end(); it++) {
+		if (it < nb_var) {
+			output->add(it);
+			input->add(it);
 		}
 	}
 }
@@ -64,10 +63,17 @@ void CtcFwdBwdSIC::contract(IntervalVector &box) {
 			}
 			if (full_box.is_empty())
 				break;
+			/*if (!constraint_.function_->backward(backward_domain_, full_box)) {
+				fixpoint = false;
+			}
+			if (full_box.is_empty())
+				break;*/
 		}
 	}
 
 	box = full_box.subvector(0, nb_var - 1);
+	//if(full_box.is_empty())
+	//	box.set_empty();
 	if (fixpoint) {
 		set_flag(FIXPOINT);
 		set_flag(INACTIVE);

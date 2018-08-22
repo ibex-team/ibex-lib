@@ -55,7 +55,7 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(
 	if(count < 0) {
 		throw NotFound();
 	}
-	lp_solver_->write_file();
+	//lp_solver_->write_file();
 	//cout << "beforesolve" << endl;
 	LPSolver::Status_Sol stat = lp_solver_->solve_proved();
 	//cout << "aftersolve" << endl;

@@ -32,6 +32,8 @@ public:
     void contractCell(Cell& cell);
 };
 
+ParameterEvaluationsCache _createNewCache(const SIConstraint& constraint, const IntervalVector& box,
+		const IntervalVector& parameter_box);
 } // end namespace ibex
 
 #endif // __SIP_IBEX_GOLDSZTEJNSICBISECTOR_H__

@@ -34,11 +34,12 @@ namespace ibex {
 
 const double SIPOptimizer::default_rel_eps_f = 1e-3;
 const double SIPOptimizer::default_abs_eps_f = 1e-3;
+const double SIPOptimizer::default_lf_loop_ratio = 0.1;
 
 SIPOptimizer::SIPOptimizer(CellCtc& ctc, Bsc& bisector, LoupFinderSIP& loup_finder, LoupFinderSIP* loup_finder2,
-		CellBufferOptim& buffer, double abs_eps, double rel_eps, double timeout, double eps_x, int maxiter) :
+		CellBufferOptim& buffer, double abs_eps, double rel_eps, double timeout, double eps_x, int maxiter, double lf_loop_ratio) :
 		ctc_(ctc), bisector_(bisector), loup_finder_(loup_finder), loup_finder2_(loup_finder2), buffer_(buffer), obj_rel_prec_f_(
-				rel_eps), obj_abs_prec_f_(abs_eps), timeout_(timeout), eps_x_(eps_x), maxiter_(maxiter) {
+				rel_eps), obj_abs_prec_f_(abs_eps), timeout_(timeout), eps_x_(eps_x), maxiter_(maxiter), lf_loop_ratio_(lf_loop_ratio) {
 
 }
 
@@ -58,8 +59,8 @@ SIPOptimizer::Status SIPOptimizer::minimize(const IntervalVector& box, double ob
 	initial_box[n - 1] = Interval::ALL_REALS;
 	Cell* root = new Cell(initial_box);
 	bisector_.add_property(initial_box, root->prop);
-	buffer_.add_backtrackable(initial_box, *root);
-	root->add<NodeData>();
+	buffer_.add_property(initial_box, root->prop);
+	root->prop.add(new NodeData());
 	loup_changed_ = false;
 	initial_loup_ = obj_init_bound;
 	loup_point_ = box;
@@ -70,24 +71,24 @@ SIPOptimizer::Status SIPOptimizer::minimize(const IntervalVector& box, double ob
 	updateUplo();
 
 	cout << setprecision(12);
+	//maxiter_ = 7;
 	while (!buffer_.empty() && (timeout_ <= 0 || time_ < timeout_) && (maxiter_ < 0 || iter < maxiter_)) {
 		++iter;
 		loup_changed_ = false;
 		Cell* cell = buffer_.top();
-		if (trace_ >= 2) {
+		if (trace_ >= 1) {
 			cout << "******** ITERATION " << iter << "********" << endl;
 			cout << " current box " << cell->box << endl;
 		}
 		try {
             BisectionPoint bisection_point = bisector_.choose_var(*cell);
-			//auto boxes = bisector_.bisect(*cell);
-			//auto new_cells = cell->bisect(boxes.first, boxes.second);
-            auto new_cells = cell->bisect(bisection_point);
+           auto new_cells = cell->bisect(bisection_point);
 			buffer_.pop();
 			delete cell;
 			nb_cells_ += 2;
 			handleCell(*new_cells.first);
 			handleCell(*new_cells.second);
+			//handleCell(*cell);
 		} catch (NoBisectableVariableException&) {
 			updateUploEpsboxes((cell->box)[n].lb());
 			buffer_.pop();
@@ -137,13 +138,29 @@ SIPOptimizer::Status SIPOptimizer::minimize(const IntervalVector& box, double ob
 
 void SIPOptimizer::handleCell(Cell& cell) {
 	// LOAD THE NEW CACHE!
-	NodeData::sip_system->loadNodeData(&cell.get<NodeData>());
+
+	NodeData* data=(NodeData*) cell.prop[NodeData::id];
+	if (!data) ibex_error("[ibexopt-sip]: no node data!");
+
+	NodeData::sip_system->loadNodeData(data);
 	//cout << "before : " << cell.box << endl;
-	const auto& list = cell.get<NodeData>().sic_constraints_caches[0].parameter_caches_;
-	//for(const auto& param_cache : list) {
-	//	cout << param_cache.parameter_box << " eval=" << param_cache.evaluation <<  endl;
-	//}
+	//const auto& list = cell.get<NodeData>().sic_constraints_caches[0].parameter_caches_;
+	/*cout << "{";
+	for(const auto& param_cache : list) {
+		cout << "{";;
+		cout << "{" << param_cache.parameter_box[0].lb() << "," << param_cache.parameter_box[0].ub() << "}";
+		for(int i = 1; i < param_cache.parameter_box.size(); ++i) {
+			cout << ",{" << param_cache.parameter_box[i].lb() << "," << param_cache.parameter_box[i].ub() << "}";
+		}
+		cout << "},";
+		//cout << param_cache.parameter_box << " eval=" << param_cache.evaluation <<  endl;
+	}
+	cout << "}" << endl;*/
 	//cout << "paramsize=" << list.size() << endl;
+	/*for(int i = 0; i < 1; ++i) {
+		const auto& list = cell.get<NodeData>().sic_constraints_caches[i].parameter_caches_;
+		cout << "paramsize[" << i << "]=" << list.size() << endl;
+	}*/
 	//cout << endl << endl;
 	// =============== Contract y with y <= loup
 	Interval& y = cell.box[n - 1];
@@ -157,14 +174,17 @@ void SIPOptimizer::handleCell(Cell& cell) {
 	if (y.is_empty()) {
 		cell.box.set_empty();
 	}
+
 	// =============== Contract x with f(x) = y and g(x) <= 0
 	bool loop = true;
 	while (!cell.box.is_empty() && loop) {
 		//cout << "after: " << cell.box << endl << endl << endl;
 		//cout << "beforectc" << endl;
+		double old_loup = loup_;
 		ctc_.contractCell(cell);
 		//cout << "afterctc" << endl;
 		loop = false;
+
 		if (!cell.box.is_empty()) {
 			bool loup_changed_here = updateLoup2(cell);
 			loop = loup_changed_here;
@@ -176,6 +196,8 @@ void SIPOptimizer::handleCell(Cell& cell) {
 				cell.box.set_empty();
 			}
 		}
+		loop = (old_loup - loup_)/loup_ > lf_loop_ratio_;
+		//break;
 	}
 
 
@@ -397,4 +419,5 @@ double SIPOptimizer::compute_ymax() {
 		ymax = loup_ - obj_abs_prec_f_;
 	return ymax;
 }
+
 } // end namespace ibex

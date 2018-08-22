@@ -15,7 +15,7 @@
 #include "ibex_Interval.h"
 #include "ibex_System.h"
 #include "ibex_VarSet.h"
-
+#include "ibex_Id.h"
 
 using namespace std;
 
@@ -23,19 +23,22 @@ namespace ibex {
 
 SIPSystem* NodeData::sip_system = nullptr;
 
+long NodeData::id = next_id();
+
 NodeData::NodeData() :
 		NodeData(NodeData::sip_system->getInitialNodeCaches()) {
 }
 
 NodeData::NodeData(const vector<SIConstraintCache>& caches) :
-		sic_constraints_caches(caches) {
+		Bxp(id), sic_constraints_caches(caches) {
 }
 
-std::pair<Backtrackable*, Backtrackable*> NodeData::down(const BisectionPoint& bp) {
-	return std::pair<Backtrackable*, Backtrackable*>(new NodeData(*this), new NodeData(*this));
+void NodeData::update(const BoxEvent& event, const BoxProperties& prop) {
+	// something should be done here, at least
+	// an up-to-date flag should be set to "false".
 }
 
-Backtrackable* NodeData::copy() const {
+Bxp* NodeData::copy(const IntervalVector& box, const BoxProperties& prop) const {
 	return new NodeData(*this);
 }
 
@@ -192,7 +195,7 @@ Array<const ExprSymbol> SIPSystem::getUsedParamSymbols(const Function* fun) {
 	for (int i = 0; i < fun->nb_arg(); ++i) {
 		//if (fun->arg_name(i)[0] == 'p' && fun->arg_name(i)[1] == '_' && fun->used_vars[i]) {
 		string name = fun->arg_name(i);
-		if(regex_match(name.begin(), name.end(), quantified_regex_)) {
+		if(fun->used_vars[i] && regex_match(name.begin(), name.end(), quantified_regex_)) {
 			paramSymbols.add(fun->arg(i));
 		}
 	}

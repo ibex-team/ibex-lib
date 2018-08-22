@@ -123,11 +123,10 @@ void SIPSolver::start(const IntervalVector& init_box)
     Cell* root = new Cell(init_box);
 
     // add data required by this solver
-    root->add<BisectedVar>();
-    root->add<NodeData>();
+    root->prop.add(new NodeData());
 
     // add data required by the bisector
-    bsc.add_property(initial_box, root->prop);
+    bsc.add_property(init_box, root->prop);
 
     buffer.push(root);
     nb_cells = 1;
@@ -158,11 +157,10 @@ void SIPSolver::start(const char* input_paving)
         Cell* cell = new Cell(it->existence());
 
         // add data required by this solver
-        cell->add<BisectedVar>();
-        cell->add<NodeData>(); // Not efficient...
+        cell->prop.add(new NodeData()); // Not efficient...
 
         // add data required by the bisector
-        bsc.add_property(initial_box, cell->prop);
+        bsc.add_property(it->existence(), cell->prop);
 
         buffer.push(cell);
 
@@ -202,12 +200,15 @@ SIPSolverOutputBox* SIPSolver::next()
                 throw PathFoundException();
             }
         }
-        NodeData::sip_system->loadNodeData(&c->get<NodeData>());
+    	NodeData* data=(NodeData*) c->prop[NodeData::id];
+    	if (!data) ibex_error("[ibexopt-sip]: no node data!");
+    	NodeData::sip_system->loadNodeData(data);
+
         /*const auto& list = c->get<NodeData>().sic_constraints_caches[0].parameter_caches_;
 		 for(const auto& param_cache : list) {
 		 cout << param_cache.parameter_box << " eval=" << param_cache.evaluation <<  endl;
 		 }*/
-        int v = c->get<BisectedVar>().var; // last bisected var.
+        int v = c->bisected_var; // last bisected var.
 
         if (v != -1) // no root node :  impact set to 1 for last bisected var only
             impact.add(v);
