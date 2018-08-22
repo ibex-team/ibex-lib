@@ -48,7 +48,7 @@ bool newton(const Fnc& f, const VarSet* vars, IntervalVector& full_box, double p
 	if (vars) {
 		p=new IntervalVector(vars->param_box(full_box));
 		midp=new IntervalVector(p->mid());
-		Jp=new IntervalMatrix(n,vars->nb_param);
+		Jp=new IntervalMatrix(m,vars->nb_param);
 	}
 
 	IntervalVector y(n);
