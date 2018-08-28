@@ -99,12 +99,11 @@ Now, let us modify the implementation of our contractor.
 To take benefit of properties, two steps are required.
 First, we have to override the ``add_property`` function of the ``Ctc`` interface.
 This function is called by all strategies at initialization.
-This function takes as argument the initial box (of the search) and a set of properties
-which is an instance of ``BoxProperties``. This object basically just stores pointers to ``Bxp*``,
+This function takes as argument the initial box (of the search) and a container for properties: an instance of ``BoxProperties``. This object basically just stores pointers to ``Bxp*``,
 except that it can handle :ref:`inter-dependencies <bxp_dependencies>`.
 
 Second, we have to override a variant of the ``contract`` function,
-which takes in argument not only the box, but also the current set of property values (an instance of ``BoxProperties``).
+which takes in argument not only the box, but also a ``ContractContext`` object which contains, among other things, the current set of property values (an instance of ``BoxProperties``).
 The ``BoxProperties`` class works like a simple map: by using the bracket operator ``[...]`` 
 with the property id inside the brackets, you get the corresponding property value associated to the box:
 
