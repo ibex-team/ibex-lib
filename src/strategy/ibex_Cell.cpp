@@ -18,7 +18,7 @@ using namespace std;
 
 namespace ibex {
 
-Cell::Cell(const IntervalVector& box, int var) : box(box), bisected_var(var) {
+Cell::Cell(const IntervalVector& box, int var) : box(box), prop(box), bisected_var(var) {
 
 }
 

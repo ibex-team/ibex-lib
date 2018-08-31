@@ -177,7 +177,7 @@ void CtcCompo::add_property(const IntervalVector& init_box, BoxProperties& map) 
 }
 
 void CtcCompo::contract(IntervalVector& box) {
-	ContractContext context;
+	ContractContext context(box);
 	contract(box,context);
 }
 
@@ -185,49 +185,40 @@ void CtcCompo::contract(IntervalVector& box, ContractContext& context) {
 
 	bool inactive = true;
 
-	BitSet* flags = context.output_flags();
+	BitSet input_impact = context.impact; // saved-->useful?
 
-	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
-
-	BitSet* input_impact = context.impact();
-	context.set_impact(&impact);
+	context.impact.fill(0,nb_var-1); // always set to "all" for the moment (to be improved later)
 
 	// TODO: a more clever impact handling could be
 	// done here
 	for (int i=0; i<list.size(); i++) {
 
-		if (flags && inactive) {
+		if (inactive) {
 
-			flags->clear();
+			context.output_flags.clear();
 
 			list[i].contract(box, context);
 
-			if (!(*flags)[ContractContext::INACTIVE]) {
+			if (!context.output_flags[INACTIVE]) {
 				inactive=false;
-				// now, no need for asking sub-contractors
-				// to calculate the impact:
-				context.set_output_flags(NULL);
+				// Improvement: no need now for asking sub-contractors
+				// to calculate the output flags
 			}
 		} else {
 			list[i].contract(box, context);
 		}
 
 		if (box.is_empty()) {
-			if (flags) {
-				flags->clear();
-				flags->add(ContractContext::FIXPOINT);
-				context.set_output_flags(flags); // restore!
-			}
-			context.set_impact(input_impact); // restore!
+			context.output_flags.clear();
+			context.output_flags.add(FIXPOINT);
+			context.impact =  input_impact; // restore!--> useful?
 			return;
 		}
 	}
 
-	if (flags) {
-		if (inactive) flags->add(ContractContext::INACTIVE);
-		context.set_output_flags(flags); // restore!
-	}
-	context.set_impact(input_impact); // restore!
+	if (inactive) context.output_flags.add(INACTIVE);
+
+	context.impact = input_impact; // restored--> useful?
 }
 
 } // end namespace ibex

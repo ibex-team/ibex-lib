@@ -48,6 +48,25 @@ protected:
 
 public:
 	/**
+	 * \brief Output flag numbers
+	 *
+	 * After a call to #contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags):
+	 * <ul>
+	 * <li> if (flags[FIXPOINT]==true) then the fixpoint is reached by this contractor on the
+	 * box which means: \f[C(C(box)) = C(box)\f]. Note that the box may have been modified
+	 * by the contractor and the fixpoint property is valid for the resulting box (after
+	 * contraction).
+	 *
+	 * <li> if (flags[INACTIVE]==true) then the fixpoint was reached and this contractor cannot
+	 * contract any subbox: \f[\forall [x]\subseteq {\tt box}, \quad C([x])=[x].\f]. Note that
+	 * this property is valid for the box *before* contraction. Even if the contractor turns
+	 * to be inactive on the resulting box (typically, in the case of an empty set) this flag
+	 * is not set.
+	 * </ul>
+	 */
+	enum {FIXPOINT, INACTIVE, NB_OUTPUT_FLAGS};
+
+	/**
 	 * \brief Delete *this.
 	 */
 	virtual ~Ctc();
@@ -70,6 +89,8 @@ public:
 	/**
 	 * \brief Contraction with specified impact.
 	 *
+	 * \deprecated
+	 *
 	 * Information on the impact allows incremental contraction.
 	 * The \a impact specifies the variables that have been
 	 * modified since the last call to this contractor.
@@ -81,6 +102,8 @@ public:
 
 	/**
 	 * \brief Contraction with specified impact and output flags.
+	 *
+	 * \deprecated
 	 *
 	 * \see #contract(IntervalVector&, const BoolMask&).
 	 * \see #flags
@@ -135,25 +158,23 @@ inline Ctc::~Ctc() { }
 
 inline void Ctc::contract(IntervalVector& box, ContractContext& context) {
 	contract(box);
-	if (context.prop()) {
-		// TODO: the input impact of update is the "output" impact
-		// of the previous call to contract. Such a field does not
-		// exist yet in Context --> set temporarily to "all".
-		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
-	}
+	// TODO: the input impact of update is the "output" impact
+	// of the previous call to contract. Such a field does not
+	// exist yet in Context --> set temporarily to "all".
+	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
 }
 
 inline void Ctc::contract(IntervalVector& box, const BitSet& impact) {
-	ContractContext context;
-	context.set_impact(&impact);
+	ContractContext context(box);
+	context.impact = impact;
 	contract(box,context);
 }
 
 inline void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& flags) {
-	ContractContext context;
-	context.set_impact(&impact);
-	context.set_output_flags(&flags);
+	ContractContext context(box);
+	context.impact = impact;
 	contract(box,context);
+	flags = context.output_flags;
 }
 
 inline void Ctc::add_property(const IntervalVector&, BoxProperties&) {

@@ -242,12 +242,12 @@ protected:
 	int start_var;
 
 	/**
-	 * Sub-context
+	 * Current context
 	 * Used to pass the impact (+ the shaved variable) to the sub-contractor.
 	 * Allow to benefit from the incrementality of the sub-contractor.
 	 * Also use to transmit the properties.
 	 */
-	ContractContext subcontext;
+	ContractContext* context;
 
 	virtual int limitCIDDichotomy();
 };

@@ -77,7 +77,7 @@ protected:
 
 
 inline std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
-	BoxProperties prop;
+	BoxProperties prop(box);
 	return find(box, loup_point, loup, prop);
 }
 

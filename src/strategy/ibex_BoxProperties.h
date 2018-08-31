@@ -37,7 +37,7 @@ public:
 	/**
 	 * \brief Buid a new property map.
 	 */
-	BoxProperties();
+	BoxProperties(const IntervalVector& box);
 
 	/**
 	 * \brief Copy constructor.
@@ -45,6 +45,13 @@ public:
 	 * Duplicate all properties for the new box.
 	 */
 	BoxProperties(const IntervalVector& box, const BoxProperties&);
+
+	/**
+	 * \brief Copy constructor.
+	 *
+	 * Duplicate all properties for the same box.
+	 */
+	BoxProperties(const BoxProperties&);
 
 	/**
 	 * \brief Delete this.
@@ -106,6 +113,11 @@ public:
 	 * \param rprop - The properties associated to the right box after bisection
 	 */
 	void update_bisect(const Bisection& b, BoxProperties& lprop, BoxProperties& rprop) const;
+
+	/**
+	 * \brief The box.
+	 */
+	const IntervalVector& box;
 
 protected:
 	/*

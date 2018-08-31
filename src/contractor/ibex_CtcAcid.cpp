@@ -31,7 +31,7 @@ CtcAcid::CtcAcid(const System& sys, Ctc& ctc, bool optim, int s3b, int scid,
 }
 
 void CtcAcid::contract(IntervalVector& box) {
-	ContractContext context;
+	ContractContext context(box);
 	contract(box,context);
 }
 
@@ -44,9 +44,8 @@ void CtcAcid::contract(IntervalVector& box, ContractContext& context) {
 	if (box.is_empty()) return;
 
 	// --------------------- context ------------------
-	BitSet impact(nb_var); // can be empty!
-	subcontext.set_impact(&impact);
-	subcontext.set_properties(context.prop());
+	context.impact.clear(); // should we restore the initial impact on return?
+	this->context = &context;
 	// ------------------------------------------------
 
 	int nb_CID_var=cid_vars.size();                    // [gch]
@@ -81,15 +80,14 @@ void CtcAcid::contract(IntervalVector& box, ContractContext& context) {
 		int v2=smearorder[v1];
 
 		// [gch]: impact handling:
-		bool was_impacted_var = impact[v2];           // was v2 initially in the impact?
-		impact.add(v2);
 
 		var3BCID(box, v2);                             // appel 3BCID sur la variable v2
 
-		if (!was_impacted_var)
-			impact.remove(v2);                        // restore [gch]
-
-		if (box.is_empty()) return;
+		if (box.is_empty()) {
+			context.output_flags.add(FIXPOINT);
+			this->context = NULL;
+			return;
+		}
 
 		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
 			for (int i=0; i<initbox.size(); i++) {
@@ -128,9 +126,8 @@ void CtcAcid::contract(IntervalVector& box, ContractContext& context) {
 
 	delete [] ctstat;
 
-	if (context.prop()) {
-		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
-	}
+	this->context = NULL;
+	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
 }
 
 // en optim, l'objectif est placé en 1er

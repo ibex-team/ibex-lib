@@ -67,7 +67,7 @@ void LinearizerXTaylor::add_property(const IntervalVector& init_box, BoxProperti
 }
 
 int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver)  {
-	BoxProperties prop;
+	BoxProperties prop(box);
 	return linearize(box, _lp_solver, prop);
 }
 

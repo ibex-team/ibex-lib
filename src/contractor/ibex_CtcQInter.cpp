@@ -21,37 +21,27 @@ void CtcQInter::add_property(const IntervalVector& init_box, BoxProperties& map)
 }
 
 void CtcQInter::contract(IntervalVector& box) {
-	ContractContext context;
+	ContractContext context(box);
 	contract(box,context);
 }
 
 void CtcQInter::contract(IntervalVector& box, ContractContext& context) {
 	Array<IntervalVector> refs(list.size());
 
-	// --------------------- context ------------------
-	ContractContext c_context;
-	c_context.set_impact(context.impact());
-	// ------------------------------------------------
-
 	for (int i=0; i<list.size(); i++) {
 		boxes[i]=box;
 
-		if (context.prop())
-			c_context.set_properties(new BoxProperties(boxes[i], *context.prop()));
+		ContractContext c_context(boxes[i], context);
 
 		list[i].contract(boxes[i], c_context);
 
 		refs.set_ref(i,boxes[i]);
-
-		if (context.prop())
-			delete c_context.prop();
 	}
 
 	box = qinter(refs,q);
 
-	if (context.prop()) {
-		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
-	}
+	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
+
 }
 
 } // end namespace ibex

@@ -86,7 +86,7 @@ protected:
 };
 
 inline std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
-	BoxProperties prop;
+	BoxProperties prop(box);
 	return find(box, loup_point, loup, prop);
 }
 

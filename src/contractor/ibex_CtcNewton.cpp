@@ -32,7 +32,7 @@ CtcNewton::CtcNewton(const Fnc& f, const VarSet& vars, double ceil, double prec,
 }
 
 void CtcNewton::contract(IntervalVector& box) {
-	ContractContext context;
+	ContractContext context(box);
 	contract(box,context);
 }
 
@@ -46,7 +46,7 @@ void CtcNewton::contract(IntervalVector& box, ContractContext& context) {
 	}
 
 	if (box.is_empty()) {
-		context.set_flag(ContractContext::FIXPOINT);
+		context.output_flags.add(FIXPOINT);
 	}
 }
 

@@ -133,7 +133,7 @@ CtcUnion::~CtcUnion() {
 }
 
 void CtcUnion::contract(IntervalVector& box) {
-	ContractContext context;
+	ContractContext context(box);
 	contract(box,context);
 }
 
@@ -141,36 +141,25 @@ void CtcUnion::contract(IntervalVector& box, ContractContext& context) {
 	IntervalVector savebox(box);
 	IntervalVector result(IntervalVector::empty(box.size()));
 
-	// --------------------- context ------------------
-	ContractContext c_context;
-	c_context.set_impact(context.impact());
-	BitSet flags(BitSet::empty(ContractContext::NB_OUTPUT_FLAGS));
-	c_context.set_output_flags(&flags);
-	// ------------------------------------------------
-
 	for (int i=0; i<list.size(); i++) {
 		if (i>0) box=savebox;
 
-		if (context.prop())
-			c_context.set_properties(new BoxProperties(box, *context.prop()));
+		ContractContext c_context(context);
 
-		flags.clear();
 		list[i].contract(box,c_context);
+
 		result |= box;
 
-		if (context.prop())
-			delete c_context.prop();
-
-		if (flags[ContractContext::INACTIVE]) {
-			context.set_flag(ContractContext::INACTIVE);
+		if (c_context.output_flags[INACTIVE]) {
+			context.output_flags.add(INACTIVE);
 			break;
 		}
 	}
 
 	box = result;
 
-	if (context.prop() && !flags[ContractContext::INACTIVE]) {
-		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
+	if (!context.output_flags[INACTIVE]) {
+		context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
 	}
 
 } // end namespace ibex

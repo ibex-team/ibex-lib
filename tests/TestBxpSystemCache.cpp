@@ -28,7 +28,7 @@ void TestBxpSystemCache::goal_eval01() {
 
 	BxpSystemCache cache(sys,0.1);
 	IntervalVector box(sys.nb_var);
-	BoxProperties prop;
+	BoxProperties prop(box);
 
 	box[0]=Interval(0,100);
 	cache.update(BoxEvent(box,BoxEvent::CONTRACT),prop);
@@ -66,7 +66,7 @@ void TestBxpSystemCache::goal_gradient01() {
 
 	BxpSystemCache cache(sys,0.1);
 	IntervalVector box(sys.nb_var);
-	BoxProperties prop;
+	BoxProperties prop(box);
 
 	box[0]=Interval(0,100);
 	cache.update(BoxEvent(box,BoxEvent::CONTRACT),prop);
@@ -101,7 +101,7 @@ void TestBxpSystemCache::ctrs_eval() {
 
 	BxpSystemCache cache(sys,0.1);
 	IntervalVector box(sys.nb_var);
-	BoxProperties prop;
+	BoxProperties prop(box);
 
 	box[0]=Interval(0,100);
 	cache.update(BoxEvent(box,BoxEvent::CONTRACT),prop);
@@ -140,7 +140,7 @@ void TestBxpSystemCache::ctrs_jacobian() {
 
 	BxpSystemCache cache(sys,0.1);
 	IntervalVector box(sys.nb_var);
-	BoxProperties prop;
+	BoxProperties prop(box);
 
 	box[0]=Interval(0,100);
 	box[1]=Interval(100,200);
@@ -181,7 +181,7 @@ void TestBxpSystemCache::active_ctrs() {
 
 	BxpSystemCache cache(sys,0.1);
 	IntervalVector box(sys.nb_var);
-	BoxProperties prop;
+	BoxProperties prop(box);
 
 	box[0]=Interval(-102,-2);
 	cache.update(BoxEvent(box,BoxEvent::CONTRACT),prop);
@@ -225,7 +225,7 @@ void TestBxpSystemCache::is_inner() {
 
 	BxpSystemCache cache(sys,0.1);
 	IntervalVector box(sys.nb_var);
-	BoxProperties prop;
+	BoxProperties prop(box);
 
 	box[0]=Interval(-104,-4);
 	cache.update(BoxEvent(box,BoxEvent::CONTRACT),prop);
@@ -248,7 +248,7 @@ void TestBxpSystemCache::active_ctrs_eval() {
 
 	BxpSystemCache cache(sys,0.1);
 	IntervalVector box(sys.nb_var);
-	BoxProperties prop;
+	BoxProperties prop(box);
 
 	box[0]=Interval(-102,-2);
 	cache.update(BoxEvent(box,BoxEvent::CONTRACT),prop);
@@ -296,7 +296,7 @@ void TestBxpSystemCache::active_ctrs_jacobian() {
 
 	BxpSystemCache cache(sys,0.1);
 	IntervalVector box(sys.nb_var);
-	BoxProperties prop;
+	BoxProperties prop(box);
 
 	box[0]=Interval(0,9);
 	cache.update(BoxEvent(box,BoxEvent::CONTRACT),prop);

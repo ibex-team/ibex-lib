@@ -32,22 +32,21 @@ void CtcLinearRelax::add_property(const IntervalVector& init_box, BoxProperties&
 }
 
 void CtcLinearRelax::contract(IntervalVector& box) {
-	ContractContext context;
+	ContractContext context(box);
 	contract(box,context);
 }
 
 void CtcLinearRelax::contract(IntervalVector& box, ContractContext& context) {
 	CtcPolytopeHull::contract(box,context);
 
-	BxpLinearRelaxArgMin* p=NULL;
-	if (context.prop())
-		p=(BxpLinearRelaxArgMin*) (*context.prop())[BxpLinearRelaxArgMin::get_id(sys)];
+	BxpLinearRelaxArgMin* p=(BxpLinearRelaxArgMin*) context.prop[BxpLinearRelaxArgMin::get_id(sys)];
+
 	if (!p) return;
 
 	try {
 		sys.read_ext_vec(arg_min(sys.goal_var(),true), p->_argmin);
 		p->inside = true;
-		context.prop()->propagate(*p);
+		context.prop.propagate(*p);
 	} catch(LPException&) {
 	}
 }

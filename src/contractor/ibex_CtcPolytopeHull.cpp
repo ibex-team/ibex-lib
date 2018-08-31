@@ -51,7 +51,7 @@ void CtcPolytopeHull::add_property(const IntervalVector& init_box, BoxProperties
 }
 
 void CtcPolytopeHull::contract(IntervalVector& box) {
-	ContractContext context;
+	ContractContext context(box);
 	contract(box,context);
 }
 
@@ -65,9 +65,7 @@ void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 	try {
 
 		//returns the number of constraints in the linearized system
-		int cont = context.prop() ?
-				lr.linearize(box, mylinearsolver, *context.prop()) :
-				lr.linearize(box, mylinearsolver);
+		int cont = lr.linearize(box, mylinearsolver, context.prop);
 
 		//cout << "[polytope-hull] end of LR" << endl;
 
@@ -90,9 +88,8 @@ void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 		mylinearsolver.clean_ctrs();
 	}
 
-	if (context.prop()) {
-		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
-	}
+	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
+
 }
 
 void CtcPolytopeHull::set_contracted_vars(const BitSet& vars) {

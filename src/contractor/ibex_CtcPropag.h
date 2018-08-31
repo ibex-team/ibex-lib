@@ -86,14 +86,9 @@ public:
 
 protected:
 
-
 	DirectedHyperGraph g; // constraint network (hypergraph)
 
 	Agenda agenda;        // propagation agenda
-
-	BitSet _impact;     // impact given to sub-contractors
-
-	BitSet flags;       // status of a contraction
 
 	BitSet active;      // mark active sub-contractors
 

@@ -32,7 +32,7 @@ Ctc3BCid::Ctc3BCid(const BitSet& cid_vars, Ctc& ctc, int s3b, int scid, int vhan
 Ctc3BCid::Ctc3BCid(Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
                     				Ctc(ctc.nb_var), cid_vars(BitSet::all(nb_var)), ctc(ctc), s3b(s3b), scid(scid),
 									vhandled(vhandled<=0? nb_var : vhandled),
-									var_min_width(var_min_width), start_var(0) {
+									var_min_width(var_min_width), start_var(0), context(NULL) {
 
 	assert(ctc.nb_var>0);
 	//	if (ctc.nb_var<=0)
@@ -63,7 +63,7 @@ bool Ctc3BCid::equalBoxes (int var, IntervalVector &box1, IntervalVector &box2) 
 }
 
 void Ctc3BCid::contract(IntervalVector& box) {
-	ContractContext context;
+	ContractContext context(box);
 	contract(box,context);
 }
 
@@ -73,39 +73,23 @@ void Ctc3BCid::contract(IntervalVector& box, ContractContext& context) {
 	start_var=nb_var-1;
 	//  patch pour l'optim  A RETIRER ??
 
-	// --------------------- context ------------------
-	BitSet impact(nb_var);
-	if (context.impact())
-		impact = *context.impact();
-	else
-		impact.fill(0,nb_var-1);
-
-	subcontext.set_impact(&impact);
-	subcontext.set_properties(context.prop());
-	// ------------------------------------------------
+	this->context = &context;
 
 	for (int k=0; k<vhandled; k++) {                   // [gch] k counts the number of varCIDed variables [gch]
 
 		var=(start_var+k)%nb_var;
 
-		// [gch]: impact handling:
-		bool was_impacted_var = impact[var]; // was var initially in the impact?
-		impact.add(var);
-
 		var3BCID(box, var);
 
-		if (!was_impacted_var)
-			impact.remove(var);                        // restore [gch]
-
 		if (box.is_empty()) {
-			context.set_flag(ContractContext::FIXPOINT);
+			context.output_flags.add(FIXPOINT);
+			this->context = NULL;
 			return;
 		}
 	}
 
-	if (context.prop()) {
-		context.prop()->update(BoxEvent(box,BoxEvent::CONTRACT));
-	}
+	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
+	this->context = NULL;
 	//	start_var=(start_var+vhandled)%nb_var;             //  en contradiction avec le patch pour l'optim
 }
 
@@ -175,24 +159,18 @@ bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 
 void Ctc3BCid::update_and_contract(IntervalVector& box, int var) {
 
-	BoxProperties* old_prop = subcontext.prop();
-	BoxProperties* new_prop;
+	ContractContext sub_context(box, *context);
 
-	if (old_prop) {
-		new_prop = new BoxProperties(box, *old_prop);
-		// By creating a "slice", we have contracted only the domain of
-		// a single variable:
-		BoxEvent event(box, BoxEvent::CONTRACT, BitSet::singleton(nb_var,var));
-		new_prop->update(event);
-		subcontext.set_properties(new_prop);
-	}
+	// Note: the initial impact (that of Ctc3BCid) is maintained.
+	sub_context.impact.add(var);
 
-	ctc.contract(box,subcontext); // note: var is already in the impact (see contract(...))
+	// By creating a "slice", we have contracted only the domain of
+	// a single variable:
+	BoxEvent event(box, BoxEvent::CONTRACT, BitSet::singleton(nb_var,var));
 
-	if (old_prop) {
-		delete new_prop;
-		subcontext.set_properties(old_prop);
-	}
+	sub_context.prop.update(event);
+
+	ctc.contract(box,sub_context);
 }
 
 bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var, double wv, bool left) {

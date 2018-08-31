@@ -132,11 +132,15 @@ void BoxProperties::update_bisect(const Bisection& b, BoxProperties& lprop, BoxP
 	}
 }
 
-BoxProperties::BoxProperties() : _dep_up2date(true) {
+BoxProperties::BoxProperties(const IntervalVector& box) : box(box), _dep_up2date(true) {
 
 }
 
-BoxProperties::BoxProperties(const IntervalVector& box, const BoxProperties& p) : _dep_up2date(p._dep_up2date) {
+BoxProperties::BoxProperties(const BoxProperties& p) : BoxProperties(p.box, p) {
+
+}
+
+BoxProperties::BoxProperties(const IntervalVector& box, const BoxProperties& p) : box(box), _dep_up2date(p._dep_up2date) {
 
 	if (!p._dep_up2date) p.topo_sort();
 

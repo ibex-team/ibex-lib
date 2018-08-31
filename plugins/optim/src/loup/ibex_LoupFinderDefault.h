@@ -85,7 +85,7 @@ public:
 };
 
 inline std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
-	BoxProperties prop;
+	BoxProperties prop(box);
 	return find(box, loup_point, loup, prop);
 }
 

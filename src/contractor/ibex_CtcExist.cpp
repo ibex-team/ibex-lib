@@ -30,18 +30,18 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 	IntervalVector x = x_current;
 
 	// TODO: handle impact!
-	CtcQuantif::contract(x, y);
+	bool inactive = CtcQuantif::contract(x, y);
 
 	if (x.is_empty()) {
 		return false;
 	}
 
 	// if the contractor for c(x,y) is inactive on [x]*[y]
-	if (flags[ContractContext::INACTIVE]) {
+	if (inactive) {
 		// ... the contractor for \exists y\in[yinit] c(x) is inactive on [x]
 		if (x==x_init) {
 			x_res =x_init;
-			context.set_flag(ContractContext::INACTIVE);
+			context.output_flags.add(INACTIVE);
 			return true;
 		} else {
 			x_res |= x;
@@ -70,8 +70,8 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 
 				x_res |= x;
 
-				if ((flags[ContractContext::INACTIVE]) && (x==x_init)) {
-					context.set_flag(ContractContext::INACTIVE);
+				if (inactive && (x==x_init)) {
+					context.output_flags.add(INACTIVE);
 					return true;
 				}
 
@@ -86,7 +86,7 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 }
 
 void CtcExist::contract(IntervalVector& box) {
-	ContractContext context;
+	ContractContext context(box);
 	contract(box,context);
 }
 
@@ -127,7 +127,7 @@ void CtcExist::contract(IntervalVector& box, ContractContext& context) {
 	box &= res;
 
 	if (box.is_empty()) {
-		context.set_flag(ContractContext::FIXPOINT);
+		context.output_flags.add(FIXPOINT);
 	}
 
 }
