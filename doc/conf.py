@@ -27,7 +27,9 @@ sys.path.append(os.path.abspath('.'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'hidden_code_block']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.coverage', #'sphinx.ext.pngmath', 
+'sphinx.ext.mathjax', 'sphinx.ext.ifconfig' #, 'hidden_code_block']
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -43,7 +45,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'IBEX'
-copyright = u'2014, Gilles Chabert'
+copyright = u'2018, IMT Atlantique'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
