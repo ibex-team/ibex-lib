@@ -27,6 +27,12 @@ namespace ibex {
  */
 class ContractContext {
 public:
+
+	/**
+	 * \brief Create a context from existing properties.
+	 */
+	ContractContext(BoxProperties& prop);
+
 	/**
 	 * \brief Create a new and empty context.
 	 */
@@ -43,6 +49,11 @@ public:
 	 * \brief Copy a context for a new (copy of the) box.
 	 */
 	ContractContext(const IntervalVector& box, const ContractContext& c);
+
+	/**
+	 * \brief Delete this.
+	 */
+	~ContractContext();
 
 	/*
 	 * \brief Contractor "input" impact
@@ -63,14 +74,21 @@ public:
 	/**
 	 * \brief Properties of the box to be contracted
 	 */
-	BoxProperties prop;
+	BoxProperties& prop;
+
+protected:
+	const bool own_prop; // for cleanup
 };
 
 /*============================================================================
  	 	 	 	 	 	 	 inline implementation
  ============================================================================*/
 
-inline ContractContext::ContractContext(const IntervalVector& box) : impact(BitSet::all(box.size())), output_flags(box.size()), prop(box) {
+inline ContractContext::ContractContext(BoxProperties& prop) : impact(BitSet::all(prop.box.size())), output_flags(prop.box.size()), prop(prop), own_prop(false) {
+
+}
+
+inline ContractContext::ContractContext(const IntervalVector& box) : impact(BitSet::all(box.size())), output_flags(box.size()), prop(*new BoxProperties(box)), own_prop(true) {
 
 }
 
@@ -78,10 +96,13 @@ inline ContractContext::ContractContext(const ContractContext& c) : ContractCont
 
 }
 
-inline ContractContext::ContractContext(const IntervalVector& box, const ContractContext& c) : impact(c.impact), output_flags(c.output_flags), prop(box, c.prop) {
+inline ContractContext::ContractContext(const IntervalVector& box, const ContractContext& c) : impact(c.impact), output_flags(c.output_flags), prop(*new BoxProperties(box, c.prop)), own_prop(true) {
 
 }
 
+inline ContractContext::~ContractContext() {
+	if (own_prop) delete &prop;
+}
 
 } /* namespace ibex */
 

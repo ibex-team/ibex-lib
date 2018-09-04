@@ -18,11 +18,11 @@ using namespace std;
 
 namespace ibex {
 
-Cell::Cell(const IntervalVector& box, int var) : box(box), prop(box), bisected_var(var) {
+Cell::Cell(const IntervalVector& box, int var) : box(box), prop(this->box), bisected_var(var) {
 
 }
 
-Cell::Cell(const Cell& e) : box(e.box), prop(e.box, e.prop), bisected_var(e.bisected_var) {
+Cell::Cell(const Cell& e) : box(e.box), prop(this->box, e.prop), bisected_var(e.bisected_var) {
 
 }
 

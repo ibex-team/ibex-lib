@@ -299,13 +299,6 @@ protected:
 	 */
 	void flush();
 
-	BitSet impact;
-
-	/*
-	 * Context for the contractor
-	 */
-	ContractContext context;
-
 	/*
 	 * \brief Initial box of the current search.
 	 */

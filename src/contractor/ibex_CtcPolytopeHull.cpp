@@ -37,7 +37,7 @@ CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter,
 		Ctc(A.nb_cols()), lr(*new LinearizerFixed(A,b)),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
 		mylinearsolver(nb_var, max_iter, time_out, eps),
-		contracted_vars(BitSet::all(nb_var)), own_lr(true), primal_sols(nb_var, nb_var),
+		contracted_vars(BitSet::all(nb_var)), own_lr(true), primal_sols(2*nb_var, nb_var),
 		primal_sol_found(2*nb_var) {
 
 }

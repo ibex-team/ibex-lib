@@ -81,7 +81,7 @@ void LinearizerCombo::add_property(const IntervalVector& init_box, BoxProperties
 }
 
 int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver) {
-	BoxProperties prop;
+	BoxProperties prop(box);
 	return linearize(box, lp_solver, prop);
 }
 

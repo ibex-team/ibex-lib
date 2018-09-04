@@ -27,7 +27,7 @@ namespace {
 Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		const Vector& eps_x_min, const Vector& eps_x_max) :
 		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
-		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0), impact(BitSet::all(ctc.nb_var)),
+		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0),
 		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL),
 		  params(sys.nb_var,BitSet::empty(sys.nb_var),false) /* no forced parameter by default */,
 		  manif(NULL), time(0), nb_cells(0) {
@@ -61,8 +61,6 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 
 	if (m>n)
 		ibex_warning("Certification not implemented for over-constrained systems ");
-
-	context.set_impact(&impact);
 }
 
 void Solver::set_var_names() {
@@ -185,25 +183,18 @@ QualifiedBox* Solver::next() {
 
 		Cell* c=buffer.top();
 
+		ContractContext context(c->prop);
+
 		int v=c->bisected_var; // last bisected var.
 
-		if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
-			impact.add(v);
-		else                                // root node : impact set to 1 for all variables
-			impact.fill(0,ctc.nb_var-1);
+		if (v!=-1) { // not the root node :  impact set to the last bisected variable only
+			context.impact = BitSet::singleton(n,v);
+		}
 
 		try {
-
-			context.set_properties(&c->prop);
-
 			ctc.contract(c->box,context);
 
 			if (c->box.is_empty()) throw EmptyBoxException();
-
-			if (v!=-1)
-				impact.remove(v);
-			else                              // root node : impact set to 0 for all variables after contraction
-				impact.clear();
 
 			// certification is performed at each intermediate step
 			// if the system is under constrained
@@ -249,10 +240,6 @@ QualifiedBox* Solver::next() {
 			//impact.remove(v); // note: in case of the root node, we should clear the bitset
 			// instead but since the search is over, the impact is not used anymore.
 			// JN: that make a bug with Mingw
-			if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
-				impact.remove(v);
-			else                                // root node : impact set to 1 for all variables
-				impact.clear();
 
 			continue;
 		}

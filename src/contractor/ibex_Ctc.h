@@ -89,7 +89,7 @@ public:
 	/**
 	 * \brief Contraction with specified impact.
 	 *
-	 * \deprecated
+	 * \deprecated Use contract(IntervalVector& box, ContractContext& context) instead.
 	 *
 	 * Information on the impact allows incremental contraction.
 	 * The \a impact specifies the variables that have been
@@ -103,7 +103,7 @@ public:
 	/**
 	 * \brief Contraction with specified impact and output flags.
 	 *
-	 * \deprecated
+	 * \deprecated Use contract(IntervalVector& box, ContractContext& context) instead.
 	 *
 	 * \see #contract(IntervalVector&, const BoolMask&).
 	 * \see #flags

@@ -194,18 +194,16 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	}
 
 	/*================ contract x with f(x)=y and g(x)<=0 ================*/
-	//cout << " [contract]  x before=" << c.box << endl;
+	cout << " [contract]  x before=" << c.box << endl;
 	//cout << " [contract]  y before=" << y << endl;
-	ContractContext context;
-	BitSet impact(n+1);
-	if (c.bisected_var==-1) {
-		impact.fill(0,n);
-	} else {
-		impact.add(c.bisected_var);
-		impact.add(goal_var);
+	cout << "c.prop.size=" << c.prop.box.size() << endl;
+	ContractContext context(c.prop);
+	if (c.bisected_var!=-1) {
+		context.impact.clear();
+		context.impact.add(c.bisected_var);
+		context.impact.add(goal_var);
 	}
-	context.set_impact(&impact);
-	context.set_properties(&c.prop);
+
 	ctc.contract(c.box, context);
 
 	if (c.box.is_empty()) return;
