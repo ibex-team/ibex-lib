@@ -92,7 +92,7 @@ int main() {
 	CellStack buff;
 
 	/* Vector precisions required on variables */
-	Vector prec(2, 1e-07);
+	Vector prec(6, 1e-07);
 
 	/* Create a solver with the previous objects */
 	Solver s(system, compo, bisector, buff, prec, prec);
@@ -139,7 +139,7 @@ int main() {
 	CellStack buff;
 
 	/* Vector precisions required on variables */
-	Vector prec(2, 1e-07);
+	Vector prec(6, 1e-07);
 
 	/* Create a solver with the previous objects */
 	Solver s(system, compo, bisector, buff, prec, prec);
