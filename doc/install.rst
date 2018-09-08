@@ -139,7 +139,8 @@ In particular, ``waf`` ``configure`` supports the following options:
                         
                         Under a Windows command window::
                         
-                        C:\...> set PATH=%PATH%;C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.6.0\lib;C:\MinGW\bin
+                        > set PATH=%PATH%;C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.6.0\lib;C:\MinGW\bin
+                        
                         
 
 --prefix=PREFIX         Set the folder where Ibex must be installed (by default, ``/usr/local``).
@@ -247,7 +248,7 @@ Copy-paste the following example code in a file named ``foo.cpp`` ::
 
   int main(int argc, char** argv) {
     Interval x(0,1);
-    cout << "My first interval: << x << endl; 
+    cout << "My first interval:" << x << endl; 
   }
 
 There is a simple "makefile" in the ``examples`` folder that you can use to compile your own programs (note: this makefile uses the extended syntax of GNU make).

@@ -61,7 +61,7 @@ LinearizerXTaylor::~LinearizerXTaylor() {
 }
 
 void LinearizerXTaylor::add_property(const IntervalVector& init_box, BoxProperties& prop) {
-	if (!prop[BxpSystemCache::get_id(sys)]) {
+	if (/*mode==RELAX && slope==TAYLOR && */!prop[BxpSystemCache::get_id(sys)]) {
 		prop.add(new BxpSystemCache(sys,BxpSystemCache::default_update_ratio));
 	}
 }
@@ -176,8 +176,10 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box, const BitSet& 
 	try {
 		// the corner used -> typed IntervalVector just to have guaranteed computations
 		IntervalVector corner = get_corner_point(box);
-		IntervalMatrix J=cache? cache->active_ctrs_jacobian() : sys.f_ctrs.jacobian(box,active);
+		//IntervalMatrix J=cache? cache->active_ctrs_jacobian() : sys.f_ctrs.jacobian(box,active);
 		//IntervalMatrix J=sys.f_ctrs.jacobian(box,active);
+		IntervalMatrix J(active.size(),n); // derivatives over the box
+		sys.f_ctrs.hansen_matrix(box,corner,J,active);
 
 		if (J.is_empty()) return -1; // note: no way to inform that the box is actually infeasible
 

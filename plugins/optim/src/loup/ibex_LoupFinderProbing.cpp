@@ -157,7 +157,7 @@ bool LoupFinderProbing::line_probing(Vector& loup_point, double& loup, const Int
 bool LoupFinderProbing::dichotomic_line_search(Vector& loup_point, double& loup, const Vector& end_point, bool exit_if_above_loup) {
 	Vector seg=end_point-loup_point;
 
-	double eps=1.0/16.0;
+	double eps=1.0/64.0;
 	double alpha0=0;
 	double alpha1=1.0;
 	double alpha2=alpha1;
