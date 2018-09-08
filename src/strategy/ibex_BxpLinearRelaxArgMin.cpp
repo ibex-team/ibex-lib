@@ -26,8 +26,8 @@ namespace {
  */
 int get_original_nb_var(const System& sys) {
 
-	const NormalizedSystem* norm_sys = dynamic_cast<const NormalizedSystem*>(&sys);
-	if (norm_sys) return norm_sys->nb_var-1;
+	const ExtendedSystem* ext_sys = dynamic_cast<const ExtendedSystem*>(&sys);
+	if (ext_sys) return ext_sys->nb_var-1;
 	else return sys.nb_var;
 }
 

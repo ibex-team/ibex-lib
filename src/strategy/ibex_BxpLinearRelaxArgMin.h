@@ -55,6 +55,9 @@ public:
 
 	/**
 	 * \brief Return the argmin (NULL if none).
+	 *
+	 * The size of the returned vector is the number of variables of the original system
+	 * (even if an extended system was given to the constructor).
 	 */
 	const Vector* argmin();
 
