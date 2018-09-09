@@ -36,12 +36,16 @@ void CtcAcid::contract(IntervalVector& box) {
 }
 
 void CtcAcid::contract(IntervalVector& box, ContractContext& context) {
-	// this initial contraction allows to set, after, the impact
-	// to only one variable (in the slicing process)!
+	// the initial contraction allows to set, after, the impact
+	// to only one variable (in the slicing process). However, it turns
+	// to be more efficient in practice to skip this initial contraction.
+	// This is probably a side effect of the strategy chosen in DefaultOptimizer
+	// (the call to CtcAcid(HC4) is preceded by a call to HC4 with higher precision).
+
 	// note: we can transmit here the input impact to the contractor
 	// as it is strictly less contracting that ACID (TODO: check that)
-	ctc.contract(box, context);
-	if (box.is_empty()) return;
+	//ctc.contract(box, context);
+	//if (box.is_empty()) return;
 
 	// --------------------- context ------------------
 	context.impact.clear(); // should we restore the initial impact on return?

@@ -161,7 +161,16 @@ void Ctc3BCid::update_and_contract(IntervalVector& box, int var) {
 
 	ContractContext sub_context(box, *context);
 
-	// Note: the initial impact (that of Ctc3BCid) is maintained.
+	// ----------------------------------------------------------------
+	// Note: the initial impact (that of Ctc3BCid) should be maintained
+	// (the next line should be removed) if there is no initial
+	// contraction before the slicing process (see comment in
+	// CtcAcid::contract). However, it is more efficient in practice
+	// to only set the split variable in the impact, with or without
+	// initial contraction.
+	sub_context.impact.clear();
+	// ----------------------------------------------------------------
+
 	sub_context.impact.add(var);
 
 	// By creating a "slice", we have contracted only the domain of
