@@ -157,6 +157,11 @@ public:
 	 */
 	static double default_update_ratio;
 
+	/**
+	 * \brief Is the set of active constraints up-to-date?
+	 */
+	bool is_active_ctrs_uptodate() const;
+
 protected:
 
 	/**
@@ -203,6 +208,10 @@ protected:
 };
 
 /*================================== inline implementations ========================================*/
+
+inline bool BxpSystemCache::is_active_ctrs_uptodate() const {
+	return active_ctr_updated;
+}
 
 } /* namespace ibex */
 

@@ -100,7 +100,7 @@ void CtcFwdBwd::contract(IntervalVector& box, ContractContext& context) {
 		sp=(BxpSystemCache*) context.prop[system_cache_id];
 
 
-	if ((p && !p->active()) || (sp && !(sp->active_ctrs()[ctr_num]))) {
+	if ((p && !p->active()) || (sp && sp->is_active_ctrs_uptodate() && !(sp->active_ctrs()[ctr_num]))) {
 		context.output_flags.add(INACTIVE);
 		context.output_flags.add(FIXPOINT);
 		return;
