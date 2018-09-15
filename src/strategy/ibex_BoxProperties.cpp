@@ -128,7 +128,9 @@ void BoxProperties::update_bisect(const Bisection& b, BoxProperties& lprop, BoxP
 		p2->update(BoxEvent(b.right,BoxEvent::CONTRACT,BitSet::singleton(b.box.size(), b.pt.var)), rprop);
 
 		lprop.add(p1);
+		lprop._dep_up2date = true; // avoid a call to topo_sort()
 		rprop.add(p2);
+		rprop._dep_up2date = true; // avoid a call to topo_sort()
 	}
 }
 
@@ -148,6 +150,8 @@ BoxProperties::BoxProperties(const IntervalVector& box, const BoxProperties& p) 
 	for (vector<Bxp*>::iterator it=p.dep.begin(); it!=p.dep.end(); it++) {
 		add((*it)->copy(box, *this));
 	}
+
+	_dep_up2date = true; // avoid a call to topo_sort()
 }
 
 BoxProperties::~BoxProperties() {
