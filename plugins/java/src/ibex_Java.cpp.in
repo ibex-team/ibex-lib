@@ -22,7 +22,7 @@
 #include "ibex_VarSet.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_Solver.h"
-#include "ibex_SolverOutputBox.h"
+#include "ibex_QualifiedBox.h"
 #include "ibex_CellStack.h"
 
 #include <stdio.h>
@@ -520,12 +520,12 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_next_1solution(JNIEnv* env, jo
 		return BAD_DOMAIN;
 	}
 
-	const SolverOutputBox* sol;
+	const QualifiedBox* sol;
 
 	sol=inst.solver->next();
 	if (sol!=NULL) {
 		inst.write_box(env,sol->existence(),d);
-		result = sol->status==SolverOutputBox::UNKNOWN? UNKNOWN : SOLUTION;
+		result = sol->status==QualifiedBox::UNKNOWN? UNKNOWN : SOLUTION;
 	} else {
 		result = SEARCH_OVER;
 	}
