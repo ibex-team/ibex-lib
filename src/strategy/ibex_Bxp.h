@@ -37,9 +37,9 @@ class BoxProperties;
  * a property and the instances of BxpWidh are property values.
  *
  * The initial value is built for the root box (typically, by an operator requiring this property)
- * and the way the property value is updated through the search tree is controlled by the three virtual
- * functions update(...), update_copy() and update_bisect(...). In particular, update_bisect(...)
- * allows to make a node inherits its property values from its father node. Note, however, that control
+ * and the way the property value is updated through the search tree is controlled by the two virtual
+ * functions update(...) and copy(). In particular, the combination of both allows to make a node
+ * inherits its property values from its father node. Note, however, that control
  * can only be made downward for the moment (e.g., there is no way of updating the properties of a
  * right branch after backtracking from the left branch).
  *
@@ -67,7 +67,7 @@ public:
 	virtual Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const=0;
 
 	/**
-	 * \brief Update the property upon box modification.
+	 * \brief Update the property value upon box modification.
 	 *
 	 * \param event - the box modification
 	 * \param prop  - the properties (dependencies are up to date)

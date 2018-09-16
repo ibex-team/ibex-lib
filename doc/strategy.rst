@@ -29,7 +29,7 @@ Imagine also that this function has quite a long expression so that calculating 
 
 Recalculating this image each time a contractor is called represents a waste of time if
 the box hasn't changed meanwhile. One would like to store this information in the box. 
-This is precisely what ''box properties'' allow to do.
+This is the kind of things ''box properties'' allow to do.
 
 All is based on the ``Bxp`` interface. This ``Bxp`` interface allows to extend the simple ``IntervalVector`` data structure and to make this extension being propagated through a strategy (search tree). The extended box is then visible by all operators involved in the strategy (contractors, bisectors, cell buffers, etc.).
 
@@ -53,7 +53,7 @@ Constructor
 
 It is natural to ask the constructor of ``BxpImage`` to take a box in argument and to set the ``image`` field appropriately.
 
-The constructor of the mother class ``Bxp`` also requires an identifying number. Here is why. A box property is actually a set of *instances* of the ``Bxp`` interface: if the solver handles 1000 boxes at a given time, every box has it own image, hence its specific instance of ``BxpImage``. These 1000 instances represent the same ''property'' and since there may be other properties attached to the boxes at the same time, we can retreive a given property thanks to its ``id`` field.
+The constructor of the mother class ``Bxp`` also requires an identifying number. Here is why. A box property is actually a set of *instances* of the ``Bxp`` interface: if the solver handles 1000 boxes at a given time, every box has it own image, hence its specific instance of ``BxpImage``. These 1000 instances represent the same ''property'' and since there may be other properties attached to the boxes at the same time, we can retreive a given property thanks to its ``id`` field. (**Note**: using the class name directly as identifier would be too restrictive as there may be different ``BxpImage`` properties attached to different functions ``f``). 
 You can simply fix this identifier to any random ``long`` number or use the ``next_id()`` function of Ibex as follows:
 
 .. literalinclude:: ../examples/doc-strategy.cpp 
@@ -61,7 +61,9 @@ You can simply fix this identifier to any random ``long`` number or use the ``ne
    :start-after: prop-id
    :end-before: prop-id
 
-To avoid confusion, we call for now "property value" an instance of the same property. So, ``BxpImage`` is a property and the instances of ``BxpImage`` are property values.
+**Note**: In the case of several ``BxpImage`` properties (one for each function ``f``) you can store identifying numbers in a map structure (see examples in the Ibex code).
+
+To avoid confusion, we call for now "property value" an instance of the same property. So, ``BxpImage`` is a property (or a set of properties, one for each ``f``) and the instances of ``BxpImage`` are property values.
 
 .. _bxp_update:
 
@@ -99,11 +101,10 @@ Now, let us modify the implementation of our contractor.
 To take benefit of properties, two steps are required.
 First, we have to override the ``add_property`` function of the ``Ctc`` interface.
 This function is called by all strategies at initialization.
-This function takes as argument the initial box (of the search) and a container for properties: an instance of ``BoxProperties``. This object basically just stores pointers to ``Bxp*``,
-except that it can handle :ref:`inter-dependencies <bxp_dependencies>`.
+This function takes as argument the initial box (of the search) and a container for property values: an instance of ``BoxProperties``. This object basically just stores pointers to ``Bxp*``, except that it can handle :ref:`inter-dependencies <bxp_dependencies>`.
 
 Second, we have to override a variant of the ``contract`` function,
-which takes in argument not only the box, but also a ``ContractContext`` object which contains, among other things, the current set of property values (an instance of ``BoxProperties``).
+which takes in argument not only the box, but also a ``ContractContext`` object which contains, among other things, the current property values container (again, an instance of ``BoxProperties``).
 The ``BoxProperties`` class works like a simple map: by using the bracket operator ``[...]`` 
 with the property id inside the brackets, you get the corresponding property value associated to the box:
 
@@ -157,6 +158,25 @@ identifier of ``BxpImage`` in the *dependencies* of ``BxpImageWidth``. This must
    :end-before: prop-dependencies
 
 For the sake of concision, we haven't used laziness in this code. A lazy variant is necessary here.
+
+----------------------------------------
+Trust chain principle
+----------------------------------------
+The trust chain principle is the following:
+
+- Property values are always up-to-date when given to argument of a function.
+
+Consider a function that handles properties (e.g., an implementation of the ``contract`` variant with ``BoxProperties``, as above).
+It the box is modified at several points in the code, it is not necessary to perform updates as long
+as properties are not used elsewhere. The update can be postponed to the
+point where property values are transmitted to another function or, on last resort, before returning.
+
+Note that updating all property values can be simply done via the ``update`` function of ``BoxProperties`` (this
+also allows to respect dependencies).
+
+As a consequence, if the function does not modify itself the box (would it calls other functions that potentially modify it), it does not
+have to perform at all any update of property values.
+
 
 .. _strategy-bisectors:
 

@@ -117,7 +117,7 @@ public:
   void contract(IntervalVector& box, ContractContext& context) {
     // Get the desired property from the map, by its id
     // (a cast is necessary because all properties are typed Bxp*)
-    BxpImage* bxp=(BxpImage*) (*context.prop())[BxpImage::id];
+    BxpImage* bxp=(BxpImage*) context.prop[BxpImage::id];
 
     if (bxp==NULL) {
       // This happens if the property is not present.
