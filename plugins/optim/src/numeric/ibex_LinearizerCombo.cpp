@@ -99,12 +99,12 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver, B
 #ifdef _IBEX_WITH_AFFINE_
 	case ART:
 	case AFFINE2:
-		cont = myart->linearize(box,lp_solver,prop);
+		cont = myart->linearize(box,lp_solver);
 		break;
 	case COMPO: {
 		cont = myxnewton->linearize(box,lp_solver,prop);
 		if (cont!=-1) {
-			int cont2 = myart->linearize(box,lp_solver,prop);
+			int cont2 = myart->linearize(box,lp_solver);
 			if (cont2==-1) cont=-1;
 			else cont+=cont2;
 		}
