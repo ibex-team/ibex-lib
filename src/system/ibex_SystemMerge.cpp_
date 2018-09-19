@@ -13,6 +13,8 @@
 
 #include <sstream>
 
+using namespace std;
+
 namespace ibex {
 
 namespace {
@@ -94,15 +96,24 @@ public:
 		}
 
 		// -------------  Add constraints -----------
+		vector<const ExprNode*> to_be_deleted;
 		for (int i=0; i<sys1.ctrs.size(); i++) {
 			const ExprNode& e=ExprCopy().copy(sys1.ctrs[i].f.args(), vars1, sys1.ctrs[i].f.expr());
 			add_ctr(ExprCtr(e,sys1.ctrs[i].op));
-			cleanup(e, false);
+
+			// don't cleanup nodes now because SystemFactory keeps track of nodes in f_ctrs_copy.
+			to_be_deleted.push_back(&e);
 		}
 		for (int i=0; i<sys2.ctrs.size(); i++) {
 			const ExprNode& e=ExprCopy().copy(sys2.ctrs[i].f.args(), vars2, sys2.ctrs[i].f.expr());
 			add_ctr(ExprCtr(e,sys2.ctrs[i].op));
-			cleanup(e, false);
+
+			// see comment supra
+			to_be_deleted.push_back(&e);
+		}
+
+		for (vector<const ExprNode*>::iterator it=to_be_deleted.begin(); it!=to_be_deleted.end(); it++) {
+			cleanup(**it, false);
 		}
 	}
 };

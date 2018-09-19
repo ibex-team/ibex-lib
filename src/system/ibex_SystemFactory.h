@@ -70,6 +70,9 @@ public:
 	 * \brief Add a new constraint (by copy).
 	 *
 	 * \pre All the variables must have been added.
+	 *
+	 * \warning the ctr expression must no be deleted until the final system has been built
+	 * (the factory keeps track of nodes for building DAGS).
 	 */
 	void add_ctr(const ExprCtr& ctr);
 
@@ -77,6 +80,9 @@ public:
 	 * \brief Add a new constraint (by copy).
 	 *
 	 * \pre All the variables must have been added.
+	 *
+	 * \warning the ctr expression must no be deleted until the final system has been built
+	 * (the factory keeps track of nodes for building DAGS).
 	 */
 	void add_ctr(const NumConstraint& ctr);
 
