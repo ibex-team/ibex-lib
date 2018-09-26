@@ -107,5 +107,15 @@ void TestOptimizer::issue50_4() {
 	CPPUNIT_ASSERT(issue50(-1e-10, 0)==Optimizer::INFEASIBLE);
 }
 
+void TestOptimizer::unconstrained() {
+	const ExprSymbol& x=ExprSymbol::new_();
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_goal(sqr(x));
+	System sys(fac);
+	DefaultOptimizer o(sys);
+	o.optimize(IntervalVector(1,Interval(-10,10)));
+	CPPUNIT_ASSERT(o.get_loup()>=0 && o.get_uplo()<=0);
+}
 
 } // end namespace

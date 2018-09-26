@@ -21,15 +21,30 @@ double BxpSystemCache::default_update_ratio = 0.1;
 
 Map<long,false> BxpSystemCache::ids;
 
+namespace {
+	// true if the function exists (is initialized)
+	bool exists(const Function& f_ctrs) {
+		return f_ctrs.nb_var()!=-1;
+	}
+}
+
 BxpSystemCache::BxpSystemCache(const System& sys, double update_ratio/*, int goal_var*/) :
 		Bxp(get_id(sys)), sys(sys), nb_var(sys.nb_var),
 		update_ratio(update_ratio), cache(IntervalVector::empty(sys.nb_var)),
 		goal_eval_updated(false), _goal_gradient(sys.nb_var), goal_gradient_updated(false),
-		_ctrs_eval(sys.f_ctrs.image_dim()>0? sys.f_ctrs.image_dim() : 1), ctr_eval_updated(false),
-		_ctrs_jacobian(sys.f_ctrs.image_dim()>0? sys.f_ctrs.image_dim() : 1, sys.f_ctrs.image_dim()>0? sys.nb_var : 1),
+		_ctrs_eval(sys.f_ctrs.image_dim() /* note: =1 if unconstrained */), ctr_eval_updated(false),
+		_ctrs_jacobian(sys.f_ctrs.image_dim(), exists(sys.f_ctrs)? sys.nb_var : 1),
 		ctr_jacobian_updated(false),
-		active(BitSet::empty(sys.f_ctrs.image_dim())),
+		active(BitSet::empty(sys.f_ctrs.image_dim())), // default value (empty bitset) important for unconstrained systems
 		active_ctr_updated(false), active_ctr_jacobian_updated(false) /*, goal_var(goal_var) */ {
+
+	if (!exists(sys.f_ctrs)) {
+		// avoid functions like ctr_eval to be called:
+		active_ctr_updated = true;
+		ctr_eval_updated = true;
+		ctr_jacobian_updated  = true;
+		active_ctr_jacobian_updated = true;
+	}
 
 	//assert((goal_var==-1 && init_box.size()==sys.nb_var) || (goal_var!=-1 && init_box.size()==sys.nb_var+1));
 }
@@ -102,22 +117,25 @@ void BxpSystemCache::update(const BoxEvent& e, const BoxProperties& prop) {
 			goal_eval_updated=false;
 			goal_gradient_updated=false;
 		}
-		if (sys.f_ctrs.image_dim()>0) {
+		if (exists(sys.f_ctrs)) {
 			ctr_eval_updated=false;
 			ctr_jacobian_updated=false;
 			active_ctr_jacobian_updated=false;
 		}
 
-		if (!included) {
-			// All the constraints are now
-			// marked as potentially active.
-			active.fill(0,sys.f_ctrs.image_dim()-1);
-		}
+		if (exists(sys.f_ctrs)) {
+			if (!included) {
+				// All the constraints are now
+				// marked as potentially active.
+				active.fill(0,sys.f_ctrs.image_dim()-1);
+			}
 
-		// note: if the box has changed but is included
-		// in the cache, we keep the constraints marked
-		// as inactive.
-		active_ctr_updated=false;
+			// note: if the box has changed but is included
+			// in the cache, we keep the constraints marked
+			// as inactive.
+
+			active_ctr_updated=false;
+		}
 
 //		for (int i=0; i<sys.sys.f_ctrs.image_dim(); i++) {
 //			if (!included ||
