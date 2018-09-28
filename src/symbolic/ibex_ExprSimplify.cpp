@@ -559,6 +559,18 @@ void ExprSimplify::visit(const ExprPower& e) {
 		insert(e, ExprPower::new_(expr,e.expon));
 }
 
+void ExprSimplify::visit(const ExprUnaryGenericOp& e) {
+	const ExprNode& expr=get(e.expr, idx);
+
+	if (is_cst(expr))
+		/* evaluate the constant expression on-the-fly */
+		insert(e, ExprConstant::new_(e.eval(to_cst(expr))));
+	else if (&e.expr == &expr)  // if nothing changed
+		insert(e, e);
+	else
+		insert(e, e.new__(expr));
+}
+
 void ExprSimplify::visit(const ExprMax& e)   { binary(e,max); }
 void ExprSimplify::visit(const ExprMin& e)   { binary(e,min); }
 void ExprSimplify::visit(const ExprAtan2& e) { binary(e,atan2); }

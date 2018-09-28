@@ -7,6 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Jan 05, 2012
+ * Last Update : Sep 28, 2018
  * ---------------------------------------------------------------------------- */
 
 #ifndef _IBEX_EXPR_H
@@ -893,6 +894,56 @@ public:
 protected:
 	ExprUnaryOp(const ExprNode& subexpr, const Dim& dim);
 
+};
+
+/**
+ * \ingroup symbolic
+ * \brief Unary expression
+ */
+class ExprUnaryGenericOp : public ExprUnaryOp {
+public:
+	/** Create an equality constraint op(expr)=expr. */
+	const ExprCtr& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint op(expr)=value. */
+	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint op(expr)=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint op(expr)=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
+
+	/**
+	 * Create a new node with a given expression (dynamic variant).
+	 */
+	virtual const ExprUnaryGenericOp& new__(const ExprNode& expr) const=0;
+
+	/** Forward evaluation.
+	 *  Set y to f(x). */
+	virtual void fwd(const Domain& x, Domain& y) const=0;
+
+	/** Backward evaluation.
+	 * Set x to (inv(f)(y) */
+	virtual void bwd(Domain& x, const Domain& y) const=0;
+
+	/** Derivative.
+	 * Set g to df(x). */
+	virtual void diff(const Domain& x, Domain& g) const=0;
+
+	/** Operator name, ex: "cos", "exp". */
+	virtual std::string to_string() const=0;
+
+	/** Forward evaluation.
+	 *  Set y to f(x). */
+	Domain eval(const Domain& x) const;
+
+protected:
+
+	ExprUnaryGenericOp(const ExprNode& subexpr, const Dim& dim);
 };
 
 /**

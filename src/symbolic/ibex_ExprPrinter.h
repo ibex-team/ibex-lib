@@ -57,6 +57,7 @@ protected:
 	void visit(const ExprMax& e);
 	void visit(const ExprMin& e);
 	void visit(const ExprAtan2& e);
+	void visit(const ExprUnaryGenericOp& e);
 	void visit(const ExprMinus& e);
 	void visit(const ExprTrans& e);
 	void visit(const ExprSign& e);

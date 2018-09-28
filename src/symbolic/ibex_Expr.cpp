@@ -7,6 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Jan 5, 2012
+ * Last Update : Sep 28, 2018
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Expr.h"
@@ -397,6 +398,17 @@ ExprPower::ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.di
 ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
 				ExprNode(subexpr.height+1, subexpr.size+1, dim), expr(subexpr) {
 	((ExprNode&) expr).fathers.add(*this);
+}
+
+ExprUnaryGenericOp::ExprUnaryGenericOp(const ExprNode& subexpr, const Dim& dim) :
+		ExprUnaryOp(subexpr, dim) {
+
+}
+
+Domain ExprUnaryGenericOp::eval(const Domain& x) const {
+	Domain y(dim);
+	fwd(x,y);
+	return y;
 }
 
 ExprSign::ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
