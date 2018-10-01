@@ -40,7 +40,7 @@ class ExprMax;
 class ExprMin;
 class ExprAtan2;
 
-class ExprUnaryGenericOp;
+class ExprGenericUnaryOp;
 
 class ExprMinus;
 class ExprTrans;
@@ -194,7 +194,7 @@ class ExprVisitor {
 
   /** Visit a generic unary operator (Implementation is not mandatory).
      * By default call visit(const ExprUnaryOp&). */
-    virtual void visit(const ExprUnaryGenericOp& e) {
+    virtual void visit(const ExprGenericUnaryOp& e) {
   	  visit((const ExprUnaryOp&) e);
     }
 

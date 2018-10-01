@@ -132,6 +132,8 @@ void ExprCopy::visit(const ExprMax& e)   { visit(e.left); visit(e.right); clone.
 void ExprCopy::visit(const ExprMin& e)   { visit(e.left); visit(e.right); clone.insert(e, &min(LEFT,RIGHT)); }
 void ExprCopy::visit(const ExprAtan2& e) { visit(e.left); visit(e.right); clone.insert(e, &atan2(LEFT,RIGHT)); }
 void ExprCopy::visit(const ExprPower& e) { visit(e.expr); clone.insert(e, &pow(EXPR,e.expon)); }
+void ExprCopy::visit(const ExprGenericUnaryOp& e) {
+	                                       visit(e.expr); clone.insert(e,&ExprGenericUnaryOp::new_(e.name,EXPR,e.dim)); }
 void ExprCopy::visit(const ExprMinus& e) { visit(e.expr); clone.insert(e,&(-EXPR)); }
 void ExprCopy::visit(const ExprTrans& e) { visit(e.expr); clone.insert(e,&transpose (EXPR)); }
 void ExprCopy::visit(const ExprSign& e)  { visit(e.expr); clone.insert(e,&sign (EXPR)); }

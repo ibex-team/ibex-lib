@@ -559,16 +559,18 @@ void ExprSimplify::visit(const ExprPower& e) {
 		insert(e, ExprPower::new_(expr,e.expon));
 }
 
-void ExprSimplify::visit(const ExprUnaryGenericOp& e) {
+void ExprSimplify::visit(const ExprGenericUnaryOp& e) {
 	const ExprNode& expr=get(e.expr, idx);
 
-	if (is_cst(expr))
+	if (is_cst(expr)) {
 		/* evaluate the constant expression on-the-fly */
-		insert(e, ExprConstant::new_(e.eval(to_cst(expr))));
-	else if (&e.expr == &expr)  // if nothing changed
+		Domain y(e.dim);
+		e.fwd(to_cst(expr),y);
+		insert(e, ExprConstant::new_(y));
+	} else if (&e.expr == &expr)  // if nothing changed
 		insert(e, e);
 	else
-		insert(e, e.new__(expr));
+		insert(e, ExprGenericUnaryOp::new_(e.name, expr, e.dim));
 }
 
 void ExprSimplify::visit(const ExprMax& e)   { binary(e,max); }

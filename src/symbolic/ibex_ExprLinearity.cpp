@@ -340,7 +340,7 @@ void ExprLinearity::unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), b
 	}
 }
 
-void ExprLinearity::visit(const ExprPower& e){
+void ExprLinearity::visit(const ExprPower& e) {
 	visit(e.expr);
 
 	Array<Domain>& expr_d=*(_coeffs[e.expr].first);
@@ -349,6 +349,30 @@ void ExprLinearity::visit(const ExprPower& e){
 	if (expr_type==CONSTANT)
 		_coeffs.insert(e,build_cst(pow(expr_d[n],e.expon)));
 	else {
+		Array<Domain>* d=new Array<Domain>(n+1);
+
+		for (int i=0; i<n+1; i++) {
+			// by default: (-oo,oo) means non-linear
+			d->set_ref(i,*new Domain(e.dim));
+
+			if (i<n && expr_d[i].is_zero()) (*d)[i].clear();
+		}
+
+		_coeffs.insert(e, make_pair(d,NONLINEAR));
+	}
+}
+
+void ExprLinearity::visit(const ExprGenericUnaryOp& e) {
+	visit(e.expr);
+
+	Array<Domain>& expr_d=*(_coeffs[e.expr].first);
+	nodetype expr_type=_coeffs[e.expr].second;
+
+	if (expr_type==CONSTANT) {
+		Domain cst(e.dim);
+		e.fwd(expr_d[n],cst);
+		_coeffs.insert(e,build_cst(cst));
+	} else {
 		Array<Domain>* d=new Array<Domain>(n+1);
 
 		for (int i=0; i<n+1; i++) {

@@ -112,7 +112,7 @@ def configure (conf):
 		conf.define ("DEBUG", 1)
 		conf.env.DEBUG = True
 	else:
-		flags = "-std=c++11 -O3"
+		flags = "-std=c++11 -O3 -Wno-deprecated"
 		conf.define ("NDEBUG", 1)
 		conf.env.DEBUG = False
 	for f in flags.split():

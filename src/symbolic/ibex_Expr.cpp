@@ -400,17 +400,6 @@ ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
 	((ExprNode&) expr).fathers.add(*this);
 }
 
-ExprUnaryGenericOp::ExprUnaryGenericOp(const ExprNode& subexpr, const Dim& dim) :
-		ExprUnaryOp(subexpr, dim) {
-
-}
-
-Domain ExprUnaryGenericOp::eval(const Domain& x) const {
-	Domain y(dim);
-	fwd(x,y);
-	return y;
-}
-
 ExprSign::ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
 	if (!expr.dim.is_scalar()) throw DimException("\"sign\" expects a scalar argument");
 }
