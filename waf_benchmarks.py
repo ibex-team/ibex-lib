@@ -47,6 +47,39 @@ class BenchCurrentRef (BenchRef):
 	def __init__ (self):
 		super(BenchCurrentRef, self).__init__ ("current benchmarks", None)
 
+#
+class Eps (object):
+	NDECIMAL = 1
+
+	@staticmethod
+	def exp_to_prec (d):
+		return - int (round (10**(Eps.NDECIMAL) * d))
+
+	def __init__ (self, value):
+		if value.startswith ("10^"):
+			self._p = self.exp_to_prec (float (value[3:]))
+		else:
+			self._p = self.exp_to_prec (math.log10(float(value)))
+
+	def to_double (self):
+		return math.pow (10.0, - float (self._p) / (10**Eps.NDECIMAL))
+
+	def __eq__ (self, other):
+		return self._p == other._p
+
+	def __lt__ (self, other):
+		return self._p > other._p
+
+	def __hash__ (self):
+		return hash (self._p)
+
+	def __str__ (self):
+		return "%e" % self.to_double()
+
+	def __repr__ (self):
+		b = 10**Eps.NDECIMAL
+		return "10^-%u.%u" % (self._p / b, self._p % b)
+
 # Base class for all bench classes
 class Bench (Task.Task):
 	color = 'CYAN'
@@ -67,7 +100,7 @@ class BenchRun (Bench):
 # .data file
 class BenchData (Bench):
 	KEYS_TYPE = collections.OrderedDict ()
-	KEYS_TYPE["eps"] = float
+	KEYS_TYPE["eps"] = Eps
 	KEYS_TYPE["status"] = int
 	KEYS_TYPE["time"] = float
 	KEYS_TYPE["nb_cells"] = int
@@ -77,7 +110,7 @@ class BenchData (Bench):
 	PREFIX = "BENCH: "
 	RESULTS_PATTERN = "(%s) = (.*)" % "|".join(KEYS_TYPE.keys())
 	RESULTS_RE = re.compile (RESULTS_PATTERN)
-	RESULTS_FORMAT = PREFIX + " ; ".join("%s = {%s}" % (k,k) for k in KEYS_TYPE.keys())
+	RESULTS_FORMAT = PREFIX + " ; ".join("%s = {%s!r}" % (k,k) for k in KEYS_TYPE.keys())
 
 	@classmethod
 	def parse_bench_line (cls, line):
@@ -100,7 +133,7 @@ class BenchData (Bench):
 			D = self.parse_bench_line (l)
 			if not D is None:
 				data.append (D)
-		data.sort (key=lambda x:-x["eps"])
+		data.sort (key=lambda x:x["eps"], reverse=True)
 
 		keys = self.KEYS_TYPE.keys()
 		datastr = " ".join(keys) + os.linesep
@@ -188,7 +221,7 @@ class BenchCmp (Bench):
 	KEYS_TYPE["rm1M0"] = float
 	KEYS_TYPE["rM1m0"] = float
 	PREFIX = "CMP: "
-	CMP_FORMAT = PREFIX + " ; ".join("%s = {%s}" % (k,k) for k in KEYS_TYPE.keys())
+	CMP_FORMAT = PREFIX + " ; ".join("%s = {%s!r}" % (k,k) for k in KEYS_TYPE.keys())
 	def run (self):
 		if not (self.k0, self.k1) in self.generator.bld.bench_cmp:
 			self.generator.bld.bench_cmp[(self.k0, self.k1)] = {}
@@ -211,9 +244,13 @@ class BenchCmp (Bench):
 			for eps in reversed(sorted(eps0 | eps1)):
 				time0 = set (d["time"] for d in fdata0 if d["eps"] == eps)
 				time1 = set (d["time"] for d in fdata1 if d["eps"] == eps)
-				rm1M0 = min(time1)/max(time0)
-				rM1m0 = max(time1)/min(time0)
-				# we always have rm1M0 < rM1m0
+				if not time0 or not time1:
+					rm1M0 = float ('nan')
+					rM1m0 = float ('nan')
+				else:
+					rm1M0 = min(time1)/max(time0)
+					rM1m0 = max(time1)/min(time0)
+					# we always have rm1M0 < rM1m0
 				data.append ( { "eps": eps, "rm1M0": rm1M0, "rM1m0": rM1m0 } )
 
 			outstr += os.linesep.join (self.CMP_FORMAT.format (**d) for d in data)
@@ -243,11 +280,8 @@ class BenchCmp (Bench):
 # Class for the task that generates the scatter plot for comparison
 class BenchScatterPlotData (Bench):
 	def get_time (self, L):
-		T = [ l for l in L if abs(l["eps"]-self.eps) <= 1e-6 ]
-		if len(T) == 0:
-			return self.env.BCH_TIME_LIMIT
-		else:
-			return max(t["time"] for t in T)
+		T = [ l["time"] for l in L if l["eps"] == self.eps ]
+		return max(T) if T else self.env.BCH_TIME_LIMIT
 
 	def run (self):
 		groupname = self.generator.name
@@ -302,7 +336,9 @@ def parse_summary_file (bch, filename):
 					curfile = str(mf.group(1))
 					data[curgroup]["data"][curfile] = []
 				else:
-					data[curgroup]["data"][curfile].append (BenchData.parse_bench_line(l))
+					D = BenchData.parse_bench_line(l)
+					if not D is None:
+						data[curgroup]["data"][curfile].append (D)
 	except UnboundLocalError:
 		bch.end_msg ("error, the file is not correctly formatted", color="RED")
 		return 1
@@ -403,7 +439,7 @@ def benchmarks_gather_data (self):
 
 			dm = float(args0["prec_ndigits_min"]) # same value in args1
 			dM = float(args0["prec_ndigits_max"]) # same value in args1
-			kw["eps"] = math.pow (10.0, -math.floor((dm+dM)/2.0))
+			kw["eps"] = Eps ("10^-%u" % math.floor((dm+dM)/2.0))
 			tsk2 = self.create_task ('BenchScatterPlotData', [], spdatanode, **kw)
 
 			if self.bld.with_graphs:
@@ -470,7 +506,7 @@ def benchmarks_format_output (bch):
 						c = "YELLOW"
 					else:
 						c = "NORMAL"
-					bch.msg ("  eps = %.1e" % eps, "%.2e %.2e %.2e" % (m, av, M), color=c)
+					bch.msg ("  eps = %r" % eps, "%.2e %.2e %.2e" % (m, av, M), color=c)
 
 	for k, D in bch.bench_cmp.items():
 		bch.msg ("", "", color="NORMAL")
@@ -482,7 +518,7 @@ def benchmarks_format_output (bch):
 			for f, data in sorted(groupdict.items(), key = lambda x:x[0]):
 				bch.msg (f, "rm1M0 rM1m0", color = "CYAN")
 				for eps_data in data:
-					msg_s = "  eps = %.1e" % eps_data["eps"]
+					msg_s = "  eps = %r" % eps_data["eps"]
 					msg_e = " %.2f  %.2f" % (eps_data["rm1M0"], eps_data["rM1m0"])
 					if eps_data["rM1m0"] <= BENCHS_CMP_IMPROVMENT_FACTOR:
 						c = "GREEN"
@@ -535,7 +571,7 @@ def options (opt):
 	                help = "Compare to previously saved benchmarks")
 	grp.add_option ("--benchs-cmp-only", action = "store_true",
 	                help = "No benchmarks run, only comparisons are performed",
-									dest = "BENCHS_CMP_ONLY")
+	                dest = "BENCHS_CMP_ONLY")
 	grp.add_option ("--benchs-with-graphs", action = "store_true",
 	                help = "Generate graphics from benchs (when available)",
 	                dest = "BENCHS_WITH_GRAPHS")
