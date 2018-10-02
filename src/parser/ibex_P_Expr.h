@@ -73,7 +73,7 @@ public:
 		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
 		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
 		INF, MID, SUP,  // deprecated??
-		DIFF, GEN_UNARY_OP,
+		DIFF, UNARY_OP,
 	} operation;
 
 	P_ExprNode(operation op) : op(op), lab(NULL), line(ibex_lineno) { }
@@ -453,9 +453,6 @@ inline const P_ExprNode* diff(const std::vector<const P_ExprNode*>* args) {
 	return new P_ExprNode(P_ExprNode::DIFF,*args);
 }
 
-inline const P_ExprNode* generic_unary_op(const char* name, const P_ExprNode* exp) {
-	return new P_ExprGenericUnaryOp(name,*exp);
-}
 
 } // end namespace parser
 

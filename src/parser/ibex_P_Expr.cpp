@@ -133,7 +133,7 @@ P_ExprApply::P_ExprApply(const Function& f, const Array<const P_ExprNode>& args)
 }
 
 P_ExprGenericUnaryOp::P_ExprGenericUnaryOp(const char* name, const P_ExprNode& expr) :
-		P_ExprNode(GEN_UNARY_OP,expr), name(strdup(name)) {
+		P_ExprNode(UNARY_OP,expr), name(strdup(name)) {
 }
 
 P_ExprGenericUnaryOp::~P_ExprGenericUnaryOp() {

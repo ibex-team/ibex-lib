@@ -122,7 +122,7 @@ void Expr2DAG::visit(const ExprDiv& e)    { visit_binary(e); }
 void Expr2DAG::visit(const ExprMax& e)    { visit_binary(e); }
 void Expr2DAG::visit(const ExprMin& e)    { visit_binary(e); }
 void Expr2DAG::visit(const ExprAtan2& e)  { visit_binary(e); }
-void Expr2DAG::visit(const ExprGenericUnaryOp& e)  { peer[e]=&ExprGenericUnaryOp::new_(e.name,*peer[e.expr],e.dim); }
+void Expr2DAG::visit(const ExprGenericUnaryOp& e)  { peer[e]=&ExprGenericUnaryOp::new_(e.name,*peer[e.expr]); }
 void Expr2DAG::visit(const ExprMinus& e)  { visit_unary(e); }
 void Expr2DAG::visit(const ExprTrans& e)  { visit_unary(e); }
 void Expr2DAG::visit(const ExprSign& e)   { visit_unary(e); }

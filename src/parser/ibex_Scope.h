@@ -109,7 +109,6 @@ public:
 	 *    TK_FUNC_SYMBOL:      name of a function declared in minibex.
 	 *    TK_EXPR_TMP_SYMBOL:  left-hand symbol in an expression assignment like expr=f(x)
 	 *    TK_ITERATOR:         name of an iterator in a "for" constraint loop
-	 *    TK_OPERATOR:         name of an used-defined operator
 	 */
 	int token(const char* id) const;
 	/*---------------------------------------------------------------------*/

@@ -362,30 +362,6 @@ void ExprLinearity::visit(const ExprPower& e) {
 	}
 }
 
-void ExprLinearity::visit(const ExprGenericUnaryOp& e) {
-	visit(e.expr);
-
-	Array<Domain>& expr_d=*(_coeffs[e.expr].first);
-	nodetype expr_type=_coeffs[e.expr].second;
-
-	if (expr_type==CONSTANT) {
-		Domain cst(e.dim);
-		e.fwd(expr_d[n],cst);
-		_coeffs.insert(e,build_cst(cst));
-	} else {
-		Array<Domain>* d=new Array<Domain>(n+1);
-
-		for (int i=0; i<n+1; i++) {
-			// by default: (-oo,oo) means non-linear
-			d->set_ref(i,*new Domain(e.dim));
-
-			if (i<n && expr_d[i].is_zero()) (*d)[i].clear();
-		}
-
-		_coeffs.insert(e, make_pair(d,NONLINEAR));
-	}
-}
-
 void ExprLinearity::visit(const ExprChi& e) {
 	Array<Domain>* d=new Array<Domain>(n+1);
 
@@ -412,6 +388,8 @@ void ExprLinearity::visit(const ExprApply& a)  { assert(false); /* deprecated */
 
 void ExprLinearity::visit(const ExprAdd& e)    { binary(e,operator+,true); }
 void ExprLinearity::visit(const ExprSub& e)    { binary(e,operator-,true); }
+
+void ExprLinearity::visit(const ExprGenericUnaryOp& e) { unary(e,e.eval,true); }
 
 void ExprLinearity::visit(const ExprMinus& e)  { unary(e,operator-,true); }
 void ExprLinearity::visit(const ExprTrans& e)  { unary(e,transpose,true); }

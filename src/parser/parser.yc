@@ -38,7 +38,7 @@
 %token <str> TK_EXPR_TMP_SYMBOL
 %token <str> TK_ENTITY
 %token <str> TK_ITERATOR
-%token <str> TK_OPERATOR
+%token <str> TK_UNARY_OP               // generic (user-defined) unary operator
 
 %token <str> TK_STRING
 %token <itg> TK_INTEGER
@@ -47,7 +47,7 @@
 %token <_bool> TK_BOOL
 
 %token TK_PARAM TK_CONST TK_VARS TK_FUNCTION 
-%token TK_DIFF
+%token TK_DIFF 
 %token TK_MIN TK_MAX TK_INF TK_MID TK_SUP TK_SIGN TK_ABS
 %token TK_SQRT TK_EXPO  TK_LOG 
 %token TK_COS  TK_SIN   TK_TAN  TK_ACOS  TK_ASIN  TK_ATAN TK_ATAN2
@@ -309,7 +309,7 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | TK_MID '(' expr ')'             { $$ = mid($3); }
               | TK_SUP '(' expr ')'             { $$ = sup($3); }
               | TK_DIFF '(' expr_row ')'        { $$ = diff($3); }
-//            | TK_OPERATOR '(' expr_row ')'    { $$ = ; }
+              | TK_UNARY_OP '(' expr ')'        { $$ = new P_ExprGenericUnaryOp($1,*$3); free($1); }
               ;
 	      
 expr_row      : expr_row  ',' expr              { $1->push_back($3); $$=$1; }

@@ -269,6 +269,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::ATAN2:   e.lab=new LabelConst(atan2(arg_cst[0], arg_cst[1])); break;
 			case P_ExprNode::POWER:
 			case P_ExprNode::MINUS:   assert(false); /* impossible */ break;
+			case P_ExprNode::UNARY_OP:e.lab=new LabelConst(ExprGenericUnaryOp::get_eval(((const P_ExprGenericUnaryOp&) e).name)(arg_cst[0])); break;
 			case P_ExprNode::TRANS:   e.lab=new LabelConst(transpose(arg_cst[0])); break;
 			case P_ExprNode::SIGN:    e.lab=new LabelConst(sign (arg_cst[0])); break;
 			case P_ExprNode::ABS:     e.lab=new LabelConst(abs  (arg_cst[0])); break;
@@ -340,6 +341,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::ATAN2:  node=&atan2(arg_node[0], arg_node[1]); break;
 		case P_ExprNode::POWER:  assert(false); /* impossible */ break;
 		case P_ExprNode::MINUS:  node=&(-arg_node[0]); break;
+		case P_ExprNode::UNARY_OP:node=&ExprGenericUnaryOp::new_(((const P_ExprGenericUnaryOp&) e).name, arg_node[0]); break;
 		case P_ExprNode::TRANS:  node=&transpose(arg_node[0]); break;
 		case P_ExprNode::SIGN:   node=&sign (arg_node[0]); break;
 		case P_ExprNode::ABS:    node=&abs  (arg_node[0]); break;

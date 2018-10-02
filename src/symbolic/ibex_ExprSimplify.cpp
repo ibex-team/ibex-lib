@@ -564,13 +564,11 @@ void ExprSimplify::visit(const ExprGenericUnaryOp& e) {
 
 	if (is_cst(expr)) {
 		/* evaluate the constant expression on-the-fly */
-		Domain y(e.dim);
-		e.fwd(to_cst(expr),y);
-		insert(e, ExprConstant::new_(y));
+		insert(e, ExprConstant::new_(e.eval(to_cst(expr))));
 	} else if (&e.expr == &expr)  // if nothing changed
 		insert(e, e);
 	else
-		insert(e, ExprGenericUnaryOp::new_(e.name, expr, e.dim));
+		insert(e, ExprGenericUnaryOp::new_(e.name, expr));
 }
 
 void ExprSimplify::visit(const ExprMax& e)   { binary(e,max); }
