@@ -25,7 +25,7 @@ public:
 
 	static void bwd(Input& x, const Output& y);
 
-	static Input diff(const Input& x);
+	static Input diff(const Input& x, const Output& g);
 
 	static const ExprNode& diff(const ExprNode& expr);
 };
@@ -60,9 +60,9 @@ public:
 
 	typedef void (*bwd_func)(Domain& x, const Domain& y);
 
-	typedef Domain (*num_diff_func)(const Domain& x);
+	typedef Domain (*num_diff_func)(const Domain& x, const Domain& g);
 
-	typedef const ExprNode& (*symb_diff_func)(const ExprNode& expr);
+	typedef const ExprNode& (*symb_diff_func)(const ExprNode& expr, const ExprNode& g);
 
 	eval_func eval;
 	bwd_func bwd;

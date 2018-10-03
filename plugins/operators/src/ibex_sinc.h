@@ -11,7 +11,6 @@
 #define __IBEX_SINC_H__
 
 #include "ibex_ExprOperators.h"
-#include "ibex_Interval.h"
 
 namespace ibex {
 
@@ -32,17 +31,17 @@ public:
 
 	/** Backward evaluation. */
 	static void bwd(Interval& x, const Interval& y) {
-		x=sin(x)/y; // pessimistic...
+		x=sin(x)/y; // note: pessimistic!
 	}
 
-	/** Numerical derivative. */
-	static Interval diff(const Interval& x) {
-		return cos(x)-sin(x)/sqr(x);
+	/** Backward numerical derivative. */
+	static Interval diff(const Interval& x, const Interval& g) {
+		return g*(cos(x)-sin(x)/sqr(x));
 	}
 
-	/** Symbolic derivative. */
-	static const ExprNode& diff(const ExprNode& expr) {
-		return cos(expr)-sin(expr)/sqr(expr);
+	/** Backward symbolic derivative. */
+	static const ExprNode& diff(const ExprNode& x, const ExprNode& g) {
+		return g*(cos(x)-sin(x)/sqr(x));
 	}
 };
 } // end namespace
