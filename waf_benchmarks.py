@@ -414,7 +414,9 @@ def benchmarks_gather_data (self):
 	for cmp_key, cmp_data in self.bld.bench_results.items():
 		if self.name in cmp_data:
 			cmp_key_set.add (cmp_key)
-		else:
+
+	if cmp_key_set:
+		for cmp_key in set(self.bld.bench_results.keys()) - cmp_key_set:
 			Logs.info ("No data for group '%s' in file '%s'" % (self.name, cmp_key))
 
 	for k0, k1 in ((k0,k1) for k0 in cmp_key_set for k1 in cmp_key_set if k0<k1):
@@ -532,6 +534,36 @@ def benchmarks_format_output (bch):
 		sep = os.linesep + "  - "
 		bch.fatal (sep.join (["Benchmarks errors:"] + bch.bench_errors))
 
+#
+class Cat (object):
+	_choices = [ "easy", "medium", "hard", "blowup", "others", "unsolved" ]
+	_default = "medium"
+
+	@classmethod
+	def help (cls):
+		s = ", ".join (cls._choices)
+		return "Possible values: %s [ default: %s ]" % (s, cls._default)
+
+	@classmethod
+	def default (cls):
+		return [ cls._default ]
+
+	@classmethod
+	def list (cls):
+		return cls._choices
+
+	@staticmethod
+	def opt_callback (option, opt_str, value, parser, *args, **kwargs):
+		L = value.replace ("+", ",").split(",")
+		for cat in L:
+			if not cat in Cat.list():
+				import optparse
+				fmt = "option %s: invalid choice: '%s' (choose from %s)"
+				h = ", ".join ("'%s'" % c for c in Cat.list())
+				raise optparse.OptionValueError(fmt % (option, cat, h))
+		setattr(parser.values, option.dest, L)
+
+
 ######################
 ###### options #######
 ######################
@@ -540,31 +572,15 @@ def options (opt):
 	Options for the benchmarks
 	"""
 
-	categories = [ "easy", "medium", "hard", "blowup", "others", "unsolved" ]
-	cat_default = "medium"
-	cat_help = "Possible values: " + ", ".join(categories)
-	cat_help += " [ default: %s ]" % cat_default
-
-	def parse_cat_callback (option, opt_str, value, parser, *args, **kwargs):
-		choices = categories,
-		L = value.replace ("+", ",").split(",")
-		for cat in L:
-			if not cat in categories:
-				import optparse
-				fmt = "option %s: invalid choice: '%s' (choose from %s)"
-				h = ", ".join ("'%s'" % c for c in categories)
-				raise optparse.OptionValueError(fmt % (option, cat, h))
-		setattr(parser.values, option.dest, L)
-
 
 	grp = opt.add_option_group ("Options for benchmarks")
 	for n, v in BENCHS_DEFAULT_ARGS.items():
 		optname = "--benchs-" + n.replace("_", "-")
 		grp.add_option (optname, action="store", dest = "BENCHS_" + n.upper(),
 		                help = "Override default %s (default is %s)" % (n, v))
-	grp.add_option ("--benchs-categories", help = cat_help, action = "callback",
-	                callback = parse_cat_callback, type = str,
-	                default = [cat_default], dest = "BENCHS_CATEGORIES")
+	grp.add_option ("--benchs-categories", help = Cat.help(), action = "callback",
+	                callback = Cat.opt_callback, type = str,
+	                dest = "BENCHS_CATEGORIES")
 	grp.add_option ("--benchs-save", action = "store", dest = "BENCHS_SAVE",
 	                help = "Save the results of the benchmarks in the given file")
 	grp.add_option ("--benchs-cmp-to", action = "append", dest = "BENCHS_CMP_TO",
@@ -600,10 +616,6 @@ def benchmarks (bch):
 	if all ([ not a in sys.argv for a in p]): # jobs is not explicitly set
 		bch.jobs = bch.options.jobs = 1
 
-	# Read list of categories from command line arguments
-	if bch.options.BENCHS_CATEGORIES:
-		bch.categories = bch.options.BENCHS_CATEGORIES
-
 	# Do not overwrite file with --benchs-save option
 	if bch.options.BENCHS_SAVE:
 		f = bch.options.BENCHS_SAVE
@@ -631,6 +643,15 @@ def benchmarks (bch):
 		bch.cmp_only = bch.options.BENCHS_CMP_ONLY
 	else:
 		bch.cmp_only = False
+
+	# Read list of categories from command line arguments
+	if bch.options.BENCHS_CATEGORIES:
+		bch.categories = bch.options.BENCHS_CATEGORIES
+	else:
+		if bch.cmp_only:
+			bch.categories = Cat.list()
+		else:
+			bch.categories = Cat.default()
 
 	# Handle --benchs-with-graphs option
 	if bch.options.BENCHS_WITH_GRAPHS:
