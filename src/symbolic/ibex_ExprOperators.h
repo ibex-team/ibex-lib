@@ -16,6 +16,20 @@
 
 namespace ibex {
 
+template<const char* Name, class Input, class Output>
+class UnaryOperator {
+public:
+	static Dim dim(const Dim& x_dim);
+
+	static Output eval(const Input& x);
+
+	static void bwd(Input& x, const Output& y);
+
+	static Input diff(const Input& x);
+
+	static const ExprNode& diff(const ExprNode& expr);
+};
+
 /**
  * \ingroup symbolic
  * \brief Unary expression
@@ -40,6 +54,8 @@ public:
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
+	typedef Dim (*dim_func)(const Dim& x);
+
 	typedef Domain (*eval_func)(const Domain& x);
 
 	typedef void (*bwd_func)(Domain& x, const Domain& y);
@@ -60,7 +76,7 @@ public:
 
 protected:
 	typedef struct {
-		Dim dim;
+		dim_func dim;
 		eval_func eval;
 		bwd_func bwd;
 		num_diff_func num_diff;

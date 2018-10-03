@@ -73,6 +73,27 @@ public:
 	explicit TemplateDomain(typename D::MATRIX& m1);
 
 	/**
+	 * \brief Creates a reference to an interval.
+	 *
+	 * The internal domain will point to \a itv.
+	 */
+	explicit TemplateDomain(const typename D::SCALAR& itv);
+
+	/**
+	 * \brief Creates a reference to an interval vector.
+	 *
+	 *  The internal domain will point to \a v.
+	 */
+	explicit TemplateDomain(const typename D::VECTOR& v1, bool in_row);
+
+	/**
+	 * \brief Creates a reference to an interval matrix.
+	 *
+	 *  The internal domain will point to \a m.
+	 */
+	explicit TemplateDomain(const typename D::MATRIX& m1);
+
+	/**
 	 * \brief Creates a domain by copy.
 	 *
 	 * If \a is_reference is true, the internal domain is a reference to the

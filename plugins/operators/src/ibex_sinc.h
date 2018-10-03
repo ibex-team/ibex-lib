@@ -10,25 +10,41 @@
 #ifndef __IBEX_SINC_H__
 #define __IBEX_SINC_H__
 
-#include "ibex_Expr.h"
-#include "ibex_Domain.h"
+#include "ibex_ExprOperators.h"
+#include "ibex_Interval.h"
 
 namespace ibex {
 
-//DECLARE_UNARY_OPERATOR("sinc",sinc,sinc_bwd,dsinc,dsinc);
+extern const char SINC[];
 
-/** Forward evaluation. */
-Domain sinc(const Domain& x);
+template<>
+class UnaryOperator<SINC,Interval,Interval> {
+public:
+	/** Dimension */
+	static Dim dim(const Dim& x) {
+		return Dim::scalar();
+	}
 
-/** Backward evaluation. */
-void sinc_bwd(Domain& x, const Domain& y);
+	/** Forward evaluation. */
+	static Interval eval(const Interval& x) {
+		return sin(x)/x;
+	}
 
-/** Numerical derivative. */
-Domain dsinc(const Domain& x);
+	/** Backward evaluation. */
+	static void bwd(Interval& x, const Interval& y) {
+		x=sin(x)/y; // pessimistic...
+	}
 
-/** Symbolic derivative. */
-const ExprNode& dsinc_symb(const ExprNode& expr);
+	/** Numerical derivative. */
+	static Interval diff(const Interval& x) {
+		return cos(x)-sin(x)/sqr(x);
+	}
 
+	/** Symbolic derivative. */
+	static const ExprNode& diff(const ExprNode& expr) {
+		return cos(expr)-sin(expr)/sqr(expr);
+	}
+};
 } // end namespace
 
 #endif /* __IBEX_SINC_H__ */
