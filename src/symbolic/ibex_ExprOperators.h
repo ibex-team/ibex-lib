@@ -16,6 +16,22 @@
 
 namespace ibex {
 
+template<const char* Name, class Input1, class Input2, class Output>
+class BinaryOperator {
+public:
+	static Dim dim(const Dim& x1_dim, const Dim& x2_dim);
+
+	static Output eval(const Input1& x1, const Input2& x2);
+
+	static void bwd(Input1& x1, Input2& x2, const Output& y);
+
+	static Input1 diff1(const Input1& x1, const Input2& x2, const Output& g);
+
+	static Input2 diff2(const Input1& x1, const Input2& x2, const Output& g);
+
+	static const ExprNode& diff(const ExprNode& expr);
+};
+
 template<const char* Name, class Input, class Output>
 class UnaryOperator {
 public:
@@ -75,17 +91,7 @@ public:
 	const char* name;
 
 protected:
-	typedef struct {
-		dim_func dim;
-		eval_func eval;
-		bwd_func bwd;
-		num_diff_func num_diff;
-		symb_diff_func symb_diff;
-	} OperatorDef;
-
-	static OperatorDef get(const char* name);
-
-	ExprGenericUnaryOp(const char* name, const OperatorDef& def, const ExprNode& subexpr);
+	ExprGenericUnaryOp(const char* name, const ExprNode& subexpr);
 
 	~ExprGenericUnaryOp();
 };

@@ -463,4 +463,16 @@ void Gradient::atan2_bwd(int x1, int x2, int y) {
     g[x2].i() += g[y].i() * - d[x1].i() / (sqr(d[x2].i()) + sqr(d[x1].i()));
 }
 
+void Gradient::gen2_bwd(int x1, int x2, int y) {
+	/* TODO */
+}
+
+void Gradient::gen1_bwd(int x, int y) {
+	assert(dynamic_cast<const ExprGenericUnaryOp*>(&(f.node(y))));
+
+	const ExprGenericUnaryOp& e = (const ExprGenericUnaryOp&) f.node(y);
+
+	g[x] = g[x] + e.num_diff(d[x],g[y]); // TODO: implement += for Domain?
+}
+
 } // namespace ibex

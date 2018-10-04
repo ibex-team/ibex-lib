@@ -80,6 +80,7 @@ public:
 	       void symbol_fwd(int y)             { g[y].clear(); }
 	       void apply_fwd(int*, int y)        { g[y].clear(); }
 	inline void chi_fwd(int, int, int, int y) { g[y].i()=0; }
+	inline void gen2_fwd(int, int, int y)     { g[y].clear(); }
 	inline void add_fwd(int, int, int y)      { g[y].i()=0; }
 	inline void mul_fwd(int, int, int y)      { g[y].i()=0; }
 	inline void sub_fwd(int, int, int y)      { g[y].i()=0; }
@@ -87,6 +88,7 @@ public:
 	inline void max_fwd(int, int, int y)      { g[y].i()=0; }
 	inline void min_fwd(int, int, int y)      { g[y].i()=0; }
 	inline void atan2_fwd(int, int, int y)    { g[y].i()=0; }
+	inline void gen1_fwd(int, int y)          { g[y].clear(); }
 	inline void minus_fwd(int, int y)         { g[y].i()=0; }
 	inline void minus_V_fwd(int, int y)       { g[y].v().clear(); }
 	inline void minus_M_fwd(int, int y)       { g[y].m().clear(); }
@@ -131,6 +133,7 @@ public:
 	inline void cst_bwd    (int) { /* nothing to do */ }
 	       void apply_bwd  (int* x, int y);
 	       void chi_bwd    (int x1, int x2, int x3, int y);
+	       void gen2_bwd   (int x1, int x2, int y);
 	inline void add_bwd    (int x1, int x2, int y) { g[x1].i() += g[y].i();  g[x2].i() += g[y].i(); }
 	inline void mul_bwd    (int x1, int x2, int y) { g[x1].i() += g[y].i() * d[x2].i(); g[x2].i() += g[y].i() * d[x1].i(); }
 	inline void sub_bwd    (int x1, int x2, int y) { g[x1].i() += g[y].i();  g[x2].i() += -g[y].i(); }
@@ -138,6 +141,7 @@ public:
 	       void max_bwd    (int x1, int x2, int y);
 	       void min_bwd    (int x1, int x2, int y);
 	       void atan2_bwd  (int x1, int x2, int y);
+	       void gen1_bwd   (int x, int y);
 	inline void minus_bwd  (int x, int y) { g[x].i() += -1.0*g[y].i(); }
 	inline void minus_V_bwd(int x, int y) { g[x].v() += -1.0*g[y].v(); }
 	inline void minus_M_bwd(int x, int y) { g[x].m() += -1.0*g[y].m(); }
