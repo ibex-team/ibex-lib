@@ -36,7 +36,7 @@ public:
 	}
 
 	/** Backward evaluation. */
-	static void bwd(IntervalMatrix& x, const IntervalVector& y) {
+	static void bwd(const IntervalVector& y, IntervalMatrix& x) {
 		int n=x.nb_rows();
 		for (int i=0; i<n; i++)
 			x[i][i] &= y[i];

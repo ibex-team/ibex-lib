@@ -1,26 +1,26 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_sinc.h
+// File        : ibex_atanhccc.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : Oct 02, 2018
+// Created     : Oct 05, 2018
 //============================================================================
 
-#ifndef __IBEX_SINC_H__
-#define __IBEX_SINC_H__
+#ifndef __IBEX_ATANHCCC_H__
+#define __IBEX_ATANHCCC_H__
 
 #include "ibex_ExprOperators.h"
 
 namespace ibex {
 
-extern const char SINC[];
+extern const char ATANHCCC[];
 
 /**
- * \brief Cardinal sine.
+ * \brief 3rd-order cardinal arctangent.
  */
 template<>
-class UnaryOperator<SINC,Interval,Interval> {
+class UnaryOperator<ATANHCCC,Interval,Interval> {
 public:
 	/** Dimension */
 	static Dim dim(const Dim& x) {
@@ -29,25 +29,30 @@ public:
 
 	/** Forward evaluation. */
 	static Interval eval(const Interval& x) {
-		return sin(x)/x;
+		return (atanh(x)-x)/pow(x,3);
 	}
 
 	/** Backward evaluation. */
 	static void bwd(const Interval& y, Interval& x) {
-		x &= sin(x)/y; // note: pessimistic!
-		bwd_sin(y*x,x);
+		Interval atanhx=atanh(x);
+		Interval xcube=pow(x,3);
+		Interval ycopy=y;
+		bwd_sub(y*xcube, atanhx, x);
+		bwd_mul(atanhx-x, ycopy, xcube);
+		bwd_pow(xcube, 3, x);
+		bwd_atanh(atanhx,x);
 	}
 
 	/** Backward numerical derivative. */
 	static Interval diff(const Interval& x, const Interval& g) {
-		return g*(cos(x)-sin(x)/sqr(x));
+		return g*(1/(pow(x,3)*(1-sqr(x)))-3*atanh(x)/pow(x,4));
 	}
 
 	/** Backward symbolic derivative. */
 	static const ExprNode& diff(const ExprNode& x, const ExprNode& g) {
-		return g*(cos(x)-sin(x)/sqr(x));
+		return g*(1/(pow(x,3)*(1-sqr(x)))-3*atanh(x)/pow(x,4));
 	}
 };
 } // end namespace
 
-#endif /* __IBEX_SINC_H__ */
+#endif /* __IBEX_ATANHCCC_H__ */
