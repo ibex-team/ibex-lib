@@ -124,6 +124,8 @@ void ExprCopy::visit(const ExprChi& e) {
 	clone.insert(e, &ExprChi::new_(args2));
 }
 
+void ExprCopy::visit(const ExprGenericBinaryOp& e) {
+	                                       visit(e.left); visit(e.right); clone.insert(e,&ExprGenericBinaryOp::new_(e.name,LEFT,RIGHT)); }
 void ExprCopy::visit(const ExprAdd& e)   { visit(e.left); visit(e.right); clone.insert(e, &(LEFT+RIGHT));; }
 void ExprCopy::visit(const ExprMul& e)   { visit(e.left); visit(e.right); clone.insert(e, &(LEFT*RIGHT)); }
 void ExprCopy::visit(const ExprSub& e)   { visit(e.left); visit(e.right); clone.insert(e, &(LEFT-RIGHT)); }

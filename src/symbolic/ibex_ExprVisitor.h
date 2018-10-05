@@ -32,6 +32,8 @@ class ExprVector;
 class ExprApply;
 class ExprChi;
 
+class ExprGenericBinaryOp;
+
 class ExprAdd;
 class ExprMul;
 class ExprSub;

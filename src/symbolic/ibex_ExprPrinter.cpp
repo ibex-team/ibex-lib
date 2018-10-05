@@ -103,6 +103,8 @@ void ExprPrinter::visit(const ExprChi& a) {
 	(*os) << ")";
 }
 
+void ExprPrinter::visit(const ExprGenericBinaryOp& e)
+                                            { (*os) << e.name << "("; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprAdd& e)   { (*os) << "("; visit(e.left); (*os) << "+"; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprMul& e)   { (*os) << "("; visit(e.left); (*os) << "*"; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprSub& e)   { (*os) << "("; visit(e.left); (*os) << "-"; visit(e.right); (*os) << ")"; }

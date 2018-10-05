@@ -393,6 +393,10 @@ void ExprDiff::visit(const ExprMul& e)   {
 	}
 }
 
+void ExprDiff::visit(const ExprGenericBinaryOp& e) {
+	                                       add_grad_expr(e.left,  e.symb_diff1(e.left,e.right,*grad[e]));
+	                                       add_grad_expr(e.right, e.symb_diff2(e.left,e.right,*grad[e])); }
+
 void ExprDiff::visit(const ExprAdd& e)   { add_grad_expr(e.left,  *grad[e]);
                                            add_grad_expr(e.right, *grad[e]); }
 void ExprDiff::visit(const ExprSub& e)   { add_grad_expr(e.left,  *grad[e]);

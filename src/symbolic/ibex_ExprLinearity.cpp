@@ -386,6 +386,8 @@ void ExprLinearity::visit(const ExprChi& e) {
 void ExprLinearity::visit(const ExprSymbol& e) { assert(false); }
 void ExprLinearity::visit(const ExprApply& a)  { assert(false); /* deprecated */}
 
+void ExprLinearity::visit(const ExprGenericBinaryOp& e) { binary(e,e.eval,true); }
+
 void ExprLinearity::visit(const ExprAdd& e)    { binary(e,operator+,true); }
 void ExprLinearity::visit(const ExprSub& e)    { binary(e,operator-,true); }
 

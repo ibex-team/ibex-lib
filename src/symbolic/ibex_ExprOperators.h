@@ -80,7 +80,7 @@ public:
 
 	typedef Domain (*num_diff_func)(const Domain& x1, const Domain& x2, const Domain& g);
 
-	typedef const ExprNode& (*symb_diff_func)(const ExprNode& expr, const ExprNode& g);
+	typedef const ExprNode& (*symb_diff_func)(const ExprNode& expr1, const ExprNode& expr2, const ExprNode& g);
 
 	eval_func eval;
 	bwd_func bwd;
