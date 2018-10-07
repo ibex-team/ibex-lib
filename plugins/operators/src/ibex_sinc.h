@@ -28,7 +28,7 @@ public:
 	}
 
 	/** Forward evaluation. */
-	static Interval eval(const Interval& x) {
+	static Interval fwd(const Interval& x) {
 		return sin(x)/x;
 	}
 

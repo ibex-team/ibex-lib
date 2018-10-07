@@ -27,7 +27,7 @@ public:
 	}
 
 	/** Forward evaluation. */
-	static IntervalVector eval(const IntervalMatrix& x) {
+	static IntervalVector fwd(const IntervalMatrix& x) {
 		int n=x.nb_rows();
 		IntervalVector t(n);
 		for (int i=0; i<n; i++)

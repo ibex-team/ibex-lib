@@ -30,7 +30,7 @@ public:
 	}
 
 	/** Forward evaluation. */
-	static IntervalVector eval(const IntervalVector& x1, const IntervalVector& x2) {
+	static IntervalVector fwd(const IntervalVector& x1, const IntervalVector& x2) {
 		assert(x1.size()==3);
 		assert(x2.size()==3);
 
