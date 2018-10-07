@@ -1,16 +1,16 @@
 /* ============================================================================
- * I B E X - Generic operators
+ * I B E X - Operators Tests
  * ============================================================================
  * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
- * Created     : Sep 28, 2018
+ * Created     : Oct 7, 2018
  * ---------------------------------------------------------------------------- */
 
-#ifndef __TEST_GENERIC_OP_H__
-#define __TEST_GENERIC_OP_H__
+#ifndef __TEST_TRACE_H__
+#define __TEST_TRACE_H__
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -18,22 +18,22 @@
 
 namespace ibex {
 
-class TestGenericOp : public CppUnit::TestFixture {
+class TestTrace : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestGenericOp);
-	CPPUNIT_TEST(build1);
-	CPPUNIT_TEST(simplify1);
+	CPPUNIT_TEST_SUITE(TestTrace);
+#ifndef _IBEX_WITH_NOLP_
+	CPPUNIT_TEST(eval1);
+
+#endif
 	CPPUNIT_TEST_SUITE_END();
 
-	void build1();
-	void simplify1();
-
+	void eval1();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestGenericOp);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestTrace);
 
 } // namespace ibex
 
-#endif // __TEST_GENERIC_OP_H__
+#endif // __TEST_TRACE_H__

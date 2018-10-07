@@ -40,12 +40,12 @@ public:
 
 	/** Backward numerical derivative. */
 	static Interval diff(const Interval& x, const Interval& g) {
-		return g*(cos(x)-sin(x)/sqr(x));
+		return g*((x*cos(x)-sin(x))/sqr(x));
 	}
 
 	/** Backward symbolic derivative. */
 	static const ExprNode& diff(const ExprNode& x, const ExprNode& g) {
-		return g*(cos(x)-sin(x)/sqr(x));
+		return g*((x*cos(x)-sin(x))/sqr(x));
 	}
 };
 } // end namespace

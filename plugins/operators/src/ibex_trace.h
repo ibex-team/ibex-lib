@@ -43,7 +43,7 @@ public:
 	}
 
 	/** Backward numerical derivative. */
-	static IntervalMatrix bwd_diff(const IntervalMatrix& x, const IntervalVector& g) {
+	static IntervalMatrix diff(const IntervalMatrix& x, const IntervalVector& g) {
 		int n=x.nb_rows();
 		IntervalMatrix M=Matrix::zeros(n);
 		for (int i=0; i<n; i++)

@@ -75,14 +75,14 @@ static void bwd_binary_domain(const Domain& y, Domain& x1, Domain& x2) {
 template<const char* Name, class Input1, class Input2, class Output>
 static Domain num_diff1_binary_domain(const Domain& x1, const Domain& x2, const Domain& g) {
 	Domain dx1(x1.dim);
-	BinaryOperator<Name,Input1, Input2, Output>::diff1(get<Input1>(x1),get<Input2>(x2),get<Output>(g));
+	get<Input1>(dx1)=BinaryOperator<Name,Input1, Input2, Output>::diff1(get<Input1>(x1),get<Input2>(x2),get<Output>(g));
 	return dx1;
 }
 
 template<const char* Name, class Input1, class Input2, class Output>
 static Domain num_diff2_binary_domain(const Domain& x1, const Domain& x2, const Domain& g) {
 	Domain dx2(x2.dim);
-	BinaryOperator<Name,Input1, Input2, Output>::diff2(get<Input1>(x1),get<Input2>(x2),get<Output>(g));
+	get<Input1>(dx2)=BinaryOperator<Name,Input1, Input2, Output>::diff2(get<Input1>(x1),get<Input2>(x2),get<Output>(g));
 	return dx2;
 }
 
@@ -101,7 +101,7 @@ static void bwd_unary_domain(const Domain& y, Domain& x) {
 template<const char* Name, class Input, class Output>
 static Domain num_diff_unary_domain(const Domain& x, const Domain& g) {
 	Domain dx(x.dim);
-	UnaryOperator<Name,Input,Output>::diff(get<Input>(x),get<Output>(g));
+	get<Input>(dx)=UnaryOperator<Name,Input,Output>::diff(get<Input>(x),get<Output>(g));
 	return dx;
 }
 
@@ -192,7 +192,7 @@ const ExprGenericUnaryOp& ExprGenericUnaryOp::new_(const char* op_name, const Ex
 }
 
 ExprGenericUnaryOp::ExprGenericUnaryOp(const char* op_name, const ExprNode& subexpr) :
-		ExprUnaryOp(subexpr, get_unary_op(op_name).dim(subexpr.dim)), name(strdup(name)) {
+		ExprUnaryOp(subexpr, get_unary_op(op_name).dim(subexpr.dim)), name(strdup(op_name)) {
 
 	UnaryOperatorDef def=get_unary_op(op_name);
 	eval = def.eval;

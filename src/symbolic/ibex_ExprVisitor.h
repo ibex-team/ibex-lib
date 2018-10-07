@@ -149,7 +149,13 @@ class ExprVisitor {
    }
 
   /*==================== binary operators =========================*/
-  /** Visit an addition (Implementation is not mandatory).
+   /** Visit a generic binary operator (Implementation is not mandatory).
+    * By default: call visit(const ExprBinaryOp& e). */
+   virtual void visit(const ExprGenericBinaryOp& e) {
+ 	  visit((const ExprBinaryOp&) e);
+   }
+
+   /** Visit an addition (Implementation is not mandatory).
    * By default: call visit(const ExprBinaryOp& e). */
   virtual void visit(const ExprAdd& e) {
 	  visit((const ExprBinaryOp&) e);
