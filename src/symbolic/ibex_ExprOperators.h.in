@@ -116,7 +116,7 @@ public:
 
 } // end namespace
 
-@OPERATORS_HEADERS@
+@OPERATORS_INCLUDES@
 
 namespace ibex {
 
