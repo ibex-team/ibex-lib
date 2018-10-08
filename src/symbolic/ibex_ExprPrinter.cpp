@@ -103,6 +103,8 @@ void ExprPrinter::visit(const ExprChi& a) {
 	(*os) << ")";
 }
 
+void ExprPrinter::visit(const ExprGenericBinaryOp& e)
+                                            { (*os) << e.name << "("; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprAdd& e)   { (*os) << "("; visit(e.left); (*os) << "+"; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprMul& e)   { (*os) << "("; visit(e.left); (*os) << "*"; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprSub& e)   { (*os) << "("; visit(e.left); (*os) << "-"; visit(e.right); (*os) << ")"; }
@@ -111,7 +113,8 @@ void ExprPrinter::visit(const ExprDiv& e)   { (*os) << "("; visit(e.left); (*os)
 void ExprPrinter::visit(const ExprMax& e)   { (*os) << "max("  ; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprMin& e)   { (*os) << "min("  ; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprAtan2& e) { (*os) << "atan2("; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
-
+void ExprPrinter::visit(const ExprGenericUnaryOp& e)
+                                            { (*os) << e.name << "("  ; visit(e.expr); (*os) << ")"; }
 void ExprPrinter::visit(const ExprMinus& e) { (*os) << "(-"   ; visit(e.expr); (*os) << ")"; }
 void ExprPrinter::visit(const ExprTrans& e) { (*os) << "("   ; visit(e.expr); (*os) << ")'"; }
 void ExprPrinter::visit(const ExprSign& e)  { (*os) << "sign("; visit(e.expr); (*os) << ")"; }

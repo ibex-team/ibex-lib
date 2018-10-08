@@ -81,6 +81,7 @@ public: // because called from CompiledFunction
 	inline void symbol_fwd (int y);
 	inline void cst_fwd    (int y);
 	inline void chi_fwd    (int x1, int x2, int x3, int y);
+	inline void gen2_fwd   (int x, int x2, int y);
 	inline void add_fwd    (int x1, int x2, int y);
 	inline void mul_fwd    (int x1, int x2, int y);
 	inline void sub_fwd    (int x1, int x2, int y);
@@ -88,6 +89,7 @@ public: // because called from CompiledFunction
 	inline void max_fwd    (int x1, int x2, int y);
 	inline void min_fwd    (int x1, int x2, int y);
 	inline void atan2_fwd  (int x1, int x2, int y);
+	inline void gen1_fwd   (int x, int y);
 	inline void minus_fwd  (int x, int y);
 	inline void minus_V_fwd(int x, int y);
 	inline void minus_M_fwd(int x, int y);
@@ -148,6 +150,7 @@ inline void Eval::cst_fwd(int y) {
 }
 
 inline void Eval::chi_fwd(int x1, int x2, int x3, int y) { d[y].i() = chi(d[x1].i(),d[x2].i(),d[x3].i()); }
+inline void Eval::gen2_fwd(int x1, int x2, int y)  { /* TODO */ }
 inline void Eval::add_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()+d[x2].i(); }
 inline void Eval::mul_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()*d[x2].i(); }
 inline void Eval::sub_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()-d[x2].i(); }

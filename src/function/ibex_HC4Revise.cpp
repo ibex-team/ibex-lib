@@ -159,4 +159,21 @@ void HC4Revise::vector_bwd(int* x, int y) {
 	}
 }
 
+void HC4Revise::gen2_bwd(int x1, int x2, int y) {
+	assert(dynamic_cast<const ExprGenericBinaryOp*>(&(f.node(y))));
+
+	const ExprGenericBinaryOp& e = (const ExprGenericBinaryOp&) f.node(y);
+	e.bwd(d[y], d[x1], d[x2]);
+	if (d[x1].is_empty() || d[x2].is_empty()) throw EmptyBoxException();
+}
+
+void HC4Revise::gen1_bwd(int x, int y) {
+	assert(dynamic_cast<const ExprGenericUnaryOp*>(&(f.node(y))));
+
+	const ExprGenericUnaryOp& e = (const ExprGenericUnaryOp&) f.node(y);
+	e.bwd(d[y], d[x]);
+	if (d[x].is_empty()) throw EmptyBoxException();
+}
+
+
 } /* namespace ibex */

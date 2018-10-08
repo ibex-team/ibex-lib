@@ -120,6 +120,8 @@ void CompiledFunction::visit(const ExprApply& e) { visit(e,APPLY); }
 
 void CompiledFunction::visit(const ExprChi& e) { visit(e,CHI); }
 
+void CompiledFunction::visit(const ExprGenericBinaryOp& e) { visit(e,GEN2); }
+
 void CompiledFunction::visit(const ExprAdd& e)   {
 	if (e.dim.is_scalar())      visit(e,ADD);
 	else if (e.dim.is_vector()) visit(e,ADD_V);
@@ -155,6 +157,8 @@ void CompiledFunction::visit(const ExprMax& e)   { visit(e,MAX); }
 void CompiledFunction::visit(const ExprMin& e)   { visit(e,MIN); }
 
 void CompiledFunction::visit(const ExprAtan2& e) { visit(e,ATAN2); }
+
+void CompiledFunction::visit(const ExprGenericUnaryOp& e) { visit(e,GEN1); }
 
 void CompiledFunction::visit(const ExprMinus& e) {
 	if (e.dim.is_vector())      visit(e,MINUS_V);
@@ -220,6 +224,7 @@ const char* CompiledFunction::op(operation o) const {
 		         return "+";
 	case MUL: case MUL_SV: case MUL_SM: case MUL_VV: case MUL_MV: case MUL_MM:  case MUL_VM:
 		         return "*";
+	case GEN1:   return "(gen-1)";
 	case MINUS: case MINUS_V: case MINUS_M:
 	case SUB: case SUB_V: case SUB_M:
 		         return "-";

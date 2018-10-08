@@ -215,4 +215,12 @@ void Eval::vector_fwd(int* x, int y) {
 
 }
 
+void Eval::gen1_fwd(int x, int y) {
+	assert(dynamic_cast<const ExprGenericUnaryOp*>(&(f.node(y))));
+
+	const ExprGenericUnaryOp& e = (const ExprGenericUnaryOp&) f.node(y);
+	d[y]=e.eval(d[x]);
+}
+
+
 } // namespace ibex

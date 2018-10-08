@@ -90,6 +90,7 @@ public: // because called from CompiledFunction
 	inline void cst_bwd    (int)                 { /* nothing to do */ }
 	       void apply_bwd  (int* x, int y);
 	inline void chi_bwd(int a, int b, int c, int y){ if (!(bwd_chi(d[y].i(),d[a].i(),d[b].i(),d[c].i()))) throw EmptyBoxException();  }
+	       void gen2_bwd   (int x1, int x2, int y);
 	inline void add_bwd    (int x1, int x2, int y) { if (!(bwd_add(d[y].i(),d[x1].i(),d[x2].i()))) throw EmptyBoxException();  }
 	inline void add_V_bwd  (int x1, int x2, int y) { if (!(bwd_add(d[y].v(),d[x1].v(),d[x2].v()))) throw EmptyBoxException();  }
 	inline void add_M_bwd  (int x1, int x2, int y) { if (!(bwd_add(d[y].m(),d[x1].m(),d[x2].m()))) throw EmptyBoxException();  }
@@ -107,6 +108,7 @@ public: // because called from CompiledFunction
 	inline void max_bwd    (int x1, int x2, int y) { if (!(bwd_max(d[y].i(),d[x1].i(),d[x2].i()))) throw EmptyBoxException();  }
 	inline void min_bwd    (int x1, int x2, int y) { if (!(bwd_min(d[y].i(),d[x1].i(),d[x2].i()))) throw EmptyBoxException();  }
 	inline void atan2_bwd  (int x1, int x2, int y) { if (!(bwd_atan2(d[y].i(),d[x1].i(),d[x2].i()))) throw EmptyBoxException();  }
+	       void gen1_bwd   (int x, int y);
 	inline void minus_bwd  (int x, int y)          { if ((d[x].i() &=-d[y].i()).is_empty()) throw EmptyBoxException();  }
 	inline void minus_V_bwd(int x, int y)          { if ((d[x].v() &=-d[y].v()).is_empty()) throw EmptyBoxException();  }
 	inline void minus_M_bwd(int x, int y)          { if ((d[x].m() &=-d[y].m()).is_empty()) throw EmptyBoxException();  }

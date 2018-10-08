@@ -7,6 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Jan 05, 2012
+ * Last Update : Sep 28, 2018
  * ---------------------------------------------------------------------------- */
 
 #ifndef _IBEX_EXPR_H
@@ -296,14 +297,29 @@ public:
 	static const ExprVector& new_col(const ExprNode& e1, const ExprNode& e2);
 
 	/**
-	 * \brief Create a column vector of two expressions.
+	 * \brief Create a column vector of three expressions.
+	 */
+	static const ExprVector& new_col(const ExprNode& e1, const ExprNode& e2, const ExprNode& e3);
+
+	/**
+	 * \brief Create a rwo vector of two expressions.
 	 */
 	static const ExprVector& new_row(const ExprNode& e1, const ExprNode& e2);
+
+	/**
+	 * \brief Create a row vector of three expressions.
+	 */
+	static const ExprVector& new_row(const ExprNode& e1, const ExprNode& e2, const ExprNode& e3);
 
 	/**
 	 * \brief Create a vector of two expressions.
 	 */
 	static const ExprVector& new_(const ExprNode& e1, const ExprNode& e2, Orientation o);
+
+	/**
+	 * \brief Create a vector of three expressions.
+	 */
+	static const ExprVector& new_(const ExprNode& e1, const ExprNode& e2, const ExprNode& e3, Orientation o);
 
 	/** \brief It the vector structured as a row or a column?
 	 *
@@ -1421,7 +1437,6 @@ private:
 	ExprAtanh(const ExprAtanh&); // copy constructor forbidden
 };
 
-
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
@@ -1453,12 +1468,24 @@ inline const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2
 	return *new ExprVector(Array<const ExprNode>(e1,e2), o);
 }
 
+inline const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, const ExprNode& e3, ExprVector::Orientation o) {
+	return *new ExprVector(Array<const ExprNode>(e1,e2,e3), o);
+}
+
 inline const ExprVector& ExprVector::new_col(const ExprNode& e1, const ExprNode& e2) {
 	return new_(e1,e2, COL);
 }
 
+inline const ExprVector& ExprVector::new_col(const ExprNode& e1, const ExprNode& e2, const ExprNode& e3) {
+	return new_(e1,e2,e3, COL);
+}
+
 inline const ExprVector& ExprVector::new_row(const ExprNode& e1, const ExprNode& e2) {
 	return new_(e1,e2, ROW);
+}
+
+inline const ExprVector& ExprVector::new_row(const ExprNode& e1, const ExprNode& e2, const ExprNode& e3) {
+	return new_(e1,e2,e3, ROW);
 }
 
 inline const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, ExprVector::Orientation o) {
@@ -1741,5 +1768,7 @@ inline IntervalVector::operator const ExprConstant&() const {
 }
 
 } // end namespace ibex
+
+#include "ibex_ExprOperators.h"
 
 #endif // end _IBEX_EXPR_H

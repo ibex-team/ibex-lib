@@ -76,6 +76,10 @@ void ExprCmp::visit(const ExprApply& e) { visit_nary(e);
 }
 void ExprCmp::visit(const ExprChi& e)   { visit_nary(e); }
 
+void ExprCmp::visit(const ExprGenericBinaryOp& e) {
+	visit_binary(e);
+	if (are_equal) are_equal &=strcmp(e.name,dynamic_cast<const ExprGenericBinaryOp*>(e2)->name)==0;
+}
 void ExprCmp::visit(const ExprAdd& e)   { visit_binary(e); }
 void ExprCmp::visit(const ExprMul& e)   { visit_binary(e); }
 void ExprCmp::visit(const ExprSub& e)   { visit_binary(e); }
@@ -84,6 +88,10 @@ void ExprCmp::visit(const ExprMax& e)   { visit_binary(e); }
 void ExprCmp::visit(const ExprMin& e)   { visit_binary(e); }
 void ExprCmp::visit(const ExprAtan2& e) { visit_binary(e); }
 
+void ExprCmp::visit(const ExprGenericUnaryOp& e) {
+	visit_unary(e);
+	if (are_equal) are_equal &=strcmp(e.name,dynamic_cast<const ExprGenericUnaryOp*>(e2)->name)==0;
+}
 void ExprCmp::visit(const ExprMinus& e) { visit_unary(e); }
 void ExprCmp::visit(const ExprTrans& e) { visit_unary(e); }
 void ExprCmp::visit(const ExprSign& e)  { visit_unary(e); }

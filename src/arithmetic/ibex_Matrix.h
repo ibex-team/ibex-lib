@@ -353,7 +353,7 @@ inline Matrix Matrix::zeros(int m, int n) {
 	return Matrix(m,n,0.0);
 }
 
-inline Matrix Matrix::ones(int n){
+inline Matrix Matrix::ones(int n) {
 	return Matrix(n,n,1.0);
 }
 

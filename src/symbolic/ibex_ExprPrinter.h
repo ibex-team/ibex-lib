@@ -50,6 +50,7 @@ protected:
 	void visit(const ExprVector& e);
 	void visit(const ExprApply& a);
 	void visit(const ExprChi& a);
+	void visit(const ExprGenericBinaryOp& e);
 	void visit(const ExprAdd& e);
 	void visit(const ExprMul& e);
 	void visit(const ExprSub& e);
@@ -57,6 +58,7 @@ protected:
 	void visit(const ExprMax& e);
 	void visit(const ExprMin& e);
 	void visit(const ExprAtan2& e);
+	void visit(const ExprGenericUnaryOp& e);
 	void visit(const ExprMinus& e);
 	void visit(const ExprTrans& e);
 	void visit(const ExprSign& e);

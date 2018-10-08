@@ -132,6 +132,14 @@ P_ExprApply::P_ExprApply(const Function& f, const Array<const P_ExprNode>& args)
 		P_ExprNode(APPLY,args), f(f) {
 }
 
+P_ExprGenericUnaryOp::P_ExprGenericUnaryOp(const char* name, const P_ExprNode& expr) :
+		P_ExprNode(UNARY_OP,expr), name(strdup(name)) {
+}
+
+P_ExprGenericUnaryOp::~P_ExprGenericUnaryOp() {
+	free((char*) name);
+}
+
 const P_ExprNode* apply(Function& f, const Array<const P_ExprNode>& args) {
 	int n=f.nb_arg();
 	if (n!=args.size()) {

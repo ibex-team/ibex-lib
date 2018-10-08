@@ -103,6 +103,12 @@ public:
 	}
 
 	/*==================== binary operators =========================*/
+	/** Visit a generic binary op (Implementation is not mandatory).
+	 * By default: call init(const ExprBinaryOp& e). */
+	virtual T* init(const ExprGenericBinaryOp& e, T& left_deco, T& right_deco) {
+		return init((const ExprBinaryOp&) e, left_deco, right_deco);
+	}
+
 	/** Visit an addition (Implementation is not mandatory).
 	 * By default: call init(const ExprBinaryOp& e). */
 	virtual T* init(const ExprAdd& e, T& left_deco, T& right_deco) {
@@ -147,6 +153,12 @@ public:
 
 
 	/*==================== unary operators =========================*/
+	/** Visit a generic unary op (Implementation is not mandatory).
+	 * By default call init(const ExprUnaryOp&). */
+	virtual T* init(const ExprGenericUnaryOp& e, T& expr_deco) {
+		return init((const ExprUnaryOp&) e, expr_deco);
+	}
+
 	/** Visit a minus sign (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
 	virtual T* init(const ExprMinus& e, T& expr_deco) {
@@ -288,40 +300,42 @@ public:
 	template<class Node>
 	void __visit_0ary(const Node& e);
 
-	virtual void visit(const ExprPower& e)   { __visit_unary<ExprPower>(e); }
-	virtual void visit(const ExprIndex& e)   { __visit_unary<ExprIndex>(e); }
-	virtual void visit(const ExprVector& e)  { __visit_nary<ExprVector>(e); }
-	virtual void visit(const ExprApply& e)   { __visit_nary<ExprApply>(e); }
-	virtual void visit(const ExprChi& e)     { __visit_nary<ExprChi>(e); }
-	virtual void visit(const ExprAdd& e)     { __visit_binary<ExprAdd>(e); }
-	virtual void visit(const ExprMul& e)     { __visit_binary<ExprMul>(e); }
-	virtual void visit(const ExprSub& e)     { __visit_binary<ExprSub>(e); }
-	virtual void visit(const ExprDiv& e)     { __visit_binary<ExprDiv>(e); }
-	virtual void visit(const ExprMax& e)     { __visit_binary<ExprMax>(e); }
-	virtual void visit(const ExprMin& e)     { __visit_binary<ExprMin>(e); }
-	virtual void visit(const ExprAtan2& e)   { __visit_binary<ExprAtan2>(e); }
-	virtual void visit(const ExprMinus& e)   { __visit_unary<ExprMinus>(e); }
-	virtual void visit(const ExprTrans& e)   { __visit_unary<ExprTrans>(e); }
-	virtual void visit(const ExprSign& e)    { __visit_unary<ExprSign>(e); }
-	virtual void visit(const ExprAbs& e)     { __visit_unary<ExprAbs>(e); }
-	virtual void visit(const ExprSqr& e)     { __visit_unary<ExprSqr>(e); }
-	virtual void visit(const ExprSqrt& e)    { __visit_unary<ExprSqrt>(e); }
-	virtual void visit(const ExprExp& e)     { __visit_unary<ExprExp>(e); }
-	virtual void visit(const ExprLog& e)     { __visit_unary<ExprLog>(e); }
-	virtual void visit(const ExprCos& e)     { __visit_unary<ExprCos>(e); }
-	virtual void visit(const ExprSin& e)     { __visit_unary<ExprSin>(e); }
-	virtual void visit(const ExprTan& e)     { __visit_unary<ExprTan>(e); }
-	virtual void visit(const ExprCosh& e)    { __visit_unary<ExprCosh>(e); }
-	virtual void visit(const ExprSinh& e)    { __visit_unary<ExprSinh>(e); }
-	virtual void visit(const ExprTanh& e)    { __visit_unary<ExprTanh>(e); }
-	virtual void visit(const ExprAcos& e)    { __visit_unary<ExprAcos>(e); }
-	virtual void visit(const ExprAsin& e)    { __visit_unary<ExprAsin>(e); }
-	virtual void visit(const ExprAtan& e)    { __visit_unary<ExprAtan>(e); }
-	virtual void visit(const ExprAcosh& e)   { __visit_unary<ExprAcosh>(e); }
-	virtual void visit(const ExprAsinh& e)   { __visit_unary<ExprAsinh>(e); }
-	virtual void visit(const ExprAtanh& e)   { __visit_unary<ExprAtanh>(e); }
-	virtual void visit(const ExprConstant& e){ __visit_0ary<ExprConstant>(e); }
-	virtual void visit(const ExprSymbol& e)  { __visit_0ary<ExprSymbol>(e); }
+	virtual void visit(const ExprPower& e)           { __visit_unary<ExprPower>(e); }
+	virtual void visit(const ExprIndex& e)           { __visit_unary<ExprIndex>(e); }
+	virtual void visit(const ExprVector& e)          { __visit_nary<ExprVector>(e); }
+	virtual void visit(const ExprApply& e)           { __visit_nary<ExprApply>(e); }
+	virtual void visit(const ExprChi& e)             { __visit_nary<ExprChi>(e); }
+	virtual void visit(const ExprGenericBinaryOp& e) { __visit_binary<ExprGenericBinaryOp>(e); }
+	virtual void visit(const ExprAdd& e)             { __visit_binary<ExprAdd>(e); }
+	virtual void visit(const ExprMul& e)             { __visit_binary<ExprMul>(e); }
+	virtual void visit(const ExprSub& e)             { __visit_binary<ExprSub>(e); }
+	virtual void visit(const ExprDiv& e)             { __visit_binary<ExprDiv>(e); }
+	virtual void visit(const ExprMax& e)             { __visit_binary<ExprMax>(e); }
+	virtual void visit(const ExprMin& e)             { __visit_binary<ExprMin>(e); }
+	virtual void visit(const ExprAtan2& e)           { __visit_binary<ExprAtan2>(e); }
+	virtual void visit(const ExprGenericUnaryOp& e)  { __visit_unary<ExprGenericUnaryOp>(e); }
+	virtual void visit(const ExprMinus& e)           { __visit_unary<ExprMinus>(e); }
+	virtual void visit(const ExprTrans& e)           { __visit_unary<ExprTrans>(e); }
+	virtual void visit(const ExprSign& e)            { __visit_unary<ExprSign>(e); }
+	virtual void visit(const ExprAbs& e)             { __visit_unary<ExprAbs>(e); }
+	virtual void visit(const ExprSqr& e)             { __visit_unary<ExprSqr>(e); }
+	virtual void visit(const ExprSqrt& e)            { __visit_unary<ExprSqrt>(e); }
+	virtual void visit(const ExprExp& e)             { __visit_unary<ExprExp>(e); }
+	virtual void visit(const ExprLog& e)             { __visit_unary<ExprLog>(e); }
+	virtual void visit(const ExprCos& e)             { __visit_unary<ExprCos>(e); }
+	virtual void visit(const ExprSin& e)             { __visit_unary<ExprSin>(e); }
+	virtual void visit(const ExprTan& e)             { __visit_unary<ExprTan>(e); }
+	virtual void visit(const ExprCosh& e)            { __visit_unary<ExprCosh>(e); }
+	virtual void visit(const ExprSinh& e)            { __visit_unary<ExprSinh>(e); }
+	virtual void visit(const ExprTanh& e)            { __visit_unary<ExprTanh>(e); }
+	virtual void visit(const ExprAcos& e)            { __visit_unary<ExprAcos>(e); }
+	virtual void visit(const ExprAsin& e)            { __visit_unary<ExprAsin>(e); }
+	virtual void visit(const ExprAtan& e)            { __visit_unary<ExprAtan>(e); }
+	virtual void visit(const ExprAcosh& e)           { __visit_unary<ExprAcosh>(e); }
+	virtual void visit(const ExprAsinh& e)           { __visit_unary<ExprAsinh>(e); }
+	virtual void visit(const ExprAtanh& e)           { __visit_unary<ExprAtanh>(e); }
+	virtual void visit(const ExprConstant& e)        { __visit_0ary<ExprConstant>(e); }
+	virtual void visit(const ExprSymbol& e)          { __visit_0ary<ExprSymbol>(e); }
 };
 
 /**
