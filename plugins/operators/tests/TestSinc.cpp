@@ -44,11 +44,11 @@ void TestSinc::callbacks() {
 
 	Domain g(Dim::scalar());
 	g.i()=Interval::ONE;
-	CPPUNIT_ASSERT(y.num_diff(a,g).i()==((cos(a.i())-sin(a.i())/sqr(a.i()))));
+	CPPUNIT_ASSERT(y.num_diff(a,g).i()==(a.i()*cos(a.i())-sin(a.i()))/sqr(a.i()));
 
 	const ExprNode& gnode=ExprConstant::new_scalar(Interval::ONE);
 	const ExprNode& e=y.symb_diff(x,gnode);
-	CPPUNIT_ASSERT(e.size == 8);
+	CPPUNIT_ASSERT(e.size == 9);
 	cleanup(y,true);
 }
 
@@ -86,9 +86,9 @@ void TestSinc::solve() {
 
     DefaultSolver solver(sys,1e-7,1e-7);
 	solver.solve(IntervalVector(1,Interval(-100,100)));
-    solver.report();
 
     CPPUNIT_ASSERT(solver.get_manifold().inner.size()==2);
+    CPPUNIT_ASSERT(solver.get_manifold().unknown.size()==1);
     Interval sol=((const IntervalVector&) (solver.get_manifold().inner.back()))[0];
     CPPUNIT_ASSERT(almost_eq(sin(sol),0.5*sol,1e-6));
 }

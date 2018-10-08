@@ -34,8 +34,9 @@ public:
 
 	/** Backward evaluation. */
 	static void bwd(const Interval& y, Interval& x) {
-		x &= sin(x)/y; // note: pessimistic!
-		bwd_sin(y*x,x);
+		Interval sinx=sin(x);
+		bwd_div(y, sinx, x);
+		bwd_sin(sinx,x);
 	}
 
 	/** Backward numerical derivative. */

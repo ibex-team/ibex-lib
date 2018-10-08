@@ -120,6 +120,8 @@ void CompiledFunction::visit(const ExprApply& e) { visit(e,APPLY); }
 
 void CompiledFunction::visit(const ExprChi& e) { visit(e,CHI); }
 
+void CompiledFunction::visit(const ExprGenericBinaryOp& e) { visit(e,GEN2); }
+
 void CompiledFunction::visit(const ExprAdd& e)   {
 	if (e.dim.is_scalar())      visit(e,ADD);
 	else if (e.dim.is_vector()) visit(e,ADD_V);
