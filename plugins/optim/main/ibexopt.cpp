@@ -104,18 +104,20 @@ int main(int argc, char** argv) {
 
 		System *sys;
 
-#ifdef _IBEX_WITH_AMPL_
 		string extension = filename.Get().substr(filename.Get().find_last_of('.')+1);
 		if (extension == "nl") {
+
+#ifdef _IBEX_WITH_AMPL_
 			AmplInterface ampl(filename.Get());
 			sys = new System(ampl);
+#else
+			cerr << "\n\033[31mCannot read \".nl\" files: AMPL plugin required \033[0m(try reconfigure with --with-ampl)\n\n";
+			exit(0);
+#endif
 		}
 		else
-			sys = new System(filename.Get().c_str());
-#else
 		// Load a system of equations
 		sys = new System(filename.Get().c_str());
-#endif
 
 		if (!sys->goal) {
 			ibex_error(" input file has not goal (it is not an optimization problem).");
