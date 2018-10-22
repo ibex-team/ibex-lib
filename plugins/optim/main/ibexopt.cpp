@@ -102,10 +102,22 @@ int main(int argc, char** argv) {
 
 	try {
 
-		// Load a system of equations
-		System sys(filename.Get().c_str());
+		System *sys;
 
-		if (!sys.goal) {
+#ifdef _IBEX_WITH_AMPL_
+		string extension = filename.Get().substr(filename.Get().find_last_of('.')+1);
+		if (extension == "nl") {
+			AmplInterface ampl(filename.Get());
+			sys = new System(ampl);
+		}
+		else
+			sys = new System(filename.Get().c_str());
+#else
+		// Load a system of equations
+		sys = new System(filename.Get().c_str());
+#endif
+
+		if (!sys->goal) {
 			ibex_error(" input file has not goal (it is not an optimization problem).");
 		}
 
@@ -153,12 +165,12 @@ int main(int argc, char** argv) {
 
 		bool inHC4=true;
 
-		if (sys.nb_ctr<sys.f_ctrs.image_dim()) {
+		if (sys->nb_ctr<sys->f_ctrs.image_dim()) {
 			inHC4=false;
 		}
 
 		// Build the default optimizer
-		DefaultOptimizer o(sys,
+		DefaultOptimizer o(*sys,
 				rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f,
 				abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f,
 				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
@@ -197,15 +209,17 @@ int main(int argc, char** argv) {
 
 		// Search for the optimum
 		if (initial_loup)
-			o.optimize(sys.box, initial_loup.Get());
+			o.optimize(sys->box, initial_loup.Get());
 		else
-			o.optimize(sys.box);
+			o.optimize(sys->box);
 
 		if (trace) cout << endl;
 
 		// Report some information (computation time, etc.)
 
 		o.report(!quiet);
+
+		delete sys;
 
 		return 0;
 
