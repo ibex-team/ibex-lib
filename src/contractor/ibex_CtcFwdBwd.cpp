@@ -94,11 +94,16 @@ void CtcFwdBwd::contract(IntervalVector& box, ContractContext& context) {
 	BxpActiveCtr* p=NULL;
 	BxpSystemCache* sp=NULL;
 
-	if (ctr_num==-1)
-		p=(BxpActiveCtr*) context.prop[active_prop_id];
-	else
-		sp=(BxpSystemCache*) context.prop[system_cache_id];
-
+//
+// Notes:
+// Using properties is counter-productive here just because of the cost 
+// of looking inside a map (operator[]). See issue #342
+//
+//	if (ctr_num==-1)
+//		p=(BxpActiveCtr*) context.prop[active_prop_id];
+//	else
+//		sp=(BxpSystemCache*) context.prop[system_cache_id];
+//
 
 	if ((p && !p->active()) || (sp && sp->is_active_ctrs_uptodate() && !(sp->active_ctrs()[ctr_num]))) {
 		context.output_flags.add(INACTIVE);
