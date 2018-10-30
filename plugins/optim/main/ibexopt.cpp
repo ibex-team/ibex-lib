@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
 
 		bool inHC4=true;
 
-		if (sys->nb_ctr<sys->f_ctrs.image_dim()) {
+		if (sys->nb_ctr>0 && sys->nb_ctr<sys->f_ctrs.image_dim()) {
 			inHC4=false;
 		}
 
