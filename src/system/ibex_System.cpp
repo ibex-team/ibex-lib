@@ -181,7 +181,7 @@ bool __is_inactive(const Interval& gx, CmpOp op) {
 
 BitSet System::active_ctrs(const IntervalVector& box) const {
 
-	if (nb_ctr==0) return BitSet(0);
+	if (nb_ctr==0) return BitSet::empty(1);
 
 	BitSet active(BitSet::all(f_ctrs.image_dim()));
 
