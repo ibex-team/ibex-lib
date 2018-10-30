@@ -34,7 +34,8 @@ class Operator (object):
 			self._all_ops.append (self.data)
 
 	def _check_cpp (self):
-		self.cppfile = self.hfile.change_ext (".cpp")
+		cppname = self.hfile.name[:-1] + "cpp"
+		self.cppfile = self.hfile.parent.make_node (cppname)
 		self.ok = self.cppfile.exists()
 		if not self.ok:
 			Logs.warn ("No cpp file found for %s" % self.hfile.srcpath())
