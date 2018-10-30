@@ -136,7 +136,18 @@ def configure (conf):
 		Operator (headerfile)
 
 	Operator.set_env (conf, mainsrc)
+	# The utest step will be run from the main tests/wscript script so we need to
+	# give path relative to the main tests directory
+	maintests = conf.srcnode.make_node ("tests")
 
+	# add OPERATORS test files
+	for f in conf.path.ant_glob ("tests/**/Test*.cpp"):
+		conf.env.append_unique ('TEST_SRC', f.path_from (maintests))
+
+	# Add operators/tests directory to list of INCLUDES for TESTS
+	testsnode = conf.path.make_node ("tests")
+	conf.env.append_unique ("INCLUDES_TESTS", testsnode.abspath ())
+	
 ######################
 ####### build ########
 ######################
