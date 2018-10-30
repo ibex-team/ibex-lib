@@ -90,6 +90,7 @@ void CtcAcid::contract(IntervalVector& box, ContractContext& context) {
 		if (box.is_empty()) {
 			context.output_flags.add(FIXPOINT);
 			this->context = NULL;
+			delete[] ctstat;
 			return;
 		}
 
