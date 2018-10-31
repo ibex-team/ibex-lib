@@ -104,15 +104,15 @@ private:
 
     /* return a feasible point in y_box w.r.t constraints on xy
      *  */
-    IntervalVector get_feasible_point(Cell* x_cell, Cell * y_cell);
+    IntervalVector get_feasible_point(Cell* x_cell, Cell * const y_cell);
 
     /* return 0 if box is non feasible w.r.t constraints on xy, 1 if not known, 2 if box is entierly feasible
      * */
     int check_constraints(const IntervalVector& xy_box);
 
-    bool handle_cstfree(IntervalVector& xy_box,Cell * y_cell);
+    bool handle_cstfree(IntervalVector& xy_box,Cell * const y_cell);
 
-    bool handle_cell( Cell* x_cell, Cell* y_cell,double loup,bool no_stack = false);
+    bool handle_cell( Cell* x_cell,Cell* const y_cell,double loup,bool no_stack = false);
     // no stack needed for visit all leaves.
 
     bool handle_constraint(OptimData  *data_y, IntervalVector& xy_box,IntervalVector& y_box);
@@ -136,6 +136,11 @@ private:
 
     IntervalVector xy_box_hull(const IntervalVector& x_box);
 
+    /*
+     * Delete the elements in the save heap
+     */
+    void delete_save_heap();
+
     void set_y_sol(Vector& start_point);
 
     /* add elements of Heap_save into y_heap
@@ -148,7 +153,11 @@ private:
     static const double default_goal_abs_prec;
 
 
+    bool check_already_in(Cell * const y_cell, DoubleHeap<Cell> * y_heap);
+
+
 };
+
 void export_monitor(std::vector<double> * ub,std::vector<double> * lb,std::vector<double> * nbel,std::vector<double> * nbel_save,const IntervalVector& box);
 } // end namespace ibex
 #endif
