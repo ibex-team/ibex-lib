@@ -72,6 +72,7 @@ public:
      * Enclosure of maximum of the objective function
      */
     Interval fmax;
+    IntervalVector * best_sol;
 
 	/**
 	 * \brief Casado criterion
@@ -86,7 +87,7 @@ public:
     DoubleHeap<Cell>* y_heap;
 
     std::vector<feasible_point> fsbl_pt_list;
-
+    long int nb_bisect;
 
 	/**
 	 * Cost function of the heap to store the element of the light solver
