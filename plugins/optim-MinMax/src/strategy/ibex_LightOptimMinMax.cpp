@@ -18,8 +18,8 @@
 using namespace std;
 namespace ibex{
 
-const double LightOptimMinMax::default_timeout = 30;
-const double LightOptimMinMax::default_goal_abs_prec = 0;
+const double LightOptimMinMax::default_timeout = 20;
+const double LightOptimMinMax::default_goal_abs_prec = 1e-2;
 
 LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy,UnconstrainedLocalSearch *local_solver,bool csp_actif):
                                                 trace(false) , timeout(default_timeout), local_search_iter(0),
@@ -68,6 +68,8 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 }
 
 bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
+//   cout<<" maximum elements  "<< list_elem_max<<endl;
+        delete_save_heap();
         //    std::cout<<"run light optim"<<std::endl;
 
 //        std::cout<<std::endl<<std::endl<<"********************* Light optim res for box "<<x_cell->box<<" *************** "<<std::endl;
@@ -185,8 +187,8 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
                                 bool res = handle_cell(x_cell,y_cell,loup);
                                 cout<<" no bisectable caught"<<endl;
 
-                                if (res) heap_save.push_back(y_cell);
-                                else return false;
+//                                if (res) heap_save.push_back(y_cell);
+                                if(!res) return false;
 
                             }
                         }
@@ -212,6 +214,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 
 //        cout<<"visit all, y_heap size: "<<y_heap->size()<<endl;
         //force visit of all elements of the heap
+//        cout<<"visit all = "<<visit_all<<endl;
         if(visit_all == true) {
 //            cout<<"             y_heap detail: "<<endl;
             while(!y_heap->empty()) {
@@ -219,6 +222,18 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 //                cout<<"                 "<<y_cell->box<<endl;
                 bool res = handle_cell(x_cell,y_cell,loup,true);
                 if (!res) return false;
+                if(monitor)
+                {
+                    if(!y_heap->empty()) {
+                        lb.push_back(data_x->fmax.lb());
+                        if(save_heap_ub<y_heap->top1()->get<OptimData>().pf.ub())
+                            ub.push_back(y_heap->top1()->get<OptimData>().pf.ub());
+                        else
+                            ub.push_back(save_heap_ub);
+                        nbel.push_back(y_heap->size());
+                        nbel_save.push_back(heap_save.size());
+                    }
+                }
             }
         }
 //        cout<<"all eval done"<<endl;
@@ -242,7 +257,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 
         //if (found_point) { // a feasible solution has been found
 //        if(!csp_actif)
-            y_heap->contract(-(data_x->fmax.lb())); // to check
+//            y_heap->contract(-(data_x->fmax.lb())); // to check
 //            cout<<"contraction done"<<endl;
 //        else
 //            y_heap->contract(-loup); // in csp solve, remove all boxes y that satisfy the constraint for all
@@ -252,11 +267,16 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
         // ** contract y_heap now
 
         //        std::cout<<"found point pass"<<std::endl;
+
+
         if(y_heap->empty()){
-            //                std::cout <<"       OUT 3 "<<std::endl;
+                            std::cout <<"       OUT 3 "<<std::endl;
 //            data_x->clear_fsbl_list(); // need to delete elements of fsbl_point_list since this branch is closed and they will not be needed later
 //            delete x_cell;
-            return false;
+            if(csp_actif) // sic case: empty set y means that the set defined by the constraints g(x,y)<0 is empty, and therefore that the sic is respected over the empty set
+                return true;
+            else
+                return false; // minmax case: empty set means ????? suppose that x can be discarded????
         }
 //        cout<<"non empty heap"<<endl;
 
@@ -264,7 +284,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
         double new_fmax_ub = y_heap->top1()->get<OptimData>().pf.ub(); // get the upper bound of max f(x,y_heap)
         double new_fmax_lb = y_heap->top2()->get<OptimData>().pf.lb(); // get the lower bound of max f(x,y_heap)
 
-//        std::cout<<"new_fmax_ub: "<<new_fmax_ub<<std::endl<<"new_fmax_lb: "<<new_fmax_lb<<std::endl<<"fmax_lb (from found point): "<<data_x->fmax.lb()<<std::endl;
+        std::cout<<"new_fmax_ub: "<<new_fmax_ub<<std::endl<<"new_fmax_lb: "<<new_fmax_lb<<std::endl<<"fmax_lb (from found point): "<<data_x->fmax.lb()<<std::endl;
 
         if (new_fmax_ub< new_fmax_lb) {
                 ibex_error("ibex_LightOptimMinMax: error, please report this bug.");
@@ -279,6 +299,12 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
 
         //        }
 //                cout<<"loup: "<<loup<<endl;
+
+//        if(csp_actif) { // if SIC, all boxes lower than  can be deleted since of no interest (verify the constraint)
+//            y_heap->contract(loup);
+//            if(y_heap->empty())
+//                cout<<" y_heap empty after loup contraction"<<endl;
+//        }
 
         if(  data_x->fmax.is_empty() || data_x->fmax.lb() > loup) {
 //                                std::cout <<"       OUT 4 "<<std::endl;
@@ -323,13 +349,13 @@ bool LightOptimMinMax::stop_crit_reached(int current_iter,DoubleHeap<Cell> * y_h
 //            cout<<"Stop light solver: Csp case, upper bound lower than 0"<<endl;
             return true;
         }
-        if (fmax.diam()<goal_abs_prec) { //desired precision on global maximum enclosure reached
-            return true;
-        }
+//        if (fmax.diam()<goal_abs_prec) { //desired precision on global maximum enclosure reached
+//            return true;
+//        }
 	return false;
 }
 
-bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup,bool no_stack) {
+bool LightOptimMinMax::handle_cell( Cell* x_cell,Cell*  y_cell,double loup,bool no_stack) {
 
         IntervalVector xy_box =init_xy_box(x_cell->box,y_cell->box);
         // recuperer les data
@@ -341,7 +367,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup,bool
             data_x = &(x_cell->get<DataMinMaxOpti>());
 
         OptimData  *data_y = &(y_cell->get<OptimData>());
-//        cout<<"xy_cell box: "<<xy_box<<endl;
+//        cout<<"xy_cell box: "<<xy_box<<" value of pu : "<<data_y->pu<<endl;
 
 
         if(data_y->pu!=1) { // Check constraints
@@ -349,6 +375,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup,bool
                         delete y_cell;
                         return true;
                 }
+//                cout<<"xy_box after contraction: "<<y_cell->box<<endl;
         }
         else {
                 handle_cstfree(xy_box,y_cell);
@@ -356,8 +383,8 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup,bool
         /********************************************************************************/
         //mid point test (TO DO: replace with local optim to find a better point than midpoint)
         IntervalVector mid_y_box = get_feasible_point(x_cell,y_cell);
-
         if (!(mid_y_box.is_empty())) {
+
                 // x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
 //                Interval midres = xy_sys.goal->eval_baumann(mid_y_box);
             Interval midres = eval_all(xy_sys.goal,mid_y_box);
@@ -373,8 +400,12 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup,bool
                 else if(midres.lb()>data_y->pf.lb()) { // found y such as xy constraint is respected
                         // TODO	 to check		// il faut faire un contract de y_heap
                         data_y->pf   &= Interval(midres.lb(),POS_INFINITY);
+                        if(data_x->best_sol!=NULL)
+                            delete data_x->best_sol;
+                        data_x->best_sol = new IntervalVector(mid_y_box);
                         if (data_x->fmax.lb() < midres.lb() ) {
-//                            cout<<"found point: "<<midres<<endl;
+//                            data_x->best_sol = mid_y_box.mid();
+//                            cout<<"found point: "<<midres<< "  at  "<<mid_y_box<<endl;
                                 found_point = true;
                                 data_x->fmax &= Interval(midres.lb(),POS_INFINITY);; // yes we found a feasible solution for all x
                         }
@@ -412,8 +443,17 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup,bool
 
         // Update the lower and upper bound on y
         //data_y->pf &= xy_sys.goal->eval_baumann(xy_box); // objective function evaluation
+        if(eval_all(xy_sys.goal,xy_box).ub()>data_y->pf.ub()){
+            cout<<" ************************** CRITICAL ISSUE *******************"<<endl;
+            cout<<" get worst upper bound, should not happen due to monotonicity of ifunc"<<endl;
+            cout<<"***************************************************************"<<endl;
+        }
+
+//        cout<<"    dealing with box: "<<xy_box<<endl;
+//        cout<<"    previous value of pf:  "<<data_y->pf<<endl;
         data_y->pf &= eval_all(xy_sys.goal,xy_box);
-//        cout<<"res of eval: "<<xy_sys.goal->eval_baumann(xy_box)<<endl;
+//        cout<<"    eval res: "<<eval_all(xy_sys.goal,xy_box)<<endl;
+//        cout<<"    new value of pf: "<<data_y->pf<<endl;
         if( data_y->pf.is_empty() || data_x->fmax.lb() > data_y->pf.ub()) {  // y_box cannot contains max f(x,y)
                 delete y_cell;
                 return true;
@@ -436,9 +476,12 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup,bool
             //            std::cout<<"y_cell pushed in heap_save, box: "<<y_cell->box<<" pf: "<<data_y->pf<<" pu: "<<data_y->pu<<std::endl;
             save_heap_ub = save_heap_ub<data_y->pf.ub()?data_y->pf.ub():save_heap_ub;
             heap_save.push_back(y_cell);
-        } else {
-            if(!no_stack)
+        }
+        else {
+            if(!no_stack) {
+//                check_already_in(y_cell,data_x->y_heap);
                 data_x->y_heap->push(y_cell);
+            }
             else
                 heap_save.push_back(y_cell);
         }
@@ -448,7 +491,8 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell,double loup,bool
 
 
 bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector & xy_box,IntervalVector & y_box) {
-	switch(check_constraints(xy_box)){
+//    cout<<"handle constraint on xy, xy init: "<<xy_box<<endl;
+    switch(check_constraints(xy_box)){
 	case 2: { // all the constraints are satisfied
 		data_y->pu=1;
 		break;
@@ -474,11 +518,11 @@ bool LightOptimMinMax::handle_constraint(OptimData  *data_y, IntervalVector & xy
 				y_box[k] &= xy_box[xy_box.size()-y_box.size()+k];
 			}
 		}
-	}
+        }
 	return false;
 }
 
-bool LightOptimMinMax::handle_cstfree(IntervalVector& xy_box,Cell * y_cell) {
+bool LightOptimMinMax::handle_cstfree(IntervalVector& xy_box,Cell * const y_cell) {
 	//    std::cout<<"init box: "<<*xy_box<<std::endl;
 //        if((xy_box.subvector(xy_box.size()-y_cell->box.size(), xy_box.size()-1)).max_diam()<=1.e-14)
 //                return true;
@@ -517,7 +561,7 @@ void LightOptimMinMax::contract_best_max_cst(Ctc& max_ctc,IntervalVector& xy_box
 
  */
 
-IntervalVector LightOptimMinMax::get_feasible_point(Cell * x_cell,Cell * y_cell) {
+IntervalVector LightOptimMinMax::get_feasible_point(Cell * x_cell,Cell * const y_cell) {
 	IntervalVector mid_y_box = get_mid_y(x_cell->box,y_cell->box); // get the box (x,mid(y))
 	if((y_cell->get<OptimData>().pu != 1)) { // constraint on xy exist and is not proved to be satisfied
                 int res = check_constraints(mid_y_box);
@@ -531,12 +575,12 @@ int LightOptimMinMax::check_constraints(const IntervalVector& xy_box) {
 	int res =2;
 
 	for(int i=0;i<xy_sys.nb_ctr;i++) {
-//        Interval int_res =  xy_sys.ctrs[i].f.eval_baumann(xy_box);
-        Interval int_res =  eval_all(&(xy_sys.ctrs[i].f),xy_box);
-		if(int_res.lb()>0)
-			return 0;
-		else if(int_res.ub()>=0)
-			res = 1;
+            Interval int_res =  eval_all(&(xy_sys.ctrs[i].f),xy_box);
+//            cout<<" val of ctr "<<i<<" : "<<int_res<<endl;
+            if(int_res.lb()>0)
+                    return 0;
+            else if(int_res.ub()>=0)
+                    res = 1;
 	}
 	return res;
 
@@ -626,7 +670,7 @@ void LightOptimMinMax::fill_y_heap(DoubleHeap<Cell>& y_heap) {
 	//        if(nb_pt>1) {
 	//            std::cout<<"CRITICAL ISSUE: more than 1 point in heap"<<std::endl;
 	//        }
-	heap_save.clear();
+//	heap_save.clear();
 }
 
 void LightOptimMinMax::set_y_sol(Vector& start_point) {
@@ -634,6 +678,13 @@ void LightOptimMinMax::set_y_sol(Vector& start_point) {
 //    cout<<" best point eval: "<<best_point_eval<<endl;
 //    for(int i=start_point.size()-best_point_eval.size();i<start_point.size();i++)
 //        start_point[i] = best_point_eval[i-start_point.size()];
+}
+
+void LightOptimMinMax::delete_save_heap() {
+    while(!heap_save.empty()) {
+        delete heap_save.back();
+        heap_save.pop_back();
+    }
 }
 
 void export_monitor(std::vector<double> * ub,std::vector<double> * lb,std::vector<double> * nbel,std::vector<double> * nbel_save,const IntervalVector& box) {
@@ -663,4 +714,24 @@ Interval LightOptimMinMax::eval_all(Function* f,const IntervalVector& box) {
     return eval;
 //     return itv;
 }
+
+bool LightOptimMinMax::check_already_in(Cell * const y_cell, DoubleHeap<Cell> * y_heap) {
+    vector<Cell *> stack;
+    while(!y_heap->empty()) {
+        Cell * c = y_heap->pop1();
+        stack.push_back(c);
+        if(y_cell == c) {
+            cout<<" ***************** CRITICAL ERROR****************"<<endl;
+            cout<<"   insert same cell in the heap, pointer =  "<<y_cell<<",  box: "<<y_cell->box<<endl;
+            cout<<" ************************************************"<<endl;
+        }
+    }
+    while(!stack.empty()) {
+        y_heap->push(stack.back());
+        stack.pop_back();
+    }
+
 }
+}
+
+
