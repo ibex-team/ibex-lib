@@ -23,11 +23,11 @@ feasible_point::~feasible_point() {
 CellCostMaxPFub DataMinMax::y_heap_costf1;
 CellCostPFlb DataMinMax::y_heap_costf2;
 
-DataMinMax::DataMinMax() : fmax(), pu(0), y_heap(new DoubleHeap<Cell>(y_heap_costf1,false,y_heap_costf2,false)) {
+DataMinMax::DataMinMax() : fmax(), pu(0), y_heap(new DoubleHeap<Cell>(y_heap_costf1,false,y_heap_costf2,false)),nb_bisect(0) {
 
 }
 
-DataMinMax::DataMinMax(const DataMinMax& e) : fmax(e.fmax), pu(e.pu),y_heap(e.y_heap->deepcopy()),fsbl_pt_list(e.fsbl_pt_list) {
+DataMinMax::DataMinMax(const DataMinMax& e) : fmax(e.fmax), pu(e.pu),y_heap(e.y_heap->deepcopy()),fsbl_pt_list(e.fsbl_pt_list),best_sol(NULL),nb_bisect(e.nb_bisect) {
 }
 
 std::pair<Backtrackable*,Backtrackable*> DataMinMax::down() {
@@ -35,8 +35,16 @@ std::pair<Backtrackable*,Backtrackable*> DataMinMax::down() {
 }
 
 DataMinMax::~DataMinMax() {
-	y_heap->flush();
-	delete y_heap;
+//    std::cout<<"dataminmax destructor"<<std::endl;
+    if (y_heap!=NULL) {
+//        std::cout<<" flushing y_heap, which contains"<<y_heap->size()<< "elements"<<std::endl;
+        y_heap->flush();
+//        std::cout<<"y_heap flushed"<<std::endl;
+        delete y_heap;
+    }
+//    std::cout<<"yheap flushed, delete best sol..."<<std::endl;
+        if(best_sol != NULL)
+            delete best_sol;
 }
 
 void DataMinMax::clear_fsbl_list() {
