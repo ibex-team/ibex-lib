@@ -24,6 +24,7 @@
 namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
+class BxsRawListFactory;
 
 /**
  * \ingroup arithmetic
@@ -597,6 +598,7 @@ public:
 
 private:
 	friend class IntervalMatrix;
+	friend class BxsRawListFactory;
 
 	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
 
