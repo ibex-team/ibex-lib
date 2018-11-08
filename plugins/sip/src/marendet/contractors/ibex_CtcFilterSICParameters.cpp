@@ -30,20 +30,29 @@ CtcFilterSICParameters::CtcFilterSICParameters(const SIPSystem& system) :
 CtcFilterSICParameters::~CtcFilterSICParameters() {
 }
 
+void CtcFilterSICParameters::add_property(const IntervalVector& init_box, BoxProperties& map) {
+    if(map[BxpNodeData::id] == nullptr) {
+        map.add(new BxpNodeData());
+    }
+}
+
 void CtcFilterSICParameters::contract(IntervalVector& box) {
     ibex_warning("CtcFilterSICParameters: called with no context");
 
 }
 void CtcFilterSICParameters::contract(IntervalVector& box, ContractContext& context) {
-	BxpNodeData& node_data = *system_.node_data_;
+	BxpNodeData* node_data = (BxpNodeData*) context.prop[BxpNodeData::id];
+	if(node_data == nullptr) {
+		ibex_error("CtcFilterSICParameters: BxpNodeData must be set");
+	}
 	for (int i = 0; i < system_.sic_constraints_.size(); ++i) {
 		//node_data.sic_constraints_caches[i].update_cache(*system_.sic_constraints_[i].function_, box);
 		//contractOneConstraint(i, node_data, box);
-		simplify_paving(system_.sic_constraints_[i], node_data.sic_constraints_caches[i], box, true);
+		simplify_paving(system_.sic_constraints_[i], node_data->sic_constraints_caches[i], box, true);
 	}
 }
 
-void CtcFilterSICParameters::contractOneConstraint(size_t i, BxpNodeData& node_data, const IntervalVector& box) {
+/*void CtcFilterSICParameters::contractOneConstraint(size_t i, BxpNodeData& node_data, const IntervalVector& box) {
 	auto& list = node_data.sic_constraints_caches[i].parameter_caches_;
 	auto it = list.begin();
 	IntervalVector paramBoxUnion = node_data.sic_constraints_caches[i].initial_box_;
@@ -89,5 +98,5 @@ void CtcFilterSICParameters::contractOneConstraint(size_t i, BxpNodeData& node_d
 	sort(list.begin(), list.end(), [](const ParameterEvaluationsCache& p1, const ParameterEvaluationsCache& p2) {
 		return p1.evaluation.ub() > p2.evaluation.ub();
 	});
-}
+}*/
 } // end namespace ibex

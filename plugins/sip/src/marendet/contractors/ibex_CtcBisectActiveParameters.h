@@ -26,6 +26,7 @@ public:
     CtcBisectActiveParameters(const SIPSystem& system);
     virtual ~CtcBisectActiveParameters();
 
+    void add_property(const IntervalVector& init_box, BoxProperties& map);
     void contract(IntervalVector& box);
     void contract(IntervalVector& box, ContractContext& context);
 };

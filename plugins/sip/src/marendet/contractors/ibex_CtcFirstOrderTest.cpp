@@ -10,7 +10,6 @@
 
 #include "ibex_CtcFirstOrderTest.h"
 
-#include "ibex_Cell.h"
 #include "ibex_Function.h"
 #include "ibex_IntervalMatrix.h"
 #include "ibex_IntervalVector.h"
@@ -30,6 +29,12 @@ CtcFirstOrderTest::CtcFirstOrderTest(const SIPSystem& system) :
 }
 
 CtcFirstOrderTest::~CtcFirstOrderTest() {
+}
+
+void CtcFirstOrderTest::add_property(const IntervalVector& init_box, BoxProperties& map) {
+    if(map[BxpNodeData::id] == nullptr) {
+        map.add(new BxpNodeData());
+    }
 }
 
 void CtcFirstOrderTest::contract(IntervalVector& box) {

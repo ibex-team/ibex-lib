@@ -56,9 +56,19 @@ Interval SIConstraint::evaluate(const IntervalVector &box,
 	return centeredFormEval(*function_, full_box);
 }
 
+Interval SIConstraint::evaluate(const IntervalVector& box, SIConstraintCache& cache) const {
+	cache.update_cache(*function_, box);
+	return cache.eval_cache_;
+}
+
 IntervalVector SIConstraint::gradient(const IntervalVector& box) const {
 	cache_->update_cache(*function_, box);
 	return cache_->gradient_cache_;
+}
+
+IntervalVector SIConstraint::gradient(const IntervalVector& box, SIConstraintCache& cache) const {
+	cache.update_cache(*function_, box);
+	return cache.gradient_cache_;
 }
 
 IntervalVector SIConstraint::gradient(const IntervalVector& box,

@@ -42,19 +42,29 @@ ParameterEvaluationsCache _createNewCache(const SIConstraint& constraint, const 
 			constraint.gradient(box, parameter_box));
 }
 
+void GoldsztejnSICBisector::add_property(const IntervalVector& init_box, BoxProperties& map) {
+    if(map[BxpNodeData::id] == nullptr) {
+        map.add(new BxpNodeData());
+    }
+}
+
 void GoldsztejnSICBisector::contract(IntervalVector& box) {
     ibex_warning("GoldsztejnSICBisector: called with no context");
 
 }
 void GoldsztejnSICBisector::contract(IntervalVector& box, ContractContext& context) {
 	LargestFirst bisector;
-	BxpNodeData& node_data = *system_.node_data_;
-	for (int cst_index = 0; cst_index < node_data.sic_constraints_caches.size(); ++cst_index) {
-		node_data.sic_constraints_caches[cst_index].update_cache(*system_.sic_constraints_[cst_index].function_,
+
+	BxpNodeData* node_data = (BxpNodeData*) context.prop[BxpNodeData::id];
+	if(node_data == nullptr) {
+		ibex_error("GoldsztejnSICBisector: BxpNodeData must be set");
+	}
+	for (int cst_index = 0; cst_index < node_data->sic_constraints_caches.size(); ++cst_index) {
+		node_data->sic_constraints_caches[cst_index].update_cache(*system_.sic_constraints_[cst_index].function_,
 				box, true);
 		// Retrieve list of box and the associated constraint
 		bool hasBisected = false;
-		auto& cacheList = node_data.sic_constraints_caches[cst_index].parameter_caches_;
+		auto& cacheList = node_data->sic_constraints_caches[cst_index].parameter_caches_;
 		std::sort(cacheList.begin(), cacheList.end(),
 				[](const ParameterEvaluationsCache& p1, const ParameterEvaluationsCache& p2) {
 					return p1.evaluation.ub() > p2.evaluation.ub();

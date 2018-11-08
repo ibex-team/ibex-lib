@@ -26,6 +26,12 @@ lp_solver_(sys.ext_nb_var) {
 CtcBisectActiveParameters::~CtcBisectActiveParameters() {
 }
 
+void CtcBisectActiveParameters::add_property(const IntervalVector& init_box, BoxProperties& map) {
+    if(map[BxpNodeData::id] == nullptr) {
+        map.add(new BxpNodeData());
+    }
+}
+
 void CtcBisectActiveParameters::contract(IntervalVector& box) {
     ibex_warning("CtcBisectActiveParameters: called with no context");
 
@@ -52,20 +58,26 @@ void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& c
 	//Matrix A(lp_solver_.get_nb_rows(), system_.ext_nb_var);
 	Matrix A = lp_solver_.get_rows();
 
+	BxpNodeData* node_data = (BxpNodeData*) context.prop[BxpNodeData::id];
+	if(node_data == nullptr) {
+		ibex_error("CtcBisectActiveParameters: BxpNodeData must be set");
+	}
+
 	// After variables, linearized goal and normal constraints
 	int current_row = sys_.ext_nb_var+sys_.normal_constraints_.size();
 	for(int constraint_index = 0; constraint_index < sys_.sic_constraints_.size(); ++constraint_index) {
 		auto& constraint = sys_.sic_constraints_[constraint_index];
-		auto& cache = constraint.cache_->parameter_caches_;
-		int caches_size = cache.size();
+		//auto& cache = constraint.cache_->parameter_caches_;
+		auto& cache = node_data->sic_constraints_caches[constraint_index];
+		int caches_size = cache.parameter_caches_.size();
 		for(int i = 0; i < caches_size; ++i) {
-			auto parameter_box = cache[i].parameter_box;
+			auto parameter_box = cache.parameter_caches_[i].parameter_box;
 			//if(Interval(dual[current_row]).inflate(1e-10).contains(0)) {
 			if(constraint.evaluate(sol, parameter_box).ub() > 0) {
 				auto bisectList = bisectAllDim(parameter_box);
-				cache[i] = _createNewCache(constraint, box, bisectList[0]);
+				cache.parameter_caches_[i] = _createNewCache(constraint, box, bisectList[0]);
 				for (int j = 1; j < bisectList.size(); ++j)
-					cache.emplace_back(_createNewCache(constraint, box, bisectList[j]));
+					cache.parameter_caches_.emplace_back(_createNewCache(constraint, box, bisectList[j]));
 			}
 			current_row++;
 		}

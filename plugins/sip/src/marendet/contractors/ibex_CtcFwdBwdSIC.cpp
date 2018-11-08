@@ -12,6 +12,8 @@
 
 #include "system/ibex_SIConstraint.h"
 #include "system/ibex_SIConstraintCache.h"
+#include "system/ibex_SIPSystem.h"
+
 
 #include "ibex_BitSet.h"
 #include "ibex_Function.h"
@@ -21,8 +23,8 @@ using namespace std;
 
 namespace ibex {
 
-CtcFwdBwdSIC::CtcFwdBwdSIC(const SIConstraint& constraint) :
-		Ctc(constraint.variable_count_), constraint_(constraint), backward_domain_(Interval::NEG_REALS) {
+CtcFwdBwdSIC::CtcFwdBwdSIC(const SIConstraint& constraint, size_t sic_index) :
+		Ctc(constraint.variable_count_), constraint_(constraint), backward_domain_(Interval::NEG_REALS), sic_index_(sic_index) {
 	init();
 }
 
@@ -49,6 +51,12 @@ void CtcFwdBwdSIC::init() {
 	}*/
 }
 
+void CtcFwdBwdSIC::add_property(const IntervalVector& init_box, BoxProperties& map) {
+    if(map[BxpNodeData::id] == nullptr) {
+        map.add(new BxpNodeData());
+    }
+}
+
 void CtcFwdBwdSIC::contract(IntervalVector& box) {
     ibex_warning("CtcFwdBwdSIC: called with no context");
 }
@@ -57,7 +65,14 @@ void CtcFwdBwdSIC::contract(IntervalVector &box, ContractContext& context) {
 	IntervalVector full_box(constraint_.function_->nb_var());
 	full_box.put(0, box);
 	bool fixpoint = true;
-	for (const auto& parameter_box : constraint_.cache_->parameter_caches_) {
+
+	BxpNodeData* node_data = (BxpNodeData*) context.prop[BxpNodeData::id];
+	if(node_data == nullptr) {
+		ibex_error("CtcFwdBwdSIC: BxpNodeData must be set");
+	}
+
+	auto& cache = node_data->sic_constraints_caches[sic_index_];
+	for (const auto& parameter_box : cache.parameter_caches_) {
 		full_box.put(nb_var, parameter_box.parameter_box.mid());
 		if (!constraint_.function_->backward(backward_domain_, full_box)) {
 			fixpoint = false;
@@ -66,7 +81,7 @@ void CtcFwdBwdSIC::contract(IntervalVector &box, ContractContext& context) {
 			break;
 	}
 	if (!full_box.is_empty()) {
-		for (const auto& box : constraint_.cache_->best_blankenship_points_) {
+		for (const auto& box : cache.best_blankenship_points_) {
 			full_box.put(nb_var, box);
 			if (!constraint_.function_->backward(backward_domain_, full_box)) {
 				fixpoint = false;

@@ -29,6 +29,7 @@ class GoldsztejnSICBisector : public Ctc {
 public:
     GoldsztejnSICBisector(const SIPSystem& system, double ratio=default_ratio);
     ~GoldsztejnSICBisector();
+    void add_property(const IntervalVector& init_box, BoxProperties& map);
     void contract(IntervalVector& box);
     void contract(IntervalVector& box, ContractContext& context);
 };

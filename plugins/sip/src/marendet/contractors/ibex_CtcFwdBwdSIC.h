@@ -26,10 +26,12 @@ class SIConstraint;
 class CtcFwdBwdSIC : public Ctc {
     const SIConstraint& constraint_;
     Interval backward_domain_;
+    size_t sic_index_;
 
 public:
-    CtcFwdBwdSIC(const SIConstraint& constraint);
+    CtcFwdBwdSIC(const SIConstraint& constraint, size_t sic_index);
     ~CtcFwdBwdSIC();
+    void add_property(const IntervalVector& init_box, BoxProperties& map);
     void contract(IntervalVector& box);
     void contract(IntervalVector& box, ContractContext& context);
     

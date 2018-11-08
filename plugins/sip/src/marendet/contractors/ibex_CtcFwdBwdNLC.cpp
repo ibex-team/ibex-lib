@@ -12,7 +12,7 @@
 
 #include "ibex_BitSet.h"
 #include "ibex_Function.h"
-
+#include "system/ibex_SIPSystem.h"
 namespace ibex {
 
 CtcFwdBwdNLC::CtcFwdBwdNLC(const NLConstraint& constraint)
@@ -30,6 +30,12 @@ CtcFwdBwdNLC::~CtcFwdBwdNLC() {
 void CtcFwdBwdNLC::init() {
 	input = new BitSet(function_->used_vars);
 	output = new BitSet(function_->used_vars);
+}
+
+void CtcFwdBwdNLC::add_property(const IntervalVector& init_box, BoxProperties& map) {
+    if(map[BxpNodeData::id] == nullptr) {
+        map.add(new BxpNodeData());
+    }
 }
 
 void CtcFwdBwdNLC::contract(IntervalVector& box) {
