@@ -17,6 +17,12 @@ LoupFinderSIP::~LoupFinderSIP() {
 
 }
 
+void LoupFinderSIP::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+	if(prop[BxpNodeData::id] == nullptr) {
+        prop.add(new BxpNodeData());
+    }
+}
+
 bool LoupFinderSIP::check(const SIPSystem& sys, const Vector& pt, double& loup, bool _is_inner) {
 
 	// "res" will contain an upper bound of the criterion

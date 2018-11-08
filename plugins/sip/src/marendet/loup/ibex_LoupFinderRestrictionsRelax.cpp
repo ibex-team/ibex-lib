@@ -10,7 +10,6 @@
 
 #include "ibex_LoupFinderRestrictionsRelax.h"
 
-#include "ibex_Cell.h"
 #include "ibex_Function.h"
 #include "ibex_Interval.h"
 #include "ibex_LPSolver.h"
@@ -32,10 +31,8 @@ LoupFinderRestrictionsRelax::~LoupFinderRestrictionsRelax() {
 	delete lp_solver_;
 }
 
-std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(
-		const Cell& cell, const IntervalVector& loup_point,
-		double loup) {
-	IntervalVector box_without_goal = cell.box.subvector(0, cell.box.size()-2);
+std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
+	IntervalVector box_without_goal = box.subvector(0, box.size()-2);
 	if(!(lp_solver_->default_limit_diam_box.contains(box_without_goal.max_diam()))) {
 		throw NotFound();
 	}
@@ -51,7 +48,7 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(
 		lp_solver_->set_obj_var(i, g[i]);
 	}
 	lp_solver_->set_sense(LPSolver::MINIMIZE);
-	int count = linearizer_.linearize(cell.box, *lp_solver_);
+	int count = linearizer_.linearize(box, *lp_solver_);
 	if(count < 0) {
 		throw NotFound();
 	}
@@ -73,9 +70,9 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(
 			return std::make_pair(loup_point, new_loup);
 		}
 	}
-	Vector loup_point_plus_goal(cell.box.mid());
+	Vector loup_point_plus_goal(box.mid());
 	if(check(system_, loup_point_plus_goal, loup, false)) {
-		return std::make_pair(loup_point_plus_goal.subvector(0, cell.box.size()-2), loup);
+		return std::make_pair(loup_point_plus_goal.subvector(0, box.size()-2), loup);
 	}
 	throw NotFound();
 }

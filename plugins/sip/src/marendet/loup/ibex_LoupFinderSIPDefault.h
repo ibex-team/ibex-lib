@@ -25,9 +25,8 @@ class LoupFinderSIPDefault: public LoupFinderSIP {
 	const SIPSystem& system_;
 public:
 	LoupFinderSIPDefault(const SIPSystem& system);
-	virtual std::pair<IntervalVector, double> find(const Cell& cell,
-			const IntervalVector& loup_point, double loup);
 	virtual ~LoupFinderSIPDefault();
+	std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
 };
 
 } // end namespace ibex
