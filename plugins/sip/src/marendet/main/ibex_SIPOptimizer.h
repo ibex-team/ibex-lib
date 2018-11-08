@@ -64,8 +64,8 @@ private:
 	double compute_ymax();
 	void handleCell(Cell& cell);
 	void updateUplo();
-	bool updateLoup(const Cell& cell);
-	bool updateLoup2(const Cell& cell);
+	bool updateLoup(Cell& cell);
+	bool updateLoup2(Cell& cell);
 
 	void updateUploEpsboxes(double ymin);
 

@@ -28,9 +28,9 @@ class LoupFinderRestrictionsRelax: public LoupFinderSIP {
 	LPSolver* lp_solver_;
 public:
 	LoupFinderRestrictionsRelax(const SIPSystem& system, Linearizer& restrictions);
-	virtual std::pair<IntervalVector, double> find(const Cell& cell,
-			const IntervalVector& loup_point, double loup);
 	virtual ~LoupFinderRestrictionsRelax();
+	std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
+
 };
 
 } // end namespace ibex

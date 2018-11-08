@@ -26,11 +26,10 @@ LoupFinderSIPDefault::~LoupFinderSIPDefault() {
 }
 
 std::pair<IntervalVector, double> LoupFinderSIPDefault::find(
-		const Cell& cell, const IntervalVector& loup_point,
-		double loup) {
-    Vector loup_point_plus_goal(cell.box.mid());
+		const IntervalVector& box, const IntervalVector& loup_point, double loup) {
+    Vector loup_point_plus_goal(box.mid());
 	if(check(system_, loup_point_plus_goal, loup, false)) {
-		return std::make_pair(loup_point_plus_goal.subvector(0, cell.box.size()-2), loup);
+		return std::make_pair(loup_point_plus_goal.subvector(0, box.size()-2), loup);
 	}
 	throw NotFound();
 }

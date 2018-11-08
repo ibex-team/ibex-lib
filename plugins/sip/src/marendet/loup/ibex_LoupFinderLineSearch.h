@@ -25,18 +25,17 @@ namespace ibex {
 class LoupFinderLineSearch: public LoupFinderSIP {
 public:
 	LoupFinderLineSearch(SIPSystem& system);
-
-	virtual std::pair<IntervalVector, double> find(const Cell& cell,
-				const IntervalVector& loup_point, double loup);
-
 	virtual ~LoupFinderLineSearch();
 
+	std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
+	std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop);
 	bool is_inner_with_paving_simplification(const IntervalVector& box);
 	void blankenship(const IntervalVector& box);
 private:
 	SIPSystem& system_;
 	RelaxationLinearizerSIP linearizer_;
 	LPSolver lp_solver_;
+	BxpNodeData* node_data_ = nullptr;
 };
 
 } // end namespace ibex

@@ -279,11 +279,11 @@ void SIPOptimizer::updateUplo() {
 	}
 }
 
-bool SIPOptimizer::updateLoup(const Cell& cell) {
+bool SIPOptimizer::updateLoup(Cell& cell) {
 	if (cell.box.is_empty())
 		return false;
 	try {
-		auto p = loup_finder_.find(cell, loup_point_, loup_);
+		auto p = loup_finder_.find(cell.box, loup_point_, loup_, cell.prop);
 		loup_point_ = p.first.subvector(0, cell.box.size() - 2); // -2 to remove the goal variable
 		loup_ = p.second;
 		if (trace_ > 0) {
@@ -297,11 +297,11 @@ bool SIPOptimizer::updateLoup(const Cell& cell) {
 	}
 }
 
-bool SIPOptimizer::updateLoup2(const Cell& cell) {
+bool SIPOptimizer::updateLoup2(Cell& cell) {
 	if (cell.box.is_empty() || loup_finder2_ == nullptr)
 		return false;
 	try {
-		auto p = loup_finder2_->find(cell, loup_point_, loup_);
+		auto p = loup_finder2_->find(cell.box, loup_point_, loup_, cell.prop);
 		loup_point_ = p.first.subvector(0, cell.box.size() - 2); // -2 to remove the goal variable
 		loup_ = p.second;
 		if (trace_ > 0) {

@@ -21,30 +21,11 @@
 #include <utility>
 
 namespace ibex {
-class LoupFinderSIP {
+class LoupFinderSIP : public LoupFinder {
 public:
-	typedef LoupFinder::NotFound NotFound;
-
-	/**
-	 * \brief Find a new loup in a given box.
-	 *
-	 * This function is abstract and has to be implemented in the subclass.
-	 *
-	 * The function takes as parameter the last loup-point (x{k}) and
-	 * loup value (f(x{k})) found by the optimizer and returns the new
-	 * loup-point (x{k+1}) and its value (f(x{k+1}))
-	 * Note that xk is not necessarily inside the box.
-	 *
-	 * \param cell        - the cell where x{k+1} is searched
-	 * \param loup_point - an enclosure of x{k}
-	 * \param loup       - (an upper bound of) f(x{k})
-	 * \return             <x{k+1},f(x{k+1})>
-	 * \throws             NotFound in case of failure.
-	 */
-	virtual std::pair<IntervalVector, double> find(const Cell& cell,
-			const IntervalVector& loup_point, double loup)=0;
-
 	virtual ~LoupFinderSIP();
+
+	void add_property(const IntervalVector& init_box, BoxProperties& prop);
 
 protected:
 
