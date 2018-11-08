@@ -43,7 +43,9 @@ public:
 	Interval evaluateWithoutCachedValue(const IntervalVector& box) const;
 	Interval evaluate(const IntervalVector &box,
 			const IntervalVector& parameter_box) const;
+	Interval evaluate(const IntervalVector& box, SIConstraintCache& cache) const;
 	IntervalVector gradient(const IntervalVector& box) const;
+	IntervalVector gradient(const IntervalVector& box, SIConstraintCache& cache) const;
 	IntervalVector gradient(const IntervalVector& box,
 			const IntervalVector& parameter_box) const;
 	bool isSatisfied(const IntervalVector& box) const;

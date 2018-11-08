@@ -34,11 +34,21 @@ CtcBlankenship::CtcBlankenship(SIPSystem& system, double eps, int max_iter) :
 CtcBlankenship::~CtcBlankenship() {
 }
 
+void CtcBlankenship::add_property(const IntervalVector& init_box, BoxProperties& map) {
+    if(map[BxpNodeData::id] == nullptr) {
+        map.add(new BxpNodeData());
+    }
+}
+
 void CtcBlankenship::contract(IntervalVector& box) {
     ibex_warning("CtcBlankenship: called with no context");
 
 }
 void CtcBlankenship::contract(IntervalVector& box, ContractContext& context) {
+	node_data_ = (BxpNodeData*) context.prop[BxpNodeData::id];
+	if(node_data_ == nullptr) {
+		ibex_error("CtcBlankenship: BxpNodeData must be set");
+	}
 	box_ = &box;
 	lp_solver_.clean_ctrs();
 	lp_solver_.set_bounds(box);
@@ -58,9 +68,9 @@ void CtcBlankenship::contract(IntervalVector& box, ContractContext& context) {
 }
 
 bool CtcBlankenship::maximizeSIC(int sic_index, const Vector& uplo_point) {
-	auto& node_data = *system_.node_data_;
+	//auto& node_data = *system_.node_data_;
 
-	auto& cache = node_data.sic_constraints_caches[sic_index];
+	auto& cache = node_data_->sic_constraints_caches[sic_index];
 	const auto& constraint = system_.sic_constraints_[sic_index];
 	const int max_blankenship_list_size = 10 * constraint.variable_count_;
 	IntervalVector parameter_search_space = IntervalVector::empty(constraint.parameter_count_);

@@ -31,12 +31,14 @@ class CtcBlankenship: public Ctc {
 public:
 	CtcBlankenship(SIPSystem& system, double eps_, int max_iter);
 	virtual ~CtcBlankenship();
-	void contract(IntervalVector& box);
+	void add_property(const IntervalVector& init_box, BoxProperties& map);
+    void contract(IntervalVector& box);
     void contract(IntervalVector& box, ContractContext& context);
 	bool maximizeSIC(int sic_index, const Vector& uplo_point);
 
 private:
 	IntervalVector* box_;
+	BxpNodeData* node_data_ = nullptr;
 	const SIPSystem& system_;
 	double eps_;
 	int max_iter_;

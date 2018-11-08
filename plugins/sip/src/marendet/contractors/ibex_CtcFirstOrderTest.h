@@ -27,7 +27,8 @@ private:
 public:
 	CtcFirstOrderTest(const SIPSystem& system);
 	virtual ~CtcFirstOrderTest();
-	void contract(IntervalVector& box);
+	void add_property(const IntervalVector& init_box, BoxProperties& map);
+    void contract(IntervalVector& box);
     void contract(IntervalVector& box, ContractContext& context);
 };
 

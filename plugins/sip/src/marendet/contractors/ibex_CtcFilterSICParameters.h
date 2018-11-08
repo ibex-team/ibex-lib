@@ -27,11 +27,12 @@ namespace ibex {
 class CtcFilterSICParameters: public Ctc {
 private:
 	const SIPSystem& system_;
-	void contractOneConstraint(size_t i, BxpNodeData& node_data, const IntervalVector& box);
+	//void contractOneConstraint(size_t i, BxpNodeData& node_data, const IntervalVector& box);
 public:
 	CtcFilterSICParameters(const SIPSystem& system_);
 	virtual ~CtcFilterSICParameters();
-	void contract(IntervalVector& box);
+	void add_property(const IntervalVector& init_box, BoxProperties& map);
+    void contract(IntervalVector& box);
     void contract(IntervalVector& box, ContractContext& context);
 };
 

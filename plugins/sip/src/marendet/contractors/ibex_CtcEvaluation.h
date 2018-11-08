@@ -29,7 +29,8 @@ private:
 public:
 	CtcEvaluation(const SIPSystem& system);
 	virtual ~CtcEvaluation();
-	void contract(IntervalVector& box);
+	void add_property(const IntervalVector& init_box, BoxProperties& map);
+    void contract(IntervalVector& box);
     void contract(IntervalVector& box, ContractContext& context);
 };
 
