@@ -5,10 +5,8 @@
  *      Author: antoinemarendet
  */
 
-#include "contractors/ibex_CtcCompoSIP.h"
 #include "contractors/ibex_CtcEvaluation.h"
 #include "contractors/ibex_CtcFilterSICParameters.h"
-#include "contractors/ibex_CtcFixPointSIP.h"
 #include "contractors/ibex_CtcHC4SIP.h"
 #include "contractors/ibex_GoldsztejnSICBisector.h"
 #include "main/ibex_CellBufferNeighborhood.h"
@@ -28,6 +26,8 @@
 #include "ibex_SyntaxError.h"
 #include "ibex_UnknownFileException.h"
 #include "ibex_Vector.h"
+#include "ibex_CtcCompo.h"
+#include "ibex_CtcFixPoint.h"
 
 #include <algorithm>
 #include <cmath>
@@ -251,7 +251,7 @@ int main(int argc, const char ** argv) {
 		} else {
 			srand(time(NULL));
 		}
-		NodeData::sip_system = &system;
+		BxpNodeData::sip_system = &system;
 
 		//ibex::CellStack buffer;
 		ibex::CellBuffer* buffer;
@@ -285,7 +285,7 @@ int main(int argc, const char ** argv) {
 		CtcEvaluation* evaluation = new CtcEvaluation(system);
 
 		// FixPoint
-		vector<CellCtc*> fixpoint_list;
+		vector<Ctc*> fixpoint_list;
 		CtcHC4SIP* hc4_2 = new CtcHC4SIP(system, 0.1, true);
 		fixpoint_list.emplace_back(hc4_2);
 
@@ -297,10 +297,10 @@ int main(int argc, const char ** argv) {
 		//fixpoint_list.emplace_back(sic_filter2);
 		//CtcBlankenship* blankenship = new CtcBlankenship(system, 0.1, 1000);
 		//fixpoint_list.emplace_back(blankenship);
-		CtcCompoSIP* compo = new CtcCompoSIP(fixpoint_list);
-		CtcFixPointSIP* fixpoint = new CtcFixPointSIP(*compo, 0.1); // Best: 0.1
+		CtcCompo* compo = new CtcCompo(fixpoint_list);
+		CtcFixPoint* fixpoint = new CtcFixPoint(*compo, 0.1); // Best: 0.1
 
-		vector<CellCtc*> ctc_list;
+		vector<Ctc*> ctc_list;
 		ctc_list.emplace_back(sic_bisector);
 		ctc_list.emplace_back(sic_filter);
 		CtcHC4SIP* hc4 = new CtcHC4SIP(system, 0.01, true);
@@ -308,7 +308,7 @@ int main(int argc, const char ** argv) {
 		ctc_list.emplace_back(fixpoint);
 		//ctc_list.emplace_back(evaluation);
 
-		CtcCompoSIP* ctc = new CtcCompoSIP(ctc_list);
+		CtcCompo* ctc = new CtcCompo(ctc_list);
 
 		ibex::Vector eps_min(system.nb_var, eps_x_min ? eps_x_min.Get() : default_eps_x_min);
 		ibex::Vector eps_max(system.nb_var, eps_x_max ? eps_x_max.Get() : default_eps_x_max);

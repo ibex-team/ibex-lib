@@ -11,12 +11,12 @@
 #ifndef __SIP_IBEX_CTC_BISECT_ACTIVE_PARAMETERS_H_
 #define __SIP_IBEX_CTC_BISECT_ACTIVE_PARAMETERS_H_
 
-#include "ibex_CellCtc.h"
+#include "ibex_Ctc.h"
 #include "ibex_RelaxationLinearizerSIP.h"
 
 namespace ibex {
 
-class CtcBisectActiveParameters : public CellCtc
+class CtcBisectActiveParameters : public Ctc
 {
 private:
     const SIPSystem& sys_;
@@ -26,7 +26,8 @@ public:
     CtcBisectActiveParameters(const SIPSystem& system);
     virtual ~CtcBisectActiveParameters();
 
-    void contractCell(Cell& cell);
+    void contract(IntervalVector& box);
+    void contract(IntervalVector& box, ContractContext& context);
 };
 
 }  // namespace ibex

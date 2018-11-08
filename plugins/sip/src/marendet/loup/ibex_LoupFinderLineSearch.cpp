@@ -199,7 +199,7 @@ bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVec
 		}
 	}
 
-	NodeData node_data_copy = NodeData(*system_.node_data_);
+	BxpNodeData node_data_copy = BxpNodeData(*system_.node_data_);
 
 	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
 		const auto& sic = system_.sic_constraints_[cst_index];
@@ -228,7 +228,7 @@ bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVec
 
 void LoupFinderLineSearch::blankenship(const IntervalVector& box) {
 	//std::cout << "xlin(blankenship)=" << print_mma(box.mid()) << std::endl;
-	NodeData node_data_copy = NodeData(*system_.node_data_);
+	BxpNodeData node_data_copy = BxpNodeData(*system_.node_data_);
 	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
 		const auto& sic = system_.sic_constraints_[cst_index];
 		auto& cache = node_data_copy.sic_constraints_caches[cst_index];

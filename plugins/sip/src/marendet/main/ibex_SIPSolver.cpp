@@ -33,7 +33,7 @@ class EmptyBoxException : Exception {
 };
 }
 
-SIPSolver::SIPSolver(const SIPSystem& sys, CellCtc& ctc, Bsc& bsc, CellBuffer& buffer, const Vector& eps_x_min,
+SIPSolver::SIPSolver(const SIPSystem& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, const Vector& eps_x_min,
     const Vector& eps_x_max, bool pathFinding)
     : ctc(ctc)
     , bsc(bsc)
@@ -123,7 +123,7 @@ void SIPSolver::start(const IntervalVector& init_box)
     Cell* root = new Cell(init_box);
 
     // add data required by this solver
-    root->prop.add(new NodeData());
+    root->prop.add(new BxpNodeData());
 
     // add data required by the bisector
     bsc.add_property(init_box, root->prop);
@@ -157,7 +157,7 @@ void SIPSolver::start(const char* input_paving)
         Cell* cell = new Cell(it->existence());
 
         // add data required by this solver
-        cell->prop.add(new NodeData()); // Not efficient...
+        cell->prop.add(new BxpNodeData()); // Not efficient...
 
         // add data required by the bisector
         bsc.add_property(it->existence(), cell->prop);
@@ -200,34 +200,34 @@ SIPSolverOutputBox* SIPSolver::next()
                 throw PathFoundException();
             }
         }
-    	NodeData* data=(NodeData*) c->prop[NodeData::id];
+    	BxpNodeData* data=(BxpNodeData*) c->prop[BxpNodeData::id];
     	if (!data) ibex_error("[ibexopt-sip]: no node data!");
-    	NodeData::sip_system->loadNodeData(data);
+    	BxpNodeData::sip_system->loadBxpNodeData(data);
 
-        /*const auto& list = c->get<NodeData>().sic_constraints_caches[0].parameter_caches_;
+        /*const auto& list = c->get<BxpNodeData>().sic_constraints_caches[0].parameter_caches_;
 		 for(const auto& param_cache : list) {
 		 cout << param_cache.parameter_box << " eval=" << param_cache.evaluation <<  endl;
 		 }*/
-        int v = c->bisected_var; // last bisected var.
+        ContractContext context(c->prop);
 
-        if (v != -1) // no root node :  impact set to 1 for last bisected var only
-            impact.add(v);
-        else
-            // root node : impact set to 1 for all variables
-            impact.fill(0, ctc.nb_var - 1);
+		int v=c->bisected_var; // last bisected var.
+
+		if (v!=-1) { // not the root node :  impact set to the last bisected variable only
+			context.impact = BitSet::singleton(n,v);
+		}
 
         try {
-            ctc.contractCell(*c, impact);
+            ctc.contract(c->box, context);
             //std::cout << c->box << std::endl;
 
             if (c->box.is_empty())
                 throw EmptyBoxException();
 
-            if (v != -1)
+            /*if (v != -1)
                 impact.remove(v);
             else
                 // root node : impact set to 0 for all variables after contraction
-                impact.clear();
+                impact.clear();*/
 
             // certification is performed at each intermediate step
             // if the system is under constrained

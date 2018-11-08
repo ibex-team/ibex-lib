@@ -68,7 +68,7 @@ public:
 	/**
 	 * \brief Add backtrackable data required by this buffer.
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(IntervalVector& init_box, BoxProperties& map);
 
 	/**
 	 * \brief Flush the buffer.
@@ -163,9 +163,9 @@ inline CellCostFunc& CellDoubleHeapSIP::cost2() {
 	return (CellCostFunc&) heap2->costf;
 }
 
-inline void CellDoubleHeapSIP::add_backtrackable(Cell& root) {
+inline void CellDoubleHeapSIP::add_property(IntervalVector& init_root, BoxProperties& map) {
 	// add data "pu" and "pf" (if required)
-	cost2().add_backtrackable(root);
+	cost2().add_property(map);
 }
 
 inline void CellDoubleHeapSIP::flush() {

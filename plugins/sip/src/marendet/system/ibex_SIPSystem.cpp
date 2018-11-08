@@ -21,25 +21,25 @@ using namespace std;
 
 namespace ibex {
 
-SIPSystem* NodeData::sip_system = nullptr;
+SIPSystem* BxpNodeData::sip_system = nullptr;
 
-long NodeData::id = next_id();
+long BxpNodeData::id = next_id();
 
-NodeData::NodeData() :
-		NodeData(NodeData::sip_system->getInitialNodeCaches()) {
+BxpNodeData::BxpNodeData() :
+		BxpNodeData(BxpNodeData::sip_system->getInitialNodeCaches()) {
 }
 
-NodeData::NodeData(const vector<SIConstraintCache>& caches) :
+BxpNodeData::BxpNodeData(const vector<SIConstraintCache>& caches) :
 		Bxp(id), sic_constraints_caches(caches) {
 }
 
-void NodeData::update(const BoxEvent& event, const BoxProperties& prop) {
+void BxpNodeData::update(const BoxEvent& event, const BoxProperties& prop) {
 	// something should be done here, at least
 	// an up-to-date flag should be set to "false".
 }
 
-Bxp* NodeData::copy(const IntervalVector& box, const BoxProperties& prop) const {
-	return new NodeData(*this);
+Bxp* BxpNodeData::copy(const IntervalVector& box, const BoxProperties& prop) const {
+	return new BxpNodeData(*this);
 }
 
 SIPSystem::SIPSystem(const string& filename, const regex& quantified_regex) :
@@ -220,12 +220,12 @@ vector<SIConstraintCache> SIPSystem::getInitialNodeCaches() {
 	return caches;
 }
 
-void SIPSystem::loadNodeData(NodeData* node_data) {
+void SIPSystem::loadBxpNodeData(BxpNodeData* node_data) {
 	node_data_ = node_data;
-	updateNodeData();
+	updateBxpNodeData();
 }
 
-void SIPSystem::updateNodeData() {
+void SIPSystem::updateBxpNodeData() {
 	for (int i = 0; i < sic_constraints_.size(); ++i) {
 		sic_constraints_[i].loadCache(&node_data_->sic_constraints_caches[i]);
 	}

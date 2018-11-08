@@ -14,7 +14,7 @@
 #include "ibex_RelaxationLinearizerSIP.h"
 #include "ibex_SIPSystem.h"
 
-#include "ibex_CellCtc.h"
+#include "ibex_Ctc.h"
 #include "ibex_IntervalVector.h"
 #include "ibex_LPSolver.h"
 #include "ibex_Vector.h"
@@ -27,15 +27,16 @@ namespace ibex {
  * and add the parameter point to a "Blankenship points" pool. The pool has a max size of 2n,
  * where n is the number of variables of the constraint.
  */
-class CtcBlankenship: public CellCtc {
+class CtcBlankenship: public Ctc {
 public:
 	CtcBlankenship(SIPSystem& system, double eps_, int max_iter);
 	virtual ~CtcBlankenship();
-	void contractCell(Cell& cell);
+	void contract(IntervalVector& box);
+    void contract(IntervalVector& box, ContractContext& context);
 	bool maximizeSIC(int sic_index, const Vector& uplo_point);
 
 private:
-	Cell* cell_;
+	IntervalVector* box_;
 	const SIPSystem& system_;
 	double eps_;
 	int max_iter_;

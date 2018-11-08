@@ -13,7 +13,7 @@
 
 #include "ibex_SIPSystem.h"
 
-#include "ibex_CellCtc.h"
+#include "ibex_Ctc.h"
 
 namespace ibex {
 /**
@@ -22,14 +22,15 @@ namespace ibex {
  * Bisect parameter boxes if the evaluation of the bisection of a parameter box if the ratio of rel_diam() of the original box
  * over the bisected box is less than a certain value.
  */
-class GoldsztejnSICBisector : public CellCtc {
+class GoldsztejnSICBisector : public Ctc {
     const SIPSystem& system_;
     static constexpr double default_ratio = 0.8;
     const double ratio_;
 public:
     GoldsztejnSICBisector(const SIPSystem& system, double ratio=default_ratio);
     ~GoldsztejnSICBisector();
-    void contractCell(Cell& cell);
+    void contract(IntervalVector& box);
+    void contract(IntervalVector& box, ContractContext& context);
 };
 
 ParameterEvaluationsCache _createNewCache(const SIConstraint& constraint, const IntervalVector& box,

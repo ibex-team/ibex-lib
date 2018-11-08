@@ -26,7 +26,7 @@
 #include <regex>
 
 namespace ibex {
-class NodeData;
+class BxpNodeData;
 class SIPSystem {
 
 public:
@@ -49,11 +49,11 @@ public:
 
 	// Load all node data for this node: current B&B box and SIConstraintsCache
 	std::vector<SIConstraintCache> getInitialNodeCaches();
-	void loadNodeData(NodeData* nodeData);
-	void updateNodeData();
+	void loadBxpNodeData(BxpNodeData* BxpNodeData);
+	void updateBxpNodeData();
 	IntervalVector extractInitialBox() const;
 
-	NodeData* node_data_ = nullptr;
+	BxpNodeData* node_data_ = nullptr;
 
 private:
 
@@ -67,15 +67,15 @@ private:
 	std::regex quantified_regex_;
 };
 
-class NodeData: public Bxp {
+class BxpNodeData: public Bxp {
 public:
 	static SIPSystem* sip_system;
 	static long id;
-	NodeData();
-	NodeData(const std::vector<SIConstraintCache>& caches);
+	BxpNodeData();
+	BxpNodeData(const std::vector<SIConstraintCache>& caches);
 	virtual Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const;
 	virtual void update(const BoxEvent& event, const BoxProperties& prop);
-	virtual std::string to_string() const;
+	//virtual std::string to_string() const;
 
 	std::vector<SIConstraintCache> sic_constraints_caches;
 };
