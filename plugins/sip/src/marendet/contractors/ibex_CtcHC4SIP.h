@@ -15,10 +15,9 @@
 #include "ibex_SIConstraint.h"
 #include "ibex_SIPSystem.h"
 
-#include "ibex_CellCtc.h"
+#include "ibex_Ctc.h"
 #include "ibex_CtcFwdBwdNLC.h"
 #include "ibex_CtcFwdBwdSIC.h"
-#include "ibex_CtcPropagSIP.h"
 #include "ibex_Array.h"
 #include "ibex_Cell.h"
 #include "ibex_Ctc3BCid.h"
@@ -27,7 +26,7 @@
 #include <vector>
 
 namespace ibex {
-class CtcHC4SIP: public CellCtc {
+class CtcHC4SIP: public Ctc {
 private:
 	Array<Ctc> convert(const SIPSystem& system) {
 		for (const SIConstraint& sic : system.sic_constraints_) {
@@ -40,11 +39,11 @@ private:
 	}
 
 	std::vector<Ctc*> owned_ctcs_;
-	CtcPropagSIP* propag_;
+	CtcPropag* propag_;
 	Ctc3BCid* cid_;
 public:
 	CtcHC4SIP(const SIPSystem& system, double ratio = CtcHC4::default_ratio, bool incremental = false) :
-			CellCtc(system.ext_nb_var), propag_(new CtcPropagSIP(CtcHC4SIP::convert(system), ratio, incremental)), cid_(
+			Ctc(system.ext_nb_var), propag_(new CtcPropag(CtcHC4SIP::convert(system), ratio, incremental)), cid_(
 					new Ctc3BCid(*propag_)) {
 
 	}
@@ -56,8 +55,12 @@ public:
 		}
 	}
 
-	void contractCell(Cell& cell) {
-		cid_->contract(cell.box);
+	void contract(IntervalVector& box) {
+		ibex_warning("CtcHC4SIP: called with no context");
+	}
+
+	void contract(IntervalVector& box, ContractContext& context) {
+		cid_->contract(box, context);
 	}
 };
 

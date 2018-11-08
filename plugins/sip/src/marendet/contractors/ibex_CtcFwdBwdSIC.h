@@ -31,6 +31,7 @@ public:
     CtcFwdBwdSIC(const SIConstraint& constraint);
     ~CtcFwdBwdSIC();
     void contract(IntervalVector& box);
+    void contract(IntervalVector& box, ContractContext& context);
     
 private:
     void init();

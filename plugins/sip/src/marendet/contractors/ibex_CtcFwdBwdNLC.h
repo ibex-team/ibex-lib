@@ -31,6 +31,7 @@ public:
     CtcFwdBwdNLC(const NLConstraint& constraint);
     ~CtcFwdBwdNLC();
     void contract(IntervalVector& box);
+    void contract(IntervalVector& box, ContractContext& context);
     
 private:
     void init();

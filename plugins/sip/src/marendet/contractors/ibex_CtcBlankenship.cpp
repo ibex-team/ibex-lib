@@ -14,7 +14,6 @@
 #include "system/ibex_SIConstraintCache.h"
 
 #include "ibex_Array.h"
-#include "ibex_Cell.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 #include "ibex_Interval.h"
@@ -27,7 +26,7 @@
 namespace ibex {
 
 CtcBlankenship::CtcBlankenship(SIPSystem& system, double eps, int max_iter) :
-		CellCtc(system.ext_nb_var), cell_(nullptr), system_(system), eps_(eps), max_iter_(max_iter), relax_(system,
+		Ctc(system.ext_nb_var), box_(nullptr), system_(system), eps_(eps), max_iter_(max_iter), relax_(system,
 				RelaxationLinearizerSIP::CornerPolicy::random, false), lp_solver_(system.ext_nb_var, 10000, 10000) {
 
 }
@@ -35,18 +34,22 @@ CtcBlankenship::CtcBlankenship(SIPSystem& system, double eps, int max_iter) :
 CtcBlankenship::~CtcBlankenship() {
 }
 
-void CtcBlankenship::contractCell(Cell& cell) {
-	cell_ = &cell;
+void CtcBlankenship::contract(IntervalVector& box) {
+    ibex_warning("CtcBlankenship: called with no context");
+
+}
+void CtcBlankenship::contract(IntervalVector& box, ContractContext& context) {
+	box_ = &box;
 	lp_solver_.clean_ctrs();
-	lp_solver_.set_bounds(cell.box);
+	lp_solver_.set_bounds(box);
 	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
-	relax_.linearize(cell.box, lp_solver_);
+	relax_.linearize(box, lp_solver_);
 	auto return_code = lp_solver_.solve();
 	if (return_code != LPSolver::Status_Sol::OPTIMAL) {
 		return;
 	}
-	//Vector sol(cell.box.mid());
+	//Vector sol(box.mid());
 	Vector sol = lp_solver_.get_primal_sol();
 	//std::cout << "xlin(ls)=" << sol << std::endl;
 	for (int i = 0; i < system_.sic_constraints_.size(); ++i) {
@@ -55,7 +58,8 @@ void CtcBlankenship::contractCell(Cell& cell) {
 }
 
 bool CtcBlankenship::maximizeSIC(int sic_index, const Vector& uplo_point) {
-	auto& node_data = cell_->get<NodeData>();
+	auto& node_data = *system_.node_data_;
+
 	auto& cache = node_data.sic_constraints_caches[sic_index];
 	const auto& constraint = system_.sic_constraints_[sic_index];
 	const int max_blankenship_list_size = 10 * constraint.variable_count_;

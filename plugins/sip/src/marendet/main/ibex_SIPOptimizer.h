@@ -11,7 +11,7 @@
 #ifndef __SIP_IBEX_SIPOPTIMIZER_H__
 #define __SIP_IBEX_SIPOPTIMIZER_H__
 
-#include "ibex_CellCtc.h"
+#include "ibex_Ctc.h"
 #include "ibex_LoupFinderSIP.h"
 
 #include "ibex_Bsc.h"
@@ -40,7 +40,7 @@ public:
 	static const double default_lf_loop_ratio;
 
 
-	SIPOptimizer(CellCtc& ctc, Bsc& bisector,
+	SIPOptimizer(Ctc& ctc, Bsc& bisector,
 			LoupFinderSIP& loup_finder, LoupFinderSIP* loup_finder2, CellBufferOptim& buffer,
 			double abs_eps, double rel_eps, double timeout = -1, double eps_x = 0, int maxiter_ = -1, double lf_loop_ratio=default_lf_loop_ratio);
 
@@ -69,7 +69,7 @@ private:
 
 	void updateUploEpsboxes(double ymin);
 
-	CellCtc& ctc_;
+	Ctc& ctc_;
 	Bsc& bisector_;
 	LoupFinderSIP& loup_finder_;
 	LoupFinderSIP* loup_finder2_;

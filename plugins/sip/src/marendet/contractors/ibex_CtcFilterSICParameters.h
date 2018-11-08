@@ -13,7 +13,7 @@
 
 #include "ibex_SIPSystem.h"
 
-#include "ibex_CellCtc.h"
+#include "ibex_Ctc.h"
 #include "ibex_IntervalVector.h"
 
 namespace ibex {
@@ -24,14 +24,15 @@ namespace ibex {
  * parameters box for which the constraint is satisfied. We also instantiate parameter boxes for which the evaluation of
  * the gradient of the constraint is > 0 or < 0. See the article for more details.
  */
-class CtcFilterSICParameters: public CellCtc {
+class CtcFilterSICParameters: public Ctc {
 private:
 	const SIPSystem& system_;
-	void contractOneConstraint(size_t i, NodeData& node_data, const IntervalVector& box);
+	void contractOneConstraint(size_t i, BxpNodeData& node_data, const IntervalVector& box);
 public:
 	CtcFilterSICParameters(const SIPSystem& system_);
 	virtual ~CtcFilterSICParameters();
-	void contractCell(Cell& cell);
+	void contract(IntervalVector& box);
+    void contract(IntervalVector& box, ContractContext& context);
 };
 
 } // end namespace ibex

@@ -12,7 +12,6 @@
 
 #include "system/ibex_SIConstraintCache.h"
 
-#include "ibex_Cell.h"
 #include "ibex_Function.h"
 #include "ibex_Interval.h"
 #include "ibex_SICPaving.h"
@@ -24,23 +23,27 @@
 namespace ibex {
 
 CtcFilterSICParameters::CtcFilterSICParameters(const SIPSystem& system) :
-		CellCtc(system.ext_nb_var), system_(system) {
+		Ctc(system.ext_nb_var), system_(system) {
 
 }
 
 CtcFilterSICParameters::~CtcFilterSICParameters() {
 }
 
-void CtcFilterSICParameters::contractCell(Cell& cell) {
-	NodeData& node_data = cell.get<NodeData>();
+void CtcFilterSICParameters::contract(IntervalVector& box) {
+    ibex_warning("CtcFilterSICParameters: called with no context");
+
+}
+void CtcFilterSICParameters::contract(IntervalVector& box, ContractContext& context) {
+	BxpNodeData& node_data = *system_.node_data_;
 	for (int i = 0; i < system_.sic_constraints_.size(); ++i) {
-		//node_data.sic_constraints_caches[i].update_cache(*system_.sic_constraints_[i].function_, cell.box);
-		//contractOneConstraint(i, node_data, cell.box);
-		simplify_paving(system_.sic_constraints_[i], node_data.sic_constraints_caches[i], cell.box, true);
+		//node_data.sic_constraints_caches[i].update_cache(*system_.sic_constraints_[i].function_, box);
+		//contractOneConstraint(i, node_data, box);
+		simplify_paving(system_.sic_constraints_[i], node_data.sic_constraints_caches[i], box, true);
 	}
 }
 
-void CtcFilterSICParameters::contractOneConstraint(size_t i, NodeData& node_data, const IntervalVector& box) {
+void CtcFilterSICParameters::contractOneConstraint(size_t i, BxpNodeData& node_data, const IntervalVector& box) {
 	auto& list = node_data.sic_constraints_caches[i].parameter_caches_;
 	auto it = list.begin();
 	IntervalVector paramBoxUnion = node_data.sic_constraints_caches[i].initial_box_;

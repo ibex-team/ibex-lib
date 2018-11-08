@@ -13,7 +13,7 @@
 
 #include "ibex_SIPSystem.h"
 
-#include "ibex_CellCtc.h"
+#include "ibex_Ctc.h"
 
 namespace ibex {
 /**
@@ -21,13 +21,14 @@ namespace ibex {
  *
  * Set box to empty if the box can not contain a minimum by applying a first order test. See article for more details.
  */
-class CtcFirstOrderTest: public CellCtc {
+class CtcFirstOrderTest: public Ctc {
 private:
 	const SIPSystem& system_;
 public:
 	CtcFirstOrderTest(const SIPSystem& system);
 	virtual ~CtcFirstOrderTest();
-	void contractCell(Cell& cell);
+	void contract(IntervalVector& box);
+    void contract(IntervalVector& box, ContractContext& context);
 };
 
 } // end namespace ibex

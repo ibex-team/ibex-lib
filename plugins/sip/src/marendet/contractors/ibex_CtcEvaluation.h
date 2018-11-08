@@ -13,7 +13,7 @@
 
 #include "ibex_SIPSystem.h"
 
-#include "ibex_CellCtc.h"
+#include "ibex_Ctc.h"
 
 namespace ibex {
 /**
@@ -23,13 +23,14 @@ namespace ibex {
  * This contractor is necessary because with SIC, the evaluation of the constraint does not only depends on the cell box,
  * it depends also on the paving stored in SIConstraintCache.
  */
-class CtcEvaluation: public CellCtc {
+class CtcEvaluation: public Ctc {
 private:
 	const SIPSystem& system_;
 public:
 	CtcEvaluation(const SIPSystem& system);
 	virtual ~CtcEvaluation();
-	void contractCell(Cell& cell);
+	void contract(IntervalVector& box);
+    void contract(IntervalVector& box, ContractContext& context);
 };
 
 } // end namespace ibex

@@ -32,15 +32,20 @@ void CtcFwdBwdNLC::init() {
 	output = new BitSet(function_->used_vars);
 }
 
-void CtcFwdBwdNLC::contract(IntervalVector &box) {
+void CtcFwdBwdNLC::contract(IntervalVector& box) {
+    ContractContext context(box);
+	contract(box,context);
+}
+
+void CtcFwdBwdNLC::contract(IntervalVector& box, ContractContext& context) {
     if(function_->backward(backward_domain_, box)) {
-        set_flag(INACTIVE);
-        set_flag(FIXPOINT);
+        context.output_flags.add(INACTIVE);
+        context.output_flags.add(FIXPOINT);
     }
 
     
     if(box.is_empty()) {
-        set_flag(FIXPOINT);
+        context.output_flags.add(FIXPOINT);
     }
 
 }

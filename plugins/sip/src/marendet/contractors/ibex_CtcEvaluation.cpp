@@ -12,7 +12,6 @@
 
 #include "system/ibex_SIConstraintCache.h"
 
-#include "ibex_Cell.h"
 #include "ibex_Function.h"
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
@@ -21,22 +20,26 @@
 
 namespace ibex {
 CtcEvaluation::CtcEvaluation(const SIPSystem& system)
-: CellCtc(system.ext_nb_var), system_(system) {
+: Ctc(system.ext_nb_var), system_(system) {
 
 }
 
 CtcEvaluation::~CtcEvaluation() {
 }
 
-void CtcEvaluation::contractCell(Cell& cell) {
+void CtcEvaluation::contract(IntervalVector& box) {
+    ibex_warning("CtcEvaluation: called with no context");
+
+}
+void CtcEvaluation::contract(IntervalVector& box, ContractContext& context) {
 	if(system_.goal_function_ != NULL)
-		cell.box[nb_var-1] = cell.box[nb_var-1] & system_.goal_function_->eval(cell.box.subvector(0, nb_var-2));
+		box[nb_var-1] = box[nb_var-1] & system_.goal_function_->eval(box.subvector(0, nb_var-2));
 	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
-		system_.sic_constraints_[i].cache_->update_cache(*system_.sic_constraints_[i].function_, cell.box);
+		system_.sic_constraints_[i].cache_->update_cache(*system_.sic_constraints_[i].function_, box);
 		const auto& cacheList = system_.node_data_->sic_constraints_caches[i];
 		for(const auto& mem_box : cacheList.parameter_caches_) {
 			if(mem_box.evaluation.lb() > 0) {
-				cell.box.set_empty();
+				box.set_empty();
 				return;
 			}
 		}
@@ -48,8 +51,8 @@ void CtcEvaluation::contractCell(Cell& cell) {
 		normalConstraintsWithoutGoal = system_.normal_constraints_.size();
 	}
 	for(int i = 0; i < normalConstraintsWithoutGoal; ++i) {
-		if(system_.normal_constraints_[i].evaluate(cell.box).lb() > 0) {
-			cell.box.set_empty();
+		if(system_.normal_constraints_[i].evaluate(box).lb() > 0) {
+			box.set_empty();
 			return;
 		}
 	}

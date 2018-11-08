@@ -7,15 +7,12 @@
 //
 
 #include "contractors/ibex_CtcBlankenship.h"
-#include "contractors/ibex_CtcCompoSIP.h"
 #include "contractors/ibex_CtcEvaluation.h"
 #include "contractors/ibex_CtcFilterSICParameters.h"
 #include "contractors/ibex_CtcBisectActiveParameters.h"
 #include "contractors/ibex_CtcFirstOrderTest.h"
-#include "contractors/ibex_CtcFixPointSIP.h"
 #include "contractors/ibex_CtcHC4SIP.h"
 #include "contractors/ibex_GoldsztejnSICBisector.h"
-#include "contractors/ibex_IbexCtcWrapper.h"
 #include "loup/ibex_LoupFinderLineSearch.h"
 #include "loup/ibex_LoupFinderRestrictionsRelax.h"
 #include "loup/ibex_LoupFinderSIPDefault.h"
@@ -27,6 +24,8 @@
 #include "system/ibex_SIPSystem.h"
 
 #include "args.hxx"
+#include "ibex_CtcCompo.h"
+#include "ibex_CtcFixPoint.h"
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_Exception.h"
 #include "ibex_Interval.h"
@@ -34,6 +33,7 @@
 #include "ibex_RoundRobin.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_UnknownFileException.h"
+#include "ibex_LargestFirst.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -256,13 +256,13 @@ int main(int argc, const char ** argv) {
 
 		srand(random_seed.Get());
 
-		NodeData::sip_system = &sys;
+		BxpNodeData::sip_system = &sys;
 
 		CellDoubleHeapSIP buffer = CellDoubleHeapSIP(sys, 20);
 		ibex::RoundRobin bisector = ibex::RoundRobin(0);
-		/*ibex::Vector prec(system.ext_nb_var, 1e-20);
-		 prec[system.ext_nb_var - 1] = POS_INFINITY;
-		 ibex::LargestFirst bisector(prec);*/
+		/*Vector prec(sys.ext_nb_var, 1e-20);
+		prec[sys.ext_nb_var - 1] = POS_INFINITY;
+		LargestFirst bisector(prec);*/
 		LoupFinderSIP *loup_finder = nullptr;
 		if (!no_inner_lin) {
 			RestrictionLinearizerSIP *restrictions = new RestrictionLinearizerSIP(sys,
@@ -299,7 +299,7 @@ int main(int argc, const char ** argv) {
 		CtcEvaluation* evaluation = new CtcEvaluation(sys);
 
 		// FixPoint
-		vector<CellCtc*> fixpoint_list;
+		vector<Ctc*> fixpoint_list;
 		if (!no_propag) {
 			CtcHC4SIP* hc4_2 = new CtcHC4SIP(sys, 0.1, true);
 			fixpoint_list.emplace_back(hc4_2);
@@ -307,7 +307,7 @@ int main(int argc, const char ** argv) {
 		if (!no_outer_lin) {
 			RelaxationLinearizerSIP* relax = new RelaxationLinearizerSIP(sys,
 					RelaxationLinearizerSIP::CornerPolicy::random, true);
-			IbexCtcWrapper* ph = new IbexCtcWrapper(*(new ibex::CtcPolytopeHull(*relax, 1000000, 10000)));
+			CtcPolytopeHull* ph = new ibex::CtcPolytopeHull(*relax, 1000000, 10000);
 			fixpoint_list.emplace_back(ph);
 		}
 		fixpoint_list.emplace_back(sic_bisector2);
@@ -317,10 +317,10 @@ int main(int argc, const char ** argv) {
 			CtcBlankenship* blankenship = new CtcBlankenship(sys, 0.1, 1000);
 			fixpoint_list.emplace_back(blankenship);
 		}
-		CtcCompoSIP* compo = new CtcCompoSIP(fixpoint_list);
-		CtcFixPointSIP* fixpoint = new CtcFixPointSIP(*compo, 0.1); // Best: 0.1
+		CtcCompo* compo = new CtcCompo(fixpoint_list);
+		CtcFixPoint* fixpoint = new CtcFixPoint(*compo, 0.1); // Best: 0.1
 
-		vector<CellCtc*> ctc_list;
+		vector<Ctc*> ctc_list;
 		ctc_list.emplace_back(sic_bisector);
 		ctc_list.emplace_back(sic_filter);
 		if (!no_propag) {
@@ -333,7 +333,7 @@ int main(int argc, const char ** argv) {
 			CtcFirstOrderTest* firstordertest = new CtcFirstOrderTest(sys);
 			ctc_list.push_back(firstordertest);
 		}
-		CtcCompoSIP* ctc = new CtcCompoSIP(ctc_list);
+		CtcCompo* ctc = new CtcCompo(ctc_list);
 
 		SIPOptimizer optimizer(*ctc, bisector, *loup_finder, loup_finder2, buffer, abs_eps_f.Get(), -1, 0, -1);
 

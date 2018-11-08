@@ -11,7 +11,7 @@
 #ifndef __SIP_IBEX_SIPSOLVER_H__
 #define __SIP_IBEX_SIPSOLVER_H__
 
-#include "ibex_CellCtc.h"
+#include "ibex_Ctc.h"
 #include "ibex_SIPSystem.h"
 
 #include "ibex_BitSet.h"
@@ -61,7 +61,7 @@ public:
 	 * \param eps_min - Criterion to stop bisection
 	 * \param eps_max - Criterion to force bisection
 	 */
-	SIPSolver(const SIPSystem& sys, CellCtc& ctc, Bsc& bsc, CellBuffer& buffer,
+	SIPSolver(const SIPSystem& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 			const Vector& eps_min, const Vector& eps_max, bool pathFinding=false);
 
 	/**
@@ -179,7 +179,7 @@ public:
 	 * Acid, Newton, a linear relaxation, ... )
 	 *
 	 */
-	CellCtc& ctc;
+	Ctc& ctc;
 
 	/**
 	 * \brief The bisector.

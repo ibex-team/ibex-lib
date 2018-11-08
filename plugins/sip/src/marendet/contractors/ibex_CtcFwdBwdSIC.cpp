@@ -35,15 +35,25 @@ void CtcFwdBwdSIC::init() {
 
 	input = new BitSet(nb_var);
 	output = new BitSet(nb_var);
-	for (BitSet::const_iterator it=constraint_.function_->used_vars.begin(); it!=constraint_.function_->used_vars.end(); it++) {
+	for(int i = 0; i < nb_var; ++i) {
+		if(constraint_.function_->used_vars[i]) {
+			input->add(i);
+			output->add(i);
+		}
+	}
+	/*for (BitSet::const_iterator it=constraint_.function_->used_vars.begin(); it!=constraint_.function_->used_vars.end(); it++) {
 		if (it < nb_var) {
 			output->add(it);
 			input->add(it);
 		}
-	}
+	}*/
 }
 
-void CtcFwdBwdSIC::contract(IntervalVector &box) {
+void CtcFwdBwdSIC::contract(IntervalVector& box) {
+    ibex_warning("CtcFwdBwdSIC: called with no context");
+}
+
+void CtcFwdBwdSIC::contract(IntervalVector &box, ContractContext& context) {
 	IntervalVector full_box(constraint_.function_->nb_var());
 	full_box.put(0, box);
 	bool fixpoint = true;
@@ -75,12 +85,12 @@ void CtcFwdBwdSIC::contract(IntervalVector &box) {
 	//if(full_box.is_empty())
 	//	box.set_empty();
 	if (fixpoint) {
-		set_flag(FIXPOINT);
-		set_flag(INACTIVE);
+		context.output_flags.add(FIXPOINT);
+		context.output_flags.add(INACTIVE);
 	}
 
 	if (box.is_empty()) {
-		set_flag(FIXPOINT);
+		context.output_flags.add(FIXPOINT);
 	}
 
 }

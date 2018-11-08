@@ -17,7 +17,7 @@
 namespace ibex {
 
 CtcBisectActiveParameters::CtcBisectActiveParameters(const SIPSystem& sys)
-: CellCtc(sys.ext_nb_var), sys_(sys), 
+: Ctc(sys.ext_nb_var), sys_(sys), 
 linearizer_(sys_, RelaxationLinearizerSIP::CornerPolicy::random, false), 
 lp_solver_(sys.ext_nb_var) {
 
@@ -26,19 +26,23 @@ lp_solver_(sys.ext_nb_var) {
 CtcBisectActiveParameters::~CtcBisectActiveParameters() {
 }
 
-void CtcBisectActiveParameters::contractCell(Cell& cell) {
+void CtcBisectActiveParameters::contract(IntervalVector& box) {
+    ibex_warning("CtcBisectActiveParameters: called with no context");
+
+}
+void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& context) {
     lp_solver_.clean_ctrs();
-	lp_solver_.set_bounds(cell.box);
+	lp_solver_.set_bounds(box);
 	lp_solver_.set_obj_var(sys_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
-	linearizer_.linearize(cell.box, lp_solver_);
+	linearizer_.linearize(box, lp_solver_);
 	//lp_solver_.write_file();
 
 	auto return_code = lp_solver_.solve();
 	if (return_code != LPSolver::Status_Sol::OPTIMAL) {
 		return;
 	}
-	//Vector sol(cell.box.mid());
+	//Vector sol(box.mid());
 	Vector sol = lp_solver_.get_primal_sol();
 	Vector sol_without_goal = sol.subvector(0, sys_.nb_var - 1);
 	//Vector dual(lp_solver_.get_nb_rows());
@@ -59,9 +63,9 @@ void CtcBisectActiveParameters::contractCell(Cell& cell) {
 			//if(Interval(dual[current_row]).inflate(1e-10).contains(0)) {
 			if(constraint.evaluate(sol, parameter_box).ub() > 0) {
 				auto bisectList = bisectAllDim(parameter_box);
-				cache[i] = _createNewCache(constraint, cell.box, bisectList[0]);
+				cache[i] = _createNewCache(constraint, box, bisectList[0]);
 				for (int j = 1; j < bisectList.size(); ++j)
-					cache.emplace_back(_createNewCache(constraint, cell.box, bisectList[j]));
+					cache.emplace_back(_createNewCache(constraint, box, bisectList[j]));
 			}
 			current_row++;
 		}
