@@ -23,7 +23,7 @@ class Bxs {
 public:
 	virtual int subformat_number() const=0;
 
-	virtual Bxs& operator&=(const Bxs& set)=0;
+	//virtual Bxs& operator&=(const Bxs& set)=0;
 
 	Bxs(size_t n);
 

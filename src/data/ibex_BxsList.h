@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_Bxs.h
+// File        : ibex_BxsList.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file

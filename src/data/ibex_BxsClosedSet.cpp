@@ -38,7 +38,7 @@ BxsClosedSetFactory::~BxsClosedSetFactory() {
 }
 
 void BxsClosedSetFactory::add_boundary(const IntervalVector& x) {
-	add_unknown(x);
+	BxsSetFactory::add_unknown(x);
 	is_boundary.push_back(true);
 }
 

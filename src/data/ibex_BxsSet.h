@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_Bxs.h
+// File        : ibex_BxsSet.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -12,8 +12,6 @@
 #define __IBEX_BXS_SET_H__
 
 #include "ibex_BxsList.h"
-
-#include <vector>
 
 namespace ibex {
 
