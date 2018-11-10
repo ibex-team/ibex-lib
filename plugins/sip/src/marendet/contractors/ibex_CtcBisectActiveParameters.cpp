@@ -41,7 +41,7 @@ void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& c
 	lp_solver_.set_bounds(box);
 	lp_solver_.set_obj_var(sys_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
-	linearizer_.linearize(box, lp_solver_);
+	linearizer_.linearize(box, lp_solver_, context.prop);
 	//lp_solver_.write_file();
 
 	auto return_code = lp_solver_.solve();

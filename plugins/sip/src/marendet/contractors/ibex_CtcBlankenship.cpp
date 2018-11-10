@@ -54,7 +54,7 @@ void CtcBlankenship::contract(IntervalVector& box, ContractContext& context) {
 	lp_solver_.set_bounds(box);
 	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
-	relax_.linearize(box, lp_solver_);
+	relax_.linearize(box, lp_solver_, context.prop);
 	auto return_code = lp_solver_.solve();
 	if (return_code != LPSolver::Status_Sol::OPTIMAL) {
 		return;

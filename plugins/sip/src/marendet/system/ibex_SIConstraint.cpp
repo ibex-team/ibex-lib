@@ -26,10 +26,10 @@ SIConstraint::SIConstraint(const Function* function, int variable_count) :
 SIConstraint::~SIConstraint() {
 }
 
-void SIConstraint::loadCache(SIConstraintCache *cache) {
+/*void SIConstraint::loadCache(SIConstraintCache *cache) {
 	cache_ = cache;
 	cache_->must_be_updated_ = true;
-}
+}*/
 
 Interval SIConstraint::evaluateWithoutCachedValue(const IntervalVector& box, SIConstraintCache& cache) const {
 	Interval res = Interval::ZERO;

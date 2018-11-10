@@ -222,7 +222,7 @@ vector<SIConstraintCache> SIPSystem::getInitialNodeCaches() {
 	return caches;
 }
 
-void SIPSystem::loadBxpNodeData(BxpNodeData* node_data) {
+/*void SIPSystem::loadBxpNodeData(BxpNodeData* node_data) {
 	node_data_ = node_data;
 	updateBxpNodeData();
 }
@@ -231,5 +231,5 @@ void SIPSystem::updateBxpNodeData() {
 	for (int i = 0; i < sic_constraints_.size(); ++i) {
 		sic_constraints_[i].loadCache(&node_data_->sic_constraints_caches[i]);
 	}
-}
+}*/
 } // end namespace ibex

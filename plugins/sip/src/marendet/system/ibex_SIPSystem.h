@@ -49,11 +49,11 @@ public:
 
 	// Load all node data for this node: current B&B box and SIConstraintsCache
 	std::vector<SIConstraintCache> getInitialNodeCaches();
-	void loadBxpNodeData(BxpNodeData* BxpNodeData);
-	void updateBxpNodeData();
+	//void loadBxpNodeData(BxpNodeData* BxpNodeData);
+	//void updateBxpNodeData();
 	IntervalVector extractInitialBox() const;
 
-	BxpNodeData* node_data_ = nullptr;
+	//BxpNodeData* node_data_ = nullptr;
 
 private:
 

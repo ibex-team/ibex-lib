@@ -200,9 +200,9 @@ SIPSolverOutputBox* SIPSolver::next()
                 throw PathFoundException();
             }
         }
-    	BxpNodeData* data=(BxpNodeData*) c->prop[BxpNodeData::id];
-    	if (!data) ibex_error("[ibexopt-sip]: no node data!");
-    	BxpNodeData::sip_system->loadBxpNodeData(data);
+    	//BxpNodeData* data=(BxpNodeData*) c->prop[BxpNodeData::id];
+    	//if (!data) ibex_error("[ibexopt-sip]: no node data!");
+    	//BxpNodeData::sip_system->loadBxpNodeData(data);
 
         /*const auto& list = c->get<BxpNodeData>().sic_constraints_caches[0].parameter_caches_;
 		 for(const auto& param_cache : list) {

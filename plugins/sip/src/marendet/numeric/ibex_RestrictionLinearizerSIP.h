@@ -34,10 +34,11 @@ public:
 	RestrictionLinearizerSIP(const SIPSystem& system,
 			CornerPolicy corner_policy);
 	int linearize(const IntervalVector& box, LPSolver& lp_solver);
+	int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
 	int linearizeNLC(const NLConstraint& constraint, Vector& lhs,
 			double& rhs) const;
 	int linearizeSIC(const SIConstraint& constraint,
-			std::vector<Vector>& lhs, std::vector<double>& rhs) const;
+			std::vector<Vector>& lhs, std::vector<double>& rhs, SIConstraintCache& cache) const;
 private:
 	void setCornerAndAlpha();
 
