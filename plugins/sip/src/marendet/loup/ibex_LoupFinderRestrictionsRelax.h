@@ -23,7 +23,6 @@
 
 namespace ibex {
 class LoupFinderRestrictionsRelax: public LoupFinderSIP {
-	const SIPSystem& system_;
 	Linearizer& linearizer_;
 	LPSolver* lp_solver_;
 public:

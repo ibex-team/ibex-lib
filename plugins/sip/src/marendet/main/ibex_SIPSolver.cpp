@@ -123,7 +123,7 @@ void SIPSolver::start(const IntervalVector& init_box)
     Cell* root = new Cell(init_box);
 
     // add data required by this solver
-    root->prop.add(new BxpNodeData());
+    ctc.add_property(init_box, root->prop);
 
     // add data required by the bisector
     bsc.add_property(init_box, root->prop);
@@ -157,7 +157,7 @@ void SIPSolver::start(const char* input_paving)
         Cell* cell = new Cell(it->existence());
 
         // add data required by this solver
-        cell->prop.add(new BxpNodeData()); // Not efficient...
+        ctc.add_property(it->existence(), cell->prop); // Not efficient...
 
         // add data required by the bisector
         bsc.add_property(it->existence(), cell->prop);

@@ -15,9 +15,9 @@
 #include "system/ibex_SIPSystem.h"
 namespace ibex {
 
-CtcFwdBwdNLC::CtcFwdBwdNLC(const NLConstraint& constraint)
+CtcFwdBwdNLC::CtcFwdBwdNLC(const NLConstraint& constraint, const SIPSystem& system)
 : Ctc(constraint.function_->nb_var()), function_(constraint.function_),
-backward_domain_(Interval::NEG_REALS)
+backward_domain_(Interval::NEG_REALS), system_(system)
 {
 	init();
 }
@@ -34,7 +34,7 @@ void CtcFwdBwdNLC::init() {
 
 void CtcFwdBwdNLC::add_property(const IntervalVector& init_box, BoxProperties& map) {
     if(map[BxpNodeData::id] == nullptr) {
-        map.add(new BxpNodeData());
+        map.add(new BxpNodeData(system_.getInitialNodeCaches()));
     }
 }
 

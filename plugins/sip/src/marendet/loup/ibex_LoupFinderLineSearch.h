@@ -24,7 +24,7 @@
 namespace ibex {
 class LoupFinderLineSearch: public LoupFinderSIP {
 public:
-	LoupFinderLineSearch(SIPSystem& system);
+	LoupFinderLineSearch(const SIPSystem& system);
 	virtual ~LoupFinderLineSearch();
 
 	std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
@@ -32,7 +32,6 @@ public:
 	bool is_inner_with_paving_simplification(const IntervalVector& box);
 	void blankenship(const IntervalVector& box);
 private:
-	SIPSystem& system_;
 	RelaxationLinearizerSIP linearizer_;
 	LPSolver lp_solver_;
 	BxpNodeData* node_data_ = nullptr;

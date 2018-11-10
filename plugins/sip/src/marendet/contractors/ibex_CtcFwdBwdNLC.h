@@ -12,6 +12,7 @@
 #define __SIP_IBEX_CTCFWDBWDNLC_H__
 
 #include "ibex_NLConstraint.h"
+#include "ibex_SIPSystem.h"
 
 #include "ibex_Ctc.h"
 #include "ibex_Interval.h"
@@ -26,9 +27,9 @@ namespace ibex {
 class CtcFwdBwdNLC : public Ctc {
     const Function* function_;
     Interval backward_domain_;
-    
+    const SIPSystem& system_;
 public:
-    CtcFwdBwdNLC(const NLConstraint& constraint);
+    CtcFwdBwdNLC(const NLConstraint& constraint, const SIPSystem& system);
     ~CtcFwdBwdNLC();
     void add_property(const IntervalVector& init_box, BoxProperties& map);
     void contract(IntervalVector& box);

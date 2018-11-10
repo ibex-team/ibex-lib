@@ -11,6 +11,8 @@
 #ifndef __SIP_IBEX_CTCFWDBWDSIC_H__
 #define __SIP_IBEX_CTCFWDBWDSIC_H__
 
+#include "ibex_SIPSystem.h"
+
 #include "ibex_Ctc.h"
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
@@ -27,9 +29,10 @@ class CtcFwdBwdSIC : public Ctc {
     const SIConstraint& constraint_;
     Interval backward_domain_;
     size_t sic_index_;
+    const SIPSystem& system_;
 
 public:
-    CtcFwdBwdSIC(const SIConstraint& constraint, size_t sic_index);
+    CtcFwdBwdSIC(const SIConstraint& constraint, size_t sic_index, const SIPSystem& system);
     ~CtcFwdBwdSIC();
     void add_property(const IntervalVector& init_box, BoxProperties& map);
     void contract(IntervalVector& box);

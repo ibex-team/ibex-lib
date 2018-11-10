@@ -29,7 +29,7 @@ CtcEvaluation::~CtcEvaluation() {
 
 void CtcEvaluation::add_property(const IntervalVector& init_box, BoxProperties& map) {
     if(map[BxpNodeData::id] == nullptr) {
-        map.add(new BxpNodeData());
+        map.add(new BxpNodeData(system_.getInitialNodeCaches()));
     }
 }
 

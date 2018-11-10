@@ -21,7 +21,7 @@ namespace ibex {
 
 LoupFinderRestrictionsRelax::LoupFinderRestrictionsRelax(
 		const SIPSystem& system, Linearizer& linearizer) :
-		system_(system), linearizer_(linearizer), lp_solver_(
+		LoupFinderSIP(system), linearizer_(linearizer), lp_solver_(
 				new LPSolver(linearizer_.nb_var())) {
 	lp_solver_->set_max_iter(10000000);
 	lp_solver_->set_max_time_out(1000000);

@@ -26,8 +26,8 @@ using namespace std;
 
 namespace ibex {
 
-LoupFinderLineSearch::LoupFinderLineSearch(SIPSystem& system) :
-		system_(system), linearizer_(system, RelaxationLinearizerSIP::CornerPolicy::random, false), lp_solver_(
+LoupFinderLineSearch::LoupFinderLineSearch(const SIPSystem& system) :
+		LoupFinderSIP(system), linearizer_(system, RelaxationLinearizerSIP::CornerPolicy::random, false), lp_solver_(
 				system.ext_nb_var, 10000, 10000) {
 
 }
