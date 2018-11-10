@@ -22,7 +22,6 @@
 
 namespace ibex {
 class LoupFinderSIPDefault: public LoupFinderSIP {
-	const SIPSystem& system_;
 public:
 	LoupFinderSIPDefault(const SIPSystem& system);
 	virtual ~LoupFinderSIPDefault();

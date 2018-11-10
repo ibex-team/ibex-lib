@@ -19,7 +19,7 @@ namespace ibex {
 
 LoupFinderSIPDefault::LoupFinderSIPDefault(
 		const SIPSystem& system) :
-		system_(system) {
+		LoupFinderSIP(system) {
 }
 
 LoupFinderSIPDefault::~LoupFinderSIPDefault() {

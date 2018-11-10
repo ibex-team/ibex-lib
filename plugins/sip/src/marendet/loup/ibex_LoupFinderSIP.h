@@ -23,6 +23,7 @@
 namespace ibex {
 class LoupFinderSIP : public LoupFinder {
 public:
+	LoupFinderSIP(const SIPSystem& system);
 	virtual ~LoupFinderSIP();
 
 	void add_property(const IntervalVector& init_box, BoxProperties& prop);
@@ -44,6 +45,7 @@ protected:
 	 */
 	bool check(const SIPSystem& sys, const Vector& pt, double& loup, bool is_inner, BoxProperties& prop);
 
+	const SIPSystem& system_;
 };
 
 } // end namespace ibex

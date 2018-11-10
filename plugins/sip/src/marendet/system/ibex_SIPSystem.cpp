@@ -21,13 +21,13 @@ using namespace std;
 
 namespace ibex {
 
-SIPSystem* BxpNodeData::sip_system = nullptr;
+//SIPSystem* BxpNodeData::sip_system = nullptr;
 
 long BxpNodeData::id = next_id();
 
-BxpNodeData::BxpNodeData() :
+/*BxpNodeData::BxpNodeData() :
 		BxpNodeData(BxpNodeData::sip_system->getInitialNodeCaches()) {
-}
+}*/
 
 BxpNodeData::BxpNodeData(const vector<SIConstraintCache>& caches) :
 		Bxp(id), sic_constraints_caches(caches) {
@@ -214,7 +214,7 @@ IntervalVector SIPSystem::extractInitialBox() const {
 	return tmp.var_box(ibex_system_->box);
 }
 
-vector<SIConstraintCache> SIPSystem::getInitialNodeCaches() {
+vector<SIConstraintCache> SIPSystem::getInitialNodeCaches() const {
 	vector<SIConstraintCache> caches;
 	for (const IntervalVector& parameter_box : initial_parameter_boxes_) {
 		caches.emplace_back(SIConstraintCache(parameter_box));

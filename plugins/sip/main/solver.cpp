@@ -251,7 +251,7 @@ int main(int argc, const char ** argv) {
 		} else {
 			srand(time(NULL));
 		}
-		BxpNodeData::sip_system = &system;
+		//BxpNodeData::sip_system = &system;
 
 		//ibex::CellStack buffer;
 		ibex::CellBuffer* buffer;

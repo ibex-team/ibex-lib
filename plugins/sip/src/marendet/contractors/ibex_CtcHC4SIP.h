@@ -31,11 +31,11 @@ private:
 	Array<Ctc> convert(const SIPSystem& system) {
 		size_t sic_index = 0;
 		for (const SIConstraint& sic : system.sic_constraints_) {
-			owned_ctcs_.push_back(new CtcFwdBwdSIC(sic, sic_index));
+			owned_ctcs_.push_back(new CtcFwdBwdSIC(sic, sic_index, system));
 			sic_index++;
 		}
 		for (const NLConstraint& nlc : system.normal_constraints_) {
-			owned_ctcs_.push_back(new CtcFwdBwdNLC(nlc));
+			owned_ctcs_.push_back(new CtcFwdBwdNLC(nlc, system));
 		}
 		return owned_ctcs_;
 	}

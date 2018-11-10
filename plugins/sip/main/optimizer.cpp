@@ -256,7 +256,7 @@ int main(int argc, const char ** argv) {
 
 		srand(random_seed.Get());
 
-		BxpNodeData::sip_system = &sys;
+		//BxpNodeData::sip_system = &sys;
 
 		CellDoubleHeapSIP buffer = CellDoubleHeapSIP(sys, 20);
 		ibex::RoundRobin bisector = ibex::RoundRobin(0);

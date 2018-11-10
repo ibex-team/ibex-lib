@@ -59,7 +59,7 @@ SIPOptimizer::Status SIPOptimizer::minimize(const IntervalVector& box, double ob
 	initial_box.put(0, box);
 	initial_box[n - 1] = Interval::ALL_REALS;
 	Cell* root = new Cell(initial_box);
-	root->prop.add(new BxpNodeData());
+	//root->prop.add(new BxpNodeData());
 	bisector_.add_property(initial_box, root->prop);
 	buffer_.add_property(initial_box, root->prop);
 	ctc_.add_property(initial_box, root->prop);

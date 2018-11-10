@@ -48,7 +48,7 @@ public:
 	bool is_inner(const IntervalVector& pt, BxpNodeData& prop) const;
 
 	// Load all node data for this node: current B&B box and SIConstraintsCache
-	std::vector<SIConstraintCache> getInitialNodeCaches();
+	std::vector<SIConstraintCache> getInitialNodeCaches() const;
 	//void loadBxpNodeData(BxpNodeData* BxpNodeData);
 	//void updateBxpNodeData();
 	IntervalVector extractInitialBox() const;
@@ -69,9 +69,9 @@ private:
 
 class BxpNodeData: public Bxp {
 public:
-	static SIPSystem* sip_system;
+	//static SIPSystem* sip_system;
 	static long id;
-	BxpNodeData();
+	//BxpNodeData();
 	BxpNodeData(const std::vector<SIConstraintCache>& caches);
 	virtual Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const;
 	virtual void update(const BoxEvent& event, const BoxProperties& prop);
