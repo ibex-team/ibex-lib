@@ -33,6 +33,16 @@ RestrictionLinearizerSIP::RestrictionLinearizerSIP(const SIPSystem& system, Corn
 }
 
 int RestrictionLinearizerSIP::linearize(const IntervalVector& box, LPSolver& lp_solver) {
+	ibex_error("RestrictionLinearizerSIP::linearize: called with no box_properties");
+	return -1;
+}
+
+int RestrictionLinearizerSIP::linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) {
+    BxpNodeData* node_data = (BxpNodeData*) prop[BxpNodeData::id];
+	if(node_data == nullptr) {
+		ibex_error("RelaxationLinearizerSIP::linearize: BxpNodeData must be set");
+	}
+    
     int added_count = 0;
     box_ = box;
     setCornerAndAlpha();
@@ -49,7 +59,7 @@ int RestrictionLinearizerSIP::linearize(const IntervalVector& box, LPSolver& lp_
     std::vector<Vector> lhs_sic;
     std::vector<double> rhs_sic;
     for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
-        added_count += linearizeSIC(system_.sic_constraints_[i], lhs_sic, rhs_sic);
+        added_count += linearizeSIC(system_.sic_constraints_[i], lhs_sic, rhs_sic, node_data->sic_constraints_caches[i]);
     }
     for(int i = 0; i < rhs_sic.size(); ++i) {
         if(lhs_sic[i].max() > 1e10 || lhs_sic[i].min() < -1e10 || !isfinite(lhs_sic[i]) || !std::isfinite(rhs_sic[i])) {
@@ -72,11 +82,11 @@ int RestrictionLinearizerSIP::linearizeNLC(const NLConstraint& nlc, Vector& lhs,
     return 1;
 }
 
-int RestrictionLinearizerSIP::linearizeSIC(const SIConstraint& constraint, std::vector<Vector>& lhs, std::vector<double>& rhs) const {
+int RestrictionLinearizerSIP::linearizeSIC(const SIConstraint& constraint, std::vector<Vector>& lhs, std::vector<double>& rhs, SIConstraintCache& cache) const {
     int added_count = 0;
     // TODO : Sale. Peut etre une fonction getUpdatedCache dans SIConstraint ?
-    constraint.cache_->update_cache(*constraint.function_, box_);
-    for(const auto& mem_box : constraint.cache_->parameter_caches_) {
+    cache.update_cache(*constraint.function_, box_);
+    for(const auto& mem_box : cache.parameter_caches_) {
     	Interval function_value = constraint.evaluate(corner_, mem_box.parameter_box);
         //Interval function_value = mem_box.evaluation;
         IntervalVector gradient = mem_box.full_gradient;

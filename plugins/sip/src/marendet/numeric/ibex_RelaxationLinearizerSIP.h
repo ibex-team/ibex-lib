@@ -36,10 +36,11 @@ public:
 	RelaxationLinearizerSIP(const SIPSystem& system,
 			CornerPolicy corner_policy, bool opposite);
 	int linearize(const IntervalVector& box, LPSolver& lp_solver);
+	int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
 	int linearizeNLC(const NLConstraint& constraint,
 			std::vector<Vector>& lhs, std::vector<double>& rhs) const;
 	int linearizeSIC(const SIConstraint& constraint,
-			std::vector<Vector>& lhs, std::vector<double>& rhs) const;
+			std::vector<Vector>& lhs, std::vector<double>& rhs, SIConstraintCache& cache) const;
 private:
 	void setCornersAndAlphas();
 	const SIPSystem& system_;

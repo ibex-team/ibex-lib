@@ -142,10 +142,10 @@ SIPOptimizer::Status SIPOptimizer::minimize(const IntervalVector& box, double ob
 void SIPOptimizer::handleCell(Cell& cell) {
 	// LOAD THE NEW CACHE!
 
-	BxpNodeData* data=(BxpNodeData*) cell.prop[BxpNodeData::id];
-	if (data == nullptr) ibex_error("[ibexopt-sip]: no node data!");
+	//BxpNodeData* data=(BxpNodeData*) cell.prop[BxpNodeData::id];
+	//if (data == nullptr) ibex_error("[ibexopt-sip]: no node data!");
 
-	BxpNodeData::sip_system->loadBxpNodeData(data);
+	//BxpNodeData::sip_system->loadBxpNodeData(data);
 	//cout << "before : " << cell.box << endl;
 	//const auto& list = cell.get<BxpNodeData>().sic_constraints_caches[0].parameter_caches_;
 	/*cout << "{";
