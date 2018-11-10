@@ -32,6 +32,11 @@ LoupFinderRestrictionsRelax::~LoupFinderRestrictionsRelax() {
 }
 
 std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
+	ibex_warning("LoupFinderRestrictionsRelax: called with no BoxProperties");
+	return make_pair(loup_point, loup);
+}
+
+std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop) {
 	IntervalVector box_without_goal = box.subvector(0, box.size()-2);
 	if(!(lp_solver_->default_limit_diam_box.contains(box_without_goal.max_diam()))) {
 		throw NotFound();
@@ -66,12 +71,12 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const Interv
 		//if(new_loup < loup)
 		Vector loup_point_plus_goal(loup_point.size()+1);
 		loup_point_plus_goal.put(0, loup_point);
-		if(check(system_, loup_point_plus_goal, new_loup, true)) {
+		if(check(system_, loup_point_plus_goal, new_loup, true, prop)) {
 			return std::make_pair(loup_point, new_loup);
 		}
 	}
 	Vector loup_point_plus_goal(box.mid());
-	if(check(system_, loup_point_plus_goal, loup, false)) {
+	if(check(system_, loup_point_plus_goal, loup, false, prop)) {
 		return std::make_pair(loup_point_plus_goal.subvector(0, box.size()-2), loup);
 	}
 	throw NotFound();

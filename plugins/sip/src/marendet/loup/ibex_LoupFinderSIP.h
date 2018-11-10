@@ -42,7 +42,7 @@ protected:
 	 *
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
-	bool check(const SIPSystem& sys, const Vector& pt, double& loup, bool is_inner);
+	bool check(const SIPSystem& sys, const Vector& pt, double& loup, bool is_inner, BoxProperties& prop);
 
 };
 

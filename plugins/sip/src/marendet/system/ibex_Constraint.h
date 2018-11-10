@@ -19,9 +19,9 @@ class Constraint {
     
 public:
 	virtual ~Constraint() { };
-    virtual Interval evaluate(const IntervalVector& box) const =0;
-    virtual IntervalVector gradient(const IntervalVector& box) const =0;
-    virtual bool isSatisfied(const IntervalVector& box) const =0;
+    //virtual Interval evaluate(const IntervalVector& box) const =0;
+    //virtual IntervalVector gradient(const IntervalVector& box) const =0;
+    //virtual bool isSatisfied(const IntervalVector& box) const =0;
 };
 
 } // end namespace ibex
