@@ -76,11 +76,13 @@ double SIPSystem::goal_ub(const IntervalVector& pt) const {
 	return goal_function_->eval(pt).ub();
 }
 
-bool SIPSystem::is_inner(const IntervalVector& pt) const {
+bool SIPSystem::is_inner(const IntervalVector& pt, BxpNodeData& node_data) const {
+	int sic_index = 0;
 	for (const auto& sic : sic_constraints_) {
-		if (sic.evaluateWithoutCachedValue(pt).ub() > 0) {
+		if (sic.evaluateWithoutCachedValue(pt, node_data.sic_constraints_caches[sic_index]).ub() > 0) {
 			return false;
 		}
+		sic_index++;
 	}
 	for (int i = 0; i < normal_constraints_.size() - 1; ++i) {
 		if (normal_constraints_[i].evaluate(pt).ub() > 0) {

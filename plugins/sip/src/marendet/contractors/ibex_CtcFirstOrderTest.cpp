@@ -45,6 +45,10 @@ void CtcFirstOrderTest::contract(IntervalVector& box, ContractContext& context) 
 	if(box.size() == 2) {
 		return;
 	}
+	BxpNodeData* node_data = (BxpNodeData*) context.prop[BxpNodeData::id];
+	if(node_data == nullptr) {
+		ibex_error("CtcFirstOrderTest: BxpNodeData must be set");
+	}
 	vector<IntervalVector> gradients;
 	for (int i = 0; i < system_.normal_constraints_.size() - 1; ++i) {
 		if (!system_.normal_constraints_[i].isSatisfied(box)) {
@@ -52,8 +56,8 @@ void CtcFirstOrderTest::contract(IntervalVector& box, ContractContext& context) 
 		}
 	}
 	for (int i = 0; i < system_.sic_constraints_.size(); ++i) {
-		if (!system_.sic_constraints_[i].isSatisfied(box)) {
-			gradients.push_back(system_.sic_constraints_[i].gradient(box));
+		if (!system_.sic_constraints_[i].isSatisfied(box, node_data->sic_constraints_caches[i])) {
+			gradients.push_back(system_.sic_constraints_[i].gradient(box, node_data->sic_constraints_caches[i]));
 		}
 	}
 

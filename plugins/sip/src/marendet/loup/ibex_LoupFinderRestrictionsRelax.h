@@ -30,6 +30,7 @@ public:
 	LoupFinderRestrictionsRelax(const SIPSystem& system, Linearizer& restrictions);
 	virtual ~LoupFinderRestrictionsRelax();
 	std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
+	std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop);
 
 };
 

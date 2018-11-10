@@ -31,22 +31,22 @@ void SIConstraint::loadCache(SIConstraintCache *cache) {
 	cache_->must_be_updated_ = true;
 }
 
-Interval SIConstraint::evaluateWithoutCachedValue(const IntervalVector& box) const {
+Interval SIConstraint::evaluateWithoutCachedValue(const IntervalVector& box, SIConstraintCache& cache) const {
 	Interval res = Interval::ZERO;
 	IntervalVector full_box(function_->nb_var());
 	full_box.put(0, box);
 	const int x_dim = box.size();
-	for (auto& cache_cell : cache_->parameter_caches_) {
+	for (auto& cache_cell : cache.parameter_caches_) {
 		full_box.put(x_dim, cache_cell.parameter_box);
 		res |= centeredFormEval(*function_, full_box);
 	}
 	return res;
 }
 
-Interval SIConstraint::evaluate(const IntervalVector& box) const {
+/*Interval SIConstraint::evaluate(const IntervalVector& box) const {
 	cache_->update_cache(*function_, box);
 	return cache_->eval_cache_;
-}
+}*/
 
 Interval SIConstraint::evaluate(const IntervalVector &box,
 		const IntervalVector& parameter_box) const {
@@ -61,10 +61,10 @@ Interval SIConstraint::evaluate(const IntervalVector& box, SIConstraintCache& ca
 	return cache.eval_cache_;
 }
 
-IntervalVector SIConstraint::gradient(const IntervalVector& box) const {
+/*IntervalVector SIConstraint::gradient(const IntervalVector& box) const {
 	cache_->update_cache(*function_, box);
 	return cache_->gradient_cache_;
-}
+}*/
 
 IntervalVector SIConstraint::gradient(const IntervalVector& box, SIConstraintCache& cache) const {
 	cache.update_cache(*function_, box);
@@ -79,15 +79,15 @@ IntervalVector SIConstraint::gradient(const IntervalVector& box,
 	return function_->gradient(full_box);
 }
 
-bool SIConstraint::isSatisfied(const IntervalVector& box) const {
-	return evaluate(box).ub() <= 0;
+bool SIConstraint::isSatisfied(const IntervalVector& box, SIConstraintCache& cache) const {
+	return evaluate(box, cache).ub() <= 0;
 }
 
-bool SIConstraint::isSatisfiedWithoutCachedValues(const IntervalVector& box) const {
+bool SIConstraint::isSatisfiedWithoutCachedValues(const IntervalVector& box, SIConstraintCache& cache) const {
 	IntervalVector full_box(function_->nb_var());
 	full_box.put(0, box);
 	const int x_dim = box.size();
-	for (auto& cache_cell : cache_->parameter_caches_) {
+	for (auto& cache_cell : cache.parameter_caches_) {
 		full_box.put(x_dim, cache_cell.parameter_box);
 		if(centeredFormEval(*function_, full_box).ub() > 0) {
 			return false;

@@ -258,7 +258,7 @@ protected:
 	 * slightly changed (due to inflating Newton) and the actual "solution"
 	 * is stored in the existence box of the output.
 	 */
-	SIPSolverOutputBox check_sol(const IntervalVector& box);
+	SIPSolverOutputBox check_sol(const Cell& c);
 
 	/**
 	 * \brief Check if the box is "BOUNDARY"

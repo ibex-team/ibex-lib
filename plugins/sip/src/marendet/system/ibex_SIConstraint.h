@@ -39,17 +39,17 @@ public:
 	 * \brief Must be called each time the cache change (i.e. when treating a new node).
 	 **/
 	void loadCache(SIConstraintCache* cache);
-	Interval evaluate(const IntervalVector& box) const;
-	Interval evaluateWithoutCachedValue(const IntervalVector& box) const;
+	//Interval evaluate(const IntervalVector& box) const;
+	Interval evaluateWithoutCachedValue(const IntervalVector& box, SIConstraintCache& cache) const;
 	Interval evaluate(const IntervalVector &box,
 			const IntervalVector& parameter_box) const;
 	Interval evaluate(const IntervalVector& box, SIConstraintCache& cache) const;
-	IntervalVector gradient(const IntervalVector& box) const;
+	//IntervalVector gradient(const IntervalVector& box) const;
 	IntervalVector gradient(const IntervalVector& box, SIConstraintCache& cache) const;
 	IntervalVector gradient(const IntervalVector& box,
 			const IntervalVector& parameter_box) const;
-	bool isSatisfied(const IntervalVector& box) const;
-	bool isSatisfiedWithoutCachedValues(const IntervalVector& box) const;
+	bool isSatisfied(const IntervalVector& box, SIConstraintCache& cache) const;
+	bool isSatisfiedWithoutCachedValues(const IntervalVector& box, SIConstraintCache& cache) const;
 
 };
 

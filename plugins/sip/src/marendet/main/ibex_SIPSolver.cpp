@@ -233,7 +233,7 @@ SIPSolverOutputBox* SIPSolver::next()
             // if the system is under constrained
             if (!c->box.is_empty() && m < n) {
                 // note: cannot return PENDING status
-                SIPSolverOutputBox new_sol = check_sol(c->box);
+                SIPSolverOutputBox new_sol = check_sol(*c);
                 if (new_sol.status != SIPSolverOutputBox::UNKNOWN) {
                     if ((m == 0 && new_sol.status == SIPSolverOutputBox::INNER) || !is_too_large(new_sol.existence())) {
                         delete buffer.pop();
@@ -262,7 +262,7 @@ SIPSolverOutputBox* SIPSolver::next()
             }
 
             catch (NoBisectableVariableException&) {
-                SIPSolverOutputBox new_sol = check_sol(c->box);
+                SIPSolverOutputBox new_sol = check_sol(*c);
                 delete buffer.pop();
                 return &store_sol(new_sol);
             }
@@ -330,7 +330,7 @@ SIPSolver::Status SIPSolver::solve()
     return manif->status;
 }
 
-SIPSolverOutputBox SIPSolver::check_sol(const IntervalVector& box)
+SIPSolverOutputBox SIPSolver::check_sol(const Cell& c)
 {
 
     SIPSolverOutputBox sol(n);
@@ -365,12 +365,12 @@ SIPSolverOutputBox SIPSolver::check_sol(const IntervalVector& box)
 	 }
 	 }*/
     //} else {
-    sol._existence = box;
+    sol._existence = c.box;
     sol._unicity = NULL;
     //}
 
     if (sol.status == SIPSolverOutputBox::UNKNOWN) {
-        sol._existence = box;
+        sol._existence = c.box;
         if (sol._unicity != NULL)
             delete sol._unicity;
         sol._unicity = NULL;
@@ -379,7 +379,7 @@ SIPSolverOutputBox SIPSolver::check_sol(const IntervalVector& box)
 
         // Note that the following line also tests the case of an existence box outside
         // the initial box of the search
-        if (box.is_disjoint(sol.existence())) {
+        if (c.box.is_disjoint(sol.existence())) {
             throw EmptyBoxException();
         }
     }
@@ -394,7 +394,8 @@ SIPSolverOutputBox SIPSolver::check_sol(const IntervalVector& box)
             //NumConstraint& c=ineqs->ctrs[i];
             //assert(c.f.image_dim()==1);
             //y=c.f.eval(sol.existence());
-            y = ineqs->sic_constraints_[i].evaluateWithoutCachedValue(sol.existence());
+            auto& cache = ((BxpNodeData*)c.prop[BxpNodeData::id])->sic_constraints_caches[i];
+            y = ineqs->sic_constraints_[i].evaluateWithoutCachedValue(sol.existence(), cache);
             //r=c.right_hand_side().i();
             r = Interval::NEG_REALS; // Constraint is always scalar and <= 0
             if (y.is_disjoint(r)) {

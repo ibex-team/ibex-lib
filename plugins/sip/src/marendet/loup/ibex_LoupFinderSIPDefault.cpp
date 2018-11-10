@@ -25,10 +25,15 @@ LoupFinderSIPDefault::LoupFinderSIPDefault(
 LoupFinderSIPDefault::~LoupFinderSIPDefault() {
 }
 
+std::pair<IntervalVector, double> LoupFinderSIPDefault::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
+	ibex_warning("LoupFinderSIPDefault: called with no BoxProperties");
+	return make_pair(loup_point, loup);
+}
+
 std::pair<IntervalVector, double> LoupFinderSIPDefault::find(
-		const IntervalVector& box, const IntervalVector& loup_point, double loup) {
+		const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop) {
     Vector loup_point_plus_goal(box.mid());
-	if(check(system_, loup_point_plus_goal, loup, false)) {
+	if(check(system_, loup_point_plus_goal, loup, false, prop)) {
 		return std::make_pair(loup_point_plus_goal.subvector(0, box.size()-2), loup);
 	}
 	throw NotFound();

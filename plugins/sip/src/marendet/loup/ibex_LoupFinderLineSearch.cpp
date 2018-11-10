@@ -153,7 +153,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 		//cout << print_mma(point_plus_goal) << endl;
 		if (box.subvector(0, system_.nb_var-1).contains(point)) {
 			double new_loup = loup;
-			if (check(system_, point, new_loup, true) && new_loup < best_loup) {
+			if (check(system_, point, new_loup, true, prop) && new_loup < best_loup) {
 				best_loup_point = point;
 				best_loup = new_loup;
 				loup_found = true;
@@ -179,7 +179,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 			//cout << "point=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
 			//cout << "line search=" <<  point_plus_goal << endl;
 			new_loup = loup;
-			if (box.contains(point_plus_goal) && check(system_, point, new_loup, true) && new_loup < best_loup) {
+			if (box.contains(point_plus_goal) && check(system_, point, new_loup, true, prop) && new_loup < best_loup) {
 				//std::cout << "lf22" << std::endl;
 				best_loup_point = point;
 				best_loup = new_loup;
