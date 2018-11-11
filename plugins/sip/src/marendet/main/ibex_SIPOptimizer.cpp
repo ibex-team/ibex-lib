@@ -45,7 +45,7 @@ SIPOptimizer::SIPOptimizer(Ctc& ctc, Bsc& bisector, LoupFinderSIP& loup_finder, 
 
 }
 
-SIPOptimizer::Status SIPOptimizer::minimize(const IntervalVector& box, double obj_init_bound) {
+SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double obj_init_bound) {
 	n = box.size() + 1;
 	loup_ = obj_init_bound;
 	// Initialize the loup for the buffer

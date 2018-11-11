@@ -44,7 +44,7 @@ public:
 			LoupFinderSIP& loup_finder, LoupFinderSIP* loup_finder2, CellBufferOptim& buffer,
 			double abs_eps, double rel_eps, double timeout = -1, double eps_x = 0, int maxiter_ = -1, double lf_loop_ratio=default_lf_loop_ratio);
 
-	SIPOptimizer::Status minimize(const IntervalVector& box, double obj_init_bound =
+	SIPOptimizer::Status optimize(const IntervalVector& box, double obj_init_bound =
 	POS_INFINITY);
 
 	void report(bool verbose = true);
