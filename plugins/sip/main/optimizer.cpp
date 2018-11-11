@@ -16,6 +16,7 @@
 #include "loup/ibex_LoupFinderLineSearch.h"
 #include "loup/ibex_LoupFinderRestrictionsRelax.h"
 #include "loup/ibex_LoupFinderSIPDefault.h"
+#include "loup/ibex_LoupFinderCompo.h"
 #include "main/ibex_CellDoubleHeapSIP.h"
 #include "main/ibex_MinibexOptionsParser.h"
 #include "main/ibex_SIPOptimizer.h"
@@ -34,6 +35,7 @@
 #include "ibex_SyntaxError.h"
 #include "ibex_UnknownFileException.h"
 #include "ibex_LargestFirst.h"
+#include "ibex_Optimizer.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -335,8 +337,9 @@ int main(int argc, const char ** argv) {
 		}
 		CtcCompo* ctc = new CtcCompo(ctc_list);
 
+		//LoupFinderCompo lf_compo(Array<LoupFinder>(*loup_finder, *loup_finder2));
 		SIPOptimizer optimizer(*ctc, bisector, *loup_finder, loup_finder2, buffer, abs_eps_f.Get(), -1, 0, -1);
-
+		//Optimizer optimizer(sys.nb_var, *ctc, bisector, lf_compo, buffer, sys.nb_var);
 		// This option limits the search time
 		if (timeout) {
 			if (!quiet)
@@ -369,9 +372,9 @@ int main(int argc, const char ** argv) {
 
 		// Search for the optimum
 		if (initial_loup)
-			optimizer.minimize(sys.extractInitialBox(), initial_loup.Get());
+			optimizer.optimize(sys.extractInitialBox(), initial_loup.Get());
 		else
-			optimizer.minimize(sys.extractInitialBox());
+			optimizer.optimize(sys.extractInitialBox());
 
 		if (trace)
 			cout << endl;
