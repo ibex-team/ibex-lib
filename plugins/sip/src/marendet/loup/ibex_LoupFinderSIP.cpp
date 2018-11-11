@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_LoupFinderSIP.h"
+#include "ibex_utils.h"
 
 using namespace std;
 
@@ -31,9 +32,7 @@ void LoupFinderSIP::add_property(const IntervalVector& init_box, BoxProperties& 
 bool LoupFinderSIP::check(const SIPSystem& sys, const Vector& pt, double& loup, bool _is_inner, BoxProperties& prop) {
 
 	// "res" will contain an upper bound of the criterion
-	Vector pt_without_goal(pt.size()-1);
-	pt_without_goal.put(0, pt.subvector(0, pt.size()-2));
-	double res = sys.goal_ub(pt_without_goal);
+	double res = sys.goal_ub(pt);
 
 	// check if f(x) is below the "loup" (the current upper bound).
 	//
@@ -49,9 +48,9 @@ bool LoupFinderSIP::check(const SIPSystem& sys, const Vector& pt, double& loup, 
 	if(node_data == nullptr) {
 		ibex_error("LoupFinderSIP::check: BxpNodeData must be set");
 	}
-
+	Vector ext_pt = sip_to_ext_box(pt, res);
 	if (res<loup) {
-		if (_is_inner || sys.is_inner(pt, *node_data)) {
+		if (_is_inner || sys.is_inner(ext_pt, *node_data)) {
 			loup = res;
 			return true;
 		}
