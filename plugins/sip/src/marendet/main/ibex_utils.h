@@ -23,6 +23,14 @@ std::vector<IntervalVector> bisectAllDim(const IntervalVector& iv);
 
 bool isfinite(const Vector& v);
 
+IntervalVector sip_to_ext_box(const IntervalVector& box, const Interval& g);
+IntervalVector sip_from_ext_box(const IntervalVector& ext_box);
+Interval sip_goal_from_ext_box(const IntervalVector& ext_box);
+
+Vector sip_to_ext_box(const Vector& box, double g);
+Vector sip_from_ext_box(const Vector& ext_box);
+double sip_goal_from_ext_box(const Vector& ext_box);
+
 
 std::string print_mma(const Vector& iv);
 std::string print_mma(const IntervalVector& iv);

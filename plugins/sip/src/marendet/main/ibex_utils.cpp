@@ -19,6 +19,36 @@ using namespace std;
 
 namespace ibex {
 
+IntervalVector sip_to_ext_box(const IntervalVector& box, const Interval& g) {
+	IntervalVector ext_box(box.size()+1);
+	ext_box.put(0, box);
+	ext_box[ext_box.size()-1] = g;
+	return ext_box;
+}
+
+IntervalVector sip_from_ext_box(const IntervalVector& ext_box) {
+	return ext_box.subvector(0, ext_box.size()-2);
+}
+
+Interval sip_goal_from_ext_box(const IntervalVector& ext_box) {
+	return ext_box[ext_box.size()-1];
+}
+
+Vector sip_to_ext_box(const Vector& box, double g) {
+	Vector ext_box(box.size()+1);
+	ext_box.put(0, box);
+	ext_box[ext_box.size()-1] = g;
+	return ext_box;
+}
+
+Vector sip_from_ext_box(const Vector& ext_box) {
+	return ext_box.subvector(0, ext_box.size()-2);
+}
+
+double sip_goal_from_ext_box(const Vector& ext_box) {
+	return ext_box[ext_box.size()-1];
+}
+
 Interval centeredFormEval(const Function& function, const IntervalVector& arg) {
 	/*Interval natural_extension = function.eval(arg);
 	Interval centered_form = function.eval(arg.mid()) + function.gradient(arg) * (arg - arg.mid());*/

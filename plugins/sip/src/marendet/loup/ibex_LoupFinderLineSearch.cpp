@@ -145,26 +145,25 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	}
 	//cout << "t=" << t << endl;
 	if (!t.is_empty()) {
-		Vector point = sol + t.lb() * direction;
+		Vector point = sol_without_goal + t.lb() * direction;
 		//cout << "g(point)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
-		Vector point_plus_goal(system_.ext_nb_var);
-		point_plus_goal.put(0, point);
-		point_plus_goal[system_.ext_nb_var-1] = system_.goal_ub(point);
+		Vector ext_point = sip_to_ext_box(point, system_.goal_ub(point));
 		//cout << print_mma(point_plus_goal) << endl;
 		if (box.subvector(0, system_.nb_var-1).contains(point)) {
 			double new_loup = loup;
-			if (check(system_, point, new_loup, true, prop) && new_loup < best_loup) {
-				best_loup_point = point;
+			if (check(system_, ext_point, new_loup, true, prop) && new_loup < best_loup) {
+				best_loup_point = ext_point;
 				best_loup = new_loup;
 				loup_found = true;
 			}
-			Vector left = sol;
+			Vector left = sol_without_goal;
 			Vector right = point;
-			for(int i = 0; i < 10; ++i) {
+			for(int i = 0; i < 20; ++i) {
 				Vector middle = 0.5*(left + right);
 				//cout << "middle=" << middle.subvector(0,system_.nb_var-1) << endl;
 				//cout << "g(middle)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
-				if(is_inner_with_paving_simplification(middle)) {
+				IntervalVector ext_middle = sip_to_ext_box(middle, system_.goal_ub(middle));
+				if(is_inner_with_paving_simplification(ext_middle)) {
 				//if(system_.is_inner(middle)) {
 					//cout << "g(middle_inner)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
 					//cout << "goal_ub(middle)=" << system_.goal_ub(middle.subvector(0,system_.nb_var-1)) << endl;
@@ -174,14 +173,13 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 				}
 			}
 			point = right;
-			point_plus_goal.put(0, point);
-			point_plus_goal[system_.ext_nb_var-1] = system_.goal_ub(point);
+			ext_point = sip_to_ext_box(point, system_.goal_ub(point));
 			//cout << "point=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
 			//cout << "line search=" <<  point_plus_goal << endl;
 			new_loup = loup;
-			if (box.contains(point_plus_goal) && check(system_, point, new_loup, true, prop) && new_loup < best_loup) {
+			if (box.subvector(0, box.size()-2).contains(point) && check(system_, ext_point, new_loup, true, prop) && new_loup < best_loup) {
 				//std::cout << "lf22" << std::endl;
-				best_loup_point = point;
+				best_loup_point = ext_point;
 				best_loup = new_loup;
 				loup_found = true;
 			}
