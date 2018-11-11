@@ -11,8 +11,9 @@
 #include "ibex_SIPOptimizer.h"
 
 #include "ibex_Ctc.h"
-#include "loup/ibex_LoupFinderSIP.h"
-#include "system/ibex_SIPSystem.h"
+#include "ibex_LoupFinderSIP.h"
+#include "ibex_SIPSystem.h"
+#include "ibex_utils.h"
 
 #include "ibex_BisectionPoint.h"
 #include "ibex_Cell.h"
@@ -283,8 +284,8 @@ bool SIPOptimizer::updateLoup(Cell& cell) {
 	if (cell.box.is_empty())
 		return false;
 	try {
-		auto p = loup_finder_.find(cell.box, loup_point_, loup_, cell.prop);
-		loup_point_ = p.first.subvector(0, cell.box.size() - 2); // -2 to remove the goal variable
+		auto p = loup_finder_.find(sip_from_ext_box(cell.box), loup_point_, loup_, cell.prop);
+		loup_point_ = p.first; // -2 to remove the goal variable
 		loup_ = p.second;
 		if (trace_ > 0) {
 			cout << "                    ";
@@ -301,8 +302,8 @@ bool SIPOptimizer::updateLoup2(Cell& cell) {
 	if (cell.box.is_empty() || loup_finder2_ == nullptr)
 		return false;
 	try {
-		auto p = loup_finder2_->find(cell.box, loup_point_, loup_, cell.prop);
-		loup_point_ = p.first.subvector(0, cell.box.size() - 2); // -2 to remove the goal variable
+		auto p = loup_finder2_->find(sip_from_ext_box(cell.box), loup_point_, loup_, cell.prop);
+		loup_point_ = p.first; // -2 to remove the goal variable
 		loup_ = p.second;
 		if (trace_ > 0) {
 			cout << "                    ";
