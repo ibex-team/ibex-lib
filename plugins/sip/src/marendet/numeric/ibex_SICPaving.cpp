@@ -130,7 +130,7 @@ void newton_filter(const SIConstraint& constraint, SIConstraintCache& cache, con
 		try {
 			precond(param_hessian, param_gradient);
 		} catch(...) {
-			ibex_warning("Precond failed in newton_filter");
+			//ibex_warning("Precond failed in newton_filter");
 		}
 		gauss_seidel(param_hessian, -param_gradient, h);
 		it->parameter_box = h + it->parameter_box.mid();
