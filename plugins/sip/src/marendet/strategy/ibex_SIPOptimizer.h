@@ -28,24 +28,26 @@ class SIPOptimizer {
 
 public:
 	enum Status {
-		success,
-		timeout,
-		infeasible,
-		no_feasible_found,
-		unbounded_obj,
-		unreached_prec
+		SUCCESS,
+		TIMEOUT,
+		INFEASIBLE,
+		NO_FEASIBLE_FOUND,
+		UNBOUNDED_OBJ,
+		UNREACHED_PREC
 	};
 
 	static const double default_rel_eps_f;
 	static const double default_abs_eps_f;
 	static const double default_lf_loop_ratio;
+	static const double default_eps_x;
 
+	SIPOptimizer(int n, Ctc& ctc, Bsc& bisector,
+			LoupFinderSIP& loup_finder, LoupFinderSIP& loup_finder2, CellBufferOptim& buffer, int goal_var,
+			double eps_x=default_eps_x,
+			double rel_eps_f=default_rel_eps_f,
+			double abs_eps_f=default_abs_eps_f);
 
-	SIPOptimizer(Ctc& ctc, Bsc& bisector,
-			LoupFinderSIP& loup_finder, LoupFinderSIP* loup_finder2, CellBufferOptim& buffer,
-			double abs_eps, double rel_eps, double timeout = -1, double eps_x = 0, int maxiter_ = -1, double lf_loop_ratio=default_lf_loop_ratio);
-
-	SIPOptimizer::Status optimize(const IntervalVector& box, double obj_init_bound =
+	SIPOptimizer::Status optimize(const IntervalVector& init_box, double obj_init_bound =
 	POS_INFINITY);
 
 	void report(bool verbose = true);
@@ -58,8 +60,11 @@ public:
 	double get_obj_rel_prec() const;
 	double get_obj_abs_prec() const;
 
-	int trace_ = 0;
-	double timeout_;
+	const int n;
+	const int goal_var;
+	int trace = 0;
+	double timeout = -1;
+	int maxiter = -1;
 
 private:
 	double compute_ymax();
@@ -73,16 +78,15 @@ private:
 	Ctc& ctc_;
 	Bsc& bisector_;
 	LoupFinderSIP& loup_finder_;
-	LoupFinderSIP* loup_finder2_;
+	LoupFinderSIP& loup_finder2_;
 	CellBufferOptim& buffer_;
 
 	const double obj_rel_prec_f_;
 	const double obj_abs_prec_f_;
 	double eps_x_;
-	int maxiter_;
 	double lf_loop_ratio_;
 
-	SIPOptimizer::Status status_ = SIPOptimizer::Status::success;
+	SIPOptimizer::Status status_ = SIPOptimizer::Status::SUCCESS;
 	double uplo_ = NEG_INFINITY;
 	double loup_ = POS_INFINITY;
 	double initial_loup_ = POS_INFINITY;
@@ -91,29 +95,28 @@ private:
 	IntervalVector loup_point_ = IntervalVector(1);
 	int nb_cells_ = 0;
 	bool loup_changed_ = false;
-	int n = 0; // dimension of search space
 
 };
 
 inline
     std::ostream& operator<<(std::ostream& os, SIPOptimizer::Status status) {
         switch(status) {
-        case SIPOptimizer::Status::success:
+        case SIPOptimizer::Status::SUCCESS:
             os << "SUCCESS";
             break;
-        case SIPOptimizer::Status::timeout:
+        case SIPOptimizer::Status::TIMEOUT:
             os << "TIMEOUT";
             break;
-        case SIPOptimizer::Status::infeasible:
+        case SIPOptimizer::Status::INFEASIBLE:
             os << "INFEASIBLE";
             break;
-        case SIPOptimizer::Status::no_feasible_found:
+        case SIPOptimizer::Status::NO_FEASIBLE_FOUND:
             os << "NO FEASIBLE POINT FOUND";
             break;
-        case SIPOptimizer::Status::unreached_prec:
+        case SIPOptimizer::Status::UNREACHED_PREC:
             os << "UNREACHED PREC";
             break;
-        case SIPOptimizer::Status::unbounded_obj:
+        case SIPOptimizer::Status::UNBOUNDED_OBJ:
             os << "UBOUNDED OBJ";
             break;
         }

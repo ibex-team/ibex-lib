@@ -341,20 +341,21 @@ int main(int argc, const char ** argv) {
 		CtcCompo* ctc = new CtcCompo(ctc_list);
 
 		//LoupFinderCompo lf_compo(Array<LoupFinder>(*loup_finder, *loup_finder2));
-		SIPOptimizer optimizer(*ctc, bisector, *loup_finder, loup_finder2, buffer, abs_eps_f.Get(), -1, 0, -1);
+		SIPOptimizer optimizer(sys.nb_var, *ctc, bisector, *loup_finder, *loup_finder2, buffer, sys.nb_var,
+			eps_x.Get(), rel_eps_f.Get(), abs_eps_f.Get());
 		//Optimizer optimizer(sys.nb_var, *ctc, bisector, lf_compo, buffer, sys.nb_var);
 		// This option limits the search time
 		if (timeout) {
 			if (!quiet)
 				cout << "  timeout:\t" << timeout.Get() << "s" << endl;
-			optimizer.timeout_ = timeout.Get();
+			optimizer.timeout = timeout.Get();
 		}
 
 		// This option prints each better feasible point when it is found
 		if (trace) {
 			if (!quiet)
 				cout << "  trace:\tON" << endl;
-			optimizer.trace_ = trace.Get();
+			optimizer.trace = trace.Get();
 		}
 
 		/*

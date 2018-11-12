@@ -30,6 +30,7 @@
 #include <cmath>
 #include <iomanip>
 #include <utility>
+#include <cassert>
 
 using namespace std;
 
@@ -37,17 +38,22 @@ namespace ibex {
 
 const double SIPOptimizer::default_rel_eps_f = 1e-3;
 const double SIPOptimizer::default_abs_eps_f = 1e-3;
+const double SIPOptimizer::default_eps_x = 0;
 const double SIPOptimizer::default_lf_loop_ratio = 0.1;
 
-SIPOptimizer::SIPOptimizer(Ctc& ctc, Bsc& bisector, LoupFinderSIP& loup_finder, LoupFinderSIP* loup_finder2,
-		CellBufferOptim& buffer, double abs_eps, double rel_eps, double timeout, double eps_x, int maxiter, double lf_loop_ratio) :
-		ctc_(ctc), bisector_(bisector), loup_finder_(loup_finder), loup_finder2_(loup_finder2), buffer_(buffer), obj_rel_prec_f_(
-				rel_eps), obj_abs_prec_f_(abs_eps), timeout_(timeout), eps_x_(eps_x), maxiter_(maxiter), lf_loop_ratio_(lf_loop_ratio) {
-
+SIPOptimizer::SIPOptimizer(int n, Ctc& ctc, Bsc& bisector, LoupFinderSIP& loup_finder, LoupFinderSIP& loup_finder2,
+		CellBufferOptim& buffer, int goal_var,
+		double eps_x,
+		double rel_eps_f,
+		double abs_eps_f) :
+		n(n), goal_var(goal_var), ctc_(ctc), bisector_(bisector), loup_finder_(loup_finder),
+		loup_finder2_(loup_finder2), buffer_(buffer), obj_rel_prec_f_(rel_eps_f),
+		obj_abs_prec_f_(abs_eps_f), eps_x_(eps_x), lf_loop_ratio_(default_lf_loop_ratio) {
+	assert(n == goal_var);
 }
 
 SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double obj_init_bound) {
-	n = box.size() + 1;
+	int ext_n = box.size() + 1;
 	loup_ = obj_init_bound;
 	// Initialize the loup for the buffer
 	buffer_.contract(loup_);
@@ -57,14 +63,16 @@ SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double ob
 	int iter = 0;
 	buffer_.flush();
 
-	IntervalVector initial_box(n);
+	IntervalVector initial_box(ext_n);
 	initial_box.put(0, box);
-	initial_box[n - 1] = Interval::ALL_REALS;
+	initial_box[ext_n - 1] = Interval::ALL_REALS;
 	Cell* root = new Cell(initial_box);
 	//root->prop.add(new BxpNodeData());
 	bisector_.add_property(initial_box, root->prop);
 	buffer_.add_property(initial_box, root->prop);
 	ctc_.add_property(initial_box, root->prop);
+	loup_finder_.add_property(initial_box, root->prop);
+	loup_finder2_.add_property(initial_box, root->prop);
 	loup_changed_ = false;
 	initial_loup_ = obj_init_bound;
 	loup_point_ = box;
@@ -76,11 +84,11 @@ SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double ob
 
 	cout << setprecision(12);
 	//maxiter_ = 7;
-	while (!buffer_.empty() && (timeout_ <= 0 || time_ < timeout_) && (maxiter_ < 0 || iter < maxiter_)) {
+	while (!buffer_.empty() && (timeout <= 0 || time_ < timeout) && (maxiter < 0 || iter < maxiter)) {
 		++iter;
 		loup_changed_ = false;
 		Cell* cell = buffer_.top();
-		if (trace_ >= 1) {
+		if (trace >= 1) {
 			cout << "******** ITERATION " << iter << "********" << endl;
 			cout << " current box " << cell->box << endl;
 		}
@@ -95,7 +103,7 @@ SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double ob
 			handleCell(*new_cells.second);
 			//handleCell(*cell);
 		} catch (NoBisectableVariableException&) {
-			updateUploEpsboxes((cell->box)[n].lb());
+			updateUploEpsboxes((cell->box)[ext_n-1].lb());
 			buffer_.pop();
 			delete cell;
 			updateUplo();
@@ -110,33 +118,33 @@ SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double ob
 			double ymax = compute_ymax();
 			buffer_.contract(ymax);
 			if (ymax <= NEG_INFINITY) {
-				if (trace_ > 0) {
+				if (trace > 0) {
 					cout << " infinite value for the minimum " << endl;
 					break;
 				}
 			}
 		}
 		updateUplo();
-		if (timeout_ > 0) {
-			timer.check(timeout_);
+		if (timeout > 0) {
+			timer.check(timeout);
 		}
 		time_ = timer.get_time();
 	}
 	time_ = timer.get_time();
 	timer.stop();
-	if (timeout_ > 0 && time_ > timeout_) {
-		status_ = Status::timeout;
+	if (timeout > 0 && time_ > timeout) {
+		status_ = Status::TIMEOUT;
 	} else if (uplo_epsboxes == POS_INFINITY
 			&& (loup_ == POS_INFINITY || (loup_ == initial_loup_ && obj_abs_prec_f_ == 0 && obj_rel_prec_f_ == 0))) {
-		status_ = Status::infeasible;
+		status_ = Status::INFEASIBLE;
 	} else if (loup_ == initial_loup_) {
-		status_ = Status::no_feasible_found;
+		status_ = Status::NO_FEASIBLE_FOUND;
 	} else if (uplo_epsboxes == NEG_INFINITY) {
-		status_ = Status::unbounded_obj;
+		status_ = Status::UNBOUNDED_OBJ;
 	} else if (get_obj_rel_prec() > obj_rel_prec_f_ && get_obj_abs_prec() > obj_abs_prec_f_) {
-		status_ = Status::unreached_prec;
+		status_ = Status::UNREACHED_PREC;
 	} else {
-		status_ = Status::success;
+		status_ = Status::SUCCESS;
 	}
 	return status_;
 }
@@ -178,7 +186,7 @@ void SIPOptimizer::handleCell(Cell& cell) {
 	}*/
 
 	// =============== Contract y with y <= loup
-	Interval& y = cell.box[n - 1];
+	Interval& y = cell.box[goal_var];
 	double ymax;
 	if (loup_ == POS_INFINITY)
 		ymax = POS_INFINITY;
@@ -234,7 +242,7 @@ void SIPOptimizer::handleCell(Cell& cell) {
 
 	// =============== Handle epsilon boxes
 	if (!cell.box.is_empty()) {
-		IntervalVector box_without_gaol = cell.box.subvector(0, n - 2);
+		IntervalVector box_without_gaol = sip_from_ext_box(cell.box);
 		if ((box_without_gaol.max_diam() <= eps_x_ && y.diam() <= obj_abs_prec_f_) || !cell.box.is_bisectable()) {
 			updateUploEpsboxes(y.lb());
 			cell.box.set_empty();
@@ -265,7 +273,7 @@ void SIPOptimizer::updateUplo() {
 		if (new_uplo < uplo_epsboxes) {
 			if (new_uplo > uplo_) {
 				uplo_ = new_uplo;
-				if (trace_ > 0) {
+				if (trace > 0) {
 					cout << "\033[33m uplo= " << uplo_ << "\033[0m" << endl;
 				}
 			}
@@ -288,7 +296,7 @@ bool SIPOptimizer::updateLoup(Cell& cell) {
 		auto p = loup_finder_.find(sip_from_ext_box(cell.box), loup_point_, loup_, cell.prop);
 		loup_point_ = p.first; // -2 to remove the goal variable
 		loup_ = p.second;
-		if (trace_ > 0) {
+		if (trace > 0) {
 			cout << "                    ";
 			cout << "\033[32m loup= " << loup_ << "(lf1)\033[0m" << endl;
 
@@ -300,13 +308,13 @@ bool SIPOptimizer::updateLoup(Cell& cell) {
 }
 
 bool SIPOptimizer::updateLoup2(Cell& cell) {
-	if (cell.box.is_empty() || loup_finder2_ == nullptr)
+	if (cell.box.is_empty())
 		return false;
 	try {
-		auto p = loup_finder2_->find(sip_from_ext_box(cell.box), loup_point_, loup_, cell.prop);
+		auto p = loup_finder2_.find(sip_from_ext_box(cell.box), loup_point_, loup_, cell.prop);
 		loup_point_ = p.first; // -2 to remove the goal variable
 		loup_ = p.second;
-		if (trace_ > 0) {
+		if (trace > 0) {
 			cout << "                    ";
 			cout << "\033[32m loup= " << loup_ << " (lf2)\033[0m" << endl;
 
@@ -320,7 +328,7 @@ bool SIPOptimizer::updateLoup2(Cell& cell) {
 void SIPOptimizer::updateUploEpsboxes(double ymin) {
 	if (uplo_epsboxes > ymin) {
 		uplo_epsboxes = ymin;
-		if (trace_ > 0) {
+		if (trace > 0) {
 			cout << " unprocessable tiny box: now uplo <=" << setprecision(12) << uplo_epsboxes << " uplo= " << uplo_
 					<< endl;
 		}
@@ -337,22 +345,22 @@ void SIPOptimizer::report(bool verbose) {
 		return;
 	}
 	switch (status_) {
-	case success:
+	case SUCCESS:
 		cout << "\033[32m" << " optimization successful!" << endl;
 		break;
-	case infeasible:
+	case INFEASIBLE:
 		cout << "\033[31m" << " infeasible problem" << endl;
 		break;
-	case no_feasible_found:
+	case NO_FEASIBLE_FOUND:
 		cout << "\033[31m" << " no feasible point found (the problem may be infeasible)" << endl;
 		break;
-	case unbounded_obj:
+	case UNBOUNDED_OBJ:
 		cout << "\033[31m" << " possibly unbounded objective (f*=-oo)" << endl;
 		break;
-	case timeout:
-		cout << "\033[31m" << " time limit " << timeout_ << "s. reached " << endl;
+	case TIMEOUT:
+		cout << "\033[31m" << " time limit " << timeout << "s. reached " << endl;
 		break;
-	case unreached_prec:
+	case UNREACHED_PREC:
 		cout << "\033[31m" << " unreached precision" << endl;
 	}
 
