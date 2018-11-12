@@ -1,0 +1,11 @@
+Variables
+    //!--universal="y.*"
+    x in [0,6];
+    y in [2,6];
+
+Minimize
+    10 - x;
+
+Constraints
+    (y^2)/(1+exp(-40*(x-y))) + x - y - 2 <= 0;
+end

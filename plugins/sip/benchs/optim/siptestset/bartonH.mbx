@@ -1,0 +1,14 @@
+Variables
+    //!--universal="y.*"
+    x1 in [0, 1];
+    x2 in [-1000, 1000];
+    y in [-1, 1];
+
+Minimize
+    x2;
+
+Constraints
+    -(x1 - y)^2 - x2 <= 0;
+end
+
+

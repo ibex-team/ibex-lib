@@ -1,0 +1,12 @@
+Variables
+    //!--universal="y.*"
+    x1 in [-1000, 1000];
+    x2 in [-1000, 1000];
+    y in [0, 1];
+
+Minimize
+    (x1 - 2*x2 + 5*x2^2 - x2^2*x2 - 13)^2 + (x1 - 14*x2 + x2^2 + x2^3 - 29)^2;
+
+Constraints
+    x1^2 + 2*x2*y^2 + exp(x1+x2) - exp(y) <= 0;
+end
