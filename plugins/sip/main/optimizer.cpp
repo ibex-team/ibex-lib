@@ -1,10 +1,13 @@
-//
-//  main.cpp
-//  Sipsolve
-//
-//  Created by Antoine Marendet on 02/11/2017.
-//  Copyright © 2017 Antoine Marendet. All rights reserved.
-//
+/* ============================================================================
+ * I B E X - optimizer.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * Created     : Nov 2, 2017
+ * ---------------------------------------------------------------------------- */
 
 #include "ibex_CtcBlankenship.h"
 #include "ibex_CtcEvaluation.h"

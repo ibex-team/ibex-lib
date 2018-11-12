@@ -1,13 +1,14 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_SICPaving.cpp
-// Author      : Antoine Marendet
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : July 13, 2018
-// Last Update : July 13, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_SICPaving.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * Created     : July 13, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #include "ibex_SICPaving.h"
 
 #include "ibex_utils.h"

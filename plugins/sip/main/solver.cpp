@@ -1,9 +1,13 @@
-/*
- * solver.cpp
+ /* ============================================================================
+ * I B E X - solver.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
  *
- *  Created on: 13 mars 2018
- *      Author: antoinemarendet
- */
+ * Author(s)   : Antoine Marendet
+ * Created     : Mar 13, 2017
+ * ---------------------------------------------------------------------------- */
 
 #include "ibex_CtcEvaluation.h"
 #include "ibex_CtcFilterSICParameters.h"

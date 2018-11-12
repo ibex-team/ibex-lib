@@ -1,13 +1,14 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_LoupFinderDefault.cpp
-// Author      : Antoine Marendet, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : May 4, 2018
-// Last Update : May 4, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_LoupFinderSIPDefault.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * Created     : Nov 12, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #include "ibex_Cell.h"
 #include "ibex_LoupFinderSIPDefault.h"
 #include "ibex_Vector.h"
@@ -39,3 +40,4 @@ std::pair<IntervalVector, double> LoupFinderSIPDefault::find(
 }
 
 } // end namespace ibex
+

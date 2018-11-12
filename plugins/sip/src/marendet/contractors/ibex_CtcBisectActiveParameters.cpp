@@ -1,13 +1,14 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_CtcBisectActiveParameters.cpp
-// Author      : Antoine Marendet
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : July 11, 2018
-// Last Update : July 11, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_CtcBisectActiveParameters.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * Created     : July 11, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #include "ibex_CtcBisectActiveParameters.h"
 
 #include "ibex_GoldsztejnSICBisector.h"
