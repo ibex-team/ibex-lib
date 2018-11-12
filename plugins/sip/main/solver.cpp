@@ -5,15 +5,15 @@
  *      Author: antoinemarendet
  */
 
-#include "contractors/ibex_CtcEvaluation.h"
-#include "contractors/ibex_CtcFilterSICParameters.h"
-#include "contractors/ibex_CtcHC4SIP.h"
-#include "contractors/ibex_GoldsztejnSICBisector.h"
-#include "main/ibex_CellBufferNeighborhood.h"
-#include "main/ibex_MinibexOptionsParser.h"
-#include "main/ibex_SIPManifold.h"
-#include "main/ibex_SIPSolver.h"
-#include "system/ibex_SIPSystem.h"
+#include "ibex_CtcEvaluation.h"
+#include "ibex_CtcFilterSICParameters.h"
+#include "ibex_CtcHC4SIP.h"
+#include "ibex_GoldsztejnSICBisector.h"
+#include "ibex_CellBufferNeighborhood.h"
+#include "ibex_MinibexOptionsParser.h"
+#include "ibex_SIPManifold.h"
+#include "ibex_SIPSolver.h"
+#include "ibex_SIPSystem.h"
 
 #include "args.hxx"
 #include "ibex_CellStack.h"

@@ -12,7 +12,7 @@
 
 #include "ibex_BitSet.h"
 #include "ibex_Function.h"
-#include "system/ibex_SIPSystem.h"
+#include "ibex_SIPSystem.h"
 namespace ibex {
 
 CtcFwdBwdNLC::CtcFwdBwdNLC(const NLConstraint& constraint, const SIPSystem& system)
