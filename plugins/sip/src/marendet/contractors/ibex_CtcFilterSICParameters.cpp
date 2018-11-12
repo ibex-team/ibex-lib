@@ -10,7 +10,7 @@
 
 #include "ibex_CtcFilterSICParameters.h"
 
-#include "system/ibex_SIConstraintCache.h"
+#include "ibex_SIConstraintCache.h"
 
 #include "ibex_Function.h"
 #include "ibex_Interval.h"

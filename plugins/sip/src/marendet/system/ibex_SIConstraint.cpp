@@ -10,7 +10,7 @@
 
 #include "ibex_SIConstraint.h"
 
-#include "main/ibex_utils.h"
+#include "ibex_utils.h"
 
 #include "ibex_Function.h"
 #include "ibex_SIConstraintCache.h"

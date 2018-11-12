@@ -10,7 +10,7 @@
 
 #include "ibex_SIConstraintCache.h"
 
-#include "main/ibex_utils.h"
+#include "ibex_utils.h"
 
 
 using namespace std;

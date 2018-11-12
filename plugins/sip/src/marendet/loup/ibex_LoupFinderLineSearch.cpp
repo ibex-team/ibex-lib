@@ -10,9 +10,9 @@
 
 #include "ibex_LoupFinderLineSearch.h"
 
-#include "system/ibex_SIConstraint.h"
-#include "system/ibex_SIConstraintCache.h"
-#include "main/ibex_utils.h"
+#include "ibex_SIConstraint.h"
+#include "ibex_SIConstraintCache.h"
+#include "ibex_utils.h"
 #include "ibex_Interval.h"
 #include "ibex_Linear.h"
 #include "ibex_LinearException.h"

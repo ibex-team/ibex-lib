@@ -10,9 +10,9 @@
 
 #include "ibex_CtcFwdBwdSIC.h"
 
-#include "system/ibex_SIConstraint.h"
-#include "system/ibex_SIConstraintCache.h"
-#include "system/ibex_SIPSystem.h"
+#include "ibex_SIConstraint.h"
+#include "ibex_SIConstraintCache.h"
+#include "ibex_SIPSystem.h"
 
 
 #include "ibex_BitSet.h"

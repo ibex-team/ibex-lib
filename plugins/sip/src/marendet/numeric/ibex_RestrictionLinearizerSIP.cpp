@@ -10,9 +10,9 @@
 
 #include "ibex_RestrictionLinearizerSIP.h"
 
-#include "main/ibex_utils.h"
-#include "system/ibex_SIConstraint.h"
-#include "system/ibex_SIConstraintCache.h"
+#include "ibex_utils.h"
+#include "ibex_SIConstraint.h"
+#include "ibex_SIConstraintCache.h"
 
 #include "ibex_CmpOp.h"
 #include "ibex_Function.h"

@@ -10,8 +10,8 @@
 
 #include "ibex_CtcBlankenship.h"
 
-#include "system/ibex_SIConstraint.h"
-#include "system/ibex_SIConstraintCache.h"
+#include "ibex_SIConstraint.h"
+#include "ibex_SIConstraintCache.h"
 
 #include "ibex_Array.h"
 #include "ibex_Expr.h"
