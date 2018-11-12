@@ -1,13 +1,14 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_LoupFinderLineSearch.h
-// Author      : Antoine Marendet
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : Nov 12, 2018
-// Last Update : Nov 12, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_LoupFinderCompo.h
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * Created     : Nov 12, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #include "ibex_LoupFinder.h"
 #include "ibex_Array.h"
 

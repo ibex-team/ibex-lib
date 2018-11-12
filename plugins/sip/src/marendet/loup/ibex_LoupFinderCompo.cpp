@@ -1,3 +1,14 @@
+/* ============================================================================
+ * I B E X - ibex_LoupFinderCompo.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * Created     : Nov 12, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #include "ibex_LoupFinderCompo.h"
 #include <utility>
 namespace ibex {
