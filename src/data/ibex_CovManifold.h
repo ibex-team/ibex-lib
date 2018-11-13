@@ -62,11 +62,11 @@ inline const IntervalVector& CovManifold::boundary(int i) const {
 
 class CovManifoldFactory : public CovIBUListFactory {
 public:
-	CovManifoldFactory();
+	CovManifoldFactory(size_t n);
 
 	virtual ~CovManifoldFactory();
 
-	void add_solution(const IntervalVector& x);
+	virtual void add_solution(const IntervalVector& x);
 
 	virtual void add_boundary(const IntervalVector& x);
 

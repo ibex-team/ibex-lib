@@ -39,40 +39,57 @@ public:
 	const size_t n;
 
 
-protected:
-	friend class CovFactory;
+//protected:
+//	friend class CovFactory;
 
-	Cov(size_t n);
-
-	Cov(const char* filename);
+//	Cov(size_t n);
+//
+//	Cov(const char* filename);
 
 };
+//
+//class CovFactoryData {
+//public:
+//	/**
+//	 * \brief Number of variables
+//	 */
+//	size_t n;
+//
+//	void build(Cov& cov) const;
+//};
 
 class CovFactory {
 public:
+
+	CovFactory();
+
 	CovFactory(size_t n);
+
+	void set_nb_var(size_t n);
 
 	/**
 	 * \brief Number of variables
 	 */
-	const size_t n;
+	size_t n;
 
-protected:
-	friend class Cov;
 	void build(Cov& cov) const;
 };
+//
+//inline void CovFactory::set_nb_var(size_t _n) {
+//	n = _n;
+//}
 
-class CovFile : public CovFactory {
-
+class CovFile {
+public:
 	/**
 	 * \brief Load a COV file.
 	 */
-	CovFile(const char* filename); //, CovFactory* factory=NULL);
+	CovFile(const char* filename, CovFactory* factory=NULL);
 
 	/**
 	 * \brief Save a covering in a COV file.
 	 */
-	CovFile(const Cov&);
+	//CovFile(const Cov&);
 
 	virtual ~CovFile();
 
@@ -83,9 +100,9 @@ class CovFile : public CovFactory {
 	 */
 	static const int FORMAT_VERSION;
 
-protected:
-	//CovFactory*	factory;
+	CovFactory* factory;
 
+protected:
 	std::ifstream *f;
 
 	static const int  SIGNATURE_LENGTH;
@@ -94,8 +111,6 @@ protected:
 	int read_signature(std::ifstream& f);
 	unsigned int read_pos_int(std::ifstream& f);
 	double read_double(std::ifstream& f);
-
-	void build(Cov& cov);
 
 	void write_signature(std::ofstream& f) const;
 	void write_int(std::ofstream& f, uint32_t x) const;

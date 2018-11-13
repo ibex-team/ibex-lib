@@ -21,7 +21,7 @@ CovIUList::CovIUList(const CovIUListFactory& fac) : CovList(fac), nb_inner(0), n
 	fac.build(*this);
 }
 
-CovIUList::CovIUList(const char* filename) : CovIUList(*CovIUListFile(filename).factory) {
+CovIUList::CovIUList(const char* filename) : CovIUList((CovIUListFactory&) *CovIUListFile(filename).factory) {
 
 }
 
@@ -38,15 +38,18 @@ CovIUList::~CovIUList() {
 CovIUListFactory::CovIUListFactory(size_t n) : CovListFactory(n), nb_inner(0) {
 
 }
+void CovIUListFactory::add(const IntervalVector& x) {
+	add_unknown(x);
+}
 
 void CovIUListFactory::add_inner(const IntervalVector& x) {
-	add(x);
+	CovListFactory::add(x);
 	is_inner.push_back(true);
 	nb_inner++;
 }
 
 void CovIUListFactory::add_unknown(const IntervalVector& x) {
-	add(x);
+	CovListFactory::add(x);
 	is_inner.push_back(false);
 }
 
@@ -78,36 +81,29 @@ void CovIUListFactory::build(CovIUList& set) const {
 
 //----------------------------------------------------------------------------------------------------
 
-CovIUListFile::CovIUListFile(const char* filename, CovIUListFactory* factory=NULL) :
+CovIUListFile::CovIUListFile(const char* filename, CovIUListFactory* factory) :
 
-		CovListFile(filename,factory? factory : new CovIUListFactory(0 /*tmp*/)), factory(factory) {
+		CovListFile(filename,factory? factory : new CovIUListFactory(0 /*tmp*/)) {
 
-	if (factory==NULL)
-		factory = (CovIUListFactory*) CovListFile::factory;
+	CovIUListFactory& fac = * ((CovIUListFactory*) this->factory);
 
-	assert(f); // file is open by Cov constructor
+	assert(f); // file descriptor is open by CovFile constructor
 
 	size_t nb_inner = read_pos_int(*f);
 
 	size_t nb_unknown = read_pos_int(*f);
 
-	if (nb_inner  + nb_unknown != factory->boxes.size())
+	if (nb_inner  + nb_unknown != factory->nb_boxes())
 		ibex_error("[CovIUListFile]: number of inner + boundary boxes <> total");
 
-	if (factory->boxes.size()==0) return;
+	if (fac.nb_boxes()==0) return;
 
-//	if (nb_inner>0)
-//		_set_inner    = new IntervalVector*[nb_inner];
-//	if (nb_unknown>0)
-//		_set_unknown  = new IntervalVector*[size() - nb_inner];
-//
-//	_set_status = new BoxStatus[size()];
-
-	for (unsigned int i=0; i<factory->boxes.size(); i++) {
+	for (vector<bool>::iterator it=fac.is_inner.begin(); it!=fac.is_inner.end(); ++it) {
+	//for (unsigned int i=0; i<factory.boxes.size(); i++) {
 		unsigned int status=read_pos_int(*f);
 		switch(status) {
-		case 0:  factory->is_inner.push_back(true); factory->nb_inner++;  break;
-		case 1:  factory->is_inner.push_back(false); break;
+		case 0:  *it = true; fac.nb_inner++;  break;
+		case 1:  *it = false; /*useless*/ break;
 		default: ibex_error("[CovIUListFile]: bad input file (bad status code).");
 		}
 	}

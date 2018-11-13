@@ -95,7 +95,9 @@ public:
 
 	virtual ~CovIUListFactory();
 
-	void add_inner(const IntervalVector& x);
+	virtual void add(const IntervalVector& x);
+
+	virtual void add_inner(const IntervalVector& x);
 
 	virtual void add_unknown(const IntervalVector& x);
 
@@ -114,11 +116,6 @@ public:
 	CovIUListFile(const char* filename, CovIUListFactory* factory=NULL);
 
 	virtual int subformat_number() const;
-
-protected:
-	friend class CovIUList;
-
-	CovIUListFactory* factory;
 };
 
 } /* namespace ibex */

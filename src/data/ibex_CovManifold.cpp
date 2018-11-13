@@ -30,7 +30,7 @@ int CovManifold::subformat_number() const {
 	return 0;
 }
 
-CovManifoldFactory::CovManifoldFactory() : nb_solution(0), m(0), nb_ineq(0) {
+CovManifoldFactory::CovManifoldFactory(size_t n) : CovIBUListFactory(n), nb_solution(0), m(0), nb_ineq(0) {
 
 }
 

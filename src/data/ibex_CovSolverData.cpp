@@ -34,7 +34,7 @@ int CovSolverData::subformat_number() const {
 /**
  * TODO: default solver status should be something like Solver::UNKNOWN
  */
-CovSolverDataFactory::CovSolverDataFactory() : nb_pending(0), var_names(NULL), status(Solver::INFEASIBLE), time(-1), nb_cells(0) {
+CovSolverDataFactory::CovSolverDataFactory(size_t n) : CovManifoldFactory(n), nb_pending(0), var_names(NULL), status(Solver::INFEASIBLE), time(-1), nb_cells(0) {
 
 }
 

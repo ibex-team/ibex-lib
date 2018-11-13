@@ -78,7 +78,7 @@ inline const IntervalVector& CovSolverData::unknown(int i) const {
 
 class CovSolverDataFactory : public CovManifoldFactory {
 public:
-	CovSolverDataFactory();
+	CovSolverDataFactory(size_t n);
 
 	virtual ~CovSolverDataFactory();
 

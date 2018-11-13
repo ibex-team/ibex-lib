@@ -30,11 +30,15 @@ int CovIBUList::subformat_number() const {
 	return 0;
 }
 
-CovIBUListFactory::CovIBUListFactory() : nb_boundary(0) {
+CovIBUListFactory::CovIBUListFactory(size_t n) : CovIUListFactory(n), nb_boundary(0) {
 
 }
 
 CovIBUListFactory::~CovIBUListFactory() {
+}
+
+void CovIBUListFactory::add(const IntervalVector& x) {
+	add_unknown(x);
 }
 
 void CovIBUListFactory::add_boundary(const IntervalVector& x) {

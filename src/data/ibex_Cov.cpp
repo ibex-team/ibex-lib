@@ -26,7 +26,7 @@ Cov::Cov(const CovFactory& fac) : n(fac.n) {
 }
 
 //Cov::Cov(const char* filename) : n(*CovFile(filename).factory) {
-Cov::Cov(const char* filename) : n(CovFile(filename)) {
+Cov::Cov(const char* filename) : Cov(*CovFile(filename).factory) {
 
 }
 
@@ -36,9 +36,9 @@ Cov::~Cov() {
 
 //----------------------------------------------------------------------------------------------------
 
-CovFactory::CovFactory(size_t n) : n(n) {
+CovFactory::CovFactory() : n(0) { }
 
-}
+CovFactory::CovFactory(size_t n) : n(n) { }
 
 void CovFactory::build(Cov& cov) const {
 	// nothing to do (so far)
@@ -46,8 +46,10 @@ void CovFactory::build(Cov& cov) const {
 
 //----------------------------------------------------------------------------------------------------
 
-CovFile::CovFile(const char* filename) //, CovFactory* factory) : factory(factory),
-: f(new ifstream()) {
+CovFile::CovFile(const char* filename, CovFactory* _factory) : f(new ifstream()), factory(_factory) {
+
+	if (factory==NULL)
+		factory = new CovFactory();
 
 	f->open(filename, ios::in | ios::binary);
 
@@ -57,11 +59,7 @@ CovFile::CovFile(const char* filename) //, CovFactory* factory) : factory(factor
 
 	size_t _n = read_pos_int(*f);
 
-//	if (factory==NULL)
-//		factory = new CovFactory(n);
-//	else
-//		(size_t&) factory->n = n;
-	(size_t&) n = _n;
+	factory->n = _n;
 }
 
 CovFile::~CovFile() {

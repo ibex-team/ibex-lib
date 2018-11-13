@@ -51,24 +51,21 @@ inline const IntervalVector& CovList::operator[](int i) const {
 	return list[i];
 }
 
-class CovListFactory : public CovFactory {
+class CovListFile;
+
+class CovListFactory : protected CovFactory {
 
 public:
 	CovListFactory(size_t n);
 
-	void add(const IntervalVector& x);
+	virtual ~CovListFactory();
 
-	//	virtual void update(int i, const IntervalVector& xi);
-	//
-	//	virtual void update(int i, int j, const Interval& xij);
-	//
-	//	virtual void remove(int i);
-	//
-	//	virtual void add(const IntervalVector& box);
+	virtual void add(const IntervalVector& x);
 
-	size_t n;
+	size_t nb_boxes() const;
 
 private:
+	friend class CovListFile;
 	friend class CovList;
 
 	void build(CovList&) const;
@@ -76,18 +73,18 @@ private:
 	std::vector<IntervalVector> boxes;
 };
 
-class CovListFile : public CovListFactory {
+inline size_t CovListFactory::nb_boxes() const {
+	return boxes.size();
+}
+
+class CovListFile : public CovFile {
 public:
-	CovListFile(const char* filename); //, CovListFactory* factory=NULL);
+	CovListFile(const char* filename, CovListFactory* factory=NULL);
 
 //	virtual int subformat_number() const;
 
 protected:
-	friend class CovList;
-
-	CovFile cov_file;
-
-	IntervalVector read_box(std::ifstream& f);
+	IntervalVector read_box(std::ifstream& f, size_t n);
 
 	void write_box(std::ofstream& f, const IntervalVector& box) const;
 };

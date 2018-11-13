@@ -63,11 +63,13 @@ inline const IntervalVector& CovIBUList::unknown(int i) const {
 
 class CovIBUListFactory : public CovIUListFactory {
 public:
-	CovIBUListFactory();
+	CovIBUListFactory(size_t n);
 
 	virtual ~CovIBUListFactory();
 
-	void add_boundary(const IntervalVector& x);
+	virtual void add(const IntervalVector& x);
+
+	virtual void add_boundary(const IntervalVector& x);
 
 	virtual void add_unknown(const IntervalVector& x);
 
