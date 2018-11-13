@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Not 08, 2018
+// Last update : Nov 13, 2018
 //============================================================================
 
 #include "ibex_CovManifold.h"
@@ -15,13 +15,13 @@ using namespace std;
 namespace ibex {
 
 CovManifold::CovManifold(const CovManifoldFactory& fac) : CovIBUList(fac), m(fac.m), nb_ineq(fac.nb_ineq), nb_solution(0), nb_boundary(0),
-		_manifold_is_solution(NULL), _manifold_solution(NULL), _manifold_boundary(NULL) {
+		_manifold_status(NULL), _manifold_solution(NULL), _manifold_boundary(NULL) {
 	fac.build(*this);
 }
 
 CovManifold::~CovManifold() {
-	assert(_manifold_is_solution);
-	delete[] _manifold_is_solution;
+	assert(_manifold_status);
+	delete[] _manifold_status;
 	delete[] _manifold_solution;
 	delete[] _manifold_boundary;
 }
@@ -52,20 +52,31 @@ void CovManifoldFactory::build(CovManifold& manif) const {
 	assert(manif.CovIBUList::nb_boundary == nb_boundary);
 	(size_t&) manif.nb_solution = nb_solution;
 	(size_t&) manif.nb_boundary = manif.CovIBUList::nb_boundary - nb_solution;
-	manif._manifold_is_solution = new bool[manif.CovIBUList::nb_boundary];
+	manif._manifold_status      = new CovManifold::BoxStatus[manif.CovIBUList::nb_boundary];
 	manif._manifold_solution    = new IntervalVector*[nb_solution];
-	manif._manifold_boundary     = new IntervalVector*[manif.CovIBUList::nb_boundary - nb_solution];
+	manif._manifold_boundary    = new IntervalVector*[manif.CovIBUList::nb_boundary - nb_solution];
 
 	int i=0;    // count closed_set_boundary boxes
+	vector<bool>::const_iterator it=is_solution.begin();
 	int jsol=0; // count solution boxes
 	int jbo=0;  // count boundary boxes
-	for (vector<bool>::const_iterator it=is_solution.begin(); it!=is_solution.end(); ++it, i++) {
-		manif._manifold_is_solution[i]=*it;
-		if (*it)
-			manif._manifold_solution[jsol++]=(IntervalVector*) &manif.boundary(i);
-		else
-			manif._manifold_boundary[jbo++]=(IntervalVector*) &manif.boundary(i);
+	for (int i=0; i<manif.size; i++) {
+		if (manif.is_inner(i))
+			manif._manifold_status[i]=CovManifold::INNER;
+		else if (manif.is_unknown(i))
+			manif._manifold_status[i]=CovManifold::UNKNOWN;
+		else {
+			if (*it) {
+				manif._manifold_status[i]=CovManifold::SOLUTION;
+				manif._manifold_solution[jsol++]=(IntervalVector*) &manif.boundary(i);
+			} else {
+				manif._manifold_status[i]=CovManifold::BOUNDARY;
+				manif._manifold_boundary[jbo++]=(IntervalVector*) &manif.boundary(i);
+			}
+			++it;
+		}
 	}
+	assert(it==is_solution.end());
 	assert(jsol==manif.nb_solution);
 	assert(jbo==manif.nb_boundary);
 }

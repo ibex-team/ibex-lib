@@ -5,11 +5,11 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Not 07, 2018
+// Last update : Nov 13, 2018
 //============================================================================
 
-#ifndef __IBEX_BXS_RAW_LIST_H__
-#define __IBEX_BXS_RAW_LIST_H__
+#ifndef __IBEX_COV_LIST_H__
+#define __IBEX_COV_LIST_H__
 
 #include "ibex_Cov.h"
 
@@ -42,8 +42,6 @@ public:
 protected:
 	friend class CovListFactory;
 	IntervalVector* list;
-
-	//std::vector<IntervalVector> list;
 };
 
 
@@ -91,4 +89,4 @@ protected:
 
 } /* namespace ibex */
 
-#endif /* __IBEX_BXS_RAW_LIST_H__ */
+#endif /* __IBEX_COV_LIST_H__ */

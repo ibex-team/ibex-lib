@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Not 07, 2018
+// Last update : Nov 13, 2018
 //============================================================================
 
 #include "ibex_CovIUList.h"
@@ -17,7 +17,7 @@ using namespace std;
 namespace ibex {
 
 CovIUList::CovIUList(const CovIUListFactory& fac) : CovList(fac), nb_inner(0), nb_unknown(0),
-		_set_status(NULL), _set_inner(NULL), _set_unknown(NULL) {
+		_IU_status(NULL), _IU_inner(NULL), _IU_unknown(NULL) {
 	fac.build(*this);
 }
 
@@ -26,10 +26,10 @@ CovIUList::CovIUList(const char* filename) : CovIUList((CovIUListFactory&) *CovI
 }
 
 CovIUList::~CovIUList() {
-	if (_set_status) {
-		delete[] _set_status;
-		delete[] _set_inner;
-		delete[] _set_unknown;
+	if (_IU_status) {
+		delete[] _IU_status;
+		delete[] _IU_inner;
+		delete[] _IU_unknown;
 	}
 }
 
@@ -57,9 +57,9 @@ void CovIUListFactory::build(CovIUList& set) const {
 	assert(set.size == boxes.size());
 	(size_t&) set.nb_inner = nb_inner;
 	(size_t&) set.nb_unknown = set.size - nb_inner;
-	set._set_status = new CovIUList::BoxStatus[set.size];
-	set._set_inner    = new IntervalVector*[nb_inner];
-	set._set_unknown  = new IntervalVector*[set.size - nb_inner];
+	set._IU_status = new CovIUList::BoxStatus[set.size];
+	set._IU_inner    = new IntervalVector*[nb_inner];
+	set._IU_unknown  = new IntervalVector*[set.size - nb_inner];
 
 	int i=0;   // count boxes
 	int jin=0; // count inner boxes
@@ -67,11 +67,11 @@ void CovIUListFactory::build(CovIUList& set) const {
 	for (vector<bool>::const_iterator it=is_inner.begin(); it!=is_inner.end(); ++it, i++) {
 
 		if (*it) {
-			set._set_status[i]=CovIUList::INNER;
-			set._set_inner[jin++]=(IntervalVector*) &set[i];
+			set._IU_status[i]=CovIUList::INNER;
+			set._IU_inner[jin++]=(IntervalVector*) &set[i];
 		} else {
-			set._set_status[i]=CovIUList::UNKNOWN;
-			set._set_unknown[juk++]=(IntervalVector*) &set[i];
+			set._IU_status[i]=CovIUList::UNKNOWN;
+			set._IU_unknown[juk++]=(IntervalVector*) &set[i];
 		}
 	}
 	assert(jin==set.nb_inner);
@@ -81,9 +81,9 @@ void CovIUListFactory::build(CovIUList& set) const {
 
 //----------------------------------------------------------------------------------------------------
 
-CovIUListFile::CovIUListFile(const char* filename, CovIUListFactory* factory) :
+CovIUListFile::CovIUListFile(const char* filename, CovIUListFactory* _factory) :
 
-		CovListFile(filename,factory? factory : new CovIUListFactory(0 /*tmp*/)) {
+		CovListFile(filename, _factory? _factory : new CovIUListFactory(0 /*tmp*/)) {
 
 	CovIUListFactory& fac = * ((CovIUListFactory*) this->factory);
 
@@ -93,7 +93,7 @@ CovIUListFile::CovIUListFile(const char* filename, CovIUListFactory* factory) :
 
 	size_t nb_unknown = read_pos_int(*f);
 
-	if (nb_inner  + nb_unknown != factory->nb_boxes())
+	if (nb_inner  + nb_unknown != fac.nb_boxes())
 		ibex_error("[CovIUListFile]: number of inner + boundary boxes <> total");
 
 	if (fac.nb_boxes()==0) return;
@@ -108,7 +108,7 @@ CovIUListFile::CovIUListFile(const char* filename, CovIUListFactory* factory) :
 		}
 	}
 
-	if (factory->nb_inner != nb_inner)
+	if (fac.nb_inner != nb_inner)
 		ibex_error("[CovIUListFile]: number of inner boxes does not match");
 }
 

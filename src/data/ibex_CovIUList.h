@@ -5,11 +5,11 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Not 07, 2018
+// Last update : Nov 13, 2018
 //============================================================================
 
-#ifndef __IBEX_BXS_SET_H__
-#define __IBEX_BXS_SET_H__
+#ifndef __IBEX_COV_IU_LIST_H__
+#define __IBEX_COV_IU_LIST_H__
 
 #include "ibex_CovList.h"
 
@@ -33,22 +33,12 @@ public:
 
 	bool is_inner(int i) const;
 
-	/**
-	 * \brief Number of inner boxes
-	 */
-	const size_t nb_inner;
+	bool is_unknown(int i) const;
 
 	/**
 	 * \brief Get the ith inner box.
 	 */
-	const IntervalVector& inner(int i) const;
-
-	bool is_unknown(int i) const;
-
-	/**
-	 * \brief Number of boxes
-	 */
-	const size_t nb_unknown;
+	const IntervalVector& inner(int j) const;
 
 	/**
 	 * \brief Get the ith unknown box.
@@ -58,33 +48,44 @@ public:
 	 * of the 'unknown' function, depending through which mother class it is handled.
 	 * This is why this function is intentionally *not* virtual.
 	 */
-	const IntervalVector& unknown(int i) const;
+	const IntervalVector& unknown(int j) const;
+
+	/**
+	 * \brief Number of inner boxes
+	 */
+	const size_t nb_inner;
+
+	/**
+	 * \brief Number of boxes
+	 */
+	const size_t nb_unknown;
 
 protected:
 	friend class CovIUListFactory;
-	BoxStatus* _set_status;
-	IntervalVector**  _set_inner;
-	IntervalVector**  _set_unknown;  // indices of other 'unknown' boxes
+
+	BoxStatus* _IU_status;         // status of the ith box
+	IntervalVector** _IU_inner;    // pointers to other 'inner' boxes
+	IntervalVector** _IU_unknown;  // pointers to other 'unknown' boxes
 };
 
 inline CovIUList::BoxStatus CovIUList::status(int i) const {
-	return INNER; //TODO is_inner(i)
+	return _IU_status[i];
 }
 
 inline bool CovIUList::is_inner(int i) const {
-	return _set_status[i]==INNER;
+	return status(i)==INNER;
 }
 
 inline bool CovIUList::is_unknown(int i) const {
-	return !is_inner(i);
+	return status(i)==UNKNOWN;
 }
 
-inline const IntervalVector& CovIUList::inner(int i) const {
-	return *_set_inner[i];
+inline const IntervalVector& CovIUList::inner(int j) const {
+	return *_IU_inner[j];
 }
 
-inline const IntervalVector& CovIUList::unknown(int i) const {
-	return *_set_unknown[i];
+inline const IntervalVector& CovIUList::unknown(int j) const {
+	return *_IU_unknown[j];
 }
 
 class CovIUListFile;
@@ -120,4 +121,4 @@ public:
 
 } /* namespace ibex */
 
-#endif /* __IBEX_BXS_SET_H__ */
+#endif /* __IBEX_COV_IU_LIST_H__ */

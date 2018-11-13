@@ -5,11 +5,11 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Not 08, 2018
+// Last update : Nov 13, 2018
 //============================================================================
 
-#ifndef __IBEX_BXS_MANIFOLD_H__
-#define __IBEX_BXS_MANIFOLD_H__
+#ifndef __IBEX_COV_MANIFOLD_H__
+#define __IBEX_COV_MANIFOLD_H__
 
 #include "ibex_CovIBUList.h"
 
@@ -19,11 +19,23 @@ class CovManifoldFactory;
 
 class CovManifold : public CovIBUList {
 public:
+	typedef enum { INNER, SOLUTION, BOUNDARY, UNKNOWN } BoxStatus;
+
 	CovManifold(const CovManifoldFactory&);
 
 	virtual ~CovManifold();
 
 	virtual int subformat_number() const;
+
+	BoxStatus status(int i) const;
+
+	bool is_solution(int i) const;
+
+	bool is_boundary(int i) const;
+
+	const IntervalVector& solution(int i) const;
+
+	const IntervalVector& boundary(int i) const;
 
 	/**
 	 * \brief Number of equalities.
@@ -37,20 +49,28 @@ public:
 
 	const size_t nb_solution;
 
-	const IntervalVector& solution(int i) const;
-
 	const size_t nb_boundary;
-
-	const IntervalVector& boundary(int i) const;
 
 protected:
 	friend class CovManifoldFactory;
 
-	bool* _manifold_is_solution;  // whether the ith 'manifold_boundary' is a solution or not.
-	IntervalVector**  _manifold_solution;
-	IntervalVector**  _manifold_boundary;
+	BoxStatus* _manifold_status;           // status of the ith box
+	IntervalVector**  _manifold_solution;  // pointer to 'solution' boxes
+	IntervalVector**  _manifold_boundary;  // pointer to 'boundary' boxes
 	//	Certificate* proofs; // proofs for the solution.
 };
+
+inline CovManifold::BoxStatus CovManifold::status(int i) const {
+	return _manifold_status[i];
+}
+
+inline bool CovManifold::is_solution(int i) const {
+	return status(i)==SOLUTION;
+}
+
+inline bool CovManifold::is_boundary(int i) const {
+	return status(i)==BOUNDARY;
+}
 
 inline const IntervalVector& CovManifold::solution(int i) const {
 	return *_manifold_solution[i];
@@ -81,6 +101,7 @@ private:
 	size_t m;
 	size_t nb_ineq;
 
+	/* whether the jth 'boundary' CovIBUList box is 'solution' */
 	std::vector<bool> is_solution;
 	int nb_solution;
 };
@@ -141,4 +162,4 @@ inline void CovManifoldFactory::set_nb_ineq(size_t nb_ineq) {
 
 } /* namespace ibex */
 
-#endif /* __IBEX_BXS_MANIFOLD_H__ */
+#endif /* __IBEX_COV_MANIFOLD_H__ */

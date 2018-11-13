@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Not 07, 2018
+// Last update : Nov 13, 2018
 //============================================================================
 
 #include "ibex_CovList.h"

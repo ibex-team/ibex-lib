@@ -5,11 +5,11 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Not 07, 2018
+// Last update : Nov 13, 2018
 //============================================================================
 
-#ifndef __IBEX_BXS_H__
-#define __IBEX_BXS_H__
+#ifndef __IBEX_COV_H__
+#define __IBEX_COV_H__
 
 #include "ibex_IntervalVector.h"
 #include "ibex_BoolInterval.h"
@@ -39,24 +39,13 @@ public:
 	const size_t n;
 
 
-//protected:
-//	friend class CovFactory;
+	//	friend class CovFactory;
 
 //	Cov(size_t n);
 //
 //	Cov(const char* filename);
 
 };
-//
-//class CovFactoryData {
-//public:
-//	/**
-//	 * \brief Number of variables
-//	 */
-//	size_t n;
-//
-//	void build(Cov& cov) const;
-//};
 
 class CovFactory {
 public:
@@ -119,4 +108,4 @@ protected:
 
 } /* namespace ibex */
 
-#endif /* __IBEX_BXS_H__ */
+#endif /* __IBEX_COV_H__ */
