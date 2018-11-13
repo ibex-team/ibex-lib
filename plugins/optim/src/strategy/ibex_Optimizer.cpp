@@ -205,7 +205,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	}
 
 	ctc.contract(c.box, context);
-	//cout << c.prop << endl;
+	cout << c.prop << endl;
 	if (c.box.is_empty()) return;
 
 	//cout << " [contract]  x after=" << c.box << endl;
