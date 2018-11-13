@@ -48,7 +48,7 @@ bool sameExpr(const ExprNode& node, const ExprNode& node2) {
 }
 
 void check(double y_actual, double y_expected, double err) {
-	CPPUNIT_ASSERT(!isnan(y_expected));
+	CPPUNIT_ASSERT(!std::isnan(y_expected));
 	if (y_expected==POS_INFINITY) { CPPUNIT_ASSERT(y_actual==POS_INFINITY); }
 	else if (y_expected==NEG_INFINITY) { CPPUNIT_ASSERT(y_actual==NEG_INFINITY); }
 	else {
@@ -63,8 +63,8 @@ void check(const Interval& y_actual, const Interval& y_expected, double err) {
 	if (y_expected.is_empty()) { CPPUNIT_ASSERT(y_actual.is_empty()); return; }
 
 	CPPUNIT_ASSERT(!y_actual.is_empty());
-	CPPUNIT_ASSERT(!isnan(y_actual.lb()));
-	CPPUNIT_ASSERT(!isnan(y_actual.ub()));
+	CPPUNIT_ASSERT(!std::isnan(y_actual.lb()));
+	CPPUNIT_ASSERT(!std::isnan(y_actual.ub()));
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.lb(),y_actual.lb(),err);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.ub(),y_actual.ub(),err);
 }
@@ -147,7 +147,7 @@ bool almost_eq(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected,
 
 
 void check_relatif(double y_actual, double y_expected, double err) {
-	CPPUNIT_ASSERT(!isnan(y_expected));
+	CPPUNIT_ASSERT(!std::isnan(y_expected));
 	if (y_expected==POS_INFINITY) { CPPUNIT_ASSERT(y_actual==POS_INFINITY); }
 	else if (y_expected==NEG_INFINITY) { CPPUNIT_ASSERT(y_actual==NEG_INFINITY); }
 	else {
@@ -165,8 +165,8 @@ void check_relatif(const Interval& y_actual, const Interval& y_expected, double 
 	if (y_expected.is_empty()) { CPPUNIT_ASSERT(y_actual.is_empty()); return; }
 
 	CPPUNIT_ASSERT(!y_actual.is_empty());
-	CPPUNIT_ASSERT(!isnan(y_actual.lb()));
-	CPPUNIT_ASSERT(!isnan(y_actual.ub()));
+	CPPUNIT_ASSERT(!std::isnan(y_actual.lb()));
+	CPPUNIT_ASSERT(!std::isnan(y_actual.ub()));
 	if (fabs(y_expected.lb())<1)
 		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.lb(),y_actual.lb(),err);
 	else

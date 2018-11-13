@@ -51,7 +51,6 @@ addons:
       - flex
       - bison
       - libcppunit-dev
-      - coinor-libclp-dev
 
 # need this to install dependencies on osx
 before_install:
