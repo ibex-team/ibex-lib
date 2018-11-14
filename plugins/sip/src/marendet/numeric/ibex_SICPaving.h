@@ -14,6 +14,7 @@
 
 #include "ibex_SIConstraint.h"
 #include "ibex_SIConstraintCache.h"
+#include "ibex_SIPSystem.h"
 
 namespace ibex {
 
@@ -34,7 +35,7 @@ void simplify_paving(const SIConstraint& constraint, SIConstraintCache& cache, c
 void monotonicity_filter(const SIConstraint& constraint, SIConstraintCache& cache, const IntervalVector& box);
 void evaluation_filter(const SIConstraint& constraint, SIConstraintCache& cache, const IntervalVector& box);
 void newton_filter(const SIConstraint& constraint, SIConstraintCache& cache, const IntervalVector& box);
-
+void blankenship(const IntervalVector& box, const SIPSystem& sys, BxpNodeData* node_data);
 }
 
 #endif  // __SIP_IBEX_IBEX_SIC_PAVING_H__

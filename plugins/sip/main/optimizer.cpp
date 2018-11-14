@@ -317,13 +317,13 @@ int main(int argc, const char ** argv) {
 		}
 		fixpoint_list.emplace_back(sic_bisector2);
 		fixpoint_list.emplace_back(sic_filter2);
-		fixpoint_list.emplace_back(ctc_bisect_active);
+		//fixpoint_list.emplace_back(ctc_bisect_active);
 		if (!no_blankenship) {
 			CtcBlankenship* blankenship = new CtcBlankenship(sys, 0.1, 1000);
 			fixpoint_list.emplace_back(blankenship);
 		}
 		CtcCompo* compo = new CtcCompo(fixpoint_list);
-		CtcFixPoint* fixpoint = new CtcFixPoint(*compo, 0.1); // Best: 0.1
+		CtcFixPoint* fixpoint = new CtcFixPoint(*compo, 1); // Best: 0.1
 
 		vector<Ctc*> ctc_list;
 		ctc_list.emplace_back(sic_bisector);

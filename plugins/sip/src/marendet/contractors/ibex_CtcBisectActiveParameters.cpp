@@ -14,6 +14,7 @@
 #include "ibex_GoldsztejnSICBisector.h"
 
 #include "ibex_utils.h"
+#include "ibex_SICPaving.h"
 
 namespace ibex {
 
@@ -63,9 +64,9 @@ void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& c
 	if(node_data == nullptr) {
 		ibex_error("CtcBisectActiveParameters: BxpNodeData must be set");
 	}
-
+	blankenship(sol, sys_, node_data);
 	// After variables, linearized goal and normal constraints
-	int current_row = sys_.ext_nb_var+sys_.normal_constraints_.size();
+	/*int current_row = sys_.ext_nb_var+sys_.normal_constraints_.size();
 	for(int constraint_index = 0; constraint_index < sys_.sic_constraints_.size(); ++constraint_index) {
 		auto& constraint = sys_.sic_constraints_[constraint_index];
 		//auto& cache = constraint.cache_->parameter_caches_;
@@ -82,7 +83,7 @@ void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& c
 			}
 			current_row++;
 		}
-	}
+	}*/
 }
 
 }  // namespace ibex

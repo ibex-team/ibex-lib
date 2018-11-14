@@ -11,6 +11,8 @@
  
 #include "ibex_SICPaving.h"
 
+#include "ibex_SIPSystem.h"
+
 #include "ibex_utils.h"
 #include "ibex_Newton.h"
 #include "ibex_Linear.h"
@@ -150,6 +152,44 @@ void newton_filter(const SIConstraint& constraint, SIConstraintCache& cache, con
             it++;
         }
     }
+}
+
+void blankenship(const IntervalVector& box, const SIPSystem& sys, BxpNodeData* node_data) {
+	//std::cout << "xlin(blankenship)=" << print_mma(box.mid()) << std::endl;
+	//BxpNodeData node_data_copy = BxpNodeData(*sys.node_data_);
+	BxpNodeData node_data_copy = BxpNodeData(*node_data);
+	for(int cst_index = 0; cst_index < sys.sic_constraints_.size(); ++cst_index) {
+		const auto& sic = sys.sic_constraints_[cst_index];
+		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
+		simplify_paving(sys.sic_constraints_[cst_index], cache, box, true);
+	}
+	const int MAX_ITERATIONS = 4;
+	for(int i = 0; i < MAX_ITERATIONS; ++i) {
+		for(int cst_index = 0; cst_index < sys.sic_constraints_.size(); ++cst_index) {
+			const auto& sic = sys.sic_constraints_[cst_index];
+			auto& cache = node_data_copy.sic_constraints_caches[cst_index];
+			bisect_paving(cache);
+			simplify_paving(sys.sic_constraints_[cst_index], cache, box, true);
+		}
+	}
+	//std::cout << "NEW ITER" << std::endl << std::endl;
+	for(int cst_index = 0; cst_index < sys.sic_constraints_.size(); ++cst_index) {
+		const auto& sic = sys.sic_constraints_[cst_index];
+		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
+		const int max_blankenship_list_size = 10 * sic.variable_count_;
+		//auto& blankenship_list = sys.node_data_->sic_constraints_caches[cst_index].best_blankenship_points_;
+		auto& blankenship_list = node_data->sic_constraints_caches[cst_index].best_blankenship_points_;
+		for(const auto& param_box : cache.parameter_caches_) {
+			if(std::find(blankenship_list.begin(), blankenship_list.end(), param_box.parameter_box.mid()) == blankenship_list.end()) {
+				//std::cout << "blankenship=" <<param_box.parameter_box.mid() << std::endl;
+				blankenship_list.emplace_back(param_box.parameter_box.mid());
+				//blankenship_list.emplace_back(param_box.parameter_box.mid());
+			}
+		}
+		while(blankenship_list.size() > max_blankenship_list_size) {
+			blankenship_list.pop_front();
+		}
+	}
 }
 
 

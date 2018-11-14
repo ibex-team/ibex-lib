@@ -31,7 +31,6 @@ public:
 	std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
 	std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop);
 	bool is_inner_with_paving_simplification(const IntervalVector& box);
-	void blankenship(const IntervalVector& box);
 private:
 	RelaxationLinearizerSIP linearizer_;
 	LPSolver lp_solver_;

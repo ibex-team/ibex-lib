@@ -69,7 +69,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	Matrix A = lp_solver_.get_rows();
 	vector<Vector> active_constraints;
 
-	blankenship(sol);
+	blankenship(sol, system_, node_data_);
 	// After variables and linearized goal
 	for (int i = system_.ext_nb_var + 1; i < A.nb_rows(); ++i) {
 		if (!Interval(dual[i]).inflate(1e-10).contains(0)) {
@@ -236,44 +236,6 @@ bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVec
 		}
 	}
 	return true;
-}
-
-void LoupFinderLineSearch::blankenship(const IntervalVector& box) {
-	//std::cout << "xlin(blankenship)=" << print_mma(box.mid()) << std::endl;
-	//BxpNodeData node_data_copy = BxpNodeData(*system_.node_data_);
-	BxpNodeData node_data_copy = BxpNodeData(*node_data_);
-	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
-		const auto& sic = system_.sic_constraints_[cst_index];
-		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
-		simplify_paving(system_.sic_constraints_[cst_index], cache, box, true);
-	}
-	const int MAX_ITERATIONS = 4;
-	for(int i = 0; i < MAX_ITERATIONS; ++i) {
-		for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
-			const auto& sic = system_.sic_constraints_[cst_index];
-			auto& cache = node_data_copy.sic_constraints_caches[cst_index];
-			bisect_paving(cache);
-			simplify_paving(system_.sic_constraints_[cst_index], cache, box, true);
-		}
-	}
-	//std::cout << "NEW ITER" << std::endl << std::endl;
-	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
-		const auto& sic = system_.sic_constraints_[cst_index];
-		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
-		const int max_blankenship_list_size = 10 * sic.variable_count_;
-		//auto& blankenship_list = system_.node_data_->sic_constraints_caches[cst_index].best_blankenship_points_;
-		auto& blankenship_list = node_data_->sic_constraints_caches[cst_index].best_blankenship_points_;
-		for(const auto& param_box : cache.parameter_caches_) {
-			if(std::find(blankenship_list.begin(), blankenship_list.end(), param_box.parameter_box.mid()) == blankenship_list.end()) {
-				//std::cout << "blankenship=" <<param_box.parameter_box.mid() << std::endl;
-				blankenship_list.emplace_back(param_box.parameter_box.mid());
-				//blankenship_list.emplace_back(param_box.parameter_box.mid());
-			}
-		}
-		while(blankenship_list.size() > max_blankenship_list_size) {
-			blankenship_list.pop_front();
-		}
-	}
 }
 
 LoupFinderLineSearch::~LoupFinderLineSearch() {
