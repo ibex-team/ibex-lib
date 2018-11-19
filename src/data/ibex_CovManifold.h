@@ -12,6 +12,7 @@
 #define __IBEX_COV_MANIFOLD_H__
 
 #include "ibex_CovIBUList.h"
+#include "ibex_Certificate.h"
 
 namespace ibex {
 
@@ -33,9 +34,14 @@ public:
 
 	bool is_boundary(int i) const;
 
-	const IntervalVector& solution(int i) const;
+	const IntervalVector& solution(int j) const;
 
-	const IntervalVector& boundary(int i) const;
+	const IntervalVector& boundary(int j) const;
+
+	/**
+	 * \brief Certificate of the jth solution.
+	 */
+	const Certificate& certificate(int j) const;
 
 	/**
 	 * \brief Number of equalities.
@@ -57,7 +63,7 @@ protected:
 	BoxStatus* _manifold_status;           // status of the ith box
 	IntervalVector**  _manifold_solution;  // pointer to 'solution' boxes
 	IntervalVector**  _manifold_boundary;  // pointer to 'boundary' boxes
-	//	Certificate* proofs; // proofs for the solution.
+	Certificate** proofs;                  // proofs for the solution. TODO: the existence box is redundant. Can we save space?
 };
 
 inline CovManifold::BoxStatus CovManifold::status(int i) const {
@@ -80,13 +86,19 @@ inline const IntervalVector& CovManifold::boundary(int i) const {
 	return *_manifold_boundary[i];
 }
 
+inline const Certificate& CovManifold::certificate(int j) const {
+	return *proofs[j];
+}
+
+class CovManifoldFile;
+
 class CovManifoldFactory : public CovIBUListFactory {
 public:
 	CovManifoldFactory(size_t n);
 
 	virtual ~CovManifoldFactory();
 
-	virtual void add_solution(const IntervalVector& x);
+	virtual void add_solution(const Certificate& c);
 
 	virtual void add_boundary(const IntervalVector& x);
 
@@ -95,7 +107,9 @@ public:
 	void set_nb_ineq(size_t);
 
 private:
+	friend class CovManifoldFile;
 	friend class CovManifold;
+
 	void build(CovManifold&) const;
 
 	size_t m;
@@ -103,9 +117,18 @@ private:
 
 	/* whether the jth 'boundary' CovIBUList box is 'solution' */
 	std::vector<bool> is_solution;
+	std::vector<Certificate> proofs;
 	int nb_solution;
 };
 
+class CovManifoldFile : public CovIBUListFile {
+public:
+	CovManifoldFile(const char* filename, CovManifoldFactory* factory=NULL);
+
+protected:
+	/* read the variable names */
+	void read_vars(std::ifstream& f);
+};
 
 inline void CovManifoldFactory::set_nb_equ(size_t m) {
 	this->m = m;
@@ -126,39 +149,6 @@ inline void CovManifoldFactory::set_nb_ineq(size_t nb_ineq) {
 //	int* not_regular;
 //};
 //
-//class CovSolverDataCova : public CovRegularBoundaryManifold {
-//public:
-//	/**
-//	 * \brief Names of the variables.
-//	 *
-//	 * By default: empty strings.
-//	 */
-//	std::string *var_names;
-//
-//	/*
-//	 * \brief Return status of the last solving.
-//	 */
-//	Solver::Status status;
-//
-//
-//	/*
-//	 * \brief CPU running time used to obtain this manifold.
-//	 */
-//	double time;
-//
-//	/**
-//	 * \brief Number of cells used to obtain this manifold.
-//	 */
-//	unsigned int nb_cells;
-//protected:
-//	bool* is_pending; // whether the ith not_boundary box is 'pending' or 'unknwon'.
-//	int nb_pending;
-//	int* pending; // indices of pending boxes
-//
-//	int nb_not_pending;
-//	int* not_pending;
-//
-//};
 
 } /* namespace ibex */
 

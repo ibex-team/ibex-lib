@@ -44,6 +44,7 @@ void CovIBUListFactory::add(const IntervalVector& x) {
 void CovIBUListFactory::add_boundary(const IntervalVector& x) {
 	CovIUListFactory::add_unknown(x);
 	is_boundary.push_back(true);
+	nb_boundary++;
 }
 
 void CovIBUListFactory::add_unknown(const IntervalVector& x) {
@@ -63,6 +64,8 @@ void CovIBUListFactory::build(CovIBUList& set) const {
 	vector<bool>::const_iterator it=is_boundary.begin();
 	int jbo=0; // count boundary boxes
 	int juk=0; // count unknown boxes
+
+
 	for (int i=0; i<set.size; i++) {
 		if (set.is_inner(i)) {
 			set._IBU_status[i]=CovIBUList::INNER;
@@ -81,6 +84,37 @@ void CovIBUListFactory::build(CovIBUList& set) const {
 	assert(jbo==set.nb_boundary);
 	assert(juk==set.nb_unknown);
 }
+
+//----------------------------------------------------------------------------------------------------
+
+CovIBUListFile::CovIBUListFile(const char* filename, CovIBUListFactory* _factory) :
+
+		CovIUListFile(filename, _factory? _factory : new CovIBUListFactory(0 /*tmp*/)) {
+
+	CovIBUListFactory& fac = * ((CovIBUListFactory*) this->factory);
+
+	assert(f); // file descriptor is open by CovFile constructor
+
+	size_t nb_boundary = read_pos_int(*f);
+
+	size_t nb_unknown = read_pos_int(*f); // just for integrity check
+
+	if (nb_boundary  + nb_unknown != fac.is_boundary.size())
+		ibex_error("[CovIUListFile]: number of boundary + unknown boxes <> number of CovList boundary boxes");
+
+	for (vector<bool>::iterator it=fac.is_boundary.begin(); it!=fac.is_boundary.end(); ++it) {
+		unsigned int status=read_pos_int(*f);
+		switch(status) {
+		case 0:  *it = true; fac.nb_boundary++;  break;
+		case 1:  *it = false; /*useless*/ break;
+		default: ibex_error("[CovIBUListFile]: bad input file (bad status code).");
+		}
+	}
+
+	if (fac.nb_boundary != nb_boundary)
+		ibex_error("[CovIUListFile]: number of boundary boxes does not match");
+}
+
 
 } // end namespace
 

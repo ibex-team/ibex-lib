@@ -68,6 +68,8 @@ inline const IntervalVector& CovIBUList::unknown(int i) const {
 	return *_IBU_unknown[i];
 }
 
+class CovIBUListFile;
+
 class CovIBUListFactory : public CovIUListFactory {
 public:
 	CovIBUListFactory(size_t n);
@@ -81,12 +83,21 @@ public:
 	virtual void add_unknown(const IntervalVector& x);
 
 private:
+	friend class CovIBUListFile;
 	friend class CovIBUList;
 	void build(CovIBUList&) const;
 
 	/* whether the jth 'unknown' CovIUList box is 'boundary' */
 	std::vector<bool> is_boundary;
 	int nb_boundary;
+};
+
+
+class CovIBUListFile : public CovIUListFile {
+public:
+	CovIBUListFile(const char* filename, CovIBUListFactory* factory=NULL);
+
+	virtual int subformat_number() const;
 };
 
 } /* namespace ibex */

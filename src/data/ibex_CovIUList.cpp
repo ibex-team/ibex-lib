@@ -78,7 +78,6 @@ void CovIUListFactory::build(CovIUList& set) const {
 	assert(juk==set.nb_unknown);
 }
 
-
 //----------------------------------------------------------------------------------------------------
 
 CovIUListFile::CovIUListFile(const char* filename, CovIUListFactory* _factory) :
@@ -91,7 +90,7 @@ CovIUListFile::CovIUListFile(const char* filename, CovIUListFactory* _factory) :
 
 	size_t nb_inner = read_pos_int(*f);
 
-	size_t nb_unknown = read_pos_int(*f);
+	size_t nb_unknown = read_pos_int(*f); // just for integrity check
 
 	if (nb_inner  + nb_unknown != fac.nb_boxes())
 		ibex_error("[CovIUListFile]: number of inner + boundary boxes <> total");
