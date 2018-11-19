@@ -317,13 +317,13 @@ int main(int argc, const char ** argv) {
 		}
 		fixpoint_list.emplace_back(sic_bisector2);
 		fixpoint_list.emplace_back(sic_filter2);
-		//fixpoint_list.emplace_back(ctc_bisect_active);
+		fixpoint_list.emplace_back(ctc_bisect_active);
 		if (!no_blankenship) {
 			CtcBlankenship* blankenship = new CtcBlankenship(sys, 0.1, 1000);
 			fixpoint_list.emplace_back(blankenship);
 		}
 		CtcCompo* compo = new CtcCompo(fixpoint_list);
-		CtcFixPoint* fixpoint = new CtcFixPoint(*compo, 1); // Best: 0.1
+		CtcFixPoint* fixpoint = new CtcFixPoint(*compo, 0.1); // Best: 0.1
 
 		vector<Ctc*> ctc_list;
 		ctc_list.emplace_back(sic_bisector);
@@ -340,7 +340,7 @@ int main(int argc, const char ** argv) {
 		}
 		CtcCompo* ctc = new CtcCompo(ctc_list);
 
-		//LoupFinderCompo lf_compo(Array<LoupFinder>(*loup_finder, *loup_finder2));
+		LoupFinderCompo lf_compo(Array<LoupFinder>(*loup_finder, *loup_finder2));
 		SIPOptimizer optimizer(sys.nb_var, *ctc, bisector, *loup_finder, *loup_finder2, buffer, sys.nb_var,
 			eps_x.Get(), rel_eps_f.Get(), abs_eps_f.Get());
 		//Optimizer optimizer(sys.nb_var, *ctc, bisector, lf_compo, buffer, sys.nb_var);

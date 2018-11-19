@@ -42,7 +42,7 @@ public:
 	static const double default_eps_x;
 
 	SIPOptimizer(int n, Ctc& ctc, Bsc& bisector,
-			LoupFinderSIP& loup_finder, LoupFinderSIP& loup_finder2, CellBufferOptim& buffer, int goal_var,
+			LoupFinder& loup_finder, LoupFinder& loup_finder2, CellBufferOptim& buffer, int goal_var,
 			double eps_x=default_eps_x,
 			double rel_eps_f=default_rel_eps_f,
 			double abs_eps_f=default_abs_eps_f);
@@ -68,7 +68,8 @@ public:
 
 private:
 	double compute_ymax();
-	void handleCell(Cell& cell);
+	void handle_cell(Cell& c, const IntervalVector& init_box);
+	void contract_and_bound(Cell& c, const IntervalVector& init_box);
 	void updateUplo();
 	bool updateLoup(Cell& cell);
 	bool updateLoup2(Cell& cell);
@@ -77,8 +78,8 @@ private:
 
 	Ctc& ctc_;
 	Bsc& bisector_;
-	LoupFinderSIP& loup_finder_;
-	LoupFinderSIP& loup_finder2_;
+	LoupFinder& loup_finder_;
+	LoupFinder& loup_finder2_;
 	CellBufferOptim& buffer_;
 
 	const double obj_rel_prec_f_;

@@ -41,7 +41,7 @@ const double SIPOptimizer::default_abs_eps_f = 1e-3;
 const double SIPOptimizer::default_eps_x = 0;
 const double SIPOptimizer::default_lf_loop_ratio = 0.1;
 
-SIPOptimizer::SIPOptimizer(int n, Ctc& ctc, Bsc& bisector, LoupFinderSIP& loup_finder, LoupFinderSIP& loup_finder2,
+SIPOptimizer::SIPOptimizer(int n, Ctc& ctc, Bsc& bisector, LoupFinder& loup_finder, LoupFinder& loup_finder2,
 		CellBufferOptim& buffer, int goal_var,
 		double eps_x,
 		double rel_eps_f,
@@ -79,7 +79,7 @@ SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double ob
 	time_ = 0;
 	Timer timer;
 	timer.start();
-	handleCell(*root);
+	handle_cell(*root, initial_box);
 	updateUplo();
 
 	cout << setprecision(12);
@@ -88,8 +88,7 @@ SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double ob
 		++iter;
 		loup_changed_ = false;
 		Cell* cell = buffer_.top();
-		if (trace >= 1) {
-			cout << "******** ITERATION " << iter << "********" << endl;
+		if (trace >= 2) {
 			cout << " current box " << cell->box << endl;
 		}
 		try {
@@ -99,8 +98,8 @@ SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double ob
 			buffer_.pop();
 			delete cell;
 			nb_cells_ += 2;
-			handleCell(*new_cells.first);
-			handleCell(*new_cells.second);
+			handle_cell(*new_cells.first, initial_box);
+			handle_cell(*new_cells.second, initial_box);
 			//handleCell(*cell);
 		} catch (NoBisectableVariableException&) {
 			updateUploEpsboxes((cell->box)[ext_n-1].lb());
@@ -149,7 +148,17 @@ SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double ob
 	return status_;
 }
 
-void SIPOptimizer::handleCell(Cell& cell) {
+void SIPOptimizer::handle_cell(Cell& c, const IntervalVector& init_box) {
+	contract_and_bound(c, init_box);
+
+	if(c.box.is_empty()) {
+		delete &c;
+	} else {
+		buffer_.push(&c);
+	}
+}
+
+void SIPOptimizer::contract_and_bound(Cell& cell, const IntervalVector& init_box) {
 	// LOAD THE NEW CACHE!
 
 	//BxpNodeData* data=(BxpNodeData*) cell.prop[BxpNodeData::id];
@@ -179,11 +188,11 @@ void SIPOptimizer::handleCell(Cell& cell) {
 
 
 	ContractContext context(cell.prop);
-	/*if (cell.bisected_var!=-1) {
+	if (cell.bisected_var!=-1) {
 		context.impact.clear();
 		context.impact.add(cell.bisected_var);
 		context.impact.add(cell.box.size()-1);
-	}*/
+	}
 
 	// =============== Contract y with y <= loup
 	Interval& y = cell.box[goal_var];
@@ -191,35 +200,40 @@ void SIPOptimizer::handleCell(Cell& cell) {
 	if (loup_ == POS_INFINITY)
 		ymax = POS_INFINITY;
 	else
-		ymax = compute_ymax();
+		ymax = compute_ymax()+1e-15;
 
 	y &= Interval(NEG_INFINITY, ymax);
 	if (y.is_empty()) {
 		cell.box.set_empty();
+		return;
 	}
 
 	// =============== Contract x with f(x) = y and g(x) <= 0
 	bool loop = true;
-	while (!cell.box.is_empty() && loop) {
+	while (loop) {
+		cell.prop.update(BoxEvent(cell.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
 		//cout << "after: " << cell.box << endl << endl << endl;
 		//cout << "beforectc" << endl;
 		double old_loup = loup_;
 		ctc_.contract(cell.box, context);
+		if(cell.box.is_empty()) {
+			return;
+		}
 		//cout << "afterctc" << endl;
 		loop = false;
 
-		if (!cell.box.is_empty()) {
-			bool loup_changed_here = updateLoup2(cell);
-			loop = loup_changed_here;
-			if (loup_changed_here) {
-				y &= Interval(NEG_INFINITY, compute_ymax());
-			}
-			loup_changed_ |= loup_changed_here;
-			if (y.is_empty()) {
-				cell.box.set_empty();
-			}
+		bool loup_changed_here = updateLoup2(cell);
+		loop = loup_changed_here;
+		if (loup_changed_here) {
+			y &= Interval(NEG_INFINITY, compute_ymax());
+		}
+		loup_changed_ |= loup_changed_here;
+		if (y.is_empty()) {
+			cell.box.set_empty();
+			return;
 		}
 		loop = (old_loup - loup_)/loup_ > lf_loop_ratio_;
+		//loop = false;
 		//break;
 	}
 
@@ -228,33 +242,25 @@ void SIPOptimizer::handleCell(Cell& cell) {
 	// we pass the full box with goal to the updateLoup function,
 	// the linearize function won't use the last variable of the box
 	//bool loup_changed_here = updateLoup(box_without_gaol);
-	if (!cell.box.is_empty()) {
-		bool loup_changed_here = updateLoup(cell);
-		if (loup_changed_here) {
-			y &= Interval(NEG_INFINITY, compute_ymax());
-		}
-		loup_changed_ |= loup_changed_here;
-		if (y.is_empty()) {
-			cell.box.set_empty();
-		}
+	bool loup_changed_here = updateLoup(cell);
+	if (loup_changed_here) {
+		y &= Interval(NEG_INFINITY, compute_ymax());
+		cell.prop.update(BoxEvent(cell.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
+	}
+	loup_changed_ |= loup_changed_here;
+	if (y.is_empty()) {
+		cell.box.set_empty();
+		return;
 	}
 
 
 	// =============== Handle epsilon boxes
-	if (!cell.box.is_empty()) {
-		IntervalVector box_without_gaol = sip_from_ext_box(cell.box);
-		if ((box_without_gaol.max_diam() <= eps_x_ && y.diam() <= obj_abs_prec_f_) || !cell.box.is_bisectable()) {
-			updateUploEpsboxes(y.lb());
-			cell.box.set_empty();
-		}
+	IntervalVector box_without_gaol = sip_from_ext_box(cell.box);
+	if ((box_without_gaol.max_diam() <= eps_x_ && y.diam() <= obj_abs_prec_f_) || !cell.box.is_bisectable()) {
+		updateUploEpsboxes(y.lb());
+		cell.box.set_empty();
 	}
 
-	if (cell.box.is_empty()) {
-		delete &cell;
-	} else {
-		//cell.box.put(0, box_without_gaol); // TODO Useful ?
-		buffer_.push(&cell);
-	}
 }
 
 void SIPOptimizer::updateUplo() {
