@@ -27,6 +27,7 @@ LoupFinderSIP::~LoupFinderSIP() {
 void LoupFinderSIP::add_property(const IntervalVector& init_box, BoxProperties& prop) {
 	if(prop[BxpNodeData::id] == nullptr) {
         prop.add(new BxpNodeData(system_.getInitialNodeCaches()));
+        ((BxpNodeData*)prop[BxpNodeData::id])->init_box = init_box;
     }
 }
 

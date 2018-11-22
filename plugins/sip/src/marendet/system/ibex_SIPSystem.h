@@ -77,7 +77,7 @@ public:
 	virtual Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const;
 	virtual void update(const BoxEvent& event, const BoxProperties& prop);
 	//virtual std::string to_string() const;
-
+	IntervalVector init_box;
 	std::vector<SIConstraintCache> sic_constraints_caches;
 };
 

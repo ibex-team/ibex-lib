@@ -31,7 +31,7 @@ long BxpNodeData::id = next_id();
 }*/
 
 BxpNodeData::BxpNodeData(const vector<SIConstraintCache>& caches) :
-		Bxp(id), sic_constraints_caches(caches) {
+		Bxp(id), init_box(1), sic_constraints_caches(caches) {
 }
 
 void BxpNodeData::update(const BoxEvent& event, const BoxProperties& prop) {

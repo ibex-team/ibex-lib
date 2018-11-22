@@ -35,6 +35,7 @@ CtcFirstOrderTest::~CtcFirstOrderTest() {
 void CtcFirstOrderTest::add_property(const IntervalVector& init_box, BoxProperties& map) {
     if(map[BxpNodeData::id] == nullptr) {
         map.add(new BxpNodeData(system_.getInitialNodeCaches()));
+        ((BxpNodeData*)map[BxpNodeData::id])->init_box = init_box;
     }
 }
 

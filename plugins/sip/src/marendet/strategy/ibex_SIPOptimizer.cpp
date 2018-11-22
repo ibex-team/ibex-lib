@@ -243,6 +243,7 @@ void SIPOptimizer::contract_and_bound(Cell& cell, const IntervalVector& init_box
 	// the linearize function won't use the last variable of the box
 	//bool loup_changed_here = updateLoup(box_without_gaol);
 	bool loup_changed_here = updateLoup(cell);
+	//bool loup_changed_here = false;
 	if (loup_changed_here) {
 		y &= Interval(NEG_INFINITY, compute_ymax());
 		cell.prop.update(BoxEvent(cell.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));

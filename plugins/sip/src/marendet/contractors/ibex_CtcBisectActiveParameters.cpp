@@ -31,6 +31,7 @@ CtcBisectActiveParameters::~CtcBisectActiveParameters() {
 void CtcBisectActiveParameters::add_property(const IntervalVector& init_box, BoxProperties& map) {
     if(map[BxpNodeData::id] == nullptr) {
         map.add(new BxpNodeData(sys_.getInitialNodeCaches()));
+        ((BxpNodeData*)map[BxpNodeData::id])->init_box = init_box;
     }
 }
 
