@@ -74,12 +74,20 @@ void CtcFwdBwd::init() {
 }
 
 void CtcFwdBwd::add_property(const IntervalVector& init_box, BoxProperties& map) {
-	if (ctr_num==-1) {
+//
+// Notes:
+// Adding a propertiy is counter-productive on some benchmarks (in particular on benchmark hs099.nl)
+// because of the cost of copying/updating this property during the search. However, this copy/update is
+// most of the time harmless compared to accessing this property at each fwd/bwd contraction (see note below), since the 
+// copy/update is only performed once at each search node. So this problem is not related to CtcFwdBwd
+// but to the relevancy of introducing properties in general on some benchmarks. See issue #342.
+//
+/*	if (ctr_num==-1) {
 		if (ctr.op!=EQ && !map[active_prop_id])
 		map.add(new BxpActiveCtr(init_box, ctr));
 	} else {
 		// the system cache is added at higher level
-	}
+	}*/
 }
 
 void CtcFwdBwd::contract(IntervalVector& box) {
@@ -96,7 +104,7 @@ void CtcFwdBwd::contract(IntervalVector& box, ContractContext& context) {
 
 //
 // Notes:
-// Using properties is counter-productive here just because of the cost 
+// Using properties here is counter-productive on many benchmarks just because of the cost 
 // of looking inside a map (operator[]). See issue #342
 //
 //	if (ctr_num==-1)
