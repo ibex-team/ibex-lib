@@ -182,13 +182,14 @@ template<class D>
 inline void ExprTemplateDomain<D>::write_arg_domains(const typename D::VECTOR& box) {
 
 	if (ExprData<TemplateDomain<D> >::f.all_args_scalar()) {
-		for (BitSet::const_iterator j=ExprData<TemplateDomain<D> >::f.used_vars.begin();
+		for (std::vector<int>::const_iterator j=ExprData<TemplateDomain<D> >::f.used_vars.begin();
 				j!=ExprData<TemplateDomain<D> >::f.used_vars.end(); ++j) {
-			ExprData<TemplateDomain<D> >::args[j].i()=box[j];
+			ExprData<TemplateDomain<D> >::args[*j].i()=box[*j];
 		}
 	}
-	else
+	else {
 		load(ExprData<TemplateDomain<D> >::args, box, ExprData<TemplateDomain<D> >::f.used_vars);
+	}
 }
 
 template<class D>
@@ -196,9 +197,9 @@ inline void ExprTemplateDomain<D>::read_arg_domains(typename D::VECTOR& box) con
 	if (ExprData<TemplateDomain<D> >::f.all_args_scalar()) {
 		int j;
 
-		for (BitSet::const_iterator j=ExprData<TemplateDomain<D> >::f.used_vars.begin();
+		for (std::vector<int>::const_iterator  j=ExprData<TemplateDomain<D> >::f.used_vars.begin();
 				j!=ExprData<TemplateDomain<D> >::f.used_vars.end(); ++j) {
-			box[j]=ExprData<TemplateDomain<D> >::args[j].i();
+			box[*j]=ExprData<TemplateDomain<D> >::args[*j].i();
 		}
 	}
 	else {

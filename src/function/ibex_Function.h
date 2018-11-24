@@ -832,7 +832,7 @@ public:
 	 * \warning The function is seen as a function from R^n to R^m. So, the
 	 * ith variable is <b>not</b> the ith symbol.
 	 */
-	const BitSet used_vars;
+	const std::vector<int> used_vars;
 
 	ExprSubNodes nodes;
 

@@ -14,6 +14,8 @@
 #include "ibex_BxpSystemCache.h"
 #include "ibex_ExprCopy.h"
 
+using namespace std;
+
 namespace ibex {
 
 namespace {
@@ -69,8 +71,17 @@ CtcFwdBwd::~CtcFwdBwd() {
 }
 
 void CtcFwdBwd::init() {
-	input = new BitSet(ctr.f.used_vars);
-	output = new BitSet(ctr.f.used_vars);
+	//	input = new BitSet(ctr.f.used_vars);  // used_vars is not a bitset anymore ...
+//	output = new BitSet(ctr.f.used_vars);
+	input = new BitSet(nb_var);
+	output = new BitSet(nb_var);
+	
+	int v;
+	for (vector<int>::const_iterator it=ctr.f.used_vars.begin(); it!=ctr.f.used_vars.end(); it++) {
+		output->add(*it);
+		input->add(*it);
+	}
+
 }
 
 void CtcFwdBwd::add_property(const IntervalVector& init_box, BoxProperties& map) {
