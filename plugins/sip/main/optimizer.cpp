@@ -9,7 +9,6 @@
  * Created     : Nov 2, 2017
  * ---------------------------------------------------------------------------- */
 
-#include "ibex_CtcBlankenship.h"
 #include "ibex_CtcEvaluation.h"
 #include "ibex_CtcFilterSICParameters.h"
 #include "ibex_CtcBisectActiveParameters.h"
@@ -97,7 +96,7 @@ int main(int argc, const char ** argv) {
 	args::Flag no_inner_lin(parser, "no-inner-linearizations", "Deactivate inner linearizations",
 			{ 'i', "no-inner-lin" });
 	args::Flag no_first_order(parser, "no-first-order-test", "Deactivate first order test", { 'f', "no-first-order" });
-	args::Flag no_blankenship(parser, "no-blankenship", "Deactivate Blankenship heuristic", { 'b', "no-blankenship" });
+	//args::Flag no_blankenship(parser, "no-blankenship", "Deactivate Blankenship heuristic", { 'b', "no-blankenship" });
 	args::Flag no_line_search(parser, "no-line-search", "Deactivate line search for feasible points", { 'l',
 			"no-line-search" });
 
@@ -155,7 +154,7 @@ int main(int argc, const char ** argv) {
 	}
 
 	std::vector<std::string> accepted_options = { "--rel-eps-f", "--abs-eps-f", "--timeout", "--random-seed", "--eps-x",
-			"--initial-loup", "--no-propag", "--no-outer-lin", "--no-inner-lin", "--no-first-order", "--no-blankenship",
+			"--initial-loup", "--no-propag", "--no-outer-lin", "--no-inner-lin", "--no-first-order",
 			"--no-line-search", "--trace", "--universal" };
 	MinibexOptionsParser minibexParser(accepted_options);
 	minibexParser.parse(filename.Get());
@@ -318,10 +317,10 @@ int main(int argc, const char ** argv) {
 		fixpoint_list.emplace_back(sic_bisector2);
 		fixpoint_list.emplace_back(sic_filter2);
 		fixpoint_list.emplace_back(ctc_bisect_active);
-		if (!no_blankenship) {
+		/*if (!no_blankenship) {
 			CtcBlankenship* blankenship = new CtcBlankenship(sys, 0.1, 1000);
 			fixpoint_list.emplace_back(blankenship);
-		}
+		}*/
 		CtcCompo* compo = new CtcCompo(fixpoint_list);
 		CtcFixPoint* fixpoint = new CtcFixPoint(*compo, 0.1); // Best: 0.1
 

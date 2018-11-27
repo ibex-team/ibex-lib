@@ -41,6 +41,7 @@ struct ParameterEvaluationsCache {
 class SIConstraintCache {
 public:
 	SIConstraintCache(const IntervalVector& initial_box);
+	virtual ~SIConstraintCache() {}
 	void update_cache(const Function& function,
 			const IntervalVector& new_box_, bool force=false);
 

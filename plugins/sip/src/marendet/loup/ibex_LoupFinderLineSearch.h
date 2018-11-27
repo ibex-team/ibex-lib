@@ -35,6 +35,7 @@ private:
 	RelaxationLinearizerSIP linearizer_;
 	LPSolver lp_solver_;
 	BxpNodeData* node_data_ = nullptr;
+	bool delete_node_data_ = false;
 };
 
 } // end namespace ibex

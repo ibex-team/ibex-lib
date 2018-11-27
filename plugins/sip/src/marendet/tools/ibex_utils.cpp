@@ -115,4 +115,13 @@ std::vector<IntervalVector> bisectAllDim(const IntervalVector& iv) {
 	}
 	return res;
 }
+
+int symbol_array_dim(const Array<const ExprSymbol>& array) {
+	int res = 0;
+	for(int i = 0; i < array.size(); ++i) {
+		res += array[i].dim.size();
+	}
+	return res;
+}
+
 } // end namespace ibex

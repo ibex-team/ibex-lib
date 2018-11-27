@@ -31,7 +31,7 @@ long BxpNodeData::id = next_id();
 }*/
 
 BxpNodeData::BxpNodeData(const vector<SIConstraintCache>& caches) :
-		Bxp(id), init_box(1), sic_constraints_caches(caches) {
+		Bxp(id), init_box(1), sic_constraints_caches(caches), init_sic_constraints_caches(caches) {
 }
 
 void BxpNodeData::update(const BoxEvent& event, const BoxProperties& prop) {
@@ -137,11 +137,12 @@ void SIPSystem::extractConstraints() {
 			VarSet tmpVarset(ibex_system_->ctrs[i].f, usedParamSymbols, false);
 			IntervalVector initParamBox = tmpVarset.param_box(ibex_system_->box);
 			initial_parameter_boxes_.emplace_back(initParamBox);
+			int ext_var_dim = newF->nb_var() - initParamBox.size();
 			if (goal_function_ != NULL) {
-				SIConstraint test(newF, varCopy.size() + 1);
+				SIConstraint test(newF, ext_var_dim);
 				sic_constraints_.emplace_back(test);
 			} else {
-				SIConstraint test(newF, varCopy.size());
+				SIConstraint test(newF, ext_var_dim-1);
 				sic_constraints_.emplace_back(test);
 			}
 		}

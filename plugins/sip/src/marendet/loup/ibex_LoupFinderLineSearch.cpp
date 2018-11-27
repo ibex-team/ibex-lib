@@ -43,13 +43,16 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	if(node_data_ == nullptr) {
 		ibex_error("LoupFinderLineSearch: BxpNodeData must be set");
 	}
+	delete_node_data_ = false;
 
 	IntervalVector ext_box = sip_to_ext_box(box, system_.goal_function_->eval(box));
 	lp_solver_.clean_ctrs();
 	lp_solver_.set_bounds(ext_box);
 	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
-	linearizer_.linearize(ext_box, lp_solver_, prop);
+	if(linearizer_.linearize(ext_box, lp_solver_, prop) < 0) {
+		throw NotFound();
+	}
 	//lp_solver_.write_file();
 
 	auto return_code = lp_solver_.solve();
@@ -82,12 +85,12 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	}
 
 	for (int i = 0; i < system_.nb_var; ++i) {
-		if (Interval(ext_box[i].lb()).inflate(1e-10).contains(sol[i])) {
+		if (Interval(node_data_->init_box[i].lb()).inflate(1e-10).contains(sol[i])) {
 			Vector cst(system_.nb_var, 0.0);
 			//cst[box.size()] = 1;
 			cst[i] = 1;
 			active_constraints.emplace_back(cst);
-		} else if (Interval(ext_box[i].ub()).inflate(1e-10).contains(sol[i])) {
+		} else if (Interval(node_data_->init_box[i].ub()).inflate(1e-10).contains(sol[i])) {
 			Vector cst(system_.nb_var, 0.0);
 			//cst[box.size()] = 1;
 			cst[i] = -1;
@@ -151,41 +154,48 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 		//cout << "g(point)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
 		Vector ext_point = sip_to_ext_box(point, system_.goal_ub(point));
 		//cout << print_mma(point_plus_goal) << endl;
-		if (ext_box.subvector(0, system_.nb_var-1).contains(point)) {
-			double new_loup = loup;
-			if (check(system_, point, new_loup, true, prop) && new_loup < best_loup) {
-				best_loup_point = ext_point;
-				best_loup = new_loup;
-				loup_found = true;
-			}
-			Vector left = sol_without_goal;
-			Vector right = point;
-			for(int i = 0; i < 20; ++i) {
-				Vector middle = 0.5*(left + right);
-				//cout << "middle=" << middle.subvector(0,system_.nb_var-1) << endl;
-				//cout << "g(middle)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
-				IntervalVector ext_middle = sip_to_ext_box(middle, system_.goal_ub(middle));
-				if(is_inner_with_paving_simplification(ext_middle)) {
-				//if(system_.is_inner(middle)) {
-					//cout << "g(middle_inner)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
-					//cout << "goal_ub(middle)=" << system_.goal_ub(middle.subvector(0,system_.nb_var-1)) << endl;
-					right = middle;
-				} else {
-					left = middle;
-				}
-			}
-			point = right;
-			ext_point = sip_to_ext_box(point, system_.goal_ub(point));
-			//cout << "point=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
-			//cout << "line search=" <<  point_plus_goal << endl;
-			new_loup = loup;
-			if (ext_box.subvector(0, ext_box.size()-2).contains(point) && check(system_, point, new_loup, true, prop) && new_loup < best_loup) {
-				//std::cout << "lf22" << std::endl;
-				best_loup_point = ext_point;
-				best_loup = new_loup;
-				loup_found = true;
+		if (!ext_box.subvector(0, system_.nb_var-1).contains(point)) {
+			node_data_ = new BxpNodeData(*node_data_);
+			delete_node_data_ = true;
+			node_data_->sic_constraints_caches = node_data_->init_sic_constraints_caches;
+			blankenship(node_data_->init_box, system_, node_data_);
+		}
+		double new_loup = loup;
+		if (check(system_, point, new_loup, true, prop) && new_loup < best_loup) {
+			best_loup_point = ext_point;
+			best_loup = new_loup;
+			loup_found = true;
+		}
+		Vector left = sol_without_goal;
+		Vector right = point;
+		for(int i = 0; i < 20; ++i) {
+			Vector middle = 0.5*(left + right);
+			//cout << "middle=" << middle.subvector(0,system_.nb_var-1) << endl;
+			//cout << "g(middle)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
+			IntervalVector ext_middle = sip_to_ext_box(middle, system_.goal_ub(middle));
+			if(is_inner_with_paving_simplification(ext_middle)) {
+			//if(system_.is_inner(middle)) {
+				//cout << "g(middle_inner)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(middle) << endl;
+				//cout << "goal_ub(middle)=" << system_.goal_ub(middle.subvector(0,system_.nb_var-1)) << endl;
+				right = middle;
+			} else {
+				left = middle;
 			}
 		}
+		point = right;
+		ext_point = sip_to_ext_box(point, system_.goal_ub(point));
+		//cout << "point=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(point) << endl;
+		//cout << "line search=" <<  point_plus_goal << endl;
+		new_loup = loup;
+		if (ext_box.subvector(0, ext_box.size()-2).contains(point) && check(system_, point, new_loup, true, prop) && new_loup < best_loup) {
+			//std::cout << "lf22" << std::endl;
+			best_loup_point = ext_point;
+			best_loup = new_loup;
+			loup_found = true;
+		}
+	}
+	if(delete_node_data_) {
+		delete node_data_;
 	}
 	if (loup_found) {
 		return make_pair(best_loup_point, best_loup);
@@ -216,7 +226,7 @@ bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVec
 	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
 		const auto& sic = system_.sic_constraints_[cst_index];
 		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
-		simplify_paving(system_.sic_constraints_[cst_index], cache, box, true);
+		simplify_paving(sic, cache, box, true);
 	}
 	const int MAX_ITERATIONS = 4;
 	for(int i = 0; i < MAX_ITERATIONS; ++i) {
@@ -224,7 +234,7 @@ bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVec
 			const auto& sic = system_.sic_constraints_[cst_index];
 			auto& cache = node_data_copy.sic_constraints_caches[cst_index];
 			bisect_paving(cache);
-			simplify_paving(system_.sic_constraints_[cst_index], cache, box, true);
+			simplify_paving(sic, cache, box, true);
 		}
 	}
 	

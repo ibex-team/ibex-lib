@@ -39,6 +39,9 @@ int RestrictionLinearizerSIP::linearize(const IntervalVector& box, LPSolver& lp_
 }
 
 int RestrictionLinearizerSIP::linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) {
+    /*if(box.is_unbounded()) {
+        return -1;
+    }*/
     BxpNodeData* node_data = (BxpNodeData*) prop[BxpNodeData::id];
 	if(node_data == nullptr) {
 		ibex_error("RelaxationLinearizerSIP::linearize: BxpNodeData must be set");
