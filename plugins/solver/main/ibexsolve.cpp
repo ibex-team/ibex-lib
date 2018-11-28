@@ -35,6 +35,7 @@ int main(int argc, char** argv) {
 
 	args::ArgumentParser parser("********* IbexSolve (defaultsolver) *********.", "Solve a Minibex file.");
 	args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
+	args::Flag version(parser, "version", "Display the version of this plugin (same as the version of Ibex).", {'v',"version"});
 	args::ValueFlag<double> eps_x_min(parser, "float", _eps_x_min.str(), {'e', "eps-min"});
 	args::ValueFlag<double> eps_x_max(parser, "float", _eps_x_max.str(), {'E', "eps-max"});
 	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo (none).", {'t', "timeout"});
@@ -55,7 +56,7 @@ int main(int argc, char** argv) {
 	args::Flag sols(parser, "sols", "Display the \"solutions\" (output boxes) on the standard output.", {'s',"sols"});
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
-	args::ValueFlag<string> forced_params(parser, "vars","Force some variables to be parameters in the parametric proofs.",{"forced-params"});
+	args::ValueFlag<string> forced_params(parser, "vars","Force some variables to be parameters in the parametric proofs, separated by '+'. Example: --forced-params=x+y",{"forced-params"});
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
 	try
@@ -78,6 +79,11 @@ int main(int argc, char** argv) {
 		std::cerr << e.what() << std::endl;
 		std::cerr << parser;
 		return 1;
+	}
+
+	if (version) {
+		cout << "IbexSolve Release " << _IBEX_RELEASE_ << endl;
+		exit(0);
 	}
 
 	if (format) {

@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
 
 	args::ArgumentParser parser("********* IbexOpt (defaultoptimizer) *********.", "Solve a Minibex file.");
 	args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
+	args::Flag version(parser, "version", "Display the version of this plugin (same as the version of Ibex).", {'v',"version"});
 	args::ValueFlag<double> rel_eps_f(parser, "float", _rel_eps_f.str(), {'r', "rel-eps-f"});
 	args::ValueFlag<double> abs_eps_f(parser, "float", _abs_eps_f.str(), {'a', "abs-eps-f"});
 	args::ValueFlag<double> eps_h(parser, "float", _eps_h.str(), {"eps-h"});
@@ -68,6 +69,11 @@ int main(int argc, char** argv) {
 		std::cerr << e.what() << std::endl;
 		std::cerr << parser;
 		return 1;
+	}
+
+	if (version) {
+		cout << "IbexOpt Release " << _IBEX_RELEASE_ << endl;
+		exit(0);
 	}
 
 	if (format) {
