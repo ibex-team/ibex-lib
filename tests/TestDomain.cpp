@@ -205,11 +205,11 @@ void TestDomain::load01() {
 
 	IntervalVector box(11,Interval(0,1));
 
-	BitSet vars(11);
-	vars.add(3);
-	vars.add(5);
-	vars.add(7);
-	vars.add(9);
+	vector<int> vars;
+	vars.push_back(3);
+	vars.push_back(5);
+	vars.push_back(7);
+	vars.push_back(9);
 	load(x,box,vars);
 
 	CPPUNIT_ASSERT(x[0].v()[0]==Interval::ALL_REALS);
@@ -241,11 +241,11 @@ void TestDomain::load02() {
 
 	IntervalVector box(11,Interval::ALL_REALS);
 
-	BitSet vars(11);
-	vars.add(3);
-	vars.add(5);
-	vars.add(7);
-	vars.add(9);
+	vector<int> vars;
+	vars.push_back(3);
+	vars.push_back(5);
+	vars.push_back(7);
+	vars.push_back(9);
 
 	x[1].v()[0]=Interval(0,1);
 	x[2].i()=Interval(0,2);

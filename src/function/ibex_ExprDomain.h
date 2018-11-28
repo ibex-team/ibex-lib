@@ -195,7 +195,6 @@ inline void ExprTemplateDomain<D>::write_arg_domains(const typename D::VECTOR& b
 template<class D>
 inline void ExprTemplateDomain<D>::read_arg_domains(typename D::VECTOR& box) const {
 	if (ExprData<TemplateDomain<D> >::f.all_args_scalar()) {
-		int j;
 
 		for (std::vector<int>::const_iterator  j=ExprData<TemplateDomain<D> >::f.used_vars.begin();
 				j!=ExprData<TemplateDomain<D> >::f.used_vars.end(); ++j) {

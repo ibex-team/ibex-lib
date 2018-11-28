@@ -73,7 +73,7 @@ public:
 		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
 		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
 		INF, MID, SUP,  // deprecated??
-		DIFF, UNARY_OP,
+		DIFF, UNARY_OP, BINARY_OP
 	} operation;
 
 	P_ExprNode(operation op) : op(op), lab(NULL), line(ibex_lineno) { }
@@ -270,13 +270,27 @@ public:
 };
 
 /**
- * \brief Function application.
+ * \brief Unary generic operator.
  */
 class P_ExprGenericUnaryOp : public P_ExprNode {
 public:
 	P_ExprGenericUnaryOp(const char* name, const P_ExprNode& expr);
 
 	~P_ExprGenericUnaryOp();
+
+	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+
+	const char* name;
+};
+
+/**
+ * \brief Binary generic operator.
+ */
+class P_ExprGenericBinaryOp : public P_ExprNode {
+public:
+	P_ExprGenericBinaryOp(const char* name, const P_ExprNode& left, const P_ExprNode& right);
+
+	~P_ExprGenericBinaryOp();
 
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
 

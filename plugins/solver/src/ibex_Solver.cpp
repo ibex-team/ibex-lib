@@ -505,7 +505,7 @@ void Solver::report() {
 	cout << " cpu time used:\t\t\t" << time << "s";
 	if (manif->time!=time)
 		cout << " [total=" << manif->time << "]";
-		cout << endl;
+	cout << endl;
 	cout << " number of cells:\t\t" << nb_cells;
 	if (manif->nb_cells!=nb_cells)
 		cout << " [total=" << manif->nb_cells << "]";

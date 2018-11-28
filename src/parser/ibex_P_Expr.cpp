@@ -140,6 +140,14 @@ P_ExprGenericUnaryOp::~P_ExprGenericUnaryOp() {
 	free((char*) name);
 }
 
+P_ExprGenericBinaryOp::P_ExprGenericBinaryOp(const char* name, const P_ExprNode& left, const P_ExprNode& right) :
+		P_ExprNode(BINARY_OP,left,right), name(strdup(name)) {
+}
+
+P_ExprGenericBinaryOp::~P_ExprGenericBinaryOp() {
+	free((char*) name);
+}
+
 const P_ExprNode* apply(Function& f, const Array<const P_ExprNode>& args) {
 	int n=f.nb_arg();
 	if (n!=args.size()) {

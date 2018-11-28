@@ -79,7 +79,7 @@ private:
         Interval x(x_double);
         // 3th order Taylor Expansion (remainder valid for all x in [-1,1])
         Interval taylor_3 = x*(Interval(2.)/Interval(5.) + Interval(4.)/Interval(7.)*sqr(x)) + Interval(-1.,1.)*(pow(x,5)/(Interval(1.)-sqr(x)));
-        return taylor_3 & (-1 + 1/(1 - sqr(x)))/pow(x,3) - (3*(-x + _atanh(x)))/pow(x,4) ;
+        return taylor_3 & ((-1 + 1/(1 - sqr(x)))/pow(x,3) - (3*(-x + _atanh(x)))/pow(x,4));
     }
 };
 

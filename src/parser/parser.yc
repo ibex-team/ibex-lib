@@ -39,6 +39,7 @@
 %token <str> TK_ENTITY
 %token <str> TK_ITERATOR
 %token <str> TK_UNARY_OP               // generic (user-defined) unary operator
+%token <str> TK_BINARY_OP              // generic (user-defined) binary operator
 
 %token <str> TK_STRING
 %token <itg> TK_INTEGER
@@ -310,6 +311,8 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | TK_SUP '(' expr ')'             { $$ = sup($3); }
               | TK_DIFF '(' expr_row ')'        { $$ = diff($3); }
               | TK_UNARY_OP '(' expr ')'        { $$ = new P_ExprGenericUnaryOp($1,*$3); free($1); }
+              | TK_BINARY_OP '(' expr ',' expr ')'      
+                                                { $$ = new P_ExprGenericBinaryOp($1,*$3,*$5); free($1); }
               ;
 	      
 expr_row      : expr_row  ',' expr              { $1->push_back($3); $$=$1; }

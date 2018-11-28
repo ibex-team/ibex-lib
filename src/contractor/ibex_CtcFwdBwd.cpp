@@ -76,7 +76,6 @@ void CtcFwdBwd::init() {
 	input = new BitSet(nb_var);
 	output = new BitSet(nb_var);
 	
-	int v;
 	for (vector<int>::const_iterator it=ctr.f.used_vars.begin(); it!=ctr.f.used_vars.end(); it++) {
 		output->add(*it);
 		input->add(*it);

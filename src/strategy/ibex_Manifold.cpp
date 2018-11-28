@@ -336,7 +336,6 @@ void Manifold::write_txt(const char* filename) const {
 	file << inner.size() << s << boundary.size() << s << unknown.size() << s << pending.size() << '\n';
 	file << time << s << nb_cells << '\n';
 
-	bool first_sol=true;
 	for (vector<QualifiedBox>::const_iterator it=inner.begin(); it!=inner.end(); it++) {
 		write_output_box_txt(file,*it);
 	}
