@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Nov 13, 2018
+// Last update : Nov 28, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_H__
@@ -42,9 +42,6 @@ public:
 	//	friend class CovFactory;
 
 //	Cov(size_t n);
-//
-//	Cov(const char* filename);
-
 };
 
 class CovFactory {
@@ -54,8 +51,6 @@ public:
 
 	CovFactory(size_t n);
 
-	void set_nb_var(size_t n);
-
 	/**
 	 * \brief Number of variables
 	 */
@@ -63,10 +58,6 @@ public:
 
 	void build(Cov& cov) const;
 };
-//
-//inline void CovFactory::set_nb_var(size_t _n) {
-//	n = _n;
-//}
 
 class CovFile {
 public:
@@ -87,15 +78,15 @@ public:
 	/**
 	 * \brief Cover file format version.
 	 */
-	static const int FORMAT_VERSION;
+	static const uint32_t FORMAT_VERSION;
 
 	CovFactory* factory;
 
 protected:
 	std::ifstream *f;
 
-	static const int  SIGNATURE_LENGTH;
-	static const char* SIGNATURE;
+	static const size_t SIGNATURE_LENGTH;
+	static const char*  SIGNATURE;
 
 	int read_signature(std::ifstream& f);
 	unsigned int read_pos_int(std::ifstream& f);

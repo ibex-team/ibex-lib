@@ -17,9 +17,9 @@ using namespace std;
 
 namespace ibex {
 
-const int CovFile::SIGNATURE_LENGTH = 20;
+const size_t CovFile::SIGNATURE_LENGTH = 16;
 const char* CovFile::SIGNATURE = "IBEX DATA FILE ";
-const int CovFile::FORMAT_VERSION = 1;
+const uint32_t CovFile::FORMAT_VERSION = 1;
 
 Cov::Cov(const CovFactory& fac) : n(fac.n) {
 	fac.build(*this);
@@ -72,8 +72,9 @@ int CovFile::read_signature(ifstream& f) {
 	if (f.eof()) ibex_error("[manifold]: unexpected end of file.");
 	if (strcmp(sig,SIGNATURE)!=0)
 	ibex_error("[Cov]: not an Ibex \"cover\" file.");
-	int format_version=read_pos_int(f); // manifold version
+	uint32_t format_version=read_pos_int(f); // manifold version
 	if (format_version>FORMAT_VERSION) {
+		cout << "format version = " << format_version << endl;
 		ibex_error("[Cov]: wrong format version");
 		return -1;
 	} else

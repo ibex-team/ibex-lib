@@ -56,8 +56,8 @@ void CovManifoldFactory::add_boundary(const IntervalVector& x) {
 }
 
 void CovManifoldFactory::build(CovManifold& manif) const {
-	assert(manif.nb_inner == nb_inner);
-	assert(manif.CovIBUList::nb_boundary == nb_boundary);
+	//assert(manif.nb_inner == nb_inner);
+	//assert(manif.CovIBUList::nb_boundary == nb_boundary);
 	(size_t&) manif.nb_solution = nb_solution;
 	(size_t&) manif.nb_boundary = manif.CovIBUList::nb_boundary - nb_solution;
 	manif._manifold_status      = new CovManifold::BoxStatus[manif.CovIBUList::nb_boundary];

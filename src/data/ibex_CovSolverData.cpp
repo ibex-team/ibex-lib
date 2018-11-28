@@ -52,9 +52,9 @@ void CovSolverDataFactory::add_unknown(const IntervalVector& x) {
 }
 
 void CovSolverDataFactory::build(CovSolverData& solver) const {
-	assert(solver.nb_inner == nb_inner);
-	assert(solver.nb_boundary == nb_boundary);
-	assert(solver.nb_solution == nb_solution);
+//	assert(solver.nb_inner == nb_inner);
+//  assert(solver.nb_boundary == nb_boundary);
+//	assert(solver.nb_solution == nb_solution);
 	(size_t&) solver.nb_pending = nb_pending;
 	(size_t&) solver.nb_unknown= solver.CovIBUList::nb_unknown - nb_pending;
 	solver._closed_set_is_pending = new bool[solver.CovIBUList::nb_unknown];

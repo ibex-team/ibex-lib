@@ -53,8 +53,8 @@ void CovIBUListFactory::add_unknown(const IntervalVector& x) {
 }
 
 void CovIBUListFactory::build(CovIBUList& set) const {
-	assert(set.nb_inner == nb_inner);
-	(size_t&) set.nb_boundary = nb_boundary;
+	//assert(set.nb_inner == nb_inner);
+	//(size_t&) set.nb_boundary = nb_boundary;
 	(size_t&) set.nb_unknown  = set.CovIUList::nb_unknown - nb_boundary;
 	set._IBU_status           = new CovIBUList::BoxStatus[set.CovIUList::nb_unknown];
 	set._IBU_boundary         = new IntervalVector*[nb_boundary];

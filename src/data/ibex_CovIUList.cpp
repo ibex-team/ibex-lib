@@ -54,7 +54,7 @@ void CovIUListFactory::add_unknown(const IntervalVector& x) {
 }
 
 void CovIUListFactory::build(CovIUList& set) const {
-	assert(set.size == boxes.size());
+	//assert(set.size == boxes.size());
 	(size_t&) set.nb_inner = nb_inner;
 	(size_t&) set.nb_unknown = set.size - nb_inner;
 	set._IU_status = new CovIUList::BoxStatus[set.size];
