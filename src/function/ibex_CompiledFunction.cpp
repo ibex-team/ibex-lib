@@ -19,12 +19,6 @@ using namespace std;
 
 namespace ibex {
 
-namespace {
-
-bool compare(const ExprNode* x, const ExprNode* y) { return (x->height>y->height); }
-
-}
-
 CompiledFunction::CompiledFunction() : n(0), n_total(0), nodes(NULL), code(NULL), nb_args(NULL), args(NULL), ptr(-1) {
 
 }

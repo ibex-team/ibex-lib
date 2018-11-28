@@ -150,7 +150,6 @@ inline void Eval::cst_fwd(int y) {
 }
 
 inline void Eval::chi_fwd(int x1, int x2, int x3, int y) { d[y].i() = chi(d[x1].i(),d[x2].i(),d[x3].i()); }
-inline void Eval::gen2_fwd(int x1, int x2, int y)  { /* TODO */ }
 inline void Eval::add_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()+d[x2].i(); }
 inline void Eval::mul_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()*d[x2].i(); }
 inline void Eval::sub_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()-d[x2].i(); }

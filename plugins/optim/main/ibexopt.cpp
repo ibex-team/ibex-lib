@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
 
 	args::ArgumentParser parser("********* IbexOpt (defaultoptimizer) *********.", "Solve a Minibex file.");
 	args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
+	args::Flag version(parser, "version", "Display the version of this plugin (same as the version of Ibex).", {'v',"version"});
 	args::ValueFlag<double> rel_eps_f(parser, "float", _rel_eps_f.str(), {'r', "rel-eps-f"});
 	args::ValueFlag<double> abs_eps_f(parser, "float", _abs_eps_f.str(), {'a', "abs-eps-f"});
 	args::ValueFlag<double> eps_h(parser, "float", _eps_h.str(), {"eps-h"});
@@ -70,6 +71,11 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	if (version) {
+		cout << "IbexOpt Release " << _IBEX_RELEASE_ << endl;
+		exit(0);
+	}
+
 	if (format) {
 		cout <<
 		"\n"
@@ -102,10 +108,24 @@ int main(int argc, char** argv) {
 
 	try {
 
-		// Load a system of equations
-		System sys(filename.Get().c_str());
+		System *sys;
 
-		if (!sys.goal) {
+		string extension = filename.Get().substr(filename.Get().find_last_of('.')+1);
+		if (extension == "nl") {
+
+#ifdef _IBEX_WITH_AMPL_
+			AmplInterface ampl(filename.Get());
+			sys = new System(ampl);
+#else
+			cerr << "\n\033[31mCannot read \".nl\" files: AMPL plugin required \033[0m(try reconfigure with --with-ampl)\n\n";
+			exit(0);
+#endif
+		}
+		else
+		// Load a system of equations
+		sys = new System(filename.Get().c_str());
+
+		if (!sys->goal) {
 			ibex_error(" input file has not goal (it is not an optimization problem).");
 		}
 
@@ -153,12 +173,12 @@ int main(int argc, char** argv) {
 
 		bool inHC4=true;
 
-		if (sys.nb_ctr<sys.f_ctrs.image_dim()) {
+		if (sys->nb_ctr>0 && sys->nb_ctr<sys->f_ctrs.image_dim()) {
 			inHC4=false;
 		}
 
 		// Build the default optimizer
-		DefaultOptimizer o(sys,
+		DefaultOptimizer o(*sys,
 				rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f,
 				abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f,
 				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
@@ -197,15 +217,17 @@ int main(int argc, char** argv) {
 
 		// Search for the optimum
 		if (initial_loup)
-			o.optimize(sys.box, initial_loup.Get());
+			o.optimize(sys->box, initial_loup.Get());
 		else
-			o.optimize(sys.box);
+			o.optimize(sys->box);
 
 		if (trace) cout << endl;
 
 		// Report some information (computation time, etc.)
 
 		o.report(!quiet);
+
+		delete sys;
 
 		return 0;
 

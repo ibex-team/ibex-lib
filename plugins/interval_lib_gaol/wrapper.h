@@ -266,12 +266,17 @@ inline Interval pow(const Interval& x, int n) {
 inline Interval pow(const Interval &x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
-	else
-		return gaol::pow(x.itv, d);
+	else {
+		Interval res=gaol::pow(x.itv, d);
+		fpu_round_up();
+		return res;
+	}
 }
 
 inline Interval pow(const Interval &x, const Interval &y) {
-	return gaol::pow(x.itv, y.itv);
+	Interval res=gaol::pow(x.itv, y.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval root(const Interval& x, int n) {
@@ -320,19 +325,27 @@ inline Interval sin(const Interval& x) {
 }
 
 inline Interval tan(const Interval& x) {
-	return gaol::tan(x.itv);
+	Interval res = gaol::tan(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval acos(const Interval& x) {
-	return gaol::acos(x.itv);
+	Interval res = gaol::acos(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval asin(const Interval& x) {
-	return gaol::asin(x.itv);
+	Interval res = gaol::asin(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval atan(const Interval& x) {
-	return gaol::atan(x.itv);
+	Interval res = gaol::atan(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval cosh(const Interval& x) {
@@ -358,22 +371,28 @@ inline Interval tanh(const Interval& x) {
 }
 
 inline Interval acosh(const Interval& x) {
-	return gaol::acosh(x.itv);
+	Interval res = gaol::acosh(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval asinh(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
-	else if (x.lb()>=0) return gaol::asinh(x.itv);
-	else if (x.ub()<=0) return -gaol::asinh(-x.itv);
+	Interval res;
+	if (x.is_empty()) res=Interval::EMPTY_SET;
+	else if (x.lb()>=0) res=gaol::asinh(x.itv);
+	else if (x.ub()<=0) res=-gaol::asinh(-x.itv);
 	else {
 		gaol::interval y1=gaol::asinh(gaol::interval(0,x.ub()));
 		gaol::interval y2=gaol::asinh(gaol::interval(0,-x.lb()));
-		return Interval(-y2.right(),y1.right());
+		res=Interval(-y2.right(),y1.right());
 	}
+	return res;
 }
 
 inline Interval atanh(const Interval& x) {
-	return gaol::atanh(x.itv);
+	Interval res = gaol::atanh(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval abs(const Interval &x) {

@@ -27,14 +27,21 @@ void TestCell::test01() {
 	IntervalVector box (2, Interval(-1,1));
 	Cell * c = new Cell(box);
 
+	CPPUNIT_ASSERT(c->depth==0);
+
 	Cell * copy =new Cell(*c);
 	check(copy->box,c->box);
+
+
+	CPPUNIT_ASSERT(copy->depth==0);
 
 	LargestFirst bsc;
 	std::pair<Cell*, Cell*> new_cells = bsc.bisect(*c);
 
-
 	check(new_cells.first->box|new_cells.second->box,c->box);
+
+	CPPUNIT_ASSERT(new_cells.first->depth==1);
+	CPPUNIT_ASSERT(new_cells.second->depth==1);
 	delete c;
 
 	check(new_cells.first->box|new_cells.second->box,copy->box);

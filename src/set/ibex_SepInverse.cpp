@@ -36,16 +36,17 @@ void SepInverse::separate(IntervalVector& xin, IntervalVector& xout){
 
 	if( yin.is_empty())
 		xin.set_empty();
-	else
+	else {
 		tmp = id->eval_domain(yin);
 		f.backward(tmp, xin);
+	}
 
 	if( yout.is_empty())
 		xout.set_empty();
-	else
+	else {
 		tmp = id->eval_domain(yout);
 		f.backward(tmp, xout);
-
+	}
 }
 
 } // end namespace ibex

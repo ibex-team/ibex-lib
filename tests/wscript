@@ -179,14 +179,17 @@ def utest (tst):
 
         tst.check_cxx(cxxflags="-std=c++11", use="TESTS", mandatory=False, uselib_store="TESTS")
 
+
         if tst.env.DEBUG:
             Logs.info("Enabling debug mode")
-            flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
-            flags += " -fmessage-length=0"
-            tst.define ("DEBUG", 1)
-            for f in flags.split():
-                 tst.check_cxx(cxxflags=f, use="TESTS", mandatory=False, uselib_store="TESTS")
-            
+            flags = "-O0 -g -pg -Wall -fmessage-length=0"
+            tst.define ("DEBUG", 1)    
+        else:
+            flags = "-Wno-deprecated -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
+
+        for f in flags.split():
+            tst.check_cxx(cxxflags=f, use="TESTS", mandatory=False, uselib_store="TESTS")
+
         if tst.env.ENABLE_SHARED:
             # add in rpath if not in LD_LIBRARY_PATH
             ld_lib_path = os.getenv ("LD_LIBRARY_PATH", "").split (":")

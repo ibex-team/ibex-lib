@@ -56,6 +56,7 @@ public:
 	void symbol_fwd(int y);
 	void apply_fwd (int* x, int y);
 	void chi_fwd   (int x1, int x2, int x3, int y);
+	void gen2_fwd  (int x1, int x2, int y);
 	void add_fwd   (int x1, int x2, int y);
 	void mul_fwd   (int x1, int x2, int y);
 	void sub_fwd   (int x1, int x2, int y);
@@ -63,6 +64,7 @@ public:
 	void max_fwd   (int x1, int x2, int y);
 	void min_fwd   (int x1, int x2, int y);
 	void atan2_fwd (int x1, int x2, int y);
+	void gen1_fwd  (int x, int y);
 	void minus_fwd (int x, int y);
 	void minus_V_fwd(int x, int y);
 	void minus_M_fwd(int x, int y);
@@ -232,6 +234,17 @@ inline void AffineEval<T>::cst_fwd(int y) {
 	}
 	}
 }
+template<class T>
+inline void AffineEval<T>::gen2_fwd(int x1, int x2, int y) {
+	const ExprGenericBinaryOp& e = (const ExprGenericBinaryOp&) f.node(y);
+	d[y]=e.eval(d[x1],d[x2]);
+	switch(e.dim.type()) {
+	case Dim::SCALAR :     af2[y].i()= AffineMain<T>(d[y].i()); break;
+	case Dim::ROW_VECTOR :
+	case Dim::COL_VECTOR : af2[y].v()=AffineMainVector<T>(d[y].v()); break;
+	case Dim::MATRIX :     af2[y].m()=AffineMainMatrix<T>(d[y].m()); break;
+	}
+}
 
 template<class T>
 inline void AffineEval<T>::chi_fwd(int x1, int x2, int x3, int y) {
@@ -281,6 +294,18 @@ template<class T>
 inline void AffineEval<T>::atan2_fwd(int x1, int x2, int y) {
 	d[y].i() = atan2(d[x1].i(),d[x2].i());
 	af2[y].i()= AffineMain<T>(d[y].i());
+}
+
+template<class T>
+inline void AffineEval<T>::gen1_fwd(int x, int y) {
+	const ExprGenericUnaryOp& e = (const ExprGenericUnaryOp&) f.node(y);
+	d[y]=e.eval(d[x]);
+	switch(e.dim.type()) {
+	case Dim::SCALAR :     af2[y].i()= AffineMain<T>(d[y].i()); break;
+	case Dim::ROW_VECTOR :
+	case Dim::COL_VECTOR : af2[y].v()=AffineMainVector<T>(d[y].v()); break;
+	case Dim::MATRIX :     af2[y].m()=AffineMainMatrix<T>(d[y].m()); break;
+	}
 }
 
 template<class T>
