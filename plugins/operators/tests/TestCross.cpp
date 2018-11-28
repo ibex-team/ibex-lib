@@ -21,9 +21,9 @@ void TestCrossProduct::eval1() {
 	double _x2[]={4,5,6};
 	double _y[]= {-3,6,-3};
 	Vector x1(3,_x1);
-	Vector x2(3,_x1);
+	Vector x2(3,_x2);
 	Vector y(3,_y);
-	//CPPUNIT_ASSERT(cross(x1,x2)==y);
+	CPPUNIT_ASSERT(cross(x1,x2)==y);
 }
 
 } // end namespace
