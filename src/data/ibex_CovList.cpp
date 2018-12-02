@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Nov 13, 2018
+// Last update : Dec 01, 2018
 //============================================================================
 
 #include "ibex_CovList.h"
@@ -16,7 +16,7 @@ using namespace std;
 
 namespace ibex {
 
-CovList::CovList(const CovListFactory& fac) : Cov(fac.n), size(0), list(NULL) {
+CovList::CovList(const CovListFactory& fac) : Cov(fac), size(0), list(NULL) {
 	fac.build(*this);
 }
 
@@ -98,6 +98,14 @@ void CovListFile::write_box(ofstream& f, const IntervalVector& box) const {
 		write_double(f,box[i].lb());
 		write_double(f,box[i].ub());
 	}
+}
+
+void CovListFile::format(stringstream& ss, const string& title) {
+	CovFile::format(ss, title);
+
+	ss <<   "- 1 line:   1 integer: the total number N of boxes\n"
+			"- N lines:  Each line corresponds to one box and contains the following information:\n"
+			"            2*n real values: lb(x1), ub(x1),...,lb(xn), ub(xn)\n";
 }
 
 //int CovListFile::subformat_number() const {

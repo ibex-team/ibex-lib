@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Nov 13, 2018
+// Last update : Dec 01, 2018
 //============================================================================
 
 #include "ibex_Cov.h"
@@ -17,8 +17,8 @@ using namespace std;
 
 namespace ibex {
 
-const size_t CovFile::SIGNATURE_LENGTH = 16;
-const char* CovFile::SIGNATURE = "IBEX DATA FILE ";
+const size_t CovFile::SIGNATURE_LENGTH = 20;
+const char* CovFile::SIGNATURE = "IBEX COVERING FILE ";
 const uint32_t CovFile::FORMAT_VERSION = 1;
 
 Cov::Cov(const CovFactory& fac) : n(fac.n) {
@@ -107,6 +107,26 @@ void CovFile::write_int(ofstream& f, uint32_t x) const {
 
 void CovFile::write_double(ofstream& f, double x) const {
 	f.write((char*) &x, sizeof(x));
+}
+
+void CovFile::format(stringstream& ss, const string& title) {
+
+	ss <<
+			"\n"
+			"--------------------------------------------------------------------------------\n"
+			"                          " << title << " file format v" << FORMAT_VERSION << "\n"
+			"\n"
+			"The " << title << " text format (obtained with --txt) is described below.\n"
+			"The " << title << " binary format (.cov) is exactly the same except that:\n"
+			"  - all separating characters (space, line return) are removed except\n"
+			"    those inside the signature (line 1 in text format)\n"
+			"  - integer values are unsigned 32 bits integer (uint32_t)\n"
+			"  - real values are 64 bits double\n"
+			"--------------------------------------------------------------------------------\n"
+			"- 1 line:   the signature: the null-terminated sequence of " << SIGNATURE_LENGTH <<  "\n"
+			"            characters \"" << SIGNATURE << "\" (mind the space at the end)\n"
+			"            followed by the format version number: " << FORMAT_VERSION << "\n"
+			"- 1 line:   1 integer: the dimension n of boxes (number of variables)\n";
 }
 
 //virtual int CovFile::subformat_number() const {

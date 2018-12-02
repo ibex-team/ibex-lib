@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Nov 13, 2018
+// Last update : Dec 01, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_LIST_H__
@@ -22,7 +22,7 @@ class CovListFactory;
 /**
  * \brief Unordered set of boxes
  *
- * The order in which boxes are stored has no meaning?
+ * The order in which boxes are stored has no meaning.
  */
 class CovList : public Cov {
 public:
@@ -81,11 +81,21 @@ public:
 
 //	virtual int subformat_number() const;
 
+	static string format();
+
 protected:
+	static void format(std::stringstream& ss, const string& title);
+
 	IntervalVector read_box(std::ifstream& f, size_t n);
 
 	void write_box(std::ofstream& f, const IntervalVector& box) const;
 };
+
+	inline std::string CovListFile::format() {
+		std::stringstream ss;
+		format(ss,"CovList");
+		return ss.str();
+	}
 
 } /* namespace ibex */
 

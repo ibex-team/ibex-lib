@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Nov 28, 2018
+// Last update : Dec 01, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_H__
@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <fstream>
+#include <sstream>
 
 namespace ibex {
 
@@ -73,6 +74,8 @@ public:
 
 	virtual ~CovFile();
 
+	static string format();
+
 	//virtual int subformat_number() const;
 
 	/**
@@ -83,6 +86,8 @@ public:
 	CovFactory* factory;
 
 protected:
+	static void format(std::stringstream& ss, const string& title);
+
 	std::ifstream *f;
 
 	static const size_t SIGNATURE_LENGTH;
@@ -96,6 +101,12 @@ protected:
 	void write_int(std::ofstream& f, uint32_t x) const;
 	void write_double(std::ofstream& f, double x) const;
 };
+
+inline std::string CovFile::format() {
+	std::stringstream ss;
+	format(ss,"COV");
+	return ss.str();
+}
 
 } /* namespace ibex */
 

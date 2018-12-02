@@ -15,7 +15,15 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <fstream>
+
 #include "utils.h"
+
+#include "ibex_IntervalVector.h"
+#include "ibex_Cov.h"
+#include "ibex_CovList.h"
+#include "ibex_CovIUList.h"
+#include "ibex_CovIBUList.h"
 
 using namespace ibex;
 
@@ -25,11 +33,58 @@ public:
 	CPPUNIT_TEST_SUITE(TestCov);
 	CPPUNIT_TEST(covfac);
 	CPPUNIT_TEST(covfile);
+	CPPUNIT_TEST(covlistfac);
+	CPPUNIT_TEST(covlistfile);
+	CPPUNIT_TEST(covIUlistfac);
+	CPPUNIT_TEST(covIUlistfile);
+	CPPUNIT_TEST(covIBUlistfac);
+	CPPUNIT_TEST(covIBUlistfile);
 	CPPUNIT_TEST_SUITE_END();
-	
+
 private:
+
+	static void write_cov(std::ofstream& f);
+	static void write_covlist(std::ofstream& f);
+	static void write_covIUlist(std::ofstream& f);
+	static void write_covIBUlist(std::ofstream& f);
+
+	static void test_cov(Cov& cov);
+	static void test_covlist(CovList& cov);
+	static void test_covIUlist(CovIUList& cov);
+	static void test_covIBUlist(CovIBUList& cov);
+
 	void covfac();
 	void covfile();
+	void covlistfac();
+	void covlistfile();
+	void covIUlistfac();
+	void covIUlistfile();
+	void covIBUlistfac();
+	void covIBUlistfile();
+
+	static const size_t n = 3;
+	static const size_t N = 10; // total number of boxes
+
+	static const size_t ni = 3; // number of inner boxes
+	static uint32_t inner[ni];
+	static bool is_inner[N];
+
+	static const size_t nsol = 2; // number of solutions
+	static uint32_t sol[nsol];
+	static bool is_sol[N];
+
+	static const size_t nunk = 2; // number of unknown
+	static uint32_t unk[nunk];
+	static bool is_unk[N];
+
+	static const size_t nbnd = 3; // number of boundary boxes
+	static uint32_t bnd[nbnd];
+	static bool is_bnd[N];
+
+	static uint32_t not_inner[N-ni];
+	static uint32_t bnd_or_sol[nbnd+nsol];
+
+	static std::vector<IntervalVector> boxes();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestCov);

@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Nov 13, 2018
+// Last update : Dec 01, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_IBU_LIST_H__
@@ -22,6 +22,8 @@ public:
 	typedef enum { INNER, BOUNDARY, UNKNOWN } BoxStatus;
 
 	CovIBUList(const CovIBUListFactory&);
+
+	CovIBUList(const char* filename);
 
 	virtual ~CovIBUList();
 
@@ -76,20 +78,18 @@ public:
 
 	virtual ~CovIBUListFactory();
 
-	virtual void add(const IntervalVector& x);
-
 	virtual void add_boundary(const IntervalVector& x);
-
-	virtual void add_unknown(const IntervalVector& x);
 
 private:
 	friend class CovIBUListFile;
 	friend class CovIBUList;
 	void build(CovIBUList&) const;
 
-	/* whether the jth 'unknown' CovIUList box is 'boundary' */
-	std::vector<bool> is_boundary;
-	int nb_boundary;
+	/*
+	 * Indices of boundary boxes.
+	 * Must be a subset of the 'unknown' CovIUList boxes.
+	 */
+	std::vector<unsigned int> boundary;
 };
 
 
@@ -97,8 +97,21 @@ class CovIBUListFile : public CovIUListFile {
 public:
 	CovIBUListFile(const char* filename, CovIBUListFactory* factory=NULL);
 
-	virtual int subformat_number() const;
+	//virtual int subformat_number() const;
+
+	static string format();
+
+	//virtual int subformat_number() const;
+protected:
+	static void format(std::stringstream& ss, const string& title);
 };
+
+inline std::string CovIBUListFile::format() {
+	std::stringstream ss;
+	format(ss,"CovIBUList");
+	return ss.str();
+}
+
 
 } /* namespace ibex */
 

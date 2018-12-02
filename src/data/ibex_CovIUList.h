@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Nov 13, 2018
+// Last update : Dec 01, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_IU_LIST_H__
@@ -27,7 +27,7 @@ public:
 
 	virtual ~CovIUList();
 
-	virtual int subformat_number() const;
+	//virtual int subformat_number() const;
 
 	BoxStatus status(int i) const;
 
@@ -56,7 +56,7 @@ public:
 	const size_t nb_inner;
 
 	/**
-	 * \brief Number of boxes
+	 * \brief Number of unknown boxes
 	 */
 	const size_t nb_unknown;
 
@@ -96,11 +96,13 @@ public:
 
 	virtual ~CovIUListFactory();
 
-	virtual void add(const IntervalVector& x);
-
 	virtual void add_inner(const IntervalVector& x);
 
 	virtual void add_unknown(const IntervalVector& x);
+
+	size_t nb_inner() const;
+
+	size_t nb_unknown() const;
 
 private:
 	friend class CovIUList;
@@ -108,16 +110,34 @@ private:
 
 	void build(CovIUList&) const;
 
-	std::vector<bool> is_inner;
-	int nb_inner;
+	std::vector<unsigned int> inner;
 };
+
+inline size_t CovIUListFactory::nb_inner() const {
+	return inner.size();
+}
+
+inline size_t CovIUListFactory::nb_unknown() const {
+	return nb_boxes() - nb_inner();
+}
 
 class CovIUListFile : public CovListFile {
 public:
 	CovIUListFile(const char* filename, CovIUListFactory* factory=NULL);
 
-	virtual int subformat_number() const;
+	static string format();
+
+	//virtual int subformat_number() const;
+protected:
+	static void format(std::stringstream& ss, const string& title);
 };
+
+inline std::string CovIUListFile::format() {
+	std::stringstream ss;
+	format(ss,"CovIUList");
+	return ss.str();
+}
+
 
 } /* namespace ibex */
 
