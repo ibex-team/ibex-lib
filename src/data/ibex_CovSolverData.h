@@ -22,6 +22,8 @@ class CovSolverData : public CovManifold {
 public:
 	CovSolverData(const CovSolverDataFactory&);
 
+	//CovSolverData(const char* filename);
+
 	virtual ~CovSolverData();
 
 	virtual int subformat_number() const;

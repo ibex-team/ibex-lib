@@ -19,7 +19,7 @@ CovIBUList::CovIBUList(const CovIBUListFactory& fac) : CovIUList(fac), nb_bounda
 	fac.build(*this);
 }
 
-CovIBUList::CovIBUList(const char* filename) : CovIBUList((CovIBUListFactory&) *CovIBUListFile(filename).factory) {
+CovIBUList::CovIBUList(const char* filename) : CovIBUList(CovIBUListFactory(filename)) {
 
 }
 
@@ -36,6 +36,12 @@ int CovIBUList::subformat_number() const {
 
 CovIBUListFactory::CovIBUListFactory(size_t n) : CovIUListFactory(n) {
 
+}
+
+CovIBUListFactory::CovIBUListFactory(const char* filename) : CovIUListFactory((size_t) 0 /* tmp*/) {
+	ifstream* f = CovIBUListFile::load(filename, *this);
+	f->close();
+	delete f;
 }
 
 CovIBUListFactory::~CovIBUListFactory() {
@@ -83,27 +89,25 @@ void CovIBUListFactory::build(CovIBUList& set) const {
 
 //----------------------------------------------------------------------------------------------------
 
-CovIBUListFile::CovIBUListFile(const char* filename, CovIBUListFactory* _factory) :
+ifstream* CovIBUListFile::load(const char* filename, CovIBUListFactory& factory) {
 
-		CovIUListFile(filename, _factory? _factory : new CovIBUListFactory(0 /*tmp*/)) {
-
-	CovIBUListFactory& fac = * ((CovIBUListFactory*) this->factory);
-
-	assert(f); // file descriptor is open by CovFile constructor
+	ifstream* f = CovIUListFile::load(filename, factory);
 
 	size_t nb_boundary = read_pos_int(*f);
 
-	if (nb_boundary  > (fac.nb_boxes()-fac.nb_inner()))
+	if (nb_boundary  > (factory.nb_boxes()-factory.nb_inner()))
 		ibex_error("[CovIBUListFile]: number of boundary boxes > number of CovIUList unknown boxes!");
 
 	for (size_t i=0; i<nb_boundary; i++) {
 		unsigned int j=read_pos_int(*f);
-		if (j>=fac.nb_boxes()) ibex_error("[CovIBUListFile]: invalid boundary box index.");
-		fac.boundary.push_back(j); // checking that j is not an index of inner box is done in CovIBUListFactory::build
+		if (j>=factory.nb_boxes()) ibex_error("[CovIBUListFile]: invalid boundary box index.");
+		factory.boundary.push_back(j); // checking that j is not an index of inner box is done in CovIBUListFactory::build
 	}
 
-	if (fac.boundary.size() != nb_boundary)
+	if (factory.boundary.size() != nb_boundary)
 		ibex_error("[CovIUListFile]: number of boundary boxes does not match.");
+
+	return f;
 }
 
 

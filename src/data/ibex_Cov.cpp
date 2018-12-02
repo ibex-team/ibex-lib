@@ -25,9 +25,7 @@ Cov::Cov(const CovFactory& fac) : n(fac.n) {
 	fac.build(*this);
 }
 
-//Cov::Cov(const char* filename) : n(*CovFile(filename).factory) {
-Cov::Cov(const char* filename) : Cov(*CovFile(filename).factory) {
-
+Cov::Cov(const char* filename) : Cov(CovFactory(filename)) {
 }
 
 Cov::~Cov() {
@@ -40,16 +38,21 @@ CovFactory::CovFactory() : n(0) { }
 
 CovFactory::CovFactory(size_t n) : n(n) { }
 
+CovFactory::CovFactory(const char* filename) : n(0) {
+	ifstream* f = CovFile::load(filename, *this);
+	f->close();
+	delete f;
+}
+
 void CovFactory::build(Cov& cov) const {
 	// nothing to do (so far)
 }
 
 //----------------------------------------------------------------------------------------------------
 
-CovFile::CovFile(const char* filename, CovFactory* _factory) : f(new ifstream()), factory(_factory) {
+ifstream* CovFile::load(const char* filename, CovFactory& factory) {
 
-	if (factory==NULL)
-		factory = new CovFactory();
+	ifstream* f = new ifstream();
 
 	f->open(filename, ios::in | ios::binary);
 
@@ -59,11 +62,9 @@ CovFile::CovFile(const char* filename, CovFactory* _factory) : f(new ifstream())
 
 	size_t _n = read_pos_int(*f);
 
-	factory->n = _n;
-}
+	factory.n = _n;
 
-CovFile::~CovFile() {
-	delete f;
+	return f;
 }
 
 int CovFile::read_signature(ifstream& f) {
@@ -96,16 +97,16 @@ double CovFile::read_double(ifstream& f) {
 	return x;
 }
 
-void CovFile::write_signature(ofstream& f) const {
+void CovFile::write_signature(ofstream& f) {
 	f.write(SIGNATURE, SIGNATURE_LENGTH*sizeof(char));
 	write_int(f, FORMAT_VERSION);
 }
 
-void CovFile::write_int(ofstream& f, uint32_t x) const {
+void CovFile::write_int(ofstream& f, uint32_t x) {
 	f.write((char*) &x, sizeof(uint32_t));
 }
 
-void CovFile::write_double(ofstream& f, double x) const {
+void CovFile::write_double(ofstream& f, double x) {
 	f.write((char*) &x, sizeof(x));
 }
 

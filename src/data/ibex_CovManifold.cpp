@@ -20,13 +20,17 @@ CovManifold::CovManifold(const CovManifoldFactory& fac) : CovIBUList(fac), m(fac
 	fac.build(*this);
 }
 
+CovManifold::CovManifold(const char* filename) : CovManifold(CovManifoldFactory(filename)) {
+
+}
+
 CovManifold::~CovManifold() {
 	assert(_manifold_status);
 	delete[] _manifold_status;
 	delete[] _manifold_solution;
 	delete[] _manifold_boundary;
 
-	for (int j=0; j<nb_solution; j++)
+	for (size_t j=0; j<nb_solution; j++)
 		delete proofs[j];
 	delete[] proofs;
 }
@@ -35,8 +39,14 @@ int CovManifold::subformat_number() const {
 	return 0;
 }
 
-CovManifoldFactory::CovManifoldFactory(size_t n) : CovIBUListFactory(n), nb_solution(0), m(0), nb_ineq(0) {
+CovManifoldFactory::CovManifoldFactory(size_t n) : CovIBUListFactory(n), m(0), nb_ineq(0), nb_solution(0) {
 
+}
+
+CovManifoldFactory::CovManifoldFactory(const char* filename) : CovIBUListFactory((size_t) 0 /* tmp*/) {
+	ifstream* f = CovManifoldFile::load(filename, *this);
+	f->close();
+	delete f;
 }
 
 CovManifoldFactory::~CovManifoldFactory() {
@@ -90,23 +100,20 @@ void CovManifoldFactory::build(CovManifold& manif) const {
 }
 
 //----------------------------------------------------------------------------------------------------
+ifstream* CovManifoldFile::load(const char* filename, CovManifoldFactory& factory) {
 
-CovManifoldFile::CovManifoldFile(const char* filename, CovManifoldFactory* _factory) :
-							CovIBUListFile(filename, _factory? _factory : new CovManifoldFactory(0 /*tmp*/)) {
-
-	CovManifoldFactory& fac = * ((CovManifoldFactory*) this->factory);
-
-	assert(f); // file descriptor is open by CovFile constructor
+	ifstream* f = CovIBUListFile::load(filename, factory);
 
 	size_t nb_solution = read_pos_int(*f);
 
 	size_t nb_boundary = read_pos_int(*f); // just for integrity check
 
-	if (nb_solution + nb_boundary != fac.is_solution.size())
+	if (nb_solution + nb_boundary != factory.is_solution.size())
 		ibex_error("[CovManifoldFile]: number of solution + boundary boxes <> number of CovIBUList boundary boxes");
 
-
 	/* TODO */
+
+	return f;
 }
 
 

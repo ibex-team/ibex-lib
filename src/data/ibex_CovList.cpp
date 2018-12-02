@@ -21,7 +21,7 @@ CovList::CovList(const CovListFactory& fac) : Cov(fac), size(0), list(NULL) {
 }
 
 
-CovList::CovList(const char* filename) : CovList((CovListFactory&) *CovListFile(filename).factory) {
+CovList::CovList(const char* filename) : CovList(CovListFactory(filename)) {
 
 }
 
@@ -33,6 +33,12 @@ CovList::~CovList() {
 
 CovListFactory::CovListFactory(size_t n) : CovFactory(n) {
 
+}
+
+CovListFactory::CovListFactory(const char* filename) : CovFactory((size_t) 0 /* tmp*/) {
+	ifstream* f = CovListFile::load(filename, *this);
+	f->close();
+	delete f;
 }
 
 CovListFactory::~CovListFactory() {
@@ -64,20 +70,17 @@ void CovListFactory::build(CovList& l) const {
 
 //----------------------------------------------------------------------------------------------------
 
-CovListFile::CovListFile(const char* filename, CovListFactory* _factory):
+ifstream* CovListFile::load(const char* filename, CovListFactory& factory) {
 
-		CovFile(filename, _factory? _factory : new CovListFactory(0 /*tmp*/)) {
-
-	CovListFactory& factory = * ((CovListFactory*) this->factory);
-
-	assert(f); // file is open by Cov constructor
+	ifstream* f = CovFile::load(filename, factory);
 
 	size_t size = read_pos_int(*f);
-
 
 	for (unsigned int i=0; i<size; i++) {
 		factory.add(read_box(*f, factory.n));
 	}
+
+	return f;
 }
 
 IntervalVector CovListFile::read_box(ifstream& f, size_t n) {
@@ -93,7 +96,7 @@ IntervalVector CovListFile::read_box(ifstream& f, size_t n) {
 	return box;
 }
 
-void CovListFile::write_box(ofstream& f, const IntervalVector& box) const {
+void CovListFile::write_box(ofstream& f, const IntervalVector& box) {
 	for (int i=0; i<box.size(); i++) {
 		write_double(f,box[i].lb());
 		write_double(f,box[i].ub());

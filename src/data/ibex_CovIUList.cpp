@@ -21,7 +21,7 @@ CovIUList::CovIUList(const CovIUListFactory& fac) : CovList(fac), nb_inner(0), n
 	fac.build(*this);
 }
 
-CovIUList::CovIUList(const char* filename) : CovIUList((CovIUListFactory&) *CovIUListFile(filename).factory) {
+CovIUList::CovIUList(const char* filename) : CovIUList(CovIUListFactory(filename)) {
 
 }
 
@@ -37,6 +37,12 @@ CovIUList::~CovIUList() {
 
 CovIUListFactory::CovIUListFactory(size_t n) : CovListFactory(n) {
 
+}
+
+CovIUListFactory::CovIUListFactory(const char* filename) : CovListFactory((size_t) 0 /* tmp*/) {
+	ifstream* f = CovIUListFile::load(filename, *this);
+	f->close();
+	delete f;
 }
 
 CovIUListFactory::~CovIUListFactory() {
@@ -82,30 +88,27 @@ void CovIUListFactory::build(CovIUList& set) const {
 }
 
 //----------------------------------------------------------------------------------------------------
+ifstream* CovIUListFile::load(const char* filename, CovIUListFactory& factory) {
 
-CovIUListFile::CovIUListFile(const char* filename, CovIUListFactory* _factory) :
-
-		CovListFile(filename, _factory? _factory : new CovIUListFactory(0 /*tmp*/)) {
-
-	CovIUListFactory& fac = * ((CovIUListFactory*) this->factory);
-
-	assert(f); // file descriptor is open by CovFile constructor
+	ifstream* f = CovListFile::load(filename, factory);
 
 	size_t nb_inner = read_pos_int(*f);
 
-	if (nb_inner  > fac.nb_boxes())
+	if (nb_inner  > factory.nb_boxes())
 		ibex_error("[CovIUListFile]: number of inner boxes exceeds total!");
 
-	if (fac.nb_boxes()==0) return;
+	if (factory.nb_boxes()==0) return f;
 
 	for (size_t i=0; i<nb_inner; i++) {
 		unsigned int j=read_pos_int(*f);
-		if (j>=fac.nb_boxes()) ibex_error("[CovIUListFile]: invalid inner box index.");
-		fac.inner.push_back(j);
+		if (j>=factory.nb_boxes()) ibex_error("[CovIUListFile]: invalid inner box index.");
+		factory.inner.push_back(j);
 	}
 
-	if (fac.inner.size() != nb_inner)
+	if (factory.inner.size() != nb_inner)
 		ibex_error("[CovIUListFile]: number of inner boxes does not match");
+
+	return f;
 }
 
 void CovIUListFile::format(stringstream& ss, const string& title) {

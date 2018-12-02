@@ -81,8 +81,11 @@ public:
 	virtual void add_boundary(const IntervalVector& x);
 
 private:
-	friend class CovIBUListFile;
 	friend class CovIBUList;
+	friend class CovIBUListFile;
+
+	CovIBUListFactory(const char* filename);
+
 	void build(CovIBUList&) const;
 
 	/*
@@ -95,7 +98,7 @@ private:
 
 class CovIBUListFile : public CovIUListFile {
 public:
-	CovIBUListFile(const char* filename, CovIBUListFactory* factory=NULL);
+	static std::ifstream* load(const char* filename, CovIBUListFactory& factory);
 
 	//virtual int subformat_number() const;
 

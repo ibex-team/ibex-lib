@@ -24,6 +24,8 @@ public:
 
 	CovManifold(const CovManifoldFactory&);
 
+	CovManifold(const char* filename);
+
 	virtual ~CovManifold();
 
 	virtual int subformat_number() const;
@@ -107,8 +109,10 @@ public:
 	void set_nb_ineq(size_t);
 
 private:
-	friend class CovManifoldFile;
 	friend class CovManifold;
+	friend class CovManifoldFile;
+
+	CovManifoldFactory(const char* filename);
 
 	void build(CovManifold&) const;
 
@@ -123,7 +127,7 @@ private:
 
 class CovManifoldFile : public CovIBUListFile {
 public:
-	CovManifoldFile(const char* filename, CovManifoldFactory* factory=NULL);
+	static std::ifstream* load(const char* filename, CovManifoldFactory& factory);
 
 protected:
 	/* read the variable names */

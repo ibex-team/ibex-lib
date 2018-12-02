@@ -45,6 +45,8 @@ public:
 //	Cov(size_t n);
 };
 
+class CovFile;
+
 class CovFactory {
 public:
 
@@ -57,7 +59,13 @@ public:
 	 */
 	size_t n;
 
+private:
+	friend class Cov;
+	friend class CovFile;
+
 	void build(Cov& cov) const;
+
+	CovFactory(const char* filename);
 };
 
 class CovFile {
@@ -65,14 +73,18 @@ public:
 	/**
 	 * \brief Load a COV file.
 	 */
-	CovFile(const char* filename, CovFactory* factory=NULL);
+	static std::ifstream* load(const char* filename, CovFactory& factory);
+
+	/**
+	 * \brief Write a Cov into a COV file.
+	 */
+//	CovFile(const char* filename, const Cov& cov);
 
 	/**
 	 * \brief Save a covering in a COV file.
 	 */
 	//CovFile(const Cov&);
 
-	virtual ~CovFile();
 
 	static string format();
 
@@ -83,23 +95,19 @@ public:
 	 */
 	static const uint32_t FORMAT_VERSION;
 
-	CovFactory* factory;
-
 protected:
 	static void format(std::stringstream& ss, const string& title);
-
-	std::ifstream *f;
 
 	static const size_t SIGNATURE_LENGTH;
 	static const char*  SIGNATURE;
 
-	int read_signature(std::ifstream& f);
-	unsigned int read_pos_int(std::ifstream& f);
-	double read_double(std::ifstream& f);
+	static int read_signature(std::ifstream& f);
+	static unsigned int read_pos_int(std::ifstream& f);
+	static double read_double(std::ifstream& f);
 
-	void write_signature(std::ofstream& f) const;
-	void write_int(std::ofstream& f, uint32_t x) const;
-	void write_double(std::ofstream& f, double x) const;
+	static void write_signature(std::ofstream& f);
+	static void write_int(std::ofstream& f, uint32_t x);
+	static void write_double(std::ofstream& f, double x);
 };
 
 inline std::string CovFile::format() {

@@ -108,6 +108,8 @@ private:
 	friend class CovIUList;
 	friend class CovIUListFile;
 
+	CovIUListFactory(const char* filename);
+
 	void build(CovIUList&) const;
 
 	std::vector<unsigned int> inner;
@@ -123,7 +125,7 @@ inline size_t CovIUListFactory::nb_unknown() const {
 
 class CovIUListFile : public CovListFile {
 public:
-	CovIUListFile(const char* filename, CovIUListFactory* factory=NULL);
+	static std::ifstream* load(const char* filename, CovIUListFactory& factory);
 
 	static string format();
 

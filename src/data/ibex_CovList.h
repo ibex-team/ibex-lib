@@ -63,8 +63,10 @@ public:
 	size_t nb_boxes() const;
 
 private:
-	friend class CovListFile;
 	friend class CovList;
+	friend class CovListFile;
+
+	CovListFactory(const char* filename);
 
 	void build(CovList&) const;
 
@@ -77,7 +79,13 @@ inline size_t CovListFactory::nb_boxes() const {
 
 class CovListFile : public CovFile {
 public:
-	CovListFile(const char* filename, CovListFactory* factory=NULL);
+
+	/**
+	 * \brief Load a COV file.
+	 */
+	static CovListFactory* load(const char* filename);
+
+	static std::ifstream* load(const char* filename, CovListFactory& factory);
 
 //	virtual int subformat_number() const;
 
@@ -86,16 +94,16 @@ public:
 protected:
 	static void format(std::stringstream& ss, const string& title);
 
-	IntervalVector read_box(std::ifstream& f, size_t n);
+	static IntervalVector read_box(std::ifstream& f, size_t n);
 
-	void write_box(std::ofstream& f, const IntervalVector& box) const;
+	static void write_box(std::ofstream& f, const IntervalVector& box);
 };
 
-	inline std::string CovListFile::format() {
-		std::stringstream ss;
-		format(ss,"CovList");
-		return ss.str();
-	}
+inline std::string CovListFile::format() {
+	std::stringstream ss;
+	format(ss,"CovList");
+	return ss.str();
+}
 
 } /* namespace ibex */
 
