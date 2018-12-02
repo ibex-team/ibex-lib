@@ -27,6 +27,11 @@ public:
 
 	virtual ~CovIUList();
 
+	/**
+	 * \brief Save this as a COV file.
+	 */
+	void save(const char* filename);
+
 	//virtual int subformat_number() const;
 
 	BoxStatus status(int i) const;
@@ -125,7 +130,15 @@ inline size_t CovIUListFactory::nb_unknown() const {
 
 class CovIUListFile : public CovListFile {
 public:
-	static std::ifstream* load(const char* filename, CovIUListFactory& factory);
+	/**
+	 * \brief Read a COV file.
+	 */
+	static std::ifstream* read(const char* filename, CovIUListFactory& factory);
+
+	/**
+	 * \brief Write a CovIUList into a COV file.
+	 */
+	static std::ofstream* write(const char* filename, const CovIUList& cov);
 
 	static string format();
 

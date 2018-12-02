@@ -196,7 +196,7 @@ void TestCov::covfac() {
 	test_cov(cov);
 }
 
-void TestCov::covfile() {
+void TestCov::read_covfile() {
 	ofstream f;
 	char* filename=open_file(f);
 	write_cov(f);
@@ -205,6 +205,21 @@ void TestCov::covfile() {
 	Cov cov(filename);
 	test_cov(cov);
 	free(filename);
+}
+
+void TestCov::write_covfile() {
+	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
+	mkstemp(tmpname);
+
+	CovFactory fac(n);
+	Cov cov(fac);
+
+	cov.save(tmpname);
+
+	Cov cov2(tmpname);
+	test_cov(cov2);
+
+	free(tmpname);
 }
 
 void TestCov::covlistfac() {
@@ -220,7 +235,7 @@ void TestCov::covlistfac() {
 	test_covlist(cov);
 }
 
-void TestCov::covlistfile() {
+void TestCov::read_covlistfile() {
 
 	ofstream f;
 	char* filename=open_file(f);
@@ -230,6 +245,21 @@ void TestCov::covlistfile() {
 	CovList cov(filename);
 	test_covlist(cov);
 	free(filename);
+}
+
+void TestCov::write_covlistfile() {
+	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
+	mkstemp(tmpname);
+
+	CovListFactory fac(n);
+	CovList cov(fac);
+
+	cov.save(tmpname);
+
+	CovList cov2(tmpname);
+	test_cov(cov2);
+
+	free(tmpname);
 }
 
 void TestCov::covIUlistfac() {
@@ -246,7 +276,7 @@ void TestCov::covIUlistfac() {
 	test_covIUlist(cov);
 }
 
-void TestCov::covIUlistfile() {
+void TestCov::read_covIUlistfile() {
 	ofstream f;
 	char* filename=open_file(f);
 	write_covIUlist(f);
@@ -255,6 +285,21 @@ void TestCov::covIUlistfile() {
 	CovIUList cov(filename);
 	test_covIUlist(cov);
 	free(filename);
+}
+
+void TestCov::write_covIUlistfile() {
+	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
+	mkstemp(tmpname);
+
+	CovIUListFactory fac(n);
+	CovIUList cov(fac);
+
+	cov.save(tmpname);
+
+	CovIUList cov2(tmpname);
+	test_cov(cov2);
+
+	free(tmpname);
 }
 
 void TestCov::covIBUlistfac() {
@@ -275,7 +320,7 @@ void TestCov::covIBUlistfac() {
 	test_covIBUlist(cov);
 }
 
-void TestCov::covIBUlistfile() {
+void TestCov::read_covIBUlistfile() {
 	ofstream f;
 	char* filename=open_file(f);
 	write_covIBUlist(f);
@@ -284,4 +329,19 @@ void TestCov::covIBUlistfile() {
 	CovIBUList cov(filename);
 	test_covIBUlist(cov);
 	free(filename);
+}
+
+void TestCov::write_covIBUlistfile() {
+	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
+	mkstemp(tmpname);
+
+	CovIBUListFactory fac(n);
+	CovIBUList cov(fac);
+
+	cov.save(tmpname);
+
+	CovIBUList cov2(tmpname);
+	test_cov(cov2);
+
+	free(tmpname);
 }

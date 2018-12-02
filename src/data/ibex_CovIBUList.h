@@ -27,6 +27,11 @@ public:
 
 	virtual ~CovIBUList();
 
+	/**
+	 * \brief Save this as a COV file.
+	 */
+	void save(const char* filename);
+
 	virtual int subformat_number() const;
 
 	BoxStatus status(int i) const;
@@ -80,6 +85,8 @@ public:
 
 	virtual void add_boundary(const IntervalVector& x);
 
+	size_t nb_boundary() const;
+
 private:
 	friend class CovIBUList;
 	friend class CovIBUListFile;
@@ -96,9 +103,22 @@ private:
 };
 
 
+inline size_t CovIBUListFactory::nb_boundary() const {
+	return boundary.size();
+}
+
 class CovIBUListFile : public CovIUListFile {
 public:
-	static std::ifstream* load(const char* filename, CovIBUListFactory& factory);
+	/**
+	 * \brief Read a COV file.
+	 */
+	static std::ifstream* read(const char* filename, CovIBUListFactory& factory);
+
+	/**
+	 * \brief Write a CovIUList into a COV file.
+	 */
+	static std::ofstream* write(const char* filename, const CovIBUList& cov);
+
 
 	//virtual int subformat_number() const;
 

@@ -30,6 +30,11 @@ public:
 
 	Cov(const char* filename);
 
+	/**
+	 * \brief Save this as a COV file.
+	 */
+	void save(const char* filename);
+
 	//virtual Cov& operator&=(const Cov& set)=0;
 
 	virtual ~Cov();
@@ -71,19 +76,14 @@ private:
 class CovFile {
 public:
 	/**
-	 * \brief Load a COV file.
+	 * \brief Read a COV file.
 	 */
-	static std::ifstream* load(const char* filename, CovFactory& factory);
+	static std::ifstream* read(const char* filename, CovFactory& factory);
 
 	/**
 	 * \brief Write a Cov into a COV file.
 	 */
-//	CovFile(const char* filename, const Cov& cov);
-
-	/**
-	 * \brief Save a covering in a COV file.
-	 */
-	//CovFile(const Cov&);
+	static std::ofstream* write(const char* filename, const Cov& cov);
 
 
 	static string format();

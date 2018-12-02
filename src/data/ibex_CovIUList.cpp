@@ -25,6 +25,12 @@ CovIUList::CovIUList(const char* filename) : CovIUList(CovIUListFactory(filename
 
 }
 
+void CovIUList::save(const char* filename) {
+	ofstream* of=CovIUListFile::write(filename,*this);
+	of->close();
+	delete of;
+}
+
 CovIUList::~CovIUList() {
 	if (_IU_status) {
 		delete[] _IU_status;
@@ -40,7 +46,7 @@ CovIUListFactory::CovIUListFactory(size_t n) : CovListFactory(n) {
 }
 
 CovIUListFactory::CovIUListFactory(const char* filename) : CovListFactory((size_t) 0 /* tmp*/) {
-	ifstream* f = CovIUListFile::load(filename, *this);
+	ifstream* f = CovIUListFile::read(filename, *this);
 	f->close();
 	delete f;
 }
@@ -74,8 +80,8 @@ void CovIUListFactory::build(CovIUList& set) const {
 		set._IU_status[*it]=CovIUList::INNER;
 	}
 
-	int jin=0; // count inner boxes
-	int juk=0; // count unknown boxes
+	size_t jin=0; // count inner boxes
+	size_t juk=0; // count unknown boxes
 
 	for (int i=0; i<set.size; i++) {
 		if (set._IU_status[i]==CovIUList::INNER)
@@ -88,9 +94,9 @@ void CovIUListFactory::build(CovIUList& set) const {
 }
 
 //----------------------------------------------------------------------------------------------------
-ifstream* CovIUListFile::load(const char* filename, CovIUListFactory& factory) {
+ifstream* CovIUListFile::read(const char* filename, CovIUListFactory& factory) {
 
-	ifstream* f = CovListFile::load(filename, factory);
+	ifstream* f = CovListFile::read(filename, factory);
 
 	size_t nb_inner = read_pos_int(*f);
 
@@ -108,6 +114,20 @@ ifstream* CovIUListFile::load(const char* filename, CovIUListFactory& factory) {
 	if (factory.inner.size() != nb_inner)
 		ibex_error("[CovIUListFile]: number of inner boxes does not match");
 
+	return f;
+}
+
+ofstream* CovIUListFile::write(const char* filename, const CovIUList& cov) {
+
+	ofstream* f = CovListFile::write(filename, cov);
+
+	write_int(*f, cov.nb_inner);
+
+	// TODO: a complete scan could be avoided
+	for (size_t i=0; i<cov.size; i++) {
+		if (cov.status(i)==CovIUList::INNER)
+			write_int(*f, (uint32_t) i);
+	}
 	return f;
 }
 

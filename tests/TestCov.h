@@ -32,13 +32,17 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestCov);
 	CPPUNIT_TEST(covfac);
-	CPPUNIT_TEST(covfile);
+	CPPUNIT_TEST(read_covfile);
+	CPPUNIT_TEST(write_covfile);
 	CPPUNIT_TEST(covlistfac);
-	CPPUNIT_TEST(covlistfile);
+	CPPUNIT_TEST(read_covlistfile);
+	CPPUNIT_TEST(write_covlistfile);
 	CPPUNIT_TEST(covIUlistfac);
-	CPPUNIT_TEST(covIUlistfile);
+	CPPUNIT_TEST(read_covIUlistfile);
+	CPPUNIT_TEST(write_covIUlistfile);
 	CPPUNIT_TEST(covIBUlistfac);
-	CPPUNIT_TEST(covIBUlistfile);
+	CPPUNIT_TEST(read_covIBUlistfile);
+	CPPUNIT_TEST(write_covIBUlistfile);
 	CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -54,13 +58,17 @@ private:
 	static void test_covIBUlist(CovIBUList& cov);
 
 	void covfac();
-	void covfile();
+	void read_covfile();
+	void write_covfile();
 	void covlistfac();
-	void covlistfile();
+	void read_covlistfile();
+	void write_covlistfile();
 	void covIUlistfac();
-	void covIUlistfile();
+	void read_covIUlistfile();
+	void write_covIUlistfile();
 	void covIBUlistfac();
-	void covIBUlistfile();
+	void read_covIBUlistfile();
+	void write_covIBUlistfile();
 
 	static const size_t n = 3;
 	static const size_t N = 10; // total number of boxes

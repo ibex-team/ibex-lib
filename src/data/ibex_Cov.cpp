@@ -26,6 +26,13 @@ Cov::Cov(const CovFactory& fac) : n(fac.n) {
 }
 
 Cov::Cov(const char* filename) : Cov(CovFactory(filename)) {
+
+}
+
+void Cov::save(const char* filename) {
+	ofstream* of=CovFile::write(filename,*this);
+	of->close();
+	delete of;
 }
 
 Cov::~Cov() {
@@ -39,7 +46,7 @@ CovFactory::CovFactory() : n(0) { }
 CovFactory::CovFactory(size_t n) : n(n) { }
 
 CovFactory::CovFactory(const char* filename) : n(0) {
-	ifstream* f = CovFile::load(filename, *this);
+	ifstream* f = CovFile::read(filename, *this);
 	f->close();
 	delete f;
 }
@@ -50,7 +57,7 @@ void CovFactory::build(Cov& cov) const {
 
 //----------------------------------------------------------------------------------------------------
 
-ifstream* CovFile::load(const char* filename, CovFactory& factory) {
+ifstream* CovFile::read(const char* filename, CovFactory& factory) {
 
 	ifstream* f = new ifstream();
 
@@ -63,6 +70,22 @@ ifstream* CovFile::load(const char* filename, CovFactory& factory) {
 	size_t _n = read_pos_int(*f);
 
 	factory.n = _n;
+
+	return f;
+}
+
+ofstream* CovFile::write(const char* filename, const Cov& cov) {
+
+	ofstream* f = new ofstream();
+
+	f->open(filename, ios::out | ios::binary);
+
+	if (f->fail())
+		ibex_error("[CovFile]: cannot create output file.\n");
+
+	write_signature(*f);
+
+	write_int(*f, cov.n);
 
 	return f;
 }

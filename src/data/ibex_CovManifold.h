@@ -28,6 +28,11 @@ public:
 
 	virtual ~CovManifold();
 
+	/**
+	 * \brief Save this as a COV file.
+	 */
+	void save(const char* filename);
+
 	virtual int subformat_number() const;
 
 	BoxStatus status(int i) const;
@@ -127,7 +132,12 @@ private:
 
 class CovManifoldFile : public CovIBUListFile {
 public:
-	static std::ifstream* load(const char* filename, CovManifoldFactory& factory);
+	static std::ifstream* read(const char* filename, CovManifoldFactory& factory);
+
+	/**
+	 * \brief Write a CovManifold into a COV file.
+	 */
+	static std::ofstream* write(const char* filename, const CovManifold& cov);
 
 protected:
 	/* read the variable names */

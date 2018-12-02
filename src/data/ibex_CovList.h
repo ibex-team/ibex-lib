@@ -32,6 +32,12 @@ public:
 
 	virtual ~CovList();
 
+	/**
+	 * \brief Save this as a COV file.
+	 */
+	void save(const char* filename);
+
+
 	const IntervalVector& operator[](int i) const;
 
 	/**
@@ -79,13 +85,15 @@ inline size_t CovListFactory::nb_boxes() const {
 
 class CovListFile : public CovFile {
 public:
+	/**
+	 * \brief Read a COV file.
+	 */
+	static std::ifstream* read(const char* filename, CovListFactory& factory);
 
 	/**
-	 * \brief Load a COV file.
+	 * \brief Write a CovList into a COV file.
 	 */
-	static CovListFactory* load(const char* filename);
-
-	static std::ifstream* load(const char* filename, CovListFactory& factory);
+	static std::ofstream* write(const char* filename, const CovList& cov);
 
 //	virtual int subformat_number() const;
 

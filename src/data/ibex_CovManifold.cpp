@@ -24,6 +24,12 @@ CovManifold::CovManifold(const char* filename) : CovManifold(CovManifoldFactory(
 
 }
 
+void CovManifold::save(const char* filename) {
+	ofstream* of=CovManifoldFile::write(filename,*this);
+	of->close();
+	delete of;
+}
+
 CovManifold::~CovManifold() {
 	assert(_manifold_status);
 	delete[] _manifold_status;
@@ -44,7 +50,7 @@ CovManifoldFactory::CovManifoldFactory(size_t n) : CovIBUListFactory(n), m(0), n
 }
 
 CovManifoldFactory::CovManifoldFactory(const char* filename) : CovIBUListFactory((size_t) 0 /* tmp*/) {
-	ifstream* f = CovManifoldFile::load(filename, *this);
+	ifstream* f = CovManifoldFile::read(filename, *this);
 	f->close();
 	delete f;
 }
@@ -74,10 +80,10 @@ void CovManifoldFactory::build(CovManifold& manif) const {
 	manif._manifold_solution    = new IntervalVector*[nb_solution];
 	manif._manifold_boundary    = new IntervalVector*[manif.CovIBUList::nb_boundary - nb_solution];
 
-	int i=0;    // count closed_set_boundary boxes
+	size_t i=0;    // count closed_set_boundary boxes
 	vector<bool>::const_iterator it=is_solution.begin();
-	int jsol=0; // count solution boxes
-	int jbo=0;  // count boundary boxes
+	size_t jsol=0; // count solution boxes
+	size_t jbo=0;  // count boundary boxes
 	for (int i=0; i<manif.size; i++) {
 		if (manif.is_inner(i))
 			manif._manifold_status[i]=CovManifold::INNER;
@@ -100,19 +106,32 @@ void CovManifoldFactory::build(CovManifold& manif) const {
 }
 
 //----------------------------------------------------------------------------------------------------
-ifstream* CovManifoldFile::load(const char* filename, CovManifoldFactory& factory) {
+ifstream* CovManifoldFile::read(const char* filename, CovManifoldFactory& factory) {
 
-	ifstream* f = CovIBUListFile::load(filename, factory);
+	ifstream* f = CovIBUListFile::read(filename, factory);
 
 	size_t nb_solution = read_pos_int(*f);
 
-	size_t nb_boundary = read_pos_int(*f); // just for integrity check
-
-	if (nb_solution + nb_boundary != factory.is_solution.size())
-		ibex_error("[CovManifoldFile]: number of solution + boundary boxes <> number of CovIBUList boundary boxes");
+	if (nb_solution > factory.nb_boundary())
+		ibex_error("[CovManifoldFile]: number of solutions > number of CovIBUList boundary boxes");
 
 	/* TODO */
 
+	return f;
+}
+
+
+ofstream* CovManifoldFile::write(const char* filename, const CovManifold& cov) {
+
+	ofstream* f = CovIBUListFile::write(filename, cov);
+
+	write_int(*f, cov.nb_solution);
+
+	// TODO: a complete scan could be avoided
+//	for (size_t i=0; i<cov.size; i++) {
+//		if (cov.status(i)==CovIBUList::SOLUTION)
+//			write_int(*f, (uint32_t) i);
+//	}
 	return f;
 }
 

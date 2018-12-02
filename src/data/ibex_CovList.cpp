@@ -25,6 +25,12 @@ CovList::CovList(const char* filename) : CovList(CovListFactory(filename)) {
 
 }
 
+void CovList::save(const char* filename) {
+	ofstream* of=CovListFile::write(filename,*this);
+	of->close();
+	delete of;
+}
+
 CovList::~CovList() {
 	if (list) delete[] list;
 }
@@ -36,7 +42,7 @@ CovListFactory::CovListFactory(size_t n) : CovFactory(n) {
 }
 
 CovListFactory::CovListFactory(const char* filename) : CovFactory((size_t) 0 /* tmp*/) {
-	ifstream* f = CovListFile::load(filename, *this);
+	ifstream* f = CovListFile::read(filename, *this);
 	f->close();
 	delete f;
 }
@@ -60,7 +66,7 @@ void CovListFactory::build(CovList& l) const {
 	(size_t&) l.size = boxes.size();
 	if (l.size>0) {
 		l.list = new IntervalVector[boxes.size()];
-		int i=0;
+		size_t i=0;
 		for (vector<IntervalVector>::const_iterator it=boxes.begin(); it!=boxes.end(); ++it, i++) {
 			l.list[i].resize(n);
 			l.list[i]=*it;
@@ -70,14 +76,25 @@ void CovListFactory::build(CovList& l) const {
 
 //----------------------------------------------------------------------------------------------------
 
-ifstream* CovListFile::load(const char* filename, CovListFactory& factory) {
+ifstream* CovListFile::read(const char* filename, CovListFactory& factory) {
 
-	ifstream* f = CovFile::load(filename, factory);
+	ifstream* f = CovFile::read(filename, factory);
 
 	size_t size = read_pos_int(*f);
 
 	for (unsigned int i=0; i<size; i++) {
 		factory.add(read_box(*f, factory.n));
+	}
+
+	return f;
+}
+
+ofstream* CovListFile::write(const char* filename, const CovList& cov) {
+
+	ofstream* f = CovFile::write(filename, cov);
+
+	for (unsigned int i=0; i<cov.size; i++) {
+		write_box(*f, cov[i]);
 	}
 
 	return f;

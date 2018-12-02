@@ -23,6 +23,13 @@ CovIBUList::CovIBUList(const char* filename) : CovIBUList(CovIBUListFactory(file
 
 }
 
+void CovIBUList::save(const char* filename) {
+	ofstream* of=CovIBUListFile::write(filename,*this);
+	of->close();
+	delete of;
+}
+
+
 CovIBUList::~CovIBUList() {
 	assert(_IBU_status);
 	delete[] _IBU_status;
@@ -39,7 +46,7 @@ CovIBUListFactory::CovIBUListFactory(size_t n) : CovIUListFactory(n) {
 }
 
 CovIBUListFactory::CovIBUListFactory(const char* filename) : CovIUListFactory((size_t) 0 /* tmp*/) {
-	ifstream* f = CovIBUListFile::load(filename, *this);
+	ifstream* f = CovIBUListFile::read(filename, *this);
 	f->close();
 	delete f;
 }
@@ -74,8 +81,8 @@ void CovIBUListFactory::build(CovIBUList& set) const {
 			set._IBU_status[*it]=CovIBUList::BOUNDARY;
 	}
 
-	int jbo=0; // count boundary boxes
-	int juk=0; // count unknown boxes
+	size_t jbo=0; // count boundary boxes
+	size_t juk=0; // count unknown boxes
 
 	for (int i=0; i<set.size; i++) {
 		if (set._IBU_status[i]==CovIBUList::BOUNDARY)
@@ -89,9 +96,9 @@ void CovIBUListFactory::build(CovIBUList& set) const {
 
 //----------------------------------------------------------------------------------------------------
 
-ifstream* CovIBUListFile::load(const char* filename, CovIBUListFactory& factory) {
+ifstream* CovIBUListFile::read(const char* filename, CovIBUListFactory& factory) {
 
-	ifstream* f = CovIUListFile::load(filename, factory);
+	ifstream* f = CovIUListFile::read(filename, factory);
 
 	size_t nb_boundary = read_pos_int(*f);
 
@@ -107,6 +114,21 @@ ifstream* CovIBUListFile::load(const char* filename, CovIBUListFactory& factory)
 	if (factory.boundary.size() != nb_boundary)
 		ibex_error("[CovIUListFile]: number of boundary boxes does not match.");
 
+	return f;
+}
+
+
+ofstream* CovIBUListFile::write(const char* filename, const CovIBUList& cov) {
+
+	ofstream* f = CovIUListFile::write(filename, cov);
+
+	write_int(*f, cov.nb_boundary);
+
+	// TODO: a complete scan could be avoided
+	for (size_t i=0; i<cov.size; i++) {
+		if (cov.status(i)==CovIBUList::BOUNDARY)
+			write_int(*f, (uint32_t) i);
+	}
 	return f;
 }
 
