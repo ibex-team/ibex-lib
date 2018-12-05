@@ -93,6 +93,8 @@ ofstream* CovListFile::write(const char* filename, const CovList& cov) {
 
 	ofstream* f = CovFile::write(filename, cov);
 
+	write_int(*f, cov.size);
+
 	for (unsigned int i=0; i<cov.size; i++) {
 		write_box(*f, cov[i]);
 	}
