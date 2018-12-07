@@ -8,9 +8,22 @@ BENCHS_DEFAULT_ARGS = {"time_limit": "5", "prec_ndigits_max": "6",
 BENCHS_ARGS_NAME = BENCHS_DEFAULT_ARGS.keys()
 BENCHS_ARGS_PATTERN = " ; ".join("%s = (?P<%s>.+?)" % (k, k) for k in BENCHS_ARGS_NAME)
 BENCHS_ARGS_FORMAT = " ; ".join("%s = {%s}" % (k, k) for k in BENCHS_ARGS_NAME)
-BENCHS_INSTABLE_FACTOR = 2
-BENCHS_CMP_REGRESSION_FACTOR = 1.05
-BENCHS_CMP_IMPROVMENT_FACTOR = 1/BENCHS_CMP_REGRESSION_FACTOR
+
+BENCHS_INSTABLE_FACTOR = 1.2
+BENCHS_CMP_REGRESSION_FACTOR = 0.1
+BENCHS_CMP_IMPROVMENT_FACTOR = 0.05
+
+# return min, max, average and stantard deviation
+def set_stats (S):
+	if S:
+		m = min (S)
+		M = max (S)
+		av = sum (S)/len(S)
+		std = (sum((v-av)**2 for v in S)/len(S))**0.5
+		return m, M, av, std
+	else:
+		nan = float ('nan')
+		return nan, nan, nan, nan
 
 class BenchRef (object):
 	def __init__ (self, string, hash_salt):
@@ -216,12 +229,9 @@ class BenchSummary (BenchData):
 
 # Class for the task that does the comparison between benchmarks
 class BenchCmp (Bench):
-	KEYS_TYPE = collections.OrderedDict ()
-	KEYS_TYPE["eps"] = float
-	KEYS_TYPE["rm1M0"] = float
-	KEYS_TYPE["rM1m0"] = float
-	PREFIX = "CMP: "
-	CMP_FORMAT = PREFIX + " ; ".join("%s = {%s!r}" % (k,k) for k in KEYS_TYPE.keys())
+	KEYS = [ "eps", "std1/std0", "#cells1/#cells0" ]
+	CMP_FORMAT = "CMP: " + " ; ".join("%s = {%s!r}" % (k,k) for k in KEYS)
+
 	def run (self):
 		if not (self.k0, self.k1) in self.generator.bld.bench_cmp:
 			self.generator.bld.bench_cmp[(self.k0, self.k1)] = {}
@@ -242,16 +252,17 @@ class BenchCmp (Bench):
 			eps0 = set(d["eps"] for d in fdata0)
 			eps1 = set(d["eps"] for d in fdata1)
 			for eps in reversed(sorted(eps0 | eps1)):
-				time0 = set (d["time"] for d in fdata0 if d["eps"] == eps)
-				time1 = set (d["time"] for d in fdata1 if d["eps"] == eps)
-				if not time0 or not time1:
-					rm1M0 = float ('nan')
-					rM1m0 = float ('nan')
-				else:
-					rm1M0 = min(time1)/max(time0)
-					rM1m0 = max(time1)/min(time0)
-					# we always have rm1M0 < rM1m0
-				data.append ( { "eps": eps, "rm1M0": rm1M0, "rM1m0": rM1m0 } )
+				time_data0 = set (d["time"] for d in fdata0 if d["eps"] == eps)
+				time_data1 = set (d["time"] for d in fdata1 if d["eps"] == eps)
+				_, _, av0, std0 = set_stats (time_data0)
+				_, _, av1, std1 = set_stats (time_data1)
+				cells_data0 = set (d["nb_cells"] for d in fdata0 if d["eps"] == eps)
+				cells_data1 = set (d["nb_cells"] for d in fdata1 if d["eps"] == eps)
+				_, _, avcells0, _ = set_stats ({float(v) for v in cells_data0})
+				_, _, avcells1, _ = set_stats ({float(v) for v in cells_data1})
+				data.append ( { "eps": eps, "std1/std0": std1/std0,
+																		"(av1-av0)/std0": (av1-av0)/std0,
+																		"#cells1/#cells0": avcells1/avcells0 } )
 
 			outstr += os.linesep.join (self.CMP_FORMAT.format (**d) for d in data)
 			outstr += os.linesep
@@ -492,43 +503,49 @@ def benchmarks_format_output (bch):
 	if not bch.cmp_only:
 		bch.msg ("", "", color="NORMAL")
 		bch.msg ("##### %s #####" % BenchCurrentRef(), "##########", color="NORMAL")
+		fmt = "{:^9{fmt}} {:^9{fmt}} {:^9{fmt}} {:^9{fmt}}"
 		D = bch.bench_results[BenchCurrentRef()]
 		for groupname, groupdict in sorted(D.items(), key = lambda x:x[0]):
 			bch.msg ("===== %s =====" % groupname, "==========", color = "NORMAL")
 			for k,v in groupdict["args"].items():
 				bch.msg ("args: %s" % k, v, color = "NORMAL")
 			for f, data in sorted(groupdict["data"].items(), key = lambda x:x[0]):
-				bch.msg (f, "  min      av      max", color = "CYAN")
+				head = fmt.format ("min", "av", "max", "std", fmt="s")
+				bch.msg (f, head, color = "CYAN")
 				for eps in reversed(sorted(set(d["eps"] for d in data))):
-					eps_data = set (d["time"] for d in data if d["eps"] == eps)
-					m = min (eps_data)
-					M = max (eps_data)
-					av = sum (eps_data)/len(eps_data)
-					if M/m > BENCHS_INSTABLE_FACTOR:
-						c = "YELLOW"
-					else:
-						c = "NORMAL"
-					bch.msg ("  eps = %r" % eps, "%.2e %.2e %.2e" % (m, av, M), color=c)
+					eps_time = set (d["time"] for d in data if d["eps"] == eps)
+					m, M, av, std = set_stats (eps_time)
+					c = "YELLOW" if M/m > 2 else "NORMAL"
+					row = fmt.format (m, av, M, std, fmt=".2e")
+					bch.msg ("  eps = %r" % eps, row, color=c)
 
 	for k, D in bch.bench_cmp.items():
-		bch.msg ("", "", color="NORMAL")
+		bch.msg (" ", " ", color="NORMAL")
 		bch.msg ("##### Comparison #####", "##########", color = "NORMAL")
 		bch.msg ("reference", str(k[0]), color = "NORMAL")
 		bch.msg ("compare with", str(k[1]), color = "NORMAL")
+		fmt = "{:^16{fmt}} {:^16{fmt}}"
 		for groupname, groupdict in sorted(D.items(), key = lambda x:x[0]):
 			bch.msg ("===== %s =====" % groupname, "==========", color = "NORMAL")
 			for f, data in sorted(groupdict.items(), key = lambda x:x[0]):
-				bch.msg (f, "rm1M0 rM1m0", color = "CYAN")
+				head = fmt.format ("(av1-av0)/std0", "#cells1/#cells0", fmt="s")
+				bch.msg (f, head, color = "CYAN")
 				for eps_data in data:
 					msg_s = "  eps = %r" % eps_data["eps"]
-					msg_e = " %.2f  %.2f" % (eps_data["rm1M0"], eps_data["rM1m0"])
-					if eps_data["rM1m0"] <= BENCHS_CMP_IMPROVMENT_FACTOR:
-						c = "GREEN"
-					elif eps_data["rm1M0"] >= BENCHS_CMP_REGRESSION_FACTOR:
-						c = "RED"
+					rstd = eps_data["std1/std0"]
+					if rstd > BENCHS_INSTABLE_FACTOR:
+						bch.msg (msg_s, "warning, loss of stability std0/std1=%.1f" % rstd,
+						         color = "YELLOW")
 					else:
-						c = "NORMAL"
-					bch.msg (msg_s, msg_e, color = c)
+						r = eps_data["(av1-av0)/std0"]
+						row = fmt.format (r, eps_data["#cells1/#cells0"], fmt=".2f")
+						if rstd < 1/BENCHS_INSTABLE_FACTOR or -r > BENCHS_CMP_IMPROVMENT_FACTOR:
+							c = "GREEN"
+						if r >= BENCHS_CMP_REGRESSION_FACTOR:
+							c = "RED"
+						else:
+							c = "NORMAL"
+						bch.msg (msg_s, row, color = c)
 
 	if bch.bench_errors:
 		sep = os.linesep + "  - "
@@ -536,7 +553,7 @@ def benchmarks_format_output (bch):
 
 #
 class Cat (object):
-	_choices = [ "easy", "medium", "hard", "blowup", "others", "unsolved" ]
+	_choices = [ "dev", "easy", "medium", "hard", "blowup", "others", "unsolved" ]
 	_default = "medium"
 
 	@classmethod
