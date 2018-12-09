@@ -85,7 +85,9 @@ public:
 	 */
 	static std::ofstream* write(const char* filename, const Cov& cov);
 
-
+	/**
+	 * \brief Display the format of a Cov file.
+	 */
 	static string format();
 
 	//virtual int subformat_number() const;

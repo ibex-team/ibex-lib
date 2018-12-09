@@ -97,6 +97,9 @@ public:
 
 //	virtual int subformat_number() const;
 
+	/**
+	 * \brief Display the format of a CovList file.
+	 */
 	static string format();
 
 protected:

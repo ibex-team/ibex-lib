@@ -12,7 +12,6 @@
 #define __IBEX_COV_MANIFOLD_H__
 
 #include "ibex_CovIBUList.h"
-#include "ibex_Certificate.h"
 
 namespace ibex {
 
@@ -43,12 +42,14 @@ public:
 
 	const IntervalVector& solution(int j) const;
 
-	const IntervalVector& boundary(int j) const;
+	const IntervalVector& unicity(int j) const;
 
 	/**
 	 * \brief Certificate of the jth solution.
 	 */
-	const Certificate& certificate(int j) const;
+	const VarSet& varset(int j) const;
+
+	const IntervalVector& boundary(int j) const;
 
 	/**
 	 * \brief Number of equalities.
@@ -60,17 +61,24 @@ public:
 	 */
 	const size_t nb_ineq;
 
+	/**
+	 * \brief Number of solutions.
+	 */
 	const size_t nb_solution;
 
+	/**
+	 * \brief Number of boundary boxes.
+	 */
 	const size_t nb_boundary;
 
 protected:
 	friend class CovManifoldFactory;
 
-	BoxStatus* _manifold_status;           // status of the ith box
+	BoxStatus*        _manifold_status;    // status of the ith box
 	IntervalVector**  _manifold_solution;  // pointer to 'solution' boxes
 	IntervalVector**  _manifold_boundary;  // pointer to 'boundary' boxes
-	Certificate** proofs;                  // proofs for the solution. TODO: the existence box is redundant. Can we save space?
+	IntervalMatrix    _unicity;            // all the unicity boxes (stored in a matrix)
+	VarSet**          _varset;
 };
 
 inline CovManifold::BoxStatus CovManifold::status(int i) const {
@@ -93,8 +101,12 @@ inline const IntervalVector& CovManifold::boundary(int i) const {
 	return *_manifold_boundary[i];
 }
 
-inline const Certificate& CovManifold::certificate(int j) const {
-	return *proofs[j];
+inline const IntervalVector& CovManifold::unicity(int j) const {
+	return _unicity[j];
+}
+
+inline const VarSet& CovManifold::varset(int j) const {
+	return *_varset[j];
 }
 
 class CovManifoldFile;
@@ -105,13 +117,15 @@ public:
 
 	virtual ~CovManifoldFactory();
 
-	virtual void add_solution(const Certificate& c);
-
-	virtual void add_boundary(const IntervalVector& x);
+	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset);
 
 	void set_nb_equ(size_t);
 
 	void set_nb_ineq(size_t);
+
+	size_t nb_eq;
+
+	size_t nb_ineq;
 
 private:
 	friend class CovManifold;
@@ -121,14 +135,23 @@ private:
 
 	void build(CovManifold&) const;
 
-	size_t m;
-	size_t nb_ineq;
-
-	/* whether the jth 'boundary' CovIBUList box is 'solution' */
-	std::vector<bool> is_solution;
-	std::vector<Certificate> proofs;
-	int nb_solution;
+	/*
+	 * Indices of solution boxes.
+	 * Must be a subset of the 'boundary' CovIBUList boxes.
+	 */
+	std::vector<unsigned int> solution;
+	std::vector<IntervalVector> unicity;
+	std::vector<VarSet> varset;
 };
+
+
+inline void CovManifoldFactory::set_nb_equ(size_t nb_eq) {
+	this->nb_eq = nb_eq;
+}
+
+inline void CovManifoldFactory::set_nb_ineq(size_t nb_ineq) {
+	this->nb_ineq = nb_ineq;
+}
 
 class CovManifoldFile : public CovIBUListFile {
 public:
@@ -139,17 +162,25 @@ public:
 	 */
 	static std::ofstream* write(const char* filename, const CovManifold& cov);
 
+	/**
+	 * \brief Display the format of a CovManifold file.
+	 */
+	static string format();
+
 protected:
-	/* read the variable names */
-	void read_vars(std::ifstream& f);
+	static void format(std::stringstream& ss, const string& title);
+
+	/* read parameters of the parametric proof */
+	static VarSet read_varset(std::ifstream& f, size_t n, size_t m);
+
+	/* write parameters of the parametric proof */
+	static void write_varset(std::ofstream& f, const VarSet& varset);
 };
 
-inline void CovManifoldFactory::set_nb_equ(size_t m) {
-	this->m = m;
-}
-
-inline void CovManifoldFactory::set_nb_ineq(size_t nb_ineq) {
-	this->nb_ineq = nb_ineq;
+inline std::string CovManifoldFile::format() {
+	std::stringstream ss;
+	format(ss,"CovManifold");
+	return ss.str();
 }
 
 //class CovRegularBoundaryManifold : public CovManifold {

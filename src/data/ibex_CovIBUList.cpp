@@ -124,7 +124,7 @@ ofstream* CovIBUListFile::write(const char* filename, const CovIBUList& cov) {
 
 	write_int(*f, cov.nb_boundary);
 
-	// TODO: a complete scan could be avoided
+	// TODO: a complete scan could be avoided?
 	for (size_t i=0; i<cov.size; i++) {
 		if (cov.status(i)==CovIBUList::BOUNDARY)
 			write_int(*f, (uint32_t) i);
@@ -136,8 +136,8 @@ ofstream* CovIBUListFile::write(const char* filename, const CovIBUList& cov) {
 void CovIBUListFile::format(stringstream& ss, const string& title) {
 	CovIUListFile::format(ss, title);
 
-	ss <<   "- 1 line:   1 integer: the number Bi of boundary boxes (among N-Ni)\n"
-			"- 1 line:   Bi integers: the indices of boxes that are boundary boxes.\n";
+	ss <<   "- 1 line:   1 integer: the number Nb of boundary boxes (among N-Ni)\n"
+			"- 1 line:   Nb integers: the indices of boxes that are boundary boxes.\n";
 }
 
 } // end namespace

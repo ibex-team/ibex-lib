@@ -146,6 +146,8 @@ void CovFile::format(stringstream& ss, const string& title) {
 			"    those inside the signature (line 1 in text format)\n"
 			"  - integer values are unsigned 32 bits integer (uint32_t)\n"
 			"  - real values are 64 bits double\n"
+			"    \n"
+			"  Note: all indices start from 0.\n"
 			"--------------------------------------------------------------------------------\n"
 			"- 1 line:   the signature: the null-terminated sequence of " << SIGNATURE_LENGTH <<  "\n"
 			"            characters \"" << SIGNATURE << "\" (mind the space at the end)\n"

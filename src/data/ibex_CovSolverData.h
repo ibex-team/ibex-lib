@@ -134,6 +134,16 @@ inline void CovSolverDataFactory::set_nb_cells(unsigned long nb_cells) {
 	this->nb_cells = nb_cells;
 }
 
+
+class CovSolverDataFile : public CovManifoldFile {
+public:
+	/* read the variable names */
+	static void read_vars(std::ifstream& f, size_t n, std::string* var_names);
+
+	/* write the variable names */
+	static void write_vars(std::ofstream& f, size_t n, std::string* var_names);
+};
+
 } /* namespace ibex */
 
 #endif /* __IBEX_BXS_SOLVER_H__ */

@@ -140,6 +140,9 @@ public:
 	 */
 	static std::ofstream* write(const char* filename, const CovIUList& cov);
 
+	/**
+	 * \brief Display the format of a CovIUList file.
+	 */
 	static string format();
 
 	//virtual int subformat_number() const;

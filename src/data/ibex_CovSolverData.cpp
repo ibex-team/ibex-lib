@@ -75,5 +75,26 @@ void CovSolverDataFactory::build(CovSolverData& solver) const {
 	assert(junk==solver.nb_unknown);
 }
 
+
+void CovSolverDataFile::read_vars(ifstream& f, size_t n, string *var_names) {
+	char x;
+	for (size_t i=0; i<n; i++) {
+		stringstream s;
+		do {
+			f.read(&x, sizeof(char));
+			if (f.eof()) ibex_error("[CovManifoldFile]: unexpected end of file.");
+			if (x!='\0') s << x;
+		} while(x!='\0');
+		var_names[i]=s.str();
+	}
+}
+
+
+void CovSolverDataFile::write_vars(ofstream& f, size_t n, string* var_names) {
+	for (unsigned int i=0; i<n; i++) {
+		f.write(var_names[i].c_str(),var_names[i].size()*sizeof(char));
+		f.put('\0');
+	}
+}
 } // end namespace
 

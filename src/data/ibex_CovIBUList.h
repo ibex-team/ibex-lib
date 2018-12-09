@@ -122,6 +122,9 @@ public:
 
 	//virtual int subformat_number() const;
 
+	/**
+	 * \brief Display the format of a CovIBUList file.
+	 */
 	static string format();
 
 	//virtual int subformat_number() const;
