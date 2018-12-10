@@ -1,0 +1,16 @@
+Variables
+    //!--universal="y.*"
+    x1 in [-1000, 1000];
+    x2 in [-1000, 1000];
+    x3 in [-1000, 1000];
+    x4 in [-1000, 1000];
+    x5 in [-1000, 1000];
+    x6 in [-1000, 1000];
+    y in [0, 1];
+
+Minimize
+   x1 + x2/2 + x3/3 + x4/4 + x5/5 + x6/6;
+
+Constraints
+    exp(y - 1) - x1 - x2*y - x3*y^2 - x4*y^3 - x5*y^4 - x6*y^5 <= 0;
+end

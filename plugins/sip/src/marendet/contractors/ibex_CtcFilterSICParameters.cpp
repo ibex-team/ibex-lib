@@ -1,18 +1,18 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_CtcFilterSICParameters.cpp
-// Author      : Antoine Marendet, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : May 4, 2018
-// Last Update : May 4, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_CtcFilterSICParameters.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet, Gilles Chabert
+ * Created     : May 4, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #include "ibex_CtcFilterSICParameters.h"
 
-#include "system/ibex_SIConstraintCache.h"
+#include "ibex_SIConstraintCache.h"
 
-#include "ibex_Cell.h"
 #include "ibex_Function.h"
 #include "ibex_Interval.h"
 #include "ibex_SICPaving.h"
@@ -24,23 +24,37 @@
 namespace ibex {
 
 CtcFilterSICParameters::CtcFilterSICParameters(const SIPSystem& system) :
-		CellCtc(system.ext_nb_var), system_(system) {
+		Ctc(system.ext_nb_var), system_(system) {
 
 }
 
 CtcFilterSICParameters::~CtcFilterSICParameters() {
 }
 
-void CtcFilterSICParameters::contractCell(Cell& cell) {
-	NodeData& node_data = cell.get<NodeData>();
+void CtcFilterSICParameters::add_property(const IntervalVector& init_box, BoxProperties& map) {
+    if(map[BxpNodeData::id] == nullptr) {
+        map.add(new BxpNodeData(system_.getInitialNodeCaches()));
+        ((BxpNodeData*)map[BxpNodeData::id])->init_box = init_box;
+    }
+}
+
+void CtcFilterSICParameters::contract(IntervalVector& box) {
+    ibex_warning("CtcFilterSICParameters: called with no context");
+
+}
+void CtcFilterSICParameters::contract(IntervalVector& box, ContractContext& context) {
+	BxpNodeData* node_data = (BxpNodeData*) context.prop[BxpNodeData::id];
+	if(node_data == nullptr) {
+		ibex_error("CtcFilterSICParameters: BxpNodeData must be set");
+	}
 	for (int i = 0; i < system_.sic_constraints_.size(); ++i) {
-		//node_data.sic_constraints_caches[i].update_cache(*system_.sic_constraints_[i].function_, cell.box);
-		//contractOneConstraint(i, node_data, cell.box);
-		simplify_paving(system_.sic_constraints_[i], node_data.sic_constraints_caches[i], cell.box, true);
+		//node_data.sic_constraints_caches[i].update_cache(*system_.sic_constraints_[i].function_, box);
+		//contractOneConstraint(i, node_data, box);
+		simplify_paving(system_.sic_constraints_[i], node_data->sic_constraints_caches[i], box, true);
 	}
 }
 
-void CtcFilterSICParameters::contractOneConstraint(size_t i, NodeData& node_data, const IntervalVector& box) {
+/*void CtcFilterSICParameters::contractOneConstraint(size_t i, BxpNodeData& node_data, const IntervalVector& box) {
 	auto& list = node_data.sic_constraints_caches[i].parameter_caches_;
 	auto it = list.begin();
 	IntervalVector paramBoxUnion = node_data.sic_constraints_caches[i].initial_box_;
@@ -86,5 +100,5 @@ void CtcFilterSICParameters::contractOneConstraint(size_t i, NodeData& node_data
 	sort(list.begin(), list.end(), [](const ParameterEvaluationsCache& p1, const ParameterEvaluationsCache& p2) {
 		return p1.evaluation.ub() > p2.evaluation.ub();
 	});
-}
+}*/
 } // end namespace ibex

@@ -1,0 +1,24 @@
+constants
+
+Variables
+    //!--universal="y.*"
+
+x1 in [-1, 1];
+x2 in [0, 2];
+x3 in [0, 1];
+y1 in [-1,1];
+y2 in [-1,1];
+
+minimize  -x3^2;
+
+constraints
+
+x2-sqrt((1-x1^2)/0.3)<=0;
+
+x3^2-(y1-x1)^2-(sqrt((1-y1^2)/0.3)-x2)^2<=0;
+
+abs(0.25-(x1-0.5)^2)-x2<=0;
+
+x3^2-(y2-x1)^2-(abs(0.25-(y2-0.5)^2)-x2)^2<=0;
+
+end
