@@ -10,8 +10,8 @@ BENCHS_ARGS_PATTERN = " ; ".join("%s = (?P<%s>.+?)" % (k, k) for k in BENCHS_ARG
 BENCHS_ARGS_FORMAT = " ; ".join("%s = {%s}" % (k, k) for k in BENCHS_ARGS_NAME)
 
 BENCHS_INSTABLE_FACTOR = 1.2
-BENCHS_CMP_REGRESSION_FACTOR = 0.1
-BENCHS_CMP_IMPROVMENT_FACTOR = 0.05
+BENCHS_CMP_REGRESSION_FACTOR = 2.
+BENCHS_CMP_IMPROVMENT_FACTOR = 2.
 
 # return min, max, average and stantard deviation
 def set_stats (S):
@@ -524,28 +524,27 @@ def benchmarks_format_output (bch):
 		bch.msg ("##### Comparison #####", "##########", color = "NORMAL")
 		bch.msg ("reference", str(k[0]), color = "NORMAL")
 		bch.msg ("compare with", str(k[1]), color = "NORMAL")
-		fmt = "{:^16{fmt}} {:^16{fmt}}"
+		fmt = "{:^9{fmt}} {:^14{fmt}} {:^13{fmt}}"
 		for groupname, groupdict in sorted(D.items(), key = lambda x:x[0]):
 			bch.msg ("===== %s =====" % groupname, "==========", color = "NORMAL")
 			for f, data in sorted(groupdict.items(), key = lambda x:x[0]):
-				head = fmt.format ("(av1-av0)/std0", "#cells1/#cells0", fmt="s")
+				head = fmt.format ("std1/std0", "(av1-av0)/std0", "#cells1/#cells0", fmt="s")
 				bch.msg (f, head, color = "CYAN")
 				for eps_data in data:
 					msg_s = "  eps = %r" % eps_data["eps"]
 					rstd = eps_data["std1/std0"]
 					if rstd > BENCHS_INSTABLE_FACTOR:
-						bch.msg (msg_s, "warning, loss of stability std0/std1=%.1f" % rstd,
-						         color = "YELLOW")
+						msg_s += " (warning, loss of stability)"
+
+					r = eps_data["(av1-av0)/std0"]
+					row = fmt.format (rstd, r, eps_data["#cells1/#cells0"], fmt=".2f")
+					if r >= BENCHS_CMP_REGRESSION_FACTOR:
+						c = "RED"
+					elif rstd<1/BENCHS_INSTABLE_FACTOR or -r>BENCHS_CMP_IMPROVMENT_FACTOR:
+						c = "GREEN"
 					else:
-						r = eps_data["(av1-av0)/std0"]
-						row = fmt.format (r, eps_data["#cells1/#cells0"], fmt=".2f")
-						if rstd < 1/BENCHS_INSTABLE_FACTOR or -r > BENCHS_CMP_IMPROVMENT_FACTOR:
-							c = "GREEN"
-						if r >= BENCHS_CMP_REGRESSION_FACTOR:
-							c = "RED"
-						else:
-							c = "NORMAL"
-						bch.msg (msg_s, row, color = c)
+						c = "NORMAL"
+					bch.msg (msg_s, row, color = c)
 
 	if bch.bench_errors:
 		sep = os.linesep + "  - "
