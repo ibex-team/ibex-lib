@@ -125,9 +125,8 @@ void CovListFile::write_box(ofstream& f, const IntervalVector& box) {
 void CovListFile::format(stringstream& ss, const string& title) {
 	CovFile::format(ss, title);
 
-	ss <<   "- 1 line:   1 integer: the total number N of boxes\n"
-			"- N lines:  Each line corresponds to one box and contains the following information:\n"
-			"            2*n real values: lb(x1), ub(x1),...,lb(xn), ub(xn)\n";
+	ss <<   "- 1 integer:      the total number N of boxes\n"
+			"- N boxes:        each box is a sequence of 2*n real values: lb(x1), ub(x1),...,lb(xn), ub(xn)\n";
 }
 
 //int CovListFile::subformat_number() const {

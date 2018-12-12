@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Nov 13, 2018
+// Last update : Dec 12, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_MANIFOLD_H__
@@ -78,6 +78,10 @@ protected:
 	IntervalVector**  _manifold_solution;  // pointer to 'solution' boxes
 	IntervalVector**  _manifold_boundary;  // pointer to 'boundary' boxes
 	IntervalMatrix    _unicity;            // all the unicity boxes (stored in a matrix)
+
+	// in the special case where m=n, there is only one
+	// possible varset, so a unique varset is stored:
+	// _varset[0][0].
 	VarSet**          _varset;
 };
 
@@ -106,7 +110,10 @@ inline const IntervalVector& CovManifold::unicity(int j) const {
 }
 
 inline const VarSet& CovManifold::varset(int j) const {
-	return *_varset[j];
+	if (m<n)
+		return *_varset[j];
+	else
+		return *_varset[0];
 }
 
 class CovManifoldFile;
@@ -116,6 +123,10 @@ public:
 	CovManifoldFactory(size_t n);
 
 	virtual ~CovManifoldFactory();
+
+	void add_solution(const IntervalVector& existence);
+
+	void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
 
 	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset);
 
@@ -151,6 +162,10 @@ inline void CovManifoldFactory::set_nb_equ(size_t nb_eq) {
 
 inline void CovManifoldFactory::set_nb_ineq(size_t nb_ineq) {
 	this->nb_ineq = nb_ineq;
+}
+
+inline void CovManifoldFactory::add_solution(const IntervalVector& existence) {
+	add_solution(existence, existence);
 }
 
 class CovManifoldFile : public CovIBUListFile {

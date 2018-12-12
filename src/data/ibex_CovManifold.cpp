@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Nov 13, 2018
+// Last update : Dec 12, 2018
 //============================================================================
 
 #include "ibex_CovManifold.h"
@@ -36,6 +36,13 @@ CovManifold::~CovManifold() {
 	delete[] _manifold_status;
 	delete[] _manifold_solution;
 	delete[] _manifold_boundary;
+
+	if (m<n)
+		for (int i=0; i<nb_solution; i++)
+			delete _varset[i];
+	else
+		delete _varset[0];
+
 	delete[] _varset;
 }
 
@@ -56,6 +63,15 @@ CovManifoldFactory::CovManifoldFactory(const char* filename) : CovManifoldFactor
 CovManifoldFactory::~CovManifoldFactory() {
 }
 
+void CovManifoldFactory::add_solution(const IntervalVector& existence, const IntervalVector& unicity) {
+	if (nb_eq < n)
+		ibex_error("CovManifoldFactory: a solution of under-constrained system requires \"VarSet\" structure (parameters/variables)");
+
+	CovIBUListFactory::add_boundary(existence);
+	this->solution.push_back(nb_boxes()-1);
+	this->unicity.push_back(unicity);
+}
+
 void CovManifoldFactory::add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset) {
 	CovIBUListFactory::add_boundary(existence);
 	this->solution.push_back(nb_boxes()-1);
@@ -72,13 +88,17 @@ void CovManifoldFactory::build(CovManifold& manif) const {
 	manif._manifold_solution    = new IntervalVector*[manif.nb_solution];
 	manif._manifold_boundary    = new IntervalVector*[manif.nb_boundary];
 	manif._unicity.resize(manif.nb_solution, manif.n);
-	manif._varset               = new VarSet*[manif.nb_solution];
+
+	if (manif.m < manif.n)
+		manif._varset               = new VarSet*[manif.nb_solution];
+	else
+		manif._varset               = new VarSet*[1];
 
 	for (int i=0; i<manif.size; i++) {
 		switch (manif.CovIBUList::status(i)) {
-		case CovIUList::INNER:   manif._manifold_status[i]=CovManifold::INNER;   break;
-		case CovIUList::UNKNOWN: manif._manifold_status[i]=CovManifold::UNKNOWN; break;
-		default :                manif._manifold_status[i]=CovManifold::BOUNDARY; // by default
+		case CovIBUList::INNER:   manif._manifold_status[i]=CovManifold::INNER;   break;
+		case CovIBUList::UNKNOWN: manif._manifold_status[i]=CovManifold::UNKNOWN; break;
+		default :                 manif._manifold_status[i]=CovManifold::BOUNDARY; // by default
 		}
 	}
 
@@ -93,11 +113,15 @@ void CovManifoldFactory::build(CovManifold& manif) const {
 	size_t jsol=0; // count solution boxes
 	size_t jbo=0;  // count boundary boxes
 
+	if (manif.m >= manif.n)
+		manif._varset[0] = new VarSet(manif.n,BitSet::all(manif.n),true);
+
 	for (int i=0; i<manif.size; i++) {
 		if (manif._manifold_status[i]==CovManifold::SOLUTION) {
 			manif._manifold_solution[jsol] = (IntervalVector*) &manif[i];
 			manif._unicity.row(jsol) = unicity[jsol];
-			manif._varset[jsol] = new VarSet(varset[jsol]);
+			if (manif.m < manif.n)
+				manif._varset[jsol] = new VarSet(varset[jsol]);
 			jsol++;
 		}
 		else if (manif._manifold_status[i]==CovManifold::BOUNDARY) {
@@ -175,9 +199,9 @@ void CovManifoldFile::write_varset(ofstream& f, const VarSet& varset) {
 void CovManifoldFile::format(stringstream& ss, const string& title) {
 	CovIBUListFile::format(ss, title);
 
-	ss <<   "- 1 line:   2 integers: the number m of equalities and the number of inequalities\n"
-			"- 1 line:   1 integer: the number Ns of solution boxes (<= Nb)\n"
-			"- Ns lines: Each line corresponds to one solution and contains the following information:\n"
+	ss <<   "- 2 integers:     the number m of equalities and the number of inequalities\n"
+			"- 1 integer:      the number Ns of solution boxes (<= Nb)\n"
+			"- Ns solutions:   each solution is the sequence of following information:\n"
 			"            * 1 integer: the index of the solution boxes (in 0..N);\n"
 			"            * [if m<n] n-m integers: the indices of parameters in the parametric proofs;\n"
 			"            * 2*n real values: the unicity box in the proof (lb(x1), ub(x1),...,lb(xn), ub(xn));\n";

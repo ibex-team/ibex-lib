@@ -140,19 +140,19 @@ void CovFile::format(stringstream& ss, const string& title) {
 			"--------------------------------------------------------------------------------\n"
 			"                          " << title << " file format v" << FORMAT_VERSION << "\n"
 			"\n"
-			"The " << title << " text format (obtained with --txt) is described below.\n"
-			"The " << title << " binary format (.cov) is exactly the same except that:\n"
-			"  - all separating characters (space, line return) are removed except\n"
-			"    those inside the signature (line 1 in text format)\n"
+//			"The " << title << " text format (obtained with --txt) is described below.\n"
+//			"The " << title << " binary format (.cov) is exactly the same except that:\n"
+//			"  - all separating characters (space, line return) are removed except\n"
+//			"    those inside the signature (line 1 in text format)\n"
 			"  - integer values are unsigned 32 bits integer (uint32_t)\n"
 			"  - real values are 64 bits double\n"
 			"    \n"
 			"  Note: all indices start from 0.\n"
 			"--------------------------------------------------------------------------------\n"
-			"- 1 line:   the signature: the null-terminated sequence of " << SIGNATURE_LENGTH <<  "\n"
-			"            characters \"" << SIGNATURE << "\" (mind the space at the end)\n"
-			"            followed by the format version number: " << FORMAT_VERSION << "\n"
-			"- 1 line:   1 integer: the dimension n of boxes (number of variables)\n";
+			"- the signature: the null-terminated sequence of " << SIGNATURE_LENGTH <<  "\n"
+			"                 characters \"" << SIGNATURE << "\" (mind the space at the end)\n"
+			"                 followed by the format version number: " << FORMAT_VERSION << "\n"
+			"- 1 integer:     the dimension n of boxes (number of variables)\n";
 }
 
 //virtual int CovFile::subformat_number() const {

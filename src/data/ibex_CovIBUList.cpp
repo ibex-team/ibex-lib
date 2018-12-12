@@ -136,8 +136,8 @@ ofstream* CovIBUListFile::write(const char* filename, const CovIBUList& cov) {
 void CovIBUListFile::format(stringstream& ss, const string& title) {
 	CovIUListFile::format(ss, title);
 
-	ss <<   "- 1 line:   1 integer: the number Nb of boundary boxes (among N-Ni)\n"
-			"- 1 line:   Nb integers: the indices of boxes that are boundary boxes.\n";
+	ss <<   "- 1 integer:     the number Nb of boundary boxes (among N-Ni)\n"
+			"- Nb integers:   the indices of boxes that are boundary boxes.\n";
 }
 
 } // end namespace

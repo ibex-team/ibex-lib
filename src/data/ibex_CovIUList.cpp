@@ -134,8 +134,8 @@ ofstream* CovIUListFile::write(const char* filename, const CovIUList& cov) {
 void CovIUListFile::format(stringstream& ss, const string& title) {
 	CovListFile::format(ss, title);
 
-	ss <<   "- 1 line:   1 integer: the number Ni of inner boxes (among N)\n"
-			"- 1 line:   Ni integers: the indices of boxes that are inner.\n";
+	ss <<   "- 1 integer:      the number Ni of inner boxes (among N)\n"
+			"- Ni integers:    the indices of boxes that are inner.\n";
 }
 
 //int CovIUListFile::subformat_number() const {
