@@ -99,6 +99,8 @@ public:
 
 protected:
 	static void format(std::stringstream& ss, const string& title);
+	static const std::string separator;
+	static const std::string space;
 
 	static const size_t SIGNATURE_LENGTH;
 	static const char*  SIGNATURE;

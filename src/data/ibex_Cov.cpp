@@ -20,6 +20,8 @@ namespace ibex {
 const size_t CovFile::SIGNATURE_LENGTH = 20;
 const char* CovFile::SIGNATURE = "IBEX COVERING FILE ";
 const uint32_t CovFile::FORMAT_VERSION = 1;
+const string CovFile::separator = "+-------------------+-----------------------------------------------------------\n";
+const string CovFile::space     = "|                   |";
 
 Cov::Cov(const CovFactory& fac) : n(fac.n) {
 	fac.build(*this);
@@ -135,24 +137,27 @@ void CovFile::write_double(ofstream& f, double x) {
 
 void CovFile::format(stringstream& ss, const string& title) {
 
-	ss <<
-			"\n"
-			"--------------------------------------------------------------------------------\n"
-			"                          " << title << " file format v" << FORMAT_VERSION << "\n"
-			"\n"
-//			"The " << title << " text format (obtained with --txt) is described below.\n"
-//			"The " << title << " binary format (.cov) is exactly the same except that:\n"
-//			"  - all separating characters (space, line return) are removed except\n"
-//			"    those inside the signature (line 1 in text format)\n"
-			"  - integer values are unsigned 32 bits integer (uint32_t)\n"
-			"  - real values are 64 bits double\n"
-			"    \n"
-			"  Note: all indices start from 0.\n"
-			"--------------------------------------------------------------------------------\n"
-			"- the signature: the null-terminated sequence of " << SIGNATURE_LENGTH <<  "\n"
-			"                 characters \"" << SIGNATURE << "\" (mind the space at the end)\n"
-			"                 followed by the format version number: " << FORMAT_VERSION << "\n"
-			"- 1 integer:     the dimension n of boxes (number of variables)\n";
+	ss
+	<< "\n"
+	<< "+-------------------------------------------------------------------------------\n"
+	<< "|                          " << title << " file format v" << FORMAT_VERSION << "\n"
+	"|\n"
+	//			"The " << title << " text format (obtained with --txt) is described below.\n"
+	//			"The " << title << " binary format (.cov) is exactly the same except that:\n"
+	//			"  - all separating characters (space, line return) are removed except\n"
+	//			"    those inside the signature (line 1 in text format)\n"
+	"| Note:\n"
+	"| - integer values are unsigned 32 bits integer (uint32_t)\n"
+	"| - real values are 64 bits double\n"
+	"| - all indices start from 0.\n"
+	<< separator
+	<< space << " - the signature: the null-terminated sequence of " << SIGNATURE_LENGTH <<  "\n"
+	<< space <<	"                  characters \"" << SIGNATURE << "\"\n"
+	<< "|        Cov        |" <<
+	"                  (mind the space at the end)\n"
+	<< space << "                  followed by the format version number: " << FORMAT_VERSION << "\n"
+	<< space << " - 1 integer:     the dimension n of boxes (# of variables)\n"
+	<< separator;
 }
 
 //virtual int CovFile::subformat_number() const {

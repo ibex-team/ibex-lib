@@ -30,36 +30,7 @@ public:
 
 	virtual int subformat_number() const;
 
-	/**
-	 * \brief Names of the variables.
-	 *
-	 * By default: empty strings.
-	 */
-	std::string *var_names;
-
-	/*
-	 * \brief Return status of the last solving.
-	 */
-	Solver::Status status;
-
-	/*
-	 * \brief CPU running time used to obtain this manifold.
-	 *
-	 * -1 means: unknown
-	 */
-	double time;
-
-	/**
-	 * \brief Number of cells used to obtain this manifold.
-	 *
-	 * 0 means: unknown
-	 */
-	unsigned long nb_cells;
-
-	/**
-	 * \brief Number of pending boxes.
-	 */
-	const size_t nb_pending;
+	BoxStatus status(int i) const;
 
 	/**
 	 * \brief The jth pending box.
@@ -67,14 +38,51 @@ public:
 	const IntervalVector& pending(int j) const;
 
 	/**
-	 * \brief Number of unknown boxes.
-	 */
-	const size_t nb_unknown;
-
-	/**
 	 * \brief The jth unknown box.
 	 */
 	const IntervalVector& unknown(int j) const;
+
+	/**
+	 * \brief Names of the variables.
+	 *
+	 * By default: empty strings.
+	 */
+	std::vector<std::string> var_names;
+
+	/*
+	 * \brief Return status of the last solving.
+	 *
+	 * By default: ??
+	 */
+	Solver::Status solver_status;
+
+	/*
+	 * \brief CPU running time used to obtain this manifold.
+	 *
+	 * By default: -1 (means "unknown").
+	 */
+	double time;
+
+	/**
+	 * \brief Number of cells used to obtain this manifold.
+	 *
+	 * By default: 0 (means "unknown").
+	 */
+	unsigned long nb_cells;
+
+	/**
+	 * \brief Number of pending boxes.
+	 *
+	 * By default: 0.
+	 */
+	const size_t nb_pending;
+
+	/**
+	 * \brief Number of unknown boxes.
+	 *
+	 * By default: #CovIUList::nb_unknown.
+	 */
+	const size_t nb_unknown;
 
 protected:
 	friend class CovSolverDataFactory;
@@ -83,6 +91,10 @@ protected:
 	IntervalVector**  _solver_pending;
 	IntervalVector**  _solver_unknown;
 };
+
+inline CovSolverData::BoxStatus CovSolverData::status(int i) const {
+	return _solver_status[i];
+}
 
 inline const IntervalVector& CovSolverData::pending(int j) const {
 	return *_solver_pending[j];
@@ -113,6 +125,8 @@ public:
 private:
 	friend class CovSolverData;
 	friend class CovSolverDataFile;
+
+	CovSolverDataFactory(const char* filename);
 
 	void build(CovSolverData&) const;
 
@@ -175,7 +189,7 @@ protected:
 	static void read_vars(std::ifstream& f, size_t n, std::vector<std::string>& var_names);
 
 	/* write the variable names */
-	static void write_vars(std::ofstream& f, size_t n, std::string* var_names);
+	static void write_vars(std::ofstream& f, size_t n, const std::vector<std::string>& var_names);
 };
 
 inline std::string CovSolverDataFile::format() {

@@ -14,10 +14,14 @@ using namespace std;
 
 namespace ibex {
 
-CovSolverData::CovSolverData(const CovSolverDataFactory& fac) : CovManifold(fac), var_names(NULL /*TODO */),
-		status(fac.status), time(fac.time), nb_cells(fac.nb_cells),
+CovSolverData::CovSolverData(const CovSolverDataFactory& fac) : CovManifold(fac),
+		solver_status(fac.status), time(fac.time), nb_cells(fac.nb_cells),
 		nb_pending(0), nb_unknown(0), _solver_status(NULL), _solver_pending(NULL), _solver_unknown(NULL) {
 	fac.build(*this);
+}
+
+CovSolverData::CovSolverData(const char* filename) : CovSolverData(CovSolverDataFactory(filename)) {
+
 }
 
 CovSolverData::~CovSolverData() {
@@ -29,6 +33,16 @@ CovSolverData::~CovSolverData() {
 
 int CovSolverData::subformat_number() const {
 	return 0;
+}
+
+CovSolverDataFactory::CovSolverDataFactory(size_t n) : CovManifoldFactory(n), status(Solver::SUCCESS /* ? */), time(0), nb_cells(0) {
+
+}
+
+CovSolverDataFactory::CovSolverDataFactory(const char* filename) : CovSolverDataFactory((size_t) 0 /* tmp*/) {
+	ifstream* f = CovSolverDataFile::read(filename, *this);
+	f->close();
+	delete f;
 }
 
 CovSolverDataFactory::~CovSolverDataFactory() {
@@ -43,6 +57,10 @@ void CovSolverDataFactory::build(CovSolverData& solver) const {
 //	assert(solver.nb_inner == nb_inner);
 //  assert(solver.nb_boundary == nb_boundary);
 //	assert(solver.nb_solution == nb_solution);
+
+	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++)
+		solver.var_names.push_back(*it);
+
 	(size_t&) solver.nb_pending = pending.size();
 	(size_t&) solver.nb_unknown = solver.CovIBUList::nb_unknown - solver.nb_pending;
 	solver._solver_status       = new CovSolverData::BoxStatus[solver.size];
@@ -118,6 +136,24 @@ ifstream* CovSolverDataFile::read(const char* filename, CovSolverDataFactory& fa
 	return f;
 }
 
+ofstream* CovSolverDataFile::write(const char* filename, const CovSolverData& cov) {
+
+	ofstream* f = CovManifoldFile::write(filename, cov);
+
+	write_vars(*f, cov.n, cov.var_names);
+	write_int(*f, cov.solver_status);
+	write_double(*f, cov.time);
+	write_int(*f, cov.nb_cells);
+	write_int(*f, cov.nb_pending);
+
+	// TODO: a complete scan could be avoided?
+	for (size_t i=0; i<cov.size; i++) {
+		if (cov.status(i)==CovSolverData::PENDING)
+			write_int(*f, (uint32_t) i);
+	}
+	return f;
+}
+
 void CovSolverDataFile::read_vars(ifstream& f, size_t n, vector<string>& var_names) {
 	char x;
 	for (size_t i=0; i<n; i++) {
@@ -131,10 +167,9 @@ void CovSolverDataFile::read_vars(ifstream& f, size_t n, vector<string>& var_nam
 	}
 }
 
-
-void CovSolverDataFile::write_vars(ofstream& f, size_t n, string* var_names) {
-	for (unsigned int i=0; i<n; i++) {
-		f.write(var_names[i].c_str(),var_names[i].size()*sizeof(char));
+void CovSolverDataFile::write_vars(ofstream& f, size_t n, const vector<string>& var_names) {
+	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++) {
+		f.write(it->c_str(),it->size()*sizeof(char));
 		f.put('\0');
 	}
 }
@@ -142,17 +177,25 @@ void CovSolverDataFile::write_vars(ofstream& f, size_t n, string* var_names) {
 void CovSolverDataFile::format(stringstream& ss, const string& title) {
 	CovManifoldFile::format(ss, title);
 
-	ss <<  	"n strings:      the names of variables. Each string is terminated by the null character \'0\'.\n"
-			"1 integer:      the status of the search. Possible values are:\n"
-			"\t\t* 0=complete search:   all output boxes are validated\n"
-			"\t\t* 1=complete search:   infeasible problem\n"
-			"\t\t* 2=incomplete search: minimal width (--eps-min) reached\n"
-			"\t\t* 3=incomplete search: time out\n"
-			"\t\t* 4=incomplete search: buffer overflow\n"
-			"1 real value:   time (in seconds)\n"
-			"1 integer:      the number of cells.\n"
-			"1 value:        the number Np of pending boxes\n"
-			"Np integers:    the indices of boxes that are pending boxes.\n";
+	ss
+	<< space << " - n strings:      the names of variables. Each string is\n"
+	<< space << "                   terminated by the null character \'0\'.\n"
+	<< space << " - 1 integer:      the status of the search. Possible \n"
+	<< space << "                   values are:\n"
+	<< space << "                   - 0=complete search: all output boxes\n"
+	<< space << "                     are validated\n"
+	<< space << "                   - 1=complete search: infeasible problem\n"
+	<< "|   CovSolverData   |" <<
+	            "                   - 2=incomplete search: minimal width\n"
+	<< space << "                     (--eps-min) reached\n"
+	<< space << "                   - 3=incomplete search: time out\n"
+	<< space << "                   - 4=incomplete search: buffer overflow\n"
+	<< space << " - 1 real value:   time (in seconds)\n"
+	<< space << " - 1 integer:      the number of cells.\n"
+	<< space << " - 1 value:        the number Np of pending boxes\n"
+	<< space << " - Np integers:    the indices of pending boxes\n"
+	<< space << "                   (a subset of CovIUList unknown boxes).\n"
+	<< separator;
 }
 
 } // end namespace

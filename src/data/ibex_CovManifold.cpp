@@ -199,12 +199,19 @@ void CovManifoldFile::write_varset(ofstream& f, const VarSet& varset) {
 void CovManifoldFile::format(stringstream& ss, const string& title) {
 	CovIBUListFile::format(ss, title);
 
-	ss <<   "- 2 integers:     the number m of equalities and the number of inequalities\n"
-			"- 1 integer:      the number Ns of solution boxes (<= Nb)\n"
-			"- Ns solutions:   each solution is the sequence of following information:\n"
-			"            * 1 integer: the index of the solution boxes (in 0..N);\n"
-			"            * [if m<n] n-m integers: the indices of parameters in the parametric proofs;\n"
-			"            * 2*n real values: the unicity box in the proof (lb(x1), ub(x1),...,lb(xn), ub(xn));\n";
+	ss
+	<< space << " - 1 integer:     the number m of equalities\n"
+	<< space << " - 1 integer:     the number of inequalities\n"
+	<< space << " - 1 integer:     the number Ns of solution boxes (<= Nb)\n"
+	<< space << " - Ns solutions:  each solution is the following sequence:\n"
+	<< "|    CovManifold    |" <<
+	            "                  - 1 integer: the index of the solution\n"
+	<< space << "                    (belongs to CovIBUList boundary boxes);\n"
+	<< space << "                  - [if m<n] n-m integers: the indices of\n"
+	<< space << "                    parameters in the parametric proofs;\n"
+	<< space << "                  - 2*n real values: the unicity box in the\n"
+	<< space << "                    proof (lb(x1), ub(x1),..., ub(xn));\n"
+	<< separator;
 }
 
 } // end namespace
