@@ -524,27 +524,34 @@ def benchmarks_format_output (bch):
 		bch.msg ("##### Comparison #####", "##########", color = "NORMAL")
 		bch.msg ("reference", str(k[0]), color = "NORMAL")
 		bch.msg ("compare with", str(k[1]), color = "NORMAL")
-		fmt = "{:^9{fmt}} {:^14{fmt}} {:^13{fmt}}"
 		for groupname, groupdict in sorted(D.items(), key = lambda x:x[0]):
 			bch.msg ("===== %s =====" % groupname, "==========", color = "NORMAL")
 			for f, data in sorted(groupdict.items(), key = lambda x:x[0]):
-				head = fmt.format ("std1/std0", "(av1-av0)/std0", "#cells1/#cells0", fmt="s")
-				bch.msg (f, head, color = "CYAN")
+				bch.msg (f, "std1/std0 (av1-av0)/std0 #cells1/#cells0", color = "CYAN")
 				for eps_data in data:
 					msg_s = "  eps = %r" % eps_data["eps"]
 					rstd = eps_data["std1/std0"]
-					if rstd > BENCHS_INSTABLE_FACTOR:
-						msg_s += " (warning, loss of stability)"
-
 					r = eps_data["(av1-av0)/std0"]
-					row = fmt.format (rstd, r, eps_data["#cells1/#cells0"], fmt=".2f")
-					if r >= BENCHS_CMP_REGRESSION_FACTOR:
-						c = "RED"
-					elif rstd<1/BENCHS_INSTABLE_FACTOR or -r>BENCHS_CMP_IMPROVMENT_FACTOR:
-						c = "GREEN"
+					rc = eps_data["#cells1/#cells0"]
+					fmt = "  %s%.2f%s         %s%.2f%s           %.2f"
+
+					if rstd >= BENCHS_INSTABLE_FACTOR:
+						c1 = Logs.colors.RED
+					elif rstd <= 1./BENCHS_INSTABLE_FACTOR:
+						c1 = Logs.colors.GREEN
 					else:
-						c = "NORMAL"
-					bch.msg (msg_s, row, color = c)
+						c1 = Logs.colors.NORMAL
+					args = [ c1, rstd, Logs.colors.NORMAL ]
+
+					if r >= BENCHS_CMP_REGRESSION_FACTOR:
+						c2 = Logs.colors.RED
+					elif -r >= BENCHS_CMP_IMPROVMENT_FACTOR:
+						c2 = Logs.colors.GREEN
+					else:
+						c2 = Logs.colors.NORMAL
+					args += [ c2, r, Logs.colors.NORMAL, rc ]
+
+					bch.msg (msg_s, fmt % tuple(args))
 
 	if bch.bench_errors:
 		sep = os.linesep + "  - "
