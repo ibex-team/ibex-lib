@@ -31,6 +31,12 @@ CovSolverData::~CovSolverData() {
 	delete[] _solver_unknown;
 }
 
+void CovSolverData::save(const char* filename) {
+	ofstream* of=CovSolverDataFile::write(filename,*this);
+	of->close();
+	delete of;
+}
+
 int CovSolverData::subformat_number() const {
 	return 0;
 }
@@ -121,7 +127,7 @@ ifstream* CovSolverDataFile::read(const char* filename, CovSolverDataFactory& fa
 	default: ibex_error("[CovSolverDataFile]: invalid solver status.");
 	}
 
-	factory.time = read_pos_int(*f);
+	factory.time = read_double(*f);
 	factory.nb_cells = read_pos_int(*f);
 
 	size_t nb_pending = read_pos_int(*f);
@@ -140,7 +146,7 @@ ofstream* CovSolverDataFile::write(const char* filename, const CovSolverData& co
 
 	ofstream* f = CovManifoldFile::write(filename, cov);
 
-	write_vars(*f, cov.n, cov.var_names);
+	write_vars(*f, cov.var_names);
 	write_int(*f, cov.solver_status);
 	write_double(*f, cov.time);
 	write_int(*f, cov.nb_cells);
@@ -167,7 +173,7 @@ void CovSolverDataFile::read_vars(ifstream& f, size_t n, vector<string>& var_nam
 	}
 }
 
-void CovSolverDataFile::write_vars(ofstream& f, size_t n, const vector<string>& var_names) {
+void CovSolverDataFile::write_vars(ofstream& f, const vector<string>& var_names) {
 	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++) {
 		f.write(it->c_str(),it->size()*sizeof(char));
 		f.put('\0');

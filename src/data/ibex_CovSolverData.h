@@ -28,6 +28,11 @@ public:
 
 	virtual ~CovSolverData();
 
+	/**
+	 * \brief Save this as a COV file.
+	 */
+	void save(const char* filename);
+
 	virtual int subformat_number() const;
 
 	BoxStatus status(int i) const;
@@ -189,7 +194,7 @@ protected:
 	static void read_vars(std::ifstream& f, size_t n, std::vector<std::string>& var_names);
 
 	/* write the variable names */
-	static void write_vars(std::ofstream& f, size_t n, const std::vector<std::string>& var_names);
+	static void write_vars(std::ofstream& f, const std::vector<std::string>& var_names);
 };
 
 inline std::string CovSolverDataFile::format() {

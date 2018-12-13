@@ -80,6 +80,8 @@ void CovManifoldFactory::add_solution(const IntervalVector& existence, const Int
 }
 
 void CovManifoldFactory::build(CovManifold& manif) const {
+	if (nb_eq==0 && nb_ineq==0)
+		ibex_error("[CovManifoldFactoy]: manifold with no equation and no inequality");
 	//assert(manif.nb_inner == nb_inner);
 	//assert(manif.CovIBUList::nb_boundary == nb_boundary);
 	(size_t&) manif.nb_solution = solution.size();
@@ -185,7 +187,7 @@ VarSet CovManifoldFile::read_varset(ifstream& f, size_t n, size_t m) {
 		if (v>n) {
 			ibex_error("[CovManifoldFile]: bad input file (bad parameter index)");
 		}
-		params.add(v-1); // index starting from 1 in the raw format
+		params.add(v); // index starting from 1 in the raw format
 	}
 
 	return VarSet(n,params,false);

@@ -128,6 +128,8 @@ public:
 
 	void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
 
+	void add_solution(const IntervalVector& existence, const VarSet& varset);
+
 	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset);
 
 	void set_nb_equ(size_t);
@@ -166,6 +168,10 @@ inline void CovManifoldFactory::set_nb_ineq(size_t nb_ineq) {
 
 inline void CovManifoldFactory::add_solution(const IntervalVector& existence) {
 	add_solution(existence, existence);
+}
+
+inline void CovManifoldFactory::add_solution(const IntervalVector& existence, const VarSet& varset) {
+	add_solution(existence, existence, varset);
 }
 
 class CovManifoldFile : public CovIBUListFile {
