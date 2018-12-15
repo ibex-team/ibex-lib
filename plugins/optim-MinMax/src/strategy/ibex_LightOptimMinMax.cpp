@@ -284,7 +284,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell,double loup) {
         double new_fmax_ub = y_heap->top1()->get<OptimData>().pf.ub(); // get the upper bound of max f(x,y_heap)
         double new_fmax_lb = y_heap->top2()->get<OptimData>().pf.lb(); // get the lower bound of max f(x,y_heap)
 
-        std::cout<<"new_fmax_ub: "<<new_fmax_ub<<std::endl<<"new_fmax_lb: "<<new_fmax_lb<<std::endl<<"fmax_lb (from found point): "<<data_x->fmax.lb()<<std::endl;
+        //std::cout<<"new_fmax_ub: "<<new_fmax_ub<<std::endl<<"new_fmax_lb: "<<new_fmax_lb<<std::endl<<"fmax_lb (from found point): "<<data_x->fmax.lb()<<std::endl;
 
         if (new_fmax_ub< new_fmax_lb) {
                 ibex_error("ibex_LightOptimMinMax: error, please report this bug.");
@@ -733,5 +733,4 @@ bool LightOptimMinMax::check_already_in(Cell * const y_cell, DoubleHeap<Cell> * 
 
 }
 }
-
 
