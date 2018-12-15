@@ -88,33 +88,35 @@ public:
 	/**
 	 * \brief Read a COV file.
 	 */
-	static std::ifstream* read(const char* filename, CovListFactory& factory);
+	static std::ifstream* read(const char* filename, CovListFactory& factory, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a CovList into a COV file.
 	 */
-	static std::ofstream* write(const char* filename, const CovList& cov);
-
-//	virtual int subformat_number() const;
+	static std::ofstream* write(const char* filename, const CovList& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Display the format of a CovList file.
 	 */
 	static string format();
 
+	/**
+	 * \brief Subformat level.
+	 */
+	static const unsigned int subformat_level;
+
+	/**
+	 * \brief Subformat identifying number.
+	 */
+	static const unsigned int subformat_number;
+
 protected:
-	static void format(std::stringstream& ss, const string& title);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
 
 	static IntervalVector read_box(std::ifstream& f, size_t n);
 
 	static void write_box(std::ofstream& f, const IntervalVector& box);
 };
-
-inline std::string CovListFile::format() {
-	std::stringstream ss;
-	format(ss,"CovList");
-	return ss.str();
-}
 
 } /* namespace ibex */
 

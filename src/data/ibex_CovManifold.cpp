@@ -25,7 +25,8 @@ CovManifold::CovManifold(const char* filename) : CovManifold(CovManifoldFactory(
 }
 
 void CovManifold::save(const char* filename) {
-	ofstream* of=CovManifoldFile::write(filename,*this);
+	stack<unsigned int> format_seq;
+	ofstream* of=CovManifoldFile::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
@@ -38,7 +39,7 @@ CovManifold::~CovManifold() {
 	delete[] _manifold_boundary;
 
 	if (m<n)
-		for (int i=0; i<nb_solution; i++)
+		for (size_t i=0; i<nb_solution; i++)
 			delete _varset[i];
 	else
 		delete _varset[0];
@@ -46,16 +47,13 @@ CovManifold::~CovManifold() {
 	delete[] _varset;
 }
 
-int CovManifold::subformat_number() const {
-	return 0;
-}
-
 CovManifoldFactory::CovManifoldFactory(size_t n) : CovIBUListFactory(n), nb_eq(0), nb_ineq(0) {
 
 }
 
 CovManifoldFactory::CovManifoldFactory(const char* filename) : CovManifoldFactory((size_t) 0 /* tmp*/) {
-	ifstream* f = CovManifoldFile::read(filename, *this);
+	stack<unsigned int> format_seq;
+	ifstream* f = CovManifoldFile::read(filename, *this, format_seq);
 	f->close();
 	delete f;
 }
@@ -80,7 +78,7 @@ void CovManifoldFactory::add_solution(const IntervalVector& existence, const Int
 }
 
 void CovManifoldFactory::build(CovManifold& manif) const {
-	if (nb_eq==0 && nb_ineq==0)
+	if (nb_eq==0 && nb_ineq==0 && solution.size()>0)
 		ibex_error("[CovManifoldFactoy]: manifold with no equation and no inequality");
 	//assert(manif.nb_inner == nb_inner);
 	//assert(manif.CovIBUList::nb_boundary == nb_boundary);
@@ -89,14 +87,15 @@ void CovManifoldFactory::build(CovManifold& manif) const {
 	manif._manifold_status      = new CovManifold::BoxStatus[manif.size];
 	manif._manifold_solution    = new IntervalVector*[manif.nb_solution];
 	manif._manifold_boundary    = new IntervalVector*[manif.nb_boundary];
-	manif._unicity.resize(manif.nb_solution, manif.n);
+	if (manif.nb_solution>0) // (resize imposes size>0)
+		manif._unicity.resize(manif.nb_solution, manif.n);
 
 	if (manif.m < manif.n)
 		manif._varset               = new VarSet*[manif.nb_solution];
 	else
 		manif._varset               = new VarSet*[1];
 
-	for (int i=0; i<manif.size; i++) {
+	for (size_t i=0; i<manif.size; i++) {
 		switch (manif.CovIBUList::status(i)) {
 		case CovIBUList::INNER:   manif._manifold_status[i]=CovManifold::INNER;   break;
 		case CovIBUList::UNKNOWN: manif._manifold_status[i]=CovManifold::UNKNOWN; break;
@@ -118,7 +117,7 @@ void CovManifoldFactory::build(CovManifold& manif) const {
 	if (manif.m >= manif.n)
 		manif._varset[0] = new VarSet(manif.n,BitSet::all(manif.n),true);
 
-	for (int i=0; i<manif.size; i++) {
+	for (size_t i=0; i<manif.size; i++) {
 		if (manif._manifold_status[i]==CovManifold::SOLUTION) {
 			manif._manifold_solution[jsol] = (IntervalVector*) &manif[i];
 			manif._unicity.row(jsol) = unicity[jsol];
@@ -136,9 +135,16 @@ void CovManifoldFactory::build(CovManifold& manif) const {
 
 //----------------------------------------------------------------------------------------------------
 
-ifstream* CovManifoldFile::read(const char* filename, CovManifoldFactory& factory) {
+const unsigned int CovManifoldFile::subformat_level = 4;
 
-	ifstream* f = CovIBUListFile::read(filename, factory);
+const unsigned int CovManifoldFile::subformat_number = 0;
+
+ifstream* CovManifoldFile::read(const char* filename, CovManifoldFactory& factory, stack<unsigned int>& format_seq) {
+
+	ifstream* f = CovIBUListFile::read(filename, factory, format_seq);
+
+	if (format_seq.empty() || format_seq.top()!=subformat_number) return f;
+	else format_seq.pop();
 
 	factory.nb_eq = read_pos_int(*f);
 	factory.nb_ineq = read_pos_int(*f);
@@ -157,9 +163,11 @@ ifstream* CovManifoldFile::read(const char* filename, CovManifoldFactory& factor
 	return f;
 }
 
-ofstream* CovManifoldFile::write(const char* filename, const CovManifold& cov) {
+ofstream* CovManifoldFile::write(const char* filename, const CovManifold& cov, stack<unsigned int>& format_seq) {
 
-	ofstream* f = CovIBUListFile::write(filename, cov);
+	format_seq.push(subformat_number);
+
+	ofstream* f = CovIBUListFile::write(filename, cov, format_seq);
 
 	write_int(*f, cov.m);
 	write_int(*f, cov.nb_ineq);
@@ -198,8 +206,10 @@ void CovManifoldFile::write_varset(ofstream& f, const VarSet& varset) {
 		write_int(f, varset.param(i));
 }
 
-void CovManifoldFile::format(stringstream& ss, const string& title) {
-	CovIBUListFile::format(ss, title);
+void CovManifoldFile::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+	format_seq.push(subformat_number);
+
+	CovIBUListFile::format(ss, title, format_seq);
 
 	ss
 	<< space << " - 1 integer:     the number m of equalities\n"
@@ -215,6 +225,14 @@ void CovManifoldFile::format(stringstream& ss, const string& title) {
 	<< space << "                    proof (lb(x1), ub(x1),..., ub(xn));\n"
 	<< separator;
 }
+
+string CovManifoldFile::format() {
+	stringstream ss;
+	stack<unsigned int> format_seq;
+	format(ss, "CovManifold", format_seq);
+	return ss.str();
+}
+
 
 } // end namespace
 

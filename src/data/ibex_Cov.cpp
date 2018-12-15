@@ -11,7 +11,7 @@
 #include "ibex_Cov.h"
 #include <cassert>
 #include <sstream>
-
+#include <list>
 
 using namespace std;
 
@@ -32,7 +32,8 @@ Cov::Cov(const char* filename) : Cov(CovFactory(filename)) {
 }
 
 void Cov::save(const char* filename) {
-	ofstream* of=CovFile::write(filename,*this);
+	stack<unsigned int> format_seq;
+	ofstream* of=CovFile::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
@@ -48,7 +49,8 @@ CovFactory::CovFactory() : n(0) { }
 CovFactory::CovFactory(size_t n) : n(n) { }
 
 CovFactory::CovFactory(const char* filename) : n(0) {
-	ifstream* f = CovFile::read(filename, *this);
+	stack<unsigned int> format_seq;
+	ifstream* f = CovFile::read(filename, *this, format_seq);
 	f->close();
 	delete f;
 }
@@ -59,7 +61,11 @@ void CovFactory::build(Cov& cov) const {
 
 //----------------------------------------------------------------------------------------------------
 
-ifstream* CovFile::read(const char* filename, CovFactory& factory) {
+const unsigned int CovFile::subformat_level = 0;
+
+const unsigned int CovFile::subformat_number = 0;
+
+ifstream* CovFile::read(const char* filename, CovFactory& factory, stack<unsigned int>& format_seq) {
 
 	ifstream* f = new ifstream();
 
@@ -69,6 +75,11 @@ ifstream* CovFile::read(const char* filename, CovFactory& factory) {
 
 	int input_format_version = read_signature(*f);
 
+	read_format_seq(*f, format_seq);
+
+	if (format_seq.top()!=subformat_number) return f;
+	else format_seq.pop();
+
 	size_t _n = read_pos_int(*f);
 
 	factory.n = _n;
@@ -76,7 +87,7 @@ ifstream* CovFile::read(const char* filename, CovFactory& factory) {
 	return f;
 }
 
-ofstream* CovFile::write(const char* filename, const Cov& cov) {
+ofstream* CovFile::write(const char* filename, const Cov& cov, std::stack<unsigned int>& format_seq) {
 
 	ofstream* f = new ofstream();
 
@@ -86,6 +97,10 @@ ofstream* CovFile::write(const char* filename, const Cov& cov) {
 		ibex_error("[CovFile]: cannot create output file.\n");
 
 	write_signature(*f);
+
+	format_seq.push(subformat_number);
+
+	write_format_seq(*f, format_seq);
 
 	write_int(*f, cov.n);
 
@@ -105,6 +120,17 @@ int CovFile::read_signature(ifstream& f) {
 		return -1;
 	} else
 		return format_version;
+}
+
+void CovFile::read_format_seq(std::ifstream& f, stack<unsigned int>& format_seq) {
+	size_t format_level = read_pos_int(f);
+
+	list<unsigned int> tmp;
+	for (size_t i=0; i<=format_level; i++)
+		tmp.push_front(read_pos_int(f));
+
+	for (list<unsigned int>::const_iterator it=tmp.begin(); it!=tmp.end(); ++it)
+		format_seq.push(*it);
 }
 
 unsigned int CovFile::read_pos_int(ifstream& f) {
@@ -127,6 +153,16 @@ void CovFile::write_signature(ofstream& f) {
 	write_int(f, FORMAT_VERSION);
 }
 
+void CovFile::write_format_seq(std::ofstream& f, std::stack<unsigned int>& format_seq) {
+	write_int(f, format_seq.size()-1); // level = size-1 (starts from 0)
+
+	while (!format_seq.empty()) {
+		write_int(f, format_seq.top());
+		format_seq.pop();
+	}
+
+}
+
 void CovFile::write_int(ofstream& f, uint32_t x) {
 	f.write((char*) &x, sizeof(uint32_t));
 }
@@ -135,7 +171,9 @@ void CovFile::write_double(ofstream& f, double x) {
 	f.write((char*) &x, sizeof(x));
 }
 
-void CovFile::format(stringstream& ss, const string& title) {
+void CovFile::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+
+	format_seq.push(subformat_number);
 
 	ss
 	<< "\n"
@@ -156,12 +194,27 @@ void CovFile::format(stringstream& ss, const string& title) {
 	<< "|        Cov        |" <<
 	"                  (mind the space at the end)\n"
 	<< space << "                  followed by the format version number: " << FORMAT_VERSION << "\n"
+	<< space << " - 1 integer:     the subformat level L (=" << format_seq.size()-1 << " in the case of\n"
+	<< space << "                  " << title << ")\n"
+	<< space << " - L integers:    the subformat identifying sequence:\n"
+	<< space << "                      ";
+	while (!format_seq.empty()) {
+		ss << format_seq.top();
+		format_seq.pop();
+		if (!format_seq.empty()) ss << ' ';
+	}
+	ss
+	<< "\n"
+	<< space << "                  (in the case of " << title << ")\n"
 	<< space << " - 1 integer:     the dimension n of boxes (# of variables)\n"
 	<< separator;
 }
 
-//virtual int CovFile::subformat_number() const {
-//	return 0;
-//}
+string CovFile::format() {
+	stringstream ss;
+	stack<unsigned int> format_seq;
+	format(ss, "COV", format_seq);
+	return ss.str();
+}
 
 } /* namespace ibex */

@@ -32,8 +32,6 @@ public:
 	 */
 	void save(const char* filename);
 
-	virtual int subformat_number() const;
-
 	BoxStatus status(int i) const;
 
 	bool is_solution(int i) const;
@@ -53,11 +51,15 @@ public:
 
 	/**
 	 * \brief Number of equalities.
+	 *
+	 * By default : 0.
 	 */
 	const unsigned int m;
 
 	/**
 	 * \brief Number of inequalities.
+	 *
+	 * By default : 0.
 	 */
 	const size_t nb_ineq;
 
@@ -176,20 +178,30 @@ inline void CovManifoldFactory::add_solution(const IntervalVector& existence, co
 
 class CovManifoldFile : public CovIBUListFile {
 public:
-	static std::ifstream* read(const char* filename, CovManifoldFactory& factory);
+	static std::ifstream* read(const char* filename, CovManifoldFactory& factory, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a CovManifold into a COV file.
 	 */
-	static std::ofstream* write(const char* filename, const CovManifold& cov);
+	static std::ofstream* write(const char* filename, const CovManifold& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Display the format of a CovManifold file.
 	 */
 	static string format();
 
+	/**
+	 * \brief Subformat level.
+	 */
+	static const unsigned int subformat_level;
+
+	/**
+	 * \brief Subformat identifying number.
+	 */
+	static const unsigned int subformat_number;
+
 protected:
-	static void format(std::stringstream& ss, const string& title);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
 
 	/* read parameters of the parametric proof */
 	static VarSet read_varset(std::ifstream& f, size_t n, size_t m);
@@ -197,12 +209,6 @@ protected:
 	/* write parameters of the parametric proof */
 	static void write_varset(std::ofstream& f, const VarSet& varset);
 };
-
-inline std::string CovManifoldFile::format() {
-	std::stringstream ss;
-	format(ss,"CovManifold");
-	return ss.str();
-}
 
 //class CovRegularBoundaryManifold : public CovManifold {
 //public:

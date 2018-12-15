@@ -26,7 +26,8 @@ CovIUList::CovIUList(const char* filename) : CovIUList(CovIUListFactory(filename
 }
 
 void CovIUList::save(const char* filename) {
-	ofstream* of=CovIUListFile::write(filename,*this);
+	stack<unsigned int> format_seq;
+	ofstream* of=CovIUListFile::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
@@ -46,7 +47,8 @@ CovIUListFactory::CovIUListFactory(size_t n) : CovListFactory(n) {
 }
 
 CovIUListFactory::CovIUListFactory(const char* filename) : CovListFactory((size_t) 0 /* tmp*/) {
-	ifstream* f = CovIUListFile::read(filename, *this);
+	stack<unsigned int> format_seq;
+	ifstream* f = CovIUListFile::read(filename, *this, format_seq);
 	f->close();
 	delete f;
 }
@@ -72,7 +74,7 @@ void CovIUListFactory::build(CovIUList& set) const {
 	set._IU_inner    = new IntervalVector*[set.nb_inner];
 	set._IU_unknown  = new IntervalVector*[set.nb_unknown];
 
-	for (int i=0; i<set.size; i++) {
+	for (size_t i=0; i<set.size; i++) {
 		set._IU_status[i]=CovIUList::UNKNOWN; // by default
 	}
 
@@ -83,7 +85,7 @@ void CovIUListFactory::build(CovIUList& set) const {
 	size_t jin=0; // count inner boxes
 	size_t juk=0; // count unknown boxes
 
-	for (int i=0; i<set.size; i++) {
+	for (size_t i=0; i<set.size; i++) {
 		if (set._IU_status[i]==CovIUList::INNER)
 			set._IU_inner[jin++]=(IntervalVector*) &set[i];
 		else
@@ -94,9 +96,17 @@ void CovIUListFactory::build(CovIUList& set) const {
 }
 
 //----------------------------------------------------------------------------------------------------
-ifstream* CovIUListFile::read(const char* filename, CovIUListFactory& factory) {
 
-	ifstream* f = CovListFile::read(filename, factory);
+const unsigned int CovIUListFile::subformat_level = 2;
+
+const unsigned int CovIUListFile::subformat_number = 0;
+
+ifstream* CovIUListFile::read(const char* filename, CovIUListFactory& factory, stack<unsigned int>& format_seq) {
+
+	ifstream* f = CovListFile::read(filename, factory, format_seq);
+
+	if (format_seq.empty() || format_seq.top()!=subformat_number) return f;
+	else format_seq.pop();
 
 	size_t nb_inner = read_pos_int(*f);
 
@@ -117,9 +127,11 @@ ifstream* CovIUListFile::read(const char* filename, CovIUListFactory& factory) {
 	return f;
 }
 
-ofstream* CovIUListFile::write(const char* filename, const CovIUList& cov) {
+ofstream* CovIUListFile::write(const char* filename, const CovIUList& cov, stack<unsigned int>& format_seq) {
 
-	ofstream* f = CovListFile::write(filename, cov);
+	format_seq.push(subformat_number);
+
+	ofstream* f = CovListFile::write(filename, cov, format_seq);
 
 	write_int(*f, cov.nb_inner);
 
@@ -131,8 +143,10 @@ ofstream* CovIUListFile::write(const char* filename, const CovIUList& cov) {
 	return f;
 }
 
-void CovIUListFile::format(stringstream& ss, const string& title) {
-	CovListFile::format(ss, title);
+void CovIUListFile::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+	format_seq.push(subformat_number);
+
+	CovListFile::format(ss, title, format_seq);
 
 	ss
 	<< space << " - 1 integer:     the number Ni of inner boxes (<= N)\n"
@@ -142,8 +156,11 @@ void CovIUListFile::format(stringstream& ss, const string& title) {
 	<< separator;
 }
 
-//int CovIUListFile::subformat_number() const {
-//	return 0;
-//}
+string CovIUListFile::format() {
+	stringstream ss;
+	stack<unsigned int> format_seq;
+	format(ss, "CovIUList", format_seq);
+	return ss.str();
+}
 
 } /* namespace ibex */

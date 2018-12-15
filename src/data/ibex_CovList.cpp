@@ -26,7 +26,8 @@ CovList::CovList(const char* filename) : CovList(CovListFactory(filename)) {
 }
 
 void CovList::save(const char* filename) {
-	ofstream* of=CovListFile::write(filename,*this);
+	stack<unsigned int> format_seq;
+	ofstream* of=CovListFile::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
@@ -42,7 +43,8 @@ CovListFactory::CovListFactory(size_t n) : CovFactory(n) {
 }
 
 CovListFactory::CovListFactory(const char* filename) : CovFactory((size_t) 0 /* tmp*/) {
-	ifstream* f = CovListFile::read(filename, *this);
+	stack<unsigned int> format_seq;
+	ifstream* f = CovListFile::read(filename, *this, format_seq);
 	f->close();
 	delete f;
 }
@@ -76,9 +78,16 @@ void CovListFactory::build(CovList& l) const {
 
 //----------------------------------------------------------------------------------------------------
 
-ifstream* CovListFile::read(const char* filename, CovListFactory& factory) {
+const unsigned int CovListFile::subformat_level = 1;
 
-	ifstream* f = CovFile::read(filename, factory);
+const unsigned int CovListFile::subformat_number = 0;
+
+ifstream* CovListFile::read(const char* filename, CovListFactory& factory, stack<unsigned int>& format_seq) {
+
+	ifstream* f = CovFile::read(filename, factory, format_seq);
+
+	if (format_seq.empty() || format_seq.top()!=subformat_number) return f;
+	else format_seq.pop();
 
 	size_t size = read_pos_int(*f);
 
@@ -89,9 +98,11 @@ ifstream* CovListFile::read(const char* filename, CovListFactory& factory) {
 	return f;
 }
 
-ofstream* CovListFile::write(const char* filename, const CovList& cov) {
+ofstream* CovListFile::write(const char* filename, const CovList& cov, stack<unsigned int>& format_seq) {
 
-	ofstream* f = CovFile::write(filename, cov);
+	format_seq.push(subformat_number);
+
+	ofstream* f = CovFile::write(filename, cov, format_seq);
 
 	write_int(*f, cov.size);
 
@@ -122,8 +133,10 @@ void CovListFile::write_box(ofstream& f, const IntervalVector& box) {
 	}
 }
 
-void CovListFile::format(stringstream& ss, const string& title) {
-	CovFile::format(ss, title);
+void CovListFile::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+	format_seq.push(subformat_number);
+
+	CovFile::format(ss, title, format_seq);
 
 	ss      << space << " - 1 integer:     the total number N of boxes\n"
 			<< "|      CovList      |" << " - N boxes:       a box is a sequence of 2*n real values:\n"
@@ -131,9 +144,12 @@ void CovListFile::format(stringstream& ss, const string& title) {
 			<< separator;
 }
 
-//int CovListFile::subformat_number() const {
-//	return 0;
-//}
+string CovListFile::format() {
+	stringstream ss;
+	stack<unsigned int> format_seq;
+	format(ss, "CovList", format_seq);
+	return ss.str();
+}
 
 
 } /* namespace ibex */

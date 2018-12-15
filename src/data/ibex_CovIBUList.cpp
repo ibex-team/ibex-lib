@@ -24,7 +24,8 @@ CovIBUList::CovIBUList(const char* filename) : CovIBUList(CovIBUListFactory(file
 }
 
 void CovIBUList::save(const char* filename) {
-	ofstream* of=CovIBUListFile::write(filename,*this);
+	stack<unsigned int> format_seq;
+	ofstream* of=CovIBUListFile::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
@@ -37,16 +38,13 @@ CovIBUList::~CovIBUList() {
 	delete[] _IBU_unknown;
 }
 
-int CovIBUList::subformat_number() const {
-	return 0;
-}
-
 CovIBUListFactory::CovIBUListFactory(size_t n) : CovIUListFactory(n) {
 
 }
 
 CovIBUListFactory::CovIBUListFactory(const char* filename) : CovIUListFactory((size_t) 0 /* tmp*/) {
-	ifstream* f = CovIBUListFile::read(filename, *this);
+	stack<unsigned int> format_seq;
+	ifstream* f = CovIBUListFile::read(filename, *this, format_seq);
 	f->close();
 	delete f;
 }
@@ -67,7 +65,7 @@ void CovIBUListFactory::build(CovIBUList& set) const {
 	set._IBU_boundary         = new IntervalVector*[set.nb_boundary];
 	set._IBU_unknown          = new IntervalVector*[set.nb_unknown];
 
-	for (int i=0; i<set.size; i++) {
+	for (size_t i=0; i<set.size; i++) {
 		if (set.CovIUList::status(i)==CovIUList::INNER)
 			set._IBU_status[i]=CovIBUList::INNER;
 		else
@@ -84,7 +82,7 @@ void CovIBUListFactory::build(CovIBUList& set) const {
 	size_t jbo=0; // count boundary boxes
 	size_t juk=0; // count unknown boxes
 
-	for (int i=0; i<set.size; i++) {
+	for (size_t i=0; i<set.size; i++) {
 		if (set._IBU_status[i]==CovIBUList::BOUNDARY)
 			set._IBU_boundary[jbo++]=(IntervalVector*) &set[i];
 		else if (set._IBU_status[i]==CovIBUList::UNKNOWN)
@@ -96,9 +94,16 @@ void CovIBUListFactory::build(CovIBUList& set) const {
 
 //----------------------------------------------------------------------------------------------------
 
-ifstream* CovIBUListFile::read(const char* filename, CovIBUListFactory& factory) {
+const unsigned int CovIBUListFile::subformat_level = 3;
 
-	ifstream* f = CovIUListFile::read(filename, factory);
+const unsigned int CovIBUListFile::subformat_number = 0;
+
+ifstream* CovIBUListFile::read(const char* filename, CovIBUListFactory& factory, stack<unsigned int>& format_seq) {
+
+	ifstream* f = CovIUListFile::read(filename, factory, format_seq);
+
+	if (format_seq.empty() || format_seq.top()!=subformat_number) return f;
+	else format_seq.pop();
 
 	size_t nb_boundary = read_pos_int(*f);
 
@@ -118,9 +123,11 @@ ifstream* CovIBUListFile::read(const char* filename, CovIBUListFactory& factory)
 }
 
 
-ofstream* CovIBUListFile::write(const char* filename, const CovIBUList& cov) {
+ofstream* CovIBUListFile::write(const char* filename, const CovIBUList& cov, stack<unsigned int>& format_seq) {
 
-	ofstream* f = CovIUListFile::write(filename, cov);
+	format_seq.push(subformat_number);
+
+	ofstream* f = CovIUListFile::write(filename, cov, format_seq);
 
 	write_int(*f, cov.nb_boundary);
 
@@ -132,9 +139,10 @@ ofstream* CovIBUListFile::write(const char* filename, const CovIBUList& cov) {
 	return f;
 }
 
+void CovIBUListFile::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+	format_seq.push(subformat_number);
 
-void CovIBUListFile::format(stringstream& ss, const string& title) {
-	CovIUListFile::format(ss, title);
+	CovIUListFile::format(ss, title, format_seq);
 
 	ss
 	<< space << " - 1 integer:     the number Nb of boundary boxes (<= N-Ni)\n"
@@ -142,6 +150,13 @@ void CovIBUListFile::format(stringstream& ss, const string& title) {
 	            " - Nb integers:   the indices of boundary boxes\n"
 	<< space << "                  (a subset of CovIUList unknown boxes)\n"
 	<< separator;
+}
+
+string CovIBUListFile::format() {
+	stringstream ss;
+	stack<unsigned int> format_seq;
+	format(ss, "CovIBUList", format_seq);
+	return ss.str();
 }
 
 } // end namespace

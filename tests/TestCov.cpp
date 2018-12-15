@@ -44,6 +44,7 @@ double TestCov::unicity_infl = 0.5;
 
 string TestCov::solver_var_names[n]      = { "x1", "x2", "x3" };
 
+
 namespace {
 
 char* open_file(ofstream& f) { // return char* must be freed
@@ -68,6 +69,7 @@ void write(ofstream& of, double x) {
 
 }
 
+
 /*=============================================================================================*/
 
 vector<IntervalVector> TestCov::boxes() {
@@ -80,14 +82,17 @@ vector<IntervalVector> TestCov::boxes() {
 
 /*=============================================================================================*/
 
-void TestCov::write_cov(ofstream& f) {
+void TestCov::write_cov(ofstream& f, unsigned int level) {
 	write(f,"IBEX COVERING FILE "); // signature
 	write(f,(uint32_t) 1);          // format version
+	write(f,(uint32_t) level);      // subformat level
+	for (unsigned int i=0; i<=level; i++)
+		write(f, (uint32_t) 0);
 	write(f,(uint32_t) n);          // box dimension
 }
 
-void TestCov::write_covlist(ofstream& f) {
-	write_cov(f);
+void TestCov::write_covlist(ofstream& f, unsigned int level) {
+	write_cov(f,level);
 	write(f,(uint32_t) N);  // number of boxes
 
 	vector<IntervalVector> b = boxes();
@@ -100,16 +105,16 @@ void TestCov::write_covlist(ofstream& f) {
 	}
 }
 
-void TestCov::write_covIUlist(ofstream& f) {
-	write_covlist(f);
+void TestCov::write_covIUlist(ofstream& f, unsigned int level) {
+	write_covlist(f,level);
 	write(f, (uint32_t) ni); // number of inner boxes
 	for (size_t i=0; i<ni; i++) {
 		write(f, (uint32_t) inner[i]); // ith inner box
 	}
 }
 
-void TestCov::write_covIBUlist(ofstream& f) {
-	write_covIUlist(f);
+void TestCov::write_covIBUlist(ofstream& f, unsigned int level) {
+	write_covIUlist(f,level);
 	write(f, (uint32_t) (nbnd+nsol)); // total number of boundary boxes
 	for (size_t i=0; i<nbnd; i++) {
 		write(f, (uint32_t) bnd[i]);
@@ -119,8 +124,8 @@ void TestCov::write_covIBUlist(ofstream& f) {
 	}
 }
 
-void TestCov::write_covManifold(ofstream& f) {
-	write_covIBUlist(f);
+void TestCov::write_covManifold(ofstream& f, unsigned int level) {
+	write_covIBUlist(f,level);
 	write(f, (uint32_t) m); // number of equalities
 	write(f, (uint32_t) nb_ineq); // number of inequalities
 	write(f, (uint32_t) nsol);
@@ -142,8 +147,8 @@ void TestCov::write_covManifold(ofstream& f) {
 	}
 }
 
-void TestCov::write_covSolverData(ofstream& f) {
-	write_covManifold(f);
+void TestCov::write_covSolverData(ofstream& f, unsigned int level) {
+	write_covManifold(f,level);
 
 	for (size_t i=0; i<n; i++)
 		write(f,solver_var_names[i].c_str());
@@ -438,7 +443,7 @@ void TestCov::covfac() {
 void TestCov::read_covfile() {
 	ofstream f;
 	char* filename=open_file(f);
-	write_cov(f);
+	write_cov(f,0);
 	f.close();
 
 	Cov cov(filename);
@@ -466,15 +471,26 @@ void TestCov::covlistfac() {
 	delete cov;
 }
 
-void TestCov::read_covlistfile() {
-
+void TestCov::read_covlistfile1() {
 	ofstream f;
 	char* filename=open_file(f);
-	write_covlist(f);
+	write_covlist(f,1);
 	f.close();
 
 	CovList cov(filename);
 	test_covlist(cov);
+	free(filename);
+}
+
+void TestCov::read_covlistfile2() {
+	ofstream f;
+	char* filename=open_file(f);
+	write_cov(f,0);
+	f.close();
+
+	CovList cov(filename);
+	test_cov(cov);
+	CPPUNIT_ASSERT(cov.size==0);
 	free(filename);
 }
 
@@ -498,14 +514,29 @@ void TestCov::covIUlistfac() {
 	delete cov;
 }
 
-void TestCov::read_covIUlistfile() {
+void TestCov::read_covIUlistfile1() {
 	ofstream f;
 	char* filename=open_file(f);
-	write_covIUlist(f);
+	write_covIUlist(f,2);
 	f.close();
 
 	CovIUList cov(filename);
 	test_covIUlist(cov);
+	free(filename);
+}
+
+void TestCov::read_covIUlistfile2() {
+	ofstream f;
+	char* filename=open_file(f);
+	write_covlist(f,1);
+	f.close();
+
+	CovIUList cov(filename);
+	test_covlist(cov);
+
+	CPPUNIT_ASSERT(cov.nb_inner==0);
+	CPPUNIT_ASSERT(cov.nb_unknown==N);
+
 	free(filename);
 }
 
@@ -529,16 +560,30 @@ void TestCov::covIBUlistfac() {
 	delete cov;
 }
 
-void TestCov::read_covIBUlistfile() {
+void TestCov::read_covIBUlistfile1() {
 	ofstream f;
 	char* filename=open_file(f);
-	write_covIBUlist(f);
+	write_covIBUlist(f,3);
 	f.close();
 
 	CovIBUList cov(filename);
 	test_covIBUlist(cov);
 	free(filename);
 }
+
+void TestCov::read_covIBUlistfile2() {
+	ofstream f;
+	char* filename=open_file(f);
+	write_covIUlist(f,2);
+	f.close();
+
+	CovIBUList cov(filename);
+	test_covIUlist(cov);
+	CPPUNIT_ASSERT(cov.nb_boundary==0);
+	CPPUNIT_ASSERT(cov.nb_unknown==cov.size - cov.nb_inner);
+	free(filename);
+}
+
 
 void TestCov::write_covIBUlistfile() {
 	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
@@ -560,14 +605,30 @@ void TestCov::covManifoldfac() {
 	delete cov;
 }
 
-void TestCov::read_covManifoldfile() {
+void TestCov::read_covManifoldfile1() {
 	ofstream f;
 	char* filename=open_file(f);
-	write_covManifold(f);
+	write_covManifold(f,4);
 	f.close();
 
 	CovManifold cov(filename);
 	test_covManifold(cov);
+	free(filename);
+}
+
+void TestCov::read_covManifoldfile2() {
+	ofstream f;
+	char* filename=open_file(f);
+	write_covIBUlist(f,3);
+	f.close();
+
+	CovManifold cov(filename);
+	test_covIBUlist(cov);
+	CPPUNIT_ASSERT(cov.m==0);
+	CPPUNIT_ASSERT(cov.nb_ineq==0);
+	CPPUNIT_ASSERT(cov.nb_solution==0);
+	CPPUNIT_ASSERT(cov.nb_boundary==cov.CovIBUList::nb_boundary);
+
 	free(filename);
 }
 
@@ -591,14 +652,31 @@ void TestCov::covSolverDatafac() {
 	delete cov;
 }
 
-void TestCov::read_covSolverDatafile() {
+void TestCov::read_covSolverDatafile1() {
 	ofstream f;
 	char* filename=open_file(f);
-	write_covSolverData(f);
+	write_covSolverData(f,5);
 	f.close();
 
 	CovSolverData cov(filename);
 	test_covSolverData(cov);
+	free(filename);
+}
+
+void TestCov::read_covSolverDatafile2() {
+	ofstream f;
+	char* filename=open_file(f);
+	write_covManifold(f,4);
+	f.close();
+
+	CovSolverData cov(filename);
+	test_covManifold(cov);
+	CPPUNIT_ASSERT(cov.var_names.empty());
+	CPPUNIT_ASSERT(cov.solver_status == Solver::SUCCESS);
+	CPPUNIT_ASSERT(cov.time == -1);
+	CPPUNIT_ASSERT(cov.nb_cells == 0);
+	CPPUNIT_ASSERT(cov.nb_pending == 0);
+
 	free(filename);
 }
 
@@ -615,3 +693,5 @@ void TestCov::write_covSolverDatafile() {
 
 	free(tmpname);
 }
+
+

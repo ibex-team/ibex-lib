@@ -32,21 +32,19 @@ CovSolverData::~CovSolverData() {
 }
 
 void CovSolverData::save(const char* filename) {
-	ofstream* of=CovSolverDataFile::write(filename,*this);
+	stack<unsigned int> format_seq;
+	ofstream* of=CovSolverDataFile::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
 
-int CovSolverData::subformat_number() const {
-	return 0;
-}
-
-CovSolverDataFactory::CovSolverDataFactory(size_t n) : CovManifoldFactory(n), status(Solver::SUCCESS /* ? */), time(0), nb_cells(0) {
+CovSolverDataFactory::CovSolverDataFactory(size_t n) : CovManifoldFactory(n), status(Solver::SUCCESS /* ? */), time(-1), nb_cells(0) {
 
 }
 
 CovSolverDataFactory::CovSolverDataFactory(const char* filename) : CovSolverDataFactory((size_t) 0 /* tmp*/) {
-	ifstream* f = CovSolverDataFile::read(filename, *this);
+	stack<unsigned int> format_seq;
+	ifstream* f = CovSolverDataFile::read(filename, *this, format_seq);
 	f->close();
 	delete f;
 }
@@ -73,7 +71,7 @@ void CovSolverDataFactory::build(CovSolverData& solver) const {
 	solver._solver_pending      = new IntervalVector*[solver.nb_pending];
 	solver._solver_unknown      = new IntervalVector*[solver.nb_unknown];
 
-	for (int i=0; i<solver.size; i++) {
+	for (size_t i=0; i<solver.size; i++) {
 		switch (solver.CovManifold::status(i)) {
 		case CovManifold::INNER:    solver._solver_status[i]=CovSolverData::INNER;   break;
 		case CovManifold::SOLUTION: solver._solver_status[i]=CovSolverData::SOLUTION;   break;
@@ -83,7 +81,7 @@ void CovSolverDataFactory::build(CovSolverData& solver) const {
 	}
 
 	for (vector<unsigned int>::const_iterator it=pending.begin(); it!=pending.end(); ++it) {
-		if (!solver._solver_status[*it]==CovSolverData::UNKNOWN)
+		if (solver._solver_status[*it]!=CovSolverData::UNKNOWN)
 			ibex_error("[CovSolverDataFactoy]: a pending box cannot be inner, boundary or solution.");
 		else {
 			solver._solver_status[*it]=CovSolverData::PENDING;
@@ -93,7 +91,7 @@ void CovSolverDataFactory::build(CovSolverData& solver) const {
 	size_t junk=0; // count unknown boxes
 	size_t jpen=0;  // count pending boxes
 
-	for (int i=0; i<solver.size; i++) {
+	for (size_t i=0; i<solver.size; i++) {
 		if (solver._solver_status[i]==CovSolverData::PENDING) {
 			solver._solver_pending[jpen] = (IntervalVector*) &solver[i];
 			jpen++;
@@ -110,9 +108,16 @@ void CovSolverDataFactory::build(CovSolverData& solver) const {
 
 //----------------------------------------------------------------------------------------------------
 
-ifstream* CovSolverDataFile::read(const char* filename, CovSolverDataFactory& factory) {
+const unsigned int CovSolverDataFile::subformat_level = 5;
 
-	ifstream* f = CovManifoldFile::read(filename, factory);
+const unsigned int CovSolverDataFile::subformat_number = 0;
+
+ifstream* CovSolverDataFile::read(const char* filename, CovSolverDataFactory& factory, stack<unsigned int>& format_seq) {
+
+	ifstream* f = CovManifoldFile::read(filename, factory, format_seq);
+
+	if (format_seq.empty() || format_seq.top()!=subformat_number) return f;
+	else format_seq.pop();
 
 	read_vars(*f, factory.n, factory.var_names);
 
@@ -142,9 +147,11 @@ ifstream* CovSolverDataFile::read(const char* filename, CovSolverDataFactory& fa
 	return f;
 }
 
-ofstream* CovSolverDataFile::write(const char* filename, const CovSolverData& cov) {
+ofstream* CovSolverDataFile::write(const char* filename, const CovSolverData& cov, stack<unsigned int>& format_seq) {
 
-	ofstream* f = CovManifoldFile::write(filename, cov);
+	format_seq.push(subformat_number);
+
+	ofstream* f = CovManifoldFile::write(filename, cov, format_seq);
 
 	write_vars(*f, cov.var_names);
 	write_int(*f, cov.solver_status);
@@ -180,8 +187,10 @@ void CovSolverDataFile::write_vars(ofstream& f, const vector<string>& var_names)
 	}
 }
 
-void CovSolverDataFile::format(stringstream& ss, const string& title) {
-	CovManifoldFile::format(ss, title);
+void CovSolverDataFile::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+	format_seq.push(subformat_number);
+
+	CovManifoldFile::format(ss, title, format_seq);
 
 	ss
 	<< space << " - n strings:      the names of variables. Each string is\n"
@@ -202,6 +211,13 @@ void CovSolverDataFile::format(stringstream& ss, const string& title) {
 	<< space << " - Np integers:    the indices of pending boxes\n"
 	<< space << "                   (a subset of CovIUList unknown boxes).\n"
 	<< separator;
+}
+
+string CovSolverDataFile::format() {
+	stringstream ss;
+	stack<unsigned int> format_seq;
+	format(ss, "CovSolverData", format_seq);
+	return ss.str();
 }
 
 } // end namespace

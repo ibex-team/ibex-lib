@@ -33,8 +33,6 @@ public:
 	 */
 	void save(const char* filename);
 
-	virtual int subformat_number() const;
-
 	BoxStatus status(int i) const;
 
 	/**
@@ -50,14 +48,14 @@ public:
 	/**
 	 * \brief Names of the variables.
 	 *
-	 * By default: empty strings.
+	 * By default: empty vector.
 	 */
 	std::vector<std::string> var_names;
 
 	/*
 	 * \brief Return status of the last solving.
 	 *
-	 * By default: ??
+	 * By default: SUCCESS (means "unknown" if time==-1)
 	 */
 	Solver::Status solver_status;
 
@@ -175,20 +173,30 @@ inline void CovSolverDataFactory::set_nb_cells(unsigned long nb_cells) {
 
 class CovSolverDataFile : public CovManifoldFile {
 public:
-	static std::ifstream* read(const char* filename, CovSolverDataFactory& factory);
+	static std::ifstream* read(const char* filename, CovSolverDataFactory& factory, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a CovSolverData into a COV file.
 	 */
-	static std::ofstream* write(const char* filename, const CovSolverData& cov);
+	static std::ofstream* write(const char* filename, const CovSolverData& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Display the format of a CovSolverData file.
 	 */
 	static string format();
 
+	/**
+	 * \brief Subformat level.
+	 */
+	static const unsigned int subformat_level;
+
+	/**
+	 * \brief Subformat identifying number.
+	 */
+	static const unsigned int subformat_number;
+
 protected:
-	static void format(std::stringstream& ss, const string& title);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
 
 	/* read the variable names */
 	static void read_vars(std::ifstream& f, size_t n, std::vector<std::string>& var_names);
@@ -196,12 +204,6 @@ protected:
 	/* write the variable names */
 	static void write_vars(std::ofstream& f, const std::vector<std::string>& var_names);
 };
-
-inline std::string CovSolverDataFile::format() {
-	std::stringstream ss;
-	format(ss,"CovSolverData");
-	return ss.str();
-}
 
 } /* namespace ibex */
 

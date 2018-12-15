@@ -18,6 +18,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <stack>
 
 namespace ibex {
 
@@ -77,28 +78,40 @@ class CovFile {
 public:
 	/**
 	 * \brief Read a COV file.
+	 *
+	 * format_seq: subformat identifying sequence (in reverse order: last number is Cov::subformat_number).
 	 */
-	static std::ifstream* read(const char* filename, CovFactory& factory);
+	static std::ifstream* read(const char* filename, CovFactory& factory, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a Cov into a COV file.
+	 *
+	 * format_seq: subformat identifying sequence  (in reverse order: last number is Cov::subformat_number).
 	 */
-	static std::ofstream* write(const char* filename, const Cov& cov);
+	static std::ofstream* write(const char* filename, const Cov& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Display the format of a Cov file.
 	 */
 	static string format();
 
-	//virtual int subformat_number() const;
-
 	/**
 	 * \brief Cover file format version.
 	 */
 	static const uint32_t FORMAT_VERSION;
 
+	/**
+	 * \brief Subformat level.
+	 */
+	static const unsigned int subformat_level;
+
+	/**
+	 * \brief Subformat identifying number.
+	 */
+	static const unsigned int subformat_number;
+
 protected:
-	static void format(std::stringstream& ss, const string& title);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
 	static const std::string separator;
 	static const std::string space;
 
@@ -106,19 +119,15 @@ protected:
 	static const char*  SIGNATURE;
 
 	static int read_signature(std::ifstream& f);
+	static void read_format_seq(std::ifstream& f, std::stack<unsigned int>&);
 	static unsigned int read_pos_int(std::ifstream& f);
 	static double read_double(std::ifstream& f);
 
 	static void write_signature(std::ofstream& f);
+	static void write_format_seq(std::ofstream& f, std::stack<unsigned int>&); // warning: format seq is emptied.
 	static void write_int(std::ofstream& f, uint32_t x);
 	static void write_double(std::ofstream& f, double x);
 };
-
-inline std::string CovFile::format() {
-	std::stringstream ss;
-	format(ss,"COV");
-	return ss.str();
-}
 
 } /* namespace ibex */
 
