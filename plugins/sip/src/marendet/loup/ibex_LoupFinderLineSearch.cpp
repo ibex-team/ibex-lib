@@ -73,6 +73,9 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	vector<Vector> active_constraints;
 
 	blankenship(sol, system_, node_data_);
+
+	/****************** DIRECTION **********************/
+
 	// After variables and linearized goal
 	for (int i = system_.ext_nb_var + 1; i < A.nb_rows(); ++i) {
 		if (!Interval(dual[i]).inflate(1e-10).contains(0)) {
@@ -107,11 +110,28 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	}
 
 	LPSolver dir_solver(system_.nb_var + 1, 10000, 10000);
-	for(int i = 0; i < G.nb_cols(); ++i) {
+	/*for(int i = 0; i < G.nb_cols(); ++i) {
 		Vector row(system_.nb_var + 1);
 		row.put(0, G.col(i));
 		row[system_.nb_var] = -1;
 		dir_solver.add_constraint(row, CmpOp::LEQ, 0);
+	}*/
+	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
+		const auto& sic = system_.sic_constraints_[i];
+		const auto& param_boxes = node_data_->sic_constraints_caches[i].parameter_caches_;
+		for(int j = 0; j < param_boxes.size(); ++j) {
+			Vector full_grad = (sic.gradient(box.mid(), param_boxes[j].parameter_box.mid())).mid();
+			Vector grad_x = full_grad.subvector(0, system_.ext_nb_var-1);
+			grad_x[system_.ext_nb_var-1] = -1;
+			dir_solver.add_constraint(grad_x, CmpOp::LEQ, 0);
+		}
+	}
+	for(int i = 0; i < system_.normal_constraints_.size(); ++i) {
+		IntervalVector grad = system_.normal_constraints_[i].gradient(box.mid().subvector(0, system_.nb_var-1));
+		Vector grad_x = Vector(system_.ext_nb_var, 0.0);
+		grad_x.put(0, grad.mid());
+		grad_x[system_.ext_nb_var-1] = -1;
+		dir_solver.add_constraint(grad_x, CmpOp::LEQ, 0);
 	}
 	IntervalVector bounds(system_.nb_var + 1, Interval(-1, 1));
 	bounds[system_.nb_var] = Interval::ALL_REALS;
@@ -122,6 +142,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	LPSolver::Status_Sol dir_solver_status = dir_solver.solve();
 
 	Vector direction = dir_solver.get_primal_sol().subvector(0, system_.nb_var-1);
+	/************************************************/
 
 	double best_loup = POS_INFINITY;
 	Vector best_loup_point(system_.nb_var);

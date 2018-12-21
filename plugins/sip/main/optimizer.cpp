@@ -275,9 +275,11 @@ int main(int argc, const char ** argv) {
 		} else {
 			loup_finder = new LoupFinderSIPDefault(sys);
 		}
-		LoupFinderLineSearch *loup_finder2 = nullptr;
+		LoupFinder *loup_finder2 = nullptr;
 		if (!no_line_search) {
 			loup_finder2 = new LoupFinderLineSearch(sys);
+		} else {
+			loup_finder2 = new LoupFinderSIPDefault(sys);
 		}
 
 		/**
