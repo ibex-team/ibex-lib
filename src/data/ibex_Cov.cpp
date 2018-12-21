@@ -9,9 +9,11 @@
 //============================================================================
 
 #include "ibex_Cov.h"
+
 #include <cassert>
 #include <sstream>
 #include <list>
+#include <string.h>
 
 using namespace std;
 
@@ -74,6 +76,9 @@ ifstream* CovFile::read(const char* filename, CovFactory& factory, stack<unsigne
 	if (f->fail()) ibex_error("[CovFile]: cannot open input file.\n");
 
 	int input_format_version = read_signature(*f);
+
+	if (input_format_version!=FORMAT_VERSION)
+		ibex_error("[CovFile] unsupported format version");
 
 	read_format_seq(*f, format_seq);
 

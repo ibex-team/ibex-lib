@@ -51,6 +51,8 @@ protected:
 };
 
 
+std::ostream& operator<<(std::ostream& os, const CovList& cov);
+
 inline const IntervalVector& CovList::operator[](int i) const {
 	return list[i];
 }

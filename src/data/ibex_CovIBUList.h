@@ -53,6 +53,8 @@ protected:
 	IntervalVector**  _IBU_unknown;      // pointer to 'unknown' boxes
 };
 
+std::ostream& operator<<(std::ostream& os, const CovIBUList& cov);
+
 inline CovIBUList::BoxStatus CovIBUList::status(int i) const {
 	return _IBU_status[i];
 }
@@ -85,6 +87,8 @@ public:
 
 	size_t nb_boundary() const;
 
+	size_t nb_unknown() const;
+
 private:
 	friend class CovIBUList;
 	friend class CovIBUListFile;
@@ -100,9 +104,12 @@ private:
 	std::vector<unsigned int> boundary;
 };
 
-
 inline size_t CovIBUListFactory::nb_boundary() const {
 	return boundary.size();
+}
+
+inline size_t CovIBUListFactory::nb_unknown() const {
+	return CovIUListFactory::nb_unknown() - nb_boundary();
 }
 
 class CovIBUListFile : public CovIUListFile {

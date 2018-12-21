@@ -13,7 +13,6 @@
 
 #include "ibex_IntervalVector.h"
 #include "ibex_BoolInterval.h"
-#include "ibex_Solver.h"
 
 #include <vector>
 #include <fstream>

@@ -47,6 +47,27 @@ CovManifold::~CovManifold() {
 	delete[] _varset;
 }
 
+ostream& operator<<(ostream& os, const CovManifold& manif) {
+
+	for (size_t i=0; i<manif.nb_solution; i++) {
+		os << " solution n°" << (i+1) << " = " << manif.solution(i) << endl;
+	}
+
+	for (size_t i=0; i<manif.nb_inner; i++) {
+		os << " inner n°" << (i+1) << " = " << manif.inner(i) << endl;
+	}
+
+	for (size_t i=0; i<manif.nb_boundary; i++) {
+		os << " boundary n°" << (i+1) << " = " << manif.boundary(i) << endl;
+	}
+
+	for (size_t i=0; i<manif.nb_unknown; i++) {
+		os << " unknown n°" << (i+1) << " = " << manif.unknown(i) << endl;
+	}
+
+	return os;
+}
+
 CovManifoldFactory::CovManifoldFactory(size_t n) : CovIBUListFactory(n), nb_eq(0), nb_ineq(0) {
 
 }

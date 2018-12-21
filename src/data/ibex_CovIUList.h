@@ -71,6 +71,8 @@ protected:
 	IntervalVector** _IU_unknown;  // pointers to other 'unknown' boxes
 };
 
+std::ostream& operator<<(std::ostream& os, const CovIUList& cov);
+
 inline CovIUList::BoxStatus CovIUList::status(int i) const {
 	return _IU_status[i];
 }

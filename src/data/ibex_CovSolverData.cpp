@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_CovSolverData.h"
+#include "ibex_Solver.h"
 
 using namespace std;
 
@@ -38,7 +39,33 @@ void CovSolverData::save(const char* filename) {
 	delete of;
 }
 
-CovSolverDataFactory::CovSolverDataFactory(size_t n) : CovManifoldFactory(n), status(Solver::SUCCESS /* ? */), time(-1), nb_cells(0) {
+ostream& operator<<(ostream& os, const CovSolverData& solver) {
+
+	for (size_t i=0; i<solver.nb_solution; i++) {
+		os << " solution n°" << (i+1) << " = " << solver.solution(i) << endl;
+	}
+
+	for (size_t i=0; i<solver.nb_inner; i++) {
+		os << " inner n°" << (i+1) << " = " << solver.inner(i) << endl;
+	}
+
+	for (size_t i=0; i<solver.nb_boundary; i++) {
+		os << " boundary n°" << (i+1) << " = " << solver.boundary(i) << endl;
+	}
+
+	for (size_t i=0; i<solver.nb_unknown; i++) {
+		os << " unknown n°" << (i+1) << " = " << solver.unknown(i) << endl;
+	}
+
+	for (size_t i=0; i<solver.nb_pending; i++) {
+		os << " pending n°" << (i+1) << " = " << solver.pending(i) << endl;
+	}
+
+	return os;
+
+}
+
+CovSolverDataFactory::CovSolverDataFactory(size_t n) : CovManifoldFactory(n), status((unsigned int) Solver::SUCCESS /* ? */), time(-1), nb_cells(0) {
 
 }
 
@@ -124,11 +151,11 @@ ifstream* CovSolverDataFile::read(const char* filename, CovSolverDataFactory& fa
 	unsigned int status = read_pos_int(*f);
 
 	switch (status) {
-	case 0: factory.status = Solver::SUCCESS;           break;
-	case 1: factory.status = Solver::INFEASIBLE;        break;
-	case 2: factory.status = Solver::NOT_ALL_VALIDATED; break;
-	case 3: factory.status = Solver::TIME_OUT;          break;
-	case 4: factory.status = Solver::CELL_OVERFLOW;     break;
+	case 0: factory.status = (unsigned int) Solver::SUCCESS;           break;
+	case 1: factory.status = (unsigned int) Solver::INFEASIBLE;        break;
+	case 2: factory.status = (unsigned int) Solver::NOT_ALL_VALIDATED; break;
+	case 3: factory.status = (unsigned int) Solver::TIME_OUT;          break;
+	case 4: factory.status = (unsigned int) Solver::CELL_OVERFLOW;     break;
 	default: ibex_error("[CovSolverDataFile]: invalid solver status.");
 	}
 

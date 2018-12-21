@@ -38,6 +38,25 @@ CovIBUList::~CovIBUList() {
 	delete[] _IBU_unknown;
 }
 
+ostream& operator<<(ostream& os, const CovIBUList& cov) {
+
+	for (size_t i=0; i<cov.nb_inner; i++) {
+		os << " inner n°" << (i+1) << " = " << cov.inner(i) << endl;
+	}
+
+	for (size_t i=0; i<cov.nb_boundary; i++) {
+		os << " boundary n°" << (i+1) << " = " << cov.boundary(i) << endl;
+	}
+
+	for (size_t i=0; i<cov.nb_unknown; i++) {
+		os << " unknown n°" << (i+1) << " = " << cov.unknown(i) << endl;
+	}
+
+	return os;
+}
+
+//----------------------------------------------------------------------------------------------------
+
 CovIBUListFactory::CovIBUListFactory(size_t n) : CovIUListFactory(n) {
 
 }

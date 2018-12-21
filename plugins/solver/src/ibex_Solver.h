@@ -19,8 +19,9 @@
 #include "ibex_Timer.h"
 #include "ibex_Exception.h"
 #include "ibex_Linear.h"
+#include "ibex_CovSolverData.h"
+
 #include <vector>
-#include "ibex_QualifiedBox.h"
 
 namespace ibex {
 
@@ -36,7 +37,8 @@ namespace ibex {
 
 class CellLimitException : public Exception {} ;
 
-class Manifold;
+class CovSolverData;
+class CovSolverDataFactory;
 
 class Solver {
 public:
@@ -152,7 +154,7 @@ public:
 	 *
 	 *   CELL_OVERFLOW:     the number of cell has exceeded the limit.
 	 */
-	QualifiedBox* next();
+	Status next();
 
 	/**
 	 * \brief Displays on standard output a report of the last call to solve(...).
@@ -164,7 +166,7 @@ public:
 	 *
 	 * \return the output boxes of the last call to solve(...).
 	 */
-	const Manifold& get_manifold() const;
+	const CovSolverData& get_manifold() const;
 
 	/**
 	 * \brief Get the time spent.
@@ -266,7 +268,7 @@ protected:
 	 * slightly changed (due to inflating Newton) and the actual "solution"
 	 * is stored in the existence box of the output.
 	 */
-	QualifiedBox check_sol(const IntervalVector& box);
+	CovSolverData::BoxStatus check_sol(const IntervalVector& box);
 
 	/**
 	 * \brief Check if the box is "BOUNDARY"
@@ -284,10 +286,7 @@ protected:
 	 */
 	bool is_too_small(const IntervalVector& box);
 
-	/**
-	 * \brief Store the solution in "solutions" and print it (if trace>=0).
-	 */
-	QualifiedBox& store_sol(const QualifiedBox& sol);
+	bool check_ineq(const IntervalVector& box);
 
 	/**
 	 * \brief Check if time is out.
@@ -337,18 +336,29 @@ protected:
 	/*
 	 * \brief Solutions found in the current search.
 	 */
-	Manifold* manif;
+	CovSolverDataFactory* manif_factory;
 
 	/*
 	 * \brief CPU running time used to obtain this manifold.
 	 */
 	double time;
+
+	/*
+	 * \brief CPU running time of the previous call.
+	 */
+	double old_time;
+
 	Timer timer;
 
 	/**
 	 * \brief Number of cells used to obtain this manifold.
 	 */
 	unsigned int nb_cells;
+
+	/**
+	 * \brief Number of cells of the previous call.
+	 */
+	unsigned int old_nb_cells;
 };
 
 /*============================================ inline implementation ============================================ */

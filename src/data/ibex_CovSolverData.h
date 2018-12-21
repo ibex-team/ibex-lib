@@ -12,7 +12,6 @@
 #define __IBEX_COV_SOLVER_DATA_H__
 
 #include "ibex_CovManifold.h"
-#include "ibex_Solver.h"
 
 namespace ibex {
 
@@ -55,9 +54,11 @@ public:
 	/*
 	 * \brief Return status of the last solving.
 	 *
+	 * Return type can be safely cast to Solver::Status.
+	 *
 	 * By default: SUCCESS (means "unknown" if time==-1)
 	 */
-	Solver::Status solver_status;
+	unsigned int solver_status;
 
 	/*
 	 * \brief CPU running time used to obtain this manifold.
@@ -95,6 +96,8 @@ protected:
 	IntervalVector**  _solver_unknown;
 };
 
+std::ostream& operator<<(std::ostream& os, const CovSolverData& solver);
+
 inline CovSolverData::BoxStatus CovSolverData::status(int i) const {
 	return _solver_status[i];
 }
@@ -119,11 +122,15 @@ public:
 
 	void set_var_names(const std::vector<std::string>&);
 
-	void set_status(Solver::Status status);
+	void set_status(unsigned int status);
 
 	void set_time(double time);
 
 	void set_nb_cells(unsigned long nb_cells);
+
+	size_t nb_pending() const;
+
+	size_t nb_unknown() const;
 
 private:
 	friend class CovSolverData;
@@ -135,7 +142,7 @@ private:
 
 	std::vector<std::string> var_names;
 
-	Solver::Status status;
+	unsigned int status;
 
 	/*
 	 * \brief CPU running time used to obtain this manifold.
@@ -158,7 +165,7 @@ inline void CovSolverDataFactory::set_var_names(const std::vector<std::string>& 
 	this->var_names = var_names;
 }
 
-inline void CovSolverDataFactory::set_status(Solver::Status status) {
+inline void CovSolverDataFactory::set_status(unsigned int status) {
 	this->status = status;
 }
 
@@ -168,6 +175,14 @@ inline void CovSolverDataFactory::set_time(double time) {
 
 inline void CovSolverDataFactory::set_nb_cells(unsigned long nb_cells) {
 	this->nb_cells = nb_cells;
+}
+
+inline size_t CovSolverDataFactory::nb_pending() const {
+	return pending.size();
+}
+
+inline size_t CovSolverDataFactory::nb_unknown() const {
+	return CovManifoldFactory::nb_unknown() - nb_pending();
 }
 
 

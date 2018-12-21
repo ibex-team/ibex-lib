@@ -36,6 +36,16 @@ CovList::~CovList() {
 	if (list) delete[] list;
 }
 
+ostream& operator<<(ostream& os, const CovList& cov) {
+
+	for (size_t i=0; i<cov.size; i++) {
+		os << " " << cov[i] << endl;
+	}
+	os << endl;
+
+	return os;
+}
+
 //----------------------------------------------------------------------------------------------------
 
 CovListFactory::CovListFactory(size_t n) : CovFactory(n) {

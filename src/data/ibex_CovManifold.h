@@ -12,6 +12,7 @@
 #define __IBEX_COV_MANIFOLD_H__
 
 #include "ibex_CovIBUList.h"
+#include "ibex_VarSet.h"
 
 namespace ibex {
 
@@ -138,6 +139,10 @@ public:
 
 	void set_nb_ineq(size_t);
 
+	size_t nb_solution() const;
+
+	size_t nb_boundary() const;
+
 	size_t nb_eq;
 
 	size_t nb_ineq;
@@ -159,6 +164,7 @@ private:
 	std::vector<VarSet> varset;
 };
 
+std::ostream& operator<<(std::ostream& os, const CovManifold& manif);
 
 inline void CovManifoldFactory::set_nb_equ(size_t nb_eq) {
 	this->nb_eq = nb_eq;
@@ -174,6 +180,14 @@ inline void CovManifoldFactory::add_solution(const IntervalVector& existence) {
 
 inline void CovManifoldFactory::add_solution(const IntervalVector& existence, const VarSet& varset) {
 	add_solution(existence, existence, varset);
+}
+
+inline size_t CovManifoldFactory::nb_solution() const {
+	return solution.size();
+}
+
+inline size_t CovManifoldFactory::nb_boundary() const {
+	return CovIBUListFactory::nb_boundary() - nb_solution();
 }
 
 class CovManifoldFile : public CovIBUListFile {
