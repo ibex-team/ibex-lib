@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 01, 2018
+// Last update : Dec 24, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_IU_LIST_H__
@@ -14,8 +14,6 @@
 #include "ibex_CovList.h"
 
 namespace ibex {
-
-class CovIUListFile;
 
 class CovIUList : public CovList {
 public:
@@ -69,12 +67,40 @@ public:
 	 */
 	size_t nb_unknown() const;
 
+	/**
+	 * \brief Display the format of a CovIUList file.
+	 */
+	static string format();
+
 protected:
-	friend class CovIUListFile;
+
+	/**
+	 * \brief Read a COV file.
+	 */
+	static std::ifstream* read(const char* filename, CovIUList& cov, std::stack<unsigned int>& format_seq);
+
+	/**
+	 * \brief Write a CovIUList into a COV file.
+	 */
+	static std::ofstream* write(const char* filename, const CovIUList& cov, std::stack<unsigned int>& format_seq);
+
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+
+	/**
+	 * \brief Subformat level.
+	 */
+	static const unsigned int subformat_level;
+
+	/**
+	 * \brief Subformat identifying number.
+	 */
+	static const unsigned int subformat_number;
+
 
 	std::vector<BoxStatus> _IU_status;         // status of the ith box
 	std::vector<IntervalVector*> _IU_inner;    // pointers to other 'inner' boxes
 	std::vector<IntervalVector*> _IU_unknown;  // pointers to other 'unknown' boxes
+
 };
 
 std::ostream& operator<<(std::ostream& os, const CovIUList& cov);
@@ -106,37 +132,6 @@ inline size_t CovIUList::nb_inner() const {
 inline size_t CovIUList::nb_unknown() const {
 	return _IU_unknown.size();
 }
-
-class CovIUListFile : public CovListFile {
-public:
-	/**
-	 * \brief Read a COV file.
-	 */
-	static std::ifstream* read(const char* filename, CovIUList& cov, std::stack<unsigned int>& format_seq);
-
-	/**
-	 * \brief Write a CovIUList into a COV file.
-	 */
-	static std::ofstream* write(const char* filename, const CovIUList& cov, std::stack<unsigned int>& format_seq);
-
-	/**
-	 * \brief Display the format of a CovIUList file.
-	 */
-	static string format();
-
-	/**
-	 * \brief Subformat level.
-	 */
-	static const unsigned int subformat_level;
-
-	/**
-	 * \brief Subformat identifying number.
-	 */
-	static const unsigned int subformat_number;
-
-protected:
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
-};
 
 } /* namespace ibex */
 

@@ -5,30 +5,35 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 01, 2018
+// Last update : Dec 24, 2018
 //============================================================================
 
 #include "ibex_CovIBUList.h"
 
+#include <sstream>
 #include <algorithm>
 
 using namespace std;
 
 namespace ibex {
 
+const unsigned int CovIBUList::subformat_level = 3;
+
+const unsigned int CovIBUList::subformat_number = 0;
+
 CovIBUList::CovIBUList(size_t n) : CovIUList(n) {
 }
 
 CovIBUList::CovIBUList(const char* filename) : CovIUList((size_t) 0 /* tmp */) {
 	stack<unsigned int> format_seq;
-	ifstream* f = CovIBUListFile::read(filename, *this, format_seq);
+	ifstream* f = CovIBUList::read(filename, *this, format_seq);
 	f->close();
 	delete f;
 }
 
 void CovIBUList::save(const char* filename) const	 {
 	stack<unsigned int> format_seq;
-	ofstream* of=CovIBUListFile::write(filename, *this, format_seq);
+	ofstream* of=CovIBUList::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
@@ -75,15 +80,9 @@ ostream& operator<<(ostream& os, const CovIBUList& cov) {
 	return os;
 }
 
-//----------------------------------------------------------------------------------------------------
+ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned int>& format_seq) {
 
-const unsigned int CovIBUListFile::subformat_level = 3;
-
-const unsigned int CovIBUListFile::subformat_number = 0;
-
-ifstream* CovIBUListFile::read(const char* filename, CovIBUList& cov, stack<unsigned int>& format_seq) {
-
-	ifstream* f = CovIUListFile::read(filename, cov, format_seq);
+	ifstream* f = CovIUList::read(filename, cov, format_seq);
 
 	size_t nb_boundary;
 
@@ -96,7 +95,7 @@ ifstream* CovIBUListFile::read(const char* filename, CovIBUList& cov, stack<unsi
 	}
 
 	if (nb_boundary  > cov.CovIUList::nb_unknown())
-		ibex_error("[CovIBUListFile]: number of boundary boxes > number of CovIUList unknown boxes!");
+		ibex_error("[CovIBUList]: number of boundary boxes > number of CovIUList unknown boxes!");
 
 	unsigned int indices[nb_boundary];
 	for (size_t i=0; i<nb_boundary; i++) {
@@ -112,7 +111,7 @@ ifstream* CovIBUListFile::read(const char* filename, CovIBUList& cov, stack<unsi
 
 		if (i2<nb_boundary && i==indices[i2]) {
 			if (!cov.CovIUList::is_unknown(i))
-				ibex_error("[CovIBUListFile]: a boundary box must be a CovIUList unknown box.");
+				ibex_error("[CovIBUList]: a boundary box must be a CovIUList unknown box.");
 			cov._IBU_boundary.push_back(cov.vec[i]);
 			cov._IBU_status.push_back(CovIBUList::BOUNDARY);
 			i2++;
@@ -128,20 +127,20 @@ ifstream* CovIBUListFile::read(const char* filename, CovIBUList& cov, stack<unsi
 		}
 	}
 
-	if (i2<nb_boundary) ibex_error("[CovIBUListFile]: invalid boundary box index.");
+	if (i2<nb_boundary) ibex_error("[CovIBUList]: invalid boundary box index.");
 
 	if (cov.nb_boundary() != nb_boundary)
-		ibex_error("[CovIBUListFile]: number of boundary boxes does not match.");
+		ibex_error("[CovIBUList]: number of boundary boxes does not match.");
 
 	return f;
 }
 
 
-ofstream* CovIBUListFile::write(const char* filename, const CovIBUList& cov, stack<unsigned int>& format_seq) {
+ofstream* CovIBUList::write(const char* filename, const CovIBUList& cov, stack<unsigned int>& format_seq) {
 
 	format_seq.push(subformat_number);
 
-	ofstream* f = CovIUListFile::write(filename, cov, format_seq);
+	ofstream* f = CovIUList::write(filename, cov, format_seq);
 
 	write_int(*f, cov.nb_boundary());
 
@@ -153,10 +152,10 @@ ofstream* CovIBUListFile::write(const char* filename, const CovIBUList& cov, sta
 	return f;
 }
 
-void CovIBUListFile::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+void CovIBUList::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
 	format_seq.push(subformat_number);
 
-	CovIUListFile::format(ss, title, format_seq);
+	CovIUList::format(ss, title, format_seq);
 
 	ss
 	<< space << " - 1 integer:     the number Nb of boundary boxes (<= N-Ni)\n"
@@ -166,7 +165,7 @@ void CovIBUListFile::format(stringstream& ss, const string& title, stack<unsigne
 	<< separator;
 }
 
-string CovIBUListFile::format() {
+string CovIBUList::format() {
 	stringstream ss;
 	stack<unsigned int> format_seq;
 	format(ss, "CovIBUList", format_seq);

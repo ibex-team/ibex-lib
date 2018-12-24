@@ -5,11 +5,12 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 01, 2018
+// Last update : Dec 24, 2018
 //============================================================================
 
 #include "ibex_CovIUList.h"
 
+#include <sstream>
 #include <cassert>
 #include <algorithm>
 
@@ -17,20 +18,24 @@ using namespace std;
 
 namespace ibex {
 
+const unsigned int CovIUList::subformat_level = 2;
+
+const unsigned int CovIUList::subformat_number = 0;
+
 CovIUList::CovIUList(size_t n) : CovList(n) {
 
 }
 
 CovIUList::CovIUList(const char* filename) : CovList((size_t) 0 /* tmp */) {
 	stack<unsigned int> format_seq;
-	ifstream* f = CovIUListFile::read(filename, *this, format_seq);
+	ifstream* f = CovIUList::read(filename, *this, format_seq);
 	f->close();
 	delete f;
 }
 
 void CovIUList::save(const char* filename) const {
 	stack<unsigned int> format_seq;
-	ofstream* of=CovIUListFile::write(filename, *this, format_seq);
+	ofstream* of=CovIUList::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
@@ -67,15 +72,9 @@ ostream& operator<<(ostream& os, const CovIUList& cov) {
 	return os;
 }
 
-//----------------------------------------------------------------------------------------------------
+ifstream* CovIUList::read(const char* filename, CovIUList& cov, stack<unsigned int>& format_seq) {
 
-const unsigned int CovIUListFile::subformat_level = 2;
-
-const unsigned int CovIUListFile::subformat_number = 0;
-
-ifstream* CovIUListFile::read(const char* filename, CovIUList& cov, stack<unsigned int>& format_seq) {
-
-	ifstream* f = CovListFile::read(filename, cov, format_seq);
+	ifstream* f = CovList::read(filename, cov, format_seq);
 
 	if (cov.size()==0) return f;
 
@@ -90,7 +89,7 @@ ifstream* CovIUListFile::read(const char* filename, CovIUList& cov, stack<unsign
 		nb_inner = read_pos_int(*f);
 
 		if (nb_inner  > cov.size())
-			ibex_error("[CovIUListFile]: number of inner boxes exceeds total!");
+			ibex_error("[CovIUList]: number of inner boxes exceeds total!");
 	}
 
 	unsigned int indices[nb_inner];
@@ -114,19 +113,19 @@ ifstream* CovIUListFile::read(const char* filename, CovIUList& cov, stack<unsign
 			cov._IU_status.push_back(CovIUList::UNKNOWN);
 		}
 	}
-	if (i2<nb_inner) ibex_error("[CovIUListFile]: invalid inner box index.");
+	if (i2<nb_inner) ibex_error("[CovIUList]: invalid inner box index.");
 
 	if (cov.nb_inner() != nb_inner)
-		ibex_error("[CovIUListFile]: number of inner boxes does not match");
+		ibex_error("[CovIUList]: number of inner boxes does not match");
 
 	return f;
 }
 
-ofstream* CovIUListFile::write(const char* filename, const CovIUList& cov, stack<unsigned int>& format_seq) {
+ofstream* CovIUList::write(const char* filename, const CovIUList& cov, stack<unsigned int>& format_seq) {
 
 	format_seq.push(subformat_number);
 
-	ofstream* f = CovListFile::write(filename, cov, format_seq);
+	ofstream* f = CovList::write(filename, cov, format_seq);
 
 	write_int(*f, cov.nb_inner());
 
@@ -138,10 +137,10 @@ ofstream* CovIUListFile::write(const char* filename, const CovIUList& cov, stack
 	return f;
 }
 
-void CovIUListFile::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+void CovIUList::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
 	format_seq.push(subformat_number);
 
-	CovListFile::format(ss, title, format_seq);
+	CovList::format(ss, title, format_seq);
 
 	ss
 	<< space << " - 1 integer:     the number Ni of inner boxes (<= N)\n"
@@ -151,7 +150,7 @@ void CovIUListFile::format(stringstream& ss, const string& title, stack<unsigned
 	<< separator;
 }
 
-string CovIUListFile::format() {
+string CovIUList::format() {
 	stringstream ss;
 	stack<unsigned int> format_seq;
 	format(ss, "CovIUList", format_seq);

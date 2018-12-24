@@ -30,7 +30,7 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0),
 		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL),
 		  params(sys.nb_var,BitSet::empty(sys.nb_var),false) /* no forced parameter by default */,
-		  manif(NULL), time(0), old_time(0), nb_cells(0), old_nb_cells(0) {
+		  manif(NULL), time(0), nb_cells(0) {
 
 	assert(sys.box.size()==ctc.nb_var);
 
@@ -86,6 +86,7 @@ void Solver::set_var_names() {
 					var_names.push_back(string(x.name)+'('+to_string(i+1)+','+to_string(j+1)+')');
 			break;
 		}
+		v+=x.dim.size();
 	}
 	manif->var_names = var_names;
 
@@ -130,10 +131,10 @@ void Solver::start(const IntervalVector& init_box) {
 	buffer.push(root);
 
 	time = 0;
-	old_time = 0;
+	manif->time =  0;
 
 	nb_cells = 1;
-	old_nb_cells = 0;
+	manif->nb_cells = 0;
 
 	timer.restart();
 }
@@ -149,6 +150,19 @@ void Solver::start(const char* input_paving) {
 	// may erase former variable names if the input paving was actually
 	// not calculated with the same Minibex file.
 	set_var_names();
+
+	// just copy inner, solution and boundary boxes
+	for (size_t i=0; i<data.nb_inner(); i++)
+		manif->add_inner(data.inner(i));
+
+	for (size_t i=0; i<data.nb_solution(); i++)
+		if (m==n)
+			manif->add_solution(data.solution(i), data.unicity(i));
+		else
+			manif->add_solution(data.solution(i), data.unicity(i), data.varset(i));
+
+	for (size_t i=0; i<data.nb_boundary(); i++)
+		manif->add_boundary(data.boundary(i));
 
 	// the unknown and pending boxes have to be processed
 	for (size_t i=0; i<data.CovManifold::nb_unknown(); i++) {
@@ -171,10 +185,10 @@ void Solver::start(const char* input_paving) {
 	}
 
 	time = 0;
-	old_time = data.time;
+	manif->time = data.time;
 
 	nb_cells=0; // no new cell created!
-	old_nb_cells = data.nb_cells;
+	manif->nb_cells = data.nb_cells;
 
 	timer.restart();
 }
@@ -277,7 +291,13 @@ Solver::Status Solver::solve(const char* init_paving) {
 
 Solver::Status Solver::solve() {
 
-	Solver::Status final_status = INFEASIBLE;
+	Solver::Status final_status;
+
+	// initialization...
+	if (manif->nb_inner()==0 && manif->nb_solution()==0 && manif->nb_boundary()==0)
+		final_status = INFEASIBLE;
+	else
+		final_status = SUCCESS;
 
 	Solver::Status status = SUCCESS;
 
@@ -297,9 +317,9 @@ Solver::Status Solver::solve() {
 	timer.stop();
 	time = timer.get_time();
 
-	manif->time = time + old_time;
+	manif->time += time;
 
-	manif->nb_cells = nb_cells + old_nb_cells;
+	manif->nb_cells += nb_cells;
 
 	return status;
 }
@@ -494,6 +514,7 @@ void Solver::report() {
 	cout << "\033[0m" << endl;
 
 	cout << " number of inner boxes:\t\t" << manif->nb_inner() << endl;
+	cout << " number of solution boxes:\t" << manif->nb_solution() << endl;
 	cout << " number of boundary boxes:\t" << manif->nb_boundary() << endl;
 	cout << " number of unknown boxes:\t" << manif->nb_unknown() << endl;
 	cout << " number of pending boxes:\t" << manif->nb_pending() << endl;

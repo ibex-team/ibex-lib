@@ -5,16 +5,13 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 01, 2018
+// Last update : Dec 24, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_LIST_H__
 #define __IBEX_COV_LIST_H__
 
 #include "ibex_Cov.h"
-
-#include <list>
-#include <vector>
 
 namespace ibex {
 
@@ -41,28 +38,16 @@ public:
 	const IntervalVector& operator[](int i) const;
 
 	/**
+	 * \brief Display the format of a CovList file.
+	 */
+	static string format();
+
+	/**
 	 * \brief Number of boxes
 	 */
 	size_t size() const;
 
 protected:
-	std::list<IntervalVector> list;
-	std::vector<IntervalVector*> vec;
-};
-
-
-inline size_t CovList::size() const {
-	return list.size();
-}
-
-std::ostream& operator<<(std::ostream& os, const CovList& cov);
-
-inline const IntervalVector& CovList::operator[](int i) const {
-	return *vec[i];
-}
-
-class CovListFile : public CovFile {
-public:
 	/**
 	 * \brief Read a COV file.
 	 */
@@ -73,10 +58,11 @@ public:
 	 */
 	static std::ofstream* write(const char* filename, const CovList& cov, std::stack<unsigned int>& format_seq);
 
-	/**
-	 * \brief Display the format of a CovList file.
-	 */
-	static string format();
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+
+	static IntervalVector read_box(std::ifstream& f, size_t n);
+
+	static void write_box(std::ofstream& f, const IntervalVector& box);
 
 	/**
 	 * \brief Subformat level.
@@ -88,13 +74,20 @@ public:
 	 */
 	static const unsigned int subformat_number;
 
-protected:
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
-
-	static IntervalVector read_box(std::ifstream& f, size_t n);
-
-	static void write_box(std::ofstream& f, const IntervalVector& box);
+	std::list<IntervalVector> list;
+	std::vector<IntervalVector*> vec;
 };
+
+inline size_t CovList::size() const {
+	return list.size();
+}
+
+std::ostream& operator<<(std::ostream& os, const CovList& cov);
+
+inline const IntervalVector& CovList::operator[](int i) const {
+	return *vec[i];
+}
+
 
 } /* namespace ibex */
 

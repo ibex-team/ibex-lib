@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 01, 2018
+// Last update : Dec 24, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_IBU_LIST_H__
@@ -14,8 +14,6 @@
 #include "ibex_CovIUList.h"
 
 namespace ibex {
-
-class CovIBUListFile;
 
 class CovIBUList : public CovIUList {
 public:
@@ -53,12 +51,40 @@ public:
 	size_t nb_boundary() const;
 
 	size_t nb_unknown() const;
+
+	/**
+	 * \brief Display the format of a CovIBUList file.
+	 */
+	static string format();
+
 protected:
-	friend class CovIBUListFile;
+
+	/**
+	 * \brief Read a COV file.
+	 */
+	static std::ifstream* read(const char* filename, CovIBUList& cov, std::stack<unsigned int>& format_seq);
+
+	/**
+	 * \brief Write a CovIUList into a COV file.
+	 */
+	static std::ofstream* write(const char* filename, const CovIBUList& cov, std::stack<unsigned int>& format_seq);
+
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+
+	/**
+	 * \brief Subformat level.
+	 */
+	static const unsigned int subformat_level;
+
+	/**
+	 * \brief Subformat identifying number.
+	 */
+	static const unsigned int subformat_number;
 
 	std::vector<BoxStatus> _IBU_status;              // status of the ith box
 	std::vector<IntervalVector*>  _IBU_boundary;     // pointer to 'boundary' boxes
 	std::vector<IntervalVector*>  _IBU_unknown;      // pointer to 'unknown' boxes
+
 };
 
 std::ostream& operator<<(std::ostream& os, const CovIBUList& cov);
@@ -90,37 +116,6 @@ inline const IntervalVector& CovIBUList::boundary(int i) const {
 inline const IntervalVector& CovIBUList::unknown(int i) const {
 	return *_IBU_unknown[i];
 }
-
-class CovIBUListFile : public CovIUListFile {
-public:
-	/**
-	 * \brief Read a COV file.
-	 */
-	static std::ifstream* read(const char* filename, CovIBUList& cov, std::stack<unsigned int>& format_seq);
-
-	/**
-	 * \brief Write a CovIUList into a COV file.
-	 */
-	static std::ofstream* write(const char* filename, const CovIBUList& cov, std::stack<unsigned int>& format_seq);
-
-	/**
-	 * \brief Display the format of a CovIBUList file.
-	 */
-	static string format();
-
-	/**
-	 * \brief Subformat level.
-	 */
-	static const unsigned int subformat_level;
-
-	/**
-	 * \brief Subformat identifying number.
-	 */
-	static const unsigned int subformat_number;
-
-protected:
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
-};
 
 } /* namespace ibex */
 

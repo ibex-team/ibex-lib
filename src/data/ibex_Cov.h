@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 21, 2018
+// Last update : Dec 24, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_H__
@@ -13,9 +13,9 @@
 
 #include "ibex_IntervalVector.h"
 
+#include <list>
 #include <vector>
 #include <fstream>
-#include <sstream>
 #include <stack>
 
 namespace ibex {
@@ -37,14 +37,22 @@ public:
 	virtual ~Cov();
 
 	/**
+	 * \brief Display the format of a Cov file.
+	 */
+	static string format();
+
+	/**
+	 * \brief Cover file format version.
+	 */
+	static const uint32_t FORMAT_VERSION;
+
+	/**
 	 * \brief Number of variables
 	 */
 	const size_t n;
 
-};
+protected:
 
-class CovFile {
-public:
 	/**
 	 * \brief Read a COV file.
 	 *
@@ -59,15 +67,23 @@ public:
 	 */
 	static std::ofstream* write(const char* filename, const Cov& cov, std::stack<unsigned int>& format_seq);
 
-	/**
-	 * \brief Display the format of a Cov file.
-	 */
-	static string format();
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
 
-	/**
-	 * \brief Cover file format version.
-	 */
-	static const uint32_t FORMAT_VERSION;
+	static int read_signature(std::ifstream& f);
+
+	static void read_format_seq(std::ifstream& f, std::stack<unsigned int>&);
+
+	static unsigned int read_pos_int(std::ifstream& f);
+
+	static double read_double(std::ifstream& f);
+
+	static void write_signature(std::ofstream& f);
+
+	static void write_format_seq(std::ofstream& f, std::stack<unsigned int>&); // warning: format seq is emptied.
+
+	static void write_int(std::ofstream& f, uint32_t x);
+
+	static void write_double(std::ofstream& f, double x);
 
 	/**
 	 * \brief Subformat level.
@@ -79,23 +95,13 @@ public:
 	 */
 	static const unsigned int subformat_number;
 
-protected:
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
 	static const std::string separator;
+
 	static const std::string space;
 
 	static const size_t SIGNATURE_LENGTH;
+
 	static const char*  SIGNATURE;
-
-	static int read_signature(std::ifstream& f);
-	static void read_format_seq(std::ifstream& f, std::stack<unsigned int>&);
-	static unsigned int read_pos_int(std::ifstream& f);
-	static double read_double(std::ifstream& f);
-
-	static void write_signature(std::ofstream& f);
-	static void write_format_seq(std::ofstream& f, std::stack<unsigned int>&); // warning: format seq is emptied.
-	static void write_int(std::ofstream& f, uint32_t x);
-	static void write_double(std::ofstream& f, double x);
 };
 
 } /* namespace ibex */

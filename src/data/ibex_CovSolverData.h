@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Dec 12, 2018
+// Last update : Dec 24, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_SOLVER_DATA_H__
@@ -14,8 +14,6 @@
 #include "ibex_CovManifold.h"
 
 namespace ibex {
-
-class CovSolverDataFile;
 
 class CovSolverData : public CovManifold {
 public:
@@ -103,13 +101,47 @@ public:
 	 */
 	size_t nb_unknown() const;
 
+	/**
+	 * \brief Display the format of a CovSolverData file.
+	 */
+	static string format();
+
 protected:
-	friend class CovSolverDataFile;
+
+	/**
+	 * \brief Read a COV file.
+	 */
+	static std::ifstream* read(const char* filename, CovSolverData& cov, std::stack<unsigned int>& format_seq);
+
+	/**
+	 * \brief Write a CovSolverData into a COV file.
+	 */
+	static std::ofstream* write(const char* filename, const CovSolverData& cov, std::stack<unsigned int>& format_seq);
+
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+
+	/* read the variable names */
+	static void read_vars(std::ifstream& f, size_t n, std::vector<std::string>& var_names);
+
+	/* write the variable names */
+	static void write_vars(std::ofstream& f, const std::vector<std::string>& var_names);
+
+	/**
+	 * \brief Subformat level.
+	 */
+	static const unsigned int subformat_level;
+
+	/**
+	 * \brief Subformat identifying number.
+	 */
+	static const unsigned int subformat_number;
 
 	std::vector<BoxStatus>        _solver_status;    // status of the ith box
 	std::vector<IntervalVector*>  _solver_pending;
 	std::vector<IntervalVector*>  _solver_unknown;
+
 };
+
 
 std::ostream& operator<<(std::ostream& os, const CovSolverData& solver);
 
@@ -125,7 +157,6 @@ inline const IntervalVector& CovSolverData::unknown(int j) const {
 	return *_solver_unknown[j];
 }
 
-
 inline size_t CovSolverData::nb_pending() const {
 	return _solver_pending.size();
 }
@@ -133,41 +164,6 @@ inline size_t CovSolverData::nb_pending() const {
 inline size_t CovSolverData::nb_unknown() const {
 	return _solver_unknown.size();
 }
-
-
-class CovSolverDataFile : public CovManifoldFile {
-public:
-	static std::ifstream* read(const char* filename, CovSolverData& cov, std::stack<unsigned int>& format_seq);
-
-	/**
-	 * \brief Write a CovSolverData into a COV file.
-	 */
-	static std::ofstream* write(const char* filename, const CovSolverData& cov, std::stack<unsigned int>& format_seq);
-
-	/**
-	 * \brief Display the format of a CovSolverData file.
-	 */
-	static string format();
-
-	/**
-	 * \brief Subformat level.
-	 */
-	static const unsigned int subformat_level;
-
-	/**
-	 * \brief Subformat identifying number.
-	 */
-	static const unsigned int subformat_number;
-
-protected:
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
-
-	/* read the variable names */
-	static void read_vars(std::ifstream& f, size_t n, std::vector<std::string>& var_names);
-
-	/* write the variable names */
-	static void write_vars(std::ofstream& f, const std::vector<std::string>& var_names);
-};
 
 } /* namespace ibex */
 

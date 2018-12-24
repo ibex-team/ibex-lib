@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Dec 12, 2018
+// Last update : Dec 24, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_MANIFOLD_H__
@@ -16,7 +16,6 @@
 
 namespace ibex {
 
-class CovManifoldFile;
 
 /**
  * \ingroup strategy
@@ -151,8 +150,40 @@ public:
 	 */
 	size_t nb_boundary() const;
 
+	/**
+	 * \brief Display the format of a CovManifold file.
+	 */
+	static string format();
+
 protected:
-	friend class CovManifoldFile;
+
+	/**
+	 * \brief Read a COV file.
+	 */
+	static std::ifstream* read(const char* filename, CovManifold& cov, std::stack<unsigned int>& format_seq);
+
+	/**
+	 * \brief Write a CovManifold into a COV file.
+	 */
+	static std::ofstream* write(const char* filename, const CovManifold& cov, std::stack<unsigned int>& format_seq);
+
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+
+	/* read parameters of the parametric proof */
+	static VarSet read_varset(std::ifstream& f, size_t n, size_t m);
+
+	/* write parameters of the parametric proof */
+	static void write_varset(std::ofstream& f, const VarSet& varset);
+
+	/**
+	 * \brief Subformat level.
+	 */
+	static const unsigned int subformat_level;
+
+	/**
+	 * \brief Subformat identifying number.
+	 */
+	static const unsigned int subformat_number;
 
 	std::vector<BoxStatus>        _manifold_status;    // status of the ith box
 	std::vector<IntervalVector*>  _manifold_solution;  // pointer to 'solution' boxes
@@ -164,6 +195,8 @@ protected:
 	// _varset[0][0].
 	std::vector<VarSet>          _manifold_varset;
 };
+
+std::ostream& operator<<(std::ostream& os, const CovManifold& manif);
 
 inline CovManifold::BoxStatus CovManifold::status(int i) const {
 	return _manifold_status[i];
@@ -211,42 +244,6 @@ inline size_t CovManifold::nb_solution() const {
 inline size_t CovManifold::nb_boundary() const {
 	return _manifold_boundary.size();
 }
-
-std::ostream& operator<<(std::ostream& os, const CovManifold& manif);
-
-class CovManifoldFile : public CovIBUListFile {
-public:
-	static std::ifstream* read(const char* filename, CovManifold& cov, std::stack<unsigned int>& format_seq);
-
-	/**
-	 * \brief Write a CovManifold into a COV file.
-	 */
-	static std::ofstream* write(const char* filename, const CovManifold& cov, std::stack<unsigned int>& format_seq);
-
-	/**
-	 * \brief Display the format of a CovManifold file.
-	 */
-	static string format();
-
-	/**
-	 * \brief Subformat level.
-	 */
-	static const unsigned int subformat_level;
-
-	/**
-	 * \brief Subformat identifying number.
-	 */
-	static const unsigned int subformat_number;
-
-protected:
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
-
-	/* read parameters of the parametric proof */
-	static VarSet read_varset(std::ifstream& f, size_t n, size_t m);
-
-	/* write parameters of the parametric proof */
-	static void write_varset(std::ofstream& f, const VarSet& varset);
-};
 
 //class CovRegularBoundaryManifold : public CovManifold {
 //public:

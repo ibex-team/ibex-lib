@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Not 08, 2018
+// Last update : Dec 24, 2018
 //============================================================================
 
 #include "ibex_CovSolverData.h"
@@ -17,12 +17,16 @@ using namespace std;
 
 namespace ibex {
 
+const unsigned int CovSolverData::subformat_level = 5;
+
+const unsigned int CovSolverData::subformat_number = 0;
+
 CovSolverData::CovSolverData(size_t n, size_t m, size_t nb_ineq) : CovManifold(n, m, nb_ineq), solver_status((unsigned int) Solver::SUCCESS /* ? */), time(-1), nb_cells(0) {
 }
 
 CovSolverData::CovSolverData(const char* filename) : CovManifold(n, m, nb_ineq /* tmp */), solver_status((unsigned int) Solver::SUCCESS), time(-1), nb_cells(0) {
 	stack<unsigned int> format_seq;
-	ifstream* f = CovSolverDataFile::read(filename, *this, format_seq);
+	ifstream* f = CovSolverData::read(filename, *this, format_seq);
 	f->close();
 	delete f;
 }
@@ -33,7 +37,7 @@ CovSolverData::~CovSolverData() {
 
 void CovSolverData::save(const char* filename) const {
 	stack<unsigned int> format_seq;
-	ofstream* of=CovSolverDataFile::write(filename, *this, format_seq);
+	ofstream* of=CovSolverData::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
@@ -101,15 +105,9 @@ ostream& operator<<(ostream& os, const CovSolverData& solver) {
 
 }
 
-//----------------------------------------------------------------------------------------------------
+ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, stack<unsigned int>& format_seq) {
 
-const unsigned int CovSolverDataFile::subformat_level = 5;
-
-const unsigned int CovSolverDataFile::subformat_number = 0;
-
-ifstream* CovSolverDataFile::read(const char* filename, CovSolverData& cov, stack<unsigned int>& format_seq) {
-
-	ifstream* f = CovManifoldFile::read(filename, cov, format_seq);
+	ifstream* f = CovManifold::read(filename, cov, format_seq);
 
 	size_t nb_pending;
 
@@ -132,7 +130,7 @@ ifstream* CovSolverDataFile::read(const char* filename, CovSolverData& cov, stac
 		case 2: cov.solver_status = (unsigned int) Solver::NOT_ALL_VALIDATED; break;
 		case 3: cov.solver_status = (unsigned int) Solver::TIME_OUT;          break;
 		case 4: cov.solver_status = (unsigned int) Solver::CELL_OVERFLOW;     break;
-		default: ibex_error("[CovSolverDataFile]: invalid solver status.");
+		default: ibex_error("[CovSolverData]: invalid solver status.");
 		}
 
 		cov.time = read_double(*f);
@@ -142,7 +140,7 @@ ifstream* CovSolverDataFile::read(const char* filename, CovSolverData& cov, stac
 	}
 
 	if (nb_pending > cov.CovManifold::nb_unknown())
-		ibex_error("[CovSolverDataFile]: number of pending boxes > number of CovManifold unknown boxes");
+		ibex_error("[CovSolverData]: number of pending boxes > number of CovManifold unknown boxes");
 
 	unsigned int indices[nb_pending];
 	for (size_t i=0; i<nb_pending; i++) {
@@ -159,7 +157,7 @@ ifstream* CovSolverDataFile::read(const char* filename, CovSolverData& cov, stac
 
 		if (i2<nb_pending && i==indices[i2]) {
 			if (!cov.CovManifold::is_unknown(i))
-				ibex_error("[CovSolverDataFile]: a pending box must be a CovManifold unknown box.");
+				ibex_error("[CovSolverData]: a pending box must be a CovManifold unknown box.");
 			cov._solver_pending.push_back(cov.vec[i]);
 			cov._solver_status.push_back(CovSolverData::PENDING);
 			i2++;
@@ -181,7 +179,7 @@ ifstream* CovSolverDataFile::read(const char* filename, CovSolverData& cov, stac
 		}
 
 	}
-	if (i2<nb_pending) ibex_error("[CovSolverDataFile]: invalid solution box index.");
+	if (i2<nb_pending) ibex_error("[CovSolverData]: invalid solution box index.");
 
 	if (cov.nb_pending() != nb_pending)
 		ibex_error("[CovSolverDataFiile]: number of solution boxes does not match.");
@@ -189,11 +187,11 @@ ifstream* CovSolverDataFile::read(const char* filename, CovSolverData& cov, stac
 	return f;
 }
 
-ofstream* CovSolverDataFile::write(const char* filename, const CovSolverData& cov, stack<unsigned int>& format_seq) {
+ofstream* CovSolverData::write(const char* filename, const CovSolverData& cov, stack<unsigned int>& format_seq) {
 
 	format_seq.push(subformat_number);
 
-	ofstream* f = CovManifoldFile::write(filename, cov, format_seq);
+	ofstream* f = CovManifold::write(filename, cov, format_seq);
 
 	write_vars(*f, cov.var_names);
 	write_int(*f, cov.solver_status);
@@ -209,30 +207,30 @@ ofstream* CovSolverDataFile::write(const char* filename, const CovSolverData& co
 	return f;
 }
 
-void CovSolverDataFile::read_vars(ifstream& f, size_t n, vector<string>& var_names) {
+void CovSolverData::read_vars(ifstream& f, size_t n, vector<string>& var_names) {
 	char x;
 	for (size_t i=0; i<n; i++) {
 		stringstream s;
 		do {
 			f.read(&x, sizeof(char));
-			if (f.eof()) ibex_error("[CovManifoldFile]: unexpected end of file.");
+			if (f.eof()) ibex_error("[CovManifold]: unexpected end of file.");
 			if (x!='\0') s << x;
 		} while(x!='\0');
 		var_names.push_back(s.str());
 	}
 }
 
-void CovSolverDataFile::write_vars(ofstream& f, const vector<string>& var_names) {
+void CovSolverData::write_vars(ofstream& f, const vector<string>& var_names) {
 	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++) {
 		f.write(it->c_str(),it->size()*sizeof(char));
 		f.put('\0');
 	}
 }
 
-void CovSolverDataFile::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+void CovSolverData::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
 	format_seq.push(subformat_number);
 
-	CovManifoldFile::format(ss, title, format_seq);
+	CovManifold::format(ss, title, format_seq);
 
 	ss
 	<< space << " - n strings:      the names of variables. Each string is\n"
@@ -255,7 +253,7 @@ void CovSolverDataFile::format(stringstream& ss, const string& title, stack<unsi
 	<< separator;
 }
 
-string CovSolverDataFile::format() {
+string CovSolverData::format() {
 	stringstream ss;
 	stack<unsigned int> format_seq;
 	format(ss, "CovSolverData", format_seq);
