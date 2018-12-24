@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
 	}
 
 	if (format) {
-		cout << Manifold::format() << endl;
+		cout << CovSolverDataFile::format() << endl;
 		exit(0);
 	}
 
@@ -242,10 +242,7 @@ int main(int argc, char** argv) {
 
 		if (sols) cout << s.get_manifold() << endl;
 
-		if (txt)
-			s.get_manifold().write_txt(output_manifold_file.c_str());
-		else
-			s.get_manifold().write(output_manifold_file.c_str());
+		s.get_manifold().save(output_manifold_file.c_str());
 
 		if (!quiet) {
 			cout << " results written in " << output_manifold_file << "\n";

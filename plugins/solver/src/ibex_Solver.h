@@ -336,7 +336,7 @@ protected:
 	/*
 	 * \brief Solutions found in the current search.
 	 */
-	CovSolverDataFactory* manif_factory;
+	CovSolverData* manif;
 
 	/*
 	 * \brief CPU running time used to obtain this manifold.
@@ -362,6 +362,10 @@ protected:
 };
 
 /*============================================ inline implementation ============================================ */
+
+inline const CovSolverData& Solver::get_manifold() const {
+	return *manif;
+}
 
 
 } // end namespace ibex

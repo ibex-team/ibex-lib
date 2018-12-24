@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 01, 2018
+// Last update : Dec 21, 2018
 //============================================================================
 
 #include "ibex_Cov.h"
@@ -25,15 +25,18 @@ const uint32_t CovFile::FORMAT_VERSION = 1;
 const string CovFile::separator = "+-------------------+-----------------------------------------------------------\n";
 const string CovFile::space     = "|                   |";
 
-Cov::Cov(const CovFactory& fac) : n(fac.n) {
-	fac.build(*this);
-}
-
-Cov::Cov(const char* filename) : Cov(CovFactory(filename)) {
+Cov::Cov(size_t n) : n(n) {
 
 }
 
-void Cov::save(const char* filename) {
+Cov::Cov(const char* filename) : n(0 /* tmp */) {
+	stack<unsigned int> format_seq;
+	ifstream* f = CovFile::read(filename, *this, format_seq);
+	f->close();
+	delete f;
+}
+
+void Cov::save(const char* filename) const {
 	stack<unsigned int> format_seq;
 	ofstream* of=CovFile::write(filename, *this, format_seq);
 	of->close();
@@ -46,28 +49,11 @@ Cov::~Cov() {
 
 //----------------------------------------------------------------------------------------------------
 
-CovFactory::CovFactory() : n(0) { }
-
-CovFactory::CovFactory(size_t n) : n(n) { }
-
-CovFactory::CovFactory(const char* filename) : n(0) {
-	stack<unsigned int> format_seq;
-	ifstream* f = CovFile::read(filename, *this, format_seq);
-	f->close();
-	delete f;
-}
-
-void CovFactory::build(Cov& cov) const {
-	// nothing to do (so far)
-}
-
-//----------------------------------------------------------------------------------------------------
-
 const unsigned int CovFile::subformat_level = 0;
 
 const unsigned int CovFile::subformat_number = 0;
 
-ifstream* CovFile::read(const char* filename, CovFactory& factory, stack<unsigned int>& format_seq) {
+ifstream* CovFile::read(const char* filename, Cov& cov, stack<unsigned int>& format_seq) {
 
 	ifstream* f = new ifstream();
 
@@ -87,7 +73,7 @@ ifstream* CovFile::read(const char* filename, CovFactory& factory, stack<unsigne
 
 	size_t _n = read_pos_int(*f);
 
-	factory.n = _n;
+	(size_t&) cov.n = _n;
 
 	return f;
 }

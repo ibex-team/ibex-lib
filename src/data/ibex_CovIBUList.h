@@ -15,13 +15,13 @@
 
 namespace ibex {
 
-class CovIBUListFactory;
+class CovIBUListFile;
 
 class CovIBUList : public CovIUList {
 public:
 	typedef enum { INNER, BOUNDARY, UNKNOWN } BoxStatus;
 
-	CovIBUList(const CovIBUListFactory&);
+	CovIBUList(size_t n);
 
 	CovIBUList(const char* filename);
 
@@ -30,7 +30,15 @@ public:
 	/**
 	 * \brief Save this as a COV file.
 	 */
-	void save(const char* filename);
+	void save(const char* filename) const;
+
+	virtual void add(const IntervalVector& x);
+
+	virtual void add_inner(const IntervalVector& x);
+
+	virtual void add_unknown(const IntervalVector& x);
+
+	virtual void add_boundary(const IntervalVector& x);
 
 	BoxStatus status(int i) const;
 
@@ -42,18 +50,26 @@ public:
 
 	const IntervalVector& unknown(int i) const;
 
-	const size_t nb_boundary;
+	size_t nb_boundary() const;
 
-	const size_t nb_unknown;
+	size_t nb_unknown() const;
 protected:
-	friend class CovIBUListFactory;
+	friend class CovIBUListFile;
 
-	BoxStatus* _IBU_status;              // status of the ith box
-	IntervalVector**  _IBU_boundary;     // pointer to 'boundary' boxes
-	IntervalVector**  _IBU_unknown;      // pointer to 'unknown' boxes
+	std::vector<BoxStatus> _IBU_status;              // status of the ith box
+	std::vector<IntervalVector*>  _IBU_boundary;     // pointer to 'boundary' boxes
+	std::vector<IntervalVector*>  _IBU_unknown;      // pointer to 'unknown' boxes
 };
 
 std::ostream& operator<<(std::ostream& os, const CovIBUList& cov);
+
+inline size_t CovIBUList::nb_boundary() const {
+	return _IBU_boundary.size();
+}
+
+inline size_t CovIBUList::nb_unknown() const {
+	return _IBU_unknown.size();
+}
 
 inline CovIBUList::BoxStatus CovIBUList::status(int i) const {
 	return _IBU_status[i];
@@ -75,49 +91,12 @@ inline const IntervalVector& CovIBUList::unknown(int i) const {
 	return *_IBU_unknown[i];
 }
 
-class CovIBUListFile;
-
-class CovIBUListFactory : public CovIUListFactory {
-public:
-	CovIBUListFactory(size_t n);
-
-	virtual ~CovIBUListFactory();
-
-	virtual void add_boundary(const IntervalVector& x);
-
-	size_t nb_boundary() const;
-
-	size_t nb_unknown() const;
-
-private:
-	friend class CovIBUList;
-	friend class CovIBUListFile;
-
-	CovIBUListFactory(const char* filename);
-
-	void build(CovIBUList&) const;
-
-	/*
-	 * Indices of boundary boxes.
-	 * Must be a subset of the 'unknown' CovIUList boxes.
-	 */
-	std::vector<unsigned int> boundary;
-};
-
-inline size_t CovIBUListFactory::nb_boundary() const {
-	return boundary.size();
-}
-
-inline size_t CovIBUListFactory::nb_unknown() const {
-	return CovIUListFactory::nb_unknown() - nb_boundary();
-}
-
 class CovIBUListFile : public CovIUListFile {
 public:
 	/**
 	 * \brief Read a COV file.
 	 */
-	static std::ifstream* read(const char* filename, CovIBUListFactory& factory, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovIBUList& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a CovIUList into a COV file.

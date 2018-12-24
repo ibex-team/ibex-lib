@@ -13,11 +13,10 @@
 
 #include "ibex_Cov.h"
 
+#include <list>
 #include <vector>
 
 namespace ibex {
-
-class CovListFactory;
 
 /**
  * \brief Unordered set of boxes
@@ -26,7 +25,7 @@ class CovListFactory;
  */
 class CovList : public Cov {
 public:
-	CovList(const CovListFactory&);
+	CovList(size_t n);
 
 	CovList(const char* filename);
 
@@ -35,54 +34,31 @@ public:
 	/**
 	 * \brief Save this as a COV file.
 	 */
-	void save(const char* filename);
+	void save(const char* filename) const;
 
+	virtual void add(const IntervalVector& x);
 
 	const IntervalVector& operator[](int i) const;
 
 	/**
 	 * \brief Number of boxes
 	 */
-	const size_t size;
+	size_t size() const;
 
 protected:
-	friend class CovListFactory;
-	IntervalVector* list;
+	std::list<IntervalVector> list;
+	std::vector<IntervalVector*> vec;
 };
 
+
+inline size_t CovList::size() const {
+	return list.size();
+}
 
 std::ostream& operator<<(std::ostream& os, const CovList& cov);
 
 inline const IntervalVector& CovList::operator[](int i) const {
-	return list[i];
-}
-
-class CovListFile;
-
-class CovListFactory : protected CovFactory {
-
-public:
-	CovListFactory(size_t n);
-
-	virtual ~CovListFactory();
-
-	virtual void add(const IntervalVector& x);
-
-	size_t nb_boxes() const;
-
-private:
-	friend class CovList;
-	friend class CovListFile;
-
-	CovListFactory(const char* filename);
-
-	void build(CovList&) const;
-
-	std::vector<IntervalVector> boxes;
-};
-
-inline size_t CovListFactory::nb_boxes() const {
-	return boxes.size();
+	return *vec[i];
 }
 
 class CovListFile : public CovFile {
@@ -90,7 +66,7 @@ public:
 	/**
 	 * \brief Read a COV file.
 	 */
-	static std::ifstream* read(const char* filename, CovListFactory& factory, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovList& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a CovList into a COV file.

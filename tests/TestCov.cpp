@@ -12,6 +12,7 @@
 #include "TestCov.h"
 #include "ibex_Cov.h"
 #include "utils.h"
+
 #include <fstream>
 #include <string.h>
 #include <stdlib.h>
@@ -178,7 +179,7 @@ void TestCov::test_cov(Cov& cov) {
 void TestCov::test_covlist(CovList& cov) {
 	test_cov(cov);
 
-	CPPUNIT_ASSERT(cov.size==N);
+	CPPUNIT_ASSERT(cov.size()==N);
 
 	vector<IntervalVector> b=boxes();
 
@@ -191,8 +192,8 @@ void TestCov::test_covlist(CovList& cov) {
 void TestCov::test_covIUlist(CovIUList& cov) {
 	test_covlist(cov);
 
-	CPPUNIT_ASSERT(cov.nb_inner==ni);
-	CPPUNIT_ASSERT(cov.nb_unknown==N-ni);
+	CPPUNIT_ASSERT(cov.nb_inner()==ni);
+	CPPUNIT_ASSERT(cov.nb_unknown()==N-ni);
 
 	for (size_t i=0; i<N; i++) {
 		CPPUNIT_ASSERT((cov.status(i)==CovIUList::INNER && is_inner[i]) ||
@@ -221,8 +222,8 @@ void TestCov::test_covIUlist(CovIUList& cov) {
 void TestCov::test_covIBUlist(CovIBUList& cov) {
 	test_covIUlist(cov);
 
-	CPPUNIT_ASSERT(cov.nb_boundary==nbnd+nsol);
-	CPPUNIT_ASSERT(cov.nb_unknown==nunk+npen);
+	CPPUNIT_ASSERT(cov.nb_boundary()==nbnd+nsol);
+	CPPUNIT_ASSERT(cov.nb_unknown()==nunk+npen);
 
 	for (size_t i=0; i<N; i++) {
 		CPPUNIT_ASSERT(
@@ -255,8 +256,8 @@ void TestCov::test_covManifold(CovManifold& cov) {
 	test_covIBUlist(cov);
 	CPPUNIT_ASSERT(cov.m==m);
 	CPPUNIT_ASSERT(cov.nb_ineq==nb_ineq);
-	CPPUNIT_ASSERT(cov.nb_solution==nsol);
-	CPPUNIT_ASSERT(cov.nb_boundary==nbnd);
+	CPPUNIT_ASSERT(cov.nb_solution()==nsol);
+	CPPUNIT_ASSERT(cov.nb_boundary()==nbnd);
 
 	for (size_t i=0; i<N; i++) {
 		CPPUNIT_ASSERT(
@@ -301,7 +302,7 @@ void TestCov::test_covSolverData(CovSolverData& cov) {
 	CPPUNIT_ASSERT(cov.solver_status == solver_status);
 	CPPUNIT_ASSERT(cov.time == solver_time);
 	CPPUNIT_ASSERT(cov.nb_cells == solver_nb_cells);
-	CPPUNIT_ASSERT(cov.nb_pending == npen);
+	CPPUNIT_ASSERT(cov.nb_pending() == npen);
 
 	vector<IntervalVector> b=boxes();
 
@@ -317,65 +318,62 @@ void TestCov::test_covSolverData(CovSolverData& cov) {
 /*=============================================================================================*/
 
 Cov* TestCov::build_cov() {
-	CovFactory fac(n);
-	return new Cov(fac);
+	return new Cov(n);
 }
 
 CovList* TestCov::build_covlist() {
-	CovListFactory fac(n);// box dimension
+	CovList* cov = new CovList(n);// box dimension
 
 	vector<IntervalVector> b=boxes();
 
 	for (size_t i=0; i<N; i++) {
-		fac.add(b[i]);
+		cov->add(b[i]);
 	}
 
-	return new CovList(fac);
+	return cov;
 }
 
 CovIUList* TestCov::build_covIUlist() {
-	CovIUListFactory fac(n); // box dimension
+	CovIUList* cov = new CovIUList(n); // box dimension
 
 	vector<IntervalVector> b=boxes();
 
 	for (size_t i=0; i<N; i++) {
-		if (is_inner[i]) fac.add_inner(b[i]);
-		else fac.add_unknown(b[i]);
+		if (is_inner[i]) cov->add_inner(b[i]);
+		else cov->add_unknown(b[i]);
 	}
 
-	return new CovIUList(fac);
+	return cov;
 }
 
 CovIBUList* TestCov::build_covIBUlist() {
-	CovIBUListFactory fac(n); // box dimension
+	CovIBUList* cov = new CovIBUList(n); // box dimension
 
 	vector<IntervalVector> b=boxes();
 
 	for (size_t i=0; i<N; i++) {
 		if (is_inner[i])
-			fac.add_inner(b[i]);
+			cov->add_inner(b[i]);
 		else if (is_bnd[i] || is_sol[i])
-			fac.add_boundary(b[i]);
+			cov->add_boundary(b[i]);
 		else
-			fac.add_unknown(b[i]);
+			cov->add_unknown(b[i]);
 	}
 
-	return new CovIBUList(fac);
+	return cov;
 }
 
 CovManifold* TestCov::build_covManifold() {
-	CovManifoldFactory fac(n); // box dimension
-	fac.set_nb_equ(m);
-	fac.set_nb_ineq(nb_ineq);
+	CovManifold* cov = new CovManifold(n, m, nb_ineq); // box dimension
 
 	vector<IntervalVector> b=boxes();
 
 	int nsol=0;
 	for (size_t i=0; i<N; i++) {
 		if (is_inner[i])
-			fac.add_inner(b[i]);
+			cov->add_inner(b[i]);
 		else if (is_bnd[i])
-			fac.add_boundary(b[i]);
+			cov->add_boundary(b[i]);
 		else if (is_sol[i]) {
 			BitSet bitset(n);
 			IntervalVector unicity=b[sol[nsol]];
@@ -383,28 +381,26 @@ CovManifold* TestCov::build_covManifold() {
 
 			for (size_t j=0; j<n-m; j++)
 				bitset.add(varset[nsol][j]);
-			fac.add_solution(b[i], unicity, VarSet(n,bitset,false));
+			cov->add_solution(b[i], unicity, VarSet(n,bitset,false));
 			nsol++;;
 		} else
-			fac.add_unknown(b[i]);
+			cov->add_unknown(b[i]);
 	}
 
-	return new CovManifold(fac);
+	return cov;
 }
 
 CovSolverData* TestCov::build_covSolverData() {
-	CovSolverDataFactory fac(n); // box dimension
-	fac.set_nb_equ(m);
-	fac.set_nb_ineq(nb_ineq);
+	CovSolverData* cov = new CovSolverData(n, m, nb_ineq); // box dimension
 
 	vector<IntervalVector> b=boxes();
 
 	int nsol=0;
 	for (size_t i=0; i<N; i++) {
 		if (is_inner[i])
-			fac.add_inner(b[i]);
+			cov->add_inner(b[i]);
 		else if (is_bnd[i])
-			fac.add_boundary(b[i]);
+			cov->add_boundary(b[i]);
 		else if (is_sol[i]) {
 			BitSet bitset(n);
 			IntervalVector unicity=b[sol[nsol]];
@@ -412,24 +408,24 @@ CovSolverData* TestCov::build_covSolverData() {
 
 			for (size_t j=0; j<n-m; j++)
 				bitset.add(varset[nsol][j]);
-			fac.add_solution(b[i], unicity, VarSet(n,bitset,false));
+			cov->add_solution(b[i], unicity, VarSet(n,bitset,false));
 			nsol++;;
 		} else if (is_pen[i]) {
-			fac.add_pending(b[i]);
+			cov->add_pending(b[i]);
 		} else
-			fac.add_unknown(b[i]);
+			cov->add_unknown(b[i]);
 	}
 
 	vector<string> var_names;
 	for (size_t i=0; i<n; i++)
 		var_names.push_back(solver_var_names[i]);
 
-	fac.set_var_names(var_names);
-	fac.set_time(solver_time);
-	fac.set_status(solver_status);
-	fac.set_nb_cells(solver_nb_cells);
+	cov->var_names = var_names;
+	cov->time = solver_time;
+	cov->solver_status = solver_status;
+	cov->nb_cells = solver_nb_cells;
 
-	return new CovSolverData(fac);
+	return cov;
 }
 
 /*=============================================================================================*/
@@ -490,7 +486,7 @@ void TestCov::read_covlistfile2() {
 
 	CovList cov(filename);
 	test_cov(cov);
-	CPPUNIT_ASSERT(cov.size==0);
+	CPPUNIT_ASSERT(cov.size()==0);
 	free(filename);
 }
 
@@ -534,8 +530,8 @@ void TestCov::read_covIUlistfile2() {
 	CovIUList cov(filename);
 	test_covlist(cov);
 
-	CPPUNIT_ASSERT(cov.nb_inner==0);
-	CPPUNIT_ASSERT(cov.nb_unknown==N);
+	CPPUNIT_ASSERT(cov.nb_inner()==0);
+	CPPUNIT_ASSERT(cov.nb_unknown()==N);
 
 	free(filename);
 }
@@ -579,8 +575,8 @@ void TestCov::read_covIBUlistfile2() {
 
 	CovIBUList cov(filename);
 	test_covIUlist(cov);
-	CPPUNIT_ASSERT(cov.nb_boundary==0);
-	CPPUNIT_ASSERT(cov.nb_unknown==cov.size - cov.nb_inner);
+	CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	CPPUNIT_ASSERT(cov.nb_unknown()==cov.size() - cov.nb_inner());
 	free(filename);
 }
 
@@ -626,8 +622,8 @@ void TestCov::read_covManifoldfile2() {
 	test_covIBUlist(cov);
 	CPPUNIT_ASSERT(cov.m==0);
 	CPPUNIT_ASSERT(cov.nb_ineq==0);
-	CPPUNIT_ASSERT(cov.nb_solution==0);
-	CPPUNIT_ASSERT(cov.nb_boundary==cov.CovIBUList::nb_boundary);
+	CPPUNIT_ASSERT(cov.nb_solution()==0);
+	CPPUNIT_ASSERT(cov.nb_boundary()==cov.CovIBUList::nb_boundary());
 
 	free(filename);
 }
@@ -675,7 +671,7 @@ void TestCov::read_covSolverDatafile2() {
 	CPPUNIT_ASSERT(cov.solver_status == Solver::SUCCESS);
 	CPPUNIT_ASSERT(cov.time == -1);
 	CPPUNIT_ASSERT(cov.nb_cells == 0);
-	CPPUNIT_ASSERT(cov.nb_pending == 0);
+	CPPUNIT_ASSERT(cov.nb_pending() == 0);
 
 	free(filename);
 }

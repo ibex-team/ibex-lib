@@ -10,21 +10,23 @@
 
 #include "ibex_CovManifold.h"
 
+#include <algorithm>
+
 using namespace std;
 
 namespace ibex {
 
-CovManifold::CovManifold(const CovManifoldFactory& fac) : CovIBUList(fac), m(fac.nb_eq), nb_ineq(fac.nb_ineq), nb_solution(0), nb_boundary(0),
-		_manifold_status(NULL), _manifold_solution(NULL), _manifold_boundary(NULL), _unicity(1,1 /*tmp*/), _varset(NULL) {
-
-	fac.build(*this);
+CovManifold::CovManifold(size_t n, size_t m, size_t nb_ineq) : CovIBUList(n), m(m), nb_ineq(nb_ineq) {
 }
 
-CovManifold::CovManifold(const char* filename) : CovManifold(CovManifoldFactory(filename)) {
-
+CovManifold::CovManifold(const char* filename) : CovManifold(0,0,0 /* tmp */) {
+	stack<unsigned int> format_seq;
+	ifstream* f = CovManifoldFile::read(filename, *this, format_seq);
+	f->close();
+	delete f;
 }
 
-void CovManifold::save(const char* filename) {
+void CovManifold::save(const char* filename) const {
 	stack<unsigned int> format_seq;
 	ofstream* of=CovManifoldFile::write(filename, *this, format_seq);
 	of->close();
@@ -32,126 +34,66 @@ void CovManifold::save(const char* filename) {
 }
 
 CovManifold::~CovManifold() {
-	assert(_manifold_status);
 
-	delete[] _manifold_status;
-	delete[] _manifold_solution;
-	delete[] _manifold_boundary;
+}
 
-	if (m<n)
-		for (size_t i=0; i<nb_solution; i++)
-			delete _varset[i];
-	else
-		delete _varset[0];
+void CovManifold::add(const IntervalVector& x) {
+	add_unknown(x);
+}
 
-	delete[] _varset;
+void CovManifold::add_inner(const IntervalVector& x) {
+	CovIBUList::add_inner(x);
+	_manifold_status.push_back(INNER);
+}
+
+void CovManifold::add_boundary(const IntervalVector& x) {
+	CovIBUList::add_boundary(x);
+	_manifold_status.push_back(BOUNDARY);
+	_manifold_boundary.push_back(&list.back());
+}
+
+void CovManifold::add_unknown(const IntervalVector& x) {
+	CovIBUList::add_unknown(x);
+	_manifold_status.push_back(UNKNOWN);
+}
+
+void CovManifold::add_solution(const IntervalVector& existence, const IntervalVector& unicity) {
+	if (m < n)
+		ibex_error("CovManifold: a solution of under-constrained system requires \"VarSet\" structure (parameters/variables)");
+
+	CovIBUList::add_boundary(existence);
+	_manifold_solution.push_back(&list.back());
+	_manifold_unicity.push_back(unicity);
+	_manifold_status.push_back(SOLUTION);
+}
+
+void CovManifold::add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset) {
+	CovIBUList::add_boundary(existence);
+	_manifold_solution.push_back(&list.back());
+	_manifold_unicity.push_back(unicity);
+	_manifold_status.push_back(SOLUTION);
+	_manifold_varset.push_back(varset);
 }
 
 ostream& operator<<(ostream& os, const CovManifold& manif) {
 
-	for (size_t i=0; i<manif.nb_solution; i++) {
+	for (size_t i=0; i<manif.nb_solution(); i++) {
 		os << " solution n°" << (i+1) << " = " << manif.solution(i) << endl;
 	}
 
-	for (size_t i=0; i<manif.nb_inner; i++) {
+	for (size_t i=0; i<manif.nb_inner(); i++) {
 		os << " inner n°" << (i+1) << " = " << manif.inner(i) << endl;
 	}
 
-	for (size_t i=0; i<manif.nb_boundary; i++) {
+	for (size_t i=0; i<manif.nb_boundary(); i++) {
 		os << " boundary n°" << (i+1) << " = " << manif.boundary(i) << endl;
 	}
 
-	for (size_t i=0; i<manif.nb_unknown; i++) {
+	for (size_t i=0; i<manif.nb_unknown(); i++) {
 		os << " unknown n°" << (i+1) << " = " << manif.unknown(i) << endl;
 	}
 
 	return os;
-}
-
-CovManifoldFactory::CovManifoldFactory(size_t n) : CovIBUListFactory(n), nb_eq(0), nb_ineq(0) {
-
-}
-
-CovManifoldFactory::CovManifoldFactory(const char* filename) : CovManifoldFactory((size_t) 0 /* tmp*/) {
-	stack<unsigned int> format_seq;
-	ifstream* f = CovManifoldFile::read(filename, *this, format_seq);
-	f->close();
-	delete f;
-}
-
-CovManifoldFactory::~CovManifoldFactory() {
-}
-
-void CovManifoldFactory::add_solution(const IntervalVector& existence, const IntervalVector& unicity) {
-	if (nb_eq < n)
-		ibex_error("CovManifoldFactory: a solution of under-constrained system requires \"VarSet\" structure (parameters/variables)");
-
-	CovIBUListFactory::add_boundary(existence);
-	this->solution.push_back(nb_boxes()-1);
-	this->unicity.push_back(unicity);
-}
-
-void CovManifoldFactory::add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset) {
-	CovIBUListFactory::add_boundary(existence);
-	this->solution.push_back(nb_boxes()-1);
-	this->unicity.push_back(unicity);
-	this->varset.push_back(varset);
-}
-
-void CovManifoldFactory::build(CovManifold& manif) const {
-	if (nb_eq==0 && nb_ineq==0 && solution.size()>0)
-		ibex_error("[CovManifoldFactoy]: manifold with no equation and no inequality");
-	//assert(manif.nb_inner == nb_inner);
-	//assert(manif.CovIBUList::nb_boundary == nb_boundary);
-	(size_t&) manif.nb_solution = solution.size();
-	(size_t&) manif.nb_boundary = manif.CovIBUList::nb_boundary - manif.nb_solution;
-	manif._manifold_status      = new CovManifold::BoxStatus[manif.size];
-	manif._manifold_solution    = new IntervalVector*[manif.nb_solution];
-	manif._manifold_boundary    = new IntervalVector*[manif.nb_boundary];
-	if (manif.nb_solution>0) // (resize imposes size>0)
-		manif._unicity.resize(manif.nb_solution, manif.n);
-
-	if (manif.m < manif.n)
-		manif._varset               = new VarSet*[manif.nb_solution];
-	else
-		manif._varset               = new VarSet*[1];
-
-	for (size_t i=0; i<manif.size; i++) {
-		switch (manif.CovIBUList::status(i)) {
-		case CovIBUList::INNER:   manif._manifold_status[i]=CovManifold::INNER;   break;
-		case CovIBUList::UNKNOWN: manif._manifold_status[i]=CovManifold::UNKNOWN; break;
-		default :                 manif._manifold_status[i]=CovManifold::BOUNDARY; // by default
-		}
-	}
-
-	for (vector<unsigned int>::const_iterator it=solution.begin(); it!=solution.end(); ++it) {
-		if (manif._manifold_status[*it]!=CovManifold::BOUNDARY)
-			ibex_error("[CovManifoldFactoy]: a solution box cannot be inner or unknown at the same time.");
-		else {
-			manif._manifold_status[*it]=CovManifold::SOLUTION;
-		}
-	}
-
-	size_t jsol=0; // count solution boxes
-	size_t jbo=0;  // count boundary boxes
-
-	if (manif.m >= manif.n)
-		manif._varset[0] = new VarSet(manif.n,BitSet::all(manif.n),true);
-
-	for (size_t i=0; i<manif.size; i++) {
-		if (manif._manifold_status[i]==CovManifold::SOLUTION) {
-			manif._manifold_solution[jsol] = (IntervalVector*) &manif[i];
-			manif._unicity.row(jsol) = unicity[jsol];
-			if (manif.m < manif.n)
-				manif._varset[jsol] = new VarSet(varset[jsol]);
-			jsol++;
-		}
-		else if (manif._manifold_status[i]==CovManifold::BOUNDARY) {
-			manif._manifold_boundary[jbo++]=(IntervalVector*) &manif[i];
-		}
-	}
-	assert(jsol==manif.nb_solution);
-	assert(jbo==manif.nb_boundary);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -160,26 +102,68 @@ const unsigned int CovManifoldFile::subformat_level = 4;
 
 const unsigned int CovManifoldFile::subformat_number = 0;
 
-ifstream* CovManifoldFile::read(const char* filename, CovManifoldFactory& factory, stack<unsigned int>& format_seq) {
+ifstream* CovManifoldFile::read(const char* filename, CovManifold& cov, stack<unsigned int>& format_seq) {
 
-	ifstream* f = CovIBUListFile::read(filename, factory, format_seq);
+	ifstream* f = CovIBUListFile::read(filename, cov, format_seq);
 
-	if (format_seq.empty() || format_seq.top()!=subformat_number) return f;
-	else format_seq.pop();
+	size_t nb_solution;
 
-	factory.nb_eq = read_pos_int(*f);
-	factory.nb_ineq = read_pos_int(*f);
-	size_t nb_solution = read_pos_int(*f);
+	if (format_seq.empty() || format_seq.top()!=subformat_number) {
+		(size_t&) cov.m = 0;
+		(size_t&) cov.nb_ineq = 0;
+		nb_solution = 0;
+	}
+	else {
+		format_seq.pop();
+		(size_t&) cov.m = read_pos_int(*f);
+		(size_t&) cov.nb_ineq = read_pos_int(*f);
+		nb_solution = read_pos_int(*f);
+	}
 
-	if (nb_solution > factory.nb_boundary())
+	if (nb_solution > cov.CovIBUList::nb_boundary())
 		ibex_error("[CovManifoldFile]: number of solutions > number of CovIBUList boundary boxes");
 
+	unsigned int indices[nb_solution];
 	for (size_t i=0; i<nb_solution; i++) {
-		factory.solution.push_back(read_pos_int(*f));
-		if (factory.nb_eq < factory.n)
-			factory.varset.push_back(read_varset(*f, factory.n, factory.nb_eq));
-		factory.unicity.push_back(read_box(*f, factory.n));
+		indices[i]=read_pos_int(*f);
+		if (cov.m < cov.n)
+			cov._manifold_varset.push_back(read_varset(*f, cov.n, cov.m));
+		cov._manifold_unicity.push_back(read_box(*f, cov.n));
 	}
+
+	if (nb_solution>0)
+		sort(indices,indices+nb_solution);
+
+
+	size_t i2=0; // counter of solution boxes
+
+	for (size_t i=0; i<cov.size(); i++) {
+
+		if (i2<nb_solution && i==indices[i2]) {
+			if (!cov.CovIBUList::is_boundary(i))
+				ibex_error("[CovManifoldFile]: a solution box must be a CovIBUList boundary box.");
+			cov._manifold_solution.push_back(cov.vec[i]);
+			cov._manifold_status.push_back(CovManifold::SOLUTION);
+			i2++;
+		} else {
+			switch(cov.CovIBUList::status(i)) {
+			case CovIBUList::INNER :
+				cov._manifold_status.push_back(CovManifold::INNER);
+				break;
+			case CovIBUList::UNKNOWN :
+				cov._manifold_status.push_back(CovManifold::UNKNOWN);
+				break;
+			default :
+				cov._manifold_boundary.push_back(cov.vec[i]);
+				cov._manifold_status.push_back(CovManifold::BOUNDARY);
+			}
+		}
+	}
+
+	if (i2<nb_solution) ibex_error("[CovManifoldFile]: invalid solution box index.");
+
+	if (cov.nb_solution() != nb_solution)
+		ibex_error("[CovManifoldFiile]: number of solution boxes does not match.");
 
 	return f;
 }
@@ -192,11 +176,11 @@ ofstream* CovManifoldFile::write(const char* filename, const CovManifold& cov, s
 
 	write_int(*f, cov.m);
 	write_int(*f, cov.nb_ineq);
-	write_int(*f, cov.nb_solution);
+	write_int(*f, cov.nb_solution());
 
 	// TODO: a complete scan could be avoided?
 	int j=0;
-	for (size_t i=0; i<cov.size; i++) {
+	for (size_t i=0; i<cov.size(); i++) {
 		if (cov.status(i)==CovManifold::SOLUTION) {
 			write_int(*f, (uint32_t) i);
 			if (cov.m < cov.n) write_varset(*f, cov.varset(j));

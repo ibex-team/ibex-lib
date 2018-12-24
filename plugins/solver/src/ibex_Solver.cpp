@@ -12,7 +12,7 @@
 #include "ibex_Newton.h"
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_LinearException.h"
-#include "ibex_CovManifold.h"
+#include "ibex_CovSolverData.h"
 
 #include <cassert>
 
@@ -30,7 +30,7 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0),
 		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL),
 		  params(sys.nb_var,BitSet::empty(sys.nb_var),false) /* no forced parameter by default */,
-		  manif_factory(NULL), time(0), old_time(0), nb_cells(0), old_nb_cells(0) {
+		  manif(NULL), time(0), old_time(0), nb_cells(0), old_nb_cells(0) {
 
 	assert(sys.box.size()==ctc.nb_var);
 
@@ -87,7 +87,7 @@ void Solver::set_var_names() {
 			break;
 		}
 	}
-	manif_factory->set_var_names(var_names);
+	manif->var_names = var_names;
 
 	assert(v==sys.nb_var);
 }
@@ -104,18 +104,16 @@ Solver::~Solver() {
 		}
 	}
 
-	if (manif_factory) delete manif_factory;
+	if (manif) delete manif;
 }
 
 void Solver::start(const IntervalVector& init_box) {
 
 	buffer.flush();
 
-	if (manif_factory) delete manif_factory;
+	if (manif) delete manif;
 
-	manif_factory = new CovSolverDataFactory(n);
-	manif_factory->set_nb_equ(m);
-	manif_factory->set_nb_ineq(nb_ineq);
+	manif = new CovSolverData(n, m, nb_ineq);
 
 	set_var_names();
 
@@ -143,10 +141,8 @@ void Solver::start(const IntervalVector& init_box) {
 void Solver::start(const char* input_paving) {
 	buffer.flush();
 
-	if (manif_factory) delete manif_factory;
-	manif_factory = new CovSolverDataFactory(n);
-	manif_factory->set_nb_equ(m);
-	manif_factory->set_nb_ineq(nb_ineq);
+	if (manif) delete manif;
+	manif = new CovSolverData(n, m, nb_ineq);
 
 	CovSolverData data(input_paving);
 
@@ -155,7 +151,7 @@ void Solver::start(const char* input_paving) {
 	set_var_names();
 
 	// the unknown and pending boxes have to be processed
-	for (size_t i=0; i<data.CovManifold::nb_unknown; i++) {
+	for (size_t i=0; i<data.CovManifold::nb_unknown(); i++) {
 
 		const IntervalVector& box=data.CovManifold::unknown(i);
 
@@ -247,7 +243,7 @@ Solver::Status Solver::next() {
 				CovSolverData::BoxStatus status=check_sol(c->box);
 				if (status==CovSolverData::UNKNOWN) {
 					if (trace >=1) cout << " [unknown] " << c->box << endl;
-					manif_factory->add_unknown(c->box);
+					manif->add_unknown(c->box);
 					delete buffer.pop();
 					return NOT_ALL_VALIDATED;
 				} else {
@@ -296,16 +292,14 @@ Solver::Status Solver::solve() {
 			if (final_status==INFEASIBLE) final_status=SUCCESS;
 	}
 
-	manif_factory->set_status(final_status);
+	manif->solver_status = final_status;
 
 	timer.stop();
 	time = timer.get_time();
 
-	manif_factory->set_time(time);
+	manif->time = time + old_time;
 
-	manif_factory->set_time(time + old_time);
-
-	manif_factory->set_nb_cells(nb_cells + old_nb_cells);
+	manif->nb_cells = nb_cells + old_nb_cells;
 
 	return status;
 }
@@ -340,7 +334,7 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 	if (!eqs) {
 		if (check_ineq(box)) {
 			if (trace >=1) cout << " [inner] " << box << endl;
-			manif_factory->add_inner(box);
+			manif->add_inner(box);
 			return CovSolverData::INNER;
 		} else
 			return CovSolverData::UNKNOWN;
@@ -404,12 +398,12 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 
 		if (solution) {
 			if (trace >=1) cout << " [solution] " << existence << endl;
-			manif_factory->add_solution(existence,unicity,varset);
+			manif->add_solution(existence,unicity,varset);
 			return CovSolverData::SOLUTION;
 		} else {
 			if (is_boundary(existence)) {
 				if (trace >=1) cout << " [boundary] " << existence << endl;
-				manif_factory->add_boundary(existence);
+				manif->add_boundary(existence);
 				return CovSolverData::BOUNDARY;
 			} else
 				return CovSolverData::UNKNOWN;
@@ -478,14 +472,14 @@ void Solver::flush() {
 	while (!buffer.empty()) {
 		Cell* cell=buffer.top();
 		if (trace >=1) cout << " [pending] " << cell->box << endl;
-		manif_factory->add_pending(cell->box);
+		manif->add_pending(cell->box);
 		delete buffer.pop();
 	}
 }
 
 void Solver::report() {
 
-	switch ((Status) manif_factory->status) {
+	switch ((Status) manif->solver_status) {
 	case SUCCESS: cout << "\033[32m" << " solving successful!" << endl;
 	break;
 	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
@@ -499,10 +493,10 @@ void Solver::report() {
 
 	cout << "\033[0m" << endl;
 
-	cout << " number of inner boxes:\t\t" << manif->inner.size() << endl;
-	cout << " number of boundary boxes:\t" << manif->boundary.size() << endl;
-	cout << " number of unknown boxes:\t" << manif->unknown.size() << endl;
-	cout << " number of pending boxes:\t" << manif->pending.size() << endl;
+	cout << " number of inner boxes:\t\t" << manif->nb_inner() << endl;
+	cout << " number of boundary boxes:\t" << manif->nb_boundary() << endl;
+	cout << " number of unknown boxes:\t" << manif->nb_unknown() << endl;
+	cout << " number of pending boxes:\t" << manif->nb_pending() << endl;
 	cout << " cpu time used:\t\t\t" << time << "s";
 	if (manif->time!=time)
 		cout << " [total=" << manif->time << "]";

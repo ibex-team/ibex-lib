@@ -26,6 +26,7 @@
 #include "ibex_CovIBUList.h"
 #include "ibex_CovManifold.h"
 #include "ibex_CovSolverData.h"
+#include "ibex_Solver.h"
 
 using namespace ibex;
 

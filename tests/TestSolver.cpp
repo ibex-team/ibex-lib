@@ -15,7 +15,6 @@
 #include "ibex_RoundRobin.h"
 #include "ibex_CellStack.h"
 #include "ibex_CtcHC4.h"
-#include "ibex_Manifold.h"
 
 using namespace std;
 
@@ -50,13 +49,13 @@ void TestSolver::circle1() {
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol1));
+	CPPUNIT_ASSERT(solver.get_manifold().nb_inner()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().inner(0).is_superset(sol1));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==2);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol2));
+	CPPUNIT_ASSERT(solver.get_manifold().nb_inner()==2);
+	CPPUNIT_ASSERT(solver.get_manifold().inner(1).is_superset(sol2));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==false);
@@ -86,8 +85,8 @@ void TestSolver::circle2() {
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown.back().existence().is_superset(sol1));
+	CPPUNIT_ASSERT(solver.get_manifold().nb_unknown()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().unknown(0).is_superset(sol1));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==false);
@@ -125,13 +124,13 @@ void TestSolver::circle3() {
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown.back().existence().is_superset(sol1));
+	CPPUNIT_ASSERT(solver.get_manifold().nb_unknown()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().unknown(0).is_superset(sol1));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol2));
+	CPPUNIT_ASSERT(solver.get_manifold().nb_inner()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().inner(0).is_superset(sol2));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==false);
@@ -176,13 +175,13 @@ void TestSolver::circle4() {
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol1));
+	CPPUNIT_ASSERT(solver.get_manifold().nb_inner()==1);
+	CPPUNIT_ASSERT(solver.get_manifold().inner(0).is_superset(sol1));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==2);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol2));
+	CPPUNIT_ASSERT(solver.get_manifold().nb_inner()==2);
+	CPPUNIT_ASSERT(solver.get_manifold().inner(1).is_superset(sol2));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==false);

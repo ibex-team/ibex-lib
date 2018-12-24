@@ -13,7 +13,6 @@
 #include "ibex_ExprOperators.h"
 #include "ibex_DefaultSolver.h"
 #include "ibex_SystemFactory.h"
-#include "ibex_Manifold.h"
 
 using namespace std;
 
@@ -87,9 +86,9 @@ void TestSinc::solve() {
     DefaultSolver solver(sys,1e-7,1e-7);
 	solver.solve(IntervalVector(1,Interval(-100,100)));
 
-    CPPUNIT_ASSERT(solver.get_manifold().inner.size()==2);
-    CPPUNIT_ASSERT(solver.get_manifold().unknown.size()==1);
-    Interval sol=((const IntervalVector&) (solver.get_manifold().inner.back()))[0];
+    CPPUNIT_ASSERT(solver.get_manifold().nb_inner()==2);
+    CPPUNIT_ASSERT(solver.get_manifold().nb_unknown()==1);
+    Interval sol=solver.get_manifold().inner(1)[0];
     CPPUNIT_ASSERT(almost_eq(sin(sol),0.5*sol,1e-6));
 }
 

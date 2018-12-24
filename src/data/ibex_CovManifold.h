@@ -16,13 +16,61 @@
 
 namespace ibex {
 
-class CovManifoldFactory;
+class CovManifoldFile;
 
+/**
+ * \ingroup strategy
+ *
+ * \brief Qualified box (calculated by strategies like ibexsolve/ibexopt).
+ *
+ * Given a system of m equalities f(x)=0 and inequalities g(x)<=0:
+ *
+ * A qualified box ([p],[x]) is INNER only if
+ *
+ *     for all x in [x], for all p in [p]
+ *     g(x,p)<=0                                      (1)
+ *
+ *     for all p in [p] there exists x in [x]
+ *     f(x,p)=0                                       (2)
+ *
+ * When the system is well-constrained (m=n), (2) boils down to:
+ *
+ *     there exists x in [x], f(x)=0
+ *
+ * so that the qualified box is a box containing a solution, according
+ * to the usual meaning.
+ *
+ * A qualified box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
+ * f=0 crosses the inequalities in a "regular" way, the exact definition
+ * of "regular" depending on the boundary_test flag of the solver.
+ * See #Solver::boundary_test_strength.
+ *
+ * When the system is under-constrained, the "solution" box ([x],[p])" may be a
+ * large box (compared to eps-min). The "varset" structure indicates which
+ * components correspond to x and p. It is NULL in case of well-constrained
+ * systems (no parameters) or if m=0 (all parameters).
+
+ * The status is UNKNOWN if the box has been processed (precision eps-min reached)
+ * but nothing could be proven.
+ *
+ * The status is PENDING if the box has not been processed (the search has been
+ * interrupted because of a timeout/memory overflow).
+ *
+ */
 class CovManifold : public CovIBUList {
 public:
+
+	/**
+	 * \brief Possible status of a qualified box.
+	 *
+	 * See above.
+	 */
 	typedef enum { INNER, SOLUTION, BOUNDARY, UNKNOWN } BoxStatus;
 
-	CovManifold(const CovManifoldFactory&);
+	/**
+	 * \brief Create a CovManifold.
+	 */
+	CovManifold(size_t n, size_t m, size_t nb_ineq=0);
 
 	CovManifold(const char* filename);
 
@@ -31,7 +79,23 @@ public:
 	/**
 	 * \brief Save this as a COV file.
 	 */
-	void save(const char* filename);
+	void save(const char* filename) const;
+
+	virtual void add(const IntervalVector& x);
+
+	virtual void add_inner(const IntervalVector& x);
+
+	virtual void add_unknown(const IntervalVector& x);
+
+	virtual void add_boundary(const IntervalVector& x);
+
+	void add_solution(const IntervalVector& existence);
+
+	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
+
+	void add_solution(const IntervalVector& existence, const VarSet& varset);
+
+	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset);
 
 	BoxStatus status(int i) const;
 
@@ -39,12 +103,25 @@ public:
 
 	bool is_boundary(int i) const;
 
+	/**
+	 * \brief Existence box.
+	 *
+	 * Represents the smallest box found enclosing the manifold.
+	 */
 	const IntervalVector& solution(int j) const;
 
+	/**
+	 * \brief Unicity box.
+	 *
+	 * Represents the largest superset of solution(j) found such
+	 * that the solution enclosed is unique.
+	 */
 	const IntervalVector& unicity(int j) const;
 
 	/**
 	 * \brief Certificate of the jth solution.
+	 *
+	 * Variable/Parameter structure used to certify the box.
 	 */
 	const VarSet& varset(int j) const;
 
@@ -67,25 +144,25 @@ public:
 	/**
 	 * \brief Number of solutions.
 	 */
-	const size_t nb_solution;
+	size_t nb_solution() const;
 
 	/**
 	 * \brief Number of boundary boxes.
 	 */
-	const size_t nb_boundary;
+	size_t nb_boundary() const;
 
 protected:
-	friend class CovManifoldFactory;
+	friend class CovManifoldFile;
 
-	BoxStatus*        _manifold_status;    // status of the ith box
-	IntervalVector**  _manifold_solution;  // pointer to 'solution' boxes
-	IntervalVector**  _manifold_boundary;  // pointer to 'boundary' boxes
-	IntervalMatrix    _unicity;            // all the unicity boxes (stored in a matrix)
+	std::vector<BoxStatus>        _manifold_status;    // status of the ith box
+	std::vector<IntervalVector*>  _manifold_solution;  // pointer to 'solution' boxes
+	std::vector<IntervalVector*>  _manifold_boundary;  // pointer to 'boundary' boxes
+	std::vector<IntervalVector>   _manifold_unicity;   // all the unicity boxes
 
 	// in the special case where m=n, there is only one
 	// possible varset, so a unique varset is stored:
 	// _varset[0][0].
-	VarSet**          _varset;
+	std::vector<VarSet>          _manifold_varset;
 };
 
 inline CovManifold::BoxStatus CovManifold::status(int i) const {
@@ -109,90 +186,37 @@ inline const IntervalVector& CovManifold::boundary(int i) const {
 }
 
 inline const IntervalVector& CovManifold::unicity(int j) const {
-	return _unicity[j];
+	return _manifold_unicity[j];
 }
 
 inline const VarSet& CovManifold::varset(int j) const {
 	if (m<n)
-		return *_varset[j];
+		return _manifold_varset[j];
 	else
-		return *_varset[0];
+		return _manifold_varset[0];
 }
 
-class CovManifoldFile;
-
-class CovManifoldFactory : public CovIBUListFactory {
-public:
-	CovManifoldFactory(size_t n);
-
-	virtual ~CovManifoldFactory();
-
-	void add_solution(const IntervalVector& existence);
-
-	void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
-
-	void add_solution(const IntervalVector& existence, const VarSet& varset);
-
-	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset);
-
-	void set_nb_equ(size_t);
-
-	void set_nb_ineq(size_t);
-
-	size_t nb_solution() const;
-
-	size_t nb_boundary() const;
-
-	size_t nb_eq;
-
-	size_t nb_ineq;
-
-private:
-	friend class CovManifold;
-	friend class CovManifoldFile;
-
-	CovManifoldFactory(const char* filename);
-
-	void build(CovManifold&) const;
-
-	/*
-	 * Indices of solution boxes.
-	 * Must be a subset of the 'boundary' CovIBUList boxes.
-	 */
-	std::vector<unsigned int> solution;
-	std::vector<IntervalVector> unicity;
-	std::vector<VarSet> varset;
-};
-
-std::ostream& operator<<(std::ostream& os, const CovManifold& manif);
-
-inline void CovManifoldFactory::set_nb_equ(size_t nb_eq) {
-	this->nb_eq = nb_eq;
-}
-
-inline void CovManifoldFactory::set_nb_ineq(size_t nb_ineq) {
-	this->nb_ineq = nb_ineq;
-}
-
-inline void CovManifoldFactory::add_solution(const IntervalVector& existence) {
+inline void CovManifold::add_solution(const IntervalVector& existence) {
 	add_solution(existence, existence);
 }
 
-inline void CovManifoldFactory::add_solution(const IntervalVector& existence, const VarSet& varset) {
+inline void CovManifold::add_solution(const IntervalVector& existence, const VarSet& varset) {
 	add_solution(existence, existence, varset);
 }
 
-inline size_t CovManifoldFactory::nb_solution() const {
-	return solution.size();
+inline size_t CovManifold::nb_solution() const {
+	return _manifold_solution.size();
 }
 
-inline size_t CovManifoldFactory::nb_boundary() const {
-	return CovIBUListFactory::nb_boundary() - nb_solution();
+inline size_t CovManifold::nb_boundary() const {
+	return _manifold_boundary.size();
 }
+
+std::ostream& operator<<(std::ostream& os, const CovManifold& manif);
 
 class CovManifoldFile : public CovIBUListFile {
 public:
-	static std::ifstream* read(const char* filename, CovManifoldFactory& factory, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovManifold& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a CovManifold into a COV file.

@@ -5,14 +5,13 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 01, 2018
+// Last update : Dec 21, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_H__
 #define __IBEX_COV_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_BoolInterval.h"
 
 #include <vector>
 #include <fstream>
@@ -21,19 +20,17 @@
 
 namespace ibex {
 
-class CovFactory;
-
 class Cov {
 public:
 
-	Cov(const CovFactory&);
+	Cov(const size_t n);
 
 	Cov(const char* filename);
 
 	/**
 	 * \brief Save this as a COV file.
 	 */
-	void save(const char* filename);
+	void save(const char* filename) const;
 
 	//virtual Cov& operator&=(const Cov& set)=0;
 
@@ -44,33 +41,6 @@ public:
 	 */
 	const size_t n;
 
-
-	//	friend class CovFactory;
-
-//	Cov(size_t n);
-};
-
-class CovFile;
-
-class CovFactory {
-public:
-
-	CovFactory();
-
-	CovFactory(size_t n);
-
-	/**
-	 * \brief Number of variables
-	 */
-	size_t n;
-
-private:
-	friend class Cov;
-	friend class CovFile;
-
-	void build(Cov& cov) const;
-
-	CovFactory(const char* filename);
 };
 
 class CovFile {
@@ -80,7 +50,7 @@ public:
 	 *
 	 * format_seq: subformat identifying sequence (in reverse order: last number is Cov::subformat_number).
 	 */
-	static std::ifstream* read(const char* filename, CovFactory& factory, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, Cov& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a Cov into a COV file.

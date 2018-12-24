@@ -11,53 +11,89 @@
 #include "ibex_CovSolverData.h"
 #include "ibex_Solver.h"
 
+#include <algorithm>
+
 using namespace std;
 
 namespace ibex {
 
-CovSolverData::CovSolverData(const CovSolverDataFactory& fac) : CovManifold(fac),
-		solver_status(fac.status), time(fac.time), nb_cells(fac.nb_cells),
-		nb_pending(0), nb_unknown(0), _solver_status(NULL), _solver_pending(NULL), _solver_unknown(NULL) {
-	fac.build(*this);
+CovSolverData::CovSolverData(size_t n, size_t m, size_t nb_ineq) : CovManifold(n, m, nb_ineq), solver_status((unsigned int) Solver::SUCCESS /* ? */), time(-1), nb_cells(0) {
 }
 
-CovSolverData::CovSolverData(const char* filename) : CovSolverData(CovSolverDataFactory(filename)) {
-
+CovSolverData::CovSolverData(const char* filename) : CovManifold(n, m, nb_ineq /* tmp */), solver_status((unsigned int) Solver::SUCCESS), time(-1), nb_cells(0) {
+	stack<unsigned int> format_seq;
+	ifstream* f = CovSolverDataFile::read(filename, *this, format_seq);
+	f->close();
+	delete f;
 }
 
 CovSolverData::~CovSolverData() {
-	assert(_solver_status);
-	delete[] _solver_status;
-	delete[] _solver_pending;
-	delete[] _solver_unknown;
+
 }
 
-void CovSolverData::save(const char* filename) {
+void CovSolverData::save(const char* filename) const {
 	stack<unsigned int> format_seq;
 	ofstream* of=CovSolverDataFile::write(filename, *this, format_seq);
 	of->close();
 	delete of;
 }
 
+
+void CovSolverData::add(const IntervalVector& x) {
+	add_unknown(x);
+}
+
+void CovSolverData::add_inner(const IntervalVector& x) {
+	CovManifold::add_inner(x);
+	_solver_status.push_back(INNER);
+}
+
+void CovSolverData::add_boundary(const IntervalVector& x) {
+	CovManifold::add_boundary(x);
+	_solver_status.push_back(BOUNDARY);
+}
+
+void CovSolverData::add_unknown(const IntervalVector& x) {
+	CovManifold::add_unknown(x);
+	_solver_status.push_back(UNKNOWN);
+	_solver_unknown.push_back(&list.back());
+}
+
+void CovSolverData::add_solution(const IntervalVector& existence, const IntervalVector& unicity) {
+	CovManifold::add_solution(existence, unicity);
+	_solver_status.push_back(SOLUTION);
+}
+
+void CovSolverData::add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset) {
+	CovManifold::add_solution(existence, unicity, varset);
+	_solver_status.push_back(SOLUTION);
+}
+
+void CovSolverData::add_pending(const IntervalVector& x) {
+	CovManifold::add_unknown(x);
+	_solver_status.push_back(PENDING);
+	_solver_pending.push_back(&list.back());
+}
+
 ostream& operator<<(ostream& os, const CovSolverData& solver) {
 
-	for (size_t i=0; i<solver.nb_solution; i++) {
+	for (size_t i=0; i<solver.nb_solution(); i++) {
 		os << " solution n°" << (i+1) << " = " << solver.solution(i) << endl;
 	}
 
-	for (size_t i=0; i<solver.nb_inner; i++) {
+	for (size_t i=0; i<solver.nb_inner(); i++) {
 		os << " inner n°" << (i+1) << " = " << solver.inner(i) << endl;
 	}
 
-	for (size_t i=0; i<solver.nb_boundary; i++) {
+	for (size_t i=0; i<solver.nb_boundary(); i++) {
 		os << " boundary n°" << (i+1) << " = " << solver.boundary(i) << endl;
 	}
 
-	for (size_t i=0; i<solver.nb_unknown; i++) {
+	for (size_t i=0; i<solver.nb_unknown(); i++) {
 		os << " unknown n°" << (i+1) << " = " << solver.unknown(i) << endl;
 	}
 
-	for (size_t i=0; i<solver.nb_pending; i++) {
+	for (size_t i=0; i<solver.nb_pending(); i++) {
 		os << " pending n°" << (i+1) << " = " << solver.pending(i) << endl;
 	}
 
@@ -65,111 +101,90 @@ ostream& operator<<(ostream& os, const CovSolverData& solver) {
 
 }
 
-CovSolverDataFactory::CovSolverDataFactory(size_t n) : CovManifoldFactory(n), status((unsigned int) Solver::SUCCESS /* ? */), time(-1), nb_cells(0) {
-
-}
-
-CovSolverDataFactory::CovSolverDataFactory(const char* filename) : CovSolverDataFactory((size_t) 0 /* tmp*/) {
-	stack<unsigned int> format_seq;
-	ifstream* f = CovSolverDataFile::read(filename, *this, format_seq);
-	f->close();
-	delete f;
-}
-
-CovSolverDataFactory::~CovSolverDataFactory() {
-}
-
-void CovSolverDataFactory::add_pending(const IntervalVector& x) {
-	CovIUListFactory::add_unknown(x);
-	pending.push_back(nb_boxes()-1);
-}
-
-void CovSolverDataFactory::build(CovSolverData& solver) const {
-//	assert(solver.nb_inner == nb_inner);
-//  assert(solver.nb_boundary == nb_boundary);
-//	assert(solver.nb_solution == nb_solution);
-
-	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++)
-		solver.var_names.push_back(*it);
-
-	(size_t&) solver.nb_pending = pending.size();
-	(size_t&) solver.nb_unknown = solver.CovIBUList::nb_unknown - solver.nb_pending;
-	solver._solver_status       = new CovSolverData::BoxStatus[solver.size];
-	solver._solver_pending      = new IntervalVector*[solver.nb_pending];
-	solver._solver_unknown      = new IntervalVector*[solver.nb_unknown];
-
-	for (size_t i=0; i<solver.size; i++) {
-		switch (solver.CovManifold::status(i)) {
-		case CovManifold::INNER:    solver._solver_status[i]=CovSolverData::INNER;   break;
-		case CovManifold::SOLUTION: solver._solver_status[i]=CovSolverData::SOLUTION;   break;
-		case CovManifold::BOUNDARY: solver._solver_status[i]=CovSolverData::BOUNDARY; break;
-		default:                    solver._solver_status[i]=CovSolverData::UNKNOWN; break; // by default
-		}
-	}
-
-	for (vector<unsigned int>::const_iterator it=pending.begin(); it!=pending.end(); ++it) {
-		if (solver._solver_status[*it]!=CovSolverData::UNKNOWN)
-			ibex_error("[CovSolverDataFactoy]: a pending box cannot be inner, boundary or solution.");
-		else {
-			solver._solver_status[*it]=CovSolverData::PENDING;
-		}
-	}
-
-	size_t junk=0; // count unknown boxes
-	size_t jpen=0;  // count pending boxes
-
-	for (size_t i=0; i<solver.size; i++) {
-		if (solver._solver_status[i]==CovSolverData::PENDING) {
-			solver._solver_pending[jpen] = (IntervalVector*) &solver[i];
-			jpen++;
-		}
-		else if (solver._solver_status[i]==CovSolverData::UNKNOWN) {
-			solver._solver_unknown[junk] = (IntervalVector*) &solver[i];
-			junk++;
-		}
-	}
-	assert(junk==solver.nb_unknown);
-	assert(jpen==solver.nb_pending);
-}
-
-
 //----------------------------------------------------------------------------------------------------
 
 const unsigned int CovSolverDataFile::subformat_level = 5;
 
 const unsigned int CovSolverDataFile::subformat_number = 0;
 
-ifstream* CovSolverDataFile::read(const char* filename, CovSolverDataFactory& factory, stack<unsigned int>& format_seq) {
+ifstream* CovSolverDataFile::read(const char* filename, CovSolverData& cov, stack<unsigned int>& format_seq) {
 
-	ifstream* f = CovManifoldFile::read(filename, factory, format_seq);
+	ifstream* f = CovManifoldFile::read(filename, cov, format_seq);
 
-	if (format_seq.empty() || format_seq.top()!=subformat_number) return f;
-	else format_seq.pop();
+	size_t nb_pending;
 
-	read_vars(*f, factory.n, factory.var_names);
+	if (format_seq.empty() || format_seq.top()!=subformat_number) {
+		cov.solver_status = (unsigned int) Solver::SUCCESS;
+		cov.time = -1;
+		cov.nb_cells = 0;
+		nb_pending = 0;
+	}
+	else {
+		format_seq.pop();
 
-	unsigned int status = read_pos_int(*f);
+		read_vars(*f, cov.n, cov.var_names);
 
-	switch (status) {
-	case 0: factory.status = (unsigned int) Solver::SUCCESS;           break;
-	case 1: factory.status = (unsigned int) Solver::INFEASIBLE;        break;
-	case 2: factory.status = (unsigned int) Solver::NOT_ALL_VALIDATED; break;
-	case 3: factory.status = (unsigned int) Solver::TIME_OUT;          break;
-	case 4: factory.status = (unsigned int) Solver::CELL_OVERFLOW;     break;
-	default: ibex_error("[CovSolverDataFile]: invalid solver status.");
+		unsigned int status = read_pos_int(*f);
+
+		switch (status) {
+		case 0: cov.solver_status = (unsigned int) Solver::SUCCESS;           break;
+		case 1: cov.solver_status = (unsigned int) Solver::INFEASIBLE;        break;
+		case 2: cov.solver_status = (unsigned int) Solver::NOT_ALL_VALIDATED; break;
+		case 3: cov.solver_status = (unsigned int) Solver::TIME_OUT;          break;
+		case 4: cov.solver_status = (unsigned int) Solver::CELL_OVERFLOW;     break;
+		default: ibex_error("[CovSolverDataFile]: invalid solver status.");
+		}
+
+		cov.time = read_double(*f);
+		cov.nb_cells = read_pos_int(*f);
+
+		nb_pending = read_pos_int(*f);
 	}
 
-	factory.time = read_double(*f);
-	factory.nb_cells = read_pos_int(*f);
+	if (nb_pending > cov.CovManifold::nb_unknown())
+		ibex_error("[CovSolverDataFile]: number of pending boxes > number of CovManifold unknown boxes");
 
-	size_t nb_pending = read_pos_int(*f);
-
-	if (nb_pending > factory.nb_unknown())
-		ibex_error("[CovSolverDataFile]: number of pending boxes > number of CovIUList unknown boxes");
-
+	unsigned int indices[nb_pending];
 	for (size_t i=0; i<nb_pending; i++) {
-		factory.pending.push_back(read_pos_int(*f));
+		indices[i]=read_pos_int(*f);
 	}
+
+	if (nb_pending>0)
+		sort(indices,indices+nb_pending);
+
+
+	size_t i2=0; // counter of pending boxes
+
+	for (size_t i=0; i<cov.size(); i++) {
+
+		if (i2<nb_pending && i==indices[i2]) {
+			if (!cov.CovManifold::is_unknown(i))
+				ibex_error("[CovSolverDataFile]: a pending box must be a CovManifold unknown box.");
+			cov._solver_pending.push_back(cov.vec[i]);
+			cov._solver_status.push_back(CovSolverData::PENDING);
+			i2++;
+		} else {
+			switch(cov.CovManifold::status(i)) {
+			case CovManifold::INNER :
+				cov._solver_status.push_back(CovSolverData::INNER);
+				break;
+			case CovManifold::SOLUTION :
+				cov._solver_status.push_back(CovSolverData::SOLUTION);
+				break;
+			case CovManifold::BOUNDARY :
+				cov._solver_status.push_back(CovSolverData::BOUNDARY);
+				break;
+			default :
+				cov._solver_unknown.push_back(cov.vec[i]);
+				cov._solver_status.push_back(CovSolverData::UNKNOWN);
+			}
+		}
+
+	}
+	if (i2<nb_pending) ibex_error("[CovSolverDataFile]: invalid solution box index.");
+
+	if (cov.nb_pending() != nb_pending)
+		ibex_error("[CovSolverDataFiile]: number of solution boxes does not match.");
 
 	return f;
 }
@@ -184,10 +199,10 @@ ofstream* CovSolverDataFile::write(const char* filename, const CovSolverData& co
 	write_int(*f, cov.solver_status);
 	write_double(*f, cov.time);
 	write_int(*f, cov.nb_cells);
-	write_int(*f, cov.nb_pending);
+	write_int(*f, cov.nb_pending());
 
 	// TODO: a complete scan could be avoided?
-	for (size_t i=0; i<cov.size; i++) {
+	for (size_t i=0; i<cov.size(); i++) {
 		if (cov.status(i)==CovSolverData::PENDING)
 			write_int(*f, (uint32_t) i);
 	}

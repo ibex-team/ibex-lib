@@ -15,13 +15,13 @@
 
 namespace ibex {
 
-class CovIUListFactory;
+class CovIUListFile;
 
 class CovIUList : public CovList {
 public:
 	typedef enum { INNER, UNKNOWN } BoxStatus;
 
-	CovIUList(const CovIUListFactory&);
+	CovIUList(size_t n);
 
 	CovIUList(const char* filename);
 
@@ -30,7 +30,13 @@ public:
 	/**
 	 * \brief Save this as a COV file.
 	 */
-	void save(const char* filename);
+	void save(const char* filename) const;
+
+	virtual void add_inner(const IntervalVector& x);
+
+	virtual void add_unknown(const IntervalVector& x);
+
+	virtual void add(const IntervalVector& x);
 
 	BoxStatus status(int i) const;
 
@@ -56,19 +62,19 @@ public:
 	/**
 	 * \brief Number of inner boxes
 	 */
-	const size_t nb_inner;
+	size_t nb_inner() const;
 
 	/**
 	 * \brief Number of unknown boxes
 	 */
-	const size_t nb_unknown;
+	size_t nb_unknown() const;
 
 protected:
-	friend class CovIUListFactory;
+	friend class CovIUListFile;
 
-	BoxStatus* _IU_status;         // status of the ith box
-	IntervalVector** _IU_inner;    // pointers to other 'inner' boxes
-	IntervalVector** _IU_unknown;  // pointers to other 'unknown' boxes
+	std::vector<BoxStatus> _IU_status;         // status of the ith box
+	std::vector<IntervalVector*> _IU_inner;    // pointers to other 'inner' boxes
+	std::vector<IntervalVector*> _IU_unknown;  // pointers to other 'unknown' boxes
 };
 
 std::ostream& operator<<(std::ostream& os, const CovIUList& cov);
@@ -93,39 +99,12 @@ inline const IntervalVector& CovIUList::unknown(int j) const {
 	return *_IU_unknown[j];
 }
 
-class CovIUListFile;
-
-class CovIUListFactory : public CovListFactory {
-public:
-	CovIUListFactory(size_t n);
-
-	virtual ~CovIUListFactory();
-
-	virtual void add_inner(const IntervalVector& x);
-
-	virtual void add_unknown(const IntervalVector& x);
-
-	size_t nb_inner() const;
-
-	size_t nb_unknown() const;
-
-private:
-	friend class CovIUList;
-	friend class CovIUListFile;
-
-	CovIUListFactory(const char* filename);
-
-	void build(CovIUList&) const;
-
-	std::vector<unsigned int> inner;
-};
-
-inline size_t CovIUListFactory::nb_inner() const {
-	return inner.size();
+inline size_t CovIUList::nb_inner() const {
+	return _IU_inner.size();
 }
 
-inline size_t CovIUListFactory::nb_unknown() const {
-	return nb_boxes() - nb_inner();
+inline size_t CovIUList::nb_unknown() const {
+	return _IU_unknown.size();
 }
 
 class CovIUListFile : public CovListFile {
@@ -133,7 +112,7 @@ public:
 	/**
 	 * \brief Read a COV file.
 	 */
-	static std::ifstream* read(const char* filename, CovIUListFactory& factory, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovIUList& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a CovIUList into a COV file.

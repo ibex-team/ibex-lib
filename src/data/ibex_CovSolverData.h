@@ -15,13 +15,13 @@
 
 namespace ibex {
 
-class CovSolverDataFactory;
+class CovSolverDataFile;
 
 class CovSolverData : public CovManifold {
 public:
 	typedef enum { INNER, SOLUTION, BOUNDARY, UNKNOWN, PENDING } BoxStatus;
 
-	CovSolverData(const CovSolverDataFactory&);
+	CovSolverData(size_t n, size_t m, size_t nb_ineq=0);
 
 	CovSolverData(const char* filename);
 
@@ -30,7 +30,22 @@ public:
 	/**
 	 * \brief Save this as a COV file.
 	 */
-	void save(const char* filename);
+	void save(const char* filename) const;
+
+	virtual void add(const IntervalVector& x);
+
+	virtual void add_inner(const IntervalVector& x);
+
+	virtual void add_unknown(const IntervalVector& x);
+
+	virtual void add_boundary(const IntervalVector& x);
+
+	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
+
+	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset);
+
+	virtual void add_pending(const IntervalVector& x);
+
 
 	BoxStatus status(int i) const;
 
@@ -79,21 +94,21 @@ public:
 	 *
 	 * By default: 0.
 	 */
-	const size_t nb_pending;
+	size_t nb_pending() const;
 
 	/**
 	 * \brief Number of unknown boxes.
 	 *
 	 * By default: #CovIUList::nb_unknown.
 	 */
-	const size_t nb_unknown;
+	size_t nb_unknown() const;
 
 protected:
-	friend class CovSolverDataFactory;
+	friend class CovSolverDataFile;
 
-	BoxStatus*        _solver_status;    // status of the ith box
-	IntervalVector**  _solver_pending;
-	IntervalVector**  _solver_unknown;
+	std::vector<BoxStatus>        _solver_status;    // status of the ith box
+	std::vector<IntervalVector*>  _solver_pending;
+	std::vector<IntervalVector*>  _solver_unknown;
 };
 
 std::ostream& operator<<(std::ostream& os, const CovSolverData& solver);
@@ -110,85 +125,19 @@ inline const IntervalVector& CovSolverData::unknown(int j) const {
 	return *_solver_unknown[j];
 }
 
-class CovSolverDataFile;
 
-class CovSolverDataFactory : public CovManifoldFactory {
-public:
-	CovSolverDataFactory(size_t n);
-
-	virtual ~CovSolverDataFactory();
-
-	void add_pending(const IntervalVector& x);
-
-	void set_var_names(const std::vector<std::string>&);
-
-	void set_status(unsigned int status);
-
-	void set_time(double time);
-
-	void set_nb_cells(unsigned long nb_cells);
-
-	size_t nb_pending() const;
-
-	size_t nb_unknown() const;
-
-private:
-	friend class CovSolverData;
-	friend class CovSolverDataFile;
-
-	CovSolverDataFactory(const char* filename);
-
-	void build(CovSolverData&) const;
-
-	std::vector<std::string> var_names;
-
-	unsigned int status;
-
-	/*
-	 * \brief CPU running time used to obtain this manifold.
-	 */
-	double time;
-
-	/**
-	 * \brief Number of cells used to obtain this manifold.
-	 */
-	unsigned long nb_cells;
-
-	/*
-	 * Indices of pending boxes.
-	 * Must be a subset of the 'unknown' CovIUList boxes.
-	 */
-	std::vector<unsigned int> pending;
-};
-
-inline void CovSolverDataFactory::set_var_names(const std::vector<std::string>& var_names) {
-	this->var_names = var_names;
+inline size_t CovSolverData::nb_pending() const {
+	return _solver_pending.size();
 }
 
-inline void CovSolverDataFactory::set_status(unsigned int status) {
-	this->status = status;
-}
-
-inline void CovSolverDataFactory::set_time(double time) {
-	this->time = time;
-}
-
-inline void CovSolverDataFactory::set_nb_cells(unsigned long nb_cells) {
-	this->nb_cells = nb_cells;
-}
-
-inline size_t CovSolverDataFactory::nb_pending() const {
-	return pending.size();
-}
-
-inline size_t CovSolverDataFactory::nb_unknown() const {
-	return CovManifoldFactory::nb_unknown() - nb_pending();
+inline size_t CovSolverData::nb_unknown() const {
+	return _solver_unknown.size();
 }
 
 
 class CovSolverDataFile : public CovManifoldFile {
 public:
-	static std::ifstream* read(const char* filename, CovSolverDataFactory& factory, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovSolverData& cov, std::stack<unsigned int>& format_seq);
 
 	/**
 	 * \brief Write a CovSolverData into a COV file.
