@@ -246,12 +246,6 @@ public:
 
 
 protected:
-
-	/**
-	 * \brief Set variable names in the manifold structure.
-	 */
-	void set_var_names();
-
 	/**
 	 * \brief Call "next" until search is over.
 	 */

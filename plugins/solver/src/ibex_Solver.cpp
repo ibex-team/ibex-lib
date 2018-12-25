@@ -63,36 +63,6 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		ibex_warning("Certification not implemented for over-constrained systems ");
 }
 
-void Solver::set_var_names() {
-
-	const System& sys=eqs? *eqs : *ineqs;
-
-	vector<string> var_names;
-	int v=0;
-	for (int s=0; s<sys.args.size(); s++) {
-		const ExprSymbol& x=sys.args[s];
-		switch (x.dim.type()) {
-		case Dim::SCALAR:
-			var_names.push_back(x.name);
-			break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:
-			for (int i=0; i<x.dim.vec_size(); i++)
-				var_names.push_back(string(x.name)+'('+to_string(i+1)+')');
-			break;
-		default: // MATRIX
-			for (int i=0; i<x.dim.nb_rows(); i++)
-				for (int j=0; j<x.dim.nb_cols(); j++)
-					var_names.push_back(string(x.name)+'('+to_string(i+1)+','+to_string(j+1)+')');
-			break;
-		}
-		v+=x.dim.size();
-	}
-	manif->var_names = var_names;
-
-	assert(v==sys.nb_var);
-}
-
 void Solver::set_params(const VarSet& _params) {
 	params=_params;
 }
@@ -116,7 +86,7 @@ void Solver::start(const IntervalVector& init_box) {
 
 	manif = new CovSolverData(n, m, nb_ineq);
 
-	set_var_names();
+	manif->var_names = eqs? eqs->var_names() : ineqs->var_names();
 
 	Cell* root=new Cell(init_box);
 
@@ -149,7 +119,7 @@ void Solver::start(const char* input_paving) {
 
 	// may erase former variable names if the input paving was actually
 	// not calculated with the same Minibex file.
-	set_var_names();
+	manif->var_names = eqs? eqs->var_names() : ineqs->var_names();
 
 	// just copy inner, solution and boundary boxes
 	for (size_t i=0; i<data.nb_inner(); i++)

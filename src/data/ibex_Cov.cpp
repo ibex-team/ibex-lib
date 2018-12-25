@@ -181,7 +181,7 @@ void Cov::format(stringstream& ss, const string& title, stack<unsigned int>& for
 	<< space << "                  followed by the format version number: " << FORMAT_VERSION << "\n"
 	<< space << " - 1 integer:     the subformat level L (=" << format_seq.size()-1 << " in the case of\n"
 	<< space << "                  " << title << ")\n"
-	<< space << " - L integers:    the subformat identifying sequence:\n"
+	<< space << " - L+1 integers:  the subformat identifying sequence:\n"
 	<< space << "                      ";
 	while (!format_seq.empty()) {
 		ss << format_seq.top();

@@ -17,6 +17,7 @@
 #include "ibex_CellBufferOptim.h"
 //#include "ibex_EntailedCtr.h"
 #include "ibex_CtcKhunTucker.h"
+#include "ibex_CovOptimData.h"
 
 namespace ibex {
 
@@ -121,6 +122,15 @@ public:
 	 */
 	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
+	/**
+	 * \brief Continue optimization.
+	 *
+	 * Load intermediate data from a COV file, and continue optimization.
+	 *
+	 * See above for comments on return values.
+	 */
+	Status optimize(const char* cov_file, double obj_init_bound=POS_INFINITY);
+
 	/* =========================== Output ============================= */
 
 	/**
@@ -193,6 +203,11 @@ public:
 	 * \brief Get the absolute precision on the objective obtained after last execution.
 	 */
 	double get_obj_abs_prec() const;
+
+	/**
+	 * \brief Get all optimization data.
+	 */
+	const CovOptimData& get_data() const;
 
 	/* =========================== Settings ============================= */
 
@@ -275,6 +290,20 @@ public:
 
 
 protected:
+	/*
+	 * \brief Initialize the optimizer from a single box.
+	 */
+	void start(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
+
+	/*
+	 * \brief Initialize the optimizer from a COV input file.
+	 */
+	void start(const char* cov_file, double obj_init_bound=POS_INFINITY);
+
+	/**
+	 * \brief Run the optimizer (once started).
+	 */
+	Status optimize();
 
 	/**
 	 * \brief Main procedure for processing a box.
@@ -285,7 +314,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void handle_cell(Cell& c, const IntervalVector& init_box);
+	void handle_cell(Cell& c);
 
 	/**
 	 * \brief Contract and bound procedure for processing a box.
@@ -298,7 +327,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void contract_and_bound(Cell& c, const IntervalVector& init_box);
+	void contract_and_bound(Cell& c);
 
 	/**
 	 * \brief Update the entailed constraint for the current box
@@ -394,6 +423,9 @@ private:
 
 	/** Number of cells pushed into the heap (which passed through the contractors) */
 	size_t nb_cells;
+
+	/** Result. */
+	CovOptimData* cov;
 };
 
 inline Optimizer::Status Optimizer::get_status() const { return status; }
@@ -420,6 +452,11 @@ inline double Optimizer::get_obj_rel_prec() const {
 
 inline double Optimizer::get_obj_abs_prec() const {
 	return loup-uplo;
+}
+
+inline const CovOptimData& Optimizer::get_data() const {
+	if (!cov) ibex_error("[Optimizer] no data (run optimizer first)");
+	return *cov;
 }
 
 //inline std::ostream& operator<<(std::ostream& os, const Optimizer::Status s) {
