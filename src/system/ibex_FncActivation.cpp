@@ -42,6 +42,11 @@ FncActivation::~FncActivation() {
 
 }
 
+Interval FncActivation::eval(const IntervalVector& x) const {
+	assert(_activated.size()==1);
+	return sys.f_ctrs.eval(_activated.begin(), x);
+}
+
 IntervalVector FncActivation::eval_vector(const IntervalVector& x, const BitSet& components) const {
 	return sys.f_ctrs.eval_vector(x, _activated.compose(components));
 }
