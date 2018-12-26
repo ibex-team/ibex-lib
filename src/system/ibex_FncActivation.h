@@ -14,6 +14,7 @@
 
 #include "ibex_System.h"
 #include "ibex_BitSet.h"
+#include "ibex_FncProj.h"
 
 namespace ibex {
 
@@ -22,7 +23,7 @@ namespace ibex {
  *
  * \brief Components of a system function that correspond to activate constraints.
  */
-class FncActivation : public Fnc {
+class FncActivation : public FncProj {
 public:
 	/**
 	 * \brief Build the function.
@@ -35,6 +36,7 @@ public:
 	FncActivation(const System& sys, const Vector& pt, double activation_threshold=1e-6, bool trace=false);
 
 	/**
+<<<<<<< HEAD
 	 * \brief Delete this.
 	 */
 	virtual ~FncActivation();
@@ -57,17 +59,18 @@ public:
 	virtual void jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const;
 
 	/**
+=======
+>>>>>>> origin/develop
 	 * \brief Get the activated constraints
 	 */
 	const BitSet& activated() const;
 
 protected:
-	const System& sys;
-	BitSet _activated;
+	//const System& sys;
 };
 
 inline const BitSet& FncActivation::activated() const {
-	return _activated;
+	return components;
 }
 
 } /* namespace ibex */
