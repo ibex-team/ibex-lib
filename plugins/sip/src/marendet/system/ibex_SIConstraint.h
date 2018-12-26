@@ -1,13 +1,14 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_SIConstraint.h
-// Author      : Antoine Marendet, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : May 4, 2018
-// Last Update : May 4, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_SIConstraint.h
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet, Gilles Chabert
+ * Created     : May 4, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #ifndef __SIP_IBEX_SICONSTRAINT_H__
 #define __SIP_IBEX_SICONSTRAINT_H__
 
@@ -38,16 +39,18 @@ public:
 	/**
 	 * \brief Must be called each time the cache change (i.e. when treating a new node).
 	 **/
-	void loadCache(SIConstraintCache* cache);
-	Interval evaluate(const IntervalVector& box) const;
-	Interval evaluateWithoutCachedValue(const IntervalVector& box) const;
+	//void loadCache(SIConstraintCache* cache);
+	//Interval evaluate(const IntervalVector& box) const;
+	Interval evaluateWithoutCachedValue(const IntervalVector& box, SIConstraintCache& cache) const;
 	Interval evaluate(const IntervalVector &box,
 			const IntervalVector& parameter_box) const;
-	IntervalVector gradient(const IntervalVector& box) const;
+	Interval evaluate(const IntervalVector& box, SIConstraintCache& cache) const;
+	//IntervalVector gradient(const IntervalVector& box) const;
+	IntervalVector gradient(const IntervalVector& box, SIConstraintCache& cache) const;
 	IntervalVector gradient(const IntervalVector& box,
 			const IntervalVector& parameter_box) const;
-	bool isSatisfied(const IntervalVector& box) const;
-	bool isSatisfiedWithoutCachedValues(const IntervalVector& box) const;
+	bool isSatisfied(const IntervalVector& box, SIConstraintCache& cache) const;
+	bool isSatisfiedWithoutCachedValues(const IntervalVector& box, SIConstraintCache& cache) const;
 
 };
 

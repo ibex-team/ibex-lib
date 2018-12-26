@@ -1,13 +1,14 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_SIPSystem.cpp
-// Author      : Antoine Marendet, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : May 4, 2018
-// Last Update : May 4, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_SIPSystem.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet, Gilles Chabert
+ * Created     : May 4, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #include "ibex_SIPSystem.h"
 
 #include "ibex_CmpOp.h"
@@ -21,25 +22,25 @@ using namespace std;
 
 namespace ibex {
 
-SIPSystem* NodeData::sip_system = nullptr;
+//SIPSystem* BxpNodeData::sip_system = nullptr;
 
-long NodeData::id = next_id();
+long BxpNodeData::id = next_id();
 
-NodeData::NodeData() :
-		NodeData(NodeData::sip_system->getInitialNodeCaches()) {
+/*BxpNodeData::BxpNodeData() :
+		BxpNodeData(BxpNodeData::sip_system->getInitialNodeCaches()) {
+}*/
+
+BxpNodeData::BxpNodeData(const vector<SIConstraintCache>& caches) :
+		Bxp(id), init_box(1), sic_constraints_caches(caches), init_sic_constraints_caches(caches) {
 }
 
-NodeData::NodeData(const vector<SIConstraintCache>& caches) :
-		Bxp(id), sic_constraints_caches(caches) {
-}
-
-void NodeData::update(const BoxEvent& event, const BoxProperties& prop) {
+void BxpNodeData::update(const BoxEvent& event, const BoxProperties& prop) {
 	// something should be done here, at least
 	// an up-to-date flag should be set to "false".
 }
 
-Bxp* NodeData::copy(const IntervalVector& box, const BoxProperties& prop) const {
-	return new NodeData(*this);
+Bxp* BxpNodeData::copy(const IntervalVector& box, const BoxProperties& prop) const {
+	return new BxpNodeData(*this);
 }
 
 SIPSystem::SIPSystem(const string& filename, const regex& quantified_regex) :
@@ -76,11 +77,13 @@ double SIPSystem::goal_ub(const IntervalVector& pt) const {
 	return goal_function_->eval(pt).ub();
 }
 
-bool SIPSystem::is_inner(const IntervalVector& pt) const {
+bool SIPSystem::is_inner(const IntervalVector& pt, BxpNodeData& node_data) const {
+	int sic_index = 0;
 	for (const auto& sic : sic_constraints_) {
-		if (sic.evaluateWithoutCachedValue(pt).ub() > 0) {
+		if (sic.evaluateWithoutCachedValue(pt, node_data.sic_constraints_caches[sic_index]).ub() > 0) {
 			return false;
 		}
+		sic_index++;
 	}
 	for (int i = 0; i < normal_constraints_.size() - 1; ++i) {
 		if (normal_constraints_[i].evaluate(pt).ub() > 0) {
@@ -134,11 +137,12 @@ void SIPSystem::extractConstraints() {
 			VarSet tmpVarset(ibex_system_->ctrs[i].f, usedParamSymbols, false);
 			IntervalVector initParamBox = tmpVarset.param_box(ibex_system_->box);
 			initial_parameter_boxes_.emplace_back(initParamBox);
+			int ext_var_dim = newF->nb_var() - initParamBox.size();
 			if (goal_function_ != NULL) {
-				SIConstraint test(newF, varCopy.size() + 1);
+				SIConstraint test(newF, ext_var_dim);
 				sic_constraints_.emplace_back(test);
 			} else {
-				SIConstraint test(newF, varCopy.size());
+				SIConstraint test(newF, ext_var_dim-1);
 				sic_constraints_.emplace_back(test);
 			}
 		}
@@ -212,7 +216,7 @@ IntervalVector SIPSystem::extractInitialBox() const {
 	return tmp.var_box(ibex_system_->box);
 }
 
-vector<SIConstraintCache> SIPSystem::getInitialNodeCaches() {
+vector<SIConstraintCache> SIPSystem::getInitialNodeCaches() const {
 	vector<SIConstraintCache> caches;
 	for (const IntervalVector& parameter_box : initial_parameter_boxes_) {
 		caches.emplace_back(SIConstraintCache(parameter_box));
@@ -220,14 +224,14 @@ vector<SIConstraintCache> SIPSystem::getInitialNodeCaches() {
 	return caches;
 }
 
-void SIPSystem::loadNodeData(NodeData* node_data) {
+/*void SIPSystem::loadBxpNodeData(BxpNodeData* node_data) {
 	node_data_ = node_data;
-	updateNodeData();
+	updateBxpNodeData();
 }
 
-void SIPSystem::updateNodeData() {
+void SIPSystem::updateBxpNodeData() {
 	for (int i = 0; i < sic_constraints_.size(); ++i) {
 		sic_constraints_[i].loadCache(&node_data_->sic_constraints_caches[i]);
 	}
-}
+}*/
 } // end namespace ibex

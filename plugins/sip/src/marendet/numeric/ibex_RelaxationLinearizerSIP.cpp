@@ -1,18 +1,19 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_RelaxationLinearizerSIP.cpp
-// Author      : Antoine Marendet, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : May 4, 2018
-// Last Update : May 4, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_RelaxationLinearizerSIP.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet, Gilles Chabert
+ * Created     : May 4, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #include "ibex_RelaxationLinearizerSIP.h"
 
-#include "main/ibex_utils.h"
-#include "system/ibex_SIConstraint.h"
-#include "system/ibex_SIConstraintCache.h"
+#include "ibex_utils.h"
+#include "ibex_SIConstraint.h"
+#include "ibex_SIConstraintCache.h"
 
 #include "ibex_CmpOp.h"
 #include "ibex_Interval.h"
@@ -31,6 +32,19 @@ RelaxationLinearizerSIP::RelaxationLinearizerSIP(const SIPSystem& system, Corner
 }
 
 int RelaxationLinearizerSIP::linearize(const IntervalVector& box, LPSolver& lp_solver) {
+	ibex_error("RelaxationLinearizerSIP::linearize: called with no box_properties");
+	return -1;
+}
+
+int RelaxationLinearizerSIP::linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) {
+	/*if(box.is_unbounded()) {
+		return -1;
+	}*/
+	BxpNodeData* node_data = (BxpNodeData*) prop[BxpNodeData::id];
+	if(node_data == nullptr) {
+		ibex_error("RelaxationLinearizerSIP::linearize: BxpNodeData must be set");
+	}
+
 	int added_count = 0;
 	box_ = box;
 	setCornersAndAlphas();
@@ -40,8 +54,10 @@ int RelaxationLinearizerSIP::linearize(const IntervalVector& box, LPSolver& lp_s
 	for (const auto& nlc : system_.normal_constraints_) {
 		added_count += linearizeNLC(nlc, lhs, rhs);
 	}
+	int sic_index = 0;
 	for (const auto& sic : system_.sic_constraints_) {
-		added_count += linearizeSIC(sic, lhs, rhs);
+		added_count += linearizeSIC(sic, lhs, rhs, node_data->sic_constraints_caches[sic_index]);
+		sic_index++;
 	}
 	for (int i = 0; i < rhs.size(); ++i) {
 		if (lhs[i].max() < 1e10 && lhs[i].min() > -1e10 && isfinite(lhs[i]) && std::isfinite(rhs[i])) {
@@ -73,10 +89,10 @@ int RelaxationLinearizerSIP::linearizeNLC(const NLConstraint& nlc, std::vector<V
 }
 
 int RelaxationLinearizerSIP::linearizeSIC(const SIConstraint& constraint, std::vector<Vector>& lhs,
-		std::vector<double>& rhs) const {
+		std::vector<double>& rhs, SIConstraintCache& cache) const {
 	int added_count = 0;
 	for (int i = 0; i < alphas_.size(); ++i) {
-		for (const auto& mem_box : constraint.cache_->parameter_caches_) {
+		for (const auto& mem_box : cache.parameter_caches_) {
 			Interval function_value = constraint.evaluate(corners_[i], mem_box.parameter_box.mid());
 			IntervalVector gradient = constraint.gradient(box_, mem_box.parameter_box.mid());
 			double rhs_param = -function_value.lb();
@@ -90,7 +106,7 @@ int RelaxationLinearizerSIP::linearizeSIC(const SIConstraint& constraint, std::v
 			lhs.emplace_back(lhs_param);
 			rhs.emplace_back(rhs_param);
 		}
-		for (const auto& parameter_point : constraint.cache_->best_blankenship_points_) {
+		for (const auto& parameter_point : cache.best_blankenship_points_) {
 			Interval function_value = constraint.evaluate(corners_[i], parameter_point);
 			IntervalVector gradient = constraint.gradient(box_, parameter_point);
 			double rhs_param = -function_value.lb();
