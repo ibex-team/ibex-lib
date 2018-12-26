@@ -15,44 +15,33 @@ using namespace std;
 
 namespace ibex {
 
-FncActivation::FncActivation(const System& sys, const Vector& pt, double activation_threshold, bool trace) : sys(sys), _activated(sys.f_ctrs.image_dim()) {
+namespace {
+
+BitSet get_activated_ctrs(const System& sys, const Vector& pt, double activation_threshold, bool trace) {
+
+	BitSet activated=BitSet::empty(sys.f_ctrs.image_dim());
 
 	BitSet ith=BitSet::empty(sys.f_ctrs.image_dim());
 
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
-		if (sys.ops[i]==EQ) _activated.add(i);
+		if (sys.ops[i]==EQ) activated.add(i);
 		else {
 			ith.add(i);
-
 			// call to eval_vector to avoid component generation
 			if (sys.f_ctrs.eval_vector(pt,ith)[0].mag() < activation_threshold) {
 				if (trace) cout << " activate inequality n°" << i << endl;
-				_activated.add(i);
+				activated.add(i);
 			}
 			ith.remove(i);
 		}
 	}
-
-	(int &) _nb_var = sys.nb_var;
-	(int &) _image_dim = _activated.size();
+	return activated;
 }
 
+} // end namespace
 
-FncActivation::~FncActivation() {
+FncActivation::FncActivation(const System& sys, const Vector& pt, double activation_threshold, bool trace) : FncProj(sys.f_ctrs, get_activated_ctrs(sys, pt, activation_threshold, trace)) {
 
-}
-
-Interval FncActivation::eval(const IntervalVector& x) const {
-	assert(_activated.size()==1);
-	return sys.f_ctrs.eval(_activated.begin(), x);
-}
-
-IntervalVector FncActivation::eval_vector(const IntervalVector& x, const BitSet& components) const {
-	return sys.f_ctrs.eval_vector(x, _activated.compose(components));
-}
-
-void FncActivation::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components, int v) const {
-	sys.f_ctrs.jacobian(x, J, _activated.compose(components),v);
 }
 
 } /* namespace ibex */
