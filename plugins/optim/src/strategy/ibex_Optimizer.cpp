@@ -51,7 +51,7 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
                 				status(SUCCESS),
                 				//kkt(normalized_user_sys),
 						uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
-                				loup_point(n), initial_loup(POS_INFINITY), loup_changed(false),
+                				loup_point(IntervalVector::empty(n)), initial_loup(POS_INFINITY), loup_changed(false),
                                                 time(0), nb_cells(0) {
 
 	if (trace) cout.precision(12);
