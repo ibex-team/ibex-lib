@@ -15,9 +15,19 @@
 
 namespace ibex {
 
+/**
+ *
+ */
 class CovOptimData : public CovList {
 public:
-	CovOptimData(size_t n);
+
+	/**
+	 * Build a new empty COV structure for optimization.
+	 *
+	 * \param n                 - size of boxes
+	 * \param is_extended_space - see #is_extended_space below.
+	 */
+	CovOptimData(size_t n, bool is_extended_space=false);
 
 	CovOptimData(const char* filename);
 
@@ -41,6 +51,17 @@ public:
 	 */
 	std::vector<std::string> var_names;
 
+	/**
+	 * \brief Whether the covered space includes objective values.
+	 *
+	 * If true, n is the dimension of the extended space,
+	 * i.e., nb of variables + 1. Each box contains the
+	 * domain "x" of variables in the (n-1) first components and
+	 * the domain of "f(x)" in the (n-1)^th (last) component.
+	 * Otherwise, n is the dimension of the original space.
+	 */
+	bool is_extended_space;
+
 	/*
 	 * \brief Return status of the last optimization.
 	 *
@@ -61,9 +82,17 @@ public:
 
 	/**
 	 * The point satisfying the constraints corresponding to the loup.
+	 *
+	 * Empty vector if none. If not empty, this box is also the first
+	 * box in the CovList (for consistency reasons, since the list alone
+	 * has to be a covering of the global minimizer).
+	 *
+	 * This box always contains only the original variables values, not
+	 * the objective (regardless of the #is_extended_space flag).
+	 *
 	 * If the loup-finder is rigorous, this point is a (non-degenerated) box.
 	 */
-	const IntervalVector& get_loup_point() const;
+	IntervalVector loup_point;
 
 	/*
 	 * \brief (Cumulated) CPU running time.

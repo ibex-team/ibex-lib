@@ -483,11 +483,21 @@ void Solver::report() {
 
 	cout << "\033[0m" << endl;
 
-	cout << " number of inner boxes:\t\t" << manif->nb_inner() << endl;
-	cout << " number of solution boxes:\t" << manif->nb_solution() << endl;
-	cout << " number of boundary boxes:\t" << manif->nb_boundary() << endl;
-	cout << " number of unknown boxes:\t" << manif->nb_unknown() << endl;
-	cout << " number of pending boxes:\t" << manif->nb_pending() << endl;
+	cout << " number of inner boxes:\t\t";
+	if (manif->nb_inner()==0) cout << "--"; else cout << manif->nb_inner();
+	cout << endl;
+	cout << " number of solution boxes:\t";
+	if (manif->nb_solution()==0) cout << "--"; else cout << manif->nb_solution();
+	cout << endl;
+	cout << " number of boundary boxes:\t";
+	if (manif->nb_boundary()==0) cout << "--"; else cout << manif->nb_boundary();
+	cout << endl;
+	cout << " number of unknown boxes:\t";
+	if (manif->nb_unknown()==0) cout << "--"; else cout << manif->nb_unknown();
+	cout << endl;
+	cout << " number of pending boxes:\t";
+	if (manif->nb_pending()==0) cout << "--"; else cout << manif->nb_pending();
+	cout << endl;
 	cout << " cpu time used:\t\t\t" << time << "s";
 	if (manif->time!=time)
 		cout << " [total=" << manif->time << "]";

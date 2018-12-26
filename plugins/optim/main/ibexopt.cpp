@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
 		// This option certifies feasibility with equalities
 		if (rigor) {
 			if (!quiet)
-				cout << "  rigor mode:\tON\t(feasibility of equalities certified)" << endl;
+				cout << "  rigor mode:\t\tON\t(feasibility of equalities certified)" << endl;
 		}
 
 		if (initial_loup) {
@@ -212,14 +212,14 @@ int main(int argc, char** argv) {
 		// This option limits the search time
 		if (timeout) {
 			if (!quiet)
-				cout << "  timeout:\t" << timeout.Get() << "s" << endl;
+				cout << "  timeout:\t\t" << timeout.Get() << "s" << endl;
 			o.timeout=timeout.Get();
 		}
 
 		// This option prints each better feasible point when it is found
 		if (trace) {
 			if (!quiet)
-				cout << "  trace:\tON" << endl;
+				cout << "  trace:\t\tON" << endl;
 			o.trace=trace.Get();
 		}
 
