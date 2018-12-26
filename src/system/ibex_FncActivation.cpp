@@ -40,22 +40,7 @@ BitSet get_activated_ctrs(const System& sys, const Vector& pt, double activation
 
 } // end namespace
 
-<<<<<<< HEAD
-FncActivation::~FncActivation() {
-
-}
-
-Interval FncActivation::eval(const IntervalVector& x) const {
-	assert(_activated.size()==1);
-	return sys.f_ctrs.eval(_activated.begin(), x);
-}
-
-IntervalVector FncActivation::eval_vector(const IntervalVector& x, const BitSet& components) const {
-	return sys.f_ctrs.eval_vector(x, _activated.compose(components));
-}
-=======
 FncActivation::FncActivation(const System& sys, const Vector& pt, double activation_threshold, bool trace) : FncProj(sys.f_ctrs, get_activated_ctrs(sys, pt, activation_threshold, trace)) {
->>>>>>> origin/develop
 
 }
 

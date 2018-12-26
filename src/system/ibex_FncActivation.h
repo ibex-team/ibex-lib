@@ -36,31 +36,6 @@ public:
 	FncActivation(const System& sys, const Vector& pt, double activation_threshold=1e-6, bool trace=false);
 
 	/**
-<<<<<<< HEAD
-	 * \brief Delete this.
-	 */
-	virtual ~FncActivation();
-
-	/**
-	 * \brief Evaluatin of the function.
-	 *
-	 * In the case of only one constraint is potentially active.
-	 */
-	virtual Interval eval(const IntervalVector& box) const;
-
-	/**
-	 * \brief Evaluation of the function.
-	 */
-	virtual IntervalVector eval_vector(const IntervalVector& x, const BitSet& components) const;
-
-	/**
-	 * \brief Jacobian matrix of the function.
-	 */
-	virtual void jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const;
-
-	/**
-=======
->>>>>>> origin/develop
 	 * \brief Get the activated constraints
 	 */
 	const BitSet& activated() const;
