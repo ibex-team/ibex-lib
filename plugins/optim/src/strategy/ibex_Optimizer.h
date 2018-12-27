@@ -143,7 +143,7 @@ public:
 	 *     <li> total number of cells (~boxes) created during the exploration
 	 * </ul>
 	 */
-	void report(bool verbose=true);
+	void report();
 	
 	/**
 	 * \brief Get the status.

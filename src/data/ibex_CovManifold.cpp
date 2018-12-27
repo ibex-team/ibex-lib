@@ -38,10 +38,6 @@ void CovManifold::save(const char* filename) const {
 	delete of;
 }
 
-CovManifold::~CovManifold() {
-
-}
-
 void CovManifold::add(const IntervalVector& x) {
 	add_unknown(x);
 }

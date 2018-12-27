@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 24, 2018
+// Last update : Dec 27, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_LIST_H__
@@ -16,25 +16,42 @@
 namespace ibex {
 
 /**
- * \brief Unordered set of boxes
+ * \ingroup data
  *
- * The order in which boxes are stored has no meaning.
+ * \brief Covering list.
+ *
+ * Set covering with a list of unordered boxes.
+ *
+ * The order in which boxes are stored is preserved but
+ * has no meaning.
  */
 class CovList : public Cov {
 public:
+	/**
+	 * \brief Create a new, empty covering list.
+	 *
+	 * \param n - the dimension of the covered set.
+	 */
 	CovList(size_t n);
 
+	/**
+	 * \brief Load a list from a COV file.
+	 */
 	CovList(const char* filename);
 
-	virtual ~CovList();
-
 	/**
-	 * \brief Save this as a COV file.
+	 * \brief Save this list as a COV file.
 	 */
 	void save(const char* filename) const;
 
+	/**
+	 * \brief Add a new box at the end of the list.
+	 */
 	virtual void add(const IntervalVector& x);
 
+	/**
+	 * \brief Get the ith box.
+	 */
 	const IntervalVector& operator[](int i) const;
 
 	/**
@@ -49,7 +66,7 @@ public:
 
 protected:
 	/**
-	 * \brief Read a COV file.
+	 * \brief Load a list from a COV file.
 	 */
 	static std::ifstream* read(const char* filename, CovList& cov, std::stack<unsigned int>& format_seq);
 
@@ -78,11 +95,17 @@ protected:
 	std::vector<IntervalVector*> vec;
 };
 
+/**
+ * \brief Stream out a list.
+ */
+std::ostream& operator<<(std::ostream& os, const CovList& cov);
+
+/*================================== inline implementations ========================================*/
+
 inline size_t CovList::size() const {
 	return list.size();
 }
 
-std::ostream& operator<<(std::ostream& os, const CovList& cov);
 
 inline const IntervalVector& CovList::operator[](int i) const {
 	return *vec[i];

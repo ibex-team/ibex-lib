@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
 			"optimization data in the COV (binary) format. See --format", {'o',"output"});
 	args::Flag rigor(parser, "rigor", "Activate rigor mode (certify feasibility of equalities).", {"rigor"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
-	args::Flag format(parser, "format", "Display the output format in quiet mode", {"format"});
-	args::Flag quiet(parser, "quiet", "Print no message and display minimal information (for automatic output processing). See --format.",{'q',"quiet"});
+	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
+	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
 
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
@@ -254,7 +254,8 @@ int main(int argc, char** argv) {
 
 		// Report some information (computation time, etc.)
 
-		o.report(!quiet);
+		if (!quiet)
+			o.report();
 
 		o.get_data().save(output_cov_file.c_str());
 

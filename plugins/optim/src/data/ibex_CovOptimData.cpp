@@ -37,10 +37,6 @@ CovOptimData::CovOptimData(const char* filename) : CovList((size_t) 0 /* tmp */)
 	delete f;
 }
 
-CovOptimData::~CovOptimData() {
-
-}
-
 void CovOptimData::save(const char* filename) const {
 	stack<unsigned int> format_seq;
 	ofstream* of=CovOptimData::write(filename, *this, format_seq);
@@ -175,14 +171,14 @@ void CovOptimData::format(stringstream& ss, const string& title, stack<unsigned 
 	<< space << "                   - 3=unbounded objective\n"
 	<< space << "                   - 4=time out\n"
 	<< space << "                   - 5=unreached precision\n"
-	<< space << " - 1 integer:      1 <=> boxes is a covering of the extended\n"
-	<< space << "                   space (vars+obj), 0 <=> it is a covering\n"
-	<< space << "                   of the orignal space (variables only).\n"
+	<< space << " - 1 integer:      1 <=> covering of the extended space\n"
+	<< space << "                    (vars+obj), 0 <=> covering of the \n"
+	<< space << "                   original space (variables only).\n"
 	<< space << " - 3 real values:  'uplo', 'uplo-of-epsboxes' and 'loup'\n"
 	<< space << "                   'uplo' is the uppest lower bound of f*\n"
 	<< space << "                   'loup' is the lowest upper bound of f*\n"
 	<< space << "                   so we have:       uplo<= f* <=loup.\n"
-	<< space << " - 1 integer:      1 <=> the first box is the 'loup point'"
+	<< space << " - 1 integer:      1 <=> the first box is the 'loup point'\n"
 	<< space << "                   (best feasible point found), possibly\n"
 	<< space << "                   extended (see above). 0 <=> no feasible\n"
 	<< space << "                   point found.\n"

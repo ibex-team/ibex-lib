@@ -1,10 +1,10 @@
 //                                  I B E X                                   
 // File        : ibex_Optimizer.cpp
 // Author      : Gilles Chabert, Bertrand Neveu
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
-// Last Update : December 24, 2012
+// Last Update : Dec 26, 2018
 //============================================================================
 
 #include "ibex_Optimizer.h"
@@ -312,7 +312,7 @@ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 	time=0;
 
 	if (cov) delete cov;
-	cov = new CovOptimData(n+1);
+	cov = new CovOptimData(n+1,true);
 	cov->time = 0;
 	cov->nb_cells = 0;
 
@@ -331,7 +331,7 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 
 	uplo=data.uplo;
 	loup=data.loup;
-	loup_point=data[0].subvector(0,n-1); //<-> get_loup_point();
+	loup_point=data.loup_point;
 	uplo_of_epsboxes=POS_INFINITY;
 
 	nb_cells=0;
@@ -340,7 +340,15 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 
 	for (size_t i=1; i<data.size(); i++) {
 
-		const IntervalVector& box=data[i];
+		IntervalVector box(n+1);
+
+		if (data.is_extended_space)
+			box = data[i];
+		else {
+			box = cart_prod(data[i],Interval::ALL_REALS);
+			ctc.contract(box);
+			if (box.is_empty()) continue;
+		}
 
 		Cell* cell=new Cell(box);
 
@@ -365,10 +373,9 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 	time=0;
 
 	if (cov) delete cov;
-	cov = new CovOptimData(n+1);
+	cov = new CovOptimData(n+1, true);
 	cov->time = data.time;
 	cov->nb_cells = data.nb_cells;
-	//cov->optimizer_status = data.optimizer_status;
 }
 
 Optimizer::Status Optimizer::optimize() {
@@ -397,7 +404,6 @@ Optimizer::Status Optimizer::optimize() {
 				handle_cell(*new_cells.second);
 
 				if (uplo_of_epsboxes == NEG_INFINITY) {
-					cout << " possible infinite minimum " << endl;
 					break;
 				}
 				if (loup_changed) {
@@ -438,12 +444,12 @@ Optimizer::Status Optimizer::optimize() {
 
 		// No solution found and optimization stopped with empty buffer
 		// before the required precision is reached => means infeasible problem
-	 	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && abs_eps_f==0 && rel_eps_f==0)))
+	 	if (uplo_of_epsboxes == NEG_INFINITY)
+	 		status = UNBOUNDED_OBJ;
+	 	else if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && abs_eps_f==0 && rel_eps_f==0)))
 	 		status = INFEASIBLE;
 	 	else if (loup==initial_loup)
 	 		status = NO_FEASIBLE_FOUND;
-	 	else if (uplo_of_epsboxes == NEG_INFINITY)
-	 		status = UNBOUNDED_OBJ;
 	 	else if (get_obj_rel_prec()>rel_eps_f && get_obj_abs_prec()>abs_eps_f)
 	 		status = UNREACHED_PREC;
 	 	else
@@ -464,8 +470,9 @@ Optimizer::Status Optimizer::optimize() {
 
 	cov->time += time;
 	cov->nb_cells += nb_cells;
+	cov->loup_point = loup_point;
 
-	// by convention, the first box is the loup-point.
+	// by convention, the first box has to be the loup-point.
 	cov->add(cart_prod(loup_point,Interval(uplo,loup)));
 
 	while (!buffer.empty()) {
@@ -477,20 +484,7 @@ Optimizer::Status Optimizer::optimize() {
 	return status;
 }
 
-void Optimizer::report(bool verbose) {
-
-	if (!verbose) {
-		cout << get_status() << endl;
-		cout << get_uplo() << ' ' << get_loup() << endl;
-		for (int i=0; i<n; i++) {
-			if (i>0) cout << ' ';
-			cout << get_loup_point()[i].lb();
-			if (loup_finder.rigorous())
-				cout << ' ' << get_loup_point()[i].ub();
-		}
-		cout << endl << get_time() << " " << get_nb_cells() << endl;
-		return;
-	}
+void Optimizer::report() {
 
 	switch(status) {
 	case SUCCESS: cout << "\033[32m" << " optimization successful!" << endl;
@@ -517,7 +511,7 @@ void Optimizer::report(bool verbose) {
 		cout << "\t(best bound)" << endl << endl;
 
 		if (loup==initial_loup)
-			cout << " x* =\t?\n\t(no feasible point found)" << endl;
+			cout << " x* =\t--\n\t(no feasible point found)" << endl;
 		else {
 			if (loup_finder.rigorous())
 				cout << " x* in\t" << loup_point << endl;

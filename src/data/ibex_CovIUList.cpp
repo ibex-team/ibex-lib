@@ -40,10 +40,6 @@ void CovIUList::save(const char* filename) const {
 	delete of;
 }
 
-CovIUList::~CovIUList() {
-
-}
-
 void CovIUList::add_inner(const IntervalVector& x) {
 	CovList::add(x);
 	_IU_status.push_back(INNER);

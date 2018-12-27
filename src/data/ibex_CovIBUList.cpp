@@ -38,10 +38,6 @@ void CovIBUList::save(const char* filename) const	 {
 	delete of;
 }
 
-CovIBUList::~CovIBUList() {
-
-}
-
 void CovIBUList::add(const IntervalVector& x) {
 	add_unknown(x);
 }

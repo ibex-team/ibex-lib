@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 24, 2018
-// Last update : Dec 24, 2018
+// Last update : Dec 27, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_OPTIM_DATA_H__
@@ -16,28 +16,53 @@
 namespace ibex {
 
 /**
+ * \ingroup data
  *
+ * \brief Optimizer (IbexOpt) data.
+ *
+ * The optimizer data is made of a simple list of boxes (note: this may evolve
+ * to an IU/IBU list or manifold covering list in the future) and contain
+ * additional information about the last optimization process.
+ *
+ * The list represents a covering of one global optimizer of a NLP problem.
+ * This NLP problem is usually represented in Ibex by a #System object. This
+ * object is usually built by ibexopt from a Minibex input file.
+ *
+ * Unknown boxes (inherited from the mother class) represent boxes that have
+ * not been processed yet (the search has been interrupted because of a
+ * timeout/memory overflow).
+ *
+ * The list is either n-dimensional, where n is the number of variables of
+ * the original problem, or (n+1)-dimensional. In the latter case, each
+ * box [x] has an extra component which is an enclosure of f([x]) where
+ * f is the objective function.
+ * By default, the list is stored in this 'extended' mode.
+ *
+ * Information about the last optimization include:
+ * - optimizer status
+ * - number of cells
+ * - running time.
  */
 class CovOptimData : public CovList {
 public:
 
 	/**
-	 * Build a new empty COV structure for optimization.
+	 * Build a new empty optimizer data structure.
 	 *
 	 * \param n                 - size of boxes
 	 * \param is_extended_space - see #is_extended_space below.
 	 */
 	CovOptimData(size_t n, bool is_extended_space=false);
 
+	/**
+	 * \brief Load optimizer data from a COV file.
+	 */
 	CovOptimData(const char* filename);
-
-	virtual ~CovOptimData();
 
 	/**
 	 * \brief Save this as a COV file.
 	 */
 	void save(const char* filename) const;
-
 
 	/**
 	 * \brief Display the format of a CovOptimData file.
@@ -111,12 +136,12 @@ public:
 protected:
 
 	/**
-	 * \brief Read a COV file.
+	 * \brief Load optimizer data from a COV file.
 	 */
 	static std::ifstream* read(const char* filename, CovOptimData& cov, std::stack<unsigned int>& format_seq);
 
 	/**
-	 * \brief Write a CovOptimData into a COV file.
+	 * \brief Write optimizer data into a COV file.
 	 */
 	static std::ofstream* write(const char* filename, const CovOptimData& cov, std::stack<unsigned int>& format_seq);
 
@@ -140,6 +165,9 @@ protected:
 
 };
 
+/**
+ * \brief Stream out optimizer data.
+ */
 std::ostream& operator<<(std::ostream& os, const CovOptimData& optim);
 
 } /* namespace ibex */

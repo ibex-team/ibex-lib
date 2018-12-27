@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 24, 2018
+// Last update : Dec 27, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_IBU_LIST_H__
@@ -15,41 +15,96 @@
 
 namespace ibex {
 
+/**
+ * \ingroup data
+ *
+ * \brief Covering IBU list (with Inner, Boundary and Unknown boxes)
+ *
+ * A CovIBUList is a CovIUList where unknown boxes of the mother class
+ * are separated into two groups:
+ * - the 'boundary' boxes: boxes that are known to cross the boundary
+ *   (at least one point in the box belongs to the set and one point
+ *    in the box does not belong to the set).
+ * - the 'unknown' boxes: other boxes (no attached property).
+ */
 class CovIBUList : public CovIUList {
 public:
+
+	/**
+	 * \brief Possible status of boxes in a IBU list.
+	 */
 	typedef enum { INNER, BOUNDARY, UNKNOWN } BoxStatus;
 
+	/**
+	 * \brief Create a new, empty covering IBU list.
+	 *
+	 * \param n - the dimension of the covered set.
+	 */
 	CovIBUList(size_t n);
 
+	/**
+	 * \brief Load a IBU list from a COV file.
+	 */
 	CovIBUList(const char* filename);
-
-	virtual ~CovIBUList();
 
 	/**
 	 * \brief Save this as a COV file.
 	 */
 	void save(const char* filename) const;
 
-	virtual void add(const IntervalVector& x);
-
+	/**
+	 * \brief Add a new 'inner' box at the end of the list.
+	 */
 	virtual void add_inner(const IntervalVector& x);
 
-	virtual void add_unknown(const IntervalVector& x);
-
+	/**
+	 * \brief Add a new 'boundary' box at the end of the list.
+	 */
 	virtual void add_boundary(const IntervalVector& x);
 
+	/**
+	 * \brief Add a new 'unknown' box at the end of the list.
+	 */
+	virtual void add_unknown(const IntervalVector& x);
+
+	/**
+	 * \brief Add a new 'unknown' box at the end of the list.
+	 */
+	virtual void add(const IntervalVector& x);
+
+	/**
+	 * \brief Status of the ith box.
+	 */
 	BoxStatus status(int i) const;
 
+	/**
+	 * \brief Whether the ith box is 'boundary'.
+	 */
 	bool is_boundary(int i) const;
 
+	/**
+	 * \brief Whether the ith box is 'unknown'.
+	 */
 	bool is_unknown(int i) const;
 
+	/**
+	 * \brief Get the ith boundary box.
+	 */
 	const IntervalVector& boundary(int i) const;
 
+	/**
+	 * \brief Get the ith unknown box.
+	 */
 	const IntervalVector& unknown(int i) const;
 
+	/**
+	 * \brief Number of boundary boxes
+	 */
 	size_t nb_boundary() const;
 
+	/**
+	 * \brief Number of unknown boxes
+	 */
 	size_t nb_unknown() const;
 
 	/**
@@ -60,12 +115,12 @@ public:
 protected:
 
 	/**
-	 * \brief Read a COV file.
+	 * \brief Load a IBU list from a COV file.
 	 */
 	static std::ifstream* read(const char* filename, CovIBUList& cov, std::stack<unsigned int>& format_seq);
 
 	/**
-	 * \brief Write a CovIUList into a COV file.
+	 * \brief Write a IBU list into a COV file.
 	 */
 	static std::ofstream* write(const char* filename, const CovIBUList& cov, std::stack<unsigned int>& format_seq);
 
@@ -87,7 +142,12 @@ protected:
 
 };
 
+/**
+ * \brief Stream out a IBU list.
+ */
 std::ostream& operator<<(std::ostream& os, const CovIBUList& cov);
+
+/*================================== inline implementations ========================================*/
 
 inline size_t CovIBUList::nb_boundary() const {
 	return _IBU_boundary.size();

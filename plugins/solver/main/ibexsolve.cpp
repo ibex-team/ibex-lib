@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 			"(intermediate) description of the manifold with boxes in the COV (binary) format.", {'i',"input"});
 	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
 			"description of the manifold with boxes in the COV (binary) format. See --format", {'o',"output"});
-	args::Flag format(parser, "format", "Give a description of the COV format", {"format"});
+	args::Flag format(parser, "format", "Give a description of the COV format used by IbexSolve", {"format"});
 	args::Flag bfs(parser, "bfs", "Perform breadth-first search (instead of depth-first search, by default)", {"bfs"});
 	args::Flag trace(parser, "trace", "Activate trace. \"Solutions\" (output boxes) are displayed as and when they are found.", {"trace"});
 	args::ValueFlag<string> boundary_test_arg(parser, "true|full-rank|half-ball|false", "Boundary test strength. Possible values are:\n"

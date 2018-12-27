@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Dec 24, 2018
+// Last update : Dec 27, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_MANIFOLD_H__
@@ -16,15 +16,14 @@
 
 namespace ibex {
 
-
 /**
  * \ingroup strategy
  *
- * \brief Qualified box (calculated by strategies like ibexsolve/ibexopt).
+ * \brief Covering of a manifold
  *
  * Given a system of m equalities f(x)=0 and inequalities g(x)<=0:
  *
- * A qualified box ([p],[x]) is INNER only if
+ * A box ([p],[x]) is a 'SOLUTION' only if
  *
  *     for all x in [x], for all p in [p]
  *     g(x,p)<=0                                      (1)
@@ -36,7 +35,7 @@ namespace ibex {
  *
  *     there exists x in [x], f(x)=0
  *
- * so that the qualified box is a box containing a solution, according
+ * so that a 'solution' box is a box containing a solution, according
  * to the usual meaning.
  *
  * A qualified box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
@@ -48,69 +47,107 @@ namespace ibex {
  * large box (compared to eps-min). The "varset" structure indicates which
  * components correspond to x and p. It is NULL in case of well-constrained
  * systems (no parameters) or if m=0 (all parameters).
-
- * The status is UNKNOWN if the box has been processed (precision eps-min reached)
- * but nothing could be proven.
- *
- * The status is PENDING if the box has not been processed (the search has been
- * interrupted because of a timeout/memory overflow).
  *
  */
 class CovManifold : public CovIBUList {
 public:
 
 	/**
-	 * \brief Possible status of a qualified box.
+	 * \brief Possible status of a box in a manifold covering.
 	 *
 	 * See above.
 	 */
 	typedef enum { INNER, SOLUTION, BOUNDARY, UNKNOWN } BoxStatus;
 
 	/**
-	 * \brief Create a CovManifold.
+	 * \brief Create an empty manifold covering.
 	 */
 	CovManifold(size_t n, size_t m, size_t nb_ineq=0);
 
+	/**
+	 * \brief Load a manifold covering from a COV file.
+	 */
 	CovManifold(const char* filename);
-
-	virtual ~CovManifold();
 
 	/**
 	 * \brief Save this as a COV file.
 	 */
 	void save(const char* filename) const;
 
+	/**
+	 * \brief Add a new 'unknown' box at the end of the list.
+	 */
 	virtual void add(const IntervalVector& x);
 
+	/**
+	 * \brief Add a new 'inner' box at the end of the list.
+	 */
 	virtual void add_inner(const IntervalVector& x);
 
+	/**
+	 * \brief Add a new 'unknown' box at the end of the list.
+	 */
 	virtual void add_unknown(const IntervalVector& x);
 
+	/**
+	 * \brief Add a new 'boundary' box at the end of the list.
+	 */
 	virtual void add_boundary(const IntervalVector& x);
 
+	/**
+	 * \brief Add a new 'solution' box at the end of the list.
+	 */
 	void add_solution(const IntervalVector& existence);
 
+	/**
+	 * \brief Add a new 'solution' box at the end of the list.
+	 *
+	 * \param unicity - the unicity box. Represents the largest superset
+	 *                  of 'existence' found such that the solution enclosed
+	 *                  is unique.
+	 */
 	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
 
+	/**
+	 * \brief Add a new 'solution' box at the end of the list.
+	 *
+	 * \param varset - indicates which components of the box are parameters
+	 *                 in the proof, and which are variables.
+	 */
 	void add_solution(const IntervalVector& existence, const VarSet& varset);
 
+	/**
+	 * \brief Add a new 'solution' box at the end of the list.
+	 *
+	 * \param unicity - see above.
+	 * \param varset  - see above.
+	 */
 	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset);
 
+	/**
+	 * \brief Status of the ith box.
+	 */
 	BoxStatus status(int i) const;
 
+	/**
+	 * \brief Whether the ith box is 'solution'.
+	 */
 	bool is_solution(int i) const;
 
+	/**
+	 * \brief Whether the ith box is 'boundary'.
+	 */
 	bool is_boundary(int i) const;
 
 	/**
-	 * \brief Existence box.
+	 * \brief Existence box of the jth solution.
 	 *
 	 * Represents the smallest box found enclosing the manifold.
 	 */
 	const IntervalVector& solution(int j) const;
 
 	/**
-	 * \brief Unicity box.
+	 * \brief Unicity box of the jth solution.
 	 *
 	 * Represents the largest superset of solution(j) found such
 	 * that the solution enclosed is unique.
@@ -124,6 +161,9 @@ public:
 	 */
 	const VarSet& varset(int j) const;
 
+	/**
+	 * \brief Get the jth boundary box.
+	 */
 	const IntervalVector& boundary(int j) const;
 
 	/**
@@ -158,12 +198,12 @@ public:
 protected:
 
 	/**
-	 * \brief Read a COV file.
+	 * \brief Load a manifold covering from a COV file.
 	 */
 	static std::ifstream* read(const char* filename, CovManifold& cov, std::stack<unsigned int>& format_seq);
 
 	/**
-	 * \brief Write a CovManifold into a COV file.
+	 * \brief Write a manifold covering into a COV file.
 	 */
 	static std::ofstream* write(const char* filename, const CovManifold& cov, std::stack<unsigned int>& format_seq);
 
@@ -196,7 +236,12 @@ protected:
 	std::vector<VarSet>          _manifold_varset;
 };
 
+/**
+ * \brief Stream out a manifold covering.
+ */
 std::ostream& operator<<(std::ostream& os, const CovManifold& manif);
+
+/*================================== inline implementations ========================================*/
 
 inline CovManifold::BoxStatus CovManifold::status(int i) const {
 	return _manifold_status[i];
@@ -244,18 +289,6 @@ inline size_t CovManifold::nb_solution() const {
 inline size_t CovManifold::nb_boundary() const {
 	return _manifold_boundary.size();
 }
-
-//class CovRegularBoundaryManifold : public CovManifold {
-//public:
-//protected:
-//	bool* is_regular; // whether the ith not_solution box is regular.
-//	int nb_regular;
-//	int* regular; // indices of regular boxes
-//
-//	int nb_not_regular;
-//	int* not_regular;
-//};
-//
 
 } /* namespace ibex */
 

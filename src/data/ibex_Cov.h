@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 24, 2018
+// Last update : Dec 26, 2018
 //============================================================================
 
 #ifndef __IBEX_COV_H__
@@ -20,11 +20,30 @@
 
 namespace ibex {
 
+/**
+ * \defgroup data COV data structures
+ */
+
+/**
+ * \ingroup data
+ *
+ * \brief Covering mother class.
+ *
+ * The information stored at this level is only the dimension 'n' of
+ * the covered set.
+ */
 class Cov {
 public:
-
+	/**
+	 * \brief Create a new, empty covering.
+	 *
+	 * \param n - the dimension of the covered set.
+	 */
 	Cov(const size_t n);
 
+	/**
+	 * \brief Loads a covering from a COV file.
+	 */
 	Cov(const char* filename);
 
 	/**
@@ -34,15 +53,18 @@ public:
 
 	//virtual Cov& operator&=(const Cov& set)=0;
 
+	/**
+	 * \brief Delete this.
+	 */
 	virtual ~Cov();
 
 	/**
-	 * \brief Display the format of a Cov file.
+	 * \brief Display the COV file format.
 	 */
 	static string format();
 
 	/**
-	 * \brief Cover file format version.
+	 * \brief COV file format version.
 	 */
 	static const uint32_t FORMAT_VERSION;
 
@@ -95,8 +117,10 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
+	/** for 'format' display */
 	static const std::string separator;
 
+	/** for 'format' display */
 	static const std::string space;
 
 	static const size_t SIGNATURE_LENGTH;

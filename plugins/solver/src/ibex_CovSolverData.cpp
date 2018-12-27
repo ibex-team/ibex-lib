@@ -31,10 +31,6 @@ CovSolverData::CovSolverData(const char* filename) : CovManifold(n, m, nb_ineq /
 	delete f;
 }
 
-CovSolverData::~CovSolverData() {
-
-}
-
 void CovSolverData::save(const char* filename) const {
 	stack<unsigned int> format_seq;
 	ofstream* of=CovSolverData::write(filename, *this, format_seq);
