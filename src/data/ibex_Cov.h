@@ -66,7 +66,7 @@ public:
 	/**
 	 * \brief COV file format version.
 	 */
-	static const uint32_t FORMAT_VERSION;
+	static const unsigned int FORMAT_VERSION;
 
 	/**
 	 * \brief Number of variables
@@ -80,20 +80,20 @@ protected:
 	 *
 	 * format_seq: subformat identifying sequence (in reverse order: last number is Cov::subformat_number).
 	 */
-	static std::ifstream* read(const char* filename, Cov& cov, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, Cov& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/**
 	 * \brief Write a Cov into a COV file.
 	 *
 	 * format_seq: subformat identifying sequence  (in reverse order: last number is Cov::subformat_number).
 	 */
-	static std::ofstream* write(const char* filename, const Cov& cov, std::stack<unsigned int>& format_seq);
+	static std::ofstream* write(const char* filename, const Cov& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static int read_signature(std::ifstream& f);
+	static void read_signature(std::ifstream& f);
 
-	static void read_format_seq(std::ifstream& f, std::stack<unsigned int>&);
+	static void read_format_seq(std::ifstream& f, std::stack<unsigned int>&, std::stack<unsigned int>&);
 
 	static unsigned int read_pos_int(std::ifstream& f);
 
@@ -101,9 +101,9 @@ protected:
 
 	static void write_signature(std::ofstream& f);
 
-	static void write_format_seq(std::ofstream& f, std::stack<unsigned int>&); // warning: format seq is emptied.
+	static void write_format_seq(std::ofstream& f, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version); // warning: format seq is emptied.
 
-	static void write_int(std::ofstream& f, uint32_t x);
+	static void write_pos_int(std::ofstream& f, uint32_t x);
 
 	static void write_double(std::ofstream& f, double x);
 

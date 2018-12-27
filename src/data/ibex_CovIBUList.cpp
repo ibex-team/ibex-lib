@@ -17,6 +17,8 @@ using namespace std;
 
 namespace ibex {
 
+const unsigned int CovIBUList::FORMAT_VERSION = 1;
+
 const unsigned int CovIBUList::subformat_level = 3;
 
 const unsigned int CovIBUList::subformat_number = 0;
@@ -25,15 +27,17 @@ CovIBUList::CovIBUList(size_t n) : CovIUList(n) {
 }
 
 CovIBUList::CovIBUList(const char* filename) : CovIUList((size_t) 0 /* tmp */) {
-	stack<unsigned int> format_seq;
-	ifstream* f = CovIBUList::read(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ifstream* f = CovIBUList::read(filename, *this, format_id, format_version);
 	f->close();
 	delete f;
 }
 
 void CovIBUList::save(const char* filename) const	 {
-	stack<unsigned int> format_seq;
-	ofstream* of=CovIBUList::write(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ofstream* of=CovIBUList::write(filename, *this, format_id, format_version);
 	of->close();
 	delete of;
 }
@@ -76,17 +80,19 @@ ostream& operator<<(ostream& os, const CovIBUList& cov) {
 	return os;
 }
 
-ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned int>& format_seq) {
+ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned int>& format_id, stack<unsigned int>& format_version) {
 
-	ifstream* f = CovIUList::read(filename, cov, format_seq);
+	ifstream* f = CovIUList::read(filename, cov, format_id, format_version);
 
 	size_t nb_boundary;
 
-	if (format_seq.empty() || format_seq.top()!=subformat_number) {
+	if (format_id.empty() || format_id.top()!=subformat_number || format_version.top()!=FORMAT_VERSION) {
 		nb_boundary = 0;
 	}
 	else {
-		format_seq.pop();
+		format_id.pop();
+		format_version.pop();
+
 		nb_boundary = read_pos_int(*f);
 	}
 
@@ -132,26 +138,28 @@ ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned
 }
 
 
-ofstream* CovIBUList::write(const char* filename, const CovIBUList& cov, stack<unsigned int>& format_seq) {
+ofstream* CovIBUList::write(const char* filename, const CovIBUList& cov, stack<unsigned int>& format_id, stack<unsigned int>& format_version) {
 
-	format_seq.push(subformat_number);
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
-	ofstream* f = CovIUList::write(filename, cov, format_seq);
+	ofstream* f = CovIUList::write(filename, cov, format_id, format_version);
 
-	write_int(*f, cov.nb_boundary());
+	write_pos_int(*f, cov.nb_boundary());
 
 	// TODO: a complete scan could be avoided?
 	for (size_t i=0; i<cov.size(); i++) {
 		if (cov.status(i)==CovIBUList::BOUNDARY)
-			write_int(*f, (uint32_t) i);
+			write_pos_int(*f, (uint32_t) i);
 	}
 	return f;
 }
 
-void CovIBUList::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
-	format_seq.push(subformat_number);
+void CovIBUList::format(stringstream& ss, const string& title, stack<unsigned int>& format_id, stack<unsigned int>& format_version) {
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
-	CovIUList::format(ss, title, format_seq);
+	CovIUList::format(ss, title, format_id, format_version);
 
 	ss
 	<< space << " - 1 integer:     the number Nb of boundary boxes (<= N-Ni)\n"
@@ -163,8 +171,9 @@ void CovIBUList::format(stringstream& ss, const string& title, stack<unsigned in
 
 string CovIBUList::format() {
 	stringstream ss;
-	stack<unsigned int> format_seq;
-	format(ss, "CovIBUList", format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	format(ss, "CovIBUList", format_id, format_version);
 	return ss.str();
 }
 

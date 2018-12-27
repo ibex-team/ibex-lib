@@ -165,19 +165,24 @@ public:
 	 */
 	static string format();
 
+	/**
+	 * \brief COVSolverData file format version.
+	 */
+	static const unsigned int FORMAT_VERSION;
+
 protected:
 
 	/**
 	 * \brief Load solver data from a COV file.
 	 */
-	static std::ifstream* read(const char* filename, CovSolverData& cov, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovSolverData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/**
 	 * \brief Write solver data into a COV file.
 	 */
-	static std::ofstream* write(const char* filename, const CovSolverData& cov, std::stack<unsigned int>& format_seq);
+	static std::ofstream* write(const char* filename, const CovSolverData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/* read the variable names */
 	static void read_vars(std::ifstream& f, size_t n, std::vector<std::string>& var_names);

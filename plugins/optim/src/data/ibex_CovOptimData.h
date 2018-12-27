@@ -70,6 +70,11 @@ public:
 	static string format();
 
 	/**
+	 * \brief COVOptimData file format version.
+	 */
+	static const unsigned int FORMAT_VERSION;
+
+	/**
 	 * \brief Names of the variables.
 	 *
 	 * By default: empty vector.
@@ -138,14 +143,14 @@ protected:
 	/**
 	 * \brief Load optimizer data from a COV file.
 	 */
-	static std::ifstream* read(const char* filename, CovOptimData& cov, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovOptimData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/**
 	 * \brief Write optimizer data into a COV file.
 	 */
-	static std::ofstream* write(const char* filename, const CovOptimData& cov, std::stack<unsigned int>& format_seq);
+	static std::ofstream* write(const char* filename, const CovOptimData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/* read the variable names */
 	static void read_vars(std::ifstream& f, size_t n, std::vector<std::string>& var_names);

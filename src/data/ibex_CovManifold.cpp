@@ -17,6 +17,8 @@ using namespace std;
 
 namespace ibex {
 
+const unsigned int CovManifold::FORMAT_VERSION = 1;
+
 const unsigned int CovManifold::subformat_level = 4;
 
 const unsigned int CovManifold::subformat_number = 0;
@@ -25,15 +27,17 @@ CovManifold::CovManifold(size_t n, size_t m, size_t nb_ineq) : CovIBUList(n), m(
 }
 
 CovManifold::CovManifold(const char* filename) : CovManifold(0,0,0 /* tmp */) {
-	stack<unsigned int> format_seq;
-	ifstream* f = CovManifold::read(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ifstream* f = CovManifold::read(filename, *this, format_id, format_version);
 	f->close();
 	delete f;
 }
 
 void CovManifold::save(const char* filename) const {
-	stack<unsigned int> format_seq;
-	ofstream* of=CovManifold::write(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ofstream* of=CovManifold::write(filename, *this, format_id, format_version);
 	of->close();
 	delete of;
 }
@@ -97,19 +101,40 @@ ostream& operator<<(ostream& os, const CovManifold& manif) {
 	return os;
 }
 
-ifstream* CovManifold::read(const char* filename, CovManifold& cov, stack<unsigned int>& format_seq) {
+VarSet CovManifold::read_varset(ifstream& f, size_t n, size_t m) {
 
-	ifstream* f = CovIBUList::read(filename, cov, format_seq);
+	BitSet params(n);
+
+	for (unsigned int j=0; j<n-m; j++) {
+		unsigned int v=read_pos_int(f);
+		if (v>n) {
+			ibex_error("[CovManifold]: bad input file (bad parameter index)");
+		}
+		params.add(v); // index starting from 1 in the raw format
+	}
+
+	return VarSet(n,params,false);
+}
+
+void CovManifold::write_varset(ofstream& f, const VarSet& varset) {
+	for (int i=0; i<varset.nb_param; i++)
+		write_pos_int(f, varset.param(i));
+}
+
+ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
+
+	ifstream* f = CovIBUList::read(filename, cov, format_id, format_version);
 
 	size_t nb_solution;
 
-	if (format_seq.empty() || format_seq.top()!=subformat_number) {
+	if (format_id.empty() || format_id.top()!=subformat_number || format_version.top()!=FORMAT_VERSION) {
 		(size_t&) cov.m = 0;
 		(size_t&) cov.nb_ineq = 0;
 		nb_solution = 0;
 	}
 	else {
-		format_seq.pop();
+		format_id.pop();
+		format_version.pop();
 		(size_t&) cov.m = read_pos_int(*f);
 		(size_t&) cov.nb_ineq = read_pos_int(*f);
 		nb_solution = read_pos_int(*f);
@@ -163,21 +188,22 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, stack<unsign
 	return f;
 }
 
-ofstream* CovManifold::write(const char* filename, const CovManifold& cov, stack<unsigned int>& format_seq) {
+ofstream* CovManifold::write(const char* filename, const CovManifold& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
 
-	format_seq.push(subformat_number);
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
-	ofstream* f = CovIBUList::write(filename, cov, format_seq);
+	ofstream* f = CovIBUList::write(filename, cov, format_id, format_version);
 
-	write_int(*f, cov.m);
-	write_int(*f, cov.nb_ineq);
-	write_int(*f, cov.nb_solution());
+	write_pos_int(*f, cov.m);
+	write_pos_int(*f, cov.nb_ineq);
+	write_pos_int(*f, cov.nb_solution());
 
 	// TODO: a complete scan could be avoided?
 	int j=0;
 	for (size_t i=0; i<cov.size(); i++) {
 		if (cov.status(i)==CovManifold::SOLUTION) {
-			write_int(*f, (uint32_t) i);
+			write_pos_int(*f, (uint32_t) i);
 			if (cov.m < cov.n) write_varset(*f, cov.varset(j));
 			write_box(*f, cov.unicity(j));
 			j++;
@@ -186,30 +212,11 @@ ofstream* CovManifold::write(const char* filename, const CovManifold& cov, stack
 	return f;
 }
 
-VarSet CovManifold::read_varset(ifstream& f, size_t n, size_t m) {
+void CovManifold::format(stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
-	BitSet params(n);
-
-	for (unsigned int j=0; j<n-m; j++) {
-		unsigned int v=read_pos_int(f);
-		if (v>n) {
-			ibex_error("[CovManifold]: bad input file (bad parameter index)");
-		}
-		params.add(v); // index starting from 1 in the raw format
-	}
-
-	return VarSet(n,params,false);
-}
-
-void CovManifold::write_varset(ofstream& f, const VarSet& varset) {
-	for (int i=0; i<varset.nb_param; i++)
-		write_int(f, varset.param(i));
-}
-
-void CovManifold::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
-	format_seq.push(subformat_number);
-
-	CovIBUList::format(ss, title, format_seq);
+	CovIBUList::format(ss, title, format_id, format_version);
 
 	ss
 	<< space << " - 1 integer:     the number m of equalities\n"
@@ -228,8 +235,9 @@ void CovManifold::format(stringstream& ss, const string& title, stack<unsigned i
 
 string CovManifold::format() {
 	stringstream ss;
-	stack<unsigned int> format_seq;
-	format(ss, "CovManifold", format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	format(ss, "CovManifold", format_id, format_version);
 	return ss.str();
 }
 

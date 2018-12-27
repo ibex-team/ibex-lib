@@ -61,12 +61,12 @@ public:
 
 private:
 
-	static void write_cov(std::ofstream& f, unsigned int level);
-	static void write_covlist(std::ofstream& f, unsigned int level);
-	static void write_covIUlist(std::ofstream& f, unsigned int level);
-	static void write_covIBUlist(std::ofstream& f, unsigned int level);
-	static void write_covManifold(std::ofstream& f, unsigned int level);
-	static void write_covSolverData(std::ofstream& f, unsigned int level);
+	static void write_cov(std::ofstream& f, unsigned int level, bool right_version=true);
+	static void write_covlist(std::ofstream& f, unsigned int level, bool right_version=true);
+	static void write_covIUlist(std::ofstream& f, unsigned int level, bool right_version=true);
+	static void write_covIBUlist(std::ofstream& f, unsigned int level, bool right_version=true);
+	static void write_covManifold(std::ofstream& f, unsigned int level, bool right_version=true);
+	static void write_covSolverData(std::ofstream& f, unsigned int level, bool right_version=true);
 
 	static void test_cov(Cov& cov);
 	static void test_covlist(CovList& cov);
@@ -96,6 +96,7 @@ private:
 	static void covIBUlistfac();
 	static void read_covIBUlistfile1();
 	static void read_covIBUlistfile2();
+	static void read_covIBUlistfile3();
 	static void write_covIBUlistfile();
 	static void covManifoldfac();
 	static void read_covManifoldfile1();

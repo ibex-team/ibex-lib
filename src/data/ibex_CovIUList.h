@@ -112,19 +112,24 @@ public:
 	 */
 	static string format();
 
+	/**
+	 * \brief COVIUList file format version.
+	 */
+	static const unsigned int FORMAT_VERSION;
+
 protected:
 
 	/**
 	 * \brief Load a IU list from a COV file.
 	 */
-	static std::ifstream* read(const char* filename, CovIUList& cov, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovIUList& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/**
 	 * \brief Write a IU list into a COV file.
 	 */
-	static std::ofstream* write(const char* filename, const CovIUList& cov, std::stack<unsigned int>& format_seq);
+	static std::ofstream* write(const char* filename, const CovIUList& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/**
 	 * \brief Subformat level.

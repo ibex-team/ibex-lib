@@ -17,6 +17,8 @@ using namespace std;
 
 namespace ibex {
 
+const unsigned int CovSolverData::FORMAT_VERSION = 1;
+
 const unsigned int CovSolverData::subformat_level = 5;
 
 const unsigned int CovSolverData::subformat_number = 0;
@@ -25,15 +27,17 @@ CovSolverData::CovSolverData(size_t n, size_t m, size_t nb_ineq) : CovManifold(n
 }
 
 CovSolverData::CovSolverData(const char* filename) : CovManifold(n, m, nb_ineq /* tmp */), solver_status((unsigned int) Solver::SUCCESS), time(-1), nb_cells(0) {
-	stack<unsigned int> format_seq;
-	ifstream* f = CovSolverData::read(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ifstream* f = CovSolverData::read(filename, *this, format_id, format_version);
 	f->close();
 	delete f;
 }
 
 void CovSolverData::save(const char* filename) const {
-	stack<unsigned int> format_seq;
-	ofstream* of=CovSolverData::write(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ofstream* of=CovSolverData::write(filename, *this, format_id, format_version);
 	of->close();
 	delete of;
 }
@@ -101,20 +105,41 @@ ostream& operator<<(ostream& os, const CovSolverData& solver) {
 
 }
 
-ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, stack<unsigned int>& format_seq) {
+void CovSolverData::read_vars(ifstream& f, size_t n, vector<string>& var_names) {
+	char x;
+	for (size_t i=0; i<n; i++) {
+		stringstream s;
+		do {
+			f.read(&x, sizeof(char));
+			if (f.eof()) ibex_error("[CovManifold]: unexpected end of file.");
+			if (x!='\0') s << x;
+		} while(x!='\0');
+		var_names.push_back(s.str());
+	}
+}
 
-	ifstream* f = CovManifold::read(filename, cov, format_seq);
+void CovSolverData::write_vars(ofstream& f, const vector<string>& var_names) {
+	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++) {
+		f.write(it->c_str(),it->size()*sizeof(char));
+		f.put('\0');
+	}
+}
+
+ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
+
+	ifstream* f = CovManifold::read(filename, cov, format_id, format_version);
 
 	size_t nb_pending;
 
-	if (format_seq.empty() || format_seq.top()!=subformat_number) {
+	if (format_id.empty() || format_id.top()!=subformat_number || format_version.top()!=FORMAT_VERSION) {
 		cov.solver_status = (unsigned int) Solver::SUCCESS;
 		cov.time = -1;
 		cov.nb_cells = 0;
 		nb_pending = 0;
 	}
 	else {
-		format_seq.pop();
+		format_id.pop();
+		format_version.pop();
 
 		read_vars(*f, cov.n, cov.var_names);
 
@@ -183,50 +208,32 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, stack<un
 	return f;
 }
 
-ofstream* CovSolverData::write(const char* filename, const CovSolverData& cov, stack<unsigned int>& format_seq) {
+ofstream* CovSolverData::write(const char* filename, const CovSolverData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
 
-	format_seq.push(subformat_number);
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
-	ofstream* f = CovManifold::write(filename, cov, format_seq);
+	ofstream* f = CovManifold::write(filename, cov, format_id, format_version);
 
 	write_vars(*f, cov.var_names);
-	write_int(*f, cov.solver_status);
+	write_pos_int(*f, cov.solver_status);
 	write_double(*f, cov.time);
-	write_int(*f, cov.nb_cells);
-	write_int(*f, cov.nb_pending());
+	write_pos_int(*f, cov.nb_cells);
+	write_pos_int(*f, cov.nb_pending());
 
 	// TODO: a complete scan could be avoided?
 	for (size_t i=0; i<cov.size(); i++) {
 		if (cov.status(i)==CovSolverData::PENDING)
-			write_int(*f, (uint32_t) i);
+			write_pos_int(*f, (uint32_t) i);
 	}
 	return f;
 }
 
-void CovSolverData::read_vars(ifstream& f, size_t n, vector<string>& var_names) {
-	char x;
-	for (size_t i=0; i<n; i++) {
-		stringstream s;
-		do {
-			f.read(&x, sizeof(char));
-			if (f.eof()) ibex_error("[CovManifold]: unexpected end of file.");
-			if (x!='\0') s << x;
-		} while(x!='\0');
-		var_names.push_back(s.str());
-	}
-}
+void CovSolverData::format(stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
-void CovSolverData::write_vars(ofstream& f, const vector<string>& var_names) {
-	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++) {
-		f.write(it->c_str(),it->size()*sizeof(char));
-		f.put('\0');
-	}
-}
-
-void CovSolverData::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
-	format_seq.push(subformat_number);
-
-	CovManifold::format(ss, title, format_seq);
+	CovManifold::format(ss, title, format_id, format_version);
 
 	ss
 	<< space << " - n strings:      the names of variables. Each string is\n"
@@ -251,8 +258,9 @@ void CovSolverData::format(stringstream& ss, const string& title, stack<unsigned
 
 string CovSolverData::format() {
 	stringstream ss;
-	stack<unsigned int> format_seq;
-	format(ss, "CovSolverData", format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	format(ss, "CovSolverData", format_id, format_version);
 	return ss.str();
 }
 

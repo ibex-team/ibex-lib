@@ -17,6 +17,8 @@ using namespace std;
 
 namespace ibex {
 
+const unsigned int CovOptimData::FORMAT_VERSION = 1;
+
 const unsigned int CovOptimData::subformat_level = 5;
 
 const unsigned int CovOptimData::subformat_number = 1;
@@ -31,15 +33,17 @@ CovOptimData::CovOptimData(const char* filename) : CovList((size_t) 0 /* tmp */)
 		is_extended_space(false /* tmp*/),
 		optimizer_status((unsigned int) Optimizer::SUCCESS),
 		uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY), loup_point(1), time(-1), nb_cells(0) {
-	stack<unsigned int> format_seq;
-	ifstream* f = CovOptimData::read(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ifstream* f = CovOptimData::read(filename, *this, format_id, format_version);
 	f->close();
 	delete f;
 }
 
 void CovOptimData::save(const char* filename) const {
-	stack<unsigned int> format_seq;
-	ofstream* of=CovOptimData::write(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ofstream* of=CovOptimData::write(filename, *this, format_id, format_version);
 	of->close();
 	delete of;
 }
@@ -57,13 +61,33 @@ ostream& operator<<(ostream& os, const CovOptimData& optim) {
 
 }
 
-ifstream* CovOptimData::read(const char* filename, CovOptimData& cov, stack<unsigned int>& format_seq) {
+void CovOptimData::read_vars(ifstream& f, size_t n, vector<string>& var_names) {
+	char x;
+	for (size_t i=0; i<n; i++) {
+		stringstream s;
+		do {
+			f.read(&x, sizeof(char));
+			if (f.eof()) ibex_error("[CovManifold]: unexpected end of file.");
+			if (x!='\0') s << x;
+		} while(x!='\0');
+		var_names.push_back(s.str());
+	}
+}
 
-	ifstream* f = CovList::read(filename, cov, format_seq);
+void CovOptimData::write_vars(ofstream& f, const vector<string>& var_names) {
+	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++) {
+		f.write(it->c_str(),it->size()*sizeof(char));
+		f.put('\0');
+	}
+}
+
+ifstream* CovOptimData::read(const char* filename, CovOptimData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
+
+	ifstream* f = CovList::read(filename, cov, format_id, format_version);
 
 	cov.loup_point.resize((int) cov.n);
 
-	if (format_seq.empty() || format_seq.top()!=subformat_number) {
+	if (format_id.empty() || format_id.top()!=subformat_number || format_version.top()!=FORMAT_VERSION) {
 		cov.optimizer_status = (unsigned int) Optimizer::SUCCESS;
 		cov.is_extended_space = false;
 		cov.uplo = NEG_INFINITY;
@@ -73,7 +97,8 @@ ifstream* CovOptimData::read(const char* filename, CovOptimData& cov, stack<unsi
 		cov.nb_cells = 0;
 	}
 	else {
-		format_seq.pop();
+		format_id.pop();
+		format_version.pop();
 
 		read_vars(*f, cov.n, cov.var_names);
 
@@ -105,15 +130,16 @@ ifstream* CovOptimData::read(const char* filename, CovOptimData& cov, stack<unsi
 	return f;
 }
 
-ofstream* CovOptimData::write(const char* filename, const CovOptimData& cov, stack<unsigned int>& format_seq) {
+ofstream* CovOptimData::write(const char* filename, const CovOptimData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
 
-	format_seq.push(subformat_number);
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
-	ofstream* f = CovList::write(filename, cov, format_seq);
+	ofstream* f = CovList::write(filename, cov, format_id, format_version);
 
 	write_vars  (*f, cov.var_names);
-	write_int   (*f, cov.optimizer_status);
-	write_int   (*f, (uint32_t) cov.is_extended_space);
+	write_pos_int   (*f, cov.optimizer_status);
+	write_pos_int   (*f, (uint32_t) cov.is_extended_space);
 	write_double(*f, cov.uplo);
 	write_double(*f, cov.uplo_of_epsboxes);
 	write_double(*f, cov.loup);
@@ -123,41 +149,22 @@ ofstream* CovOptimData::write(const char* filename, const CovOptimData& cov, sta
 		if (cov[0].subvector(0,nb_var-1)!=cov.loup_point) {
 			ibex_error("[CovOptimData] the first box in the list must be the 'loup-point'.");
 		}
-		write_int(*f, (uint32_t) 1);
+		write_pos_int(*f, (uint32_t) 1);
 	} else {
-		write_int(*f, (uint32_t) 0);
+		write_pos_int(*f, (uint32_t) 0);
 	}
 
 	write_double(*f, cov.time);
-	write_int   (*f, cov.nb_cells);
+	write_pos_int   (*f, cov.nb_cells);
 
 	return f;
 }
 
-void CovOptimData::read_vars(ifstream& f, size_t n, vector<string>& var_names) {
-	char x;
-	for (size_t i=0; i<n; i++) {
-		stringstream s;
-		do {
-			f.read(&x, sizeof(char));
-			if (f.eof()) ibex_error("[CovManifold]: unexpected end of file.");
-			if (x!='\0') s << x;
-		} while(x!='\0');
-		var_names.push_back(s.str());
-	}
-}
+void CovOptimData::format(stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
-void CovOptimData::write_vars(ofstream& f, const vector<string>& var_names) {
-	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++) {
-		f.write(it->c_str(),it->size()*sizeof(char));
-		f.put('\0');
-	}
-}
-
-void CovOptimData::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
-	format_seq.push(subformat_number);
-
-	CovList::format(ss, title, format_seq);
+	CovList::format(ss, title, format_id, format_version);
 
 	ss
 	<< space << " - n strings:      the names of variables. Each string is\n"
@@ -189,8 +196,9 @@ void CovOptimData::format(stringstream& ss, const string& title, stack<unsigned 
 
 string CovOptimData::format() {
 	stringstream ss;
-	stack<unsigned int> format_seq;
-	format(ss, "CovOptimData", format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	format(ss, "CovOptimData", format_id, format_version);
 	return ss.str();
 }
 

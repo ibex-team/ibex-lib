@@ -83,17 +83,22 @@ vector<IntervalVector> TestCov::boxes() {
 
 /*=============================================================================================*/
 
-void TestCov::write_cov(ofstream& f, unsigned int level) {
+void TestCov::write_cov(ofstream& f, unsigned int level, bool right_version) {
 	write(f,"IBEX COVERING FILE "); // signature
-	write(f,(uint32_t) 1);          // format version
 	write(f,(uint32_t) level);      // subformat level
-	for (unsigned int i=0; i<=level; i++)
+	for (unsigned int i=0; i<=level; i++) // format sequence
 		write(f, (uint32_t) 0);
+	for (unsigned int i=0; i<=level; i++) // format version
+		if (!right_version && i==level)
+			write(f, (uint32_t) 2); // test a wrong version at last level
+		else
+			write(f, (uint32_t) 1);
+
 	write(f,(uint32_t) n);          // box dimension
 }
 
-void TestCov::write_covlist(ofstream& f, unsigned int level) {
-	write_cov(f,level);
+void TestCov::write_covlist(ofstream& f, unsigned int level, bool right_version) {
+	write_cov(f,level,right_version);
 	write(f,(uint32_t) N);  // number of boxes
 
 	vector<IntervalVector> b = boxes();
@@ -106,16 +111,16 @@ void TestCov::write_covlist(ofstream& f, unsigned int level) {
 	}
 }
 
-void TestCov::write_covIUlist(ofstream& f, unsigned int level) {
-	write_covlist(f,level);
+void TestCov::write_covIUlist(ofstream& f, unsigned int level, bool right_version) {
+	write_covlist(f,level,right_version);
 	write(f, (uint32_t) ni); // number of inner boxes
 	for (size_t i=0; i<ni; i++) {
 		write(f, (uint32_t) inner[i]); // ith inner box
 	}
 }
 
-void TestCov::write_covIBUlist(ofstream& f, unsigned int level) {
-	write_covIUlist(f,level);
+void TestCov::write_covIBUlist(ofstream& f, unsigned int level, bool right_version) {
+	write_covIUlist(f,level,right_version);
 	write(f, (uint32_t) (nbnd+nsol)); // total number of boundary boxes
 	for (size_t i=0; i<nbnd; i++) {
 		write(f, (uint32_t) bnd[i]);
@@ -125,8 +130,8 @@ void TestCov::write_covIBUlist(ofstream& f, unsigned int level) {
 	}
 }
 
-void TestCov::write_covManifold(ofstream& f, unsigned int level) {
-	write_covIBUlist(f,level);
+void TestCov::write_covManifold(ofstream& f, unsigned int level, bool right_version) {
+	write_covIBUlist(f,level,right_version);
 	write(f, (uint32_t) m); // number of equalities
 	write(f, (uint32_t) nb_ineq); // number of inequalities
 	write(f, (uint32_t) nsol);
@@ -148,8 +153,8 @@ void TestCov::write_covManifold(ofstream& f, unsigned int level) {
 	}
 }
 
-void TestCov::write_covSolverData(ofstream& f, unsigned int level) {
-	write_covManifold(f,level);
+void TestCov::write_covSolverData(ofstream& f, unsigned int level, bool right_version) {
+	write_covManifold(f,level,right_version);
 
 	for (size_t i=0; i<n; i++)
 		write(f,solver_var_names[i].c_str());
@@ -184,7 +189,7 @@ void TestCov::test_covlist(CovList& cov) {
 	vector<IntervalVector> b=boxes();
 
 	for (size_t i=0; i<N; i++) {
-		cout << cov[i] << endl;
+		//cout << cov[i] << endl;
 		CPPUNIT_ASSERT(cov[i]==b[i]);
 	}
 }
@@ -285,7 +290,7 @@ void TestCov::test_covManifold(CovManifold& cov) {
 
 		IntervalVector unicity=b[sol[i]];
 		unicity.inflate(unicity_infl);
-		cout << cov.unicity(i) << " " << unicity << endl;
+		//cout << cov.unicity(i) << " " << unicity << endl;
 		CPPUNIT_ASSERT(cov.unicity(i)==unicity);
 	}
 }
@@ -528,8 +533,6 @@ void TestCov::read_covIUlistfile2() {
 	f.close();
 
 	CovIUList cov(filename);
-	test_covlist(cov);
-
 	CPPUNIT_ASSERT(cov.nb_inner()==0);
 	CPPUNIT_ASSERT(cov.nb_unknown()==N);
 
@@ -580,6 +583,19 @@ void TestCov::read_covIBUlistfile2() {
 	free(filename);
 }
 
+void TestCov::read_covIBUlistfile3() {
+	ofstream f;
+	char* filename=open_file(f);
+	write_covIBUlist(f,3,false);
+	f.close();
+
+   // check that we still managed to read a CovIUlist...
+	CovIBUList cov(filename);
+	test_covIUlist(cov);
+	CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	CPPUNIT_ASSERT(cov.nb_unknown()==cov.size() - cov.nb_inner());
+	free(filename);
+}
 
 void TestCov::write_covIBUlistfile() {
 	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
@@ -689,5 +705,3 @@ void TestCov::write_covSolverDatafile() {
 
 	free(tmpname);
 }
-
-

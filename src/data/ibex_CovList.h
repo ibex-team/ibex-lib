@@ -55,27 +55,32 @@ public:
 	const IntervalVector& operator[](int i) const;
 
 	/**
+	 * \brief Number of boxes
+	 */
+	size_t size() const;
+
+	/**
 	 * \brief Display the format of a CovList file.
 	 */
 	static string format();
 
 	/**
-	 * \brief Number of boxes
+	 * \brief COVList file format version.
 	 */
-	size_t size() const;
+	static const unsigned int FORMAT_VERSION;
 
 protected:
 	/**
 	 * \brief Load a list from a COV file.
 	 */
-	static std::ifstream* read(const char* filename, CovList& cov, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovList& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/**
 	 * \brief Write a CovList into a COV file.
 	 */
-	static std::ofstream* write(const char* filename, const CovList& cov, std::stack<unsigned int>& format_seq);
+	static std::ofstream* write(const char* filename, const CovList& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	static IntervalVector read_box(std::ifstream& f, size_t n);
 

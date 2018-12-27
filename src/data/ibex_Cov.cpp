@@ -18,11 +18,14 @@ using namespace std;
 
 namespace ibex {
 
+const unsigned int  Cov::FORMAT_VERSION = 1;
+
 const unsigned int Cov::subformat_level = 0;
+
 const unsigned int Cov::subformat_number = 0;
+
 const size_t Cov::SIGNATURE_LENGTH = 20;
 const char* Cov::SIGNATURE = "IBEX COVERING FILE ";
-const uint32_t Cov::FORMAT_VERSION = 1;
 const string Cov::separator = "+-------------------+-----------------------------------------------------------\n";
 const string Cov::space     = "|                   |";
 
@@ -31,15 +34,17 @@ Cov::Cov(size_t n) : n(n) {
 }
 
 Cov::Cov(const char* filename) : n(0 /* tmp */) {
-	stack<unsigned int> format_seq;
-	ifstream* f = Cov::read(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ifstream* f = Cov::read(filename, *this, format_id, format_version);
 	f->close();
 	delete f;
 }
 
 void Cov::save(const char* filename) const {
-	stack<unsigned int> format_seq;
-	ofstream* of=Cov::write(filename, *this, format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	ofstream* of=Cov::write(filename, *this, format_id, format_version);
 	of->close();
 	delete of;
 }
@@ -48,7 +53,7 @@ Cov::~Cov() {
 
 }
 
-ifstream* Cov::read(const char* filename, Cov& cov, stack<unsigned int>& format_seq) {
+ifstream* Cov::read(const char* filename, Cov& cov, stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
 
 	ifstream* f = new ifstream();
 
@@ -56,15 +61,20 @@ ifstream* Cov::read(const char* filename, Cov& cov, stack<unsigned int>& format_
 
 	if (f->fail()) ibex_error("[Cov]: cannot open input file.\n");
 
-	int input_format_version = read_signature(*f);
+	read_signature(*f);
 
-	if (input_format_version!=FORMAT_VERSION)
+	read_format_seq(*f, format_id, format_version);
+
+	if (format_version.top()>FORMAT_VERSION) {
 		ibex_error("[Cov] unsupported format version");
+	}
 
-	read_format_seq(*f, format_seq);
-
-	if (format_seq.top()!=subformat_number) return f;
-	else format_seq.pop();
+	if (format_id.top()!=subformat_number || format_version.top()!=FORMAT_VERSION)
+		return f;
+	else {
+		format_id.pop();
+		format_version.pop();
+	}
 
 	size_t _n = read_pos_int(*f);
 
@@ -73,7 +83,7 @@ ifstream* Cov::read(const char* filename, Cov& cov, stack<unsigned int>& format_
 	return f;
 }
 
-ofstream* Cov::write(const char* filename, const Cov& cov, std::stack<unsigned int>& format_seq) {
+ofstream* Cov::write(const char* filename, const Cov& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
 
 	ofstream* f = new ofstream();
 
@@ -84,39 +94,43 @@ ofstream* Cov::write(const char* filename, const Cov& cov, std::stack<unsigned i
 
 	write_signature(*f);
 
-	format_seq.push(subformat_number);
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
-	write_format_seq(*f, format_seq);
+	write_format_seq(*f, format_id, format_version);
 
-	write_int(*f, cov.n);
+	write_pos_int(*f, cov.n);
 
 	return f;
 }
 
-int Cov::read_signature(ifstream& f) {
+void Cov::read_signature(ifstream& f) {
 	char* sig=new char[SIGNATURE_LENGTH];
 	f.read(sig, SIGNATURE_LENGTH*sizeof(char));
 	if (f.eof()) ibex_error("[manifold]: unexpected end of file.");
 	if (strcmp(sig,SIGNATURE)!=0)
 	ibex_error("[Cov]: not an Ibex \"cover\" file.");
-	uint32_t format_version=read_pos_int(f); // manifold version
-	if (format_version>FORMAT_VERSION) {
-		cout << "format version = " << format_version << endl;
-		ibex_error("[Cov]: wrong format version");
-		return -1;
-	} else
-		return format_version;
 }
 
-void Cov::read_format_seq(std::ifstream& f, stack<unsigned int>& format_seq) {
+void Cov::read_format_seq(std::ifstream& f, stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
 	size_t format_level = read_pos_int(f);
+
+	assert(format_id.empty());
+	assert(format_version.empty());
 
 	list<unsigned int> tmp;
 	for (size_t i=0; i<=format_level; i++)
 		tmp.push_front(read_pos_int(f));
 
 	for (list<unsigned int>::const_iterator it=tmp.begin(); it!=tmp.end(); ++it)
-		format_seq.push(*it);
+		format_id.push(*it);
+
+	tmp.clear();
+	for (size_t i=0; i<=format_level; i++)
+		tmp.push_front(read_pos_int(f));
+
+	for (list<unsigned int>::const_iterator it=tmp.begin(); it!=tmp.end(); ++it)
+		format_version.push(*it);
 }
 
 unsigned int Cov::read_pos_int(ifstream& f) {
@@ -136,19 +150,25 @@ double Cov::read_double(ifstream& f) {
 
 void Cov::write_signature(ofstream& f) {
 	f.write(SIGNATURE, SIGNATURE_LENGTH*sizeof(char));
-	write_int(f, FORMAT_VERSION);
 }
 
-void Cov::write_format_seq(std::ofstream& f, std::stack<unsigned int>& format_seq) {
-	write_int(f, format_seq.size()-1); // level = size-1 (starts from 0)
+void Cov::write_format_seq(std::ofstream& f, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
+	write_pos_int(f, format_id.size()-1); // level = size-1 (starts from 0)
 
-	while (!format_seq.empty()) {
-		write_int(f, format_seq.top());
-		format_seq.pop();
+	assert(format_version.size()==format_id.size());
+
+	while (!format_id.empty()) {
+		write_pos_int(f, format_id.top());
+		format_id.pop();
+	}
+
+	while (!format_version.empty()) {
+		write_pos_int(f, format_version.top());
+		format_version.pop();
 	}
 }
 
-void Cov::write_int(ofstream& f, uint32_t x) {
+void Cov::write_pos_int(ofstream& f, uint32_t x) {
 	f.write((char*) &x, sizeof(uint32_t));
 }
 
@@ -156,14 +176,15 @@ void Cov::write_double(ofstream& f, double x) {
 	f.write((char*) &x, sizeof(x));
 }
 
-void Cov::format(stringstream& ss, const string& title, stack<unsigned int>& format_seq) {
+void Cov::format(stringstream& ss, const string& title, stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
 
-	format_seq.push(subformat_number);
+	format_id.push(subformat_number);
+	format_version.push(FORMAT_VERSION);
 
 	ss
 	<< "\n"
 	<< "+-------------------------------------------------------------------------------\n"
-	<< "|                          " << title << " file format v" << FORMAT_VERSION << "\n"
+	<< "|                          " << title << " file format\n"
 	"|\n"
 	//			"The " << title << " text format (obtained with --txt) is described below.\n"
 	//			"The " << title << " binary format (.cov) is exactly the same except that:\n"
@@ -178,15 +199,24 @@ void Cov::format(stringstream& ss, const string& title, stack<unsigned int>& for
 	<< space <<	"                  characters \"" << SIGNATURE << "\"\n"
 	<< "|        Cov        |" <<
 	"                  (mind the space at the end)\n"
-	<< space << "                  followed by the format version number: " << FORMAT_VERSION << "\n"
-	<< space << " - 1 integer:     the subformat level L (=" << format_seq.size()-1 << " in the case of\n"
+	<< space << " - 1 integer:     the format level L (=" << format_id.size()-1 << " in the case of\n"
 	<< space << "                  " << title << ")\n"
-	<< space << " - L+1 integers:  the subformat identifying sequence:\n"
+	<< space << " - L+1 integers:  the format identifying sequence:\n"
 	<< space << "                      ";
-	while (!format_seq.empty()) {
-		ss << format_seq.top();
-		format_seq.pop();
-		if (!format_seq.empty()) ss << ' ';
+	while (!format_id.empty()) {
+		ss << format_id.top();
+		format_id.pop();
+		if (!format_id.empty()) ss << ' ';
+	}
+	ss
+	<< "\n"
+	<< space << "                  (in the case of " << title << ")\n"
+	<< space << " - L+1 integers:  the format version sequence:\n"
+	<< space << "                      ";
+	while (!format_version.empty()) {
+		ss << format_version.top();
+		format_version.pop();
+		if (!format_version.empty()) ss << ' ';
 	}
 	ss
 	<< "\n"
@@ -197,8 +227,9 @@ void Cov::format(stringstream& ss, const string& title, stack<unsigned int>& for
 
 string Cov::format() {
 	stringstream ss;
-	stack<unsigned int> format_seq;
-	format(ss, "COV", format_seq);
+	stack<unsigned int> format_id;
+	stack<unsigned int> format_version;
+	format(ss, "COV", format_id, format_version);
 	return ss.str();
 }
 

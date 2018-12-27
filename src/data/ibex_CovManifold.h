@@ -195,19 +195,24 @@ public:
 	 */
 	static string format();
 
+	/**
+	 * \brief COVManifold file format version.
+	 */
+	static const unsigned int FORMAT_VERSION;
+
 protected:
 
 	/**
 	 * \brief Load a manifold covering from a COV file.
 	 */
-	static std::ifstream* read(const char* filename, CovManifold& cov, std::stack<unsigned int>& format_seq);
+	static std::ifstream* read(const char* filename, CovManifold& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/**
 	 * \brief Write a manifold covering into a COV file.
 	 */
-	static std::ofstream* write(const char* filename, const CovManifold& cov, std::stack<unsigned int>& format_seq);
+	static std::ofstream* write(const char* filename, const CovManifold& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>&);
+	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/* read parameters of the parametric proof */
 	static VarSet read_varset(std::ifstream& f, size_t n, size_t m);
