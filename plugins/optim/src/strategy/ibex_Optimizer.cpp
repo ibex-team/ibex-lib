@@ -334,7 +334,6 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 	uplo=data.uplo;
 	loup=data.loup;
 	loup_point=data.loup_point;
-	cout << "loup point loaded: " << loup_point << endl;
 	uplo_of_epsboxes=POS_INFINITY;
 
 	nb_cells=0;
@@ -349,7 +348,7 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 			box = data[i];
 		else {
 			write_ext_box(data[i], box);
-			box[goal_var] = Interval::ALL_REALS;
+			box[goal_var] = Interval(uplo,loup);
 			ctc.contract(box);
 			if (box.is_empty()) continue;
 		}
