@@ -26,11 +26,11 @@ namespace ibex {
  *
  * The list represents a covering of one global optimizer of a NLP problem.
  * This NLP problem is usually represented in Ibex by a #System object. This
- * object is usually built by ibexopt from a Minibex input file.
+ * object is usually built by IbexOpt from a Minibex input file.
  *
- * Unknown boxes (inherited from the mother class) represent boxes that have
- * not been processed yet (the search has been interrupted because of a
- * timeout/memory overflow).
+ * Boxes (inherited from the mother class) include the best feasible point
+ * found, if any, and boxes that have not been processed yet (the search
+ * has been interrupted because of a timeout/memory overflow).
  *
  * The list is either n-dimensional, where n is the number of variables of
  * the original problem, or (n+1)-dimensional. In the latter case, each

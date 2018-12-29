@@ -47,6 +47,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
 			"optimization data in the COV (binary) format. See --format", {'o',"output"});
 	args::Flag rigor(parser, "rigor", "Activate rigor mode (certify feasibility of equalities).", {"rigor"});
+	args::Flag output_no_obj(parser, "output-no-obj", "Generate a COV with domains of variables only (not objective values).", {"output-no-obj"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
@@ -225,6 +226,11 @@ int main(int argc, char** argv) {
 
 		if (!inHC4) {
 			cerr << "\n  \033[33mwarning: inHC4 disabled\033[0m (does not support vector/matrix operations)" << endl;
+		}
+
+		if (output_no_obj) {
+			cout << "  Generates COV with:\tvariable domains only\n";
+			o.extended_COV = false;
 		}
 
 		if (!quiet) {

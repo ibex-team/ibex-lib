@@ -51,9 +51,18 @@ void CovOptimData::save(const char* filename) const {
 ostream& operator<<(ostream& os, const CovOptimData& optim) {
 
 	os << " f* in [" << optim.uplo << "," << optim.loup << "]" << endl;
-	os << " x* ~  " << optim.loup_point << endl;
 
-	for (size_t i=1; i<optim.size(); i++) {
+	size_t i;
+
+	if (optim.loup_point.is_empty()) {
+		os << " no feasible point found." << endl;
+		i = 0;
+	} else {
+		os << " x* ~  " << optim.loup_point << endl;
+		i = 1;
+	}
+
+	for (; i<optim.size(); i++) {
 		os << " pending n°" << (i+1) << " = " << optim[i] << endl;
 	}
 
@@ -85,13 +94,12 @@ ifstream* CovOptimData::read(const char* filename, CovOptimData& cov, std::stack
 
 	ifstream* f = CovList::read(filename, cov, format_id, format_version);
 
-	cov.loup_point.resize((int) cov.n);
-
 	if (format_id.empty() || format_id.top()!=subformat_number || format_version.top()!=FORMAT_VERSION) {
 		cov.optimizer_status = (unsigned int) Optimizer::SUCCESS;
 		cov.is_extended_space = false;
 		cov.uplo = NEG_INFINITY;
 		cov.loup = POS_INFINITY;
+		cov.loup_point.resize((int) cov.n);
 		cov.loup_point = IntervalVector::empty(cov.n);
 		cov.time = -1;
 		cov.nb_cells = 0;
@@ -119,8 +127,10 @@ ifstream* CovOptimData::read(const char* filename, CovOptimData& cov, std::stack
 		cov.uplo_of_epsboxes  = read_double(*f);
 		cov.loup              = read_double(*f);
 
-		uint32_t loup_found   = read_pos_int(*f);
+		unsigned int loup_found   = read_pos_int(*f);
 		unsigned int nb_var   = cov.is_extended_space ? cov.n-1 : cov.n;
+		cov.loup_point.resize((int) nb_var);
+		// TODO: we assume here that the goal var is n-1
 		cov.loup_point 		  = loup_found==1? cov[0].subvector(0,nb_var-1) : IntervalVector::empty(nb_var);
 
 		cov.time              = read_double(*f);
@@ -137,15 +147,16 @@ ofstream* CovOptimData::write(const char* filename, const CovOptimData& cov, std
 
 	ofstream* f = CovList::write(filename, cov, format_id, format_version);
 
-	write_vars  (*f, cov.var_names);
-	write_pos_int   (*f, cov.optimizer_status);
-	write_pos_int   (*f, (uint32_t) cov.is_extended_space);
-	write_double(*f, cov.uplo);
-	write_double(*f, cov.uplo_of_epsboxes);
-	write_double(*f, cov.loup);
+	write_vars   (*f, cov.var_names);
+	write_pos_int(*f, cov.optimizer_status);
+	write_pos_int(*f, (uint32_t) cov.is_extended_space);
+	write_double (*f, cov.uplo);
+	write_double (*f, cov.uplo_of_epsboxes);
+	write_double (*f, cov.loup);
 
 	if (!cov.loup_point.is_empty()) {
 		unsigned int nb_var   = cov.is_extended_space ? cov.n-1 : cov.n;
+		// TODO: we assume here that the goal var is n-1
 		if (cov[0].subvector(0,nb_var-1)!=cov.loup_point) {
 			ibex_error("[CovOptimData] the first box in the list must be the 'loup-point'.");
 		}

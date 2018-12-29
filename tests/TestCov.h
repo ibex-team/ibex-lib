@@ -7,7 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Nov 28, 2018
- * Last Update : Dec 13, 2018
+ * Last Update : Dec 27, 2018
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_COV_H__

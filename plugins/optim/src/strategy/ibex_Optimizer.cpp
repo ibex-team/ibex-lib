@@ -26,6 +26,9 @@ const double Optimizer::default_eps_x = 0;
 const double Optimizer::default_rel_eps_f = 1e-03;
 const double Optimizer::default_abs_eps_f = 1e-07;
 
+/*
+ * TODO: redundant with ExtendedSystem.
+ */
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;
 	for (int i=0; i<n; i++,i2++) {
@@ -48,7 +51,7 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
                 						n(n), goal_var(goal_var),
 										ctc(ctc), bsc(bsc), loup_finder(finder), buffer(buffer),
 										eps_x(eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
-										trace(0), timeout(-1),
+										trace(0), timeout(-1), extended_COV(true),
 										status(SUCCESS),
 										//kkt(normalized_user_sys),
 										uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
@@ -307,12 +310,11 @@ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 	loup_changed=false;
 	initial_loup=obj_init_bound;
 
-	// TODO: no loup-point if handle_cell contracts everything
-	loup_point=init_box;
+	loup_point.set_empty();
 	time=0;
 
 	if (cov) delete cov;
-	cov = new CovOptimData(n+1,true);
+	cov = new CovOptimData(extended_COV? n+1 : n, extended_COV);
 	cov->time = 0;
 	cov->nb_cells = 0;
 
@@ -332,6 +334,7 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 	uplo=data.uplo;
 	loup=data.loup;
 	loup_point=data.loup_point;
+	cout << "loup point loaded: " << loup_point << endl;
 	uplo_of_epsboxes=POS_INFINITY;
 
 	nb_cells=0;
@@ -345,7 +348,8 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 		if (data.is_extended_space)
 			box = data[i];
 		else {
-			box = cart_prod(data[i],Interval::ALL_REALS);
+			write_ext_box(data[i], box);
+			box[goal_var] = Interval::ALL_REALS;
 			ctc.contract(box);
 			if (box.is_empty()) continue;
 		}
@@ -373,7 +377,7 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 	time=0;
 
 	if (cov) delete cov;
-	cov = new CovOptimData(n+1, true);
+	cov = new CovOptimData(extended_COV? n+1 : n, extended_COV);
 	cov->time = data.time;
 	cov->nb_cells = data.nb_cells;
 }
@@ -459,8 +463,8 @@ Optimizer::Status Optimizer::optimize() {
 		status = TIME_OUT;
 	}
 
-	/* TODO: cannot retreive variable names here. */
-	for (int i=0; i<n+1; i++)
+	/* TODO: cannot retrieve variable names here. */
+	for (int i=0; i<(extended_COV ? n+1 : n); i++)
 		cov->var_names.push_back(string(""));
 
 	cov->optimizer_status = (unsigned int) status;
@@ -472,12 +476,27 @@ Optimizer::Status Optimizer::optimize() {
 	cov->nb_cells += nb_cells;
 	cov->loup_point = loup_point;
 
+	// for conversion between original/extended boxes
+	IntervalVector tmp(extended_COV ? n+1 : n);
+
 	// by convention, the first box has to be the loup-point.
-	cov->add(cart_prod(loup_point,Interval(uplo,loup)));
+	if (extended_COV) {
+		write_ext_box(loup_point, tmp);
+		tmp[goal_var] = Interval(uplo,loup);
+		cov->add(tmp);
+	}
+	else {
+		cov->add(loup_point);
+	}
 
 	while (!buffer.empty()) {
 		Cell* cell=buffer.top();
-		cov->add(cell->box);
+		if (extended_COV)
+			cov->add(cell->box);
+		else {
+			read_ext_box(cell->box,tmp);
+			cov->add(tmp);
+		}
 		delete buffer.pop();
 	}
 
