@@ -110,6 +110,7 @@ void Cov::read_signature(ifstream& f) {
 	if (f.eof()) ibex_error("[manifold]: unexpected end of file.");
 	if (strcmp(sig,SIGNATURE)!=0)
 	ibex_error("[Cov]: not an Ibex \"cover\" file.");
+	delete[] sig;
 }
 
 void Cov::read_format_seq(std::ifstream& f, stack<unsigned int>& format_id, std::stack<unsigned int>& format_version) {
