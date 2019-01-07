@@ -502,23 +502,56 @@ Optimizer::Status Optimizer::optimize() {
 	return status;
 }
 
+namespace {
+const char* green() {
+#ifndef _WIN32
+	return "\033[32m";
+#else
+	return "";
+#endif
+}
+
+const char* red(){
+#ifndef _WIN32
+	return "\033[31m";
+#else
+	return "";
+#endif
+}
+
+const char* white() {
+#ifndef _WIN32
+	return "\033[0m";
+#else
+	return "";
+#endif
+}
+
+}
+
 void Optimizer::report() {
 
 	switch(status) {
-	case SUCCESS: cout << "\033[32m" << " optimization successful!" << endl;
-	break;
-	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
-	break;
-	case NO_FEASIBLE_FOUND: cout << "\033[31m" << " no feasible point found (the problem may be infeasible)" << endl;
-	break;
-	case UNBOUNDED_OBJ: cout << "\033[31m" << " possibly unbounded objective (f*=-oo)" << endl;
-	break;
-	case TIME_OUT: cout << "\033[31m" << " time limit " << timeout << "s. reached " << endl;
-	break;
-	case UNREACHED_PREC: cout << "\033[31m" << " unreached precision" << endl;
+	case SUCCESS: 
+		cout << green() << " optimization successful!" << endl;
+		break;
+	case INFEASIBLE: 
+		cout << red() << " infeasible problem" << endl;
+		break;
+	case NO_FEASIBLE_FOUND: 
+		cout << red() << " no feasible point found (the problem may be infeasible)" << endl;
+		break;
+	case UNBOUNDED_OBJ: 
+		cout << red() << " possibly unbounded objective (f*=-oo)" << endl;
+		break;
+	case TIME_OUT: 
+		cout << red() << " time limit " << timeout << "s. reached " << endl;
+		break;
+	case UNREACHED_PREC: 
+		cout << red() << " unreached precision" << endl;
+		break;
 	}
-
-	cout << "\033[0m" << endl;
+	cout << white() <<  endl;
 
 	// No solution found and optimization stopped with empty buffer
 	// before the required precision is reached => means infeasible problem
@@ -543,12 +576,12 @@ void Optimizer::report() {
 
 		cout << " relative precision on f*:\t" << rel_prec;
 		if (rel_prec <= rel_eps_f)
-			cout << "\033[32m [passed] \033[0m";
+			cout << green() << " [passed] " << white();
 		cout << endl;
 
 		cout << " absolute precision on f*:\t" << abs_prec;
 		if (abs_prec <= abs_eps_f)
-			cout << "\033[32m [passed] \033[0m";
+			cout << green() << " [passed] " << white();
 		cout << endl;
 	}
 

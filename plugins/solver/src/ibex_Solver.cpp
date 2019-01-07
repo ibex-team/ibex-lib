@@ -467,21 +467,52 @@ void Solver::flush() {
 	}
 }
 
+namespace {
+const char* green() {
+#ifndef _WIN32
+	return "\033[32m";
+#else
+	return "";
+#endif
+}
+
+const char* red(){
+#ifndef _WIN32
+	return "\033[31m";
+#else
+	return "";
+#endif
+}
+
+const char* white() {
+#ifndef _WIN32
+	return "\033[0m";
+#else
+	return "";
+#endif
+}
+
+}
 void Solver::report() {
 
 	switch ((Status) manif->solver_status) {
-	case SUCCESS: cout << "\033[32m" << " solving successful!" << endl;
-	break;
-	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
-	break;
-	case NOT_ALL_VALIDATED: cout << "\033[31m" << " done! but some boxes have 'unknown' status." << endl;
-	break;
-	case TIME_OUT: cout << "\033[31m" << " time limit " << time_limit << "s. reached " << endl;
-	break;
-	case CELL_OVERFLOW: cout << "\033[31m" << " cell overflow" << endl;
+	case SUCCESS: 
+		cout << green() << " solving successful!" << endl;
+		break;
+	case INFEASIBLE: 
+		cout << red() << " infeasible problem" << endl;
+		break;
+	case NOT_ALL_VALIDATED: 
+		cout << red() << " done! but some boxes have 'unknown' status." << endl;
+		break;
+	case TIME_OUT: 
+		cout << red() << " time limit " << time_limit << "s. reached " << endl;
+		break;
+	case CELL_OVERFLOW: 
+		cout << red() << " cell overflow" << endl;
 	}
 
-	cout << "\033[0m" << endl;
+	cout << white() << endl;
 
 	cout << " number of inner boxes:\t\t";
 	if (manif->nb_inner()==0) cout << "--"; else cout << manif->nb_inner();
