@@ -485,18 +485,40 @@ void Solver::flush() {
 void Solver::report() {
 
 	switch(manif->status) {
-	case SUCCESS: cout << "\033[32m" << " solving successful!" << endl;
+	case SUCCESS: 
+#ifndef _WIN32
+	cout << "\033[32m";
+#endif
+	cout << " solving successful!" << endl;
 	break;
-	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
+	case INFEASIBLE: 
+#ifndef _WIN32
+	cout << "\033[31m";
+#endif
+	cout << " infeasible problem" << endl;
 	break;
-	case NOT_ALL_VALIDATED: cout << "\033[31m" << " done! but some boxes have 'unknown' status." << endl;
+	case NOT_ALL_VALIDATED: 
+#ifndef _WIN32
+	cout << "\033[31m";
+#endif
+	cout << " done! but some boxes have 'unknown' status." << endl;
 	break;
-	case TIME_OUT: cout << "\033[31m" << " time limit " << time_limit << "s. reached " << endl;
+	case TIME_OUT: 
+#ifndef _WIN32
+	cout << "\033[31m";
+#endif
+	cout << " time limit " << time_limit << "s. reached " << endl;
 	break;
-	case CELL_OVERFLOW: cout << "\033[31m" << " cell overflow" << endl;
+	case CELL_OVERFLOW: 
+#ifndef _WIN32
+	cout << "\033[31m";
+#endif
+	cout << " cell overflow" << endl;
 	}
 
+#ifndef _WIN32
 	cout << "\033[0m" << endl;
+#endif
 
 	cout << " number of inner boxes:\t\t" << manif->inner.size() << endl;
 	cout << " number of boundary boxes:\t" << manif->boundary.size() << endl;

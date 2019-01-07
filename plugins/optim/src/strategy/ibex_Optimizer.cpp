@@ -400,20 +400,45 @@ void Optimizer::report(bool verbose) {
 	}
 
 	switch(status) {
-	case SUCCESS: cout << "\033[32m" << " optimization successful!" << endl;
+	case SUCCESS: 
+#ifndef _WIN32
+	cout << "\033[32m";
+#endif
+	cout << " optimization successful!" << endl;
 	break;
-	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
+	case INFEASIBLE: 
+#ifndef _WIN32
+	cout << "\033[31m";
+#endif
+	cout << " infeasible problem" << endl;
 	break;
-	case NO_FEASIBLE_FOUND: cout << "\033[31m" << " no feasible point found (the problem may be infeasible)" << endl;
+	case NO_FEASIBLE_FOUND: 
+#ifndef _WIN32	
+	cout << "\033[31m";
+#endif
+	cout << " no feasible point found (the problem may be infeasible)" << endl;
 	break;
-	case UNBOUNDED_OBJ: cout << "\033[31m" << " possibly unbounded objective (f*=-oo)" << endl;
+	case UNBOUNDED_OBJ: 
+#ifndef _WIN32
+	cout << "\033[31m";
+#endif
+	cout << " possibly unbounded objective (f*=-oo)" << endl;
 	break;
-	case TIME_OUT: cout << "\033[31m" << " time limit " << timeout << "s. reached " << endl;
+	case TIME_OUT: 
+#ifndef _WIN32
+	cout << "\033[31m";
+#endif
+	cout << " time limit " << timeout << "s. reached " << endl;
 	break;
-	case UNREACHED_PREC: cout << "\033[31m" << " unreached precision" << endl;
+	case UNREACHED_PREC: 
+#ifndef _WIN32
+	cout << "\033[31m";
+#endif
+	cout << " unreached precision" << endl;
 	}
-
+#ifndef _WIN32
 	cout << "\033[0m" << endl;
+#endif
 
 	// No solution found and optimization stopped with empty buffer  before the required precision is reached => means infeasible problem
 	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && abs_eps_f==0 && rel_eps_f==0))) {
