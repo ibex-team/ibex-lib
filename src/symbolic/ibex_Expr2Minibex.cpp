@@ -33,7 +33,7 @@ void Expr2Minibex::print(std::ostream& os, const ExprNode& e, bool human) {
 
 			os << "  _tmp_" << tmp << "_ = ";
 			visit(node);
-			os << ";           " << node.fathers.size() << std::endl;
+			os << ";" << std::endl;
 			map.insert(node, tmp++);
 		}
 	}
