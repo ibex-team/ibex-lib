@@ -43,7 +43,7 @@ public:
 	explicit NormalizedSystem(const System& sys, double eps=0, bool extended=false);
 
 	/** Default epsilon applied to equations: 1e-8. */
-	static const double default_eps_h;
+	static constexpr double default_eps_h = 1e-08;
 
 	/**
 	 * \brief Id of the original system

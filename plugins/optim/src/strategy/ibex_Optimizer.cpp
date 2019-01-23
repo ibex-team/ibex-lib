@@ -21,10 +21,6 @@ using namespace std;
 
 namespace ibex {
 
-const double Optimizer::default_eps_x = 0;
-const double Optimizer::default_rel_eps_f = 1e-03;
-const double Optimizer::default_abs_eps_f = 1e-07;
-
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;
 	for (int i=0; i<n; i++,i2++) {

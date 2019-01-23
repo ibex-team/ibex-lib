@@ -31,7 +31,7 @@ def configure (conf):
 		conf.fatal ("Optim plugin requires a LP library (--lp-lib)")
 
 	# We need -std=c++11 to compile ibexopt
-	conf.check_cxx(cxxflags = "-std=c++11", uselib_store="IBEXOPT")
+	conf.check_cxx(cxxflags = "--std=c++11", uselib_store="IBEXOPT")
 
 	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
 	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEXOPT")

@@ -90,8 +90,8 @@ public :
 	/** the average (on all tunings) of the  number of variables to be shaved  : result given at the end of the search*/
 	static double nbvarstat;
 
-	/** default ctratio value, set to 0.005 */
-	static const double default_ctratio;
+	/** default ctratio value, set to 0.002. */
+	static constexpr double default_ctratio = 0.002;
 
 protected :
 	/**

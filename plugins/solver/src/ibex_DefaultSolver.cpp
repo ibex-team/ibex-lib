@@ -28,10 +28,6 @@ using namespace std;
 
 namespace ibex {
 
-const double DefaultSolver::default_eps_x_min = 1e-3;
-const double DefaultSolver::default_eps_x_max = POS_INFINITY;
-const double DefaultSolver::default_random_seed = 1.0;
-
 #define SQUARE_EQ_SYSTEM_TAG 1
 
 namespace {

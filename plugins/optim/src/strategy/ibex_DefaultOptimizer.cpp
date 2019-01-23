@@ -30,8 +30,6 @@ using namespace std;
 
 namespace ibex {
 
-const double DefaultOptimizer::default_random_seed = 1.0;
-
 #define NORMALIZED_SYSTEM_TAG 1
 #define EXTENDED_SYSTEM_TAG 2
 

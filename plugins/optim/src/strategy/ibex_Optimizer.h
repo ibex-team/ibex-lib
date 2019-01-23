@@ -239,19 +239,19 @@ public:
 	const double eps_x;
 
 	/** Default bisection precision: 0. */
-	static const double default_eps_x;
+	static constexpr double default_eps_x = 0;
 
 	/** Relative precision on the objective */
 	const double rel_eps_f;
 
 	/** Default goal relative precision: 1e-3. */
-	static const double default_rel_eps_f;
+	static constexpr double default_rel_eps_f = 1e-03;
 
 	/** Absolute precision on the objective */
 	const double abs_eps_f;
 
 	/** Default goal absolute precision: 1e-7. */
-	static const double default_abs_eps_f;
+	static constexpr double default_abs_eps_f = 1e-07;;
 
 	/**
 	 * \brief Trace activation flag.

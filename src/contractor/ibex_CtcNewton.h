@@ -72,7 +72,7 @@ public:
 	const double gauss_seidel_ratio;
 
 	/** Initialized to 0.01 */
-	static const double default_ceil;
+	static constexpr double default_ceil = 0.01;
 
 };
 

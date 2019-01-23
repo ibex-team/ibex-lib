@@ -13,8 +13,6 @@
 
 namespace ibex {
 
-const double HC4Revise::RATIO = 0.1;
-
 HC4Revise::HC4Revise(Eval& e) : f(e.f), eval(e), d(e.d) {
 
 }
