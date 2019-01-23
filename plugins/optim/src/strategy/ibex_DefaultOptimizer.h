@@ -51,7 +51,7 @@ public:
     		double eps_x=Optimizer::default_eps_x);
 
 	/** Default random seed: 1.0. */
-	static const double default_random_seed;
+	static constexpr double default_random_seed = 1.0;
 
 private:
 

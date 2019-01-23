@@ -29,7 +29,7 @@ public:
 	void contract(IntervalVector& box);
 	virtual void contract(IntervalVector& box, ContractContext& context);
 
-	static const int LimitCIDDichotomy;
+	static constexpr int LimitCIDDichotomy = 100;
 
 protected:
 	virtual bool var3BCID_dicho(IntervalVector& box, int var, double wv);

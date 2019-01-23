@@ -14,7 +14,10 @@ using namespace std;
 
 namespace ibex {
 
-Map<long,false> BxpActiveCtrs::ids;
+Map<long,false>& BxpActiveCtrs::ids() {
+	static Map<long,false> _ids;
+	return _ids;
+}
 
 BxpActiveCtrs::BxpActiveCtrs(const System& sys) :
 		Bxp(get_id(sys)), sys(sys), active(sys.nb_ctr), ineq(sys.nb_ctr) {
@@ -66,10 +69,10 @@ void BxpActiveCtrs::_update(const BoxProperties& prop) {
 
 long BxpActiveCtrs::get_id(const System& sys) {
 	try {
-		return ids[sys.id];
+		return ids()[sys.id];
 	} catch(Map<long,false>::NotFound&) {
 		long new_id=next_id();
-		ids.insert_new(sys.id, new_id);
+		ids().insert_new(sys.id, new_id);
 		return new_id;
 	}
 }

@@ -50,17 +50,19 @@ public:
 	/**
 	 * \brief Default minimal width: 1e-6.
 	 */
-	static const double default_eps_x_min;
+	static constexpr double default_eps_x_min = 1e-3;
 
 	/**
 	 * \brief Default maximal width: +oo.
 	 */
-	static const double default_eps_x_max;
+	static constexpr double default_eps_x_max = POS_INFINITY;
 
-	/** Default random seed: 1.0. */
-	static const double default_random_seed;
+	/**
+	 * Default random seed: 1.0.
+	 */
+	static constexpr double default_random_seed = 1.0;
 
-	System & sys;
+	System& sys;
 
 private:
 

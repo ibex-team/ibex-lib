@@ -135,18 +135,18 @@ public:
 	Ctc& ctc;
 
 	/** Default s3b value, set to 10 **/
-	static const int default_s3b;
+	static constexpr int default_s3b = 10;
 
 	/** Default scid value, set to 1 **/
-	static const int default_scid;
+	static constexpr int default_scid = 1;
 
 	/** Default var_min_width value, set to 1e-11 **/
-	static const double default_var_min_width;
+	static constexpr double default_var_min_width = 1.e-11;
 
 	/** Dichotomy limit , set to 16 : if the number of slices is greater than
       LimitCIDDichotomy, the shaving process is achieved in a dichotomic way,
       otherwise it is achieved in a linear way. **/
-	static const int LimitCIDDichotomy;
+	static constexpr int LimitCIDDichotomy = 16;
 
 protected:
 	/**

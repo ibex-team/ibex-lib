@@ -17,10 +17,6 @@ using namespace std;
 
 namespace ibex {
 
-/*! Default propagation ratio. */
-#define __IBEX_DEFAULT_RATIO_PROPAG           0.01
-
-
 CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  Ctc(cl), list(cl), ratio(ratio), incremental(incremental),
 		  accumulate(false), g(cl.size(), nb_var), agenda(cl.size()),
@@ -176,7 +172,5 @@ void CtcPropag::contract(IntervalVector& box, ContractContext& context) {
 		// which imposes that the contractor is inactive before contraction
 		context.output_flags.add(INACTIVE);
 }
-
-const double CtcPropag::default_ratio = __IBEX_DEFAULT_RATIO_PROPAG;
 
 } // namespace ibex

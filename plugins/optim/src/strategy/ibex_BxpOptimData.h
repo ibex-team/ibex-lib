@@ -91,7 +91,7 @@ protected:
 	 */
 	explicit BxpOptimData(const BxpOptimData& e);
 
-	static Map<long,false> ids;
+	static Map<long,false>& ids();
 };
 
 /*================================== inline implementations ========================================*/

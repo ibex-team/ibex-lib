@@ -12,8 +12,10 @@
 
 namespace ibex {
 
-Map<long,false> BxpOptimData::ids;
-
+Map<long,false>& BxpOptimData::ids() {
+	static Map<long,false> _ids;
+	return _ids;
+}
 
 BxpOptimData::BxpOptimData(const ExtendedSystem& sys) : Bxp(get_id(sys)), sys(sys), pf(), pu(0) {
 
@@ -29,10 +31,10 @@ BxpOptimData::~BxpOptimData() {
 
 long BxpOptimData::get_id(const ExtendedSystem& sys) {
 	try {
-		return ids[sys.id];
+		return ids()[sys.id];
 	} catch(Map<long,false>::NotFound&) {
 		long new_id=next_id();
-		ids.insert_new(sys.id, new_id);
+		ids().insert_new(sys.id, new_id);
 		return new_id;
 	}
 }

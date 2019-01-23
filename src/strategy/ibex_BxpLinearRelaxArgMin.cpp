@@ -16,8 +16,6 @@ using namespace std;
 
 namespace ibex {
 
-Map<long,false> BxpLinearRelaxArgMin::ids;
-
 namespace {
 
 /*
@@ -32,6 +30,12 @@ int get_original_nb_var(const System& sys) {
 }
 
 }
+
+Map<long,false>& BxpLinearRelaxArgMin::ids() {
+	static Map<long,false> _ids;
+	return _ids;
+}
+
 BxpLinearRelaxArgMin::BxpLinearRelaxArgMin(const System& sys) : Bxp(get_id(sys)), sys(sys), _argmin(get_original_nb_var(sys)), inside(false) {
 
 }
@@ -70,10 +74,10 @@ long BxpLinearRelaxArgMin::get_id(const System& sys) {
 	const NormalizedSystem* norm_sys = dynamic_cast<const NormalizedSystem*>(&sys);
 	long sys_id = norm_sys? norm_sys->original_sys_id : sys.id;
 	try {
-		return ids[sys_id];
+		return ids()[sys_id];
 	} catch(Map<long,false>::NotFound&) {
 		long new_id=next_id();
-		ids.insert_new(sys_id, new_id);
+		ids().insert_new(sys_id, new_id);
 		return new_id;
 	}
 }
