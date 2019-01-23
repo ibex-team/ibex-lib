@@ -25,7 +25,6 @@
 #include "ibex_Exception.h"
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
-#include "ibex_Manifold.h"
 #include "ibex_RoundRobin.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_UnknownFileException.h"
@@ -177,7 +176,7 @@ int main(int argc, const char ** argv) {
 	}
 
 	if (format) {
-		cout << ibex::Manifold::format() << endl;
+		cout << ibex::SIPManifold::format() << endl;
 		exit(0);
 	}
 

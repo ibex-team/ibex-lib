@@ -66,9 +66,9 @@ int main(int argc, const char ** argv) {
 	const long default_random_seed = 0L;
 	stringstream _rel_eps_f, _abs_eps_f, _eps_h, _random_seed, _eps_x;
 	_rel_eps_f << "Relative precision on the objective. Default value is 1e"
-			<< round(::log10(SIPOptimizer::default_rel_eps_f)) << ".";
+			<< round(::log10(double(SIPOptimizer::default_rel_eps_f))) << ".";
 	_abs_eps_f << "Absolute precision on the objective. Default value is 1e"
-			<< round(::log10(SIPOptimizer::default_abs_eps_f)) << ".";
+			<< round(::log10(double(SIPOptimizer::default_abs_eps_f))) << ".";
 	//_eps_h << "Equality relaxation value. Default value is 1e" << round(::log10(NormalizedSystem::default_eps_h)) << ".";
 	_random_seed << "Random seed (useful for reproducibility). Default value is " << default_random_seed << ".";
 	_eps_x << "Precision on the variable (**Deprecated**). Default value is 0.";
@@ -76,9 +76,9 @@ int main(int argc, const char ** argv) {
 	args::ArgumentParser parser("********* SIPOpt (sipopt) *********.", "Solve a Minibex file.");
 	args::HelpFlag help(parser, "help", "Display this help menu", { 'h', "help" });
 	args::ValueFlag<double> rel_eps_f(parser, "float", _rel_eps_f.str(), { 'r', "rel-eps-f" },
-			SIPOptimizer::default_rel_eps_f);
+			double(SIPOptimizer::default_rel_eps_f));
 	args::ValueFlag<double> abs_eps_f(parser, "float", _abs_eps_f.str(), { 'a', "abs-eps-f" },
-			SIPOptimizer::default_abs_eps_f);
+			double(SIPOptimizer::default_abs_eps_f));
 	//args::ValueFlag<double> eps_h(parser, "float", _eps_h.str(), {"eps-h"});
 	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo.", { 't',
 			"timeout" });
