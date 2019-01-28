@@ -38,15 +38,12 @@ namespace ibex {
  * so that a 'solution' box is a box containing a solution, according
  * to the usual meaning.
  *
- * A qualified box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
- * f=0 crosses the inequalities in a "regular" way, the exact definition
- * of "regular" depending on the boundary_test flag of the solver.
- * See #Solver::boundary_test_strength.
- *
  * When the system is under-constrained, the "solution" box ([x],[p])" may be a
- * large box (compared to eps-min). The "varset" structure indicates which
- * components correspond to x and p. It is NULL in case of well-constrained
- * systems (no parameters) or if m=0 (all parameters).
+ * large box. The "varset" structure indicates which components correspond to x and p.
+ *
+ * A box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
+ * f=0 crosses the inequalities. Note: 	a solver may impose more stringent
+ * conditions on a box to be "boundary". See #Solver::boundary_test_strength.
  *
  */
 class CovManifold : public CovIBUList {
