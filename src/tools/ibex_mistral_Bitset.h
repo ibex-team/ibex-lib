@@ -15,6 +15,24 @@
 #include <string.h>
 
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+
+static unsigned int __inline __builtin_ctz(unsigned int x){
+  unsigned long r = 0;
+  _BitScanForward(&r, x);
+  return r;
+}
+
+static unsigned int __inline __builtin_clz(unsigned int x){
+  unsigned long r = 0;
+  _BitScanReverse(&r, x);
+  return (32 - r);
+}
+#  define __builtin_popcount __popcnt
+#endif
+
+
 namespace Mistral {
 
 template <class WORD_TYPE>
@@ -1140,7 +1158,7 @@ typedef Bitset64 BitSet;
 typedef Bitset32 BitSet;
 
 #endif
-  
+
 } // end namespace Mistral
-  
+
 #endif

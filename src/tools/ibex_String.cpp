@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_String.cpp
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
@@ -24,6 +24,7 @@ namespace ibex {
 
 #ifdef _MSC_VER
 #define SNPRINTF _snprintf
+#define __attribute__(x)
 #else
 #define SNPRINTF snprintf
 #endif // _MSC_VER
