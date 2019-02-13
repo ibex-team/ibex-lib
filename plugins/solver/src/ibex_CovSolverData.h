@@ -46,7 +46,7 @@ public:
 	/**
 	 * \brief Possible status of a box in solver data.
 	 */
-	typedef enum { INNER, SOLUTION, BOUNDARY, UNKNOWN, PENDING } BoxStatus;
+	typedef enum { SOLUTION, BOUNDARY, UNKNOWN, PENDING } BoxStatus;
 
 	/**
 	 * \brief Create an empty solver data structure.
@@ -219,11 +219,11 @@ inline CovSolverData::BoxStatus CovSolverData::status(int i) const {
 }
 
 inline const IntervalVector& CovSolverData::pending(int j) const {
-	return *_solver_pending[j];
+	return (*this)[_solver_pending[j]];
 }
 
 inline const IntervalVector& CovSolverData::unknown(int j) const {
-	return *_solver_unknown[j];
+	return (*this)[_solver_unknown[j]];
 }
 
 inline size_t CovSolverData::nb_pending() const {

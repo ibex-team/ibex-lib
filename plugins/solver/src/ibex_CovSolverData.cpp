@@ -49,7 +49,7 @@ void CovSolverData::add(const IntervalVector& x) {
 
 void CovSolverData::add_inner(const IntervalVector& x) {
 	CovManifold::add_inner(x);
-	_solver_status.push_back(INNER);
+	_solver_status.push_back(SOLUTION);
 }
 
 void CovSolverData::add_boundary(const IntervalVector& x) {
@@ -184,9 +184,6 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::sta
 			++it;
 		} else {
 			switch(cov.CovManifold::status(i)) {
-			case CovManifold::INNER :
-				cov._solver_status.push_back(CovSolverData::INNER);
-				break;
 			case CovManifold::SOLUTION :
 				cov._solver_status.push_back(CovSolverData::SOLUTION);
 				break;
@@ -194,7 +191,7 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::sta
 				cov._solver_status.push_back(CovSolverData::BOUNDARY);
 				break;
 			default :
-				cov._solver_unknown.push_back(cov.vec[i]);
+				cov._solver_unknown.push_back(i);
 				cov._solver_status.push_back(CovSolverData::UNKNOWN);
 			}
 		}

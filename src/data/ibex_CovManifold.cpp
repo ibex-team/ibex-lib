@@ -56,8 +56,8 @@ void CovManifold::add_inner(const IntervalVector& x) {
 
 void CovManifold::add_boundary(const IntervalVector& x) {
 	switch (boundary_type) {
-	case EQU_ONLY  : CovIBUList::add_unknwon(x); break;
-	case FULL_RANK : CovIBUList::add_unknwon(x); break;
+	case EQU_ONLY  : CovIBUList::add_unknown(x); break;
+	case FULL_RANK : CovIBUList::add_unknown(x); break;
 	case HALF_BALL : CovIBUList::add_boundary(x); break;
 	default        : assert(false);
 	}
@@ -151,9 +151,9 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 
 		unsigned int _boundary_type = read_pos_int(*f);
 		switch (_boundary_type) {
-		case 0: (BoundaryType&) boundary_type = EQU_ONLY; break;
-		case 1: (BoundaryType&) boundary_type = FULL_RANK; break;
-		case 2: (BoundaryType&) boundary_type = HALF_BALL; break;
+		case 0: (BoundaryType&) cov.boundary_type = EQU_ONLY; break;
+		case 1: (BoundaryType&) cov.boundary_type = FULL_RANK; break;
+		case 2: (BoundaryType&) cov.boundary_type = HALF_BALL; break;
 		default: ibex_error("[CovManifold]: unknown boundary type identifier.");
 		}
 
@@ -189,11 +189,11 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 		nb_boundary = read_pos_int(*f);
 
 		// (check redundant with below)
-		if (boundary_type != HALF_BALL && nb_boundary > cov.CovIBUList::nb_unknown())
+		if (cov.boundary_type != HALF_BALL && nb_boundary > cov.CovIBUList::nb_unknown())
 			ibex_error("[CovManifold]: number of (uncertified) boundary boxes > number of CovIBUList unknown boxes");
 
 		// (check redundant with below)
-		if (boundary_type == HALF_BALL && nb_boundary > cov.CovIBUList::nb_boundary())
+		if (cov.boundary_type == HALF_BALL && nb_boundary > cov.CovIBUList::nb_boundary())
 			ibex_error("[CovManifold]: number of boundary boxes > number of CovIBUList boundary boxes");
 
 		for (size_t i=0; i<nb_boundary; i++) {
@@ -217,14 +217,14 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 
 	for (size_t i=0; i<cov.size(); i++) {
 		if (it_sol!=cov._manifold_solution.end() && i==*it_sol) {
-			if (m>0 && !cov.CovIBUList::is_boundary(i))
+			if (cov.m>0 && !cov.CovIBUList::is_boundary(i))
 				ibex_error("[CovManifold]: a solution box must be a CovIBUList boundary box (if m>0).");
 			cov._manifold_status.push_back(CovManifold::SOLUTION);
 			++it_sol;
 		} else if (it_bnd!=cov._manifold_boundary.end() && i==*it_bnd) {
-			if (boundary_type != HALF_BALL && !cov.CovIBUList::is_unknown(i))
+			if (cov.boundary_type != HALF_BALL && !cov.CovIBUList::is_unknown(i))
 				ibex_error("[CovManifold]: a (uncertified) boundary box must be a CovIBUList unknown box.");
-			if (boundary_type == HALF_BALL && !cov.CovIBUList::is_boundary(i))
+			if (cov.boundary_type == HALF_BALL && !cov.CovIBUList::is_boundary(i))
 				ibex_error("[CovManifold]: a boundary box must be a CovIBUList boundary box.");
 			cov._manifold_status.push_back(CovManifold::BOUNDARY);
 			++it_bnd;
@@ -269,7 +269,7 @@ ofstream* CovManifold::write(const char* filename, const CovManifold& cov, std::
 	default        : assert(false);
 	}
 
-	if (m>0) {
+	if (cov.m>0) {
 		write_pos_int(*f, cov.nb_solution());
 		for (size_t i=0; i<cov.nb_solution(); i++) {
 			assert(i<sizeof(uint32_t));

@@ -112,7 +112,7 @@ ofstream* CovList::write(const char* filename, const CovList& cov, std::stack<un
 
 	write_pos_int(*f, cov.size());
 
-	for (list<IntervalVector>::const_iterator it=cov.list.begin(); it!=cov.list.end(); ++it) {
+	for (std::list<IntervalVector>::const_iterator it=cov.list.begin(); it!=cov.list.end(); ++it) {
 		write_box(*f, *it);
 	}
 

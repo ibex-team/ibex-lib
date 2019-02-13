@@ -306,7 +306,7 @@ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 	loup_changed=false;
 	initial_loup=obj_init_bound;
 
-	loup_point.set_empty();
+	loup_point = init_box; //.set_empty();
 	time=0;
 
 	if (cov) delete cov;

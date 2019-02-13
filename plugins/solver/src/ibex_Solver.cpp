@@ -323,9 +323,9 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 
 	if (!eqs) {
 		if (check_ineq(box)) {
-			if (trace >=1) cout << " [inner] " << box << endl;
+			if (trace >=1) cout << " [solution] " << box << endl;
 			manif->add_inner(box);
-			return CovSolverData::INNER;
+			return CovSolverData::SOLUTION;
 		} else
 			return CovSolverData::UNKNOWN;
 	} else {

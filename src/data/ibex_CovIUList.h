@@ -172,7 +172,7 @@ inline const IntervalVector& CovIUList::inner(int j) const {
 }
 
 inline const IntervalVector& CovIUList::unknown(int j) const {
-	return (*this)[*_IU_unknown[j]];
+	return (*this)[_IU_unknown[j]];
 }
 
 inline size_t CovIUList::nb_inner() const {

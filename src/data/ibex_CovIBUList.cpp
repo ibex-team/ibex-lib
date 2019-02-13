@@ -96,8 +96,8 @@ ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned
 		unsigned int _boundary_type = read_pos_int(*f);
 
 		switch(_boundary_type) {
-		case 0 :  (BoundaryType&) boundary_type = INNER_PT; break;
-		case 1 :  (BoundaryType&) boundary_type = INNER_AND_OUTER_PT; break;
+		case 0 :  (BoundaryType&) cov.boundary_type = INNER_PT; break;
+		case 1 :  (BoundaryType&) cov.boundary_type = INNER_AND_OUTER_PT; break;
 		default : ibex_error("[CovIBUList]: unknown boundary type identifier.");
 		}
 
@@ -116,7 +116,7 @@ ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned
 		}
 	}
 
-	vector<size_t>::const_iterator it=_IBU_boundary.begin(); // iterator of boundary boxes
+	vector<size_t>::const_iterator it=cov._IBU_boundary.begin(); // iterator of boundary boxes
 
 	for (size_t i=0; i<cov.size(); i++) {
 
