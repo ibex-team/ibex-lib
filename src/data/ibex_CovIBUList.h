@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 27, 2018
+// Last update : Feb 13, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_IBU_LIST_H__
@@ -22,9 +22,15 @@ namespace ibex {
  *
  * A CovIBUList is a CovIUList where unknown boxes of the mother class
  * are separated into two groups:
- * - the 'boundary' boxes: boxes that are known to cross the boundary
- *   (at least one point in the box belongs to the set and one point
- *    in the box does not belong to the set).
+ * - the 'boundary' boxes: boxes that are supposed to cross the boundary.
+ *   The exact property of these box depends on the boundary_type field:
+ *    - INNER_PT :           at least one point in the box belongs to the
+ *                           set (while the box could not be proven to be
+ *                           fully INNER);
+ *    - INNER_AND_OUTER_PT:  at least one point in the box belongs to the
+ *                           set and one point in the box does not belong
+ *                           to the set (proves that it actually crosses
+ *                           the boundary).
  * - the 'unknown' boxes: other boxes (no attached property).
  */
 class CovIBUList : public CovIUList {
@@ -36,11 +42,16 @@ public:
 	typedef enum { INNER, BOUNDARY, UNKNOWN } BoxStatus;
 
 	/**
+	 * \brief Type of a boundary box.
+	 */
+	typedef enum { INNER_PT, INNER_AND_OUTER_PT } BoundaryType;
+
+	/**
 	 * \brief Create a new, empty covering IBU list.
 	 *
 	 * \param n - the dimension of the covered set.
 	 */
-	CovIBUList(size_t n);
+	CovIBUList(size_t n, BoundaryType boundary_type=INNER_PT);
 
 	/**
 	 * \brief Load a IBU list from a COV file.
@@ -117,6 +128,15 @@ public:
 	 */
 	static const unsigned int FORMAT_VERSION;
 
+	/**
+	 * \brief Type of boundary boxes.
+	 *
+	 * This type is applied globally to the COV structure
+	 * (we cannot mix boundary boxes of different types in
+	 * the same COV file).
+	 */
+	const BoundaryType boundary_type;
+
 protected:
 
 	/**
@@ -141,9 +161,9 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
-	std::vector<BoxStatus> _IBU_status;              // status of the ith box
-	std::vector<IntervalVector*>  _IBU_boundary;     // pointer to 'boundary' boxes
-	std::vector<IntervalVector*>  _IBU_unknown;      // pointer to 'unknown' boxes
+	std::vector<BoxStatus> _IBU_status;       // status of the ith box
+	std::vector<size_t>    _IBU_boundary;     // indices of 'boundary' boxes
+	std::vector<size_t>    _IBU_unknown;      // indices of 'unknown' boxes
 
 };
 
@@ -175,11 +195,11 @@ inline bool CovIBUList::is_unknown(int i) const {
 }
 
 inline const IntervalVector& CovIBUList::boundary(int i) const {
-	return *_IBU_boundary[i];
+	return (*this)[_IBU_boundary[i]];
 }
 
 inline const IntervalVector& CovIBUList::unknown(int i) const {
-	return *_IBU_unknown[i];
+	return (*this)[_IBU_unknown[i]];
 }
 
 } /* namespace ibex */

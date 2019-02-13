@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Dec 24, 2018
+// Last update : Feb 13, 2019
 //============================================================================
 
 #include "ibex_CovSolverData.h"
@@ -60,7 +60,7 @@ void CovSolverData::add_boundary(const IntervalVector& x) {
 void CovSolverData::add_unknown(const IntervalVector& x) {
 	CovManifold::add_unknown(x);
 	_solver_status.push_back(UNKNOWN);
-	_solver_unknown.push_back(&list.back());
+	_solver_unknown.push_back(list.size()-1);
 }
 
 void CovSolverData::add_solution(const IntervalVector& existence, const IntervalVector& unicity) {
@@ -76,7 +76,7 @@ void CovSolverData::add_solution(const IntervalVector& existence, const Interval
 void CovSolverData::add_pending(const IntervalVector& x) {
 	CovManifold::add_unknown(x);
 	_solver_status.push_back(PENDING);
-	_solver_pending.push_back(&list.back());
+	_solver_pending.push_back(list.size()-1);
 }
 
 ostream& operator<<(ostream& os, const CovSolverData& solver) {
@@ -158,30 +158,30 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::sta
 		cov.nb_cells = read_pos_int(*f);
 
 		nb_pending = read_pos_int(*f);
+
+		if (nb_pending > cov.CovManifold::nb_unknown())
+			ibex_error("[CovSolverData]: number of pending boxes > number of CovManifold unknown boxes");
+
+		for (size_t i=0; i<nb_pending; i++) {
+			uint32_t j=read_pos_int(*f);
+			if (j<cov._solver_pending.back())
+				ibex_error("[CovSolverData]: indices of pending boxes are not in increasing order.");
+			if (j==cov._solver_pending.back())
+				ibex_error("[CovSolverData]: duplicated index of pending box.");
+			cov._solver_pending.push_back(j);
+		}
 	}
 
-	if (nb_pending > cov.CovManifold::nb_unknown())
-		ibex_error("[CovSolverData]: number of pending boxes > number of CovManifold unknown boxes");
 
-	unsigned int indices[nb_pending];
-	for (size_t i=0; i<nb_pending; i++) {
-		indices[i]=read_pos_int(*f);
-	}
-
-	if (nb_pending>0)
-		sort(indices,indices+nb_pending);
-
-
-	size_t i2=0; // counter of pending boxes
+	vector<size_t>::const_iterator it=cov._solver_pending.begin(); // iterator of pending boxes
 
 	for (size_t i=0; i<cov.size(); i++) {
 
-		if (i2<nb_pending && i==indices[i2]) {
+		if (it!=cov._solver_pending.end() && i==*it) {
 			if (!cov.CovManifold::is_unknown(i))
 				ibex_error("[CovSolverData]: a pending box must be a CovManifold unknown box.");
-			cov._solver_pending.push_back(cov.vec[i]);
 			cov._solver_status.push_back(CovSolverData::PENDING);
-			i2++;
+			++it;
 		} else {
 			switch(cov.CovManifold::status(i)) {
 			case CovManifold::INNER :
@@ -200,10 +200,7 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::sta
 		}
 
 	}
-	if (i2<nb_pending) ibex_error("[CovSolverData]: invalid solution box index.");
-
-	if (cov.nb_pending() != nb_pending)
-		ibex_error("[CovSolverDataFiile]: number of solution boxes does not match.");
+	if (it!=cov._solver_pending.end()) ibex_error("[CovSolverData]: invalid pending box index.");
 
 	return f;
 }
@@ -221,11 +218,12 @@ ofstream* CovSolverData::write(const char* filename, const CovSolverData& cov, s
 	write_pos_int(*f, cov.nb_cells);
 	write_pos_int(*f, cov.nb_pending());
 
-	// TODO: a complete scan could be avoided?
-	for (size_t i=0; i<cov.size(); i++) {
-		if (cov.status(i)==CovSolverData::PENDING)
-			write_pos_int(*f, (uint32_t) i);
+
+	for (vector<size_t>::const_iterator it=cov._solver_pending.begin(); it!=cov._solver_pending.end(); ++it) {
+		assert(*it<sizeof(uint32_t));
+		write_pos_int(*f, (uint32_t) *it);
 	}
+
 	return f;
 }
 

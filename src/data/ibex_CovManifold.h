@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Dec 27, 2018
+// Last update : Feb 13, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_MANIFOLD_H__
@@ -54,12 +54,18 @@ public:
 	 *
 	 * See above.
 	 */
-	typedef enum { INNER, SOLUTION, BOUNDARY, UNKNOWN } BoxStatus;
+	typedef enum { SOLUTION, BOUNDARY, UNKNOWN } BoxStatus;
+
+
+	/**
+	 * \brief Type of a boundary box.
+	 */
+	typedef enum { EQU_ONLY, FULL_RANK, HALF_BALL } BoundaryType;
 
 	/**
 	 * \brief Create an empty manifold covering.
 	 */
-	CovManifold(size_t n, size_t m, size_t nb_ineq=0);
+	CovManifold(size_t n, size_t m, size_t nb_ineq=0, BoundaryType boundary_type=EQU_ONLY);
 
 	/**
 	 * \brief Load a manifold covering from a COV file.
@@ -178,6 +184,13 @@ public:
 	const size_t nb_ineq;
 
 	/**
+	 * \brief Type of boundary boxes.
+	 *
+	 * By default: EQU_ONLY.
+	 */
+	const BoundaryType boundary_type;
+
+	/**
 	 * \brief Number of solutions.
 	 */
 	size_t nb_solution() const;
@@ -227,12 +240,12 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
-	std::vector<BoxStatus>        _manifold_status;    // status of the ith box
-	std::vector<IntervalVector*>  _manifold_solution;  // pointer to 'solution' boxes
-	std::vector<IntervalVector*>  _manifold_boundary;  // pointer to 'boundary' boxes
-	std::vector<IntervalVector>   _manifold_unicity;   // all the unicity boxes
+	std::vector<BoxStatus>       _manifold_status;    // status of the ith box
+	std::vector<size_t>          _manifold_solution;  // indices of 'solution' boxes
+	std::vector<size_t>          _manifold_boundary;  // indices of 'boundary' boxes
+	std::vector<IntervalVector>  _manifold_unicity;   // all the unicity boxes
 
-	// in the special case where m=n, there is only one
+	// in the special cases where m=0 or m=n, there is only one
 	// possible varset, so a unique varset is stored:
 	// _varset[0][0].
 	std::vector<VarSet>          _manifold_varset;
@@ -258,11 +271,11 @@ inline bool CovManifold::is_boundary(int i) const {
 }
 
 inline const IntervalVector& CovManifold::solution(int i) const {
-	return *_manifold_solution[i];
+	return (*this)[_manifold_solution[i]];
 }
 
 inline const IntervalVector& CovManifold::boundary(int i) const {
-	return *_manifold_boundary[i];
+	return (*this)[_manifold_boundary[i]];
 }
 
 inline const IntervalVector& CovManifold::unicity(int j) const {
@@ -270,7 +283,7 @@ inline const IntervalVector& CovManifold::unicity(int j) const {
 }
 
 inline const VarSet& CovManifold::varset(int j) const {
-	if (m<n)
+	if (m>0 && m<n)
 		return _manifold_varset[j];
 	else
 		return _manifold_varset[0];

@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Dec 27, 2018
+// Last update : Feb 13, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_SOLVER_DATA_H__
@@ -34,6 +34,7 @@ namespace ibex {
  *   interrupted because of a timeout/memory overflow).
  *
  * Furthermore, this class contains additional information about the last solving:
+ * - variable names
  * - solver status
  * - number of cells
  * - running time.
@@ -200,9 +201,9 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
-	std::vector<BoxStatus>        _solver_status;    // status of the ith box
-	std::vector<IntervalVector*>  _solver_pending;
-	std::vector<IntervalVector*>  _solver_unknown;
+	std::vector<BoxStatus>  _solver_status;    // status of the ith box
+	std::vector<size_t>     _solver_pending;   // indices of pending boxes
+	std::vector<size_t>     _solver_unknown;   // indices of unknown boxes
 
 };
 

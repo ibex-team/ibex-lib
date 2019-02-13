@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 27, 2018
+// Last update : Feb 13, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_IU_LIST_H__
@@ -142,9 +142,9 @@ protected:
 	static const unsigned int subformat_number;
 
 
-	std::vector<BoxStatus> _IU_status;         // status of the ith box
-	std::vector<IntervalVector*> _IU_inner;    // pointers to other 'inner' boxes
-	std::vector<IntervalVector*> _IU_unknown;  // pointers to other 'unknown' boxes
+	std::vector<BoxStatus> _IU_status; // status of the ith box
+	std::vector<size_t> _IU_inner;     // indices of other 'inner' boxes
+	std::vector<size_t> _IU_unknown;   // indices of other 'unknown' boxes
 
 };
 
@@ -168,11 +168,11 @@ inline bool CovIUList::is_unknown(int i) const {
 }
 
 inline const IntervalVector& CovIUList::inner(int j) const {
-	return *_IU_inner[j];
+	return (*this)[_IU_inner[j]];
 }
 
 inline const IntervalVector& CovIUList::unknown(int j) const {
-	return *_IU_unknown[j];
+	return (*this)[*_IU_unknown[j]];
 }
 
 inline size_t CovIUList::nb_inner() const {

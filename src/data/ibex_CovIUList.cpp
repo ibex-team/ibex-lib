@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 24, 2018
+// Last update : Feb 13, 2019
 //============================================================================
 
 #include "ibex_CovIUList.h"
@@ -47,13 +47,13 @@ void CovIUList::save(const char* filename) const {
 void CovIUList::add_inner(const IntervalVector& x) {
 	CovList::add(x);
 	_IU_status.push_back(INNER);
-	_IU_inner.push_back(&list.back());
+	_IU_inner.push_back(list.size()-1);
 }
 
 void CovIUList::add_unknown(const IntervalVector& x) {
 	CovList::add(x);
 	_IU_status.push_back(UNKNOWN);
-	_IU_unknown.push_back(&list.back());
+	_IU_unknown.push_back(list.size()-1);
 }
 
 void CovIUList::add(const IntervalVector& x) {
@@ -91,33 +91,30 @@ ifstream* CovIUList::read(const char* filename, CovIUList& cov, std::stack<unsig
 
 		if (nb_inner  > cov.size())
 			ibex_error("[CovIUList]: number of inner boxes exceeds total!");
+
+		for (size_t i=0; i<nb_inner; i++) {
+			uint32_t j=read_pos_int(*f);
+			if (j<cov._IU_inner.back())
+				ibex_error("[CovIUList]: indices of inner boxes are not in increasing order.");
+			if (j==cov._IU_inner.back())
+				ibex_error("[CovIUList]: duplicated index of inner box.");
+			cov._IU_inner.push_back(j);
+		}
 	}
 
-	unsigned int indices[nb_inner];
-	for (size_t i=0; i<nb_inner; i++) {
-		indices[i]=read_pos_int(*f);
-	}
-
-	if (nb_inner>0)
-		sort(indices,indices+nb_inner);
-
-	size_t i2=0; // counter of inner boxes
+	vector<size_t>::const_iterator it=cov._IU_inner.begin(); // iterator of inner boxes
 
 	for (size_t i=0; i<cov.size(); i++) {
-		if (i2<nb_inner && i==indices[i2]) {
-			cov._IU_inner.push_back(cov.vec[i]);
+		if (it!=cov._IU_inner.end() && i==*it) {
 			cov._IU_status.push_back(CovIUList::INNER);
-			i2++;
+			++it;
 		}
 		else {
-			cov._IU_unknown.push_back(cov.vec[i]);
+			cov._IU_unknown.push_back(i);
 			cov._IU_status.push_back(CovIUList::UNKNOWN);
 		}
 	}
-	if (i2<nb_inner) ibex_error("[CovIUList]: invalid inner box index.");
-
-	if (cov.nb_inner() != nb_inner)
-		ibex_error("[CovIUList]: number of inner boxes does not match");
+	if (it!=cov._IU_inner.end()) ibex_error("[CovIUList]: invalid inner box index.");
 
 	return f;
 }
@@ -131,10 +128,9 @@ ofstream* CovIUList::write(const char* filename, const CovIUList& cov, std::stac
 
 	write_pos_int(*f, cov.nb_inner());
 
-	// TODO: a complete scan could be avoided
-	for (size_t i=0; i<cov.size(); i++) {
-		if (cov.status(i)==CovIUList::INNER)
-			write_pos_int(*f, (uint32_t) i);
+	for (vector<size_t>::const_iterator it=cov._IU_inner.begin(); it!=cov._IU_inner.end(); ++it) {
+		assert(*it<sizeof(uint32_t));
+		write_pos_int(*f, (uint32_t) *it);
 	}
 	return f;
 }
@@ -148,7 +144,7 @@ void CovIUList::format(stringstream& ss, const string& title, std::stack<unsigne
 	ss
 	<< space << " - 1 integer:     the number Ni of inner boxes (<= N)\n"
 	<< "|     CovIUList     |"
-	            " - Ni integers:   the indices of inner boxes\n"
+	            " - Ni integers:   the indices of inner boxes in increasing order\n"
 	<< space << "                  (a subset of CovList boxes).\n"
 	<< separator;
 }
