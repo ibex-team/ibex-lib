@@ -164,10 +164,12 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::sta
 
 		for (size_t i=0; i<nb_pending; i++) {
 			uint32_t j=read_pos_int(*f);
-			if (j<cov._solver_pending.back())
-				ibex_error("[CovSolverData]: indices of pending boxes are not in increasing order.");
-			if (j==cov._solver_pending.back())
-				ibex_error("[CovSolverData]: duplicated index of pending box.");
+			if (!cov._solver_pending.empty()) { // check ordering
+				if (j<cov._solver_pending.back())
+					ibex_error("[CovSolverData]: indices of pending boxes are not in increasing order.");
+				if (j==cov._solver_pending.back())
+					ibex_error("[CovSolverData]: duplicated index of pending box.");
+			}
 			cov._solver_pending.push_back(j);
 		}
 	}
@@ -217,7 +219,7 @@ ofstream* CovSolverData::write(const char* filename, const CovSolverData& cov, s
 
 
 	for (vector<size_t>::const_iterator it=cov._solver_pending.begin(); it!=cov._solver_pending.end(); ++it) {
-		assert(*it<sizeof(uint32_t));
+		assert(*it<numeric_limits<uint32_t>::max());
 		write_pos_int(*f, (uint32_t) *it);
 	}
 

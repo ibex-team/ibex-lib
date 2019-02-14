@@ -94,10 +94,12 @@ ifstream* CovIUList::read(const char* filename, CovIUList& cov, std::stack<unsig
 
 		for (size_t i=0; i<nb_inner; i++) {
 			uint32_t j=read_pos_int(*f);
-			if (j<cov._IU_inner.back())
-				ibex_error("[CovIUList]: indices of inner boxes are not in increasing order.");
-			if (j==cov._IU_inner.back())
-				ibex_error("[CovIUList]: duplicated index of inner box.");
+			if (!cov._IU_inner.empty()) { // check ordering
+				if  (j<cov._IU_inner.back())
+					ibex_error("[CovIUList]: indices of inner boxes are not in increasing order.");
+				if (j==cov._IU_inner.back())
+					ibex_error("[CovIUList]: duplicated index of inner box.");
+			}
 			cov._IU_inner.push_back(j);
 		}
 	}
@@ -129,7 +131,7 @@ ofstream* CovIUList::write(const char* filename, const CovIUList& cov, std::stac
 	write_pos_int(*f, cov.nb_inner());
 
 	for (vector<size_t>::const_iterator it=cov._IU_inner.begin(); it!=cov._IU_inner.end(); ++it) {
-		assert(*it<sizeof(uint32_t));
+		assert(*it<numeric_limits<uint32_t>::max());
 		write_pos_int(*f, (uint32_t) *it);
 	}
 	return f;

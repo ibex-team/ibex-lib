@@ -51,7 +51,11 @@ void CovManifold::add_inner(const IntervalVector& x) {
 	if (m>0)
 		ibex_error("[CovManifold] inner boxes not allowed with equalities");
 	CovIBUList::add_inner(x);
+	_manifold_solution.push_back(list.size()-1);
 	_manifold_status.push_back(SOLUTION);
+	if (_manifold_solution_varset.empty()) {
+		_manifold_solution_varset.push_back(VarSet(n,BitSet::all(n),false)); // all parameters
+	}
 }
 
 void CovManifold::add_boundary(const IntervalVector& x) {
@@ -74,13 +78,17 @@ void CovManifold::add_unknown(const IntervalVector& x) {
 void CovManifold::add_solution(const IntervalVector& existence, const IntervalVector& unicity) {
 	if (m==0)
 		ibex_error("[CovManifold]: solution boxes not allowed without equalities");
-	if (m > 0 && m < n)
+	if (m < n)
 		ibex_error("[CovManifold]: a solution of under-constrained system requires \"VarSet\" structure (parameters/variables)");
 
 	CovIBUList::add_boundary(existence);
 	_manifold_solution.push_back(list.size()-1);
 	_manifold_unicity.push_back(unicity);
 	_manifold_status.push_back(SOLUTION);
+
+	if (_manifold_solution_varset.empty()) {
+		_manifold_solution_varset.push_back(VarSet(n,BitSet::empty(n),false)); // no parameter
+	}
 }
 
 void CovManifold::add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset) {
@@ -91,7 +99,9 @@ void CovManifold::add_solution(const IntervalVector& existence, const IntervalVe
 	_manifold_solution.push_back(list.size()-1);
 	_manifold_unicity.push_back(unicity);
 	_manifold_status.push_back(SOLUTION);
-	_manifold_varset.push_back(varset);
+
+	if (_manifold_solution_varset.empty() || m<n) // useless otherwise
+		_manifold_solution_varset.push_back(varset);
 }
 
 ostream& operator<<(ostream& os, const CovManifold& manif) {
@@ -170,20 +180,23 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 
 			for (size_t i=0; i<nb_solution; i++) {
 				uint32_t j=read_pos_int(*f);
-				if (j<cov._manifold_solution.back())
-					ibex_error("[CovManifold]: indices of solutions are not in increasing order.");
-				if (j==cov._manifold_solution.back())
-					ibex_error("[CovManifold]: duplicated index of solution.");
+				if (!cov._manifold_solution.empty()) { // check ordering
+					if (j<cov._manifold_solution.back())
+						ibex_error("[CovManifold]: indices of solutions are not in increasing order.");
+					if (j==cov._manifold_solution.back())
+						ibex_error("[CovManifold]: duplicated index of solution.");
+				}
 				cov._manifold_solution.push_back(j);
 
 				if (cov.m < cov.n)
-					cov._manifold_varset.push_back(read_varset(*f, cov.n, cov.m));
+					cov._manifold_solution_varset.push_back(read_varset(*f, cov.n, cov.m));
 
 				cov._manifold_unicity.push_back(read_box(*f, cov.n));
 			}
-		}
-		else {
-			nb_solution = 0; // temporary since there may be inner boxes.
+
+			if (cov.m==cov.n) {
+				cov._manifold_solution_varset.push_back(VarSet(cov.n,BitSet::empty(cov.n),false)); // no parameter
+			}
 		}
 
 		nb_boundary = read_pos_int(*f);
@@ -198,17 +211,26 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 
 		for (size_t i=0; i<nb_boundary; i++) {
 			uint32_t j=read_pos_int(*f);
-			if (j<cov._manifold_boundary.back())
-				ibex_error("[CovManifold]: indices of boundary boxes are not in increasing order.");
-			if (j==cov._manifold_boundary.back())
-				ibex_error("[CovManifold]: duplicated index of boundary box.");
+			if (!cov._manifold_boundary.empty()) { // check ordering
+				if (j<cov._manifold_boundary.back())
+					ibex_error("[CovManifold]: indices of boundary boxes are not in increasing order.");
+				if (j==cov._manifold_boundary.back())
+					ibex_error("[CovManifold]: duplicated index of boundary box.");
+			}
 			cov._manifold_boundary.push_back(j);
 
-			if (cov.m < cov.n)
-				cov._manifold_varset.push_back(read_varset(*f, cov.n, cov.m));
+			if (cov.m>0 && cov.m < cov.n)
+				cov._manifold_solution_varset.push_back(read_varset(*f, cov.n, cov.m));
 		}
 	}
 
+	if (cov.m==0) { // comes from either a CovManifold with no equality or a CovIBUList.
+		nb_solution = cov.CovIUList::nb_inner();
+		for (size_t i=0; i<cov.CovIUList::nb_inner(); i++) {
+			cov._manifold_solution.push_back(cov._IU_inner[i]);
+		}
+		cov._manifold_solution_varset.push_back(VarSet(cov.n,BitSet::all(cov.n),false)); // all parameters
+	}
 
 	// iterator of solution boxes
 	vector<size_t>::const_iterator it_sol=cov._manifold_solution.begin();
@@ -230,17 +252,16 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 			++it_bnd;
 		} else {
 			switch(cov.CovIBUList::status(i)) {
-			case CovIBUList::INNER :
-				cov._manifold_solution.push_back(i);
-				cov._manifold_status.push_back(CovManifold::SOLUTION);
+			case CovIBUList::BOUNDARY :
+				// This case typically happens in the case of FULL_RANK
+				// when a IBU boundary box meets a singularity of the inequality.
+				cov._manifold_status.push_back(CovManifold::UNKNOWN);
 				break;
 			case CovIBUList::UNKNOWN :
 				cov._manifold_status.push_back(CovManifold::UNKNOWN);
 				break;
 			default :
-				// This case typically happens in the case of FULL_RANK
-				// when a IBU boundary box meets a singularity of the inequality.
-				cov._manifold_status.push_back(CovManifold::UNKNOWN);
+				assert(false);
 			}
 		}
 	}
@@ -271,19 +292,27 @@ ofstream* CovManifold::write(const char* filename, const CovManifold& cov, std::
 
 	if (cov.m>0) {
 		write_pos_int(*f, cov.nb_solution());
-		for (size_t i=0; i<cov.nb_solution(); i++) {
-			assert(i<sizeof(uint32_t));
-			write_pos_int(*f, (uint32_t) i);
-			if (cov.m < cov.n) write_varset(*f, cov.varset(i));
-			write_box(*f, cov.unicity(i));
+		std::vector<VarSet>::const_iterator it_varset=cov._manifold_solution_varset.begin();
+		std::vector<IntervalVector>::const_iterator it_unicity=cov._manifold_unicity.begin();
+
+		for (vector<size_t>::const_iterator it=cov._manifold_solution.begin(); it!=cov._manifold_solution.end(); ++it) {
+			assert(*it<numeric_limits<uint32_t>::max());
+			write_pos_int(*f, (uint32_t) *it);
+			if (cov.m < cov.n) write_varset(*f, *it_varset);
+			write_box(*f, *it_unicity);
+			++it_varset;
+			++it_unicity;
 		}
 	}
 
 	write_pos_int(*f, cov.nb_boundary());
-	for (size_t i=0; i<cov.nb_boundary(); i++) {
-		assert(i<sizeof(uint32_t));
-		write_pos_int(*f, (uint32_t) i);
-		if (cov.m < cov.n) write_varset(*f, cov.varset(i));
+	for (vector<size_t>::const_iterator it=cov._manifold_boundary.begin(); it!=cov._manifold_boundary.end(); ++it) {
+		assert(*it<numeric_limits<uint32_t>::max());
+		write_pos_int(*f, (uint32_t) *it);
+
+		// TODO TODO TODO TODO
+		if (cov.m>0 && cov.m < cov.n)
+			write_varset(*f, VarSet(cov.n, BitSet::empty(cov.n), false) /* TODO */);
 	}
 
 	return f;
@@ -320,7 +349,7 @@ void CovManifold::format(stringstream& ss, const string& title, std::stack<unsig
 	<< space << "                  - 1 integer: the index of the boundary box\n"
 	<< space << "                    (belongs to CovIBUList boundary or unknown"
 	<< space << "                     boxes);\n"
-	<< space << "                  - [if m<n] n-m integers: the indices of\n"
+	<< space << "                  - [if m>0 and m<n] n-m integers: the indices of\n"
 	<< space << "                    parameters in the parametric proofs;\n"
 	<< separator;
 }

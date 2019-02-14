@@ -42,9 +42,14 @@ namespace ibex {
  * large box. The "varset" structure indicates which components correspond to x and p.
  *
  * A box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
- * f=0 crosses the inequalities. Note: 	a solver may impose more stringent
- * conditions on a box to be "boundary". See #Solver::boundary_test_strength.
- *
+ * f=0 crosses the inequalities. The exact meaning of "crosses" depends on the
+ * 'boundary_type' field:
+ * - EQU_ONLY  : equalities are certified (in the same way as solution boxes) but the box
+ * 				 could not be proven to be entirely inside inequalities
+ * - FULL_RANK : same as EQU_ONLY and the gradients of all active constraints are linearly
+ *               independent
+ * - HALF_BALL : the intersection of the manifold and the box is homeomorphic to a
+ *               half-ball of R^n (not implemented yet).
  */
 class CovManifold : public CovIBUList {
 public:
@@ -55,7 +60,6 @@ public:
 	 * See above.
 	 */
 	typedef enum { SOLUTION, BOUNDARY, UNKNOWN } BoxStatus;
-
 
 	/**
 	 * \brief Type of a boundary box.
@@ -248,7 +252,7 @@ protected:
 	// in the special cases where m=0 or m=n, there is only one
 	// possible varset, so a unique varset is stored:
 	// _varset[0][0].
-	std::vector<VarSet>          _manifold_varset;
+	std::vector<VarSet>          _manifold_solution_varset;
 };
 
 /**
@@ -284,9 +288,9 @@ inline const IntervalVector& CovManifold::unicity(int j) const {
 
 inline const VarSet& CovManifold::varset(int j) const {
 	if (m>0 && m<n)
-		return _manifold_varset[j];
+		return _manifold_solution_varset[j];
 	else
-		return _manifold_varset[0];
+		return _manifold_solution_varset[0];
 }
 
 inline void CovManifold::add_solution(const IntervalVector& existence) {

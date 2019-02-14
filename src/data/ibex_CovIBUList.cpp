@@ -108,10 +108,12 @@ ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned
 
 		for (size_t i=0; i<nb_boundary; i++) {
 			uint32_t j=read_pos_int(*f);
-			if (j<cov._IBU_boundary.back())
-				ibex_error("[CovIBUList]: indices of boundary boxes are not in increasing order.");
-			if (j==cov._IBU_boundary.back())
-				ibex_error("[CovIBUList]: duplicated index of boundary box.");
+			if (!cov._IBU_boundary.empty()) { // check ordering
+				if (j<cov._IBU_boundary.back())
+					ibex_error("[CovIBUList]: indices of boundary boxes are not in increasing order.");
+				if (j==cov._IBU_boundary.back())
+					ibex_error("[CovIBUList]: duplicated index of boundary box.");
+			}
 			cov._IBU_boundary.push_back(j);
 		}
 	}
@@ -154,7 +156,7 @@ ofstream* CovIBUList::write(const char* filename, const CovIBUList& cov, stack<u
 	write_pos_int(*f, cov.nb_boundary());
 
 	for (vector<size_t>::const_iterator it=cov._IBU_boundary.begin(); it!=cov._IBU_boundary.end(); ++it) {
-		assert(*it<sizeof(uint32_t));
+		assert(*it<numeric_limits<uint32_t>::max());
 		write_pos_int(*f, (uint32_t) *it);
 	}
 

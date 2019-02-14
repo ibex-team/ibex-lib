@@ -162,7 +162,10 @@ void TestCov::write_covIBUlist(ofstream& f, ScenarioType scenario, unsigned int 
 
 void TestCov::write_covManifold(ofstream& f, ScenarioType scenario, unsigned int level, bool right_version) {
 	write_covIBUlist(f,scenario, level,right_version);
-	write(f, (uint32_t) m);       // number of equalities
+
+	size_t nb_eq = (scenario==INEQ_EQ_ONLY || scenario==INEQ_HALF_BALL) ? 0 : m;
+
+	write(f, (uint32_t) nb_eq);   // number of equalities
 	write(f, (uint32_t) nb_ineq); // number of inequalities
 
 	vector<IntervalVector> b=boxes();
@@ -171,10 +174,18 @@ void TestCov::write_covManifold(ofstream& f, ScenarioType scenario, unsigned int
 	case INEQ_EQ_ONLY:
 		write(f, (uint32_t) 0);       // type of boundary boxes = EQU_ONLY
 		// no solution
+		write(f, (uint32_t) nbnd);
+		for (size_t i=0; i<nbnd; i++) {
+			write(f, (uint32_t) bnd[i]);
+		}
 		break;
 	case INEQ_HALF_BALL:
 		write(f, (uint32_t) 2);       // type of boundary boxes = HALF_BALL
 		// no solution
+		write(f, (uint32_t) nbnd);
+		for (size_t i=0; i<nbnd; i++) {
+			write(f, (uint32_t) bnd[i]);
+		}
 		break;
 	case EQ_ONLY:
 		write(f, (uint32_t) 0);       // type of boundary boxes = EQU_ONLY
@@ -189,6 +200,13 @@ void TestCov::write_covManifold(ofstream& f, ScenarioType scenario, unsigned int
 			for (size_t j=0; j<n; j++) {
 				write(f,unicity[j].lb());
 				write(f,unicity[j].ub());
+			}
+		}
+		write(f, (uint32_t) nbnd);
+		for (size_t i=0; i<nbnd; i++) {
+			write(f, (uint32_t) bnd[i]);
+			for (size_t j=0; j<n-m; j++) {
+				write(f, varset_bnd[i][j]);
 			}
 		}
 		break;
@@ -207,16 +225,16 @@ void TestCov::write_covManifold(ofstream& f, ScenarioType scenario, unsigned int
 				write(f,unicity[j].ub());
 			}
 		}
+		write(f, (uint32_t) nbnd);
+		for (size_t i=0; i<nbnd; i++) {
+			write(f, (uint32_t) bnd[i]);
+			for (size_t j=0; j<n-m; j++) {
+				write(f, varset_bnd[i][j]);
+			}
+		}
 		break;
 	default:
 		assert(false);
-	}
-
-	for (size_t i=0; i<nbnd; i++) {
-		write(f, (uint32_t) bnd[i]);
-		for (size_t j=0; j<n-m; j++) {
-			write(f, varset_bnd[i][j]);
-		}
 	}
 }
 
@@ -420,7 +438,10 @@ void TestCov::test_covIBUlist(ScenarioType scenario, CovIBUList& cov) {
 
 void TestCov::test_covManifold(ScenarioType scenario, CovManifold& cov) {
 	test_covIBUlist(scenario, cov);
-	CPPUNIT_ASSERT(cov.m==m);
+
+	size_t nb_eq = (scenario==INEQ_EQ_ONLY || scenario==INEQ_HALF_BALL) ? 0 : m;
+
+	CPPUNIT_ASSERT(cov.m==nb_eq);
 	CPPUNIT_ASSERT(cov.nb_ineq==nb_ineq);
 	CPPUNIT_ASSERT(cov.nb_solution()==nsol);
 	CPPUNIT_ASSERT(cov.nb_boundary()==nbnd);
@@ -438,26 +459,28 @@ void TestCov::test_covManifold(ScenarioType scenario, CovManifold& cov) {
 	for (size_t i=0; i<nsol; i++) {
 		CPPUNIT_ASSERT(cov.solution(i)==b[sol[i]]);
 
-		CPPUNIT_ASSERT(cov.varset(i).nb_param==n-m);
+		CPPUNIT_ASSERT(cov.varset(i).nb_param==n-nb_eq);
 
-		for (size_t j=0; j<n-m; j++) {
-			CPPUNIT_ASSERT(cov.varset(i).param(j)==(int) varset_sol[i][j]);
+		if (scenario==EQ_ONLY || scenario==HALF_BALL) {
+			for (size_t j=0; j<n-nb_eq; j++) {
+				CPPUNIT_ASSERT(cov.varset(i).param(j)==(int) varset_sol[i][j]);
+			}
+
+			IntervalVector unicity=b[sol[i]];
+			unicity.inflate(unicity_infl);
+			//cout << cov.unicity(i) << " " << unicity << endl;
+			CPPUNIT_ASSERT(cov.unicity(i)==unicity);
 		}
-
-		IntervalVector unicity=b[sol[i]];
-		unicity.inflate(unicity_infl);
-		//cout << cov.unicity(i) << " " << unicity << endl;
-		CPPUNIT_ASSERT(cov.unicity(i)==unicity);
 	}
 
 	for (size_t i=0; i<nbnd; i++) {
 		CPPUNIT_ASSERT(cov.boundary(i)==b[bnd[i]]);
 
 
-		CPPUNIT_ASSERT(cov.varset(i).nb_param==n-m);
+		CPPUNIT_ASSERT(cov.varset(i).nb_param==n-nb_eq);
 
 		// TODO!!!!!
-		//			for (size_t j=0; j<n-m; j++) {
+		//			for (size_t j=0; j<n-nb_eq; j++) {
 		//				CPPUNIT_ASSERT(cov.varset(i).param(j)==(int) varset_bnd[i][j]);
 		//			}
 	}
@@ -556,7 +579,11 @@ CovIBUList* TestCov::build_covIBUlist(ScenarioType scenario) {
 }
 
 CovManifold* TestCov::build_covManifold(ScenarioType scenario) {
-	CovManifold* cov = new CovManifold(n, m, nb_ineq); // box dimension
+	size_t nb_eq = (scenario==INEQ_EQ_ONLY || scenario==INEQ_HALF_BALL) ? 0 : m;
+
+	CovManifold::BoundaryType boundary_type = (scenario==INEQ_EQ_ONLY || scenario==EQ_ONLY) ? CovManifold::EQU_ONLY : CovManifold::HALF_BALL;
+
+	CovManifold* cov = new CovManifold(n, nb_eq, nb_ineq, boundary_type); // box dimension
 
 	vector<IntervalVector> b=boxes();
 
@@ -585,7 +612,9 @@ CovManifold* TestCov::build_covManifold(ScenarioType scenario) {
 }
 
 CovSolverData* TestCov::build_covSolverData(ScenarioType scenario) {
-	CovSolverData* cov = new CovSolverData(n, m, nb_ineq); // box dimension
+	size_t nb_eq = (scenario==INEQ_EQ_ONLY || scenario==INEQ_HALF_BALL) ? 0 : m;
+
+	CovSolverData* cov = new CovSolverData(n, nb_eq, nb_ineq); // box dimension
 
 	vector<IntervalVector> b=boxes();
 
@@ -829,8 +858,27 @@ void TestCov::read_covManifoldfile2(ScenarioType scenario) {
 	test_covIBUlist(scenario, cov);
 	CPPUNIT_ASSERT(cov.m==0);
 	CPPUNIT_ASSERT(cov.nb_ineq==0);
-	CPPUNIT_ASSERT(cov.nb_solution()==0);
-	CPPUNIT_ASSERT(cov.nb_boundary()==cov.CovIBUList::nb_boundary());
+
+	switch(scenario) {
+	case INEQ_EQ_ONLY:
+		CPPUNIT_ASSERT(cov.nb_solution()==nsol);
+		CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	break;
+	case INEQ_HALF_BALL:
+		CPPUNIT_ASSERT(cov.nb_solution()==nsol);
+		CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	break;
+	case EQ_ONLY:
+		CPPUNIT_ASSERT(cov.nb_solution()==0);
+		CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	break;
+	case HALF_BALL:
+		CPPUNIT_ASSERT(cov.nb_solution()==0);
+		CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	break;
+	default:
+		assert(false);
+	}
 
 	free(filename);
 }
