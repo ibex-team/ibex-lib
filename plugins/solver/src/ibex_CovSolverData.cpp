@@ -28,7 +28,7 @@ CovSolverData::CovSolverData(size_t n, size_t m, size_t nb_ineq, BoundaryType bo
 		time(-1), nb_cells(0) {
 }
 
-CovSolverData::CovSolverData(const char* filename) : CovManifold(n, m, nb_ineq /* tmp */), solver_status((unsigned int) Solver::SUCCESS), time(-1), nb_cells(0) {
+CovSolverData::CovSolverData(const char* filename) : CovManifold(0, 0, 0 /* tmp */), solver_status((unsigned int) Solver::SUCCESS), time(-1), nb_cells(0) {
 	stack<unsigned int> format_id;
 	stack<unsigned int> format_version;
 	ifstream* f = CovSolverData::read(filename, *this, format_id, format_version);

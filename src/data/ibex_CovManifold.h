@@ -186,6 +186,11 @@ public:
 	const VarSet& boundary_varset(int j) const;
 
 	/**
+	 * \brief Get the jth unknown box.
+	 */
+	const IntervalVector& unknown(int j) const;
+
+	/**
 	 * \brief Number of equalities.
 	 *
 	 * By default : 0.
@@ -215,6 +220,11 @@ public:
 	 * \brief Number of boundary boxes.
 	 */
 	size_t nb_boundary() const;
+
+	/**
+	 * \brief Number of unknown boxes.
+	 */
+	size_t nb_unknown() const;
 
 	/**
 	 * \brief Display the format of a CovManifold file.
@@ -259,6 +269,7 @@ protected:
 	std::vector<BoxStatus>       _manifold_status;    // status of the ith box
 	std::vector<size_t>          _manifold_solution;  // indices of 'solution' boxes
 	std::vector<size_t>          _manifold_boundary;  // indices of 'boundary' boxes
+	std::vector<size_t>          _manifold_unknown;  // indices of 'unknown' boxes
 	std::vector<IntervalVector>  _manifold_unicity;   // all the unicity boxes
 
 	// in the special cases where m=0 or m=n, there is only one
@@ -313,6 +324,10 @@ inline const VarSet& CovManifold::boundary_varset(int j) const {
 		return _manifold_solution_varset[0];
 }
 
+inline const IntervalVector& CovManifold::unknown(int j) const {
+	return (*this)[_manifold_unknown[j]];
+}
+
 inline void CovManifold::add_solution(const IntervalVector& existence) {
 	add_solution(existence, existence);
 }
@@ -327,6 +342,10 @@ inline size_t CovManifold::nb_solution() const {
 
 inline size_t CovManifold::nb_boundary() const {
 	return _manifold_boundary.size();
+}
+
+inline size_t CovManifold::nb_unknown() const {
+	return _manifold_unknown.size();
 }
 
 } /* namespace ibex */

@@ -56,9 +56,9 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 	m=eqs? eqs->f_ctrs.image_dim() : 0;
 	nb_ineq=ineqs? ineqs->f_ctrs.image_dim() : 0;
 
-	if (m==0 || m==n)
+	if (m==0 || m==n) {
 		boundary_test=ALL_FALSE;
-
+	}
 	if (m>n)
 		ibex_warning("Certification not implemented for over-constrained systems ");
 }
@@ -326,6 +326,9 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 			if (trace >=1) cout << " [solution] " << box << endl;
 			manif->add_inner(box);
 			return CovSolverData::SOLUTION;
+		} else if (is_boundary(box)) {
+			manif->add_boundary(box);
+			return CovSolverData::BOUNDARY;
 		} else
 			return CovSolverData::UNKNOWN;
 	} else {
@@ -514,9 +517,6 @@ void Solver::report() {
 
 	cout << white() << endl;
 
-	cout << " number of inner boxes:\t\t";
-	if (manif->nb_inner()==0) cout << "--"; else cout << manif->nb_inner();
-	cout << endl;
 	cout << " number of solution boxes:\t";
 	if (manif->nb_solution()==0) cout << "--"; else cout << manif->nb_solution();
 	cout << endl;

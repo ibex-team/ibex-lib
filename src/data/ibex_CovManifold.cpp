@@ -86,6 +86,7 @@ void CovManifold::add_boundary(const IntervalVector& x, const VarSet& varset) {
 
 void CovManifold::add_unknown(const IntervalVector& x) {
 	CovIBUList::add_unknown(x);
+	_manifold_unknown.push_back(list.size()-1);
 	_manifold_status.push_back(UNKNOWN);
 }
 
@@ -257,9 +258,11 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 			case CovIBUList::BOUNDARY :
 				// This case typically happens in the case of FULL_RANK
 				// when a IBU boundary box meets a singularity of the inequality.
+				cov._manifold_unknown.push_back(i);
 				cov._manifold_status.push_back(CovManifold::UNKNOWN);
 				break;
 			case CovIBUList::UNKNOWN :
+				cov._manifold_unknown.push_back(i);
 				cov._manifold_status.push_back(CovManifold::UNKNOWN);
 				break;
 			default :

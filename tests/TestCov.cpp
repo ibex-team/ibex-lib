@@ -444,6 +444,7 @@ void TestCov::test_covManifold(ScenarioType scenario, CovManifold& cov) {
 	CPPUNIT_ASSERT(cov.nb_ineq==nb_ineq);
 	CPPUNIT_ASSERT(cov.nb_solution()==nsol);
 	CPPUNIT_ASSERT(cov.nb_boundary()==nbnd);
+	CPPUNIT_ASSERT(cov.nb_unknown()==nunk+npen);
 
 	for (size_t i=0; i<N; i++) {
 		CPPUNIT_ASSERT(
@@ -483,6 +484,11 @@ void TestCov::test_covManifold(ScenarioType scenario, CovManifold& cov) {
 			}
 		}
 	}
+
+	for (size_t i=0; i<nunk+npen; i++) {
+		CPPUNIT_ASSERT(cov.unknown(i)==b[unk_or_pen[i]]);
+	}
+
 }
 
 void TestCov::test_covSolverData(ScenarioType scenario, CovSolverData& cov) {
