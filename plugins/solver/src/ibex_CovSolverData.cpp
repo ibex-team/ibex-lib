@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 15, 2019
 //============================================================================
 
 #include "ibex_CovSolverData.h"
@@ -23,7 +23,9 @@ const unsigned int CovSolverData::subformat_level = 5;
 
 const unsigned int CovSolverData::subformat_number = 0;
 
-CovSolverData::CovSolverData(size_t n, size_t m, size_t nb_ineq) : CovManifold(n, m, nb_ineq), solver_status((unsigned int) Solver::SUCCESS /* ? */), time(-1), nb_cells(0) {
+CovSolverData::CovSolverData(size_t n, size_t m, size_t nb_ineq, BoundaryType boundary_type) :
+		CovManifold(n, m, nb_ineq, boundary_type), solver_status((unsigned int) Solver::SUCCESS /* ? */),
+		time(-1), nb_cells(0) {
 }
 
 CovSolverData::CovSolverData(const char* filename) : CovManifold(n, m, nb_ineq /* tmp */), solver_status((unsigned int) Solver::SUCCESS), time(-1), nb_cells(0) {
@@ -52,8 +54,8 @@ void CovSolverData::add_inner(const IntervalVector& x) {
 	_solver_status.push_back(SOLUTION);
 }
 
-void CovSolverData::add_boundary(const IntervalVector& x) {
-	CovManifold::add_boundary(x);
+void CovSolverData::add_boundary(const IntervalVector& x, const VarSet& varset) {
+	CovManifold::add_boundary(x,varset);
 	_solver_status.push_back(BOUNDARY);
 }
 
@@ -61,11 +63,6 @@ void CovSolverData::add_unknown(const IntervalVector& x) {
 	CovManifold::add_unknown(x);
 	_solver_status.push_back(UNKNOWN);
 	_solver_unknown.push_back(list.size()-1);
-}
-
-void CovSolverData::add_solution(const IntervalVector& existence, const IntervalVector& unicity) {
-	CovManifold::add_solution(existence, unicity);
-	_solver_status.push_back(SOLUTION);
 }
 
 void CovSolverData::add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset) {
@@ -234,7 +231,7 @@ void CovSolverData::format(stringstream& ss, const string& title, std::stack<uns
 
 	ss
 	<< space << " - n strings:      the names of variables. Each string is\n"
-	<< space << "                   terminated by the null character \'0\'.\n"
+	<< space << "                   terminated by the null character \'\\0\'.\n"
 	<< space << " - 1 integer:      the status of the search. Possible \n"
 	<< space << "                   values are:\n"
 	<< space << "                   - 0=complete search: all output boxes\n"

@@ -129,10 +129,10 @@ void Solver::start(const char* input_paving) {
 		if (m==n)
 			manif->add_solution(data.solution(i), data.unicity(i));
 		else
-			manif->add_solution(data.solution(i), data.unicity(i), data.varset(i));
+			manif->add_solution(data.solution(i), data.unicity(i), data.solution_varset(i));
 
 	for (size_t i=0; i<data.nb_boundary(); i++)
-		manif->add_boundary(data.boundary(i));
+		manif->add_boundary(data.boundary(i), data.boundary_varset(i));
 
 	// the unknown and pending boxes have to be processed
 	for (size_t i=0; i<data.CovManifold::nb_unknown(); i++) {
@@ -388,12 +388,12 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 
 		if (solution) {
 			if (trace >=1) cout << " [solution] " << existence << endl;
-			manif->add_solution(existence,unicity,varset);
+			manif->add_solution(existence, unicity, varset);
 			return CovSolverData::SOLUTION;
 		} else {
 			if (is_boundary(existence)) {
 				if (trace >=1) cout << " [boundary] " << existence << endl;
-				manif->add_boundary(existence);
+				manif->add_boundary(existence, varset);
 				return CovSolverData::BOUNDARY;
 			} else
 				return CovSolverData::UNKNOWN;

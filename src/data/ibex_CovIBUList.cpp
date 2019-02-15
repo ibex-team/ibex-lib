@@ -171,14 +171,14 @@ void CovIBUList::format(stringstream& ss, const string& title, stack<unsigned in
 
 	ss
 	<< space << " - 1 integer:     the type of boundary boxes:\n"
-	<< space << "                  0=\"inner\": a boundary box contains at \n"
-	<< space << "		             least an inner point.\n"
-	<< space << "                  1=\"inner and outer\":  boundary box contains\n"
-	<< space << "                    at least one inner and one outer point.\n"
+	<< space << "                  -0=a boundary box contains at least\n"
+	<< space << "                   an inner point.\n"
+	<< space << "                  -1=a boundary box contains at least\n"
+	<< space << "                   one inner and one outer point.\n"
 	<< space << " - 1 integer:     the number Nb of boundary boxes (<= N-Ni)\n"
 	<< "|     CovIBUList    |"
-	            " - Nb integers:   the indices of boundary boxes in increasing order\n"
-	<< space << "                  (a subset of CovIUList unknown boxes)\n"
+	            " - Nb integers:   indices of boundary boxes in increasing\n"
+	<< space << "                  order (subset of CovIUList unknown boxes)\n"
 	<< separator;
 }
 

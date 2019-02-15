@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 15, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_MANIFOLD_H__
@@ -99,7 +99,12 @@ public:
 	/**
 	 * \brief Add a new 'boundary' box at the end of the list.
 	 */
-	virtual void add_boundary(const IntervalVector& x);
+	void add_boundary(const IntervalVector& x);
+
+	/**
+	 * \brief Add a new 'boundary' box at the end of the list.
+	 */
+	virtual void add_boundary(const IntervalVector& x, const VarSet& varset);
 
 	/**
 	 * \brief Add a new 'solution' box at the end of the list.
@@ -113,7 +118,7 @@ public:
 	 *                  of 'existence' found such that the solution enclosed
 	 *                  is unique.
 	 */
-	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
+	void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
 
 	/**
 	 * \brief Add a new 'solution' box at the end of the list.
@@ -166,12 +171,19 @@ public:
 	 *
 	 * Variable/Parameter structure used to certify the box.
 	 */
-	const VarSet& varset(int j) const;
+	const VarSet& solution_varset(int j) const;
 
 	/**
 	 * \brief Get the jth boundary box.
 	 */
 	const IntervalVector& boundary(int j) const;
+
+	/**
+	 * \brief Certificate of the jth boundary box.
+	 *
+	 * Variable/Parameter structure used to certify the box.
+	 */
+	const VarSet& boundary_varset(int j) const;
 
 	/**
 	 * \brief Number of equalities.
@@ -253,6 +265,7 @@ protected:
 	// possible varset, so a unique varset is stored:
 	// _varset[0][0].
 	std::vector<VarSet>          _manifold_solution_varset;
+	std::vector<VarSet>          _manifold_boundary_varset;
 };
 
 /**
@@ -286,9 +299,16 @@ inline const IntervalVector& CovManifold::unicity(int j) const {
 	return _manifold_unicity[j];
 }
 
-inline const VarSet& CovManifold::varset(int j) const {
+inline const VarSet& CovManifold::solution_varset(int j) const {
 	if (m>0 && m<n)
 		return _manifold_solution_varset[j];
+	else
+		return _manifold_solution_varset[0];
+}
+
+inline const VarSet& CovManifold::boundary_varset(int j) const {
+	if (m>0 && m<n)
+		return _manifold_boundary_varset[j];
 	else
 		return _manifold_solution_varset[0];
 }

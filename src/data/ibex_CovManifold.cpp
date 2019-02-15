@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 15, 2019
 //============================================================================
 
 #include "ibex_CovManifold.h"
@@ -25,6 +25,13 @@ const unsigned int CovManifold::subformat_number = 0;
 
 CovManifold::CovManifold(size_t n, size_t m, size_t nb_ineq, BoundaryType boundary_type) :
 		CovIBUList(n, INNER_AND_OUTER_PT), m(m), nb_ineq(nb_ineq), boundary_type(boundary_type) {
+
+	if (n>0) // if well initialized
+		// create once for all varset structure for variables and parameters
+		if (m==0)
+			_manifold_solution_varset.push_back(VarSet(n,BitSet::all(n),false)); // all parameters
+		else if (m==n)
+			_manifold_solution_varset.push_back(VarSet(n,BitSet::empty(n),false)); // no parameter
 }
 
 CovManifold::CovManifold(const char* filename) : CovManifold(0,0,0 /* tmp */, EQU_ONLY /* by default */) {
@@ -53,12 +60,16 @@ void CovManifold::add_inner(const IntervalVector& x) {
 	CovIBUList::add_inner(x);
 	_manifold_solution.push_back(list.size()-1);
 	_manifold_status.push_back(SOLUTION);
-	if (_manifold_solution_varset.empty()) {
-		_manifold_solution_varset.push_back(VarSet(n,BitSet::all(n),false)); // all parameters
-	}
 }
 
 void CovManifold::add_boundary(const IntervalVector& x) {
+	if (m>0 && m<n)
+		ibex_error("[CovManifold]: a boundary box for an under-constrained system requires \"VarSet\" structure (parameters/variables)");
+
+	add_boundary(x,_manifold_solution_varset[0]);
+}
+
+void CovManifold::add_boundary(const IntervalVector& x, const VarSet& varset) {
 	switch (boundary_type) {
 	case EQU_ONLY  : CovIBUList::add_unknown(x); break;
 	case FULL_RANK : CovIBUList::add_unknown(x); break;
@@ -68,6 +79,9 @@ void CovManifold::add_boundary(const IntervalVector& x) {
 
 	_manifold_status.push_back(BOUNDARY);
 	_manifold_boundary.push_back(list.size()-1);
+
+	if (m>0 && m<n) // useless otherwise
+		_manifold_boundary_varset.push_back(varset);
 }
 
 void CovManifold::add_unknown(const IntervalVector& x) {
@@ -76,31 +90,22 @@ void CovManifold::add_unknown(const IntervalVector& x) {
 }
 
 void CovManifold::add_solution(const IntervalVector& existence, const IntervalVector& unicity) {
-	if (m==0)
-		ibex_error("[CovManifold]: solution boxes not allowed without equalities");
 	if (m < n)
 		ibex_error("[CovManifold]: a solution of under-constrained system requires \"VarSet\" structure (parameters/variables)");
 
-	CovIBUList::add_boundary(existence);
-	_manifold_solution.push_back(list.size()-1);
-	_manifold_unicity.push_back(unicity);
-	_manifold_status.push_back(SOLUTION);
-
-	if (_manifold_solution_varset.empty()) {
-		_manifold_solution_varset.push_back(VarSet(n,BitSet::empty(n),false)); // no parameter
-	}
+	add_solution(existence, unicity, _manifold_solution_varset[0]);
 }
 
 void CovManifold::add_solution(const IntervalVector& existence, const IntervalVector& unicity, const VarSet& varset) {
 	if (m==0)
-			ibex_error("[CovManifold]: solution boxes not allowed without equalities");
+		ibex_error("[CovManifold]: solution boxes not allowed without equalities");
 
 	CovIBUList::add_boundary(existence);
 	_manifold_solution.push_back(list.size()-1);
 	_manifold_unicity.push_back(unicity);
 	_manifold_status.push_back(SOLUTION);
 
-	if (_manifold_solution_varset.empty() || m<n) // useless otherwise
+	if (m<n) // useless otherwise
 		_manifold_solution_varset.push_back(varset);
 }
 
@@ -193,10 +198,6 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 
 				cov._manifold_unicity.push_back(read_box(*f, cov.n));
 			}
-
-			if (cov.m==cov.n) {
-				cov._manifold_solution_varset.push_back(VarSet(cov.n,BitSet::empty(cov.n),false)); // no parameter
-			}
 		}
 
 		nb_boundary = read_pos_int(*f);
@@ -220,16 +221,17 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 			cov._manifold_boundary.push_back(j);
 
 			if (cov.m>0 && cov.m < cov.n)
-				cov._manifold_solution_varset.push_back(read_varset(*f, cov.n, cov.m));
+				cov._manifold_boundary_varset.push_back(read_varset(*f, cov.n, cov.m));
 		}
 	}
 
-	if (cov.m==0) { // comes from either a CovManifold with no equality or a CovIBUList.
+	if (cov.m==0) {
+		// comes from either a CovManifold with no equality or a CovManifold
+		// loaded from a CovIBUList file (or lesser).
 		nb_solution = cov.CovIUList::nb_inner();
 		for (size_t i=0; i<cov.CovIUList::nb_inner(); i++) {
 			cov._manifold_solution.push_back(cov._IU_inner[i]);
 		}
-		cov._manifold_solution_varset.push_back(VarSet(cov.n,BitSet::all(cov.n),false)); // all parameters
 	}
 
 	// iterator of solution boxes
@@ -270,6 +272,12 @@ ifstream* CovManifold::read(const char* filename, CovManifold& cov, std::stack<u
 
 	if (it_bnd!=cov._manifold_boundary.end()) ibex_error("[CovManifold]: invalid boundary box index.");
 
+	// create once for all varset structure for variables and parameters
+	if (cov.n>0 && cov.m==0)
+		cov._manifold_solution_varset.push_back(VarSet(cov.n,BitSet::all(cov.n),false)); // all parameters
+	else if (cov.n>0 && cov.m==cov.n)
+		cov._manifold_solution_varset.push_back(VarSet(cov.n,BitSet::empty(cov.n),false)); // no parameter
+
 	return f;
 }
 
@@ -298,21 +306,26 @@ ofstream* CovManifold::write(const char* filename, const CovManifold& cov, std::
 		for (vector<size_t>::const_iterator it=cov._manifold_solution.begin(); it!=cov._manifold_solution.end(); ++it) {
 			assert(*it<numeric_limits<uint32_t>::max());
 			write_pos_int(*f, (uint32_t) *it);
-			if (cov.m < cov.n) write_varset(*f, *it_varset);
+			if (cov.m < cov.n) {
+				write_varset(*f, *it_varset);
+				++it_varset;
+			}
 			write_box(*f, *it_unicity);
-			++it_varset;
 			++it_unicity;
 		}
 	}
 
 	write_pos_int(*f, cov.nb_boundary());
+	std::vector<VarSet>::const_iterator it_varset=cov._manifold_boundary_varset.begin();
+
 	for (vector<size_t>::const_iterator it=cov._manifold_boundary.begin(); it!=cov._manifold_boundary.end(); ++it) {
 		assert(*it<numeric_limits<uint32_t>::max());
 		write_pos_int(*f, (uint32_t) *it);
 
-		// TODO TODO TODO TODO
-		if (cov.m>0 && cov.m < cov.n)
-			write_varset(*f, VarSet(cov.n, BitSet::empty(cov.n), false) /* TODO */);
+		if (cov.m>0 && cov.m < cov.n) {
+			write_varset(*f, *it_varset);
+			++it_varset;
+		}
 	}
 
 	return f;
@@ -328,29 +341,32 @@ void CovManifold::format(stringstream& ss, const string& title, std::stack<unsig
 	<< space << " - 1 integer:     the number m of equalities\n"
 	<< space << " - 1 integer:     the number of inequalities\n"
 	<< space << " - 1 integer:     the type of boundary boxes:\n"
-	<< space << "                  0=only equalities are certified.\n"
-	<< space << "                  1=equalities are certified and the gradients\n"
-	<< space << "                    of equalities and inequalities are\n"
-	<< space << "                    linearly independent.\n"
-	<< space << "                  2=the intersection of the manifold and the\n"
-	<< space << "                    box is homeomorphic to a hall-ball of R^n.\n"
-	<< space << " - [if m>0]\n"
+	<< space << "                  - 0=only equalities are certified.\n"
+	<< space << "                  - 1=equalities are certified and the \n"
+	<< space << "                    gradients of all active constraints\n"
+	<< space << "                    are linearly independent.\n"
+	<< space << "                  - 2=the intersection of the manifold and\n"
+	<< space << "                    the box is homeomorphic to a hall-ball\n"
+	<< space << "                    of R^n.\n"
+	<< space << " +----[if m>0]----\n"
 	<< space << " | - 1 integer:   the number Ns of solution boxes (<= Nb)\n"
 	<< space << " | - Ns solutions:each solution is the following sequence:\n"
 	<< "|    CovManifold    |" <<
 	            " |                - 1 integer: the index of the solution\n"
 	<< space << " |                  (belongs to CovIBUList boundar boxes);\n"
 	<< space << " |                - [if m<n] n-m integers: the indices of\n"
-	<< space << " |                  parameters in the parametric proofs;\n"
+	<< space << " |                  parameters in the parametric proofs\n"
 	<< space << " |                - 2*n real values: the unicity box in the\n"
-	<< space << " |                  proof (lb(x1), ub(x1),..., ub(xn));\n"
+	<< space << " |                  proof (lb(x1), ub(x1),..., ub(xn))\n"
+	<< space << " +----------------\n"
 	<< space << " - 1 integer:     the number Nbb of boundary boxes\n"
 	<< space << " - Nbb times      the following sequence:\n"
-	<< space << "                  - 1 integer: the index of the boundary box\n"
-	<< space << "                    (belongs to CovIBUList boundary or unknown"
-	<< space << "                     boxes);\n"
-	<< space << "                  - [if m>0 and m<n] n-m integers: the indices of\n"
-	<< space << "                    parameters in the parametric proofs;\n"
+	<< space << "                  - 1 integer: the index of the boundary \n"
+	<< space << "                    box (belongs to CovIBUList boundary or \n"
+	<< space << "                    unknown boxes)\n"
+	<< space << "                  - [if m>0 and m<n]: \n"
+	<< space << "                    n-m integers: the indices of parameters\n"
+	<< space << "                    in the parametric proofs\n"
 	<< separator;
 }
 

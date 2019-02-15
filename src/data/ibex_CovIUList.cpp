@@ -146,8 +146,8 @@ void CovIUList::format(stringstream& ss, const string& title, std::stack<unsigne
 	ss
 	<< space << " - 1 integer:     the number Ni of inner boxes (<= N)\n"
 	<< "|     CovIUList     |"
-	            " - Ni integers:   the indices of inner boxes in increasing order\n"
-	<< space << "                  (a subset of CovList boxes).\n"
+	            " - Ni integers:   the indices of inner boxes in increasing\n"
+	<< space << "                  order (a subset of CovList boxes).\n"
 	<< separator;
 }
 

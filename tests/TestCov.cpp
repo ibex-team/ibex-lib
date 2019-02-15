@@ -123,6 +123,8 @@ void TestCov::write_covIUlist(ofstream& f, ScenarioType scenario, unsigned int l
 		for (size_t i=0; i<nsol; i++) {
 			write(f, (uint32_t) sol[i]); // ith inner box
 		}
+	} else {
+		write(f, (uint32_t) 0);
 	}
 }
 
@@ -148,11 +150,8 @@ void TestCov::write_covIBUlist(ofstream& f, ScenarioType scenario, unsigned int 
 		break;
 	case HALF_BALL:
 		write(f, (uint32_t) (nbnd+nsol)); // total number of boundary boxes
-		for (size_t i=0; i<nbnd; i++) {
-			write(f, (uint32_t) bnd[i]);
-		}
-		for (size_t i=0; i<nsol; i++) {
-			write(f, (uint32_t) sol[i]);
+		for (size_t i=0; i<nbnd+nsol; i++) {
+			write(f, (uint32_t) sol_or_bnd[i]);
 		}
 		break;
 	default:
@@ -459,11 +458,11 @@ void TestCov::test_covManifold(ScenarioType scenario, CovManifold& cov) {
 	for (size_t i=0; i<nsol; i++) {
 		CPPUNIT_ASSERT(cov.solution(i)==b[sol[i]]);
 
-		CPPUNIT_ASSERT(cov.varset(i).nb_param==n-nb_eq);
+		CPPUNIT_ASSERT((size_t) cov.solution_varset(i).nb_param==n-nb_eq);
 
 		if (scenario==EQ_ONLY || scenario==HALF_BALL) {
 			for (size_t j=0; j<n-nb_eq; j++) {
-				CPPUNIT_ASSERT(cov.varset(i).param(j)==(int) varset_sol[i][j]);
+				CPPUNIT_ASSERT(cov.solution_varset(i).param(j)==(int) varset_sol[i][j]);
 			}
 
 			IntervalVector unicity=b[sol[i]];
@@ -476,13 +475,13 @@ void TestCov::test_covManifold(ScenarioType scenario, CovManifold& cov) {
 	for (size_t i=0; i<nbnd; i++) {
 		CPPUNIT_ASSERT(cov.boundary(i)==b[bnd[i]]);
 
+		CPPUNIT_ASSERT((size_t) cov.boundary_varset(i).nb_param==n-nb_eq);
 
-		CPPUNIT_ASSERT(cov.varset(i).nb_param==n-nb_eq);
-
-		// TODO!!!!!
-		//			for (size_t j=0; j<n-nb_eq; j++) {
-		//				CPPUNIT_ASSERT(cov.varset(i).param(j)==(int) varset_bnd[i][j]);
-		//			}
+		if (scenario==EQ_ONLY || scenario==HALF_BALL) {
+			for (size_t j=0; j<n-nb_eq; j++) {
+				CPPUNIT_ASSERT(cov.boundary_varset(i).param(j)==(int) varset_bnd[i][j]);
+			}
+		}
 	}
 }
 
@@ -579,6 +578,7 @@ CovIBUList* TestCov::build_covIBUlist(ScenarioType scenario) {
 }
 
 CovManifold* TestCov::build_covManifold(ScenarioType scenario) {
+
 	size_t nb_eq = (scenario==INEQ_EQ_ONLY || scenario==INEQ_HALF_BALL) ? 0 : m;
 
 	CovManifold::BoundaryType boundary_type = (scenario==INEQ_EQ_ONLY || scenario==EQ_ONLY) ? CovManifold::EQU_ONLY : CovManifold::HALF_BALL;
@@ -588,6 +588,7 @@ CovManifold* TestCov::build_covManifold(ScenarioType scenario) {
 	vector<IntervalVector> b=boxes();
 
 	int isol=0;
+	int ibnd=0;
 	for (size_t i=0; i<N; i++) {
 		if (is_sol[i]) {
 			if (scenario==INEQ_EQ_ONLY || scenario==INEQ_HALF_BALL)
@@ -602,8 +603,16 @@ CovManifold* TestCov::build_covManifold(ScenarioType scenario) {
 				cov->add_solution(b[i], unicity, VarSet(n,bitset,false));
 				isol++;;
 			}
-		} else if (is_bnd[i])
-			cov->add_boundary(b[i]);
+		} else if (is_bnd[i]) {
+			if (nb_eq>0 && m<n) {
+				BitSet bitset(n);
+				for (size_t j=0; j<n-m; j++)
+					bitset.add(varset_bnd[ibnd][j]);
+				cov->add_boundary(b[i], VarSet(n,bitset,false));
+				ibnd++;
+			} else
+				cov->add_boundary(b[i]);
+		}
 		else
 			cov->add_unknown(b[i]);
 	}
@@ -614,11 +623,14 @@ CovManifold* TestCov::build_covManifold(ScenarioType scenario) {
 CovSolverData* TestCov::build_covSolverData(ScenarioType scenario) {
 	size_t nb_eq = (scenario==INEQ_EQ_ONLY || scenario==INEQ_HALF_BALL) ? 0 : m;
 
-	CovSolverData* cov = new CovSolverData(n, nb_eq, nb_ineq); // box dimension
+	CovManifold::BoundaryType boundary_type = (scenario==INEQ_EQ_ONLY || scenario==EQ_ONLY) ? CovManifold::EQU_ONLY : CovManifold::HALF_BALL;
+
+	CovSolverData* cov = new CovSolverData(n, nb_eq, nb_ineq, boundary_type); // box dimension
 
 	vector<IntervalVector> b=boxes();
 
 	int isol=0;
+		int ibnd=0;
 	for (size_t i=0; i<N; i++) {
 		if (is_sol[i]) {
 			if (scenario==INEQ_EQ_ONLY || scenario==INEQ_HALF_BALL)
@@ -633,9 +645,16 @@ CovSolverData* TestCov::build_covSolverData(ScenarioType scenario) {
 				cov->add_solution(b[i], unicity, VarSet(n,bitset,false));
 				isol++;;
 			}
-		} else if (is_bnd[i])
-			cov->add_boundary(b[i]);
-		else if (is_pen[i]) {
+		} else if (is_bnd[i]) {
+			if (nb_eq>0 && m<n) {
+				BitSet bitset(n);
+				for (size_t j=0; j<n-m; j++)
+					bitset.add(varset_bnd[ibnd][j]);
+				cov->add_boundary(b[i], VarSet(n,bitset,false));
+				ibnd++;
+			} else
+				cov->add_boundary(b[i]);
+		} else if (is_pen[i]) {
 			cov->add_pending(b[i]);
 		} else
 			cov->add_unknown(b[i]);
