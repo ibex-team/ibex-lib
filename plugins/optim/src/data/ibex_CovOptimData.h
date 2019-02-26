@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 24, 2018
-// Last update : Dec 27, 2018
+// Last update : Feb 13, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_OPTIM_DATA_H__

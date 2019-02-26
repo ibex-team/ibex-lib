@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
 			}
 
 			if (!quiet)
-				cout << "  boundary test:\t\t" << boundary_test_arg.Get() << endl;
+				cout << "  boundary test:\t" << boundary_test_arg.Get() << endl;
 		}
 
 		if (forced_params) {

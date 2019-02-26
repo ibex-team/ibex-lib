@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 24, 2018
+// Last update : Feb 13, 2019
 //============================================================================
 
 #include "ibex_CovIBUList.h"
@@ -23,10 +23,10 @@ const unsigned int CovIBUList::subformat_level = 3;
 
 const unsigned int CovIBUList::subformat_number = 0;
 
-CovIBUList::CovIBUList(size_t n) : CovIUList(n) {
+CovIBUList::CovIBUList(size_t n, BoundaryType boundary_type) : CovIUList(n), boundary_type(boundary_type) {
 }
 
-CovIBUList::CovIBUList(const char* filename) : CovIUList((size_t) 0 /* tmp */) {
+CovIBUList::CovIBUList(const char* filename) : CovIUList((size_t) 0 /* tmp */), boundary_type(INNER_PT /* by default */) {
 	stack<unsigned int> format_id;
 	stack<unsigned int> format_version;
 	ifstream* f = CovIBUList::read(filename, *this, format_id, format_version);
@@ -54,13 +54,13 @@ void CovIBUList::add_inner(const IntervalVector& x) {
 void CovIBUList::add_boundary(const IntervalVector& x) {
 	CovIUList::add_unknown(x);
 	_IBU_status.push_back(BOUNDARY);
-	_IBU_boundary.push_back(&list.back());
+	_IBU_boundary.push_back(list.size()-1);
 }
 
 void CovIBUList::add_unknown(const IntervalVector& x) {
 	CovIUList::add_unknown(x);
 	_IBU_status.push_back(UNKNOWN);
-	_IBU_unknown.push_back(&list.back());
+	_IBU_unknown.push_back(list.size()-1);
 }
 
 ostream& operator<<(ostream& os, const CovIBUList& cov) {
@@ -93,50 +93,56 @@ ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned
 		format_id.pop();
 		format_version.pop();
 
+		unsigned int _boundary_type = read_pos_int(*f);
+
+		switch(_boundary_type) {
+		case 0 :  (BoundaryType&) cov.boundary_type = INNER_PT; break;
+		case 1 :  (BoundaryType&) cov.boundary_type = INNER_AND_OUTER_PT; break;
+		default : ibex_error("[CovIBUList]: unknown boundary type identifier.");
+		}
+
 		nb_boundary = read_pos_int(*f);
+
+		if (nb_boundary  > cov.CovIUList::nb_unknown())
+			ibex_error("[CovIBUList]: number of boundary boxes > number of CovIUList unknown boxes!");
+
+		for (size_t i=0; i<nb_boundary; i++) {
+			uint32_t j=read_pos_int(*f);
+			if (!cov._IBU_boundary.empty()) { // check ordering
+				if (j<cov._IBU_boundary.back())
+					ibex_error("[CovIBUList]: indices of boundary boxes are not in increasing order.");
+				if (j==cov._IBU_boundary.back())
+					ibex_error("[CovIBUList]: duplicated index of boundary box.");
+			}
+			cov._IBU_boundary.push_back(j);
+		}
 	}
 
-	if (nb_boundary  > cov.CovIUList::nb_unknown())
-		ibex_error("[CovIBUList]: number of boundary boxes > number of CovIUList unknown boxes!");
-
-	unsigned int indices[nb_boundary];
-	for (size_t i=0; i<nb_boundary; i++) {
-		indices[i]=read_pos_int(*f);
-	}
-
-	if (nb_boundary>0)
-		sort(indices,indices+nb_boundary);
-
-	size_t i2=0; // counter of boundary boxes
+	vector<size_t>::const_iterator it=cov._IBU_boundary.begin(); // iterator of boundary boxes
 
 	for (size_t i=0; i<cov.size(); i++) {
 
-		if (i2<nb_boundary && i==indices[i2]) {
+		if (it!=cov._IBU_boundary.end() && i==*it) {
 			if (!cov.CovIUList::is_unknown(i))
 				ibex_error("[CovIBUList]: a boundary box must be a CovIUList unknown box.");
-			cov._IBU_boundary.push_back(cov.vec[i]);
 			cov._IBU_status.push_back(CovIBUList::BOUNDARY);
-			i2++;
+			++it;
 		} else {
 			switch(cov.CovIUList::status(i)) {
 			case CovIUList::INNER :
 				cov._IBU_status.push_back(CovIBUList::INNER);
 				break;
 			default :
-				cov._IBU_unknown.push_back(cov.vec[i]);
+				cov._IBU_unknown.push_back(i);
 				cov._IBU_status.push_back(CovIBUList::UNKNOWN);
 			}
 		}
 	}
 
-	if (i2<nb_boundary) ibex_error("[CovIBUList]: invalid boundary box index.");
-
-	if (cov.nb_boundary() != nb_boundary)
-		ibex_error("[CovIBUList]: number of boundary boxes does not match.");
+	if (it!=cov._IBU_boundary.end()) ibex_error("[CovIBUList]: invalid boundary box index.");
 
 	return f;
 }
-
 
 ofstream* CovIBUList::write(const char* filename, const CovIBUList& cov, stack<unsigned int>& format_id, stack<unsigned int>& format_version) {
 
@@ -145,13 +151,15 @@ ofstream* CovIBUList::write(const char* filename, const CovIBUList& cov, stack<u
 
 	ofstream* f = CovIUList::write(filename, cov, format_id, format_version);
 
+	write_pos_int(*f, cov.boundary_type==INNER_PT? 0 : 1);
+
 	write_pos_int(*f, cov.nb_boundary());
 
-	// TODO: a complete scan could be avoided?
-	for (size_t i=0; i<cov.size(); i++) {
-		if (cov.status(i)==CovIBUList::BOUNDARY)
-			write_pos_int(*f, (uint32_t) i);
+	for (vector<size_t>::const_iterator it=cov._IBU_boundary.begin(); it!=cov._IBU_boundary.end(); ++it) {
+		assert(*it<numeric_limits<uint32_t>::max());
+		write_pos_int(*f, (uint32_t) *it);
 	}
+
 	return f;
 }
 
@@ -162,10 +170,15 @@ void CovIBUList::format(stringstream& ss, const string& title, stack<unsigned in
 	CovIUList::format(ss, title, format_id, format_version);
 
 	ss
+	<< space << " - 1 integer:     the type of boundary boxes:\n"
+	<< space << "                  -0=a boundary box contains at least\n"
+	<< space << "                   an inner point.\n"
+	<< space << "                  -1=a boundary box contains at least\n"
+	<< space << "                   one inner and one outer point.\n"
 	<< space << " - 1 integer:     the number Nb of boundary boxes (<= N-Ni)\n"
 	<< "|     CovIBUList    |"
-	            " - Nb integers:   the indices of boundary boxes\n"
-	<< space << "                  (a subset of CovIUList unknown boxes)\n"
+	            " - Nb integers:   indices of boundary boxes in increasing\n"
+	<< space << "                  order (subset of CovIUList unknown boxes)\n"
 	<< separator;
 }
 

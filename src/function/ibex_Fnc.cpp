@@ -69,6 +69,8 @@ void Fnc::hansen_matrix(const IntervalVector& box, const IntervalVector& x0, Int
 	IntervalVector x=x0;
 	IntervalMatrix J(m,n);
 
+	if (H.is_empty()) H = IntervalMatrix(m,n); // required because the matrix is filled step by step
+
 	// test!
 //	int tab[box.size()];
 //	box.sort_indices(false,tab);

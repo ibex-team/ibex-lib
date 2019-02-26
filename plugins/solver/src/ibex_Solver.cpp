@@ -56,9 +56,9 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 	m=eqs? eqs->f_ctrs.image_dim() : 0;
 	nb_ineq=ineqs? ineqs->f_ctrs.image_dim() : 0;
 
-	if (m==0 || m==n)
+	if (m==0 || m==n) {
 		boundary_test=ALL_FALSE;
-
+	}
 	if (m>n)
 		ibex_warning("Certification not implemented for over-constrained systems ");
 }
@@ -129,10 +129,10 @@ void Solver::start(const char* input_paving) {
 		if (m==n)
 			manif->add_solution(data.solution(i), data.unicity(i));
 		else
-			manif->add_solution(data.solution(i), data.unicity(i), data.varset(i));
+			manif->add_solution(data.solution(i), data.unicity(i), data.solution_varset(i));
 
 	for (size_t i=0; i<data.nb_boundary(); i++)
-		manif->add_boundary(data.boundary(i));
+		manif->add_boundary(data.boundary(i), data.boundary_varset(i));
 
 	// the unknown and pending boxes have to be processed
 	for (size_t i=0; i<data.CovManifold::nb_unknown(); i++) {
@@ -323,9 +323,12 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 
 	if (!eqs) {
 		if (check_ineq(box)) {
-			if (trace >=1) cout << " [inner] " << box << endl;
+			if (trace >=1) cout << " [solution] " << box << endl;
 			manif->add_inner(box);
-			return CovSolverData::INNER;
+			return CovSolverData::SOLUTION;
+		} else if (is_boundary(box)) {
+			manif->add_boundary(box);
+			return CovSolverData::BOUNDARY;
 		} else
 			return CovSolverData::UNKNOWN;
 	} else {
@@ -388,12 +391,12 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 
 		if (solution) {
 			if (trace >=1) cout << " [solution] " << existence << endl;
-			manif->add_solution(existence,unicity,varset);
+			manif->add_solution(existence, unicity, varset);
 			return CovSolverData::SOLUTION;
 		} else {
 			if (is_boundary(existence)) {
 				if (trace >=1) cout << " [boundary] " << existence << endl;
-				manif->add_boundary(existence);
+				manif->add_boundary(existence, varset);
 				return CovSolverData::BOUNDARY;
 			} else
 				return CovSolverData::UNKNOWN;
@@ -514,9 +517,6 @@ void Solver::report() {
 
 	cout << white() << endl;
 
-	cout << " number of inner boxes:\t\t";
-	if (manif->nb_inner()==0) cout << "--"; else cout << manif->nb_inner();
-	cout << endl;
 	cout << " number of solution boxes:\t";
 	if (manif->nb_solution()==0) cout << "--"; else cout << manif->nb_solution();
 	cout << endl;

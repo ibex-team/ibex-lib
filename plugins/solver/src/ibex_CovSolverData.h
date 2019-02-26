@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Dec 27, 2018
+// Last update : Feb 15, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_SOLVER_DATA_H__
@@ -34,6 +34,7 @@ namespace ibex {
  *   interrupted because of a timeout/memory overflow).
  *
  * Furthermore, this class contains additional information about the last solving:
+ * - variable names
  * - solver status
  * - number of cells
  * - running time.
@@ -45,7 +46,7 @@ public:
 	/**
 	 * \brief Possible status of a box in solver data.
 	 */
-	typedef enum { INNER, SOLUTION, BOUNDARY, UNKNOWN, PENDING } BoxStatus;
+	typedef enum { SOLUTION, BOUNDARY, UNKNOWN, PENDING } BoxStatus;
 
 	/**
 	 * \brief Create an empty solver data structure.
@@ -54,7 +55,7 @@ public:
 	 * \param m       - number of equalities
 	 * \param nb_ineq - number of inequalities (0 by default)
 	 */
-	CovSolverData(size_t n, size_t m, size_t nb_ineq=0);
+	CovSolverData(size_t n, size_t m, size_t nb_ineq=0, BoundaryType boundary_type=EQU_ONLY);
 
 	/**
 	 * \brief Load solver data from a COV file.
@@ -84,14 +85,24 @@ public:
 	/**
 	 * \brief Add a new 'boundary' box at the end of the list.
 	 */
-	virtual void add_boundary(const IntervalVector& x);
+	void add_boundary(const IntervalVector& x);
+
+	/**
+	 * \brief Add a new 'boundary' box at the end of the list.
+	 */
+	virtual void add_boundary(const IntervalVector& x, const VarSet& varset);
+
+	/**
+	 * \brief Add a new 'solution' box at the end of the list.
+	 */
+	void add_solution(const IntervalVector& existence);
 
 	/**
 	 * \brief Add a new 'solution' box at the end of the list.
 	 *
 	 * \see CovManifold.
 	 */
-	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
+	void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
 
 	/**
 	 * \brief Add a new 'solution' box at the end of the list.
@@ -200,9 +211,9 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
-	std::vector<BoxStatus>        _solver_status;    // status of the ith box
-	std::vector<IntervalVector*>  _solver_pending;
-	std::vector<IntervalVector*>  _solver_unknown;
+	std::vector<BoxStatus>  _solver_status;    // status of the ith box
+	std::vector<size_t>     _solver_pending;   // indices of pending boxes
+	std::vector<size_t>     _solver_unknown;   // indices of unknown boxes
 
 };
 
@@ -218,11 +229,11 @@ inline CovSolverData::BoxStatus CovSolverData::status(int i) const {
 }
 
 inline const IntervalVector& CovSolverData::pending(int j) const {
-	return *_solver_pending[j];
+	return (*this)[_solver_pending[j]];
 }
 
 inline const IntervalVector& CovSolverData::unknown(int j) const {
-	return *_solver_unknown[j];
+	return (*this)[_solver_unknown[j]];
 }
 
 inline size_t CovSolverData::nb_pending() const {
@@ -231,6 +242,18 @@ inline size_t CovSolverData::nb_pending() const {
 
 inline size_t CovSolverData::nb_unknown() const {
 	return _solver_unknown.size();
+}
+
+inline void CovSolverData::add_boundary(const IntervalVector& x) {
+	CovManifold::add_boundary(x);
+}
+
+inline void CovSolverData::add_solution(const IntervalVector& existence) {
+	CovManifold::add_solution(existence);
+}
+
+inline void CovSolverData::add_solution(const IntervalVector& existence, const IntervalVector& unicity) {
+	CovManifold::add_solution(existence, unicity);
 }
 
 } /* namespace ibex */

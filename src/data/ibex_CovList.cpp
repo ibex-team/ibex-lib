@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Dec 24, 2018
+// Last update : Feb 13, 2019
 //============================================================================
 
 #include "ibex_CovList.h"
@@ -112,8 +112,8 @@ ofstream* CovList::write(const char* filename, const CovList& cov, std::stack<un
 
 	write_pos_int(*f, cov.size());
 
-	for (unsigned int i=0; i<cov.size(); i++) {
-		write_box(*f, cov[i]);
+	for (std::list<IntervalVector>::const_iterator it=cov.list.begin(); it!=cov.list.end(); ++it) {
+		write_box(*f, *it);
 	}
 
 	return f;

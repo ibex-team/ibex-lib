@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Dec 27, 2018
+// Last update : Feb 15, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_MANIFOLD_H__
@@ -42,9 +42,14 @@ namespace ibex {
  * large box. The "varset" structure indicates which components correspond to x and p.
  *
  * A box ([p],[x]) is BOUNDARY only if (2) holds and the manifold
- * f=0 crosses the inequalities. Note: 	a solver may impose more stringent
- * conditions on a box to be "boundary". See #Solver::boundary_test_strength.
- *
+ * f=0 crosses the inequalities. The exact meaning of "crosses" depends on the
+ * 'boundary_type' field:
+ * - EQU_ONLY  : equalities are certified (in the same way as solution boxes) but the box
+ * 				 could not be proven to be entirely inside inequalities
+ * - FULL_RANK : same as EQU_ONLY and the gradients of all active constraints are linearly
+ *               independent
+ * - HALF_BALL : the intersection of the manifold and the box is homeomorphic to a
+ *               half-ball of R^n (not implemented yet).
  */
 class CovManifold : public CovIBUList {
 public:
@@ -54,12 +59,17 @@ public:
 	 *
 	 * See above.
 	 */
-	typedef enum { INNER, SOLUTION, BOUNDARY, UNKNOWN } BoxStatus;
+	typedef enum { SOLUTION, BOUNDARY, UNKNOWN } BoxStatus;
+
+	/**
+	 * \brief Type of a boundary box.
+	 */
+	typedef enum { EQU_ONLY, FULL_RANK, HALF_BALL } BoundaryType;
 
 	/**
 	 * \brief Create an empty manifold covering.
 	 */
-	CovManifold(size_t n, size_t m, size_t nb_ineq=0);
+	CovManifold(size_t n, size_t m, size_t nb_ineq=0, BoundaryType boundary_type=EQU_ONLY);
 
 	/**
 	 * \brief Load a manifold covering from a COV file.
@@ -89,7 +99,12 @@ public:
 	/**
 	 * \brief Add a new 'boundary' box at the end of the list.
 	 */
-	virtual void add_boundary(const IntervalVector& x);
+	void add_boundary(const IntervalVector& x);
+
+	/**
+	 * \brief Add a new 'boundary' box at the end of the list.
+	 */
+	virtual void add_boundary(const IntervalVector& x, const VarSet& varset);
 
 	/**
 	 * \brief Add a new 'solution' box at the end of the list.
@@ -103,7 +118,7 @@ public:
 	 *                  of 'existence' found such that the solution enclosed
 	 *                  is unique.
 	 */
-	virtual void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
+	void add_solution(const IntervalVector& existence, const IntervalVector& unicity);
 
 	/**
 	 * \brief Add a new 'solution' box at the end of the list.
@@ -156,12 +171,24 @@ public:
 	 *
 	 * Variable/Parameter structure used to certify the box.
 	 */
-	const VarSet& varset(int j) const;
+	const VarSet& solution_varset(int j) const;
 
 	/**
 	 * \brief Get the jth boundary box.
 	 */
 	const IntervalVector& boundary(int j) const;
+
+	/**
+	 * \brief Certificate of the jth boundary box.
+	 *
+	 * Variable/Parameter structure used to certify the box.
+	 */
+	const VarSet& boundary_varset(int j) const;
+
+	/**
+	 * \brief Get the jth unknown box.
+	 */
+	const IntervalVector& unknown(int j) const;
 
 	/**
 	 * \brief Number of equalities.
@@ -178,6 +205,13 @@ public:
 	const size_t nb_ineq;
 
 	/**
+	 * \brief Type of boundary boxes.
+	 *
+	 * By default: EQU_ONLY.
+	 */
+	const BoundaryType boundary_type;
+
+	/**
 	 * \brief Number of solutions.
 	 */
 	size_t nb_solution() const;
@@ -186,6 +220,11 @@ public:
 	 * \brief Number of boundary boxes.
 	 */
 	size_t nb_boundary() const;
+
+	/**
+	 * \brief Number of unknown boxes.
+	 */
+	size_t nb_unknown() const;
 
 	/**
 	 * \brief Display the format of a CovManifold file.
@@ -227,15 +266,17 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
-	std::vector<BoxStatus>        _manifold_status;    // status of the ith box
-	std::vector<IntervalVector*>  _manifold_solution;  // pointer to 'solution' boxes
-	std::vector<IntervalVector*>  _manifold_boundary;  // pointer to 'boundary' boxes
-	std::vector<IntervalVector>   _manifold_unicity;   // all the unicity boxes
+	std::vector<BoxStatus>       _manifold_status;    // status of the ith box
+	std::vector<size_t>          _manifold_solution;  // indices of 'solution' boxes
+	std::vector<size_t>          _manifold_boundary;  // indices of 'boundary' boxes
+	std::vector<size_t>          _manifold_unknown;  // indices of 'unknown' boxes
+	std::vector<IntervalVector>  _manifold_unicity;   // all the unicity boxes
 
-	// in the special case where m=n, there is only one
+	// in the special cases where m=0 or m=n, there is only one
 	// possible varset, so a unique varset is stored:
 	// _varset[0][0].
-	std::vector<VarSet>          _manifold_varset;
+	std::vector<VarSet>          _manifold_solution_varset;
+	std::vector<VarSet>          _manifold_boundary_varset;
 };
 
 /**
@@ -258,22 +299,33 @@ inline bool CovManifold::is_boundary(int i) const {
 }
 
 inline const IntervalVector& CovManifold::solution(int i) const {
-	return *_manifold_solution[i];
+	return (*this)[_manifold_solution[i]];
 }
 
 inline const IntervalVector& CovManifold::boundary(int i) const {
-	return *_manifold_boundary[i];
+	return (*this)[_manifold_boundary[i]];
 }
 
 inline const IntervalVector& CovManifold::unicity(int j) const {
 	return _manifold_unicity[j];
 }
 
-inline const VarSet& CovManifold::varset(int j) const {
-	if (m<n)
-		return _manifold_varset[j];
+inline const VarSet& CovManifold::solution_varset(int j) const {
+	if (m>0 && m<n)
+		return _manifold_solution_varset[j];
 	else
-		return _manifold_varset[0];
+		return _manifold_solution_varset[0];
+}
+
+inline const VarSet& CovManifold::boundary_varset(int j) const {
+	if (m>0 && m<n)
+		return _manifold_boundary_varset[j];
+	else
+		return _manifold_solution_varset[0];
+}
+
+inline const IntervalVector& CovManifold::unknown(int j) const {
+	return (*this)[_manifold_unknown[j]];
 }
 
 inline void CovManifold::add_solution(const IntervalVector& existence) {
@@ -290,6 +342,10 @@ inline size_t CovManifold::nb_solution() const {
 
 inline size_t CovManifold::nb_boundary() const {
 	return _manifold_boundary.size();
+}
+
+inline size_t CovManifold::nb_unknown() const {
+	return _manifold_unknown.size();
 }
 
 } /* namespace ibex */
