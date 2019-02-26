@@ -11,10 +11,7 @@ def options (opt):
 ######################
 ##### configure ######
 ######################
-def configure (conf):
-	
-	if not conf.options.WITH_OPTIM:
-		conf.fatal ("Lyapunov plugin requires IbexOpt (--with-optim)")
+def configure (conf):	
 
 	conf.env.WITH_LYAPUNOV = conf.options.WITH_LYAPUNOV
 		
@@ -23,6 +20,9 @@ def configure (conf):
 		conf.end_msg ("not used")
 		return
 	
+	if not conf.options.WITH_OPTIM:
+		conf.fatal ("Lyapunov plugin requires IbexOpt (--with-optim)")
+
 	conf.end_msg ("enabled")
 	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "LYAPUNOV")
 	
