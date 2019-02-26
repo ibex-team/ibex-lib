@@ -10,7 +10,6 @@
 #include "ibex_SetNode.h"
 #include "ibex_SetLeaf.h"
 #include "ibex_SetBisect.h"
- #include <unistd.h>
 
 using namespace std;
 
