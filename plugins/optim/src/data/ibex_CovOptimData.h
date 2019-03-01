@@ -77,7 +77,7 @@ public:
 	/**
 	 * \brief Display the format of a CovOptimData file.
 	 */
-	static string format();
+	static std::string format();
 
 	/**
 	 * \brief COVOptimData file format version.
@@ -161,7 +161,7 @@ protected:
 	 */
 	static std::ofstream* write(const char* filename, const CovOptimData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
+	static void format(std::stringstream& ss, const std::string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/* read the variable names */
 	static void read_vars(std::ifstream& f, size_t n, std::vector<std::string>& var_names);

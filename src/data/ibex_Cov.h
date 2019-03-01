@@ -61,7 +61,7 @@ public:
 	/**
 	 * \brief Display the COV file format.
 	 */
-	static string format();
+	static std::string format();
 
 	/**
 	 * \brief COV file format version.
@@ -89,7 +89,7 @@ protected:
 	 */
 	static std::ofstream* write(const char* filename, const Cov& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
+	static void format(std::stringstream& ss, const std::string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	static void read_signature(std::ifstream& f);
 

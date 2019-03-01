@@ -55,8 +55,12 @@ public:
 	/**
 	 * \brief Default maximal width: +oo.
 	 */
-	static constexpr double default_eps_x_max = POS_INFINITY;
-
+	
+	// TODO: constexpr definition not possible with FILIB (POS_INFINITY is not
+	// a constexpr with FILIB). 
+	//static constexpr double default_eps_x_max = POS_INFINITY;
+	static double default_eps_x_max;
+	
 	/**
 	 * Default random seed: 1.0.
 	 */

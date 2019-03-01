@@ -75,7 +75,7 @@ public:
 	/**
 	 * \brief Display the format of a CovList file.
 	 */
-	static string format();
+	static std::string format();
 
 	/**
 	 * \brief COVList file format version.
@@ -93,7 +93,7 @@ protected:
 	 */
 	static std::ofstream* write(const char* filename, const CovList& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
+	static void format(std::stringstream& ss, const std::string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	static IntervalVector read_box(std::ifstream& f, size_t n);
 

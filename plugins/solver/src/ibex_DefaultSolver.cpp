@@ -28,6 +28,8 @@ using namespace std;
 
 namespace ibex {
 
+double DefaultSolver::default_eps_x_max = POS_INFINITY;
+
 #define SQUARE_EQ_SYSTEM_TAG 1
 
 namespace {

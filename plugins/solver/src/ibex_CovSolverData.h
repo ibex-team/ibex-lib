@@ -199,7 +199,7 @@ public:
 	/**
 	 * \brief Display the format of a CovSolverData file.
 	 */
-	static string format();
+	static std::string format();
 
 	/**
 	 * \brief COVSolverData file format version.
@@ -219,7 +219,7 @@ protected:
 	 */
 	static std::ofstream* write(const char* filename, const CovSolverData& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
+	static void format(std::stringstream& ss, const std::string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/* read the variable names */
 	static void read_vars(std::ifstream& f, size_t n, std::vector<std::string>& var_names);

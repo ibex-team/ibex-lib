@@ -120,7 +120,7 @@ public:
 	/**
 	 * \brief Display the format of a CovIUList file.
 	 */
-	static string format();
+	static std::string format();
 
 	/**
 	 * \brief COVIUList file format version.
@@ -139,7 +139,7 @@ protected:
 	 */
 	static std::ofstream* write(const char* filename, const CovIUList& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
+	static void format(std::stringstream& ss, const std::string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/**
 	 * \brief Subformat level.

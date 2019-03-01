@@ -131,7 +131,7 @@ public:
 	/**
 	 * \brief Display the format of a CovIBUList file.
 	 */
-	static string format();
+	static std::string format();
 
 	/**
 	 * \brief COVIBUList file format version.
@@ -159,7 +159,7 @@ protected:
 	 */
 	static std::ofstream* write(const char* filename, const CovIBUList& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
+	static void format(std::stringstream& ss, const std::string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/**
 	 * \brief Subformat level.

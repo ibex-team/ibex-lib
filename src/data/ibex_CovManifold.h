@@ -239,7 +239,7 @@ public:
 	/**
 	 * \brief Display the format of a CovManifold file.
 	 */
-	static string format();
+	static std::string format();
 
 	/**
 	 * \brief COVManifold file format version.
@@ -258,7 +258,7 @@ protected:
 	 */
 	static std::ofstream* write(const char* filename, const CovManifold& cov, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
-	static void format(std::stringstream& ss, const string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
+	static void format(std::stringstream& ss, const std::string& title, std::stack<unsigned int>& format_id, std::stack<unsigned int>& format_version);
 
 	/* read parameters of the parametric proof */
 	static VarSet read_varset(std::ifstream& f, size_t n, size_t m);
