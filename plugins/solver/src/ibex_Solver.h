@@ -112,6 +112,13 @@ public:
 	/**
 	 * \brief Continue solving of the system.
 	 *
+	 * \param cov - COV data structure containing the input paving;
+	 */
+	Status solve(const CovSolverData& cov);
+
+	/**
+	 * \brief Continue solving of the system.
+	 *
 	 * \param filename - Name of the file containing the input paving;
 	 */
 	Status solve(const char* filename);
@@ -130,7 +137,18 @@ public:
 	 */
 	void start(const IntervalVector& init_box);
 
+	/**
+	 * \brief Start solving (interactive mode).
+	 *
+	 * Can also be used to restart a new search.
+	 */
+	void start(const CovSolverData& data);
 
+	/**
+	 * \brief Start solving (interactive mode).
+	 *
+	 * Can also be used to restart a new search.
+	 */
 	void start(const char* input_paving);
 
 	/**
@@ -166,7 +184,7 @@ public:
 	 *
 	 * \return the output boxes of the last call to solve(...).
 	 */
-	const CovSolverData& get_manifold() const;
+	const CovSolverData& get_data() const;
 
 	/**
 	 * \brief Get the time spent.
@@ -357,7 +375,7 @@ protected:
 
 /*============================================ inline implementation ============================================ */
 
-inline const CovSolverData& Solver::get_manifold() const {
+inline const CovSolverData& Solver::get_data() const {
 	return *manif;
 }
 

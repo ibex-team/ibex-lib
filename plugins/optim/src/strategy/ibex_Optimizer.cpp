@@ -265,8 +265,15 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	return optimize();
 }
 
+
+Optimizer::Status Optimizer::optimize(const CovOptimData& data, double obj_init_bound) {
+	start(data, obj_init_bound);
+	return optimize();
+}
+
 Optimizer::Status Optimizer::optimize(const char* cov_file, double obj_init_bound) {
-	start(cov_file, obj_init_bound);
+	CovOptimData data(cov_file);
+	start(data, obj_init_bound);
 	return optimize();
 }
 
@@ -311,13 +318,13 @@ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 
 	if (cov) delete cov;
 	cov = new CovOptimData(extended_COV? n+1 : n, extended_COV);
-	cov->time = 0;
-	cov->nb_cells = 0;
+	cov->data->_optim_time = 0;
+	cov->data->_optim_nb_cells = 0;
 
 	handle_cell(*root);
 }
 
-void Optimizer::start(const char* cov_file, double obj_init_bound) {
+void Optimizer::start(const CovOptimData& data, double obj_init_bound) {
 
 	loup=obj_init_bound;
 
@@ -325,22 +332,20 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 	// TODO: replace with a set_loup function
 	buffer.contract(loup);
 
-	CovOptimData data(cov_file);
-
-	uplo=data.uplo;
-	loup=data.loup;
-	loup_point=data.loup_point;
+	uplo=data.uplo();
+	loup=data.loup();
+	loup_point=data.loup_point();
 	uplo_of_epsboxes=POS_INFINITY;
 
 	nb_cells=0;
 
 	buffer.flush();
 
-	for (size_t i=1; i<data.size(); i++) {
+	for (size_t i=loup_point.is_empty()? 0 : 1; i<data.size(); i++) {
 
 		IntervalVector box(n+1);
 
-		if (data.is_extended_space)
+		if (data.is_extended_space())
 			box = data[i];
 		else {
 			write_ext_box(data[i], box);
@@ -373,8 +378,8 @@ void Optimizer::start(const char* cov_file, double obj_init_bound) {
 
 	if (cov) delete cov;
 	cov = new CovOptimData(extended_COV? n+1 : n, extended_COV);
-	cov->time = data.time;
-	cov->nb_cells = data.nb_cells;
+	cov->data->_optim_time = data.time();
+	cov->data->_optim_nb_cells = data.nb_cells();
 }
 
 Optimizer::Status Optimizer::optimize() {
@@ -460,16 +465,16 @@ Optimizer::Status Optimizer::optimize() {
 
 	/* TODO: cannot retrieve variable names here. */
 	for (int i=0; i<(extended_COV ? n+1 : n); i++)
-		cov->var_names.push_back(string(""));
+		cov->data->_optim_var_names.push_back(string(""));
 
-	cov->optimizer_status = (unsigned int) status;
-	cov->uplo = uplo;
-	cov->uplo_of_epsboxes = uplo_of_epsboxes;
-	cov->loup = loup;
+	cov->data->_optim_optimizer_status = (unsigned int) status;
+	cov->data->_optim_uplo = uplo;
+	cov->data->_optim_uplo_of_epsboxes = uplo_of_epsboxes;
+	cov->data->_optim_loup = loup;
 
-	cov->time += time;
-	cov->nb_cells += nb_cells;
-	cov->loup_point = loup_point;
+	cov->data->_optim_time += time;
+	cov->data->_optim_nb_cells += nb_cells;
+	cov->data->_optim_loup_point = loup_point;
 
 	// for conversion between original/extended boxes
 	IntervalVector tmp(extended_COV ? n+1 : n);
@@ -527,6 +532,11 @@ const char* white() {
 
 void Optimizer::report() {
 
+	if (!cov || !buffer.empty()) { // not started
+		cout << " not started." << endl;
+		return;
+	}
+
 	switch(status) {
 	case SUCCESS: 
 		cout << green() << " optimization successful!" << endl;
@@ -582,12 +592,12 @@ void Optimizer::report() {
 	}
 
 	cout << " cpu time used:\t\t\t" << time << "s";
-	if (cov->time!=time)
-		cout << " [total=" << cov->time << "]";
+	if (cov->time()!=time)
+		cout << " [total=" << cov->time() << "]";
 	cout << endl;
 	cout << " number of cells:\t\t" << nb_cells;
-	if (cov->nb_cells!=nb_cells)
-		cout << " [total=" << cov->nb_cells << "]";
+	if (cov->nb_cells()!=nb_cells)
+		cout << " [total=" << cov->nb_cells() << "]";
 	cout << endl << endl;
 }
 

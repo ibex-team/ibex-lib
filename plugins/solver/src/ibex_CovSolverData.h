@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 08, 2018
-// Last update : Feb 15, 2019
+// Last update : Feb 28, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_SOLVER_DATA_H__
@@ -55,12 +55,22 @@ public:
 	 * \param m       - number of equalities
 	 * \param nb_ineq - number of inequalities (0 by default)
 	 */
-	CovSolverData(size_t n, size_t m, size_t nb_ineq=0, BoundaryType boundary_type=EQU_ONLY);
+	CovSolverData(size_t n, size_t m, size_t nb_ineq=0, BoundaryType boundary_type=EQU_ONLY, const std::vector<std::string>& var_names=std::vector<std::string>());
 
 	/**
 	 * \brief Load solver data from a COV file.
 	 */
 	CovSolverData(const char* filename);
+
+	/**
+	 * \brief Conversion from a COV.
+	 */
+	CovSolverData(const Cov& cov, bool copy=false);
+
+	/**
+	 * \brief Delete this
+	 */
+	~CovSolverData();
 
 	/**
 	 * \brief Save this as a COV file.
@@ -136,7 +146,12 @@ public:
 	 *
 	 * By default: empty vector.
 	 */
-	std::vector<std::string> var_names;
+	std::vector<std::string>& var_names();
+
+	/**
+	 * \brief Set the status of the solver.
+	 */
+	void set_solver_status(unsigned int status);
 
 	/*
 	 * \brief Status of the last solving.
@@ -145,21 +160,31 @@ public:
 	 *
 	 * By default: SUCCESS (means "unknown" if time==-1)
 	 */
-	unsigned int solver_status;
+	unsigned int solver_status() const;
+
+	/**
+	 * \brief Set the CPU running time.
+	 */
+	void set_time(double time);
 
 	/*
 	 * \brief CPU running time used to obtain this manifold.
 	 *
 	 * By default: -1 (means "unknown").
 	 */
-	double time;
+	double time() const;
+
+	/**
+	 * \brief Set the number of cells.
+	 */
+	void set_nb_cells(unsigned long nb_cells);
 
 	/**
 	 * \brief Number of cells used to obtain this manifold.
 	 *
 	 * By default: 0 (means "unknown").
 	 */
-	unsigned long nb_cells;
+	unsigned long nb_cells() const;
 
 	/**
 	 * \brief Number of pending boxes.
@@ -182,6 +207,7 @@ public:
 	static const unsigned int FORMAT_VERSION;
 
 protected:
+	friend class Solver;
 
 	/**
 	 * \brief Load solver data from a COV file.
@@ -211,10 +237,17 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
-	std::vector<BoxStatus>  _solver_status;    // status of the ith box
-	std::vector<size_t>     _solver_pending;   // indices of pending boxes
-	std::vector<size_t>     _solver_unknown;   // indices of unknown boxes
+	struct Data {
+		std::vector<std::string> _solver_var_names;
+		unsigned int             _solver_solver_status;
+		double                   _solver_time;
+		unsigned long            _solver_nb_cells;
+		std::vector<BoxStatus>   _solver_status;    // status of the ith box
+		std::vector<size_t>      _solver_pending;   // indices of pending boxes
+		std::vector<size_t>      _solver_unknown;   // indices of unknown boxes
+	} *data;
 
+	bool own_data;
 };
 
 /**
@@ -225,23 +258,51 @@ std::ostream& operator<<(std::ostream& os, const CovSolverData& solver);
 /*================================== inline implementations ========================================*/
 
 inline CovSolverData::BoxStatus CovSolverData::status(int i) const {
-	return _solver_status[i];
+	return data->_solver_status[i];
 }
 
 inline const IntervalVector& CovSolverData::pending(int j) const {
-	return (*this)[_solver_pending[j]];
+	return (*this)[data->_solver_pending[j]];
 }
 
 inline const IntervalVector& CovSolverData::unknown(int j) const {
-	return (*this)[_solver_unknown[j]];
+	return (*this)[data->_solver_unknown[j]];
+}
+
+inline std::vector<std::string>& CovSolverData::var_names() {
+	return data->_solver_var_names;
+}
+
+inline void CovSolverData::set_solver_status(unsigned int status) {
+	data->_solver_solver_status = status;
+}
+
+inline unsigned int CovSolverData::solver_status() const {
+	return data->_solver_solver_status;
+}
+
+inline void CovSolverData::set_time(double time) {
+	data->_solver_time = time;
+}
+
+inline double CovSolverData::time() const {
+	return data->_solver_time;
+}
+
+inline void CovSolverData::set_nb_cells(unsigned long n) {
+	data->_solver_nb_cells = n;
+}
+
+inline unsigned long CovSolverData::nb_cells() const {
+	return data->_solver_nb_cells;
 }
 
 inline size_t CovSolverData::nb_pending() const {
-	return _solver_pending.size();
+	return data->_solver_pending.size();
 }
 
 inline size_t CovSolverData::nb_unknown() const {
-	return _solver_unknown.size();
+	return data->_solver_unknown.size();
 }
 
 inline void CovSolverData::add_boundary(const IntervalVector& x) {

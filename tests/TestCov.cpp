@@ -440,8 +440,8 @@ void TestCov::test_covManifold(ScenarioType scenario, CovManifold& cov) {
 
 	size_t nb_eq = (scenario==INEQ_EQ_ONLY || scenario==INEQ_HALF_BALL) ? 0 : m;
 
-	CPPUNIT_ASSERT(cov.m==nb_eq);
-	CPPUNIT_ASSERT(cov.nb_ineq==nb_ineq);
+	CPPUNIT_ASSERT(cov.nb_eq()==nb_eq);
+	CPPUNIT_ASSERT(cov.nb_ineq()==nb_ineq);
 	CPPUNIT_ASSERT(cov.nb_solution()==nsol);
 	CPPUNIT_ASSERT(cov.nb_boundary()==nbnd);
 	CPPUNIT_ASSERT(cov.nb_unknown()==nunk+npen);
@@ -512,12 +512,12 @@ void TestCov::test_covSolverData(ScenarioType scenario, CovSolverData& cov) {
 
 	for (size_t i=0; i<n; i++) {
 		//CPPUNIT_ASSERT(strcmp(cov.var_names[i].c_str(),solver_var_names[i])==0);
-		CPPUNIT_ASSERT(cov.var_names[i] == solver_var_names[i]);
+		CPPUNIT_ASSERT(cov.var_names()[i] == solver_var_names[i]);
 	}
 
-	CPPUNIT_ASSERT(cov.solver_status == solver_status);
-	CPPUNIT_ASSERT(cov.time == solver_time);
-	CPPUNIT_ASSERT(cov.nb_cells == solver_nb_cells);
+	CPPUNIT_ASSERT(cov.solver_status() == solver_status);
+	CPPUNIT_ASSERT(cov.time() == solver_time);
+	CPPUNIT_ASSERT(cov.nb_cells() == solver_nb_cells);
 	CPPUNIT_ASSERT(cov.nb_pending() == npen);
 
 	vector<IntervalVector> b=boxes();
@@ -670,10 +670,10 @@ CovSolverData* TestCov::build_covSolverData(ScenarioType scenario) {
 	for (size_t i=0; i<n; i++)
 		var_names.push_back(solver_var_names[i]);
 
-	cov->var_names = var_names;
-	cov->time = solver_time;
-	cov->solver_status = solver_status;
-	cov->nb_cells = solver_nb_cells;
+	cov->var_names() = var_names;
+	cov->set_time(solver_time);
+	cov->set_solver_status(solver_status);
+	cov->set_nb_cells(solver_nb_cells);
 
 	return cov;
 }
@@ -711,10 +711,18 @@ void TestCov::write_covfile(ScenarioType scenario) {
 	free(tmpname);
 }
 
-void TestCov::covlistfac(ScenarioType scenario) {
+void TestCov::covlistfac1(ScenarioType scenario) {
 	CovList* cov=build_covlist(scenario);
 	test_covlist(scenario, *cov);
 	delete cov;
+}
+
+void TestCov::covlistfac2(ScenarioType scenario) {
+	Cov* _cov=build_cov(scenario);
+	CovList cov(*_cov);
+	test_cov(scenario, cov);
+	CPPUNIT_ASSERT(cov.size()==0);
+	delete _cov;
 }
 
 void TestCov::read_covlistfile1(ScenarioType scenario) {
@@ -754,10 +762,19 @@ void TestCov::write_covlistfile(ScenarioType scenario) {
 	free(tmpname);
 }
 
-void TestCov::covIUlistfac(ScenarioType scenario) {
+void TestCov::covIUlistfac1(ScenarioType scenario) {
 	CovIUList* cov=build_covIUlist(scenario);
 	test_covIUlist(scenario, *cov);
 	delete cov;
+}
+
+void TestCov::covIUlistfac2(ScenarioType scenario) {
+	CovList* _cov=build_covlist(scenario);
+	CovIUList cov(*_cov);
+	test_covlist(scenario, cov);
+	CPPUNIT_ASSERT(cov.nb_inner()==0);
+	CPPUNIT_ASSERT(cov.nb_unknown()==N);
+	delete _cov;
 }
 
 void TestCov::read_covIUlistfile1(ScenarioType scenario) {
@@ -798,10 +815,19 @@ void TestCov::write_covIUlistfile(ScenarioType scenario) {
 	free(tmpname);
 }
 
-void TestCov::covIBUlistfac(ScenarioType scenario) {
+void TestCov::covIBUlistfac1(ScenarioType scenario) {
 	CovIBUList* cov=build_covIBUlist(scenario);
 	test_covIBUlist(scenario, *cov);
 	delete cov;
+}
+
+void TestCov::covIBUlistfac2(ScenarioType scenario) {
+	CovIUList* _cov=build_covIUlist(scenario);
+	CovIBUList cov(*_cov);
+	test_covIUlist(scenario, cov);
+	CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	CPPUNIT_ASSERT(cov.nb_unknown()==cov.size() - cov.nb_inner());
+	delete _cov;
 }
 
 void TestCov::read_covIBUlistfile1(ScenarioType scenario) {
@@ -856,10 +882,42 @@ void TestCov::write_covIBUlistfile(ScenarioType scenario) {
 	free(tmpname);
 }
 
-void TestCov::covManifoldfac(ScenarioType scenario) {
+void TestCov::covManifoldfac1(ScenarioType scenario) {
 	CovManifold* cov=build_covManifold(scenario);
 	test_covManifold(scenario, *cov);
 	delete cov;
+}
+
+void TestCov::covManifoldfac2(ScenarioType scenario) {
+	CovIBUList* _cov=build_covIBUlist(scenario);
+	CovManifold cov(*_cov);
+
+	test_covIBUlist(scenario, cov);
+	CPPUNIT_ASSERT(cov.nb_eq()==0);
+	CPPUNIT_ASSERT(cov.nb_ineq()==0);
+
+	switch(scenario) {
+	case INEQ_EQ_ONLY:
+		CPPUNIT_ASSERT(cov.nb_solution()==nsol);
+		CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	break;
+	case INEQ_HALF_BALL:
+		CPPUNIT_ASSERT(cov.nb_solution()==nsol);
+		CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	break;
+	case EQ_ONLY:
+		CPPUNIT_ASSERT(cov.nb_solution()==0);
+		CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	break;
+	case HALF_BALL:
+		CPPUNIT_ASSERT(cov.nb_solution()==0);
+		CPPUNIT_ASSERT(cov.nb_boundary()==0);
+	break;
+	default:
+		assert(false);
+	}
+
+	delete _cov;
 }
 
 void TestCov::read_covManifoldfile1(ScenarioType scenario) {
@@ -881,8 +939,8 @@ void TestCov::read_covManifoldfile2(ScenarioType scenario) {
 
 	CovManifold cov(filename);
 	test_covIBUlist(scenario, cov);
-	CPPUNIT_ASSERT(cov.m==0);
-	CPPUNIT_ASSERT(cov.nb_ineq==0);
+	CPPUNIT_ASSERT(cov.nb_eq()==0);
+	CPPUNIT_ASSERT(cov.nb_ineq()==0);
 
 	switch(scenario) {
 	case INEQ_EQ_ONLY:
@@ -922,11 +980,25 @@ void TestCov::write_covManifoldfile(ScenarioType scenario) {
 	free(tmpname);
 }
 
-void TestCov::covSolverDatafac(ScenarioType scenario) {
+void TestCov::covSolverDatafac1(ScenarioType scenario) {
 	CovSolverData* cov=build_covSolverData(scenario);
 	test_covSolverData(scenario, *cov);
 	delete cov;
 }
+
+void TestCov::covSolverDatafac2(ScenarioType scenario) {
+	CovManifold* _cov=build_covManifold(scenario);
+	CovSolverData cov(*_cov);
+	test_covManifold(scenario, cov);
+	CPPUNIT_ASSERT(cov.var_names().empty());
+	CPPUNIT_ASSERT(cov.solver_status() == Solver::SUCCESS);
+	CPPUNIT_ASSERT(cov.time() == -1);
+	CPPUNIT_ASSERT(cov.nb_cells() == 0);
+	CPPUNIT_ASSERT(cov.nb_pending() == 0);
+
+	delete _cov;
+}
+
 
 void TestCov::read_covSolverDatafile1(ScenarioType scenario) {
 	ofstream f;
@@ -947,10 +1019,10 @@ void TestCov::read_covSolverDatafile2(ScenarioType scenario) {
 
 	CovSolverData cov(filename);
 	test_covManifold(scenario, cov);
-	CPPUNIT_ASSERT(cov.var_names.empty());
-	CPPUNIT_ASSERT(cov.solver_status == Solver::SUCCESS);
-	CPPUNIT_ASSERT(cov.time == -1);
-	CPPUNIT_ASSERT(cov.nb_cells == 0);
+	CPPUNIT_ASSERT(cov.var_names().empty());
+	CPPUNIT_ASSERT(cov.solver_status() == Solver::SUCCESS);
+	CPPUNIT_ASSERT(cov.time() == -1);
+	CPPUNIT_ASSERT(cov.nb_cells() == 0);
 	CPPUNIT_ASSERT(cov.nb_pending() == 0);
 
 	free(filename);

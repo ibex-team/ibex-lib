@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 28, 2019
 //============================================================================
 
 #include "ibex_CovList.h"
@@ -23,16 +23,37 @@ const unsigned int CovList::subformat_level = 1;
 
 const unsigned int CovList::subformat_number = 0;
 
-CovList::CovList(size_t n) : Cov(n) {
+CovList::CovList(size_t n) : Cov(n), data(new Data()), own_data(true) {
 
 }
 
-CovList::CovList(const char* filename) : Cov((size_t) 0) {
+CovList::CovList(const char* filename) : CovList((size_t) 0 /*tmp*/) {
 	stack<unsigned int> format_id;
 	stack<unsigned int> format_version;
 	ifstream* f = CovList::read(filename, *this, format_id, format_version);
 	f->close();
 	delete f;
+}
+
+CovList::CovList(const Cov& cov, bool copy) : Cov(cov.n) {
+	const CovList* covlist = dynamic_cast<const CovList*>(&cov);
+
+	if (covlist) {
+		if (copy) {
+			data = new Data();
+			data->lst  = covlist->data->lst;
+			for (list<IntervalVector>::iterator it=data->lst.begin(); it!=data->lst.end(); ++it)
+				data->vec.push_back(&(*it));
+			own_data = true;
+		} else {
+			data = covlist->data;
+			own_data = false;
+		}
+	} else {
+		data = new Data();
+		// nothing to add
+		own_data = true;
+	}
 }
 
 void CovList::save(const char* filename) const {
@@ -43,6 +64,12 @@ void CovList::save(const char* filename) const {
 	delete of;
 }
 
+CovList::~CovList() {
+	if (own_data) {
+		delete data;
+	}
+}
+
 void CovList::add(const IntervalVector& x) {
 //	if (list.empty())
 //		n=x.size();
@@ -50,8 +77,8 @@ void CovList::add(const IntervalVector& x) {
 		if (n!=x.size())
 			ibex_error("[CovList] boxes must have all the same size.");
 //	}
-	list.push_back(x);
-	vec.push_back(&list.back());
+	data->lst.push_back(x);
+	data->vec.push_back(&data->lst.back());
 }
 
 ostream& operator<<(ostream& os, const CovList& cov) {
@@ -112,7 +139,7 @@ ofstream* CovList::write(const char* filename, const CovList& cov, std::stack<un
 
 	write_pos_int(*f, cov.size());
 
-	for (std::list<IntervalVector>::const_iterator it=cov.list.begin(); it!=cov.list.end(); ++it) {
+	for (std::list<IntervalVector>::const_iterator it=cov.data->lst.begin(); it!=cov.data->lst.end(); ++it) {
 		write_box(*f, *it);
 	}
 

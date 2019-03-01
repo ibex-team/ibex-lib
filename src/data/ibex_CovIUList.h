@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 28, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_IU_LIST_H__
@@ -45,6 +45,16 @@ public:
 	 * \brief Load a IU list from a COV file.
 	 */
 	CovIUList(const char* filename);
+
+	/**
+	 * \brief Conversion from a COV.
+	 */
+	CovIUList(const Cov& cov, bool copy=false);
+
+	/**
+	 * \brief Delete this
+	 */
+	~CovIUList();
 
 	/**
 	 * \brief Save this as a COV file.
@@ -141,11 +151,13 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
+	struct Data {
+		std::vector<BoxStatus> _IU_status; // status of the ith box
+		std::vector<size_t> _IU_inner;     // indices of other 'inner' boxes
+		std::vector<size_t> _IU_unknown;   // indices of other 'unknown' boxes
+	} *data;
 
-	std::vector<BoxStatus> _IU_status; // status of the ith box
-	std::vector<size_t> _IU_inner;     // indices of other 'inner' boxes
-	std::vector<size_t> _IU_unknown;   // indices of other 'unknown' boxes
-
+	bool own_data;
 };
 
 /**
@@ -156,7 +168,7 @@ std::ostream& operator<<(std::ostream& os, const CovIUList& cov);
 /*================================== inline implementations ========================================*/
 
 inline CovIUList::BoxStatus CovIUList::status(int i) const {
-	return _IU_status[i];
+	return (data->_IU_status)[i];
 }
 
 inline bool CovIUList::is_inner(int i) const {
@@ -168,19 +180,19 @@ inline bool CovIUList::is_unknown(int i) const {
 }
 
 inline const IntervalVector& CovIUList::inner(int j) const {
-	return (*this)[_IU_inner[j]];
+	return (*this)[(data->_IU_inner)[j]];
 }
 
 inline const IntervalVector& CovIUList::unknown(int j) const {
-	return (*this)[_IU_unknown[j]];
+	return (*this)[(data->_IU_unknown)[j]];
 }
 
 inline size_t CovIUList::nb_inner() const {
-	return _IU_inner.size();
+	return data->_IU_inner.size();
 }
 
 inline size_t CovIUList::nb_unknown() const {
-	return _IU_unknown.size();
+	return data->_IU_unknown.size();
 }
 
 } /* namespace ibex */

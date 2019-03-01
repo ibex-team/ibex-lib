@@ -5,13 +5,16 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 28, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_LIST_H__
 #define __IBEX_COV_LIST_H__
 
 #include "ibex_Cov.h"
+
+#include <list>
+#include <vector>
 
 namespace ibex {
 
@@ -38,6 +41,16 @@ public:
 	 * \brief Load a list from a COV file.
 	 */
 	CovList(const char* filename);
+
+	/**
+	 * \brief Conversion from a COV.
+	 */
+	CovList(const Cov& cov, bool copy=false);
+
+	/**
+	 * \brief Delete this
+	 */
+	~CovList();
 
 	/**
 	 * \brief Save this list as a COV file.
@@ -96,8 +109,12 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
-	std::list<IntervalVector> list;
-	std::vector<IntervalVector*> vec;
+	struct Data {
+		std::list<IntervalVector> lst;
+		std::vector<IntervalVector*> vec;
+	} *data;
+
+	bool own_data;
 };
 
 /**
@@ -108,12 +125,12 @@ std::ostream& operator<<(std::ostream& os, const CovList& cov);
 /*================================== inline implementations ========================================*/
 
 inline size_t CovList::size() const {
-	return list.size();
+	return data->lst.size();
 }
 
 
 inline const IntervalVector& CovList::operator[](int i) const {
-	return *vec[i];
+	return *(data->vec)[i];
 }
 
 

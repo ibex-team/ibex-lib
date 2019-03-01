@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 24, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 28, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_OPTIM_DATA_H__
@@ -60,6 +60,16 @@ public:
 	CovOptimData(const char* filename);
 
 	/**
+	 * \brief Conversion from a COV.
+	 */
+	CovOptimData(const Cov& cov, bool copy=false);
+
+	/**
+	 * \brief Delete this
+	 */
+	~CovOptimData();
+
+	/**
 	 * \brief Save this as a COV file.
 	 */
 	void save(const char* filename) const;
@@ -79,7 +89,7 @@ public:
 	 *
 	 * By default: empty vector.
 	 */
-	std::vector<std::string> var_names;
+	const std::vector<std::string>& var_names() const;
 
 	/**
 	 * \brief Whether the covered space includes objective values.
@@ -90,7 +100,7 @@ public:
 	 * the domain of "f(x)" in the (n-1)^th (last) component.
 	 * Otherwise, n is the dimension of the original space.
 	 */
-	bool is_extended_space;
+	bool is_extended_space() const;
 
 	/*
 	 * \brief Return status of the last optimization.
@@ -99,16 +109,16 @@ public:
 	 *
 	 * By default: SUCCESS (means "unknown" if time==-1)
 	 */
-	unsigned int optimizer_status;
+	unsigned int optimizer_status() const;
 
 	/** The current uplo. */
-	double uplo;
+	double uplo() const;
 
 	/** Lower bound of the small boxes taken by the precision. */
-	double uplo_of_epsboxes;
+	double uplo_of_epsboxes() const;
 
 	/** The current loup. */
-	double loup;
+	double loup() const;
 
 	/**
 	 * The point satisfying the constraints corresponding to the loup.
@@ -122,23 +132,24 @@ public:
 	 *
 	 * If the loup-finder is rigorous, this point is a (non-degenerated) box.
 	 */
-	IntervalVector loup_point;
+	const IntervalVector& loup_point() const;
 
 	/*
 	 * \brief (Cumulated) CPU running time.
 	 *
 	 * By default: -1 (means "unknown").
 	 */
-	double time;
+	double time() const;
 
 	/**
 	 * \brief (Cumulated) number of cells.
 	 *
 	 * By default: 0 (means "unknown").
 	 */
-	unsigned long nb_cells;
+	unsigned long nb_cells() const;
 
 protected:
+	friend class Optimizer;
 
 	/**
 	 * \brief Load optimizer data from a COV file.
@@ -168,12 +179,63 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
+	struct Data {
+		std::vector<std::string> _optim_var_names;
+		bool                     _optim_is_extended_space;
+		unsigned int             _optim_optimizer_status;
+		double                   _optim_uplo;
+		double                   _optim_uplo_of_epsboxes;
+		double                   _optim_loup;
+		IntervalVector           _optim_loup_point;
+		double                   _optim_time;
+		unsigned long            _optim_nb_cells;
+	} *data;
+
+	bool own_data;
 };
 
 /**
  * \brief Stream out optimizer data.
  */
 std::ostream& operator<<(std::ostream& os, const CovOptimData& optim);
+
+/*================================== inline implementations ========================================*/
+
+inline const std::vector<std::string>& CovOptimData::var_names() const {
+	return data->_optim_var_names;
+}
+
+inline bool CovOptimData::is_extended_space() const {
+	return data->_optim_is_extended_space;
+}
+
+inline unsigned int CovOptimData::optimizer_status() const {
+	return data->_optim_optimizer_status;
+}
+
+inline double CovOptimData::uplo() const {
+	return data->_optim_uplo;
+}
+
+inline double CovOptimData::uplo_of_epsboxes() const {
+	return data->_optim_uplo_of_epsboxes;
+}
+
+inline double CovOptimData::loup() const {
+	return data->_optim_loup;
+}
+
+inline const IntervalVector& CovOptimData::loup_point() const {
+	return data->_optim_loup_point;
+}
+
+inline double CovOptimData::time() const {
+	return data->_optim_time;
+}
+
+inline unsigned long CovOptimData::nb_cells() const {
+	return data->_optim_nb_cells;
+}
 
 } /* namespace ibex */
 

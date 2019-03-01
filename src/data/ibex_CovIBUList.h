@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 28, 2019
 //============================================================================
 
 #ifndef __IBEX_COV_IBU_LIST_H__
@@ -57,6 +57,16 @@ public:
 	 * \brief Load a IBU list from a COV file.
 	 */
 	CovIBUList(const char* filename);
+
+	/**
+	 * \brief Conversion from a COV.
+	 */
+	CovIBUList(const Cov& cov, bool copy=false);
+
+	/**
+	 * \brief Delete this
+	 */
+	~CovIBUList();
 
 	/**
 	 * \brief Save this as a COV file.
@@ -135,7 +145,7 @@ public:
 	 * (we cannot mix boundary boxes of different types in
 	 * the same COV file).
 	 */
-	const BoundaryType boundary_type;
+	BoundaryType boundary_type() const;
 
 protected:
 
@@ -161,10 +171,14 @@ protected:
 	 */
 	static const unsigned int subformat_number;
 
-	std::vector<BoxStatus> _IBU_status;       // status of the ith box
-	std::vector<size_t>    _IBU_boundary;     // indices of 'boundary' boxes
-	std::vector<size_t>    _IBU_unknown;      // indices of 'unknown' boxes
+	struct Data {
+		BoundaryType           _IBU_boundary_type;
+		std::vector<BoxStatus> _IBU_status;       // status of the ith box
+		std::vector<size_t>    _IBU_boundary;     // indices of 'boundary' boxes
+		std::vector<size_t>    _IBU_unknown;      // indices of 'unknown' boxes
+	} *data;
 
+	bool own_data;
 };
 
 /**
@@ -175,15 +189,15 @@ std::ostream& operator<<(std::ostream& os, const CovIBUList& cov);
 /*================================== inline implementations ========================================*/
 
 inline size_t CovIBUList::nb_boundary() const {
-	return _IBU_boundary.size();
+	return data->_IBU_boundary.size();
 }
 
 inline size_t CovIBUList::nb_unknown() const {
-	return _IBU_unknown.size();
+	return data->_IBU_unknown.size();
 }
 
 inline CovIBUList::BoxStatus CovIBUList::status(int i) const {
-	return _IBU_status[i];
+	return (data->_IBU_status)[i];
 }
 
 inline bool CovIBUList::is_boundary(int i) const {
@@ -195,11 +209,15 @@ inline bool CovIBUList::is_unknown(int i) const {
 }
 
 inline const IntervalVector& CovIBUList::boundary(int i) const {
-	return (*this)[_IBU_boundary[i]];
+	return (*this)[data->_IBU_boundary[i]];
 }
 
 inline const IntervalVector& CovIBUList::unknown(int i) const {
-	return (*this)[_IBU_unknown[i]];
+	return (*this)[data->_IBU_unknown[i]];
+}
+
+inline CovIBUList::BoundaryType CovIBUList::boundary_type() const {
+	return data->_IBU_boundary_type;
 }
 
 } /* namespace ibex */

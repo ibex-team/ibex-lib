@@ -123,7 +123,17 @@ public:
 	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
 	/**
+	/**
 	 * \brief Continue optimization.
+	 *
+	 * Load intermediate data from a COV structure, and continue optimization.
+	 *
+	 * See above for comments on return values.
+	 */
+	Status optimize(const CovOptimData& cov, double obj_init_bound=POS_INFINITY);
+
+
+	/* \brief Continue optimization.
 	 *
 	 * Load intermediate data from a COV file, and continue optimization.
 	 *
@@ -307,7 +317,7 @@ protected:
 	/*
 	 * \brief Initialize the optimizer from a COV input file.
 	 */
-	void start(const char* cov_file, double obj_init_bound=POS_INFINITY);
+	void start(const CovOptimData& cov, double obj_init_bound=POS_INFINITY);
 
 	/**
 	 * \brief Run the optimizer (once started).

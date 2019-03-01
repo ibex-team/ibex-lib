@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 28, 2019
 //============================================================================
 
 #include "ibex_CovIBUList.h"
@@ -23,15 +23,48 @@ const unsigned int CovIBUList::subformat_level = 3;
 
 const unsigned int CovIBUList::subformat_number = 0;
 
-CovIBUList::CovIBUList(size_t n, BoundaryType boundary_type) : CovIUList(n), boundary_type(boundary_type) {
+CovIBUList::CovIBUList(size_t n, BoundaryType boundary_type) : CovIUList(n), data(new Data()), own_data(true) {
+	data->_IBU_boundary_type = boundary_type;
 }
 
-CovIBUList::CovIBUList(const char* filename) : CovIUList((size_t) 0 /* tmp */), boundary_type(INNER_PT /* by default */) {
+CovIBUList::CovIBUList(const char* filename) : CovIBUList((size_t) 0, INNER_PT /* tmp */) {
 	stack<unsigned int> format_id;
 	stack<unsigned int> format_version;
 	ifstream* f = CovIBUList::read(filename, *this, format_id, format_version);
 	f->close();
 	delete f;
+}
+
+CovIBUList::CovIBUList(const Cov& cov, bool copy) : CovIUList(cov, copy) {
+	const CovIBUList* covIBUlist = dynamic_cast<const CovIBUList*>(&cov);
+
+	if (covIBUlist) {
+		if (copy) {
+			data = new Data();
+			data->_IBU_boundary_type = covIBUlist->data->_IBU_boundary_type;
+			data->_IBU_status   = covIBUlist->data->_IBU_status;
+			data->_IBU_boundary = covIBUlist->data->_IBU_boundary;
+			data->_IBU_unknown  = covIBUlist->data->_IBU_unknown;
+			own_data = true;
+		} else {
+			data = covIBUlist->data;
+			own_data = false;
+		}
+	} else {
+		data = new Data();
+		data->_IBU_boundary_type = INNER_PT; /* by default */
+		for (size_t i=0; i<size(); i++) {
+			switch(CovIUList::status(i)) {
+			case CovIUList::INNER :
+				data->_IBU_status.push_back(CovIBUList::INNER);
+				break;
+			default :
+				data->_IBU_unknown.push_back(i);
+				data->_IBU_status.push_back(CovIBUList::UNKNOWN);
+			}
+		}
+		own_data = true;
+	}
 }
 
 void CovIBUList::save(const char* filename) const	 {
@@ -42,25 +75,31 @@ void CovIBUList::save(const char* filename) const	 {
 	delete of;
 }
 
+CovIBUList::~CovIBUList() {
+	if (own_data) {
+		delete data;
+	}
+}
+
 void CovIBUList::add(const IntervalVector& x) {
 	add_unknown(x);
 }
 
 void CovIBUList::add_inner(const IntervalVector& x) {
 	CovIUList::add_inner(x);
-	_IBU_status.push_back(INNER);
+	data->_IBU_status.push_back(INNER);
 }
 
 void CovIBUList::add_boundary(const IntervalVector& x) {
 	CovIUList::add_unknown(x);
-	_IBU_status.push_back(BOUNDARY);
-	_IBU_boundary.push_back(list.size()-1);
+	data->_IBU_status.push_back(BOUNDARY);
+	data->_IBU_boundary.push_back(size()-1);
 }
 
 void CovIBUList::add_unknown(const IntervalVector& x) {
 	CovIUList::add_unknown(x);
-	_IBU_status.push_back(UNKNOWN);
-	_IBU_unknown.push_back(list.size()-1);
+	data->_IBU_status.push_back(UNKNOWN);
+	data->_IBU_unknown.push_back(size()-1);
 }
 
 ostream& operator<<(ostream& os, const CovIBUList& cov) {
@@ -96,8 +135,8 @@ ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned
 		unsigned int _boundary_type = read_pos_int(*f);
 
 		switch(_boundary_type) {
-		case 0 :  (BoundaryType&) cov.boundary_type = INNER_PT; break;
-		case 1 :  (BoundaryType&) cov.boundary_type = INNER_AND_OUTER_PT; break;
+		case 0 :  (BoundaryType&) cov.data->_IBU_boundary_type = INNER_PT; break;
+		case 1 :  (BoundaryType&) cov.data->_IBU_boundary_type = INNER_AND_OUTER_PT; break;
 		default : ibex_error("[CovIBUList]: unknown boundary type identifier.");
 		}
 
@@ -108,38 +147,38 @@ ifstream* CovIBUList::read(const char* filename, CovIBUList& cov, stack<unsigned
 
 		for (size_t i=0; i<nb_boundary; i++) {
 			uint32_t j=read_pos_int(*f);
-			if (!cov._IBU_boundary.empty()) { // check ordering
-				if (j<cov._IBU_boundary.back())
+			if (!cov.data->_IBU_boundary.empty()) { // check ordering
+				if (j<cov.data->_IBU_boundary.back())
 					ibex_error("[CovIBUList]: indices of boundary boxes are not in increasing order.");
-				if (j==cov._IBU_boundary.back())
+				if (j==cov.data->_IBU_boundary.back())
 					ibex_error("[CovIBUList]: duplicated index of boundary box.");
 			}
-			cov._IBU_boundary.push_back(j);
+			cov.data->_IBU_boundary.push_back(j);
 		}
 	}
 
-	vector<size_t>::const_iterator it=cov._IBU_boundary.begin(); // iterator of boundary boxes
+	vector<size_t>::const_iterator it=cov.data->_IBU_boundary.begin(); // iterator of boundary boxes
 
 	for (size_t i=0; i<cov.size(); i++) {
 
-		if (it!=cov._IBU_boundary.end() && i==*it) {
+		if (it!=cov.data->_IBU_boundary.end() && i==*it) {
 			if (!cov.CovIUList::is_unknown(i))
 				ibex_error("[CovIBUList]: a boundary box must be a CovIUList unknown box.");
-			cov._IBU_status.push_back(CovIBUList::BOUNDARY);
+			cov.data->_IBU_status.push_back(CovIBUList::BOUNDARY);
 			++it;
 		} else {
 			switch(cov.CovIUList::status(i)) {
 			case CovIUList::INNER :
-				cov._IBU_status.push_back(CovIBUList::INNER);
+				cov.data->_IBU_status.push_back(CovIBUList::INNER);
 				break;
 			default :
-				cov._IBU_unknown.push_back(i);
-				cov._IBU_status.push_back(CovIBUList::UNKNOWN);
+				cov.data->_IBU_unknown.push_back(i);
+				cov.data->_IBU_status.push_back(CovIBUList::UNKNOWN);
 			}
 		}
 	}
 
-	if (it!=cov._IBU_boundary.end()) ibex_error("[CovIBUList]: invalid boundary box index.");
+	if (it!=cov.data->_IBU_boundary.end()) ibex_error("[CovIBUList]: invalid boundary box index.");
 
 	return f;
 }
@@ -151,11 +190,11 @@ ofstream* CovIBUList::write(const char* filename, const CovIBUList& cov, stack<u
 
 	ofstream* f = CovIUList::write(filename, cov, format_id, format_version);
 
-	write_pos_int(*f, cov.boundary_type==INNER_PT? 0 : 1);
+	write_pos_int(*f, cov.boundary_type()==INNER_PT? 0 : 1);
 
 	write_pos_int(*f, cov.nb_boundary());
 
-	for (vector<size_t>::const_iterator it=cov._IBU_boundary.begin(); it!=cov._IBU_boundary.end(); ++it) {
+	for (vector<size_t>::const_iterator it=cov.data->_IBU_boundary.begin(); it!=cov.data->_IBU_boundary.end(); ++it) {
 		assert(*it<numeric_limits<uint32_t>::max());
 		write_pos_int(*f, (uint32_t) *it);
 	}

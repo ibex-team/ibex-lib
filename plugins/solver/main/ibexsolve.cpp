@@ -237,9 +237,9 @@ int main(int argc, char** argv) {
 
 		if (!quiet) s.report();
 
-		if (sols) cout << s.get_manifold() << endl;
+		if (sols) cout << s.get_data() << endl;
 
-		s.get_manifold().save(output_manifold_file.c_str());
+		s.get_data().save(output_manifold_file.c_str());
 
 		if (!quiet) {
 			cout << " results written in " << output_manifold_file << "\n";

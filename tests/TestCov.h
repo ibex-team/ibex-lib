@@ -38,23 +38,28 @@ public:
 	CPPUNIT_TEST(covfac_scenario1);
 	CPPUNIT_TEST(read_covfile_scenario1);
 	CPPUNIT_TEST(write_covfile_scenario1);
-	CPPUNIT_TEST(covlistfac_scenario1);
+	CPPUNIT_TEST(covlistfac1_scenario1);
+	CPPUNIT_TEST(covlistfac2_scenario1);
 	CPPUNIT_TEST(read_covlistfile1_scenario1);
 	CPPUNIT_TEST(read_covlistfile2_scenario1);
 	CPPUNIT_TEST(write_covlistfile_scenario1);
-	CPPUNIT_TEST(covIUlistfac_scenario1);
+	CPPUNIT_TEST(covIUlistfac1_scenario1);
+	CPPUNIT_TEST(covIUlistfac2_scenario1);
 	CPPUNIT_TEST(read_covIUlistfile1_scenario1);
 	CPPUNIT_TEST(read_covIUlistfile2_scenario1);
 	CPPUNIT_TEST(write_covIUlistfile_scenario1);
-	CPPUNIT_TEST(covIBUlistfac_scenario1);
+	CPPUNIT_TEST(covIBUlistfac1_scenario1);
+	CPPUNIT_TEST(covIBUlistfac2_scenario1);
 	CPPUNIT_TEST(read_covIBUlistfile1_scenario1);
 	CPPUNIT_TEST(read_covIBUlistfile2_scenario1);
 	CPPUNIT_TEST(write_covIBUlistfile_scenario1);
-	CPPUNIT_TEST(covManifoldfac_scenario1);
+	CPPUNIT_TEST(covManifoldfac1_scenario1);
+	CPPUNIT_TEST(covManifoldfac2_scenario1);
 	CPPUNIT_TEST(read_covManifoldfile1_scenario1);
 	CPPUNIT_TEST(read_covManifoldfile2_scenario1);
 	CPPUNIT_TEST(write_covManifoldfile_scenario1);
-	CPPUNIT_TEST(covSolverDatafac_scenario1);
+	CPPUNIT_TEST(covSolverDatafac1_scenario1);
+	CPPUNIT_TEST(covSolverDatafac2_scenario1);
 	CPPUNIT_TEST(read_covSolverDatafile1_scenario1);
 	CPPUNIT_TEST(read_covSolverDatafile2_scenario1);
 	CPPUNIT_TEST(write_covSolverDatafile_scenario1);
@@ -62,23 +67,28 @@ public:
 	CPPUNIT_TEST(covfac_scenario2);
 	CPPUNIT_TEST(read_covfile_scenario2);
 	CPPUNIT_TEST(write_covfile_scenario2);
-	CPPUNIT_TEST(covlistfac_scenario2);
+	CPPUNIT_TEST(covlistfac1_scenario2);
+	CPPUNIT_TEST(covlistfac2_scenario2);
 	CPPUNIT_TEST(read_covlistfile1_scenario2);
 	CPPUNIT_TEST(read_covlistfile2_scenario2);
 	CPPUNIT_TEST(write_covlistfile_scenario2);
-	CPPUNIT_TEST(covIUlistfac_scenario2);
+	CPPUNIT_TEST(covIUlistfac1_scenario2);
+	CPPUNIT_TEST(covIUlistfac2_scenario2);
 	CPPUNIT_TEST(read_covIUlistfile1_scenario2);
 	CPPUNIT_TEST(read_covIUlistfile2_scenario2);
 	CPPUNIT_TEST(write_covIUlistfile_scenario2);
-	CPPUNIT_TEST(covIBUlistfac_scenario2);
+	CPPUNIT_TEST(covIBUlistfac1_scenario2);
+	CPPUNIT_TEST(covIBUlistfac2_scenario2);
 	CPPUNIT_TEST(read_covIBUlistfile1_scenario2);
 	CPPUNIT_TEST(read_covIBUlistfile2_scenario2);
 	CPPUNIT_TEST(write_covIBUlistfile_scenario2);
-	CPPUNIT_TEST(covManifoldfac_scenario2);
+	CPPUNIT_TEST(covManifoldfac1_scenario2);
+	CPPUNIT_TEST(covManifoldfac2_scenario2);
 	CPPUNIT_TEST(read_covManifoldfile1_scenario2);
 	CPPUNIT_TEST(read_covManifoldfile2_scenario2);
 	CPPUNIT_TEST(write_covManifoldfile_scenario2);
-	CPPUNIT_TEST(covSolverDatafac_scenario2);
+	CPPUNIT_TEST(covSolverDatafac1_scenario2);
+	CPPUNIT_TEST(covSolverDatafac2_scenario2);
 	CPPUNIT_TEST(read_covSolverDatafile1_scenario2);
 	CPPUNIT_TEST(read_covSolverDatafile2_scenario2);
 	CPPUNIT_TEST(write_covSolverDatafile_scenario2);
@@ -86,23 +96,28 @@ public:
 	CPPUNIT_TEST(covfac_scenario3);
 	CPPUNIT_TEST(read_covfile_scenario3);
 	CPPUNIT_TEST(write_covfile_scenario3);
-	CPPUNIT_TEST(covlistfac_scenario3);
+	CPPUNIT_TEST(covlistfac1_scenario3);
+	CPPUNIT_TEST(covlistfac2_scenario3);
 	CPPUNIT_TEST(read_covlistfile1_scenario3);
 	CPPUNIT_TEST(read_covlistfile2_scenario3);
 	CPPUNIT_TEST(write_covlistfile_scenario3);
-	CPPUNIT_TEST(covIUlistfac_scenario3);
+	CPPUNIT_TEST(covIUlistfac1_scenario3);
+	CPPUNIT_TEST(covIUlistfac2_scenario3);
 	CPPUNIT_TEST(read_covIUlistfile1_scenario3);
 	CPPUNIT_TEST(read_covIUlistfile2_scenario3);
 	CPPUNIT_TEST(write_covIUlistfile_scenario3);
-	CPPUNIT_TEST(covIBUlistfac_scenario3);
+	CPPUNIT_TEST(covIBUlistfac1_scenario3);
+	CPPUNIT_TEST(covIBUlistfac2_scenario3);
 	CPPUNIT_TEST(read_covIBUlistfile1_scenario3);
 	CPPUNIT_TEST(read_covIBUlistfile2_scenario3);
 	CPPUNIT_TEST(write_covIBUlistfile_scenario3);
-	CPPUNIT_TEST(covManifoldfac_scenario3);
+	CPPUNIT_TEST(covManifoldfac1_scenario3);
+	CPPUNIT_TEST(covManifoldfac2_scenario3);
 	CPPUNIT_TEST(read_covManifoldfile1_scenario3);
 	CPPUNIT_TEST(read_covManifoldfile2_scenario3);
 	CPPUNIT_TEST(write_covManifoldfile_scenario3);
-	CPPUNIT_TEST(covSolverDatafac_scenario3);
+	CPPUNIT_TEST(covSolverDatafac1_scenario3);
+	CPPUNIT_TEST(covSolverDatafac2_scenario3);
 	CPPUNIT_TEST(read_covSolverDatafile1_scenario3);
 	CPPUNIT_TEST(read_covSolverDatafile2_scenario3);
 	CPPUNIT_TEST(write_covSolverDatafile_scenario3);
@@ -110,23 +125,28 @@ public:
 	CPPUNIT_TEST(covfac_scenario4);
 	CPPUNIT_TEST(read_covfile_scenario4);
 	CPPUNIT_TEST(write_covfile_scenario4);
-	CPPUNIT_TEST(covlistfac_scenario4);
+	CPPUNIT_TEST(covlistfac1_scenario4);
+	CPPUNIT_TEST(covlistfac2_scenario4);
 	CPPUNIT_TEST(read_covlistfile1_scenario4);
 	CPPUNIT_TEST(read_covlistfile2_scenario4);
 	CPPUNIT_TEST(write_covlistfile_scenario4);
-	CPPUNIT_TEST(covIUlistfac_scenario4);
+	CPPUNIT_TEST(covIUlistfac1_scenario4);
+	CPPUNIT_TEST(covIUlistfac2_scenario4);
 	CPPUNIT_TEST(read_covIUlistfile1_scenario4);
 	CPPUNIT_TEST(read_covIUlistfile2_scenario4);
 	CPPUNIT_TEST(write_covIUlistfile_scenario4);
-	CPPUNIT_TEST(covIBUlistfac_scenario4);
+	CPPUNIT_TEST(covIBUlistfac1_scenario4);
+	CPPUNIT_TEST(covIBUlistfac2_scenario4);
 	CPPUNIT_TEST(read_covIBUlistfile1_scenario4);
 	CPPUNIT_TEST(read_covIBUlistfile2_scenario4);
 	CPPUNIT_TEST(write_covIBUlistfile_scenario4);
-	CPPUNIT_TEST(covManifoldfac_scenario4);
+	CPPUNIT_TEST(covManifoldfac1_scenario4);
+	CPPUNIT_TEST(covManifoldfac2_scenario4);
 	CPPUNIT_TEST(read_covManifoldfile1_scenario4);
 	CPPUNIT_TEST(read_covManifoldfile2_scenario4);
 	CPPUNIT_TEST(write_covManifoldfile_scenario4);
-	CPPUNIT_TEST(covSolverDatafac_scenario4);
+	CPPUNIT_TEST(covSolverDatafac1_scenario4);
+	CPPUNIT_TEST(covSolverDatafac2_scenario4);
 	CPPUNIT_TEST(read_covSolverDatafile1_scenario4);
 	CPPUNIT_TEST(read_covSolverDatafile2_scenario4);
 	CPPUNIT_TEST(write_covSolverDatafile_scenario4);
@@ -165,24 +185,29 @@ private:
 	static void covfac(ScenarioType scenario);
 	static void read_covfile(ScenarioType scenario);
 	static void write_covfile(ScenarioType scenario);
-	static void covlistfac(ScenarioType scenario);
+	static void covlistfac1(ScenarioType scenario);
+	static void covlistfac2(ScenarioType scenario);
 	static void read_covlistfile1(ScenarioType scenario);
 	static void read_covlistfile2(ScenarioType scenario);
 	static void write_covlistfile(ScenarioType scenario);
-	static void covIUlistfac(ScenarioType scenario);
+	static void covIUlistfac1(ScenarioType scenario);
+	static void covIUlistfac2(ScenarioType scenario);
 	static void read_covIUlistfile1(ScenarioType scenario);
 	static void read_covIUlistfile2(ScenarioType scenario);
 	static void write_covIUlistfile(ScenarioType scenario);
-	static void covIBUlistfac(ScenarioType scenario);
+	static void covIBUlistfac1(ScenarioType scenario);
+	static void covIBUlistfac2(ScenarioType scenario);
 	static void read_covIBUlistfile1(ScenarioType scenario);
 	static void read_covIBUlistfile2(ScenarioType scenario);
 	static void read_covIBUlistfile3(ScenarioType scenario);
 	static void write_covIBUlistfile(ScenarioType scenario);
-	static void covManifoldfac(ScenarioType scenario);
+	static void covManifoldfac1(ScenarioType scenario);
+	static void covManifoldfac2(ScenarioType scenario);
 	static void read_covManifoldfile1(ScenarioType scenario);
 	static void read_covManifoldfile2(ScenarioType scenario);
 	static void write_covManifoldfile(ScenarioType scenario);
-	static void covSolverDatafac(ScenarioType scenario);
+	static void covSolverDatafac1(ScenarioType scenario);
+	static void covSolverDatafac2(ScenarioType scenario);
 	static void read_covSolverDatafile1(ScenarioType scenario);
 	static void read_covSolverDatafile2(ScenarioType scenario);
 	static void write_covSolverDatafile(ScenarioType scenario);
@@ -190,24 +215,29 @@ private:
 	static void covfac_scenario1()                  { covfac(INEQ_EQ_ONLY); }
 	static void read_covfile_scenario1()            { read_covfile(INEQ_EQ_ONLY); }
 	static void write_covfile_scenario1()           { write_covfile(INEQ_EQ_ONLY); }
-	static void covlistfac_scenario1()              { covlistfac(INEQ_EQ_ONLY); }
+	static void covlistfac1_scenario1()             { covlistfac1(INEQ_EQ_ONLY); }
+	static void covlistfac2_scenario1()             { covlistfac2(INEQ_EQ_ONLY); }
 	static void read_covlistfile1_scenario1()       { read_covlistfile1(INEQ_EQ_ONLY); }
 	static void read_covlistfile2_scenario1()       { read_covlistfile2(INEQ_EQ_ONLY); }
 	static void write_covlistfile_scenario1()       { write_covlistfile(INEQ_EQ_ONLY); }
-	static void covIUlistfac_scenario1()            { covIUlistfac(INEQ_EQ_ONLY); }
+	static void covIUlistfac1_scenario1()           { covIUlistfac1(INEQ_EQ_ONLY); }
+	static void covIUlistfac2_scenario1()           { covIUlistfac2(INEQ_EQ_ONLY); }
 	static void read_covIUlistfile1_scenario1()     { read_covIUlistfile1(INEQ_EQ_ONLY); }
 	static void read_covIUlistfile2_scenario1()     { read_covIUlistfile2(INEQ_EQ_ONLY); }
 	static void write_covIUlistfile_scenario1()     { write_covIUlistfile(INEQ_EQ_ONLY); }
-	static void covIBUlistfac_scenario1()           { covIBUlistfac(INEQ_EQ_ONLY); }
+	static void covIBUlistfac1_scenario1()          { covIBUlistfac1(INEQ_EQ_ONLY); }
+	static void covIBUlistfac2_scenario1()          { covIBUlistfac2(INEQ_EQ_ONLY); }
 	static void read_covIBUlistfile1_scenario1()    { read_covIBUlistfile1(INEQ_EQ_ONLY); }
 	static void read_covIBUlistfile2_scenario1()    { read_covIBUlistfile2(INEQ_EQ_ONLY); }
 	static void read_covIBUlistfile3_scenario1()    { read_covIBUlistfile3(INEQ_EQ_ONLY); }
 	static void write_covIBUlistfile_scenario1()    { write_covIBUlistfile(INEQ_EQ_ONLY); }
-	static void covManifoldfac_scenario1()          { covManifoldfac(INEQ_EQ_ONLY); }
+	static void covManifoldfac1_scenario1()         { covManifoldfac1(INEQ_EQ_ONLY); }
+	static void covManifoldfac2_scenario1()         { covManifoldfac2(INEQ_EQ_ONLY); }
 	static void read_covManifoldfile1_scenario1()   { read_covManifoldfile1(INEQ_EQ_ONLY); }
 	static void read_covManifoldfile2_scenario1()   { read_covManifoldfile2(INEQ_EQ_ONLY); }
 	static void write_covManifoldfile_scenario1()   { write_covManifoldfile(INEQ_EQ_ONLY); }
-	static void covSolverDatafac_scenario1()        { covSolverDatafac(INEQ_EQ_ONLY); }
+	static void covSolverDatafac1_scenario1()       { covSolverDatafac1(INEQ_EQ_ONLY); }
+	static void covSolverDatafac2_scenario1()       { covSolverDatafac2(INEQ_EQ_ONLY); }
 	static void read_covSolverDatafile1_scenario1() { read_covSolverDatafile1(INEQ_EQ_ONLY); }
 	static void read_covSolverDatafile2_scenario1() { read_covSolverDatafile2(INEQ_EQ_ONLY); }
 	static void write_covSolverDatafile_scenario1() { write_covSolverDatafile(INEQ_EQ_ONLY); }
@@ -215,24 +245,29 @@ private:
 	static void covfac_scenario2()                  { covfac(INEQ_HALF_BALL); }
 	static void read_covfile_scenario2()            { read_covfile(INEQ_HALF_BALL); }
 	static void write_covfile_scenario2()           { write_covfile(INEQ_HALF_BALL); }
-	static void covlistfac_scenario2()              { covlistfac(INEQ_HALF_BALL); }
+	static void covlistfac1_scenario2()             { covlistfac1(INEQ_HALF_BALL); }
+	static void covlistfac2_scenario2()             { covlistfac2(INEQ_HALF_BALL); }
 	static void read_covlistfile1_scenario2()       { read_covlistfile1(INEQ_HALF_BALL); }
 	static void read_covlistfile2_scenario2()       { read_covlistfile2(INEQ_HALF_BALL); }
 	static void write_covlistfile_scenario2()       { write_covlistfile(INEQ_HALF_BALL); }
-	static void covIUlistfac_scenario2()            { covIUlistfac(INEQ_HALF_BALL); }
+	static void covIUlistfac1_scenario2()           { covIUlistfac1(INEQ_HALF_BALL); }
+	static void covIUlistfac2_scenario2()           { covIUlistfac2(INEQ_HALF_BALL); }
 	static void read_covIUlistfile1_scenario2()     { read_covIUlistfile1(INEQ_HALF_BALL); }
 	static void read_covIUlistfile2_scenario2()     { read_covIUlistfile2(INEQ_HALF_BALL); }
 	static void write_covIUlistfile_scenario2()     { write_covIUlistfile(INEQ_HALF_BALL); }
-	static void covIBUlistfac_scenario2()           { covIBUlistfac(INEQ_HALF_BALL); }
+	static void covIBUlistfac1_scenario2()          { covIBUlistfac1(INEQ_HALF_BALL); }
+	static void covIBUlistfac2_scenario2()          { covIBUlistfac2(INEQ_HALF_BALL); }
 	static void read_covIBUlistfile1_scenario2()    { read_covIBUlistfile1(INEQ_HALF_BALL); }
 	static void read_covIBUlistfile2_scenario2()    { read_covIBUlistfile2(INEQ_HALF_BALL); }
 	static void read_covIBUlistfile3_scenario2()    { read_covIBUlistfile3(INEQ_HALF_BALL); }
 	static void write_covIBUlistfile_scenario2()    { write_covIBUlistfile(INEQ_HALF_BALL); }
-	static void covManifoldfac_scenario2()          { covManifoldfac(INEQ_HALF_BALL); }
+	static void covManifoldfac1_scenario2()         { covManifoldfac1(INEQ_HALF_BALL); }
+	static void covManifoldfac2_scenario2()         { covManifoldfac2(INEQ_HALF_BALL); }
 	static void read_covManifoldfile1_scenario2()   { read_covManifoldfile1(INEQ_HALF_BALL); }
 	static void read_covManifoldfile2_scenario2()   { read_covManifoldfile2(INEQ_HALF_BALL); }
 	static void write_covManifoldfile_scenario2()   { write_covManifoldfile(INEQ_HALF_BALL); }
-	static void covSolverDatafac_scenario2()        { covSolverDatafac(INEQ_HALF_BALL); }
+	static void covSolverDatafac1_scenario2()       { covSolverDatafac1(INEQ_HALF_BALL); }
+	static void covSolverDatafac2_scenario2()       { covSolverDatafac2(INEQ_HALF_BALL); }
 	static void read_covSolverDatafile1_scenario2() { read_covSolverDatafile1(INEQ_HALF_BALL); }
 	static void read_covSolverDatafile2_scenario2() { read_covSolverDatafile2(INEQ_HALF_BALL); }
 	static void write_covSolverDatafile_scenario2() { write_covSolverDatafile(INEQ_HALF_BALL); }
@@ -240,24 +275,29 @@ private:
 	static void covfac_scenario3()                  { covfac(EQ_ONLY); }
 	static void read_covfile_scenario3()            { read_covfile(EQ_ONLY); }
 	static void write_covfile_scenario3()           { write_covfile(EQ_ONLY); }
-	static void covlistfac_scenario3()              { covlistfac(EQ_ONLY); }
+	static void covlistfac1_scenario3()             { covlistfac1(EQ_ONLY); }
+	static void covlistfac2_scenario3()             { covlistfac2(EQ_ONLY); }
 	static void read_covlistfile1_scenario3()       { read_covlistfile1(EQ_ONLY); }
 	static void read_covlistfile2_scenario3()       { read_covlistfile2(EQ_ONLY); }
 	static void write_covlistfile_scenario3()       { write_covlistfile(EQ_ONLY); }
-	static void covIUlistfac_scenario3()            { covIUlistfac(EQ_ONLY); }
+	static void covIUlistfac1_scenario3()           { covIUlistfac1(EQ_ONLY); }
+	static void covIUlistfac2_scenario3()           { covIUlistfac2(EQ_ONLY); }
 	static void read_covIUlistfile1_scenario3()     { read_covIUlistfile1(EQ_ONLY); }
 	static void read_covIUlistfile2_scenario3()     { read_covIUlistfile2(EQ_ONLY); }
 	static void write_covIUlistfile_scenario3()     { write_covIUlistfile(EQ_ONLY); }
-	static void covIBUlistfac_scenario3()           { covIBUlistfac(EQ_ONLY); }
+	static void covIBUlistfac1_scenario3()          { covIBUlistfac1(EQ_ONLY); }
+	static void covIBUlistfac2_scenario3()          { covIBUlistfac2(EQ_ONLY); }
 	static void read_covIBUlistfile1_scenario3()    { read_covIBUlistfile1(EQ_ONLY); }
 	static void read_covIBUlistfile2_scenario3()    { read_covIBUlistfile2(EQ_ONLY); }
 	static void read_covIBUlistfile3_scenario3()    { read_covIBUlistfile3(EQ_ONLY); }
 	static void write_covIBUlistfile_scenario3()    { write_covIBUlistfile(EQ_ONLY); }
-	static void covManifoldfac_scenario3()          { covManifoldfac(EQ_ONLY); }
+	static void covManifoldfac1_scenario3()         { covManifoldfac1(EQ_ONLY); }
+	static void covManifoldfac2_scenario3()         { covManifoldfac2(EQ_ONLY); }
 	static void read_covManifoldfile1_scenario3()   { read_covManifoldfile1(EQ_ONLY); }
 	static void read_covManifoldfile2_scenario3()   { read_covManifoldfile2(EQ_ONLY); }
 	static void write_covManifoldfile_scenario3()   { write_covManifoldfile(EQ_ONLY); }
-	static void covSolverDatafac_scenario3()        { covSolverDatafac(EQ_ONLY); }
+	static void covSolverDatafac1_scenario3()       { covSolverDatafac1(EQ_ONLY); }
+	static void covSolverDatafac2_scenario3()       { covSolverDatafac2(EQ_ONLY); }
 	static void read_covSolverDatafile1_scenario3() { read_covSolverDatafile1(EQ_ONLY); }
 	static void read_covSolverDatafile2_scenario3() { read_covSolverDatafile2(EQ_ONLY); }
 	static void write_covSolverDatafile_scenario3() { write_covSolverDatafile(EQ_ONLY); }
@@ -265,24 +305,29 @@ private:
 	static void covfac_scenario4()                  { covfac(HALF_BALL); }
 	static void read_covfile_scenario4()            { read_covfile(HALF_BALL); }
 	static void write_covfile_scenario4()           { write_covfile(HALF_BALL); }
-	static void covlistfac_scenario4()              { covlistfac(HALF_BALL); }
+	static void covlistfac1_scenario4()             { covlistfac1(HALF_BALL); }
+	static void covlistfac2_scenario4()             { covlistfac2(HALF_BALL); }
 	static void read_covlistfile1_scenario4()       { read_covlistfile1(HALF_BALL); }
 	static void read_covlistfile2_scenario4()       { read_covlistfile2(HALF_BALL); }
 	static void write_covlistfile_scenario4()       { write_covlistfile(HALF_BALL); }
-	static void covIUlistfac_scenario4()            { covIUlistfac(HALF_BALL); }
+	static void covIUlistfac1_scenario4()           { covIUlistfac1(HALF_BALL); }
+	static void covIUlistfac2_scenario4()           { covIUlistfac2(HALF_BALL); }
 	static void read_covIUlistfile1_scenario4()     { read_covIUlistfile1(HALF_BALL); }
 	static void read_covIUlistfile2_scenario4()     { read_covIUlistfile2(HALF_BALL); }
 	static void write_covIUlistfile_scenario4()     { write_covIUlistfile(HALF_BALL); }
-	static void covIBUlistfac_scenario4()           { covIBUlistfac(HALF_BALL); }
+	static void covIBUlistfac1_scenario4()          { covIBUlistfac1(HALF_BALL); }
+	static void covIBUlistfac2_scenario4()          { covIBUlistfac2(HALF_BALL); }
 	static void read_covIBUlistfile1_scenario4()    { read_covIBUlistfile1(HALF_BALL); }
 	static void read_covIBUlistfile2_scenario4()    { read_covIBUlistfile2(HALF_BALL); }
 	static void read_covIBUlistfile3_scenario4()    { read_covIBUlistfile3(HALF_BALL); }
 	static void write_covIBUlistfile_scenario4()    { write_covIBUlistfile(HALF_BALL); }
-	static void covManifoldfac_scenario4()          { covManifoldfac(HALF_BALL); }
+	static void covManifoldfac1_scenario4()         { covManifoldfac1(HALF_BALL); }
+	static void covManifoldfac2_scenario4()         { covManifoldfac2(HALF_BALL); }
 	static void read_covManifoldfile1_scenario4()   { read_covManifoldfile1(HALF_BALL); }
 	static void read_covManifoldfile2_scenario4()   { read_covManifoldfile2(HALF_BALL); }
 	static void write_covManifoldfile_scenario4()   { write_covManifoldfile(HALF_BALL); }
-	static void covSolverDatafac_scenario4()        { covSolverDatafac(HALF_BALL); }
+	static void covSolverDatafac1_scenario4()       { covSolverDatafac1(HALF_BALL); }
+	static void covSolverDatafac2_scenario4()       { covSolverDatafac2(HALF_BALL); }
 	static void read_covSolverDatafile1_scenario4() { read_covSolverDatafile1(HALF_BALL); }
 	static void read_covSolverDatafile2_scenario4() { read_covSolverDatafile2(HALF_BALL); }
 	static void write_covSolverDatafile_scenario4() { write_covSolverDatafile(HALF_BALL); }

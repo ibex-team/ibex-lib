@@ -49,13 +49,13 @@ void TestSolver::circle1() {
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::SUCCESS);
-	CPPUNIT_ASSERT(solver.get_manifold().nb_solution()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().solution(0).is_superset(sol1));
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
+	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol1));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::SUCCESS);
-	CPPUNIT_ASSERT(solver.get_manifold().nb_solution()==2);
-	CPPUNIT_ASSERT(solver.get_manifold().solution(1).is_superset(sol2));
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==2);
+	CPPUNIT_ASSERT(solver.get_data().solution(1).is_superset(sol2));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::INFEASIBLE);
@@ -85,8 +85,8 @@ void TestSolver::circle2() {
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::NOT_ALL_VALIDATED);
-	CPPUNIT_ASSERT(solver.get_manifold().nb_unknown()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown(0).is_superset(sol1));
+	CPPUNIT_ASSERT(solver.get_data().nb_unknown()==1);
+	CPPUNIT_ASSERT(solver.get_data().unknown(0).is_superset(sol1));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::INFEASIBLE);
@@ -124,13 +124,13 @@ void TestSolver::circle3() {
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::NOT_ALL_VALIDATED);
-	CPPUNIT_ASSERT(solver.get_manifold().nb_unknown()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown(0).is_superset(sol1));
+	CPPUNIT_ASSERT(solver.get_data().nb_unknown()==1);
+	CPPUNIT_ASSERT(solver.get_data().unknown(0).is_superset(sol1));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::SUCCESS);
-	CPPUNIT_ASSERT(solver.get_manifold().nb_solution()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().solution(0).is_superset(sol2));
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
+	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol2));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::INFEASIBLE);
@@ -176,13 +176,13 @@ void TestSolver::circle4() {
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::SUCCESS);
-	CPPUNIT_ASSERT(solver.get_manifold().nb_solution()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().solution(0).is_superset(sol1));
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
+	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol1));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::SUCCESS);
-	CPPUNIT_ASSERT(solver.get_manifold().nb_solution()==2);
-	CPPUNIT_ASSERT(solver.get_manifold().solution(1).is_superset(sol2));
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==2);
+	CPPUNIT_ASSERT(solver.get_data().solution(1).is_superset(sol2));
 
 	res=solver.next();
 	CPPUNIT_ASSERT(res==Solver::INFEASIBLE);

@@ -86,9 +86,9 @@ void TestSinc::solve() {
     DefaultSolver solver(sys,1e-7,1e-7);
 	solver.solve(IntervalVector(1,Interval(-100,100)));
 
-    CPPUNIT_ASSERT(solver.get_manifold().nb_solution()==2);
-    CPPUNIT_ASSERT(solver.get_manifold().nb_unknown()==1);
-    Interval sol=solver.get_manifold().solution(1)[0];
+    CPPUNIT_ASSERT(solver.get_data().nb_solution()==2);
+    CPPUNIT_ASSERT(solver.get_data().nb_unknown()==1);
+    Interval sol=solver.get_data().solution(1)[0];
     CPPUNIT_ASSERT(almost_eq(sin(sol),0.5*sol,1e-6));
 }
 

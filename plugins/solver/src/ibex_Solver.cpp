@@ -84,9 +84,7 @@ void Solver::start(const IntervalVector& init_box) {
 
 	if (manif) delete manif;
 
-	manif = new CovSolverData(n, m, nb_ineq);
-
-	manif->var_names = eqs? eqs->var_names() : ineqs->var_names();
+	manif = new CovSolverData(n, m, nb_ineq, CovManifold::EQU_ONLY, eqs? eqs->var_names() : ineqs->var_names());
 
 	Cell* root=new Cell(init_box);
 
@@ -101,25 +99,23 @@ void Solver::start(const IntervalVector& init_box) {
 	buffer.push(root);
 
 	time = 0;
-	manif->time =  0;
+	manif->set_time(0);
 
 	nb_cells = 1;
-	manif->nb_cells = 0;
+	manif->set_nb_cells(0);
 
 	timer.restart();
 }
 
-void Solver::start(const char* input_paving) {
+void Solver::start(const CovSolverData& data) {
 	buffer.flush();
 
 	if (manif) delete manif;
 	manif = new CovSolverData(n, m, nb_ineq);
 
-	CovSolverData data(input_paving);
-
 	// may erase former variable names if the input paving was actually
 	// not calculated with the same Minibex file.
-	manif->var_names = eqs? eqs->var_names() : ineqs->var_names();
+	manif->var_names() = eqs? eqs->var_names() : ineqs->var_names();
 
 	// just copy inner, solution and boundary boxes
 	for (size_t i=0; i<data.nb_inner(); i++)
@@ -155,12 +151,17 @@ void Solver::start(const char* input_paving) {
 	}
 
 	time = 0;
-	manif->time = data.time;
+	manif->set_time(data.time());
 
 	nb_cells=0; // no new cell created!
-	manif->nb_cells = data.nb_cells;
+	manif->set_nb_cells(data.nb_cells());
 
 	timer.restart();
+}
+
+void Solver::start(const char* input_paving) {
+	CovSolverData data(input_paving);
+	start(data);
 }
 
 Solver::Status Solver::next() {
@@ -254,6 +255,11 @@ Solver::Status Solver::solve(const IntervalVector& init_box) {
 	return solve();
 }
 
+Solver::Status Solver::solve(const CovSolverData& data) {
+	start(data);
+	return solve();
+}
+
 Solver::Status Solver::solve(const char* init_paving) {
 	start(init_paving);
 	return solve();
@@ -282,14 +288,14 @@ Solver::Status Solver::solve() {
 			if (final_status==INFEASIBLE) final_status=SUCCESS;
 	}
 
-	manif->solver_status = final_status;
+	manif->set_solver_status(final_status);
 
 	timer.stop();
 	time = timer.get_time();
 
-	manif->time += time;
+	manif->set_time(manif->time() + time);
 
-	manif->nb_cells += nb_cells;
+	manif->set_nb_cells(manif->nb_cells() + nb_cells);
 
 	return status;
 }
@@ -498,7 +504,7 @@ const char* white() {
 }
 void Solver::report() {
 
-	switch ((Status) manif->solver_status) {
+	switch ((Status) manif->solver_status()) {
 	case SUCCESS: 
 		cout << green() << " solving successful!" << endl;
 		break;
@@ -530,12 +536,12 @@ void Solver::report() {
 	if (manif->nb_pending()==0) cout << "--"; else cout << manif->nb_pending();
 	cout << endl;
 	cout << " cpu time used:\t\t\t" << time << "s";
-	if (manif->time!=time)
-		cout << " [total=" << manif->time << "]";
+	if (manif->time()!=time)
+		cout << " [total=" << manif->time() << "]";
 	cout << endl;
 	cout << " number of cells:\t\t" << nb_cells;
-	if (manif->nb_cells!=nb_cells)
-		cout << " [total=" << manif->nb_cells << "]";
+	if (manif->nb_cells()!=nb_cells)
+		cout << " [total=" << manif->nb_cells() << "]";
 	cout << endl << endl;
 }
 

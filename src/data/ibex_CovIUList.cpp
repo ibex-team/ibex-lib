@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Nov 07, 2018
-// Last update : Feb 13, 2019
+// Last update : Feb 28, 2019
 //============================================================================
 
 #include "ibex_CovIUList.h"
@@ -24,16 +24,40 @@ const unsigned int CovIUList::subformat_level = 2;
 
 const unsigned int CovIUList::subformat_number = 0;
 
-CovIUList::CovIUList(size_t n) : CovList(n) {
+CovIUList::CovIUList(size_t n) : CovList(n), data(new Data()), own_data(true) {
 
 }
 
-CovIUList::CovIUList(const char* filename) : CovList((size_t) 0 /* tmp */) {
+CovIUList::CovIUList(const char* filename) : CovIUList((size_t) 0 /* tmp */) {
 	stack<unsigned int> format_id;
 	stack<unsigned int> format_version;
 	ifstream* f = CovIUList::read(filename, *this, format_id, format_version);
 	f->close();
 	delete f;
+}
+
+CovIUList::CovIUList(const Cov& cov, bool copy) : CovList(cov, copy) {
+	const CovIUList* covIUlist = dynamic_cast<const CovIUList*>(&cov);
+
+	if (covIUlist) {
+		if (copy) {
+			data = new Data();
+			data->_IU_inner   = covIUlist->data->_IU_inner;
+			data->_IU_status  = covIUlist->data->_IU_status;
+			data->_IU_unknown = covIUlist->data->_IU_unknown;
+			own_data = true;
+		} else {
+			data = covIUlist->data;
+			own_data = false;
+		}
+	} else {
+		data = new Data();
+		for (size_t i=0; i<size(); i++) {
+			data->_IU_status.push_back(UNKNOWN);
+			data->_IU_unknown.push_back(i);
+		}
+		own_data = true;
+	}
 }
 
 void CovIUList::save(const char* filename) const {
@@ -44,16 +68,22 @@ void CovIUList::save(const char* filename) const {
 	delete of;
 }
 
+CovIUList::~CovIUList() {
+	if (own_data) {
+		delete data;
+	}
+}
+
 void CovIUList::add_inner(const IntervalVector& x) {
 	CovList::add(x);
-	_IU_status.push_back(INNER);
-	_IU_inner.push_back(list.size()-1);
+	data->_IU_status.push_back(INNER);
+	data->_IU_inner.push_back(size()-1);
 }
 
 void CovIUList::add_unknown(const IntervalVector& x) {
 	CovList::add(x);
-	_IU_status.push_back(UNKNOWN);
-	_IU_unknown.push_back(list.size()-1);
+	data->_IU_status.push_back(UNKNOWN);
+	data->_IU_unknown.push_back(size()-1);
 }
 
 void CovIUList::add(const IntervalVector& x) {
@@ -94,29 +124,29 @@ ifstream* CovIUList::read(const char* filename, CovIUList& cov, std::stack<unsig
 
 		for (size_t i=0; i<nb_inner; i++) {
 			uint32_t j=read_pos_int(*f);
-			if (!cov._IU_inner.empty()) { // check ordering
-				if  (j<cov._IU_inner.back())
+			if (!cov.data->_IU_inner.empty()) { // check ordering
+				if  (j<cov.data->_IU_inner.back())
 					ibex_error("[CovIUList]: indices of inner boxes are not in increasing order.");
-				if (j==cov._IU_inner.back())
+				if (j==cov.data->_IU_inner.back())
 					ibex_error("[CovIUList]: duplicated index of inner box.");
 			}
-			cov._IU_inner.push_back(j);
+			cov.data->_IU_inner.push_back(j);
 		}
 	}
 
-	vector<size_t>::const_iterator it=cov._IU_inner.begin(); // iterator of inner boxes
+	vector<size_t>::const_iterator it=cov.data->_IU_inner.begin(); // iterator of inner boxes
 
 	for (size_t i=0; i<cov.size(); i++) {
-		if (it!=cov._IU_inner.end() && i==*it) {
-			cov._IU_status.push_back(CovIUList::INNER);
+		if (it!=cov.data->_IU_inner.end() && i==*it) {
+			cov.data->_IU_status.push_back(CovIUList::INNER);
 			++it;
 		}
 		else {
-			cov._IU_unknown.push_back(i);
-			cov._IU_status.push_back(CovIUList::UNKNOWN);
+			cov.data->_IU_unknown.push_back(i);
+			cov.data->_IU_status.push_back(CovIUList::UNKNOWN);
 		}
 	}
-	if (it!=cov._IU_inner.end()) ibex_error("[CovIUList]: invalid inner box index.");
+	if (it!=cov.data->_IU_inner.end()) ibex_error("[CovIUList]: invalid inner box index.");
 
 	return f;
 }
@@ -130,7 +160,7 @@ ofstream* CovIUList::write(const char* filename, const CovIUList& cov, std::stac
 
 	write_pos_int(*f, cov.nb_inner());
 
-	for (vector<size_t>::const_iterator it=cov._IU_inner.begin(); it!=cov._IU_inner.end(); ++it) {
+	for (vector<size_t>::const_iterator it=cov.data->_IU_inner.begin(); it!=cov.data->_IU_inner.end(); ++it) {
 		assert(*it<numeric_limits<uint32_t>::max());
 		write_pos_int(*f, (uint32_t) *it);
 	}
