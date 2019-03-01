@@ -178,6 +178,223 @@ As a consequence, if the function does not modify itself the box (would it calls
 have to perform at all any update of property values.
 
 
+.. _cov:
+
+==================
+COV files
+==================
+
+File Input/Output operations in Ibex are based on the COV format.  
+
+The COV format is actually a *family* of formats because Ibex is a library
+upon which different executables are built, each handling different types of data.
+There is no one-fits-all definition in this context. 
+When we talk about 'programs' we mean not only the official ones supplied with
+the library itself (like ``ibexsolve``, ``ibexopt``, ...) but all the programs that
+can be potentially developed by Ibex users.
+
+The common point of these programs is that they usually calculate sets with boxes,
+because this is what Ibex is all about.
+More precisely, they calculate boxes that form a *covering* of some set, whence the
+name 'COV'.
+
+So, instead of creating a monolithic file format for each program, we can imagine a
+file format made of two parts:
+
+- a part common to all programs containing a description of the covering;
+- a part specific to each program gathering additional information handled by the proram.
+
+This way, all the programs can now exchange data by extracting from a file the 
+common part. Let us call this part after the corresponding C++ class: ``CovList``.
+
+In fact, we can go a step further. 
+In a covering of a set, we often distinguish *inner* boxes, that is, the ones that
+are proven to be inside the set,  and *unknwon* boxes, the other ones.
+But not all programs do. So, instead of replacing the ``CovList`` by a more elaborated
+structure, we rather insert an intermediate level of information in the format; now,
+a program that makes a distinction between inner and unknown boxes has an associated 
+file format made of three parts:
+
+- the ``CovList`` part that tells which boxes form the covering
+- the ``CovIUList`` part that tells which among the ``CovList`` boxes are inner (<-> 'I'), the
+  other being implicitly unknown (<> 'U').
+- the part specific to the program
+
+This way, the program can communicate with another one handling inner boxes. But
+it can still communicate with all the other programs through the ``CovList`` level.
+
+This principle can be extended to any level and gives rise to a hierarchy of formats,
+where each level refines the semantics of the previous one. This is how the COV format works.
+This principle allows programs to store and exchange data at the right level
+and without restriction on what amount of data they actually need. 
+The top-level format is not ``CovList`` in fact, but something more general simply called ``Cov``,
+because we may represent a covering by something else than a list (example: a quadtree).
+
+The file format managed by ``ibexsolve`` is called ``CovSolverData`` and is 5 levels
+below the root format ``Cov``. We have:
+
+- ``Cov``: a covering (root format)
+- ``CovList``: a Cov described by a list of boxes
+- ``CovIUList``: a Covlist with some boxes marked as *inner*
+- ``CovIBUList``: a CovIUlist with some boxes marked as *boundary* 
+- ``CovManifold``: a CovIBUList with some boxes marked as *solutions* (i.e., they enclose 
+  a subset of the manifold in a precise way).
+- ``CovSolverData``: a CovManifold with additional data related to the solving process
+
+-------------------------------------
+First example
+-------------------------------------
+
+We illustrate the usage of COV files with ``ibexsolve``.
+Let us first solve a simple problem, like an inequality:
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex1-build-C
+   :end-before: cov-ex1-build-C
+   
+The result of the solver is a COV object we can access to with the ``get_data`` function.
+So, we can cast the returned object to a ``CovList`` and access to the result as
+a simple list of boxes:
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex1-list-C
+   :end-before: cov-ex1-list-C
+
+The output is:
+
+.. literalinclude:: ../examples/doc-covfiles.txt
+   :start-after: cov-ex1-list-O
+   :end-before:  cov-ex1-list-O
+
+We can also cast the object to a ``CovIUList`` and access to the result as two
+lists: the list of inner boxes and the list of unknown boxes:
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex1-IUlist-C
+   :end-before: cov-ex1-IUlist-C
+
+The output is:
+
+.. literalinclude:: ../examples/doc-covfiles.txt
+   :start-after: cov-ex1-IUlist-O
+   :end-before:  cov-ex1-IUlist-O
+
+We jump now directly to the ``CovSolverData`` format.
+Among other things, the format distinguishes two types of boxes
+in the unknown boxes in the ``CovManifold`` view:
+
+- the boxes that have reached the precision (1.0) and which could neither
+  be proven to be inner or outer. They are also called *unknown* at the
+  ``CovSolverData`` level.
+- the boxes that have not been processed because the solving process
+  was interrupted for whatever reason (time out or cell overflow).
+  They are called *pending* boxes.
+  
+We can seen now that the solver was actually interrupted because
+of the cell limit we fixed:
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex1-SolverData-C
+   :end-before: cov-ex1-SolverData-C
+
+The output is:
+
+.. literalinclude:: ../examples/doc-covfiles.txt
+   :start-after: cov-ex1-SolverData-O
+   :end-before:  cov-ex1-SolverData-O
+
+------------------------------------------------
+Exchanging data between IbexSolve and IbexOpt
+------------------------------------------------
+
+The power of COV files is now illustrated by feeding the optimizer
+with the output of the solver and vice versa.
+
+To this end, we consider a problem where we optimize a simple criterion 
+(x+y) over the inequality x^2+y^2<=1. But instead of running the optimizer with the overall 
+problem, we treat the constraint and the criterion separately: we
+first produce a covering of the constraint with the solver
+and then apply the unconstrained optimizer on the covering.
+
+We have already built in the previous example the system ``sys``. Let us
+run the solver with a higher precision:
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex2-solver-C
+   :end-before: cov-ex2-solver-C
+   
+Let us now build the system representing the unconstrained optimization problem:
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex2-optim-C
+   :end-before: cov-ex2-optim-C
+
+And now, we run the optimizer on the solver output:
+
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex2-run-C
+   :end-before: cov-ex2-run-C
+
+The output is:
+
+.. literalinclude:: ../examples/doc-covfiles.txt
+   :start-after: cov-ex2-run-O
+   :end-before:  cov-ex2-run-O
+   
+Let us do it now in the other way around. 
+We first run the optimizer on the objective function abs(x^2+y^2-1) so that the whole unit circle is made of global minima.
+However, if we set the problem like this, the optimizer quickly converges to a unique global minimum because it
+resorts to some 'anticipated' bounding techniques.
+To force the optimizer to keep all the circle, we replace the constant 1 by an interval thicker than the optimizer precision:
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex3-optim-sys-C
+   :end-before: cov-ex3-optim-sys-C
+
+Then we run the optimizer. We fix a timeout to prevent him from bisecting again and again inside the thick circle.
+This way, we obtain a coarse approximation of the circle.
+If we want to communicate the result to the solver, an extra instruction is also necessary; Indeed, by default, the optimizer generates
+a COV file in the *extended space*, that is, it generates 3 dimensional boxes, the third dimension corresponding to
+the objective values. By default, a box in the optimizer data is ([x],[y],f([x],[y]). If we feed the solver with such
+boxes, it will refuse with a dimension mismatching error message. So we need to configure the optimizer 
+so that only variables domains are produced.
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex3-optim-run-C
+   :end-before: cov-ex3-optim-run-C
+
+We can now build the solver to solve a constraint, like x-y=0. 
+
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex3-solver-sys-C
+   :end-before: cov-ex3-solver-sys-C
+
+and feed it with the optimizer data:
+
+.. literalinclude:: ../examples/doc-covfiles.cpp 
+   :language: cpp
+   :start-after: cov-ex3-solver-run-C
+   :end-before: cov-ex3-solver-run-C
+
+The output indeeds contains a sequence of boxes enclosing the intersection of the
+unit circle and the line x=y:
+
+.. literalinclude:: ../examples/doc-covfiles.txt
+   :start-after: cov-ex3-solver-run-O
+   :end-before:  cov-ex3-solver-run-O
+  
 .. _strategy-bisectors:
 
 ==========
