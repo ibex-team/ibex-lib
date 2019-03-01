@@ -45,20 +45,22 @@ void TestSolver::circle1() {
 	Solver solver(sys,hc4,rr,stack,prec,prec);
 	solver.start(IntervalVector(2,Interval(-10,10)));
 
-	Solver::Status res;
+	CovSolverData::BoxStatus status;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::SUCCESS);
+	bool res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
 	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
 	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol1));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::SUCCESS);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
 	CPPUNIT_ASSERT(solver.get_data().nb_solution()==2);
 	CPPUNIT_ASSERT(solver.get_data().solution(1).is_superset(sol2));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::INFEASIBLE);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(!res);
 }
 
 void TestSolver::circle2() {
@@ -81,15 +83,16 @@ void TestSolver::circle2() {
 
 	solver.start(IntervalVector(2,Interval(-10,10)));
 
-	Solver::Status res;
+	CovSolverData::BoxStatus status;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::NOT_ALL_VALIDATED);
+	bool res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::UNKNOWN);
 	CPPUNIT_ASSERT(solver.get_data().nb_unknown()==1);
 	CPPUNIT_ASSERT(solver.get_data().unknown(0).is_superset(sol1));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::INFEASIBLE);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(!res);
 }
 
 void TestSolver::circle3() {
@@ -120,20 +123,23 @@ void TestSolver::circle3() {
 
 	solver.start(IntervalVector(2,Interval(-10,10)));
 
-	Solver::Status res;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::NOT_ALL_VALIDATED);
+	CovSolverData::BoxStatus status;
+
+	bool res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::UNKNOWN);
 	CPPUNIT_ASSERT(solver.get_data().nb_unknown()==1);
 	CPPUNIT_ASSERT(solver.get_data().unknown(0).is_superset(sol1));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::SUCCESS);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
 	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
 	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol2));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::INFEASIBLE);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(!res);
 }
 
 void TestSolver::circle4() {
@@ -172,20 +178,21 @@ void TestSolver::circle4() {
 	box[2]=Interval(1,1);
 	solver.start(box);
 
-	Solver::Status res;
+	CovSolverData::BoxStatus status;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::SUCCESS);
+	bool res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
 	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
 	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol1));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::SUCCESS);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
 	CPPUNIT_ASSERT(solver.get_data().nb_solution()==2);
 	CPPUNIT_ASSERT(solver.get_data().solution(1).is_superset(sol2));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==Solver::INFEASIBLE);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(!res);
 }
 
 

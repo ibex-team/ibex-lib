@@ -164,7 +164,7 @@ void Solver::start(const char* input_paving) {
 	start(data);
 }
 
-Solver::Status Solver::next() {
+bool Solver::next(CovSolverData::BoxStatus& status, const IntervalVector** sol) {
 
 	while (!buffer.empty()) {
 
@@ -172,9 +172,10 @@ Solver::Status Solver::next() {
 			try {
 				timer.check(time_limit);
 			}
-			catch(TimeOutException&) {
+			catch(TimeOutException& e) {
 				flush();
-				return TIME_OUT;
+				if (sol) *sol=NULL;
+				throw e;
 			}
 		}
 
@@ -199,10 +200,11 @@ Solver::Status Solver::next() {
 			// each intermediate step only if the system is under constrained
 			if (m==0 || (m<n && !is_too_large(c->box))) {
 				// note: cannot return PENDING status
-				CovSolverData::BoxStatus status=check_sol(c->box);
+				status=check_sol(c->box);
 				if (status!=CovSolverData::UNKNOWN) { // <=> solution or boundary
 					delete buffer.pop();
-					return SUCCESS;
+					if (sol) *sol=&(*manif)[manif->size()-1];
+					return true;
 				} // otherwise: continue search...
 			} // else: otherwise: continue search...
 
@@ -218,23 +220,21 @@ Solver::Status Solver::next() {
 				buffer.push(new_cells.second);
 				nb_cells+=2;
 				if (cell_limit >=0 && nb_cells>=cell_limit) {
-					//throw CellLimitException();
 					flush();
-					return CELL_OVERFLOW;
+					if (sol) *sol=NULL;
+					throw CellLimitException();
 				}
 			}
 
 			catch (NoBisectableVariableException&) {
-				CovSolverData::BoxStatus status=check_sol(c->box);
+				status=check_sol(c->box);
 				if (status==CovSolverData::UNKNOWN) {
 					if (trace >=1) cout << " [unknown] " << c->box << endl;
 					manif->add_unknown(c->box);
-					delete buffer.pop();
-					return NOT_ALL_VALIDATED;
-				} else {
-					delete buffer.pop();
-					return SUCCESS;
 				}
+				delete buffer.pop();
+				if (sol) *sol=&(*manif)[manif->size()-1];
+				return true;
 			}
 		}
 		catch (EmptyBoxException&) {
@@ -247,7 +247,8 @@ Solver::Status Solver::next() {
 		}
 	}
 
-	return INFEASIBLE;
+	if (sol) *sol=NULL;
+	return false;
 }
 
 Solver::Status Solver::solve(const IntervalVector& init_box) {
@@ -275,17 +276,20 @@ Solver::Status Solver::solve() {
 	else
 		final_status = SUCCESS;
 
-	Solver::Status status = SUCCESS;
+	CovSolverData::BoxStatus status;
 
-	while (status==SUCCESS || status==NOT_ALL_VALIDATED) {
+	try {
+		while (next(status)) {
+			if (final_status==INFEASIBLE) // first solution found
+				final_status=SUCCESS; // by default... may be changed right after
 
-		status=next();
-
-		if (status==CELL_OVERFLOW)     final_status=CELL_OVERFLOW;
-		if (status==TIME_OUT)          final_status=TIME_OUT;
-		if (status==NOT_ALL_VALIDATED) final_status=NOT_ALL_VALIDATED;
-		if (status==SUCCESS)
-			if (final_status==INFEASIBLE) final_status=SUCCESS;
+			if (status==CovSolverData::UNKNOWN)
+				final_status=NOT_ALL_VALIDATED;
+		}
+	} catch(CellLimitException&) {
+		final_status=CELL_OVERFLOW;
+	} catch(TimeOutException&) {
+		final_status=TIME_OUT;
 	}
 
 	manif->set_solver_status(final_status);
@@ -297,7 +301,7 @@ Solver::Status Solver::solve() {
 
 	manif->set_nb_cells(manif->nb_cells() + nb_cells);
 
-	return status;
+	return final_status;
 }
 
 bool Solver::check_ineq(const IntervalVector& box) {

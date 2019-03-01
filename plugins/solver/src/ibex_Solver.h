@@ -98,11 +98,14 @@ public:
 	 *
 	 *   INFEASIBLE:        (complete search) infeasible problem.
 	 *
-	 *   NOT_ALL_VALIDATED: (incomplete search) minimal width (eps-min)
-	 *                      reached
+	 *   NOT_ALL_VALIDATED: (incomplete search) a non-validated box
+	 *                      reaching the minimal width (eps-min)
+	 *                      has been found.
+	 *
 	 *   TIME_OUT:          (incomplete search) time out
 	 *
-	 *   CELL_OVERFLOW:     (incomplete search) cell overflow
+	 *   CELL_OVERFLOW:     (incomplete search) cell overflow : the number of
+	 *                      cell has exceeded the limit.
 	 *
 	 * The vector of "solutions" (output boxes) found by the solver
 	 * are retrieved with #get_solutions().
@@ -152,27 +155,24 @@ public:
 	void start(const char* input_paving);
 
 	/**
-	 * \brief Find the next solution (interactive mode).
+	 * \brief Find the next covering box (interactive mode).
 	 *
-	 * \param sol - (output argument) pointer to the new solution (if found). This
-	 *              is just the address of the last element in the "solutions" vector.
-	 *              Set to NULL if search is over, time is out or the number of cells
-	 *              exceeds the limit.
+	 * The next box is either a new solution, a boundary or an unknown box.
 	 *
-	 * \return Possible values. For commodity, the same return type is used for next(..)
-	 *         and solve(..) but the interpretation slightly differs:
+	 * \return true if a new covering box is found.
 	 *
-	 *   SUCCESS:           a new validated solution has been found.
+	 * \param status - status of the new box found. Undefined if an exception is
+	 *               thrown, or the search is over.
+	 * \param sol - (output argument) pointer to the new box. This parameter is
+	 *              ignored if set to NULL (default value). Otherwise, in return, *sol
+	 *              is the address of the last element added in the CovSolverData
+	 *              structure.
+	 *              *sol is set to NULL if search is over, time is out or the number
+	 *              of cells exceeds the limit.
 	 *
-	 *   INFEASIBLE:        no more solution (search over).
-	 *
-	 *   NOT_ALL_VALIDATED: a non-validated box reaching the minimal width (eps-min)
-	 *                      has been found.
-	 *   TIME_OUT:          time is out
-	 *
-	 *   CELL_OVERFLOW:     the number of cell has exceeded the limit.
+	 * \throw CellLimitException or TimeOutException
 	 */
-	Status next();
+	bool next(CovSolverData::BoxStatus& box_status, const IntervalVector** sol=NULL);
 
 	/**
 	 * \brief Displays on standard output a report of the last call to solve(...).
