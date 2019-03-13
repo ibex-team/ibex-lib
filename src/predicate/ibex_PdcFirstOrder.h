@@ -16,8 +16,11 @@
 
 namespace ibex {
 
-/** \ingroup predicate
+/**
+ * \ingroup predicate
  * \brief Rejection test based on first-order condition
+ *
+ * Full rank and multiplier sign tests.
  *
  * See Theorem 1 in "First Order Rejection Tests For Multiple-Objective
  * Optimization" by Alexandre Goldsztejn, Ferenc Domes and Brice Chevalier,
@@ -49,6 +52,11 @@ public:
 	 * \brief The bounding constraints
 	 */
 	const IntervalVector& init_box;
+
+protected:
+	/* Whether the multiplier sign test can be applied
+	 * (only inequalities). */
+	bool multiplier_sign_test;
 };
 
 } // end namespace ibex

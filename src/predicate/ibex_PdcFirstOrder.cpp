@@ -15,7 +15,18 @@ using namespace std;
 
 namespace ibex {
 
-PdcFirstOrder::PdcFirstOrder(const System& sys, const IntervalVector& init_box) : Pdc(sys.nb_var), sys(sys), init_box(init_box) { }
+PdcFirstOrder::PdcFirstOrder(const System& sys, const IntervalVector& init_box) :
+		Pdc(sys.nb_var), sys(sys), init_box(init_box), multiplier_sign_test(true) {
+
+	if (!sys.goal) {
+		ibex_error("[PdcFirstOrder] not an optimization problem.");
+	}
+
+	for (int i=0; i<sys.nb_ctr; i++) {
+		if (sys.ops[i]==EQ) multiplier_sign_test=false;
+	}
+
+}
 
 BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 
@@ -26,7 +37,9 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 	// in the system
 	int M=sys.active_ctrs(box).size();
 
-	if (M>n) { return MAYBE; } // cannot be full rank
+	if (M>n) {
+		return MAYBE;
+	} // cannot be full rank
 
 	IntervalMatrix* J=new IntervalMatrix(M+1,n); // +1 because we add the gradient of f
 
@@ -43,6 +56,8 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		if (!box[i].is_interior_subset(init_box[i])) {
 			if (box[i].is_superset(init_box[i])) {
 				delete J;
+				// two linearly dependent bound constraints
+				// activated at the same time --> MAYBE
 				return MAYBE; // cannot be full rank
 			}
 			else {
@@ -66,6 +81,31 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		}
 		delete J;
 		assert(i2==N);
+	}
+
+	// multiplier sign test
+	if (multiplier_sign_test) {
+		for (int j=0; j<N; j++) {
+			bool sign;
+
+			if ((*J2)[0][j].lb()>0)
+				sign=true;
+			else if ((*J2)[0][j].ub()<0)
+				sign=false;
+			else
+				continue;
+
+			int i=0;
+			for (; i<M+1; i++) {
+				if (sign) {
+					if ((*J2)[i][j].lb()<=0) break;
+				} else {
+					if ((*J2)[i][j].ub()>=0) break;
+				}
+			}
+			if (i==M+1) // the whole column has the same sign
+				return NO;
+		}
 	}
 
 	// check for invertibility
