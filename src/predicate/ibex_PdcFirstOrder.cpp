@@ -32,10 +32,20 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 
 	BoolInterval res;
 	int n=sys.nb_var;
+	// note: calling directly sys.active_ctrs_jacobian(box)
+	// fails if there is no active constraint
+	BitSet bitset=sys.active_ctrs(box);
+
+	if (bitset.empty()) {
+		if (!sys.goal->gradient(box).contains(Vector::zeros(n)))
+			return NO;
+		else
+			return MAYBE;
+	}
 
 	// count the number of active constraints
 	// in the system
-	int M=sys.active_ctrs(box).size();
+	int M=bitset.size();
 
 	if (M>n) {
 		return MAYBE;
@@ -45,7 +55,7 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 
 	sys.goal->gradient(box,J->row(0));
 
-	J->put(1,0,sys.active_ctrs_jacobian(box));
+	J->put(1,0,sys.f_ctrs.jacobian(box,bitset));
 
 	int N=sys.nb_var; // final number of variables
 
