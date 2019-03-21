@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_LoupFinderDuality.h"
+#include "ibex_BxpLinearRelaxArgMin.h"
 
 using namespace std;
 
@@ -23,10 +24,17 @@ void LoupFinderDuality::add_property(const IntervalVector& init_box, BoxProperti
 	//		prop.add(new BxpSystemCache(sys,BxpSystemCache::default_update_ratio));
 	//	}
 	//--------------------------------------------------------------------------
+
+	//--------------------------------------------------------------------------
+	/* Using line search from LP relaxation minimizer seems not interesting. */
+	if (!prop[BxpLinearRelaxArgMin::get_id(sys)]) {
+		prop.add(new BxpLinearRelaxArgMin(sys));
+	}
+	//--------------------------------------------------------------------------
 }
 
 
-LPSolver* LoupFinderDuality::linearize(const IntervalVector& box) {
+LPSolver* LoupFinderDuality::linearize(const IntervalVector& box, BoxProperties& prop) {
 	// ========= get active constraints ===========
 	/* Using system cache seems not interesting. */
 	//BxpSystemCache* cache=(BxpSystemCache*) prop[BxpSystemCache::get_id(sys)];
@@ -51,7 +59,12 @@ LPSolver* LoupFinderDuality::linearize(const IntervalVector& box) {
 
 	LPSolver* lp_solver = new LPSolver(n_total, LP_max_iter);
 
-	IntervalVector point=box.mid();
+	IntervalVector point(n);
+	BxpLinearRelaxArgMin* argmin=(BxpLinearRelaxArgMin*) prop[BxpLinearRelaxArgMin::get_id(sys)];
+	if (argmin && argmin->argmin()) {
+		point = *argmin->argmin();
+	} else
+		point=box.mid();
 
 	if (!active->empty()) {
 
@@ -77,8 +90,7 @@ LPSolver* LoupFinderDuality::linearize(const IntervalVector& box) {
 			throw NotFound();
 		}
 
-		int i=0; // counter of active constraints
-		for (BitSet::const_iterator c=active->begin(); c!=active->end(); ++c) {
+		for (int i=0; i<active->size(); i++)  {
 			for (int j=0; j<n; j++) {
 				Vector row(n_total,0.0);
 				row[j]=1;
@@ -91,15 +103,15 @@ LPSolver* LoupFinderDuality::linearize(const IntervalVector& box) {
 
 			{
 				Vector row(n_total,0.0);
-				row.put(0,J[c].lb());
+				row.put(0,J[i].lb());
 
-				IntervalVector Gl(J[c].lb());
+				IntervalVector gl(J[i].lb());
 
-				Vector diam_correctly_rounded = (IntervalVector(J[c].ub())-Gl).lb();
+				Vector diam_correctly_rounded = (IntervalVector(J[i].ub())-gl).lb();
 
-				row.put(n + c*n,-diam_correctly_rounded);
+				row.put(n + i*n,-diam_correctly_rounded);
 
-				double rhs = (-gx[i] + (Gl*point)).lb();
+				double rhs = (-gx[i] + (gl*point)).lb();
 
 				lp_solver->add_constraint(row, LEQ, rhs);
 			}
@@ -122,7 +134,8 @@ LPSolver* LoupFinderDuality::linearize(const IntervalVector& box) {
 	for (int j=0; j<n; j++)
 		lp_solver->set_obj_var(j,goal[j]);
 	for (int i=0; i<active->size(); i++)
-		lp_solver->set_obj_var(n+i,0);
+		for (int j=0; j<n; j++)
+			lp_solver->set_obj_var(n+i*n+j,0);
 
 	return lp_solver;
 }
@@ -135,7 +148,7 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 
 	int n=sys.nb_var;
 
-	LPSolver* lp_solver = linearize(box); // may throw NotFound --> forwarded
+	LPSolver* lp_solver = linearize(box, prop); // may throw NotFound --> forwarded
 
 	LPSolver::Status_Sol stat = lp_solver->solve();
 
@@ -143,7 +156,7 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 		//the linear solution is mapped to intervals and evaluated
 		Vector loup_point = lp_solver->get_primal_sol().subvector(0,n-1);
 
-		//std::cout << " simplex result " << prim[0] << " " << loup_point << std::endl;
+		//std::cout << " simplex result " << loup_point << std::endl;
 
 		if (!box.contains(loup_point)) {
 			delete lp_solver;

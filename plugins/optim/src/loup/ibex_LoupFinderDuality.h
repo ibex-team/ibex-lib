@@ -74,7 +74,7 @@ protected:
 	 * this is not currently possible as the number of variables in the LPSolver is dynamic
 	 * (depends on the number of active constraints on the box).
 	 */
-	LPSolver* linearize(const IntervalVector& box);
+	LPSolver* linearize(const IntervalVector& box, BoxProperties& prop);
 };
 
 
