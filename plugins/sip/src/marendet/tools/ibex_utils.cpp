@@ -106,7 +106,7 @@ std::vector<IntervalVector> bisectAllDim(const IntervalVector& iv) {
 	for (int i = 0; i < iv.size(); ++i) {
 		const int res_size = res.size();
 		for (int j = 0; j < res_size; ++j) {
-			if (res[j][i].is_bisectable()) {
+			if (res[j][i].is_bisectable() && res[j][i].diam() > 1e-10) {
 				auto pair = res[j].bisect(i);
 				res[j] = pair.first;
 				res.emplace_back(pair.second);

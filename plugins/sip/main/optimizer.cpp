@@ -262,7 +262,7 @@ int main(int argc, const char ** argv) {
 
 		//BxpNodeData::sip_system = &sys;
 
-		CellDoubleHeapSIP buffer = CellDoubleHeapSIP(sys, 20);
+		CellDoubleHeapSIP buffer = CellDoubleHeapSIP(sys, 0);
 		ibex::RoundRobin bisector = ibex::RoundRobin(0);
 		/*Vector prec(sys.ext_nb_var, 1e-20);
 		prec[sys.ext_nb_var - 1] = POS_INFINITY;

@@ -44,13 +44,15 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 		ibex_error("LoupFinderLineSearch: BxpNodeData must be set");
 	}
 	delete_node_data_ = false;
-
+	IntervalVector inf_box = box;
+	inf_box.inflate(1.01, 0);
 	IntervalVector ext_box = sip_to_ext_box(box, system_.goal_function_->eval(box));
+	IntervalVector ext_inf_box = sip_to_ext_box(inf_box, system_.goal_function_->eval(box));
 	lp_solver_.clean_ctrs();
 	lp_solver_.set_bounds(ext_box);
 	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
-	if(linearizer_.linearize(ext_box, lp_solver_, prop) < 0) {
+	if(linearizer_.linearize(ext_inf_box, lp_solver_, prop) < 0) {
 		throw NotFound();
 	}
 	//lp_solver_.write_file();
@@ -64,6 +66,11 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	//cout << "sol=" << print_mma(sol) << endl;
 	//cout << "g(sol)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(sol) << std::endl;
 	Vector sol_without_goal = sol.subvector(0, system_.nb_var - 1);
+	if(is_inner_with_paving_simplification(sol)) {
+		if(check(system_, sol_without_goal, loup, true, prop)) {
+			return make_pair(sol, loup);
+		}
+	}
 	//Vector dual(lp_solver_.get_nb_rows());
 	Vector dual = lp_solver_.get_dual_sol();
 	//IntervalVector rhs(dual.size());
@@ -73,7 +80,6 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	vector<Vector> active_constraints;
 
 	blankenship(sol, system_, node_data_);
-
 	/****************** DIRECTION **********************/
 
 	// After variables and linearized goal
@@ -88,16 +94,16 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	}
 
 	for (int i = 0; i < system_.nb_var; ++i) {
-		if (Interval(node_data_->init_box[i].lb()).inflate(1e-10).contains(sol[i])) {
+		if (true || Interval(node_data_->init_box[i].lb()).inflate(1e-10).contains(sol[i])) {
 			Vector cst(system_.nb_var, 0.0);
 			//cst[box.size()] = 1;
 			cst[i] = 1;
-			active_constraints.emplace_back(cst);
-		} else if (Interval(node_data_->init_box[i].ub()).inflate(1e-10).contains(sol[i])) {
+            active_constraints.emplace_back(cst);
+		} else if (true || Interval(node_data_->init_box[i].ub()).inflate(1e-10).contains(sol[i])) {
 			Vector cst(system_.nb_var, 0.0);
 			//cst[box.size()] = 1;
 			cst[i] = -1;
-			active_constraints.emplace_back(cst);
+        	active_constraints.emplace_back(cst);
 		}
 	}
 	if(active_constraints.size() == 0) {
@@ -110,40 +116,56 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	}
 
 	LPSolver dir_solver(system_.nb_var + 1, 10000, 10000);
-	/*for(int i = 0; i < G.nb_cols(); ++i) {
-		Vector row(system_.nb_var + 1);
-		row.put(0, G.col(i));
-		row[system_.nb_var] = -1;
-		dir_solver.add_constraint(row, CmpOp::LEQ, 0);
-	}*/
-	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
-		const auto& sic = system_.sic_constraints_[i];
-		const auto& param_boxes = node_data_->sic_constraints_caches[i].parameter_caches_;
-		for(int j = 0; j < param_boxes.size(); ++j) {
-			Vector full_grad = (sic.gradient(box.mid(), param_boxes[j].parameter_box.mid())).mid();
-			Vector grad_x = full_grad.subvector(0, system_.ext_nb_var-1);
-			grad_x[system_.ext_nb_var-1] = -1;
-			dir_solver.add_constraint(grad_x, CmpOp::LEQ, 0);
-		}
-	}
-	for(int i = 0; i < system_.normal_constraints_.size(); ++i) {
-		IntervalVector grad = system_.normal_constraints_[i].gradient(box.mid().subvector(0, system_.nb_var-1));
-		Vector grad_x = Vector(system_.ext_nb_var, 0.0);
-		grad_x.put(0, grad.mid());
-		grad_x[system_.ext_nb_var-1] = -1;
-		dir_solver.add_constraint(grad_x, CmpOp::LEQ, 0);
-	}
+	dir_solver.set_sense(LPSolver::MINIMIZE);
+    /*for(int i = 0; i < G.nb_cols(); ++i) {
+        Vector row(system_.nb_var + 1);
+        row.put(0, G.col(i));
+        row[system_.nb_var] = -1;
+        dir_solver.add_constraint(row, CmpOp::LEQ, 0);
+    }*/
+    //std::cout << G.nb_cols() << std::endl;
+    //int nbrows = 0;
+	//std::cout << "sol=" << sol << std::endl;
+    for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
+        const auto& sic = system_.sic_constraints_[i];
+        const auto& param_boxes = node_data_->sic_constraints_caches[i].parameter_caches_;
+        //for(int j = 0; j < param_boxes.size(); ++j) {
+		for(const  Vector& bs_point : node_data_->sic_constraints_caches[i].best_blankenship_points_) {
+            //Interval eval = sic.evaluate(sol, param_boxes[j].parameter_box);
+			Interval eval = sic.evaluate(sol, bs_point);
+            //if(eval.contains(0)) {
+			if(true) {
+                Vector full_grad = (sic.gradient(sol, bs_point)).mid();
+                Vector grad_x = full_grad.subvector(0, system_.ext_nb_var-1);
+                grad_x[system_.ext_nb_var-1] = -1;
+				//std::cout << print_mma(grad_x) << "," <<  std::endl;
+                dir_solver.add_constraint(grad_x, CmpOp::LEQ, 0);
+            }
+        }
+    }
+    for(int i = 0; i < system_.normal_constraints_.size()-1; ++i) {
+        IntervalVector grad = system_.normal_constraints_[i].gradient(sol);
+        Vector grad_x = Vector(system_.ext_nb_var, 0.0);
+        grad_x.put(0, grad.mid());
+        grad_x[system_.ext_nb_var-1] = -1;
+        dir_solver.add_constraint(grad_x, CmpOp::LEQ, 0);
+    }
+
 	IntervalVector bounds(system_.nb_var + 1, Interval(-1, 1));
 	bounds[system_.nb_var] = Interval::ALL_REALS;
 	dir_solver.set_bounds(bounds);
 
 	dir_solver.set_obj_var(system_.nb_var, 1);
-
+	//std::cout << dir_solver.get_rows() << std::endl;
 	LPSolver::Status_Sol dir_solver_status = dir_solver.solve();
-
+	if (dir_solver_status != LPSolver::Status_Sol::OPTIMAL) {
+		throw NotFound();
+	}
 	Vector direction = dir_solver.get_primal_sol().subvector(0, system_.nb_var-1);
+	//std::cout << direction << std::endl;
 	/************************************************/
 
+	/* t value in the direction using linear restrictions */
 	double best_loup = POS_INFINITY;
 	Vector best_loup_point(system_.nb_var);
 	bool loup_found = false;
@@ -155,7 +177,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 		const auto& cache = node_data_->sic_constraints_caches[sic_index].parameter_caches_;
 		for (const auto& mem_box : cache) {
 			Interval eval = constraint.evaluate(sol, mem_box.parameter_box);
-			IntervalVector gradient_x = constraint.gradient(ext_box, mem_box.parameter_box).subvector(0,
+			IntervalVector gradient_x = constraint.gradient(ext_inf_box, mem_box.parameter_box).subvector(0,
 					system_.nb_var - 1);
 			//IntervalVector gradient_x = mem_box.full_gradient.subvector(0, system_.nb_var-1);
 			t &= (Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub();
@@ -166,9 +188,11 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	// -1 to exclude goal
 	for (int i = 0; i < system_.normal_constraints_.size() - 1; ++i) {
 		const auto& constraint = system_.normal_constraints_[i];
-		IntervalVector gradient_x = constraint.gradient(ext_box).subvector(0, system_.nb_var - 1);
+		IntervalVector gradient_x = constraint.gradient(ext_inf_box).subvector(0, system_.nb_var - 1);
 		t &= (Interval::NEG_REALS - constraint.evaluate(sol).ub()) / (gradient_x * direction).ub();
 	}
+	/***************************************************/
+
 	//cout << "t=" << t << endl;
 	if (!t.is_empty()) {
 		Vector point = sol_without_goal + t.lb() * direction;
@@ -179,7 +203,8 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 			node_data_ = new BxpNodeData(*node_data_);
 			delete_node_data_ = true;
 			node_data_->sic_constraints_caches = node_data_->init_sic_constraints_caches;
-			blankenship(node_data_->init_box, system_, node_data_);
+			// Useless a priori
+			//blankenship(node_data_->init_box, system_, node_data_);
 		}
 		double new_loup = loup;
 		if (check(system_, point, new_loup, true, prop) && new_loup < best_loup) {
