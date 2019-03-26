@@ -26,9 +26,12 @@ CtcLinearRelax::~CtcLinearRelax() {
 
 void CtcLinearRelax::add_property(const IntervalVector& init_box, BoxProperties& map) {
 	lr.add_property(init_box, map);
-	if (!map[BxpLinearRelaxArgMin::get_id(sys)]) {
-		map.add(new BxpLinearRelaxArgMin(sys));
-	}
+	//--------------------------------------------------------------------------
+	/* Using line search from LP relaxation minimizer seems not interesting. */
+//	if (!map[BxpLinearRelaxArgMin::get_id(sys)]) {
+//		map.add(new BxpLinearRelaxArgMin(sys));
+//	}
+	//--------------------------------------------------------------------------
 }
 
 void CtcLinearRelax::contract(IntervalVector& box) {
@@ -39,7 +42,11 @@ void CtcLinearRelax::contract(IntervalVector& box) {
 void CtcLinearRelax::contract(IntervalVector& box, ContractContext& context) {
 	CtcPolytopeHull::contract(box,context);
 
-	BxpLinearRelaxArgMin* p=(BxpLinearRelaxArgMin*) context.prop[BxpLinearRelaxArgMin::get_id(sys)];
+	//--------------------------------------------------------------------------
+	/* Using line search from LP relaxation minimizer seems not interesting. */
+	//	BxpLinearRelaxArgMin* p=(BxpLinearRelaxArgMin*) context.prop[BxpLinearRelaxArgMin::get_id(sys)];
+	BxpLinearRelaxArgMin* p=NULL;
+	//--------------------------------------------------------------------------
 
 	if (!p) return;
 

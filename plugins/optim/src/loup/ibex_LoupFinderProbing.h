@@ -70,7 +70,7 @@ public:
 	/**
 	 * Default sample size
 	 */
-	static const int default_sample_size;
+	static constexpr int default_sample_size = 1;
 
 	/**
 	 * \brief The NLP problem.

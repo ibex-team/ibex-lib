@@ -228,4 +228,32 @@ bool System::is_inner(const IntervalVector& box) const {
 
 }
 
+vector<string> System::var_names() const {
+
+	vector<string> var_names;
+	int v=0;
+	for (int s=0; s<args.size(); s++) {
+		const ExprSymbol& x=args[s];
+		switch (x.dim.type()) {
+		case Dim::SCALAR:
+			var_names.push_back(x.name);
+			break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:
+			for (int i=0; i<x.dim.vec_size(); i++)
+				var_names.push_back(string(x.name)+'('+to_string(i+1)+')');
+			break;
+		default: // MATRIX
+			for (int i=0; i<x.dim.nb_rows(); i++)
+				for (int j=0; j<x.dim.nb_cols(); j++)
+					var_names.push_back(string(x.name)+'('+to_string(i+1)+','+to_string(j+1)+')');
+			break;
+		}
+		v+=x.dim.size();
+	}
+	assert(v==nb_var);
+	return var_names;
+}
+
+
 } // end namespace ibex

@@ -51,20 +51,27 @@ class LPSolver {
 public:
 
 	/** the default precision on the objective, set to 1e-10. */
-	static const double default_eps;
+	static constexpr double default_eps = 1e-9;
 
 	/** the maximal bound of the variable, set to 1e20. */
-	static const double default_max_bound;
+	static constexpr double default_max_bound = 1e20;
 
     /** Default max_time_out, set to 100s  */
-    static const int default_max_time_out;
+    static constexpr int default_max_time_out = 100;
 
     /** Default max_iter, set to 100 iterations */
-    static const int default_max_iter;
+    static constexpr int default_max_iter = 100;
 
-
-	/** Default max_diam_deriv value, set to 1e6  **/
-	static const Interval default_limit_diam_box;
+	/** Default minimal diameter of ??, set to 1e-14  **/
+	static constexpr double min_box_diam = 1e-14;
+	
+	/** 
+	 * TODO: Default maximal diameter of ... what exactly? 
+	 *   In LoupFinderXTaylor: -> the box
+	 *   In LinearizerXTaylor : -> the derivative enclosure 
+	 * Set to 1e6. 
+	 */
+	static constexpr double max_box_diam = 1e6; 
 
 	typedef enum  {OPTIMAL=1, INFEASIBLE=2, OPTIMAL_PROVED=3, INFEASIBLE_PROVED=4, UNKNOWN=0, TIME_OUT=-1, MAX_ITER=-2} Status_Sol;
 

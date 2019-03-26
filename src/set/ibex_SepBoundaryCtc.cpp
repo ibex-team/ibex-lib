@@ -12,8 +12,6 @@
 
 namespace ibex {
 
-const int SepBoundaryCtc::NB_SAMPLES = 1;
-
 SepBoundaryCtc::SepBoundaryCtc(Ctc& _ctc_boundary, Pdc& _is_inside) : Sep(_is_inside.nb_var), ctc_boundary(_ctc_boundary), is_inside(_is_inside) {
 
 }
@@ -36,7 +34,7 @@ void SepBoundaryCtc::separate(IntervalVector& x_in, IntervalVector& x_out) {
 	x_in = box; x_out = box;
 
 	IntervalVector* rest;
-	int n=box0.diff(box,rest); // calculate the set difference
+	int n=box0.diff(box,rest, false); // calculate the set difference
 
 	BoolInterval res;
 
@@ -65,7 +63,12 @@ void SepBoundaryCtc::separate(IntervalVector& x_in, IntervalVector& x_out) {
 			}
 			else if (res==NO) {
 				x_in |= rest[i]; break;
+			} else {
+				x_in |=rest[i];
+				x_out |= rest[i];
+				break;
 			}
+
 			candidate_pt = rest[i].random();
 		}
 	}

@@ -65,7 +65,7 @@ public:
 	double ratio;
 
 	/** Default ratio used, set to 0.1. */
-	static const double default_ratio;
+	static constexpr double default_ratio = 0.1;
 };
 
 } // end namespace ibex

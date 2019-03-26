@@ -7,7 +7,7 @@ from waflib import Scripting, Logs, Options, Utils
 import ibexutils
 
 # The following variable is used to build ibex.pc and by "waf dist"
-VERSION="2.6.0"
+VERSION="2.8.0"
 # The following variable is used only by "waf dist"
 APPNAME='ibex-lib'
 

@@ -12,9 +12,6 @@
 
 namespace ibex {
 
-/*! Default composition ratio. */
-const double CtcCompo::default_ratio = 0.1;
-
 void CtcCompo::init_impacts() {
 
 //	impacts = new BoolMask[list.size()];

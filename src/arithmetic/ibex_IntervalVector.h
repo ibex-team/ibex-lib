@@ -46,6 +46,18 @@ class IntervalMatrix; // declared only for friendship
 class IntervalVector {
 
 public:
+
+	/**
+	 * \brief Create an uninitialized interval vector.
+	 *
+	 * This constructor is useful, e.g., for building arrays
+	 * of IntervalVector.
+	 *
+	 * \warning The object must be "resize" before being used.
+	 * \see	#resize(int).
+	 */
+	IntervalVector();
+
 	/**
 	 * \brief Create [(-oo,+oo) ; ..; (-oo,+oo)]
 	 *
@@ -598,8 +610,6 @@ public:
 private:
 	friend class IntervalMatrix;
 
-	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
-
 	int n;             // dimension (size of vec)
 	Interval *vec;	   // vector of elements
 };
@@ -806,6 +816,10 @@ inline void ___set_empty(IntervalVector& v) { v.set_empty(); }
 #include "ibex_LinearArith.h"
 
 namespace ibex {
+
+inline IntervalVector::IntervalVector() : n(0), vec(NULL) {
+
+}
 
 inline IntervalVector IntervalVector::empty(int n) {
 	return IntervalVector(n, Interval::EMPTY_SET);

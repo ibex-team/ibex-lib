@@ -21,7 +21,7 @@ def configure (conf):
 	
 	conf.end_msg ("enabled")
 		
-	if not conf.env.WITH_OPTIM:
+	if not conf.options.WITH_OPTIM:
 		conf.fatal ("The SIP plugin requires IbexOpt: please run configure with --with-optim")
 
 	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "SIP")

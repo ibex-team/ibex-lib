@@ -813,6 +813,13 @@ public:
 	 */
 	InHC4Revise& inhc4revise() const;
 
+	/**
+	 * \brief True if all the arguments are scalar
+	 *
+	 * Useful for various code optimization.
+	 */
+	bool all_args_scalar() const;
+
 	// ============================================================================
 
 	// ***internal***
@@ -832,24 +839,20 @@ public:
 	 * \warning The function is seen as a function from R^n to R^m. So, the
 	 * ith variable is <b>not</b> the ith symbol.
 	 */
-	const BitSet used_vars;
+	const std::vector<int> used_vars;
 
+	/**
+	 * \brief Syntactical tree of the function
+	 */
 	ExprSubNodes nodes;
+
+protected:
+	friend std::ostream& operator<<(std::ostream& os, const Function& f);
 
 	/**
 	 * \brief Initialize _nb_used_vars and _used_var
 	 */
 	void generate_used_vars() const;
-
-	/**
-	 * \brief True if all the arguments are scalar
-	 *
-	 * Useful for various code optimization.
-	 */
-	bool all_args_scalar() const;
-
-protected:
-	friend std::ostream& operator<<(std::ostream& os, const Function& f);
 
 	/**
 	 * \brief Generate f[0], f[1], etc. (all stored in "comp")

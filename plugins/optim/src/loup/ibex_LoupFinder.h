@@ -49,7 +49,7 @@ public:
 	 * Note that xk is not necessarily inside the box.
 	 *
 	 * \param box        - the box where x{k+1} is searched
-	 * \param loup_point - an enclosure of x{k}
+	 * \param loup_point - an enclosure of x{k} or empty box if none.
 	 * \param loup       - (an upper bound of) f(x{k})
 	 * \return             <x{k+1},f(x{k+1})>
 	 * \throws             NotFound in case of failure.

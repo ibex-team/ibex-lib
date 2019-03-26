@@ -14,6 +14,9 @@
 #include "ibex_BitSet.h"
 #include "ibex_Function.h"
 #include "ibex_SIPSystem.h"
+
+using namespace std;
+
 namespace ibex {
 
 CtcFwdBwdNLC::CtcFwdBwdNLC(const NLConstraint& constraint, const SIPSystem& system)
@@ -29,8 +32,13 @@ CtcFwdBwdNLC::~CtcFwdBwdNLC() {
 }
 
 void CtcFwdBwdNLC::init() {
-	input = new BitSet(function_->used_vars);
-	output = new BitSet(function_->used_vars);
+	input = new BitSet(nb_var);
+	output = new BitSet(nb_var);
+	
+	for (vector<int>::const_iterator it=function_->used_vars.begin(); it!=function_->used_vars.end(); it++) {
+		output->add(*it);
+		input->add(*it);
+	}
 }
 
 void CtcFwdBwdNLC::add_property(const IntervalVector& init_box, BoxProperties& map) {

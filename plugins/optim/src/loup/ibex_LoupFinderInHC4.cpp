@@ -38,9 +38,12 @@ LoupFinderInHC4::LoupFinderInHC4(const System& sys) : sys(sys), goal_ctr(-1) {
 //}
 
 void LoupFinderInHC4::add_property(const IntervalVector& init_box, BoxProperties& prop) {
-	if (!prop[BxpSystemCache::get_id(sys)]) {
-		prop.add(new BxpSystemCache(sys,BxpSystemCache::default_update_ratio));
-	}
+	//--------------------------------------------------------------------------
+	/* Using system cache seems not interesting. */
+//	if (!prop[BxpSystemCache::get_id(sys)]) {
+//		prop.add(new BxpSystemCache(sys,BxpSystemCache::default_update_ratio));
+//	}
+	//--------------------------------------------------------------------------
 }
 
 std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop) {
@@ -52,7 +55,13 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 
 		// ========= get active constraints ===========
 		BitSet* active;
-		BxpSystemCache* p=(BxpSystemCache*) prop[BxpSystemCache::get_id(sys)];
+
+		//--------------------------------------------------------------------------
+		/* Using system cache seems not interesting. */
+		//BxpSystemCache* p=(BxpSystemCache*) prop[BxpSystemCache::get_id(sys)];
+		BxpSystemCache* p=NULL;
+		//--------------------------------------------------------------------------
+
 		if (p!=NULL) {
 			active = &p->active_ctrs();
 //			if (active->size()<box.size()) {

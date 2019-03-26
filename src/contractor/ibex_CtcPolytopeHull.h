@@ -39,7 +39,7 @@ public:
 
 	CtcPolytopeHull(Linearizer& lr, int max_iter=LPSolver::default_max_iter,
 			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
-			Interval limit_diam=LPSolver::default_limit_diam_box);
+			Interval limit_diam=Interval(LPSolver::min_box_diam,LPSolver::max_box_diam));
 
 	/**
 	 * \brief Creates the contractor w.r.t. Ax<=b
@@ -53,7 +53,7 @@ public:
 	 */
 	CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter=LPSolver::default_max_iter,
 			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
-			Interval limit_diam=LPSolver::default_limit_diam_box);
+			Interval limit_diam=Interval(LPSolver::min_box_diam,LPSolver::max_box_diam));
 
 	/**
 	 * \brief Delete this.

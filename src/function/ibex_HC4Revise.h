@@ -48,7 +48,7 @@ public:
 	 *
 	 * Set to 0.1.
 	 */
-	static const double RATIO;
+	static constexpr double RATIO = 0.1;
 
 protected:
 	/**

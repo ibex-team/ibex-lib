@@ -1,0 +1,11 @@
+variables
+  x[5] in (0; 0; 0; 0; 0);
+
+function f(x[5])
+  expr=1 - x(1)*x(2)*x(3)*x(4)*x(5);
+  return(-(expr*x(1)); -(expr*x(2)); -(expr*x(3)); -(expr*x(4)); -(expr*x(5)));
+end
+
+function v(u[5])
+  return(u(1)^2 + u(2)^2 + u(3)^2 + u(4)^2 + u(5)^2);
+end

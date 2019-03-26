@@ -116,7 +116,12 @@ using namespace ibex::parser;
   								        ExprGenericUnaryOp::get_eval(ibextext); 
   								        return TK_UNARY_OP;
   								      } catch(SyntaxError&) {
-                                        return scopes().top().token(ibextext);
+  								        try {
+  								          ExprGenericBinaryOp::get_eval(ibextext); 
+  								          return TK_BINARY_OP;
+  								        } catch(SyntaxError&) {
+                                          return scopes().top().token(ibextext);
+                                        }
                                       }
                                  }
 ([0-9]{6,10}[0-9]*|([0-9][0-9]*\.[0-9]*)|(\.[0-9]+))(e(\-|\+)?[0-9]+)?|([0-9]{1,5}e(\-|\+)?[0-9]+)  {

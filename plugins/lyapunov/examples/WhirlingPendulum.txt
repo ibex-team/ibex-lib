@@ -1,0 +1,10 @@
+variables
+  x[2] in (0; 0);
+  
+function f(x[2])
+  return(x(2); -1.*sin(x(1)) + 0.81*cos(x(1))*sin(x(1)) - 0.2*x(2));
+end
+
+function v(u[2])
+  return u(1)^2 +u(1)*u(2) + 4*u(2)^2;
+end

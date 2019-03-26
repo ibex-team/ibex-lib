@@ -1,0 +1,10 @@
+variables
+  x[2] in (0; 0);
+
+function f(x[2])
+  return(x(2), -max(-5, min(5, 13*x(1) + 7*x(2))) + x(1));
+end
+
+function v(u[2])
+  return 1.22024*u(1)^2 + 2*0.0416667*u(1)*u(2) + 0.077381*u(2)^2;
+end

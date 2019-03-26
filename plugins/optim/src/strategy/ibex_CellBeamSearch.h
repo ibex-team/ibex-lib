@@ -78,7 +78,7 @@ public :
 	virtual void contract (double new_loup);
 
 	/** \brief The default value for the maximum beam size */
-	static const unsigned int default_beamsize;
+	static constexpr unsigned int default_beamsize = 1;
 
 protected :
 	/**

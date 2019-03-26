@@ -155,7 +155,7 @@ public:
 	/**
 	 * Set to 0.01
 	 */
-	static double default_update_ratio;
+	static constexpr double default_update_ratio = 0.1;
 
 	/**
 	 * \brief Is the set of active constraints up-to-date?
@@ -204,7 +204,7 @@ protected:
 	// Note: Not very clean. To be fixed at some point...
 	int goal_var;
 
-	static Map<long,false> ids;
+	static Map<long,false>& ids();
 };
 
 /*================================== inline implementations ========================================*/

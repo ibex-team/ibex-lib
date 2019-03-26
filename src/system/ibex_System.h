@@ -11,12 +11,10 @@
 #ifndef __IBEX_SYSTEM_H__
 #define __IBEX_SYSTEM_H__
 
-
 #include "ibex_Setting.h"
-
-#include <vector>
 #include "ibex_NumConstraint.h"
 
+#include <vector>
 
 namespace ibex {
 
@@ -197,6 +195,11 @@ public:
 	 * * \pre The number of (potentially) active constraints must be >0
 	 */
 	IntervalMatrix active_ctrs_jacobian(const IntervalVector& box) const;
+
+	/**
+	 * \brief All the variable names in a string vector.
+	 */
+	std::vector<std::string> var_names() const;
 
 	/**
 	 * \brief Identifying number.

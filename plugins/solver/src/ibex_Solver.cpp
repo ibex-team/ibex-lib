@@ -12,7 +12,7 @@
 #include "ibex_Newton.h"
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_LinearException.h"
-#include "ibex_Manifold.h"
+#include "ibex_CovSolverData.h"
 
 #include <cassert>
 
@@ -56,37 +56,11 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 	m=eqs? eqs->f_ctrs.image_dim() : 0;
 	nb_ineq=ineqs? ineqs->f_ctrs.image_dim() : 0;
 
-	if (m==0 || m==n)
+	if (m==0 || m==n) {
 		boundary_test=ALL_FALSE;
-
+	}
 	if (m>n)
 		ibex_warning("Certification not implemented for over-constrained systems ");
-}
-
-void Solver::set_var_names() {
-
-	const System& sys=eqs? *eqs : *ineqs;
-
-	int v=0;
-	for (int s=0; s<sys.args.size(); s++) {
-		const ExprSymbol& x=sys.args[s];
-		switch (x.dim.type()) {
-		case Dim::SCALAR:
-			manif->var_names[v++].assign(x.name);
-			break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:
-			for (int i=0; i<x.dim.vec_size(); i++)
-				manif->var_names[v++].assign(string(x.name)+'('+to_string(i+1)+')');
-			break;
-		default: // MATRIX
-			for (int i=0; i<x.dim.nb_rows(); i++)
-				for (int j=0; j<x.dim.nb_cols(); j++)
-					manif->var_names[v++].assign(string(x.name)+'('+to_string(i+1)+','+to_string(j+1)+')');
-			break;
-		}
-	}
-	assert(v==sys.nb_var);
 }
 
 void Solver::set_params(const VarSet& _params) {
@@ -110,9 +84,7 @@ void Solver::start(const IntervalVector& init_box) {
 
 	if (manif) delete manif;
 
-	manif = new Manifold(n,m,nb_ineq);
-
-	set_var_names();
+	manif = new CovSolverData(n, m, nb_ineq, CovManifold::EQU_ONLY, eqs? eqs->var_names() : ineqs->var_names());
 
 	Cell* root=new Cell(init_box);
 
@@ -125,59 +97,87 @@ void Solver::start(const IntervalVector& init_box) {
 	buffer.add_property(init_box, root->prop);
 
 	buffer.push(root);
-	nb_cells = 1;
 
 	time = 0;
+	manif->set_time(0);
+
+	nb_cells = 1;
+	manif->set_nb_cells(0);
+
+	timer.restart();
+}
+
+void Solver::start(const CovSolverData& data) {
+	buffer.flush();
+
+	if (manif) delete manif;
+	manif = new CovSolverData(n, m, nb_ineq);
+
+	// may erase former variable names if the input paving was actually
+	// not calculated with the same Minibex file.
+	manif->var_names() = eqs? eqs->var_names() : ineqs->var_names();
+
+	// just copy inner, solution and boundary boxes
+	for (size_t i=0; i<data.nb_inner(); i++)
+		manif->add_inner(data.inner(i));
+
+	for (size_t i=0; i<data.nb_solution(); i++)
+		if (m==n)
+			manif->add_solution(data.solution(i), data.unicity(i));
+		else
+			manif->add_solution(data.solution(i), data.unicity(i), data.solution_varset(i));
+
+	for (size_t i=0; i<data.nb_boundary(); i++)
+		manif->add_boundary(data.boundary(i), data.boundary_varset(i));
+
+	// the unknown and pending boxes have to be processed
+	for (size_t i=0; i<data.CovManifold::nb_unknown(); i++) {
+
+		const IntervalVector& box=data.CovManifold::unknown(i);
+
+		Cell* cell=new Cell(box);
+
+		// add data required by the cell buffer
+		buffer.add_property(box, cell->prop);
+
+		// add data required by the bisector
+		bsc.add_property(box, cell->prop);
+
+		// add data required by the contractor
+		ctc.add_property(box, cell->prop);
+
+		buffer.push(cell);
+
+	}
+
+	time = 0;
+	manif->set_time(data.time());
+
+	nb_cells=0; // no new cell created!
+	manif->set_nb_cells(data.nb_cells());
 
 	timer.restart();
 }
 
 void Solver::start(const char* input_paving) {
-	buffer.flush();
-
-	if (manif) delete manif;
-	manif = new Manifold(n,m,nb_ineq);
-	manif->load(input_paving);
-
-	// may erase former variable names if the input paving was actually
-	// not calculated with the same minibex file.
-	set_var_names();
-
-	vector<QualifiedBox>::const_iterator it=manif->unknown.begin();
-
-	// the unknown and pending boxes have to be processed
-	while (it!=manif->pending.end()) {
-		if (it==manif->unknown.end())
-			it=manif->pending.begin();
-		if (it==manif->pending.end())
-			break;
-
-		Cell* cell=new Cell(it->existence());
-
-		buffer.add_property(it->existence(), cell->prop);
-
-		// add data required by the bisector
-		bsc.add_property(it->existence(), cell->prop);
-
-		// add data required by the contractor
-		ctc.add_property(it->existence(), cell->prop);
-
-		buffer.push(cell);
-
-		it++;
-	}
-
-	nb_cells=0; // no new cell created!
-
-	manif->unknown.clear();
-	manif->pending.clear();
-
-	timer.restart();
+	CovSolverData data(input_paving);
+	start(data);
 }
 
-QualifiedBox* Solver::next() {
+bool Solver::next(CovSolverData::BoxStatus& status, const IntervalVector** sol) {
+
 	while (!buffer.empty()) {
-		if (time_limit >0) timer.check(time_limit);
+
+		if (time_limit >0) {
+			try {
+				timer.check(time_limit);
+			}
+			catch(TimeOutException& e) {
+				flush();
+				if (sol) *sol=NULL;
+				throw e;
+			}
+		}
 
 		if (trace==2) cout << buffer << endl;
 
@@ -196,24 +196,17 @@ QualifiedBox* Solver::next() {
 
 			if (c->box.is_empty()) throw EmptyBoxException();
 
-			// certification is performed at each intermediate step
-			// if the system is under constrained
-			if (!c->box.is_empty() && m<n) {
+			// 2nd condition: certification is performed at
+			// each intermediate step only if the system is under constrained
+			if (m==0 || (m<n && !is_too_large(c->box))) {
 				// note: cannot return PENDING status
-				QualifiedBox new_sol=check_sol(c->box);
-				if (new_sol.status!=QualifiedBox::UNKNOWN) {
-					if ((m==0 && new_sol.status==QualifiedBox::INNER) ||
-							!is_too_large(new_sol.existence())) {
-						delete buffer.pop();
-						return &store_sol(new_sol);
-					} else {
-						// otherwise: continue search...
-					}
-				}
-				else {
-					// otherwise: continue search...
-				}
-			}
+				status=check_sol(c->box);
+				if (status!=CovSolverData::UNKNOWN) { // <=> solution or boundary
+					delete buffer.pop();
+					if (sol) *sol=&(*manif)[manif->size()-1];
+					return true;
+				} // otherwise: continue search...
+			} // else: otherwise: continue search...
 
 			try {
 				if (is_too_small(c->box))
@@ -226,13 +219,22 @@ QualifiedBox* Solver::next() {
 				buffer.push(new_cells.first);
 				buffer.push(new_cells.second);
 				nb_cells+=2;
-				if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();
+				if (cell_limit >=0 && nb_cells>=cell_limit) {
+					flush();
+					if (sol) *sol=NULL;
+					throw CellLimitException();
+				}
 			}
 
 			catch (NoBisectableVariableException&) {
-				QualifiedBox new_sol=check_sol(c->box);
+				status=check_sol(c->box);
+				if (status==CovSolverData::UNKNOWN) {
+					if (trace >=1) cout << " [unknown] " << c->box << endl;
+					manif->add_unknown(c->box);
+				}
 				delete buffer.pop();
-				return &store_sol(new_sol);
+				if (sol) *sol=&(*manif)[manif->size()-1];
+				return true;
 			}
 		}
 		catch (EmptyBoxException&) {
@@ -245,11 +247,17 @@ QualifiedBox* Solver::next() {
 		}
 	}
 
-	return NULL;
+	if (sol) *sol=NULL;
+	return false;
 }
 
 Solver::Status Solver::solve(const IntervalVector& init_box) {
 	start(init_box);
+	return solve();
+}
+
+Solver::Status Solver::solve(const CovSolverData& data) {
+	start(data);
 	return solve();
 }
 
@@ -260,139 +268,150 @@ Solver::Status Solver::solve(const char* init_paving) {
 
 Solver::Status Solver::solve() {
 
+	Solver::Status final_status;
+
+	// initialization...
+	if (manif->nb_inner()==0 && manif->nb_solution()==0 && manif->nb_boundary()==0)
+		final_status = INFEASIBLE;
+	else
+		final_status = SUCCESS;
+
+	CovSolverData::BoxStatus status;
+
 	try {
+		while (next(status)) {
+			if (final_status==INFEASIBLE) // first solution found
+				final_status=SUCCESS; // by default... may be changed right after
 
-		while (next()!=NULL) { }
-
-		if (manif->unknown.size()>0)
-			manif->status = NOT_ALL_VALIDATED;
-		else if (manif->inner.size()>0 || manif->boundary.size()>0)
-			manif->status = SUCCESS;
-		else
-			manif->status = INFEASIBLE;
-
-	} catch (TimeOutException&) {
-		flush();
-		manif->status = TIME_OUT;
+			if (status==CovSolverData::UNKNOWN)
+				final_status=NOT_ALL_VALIDATED;
+		}
+	} catch(CellLimitException&) {
+		final_status=CELL_OVERFLOW;
+	} catch(TimeOutException&) {
+		final_status=TIME_OUT;
 	}
-	catch (CellLimitException&) {
-		flush();
-		manif->status = CELL_OVERFLOW;
-	}
+
+	manif->set_solver_status(final_status);
 
 	timer.stop();
 	time = timer.get_time();
 
-	manif->time += time;
-	manif->nb_cells += nb_cells;
+	manif->set_time(manif->time() + time);
 
-	return manif->status;
+	manif->set_nb_cells(manif->nb_cells() + nb_cells);
+
+	return final_status;
 }
 
+bool Solver::check_ineq(const IntervalVector& box) {
+	if (!ineqs)
+		return true;
 
-QualifiedBox Solver::check_sol(const IntervalVector& box) {
+	Interval y,r;
 
-	//QualifiedBox sol(n);
-	QualifiedBox::sol_status status = QualifiedBox::INNER; // by default
-	IntervalVector existence(box);
-	IntervalVector* unicity = NULL;
-	VarSet* varset = NULL;
+	bool not_inner=false;
 
-	if (eqs) {
+	for (int i=0; i<ineqs->nb_ctr; i++) {
+		NumConstraint& c=ineqs->ctrs[i];
+		assert(c.f.image_dim()==1);
+		y=c.f.eval(box);
+		r=c.right_hand_side().i();
 
-		if (m>n) {
-			// Certification not implemented for over-constrained systems
-			status = QualifiedBox::UNKNOWN;
-		} else if (m<n) {
-			// ====== under-constrained =========
-			try {
-
-				unicity = new IntervalVector(n);
-
-				VarSet _varset=get_newton_vars(eqs->f_ctrs,box.mid(),params);
-
-				if (inflating_newton(eqs->f_ctrs, _varset, box, existence, *unicity)) {
-					if (params.nb_param<n-m)
-						varset = new VarSet(_varset);
-				} else
-					status = QualifiedBox::UNKNOWN;
-
-			} catch(SingularMatrixException& e) {
-				status = QualifiedBox::UNKNOWN;
-			}
-		} else {
-			// ====== well-constrained =========
-			unicity = new IntervalVector(n);
-
-			if (!inflating_newton(eqs->f_ctrs, box.mid(), existence, *unicity)) {
-				status = QualifiedBox::UNKNOWN;
-			}
+		if (y.is_disjoint(r)) {
+			throw EmptyBoxException();
+		}
+		else if (!y.is_subset(r)) {
+			not_inner=true;
 		}
 	}
 
-	if (status==QualifiedBox::UNKNOWN) {
-		existence = box;
-		if (unicity!=NULL) delete unicity;
-		unicity=NULL;
-		assert(varset==NULL);
+	return !not_inner;
+}
+
+CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
+
+	if (!eqs) {
+		if (check_ineq(box)) {
+			if (trace >=1) cout << " [solution] " << box << endl;
+			manif->add_inner(box);
+			return CovSolverData::SOLUTION;
+		} else if (is_boundary(box)) {
+			manif->add_boundary(box);
+			return CovSolverData::BOUNDARY;
+		} else
+			return CovSolverData::UNKNOWN;
 	} else {
+
+		if (m>n) {
+			// Certification not implemented for over-constrained systems
+			return CovSolverData::UNKNOWN;
+		}
+
+		IntervalVector existence(box);
+		IntervalVector unicity(n);
+		VarSet varset(n,BitSet::empty(n));
+
+		if (m<n) {
+			// ====== under-constrained =========
+			try {
+
+				varset=get_newton_vars(eqs->f_ctrs,box.mid(),params);
+
+				if (!inflating_newton(eqs->f_ctrs, varset, box, existence, unicity)) {
+					return CovSolverData::UNKNOWN;
+				}
+
+			} catch(SingularMatrixException& e) {
+				return CovSolverData::UNKNOWN;
+			}
+		} else {
+			// ====== well-constrained =========
+			if (!inflating_newton(eqs->f_ctrs, box.mid(), existence, unicity)) {
+				return CovSolverData::UNKNOWN;
+			}
+		}
+
 		// The inflating Newton may cause the existence box to be disjoint from the input box.
 
 		// Note that the following line also tests the case of an existence box outside
 		// the initial box of the search
 		if (box.is_disjoint(existence)) {
-			if (unicity) delete unicity;
-			if (varset) delete varset;
 			throw EmptyBoxException();
 		}
-	}
 
-	if (status==QualifiedBox::INNER && !existence.is_subset(solve_init_box))
-		// BOUNDARY by default: will be verified later
-		status = QualifiedBox::BOUNDARY;
+		bool solution = existence.is_subset(solve_init_box);
 
-	if (ineqs) {
-		Interval y,r;
-		for (int i=0; i<ineqs->nb_ctr; i++) {
-			NumConstraint& c=ineqs->ctrs[i];
-			assert(c.f.image_dim()==1);
-			y=c.f.eval(existence);
-			r=c.right_hand_side().i();
+		solution &= check_ineq(existence);
 
-			if (y.is_disjoint(r)) {
-				if (unicity) delete unicity;
-				if (varset) delete varset;
-				throw EmptyBoxException();
-			}
+		if (eqs && n==m) {
+			// Check if the solution is new, that is, that the solution is not included in the unicity
+			// box of a previously found solution. For efficiency reason, this test is not performed in
+			// the case of under-constrained systems (m<n).
 
-			if (status==QualifiedBox::INNER && !y.is_subset(r)) {
-				// BOUNDARY by default: will be verified later
-				status = QualifiedBox::BOUNDARY;
-			}
+			// TODO
+			//		for (vector<QualifiedBox>::iterator it=manif->inner.begin(); it!=manif->inner.end(); it++) {
+			//			if (it->unicity().is_superset(existence)) {
+			//				if (unicity) delete unicity;
+			//				if (varset) delete varset;
+			//				throw EmptyBoxException();
+			//			}
+			//		}
+		}
+
+		if (solution) {
+			if (trace >=1) cout << " [solution] " << existence << endl;
+			manif->add_solution(existence, unicity, varset);
+			return CovSolverData::SOLUTION;
+		} else {
+			if (is_boundary(existence)) {
+				if (trace >=1) cout << " [boundary] " << existence << endl;
+				manif->add_boundary(existence, varset);
+				return CovSolverData::BOUNDARY;
+			} else
+				return CovSolverData::UNKNOWN;
 		}
 	}
-
-	if (status==QualifiedBox::BOUNDARY) {
-		if (!is_boundary(existence))
-			status = QualifiedBox::UNKNOWN;
-
-	}
-
-	if (eqs && n==m) {
-		// Check if the solution is new, that is, that the solution is not included in the unicity
-		// box of a previously found solution. For efficiency reason, this test is not performed in
-		// the case of under-constrained systems (m<n).
-
-		for (vector<QualifiedBox>::iterator it=manif->inner.begin(); it!=manif->inner.end(); it++) {
-			if (it->unicity().is_superset(existence)) {
-				if (unicity) delete unicity;
-				if (varset) delete varset;
-				throw EmptyBoxException();
-			}
-		}
-	}
-
-	return QualifiedBox(existence,status,unicity,varset);
 }
 
 bool Solver::is_boundary(const IntervalVector& box) {
@@ -452,63 +471,81 @@ bool Solver::is_too_large(const IntervalVector& box) {
 	return false;
 }
 
-QualifiedBox& Solver::store_sol(const QualifiedBox& sol) {
-
-	if (trace >=1) cout << sol << endl;
-
-	switch (sol.status) {
-	case QualifiedBox::INNER    :
-		manif->inner.push_back(sol);
-		return manif->inner.back();
-	case QualifiedBox::BOUNDARY :
-		manif->boundary.push_back(sol);
-		return manif->boundary.back();
-	case QualifiedBox::UNKNOWN  :
-		manif->unknown.push_back(sol);
-		return manif->unknown.back();
-	case QualifiedBox::PENDING :
-	default:
-		manif->pending.push_back(sol);
-		return manif->pending.back();
-	}
-}
-
 void Solver::flush() {
 	while (!buffer.empty()) {
 		Cell* cell=buffer.top();
-		QualifiedBox sol(cell->box,QualifiedBox::PENDING);
-		store_sol(sol);
+		if (trace >=1) cout << " [pending] " << cell->box << endl;
+		manif->add_pending(cell->box);
 		delete buffer.pop();
 	}
 }
 
+namespace {
+const char* green() {
+#ifndef _WIN32
+	return "\033[32m";
+#else
+	return "";
+#endif
+}
+
+const char* red(){
+#ifndef _WIN32
+	return "\033[31m";
+#else
+	return "";
+#endif
+}
+
+const char* white() {
+#ifndef _WIN32
+	return "\033[0m";
+#else
+	return "";
+#endif
+}
+
+}
 void Solver::report() {
 
-	switch(manif->status) {
-	case SUCCESS: cout << "\033[32m" << " solving successful!" << endl;
-	break;
-	case INFEASIBLE: cout << "\033[31m" << " infeasible problem" << endl;
-	break;
-	case NOT_ALL_VALIDATED: cout << "\033[31m" << " done! but some boxes have 'unknown' status." << endl;
-	break;
-	case TIME_OUT: cout << "\033[31m" << " time limit " << time_limit << "s. reached " << endl;
-	break;
-	case CELL_OVERFLOW: cout << "\033[31m" << " cell overflow" << endl;
+	switch ((Status) manif->solver_status()) {
+	case SUCCESS: 
+		cout << green() << " solving successful!" << endl;
+		break;
+	case INFEASIBLE: 
+		cout << red() << " infeasible problem" << endl;
+		break;
+	case NOT_ALL_VALIDATED: 
+		cout << red() << " done! but some boxes have 'unknown' status." << endl;
+		break;
+	case TIME_OUT: 
+		cout << red() << " time limit " << time_limit << "s. reached " << endl;
+		break;
+	case CELL_OVERFLOW: 
+		cout << red() << " cell overflow" << endl;
 	}
 
-	cout << "\033[0m" << endl;
+	cout << white() << endl;
 
-	cout << " number of inner boxes:\t\t" << manif->inner.size() << endl;
-	cout << " number of boundary boxes:\t" << manif->boundary.size() << endl;
-	cout << " number of unknown boxes:\t" << manif->unknown.size() << endl;
-	cout << " number of pending boxes:\t" << manif->pending.size() << endl;
+	cout << " number of solution boxes:\t";
+	if (manif->nb_solution()==0) cout << "--"; else cout << manif->nb_solution();
+	cout << endl;
+	cout << " number of boundary boxes:\t";
+	if (manif->nb_boundary()==0) cout << "--"; else cout << manif->nb_boundary();
+	cout << endl;
+	cout << " number of unknown boxes:\t";
+	if (manif->nb_unknown()==0) cout << "--"; else cout << manif->nb_unknown();
+	cout << endl;
+	cout << " number of pending boxes:\t";
+	if (manif->nb_pending()==0) cout << "--"; else cout << manif->nb_pending();
+	cout << endl;
 	cout << " cpu time used:\t\t\t" << time << "s";
-	if (manif->time!=time)
-		cout << " [total=" << manif->time << "]";
-		cout << endl;
+	if (manif->time()!=time)
+		cout << " [total=" << manif->time() << "]";
+	cout << endl;
 	cout << " number of cells:\t\t" << nb_cells;
-	if (manif->nb_cells!=nb_cells)
-		cout << " [total=" << manif->nb_cells << "]";
+	if (manif->nb_cells()!=nb_cells)
+		cout << " [total=" << manif->nb_cells() << "]";
 	cout << endl << endl;
 }
 

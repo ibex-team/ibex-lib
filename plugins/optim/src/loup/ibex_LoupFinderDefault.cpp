@@ -28,9 +28,12 @@ void LoupFinderDefault::add_property(const IntervalVector& init_box, BoxProperti
 	finder_probing.add_property(init_box,prop);
 	finder_x_taylor.add_property(init_box,prop);
 
-	if (!prop[BxpLinearRelaxArgMin::get_id(finder_x_taylor.sys)]) {
-		prop.add(new BxpLinearRelaxArgMin(finder_x_taylor.sys));
-	}
+	//--------------------------------------------------------------------------
+	/* Using line search from LP relaxation minimizer seems not interesting. */
+//	if (!prop[BxpLinearRelaxArgMin::get_id(finder_x_taylor.sys)]) {
+//		prop.add(new BxpLinearRelaxArgMin(finder_x_taylor.sys));
+//	}
+	//--------------------------------------------------------------------------
 
 }
 
@@ -53,7 +56,12 @@ std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& 
 	} catch(NotFound&) { }
 
 	if (found) {
-		BxpLinearRelaxArgMin* argmin=(BxpLinearRelaxArgMin*) prop[BxpLinearRelaxArgMin::get_id(finder_x_taylor.sys)];
+		//--------------------------------------------------------------------------
+		/* Using line search from LP relaxation minimizer seems not interesting. */
+		//	BxpLinearRelaxArgMin* argmin=(BxpLinearRelaxArgMin*) prop[BxpLinearRelaxArgMin::get_id(finder_x_taylor.sys)];
+		BxpLinearRelaxArgMin* argmin=NULL;
+		//--------------------------------------------------------------------------
+
 		if (argmin && argmin->argmin()) {
 			Vector loup_point = p.first.lb();
 			double loup = p.second;

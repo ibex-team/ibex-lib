@@ -61,9 +61,12 @@ LinearizerXTaylor::~LinearizerXTaylor() {
 }
 
 void LinearizerXTaylor::add_property(const IntervalVector& init_box, BoxProperties& prop) {
-	if (/*mode==RELAX && slope==TAYLOR && */!prop[BxpSystemCache::get_id(sys)]) {
-		prop.add(new BxpSystemCache(sys,BxpSystemCache::default_update_ratio));
-	}
+	//--------------------------------------------------------------------------
+	/* Using system cache seems not interesting. */
+	//	if (/*mode==RELAX && slope==TAYLOR && */!prop[BxpSystemCache::get_id(sys)]) {
+	//		prop.add(new BxpSystemCache(sys,BxpSystemCache::default_update_ratio));
+	//	}
+	//--------------------------------------------------------------------------
 }
 
 int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver)  {
@@ -76,7 +79,12 @@ int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver
 
 	// ========= get active constraints ===========
 	BitSet* active;
-	cache=(BxpSystemCache*) prop[BxpSystemCache::get_id(sys)];
+
+	//--------------------------------------------------------------------------
+	/* Using system cache seems not interesting. */
+	//cache=(BxpSystemCache*) prop[BxpSystemCache::get_id(sys)];
+	cache=NULL;
+	//--------------------------------------------------------------------------
 
 	if (cache!=NULL) {
 		active = &cache->active_ctrs();
@@ -270,7 +278,7 @@ IntervalVector LinearizerXTaylor::get_corner_point(const IntervalVector& box) {
 int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalVector& corner, const IntervalVector& dg_box, const Interval& g_corner) {
 	Vector a(n); // vector of coefficients
 
-	if (dg_box.max_diam() > lp_solver->default_limit_diam_box.ub()) {
+	if (dg_box.max_diam() > LPSolver::max_box_diam) {
 		// we also also avoid this way to deal with infinite bounds (see below)
 		throw LPException();
 	}

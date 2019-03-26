@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_SetVisitor.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -9,6 +9,8 @@
 
 #ifndef __IBEX_SET_VISITOR_H__
 #define __IBEX_SET_VISITOR_H__
+
+#include "ibex_BoolInterval.h"
 
 namespace ibex {
 
