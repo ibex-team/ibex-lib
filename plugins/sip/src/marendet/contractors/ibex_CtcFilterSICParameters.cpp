@@ -47,10 +47,12 @@ void CtcFilterSICParameters::contract(IntervalVector& box, ContractContext& cont
 	if(node_data == nullptr) {
 		ibex_error("CtcFilterSICParameters: BxpNodeData must be set");
 	}
+	IntervalVector inf_box = box;
+	inf_box.inflate(1.01, 0);
 	for (int i = 0; i < system_.sic_constraints_.size(); ++i) {
 		//node_data.sic_constraints_caches[i].update_cache(*system_.sic_constraints_[i].function_, box);
 		//contractOneConstraint(i, node_data, box);
-		simplify_paving(system_.sic_constraints_[i], node_data->sic_constraints_caches[i], box, true);
+		simplify_paving(system_.sic_constraints_[i], node_data->sic_constraints_caches[i], inf_box, true);
 	}
 }
 

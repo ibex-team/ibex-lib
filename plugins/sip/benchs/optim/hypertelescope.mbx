@@ -1,0 +1,61 @@
+//!--universal="alpha"
+
+
+Constants
+    m = 4;
+    d = 1;
+    alpha_min = 0.25;
+    alpha_max = 0.75;
+    eps=1e-5;
+    q=101;
+    alpha_q[q]=(0.25,0.255,0.26,0.265,0.27,0.275,0.28,0.285,0.29,0.295,0.3,0.305,0.31,0.315,0.32,0.325,0.33,0.335,0.34,0.345,0.35,0.355,0.36,0.365,0.37,0.375,0.38,0.385,0.39,0.395,0.4,0.405,0.41,0.415,0.42,0.425,0.43,0.435,0.44,0.445,0.45,0.455,0.46,0.465,0.47,0.475,0.48,0.485,0.49,0.495,0.5,0.505,0.51,0.515,0.52,0.525,0.53,0.535,0.54,0.545,0.55,0.555,0.56,0.565,0.57,0.575,0.58,0.585,0.59,0.595,0.6,0.605,0.61,0.615,0.62,0.625,0.63,0.635,0.64,0.645,0.65,0.655,0.66,0.665,0.67,0.675,0.68,0.685,0.69,0.695,0.7,0.705,0.71,0.715,0.72,0.725,0.73,0.735,0.74,0.745,0.75)';
+
+Variables
+    alpha in [alpha_min,alpha_max];
+    t in [0,1000];
+    a[4] in [0,1];
+    u[4] in [0,5];
+
+function sum(a[4])
+    return a(1)+a(2)+a(3)+a(4);
+end 
+
+function sum2term(a,u,alpha)
+    return a*cos(2*pi/d*u*alpha);
+end
+
+function sum2(a[4],u[4],alpha)
+    s1 = sum2term(a(1),u(1),alpha);
+    s2 = sum2term(a(2),u(2),alpha);
+    s3 = sum2term(a(3),u(3),alpha);
+    s4 = sum2term(a(4),u(4),alpha);
+    return s1+s2+s3+s4;
+end
+
+function j1_low(x)
+    return pi/2- pi^3*(x^2)/16+ pi^5*(x^4)/384;
+end
+
+
+function j1(x)
+    return pi/2- pi^3*x^2/16+ pi^5*x^4/384 - pi^7*x^6/18432 + pi^9*x^8/1474560 - pi^11*x^10/176947200 + pi^13*x^12/29727129600;
+end
+
+minimize t;
+   
+Constraints
+    /*besselj(alpha)*sum2(a,u,alpha) <= t;*/
+    /*-t <= besselj(alpha)*sum2(a,u,alpha);*/
+    j1_low(alpha)*sum2(a,u,alpha) <= t;
+    -t <= j1_low(alpha)*sum2(a,u,alpha);
+    /*for k=1:q;*/
+        /*j1(alpha_q(k))*sum2(a,u,alpha_q(k)) <= t;*/
+        /*-t <= j1(alpha_q(k))*sum2(a,u,alpha_q(k));*/
+    /*end;*/
+    sum(a) >= 0.5-eps;
+    sum(a) <= 0.5+eps;
+    u(1) >= d/2;
+    u(2)-u(1) >= d;
+    u(3)-u(2) >= d;
+    u(4)-u(3) >= d;
+end
