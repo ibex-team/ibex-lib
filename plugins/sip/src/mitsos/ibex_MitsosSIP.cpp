@@ -22,7 +22,7 @@ namespace ibex {
 
 MitsosSIP::MitsosSIP(System& sys, const Array<const ExprSymbol>& vars, const Array<const ExprSymbol>& params, const BitSet& is_param, bool shared_discretization) :
 			SIP(sys, vars, params, is_param), p_domain(p_arg),
-			trace(1), l_max(20), LBD_samples(new vector<double>[p]),
+			trace(1), l_max(20), LBD_samples(new vector<double>[p]), random_seed(0L),
 			UBD_samples(shared_discretization? LBD_samples : new vector<double>[p]),
 			ORA_samples(shared_discretization? LBD_samples : new vector<double>[p]),
 			shared_discretization(shared_discretization) {
