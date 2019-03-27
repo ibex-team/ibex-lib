@@ -280,8 +280,8 @@ void MitsosSIP::optimize(double eps_f) {
 	cout << endl << endl << "f* in [" << f_LBD << "," << f_UBD << "]" << endl;
 	cout << endl << endl << "x*=" << x_opt << endl << endl;
 	cout << endl << endl << iteration << " iterations" << endl;
-	cout << time << "s (real time)" << endl;
-	cout << time/iteration << "s per iteration" << endl;
+	cout << time << " s (real time)" << endl;
+	cout << time/iteration << " s per iteration" << endl;
 	cout << "Last iteration time: " << last_iter_time << endl;
 }
 
@@ -299,7 +299,9 @@ bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eta_ub, doub
 	System ORA_sys(ORA_Factory(*this,f_RES));
 
 	// compute initial domain of eta
-	IntervalVector g_x_LBD = ORA_sys.f_ctrs.eval_vector(x_LBD);
+	Vector x_LBD_eta(x_LBD.size() + 1, eta_ub);
+	x_LBD_eta.put(0, x_LBD);
+	IntervalVector g_x_LBD = ORA_sys.f_ctrs.eval_vector(x_LBD_eta);
 	double eta_lb=-(g_x_LBD[0].ub());
 	for (int i=1; i<g_x_LBD.size(); i++)
 		eta_lb=std::min(eta_lb, -g_x_LBD[i].ub());
@@ -311,7 +313,9 @@ bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eta_ub, doub
 		ibex_warning("[SIP] unbounded domain for objective variable in the \"oracle\" problem (replaced by [-1e8,1e8])");
 	}
 
-	return solve(ORA_sys, eps, x_opt, uplo, loup);
+	bool b = solve(ORA_sys, eps, x_opt, uplo, loup);
+	x_opt.resize(x_opt.size() - 1);
+	return b;
 }
 
 bool MitsosSIP::solve(const System& sub_sys, double eps, Vector& x_opt, double& uplo, double& loup) {
