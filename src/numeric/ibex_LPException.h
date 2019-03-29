@@ -25,4 +25,5 @@ class LPException : public Exception {
 };
 
 } // namespace ibex
+
 #endif // __IBEX_LP_EXCEPTION_H__

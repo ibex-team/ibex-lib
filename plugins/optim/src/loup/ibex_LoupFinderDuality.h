@@ -5,16 +5,17 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Mar 20, 2019
-// Last Update : Mar 20, 2019
+// Last Update : Mar 29, 2019
 //============================================================================
 
 #ifndef __IBEX_LOUP_FINDER_DUALITY_H__
 #define __IBEX_LOUP_FINDER_DUALITY_H__
 
-#include "ibex_LinearizerXTaylor.h"
 #include "ibex_LoupFinder.h"
+#include "ibex_LinearizerDuality.h"
 
 namespace ibex {
+
 /**
  * \ingroup optim
  *
@@ -64,17 +65,17 @@ public:
 
 protected:
 
-	/* Linearization technique
-	 *
-	 * Return the LP solver with variables, constraints, bounds and objective set.
-	 *
-	 * \throw NotFound if a problem occurs in the linearization
-	 *
-	 * TODO: the following function should be embedded in a Linearizer object, but
-	 * this is not currently possible as the number of variables in the LPSolver is dynamic
-	 * (depends on the number of active constraints on the box).
-	 */
-	LPSolver* linearize(const IntervalVector& box, BoxProperties& prop);
+	/** Total number of variables */
+	const size_t nb_LP_var;
+
+	/** Linearization technique. */
+	LinearizerDuality lr;
+
+	/** linear solver */
+	LPSolver lp_solver;
+
+	/** [0,+oo)x...[0,+oo) */
+	IntervalVector init_dual_box;
 };
 
 
@@ -84,7 +85,6 @@ inline std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalV
 }
 
 } /* namespace ibex */
-
 
 
 #endif /* __IBEX_LOUP_FINDER_DUALITY_H__ */

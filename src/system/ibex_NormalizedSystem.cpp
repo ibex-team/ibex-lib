@@ -51,7 +51,7 @@ CmpOp norm(CmpOp op) {
 	case EQ: return EQ;
 	case GT: return LT;
 	case GEQ: return LEQ;
-	default: assert(false);
+	default: assert(false); return EQ;
 	}
 }
 

@@ -75,6 +75,7 @@ protected:
 //	double diam_simplex;
 };
 
+/*============================================ inline implementation ============================================ */
 
 inline std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
 	BoxProperties prop(box);

@@ -189,7 +189,9 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box, const BitSet& 
 		IntervalMatrix J(active.size(),n); // derivatives over the box
 		sys.f_ctrs.hansen_matrix(box,corner,J,active);
 
-		if (J.is_empty()) return -1; // note: no way to inform that the box is actually infeasible
+		// note: no way to inform that the box is actually infeasible
+		// (we are in "restrict" mode)
+		if (J.is_empty()) return -1;
 
 		// the evaluation of the constraints in the corner x_corner
 		IntervalVector g_corner(sys.f_ctrs.eval_vector(corner,active));
