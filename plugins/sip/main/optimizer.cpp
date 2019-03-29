@@ -262,7 +262,7 @@ int main(int argc, const char ** argv) {
 
 		//BxpNodeData::sip_system = &sys;
 
-		CellDoubleHeapSIP buffer = CellDoubleHeapSIP(sys, 20);
+		CellDoubleHeapSIP buffer = CellDoubleHeapSIP(sys, 0);
 		ibex::RoundRobin bisector = ibex::RoundRobin(0);
 		/*Vector prec(sys.ext_nb_var, 1e-20);
 		prec[sys.ext_nb_var - 1] = POS_INFINITY;
@@ -275,9 +275,11 @@ int main(int argc, const char ** argv) {
 		} else {
 			loup_finder = new LoupFinderSIPDefault(sys);
 		}
-		LoupFinderLineSearch *loup_finder2 = nullptr;
+		LoupFinder *loup_finder2 = nullptr;
 		if (!no_line_search) {
 			loup_finder2 = new LoupFinderLineSearch(sys);
+		} else {
+			loup_finder2 = new LoupFinderSIPDefault(sys);
 		}
 
 		/**

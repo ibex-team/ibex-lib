@@ -36,10 +36,10 @@ public:
 		UNREACHED_PREC
 	};
 
-	static constexpr double default_rel_eps_f = 1e-3;
-	static constexpr double default_abs_eps_f = 1e-3;
-	static constexpr double default_lf_loop_ratio = 0.1;
-	static constexpr double default_eps_x = 0;
+	static const double default_rel_eps_f;
+	static const double default_abs_eps_f;
+	static const double default_lf_loop_ratio;
+	static const double default_eps_x;
 
 	SIPOptimizer(int n, Ctc& ctc, Bsc& bisector,
 			LoupFinder& loup_finder, LoupFinder& loup_finder2, CellBufferOptim& buffer, int goal_var,
