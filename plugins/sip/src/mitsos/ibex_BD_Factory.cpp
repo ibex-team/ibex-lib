@@ -133,7 +133,7 @@ void BD_Factory::add_discretized_ctr(double eps_g) {
 			//cout << "  generated constraint:" << ctr << endl;
 			add_ctr(ctr);
 
-			//cleanup(expr_ctr,false);
+			cleanup(expr_ctr,false);
 		}
 		//cout << endl;
 	}
