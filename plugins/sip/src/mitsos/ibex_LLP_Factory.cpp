@@ -75,7 +75,10 @@ LLP_Factory::LLP_Factory(const MitsosSIP& sip, int c, const Vector& xopt) : new_
 
 	// TODO: not the cleanest way!!
 	for (int j=0; j<sip.p; j++) {
-		if (sip.sys.ctrs[c].f.used_vars[sip.varset.param(j)]) {
+		bool used = std::find(sip.sys.ctrs[c].f.used_vars.begin(),
+				sip.sys.ctrs[c].f.used_vars.end(),
+				sip.varset.param(j)) != sip.sys.ctrs[c].f.used_vars.end();
+		if (used) {
 			param_LLP_var.add(j);
 		}
 	}

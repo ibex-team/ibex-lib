@@ -299,7 +299,8 @@ bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eta_ub, doub
 	System ORA_sys(ORA_Factory(*this,f_RES));
 
 	// compute initial domain of eta
-	Vector x_LBD_eta(x_LBD.size() + 1, eta_ub);
+	const int n_vars = x_LBD.size() + 1;
+	Vector x_LBD_eta(n_vars, eta_ub);
 	x_LBD_eta.put(0, x_LBD);
 	IntervalVector g_x_LBD = ORA_sys.f_ctrs.eval_vector(x_LBD_eta);
 	double eta_lb=-(g_x_LBD[0].ub());
@@ -312,9 +313,9 @@ bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eta_ub, doub
 		eta_domain = Interval(-1e8,1e8);
 		ibex_warning("[SIP] unbounded domain for objective variable in the \"oracle\" problem (replaced by [-1e8,1e8])");
 	}
-
+	ORA_sys.box[n_vars-1] = eta_domain;
 	bool b = solve(ORA_sys, eps, x_opt, uplo, loup);
-	x_opt.resize(x_opt.size() - 1);
+	x_opt.resize(n_vars-1);
 	return b;
 }
 
