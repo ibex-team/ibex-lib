@@ -11,7 +11,7 @@
 #define __IBEX_LINEARIZER_DUALITY_H__
 
 #include "ibex_Linearizer.h"
-#include "ibex_System.h"
+#include "ibex_NormalizedSystem.h"
 
 namespace ibex {
 
@@ -42,7 +42,7 @@ public:
 	/**
 	 * \brief Create the linear restriction.
 	 */
-	LinearizerDuality(const System& sys, slope_formula slope=HANSEN);
+	LinearizerDuality(const NormalizedSystem& sys, slope_formula slope=HANSEN);
 
 	/**
 	 * \brief Add the inequalities in the LP solver.

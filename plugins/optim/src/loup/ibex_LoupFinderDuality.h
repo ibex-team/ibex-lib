@@ -13,6 +13,7 @@
 
 #include "ibex_LoupFinder.h"
 #include "ibex_LinearizerDuality.h"
+#include "ibex_NormalizedSystem.h"
 
 namespace ibex {
 
@@ -21,13 +22,10 @@ namespace ibex {
  *
  * \brief Upper-bounding algorithm based on duality.
  *
- * The algorithm builds an inner (feasible) polytope inside the
- * current box (see #LinearizerXTaylor) and then minimizes a
- * linear approximation of the goal function on this polytope via
- * a LP solver. The resulting point is verified a posteriori to
- * be feasible (wrt nonlinear constraint) and a new "loup".
+ * This loup finder is based on a linear restriction of the NLP
+ * that does not require the expansion point to be at a corner
+ * of the input box. So, this restriction is likely to be better.
  *
- * \note Only works with inequality constraints.
  */
 class LoupFinderDuality : public LoupFinder {
 public:
@@ -37,7 +35,7 @@ public:
 	 *
 	 * \param sys         - The NLP problem.
 	 */
-	LoupFinderDuality(const System& sys);
+	LoupFinderDuality(const NormalizedSystem& sys);
 
 	/**
 	 * \brief Find a new loup in a given box.
@@ -61,7 +59,7 @@ public:
 	/**
 	 * \brief The NLP problem.
 	 */
-	const System& sys;
+	const NormalizedSystem& sys;
 
 protected:
 
@@ -74,8 +72,8 @@ protected:
 	/** linear solver */
 	LPSolver lp_solver;
 
-	/** [0,+oo)x...[0,+oo) */
-	IntervalVector init_dual_box;
+	/** Initialization box: set [0,+oo) once for all, for all dual variables */
+	IntervalVector init_box;
 };
 
 

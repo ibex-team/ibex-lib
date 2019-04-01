@@ -16,10 +16,10 @@ using namespace std;
 namespace ibex {
 
 //TODO: remove this recipe for the argument of the max number of iterations of the LP solver
-LoupFinderDuality::LoupFinderDuality(const System& sys) : sys(sys),
+LoupFinderDuality::LoupFinderDuality(const NormalizedSystem& sys) : sys(sys),
 		nb_LP_var(sys.nb_var*(1+sys.f_ctrs.image_dim())),
-		lr(sys), lp_solver(nb_LP_var, nb_LP_var*3 > LPSolver::default_max_iter ? LPSolver::default_max_iter : nb_LP_var*3),
-		init_dual_box(sys.f_ctrs.image_dim(), Interval::POS_REALS) {
+		lr(sys), lp_solver(nb_LP_var, nb_LP_var*3),
+		init_box(nb_LP_var, Interval::NEG_REALS /*note: the domain of variables will be overwritten) */) {
 
 }
 
@@ -34,9 +34,9 @@ void LoupFinderDuality::add_property(const IntervalVector& init_box, BoxProperti
 
 	//--------------------------------------------------------------------------
 	/* Using line search from LP relaxation minimizer seems not interesting. */
-	if (!prop[BxpLinearRelaxArgMin::get_id(sys)]) {
-		prop.add(new BxpLinearRelaxArgMin(sys));
-	}
+//	if (!prop[BxpLinearRelaxArgMin::get_id(sys)]) {
+//		prop.add(new BxpLinearRelaxArgMin(sys));
+//	}
 	//--------------------------------------------------------------------------
 }
 
@@ -49,7 +49,8 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 	int n=sys.nb_var;
 
 	lp_solver.clean_ctrs();
-	lp_solver.set_bounds(cart_prod(box,init_dual_box));
+	init_box.put(0, box);
+	lp_solver.set_bounds(init_box);
 
 	int count = lr.linearize(box,lp_solver,prop);
 
@@ -75,8 +76,6 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 	if (stat == LPSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
 		Vector loup_point = lp_solver.get_primal_sol().subvector(0,n-1);
-
-		//std::cout << " simplex result " << loup_point << std::endl;
 
 		if (!box.contains(loup_point)) throw NotFound();
 

@@ -11,9 +11,11 @@
 #include "ibex_BxpSystemCache.h"
 #include "ibex_BxpLinearRelaxArgMin.h"
 
+using namespace std;
+
 namespace ibex {
 
-LinearizerDuality::LinearizerDuality(const System& sys, slope_formula slope) :
+LinearizerDuality::LinearizerDuality(const NormalizedSystem& sys, slope_formula slope) :
 			Linearizer(sys.nb_var), sys(sys), slope(slope), pt(sys.nb_var) {
 
 }
@@ -45,19 +47,20 @@ int LinearizerDuality::linearize(const IntervalVector& box, LPSolver& lp_solver,
 
 	int nb_ctr=0; // number of inequalities added in the LP solver
 
-	BxpLinearRelaxArgMin* argmin=(BxpLinearRelaxArgMin*) prop[BxpLinearRelaxArgMin::get_id(sys)];
-
-	if (argmin && argmin->argmin()) {
-		pt=*argmin->argmin();
-	} else
+//	BxpLinearRelaxArgMin* argmin=(BxpLinearRelaxArgMin*) prop[BxpLinearRelaxArgMin::get_id(sys)];
+//
+//	if (argmin && argmin->argmin()) {
+//		pt=*argmin->argmin();
+//	} else
 		pt=box.mid();
 
 	if (!active->empty()) {
 
 		//IntervalMatrix J=cache? cache->active_ctrs_jacobian() : sys.f_ctrs.jacobian(box,active);
-		//IntervalMatrix J=sys.f_ctrs.jacobian(box,active);
+		//IntervalMatrix J=sys.f_ctrs.jacobian(box,*active);
 		IntervalMatrix J(active->size(),n); // derivatives over the box
 		sys.f_ctrs.hansen_matrix(box,pt,J,*active);
+
 		if (J.is_empty()) {
 			if (cache==NULL) delete active;
 			return -1;
@@ -70,17 +73,21 @@ int LinearizerDuality::linearize(const IntervalVector& box, LPSolver& lp_solver,
 			return 0;
 		}
 
+
 		int i=0; // counter of active constraints
 		for (BitSet::iterator c=active->begin(); c!=active->end(); ++c, i++)  {
-			for (int j=0; j<n; j++) {
-				Vector row(n_total,0.0);
-				row[j]=1;
-				row[n + c*n +j]=1;
 
-				double rhs = pt[j];
+			if (!sys.f_ctrs.deriv_calculator().is_linear[c]) {
+				for (int j=0; j<n; j++) {
+					Vector row(n_total,0.0);
+					row[j]=1;
+					row[n + c*n +j]=1;
 
-				lp_solver.add_constraint(row, LEQ, rhs);
-				nb_ctr++;
+					double rhs = pt[j] - lp_solver.get_epsilon();
+
+					lp_solver.add_constraint(row, LEQ, rhs);
+					nb_ctr++;
+				}
 			}
 
 			Vector row(n_total,0.0);
@@ -90,9 +97,14 @@ int LinearizerDuality::linearize(const IntervalVector& box, LPSolver& lp_solver,
 
 			Vector diam_correctly_rounded = (IntervalVector(J[i].ub())-gl).lb();
 
+			for (int j=0; j<n; j++) {
+				if (diam_correctly_rounded[j]<0)
+					ibex_error("negative diameter");
+			}
+
 			row.put(n + c*n,-diam_correctly_rounded);
 
-			double rhs = (-gx[i] + (gl*pt)).lb();
+			double rhs = (-gx[i] + (gl*pt)).lb()- lp_solver.get_epsilon();
 
 			lp_solver.add_constraint(row, LEQ, rhs);
 			nb_ctr++;
