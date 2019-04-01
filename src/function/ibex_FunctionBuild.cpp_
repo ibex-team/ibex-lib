@@ -530,10 +530,11 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 //		ExprNAryOp* nary_op = dynamic_cast<const ExprNA>)
 //	}
 
-	BitSet _used_vars(_nb_var);
 
-	FindInputsUsed fsu(x, y, __symbol_index, _used_vars);
-	for (BitSet::const_iterator it=_used_vars.begin(); it!=_used_vars.end(); ++it) {
+	is_used.resize(_nb_var);
+
+	FindInputsUsed fsu(x, y, __symbol_index, is_used);
+	for (BitSet::const_iterator it=is_used.begin(); it!=is_used.end(); ++it) {
 		((vector<int>&) used_vars).push_back((int) it);
 	}
 

@@ -18,6 +18,7 @@
 #include "ibex_SymbolMap.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_Fnc.h"
+#include "ibex_BitSet.h"
 
 #include <stdexcept>
 #include <stdarg.h>
@@ -570,6 +571,15 @@ public:
 	int nb_arg() const;
 
 	/**
+	 * \brief Return true if the ith variable is used in the function.
+	 *
+	 * \warning The function is seen as a function from R^n to R^m. So, the
+	 * ith variable is <b>not</b> the ith symbol.
+	 *
+	 */
+	bool used(int i) const;
+
+	/**
 	 * \brief Return the current number of nodes in the DAG.
 	 */
 	int nb_nodes() const;
@@ -890,7 +900,7 @@ private:
 	void decorate(const Array<const ExprSymbol>& x, const ExprNode& y);
 
 	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
-	std::vector<bool> is_used;                  // tells whether the i^th component is used.
+	BitSet is_used;                             // tells whether the i^th component is used.
 
 	// only generated if required
 	Function** comp;                             // the components. ==this if output_size()==1.
@@ -943,6 +953,10 @@ inline Function& Function::operator[](int i) const {
 
 inline int Function::nb_arg() const {
 	return symbs.size();
+}
+
+inline bool Function::used(int i) const {
+	return is_used[i];
 }
 
 inline const Array<const ExprSymbol>& Function::args() const {

@@ -68,7 +68,7 @@ void BD_Factory::add_discretized_ctr(double eps_g) {
 		// with all previously existing combinations.
 		for (int j=0; j<sip.p; j++) {
 			//cout << "  param n°" << j << "=" << sip.varset.param(j);
-			if (sip.sys.ctrs[c].f.used_vars[sip.varset.param(j)]) {
+			if (sip.sys.ctrs[c].f.used(sip.varset.param(j))) {
 				//cout << " **used**" << endl;
 				// for each box already inside the list...
 				for (list<Vector>::iterator it2=p_boxes.begin(); it2!=p_boxes.end(); it2=p_boxes.erase(it2)) {
