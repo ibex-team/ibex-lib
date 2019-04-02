@@ -86,6 +86,11 @@ void BD_Factory::add_discretized_ctr(double eps_g) {
 			}
 		}
 
+		// all the constraints generated with constraint n°c
+		// (stored in an array for cleanup)
+		Array<const ExprNode> exprs_ctr(p_boxes.size());
+		int i=0;
+
 		// We generate one constraint for each p_box
 		for (list<Vector>::iterator it=p_boxes.begin(); it!=p_boxes.end(); it++) {
 
@@ -103,6 +108,7 @@ void BD_Factory::add_discretized_ctr(double eps_g) {
 					new_args.set_ref(K,new_vars[I++]);
 				else
 					// a parameter becomes a constant
+					// (note: can have a reference because the expression is copied afterward)
 					new_args.set_ref(K,ExprConstant::new_(sip.p_domain[J++],true));
 			}
 			const ExprNode* expr_ctr_tmp=&sip.sys.ctrs[c].f(new_args);
@@ -130,8 +136,12 @@ void BD_Factory::add_discretized_ctr(double eps_g) {
 			//cout << "  generated constraint:" << ctr << endl;
 			add_ctr(ctr);
 
-			cleanup(expr_ctr,false);
+			exprs_ctr.set_ref(i++,expr_ctr);
+
 		}
+
+		cleanup(exprs_ctr,false);
+
 		//cout << endl;
 	}
 }
