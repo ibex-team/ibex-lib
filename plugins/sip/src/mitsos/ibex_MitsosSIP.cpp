@@ -318,7 +318,7 @@ bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eps, Vector&
 	Vector x_LBD_eta(n+1);
 	x_LBD_eta.put(0,x_LBD);
 
-	// g(x_LBD) is a valid upper bound for eta since we have f_LBD < f_RES
+	// g(x_LBD) is a valid upper bound for eta since we have f(x_LBD) < LBD_loup < f_RES
 	// Note: the first constraint (f-f_RES<=0) is skipped although it should
 	// have no impact (gives negative number).
 	IntervalVector g_x_LBD = ORA_sys.f_ctrs.eval_vector(x_LBD_eta).subvector(1,ORA_sys.f_ctrs.image_dim()-1);
