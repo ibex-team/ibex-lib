@@ -89,13 +89,21 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	Vector best_loup_point = loup_point.mid();
 	bool loup_found = false;
 
-	if(blankenship_direction(direction)) {
+	/*if(blankenship_direction(direction)) {
 		Interval t = t_value(direction);
-		loup_found = loup_found || line_search(sol_without_goal, direction, t, best_loup_point, best_loup);
+		bool b = line_search(sol_without_goal, direction, t, best_loup_point, best_loup);
+		loup_found = b || loup_found;
+	}*/
+	if(relaxations_direction(direction, true)) {
+		Interval t = t_value(direction);
+		bool b = line_search(sol_without_goal, direction, t, best_loup_point, best_loup);
+		loup_found = b || loup_found;
+
 	}
-	if(relaxations_direction(direction)) {
+	if(relaxations_direction(direction, false)) {
 		Interval t = t_value(direction);
-		loup_found = loup_found || line_search(sol_without_goal, direction, t, best_loup_point, best_loup);
+		bool b = line_search(sol_without_goal, direction, t, best_loup_point, best_loup);
+		loup_found = b || loup_found;
 	}
 	if (loup_found) {
 		return make_pair(best_loup_point, best_loup);
@@ -139,14 +147,14 @@ bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVec
 	return true;
 }
 
-bool LoupFinderLineSearch::relaxations_direction(Vector& direction, bool with_sides) {
+bool LoupFinderLineSearch::relaxations_direction(Vector& direction, bool actives_only, bool with_sides) {
 	Matrix A = lp_solver_.get_rows();
 	Vector dual = lp_solver_.get_dual_sol();
 	IntervalVector rhs = lp_solver_.get_lhs_rhs();
 	vector<Vector> active_constraints;
 
 	for (int i = system_.ext_nb_var + 1; i < A.nb_rows(); ++i) {
-		if (!Interval(dual[i]).inflate(1e-10).contains(0)) {
+		if (!actives_only || !Interval(dual[i]).inflate(1e-10).contains(0)) {
 			active_constraints.emplace_back(A.row(i).subvector(0, system_.nb_var-1));
 		}
 		/*Interval cst_eval = A.row(i) * sol - rhs[i].ub();
@@ -313,7 +321,7 @@ bool LoupFinderLineSearch::line_search(const Vector& start_point, const Vector& 
 		}
 		Vector left = start_point;
 		Vector right = point;
-		for(int i = 0; i < 20; ++i) {
+		for(int i = 0; i < 10; ++i) {
 			Vector middle = 0.5*(left + right);
 			IntervalVector ext_middle = sip_to_ext_box(middle, system_.goal_ub(middle));
 			if(is_inner_with_paving_simplification(ext_middle, local_node_data)) {

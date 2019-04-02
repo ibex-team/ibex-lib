@@ -43,7 +43,7 @@ private:
 	BoxProperties* prop_ = nullptr;
 	const BxpNodeData* initial_node_data_ = nullptr;
 	bool delete_node_data_ = false;
-	bool relaxations_direction(Vector& direction, bool with_sides=false);
+	bool relaxations_direction(Vector& direction, bool actives_only, bool with_sides=false);
 	bool blankenship_direction(Vector&);
 	bool active_constraints_direction(Vector&);
 	Interval t_value(const Vector& direction);
