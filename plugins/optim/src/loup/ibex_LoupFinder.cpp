@@ -57,7 +57,7 @@ void LoupFinder::monotonicity_analysis(const System& sys, IntervalVector& box, b
 	sys.goal->gradient(box,g);
 
 	for (int j=0; j<n; j++) {
-		if (is_inner || !sys.f_ctrs.used_vars[j]) {
+		if (is_inner || !sys.f_ctrs.used(j)) {
 			if (g[j].lb()>=0 && box[j].lb()!=NEG_INFINITY) box[j]=box[j].lb();
 			if (g[j].ub()<=0 && box[j].ub()!=POS_INFINITY) box[j]=box[j].ub();
 		}
