@@ -126,7 +126,26 @@ public:
 
 protected:
 	IBEX_NODE_MAP(T) map;
+
+	// Dereference "t" if it is a pointer (use for operator<<)
+	const T* value(T& t, std::true_type is_pointer)  const { return *t; }
+	const T& value(T& t, std::false_type is_pointer) const { return t; }
+
+	template<class U>
+	friend std::ostream& operator<<(std::ostream& os, const NodeMap<U> map);
 };
+
+/*============================================ inline implementation ============================================ */
+
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, const NodeMap<T> map) {
+	os << "{\n";
+	for (typename IBEX_NODE_MAP(T)::const_iterator it=map.begin(); it!=map.end(); ++it) {
+		os << "   " << it->first->id  << ": " << map.value(it->second,typename std::is_pointer<T>::type()) << "\n";
+	}
+	os << "}";
+	return os;
+}
 
 } // end namespace ibex
 #endif // __IBEX_NODE_MAP_H__

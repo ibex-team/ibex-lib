@@ -21,8 +21,8 @@ using namespace std;
 namespace ibex {
 
 MitsosSIP::MitsosSIP(System& sys, const Array<const ExprSymbol>& vars, const Array<const ExprSymbol>& params, const BitSet& is_param, bool shared_discretization) :
-			SIP(sys, vars, params, is_param), p_domain(p_arg),
-			trace(1), l_max(20), LBD_samples(new vector<double>[p]), random_seed(0L),
+			SIP(sys, vars, params, is_param), trace(1), l_max(20), random_seed(0L),
+			p_domain(p_arg), LBD_samples(new vector<double>[p]),
 			UBD_samples(shared_discretization? LBD_samples : new vector<double>[p]),
 			ORA_samples(shared_discretization? LBD_samples : new vector<double>[p]),
 			shared_discretization(shared_discretization) {
@@ -60,7 +60,7 @@ void MitsosSIP::optimize(double eps_f) {
 	Vector x_LBD(sys.nb_var);
 	Vector x_UBD(sys.nb_var);
 	Vector x_opt(sys.nb_var);
-	Vector x_ORA(sys.nb_var+1);
+	Vector x_ORA(sys.nb_var);
 
 	double f_LBD=NEG_INFINITY;
 	double f_UBD=POS_INFINITY;
@@ -113,6 +113,9 @@ void MitsosSIP::optimize(double eps_f) {
 			cout << " * LBD" << endl;
 		}
 
+		Vector x_LBD_save=x_LBD;
+		double LBD_loup_save=LBD_loup;
+
 		if (!solve_LBD(eps_LBD, x_LBD, LBD_uplo, LBD_loup)) {
 			cout << "   infeasible problem";
 			exit(0);
@@ -121,11 +124,17 @@ void MitsosSIP::optimize(double eps_f) {
 		if (LBD_uplo < f_LBD) {
 			stringstream msg;
 			msg << "[SIP]: uplo is decreasing (uplo=" << f_LBD << "  LBD_uplo=" << LBD_uplo << ")";
+
 			ibex_warning(msg.str());
 
-			// note: in this case, do we really have to solve LLP?
+			// restore
+			x_LBD = x_LBD_save;
+			LBD_loup = LBD_loup_save;
+
+			// note: in this case, we don't want to solve LLP.
 			// this may add useless parameter values
 			// (the optimum x* being less "good")
+
 			//				eps_ibex = eps_ibex/2.0;
 			//				cout << "eps_ibex=" << eps_ibex << endl;
 		} else {
@@ -136,26 +145,25 @@ void MitsosSIP::optimize(double eps_f) {
 			} else {
 
 			}
-		}
 
-		Interval g_max_LBD=solve_LLP(true, x_LBD, eps_LLP);
+			Interval g_max_LBD=solve_LLP(true, x_LBD, eps_LLP);
 
-		if (g_max_LBD.ub()<=0) {
-			//cout << " found feasible x_LBD!! --->";
-			if (LBD_loup < f_UBD) {
-				//cout << " decreases loup!\n";
-				f_UBD=LBD_loup;
-				x_opt=x_LBD;
-			} else {
-				ibex_warning("[SIP]: LBD finds a SIP-feasible point that does not decrease the UB!");
-				//cout << " don't decrease loup...\n";
-				//eps_ibex = eps_ibex/2.0;
+			if (g_max_LBD.ub()<=0) {
+				//cout << " found feasible x_LBD!! --->";
+				if (LBD_loup < f_UBD) {
+					//cout << " decreases loup!\n";
+					f_UBD=LBD_loup;
+					x_opt=x_LBD;
+				} else {
+					ibex_warning("[SIP]: LBD finds a SIP-feasible point that does not decrease the UB!");
+					//cout << " don't decrease loup...\n";
+					//eps_ibex = eps_ibex/2.0;
+				}
+			} else if (g_max_LBD.lb()<=0) {
+				eps_LLP = g_max_LBD.diam() / r_LLP;
+				if (trace>=1) cout << "   eps_LLP=" << eps_LLP << endl;
 			}
-		} else if (g_max_LBD.lb()<=0) {
-			eps_LLP = g_max_LBD.diam() / r_LLP;
-			if (trace>=1) cout << "   eps_LLP=" << eps_LLP << endl;
 		}
-
 
 		// ============================== UBD ==============================
 		bool UBD_changed=true ;
@@ -209,20 +217,25 @@ void MitsosSIP::optimize(double eps_f) {
 			bool LBD_changed=true;
 			int l=0;
 
-			while ((l<l_max) && LBD_changed && (f_UBD - f_LBD > eps_f)) {
+			// we use LBD_loup instead of f_LBD in the definition of f_RES
+			// so that x_LBD is a feasible point for ORA (its maximal violation gives
+			// a valid upper bound for eta). We could also choose f_LBD and
+			// set (-oo,oo) as domain for eta.
+			while ((l<l_max) && LBD_changed && (f_UBD - LBD_loup > eps_f)) {
 
 				l++;
 				LBD_changed=false;
 
-				double f_RES=0.5*(f_UBD + f_LBD);
+				double f_RES=0.5*(f_UBD + LBD_loup);
 
 				// note: the oracle is called several times
 				// consecutively only if the lower bound has changed
 				// so x_UBD does actually correspond to the last LLP
 				// program solved (the SIP-feasibility of x_ORA has not
-				// been called yet), and g_max_UBD.ub() is a valid upper
-				// bound for eta.
-				if (!solve_ORA(f_RES, x_LBD, -g_max_UBD.ub(), eps_ORA, x_ORA, ORA_uplo, ORA_loup)) {
+				// been called yet), and g_max_UBD.ub() is a valid lower
+				// bound for eta. --> Wrong
+				// Note: it is neither a upper bound (since we also impose f<f_RES in ORA).
+				if (!solve_ORA(f_RES, x_LBD, eps_ORA, x_ORA, ORA_uplo, ORA_loup)) {
 					// if happens => bug
 					ibex_error("[SIP]: the oracle problem is infeasible");
 				}
@@ -234,6 +247,7 @@ void MitsosSIP::optimize(double eps_f) {
 					f_LBD = f_RES;
 					x_LBD = x_ORA;
 					LBD_changed = true;
+					LBD_loup = sys.goal->eval(x_LBD).ub();
 					if (trace>=1) cout << "\033[33m   f_LBD = " << f_LBD << "\033[0m" << endl;
 					continue;
 				}
@@ -295,23 +309,38 @@ bool MitsosSIP::solve_UBD(double eps_g, double eps, Vector& x_opt, double& uplo,
 	return solve(UBD_sys, eps, x_opt, uplo, loup);
 }
 
-bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eta_ub, double eps, Vector& x_opt, double& uplo, double& loup) {
+bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eps, Vector& x_opt, double& uplo, double& loup) {
+
 	System ORA_sys(ORA_Factory(*this,f_RES));
 
 	// compute initial domain of eta
-	IntervalVector g_x_LBD = ORA_sys.f_ctrs.eval_vector(x_LBD);
-	double eta_lb=-(g_x_LBD[0].ub());
-	for (int i=1; i<g_x_LBD.size(); i++)
-		eta_lb=std::min(eta_lb, -g_x_LBD[i].ub());
+	// note : domain of eta is temporarily set to 0.
+	Vector x_LBD_eta(n+1);
+	x_LBD_eta.put(0,x_LBD);
 
-	Interval eta_domain(eta_lb, eta_ub);
+	// g(x_LBD) is a valid upper bound for eta since we have f_LBD < f_RES
+	// Note: the first constraint (f-f_RES<=0) is skipped although it should
+	// have no impact (gives negative number).
+	IntervalVector g_x_LBD = ORA_sys.f_ctrs.eval_vector(x_LBD_eta).subvector(1,ORA_sys.f_ctrs.image_dim()-1);
 
-	if (eta_domain.is_unbounded()) {
-		eta_domain = Interval(-1e8,1e8);
-		ibex_warning("[SIP] unbounded domain for objective variable in the \"oracle\" problem (replaced by [-1e8,1e8])");
-	}
+	double max_violation = g_x_LBD.ub().max();
 
-	return solve(ORA_sys, eps, x_opt, uplo, loup);
+	Interval minus_eta_domain(-max_violation,POS_INFINITY);
+
+	ORA_sys.box[n] = minus_eta_domain;
+
+//	if (eta_domain.is_unbounded()) {
+//		eta_domain = Interval(-1e8,1e8);
+//		ibex_warning("[SIP] unbounded domain for objective variable in the \"oracle\" problem (replaced by [-1e8,1e8])");
+//	}
+
+//	x_LBD_eta[n]=-max_violation;
+
+	Vector x_ORA(n+1);
+
+	bool status=solve(ORA_sys, eps, x_ORA, uplo, loup);
+	x_opt = x_ORA.subvector(0,n-1);
+	return status;
 }
 
 bool MitsosSIP::solve(const System& sub_sys, double eps, Vector& x_opt, double& uplo, double& loup) {

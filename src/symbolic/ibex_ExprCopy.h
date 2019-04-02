@@ -110,7 +110,7 @@ protected:
 	void visit(const ExprAcosh& e);
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
-
+public:
 	NodeMap<const ExprNode*> clone;
 };
 

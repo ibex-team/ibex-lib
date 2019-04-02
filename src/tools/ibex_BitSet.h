@@ -342,7 +342,9 @@ inline BitSet::iterator BitSet::begin() const { assert(initialized()); return it
 
 inline BitSet::iterator BitSet::end() const { assert(initialized()); return iterator(*this,false); }
 
-inline BitSet::iterator::iterator(const BitSet& b, bool min) : b(&b), el(min && !b.empty()? b.min():INT_MIN) { assert(initialized());  }
+inline BitSet::iterator::iterator(const BitSet& b, bool min) : b(&b), el(min && !b.empty()? b.min():INT_MIN) {
+	assert(b.initialized());
+}
 
 inline BitSet::iterator& BitSet::iterator::operator++() {
 	assert(b->initialized());

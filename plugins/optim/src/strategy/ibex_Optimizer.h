@@ -123,7 +123,6 @@ public:
 	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
 	/**
-	/**
 	 * \brief Continue optimization.
 	 *
 	 * Load intermediate data from a COV structure, and continue optimization.
