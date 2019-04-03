@@ -240,7 +240,7 @@ bool LoupFinderLineSearch::blankenship_direction(Vector& direction) {
 	return true;
 }
 
-bool LoupFinderLineSearch::active_constraints_direction(Vector& direction) {
+bool LoupFinderLineSearch::stein_direction(Vector& direction) {
 	dir_solver_.clean_ctrs();
 	blankenship(relax_point_, system_, node_data_);
 	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
@@ -257,7 +257,7 @@ bool LoupFinderLineSearch::active_constraints_direction(Vector& direction) {
         }
     }
     for(int i = 0; i < system_.normal_constraints_.size()-1; ++i) {
-        IntervalVector grad = system_.normal_constraints_[i].gradient(relax_point_);
+        IntervalVector grad = system_.normal_constraints_[i].gradient(ext_inf_box_);
         Vector grad_x = Vector(system_.ext_nb_var, 0.0);
         grad_x.put(0, grad.mid());
         grad_x[system_.ext_nb_var-1] = -1;
@@ -315,10 +315,10 @@ bool LoupFinderLineSearch::line_search(const Vector& start_point, const Vector& 
 		if (!ext_box_.subvector(0, system_.nb_var-1).contains(point)) {
 			local_node_data = initial_node_data_;
 		}
-		if (check(system_, point, loup, true, *prop_)) {
+		/*if (check(system_, point, loup, true, *prop_)) {
 			loup_point = ext_point;
 			loup_found = true;
-		}
+		}*/
 		Vector left = start_point;
 		Vector right = point;
 		for(int i = 0; i < 10; ++i) {
