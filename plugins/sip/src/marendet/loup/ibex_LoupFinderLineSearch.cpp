@@ -52,14 +52,11 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	}
 	box_ = box;
 	delete_node_data_ = false;
-	IntervalVector inf_box = box;
-	inf_box.inflate(1.01, 0);
 	ext_box_ = sip_to_ext_box(box, system_.goal_function_->eval(box));
-	ext_inf_box_ = sip_to_ext_box(inf_box, system_.goal_function_->eval(box));
 	lp_solver_.clean_ctrs();
 	lp_solver_.set_bounds(ext_box_);
 	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
-	if(linearizer_.linearize(ext_inf_box_, lp_solver_, prop) < 0) {
+	if(linearizer_.linearize(ext_box_, lp_solver_, prop) < 0) {
 		throw NotFound();
 	}
 	//lp_solver_.write_file();
@@ -94,13 +91,20 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 		bool b = line_search(sol_without_goal, direction, t, best_loup_point, best_loup);
 		loup_found = b || loup_found;
 	}*/
-	if(relaxations_direction(direction, true)) {
+	// Greedy 
+	/*if(relaxations_direction(direction, true)) {
 		Interval t = t_value(direction);
 		bool b = line_search(sol_without_goal, direction, t, best_loup_point, best_loup);
 		loup_found = b || loup_found;
 
-	}
+	}*/
+	/*
 	if(relaxations_direction(direction, false)) {
+		Interval t = t_value(direction);
+		bool b = line_search(sol_without_goal, direction, t, best_loup_point, best_loup);
+		loup_found = b || loup_found;
+	}*/
+	if(stein_direction(direction)) {
 		Interval t = t_value(direction);
 		bool b = line_search(sol_without_goal, direction, t, best_loup_point, best_loup);
 		loup_found = b || loup_found;
@@ -247,17 +251,14 @@ bool LoupFinderLineSearch::stein_direction(Vector& direction) {
         const auto& sic = system_.sic_constraints_[i];
         const auto& param_boxes = node_data_->sic_constraints_caches[i].parameter_caches_;
         for(int j = 0; j < param_boxes.size(); ++j) {
-            Interval eval = sic.evaluate(relax_point_, param_boxes[j].parameter_box);
-            if(eval.contains(0)) {
-                Vector full_grad = sic.gradient(ext_inf_box_, param_boxes[j].parameter_box).mid();
-                Vector grad_x = full_grad.subvector(0, system_.ext_nb_var-1);
-                grad_x[system_.ext_nb_var-1] = -1;
-                dir_solver_.add_constraint(grad_x, CmpOp::LEQ, 0);
-            }
+            Vector full_grad = sic.gradient(ext_box_, param_boxes[j].parameter_box).mid();
+			Vector grad_x = full_grad.subvector(0, system_.ext_nb_var-1);
+			grad_x[system_.ext_nb_var-1] = -1;
+			dir_solver_.add_constraint(grad_x, CmpOp::LEQ, 0);
         }
     }
     for(int i = 0; i < system_.normal_constraints_.size()-1; ++i) {
-        IntervalVector grad = system_.normal_constraints_[i].gradient(ext_inf_box_);
+        IntervalVector grad = system_.normal_constraints_[i].gradient(ext_box_);
         Vector grad_x = Vector(system_.ext_nb_var, 0.0);
         grad_x.put(0, grad.mid());
         grad_x[system_.ext_nb_var-1] = -1;
@@ -289,7 +290,7 @@ Interval LoupFinderLineSearch::t_value(const Vector& direction) {
 		const auto& cache = node_data_->sic_constraints_caches[sic_index].parameter_caches_;
 		for (const auto& mem_box : cache) {
 			Interval eval = constraint.evaluate(relax_point_, mem_box.parameter_box);
-			IntervalVector gradient_x = constraint.gradient(ext_inf_box_, mem_box.parameter_box).subvector(0,
+			IntervalVector gradient_x = constraint.gradient(ext_box_, mem_box.parameter_box).subvector(0,
 					system_.nb_var - 1);
 			//IntervalVector gradient_x = mem_box.full_gradient.subvector(0, system_.nb_var-1);
 			t &= (Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub();
@@ -300,7 +301,7 @@ Interval LoupFinderLineSearch::t_value(const Vector& direction) {
 	// -1 to exclude goal
 	for (int i = 0; i < system_.normal_constraints_.size() - 1; ++i) {
 		const auto& constraint = system_.normal_constraints_[i];
-		IntervalVector gradient_x = constraint.gradient(ext_inf_box_).subvector(0, system_.nb_var - 1);
+		IntervalVector gradient_x = constraint.gradient(ext_box_).subvector(0, system_.nb_var - 1);
 		t &= (Interval::NEG_REALS - constraint.evaluate(relax_point_).ub()) / (gradient_x * direction).ub();
 	}
 	return t;

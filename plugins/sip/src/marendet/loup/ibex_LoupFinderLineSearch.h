@@ -38,7 +38,6 @@ private:
 	LPSolver dir_solver_;
 	IntervalVector box_;
 	IntervalVector ext_box_;
-	IntervalVector ext_inf_box_;
 	BxpNodeData* node_data_ = nullptr;
 	BoxProperties* prop_ = nullptr;
 	const BxpNodeData* initial_node_data_ = nullptr;
