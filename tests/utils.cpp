@@ -39,11 +39,11 @@ bool sameExpr(const ExprNode& node, const ExprNode& node2) {
 	if (strcmp(s.str().c_str(),s2.str().c_str())==0)
 		return true;
 	else  {
-	/*	std::cout<< "Expr tested : " << std::endl;
+		std::cout<< "Expr tested : " << std::endl;
 		std::cout<< s.str().c_str() << std::endl;
 		std::cout<< "Expr wanted : " << std::endl;
 		std::cout<< s2.str().c_str() << std::endl;
-	*/	return false;
+		return false;
 	}
 }
 

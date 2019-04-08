@@ -205,6 +205,11 @@ void TestAmpl::merge() {
 	System sys2(i2);
 	System sys3(sys1,sys2);
 
+	std::cout << " sys3" << std::endl;
+	std::cout<< sys3 << std::endl;
+	for (int i=0; i<sys3.nb_ctr; i++)  {
+		std::cout << sys3.f_ctrs[i].expr() << std::endl;
+		std::cout << sys3.ctrs[i].f.expr() << std::endl; }
 	for (int i=0; i<sys1.nb_ctr; i++)
 		CPPUNIT_ASSERT(sameExpr(sys3.f_ctrs[i].expr(),sys1.f_ctrs[i].expr()));
 	for (int i=0; i<sys2.nb_ctr; i++)

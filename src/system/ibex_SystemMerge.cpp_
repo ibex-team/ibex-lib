@@ -94,14 +94,14 @@ public:
 		}
 
 		// -------------  Add constraints -----------
-		for (int i=0; i<sys1.ctrs.size(); i++) {
-			const ExprNode& e=ExprCopy().copy(sys1.ctrs[i].f.args(), vars1, sys1.ctrs[i].f.expr());
-			add_ctr(ExprCtr(e,sys1.ctrs[i].op));
+		for (int i=0; i<sys1.f_ctrs.image_dim(); i++) {
+			const ExprNode& e=ExprCopy().copy(sys1.f_ctrs[i].args(), vars1, sys1.f_ctrs[i].expr());
+			add_ctr(ExprCtr(e,sys1.ops[i]));
 			cleanup(e, false);
 		}
-		for (int i=0; i<sys2.ctrs.size(); i++) {
-			const ExprNode& e=ExprCopy().copy(sys2.ctrs[i].f.args(), vars2, sys2.ctrs[i].f.expr());
-			add_ctr(ExprCtr(e,sys2.ctrs[i].op));
+		for (int i=0; i<sys2.f_ctrs.image_dim(); i++) {
+			const ExprNode& e=ExprCopy().copy(sys2.f_ctrs[i].args(), vars2, sys2.f_ctrs[i].expr());
+			add_ctr(ExprCtr(e,sys2.ops[i]));
 			cleanup(e, false);
 		}
 	}
