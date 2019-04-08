@@ -162,8 +162,14 @@ void ExprPrinter::print_dbl(double x) {
 	else {
 		assert(sizeof(double)==8);
 		uint64_t u;
-		memcpy(&u, &x, 8);
-		(*os) << '#' << std::hex << u;
+		if (x>0) {
+			memcpy(&u, &x, 8);
+			(*os) << '#' << std::hex << u;
+		} else {
+			double minus_x=-x;
+			memcpy(&u, &minus_x, 8);
+			(*os) << "-#" << std::hex << u;
+		}
 	}
 }
 
