@@ -38,7 +38,7 @@ namespace ibex {
 
 const double SIPOptimizer::default_rel_eps_f = 1e-3;
 const double SIPOptimizer::default_abs_eps_f = 1e-3;
-const double SIPOptimizer::default_lf_loop_ratio = 0.1;
+const double SIPOptimizer::default_lf_loop_ratio = 0.01;
 const double SIPOptimizer::default_eps_x = 0;
 
 SIPOptimizer::SIPOptimizer(int n, Ctc& ctc, Bsc& bisector, LoupFinder& loup_finder, LoupFinder& loup_finder2,
