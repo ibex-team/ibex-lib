@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Jul 16, 2012
+// Last Update : Apr 08, 2019
 //============================================================================
 
 #ifndef __IBEX_SYSTEM_H__
@@ -200,6 +200,18 @@ public:
 	 * \brief All the variable names in a string vector.
 	 */
 	std::vector<std::string> var_names() const;
+
+	/**
+	 * \brief Serialize the system (get the Minibex code)
+	 *
+	 * \param human: if true, numeric constant are converted to character
+	 *               in decimal format to be human-readable, but this is an
+	 *               unsafe conversion. Value by default is "true".
+	 *
+	 *               If false, all constants are converted to their exact
+	 *               hexadecimal representation, whence a safe serialization.
+	 */
+	std::string minibex(bool human=true) const;
 
 	/**
 	 * \brief Identifying number.

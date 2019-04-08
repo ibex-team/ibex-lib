@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Nov 22, 2017
+// Last Update : Apr 08, 2019
 //============================================================================
 
 #include "ibex_System.h"
@@ -14,6 +14,8 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_SystemCopy.cpp_"
 #include "ibex_SystemMerge.cpp_"
+#include "ibex_Expr2Minibex.h"
+#include "ibex_Domain.h"
 
 #include <stdio.h>
 
@@ -83,6 +85,65 @@ System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb
 
 System::System(const System& sys1, const System& sys2) : id(next_id()), nb_var(0), nb_ctr(0), func(0), ops(NULL), box(1) {
 	init(SystemMerge(sys1,sys2));
+}
+
+std::string System::minibex(bool human) const {
+	stringstream s;
+	s << "variables\n";
+
+	Array<Domain> domains(args.size());
+	for (int i=0; i<args.size(); i++) {
+		domains.set_ref(i,*new Domain(args[i].dim));
+	}
+
+	ibex::load(domains, box);
+
+	for (int i=0; i<args.size(); i++) {
+		const ExprSymbol& x=args[i];
+		s << x.name;
+		if (x.dim.nb_rows()>1) s << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_cols()>1) s << '[' << x.dim.nb_cols() << ']';
+		s << " in " << domains[i] << ";\n";
+	}
+
+	s << '\n';
+
+	if (goal) {
+		s << goal->minibex(human) << "\n\n";
+	}
+
+	if (nb_ctr>0) {
+		s << f_ctrs.minibex() << "\n\n";
+	}
+
+	if (goal) {
+		s << "minimize\n " << goal->name << "(";
+		for (int i=0; i<args.size(); i++) {
+			if (i>0) s << ',';
+			s << args[i];
+		}
+		s << ");\n\n";
+	}
+
+	if (nb_ctr>0) {
+		s << "constraints\n";
+		for (int i=0; i<nb_ctr; i++) {
+			s << " " << f_ctrs.name << '(';
+			for (int i=0; i<args.size(); i++) {
+				if (i>0) s << ',';
+				s << args[i];
+			}
+			s << ')' << '[' << i << ']'<< ops[i] << "0;\n";
+		}
+	}
+	s << "end";
+	s.flush();
+
+	for (int i=0; i<args.size(); i++) {
+		delete &domains[i];
+	}
+
+	return s.str();
 }
 
 std::ostream& operator<<(std::ostream& os, const System& sys) {
