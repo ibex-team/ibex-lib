@@ -101,9 +101,11 @@ std::string System::minibex(bool human) const {
 	for (int i=0; i<args.size(); i++) {
 		const ExprSymbol& x=args[i];
 		s << x.name;
-		if (x.dim.nb_rows()>1) s << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_rows()>1 || x.dim.nb_cols()>1) s << '[' << x.dim.nb_rows() << ']';
 		if (x.dim.nb_cols()>1) s << '[' << x.dim.nb_cols() << ']';
-		s << " in " << domains[i] << ";\n";
+		s << " in ";
+		ExprPrinter().print(s,domains[i],human);
+		s << ";\n";
 	}
 
 	s << '\n';
@@ -113,7 +115,7 @@ std::string System::minibex(bool human) const {
 	}
 
 	if (nb_ctr>0) {
-		s << f_ctrs.minibex() << "\n\n";
+		s << f_ctrs.minibex(human) << "\n\n";
 	}
 
 	if (goal) {

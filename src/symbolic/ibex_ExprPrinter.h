@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include "ibex_ExprVisitor.h"
+#include "ibex_Domain.h"
 
 namespace ibex {
 
@@ -33,6 +34,11 @@ public:
 	 *               hexadecimal representation, whence a safe serialization.
 	 */
 	void print(std::ostream& os, const ExprNode&, bool human=true);
+
+	/**
+	 * \brief Print a domain on a given output stream.
+	 */
+	void print(std::ostream& os, const Domain&, bool human=true);
 
 protected:
 	std::ostream* os;
@@ -82,6 +88,7 @@ protected:
 	void visit(const ExprAtanh& e);
 
 private:
+	void print_domain(const Domain& d);
 	void print_dbl(double x);
 	void print_itv(const Interval& x);
 	void print_itv_vec(const IntervalVector& v, bool in_row);
