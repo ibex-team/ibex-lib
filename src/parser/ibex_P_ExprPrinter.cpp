@@ -77,6 +77,10 @@ void P_ExprPrinter::visit(const P_ExprNode& e) {
 	case P_ExprNode::MID:           os << "mid";   print_arg_list(e);  break;
 	case P_ExprNode::SUP:           os << "sup";   print_arg_list(e);  break;
 	case P_ExprNode::DIFF:			os << "diff";  print_arg_list(e);  break;
+	case P_ExprNode::UNARY_OP:      os <<  ((const P_ExprGenericUnaryOp&) e).name;
+	                                               print_arg_list(e); break;
+	case P_ExprNode::BINARY_OP:     os <<  ((const P_ExprGenericUnaryOp&) e).name;
+	                                               print_arg_list(e); break;
 	}
 }
 

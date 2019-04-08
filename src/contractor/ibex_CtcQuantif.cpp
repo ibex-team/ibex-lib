@@ -17,7 +17,6 @@ namespace ibex {
 
 CtcQuantif::CtcQuantif(const NumConstraint& ctr, const VarSet& _vars, const IntervalVector& init_box, double prec) :
 				Ctc(_vars.nb_var), y_init(init_box),
-				flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), impact(BitSet::all(_vars.nb_var+_vars.nb_param)),
 				ctc(new CtcFwdBwd(ctr)), bsc(new LargestFirst(prec)),
 				vars(_vars), prec(prec), _own_ctc(true) {
 
@@ -29,7 +28,6 @@ CtcQuantif::CtcQuantif(const NumConstraint& ctr, const VarSet& _vars, const Inte
 
 CtcQuantif::CtcQuantif(Ctc& ctc, const VarSet& _vars, const IntervalVector& init_box, double prec, bool own_ctc) :
 			   Ctc(_vars.nb_var), y_init(init_box),
-			   flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), impact(BitSet::all(_vars.nb_var+_vars.nb_param)),
 			   ctc(&ctc), bsc(new LargestFirst(prec)),
 			   vars(_vars), prec(prec), _own_ctc(own_ctc) {
 
@@ -43,16 +41,18 @@ CtcQuantif::~CtcQuantif(){
 }
 
 
-void CtcQuantif::contract(IntervalVector& x, IntervalVector& y) {
+bool CtcQuantif::contract(IntervalVector& x, IntervalVector& y) {
 	// create the full box by concatening x and y
 	IntervalVector fullbox = vars.full_box(x,y);
 
-	flags.clear();
+	ContractContext slice_context(fullbox);
 
-	ctc->contract(fullbox, impact, flags);
+	ctc->contract(fullbox, slice_context);
 
 	x=vars.var_box(fullbox);
 	y=vars.param_box(fullbox);
+
+	return slice_context.output_flags[INACTIVE];
 }
 
 } // namespace ibex

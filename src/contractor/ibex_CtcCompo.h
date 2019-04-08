@@ -80,7 +80,17 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	virtual void contract(IntervalVector& box);
+	void contract(IntervalVector& box);
+
+	/**
+	 * \brief Contract a box.
+	 */
+	virtual void contract(IntervalVector& box, ContractContext& context);
+
+	/**
+	 * \brief Add sub-contractors properties to the map
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/** The list of sub-contractors */
 	Array<Ctc> list;
@@ -92,7 +102,7 @@ public:
 	double ratio;
 
 	/** Default ratio used in incremental mode, set to 0.1. */
-	static const double default_ratio;
+	static constexpr double default_ratio = 0.1;
 
 protected:
 	void init_impacts();

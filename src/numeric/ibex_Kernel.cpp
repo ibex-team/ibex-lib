@@ -55,7 +55,7 @@ unsigned int gram_schmidt(Matrix& A, double eps) {
 }
 
 Matrix kernel(const Matrix& A) {
-	Matrix P=Matrix::eye(3)-A.transpose()*real_inverse(A*A.transpose())*A;
+	Matrix P=Matrix::eye(A.nb_cols())-A.transpose()*real_inverse(A*A.transpose())*A;
 	unsigned int dim_kernel=gram_schmidt(P);
 	Matrix U(dim_kernel,A.nb_cols());
 	for(unsigned int i=0; i<dim_kernel; i++) {

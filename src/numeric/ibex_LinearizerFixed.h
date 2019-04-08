@@ -17,7 +17,7 @@ namespace ibex {
 /**
  * \ingroup numeric
  *
- * \brief Fixed linear relaxation Ax<=b
+ * \brief Fixed linear system Ax<=b
  */
 class LinearizerFixed : public Linearizer {
 public:
@@ -42,4 +42,4 @@ protected:
 
 } // namespace ibex
 
-#endif // __IBEX_LINEAR_RELAX_FIXED_H__
+#endif // __IBEX_LINEARIZER_FIXED_H__

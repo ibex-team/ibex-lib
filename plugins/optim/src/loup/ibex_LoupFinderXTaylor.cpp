@@ -15,14 +15,20 @@ using namespace std;
 namespace ibex {
 
 //TODO: remove this recipe for the argument of the max number of iterations of the LP solver
-LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT), lp_solver(sys.nb_var, std::max(sys.nb_var*3,LPSolver::default_max_iter)) {
+LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT), lp_solver(sys.nb_var,
+		sys.nb_var*3 > LPSolver::default_max_iter ? LPSolver::default_max_iter : sys.nb_var*3) {
 //	nb_simplex=0;
 //	diam_simplex=0;
 }
 
-std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup) {
+void LoupFinderXTaylor::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+	lr.add_property(init_box,prop);
+}
 
-	if (!(lp_solver.default_limit_diam_box.contains(box.max_diam())))
+std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup, BoxProperties& prop) {
+
+	double d=box.max_diam();
+	if (d < LPSolver::min_box_diam || d > LPSolver::max_box_diam)
 		throw NotFound();
 
 	int n=sys.nb_var;
@@ -30,7 +36,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 	lp_solver.clean_ctrs();
 	lp_solver.set_bounds(box);
 
-	IntervalVector ig=sys.goal_gradient(box.mid());
+	IntervalVector ig=sys.goal->gradient(box.mid());
 	if (ig.is_empty()) // unfortunately, at the midpoint the function is not differentiable
 		throw NotFound(); // not a big deal: wait for another box...
 
@@ -41,7 +47,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 	for (int j=0; j<n; j++)
 		lp_solver.set_obj_var(j,g[j]);
 
-	int count = lr.linearize(box,lp_solver);
+	int count = lr.linearize(box,lp_solver,prop);
 
 	if (count==-1) {
 		lp_solver.clean_ctrs();

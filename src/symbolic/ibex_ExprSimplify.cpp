@@ -73,6 +73,12 @@ bool is_identity(const ExprNode& e) {
 } // end anonymous namespace
 
 const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
+	ExprSubNodes old_nodes(e);
+	// the list of fathers has to be recalculated.
+	for (int i=0; i<old_nodes.size(); i++) {
+		((ExprNode&) old_nodes[i]).fathers.clear();
+		((ExprNode&) old_nodes[i]).fathers.resize(0);
+	}
 
 	idx = DoubleIndex::all(e.dim);
 	e.acceptVisitor(*this);
@@ -88,7 +94,7 @@ const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 	//           (1*2)+(x+1)
 	// we must not delete "1" when copying (1*2).
 
-	ExprSubNodes old_nodes(e);
+
 	ExprSubNodes new_nodes(result);
 
 	NodeMap<bool> all_nodes;
@@ -203,9 +209,11 @@ void ExprSimplify::visit(const ExprVector& e) {
 		for (i=0; i<res.size(); i++)
 			arg_cst.set_ref(i, to_cst(*res[i]));
 		insert(e, ExprConstant::new_(Domain(arg_cst, e.row_vector())));
-	} else if (((int) res.size())==e.nb_args && all_same)
+	} else if (((int) res.size())==e.nb_args && all_same) {
+		for (int i=0; i<e.nb_args; i++)
+			((Array<const ExprNode>&) e.arg(i).fathers).add(e);
 		insert(e, e);
-	else
+	} else
 		insert(e, ExprVector::new_(res,e.orient));
 }
 
@@ -216,7 +224,11 @@ void ExprSimplify::visit(const ExprIndex& e) {
 			e.index.first_col()+idx.first_col(),
 			e.index.first_col()+idx.last_col());
 
-	insert(e, get(e.expr,e_idx));
+	const ExprNode& expr=get(e.expr,e_idx);
+
+	if (&expr==&e.expr)
+		((Array<const ExprNode>&) expr.fathers).add(e);
+	insert(e, expr);
 }
 
 void ExprSimplify::visit(const ExprSymbol& x) {
@@ -319,9 +331,11 @@ void ExprSimplify::visit_add_sub(const ExprBinaryOp& e, bool sign) {
 	else if (cr)                    { cfinal=cr; cst_sign=rsign; }
 	else {
 		// no constants at all ----> no simplification
-		if ((&l == &e.left) && (&r == &e.right))  // nothing changed
+		if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
+			((Array<const ExprNode>&) e.left.fathers).add(e);
+			((Array<const ExprNode>&) e.right.fathers).add(e);
 			insert(e, e);
-		else if (sign)
+		} else if (sign)
 			insert(e, l+r);
 		else
 			insert(e,l-r);
@@ -435,9 +449,11 @@ void ExprSimplify::visit(const ExprMul& e) {
 		else if (is_mul(r) && is_cst(left(r)))
 			// note: l and left(r) and right(r) may not be scalar.
 			insert(e, ExprConstant::new_(to_cst(l)*to_cst(left(r)))*(right(r)));
-		else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
+		else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
+			((Array<const ExprNode>&) e.left.fathers).add(e);
+			((Array<const ExprNode>&) e.right.fathers).add(e);
 			insert(e, e);
-		else
+		} else
 			insert(e, l*r);
 	}
 	else if (is_mul(l) && is_cst(left(l))) {
@@ -458,9 +474,11 @@ void ExprSimplify::visit(const ExprMul& e) {
 			insert(e, r*l);
 		else if (is_mul(r) && is_cst(left(r)) && left(r).dim.is_scalar())
 			insert(e, left(r)*(l*right(r)));
-		else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
+		else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
+			((Array<const ExprNode>&) e.left.fathers).add(e);
+			((Array<const ExprNode>&) e.right.fathers).add(e);
 			insert(e, e);
-		else
+		} else
 			insert(e, l*r);
 	}
 }
@@ -476,9 +494,11 @@ void ExprSimplify::visit(const ExprDiv& e) {
 		insert(e, l);
 	else if (is_cst(l) && is_cst(r))
 		insert(e, ExprConstant::new_(to_cst(l)/to_cst(r)));
-	else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
+	else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
+		((Array<const ExprNode>&) e.left.fathers).add(e);
+		((Array<const ExprNode>&) e.right.fathers).add(e);
 		insert(e, e);
-	else
+	} else
 		insert(e, l/r);
 }
 
@@ -500,9 +520,11 @@ void ExprSimplify::binary(const N& e, dom_func2 fcst) {
 
 	if (is_cst(l) && is_cst(r))
 		insert(e, ExprConstant::new_(fcst(to_cst(l),to_cst(r))));
-	else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
+	else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
+		((Array<const ExprNode>&) e.left.fathers).add(e);
+		((Array<const ExprNode>&) e.right.fathers).add(e);
 		insert(e, e);
-	else
+	} else
 		insert(e, N::new_(l,r));
 }
 
@@ -514,9 +536,10 @@ void ExprSimplify::unary(const N& e, Domain (*fcst)(const Domain&)) {
 	if (is_cst(expr))
 		/* evaluate the constant expression on-the-fly */
 		insert(e, ExprConstant::new_(fcst(to_cst(expr))));
-	else if (&e.expr == &expr)  // if nothing changed
+	else if (&e.expr == &expr) { // if nothing changed
+		((Array<const ExprNode>&) e.expr.fathers).add(e);
 		insert(e, e);
-	else
+	} else
 		insert(e, N::new_(expr));
 }
 
@@ -538,6 +561,9 @@ void ExprSimplify::visit(const ExprChi& e) {
 			return;
 		}
 	} else {
+		((Array<const ExprNode>&) e.args[0].fathers).add(e);
+		((Array<const ExprNode>&) e.args[1].fathers).add(e);
+		((Array<const ExprNode>&) e.args[2].fathers).add(e);
 		insert(e, e);
 	}
 }
@@ -553,10 +579,40 @@ void ExprSimplify::visit(const ExprPower& e) {
 	if (is_cst(expr))
 		/* evaluate the constant expression on-the-fly */
 		insert(e, ExprConstant::new_(pow(to_cst(expr),e.expon)));
-	else if (&e.expr == &expr)  // if nothing changed
+	else if (&e.expr == &expr) { // if nothing changed
+		((Array<const ExprNode>&) e.expr.fathers).add(e);
 		insert(e, e);
+	}
 	else
 		insert(e, ExprPower::new_(expr,e.expon));
+}
+
+void ExprSimplify::visit(const ExprGenericBinaryOp& e) {
+
+	const ExprNode& l=get(e.left, idx);
+	const ExprNode& r=get(e.right, idx);
+
+	if (is_cst(l) && is_cst(r))
+		insert(e, ExprConstant::new_(e.eval(to_cst(l),to_cst(r))));
+	else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
+		((Array<const ExprNode>&) e.left.fathers).add(e);
+		((Array<const ExprNode>&) e.right.fathers).add(e);
+		insert(e, e);
+	} else
+		insert(e, ExprGenericBinaryOp::new_(e.name,l,r));
+}
+
+void ExprSimplify::visit(const ExprGenericUnaryOp& e) {
+	const ExprNode& expr=get(e.expr, idx);
+
+	if (is_cst(expr)) {
+		/* evaluate the constant expression on-the-fly */
+		insert(e, ExprConstant::new_(e.eval(to_cst(expr))));
+	} else if (&e.expr == &expr) { // if nothing changed
+		((Array<const ExprNode>&) e.expr.fathers).add(e);
+		insert(e, e);
+	} else
+		insert(e, ExprGenericUnaryOp::new_(e.name, expr));
 }
 
 void ExprSimplify::visit(const ExprMax& e)   { binary(e,max); }
@@ -572,9 +628,10 @@ void ExprSimplify::visit(const ExprTrans& e) {
 		insert(e, ExprConstant::new_(transpose(to_cst(expr))));
 	else if (expr.dim.is_scalar())
 		insert(e,expr);
-	else if (&e.expr == &expr)  // if nothing changed
+	else if (&e.expr == &expr) { // if nothing changed
+		((Array<const ExprNode>&) e.expr.fathers).add(e);
 		insert(e, e);
-	else
+	} else
 		insert(e, ExprTrans::new_(expr));
 }
 

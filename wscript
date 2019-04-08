@@ -7,7 +7,7 @@ from waflib import Scripting, Logs, Options, Utils
 import ibexutils
 
 # The following variable is used to build ibex.pc and by "waf dist"
-VERSION="2.6.0"
+VERSION="2.8.0"
 # The following variable is used only by "waf dist"
 APPNAME='ibex-lib'
 
@@ -107,12 +107,12 @@ def configure (conf):
 	# Optimised compilation flags
 	if conf.options.DEBUG:
 		Logs.info("Enabling debug mode")
-		flags = "-std=c++11 -O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
+		flags = "-std=c++11 -O0 -g -pg -Wall"
 		flags += " -fmessage-length=0"
 		conf.define ("DEBUG", 1)
 		conf.env.DEBUG = True
 	else:
-		flags = "-std=c++11 -O3"
+		flags = "-std=c++11 -O3 -Wno-deprecated -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
 		conf.define ("NDEBUG", 1)
 		conf.env.DEBUG = False
 	for f in flags.split():

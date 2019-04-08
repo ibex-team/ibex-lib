@@ -1,20 +1,23 @@
 /* ============================================================================
  * I B E X - Contractor interface
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Feb 27, 2012
+ * Last update : Jul 06, 2018
  * ---------------------------------------------------------------------------- */
 
 #ifndef __IBEX_CONTRACTOR_H__
 #define __IBEX_CONTRACTOR_H__
 
+#include "ibex_Map.h"
 #include "ibex_IntervalVector.h"
 #include "ibex_BitSet.h"
 #include "ibex_Array.h"
+#include "ibex_ContractContext.h"
 #include "ibex_Set.h"
 
 namespace ibex {
@@ -29,8 +32,7 @@ namespace ibex {
  */
 class Ctc {
 
-public:
-
+protected:
 
 	/**
 	 * \brief Build a contractor for n-dimensional boxes
@@ -42,59 +44,9 @@ public:
 	 */
 	Ctc(const Array<Ctc>& l);
 
-	/**
-	 * \brief Contraction.
-	 */
-	virtual void contract(IntervalVector& box)=0;
 
-	/**
-	 * \brief Contract a set with this contractor.
-	 *
-	 * \param eps - The contractor is applied recursively on the set. This parameter
-	 *              is a precision for controlling the recursivity.
-	 */
-	void contract(Set& set, double eps);
 
-	/**
-	 * \brief Delete *this.
-	 */
-	virtual ~Ctc();
-
-	/**
-	 * \brief Contraction with specified impact.
-	 *
-	 * Information on the impact allows incremental contraction.
-	 * The \a impact specifies the variables that have been
-	 * modified since the last call to this contractor.
-	 * By default, this function calls contract(box).
-	 *
-	 * \see #contract(IntervalVector&).
-	 */
-	void contract(IntervalVector& box, const BitSet& impact);
-
-	/**
-	 * \brief Contraction with specified impact and output flags.
-	 *
-	 * \see #contract(IntervalVector&, const BoolMask&).
-	 * \see #flags
-	 */
-	void contract(IntervalVector& box, const BitSet& impact, BitSet& flags);
-
-	/**
-	 * \brief The number of variables this contractor works with.
-	 */
-	const int nb_var;
-
-	/**
-	 * \brief The input variables (NULL pointer means "unspecified")
-	 */
-	BitSet* input;
-
-	/**
-	 * \brief The output variables NULL pointer means "unspecified")
-	 */
-	BitSet* output;
-
+public:
 	/**
 	 * \brief Output flag numbers
 	 *
@@ -114,33 +66,83 @@ public:
 	 */
 	enum {FIXPOINT, INACTIVE, NB_OUTPUT_FLAGS};
 
-
-protected:
+	/**
+	 * \brief Delete *this.
+	 */
+	virtual ~Ctc();
 
 	/**
-	 * \brief Return the current impact (NULL pointer if none).
+	 * \brief Contraction.
+	 */
+	virtual void contract(IntervalVector& box)=0;
+
+	/*
+	 * Contract a box with a context.
+	 * By default, this function calls contract(box).
 	 *
-	 * \return if NULL, it does not mean that there is no impact but that the information on
-	 * the impact is not provided.
+	 * Can be overridden.
+	 *
+	 * \see #contract(IntervalVector&).
 	 */
-	const BitSet* impact();
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	/**
-	 * Set an output flag.
+	 * \brief Contraction with specified impact.
+	 *
+	 * \deprecated Use contract(IntervalVector& box, ContractContext& context) instead.
+	 *
+	 * Information on the impact allows incremental contraction.
+	 * The \a impact specifies the variables that have been
+	 * modified since the last call to this contractor.
+	 * By default, this function calls contract(box).
+	 *
+	 * \see #contract(IntervalVector&).
 	 */
-	void set_flag(unsigned int);
+	void contract(IntervalVector& box, const BitSet& impact);
+
+	/**
+	 * \brief Contraction with specified impact and output flags.
+	 *
+	 * \deprecated Use contract(IntervalVector& box, ContractContext& context) instead.
+	 *
+	 * \see #contract(IntervalVector&, const BoolMask&).
+	 * \see #flags
+	 */
+	void contract(IntervalVector& box, const BitSet& impact, BitSet& flags);
+
+	/**
+	 * \brief Contract a set with this contractor.
+	 *
+	 * \param eps - The contractor is applied recursively on the set. This parameter
+	 *              is a precision for controlling the recursivity.
+	 */
+	void contract(Set& set, double eps);
+
+	/**
+	 * \brief Add properties required by this contractor.
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+
+	/**
+	 * \brief The number of variables this contractor works with.
+	 */
+	const int nb_var;
+
+	/**
+	 * \brief The input variables (NULL pointer means "unspecified")
+	 */
+	BitSet* input;
+
+	/**
+	 * \brief The output variables NULL pointer means "unspecified")
+	 */
+	BitSet* output;
 
 protected:
 	/**
 	 * \brief Check if the size of all the contractor of the list is the same.
 	 */
 	static bool check_nb_var_ctc_list (const Array<Ctc>& l);
-
-private:
-	const BitSet* _impact;
-	BitSet* _output_flags;
-
-
 };
 
 
@@ -148,23 +150,36 @@ private:
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
+inline Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL) { }
 
-
-inline Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) { }
-
-inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) { }
+inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(NULL) { }
 
 inline Ctc::~Ctc() { }
 
-inline const BitSet* Ctc::impact() {
-	return _impact;
+inline void Ctc::contract(IntervalVector& box, ContractContext& context) {
+	contract(box);
+	// TODO: the input impact of update is the "output" impact
+	// of the previous call to contract. Such a field does not
+	// exist yet in Context --> set temporarily to "all".
+	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
 }
 
-inline void Ctc::set_flag(unsigned int f) {
-	assert(f<NB_OUTPUT_FLAGS);
-	if (_output_flags) _output_flags->add(f);
+inline void Ctc::contract(IntervalVector& box, const BitSet& impact) {
+	ContractContext context(box);
+	context.impact = impact;
+	contract(box,context);
 }
 
+inline void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& flags) {
+	ContractContext context(box);
+	context.impact = impact;
+	contract(box,context);
+	flags = context.output_flags;
+}
+
+inline void Ctc::add_property(const IntervalVector&, BoxProperties&) {
+
+}
 
 } // namespace ibex
 

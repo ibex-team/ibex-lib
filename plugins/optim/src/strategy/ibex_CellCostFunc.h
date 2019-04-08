@@ -27,7 +27,7 @@ class CellCostFunc : public CostFunc<Cell> {
 
 public:
 
-	CellCostFunc(bool depends_on_loup);
+	CellCostFunc(const ExtendedSystem& sys, bool depends_on_loup);
 
 	/**
 	 * \brief Criteria implemented for a heap in optimization
@@ -40,14 +40,14 @@ public:
 	/**
 	 * \brief Get the cost function from a criterion.
 	 */
-	static CellCostFunc* get_cost(criterion crit, int goal_var);
+	static CellCostFunc* get_cost(const ExtendedSystem& sys, criterion crit, int goal_var);
 
 	/**
 	 * \brief Store the new "loup" obtained by the optimizer, if used.
 	 *
 	 * Does nothing (by default).
 	 */
-	virtual void set_loup(double lb) { }
+	virtual void set_loup(double lb);
 
 	/**
 	 * \brief Add backtrackable data required by this cost function
@@ -57,7 +57,7 @@ public:
 	 *
 	 * Does nothing by default.
 	 */
-	virtual void add_backtrackable(Cell& root) { }
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Set data in OptimData in the cell
@@ -68,7 +68,12 @@ public:
 	 *
 	 * Does nothing (by default).
 	 */
-	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys) { }
+	virtual void set_optim_data(Cell& c);
+
+	/**
+	 * The system
+	 */
+	const ExtendedSystem& sys;
 
 	/**
 	 * If the cost depends on the loup.
@@ -84,7 +89,7 @@ public:
 class CellCostVarLB: public CellCostFunc  {
 public:
 
-	CellCostVarLB(int goal_var) ;
+	CellCostVarLB(const ExtendedSystem& sys, int goal_var) ;
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -104,7 +109,7 @@ private:
 class CellCostVarUB: public CellCostFunc  {
 public:
 
-	CellCostVarUB(int ind_var) ;
+	CellCostVarUB(const ExtendedSystem& sys, int ind_var) ;
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -127,7 +132,7 @@ public:
 	/**
 	 * TODO: what is this "lb" for?
 	 */
-	CellCostC3(double lb= NEG_INFINITY) ;
+	CellCostC3(const ExtendedSystem& sys, double lb= NEG_INFINITY) ;
 
 	/**
 	 * \brief Contracts the heap.
@@ -143,12 +148,12 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
+	virtual void set_optim_data(Cell& c);
 private:
 
 	/** the lower upper bound. */
@@ -164,7 +169,7 @@ public:
 	/**
 	 * TODO: what is this "lb" for?
 	 */
-	CellCostC5(double lb= NEG_INFINITY) ;
+	CellCostC5(const ExtendedSystem& sys, double lb= NEG_INFINITY) ;
 
 	/**
 	 * \brief Contracts the heap.
@@ -180,12 +185,12 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
+	virtual void set_optim_data(Cell& c);
 private:
 
 	/** the lower upper bound. */
@@ -199,7 +204,7 @@ public:
 	/**
 	 * TODO: what is this "lb" for?
 	 */
-	CellCostC7(int ind_var, double lb=NEG_INFINITY) ;
+	CellCostC7(const ExtendedSystem& sys, int ind_var, double lb=NEG_INFINITY) ;
 
 	/**
 	 * \brief Contracts the heap.
@@ -215,12 +220,12 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
+	virtual void set_optim_data(Cell& c);
 private:
 
 	/** the lower upper bound. */
@@ -234,7 +239,7 @@ private:
 
 class CellCostPU: public CellCostFunc {
 public:
-	CellCostPU();
+	CellCostPU(const ExtendedSystem& sys);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -242,28 +247,28 @@ public:
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
+	virtual void set_optim_data(Cell& c);
 };
 
 
 class CellCostPFlb: public CellCostFunc {
 public:
-	CellCostPFlb();
+	CellCostPFlb(const ExtendedSystem& sys);
 
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
+	virtual void set_optim_data(Cell& c);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -275,17 +280,17 @@ public:
 
 class CellCostPFub: public CellCostFunc {
 public:
-	CellCostPFub();
+	CellCostPFub(const ExtendedSystem& sys);
 
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, const ExtendedSystem& sys);
+	virtual void set_optim_data(Cell& c);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -297,17 +302,17 @@ public:
 
 class CellCostMaxPFub: public CellCostFunc {
 public:
-	CellCostMaxPFub();
+	CellCostMaxPFub(const ExtendedSystem& sys);
 
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(BoxProperties& map);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c, System& sys);
+	virtual void set_optim_data(Cell& c);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;

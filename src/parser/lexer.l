@@ -19,6 +19,7 @@
 #include "ibex_Scope.h"
 #include "ibex_Interval.h"
 #include "ibex_Expr.h"
+#include "ibex_ExprOperators.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_P_NumConstraint.h"
 
@@ -110,8 +111,18 @@ using namespace ibex::parser;
   									  // The lexer tries to retreive this identifier from the scope, which has not
   									  // been created yet -> seg fault
   									  return TK_NEW_SYMBOL;
-  								   else
-                                      return scopes().top().token(ibextext);
+  								   else 
+  								      try {
+  								        ExprGenericUnaryOp::get_eval(ibextext); 
+  								        return TK_UNARY_OP;
+  								      } catch(SyntaxError&) {
+  								        try {
+  								          ExprGenericBinaryOp::get_eval(ibextext); 
+  								          return TK_BINARY_OP;
+  								        } catch(SyntaxError&) {
+                                          return scopes().top().token(ibextext);
+                                        }
+                                      }
                                  }
 ([0-9]{6,10}[0-9]*|([0-9][0-9]*\.[0-9]*)|(\.[0-9]+))(e(\-|\+)?[0-9]+)?|([0-9]{1,5}e(\-|\+)?[0-9]+)  {
                                    ibexlval.real = atof(ibextext); return TK_FLOAT;

@@ -14,13 +14,6 @@
 namespace ibex {
 
 //const double LPSolver::default_eps = @IBEX_LP_LIB_DEFAULT_EPS@;
-const double LPSolver::default_eps = 1e-9;
-const double LPSolver::default_max_bound = 1e20; // max bound in CPLEX
-const int LPSolver::default_max_time_out=100;
-const int LPSolver::default_max_iter=100;
-const Interval LPSolver::default_limit_diam_box = Interval(1.e-14,1.e6);
-
-
 
 /** \brief Stream out \a x. */
 std::ostream& operator<<(std::ostream& os, const LPSolver::Status_Sol x){

@@ -48,7 +48,7 @@ int main() {
 	solver.solve(system.box); // Run the solver
 
 	/* Display the solutions. */
-	output << solver.get_manifold() << endl;
+	output << solver.get_data() << endl;
 	//! [solver-call-default-C]
 	output << "! [solver-call-default-O]" << endl;
 	}
@@ -92,7 +92,7 @@ int main() {
 	CellStack buff;
 
 	/* Vector precisions required on variables */
-	Vector prec(2, 1e-07);
+	Vector prec(6, 1e-07);
 
 	/* Create a solver with the previous objects */
 	Solver s(system, compo, bisector, buff, prec, prec);
@@ -101,7 +101,7 @@ int main() {
 	s.solve(box);
 
 	/* Display the solutions */
-	output << s.get_manifold() << endl;
+	output << s.get_data() << endl;
 	//! [solver-solver-generic-C]
 	output << "! [solver-solver-generic-O]" << endl;
 	}
@@ -139,7 +139,7 @@ int main() {
 	CellStack buff;
 
 	/* Vector precisions required on variables */
-	Vector prec(2, 1e-07);
+	Vector prec(6, 1e-07);
 
 	/* Create a solver with the previous objects */
 	Solver s(system, compo, bisector, buff, prec, prec);
@@ -148,7 +148,7 @@ int main() {
 	s.solve(system.box);
 
 	/* Display the solutions */
-	output << s.get_manifold() << endl;
+	output << s.get_data() << endl;
 
 	/* Report performances */
 	output << "cpu time used=" << s.get_time() << "s."<< endl;
@@ -189,8 +189,8 @@ int main() {
 	}
 	// =======================================================
 
-	output << "solver #1 found " << solver1.get_manifold().size() << endl;
-	output << "solver #2 found " << solver2.get_manifold().size() << endl;
+	output << "solver #1 found " << solver1.get_data().size() << endl;
+	output << "solver #2 found " << solver2.get_data().size() << endl;
 	//! [solver-parallel-C-1]
 
 	{

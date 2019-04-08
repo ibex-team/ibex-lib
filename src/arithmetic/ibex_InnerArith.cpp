@@ -13,6 +13,8 @@
 
 //#include <stdlib.h>
 #include <cassert>
+#include <iomanip>
+#include <limits>
 
 using namespace std;
 
@@ -852,9 +854,9 @@ bool ibwd_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 	//cout << "[sqr] result: x=" << x << endl;
 }
 
-#define PERIOD_COS(i) (i1%2==0? iadd(period_0,imul((double) i1,Interval::PI)) : isub(imul((double) i1+1,Interval::PI),period_0))
-#define PERIOD_SIN(i) (i1%2==0? iadd(period_0,imul((double) i1,Interval::PI)) : isub(imul((double) i1,Interval::PI),period_0))
-#define PERIOD_TAN(i) (iadd(period_0, imul((double) i1,Interval::PI)))
+#define PERIOD_COS(i) (i%2==0? iadd(period_0,imul((double) i,Interval::PI)) : isub(imul((double) i+1,Interval::PI),period_0))
+#define PERIOD_SIN(i) (i%2==0? iadd(period_0,imul((double) i,Interval::PI)) : isub(imul((double) i,Interval::PI),period_0))
+#define PERIOD_TAN(i) (iadd(period_0, imul((double) i,Interval::PI)))
 
 #define COS 0
 #define SIN 1
@@ -897,21 +899,28 @@ static bool ibwd_trigo(const Interval& y, Interval& x, const Interval& xin, int 
 		nb_period = ((inflate? xin : x) + Interval::HALF_PI) / Interval::PI; break;
 	}
 
-	int p1 = ((int) nb_period.lb())-1;
-	int p2 = ((int) nb_period.ub());
+	if (nb_period.lb() < std::numeric_limits<long>::min() ||
+			nb_period.ub() > std::numeric_limits<long>::max()) {
+		if (inflate) x=xin;
+		else x.set_empty();
+		return inflate;
+	}
 
-	int i1 = p1;
+	long p1 = ((long) nb_period.lb())-1;
+	long p2 = ((long) nb_period.ub())+1;
+
+ 	long i1 = p1;
 
 	switch(ftype) {
 	case COS :
 		// should find in at most 2 turns.. but consider rounding !
-		while (i1<=p2 && ((inflate? xin : x) & PERIOD_COS(i)).is_empty()) i1++;
+		while (i1<=p2 && ((inflate? xin : x) & PERIOD_COS(i1)).is_empty()) i1++;
 		break;
 	case SIN :
-		while (i1<=p2 && ((inflate? xin : x) & PERIOD_SIN(i)).is_empty()) i1++;
+		while (i1<=p2 && ((inflate? xin : x) & PERIOD_SIN(i1)).is_empty()) i1++;
 		break;
 	case TAN :
-		while (i1<=p2 && ((inflate? xin : x) & PERIOD_TAN(i)).is_empty()) i1++;
+		while (i1<=p2 && ((inflate? xin : x) & PERIOD_TAN(i1)).is_empty()) i1++;
 		break;
 	}
 
@@ -924,19 +933,19 @@ static bool ibwd_trigo(const Interval& y, Interval& x, const Interval& xin, int 
 		return inflate;
 	}
 
-	int i2 = p2;
+	long i2 = p2;
 
 	if (i1<p2) {
 		switch(ftype) {
 		case COS :
 			// should find in at most 2 turns.. but consider rounding !
-			while (i2>=p1 && ((inflate? xin : x) & PERIOD_COS(i)).is_empty()) i2--;
+			while (i2>=p1 && ((inflate? xin : x) & PERIOD_COS(i2)).is_empty()) i2--;
 			break;
 		case SIN :
-			while (i2>=p1 && ((inflate? xin : x) & PERIOD_SIN(i)).is_empty()) i2--;
+			while (i2>=p1 && ((inflate? xin : x) & PERIOD_SIN(i2)).is_empty()) i2--;
 			break;
 		case TAN :
-			while (i2>=p1 && ((inflate? xin : x) & PERIOD_TAN(i)).is_empty()) i2--;
+			while (i2>=p1 && ((inflate? xin : x) & PERIOD_TAN(i2)).is_empty()) i2--;
 			break;
 		}
 	}
@@ -960,7 +969,7 @@ static bool ibwd_trigo(const Interval& y, Interval& x, const Interval& xin, int 
 	}
 	else {
 		// choose randomly the period on which we project
-		int i;
+		long i;
 		if (i1==i2) i = i1; // no choice
 		else i = i1+ (RNG::rand() % (i2-i1+1));
 

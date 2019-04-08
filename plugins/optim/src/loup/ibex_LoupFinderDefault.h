@@ -56,9 +56,20 @@ public:
 	/**
 	 * \brief Find a new loup in a given box.
 	 *
-	 * \see comments in LoupFinder.
 	 */
 	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
+
+	/**
+	 * \brief Find a new loup in a given box.
+	 *
+	 * \see comments in LoupFinder.
+	 */
+	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop);
+
+	/**
+	 * \brief Add properties required by finder_probing and finder_x_taylor.
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
 
 	/*
 	 * Loup finder using inner boxes.
@@ -72,6 +83,11 @@ public:
 	 */
 	LoupFinderXTaylor finder_x_taylor;
 };
+
+inline std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
+	BoxProperties prop(box);
+	return find(box, loup_point, loup, prop);
+}
 
 } /* namespace ibex */
 

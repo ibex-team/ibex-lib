@@ -15,6 +15,7 @@
 
 #include "ibex_Linearizer.h"
 #include "ibex_System.h"
+#include "ibex_BxpSystemCache.h"
 
 namespace ibex {
 
@@ -87,6 +88,16 @@ public:
 	 */
 	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
 
+	/**
+	 * \brief Generation of the linear inequalities
+	 */
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
+
+	/**
+	 * \brief Add BxpActiveCtrs
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+
 private:
 
 	/**
@@ -97,12 +108,12 @@ private:
 	/**
 	 * \brief Linearization (RELAX mode)
 	 */
-	int linear_relax(const IntervalVector& box);
+	int linear_relax(const IntervalVector& box, const BitSet& active);
 
 	/**
 	 * \brief Linearization (RESTRICT mode)
 	 */
-	int linear_restrict(const IntervalVector& box);
+	int linear_restrict(const IntervalVector& box, const BitSet& active);
 
 	/**
 	 * \brief Set the corner information "inf" (see below).
@@ -172,6 +183,10 @@ private:
 	 */
 	LPSolver* lp_solver;
 
+	/**
+	 * Current system cache (NULL if none)
+	 */
+	BxpSystemCache* cache;
 };
 
 } // end namespace ibex

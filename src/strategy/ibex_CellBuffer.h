@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_CellBuffer.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 12, 2012
 // Last Update : May 12, 2012
@@ -55,14 +55,14 @@ class CellBuffer {
 	virtual ~CellBuffer();
 
 	/**
-	 * \brief Add backtrackable data required by this buffer.
+	 * \brief Add properties required by this buffer.
 	 *
 	 * This function is called for the root cell (before a
 	 * strategy is executed).
 	 *
 	 * Does nothing by default.
 	 */
-	virtual void add_backtrackable(Cell& root) { }
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -99,5 +99,12 @@ protected:
 
 std::ostream& operator<<(std::ostream& os, const CellBuffer& h);
 
+/*================================== inline implementations ========================================*/
+
+inline void CellBuffer::add_property(const IntervalVector& init_box, BoxProperties& map) {
+
+}
+
 } // end namespace ibex
+
 #endif // __IBEX_CELL_BUFFER_H__

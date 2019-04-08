@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 8, 2012
-// Last Update : Dec 25, 2017
+// Last Update : Jun 29, 2018
 //============================================================================
 
 #include "ibex_RoundRobin.h"
@@ -25,7 +25,7 @@ RoundRobin::RoundRobin(const Vector& prec, double ratio) : Bsc(prec), ratio(rati
 
 BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 
-	int last_var=cell.get<BisectedVar>().var;
+	int last_var=cell.bisected_var;
 
 	const IntervalVector& box=cell.box;
 
@@ -44,10 +44,6 @@ BisectionPoint RoundRobin::choose_var(const Cell& cell) {
 
 	else
 		return BisectionPoint(var,ratio,true); // output
-}
-
-void RoundRobin::add_backtrackable(Cell& root) {
-	root.add<BisectedVar>();
 }
 
 } // end namespace ibex

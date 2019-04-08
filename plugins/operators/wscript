@@ -1,0 +1,157 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import re, os
+import ibexutils
+from waflib import Logs
+
+class Operator (object):
+	unary_fmt_in = "class UnaryOperator<(?P<N>.+?),(?P<X>.+?),(?P<Y>.+?)>"
+	binary_fmt_in = "class BinaryOperator<(?P<N>.+?),(?P<X1>.+?),(?P<X2>.+?),(?P<Y>.+?)>"
+	cppname_fmt_in = "extern\s+const\s+char\s+{N}\[\]\s+=\s+\"(.+?)\""
+
+	header_fmt_out = "#include \"{headername}\""
+	macro_unary_fmt_out = "ADD_UNARY_OPERATOR({N},{X},{Y});"
+	macro_binary_fmt_out = "ADD_BINARY_OPERATOR({N},{X1},{X2},{Y});"
+	inline_unary_fmt_out = "inline {Y} {name}(const {X}& x) {{ return UnaryOperator<{N},{X},{Y}>::fwd(x); }}"
+	inline_binary_fmt_out = "inline {Y} {name}(const {X1}& x1, const {X2}& x2) {{ return BinaryOperator<{N},{X1},{X2},{Y}>::fwd(x1,x2); }}"
+
+	_all_ops = []
+
+	def __init__ (self, headerfile):
+		self.ok = True
+		self.hfile = headerfile
+
+		self._check_cpp()
+
+		if self.ok:
+			self._parse_header ()
+
+		if self.ok:
+			self._parse_cpp ()
+
+		if self.ok:
+			self._all_ops.append (self.data)
+
+	def _check_cpp (self):
+		cppname = self.hfile.name[:-1] + "cpp"
+		self.cppfile = self.hfile.parent.make_node (cppname)
+		self.ok = self.cppfile.exists()
+		if not self.ok:
+			Logs.warn ("No cpp file found for %s" % self.hfile.srcpath())
+
+	def _parse_header (self):
+		unary_re = re.compile (self.unary_fmt_in)
+		binary_re = re.compile (self.binary_fmt_in)
+
+		self.data = {}
+		with open (self.hfile.abspath(), "r") as f:
+			for l in ibexutils.to_unicode(f.read()).splitlines():
+				mu = unary_re.match (l)
+				mb = binary_re.match (l)
+				if mu:
+					self.data = dict (mu.groupdict()) # copy
+					self.data["type"] = "unary"
+					break
+				elif mb:
+					self.data = dict (mb.groupdict()) # copy
+					self.data["type"] = "binary"
+					break
+		self.ok = bool (self.data)
+		if not self.ok:
+			Logs.warn ("No Operator class found in %s" % self.hfile.srcpath())
+		else:
+			self.data["headername"] = self.hfile.name
+
+	def _parse_cpp (self):
+		cppname_re = re.compile (self.cppname_fmt_in.format (**self.data))
+
+		with open (self.cppfile.abspath(), "r") as f:
+			for l in ibexutils.to_unicode(f.read()).splitlines():
+				m = cppname_re.match (l)
+				if m:
+					self.data["name"] = m.group (1)
+					break
+		self.ok = "name" in self.data
+		if not self.ok:
+			Logs.warn ("No char definition found in %s" % self.cppfile.srcpath())
+		else:
+			self.data["cppfile"] = self.cppfile
+
+	@classmethod
+	def set_env (cls, conf, mainsrc):
+		for data in cls._all_ops:
+			conf.env.append_unique ("IBEX_SRC", data["cppfile"].path_from (mainsrc))
+
+		gen = (d["headername"] for d in cls._all_ops)
+		conf.env.append_unique ("OPERATORS_HEADERS", gen)
+
+		gen = (cls.header_fmt_out.format (**data) for data in cls._all_ops)
+		conf.env.OPERATORS_INCLUDES = os.linesep.join (gen)
+
+		unary_ops = [ d for d in cls._all_ops if d["type"] == "unary" ]
+		binary_ops = [ d for d in cls._all_ops if d["type"] == "binary" ]
+
+		gen = (cls.macro_unary_fmt_out.format (**data) for data in unary_ops)
+		conf.env.OPERATORS_MACRO_UNARY = os.linesep.join (gen)
+
+		gen = (cls.macro_binary_fmt_out.format (**data) for data in binary_ops)
+		conf.env.OPERATORS_MACRO_BINARY = os.linesep.join (gen)
+
+		gen = (cls.inline_unary_fmt_out.format (**data) for data in unary_ops)
+		conf.env.OPERATORS_INLINE_UNARY = os.linesep.join (gen)
+
+		gen = (cls.inline_binary_fmt_out.format (**data) for data in binary_ops)
+		conf.env.OPERATORS_INLINE_BINARY = os.linesep.join (gen)
+
+
+def options (opt):
+	pass # nothing to do
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	conf.env.WITH_OPERATORS = True
+
+	conf.start_msg ("plugin Operators")
+	if not conf.env.WITH_OPERATORS:
+		conf.end_msg ("not used")
+		return
+
+	conf.end_msg ("enabled")
+
+	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "OPERATORS")
+
+	# add OPERATORS plugin include directory
+	for f in conf.path.ant_glob ("src/** src", dir = True, src = False):
+		conf.env.append_unique("INCLUDES_OPERATORS", f.abspath())
+
+	# The build and install steps will be run from the main src/wscript script so
+	# we need to give path relative to the main src directory
+	mainsrc = conf.srcnode.make_node ("src")
+
+	# add operators headers
+	for headerfile in conf.path.ant_glob ("src/**/ibex_*.h"):
+		Operator (headerfile)
+
+	Operator.set_env (conf, mainsrc)
+	# The utest step will be run from the main tests/wscript script so we need to
+	# give path relative to the main tests directory
+	maintests = conf.srcnode.make_node ("tests")
+
+	# add OPERATORS test files
+	for f in conf.path.ant_glob ("tests/**/Test*.cpp"):
+		conf.env.append_unique ('TEST_SRC', f.path_from (maintests))
+
+	# Add operators/tests directory to list of INCLUDES for TESTS
+	testsnode = conf.path.make_node ("tests")
+	conf.env.append_unique ("INCLUDES_TESTS", testsnode.abspath ())
+	
+######################
+####### build ########
+######################
+def build (bld):
+	# install headers
+	headers = [ os.path.join ("src", f) for f in bld.env.OPERATORS_HEADERS ]
+	bld.install_files (bld.env.INCDIR_HDR, headers)

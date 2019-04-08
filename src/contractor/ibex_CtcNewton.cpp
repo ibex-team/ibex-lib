@@ -13,8 +13,6 @@
 
 namespace ibex {
 
-const double CtcNewton::default_ceil = 0.01;
-
 CtcNewton::CtcNewton(const Fnc& f, double ceil, double prec, double ratio) :
 		Ctc(f.nb_var()), f(f), vars(NULL), ceil(ceil), prec(prec), gauss_seidel_ratio(ratio) {
 
@@ -32,6 +30,11 @@ CtcNewton::CtcNewton(const Fnc& f, const VarSet& vars, double ceil, double prec,
 }
 
 void CtcNewton::contract(IntervalVector& box) {
+	ContractContext context(box);
+	contract(box,context);
+}
+
+void CtcNewton::contract(IntervalVector& box, ContractContext& context) {
 	if (!(box.max_diam()<=ceil)) return;
 	else {
 		if (!vars)
@@ -41,7 +44,7 @@ void CtcNewton::contract(IntervalVector& box) {
 	}
 
 	if (box.is_empty()) {
-		set_flag(FIXPOINT);
+		context.output_flags.add(FIXPOINT);
 	}
 }
 

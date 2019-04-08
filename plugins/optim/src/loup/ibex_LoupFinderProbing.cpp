@@ -12,17 +12,15 @@
 
 namespace ibex {
 
-const int LoupFinderProbing::default_sample_size = 1;
-
-LoupFinderProbing::LoupFinderProbing(const System& sys, int sample_size) : sys(sys), sample_size(sample_size), loup_point(sys.nb_var), loup(POS_INFINITY) {
+LoupFinderProbing::LoupFinderProbing(const System& sys, int sample_size) : sys(sys), sample_size(sample_size)/*, loup_point(sys.nb_var), loup(POS_INFINITY) */{
 
 }
 
 std::pair<IntervalVector, double> LoupFinderProbing::find(const IntervalVector& box, const IntervalVector& current_loup_point, double current_loup) {
 
 	int n=sys.nb_var;
-	loup_point  = current_loup_point.lb();
-	loup        = current_loup;
+	Vector loup_point(n);
+	double loup = current_loup;
 
 	Vector pt(n);
 	bool loup_changed=false;
@@ -44,14 +42,15 @@ std::pair<IntervalVector, double> LoupFinderProbing::find(const IntervalVector& 
 		if (loup_changed)
 			// we activate line probing only if the starting point has improved the goal.
 			// we use the full box (not inbox)
-			line_probing(box);
-		else
+			line_probing(loup_point, loup, box);
+		else if (!current_loup_point.is_empty())
 			// Try Hansen dichotomy between the last candidate point (pt)
 			// and the loup (note: the segment goes outside of the box, this is on purpose).
 			//
 			// Possible improvement: chose the random point with the smallest criterion
 			// instead of the last one.
-			loup_changed = dichotomic_line_search(pt,true);
+			loup_point = current_loup_point.lb();
+			loup_changed = dichotomic_line_search(loup_point, loup, pt,true);
 	}
 
 	/*========================================================*/
@@ -62,7 +61,7 @@ std::pair<IntervalVector, double> LoupFinderProbing::find(const IntervalVector& 
 		throw NotFound();
 }
 
-bool LoupFinderProbing::line_probing(const IntervalVector& box) {
+bool LoupFinderProbing::line_probing(Vector& loup_point, double& loup, const IntervalVector& box) {
 
 	int n=sys.nb_var;
 
@@ -151,13 +150,13 @@ bool LoupFinderProbing::line_probing(const IntervalVector& box) {
 			facet_point[j]=loup_point[j]-max_coeff*g[j];
 	}
 
-	return dichotomic_line_search(facet_point, false);
+	return dichotomic_line_search(loup_point, loup, facet_point, false);
 }
 
-bool LoupFinderProbing::dichotomic_line_search(const Vector& end_point, bool exit_if_above_loup) {
+bool LoupFinderProbing::dichotomic_line_search(Vector& loup_point, double& loup, const Vector& end_point, bool exit_if_above_loup) {
 	Vector seg=end_point-loup_point;
 
-	double eps=1.0/16.0;
+	double eps=1.0/64.0;
 	double alpha0=0;
 	double alpha1=1.0;
 	double alpha2=alpha1;

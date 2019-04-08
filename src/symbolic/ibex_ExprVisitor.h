@@ -32,6 +32,8 @@ class ExprVector;
 class ExprApply;
 class ExprChi;
 
+class ExprGenericBinaryOp;
+
 class ExprAdd;
 class ExprMul;
 class ExprSub;
@@ -39,6 +41,8 @@ class ExprDiv;
 class ExprMax;
 class ExprMin;
 class ExprAtan2;
+
+class ExprGenericUnaryOp;
 
 class ExprMinus;
 class ExprTrans;
@@ -145,7 +149,13 @@ class ExprVisitor {
    }
 
   /*==================== binary operators =========================*/
-  /** Visit an addition (Implementation is not mandatory).
+   /** Visit a generic binary operator (Implementation is not mandatory).
+    * By default: call visit(const ExprBinaryOp& e). */
+   virtual void visit(const ExprGenericBinaryOp& e) {
+ 	  visit((const ExprBinaryOp&) e);
+   }
+
+   /** Visit an addition (Implementation is not mandatory).
    * By default: call visit(const ExprBinaryOp& e). */
   virtual void visit(const ExprAdd& e) {
 	  visit((const ExprBinaryOp&) e);
@@ -189,6 +199,13 @@ class ExprVisitor {
 
 
   /*==================== unary operators =========================*/
+
+  /** Visit a generic unary operator (Implementation is not mandatory).
+     * By default call visit(const ExprUnaryOp&). */
+    virtual void visit(const ExprGenericUnaryOp& e) {
+  	  visit((const ExprUnaryOp&) e);
+    }
+
   /** Visit a minus sign (Implementation is not mandatory).
    * By default call visit(const ExprUnaryOp&). */
   virtual void visit(const ExprMinus& e) {

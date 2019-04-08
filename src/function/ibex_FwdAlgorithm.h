@@ -47,6 +47,9 @@ protected:
 
 	/*==================== binary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
+	void gen2_fwd(int x, int y);
+
+	/** TO BE DEFINED (by the subclass) */
 	void add_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
@@ -98,6 +101,9 @@ protected:
 	void atan2_fwd(int x1, int x2, int y);
 
 	/*==================== unary operators =========================*/
+	/** TO BE DEFINED (by the subclass) */
+	void gen1_fwd(int x, int y);
+
 	/** TO BE DEFINED (by the subclass) */
 	void minus_fwd(int x, int y);
 

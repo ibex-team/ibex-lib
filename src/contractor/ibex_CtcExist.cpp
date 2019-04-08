@@ -26,21 +26,22 @@ CtcExist::CtcExist(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box,
 	CtcQuantif(ctc, VarSet(ctc.nb_var,vars,true), init_box, prec, own_ctc) {
 }
 
-bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y) {
+bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y, ContractContext& context) {
 	IntervalVector x = x_current;
 
-	CtcQuantif::contract(x, y);
+	// TODO: handle impact!
+	bool inactive = CtcQuantif::contract(x, y);
 
 	if (x.is_empty()) {
 		return false;
 	}
 
 	// if the contractor for c(x,y) is inactive on [x]*[y]
-	if (flags[INACTIVE]) {
+	if (inactive) {
 		// ... the contractor for \exists y\in[yinit] c(x) is inactive on [x]
 		if (x==x_init) {
 			x_res =x_init;
-			set_flag(INACTIVE);
+			context.output_flags.add(INACTIVE);
 			return true;
 		} else {
 			x_res |= x;
@@ -69,8 +70,8 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 
 				x_res |= x;
 
-				if ((flags[INACTIVE]) && (x==x_init)) {
-					set_flag(INACTIVE);
+				if (inactive && (x==x_init)) {
+					context.output_flags.add(INACTIVE);
 					return true;
 				}
 
@@ -85,6 +86,11 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 }
 
 void CtcExist::contract(IntervalVector& box) {
+	ContractContext context(box);
+	contract(box,context);
+}
+
+void CtcExist::contract(IntervalVector& box, ContractContext& context) {
 	assert(box.size()==vars.nb_var);
 
 	// the returned box, initially empty
@@ -112,8 +118,8 @@ void CtcExist::contract(IntervalVector& box) {
 		l.pop();
 
 		// proceed with the two sub-boxes for y
-		stop=proceed(box, x_save, res, cut.first);
-		if (!stop) stop=proceed(box, x_save, res, cut.second);
+		stop=proceed(box, x_save, res, cut.first, context);
+		if (!stop) stop=proceed(box, x_save, res, cut.second, context);
 	}
 
 	while (!l.empty()) l.pop();
@@ -121,7 +127,7 @@ void CtcExist::contract(IntervalVector& box) {
 	box &= res;
 
 	if (box.is_empty()) {
-		set_flag(FIXPOINT);
+		context.output_flags.add(FIXPOINT);
 	}
 
 }

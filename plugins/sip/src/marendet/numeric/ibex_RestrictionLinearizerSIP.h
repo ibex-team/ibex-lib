@@ -1,13 +1,14 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_RestrictionLinearizerSIP.h
-// Author      : Antoine Marendet, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : May 4, 2018
-// Last Update : May 4, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_RestrictionLinearizerSIP.h
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet, Gilles Chabert
+ * Created     : May 4, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #ifndef __SIP_IBEX_RESTRICTIONLINEARIZERSIP_H__
 #define __SIP_IBEX_RESTRICTIONLINEARIZERSIP_H__
 
@@ -34,10 +35,11 @@ public:
 	RestrictionLinearizerSIP(const SIPSystem& system,
 			CornerPolicy corner_policy);
 	int linearize(const IntervalVector& box, LPSolver& lp_solver);
+	int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
 	int linearizeNLC(const NLConstraint& constraint, Vector& lhs,
 			double& rhs) const;
 	int linearizeSIC(const SIConstraint& constraint,
-			std::vector<Vector>& lhs, std::vector<double>& rhs) const;
+			std::vector<Vector>& lhs, std::vector<double>& rhs, SIConstraintCache& cache) const;
 private:
 	void setCornerAndAlpha();
 

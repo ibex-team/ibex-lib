@@ -1,31 +1,34 @@
-//
-//  main.cpp
-//  Sipsolve
-//
-//  Created by Antoine Marendet on 02/11/2017.
-//  Copyright © 2017 Antoine Marendet. All rights reserved.
-//
+/* ============================================================================
+ * I B E X - optimizer.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * Created     : Nov 2, 2017
+ * ---------------------------------------------------------------------------- */
 
-#include "contractors/ibex_CtcBlankenship.h"
-#include "contractors/ibex_CtcCompoSIP.h"
-#include "contractors/ibex_CtcEvaluation.h"
-#include "contractors/ibex_CtcFilterSICParameters.h"
-#include "contractors/ibex_CtcFirstOrderTest.h"
-#include "contractors/ibex_CtcFixPointSIP.h"
-#include "contractors/ibex_CtcHC4SIP.h"
-#include "contractors/ibex_GoldsztejnSICBisector.h"
-#include "contractors/ibex_IbexCtcWrapper.h"
-#include "loup/ibex_LoupFinderLineSearch.h"
-#include "loup/ibex_LoupFinderRestrictionsRelax.h"
-#include "loup/ibex_LoupFinderSIPDefault.h"
-#include "main/ibex_CellDoubleHeapSIP.h"
-#include "main/ibex_MinibexOptionsParser.h"
-#include "main/ibex_SIPOptimizer.h"
-#include "numeric/ibex_RelaxationLinearizerSIP.h"
-#include "numeric/ibex_RestrictionLinearizerSIP.h"
-#include "system/ibex_SIPSystem.h"
+#include "ibex_CtcEvaluation.h"
+#include "ibex_CtcFilterSICParameters.h"
+#include "ibex_CtcBisectActiveParameters.h"
+#include "ibex_CtcFirstOrderTest.h"
+#include "ibex_CtcHC4SIP.h"
+#include "ibex_GoldsztejnSICBisector.h"
+#include "ibex_LoupFinderLineSearch.h"
+#include "ibex_LoupFinderRestrictionsRelax.h"
+#include "ibex_LoupFinderSIPDefault.h"
+#include "ibex_LoupFinderCompo.h"
+#include "ibex_CellDoubleHeapSIP.h"
+#include "ibex_MinibexOptionsParser.h"
+#include "ibex_SIPOptimizer.h"
+#include "ibex_RelaxationLinearizerSIP.h"
+#include "ibex_RestrictionLinearizerSIP.h"
+#include "ibex_SIPSystem.h"
 
 #include "args.hxx"
+#include "ibex_CtcCompo.h"
+#include "ibex_CtcFixPoint.h"
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_Exception.h"
 #include "ibex_Interval.h"
@@ -33,6 +36,8 @@
 #include "ibex_RoundRobin.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_UnknownFileException.h"
+#include "ibex_LargestFirst.h"
+#include "ibex_Optimizer.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -61,9 +66,9 @@ int main(int argc, const char ** argv) {
 	const long default_random_seed = 0L;
 	stringstream _rel_eps_f, _abs_eps_f, _eps_h, _random_seed, _eps_x;
 	_rel_eps_f << "Relative precision on the objective. Default value is 1e"
-			<< round(::log10(SIPOptimizer::default_rel_eps_f)) << ".";
+			<< round(::log10(double(SIPOptimizer::default_rel_eps_f))) << ".";
 	_abs_eps_f << "Absolute precision on the objective. Default value is 1e"
-			<< round(::log10(SIPOptimizer::default_abs_eps_f)) << ".";
+			<< round(::log10(double(SIPOptimizer::default_abs_eps_f))) << ".";
 	//_eps_h << "Equality relaxation value. Default value is 1e" << round(::log10(NormalizedSystem::default_eps_h)) << ".";
 	_random_seed << "Random seed (useful for reproducibility). Default value is " << default_random_seed << ".";
 	_eps_x << "Precision on the variable (**Deprecated**). Default value is 0.";
@@ -71,9 +76,9 @@ int main(int argc, const char ** argv) {
 	args::ArgumentParser parser("********* SIPOpt (sipopt) *********.", "Solve a Minibex file.");
 	args::HelpFlag help(parser, "help", "Display this help menu", { 'h', "help" });
 	args::ValueFlag<double> rel_eps_f(parser, "float", _rel_eps_f.str(), { 'r', "rel-eps-f" },
-			SIPOptimizer::default_rel_eps_f);
+			double(SIPOptimizer::default_rel_eps_f));
 	args::ValueFlag<double> abs_eps_f(parser, "float", _abs_eps_f.str(), { 'a', "abs-eps-f" },
-			SIPOptimizer::default_abs_eps_f);
+			double(SIPOptimizer::default_abs_eps_f));
 	//args::ValueFlag<double> eps_h(parser, "float", _eps_h.str(), {"eps-h"});
 	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo.", { 't',
 			"timeout" });
@@ -91,7 +96,7 @@ int main(int argc, const char ** argv) {
 	args::Flag no_inner_lin(parser, "no-inner-linearizations", "Deactivate inner linearizations",
 			{ 'i', "no-inner-lin" });
 	args::Flag no_first_order(parser, "no-first-order-test", "Deactivate first order test", { 'f', "no-first-order" });
-	args::Flag no_blankenship(parser, "no-blankenship", "Deactivate Blankenship heuristic", { 'b', "no-blankenship" });
+	//args::Flag no_blankenship(parser, "no-blankenship", "Deactivate Blankenship heuristic", { 'b', "no-blankenship" });
 	args::Flag no_line_search(parser, "no-line-search", "Deactivate line search for feasible points", { 'l',
 			"no-line-search" });
 
@@ -149,7 +154,7 @@ int main(int argc, const char ** argv) {
 	}
 
 	std::vector<std::string> accepted_options = { "--rel-eps-f", "--abs-eps-f", "--timeout", "--random-seed", "--eps-x",
-			"--initial-loup", "--no-propag", "--no-outer-lin", "--no-inner-lin", "--no-first-order", "--no-blankenship",
+			"--initial-loup", "--no-propag", "--no-outer-lin", "--no-inner-lin", "--no-first-order",
 			"--no-line-search", "--trace", "--universal" };
 	MinibexOptionsParser minibexParser(accepted_options);
 	minibexParser.parse(filename.Get());
@@ -255,13 +260,13 @@ int main(int argc, const char ** argv) {
 
 		srand(random_seed.Get());
 
-		NodeData::sip_system = &sys;
+		//BxpNodeData::sip_system = &sys;
 
 		CellDoubleHeapSIP buffer = CellDoubleHeapSIP(sys, 0);
 		ibex::RoundRobin bisector = ibex::RoundRobin(0);
-		/*ibex::Vector prec(system.ext_nb_var, 1e-20);
-		 prec[system.ext_nb_var - 1] = POS_INFINITY;
-		 ibex::LargestFirst bisector(prec);*/
+		/*Vector prec(sys.ext_nb_var, 1e-20);
+		prec[sys.ext_nb_var - 1] = POS_INFINITY;
+		LargestFirst bisector(prec);*/
 		LoupFinderSIP *loup_finder = nullptr;
 		if (!no_inner_lin) {
 			RestrictionLinearizerSIP *restrictions = new RestrictionLinearizerSIP(sys,
@@ -270,9 +275,11 @@ int main(int argc, const char ** argv) {
 		} else {
 			loup_finder = new LoupFinderSIPDefault(sys);
 		}
-		LoupFinderLineSearch *loup_finder2 = nullptr;
+		LoupFinder *loup_finder2 = nullptr;
 		if (!no_line_search) {
 			loup_finder2 = new LoupFinderLineSearch(sys);
+		} else {
+			loup_finder2 = new LoupFinderSIPDefault(sys);
 		}
 
 		/**
@@ -291,13 +298,14 @@ int main(int argc, const char ** argv) {
 		 */
 
 		GoldsztejnSICBisector* sic_bisector = new GoldsztejnSICBisector(sys);
+		CtcBisectActiveParameters* ctc_bisect_active = new CtcBisectActiveParameters(sys);
 		CtcFilterSICParameters* sic_filter = new CtcFilterSICParameters(sys);
 		GoldsztejnSICBisector* sic_bisector2 = new GoldsztejnSICBisector(sys);
 		CtcFilterSICParameters* sic_filter2 = new CtcFilterSICParameters(sys);
 		CtcEvaluation* evaluation = new CtcEvaluation(sys);
 
 		// FixPoint
-		vector<CellCtc*> fixpoint_list;
+		vector<Ctc*> fixpoint_list;
 		if (!no_propag) {
 			CtcHC4SIP* hc4_2 = new CtcHC4SIP(sys, 0.1, true);
 			fixpoint_list.emplace_back(hc4_2);
@@ -305,23 +313,24 @@ int main(int argc, const char ** argv) {
 		if (!no_outer_lin) {
 			RelaxationLinearizerSIP* relax = new RelaxationLinearizerSIP(sys,
 					RelaxationLinearizerSIP::CornerPolicy::random, true);
-			IbexCtcWrapper* ph = new IbexCtcWrapper(*(new ibex::CtcPolytopeHull(*relax, 1000000, 10000)));
+			CtcPolytopeHull* ph = new ibex::CtcPolytopeHull(*relax, 1000000, 10000);
 			fixpoint_list.emplace_back(ph);
 		}
 		fixpoint_list.emplace_back(sic_bisector2);
 		fixpoint_list.emplace_back(sic_filter2);
-		if (!no_blankenship) {
+		fixpoint_list.emplace_back(ctc_bisect_active);
+		/*if (!no_blankenship) {
 			CtcBlankenship* blankenship = new CtcBlankenship(sys, 0.1, 1000);
 			fixpoint_list.emplace_back(blankenship);
-		}
-		CtcCompoSIP* compo = new CtcCompoSIP(fixpoint_list);
-		CtcFixPointSIP* fixpoint = new CtcFixPointSIP(*compo, POS_INFINITY); // Best: 0.1
+		}*/
+		CtcCompo* compo = new CtcCompo(fixpoint_list);
+		CtcFixPoint* fixpoint = new CtcFixPoint(*compo, 0.1); // Best: 0.1
 
-		vector<CellCtc*> ctc_list;
+		vector<Ctc*> ctc_list;
 		ctc_list.emplace_back(sic_bisector);
 		ctc_list.emplace_back(sic_filter);
 		if (!no_propag) {
-			CtcHC4SIP* hc4 = new CtcHC4SIP(sys, 0.01, true);
+			CtcHC4SIP* hc4 = new CtcHC4SIP(sys, 0.1, true);
 			ctc_list.emplace_back(hc4);
 		}
 		ctc_list.emplace_back(fixpoint);
@@ -330,22 +339,24 @@ int main(int argc, const char ** argv) {
 			CtcFirstOrderTest* firstordertest = new CtcFirstOrderTest(sys);
 			ctc_list.push_back(firstordertest);
 		}
-		CtcCompoSIP* ctc = new CtcCompoSIP(ctc_list);
+		CtcCompo* ctc = new CtcCompo(ctc_list);
 
-		SIPOptimizer optimizer(*ctc, bisector, *loup_finder, loup_finder2, buffer, abs_eps_f.Get(), -1, 0, -1);
-
+		LoupFinderCompo lf_compo(Array<LoupFinder>(*loup_finder, *loup_finder2));
+		SIPOptimizer optimizer(sys.nb_var, *ctc, bisector, *loup_finder, *loup_finder2, buffer, sys.nb_var,
+			eps_x.Get(), rel_eps_f.Get(), abs_eps_f.Get());
+		//Optimizer optimizer(sys.nb_var, *ctc, bisector, lf_compo, buffer, sys.nb_var);
 		// This option limits the search time
 		if (timeout) {
 			if (!quiet)
 				cout << "  timeout:\t" << timeout.Get() << "s" << endl;
-			optimizer.timeout_ = timeout.Get();
+			optimizer.timeout = timeout.Get();
 		}
 
 		// This option prints each better feasible point when it is found
 		if (trace) {
 			if (!quiet)
 				cout << "  trace:\tON" << endl;
-			optimizer.trace_ = trace.Get();
+			optimizer.trace = trace.Get();
 		}
 
 		/*
@@ -366,9 +377,9 @@ int main(int argc, const char ** argv) {
 
 		// Search for the optimum
 		if (initial_loup)
-			optimizer.minimize(sys.extractInitialBox(), initial_loup.Get());
+			optimizer.optimize(sys.extractInitialBox(), initial_loup.Get());
 		else
-			optimizer.minimize(sys.extractInitialBox());
+			optimizer.optimize(sys.extractInitialBox());
 
 		if (trace)
 			cout << endl;

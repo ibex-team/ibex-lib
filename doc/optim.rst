@@ -114,6 +114,41 @@ The output is:
    :start-after: optim-call-default-O
    :end-before:  optim-call-default-O
 
+.. _optim-argmin:
+
+=============================================
+Getting en enclosure of all global minima
+=============================================
+Given a problem:
+
+.. math::
+
+	{\mbox Minimize} \ f(x)
+	
+	{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0
+	
+IbexOpt gives  a feasible point that is *sufficiently* close to the real minimum :math:`f^*` of the function, i.e., a point
+that satisfies
+
+.. math::
+
+	{\mbox uplo} \leq f(x)\leq {\mbox loup}
+	
+	{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0
+	
+with *loup* and *uplo* are respectively a valid upper and lower bound of :math:`f^*`, whose accuracy depend on the input precision parameter 
+(note: validated feasibility with equalities requires ''rigor'' mode).
+
+From this, it is possible, in a second step, to get an enclosure of all global minima thanks to :ref:`solver`.
+The idea is simply to ask for all the points that satisfy the previous constraints.
+We give now a code snippet that illustrate this.
+
+.. literalinclude:: ../examples/doc-optim.cpp 
+   :language: cpp
+   :start-after: optim-all-minima-C
+   :end-before:  optim-all-minima-C
+
+
 .. _optim-generic:
   
 ==================================== 

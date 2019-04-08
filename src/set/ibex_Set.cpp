@@ -14,6 +14,10 @@
 #include "ibex_CellStack.h"
 #include "ibex_SetConnectedComponents.cpp_"
 #include "ibex_SepFwdBwd.h"
+#include "ibex_String.h"
+#include "ibex_Id.h"
+#include "ibex_Bxp.h"
+
 #include <stack>
 #include <fstream>
 
@@ -225,12 +229,31 @@ std::ostream& operator<<(std::ostream& os, const Set& set) {
 	return os;
 }
 
-class NodeAndDist : public Backtrackable {
+class BxpNodeAndDist : public Bxp {
 public:
-	NodeAndDist() : node(NULL), dist(-1) { }
+	BxpNodeAndDist(const IntervalVector& root_box, const Vector& pt, SetNode* _node) : Bxp(next_id()), pt(pt), node(_node) {
+		set_dist(root_box,pt);
+	}
 
-	NodeAndDist(SetNode* _node) : node(_node), dist(-1) { }
+	BxpNodeAndDist(long id, const IntervalVector& box, const Vector& pt, SetNode* _node) : Bxp(id), pt(pt), node(_node) {
+		set_dist(box,pt);
+	}
 
+	BxpNodeAndDist(const BxpNodeAndDist& p) : Bxp(p.id), pt(p.pt), node(p.node), dist(p.dist) { }
+
+	virtual Bxp* copy(const IntervalVector& box, const BoxProperties& prop) const {
+		return new BxpNodeAndDist(*this);
+	}
+
+	virtual void update(const BoxEvent& e, const BoxProperties& p) {
+		set_dist(e.box,pt); // actually never called by Set::dist(...)
+	}
+
+	const Vector& pt;
+	SetNode* node;
+	double dist;
+
+protected:
 	/**
 	 * calculate the square of the distance to pt
 	 * for the box of the current cell (box given in argument)
@@ -244,26 +267,6 @@ public:
 		}
 		dist=d.lb();
 	}
-
-	virtual Backtrackable* copy() const {
-		return new NodeAndDist(*this);
-	}
-
-	virtual std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint&) {
-		assert(!node->is_leaf());
-
-		SetBisect& b=*((SetBisect*) node);
-		return std::pair<NodeAndDist*,NodeAndDist*>(new NodeAndDist(b.left),
-													  new NodeAndDist(b.right));
-	}
-
-	SetNode* node;
-	double dist;
-
-protected:
-
-	explicit NodeAndDist(const NodeAndDist& e) : node(e.node), dist(e.dist) { }
-
 };
 
 /**
@@ -272,24 +275,32 @@ protected:
 class CellHeapDist : public CostFunc<Cell> {
 
 public:
+	CellHeapDist(long prop_key) : key(prop_key) { }
+
 	/** The "cost" of a element. */
-	virtual	double cost(const Cell& c) const { return c.get<NodeAndDist>().dist; }
+	virtual	double cost(const Cell& c) const {
+		return ((BxpNodeAndDist*) c.prop[key])->dist;
+	}
+
+	long key;
 };
 
 
 double Set::dist(const Vector& pt, bool inside) const {
 
- 	CellHeapDist costf;
-	Heap<Cell> heap(costf);
+	long key = next_id();
+
 
 	//int count=0; // for stats
 
 	Cell* root_cell =new Cell(Rn);
-	root_cell->add<NodeAndDist>();
-	root_cell->get<NodeAndDist>().node = root;
-	root_cell->get<NodeAndDist>().set_dist(Rn,pt);
-	//count++;
+	BxpNodeAndDist* nad=new BxpNodeAndDist(Rn,pt,root);
+	root_cell->prop.add(nad);
 
+	//count++;
+	CellHeapDist costf(key);
+
+	Heap<Cell> heap(costf);
 	heap.push(root_cell);
 
 	double lb = POS_INFINITY;
@@ -297,13 +308,13 @@ double Set::dist(const Vector& pt, bool inside) const {
 	while (!heap.empty()) {
 
 		Cell* c = heap.pop();
-
-		SetNode* node = c->get<NodeAndDist>().node;
+		BxpNodeAndDist* nad=(BxpNodeAndDist*) c->prop[key];
+		SetNode* node = nad->node;
 
 		assert(node!=NULL);
 
 		if (node->is_leaf() && ((SetLeaf*) node)->status==(inside? YES : NO)) {
-			double d=c->get<NodeAndDist>().dist;
+			double d=nad->dist;
 			if (d<lb) {
 				lb=d;
 				heap.contract(lb);
@@ -312,15 +323,18 @@ double Set::dist(const Vector& pt, bool inside) const {
 			SetBisect& b= *((SetBisect*) node);
 
             // the box is bisected twice: could be avoided.
-			std::pair<Cell*,Cell*> p=c->subcells(BisectionPoint(b.var,b.pt,false));
+			std::pair<Cell*,Cell*> p=c->bisect(BisectionPoint(b.var,b.pt,false));
 
-			p.first->get<NodeAndDist>().set_dist(p.first->box,pt);
-			//count++;
-			if (p.first->get<NodeAndDist>().dist<=lb) heap.push(p.first);
+			BxpNodeAndDist* nad1=(BxpNodeAndDist*) p.first->prop[key];
+			BxpNodeAndDist* nad2=(BxpNodeAndDist*) p.second->prop[key];
 
-			p.second->get<NodeAndDist>().set_dist(p.second->box,pt);
+			nad1->node = b.left;
+			nad2->node = b.right;
+
 			//count++;
-			if (p.second->get<NodeAndDist>().dist<=lb) heap.push(p.second);
+			if (nad1->dist<=lb) heap.push(p.first);
+			//count++;
+			if (nad2->dist<=lb) heap.push(p.second);
 		}
 		delete c;
 	}

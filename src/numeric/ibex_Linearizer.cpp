@@ -8,10 +8,11 @@
 //============================================================================
 
 #include "ibex_Linearizer.h"
+#include "ibex_Id.h"
 
 namespace ibex {
 
-Linearizer::Linearizer(int n) : n(n) {
+Linearizer::Linearizer(int n) : id(next_id()), n(n) {
 
 }
 

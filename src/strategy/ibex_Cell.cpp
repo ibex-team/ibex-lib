@@ -5,58 +5,55 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 10, 2012
-// Last Update : Dec 12, 2017
+// Last Update : Jun 07, 2018
 //============================================================================
 
 #include "ibex_Cell.h"
 #include "ibex_Bsc.h"
-
 #include <limits.h>
+#include "ibex_Bxp.h"
+#include "ibex_Bxp.h"
 
 using namespace std;
 
 namespace ibex {
 
-Cell::Cell(const IntervalVector& box) : box(box) { }
+Cell::Cell(const IntervalVector& box, int var, unsigned int depth) : box(box), prop(this->box), bisected_var(var), depth(depth) {
 
-Cell::Cell(const Cell& e) : box(e.box) {
-	for (IBEXMAP(Backtrackable*)::const_iterator it=e.data.begin(); it!=e.data.end(); it++) {
-		data.insert_new(it->first, it->second->copy());
-	}
 }
 
-pair<Cell*,Cell*> Cell::subcells(const BisectionPoint& b) const {
+Cell::Cell(const Cell& e) : box(e.box), prop(this->box, e.prop), bisected_var(e.bisected_var), depth(e.depth) {
+
+}
+
+pair<Cell*,Cell*> Cell::bisect(const BisectionPoint& pt) const {
 
 	Cell* cleft;
 	Cell* cright;
 
-	if (b.rel_pos) {
-		pair<IntervalVector,IntervalVector> boxes=box.bisect(b.var,b.pos);
-		cleft = new Cell(boxes.first);
-		cright = new Cell(boxes.second);
+	if (pt.rel_pos) {
+		pair<IntervalVector,IntervalVector> boxes=box.bisect(pt.var,pt.pos);
+		cleft = new Cell(boxes.first, pt.var, depth+1);
+		cright = new Cell(boxes.second, pt.var, depth+1);
 	} else {
 		IntervalVector b1(box);
 		IntervalVector b2(box);
-		b1[b.var]=Interval(box[b.var].lb(), b.pos);
-		b2[b.var]=Interval(b.pos, box[b.var].ub());
-		cleft = new Cell(b1);
-		cright = new Cell(b2);
+		b1[pt.var]=Interval(box[pt.var].lb(), pt.pos);
+		b2[pt.var]=Interval(pt.pos, box[pt.var].ub());
+		cleft = new Cell(b1, pt.var, depth+1);
+		cright = new Cell(b2, pt.var, depth+1);
 	}
 
-	for (IBEXMAP(Backtrackable*)::const_iterator it=data.begin(); it!=data.end(); it++) {
-		std::pair<Backtrackable*,Backtrackable*> child_data=it->second->down(b);
-		cleft->data.insert_new(it->first,child_data.first);
-		cright->data.insert_new(it->first,child_data.second);
-	}
+	prop.update_bisect(Bisection(box, pt, cleft->box, cright->box), cleft->prop, cright->prop);
+
 	return pair<Cell*,Cell*>(cleft,cright);
 }
 
 Cell::~Cell() {
-	for (IBEXMAP(Backtrackable*)::iterator it=data.begin(); it!=data.end(); it++)
-		delete it->second;
+
 }
 
-std::ostream& operator<<(std::ostream& os, const Cell& c){
+std::ostream& operator<<(std::ostream& os, const Cell& c) {
 	os << c.box;
 	return os;
 }

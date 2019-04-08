@@ -15,6 +15,7 @@
 #include "ibex_Random.h"
 #include "ibex_Exception.h"
 #include "ibex_NormalizedSystem.h"
+#include "ibex_BxpSystemCache.h"
 
 #include <vector>
 
@@ -35,7 +36,7 @@ LinearizerXTaylor::LinearizerXTaylor(const System& _sys, approx_mode _mode, corn
 			Linearizer(_sys.nb_var), sys(_sys),
 			m(sys.f_ctrs.image_dim()), goal_ctr(-1 /*tmp*/),
 			mode(_mode), slope(_slope),
-			inf(new bool[n]), lp_solver(NULL) {
+			inf(new bool[n]), lp_solver(NULL), cache(NULL) {
 
 	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
 		((int&) goal_ctr)=((const ExtendedSystem&) sys).goal_ctr();
@@ -59,21 +60,51 @@ LinearizerXTaylor::~LinearizerXTaylor() {
 	delete[] inf;
 }
 
-int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver)  {
-	lp_solver = &_lp_solver;
-
-	if (mode==RELAX)
-		return linear_relax(box);
-	else
-		return linear_restrict(box);
+void LinearizerXTaylor::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+	//--------------------------------------------------------------------------
+	/* Using system cache seems not interesting. */
+	//	if (/*mode==RELAX && slope==TAYLOR && */!prop[BxpSystemCache::get_id(sys)]) {
+	//		prop.add(new BxpSystemCache(sys,BxpSystemCache::default_update_ratio));
+	//	}
+	//--------------------------------------------------------------------------
 }
 
-int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
+int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver)  {
+	BoxProperties prop(box);
+	return linearize(box, _lp_solver, prop);
+}
 
-	int count=0; // total number of added constraint
+int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver, BoxProperties& prop) {
+	lp_solver = &_lp_solver;
 
 	// ========= get active constraints ===========
-	BitSet active=sys.active_ctrs(box);
+	BitSet* active;
+
+	//--------------------------------------------------------------------------
+	/* Using system cache seems not interesting. */
+	//cache=(BxpSystemCache*) prop[BxpSystemCache::get_id(sys)];
+	cache=NULL;
+	//--------------------------------------------------------------------------
+
+	if (cache!=NULL) {
+		active = &cache->active_ctrs();
+//			if (active->size()<box.size()) {
+//				cout << "[xtaylor] inactive constraint!\n";
+//			}
+	} else {
+		active = new BitSet(sys.active_ctrs(box));
+	}
+	// ============================================
+
+	int n = mode==RELAX ? linear_relax(box,*active) : linear_restrict(box,*active);
+
+	if (cache==NULL) delete active;
+	return n;
+}
+
+int LinearizerXTaylor::linear_relax(const IntervalVector& box, const BitSet& active)  {
+
+	int count=0; // total number of added constraint
 
 	if (active.empty()) return 0;
 
@@ -82,8 +113,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 	IntervalMatrix Df(ma,n); // derivatives over the box
 
 	if (slope == TAYLOR) { // compute derivatives once for all
-		Df=sys.f_ctrs.jacobian(box,active);
-		//Df=sys.active_ctrs_jacobian(box);  // --> better with SystemBox
+		Df=cache? cache->active_ctrs_jacobian() : sys.f_ctrs.jacobian(box,active);
 
 		if (Df.is_empty()) return -1;
 	}
@@ -145,9 +175,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box)  {
 	return count;
 }
 
-int LinearizerXTaylor::linear_restrict(const IntervalVector& box) {
-
-	BitSet active=sys.active_ctrs(box);
+int LinearizerXTaylor::linear_restrict(const IntervalVector& box, const BitSet& active) {
 
 	if (active.empty()) return 0;
 
@@ -156,11 +184,14 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box) {
 	try {
 		// the corner used -> typed IntervalVector just to have guaranteed computations
 		IntervalVector corner = get_corner_point(box);
+		//IntervalMatrix J=cache? cache->active_ctrs_jacobian() : sys.f_ctrs.jacobian(box,active);
+		//IntervalMatrix J=sys.f_ctrs.jacobian(box,active);
+		IntervalMatrix J(active.size(),n); // derivatives over the box
+		sys.f_ctrs.hansen_matrix(box,corner,J,active);
 
-		IntervalMatrix J=sys.f_ctrs.jacobian(box,active);
-		//IntervalMatrix J=sys.active_ctrs_jacobian(box);  // --> better with SystemBox
-
-		if (J.is_empty()) return -1; // note: no way to inform that the box is actually infeasible
+		// note: no way to inform that the box is actually infeasible
+		// (we are in "restrict" mode)
+		if (J.is_empty()) return -1;
 
 		// the evaluation of the constraints in the corner x_corner
 		IntervalVector g_corner(sys.f_ctrs.eval_vector(corner,active));
@@ -249,7 +280,7 @@ IntervalVector LinearizerXTaylor::get_corner_point(const IntervalVector& box) {
 int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalVector& corner, const IntervalVector& dg_box, const Interval& g_corner) {
 	Vector a(n); // vector of coefficients
 
-	if (dg_box.max_diam() > lp_solver->default_limit_diam_box.ub()) {
+	if (dg_box.max_diam() > LPSolver::max_box_diam) {
 		// we also also avoid this way to deal with infinite bounds (see below)
 		throw LPException();
 	}

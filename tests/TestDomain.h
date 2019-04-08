@@ -36,6 +36,10 @@ public:
 	CPPUNIT_TEST(index_mat_rows);
 	CPPUNIT_TEST(index_mat_cols);
 	CPPUNIT_TEST(index_mat_submat);
+	CPPUNIT_TEST(load01);
+	CPPUNIT_TEST(load02);
+	CPPUNIT_TEST(load03);
+	CPPUNIT_TEST(load04);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -57,6 +61,10 @@ public:
 	void index_mat_rows();
 	void index_mat_cols();
 	void index_mat_submat();
+	void load01();
+	void load02();
+	void load03();
+	void load04();
 
 private:
 	Domain *rv; // row vec

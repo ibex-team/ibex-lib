@@ -115,6 +115,7 @@ void Expr2DAG::visit(const ExprConstant& c) { assert(false); }
 void Expr2DAG::visit(const ExprVector& e) { peer.insert(e,&ExprVector::new_(comps(e),e.orient)); }
 void Expr2DAG::visit(const ExprApply& e)  { peer.insert(e,&ExprApply::new_(e.func,comps(e))); }
 void Expr2DAG::visit(const ExprChi& e)    { peer.insert(e,&ExprChi::new_(comps(e))); }
+void Expr2DAG::visit(const ExprGenericBinaryOp& e)  { peer[e]=&ExprGenericBinaryOp::new_(e.name,*peer[e.left],*peer[e.right]); }
 void Expr2DAG::visit(const ExprAdd& e)    { visit_binary(e); }
 void Expr2DAG::visit(const ExprMul& e)    { visit_binary(e); }
 void Expr2DAG::visit(const ExprSub& e)    { visit_binary(e); }
@@ -122,6 +123,7 @@ void Expr2DAG::visit(const ExprDiv& e)    { visit_binary(e); }
 void Expr2DAG::visit(const ExprMax& e)    { visit_binary(e); }
 void Expr2DAG::visit(const ExprMin& e)    { visit_binary(e); }
 void Expr2DAG::visit(const ExprAtan2& e)  { visit_binary(e); }
+void Expr2DAG::visit(const ExprGenericUnaryOp& e)  { peer[e]=&ExprGenericUnaryOp::new_(e.name,*peer[e.expr]); }
 void Expr2DAG::visit(const ExprMinus& e)  { visit_unary(e); }
 void Expr2DAG::visit(const ExprTrans& e)  { visit_unary(e); }
 void Expr2DAG::visit(const ExprSign& e)   { visit_unary(e); }

@@ -1,16 +1,17 @@
-//============================================================================
-//                                  I B E X                                   
-// File        : ibex_SIConstraintCache.cpp
-// Author      : Antoine Marendet, Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
-// License     : See the LICENSE file
-// Created     : May 4, 2018
-// Last Update : May 4, 2018
-//============================================================================
-
+/* ============================================================================
+ * I B E X - ibex_SIConstraintCache.cpp
+ * ============================================================================
+ * Copyright   : IMT Atlantique (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet, Gilles Chabert
+ * Created     : May 4, 2018
+ * ---------------------------------------------------------------------------- */
+ 
 #include "ibex_SIConstraintCache.h"
 
-#include "main/ibex_utils.h"
+#include "ibex_utils.h"
 
 
 using namespace std;
@@ -33,19 +34,19 @@ void SIConstraintCache::update_cache(const Function &function, const IntervalVec
 	}
 
 	// Reinitialize cache
+	const int x_dim = new_box_.size();
 	eval_cache_ = Interval::EMPTY_SET;
-	gradient_cache_ = IntervalVector::empty(function.nb_var());
+	gradient_cache_ = IntervalVector::empty(x_dim);
 	IntervalVector full_box(function.nb_var());
 
 	// Prepare IntervalVector to save instantiating a new IV for each computation
 	full_box.put(0, new_box_);
-	const int x_dim = new_box_.size();
 	for (auto& cache_cell : parameter_caches_) {
 		full_box.put(x_dim, cache_cell.parameter_box);
 		cache_cell.evaluation = centeredFormEval(function, full_box);
 		cache_cell.full_gradient = function.gradient(full_box);
 		eval_cache_ |= cache_cell.evaluation;
-		gradient_cache_ |= cache_cell.full_gradient;
+		gradient_cache_ |= cache_cell.full_gradient.subvector(0, x_dim-1);
 	}
 }
 } // end namespace ibex

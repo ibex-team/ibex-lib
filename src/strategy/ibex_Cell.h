@@ -1,21 +1,20 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : Cells
+// File        : ibex_Cell.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 10, 2012
-// Last Update : Dec 12, 2017
+// Last Update : Jun 07, 2018
 //============================================================================
 
 #ifndef __IBEX_CELL_H__
 #define __IBEX_CELL_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_Backtrackable.h"
-#include "ibex_SymbolMap.h"
-
-#include <typeinfo>
+#include "ibex_BoxProperties.h"
+#include "ibex_BisectionPoint.h"
+#include "ibex_Map.h"
 
 namespace ibex {
 
@@ -23,19 +22,21 @@ namespace ibex {
  * \defgroup strategy Strategies
  */
 
-/** \ingroup strategy
+/**
+ * \ingroup strategy
  *
  * \brief Node in an interval exploration binary tree.
  *
- * This representation includes default data (current box) and data related to
- * user-defined operators (like bisectors). A different cell is associated to each
- * node and cell construction/inheritance can be controlled (see #ibex::Backtrackable).
+ * This representation includes default data (current box) and data required by
+ * specific operators (contractors, bisectors, cell buffers, ...), stored in
+ * a "property list" (see #ibex::BoxProperties). A different cell is associated
+ * to each node and the way the properties are inherited from a cell to its children
+ * can be controlled thanks to the "update_bisect" function of Bxp. (see #ibex::Bxp).
  *
  * The cell on its own contains the minimum of information associated to the actual
- * search space: the current box (other fields might be added with future releases).
+ * search space: the current box and the last bisected variable. Other fields might
+ * be added with future releases.
  *
- * The amount of information contained in a cell can be arbitrarily augmented thanks
- * to the "data registration" technique (see #ibex::Backtrackable).
  */
 class Cell {
 public:
@@ -45,7 +46,7 @@ public:
 	 *
 	 * \param box - Box (passed by copy).
 	 */
-	explicit Cell(const IntervalVector& box);
+	explicit Cell(const IntervalVector& box, int bisected_var=-1, unsigned int depth=0);
 
 	/**
 	 * \brief Constructor by copy.
@@ -56,14 +57,14 @@ public:
 	 * \brief Bisect this cell.
 	 *
 	 * The box of the first (resp. second) cell is \a left (resp. \a right).
-	 * Each subcell inherits from the data of this cell via the
-	 * \link #ibex::Backtrackable::down(const BisectionPoint&) down \endlink
+	 * Each sub-cell inherits from the properties of this cell via the
+	 * \link #ibex::Bxp::update(const Bisection&, const BoxProperties&) update_bisect \endlink
 	 * function.
 	 *
 	 * <p>
-	 * This function is called by the bisector.
+	 * This function is called by the bisector of boxes (see #ibex::Bsc).
 	 */
-	std::pair<Cell*,Cell*> subcells(const BisectionPoint& b) const;
+	std::pair<Cell*,Cell*> bisect(const BisectionPoint& b) const;
 
 	/**
 	 * \brief Delete *this.
@@ -71,50 +72,32 @@ public:
 	virtual ~Cell();
 
 	/**
-	 * \brief Retrieve backtrackable data from this cell.
-	 *
-	 * The data is identified by its classname.
-	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
-	 */
-	template<typename T>
-	T& get() {
-		return (T&) *data[typeid(T).name()];
-	}
-
-	/**
-	 * \brief Retrieve backtrackable data from this cell.
-	 *
-	 * The data is identified by its classname.
-	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
-	 */
-	template<typename T>
-	const T& get() const {
-		return (T&) *data[typeid(T).name()];
-	}
-
-	/**
-	 * \brief Add backtrackable data into this cell.
-	 *
-	 * The data is identified by its classname.
-	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
-	 */
-	template<typename T>
-	void add() {
-		const char* id=typeid(T).name();
-		if (!data.used(id)) data.insert_new(id,new T());
-	}
-
-	/**
 	 * \brief The box
 	 */
 	IntervalVector box;
 
 	/**
-	 * \brief Other data.
+	 * \brief Properties bound to the box.
+	 *
+	 * Box properties are transmitted to operators (contractors, etc.)
+	 * through the "trust chain" principle (see documentation).
 	 */
-	SymbolMap<Backtrackable*> data;
+	BoxProperties prop;
+
+	/**
+	 * Last bisected variable (-1 if root node).
+	 */
+	int bisected_var;
+
+	/**
+	 * Cell depth (0 if root node).
+	 */
+	unsigned int depth;
 };
 
+/**
+ * \brief Print the cell.
+ */
 std::ostream& operator<<(std::ostream& os, const Cell& c);
 
 } // end namespace ibex

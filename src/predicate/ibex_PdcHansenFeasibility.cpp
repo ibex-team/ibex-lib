@@ -12,6 +12,7 @@
 #include "ibex_Newton.h"
 #include "ibex_Linear.h"
 #include "ibex_VarSet.h"
+#include "ibex_FncProj.h"
 
 namespace ibex {
 
@@ -30,7 +31,7 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 	// ==============================================================
 	Matrix A=f.jacobian(mid).mid();
 	Matrix LU(m,n);
-	int *pr = new int[m];
+	int *pr = new int[m]; // only interesting in case of over-constrained problems
 	int *pc = new int[n]; // the interesting output: the variables permutation
 	BoolInterval res=MAYBE;
 
@@ -45,37 +46,53 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 	}
 	// ==============================================================
 
-
-//	PartialFnc pf(f,pc,m,mid);
-
-	BitSet _vars=BitSet::empty(n);
-	for (int i=0; i<m; i++) _vars.add(pc[i]);
-	VarSet vars(f.nb_var(),_vars);
-
 	IntervalVector box2(box);
 
-	// fix parameters to their midpoint
-	vars.set_param_box(box2, vars.param_box(box).mid());
+	if (m<n) {
+		BitSet _vars=BitSet::empty(n);
 
-	IntervalVector savebox(box2);
+		for (int i=0; i<m; i++) _vars.add(pc[i]);
 
-	if (inflating) {
-		if (inflating_newton(f,vars,box2,_solution,_unicity_box_ignored)) {
-			res = YES;
+		VarSet vars(f.nb_var(),_vars);
+
+		// fix parameters to their midpoint
+		vars.set_param_box(box2, vars.param_box(box).mid());
+
+		if (inflating) {
+			if (inflating_newton(f,vars,box2,_solution,_unicity_box_ignored)) {
+				res = YES;
+			}
 		}
-	}
-	else {
-		// ****** TODO **********
+		else {
 			newton(f,vars,box2);
 
 			if (box2.is_empty()) {
 				_solution.set_empty();
-			} else if (box2.is_strict_subset(savebox)) {
+			} else if (box2.is_strict_subset(box)) {
 				_solution = box2;
 				res = YES;
 			}
-	}
+		}
+	} else {
+		FncProj	fnc(f,BitSet(n,pr)); // only keep the n first values of pr.
 
+		if (inflating) {
+			if (inflating_newton(fnc,box,_solution,_unicity_box_ignored)) {
+				res = YES;
+			}
+		}
+		else {
+			newton(fnc,box2);
+
+			if (box2.is_empty()) {
+				_solution.set_empty();
+			} else if (box2.is_strict_subset(box)) {
+				_solution = box2;
+				res = YES;
+			}
+		}
+
+	}
 	delete [] pr;
 	delete [] pc;
 	return res;

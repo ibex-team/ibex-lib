@@ -94,6 +94,7 @@ protected:
 		IDX_CP, // index with copy
 		VEC, SYM, CST, APPLY, CHI,
 		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2,
+		GEN1, GEN2, GENN,
 		MINUS, MINUS_V, MINUS_M,
 		TRANS_V, TRANS_M, SIGN, ABS, POWER,
 		SQR, SQRT, EXP, LOG,
@@ -124,6 +125,7 @@ private:
 	void visit(const ExprVector& e);
 	void visit(const ExprApply& e);
 	void visit(const ExprChi& e);
+	void visit(const ExprGenericBinaryOp& e);
 	void visit(const ExprAdd& e);
 	void visit(const ExprMul& e);
 	void visit(const ExprSub& e);
@@ -131,6 +133,7 @@ private:
 	void visit(const ExprMax& e);
 	void visit(const ExprMin& e);
 	void visit(const ExprAtan2& e);
+	void visit(const ExprGenericUnaryOp& e);
 	void visit(const ExprMinus& e);
 	void visit(const ExprTrans& e);
 	void visit(const ExprSign& e);
@@ -211,6 +214,7 @@ void CompiledFunction::forward(const V& algo, int i) const {
 	case CST:    ((V&) algo).cst_fwd    (i); break;
 	case APPLY:  ((V&) algo).apply_fwd  (args[i],i); break;
 	case CHI:    ((V&) algo).chi_fwd    (args[i][0], args[i][1], args[i][2], i); break;
+	case GEN2:   ((V&) algo).gen2_fwd   (args[i][0], args[i][1], i); break;
 	case ADD:    ((V&) algo).add_fwd    (args[i][0], args[i][1], i); break;
 	case ADD_V:  ((V&) algo).add_V_fwd  (args[i][0], args[i][1], i); break;
 	case ADD_M:  ((V&) algo).add_M_fwd  (args[i][0], args[i][1], i); break;
@@ -228,6 +232,7 @@ void CompiledFunction::forward(const V& algo, int i) const {
 	case MAX:    ((V&) algo).max_fwd    (args[i][0], args[i][1], i); break;
 	case MIN:    ((V&) algo).min_fwd    (args[i][0], args[i][1], i); break;
 	case ATAN2:  ((V&) algo).atan2_fwd  (args[i][0], args[i][1], i); break;
+	case GEN1:   ((V&) algo).gen1_fwd   (args[i][0], i); break;
 	case MINUS:  ((V&) algo).minus_fwd  (args[i][0], i); break;
 	case MINUS_V:((V&) algo).minus_V_fwd(args[i][0], i); break;
 	case MINUS_M:((V&) algo).minus_M_fwd(args[i][0], i); break;
@@ -286,6 +291,7 @@ void CompiledFunction::backward(const V& algo, int i) const {
 	case CST:    ((V&) algo).cst_bwd    (i); break;
 	case APPLY:  ((V&) algo).apply_bwd  (args[i], i); break;
 	case CHI:    ((V&) algo).chi_bwd    (args[i][0], args[i][1], args[i][2], i); break;
+	case GEN2:   ((V&) algo).gen2_bwd   (args[i][0], args[i][1], i); break;
 	case ADD:    ((V&) algo).add_bwd    (args[i][0], args[i][1], i); break;
 	case ADD_V:  ((V&) algo).add_V_bwd  (args[i][0], args[i][1], i); break;
 	case ADD_M:  ((V&) algo).add_M_bwd  (args[i][0], args[i][1], i); break;
@@ -303,6 +309,7 @@ void CompiledFunction::backward(const V& algo, int i) const {
 	case MAX:    ((V&) algo).max_bwd    (args[i][0], args[i][1], i); break;
 	case MIN:    ((V&) algo).min_bwd    (args[i][0], args[i][1], i); break;
 	case ATAN2:  ((V&) algo).atan2_bwd  (args[i][0], args[i][1], i); break;
+	case GEN1:   ((V&) algo).gen1_bwd   (args[i][0], i); break;
 	case MINUS:  ((V&) algo).minus_bwd  (args[i][0], i); break;
 	case MINUS_V:((V&) algo).minus_V_bwd(args[i][0], i); break;
 	case MINUS_M:((V&) algo).minus_M_bwd(args[i][0], i); break;

@@ -1,0 +1,14 @@
+Variables
+    //!--universal="y.*"
+    x1 in [-1000, 1000];
+    x2 in [-1000, 1000];
+    x3 in [-1000, 1000];
+    y1 in [0, 1];
+    y2 in [0, 1];
+
+Minimize
+    x1^2 + x2^2 + x3^2;
+
+Constraints
+    x1*(y1 + y2^2 + 1) + x2*(y1*y2 - y2^2) + x3*(y1*y2 + y2^2) + 1 <= 0;
+end

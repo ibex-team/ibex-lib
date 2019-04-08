@@ -19,8 +19,9 @@
 #include "ibex_Timer.h"
 #include "ibex_Exception.h"
 #include "ibex_Linear.h"
+#include "ibex_CovSolverData.h"
+
 #include <vector>
-#include "ibex_QualifiedBox.h"
 
 namespace ibex {
 
@@ -36,7 +37,8 @@ namespace ibex {
 
 class CellLimitException : public Exception {} ;
 
-class Manifold;
+class CovSolverData;
+class CovSolverDataFactory;
 
 class Solver {
 public:
@@ -96,16 +98,26 @@ public:
 	 *
 	 *   INFEASIBLE:        (complete search) infeasible problem.
 	 *
-	 *   NOT_ALL_VALIDATED: (incomplete search) minimal width (eps-min)
-	 *                      reached
+	 *   NOT_ALL_VALIDATED: (incomplete search) a non-validated box
+	 *                      reaching the minimal width (eps-min)
+	 *                      has been found.
+	 *
 	 *   TIME_OUT:          (incomplete search) time out
 	 *
-	 *   CELL_OVERFLOW:     (incomplete search) cell overflow
+	 *   CELL_OVERFLOW:     (incomplete search) cell overflow : the number of
+	 *                      cell has exceeded the limit.
 	 *
 	 * The vector of "solutions" (output boxes) found by the solver
 	 * are retrieved with #get_solutions().
 	 */
 	Status solve(const IntervalVector& init_box);
+
+	/**
+	 * \brief Continue solving of the system.
+	 *
+	 * \param cov - COV data structure containing the input paving;
+	 */
+	Status solve(const CovSolverData& cov);
 
 	/**
 	 * \brief Continue solving of the system.
@@ -128,31 +140,39 @@ public:
 	 */
 	void start(const IntervalVector& init_box);
 
+	/**
+	 * \brief Start solving (interactive mode).
+	 *
+	 * Can also be used to restart a new search.
+	 */
+	void start(const CovSolverData& data);
 
+	/**
+	 * \brief Start solving (interactive mode).
+	 *
+	 * Can also be used to restart a new search.
+	 */
 	void start(const char* input_paving);
 
 	/**
-	 * \brief Find the next solution (interactive mode).
+	 * \brief Find the next covering box (interactive mode).
 	 *
-	 * \param sol - (output argument) pointer to the new solution (if found). This
-	 *              is just the address of the last element in the "solutions" vector.
-	 *              Set to NULL if search is over, time is out or the number of cells
-	 *              exceeds the limit.
+	 * The next box is either a new solution, a boundary or an unknown box.
 	 *
-	 * \return Possible values. For commodity, the same return type is used for next(..)
-	 *         and solve(..) but the interpretation slightly differs:
+	 * \return true if a new covering box is found.
 	 *
-	 *   SUCCESS:           a new validated solution has been found.
+	 * \param status - status of the new box found. Undefined if an exception is
+	 *               thrown, or the search is over.
+	 * \param sol - (output argument) pointer to the new box. This parameter is
+	 *              ignored if set to NULL (default value). Otherwise, in return, *sol
+	 *              is the address of the last element added in the CovSolverData
+	 *              structure.
+	 *              *sol is set to NULL if search is over, time is out or the number
+	 *              of cells exceeds the limit.
 	 *
-	 *   INFEASIBLE:        no more solution (search over).
-	 *
-	 *   NOT_ALL_VALIDATED: a non-validated box reaching the minimal width (eps-min)
-	 *                      has been found.
-	 *   TIME_OUT:          time is out
-	 *
-	 *   CELL_OVERFLOW:     the number of cell has exceeded the limit.
+	 * \throw CellLimitException or TimeOutException
 	 */
-	QualifiedBox* next();
+	bool next(CovSolverData::BoxStatus& box_status, const IntervalVector** sol=NULL);
 
 	/**
 	 * \brief Displays on standard output a report of the last call to solve(...).
@@ -164,7 +184,7 @@ public:
 	 *
 	 * \return the output boxes of the last call to solve(...).
 	 */
-	const Manifold& get_manifold() const;
+	const CovSolverData& get_data() const;
 
 	/**
 	 * \brief Get the time spent.
@@ -244,12 +264,6 @@ public:
 
 
 protected:
-
-	/**
-	 * \brief Set variable names in the manifold structure.
-	 */
-	void set_var_names();
-
 	/**
 	 * \brief Call "next" until search is over.
 	 */
@@ -266,7 +280,7 @@ protected:
 	 * slightly changed (due to inflating Newton) and the actual "solution"
 	 * is stored in the existence box of the output.
 	 */
-	QualifiedBox check_sol(const IntervalVector& box);
+	CovSolverData::BoxStatus check_sol(const IntervalVector& box);
 
 	/**
 	 * \brief Check if the box is "BOUNDARY"
@@ -284,10 +298,7 @@ protected:
 	 */
 	bool is_too_small(const IntervalVector& box);
 
-	/**
-	 * \brief Store the solution in "solutions" and print it (if trace>=0).
-	 */
-	QualifiedBox& store_sol(const QualifiedBox& sol);
+	bool check_ineq(const IntervalVector& box);
 
 	/**
 	 * \brief Check if time is out.
@@ -298,8 +309,6 @@ protected:
 	 * \brief Flush
 	 */
 	void flush();
-
-	BitSet impact;
 
 	/*
 	 * \brief Initial box of the current search.
@@ -339,21 +348,36 @@ protected:
 	/*
 	 * \brief Solutions found in the current search.
 	 */
-	Manifold* manif;
+	CovSolverData* manif;
 
 	/*
 	 * \brief CPU running time used to obtain this manifold.
 	 */
 	double time;
+
+	/*
+	 * \brief CPU running time of the previous call.
+	 */
+	double old_time;
+
 	Timer timer;
 
 	/**
 	 * \brief Number of cells used to obtain this manifold.
 	 */
 	unsigned int nb_cells;
+
+	/**
+	 * \brief Number of cells of the previous call.
+	 */
+	unsigned int old_nb_cells;
 };
 
 /*============================================ inline implementation ============================================ */
+
+inline const CovSolverData& Solver::get_data() const {
+	return *manif;
+}
 
 
 } // end namespace ibex

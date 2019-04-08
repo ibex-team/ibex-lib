@@ -1,46 +1,51 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_OptimShaving.cpp
+// File        : ibex_CtcOptimShaving.cpp
 // Author      : Ignacio Araya, Gilles Chabert,
 //               Bertrand Neveu, Gilles Trombettoni
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Apr 4, 2014
-// Last Update : Apr 4, 2014
+// Last Update : Jul 20, 2018
 //============================================================================
 
 #include "ibex_CtcOptimShaving.h"
 
 namespace ibex {
 
-const int CtcOptimShaving::LimitCIDDichotomy=100;
-
 CtcOptimShaving::CtcOptimShaving(Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
 			Ctc3BCid (ctc,s3b,scid,vhandled,var_min_width) {
 }
 
-
 void CtcOptimShaving::contract(IntervalVector& box) {
+	ContractContext context(box);
+	contract(box,context);
+}
+
+void CtcOptimShaving::contract(IntervalVector& box, ContractContext& context) {
+
+	this->context = &context;
+
 	int	var_obj=start_var;
-	impact.clear();                                // [gch]
-	impact.add(var_obj);                           // [gch]
-	var3BCID(box,var_obj);
-	impact.remove(var_obj);                        // [gch]
+
+	var3BCID(box, var_obj);
 
 	if (box.is_empty()) {
-		set_flag(FIXPOINT);
+		context.output_flags.add(FIXPOINT);
 	}
+	this->context = NULL;
 }
 
 
 // left shaving only (for optimization)
 
-bool CtcOptimShaving::var3BCID_dicho(IntervalVector& box,int var, double w3b){
+bool CtcOptimShaving::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 	IntervalVector initbox = box;
 
-	int r0= shave_bound_dicho(box,var, w3b, true);  // left shaving , after box contains the left slide
+	// left shaving , after box contains the left slice
+	int r0 = shave_bound_dicho(box,var, w3b, true);
 	if (box[var].ub() == initbox[var].ub())
-		return true; // the left slide reaches the right bound : nothing more to do
+		return true; // the left slice reaches the right bound : nothing more to do
 	IntervalVector leftbox=box;
 	box=initbox;
 	box[var]= Interval(leftbox[var].lb(),initbox[var].ub());
@@ -53,7 +58,7 @@ int CtcOptimShaving::limitCIDDichotomy () {
 
 // left only (for optimization)
 
-bool CtcOptimShaving::var3BCID_slices(IntervalVector& box,int var, int locs3b, double w_DC, Interval& dom) {
+bool CtcOptimShaving::var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval& dom) {
 
 	IntervalVector savebox(box);
 
@@ -76,7 +81,7 @@ bool CtcOptimShaving::var3BCID_slices(IntervalVector& box,int var, int locs3b, d
 		dom = Interval(inf_k, sup_k);
 
 		// Try to refute this slice
-		ctc.contract(box,impact);
+		update_and_contract(box, var);
 
 		if (box.is_empty()) {
 			//leftBound = sup_k;

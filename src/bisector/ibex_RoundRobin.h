@@ -4,15 +4,14 @@
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : May 8, 2012
-// Last Update : Dec 25, 2017
+// Created     : May 08, 2012
+// Last Update : Jun 29, 2018
 //============================================================================
 
 #ifndef __IBEX_ROUND_ROBIN_H__
 #define __IBEX_ROUND_ROBIN_H__
 
 #include "ibex_Bsc.h"
-#include "ibex_Backtrackable.h"
 
 namespace ibex {
 
@@ -57,11 +56,6 @@ public:
 	 * NoBisectableVariableException is raised.
 	 */
 	virtual BisectionPoint choose_var(const Cell& cell);
-
-	/**
-	 * \brief Add an instance of #ibex::BisectedVar to the backtrackable data of the root cell.
-	 */
-	void add_backtrackable(Cell& root);
 
 	/**
 	 * \brief Ratio to choose the split point.

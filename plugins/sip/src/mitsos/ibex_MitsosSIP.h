@@ -89,7 +89,7 @@ protected:
 	 *
 	 * If true, set the optimum x* in "x_opt" and f* in the interval [uplo,loup].
 	 */
-	bool solve_ORA(double f_RES, const Vector& x_LBD, double eps_g_SIP_feasible, double eps, Vector& x_opt, double& uplo, double& loup);
+	bool solve_ORA(double f_RES, const Vector& x_LBD, double eps, Vector& x_opt, double& uplo, double& loup);
 
 	/**
 	 * \brief Solve an optimization problem.

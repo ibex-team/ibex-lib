@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_CtcEmpty.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
 // Last Update : May 14, 2012
@@ -44,7 +44,12 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	virtual void contract(IntervalVector& box);
+	void contract(IntervalVector& box);
+
+	/**
+	 * \brief Contract a box.
+	 */
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	/**
 	 * \brief Delete this.

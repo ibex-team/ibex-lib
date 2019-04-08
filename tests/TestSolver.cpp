@@ -15,7 +15,6 @@
 #include "ibex_RoundRobin.h"
 #include "ibex_CellStack.h"
 #include "ibex_CtcHC4.h"
-#include "ibex_Manifold.h"
 
 using namespace std;
 
@@ -46,20 +45,22 @@ void TestSolver::circle1() {
 	Solver solver(sys,hc4,rr,stack,prec,prec);
 	solver.start(IntervalVector(2,Interval(-10,10)));
 
-	bool res;
+	CovSolverData::BoxStatus status;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol1));
+	bool res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
+	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol1));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==2);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol2));
+	res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==2);
+	CPPUNIT_ASSERT(solver.get_data().solution(1).is_superset(sol2));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==false);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(!res);
 }
 
 void TestSolver::circle2() {
@@ -82,15 +83,16 @@ void TestSolver::circle2() {
 
 	solver.start(IntervalVector(2,Interval(-10,10)));
 
-	bool res;
+	CovSolverData::BoxStatus status;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown.back().existence().is_superset(sol1));
+	bool res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::UNKNOWN);
+	CPPUNIT_ASSERT(solver.get_data().nb_unknown()==1);
+	CPPUNIT_ASSERT(solver.get_data().unknown(0).is_superset(sol1));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==false);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(!res);
 }
 
 void TestSolver::circle3() {
@@ -121,20 +123,23 @@ void TestSolver::circle3() {
 
 	solver.start(IntervalVector(2,Interval(-10,10)));
 
-	bool res;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().unknown.back().existence().is_superset(sol1));
+	CovSolverData::BoxStatus status;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol2));
+	bool res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::UNKNOWN);
+	CPPUNIT_ASSERT(solver.get_data().nb_unknown()==1);
+	CPPUNIT_ASSERT(solver.get_data().unknown(0).is_superset(sol1));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==false);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
+	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol2));
+
+	res=solver.next(status);
+	CPPUNIT_ASSERT(!res);
 }
 
 void TestSolver::circle4() {
@@ -172,20 +177,22 @@ void TestSolver::circle4() {
 	box[1]=Interval(-10,10);
 	box[2]=Interval(1,1);
 	solver.start(box);
-	bool res;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==1);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol1));
+	CovSolverData::BoxStatus status;
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==true);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.size()==2);
-	CPPUNIT_ASSERT(solver.get_manifold().inner.back().existence().is_superset(sol2));
+	bool res=solver.next(status);
+	CPPUNIT_ASSERT(res);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
+	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol1));
 
-	res=solver.next();
-	CPPUNIT_ASSERT(res==false);
+	res=solver.next(status);
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==2);
+	CPPUNIT_ASSERT(solver.get_data().solution(1).is_superset(sol2));
+
+	res=solver.next(status);
+	CPPUNIT_ASSERT(!res);
 }
 
 

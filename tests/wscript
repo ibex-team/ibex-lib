@@ -93,8 +93,17 @@ def configure (conf):
         conf.check_cxx (lib="cppunit", uselib_store="CPPUNIT", mandatory=False)
 
     # Looking for fmemopen
-    conf.check_cxx (function_name = "fmemopen", header_name = "stdio.h",
-            mandatory = False)
+    fmemopen_fragment = '''
+      #include <stdio.h>
+      int main(int argc, char **argv) {
+        void (*p)();
+        (void)argc; (void)argv;
+        p=(void(*)())(fmemopen);
+        return !p;
+      }
+    '''
+    conf.check_cxx (fragment = fmemopen_fragment, define_name="HAVE_FMEMOPEN",
+                    mandatory = False)
 
     # Set env variable containing the list of all test source files (by looking
     # recursively for all files ending with '.cpp')
@@ -167,14 +176,20 @@ def utest (tst):
         kwargs = {"features": "test",
                             "use": ["TESTS", "CPPUNIT", "utest_base"],
                             "defines": defines}
+
+        tst.check_cxx(cxxflags="-std=c++11", use="TESTS", mandatory=False, uselib_store="TESTS")
+
+
         if tst.env.DEBUG:
             Logs.info("Enabling debug mode")
-            flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
-            flags += " -fmessage-length=0"
-            tst.define ("DEBUG", 1)
-            for f in flags.split():
-                 tst.check_cxx(cxxflags=f, use="TESTS", mandatory=False, uselib_store="TESTS")
-            
+            flags = "-O0 -g -pg -Wall -fmessage-length=0"
+            tst.define ("DEBUG", 1)    
+        else:
+            flags = "-Wno-deprecated -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
+
+        for f in flags.split():
+            tst.check_cxx(cxxflags=f, use="TESTS", mandatory=False, uselib_store="TESTS")
+
         if tst.env.ENABLE_SHARED:
             # add in rpath if not in LD_LIBRARY_PATH
             ld_lib_path = os.getenv ("LD_LIBRARY_PATH", "").split (":")

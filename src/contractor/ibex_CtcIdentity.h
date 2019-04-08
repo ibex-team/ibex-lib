@@ -30,7 +30,12 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	virtual void contract(IntervalVector& box);
+	void contract(IntervalVector& box);
+
+	/**
+	 * \brief Contract a box.
+	 */
+	virtual void contract(IntervalVector& box, ContractContext& context);
 };
 
 } // end namespace ibex

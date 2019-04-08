@@ -10,7 +10,7 @@
 
 #include "TestCell.h"
 #include "ibex_Cell.h"
-//#include "ibex_EntailedCtr.h"
+#include "ibex_Id.h"
 #include "ibex_Bsc.h"
 #include "ibex_LargestFirst.h"
 #include "ibex_SystemFactory.h"
@@ -21,19 +21,27 @@
 
 namespace ibex {
 
+long BxpTest::id = next_id();
 
 void TestCell::test01() {
 	IntervalVector box (2, Interval(-1,1));
 	Cell * c = new Cell(box);
 
+	CPPUNIT_ASSERT(c->depth==0);
+
 	Cell * copy =new Cell(*c);
 	check(copy->box,c->box);
+
+
+	CPPUNIT_ASSERT(copy->depth==0);
 
 	LargestFirst bsc;
 	std::pair<Cell*, Cell*> new_cells = bsc.bisect(*c);
 
-
 	check(new_cells.first->box|new_cells.second->box,c->box);
+
+	CPPUNIT_ASSERT(new_cells.first->depth==1);
+	CPPUNIT_ASSERT(new_cells.second->depth==1);
 	delete c;
 
 	check(new_cells.first->box|new_cells.second->box,copy->box);
@@ -61,14 +69,14 @@ void TestCell::test02() {
     fac.add_ctr(c2);
     NormalizedSystem sys(fac);
 
-    root->add<EssaiBacktracable>();
-    EssaiBacktracable * back = &root->get<EssaiBacktracable>();
+    root->prop.add(new BxpTest());
+    BxpTest* back = (BxpTest*) root->prop[BxpTest::id];
     back->n = 100;
 	CPPUNIT_ASSERT(back->n == 100);
-	Cell * copy =new Cell(*root);
-	CPPUNIT_ASSERT(almost_eq(copy->box,root->box));
+	Cell* copy =new Cell(*root);
+	CPPUNIT_ASSERT(copy->box == root->box);
 
-    EssaiBacktracable * back_copy = &copy->get<EssaiBacktracable>();
+    BxpTest* back_copy = (BxpTest*) copy->prop[BxpTest::id];
 	CPPUNIT_ASSERT(back_copy->n == 100);
 	back_copy->n = 1;
 	CPPUNIT_ASSERT(back->n == 100);
@@ -78,8 +86,8 @@ void TestCell::test02() {
 	std::pair<Cell*, Cell*> new_cells = bsc.bisect(*root);
 	CPPUNIT_ASSERT(almost_eq(new_cells.first->box|new_cells.second->box,root->box));
 
-    EssaiBacktracable * back_1 = &new_cells.first->get<EssaiBacktracable>();
-    EssaiBacktracable * back_2 = &new_cells.second->get<EssaiBacktracable>();
+    BxpTest* back_1 = (BxpTest*) new_cells.first->prop[BxpTest::id];
+    BxpTest* back_2 = (BxpTest*) new_cells.second->prop[BxpTest::id];
 
 	CPPUNIT_ASSERT(back_1->n == 100);
 	CPPUNIT_ASSERT(back_2->n == 100);

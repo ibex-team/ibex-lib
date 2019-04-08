@@ -43,6 +43,8 @@
 namespace ibex {
 
 /**
+ * \ingroup tools
+ *
  * This class is used to record the data created dynamically
  * (see, e.g., DefaultSolver, DefaultOptimizer), to ease disallocation.
  *

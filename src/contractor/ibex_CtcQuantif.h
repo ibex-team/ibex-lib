@@ -74,14 +74,10 @@ protected:
 	 *
 	 * \param x the vector of variables
 	 * \param y the vector parameters.
+	 *
+	 * Return true if the contractor is inactive.
 	 */
-	void contract(IntervalVector& x, IntervalVector& y);
-
-	/**
-	 * \brief temporary variable to detect inactivity
-	 */
-	BitSet flags;
-	const BitSet impact;
+	bool contract(IntervalVector& x, IntervalVector& y);
 
 	/**
 	 * \brief The Contractor.

@@ -1,0 +1,267 @@
+//============================================================================
+//                                  I B E X
+// File        : ibex_ExprOperators.h
+// Author      : Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Sep 28, 2018
+// Last update : Oct 07, 2018
+//============================================================================
+
+#ifndef __IBEX_EXPR_OPERATORS_H__
+#define __IBEX_EXPR_OPERATORS_H__
+
+#include "ibex_Expr.h"
+#include "ibex_SymbolMap.h"
+
+namespace ibex {
+
+/*
+ * \brief Template class for user-defined binary operators
+ */
+template<const char* Name, class Input1, class Input2, class Output>
+class BinaryOperator {
+public:
+	/**
+	 * \brief The dimension of the output of op(x1,x2).
+	 */
+	static Dim dim(const Dim& x1_dim, const Dim& x2_dim);
+
+	/**
+	 * \brief Forward evaluation of the operator.
+	 *
+	 * \return [y] <-- op([x1],[x2]).
+	 */
+	static Output fwd(const Input1& x1, const Input2& x2);
+
+	/**
+	 * \brief Backward evaluation of the operator.
+	 *
+	 * [x1] and [x2] are set such that
+	 *
+	 * ([x1]_out,[x2]_out) <-- { (x1,x2) in ([x1]_in,[x2]_in), y in [y] y=op(x1,x2) }
+	 */
+	static void bwd(const Output& y, Input1& x1, Input2& x2);
+
+	/**
+	 * \brief Numerical partial derivative of the operator wrt x1.
+	 *
+	 * Computed using backward automatic differentiation.
+	 *
+	 * Typically return d(op)/dx1([x1],[x2]) * [g].
+	 */
+	static Input1 diff1(const Input1& x1, const Input2& x2, const Output& g);
+
+	/**
+	 * \brief Numerical partial derivative of the operator wrt x2.
+	 *
+	 * Computed using backward automatic differentiation.
+	 *
+	 * Typically return d(op)/dx2([x1],[x2]) * [g].
+	 */
+	static Input2 diff2(const Input1& x1, const Input2& x2, const Output& g);
+
+	/**
+	 * \brief Symbolic partial derivative of the operator wrt x1.
+	 */
+	static const ExprNode& diff1(const ExprNode& x1, const ExprNode& x2, const ExprNode& g);
+
+	/**
+	 * \brief Symbolic partial derivative of the operator wrt x2.
+	 */
+	static const ExprNode& diff2(const ExprNode& x1, const ExprNode& x2, const ExprNode& g);
+};
+
+/*
+ * \brief Template class for user-defined unary operators
+ */
+template<const char* Name, class Input, class Output>
+class UnaryOperator {
+public:
+	/**
+	 * \brief The dimension of the output of op(x).
+	 */
+	static Dim dim(const Dim& x_dim);
+
+	/**
+	 * \brief Forward evaluation of the operator.
+	 *
+	 * \return [y] <-- op([x]).
+	 */
+	static Output fwd(const Input& x);
+
+	/**
+	 * \brief Backward evaluation of the operator.
+	 *
+	 * [x] are set such that
+	 *
+	 * [x]_out <-- { x in [x]_in, y in [y] y=op(x) }
+	 */
+	static void bwd(const Output& y, Input& x);
+
+	/**
+	 * \brief Numerical derivative of the operator.
+	 *
+	 * Computed using backward automatic differentiation.
+	 *
+	 * Typically return d(op)/dx([x]) * [g].
+	 */
+	static Input diff(const Input& x, const Output& g);
+
+	/**
+	 * \brief Symbolic derivative of the operator.
+	 */
+	static const ExprNode& diff(const ExprNode& x, const ExprNode& g);
+};
+
+} // end namespace
+
+@OPERATORS_INCLUDES@
+
+namespace ibex {
+
+@OPERATORS_INLINE_UNARY@
+@OPERATORS_INLINE_BINARY@
+
+/**
+ * \ingroup symbolic
+ * \brief Binary operator expression node.
+ */
+class ExprGenericBinaryOp : public ExprBinaryOp {
+public:
+
+	/** Create a new node of the binary operator "op_name". */
+	static const ExprGenericBinaryOp& new_(const char* op_name, const ExprNode& left, const ExprNode& right);
+
+	/** Create an equality constraint op(expr)=expr. */
+	const ExprCtr& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint op(expr)=value. */
+	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint op(expr)=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint op(expr)=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
+
+	/** Type of the "dim" function. */
+	typedef Dim (*dim_func)(const Dim& x1, const Dim& x2);
+
+	/** Type of the "fwd" function. */
+	typedef Domain (*eval_func)(const Domain& x1, const Domain& x2);
+
+	/** Type of the "bwd" function. */
+	typedef void (*bwd_func)(const Domain& y, Domain& x1, Domain& x2);
+
+	/** Type of the numerical "diff" functions. */
+	typedef Domain (*num_diff_func)(const Domain& x1, const Domain& x2, const Domain& g);
+
+	/** Type of the symbolic "diff" functions. */
+	typedef const ExprNode& (*symb_diff_func)(const ExprNode& expr1, const ExprNode& expr2, const ExprNode& g);
+
+	/** Callback for "fwd" */
+	eval_func eval;
+
+	/** Callback for "bwd" */
+	bwd_func bwd;
+
+	/** Callback for "diff1" */
+	num_diff_func num_diff1;
+
+	/** Callback for "diff2" */
+	num_diff_func num_diff2;
+
+	/** Callback for "diff1" */
+	symb_diff_func symb_diff1;
+
+	/** Callback for "diff2" */
+	symb_diff_func symb_diff2;
+
+	/** Get the "fwd" function. */
+	static eval_func get_eval(const char* name);
+
+	/** Operator name, ex: "cos", "exp". */
+	const char* name;
+
+protected:
+	/* Build the operator. */
+	ExprGenericBinaryOp(const char* name, const ExprNode& left, const ExprNode& right);
+
+	/* Delete this. */
+	~ExprGenericBinaryOp();
+};
+
+/**
+ * \ingroup symbolic
+ * \brief Unary operator expression node.
+ */
+class ExprGenericUnaryOp : public ExprUnaryOp {
+public:
+	
+	/** Create a new node of the unary operator "op_name". */
+	static const ExprGenericUnaryOp& new_(const char* op_name, const ExprNode& expr);
+
+	/** Create an equality constraint op(expr)=expr. */
+	const ExprCtr& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint op(expr)=value. */
+	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint op(expr)=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint op(expr)=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
+
+	/** Type of the "dim" function. */
+	typedef Dim (*dim_func)(const Dim& x);
+
+	/** Type of the "fwd" function. */
+	typedef Domain (*eval_func)(const Domain& x);
+
+	/** Type of the "bwd" function. */
+	typedef void (*bwd_func)(const Domain& y, Domain& x);
+
+	/** Type of the "diff" function. */
+	typedef Domain (*num_diff_func)(const Domain& x, const Domain& g);
+
+	/** Type of the "diff" function. */
+	typedef const ExprNode& (*symb_diff_func)(const ExprNode& expr, const ExprNode& g);
+
+	/** Callback for "fwd" */
+	eval_func eval;
+
+	/** Callback for "bwd" */
+	bwd_func bwd;
+
+	/** Callback for "diff" */
+	num_diff_func num_diff;
+
+	/** Callback for "diff" */
+	symb_diff_func symb_diff;
+
+	/** Get the "fwd" function. */
+	static eval_func get_eval(const char* name);
+
+	/** Operator name, ex: "cos", "exp". */
+	const char* name;
+
+protected:
+	/* Build the operator. */
+	ExprGenericUnaryOp(const char* name, const ExprNode& subexpr);
+
+	/* Delete this. */
+	~ExprGenericUnaryOp();
+};
+
+
+} // end namespace
+
+#endif /* __IBEX_EXPR_OPERATORS_H__ */

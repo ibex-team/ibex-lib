@@ -35,16 +35,16 @@ int main(int argc, char** argv) {
 
 	args::ArgumentParser parser("********* IbexSolve (defaultsolver) *********.", "Solve a Minibex file.");
 	args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
+	args::Flag version(parser, "version", "Display the version of this plugin (same as the version of Ibex).", {'v',"version"});
 	args::ValueFlag<double> eps_x_min(parser, "float", _eps_x_min.str(), {'e', "eps-min"});
 	args::ValueFlag<double> eps_x_max(parser, "float", _eps_x_max.str(), {'E', "eps-max"});
 	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo (none).", {'t', "timeout"});
-	args::ValueFlag<string> input_file(parser, "filename", "Manifold input file. The file contains a "
-			"(intermediate) description of the manifold with boxes in the MNF (binary) format.", {'i',"input"});
-	args::ValueFlag<string> output_file(parser, "filename", "Manifold output file. The file will contain the "
-			"description of the manifold with boxes in the MNF (binary) format.", {'o',"output"});
-	args::Flag format(parser, "format", "Show the output text format", {"format"});
+	args::ValueFlag<string> input_file(parser, "filename", "COV input file. The file contains a "
+			"(intermediate) description of the manifold with boxes in the COV (binary) format.", {'i',"input"});
+	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
+			"description of the manifold with boxes in the COV (binary) format. See --format", {'o',"output"});
+	args::Flag format(parser, "format", "Give a description of the COV format used by IbexSolve", {"format"});
 	args::Flag bfs(parser, "bfs", "Perform breadth-first search (instead of depth-first search, by default)", {"bfs"});
-	args::Flag txt(parser, "txt", "Write the output manifold in a easy-to-parse text file. See --format", {"txt"});
 	args::Flag trace(parser, "trace", "Activate trace. \"Solutions\" (output boxes) are displayed as and when they are found.", {"trace"});
 	args::ValueFlag<string> boundary_test_arg(parser, "true|full-rank|half-ball|false", "Boundary test strength. Possible values are:\n"
 			"\t\t* true:\talways satisfied. Set by default for under constrained problems (0<m<n).\n"
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
 	args::Flag sols(parser, "sols", "Display the \"solutions\" (output boxes) on the standard output.", {'s',"sols"});
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
-	args::ValueFlag<string> forced_params(parser, "vars","Force some variables to be parameters in the parametric proofs.",{"forced-params"});
+	args::ValueFlag<string> forced_params(parser, "vars","Force some variables to be parameters in the parametric proofs, separated by '+'. Example: --forced-params=x+y",{"forced-params"});
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
 	try
@@ -80,8 +80,13 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	if (version) {
+		cout << "IbexSolve Release " << _IBEX_RELEASE_ << endl;
+		exit(0);
+	}
+
 	if (format) {
-		cout << Manifold::format() << endl;
+		cout << CovSolverData::format() << endl;
 		exit(0);
 	}
 
@@ -122,7 +127,7 @@ int main(int argc, char** argv) {
 			// filename without extension
 			string filename_no_ext=filename.Get().substr(0, p);
 			stringstream ss;
-			ss << filename_no_ext << ".mnf";
+			ss << filename_no_ext << ".cov";
 			output_manifold_file=ss.str();
 
 			ifstream file;
@@ -146,8 +151,6 @@ int main(int argc, char** argv) {
 
 		if (!quiet) {
 			cout << "  output file:\t\t" << output_manifold_file << "\n";
-			if (txt)
-				cout << "  output format:\tTXT" << endl;
 		}
 
 		// Build the default solver
@@ -173,7 +176,7 @@ int main(int argc, char** argv) {
 			}
 
 			if (!quiet)
-				cout << "  boundary test:\t\t" << boundary_test_arg.Get() << endl;
+				cout << "  boundary test:\t" << boundary_test_arg.Get() << endl;
 		}
 
 		if (forced_params) {
@@ -234,12 +237,9 @@ int main(int argc, char** argv) {
 
 		if (!quiet) s.report();
 
-		if (sols) cout << s.get_manifold() << endl;
+		if (sols) cout << s.get_data() << endl;
 
-		if (txt)
-			s.get_manifold().write_txt(output_manifold_file.c_str());
-		else
-			s.get_manifold().write(output_manifold_file.c_str());
+		s.get_data().save(output_manifold_file.c_str());
 
 		if (!quiet) {
 			cout << " results written in " << output_manifold_file << "\n";

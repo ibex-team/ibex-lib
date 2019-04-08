@@ -61,7 +61,7 @@ protected:
 	 * inside or outside the set. The first sample point
 	 * is the midpoint.
 	 */
-	static const int NB_SAMPLES;
+	static constexpr int NB_SAMPLES = 1;
 
 	/** Boundary contractor. */
 	Ctc& ctc_boundary;

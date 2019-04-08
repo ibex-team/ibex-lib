@@ -86,6 +86,11 @@ void BD_Factory::add_discretized_ctr(double eps_g) {
 			}
 		}
 
+		// all the constraints generated with constraint n°c
+		// (stored in an array for cleanup)
+		Array<const ExprNode> exprs_ctr(p_boxes.size());
+		int i=0;
+
 		// We generate one constraint for each p_box
 		for (list<Vector>::iterator it=p_boxes.begin(); it!=p_boxes.end(); it++) {
 
@@ -103,6 +108,7 @@ void BD_Factory::add_discretized_ctr(double eps_g) {
 					new_args.set_ref(K,new_vars[I++]);
 				else
 					// a parameter becomes a constant
+					// (note: can have a reference because the expression is copied afterward)
 					new_args.set_ref(K,ExprConstant::new_(sip.p_domain[J++],true));
 			}
 			const ExprNode* expr_ctr_tmp=&sip.sys.ctrs[c].f(new_args);
@@ -130,8 +136,13 @@ void BD_Factory::add_discretized_ctr(double eps_g) {
 			//cout << "  generated constraint:" << ctr << endl;
 			add_ctr(ctr);
 
-			cleanup(expr_ctr,false);
+			exprs_ctr.set_ref(i++,expr_ctr);
+
 		}
+
+		cleanup(exprs_ctr,false);
+		f_ctrs_copy.clone.clean();
+
 		//cout << endl;
 	}
 }
@@ -147,15 +158,18 @@ void BD_Factory::add_gaol(double f_RES) {
 			// (there is no parameter in the goal function):
 			new_args.set_ref(K,ExprConstant::new_(sip.p_domain[J++],true));
 	}
-	const ExprNode& goal_node=(*sip.sys.goal)(new_args);
+	const ExprNode* goal_node=&((*sip.sys.goal)(new_args));
 
 	if (problem==ORA) {
 		const ExprConstant& f_RES_node=ExprConstant::new_scalar(f_RES);
-		add_ctr(goal_node <= f_RES);
-		const ExprNode& eta=new_vars[sip.n_arg];
-		add_goal(-eta);
+		goal_node = &((*goal_node) - f_RES);
+		add_ctr(ExprCtr(*goal_node,LEQ));
+
+		const ExprNode& minus_eta=-new_vars[sip.n_arg];
+		add_goal(minus_eta);
+		delete &minus_eta;
 	} else {
-		add_goal(goal_node);
+		add_goal(*goal_node);
 	}
 
 	// cleanup
@@ -166,7 +180,10 @@ void BD_Factory::add_gaol(double f_RES) {
 			delete &new_args[K];
 		}
 	}
-	cleanup(goal_node,false);
+
+	cleanup(*goal_node,false);
+
+	f_ctrs_copy.clone.clean();
 }
 
 BD_Factory::~BD_Factory() {

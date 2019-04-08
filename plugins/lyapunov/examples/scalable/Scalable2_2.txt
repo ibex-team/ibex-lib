@@ -1,0 +1,11 @@
+variables
+  x[2] in (0; 0);
+
+function f(x[2])
+  p=(-1 + x(1)*x(2));
+  return(x(1)*p; x(2)*p);
+end
+
+function v(u[2])
+  return(u(1)^2 + u(2)^2);
+end

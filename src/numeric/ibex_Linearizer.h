@@ -12,6 +12,7 @@
 
 #include "ibex_IntervalVector.h"
 #include "ibex_LPSolver.h"
+#include "ibex_BoxProperties.h"
 
 namespace ibex {
 
@@ -21,7 +22,7 @@ namespace ibex {
  * \brief Linearization method.
  *
  * This in an abstract class for all linear approximations
- * (relaxations or restrictions) of nonlinear systems.
+ * (relaxations or restrictions) of nonlin, int goal_varear systems.
  */
 class Linearizer {
 public:
@@ -44,6 +45,20 @@ public:
 	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver)=0;
 
 	/**
+	 * \brief Add constraints in a LP solver.
+	 *
+	 * By default, call linearize(box, lp_solver).
+	 */
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
+
+	/**
+	 * \brief Add properties required by this linearizer.
+	 *
+	 * By default: add nothing.
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~Linearizer();
@@ -52,6 +67,11 @@ public:
 	 * \brief Number of variables
 	 */
 	int nb_var() const;
+
+	/**
+	 * \brief Identifying number.
+	 */
+	const long id;
 
 protected:
 
@@ -65,6 +85,14 @@ protected:
 
 inline int Linearizer::nb_var() const {
 	return n;
+}
+
+inline void Linearizer::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+
+}
+
+inline int Linearizer::linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) {
+	return linearize(box, lp_solver);
 }
 
 } /* namespace ibex */

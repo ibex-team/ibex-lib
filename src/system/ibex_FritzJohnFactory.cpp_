@@ -56,7 +56,7 @@ class FritzJohnFactory : public SystemFactory {
 
 public:
 
-	static const double ACTIVE_BOUND_CEIL;
+	static constexpr double ACTIVE_BOUND_CEIL = 1e7;
 
 	/** bound_ctr is an array representing the bounds of the initial box of the system
 	 * that are less (in absolute value) than #ACTIVE_BOUND_CEIL.
@@ -309,11 +309,7 @@ public:
 	}
 };
 
-
-const double FritzJohnFactory::ACTIVE_BOUND_CEIL = 1e7;
-
 } // end anonymous namespace
-
 
 } // end namespace ibex
 

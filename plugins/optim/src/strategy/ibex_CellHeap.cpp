@@ -15,7 +15,7 @@ using namespace std;
 namespace ibex {
 
 CellHeap::CellHeap(const ExtendedSystem& sys) :
-    		Heap<Cell>(*new CellCostVarLB(sys.goal_var())),
+    		Heap<Cell>(*new CellCostVarLB(sys, sys.goal_var())),
 			sys(sys) {
 }
 

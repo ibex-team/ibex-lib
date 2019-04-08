@@ -5,11 +5,12 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 8, 2012
-// Last Update : Dec 25, 2017
+// Last Update : Jul 6, 2018
 //============================================================================
 
 #include "ibex_Bsc.h"
 #include "ibex_Exception.h"
+#include "ibex_Id.h"
 
 using namespace std;
 
@@ -29,13 +30,12 @@ Bsc::Bsc(const Vector& prec) : _prec(prec) {
 		if (prec[i]<=0) ibex_error("precision must be a nonnegative number");
 }
 
-void Bsc::add_backtrackable(Cell& root) {
-	root.add<BisectedVar>();
+void Bsc::add_property(const IntervalVector& init_box, BoxProperties& map) {
+
 }
 
 pair<IntervalVector,IntervalVector> Bsc::bisect(const IntervalVector& box) {
 	Cell cell(box);
-	add_backtrackable(cell);
 	pair<Cell*,Cell*> p=bisect(cell);
 	pair<IntervalVector,IntervalVector> boxes=make_pair(p.first->box,p.second->box);
 	delete p.first;

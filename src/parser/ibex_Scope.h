@@ -64,6 +64,8 @@ public:
 	/** Add an (uninitialized) iterator. */
 	void add_iterator(const char* id);
 
+	//void add_operator(const char* id);
+
 	/*------------- get data associated to symbols in the current scope -----------*/
 
 //	/* Bind an ExprNode object to a constant symbol */
@@ -100,9 +102,16 @@ public:
 	void set_iter_value(const char* id, int value);
 
 	/*---------------------------------------------------------------------*/
-	/* return the token associated to a symbol (used by lexer)
-	 * either TK_SYMBOL, TK_CONSTANT, TK_TMP_SYMBOL, TK_FUNC_RETURN or TK_FUNC. */
+	/* Return the token associated to a symbol (used by lexer)
+	 * either:
+	 *    TK_ENTITY:           symbol of a variable (from the "variables" block)
+	 *    TK_CONSTANT:         symbol of a constant (from the "constants" block)
+	 *    TK_FUNC_SYMBOL:      name of a function declared in minibex.
+	 *    TK_EXPR_TMP_SYMBOL:  left-hand symbol in an expression assignment like expr=f(x)
+	 *    TK_ITERATOR:         name of an iterator in a "for" constraint loop
+	 */
 	int token(const char* id) const;
+	/*---------------------------------------------------------------------*/
 
 	/* Return if id is the symbol of a constant */
 	bool is_cst_symbol(const char* id) const;

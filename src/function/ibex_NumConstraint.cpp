@@ -12,6 +12,7 @@
 #include "ibex_SyntaxError.h"
 #include "ibex_System.h"
 #include "ibex_ExprCopy.h"
+#include "ibex_Id.h"
 
 #include <sstream>
 #include <mutex>
@@ -38,39 +39,39 @@ namespace parser {
 extern System* system;
 }
 
-NumConstraint::NumConstraint(const char* filename) : f(*new Function()), op(EQ), own_f(true) {
+NumConstraint::NumConstraint(const char* filename) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_system(System(filename));
 }
 
-NumConstraint::NumConstraint(const char* x, const char* c) : f(*new Function()), op(EQ), own_f(true) {
+NumConstraint::NumConstraint(const char* x, const char* c) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_string(Array<const char*>(x),c);
 }
 
-NumConstraint::NumConstraint(const char* x1, const char* x2, const char* c) : f(*new Function()), op(EQ), own_f(true) {
+NumConstraint::NumConstraint(const char* x1, const char* x2, const char* c) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_string(Array<const char*>(x1,x2),c);
 }
 
-NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* c) : f(*new Function()), op(EQ), own_f(true) {
+NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* c) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_string(Array<const char*>(x1,x2,x3),c);
 }
 
-NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* c) : f(*new Function()), op(EQ), own_f(true) {
+NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* c) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4),c);
 }
 
-NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* c) : f(*new Function()), op(EQ), own_f(true) {
+NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* c) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5),c);
 }
 
-NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* c) : f(*new Function()), op(EQ), own_f(true) {
+NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* c) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6),c);
 }
 
-NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* c) : f(*new Function()), op(EQ), own_f(true) {
+NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* c) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7),c);
 }
 
-NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* c) : f(*new Function()), op(EQ), own_f(true) {
+NumConstraint::NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* c) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8),c);
 }
 

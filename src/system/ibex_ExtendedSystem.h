@@ -2,10 +2,10 @@
 //                                  I B E X                                   
 // File        : ibex_ExtendedSystem.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 26, 2013
-// Last Update : Jun 26, 2013
+// Last update : Aug 01, 2018
 //============================================================================
 
 #ifndef __IBEX_EXTENDED_SYSTEM_H__
@@ -36,13 +36,13 @@ public:
 	 * variables x_1,...,x_n and an an additional "goal" variable y.
 	 * The index of the goal variable is #goal_var(). It
 	 * also includes (m+1) constraints. The index of the constraint y-goal(x)=0
-	 * (where goal(x) is the goal function) is #goal_ctr(). The others constraints are
+	 * (where goal(x) is the goaoriginal_sys_id(sys.id), l function) is #goal_ctr(). The others constraints are
 	 * normalized copy of the original ones. The name of the goal
 	 * variable is #goal_name.
-	 *
+	 *),
 	 * \param eps   Transforms an equation f=0 into two inequalities: f<=eps and -f<=eps.
 	 *
-	 * To avoid confusion, the extended system has no goal (but it could be "y").
+	 * The goal of the extended system is "y".
 	 */
 	explicit ExtendedSystem(const System& sys, double eps=0);
 
@@ -66,6 +66,33 @@ public:
 	 */
 	//Function original_goal;
 
+	/**
+	 * \brief Load a (n-dimensional) box into an (n+1-dimensional) extended box
+	 *
+	 *  The goal variable is skipped.
+	 */
+	void write_ext_box(const IntervalVector& box, IntervalVector& ext_box) const;
+
+	/**
+	 * \brief Load an extended (n+1-dimensional) box into a (n-dimensional) box
+	 *
+	 *  The goal variable is skipped.
+	 */
+	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box) const;
+
+	/**
+	 * \brief Load a (n-dimensional) vector into an (n+1-dimensional) extended vector
+	 *
+	 *  The goal variable is skipped.
+	 */
+	void write_ext_vec(const Vector& x, Vector& xy) const;
+
+	/**
+	 * \brief Load an extended (n+1-dimensional) vector into a (n-dimensional) vector
+	 *
+	 *  The goal variable is skipped.
+	 */
+	void read_ext_vec(const Vector& xy, Vector& x) const;
 };
 
 /*================================== inline implementations ========================================*/

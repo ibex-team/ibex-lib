@@ -35,7 +35,12 @@ public:
 	 */
 	~CtcInteger();
 
-	virtual void contract(IntervalVector& box);
+	/**
+	 * \brief Contract a box.
+	 */
+	void contract(IntervalVector& box);
+
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 //	virtual void contract(IntervalVector& box, const BitSet& impact);
 

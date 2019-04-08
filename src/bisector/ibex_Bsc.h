@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 8, 2012
-// Last Update : Dec 25, 2017
+// Last Update : Jul 6, 2018
 //============================================================================
 
 #ifndef __IBEX_BISECTOR_H__
@@ -92,15 +92,13 @@ public:
 	virtual BisectionPoint choose_var(const Cell& cell) = 0;
 
 	/**
-	 * Allows to add the backtrackable data required
+	 * Allows to add the properties required
 	 * by this bisector to the root cell before a
 	 * strategy is executed.<br>
 	 *
-	 * By default: add information on the last bisected variable.
-	 *
-	 * See #ibex::BisectedVar.
+	 * By default: does nothing.
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/**
 	 * \brief Default ratio (0.45)
@@ -134,28 +132,6 @@ private:
 	const Vector _prec;
 };
 
-/** \ingroup bisector
- *
- * \brief Last bisected variable (used by RoundRobin, CtcPropag, etc.)
- */
-class BisectedVar : public Backtrackable {
-public:
-	BisectedVar();
-
-	BisectedVar(int x);
-
-	Backtrackable* copy() const;
-
-	std::pair<Backtrackable*,Backtrackable*> down(const BisectionPoint& b);
-
-	/** -1 if root cell */
-	int var;
-
-protected:
-	explicit BisectedVar(const BisectedVar& e);
-};
-
-
 /*============================================ inline implementation ============================================ */
 
 inline bool Bsc::uniform_prec() const {
@@ -174,26 +150,8 @@ inline bool Bsc::too_small(const IntervalVector& box, int i) const {
 }
 
 inline std::pair<Cell*,Cell*> Bsc::bisect(const Cell& cell) {
-	return cell.subcells(choose_var(cell));
+	return cell.bisect(choose_var(cell));
 }
-
-inline BisectedVar::BisectedVar() : var(-1) {
-
-}
-
-inline BisectedVar::BisectedVar(int x) : var(x) {
-
-}
-
-inline Backtrackable* BisectedVar::copy() const {
-	return new BisectedVar(*this);
-}
-
-inline std::pair<Backtrackable*,Backtrackable*> BisectedVar::down(const BisectionPoint& b) {
-	return std::pair<Backtrackable*,Backtrackable*>(new BisectedVar(b.var),new BisectedVar(b.var));
-}
-
-inline BisectedVar::BisectedVar(const BisectedVar& e) : var(e.var) { }
 
 } // end namespace ibex
 

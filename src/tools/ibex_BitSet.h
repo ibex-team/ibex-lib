@@ -13,6 +13,7 @@
 #include "ibex_mistral_Bitset.h"
 
 #include <cassert>
+#include <climits>
 
 namespace ibex {
 
@@ -36,6 +37,13 @@ class BitSet {
 public:
 
 	/**
+	 * \brief Create an uninitialized bitset.
+	 *
+	 * \warning Must be followed by a call to resize(...) !
+	 */
+	BitSet();
+
+	/**
 	 * \brief Create an "empty" bitset () of capacity n.
 	 *
 	 * The bitset contains n bits, indexed from 0 to n-1, all set to "false".
@@ -55,6 +63,12 @@ public:
 	 * The greatest integer in the list l determines the array capacity.
 	 */
 	BitSet(const int n, const int* l);
+
+	/**
+	 * \brief Initialize a bitset or change the capacity
+	 *
+	 */
+	void resize(int n);
 
 	/**
 	 * \brief Create an "empty" bitset () of capacity n.
@@ -92,6 +106,15 @@ public:
 	 * \brief Set this to another.
 	 */
 	BitSet& operator=(const BitSet& b);
+
+	/**
+	 * \brief Set this list to the intersection with another.
+	 *
+	 * E.g. if b1=(1,2,5,8) and b2=(1,5) then b1 &= b2 gives
+	 *
+	 *      b1 = (1,5)
+	 */
+	BitSet& operator&=(const BitSet& b);
 
 	/**
 	 * \brief Set this list to the union with another.
@@ -175,14 +198,68 @@ public:
 	 */
 	void diff(const BitSet& b);
 
+	/**
+	 * \brief Bitset iterator
+	 *
+	 * Iterates over the sorted list of integer
+	 */
+	class iterator {
+	public:
+		iterator(const BitSet& b, bool min=true);
+
+		iterator& operator++();
+
+		iterator operator++(int);
+
+		operator int() const;
+
+		const BitSet* b;
+		int el; // ==INT_MIN if past-the-end
+	};
+
+	/**
+	 * \brief Bitset const iterator
+	 */
+	typedef iterator const_iterator;
+
+	/**
+	 * \brief First iterator
+	 */
+	iterator begin() const;
+
+	/**
+	 * \brief Past-the-end iterator
+	 */
+	iterator end() const;
+
+protected:
+
+	bool initialized() const;
+
 private:
+
 	Mistral::BitSet bitset;
 
 };
 
+/**
+ * \brief The intersection of two bitsets
+ */
+BitSet operator&(const BitSet& b1, const BitSet& b2);
+
+/**
+ * \brief The union of two bitsets
+ */
+BitSet operator|(const BitSet& b1, const BitSet& b2);
+
+/**
+ * \brief Stream out the bitset
+ */
 std::ostream& operator<<(std::ostream& os, const BitSet& b);
 
 /*================================== inline implementations ========================================*/
+
+inline BitSet::BitSet() : bitset() { }
 
 inline BitSet::BitSet(int n) : bitset(0,n-1,Mistral::BitSet::empt) { }
 
@@ -204,35 +281,93 @@ inline BitSet BitSet::singleton(int n, int i) {
 	return b;
 }
 
-inline bool BitSet::operator==(const BitSet& b) { return bitset==b.bitset; }
+inline bool BitSet::operator==(const BitSet& b) {
+	assert(initialized() && b.initialized());
+	return bitset==b.bitset;
+}
 
-inline bool BitSet::operator!=(const BitSet& b) { return bitset!=b.bitset; }
+inline bool BitSet::operator!=(const BitSet& b) {
+	assert(initialized() && b.initialized());
+	return bitset!=b.bitset;
+}
 
-inline BitSet& BitSet::operator=(const BitSet& b) { bitset=b.bitset; return *this; }
+inline BitSet& BitSet::operator=(const BitSet& b) {
+	assert(initialized() && b.initialized());
+	bitset=b.bitset;
+	return *this;
+}
 
-inline BitSet& BitSet::operator|=(const BitSet& b) { bitset.union_with(b.bitset); return *this; }
+inline BitSet& BitSet::operator&=(const BitSet& b) {
+	assert(initialized() && b.initialized());
+	bitset.intersect_with(b.bitset);
+	return *this;
+}
 
-inline int BitSet::min() const { return bitset.min(); }
+inline BitSet& BitSet::operator|=(const BitSet& b) {
+	assert(initialized() && b.initialized());
+	bitset.union_with(b.bitset);
+	return *this;
+}
 
-inline int BitSet::max() const { return bitset.max(); }
+inline int BitSet::min() const { assert(initialized()); return bitset.min(); }
 
-inline void BitSet::remove(const int elt) { bitset.fast_remove(elt); }
+inline int BitSet::max() const { assert(initialized()); return bitset.max(); }
 
-inline int BitSet::next(const int elt) const { return bitset.next(elt); }
+inline void BitSet::remove(const int elt) { assert(initialized()); bitset.fast_remove(elt); }
 
-inline int BitSet::size() const { return (int) bitset.size(); }
+inline int BitSet::next(const int elt) const { assert(initialized()); return bitset.next(elt); }
 
-inline void BitSet::add(const int elt) { bitset.fast_add(elt); }
+inline int BitSet::size() const { assert(initialized()); return (int) bitset.size(); }
 
-inline bool BitSet::empty() const { return bitset.empty(); }
+inline void BitSet::add(const int elt) { assert(initialized()); bitset.fast_add(elt); }
 
-inline void BitSet::fill(const int lb, const int ub) { bitset.fill(lb,ub); }
+inline bool BitSet::empty() const { assert(initialized()); return bitset.empty(); }
 
-inline void BitSet::clear() { bitset.clear(); }
+inline void BitSet::fill(const int lb, const int ub) { assert(initialized()); bitset.fill(lb,ub); }
 
-inline bool BitSet::operator[](const int i) const { return bitset.fast_contain(i); }
+inline void BitSet::clear() { assert(initialized()); bitset.clear(); }
 
-inline void BitSet::diff(const BitSet& b) { bitset.setminus_with(b.bitset); }
+inline bool BitSet::operator[](const int i) const { assert(initialized()); return bitset.fast_contain(i); }
+
+inline void BitSet::diff(const BitSet& b) {
+	assert(initialized() && b.initialized());
+	bitset.setminus_with(b.bitset);
+}
+
+inline BitSet operator&(const BitSet& b1, const BitSet& b2) { return BitSet(b1)&=b2; }
+
+inline BitSet operator|(const BitSet& b1, const BitSet& b2) { return BitSet(b1)|=b2; }
+
+inline BitSet::iterator BitSet::begin() const { assert(initialized()); return iterator(*this); }
+
+inline BitSet::iterator BitSet::end() const { assert(initialized()); return iterator(*this,false); }
+
+inline BitSet::iterator::iterator(const BitSet& b, bool min) : b(&b), el(min && !b.empty()? b.min():INT_MIN) {
+	assert(b.initialized());
+}
+
+inline BitSet::iterator& BitSet::iterator::operator++() {
+	assert(b->initialized());
+	if (el==b->max()) el=INT_MIN;
+	else el=b->next(el);
+	return *this;
+}
+
+inline BitSet::iterator BitSet::iterator::operator++(int) {
+	assert(b->initialized());
+	BitSet::iterator it(*this);
+	++(*this);
+	return it;
+}
+
+inline BitSet::iterator::operator int() const {
+	assert(b->initialized());
+	return el;
+}
+
+inline bool BitSet::initialized() const {
+	return bitset.table!=NULL;
+}
 
 } // end namespace ibex
   

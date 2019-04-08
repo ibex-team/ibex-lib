@@ -13,6 +13,8 @@
 #include "ibex_Linear.h"
 #include "utils.h"
 #include <float.h>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 using namespace std;
 

@@ -30,6 +30,7 @@ public:
 	CPPUNIT_TEST(issue50_2);
 	CPPUNIT_TEST(issue50_3);
 	CPPUNIT_TEST(issue50_4);
+	CPPUNIT_TEST(unconstrained);
 #endif
 	CPPUNIT_TEST_SUITE_END();
 
@@ -46,6 +47,8 @@ public:
 	void issue50_3();
 	// upperbounding with goal_prec=0 will make the optimizer fail (initial loup < true minimum) --> INFEASIBLE
 	void issue50_4();
+
+	void unconstrained(); // issue 333 and 335
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestOptimizer);

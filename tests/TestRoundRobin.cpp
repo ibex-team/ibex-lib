@@ -24,22 +24,21 @@ void TestRoundRobin::test01() {
 	pair<IntervalVector,IntervalVector> boxes2=boxes.second.bisect(1,rr.ratio);
 
 	Cell c(box);
-	rr.add_backtrackable(c);
 	pair<Cell*,Cell*> p=rr.bisect(c);
-	CPPUNIT_ASSERT(p.first->get<BisectedVar>().var==0);
-	CPPUNIT_ASSERT(p.second->get<BisectedVar>().var==0);
+	CPPUNIT_ASSERT(p.first->bisected_var==0);
+	CPPUNIT_ASSERT(p.second->bisected_var==0);
 	CPPUNIT_ASSERT(almost_eq(p.first->box,boxes.first,0));
 	CPPUNIT_ASSERT(almost_eq(p.second->box,boxes.second,0));
 
 	pair<Cell*,Cell*> p1=rr.bisect(*p.first);
-	CPPUNIT_ASSERT(p1.first->get<BisectedVar>().var==1);
-	CPPUNIT_ASSERT(p1.second->get<BisectedVar>().var==1);
+	CPPUNIT_ASSERT(p1.first->bisected_var==1);
+	CPPUNIT_ASSERT(p1.second->bisected_var==1);
 	CPPUNIT_ASSERT(almost_eq(p1.first->box,boxes1.first,0));
 	CPPUNIT_ASSERT(almost_eq(p1.second->box,boxes1.second,0));
 
 	pair<Cell*,Cell*> p2=rr.bisect(*p.second);
-	CPPUNIT_ASSERT(p2.first->get<BisectedVar>().var==1);
-	CPPUNIT_ASSERT(p2.second->get<BisectedVar>().var==1);
+	CPPUNIT_ASSERT(p2.first->bisected_var==1);
+	CPPUNIT_ASSERT(p2.second->bisected_var==1);
 	CPPUNIT_ASSERT(almost_eq(p2.first->box,boxes2.first,0));
 	CPPUNIT_ASSERT(almost_eq(p2.second->box,boxes2.second,0));
 }
@@ -50,26 +49,25 @@ void TestRoundRobin::test02() {
 	box[1]=box[3]=box[5]=box[7]=box[9]=Interval::ZERO;
 
 	Cell c(box);
-	rr.add_backtrackable(c);
 
 	pair<Cell*,Cell*> p=rr.bisect(c);
-	CPPUNIT_ASSERT(p.first->get<BisectedVar>().var==0);
+	CPPUNIT_ASSERT(p.first->bisected_var==0);
 	CPPUNIT_ASSERT(almost_eq(p.first->box[0],Interval(0,0.5),0));
 
 	p=rr.bisect(*p.first);
-	CPPUNIT_ASSERT(p.first->get<BisectedVar>().var==2);
+	CPPUNIT_ASSERT(p.first->bisected_var==2);
 	CPPUNIT_ASSERT(almost_eq(p.first->box[2],Interval(0,0.5),0));
 
 	p=rr.bisect(*p.first);
-	CPPUNIT_ASSERT(p.first->get<BisectedVar>().var==4);
+	CPPUNIT_ASSERT(p.first->bisected_var==4);
 	CPPUNIT_ASSERT(almost_eq(p.first->box[4],Interval(0,0.5),0));
 
 	p=rr.bisect(*p.first);
-	CPPUNIT_ASSERT(p.first->get<BisectedVar>().var==6);
+	CPPUNIT_ASSERT(p.first->bisected_var==6);
 	CPPUNIT_ASSERT(almost_eq(p.first->box[6],Interval(0,0.5),0));
 
 	p=rr.bisect(*p.first);
-	CPPUNIT_ASSERT(p.first->get<BisectedVar>().var==8);
+	CPPUNIT_ASSERT(p.first->bisected_var==8);
 	CPPUNIT_ASSERT(almost_eq(p.first->box[8],Interval(0,0.5),0));
 
 	CPPUNIT_ASSERT_THROW(rr.bisect(*p.first), NoBisectableVariableException);

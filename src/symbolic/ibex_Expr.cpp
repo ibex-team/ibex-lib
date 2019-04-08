@@ -7,6 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Jan 5, 2012
+ * Last Update : Sep 28, 2018
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Expr.h"
@@ -17,19 +18,18 @@
 #include "ibex_ExprSize.h"
 #include "ibex_ExprCmp.h"
 #include "ibex_String.h"
+#include "ibex_Id.h"
 #include <sstream>
 #include <limits.h>
 #include <stdio.h>
 #include <set>
-#include <atomic>
+
 
 using namespace std;
 
 namespace ibex {
 
 namespace {
-
-atomic_long id_count(0);
 
 int max_height(const ExprNode& n1, const ExprNode& n2) {
 	if (n1.height>n2.height) return n1.height;
@@ -72,7 +72,7 @@ Array<const Dim> dims(const Array<const ExprNode>& comp) {
 } // end anonymous namespace
 
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
-  height(height), size(size), id(id_count++), dim(dim), f(NULL) {
+  height(height), size(size), id(next_id()), dim(dim), f(NULL) {
 
 }
 

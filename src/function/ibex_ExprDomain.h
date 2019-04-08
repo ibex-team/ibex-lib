@@ -164,17 +164,17 @@ inline TemplateDomain<D>& ExprTemplateDomain<D>::operator[](int i) {
 
 template<class D>
 inline void ExprTemplateDomain<D>::write_arg_domains(const Array<TemplateDomain<D> >& d) {
-	load(ExprData<TemplateDomain<D> >::args, d, ExprData<TemplateDomain<D> >::f.nb_used_vars(), ExprData<TemplateDomain<D> >::f.used_vars());
+	load(ExprData<TemplateDomain<D> >::args, d, ExprData<TemplateDomain<D> >::f.used_vars);
 }
 
 template<class D>
 inline void ExprTemplateDomain<D>::write_arg_domains(const Array<const TemplateDomain<D> >& d) {
-	load(ExprData<TemplateDomain<D> >::args, d, ExprData<TemplateDomain<D> >::f.nb_used_vars(), ExprData<TemplateDomain<D> >::f.used_vars());
+	load(ExprData<TemplateDomain<D> >::args, d, ExprData<TemplateDomain<D> >::f.used_vars);
 }
 
 template<class D>
 inline void ExprTemplateDomain<D>::read_arg_domains(Array<TemplateDomain<D> >& d) const {
-	load(d, ExprData<TemplateDomain<D> >::args, ExprData<TemplateDomain<D> >::f.nb_used_vars(), ExprData<TemplateDomain<D> >::f.used_vars());
+	load(d, ExprData<TemplateDomain<D> >::args, ExprData<TemplateDomain<D> >::f.used_vars);
 }
 
 
@@ -182,29 +182,27 @@ template<class D>
 inline void ExprTemplateDomain<D>::write_arg_domains(const typename D::VECTOR& box) {
 
 	if (ExprData<TemplateDomain<D> >::f.all_args_scalar()) {
-		int j;
-		for (int i=0; i<ExprData<TemplateDomain<D> >::f.nb_used_vars(); i++) {
-			j=ExprData<TemplateDomain<D> >::f.used_var(i);
-			ExprData<TemplateDomain<D> >::args[j].i()=box[j];
+		for (std::vector<int>::const_iterator j=ExprData<TemplateDomain<D> >::f.used_vars.begin();
+				j!=ExprData<TemplateDomain<D> >::f.used_vars.end(); ++j) {
+			ExprData<TemplateDomain<D> >::args[*j].i()=box[*j];
 		}
 	}
-	else
-		load(ExprData<TemplateDomain<D> >::args, box, ExprData<TemplateDomain<D> >::f.nb_used_vars(), ExprData<TemplateDomain<D> >::f.used_vars());
+	else {
+		load(ExprData<TemplateDomain<D> >::args, box, ExprData<TemplateDomain<D> >::f.used_vars);
+	}
 }
-
 
 template<class D>
 inline void ExprTemplateDomain<D>::read_arg_domains(typename D::VECTOR& box) const {
 	if (ExprData<TemplateDomain<D> >::f.all_args_scalar()) {
-		int j;
 
-		for (int i=0; i<ExprData<TemplateDomain<D> >::f.nb_used_vars(); i++) {
-			j=ExprData<TemplateDomain<D> >::f.used_var(i);
-			box[j]=ExprData<TemplateDomain<D> >::args[j].i();
+		for (std::vector<int>::const_iterator  j=ExprData<TemplateDomain<D> >::f.used_vars.begin();
+				j!=ExprData<TemplateDomain<D> >::f.used_vars.end(); ++j) {
+			box[*j]=ExprData<TemplateDomain<D> >::args[*j].i();
 		}
 	}
 	else {
-		load(box, ExprData<TemplateDomain<D> >::args, ExprData<TemplateDomain<D> >::f.nb_used_vars(), ExprData<TemplateDomain<D> >::f.used_vars());
+		load(box, ExprData<TemplateDomain<D> >::args, ExprData<TemplateDomain<D> >::f.used_vars);
 	}
 }
 

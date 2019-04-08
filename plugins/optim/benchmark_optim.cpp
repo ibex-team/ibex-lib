@@ -52,20 +52,94 @@ usage (const char *errmsg)
 	ibex_error (s.str().c_str());
 }
 
+#define DECIMALFP_NDECIMAL 1
+#define DECIMALFP_MUL_UINT 10 /* 10^DECIMALFP_NDECIMAL */
+#define DECIMALFP_MUL_DOUBLE 10. /* 10^DECIMALFP_NDECIMAL */
+
+class DecimalFP
+{
+	private:
+		unsigned int _v;
+
+	public:
+		DecimalFP () : _v(UINT_MAX) {} ;
+		DecimalFP (const unsigned int u)
+		{
+			_v = u * DECIMALFP_MUL_UINT;
+		}
+		DecimalFP (const double d)
+		{
+			_v = round (d * DECIMALFP_MUL_DOUBLE);
+		}
+		bool is_nan() const
+		{
+			return _v == UINT_MAX;
+		}
+		double get_double () const
+		{
+			return (this->is_nan()) ? NAN : _v/DECIMALFP_MUL_DOUBLE;
+		}
+		DecimalFP& operator= (const unsigned int u)
+		{
+			_v = u * DECIMALFP_MUL_UINT;
+			return *this;
+		}
+		DecimalFP& operator= (const double d)
+		{
+			_v = round (d * DECIMALFP_MUL_DOUBLE);
+			return *this;
+		}
+		DecimalFP& operator+= (const DecimalFP &o)
+		{
+			this->_v += o._v;
+			return *this;
+		}
+		DecimalFP& operator-= (const DecimalFP &o)
+		{
+			this->_v -= o._v;
+			return *this;
+		}
+		bool operator< (DecimalFP const & o)
+		{
+			return (this->_v < o._v);
+		}
+		bool operator<= (DecimalFP const & o)
+		{
+			return (this->_v <= o._v);
+		}
+		bool operator!= (DecimalFP const & o)
+		{
+			return (this->_v != o._v);
+		}
+		friend ostream& operator<< (ostream &, DecimalFP const &);
+};
+
+
+
+ostream& operator<< (ostream &os, DecimalFP const &v)
+{
+	if (v.is_nan())
+		return os << "nan";
+	else
+		return os << (v._v/DECIMALFP_MUL_UINT) << "." << (v._v%DECIMALFP_MUL_UINT);
+}
+
 /* Return true if timeout was reached for at least one of the #iter run(s).
  * Return false otherwise.
  */
 bool
-do_benchs_iter (System &sys, double prec, double time_limit, unsigned int iter)
+do_benchs_iter (System &sys, DecimalFP prec, double time_limit,
+                unsigned int iter)
 {
 	bool timeout = false;
+	double eps = pow (10, -prec.get_double());
 
 	for (unsigned int i = 0; i < iter; i++)
 	{
 		/* Build the default optimizer */
 		double random_seed = DefaultOptimizer::default_random_seed + (double) i;
-		DefaultOptimizer DefOpt (sys, prec, prec,
-		       NormalizedSystem::default_eps_h, false, true, random_seed, 0.0);
+		DefaultOptimizer DefOpt (sys, eps, eps, NormalizedSystem::default_eps_h,
+		                         false, true, random_seed, 0.0);
 
 		/* Set the time limit */
 		DefOpt.timeout = time_limit;
@@ -74,14 +148,14 @@ do_benchs_iter (System &sys, double prec, double time_limit, unsigned int iter)
 		Optimizer::Status status = DefOpt.optimize (sys.box);
 
 		/* Report some information (computation time, etc.) */
-		std::cout << "BENCH: eps = " << prec
-	            << " ; status = " << DefOpt.get_status()
-	            << " ; time = " << DefOpt.get_time()
-	            << " ; nb_cells = " << DefOpt.get_nb_cells()
-	            << " ; uplo = " << DefOpt.get_uplo()
-	            << " ; loup = " << DefOpt.get_loup()
-	            << " ; random_seed = " << random_seed
-	            << std::endl;
+		std::cout << "BENCH: eps = 10^-" << prec
+		          << " ; status = " << DefOpt.get_status()
+		          << " ; time = " << DefOpt.get_time()
+		          << " ; nb_cells = " << DefOpt.get_nb_cells()
+		          << " ; uplo = " << DefOpt.get_uplo()
+		          << " ; loup = " << DefOpt.get_loup()
+		          << " ; random_seed = " << random_seed
+		          << std::endl;
 
 		tot_time += DefOpt.get_time();
 		timeout |= status == Optimizer::TIME_OUT;
@@ -96,9 +170,9 @@ main (int argc, char *argv[])
 	try
 	{
 		const char *benchfile = NULL;
-		double prec_ndigits_max = NAN, prec_ndigits_min = NAN, time_limit = NAN;
-		double prec_min = NAN, prec_max = NAN;
-    unsigned int iter = 0;
+		double time_limit = NAN;
+		DecimalFP prec_max, prec_min;
+		unsigned int iter = 0;
 
 		argc--; argv++; /* skip argv[0] = binary name */
 
@@ -121,12 +195,12 @@ main (int argc, char *argv[])
 			}
 			else if (strcmp (argv[0], "--prec-ndigits-min") == 0)
 			{
-				prec_ndigits_min = double_from_arg ("--prec-ndigits-min", argv[1]);
+				prec_min = double_from_arg ("--prec-ndigits-min", argv[1]);
 				argc-=2; argv+=2;
 			}
 			else if (strcmp (argv[0], "--prec-ndigits-max") == 0)
 			{
-				prec_ndigits_max = double_from_arg ("--prec-ndigits-max", argv[1]);
+				prec_max = double_from_arg ("--prec-ndigits-max", argv[1]);
 				argc-=2; argv+=2;
 			}
 			else
@@ -137,29 +211,25 @@ main (int argc, char *argv[])
 
 		cout << "# INPUT: bench file: " << benchfile << endl;
 		cout << "# INPUT: time limit: " << time_limit << "s" << endl;
-		cout << "# INPUT: prec ndigits max: " << prec_ndigits_max << endl;
-		cout << "# INPUT: prec ndigits min: " << prec_ndigits_min << endl;
+		cout << "# INPUT: prec ndigits max: " << prec_max << endl;
+		cout << "# INPUT: prec ndigits min: " << prec_min << endl;
 
 		/* Check for missing command-line parameter */
-		if (isnan (prec_ndigits_max))
+		if (prec_max.is_nan())
 			usage ("missing --prec-ndigits-max command-line parameter");
-		else
-			prec_max = pow (10, -prec_ndigits_max);
 
-		if (isnan (prec_ndigits_min))
+		if (prec_min.is_nan())
 			usage ("missing --prec-ndigits-min command-line parameter");
-		else
-			prec_min = pow (10, -prec_ndigits_min);
 
-		if (prec_ndigits_min > prec_ndigits_max)
+		if (prec_max < prec_min)
 			usage ("--prec-ndigits-min should not be larger than --prec-ndigits-max");
 
-		cout << "# INFO: prec max: " << prec_max << endl;
-		cout << "# INFO: prec min: " << prec_min << endl;
+		if (DecimalFP (8.) < prec_max)
+			usage ("--prec-ndigits-max cannot be larger than 8");
 
 		/* Load the file */
 		System sys (benchfile);
-		
+
 		/* Check that the file has a 'goal' */
 		if (!sys.goal)
 			ibex_error ("input file does not contains an optimization problem.");
@@ -168,33 +238,31 @@ main (int argc, char *argv[])
 		bool has_timeout = do_benchs_iter (sys, prec_min, time_limit, iter);
 		if (!has_timeout)
 		{
-			double prec_ndigits = 0.;
-			for ( ; prec_ndigits < MIN (8., prec_ndigits_max); prec_ndigits += 1.)
+			DecimalFP prec = 0., incr = 1.;
+			for ( ; prec < prec_max; prec += incr)
 			{
-				if (prec_ndigits_min < prec_ndigits)
+				if (prec_min < prec)
 				{
-					double prec = pow (10, -prec_ndigits);
 					has_timeout = do_benchs_iter (sys, prec, time_limit, iter);
 					if (has_timeout)
 						break;
 				}
 			}
-			prec_ndigits -= 0.9;
-			for (unsigned int i = 1; i < 10; i++, prec_ndigits += 0.1)
+			prec -= incr; incr = 0.1; prec += incr;
+			for (unsigned int i = 1; i < 10; i++, prec += incr)
 			{
-				if (prec_ndigits <= prec_ndigits_min)
+				if (prec <= prec_min)
 					continue;
-				else if (prec_ndigits > prec_ndigits_max)
+				else if (prec_max < prec)
 					break;
 				else
 				{
-					double prec = pow (10, -prec_ndigits);
 					has_timeout = do_benchs_iter (sys, prec, time_limit, iter);
 					if (has_timeout)
 						break;
 				}
 			}
-			if (!has_timeout && prec_ndigits_max != prec_ndigits_min)
+			if (!has_timeout && prec_max != prec_min)
 				do_benchs_iter (sys, prec_max, time_limit, iter);
 		}
 		std::cout << "# Total time: " << tot_time << std::endl;

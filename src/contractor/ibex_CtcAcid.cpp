@@ -2,10 +2,10 @@
 //                                  I B E X                                   
 // File        : Adaptive CID (ACID) contractor
 // Author      : Bertrand Neveu , Gilles Trombettoni
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 1, 2012
-// Last Update : Jul 1, 2012
+// Last Update : Jul 20, 2018
 //============================================================================
 
 #include "ibex_CtcAcid.h"
@@ -15,25 +15,42 @@ using namespace std;
 
 namespace ibex {
 
-double  CtcAcid::nbvarstat=0;
-//const double CtcAcid::default_ctratio=0.005;
-const double CtcAcid::default_ctratio=0.002;
+double CtcAcid::nbvarstat = 0;
 
 CtcAcid::CtcAcid(const System& sys, const BitSet& cid_vars, Ctc& ctc, bool optim, int s3b, int scid,
 		double var_min_width, double ct_ratio): Ctc3BCid (cid_vars,ctc,s3b,scid,cid_vars.size(),var_min_width),
-		system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio),  nbcidvar(0), nbtuning(0), optim(optim)  {
+				system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio),  nbcidvar(0), nbtuning(0), optim(optim)  {
 	// [gch] BNE check the argument "cid_vars.nb_set()" given to _3BCID
 }
 
 CtcAcid::CtcAcid(const System& sys, Ctc& ctc, bool optim, int s3b, int scid,
 		double var_min_width, double ct_ratio): Ctc3BCid (BitSet::all(sys.nb_var),ctc,s3b,scid,sys.nb_var,var_min_width),
-		system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio), nbcidvar(0) ,  nbtuning(0), optim(optim) {
+				system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio), nbcidvar(0) ,  nbtuning(0), optim(optim) {
 }
 
 void CtcAcid::contract(IntervalVector& box) {
+	ContractContext context(box);
+	contract(box,context);
+}
+
+void CtcAcid::contract(IntervalVector& box, ContractContext& context) {
+	// the initial contraction allows to set, after, the impact
+	// to only one variable (in the slicing process). However, it turns
+	// to be more efficient in practice to skip this initial contraction.
+	// This is probably a side effect of the strategy chosen in DefaultOptimizer
+	// (the call to CtcAcid(HC4) is preceded by a call to HC4 with higher precision).
+
+	// note: we can transmit here the input impact to the contractor
+	// as it is strictly less contracting that ACID (TODO: check that)
+	//ctc.contract(box, context);
+	//if (box.is_empty()) return;
+
+	// --------------------- context ------------------
+	context.impact.clear(); // should we restore the initial impact on return?
+	this->context = &context;
+	// ------------------------------------------------
 
 	int nb_CID_var=cid_vars.size();                    // [gch]
-	impact.clear();                                    // [gch]
 	int nbvarmax=5*nb_CID_var;                         //  au plus 5*nbvar
 	double *ctstat = new double[nbvarmax];
 
@@ -45,9 +62,8 @@ void CtcAcid::contract(IntervalVector& box) {
 
 	if (nbcall1 < nbinitcalls) {                       // réglage
 
-
 		if (nbcalls < nbinitcalls) vhandled =nb_CID_var;     // premier réglage 3BCID une fois sur toutes les variables
-		else	vhandled = 2* nbcidvar;                       //  réglages suivants : sur 2 fois le réglage précédent
+		else vhandled = 2* nbcidvar;                       //  réglages suivants : sur 2 fois le réglage précédent
 
 		if (vhandled< 2) vhandled= 2;                  // réglage minimum  à 2
 
@@ -64,15 +80,21 @@ void CtcAcid::contract(IntervalVector& box) {
 	for (int v=0; v<vhandled; v++) {
 		int v1=v%nb_CID_var;                               // [gch] how can v be < nb_var?? [bne]  vhandled can be between 0 and nbvarmax
 		int v2=smearorder[v1];
-		impact.add(v2);
-		var3BCID(box, v2);                             // appel 3BCID sur la variable v2
-		impact.remove(v2);
 
-		if(box.is_empty()) return;
+		// [gch]: impact handling:
+
+		var3BCID(box, v2);                             // appel 3BCID sur la variable v2
+
+		if (box.is_empty()) {
+			context.output_flags.add(FIXPOINT);
+			this->context = NULL;
+			delete[] ctstat;
+			return;
+		}
 
 		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
-			for (int i=0; i<initbox.size(); i++)
-			{//cout << i << " initbox " << initbox[i].diam() << " box " << box[i].diam() << endl;
+			for (int i=0; i<initbox.size(); i++) {
+				//cout << i << " initbox " << initbox[i].diam() << " box " << box[i].diam() << endl;
 				if  (initbox[i].diam() !=0 && box[i].diam()!= POS_INFINITY)
 					// gain sur la ième dimension de la boîte courante après var3BCID sur la v-ième variable
 					ctstat[v] += 1  - box[i].diam() / initbox[i].diam();}
@@ -106,6 +128,9 @@ void CtcAcid::contract(IntervalVector& box) {
 	}
 
 	delete [] ctstat;
+
+	this->context = NULL;
+	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
 }
 
 // en optim, l'objectif est placé en 1er
@@ -147,12 +172,13 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		ctrjsum[i]=0;
 		for (int j=0; j<nb_var ; j++) {
 			// [bne]  in case of infinite derivatives , natural ordering
-			if (J[i][j].mag()==POS_INFINITY || box[j].diam()==POS_INFINITY)
-			{for (int i1=0;i1 < nb_var; i1++)
+			if (J[i][j].mag()==POS_INFINITY || box[j].diam()==POS_INFINITY) {
+				for (int i1=0;i1 < nb_var; i1++)
 				smearorder.push_back(varorder2[i1]);
-			delete [] sum_smear;
-			delete [] ctrjsum;
-			return;}
+				delete [] sum_smear;
+				delete [] ctrjsum;
+				return;
+			}
 			if (cid_vars[j])                           // [gch] (only varCIDed variables considered?)
 				ctrjsum[i]+= J[i][j].mag() * box[j].diam();
 		}
@@ -163,8 +189,7 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		if (!cid_vars[i]) continue;                    // [gch]
 		sum_smear[i]=0;
 		for (int j=0; j<nb_ctr; j++) {
-			if (ctrjsum[j]>1.e-5)
-			{
+			if (ctrjsum[j]>1.e-5) {
 				sum_smear[i]+= J[j][i].mag() * box[i].diam()/ctrjsum[j] ; // formule smearsumrel
 
 				// sum_smear[i]+= abs(J[j][i]) * box[i].diam();          // variante smearsum

@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 31, 2013
-// Last Update : Oct 31, 2013
+// Last update : Aug 01, 2018
 //============================================================================
 
 #ifndef __IBEX_CTC_POLYTOPE_HULL_H__
@@ -39,7 +39,7 @@ public:
 
 	CtcPolytopeHull(Linearizer& lr, int max_iter=LPSolver::default_max_iter,
 			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
-			Interval limit_diam=LPSolver::default_limit_diam_box);
+			Interval limit_diam=Interval(LPSolver::min_box_diam,LPSolver::max_box_diam));
 
 	/**
 	 * \brief Creates the contractor w.r.t. Ax<=b
@@ -53,7 +53,7 @@ public:
 	 */
 	CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter=LPSolver::default_max_iter,
 			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
-			Interval limit_diam=LPSolver::default_limit_diam_box);
+			Interval limit_diam=Interval(LPSolver::min_box_diam,LPSolver::max_box_diam));
 
 	/**
 	 * \brief Delete this.
@@ -69,6 +69,16 @@ public:
 	virtual void contract(IntervalVector& box);
 
 	/**
+	 * \brief Contract the box.
+	 */
+	virtual void contract(IntervalVector& box, ContractContext& context);
+
+	/**
+	 * \brief Add linearizer properties to the map
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
+
+	/**
 	 * \brief Set the variable to be contracted.
 	 *
 	 * This allows, for example, to only contract the variable corresponding
@@ -79,6 +89,21 @@ public:
 	 * goal variable is contracted.
 	 */
 	void set_contracted_vars(const BitSet& vars);
+
+	/**
+	 * \brief Return the argmin of one LP problem
+	 *
+	 * Gives the argmin of the LP problem used during
+	 * the last call to contract(...) for minimizing
+	 * (resp. maximizing) the left (resp. right
+	 * bound) of the ith variable.
+	 * If no argmin were found for this LP problem
+	 * (the primal problem has failed), a LPException
+	 * is thrown.
+	 *
+	 * \throw LPException
+	 */
+	const Vector& arg_min(int i, bool left);
 
 #ifndef _IBEX_WITH_NOLP_
 
@@ -117,8 +142,29 @@ protected:
 private:
 	bool own_lr; // for memory cleanup
 
+	/*
+	 * 2*n primal solutions (row by row).
+	 * The argmin of minimizing xi is at the (2*i)th row
+	 * The argmax of maximizing xi is at the (2*i+1)th row
+	 */
+	Matrix primal_sols;
+
+	/*
+	 *  A bit is present if the corresponding primal
+	 *  solution has been found.
+	 */
+	BitSet primal_sol_found;
+
 #endif /// end _IBEX_WITH_NOLP_
 };
+
+/*================================== inline implementations ========================================*/
+
+inline const Vector& CtcPolytopeHull::arg_min(int i, bool left) {
+	if (primal_sol_found[left? 2*i : 2*i+1])
+		return primal_sols[left? 2*i : 2*i+1];
+	else throw LPException();
+}
 
 } // end namespace ibex
 

@@ -12,7 +12,6 @@
 #define __IBEX_SMEAR_FUNCTION_H__
 
 #include "ibex_Bsc.h"
-#include "ibex_Backtrackable.h"
 #include "ibex_RoundRobin.h"
 #include "ibex_System.h"
 
@@ -72,7 +71,7 @@ public:
 	/**
 	 * \brief Add backtrackable data required by round robin.
 	 */
-	virtual void add_backtrackable(Cell& root);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 protected :
 	RoundRobin rr; // by default when smear function strategy does not apply.

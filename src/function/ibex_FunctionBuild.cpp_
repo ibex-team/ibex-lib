@@ -53,18 +53,11 @@ const char* DIFF_PREFIX = "d"; // when the differential of a function is generat
  */
 class FindInputsUsed: public ExprVisitor {
 public:
-	std::vector<bool>& is_used;
+	BitSet& is_used;
 	int* symbol_index;
 	NodeMap<bool> visited;
 
-	FindInputsUsed(const Array<const ExprSymbol>& x, const ExprNode& y, int* symbol_index, std::vector<bool>& is_used) : is_used(is_used), symbol_index(symbol_index) {
-
-		for (int i=0; i<x.size(); i++) {
-			for (int j=0; j<x[i].dim.size(); j++) {
-				is_used.push_back(false); // by default
-			}
-		}
-
+	FindInputsUsed(const Array<const ExprSymbol>& x, const ExprNode& y, int* symbol_index, BitSet& is_used) : is_used(is_used), symbol_index(symbol_index) {
 		if (!add(y)) visit(y);
 	}
 
@@ -72,7 +65,9 @@ public:
 		const ExprSymbol* s=dynamic_cast<const ExprSymbol*>(&e);
 		if (s)  {
 			int current_index = symbol_index[s->key];
-			for (int i=0; i<s->dim.size(); i++) is_used[current_index+i]=true;
+			for (int i=0; i<s->dim.size(); i++) {
+				is_used.add(current_index+i);
+			}
 			return true;
 		} else
 			return false;
@@ -88,7 +83,7 @@ public:
 			int current_index = symbol_index[s.key];
 			for (int i=0; i<s.dim.nb_rows(); i++) {
 				for (int j=0; j<s.dim.nb_cols(); j++)
-					if (mask[i][j])  is_used[current_index+(i*s.dim.nb_cols())+j]=true;
+					if (mask[i][j])  is_used.add(current_index+(i*s.dim.nb_cols())+j);
 				delete[] mask[i];
 			}
 			delete[] mask;
@@ -144,7 +139,7 @@ const char* duplicate_or_generate(const char* name) {
 }
 
 Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL),
-		_eval(NULL), _hc4revise(NULL), _grad(NULL), _inhc4revise(NULL), _used_var(NULL) {
+		_eval(NULL), _hc4revise(NULL), _grad(NULL), _inhc4revise(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 
@@ -499,27 +494,11 @@ void Function::generate_comp() {
 //	cout << "------------------------------" << endl;
 }
 
-void Function::generate_used_vars() const {
-	_nb_used_vars=0;
-	for (unsigned int i=0; i<is_used.size(); i++) {
-		if (is_used[i]) _nb_used_vars++;
-	}
-
-	_used_var=new int[_nb_used_vars];
-	int j=0;
-	for (unsigned int i=0; i<is_used.size(); i++) {
-		if (is_used[i]) { _used_var[j++]=i; }
-	}
-	assert(j==_nb_used_vars);
-}
-
 void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) {
 
 	df=NULL;
 	comp=NULL;
 	zero=NULL;
-	_used_var=NULL;
-	_nb_used_vars=-1;
 
 	this->name=duplicate_or_generate(name);
 
@@ -529,12 +508,16 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 	__symbol_index = new int[x.size()];
 	int index=0;
 
+	(int&) _nb_var=0;
+
 	for (int i=0; i<x.size(); i++) {
 		symbs.set_ref(i,x[i]);
 		((ExprSymbol&) x[i]).key = i;
 		__all_symbols_scalar &= x[i].dim.is_scalar();
-
 		__symbol_index[i]=index;
+
+		(int&) _nb_var += x[i].dim.size();
+
 		for (int j=0; j<x[i].dim.size(); j++) {
 			index++;
 		}
@@ -548,17 +531,18 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 //	}
 
 
-	FindInputsUsed fsu(x, y, __symbol_index, is_used);
+	is_used.resize(_nb_var);
 
-	(int&) _nb_var = is_used.size();
+	FindInputsUsed fsu(x, y, __symbol_index, is_used);
+	for (BitSet::const_iterator it=is_used.begin(); it!=is_used.end(); ++it) {
+		((vector<int>&) used_vars).push_back((int) it);
+	}
 
 	_image_dim = y.dim;
 
 	nodes.init(&x,y,true);
 
 	decorate(x,y);
-
-	generate_used_vars();
 
 	_eval = new Eval(*this);
 	_hc4revise = new HC4Revise(*_eval);
@@ -615,7 +599,7 @@ std::string Function::minibex(bool human) const {
 	for (int i=0; i<nb_arg(); i++) {
 		const ExprSymbol& x=arg(i);
 		s << x.name;
-		if (x.dim.nb_rows()>1) s << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_rows()>1 || x.dim.nb_cols()>1) s << '[' << x.dim.nb_rows() << ']';
 		if (x.dim.nb_cols()>1) s << '[' << x.dim.nb_cols() << ']';
 		if (i<nb_arg()-1) s << ",";
 	}

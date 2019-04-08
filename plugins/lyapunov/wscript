@@ -1,0 +1,74 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+######################
+###### options #######
+######################
+def options (opt):
+	opt.add_option ("--with-lyapunov", action="store_true",
+			dest="WITH_LYAPUNOV", help = "Use Lyapunov plugin")
+
+######################
+##### configure ######
+######################
+def configure (conf):	
+
+	conf.env.WITH_LYAPUNOV = conf.options.WITH_LYAPUNOV
+		
+	conf.start_msg ("Lyapunov plugin")
+	if not conf.env.WITH_LYAPUNOV: 
+		conf.end_msg ("not used")
+		return
+	
+	if not conf.options.WITH_OPTIM:
+		conf.fatal ("Lyapunov plugin requires IbexOpt (--with-optim)")
+
+	conf.end_msg ("enabled")
+	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "LYAPUNOV")
+	
+	# Add information in ibex_Setting
+	conf.setting_define ("WITH_LYAPUNOV", 1)
+
+	# add LYAPUNOV plugin include directory
+	for f in conf.path.ant_glob ("src/** src", dir = True, src = False):
+		conf.env.append_unique("INCLUDES_LYAPUNOV", f.abspath())
+
+	# The build and install steps will be run from the main src/wscript script so
+	# we need to give path relative to the main src directory
+	mainsrc = conf.srcnode.make_node ("src")
+
+	# add LYAPUNOV headers
+	for f in conf.path.ant_glob ("src/**/ibex_*.h"):
+		conf.env.append_unique ("IBEX_HDR", f.path_from (mainsrc))
+
+	# add LYAPUNOV source files
+	for f in conf.path.ant_glob ("src/**/ibex_*.cpp"):
+		conf.env.append_unique ("IBEX_SRC", f.path_from (mainsrc))
+
+	# The utest step will be run from the main tests/wscript script so we need to
+	# give path relative to the main tests directory
+	maintests = conf.srcnode.make_node ("tests")
+
+	# add LYAPUNOV test files
+	for f in conf.path.ant_glob ("tests/**/*.cpp"):
+		conf.env.append_unique ('TEST_SRC', f.path_from (maintests))
+
+	# Add lyapunov/tests directory to list of INCLUDES for TESTS
+	testsnode = conf.path.make_node ("tests")
+	conf.env.append_unique ("INCLUDES_TESTS", testsnode.abspath ())
+
+######################
+####### build ########
+######################
+def build (bld):
+	
+	if bld.env.WITH_LYAPUNOV:
+		# build optim binary
+		bld.program (
+		target = "find-level-set",
+		# gch: i don't know if specifying "IBEXOPT" is necessary here
+		use = [ "ibex", "IBEXOPT" ], # add dependency on ibex library
+		# note: the two other executables are not installed by default
+		source = bld.path.ant_glob ("main/find-level-set.cpp"),
+		install_path = bld.env.BINDIR,
+		)

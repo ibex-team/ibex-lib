@@ -2,7 +2,7 @@
 //                                  I B E X                                   
 // File        : ibex_CellBuffer.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 15, 2012
 // Last Update : May 15, 2012

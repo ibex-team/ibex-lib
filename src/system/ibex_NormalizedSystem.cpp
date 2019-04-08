@@ -16,8 +16,6 @@ using namespace std;
 
 namespace ibex {
 
-const double NormalizedSystem::default_eps_h = 1e-08;
-
 namespace {
 
 void set_lb_ub(const Domain& x, Domain& l, Domain& u, double eps_h) {
@@ -53,13 +51,13 @@ CmpOp norm(CmpOp op) {
 	case EQ: return EQ;
 	case GT: return LT;
 	case GEQ: return LEQ;
-	default: assert(false);
+	default: assert(false); return EQ;
 	}
 }
 
 } // end namespace
 
-NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended) {
+NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended) : original_sys_id(sys.id) {
 
 	int nb_arg;
 	int k=0; // index of components of sys.f_ctrs

@@ -195,8 +195,7 @@ Finally, the cell buffer is a stack, which leads to a depth-first search.
 
 The output is:
 
-.. literalinclude:: ../examples/doc-solver.txt 
-   :language: cpp
+.. literalinclude:: ../examples/doc-solver.txt
    :start-after: solver-generic-O
    :end-before: solver-solver-generic-O
 

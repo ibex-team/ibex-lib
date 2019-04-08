@@ -24,6 +24,15 @@ void ExprPrinter::print(std::ostream& os, const ExprNode& e, bool human) {
 	this->human = human;
 
 	visit(e);
+	os << std::dec;
+}
+
+void ExprPrinter::print(std::ostream& os, const Domain& d, bool human) {
+	this->os = &os;
+	this->human = human;
+
+	print_domain(d);
+	os << std::dec;
 }
 
 void ExprPrinter::visit(const ExprNode& e) {
@@ -39,21 +48,7 @@ void ExprPrinter::visit(const ExprSymbol& e) {
 }
 
 void ExprPrinter::visit(const ExprConstant& e) {
-	switch (e.type()) {
-	case Dim::SCALAR:
-		print_itv(e.get_value());
-		break;
-	case Dim::COL_VECTOR:
-		print_itv_vec(e.get_vector_value(),false);
-		break;
-	case Dim::ROW_VECTOR:
-		print_itv_vec(e.get_vector_value(),true);
-		break;
-	case Dim::MATRIX:
-		print_itv_mat(e.get_matrix_value());
-		break;
-	default: assert(false); break;
-	}
+	print_domain(e.get());
 }
 
 void ExprPrinter::visit(const ExprLeaf& e) {
@@ -103,6 +98,8 @@ void ExprPrinter::visit(const ExprChi& a) {
 	(*os) << ")";
 }
 
+void ExprPrinter::visit(const ExprGenericBinaryOp& e)
+                                            { (*os) << e.name << "("; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprAdd& e)   { (*os) << "("; visit(e.left); (*os) << "+"; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprMul& e)   { (*os) << "("; visit(e.left); (*os) << "*"; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprSub& e)   { (*os) << "("; visit(e.left); (*os) << "-"; visit(e.right); (*os) << ")"; }
@@ -111,7 +108,8 @@ void ExprPrinter::visit(const ExprDiv& e)   { (*os) << "("; visit(e.left); (*os)
 void ExprPrinter::visit(const ExprMax& e)   { (*os) << "max("  ; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprMin& e)   { (*os) << "min("  ; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprAtan2& e) { (*os) << "atan2("; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
-
+void ExprPrinter::visit(const ExprGenericUnaryOp& e)
+                                            { (*os) << e.name << "("  ; visit(e.expr); (*os) << ")"; }
 void ExprPrinter::visit(const ExprMinus& e) { (*os) << "(-"   ; visit(e.expr); (*os) << ")"; }
 void ExprPrinter::visit(const ExprTrans& e) { (*os) << "("   ; visit(e.expr); (*os) << ")'"; }
 void ExprPrinter::visit(const ExprSign& e)  { (*os) << "sign("; visit(e.expr); (*os) << ")"; }
@@ -134,14 +132,44 @@ void ExprPrinter::visit(const ExprAcosh& e) {(*os) << "acosh("; visit(e.expr); (
 void ExprPrinter::visit(const ExprAsinh& e) {(*os) << "asinh("; visit(e.expr); (*os) << ")";}
 void ExprPrinter::visit(const ExprAtanh& e) {(*os) << "atanh("; visit(e.expr); (*os) << ")";}
 
+
+void ExprPrinter::print_domain(const Domain& d) {
+	switch (d.dim.type()) {
+	case Dim::SCALAR:
+		print_itv(d.i());
+		break;
+	case Dim::COL_VECTOR:
+		print_itv_vec(d.v(),false);
+		break;
+	case Dim::ROW_VECTOR:
+		print_itv_vec(d.v(),true);
+		break;
+	case Dim::MATRIX:
+		print_itv_mat(d.m());
+		break;
+	default: assert(false); break;
+	}
+}
+
 void ExprPrinter::print_dbl(double x) {
-	if (human)
+	if (x==NEG_INFINITY)
+		// note: we could also use hexa representation of +/- infinity...
+		(*os) << "-oo";
+	else if (x==POS_INFINITY)
+		(*os) << "+oo";
+	else if (human)
 		(*os) << x;
 	else {
 		assert(sizeof(double)==8);
 		uint64_t u;
-		memcpy(&u, &x, 8);
-		(*os) << '#' << std::hex << u;
+		if (x>0) {
+			memcpy(&u, &x, 8);
+			(*os) << '#' << std::hex << u;
+		} else {
+			double minus_x=-x;
+			memcpy(&u, &minus_x, 8);
+			(*os) << "-#" << std::hex << u;
+		}
 	}
 }
 
@@ -150,22 +178,12 @@ void ExprPrinter::print_itv(const Interval& x) {
 		(*os) << "(empty)";
 	else if (x.is_degenerated())
 		print_dbl(x.mid());
-	else if (x.lb()==NEG_INFINITY) {
-		if (x.ub()==POS_INFINITY)
-			// note: we could also use hexa representation of +/- infinity...
-			(*os) << "[-oo,+oo]";
-		else {
-			(*os) << "[-oo,";
-			print_dbl(x.ub());
-			(*os)<< ']';
-		}
-	} else {
-		if (x.lb()==NEG_INFINITY) {
-			(*os) << '[';
-			print_dbl(x.lb());
-			(*os) << ",+oo]";
-		} else
-		(*os) << x;
+	else {
+		(*os) << '[';
+		print_dbl(x.lb());
+		(*os) << ",";
+		print_dbl(x.ub());
+		(*os) << ']';
 	}
 }
 

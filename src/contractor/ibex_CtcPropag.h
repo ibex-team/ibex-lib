@@ -47,6 +47,11 @@ public:
 	CtcPropag(const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
 
 	/**
+	 * \brief Contract a box.
+	 */
+	void contract(IntervalVector& box);
+
+	/**
 	 * \brief Enforces propagation (e.g.: HC4 or BOX) fitering.
 	 *
 	 * Call #contract(IntervalVector&, const BitSet&) with the mask
@@ -57,7 +62,12 @@ public:
 	 * \see #contract(IntervalVector&, const BitSet&).
 	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
 	 */
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box, ContractContext& context);
+
+	/**
+	 * \brief Add sub-contractors properties to the map
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/** The list of contractors to propagate */
 	Array<Ctc> list;
@@ -72,18 +82,13 @@ public:
 	bool accumulate;
 
 	/** Default ratio used by propagation, set to 0.1. */
-	static const double default_ratio;
+	static constexpr double default_ratio = 0.01;
 
 protected:
-
 
 	DirectedHyperGraph g; // constraint network (hypergraph)
 
 	Agenda agenda;        // propagation agenda
-
-	BitSet _impact;     // impact given to sub-contractors
-
-	BitSet flags;       // status of a contraction
 
 	BitSet active;      // mark active sub-contractors
 

@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ACID.h
+// File        : ibex_CtcACID.h
 // Author      : Bertrand Neveu , Gilles Trombettoni
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 1, 2012
-// Last Update : Jul 1, 2012
+// Last Update : Jul 20, 2018
 //============================================================================
 
 #ifndef __IBEX_CTC_ACID_H__
@@ -30,7 +30,7 @@ namespace ibex {
  *      in the next running phase is computed at the end of the tuning phase.
  *
  * <li> large running phases (during e.g. 950 nodes)
- *      where 3BCID is called with the  number of variables determined during the last tunig phase.
+ *      where 3BCID is called with the  number of variables determined during the last tuning phase.
  */
 
 class CtcAcid : public Ctc3BCid {
@@ -78,6 +78,8 @@ public :
 	 *  the average gain (on all the dimensions of the current box) is less  than ct_ratio:
 	 *  this average number of variables (during the tuning phase) will become nbcidvar.
 	 */
+	virtual void contract(IntervalVector& box, ContractContext& context);
+
 	virtual void contract(IntervalVector& box);
 
 	double nbvar_stat();
@@ -88,8 +90,8 @@ public :
 	/** the average (on all tunings) of the  number of variables to be shaved  : result given at the end of the search*/
 	static double nbvarstat;
 
-	/** default ctratio value, set to 0.005 */
-	static const double default_ctratio;
+	/** default ctratio value, set to 0.002. */
+	static constexpr double default_ctratio = 0.002;
 
 protected :
 	/**
@@ -109,4 +111,5 @@ protected :
 };
 
 } // end namespace ibex
+
 #endif // __IBEX_CTC_ACID_H__

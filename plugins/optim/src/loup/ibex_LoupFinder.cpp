@@ -17,6 +17,10 @@ LoupFinder::~LoupFinder() {
 
 }
 
+void LoupFinder::add_property(const IntervalVector& init_box, BoxProperties& prop) {
+
+}
+
 bool LoupFinder::check(const System& sys, const Vector& pt, double& loup, bool _is_inner) {
 
 	// "res" will contain an upper bound of the criterion
@@ -44,7 +48,7 @@ void LoupFinder::monotonicity_analysis(const System& sys, IntervalVector& box, b
 
 	int n=sys.nb_var;
 
-	if (!is_inner && sys.f_ctrs.nb_used_vars()==n)
+	if (!is_inner && sys.f_ctrs.used_vars.size()==n)
 		// if there is no inner box and all the variables appear
 		// in the constraints, nothing can be done
 		return;

@@ -12,9 +12,6 @@
 
 namespace ibex {
 
-/*! Default composition ratio. */
-const double CtcCompo::default_ratio = 0.1;
-
 void CtcCompo::init_impacts() {
 
 //	impacts = new BoolMask[list.size()];
@@ -25,10 +22,6 @@ void CtcCompo::init_impacts() {
 //		impacts[i].set_all();
 //	}
 }
-
-
-
-
 
 CtcCompo::CtcCompo(const Array<Ctc>& list, bool incremental, double ratio) :
 		Ctc(list), list(list), incremental(incremental), ratio(ratio) {
@@ -171,51 +164,58 @@ CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 	init_impacts();
 }
 
-
 CtcCompo::~CtcCompo() {
 //	delete[] impacts;
 }
 
+void CtcCompo::add_property(const IntervalVector& init_box, BoxProperties& map) {
+	for (int i=0; i<list.size(); i++)
+		list[i].add_property(init_box, map);
+}
 
 void CtcCompo::contract(IntervalVector& box) {
+	ContractContext context(box);
+	contract(box,context);
+}
 
-	// TODO: wrong algorithm here
-//	if (incremental) {
-//		for (int i=0; i<list.size(); i++) {
-//			IntervalVector old_box(box);
-//			impacts[i] |= impact;
-//
-//			list[i].contract(box);
-//
-//			for (int j=0; j<nb_var; j++) {
-//				if (old_box[j].rel_distance(box[j])>ratio)
-//					for (int i2=0; i2<list.size(); i2++)
-//						if (i2!=i) impacts[i2].set(j);
-//			}
-//		}
-//		return;
-//	}
-	bool inactive= true;
-	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
+void CtcCompo::contract(IntervalVector& box, ContractContext& context) {
 
-	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
+	bool inactive = true;
 
+	BitSet input_impact = context.impact; // saved-->useful?
+
+	context.impact.fill(0,nb_var-1); // always set to "all" for the moment (to be improved later)
+
+	// TODO: a more clever impact handling could be
+	// done here
 	for (int i=0; i<list.size(); i++) {
+
 		if (inactive) {
-			flags.clear();
-			list[i].contract(box,impact,flags);
-			if (!flags[INACTIVE]) inactive=false;
+
+			context.output_flags.clear();
+
+			list[i].contract(box, context);
+
+			if (!context.output_flags[INACTIVE]) {
+				inactive=false;
+				// Improvement: no need now for asking sub-contractors
+				// to calculate the output flags
+			}
 		} else {
-			list[i].contract(box);
+			list[i].contract(box, context);
 		}
 
 		if (box.is_empty()) {
-			set_flag(FIXPOINT);
+			context.output_flags.clear();
+			context.output_flags.add(FIXPOINT);
+			context.impact =  input_impact; // restore!--> useful?
 			return;
 		}
 	}
 
-	if (inactive) set_flag(INACTIVE);
+	if (inactive) context.output_flags.add(INACTIVE);
+
+	context.impact = input_impact; // restored--> useful?
 }
 
 } // end namespace ibex

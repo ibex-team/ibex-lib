@@ -38,11 +38,21 @@ public:
 
 	/**
 	 * \brief Contract a box.
+	 */
+	void contract(IntervalVector& box);
+
+	/**
+	 * \brief Contract a box.
 	 *
 	 * \note When the FIXPOINT output flag is set, this means a stronger
 	 *       property (the fixpoint is reached for a null ratio).
 	 */
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box, ContractContext& context);
+
+	/**
+	 * \brief Add sub-contractor properties to the map
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/** The sub-contractor */
 	Ctc& ctc;
@@ -55,7 +65,7 @@ public:
 	double ratio;
 
 	/** Default ratio used, set to 0.1. */
-	static const double default_ratio;
+	static constexpr double default_ratio = 0.1;
 };
 
 } // end namespace ibex

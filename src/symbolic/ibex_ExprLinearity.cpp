@@ -340,7 +340,7 @@ void ExprLinearity::unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), b
 	}
 }
 
-void ExprLinearity::visit(const ExprPower& e){
+void ExprLinearity::visit(const ExprPower& e) {
 	visit(e.expr);
 
 	Array<Domain>& expr_d=*(_coeffs[e.expr].first);
@@ -386,8 +386,12 @@ void ExprLinearity::visit(const ExprChi& e) {
 void ExprLinearity::visit(const ExprSymbol& e) { assert(false); }
 void ExprLinearity::visit(const ExprApply& a)  { assert(false); /* deprecated */}
 
+void ExprLinearity::visit(const ExprGenericBinaryOp& e) { binary(e,e.eval,false); }
+
 void ExprLinearity::visit(const ExprAdd& e)    { binary(e,operator+,true); }
 void ExprLinearity::visit(const ExprSub& e)    { binary(e,operator-,true); }
+
+void ExprLinearity::visit(const ExprGenericUnaryOp& e) { unary(e,e.eval,false); }
 
 void ExprLinearity::visit(const ExprMinus& e)  { unary(e,operator-,true); }
 void ExprLinearity::visit(const ExprTrans& e)  { unary(e,transpose,true); }

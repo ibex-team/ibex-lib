@@ -123,27 +123,45 @@ CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 	assert(check_nb_var_ctc_list(list));
 }
 
+void CtcUnion::add_property(const IntervalVector& init_box, BoxProperties& map) {
+	for (int i=0; i<list.size(); i++)
+		list[i].add_property(init_box, map);
+}
+
 CtcUnion::~CtcUnion() {
 	if (own_sys) delete own_sys;
 }
 
 void CtcUnion::contract(IntervalVector& box) {
+	ContractContext context(box);
+	contract(box,context);
+}
+
+void CtcUnion::contract(IntervalVector& box, ContractContext& context) {
 	IntervalVector savebox(box);
 	IntervalVector result(IntervalVector::empty(box.size()));
-	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
-	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
 
 	for (int i=0; i<list.size(); i++) {
 		if (i>0) box=savebox;
 
-		flags.clear();
-		list[i].contract(box,impact,flags);
+		ContractContext c_context(context);
+
+		list[i].contract(box,c_context);
+
 		result |= box;
 
-		if (flags[INACTIVE]) { set_flag(INACTIVE); break; }
+		if (c_context.output_flags[INACTIVE]) {
+			context.output_flags.add(INACTIVE);
+			break;
+		}
 	}
 
 	box = result;
+
+	if (!context.output_flags[INACTIVE]) {
+		context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
+	}
+
 } // end namespace ibex
 
 }

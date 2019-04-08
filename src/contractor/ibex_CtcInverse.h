@@ -20,7 +20,13 @@ class CtcInverse : public Ctc {
 public:
 	CtcInverse(Ctc& c, Function& f);
 	~CtcInverse();
-	virtual void contract(IntervalVector& box);
+
+	/**
+	 * \brief Contract a box.
+	 */
+	void contract(IntervalVector& box);
+
+	virtual void contract(IntervalVector& box, ContractContext& context);
 
 	Ctc& c;
 	Function& f;

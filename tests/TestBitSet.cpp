@@ -88,6 +88,19 @@ void TestBitSet::size02() {
 	CPPUNIT_ASSERT(b.size()==0);
 }
 
+void TestBitSet::resize() {
+	BitSet b(1);
+	b.resize(100);
+	for (int i=0; i<100; i++) b.add(i);
+	CPPUNIT_ASSERT(b.size()==100);
+}
+
+void TestBitSet::inter01() {
+	BitSet b(bitset1);
+	b&=bitset2;
+	CPPUNIT_ASSERT(b==BitSet::singleton(1,7));
+}
+
 void TestBitSet::union01() {
 	BitSet b(bitset1);
 	b|=bitset2;

@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include "ibex_ExprVisitor.h"
+#include "ibex_Domain.h"
 
 namespace ibex {
 
@@ -34,6 +35,11 @@ public:
 	 */
 	void print(std::ostream& os, const ExprNode&, bool human=true);
 
+	/**
+	 * \brief Print a domain on a given output stream.
+	 */
+	void print(std::ostream& os, const Domain&, bool human=true);
+
 protected:
 	std::ostream* os;
 	bool human;
@@ -50,6 +56,7 @@ protected:
 	void visit(const ExprVector& e);
 	void visit(const ExprApply& a);
 	void visit(const ExprChi& a);
+	void visit(const ExprGenericBinaryOp& e);
 	void visit(const ExprAdd& e);
 	void visit(const ExprMul& e);
 	void visit(const ExprSub& e);
@@ -57,6 +64,7 @@ protected:
 	void visit(const ExprMax& e);
 	void visit(const ExprMin& e);
 	void visit(const ExprAtan2& e);
+	void visit(const ExprGenericUnaryOp& e);
 	void visit(const ExprMinus& e);
 	void visit(const ExprTrans& e);
 	void visit(const ExprSign& e);
@@ -80,6 +88,7 @@ protected:
 	void visit(const ExprAtanh& e);
 
 private:
+	void print_domain(const Domain& d);
 	void print_dbl(double x);
 	void print_itv(const Interval& x);
 	void print_itv_vec(const IntervalVector& v, bool in_row);

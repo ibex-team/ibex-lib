@@ -129,7 +129,7 @@ void VarSet::init_bitset(const Function& f, const Array<const ExprNode>& x, bool
 	}
 
 	for (int i=0; i<x.size(); i++) {
-		int shift=0; // by default (if x[i] is a symbol)
+		//int shift=0; // by default (if x[i] is a symbol)
 
 		const ExprSymbol* symbol = dynamic_cast<const ExprSymbol*>(&x[i]);
 		bool** mask;

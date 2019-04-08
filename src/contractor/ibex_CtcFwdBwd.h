@@ -54,9 +54,17 @@ public:
 	CtcFwdBwd(const Function& f, const IntervalMatrix& y);
 
 	/**
-	 * \remark ctr is not kept by reference.
+	 * \remark ctr is kept by reference.
 	 */
 	CtcFwdBwd(const NumConstraint& ctr);
+
+	/**
+	 * \brief Build the contrator for the ith constraint
+	 *
+	 * Allow to benefit from the system cache associated
+	 * to the system.
+	 */
+	CtcFwdBwd(const System& sys, int i);
 
 	/**
 	 * \brief Delete this.
@@ -64,9 +72,19 @@ public:
 	~CtcFwdBwd();
 
 	/**
+	 * \brief Contract a box.
+	 */
+	void contract(IntervalVector& box);
+
+	/**
 	 * \brief Contract the box.
 	 */
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box, ContractContext& context);
+
+	/**
+	 * \brief Add BxpActiveCtr.
+	 */
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
 	/*
 	 * \brief Whether this contractor is idempotent (optional)
@@ -75,14 +93,30 @@ public:
 	// bool idempotent();
 	//
 
-	/** The function "f". */
-	const Function& f;
-
-	/** The domain "y". */
-	Domain d;
+	/** The constraint. */
+	const NumConstraint& ctr;
 
 protected:
 	void init();
+
+	/* Right-hand side of the constraint */
+	Domain d;
+
+	/* Constraint number (-1 if standalone). */
+	int ctr_num;
+
+	/* Identifier of the active property.
+	 * Used if the constraint is stand-alone, -1 otherwise.
+	 */
+	const long active_prop_id;
+
+	/* Identifier of the system cache.
+	 * Used if the constraint is from a system, -1 otherwise.
+	 */
+	const long system_cache_id;
+
+	/* Just to avoid a copy when ctr is given to the constructor. */
+	bool own_ctr;
 };
 
 } // namespace ibex

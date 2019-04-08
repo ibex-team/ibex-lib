@@ -1,8 +1,8 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_LinearRelaxFixed.cpp
+// File        : ibex_LinearizerFixed.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Aug 22, 2014
 //============================================================================
