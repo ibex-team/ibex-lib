@@ -269,15 +269,23 @@ int main(int argc, const char ** argv) {
 		LargestFirst bisector(prec);*/
 		LoupFinderSIP *loup_finder = nullptr;
 		if (!no_inner_lin) {
-			RestrictionLinearizerSIP *restrictions = new RestrictionLinearizerSIP(sys,
-					RestrictionLinearizerSIP::CornerPolicy::random);
-			loup_finder = new LoupFinderRestrictionsRelax(sys, *restrictions);
+			//RestrictionLinearizerSIP *restrictions = new RestrictionLinearizerSIP(sys,
+			//		RestrictionLinearizerSIP::CornerPolicy::random);
+			//loup_finder = new LoupFinderRestrictionsRelax(sys, *restrictions);
+			std::set<LoupFinderLineSearch::InnerPointStrategy> strategies =  {
+				LoupFinderLineSearch::CORNER
+			};
+			loup_finder = new LoupFinderLineSearch(sys, strategies);
 		} else {
 			loup_finder = new LoupFinderSIPDefault(sys);
 		}
 		LoupFinder *loup_finder2 = nullptr;
 		if (!no_line_search) {
-			loup_finder2 = new LoupFinderLineSearch(sys);
+			std::set<LoupFinderLineSearch::InnerPointStrategy> strategies =  {
+				LoupFinderLineSearch::STEIN,
+				LoupFinderLineSearch::MIDPOINT
+			};
+			loup_finder2 = new LoupFinderLineSearch(sys, strategies);
 		} else {
 			loup_finder2 = new LoupFinderSIPDefault(sys);
 		}
