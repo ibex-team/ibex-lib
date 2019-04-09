@@ -307,6 +307,20 @@ public:
 	 */
 	bool extended_COV;
 
+	/**
+	 * \brief Whether anticipated upper bounding has to be applied.
+	 *
+	 * If true, the search space is not only contracted w.r.t.
+	 *         f(x) <= loup
+	 * but
+	 *         f(x) <= loup - eps
+	 * where eps is the required precision on the objective
+	 * (the cumul of absolute and relative precision).
+	 *
+	 * Default value: true.
+	 */
+	bool anticipated_upper_bounding;
+
 protected:
 	/*
 	 * \brief Initialize the optimizer from a single box.

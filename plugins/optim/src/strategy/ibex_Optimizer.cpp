@@ -4,7 +4,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
-// Last Update : Dec 26, 2018
+// Last Update : Apr 08, 2019
 //============================================================================
 
 #include "ibex_Optimizer.h"
@@ -47,7 +47,7 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
                 						n(n), goal_var(goal_var),
 										ctc(ctc), bsc(bsc), loup_finder(finder), buffer(buffer),
 										eps_x(eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
-										trace(0), timeout(-1), extended_COV(true),
+										trace(0), timeout(-1), extended_COV(true), anticipated_upper_bounding(true),
 										status(SUCCESS),
 										//kkt(normalized_user_sys),
 										uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
@@ -64,10 +64,13 @@ Optimizer::~Optimizer() {
 // compute the value ymax (decreasing the loup with the precision)
 // the heap and the current box are contracted with y <= ymax
 double Optimizer::compute_ymax() {
-	double ymax = loup - rel_eps_f*fabs(loup);
-	if (loup - abs_eps_f < ymax)
-		ymax = loup - abs_eps_f;
-	return ymax;
+	if (anticipated_upper_bounding) {
+		double ymax = loup - rel_eps_f*fabs(loup);
+		if (loup - abs_eps_f < ymax)
+			ymax = loup - abs_eps_f;
+		return ymax;
+	} else
+		return loup;
 }
 
 bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
@@ -430,6 +433,11 @@ Optimizer::Status Optimizer::optimize() {
 					}
 				}
 				update_uplo();
+
+				if (!anticipated_upper_bounding) // useless to check precision on objective if 'true'
+					if (get_obj_rel_prec()<rel_eps_f || get_obj_abs_prec()<abs_eps_f)
+						break;
+
 				if (timeout>0) timer.check(timeout); // TODO: not reentrant, JN: done
 				time = timer.get_time();
 
