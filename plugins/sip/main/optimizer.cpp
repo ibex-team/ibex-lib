@@ -273,6 +273,7 @@ int main(int argc, const char ** argv) {
 			//		RestrictionLinearizerSIP::CornerPolicy::random);
 			//loup_finder = new LoupFinderRestrictionsRelax(sys, *restrictions);
 			std::set<LoupFinderLineSearch::InnerPointStrategy> strategies =  {
+				LoupFinderLineSearch::STEIN,
 				LoupFinderLineSearch::CORNER
 			};
 			loup_finder = new LoupFinderLineSearch(sys, strategies);
@@ -283,6 +284,7 @@ int main(int argc, const char ** argv) {
 		if (!no_line_search) {
 			std::set<LoupFinderLineSearch::InnerPointStrategy> strategies =  {
 				LoupFinderLineSearch::STEIN,
+				LoupFinderLineSearch::CORNER,
 				LoupFinderLineSearch::MIDPOINT
 			};
 			loup_finder2 = new LoupFinderLineSearch(sys, strategies);

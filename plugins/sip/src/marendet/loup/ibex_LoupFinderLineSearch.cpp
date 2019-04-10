@@ -27,12 +27,15 @@ using namespace std;
 
 namespace ibex {
 
+const double LoupFinderLineSearch::default_sigma = 0.9;
+
 LoupFinderLineSearch::LoupFinderLineSearch(const SIPSystem& system, const std::set<InnerPointStrategy>& strategies) :
 		LoupFinderSIP(system), strategies_(strategies), linearizer_(system, RelaxationLinearizerSIP::CornerPolicy::random, false), lp_solver_(
 				system.ext_nb_var, 10000, 10000), relax_point_(system.ext_nb_var),
 				dir_solver_(system.ext_nb_var, 10000, 10000),
 				corner_solver_(new LPSolver(system.nb_var, 10000, 10000)),
-				corner_linearizer_(new RestrictionLinearizerSIP(system, RestrictionLinearizerSIP::CornerPolicy::random)) {
+				corner_linearizer_(new RestrictionLinearizerSIP(system, RestrictionLinearizerSIP::CornerPolicy::random)),
+				sigma_(default_sigma) {
 	dir_solver_.set_sense(LPSolver::MINIMIZE);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
 }
@@ -79,10 +82,8 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	}
 	//Vector sol(box.mid());
 	relax_point_ = lp_solver_.get_primal_sol();
-	//cout << "sol=" << print_mma(sol) << endl;
-	//cout << "g(sol)=" << system_.sic_constraints_[0].evaluateWithoutCachedValue(sol) << std::endl;
 	Vector sol_without_goal = relax_point_.subvector(0, system_.nb_var - 1);
-	if(is_inner_with_paving_simplification(relax_point_, node_data_)) {
+	if(is_inner_with_paving_simplification(relax_point_, initial_node_data_)) {
 		if(check(system_, sol_without_goal, loup, true, prop)) {
 			return make_pair(relax_point_, loup);
 		}
@@ -93,42 +94,36 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	
 	/****************** DIRECTION **********************/
 
+	double g_relax_point = system_.max_constraints(relax_point_, *node_data_);
 	Vector direction(system_.nb_var);
+	double obj = 0;
 	double best_loup = loup;
 	Vector best_loup_point = loup_point.mid();
 	bool loup_found = false;
 
-	if(do_strategy(BLANKENSHIP) && blankenship_direction(direction)) {
-		Interval t = t_value(direction);
-		if(!t.is_empty()) {
-			Vector end_point = sol_without_goal + t.lb()*direction;
+	if(do_strategy(BLANKENSHIP) && blankenship_direction(direction, obj)) {
+			double tk = -1./sigma_*g_relax_point/obj;
+			Vector end_point = sol_without_goal + tk*direction;
 			bool b = line_search(sol_without_goal, end_point, best_loup_point, best_loup);
 			loup_found = b || loup_found;
-		}
 	}
-	if(do_strategy(ACTIVE_RELAXATIONS) && relaxations_direction(direction, true)) {
-		Interval t = t_value(direction);
-		if(!t.is_empty()) {
-			Vector end_point = sol_without_goal + t.lb()*direction;
+	if(do_strategy(ACTIVE_RELAXATIONS) && relaxations_direction(direction, obj, true)) {
+			double tk = -1./sigma_*g_relax_point/obj;
+			Vector end_point = sol_without_goal + tk*direction;			
 			bool b = line_search(sol_without_goal, end_point, best_loup_point, best_loup);
 			loup_found = b || loup_found;
-		}
 	}
-	if(do_strategy(ALL_RELAXATIONS) && relaxations_direction(direction, false)) {
-		Interval t = t_value(direction);
-		if(!t.is_empty()) {
-			Vector end_point = sol_without_goal + t.lb()*direction;
+	if(do_strategy(ALL_RELAXATIONS) && relaxations_direction(direction, obj, false)) {
+			double tk = -1./sigma_*g_relax_point/obj;
+			Vector end_point = sol_without_goal + tk*direction;
 			bool b = line_search(sol_without_goal, end_point, best_loup_point, best_loup);
 			loup_found = b || loup_found;
-		}
 	}
-	if(do_strategy(STEIN) && stein_direction(direction)) {
-		Interval t = t_value(direction);
-		if(!t.is_empty()) {
-			Vector end_point = sol_without_goal + t.lb()*direction;
+	if(do_strategy(STEIN) && stein_direction(direction, obj)) {
+			double tk = -1./sigma_*g_relax_point/obj;
+			Vector end_point = sol_without_goal + tk*direction;
 			bool b = line_search(sol_without_goal, end_point, best_loup_point, best_loup);
 			loup_found = b || loup_found;
-		}
 	}
 	if(do_strategy(MIDPOINT)) {
 		bool b = line_search(sol_without_goal, box_.mid(), best_loup_point, best_loup);
@@ -185,7 +180,7 @@ bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVec
 	return true;
 }
 
-bool LoupFinderLineSearch::relaxations_direction(Vector& direction, bool actives_only, bool with_sides) {
+bool LoupFinderLineSearch::relaxations_direction(Vector& direction, double& obj, bool actives_only, bool with_sides) {
 	Matrix A = lp_solver_.get_rows();
 	Vector dual = lp_solver_.get_dual_sol();
 	IntervalVector rhs = lp_solver_.get_lhs_rhs();
@@ -239,10 +234,11 @@ bool LoupFinderLineSearch::relaxations_direction(Vector& direction, bool actives
 		return false;
 	}
 	direction = dir_solver_.get_primal_sol().subvector(0, system_.nb_var-1);
+	obj = dir_solver_.get_obj_value().mid();
 	return true;
 }
 
-bool LoupFinderLineSearch::blankenship_direction(Vector& direction) {
+bool LoupFinderLineSearch::blankenship_direction(Vector& direction, double& obj) {
 	dir_solver_.clean_ctrs();
 	blankenship(relax_point_, system_, node_data_);
 	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
@@ -275,10 +271,11 @@ bool LoupFinderLineSearch::blankenship_direction(Vector& direction) {
 		return false;
 	}
 	direction = dir_solver_.get_primal_sol().subvector(0, system_.nb_var-1);
+	obj = dir_solver_.get_obj_value().mid();
 	return true;
 }
 
-bool LoupFinderLineSearch::stein_direction(Vector& direction) {
+bool LoupFinderLineSearch::stein_direction(Vector& direction, double& obj) {
 	dir_solver_.clean_ctrs();
 	blankenship(relax_point_, system_, node_data_);
 	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
@@ -310,6 +307,7 @@ bool LoupFinderLineSearch::stein_direction(Vector& direction) {
 		return false;
 	}
 	direction = dir_solver_.get_primal_sol().subvector(0, system_.nb_var-1);
+	obj = dir_solver_.get_obj_value().mid();
 	return true;
 }
 
@@ -344,14 +342,15 @@ Interval LoupFinderLineSearch::t_value(const Vector& direction) {
 bool LoupFinderLineSearch::line_search(const Vector& start_point, const Vector& inner_point, Vector& loup_point, double& loup) {
 	const BxpNodeData* local_node_data = node_data_;
 	bool loup_found = false;
+	bool is_right_inner = false;
 	Vector point = inner_point;
 	
 	Vector ext_point = sip_to_ext_box(point, system_.goal_ub(point));
 	if (!ext_box_.subvector(0, system_.nb_var-1).contains(point)) {
 		local_node_data = initial_node_data_;
 	}
-	if(!is_inner_with_paving_simplification(ext_point, local_node_data)) {
-		return false;
+	if(is_inner_with_paving_simplification(ext_point, local_node_data)) {
+		is_right_inner = true;
 	}
 	/*if (check(system_, point, loup, true, *prop_)) {
 		loup_point = ext_point;
@@ -364,13 +363,19 @@ bool LoupFinderLineSearch::line_search(const Vector& start_point, const Vector& 
 		IntervalVector ext_middle = sip_to_ext_box(middle, system_.goal_ub(middle));
 		if(is_inner_with_paving_simplification(ext_middle, local_node_data)) {
 			right = middle;
+			is_right_inner = true;
+		} else if(!is_right_inner) {
+			right = middle;
 		} else {
 			left = middle;
 		}
 	}
 	point = right;
 	ext_point = sip_to_ext_box(point, system_.goal_ub(point));
-	if (sip_from_ext_box(ext_box_).contains(point) && check(system_, point, loup, true, *prop_)) {
+	if(!is_right_inner) {
+		return false;
+	}
+	if (check(system_, point, loup, true, *prop_)) {
 		loup_point = ext_point;
 		loup_found = true;
 	}

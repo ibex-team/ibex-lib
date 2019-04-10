@@ -27,6 +27,8 @@
 namespace ibex {
 class LoupFinderLineSearch: public LoupFinderSIP {
 public:
+
+	static const double default_sigma;
 	enum InnerPointStrategy {
 		STEIN, ACTIVE_RELAXATIONS, ALL_RELAXATIONS, BLANKENSHIP, MIDPOINT, CORNER
 	};
@@ -46,15 +48,17 @@ private:
 	LPSolver dir_solver_;
 	LPSolver* corner_solver_;
 	RestrictionLinearizerSIP* corner_linearizer_;
+	double sigma_;
 	IntervalVector box_;
 	IntervalVector ext_box_;
 	BxpNodeData* node_data_ = nullptr;
 	BoxProperties* prop_ = nullptr;
 	const BxpNodeData* initial_node_data_ = nullptr;
 	bool delete_node_data_ = false;
-	bool relaxations_direction(Vector& direction, bool actives_only, bool with_sides=false);
-	bool blankenship_direction(Vector&);
-	bool stein_direction(Vector&);
+
+	bool relaxations_direction(Vector& direction, double& obj, bool actives_only, bool with_sides=false);
+	bool blankenship_direction(Vector& direction, double& obj);
+	bool stein_direction(Vector&, double& obj);
 	Interval t_value(const Vector& direction);
 	bool line_search(const Vector& start_point, const Vector& end_point, Vector& loup_point, double& loup);
 
