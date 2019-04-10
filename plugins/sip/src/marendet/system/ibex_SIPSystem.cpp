@@ -85,12 +85,25 @@ bool SIPSystem::is_inner(const IntervalVector& pt, BxpNodeData& node_data) const
 		}
 		sic_index++;
 	}
-	for (int i = 0; i < normal_constraints_.size() - 1; ++i) {
+	for (int i = 0; i < normal_constraints_.size() - (goal_function_ != NULL ? 1 : 0); ++i) {
 		if (normal_constraints_[i].evaluate(pt).ub() > 0) {
 			return false;
 		}
 	}
 	return true;
+}
+
+double SIPSystem::max_constraints(const IntervalVector& pt, BxpNodeData& node_data) const {
+	int sic_index = 0;
+	Interval eval = Interval::EMPTY_SET;
+	for (const auto& sic : sic_constraints_) {
+		eval |= sic.evaluateWithoutCachedValue(pt, node_data.sic_constraints_caches[sic_index]);
+		sic_index++;
+	}
+	for (int i = 0; i < normal_constraints_.size() - (goal_function_ != NULL ? 1 : 0); ++i) {
+		eval |= normal_constraints_[i].evaluate(pt);
+	}
+	return eval.ub();
 }
 
 void SIPSystem::extractConstraints() {

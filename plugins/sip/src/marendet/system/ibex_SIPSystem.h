@@ -47,7 +47,7 @@ public:
 	int ext_nb_var; // nb_var with goal variable
 	double goal_ub(const IntervalVector& pt) const;
 	bool is_inner(const IntervalVector& pt, BxpNodeData& prop) const;
-
+	double max_constraints(const IntervalVector& pt, BxpNodeData& prop) const;
 	// Load all node data for this node: current B&B box and SIConstraintsCache
 	std::vector<SIConstraintCache> getInitialNodeCaches() const;
 	//void loadBxpNodeData(BxpNodeData* BxpNodeData);
