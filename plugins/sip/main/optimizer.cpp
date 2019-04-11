@@ -93,13 +93,11 @@ int main(int argc, const char ** argv) {
 			{ 'p', "no-propag" });
 	args::Flag no_outer_lin(parser, "no-outer-linearizations", "Deactivate outer linearizations",
 			{ 'o', "no-outer-lin" });
-	args::Flag no_inner_lin(parser, "no-inner-linearizations", "Deactivate inner linearizations",
-			{ 'i', "no-inner-lin" });
+	
 	args::Flag no_first_order(parser, "no-first-order-test", "Deactivate first order test", { 'f', "no-first-order" });
 	//args::Flag no_blankenship(parser, "no-blankenship", "Deactivate Blankenship heuristic", { 'b', "no-blankenship" });
-	args::Flag no_line_search(parser, "no-line-search", "Deactivate line search for feasible points", { 'l',
-			"no-line-search" });
-
+	args::Flag no_ls_stein(parser, "no-ls-stein", "Deactivate Stein strategy in line search", {"no-ls-stein" });
+	args::Flag no_ls_corner(parser, "no-ls-corner", "Deactivate corner restrictions in line search", {"no-ls-corner" });
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.",
 			{ "trace" });
 	args::Flag format(parser, "format", "Display the output format in quiet mode", { "format" });
@@ -267,30 +265,24 @@ int main(int argc, const char ** argv) {
 		/*Vector prec(sys.ext_nb_var, 1e-20);
 		prec[sys.ext_nb_var - 1] = POS_INFINITY;
 		LargestFirst bisector(prec);*/
-		LoupFinderSIP *loup_finder = nullptr;
-		if (!no_inner_lin) {
-			//RestrictionLinearizerSIP *restrictions = new RestrictionLinearizerSIP(sys,
-			//		RestrictionLinearizerSIP::CornerPolicy::random);
-			//loup_finder = new LoupFinderRestrictionsRelax(sys, *restrictions);
-			std::set<LoupFinderLineSearch::InnerPointStrategy> strategies =  {
-				LoupFinderLineSearch::STEIN,
-				LoupFinderLineSearch::CORNER
-			};
-			loup_finder = new LoupFinderLineSearch(sys, strategies);
-		} else {
-			loup_finder = new LoupFinderSIPDefault(sys);
+		std::set<LoupFinderLineSearch::InnerPointStrategy> strategies1;
+		std::set<LoupFinderLineSearch::InnerPointStrategy> strategies2;
+		if(!no_ls_corner) {
+			strategies1.emplace(LoupFinderLineSearch::CORNER);
+			strategies2.emplace(LoupFinderLineSearch::CORNER);
+
 		}
-		LoupFinder *loup_finder2 = nullptr;
-		if (!no_line_search) {
-			std::set<LoupFinderLineSearch::InnerPointStrategy> strategies =  {
-				LoupFinderLineSearch::STEIN,
-				LoupFinderLineSearch::CORNER,
-				LoupFinderLineSearch::MIDPOINT
-			};
-			loup_finder2 = new LoupFinderLineSearch(sys, strategies);
-		} else {
-			loup_finder2 = new LoupFinderSIPDefault(sys);
+		if(!no_ls_stein) {
+			strategies1.emplace(LoupFinderLineSearch::STEIN);
+			strategies2.emplace(LoupFinderLineSearch::STEIN);
 		}
+		if(!no_ls_corner && !no_ls_stein) {
+			strategies1.emplace(LoupFinderLineSearch::MIDPOINT);
+		}
+		strategies2.emplace(LoupFinderLineSearch::MIDPOINT);
+			
+		LoupFinderSIP *loup_finder = new LoupFinderLineSearch(sys, strategies1);
+		LoupFinderSIP *loup_finder2 = new LoupFinderLineSearch(sys, strategies2);
 
 		/**
 		 * Contractors:
