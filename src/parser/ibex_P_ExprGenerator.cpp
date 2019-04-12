@@ -207,7 +207,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 	if (e.lab!=NULL) return;
 
 	if (e.op==P_ExprNode::POWER ||
-		e.op==P_ExprNode::EXPR_WITH_IDX) {
+		e.op==P_ExprNode::EXPR_WITH_IDX ||
+		e.op==P_ExprNode::SUM) {
 		e.acceptVisitor(*this);
 		return;
 	}
@@ -268,6 +269,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::MIN:      e.lab=new LabelConst(min(arg_cst)); break;
 			case P_ExprNode::ATAN2:    e.lab=new LabelConst(atan2(arg_cst[0], arg_cst[1])); break;
 			case P_ExprNode::POWER:
+			case P_ExprNode::SUM:
 			case P_ExprNode::MINUS:    assert(false); /* impossible */ break;
 			case P_ExprNode::UNARY_OP: e.lab=new LabelConst(ExprGenericUnaryOp::get_eval(((const P_ExprGenericUnaryOp&) e).name)(arg_cst[0])); break;
 			case P_ExprNode::BINARY_OP:e.lab=new LabelConst(ExprGenericBinaryOp::get_eval(((const P_ExprGenericBinaryOp&) e).name)(arg_cst[0],arg_cst[1])); break;
@@ -340,7 +342,9 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::MAX:       node=&max(arg_node); break;
 		case P_ExprNode::MIN:       node=&min(arg_node); break;
 		case P_ExprNode::ATAN2:     node=&atan2(arg_node[0], arg_node[1]); break;
-		case P_ExprNode::POWER:     assert(false); /* impossible */ break;
+		case P_ExprNode::POWER:    
+		case P_ExprNode::SUM:
+									assert(false); /* impossible */ break;
 		case P_ExprNode::MINUS:     node=&(-arg_node[0]); break;
 		case P_ExprNode::UNARY_OP:  node=&ExprGenericUnaryOp::new_(((const P_ExprGenericUnaryOp&) e).name, arg_node[0]); break;
 		case P_ExprNode::BINARY_OP: node=&ExprGenericBinaryOp::new_(((const P_ExprGenericBinaryOp&) e).name, arg_node[0], arg_node[1]); break;
@@ -438,6 +442,50 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 			e.lab=new LabelNode(&exp(right.node() * log(left.node())));
 		}
 	}
+}
+
+void ExprGenerator::visit(const P_ExprSum& e) {
+	visit(e.first_value);
+	visit(e.last_value);
+
+	const char* name     = e.iter;
+
+	int begin=e.first_value._2int();
+	int end=e.last_value._2int();
+
+	scope.add_iterator(name);
+	const ExprNode* node;
+
+	bool is_const = true;
+	Domain* domain;
+	// Visit with begin value to initialize the node value
+	scope.set_iter_value(name,begin);
+	visit(e.expr);
+	if(e.expr.lab->is_const()) {
+		domain = new Domain(e.expr.lab->domain());
+	} else {
+		is_const = false;
+	}
+	node = &e.expr.lab->node();
+	e.expr.cleanup();
+	for (int i=begin+1; i<=end; i++) {
+		scopes().top().set_iter_value(name,i);
+		visit(e.expr);
+		if(!e.expr.lab->is_const()) {
+			is_const = false;
+		} else if(is_const) {
+			*domain = *domain + e.expr.lab->domain();
+		}
+		node =&(*node + e.expr.lab->node());
+		e.expr.cleanup();
+	}
+
+	if(is_const) {
+		e.lab = new LabelConst(*domain);
+	} else {
+		e.lab = new LabelNode(node);
+	}
+	scope.rem_iterator(name);
 }
 
 pair<int,int> ExprGenerator::visit_index_tmp(const Dim& dim, const P_ExprNode& idx, bool matlab_style) {

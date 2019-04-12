@@ -67,7 +67,7 @@ public:
 		IDX_ALL,       // all indices (:)
 		EXPR_WITH_IDX, // something(i1:i2,j1:j2)
 		ROW_VEC, COL_VEC, APPLY, CHI,
-		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2, POWER,
+		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2, POWER, SUM,
 		MINUS, TRANS, SIGN, ABS,
 		SQR, SQRT, EXP, LOG,
 		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
@@ -155,6 +155,24 @@ public:
 	P_ExprPower(const P_ExprNode& expr, const P_ExprNode& power);
 
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+};
+
+/**
+ * \brief Sum expression.
+ *
+ */
+class P_ExprSum : public P_ExprNode {
+public:
+	P_ExprSum(const P_ExprNode& expr, const char* iter, const P_ExprNode& first_value, const P_ExprNode& last_value);
+
+	~P_ExprSum();
+
+	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+
+	const P_ExprNode& expr;
+	const char* iter;
+	const P_ExprNode& first_value;
+	const P_ExprNode& last_value;
 };
 
 /*
@@ -365,6 +383,10 @@ inline const P_ExprNode* atan2(const P_ExprNode* left, const P_ExprNode* right) 
 
 inline const P_ExprNode* pow(const P_ExprNode* left, const P_ExprNode* right) {
 	return new P_ExprPower(*left,*right);
+}
+
+inline const P_ExprNode* sum(const P_ExprNode* expr, const char* iter, const P_ExprNode* first_value, const P_ExprNode* last_value) {
+	return new P_ExprSum(*expr , iter, *first_value, *last_value);
 }
 
 inline const P_ExprNode* chi(const P_ExprNode* exp1, const P_ExprNode* exp2, const P_ExprNode* exp3) {
