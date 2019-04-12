@@ -469,7 +469,7 @@ void ExprGenerator::visit(const P_ExprSum& e) {
 	node = &e.expr.lab->node();
 	e.expr.cleanup();
 	for (int i=begin+1; i<=end; i++) {
-		scopes().top().set_iter_value(name,i);
+		scope.set_iter_value(name,i);
 		visit(e.expr);
 		if(!e.expr.lab->is_const()) {
 			is_const = false;
