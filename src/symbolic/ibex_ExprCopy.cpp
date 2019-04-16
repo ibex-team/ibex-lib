@@ -5,17 +5,20 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Apr 9, 2012
-// Last Update : Apr 9, 2012
+// Last Update : Apr 16, 2019
 //============================================================================
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <cassert>
+#include <sstream>
 
 #include "ibex_ExprCopy.h"
 #include "ibex_Function.h"
 #include "ibex_Domain.h"
+
+using namespace std;
 
 namespace ibex {
 
@@ -58,9 +61,7 @@ const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array
 
 	if (!shared) clone.clean();
 
-	assert(new_x.size()>=old_x.size());
-
-	for (int i=0; i<old_x.size(); i++) {
+	for (int i=0; i<std::min(new_x.size(), old_x.size()); i++) {
 		if (shared && clone.found(old_x[i])) continue;
 		clone.insert(old_x[i],&new_x[i]);
 	}
@@ -83,7 +84,9 @@ void ExprCopy::visit(const ExprIndex& i) {
 }
 
 void ExprCopy::visit(const ExprSymbol& x) {
-
+	stringstream s;
+	s << "[ExprCopy] no destination symbol for " << x;
+	ibex_error(s.str().c_str());
 }
 
 void ExprCopy::visit(const ExprConstant& c) {

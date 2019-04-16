@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 19, 2012
-// Last Update : Apr 25, 2018
+// Last Update : Apr 16, 2019
 //============================================================================
 
 #ifndef __IBEX_EXPR_COPY_H__
@@ -55,12 +55,16 @@ public:
 	 *
 	 * Symbols in \a old_x are matched to symbols in \a new_x with respect to their order.
 	 *
+	 * \param old_x  - an array containing (at least) the symbols of the original expression
+	 * \param new_x  - the corresponding symbols in the new expression.
 	 * \param shared - if true, the node map structure is maintained through all calls to "copy" (this
 	 *                 allows to benefit from the DAG structure of several expressions copied in turn).
 	 *                 The resulting expressions are therefore not independent in this case.
 	 *
-	 * \pre The size of \a new_x must be greater or equal to the size of \a old_x. It is not
-	 *      required to be the same size to allow the use of extra variables (that do not occur in the expression).
+	 * \pre It is not required \a new_x and \a old_x to be the same size. \a old_x must at
+	 *      least contain the n symbols used in the expression and \new_x must also contain at least
+	 *      n symbols so that matching can be made. \a old_x and/or \a new_x can be larger to allow
+	 *      the presence of extra variables (that do not occur in the expression).
 	 *      This is used, e.g., in ibex_Optimizer to transform a function x->g(x) into (x,y)->g(x).
 	 */
 	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, bool shared=false);
