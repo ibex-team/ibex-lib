@@ -180,9 +180,7 @@ void TestSystem::eq_only01() {
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==2);
 	CPPUNIT_ASSERT(sys.f_ctrs.image_dim()==2);
 
-	stringstream expr0;
-	expr0 << "((x+y)-" << Interval(-1,1) << ")"; // the way the interval is printed depends on the library
-	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),expr0.str().c_str()));
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x+y)-[-1,1])"));
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(x-y)"));
 	CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
 	CPPUNIT_ASSERT(sys.ctrs[1].op==EQ);

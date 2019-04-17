@@ -57,7 +57,7 @@ void TestExpr2Minibex::expr03() {
 
 	Expr2Minibex().print(stream,e);
 
-	CPPUNIT_ASSERT(strcmp(stream.str().c_str(),"  _tmp_0_ = ([1, 2] , [1, 2] , [1, 2]);\n  return ((3*(x+_tmp_0_))-(3*_tmp_0_));")==0);
+	CPPUNIT_ASSERT(strcmp(stream.str().c_str(),"  _tmp_0_ = ([1,2] , [1,2] , [1,2]);\n  return ((3*(x+_tmp_0_))-(3*_tmp_0_));")==0);
 }
 
 void TestExpr2Minibex::expr04() {
