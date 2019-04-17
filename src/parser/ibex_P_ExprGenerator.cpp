@@ -457,12 +457,17 @@ void ExprGenerator::visit(const P_ExprSum& e) {
 
 	int begin=first_value._2int();
 	int end=last_value._2int();
-
+	if(end < begin) {
+		ostringstream s;
+		s << "first value < end value (" << begin << " < " << end << "). ";
+		s << "First value must be >= end value.";
+		throw SyntaxError(s.str());
+	}
 	scope.add_iterator(name);
 	const ExprNode* node;
 
 	bool is_const = true;
-	Domain* domain;
+	Domain* domain = nullptr;
 	// Visit with begin value to initialize the node value
 	scope.set_iter_value(name,begin);
 	visit(expr);
@@ -487,9 +492,11 @@ void ExprGenerator::visit(const P_ExprSum& e) {
 
 	if(is_const) {
 		e.lab = new LabelConst(*domain);
+		cleanup(*node, false);
 	} else {
 		e.lab = new LabelNode(node);
 	}
+	delete domain;
 	scope.rem_iterator(name);
 }
 
