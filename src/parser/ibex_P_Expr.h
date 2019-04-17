@@ -169,10 +169,7 @@ public:
 
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
 
-	const P_ExprNode& expr;
 	const char* iter;
-	const P_ExprNode& first_value;
-	const P_ExprNode& last_value;
 };
 
 /*

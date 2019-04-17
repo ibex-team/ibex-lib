@@ -98,10 +98,10 @@ void P_ExprPrinter::visit(const P_ExprWithIndex& e) {
 
 void P_ExprPrinter::visit(const P_ExprSum& e) {
 	os << "sum(" << e.iter << "=";
-	visit(e.first_value);
-	visit(e.last_value);
+	visit(e.arg[0]);
+	visit(e.arg[1]);
 	os << ", ";
-	visit(e.expr);
+	visit(e.arg[2]);
 }
 
 } // end namespace parser

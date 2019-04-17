@@ -445,13 +445,18 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 }
 
 void ExprGenerator::visit(const P_ExprSum& e) {
-	visit(e.first_value);
-	visit(e.last_value);
+
+	const P_ExprNode& first_value = e.arg[0];
+	const P_ExprNode& last_value  = e.arg[1];
+	const P_ExprNode& expr        = e.arg[2];
+
+	visit(first_value);
+	visit(last_value);
 
 	const char* name     = e.iter;
 
-	int begin=e.first_value._2int();
-	int end=e.last_value._2int();
+	int begin=first_value._2int();
+	int end=last_value._2int();
 
 	scope.add_iterator(name);
 	const ExprNode* node;
@@ -460,24 +465,24 @@ void ExprGenerator::visit(const P_ExprSum& e) {
 	Domain* domain;
 	// Visit with begin value to initialize the node value
 	scope.set_iter_value(name,begin);
-	visit(e.expr);
-	if(e.expr.lab->is_const()) {
-		domain = new Domain(e.expr.lab->domain());
+	visit(expr);
+	if(expr.lab->is_const()) {
+		domain = new Domain(expr.lab->domain());
 	} else {
 		is_const = false;
 	}
-	node = &e.expr.lab->node();
-	e.expr.cleanup();
+	node = &expr.lab->node();
+	expr.cleanup();
 	for (int i=begin+1; i<=end; i++) {
 		scope.set_iter_value(name,i);
-		visit(e.expr);
-		if(!e.expr.lab->is_const()) {
+		visit(expr);
+		if(!expr.lab->is_const()) {
 			is_const = false;
 		} else if(is_const) {
-			*domain = *domain + e.expr.lab->domain();
+			*domain = *domain + expr.lab->domain();
 		}
-		node =&(*node + e.expr.lab->node());
-		e.expr.cleanup();
+		node =&(*node + expr.lab->node());
+		expr.cleanup();
 	}
 
 	if(is_const) {
