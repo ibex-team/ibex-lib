@@ -324,4 +324,17 @@ void TestParser::nary_max() {
 
 }
 
+void TestParser::sum01() {
+	try {
+		Function f("x[4]","sum(i=1:4,x(i))");
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"(((x(1)+x(2))+x(3))+x(4))"));
+	} catch(SyntaxError&) {
+		CPPUNIT_ASSERT(false);
+	}
+}
+
+void TestParser::sum02() {
+	CPPUNIT_ASSERT_THROW(Function("x[4]","sum(i=1:0,x(i))"), SyntaxError);
+}
+
 } // end namespace
