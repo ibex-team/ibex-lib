@@ -25,7 +25,7 @@ SystemFactory::~SystemFactory() {
 		if (goal) delete goal;
 
 		for (unsigned int i=0; i<ctrs.size(); i++)
-			delete &ctrs[i];
+			delete ctrs[i];
 
 		if (!f_ctrs.empty())
 			cleanup(ExprVector::new_col(f_ctrs),false);
