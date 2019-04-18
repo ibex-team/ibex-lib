@@ -44,7 +44,9 @@ public:
 	CPPUNIT_TEST(issue245_3);
 	CPPUNIT_TEST(nary_max);
 	CPPUNIT_TEST(sum01);
-	//CPPUNIT_TEST(sum02);
+	CPPUNIT_TEST(sum02);
+	CPPUNIT_TEST(sum03);
+	CPPUNIT_TEST(sum04);
 	//		CPPUNIT_TEST(error01);
 	CPPUNIT_TEST_SUITE_END();
 
@@ -68,7 +70,8 @@ public:
 
 	void sum01();
 	void sum02();
-
+	void sum03();
+	void sum04();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestParser);
