@@ -324,4 +324,39 @@ void TestParser::nary_max() {
 
 }
 
+void TestParser::sum01() {
+	try {
+		Function f("x[4]","sum(i=1:4,x(i))");
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"(((x(1)+x(2))+x(3))+x(4))"));
+	} catch(SyntaxError&) {
+		CPPUNIT_ASSERT(false);
+	}
+}
+
+void TestParser::sum02() {
+	CPPUNIT_ASSERT_THROW(Function("x","sum(x=1:4,0)"), SyntaxError);
+	CPPUNIT_ASSERT_THROW(Function("x[4]","sum(i=1:0,x(i))"), SyntaxError);
+	CPPUNIT_ASSERT_THROW(Function("x[4]","sum(i=1:2,sum(i=1:2,x(i)))"), SyntaxError);
+}
+
+void TestParser::sum03() {
+	try {
+		Function f("x[4]","sum(i=1:4,i)");
+		CPPUNIT_ASSERT(dynamic_cast<const ExprConstant*>(&f.expr())!=NULL);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"10"));
+	} catch(SyntaxError&) {
+		CPPUNIT_ASSERT(false);
+	}
+}
+
+void TestParser::sum04() {
+	try {
+		Function f("x[4]","sum(i=1:2,sum(j=1:2,x(i+j)))");
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"((x(2)+x(3))+(x(3)+x(4)))"));
+	} catch(SyntaxError&) {
+		CPPUNIT_ASSERT(false);
+	}
+}
+
+
 } // end namespace

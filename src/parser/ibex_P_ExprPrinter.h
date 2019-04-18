@@ -31,6 +31,7 @@ public:
 protected:
 	void visit(const P_ExprNode& e);
 	void visit(const P_ExprWithIndex&);
+	void visit(const P_ExprSum&);
 
 	void print_arg_list(const P_ExprNode&, bool);
 

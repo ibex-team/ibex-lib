@@ -79,6 +79,14 @@ P_ExprPower::P_ExprPower(const P_ExprNode& expr, const P_ExprNode& power) :
 		P_ExprNode(POWER,expr,power) {
 }
 
+P_ExprSum::P_ExprSum(const P_ExprNode& expr, const char* iter, const P_ExprNode& first_value, const P_ExprNode& last_value) :
+		P_ExprNode(SUM,first_value,last_value,expr), iter(strdup(iter)) {
+}
+
+P_ExprSum::~P_ExprSum() {
+	free((char*) iter);
+}
+
 P_ExprIter::P_ExprIter(const char* name) : P_ExprNode(ITER), name(strdup(name)) {
 
 }
