@@ -159,6 +159,11 @@ int main(int argc, char** argv) {
 			if (!quiet)
 				cout << "  random seed:\t\t" << random_seed.Get() << endl;
 		}
+		if (input_file) {
+			if (!quiet) {
+				cout << "  input COV file:\t" << input_file.Get().c_str() << "\n";
+			}
+		}
 
 		if (output_file) {
 			output_cov_file = output_file.Get();
@@ -191,7 +196,7 @@ int main(int argc, char** argv) {
 		}
 
 		if (!quiet) {
-			cout << "  output file:\t\t" << output_cov_file << "\n";
+			cout << "  output COV file:\t" << output_cov_file << "\n";
 		}
 
 		bool inHC4=true;
