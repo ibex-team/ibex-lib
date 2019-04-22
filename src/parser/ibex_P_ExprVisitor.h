@@ -20,6 +20,7 @@ namespace parser {
 class P_ExprNode;
 class P_ExprWithIndex;
 class P_ExprPower;
+class P_ExprSum;
 class P_ExprVarSymbol;
 class P_ExprCstSymbol;
 class P_ExprConstant;
@@ -49,6 +50,11 @@ public:
 
 	/** Visit a parser power expression. */
 	virtual void visit(const P_ExprPower& e) {
+		visit((const P_ExprNode&) e);
+	}
+
+	/** Visit a parser sum expression. */
+	virtual void visit(const P_ExprSum& e) {
 		visit((const P_ExprNode&) e);
 	}
 

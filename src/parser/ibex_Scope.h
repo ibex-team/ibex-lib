@@ -64,6 +64,10 @@ public:
 	/** Add an (uninitialized) iterator. */
 	void add_iterator(const char* id);
 
+	/** Remove an iterator
+	 */
+	void rem_iterator(const char* id);
+
 	//void add_operator(const char* id);
 
 	/*------------- get data associated to symbols in the current scope -----------*/

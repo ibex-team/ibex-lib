@@ -209,6 +209,12 @@ void Scope::add_iterator(const char* id) {
 	tab.insert_new(id, new S_Iterator(-1));
 }
 
+void Scope::rem_iterator(const char* id) {
+	assert(tab[id]->token()==TK_ITERATOR);
+	delete tab[id];
+	tab.erase(id);
+}
+
 //std::pair<const ExprConstant*, const Domain*> Scope::get_cst(const char* id) const {
 const ExprConstant& Scope::get_cst(const char* id) const {
 	const S_Object& o=*tab[id];
