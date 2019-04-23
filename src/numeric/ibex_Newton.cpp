@@ -251,8 +251,8 @@ bool inflating_newton(const Fnc& f, const VarSet* vars, const IntervalVector& fu
 			if (!success) { // to get the largest unicity box, we do this
 				            // only when the first contraction occurs
 
-				if (vars) vars->set_var_box(box_unicity,box2);
-				else box_unicity = box2;
+				if (vars) vars->set_var_box(box_unicity,box);
+				else box_unicity = box;
 
 				//=================================================
 				// We now try to enlarge the unicity box as possible
