@@ -126,10 +126,6 @@ ostream& operator<<(ostream& os, const CovSolverData& solver) {
 		os << " solution n°" << (i+1) << " = " << solver.solution(i) << endl;
 	}
 
-	for (size_t i=0; i<solver.nb_inner(); i++) {
-		os << " inner n°" << (i+1) << " = " << solver.inner(i) << endl;
-	}
-
 	for (size_t i=0; i<solver.nb_boundary(); i++) {
 		os << " boundary n°" << (i+1) << " = " << solver.boundary(i) << endl;
 	}

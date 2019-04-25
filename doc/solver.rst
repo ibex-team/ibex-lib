@@ -31,8 +31,8 @@ The benchmarks are all written in the `Minibex syntax`_ and stored in an arbores
 
 Open a terminal, move to the ``bin`` subfolder and run IbexSolve with, for example, the problem named kolev36 located at the specified path::
 
-  ~/ibex-2.6.0$ cd bin
-  ~/ibex-2.6.0/bin$ ./ibexsolve ../plugins/solver/benchs/others/kolev36.bch
+  ~/ibex-2.8.0$ cd bin
+  ~/ibex-2.8.0/bin$ ./ibexsolve ../plugins/solver/benchs/others/kolev36.bch
 	
 The following result should be displayed::
 

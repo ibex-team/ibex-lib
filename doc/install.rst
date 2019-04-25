@@ -2,7 +2,7 @@
 .. _ibex-install:
 
 ***************************
-Installation (Release 2.6)
+Installation (Release 2.8)
 ***************************
 
 
@@ -30,12 +30,12 @@ Linux and MacOS
 
 The installation assumes your system meets some `requirements`_.
 
-Save the archive ``ibex-2.6.0.tar.gz`` in some ``Ibex`` folder and::
+Save the archive ``ibex-2.8.0.tar.gz`` in some ``Ibex`` folder and::
 
-  ~/Ibex/$ tar xvfz ibex-2.6.0.tar.gz 
-  ~/Ibex/$ cd ibex-2.6.0 
-  ~/Ibex/ibex-2.6.0/$ ./waf configure
-  ~/Ibex/ibex-2.6.0/$ sudo ./waf install
+  ~/Ibex/$ tar xvfz ibex-2.8.0.tar.gz 
+  ~/Ibex/$ cd ibex-2.8.0 
+  ~/Ibex/ibex-2.8.0/$ ./waf configure
+  ~/Ibex/ibex-2.8.0/$ sudo ./waf install
     
 
 
@@ -68,19 +68,19 @@ Windows
 
   We will assume now that this folder is the root folder of ibex.
 
-- Save the archive ``ibex-2.6.0.tar.gz`` in ``C:\MinGW\msys\1.0\home\[user]\Ibex``
+- Save the archive ``ibex-2.8.0.tar.gz`` in ``C:\MinGW\msys\1.0\home\[user]\Ibex``
 - Configure Ibex (still in the shell of MinGW)::
 
   ~/Ibex/$ export PATH="$PATH:/c/Python27" 
-  ~/Ibex/$ tar xvfz ibex-2.6.0.tar.gz 
-  ~/Ibex/$ cd ibex-2.6.0 
-  ~/Ibex/ibex-2.6.0/$ ./waf configure --prefix=/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.6.0 
+  ~/Ibex/$ tar xvfz ibex-2.8.0.tar.gz 
+  ~/Ibex/$ cd ibex-2.8.0 
+  ~/Ibex/ibex-2.8.0/$ ./waf configure --prefix=/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.8.0 
   
   **Note:** the paths must be entered in Linux-style (don't use backslash ("\\") as separator).
   
 - Install Ibex::
 
-  ~/Ibex/ibex-2.6.0/$ ./waf install
+  ~/Ibex/ibex-2.8.0/$ ./waf install
 
 .. note:: 
 
@@ -116,7 +116,7 @@ Configuration options
 
 The full list of options supported by ``waf configure`` can be obtained with::
 
-	~/Ibex/ibex-2.6.0/$ ./waf --help
+	~/Ibex/ibex-2.8.0/$ ./waf --help
 	
 This will display the full list of installed interval/LP libraries and plugins with their specific options,
 as well as benchmarking features.
@@ -135,11 +135,11 @@ In particular, ``waf`` ``configure`` supports the following options:
 
                         Under MinGW::
                         
-                        $ export PATH=$PATH:/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.6.0/lib
+                        $ export PATH=$PATH:/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.8.0/lib
                         
                         Under a Windows command window::
                         
-                        > set PATH=%PATH%;C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.6.0\lib;C:\MinGW\bin
+                        > set PATH=%PATH%;C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.8.0\lib;C:\MinGW\bin
                         
                         
 
@@ -203,11 +203,11 @@ In particular, ``waf`` ``configure`` supports the following options:
                     
                         If Ibex is compiled as a shared library, you must also add the libpath of Soplex in ``LD_LIBRARY_PATH``::
 						
-							~/Ibex/ibex-2.6.0/$ export LD_LIBRARY_PATH=[prefix]/lib/:[soplex-path]/lib/
+							~/Ibex/ibex-2.8.0/$ export LD_LIBRARY_PATH=[prefix]/lib/:[soplex-path]/lib/
 					
                         Under Windows, if you run a program from a command window, the ``PATH`` variable must also be updated::
 					
-							> set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.6.0
+							> set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.8.0
 							> set SOPLEX_PATH=...
 							> set PATH=%PATH%;%IBEX_PATH%\lib;%SOPLEX_PATH%\lib;C:\MinGW\bin
 					
@@ -258,22 +258,22 @@ To install ``pkg-config`` under MinGW, follow the steps given `here <http://stac
 
 So, place the file ``foo.cpp`` in the ``examples/`` folder and::
 
-  ~/Ibex/ibex-2.6.0/$ cd examples 
-  ~/Ibex/ibex-2.6.0/examples$ make foo 
-  ~/Ibex/ibex-2.6.0/examples$ ./foo 
+  ~/Ibex/ibex-2.8.0/$ cd examples 
+  ~/Ibex/ibex-2.8.0/examples$ make foo 
+  ~/Ibex/ibex-2.8.0/examples$ ./foo 
   
 .. note::
    
    1. It may be necessary to set the ``PKG_CONFIG_PATH`` to *[prefix]*\ ``/share/pkgconfig`` where *[prefix]* is 
       ``/usr/local`` by default or whatever path specified via ``--prefix``::
 
-        ~/Ibex/ibex-2.6.0/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
+        ~/Ibex/ibex-2.8.0/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
 
 
 Under Windows, if you have compiled Ibex with ``--enable--shared`` you can run the program from a command window. 
 Just update the path to dynamically link against Ibex::
 
-	 > set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.6.0
+	 > set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.8.0
 	 > set PATH=%PATH%;%IBEX_PATH%\lib;C:\MinGW\bin
 	 > cd %IBEX_PATH%\examples
 	 > foo.exe
@@ -285,15 +285,15 @@ You can also run the whole unit tests suite with the **installed** version of Ib
 
 To this end, you must install first the `cppunit library <https://sourceforge.net/projects/cppunit/>`_. Then run::
 
-	~/Ibex/ibex-2.6.0/$ ./waf utest
+	~/Ibex/ibex-2.8.0/$ ./waf utest
 	
 Note also the following command::
 
-	~/Ibex/ibex-2.6.0/$ ./waf check
+	~/Ibex/ibex-2.8.0/$ ./waf check
 	
 as a handy shortcut for::
 
-	~/Ibex/ibex-2.6.0/$ ./waf build install clean utest
+	~/Ibex/ibex-2.8.0/$ ./waf build install clean utest
 
 
 =============
@@ -302,8 +302,8 @@ Uninstall
 
 Simply type in the path of IBEX (under the shell of MinGW for Windows)::
 
-  ~/Ibex/ibex-2.6.0$ sudo ./waf uninstall  
-  ~/Ibex/ibex-2.6.0$ ./waf distclean  
+  ~/Ibex/ibex-2.8.0$ sudo ./waf uninstall  
+  ~/Ibex/ibex-2.8.0$ ./waf distclean  
 
 **Note:** sudo is useless under MinGW or if Ibex is installed in a local folder.
 

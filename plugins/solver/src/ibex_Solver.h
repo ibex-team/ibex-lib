@@ -379,6 +379,13 @@ inline const CovSolverData& Solver::get_data() const {
 	return *manif;
 }
 
+inline double Solver::get_time() const {
+	return get_data().time();
+}
+
+inline double Solver::get_nb_cells() const {
+	return get_data().nb_cells();
+}
 
 } // end namespace ibex
 

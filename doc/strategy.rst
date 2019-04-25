@@ -217,7 +217,7 @@ file format made of three parts:
 
 - the ``CovList`` part that tells which boxes form the covering
 - the ``CovIUList`` part that tells which among the ``CovList`` boxes are inner (<-> 'I'), the
-  other being implicitly unknown (<> 'U').
+  other being implicitly unknown (<-> 'U').
 - the part specific to the program
 
 This way, the program can communicate with another one handling inner boxes. But

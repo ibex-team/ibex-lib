@@ -25,7 +25,7 @@ that allows to build a more customizable optimizer.
 
 You can directly apply this optimizer on one of the benchmark problems 
 distributed with Ibex. 
-The benchmarks are all written in the `Minibex syntax`_ and stored in an arborescence under ``plugins/optim/benchs/``.
+The benchmarks are all written in the :ref:`Minibex syntax <mod-minibex>` and stored in an arborescence under ``plugins/optim/benchs/``.
 If you compare the Minibex syntax of these files with the ones given to IbexSolve, you will see that a "minimize"
 keyword has appeared.
 
@@ -33,8 +33,8 @@ keyword has appeared.
 
 Open a terminal, move to the ``bin`` subfolder and run IbexSolve with, for example, the problem named ex3_1_3 located at the specified path::
 
-  ~/ibex-2.6.0$ cd bin
-  ~/ibex-2.6.0/bin$ ./ibexopt ../plugins/optim/benchs/easy/ex3_1_3.bch
+  ~/ibex-2.8.0$ cd bin
+  ~/ibex-2.8.0/bin$ ./ibexopt ../plugins/optim/benchs/easy/ex3_1_3.bch
 	
 The following result should be displayed::
 
@@ -77,7 +77,7 @@ Options
 +--------------------------------------+------------------------------------------------------------------------------+
 | --eps-x=<*float*>                    | Precision on the variable (**Deprecated**). Default value is 0.              |
 +--------------------------------------+------------------------------------------------------------------------------+
-| --initial-loup=<*float*>             | Intial "loup" (a priori known upper bound).                                  |
+| --initial-loup=<*float*>             | Initial "loup" (a priori known upper bound).                                 |
 +--------------------------------------+------------------------------------------------------------------------------+
 | --rigor                              | Activate rigor mode (certify feasibility of equalities).                     |
 +--------------------------------------+------------------------------------------------------------------------------+

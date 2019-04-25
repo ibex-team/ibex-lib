@@ -139,10 +139,10 @@ int main() {
   solver.solve(IntervalVector(2));
   // Get an enclosure of all minima, (under
   // the form of manifold)
-  const Manifold& minima=solver.get_data();
+  const CovSolverData& minima=solver.get_data();
   //! [optim-all-minima-C]
   output << "! [optim-all-minima-O]" << endl;
-  minima.write("doc-optim-all-minima.mnf");
+  minima.save("doc-optim-all-minima.cov");
   }
 
   return 0;
