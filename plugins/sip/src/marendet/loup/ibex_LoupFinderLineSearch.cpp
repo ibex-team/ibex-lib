@@ -282,7 +282,7 @@ bool LoupFinderLineSearch::stein_direction(Vector& direction, double& obj) {
         const auto& sic = system_.sic_constraints_[i];
         const auto& param_boxes = node_data_->sic_constraints_caches[i].parameter_caches_;
         for(int j = 0; j < param_boxes.size(); ++j) {
-            Vector full_grad = sic.gradient(ext_box_, param_boxes[j].parameter_box).mid();
+            Vector full_grad = sic.gradient(ext_box_.mid(), param_boxes[j].parameter_box.mid()).mid();
 			Vector grad_x = full_grad.subvector(0, system_.ext_nb_var-1);
 			grad_x[system_.ext_nb_var-1] = -1;
 			dir_solver_.add_constraint(grad_x, CmpOp::LEQ, 0);
