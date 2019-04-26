@@ -137,7 +137,6 @@ void TestParser::const_var_idx() {
 }
 
 void TestParser::const08() {
-	const char* code="function f(x)\n  return #3fb999999999999a;end";
 	FILE *fin = std::fopen (SRCDIR_TESTS "/minibex/const08.mbx", "r");
 	CPPUNIT_ASSERT (fin != NULL);
 	Function f(fin);
