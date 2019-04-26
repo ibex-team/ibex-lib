@@ -370,7 +370,7 @@ private:
 
 	static double unicity_infl;        // unicity boxes are just inflated solution boxes.
 
-	static string solver_var_names[n];
+	static std::string solver_var_names[n];
 
 	static const Solver::Status solver_status = Solver::NOT_ALL_VALIDATED;
 
