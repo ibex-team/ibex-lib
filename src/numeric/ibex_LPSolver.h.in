@@ -82,7 +82,7 @@ public:
 	 * \param max_time_out - Control the number of iterations inside the linear solver
 	 */
 	LPSolver(int nb_vars, int max_iter= default_max_iter,
-			int max_time_out= default_max_time_out, double eps=default_eps);
+			double max_time_out= default_max_time_out, double eps=default_eps);
 
 	~LPSolver();
 
@@ -172,7 +172,7 @@ public:
 
 	void set_max_iter(int max);
 
-	void set_max_time_out(int time);
+	void set_max_time_out(double time);
 
 	void set_sense(Sense s);
 

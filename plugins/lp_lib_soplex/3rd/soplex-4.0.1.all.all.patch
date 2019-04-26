@@ -1,0 +1,20 @@
+--- soplex-4.0.1/Makefile.back	2019-04-25 01:23:10.000000000 +0200
++++ soplex-4.0.1/Makefile	2019-04-25 10:34:21.000000000 +0200
+@@ -70,7 +70,7 @@
+ # is it allowed to link to external open source libraries?
+ OPENSOURCE	=	true
+ 
+-GMP		=	true
++GMP		=	false
+ ZLIB		=	true
+ EGLIB		=	false
+ 
+@@ -97,7 +97,7 @@
+ LIBBUILD_o	=	$(AR_o)
+ LIBBUILDFLAGS	=       $(ARFLAGS)
+ 
+-CPPFLAGS	=	-Isrc
++CPPFLAGS	=	-Isrc -fPIC
+ CXXFLAGS	=
+ BINOFLAGS	=
+ LIBOFLAGS	=

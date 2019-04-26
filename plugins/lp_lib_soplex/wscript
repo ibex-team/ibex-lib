@@ -26,7 +26,7 @@ def configure (conf):
     if soplex_dir:
         # depending on how it is installed, the headers of soplex can be installed
         # in a directory called "include" or "src"
-        soplex_include=[os.path.join (soplex_dir, d) for d in ["include", "src"]]
+        soplex_include = [os.path.join(soplex_dir, d) for d in ["include", "src"]]
         soplex_lib = os.path.join (soplex_dir, "lib")
         conf.env.append_unique ("INCLUDES_IBEX_DEPS", soplex_include)
         conf.env.append_unique ("LIBPATH_IBEX_DEPS", soplex_lib)
@@ -79,7 +79,7 @@ def configure (conf):
             # We necessarily have mandatory = False, or else conf.check_cxx () would
             # have failed.
             conf.msg ("Using library Soplex from", "3rd/ subdirectory")
-            soplex_archive = "soplex-1.7.1.tar"
+            soplex_archive = "soplex-4.0.1.tar"
             soplex_ret = conf.configure_3rd_party_with_autotools (soplex_archive,
                     without_configure = True, without_make_install = True)
             soplex_srcdir, soplex_include, soplex_lib = soplex_ret
@@ -88,6 +88,8 @@ def configure (conf):
             # The 'make install' of soplex 1.7.1 is buggy, we do it ourself
             if not os.path.exists (soplex_include):
                 os.makedirs (soplex_include)
+            if not os.path.exists(os.path.join(soplex_include, "soplex")):
+                os.makedirs(os.path.join(soplex_include, "soplex"))
             if not os.path.exists (soplex_lib):
                 os.makedirs (soplex_lib)
             conf.start_msg("Installing soplex")
@@ -99,6 +101,10 @@ def configure (conf):
                 fullpath = os.path.join (soplex_srcdir, "src", filename)
                 if filename.endswith (".h") and os.path.isfile (fullpath):
                     shutil.copy2 (fullpath, soplex_include)
+            for filename in os.listdir (os.path.join (soplex_srcdir, "src", "soplex")):
+                fullpath = os.path.join (soplex_srcdir, "src", "soplex", filename)
+                if filename.endswith (".h") and os.path.isfile (fullpath):
+                    shutil.copy2 (fullpath, os.path.join(soplex_include, "soplex"))
             conf.end_msg("done")
 
     if conf.options.DEBUG:
