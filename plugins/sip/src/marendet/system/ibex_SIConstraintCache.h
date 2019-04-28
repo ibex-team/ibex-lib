@@ -27,7 +27,7 @@ struct ParameterEvaluationsCache {
 	IntervalVector full_gradient;
 
 	ParameterEvaluationsCache(const IntervalVector& parameter_box) :
-			parameter_box(parameter_box), evaluation(Interval::EMPTY_SET), full_gradient(
+			parameter_box(parameter_box), evaluation(Interval::empty_set()), full_gradient(
 					1) {
 	}
 	ParameterEvaluationsCache(const IntervalVector& parameter_box,

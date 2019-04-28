@@ -68,7 +68,7 @@ Instance& inst_symbol_01() {
 	if (inst.evl_x_in.empty()) {
 		inst.add_evl(1,1);
 		inst.add_evl(2,2);
-		inst.add_bwd(0,Interval::ALL_REALS,0);
+		inst.add_bwd(0,Interval::all_reals(),0);
 		inst.add_bwd(Interval(0,1),Interval(-1,0),0);
 	}
 	return inst;

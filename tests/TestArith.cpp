@@ -124,56 +124,56 @@ void TestArith::float10() {
 }
 
 void TestArith::minus01() { check(-Interval(0,1), Interval(-1,0)); }
-void TestArith::minus02() { check(-Interval::ALL_REALS, Interval::ALL_REALS); }
-void TestArith::minus03() { check(-Interval::NEG_REALS, Interval::POS_REALS); }
+void TestArith::minus02() { check(-Interval::all_reals(), Interval::all_reals()); }
+void TestArith::minus03() { check(-Interval::neg_reals(), Interval::pos_reals()); }
 void TestArith::minus04() { check(-Interval(NEG_INFINITY,1), Interval(-1,POS_INFINITY)); }
 
-void TestArith::add01() { check_add(Interval::EMPTY_SET,      Interval(0,1),      Interval::EMPTY_SET); }
-void TestArith::add02() { check_add(Interval(0,1),            Interval::EMPTY_SET, Interval::EMPTY_SET); }
+void TestArith::add01() { check_add(Interval::empty_set(),      Interval(0,1),      Interval::empty_set()); }
+void TestArith::add02() { check_add(Interval(0,1),            Interval::empty_set(), Interval::empty_set()); }
 void TestArith::add03() { check_add(Interval(NEG_INFINITY,1), Interval(0,1),      Interval(NEG_INFINITY, 2)); }
 void TestArith::add04() { check_add(Interval(1,POS_INFINITY), Interval(0,1),      Interval(1,POS_INFINITY)); }
-void TestArith::add05() { check_add(Interval::ALL_REALS,      Interval(0,1),      Interval::ALL_REALS); }
+void TestArith::add05() { check_add(Interval::all_reals(),      Interval(0,1),      Interval::all_reals()); }
 
-void TestArith::add06() { check_add_scal(Interval::EMPTY_SET,      POS_INFINITY,       Interval::EMPTY_SET); }
-void TestArith::add07() { check_add_scal(Interval::EMPTY_SET,      0,                  Interval::EMPTY_SET); }
+void TestArith::add06() { check_add_scal(Interval::empty_set(),      POS_INFINITY,       Interval::empty_set()); }
+void TestArith::add07() { check_add_scal(Interval::empty_set(),      0,                  Interval::empty_set()); }
 void TestArith::add08() { check_add_scal(Interval(0,1),            1,                  Interval(1,2)); }
-void TestArith::add09() { check_add_scal(Interval(0,1),            NEG_INFINITY,       Interval::EMPTY_SET); }
-void TestArith::add10() { check_add_scal(Interval(0,1),            POS_INFINITY,       Interval::EMPTY_SET); }
+void TestArith::add09() { check_add_scal(Interval(0,1),            NEG_INFINITY,       Interval::empty_set()); }
+void TestArith::add10() { check_add_scal(Interval(0,1),            POS_INFINITY,       Interval::empty_set()); }
 void TestArith::add11() { check_add_scal(Interval(NEG_INFINITY,1), 1,                  Interval(NEG_INFINITY,2)); }
 
 void TestArith::add12() { check_add(Interval(DBL_MAX,POS_INFINITY), 1, Interval(DBL_MAX,POS_INFINITY)); }
 void TestArith::add13() { check_add(Interval(DBL_MAX,POS_INFINITY), -1, Interval(ibex::previous_float(DBL_MAX),POS_INFINITY)); }
 void TestArith::add14() { check_add(Interval(DBL_MAX,POS_INFINITY), Interval(DBL_MAX,POS_INFINITY), Interval(DBL_MAX,POS_INFINITY)); }
-void TestArith::add15() { check_add(Interval(DBL_MAX,POS_INFINITY), NEG_INFINITY, Interval::EMPTY_SET); }
-void TestArith::add16() { check_add(Interval(DBL_MAX,POS_INFINITY), POS_INFINITY, Interval::EMPTY_SET); }
+void TestArith::add15() { check_add(Interval(DBL_MAX,POS_INFINITY), NEG_INFINITY, Interval::empty_set()); }
+void TestArith::add16() { check_add(Interval(DBL_MAX,POS_INFINITY), POS_INFINITY, Interval::empty_set()); }
 void TestArith::add17() { check_add(Interval(NEG_INFINITY,-DBL_MAX),  1, Interval(NEG_INFINITY,ibex::next_float(-DBL_MAX))); }
 void TestArith::add18() { check_add(Interval(NEG_INFINITY,-DBL_MAX), -1, Interval(NEG_INFINITY,-DBL_MAX)); }
 void TestArith::add19() { check_add(Interval(NEG_INFINITY,-DBL_MAX),  Interval(NEG_INFINITY,-DBL_MAX), Interval(NEG_INFINITY,-DBL_MAX)); }
 
 
-void TestArith::mul01() { check_mul(Interval::EMPTY_SET,         Interval(0,1),               Interval::EMPTY_SET); }
-void TestArith::mul02() { check_mul(Interval::ZERO,              Interval::ALL_REALS,         Interval::ZERO); }
-void TestArith::mul03() { check_mul(Interval(-1,1),              Interval::NEG_REALS, 	     Interval::ALL_REALS); }
+void TestArith::mul01() { check_mul(Interval::empty_set(),         Interval(0,1),               Interval::empty_set()); }
+void TestArith::mul02() { check_mul(Interval::zero(),              Interval::all_reals(),         Interval::zero()); }
+void TestArith::mul03() { check_mul(Interval(-1,1),              Interval::neg_reals(), 	     Interval::all_reals()); }
 
-void TestArith::mul04() { check_mul(Interval(NEG_INFINITY,-1),   Interval(-1,0),              Interval::POS_REALS); }
+void TestArith::mul04() { check_mul(Interval(NEG_INFINITY,-1),   Interval(-1,0),              Interval::pos_reals()); }
 void TestArith::mul05() { check_mul(Interval(NEG_INFINITY, 1),   Interval(-1,0),              Interval(-1,POS_INFINITY)); }
-void TestArith::mul06() { check_mul(Interval(0, 1),              Interval(1,POS_INFINITY), 	 Interval::POS_REALS); }
+void TestArith::mul06() { check_mul(Interval(0, 1),              Interval(1,POS_INFINITY), 	 Interval::pos_reals()); }
 void TestArith::mul07() { check_mul(Interval(0, 1),              Interval(-1,POS_INFINITY),   Interval(-1,POS_INFINITY)); }
 
-void TestArith::mul08() { check_mul(Interval(NEG_INFINITY,-1),   Interval(0,1),               Interval::NEG_REALS); }
+void TestArith::mul08() { check_mul(Interval(NEG_INFINITY,-1),   Interval(0,1),               Interval::neg_reals()); }
 void TestArith::mul09() { check_mul(Interval(NEG_INFINITY, 1),   Interval(0,1),               Interval(NEG_INFINITY,1)); }
-void TestArith::mul10() { check_mul(Interval(0, 1),              Interval(NEG_INFINITY,-1),   Interval::NEG_REALS); }
+void TestArith::mul10() { check_mul(Interval(0, 1),              Interval(NEG_INFINITY,-1),   Interval::neg_reals()); }
 void TestArith::mul11() { check_mul(Interval(0, 1),              Interval(NEG_INFINITY,1),    Interval(NEG_INFINITY,1)); }
 
-void TestArith::mul12() { check_mul(Interval(1,POS_INFINITY),    Interval(0,1),               Interval::POS_REALS); }
+void TestArith::mul12() { check_mul(Interval(1,POS_INFINITY),    Interval(0,1),               Interval::pos_reals()); }
 void TestArith::mul13() { check_mul(Interval(-1,POS_INFINITY),   Interval(0,1),               Interval(-1,POS_INFINITY)); }
 
 void TestArith::mul14() { check_mul(Interval(1,2),               Interval(1,2), 	        	 Interval(1,4)); }
 void TestArith::mul15() { check_mul(Interval(1,2),               Interval(-2,3), 	         Interval(-4,6)); }
 void TestArith::mul16() { check_mul(Interval(-1,1),              Interval(-2,3), 	         Interval(-3,3)); }
 
-void TestArith::mul17() { check_mul_scal(Interval(1,2),          NEG_INFINITY, 	        	 Interval::EMPTY_SET); }
-void TestArith::mul18() { check_mul_scal(Interval(1,2),          POS_INFINITY, 	        	 Interval::EMPTY_SET); }
+void TestArith::mul17() { check_mul_scal(Interval(1,2),          NEG_INFINITY, 	        	 Interval::empty_set()); }
+void TestArith::mul18() { check_mul_scal(Interval(1,2),          POS_INFINITY, 	        	 Interval::empty_set()); }
 void TestArith::mul19() { check_mul_scal(Interval(1,2),          -1, 	        	         Interval(-2,-1)); }
 
 void TestArith::mulMM01() {
@@ -187,33 +187,33 @@ void TestArith::mulMM01() {
 	CPPUNIT_ASSERT(M==M_expected);
 }
 
-void TestArith::div01() { check_div(Interval::EMPTY_SET,         Interval(0,1),               Interval::EMPTY_SET); }
-void TestArith::div02() { check_div(Interval::ZERO,              Interval::ZERO,              Interval::EMPTY_SET); }
-void TestArith::div03() { check_div(Interval(1,2),               Interval::ZERO,              Interval::EMPTY_SET); }
-void TestArith::div04() { check_div(Interval::ALL_REALS,         Interval::ZERO,              Interval::EMPTY_SET); }
-void TestArith::div05() { check_div(Interval::ZERO,              Interval(0,1),               Interval::ZERO); }
-void TestArith::div06() { check_div(Interval::ZERO,              Interval::ALL_REALS,         Interval::ZERO); }
+void TestArith::div01() { check_div(Interval::empty_set(),         Interval(0,1),               Interval::empty_set()); }
+void TestArith::div02() { check_div(Interval::zero(),              Interval::zero(),              Interval::empty_set()); }
+void TestArith::div03() { check_div(Interval(1,2),               Interval::zero(),              Interval::empty_set()); }
+void TestArith::div04() { check_div(Interval::all_reals(),         Interval::zero(),              Interval::empty_set()); }
+void TestArith::div05() { check_div(Interval::zero(),              Interval(0,1),               Interval::zero()); }
+void TestArith::div06() { check_div(Interval::zero(),              Interval::all_reals(),         Interval::zero()); }
 void TestArith::div07() { check_div(Interval(6,12),              Interval(2,3),               Interval(2,6)); }
 void TestArith::div08() { check_div(Interval(6,12),              Interval(-3,-2),             Interval(-6,-2)); }
-void TestArith::div09() { check_div(Interval(6,12),              Interval(-2,3),              Interval::ALL_REALS); }
+void TestArith::div09() { check_div(Interval(6,12),              Interval(-2,3),              Interval::all_reals()); }
 void TestArith::div10() { check_div(Interval(NEG_INFINITY,-1),   Interval(-1,0),              Interval(1,POS_INFINITY)); }
 void TestArith::div11() { check_div(Interval(NEG_INFINITY,-1),   Interval(0,1),               Interval(NEG_INFINITY,-1)); }
 void TestArith::div12() { check_div(Interval(1,POS_INFINITY),    Interval(-1,0),              Interval(NEG_INFINITY,-1)); }
 void TestArith::div13() { check_div(Interval(1,POS_INFINITY),    Interval(0,1),               Interval(1,POS_INFINITY)); }
-void TestArith::div14() { check_div(Interval(-1,1),              Interval(-1,1), 	         Interval::ALL_REALS); }
-void TestArith::div15() { check_div_scal(Interval(1,2),          NEG_INFINITY, 	        	 Interval::EMPTY_SET); }
-void TestArith::div16() { check_div_scal(Interval(1,2),          POS_INFINITY, 	        	 Interval::EMPTY_SET); }
+void TestArith::div14() { check_div(Interval(-1,1),              Interval(-1,1), 	         Interval::all_reals()); }
+void TestArith::div15() { check_div_scal(Interval(1,2),          NEG_INFINITY, 	        	 Interval::empty_set()); }
+void TestArith::div16() { check_div_scal(Interval(1,2),          POS_INFINITY, 	        	 Interval::empty_set()); }
 void TestArith::div17() { check_div_scal(Interval(1,2),          -1, 	        	         Interval(-2,-1)); }
 
-void TestArith::sqrt01() { check(sqrt(Interval::ALL_REALS), Interval::POS_REALS); }
-void TestArith::sqrt02() { check(sqrt(Interval::NEG_REALS), Interval::ZERO); }
+void TestArith::sqrt01() { check(sqrt(Interval::all_reals()), Interval::pos_reals()); }
+void TestArith::sqrt02() { check(sqrt(Interval::neg_reals()), Interval::zero()); }
 void TestArith::sqrt03() { check(sqrt(Interval(-9,4)),      Interval(0,2)); }
 void TestArith::sqrt04() { check(sqrt(Interval(4,9)),       Interval(2,3)); }
-void TestArith::sqrt05() { check(sqrt(Interval(-9,-4)),     Interval::EMPTY_SET); }
-void TestArith::sqrt06() { check(sqrt(Interval(-9,POS_INFINITY)),     Interval::POS_REALS); }
+void TestArith::sqrt05() { check(sqrt(Interval(-9,-4)),     Interval::empty_set()); }
+void TestArith::sqrt06() { check(sqrt(Interval(-9,POS_INFINITY)),     Interval::pos_reals()); }
 
-#define piL Interval::PI.lb()
-#define piU Interval::PI.ub()
+#define piL Interval::pi().lb()
+#define piU Interval::pi().ub()
 
 void TestArith::check_sinh(const Interval& x) {
 	double xl=x.lb();
@@ -227,8 +227,8 @@ void TestArith::check_sinh(const Interval& x) {
 	check(-x,asinh(sinh(-x)));
 }
 
-void TestArith::sinh01() { check_sinh(Interval::ALL_REALS); }
-void TestArith::sinh02() { check_sinh(Interval::POS_REALS); }
+void TestArith::sinh01() { check_sinh(Interval::all_reals()); }
+void TestArith::sinh02() { check_sinh(Interval::pos_reals()); }
 void TestArith::sinh03() { check_sinh(Interval(0,1)); }
 void TestArith::sinh04() { check_sinh(Interval(1,POS_INFINITY)); }
 void TestArith::sinh05() { check_sinh(Interval(1,1)); }
@@ -262,8 +262,8 @@ void TestArith::check_cosh(const Interval& x) {
 //	check(x,acosh(cosh(-x)));
 }
 
-void TestArith::cosh01() { check_cosh(Interval::ALL_REALS); }
-void TestArith::cosh02() { check_cosh(Interval::POS_REALS); }
+void TestArith::cosh01() { check_cosh(Interval::all_reals()); }
+void TestArith::cosh02() { check_cosh(Interval::pos_reals()); }
 void TestArith::cosh03() { check_cosh(Interval(0,1)); }
 void TestArith::cosh04() { check_cosh(Interval(1,POS_INFINITY)); }
 void TestArith::cosh05() { check_cosh(Interval(1,1)); }
@@ -273,39 +273,39 @@ void TestArith::cosh07() { check_cosh(Interval(4,5)); }
 
 void TestArith::check_trigo(const Interval& x, const Interval& sin_x_expected) {
 	check(sin(x), sin_x_expected);
-	check(sin(Interval::PI-x), sin_x_expected);
-	check(sin(x+Interval::TWO_PI), sin_x_expected);
+	check(sin(Interval::pi()-x), sin_x_expected);
+	check(sin(x+Interval::two_pi()), sin_x_expected);
 	check(sin(-x), -sin_x_expected);
-	check(cos(x-Interval::HALF_PI), sin_x_expected);
-	check(cos(Interval::HALF_PI-x), sin_x_expected);
-	check(cos(x+Interval::HALF_PI), -sin_x_expected);
-	check(cos(x+Interval::TWO_PI-Interval::HALF_PI), sin_x_expected);
+	check(cos(x-Interval::half_pi()), sin_x_expected);
+	check(cos(Interval::half_pi()-x), sin_x_expected);
+	check(cos(x+Interval::half_pi()), -sin_x_expected);
+	check(cos(x+Interval::two_pi()-Interval::half_pi()), sin_x_expected);
 }
 
-void TestArith::log01() { check(log(Interval::EMPTY_SET), Interval::EMPTY_SET); }
-void TestArith::log02() { check(log(Interval::ALL_REALS), Interval::ALL_REALS); }
-void TestArith::log03() { check(log(Interval::POS_REALS), Interval::ALL_REALS); }
-void TestArith::log04() { check(log(Interval::NEG_REALS),  Interval::EMPTY_SET); /*Interval(NEG_INFINITY,-DBL_MAX));*/ }
+void TestArith::log01() { check(log(Interval::empty_set()), Interval::empty_set()); }
+void TestArith::log02() { check(log(Interval::all_reals()), Interval::all_reals()); }
+void TestArith::log03() { check(log(Interval::pos_reals()), Interval::all_reals()); }
+void TestArith::log04() { check(log(Interval::neg_reals()),  Interval::empty_set()); /*Interval(NEG_INFINITY,-DBL_MAX));*/ }
 void TestArith::log05() { check(log(Interval(1,2)),       Interval(0,::log(2))); }
 void TestArith::log06() { check(log(Interval(-1,1)),      Interval(NEG_INFINITY,0)); }
 void TestArith::log07() { CPPUNIT_ASSERT((log(Interval(0,ibex::next_float(0)))).ub()> -744.5); }
 void TestArith::log08() { check(log(Interval(0,1)),       Interval(NEG_INFINITY,0)); }
-void TestArith::log09() { check(log(Interval(1,POS_INFINITY)), Interval::POS_REALS); }
-void TestArith::log10() { check(log(Interval(0)), Interval::EMPTY_SET); /* Interval(NEG_INFINITY,-DBL_MAX)); */ }
-void TestArith::log11() { check(log(Interval(-2,-1)), Interval::EMPTY_SET); }
+void TestArith::log09() { check(log(Interval(1,POS_INFINITY)), Interval::pos_reals()); }
+void TestArith::log10() { check(log(Interval(0)), Interval::empty_set()); /* Interval(NEG_INFINITY,-DBL_MAX)); */ }
+void TestArith::log11() { check(log(Interval(-2,-1)), Interval::empty_set()); }
 
-void TestArith::exp01() { check(exp(Interval::EMPTY_SET), Interval::EMPTY_SET); }
-void TestArith::exp02() { check(exp(Interval::ALL_REALS), Interval::POS_REALS); }
-void TestArith::exp03() { check(exp(Interval::POS_REALS), Interval(1,POS_INFINITY)); }
-void TestArith::exp04() { check(exp(Interval::NEG_REALS), Interval(0,1)); }
+void TestArith::exp01() { check(exp(Interval::empty_set()), Interval::empty_set()); }
+void TestArith::exp02() { check(exp(Interval::all_reals()), Interval::pos_reals()); }
+void TestArith::exp03() { check(exp(Interval::pos_reals()), Interval(1,POS_INFINITY)); }
+void TestArith::exp04() { check(exp(Interval::neg_reals()), Interval(0,1)); }
 void TestArith::exp05() { check(exp(Interval(0,2)),       Interval(1,::exp(2))); }
 void TestArith::exp06() { check(exp(Interval(-1,1)),      Interval(::exp(-1),::exp(1))); }
 void TestArith::exp07() { check(exp(Interval(1.e100,1.e111)),Interval(DBL_MAX,POS_INFINITY)); }
 void TestArith::exp08() { check(exp(Interval(DBL_MAX,POS_INFINITY)),Interval(DBL_MAX,POS_INFINITY)); }
 void TestArith::exp09() { check(exp(Interval(0,DBL_MAX)),Interval(1,POS_INFINITY)); }
 
-void TestArith::sin01() { check_trigo(Interval::ALL_REALS, Interval(-1,1)); }
-void TestArith::sin02() { check_trigo(Interval::EMPTY_SET, Interval::EMPTY_SET); }
+void TestArith::sin01() { check_trigo(Interval::all_reals(), Interval(-1,1)); }
+void TestArith::sin02() { check_trigo(Interval::empty_set(), Interval::empty_set()); }
 void TestArith::sin03() { check_trigo(Interval(0,piU/2.0), Interval(0,1)); }
 void TestArith::sin04() { check_trigo(Interval(0,piU), Interval(0,1)); }
 void TestArith::sin05() { check_trigo(Interval(0,3*piU/2.0), Interval(-1,1)); }
@@ -318,8 +318,8 @@ void TestArith::sin11() { check_trigo(Interval(3,2*piU+1.5), Interval(-1,sin(1.5
 void TestArith::sin12() { check_trigo(Interval(5,2*piU+1.5), Interval(sin(5.0),sin(1.5))); }
 void TestArith::sin13() { check_trigo(Interval(5,2*piU+3), Interval(sin(5.0),1)); }
 
-void TestArith::tan01() { check(tan(Interval::ALL_REALS), Interval::ALL_REALS); }
-void TestArith::tan02() { check(tan(-Interval::PI/4.0 | Interval::PI/4.0), Interval(-1,1)); }
+void TestArith::tan01() { check(tan(Interval::all_reals()), Interval::all_reals()); }
+void TestArith::tan02() { check(tan(-Interval::pi()/4.0 | Interval::pi()/4.0), Interval(-1,1)); }
 void TestArith::tan03() {	// tan(pi/4,pi/2)=[1,+oo)
 	Interval x=Interval(piL/4.0,(1-1e-10)*piL/2.0); // upper bound of x is close to pi/2
 	Interval y=tan(x);
@@ -331,39 +331,39 @@ void TestArith::tan04() {	// tan(-pi/2,pi/4)=(-oo,1]
 	CPPUNIT_ASSERT(y.lb()<-1000); // lower bound is close to -oo
 	check(y.ub(),1.0);
 }
-void TestArith::tan05() { check(tan(Interval::PI/2.0),Interval::ALL_REALS); }
-void TestArith::tan06() { check(tan(-Interval::PI),Interval::ALL_REALS); }
-void TestArith::tan07() { check(tan(3*Interval::PI/4.0 | 5*Interval::PI/4.0), Interval(-1,1)); }
+void TestArith::tan05() { check(tan(Interval::pi()/2.0),Interval::all_reals()); }
+void TestArith::tan06() { check(tan(-Interval::pi()),Interval::all_reals()); }
+void TestArith::tan07() { check(tan(3*Interval::pi()/4.0 | 5*Interval::pi()/4.0), Interval(-1,1)); }
 
-void TestArith::atan2_01() { check(atan2(Interval::ALL_REALS,Interval::EMPTY_SET),Interval::EMPTY_SET); }
-void TestArith::atan2_02() { check(atan2(Interval::ONE,Interval::ONE),     Interval::PI/4.0); }
-void TestArith::atan2_03() { check(atan2(-Interval::ONE,-Interval::ONE),-3*Interval::PI/4.0); }
-void TestArith::atan2_04() { check(atan2(-Interval::ONE,Interval::ONE),   -Interval::PI/4.0); }
-void TestArith::atan2_05() { check(atan2(Interval::ONE,-Interval::ONE),  3*Interval::PI/4.0); }
-void TestArith::atan2_06() { check(atan2(Interval::POS_REALS,Interval::POS_REALS), Interval(0,1)*Interval::HALF_PI); }
-void TestArith::atan2_07() { check(atan2(Interval(NEG_INFINITY,ibex::previous_float(0.0)),Interval::NEG_REALS), -(Interval::HALF_PI | Interval::PI)); }
-void TestArith::atan2_08() { check(atan2(Interval::NEG_REALS,Interval::POS_REALS), Interval(-1,0)*Interval::HALF_PI); }
-void TestArith::atan2_09() { check(atan2(Interval::POS_REALS,Interval::NEG_REALS), (Interval::HALF_PI | Interval::PI)); }
-void TestArith::atan2_10() { check(atan2(Interval(1,POS_INFINITY),Interval(-1,1)), Interval::PI/4.0 | 3*Interval::PI/4.0); }
-void TestArith::atan2_11() { check(atan2(Interval(NEG_INFINITY,-1),Interval(-1,1)), -(Interval::PI/4.0 | 3*Interval::PI/4.0)); }
-void TestArith::atan2_12() { check(atan2(Interval(-1,1),Interval(1,POS_INFINITY)), Interval(-1,1)*Interval::PI/4.0); }
-void TestArith::atan2_13() { check(atan2(Interval(-1,1),Interval(NEG_INFINITY,-1)), Interval(-1,1)*Interval::PI); }
-void TestArith::atan2_14() { check(atan2(Interval::ALL_REALS,Interval::ALL_REALS),Interval(-1,1)*Interval::PI); }
-void TestArith::atan2_15() { check(atan2(Interval::ZERO,Interval::ZERO),Interval::EMPTY_SET); }
+void TestArith::atan2_01() { check(atan2(Interval::all_reals(),Interval::empty_set()),Interval::empty_set()); }
+void TestArith::atan2_02() { check(atan2(Interval::one(),Interval::one()),     Interval::pi()/4.0); }
+void TestArith::atan2_03() { check(atan2(-Interval::one(),-Interval::one()),-3*Interval::pi()/4.0); }
+void TestArith::atan2_04() { check(atan2(-Interval::one(),Interval::one()),   -Interval::pi()/4.0); }
+void TestArith::atan2_05() { check(atan2(Interval::one(),-Interval::one()),  3*Interval::pi()/4.0); }
+void TestArith::atan2_06() { check(atan2(Interval::pos_reals(),Interval::pos_reals()), Interval(0,1)*Interval::half_pi()); }
+void TestArith::atan2_07() { check(atan2(Interval(NEG_INFINITY,ibex::previous_float(0.0)),Interval::neg_reals()), -(Interval::half_pi() | Interval::pi())); }
+void TestArith::atan2_08() { check(atan2(Interval::neg_reals(),Interval::pos_reals()), Interval(-1,0)*Interval::half_pi()); }
+void TestArith::atan2_09() { check(atan2(Interval::pos_reals(),Interval::neg_reals()), (Interval::half_pi() | Interval::pi())); }
+void TestArith::atan2_10() { check(atan2(Interval(1,POS_INFINITY),Interval(-1,1)), Interval::pi()/4.0 | 3*Interval::pi()/4.0); }
+void TestArith::atan2_11() { check(atan2(Interval(NEG_INFINITY,-1),Interval(-1,1)), -(Interval::pi()/4.0 | 3*Interval::pi()/4.0)); }
+void TestArith::atan2_12() { check(atan2(Interval(-1,1),Interval(1,POS_INFINITY)), Interval(-1,1)*Interval::pi()/4.0); }
+void TestArith::atan2_13() { check(atan2(Interval(-1,1),Interval(NEG_INFINITY,-1)), Interval(-1,1)*Interval::pi()); }
+void TestArith::atan2_14() { check(atan2(Interval::all_reals(),Interval::all_reals()),Interval(-1,1)*Interval::pi()); }
+void TestArith::atan2_15() { check(atan2(Interval::zero(),Interval::zero()),Interval::empty_set()); }
 
 void TestArith::check_pow(const Interval& x, int p, const Interval& y_expected) {
 	check(pow(x,p),y_expected);
 	check(pow(-x,p),(p%2==0)? y_expected : -y_expected);
 }
 
-void TestArith::pow01() { check_pow(Interval::ALL_REALS, 4, Interval::POS_REALS); }
-void TestArith::pow02() { check_pow(Interval::EMPTY_SET, 4, Interval::EMPTY_SET); }
+void TestArith::pow01() { check_pow(Interval::all_reals(), 4, Interval::pos_reals()); }
+void TestArith::pow02() { check_pow(Interval::empty_set(), 4, Interval::empty_set()); }
 void TestArith::pow03() { check_pow(Interval(2,3), 4, Interval(16,81)); }
 void TestArith::pow04() { check_pow(Interval(-2,3), 4, Interval(0,81)); }
 void TestArith::pow05() { check_pow(Interval(-3,2), 4, Interval(0,81)); }
 void TestArith::pow06() { check_pow(Interval(2,POS_INFINITY), 4, Interval(16,POS_INFINITY)); }
-void TestArith::pow07() { check_pow(Interval::ALL_REALS, 3, Interval::ALL_REALS); }
-void TestArith::pow08() { check_pow(Interval::EMPTY_SET, 3, Interval::EMPTY_SET); }
+void TestArith::pow07() { check_pow(Interval::all_reals(), 3, Interval::all_reals()); }
+void TestArith::pow08() { check_pow(Interval::empty_set(), 3, Interval::empty_set()); }
 void TestArith::pow09() { check_pow(Interval(2,3), 3, Interval(8,27)); }
 void TestArith::pow10() { check_pow(Interval(-2,3), 3, Interval(-8,27)); }
 void TestArith::pow11() { check_pow(Interval(-3,2), 3, Interval(-27,8)); }
@@ -382,8 +382,8 @@ void TestArith::root04() { check(root(Interval(-8,1),3), Interval(-2,1)); }
 void TestArith::checkbwd_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter) {
     checkproj(sin,  y, xbefore, xafter);
 	checkproj(sin, -y,-xbefore,-xafter);
-	checkproj(cos,  y, xbefore-Interval::HALF_PI, xafter-Interval::HALF_PI);
-	checkproj(cos, -y, xbefore+Interval::HALF_PI, xafter+Interval::HALF_PI);
+	checkproj(cos,  y, xbefore-Interval::half_pi(), xafter-Interval::half_pi());
+	checkproj(cos, -y, xbefore+Interval::half_pi(), xafter+Interval::half_pi());
 }
 
 #define checkprojpow(p,y,xbefore,xafter) {
@@ -429,7 +429,7 @@ void TestArith::bwd_mul01() {
 }
 
 void TestArith::bwd_mul02() {
-	CPPUNIT_ASSERT(checkbwd_mul(Interval::EMPTY_SET,Interval(0.1,2.0),Interval(-10,2),Interval::EMPTY_SET,Interval::EMPTY_SET));
+	CPPUNIT_ASSERT(checkbwd_mul(Interval::empty_set(),Interval(0.1,2.0),Interval(-10,2),Interval::empty_set(),Interval::empty_set()));
 }
 
 void TestArith::bwd_mul03() {
@@ -520,16 +520,16 @@ void TestArith::checkbwd_div(const Interval& y, const Interval& x1_bef, const In
 	check(x2,-x2_aft);
 }
 
-void TestArith::bwd_div01() { checkbwd_div(Interval(1,2),  Interval(0,1),   Interval(2,3),  Interval::EMPTY_SET, Interval::EMPTY_SET); }
+void TestArith::bwd_div01() { checkbwd_div(Interval(1,2),  Interval(0,1),   Interval(2,3),  Interval::empty_set(), Interval::empty_set()); }
 void TestArith::bwd_div02() { checkbwd_div(Interval(1,2),  Interval(0,1),   Interval(1,3),  1,                   1); }
 void TestArith::bwd_div03() { checkbwd_div(Interval(1,2),  Interval(1,3),   Interval(0,1),  Interval(1,2),       Interval(0.5,1)); }
 void TestArith::bwd_div04() { checkbwd_div(Interval(-1,1), Interval(-2,2),  Interval(0,1),  Interval(-1,1),      Interval(0,1)); }
-void TestArith::bwd_div05() { checkbwd_div(Interval(-1,1), Interval(-2,2),  Interval::ZERO, Interval::ZERO,      Interval::ZERO); }
-void TestArith::bwd_div06() { checkbwd_div(Interval::ZERO, Interval(-2,2),  Interval(-2,2), Interval::ZERO,      Interval(-2,2)); }
-void TestArith::bwd_div07() { checkbwd_div(Interval::POS_REALS, Interval(0,1),  Interval(-1,0), Interval::ZERO,   Interval(-1,0)); }
+void TestArith::bwd_div05() { checkbwd_div(Interval(-1,1), Interval(-2,2),  Interval::zero(), Interval::zero(),      Interval::zero()); }
+void TestArith::bwd_div06() { checkbwd_div(Interval::zero(), Interval(-2,2),  Interval(-2,2), Interval::zero(),      Interval(-2,2)); }
+void TestArith::bwd_div07() { checkbwd_div(Interval::pos_reals(), Interval(0,1),  Interval(-1,0), Interval::zero(),   Interval(-1,0)); }
 // note: 0/0 can be any number.
-void TestArith::bwd_div08() { checkbwd_div(Interval(ibex::next_float(0),POS_INFINITY), Interval(0,1), Interval(-1,0), Interval::ZERO, Interval::ZERO); }
-void TestArith::bwd_div09() { checkbwd_div(Interval::POS_REALS, Interval(ibex::next_float(0),1),  Interval(-1,0),  Interval::EMPTY_SET, Interval::EMPTY_SET); }
+void TestArith::bwd_div08() { checkbwd_div(Interval(ibex::next_float(0),POS_INFINITY), Interval(0,1), Interval(-1,0), Interval::zero(), Interval::zero()); }
+void TestArith::bwd_div09() { checkbwd_div(Interval::pos_reals(), Interval(ibex::next_float(0),1),  Interval(-1,0),  Interval::empty_set(), Interval::empty_set()); }
 
 
 void TestArith::checkbwd_max(const Interval& z,  const Interval& x, const Interval& y, const Interval& x_expected, const Interval& y_expected) {
@@ -565,9 +565,9 @@ void TestArith::checkbwd_max(const Interval& z,  const Interval& x, const Interv
 	CPPUNIT_ASSERT(y_expected==-_y);
 }
 
-void TestArith::bwd_maxmin01() { checkbwd_max(Interval::EMPTY_SET, Interval(-2,-1),Interval(-2,3),Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestArith::bwd_maxmin01() { checkbwd_max(Interval::empty_set(), Interval(-2,-1),Interval(-2,3),Interval::empty_set(),Interval::empty_set()); }
 void TestArith::bwd_maxmin02() { checkbwd_max(Interval(0,1),       Interval(-2,-1),Interval(-2,3),Interval(-2,-1),    Interval(0,1)); }
-void TestArith::bwd_maxmin03() { checkbwd_max(Interval(0,1),       Interval(-2,-1),Interval(2,3), Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestArith::bwd_maxmin03() { checkbwd_max(Interval(0,1),       Interval(-2,-1),Interval(2,3), Interval::empty_set(),Interval::empty_set()); }
 void TestArith::bwd_maxmin04() { checkbwd_max(Interval(0,1),       Interval(-2,0), Interval(-2,3),Interval(-2,0),    Interval(-2,1)); }
 void TestArith::bwd_maxmin05() { checkbwd_max(Interval(0,1),       Interval(-2,2), Interval(-2,3),Interval(-2,1),    Interval(-2,1)); }
 
@@ -577,16 +577,16 @@ void TestArith::bwd_sqr03() { checkproj(sqr, Interval(1,9),            Interval(
 void TestArith::bwd_sqr04() { checkproj(sqr, Interval(1,9),            Interval(-4,-3),     Interval(-3,-3)); }
 void TestArith::bwd_sqr05() { checkproj(sqr, Interval(NEG_INFINITY,9), Interval(-4,1),      Interval(-3,1)); }
 void TestArith::bwd_sqr06() { checkproj(sqr, Interval(4,9),            Interval(-1,5),      Interval(2,3)); }
-void TestArith::bwd_sqr07() { checkproj(sqr, Interval(-4,-2),          Interval::ALL_REALS, Interval::EMPTY_SET); }
+void TestArith::bwd_sqr07() { checkproj(sqr, Interval(-4,-2),          Interval::all_reals(), Interval::empty_set()); }
 
-void TestArith::bwd_log01() { checkproj(log, Interval::ALL_REALS,      Interval::ALL_REALS, Interval::POS_REALS); }
-void TestArith::bwd_log02() { checkproj(log, Interval::NEG_REALS,      Interval::ALL_REALS, Interval(0,1)); }
-void TestArith::bwd_log03() { checkproj(log, Interval::POS_REALS,      Interval(0,1),       1); }
+void TestArith::bwd_log01() { checkproj(log, Interval::all_reals(),      Interval::all_reals(), Interval::pos_reals()); }
+void TestArith::bwd_log02() { checkproj(log, Interval::neg_reals(),      Interval::all_reals(), Interval(0,1)); }
+void TestArith::bwd_log03() { checkproj(log, Interval::pos_reals(),      Interval(0,1),       1); }
 void TestArith::bwd_log04() { checkproj(log, Interval(0,1),      		Interval(-1,3),      Interval(1,::exp(1))); }
 void TestArith::bwd_log05() { checkproj(log, Interval(NEG_INFINITY,1), Interval(-1,3),      Interval(0,::exp(1))); }
 void TestArith::bwd_log06() { checkproj(log, Interval(NEG_INFINITY,1), Interval(-1,2),      Interval(0,2)); }
-void TestArith::bwd_log07() { checkproj(log, Interval(NEG_INFINITY,1), Interval(3,4),       Interval::EMPTY_SET); }
-void TestArith::bwd_log08() { checkproj(log, Interval(-1,1),           Interval(-0.01,0.01),Interval::EMPTY_SET); }
+void TestArith::bwd_log07() { checkproj(log, Interval(NEG_INFINITY,1), Interval(3,4),       Interval::empty_set()); }
+void TestArith::bwd_log08() { checkproj(log, Interval(-1,1),           Interval(-0.01,0.01),Interval::empty_set()); }
 
 
 void TestArith::bwd_sin01() { checkbwd_trigo(sin(Interval(0.5,1.5)), Interval(0,piU/2.0),        Interval(0.5,1.5)); }
@@ -602,7 +602,7 @@ void TestArith::bwd_sin10() { checkbwd_trigo(sin(Interval(0.5,1.5)), Interval(0.
 void TestArith::bwd_sin11() { checkbwd_trigo(sin(Interval(0.5,1.5)), Interval(-piU-0.5,piU-1.5), Interval(-piU-0.5,piU-1.5)); }
 void TestArith::bwd_sin12() { checkbwd_trigo(sin(Interval(0.5,1.5)), Interval(-3*piU/2,piU),     Interval(-piU-1.5,piU-0.5)); }
 void TestArith::bwd_sin13() { checkbwd_trigo(sin(Interval(0.5,1.5)), Interval(-piU/2,piU/2.0),   Interval(0.5,1.5)); }
-void TestArith::bwd_sin14() { checkbwd_trigo(Interval(2,3),          Interval::ALL_REALS,        Interval::EMPTY_SET); }
+void TestArith::bwd_sin14() { checkbwd_trigo(Interval(2,3),          Interval::all_reals(),        Interval::empty_set()); }
 
 void TestArith::bwd_sin15() { checkbwd_trigo(Interval(sin(0.5),1.0), Interval(0,piU/2.0),        Interval(0.5,piU/2.0)); }
 void TestArith::bwd_sin16() { checkbwd_trigo(Interval(sin(0.5),1.0), Interval(0,5*piU/2.0),      Interval(0.5,5*piU/2.0)); }
@@ -618,24 +618,24 @@ void TestArith::bwd_sin23() { checkbwd_trigo(Interval(sin(0.5),1.0), Interval(-3
 // when the image is > 1 or < -1 the box x is
 // emptied by the call to asin (not by the
 //  intersection scheme)
-void TestArith::bwd_sin24() { checkbwd_trigo(Interval(1.0),          Interval(4.0,6.0),          Interval::EMPTY_SET); }
+void TestArith::bwd_sin24() { checkbwd_trigo(Interval(1.0),          Interval(4.0,6.0),          Interval::empty_set()); }
 
 void TestArith::bwd_pow01() { checkbwd_pow(Interval(16,81), Interval(1,4), Interval(2,3), 4); }
 void TestArith::bwd_pow02() { checkbwd_pow(Interval(16,81), Interval(3,4), Interval(3,3), 4); }
 void TestArith::bwd_pow03() { checkbwd_pow(Interval(16,81), Interval(-1,4), Interval(2,3), 4); }
 void TestArith::bwd_pow04() { checkbwd_pow(Interval(16,81), Interval(-2,4), Interval(-2,3), 4); }
 void TestArith::bwd_pow05() { checkbwd_pow(Interval(16,81), Interval(-5,4), Interval(-3,3), 4); }
-void TestArith::bwd_pow06() { checkbwd_pow(Interval(16,81), Interval(1,1), Interval::EMPTY_SET, 4); }
-void TestArith::bwd_pow07() { checkbwd_pow(Interval(16,81), Interval(4,4), Interval::EMPTY_SET, 4); }
+void TestArith::bwd_pow06() { checkbwd_pow(Interval(16,81), Interval(1,1), Interval::empty_set(), 4); }
+void TestArith::bwd_pow07() { checkbwd_pow(Interval(16,81), Interval(4,4), Interval::empty_set(), 4); }
 void TestArith::bwd_pow08() { checkbwd_pow(Interval(8,27), Interval(1,4), Interval(2,3), 3); }
 void TestArith::bwd_pow09() { checkbwd_pow(Interval(8,27), Interval(3,4), Interval(3,3), 3); }
 void TestArith::bwd_pow10() { checkbwd_pow(Interval(8,27), Interval(-5,4), Interval(2,3), 3); }
 void TestArith::bwd_pow11() { checkbwd_pow(Interval(-8,27), Interval(-5,4), Interval(-2,3), 3); }
 void TestArith::bwd_pow12() { checkbwd_pow(Interval(-27,27), Interval(-5,4), Interval(-3,3), 3); }
-void TestArith::bwd_pow13() { checkbwd_pow(Interval(8,27), Interval(1,1), Interval::EMPTY_SET, 3); }
-void TestArith::bwd_pow14() { checkbwd_pow(Interval(8,27), Interval(4,4), Interval::EMPTY_SET, 3); }
-void TestArith::bwd_pow15() { checkbwd_pow(Interval(-27,-8), Interval(-1,-1), Interval::EMPTY_SET, 3); }
-void TestArith::bwd_pow16() { checkbwd_pow(Interval(-27,-8), Interval(-4,-4), Interval::EMPTY_SET, 3); }
+void TestArith::bwd_pow13() { checkbwd_pow(Interval(8,27), Interval(1,1), Interval::empty_set(), 3); }
+void TestArith::bwd_pow14() { checkbwd_pow(Interval(8,27), Interval(4,4), Interval::empty_set(), 3); }
+void TestArith::bwd_pow15() { checkbwd_pow(Interval(-27,-8), Interval(-1,-1), Interval::empty_set(), 3); }
+void TestArith::bwd_pow16() { checkbwd_pow(Interval(-27,-8), Interval(-4,-4), Interval::empty_set(), 3); }
 void TestArith::bwd_pow17() { checkbwd_pow(Interval(0,1), Interval(-10,10), Interval(-10,10), -2); }
 
 void TestArith::check_div2(const Interval& x, const Interval& y, const Interval& out1, const Interval& out2) {
@@ -662,11 +662,11 @@ void TestArith::check_div2(const Interval& x, const Interval& y, const Interval&
 	check(_inout,out2);
 	CPPUNIT_ASSERT(_out2.is_empty());
 
-	_inout=Interval::ALL_REALS;
+	_inout=Interval::all_reals();
 	_inout.div2_inter(x,y);
 	check(_inout,out1 | out2);
 
-	_inout=Interval::ALL_REALS;
+	_inout=Interval::all_reals();
 	_inout.div2_inter(x,y,_out2);
 	check(_inout,out1);
 	check(_out2,out2);
@@ -703,19 +703,19 @@ void TestArith::check_div2(const Interval& x, const Interval& y, const Interval&
 
 }
 
-void TestArith::div2_01() { check_div2(Interval(6,12),  Interval(0,0),             Interval::EMPTY_SET,       Interval::EMPTY_SET); }
-void TestArith::div2_02() { check_div2(Interval(6,12),  Interval(2,3),             Interval(2,6),             Interval::EMPTY_SET); }
-void TestArith::div2_03() { check_div2(Interval(-2,3),  Interval(-1,1),            Interval::ALL_REALS,       Interval::EMPTY_SET); }
+void TestArith::div2_01() { check_div2(Interval(6,12),  Interval(0,0),             Interval::empty_set(),       Interval::empty_set()); }
+void TestArith::div2_02() { check_div2(Interval(6,12),  Interval(2,3),             Interval(2,6),             Interval::empty_set()); }
+void TestArith::div2_03() { check_div2(Interval(-2,3),  Interval(-1,1),            Interval::all_reals(),       Interval::empty_set()); }
 void TestArith::div2_04() { check_div2(Interval(2,3),   Interval(-1,1),            Interval(NEG_INFINITY,-2), Interval(2,POS_INFINITY)); }
 void TestArith::div2_05() { check_div2(Interval(-3,-2), Interval(-1,1),            Interval(NEG_INFINITY,-2), Interval(2,POS_INFINITY)); }
-void TestArith::div2_06() { check_div2(Interval(2,3),   Interval(NEG_INFINITY,1),  Interval::NEG_REALS,       Interval(2,POS_INFINITY)); }
-void TestArith::div2_07() { check_div2(Interval(2,3),   Interval(-1,POS_INFINITY), Interval(NEG_INFINITY,-2), Interval::POS_REALS); }
-void TestArith::div2_08() { check_div2(Interval(-3,-2), Interval(NEG_INFINITY,1),  Interval(NEG_INFINITY,-2), Interval::POS_REALS); }
-void TestArith::div2_09() { check_div2(Interval(-3,-2), Interval(-1,POS_INFINITY), Interval::NEG_REALS,       Interval(2,POS_INFINITY)); }
-void TestArith::div2_10() { check_div2(Interval(2,3),   Interval::NEG_REALS,       Interval::NEG_REALS,       Interval::EMPTY_SET); }
-void TestArith::div2_11() { check_div2(Interval(2,3),   Interval::POS_REALS,       Interval::POS_REALS,       Interval::EMPTY_SET); }
-void TestArith::div2_12() { check_div2(Interval(-3,-2), Interval::NEG_REALS,       Interval::POS_REALS,       Interval::EMPTY_SET); }
-void TestArith::div2_13() { check_div2(Interval(-3,-2), Interval::POS_REALS,       Interval::NEG_REALS,       Interval::EMPTY_SET); }
+void TestArith::div2_06() { check_div2(Interval(2,3),   Interval(NEG_INFINITY,1),  Interval::neg_reals(),       Interval(2,POS_INFINITY)); }
+void TestArith::div2_07() { check_div2(Interval(2,3),   Interval(-1,POS_INFINITY), Interval(NEG_INFINITY,-2), Interval::pos_reals()); }
+void TestArith::div2_08() { check_div2(Interval(-3,-2), Interval(NEG_INFINITY,1),  Interval(NEG_INFINITY,-2), Interval::pos_reals()); }
+void TestArith::div2_09() { check_div2(Interval(-3,-2), Interval(-1,POS_INFINITY), Interval::neg_reals(),       Interval(2,POS_INFINITY)); }
+void TestArith::div2_10() { check_div2(Interval(2,3),   Interval::neg_reals(),       Interval::neg_reals(),       Interval::empty_set()); }
+void TestArith::div2_11() { check_div2(Interval(2,3),   Interval::pos_reals(),       Interval::pos_reals(),       Interval::empty_set()); }
+void TestArith::div2_12() { check_div2(Interval(-3,-2), Interval::neg_reals(),       Interval::pos_reals(),       Interval::empty_set()); }
+void TestArith::div2_13() { check_div2(Interval(-3,-2), Interval::pos_reals(),       Interval::neg_reals(),       Interval::empty_set()); }
 
 bool TestArith::checkbwd_atan2(const Interval& a, const Interval& y_bef, const Interval& x_bef,
 								const Interval& y_aft, const Interval& x_aft) {
@@ -742,12 +742,12 @@ void TestArith::bwd_atan2_03() { // left half
 	CPPUNIT_ASSERT(checkbwd_atan2(Interval(-M_PI/4.,M_PI/4.),Interval(1.,2.),Interval(.5,2.),Interval(1.,2.),Interval(1.,2.)));
 }
 void TestArith::bwd_atan2_04() { //fourth quadrant
-	CPPUNIT_ASSERT(checkbwd_atan2(Interval(-M_PI/2.,0.),Interval(.5,2.),Interval(.5,10.),Interval::EMPTY_SET,Interval::EMPTY_SET));
+	CPPUNIT_ASSERT(checkbwd_atan2(Interval(-M_PI/2.,0.),Interval(.5,2.),Interval(.5,10.),Interval::empty_set(),Interval::empty_set()));
 }
 void TestArith::bwd_atan2_05() { //upper half
 	// ** confusion with angle constraint **
 	//CPPUNIT_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval(0. ,2.),Interval(.5,10.)));
-	CPPUNIT_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval::EMPTY_SET, Interval::EMPTY_SET));
+	CPPUNIT_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval::empty_set(), Interval::empty_set()));
 }
 void TestArith::bwd_atan2_06() { //second quadrant
 	CPPUNIT_ASSERT(checkbwd_atan2(Interval(2*M_PI/3.,5.*M_PI/6.),Interval(0.,100.),Interval(-20.,-sqrt(3.)/2.),Interval(.5,20.*sqrt(3.)),Interval(-20.,-sqrt(3.)/2)));
@@ -759,23 +759,23 @@ void TestArith::bwd_atan2_08() { //third quadrant
 	CPPUNIT_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-2*M_PI/3.),Interval(-sqrt(3.)/2.,2.),Interval(-1.,-.5),Interval(-sqrt(3.)/2.,-.5),Interval(-sqrt(3.)/2.,-.5)));
 }
 void TestArith::bwd_atan2_09() { //lower half
-	CPPUNIT_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-M_PI/4.),Interval(-5.,-.5),Interval::ALL_REALS,Interval(-5.,-.5),Interval(-5.,5.)));
+	CPPUNIT_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-M_PI/4.),Interval(-5.,-.5),Interval::all_reals(),Interval(-5.,-.5),Interval(-5.,5.)));
 }
 void TestArith::bwd_atan2_10() { //right half
-	CPPUNIT_ASSERT(checkbwd_atan2(Interval(-M_PI/3.,M_PI/4.),Interval::ALL_REALS,Interval(sqrt(3.)/2.),Interval(-1.5,sqrt(3.)/2.),Interval(sqrt(3.)/2.)));
+	CPPUNIT_ASSERT(checkbwd_atan2(Interval(-M_PI/3.,M_PI/4.),Interval::all_reals(),Interval(sqrt(3.)/2.),Interval(-1.5,sqrt(3.)/2.),Interval(sqrt(3.)/2.)));
 }
 
 void TestArith::bwd_atan2_issue134() {
-	CPPUNIT_ASSERT(checkbwd_atan2(Interval::HALF_PI,Interval::ONE, Interval::ZERO, Interval::ONE, Interval::ZERO));
+	CPPUNIT_ASSERT(checkbwd_atan2(Interval::half_pi(),Interval::one(), Interval::zero(), Interval::one(), Interval::zero()));
 }
 
 void TestArith::bwd_sqrt01() { checkproj(sqrt, Interval(1,3),				Interval(0,15),		Interval(1,9)); }
 void TestArith::bwd_sqrt02() { checkproj(sqrt, Interval(1,3),				Interval(0,2),			Interval(1,2)); }
 void TestArith::bwd_sqrt03() { checkproj(sqrt, Interval(1,3),				Interval(-4,2),		Interval(1,2)); }
-void TestArith::bwd_sqrt04() { checkproj(sqrt, Interval(1,3),				Interval(-4,-3),		Interval::EMPTY_SET); }
+void TestArith::bwd_sqrt04() { checkproj(sqrt, Interval(1,3),				Interval(-4,-3),		Interval::empty_set()); }
 void TestArith::bwd_sqrt05() { checkproj(sqrt, Interval(NEG_INFINITY,9),	Interval(-4,1),		Interval(0,1)); }
 void TestArith::bwd_sqrt06() { checkproj(sqrt, Interval(2,5),				Interval(-1,5),		Interval(4,5)); }
-void TestArith::bwd_sqrt07() { checkproj(sqrt, Interval(-4,-2),				Interval::ALL_REALS,	Interval::EMPTY_SET); }
+void TestArith::bwd_sqrt07() { checkproj(sqrt, Interval(-4,-2),				Interval::all_reals(),	Interval::empty_set()); }
 
 bool TestArith::checkbwd_atan(const Interval& y, const Interval& xbefore, const Interval& xafter) {
 	bool res=true;
@@ -800,18 +800,18 @@ void TestArith::bwd_atan01() { CPPUNIT_ASSERT(checkbwd_atan(Interval(0.,M_PI/6.)
 void TestArith::bwd_atan02() { CPPUNIT_ASSERT(checkbwd_atan(Interval(-M_PI,1.5), 		  Interval(0,5*M_PI/2.0),	Interval(0,5*M_PI/2.0))); }
 void TestArith::bwd_atan03() { CPPUNIT_ASSERT(checkbwd_atan(Interval(0.,M_PI/6.),		  Interval(.2,.5),			Interval(.2,.5))); }
 void TestArith::bwd_atan04() { CPPUNIT_ASSERT(checkbwd_atan(Interval(-M_PI/2-0.1,M_PI/2+0.1), Interval(-100,100),	Interval(-100,100))); }
-void TestArith::bwd_atan05() { CPPUNIT_ASSERT(checkbwd_atan(Interval(M_PI/2+0.1,M_PI),	       Interval(-100,100),	Interval::EMPTY_SET)); }
-void TestArith::bwd_atan06() { CPPUNIT_ASSERT(checkbwd_atan(Interval(-M_PI,-M_PI/2-0.1),      Interval(-100,100),	Interval::EMPTY_SET)); }
+void TestArith::bwd_atan05() { CPPUNIT_ASSERT(checkbwd_atan(Interval(M_PI/2+0.1,M_PI),	       Interval(-100,100),	Interval::empty_set())); }
+void TestArith::bwd_atan06() { CPPUNIT_ASSERT(checkbwd_atan(Interval(-M_PI,-M_PI/2-0.1),      Interval(-100,100),	Interval::empty_set())); }
 
 void TestArith::bwd_atan07() {
-	Interval x=Interval::ALL_REALS;
+	Interval x=Interval::all_reals();
 	bwd_atan(Interval(-M_PI/4,M_PI/2.), x);
 	check(x.lb(), -1);
 	CPPUNIT_ASSERT(x.ub() > 1000); // upper bound is close to +oo
 }
 
 void TestArith::bwd_atan08() {
-	Interval x=Interval::ALL_REALS;
+	Interval x=Interval::all_reals();
 	bwd_atan(Interval(-M_PI/2,M_PI/4.), x);
 	check(x.ub(), +1);
 	CPPUNIT_ASSERT(x.lb() < -1000); // lower bound is close to -oo
@@ -853,11 +853,11 @@ void TestArith::bwd_add01() {
 }
 
 void TestArith::bwd_add02() {
-	CPPUNIT_ASSERT(checkbwd_add(Interval::EMPTY_SET,Interval(0.1,2.0),Interval(-10,2),Interval::EMPTY_SET,Interval::EMPTY_SET));
+	CPPUNIT_ASSERT(checkbwd_add(Interval::empty_set(),Interval(0.1,2.0),Interval(-10,2),Interval::empty_set(),Interval::empty_set()));
 }
 
 void TestArith::bwd_add03() {
-	CPPUNIT_ASSERT(checkbwd_add(Interval(0,0),Interval(0,0),Interval(.1,5),Interval::EMPTY_SET,Interval::EMPTY_SET));
+	CPPUNIT_ASSERT(checkbwd_add(Interval(0,0),Interval(0,0),Interval(.1,5),Interval::empty_set(),Interval::empty_set()));
 }
 
 void TestArith::bwd_add04() {
@@ -906,11 +906,11 @@ void TestArith::bwd_sub01() {
 }
 
 void TestArith::bwd_sub02() {
-	CPPUNIT_ASSERT(checkbwd_sub(Interval::EMPTY_SET,Interval(0.1,2.0),Interval(-10,2),Interval::EMPTY_SET,Interval::EMPTY_SET));
+	CPPUNIT_ASSERT(checkbwd_sub(Interval::empty_set(),Interval(0.1,2.0),Interval(-10,2),Interval::empty_set(),Interval::empty_set()));
 }
 
 void TestArith::bwd_sub03() {
-	CPPUNIT_ASSERT(checkbwd_sub(Interval(0,0),Interval(0,0),Interval(.1,5),Interval::EMPTY_SET,Interval::EMPTY_SET));
+	CPPUNIT_ASSERT(checkbwd_sub(Interval(0,0),Interval(0,0),Interval(.1,5),Interval::empty_set(),Interval::empty_set()));
 }
 
 void TestArith::bwd_sub04() {
@@ -953,7 +953,7 @@ void TestArith::bwd_imod_04() {
 }
 
 void TestArith::bwd_imod_05() {
-	CPPUNIT_ASSERT(checkbwd_imod(2.*M_PI,Interval(3.*M_PI,4.*M_PI),Interval(M_PI/3,M_PI/2.),Interval::EMPTY_SET,Interval::EMPTY_SET));
+	CPPUNIT_ASSERT(checkbwd_imod(2.*M_PI,Interval(3.*M_PI,4.*M_PI),Interval(M_PI/3,M_PI/2.),Interval::empty_set(),Interval::empty_set()));
 }
 
 void TestArith::bwd_imod_06() {
@@ -969,7 +969,7 @@ void TestArith::bwd_imod_08() {
 }
 
 void TestArith::tan_issue248() {
-	//Interval itv = Interval(-Interval::PI.lb()/2,3*Interval::PI.ub()/8);
+	//Interval itv = Interval(-Interval::pi().lb()/2,3*Interval::pi().ub()/8);
 	Interval itv = Interval(-1.57079632679489678, 1.1780972450961728626);
 	CPPUNIT_ASSERT(!(tan(itv).is_empty()));
 }

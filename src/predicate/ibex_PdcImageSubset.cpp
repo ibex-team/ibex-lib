@@ -18,7 +18,7 @@ namespace {
 
 IntervalMatrix inv_diag(const IntervalMatrix& m) {
 	int n=m.nb_rows();
-	IntervalMatrix minv(n,n,Interval::ZERO);
+	IntervalMatrix minv(n,n,Interval::zero());
 	for (int i=0; i<n; i++) {
 		if (m[i][i].contains(0)) throw SingularMatrixException();
 		minv[i][i]=1/m[i][i];
@@ -31,7 +31,7 @@ IntervalMatrix off_diag(const IntervalMatrix& m) {
 	IntervalMatrix m2(n,n);
 	for (int i=0; i<n; i++) {
 		for (int j=0; j<n; j++) {
-			if (i==j) m2[i][j]=Interval::ZERO;
+			if (i==j) m2[i][j]=Interval::zero();
 			else m2[i][j]=m[i][j];
 		}
 	}

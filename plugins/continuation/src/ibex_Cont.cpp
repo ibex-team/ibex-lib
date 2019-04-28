@@ -84,14 +84,14 @@ Function* Cont::merge(Function &f, Function& g) {
 Cont::Cont(Function &f, Function &g, double h_min, double alpha, double beta) : dfs(false), full_diff(true), n(f.nb_var()+g.image_dim()), m(f.image_dim()+g.image_dim()), f(*merge(f,g)), g(&g), domain(this->f.nb_var()), h_min(h_min), alpha(alpha), beta(beta) {
 
 	for (int i=0; i<g.image_dim(); i++)
-		domain[f.nb_var()+i] = Interval::NEG_REALS;
+		domain[f.nb_var()+i] = Interval::neg_reals();
 }
 
 Cont::Cont(Function &f, const IntervalVector& domain, double h_min, double alpha, double beta) : dfs(false), full_diff(true), n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(domain), h_min(h_min), alpha(alpha), beta(beta) {
 
 }
 
-Cont::Cont(Function &f, double h_min, double alpha, double beta) : dfs(false), full_diff(true), n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(f.nb_var(),Interval::ALL_REALS), h_min(h_min), alpha(alpha), beta(beta) {
+Cont::Cont(Function &f, double h_min, double alpha, double beta) : dfs(false), full_diff(true), n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(f.nb_var(),Interval::all_reals()), h_min(h_min), alpha(alpha), beta(beta) {
 
 }
 

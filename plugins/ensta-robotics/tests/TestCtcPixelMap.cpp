@@ -18,7 +18,7 @@ void TestCtcPixelMap::test3d_emptyBox(){
     initRaster3D(raster);
     CtcPixelMap ctc(raster);
 
-    IntervalVector v1(3,Interval::EMPTY_SET);
+    IntervalVector v1(3,Interval::empty_set());
 
     ctc.contract(v1);
 
@@ -43,7 +43,7 @@ void TestCtcPixelMap::test3d_allReal(){
     PixelMap3D raster;
     initRaster3D(raster);
     CtcPixelMap ctc(raster);
-    IntervalVector v1(3,Interval::ALL_REALS);
+    IntervalVector v1(3,Interval::all_reals());
 
     ctc.contract(v1);
 
@@ -112,7 +112,7 @@ void TestCtcPixelMap::test2d_emptyBox(){
     initRaster2D(raster);
     CtcPixelMap ctc(raster);
 
-    IntervalVector v1(2,Interval::EMPTY_SET);
+    IntervalVector v1(2,Interval::empty_set());
 
     ctc.contract(v1);
 
@@ -137,7 +137,7 @@ void TestCtcPixelMap::test2d_allReal(){
     PixelMap2D raster;
     initRaster2D(raster);
     CtcPixelMap ctc(raster);
-    IntervalVector v1(2,Interval::ALL_REALS);
+    IntervalVector v1(2,Interval::all_reals());
 
     ctc.contract(v1);
 

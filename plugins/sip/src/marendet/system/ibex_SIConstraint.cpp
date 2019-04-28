@@ -33,7 +33,7 @@ SIConstraint::~SIConstraint() {
 }*/
 
 Interval SIConstraint::evaluateWithoutCachedValue(const IntervalVector& box, SIConstraintCache& cache) const {
-	Interval res = Interval::ZERO;
+	Interval res = Interval::zero();
 	IntervalVector full_box(function_->nb_var());
 	full_box.put(0, box);
 	const int x_dim = box.size();

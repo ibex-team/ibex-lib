@@ -41,7 +41,7 @@ SepInter::SepInter(Sep &s1, Sep &s2, Sep &s3, Sep &s4) : Sep(s1.nb_var), list(Ar
 //    }
 
 //    Xin = IntervalVector::empty(Xin.size());
-//    Xout = IntervalVector(Xout.size(),Interval::ALL_REALS);
+//    Xout = IntervalVector(Xout.size(),Interval::all_reals());
 //    for (int i=0; i<list.size(); i++){
 //        Xin |= LXin[i];
 //        Xout &= LXout[i];

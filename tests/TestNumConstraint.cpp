@@ -91,7 +91,7 @@ void TestNumConstraint::build_from_file02() {
 //	CPPUNIT_ASSERT(p.first==NULL);
 //
 //	// a "good" subtraction but with LEQ is not a thick equality
-//	Function f2(x,x-Interval::ZERO);
+//	Function f2(x,x-Interval::zero());
 //	NumConstraint c2(f2,LEQ);
 //	p=c2.is_thick_equality();
 //	CPPUNIT_ASSERT(p.first==NULL);

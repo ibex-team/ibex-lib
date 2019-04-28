@@ -398,7 +398,7 @@ SIPSolverOutputBox SIPSolver::check_sol(const Cell& c)
             auto& cache = ((BxpNodeData*)c.prop[BxpNodeData::id])->sic_constraints_caches[i];
             y = ineqs->sic_constraints_[i].evaluateWithoutCachedValue(sol.existence(), cache);
             //r=c.right_hand_side().i();
-            r = Interval::NEG_REALS; // Constraint is always scalar and <= 0
+            r = Interval::neg_reals(); // Constraint is always scalar and <= 0
             if (y.is_disjoint(r)) {
                 throw EmptyBoxException();
             }
@@ -413,7 +413,7 @@ SIPSolverOutputBox SIPSolver::check_sol(const Cell& c)
             //y=c.f.eval(sol.existence());
             y = ineqs->normal_constraints_[i].evaluate(sol.existence());
             //r=c.right_hand_side().i();
-            r = Interval::NEG_REALS; // Constraint is always scalar and <= 0
+            r = Interval::neg_reals(); // Constraint is always scalar and <= 0
             if (y.is_disjoint(r)) {
                 throw EmptyBoxException();
             }

@@ -20,7 +20,7 @@ namespace ibex {
 
 #define ONE          ExprConstant::new_scalar(1.0)
 #define ZERO         ExprConstant::new_scalar(0.0)
-#define ALL_REALS    ExprConstant::new_scalar(Interval::ALL_REALS)
+#define ALL_REALS    ExprConstant::new_scalar(Interval::all_reals())
 
 ExprDiffException::ExprDiffException(const std::string& msg) : msg(msg) {
 

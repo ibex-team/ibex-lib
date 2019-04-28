@@ -17,8 +17,8 @@ using namespace std;
 
 void TestIntervalVector::cons01() {
 	IntervalVector x(2);
-	x[0]=Interval::ALL_REALS;
-	x[1]=Interval::ALL_REALS;
+	x[0]=Interval::all_reals();
+	x[1]=Interval::all_reals();
 	check(x,IntervalVector(2));
 	check(x,IntervalVector(x));
 	check(x,IntervalVector(2)=x);
@@ -82,8 +82,8 @@ void TestIntervalVector::resize01() {
 	x.resize(3);
 	CPPUNIT_ASSERT(x.size()==3);
 	check(x[0],Interval(1,2));
-	check(x[1],Interval::ALL_REALS);
-	check(x[2],Interval::ALL_REALS);
+	check(x[1],Interval::all_reals());
+	check(x[2],Interval::all_reals());
 }
 
 void TestIntervalVector::resize02() {
@@ -101,7 +101,7 @@ void TestIntervalVector::resize03() {
 	x.resize(3);
 	CPPUNIT_ASSERT(x.size()==3);
 	CPPUNIT_ASSERT(x.is_empty());
-	CPPUNIT_ASSERT(x[2]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(x[2]==Interval::all_reals());
 }
 
 void TestIntervalVector::resize04() {
@@ -662,14 +662,14 @@ void TestIntervalVector::compl01() {
 	CPPUNIT_ASSERT(n==4);
 	CPPUNIT_ASSERT(c[0].size()==2);
 
-	CPPUNIT_ASSERT(c[0][0]==Interval::NEG_REALS);
-	CPPUNIT_ASSERT(c[0][1]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(c[0][0]==Interval::neg_reals());
+	CPPUNIT_ASSERT(c[0][1]==Interval::all_reals());
 
 	CPPUNIT_ASSERT(c[1][0]==Interval(1,POS_INFINITY));
-	CPPUNIT_ASSERT(c[1][1]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(c[1][1]==Interval::all_reals());
 
 	CPPUNIT_ASSERT(c[2][0]==Interval(0,1));
-	CPPUNIT_ASSERT(c[2][1]==Interval::NEG_REALS);
+	CPPUNIT_ASSERT(c[2][1]==Interval::neg_reals());
 
 	CPPUNIT_ASSERT(c[3][0]==Interval(0,1));
 	CPPUNIT_ASSERT(c[3][1]==Interval(1,POS_INFINITY));
@@ -687,8 +687,8 @@ void TestIntervalVector::compl02() {
 	CPPUNIT_ASSERT(n==1);
 	CPPUNIT_ASSERT(c[0].size()==2);
 
-	CPPUNIT_ASSERT(c[0][0]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(c[0][1]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(c[0][0]==Interval::all_reals());
+	CPPUNIT_ASSERT(c[0][1]==Interval::all_reals());
 
 	delete[] c;
 }

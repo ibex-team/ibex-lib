@@ -25,7 +25,7 @@ using namespace std;
 namespace ibex {
 
 CtcFwdBwdSIC::CtcFwdBwdSIC(const SIConstraint& constraint, size_t sic_index, const SIPSystem& system) :
-		Ctc(constraint.variable_count_), constraint_(constraint), backward_domain_(Interval::NEG_REALS), sic_index_(sic_index),
+		Ctc(constraint.variable_count_), constraint_(constraint), backward_domain_(Interval::neg_reals()), sic_index_(sic_index),
 		system_(system) {
 	init();
 }

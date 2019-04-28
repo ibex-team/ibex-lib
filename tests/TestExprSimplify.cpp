@@ -18,37 +18,37 @@ using namespace std;
 namespace ibex {
 void TestExprSimplify::add_zero() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
-	const ExprNode& e=x+Interval::ZERO;
+	const ExprNode& e=x+Interval::zero();
 	CPPUNIT_ASSERT(sameExpr(e.simplify(),"x"));
 }
 
 void TestExprSimplify::sub_zero1() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
-	const ExprNode& e=x-Interval::ZERO;
+	const ExprNode& e=x-Interval::zero();
 	CPPUNIT_ASSERT(sameExpr(e.simplify(),"x"));
 }
 
 void TestExprSimplify::sub_zero2() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
-	const ExprNode& e=Interval::ZERO-x;
+	const ExprNode& e=Interval::zero()-x;
 	CPPUNIT_ASSERT(sameExpr(e.simplify(),"(-x)"));
 }
 
 void TestExprSimplify::mul_zero() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
-	const ExprNode& e=x*Interval::ZERO;
+	const ExprNode& e=x*Interval::zero();
 	CPPUNIT_ASSERT(sameExpr(e.simplify(),"0"));
 }
 
 void TestExprSimplify::mul_one() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
-	const ExprNode& e=x*Interval::ONE;
+	const ExprNode& e=x*Interval::one();
 	CPPUNIT_ASSERT(sameExpr(e.simplify(),"x"));
 }
 
 void TestExprSimplify::div_one() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
-	const ExprNode& e=x/Interval::ONE;
+	const ExprNode& e=x/Interval::one();
 	CPPUNIT_ASSERT(sameExpr(e.simplify(),"x"));
 }
 

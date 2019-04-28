@@ -165,9 +165,9 @@ const Interval AffineMain<AF_No>::itv() const {
 		res += _elt._err * pmOne;
 		return res;
 	} else if (_n==-1) {
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	} else if (_n==-2) {
-		return Interval::ALL_REALS;
+		return Interval::all_reals();
 	} else if (_n==-3) {
 		return Interval(_elt._err,POS_INFINITY);
 	} else  {  //if (_n==-4)
@@ -283,7 +283,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::operator*=(double alpha) {
 			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
-			if (!b) *this = Interval::ALL_REALS;
+			if (!b) *this = Interval::all_reals();
 
 		} else {
 			*this = itv()*alpha;
@@ -310,7 +310,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::operator+=(const AffineMain<AF_No>& y) {
 			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
-			if (!b) * this = Interval::ALL_REALS;
+			if (!b) * this = Interval::all_reals();
 
 		} else  {
 			if (_n>y.size()) {
@@ -340,7 +340,7 @@ template<>
 AffineMain<AF_No>& AffineMain<AF_No>::operator+=(double beta) {
 	if (is_actif() && (fabs(beta))<POS_INFINITY) {
 		_elt._val[0] += beta;
-		if (fabs(_elt._val[0])==POS_INFINITY) { *this = Interval::ALL_REALS; }
+		if (fabs(_elt._val[0])==POS_INFINITY) { *this = Interval::all_reals(); }
 
 	} else {
 		*this = itv()+ beta;
@@ -353,7 +353,7 @@ template<>
 AffineMain<AF_No>& AffineMain<AF_No>::inflate(double ddelta) {
 	if (is_actif() && (fabs(ddelta))<POS_INFINITY) {
 		_elt._err += fabs(ddelta);
-		if (_elt._err==POS_INFINITY ) { *this = Interval::ALL_REALS; }
+		if (_elt._err==POS_INFINITY ) { *this = Interval::all_reals(); }
 
 	} else {
 		*this = itv()+Interval(-1,1)*ddelta;
@@ -414,7 +414,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::operator*=(const AffineMain<AF_No>& y) {
 					b &= (fabs(_elt._val[i])<POS_INFINITY);
 				}
 				if (!b) {
-					*this = Interval::ALL_REALS;
+					*this = Interval::all_reals();
 				}
 			}
 			delete[] xTmp;
@@ -492,7 +492,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::Asqr(const Interval& itv) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
 			if (!b) {
-				*this = Interval::ALL_REALS;
+				*this = Interval::all_reals();
 			}
 		}
 
@@ -523,7 +523,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::Apow(int n, const Interval& itv) {
 
 	// General Case
 		if (n == 0) {
-			*this = Interval::ONE;
+			*this = Interval::one();
 
 		} else if (n == 1) {
 			// Nothing to do
@@ -848,7 +848,7 @@ void AffineMain<AF_No>::compact(double tol){
 //		case AF_TAN :
 //		case AF_COS :
 //		case AF_SIN : {
-//			if (itv.diam()>=Interval::TWO_PI.lb()) {
+//			if (itv.diam()>=Interval::two_pi().lb()) {
 //				*this = Interval(-1,1);
 //				break;
 //			}
@@ -907,21 +907,21 @@ void AffineMain<AF_No>::compact(double tol){
 //				t1     = ( fabs( ::cos((itv.ub()))-(alpha*(itv.ub())+beta)));
 //				if (t1>ddelta)  ddelta= t1;
 //				u =  ::asin(-(alpha));
-//				nb_period = (itv+Interval::HALF_PI.ub()) / Interval::PI.lb();
+//				nb_period = (itv+Interval::half_pi().ub()) / Interval::pi().lb();
 //				break;
 //			case AF_SIN :
 //				ddelta = ( fabs( ::sin((itv.lb()))-(alpha*(itv.lb())+beta)));
 //				t1     = ( fabs( ::sin((itv.ub()))-(alpha*(itv.ub())+beta)));
 //				if (t1>ddelta)  ddelta= t1;
 //				u =  ::acos((alpha));
-//				nb_period = (itv) / Interval::PI.lb();
+//				nb_period = (itv) / Interval::pi().lb();
 //				break;
 //			case AF_TAN :
 //				ddelta = ( fabs( ::tan((itv.lb()))-(alpha*(itv.lb())+beta)));
 //				t1     = ( fabs( ::tan((itv.ub()))-(alpha*(itv.ub())+beta)));
 //				if (t1>ddelta)  ddelta= t1;
 //				u =  ::acos(1/ ::sqrt((alpha)));
-//				nb_period = (itv) / Interval::PI.lb();
+//				nb_period = (itv) / Interval::pi().lb();
 //				break;
 //			default:
 //				ibex_error("Not implemented yet");
@@ -936,7 +936,7 @@ void AffineMain<AF_No>::compact(double tol){
 //			switch(num) {
 //			case AF_COS :
 //				while (i<=p2) { // looking for a point
-//					TEMP1 = (i%2==0? (u + i*Interval::PI.lb()) : (i*Interval::PI.lb() - u));
+//					TEMP1 = (i%2==0? (u + i*Interval::pi().lb()) : (i*Interval::pi().lb() - u));
 //					if ((itv.contains(TEMP1))) { // check if maximize the error
 //						t1 = ( fabs( ::cos(TEMP1)-(alpha*TEMP1+beta)));
 //						if (t1>ddelta)  ddelta= t1;
@@ -946,7 +946,7 @@ void AffineMain<AF_No>::compact(double tol){
 //				break;
 //			case AF_SIN :
 //				while (i<=p2) { // looking for a point
-//					TEMP1 =  (i%2==0? (u + i*Interval::PI.lb()) : ((i+1)*Interval::PI.lb() - u));
+//					TEMP1 =  (i%2==0? (u + i*Interval::pi().lb()) : ((i+1)*Interval::pi().lb() - u));
 //					if (itv.contains(TEMP1)) {
 //						t1 = ( fabs( ::sin(TEMP1)-(alpha*TEMP1+beta)));
 //						if (t1>ddelta)  ddelta= t1;
@@ -956,12 +956,12 @@ void AffineMain<AF_No>::compact(double tol){
 //				break;
 //			case AF_TAN :
 //				while (i<=p2) { // looking for a point
-//					TEMP1 = ( ( i*Interval::PI.lb() + u));
+//					TEMP1 = ( ( i*Interval::pi().lb() + u));
 //					if (((itv.contains(TEMP1)))) {
 //						t1 = ( fabs( ::tan(TEMP1)-(alpha*TEMP1+beta)));
 //						if (t1>ddelta)  ddelta= t1;
 //					}
-//					TEMP1 = ( ( i*Interval::PI.lb() - u ));
+//					TEMP1 = ( ( i*Interval::pi().lb() - u ));
 //					if (itv.contains(TEMP1)) {
 //						t1 = ( fabs( ::tan(TEMP1)-(alpha*TEMP1+beta)));
 //						if (t1>ddelta)  ddelta= t1;

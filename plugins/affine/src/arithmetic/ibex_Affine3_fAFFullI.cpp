@@ -176,9 +176,9 @@ const Interval AffineMain<AF_fAFFullI>::itv() const {
 		res += _elt._garbage;
 		return res;
 	} else if (_n==-1) {
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	} else if (_n==-2) {
-		return Interval::ALL_REALS;
+		return Interval::all_reals();
 	} else if (_n==-3) {
 		return Interval(_elt._center,POS_INFINITY);
 	} else  {  //if (_n==-4)

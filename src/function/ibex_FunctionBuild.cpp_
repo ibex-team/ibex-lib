@@ -454,7 +454,7 @@ void Function::generate_comp() {
 			delete &yi_tmp;
 			Function* fi=new Function(x,yi);
 			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fi->expr()));
-			if (c && c->get_value()==Interval::ZERO) { // use a more efficient structure than a DAG!
+			if (c && c->get_value()==Interval::zero()) { // use a more efficient structure than a DAG!
 				if (!zero) zero=fi;
 				else delete fi;
 					comp[i] = zero;
@@ -476,7 +476,7 @@ void Function::generate_comp() {
 				delete &yij_tmp;
 				Function* fij=new Function(x,yij);
 				const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fij->expr()));
-				if (c && c->get_value()==Interval::ZERO) { // use a more efficient structure than a DAG!
+				if (c && c->get_value()==Interval::zero()) { // use a more efficient structure than a DAG!
 					if (!zero) zero=fij;
 					else delete fij;
 						comp[i*n+j] = zero;

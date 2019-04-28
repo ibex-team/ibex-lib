@@ -138,42 +138,42 @@ Interval iatan(const Interval& x);
  * \pre (xin,yin) ⊆ (x,y)
  * \pre xin op yin ⊆ z
  */
-bool ibwd_add(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
+bool ibwd_add(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::empty_set(), const Interval& yin=Interval::empty_set());
 
 /**
  * \brief Inner projection of the subtraction (inflating version)
  *
  * \see comments in \link ibex::ibwd_add(const Interval& z, Interval& x, Interval& y, const Interval& xin, const Interval& yin) ibwd_add \endlink
  */
-bool ibwd_sub(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
+bool ibwd_sub(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::empty_set(), const Interval& yin=Interval::empty_set());
 
 /**
  * \brief Inner projection of the multiplication.
  *
  * \see comments in #ibex::ibwd_add(const Interval&, Interval&, Interval&, const Interval&, const Interval&).
  */
-bool ibwd_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
+bool ibwd_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::empty_set(), const Interval& yin=Interval::empty_set());
 
 /**
  * \brief Inner projection of the division (inflating version)
  *
  * \see comments in #ibex::ibwd_add(const Interval&, Interval&, Interval&, const Interval, const Interval&).
  */
-bool ibwd_div(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
+bool ibwd_div(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::empty_set(), const Interval& yin=Interval::empty_set());
 
 /**
  * \brief Inner projection of the division (inflating version)
  *
  * \see comments in #ibex::ibwd_add(const Interval&, Interval&, Interval&, const Interval, const Interval&).
  */
-bool ibwd_max(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
+bool ibwd_max(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::empty_set(), const Interval& yin=Interval::empty_set());
 
 /**
  * \brief Inner projection of the division (inflating version)
  *
  * \see comments in #ibex::ibwd_add(const Interval&, Interval&, Interval&, const Interval, const Interval&).
  */
-bool ibwd_min(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
+bool ibwd_min(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::empty_set(), const Interval& yin=Interval::empty_set());
 
 /**
  * \brief Inner projection of the square function (inflating version)
@@ -194,7 +194,7 @@ bool ibwd_min(const Interval& z, Interval& x, Interval& y, const Interval &xin=I
  * \pre xin ⊆ x
  * \pre f(xin) ⊆ y
  */
-bool ibwd_sqr(const Interval& y, Interval& x, const Interval& xin=Interval::EMPTY_SET);
+bool ibwd_sqr(const Interval& y, Interval& x, const Interval& xin=Interval::empty_set());
 
 /**
  * \brief Inner projection of the minus operator.
@@ -210,14 +210,14 @@ bool ibwd_minus(const Interval& y, Interval& x);
  * \see comments in #ibex::ibwd_sqr(const Interval&, Interval&, const Interval&).
  *
  */
-bool ibwd_abs(const Interval& y, Interval& x, const Interval& xin=Interval::EMPTY_SET);
+bool ibwd_abs(const Interval& y, Interval& x, const Interval& xin=Interval::empty_set());
 
 /**
  * \brief Inner projection of power
  *
  * \see comments in #ibex::ibwd_sqr(const Interval&, Interval&, const Interval&).
  */
-bool ibwd_pow(const Interval& y, Interval& x, int p, const Interval &xin=Interval::EMPTY_SET);
+bool ibwd_pow(const Interval& y, Interval& x, int p, const Interval &xin=Interval::empty_set());
 
 /**
  * \brief Inner projection of exp
@@ -239,7 +239,7 @@ bool ibwd_log(const Interval& y, Interval& x);
  *
  * \see comments in #ibex::ibwd_sqr(const Interval&, Interval&, const Interval&).
  */
-bool ibwd_cos(const Interval& y, Interval& x, const Interval &xin=Interval::EMPTY_SET);
+bool ibwd_cos(const Interval& y, Interval& x, const Interval &xin=Interval::empty_set());
 
 
 /**
@@ -247,7 +247,7 @@ bool ibwd_cos(const Interval& y, Interval& x, const Interval &xin=Interval::EMPT
  *
  * \see comments in #ibex::ibwd_sqr(const Interval&, Interval&, const Interval&).
  */
-bool ibwd_sin(const Interval& y, Interval& x, const Interval &xin=Interval::EMPTY_SET);
+bool ibwd_sin(const Interval& y, Interval& x, const Interval &xin=Interval::empty_set());
 
 
 /**
@@ -255,7 +255,7 @@ bool ibwd_sin(const Interval& y, Interval& x, const Interval &xin=Interval::EMPT
  *
  * \see comments in #ibex::ibwd_sqr(const Interval&, Interval&, const Interval&).
  */
-bool ibwd_tan(const Interval& y, Interval& x, const Interval &xin=Interval::EMPTY_SET);
+bool ibwd_tan(const Interval& y, Interval& x, const Interval &xin=Interval::empty_set());
 
 /**
  * \brief Inner projection of square root
@@ -300,7 +300,7 @@ inline bool ibwd_log(const Interval& y, Interval& x) {
 }
 
 inline bool ibwd_sqrt(const Interval& y, Interval& x) {
-	return !(x&=isqr(y & Interval::POS_REALS)).is_empty();
+	return !(x&=isqr(y & Interval::pos_reals())).is_empty();
 }
 
 } // end namespace ibex

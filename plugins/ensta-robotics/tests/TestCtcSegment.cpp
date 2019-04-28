@@ -86,7 +86,7 @@ void ibex::TestCtcSegment::test_call_with_all_real()
 {
     CtcSegment c(0,0,10,20);
     //double _box[][2] = {{-5,50},  {-5,50}};
-    IntervalVector box(2,Interval::ALL_REALS);
+    IntervalVector box(2,Interval::all_reals());
 
     double _resbox[][2] = {{0,10},  {0,20}};
     IntervalVector resbox(2,_resbox);

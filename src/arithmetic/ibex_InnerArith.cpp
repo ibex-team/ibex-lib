@@ -288,8 +288,8 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		// projection of (xin,yin) onto the current quadrant
 		Interval xxin,yyin;
 
-		Interval xP = x & Interval::POS_REALS;
-		Interval yP = y & Interval::POS_REALS;
+		Interval xP = x & Interval::pos_reals();
+		Interval yP = y & Interval::pos_reals();
 		/* volatile? */double xU=x.ub();
 		/* volatile? */double yU=y.ub();
 
@@ -297,8 +297,8 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		if(!xP.is_empty() && !yP.is_empty() && xP.ub()>0 && yP.ub()>0) { //(!inflate || yin.lb()>0)) {
 			// if xP.ub()==0 or yP.ub()==0, the upper right corner is safe
 			// and these cases cannot be handled properly by ibwd_cmp_mono_op
-			xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
-			yyin=inflate? Interval(max(0.0,yin.lb()), max(0.0,yin.ub())) : Interval::EMPTY_SET;
+			xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::empty_set();
+			yyin=inflate? Interval(max(0.0,yin.lb()), max(0.0,yin.ub())) : Interval::empty_set();
 			if(!ibwd_cmp_mono_op(false, z_sup, xP, yP, xxin, yyin, MUL, true, true)) {
 				//cout << "[mul] nothing in the positive quadrant --> x and y empty" << endl;
 				x.set_empty();
@@ -310,16 +310,16 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 			//cout << "[mul] bounds in the positive quadrant xU=" << xU << " yU=" << yU << endl;
 		}
 
-		Interval xN = x & Interval::NEG_REALS;
-		Interval yN = y & Interval::NEG_REALS;
+		Interval xN = x & Interval::neg_reals();
+		Interval yN = y & Interval::neg_reals();
 		/* volatile? */double xL=x.lb();
 		/* volatile? */double yL=y.lb();
 
 		// ------------------------ quadrant x<0 y<0 ----------------------------------
 		if(!xN.is_empty() && !yN.is_empty() && xN.lb()<0 && yN.lb()<0) { //(!inflate || yin.lb()<0)) {
 			// same remark as above for xN.lb()<0 && yN.lb()<0.
-			xxin=inflate? Interval(min(0.0,xin.lb()),min(0.0,xin.ub())) : Interval::EMPTY_SET;
-			yyin=inflate? Interval(min(0.0,yin.lb()),min(0.0,yin.lb())) : Interval::EMPTY_SET;
+			xxin=inflate? Interval(min(0.0,xin.lb()),min(0.0,xin.ub())) : Interval::empty_set();
+			yyin=inflate? Interval(min(0.0,yin.lb()),min(0.0,yin.lb())) : Interval::empty_set();
 			if(!ibwd_cmp_mono_op(false, z_sup, xN, yN, xxin, yyin, MUL, false, false)) {
 				//cout << "[mul] nothing in the negative quadrant --> x and y empty" << endl;
 				x.set_empty();
@@ -341,41 +341,41 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 	else if (z_sup==0) {
 		//cout << "z_sup=0 x=" << x <<" xin=" << xin " y=" << y << endl;
 		if (x.lb()>0) {
-			assert(yin.is_subset(Interval::NEG_REALS));
-			return !(y&=Interval::NEG_REALS).is_empty();
+			assert(yin.is_subset(Interval::neg_reals()));
+			return !(y&=Interval::neg_reals()).is_empty();
 		}
 		else if (x.ub()<0) {
-			assert(yin.is_subset(Interval::POS_REALS));
-			return !(y&=Interval::POS_REALS).is_empty();
+			assert(yin.is_subset(Interval::pos_reals()));
+			return !(y&=Interval::pos_reals()).is_empty();
 		} else if (y.lb()>0) {
-			assert(xin.is_subset(Interval::NEG_REALS));
-			return !(x&=Interval::NEG_REALS).is_empty();
+			assert(xin.is_subset(Interval::neg_reals()));
+			return !(x&=Interval::neg_reals()).is_empty();
 		}
 		else if (y.ub()<0) {
-			assert(xin.is_subset(Interval::POS_REALS));
-			return !(x&=Interval::POS_REALS).is_empty();
+			assert(xin.is_subset(Interval::pos_reals()));
+			return !(x&=Interval::pos_reals()).is_empty();
 		} else if ((x.lb()==0 && x.ub()==0) || (y.lb()==0 && y.ub()==0)) {
 			return true;
 		} else {
 			if (inflate) {
 				if ((xin.lb()>=0 && xin.ub()>0) || (yin.ub()<=0 && yin.lb()<0)) {
-					assert(xin.is_subset(Interval::POS_REALS));
-					assert(yin.is_subset(Interval::NEG_REALS));
-					return (!(x&=Interval::POS_REALS).is_empty()) &&
-						   (!(y&=Interval::NEG_REALS).is_empty());
+					assert(xin.is_subset(Interval::pos_reals()));
+					assert(yin.is_subset(Interval::neg_reals()));
+					return (!(x&=Interval::pos_reals()).is_empty()) &&
+						   (!(y&=Interval::neg_reals()).is_empty());
 				}
 				else if ((xin.ub()<=0 && xin.lb()<0) || (yin.lb()>=0 && yin.ub()>0)) {
-					assert(xin.is_subset(Interval::NEG_REALS));
-					assert(yin.is_subset(Interval::POS_REALS));
-					return (!(x&=Interval::NEG_REALS).is_empty()) &&
-						   (!(y&=Interval::POS_REALS).is_empty());
+					assert(xin.is_subset(Interval::neg_reals()));
+					assert(yin.is_subset(Interval::pos_reals()));
+					return (!(x&=Interval::neg_reals()).is_empty()) &&
+						   (!(y&=Interval::pos_reals()).is_empty());
 				} else if (xin.lb()<0 && xin.ub()>0) {
 					// x does not change
-					assert(yin==Interval::ZERO);
-					return !(y&=Interval::ZERO).is_empty();
+					assert(yin==Interval::zero());
+					return !(y&=Interval::zero()).is_empty();
 				} else if (yin.lb()<0 && yin.ub()>0) { // we have here xin==[0,0]
-					assert(xin==Interval::ZERO);
-					return !(x&=Interval::ZERO).is_empty();
+					assert(xin==Interval::zero());
+					return !(x&=Interval::zero()).is_empty();
 				}
 			}
 
@@ -388,11 +388,11 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 			assert(surf_xneg_ypos>=0);
 
 			if (surf_xneg_ypos > surf_xpos_yneg) {
-				x&=Interval::NEG_REALS;
-				y&=Interval::POS_REALS;
+				x&=Interval::neg_reals();
+				y&=Interval::pos_reals();
 			} else {
-				x&=Interval::POS_REALS;
-				y&=Interval::NEG_REALS;
+				x&=Interval::pos_reals();
+				y&=Interval::neg_reals();
 			}
 			return true;
 		}
@@ -403,16 +403,16 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 			// an inner box has to be found
 			if (xin.lb()>0) {
 				assert(yin.ub()<=0);
-				x &= Interval::POS_REALS;
-				y &= Interval::NEG_REALS;
+				x &= Interval::pos_reals();
+				y &= Interval::neg_reals();
 				// note: we know x.ub()>0 && y.lb()<0
 				assert(yin.lb()<0);
 				return ibwd_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, false, true);
 			} else {
 				assert(xin.ub()<=0); // => because xin.ub()>0 => z_sup=0.
 				assert(yin.lb()>=0);
-				x &= Interval::NEG_REALS;
-				y &= Interval::POS_REALS;
+				x &= Interval::neg_reals();
+				y &= Interval::pos_reals();
 				if (z_sup==0) return true;
 				// note: we know x.ub()>0 && y.lb()<0
 				assert(yin.ub()>0);
@@ -429,8 +429,8 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		Interval ysave=y;
 
 		bool q=(RNG::rand()%2==1); // q==1 : we take first Q.
-		x &= q? Interval::POS_REALS : Interval::NEG_REALS;
-		y &= q? Interval::NEG_REALS : Interval::POS_REALS;
+		x &= q? Interval::pos_reals() : Interval::neg_reals();
+		y &= q? Interval::neg_reals() : Interval::pos_reals();
 
 		if (z_sup==0 || ((q? x.ub()>0 : x.lb()<0) &&
 						 (q? y.lb()<0 : y.ub()>0) &&
@@ -439,8 +439,8 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		} else {
 			// intersection with the first quadrant did not succeed.
 			// we try with the other one.
-			x = xsave & (q? Interval::NEG_REALS : Interval::POS_REALS);
-			y = ysave & (q? Interval::POS_REALS : Interval::NEG_REALS);
+			x = xsave & (q? Interval::neg_reals() : Interval::pos_reals());
+			y = ysave & (q? Interval::pos_reals() : Interval::neg_reals());
 			if (z_sup==0)
 				return true;
 			else if ((q? x.lb()==0 : x.ub()==0) || (q? y.ub()==0 : y.lb()==0)) {
@@ -468,8 +468,8 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		// be a real value (0 or 1).
 
 		// We chose one half-plane. TODO: if we are not inflating, we may chose it randomly.
-		if (x==Interval::ZERO)                          { }
-		else if (inflate && yin.contains(0))            { x&=Interval::ZERO; }
+		if (x==Interval::zero())                          { }
+		else if (inflate && yin.contains(0))            { x&=Interval::zero(); }
 		else if (y.ub()>0 && (!inflate || yin.lb()>0))  { y&=Interval(next_float(0),POS_INFINITY); }
 		else                                            { y&=Interval(NEG_INFINITY,previous_float(0)); }
 		//cout << "[div] z_sup=+oo --> x=" << x << " y=" << y << endl;
@@ -490,7 +490,7 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		// However, we have first to deal with the specific case where we
 		// are in inflating mode and the box to be inflated is precisely the origin.
 		if (inflate && yin.contains(0)) {
-			x&=Interval::ZERO;
+			x&=Interval::zero();
 			//cout << "[div] 0 in yin --> x=" << x << " y=" << y << endl;
 			return true;
 		}
@@ -505,12 +505,12 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		for (int i=0; i<2; i++) {
 			if ((i+r)%2==1) {
 				// we need to restrict the sign of x as well for the division to be monotonous
-				Interval xP = x & Interval::POS_REALS;
-				Interval yP = y & Interval::POS_REALS;
+				Interval xP = x & Interval::pos_reals();
+				Interval yP = y & Interval::pos_reals();
 
 				// ------------------------ quadrant x>0 y>0 ----------------------------------
 				if(!xP.is_empty() && !yP.is_empty() && (!inflate || yin.lb()>0)) {
-					Interval xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
+					Interval xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::empty_set();
 					if(ibwd_cmp_mono_op(false, z_sup,xP,yP,xxin,yin,DIV,true,false)) {
 						// we reintegrate the part of the quadrant (x<0,y>0)
 						x = Interval(x.lb(), xP.ub());
@@ -521,12 +521,12 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 				}
 			} else {
 				// we need to restrict the sign of x as well for the division to be monotonous
-				Interval xN = x & Interval::NEG_REALS;
-				Interval yN = y & Interval::NEG_REALS;
+				Interval xN = x & Interval::neg_reals();
+				Interval yN = y & Interval::neg_reals();
 
 				// ------------------------ quadrant x<0 y<0 ----------------------------------
 				if(!xN.is_empty() && !yN.is_empty() && (!inflate || yin.ub()<0)) {
-					Interval xxin=inflate? Interval(min(0.0,xin.lb()),min(0,xin.ub())) : Interval::EMPTY_SET;
+					Interval xxin=inflate? Interval(min(0.0,xin.lb()),min(0,xin.ub())) : Interval::empty_set();
 					if(ibwd_cmp_mono_op(false, z_sup,xN,yN,xxin,yin,DIV,false,true)) {
 						// we reintegrate the part of the quadrant (x>0,y<0)
 						x = Interval(xN.lb(), x.ub());
@@ -547,11 +547,11 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		if (inflate && yin.contains(0)) {
 			// this is the only case were we can inflate inside
 			// both quadrants (x<0,y>0) and (x>0,y<0), along the line x=0.
-			assert(xin==Interval::ZERO);
+			assert(xin==Interval::zero());
 			if (z_sup==0) {
 				x=xin; // 0
 			} else {
-				assert(yin==Interval::ZERO);
+				assert(yin==Interval::zero());
 				x=xin; // 0
 				y=yin; // 0
 			}
@@ -562,8 +562,8 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 
 		for (int i=0; i<2; i++) {
 			if ((i+r)%2==1) {
-				Interval xN = x & Interval::NEG_REALS;
-				Interval yP = y & Interval::POS_REALS;
+				Interval xN = x & Interval::neg_reals();
+				Interval yP = y & Interval::pos_reals();
 
 				// ------------------------ quadrant x<0 y>0 ----------------------------------
 				if(!xN.is_empty() && !yP.is_empty() && (!inflate || yin.lb()>0)) {
@@ -575,8 +575,8 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 					} else assert(!inflate);
 				}
 			} else {
-				Interval xP = x & Interval::POS_REALS;
-				Interval yN = y & Interval::NEG_REALS;
+				Interval xP = x & Interval::pos_reals();
+				Interval yN = y & Interval::neg_reals();
 
 				// ------------------------ quadrant x>0 y<0 ----------------------------------
 				if(!xP.is_empty() && !yN.is_empty() && (!inflate || yin.ub()<0)) {
@@ -854,9 +854,9 @@ bool ibwd_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 	//cout << "[sqr] result: x=" << x << endl;
 }
 
-#define PERIOD_COS(i) (i%2==0? iadd(period_0,imul((double) i,Interval::PI)) : isub(imul((double) i+1,Interval::PI),period_0))
-#define PERIOD_SIN(i) (i%2==0? iadd(period_0,imul((double) i,Interval::PI)) : isub(imul((double) i,Interval::PI),period_0))
-#define PERIOD_TAN(i) (iadd(period_0, imul((double) i,Interval::PI)))
+#define PERIOD_COS(i) (i%2==0? iadd(period_0,imul((double) i,Interval::pi())) : isub(imul((double) i+1,Interval::pi()),period_0))
+#define PERIOD_SIN(i) (i%2==0? iadd(period_0,imul((double) i,Interval::pi())) : isub(imul((double) i,Interval::pi()),period_0))
+#define PERIOD_TAN(i) (iadd(period_0, imul((double) i,Interval::pi())))
 
 #define COS 0
 #define SIN 1
@@ -892,11 +892,11 @@ static bool ibwd_trigo(const Interval& y, Interval& x, const Interval& xin, int 
 
 	switch (ftype) {
 	case COS :
-		nb_period = (inflate? xin : x) / Interval::PI; break;
+		nb_period = (inflate? xin : x) / Interval::pi(); break;
 	case SIN :
-		nb_period = ((inflate? xin : x) + Interval::HALF_PI) / Interval::PI; break;
+		nb_period = ((inflate? xin : x) + Interval::half_pi()) / Interval::pi(); break;
 	case TAN :
-		nb_period = ((inflate? xin : x) + Interval::HALF_PI) / Interval::PI; break;
+		nb_period = ((inflate? xin : x) + Interval::half_pi()) / Interval::pi(); break;
 	}
 
 	if (nb_period.lb() < std::numeric_limits<long>::min() ||
@@ -1027,10 +1027,10 @@ Interval isub(const Interval& x, const Interval& y) {
 Interval imul(const Interval& x, const Interval& y) {
 
 	if (x.is_empty() || y.is_empty())
-			return Interval::EMPTY_SET;
+			return Interval::empty_set();
 
-	if (x==Interval::ZERO || y==Interval::ZERO)
-		return Interval::ZERO;
+	if (x==Interval::zero() || y==Interval::zero())
+		return Interval::zero();
 
 	double lx=x.lb();
 	double ux=x.ub();
@@ -1068,7 +1068,7 @@ Interval imul(const Interval& x, const Interval& y) {
 
 Interval idiv(const Interval& x, const Interval& y) {
 	if (x.is_empty() || y.is_empty())
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 
 	double lx=x.lb();
 	double ux=x.ub();
@@ -1076,9 +1076,9 @@ Interval idiv(const Interval& x, const Interval& y) {
 	double uy=y.ub();
 
 	if (ly==0 && uy==0)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else if (lx==0 && ux==0)
-		return  Interval::ZERO;
+		return  Interval::zero();
 	else if (ly>0 || uy<0) {
 		if (uy<0)
 			if (ux<0)
@@ -1108,13 +1108,13 @@ Interval idiv(const Interval& x, const Interval& y) {
 				else if (lx>=0 && ly==0)
 					return Interval(UP2(operator/,lx,uy), POS_INFINITY);
 				else
-					return Interval::ALL_REALS; // lx<0<ux && ly<=0<=uy
+					return Interval::all_reals(); // lx<0<ux && ly<=0<=uy
 
 
 }
 
 Interval isqr(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
+	if (x.is_empty()) return Interval::empty_set();
 	double l,u;
 	if (x.lb()==NEG_INFINITY) {
 		l = x.ub()>=0 ? 0 : UP(sqr,x.ub());
@@ -1132,42 +1132,42 @@ Interval isqr(const Interval& x) {
 		l = x.lb()<=0 ? 0 : UP(sqr,x.lb());
 		u=LO(sqr,x.ub());
 	}
-	return l>u? Interval::EMPTY_SET : Interval(l,u);
+	return l>u? Interval::empty_set() : Interval(l,u);
 }
 
 Interval ilog(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
+	if (x.is_empty()) return Interval::empty_set();
 	double inf = x.lb()<=0 ?            NEG_INFINITY : UP(log,x.lb());
 	double sup = x.ub()==POS_INFINITY ? POS_INFINITY : LO(log,x.ub());
-	return inf>sup ? Interval::EMPTY_SET : Interval(inf,sup);
+	return inf>sup ? Interval::empty_set() : Interval(inf,sup);
 }
 
 Interval iexp(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
+	if (x.is_empty()) return Interval::empty_set();
 	double inf = x.lb()==NEG_INFINITY ? 0            : UP(exp,x.lb());
 	double sup = x.ub()==POS_INFINITY ? POS_INFINITY : LO(exp,x.ub());
-	return inf>sup ? Interval::EMPTY_SET : Interval(inf,sup);
+	return inf>sup ? Interval::empty_set() : Interval(inf,sup);
 }
 
 Interval iacos(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
+	if (x.is_empty()) return Interval::empty_set();
 	double inf = x.ub()>=1 ?  0                 : UP(acos,x.ub()); // condition added just in case x.ub()==+oo.
-	double sup = x.lb()<=-1 ? Interval::PI.lb() : LO(acos,x.lb()); // idem (in case x.lb()==-oo)
-	return inf>sup ? Interval::EMPTY_SET : Interval(inf,sup);
+	double sup = x.lb()<=-1 ? Interval::pi().lb() : LO(acos,x.lb()); // idem (in case x.lb()==-oo)
+	return inf>sup ? Interval::empty_set() : Interval(inf,sup);
 }
 
 Interval iasin(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
-	double inf = x.lb()<=-1 ? -Interval::HALF_PI.lb() : UP(asin,x.lb()); // idem
-	double sup = x.ub()>=1 ?   Interval::HALF_PI.lb() : LO(asin,x.ub()); // idem
-	return inf>sup ? Interval::EMPTY_SET : Interval(inf,sup);
+	if (x.is_empty()) return Interval::empty_set();
+	double inf = x.lb()<=-1 ? -Interval::half_pi().lb() : UP(asin,x.lb()); // idem
+	double sup = x.ub()>=1 ?   Interval::half_pi().lb() : LO(asin,x.ub()); // idem
+	return inf>sup ? Interval::empty_set() : Interval(inf,sup);
 }
 
 Interval iatan(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
-	double inf = x.lb()==NEG_INFINITY ? -Interval::HALF_PI.lb() : UP(atan,x.lb());
-	double sup = x.ub()==POS_INFINITY ?  Interval::HALF_PI.lb() : LO(atan,x.ub());
-	return inf>sup ? Interval::EMPTY_SET : Interval(inf,sup);
+	if (x.is_empty()) return Interval::empty_set();
+	double inf = x.lb()==NEG_INFINITY ? -Interval::half_pi().lb() : UP(atan,x.lb());
+	double sup = x.ub()==POS_INFINITY ?  Interval::half_pi().lb() : LO(atan,x.ub());
+	return inf>sup ? Interval::empty_set() : Interval(inf,sup);
 }
 
 

@@ -61,7 +61,7 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::operator=(const Interval& x) {
 template<>
 AffineMain<AF_iAF>::AffineMain() :
 		 _n		(-2		),
-		 _elt	(NULL	,Interval::ALL_REALS)	{
+		 _elt	(NULL	,Interval::all_reals())	{
  }
 
 template<>
@@ -276,7 +276,7 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::operator*=(double alpha) {
 			for (int i=0;i<=_n;i++) {
 				b &= (abs(_elt._val[i]).ub()<POS_INFINITY);
 			}
-			if (!b) *this = Interval::ALL_REALS;
+			if (!b) *this = Interval::all_reals();
 		} else {
 			*this = itv()*alpha;
 		}
@@ -301,7 +301,7 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::operator+=(const AffineMain<AF_iAF>& y) 
 			for (int i=0;i<=_n;i++) {
 				b &= (abs(_elt._val[i]).ub()<POS_INFINITY);
 			}
-			if (!b) 	*this = Interval::ALL_REALS;
+			if (!b) 	*this = Interval::all_reals();
 
 		} else  {
 			if (_n>y.size()) {
@@ -332,7 +332,7 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::operator+=( double beta) {
 	if (is_actif() && (fabs(beta))<POS_INFINITY) {
 		_elt._val[0] += beta;
 
-		if ((abs(_elt._val[0]).ub()==POS_INFINITY)) { *this = Interval::ALL_REALS; }
+		if ((abs(_elt._val[0]).ub()==POS_INFINITY)) { *this = Interval::all_reals(); }
 
 	} else {
 		*this = itv()+ beta;
@@ -347,7 +347,7 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::inflate(double ddelta) {
 	if (is_actif() && (fabs(ddelta))<POS_INFINITY) {
 		_elt._err += fabs(ddelta);
 
-		if (_elt._err.ub()==POS_INFINITY ) { *this = Interval::ALL_REALS; }
+		if (_elt._err.ub()==POS_INFINITY ) { *this = Interval::all_reals(); }
 	} else {
 		*this = itv()+Interval(-1,1)*ddelta;;
 	}
@@ -407,7 +407,7 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::operator*=(const AffineMain<AF_iAF>& y) 
 					b &= (abs(_elt._val[i]).ub()<POS_INFINITY);
 				}
 				if (!b) {
-					*this = Interval::ALL_REALS;
+					*this = Interval::all_reals();
 				}
 			}
 			delete[] xTmp;
@@ -484,7 +484,7 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::Asqr(const Interval& itv) {
 				b &= (abs(_elt._val[i]).ub()<POS_INFINITY);
 			}
 			if (!b) {
-				*this = Interval::ALL_REALS;
+				*this = Interval::all_reals();
 			}
 		}
 

@@ -376,14 +376,14 @@ void Gradient::chi_bwd(int a, int b, int c, int y) {
 	Interval ga,gb,gc;
 
 	if (d[a].i().ub()<0) {
-		ga=Interval::ZERO;
-		gb=Interval::ONE;
-		gc=Interval::ZERO;
+		ga=Interval::zero();
+		gb=Interval::one();
+		gc=Interval::zero();
 	}
 	else if (d[a].i().lb()>0) {
-		ga=Interval::ZERO;
-		gb=Interval::ZERO;
-		gc=Interval::ONE;
+		ga=Interval::zero();
+		gb=Interval::zero();
+		gc=Interval::one();
 	} else {
 
 		if (d[b].i().is_degenerated() && d[c].i().is_degenerated()) {
@@ -392,11 +392,11 @@ void Gradient::chi_bwd(int a, int b, int c, int y) {
 
 			double _b =d[b].i().ub();
 			double _c =d[c].i().ub();
-			if (_b<_c) ga=Interval::POS_REALS;
-			else if (_b>_c) ga=Interval::NEG_REALS;
-			else ga=Interval::ZERO;
+			if (_b<_c) ga=Interval::pos_reals();
+			else if (_b>_c) ga=Interval::neg_reals();
+			else ga=Interval::zero();
 		} else {
-			ga=Interval::ALL_REALS;
+			ga=Interval::all_reals();
 		}
 
 		gb=Interval(0,1);
@@ -413,12 +413,12 @@ void Gradient::max_bwd(int x1, int x2, int y) {
 	Interval gx1,gx2;
 
 	if (d[x1].i().lb() > d[x2].i().ub()) {
-		gx1=Interval::ONE;
-		gx2=Interval::ZERO;
+		gx1=Interval::one();
+		gx2=Interval::zero();
 	}
 	else if (d[x2].i().lb() > d[x1].i().ub()) {
-		gx1=Interval::ZERO;
-		gx2=Interval::ONE;
+		gx1=Interval::zero();
+		gx2=Interval::one();
 	} else {
 		gx1=Interval(0,1);
 		gx2=Interval(0,1);
@@ -432,12 +432,12 @@ void Gradient::min_bwd(int x1, int x2, int y) {
 	Interval gx1,gx2;
 
 	if (d[x1].i().lb() > d[x2].i().ub()) {
-		gx1=Interval::ZERO;
-		gx2=Interval::ONE;
+		gx1=Interval::zero();
+		gx2=Interval::one();
 	}
 	else if (d[x2].i().lb() > d[x1].i().ub()) {
-		gx1=Interval::ONE;
-		gx2=Interval::ZERO;
+		gx1=Interval::one();
+		gx2=Interval::zero();
 	} else {
 		gx1=Interval(0,1);
 		gx2=Interval(0,1);
@@ -448,7 +448,7 @@ void Gradient::min_bwd(int x1, int x2, int y) {
 }
 
 void Gradient::sign_bwd(int x, int y) {
-	if (d[x].i().contains(0)) g[x].i() += g[y].i()*Interval::POS_REALS;
+	if (d[x].i().contains(0)) g[x].i() += g[y].i()*Interval::pos_reals();
 	else ; // nothing to do: derivative is zero
 }
 

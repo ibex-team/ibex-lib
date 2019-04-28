@@ -65,7 +65,7 @@ LPSolver::~LPSolver() {
 }
 
 LPSolver::Status_Sol LPSolver::solve() {
-	obj_value = Interval::ALL_REALS;
+	obj_value = Interval::all_reals();
 	//int stat = -1;
 
 	try{

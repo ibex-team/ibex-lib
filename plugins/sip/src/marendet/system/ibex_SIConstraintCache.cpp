@@ -20,7 +20,7 @@ namespace ibex {
 
 SIConstraintCache::SIConstraintCache(const IntervalVector& initial_box) :
 		must_be_updated_(true), box_cached_(IntervalVector::empty(initial_box.size())), eval_cache_(
-				Interval::EMPTY_SET), gradient_cache_(IntervalVector::empty(initial_box.size())), initial_box_(
+				Interval::empty_set()), gradient_cache_(IntervalVector::empty(initial_box.size())), initial_box_(
 				initial_box) {
 	parameter_caches_.emplace_back(ParameterEvaluationsCache(initial_box));
 }
@@ -35,7 +35,7 @@ void SIConstraintCache::update_cache(const Function &function, const IntervalVec
 
 	// Reinitialize cache
 	const int x_dim = new_box_.size();
-	eval_cache_ = Interval::EMPTY_SET;
+	eval_cache_ = Interval::empty_set();
 	gradient_cache_ = IntervalVector::empty(x_dim);
 	IntervalVector full_box(function.nb_var());
 

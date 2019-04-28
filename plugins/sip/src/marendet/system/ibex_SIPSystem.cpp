@@ -95,7 +95,7 @@ bool SIPSystem::is_inner(const IntervalVector& pt, BxpNodeData& node_data) const
 
 double SIPSystem::max_constraints(const IntervalVector& pt, BxpNodeData& node_data) const {
 	int sic_index = 0;
-	Interval eval = Interval::EMPTY_SET;
+	Interval eval = Interval::empty_set();
 	for (const auto& sic : sic_constraints_) {
 		eval |= sic.evaluateWithoutCachedValue(pt, node_data.sic_constraints_caches[sic_index]);
 		sic_index++;

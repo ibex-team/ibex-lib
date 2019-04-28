@@ -35,8 +35,8 @@ int main() {
 	//! [basic-create-itv]
 	Interval x(1,2);                // create the interval [1,2]
 	Interval y;                     // create the interval (-oo,oo)
-	Interval z=Interval::ALL_REALS; // create the interval (-oo,oo)
-	Interval w=Interval::EMPTY_SET; // create the empty interval
+	Interval z=Interval::all_reals(); // create the interval (-oo,oo)
+	Interval w=Interval::empty_set(); // create the empty interval
 	//! [basic-create-itv]
 	}
 
@@ -403,7 +403,7 @@ int main() {
 	NumConstraint c2(x,x>=1);
 	CtcFwdBwd ctc1(c1);
 	CtcFwdBwd ctc2(c2);
-	IntervalVector box(1,Interval::POS_REALS); // the box [0,oo)
+	IntervalVector box(1,Interval::pos_reals()); // the box [0,oo)
 
 	CtcUnion ctc3(ctc1,ctc2); // a contractor w.r.t. (x<=-1 or x>=1)
 	ctc3.contract(box); // box will be contracted to [1,oo)
@@ -418,7 +418,7 @@ int main() {
 	NumConstraint c2(x,x<=1);
 	CtcFwdBwd ctc1(c1);
 	CtcFwdBwd ctc2(c2);
-	IntervalVector box(1,Interval::ALL_REALS);  // the box (-oo,oo)
+	IntervalVector box(1,Interval::all_reals());  // the box (-oo,oo)
 	CtcCompo ctc3(ctc1,ctc2);  // a contractor w.r.t. (x>=-1 and x<=1)
 	ctc3.contract(box);  // box will be contracted to [-1,1]
 	cout << box << endl;

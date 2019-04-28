@@ -34,7 +34,7 @@ LPSolver::~LPSolver() {
 }
 
 LPSolver::Status_Sol LPSolver::solve() {
-	obj_value = Interval::ALL_REALS;
+	obj_value = Interval::all_reals();
 
 
 	soplex::SPxSolver::Status stat = soplex::SPxSolver::UNKNOWN;

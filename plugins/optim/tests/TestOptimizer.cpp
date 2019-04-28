@@ -62,14 +62,14 @@ void TestOptimizer::vec_problem02() {
 			Optimizer::default_abs_eps_f,
 			NormalizedSystem::default_eps_h, false, false); // no INHC4
 
-	IntervalVector box=cart_prod(Interval(-1,1)*Interval::PI, Interval(-10,10), Interval(-10,10));
+	IntervalVector box=cart_prod(Interval(-1,1)*Interval::pi(), Interval(-10,10), Interval(-10,10));
 	Optimizer::Status status=o.optimize(box);
 	o.report();
 
 	CPPUNIT_ASSERT(status==Optimizer::SUCCESS);
 	CPPUNIT_ASSERT(o.get_loup()>=-20 && o.get_uplo()<=-20);
 	Vector sol=o.get_loup_point().mid();
-	CPPUNIT_ASSERT(almost_eq(fabs(sol[0]),Interval::PI.mid(),1e-3));
+	CPPUNIT_ASSERT(almost_eq(fabs(sol[0]),Interval::pi().mid(),1e-3));
 	CPPUNIT_ASSERT(almost_eq(sol[1],-10,1e-3));
 	CPPUNIT_ASSERT(almost_eq(sol[2],-10,1e-3));
 }
@@ -85,7 +85,7 @@ Optimizer::Status issue50(double init_loup, double prec) {
 	System sys(f);
 	DefaultOptimizer o(sys,prec,prec,prec);
 
-	IntervalVector init_box(1,Interval::ALL_REALS);
+	IntervalVector init_box(1,Interval::all_reals());
 	Optimizer::Status st=o.optimize(init_box,init_loup);
 	o.report(); //cout << "status=" << st << endl;
 	return o.optimize(init_box,init_loup);

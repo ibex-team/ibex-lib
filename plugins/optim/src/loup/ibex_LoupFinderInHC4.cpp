@@ -84,14 +84,14 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 				Interval right_cst;
 				switch(sys.ops[c]) {
 				case LT :
-				case LEQ : right_cst=Interval::NEG_REALS; break;
+				case LEQ : right_cst=Interval::neg_reals(); break;
 				case EQ  :
 					if (c==goal_ctr) // ---> f(x)<=y
-						right_cst=Interval::NEG_REALS;
+						right_cst=Interval::neg_reals();
 					else
-						right_cst=Interval::ZERO;      break;
+						right_cst=Interval::zero();      break;
 				case GEQ :
-				case GT : right_cst=Interval::POS_REALS;  break;
+				case GT : right_cst=Interval::pos_reals();  break;
 				}
 
 				// Quick infeasibility check

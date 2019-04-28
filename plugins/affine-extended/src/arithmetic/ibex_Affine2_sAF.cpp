@@ -167,9 +167,9 @@ const Interval AffineMain<AF_sAF>::itv() const {
 		res += _elt._err * pmOne;
 		return res;
 	} else if (_n==-1) {
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	} else if (_n==-2) {
-		return Interval::ALL_REALS;
+		return Interval::all_reals();
 	} else if (_n==-3) {
 		return Interval(_elt._err,POS_INFINITY);
 	} else  {  //if (_n==-4)
@@ -287,7 +287,7 @@ AffineMain<AF_sAF>& AffineMain<AF_sAF>::operator*=(double alpha) {
 			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
-			if (!b) *this = Interval::ALL_REALS;
+			if (!b) *this = Interval::all_reals();
 
 		} else {
 			*this = itv()*alpha;
@@ -318,7 +318,7 @@ AffineMain<AF_sAF>& AffineMain<AF_sAF>::operator+=(const AffineMain<AF_sAF>& y) 
 			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
-			if (!b) *this = Interval::ALL_REALS;
+			if (!b) *this = Interval::all_reals();
 
 		} else  {
 			if (_n>y.size()) {
@@ -352,7 +352,7 @@ AffineMain<AF_sAF>& AffineMain<AF_sAF>::operator+=(double beta) {
 		_elt._val[0]=temp;
 		_elt._err = nextafter( ttt+ _elt._err ,POS_INFINITY);
 
-		if (!(_elt._err<POS_INFINITY && (fabs(_elt._val[0])<POS_INFINITY))) { *this = Interval::ALL_REALS; }
+		if (!(_elt._err<POS_INFINITY && (fabs(_elt._val[0])<POS_INFINITY))) { *this = Interval::all_reals(); }
 	} else {
 		*this = itv()+ beta;
 	}
@@ -365,7 +365,7 @@ template<>
 AffineMain<AF_sAF>& AffineMain<AF_sAF>::inflate(double ddelta) {
 	if (is_actif() && (fabs(ddelta))<POS_INFINITY) {
 		_elt._err = nextafter( fabs(ddelta)+ _elt._err ,POS_INFINITY);
-		if (_elt._err==POS_INFINITY) { *this = Interval::ALL_REALS; }
+		if (_elt._err==POS_INFINITY) { *this = Interval::all_reals(); }
 	} else {
 		*this = itv()+ Interval(-1,1)*ddelta;
 	}
@@ -457,7 +457,7 @@ AffineMain<AF_sAF>& AffineMain<AF_sAF>::operator*=(const AffineMain<AF_sAF>& y) 
 			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
-			if (!b) *this = Interval::ALL_REALS;
+			if (!b) *this = Interval::all_reals();
 
 			delete[] xTmp;
 
@@ -560,7 +560,7 @@ AffineMain<AF_sAF>& AffineMain<AF_sAF>::Asqr(const Interval& itv) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
 			if (!b) {
-				*this = Interval::ALL_REALS;
+				*this = Interval::all_reals();
 			}
 		}
 

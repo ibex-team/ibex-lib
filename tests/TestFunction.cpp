@@ -350,10 +350,10 @@ void TestFunction::generate_comp02() {
 
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f[1].expr());
 	CPPUNIT_ASSERT(c);
-	CPPUNIT_ASSERT(c->get_value()==Interval::ZERO);
+	CPPUNIT_ASSERT(c->get_value()==Interval::zero());
 	c=dynamic_cast<const ExprConstant*>(&f[2].expr());
 	CPPUNIT_ASSERT(c);
-	CPPUNIT_ASSERT(c->get_value()==Interval::ZERO);
+	CPPUNIT_ASSERT(c->get_value()==Interval::zero());
 }
 
 void TestFunction::used() {

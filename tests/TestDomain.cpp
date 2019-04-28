@@ -212,21 +212,21 @@ void TestDomain::load01() {
 	vars.push_back(9);
 	load(x,box,vars);
 
-	CPPUNIT_ASSERT(x[0].v()[0]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(x[0].v()[1]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(x[0].v()[2]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(x[0].v()[0]==Interval::all_reals());
+	CPPUNIT_ASSERT(x[0].v()[1]==Interval::all_reals());
+	CPPUNIT_ASSERT(x[0].v()[2]==Interval::all_reals());
 
 	CPPUNIT_ASSERT(x[1].v()[0]==Interval(0,1));
-	CPPUNIT_ASSERT(x[1].v()[1]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(x[1].v()[1]==Interval::all_reals());
 
 	CPPUNIT_ASSERT(x[2].i()==Interval(0,1));
 
-	CPPUNIT_ASSERT(x[3].m()[0][0]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(x[3].m()[0][0]==Interval::all_reals());
 	CPPUNIT_ASSERT(x[3].m()[0][1]==Interval(0,1));
-	CPPUNIT_ASSERT(x[3].m()[1][0]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(x[3].m()[1][0]==Interval::all_reals());
 	CPPUNIT_ASSERT(x[3].m()[1][1]==Interval(0,1));
 
-	CPPUNIT_ASSERT(x[4].i()==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(x[4].i()==Interval::all_reals());
 }
 
 
@@ -239,7 +239,7 @@ void TestDomain::load02() {
 
 	Array<Domain> x(x1,x2,x3,x4,x5);
 
-	IntervalVector box(11,Interval::ALL_REALS);
+	IntervalVector box(11,Interval::all_reals());
 
 	vector<int> vars;
 	vars.push_back(3);
@@ -254,17 +254,17 @@ void TestDomain::load02() {
 
 	load(box,x,vars);
 
-	CPPUNIT_ASSERT(box[0]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(box[1]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(box[2]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[0]==Interval::all_reals());
+	CPPUNIT_ASSERT(box[1]==Interval::all_reals());
+	CPPUNIT_ASSERT(box[2]==Interval::all_reals());
 	CPPUNIT_ASSERT(box[3]==Interval(0,1));
-	CPPUNIT_ASSERT(box[4]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[4]==Interval::all_reals());
 	CPPUNIT_ASSERT(box[5]==Interval(0,2));
-	CPPUNIT_ASSERT(box[6]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[6]==Interval::all_reals());
 	CPPUNIT_ASSERT(box[7]==Interval(0,3));
-	CPPUNIT_ASSERT(box[8]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[8]==Interval::all_reals());
 	CPPUNIT_ASSERT(box[9]==Interval(0,4));
-	CPPUNIT_ASSERT(box[10]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[10]==Interval::all_reals());
 }
 
 void TestDomain::load03() {
@@ -306,7 +306,7 @@ void TestDomain::load04() {
 
 	Array<Domain> x(x1,x2,x3,x4,x5);
 
-	IntervalVector box(11,Interval::ALL_REALS);
+	IntervalVector box(11,Interval::all_reals());
 
 	x[1].v()[0]=Interval(0,1);
 	x[2].i()=Interval(0,2);
@@ -315,17 +315,17 @@ void TestDomain::load04() {
 
 	load(box,x);
 
-	CPPUNIT_ASSERT(box[0]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(box[1]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(box[2]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[0]==Interval::all_reals());
+	CPPUNIT_ASSERT(box[1]==Interval::all_reals());
+	CPPUNIT_ASSERT(box[2]==Interval::all_reals());
 	CPPUNIT_ASSERT(box[3]==Interval(0,1));
-	CPPUNIT_ASSERT(box[4]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[4]==Interval::all_reals());
 	CPPUNIT_ASSERT(box[5]==Interval(0,2));
-	CPPUNIT_ASSERT(box[6]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[6]==Interval::all_reals());
 	CPPUNIT_ASSERT(box[7]==Interval(0,3));
-	CPPUNIT_ASSERT(box[8]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[8]==Interval::all_reals());
 	CPPUNIT_ASSERT(box[9]==Interval(0,4));
-	CPPUNIT_ASSERT(box[10]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(box[10]==Interval::all_reals());
 }
 
 /*

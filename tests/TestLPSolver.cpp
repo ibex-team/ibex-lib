@@ -50,7 +50,7 @@ void TestLinearSolver::kleemin( int n) {
 	}
 	lp.set_obj(-v);
 
-	IntervalVector bound (n, Interval::POS_REALS);
+	IntervalVector bound (n, Interval::pos_reals());
 	lp.set_bounds(bound);
 
 	for (int i=1;i<=n;i++) {
@@ -86,7 +86,7 @@ void TestLinearSolver::kleemin30() {
 	}
 	lp.set_obj(-v);
 
-	IntervalVector bound (n, Interval::POS_REALS);
+	IntervalVector bound (n, Interval::pos_reals());
 	lp.set_bounds(bound);
 
 	for (int i=1;i<=n;i++) {

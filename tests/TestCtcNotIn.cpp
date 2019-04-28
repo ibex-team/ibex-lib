@@ -45,7 +45,7 @@ void TestCtcNotIn::contract02() {
 }
 
 void TestCtcNotIn::contract03() {
-	check_not_in(Interval(0.1,0.9),Interval::EMPTY_SET);
+	check_not_in(Interval(0.1,0.9),Interval::empty_set());
 }
 
 void TestCtcNotIn::contract04() {

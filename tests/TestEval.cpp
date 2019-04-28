@@ -214,7 +214,7 @@ void TestEval::apply04() {
 
 void TestEval::issue242() {
 	Function f("x[3]","-x");
-	IntervalVector x(3,Interval::ONE);
+	IntervalVector x(3,Interval::one());
 	CPPUNIT_ASSERT(almost_eq(f.eval_vector(x),-x,0));
 }
 
@@ -228,8 +228,8 @@ void TestEval::eval_components01() {
 	const ExprNode& e4=e1*e2;
 	Function f(x,y,z,Return(e4+1,e2+3,e4-2,e4-4));
 
-	Interval vx=Interval::ONE;
-	Interval vy=2*Interval::ONE;
+	Interval vx=Interval::one();
+	Interval vy=2*Interval::one();
 	IntervalVector box(3);
 	box[0]=vx;
 	box[1]=vy;

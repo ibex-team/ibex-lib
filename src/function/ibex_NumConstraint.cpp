@@ -164,10 +164,10 @@ Domain NumConstraint::right_hand_side() const {
 
 	switch (op) {
 	case LT :
-	case LEQ : right_cst=Interval::NEG_REALS; break;
-	case EQ  : right_cst=Interval::ZERO;      break;
+	case LEQ : right_cst=Interval::neg_reals(); break;
+	case EQ  : right_cst=Interval::zero();      break;
 	case GEQ :
-	case GT : right_cst=Interval::POS_REALS;  break;
+	case GT : right_cst=Interval::pos_reals();  break;
 	}
 
 	switch(d.dim.type()) {

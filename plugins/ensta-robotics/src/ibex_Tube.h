@@ -56,7 +56,7 @@ public:
 	 * \param tf - final time
 	 * \param step - time step
 	 */
-	Tube(double t0, double tf, double step, const Interval& x=Interval::ALL_REALS);
+	Tube(double t0, double tf, double step, const Interval& x=Interval::all_reals());
 
 	/**
 	 * \brief Create a tube from an initial vector.
@@ -514,7 +514,7 @@ std::ostream& operator<<(std::ostream& os, const Tube& x);
 											   && ((t1).get_delta_t()==(t2).get_delta_t()))
 
 inline Tube Tube::empty(double t0, double tf, double deltaT) {
-	return Tube(t0,tf,deltaT,Interval::EMPTY_SET);
+	return Tube(t0,tf,deltaT,Interval::empty_set());
 }
 
 inline double Tube::get_t0() const {

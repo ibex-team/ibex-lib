@@ -104,7 +104,7 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	FI_INTERVAL r;
 
 	if (is_empty()) return *this;
-	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+	if (y.is_empty()) { *this=Interval::empty_set(); return *this; }
 
 	const FI_BASE& a(lb());
 	const FI_BASE& b(ub());
@@ -164,7 +164,7 @@ inline Interval& Interval::operator*=(const Interval& y) {
 inline Interval& Interval::operator/=(const Interval& y) {
 
 	if (is_empty()) return *this;
-	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+	if (y.is_empty()) { *this=Interval::empty_set(); return *this; }
 
 	const FI_BASE& a(lb());
 	const FI_BASE& b(ub());
@@ -174,7 +174,7 @@ inline Interval& Interval::operator/=(const Interval& y) {
 	FI_INTERVAL r;
 
 	if (c==0 && d==0) {
-		*this=Interval::EMPTY_SET;
+		*this=Interval::empty_set();
 		return *this;
 	}
 
@@ -319,21 +319,21 @@ inline double hausdorff(const Interval &x1, const Interval &x2) {
 
 inline Interval operator+(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return x.itv+d;
 }
 
 inline Interval operator-(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return x.itv-d;
 }
 
 inline Interval operator*(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else {
 		Interval res(d);
 		return res*=x;
@@ -342,7 +342,7 @@ inline Interval operator*(const Interval& x, double d) {
 
 inline Interval operator/(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else{
 		Interval res(x);
 		return res/=Interval(d);
@@ -351,21 +351,21 @@ inline Interval operator/(const Interval& x, double d) {
 
 inline Interval operator+(double d,const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return d+x.itv;
 }
 
 inline Interval operator-(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return d-x.itv;
 }
 
 inline Interval operator*(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else {
 		Interval res(d);
 		return res*=x;
@@ -374,7 +374,7 @@ inline Interval operator*(double d, const Interval& x) {
 
 inline Interval operator/(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else{
 		Interval res(d);
 		return res/=x;
@@ -404,12 +404,12 @@ inline Interval sqr(const Interval& x) {
 }
 
 inline Interval sqrt(const Interval& x) {
-	return filib::sqrt(x.itv) & Interval::POS_REALS;
+	return filib::sqrt(x.itv) & Interval::pos_reals();
 }
 
 inline Interval pow(const Interval& x, int n) {
 	if (n==0)
-		return Interval::ONE;
+		return Interval::one();
 	else if (n<0)
 		return 1.0/Interval(filib::power(x.itv,-n));
 	else 
@@ -418,9 +418,9 @@ inline Interval pow(const Interval& x, int n) {
 
 inline Interval pow(const Interval &x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else if (d==0)
-		return Interval::ONE;
+		return Interval::one();
 	else if (d<0)
 		return 1.0/pow(x,-d);
 	else
@@ -435,17 +435,17 @@ inline Interval pow(const Interval &x, const Interval &y) {
 
 inline Interval root(const Interval& x, int n) {
 
-	if (x.is_empty()) return Interval::EMPTY_SET;
-	if (x.lb()==0 && x.ub()==0) return Interval::ZERO;
-	if (n==0) return Interval::ONE;
+	if (x.is_empty()) return Interval::empty_set();
+	if (x.lb()==0 && x.ub()==0) return Interval::zero();
+	if (n==0) return Interval::one();
 	if (n<0) return 1.0/root(x,-n);
 	if (n==1) return x;
 
 	if (n%2==0) {
-		return pow(x,Interval::ONE/n);   // the negative part of x should be removed
+		return pow(x,Interval::one()/n);   // the negative part of x should be removed
 	} else {
-		return pow(x,Interval::ONE/n) |  // the negative part of x should be removed
-	    (-pow(-x,Interval::ONE/n)); // the positive part of x should be removed
+		return pow(x,Interval::one()/n) |  // the negative part of x should be removed
+	    (-pow(-x,Interval::one()/n)); // the positive part of x should be removed
 	}
 
 }
@@ -458,7 +458,7 @@ inline Interval exp(const Interval& x) {
 
 inline Interval log(const Interval& x) {
 	if (x.ub()<=0) // filib returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else if (x.ub()<=next_float(0))
 		return Interval(NEG_INFINITY,filib::filib_consts<FI_BASE>::q_minr);
 	else
@@ -476,7 +476,7 @@ inline Interval sin(const Interval& x) {
 inline Interval tan(const Interval& x) {
 	Interval res =  filib::tan(x.itv);
 	if (res.is_empty()&& (!x.is_empty())) {
-		return Interval::ALL_REALS;
+		return Interval::all_reals();
 	} else
 		return res;
 }
@@ -522,12 +522,12 @@ inline Interval abs(const Interval &x) {
 }
 
 inline Interval max(const Interval& x, const Interval& y) {
-	if (x.is_empty()||y.is_empty()) return Interval::EMPTY_SET;
+	if (x.is_empty()||y.is_empty()) return Interval::empty_set();
 	else return x.itv.imax(y.itv);
 }
 
 inline Interval min(const Interval& x, const Interval& y) {
-	if (x.is_empty()||y.is_empty()) return Interval::EMPTY_SET;
+	if (x.is_empty()||y.is_empty()) return Interval::empty_set();
 	else return x.itv.imin(y.itv);
 }
 
@@ -611,11 +611,11 @@ inline bool bwd_trigo(const Interval& y, Interval& x, int ftype) {
 
 	switch (ftype) {
 	case COS :
-		nb_period = x / Interval::PI; break;
+		nb_period = x / Interval::pi(); break;
 	case SIN :
-		nb_period = (x+Interval::HALF_PI) / Interval::PI; break;
+		nb_period = (x+Interval::half_pi()) / Interval::pi(); break;
 	case TAN :
-		nb_period = (x+Interval::HALF_PI) / Interval::PI; break;
+		nb_period = (x+Interval::half_pi()) / Interval::pi(); break;
 	default :
 		assert(false); break;
 	}
@@ -632,13 +632,13 @@ inline bool bwd_trigo(const Interval& y, Interval& x, int ftype) {
 	switch(ftype) {
 	case COS :
 		// should find in at most 2 turns.. but consider rounding !
-		while (++i<=p2 && !found) found = !(tmp1 = (x & (i%2==0? period_0 + i*Interval::PI : (i+1)*Interval::PI - period_0))).is_empty();
+		while (++i<=p2 && !found) found = !(tmp1 = (x & (i%2==0? period_0 + i*Interval::pi() : (i+1)*Interval::pi() - period_0))).is_empty();
 		break;
 	case SIN :
-		while (++i<=p2 && !found) found = !(tmp1 = (x & (i%2==0? period_0 + i*Interval::PI : i*Interval::PI - period_0))).is_empty();
+		while (++i<=p2 && !found) found = !(tmp1 = (x & (i%2==0? period_0 + i*Interval::pi() : i*Interval::pi() - period_0))).is_empty();
 		break;
 	case TAN :
-		while (++i<=p2 && !found) found = !(tmp1 = (x & (period_0 + i*Interval::PI))).is_empty();
+		while (++i<=p2 && !found) found = !(tmp1 = (x & (period_0 + i*Interval::pi()))).is_empty();
 		break;
 	}
 
@@ -648,13 +648,13 @@ inline bool bwd_trigo(const Interval& y, Interval& x, int ftype) {
 
 	switch(ftype) {
 	case COS :
-		while (--i>=p1 && !found) found = !(tmp2 = (x & (i%2==0? period_0 + i*Interval::PI : (i+1)*Interval::PI - period_0))).is_empty();
+		while (--i>=p1 && !found) found = !(tmp2 = (x & (i%2==0? period_0 + i*Interval::pi() : (i+1)*Interval::pi() - period_0))).is_empty();
 		break;
 	case SIN :
-		while (--i>=p1 && !found) found = !(tmp2 = (x & (i%2==0? period_0 + i*Interval::PI : i*Interval::PI - period_0))).is_empty();
+		while (--i>=p1 && !found) found = !(tmp2 = (x & (i%2==0? period_0 + i*Interval::pi() : i*Interval::pi() - period_0))).is_empty();
 		break;
 	case TAN :
-		while (--i>=p1 && !found) found = !(tmp2 = (x & (period_0 + i*Interval::PI))).is_empty();
+		while (--i>=p1 && !found) found = !(tmp2 = (x & (period_0 + i*Interval::pi()))).is_empty();
 		break;
 	}
 

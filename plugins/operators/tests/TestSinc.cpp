@@ -42,10 +42,10 @@ void TestSinc::callbacks() {
 	CPPUNIT_ASSERT(b.i().is_subset(sinc(a.i())));
 
 	Domain g(Dim::scalar());
-	g.i()=Interval::ONE;
+	g.i()=Interval::one();
 	CPPUNIT_ASSERT(y.num_diff(a,g).i()==(a.i()*cos(a.i())-sin(a.i()))/sqr(a.i()));
 
-	const ExprNode& gnode=ExprConstant::new_scalar(Interval::ONE);
+	const ExprNode& gnode=ExprConstant::new_scalar(Interval::one());
 	const ExprNode& e=y.symb_diff(x,gnode);
 	CPPUNIT_ASSERT(e.size == 9);
 	cleanup(y,true);

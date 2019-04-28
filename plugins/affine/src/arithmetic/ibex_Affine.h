@@ -655,13 +655,13 @@ inline bool AffineMain<T>::operator!=(const Interval& x) const {
 
 template<class T>
 inline void AffineMain<T>::set_empty(){
-	*this = Interval::EMPTY_SET;
+	*this = Interval::empty_set();
 }
 
 //template<class T>
 //inline AffineMain<T>& AffineMain<T>::inflate(double radd){
 //	if (fabs(radd)>= POS_INFINITY) {
-//		*this = Interval::ALL_REALS;
+//		*this = Interval::all_reals();
 //	} else {
 //		saxpy(1.0, AffineMain<T>(),0.0, radd, false, false, false, true);
 //	}
@@ -709,7 +709,7 @@ inline 	AffineMain<T>& AffineMain<T>::operator/=(double d) {
 template<class T>
 inline AffineMain<T>& AffineMain<T>::operator+=(const Interval& x){
 	if ( x.is_empty()) {
-		*this = Interval::EMPTY_SET;
+		*this = Interval::empty_set();
 	} else if (x.is_unbounded() || (!is_actif())) {
 		*this = this->itv() + x;
 	} else {
@@ -1151,7 +1151,7 @@ inline AffineMain<T>& AffineMain<T>::Ainv_CH(const Interval& itv){
 
 template<class T>
 inline AffineMain<T>& AffineMain<T>::Asqrt_CH(const Interval& itv){
-	Interval itv2 = itv & Interval::POS_REALS;
+	Interval itv2 = itv & Interval::pos_reals();
 	Interval res_itv = sqrt(itv2);;
 
 	// Particular case
@@ -1282,7 +1282,7 @@ inline AffineMain<T>& AffineMain<T>::Acos(const Interval& itv){
 	// General case
 		double alpha, beta, ddelta, t1, t2;
 		Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
-		if (itv.diam()>=Interval::TWO_PI.lb()) {
+		if (itv.diam()>=Interval::two_pi().lb()) {
 			*this = Interval(-1,1);
 			return *this;
 		}
@@ -1325,7 +1325,7 @@ inline AffineMain<T>& AffineMain<T>::Acos(const Interval& itv){
 		t1     = (abs(cos(Interval(itv.ub()))-(alpha*Interval(itv.ub())+beta))).ub();
 		if (t1>ddelta)  ddelta= t1;
 		u = asin(-Interval(alpha));
-		nb_period = (itv+Interval::HALF_PI) / Interval::PI;
+		nb_period = (itv+Interval::half_pi()) / Interval::pi();
 
 		// evaluate the error at the point such as f'(u) = alpha
 		int p1 = ((int) nb_period.lb())-2;
@@ -1334,7 +1334,7 @@ inline AffineMain<T>& AffineMain<T>::Acos(const Interval& itv){
 		int i = p1;
 
 		while (i<=p2) { // looking for a point
-			TEMP1 = (itv & (i%2==0? (u + i*Interval::PI) : (i*Interval::PI - u)));
+			TEMP1 = (itv & (i%2==0? (u + i*Interval::pi()) : (i*Interval::pi() - u)));
 			if (!(TEMP1.is_empty())) { // check if maximize the error
 				t1 = (abs(cos(TEMP1)-(alpha*TEMP1+beta))).ub();
 				if (t1>ddelta)  ddelta= t1;
@@ -1363,7 +1363,7 @@ inline AffineMain<T>& AffineMain<T>::Asin(const Interval& itv){
 	// General case
 		double alpha, beta, ddelta, t1, t2;
 		Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
-		if (itv.diam()>=Interval::TWO_PI.lb()) {
+		if (itv.diam()>=Interval::two_pi().lb()) {
 			*this = Interval(-1,1);
 			return *this;
 		}
@@ -1406,7 +1406,7 @@ inline AffineMain<T>& AffineMain<T>::Asin(const Interval& itv){
 		t1     = (abs(sin(Interval(itv.ub()))-(alpha*Interval(itv.ub())+beta))).ub();
 		if (t1>ddelta)  ddelta= t1;
 		u = acos(Interval(alpha));
-		nb_period = (itv) / Interval::PI;
+		nb_period = (itv) / Interval::pi();
 
 		// evaluate the error at the point such as f'(u) = alpha
 		int p1 = ((int) nb_period.lb())-2;
@@ -1415,7 +1415,7 @@ inline AffineMain<T>& AffineMain<T>::Asin(const Interval& itv){
 		int i = p1;
 
 		while (i<=p2) { // looking for a point
-			TEMP1 = (itv & (i%2==0? (u + i*Interval::PI) : ((i+1)*Interval::PI - u)));
+			TEMP1 = (itv & (i%2==0? (u + i*Interval::pi()) : ((i+1)*Interval::pi() - u)));
 			if (!(TEMP1.is_empty())) {
 				t1 = (abs(sin(TEMP1)-(alpha*TEMP1+beta))).ub();
 				if (t1>ddelta)  ddelta= t1;
@@ -1444,7 +1444,7 @@ inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 	// General case
 		double alpha, beta, ddelta, t1, t2;
 		Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
-		if (itv.diam()>=Interval::TWO_PI.lb()) {
+		if (itv.diam()>=Interval::two_pi().lb()) {
 			*this = Interval(-1,1);
 			return *this;
 		}
@@ -1487,7 +1487,7 @@ inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 		t1     = (abs(tan(Interval(itv.ub()))-(alpha*Interval(itv.ub())+beta))).ub();
 		if (t1>ddelta)  ddelta= t1;
 		u = acos(1/sqrt(Interval(alpha)));
-		nb_period = (itv) / Interval::PI;
+		nb_period = (itv) / Interval::pi();
 
 		// evaluate the error at the point such as f'(u) = alpha
 		int p1 = ((int) nb_period.lb())-2;
@@ -1496,12 +1496,12 @@ inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 		int i = p1;
 
 		while (i<=p2) { // looking for a point
-			TEMP1 = (itv & ( i*Interval::PI + u));
+			TEMP1 = (itv & ( i*Interval::pi() + u));
 			if ((!(TEMP1.is_empty()))) {
 				t1 = (abs(tan(TEMP1)-(alpha*TEMP1+beta))).ub();
 				if (t1>ddelta)  ddelta= t1;
 			}
-			TEMP1 = (itv & ( i*Interval::PI - u ));
+			TEMP1 = (itv & ( i*Interval::pi() - u ));
 			if ((!(TEMP1.is_empty()))) {
 				t1 = (abs(tan(TEMP1)-(alpha*TEMP1+beta))).ub();
 				if (t1>ddelta)  ddelta= t1;
@@ -1963,7 +1963,7 @@ inline AffineMain<T>& AffineMain<T>::Apow(int n, const Interval& itv) {
 	} else {
 	// General Case
 		if (n == 0) {
-			*this = Interval::ONE;
+			*this = Interval::one();
 			return *this;
 		} else if (n == 1)
 			return *this;
@@ -2091,17 +2091,17 @@ template<class T>
 inline AffineMain<T>& AffineMain<T>::Aroot(int n, const Interval& itv) {
 
 	if (is_empty()) return *this;
-	else if (n==0)  return *this = Interval::ONE;
+	else if (n==0)  return *this = Interval::one();
 	else if (n==1)  return *this;
 	else if (is_degenerated()) return *this = pow(Interval(mid()),1.0/n);
 	else if (n<0) {
 		this->Aroot(-n,itv);
 		return *this->Ainv(root(itv,-n));
 	}
-	else if (n % 2 == 0) return *this->Apow(Interval::ONE/n,itv); // the negative part of x should be removed
-	else if (0 <= itv.lb()) return  *this->Apow(Interval::ONE/n,itv);
+	else if (n % 2 == 0) return *this->Apow(Interval::one()/n,itv); // the negative part of x should be removed
+	else if (0 <= itv.lb()) return  *this->Apow(Interval::one()/n,itv);
 	else if (itv.ub() <= 0) {
-		this->Apow(Interval::ONE/n,-itv);
+		this->Apow(Interval::one()/n,-itv);
 		return  *this->Aneg();
 	}
 	else {
@@ -2110,7 +2110,7 @@ inline AffineMain<T>& AffineMain<T>::Aroot(int n, const Interval& itv) {
 		//		y=pow(x,e) |  // the negative part of x should be removed
 		//	    (-pow(-x,e)); // the positive part of x should be removed
 		// BE CAREFULL the result of this union is an INTERVAL, so y lost all its affine form
-		return *this = ((pow(itv & Interval::POS_REALS, Interval::ONE/n)) | (-pow(-(itv & Interval::NEG_REALS),Interval::ONE/n)));  // BE CAREFULL the result of this union is an INTERVAL, so y lost all its affine form
+		return *this = ((pow(itv & Interval::pos_reals(), Interval::one()/n)) | (-pow(-(itv & Interval::neg_reals()),Interval::one()/n)));  // BE CAREFULL the result of this union is an INTERVAL, so y lost all its affine form
 		// BE CAREFULL the result of this union is an INTERVAL, so y lost all its affine form
 	}
 

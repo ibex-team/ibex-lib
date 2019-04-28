@@ -748,7 +748,7 @@ void TemplateDomain<D>::clear() {
 template<class D>
 bool TemplateDomain<D>::is_zero() const {
 	switch(dim.type()) {
-	case Dim::SCALAR:     return i()==Interval::ZERO; break;
+	case Dim::SCALAR:     return i()==Interval::zero(); break;
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: return v().is_zero(); break;
 	default:              return m().is_zero(); break;

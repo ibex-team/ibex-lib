@@ -261,7 +261,7 @@ protected:
 	void set_dist(const IntervalVector& box, const Vector pt) {
 		assert(box.size()==pt.size());
 
-		Interval d=Interval::ZERO;
+		Interval d=Interval::zero();
 		for (int i=0; i<pt.size(); i++) {
 			d += sqr(box[i]-pt[i]);
 		}

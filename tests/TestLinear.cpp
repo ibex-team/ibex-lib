@@ -204,26 +204,26 @@ pair<IntervalMatrix,IntervalMatrix> orthogonal_matrix() {
 
 	// Create an orthogonal 3x3 matrix
 	// with 3 rotations
-	IntervalMatrix R1(3,3,Interval::ZERO);
-	R1[0][0]=cos(Interval::PI/4.0);
-	R1[0][1]=-sin(Interval::PI/4.0);
-	R1[1][0]=sin(Interval::PI/4.0);
-	R1[1][1]=cos(Interval::PI/4.0);
-	R1[2][2]=Interval::ONE;
+	IntervalMatrix R1(3,3,Interval::zero());
+	R1[0][0]=cos(Interval::pi()/4.0);
+	R1[0][1]=-sin(Interval::pi()/4.0);
+	R1[1][0]=sin(Interval::pi()/4.0);
+	R1[1][1]=cos(Interval::pi()/4.0);
+	R1[2][2]=Interval::one();
 
-	IntervalMatrix R2(3,3,Interval::ZERO);
-	R2[1][1]=cos(Interval::PI/3.0);
-	R2[1][2]=-sin(Interval::PI/3.0);
-	R2[2][1]=sin(Interval::PI/3.0);
-	R2[2][2]=cos(Interval::PI/3.0);
-	R2[0][0]=Interval::ONE;
+	IntervalMatrix R2(3,3,Interval::zero());
+	R2[1][1]=cos(Interval::pi()/3.0);
+	R2[1][2]=-sin(Interval::pi()/3.0);
+	R2[2][1]=sin(Interval::pi()/3.0);
+	R2[2][2]=cos(Interval::pi()/3.0);
+	R2[0][0]=Interval::one();
 
-	IntervalMatrix R3(3,3,Interval::ZERO);
-	R3[2][2]=cos(Interval::PI/5.0);
-	R3[2][0]=-sin(Interval::PI/5.0);
-	R3[0][2]=sin(Interval::PI/5.0);
-	R3[0][0]=cos(Interval::PI/5.0);
-	R3[1][1]=Interval::ONE;
+	IntervalMatrix R3(3,3,Interval::zero());
+	R3[2][2]=cos(Interval::pi()/5.0);
+	R3[2][0]=-sin(Interval::pi()/5.0);
+	R3[0][2]=sin(Interval::pi()/5.0);
+	R3[0][0]=cos(Interval::pi()/5.0);
+	R3[1][1]=Interval::one();
 
 	IntervalMatrix R=R1*R2*R3;
 	IntervalMatrix Rinv=R3.transpose()*R2.transpose()*R1.transpose();

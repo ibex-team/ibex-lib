@@ -204,17 +204,17 @@ jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, j
 		// we check this is not a vector-valued constraint
 		assert(ctr.f.image_dim()==1);
 		// the only thing we can do is to check "p"
-		if (yin==Interval::ZERO) result=INFLATE;
+		if (yin==Interval::zero()) result=INFLATE;
 		else result=UNKNOWN_POINT;
 		x=xin;
 	} else {
 		Interval y;
 
 		switch (ctr.op) {
-		case LT:  y = in? Interval(NEG_INFINITY,ibex::previous_float(0)) : Interval::POS_REALS; break;
-		case LEQ: y = in? Interval::NEG_REALS : Interval(ibex::next_float(0),POS_INFINITY); break;
-		case GEQ: y = in? Interval::POS_REALS : Interval(NEG_INFINITY,ibex::previous_float(0)); break;
-		case GT:  y = in? Interval(ibex::next_float(0),POS_INFINITY) : Interval::NEG_REALS; break;
+		case LT:  y = in? Interval(NEG_INFINITY,ibex::previous_float(0)) : Interval::pos_reals(); break;
+		case LEQ: y = in? Interval::neg_reals() : Interval(ibex::next_float(0),POS_INFINITY); break;
+		case GEQ: y = in? Interval::pos_reals() : Interval(NEG_INFINITY,ibex::previous_float(0)); break;
+		case GT:  y = in? Interval(ibex::next_float(0),POS_INFINITY) : Interval::neg_reals(); break;
 		case EQ:  ibex_error("inflation with equalities"); break;
 		}
 

@@ -866,7 +866,7 @@ inline const AffineMainVector<T>& AffineMainMatrix<T>::operator[](int i) const {
 
 template<class T>
 inline void AffineMainMatrix<T>::clear() {
-	init(Interval::ZERO);
+	init(Interval::zero());
 }
 
 template<class T>

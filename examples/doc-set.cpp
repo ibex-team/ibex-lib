@@ -277,7 +277,7 @@ int main() {
   int n=8;
 
   for (int i=0; i<n; i++) {
-    NumConstraint ctr(x,y,f(x,y,i*2*Interval::PI/n)<=0.04);
+    NumConstraint ctr(x,y,f(x,y,i*2*Interval::pi()/n)<=0.04);
     SepFwdBwd sep(ctr);
     // We set the status of the second contraction to
     // "maybe" so that the i-set associated to the separator becomes [ctr,R^n]

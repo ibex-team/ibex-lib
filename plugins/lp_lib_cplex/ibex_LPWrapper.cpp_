@@ -223,7 +223,7 @@ LPSolver::~LPSolver() {
 }
 
 LPSolver::Status_Sol LPSolver::solve() {
-	obj_value = Interval::ALL_REALS;
+	obj_value = Interval::all_reals();
 
 	try {
 		// Optimize the problem and obtain solution.
@@ -722,7 +722,7 @@ LPSolver::~LPSolver() {
 }
 
 LPSolver::Status_Sol LPSolver::solve() {
-	obj_value = Interval::ALL_REALS;
+	obj_value = Interval::all_reals();
 
 	LPSolver::Status_Sol res = UNKNOWN;
 	try {

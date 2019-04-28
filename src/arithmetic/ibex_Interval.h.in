@@ -434,24 +434,77 @@ class Interval {
      */
     std::pair<Interval,Interval> bisect(double ratio=0.5) const;
 
-    /** \brief pi. */
+    /** \brief pi
+     *  Deprecated. Use pi().
+     */
     static const Interval PI;
-    /** \brief 2*pi. */
+    
+     /** \brief pi. */
+    static const Interval& pi();
+    
+    /** \brief 2*pi.
+     *  Deprecated. Use two_pi().
+     */
     static const Interval TWO_PI;
-    /** \brief pi/2. */
+ 
+    /** \brief 2*pi. */
+    static const Interval& two_pi();
+    
+    /** \brief pi/2.
+     *  Deprecated. Use half_pi().
+     */
     static const Interval HALF_PI;
-    /** \brief the empty interval. */
+    
+    /** \brief pi/2. */
+    static const Interval& half_pi();
+    
+    /** \brief the empty interval. 
+     *  Deprecated. Use empty_set().
+     */
     static const Interval EMPTY_SET;
-    /** \brief (-oo,oo). */
+    
+    /** \brief the empty interval. */
+    static const Interval& empty_set();
+    
+    /** \brief (-oo,oo). 
+     *  Deprecated. Use all_reals().
+     */
     static const Interval ALL_REALS;
-    /** \brief [0,0]. */
+    
+    /** \brief (-oo,oo). */
+    static const Interval& all_reals();
+    
+    /** \brief [0,0]. 
+     *  Deprecated. Use zero().
+     */
     static const Interval ZERO;
-    /** \brief [1,1]. */
+    
+    /** \brief [0,0]. */
+    static const Interval& zero();
+    
+    /** \brief [1,1]. 
+     *  Deprecated. Use one().
+     */
     static const Interval ONE;
-    /** \brief [0,+oo). */
+    
+    /** \brief [1,1]. */
+    static const Interval& one();
+    
+    /** \brief [0,+oo). 
+     *  Deprecated. Use pos_reals().
+     */
     static const Interval POS_REALS;
-    /** \brief (-oo,0]. */
+    
+    /** \brief [0,+oo). */
+    static const Interval& pos_reals();
+    
+    /** \brief (-oo,0]. 
+     *  Deprecated. Use neg_reals().
+     */
     static const Interval NEG_REALS;
+    
+    /** \brief (-oo,0]. */
+    static const Interval& neg_reals();
 
 //    friend class IntervalVector;
 
@@ -920,15 +973,15 @@ inline Interval chi(const Interval& a, const Interval& b, const Interval& c){
 
 inline Interval atan2(const Interval& y, const Interval& x) {
 
-	if (y.is_empty() || x.is_empty()) return Interval::EMPTY_SET;
+	if (y.is_empty() || x.is_empty()) return Interval::empty_set();
 
 	// we handle the special case x=[0,0] separately
-	else if (x==Interval::ZERO) {
+	else if (x==Interval::zero()) {
 		if (y.lb()>=0)
-			if (y.ub()==0) return Interval::EMPTY_SET; // atan2(0,0) is undefined.
-			else return Interval::HALF_PI;
-		else if (y.ub()<=0) return -Interval::HALF_PI;
-		else return Interval(-1,1)*Interval::HALF_PI;
+			if (y.ub()==0) return Interval::empty_set(); // atan2(0,0) is undefined.
+			else return Interval::half_pi();
+		else if (y.ub()<=0) return -Interval::half_pi();
+		else return Interval(-1,1)*Interval::half_pi();
 	}
 
 	else if (x.lb()>=0) {
@@ -936,31 +989,31 @@ inline Interval atan2(const Interval& y, const Interval& x) {
 	}
 	else if (x.ub()<=0) {
 		if (y.lb()>=0)
-			return atan(y/x)+Interval::PI; // x.lb()<0
+			return atan(y/x)+Interval::pi(); // x.lb()<0
 		else if (y.ub()<0)
-			return atan(y/x)-Interval::PI;
+			return atan(y/x)-Interval::pi();
 		else
-			return Interval(-1,1)*Interval::PI;
+			return Interval(-1,1)*Interval::pi();
 	} else {
 		if (y.lb()>=0)
-			return atan(y/x.ub()) | (atan(y/x.lb()) + Interval::PI);
+			return atan(y/x.ub()) | (atan(y/x.lb()) + Interval::pi());
 		else if (y.ub()<=0){
 			if(x.lb()!=NEG_INFINITY){
 				if(x.ub()!=POS_INFINITY){
-					return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+					return (atan(y/x.lb())-Interval::pi()) | atan(y/x.ub());
 				}
 				else
-					return (atan(y/x.lb())-Interval::PI) | Interval::ZERO;
+					return (atan(y/x.lb())-Interval::pi()) | Interval::zero();
 			}
 			else{
 				if(x.ub()!=POS_INFINITY)
-					return (-Interval::PI) | atan(y/x.ub());
+					return (-Interval::pi()) | atan(y/x.ub());
 				else
-					return -Interval::PI | Interval::ZERO;
+					return -Interval::pi() | Interval::zero();
 			}
 		}
 		else
-			return Interval(-1,1)*Interval::PI;
+			return Interval(-1,1)*Interval::pi();
 	}
 }
 
@@ -1031,8 +1084,8 @@ inline bool bwd_atan(const Interval& y,  Interval& x) {
 	// so the implementation is not as simple as x &= tan(y).
 
 	Interval z=y;
-	double pi2l=(Interval::PI/2).lb();
-	double pi2u=(Interval::PI/2).ub();
+	double pi2l=(Interval::pi()/2).lb();
+	double pi2u=(Interval::pi()/2).ub();
 
 	if (z.ub()>=pi2l) // not pi2u. See comments below.
 		if (z.lb()>=pi2u)
@@ -1147,9 +1200,9 @@ inline bool bwd_sign(const Interval& y,  Interval& x) {
 	}
 
 	if(y.lb()>0)
-		x &= Interval::POS_REALS;
+		x &= Interval::pos_reals();
 	else if(y.ub()<0)
-		x &= Interval::NEG_REALS;
+		x &= Interval::neg_reals();
 	return !x.is_empty();
 }
 
@@ -1158,18 +1211,18 @@ inline bool bwd_sign(const Interval& y,  Interval& x) {
 inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
 
 	// half-plane x>0
-	Interval theta_xpos = theta  & Interval(-1,1)*Interval::HALF_PI;
+	Interval theta_xpos = theta  & Interval(-1,1)*Interval::half_pi();
 	// upper left quadrant
-	Interval theta_xneg_ypos = theta  & (Interval::HALF_PI | Interval::PI);
+	Interval theta_xneg_ypos = theta  & (Interval::half_pi() | Interval::pi());
 	// lower left quadrant
-	Interval theta_xneg_yneg = theta  & -(Interval::HALF_PI | Interval::PI);
+	Interval theta_xneg_yneg = theta  & -(Interval::half_pi() | Interval::pi());
 
-	Interval xres= Interval::EMPTY_SET;
-	Interval yres= Interval::EMPTY_SET;
+	Interval xres= Interval::empty_set();
+	Interval yres= Interval::empty_set();
 
 	if (!theta_xpos.is_empty()) {
 
-		Interval xpos=x & Interval::POS_REALS;
+		Interval xpos=x & Interval::pos_reals();
 		Interval yall=y;
 
 		if (theta_xneg_ypos.is_empty() || theta_xneg_yneg.is_empty()) { // otherwise, all is valid (useless to contract)
@@ -1182,29 +1235,29 @@ inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
 		yres |= yall;
 
 		// because atan is not defined for pi/2 and -pi/2
-		if (theta_xpos.lb()>=Interval::HALF_PI.lb()) {
-			xres |= (x & Interval::ZERO);
-			yres |= (y & Interval::POS_REALS);
-		} else if (theta_xpos.ub()<=-Interval::HALF_PI.lb()) {
-			xres |= (x & Interval::ZERO);
-			yres |= (y & Interval::NEG_REALS);
+		if (theta_xpos.lb()>=Interval::half_pi().lb()) {
+			xres |= (x & Interval::zero());
+			yres |= (y & Interval::pos_reals());
+		} else if (theta_xpos.ub()<=-Interval::half_pi().lb()) {
+			xres |= (x & Interval::zero());
+			yres |= (y & Interval::neg_reals());
 		}
 	}
 
 	if (!theta_xneg_ypos.is_empty()) {
-		Interval xneg=x & Interval::NEG_REALS;
-		Interval ypos=y & Interval::POS_REALS;
+		Interval xneg=x & Interval::neg_reals();
+		Interval ypos=y & Interval::pos_reals();
 		Interval z=ypos/xneg;
-		bwd_atan(theta_xneg_ypos - Interval::PI,z);
+		bwd_atan(theta_xneg_ypos - Interval::pi(),z);
 		bwd_div(z,ypos,xneg);
 		xres |= xneg;
 		yres |= ypos;	}
 
 	if (!theta_xneg_yneg.is_empty()) {
-		Interval xneg=x & Interval::NEG_REALS;
-		Interval yneg=y & Interval::NEG_REALS;
+		Interval xneg=x & Interval::neg_reals();
+		Interval yneg=y & Interval::neg_reals();
 		Interval z=yneg/xneg;
-		bwd_atan(theta_xneg_yneg + Interval::PI,z);
+		bwd_atan(theta_xneg_yneg + Interval::pi(),z);
 		bwd_div(z,yneg,xneg);
 		xres |= xneg;
 		yres |= yneg;
@@ -1227,8 +1280,8 @@ inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
 //    //Lower half of upper right quadrant
 //    if(theta.is_subset(Interval(0,M_PI/4.)))
 //    {
-//        x = (x&Interval::POS_REALS) & ( (y&Interval::POS_REALS) * (1/tan(theta&Interval(0,M_PI/4.))) );
-//        y = (y&Interval::POS_REALS) & ( (x&Interval::POS_REALS) * (tan(theta&Interval(0,M_PI/4.))) );
+//        x = (x&Interval::pos_reals()) & ( (y&Interval::pos_reals()) * (1/tan(theta&Interval(0,M_PI/4.))) );
+//        y = (y&Interval::pos_reals()) & ( (x&Interval::pos_reals()) * (tan(theta&Interval(0,M_PI/4.))) );
 //    }
 //
 //    //Upper half of upper right quadrant
@@ -1344,11 +1397,11 @@ inline bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 	else if (a.lb()>0)  {if ((c &= f).is_empty()) { a.set_empty(); b.set_empty(); return false; } }
 
 	if (f.is_disjoint(b)) {
-		if ((a &= Interval::POS_REALS).is_empty()) { b.set_empty(); c.set_empty(); return false; }
+		if ((a &= Interval::pos_reals()).is_empty()) { b.set_empty(); c.set_empty(); return false; }
 		if ((c &= f).is_empty()) { a.set_empty(); b.set_empty(); return false; }
 	}
 	if (f.is_disjoint(c)) {
-		if ((a &= Interval::NEG_REALS).is_empty()) { b.set_empty(); c.set_empty(); return false; }
+		if ((a &= Interval::neg_reals()).is_empty()) { b.set_empty(); c.set_empty(); return false; }
 		if ((b &= f).is_empty()) { a.set_empty(); c.set_empty(); return false; }
 	}
 	return true;

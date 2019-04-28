@@ -295,7 +295,7 @@ void TestSystem::merge01() {
 		Variable y(2,"y");
 		fac2.add_var(x);
 		fac2.add_var(y);
-		fac2.add_ctr(y=IntervalVector(2,Interval::ZERO));
+		fac2.add_ctr(y=IntervalVector(2,Interval::zero()));
 	}
 	System sys2(fac2);
 
@@ -323,7 +323,7 @@ void TestSystem::merge02() {
 		Variable y(2,"y");
 		fac2.add_var(x);
 		fac2.add_var(y);
-		fac2.add_ctr(y=IntervalVector(2,Interval::ZERO));
+		fac2.add_ctr(y=IntervalVector(2,Interval::zero()));
 	}
 	System sys2(fac2);
 
@@ -359,7 +359,7 @@ void TestSystem::merge03() {
 	{
 		Variable y(2,"y");
 		fac2.add_var(y);
-		fac2.add_ctr(y=IntervalVector(2,Interval::ZERO));
+		fac2.add_ctr(y=IntervalVector(2,Interval::zero()));
 	}
 	System sys2(fac2);
 

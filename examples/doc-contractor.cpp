@@ -226,8 +226,8 @@ int main() {
 		// create the constraints of the two half-spaces
 		// delimited by f(x,y,i*2pi/n)=0
 		// and store them in the array
-		ctrs.set_ref(2*i,  *new NumConstraint(x,y,f(x,y,i*2*Interval::PI/n)<=1));
-		ctrs.set_ref(2*i+1,*new NumConstraint(x,y,f(x,y,i*2*Interval::PI/n)>1));
+		ctrs.set_ref(2*i,  *new NumConstraint(x,y,f(x,y,i*2*Interval::pi()/n)<=1));
+		ctrs.set_ref(2*i+1,*new NumConstraint(x,y,f(x,y,i*2*Interval::pi()/n)>1));
 
 		// create the contractors for these constraints
 		// and place them in the arrays
@@ -468,7 +468,7 @@ int main() {
 	Function f(x,y,Return(sqr(x)+sqr(2*y-y),y-x));
 	IntervalVector z(2);
 	z[0]=Interval(0,1);
-	z[1]=Interval::ZERO;
+	z[1]=Interval::zero();
 	NumConstraint c(x,y,f(x,y)=z);
 
 	// create domains for y

@@ -118,12 +118,12 @@ void TestIntervalMatrix::cons01() {
 	IntervalMatrix m(2,3);
 	CPPUNIT_ASSERT(m.nb_rows()==2);
 	CPPUNIT_ASSERT(m.nb_cols()==3);
-	CPPUNIT_ASSERT(m[0][0]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(m[0][1]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(m[0][2]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(m[1][0]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(m[1][1]==Interval::ALL_REALS);
-	CPPUNIT_ASSERT(m[1][2]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(m[0][0]==Interval::all_reals());
+	CPPUNIT_ASSERT(m[0][1]==Interval::all_reals());
+	CPPUNIT_ASSERT(m[0][2]==Interval::all_reals());
+	CPPUNIT_ASSERT(m[1][0]==Interval::all_reals());
+	CPPUNIT_ASSERT(m[1][1]==Interval::all_reals());
+	CPPUNIT_ASSERT(m[1][2]==Interval::all_reals());
 
 	CPPUNIT_ASSERT(m==IntervalMatrix(m));
 	CPPUNIT_ASSERT(m==(IntervalMatrix(2,3)=m));

@@ -32,7 +32,7 @@ void CtcInverse::contract(IntervalVector& box, ContractContext& context) {
 	assert(box.size()==f.nb_var());
 
 	Domain fx=f.eval_domain(box);
-	y.init(Interval::ALL_REALS);
+	y.init(Interval::all_reals());
 	id->backward(fx,y);
 
 	BitSet flags(BitSet::empty(NB_OUTPUT_FLAGS));

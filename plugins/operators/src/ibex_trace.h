@@ -60,7 +60,7 @@ public:
 			row.set_ref(i,g[i]);
 			for (int j=0; j<n; j++) {
 				if (j!=i)
-					row.set_ref(j,ExprConstant::new_scalar(Interval::ZERO));
+					row.set_ref(j,ExprConstant::new_scalar(Interval::zero()));
 			}
 			matrix.set_ref(i,ExprVector::new_row(row));
 		}

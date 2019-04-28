@@ -60,7 +60,7 @@ bool is_identity(const ExprNode& e) {
 		// but it requires to determine if an element is diagonal/off-diagonal.
 		const Domain& d = to_cst(e);
 		switch(d.dim.type()) {
-		case Dim::SCALAR:     return d.i()==Interval::ONE;
+		case Dim::SCALAR:     return d.i()==Interval::one();
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR: return false;
 		default:              return d.m()==Matrix::eye(d.dim.nb_rows());

@@ -224,7 +224,7 @@ bool LoupFinderLineSearch::relaxations_direction(Vector& direction, double& obj,
     }
 
 	IntervalVector bounds(system_.nb_var + 1, Interval(-1, 1));
-	bounds[system_.nb_var] = Interval::ALL_REALS;
+	bounds[system_.nb_var] = Interval::all_reals();
 	dir_solver_.set_bounds(bounds);
 
 	dir_solver_.set_obj_var(system_.nb_var, 1);
@@ -261,7 +261,7 @@ bool LoupFinderLineSearch::blankenship_direction(Vector& direction, double& obj)
     }
 
 	IntervalVector bounds(system_.nb_var + 1, Interval(-1, 1));
-	bounds[system_.nb_var] = Interval::ALL_REALS;
+	bounds[system_.nb_var] = Interval::all_reals();
 	dir_solver_.set_bounds(bounds);
 
 	dir_solver_.set_obj_var(system_.nb_var, 1);
@@ -297,7 +297,7 @@ bool LoupFinderLineSearch::stein_direction(Vector& direction, double& obj) {
     }
 
 	IntervalVector bounds(system_.nb_var + 1, Interval(-1, 1));
-	bounds[system_.nb_var] = Interval::ALL_REALS;
+	bounds[system_.nb_var] = Interval::all_reals();
 	dir_solver_.set_bounds(bounds);
 
 	dir_solver_.set_obj_var(system_.nb_var, 1);
@@ -314,7 +314,7 @@ bool LoupFinderLineSearch::stein_direction(Vector& direction, double& obj) {
 Interval LoupFinderLineSearch::t_value(const Vector& direction) {
 	/* t value in the direction using linear restrictions */
 	
-	Interval t = Interval::POS_REALS;
+	Interval t = Interval::pos_reals();
 	for(int sic_index = 0; sic_index < system_.sic_constraints_.size(); ++sic_index) {
 	//for (const auto& constraint : system_.sic_constraints_) {
 		const auto& constraint = system_.sic_constraints_[sic_index];
@@ -325,8 +325,8 @@ Interval LoupFinderLineSearch::t_value(const Vector& direction) {
 			IntervalVector gradient_x = constraint.gradient(ext_box_, mem_box.parameter_box).subvector(0,
 					system_.nb_var - 1);
 			//IntervalVector gradient_x = mem_box.full_gradient.subvector(0, system_.nb_var-1);
-			t &= (Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub();
-			//cout << "t=" << ((Interval::NEG_REALS - eval.ub()) / (gradient_x * direction).ub()) << "   dg(" << mem_box.parameter_box << ")= " << (gradient_x*direction) << "  g =" << eval.ub() << endl;
+			t &= (Interval::neg_reals() - eval.ub()) / (gradient_x * direction).ub();
+			//cout << "t=" << ((Interval::neg_reals() - eval.ub()) / (gradient_x * direction).ub()) << "   dg(" << mem_box.parameter_box << ")= " << (gradient_x*direction) << "  g =" << eval.ub() << endl;
 
 		}
 	}
@@ -334,7 +334,7 @@ Interval LoupFinderLineSearch::t_value(const Vector& direction) {
 	for (int i = 0; i < system_.normal_constraints_.size() - 1; ++i) {
 		const auto& constraint = system_.normal_constraints_[i];
 		IntervalVector gradient_x = constraint.gradient(ext_box_).subvector(0, system_.nb_var - 1);
-		t &= (Interval::NEG_REALS - constraint.evaluate(relax_point_).ub()) / (gradient_x * direction).ub();
+		t &= (Interval::neg_reals() - constraint.evaluate(relax_point_).ub()) / (gradient_x * direction).ub();
 	}
 	return t;
 }

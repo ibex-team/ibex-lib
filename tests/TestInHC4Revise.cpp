@@ -97,7 +97,7 @@ void TestInHC4Revise::apply02() {
 	Variable x(2),y(2);
 	Function f(x,y,sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1])));
 
-	IntervalVector constY(2,Interval::ONE);
+	IntervalVector constY(2,Interval::one());
 	Function g(x, f(x,constY));
 	IntervalVector box(2,Interval(0,4));
 	double _pt[][2] = { {0.5,0.5} , {0.5,0.5} };
@@ -105,8 +105,8 @@ void TestInHC4Revise::apply02() {
 	g.ibwd(Interval(0,1),box,pt);
 
 	// check the box is inside by testing two corners
-	CPPUNIT_ASSERT(almost_eq(g.eval(box.lb()),Interval::ONE,1e-07));
-	CPPUNIT_ASSERT(almost_eq(g.eval(box.ub()),Interval::ONE,1e-07));
+	CPPUNIT_ASSERT(almost_eq(g.eval(box.lb()),Interval::one(),1e-07));
+	CPPUNIT_ASSERT(almost_eq(g.eval(box.ub()),Interval::one(),1e-07));
 }
 
 void TestInHC4Revise::add_mult01() {
@@ -130,7 +130,7 @@ void TestInHC4Revise::add_mult01() {
 void TestInHC4Revise::bugr900() {
 	Function f("x","1+sin(x)");
 	IntervalVector box(1,Interval(0,ibex::next_float(0)));
-	IntervalVector pt(1,Interval::ZERO);
+	IntervalVector pt(1,Interval::zero());
 	f.ibwd(f.eval(pt),box,pt);
 	CPPUNIT_ASSERT(!box.is_empty());
 }
@@ -142,7 +142,7 @@ void TestInHC4Revise::issue70() {
 	Vector pt(1);
 	pt[0]=2;
 
-	f.ibwd(Interval::POS_REALS,area,pt);
+	f.ibwd(Interval::pos_reals(),area,pt);
 	// we don't test exactly [0,10] because the result is actually [-0,10]
 	CPPUNIT_ASSERT(area[0].lb()>=0);
 
@@ -155,7 +155,7 @@ void TestInHC4Revise::issue70() {
 	//
 	//
 	//	cout << "area=" << area << endl;
-	//	f.ibwd(Interval::POS_REALS,area,pt);
+	//	f.ibwd(Interval::pos_reals(),area,pt);
 	//	cout << "area=" << area << endl;
 
 

@@ -93,7 +93,7 @@ void begin_choco() {
 	// ----- generate all the variables {i} -----
 	Dim dim=Dim::scalar();
 	Domain x(dim);
-	x.i()=Interval::ALL_REALS;
+	x.i()=Interval::all_reals();
 	for (int i=0; i<system->nb_var; i++) {
 		char* name=append_index("\0",'{','}',i);
 		scopes().top().add_var(name,&dim,x);

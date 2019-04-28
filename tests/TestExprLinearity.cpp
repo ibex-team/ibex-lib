@@ -126,8 +126,8 @@ void TestExprLinearity::test07() {
 	CPPUNIT_ASSERT(de.nb_rows()==6 && de.nb_cols()==5);
 	CPPUNIT_ASSERT(de.submatrix(0,1,0,2)==A);
 	CPPUNIT_ASSERT(de.submatrix(2,2,0,2)==Matrix::zeros(1,3));
-	CPPUNIT_ASSERT(de[2][3]==Interval::ONE);
-	CPPUNIT_ASSERT(de[2][4]==Interval::ZERO);
+	CPPUNIT_ASSERT(de[2][3]==Interval::one());
+	CPPUNIT_ASSERT(de[2][4]==Interval::zero());
 	CPPUNIT_ASSERT(de.submatrix(3,5,0,3)==Matrix::zeros(3,4));
 	CPPUNIT_ASSERT(de.submatrix(3,5,4,4).col(0)==b);
 	cleanup(e,true);
@@ -191,7 +191,7 @@ void TestExprLinearity::test11() {
 	ExprLinearity lin(args,e);
 	IntervalVector de=lin.coeff_vector(e);
 
-	CPPUNIT_ASSERT(de[0]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(de[0]==Interval::all_reals());
 	CPPUNIT_ASSERT(de[1]==6);
 	cleanup(e,true);
 

@@ -21,7 +21,7 @@ namespace ibex {
 
 CtcFwdBwdNLC::CtcFwdBwdNLC(const NLConstraint& constraint, const SIPSystem& system)
 : Ctc(constraint.function_->nb_var()), function_(constraint.function_),
-backward_domain_(Interval::NEG_REALS), system_(system)
+backward_domain_(Interval::neg_reals()), system_(system)
 {
 	init();
 }

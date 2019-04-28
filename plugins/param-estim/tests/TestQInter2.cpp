@@ -24,7 +24,7 @@ void TestQInter::test_projF_1(){
     boxes.set_ref(1, X2);
     boxes.set_ref(2, X3);
     int q = 1;
-    IntervalVector x_res(2, Interval::ALL_REALS);
+    IntervalVector x_res(2, Interval::all_reals());
     x_res = qinter_projf(boxes, boxes.size() - q);
 
     IntervalVector result(2); 
@@ -72,7 +72,7 @@ void TestQInter::test_projF_3(){
     boxes.set_ref(2, X3);
     boxes.set_ref(3, X4);
     int q = 1;
-    IntervalVector x_res(2, Interval::ALL_REALS);
+    IntervalVector x_res(2, Interval::all_reals());
     x_res = qinter_projf(boxes, boxes.size()-q);
     CPPUNIT_ASSERT(!x_res.is_empty());
 }

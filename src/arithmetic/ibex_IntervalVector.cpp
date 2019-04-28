@@ -24,7 +24,7 @@ namespace ibex {
 
 IntervalVector::IntervalVector(int nn) : n(nn), vec(new Interval[nn]) {
 	assert(nn>=1);
-	for (int i=0; i<nn; i++) vec[i]=Interval::ALL_REALS;
+	for (int i=0; i<nn; i++) vec[i]=Interval::all_reals();
 }
 
 IntervalVector::IntervalVector(int n1, const Interval& x) : n(n1), vec(new Interval[n1]) {
@@ -40,7 +40,7 @@ IntervalVector::IntervalVector(const IntervalVector& x) : n(x.n), vec(new Interv
 IntervalVector::IntervalVector(int n1, double bounds[][2]) : n(n1), vec(new Interval[n1]) {
 	if (bounds==0) // probably, the user called IntervalVector(n,0) and 0 is interpreted as NULL!
 		for (int i=0; i<n1; i++)
-			vec[i]=Interval::ZERO;
+			vec[i]=Interval::zero();
 	else
 		for (int i=0; i<n1; i++)
 			vec[i]=Interval(bounds[i][0],bounds[i][1]);
@@ -70,7 +70,7 @@ void IntervalVector::resize(int n2) {
 	for (; i<size() && i<n2; i++)
 		newVec[i]=vec[i];
 	for (; i<n2; i++)
-		newVec[i]=Interval::ALL_REALS;
+		newVec[i]=Interval::all_reals();
 	if (vec!=NULL) // vec==NULL happens when default constructor is used (n==0)
 		delete[] vec;
 

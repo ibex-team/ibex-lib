@@ -27,8 +27,8 @@ void SepInverse::separate(IntervalVector& xin, IntervalVector& xout){
 
 	xin &= xout;
 	Domain tmp=f.eval_domain(xin);
-	yin.init(Interval::ALL_REALS);
-	yout.init(Interval::ALL_REALS);
+	yin.init(Interval::all_reals());
+	yout.init(Interval::all_reals());
 	id->backward(tmp, yin);
 	id->backward(tmp, yout);
 

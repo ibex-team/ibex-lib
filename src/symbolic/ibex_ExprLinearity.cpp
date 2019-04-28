@@ -91,12 +91,12 @@ void ExprLinearity::visit(const ExprSymbol& e, int k) {
 
 	switch(e.dim.type()) {
 	case Dim::SCALAR:
-		(*d)[k].i()=Interval::ONE;
+		(*d)[k].i()=Interval::one();
 		break;
 	case Dim::COL_VECTOR:
 	case Dim::ROW_VECTOR:
 		for (int j=0; j<e.dim.vec_size(); j++)
-			(*d)[k+j].v()[j]=Interval::ONE;
+			(*d)[k+j].v()[j]=Interval::one();
 		break;
 	case Dim::MATRIX:
 		// we know that matrix variables are
@@ -104,7 +104,7 @@ void ExprLinearity::visit(const ExprSymbol& e, int k) {
 		// See, e.g., ibex_TemplateDomain.h
 		for (int i=0; i<e.dim.nb_rows(); i++)
 			for (int j=0; j<e.dim.nb_cols(); j++)
-				(*d)[k+(i*e.dim.nb_cols())+j].m()[i][j]=Interval::ONE;
+				(*d)[k+(i*e.dim.nb_cols())+j].m()[i][j]=Interval::one();
 		break;
 	}
 

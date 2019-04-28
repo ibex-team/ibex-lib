@@ -9,18 +9,18 @@ namespace ibex {
  *
  *
 //#if GAOL_MAJOR_VERSION==4
-//const Interval Interval::EMPTY_SET(gaol::interval::emptyset());
+//const Interval Interval::empty_set()(gaol::interval::emptyset());
 //#else
-//const Interval Interval::EMPTY_SET(gaol::interval::emptyset);
+//const Interval Interval::empty_set()(gaol::interval::emptyset);
 //#endif
-//const Interval Interval::ALL_REALS(gaol::interval::universe);
-//const Interval Interval::NEG_REALS(gaol::interval::negative);
-//const Interval Interval::POS_REALS(gaol::interval::positive);
-//const Interval Interval::ZERO(gaol::interval::zero);
-//const Interval Interval::ONE(gaol::interval::one);
-//const Interval Interval::PI(gaol::interval::pi);
-//const Interval Interval::TWO_PI(gaol::interval::two_pi);
-//const Interval Interval::HALF_PI(gaol::interval::half_pi);
+//const Interval Interval::all_reals()(gaol::interval::universe);
+//const Interval Interval::neg_reals()(gaol::interval::negative);
+//const Interval Interval::pos_reals()(gaol::interval::positive);
+//const Interval Interval::zero()(gaol::interval::zero);
+//const Interval Interval::one()(gaol::interval::one);
+//const Interval Interval::pi()(gaol::interval::pi);
+//const Interval Interval::two_pi()(gaol::interval::two_pi);
+//const Interval Interval::half_pi()(gaol::interval::half_pi);
 //
  */
 namespace {
@@ -34,9 +34,9 @@ void init_gaol() {
 }
 }
 
-
 // we have no other choice than copy-pasting
 // the definitions (from goal_interval.cpp)
+// *** Deprecated ***
 const Interval Interval::EMPTY_SET((init_gaol(), GAOL_NAN),GAOL_NAN);
 const Interval Interval::ALL_REALS(-GAOL_INFINITY,GAOL_INFINITY);
 const Interval Interval::ZERO(0.0);
@@ -46,6 +46,50 @@ const Interval Interval::NEG_REALS(-GAOL_INFINITY,0.0);
 const Interval Interval::PI(pi_dn,pi_up);
 const Interval Interval::TWO_PI(2.0*pi_dn,2.0*pi_up);
 const Interval Interval::HALF_PI(half_pi_dn,half_pi_up);
+
+const Interval& Interval::empty_set() {
+	static Interval _empty_set(gaol::interval(GAOL_NAN,GAOL_NAN));
+	return _empty_set;
+}
+const Interval& Interval::all_reals() {
+	static Interval _all_reals(-GAOL_INFINITY,GAOL_INFINITY);
+	return _all_reals;
+}
+
+const Interval& Interval::zero() {
+	static Interval _zero(0.0);
+	return _zero;
+}
+
+const Interval& Interval::one() {
+	static Interval _one(1.0);
+	return _one;
+}
+
+const Interval& Interval::pos_reals() {
+	static Interval _pos_reals(0.0,GAOL_INFINITY);
+	return _pos_reals;
+}
+
+const Interval& Interval::neg_reals() {
+	static Interval _neg_reals(-GAOL_INFINITY,0.0);
+	return _neg_reals;
+}
+
+const Interval& Interval::pi() {
+	static Interval _pi(pi_dn,pi_up);
+	return _pi;
+}
+
+const Interval& Interval::two_pi() {
+	static Interval _two_pi(2.0*pi_dn,2.0*pi_up);
+	return _two_pi;
+}
+
+const Interval& Interval::half_pi() {
+	static Interval _half_pi(half_pi_dn,half_pi_up);
+	return _half_pi;
+}
 
 std::ostream& operator<<(std::ostream& os, const Interval& x) {
 	return os << x.itv;

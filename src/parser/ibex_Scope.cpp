@@ -194,7 +194,7 @@ void Scope::add_expr_tmp_symbol(const char* id, const P_ExprNode* expr) {
 
 void Scope::add_var(const char* id, const Dim* dim) {
 	Domain d(Dim::scalar());
-	d.i()=Interval::ALL_REALS;
+	d.i()=Interval::all_reals();
 	add_var(id,dim,d);
 	//cout << "[parser] add var " << id << endl;
 }

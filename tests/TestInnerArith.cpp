@@ -124,7 +124,7 @@ void TestInnerArith::check_mul_div_mono(const Interval& z, const Interval& xin, 
 	Interval z2=1/z;
 	Interval xin2;
 	if (xin.is_empty())
-		xin2=Interval::EMPTY_SET;
+		xin2=Interval::empty_set();
 	else {
 		xin2=1/xin; // we must have xin2 \superset 1/xin
 		CPPUNIT_ASSERT((xin2/yin).is_subset(z2)); // and, at the same time, xin2/yin \subset 1/z
@@ -243,27 +243,27 @@ void TestInnerArith::check_max_min(const Interval& z,  const Interval& x, const 
 }
 
 void TestInnerArith::add_sub01() {
-	check_add_sub(Interval(NEG_INFINITY,1.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,true);
+	check_add_sub(Interval(NEG_INFINITY,1.0),Interval::empty_set(),Interval::empty_set(),false,true);
 }
 
 void TestInnerArith::add_sub01_2() {
-	check_add_sub(Interval(-1.0,POS_INFINITY),Interval::EMPTY_SET,Interval::EMPTY_SET,true,false);
+	check_add_sub(Interval(-1.0,POS_INFINITY),Interval::empty_set(),Interval::empty_set(),true,false);
 }
 
 void TestInnerArith::add_sub01_3() {
-	check_add_sub(Interval(-1.0,1.0),Interval::EMPTY_SET,Interval::EMPTY_SET,true,true);
+	check_add_sub(Interval(-1.0,1.0),Interval::empty_set(),Interval::empty_set(),true,true);
 }
 
 void TestInnerArith::add_sub02() {
-	check_add_sub(Interval(NEG_INFINITY,2.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,false);
+	check_add_sub(Interval(NEG_INFINITY,2.0),Interval::empty_set(),Interval::empty_set(),false,false);
 }
 
 void TestInnerArith::add_sub02_2() {
-	check_add_sub(Interval(-2.0,POS_INFINITY),Interval::EMPTY_SET,Interval::EMPTY_SET,false,false);
+	check_add_sub(Interval(-2.0,POS_INFINITY),Interval::empty_set(),Interval::empty_set(),false,false);
 }
 
 void TestInnerArith::add_sub02_3() {
-	check_add_sub(Interval(-2.0,2.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,false);
+	check_add_sub(Interval(-2.0,2.0),Interval::empty_set(),Interval::empty_set(),false,false);
 }
 
 void TestInnerArith::add_sub03() {
@@ -283,15 +283,15 @@ void TestInnerArith::add_sub03_2() {
 }
 
 void TestInnerArith::add_sub04() {
-	check_add_sub(Interval(NEG_INFINITY,-2.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,true);
+	check_add_sub(Interval(NEG_INFINITY,-2.0),Interval::empty_set(),Interval::empty_set(),false,true);
 }
 
 void TestInnerArith::add_sub04_2() {
-	check_add_sub(Interval(2.0,POS_INFINITY),Interval::EMPTY_SET,Interval::EMPTY_SET,true,false);
+	check_add_sub(Interval(2.0,POS_INFINITY),Interval::empty_set(),Interval::empty_set(),true,false);
 }
 
 void TestInnerArith::add_sub04_3() {
-	check_add_sub(Interval(2.0,3.0),Interval::EMPTY_SET,Interval::EMPTY_SET,true,false);
+	check_add_sub(Interval(2.0,3.0),Interval::empty_set(),Interval::empty_set(),true,false);
 }
 
 void TestInnerArith::add_sub05_1() {
@@ -351,33 +351,33 @@ void TestInnerArith::add_sub07() {
 	Interval x(-1,1);
 	Interval y(-1,1);
 	ibwd_add(0,x,y);
-	CPPUNIT_ASSERT(x.is_empty() || (x+y==Interval::ZERO));
+	CPPUNIT_ASSERT(x.is_empty() || (x+y==Interval::zero()));
 }
 
 void TestInnerArith::mul_div_mono01() {
 	// warning: do not set lower bound to a negative number (ex:NEG_INFINITY) because we also test division
 	// so we chose lower bound < 0.25
-	check_mul_div_mono(Interval(0.2,2.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,true);
+	check_mul_div_mono(Interval(0.2,2.0),Interval::empty_set(),Interval::empty_set(),false,true);
 }
 
 void TestInnerArith::mul_div_mono01_2() {
-	check_mul_div_mono(Interval(0.5,4.0),Interval::EMPTY_SET,Interval::EMPTY_SET,true,false);
+	check_mul_div_mono(Interval(0.5,4.0),Interval::empty_set(),Interval::empty_set(),true,false);
 }
 
 void TestInnerArith::mul_div_mono01_3() {
-	check_mul_div_mono(Interval(0.5,2.0),Interval::EMPTY_SET,Interval::EMPTY_SET,true,true);
+	check_mul_div_mono(Interval(0.5,2.0),Interval::empty_set(),Interval::empty_set(),true,true);
 }
 
 void TestInnerArith::mul_div_mono02() {
-	check_mul_div_mono(Interval(0.2,4.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,false);
+	check_mul_div_mono(Interval(0.2,4.0),Interval::empty_set(),Interval::empty_set(),false,false);
 }
 
 void TestInnerArith::mul_div_mono02_2() {
-	check_mul_div_mono(Interval(0.25,4.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,false);
+	check_mul_div_mono(Interval(0.25,4.0),Interval::empty_set(),Interval::empty_set(),false,false);
 }
 
 void TestInnerArith::mul_div_mono02_3() {
-	check_mul_div_mono(Interval(0.25,4.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,false);
+	check_mul_div_mono(Interval(0.25,4.0),Interval::empty_set(),Interval::empty_set(),false,false);
 }
 
 void TestInnerArith::mul_div_mono03() {
@@ -397,15 +397,15 @@ void TestInnerArith::mul_div_mono03_2() {
 }
 
 void TestInnerArith::mul_div_mono04() {
-	check_mul_div_mono(Interval(0.1,0.25),Interval::EMPTY_SET,Interval::EMPTY_SET,false,true);
+	check_mul_div_mono(Interval(0.1,0.25),Interval::empty_set(),Interval::empty_set(),false,true);
 }
 
 void TestInnerArith::mul_div_mono04_2() {
-	check_mul_div_mono(Interval(4.0,5.0),Interval::EMPTY_SET,Interval::EMPTY_SET,true,false);
+	check_mul_div_mono(Interval(4.0,5.0),Interval::empty_set(),Interval::empty_set(),true,false);
 }
 
 void TestInnerArith::mul_div_mono04_3() {
-	check_mul_div_mono(Interval(4.0,5.0),Interval::EMPTY_SET,Interval::EMPTY_SET,true,false);
+	check_mul_div_mono(Interval(4.0,5.0),Interval::empty_set(),Interval::empty_set(),true,false);
 }
 
 void TestInnerArith::mul_div_mono05_1() {
@@ -469,7 +469,7 @@ void TestInnerArith::mul_div_mono07() {
 }
 
 void TestInnerArith::mul08() {
-	check_mul_div(Interval(NEG_INFINITY,1),Interval::EMPTY_SET,Interval::EMPTY_SET,true,false,false,true);
+	check_mul_div(Interval(NEG_INFINITY,1),Interval::empty_set(),Interval::empty_set(),true,false,false,true);
 }
 
 void TestInnerArith::mul09() {
@@ -505,19 +505,19 @@ void TestInnerArith::mul11() {
 }
 
 void TestInnerArith::mul12_1() {
-	check_mul_div(Interval(-1,1), Interval::EMPTY_SET, Interval::EMPTY_SET, true,true,true,true);
+	check_mul_div(Interval(-1,1), Interval::empty_set(), Interval::empty_set(), true,true,true,true);
 }
 
 void TestInnerArith::mul12_2() {
-	check_mul_div(Interval(-4,1), Interval::EMPTY_SET, Interval::EMPTY_SET, true,true,true,true);
+	check_mul_div(Interval(-4,1), Interval::empty_set(), Interval::empty_set(), true,true,true,true);
 }
 
 void TestInnerArith::mul12_3() {
-	check_mul_div(Interval(-1,4), Interval::EMPTY_SET, Interval::EMPTY_SET, true,true,true,true);
+	check_mul_div(Interval(-1,4), Interval::empty_set(), Interval::empty_set(), true,true,true,true);
 }
 
 void TestInnerArith::mul12_4() {
-	check_mul_div(Interval(-4,4), Interval::EMPTY_SET, Interval::EMPTY_SET, true,true,true,true);
+	check_mul_div(Interval(-4,4), Interval::empty_set(), Interval::empty_set(), true,true,true,true);
 }
 
 void TestInnerArith::mul13_1() {
@@ -538,14 +538,14 @@ void TestInnerArith::mul13_4() {
 
 void TestInnerArith::mul14_1() {
 	Interval x(-1,1);
-	Interval y=Interval::ZERO;
+	Interval y=Interval::zero();
 	ibwd_mul(Interval(-1,1),x,y);
 	CPPUNIT_ASSERT(x==Interval(-1,1));
 }
 
 void TestInnerArith::mul14_2() {
 	Interval x(-1,1);
-	Interval y=Interval::ZERO;
+	Interval y=Interval::zero();
 	ibwd_mul(Interval(1,1),x,y);
 	CPPUNIT_ASSERT(x.is_empty());
 	CPPUNIT_ASSERT(y.is_empty());
@@ -553,8 +553,8 @@ void TestInnerArith::mul14_2() {
 
 void TestInnerArith::mul14_3() {
 	Interval x(-1,1);
-	Interval y=Interval::ZERO;
-	ibwd_mul(Interval::ZERO,x,y,Interval::ZERO,Interval::ZERO);
+	Interval y=Interval::zero();
+	ibwd_mul(Interval::zero(),x,y,Interval::zero(),Interval::zero());
 	CPPUNIT_ASSERT(x==Interval(-1,1));
 }
 
@@ -599,7 +599,7 @@ void TestInnerArith::div09_2() {
 
 void TestInnerArith::abs01() {
 	Interval x;
-	bool f=ibwd_abs(Interval::EMPTY_SET,x);
+	bool f=ibwd_abs(Interval::empty_set(),x);
 	CPPUNIT_ASSERT(!f && x.is_empty());
 }
 
@@ -631,17 +631,17 @@ void TestInnerArith::abs05() {
 	check(x,Interval(1,2));
 }
 
-void TestInnerArith::maxmin01() { check_max_min(Interval::EMPTY_SET, Interval(-2,-1),Interval(-2,3), Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET); }
-void TestInnerArith::maxmin02() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(-2,3), Interval::EMPTY_SET,Interval::EMPTY_SET,Interval(-2,-1),    Interval(0,1)); }
-void TestInnerArith::maxmin03() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(2,3),  Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET); }
-void TestInnerArith::maxmin04() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(-2,-1),Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestInnerArith::maxmin01() { check_max_min(Interval::empty_set(), Interval(-2,-1),Interval(-2,3), Interval::empty_set(),Interval::empty_set(),Interval::empty_set(),Interval::empty_set()); }
+void TestInnerArith::maxmin02() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(-2,3), Interval::empty_set(),Interval::empty_set(),Interval(-2,-1),    Interval(0,1)); }
+void TestInnerArith::maxmin03() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(2,3),  Interval::empty_set(),Interval::empty_set(),Interval::empty_set(),Interval::empty_set()); }
+void TestInnerArith::maxmin04() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(-2,-1),Interval::empty_set(),Interval::empty_set(),Interval::empty_set(),Interval::empty_set()); }
 void TestInnerArith::maxmin05() { check_max_min(Interval(0,1),       Interval(-2,3), Interval(-2,3), -1,                 1,                  Interval(-2,1),     Interval(0,1)); }
 void TestInnerArith::maxmin06() { check_max_min(Interval(0,1),       Interval(-2,0), Interval(-2,3), -1,                 1,                  Interval(-2,0),     Interval(0,1)); }
-void TestInnerArith::maxmin07() { check_max_min(Interval(0,1),       Interval(-3,3), Interval(-2,3), Interval::EMPTY_SET,Interval::EMPTY_SET,Interval(-3,1),     Interval(0,1)); }
+void TestInnerArith::maxmin07() { check_max_min(Interval(0,1),       Interval(-3,3), Interval(-2,3), Interval::empty_set(),Interval::empty_set(),Interval(-3,1),     Interval(0,1)); }
 
 void TestInnerArith::sqrt01() {
 	Interval x;
-	bool f=ibwd_sqrt(Interval::EMPTY_SET,x);
+	bool f=ibwd_sqrt(Interval::empty_set(),x);
 	CPPUNIT_ASSERT(!f && x.is_empty());
 }
 
@@ -679,7 +679,7 @@ void TestInnerArith::sqrt05() {
 
 void TestInnerArith::pow01() {
 	Interval x;
-	bool f=ibwd_pow(Interval::NEG_REALS,x,3,Interval(-1,-1));
+	bool f=ibwd_pow(Interval::neg_reals(),x,3,Interval(-1,-1));
 	CPPUNIT_ASSERT(f);
 
 	CPPUNIT_ASSERT(x.lb()==NEG_INFINITY && (x.ub()==previous_float(0) || x.ub()==0));
@@ -692,7 +692,7 @@ void TestInnerArith::bugr894() {
 	Function f(x,sqr(x-_pt));
 	IntervalVector box(1);
 	IntervalVector pt(1,_pt);
-	f.ibwd(Interval::NEG_REALS,box,pt);
+	f.ibwd(Interval::neg_reals(),box,pt);
 	CPPUNIT_ASSERT(box==pt);
 }
 
@@ -700,7 +700,7 @@ void TestInnerArith::bugr899() {
 
 	Interval x(ibex::previous_float(1.0),1);
 	Interval px(ibex::previous_float(1.0),1);
-	Interval y(Interval::ZERO);
+	Interval y(Interval::zero());
 	ibwd_add(Interval(1),x,y,px,y);
 	CPPUNIT_ASSERT(x==px);
 }
@@ -738,21 +738,21 @@ void TestInnerArith::check_imul(const Interval& x, const Interval& y,const Inter
 	CPPUNIT_ASSERT(z_actual.is_subset(z_expected));
 }
 
-void TestInnerArith::imul01() { check_imul(Interval::EMPTY_SET, Interval::ZERO, Interval::EMPTY_SET); }
+void TestInnerArith::imul01() { check_imul(Interval::empty_set(), Interval::zero(), Interval::empty_set()); }
 
-void TestInnerArith::imul02() { check_imul(Interval(-1,1), Interval::ZERO, Interval::ZERO); }
+void TestInnerArith::imul02() { check_imul(Interval(-1,1), Interval::zero(), Interval::zero()); }
 
-void TestInnerArith::imul03() { check_imul(Interval::NEG_REALS, Interval::ZERO, Interval::ZERO); }
+void TestInnerArith::imul03() { check_imul(Interval::neg_reals(), Interval::zero(), Interval::zero()); }
 
-void TestInnerArith::imul04() { check_imul(Interval::ALL_REALS, Interval::ZERO, Interval::ZERO); }
+void TestInnerArith::imul04() { check_imul(Interval::all_reals(), Interval::zero(), Interval::zero()); }
 
 void TestInnerArith::imul05() { check_imul(Interval(0,1), Interval(1,2), Interval(0,2)); }
 
 void TestInnerArith::imul06() { check_imul(Interval(-2,-1), Interval(1,2), Interval(-4,-1)); }
 
-void TestInnerArith::imul07() { check_imul(Interval(NEG_INFINITY,0), Interval(1,2), Interval::NEG_REALS); }
+void TestInnerArith::imul07() { check_imul(Interval(NEG_INFINITY,0), Interval(1,2), Interval::neg_reals()); }
 
-void TestInnerArith::imul08() { check_imul(Interval(NEG_INFINITY,0), Interval(-1,2), Interval::ALL_REALS); }
+void TestInnerArith::imul08() { check_imul(Interval(NEG_INFINITY,0), Interval(-1,2), Interval::all_reals()); }
 
 void TestInnerArith::imul09() { check_imul(Interval(NEG_INFINITY,1), Interval(2,2), Interval(NEG_INFINITY,2)); }
 

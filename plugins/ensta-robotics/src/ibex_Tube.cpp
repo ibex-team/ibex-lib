@@ -34,7 +34,7 @@ Tube::Tube(double t0, double tf, double step, const Vector& x) :
 }
 
 Tube::Tube(double t0, double tf, double step, const Function& fmin, const Function& fmax) :
-                				IntervalVector((int)round(((tf - t0) / step)), Interval::ALL_REALS),_t0(t0), _tf(tf), _deltaT(step) {
+                				IntervalVector((int)round(((tf - t0) / step)), Interval::all_reals()),_t0(t0), _tf(tf), _deltaT(step) {
 
 	IntervalVector lx(1);
 	IntervalVector ux(1);
@@ -70,7 +70,7 @@ void Tube::set_t0(double t0, Interval inter) {
 }
 
 void Tube::set_t0(double t0) {
-	set_t0(t0, Interval::ALL_REALS);
+	set_t0(t0, Interval::all_reals());
 }
 
 void Tube::set_tF(double tf, Interval inter) {
@@ -96,12 +96,12 @@ void Tube::set_tF(double tf, Interval inter) {
 }
 
 void Tube::set_tF(double tf) {
-	set_tF(tf, Interval::ALL_REALS);
+	set_tF(tf, Interval::all_reals());
 }
 
 Interval Tube::at(const Interval& time) const {
 	assert(time.lb()>=_t0 && time.ub()<=_tf);
-	Interval temp(Interval::EMPTY_SET);
+	Interval temp(Interval::empty_set());
 	int first_idx=(int)round(time.lb()/_deltaT);
 	int last_idx=(int)round(time.ub()/_deltaT);
 	for(int i=first_idx;i<last_idx;i++) {
@@ -128,7 +128,7 @@ void Tube::resample(double new_deltaT) {
 		}
 	} else {
 		for(int i=0;i<temp.size();i++) {
-			temp[i]=Interval::EMPTY_SET;
+			temp[i]=Interval::empty_set();
 			for(int j=0;j<ratio;j++) {
 				temp[i]=temp[i]|(*this)[(i*ratio)+j];
 			}
@@ -143,8 +143,8 @@ void Tube::resample(double new_deltaT) {
 
 Tube Tube::sub_tube(double t0, double tf) const {
 	Tube temp = Tube(*this);
-	temp.set_t0(t0,Interval::ALL_REALS);// FIXME  why?
-	temp.set_tF(tf,Interval::ALL_REALS);// FIXME why?
+	temp.set_t0(t0,Interval::all_reals());// FIXME  why?
+	temp.set_tF(tf,Interval::all_reals());// FIXME why?
 	return temp;
 }
 
@@ -370,7 +370,7 @@ Tube& Tube::shift(double delay) {
 	int shifti = (int)round(delay/_deltaT);
 	for (int i = 0; i < size(); i++) {
 		if(i+shifti>=0 && i+shifti<size()) (*this)[i] = (*this)[i+shifti];
-		else (*this)[i] = Interval::ALL_REALS; // gch: not EMPTY_SET! a vector cannot contain
+		else (*this)[i] = Interval::all_reals(); // gch: not EMPTY_SET! a vector cannot contain
 		                                       // empty components if it is not empty itself.
 	}
 
@@ -390,7 +390,7 @@ Tube eval(const Function& f, const Tube& x) {
 }
 
 Tube inverse(const Function& f, const Tube& x) {
-	IntervalVector vec(x.size(),Interval::ALL_REALS);
+	IntervalVector vec(x.size(),Interval::all_reals());
 	IntervalVector tmp(1);
 	for (int i=0;i<x.size();i++) {
 		tmp[0] = vec[i];

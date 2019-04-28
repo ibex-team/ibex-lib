@@ -62,7 +62,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator=(const Interval& x) {
 template<>
 AffineMain<AF_fAF1>::AffineMain() :
 		 _n		(-2		),
-		 _elt	(NULL	,Interval::ALL_REALS)	{
+		 _elt	(NULL	,Interval::all_reals())	{
  }
 
 
@@ -282,7 +282,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator*=(double alpha) {
 			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
-			if (!b) *this = Interval::ALL_REALS;
+			if (!b) *this = Interval::all_reals();
 
 		} else {
 			*this = itv()*alpha;
@@ -320,7 +320,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator+=(const AffineMain<AF_fAF1>& 
 			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
-			if (!b) *this = Interval::ALL_REALS;
+			if (!b) *this = Interval::all_reals();
 
 		} else  {
 			if (_n>y.size()) {
@@ -364,7 +364,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator+=(double beta) {
 		_elt._err +=AF_EE*(AF_EM*ttt);
 		_elt._err += AF_EE*sss;
 
-		if (!(_elt._err.ub()<POS_INFINITY && (fabs(_elt._val[0])<POS_INFINITY))) { *this = Interval::ALL_REALS; }
+		if (!(_elt._err.ub()<POS_INFINITY && (fabs(_elt._val[0])<POS_INFINITY))) { *this = Interval::all_reals(); }
 
 	} else {
 		*this = itv()+ beta;
@@ -379,7 +379,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::inflate(double ddelta) {
 	if (is_actif() && (fabs(ddelta))<POS_INFINITY) {
 		_elt._err += fabs(ddelta);
 
-		if (_elt._err.ub()==POS_INFINITY ) { *this = Interval::ALL_REALS; }
+		if (_elt._err.ub()==POS_INFINITY ) { *this = Interval::all_reals(); }
 	} else {
 		*this = itv()+Interval(-1,1)*ddelta;
 	}
@@ -464,7 +464,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator*=(const AffineMain<AF_fAF1>& 
 			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
-			if (!b) *this = Interval::ALL_REALS;
+			if (!b) *this = Interval::all_reals();
 
 			delete[] xTmp;
 
@@ -556,7 +556,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::Asqr(const Interval& itv) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
 			if (!b) {
-				*this = Interval::ALL_REALS;
+				*this = Interval::all_reals();
 			}
 		}
 

@@ -34,7 +34,7 @@ void TestExprCmp::test02() {
 	const ExprSymbol& x2=ExprSymbol::new_(Dim::scalar());
 
 	CPPUNIT_ASSERT(x1!=x2);
-	CPPUNIT_ASSERT(x1!=ExprConstant::new_scalar(Interval::ZERO));
+	CPPUNIT_ASSERT(x1!=ExprConstant::new_scalar(Interval::zero()));
 	CPPUNIT_ASSERT((x1+1)!=(x1-1));
 	CPPUNIT_ASSERT((x1+x2)!=(x1-x2));
 	CPPUNIT_ASSERT((x1+x2*x1)!=(x1+x1*x2));

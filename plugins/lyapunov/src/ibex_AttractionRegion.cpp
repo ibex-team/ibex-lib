@@ -253,7 +253,7 @@ Interval AttractionRegion::find_level_set_dichotomy(ellipse_test_type test, doub
 	timer.stop();
 	time += timer.get_time();
 
-	if (cu<Delta) return Interval::ZERO;
+	if (cu<Delta) return Interval::zero();
 	else if (cl<Delta) return Interval(0, cu-Delta);
 	else return Interval(cl-Delta, cu-Delta);
 }

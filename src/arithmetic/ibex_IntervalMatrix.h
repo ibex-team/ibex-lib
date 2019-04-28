@@ -669,7 +669,7 @@ inline void ___set_empty(IntervalMatrix& m) { m.set_empty(); }
 namespace ibex {
 
 inline IntervalMatrix IntervalMatrix::empty(int m, int n) {
-	return IntervalMatrix(m, n, Interval::EMPTY_SET);
+	return IntervalMatrix(m, n, Interval::empty_set());
 }
 
 inline bool IntervalMatrix::operator!=(const IntervalMatrix& m) const {
@@ -701,7 +701,7 @@ inline void IntervalMatrix::clear() {
 inline void IntervalMatrix::set_empty() {
 	for (int i=0; i<nb_rows(); i++)
 		for (int j=0; j<nb_cols(); j++)
-			(*this)[i][j]=Interval::EMPTY_SET;
+			(*this)[i][j]=Interval::empty_set();
 }
 
 inline IntervalVector& IntervalMatrix::row(int i) {

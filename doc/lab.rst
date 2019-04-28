@@ -758,7 +758,7 @@ Our goal is to find the set of couples (a,b) that makes the origin y=0 stable. I
 
    // We require these coefficients to be all positive,
    // i.e., the image of f to be in [0,+oo)x[0,+oo)
-   SepFwdBwd sep(f,IntervalVector(2,Interval::POS_REALS));
+   SepFwdBwd sep(f,IntervalVector(2,Interval::pos_reals()));
 
    // Build the initial box
    IntervalVector box(2);

@@ -39,7 +39,7 @@ void TestCtcFwdBwd::atan2_issue134() {
 	box[1] = Interval(0,0);
 	box[2] = Interval(-100,100);
 	ctc.contract(box);
-	check(box[2],Interval::HALF_PI);
+	check(box[2],Interval::half_pi());
 }
 
 

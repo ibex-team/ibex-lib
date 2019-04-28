@@ -777,7 +777,7 @@ std::ostream& operator<<(std::ostream& os, const AffineMainVector<T>& x)        
 
 template<class T>
 inline AffineMainVector<T> AffineMainVector<T>::empty(int n) {
-	return AffineMainVector<T>(n, Interval::EMPTY_SET);
+	return AffineMainVector<T>(n, Interval::empty_set());
 }
 
 template<class T>
@@ -787,7 +787,7 @@ inline AffineMainVector<T>::~AffineMainVector<T>() {
 
 template<class T>
 inline void AffineMainVector<T>::set_empty() {
-	(*this)[0] = Interval::EMPTY_SET;
+	(*this)[0] = Interval::empty_set();
 }
 
 template<class T>
@@ -804,7 +804,7 @@ inline AffineMain<T>& AffineMainVector<T>::operator[](int i) {
 
 template<class T>
 inline void AffineMainVector<T>::clear() {
-	init(Interval::ZERO);
+	init(Interval::zero());
 }
 
 template<class T>

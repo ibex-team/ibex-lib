@@ -822,7 +822,7 @@ inline IntervalVector::IntervalVector() : n(0), vec(NULL) {
 }
 
 inline IntervalVector IntervalVector::empty(int n) {
-	return IntervalVector(n, Interval::EMPTY_SET);
+	return IntervalVector(n, Interval::empty_set());
 }
 
 inline IntervalVector::~IntervalVector() {
@@ -831,7 +831,7 @@ inline IntervalVector::~IntervalVector() {
 
 inline void IntervalVector::set_empty() {
 	for (int i=0; i<size(); i++)
-		(*this)[i]=Interval::EMPTY_SET;
+		(*this)[i]=Interval::empty_set();
 }
 
 inline const Interval& IntervalVector::operator[](int i) const {

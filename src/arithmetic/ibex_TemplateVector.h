@@ -164,7 +164,7 @@ bool _is_unbounded(const V& v) {
 template<class V>
 bool _is_zero(const V& v) {
 	for (int i=0; i<v.size(); i++)
-		if (v[i]!=Interval::ZERO) return false;
+		if (v[i]!=Interval::zero()) return false;
 	return true;
 }
 

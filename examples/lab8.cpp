@@ -99,7 +99,7 @@ int main() {
 
 // the following piece of code is how we have generated data...
 
-//double pi=Interval::PI.lb();
+//double pi=Interval::pi().lb();
 //cout << "double x_rob[n]={";
 //for (int i=0; i<n; i++) {
 //	cout << 2*cos(i*2*pi/n);

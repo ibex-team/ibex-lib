@@ -179,56 +179,56 @@ inline double hausdorff(const Interval &x1, const Interval &x2) {
 
 inline Interval operator+(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return x.itv+d;
 }
 
 inline Interval operator-(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return x.itv-d;
 }
 
 inline Interval operator*(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return x.itv*d;
 }
 
 inline Interval operator/(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return x.itv/d;
 }
 
 inline Interval operator+(double d,const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return d+x.itv;
 }
 
 inline Interval operator-(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return d-x.itv;
 }
 
 inline Interval operator*(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return d*x.itv;
 }
 
 inline Interval operator/(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else
 		return d/x.itv;
 }
@@ -265,7 +265,7 @@ inline Interval pow(const Interval& x, int n) {
 
 inline Interval pow(const Interval &x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else {
 		Interval res=gaol::pow(x.itv, d);
 		fpu_round_up();
@@ -304,7 +304,7 @@ inline Interval exp(const Interval& x) {
 
 inline Interval log(const Interval& x) {
 	if (x.ub()<=0) // gaol returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
-		return Interval::EMPTY_SET;
+		return Interval::empty_set();
 	else {
 		Interval res=gaol::log(x.itv);
 		fpu_round_up();
@@ -378,7 +378,7 @@ inline Interval acosh(const Interval& x) {
 
 inline Interval asinh(const Interval& x) {
 	Interval res;
-	if (x.is_empty()) res=Interval::EMPTY_SET;
+	if (x.is_empty()) res=Interval::empty_set();
 	else if (x.lb()>=0) res=gaol::asinh(x.itv);
 	else if (x.ub()<=0) res=-gaol::asinh(-x.itv);
 	else {

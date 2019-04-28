@@ -25,8 +25,8 @@ Ctc* _neg(Function& f, CmpOp& op) {
 
 	// since the "diff" does not calculate open bounds, we can
 	// take (-oo,0] even if op=LT.
-	if (op==LT || op==LEQ)  x=Interval::NEG_REALS;
-	else x=Interval::POS_REALS;
+	if (op==LT || op==LEQ)  x=Interval::neg_reals();
+	else x=Interval::pos_reals();
 
 	Domain d(f.expr().dim);
 

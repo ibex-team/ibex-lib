@@ -74,9 +74,9 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 //			// contraction with gradient=0, before running Newton.
 //
 //			if (nb_var==1)
-//				df->backward(Interval::ZERO,box);
+//				df->backward(Interval::zero(),box);
 //			else
-//				df->backward(IntervalVector(nb_var,Interval::ZERO),box);
+//				df->backward(IntervalVector(nb_var,Interval::zero()),box);
 //		}
 //	}
 //
@@ -178,7 +178,7 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 //
 //	IntervalVector full_box = cart_prod(box, IntervalVector(fjc.M+fjc.R+fjc.K+1,Interval(0,1)));
 //
-//	full_box.put(fjc.n+fjc.M+fjc.R+1,IntervalVector(fjc.K,Interval::ZERO));
+//	full_box.put(fjc.n+fjc.M+fjc.R+1,IntervalVector(fjc.K,Interval::zero()));
 	// =========================================================================================
 
 	IntervalVector save(full_box);

@@ -47,7 +47,7 @@ int main() {
 
 	Interval x6(1,POS_INFINITY);      // [1,+oo)
 	Interval x7(NEG_INFINITY,-1);     // (-oo,-1]
-	Interval x8=Interval::EMPTY_SET;  // empty set
+	Interval x8=Interval::empty_set();  // empty set
 
 	//! [itv-build-C]
 	}
@@ -55,15 +55,15 @@ int main() {
 	{
 	output << "![itv-constants-O]" << endl;
 	//! [itv-constants-C]
-	output << " EMPTY_SET =\t " <<  Interval::EMPTY_SET << endl;
-	output << " PI =\t\t "      <<  Interval::PI <<  endl;
-	output << " 2 PI =\t\t "    <<  Interval::TWO_PI << endl;
-	output << " 1/2 PI =\t "    <<  Interval::HALF_PI << endl;
-	output << " ONE =\t\t "     <<  Interval::ONE << endl;
-	output << " ZERO =\t\t "    <<  Interval::ZERO << endl;
-	output << " ALL_REALS =\t " <<  Interval::ALL_REALS << endl;
-	output << " POS_REALS =\t " <<  Interval::POS_REALS << endl;
-	output << " NEG_REALS =\t " <<  Interval::NEG_REALS << endl;
+	output << " EMPTY_SET =\t " <<  Interval::empty_set() << endl;
+	output << " PI =\t\t "      <<  Interval::pi() <<  endl;
+	output << " 2 PI =\t\t "    <<  Interval::two_pi() << endl;
+	output << " 1/2 PI =\t "    <<  Interval::half_pi() << endl;
+	output << " ONE =\t\t "     <<  Interval::one() << endl;
+	output << " ZERO =\t\t "    <<  Interval::zero() << endl;
+	output << " ALL_REALS =\t " <<  Interval::all_reals() << endl;
+	output << " POS_REALS =\t " <<  Interval::pos_reals() << endl;
+	output << " NEG_REALS =\t " <<  Interval::neg_reals() << endl;
 	//! [itv-constants-C]
 	output << "![itv-constants-O]" << endl;
 

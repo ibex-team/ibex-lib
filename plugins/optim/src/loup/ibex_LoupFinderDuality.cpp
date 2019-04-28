@@ -19,7 +19,7 @@ namespace ibex {
 LoupFinderDuality::LoupFinderDuality(const NormalizedSystem& sys) : sys(sys),
 		nb_LP_var(sys.nb_var*(1+sys.f_ctrs.image_dim())),
 		lr(sys), lp_solver(nb_LP_var, nb_LP_var*3),
-		init_box(nb_LP_var, Interval::NEG_REALS /*note: the domain of variables will be overwritten) */) {
+		init_box(nb_LP_var, Interval::neg_reals() /*note: the domain of variables will be overwritten) */) {
 
 }
 
