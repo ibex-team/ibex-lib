@@ -16,17 +16,6 @@
 #include "ibex_CtcFwdBwd.h"
 #include "Ponts30.h"
 #include <cstdio>
-// fmemopen doesn't exist on no POSIX system
-// The function is defined here
-#if defined(_MSC_VER) || defined(__clang__)
-inline FILE* fmemopen(void* data, int len, const char *mode ){
-       FILE * tempfile = tmpfile();
-       fwrite(data, len, 1, tempfile);
-       rewind(tempfile);
-       return tempfile;
-}
-#endif
-
 
 using namespace std;
 
@@ -148,14 +137,15 @@ void TestParser::const_var_idx() {
 }
 
 void TestParser::const08() {
-	const char* code="function f(x)\n  return #3fb999999999999a;end";
-	FILE *fin = fmemopen((char*) code, strlen(code), "r");
+	FILE *fin = std::fopen (SRCDIR_TESTS "/minibex/const08.mbx", "r");
+	CPPUNIT_ASSERT (fin != NULL);
 	Function f(fin);
 
 	double x=0.1;
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f.expr());
 	CPPUNIT_ASSERT(c!=NULL);
 	CPPUNIT_ASSERT(c->get_value().mid()==x);
+  std::fclose (fin);
 }
 
 void TestParser::func01() {
