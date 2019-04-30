@@ -79,13 +79,18 @@ def configure (conf):
             # We necessarily have mandatory = False, or else conf.check_cxx () would
             # have failed.
             conf.msg ("Using library Soplex from", "3rd/ subdirectory")
-            soplex_archive = "soplex-4.0.1.tar"
+            soplex_archive = "soplex-3.1.1.tar"
+            make_args = [
+                "GMP=false",
+                "ZLIB=false",
+                "USRCPPFLAGS=-fPIC"]
             soplex_ret = conf.configure_3rd_party_with_autotools (soplex_archive,
-                    without_configure = True, without_make_install = True)
+                    without_configure = True, without_make_install = True, make_args=make_args)
             soplex_srcdir, soplex_include, soplex_lib = soplex_ret
             conf.env.INSTALL_3RD = True
             from_3rd = True
             # The 'make install' of soplex 1.7.1 is buggy, we do it ourself
+            # Is this still needed for 3.1.1 ?
             if not os.path.exists (soplex_include):
                 os.makedirs (soplex_include)
             if not os.path.exists(os.path.join(soplex_include, "soplex")):
@@ -101,10 +106,6 @@ def configure (conf):
                 fullpath = os.path.join (soplex_srcdir, "src", filename)
                 if filename.endswith (".h") and os.path.isfile (fullpath):
                     shutil.copy2 (fullpath, soplex_include)
-            for filename in os.listdir (os.path.join (soplex_srcdir, "src", "soplex")):
-                fullpath = os.path.join (soplex_srcdir, "src", "soplex", filename)
-                if filename.endswith (".h") and os.path.isfile (fullpath):
-                    shutil.copy2 (fullpath, os.path.join(soplex_include, "soplex"))
             conf.end_msg("done")
 
     if conf.options.DEBUG:

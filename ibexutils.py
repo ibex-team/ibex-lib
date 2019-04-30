@@ -139,7 +139,7 @@ def path_pc (conf, path):
 
 @conf
 def configure_3rd_party_with_autotools (conf, archive_name,
-            without_configure=False, without_make_install=False, conf_args = "", cflags_args = ""):
+            without_configure=False, without_make_install=False, conf_args = "", cflags_args = "", make_args = []):
     name = archive_name_without_suffix (archive_name)
     Logs.pprint ("BLUE", "Starting installation of %s"%name)
     conf.to_log ((" Starting installation of %s " % name).center (80, "="))
@@ -179,11 +179,11 @@ def configure_3rd_party_with_autotools (conf, archive_name,
         conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspath ())
         conf.find_program ("sh")
         cmd_conf = [conf.env.SH, "-c", "./configure %s"%conf_args]
-        cmd_make = conf.env.MAKE
+        cmd_make = conf.env.MAKE + make_args
     else:
         conf_args += " --prefix=%s" % destnode.abspath ()
         cmd_conf = "./configure %s" % (conf_args)
-        cmd_make = conf.env.MAKE + ["-j%d"%conf.options.jobs]
+        cmd_make = conf.env.MAKE + ["-j%d"%conf.options.jobs] + make_args
     cmd_install = conf.env.MAKE + ["install"] 
 
     stages = []
