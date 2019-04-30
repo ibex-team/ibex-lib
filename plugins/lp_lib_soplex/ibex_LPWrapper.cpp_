@@ -6,6 +6,7 @@ LPSolver::LPSolver(int nb_vars1, int max_iter, double max_time_out, double eps) 
 			status_prim(false), status_dual(false){
 
 	mysoplex= new soplex::SoPlex();
+	mysoplex->setIntParam(SoPlex::VERBOSITY, SoPlex::VERBOSITY_ERROR);
 
 	mysoplex->setIntParam(SoPlex::OBJSENSE, SoPlex::OBJSENSE_MINIMIZE);
 	mysoplex->setIntParam(SoPlex::ITERLIMIT, max_iter);
