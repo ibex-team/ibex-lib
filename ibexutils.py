@@ -112,9 +112,16 @@ def escape_backslash_on_win32 (s):
     else:
         return s
 
+try:
+  unicode
+except NameError:
+  unicode = None
+
 def to_unicode (s):
     r = None
-    if isinstance (s, unicode):
+    # for Python3, unicode does not exist (set to None above), we return s
+    # for Python2, if s is already of type 'unicode', we also return s
+    if unicode is None or isinstance (s, unicode):
         r = s
     else:
         for f in [ 'ascii', 'cp1251', 'cp1252', 'latin1', 'utf-8' ] :
