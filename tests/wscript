@@ -92,19 +92,6 @@ def configure (conf):
                                         mandatory=False)
         conf.check_cxx (lib="cppunit", uselib_store="CPPUNIT", mandatory=False)
 
-    # Looking for fmemopen
-    fmemopen_fragment = '''
-      #include <stdio.h>
-      int main(int argc, char **argv) {
-        void (*p)();
-        (void)argc; (void)argv;
-        p=(void(*)())(fmemopen);
-        return !p;
-      }
-    '''
-    conf.check_cxx (fragment = fmemopen_fragment, define_name="HAVE_FMEMOPEN",
-                    mandatory = False)
-
     # Set env variable containing the list of all test source files (by looking
     # recursively for all files ending with '.cpp')
     test_src = conf.path.ant_glob ("**/*.cpp")
@@ -113,18 +100,6 @@ def configure (conf):
 
     # Add current directory to list of INCLUDES for TESTS
     conf.env.append_unique ("INCLUDES_TESTS", conf.path.abspath ())
-
-    # if fmemopen is not available, use implementation from tests/3rd/fmemopen
-    if not conf.env.HAVE_FMEMOPEN:
-        if not Utils.is_win32:
-            conf.env.append_unique ("TEST_SRC", "3rd/fmemopen/fmemopen.c")
-            conf.env.append_unique ("INCLUDES_TESTS",
-                    os.path.join (conf.path.abspath (), "3rd", "fmemopen"))
-        else:
-            # XXX The workaround does not work on windows. Missing header sys/mman.h
-            # So, for now, we remove the two test files that need fmemopen
-            conf.env.TEST_SRC.remove("TestFunction.cpp")
-            conf.env.TEST_SRC.remove("TestParser.cpp")
 
 ######################
 ####### utest ########
