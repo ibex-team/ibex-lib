@@ -12,6 +12,7 @@
 #include <vector>
 #include <sstream>
 
+#include "parser.h"
 #include "ibex_Interval.h"
 #include "ibex_Array.h"
 #include "ibex_System.h"
@@ -24,16 +25,14 @@
 #include "ibex_MainGenerator.h"
 #include "ibex_P_ExprGenerator.h"
 #include "ibex_Exception.h"
-#include "ibex_P_Source.h"
 
 using namespace std;
 
-extern int ibexlex(void);
 extern char* ibextext;
 extern int ibex_lineno;
 
 // note: do not confuse with ibex_error in tools/ibex_Exception.h
-void ibexerror (const std::string& msg) {
+void ibexerror (const string& msg) {
 	throw ibex::SyntaxError(msg, ibextext, ibex_lineno);
 }
 
@@ -58,8 +57,7 @@ Function* function=NULL;       // used when a single function is loaded
 
 /* ===============================================================================================*/
 
-
-static P_Source& source() {   // static because not to be visible:
+P_Source& source() {
 	static P_Source _source;  // construct-on-first-use idiom (safe: no de-initialization dependency between static objects)
 	return _source;
 }
@@ -186,11 +184,6 @@ Domain ball(const Domain& mid, double rad) {
 
 } // end namespace
 } // end namespace
-
-
-using namespace ibex;
-using namespace parser;
-using namespace std;
 
 
 
