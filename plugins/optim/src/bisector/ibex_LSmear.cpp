@@ -60,10 +60,9 @@ LSmear::~LSmear() {
 				nb_lctrs[i]=2;
 		  }
 		}
-		else if (goal_to_consider(J,i))
-		//else
+		else if (goal_to_consider(J,i)) 
 		  mylinearsolver->add_constraint( row1, LEQ, (-ev).ub());
-		else
+		else // the goal is equal to a variable : the goal constraint is useless.
 		  nb_lctrs[i]=0;
 		  
 		
