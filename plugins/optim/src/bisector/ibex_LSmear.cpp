@@ -60,11 +60,11 @@ LSmear::~LSmear() {
 				nb_lctrs[i]=2;
 		  }
 		}
-		//	else if (goal_to_consider(J,i))
-		else
-		  mylinearsolver->add_constraint( row1, LEQ, (-ev).ub());
+		else if (goal_to_consider(J,i))
 		//else
-		//		  nb_lctrs[i]=0;
+		  mylinearsolver->add_constraint( row1, LEQ, (-ev).ub());
+		else
+		  nb_lctrs[i]=0;
 		  
 		
 	}
