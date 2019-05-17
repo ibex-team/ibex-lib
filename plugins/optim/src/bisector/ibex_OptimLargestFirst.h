@@ -1,17 +1,18 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : Largest First bisector
-// Author      : Bertrand Neveu, Gilles Chabert
+// File        : Largest First bisector variant for optimization 
+// Author      : Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : Jul 19, 2012
-// Last Update : Dec 25, 2017
+// Created     : Dec 3, 201_
+// Last Update : May 3, 2019
 //============================================================================
 
-#ifndef __IBEX_LARGEST_FIRST_H__
-#define __IBEX_LARGEST_FIRST_H__
+#ifndef __IBEX_OPTIM_LARGEST_FIRST_H__
+#define __IBEX_OPTIM_LARGEST_FIRST_H__
 
 #include "ibex_Bsc.h"
+#include "ibex_LargestFirst.h"
 
 namespace ibex {
 
@@ -21,7 +22,7 @@ namespace ibex {
  * \brief largest-first bisector.
  *
  */
-class LargestFirst : public Bsc {
+class OptimLargestFirst : public LargestFirst {
 public:
 
 	/**
@@ -31,7 +32,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	LargestFirst(double prec=0, double ratio=Bsc::default_ratio());
+	OptimLargestFirst(int goal_var,double prec=0, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Create a bisector with largest first heuristic.
@@ -40,7 +41,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	LargestFirst(const Vector& prec, double ratio=Bsc::default_ratio());
+	OptimLargestFirst(int goal_var,const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Return next variable to be bisected.
@@ -49,18 +50,25 @@ public:
 	 */
 	virtual BisectionPoint choose_var(const Cell& cell);
 
-	/**
-	 * \brief Ratio to choose the split point.
-	 *
-	 * Ratio between the diameters of the left and right parts of a bisected
-	 * interval.
+
+	
+
+        /** 
+	 * \brief The variable representing the objective 
 	 */
-	const double ratio;
+	const int goal_var;
 
  protected :
-	virtual bool nobisectable (const IntervalVector& box, int i) const ;
+/** 
+	  * \brief  Condition for not bisecting the variable i
+	  */
+	bool nobisectable(const IntervalVector& box, int i) const;
+
+ private :
+	double max_diam_nobj;
+	  
 };
 
 } // end namespace ibex
 
-#endif // __IBEX_LARGEST_FIRST_H__
+#endif // __IBEX_OPTIM_LARGEST_FIRST_H__
