@@ -46,7 +46,7 @@ bool LoupFinder::check(const System& sys, const Vector& pt, double& loup, bool _
 
 void LoupFinder::monotonicity_analysis(const System& sys, IntervalVector& box, bool is_inner) {
 
-	int n=sys.nb_var;
+	size_t n=sys.nb_var;
 
 	if (!is_inner && sys.f_ctrs.used_vars.size()==n)
 		// if there is no inner box and all the variables appear
@@ -56,7 +56,7 @@ void LoupFinder::monotonicity_analysis(const System& sys, IntervalVector& box, b
 	IntervalVector g(n);
 	sys.goal->gradient(box,g);
 
-	for (int j=0; j<n; j++) {
+	for (size_t j=0; j<n; j++) {
 		if (is_inner || !sys.f_ctrs.used(j)) {
 			if (g[j].lb()>=0 && box[j].lb()!=NEG_INFINITY) box[j]=box[j].lb();
 			if (g[j].ub()<=0 && box[j].ub()!=POS_INFINITY) box[j]=box[j].ub();
