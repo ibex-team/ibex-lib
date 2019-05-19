@@ -60,9 +60,10 @@ public:
 	 * (Specific for vector-valued functions).
 	 *
 	 * \pre components must be non empty and contain indices in
-	 *      [0,f.image_dim()-1].
+	 *      [0,f.image_dim()-1] in case of a vector-valued function
+	 *      [0,f.expr().dim.nb_rows()] in case of a matrix-valued function.
 	 */
-	IntervalVector eval(const IntervalVector& box, const BitSet& components);
+	Domain eval(const IntervalVector& box, const BitSet& components);
 
 protected:
 	/**
