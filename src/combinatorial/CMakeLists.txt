@@ -1,0 +1,13 @@
+# see arithmetic/CMakeLists.txt for comments
+
+set (IBEX_SUBDIR_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QInter.cpp
+  PARENT_SCOPE)
+
+set (IBEX_SUBDIR_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QInter.h
+  PARENT_SCOPE)
+
+set (IBEX_SUBDIR_INCDIRS
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  PARENT_SCOPE)

@@ -1,0 +1,21 @@
+# see arithmetic/CMakeLists.txt for comments
+
+set (IBEX_SUBDIR_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Cov.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovIBUList.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovIUList.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovList.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovManifold.cpp
+  PARENT_SCOPE)
+
+set (IBEX_SUBDIR_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Cov.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovIBUList.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovIUList.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovList.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovManifold.h
+  PARENT_SCOPE)
+
+set (IBEX_SUBDIR_INCDIRS
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  PARENT_SCOPE)
