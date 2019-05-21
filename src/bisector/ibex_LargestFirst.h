@@ -56,6 +56,9 @@ public:
 	 * interval.
 	 */
 	const double ratio;
+
+ protected :
+	virtual bool nobisectable (const IntervalVector& box, int i) const ;
 };
 
 } // end namespace ibex

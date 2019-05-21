@@ -27,7 +27,7 @@ static int precond_OK=0;
 
 namespace ibex {
 
-CtcKhunTucker::CtcKhunTucker(const NormalizedSystem& sys) : Ctc(sys.nb_var), sys(sys) {
+CtcKhunTucker::CtcKhunTucker(const NormalizedSystem& sys, bool reject_unbounded) : Ctc(sys.nb_var), sys(sys), reject_unbounded(reject_unbounded) {
 	try {
 		df = new Function(*sys.goal,Function::DIFF);
 	} catch(Exception&) {
@@ -68,6 +68,8 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 
 	if (df==NULL) return;
 
+	if (reject_unbounded && box.is_unbounded()) return;
+
 //	if (sys.nb_ctr==0) {
 //		if (box.is_strict_interior_subset(sys.box)) {
 //			// for unconstrained optimization we benefit from a cheap
@@ -86,7 +88,7 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 	// =========================================================================================
 	BitSet active=sys.active_ctrs(box);
 
-	FncKhunTucker fjf(sys,df,dg,box,BitSet::all(sys.nb_ctr)); //active);
+	FncKhunTucker fjf(sys,*df,dg,box,BitSet::all(sys.nb_ctr)); //active);
 
 	// we consider that Newton will not succeed if there are more
 	// than n active constraints.

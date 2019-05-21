@@ -87,7 +87,7 @@ void MitsosSIP::optimize(double eps_f) {
 	// Enclosure of max g_i(x_UBD).
 	// the upper bound will be used in the ORA problem
 	// for the domain of the objective (eta)
-	Interval g_max_UBD=Interval::ALL_REALS;
+	Interval g_max_UBD=Interval::all_reals();
 
 	if (trace>=1) {
 		cout << "=========================" << endl;
@@ -149,10 +149,9 @@ void MitsosSIP::optimize(double eps_f) {
 			Interval g_max_LBD=solve_LLP(true, x_LBD, eps_LLP);
 
 			if (g_max_LBD.ub()<=0) {
-				//cout << " found feasible x_LBD!! --->";
 				if (LBD_loup < f_UBD) {
-					//cout << " decreases loup!\n";
 					f_UBD=LBD_loup;
+					if (trace>=1) cout << "\033[32m   f_UBD = " << f_UBD << "\033[0m" << endl;
 					x_opt=x_LBD;
 				} else {
 					ibex_warning("[SIP]: LBD finds a SIP-feasible point that does not decrease the UB!");
@@ -263,7 +262,6 @@ void MitsosSIP::optimize(double eps_f) {
 					// x_ORA is feasible: update the loup
 					if (UBD_loup > f_UBD) {
 						// if happens => bug
-						cout << "UBD_loup=" << UBD_loup;
 						ibex_error("[SIP]: the oracle problem found a SIP-feasible point above the loup.");
 					}
 
@@ -345,10 +343,12 @@ bool MitsosSIP::solve_ORA(double f_RES, const Vector& x_LBD, double eps, Vector&
 
 bool MitsosSIP::solve(const System& sub_sys, double eps, Vector& x_opt, double& uplo, double& loup) {
 
-	//DefaultOptimizer o(sub_sys,eps,eps);
+	// TODO: ibexsip only works with absolute precision.
+	// It should also work with relative precision.
 	DefaultOptimizer o(sub_sys,eps,eps,
 			NormalizedSystem::default_eps_h,
 			false,true,random_seed);
+	//o.anticipated_upper_bounding = false;
 
 	Optimizer::Status status=o.optimize(sub_sys.box);
 
@@ -383,6 +383,8 @@ Interval MitsosSIP::solve_LLP(bool LBD, const Vector& x_opt, double eps) {
 			DefaultOptimizer o(max_sys,0,eps,
 					NormalizedSystem::default_eps_h,
 					false,true,random_seed);
+
+			//o.anticipated_upper_bounding = false;
 
 			VarSet param_LLP_var(p, lpp_fac.param_LLP_var);
 

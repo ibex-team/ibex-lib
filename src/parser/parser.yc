@@ -9,7 +9,11 @@
 // Last Update : Apr 11, 2018
 //===========================================================================
 
-#include "parser.cpp_"
+#include "parser.h"
+
+using namespace ibex;
+using namespace parser;
+using namespace std;
 
 %}	
 

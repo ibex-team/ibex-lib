@@ -9,15 +9,15 @@
 //============================================================================
 
 #include "ibex_System.h"
+#include "ibex_SystemFactory.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_UnknownFileException.h"
 #include "ibex_ExprCopy.h"
-#include "ibex_SystemCopy.cpp_"
-#include "ibex_SystemMerge.cpp_"
 #include "ibex_Expr2Minibex.h"
 #include "ibex_Domain.h"
 
 #include <stdio.h>
+#include <sstream>
 
 #ifndef _WIN32 // MinGW does not support mutex
 #include <mutex>
@@ -46,6 +46,36 @@ namespace parser {
 extern System* system;
 extern bool choco_start;
 }
+
+
+namespace {
+
+class SystemCopy : public SystemFactory {
+
+public:
+
+	SystemCopy(const System& sys, const System::copy_mode& mode) {
+
+		// do not initialize variables with sys.f_ctrs.args
+		// since f may be uninitialized (unconstrained problem)
+		add_var(sys.args,sys.box);
+
+		if (mode==System::COPY && sys.goal!=NULL)
+			add_goal(*sys.goal);
+
+		for (int i=0; i<sys.nb_ctr; i++) {
+			if (mode==System::COPY ||
+					(sys.ctrs[i].op==EQ && mode==System::EQ_ONLY) ||
+					(sys.ctrs[i].op!=EQ && mode==System::INEQ_ONLY))
+
+				// TODO: we lose DAG structure here...
+
+				add_ctr(sys.ctrs[i]);
+		}
+	}
+};
+
+} // end anonymous namespace
 
 System::System() : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) /* tmp */ {
 
@@ -81,10 +111,6 @@ System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb
 	case EQ_ONLY:    init(SystemCopy(sys,EQ_ONLY)); break;
 	}
 
-}
-
-System::System(const System& sys1, const System& sys2) : id(next_id()), nb_var(0), nb_ctr(0), func(0), ops(NULL), box(1) {
-	init(SystemMerge(sys1,sys2));
 }
 
 std::string System::minibex(bool human) const {

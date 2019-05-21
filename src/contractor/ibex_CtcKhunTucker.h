@@ -33,8 +33,13 @@ public:
 	 *           In particular, this field **should not change** once this
 	 *           contractor is built (the box gives rise to bound constraints
 	 *           that are set once for all and not dynamically updated).
+	 *
+	 * \param reject_unbounded: If true, the contractor does nothing when called
+	 *        on an unbounded box. This is because minima points at infinity may
+	 *        be lost by contraction (they do not satisfy KKT conditions). Set to
+	 *        'true' by default.
 	 */
-	CtcKhunTucker(const NormalizedSystem& sys);
+	CtcKhunTucker(const NormalizedSystem& sys, bool reject_unbounded=true);
 
 	/**
 	 * \see #Ctc
@@ -62,6 +67,13 @@ protected:
 	 * \brief Symbolic gradient of constraints.
 	 */
 	Function** dg;
+
+	/**
+	 * \brief Whether unbounded boxes are rejected.
+	 *
+	 * See constructor.
+	 */
+	bool reject_unbounded;
 };
 
 } /* namespace ibex */

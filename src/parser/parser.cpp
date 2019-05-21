@@ -1,0 +1,189 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : parser.cpp_
+// Author      : Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Sep 9, 2012
+// Last Update : Sep 9, 2012
+//============================================================================
+
+#include <math.h>
+#include <vector>
+#include <sstream>
+
+#include "parser.h"
+#include "ibex_Interval.h"
+#include "ibex_Array.h"
+#include "ibex_System.h"
+#include "ibex_String.h"
+#include "ibex_ExprCopy.h"
+#include "ibex_Dim.h"
+#include "ibex_SyntaxError.h"
+#include "ibex_P_Expr.h"
+#include "ibex_P_NumConstraint.h"
+#include "ibex_MainGenerator.h"
+#include "ibex_P_ExprGenerator.h"
+#include "ibex_Exception.h"
+
+using namespace std;
+
+extern char* ibextext;
+extern int ibex_lineno;
+
+// note: do not confuse with ibex_error in tools/ibex_Exception.h
+void ibexerror (const string& msg) {
+	throw ibex::SyntaxError(msg, ibextext, ibex_lineno);
+}
+
+namespace ibex {
+
+namespace parser {
+
+/* ==================================== The result of the parser =================================*/
+
+System* system=NULL;            // standard AMPL-like system
+
+// ******************
+// Note: when a stand-alone constraint is read by CHOCO
+// the field system->nb_var must be set *before* calling the parser
+// ******************
+bool choco_start=false;        // activate generation of pseudo-start token
+                               // for CHOCO
+
+Function* function=NULL;       // used when a single function is loaded 
+                               // either from a file or using a string in C++ directly
+			                   // e.g., Function f("x","y","x+y");
+
+/* ===============================================================================================*/
+
+P_Source& source() {
+	static P_Source _source;  // construct-on-first-use idiom (safe: no de-initialization dependency between static objects)
+	return _source;
+}
+
+stack<Scope>& scopes() {  // not static because lexer needs to see it
+	static stack<Scope> _scopes; // construct-on-first-use idiom (safe: no de-initialization dependency between static objects)
+	return _scopes;
+}
+
+void begin() {
+	ibex_lineno=-1;
+	if (!setlocale(LC_NUMERIC, "C")) // to accept the dot (instead of the french coma) with numeric numbers
+		ibexerror("platform does not support \"C\" locale");
+
+	ibex_lineno=1;
+
+	/*
+	 * There may be some pending scopes (if the previous call to the parser failed).
+	 */
+	while (!scopes().empty()) scopes().pop();
+
+	scopes().push(Scope()); // a fresh new scope!
+	// TODO: it seems that this first scope is not popped during this call to the parser (but the next one)
+}
+
+void begin_choco() {
+	if (system==NULL) { // someone tries to load a Function from a file with CHOCO constraint syntax
+		throw SyntaxError("unexpected constraints declaration for a function.");
+	}
+
+	// ----- generate all the variables {i} -----
+	Dim dim=Dim::scalar();
+	Domain x(dim);
+	x.i()=Interval::all_reals();
+	for (int i=0; i<system->nb_var; i++) {
+		char* name=append_index("\0",'{','}',i);
+		scopes().top().add_var(name,&dim,x);
+		free(name);
+	}
+	// ------------------------------------------
+}
+
+void end_system() {
+	if (system==NULL) { // someone tries to load a Function from a file containing a system
+		throw SyntaxError("unexpected (global) variable declaration for a function.");
+	}
+	MainGenerator().generate(source(),*system);
+	source().cleanup();
+	// TODO: we have to cleanup the data in case of Syntax Error
+	// this probably requires a kind of garbage collector during
+	// parsing
+}
+
+void end_choco() {
+	MainGenerator().generate(source(),*system);
+	source().cleanup();
+	// TODO: see end_system()
+}
+
+void end_function() {
+	if (function==NULL) { // someone tries to load a system from a file containing a function only
+		throw SyntaxError("a system requires declaration of variables.");
+	}
+	if (source().func.empty()) {
+		throw SyntaxError("no function declared in file");
+	}
+	const Function& f=(*source().func[0]);
+	Array<const ExprSymbol> x(f.nb_arg());
+	varcopy(f.args(),x);
+	const ExprNode& y=ExprCopy().copy(f.args(),x,f.expr());
+
+	function->init(x,y,f.name);
+
+	source().cleanup();
+	delete source().func[0]; // This is an ugly stuff but we are obliged (see destructor of ParserSource)
+	// TODO: see end_system()
+}
+
+void init_symbol_domain(const char* destname, Domain& dest, const Domain& src) {
+	if (src.dim==dest.dim) {
+		dest=src;
+	} else if (src.dim.is_scalar()) {
+		// when a vector/matrix is initialized with a single interval
+		const Interval& x=src.i();
+		switch(dest.dim.type()) {
+		case Dim::SCALAR :      dest.i()=x; break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   dest.v().init(x); break;
+		case Dim::MATRIX:       dest.m().init(x); break;
+		}
+	} else {
+		stringstream s;
+		s << "Symbol \"" << destname << "\"";
+
+		if (dest.dim.type()==Dim::ROW_VECTOR && src.dim.type()==Dim::COL_VECTOR && dest.dim.vec_size()==src.dim.vec_size()) {
+			s << " is a column vector and is initialized with a row vector";
+			s << " (you have probably used \",\" instead of \";\" in the constant vector)";
+			ibexerror(s.str());
+		}
+		else {
+			s << " is not initialized correctly (dimensions do not match)";
+			ibexerror(s.str());
+		}
+	}
+}
+
+Domain ball(const Domain& mid, double rad) {
+	Domain d(mid,false);
+
+	switch (d.dim.type()) {
+	case Dim::SCALAR:
+		d.i().inflate(rad);
+		break;
+	case Dim::COL_VECTOR:
+	case Dim::ROW_VECTOR:
+		d.v().inflate(rad);
+		break;
+	case Dim::MATRIX:
+		d.m().inflate(rad);
+		break;
+	}
+	return d;
+}
+
+} // end namespace
+} // end namespace
+
+
+
