@@ -9,8 +9,8 @@
  * Created     : Jan 10, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_BIAS_INTERVAL_H_
-#define _IBEX_BIAS_INTERVAL_H_
+#ifndef _IBEX_INTERVALLIBWRAPPER_INL_
+#define _IBEX_INTERVALLIBWRAPPER_INL_
 
 #include "BIAS/BiasF.h"
 #include "Functions.h"
@@ -891,4 +891,4 @@ inline bool bwd_abs(const Interval& y,  Interval& x) {
 
 } // end namespace ibex
 
-#endif // _IBEX_BIAS_INTERVAL_H_
+#endif /* _IBEX_INTERVALLIBWRAPPER_INL_ */

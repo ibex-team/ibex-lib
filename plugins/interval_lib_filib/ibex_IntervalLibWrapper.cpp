@@ -1,3 +1,5 @@
+#include "ibex_Interval.h"
+
 static void init() {
 	filib::fp_traits<FI_BASE>::setup();
 }

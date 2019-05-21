@@ -9,8 +9,8 @@
  * Created     : Jan 10, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_DIRECT_INTERVAL_H_
-#define _IBEX_DIRECT_INTERVAL_H_
+#ifndef _IBEX_INTERVALLIBWRAPPER_INL_
+#define _IBEX_INTERVALLIBWRAPPER_INL_
 
 #include "ibex_Exception.h"
 #include <cassert>
@@ -1023,4 +1023,4 @@ inline bool bwd_abs(const Interval& y,  Interval& x) {
 
 } // end namespace ibex
 
-#endif // _IBEX_DIRECT_INTERVAL_H_
+#endif /* _IBEX_INTERVALLIBWRAPPER_INL_ */

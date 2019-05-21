@@ -1,3 +1,6 @@
+#ifndef _IBEX_INTERVALLIBWRAPPER_INL_
+#define _IBEX_INTERVALLIBWRAPPER_INL_
+
 #include "ibex_Exception.h"
 
 #ifdef _WIN32
@@ -496,3 +499,5 @@ inline bool bwd_abs(const Interval& y,  Interval& x) {
 }
 
 } // end namespace ibex
+
+#endif /* _IBEX_INTERVALLIBWRAPPER_INL_ */

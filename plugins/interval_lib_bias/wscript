@@ -52,19 +52,3 @@ def configure (conf):
 #        into variables.
 #==============================================================================
 	conf.check_cxx (cxxflags = "-ffloat-store", use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
-    
-    
-	# Define needed variables
-	cpp_wrapper_node = conf.path.make_node ("wrapper.cpp")
-	h_wrapper_node = conf.path.make_node ("wrapper.h")
-	conf.env.IBEX_INTERVAL_LIB_WRAPPER_CPP = cpp_wrapper_node.read()
-	conf.env.IBEX_INTERVAL_LIB_WRAPPER_H = h_wrapper_node.read()
-	conf.env.IBEX_INTERVAL_LIB_INCLUDES = [ "Interval.h" ]
-	conf.env.IBEX_INTERVAL_LIB_EXTRA_DEFINES = "/* */"
-	conf.env.IBEX_INTERVAL_LIB_NEG_INFINITY = "BiasNegInf"
-	conf.env.IBEX_INTERVAL_LIB_POS_INFINITY = "BiasPosInf"
-	conf.env.IBEX_INTERVAL_LIB_ITV_EXTRA = "/* */"
-	conf.env.IBEX_INTERVAL_LIB_ITV_WRAP = "Interval(const INTERVAL& x);"
-	conf.env.IBEX_INTERVAL_LIB_ITV_ASSIGN = "Interval& operator=(const INTERVAL& x);"
-	conf.env.IBEX_INTERVAL_LIB_ITV_DEF = "INTERVAL itv;"
-	conf.env.IBEX_INTERVAL_LIB_DISTANCE = "Distance(x1.itv,x2.itv);"

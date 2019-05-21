@@ -22,12 +22,12 @@
  */
 #include "ibex_Setting.h"
 
-@IBEX_INTERVAL_LIB_INCLUDES@
+#include "ibex_IntervalLibWrapper.h"
+
 /** \brief NEG_INFINITY: <double> representation of -oo */
-#define NEG_INFINITY @IBEX_INTERVAL_LIB_NEG_INFINITY@
+#define NEG_INFINITY IBEX_INTERVAL_LIB_NEG_INFINITY
 /** \brief POS_INFINITY: <double> representation of +oo */
-#define POS_INFINITY @IBEX_INTERVAL_LIB_POS_INFINITY@
-@IBEX_INTERVAL_LIB_EXTRA_DEFINES@
+#define POS_INFINITY IBEX_INTERVAL_LIB_POS_INFINITY
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -517,13 +517,12 @@ class Interval {
      */
     operator const ExprConstant&() const;
 
-		@IBEX_INTERVAL_LIB_ITV_EXTRA@
-    /* \brief Wrap the @INTERVAL_LIB@-interval [x]. */
-		@IBEX_INTERVAL_LIB_ITV_WRAP@
-    /* \brief Assign this to the @INTERVAL_LIB@-interval [x]. */
-		@IBEX_INTERVAL_LIB_ITV_ASSIGN@
+    /* \brief Constructor from an interval [x] of wrapped type. */
+    Interval(const interval_type_wrapper& x);
+    /* \brief Assign to an interval from a wrapper type. */
+    Interval& operator=(const interval_type_wrapper& x);
 
-		@IBEX_INTERVAL_LIB_ITV_DEF@
+    interval_type_wrapper itv;
 };
 
 /** \ingroup arithmetic */
@@ -837,7 +836,7 @@ bool bwd_imod(Interval& x, Interval& y, const double& p);
 
 } // end namespace ibex
 
-@IBEX_INTERVAL_LIB_WRAPPER_H@
+#include "ibex_IntervalLibWrapper.inl"
 
 /*@}*/
 
@@ -954,7 +953,7 @@ inline double distance(const Interval &x1, const Interval &x2) {
     else if (x2.is_unbounded())
     	return POS_INFINITY;
     else
-    	return @IBEX_INTERVAL_LIB_DISTANCE@
+    	return _interval_distance_wrapper (x1.itv, x2.itv);
 }
 
 inline Interval sign(const Interval& x) {

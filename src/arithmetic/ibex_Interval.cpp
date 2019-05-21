@@ -13,8 +13,6 @@
 #include <float.h>
 #include <cassert>
 
-@IBEX_INTERVAL_LIB_WRAPPER_CPP@
-
 namespace ibex {
 
 

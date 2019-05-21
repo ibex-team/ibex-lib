@@ -153,18 +153,20 @@ def configure (conf):
 				conf.env.append_unique ("LIB_IBEX_DEPS", lib)
 	else:
 		conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_ITV_LIB)
-
-	# The following variables must be defined in env by the plugin called to
+	# Need to add itvlib_dir to include path of ibex
+	full_itvlib_path = os.path.abspath (os.path.join ("plugins", itvlib_dir))
+	conf.env.append_unique ("INCLUDES_IBEX", full_itvlib_path)
+	# Need to add ibex_IntervalLibWrapper.(cpp|inl|h) to the source of ibex
+	wrapper_cpp = os.path.join (full_itvlib_path, "ibex_IntervalLibWrapper.cpp")
+	wrapper_h = os.path.join (full_itvlib_path, "ibex_IntervalLibWrapper.h")
+	wrapper_inl = os.path.join (full_itvlib_path, "ibex_IntervalLibWrapper.inl")
+	conf.env.append_unique ("IBEX_SRC", os.path.relpath (wrapper_cpp, "src"))
+	conf.env.append_unique ("IBEX_HDR", os.path.relpath (wrapper_h, "src"))
+	conf.env.append_unique ("IBEX_HDR", os.path.relpath (wrapper_inl, "src"))
+	# The variable "INTERVAL_LIB" must be defined in env by the plugin called to
 	# handle the library for interval arithmetic.
-	for var in ["INTERVAL_LIB", "IBEX_INTERVAL_LIB_WRAPPER_CPP",
-        "IBEX_INTERVAL_LIB_WRAPPER_H", "IBEX_INTERVAL_LIB_INCLUDES",
-        "IBEX_INTERVAL_LIB_NEG_INFINITY", "IBEX_INTERVAL_LIB_POS_INFINITY",
-        "IBEX_INTERVAL_LIB_EXTRA_DEFINES",
-        "IBEX_INTERVAL_LIB_ITV_EXTRA", "IBEX_INTERVAL_LIB_ITV_WRAP",
-        "IBEX_INTERVAL_LIB_ITV_ASSIGN", "IBEX_INTERVAL_LIB_ITV_DEF",
-        "IBEX_INTERVAL_LIB_DISTANCE"]:
-		if not conf.env[var]:
-			conf.fatal ("%s must be defined in env by the plugin %s"%(var,itvlib_dir))
+	if not conf.env["INTERVAL_LIB"]:
+		conf.fatal ("%s must be defined in env by the plugin %s"%(var,itvlib_dir))
 	if isinstance (conf.env.IBEX_INTERVAL_LIB_INCLUDES, list):
 		l = [ "#include \"%s\"" % s for s in conf.env.IBEX_INTERVAL_LIB_INCLUDES ]
 		conf.env.IBEX_INTERVAL_LIB_INCLUDES  = os.linesep.join (l)
@@ -204,7 +206,8 @@ def configure (conf):
 	# Generate the main Ibex header which includes all the others headers
 	conf.env.ibex_header = "ibex.h"
 	conf.env.include_key = [ conf.env.ibex_header_setting ]
-	conf.env.include_key += [ os.path.basename(h) for h in conf.env.IBEX_HDR ]
+	conf.env.include_key += [ os.path.basename(h) for h in conf.env.IBEX_HDR
+	                                                  if not h.endswith (".inl") ]
 	conf.env.include_key = [ h[:-3] if h.endswith(".in") else h
                                             for h in conf.env.include_key ]
 	conf.write_config_header (conf.env.ibex_header, defines = False, top = True,
