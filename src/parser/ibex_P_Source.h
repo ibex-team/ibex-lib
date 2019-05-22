@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ParserSource.h
+// File        : ibex_P_Source.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Jun 12, 2012
+// Last Update : May 22, 2019
 //============================================================================
 
 #ifndef __IBEX_PARSER_SOURCE_H__
@@ -44,6 +44,8 @@ public:
 	/** The constraints (NULL if none (pure optimization problem)) */
 	P_ConstraintList* ctrs;
 };
+
+std::ostream& operator<<(std::ostream& os, const P_Source& source);
 
 } // end namespace parser
 } // end namespace ibex

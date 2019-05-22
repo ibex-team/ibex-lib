@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Parser Tests
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Apr 02, 2012
+ * Last update : May 22, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_PARSER_H__
@@ -47,6 +48,8 @@ public:
 	CPPUNIT_TEST(sum02);
 	CPPUNIT_TEST(sum03);
 	CPPUNIT_TEST(sum04);
+	CPPUNIT_TEST(temp_in_loop);
+
 	//		CPPUNIT_TEST(error01);
 	CPPUNIT_TEST_SUITE_END();
 
@@ -72,6 +75,8 @@ public:
 	void sum02();
 	void sum03();
 	void sum04();
+
+	void temp_in_loop(); // issue #380
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestParser);

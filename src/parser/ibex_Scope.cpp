@@ -85,7 +85,7 @@ public:
 
 class Scope::S_ExprTmp : public Scope::S_Object {
 public:
-	S_ExprTmp(const P_ExprNode* expr) : expr(expr) { }
+	S_ExprTmp(const ExprNode* expr) : expr(expr) { }
 
 	S_Object* copy() const { return new S_ExprTmp(expr); }
 
@@ -93,7 +93,7 @@ public:
 
 	void print(ostream& os) const { os << "expression tmp " << *expr; }
 
-	const P_ExprNode* expr;
+	const ExprNode* expr;
 };
 
 class Scope::S_Entity : public Scope::S_Object {
@@ -188,7 +188,7 @@ void Scope::add_func(const char* id, Function* f) {
 	//cout << "[parser] add function " << *f << endl;
 }
 
-void Scope::add_expr_tmp_symbol(const char* id, const P_ExprNode* expr) {
+void Scope::add_expr_tmp_symbol(const char* id, const ExprNode* expr) {
 	tab.insert_new(id, new S_ExprTmp(expr));
 }
 
@@ -230,10 +230,10 @@ Function& Scope::get_func(const char* id) {
 	return *((const S_Func&) s).f;
 }
 
-const P_ExprNode& Scope::get_expr_tmp_expr(const char* id) const {
+const ExprNode* Scope::get_expr_tmp_expr(const char* id) const {
 	const S_Object& s=*tab[id];
 	assert(s.token()==TK_EXPR_TMP_SYMBOL);
-	return *((const S_ExprTmp&) s).expr;
+	return ((const S_ExprTmp&) s).expr;
 }
 
 std::pair<const ExprSymbol*,const Domain*> Scope::get_var(const char* id) const {
