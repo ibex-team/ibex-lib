@@ -1,10 +1,10 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ParserSource.cpp
+// File        : ibex_P_Source.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : Jun 12, 2012
+// Created     : May 22, 2019
 // Last Update : Jun 12, 2012
 //============================================================================
 
@@ -39,5 +39,16 @@ void P_Source::cleanup() {
 	ctrs=NULL;
 }
 
+ostream& operator<<(ostream& os, const P_Source& source) {
+	if (source.goal)
+		os << "minimize " << *source.goal << endl;
+	if (source.ctrs) {
+		os << "constraints" << endl;
+		os << *source.ctrs;
+	}
+	return os;
+}
+
 } // end namespace parser
+
 } // end namespace ibex

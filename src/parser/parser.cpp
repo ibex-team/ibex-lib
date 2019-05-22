@@ -79,8 +79,12 @@ void begin() {
 	 */
 	while (!scopes().empty()) scopes().pop();
 
-	scopes().push(Scope()); // a fresh new scope!
-	// TODO: it seems that this first scope is not popped during this call to the parser (but the next one)
+	// Bottom scope.
+	// Kept for both parsing and generation (the constants are shared by the two steps)
+	scopes().push(Scope());
+
+	// note: a second scope is created for parsing the constraints block,
+	// to store temporary variables.
 }
 
 void begin_choco() {
@@ -109,12 +113,14 @@ void end_system() {
 	// TODO: we have to cleanup the data in case of Syntax Error
 	// this probably requires a kind of garbage collector during
 	// parsing
+	scopes().pop();
 }
 
 void end_choco() {
 	MainGenerator().generate(source(),*system);
 	source().cleanup();
 	// TODO: see end_system()
+	scopes().pop();
 }
 
 void end_function() {
@@ -134,6 +140,7 @@ void end_function() {
 	source().cleanup();
 	delete source().func[0]; // This is an ugly stuff but we are obliged (see destructor of ParserSource)
 	// TODO: see end_system()
+	scopes().pop();
 }
 
 void init_symbol_domain(const char* destname, Domain& dest, const Domain& src) {

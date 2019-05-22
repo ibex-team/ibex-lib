@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ParserNumConstraint.h
+// File        : ibex_P_NumConstraint.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Jun 12, 2012
+// Last Update : May 22, 2019
 //============================================================================
 
 #ifndef __IBEX_PARSER_NUM_CONSTRAINT_H__
@@ -14,6 +14,8 @@
 #include "ibex_CtrGenerator.h"
 #include "ibex_NumConstraint.h"
 
+#include <iostream>
+
 namespace ibex {
 
 namespace parser {
@@ -21,6 +23,8 @@ namespace parser {
 class P_NumConstraint {
 public:
 	virtual void acceptVisitor(CtrGenerator& g) const=0;
+
+	virtual void print(std::ostream& os) const=0;
 
 	/**
 	 * delete all the nodes of the expression *excepted symbols*
@@ -32,9 +36,11 @@ class P_OneConstraint : public P_NumConstraint {
 public:
 	P_OneConstraint(const P_ExprNode* left, CmpOp op, const P_ExprNode* right);
 
-	void acceptVisitor(CtrGenerator& g) const {
+	virtual void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
 	}
+
+	virtual void print(std::ostream& os) const;
 
 	/**
 	 * delete all the nodes of the expression *excepted symbols*
@@ -45,13 +51,32 @@ public:
 	CmpOp op;
 };
 
+class P_TmpSymbolDecl : public P_NumConstraint {
+public:
+	P_TmpSymbolDecl(const char* symbol, const P_ExprNode* expr);
+
+	virtual void acceptVisitor(CtrGenerator& g) const {
+		g.visit(*this);
+	}
+
+	virtual void print(std::ostream& os) const;
+
+	virtual ~P_TmpSymbolDecl();
+
+	const char* symbol;
+	const P_ExprNode& expr;
+};
+
+
 class P_ConstraintList : public P_NumConstraint {
 public:
 	P_ConstraintList(std::vector<P_NumConstraint*>* ctrs);
 
-	void acceptVisitor(CtrGenerator& g) const {
+	virtual void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
 	}
+
+	virtual void print(std::ostream& os) const;
 
 	/**
 	 * delete all the nodes of the expression *excepted symbols*
@@ -66,9 +91,11 @@ class P_ConstraintLoop : public P_NumConstraint {
 public:
 	P_ConstraintLoop(const char* iter, const P_ExprNode* first_value, const P_ExprNode* last_value, std::vector<P_NumConstraint*>* ctrs);
 
-	void acceptVisitor(CtrGenerator& g) const {
+	virtual void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
 	}
+
+	virtual void print(std::ostream& os) const;
 
 	/**
 	 * delete all the nodes of the expression *excepted symbols*
@@ -96,13 +123,21 @@ public:
 	 */
 	~P_ThickEquality();
 
-	void acceptVisitor(CtrGenerator& g) const {
+	virtual void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
 	}
+
+	virtual void print(std::ostream& os) const;
 
 	const P_ExprNode& expr;
 	Interval d;
 };
+
+
+inline std::ostream& operator<<(std::ostream& os, const P_NumConstraint& ctr) {
+	ctr.print(os);
+	return os;
+}
 
 } // end namespace parser
 } // end namespace ibex
