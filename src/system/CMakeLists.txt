@@ -5,12 +5,10 @@ set (IBEX_SUBDIR_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FncActivation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FncKhunTucker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FritzJohnCond.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/ibex_FritzJohnFactory.cpp_
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_NormalizedSystem.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/ibex_SystemCopy.cpp_
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_System.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_SystemFactory.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/ibex_SystemMerge.cpp_
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_SystemMerge.cpp
   PARENT_SCOPE)
 
 set (IBEX_SUBDIR_HEADERS

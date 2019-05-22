@@ -12,6 +12,9 @@ list (APPEND IBEX_HEADERS ${INTERVAL_LIB_WRAPPER_DIR}/ibex_IntervalLibWrapper.h
                         ${INTERVAL_LIB_WRAPPER_DIR}/ibex_IntervalLibWrapper.inl)
 list (APPEND IBEX_INCDIRS ${INTERVAL_LIB_WRAPPER_DIR})
 
+# Add files from linear programming wrapper
+list (APPEND IBEX_INCDIRS ${LP_LIB_WRAPPER_DIR})
+
 # Generate ibex_Setting.h and add its path to the list of include directories
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Setting.h.in

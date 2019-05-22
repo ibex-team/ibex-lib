@@ -6,7 +6,7 @@ set (IBEX_SUBDIR_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Fnc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FncProj.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Function.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/ibex_FunctionBuild.cpp_
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FunctionBuild.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Gradient.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_HC4Revise.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_InHC4Revise.cpp

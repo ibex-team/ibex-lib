@@ -61,8 +61,11 @@ add_subdirectory (${ITV_LIB_SUBDIR})
 ################################################################################
 # Configure the library for linear programming
 ################################################################################
+set(LP_LIB "none" CACHE STRING "Library used for linear programming")
 set (IBEX_LP_LIB_INCLUDES "#define __IBEX_NO_LP_SOLVER__")
 set (IBEX_LP_LIB_EXTRA_ATTRIBUTES "")
+set (LP_LIB_SUBDIR plugins/lp_lib_${LP_LIB})
+set (LP_LIB_WRAPPER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${LP_LIB_SUBDIR})
 
 ################################################################################
 # Go to src subdirectory that builds the libibex target
@@ -74,7 +77,9 @@ add_subdirectory (src)
 ################################################################################
 include(CTest)
 if (BUILD_TESTING)
-  add_subdirectory (tests)
+  add_custom_target (check COMMAND ${CMAKE_CTEST_COMMAND} -V $(ARGS)
+                           DEPENDS ibex COMMENT "Running the tests")
+  add_subdirectory (tests EXCLUDE_FROM_ALL)
 endif ()
 
 ################################################################################

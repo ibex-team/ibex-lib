@@ -12,7 +12,7 @@ configure_file(
 set (IBEX_SUBDIR_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Certificate.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Kernel.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LPSolver.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/ibex_LPSolver.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Linear.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Linearizer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LinearizerCombo.cpp
