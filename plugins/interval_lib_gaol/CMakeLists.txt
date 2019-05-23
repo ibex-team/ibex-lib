@@ -17,8 +17,7 @@ endif()
 foreach (LIB gdtoa ultim gaol)
   set (MSG "Looking for ${LIB}")
   message (STATUS "${MSG}")
-  find_library (${LIB}_LIBRARY NAMES ${LIB} HINTS ${GAOL_DIR}
-                PATH_SUFFIXES lib lib/${LIB} ${LIB} ${LIB}/lib
+  find_library (${LIB}_LIBRARY NAMES ${LIB} HINTS ${GAOL_DIR} PATH_SUFFIXES lib
                 DOC "Set to exact lib directory to bypass internal test")
   if (${LIB}_LIBRARY)
     message (STATUS "${MSG} -- found at ${${LIB}_LIBRARY}")
