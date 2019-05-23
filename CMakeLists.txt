@@ -39,12 +39,11 @@ endif()
 ################################################################################
 # Configure the library for interval arithmetic
 ################################################################################
-file (GLOB INTERVAL_PLUGIN_DIRS "plugins/interval_lib_*")
+file (GLOB INTERVAL_PLUGIN_DIRS "interval_lib_wrapper/*")
 set (INTERVAL_LIB_LIST "")
-foreach (plugin_absolute_path ${INTERVAL_PLUGIN_DIRS})
-  get_filename_component (plugin_name ${plugin_absolute_path} NAME)
-  string (SUBSTRING ${plugin_name} 13 -1 itvlib)
-  list (APPEND INTERVAL_LIB_LIST ${itvlib})
+foreach (absolute_path ${INTERVAL_PLUGIN_DIRS})
+  get_filename_component (name ${absolute_path} NAME)
+  list (APPEND INTERVAL_LIB_LIST ${name})
 endforeach ()
 list (SORT INTERVAL_LIB_LIST)
 
@@ -58,7 +57,7 @@ else ()
   message (STATUS "Library for interval arithmetic: ${INTERVAL_LIB}")
 endif ()
 
-set (ITV_LIB_SUBDIR plugins/interval_lib_${INTERVAL_LIB})
+set (ITV_LIB_SUBDIR interval_lib_wrapper/${INTERVAL_LIB})
 set (INTERVAL_LIB_WRAPPER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${ITV_LIB_SUBDIR})
 set (INTERVAL_LIB_WRAPPER_SRC ${INTERVAL_LIB_WRAPPER_DIR}/ibex_IntervalLibWrapper.cpp)
 add_subdirectory (${ITV_LIB_SUBDIR})
