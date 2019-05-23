@@ -81,8 +81,9 @@ add_subdirectory (src)
 ################################################################################
 include(CTest)
 if (BUILD_TESTING)
-  add_custom_target (check COMMAND ${CMAKE_CTEST_COMMAND} -V $(ARGS)
-                           DEPENDS ibex COMMENT "Running the tests")
+  add_custom_target (check
+                      COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure $(ARGS)
+                      DEPENDS ibex COMMENT "Running the tests")
   add_subdirectory (tests EXCLUDE_FROM_ALL)
 endif ()
 
