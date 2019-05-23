@@ -9,6 +9,11 @@ set(IBEX_VERSION_MINOR 8)
 set(IBEX_VERSION_PATCHLEVEL 0)
 set(IBEX_VERSION "${IBEX_VERSION_MAJOR}.${IBEX_VERSION_MINOR}.${IBEX_VERSION_PATCHLEVEL}")
 
+################################################################################
+# Options for install directory
+################################################################################
+set (CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "C++ header files (include)")
+set (CMAKE_INSTALL_LIBDIR "lib" CACHE PATH "object code libraries (lib)")
 
 ################################################################################
 # Print information (to ease debugging)

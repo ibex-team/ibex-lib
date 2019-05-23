@@ -74,6 +74,6 @@ target_compile_options (ibex PUBLIC ${INTERVAL_LIB_CXXFLAGS})
 target_link_libraries (ibex PUBLIC ${INTERVAL_LIB_LIBRARIES})
 
 # Add files that should be installed
-install (TARGETS ibex DESTINATION lib)
-install (FILES ${IBEX_MAIN_HEADER} DESTINATION include)
-install (FILES ${IBEX_HEADERS} DESTINATION include/ibex)
+install (TARGETS ibex DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install (FILES ${IBEX_MAIN_HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install (FILES ${IBEX_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex)
