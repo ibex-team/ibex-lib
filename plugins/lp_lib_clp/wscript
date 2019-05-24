@@ -76,11 +76,11 @@ def configure (conf):
                 conf.env.INSTALL_3RD = True
                 from_3rd = True
                 # Cpl install everything in coin directory
-                conf.env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.INCDIR_3RD, "coin"))
+                conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_3RD)
 
     conf.env.env = env_env_bak
 
-    conf.env.IBEX_LP_LIB_INCLUDES = '#include "ClpSimplex.hpp"'
+    conf.env.IBEX_LP_LIB_INCLUDES = '#include "coin/ClpSimplex.hpp"'
     conf.env.IBEX_LP_LIB_EXTRA_ATTRIBUTES = """
     ClpSimplex *myclp;
     int * _col1Index;

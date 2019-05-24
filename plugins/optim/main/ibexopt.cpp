@@ -275,7 +275,9 @@ int main(int argc, char** argv) {
 			if (overwitten)
 				cout << " (old file saved in " << cov_copy << ")\n";
 		}
-
+#ifdef _IBEX_WITH_AMPL_
+		//TODO  si l'option -AMPL est présent, ecrire le fichier .sol pour ampl
+#endif
 		delete sys;
 
 		return 0;

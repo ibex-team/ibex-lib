@@ -9,8 +9,7 @@ from waflib import Logs
 ###### options #######
 ######################
 def options (opt):
-    opt.add_option ("--with-ampl", action="store_true", dest="WITH_AMPL",
-            help = "Use AMPL")
+    opt.add_option ("--with-ampl", action="store_true", dest="WITH_AMPL", help = "Use AMPL")
 ######################
 ##### configure ######
 ######################
