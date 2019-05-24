@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 2.8.12)
-# Cmake doc can be found at https://cmake.org/cmake/help/v2.8.12/cmake.html
+cmake_minimum_required (VERSION 3.0.2)
+# CMake doc can be found at https://cmake.org/cmake/help/v3.0/
 
 message (WARNING "CMake support is still experimental, use waf to build Ibex")
 
