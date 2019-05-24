@@ -3,11 +3,12 @@ cmake_minimum_required (VERSION 3.0.2)
 
 message (WARNING "CMake support is still experimental, use waf to build Ibex")
 
-project (IBEX CXX)
-set(IBEX_VERSION_MAJOR 2)
-set(IBEX_VERSION_MINOR 8)
-set(IBEX_VERSION_PATCHLEVEL 0)
-set(IBEX_VERSION "${IBEX_VERSION_MAJOR}.${IBEX_VERSION_MINOR}.${IBEX_VERSION_PATCHLEVEL}")
+project (IBEX VERSION 2.8.0 LANGUAGES CXX)
+
+################################################################################
+# Add cmake.utils to the list of CMAKE_MODULE_PATH
+################################################################################
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake.utils")
 
 ################################################################################
 # Options for install directory
@@ -37,39 +38,10 @@ else()
 endif()
 
 ################################################################################
-# Configure the library for interval arithmetic
+# Configure the libraries for interval arithmetic and linear programming
 ################################################################################
-file (GLOB INTERVAL_PLUGIN_DIRS "interval_lib_wrapper/*")
-set (INTERVAL_LIB_LIST "")
-foreach (absolute_path ${INTERVAL_PLUGIN_DIRS})
-  get_filename_component (name ${absolute_path} NAME)
-  list (APPEND INTERVAL_LIB_LIST ${name})
-endforeach ()
-list (SORT INTERVAL_LIB_LIST)
-
-set(INTERVAL_LIB "gaol" CACHE STRING "Library used for interval arithmetic")
-set_property(CACHE INTERVAL_LIB PROPERTY STRINGS ${INTERVAL_LIB_LIST})
-
-list(FIND INTERVAL_LIB_LIST ${INTERVAL_LIB} is_valid)
-if (is_valid LESS 0)
-  message (FATAL_ERROR "Unsupported library for interval arithmetic: ${INTERVAL_LIB}")
-else ()
-  message (STATUS "Library for interval arithmetic: ${INTERVAL_LIB}")
-endif ()
-
-set (ITV_LIB_SUBDIR interval_lib_wrapper/${INTERVAL_LIB})
-set (INTERVAL_LIB_WRAPPER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${ITV_LIB_SUBDIR})
-set (INTERVAL_LIB_WRAPPER_SRC ${INTERVAL_LIB_WRAPPER_DIR}/ibex_IntervalLibWrapper.cpp)
-add_subdirectory (${ITV_LIB_SUBDIR})
-
-################################################################################
-# Configure the library for linear programming
-################################################################################
-set(LP_LIB "none" CACHE STRING "Library used for linear programming")
-set (IBEX_LP_LIB_INCLUDES "#define __IBEX_NO_LP_SOLVER__")
-set (IBEX_LP_LIB_EXTRA_ATTRIBUTES "")
-set (LP_LIB_SUBDIR plugins/lp_lib_${LP_LIB})
-set (LP_LIB_WRAPPER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${LP_LIB_SUBDIR})
+add_subdirectory (interval_lib_wrapper)
+add_subdirectory (lp_lib_wrapper)
 
 ################################################################################
 # Go to src subdirectory that builds the libibex target

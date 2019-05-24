@@ -1,35 +1,34 @@
 # see arithmetic/CMakeLists.txt for comments
 
-set (IBEX_SUBDIR_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcAnd.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcCleared.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcDiameterLT.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcFirstOrder.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcFwdBwd.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcHansenFeasibility.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcImageSubset.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcNo.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcNot.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcOr.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcYes.cpp
-  PARENT_SCOPE)
-
-set (IBEX_SUBDIR_HEADERS
+list (APPEND IBEX_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_BoolInterval.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Pdc.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcAnd.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcAnd.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcCleared.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcCleared.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcDiameterLT.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcDiameterLT.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcFirstOrder.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcFirstOrder.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcFwdBwd.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcFwdBwd.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcHansenFeasibility.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcHansenFeasibility.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcImageSubset.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcImageSubset.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcNo.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcNo.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcNot.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcNot.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcOr.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcOr.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcYes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_PdcYes.h
-  PARENT_SCOPE)
+  )
 
-set (IBEX_SUBDIR_INCDIRS
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  PARENT_SCOPE)
+list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Propagate new values of list to parent scope
+set (IBEX_SRC ${IBEX_SRC} PARENT_SCOPE)
+set (IBEX_INCDIRS ${IBEX_INCDIRS} PARENT_SCOPE)
