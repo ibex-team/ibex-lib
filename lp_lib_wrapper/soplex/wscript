@@ -110,17 +110,3 @@ def configure (conf):
 
     if conf.options.DEBUG:
         conf.define ("DEBUG", 1) # restore DEBUG
-
-    conf.env.IBEX_LP_LIB_INCLUDES = """
-#ifdef DEBUG
-    #undef DEBUG
-    #ifndef DEBUGGING
-        #define DEBUGGING
-    #endif
-    #include "soplex.h"
-    #define DEBUG
-#else
-    #include "soplex.h"
-#endif
-"""
-    conf.env.IBEX_LP_LIB_EXTRA_ATTRIBUTES = "soplex::SoPlex *mysoplex;"

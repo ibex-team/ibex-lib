@@ -25,7 +25,7 @@
 #include "ibex_Exception.h"
 #include "ibex_LPException.h"
 
-@IBEX_LP_LIB_INCLUDES@
+#include "ibex_LPLibWrapper.h"
 
 namespace ibex {
 
@@ -231,7 +231,8 @@ private:
 	bool status_dual; // return status of the dual solving (implementation-specific)
 	/**===============================================================================*/
 
-	@IBEX_LP_LIB_EXTRA_ATTRIBUTES@
+	/* This is a macro that should be defined in ibex_LPLibWrapper.h */
+	IBEX_LPSOLVER_WRAPPER_ATTRIBUTES;
 
 };
 

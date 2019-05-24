@@ -39,17 +39,20 @@ def configure (conf):
 	conf.env.append_unique ("INCLUDES_IBEX", lplib_abspath)
 
 	# check that mandatory files exist
-	for f in [ "ibex_LPWrapper.cpp_" ]:
+	for f in [ "ibex_LPLibWrapper.cpp", "ibex_LPLibWrapper.h" ]:
 			if lplib_node.find_node (f) is None:
 					conf.fatal ("A LP plugin must contain a file named %s" % f)
 
-	# The following variables must be defined in env by the plugin called to
-	# handle the LP library.
-	for var in [ "LP_LIB", "IBEX_LP_LIB_INCLUDES",
-							 "IBEX_LP_LIB_EXTRA_ATTRIBUTES" ]:
-			if not var in conf.env:
-					err = "%s must be defined in env by the plugin %s" % (var, lplib_dirname)
-					conf.fatal (err)
+	# Need to add ibex_LPLibWrapper.(cpp|h) to the source of ibex
+	wrapper_cpp = os.path.join (lplib_abspath, "ibex_LPLibWrapper.cpp")
+	wrapper_h = os.path.join (lplib_abspath, "ibex_LPLibWrapper.h")
+	conf.env.append_unique ("IBEX_SRC", os.path.relpath (wrapper_cpp, "src"))
+	conf.env.append_unique ("IBEX_HDR", os.path.relpath (wrapper_h, "src"))
+
+  # The variable "LP_LIB" must be defined in env by the plugin called to handle
+  # the library for linear programming.
+	if not conf.env["LP_LIB"]:
+		conf.fatal ("LP_LIB must be defined in env by the plugin " + conf.options.LP_LIB)
 
 	# Copy in _IBEX_DEPS some important variables from _LP_LIB
 	# The plugin must use the store LP_LIB (uselib_store argument with

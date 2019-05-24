@@ -13,8 +13,6 @@
 
 namespace ibex {
 
-//const double LPSolver::default_eps = @IBEX_LP_LIB_DEFAULT_EPS@;
-
 /** \brief Stream out \a x. */
 std::ostream& operator<<(std::ostream& os, const LPSolver::Status_Sol x){
 
@@ -285,8 +283,5 @@ bool LPSolver::neumaier_shcherbina_infeasibilitytest() {
 	}
 
 }
-
-
-#include "ibex_LPWrapper.cpp_"
 }
  // end namespace ibex

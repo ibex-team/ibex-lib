@@ -64,14 +64,3 @@ def configure (conf):
     
     if (not(has_cplex1) or not(has_cplex2)) :
         conf.fatal ('CPLEX is not found. Use the option --cplex-path="your_path_to_cplex" ')
-    
-    conf.env.IBEX_LP_LIB_INCLUDES = '#include "ilcplex/cplex.h"'
-    conf.env.IBEX_LP_LIB_EXTRA_ATTRIBUTES = """
-    CPXENVptr  envcplex;
-    CPXLPptr lpcplex;
-    int * indice;
-    double * tmp;
-    int * r_matbeg;
-    double * r_matval;
-    int * r_matind;
-    """

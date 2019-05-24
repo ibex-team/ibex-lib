@@ -35,9 +35,10 @@ ADD_FLEX_BISON_DEPENDENCY (Lexer Parser)
 list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_BINARY_DIR}/parser)
 
 # Create the target for libibex
-add_library (ibex STATIC ${IBEX_SRC})# ${IBEX_HEADERS})
+add_library (ibex STATIC ${IBEX_SRC})
 target_include_directories(ibex PUBLIC ${IBEX_INCDIRS})
 target_link_libraries (ibex PUBLIC ${INTERVAL_LIB})
+target_link_libraries (ibex PUBLIC ${LP_LIB})
 
 ################################################################################
 # ibex.h

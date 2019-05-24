@@ -1,3 +1,6 @@
+#include "ibex_LPSolver.h"
+
+namespace ibex {
 
 LPSolver::LPSolver(int nb_vars, int max_iter, double max_time_out, double eps):
 	nb_vars(0), nb_rows(0), boundvar(1), sense(LPSolver::MINIMIZE),
@@ -81,3 +84,5 @@ void LPSolver::set_epsilon(double eps){
 void LPSolver::add_constraint(const Vector & row, CmpOp sign, double rhs ){
 	throw LPException();
 }
+
+} /* end namespace ibex */

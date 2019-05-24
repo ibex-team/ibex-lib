@@ -1,3 +1,7 @@
+#include "ibex_LPSolver.h"
+
+namespace ibex {
+
 using namespace soplex;
 
 LPSolver::LPSolver(int nb_vars1, int max_iter, double max_time_out, double eps) :
@@ -370,4 +374,4 @@ void LPSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
 	return ;
 }
 
-
+} /* end namespace ibex */

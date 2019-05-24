@@ -15,14 +15,10 @@ endif ()
 set (LP_LIB_ABSPATH ${CMAKE_CURRENT_SOURCE_DIR}/${LP_LIB})
 
 # Go into wrapper directory
-# TODO
-#add_subdirectory (${LP_LIB})
-
-set (IBEX_LP_LIB_INCLUDES "#define __IBEX_NO_LP_SOLVER__" PARENT_SCOPE)
-set (IBEX_LP_LIB_EXTRA_ATTRIBUTES "" PARENT_SCOPE)
+add_subdirectory (${LP_LIB})
 
 # Check that mandatory file exists and add it in IBEX_SRC
-set (LP_LIB_REQUIRED_FILES ibex_LPWrapper.cpp_)
+set (LP_LIB_REQUIRED_FILES ibex_LPLibWrapper.cpp ibex_LPLibWrapper.h)
 
 set (PRE "Error with wrapper of linear programming ${LP_LIB}")
 foreach (f ${LP_LIB_REQUIRED_FILES})
