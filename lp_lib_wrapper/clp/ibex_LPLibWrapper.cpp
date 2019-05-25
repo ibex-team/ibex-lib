@@ -1,10 +1,7 @@
 #include "ibex_LPSolver.h"
 
-<<<<<<< HEAD:plugins/lp_lib_clp/ibex_LPWrapper.cpp_
-=======
 namespace ibex {
 
->>>>>>> cd785c44677fb983fb03439ab83fe32812684ae5:lp_lib_wrapper/clp/ibex_LPLibWrapper.cpp
 LPSolver::LPSolver(int nb_vars1, int max_iter, double max_time_out, double eps) :
 			nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1), sense(LPSolver::MINIMIZE),
 			obj_value(0.0), primal_solution(nb_vars1), dual_solution(1 /*tmp*/),
