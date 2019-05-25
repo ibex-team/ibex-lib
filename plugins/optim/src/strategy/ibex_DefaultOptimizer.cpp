@@ -34,6 +34,7 @@ namespace ibex {
 #define EXTENDED_SYSTEM_TAG 2
 
 #define default_relax_ratio 0.2
+#define default_bisect_ratio 0.5
 
 // The two next functions are necessary because we need
 // the normalized and extended system to build
@@ -59,15 +60,16 @@ ExtendedSystem& DefaultOptimizer::get_ext_sys(const System& sys, double eps_h) {
 DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed, double eps_x) :
 		Optimizer(sys.nb_var,
 			  ctc(get_ext_sys(sys,eps_h)), // warning: we don't know which argument is evaluated first
-//			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x)),
-			  rec(new LSmear(get_ext_sys(sys,eps_h),eps_x)),
+//			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
+
+			  rec(new LSmear(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
 			  rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(get_norm_sys(sys,eps_h), inHC4))) :
 						 (LoupFinder*) new LoupFinderDefault(get_norm_sys(sys,eps_h), inHC4)),
-			  (CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h))),
-//			  (CellBufferOptim&) rec (new  CellBeamSearch (
-//								       (CellHeap&) rec (new CellHeap (get_ext_sys(sys,eps_h))),
-//								       (CellHeap&) rec (new CellHeap (get_ext_sys(sys,eps_h))),
-//								       get_ext_sys(sys,eps_h))),
+			  //			  (CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h)))
+			      (CellBufferOptim&) rec (new  CellBeamSearch (
+								       (CellHeap&) rec (new CellHeap (get_ext_sys(sys,eps_h))),
+								       (CellHeap&) rec (new CellHeap (get_ext_sys(sys,eps_h))),
+								       get_ext_sys(sys,eps_h))),
 			  get_ext_sys(sys,eps_h).goal_var(),
 			  eps_x,
 			  rel_eps_f,

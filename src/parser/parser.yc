@@ -9,7 +9,11 @@
 // Last Update : Apr 11, 2018
 //===========================================================================
 
-#include "parser.cpp_"
+#include "parser.h"
+
+using namespace ibex;
+using namespace parser;
+using namespace std;
 
 %}	
 
@@ -190,12 +194,12 @@ fnc_code      : fnc_code fnc_assign ';'
               |                       
               ;
 
-fnc_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* TODO: if this tmp symbol is not used, the expr $3 will never be deleted */
-                                                  scopes().top().add_expr_tmp_symbol($1,$3); free($1); }
+fnc_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* TODO: if this tmp symbol is not used, the generated expr will never be deleted */
+                                                  scopes().top().add_expr_tmp_symbol($1,&$3->generate()); free($1); delete $3; }
               | TK_CONSTANT TK_EQU expr         { cerr << "Warning: line " << ibex_lineno << ", local variable " << $1 << " shadows the constant of the same name\n"; 
                                                   scopes().top().rem_cst($1);
-                                                  scopes().top().add_expr_tmp_symbol($1,$3); free($1); } 
-              ;           
+                                                  scopes().top().add_expr_tmp_symbol($1,&$3->generate()); free($1); delete $3; } 
+              ;
 
 /**********************************************************************************************************************/
 /*                                                  GOAL                                                              */
@@ -209,7 +213,8 @@ decl_opt_goal :                                 { source().goal = NULL; }
 /**********************************************************************************************************************/
 
 decl_opt_ctrs : 
-              | TK_CTRS ctr_blk_list TK_END
+              | TK_CTRS                         { scopes().push(scopes().top()); /* new scope for temporary symbols */ } 
+                ctr_blk_list TK_END             { scopes().pop(); }
 	          ;
 	          
 ctr_blk_list  : ctr_blk_list_ semicolon_opt     { source().ctrs=new P_ConstraintList($1); }
@@ -221,16 +226,7 @@ ctr_blk_list_ : ctr_blk_list_ ';' ctr_blk       { $1->push_back($3); $$ = $1; }
               ;
 
 ctr_blk       : ctr_loop                        { $$ = $1; }
-              | ctr_assigns ';' ctr             { $$ = $3; }
               | ctr                             { $$ = $1; }
-              ;
-
-ctr_assigns   : ctr_assigns ';' ctr_assign
-              | ctr_assign
-              ;
-
-ctr_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* TODO: if this tmp symbol is not used, the expr $3 will never be deleted */
-                                                  scopes().top().add_expr_tmp_symbol($1,$3); free($1); }
               ;
 
 ctr_loop      : TK_FOR TK_NEW_SYMBOL TK_EQU
@@ -249,6 +245,8 @@ ctr           : expr TK_EQU expr                { $$ = new P_OneConstraint($1,EQ
               | expr   '>'  expr                { $$ = new P_OneConstraint($1,GT,$3); }
               | expr TK_IN  expr                { $$ = new P_ThickEquality($1,$3->_2itv()); delete $3; }
               | '(' ctr ')'                     { $$ = $2; }
+              | TK_NEW_SYMBOL TK_EQU expr       { $$ = new P_TmpSymbolDecl($1,$3); 
+                                                  scopes().top().add_expr_tmp_symbol($1); free($1); }
               ; 
               
 /**********************************************************************************************************************/

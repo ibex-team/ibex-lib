@@ -1,0 +1,71 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import os
+import ibexutils
+from waflib import Logs
+
+def options (opt):
+	# get the list of all possible lp library
+	list_of_lp_lib_plugin = ibexutils.get_dirlist (opt.path)
+	default_lp_lib = "none" if "none" in list_of_lp_lib_plugin else None
+	# if the none plugin does not exist, it will create a error during configure
+
+	# help string for --lp-lib command line option
+	help_string = "Possible values: " + ", ".join (list_of_lp_lib_plugin)
+	help_string += " [default: " + str(default_lp_lib) + "]"
+
+	# add the option --lp-lib
+	opt.add_option ("--lp-lib", action="store", dest="LP_LIB",
+	                                choices = list_of_lp_lib_plugin,
+	                                default = default_lp_lib, help = help_string)
+
+	opt.recurse (list_of_lp_lib_plugin)
+
+def configure (conf):
+	Logs.pprint ("BLUE", "Configuration of the library for LP")
+
+	if conf.options.LP_LIB is None:
+			conf.fatal ("The lp_lib_none plugin is not available.")
+
+	conf.msg ("Library for LP", conf.options.LP_LIB)
+	lplib_node = conf.path.find_node (conf.options.LP_LIB)
+
+	# Recurse on the plugin
+	conf.recurse (conf.options.LP_LIB)
+
+	# Add the path of directory into include paths of ibex
+	lplib_abspath = os.path.join (conf.path.abspath(), conf.options.LP_LIB)
+	conf.env.append_unique ("INCLUDES_IBEX", lplib_abspath)
+
+	# check that mandatory files exist
+	for f in [ "ibex_LPLibWrapper.cpp", "ibex_LPLibWrapper.h" ]:
+			if lplib_node.find_node (f) is None:
+					conf.fatal ("A LP plugin must contain a file named %s" % f)
+
+	# Need to add ibex_LPLibWrapper.(cpp|h) to the source of ibex
+	wrapper_cpp = os.path.join (lplib_abspath, "ibex_LPLibWrapper.cpp")
+	wrapper_h = os.path.join (lplib_abspath, "ibex_LPLibWrapper.h")
+	conf.env.append_unique ("IBEX_SRC", os.path.relpath (wrapper_cpp, "src"))
+	conf.env.append_unique ("IBEX_HDR", os.path.relpath (wrapper_h, "src"))
+
+  # The variable "LP_LIB" must be defined in env by the plugin called to handle
+  # the library for linear programming.
+	if not conf.env["LP_LIB"]:
+		conf.fatal ("LP_LIB must be defined in env by the plugin " + conf.options.LP_LIB)
+
+	# Copy in _IBEX_DEPS some important variables from _LP_LIB
+	# The plugin must use the store LP_LIB (uselib_store argument with
+	# conf.check* functions).
+	conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", conf.env.CXXFLAGS_LP_LIB)
+	if conf.env.ENABLE_SHARED:
+			# if shared lib is used, 3rd party libs are compiled as static lib with
+			# -fPIC and are contained in libibex
+			for lib in conf.env.LIB_LP_LIB:
+					if not lib in conf.env.LIB_3RD_LIST:
+							conf.env.append_unique ("LIB_IBEX_DEPS", lib)
+	else:
+			conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_LP_LIB)
+
+	# Add info on the LP library used to the settings
+	conf.setting_define ("LP_LIB", conf.env["LP_LIB"])

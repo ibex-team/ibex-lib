@@ -12,7 +12,6 @@
 #include "ibex_SetBisect.h"
 #include "ibex_Heap.h"
 #include "ibex_CellStack.h"
-#include "ibex_SetConnectedComponents.cpp_"
 #include "ibex_SepFwdBwd.h"
 #include "ibex_String.h"
 #include "ibex_Id.h"
@@ -20,6 +19,7 @@
 
 #include <stack>
 #include <fstream>
+#include <list>
 
 using namespace std;
 

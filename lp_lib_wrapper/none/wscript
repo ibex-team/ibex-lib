@@ -1,0 +1,18 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import os
+
+######################
+###### options #######
+######################
+def options (opt):
+  pass
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	if conf.env["LP_LIB"]:
+		conf.fatal ("Trying to configure a second library for LP")
+	conf.env["LP_LIB"] = "NONE"

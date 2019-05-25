@@ -1,0 +1,66 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import os, glob
+
+######################
+###### options #######
+######################
+def options (opt):
+    grp_name = "cplex options (when --lp-lib=cplex is used)"
+    grp = opt.add_option_group (grp_name)
+    grp.add_option ("--cplex-path", action="store", type="string",
+                                    dest="CPLEX_PATH", default = "",
+                    help = "location of the cplex lib and include directories \
+                            (by default use the one in 3rd directory)")
+
+######################
+##### configure ######
+######################
+def configure (conf):
+    if conf.env["LP_LIB"]:
+        conf.fatal ("Trying to configure a second library for LP")
+    conf.env["LP_LIB"] = "CPLEX"
+
+    cplex_dir = conf.options.CPLEX_PATH
+    has_cplex1 = False
+    has_cplex2 = False
+    if cplex_dir:
+        cplex_include = os.path.join (cplex_dir, "include")
+        
+        cplex_libtest = glob.glob(os.path.join (cplex_dir, "lib/*/*/libcplex*") )
+        if cplex_libtest:
+            cplex_lib = os.path.abspath(os.path.dirname(cplex_libtest[0]))
+        else:
+            cplex_lib = os.path.join (cplex_dir, "lib/x86-64_linux/static_pic")
+            
+        conf.msg ("Using library CPLEX from", cplex_dir)
+        has_cplex1 = conf.check_cxx (header_name = "ilcplex/cplex.h", includes = cplex_include,
+                use = ["IBEX", "LP_LIB"], uselib_store = "LP_LIB", mandatory =False)
+        has_cplex2 = conf.check_cxx (lib = ["cplex", "pthread"], libpath = cplex_lib,
+                use = ["IBEX", "LP_LIB"], uselib_store = "LP_LIB", mandatory =False)
+        if (not(has_cplex1) or not(has_cplex2)) :
+            cplex_include = os.path.join (cplex_dir, "cplex/include")
+            cplex_dir = os.path.join (cplex_dir, "cplex")
+            cplex_libtest = glob.glob(os.path.join (cplex_dir, "lib/*/*/libcplex*") )
+            if cplex_libtest:
+                cplex_lib = os.path.abspath(os.path.dirname(cplex_libtest[0]))
+            else:
+                cplex_lib = os.path.join (cplex_dir, "lib/x86-64_linux/static_pic")
+                
+        conf.env.append_unique ("INCLUDES_IBEX_DEPS", cplex_include)
+        conf.env.append_unique ("LIBPATH_IBEX_DEPS", cplex_lib)
+    else:
+        cplex_include = ""
+        cplex_lib = ""
+
+    if (not(has_cplex1) or not(has_cplex2)) :
+        conf.msg ("Using library CPLEX from", cplex_dir)
+        has_cplex1 = conf.check_cxx (header_name = "ilcplex/cplex.h", includes = cplex_include,
+            use = ["IBEX", "LP_LIB"], uselib_store = "LP_LIB", mandatory =False)
+        has_cplex2 = conf.check_cxx (lib = ["cplex", "pthread"], libpath = cplex_lib,
+            use = ["IBEX", "LP_LIB"], uselib_store = "LP_LIB", mandatory =False)
+    
+    
+    if (not(has_cplex1) or not(has_cplex2)) :
+        conf.fatal ('CPLEX is not found. Use the option --cplex-path="your_path_to_cplex" ')

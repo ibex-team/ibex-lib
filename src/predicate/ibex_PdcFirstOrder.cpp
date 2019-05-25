@@ -78,7 +78,8 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 
 	IntervalMatrix* J2;
 	if (N==n) J2=J; // useless to build J a second time.
-	else if (M+1>N) { // cannot be full rank
+
+	if (M+1>N) { // cannot be full rank
 		delete J;
 		return MAYBE;
 	}

@@ -23,6 +23,11 @@ LargestFirst::LargestFirst(const Vector& prec, double ratio1) : Bsc(prec), ratio
 
 }
 
+  bool LargestFirst::nobisectable(const IntervalVector & box, int i) const {
+    return too_small (box, i);
+  }
+
+
 BisectionPoint LargestFirst::choose_var(const Cell& cell) {
 
 	const IntervalVector& box=cell.box;
@@ -30,7 +35,7 @@ BisectionPoint LargestFirst::choose_var(const Cell& cell) {
 	int var =-1;
 	double l=0.0;
 	for (int i=0; i< box.size(); i++)	{
-		if (!too_small(box,i)){
+	  if (!(nobisectable (box,i))){
 			if (var==-1) {
 				var=i;
 				l = uniform_prec()? box[i].diam() : (box[i].diam()/prec(i));

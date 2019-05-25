@@ -1,0 +1,54 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import ibexutils
+import os, sys
+from waflib import Logs
+
+######################
+###### options #######
+######################
+def options (opt):
+	grp_name = "Profil/Bias options (when --interval-lib=bias is used)"
+	grp = opt.add_option_group (grp_name)
+	grp.add_option ("--bias-dir", action="store", type="string", dest="BIAS_PATH", default = "", help = "location of the Profil/Bias lib and include directories")
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	if conf.env["INTERVAL_LIB"]:
+		conf.fatal ("Trying to configure a second library for interval arithmetic")
+	conf.env["INTERVAL_LIB"] = "BIAS"
+
+	bias_dir = conf.options.BIAS_PATH
+
+	if bias_dir:
+		conf.msg ("Using library bias from", bias_dir)
+		bias_include = os.path.join (bias_dir, "include")
+		bias_lib = os.path.join (bias_dir, "lib")
+		conf.env.append_unique ("INCLUDES_IBEX_DEPS", bias_include)
+		conf.env.append_unique ("LIBPATH_IBEX_DEPS", bias_lib)
+	else:
+		bias_include = ""
+		bias_lib = ""
+
+	# Looking for Bias header and library (in fact libraries Profil, Bias and lr)
+	conf.check_cxx (header_name = "BIAS/BiasF.h", includes = bias_include,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
+	biaslibs = ["Profil", "Bias", "lr"]
+	conf.check_cxx (lib = biaslibs, libpath = bias_lib,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
+
+    # It is necessary to use filib, to avoid problem with x80 processor
+#==============================================================================
+#        This option prevents undesirable excess precision on machines such
+#        as the 68000 where the floating registers (of the 68881) keep more
+#        precision than a "double" is supposed to have.  Similarly for the
+#        x86 architecture.  For most programs, the excess precision does
+#        only good, but a few programs rely on the precise definition of
+#        IEEE floating point.  Use -ffloat-store for such programs, after
+#        modifying them to store all pertinent intermediate computations
+#        into variables.
+#==============================================================================
+	conf.check_cxx (cxxflags = "-ffloat-store", use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")

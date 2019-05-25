@@ -52,8 +52,9 @@ public:
 	/** Add a function. */
 	void add_func(const char* id, Function* f);
 
-	/** Add a local variable in a function/constraint declaration. */
-	void add_expr_tmp_symbol(const char* tmp_symbol, const P_ExprNode* expr);
+	/** Add a local variable in a function/constraint declaration.
+	 * At parse time, expr can be set to NULL. */
+	void add_expr_tmp_symbol(const char* tmp_symbol, const ExprNode* expr=NULL);
 
 	/** Add a variable symbol (domain is (-oo,oo)x...). */
 	void add_var(const char* id, const Dim* dim);
@@ -82,7 +83,7 @@ public:
 	Function& get_func(const char* id);
 
 	/* Return the expression bound to a tmp symbol */
-	const P_ExprNode& get_expr_tmp_expr(const char* id) const;
+	const ExprNode* get_expr_tmp_expr(const char* id) const;
 
 	/* Return the symbol attached to a string */
 	std::pair<const ExprSymbol*,const Domain*> get_var(const char* id) const;

@@ -10,8 +10,10 @@
 #define __IBEX_LSMEAR__
 
 #include "ibex_SmearFunction.h"
-#include "ibex_LPSolver.h"
 
+#include "ibex_OptimLargestFirst.h"
+#include "ibex_LPSolver.h"
+#include "ibex_ExtendedSystem.h"
 namespace ibex {
 
 typedef enum{ LSMEAR=0, LSMEAR_MG } lsmear_mode;
@@ -35,9 +37,9 @@ public :
 	 *
 	 * \param lsmode	- variant (see the paper)
 	 *
-	 * For the parameters, see #SmearFunction::SmearFunction(System&, double, double).
+	 * For the parameters, see #SmearFunction::SmearFunction(ExtendedSystem&, double, double).
 	 */
-	LSmear (System& sys,  double prec, double ratio=Bsc::default_ratio(),
+	LSmear (ExtendedSystem& sys,  double prec, double ratio=Bsc::default_ratio(),
 			lsmear_mode lsmode=LSMEAR_MG);
 
 	/*
@@ -45,9 +47,19 @@ public :
 	 *
 	 * \see #LSmear(System&, double, double, lsmear_mode)
 	 */
-	LSmear (System& sys, const Vector& prec, double ratio=Bsc::default_ratio(),
+	LSmear (ExtendedSystem& sys, const Vector& prec, double ratio=Bsc::default_ratio(),
 			lsmear_mode lsmode=LSMEAR_MG);
 
+	/*
+	 * \brief Variant with an OptimLargestFirst bisector as default bisector 
+	 * used by default optimizer
+	 */
+	LSmear (ExtendedSystem& sys, double prec, OptimLargestFirst& lf,lsmear_mode lsmode=LSMEAR_MG);
+/*
+	 * \brief Variant with an OptimLargestFirst bisector as default bisector and a vector of precisions
+
+	 */
+	LSmear (ExtendedSystem& sys,const Vector& prec, OptimLargestFirst& lf,lsmear_mode lsmode=LSMEAR_MG);
 	/**
 	 * \brief Delete this.
 	 */
@@ -78,17 +90,29 @@ public :
 	 * \brief The lsmear variant (LSMEAR or LSMEAR_MG)
 	 */
 	lsmear_mode lsmode;
+	
 
 };
 
 /*============================================ inline implementation ============================================ */
 
-inline LSmear::LSmear(System& sys,  double prec, double ratio, lsmear_mode lsmode) : SmearSumRelative(sys,prec,ratio),
+inline LSmear::LSmear(ExtendedSystem& sys,  double prec, double ratio, lsmear_mode lsmode) : SmearSumRelative(sys,prec,ratio),
+		lsmode(lsmode) {
+		  mylinearsolver = new LPSolver(sys.nb_var);
+}
+
+  inline LSmear::LSmear(ExtendedSystem& sys, double prec, OptimLargestFirst& lf, lsmear_mode lsmode) : SmearSumRelative(sys,prec,lf),
 		lsmode(lsmode) {
 	mylinearsolver = new LPSolver(sys.nb_var);
 }
 
-inline LSmear::LSmear(System& sys, const Vector& prec, double ratio,lsmear_mode lsmode) : SmearSumRelative(sys,prec,ratio),
+inline LSmear::LSmear(ExtendedSystem& sys, const Vector& prec, OptimLargestFirst& lf, lsmear_mode lsmode) : SmearSumRelative(sys,prec,lf),
+		lsmode(lsmode) {
+	mylinearsolver = new LPSolver(sys.nb_var);
+}
+
+
+inline LSmear::LSmear(ExtendedSystem& sys, const Vector& prec, double ratio,lsmear_mode lsmode) : SmearSumRelative(sys,prec,ratio),
 		lsmode(lsmode) {
 	mylinearsolver = new LPSolver(sys.nb_var);
 }

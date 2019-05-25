@@ -10,12 +10,11 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Function.h"
-#include "ibex_Expr.h"
+#include "ibex_ExprCopy.h"
 #include "ibex_Eval.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
-#include "ibex_FunctionBuild.cpp_"
 
 using namespace std;
 

@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Apr 26, 2017
-// Last Update : Jul 26, 2017
+// Last Update : May 09, 2019
 //============================================================================
 
 #include <stdlib.h>
@@ -17,28 +17,28 @@ using namespace std;
 
 namespace ibex {
 
-FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function* df, Function** dg, const IntervalVector& current_box, const BitSet& active) :
+FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Function** _dg, const IntervalVector& current_box, const BitSet& active) :
 								Fnc(1,1), nb_mult(0), // **tmp**
-								n(sys.nb_var), // **tmp**
-								sys(sys), df(df), dg(dg),
-								eq(BitSet::empty(sys.nb_ctr)),
-								ineq(BitSet::empty(sys.nb_ctr)),
+								n(sys.nb_var), sys(sys), df(_df), dg(active.size()), active(active),
+								eq(BitSet::empty(sys.f_ctrs.image_dim())),
+								ineq(BitSet::empty(sys.f_ctrs.image_dim())),
 								bound_left(BitSet::empty(sys.nb_var)),
 								bound_right(BitSet::empty(sys.nb_var)) {
 
 	int l=1; // lambda0
 
-	for (int i=0; i<sys.nb_ctr; i++) {
-		if (!active[i]) {
-			continue;
-		}
-		else {
-			if (sys.ctrs[i].op==EQ) eq.add(i);
-			else ineq.add(i);
-			l++;
-			//cout << " constraint n°" << i << " active\n";
-		}
+	if (_dg==NULL && !active.empty()) {
+		ibex_error("[FncKhunTucker] an unconstrained system cannot have active constraints");
 	}
+
+	unsigned int i=0; // index of a constraint in the active set
+	for (BitSet::const_iterator c=active.begin(); c!=active.end(); ++c, ++i) {
+		dg.set_ref(i,*_dg[c]);
+		if (sys.ops[c]==EQ) eq.add(i);
+		else ineq.add(i);
+		//cout << " constraint n°" << c << " active\n";
+	}
+	l+=active.size();
 
 	for (int j=0; j<sys.box.size(); j++) {
 		if (current_box[j].lb() <= sys.box[j].lb()) {
@@ -77,44 +77,28 @@ IntervalMatrix FncKhunTucker::gradients(const IntervalVector& x) const {
 
 	IntervalMatrix A=Matrix::zeros(n, nb_mult);
 
-	A.put(0, 0, df->eval_vector(x), false); // init
+	A.put(0, 0, df.eval_vector(x), false); // init
 
 	int mult=1;
 
-	if (!ineq.empty()) {
-		int c;
-		for (int i=0; i<ineq.size(); i++) {
-			c = (i==0)? ineq.min() : ineq.next(c);
-			A.put(0, mult, dg[c]->eval_vector(x), false);
-			mult++;
-		}
+	for (BitSet::const_iterator i=ineq.begin(); i!=ineq.end(); ++i) {
+		A.put(0, mult, dg[i].eval_vector(x), false);
+		mult++;
 	}
 
-	if (!eq.empty()) {
-		int c;
-		for (int i=0; i<eq.size(); i++) {
-			c = (i==0)? eq.min() : eq.next(c);
-			A.put(0, mult, dg[c]->eval_vector(x), false);
-			mult++;
-		}
+	for (BitSet::const_iterator i=eq.begin(); i!=eq.end(); ++i) {
+		A.put(0, mult, dg[i].eval_vector(x), false);
+		mult++;
 	}
 
-	if (!bound_left.empty()) {
-		int v;
-		for (int i=0; i<bound_left.size(); i++) {
-			v = (i==0)? bound_left.min() : bound_left.next(v);
-			A[v][mult] = -1;
-			mult++;
-		}
+	for (BitSet::const_iterator v=bound_left.begin(); v!=bound_left.end(); ++v) {
+		A[v][mult] = -1;
+		mult++;
 	}
 
-	if (!bound_right.empty()) {
-		int v;
-		for (int i=0; i<bound_right.size(); i++) {
-			v = (i==0)? bound_right.min() : bound_right.next(v);
-			A[v][mult] = +1;
-			mult++;
-		}
+	for (BitSet::const_iterator v=bound_right.begin(); v!=bound_right.end(); ++v) {
+		A[v][mult] = +1;
+		mult++;
 	}
 
 	assert(mult==nb_mult);
@@ -138,61 +122,50 @@ IntervalVector FncKhunTucker::eval_vector(const IntervalVector& x_lambda, const 
 
 	int lambda0=n;	// The index of lambda0 in the box x_lambda is nb_var.
 
-	int mult=lambda0; // mutipliers indices counter. The first multiplier is lambda0.
+	int l=lambda0; // multipliers indices counter. The first multiplier is lambda0.
 
 	// vector corresponding to the "gradient expression" lambda_0*dg + lambda_1*dg_1 + ... (init
-	IntervalVector grad=x_lambda[mult] * df->eval_vector(x); // init
+	IntervalVector grad=x_lambda[l] * df.eval_vector(x); // init
 
-	mult++;
+	l++;
 
+	IntervalVector gx;
+
+	if (!active.empty()) {
+		gx=sys.f_ctrs.eval_vector(x,active);
+	}
 	// normalization equation lambda_0 + ... = 1.0
 	res[lambda0] = x_lambda[lambda0] - 1.0; // init
 
-	if (!ineq.empty()) {
-		int c;
-		for (int i=0; i<ineq.size(); i++) {
-			c = (i==0)? ineq.min() : ineq.next(c);
-			grad += x_lambda[mult] * dg[c]->eval_vector(x);
-			res[mult] = x_lambda[mult] * sys.ctrs[c].f.eval(x);
-			res[lambda0] += x_lambda[mult];
-			mult++;
-		}
+	for (BitSet::const_iterator i=ineq.begin(); i!=ineq.end(); ++i) {
+		grad += x_lambda[l] * dg[i].eval_vector(x);
+		res[l] = x_lambda[l] * gx[i];
+		res[lambda0] += x_lambda[l];
+		l++;
 	}
 
-	if (!eq.empty()) {
-		int c;
-		for (int i=0; i<eq.size(); i++) {
-			c = (i==0)? eq.min() : eq.next(c);
-			grad += x_lambda[mult] * dg[c]->eval_vector(x);
-			res[mult] = sys.ctrs[c].f.eval(x);
-			res[lambda0] += sqr(x_lambda[mult]);
-			mult++;
-		}
+	for (BitSet::const_iterator i=eq.begin(); i!=eq.end(); ++i) {
+		grad += x_lambda[l] * dg[i].eval_vector(x);
+		res[l] = gx[i];
+		res[lambda0] += sqr(x_lambda[l]);
+		l++;
 	}
 
-	if (!bound_left.empty()) {
-		int v;
-		for (int i=0; i<bound_left.size(); i++) {
-			v = (i==0)? bound_left.min() : bound_left.next(v);
-			grad[v] -= x_lambda[mult];
-			res[mult] = x_lambda[mult] * (-x[v]+sys.box[v].lb());
-			res[lambda0] += x_lambda[mult];
-			mult++;
-		}
+	for (BitSet::const_iterator v=bound_left.begin(); v!=bound_left.end(); ++v) {
+		grad[v] -= x_lambda[l];
+		res[l] = x_lambda[l] * (-x[v]+sys.box[v].lb());
+		res[lambda0] += x_lambda[l];
+		l++;
 	}
 
-	if (!bound_right.empty()) {
-		int v;
-		for (int i=0; i<bound_right.size(); i++) {
-			v = (i==0)? bound_right.min() : bound_right.next(v);
-			grad[v] += x_lambda[mult];
-			res[mult] = x_lambda[mult] * (x[v]-sys.box[v].ub());
-			res[lambda0] += x_lambda[mult];
-			mult++;
-		}
+	for (BitSet::const_iterator v=bound_right.begin(); v!=bound_right.end(); ++v) {
+		grad[v] += x_lambda[l];
+		res[l] = x_lambda[l] * (x[v]-sys.box[v].ub());
+		res[lambda0] += x_lambda[l];
+		l++;
 	}
 
-	assert(mult==nb_mult+n);
+	assert(l==nb_mult+n);
 
 	res.put(0, grad);
 
@@ -210,13 +183,17 @@ void FncKhunTucker::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, 
 
 	int lambda0=n;	// The index of lambda0 in the box x_lambda is nb_var.
 
-	int mult=lambda0; // mutipliers indices counter. The first multiplier is lambda0.
+	int l=lambda0; // mutipliers indices counter. The first multiplier is lambda0.
 
 	// matrix corresponding to the "Hessian expression" lambda_0*d^2f+lambda_1*d^2g_1+...=0
-	IntervalMatrix hessian=x_lambda[mult] * df->jacobian(x,v<n? v : -1); // init
-	if (v==-1 || v==mult) J.put(0, mult, df->eval_vector(x), false);
+	IntervalMatrix hessian=x_lambda[l] * df.jacobian(x,v<n? v : -1); // init
+	if (v==-1 || v==l) J.put(0, l, df.eval_vector(x), false);
 
-	mult++;
+	l++;
+
+	IntervalVector gx;
+	if (!active.empty())
+		gx = sys.f_ctrs.eval_vector(x,active);
 
 	// normalization equation (init)
 	J[lambda0].put(0,Vector::zeros(n));
@@ -224,78 +201,63 @@ void FncKhunTucker::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, 
 
 	IntervalVector dgi(n); // store dg_i([x]) (used in several places)
 
-	if (!ineq.empty()) {
-		int c;
-		for (int i=0; i<ineq.size(); i++) {
-			c = (i==0)? ineq.min() : ineq.next(c);
-			hessian += x_lambda[mult] * dg[c]->jacobian(x,v<n? v : -1);
-			dgi=dg[c]->eval_vector(x);
-			J.put(0, mult, dgi, false);
+	for (BitSet::const_iterator i=ineq.begin(); i!=ineq.end(); ++i) {
+		hessian += x_lambda[l] * dg[i].jacobian(x,v<n? v : -1);
+		dgi=dg[i].eval_vector(x);
+		J.put(0, l, dgi, false);
 
-			J.put(mult, 0, (x_lambda[mult]*dgi), true);
-			J.put(mult, n, Vector::zeros(nb_mult), true);
-			J[mult][mult]=sys.ctrs[c].f.eval(x);
+		J.put(l, 0, (x_lambda[l]*dgi), true);
+		J.put(l, n, Vector::zeros(nb_mult), true);
+		J[l][l]=gx[i];
 
-			J[lambda0][mult] = 1.0;
+		J[lambda0][l] = 1.0;
 
-			mult++;
-		}
+		l++;
 	}
 
-	if (!eq.empty()) {
-		int c;
-		for (int i=0; i<eq.size(); i++) {
-			c = (i==0)? eq.min() : eq.next(c);
-			hessian += x_lambda[mult] * dg[c]->jacobian(x,v<n? v : -1);
-			dgi=dg[c]->eval_vector(x);
-			J.put(0, mult, dgi, false);
+	for (BitSet::const_iterator i=ineq.begin(); i!=ineq.end(); ++i) {
+		hessian += x_lambda[l] * dg[i].jacobian(x,v<n? v : -1);
+		dgi=dg[i].eval_vector(x);
+		J.put(0, l, dgi, false);
 
-			J.put(mult, 0, dgi, true);
-			J.put(mult, n, Vector::zeros(nb_mult), true);
+		J.put(l, 0, dgi, true);
+		J.put(l, n, Vector::zeros(nb_mult), true);
 
-			J[lambda0][mult] = 2*x_lambda[mult];
+		J[lambda0][l] = 2*x_lambda[l];
 
-			mult++;
-		}
+		l++;
 	}
 
-	if (!bound_left.empty()) {
-		int v;
-		for (int i=0; i<bound_left.size(); i++) {
-			v = (i==0)? bound_left.min() : bound_left.next(v);
-			// this constraint does not contribute to the "Hessian expression"
-			dgi=Vector::zeros(n);
-			dgi[v]=-1.0;
-			J.put(0, mult, dgi, false);
+	for (BitSet::const_iterator v=bound_left.begin(); v!=bound_left.end(); ++v) {
+		// this constraint does not contribute to the "Hessian expression"
+		dgi=Vector::zeros(n);
+		dgi[v]=-1.0;
+		J.put(0, l, dgi, false);
 
-			J.put(mult, 0, (x_lambda[mult]*dgi), true);
-			J.put(mult, n, Vector::zeros(nb_mult), true);
-			J[mult][mult]=(-x[v]+sys.box[v].lb());
+		J.put(l, 0, (x_lambda[l]*dgi), true);
+		J.put(l, n, Vector::zeros(nb_mult), true);
+		J[l][l]=(-x[v]+sys.box[v].lb());
 
-			J[lambda0][mult] = 1.0;
-			mult++;
-		}
+		J[lambda0][l] = 1.0;
+		l++;
 	}
 
-	if (!bound_right.empty()) {
-		int v;
-		for (int i=0; i<bound_right.size(); i++) {
-			v = (i==0)? bound_right.min() : bound_right.next(v);
-			// this constraint does not contribute to the "Hessian expression"
-			dgi=Vector::zeros(n);
-			dgi[v]=1.0;
-			J.put(0, mult, dgi, false);
 
-			J.put(mult, 0, (x_lambda[mult]*dgi), true);
-			J.put(mult, n, Vector::zeros(nb_mult), true);
-			J[mult][mult]=(x[v]-sys.box[v].ub());
+	for (BitSet::const_iterator v=bound_right.begin(); v!=bound_right.end(); ++v) {
+		// this constraint does not contribute to the "Hessian expression"
+		dgi=Vector::zeros(n);
+		dgi[v]=1.0;
+		J.put(0, l, dgi, false);
 
-			J[lambda0][mult] = 1.0;
-			mult++;
-		}
+		J.put(l, 0, (x_lambda[l]*dgi), true);
+		J.put(l, n, Vector::zeros(nb_mult), true);
+		J[l][l]=(x[v]-sys.box[v].ub());
+
+		J[lambda0][l] = 1.0;
+		l++;
 	}
 
-	assert(mult==nb_mult+n);
+	assert(l==nb_mult+n);
 
 	J.put(0,0,hessian);
 

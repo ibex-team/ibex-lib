@@ -2,10 +2,10 @@
 //                                  I B E X
 // File        : TestParser.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 22, 2012
-// Last Update : Jun 22, 2012
+// Last Update : May 22, 2019
 //============================================================================
 
 #include <sstream>
@@ -348,5 +348,9 @@ void TestParser::sum04() {
 	}
 }
 
+void TestParser::temp_in_loop() {
+	System sys(SRCDIR_TESTS "/minibex/issue380.mbx");
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"((x(1)-1);(x(2)-2);(x(3)-3);(x(4)-4))"));
+}
 
 } // end namespace

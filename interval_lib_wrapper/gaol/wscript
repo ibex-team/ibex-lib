@@ -1,0 +1,189 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import ibexutils
+import os, sys, shutil
+from waflib import Logs, Utils, Context
+from waflib.Configure import conf
+
+@conf
+def install_mathlib_win32 (conf, archive_name):
+	name = ibexutils.archive_name_without_suffix (archive_name)
+	Logs.pprint ("BLUE", "Starting installation of %s"%name)
+	conf.to_log ((" Starting installation of %s " % name).center (80, "="))
+
+	archive_path = os.path.join (conf.path.abspath (), "3rd", archive_name)
+	destnode = conf.bldnode.make_node ("3rd")
+
+	# Install everything in build directory, in '3rd' subdirectory (the 'lib' and
+	# 'include' directory can be copied in conf.env.PREFIX when ./waf install is
+	# called, if needed)
+	incdir = destnode.find_or_declare ("include").abspath()
+	libdir = destnode.find_or_declare ("lib").abspath()
+
+	srcdir = conf.extract_archive (archive_path, name, destnode)
+
+	# Apply patches
+	conf.apply_all_relevant_patches (name)
+
+	conf.setenv ("mathlib", env = conf.env)
+
+	conf.check_cc (header_name = "fenv.h")
+
+	bld = Context.create_context ("build", top_dir = os.path.join (srcdir, "src"),
+																out_dir = os.path.join (srcdir, "src"))
+	bld.init_dirs()
+	bld.logger = conf.logger
+	bld.all_envs.update(conf.all_envs)
+	bld.env = conf.env
+	bld.targets = '*'
+	bld.conf = conf
+
+	bld.stlib (
+		target = "ultim",
+		source = [ "atnat2.c", "halfulp.c", "mplog.c", "slowexp2.c", "ucot.c",
+							 "upow.c", "atnat.c", "mpa.c", "mpsqrt.c", "slowexp.c",
+							 "uexp2.c", "urem.c", "branred.c", "mpatan2.c", "mptan.c",
+							 "slowlog2.c", "uexp.c", "uroot.c", "doasin.c", "mpatan.c",
+							 "sincos32.c", "slowpow.c", "ulog2.c", "usncs.c", "dosincos.c",
+							 "mpexp.c", "slowcot.c", "uasncs.c", "ulog.c", "utan.c",
+							 "DPChange.c" ]
+	)
+
+	bld.compile ()
+
+	if not os.path.exists (incdir):
+		os.makedirs (incdir)
+	for h in ["mathlib_config.h", "mathlib_config_mingw.h", "MathLib.h"]:
+		shutil.copyfile (os.path.join (srcdir, "src", h), os.path.join (incdir, h))
+
+	if not os.path.exists (libdir):
+		os.makedirs (libdir)
+	l = "libultim.a"
+	shutil.copyfile (os.path.join (srcdir, "src", l), os.path.join (libdir, l))
+
+	conf.setenv ("")
+
+	return srcdir, incdir, libdir
+
+######################
+###### options #######
+######################
+def options (opt):
+	grp_name = "Gaol options (when --interval-lib=gaol is used)"
+	grp = opt.add_option_group (grp_name)
+	grp.add_option ("--gaol-dir", action="store", type="string", dest="GAOL_PATH", default = "", help = "location of the Gaol lib and include directories (by default use the one in 3rd directory)")
+	grp.add_option ("--mathlib-dir", action="store", type="string", dest="MATHLIB_PATH", default = "", help = "location of the Mathlib/ultim lib and include directories (by default use the one in 3rd directory)")
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	if conf.env["INTERVAL_LIB"]:
+		conf.fatal ("Trying to configure a second library for interval arithmetic")
+	conf.env["INTERVAL_LIB"] = "GAOL"
+
+	gaol_dir = conf.options.GAOL_PATH
+	mathlib_dir = conf.options.MATHLIB_PATH
+
+	if mathlib_dir != "":
+		conf.msg("Using library mathlib/ultim from", mathlib_dir)
+		mathlib_include = os.path.join (mathlib_dir, "include")
+		mathlib_lib = os.path.join (mathlib_dir, "lib")
+		conf.env.append_unique ("INCLUDES_IBEX_DEPS", mathlib_include)
+		conf.env.append_unique ("LIBPATH_IBEX_DEPS", mathlib_lib)
+	else:
+		conf.msg("Using library mathlib/ultim from", "3rd/ subdirectory")
+		mathlib_archive = "mathlib-2.1.0.tar.gz"
+		if Utils.is_win32:
+			mathlib_ret = conf.install_mathlib_win32 (mathlib_archive)
+		else:
+			mathlib_ret = conf.configure_3rd_party_with_autotools (mathlib_archive)
+		_, mathlib_include, mathlib_lib = mathlib_ret
+		conf.env.INSTALL_3RD = True
+		conf.env.append_unique ("LIB_3RD_LIST", "ultim")
+
+	# Looking for mathlib header and library (called ultim)
+	conf.check_cxx (header_name = "MathLib.h", includes = mathlib_include,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store= "ITV_LIB")
+	conf.check_cxx (lib = "ultim", libpath = mathlib_lib,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
+
+	if gaol_dir != "":
+		conf.msg ("Using library gaol from", gaol_dir)
+		gaol_include = os.path.join (gaol_dir, "include")
+		gaol_lib = os.path.join (gaol_dir, "lib")
+		conf.env.append_unique ("INCLUDES_IBEX_DEPS", gaol_include)
+		conf.env.append_unique ("LIBPATH_IBEX_DEPS", gaol_lib)
+	else:
+		conf.msg ("Using library gaol from", "3rd/ subdirectory")
+		gaol_archive = "gaol-4.2.0.tar.gz"
+		if Utils.is_win32:
+			args = "--with-mathlib-include=%s" % ibexutils.convert_path_win2msys (mathlib_include)
+			args += " --with-mathlib-lib=%s" % ibexutils.convert_path_win2msys (mathlib_lib)
+			# On windows, we disable SSE instructions (it can generate failures during
+			# execution). You can enable SSE instructions by deleting the next line,
+			# do it at your own risk.
+			args += " --disable-simd"
+		else:
+			args = "--with-mathlib-include=%s" % mathlib_include
+			args += " --with-mathlib-lib=%s" % mathlib_lib
+		args += " --disable-preserve-rounding --enable-optimize --disable-verbose-mode"
+		gaol_ret = conf.configure_3rd_party_with_autotools (gaol_archive,
+				conf_args = args)
+		_, gaol_include, gaol_lib = gaol_ret
+		conf.env.INSTALL_3RD = True
+		conf.env.append_unique ("LIB_3RD_LIST", [ "gdtoa", "gaol" ] )
+
+	# Looking for gdtoa header and library (it should be provided gaol)
+	conf.check_cxx (header_name = "gdtoa/gdtoa.h", includes = gaol_include,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store="ITV_LIB")
+	conf.check_cxx (lib = "gdtoa", libpath = gaol_lib,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
+
+	# Looking for gaol headers and library.
+	# We also test if we need to add sse2 or sse3 flags.
+	D = {"header_name": "gaol/gaol.h", "mandatory": False, "errmsg": "no",
+				"includes": gaol_include, "use": [ "IBEX", "ITV_LIB" ],
+				"uselib_store": "ITV_LIB"}
+	if Utils.is_win32: # on windows we need at least SSE2
+		ret = None
+	else:
+		ret = conf.check_cxx (**D)
+	if not ret:
+		D["cxxflags"] = "-msse2"
+		D["msg"] = "Checking for header "+D["header_name"]+" with "+D["cxxflags"]
+		ret = conf.check_cxx (**D)
+	if not ret:
+		D["cxxflags"] = "-msse3"
+		D["msg"] = "Checking for header "+D["header_name"]+" with "+D["cxxflags"]
+		ret = conf.check_cxx (**D)
+	if not ret:
+		conf.fatal ("Cannot find C++ flags to add to use gaol/gaol.h")
+
+	conf.check_cxx (header_name = "gaol/gaol_interval.h", includes = gaol_include,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
+	conf.check_cxx (lib = "gaol", libpath = gaol_lib,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
+
+	# We need to reverse the order of the lib because check_cxx append the new lib
+	# and the order in which we check for the lib is the opposite order needed by
+	# the linker (last libraries should resolve undefined references from previous
+	# libraries).
+	conf.env["LIB_ITV_LIB"].reverse()
+
+
+	# XXX: Why are these flags necessary ? 
+    # It is necessary to use filib, to avoid problem with x80 processor
+#==============================================================================
+#        This option prevents undesirable excess precision on machines such
+#        as the 68000 where the floating registers (of the 68881) keep more
+#        precision than a "double" is supposed to have.  Similarly for the
+#        x86 architecture.  For most programs, the excess precision does
+#        only good, but a few programs rely on the precise definition of
+#        IEEE floating point.  Use -ffloat-store for such programs, after
+#        modifying them to store all pertinent intermediate computations
+#        into variables.
+#==============================================================================
+	if Utils.is_win32: 
+		conf.check_cxx (cxxflags = "-ffloat-store", use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
