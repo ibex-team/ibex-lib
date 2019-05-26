@@ -151,21 +151,77 @@ AmplInterface::~AmplInterface() {
 	}
 }
 
-bool AmplInterface::writeSolution(double * sol, bool found) {
-	const char* message;
 
-	//TODO setup a nicer message
-	if (found) {
-		message = "IBEX found a solution.\n";
+#ifdef	_IBEX_WITH_OPTIM_
+bool AmplInterface::writeSolution(Optimizer& o) {
+	std::stringstream message;
+
+	Optimizer::Status status =o.get_status();
+	switch(status) {
+		case Optimizer::SUCCESS:
+			message << " optimization successful!" << std::endl;
+			solve_result_num=0;
+			break;
+		case Optimizer::INFEASIBLE:
+			message << " infeasible problem" << std::endl;
+			solve_result_num=200;
+			break;
+		case Optimizer::NO_FEASIBLE_FOUND:
+			message << " no feasible point found (the problem may be infeasible)" << std::endl;
+			solve_result_num=201;
+			break;
+		case Optimizer::UNBOUNDED_OBJ:
+			message << " possibly unbounded objective (f*=-oo)" << std::endl;
+			solve_result_num=300;
+			break;
+		case Optimizer::TIME_OUT:
+			message << " time limit " << o.timeout << "s. reached" << std::endl;
+			solve_result_num=400;
+			break;
+		case Optimizer::UNREACHED_PREC:
+			message << " unreached precision"  << std::endl;
+			solve_result_num=402;
+			break;
+		}
+	// No solution found and optimization stopped with empty buffer
+	// before the required precision is reached => means infeasible problem
+	if (status==Optimizer::INFEASIBLE) {
+		message << " infeasible problem\n ";
 	} else {
-		message = "IBEX could not found a solution.\n";
+		double loup = o.get_loup();
+		message <<  " f* in\t[" << o.get_uplo() <<"," << loup << "]" << std::endl;
+		message <<  "\t(best bound)" << std::endl << std::endl;
+
+		double rel_prec=o.get_obj_rel_prec();
+		double abs_prec=o.get_obj_abs_prec();
+
+		message << " relative precision on f*:\t" << rel_prec;
+		if (rel_prec <= o.rel_eps_f)
+			message <<  " [passed] ";
+		message  << std::endl;
+
+		message <<  " absolute precision on f*:\t" << abs_prec;
+		if (abs_prec <= o.abs_eps_f)
+			message <<   " [passed] " ;
+		message << std::endl;
 	}
 
-	write_sol(const_cast<char*>(message), sol, NULL, NULL);
+	message <<  " cpu time used:\t\t\t" << o.get_time() << "s";
+	if (o.get_data().time()!=o.get_time())
+		message <<  " [total=" << o.get_data().time() << "]";
+	message << std::endl;
+	message <<  " number of cells:\t\t" << o.get_nb_cells();
+	if (o.get_data().nb_cells()!=o.get_nb_cells())
+		message <<   " [total=" << o.get_data().nb_cells() << "]";
+	message  << std::endl << std::endl;
+
+	const char* mes = message.str().c_str();
+	Vector sol = o.get_loup_point().mid();
+	write_sol(mes, sol.raw(), NULL, NULL);
 
 	return true;
 }
-
+#endif
 
 
 

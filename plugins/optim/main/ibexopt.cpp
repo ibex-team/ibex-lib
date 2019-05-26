@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
+	args::Flag option_ampl(parser, "AMPL", "Activate the AMPL output.",{"AMPL"});
 
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
@@ -94,13 +95,16 @@ int main(int argc, char** argv) {
 	try {
 
 		System *sys;
+#ifdef _IBEX_WITH_AMPL_
+		AmplInterface *ampl;
+#endif
 
 		string extension = filename.Get().substr(filename.Get().find_last_of('.')+1);
 		if (extension == "nl") {
 
 #ifdef _IBEX_WITH_AMPL_
-			AmplInterface ampl(filename.Get());
-			sys = new System(ampl);
+			ampl = new AmplInterface(filename.Get());
+			sys = new System(*ampl);
 #else
 			cerr << "\n\033[31mCannot read \".nl\" files: AMPL plugin required \033[0m(try reconfigure with --with-ampl)\n\n";
 			exit(0);
@@ -276,9 +280,15 @@ int main(int argc, char** argv) {
 				cout << " (old file saved in " << cov_copy << ")\n";
 		}
 #ifdef _IBEX_WITH_AMPL_
-		//TODO  si l'option -AMPL est présent, ecrire le fichier .sol pour ampl
+		if (option_ampl) {
+			//  si l'option -AMPL est présent, ecrire le fichier .sol pour ampl
+			ampl->writeSolution(o);
+		}
 #endif
 		delete sys;
+		if (ampl) {
+			delete ampl;
+		}
 
 		return 0;
 

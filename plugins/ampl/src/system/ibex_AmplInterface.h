@@ -14,6 +14,7 @@
 
 #include "ibex_SystemFactory.h"
 #include "ibex_Expr.h"
+#include "ibex_Setting.h"
 
 #ifdef __GNUC__
 #include <ciso646> // just to initialize _LIBCPP_VERSION
@@ -30,6 +31,9 @@
 #endif // (_MSC_VER >= 1600)
 #endif
 
+#ifdef	_IBEX_WITH_OPTIM_
+#include "ibex_Optimizer.h"
+#endif
 
 struct ASL;
 struct expr;
@@ -71,8 +75,9 @@ public:
 
 	virtual ~AmplInterface();
 
-	bool writeSolution(double* sol, bool found);
-
+#ifdef	_IBEX_WITH_OPTIM_
+	bool writeSolution(Optimizer& o);
+#endif
 
 	//static const double default_max_bound;
 
