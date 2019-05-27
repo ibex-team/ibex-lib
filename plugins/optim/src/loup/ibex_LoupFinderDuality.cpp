@@ -65,8 +65,8 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 
 	Vector goal=igoal.mid();
 
-	int j=0;
-	for (; j<n; j++)
+	size_t j=0;
+	for (; j<(size_t) n; j++)
 		lp_solver.set_obj_var(j,goal[j]);
 	for (; j<nb_LP_var; j++)
 		lp_solver.set_obj_var(j,0);

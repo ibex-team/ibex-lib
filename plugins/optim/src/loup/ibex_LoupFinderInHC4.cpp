@@ -89,7 +89,8 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 					if (c==goal_ctr) // ---> f(x)<=y
 						right_cst=Interval::neg_reals();
 					else
-						right_cst=Interval::zero();      break;
+						right_cst=Interval::zero();
+					break;
 				case GEQ :
 				case GT : right_cst=Interval::pos_reals();  break;
 				}
