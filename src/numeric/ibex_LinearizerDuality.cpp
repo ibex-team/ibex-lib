@@ -78,7 +78,7 @@ int LinearizerDuality::linearize(const IntervalVector& box, LPSolver& lp_solver,
 		for (BitSet::iterator c=active->begin(); c!=active->end(); ++c, i++)  {
 
 			if (!sys.f_ctrs.deriv_calculator().is_linear[c]) {
-				for (int j=0; j<n; j++) {
+				for (size_t j=0; j<n; j++) {
 					Vector row(n_total,0.0);
 					row[j]=1;
 					row[n + c*n +j]=1;
@@ -97,7 +97,7 @@ int LinearizerDuality::linearize(const IntervalVector& box, LPSolver& lp_solver,
 
 			Vector diam_correctly_rounded = (IntervalVector(J[i].ub())-gl).lb();
 
-			for (int j=0; j<n; j++) {
+			for (size_t j=0; j<n; j++) {
 				if (diam_correctly_rounded[j]<0)
 					ibex_error("negative diameter");
 			}

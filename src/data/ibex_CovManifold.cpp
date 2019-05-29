@@ -30,12 +30,13 @@ CovManifold::CovManifold(size_t n, size_t m, size_t nb_ineq, BoundaryType bounda
 	data->_manifold_nb_ineq = nb_ineq;
 	data->_manifold_boundary_type =  boundary_type;
 
-	if (n>0) // if well initialized
+	if (n>0) { // if well initialized
 		// create once for all varset structure for variables and parameters
 		if (m==0)
 			data->_manifold_solution_varset.push_back(VarSet(n,BitSet::all(n),false)); // all parameters
 		else if (m==n)
 			data->_manifold_solution_varset.push_back(VarSet(n,BitSet::empty(n),false)); // no parameter
+	}
 }
 
 CovManifold::CovManifold(const char* filename) : CovManifold(0,0,0 /* tmp */, EQU_ONLY /* by default */) {
