@@ -269,7 +269,7 @@ public:
 	const double rel_eps_f;
 
 	/** Default goal relative precision: 1e-3. */
-	static constexpr double default_rel_eps_f = 1e-03;
+	static constexpr double default_rel_eps_f = 1e-06;
 
 	/** Absolute precision on the objective */
 	const double abs_eps_f;

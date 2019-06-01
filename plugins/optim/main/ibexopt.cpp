@@ -50,8 +50,9 @@ int main(int argc, char** argv) {
 	args::Flag output_no_obj(parser, "output-no-obj", "Generate a COV with domains of variables only (not objective values).", {"output-no-obj"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
-	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
-	args::Flag option_ampl(parser, "AMPL", "Activate the AMPL output.",{"AMPL"});
+	args::Flag fquiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
+	args::ValueFlag<std::string> ampl1(parser, "MPL", "option -AMPL activate the AMPL output.", {'A'});
+	args::Flag ampl2(parser, "AMPL",  "option -AMPL activate the AMPL output.",{"AMPL"});
 
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
@@ -92,6 +93,26 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
+	if (args::get(ampl1)!="MPL") {
+		std::cerr << parser;
+		return 1;
+	}
+	bool quiet =false;
+	if (fquiet) {
+		quiet = true;
+	}
+
+	bool option_ampl=false;
+	if (args::get(ampl1)=="MPL" || ampl2) {
+#ifdef _IBEX_WITH_AMPL_
+			option_ampl = true;
+			quiet =true;
+#else
+			cerr << "\n\033[31mCannot read \".nl\" files: AMPL plugin required \033[0m(try reconfigure with --with-ampl)\n\n";
+			exit(0);
+#endif
+	}
+
 	try {
 
 		System *sys;
@@ -100,19 +121,21 @@ int main(int argc, char** argv) {
 #endif
 
 		string extension = filename.Get().substr(filename.Get().find_last_of('.')+1);
-		if (extension == "nl") {
+		if (extension == "nl" || option_ampl) {
 
 #ifdef _IBEX_WITH_AMPL_
 			ampl = new AmplInterface(filename.Get());
 			sys = new System(*ampl);
 #else
-			cerr << "\n\033[31mCannot read \".nl\" files: AMPL plugin required \033[0m(try reconfigure with --with-ampl)\n\n";
+			cerr << "Cannot read \".nl\" files: AMPL plugin required (try reconfigure with --with-ampl)\n\n";
 			exit(0);
 #endif
+
 		}
-		else
+		else {
 			// Load a system of equations
 			sys = new System(filename.Get().c_str());
+		}
 
 		string output_cov_file; // cov output file
 		bool overwitten=false;  // is it overwritten?
@@ -272,23 +295,82 @@ int main(int argc, char** argv) {
 		if (!quiet)
 			o.report();
 
-		o.get_data().save(output_cov_file.c_str());
+		if (!option_ampl) {
+			o.get_data().save(output_cov_file.c_str());
 
-		if (!quiet) {
-			cout << " results written in " << output_cov_file << "\n";
-			if (overwitten)
-				cout << " (old file saved in " << cov_copy << ")\n";
-		}
+			if (!quiet) {
+				cout << " results written in " << output_cov_file << "\n";
+				if (overwitten)
+					cout << " (old file saved in " << cov_copy << ")\n";
+			}
+		} else {
 #ifdef _IBEX_WITH_AMPL_
-		if (option_ampl) {
 			//  si l'option -AMPL est présent, ecrire le fichier .sol pour ampl
+
+			cout << "IBEXOPT  "<< _IBEX_RELEASE_ << endl;
+//			cout << o.get_nb_cells()  <<  " iterations,  objective in [" << o.get_uplo() <<"," << o.get_loup() << "]" << endl;
+
+			Optimizer::Status status =o.get_status();
+			switch(status) {
+				case Optimizer::SUCCESS:
+					cout << " optimization successful!" << std::endl;
+					break;
+				case Optimizer::INFEASIBLE:
+					cout << " infeasible problem" << std::endl;
+					break;
+				case Optimizer::NO_FEASIBLE_FOUND:
+					cout << " no feasible point found (the problem may be infeasible)" << std::endl;
+					break;
+				case Optimizer::UNBOUNDED_OBJ:
+					cout << " possibly unbounded objective (f*=-oo)" << std::endl;
+					break;
+				case Optimizer::TIME_OUT:
+					cout << " time limit " << o.timeout << "s. reached" << std::endl;
+					break;
+				case Optimizer::UNREACHED_PREC:
+					cout << " unreached precision"  << std::endl;
+					break;
+				}
+			// No solution found and optimization stopped with empty buffer
+			// before the required precision is reached => means infeasible problem
+			if (status==Optimizer::INFEASIBLE) {
+				cout << " infeasible problem\n ";
+			} else {
+				double loup = o.get_loup();
+				cout <<  "f*  in [" << o.get_uplo() <<"," << loup << "]" << std::endl;
+				cout <<  "(best bound)" << std::endl;
+
+				double rel_prec=o.get_obj_rel_prec();
+				double abs_prec=o.get_obj_abs_prec();
+
+				cout << " relative precision on f*:\t" << rel_prec;
+				if (rel_prec <= o.rel_eps_f)
+					cout <<  " [passed] ";
+				cout  << std::endl;
+
+				cout <<  " absolute precision on f*:\t" << abs_prec;
+				if (abs_prec <= o.abs_eps_f)
+					cout <<   " [passed] " ;
+				cout << std::endl;
+			}
+
+			cout <<  " cpu time used:\t\t\t" << o.get_time() << "s";
+			if (o.get_data().time()!=o.get_time())
+				cout <<  " [total=" << o.get_data().time() << "]";
+			cout << std::endl;
+			cout <<  " number of cells:\t\t" << o.get_nb_cells();
+			if (o.get_data().nb_cells()!=o.get_nb_cells())
+				cout <<   " [total=" << o.get_data().nb_cells() << "]";
+			cout  << std::endl;
+
+
 			ampl->writeSolution(o);
-		}
+			if (ampl) {
+				delete ampl;
+			}
 #endif
-		delete sys;
-		if (ampl) {
-			delete ampl;
 		}
+		delete sys;
 
 		return 0;
 
