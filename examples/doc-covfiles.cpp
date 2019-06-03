@@ -9,10 +9,6 @@
 
 #include "ibex.h"
 
-#ifndef _IBEX_WITH_SOLVER_
-#error "You need to install the IbexSolve plugin (--with-solver)."
-#endif
-
 using namespace std;
 using namespace ibex;
 

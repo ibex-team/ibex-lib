@@ -11,7 +11,8 @@ list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_BINARY_DIR})
 
 # Recurse on all subdirectories
 set (SUBDIR_LIST arithmetic bisector combinatorial contractor data function
-                 numeric parser predicate set strategy symbolic system tools)
+                 numeric parser predicate set solver strategy symbolic system
+                 tools)
 
 foreach (subdir ${SUBDIR_LIST})
   add_subdirectory (${subdir})
@@ -73,3 +74,8 @@ install (TARGETS ibex DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install (FILES ${IBEX_MAIN_HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install (FILES ${IBEX_HDR} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex)
 install (FILES ${IBEX_INL} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex)
+
+################################################################################
+# binaries
+################################################################################
+add_subdirectory (bin)

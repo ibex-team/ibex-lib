@@ -108,8 +108,6 @@ def configure (conf):
 
 	# recurse
 	Logs.pprint ("BLUE", "Configuration of the plugins")
-	conf.options.WITH_SOLVER = True
-	Logs.pprint  ("YELLOW", "Note: IbexSolve automatically installed.")
 	conf.recurse ("plugins")
 	Logs.pprint ("BLUE", "Configuration of the src directory")
 	conf.recurse ("src")

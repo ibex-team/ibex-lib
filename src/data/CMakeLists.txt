@@ -11,6 +11,8 @@ list (APPEND IBEX_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovList.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovManifold.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovManifold.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovSolverData.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovSolverData.h
   )
 
 list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_SOURCE_DIR})
