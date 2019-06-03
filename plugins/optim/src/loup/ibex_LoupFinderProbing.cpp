@@ -43,7 +43,7 @@ std::pair<IntervalVector, double> LoupFinderProbing::find(const IntervalVector& 
 			// we activate line probing only if the starting point has improved the goal.
 			// we use the full box (not inbox)
 			line_probing(loup_point, loup, box);
-		else if (!current_loup_point.is_empty())
+		else if (!current_loup_point.is_empty()) {
 			// Try Hansen dichotomy between the last candidate point (pt)
 			// and the loup (note: the segment goes outside of the box, this is on purpose).
 			//
@@ -51,6 +51,7 @@ std::pair<IntervalVector, double> LoupFinderProbing::find(const IntervalVector& 
 			// instead of the last one.
 			loup_point = current_loup_point.lb();
 			loup_changed = dichotomic_line_search(loup_point, loup, pt,true);
+		}
 	}
 
 	/*========================================================*/
