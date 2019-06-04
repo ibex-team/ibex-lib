@@ -29,8 +29,8 @@
 
 
 // The different option of IBEXOPT in Ampl
-double rel_eps_f,abs_eps_f,eps_h, eps_x, initial_loup, timeout;
-int random_seed, trace, rigor;
+double rel_eps_f=0,abs_eps_f=0,eps_h=0, eps_x=0, initial_loup=0, timeout=0;
+int random_seed=0, trace2=0, rigor=0;
 
 static
 keyword keywds[] = { // must be alphabetical order
@@ -42,7 +42,7 @@ keyword keywds[] = { // must be alphabetical order
 		KW(const_cast<char*>("rel_eps_f"), D_val, &rel_eps_f, const_cast<char*>("Relative precision on the objective.")),
 		KW(const_cast<char*>("rigor"), I_val, &rigor, const_cast<char*>("Activate rigor mode (certify feasibility of equalities).")),
 		KW(const_cast<char*>("timeout"), D_val, &timeout, const_cast<char*>("Timeout (time in seconds). Default value is +oo.")),
-		KW(const_cast<char*>("trace"), I_val, &trace, const_cast<char*>("Activate trace. Updates of lower and upper bound are printed while minimizing."))
+		KW(const_cast<char*>("trace"), I_val, &trace2, const_cast<char*>("Activate trace. Updates of lower and upper bound are printed while minimizing."))
 };
 
 static
@@ -199,39 +199,38 @@ AmplInterface::~AmplInterface() {
 #ifdef	_IBEX_WITH_OPTIM_
 bool AmplInterface::writeSolution(Optimizer& o) {
 	std::stringstream message;
-	message << "IBEXOPT  "<< _IBEX_RELEASE_ << std::endl;
+	message << "IBEXOPT  "<< _IBEX_RELEASE_ << " finish : ";
 	Optimizer::Status status =o.get_status();
 	switch(status) {
 		case Optimizer::SUCCESS:
-			message << " optimization successful!" << std::endl;
+			message << " optimization successful!" ;
 			solve_result_num=0;
 			break;
 		case Optimizer::INFEASIBLE:
-			message << " infeasible problem" << std::endl;
+			message << " infeasible problem" ;
 			solve_result_num=200;
 			break;
 		case Optimizer::NO_FEASIBLE_FOUND:
-			message << " no feasible point found (the problem may be infeasible)" << std::endl;
+			message << " no feasible point found (the problem may be infeasible)";
 			solve_result_num=201;
 			break;
 		case Optimizer::UNBOUNDED_OBJ:
-			message << " possibly unbounded objective (f*=-oo)" << std::endl;
+			message << " possibly unbounded objective (f*=-oo)";
 			solve_result_num=300;
 			break;
 		case Optimizer::TIME_OUT:
-			message << " time limit " << o.timeout << "s. reached" << std::endl;
+			message << " time limit " << o.timeout << "s. reached";
 			solve_result_num=400;
 			break;
 		case Optimizer::UNREACHED_PREC:
-			message << " unreached precision"  << std::endl;
+			message << " unreached precision" ;
 			solve_result_num=402;
 			break;
 		}
 
-
-	const char* mes = message.str().c_str();
+	std::string tmp = message.str();
 	Vector sol = o.get_loup_point().mid();
-	write_sol(mes, sol.raw(), NULL, NULL);
+	write_sol(tmp.c_str(), sol.raw(), NULL, NULL);
 
 	return true;
 }
@@ -256,6 +255,7 @@ bool AmplInterface::readASLfg() {
 	asl = (ASL*) ASL_alloc (ASL_read_fg);
 
 	char* stub = getstub (&argv, &Oinfo);
+	getopts (argv, &Oinfo);
 	//getstops =  getstub + getopts
 
 	// Although very intuitive, we shall explain why the second argument
@@ -281,14 +281,13 @@ bool AmplInterface::readASLfg() {
 
 // Reads the solver option from the .nl file through the ASL methods
 bool AmplInterface::readoption() {
-
 	if (abs_eps_f) {
 		option.abs_eps_f = abs_eps_f;
 	}
 	if (rel_eps_f) {
 		option.rel_eps_f = rel_eps_f;
 	}
-	if (trace) {
+	if (trace2) {
 		option.trace = true;
 	}
 	if (rigor) {

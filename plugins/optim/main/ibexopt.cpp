@@ -118,6 +118,8 @@ int main(int argc, char** argv) {
 		System *sys;
 #ifdef _IBEX_WITH_AMPL_
 		AmplInterface *ampl;
+
+		cout << "IBEXOPT  "<< _IBEX_RELEASE_ << " is running..."<< endl;
 #endif
 
 		string extension = filename.Get().substr(filename.Get().find_last_of('.')+1);
@@ -313,7 +315,6 @@ int main(int argc, char** argv) {
 #ifdef _IBEX_WITH_AMPL_
 			//  si l'option -AMPL est présent, ecrire le fichier .sol pour ampl
 
-			cout << "IBEXOPT  "<< _IBEX_RELEASE_ << endl;
 //			cout << o.get_nb_cells()  <<  " iterations,  objective in [" << o.get_uplo() <<"," << o.get_loup() << "]" << endl;
 
 			Optimizer::Status status =o.get_status();
