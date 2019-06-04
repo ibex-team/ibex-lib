@@ -148,53 +148,37 @@ int main(int argc, char** argv) {
 		if (!quiet) {
 			cout << endl << "************************ setup ************************" << endl;
 			cout << "  file loaded:\t\t" << filename.Get() << endl;
-		}
 
-		if (rel_eps_f) {
-			if (!quiet)
+			if (rel_eps_f)
 				cout << "  rel-eps-f:\t\t" << rel_eps_f.Get() << "\t(relative precision on objective)" << endl;
-		}
 
-		if (abs_eps_f) {
-			if (!quiet)
+			if (abs_eps_f)
 				cout << "  abs-eps-f:\t\t" << abs_eps_f.Get() << "\t(absolute precision on objective)" << endl;
-		}
 
-		if (eps_h) {
-			if (!quiet)
+			if (eps_h)
 				cout << "  eps-h:\t\t" << eps_h.Get() << "\t(equality thickening)" << endl;
-		}
 
-		if (eps_x) {
-			if (!quiet)
+			if (eps_x)
 				cout << "  eps-x:\t\t" << eps_x.Get() << "\t(precision on variables domain)" << endl;
-		}
 
-		// This option certifies feasibility with equalities
-		if (rigor) {
-			if (!quiet)
+			// This option certifies feasibility with equalities
+			if (rigor)
 				cout << "  rigor mode:\t\tON\t(feasibility of equalities certified)" << endl;
-		}
 
-		if (initial_loup) {
-			if (!quiet)
+			if (initial_loup)
 				cout << "  initial loup:\t\t" << initial_loup.Get() << " (a priori upper bound of the minimum)" << endl;
+
+			// Fix the random seed for reproducibility.
+			if (random_seed)
+				cout << "  random seed:\t\t" << random_seed.Get() << endl;
+			if (input_file)
+				cout << "  input COV file:\t" << input_file.Get().c_str() << "\n";
 		}
 
-		// Fix the random seed for reproducibility.
-		if (random_seed) {
-			if (!quiet)
-				cout << "  random seed:\t\t" << random_seed.Get() << endl;
-		}
-		if (input_file) {
-			if (!quiet) {
-				cout << "  input COV file:\t" << input_file.Get().c_str() << "\n";
-			}
-		}
 
 		if (output_file) {
 			output_cov_file = output_file.Get();
-		} else {
+		} else if (!option_ampl) {
 			// got from stackoverflow.com:
 			string::size_type const p(filename.Get().find_last_of('.'));
 			// filename without extension
@@ -232,28 +216,54 @@ int main(int argc, char** argv) {
 			inHC4=false;
 		}
 
+		// Merge of the solver option: Default / from command line / from Ampl model
+		double rel_eps_f1 = rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f;
+		double 	abs_eps_f1 = abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f;
+		double 	eps_h1 = eps_h ?    eps_h.Get() : NormalizedSystem::default_eps_h;
+		bool rigor1 = rigor;
+		int random_seed1 = random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed;
+		double 	eps_x1 = eps_x ?    eps_x.Get() : Optimizer::default_eps_x;
+		double timeout1 = timeout ? timeout.Get() : 0;
+		bool trace1 = trace ? trace.Get() : false;
+		double initial_loup1 = initial_loup ? initial_loup.Get() : POS_INFINITY;
+
+#ifdef _IBEX_WITH_AMPL_
+		if (extension == "nl" || option_ampl) {
+			rel_eps_f1 = ampl->option.rel_eps_f;
+			abs_eps_f1 = ampl->option.abs_eps_f;
+			eps_h1 = ampl->option.eps_h;
+			rigor1  = ampl->option.rigor;
+			random_seed1  = ampl->option.random_seed;
+			eps_x1 =  ampl->option.eps_x;
+			timeout1 = ampl->option.timeout;
+			trace1 = ampl->option.trace;
+			initial_loup1 = ampl->option.initial_loup;
+		}
+#endif
+
 		// Build the default optimizer
 		DefaultOptimizer o(*sys,
-				rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f,
-				abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f,
-				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
-				rigor, inHC4,
-				random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed,
-				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x
+				rel_eps_f1,
+				abs_eps_f1,
+				eps_h1,
+				rigor1,
+				inHC4,
+				random_seed1,
+				eps_x1
 				);
 
 		// This option limits the search time
-		if (timeout) {
+		if (timeout1) {
 			if (!quiet)
-				cout << "  timeout:\t\t" << timeout.Get() << "s" << endl;
-			o.timeout=timeout.Get();
+				cout << "  timeout:\t\t" << timeout1 << "s" << endl;
+			o.timeout=timeout1;
 		}
 
 		// This option prints each better feasible point when it is found
-		if (trace) {
+		if (trace1) {
 			if (!quiet)
 				cout << "  trace:\t\tON" << endl;
-			o.trace=trace.Get();
+			o.trace=trace1;
 		}
 
 		if (!inHC4) {
@@ -261,7 +271,8 @@ int main(int argc, char** argv) {
 		}
 
 		if (output_no_obj) {
-			cout << "  Generates COV with:\tvariable domains only\n";
+			if (!quiet)
+				cout << "  Generates COV with:\tvariable domains only\n";
 			o.extended_COV = false;
 		}
 
@@ -278,17 +289,11 @@ int main(int argc, char** argv) {
 		// Search for the optimum
 		// Get the solutions
 		if (input_file)
-			if (initial_loup)
-				o.optimize(input_file.Get().c_str(), initial_loup.Get());
-			else
-				o.optimize(input_file.Get().c_str());
+				o.optimize(input_file.Get().c_str(), initial_loup1);
 		else
-			if (initial_loup)
-				o.optimize(sys->box, initial_loup.Get());
-			else
-				o.optimize(sys->box);
+				o.optimize(sys->box, initial_loup1);
 
-		if (trace) cout << endl;
+		if (trace1) cout << endl;
 
 		// Report some information (computation time, etc.)
 
@@ -304,6 +309,7 @@ int main(int argc, char** argv) {
 					cout << " (old file saved in " << cov_copy << ")\n";
 			}
 		} else {
+
 #ifdef _IBEX_WITH_AMPL_
 			//  si l'option -AMPL est présent, ecrire le fichier .sol pour ampl
 

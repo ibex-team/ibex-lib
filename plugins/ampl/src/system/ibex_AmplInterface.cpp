@@ -27,17 +27,34 @@
 
 #include "amplsolvers/r_opn.hd" /* for N_OPS */
 
-static fint timing = 0;
+
+// The different option of IBEXOPT in Ampl
+double rel_eps_f,abs_eps_f,eps_h, eps_x, initial_loup, timeout;
+int random_seed, trace, rigor;
 
 static
-keyword keywds[] = { // must be alphabetical
-		KW(const_cast<char*>("timing"), L_val, &timing, const_cast<char*>("display timings for the run")),
+keyword keywds[] = { // must be alphabetical order
+		KW(const_cast<char*>("abs_eps_f"), D_val, &abs_eps_f, const_cast<char*>("Absolute precision on the objective.")),
+		KW(const_cast<char*>("eps_h"), D_val, &eps_h, const_cast<char*>("Equality relaxation value.")),
+		KW(const_cast<char*>("eps_x"), D_val, &eps_x, const_cast<char*>("Precision on the variable (**Deprecated**).")),
+		KW(const_cast<char*>("initial_loup"), D_val, &initial_loup, const_cast<char*>("Intial loup (a priori known upper bound).")),
+		KW(const_cast<char*>("random_seed"), I_val, &random_seed, const_cast<char*>("Random seed (useful for reproducibility).")),
+		KW(const_cast<char*>("rel_eps_f"), D_val, &rel_eps_f, const_cast<char*>("Relative precision on the objective.")),
+		KW(const_cast<char*>("rigor"), I_val, &rigor, const_cast<char*>("Activate rigor mode (certify feasibility of equalities).")),
+		KW(const_cast<char*>("timeout"), D_val, &timeout, const_cast<char*>("Timeout (time in seconds). Default value is +oo.")),
+		KW(const_cast<char*>("trace"), I_val, &trace, const_cast<char*>("Activate trace. Updates of lower and upper bound are printed while minimizing."))
 };
 
 static
-Option_Info Oinfo = { const_cast<char*>("testampl"), const_cast<char*>("ANALYSIS TEST"),
-		const_cast<char*>("concert_options"), keywds, nkeywds, 0, const_cast<char*>("ANALYSIS TEST") };
-
+Option_Info Oinfo = {
+		const_cast<char*>("ibexopt"),
+		const_cast<char*>("IBEXOPT "),
+		const_cast<char*>("ibexopt_options"),
+		keywds,
+		nkeywds,
+		0,
+		const_cast<char*>(_IBEX_RELEASE_)
+	};
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /* $Id: invmap.cpp 577 2011-05-21 20:38:48Z pbelotti $
@@ -128,8 +145,33 @@ namespace ibex {
 
 //const double AmplInterface::default_max_bound= 1.e20;
 
+#ifdef	_IBEX_WITH_OPTIM_
 
-AmplInterface::AmplInterface(std::string nlfile) : asl(NULL), _nlfile(nlfile), _x(NULL){
+AmplOption::AmplOption():
+		abs_eps_f(Optimizer::default_abs_eps_f),
+		eps_h(NormalizedSystem::default_eps_h),
+		eps_x(0),
+		initial_loup(POS_INFINITY),
+		random_seed(DefaultOptimizer::default_random_seed),
+		rel_eps_f(Optimizer::default_rel_eps_f),
+		rigor(false),
+		trace(false),
+		timeout(0) {}
+#else
+
+AmplOption::AmplOption():
+		abs_eps_f(1.e-6),
+		eps_h(1.e-8),
+		eps_x(0),
+		initial_loup(POS_INFINITY),
+		random_seed(1),
+		rel_eps_f(1.e-7),
+		rigor(false),
+		trace(false),
+		timeout(0) {}
+#endif
+
+AmplInterface::AmplInterface(std::string nlfile) : asl(NULL), _nlfile(nlfile), _x(NULL), option(){
 
 	if (!readASLfg()) {
 		ibex_error("Fail to read the ampl file.\n");
@@ -138,7 +180,9 @@ AmplInterface::AmplInterface(std::string nlfile) : asl(NULL), _nlfile(nlfile), _
 	if (!readnl()) {
 		ibex_error("Fail to read the nl file.\n");
 	}
-
+	if (!readoption()) {
+		ibex_error("Fail to read the option.\n");
+	}
 }
 
 AmplInterface::~AmplInterface() {
@@ -155,7 +199,7 @@ AmplInterface::~AmplInterface() {
 #ifdef	_IBEX_WITH_OPTIM_
 bool AmplInterface::writeSolution(Optimizer& o) {
 	std::stringstream message;
-
+	message << "IBEXOPT  "<< _IBEX_RELEASE_ << std::endl;
 	Optimizer::Status status =o.get_status();
 	switch(status) {
 		case Optimizer::SUCCESS:
@@ -212,6 +256,7 @@ bool AmplInterface::readASLfg() {
 	asl = (ASL*) ASL_alloc (ASL_read_fg);
 
 	char* stub = getstub (&argv, &Oinfo);
+	//getstops =  getstub + getopts
 
 	// Although very intuitive, we shall explain why the second argument
 	// is passed with a minus sign: it is to tell the ASL to retrieve
@@ -233,6 +278,40 @@ bool AmplInterface::readASLfg() {
 }
 
 
+
+// Reads the solver option from the .nl file through the ASL methods
+bool AmplInterface::readoption() {
+
+	if (abs_eps_f) {
+		option.abs_eps_f = abs_eps_f;
+	}
+	if (rel_eps_f) {
+		option.rel_eps_f = rel_eps_f;
+	}
+	if (trace) {
+		option.trace = true;
+	}
+	if (rigor) {
+		option.rigor = true;
+	}
+	if (eps_h) {
+		option.eps_h = eps_h;
+	}
+	if (eps_x) {
+		option.eps_x = eps_x;
+	}
+	if (initial_loup) {
+		option.initial_loup = initial_loup;
+	}
+	if (random_seed) {
+		option.random_seed = random_seed;
+	}
+	if (timeout) {
+		option.timeout = timeout;
+	}
+
+	return true;
+}
 
 
 // Reads a NLP from an AMPL .nl file through the ASL methods

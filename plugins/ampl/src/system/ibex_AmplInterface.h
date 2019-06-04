@@ -14,6 +14,7 @@
 
 #include "ibex_SystemFactory.h"
 #include "ibex_Expr.h"
+#include "ibex_Interval.h"
 #include "ibex_Setting.h"
 
 #ifdef __GNUC__
@@ -33,12 +34,29 @@
 
 #ifdef	_IBEX_WITH_OPTIM_
 #include "ibex_Optimizer.h"
+#include "ibex_DefaultOptimizer.h"
+#include "ibex_NormalizedSystem.h"
 #endif
 
 struct ASL;
 struct expr;
 
 namespace ibex {
+class AmplOption {
+public:
+	AmplOption();
+
+	double abs_eps_f;
+	double eps_h;
+	double eps_x;
+	double initial_loup;
+	int random_seed;
+	double rel_eps_f;
+	bool rigor;
+	bool trace;
+	double timeout;
+};
+
 
 class AmplInterface : public SystemFactory  {
 private:
@@ -46,7 +64,6 @@ private:
 	ASL*     asl;
 	std::string _nlfile;
 	Variable* _x;
-
 
 
 #ifdef __GNUC__
@@ -66,13 +83,16 @@ private:
 
 
 	bool readnl();
+	bool readoption();
 	bool readASLfg();
 	const ExprNode& nl2expr(expr *e);
+
 
 
 public:
 	AmplInterface(std::string nlfile);
 
+	AmplOption option;
 	virtual ~AmplInterface();
 
 #ifdef	_IBEX_WITH_OPTIM_
