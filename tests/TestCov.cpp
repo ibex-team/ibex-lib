@@ -17,6 +17,7 @@
 #include <fstream>
 #include <string.h>
 #include <stdlib.h>
+#include <cstdio>
 
 using namespace std;
 
@@ -53,10 +54,17 @@ string TestCov::solver_var_names[n]      = { "x1", "x2", "x3" };
 namespace {
 
 char* open_file(ofstream& f) { // return char* must be freed
-	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
-	mkstemp(tmpname);
+	char *tmpname = (char*) malloc(L_tmpnam);
+	char* ret=tmpnam(tmpname);
+	assert(ret!=NULL);
 	f.open(tmpname, ios::out | ios::trunc | ios::binary);
 	return tmpname;
+}
+
+void remove_file(char* filename) { // close file and free "filename"
+	int ret=remove(filename);
+	assert(ret==0);
+	free(filename);
 }
 
 void write(ofstream& of, const char* x) {
@@ -694,12 +702,13 @@ void TestCov::read_covfile(ScenarioType scenario) {
 
 	Cov cov(filename);
 	test_cov(scenario, cov);
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::write_covfile(ScenarioType scenario) {
-	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
-	mkstemp(tmpname);
+	char *tmpname = (char*) malloc(L_tmpnam);
+	char* ret=tmpnam(tmpname);
+	assert(ret!=NULL);
 
 	Cov* cov=build_cov(scenario);
 	cov->save(tmpname);
@@ -708,7 +717,7 @@ void TestCov::write_covfile(ScenarioType scenario) {
 	Cov cov2(tmpname);
 	test_cov(scenario, cov2);
 
-	free(tmpname);
+	remove_file(tmpname);
 }
 
 void TestCov::covlistfac1(ScenarioType scenario) {
@@ -733,7 +742,7 @@ void TestCov::read_covlistfile1(ScenarioType scenario) {
 
 	CovList cov(filename);
 	test_covlist(scenario, cov);
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::read_covlistfile2(ScenarioType scenario) {
@@ -745,12 +754,13 @@ void TestCov::read_covlistfile2(ScenarioType scenario) {
 	CovList cov(filename);
 	test_cov(scenario, cov);
 	CPPUNIT_ASSERT(cov.size()==0);
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::write_covlistfile(ScenarioType scenario) {
-	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
-	mkstemp(tmpname);
+	char *tmpname = (char*) malloc(L_tmpnam);
+	char* ret=tmpnam(tmpname);
+	assert(ret!=NULL);
 
 	CovList* cov=build_covlist(scenario);
 	cov->save(tmpname);
@@ -759,7 +769,7 @@ void TestCov::write_covlistfile(ScenarioType scenario) {
 	CovList cov2(tmpname);
 	test_cov(scenario, cov2);
 
-	free(tmpname);
+	remove_file(tmpname);
 }
 
 void TestCov::covIUlistfac1(ScenarioType scenario) {
@@ -785,7 +795,7 @@ void TestCov::read_covIUlistfile1(ScenarioType scenario) {
 
 	CovIUList cov(filename);
 	test_covIUlist(scenario, cov);
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::read_covIUlistfile2(ScenarioType scenario) {
@@ -798,12 +808,13 @@ void TestCov::read_covIUlistfile2(ScenarioType scenario) {
 	CPPUNIT_ASSERT(cov.nb_inner()==0);
 	CPPUNIT_ASSERT(cov.nb_unknown()==N);
 
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::write_covIUlistfile(ScenarioType scenario) {
-	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
-	mkstemp(tmpname);
+	char *tmpname = (char*) malloc(L_tmpnam);
+	char* ret=tmpnam(tmpname);
+	assert(ret!=NULL);
 
 	CovIUList* cov=build_covIUlist(scenario);
 	cov->save(tmpname);
@@ -812,7 +823,7 @@ void TestCov::write_covIUlistfile(ScenarioType scenario) {
 	CovIUList cov2(tmpname);
 	test_cov(scenario, cov2);
 
-	free(tmpname);
+	remove_file(tmpname);
 }
 
 void TestCov::covIBUlistfac1(ScenarioType scenario) {
@@ -838,7 +849,7 @@ void TestCov::read_covIBUlistfile1(ScenarioType scenario) {
 
 	CovIBUList cov(filename);
 	test_covIBUlist(scenario, cov);
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::read_covIBUlistfile2(ScenarioType scenario) {
@@ -851,7 +862,7 @@ void TestCov::read_covIBUlistfile2(ScenarioType scenario) {
 	test_covIUlist(scenario, cov);
 	CPPUNIT_ASSERT(cov.nb_boundary()==0);
 	CPPUNIT_ASSERT(cov.nb_unknown()==cov.size() - cov.nb_inner());
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::read_covIBUlistfile3(ScenarioType scenario) {
@@ -865,12 +876,13 @@ void TestCov::read_covIBUlistfile3(ScenarioType scenario) {
 	test_covIUlist(scenario, cov);
 	CPPUNIT_ASSERT(cov.nb_boundary()==0);
 	CPPUNIT_ASSERT(cov.nb_unknown()==cov.size() - cov.nb_inner());
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::write_covIBUlistfile(ScenarioType scenario) {
-	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
-	mkstemp(tmpname);
+	char *tmpname = (char*) malloc(L_tmpnam);
+	char* ret=tmpnam(tmpname);
+	assert(ret!=NULL);
 
 	CovIBUList* cov=build_covIBUlist(scenario);
 	cov->save(tmpname);
@@ -879,7 +891,7 @@ void TestCov::write_covIBUlistfile(ScenarioType scenario) {
 	CovIBUList cov2(tmpname);
 	test_cov(scenario, cov2);
 
-	free(tmpname);
+	remove_file(tmpname);
 }
 
 void TestCov::covManifoldfac1(ScenarioType scenario) {
@@ -928,7 +940,7 @@ void TestCov::read_covManifoldfile1(ScenarioType scenario) {
 
 	CovManifold cov(filename);
 	test_covManifold(scenario, cov);
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::read_covManifoldfile2(ScenarioType scenario) {
@@ -963,12 +975,13 @@ void TestCov::read_covManifoldfile2(ScenarioType scenario) {
 		assert(false);
 	}
 
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::write_covManifoldfile(ScenarioType scenario) {
-	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
-	mkstemp(tmpname);
+	char *tmpname = (char*) malloc(L_tmpnam);
+	char* ret=tmpnam(tmpname);
+	assert(ret!=NULL);
 
 	CovManifold* cov=build_covManifold(scenario);
 	cov->save(tmpname);
@@ -977,7 +990,7 @@ void TestCov::write_covManifoldfile(ScenarioType scenario) {
 	CovManifold cov2(tmpname);
 	test_cov(scenario, cov2);
 
-	free(tmpname);
+	remove_file(tmpname);
 }
 
 void TestCov::covSolverDatafac1(ScenarioType scenario) {
@@ -1008,7 +1021,7 @@ void TestCov::read_covSolverDatafile1(ScenarioType scenario) {
 
 	CovSolverData cov(filename);
 	test_covSolverData(scenario, cov);
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::read_covSolverDatafile2(ScenarioType scenario) {
@@ -1025,12 +1038,13 @@ void TestCov::read_covSolverDatafile2(ScenarioType scenario) {
 	CPPUNIT_ASSERT(cov.nb_cells() == 0);
 	CPPUNIT_ASSERT(cov.nb_pending() == 0);
 
-	free(filename);
+	remove_file(filename);
 }
 
 void TestCov::write_covSolverDatafile(ScenarioType scenario) {
-	char *tmpname = strdup("/tmp/tmpfileXXXXXX");
-	mkstemp(tmpname);
+	char *tmpname = (char*) malloc(L_tmpnam);
+	char* ret=tmpnam(tmpname);
+	assert(ret!=NULL);
 
 	CovSolverData* cov=build_covSolverData(scenario);
 	cov->save(tmpname);
@@ -1039,5 +1053,5 @@ void TestCov::write_covSolverDatafile(ScenarioType scenario) {
 	CovSolverData cov2(tmpname);
 	test_cov(scenario, cov2);
 
-	free(tmpname);
+	remove_file(tmpname);
 }
