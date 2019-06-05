@@ -401,7 +401,8 @@ bool AmplInterface::readnl() {
 						add_ctr_eq((*(body_con[i])-lb));
 					}
 				} else  {
-					 add_ctr_eq((*(body_con[i])-Interval(lb,ub)));
+					 add_ctr(ExprCtr(*(body_con[i])-ub, LEQ));
+					 add_ctr(ExprCtr(*(body_con[i])-lb, GEQ));
 				}
 				break;
 			}
