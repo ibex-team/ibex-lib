@@ -15,6 +15,7 @@ list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake.utils")
 ################################################################################
 set (CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "C++ header files (include)")
 set (CMAKE_INSTALL_LIBDIR "lib" CACHE PATH "object code libraries (lib)")
+set (CMAKE_INSTALL_BINDIR "bin" CACHE PATH "user executables (bin)")
 
 ################################################################################
 # Print information (to ease debugging)
@@ -36,6 +37,11 @@ if(COMPILER_SUPPORTS_CXX11)
 else()
   message(FATAL_ERROR "Ibex needs a compiler with C++11 support")
 endif()
+
+if (WIN32)
+  # We need this for strdup under Windows (see issue #287)
+  add_definitions(-U__STRICT_ANSI__)
+endif ()
 
 ################################################################################
 # Configure the libraries for interval arithmetic and linear programming
