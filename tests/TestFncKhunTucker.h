@@ -35,13 +35,13 @@ public:
 
 	CPPUNIT_TEST(one_var);
 	CPPUNIT_TEST(one_var_1_bound);
-
+	CPPUNIT_TEST(one_var_1_ineq_1_bound);
 	CPPUNIT_TEST_SUITE_END();
 
 private:
 	void one_var();
 	void one_var_1_bound();
-
+	void one_var_1_ineq_1_bound();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestFncKhunTucker);

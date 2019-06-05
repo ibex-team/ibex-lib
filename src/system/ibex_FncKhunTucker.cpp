@@ -215,7 +215,7 @@ void FncKhunTucker::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, 
 		l++;
 	}
 
-	for (BitSet::const_iterator i=ineq.begin(); i!=ineq.end(); ++i) {
+	for (BitSet::const_iterator i=eq.begin(); i!=eq.end(); ++i) {
 		hessian += x_lambda[l] * dg[i].jacobian(x,v<n? v : -1);
 		dgi=dg[i].eval_vector(x);
 		J.put(0, l, dgi, false);
