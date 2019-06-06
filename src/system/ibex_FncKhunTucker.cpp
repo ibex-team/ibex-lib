@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Apr 26, 2017
-// Last Update : May 09, 2019
+// Last Update : Jun 06, 2019
 //============================================================================
 
 #include <stdlib.h>
@@ -23,7 +23,8 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 								eq(BitSet::empty(sys.f_ctrs.image_dim())),
 								ineq(BitSet::empty(sys.f_ctrs.image_dim())),
 								bound_left(BitSet::empty(sys.nb_var)),
-								bound_right(BitSet::empty(sys.nb_var)) {
+								bound_right(BitSet::empty(sys.nb_var)),
+								LICQ(true /* by default */) {
 
 	int l=1; // lambda0
 
@@ -40,6 +41,7 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 	}
 	l+=active.size();
 
+
 	for (int j=0; j<sys.box.size(); j++) {
 		if (current_box[j].lb() <= sys.box[j].lb()) {
 			bound_left.add(j);
@@ -47,7 +49,9 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 			l++;
 		}
 		if (current_box[j].ub() >= sys.box[j].ub()) {
+			if (bound_left[j]) LICQ=false;
 			bound_right.add(j);
+
 			//cout << " right bound n°" << j << " active\n";
 			l++;
 		}
@@ -61,6 +65,9 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 	assert(_nb_var == sys.nb_var + eq.size() + ineq.size() + bound_left.size() + bound_right.size() + 1);
 
 	(Dim&) _image_dim = Dim(_nb_var, 1);
+
+	if (nb_mult > sys.nb_var+1) // +1 because of lambda0
+		LICQ = false;
 
 }
 
@@ -109,6 +116,7 @@ IntervalMatrix FncKhunTucker::gradients(const IntervalVector& x) const {
 IntervalVector FncKhunTucker::eval_vector(const IntervalVector& x_lambda, const BitSet& components) const {
 
 	if (components.size()!=n+nb_mult) {
+		// TODO
 		not_implemented("FncKhunTucker: 'eval_vector' for selected components");
 		//J.resize(n+nb_mult,n+nb_mult);
 	}
