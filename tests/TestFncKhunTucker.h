@@ -7,7 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : May 17, 2019
- * Last Update : May 17, 2019
+ * Last Update : Jun 05, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_FNC_KHUN_TUCKER_H__
@@ -35,13 +35,17 @@ public:
 
 	CPPUNIT_TEST(one_var);
 	CPPUNIT_TEST(one_var_1_bound);
-
+	CPPUNIT_TEST(one_var_1_ineq_1_rbound);
+	CPPUNIT_TEST(one_var_1_eq_1_lbound);
+	CPPUNIT_TEST(two_vars_1_eq_1_ineq_2bounds);
 	CPPUNIT_TEST_SUITE_END();
 
 private:
 	void one_var();
 	void one_var_1_bound();
-
+	void one_var_1_ineq_1_rbound();
+	void one_var_1_eq_1_lbound();
+	void two_vars_1_eq_1_ineq_2bounds();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestFncKhunTucker);

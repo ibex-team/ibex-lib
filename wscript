@@ -51,13 +51,10 @@ def configure (conf):
 	# For information
 	conf.msg ("sys.platform", sys.platform)
 
-	# Set LIBDIR and INCDIR, set them in env and put them in *_IBEX_DEPS
+	# Set LIBDIR and INCDIR, set them in env
 	conf.env.LIBDIR = os.path.join (conf.env.PREFIX, "lib")
-	conf.env.append_unique ("LIBPATH_IBEX_DEPS", conf.env.LIBDIR)
 	conf.env.INCDIR = os.path.join (conf.env.PREFIX, "include")
 	conf.env.INCDIR_HDR = os.path.join (conf.env.INCDIR, "ibex")
-	conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR)
-	conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_HDR)
 	conf.env.INCDIR_3RD = os.path.join (conf.env.INCDIR_HDR, "3rd")
 	conf.env.LIBDIR_3RD = os.path.join (conf.env.LIBDIR, "ibex", "3rd")
 	conf.env.PKGDIR = os.path.join (conf.env.PREFIX, "share", "pkgconfig")
@@ -161,15 +158,16 @@ def build (bld):
 	# Generate ibex.pc, the pkg-config file
 	bld (features = "subst", source = "ibex.pc.in", target = "ibex.pc",
 				install_path = bld.env.PKGDIR,
-				PREFIX = ibexutils.escape_backslash_on_win32 (bld.env.PREFIX),
-				INCDIR = bld.path_pc_prefix (bld.env.INCDIR),
-				LIBDIR = bld.path_pc_prefix (bld.env.LIBDIR),
-				INCLUDES = " ".join(["-I" + bld.path_pc (i)
-										for i in bld.env.INCLUDES_IBEX_DEPS]),
-				CXXFLAGS = " ".join(bld.env.CXXFLAGS_IBEX_DEPS),
-				LIBPATH = " ".join(["-L" + bld.path_pc (i)
-										for i in bld.env.LIBPATH_IBEX_DEPS]),
-				LIBS = " ".join(["-l" + l for l in bld.env.LIB_IBEX_DEPS])
+				IBEX_VERSION = bld.env.VERSION,
+				CMAKE_INSTALL_PREFIX = ibexutils.escape_backslash_on_win32 (bld.env.PREFIX),
+				CMAKE_INSTALL_INCLUDEDIR = bld.path_pc_remove_prefix (bld.env.INCDIR),
+				CMAKE_INSTALL_LIBDIR = bld.path_pc_remove_prefix (bld.env.LIBDIR),
+				IBEX_PKGCONFIG_INCDIRS = " ".join(["-I" + bld.path_pc (i)
+				                                  for i in bld.env.INCLUDES_IBEX_DEPS]),
+				IBEX_PKGCONFIG_CXXFLAGS = " ".join(bld.env.CXXFLAGS_IBEX_DEPS),
+				IBEX_PKGCONFIG_LINK_DIRS = " ".join(["-L" + bld.path_pc (i)
+				                                   for i in bld.env.LIBPATH_IBEX_DEPS]),
+				IBEX_PKGCONFIG_LIBS = " ".join(["-l" + l for l in bld.env.LIB_IBEX_DEPS])
 		)
 
 	# Install ibex main header and header with settings

@@ -134,14 +134,16 @@ def to_unicode (s):
     return r
 
 @conf
-def path_pc_prefix (conf, path):
-    path = path.replace (conf.env.PREFIX, "${prefix}")
+def path_pc_remove_prefix (conf, path):
+    if path.startswith (conf.env.PREFIX + "/"):
+      path = path[len(conf.env.PREFIX)+1:]
     return escape_backslash_on_win32 (path)
 
 @conf
 def path_pc (conf, path):
     path = path.replace (conf.env.INCDIR, "${includedir}")
     path = path.replace (conf.env.LIBDIR, "${libdir}")
+    path = path.replace (conf.env.PREFIX, "${prefix}")
     return escape_backslash_on_win32 (path)
 
 @conf
