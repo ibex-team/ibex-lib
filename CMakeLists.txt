@@ -81,7 +81,18 @@ endif ()
 #add_subdirectory (benchs)
 
 ################################################################################
-# TODO archives and packages
+# archives and packages
 ################################################################################
-#set (IBEX_DIST_ARCHIVE_NAME "ibex-${IBEX_VERSION}")
-#Include (CPack)
+set (CPACK_GENERATOR "TGZ" "ZIP" "DEB")
+string (TOLOWER "${CMAKE_PROJECT_NAME}" CPACK_PACKAGE_NAME)
+set (CPACK_PACKAGE_VENDOR "IbexTeam")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ library for constraint processing over real numbers using interval arithmetic")
+set (CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+
+set (CPACK_DEBIAN_PACKAGE_MAINTAINER "Maintainer <mail@url.com>")
+set (CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://www.ibex-lib.org/")
+# TODO finish deb package
+
+Include (CPack)
