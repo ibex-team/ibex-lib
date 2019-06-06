@@ -99,13 +99,13 @@ void SystemFactory::init_args() {
 	varcopy(input_args, sys_args);
 }
 
-void SystemFactory::add_goal(const ExprNode& goal) {
+void SystemFactory::add_goal(const ExprNode& goal, const char* name) {
 	init_args();
 
 	Array<const ExprSymbol> goal_vars(input_args.size());
 	varcopy(input_args,goal_vars);
 	const ExprNode& goal_expr=ExprCopy().copy(input_args, goal_vars, goal);
-	this->goal = new Function(goal_vars, goal_expr);
+	this->goal = new Function(goal_vars, goal_expr, name);
 }
 
 void SystemFactory::add_goal(const Function& goal) {
@@ -118,14 +118,14 @@ void SystemFactory::add_goal(const Function& goal) {
 	this->goal = new Function(goal);
 }
 
-void SystemFactory::add_ctr(const ExprCtr& ctr) {
+void SystemFactory::add_ctr(const ExprCtr& ctr, const char* name) {
 	init_args();
 
 	Array<const ExprSymbol> ctr_args(input_args.size());
 	varcopy(input_args,ctr_args);
 	const ExprNode& ctr_expr=ExprCopy().copy(input_args, ctr_args, ctr.e).simplify();
 
-	ctrs.push_back(new NumConstraint(*new Function(ctr_args, ctr_expr), ctr.op, true));
+	ctrs.push_back(new NumConstraint(*new Function(ctr_args, ctr_expr, name), ctr.op, true));
 
 	f_ctrs.push_back(& f_ctrs_copy.copy(input_args, sys_args, ctr.e, true));
 }

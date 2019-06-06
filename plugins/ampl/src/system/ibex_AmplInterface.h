@@ -63,8 +63,7 @@ private:
 
 	ASL*     asl;
 	std::string _nlfile;
-	Variable* _x;
-
+	const ExprSymbol ** _x;
 
 #ifdef __GNUC__
 #include <ciso646> // just to initialize _LIBCPP_VERSION

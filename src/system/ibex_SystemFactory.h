@@ -59,7 +59,7 @@ public:
 	 * \warning for convenience, goal is cleaned up (the expression
 	 * does not exist anymore after this function call).
 	 */
-	void add_goal(const ExprNode& goal);
+	void add_goal(const ExprNode& goal,const char* name=NULL);
 
 	/**
 	 * \brief Add a goal function (by copy).
@@ -74,7 +74,7 @@ public:
 	 * \warning the ctr expression must no be deleted until the final system has been built
 	 * (the factory keeps track of nodes for building DAGS).
 	 */
-	void add_ctr(const ExprCtr& ctr);
+	void add_ctr(const ExprCtr& ctr, const char* name=NULL);
 
 	/**
 	 * \brief Add a new constraint (by copy).

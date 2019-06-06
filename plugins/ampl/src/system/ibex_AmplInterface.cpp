@@ -186,7 +186,9 @@ AmplInterface::AmplInterface(std::string nlfile) : asl(NULL), _nlfile(nlfile), _
 }
 
 AmplInterface::~AmplInterface() {
-	if (_x) delete _x;
+	for (int i =0; i< n_var;i++) {
+			if (_x[i]) delete _x[i];
+	}
 
 	var_data.clear();
 
@@ -319,7 +321,12 @@ bool AmplInterface::readnl() {
 
 	// the variable /////////////////////////////////////////////////////////////
 	// TODO only continuous variables for the moment
-	_x =new Variable(n_var,"x");
+
+	_x= new const ExprSymbol*[n_var];
+	for (int i =0; i< n_var; i++) {
+		_x[i] = &(ExprSymbol::new_(var_name(i) , Dim::scalar()));
+	}
+	//_x =new Variable(n_var,"x");
 	IntervalVector bound(n_var);
 
 		// Each has a linear and a nonlinear part
@@ -346,7 +353,10 @@ bool AmplInterface::readnl() {
 					bound[i] = Interval( LUv[i], Uvx_copy[i]);
 				}
 		} // else it is [-oo,+oo]
-		add_var(*_x, bound);
+		for (int i =0; i< n_var; i++) {
+			add_var(*(_x[i]),bound[i]);
+		}
+		//add_var(*_x, bound);
 
 	// objective functions /////////////////////////////////////////////////////////////
 		if (n_obj>1) {ibex_error("Error AmplInterface: too much objective function in the ampl model."); return false;}
@@ -368,11 +378,11 @@ bool AmplInterface::readnl() {
 						coeff = objgrad -> coef;
 						index = objgrad -> varno;
 						if (coeff==1) {
-							body = &((*_x)[index]);
+							body = ((_x[index]));
 						} else if (coeff==-1) {
-							body = &( - (*_x)[index]);
+							body = &( - (*(_x[index])));
 						} else {
-							body = &(coeff * (*_x)[index]);
+							body = &(coeff * (*(_x[index])));
 						}
 					}
 				} else {
@@ -380,11 +390,11 @@ bool AmplInterface::readnl() {
 						coeff = objgrad -> coef;
 						index = objgrad -> varno;
 						if (coeff==1) {
-							body = &(*body + (*_x)[index]);
+							body = &(*body + (*(_x[index])));
 						} else if (coeff==-1) {
-							body = &(*body - (*_x)[index]);
+							body = &(*body - (*(_x[index])));
 						} else {
-							body = &(*body +coeff * (*_x)[index]);
+							body = &(*body +coeff * (*(_x[index])));
 						}
 					}
 				}
@@ -394,9 +404,9 @@ bool AmplInterface::readnl() {
 			// Max or Min
 			// 3rd/ASL/solvers/asl.h, line 336: 0 is minimization, 1 is maximization
 			if (OBJ_sense [i] == 0) {
-				add_goal(*body);
+				add_goal(*body, obj_name(0));
 			} else {
-				add_goal(-(*body));
+				add_goal(-(*body), obj_name(0));
 			}
 		}
 
@@ -418,19 +428,19 @@ bool AmplInterface::readnl() {
 					if ((dynamic_cast<const ExprConstant*>(body_con[A_rownos[i]]))&&(((ExprConstant*)(body_con[A_rownos[i]]))->is_zero())) {
 						delete body_con[A_rownos[i]];
 						if (A_vals[i]==1) {
-							body_con[A_rownos[i]] = &((*_x)[j]);
+							body_con[A_rownos[i]] = (((_x[j])));
 						} else if (A_vals[i]==-1) {
-							body_con[A_rownos[i]] = &(- (*_x)[j]);
+							body_con[A_rownos[i]] = &(- (*(_x[j])));
 						} else {
-							body_con[A_rownos[i]] = &((A_vals[i]) * (*_x)[j]);
+							body_con[A_rownos[i]] = &((A_vals[i]) * (*(_x[j])));
 						}
 					} else {
 						if (A_vals[i]==1) {
-							body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (*_x)[j]);
+							body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (*(_x[j])));
 						} else if (A_vals[i]==-1) {
-							body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) - (*_x)[j]);
+							body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) - (*(_x[j])));
 						} else {
-							body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (A_vals[i]) * (*_x)[j]);
+							body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (A_vals[i]) * (*(_x[j])));
 						}
 					}
 
@@ -448,11 +458,11 @@ bool AmplInterface::readnl() {
 						if (fabs (coeff) != 0.0) {
 							index = congrad -> varno;
 							if (coeff==1) {
-								body_con[i] = &( (*_x)[index]);
+								body_con[i] = ( ((_x[index])));
 							} else if (coeff==-1) {
-								body_con[i] = &(-(*_x)[index]);
+								body_con[i] = &(-(*(_x[index])));
 							} else {
-								body_con[i] = &((coeff) * (*_x)[index]);
+								body_con[i] = &((coeff) * (*(_x[index])));
 							}
 						}
 
@@ -461,11 +471,11 @@ bool AmplInterface::readnl() {
 						if (fabs (coeff) != 0.0) {
 							index = congrad -> varno;
 							if (coeff==1) {
-								body_con[i] = &(*(body_con[i]) + (*_x)[index]);
+								body_con[i] = &(*(body_con[i]) + (*(_x[index])));
 							} else if (coeff==-1) {
-								body_con[i] = &(*(body_con[i]) - (*_x)[index]);
+								body_con[i] = &(*(body_con[i]) - (*(_x[index])));
 							} else {
-								body_con[i] = &(*(body_con[i]) + (coeff) * (*_x)[index]);
+								body_con[i] = &(*(body_con[i]) + (coeff) * (*(_x[index])));
 							}
 						}
 					}
@@ -505,28 +515,32 @@ bool AmplInterface::readnl() {
 						add_ctr_eq((*(body_con[i])-lb));
 					}
 				} else  {
-					 add_ctr(ExprCtr(*(body_con[i])-ub, LEQ));
-					 add_ctr(ExprCtr(*(body_con[i])-lb, GEQ));
+					 std::string name1 = "_1";
+					 name1 = con_name(i)+name1;
+					 std::string name2 = "_2";
+					 name2 = con_name(i)+name2;
+					 add_ctr(ExprCtr(*(body_con[i])-ub, LEQ), name1.c_str());
+					 add_ctr(ExprCtr(*(body_con[i])-lb, GEQ), name2.c_str());
 				}
 				break;
 			}
 			case  2:  {
 				if (lb==0) {
-					add_ctr(ExprCtr(*(body_con[i]),GEQ));
+					add_ctr(ExprCtr(*(body_con[i]),GEQ),con_name(i));
 				} else if (lb<0) {
-					add_ctr(ExprCtr(*(body_con[i])+(-lb),GEQ));
+					add_ctr(ExprCtr(*(body_con[i])+(-lb),GEQ),con_name(i));
 				} else {
-					add_ctr(ExprCtr(*(body_con[i])-lb,GEQ));
+					add_ctr(ExprCtr(*(body_con[i])-lb,GEQ),con_name(i));
 				}
 				break;
 			}
 			case  3: {
 				if (ub==0) {
-					add_ctr(ExprCtr(*(body_con[i]),LEQ));
+					add_ctr(ExprCtr(*(body_con[i]),LEQ),con_name(i));
 				} else if (ub<0) {
-					add_ctr(ExprCtr(*(body_con[i])+(-ub),LEQ));
+					add_ctr(ExprCtr(*(body_con[i])+(-ub),LEQ),con_name(i));
 				} else {
-					add_ctr(ExprCtr(*(body_con[i])-ub,LEQ));
+					add_ctr(ExprCtr(*(body_con[i])-ub,LEQ),con_name(i));
 				}
 				break;
 			}
@@ -657,7 +671,7 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 	case OPVARVAL:  {
 		int j = ((expr_v *) e) -> a;
 		if (j<n_var) {
-			return (*_x)[j];
+			return (*(_x[j]));
 		}
 		else {
 			// http://www.gerad.ca/~orban/drampl/def-vars.html
@@ -691,21 +705,21 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 									coeff = (L[i]).fac;
 									index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 									if (coeff==1) {
-										body = &((*_x)[index]);
+										body = &((*(_x[index])));
 									} else if (coeff==-1) {
-										body = &( - (*_x)[index]);
+										body = &( - (*(_x[index])));
 									} else if (coeff != 0) {
-										body = &(coeff * (*_x)[index]);
+										body = &(coeff * (*(_x[index])));
 									}
 								} else {
 									coeff = (L[i]).fac;
 									index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 									if (coeff==1) {
-										body = &(*body + (*_x)[index]);
+										body = &(*body + (*(_x[index])));
 									} else if (coeff==-1) {
-										body = &(*body - (*_x)[index]);
+										body = &(*body - (*(_x[index])));
 									} else if (coeff != 0) {
-										body = &(*body +coeff * (*_x)[index]);
+										body = &(*body +coeff * (*(_x[index])));
 									}
 								}
 							}
@@ -724,27 +738,28 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 									coeff = (L[i]).fac;
 									index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 									if (coeff==1) {
-										body = &( (*_x)[index]);
+										body = &( (*(_x[index])));
 									} else if (coeff==-1) {
-										body = &( - (*_x)[index]);
+										body = &( - (*(_x[index])));
 									} else if (coeff != 0) {
-										body = &(coeff * (*_x)[index]);
+										body = &(coeff * (*(_x[index])));
 									}
 								} else {
 									coeff = (L[i]).fac;
 									index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 									if (coeff==1) {
-										body = &(*body + (*_x)[index]);
+										body = &(*body + (*(_x[index])));
 									} else if (coeff==-1) {
-										body = &(*body - (*_x)[index]);
+										body = &(*body - (*(_x[index])));
 									} else if (coeff != 0) {
-										body = &(*body +coeff * (*_x)[index]);
+										body = &(*body +coeff * (*(_x[index])));
 									}
 
 								}
 							}
 						}
 					}
+					// Store the temporary variable, in case of reuse it late, to construct a DAG (and not just a tree.
 					var_data[k] = body;;
 				}
 				return *body;
