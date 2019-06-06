@@ -342,6 +342,7 @@ public:
 	 *               hexadecimal representation, whence a safe serialization.
 	 */
 	std::string minibex(bool human=true) const;
+	std::string toAmpl() const;
 
 	/**
 	 * \brief Serialize the function

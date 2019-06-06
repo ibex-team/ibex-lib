@@ -611,4 +611,9 @@ std::string Function::minibex(bool human) const {
 	return s.str();
 }
 
+
+std::string Function::toAmpl() const {
+	return "TODO";
+}
+
 } // namespace ibex

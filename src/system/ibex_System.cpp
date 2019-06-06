@@ -174,6 +174,119 @@ std::string System::minibex(bool human) const {
 	return s.str();
 }
 
+
+std::string System::toAmpl() const {
+	stringstream s;
+	s << "# Build with IBEX " << _IBEX_RELEASE_ << "\n";
+
+	Array<Domain> domains(args.size());
+	for (int i=0; i<args.size(); i++) {
+		domains.set_ref(i,*new Domain(args[i].dim));
+	}
+
+	ibex::load(domains, box);
+
+	for (int i=0; i<args.size(); i++) {
+		const ExprSymbol& x=args[i];
+		switch(domains[i].dim.type()) {
+		case Dim::SCALAR:{
+			s << "var " << x.name << " ";
+			Interval tmp = domains[i].i();
+			if (tmp.lb() > NEG_INFINITY) {
+				s << " >= " << tmp.lb();
+				if (tmp.ub() < POS_INFINITY) s << " , ";
+			}
+			if (tmp.ub() < POS_INFINITY) {
+				s << " <= " << tmp.ub();
+			}
+			s << "; \n";
+			break;
+		}
+
+		case Dim::COL_VECTOR:
+		case Dim::ROW_VECTOR:{
+			int n = (x.dim.nb_rows()>1) ? x.dim.nb_rows() : x.dim.nb_cols();
+			s << "set S"<<i<< " = {1.." << n << "}; \n";
+			s << "param lower_bounds"<< i  << " {S"<<i<<"}; \n";
+			s << "param upper_bounds"<< i  << " {S"<<i<<"}; \n";
+			s << "param: lower_bounds" <<i << "  upper_bounds"<< i  <<" := \n";
+			for (int j =0; j<n; j++) {
+				s << j << "  " << domains[i].v()[j].lb()<< "  " << domains[i].v()[j].ub() << " \n";
+			}
+			s <<";\n";
+			s << "var " << x.name << "{p in S"<<i<<"} >= lower_bounds"<<i<<"[p] , <= upper_bounds"<<i <<"[p] ;\n\n";
+			break;
+		}
+		case Dim::MATRIX: {
+			s << "set S1"<<i<< " = {1.." << x.dim.nb_rows() << "}; \n";
+			s << "set S2"<<i<< " = {1.." << x.dim.nb_cols() << "}; \n";
+			s << "param lower_bounds"<< i  << " {S1"<<i<<", S2"<<i<< " }; \n";
+			s << "param upper_bounds"<< i  << " {S1"<<i<<", S2"<<i<< " }; \n";
+			s << "param lower_bounds"<< i<< " : ";
+			for (int ii=0 ; ii < x.dim.nb_cols(); ii++) {
+				s << ii << " ";
+			}
+			s << " : = \n ";
+			for (int ii=0 ; ii < x.dim.nb_rows(); ii++) {
+				s << ii << " ";
+				for (int jj=0 ; jj < x.dim.nb_cols(); jj++) {
+					s << domains[i].m()[ii][jj].lb() << " ";
+				}
+				s <<"\n";
+			}
+			s << ";\n";
+			s << "param upper_bounds"<< i<< " : ";
+			for (int ii=0 ; ii < x.dim.nb_cols(); ii++) {
+				s << ii << " ";
+			}
+			s << " : = \n ";
+			for (int ii=0 ; ii < x.dim.nb_rows(); ii++) {
+				s << ii << " ";
+				for (int jj=0 ; jj < x.dim.nb_cols(); jj++) {
+					s << domains[i].m()[ii][jj].ub() << " ";
+				}
+				s <<"\n";
+			}
+			s << ";\n";
+			s << "var " << x.name << "{p in S1"<<i<<", k in S2"<< i <<"} >= lower_bounds"<<i<<"[p,k] , <= upper_bounds"<<i <<"[p,k] ;\n\n";
+			break;
+		}
+
+		}
+	}
+
+	s << '\n';
+
+	if (goal) {
+		s << goal->toAmpl() << ";\n\n";
+	}
+
+	if (nb_ctr>0) {
+		s << f_ctrs.toAmpl() << ";\n\n";
+	}
+
+	if (goal) {
+		s << "minimize GOAL:" << goal->name << ";\n\n";
+	}
+
+	if (nb_ctr>0) {
+		for (int i=0; i<nb_ctr; i++) {
+			s << "subject to ctrs_" << f_ctrs.name << "[" << i<< "] : ";
+			s << f_ctrs.name << "["<< i <<"] " << ops[i] << "0 ;\n\n";
+		}
+	}
+	s << "option ibexopt_auxfiles rc; \n";
+	s << "option solver ibexopt; \n";
+	s << "solve; \n\n ";
+	s.flush();
+
+	for (int i=0; i<args.size(); i++) {
+		delete &domains[i];
+	}
+
+	return s.str();
+}
+
 std::ostream& operator<<(std::ostream& os, const System& sys) {
 
 	os << "variables: " << endl << "  ";
