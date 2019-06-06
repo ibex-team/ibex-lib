@@ -60,11 +60,10 @@ LSmear::~LSmear() {
 				nb_lctrs[i]=2;
 		  }
 		}
-		else if (goal_to_consider(J,i)) 
+		else if (goal_to_consider(J,i) ||sys.f_ctrs.image_dim()==1 ) 
 		  mylinearsolver->add_constraint( row1, LEQ, (-ev).ub());
 		else // the goal is equal to a variable : the goal constraint is useless.
 		  nb_lctrs[i]=0;
-		  
 		
 	}
 
@@ -77,31 +76,36 @@ LSmear::~LSmear() {
 		stat = mylinearsolver->solve();
 
 		if (stat == LPSolver::OPTIMAL) {
-			// the dual solution : used to compute the bound
-			dual.resize(mylinearsolver->get_nb_rows());
-			dual = mylinearsolver->get_dual_sol();
-			int k=0; //number of multipliers != 0
-			int ii=0;
+		  // the dual solution : used to compute the bound
+		  Vector dual_solution(mylinearsolver->get_nb_rows());  //
+		  dual_solution = mylinearsolver->get_dual_sol();
 
-
-			for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
-				if (nb_lctrs[i]==2) {
-					dual[sys.nb_var+i]=dual[sys.nb_var+ii]+dual[sys.nb_var+ii+1]; ii+=2;
-				} else {
-					dual[sys.nb_var+i]=dual[sys.nb_var+ii]; ii++;
-				}
-
-				if (std::abs(dual[sys.nb_var+i])>1e-10) k++;
-			}
-
-			if(k<2) { stat = LPSolver::UNKNOWN; }
+		  int k=0; //number of multipliers != 0
+		  int ii=0;
+		  // writing the dual solution in the dual Vector of dimension +
+		  for (int i=0; i< sys.nb_var; i++)
+		    dual[i]=dual_solution[i];
+		  for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
+		    if (nb_lctrs[i]==2) {
+		      dual[sys.nb_var+i]=dual_solution[sys.nb_var+ii]+dual_solution[sys.nb_var+ii+1]; ii+=2;
+		    }
+		    else  if (nb_lctrs[i]==1) {
+		      dual[sys.nb_var+i]=dual_solution[sys.nb_var+ii]; ii++;
+		    }
+		    else {
+		      dual[sys.nb_var+i]=0.0;
+		    }
+		    if (std::abs(dual[sys.nb_var+i])>1e-10) k++;
+		  }
+		  
+		  if(k<2) { stat = LPSolver::UNKNOWN; }
 		}
 	} catch (LPException&) {
 		stat = LPSolver::UNKNOWN;
 	}
-
 	return stat;
 }
+
 
 int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
   int lvar = -1; 
@@ -109,7 +113,7 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 	//Linearization
 	LPSolver::Status_Sol stat = LPSolver::UNKNOWN;
 
-	Vector dual_solution(1);
+	Vector dual_solution(sys.nb_var+sys.f_ctrs.image_dim());
 
 	if (lsmode==LSMEAR_MG) { //compute the Jacobian in the midpoint
 		IntervalMatrix J2(sys.f_ctrs.image_dim(), sys.nb_var);
@@ -129,13 +133,13 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 		double max_Lmagn = 0.0;
 		int k=0;
 
-		for (int j=0; j<nbvars; j++) {
+		for (int j=0; j<sys.nb_var; j++) {
 			Interval lsmear=Interval(0.0);
 			if ((!too_small(box,j)) && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= prec(j))){
 				lsmear=dual_solution[j];
 
 				for (int i=0; i<sys.f_ctrs.image_dim(); i++){
-					lsmear += dual_solution[sys.nb_var+i] * J[i][j];
+				  lsmear += dual_solution[sys.nb_var+i] * J[i][j];
 				}
 			}
 

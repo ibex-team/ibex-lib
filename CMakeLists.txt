@@ -55,6 +55,15 @@ add_subdirectory (lp_lib_wrapper)
 add_subdirectory (src)
 
 ################################################################################
+# Generate ibex.pc
+################################################################################
+include (VarsPkgConfig)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/ibex.pc.in
+                ${CMAKE_CURRENT_BINARY_DIR}/ibex.pc @ONLY)
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/ibex.pc DESTINATION share/pkgconfig)
+
+
+################################################################################
 # Tests
 ################################################################################
 include(CTest)
