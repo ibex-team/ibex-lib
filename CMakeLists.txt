@@ -27,6 +27,16 @@ message (STATUS "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VER
 # TODO handle different type of build
 
 ################################################################################
+# Options for shared or static library
+################################################################################
+option (BUILD_SHARED_LIBS "Set to ON to build Ibex as a shared library" OFF)
+if (BUILD_SHARED_LIBS)
+  message (STATUS "Building libibex as shared library")
+else ()
+  message (STATUS "Building libibex as static library")
+endif ()
+
+################################################################################
 # Check that the compiler supports c++11
 ################################################################################
 include(CheckCXXCompilerFlag)
