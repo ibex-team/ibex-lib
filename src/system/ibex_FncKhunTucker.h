@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Apr 26, 2017
-// Last Update : May 17, 2019
+// Last Update : Jun 06, 2019
 //============================================================================
 
 #ifndef __IBEX_FNC_KHUN_TUCKER_H__
@@ -172,6 +172,21 @@ public:
 	 * Indices of variables with right bound active
 	 */
 	BitSet bound_right;
+
+	/**
+	 * Linear independence constraint qualification.
+	 *
+	 * If false, qualification is not respected
+	 * (resorting to Newton is useless in this case).
+	 *
+	 * Two typical situations:
+	 * - there are too many active inequalities (usually
+	 *   results from overestimation of interval arithmetic)
+	 * - the left and right bounds are simultaneously
+	 *   active for the same variable (results from too
+	 *   large domains)
+	 */
+	bool LICQ;
 };
 
 } /* namespace ibex */

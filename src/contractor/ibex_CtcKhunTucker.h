@@ -12,6 +12,7 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_NormalizedSystem.h"
+#include "ibex_FncKhunTucker.h"
 
 namespace ibex {
 
@@ -74,6 +75,8 @@ protected:
 	 * See constructor.
 	 */
 	bool reject_unbounded;
+
+	BoolInterval rejection_test(FncKhunTucker& fjf, IntervalMatrix& B);
 };
 
 } /* namespace ibex */
