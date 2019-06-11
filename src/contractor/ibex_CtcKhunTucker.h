@@ -27,6 +27,10 @@ public:
 	/**
 	 * \brief Build the contractor for a given NLP problem.
 	 *
+	 * The contractor takes a normalized system in argument but expects
+	 * an "extended" box in the "contract" function (in order to be uniform with
+	 * all other contractors in optimization).
+	 *
 	 * \warning: building this object is **costly** in both time and memory!
 	 *           Don't build this contractor on-the-fly.
 	 *
@@ -43,7 +47,11 @@ public:
 	CtcKhunTucker(const NormalizedSystem& sys, bool reject_unbounded=true);
 
 	/**
-	 * \see #Ctc
+	 * \see Contract function (see #Ctc).
+	 *
+	 * \param box: an "extended" box (in order to be uniform with
+	 *             all other contractors in optimization).
+	 *
 	 */
 	virtual void contract(IntervalVector& box);
 
@@ -76,7 +84,7 @@ protected:
 	 */
 	bool reject_unbounded;
 
-	BoolInterval rejection_test(FncKhunTucker& fjf, IntervalMatrix& B);
+	BoolInterval rejection_test(const FncKhunTucker& fjf, const IntervalMatrix& B) const;
 };
 
 } /* namespace ibex */
