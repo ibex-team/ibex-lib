@@ -55,7 +55,7 @@ CtcKhunTucker::~CtcKhunTucker() {
 	cout << " too many active=" << too_many_active << endl;
 	cout << " rejec test OK=" << rejec_test_OK << endl;
 	cout << " lu_OK=" << lu_OK << endl;
-	cout << " precond_OK" << precond_OK << endl;
+	cout << " precond_OK=" << precond_OK << endl;
 	cout << " newton KO preproc KO=" << newton_KO_preproc_KO << endl;
 	cout << " newton KO preproc OK=" << newton_KO_preproc_OK << endl;
 	cout << " newton OK preproc KO=" << newton_OK_preproc_KO << endl;
@@ -286,6 +286,9 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 		}
 
 	} catch(SingularMatrixException&) {
+		delete[] pr;
+		delete[] pc;
+		return; // Newton will fail.
 	}
 
 	delete[] pr;

@@ -24,6 +24,7 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestLinear);
 	CPPUNIT_TEST(lu_partial_underctr);
+	CPPUNIT_TEST(lu_complete_underctr);
 	CPPUNIT_TEST(gauss_seidel01);
 	CPPUNIT_TEST(gauss_seidel02);
 	CPPUNIT_TEST(gauss_seidel03);
