@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Function Tests
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Mar 23, 2012
+ * Last update : Jun 16, 2019
  * ---------------------------------------------------------------------------- */
 
 #include "TestFunction.h"
@@ -343,6 +344,16 @@ void TestFunction::generate_comp02() {
 	c=dynamic_cast<const ExprConstant*>(&f[2].expr());
 	CPPUNIT_ASSERT(c);
 	CPPUNIT_ASSERT(c->get_value()==Interval::zero());
+}
+
+void TestFunction::generate_comp03() {
+	Function f("x","((x,1);(1,2);(x,x))");
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f[1].expr());
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
+	CPPUNIT_ASSERT(c->get_vector_value().size()==2);
+	CPPUNIT_ASSERT(c->get_vector_value()[0]==Interval(1,1));
+	CPPUNIT_ASSERT(c->get_vector_value()[1]==Interval(2,2));
 }
 
 void TestFunction::used() {

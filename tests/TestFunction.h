@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Function Tests
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Mar 23, 2012
+ * Last update : Jun 16, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_FUNCTION_H__
@@ -75,6 +76,8 @@ public:
 	CPPUNIT_TEST(copy);
 	CPPUNIT_TEST(generate_comp01);
 	CPPUNIT_TEST(generate_comp02);
+	CPPUNIT_TEST(generate_comp03);
+
 	CPPUNIT_TEST(used);
 	CPPUNIT_TEST(used02);
 	CPPUNIT_TEST(numctr01);
@@ -129,6 +132,7 @@ public:
 
 	void generate_comp01();
 	void generate_comp02();
+	void generate_comp03(); // matrix-valued
 
 	void used();
 	void used02();

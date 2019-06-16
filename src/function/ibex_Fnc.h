@@ -106,7 +106,16 @@ public:
 	 *
 	 * \pre f must be matrix-valued
 	 */
-	virtual IntervalMatrix eval_matrix(const IntervalVector& x) const;
+	IntervalMatrix eval_matrix(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate f(x) using interval arithmetic.
+	 *
+	 * Default implementation: return [-oo,oo]x...x[-oo,oo].
+	 *
+	 * \pre f must be matrix-valued
+	 */
+	virtual IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows) const;
 
 	/**
 	 * \brief Calculate the gradient of f.
@@ -268,14 +277,23 @@ inline IntervalVector Fnc::eval_vector(const IntervalVector& box, const BitSet& 
 }
 
 inline IntervalMatrix Fnc::eval_matrix(const IntervalVector& box) const {
-	IntervalMatrix M(_image_dim.nb_rows(), _image_dim.nb_cols());
-	switch(_image_dim.type()) {
-	case Dim::SCALAR:     M[0][0]=eval(box); break;
-	case Dim::ROW_VECTOR: M[0]=eval_vector(box); break;
-	case Dim::COL_VECTOR: M.set_col(0,eval_vector(box)); break;
-	default: ibex_error("Fnc: 'eval_matrix' called with no implementation.");
-	}
-	return M;
+	if (_image_dim.type()==Dim::SCALAR) {
+		return IntervalMatrix(1,1,eval(box));
+	} else if (_image_dim.type()==Dim::ROW_VECTOR) {
+		IntervalMatrix M(1,_image_dim.nb_cols());
+		M.set_row(0,eval_vector(box));
+		return M;
+	} else if (_image_dim.type()==Dim::COL_VECTOR) {
+		IntervalMatrix M(_image_dim.nb_rows(),1);
+		M.set_col(0,eval_vector(box));
+		return M;
+	} else
+		return eval_matrix(box, BitSet::all(image_dim()));
+}
+
+inline IntervalMatrix Fnc::eval_matrix(const IntervalVector& box, const BitSet& rows) const {
+	ibex_error("Fnc: 'eval_matrix' called with no implementation.");
+	return IntervalMatrix(_image_dim.nb_rows(), _image_dim.nb_cols());
 }
 
 inline void Fnc::gradient(const IntervalVector& x, IntervalVector& g) const {

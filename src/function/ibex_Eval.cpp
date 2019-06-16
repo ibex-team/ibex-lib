@@ -86,7 +86,7 @@ Domain& Eval::eval(const IntervalVector& box) {
 	return *d.top;
 }
 
-IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
+Domain Eval::eval(const IntervalVector& box, const BitSet& components) {
 
 	d.write_arg_domains(box);
 
@@ -94,11 +94,11 @@ IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
 
 	int m=components.size();
 
-	IntervalVector res(m);
+	Domain res(d.top->dim.type()==Dim::ROW_VECTOR ?
+			Dim(1,m) : // in the case of a row vector, we select columns
+			Dim(m,d.top->dim.nb_cols())); // in the other cases we select rows
 
 	if (fwd_agenda==NULL) {
-
-		assert(!f.expr().dim.is_matrix());
 
 		// The vector of expression is heterogeneous (or the expression is scalar).
 		//
@@ -109,29 +109,26 @@ IntervalVector Eval::eval(const IntervalVector& box, const BitSet& components) {
 		//   no simple "on the fly" simplification as in the case of a vector
 		//   of homogeneous expressions)
 		// so we resort to the components functions f[i] --> symbolic copy+no DAG :(
-		int c;
-		for (int i=0; i<m; i++) {
-			c = (i==0 ? components.min() : components.next(c));
-			res[i] = f[c].eval(box);
+		int i=0;
+		for (BitSet::const_iterator c=components.begin(); c!=components.end(); ++c) {
+			res[i++] = f[c].eval_domain(box);
 		}
+		assert(i==m);
 
 		return res;
 	}
 
 	// merge all the agendas
-	int c;
 	Agenda a(f.nodes.size()); // the global agenda initialized with the maximal possible value
-	for (int i=0; i<m; i++) {
-		c = (i==0 ? components.min() : components.next(c));
+	for (BitSet::const_iterator c=components.begin(); c!=components.end(); ++c) {
 		a.push(*(fwd_agenda[c]));
 	}
 
 	try {
 		f.cf.forward<Eval>(*this,a);
-
-		for (int i=0; i<m; i++) {
-			c = (i==0 ? components.min() : components.next(c));
-			res[i] = d[bwd_agenda[c]->first()].i();
+		int i=0;
+		for (BitSet::const_iterator c=components.begin(); c!=components.end(); ++c) {
+			res[i++] = d[bwd_agenda[c]->first()];
 		}
 	} catch(EmptyBoxException&) {
 		d.top->set_empty();
