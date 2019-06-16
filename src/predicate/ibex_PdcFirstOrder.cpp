@@ -119,21 +119,14 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		}
 	}
 
-	// check for invertibility
-	int *p=new int[M+1]; // will not be used
-	int *q=new int[n];   // will not be used
-	IntervalMatrix LU(M+1,N); // will not be used
-	try {
-		// note: seems worse with complete pivoting
-		interval_LU(*J2, LU, p, q); //, q);
+	// rank check
+	if (full_rank(*J2))
 		// the matrix is rank M+1
 		res = NO;
-	} catch(SingularMatrixException&) {
+	else
 		res = MAYBE;
-	}
+
 	delete J2;
-	delete [] p;
-	delete [] q;
 	return res;
 }
 

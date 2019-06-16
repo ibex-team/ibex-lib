@@ -2,10 +2,10 @@
 //                                  I B E X                                   
 // File        : ibex_CtrGenerator.h
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Jun 12, 2012
+// Last Update : May 22, 2019
 //============================================================================
 
 #ifndef __IBEX_CTR_GENERATOR_H__
@@ -27,6 +27,7 @@ namespace parser {
 
 class P_NumConstraint;
 class P_OneConstraint;
+class P_TmpSymbolDecl;
 class P_ConstraintList;
 class P_ConstraintLoop;
 class P_ThickEquality;
@@ -40,6 +41,7 @@ public:
 
 	void visit(const P_NumConstraint& c);
 	void visit(const P_OneConstraint& c);
+	void visit(const P_TmpSymbolDecl& c);
 	void visit(const P_ConstraintList& l);
 	void visit(const P_ConstraintLoop& l);
 	void visit(const P_ThickEquality& e);

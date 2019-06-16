@@ -14,7 +14,7 @@ def options (opt):
 def configure (conf):
 	# The affine plugin is enabled if --with-affine or --with-affine-extended
 	# options are used.
-	if conf.options.WITH_AFFINE or conf.options.WITH_AFFINE_EXTEND:
+	if conf.options.WITH_AFFINE or (hasattr(conf.options,'WITH_AFFINE_EXTEND') and conf.options.WITH_AFFINE_EXTEND):
 		conf.env.WITH_AFFINE = True
 
 	conf.start_msg ("plugin Affine Arithmetic")

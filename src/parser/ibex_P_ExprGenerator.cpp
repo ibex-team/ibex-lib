@@ -244,15 +244,9 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::INFTY:      e.lab=LabelConst::pos_infinity(); break;
 			case P_ExprNode::VAR_SYMBOL: e.lab=new LabelNode(scope.get_var(((P_ExprVarSymbol&) e).name).first); break;
 			case P_ExprNode::CST_SYMBOL: e.lab=new LabelConst(scope.get_cst(((P_ExprCstSymbol&) e).name)); break;
-			case P_ExprNode::TMP_SYMBOL:
-				{
-					const P_ExprNode& e2=scope.get_expr_tmp_expr(((P_ExprTmpSymbol&) e).name);
-					visit(e2);
-					e.lab = new LabelNode(&e2.lab->node());
-				}
-				break;
-			case P_ExprNode::CST:     e.lab=new LabelConst(((P_ExprConstant&) e).value,true); break;
-			case P_ExprNode::ITER:    e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;
+			case P_ExprNode::TMP_SYMBOL: e.lab=new LabelNode(scope.get_expr_tmp_expr(((P_ExprTmpSymbol&) e).name)); break;
+			case P_ExprNode::CST:        e.lab=new LabelConst(((P_ExprConstant&) e).value,true); break;
+			case P_ExprNode::ITER:       e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;
 			case P_ExprNode::IDX:
 			case P_ExprNode::IDX_RANGE:
 			case P_ExprNode::IDX_ALL:

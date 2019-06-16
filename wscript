@@ -14,8 +14,6 @@ APPNAME='ibex-lib'
 top = '.'
 out = '__build__'
 
-ITVLIB_PLUGIN_PREFIX = "interval_lib_"
-
 ######################
 ###### options #######
 ######################
@@ -36,34 +34,8 @@ def options (opt):
 	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
 			help = "enable debugging")
 
-	# get the list of all possible interval library
-	plugin_node = opt.path.find_node("plugins")
-	libdir = plugin_node.ant_glob(ITVLIB_PLUGIN_PREFIX+"*", dir=True, src=False)
-	libdir = [ os.path.basename(str(d)) for d in libdir ]
-	list_of_interval_lib_plugin = [ d[len(ITVLIB_PLUGIN_PREFIX):] for d in libdir]
-	# set default interval library
-	deflib = "gaol" if not Utils.is_win32 else "filib"
-	if list_of_interval_lib_plugin == []: # this will raise a error at configure
-		default_interval_lib = None
-	elif deflib in list_of_interval_lib_plugin:
-		default_interval_lib = deflib
-	elif any(lib.startswith(deflib) for lib in list_of_interval_lib_plugin):
-		L = [ lib for lib in list_of_interval_lib_plugin if lib.startswith(deflib) ]
-		L.sort(key=LooseVersion)
-		default_interval_lib = L[-1] # choose the latest version
-	else: # use the first of the list as default
-		default_interval_lib = list_of_interval_lib_plugin[0]
-
-	# help string for --interval-lib command line option
-	help_string = "Possible values: " + ", ".join(list_of_interval_lib_plugin)
-	help_string += " [default: " + str(default_interval_lib) + "]"
-
-	# add the option --interval-lib
-	opt.add_option ("--interval-lib", action="store", dest="INTERVAL_LIB",
-									choices = list_of_interval_lib_plugin,
-									default = default_interval_lib, help = help_string)
-
-	ibexutils.lp_lib_options (opt)
+	opt.recurse ("interval_lib_wrapper")
+	opt.recurse ("lp_lib_wrapper")
 
 	# recurse on plugins directory
 	opt.recurse("plugins")
@@ -79,13 +51,10 @@ def configure (conf):
 	# For information
 	conf.msg ("sys.platform", sys.platform)
 
-	# Set LIBDIR and INCDIR, set them in env and put them in *_IBEX_DEPS
+	# Set LIBDIR and INCDIR, set them in env
 	conf.env.LIBDIR = os.path.join (conf.env.PREFIX, "lib")
-	conf.env.append_unique ("LIBPATH_IBEX_DEPS", conf.env.LIBDIR)
 	conf.env.INCDIR = os.path.join (conf.env.PREFIX, "include")
 	conf.env.INCDIR_HDR = os.path.join (conf.env.INCDIR, "ibex")
-	conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR)
-	conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_HDR)
 	conf.env.INCDIR_3RD = os.path.join (conf.env.INCDIR_HDR, "3rd")
 	conf.env.LIBDIR_3RD = os.path.join (conf.env.LIBDIR, "ibex", "3rd")
 	conf.env.PKGDIR = os.path.join (conf.env.PREFIX, "share", "pkgconfig")
@@ -100,9 +69,6 @@ def configure (conf):
 	# Put VERSION number in conf.env (needed to build ibex.pc) and in the settings
 	conf.env.VERSION = VERSION
 	conf.setting_define("RELEASE", conf.env["VERSION"])
-
-	# Set env variable with the prefix of plugins which handle interval arithmetic
-	conf.env.ITVLIB_PLUGIN_PREFIX = ITVLIB_PLUGIN_PREFIX
 
 	# Optimised compilation flags
 	if conf.options.DEBUG:
@@ -134,51 +100,11 @@ def configure (conf):
 	conf.env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
 	conf.env.append_unique ("FLEXFLAGS", "-Pibex")
 
-	# Recurse on the interval library directory.
-	if conf.options.INTERVAL_LIB is None:
-		conf.fatal ("No interval library is available.")
-	Logs.pprint ("BLUE", "Configuration of the library for interval arithmetic")
-	conf.msg ("Library for interval arithmetic", conf.options.INTERVAL_LIB)
-	itvlib_dir = ITVLIB_PLUGIN_PREFIX + conf.options.INTERVAL_LIB
-	conf.recurse (os.path.join("plugins", itvlib_dir))
-	# Copy in _IBEX_DEPS some important variables from _ITV_LIB
-	# The plugin must use the store ITV_LIB (uselib_store argument with
-	# conf.check* functions).
-	conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", conf.env.CXXFLAGS_ITV_LIB)
-	if conf.env.ENABLE_SHARED:
-		# if shared lib is used, 3rd party libs are compiled as static lib with
-		# -fPIC and are contained in libibex
-		for lib in conf.env.LIB_ITV_LIB:
-			if not lib in conf.env.LIB_3RD_LIST:
-				conf.env.append_unique ("LIB_IBEX_DEPS", lib)
-	else:
-		conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_ITV_LIB)
-
-	# The following variables must be defined in env by the plugin called to
-	# handle the library for interval arithmetic.
-	for var in ["INTERVAL_LIB", "IBEX_INTERVAL_LIB_WRAPPER_CPP",
-        "IBEX_INTERVAL_LIB_WRAPPER_H", "IBEX_INTERVAL_LIB_INCLUDES",
-        "IBEX_INTERVAL_LIB_NEG_INFINITY", "IBEX_INTERVAL_LIB_POS_INFINITY",
-        "IBEX_INTERVAL_LIB_EXTRA_DEFINES",
-        "IBEX_INTERVAL_LIB_ITV_EXTRA", "IBEX_INTERVAL_LIB_ITV_WRAP",
-        "IBEX_INTERVAL_LIB_ITV_ASSIGN", "IBEX_INTERVAL_LIB_ITV_DEF",
-        "IBEX_INTERVAL_LIB_DISTANCE"]:
-		if not conf.env[var]:
-			conf.fatal ("%s must be defined in env by the plugin %s"%(var,itvlib_dir))
-	if isinstance (conf.env.IBEX_INTERVAL_LIB_INCLUDES, list):
-		l = [ "#include \"%s\"" % s for s in conf.env.IBEX_INTERVAL_LIB_INCLUDES ]
-		conf.env.IBEX_INTERVAL_LIB_INCLUDES  = os.linesep.join (l)
-
-	# Add info on the interval library used to the settings
-	conf.setting_define("INTERVAL_LIB", conf.env["INTERVAL_LIB"])
-
-	# Configure LP library
-	conf.lp_lib ()
+	conf.recurse ("interval_lib_wrapper")
+	conf.recurse ("lp_lib_wrapper")
 
 	# recurse
 	Logs.pprint ("BLUE", "Configuration of the plugins")
-	conf.options.WITH_SOLVER = True
-	Logs.pprint  ("YELLOW", "Note: IbexSolve automatically installed.")
 	conf.recurse ("plugins")
 	Logs.pprint ("BLUE", "Configuration of the src directory")
 	conf.recurse ("src")
@@ -204,7 +130,8 @@ def configure (conf):
 	# Generate the main Ibex header which includes all the others headers
 	conf.env.ibex_header = "ibex.h"
 	conf.env.include_key = [ conf.env.ibex_header_setting ]
-	conf.env.include_key += [ os.path.basename(h) for h in conf.env.IBEX_HDR ]
+	conf.env.include_key += [ os.path.basename(h) for h in conf.env.IBEX_HDR
+	                                                  if not h.endswith (".inl") ]
 	conf.env.include_key = [ h[:-3] if h.endswith(".in") else h
                                             for h in conf.env.include_key ]
 	conf.write_config_header (conf.env.ibex_header, defines = False, top = True,
@@ -231,15 +158,16 @@ def build (bld):
 	# Generate ibex.pc, the pkg-config file
 	bld (features = "subst", source = "ibex.pc.in", target = "ibex.pc",
 				install_path = bld.env.PKGDIR,
-				PREFIX = ibexutils.escape_backslash_on_win32 (bld.env.PREFIX),
-				INCDIR = bld.path_pc_prefix (bld.env.INCDIR),
-				LIBDIR = bld.path_pc_prefix (bld.env.LIBDIR),
-				INCLUDES = " ".join(["-I" + bld.path_pc (i)
-										for i in bld.env.INCLUDES_IBEX_DEPS]),
-				CXXFLAGS = " ".join(bld.env.CXXFLAGS_IBEX_DEPS),
-				LIBPATH = " ".join(["-L" + bld.path_pc (i)
-										for i in bld.env.LIBPATH_IBEX_DEPS]),
-				LIBS = " ".join(["-l" + l for l in bld.env.LIB_IBEX_DEPS])
+				IBEX_VERSION = bld.env.VERSION,
+				CMAKE_INSTALL_PREFIX = ibexutils.escape_backslash_on_win32 (bld.env.PREFIX),
+				CMAKE_INSTALL_INCLUDEDIR = bld.path_pc_remove_prefix (bld.env.INCDIR),
+				CMAKE_INSTALL_LIBDIR = bld.path_pc_remove_prefix (bld.env.LIBDIR),
+				IBEX_PKGCONFIG_INCDIRS = " ".join(["-I" + bld.path_pc (i)
+				                                  for i in bld.env.INCLUDES_IBEX_DEPS]),
+				IBEX_PKGCONFIG_CXXFLAGS = " ".join(bld.env.CXXFLAGS_IBEX_DEPS),
+				IBEX_PKGCONFIG_LINK_DIRS = " ".join(["-L" + bld.path_pc (i)
+				                                   for i in bld.env.LIBPATH_IBEX_DEPS]),
+				IBEX_PKGCONFIG_LIBS = " ".join(["-l" + l for l in bld.env.LIB_IBEX_DEPS])
 		)
 
 	# Install ibex main header and header with settings

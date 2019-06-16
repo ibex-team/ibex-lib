@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Apr 26, 2017
-// Last Update : May 09, 2019
+// Last Update : Jun 06, 2019
 //============================================================================
 
 #include <stdlib.h>
@@ -23,7 +23,8 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 								eq(BitSet::empty(sys.f_ctrs.image_dim())),
 								ineq(BitSet::empty(sys.f_ctrs.image_dim())),
 								bound_left(BitSet::empty(sys.nb_var)),
-								bound_right(BitSet::empty(sys.nb_var)) {
+								bound_right(BitSet::empty(sys.nb_var)),
+								LICQ(true /* by default */) {
 
 	int l=1; // lambda0
 
@@ -40,6 +41,7 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 	}
 	l+=active.size();
 
+
 	for (int j=0; j<sys.box.size(); j++) {
 		if (current_box[j].lb() <= sys.box[j].lb()) {
 			bound_left.add(j);
@@ -47,7 +49,9 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 			l++;
 		}
 		if (current_box[j].ub() >= sys.box[j].ub()) {
+			if (bound_left[j]) LICQ=false;
 			bound_right.add(j);
+
 			//cout << " right bound n°" << j << " active\n";
 			l++;
 		}
@@ -61,6 +65,9 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 	assert(_nb_var == sys.nb_var + eq.size() + ineq.size() + bound_left.size() + bound_right.size() + 1);
 
 	(Dim&) _image_dim = Dim(_nb_var, 1);
+
+	if (nb_mult > sys.nb_var+1) // +1 because of lambda0
+		LICQ = false;
 
 }
 
@@ -109,6 +116,7 @@ IntervalMatrix FncKhunTucker::gradients(const IntervalVector& x) const {
 IntervalVector FncKhunTucker::eval_vector(const IntervalVector& x_lambda, const BitSet& components) const {
 
 	if (components.size()!=n+nb_mult) {
+		// TODO
 		not_implemented("FncKhunTucker: 'eval_vector' for selected components");
 		//J.resize(n+nb_mult,n+nb_mult);
 	}
@@ -186,81 +194,133 @@ void FncKhunTucker::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, 
 	int l=lambda0; // mutipliers indices counter. The first multiplier is lambda0.
 
 	// matrix corresponding to the "Hessian expression" lambda_0*d^2f+lambda_1*d^2g_1+...=0
-	IntervalMatrix hessian=x_lambda[l] * df.jacobian(x,v<n? v : -1); // init
+	IntervalMatrix hessian(n,n);
+	if (v==-1 || v<n) hessian = x_lambda[l] * df.jacobian(x,v); // init
 	if (v==-1 || v==l) J.put(0, l, df.eval_vector(x), false);
 
 	l++;
 
 	IntervalVector gx;
-	if (!active.empty())
+	if ((v==-1 || v>=n) && !active.empty())
 		gx = sys.f_ctrs.eval_vector(x,active);
 
 	// normalization equation (init)
-	J[lambda0].put(0,Vector::zeros(n));
-	J[lambda0][lambda0]=1.0;
+	if (v==-1) {
+		J[lambda0].put(0,Vector::zeros(n));
+		J[lambda0][lambda0]=1.0;
+	} else if (v<n)
+		J[lambda0][v] = 0;
+	else if (v==lambda0)
+		J[lambda0][lambda0]=1.0;
 
 	IntervalVector dgi(n); // store dg_i([x]) (used in several places)
 
 	for (BitSet::const_iterator i=ineq.begin(); i!=ineq.end(); ++i) {
-		hessian += x_lambda[l] * dg[i].jacobian(x,v<n? v : -1);
-		dgi=dg[i].eval_vector(x);
-		J.put(0, l, dgi, false);
-
-		J.put(l, 0, (x_lambda[l]*dgi), true);
-		J.put(l, n, Vector::zeros(nb_mult), true);
-		J[l][l]=gx[i];
-
-		J[lambda0][l] = 1.0;
-
-		l++;
-	}
-
-	for (BitSet::const_iterator i=ineq.begin(); i!=ineq.end(); ++i) {
-		hessian += x_lambda[l] * dg[i].jacobian(x,v<n? v : -1);
-		dgi=dg[i].eval_vector(x);
-		J.put(0, l, dgi, false);
-
-		J.put(l, 0, dgi, true);
-		J.put(l, n, Vector::zeros(nb_mult), true);
-
-		J[lambda0][l] = 2*x_lambda[l];
+		if (v==-1) {
+			hessian += x_lambda[l] * dg[i].jacobian(x);
+			dgi=dg[i].eval_vector(x);
+			J.put(0, l, dgi, false);
+			J.put(l, 0, (x_lambda[l]*dgi), true);
+			J.put(l, n, Vector::zeros(nb_mult), true);
+			J[l][l] = gx[i];
+			J[lambda0][l] = 1.0;
+		} else if (v==l) {
+			J.put(0, l, dg[i].eval_vector(x), false);
+			J[l][l] = gx[i];
+			J[lambda0][l] = 1.0;
+		} else if (v<n) {
+			hessian += x_lambda[l] * dg[i].jacobian(x,v);
+			J[l][v] = x_lambda[l]*dg[i].eval(v,x);
+		} else {
+			J[l][v] = 0;
+		}
 
 		l++;
 	}
 
-	for (BitSet::const_iterator v=bound_left.begin(); v!=bound_left.end(); ++v) {
+	for (BitSet::const_iterator i=eq.begin(); i!=eq.end(); ++i) {
+		if (v==-1) {
+			hessian += x_lambda[l] * dg[i].jacobian(x,v);
+			dgi=dg[i].eval_vector(x);
+			J.put(0, l, dgi, false);
+			J.put(l, 0, dgi, true);
+			J.put(l, n, Vector::zeros(nb_mult), true);
+			J[lambda0][l] = 2*x_lambda[l];
+		} else if (v==l) {
+			J.put(0, l, dg[i].eval_vector(x), false);
+			J[l][l] = 0;
+			J[lambda0][l] = 2*x_lambda[l];
+		} else if (v<n) {
+			hessian += x_lambda[l] * dg[i].jacobian(x,v);
+			J[l][v] = dg[i].eval(v,x);
+		} else {
+			J[l][v] = 0;
+		}
+
+		l++;
+	}
+
+	for (BitSet::const_iterator i=bound_left.begin(); i!=bound_left.end(); ++i) {
 		// this constraint does not contribute to the "Hessian expression"
-		dgi=Vector::zeros(n);
-		dgi[v]=-1.0;
-		J.put(0, l, dgi, false);
+		if (v==-1) {
+			dgi=Vector::zeros(n);
+			dgi[i]=-1.0;
+			J.put(0, l, dgi, false);
 
-		J.put(l, 0, (x_lambda[l]*dgi), true);
-		J.put(l, n, Vector::zeros(nb_mult), true);
-		J[l][l]=(-x[v]+sys.box[v].lb());
+			J.put(l, 0, (x_lambda[l]*dgi), true);
+			J.put(l, n, Vector::zeros(nb_mult), true);
+			J[l][l] = -x[i]+sys.box[i].lb();
+			J[lambda0][l] = 1.0;
+		} else if (v==l) {
+			dgi=Vector::zeros(n);
+			dgi[i]=-1.0;
+			J.put(0, l, dgi, false);
+			J[l][l] = -x[i]+sys.box[i].lb();
+			J[lambda0][l] = 1.0;
+		} else if (v<n) {
+			J[l][v] = (v==i? -x_lambda[l] : 0);
+		} else {
+			J[l][v] = 0;
+		}
 
-		J[lambda0][l] = 1.0;
+
 		l++;
 	}
 
 
-	for (BitSet::const_iterator v=bound_right.begin(); v!=bound_right.end(); ++v) {
+	for (BitSet::const_iterator i=bound_right.begin(); i!=bound_right.end(); ++i) {
 		// this constraint does not contribute to the "Hessian expression"
-		dgi=Vector::zeros(n);
-		dgi[v]=1.0;
-		J.put(0, l, dgi, false);
+		if (v==-1) {
+			dgi=Vector::zeros(n);
+			dgi[i]=1.0;
+			J.put(0, l, dgi, false);
 
-		J.put(l, 0, (x_lambda[l]*dgi), true);
-		J.put(l, n, Vector::zeros(nb_mult), true);
-		J[l][l]=(x[v]-sys.box[v].ub());
+			J.put(l, 0, (x_lambda[l]*dgi), true);
+			J.put(l, n, Vector::zeros(nb_mult), true);
+			J[l][l] = x[i]-sys.box[i].ub();
 
-		J[lambda0][l] = 1.0;
+			J[lambda0][l] = 1.0;
+		} else if (v==l) {
+			dgi=Vector::zeros(n);
+			dgi[i]=1.0;
+			J.put(0, l, dgi, false);
+			J[l][l] = x[i]-sys.box[i].ub();
+			J[lambda0][l] = 1.0;
+
+		} else if (v<n) {
+			J[l][v] = (v==i? x_lambda[l] : 0);
+		} else {
+			J[l][v] = 0;
+		}
+
+
 		l++;
 	}
 
 	assert(l==nb_mult+n);
 
-	J.put(0,0,hessian);
-
+	if (v==-1 || v<n)
+		J.put(0,0,hessian);
 }
 
 

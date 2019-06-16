@@ -5,53 +5,39 @@ import ibexutils
 
 from waflib import Configure
 
-@Configure.conf
-def get_plugins (conf):
-	plugins = ibexutils.get_dirlist (conf.path)
-	is_plugin = lambda p: not p.startswith (conf.env.ITVLIB_PLUGIN_PREFIX) \
-	                  and not p.startswith (conf.env.LPLIB_PLUGIN_PREFIX)
-	return [ p for p in plugins if is_plugin (p) ]
-
 ######################
 ###### options #######
 ######################
 def options (opt):
-	#call "options" for each surdir
-	subdir = ibexutils.get_dirlist (opt.path)
-	opt.recurse (subdir)
+	# Call "options" for each surdir
+	opt.recurse (ibexutils.get_dirlist (opt.path))
 
 ######################
 ##### configure ######
 ######################
 def configure (conf):
-	#call "configure" of each plugin (not all subdir, because some subdir
-	# correspond to interval libraries and only one is used (configure for this
-	# library is called from top wscript))
-	plugins = conf.get_plugins ()
-	conf.recurse (plugins)
+	# Call "configure" for each surdir
+	conf.recurse (ibexutils.get_dirlist (conf.path))
 
 ######################
 ####### build ########
 ######################
 def build (bld):
-	#call "build" for each plugin (not all subdir, cf comments for configure)
-	plugins = bld.get_plugins ()
-	bld.recurse (plugins)
+	# Call "build" for each surdir
+	bld.recurse (ibexutils.get_dirlist (bld.path))
 
 ######################
 ####### utest ########
 ######################
 def utest (tst):
-	# Call "utest" for each plugin (not all subdir, cf comments for configure).
+	# Call "utest" for each surdir
 	# Plugin may not have tests so we add "mandatory = False"
-	plugins = tst.get_plugins ()
-	tst.recurse (plugins, mandatory = False)
+	tst.recurse (ibexutils.get_dirlist (tst.path), mandatory = False)
 
 ######################
 ##### benchmarks #####
 ######################
 def benchmarks (bch):
-	# Call "benchmarks" for each plugin (not all subdir, cf comments for
-	# configure). Plugin may not have benchmarks so we add "mandatory = False"
-	plugins = bch.get_plugins ()
-	bch.recurse (plugins, mandatory = False)
+	# Call "benchmarks" for each surdir
+	# Plugin may not have benchmarks so we add "mandatory = False"
+	bch.recurse (ibexutils.get_dirlist (bch.path), mandatory = False)

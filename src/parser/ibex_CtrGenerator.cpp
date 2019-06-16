@@ -2,10 +2,10 @@
 //                                  I B E X                                   
 // File        : ibex_CtrGenerator.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Jun 12, 2012
+// Last Update : May 22, 2019
 //============================================================================
 
 #include "ibex_CtrGenerator.h"
@@ -69,6 +69,12 @@ void CtrGenerator::visit(const P_OneConstraint& c) {
 	}
 }
 
+void CtrGenerator::visit(const P_TmpSymbolDecl& tmp) {
+	// TODO: if the temporary symbol is never used,
+	// the generated expression is a memory leak
+	scopes().top().add_expr_tmp_symbol(tmp.symbol, &tmp.expr.generate());
+}
+
 void CtrGenerator::visit(const P_ConstraintList& list) {
 	for (vector<P_NumConstraint*>::const_iterator it=list.ctrs.begin(); it!=list.ctrs.end(); it++) {
 		visit(**it);
@@ -81,15 +87,13 @@ void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	int begin=loop.first_value._2int();
 	int end=loop.last_value._2int();
 
-	scopes().push(scopes().top());
-
-	scopes().top().add_iterator(name);
-
 	for (int i=begin; i<=end; i++) {
+		scopes().push(scopes().top());
+		scopes().top().add_iterator(name);
 		scopes().top().set_iter_value(name,i);
 		visit(loop.ctrs);
+		scopes().pop();
 	}
-	scopes().pop();
 }
 
 void CtrGenerator::visit(const P_ThickEquality& eq) {

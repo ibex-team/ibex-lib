@@ -1,0 +1,13 @@
+
+variables
+ x[4] in [-10,10];
+
+constraints
+    x(1)=1;
+	for i=2:3;
+	  tmp=i;
+	  x(i)=tmp;
+	end;
+    tmp=4;
+    x(4)=tmp;
+end

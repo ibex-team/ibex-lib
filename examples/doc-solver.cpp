@@ -10,10 +10,6 @@
 
 #include "ibex.h"
 
-#ifndef _IBEX_WITH_SOLVER_
-#error "You need the IbexSolve plugin to run this example."
-#endif
-
 #ifndef _IBEX_WITH_OPTIM_
 #error "You need the IbexOpt plugin to run this example."
 #endif

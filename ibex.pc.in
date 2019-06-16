@@ -1,9 +1,9 @@
-prefix=@PREFIX@
-includedir=@INCDIR@
-libdir=@LIBDIR@
+prefix=@CMAKE_INSTALL_PREFIX@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
 
 Name: ibex
 Description: A C++ library for interval-based algorithm design
-Version: @VERSION@
-Cflags: @INCLUDES@ @CXXFLAGS@
-Libs: @LIBPATH@ -libex @LIBS@
+Version: @IBEX_VERSION@
+Cflags: -I${includedir} -I${includedir}/ibex @IBEX_PKGCONFIG_INCDIRS@ @IBEX_PKGCONFIG_CXXFLAGS@
+Libs: -L${libdir} -libex @IBEX_PKGCONFIG_LINK_DIRS@ @IBEX_PKGCONFIG_LIBS@

@@ -17,6 +17,7 @@
 
 using namespace std;
 
+static int rejec_test_OK=0;
 static int newton_OK_preproc_OK=0;
 static int newton_OK_preproc_KO=0;
 static int newton_KO_preproc_OK=0;
@@ -27,75 +28,177 @@ static int precond_OK=0;
 
 namespace ibex {
 
-CtcKhunTucker::CtcKhunTucker(const NormalizedSystem& sys, bool reject_unbounded) : Ctc(sys.nb_var), sys(sys), reject_unbounded(reject_unbounded) {
+CtcKhunTucker::CtcKhunTucker(const NormalizedSystem& sys, bool reject_unbounded) : Ctc(sys.nb_var+1 /* extended box expected*/), sys(sys), reject_unbounded(reject_unbounded) {
 	try {
 		df = new Function(*sys.goal,Function::DIFF);
+
+		if (sys.nb_ctr>0) {
+			dg = new Function*[sys.f_ctrs.image_dim()];
+
+			for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
+				dg[i] = new Function(sys.f_ctrs[i], Function::DIFF);
+			}
+		} else {
+			dg = NULL;
+		}
+
 	} catch(Exception&) {
 		//TODO: replace with ExprDiffException.
 		// Currently, DimException is also sometimes raised.
-		cerr << "Warning: symbolic differentiation of the goal function has failed ==> first-order contraction disabled" << endl;
+		cerr << "Warning: symbolic differentiation has failed ==> KKT contractor disabled" << endl;
 		df = NULL;
-	}
-
-	if (sys.nb_ctr>0) {
-		dg = new Function*[sys.nb_ctr];
-
-		for (int i=0; i<sys.nb_ctr; i++) {
-			if (!sys.ctrs[i].f.expr().dim.is_scalar())
-				not_implemented("Khun-Tucker conditions with vector/matrix constraints.");
-
-			dg[i] = new Function(sys.ctrs[i].f,Function::DIFF);
-		}
-	} else {
 		dg = NULL;
 	}
 }
 
 CtcKhunTucker::~CtcKhunTucker() {
-	cout << " newton OK preproc OK=" << newton_OK_preproc_OK << endl;
-	cout << " newton OK preproc KO=" << newton_OK_preproc_KO << endl;
-	cout << " newton KO preproc OK=" << newton_KO_preproc_OK << endl;
-	cout << " newton KO preproc KO=" << newton_KO_preproc_KO << endl;
 	cout << " too many active=" << too_many_active << endl;
+	cout << " rejec test OK=" << rejec_test_OK << endl;
 	cout << " lu_OK=" << lu_OK << endl;
 	cout << " precond_OK" << precond_OK << endl;
+	cout << " newton KO preproc KO=" << newton_KO_preproc_KO << endl;
+	cout << " newton KO preproc OK=" << newton_KO_preproc_OK << endl;
+	cout << " newton OK preproc KO=" << newton_OK_preproc_KO << endl;
+	cout << " newton OK preproc OK=" << newton_OK_preproc_OK << endl;
 
 	if (df) delete df;
-	if (dg!=NULL) delete[] dg;
+	if (dg!=NULL) {
+		for (int i=0; i<sys.f_ctrs.image_dim(); i++)
+			delete dg[i];
+		delete[] dg;
+	}
+}
+
+BoolInterval CtcKhunTucker::rejection_test(const FncKhunTucker& fjf, const IntervalMatrix& grads) const {
+	BoolInterval res;
+	int n=sys.nb_var; // !! <> nb_var !!
+	int m=grads.nb_cols();
+
+
+	// To be more efficient, we know that if the jth
+	// column is a bound constraint on the ith variable,
+	// the rank of the matrix is the same as the matrix
+	// obtained by removing the ith row and jth column.
+	const IntervalMatrix* B2;
+
+	int N = n - fjf.bound_left.size() - fjf.bound_right.size(); // final number of rows
+
+	if (m>N) {
+		return MAYBE;
+	}  // if m>N: cannot be of rank m --> skip this test
+
+
+	if (N==n) {
+		B2=&grads; // useless to build J a second time.
+	} else {
+		B2 = new IntervalMatrix(N,m);
+		int i2=0; // counts rows of B2
+		for (int i=0; i<n; i++) {
+			if (!fjf.bound_left[i] && !fjf.bound_right[i])
+				((IntervalMatrix*) B2)->set_row(i2++,grads.row(i));
+		}
+		assert(i2==N);
+	}
+
+
+	// multiplier sign test
+	if (fjf.eq.empty()) { // works with inequalities only
+		for (int j=0; j<N; j++) {
+			bool sign;
+
+			if ((*B2)[j][0].lb()>0)
+				sign=true;
+			else if ((*B2)[j][0].ub()<0)
+				sign=false;
+			else
+				continue;
+
+			int i=0;
+			for (; i<m; i++) {
+				if (sign) {
+					if ((*B2)[j][i].lb()<=0) break;
+				} else {
+					if ((*B2)[j][i].ub()>=0) break;
+				}
+			}
+			if (i==m) { // the whole column has the same sign
+				if (N<n) delete B2;
+				return NO;
+			}
+		}
+	}
+
+	// rank check
+	if (full_rank(*B2))
+		// the matrix is rank M+1
+		res = NO;
+	else
+		res = MAYBE;
+
+	if (N<n) delete B2;
+
+	return res;
 }
 
 void CtcKhunTucker::contract(IntervalVector& box) {
 
-	if (df==NULL) return;
+	if (df==NULL);
+
+	if (box.is_empty()) return;
 
 	if (reject_unbounded && box.is_unbounded()) return;
 
-//	if (sys.nb_ctr==0) {
-//		if (box.is_strict_interior_subset(sys.box)) {
-//			// for unconstrained optimization we benefit from a cheap
-//			// contraction with gradient=0, before running Newton.
-//
-//			if (nb_var==1)
-//				df->backward(Interval::zero(),box);
-//			else
-//				df->backward(IntervalVector(nb_var,Interval::zero()),box);
-//		}
-//	}
-//
-//	if (box.is_empty()) return;
+	int n=sys.nb_var; // !! <> nb_var !!
+
+	IntervalVector x=box.subvector(0,n-1);
 
 	//if (box.max_diam()>1e-1) return; // do we need a threshold?
 	// =========================================================================================
-	BitSet active=sys.active_ctrs(box);
+	BitSet active=sys.active_ctrs(x);
 
-	FncKhunTucker fjf(sys,*df,dg,box,BitSet::all(sys.nb_ctr)); //active);
+	FncKhunTucker fjf(sys,*df,dg,x,active);
 
-	// we consider that Newton will not succeed if there are more
-	// than n active constraints.
-	if ((fjf.eq.empty() && fjf.nb_mult > sys.nb_var+1) ||
-		(!fjf.eq.empty() && fjf.nb_mult > sys.nb_var)) {
-		//cout << fjf.nb_mult << endl;
+	if (fjf.nb_mult==1) { // <=> no active constraint
+		// for unconstrained optimization we benefit from a cheap
+		// contraction with gradient=0, before running Newton.
+
+		if (n==1)
+			df->backward(Interval::zero(),x);
+		else
+			df->backward(IntervalVector(n,Interval::zero()),x);
+
+		if (x.is_empty()) { box.set_empty(); return; }
+		else box.put(0,x);
+	}
+
+	// not qualified constraints ==> useless to go further
+	if (!fjf.LICQ) {
 		too_many_active++;
+		return;
+	}
+
+	int M=active.size();
+
+	// Calculate gradients of f and in/equalities
+	// and store them in a matrix B
+	IntervalMatrix B(n, M+1); // +1 because we add the gradient of f
+	int mult=0;
+
+	B.put(0, mult++, df->eval_vector(x), false); // init
+
+	for (BitSet::const_iterator i=fjf.ineq.begin(); i!=fjf.ineq.end(); ++i) {
+		B.put(0, mult++, dg[i]->eval_vector(x), false);
+	}
+
+	for (BitSet::const_iterator i=fjf.eq.begin(); i!=fjf.eq.end(); ++i) {
+		B.put(0, mult++, dg[i]->eval_vector(x), false);
+	}
+
+	assert(mult==M+1);
+
+	if (rejection_test(fjf,B)==NO) {
+		rejec_test_OK++;
+		box.set_empty();
 		return;
 	}
 
@@ -105,19 +208,31 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 
 	int *pr;
 	int *pc=new int[fjf.nb_mult];
-	IntervalMatrix A(fjf.eq.empty() ? sys.nb_var+1 : sys.nb_var, fjf.nb_mult);
 
-	if (fjf.eq.empty()) {
-		A.put(0,0, fjf.gradients(box));
-		A.put(sys.nb_var, 0, Vector::ones(fjf.nb_mult), true); // normalization equation
-		pr = new int[sys.nb_var+1]; // selected rows
-	} else {
-		A = fjf.gradients(box);
-		pr = new int[sys.nb_var]; // selected rows
+	IntervalMatrix A=Matrix::zeros(n+1, fjf.nb_mult);
+
+	// inequalities + equalities
+	A.put(0,0,B);
+
+	for (BitSet::const_iterator v=fjf.bound_left.begin(); v!=fjf.bound_left.end(); ++v) {
+		A[v][mult++] = -1;
 	}
 
-	IntervalMatrix LU(A);
+	for (BitSet::const_iterator v=fjf.bound_right.begin(); v!=fjf.bound_right.end(); ++v) {
+		A[v][mult++] = +1;
+	}
 
+	assert(mult==fjf.nb_mult);
+
+	// normalization equation
+	A.put(n, 0, Vector::ones(fjf.nb_mult), true);
+	if (!fjf.eq.empty())
+		A.put(n, fjf.ineq.size()+1,IntervalVector(fjf.eq.size(),Interval(-1,1)), true);
+	// ----------------------
+	//cout << "A=" << A << endl;
+	pr = new int[n+1]; // selected rows
+
+	IntervalMatrix LU(A);
 
 	bool preprocess_success=false;
 
@@ -126,6 +241,12 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 
 //		if (A.nb_rows()>A.nb_cols()) {
 		//cout << "A=" << A << endl;
+
+		// note: under constraint qualififaction, the
+		// gradients of the system is of rank M,
+		// so, adding the normalization equation usually
+		// results in a system of rank nb_mult=(M+1).
+
 		interval_LU(A,LU,pr,pc);
 		lu_OK++;
 		//cout << "LU success\n";
@@ -135,16 +256,17 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 
 		Vector b2=Vector::zeros(fjf.nb_mult);
 
+		// we select the "best" rows from A
 		for (int i=0; i<fjf.nb_mult; i++) {
 			A2.set_row(i, A.row(pr[i]));
-			if (pr[i]==sys.nb_var) // right-hand side of normalization is 1
+			if (pr[i]==n) // right-hand side of normalization is 1
 				b2[i]=1;
 		}
-		//cout << "\n\nA2=" << A2 << endl;
+		//cout << "\n\nA2=" << A2 << " b2=" << b2 << endl;
 		precond(A2);
-		//cout << "precond success\n";
 		precond_OK++;
 		gauss_seidel(A2,b2,lambda);
+		//cout << "precond success: lambda=" << lambda << "\n";
 
 		double maxdiam=0;
 		for (int i=0; i<A.nb_rows(); i++) {
@@ -169,19 +291,11 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 	delete[] pr;
 	delete[] pc;
 
-	if (!preprocess_success) return;
+	//if (!preprocess_success) return;
 
-	CtcNewton newton(fjf,1);
-	IntervalVector full_box = cart_prod(box, lambda);
+	CtcNewton newton(fjf,2); //ceiling=2 because equality multipliers often have domain=[-1,1]
 
-
-	// =========================================================================================
-//	CtcNewton newton(fjc.f,1);
-//
-//	IntervalVector full_box = cart_prod(box, IntervalVector(fjc.M+fjc.R+fjc.K+1,Interval(0,1)));
-//
-//	full_box.put(fjc.n+fjc.M+fjc.R+1,IntervalVector(fjc.K,Interval::zero()));
-	// =========================================================================================
+	IntervalVector full_box = cart_prod(x, lambda);
 
 	IntervalVector save(full_box);
 
@@ -193,10 +307,10 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 		box.set_empty();
 	}
 	else {
-		if (save.subvector(0,sys.nb_var-1)!=full_box.subvector(0,sys.nb_var-1)) {
+		if (save.subvector(0,n-1)!=full_box.subvector(0,n-1)) {
 			if (preprocess_success) newton_OK_preproc_OK++;
 			else newton_OK_preproc_KO++;
-			box = full_box.subvector(0,sys.nb_var-1);
+			box.put(0,full_box.subvector(0,n-1));
 		} else {
 			if (preprocess_success) {
 				newton_KO_preproc_OK++;

@@ -1,0 +1,79 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import ibexutils
+import os, sys
+from waflib import Logs
+
+######################
+###### options #######
+######################
+def options (opt):
+    grp_name = "Filib options (when --interval-lib=filib is used)"
+    grp = opt.add_option_group (grp_name)
+    grp.add_option ("--filib-dir", action="store", type="string", dest="FILIB_PATH", default = "", help = "location of the Filib lib and include directories (by default use the one in 3rd directory)")
+    grp.add_option ("--disable-sse2", action="store_true", dest="DISABLE_SSE2", default = False, help = "do not use SSE2 optimizations")
+
+######################
+##### configure ######
+######################
+def configure (conf):
+    if conf.env["INTERVAL_LIB"]:
+        conf.fatal ("Trying to configure a second library for interval arithmetic")
+    conf.env["INTERVAL_LIB"] = "FILIB"
+
+    filib_dir = conf.options.FILIB_PATH
+
+    if filib_dir != "":
+        conf.msg ("Using library filib from", filib_dir)
+        filib_include = os.path.join (filib_dir, "include")
+        filib_lib = os.path.join (filib_dir, "lib")
+        conf.env.append_unique ("INCLUDES_IBEX_DEPS", filib_include)
+        conf.env.append_unique ("LIBPATH_IBEX_DEPS", filib_lib)
+    else:
+        conf.msg ("Using library filib from", "3rd/ subdirectory")
+        filib_archive = "filibsrc-3.0.2.2.tar.gz"
+        filib_ret = conf.configure_3rd_party_with_autotools (filib_archive)
+        _, filib_include, filib_lib = filib_ret
+        conf.env.INSTALL_3RD = True
+        conf.env.append_unique ("LIB_3RD_LIST", "prim" )
+
+    # Looking for filib header and library (called prim)
+    conf.check_cxx (header_name="interval/interval.hpp", includes = filib_include,
+        use = [ "IBEX", "ITV_LIB" ], uselib_store= "ITV_LIB")
+    conf.check_cxx (lib = "prim", libpath = filib_lib,
+        use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
+
+    # XXX: Why are these flags necessary ? 
+    # It is necessary to use filib, to avoid problem with x80 processor
+#==============================================================================
+#        This option prevents undesirable excess precision on machines such
+#        as the 68000 where the floating registers (of the 68881) keep more
+#        precision than a "double" is supposed to have.  Similarly for the
+#        x86 architecture.  For most programs, the excess precision does
+#        only good, but a few programs rely on the precise definition of
+#        IEEE floating point.  Use -ffloat-store for such programs, after
+#        modifying them to store all pertinent intermediate computations
+#        into variables.
+#==============================================================================
+    for f in ["-frounding-math", "-ffloat-store"]:
+        conf.check_cxx (cxxflags = f, uselib_store = "ITV_LIB")
+
+
+    # Looking for filib headers and library.
+    # We also test if we need to add sse2 or sse3 flags.
+    D = {"header_name": "interval/interval.hpp", "mandatory": False, "errmsg": "no",
+                "includes": filib_include, "use": [ "IBEX", "ITV_LIB" ],
+                "uselib_store": "ITV_LIB"}
+    if conf.env.DISABLE_SSE2:
+        conf.check_cxx( header_name="interval/interval.hpp", includes=filib_include, use=[ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB" )
+    else:
+        D["cxxflags"] = "-msse3"
+        D["msg"] = "Checking for header "+D["header_name"]+" with "+D["cxxflags"]
+        ret = conf.check_cxx (**D)
+        if not ret:
+            D["cxxflags"] = "-msse2"
+            D["msg"] = "Checking for header "+D["header_name"]+" with "+D["cxxflags"]
+            ret = conf.check_cxx (**D)
+        if not ret:
+            conf.check_cxx( header_name="interval/interval.hpp", includes=filib_include, use=[ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB" )
