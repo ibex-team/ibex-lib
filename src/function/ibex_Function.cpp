@@ -29,7 +29,8 @@ Function::~Function() {
 		 * This is not a very consistent choice...
 		 */
 		if (image_dim()>1) {
-			for (int i=0; i<image_dim(); i++)
+			int m=_image_dim.is_vector() ? _image_dim.vec_size() : _image_dim.nb_rows();
+			for (int i=0; i<m; i++)
 				if (!zero || comp[i]!=zero) delete comp[i];
 		}
 		if (zero) delete zero;
