@@ -239,9 +239,6 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 	try {
 		IntervalMatrix A2(fjf.nb_mult, fjf.nb_mult);
 
-//		if (A.nb_rows()>A.nb_cols()) {
-		//cout << "A=" << A << endl;
-
 		// note: under constraint qualififaction, the
 		// gradients of the system is of rank M,
 		// so, adding the normalization equation usually
@@ -249,10 +246,6 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 
 		interval_LU(A,LU,pr,pc);
 		lu_OK++;
-		//cout << "LU success\n";
-
-//		} else
-//			cout << "bypass LU\n";
 
 		Vector b2=Vector::zeros(fjf.nb_mult);
 
@@ -262,11 +255,9 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 			if (pr[i]==n) // right-hand side of normalization is 1
 				b2[i]=1;
 		}
-		//cout << "\n\nA2=" << A2 << " b2=" << b2 << endl;
 		precond(A2);
 		precond_OK++;
 		gauss_seidel(A2,b2,lambda);
-		//cout << "precond success: lambda=" << lambda << "\n";
 
 		double maxdiam=0;
 		for (int i=0; i<A.nb_rows(); i++) {
@@ -294,7 +285,11 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 	delete[] pr;
 	delete[] pc;
 
-	//if (!preprocess_success) return;
+	// Experiments have shown that Newton never
+	// succeeds if pre-processing has failed.
+	// (still, maybe 10% is a bit demanding...)
+
+	if (!preprocess_success) return;
 
 	CtcNewton newton(fjf,2); //ceiling=2 because equality multipliers often have domain=[-1,1]
 

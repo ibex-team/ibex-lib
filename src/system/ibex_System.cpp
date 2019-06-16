@@ -103,7 +103,7 @@ System::System(int n, const char* syntax) : id(next_id()), nb_var(n), /* NOT TMP
 	UNLOCK;
 }
 
-System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), func(0), ops(NULL), box(1) {
+System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) {
 
 	switch(mode) {
 	case COPY :      init(SystemCopy(sys,COPY)); break;
@@ -232,8 +232,6 @@ void System::load(FILE* fd) {
 }
 
 System::~System() {
-	for (int i=0; i<func.size(); i++)
-		delete &func[i];
 
 	if (goal) delete goal;
 

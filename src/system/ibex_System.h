@@ -231,9 +231,6 @@ public:
 	/** Number of constraints. */
 	const int nb_ctr;
 
-	/** Auxiliary functions */
-	Array<Function> func;
-
 	/** The goal (if any, otherwise NULL) */
 	Function* goal;
 

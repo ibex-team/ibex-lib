@@ -56,12 +56,9 @@ void TestLinear::lu_complete_underctr() {
 	CPPUNIT_ASSERT(pr[2]==4);
 	CPPUNIT_ASSERT(pr[3]==1);
 	CPPUNIT_ASSERT(pr[4]==2);
-
 	CPPUNIT_ASSERT(pc[0]==0);
 	CPPUNIT_ASSERT(pc[1]==2);
 	CPPUNIT_ASSERT(pc[2]==1);
-	CPPUNIT_ASSERT(pc[3]==0);
-	CPPUNIT_ASSERT(pc[4]==0);
 	delete[] pr;
 	delete[] pc;
 }
