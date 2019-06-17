@@ -13,8 +13,77 @@
 
 namespace ibex {
 
+namespace {
+
+class CheckImplemented : public FwdAlgorithm {
+public:
+	class NotImplemented : public Exception { };
+	void vector_fwd (int* x, int y) { throw NotImplemented(); }
+	void apply_fwd  (int* x, int y) { }
+	void idx_fwd    (int x, int y) { }
+	void idx_cp_fwd (int x, int y) { }
+	void symbol_fwd (int y) { }
+	void cst_fwd    (int y) { }
+	void chi_fwd    (int x1, int x2, int x3, int y) { throw NotImplemented(); }
+	void gen2_fwd   (int x, int x2, int y) { throw NotImplemented(); }
+	void add_fwd    (int x1, int x2, int y) { }
+	void mul_fwd    (int x1, int x2, int y) { }
+	void sub_fwd    (int x1, int x2, int y) { }
+	void div_fwd    (int x1, int x2, int y) { }
+	void max_fwd    (int x1, int x2, int y) { }
+	void min_fwd    (int x1, int x2, int y) { }
+	void atan2_fwd  (int x1, int x2, int y) { throw NotImplemented(); }
+	void gen1_fwd   (int x, int y) { throw NotImplemented(); }
+	void minus_fwd  (int x, int y) { }
+	void minus_V_fwd(int x, int y) { throw NotImplemented(); }
+	void minus_M_fwd(int x, int y) { throw NotImplemented(); }
+	void trans_V_fwd(int x, int y) { throw NotImplemented(); }
+	void trans_M_fwd(int x, int y) { throw NotImplemented(); }
+	void sign_fwd   (int x, int y) { throw NotImplemented(); }
+	void abs_fwd    (int x, int y) { }
+	void power_fwd  (int x, int y, int p) { }
+	void sqr_fwd    (int x, int y) { }
+	void sqrt_fwd   (int x, int y) { }
+	void exp_fwd    (int x, int y) { }
+	void log_fwd    (int x, int y) { }
+	void cos_fwd    (int x, int y) { }
+	void sin_fwd    (int x, int y) { }
+	void tan_fwd    (int x, int y) { }
+	void cosh_fwd   (int x, int y) { throw NotImplemented(); }
+	void sinh_fwd   (int x, int y) { throw NotImplemented(); }
+	void tanh_fwd   (int x, int y) { throw NotImplemented(); }
+	void acos_fwd   (int x, int y) { throw NotImplemented(); }
+	void asin_fwd   (int x, int y) { throw NotImplemented(); }
+	void atan_fwd   (int x, int y) { throw NotImplemented(); }
+	void acosh_fwd  (int x, int y) { throw NotImplemented(); }
+	void asinh_fwd  (int x, int y) { throw NotImplemented(); }
+	void atanh_fwd  (int x, int y) { throw NotImplemented(); }
+	void add_V_fwd  (int x1, int x2, int y) { throw NotImplemented(); }
+	void add_M_fwd  (int x1, int x2, int y) { throw NotImplemented(); }
+	void mul_SV_fwd (int x1, int x2, int y) { throw NotImplemented(); }
+	void mul_SM_fwd (int x1, int x2, int y) { throw NotImplemented(); }
+	void mul_VV_fwd (int x1, int x2, int y) { throw NotImplemented(); }
+	void mul_MV_fwd (int x1, int x2, int y) { throw NotImplemented(); }
+	void mul_VM_fwd (int x1, int x2, int y) { throw NotImplemented(); }
+	void mul_MM_fwd (int x1, int x2, int y) { throw NotImplemented(); }
+	void sub_V_fwd  (int x1, int x2, int y) { throw NotImplemented(); }
+	void sub_M_fwd  (int x1, int x2, int y) { throw NotImplemented(); }
+};
+
+}
+
 InHC4Revise::InHC4Revise(Eval& e) : f(e.f), eval(e), d(e.d), p_eval(f), p(p_eval.d) {
 
+}
+
+bool InHC4Revise::implemented() const {
+	CheckImplemented c;
+	try {
+		f.forward<CheckImplemented>(c);
+		return true;
+	} catch(CheckImplemented::NotImplemented&) {
+		return false;
+	}
 }
 
 void InHC4Revise::iproj(const Domain& y, IntervalVector& x) {
