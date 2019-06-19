@@ -20,6 +20,7 @@ set (CMAKE_INSTALL_INCLUDEDIR_3RD ${CMAKE_INSTALL_INCLUDEDIR}/ibex/3rd)
 set (CMAKE_INSTALL_LIBDIR "lib" CACHE PATH "object code libraries (lib)")
 set (CMAKE_INSTALL_LIBDIR_3RD ${CMAKE_INSTALL_LIBDIR}/ibex/3rd)
 set (CMAKE_INSTALL_BINDIR "bin" CACHE PATH "user executables (bin)")
+set (CMAKE_INSTALL_PKGCONFIG "share/pkgconfig" CACHE PATH "pkg files (share/pkgconfig)")
 
 ################################################################################
 # Print information (to ease debugging)
@@ -71,11 +72,7 @@ add_subdirectory (src)
 ################################################################################
 # Generate ibex.pc
 ################################################################################
-include (VarsPkgConfig)
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/ibex.pc.in
-                ${CMAKE_CURRENT_BINARY_DIR}/ibex.pc @ONLY)
-install (FILES ${CMAKE_CURRENT_BINARY_DIR}/ibex.pc DESTINATION share/pkgconfig)
-
+include (PkgConfigFile)
 
 ################################################################################
 # Tests
