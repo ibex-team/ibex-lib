@@ -4,6 +4,8 @@ cmake_minimum_required (VERSION 3.0.2)
 message (WARNING "CMake support is still experimental, use waf to build Ibex")
 
 project (IBEX VERSION 2.8.0 LANGUAGES CXX)
+set (IBEX_DESCRIPTION "A C++ library for interval-based algorithm design")
+set (IBEX_URL "http://www.ibex-lib.org/")
 
 ################################################################################
 # Add cmake.utils to the list of CMAKE_MODULE_PATH
@@ -14,7 +16,9 @@ list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake.utils")
 # Options for install directory
 ################################################################################
 set (CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "C++ header files (include)")
+set (CMAKE_INSTALL_INCLUDEDIR_3RD ${CMAKE_INSTALL_INCLUDEDIR}/ibex/3rd)
 set (CMAKE_INSTALL_LIBDIR "lib" CACHE PATH "object code libraries (lib)")
+set (CMAKE_INSTALL_LIBDIR_3RD ${CMAKE_INSTALL_LIBDIR}/ibex/3rd)
 set (CMAKE_INSTALL_BINDIR "bin" CACHE PATH "user executables (bin)")
 
 ################################################################################
@@ -96,13 +100,13 @@ endif ()
 set (CPACK_GENERATOR "TGZ" "ZIP" "DEB")
 string (TOLOWER "${CMAKE_PROJECT_NAME}" CPACK_PACKAGE_NAME)
 set (CPACK_PACKAGE_VENDOR "IbexTeam")
-set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ library for constraint processing over real numbers using interval arithmetic")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${IBEX_DESCRIPTION})
 set (CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 
 set (CPACK_DEBIAN_PACKAGE_MAINTAINER "Maintainer <mail@url.com>")
-set (CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://www.ibex-lib.org/")
+set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${IBEX_URL})
 # TODO finish deb package
 
 Include (CPack)
