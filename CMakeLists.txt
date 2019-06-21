@@ -4,6 +4,8 @@ cmake_minimum_required (VERSION 3.0.2)
 message (WARNING "CMake support is still experimental, use waf to build Ibex")
 
 project (IBEX VERSION 2.8.0 LANGUAGES CXX)
+set (IBEX_DESCRIPTION "A C++ library for interval-based algorithm design")
+set (IBEX_URL "http://www.ibex-lib.org/")
 
 ################################################################################
 # Add cmake.utils to the list of CMAKE_MODULE_PATH
@@ -14,8 +16,11 @@ list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake.utils")
 # Options for install directory
 ################################################################################
 set (CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "C++ header files (include)")
+set (CMAKE_INSTALL_INCLUDEDIR_3RD ${CMAKE_INSTALL_INCLUDEDIR}/ibex/3rd)
 set (CMAKE_INSTALL_LIBDIR "lib" CACHE PATH "object code libraries (lib)")
+set (CMAKE_INSTALL_LIBDIR_3RD ${CMAKE_INSTALL_LIBDIR}/ibex/3rd)
 set (CMAKE_INSTALL_BINDIR "bin" CACHE PATH "user executables (bin)")
+set (CMAKE_INSTALL_PKGCONFIG "share/pkgconfig" CACHE PATH "pkg files (share/pkgconfig)")
 
 ################################################################################
 # Print information (to ease debugging)
@@ -25,6 +30,16 @@ message (STATUS "Using CMake ${CMAKE_VERSION}")
 message (STATUS "Configuring Ibex ${IBEX_VERSION}")
 message (STATUS "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 # TODO handle different type of build
+
+################################################################################
+# Options for shared or static library
+################################################################################
+option (BUILD_SHARED_LIBS "Set to ON to build Ibex as a shared library" OFF)
+if (BUILD_SHARED_LIBS)
+  message (STATUS "Building libibex as shared library")
+else ()
+  message (STATUS "Building libibex as static library")
+endif ()
 
 ################################################################################
 # Check that the compiler supports c++11
@@ -57,11 +72,7 @@ add_subdirectory (src)
 ################################################################################
 # Generate ibex.pc
 ################################################################################
-include (VarsPkgConfig)
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/ibex.pc.in
-                ${CMAKE_CURRENT_BINARY_DIR}/ibex.pc @ONLY)
-install (FILES ${CMAKE_CURRENT_BINARY_DIR}/ibex.pc DESTINATION share/pkgconfig)
-
+include (PkgConfigFile)
 
 ################################################################################
 # Tests
@@ -81,7 +92,18 @@ endif ()
 #add_subdirectory (benchs)
 
 ################################################################################
-# TODO archives and packages
+# archives and packages
 ################################################################################
-#set (IBEX_DIST_ARCHIVE_NAME "ibex-${IBEX_VERSION}")
-#Include (CPack)
+set (CPACK_GENERATOR "TGZ" "ZIP" "DEB")
+string (TOLOWER "${CMAKE_PROJECT_NAME}" CPACK_PACKAGE_NAME)
+set (CPACK_PACKAGE_VENDOR "IbexTeam")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${IBEX_DESCRIPTION})
+set (CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+
+set (CPACK_DEBIAN_PACKAGE_MAINTAINER "Maintainer <mail@url.com>")
+set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${IBEX_URL})
+# TODO finish deb package
+
+Include (CPack)

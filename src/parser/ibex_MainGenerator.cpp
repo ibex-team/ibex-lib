@@ -80,13 +80,6 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 	sys.box.resize(sys.nb_var);
 	load(sys.box, scopes().top().var_domains());
 
-	//================= add the external functions ===========
-	sys.func.resize(source.func.size());
-	int i=0;
-	for (vector<Function*>::const_iterator it=source.func.begin(); it!=source.func.end(); it++) {
-		sys.func.set_ref(i++,**it);
-	}
-
 	//==================== *** cleanup *** ====================
 	for (IBEX_NODE_MAP(bool)::const_iterator it=garbage.begin(); it!=garbage.end(); it++) {
 		delete it->first;

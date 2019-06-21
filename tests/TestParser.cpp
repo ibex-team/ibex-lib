@@ -23,7 +23,6 @@ namespace ibex {
 
 void TestParser::var01() {
 	System sys(SRCDIR_TESTS "/quimper/var01.qpr");
-	CPPUNIT_ASSERT(sys.func.is_empty());
 	CPPUNIT_ASSERT(sys.args.size()==1);
 	CPPUNIT_ASSERT(strcmp(sys.args[0].name,"x")==0);
 	CPPUNIT_ASSERT(sys.args[0].dim.is_scalar());
@@ -209,7 +208,6 @@ void TestParser::func03() {
 void TestParser::ponts() {
 	System sys(SRCDIR_TESTS "/quimper/ponts.qpr");
 	Ponts30 sys2;
-	CPPUNIT_ASSERT(sys.func.is_empty());
 	CPPUNIT_ASSERT(sys.args.size()==30);
 	for (int i=0; i<30; i++) {
 		CPPUNIT_ASSERT(strcmp(sys.args[i].name,sys2.f->arg_name(i))==0);
@@ -232,7 +230,6 @@ void TestParser::ponts() {
 
 void TestParser::choco01() {
 	System sys(2,"{1}+{0}=0");
-	CPPUNIT_ASSERT(sys.func.is_empty());
 	CPPUNIT_ASSERT(sys.args.size()==2);
 	CPPUNIT_ASSERT(strcmp(sys.args[0].name,"{0}")==0);
 	CPPUNIT_ASSERT(strcmp(sys.args[1].name,"{1}")==0);

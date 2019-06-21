@@ -29,7 +29,8 @@ Function::~Function() {
 		 * This is not a very consistent choice...
 		 */
 		if (image_dim()>1) {
-			for (int i=0; i<image_dim(); i++)
+			int m=_image_dim.is_vector() ? _image_dim.vec_size() : _image_dim.nb_rows();
+			for (int i=0; i<m; i++)
 				if (!zero || comp[i]!=zero) delete comp[i];
 		}
 		if (zero) delete zero;
@@ -174,4 +175,31 @@ const ExprNode& Function::operator()(const Array<const ExprNode>& new_args) cons
 #define _M(ref,i) ExprConstant::new_matrix(CONCAT(arg,i))
 
 //const ExprApply& Function::operator()(const ExprNode& arg0, const Interval& arg1)       { return (*this)(arg0,_I(0,1)); }
+
+
+IntervalMatrix Function::eval_matrix(const IntervalVector& box, const BitSet& rows) const {
+	assert(!rows.empty());
+	assert(rows.max()<_image_dim.nb_rows());
+
+	IntervalMatrix M(rows.size(),_image_dim.nb_cols());
+
+	switch (expr().dim.type()) {
+	case Dim::SCALAR     :
+		M[0][0]=eval_domain(box).i();
+		break;
+	case Dim::ROW_VECTOR :
+		M.set_row(0,eval_domain(box).v());
+		break;
+	case Dim::COL_VECTOR :
+		M.set_col(0,eval_vector(box,rows));
+		break;
+	case Dim::MATRIX:
+		M=((Function*) this)->_eval->eval(box,rows).m();
+		break;
+	default :
+		throw std::logic_error("Function::eval_matrix: invalid Dim type");
+	}
+
+	return M;
+}
 } // namespace ibex

@@ -25,6 +25,14 @@ public:
 
 	void iproj(const Domain& y, IntervalVector& x, const IntervalVector& xin);
 
+	/*
+	 * Return true if inHC4 can be run without making the
+	 * program crash with a "not implemented" message.
+	 *
+	 * This hack is necessary as many operators are sill not implemented.
+	 */
+	bool implemented() const;
+
 	Function& f;
 
 	Eval& eval;

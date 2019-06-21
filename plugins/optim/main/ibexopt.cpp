@@ -214,7 +214,8 @@ int main(int argc, char** argv) {
 
 		bool inHC4=true;
 
-		if (sys->nb_ctr>0 && sys->nb_ctr<sys->f_ctrs.image_dim()) {
+
+		if (!sys->f_ctrs.inhc4revise().implemented()) {
 			inHC4=false;
 		}
 
@@ -269,7 +270,7 @@ int main(int argc, char** argv) {
 		}
 
 		if (!inHC4) {
-			cerr << "\n  \033[33mwarning: inHC4 disabled\033[0m (does not support vector/matrix operations)" << endl;
+			cerr << "\n  \033[33mwarning: inHC4 disabled\033[0m (unimplemented operator)" << endl;
 		}
 
 		if (output_no_obj) {

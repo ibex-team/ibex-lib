@@ -441,51 +441,57 @@ void Function::generate_comp() {
 		return;
 	}
 
-	comp = new Function*[image_dim()];
-	// rem: dimension()==expr().dim.vec_size() if expr() is a vector
+	// rem: image_dim()==expr().dim.vec_size() if expr() is a vector
 	//      and also fvec->nb_args if, in addition, fvec!=NULL
 
-	if (expr().dim.is_vector()) {
-		for (int i=0; i<expr().dim.vec_size(); i++) {
-			Array<const ExprSymbol> x(nb_arg());
-			varcopy(symbs,x);
-			const ExprIndex& yi_tmp=expr()[i];
-			const ExprNode& yi=ExprCopy().copy(symbs, x, yi_tmp).simplify();
-			delete &yi_tmp;
-			Function* fi=new Function(x,yi);
-			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fi->expr()));
-			if (c && c->get_value()==Interval::zero()) { // use a more efficient structure than a DAG!
-				if (!zero) zero=fi;
-				else delete fi;
-					comp[i] = zero;
-			} else {
-				comp[i] = fi;
-			}
+	int m=_image_dim.is_vector() ? _image_dim.vec_size() : _image_dim.nb_rows();
+
+	comp = new Function*[m];
+
+	for (int i=0; i<m; i++) {
+		Array<const ExprSymbol> x(nb_arg());
+		varcopy(symbs,x);
+		const ExprIndex& yi_tmp=expr()[i];
+		const ExprNode& yi=ExprCopy().copy(symbs, x, yi_tmp).simplify();
+		delete &yi_tmp;
+		Function* fi=new Function(x,yi);
+		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fi->expr()));
+		if (c && c->dim.is_scalar() && c->get_value()==Interval::zero()) { // use a more efficient structure than a DAG!
+			if (!zero) zero=fi;
+			else delete fi;
+			comp[i] = zero;
+		} else {
+			comp[i] = fi;
 		}
 	}
 
-	else {
-		int n=expr().dim.nb_cols();
-		for (int i=0; i<expr().dim.nb_rows(); i++) {
+	// This old code was generating all the m*n components
+	// in the case of a matrix-valued function
+	// -----------------------------------------------------------------------------------------
+	//	else {
+	//		comp = new Function*[image_dim()];		int n=expr().dim.nb_cols();
+	//		for (int i=0; i<expr().dim.nb_rows(); i++) {
+	//
+	//			for (int j=0; j<n; j++) {
+	//				Array<const ExprSymbol> x(nb_arg());
+	//				varcopy(symbs,x);
+	//				const ExprIndex& yij_tmp=expr()[DoubleIndex::one_elt(expr().dim,i,j)];
+	//				const ExprNode& yij=ExprCopy().copy(symbs, x, yij_tmp).simplify();
+	//				delete &yij_tmp;
+	//				Function* fij=new Function(x,yij);
+	//				const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fij->expr()));
+	//				if (c && c->get_value()==Interval::zero()) { // use a more efficient structure than a DAG!
+	//					if (!zero) zero=fij;
+	//					else delete fij;
+	//						comp[i*n+j] = zero;
+	//				} else {
+	//					comp[i*n+j] = fij;
+	//				}
+	//			}
+	//		}
+	//	}
+	// -----------------------------------------------------------------------------------------
 
-			for (int j=0; j<n; j++) {
-				Array<const ExprSymbol> x(nb_arg());
-				varcopy(symbs,x);
-				const ExprIndex& yij_tmp=expr()[DoubleIndex::one_elt(expr().dim,i,j)];
-				const ExprNode& yij=ExprCopy().copy(symbs, x, yij_tmp).simplify();
-				delete &yij_tmp;
-				Function* fij=new Function(x,yij);
-				const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fij->expr()));
-				if (c && c->get_value()==Interval::zero()) { // use a more efficient structure than a DAG!
-					if (!zero) zero=fij;
-					else delete fij;
-						comp[i*n+j] = zero;
-				} else {
-					comp[i*n+j] = fij;
-				}
-			}
-		}
-	}
 
 //	cout << "--------- separation ---------" << endl;
 //	for (int i=0; i<dimension(); i++) {
