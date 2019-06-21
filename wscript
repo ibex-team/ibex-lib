@@ -73,12 +73,14 @@ def configure (conf):
 	# Optimised compilation flags
 	if conf.options.DEBUG:
 		Logs.info("Enabling debug mode")
-		flags = "-std=c++11 -O0 -g -pg -Wall"
+		# note: -Wno-int-in-bool-context for Gaol
+		flags = "-std=c++11 -O0 -g -pg -Wall -Wno-int-in-bool-context"
 		flags += " -fmessage-length=0"
 		conf.define ("DEBUG", 1)
 		conf.env.DEBUG = True
 	else:
-		flags = "-std=c++11 -O3 -Wno-deprecated -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
+		# note: -Wno-int-in-bool-context for Gaol
+		flags = "-std=c++11 -O3 -Wno-deprecated -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function -Wno-int-in-bool-context"
 		conf.define ("NDEBUG", 1)
 		conf.env.DEBUG = False
 	for f in flags.split():

@@ -157,10 +157,12 @@ def utest (tst):
 
         if tst.env.DEBUG:
             Logs.info("Enabling debug mode")
-            flags = "-O0 -g -pg -Wall -fmessage-length=0"
+            # note: -Wno-int-in-bool-context for Gaol
+            flags = "-O0 -g -pg -Wall -fmessage-length=0 -Wno-int-in-bool-context"
             tst.define ("DEBUG", 1)    
         else:
-            flags = "-Wno-deprecated -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
+            # note: -Wno-int-in-bool-context for Gaol
+            flags = "-Wno-deprecated -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function -Wno-int-in-bool-context"
 
         for f in flags.split():
             tst.check_cxx(cxxflags=f, use="TESTS", mandatory=False, uselib_store="TESTS")
