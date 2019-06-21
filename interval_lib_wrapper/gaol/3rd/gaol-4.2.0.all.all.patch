@@ -10,6 +10,141 @@ diff -Naur gaol-4.2.0/gaol/gaol_allocator.h gaol-4.2.0/gaol/gaol_allocator.h
  		{
  			void *buf;
  			if ( MEMALIGN( buf,16,num*sizeof ( value_type ) ) )   // Allocation error?
+diff -Naur gaol-4.2.0/gaol/gaol_double_op_apmathlib.h gaol-4.2.0/gaol/gaol_double_op_apmathlib.h
+--- gaol-4.2.0/gaol/gaol_double_op_apmathlib.h	2012-03-06 18:08:58.000000000 +0100
++++ gaol-4.2.0/gaol/gaol_double_op_apmathlib.h	2019-06-21 12:25:08.036229637 +0200
+@@ -112,7 +112,7 @@
+     	for (;;) {
+       	if (odd(n)) {
+ 				n >>= 1;
+-				y = opposite(opposite(y)*z);
++				y = gaol_opposite(gaol_opposite(y)*z);
+ 				if (n == 0) {
+ 	  				GAOL_RND_LEAVE();
+ 	  				return y;
+@@ -120,7 +120,7 @@
+       	} else {
+ 				n>>=1;
+       	}
+-      	z = opposite(opposite(z)*z);
++      	z = gaol_opposite(gaol_opposite(z)*z);
+     	}
+ 	}
+ 
+@@ -134,9 +134,9 @@
+ 	return ipow_dn(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_dn(opposite(d),e);
++	  return ipow_dn(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_up(opposite(d),e));
++	  return gaol_opposite(ipow_up(gaol_opposite(d),e));
+ 	}
+       }
+     }
+@@ -151,9 +151,9 @@
+ 	return ipow_up(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_up(opposite(d),e);
++	  return ipow_up(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_dn(opposite(d),e));
++	  return gaol_opposite(ipow_dn(gaol_opposite(d),e));
+ 	}
+       }
+     }
+diff -Naur gaol-4.2.0/gaol/gaol_double_op_crlibm.h gaol-4.2.0/gaol/gaol_double_op_crlibm.h
+--- gaol-4.2.0/gaol/gaol_double_op_crlibm.h	2012-03-06 18:08:58.000000000 +0100
++++ gaol-4.2.0/gaol/gaol_double_op_crlibm.h	2019-06-21 12:25:28.901056220 +0200
+@@ -88,7 +88,7 @@
+     	for (;;) {
+       	if (odd(n)) {
+ 			n >>= 1;
+-			y = opposite(opposite(y)*z);
++			y = gaol_opposite(gaol_opposite(y)*z);
+ 			if (n == 0) {
+ 	  			GAOL_RND_LEAVE();
+ 	  			return y;
+@@ -96,7 +96,7 @@
+       	} else {
+ 			n>>=1;
+       	}
+-      	z = opposite(opposite(z)*z);
++      	z = gaol_opposite(gaol_opposite(z)*z);
+     	}
+ 	}
+ 
+@@ -110,9 +110,9 @@
+ 	return ipow_dn(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_dn(opposite(d),e);
++	  return ipow_dn(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_up(opposite(d),e));
++	  return gaol_opposite(ipow_up(gaol_opposite(d),e));
+ 	}
+       }
+     }
+@@ -127,9 +127,9 @@
+ 	return ipow_up(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_up(opposite(d),e);
++	  return ipow_up(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_dn(opposite(d),e));
++	  return gaol_opposite(ipow_dn(gaol_opposite(d),e));
+ 	}
+       }
+     }
+diff -Naur gaol-4.2.0/gaol/gaol_double_op_m.h gaol-4.2.0/gaol/gaol_double_op_m.h
+--- gaol-4.2.0/gaol/gaol_double_op_m.h	2009-03-01 14:53:01.000000000 +0100
++++ gaol-4.2.0/gaol/gaol_double_op_m.h	2019-06-21 12:25:46.817473387 +0200
+@@ -115,7 +115,7 @@
+     	for (;;) {
+       	if (odd(n)) {
+ 				n >>= 1;
+-				y = opposite(opposite(y)*z);
++				y = gaol_opposite(gaol_opposite(y)*z);
+ 				if (n == 0) {
+ 	  				GAOL_RND_LEAVE();
+ 	  				return y;
+@@ -123,7 +123,7 @@
+       	} else {
+ 				n>>=1;
+       	}
+-      	z = opposite(opposite(z)*z);
++      	z = gaol_opposite(gaol_opposite(z)*z);
+     	}
+ 	}
+ 
+@@ -137,9 +137,9 @@
+ 	return ipow_dn(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_dn(opposite(d),e);
++	  return ipow_dn(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_up(opposite(d),e));
++	  return gaol_opposite(ipow_up(gaol_opposite(d),e));
+ 	}
+       }
+     }
+@@ -154,9 +154,9 @@
+ 	return ipow_up(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_up(opposite(d),e);
++	  return ipow_up(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_dn(opposite(d),e));
++	  return gaol_opposite(ipow_dn(gaol_opposite(d),e));
+ 	}
+       }
+     }
 diff -Naur gaol-4.2.0/gaol/gaol_interval2f.cpp gaol-4.2.0/gaol/gaol_interval2f.cpp
 --- gaol-4.2.0/gaol/gaol_interval2f.cpp	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_interval2f.cpp	2019-06-21 11:10:43.842842834 +0200
@@ -137,7 +272,19 @@ diff -Naur gaol-4.2.0/gaol/gaol_port.cpp gaol-4.2.0/gaol/gaol_port.cpp
      // The explicit test '!=0' ensures that either 0 or 1 is returned
 diff -Naur gaol-4.2.0/gaol/gaol_port.h gaol-4.2.0/gaol/gaol_port.h
 --- gaol-4.2.0/gaol/gaol_port.h	2012-03-06 18:08:58.000000000 +0100
-+++ gaol-4.2.0/gaol/gaol_port.h	2019-06-21 12:00:49.052083077 +0200
++++ gaol-4.2.0/gaol/gaol_port.h	2019-06-21 12:24:29.653533877 +0200
+@@ -89,9 +89,9 @@
+ 
+ #if HAVE_ROUNDING_MATH_OPTION
+   INLINE double f_negate_simple(double x) { return -x; }
+-#  define opposite(x) f_negate_simple(x)
++#  define gaol_opposite(x) f_negate_simple(x)
+ #else
+-#  define opposite(x) f_negate(x)
++#  define gaol_opposite(x) f_negate(x)
+ #endif // HAVE_ROUNDING_MATH_OPTION
+ 
+   /*!
 @@ -144,9 +144,10 @@
  #  define HI_UINTDOUBLE(a) ((a).i[1])
  #endif
