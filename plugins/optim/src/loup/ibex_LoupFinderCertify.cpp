@@ -8,7 +8,7 @@
 //============================================================================
 
 #include "ibex_PdcHansenFeasibility.h"
-#include "ibex_FncActivation.h"
+#include "ibex_FncActiveCtrs.h"
 #include "ibex_LoupFinderCertify.h"
 #include "ibex_NormalizedSystem.h"
 
@@ -39,7 +39,7 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 
 	// TODO : how to fix detection threshold in a more adaptative way?
 	//        maybe, we should replace eps_h by something else!
-	FncActivation af(sys,p.first.lb(),NormalizedSystem::default_eps_h);
+	FncActiveCtrs af(sys,p.first.lb(),NormalizedSystem::default_eps_h,false);
 
 	if (af.image_dim()==0) {
 		return p;
@@ -75,7 +75,7 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 				// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
 				bool satisfy_inequalities=true;
 				for (int j=0; j<sys.f_ctrs.image_dim(); j++) {
-					if (!af.activated()[j])
+					if (!af.active[j])
 						if (((sys.ops[j]==LEQ || sys.ops[j]==LT)
 							  && sys.f_ctrs.eval(j,pdc.solution()).ub()>0)
 								||

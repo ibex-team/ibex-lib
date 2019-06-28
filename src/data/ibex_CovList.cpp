@@ -74,7 +74,7 @@ void CovList::add(const IntervalVector& x) {
 //	if (list.empty())
 //		n=x.size();
 //	else {
-		if (n!=x.size())
+		if (n!=(size_t) x.size())
 			ibex_error("[CovList] boxes must have all the same size.");
 //	}
 	data->lst.push_back(x);

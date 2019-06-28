@@ -5,13 +5,14 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Apr 26, 2017
-// Last Update : Jun 06, 2019
+// Last Update : Jun 28, 2019
 //============================================================================
 
 #ifndef __IBEX_FNC_KHUN_TUCKER_H__
 #define __IBEX_FNC_KHUN_TUCKER_H__
 
 #include "ibex_NormalizedSystem.h"
+#include "ibex_FncActiveCtrs.h"
 
 namespace ibex {
 
@@ -90,10 +91,24 @@ public:
 	 * \param dg -     Symbolic gradient of constraints. NULL if unconstrained problem.
 	 * \param box -    current box (not to be confused with the system "box", i.e., bounding constraints).
 	 *                 The current box is precisely used to determine active bound constraints.
+ 	 */
+	FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box);
+
+	/**
+	 * \brief Build the KKT conditions function for a given box.
+	 *
+	 * This variant allows to decide which constraints has to be activated.
+	 *
+	 * \param df -     Symbolic gradient of the objective
+	 * \param dg -     Symbolic gradient of constraints. NULL if unconstrained problem.
+	 * \param box -    current box (not to be confused with the system "box", i.e., bounding constraints).
+	 *                 The current box is precisely used to determine active bound constraints.
 	 * \param active - (potentially) active inequalities on the box. Must be indices of the
 	 *                 components of sys.f_ctrs.
  	 */
 	FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box, const BitSet& active);
+
+	~FncKhunTucker();
 
 	/**
 	 * \see #ibex::Fnc
@@ -133,20 +148,25 @@ public:
 	 */
 	IntervalVector multiplier_domain() const;
 
+
+	//protected: // temporary public
+
+	const NormalizedSystem& sys;   // original system
+
+	/**
+	 * Number of variables in the original system
+	 */
+	int n;
+
 	/**
 	 * Total number of multipliers.
 	 */
 	const int nb_mult;
 
-//protected: // temporary public
-
-	int n;                         // number of variables in the original system
-	const NormalizedSystem& sys;   // original system
-	Function& df;                  // gradient of objective function
-	Array<Function> dg;            // gradients of active constraints
-	BitSet active;                 // bitset of active constraints
-
-	// TODO: put these bitsets in a Bxp?
+	/*
+	 * Bitset of active constraints
+	 */
+	const BitSet& active() const;
 
 	/*
 	 * Indices of active constraints that are equalities.
@@ -155,23 +175,23 @@ public:
 	 * then eq={0,2}.
 	 * So the bitset does not contain the original indices of equalities (in the system).
 	 */
-	BitSet eq;
+	const BitSet& eq() const;
 
 	/*
 	 *  Indices of constrains that are inequalities
 	 *  Same as for equalities.
 	 */
-	BitSet ineq;
+	const BitSet& ineq() const;
 
 	/*
 	 * Indices of variables with left bound active
 	 */
-	BitSet bound_left;
+	const BitSet& left_bound() const;
 
 	/*
 	 * Indices of variables with right bound active
 	 */
-	BitSet bound_right;
+	const BitSet& right_bound() const;
 
 	/**
 	 * Linear independence constraint qualification.
@@ -186,8 +206,41 @@ public:
 	 *   active for the same variable (results from too
 	 *   large domains)
 	 */
-	bool LICQ;
+	bool LICQ() const;
+
+protected:
+	FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box, const BitSet* active);
+
+	FncActiveCtrs* act;
+
+	Function& df;                  // gradient of objective function
+	Array<Function> dg;            // gradients of active constraints
+
+	BitSet nothing;               // for the case where nothing is active.
 };
+
+/* ============================================================================
+ 	 	 	 	 	 	 	 inline implementation
+  ============================================================================*/
+inline FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box, const BitSet& active) :
+		FncKhunTucker(sys,df,dg,box,&active) {
+}
+
+inline FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box) :
+		FncKhunTucker(sys,df,dg,box,NULL) {
+}
+
+inline const BitSet& FncKhunTucker::active() const      { return act? act->active : nothing; }
+
+inline const BitSet& FncKhunTucker::eq() const          { return act? act->eq : nothing; }
+
+inline const BitSet& FncKhunTucker::ineq() const        { return act? act->ineq : nothing; }
+
+inline const BitSet& FncKhunTucker::left_bound() const  { return act? act->bound_left : nothing; }
+
+inline const BitSet& FncKhunTucker::right_bound() const { return act? act->bound_right : nothing; }
+
+inline bool FncKhunTucker::LICQ() const                 { return act? act->LICQ : false; }
 
 } /* namespace ibex */
 

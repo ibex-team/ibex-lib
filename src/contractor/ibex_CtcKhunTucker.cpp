@@ -81,7 +81,7 @@ BoolInterval CtcKhunTucker::rejection_test(const FncKhunTucker& fjf, const Inter
 	// obtained by removing the ith row and jth column.
 	const IntervalMatrix* B2;
 
-	int N = n - fjf.bound_left.size() - fjf.bound_right.size(); // final number of rows
+	int N = n - fjf.left_bound().size() - fjf.right_bound().size(); // final number of rows
 
 	if (m>N) {
 		return MAYBE;
@@ -94,7 +94,7 @@ BoolInterval CtcKhunTucker::rejection_test(const FncKhunTucker& fjf, const Inter
 		B2 = new IntervalMatrix(N,m);
 		int i2=0; // counts rows of B2
 		for (int i=0; i<n; i++) {
-			if (!fjf.bound_left[i] && !fjf.bound_right[i])
+			if (!fjf.left_bound()[i] && !fjf.right_bound()[i])
 				((IntervalMatrix*) B2)->set_row(i2++,grads.row(i));
 		}
 		assert(i2==N);
@@ -102,7 +102,7 @@ BoolInterval CtcKhunTucker::rejection_test(const FncKhunTucker& fjf, const Inter
 
 
 	// multiplier sign test
-	if (fjf.eq.empty()) { // works with inequalities only
+	if (fjf.eq().empty()) { // works with inequalities only
 		for (int j=0; j<N; j++) {
 			bool sign;
 
@@ -154,11 +154,10 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 
 	//if (box.max_diam()>1e-1) return; // do we need a threshold?
 	// =========================================================================================
-	BitSet active=sys.active_ctrs(x);
 
-	FncKhunTucker fjf(sys,*df,dg,x,active);
+	FncKhunTucker fkkt(sys,*df,dg,x);
 
-	if (fjf.nb_mult==1) { // <=> no active constraint
+	if (fkkt.nb_mult==1) { // <=> no active constraint
 		// for unconstrained optimization we benefit from a cheap
 		// contraction with gradient=0, before running Newton.
 
@@ -172,12 +171,12 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 	}
 
 	// not qualified constraints ==> useless to go further
-	if (!fjf.LICQ) {
+	if (!fkkt.LICQ()) {
 		too_many_active++;
 		return;
 	}
 
-	int M=active.size();
+	int M=fkkt.active().size();
 
 	// Calculate gradients of f and in/equalities
 	// and store them in a matrix B
@@ -186,48 +185,48 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 
 	B.put(0, mult++, df->eval_vector(x), false); // init
 
-	for (BitSet::const_iterator i=fjf.ineq.begin(); i!=fjf.ineq.end(); ++i) {
+	for (BitSet::const_iterator i=fkkt.ineq().begin(); i!=fkkt.ineq().end(); ++i) {
 		B.put(0, mult++, dg[i]->eval_vector(x), false);
 	}
 
-	for (BitSet::const_iterator i=fjf.eq.begin(); i!=fjf.eq.end(); ++i) {
+	for (BitSet::const_iterator i=fkkt.eq().begin(); i!=fkkt.eq().end(); ++i) {
 		B.put(0, mult++, dg[i]->eval_vector(x), false);
 	}
 
 	assert(mult==M+1);
 
-	if (rejection_test(fjf,B)==NO) {
+	if (rejection_test(fkkt,B)==NO) {
 		rejec_test_OK++;
 		box.set_empty();
 		return;
 	}
 
-	IntervalVector lambda=fjf.multiplier_domain();
+	IntervalVector lambda=fkkt.multiplier_domain();
 
 	IntervalVector old_lambda(lambda);
 
 	int *pr;
-	int *pc=new int[fjf.nb_mult];
+	int *pc=new int[fkkt.nb_mult];
 
-	IntervalMatrix A=Matrix::zeros(n+1, fjf.nb_mult);
+	IntervalMatrix A=Matrix::zeros(n+1, fkkt.nb_mult);
 
 	// inequalities + equalities
 	A.put(0,0,B);
 
-	for (BitSet::const_iterator v=fjf.bound_left.begin(); v!=fjf.bound_left.end(); ++v) {
+	for (BitSet::const_iterator v=fkkt.left_bound().begin(); v!=fkkt.left_bound().end(); ++v) {
 		A[v][mult++] = -1;
 	}
 
-	for (BitSet::const_iterator v=fjf.bound_right.begin(); v!=fjf.bound_right.end(); ++v) {
+	for (BitSet::const_iterator v=fkkt.right_bound().begin(); v!=fkkt.right_bound().end(); ++v) {
 		A[v][mult++] = +1;
 	}
 
-	assert(mult==fjf.nb_mult);
+	assert(mult==fkkt.nb_mult);
 
 	// normalization equation
-	A.put(n, 0, Vector::ones(fjf.nb_mult), true);
-	if (!fjf.eq.empty())
-		A.put(n, fjf.ineq.size()+1,IntervalVector(fjf.eq.size(),Interval(-1,1)), true);
+	A.put(n, 0, Vector::ones(fkkt.nb_mult), true);
+	if (!fkkt.eq().empty())
+		A.put(n, fkkt.ineq().size()+1,IntervalVector(fkkt.eq().size(),Interval(-1,1)), true);
 	// ----------------------
 	//cout << "A=" << A << endl;
 	pr = new int[n+1]; // selected rows
@@ -237,7 +236,7 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 	bool preprocess_success=false;
 
 	try {
-		IntervalMatrix A2(fjf.nb_mult, fjf.nb_mult);
+		IntervalMatrix A2(fkkt.nb_mult, fkkt.nb_mult);
 
 		// note: under constraint qualififaction, the
 		// gradients of the system is of rank M,
@@ -247,10 +246,10 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 		interval_LU(A,LU,pr,pc);
 		lu_OK++;
 
-		Vector b2=Vector::zeros(fjf.nb_mult);
+		Vector b2=Vector::zeros(fkkt.nb_mult);
 
 		// we select the "best" rows from A
-		for (int i=0; i<fjf.nb_mult; i++) {
+		for (int i=0; i<fkkt.nb_mult; i++) {
 			A2.set_row(i, A.row(pr[i]));
 			if (pr[i]==n) // right-hand side of normalization is 1
 				b2[i]=1;
@@ -291,7 +290,7 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 
 	if (!preprocess_success) return;
 
-	CtcNewton newton(fjf,2); //ceiling=2 because equality multipliers often have domain=[-1,1]
+	CtcNewton newton(fkkt,2); //ceiling=2 because equality multipliers often have domain=[-1,1]
 
 	IntervalVector full_box = cart_prod(x, lambda);
 
