@@ -19,7 +19,8 @@ using namespace std;
 namespace ibex {
 
 Eval::Eval(Function& f) : f(f), d(f), fwd_agenda(NULL), bwd_agenda(NULL) {
-	int m=f.image_dim();
+	int m=f.expr().dim.vec_size();
+
 	if (m>1) {
 		const ExprVector* vec=dynamic_cast<const ExprVector*>(&f.expr());
 		if (vec && m==vec->nb_args) {
@@ -35,7 +36,7 @@ Eval::Eval(Function& f) : f(f), d(f), fwd_agenda(NULL), bwd_agenda(NULL) {
 
 Eval::~Eval() {
 	if (fwd_agenda!=NULL) {
-		for (int i=0; i<f.image_dim(); i++) {
+		for (int i=0; i<f.expr().dim.vec_size(); i++) {
 			delete fwd_agenda[i];
 			delete bwd_agenda[i];
 		}

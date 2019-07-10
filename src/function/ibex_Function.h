@@ -1020,7 +1020,14 @@ inline Interval Function::eval(int i, const IntervalVector& box) const {
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
-	return eval_vector(box, BitSet::all(image_dim()));
+	// --> commented to avoid treating each component separately
+	// (note that in this case, the root node of the expression is not evaluated)
+	//return eval_vector(box, BitSet::all(image_dim()));
+	// --------------------------------------------------
+	assert(!_image_dim.is_matrix());
+	return _image_dim.is_scalar() ?
+			IntervalVector(1,eval(box)) :
+			((Function*) this)->_eval->eval(box).v();
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box, const BitSet& components) const {
@@ -1028,10 +1035,6 @@ inline IntervalVector Function::eval_vector(const IntervalVector& box, const Bit
 	return _image_dim.is_scalar() ?
 			IntervalVector(1,eval(box)) :
 			((Function*) this)->_eval->eval(box,components).v();
-}
-
-inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
-	return eval_matrix(box, BitSet::all(_image_dim.nb_rows()));
 }
 
 template<class V>

@@ -77,10 +77,11 @@ public:
 	bool is_matrix() const;
 
 	/**
-	 * \brief If *this is a vector, return the dimension.
+	 * \brief Return the size of *this, as a vector.
 	 *
-	 * This dimension corresponds to dim2 (in case of column vector)
-	 * or dim3 (in case of row vector).
+	 * This dimension corresponds to the number of rows in
+	 * the case of a matrix or column vector, and to the
+	 * number of columns in the case of a row vector.
 	 */
 	int vec_size() const;
 

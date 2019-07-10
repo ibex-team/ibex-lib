@@ -177,6 +177,34 @@ const ExprNode& Function::operator()(const Array<const ExprNode>& new_args) cons
 //const ExprApply& Function::operator()(const ExprNode& arg0, const Interval& arg1)       { return (*this)(arg0,_I(0,1)); }
 
 
+IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
+	// --> commented to avoid treating each component separately
+	// (note that in this case, the root node of the expression is not evaluated)
+	//return eval_matrix(box, BitSet::all(_image_dim.nb_rows()));
+	// --------------------------------------------------
+
+	IntervalMatrix M(_image_dim.nb_rows(),_image_dim.nb_cols());
+
+	switch (expr().dim.type()) {
+	case Dim::SCALAR     :
+		M[0][0]=eval_domain(box).i();
+		break;
+	case Dim::ROW_VECTOR :
+		M.set_row(0,eval_vector(box));
+		break;
+	case Dim::COL_VECTOR :
+		M.set_col(0,eval_vector(box));
+		break;
+	case Dim::MATRIX:
+		M=((Function*) this)->_eval->eval(box).m();
+		break;
+	default :
+		throw std::logic_error("Function::eval_matrix: invalid Dim type");
+	}
+
+	return M;
+}
+
 IntervalMatrix Function::eval_matrix(const IntervalVector& box, const BitSet& rows) const {
 	assert(!rows.empty());
 	assert(rows.max()<_image_dim.nb_rows());
