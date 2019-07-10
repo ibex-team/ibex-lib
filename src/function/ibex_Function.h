@@ -667,11 +667,18 @@ public:
 	IntervalMatrix eval_matrix(const IntervalVector& x) const;
 
 	/**
-	 * \brief Calculate f(x) using interval arithmetic.
+	 * \brief Calculate some rows of f(x) using interval arithmetic.
 	 *
 	 * \pre f must be matrix-valued.
 	 */
-	virtual IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows) const;
+	IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows) const;
+
+	/**
+	 * \brief Calculate a submatrix of f(x) using interval arithmetic.
+	 *
+	 * \pre f must be matrix-valued.
+	 */
+	virtual IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows, const BitSet& cols) const;
 
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.

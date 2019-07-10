@@ -216,7 +216,7 @@ IntervalMatrix Function::eval_matrix(const IntervalVector& box, const BitSet& ro
 		M[0][0]=eval_domain(box).i();
 		break;
 	case Dim::ROW_VECTOR :
-		M.set_row(0,eval_domain(box).v());
+		M.set_row(0,eval_vector(box));
 		break;
 	case Dim::COL_VECTOR :
 		M.set_col(0,eval_vector(box,rows));
@@ -230,4 +230,33 @@ IntervalMatrix Function::eval_matrix(const IntervalVector& box, const BitSet& ro
 
 	return M;
 }
+
+IntervalMatrix Function::eval_matrix(const IntervalVector& box, const BitSet& rows, const BitSet& cols) const {
+	assert(!rows.empty());
+	assert(!cols.empty());
+	assert(rows.max()<_image_dim.nb_rows());
+	assert(cols.max()<_image_dim.nb_cols());
+
+	IntervalMatrix M(rows.size(), cols.size());
+
+	switch (expr().dim.type()) {
+	case Dim::SCALAR     :
+		M[0][0]=eval_domain(box).i();
+		break;
+	case Dim::ROW_VECTOR :
+		M.set_row(0,eval_vector(box,cols));
+		break;
+	case Dim::COL_VECTOR :
+		M.set_col(0,eval_vector(box,rows));
+		break;
+	case Dim::MATRIX:
+		M=((Function*) this)->_eval->eval(box,rows,cols).m();
+		break;
+	default :
+		throw std::logic_error("Function::eval_matrix: invalid Dim type");
+	}
+
+	return M;
+}
+
 } // namespace ibex
