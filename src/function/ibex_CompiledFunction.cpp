@@ -207,8 +207,8 @@ void CompiledFunction::visit(const ExprAtanh& e) { visit(e,ATANH); }
 // for debug only
 const char* CompiledFunction::op(operation o) const {
 	switch (o) {
-	case IDX:
-	case IDX_CP: return "[]";
+	case IDX:    return "[]";
+	case IDX_CP: return "[]*";
 	case VEC:    return "V";
 	case CST:    return "const";
 	case SYM:    return "symbl";

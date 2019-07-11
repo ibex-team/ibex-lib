@@ -611,35 +611,32 @@ TemplateDomain<D>& TemplateDomain<D>::operator&=(const TemplateDomain<D>& d) {
 }
 
 template<class D>
-void TemplateDomain<D>::put(int ii, int j, const TemplateDomain<D>& d) {
+void TemplateDomain<D>::put(int i, int j, const TemplateDomain<D>& d) {
 	switch(dim.type()) {
 	case Dim::SCALAR:
-		i()=d.i();
+		this->i()=d.i();
 		break;
 	case Dim::ROW_VECTOR:
 		if (d.dim.is_scalar()) v()[j]=d.i();
 		else v().put(j,d.v());
 		break;
 	case Dim::COL_VECTOR:
-		if (d.dim.is_scalar()) v()[ii]=d.i();
-		else v().put(ii,d.v());
+		if (d.dim.is_scalar()) v()[i]=d.i();
+		else v().put(i,d.v());
 		break;
 	case Dim::MATRIX:
 		switch(d.dim.type()) {
 		case Dim::SCALAR:
-			m()[ii][j]=d.i();
+			m()[i][j]=d.i();
 			break;
 		case Dim::ROW_VECTOR:
-			m()[ii].put(j,d.v());
+			m().put(i,j,d.v(),true);
 			break;
 		case Dim::COL_VECTOR:
-		{
-			IntervalMatrix tmp(d.dim.vec_size(),1);
-			m().put(ii,j,tmp);
+			m().put(i,j,d.v(),false);
 			break;
-		}
 		case Dim::MATRIX:
-			m().put(ii,j,d.m());
+			m().put(i,j,d.m());
 			break;
 		}
 	}
