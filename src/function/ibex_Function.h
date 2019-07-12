@@ -1041,7 +1041,10 @@ inline IntervalVector Function::eval_vector(const IntervalVector& box, const Bit
 	assert(!_image_dim.is_matrix());
 	return _image_dim.is_scalar() ?
 			IntervalVector(1,eval(box)) :
-			((Function*) this)->_eval->eval(box,components).v();
+			components.size()==1 ?
+					IntervalVector(1,((Function*) this)->_eval->eval(box,components).i())
+					:
+					((Function*) this)->_eval->eval(box,components).v();
 }
 
 template<class V>

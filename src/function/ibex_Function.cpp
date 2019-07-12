@@ -222,7 +222,10 @@ IntervalMatrix Function::eval_matrix(const IntervalVector& box, const BitSet& ro
 		M.set_col(0,eval_vector(box,rows));
 		break;
 	case Dim::MATRIX:
-		M=((Function*) this)->_eval->eval(box,rows).m();
+		if (rows.size()==1)
+			M.set_row(0,((Function*) this)->_eval->eval(box,rows).v());
+		else
+			M=((Function*) this)->_eval->eval(box,rows).m();
 		break;
 	default :
 		throw std::logic_error("Function::eval_matrix: invalid Dim type");
@@ -250,7 +253,16 @@ IntervalMatrix Function::eval_matrix(const IntervalVector& box, const BitSet& ro
 		M.set_col(0,eval_vector(box,rows));
 		break;
 	case Dim::MATRIX:
-		M=((Function*) this)->_eval->eval(box,rows,cols).m();
+		if (rows.size()==1)
+			if (cols.size()==1)
+				M[0][0]=((Function*) this)->_eval->eval(box,rows,cols).i();
+			else
+				M.set_row(0,((Function*) this)->_eval->eval(box,rows,cols).v());
+		else
+			if (cols.size()==1)
+				M.set_col(0,((Function*) this)->_eval->eval(box,rows,cols).v());
+			else
+		        M=((Function*) this)->_eval->eval(box,rows,cols).m();
 		break;
 	default :
 		throw std::logic_error("Function::eval_matrix: invalid Dim type");
