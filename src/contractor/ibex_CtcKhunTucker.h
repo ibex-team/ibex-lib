@@ -5,6 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 19, 2017
+// Created     : Jul 11, 2019
 //============================================================================
 
 #ifndef __IBEX_CTC_KHUN_TUCKER_H__
@@ -32,6 +33,8 @@ public:
 	 * all other contractors in optimization).
 	 *
 	 * \warning: building this object is **costly** in both time and memory!
+	 *           (symbolic derivation of all constraints, because Ibex does not
+	 *           have automatic hessian computation).
 	 *           Don't build this contractor on-the-fly.
 	 *
 	 * \warning: sys.box should be properly set before calling this constructor.
@@ -83,8 +86,6 @@ protected:
 	 * See constructor.
 	 */
 	bool reject_unbounded;
-
-	BoolInterval rejection_test(const FncKhunTucker& fjf, const IntervalMatrix& B) const;
 };
 
 } /* namespace ibex */

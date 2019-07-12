@@ -39,10 +39,10 @@ void TestFncKhunTucker::one_var() {
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
-	CPPUNIT_ASSERT(fkt.eq().empty());
-	CPPUNIT_ASSERT(fkt.ineq().empty());
-	CPPUNIT_ASSERT(fkt.left_bound().empty());
-	CPPUNIT_ASSERT(fkt.right_bound().empty());
+	CPPUNIT_ASSERT(fkt.f_active().eq.empty());
+	CPPUNIT_ASSERT(fkt.f_active().ineq.empty());
+	CPPUNIT_ASSERT(fkt.f_active().active_left_bound.empty());
+	CPPUNIT_ASSERT(fkt.f_active().active_right_bound.empty());
 
 	IntervalVector lambda(m);
 	lambda[0]=Interval(2,3);
@@ -91,10 +91,10 @@ void TestFncKhunTucker::one_var_1_bound() {
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
-	CPPUNIT_ASSERT(fkt.eq().empty());
-	CPPUNIT_ASSERT(fkt.ineq().empty());
-	CPPUNIT_ASSERT(fkt.left_bound().empty());
-	CPPUNIT_ASSERT(fkt.right_bound().size()==1);
+	CPPUNIT_ASSERT(fkt.f_active().eq.empty());
+	CPPUNIT_ASSERT(fkt.f_active().ineq.empty());
+	CPPUNIT_ASSERT(fkt.f_active().active_left_bound.empty());
+	CPPUNIT_ASSERT(fkt.f_active().active_right_bound.size()==1);
 
 	IntervalVector lambda(m);
 	lambda[0]=Interval(2,3);
@@ -151,10 +151,10 @@ void TestFncKhunTucker::one_var_1_ineq_1_rbound() {
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
-	CPPUNIT_ASSERT(fkt.eq().empty());
-	CPPUNIT_ASSERT(fkt.ineq().size()==1);
-	CPPUNIT_ASSERT(fkt.left_bound().empty());
-	CPPUNIT_ASSERT(fkt.right_bound().size()==1);
+	CPPUNIT_ASSERT(fkt.f_active().eq.empty());
+	CPPUNIT_ASSERT(fkt.f_active().ineq.size()==1);
+	CPPUNIT_ASSERT(fkt.f_active().active_left_bound.empty());
+	CPPUNIT_ASSERT(fkt.f_active().active_right_bound.size()==1);
 
 	IntervalVector lambda(m);
 	lambda[0]=Interval(2,3);
@@ -203,10 +203,10 @@ void TestFncKhunTucker::one_var_1_eq_1_lbound() {
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
-	CPPUNIT_ASSERT(fkt.eq().size()==1);
-	CPPUNIT_ASSERT(fkt.ineq().empty());
-	CPPUNIT_ASSERT(fkt.left_bound().size()==1);
-	CPPUNIT_ASSERT(fkt.right_bound().empty());
+	CPPUNIT_ASSERT(fkt.f_active().eq.size()==1);
+	CPPUNIT_ASSERT(fkt.f_active().ineq.empty());
+	CPPUNIT_ASSERT(fkt.f_active().active_left_bound.size()==1);
+	CPPUNIT_ASSERT(fkt.f_active().active_right_bound.empty());
 
 	IntervalVector lambda(m);
 	lambda[0]=Interval(2,3);
@@ -272,10 +272,10 @@ void TestFncKhunTucker::two_vars_1_eq_1_ineq_2bounds() {
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
-	CPPUNIT_ASSERT(fkt.eq().size()==1);
-	CPPUNIT_ASSERT(fkt.ineq().size()==2);
-	CPPUNIT_ASSERT(fkt.left_bound().size()==1);
-	CPPUNIT_ASSERT(fkt.right_bound().size()==1);
+	CPPUNIT_ASSERT(fkt.f_active().eq.size()==1);
+	CPPUNIT_ASSERT(fkt.f_active().ineq.size()==2);
+	CPPUNIT_ASSERT(fkt.f_active().active_left_bound.size()==1);
+	CPPUNIT_ASSERT(fkt.f_active().active_right_bound.size()==1);
 
 	IntervalVector lambda(m);
 	lambda[0]=Interval(2,3);
