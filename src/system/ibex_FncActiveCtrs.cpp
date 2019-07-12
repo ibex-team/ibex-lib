@@ -130,7 +130,7 @@ IntervalVector FncActiveCtrs::eval_vector(const IntervalVector& box, const BitSe
 
 	if (active_ctr.empty() && active_left_bound.empty() && active_right_bound.empty())
 		// should not happen because of the etxception thrown by the construtor
-		ibex_error("[FncActivation] nothing active_ctr.");
+		ibex_error("[FncActivation] nothing active.");
 		//return IntervalVector(); // alternative answer (but dangerous)
 
 	IntervalVector res(components.size());
@@ -280,9 +280,10 @@ bool FncActiveCtrs::rejection_test(const IntervalVector& x) const {
 	// Gradient of objective
 	B.put(0, 0, sys.goal->eval_vector(x), false); // init
 
-	// Gradients of active constraints
-	// note: the order does not matter here (ineq_first ignored)
-	B.put(0, 1,((Fnc*) fact)->jacobian(x).transpose());
+	if (fact)
+		// Gradients of active constraints
+		// note: the order does not matter here (ineq_first ignored)
+		B.put(0, 1,((Fnc*) fact)->jacobian(x).transpose());
 
 	// To be more efficient, we know that if the jth
 	// column is a bound constraint on the ith variable,
