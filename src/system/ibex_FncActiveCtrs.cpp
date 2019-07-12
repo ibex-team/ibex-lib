@@ -18,7 +18,7 @@ using namespace std;
 namespace ibex {
 
 FncActiveCtrs::FncActiveCtrs(const System& sys, const IntervalVector& box, const BitSet* _active, bool ineq_first, const Function* df) :
-								Fnc(1,1), // **tmp**
+								Fnc(sys.nb_var,1), // **tmp**
 								sys(sys), ineq_first(ineq_first),
 								active_ctr(_active? *_active : sys.active_ctrs(box)),
 								eq(BitSet::empty(sys.f_ctrs.image_dim())),
@@ -69,7 +69,7 @@ FncActiveCtrs::FncActiveCtrs(const System& sys, const IntervalVector& box, const
 }
 
 FncActiveCtrs::FncActiveCtrs(const System& sys, const Vector& pt, double activation_threshold, bool ineq_first, const Function* df) :
-		Fnc(1,1), // **tmp**
+		Fnc(sys.nb_var,1), // **tmp**
 		sys(sys), ineq_first(ineq_first),
 		active_ctr(BitSet::empty(sys.f_ctrs.image_dim())),
 		eq(BitSet::empty(sys.f_ctrs.image_dim())),
@@ -175,7 +175,7 @@ IntervalVector FncActiveCtrs::eval_vector(const IntervalVector& box, const BitSe
 
 	BitSet l=active_left_bound.compose(lcomp);
 
-	for (BitSet::const_iterator v=l.begin(); v!=l.end(); v++) {
+	for (BitSet::const_iterator v=l.begin(); v!=l.end(); ++v) {
 		res[j++]=sys.box[v].lb()-box[v];
 	}
 
@@ -234,7 +234,7 @@ void FncActiveCtrs::jacobian(const IntervalVector& box, IntervalMatrix& J, const
 
 	BitSet l=active_left_bound.compose(lcomp);
 
-	for (BitSet::const_iterator i=l.begin(); i!=l.end(); i++) {
+	for (BitSet::const_iterator i=l.begin(); i!=l.end(); ++i) {
 		if (v==-1) {
 			J.row(j)=Vector::zeros(_nb_var);
 			J[j][i]=-1;
@@ -247,7 +247,7 @@ void FncActiveCtrs::jacobian(const IntervalVector& box, IntervalMatrix& J, const
 
 	BitSet r=active_right_bound.compose(rcomp);
 
-	for (BitSet::const_iterator i=r.begin(); i!=r.end(); i++) {
+	for (BitSet::const_iterator i=r.begin(); i!=r.end(); ++i) {
 		if (v==-1) {
 			J.row(j)=Vector::zeros(_nb_var);
 			J[j][i]=1;

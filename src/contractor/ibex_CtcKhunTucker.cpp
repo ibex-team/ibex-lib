@@ -78,11 +78,11 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 	}
 
 	// not qualified constraints ==> useless to go further
-	if (!fkkt.f_active().qualified()) {
+	if (!fkkt.qualified()) {
 		return;
 	}
 
-	if (fkkt.f_active().rejection_test(box)) {
+	if (fkkt.rejection_test(box)) {
 		box.set_empty();
 		return;
 	}

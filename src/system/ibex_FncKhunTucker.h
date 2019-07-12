@@ -146,6 +146,37 @@ public:
 	virtual void jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const;
 
 	/**
+	 * Linear independence constraint qualification.
+	 *
+	 * If false, qualification is not respected
+	 * (resorting to Newton is useless in this case).
+	 *
+	 * Two typical situations:
+	 * - there are too many active inequalities (usually
+	 *   results from overestimation of interval arithmetic)
+	 * - the left and right bounds are simultaneously
+	 *   active for the same variable (results from too
+	 *   large domains)
+	 *
+	 * NOTE: this field does not account for linear independence
+	 * of constraints gradients. Only a count of potentially
+	 * active constraints is done.
+	 */
+	bool qualified() const;
+
+	/**
+	 * \brief First-order rejection test.
+	 *
+	 * \param x       : a subbox of "box" argument given to the constructor.
+	 *                  (This function should not be called after the point
+	 *                  variant of the constructor).
+	 * \return true   : if the box does not contain a local minimum of the system
+	 *                  (the test is successful)
+	 *         false  : otherwise.
+	 */
+	bool rejection_test(const IntervalVector& x) const;
+
+	/**
 	 * \brief Multiplier initial domain
 	 *
 	 * The domain of an inequality multiplier is [-1,1] and
@@ -154,12 +185,34 @@ public:
 	IntervalVector multiplier_domain() const;
 
 	/*
-	 * \brief Function of active constraints
-	 *
-	 * Useful to apply a quick qualification check
-	 * or a first-order rejection test.
+	 * Bitset of active constraints
 	 */
-	const FncActiveCtrs& f_active() const;
+	const BitSet& active() const;
+
+	/*
+	 * Indices of active constraints that are equalities.
+	 *
+	 * E.g. if the active constraints are {3, 4, 7, 9} and constraint n°3 and 7 are equalities
+	 * then eq={0,2}.
+	 * So the bitset does not contain the original indices of equalities (in the system).
+	 */
+	const BitSet& eq() const;
+
+	/*
+	 *  Indices of constrains that are inequalities
+	 *  Same as for equalities.
+	 */
+	const BitSet& ineq() const;
+
+	/*
+	 * Indices of variables with left bound active
+	 */
+	const BitSet& left_bound() const;
+
+	/*
+	 * Indices of variables with right bound active
+	 */
+	const BitSet& right_bound() const;
 
 	/**
 	 * \brief Original system
@@ -200,9 +253,25 @@ inline FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& df, F
 		FncKhunTucker(sys,df,dg,box,NULL) {
 }
 
-inline const FncActiveCtrs& FncKhunTucker::f_active() const {
-	return *act;
+inline bool FncKhunTucker::qualified() const {
+	return act? act->qualified() : false;
 }
+
+inline bool FncKhunTucker::rejection_test(const IntervalVector& x) const {
+	return act? act->rejection_test(x) : false;
+}
+
+inline const BitSet& FncKhunTucker::active() const      { return act? act->active_ctr : nothing; }
+
+inline const BitSet& FncKhunTucker::eq() const          { return act? act->eq : nothing; }
+
+inline const BitSet& FncKhunTucker::ineq() const        { return act? act->ineq : nothing; }
+
+inline const BitSet& FncKhunTucker::left_bound() const  { return act? act->active_left_bound : nothing; }
+
+inline const BitSet& FncKhunTucker::right_bound() const { return act? act->active_right_bound : nothing; }
+
+
 
 } /* namespace ibex */
 

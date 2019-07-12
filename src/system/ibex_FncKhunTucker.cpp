@@ -38,7 +38,7 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 		dg.resize(act->active_ctr.size());
 
 		unsigned int i=0; // index of a constraint in the active set
-		for (BitSet::const_iterator c=act->active_ctr.begin(); c!=act->active_ctr.end(); ++c, ++i) {
+		for (BitSet::const_iterator c=act->active_ctr.begin(); c!=act->active_ctr.end(); ++c) {
 			dg.set_ref(i++,*_dg[c]);
 		}
 
@@ -161,7 +161,11 @@ void FncKhunTucker::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, 
 	else if (v==lambda0)
 		J[lambda0][lambda0]=1.0;
 
-	if (!act) return;
+	if (!act) {
+		if (v==-1 || v<n)
+			J.put(0,0,hessian);
+		return;
+	}
 
 	l++;
 

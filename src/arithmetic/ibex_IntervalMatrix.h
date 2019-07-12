@@ -702,7 +702,7 @@ inline const IntervalVector& IntervalMatrix::operator[](int i) const {
 inline IntervalMatrix IntervalMatrix::operator[](const BitSet& rows) const {
 	IntervalMatrix res(rows.size(),nb_cols());
 	int j=0;
-	for (int i=rows.begin(); i!=rows.end(); ++i)
+	for (BitSet::const_iterator i=rows.begin(); i!=rows.end(); ++i)
 		res[j++]=(*this)[i];
 	return res;
 }
