@@ -82,7 +82,7 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 		return;
 	}
 
-	if (fkkt.rejection_test(box)) {
+	if (fkkt.rejection_test(x)) {
 		box.set_empty();
 		return;
 	}
