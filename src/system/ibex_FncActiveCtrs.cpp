@@ -278,7 +278,7 @@ bool FncActiveCtrs::rejection_test(const IntervalVector& x) const {
 	IntervalMatrix B(n, m);
 
 	// Gradient of objective
-	B.put(0, 0, sys.goal->eval_vector(x), false); // init
+	B.put(0, 0, sys.goal->gradient(x), false); // init
 
 	if (fact)
 		// Gradients of active constraints
