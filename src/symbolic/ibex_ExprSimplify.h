@@ -5,6 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 19, 2016
+// Last update : Jul 18, 2019
 //============================================================================
 
 #ifndef __IBEX_EXPR_SIMPLIFY_H__
@@ -17,6 +18,7 @@
 
 #include <vector>
 #include <utility>
+#include <functional>
 
 namespace ibex {
 
@@ -84,10 +86,31 @@ protected:
 	void insert(const ExprNode& e, const ExprNode& e2);
 	const ExprNode& get(const ExprNode& e, const DoubleIndex&);
 
-	template<class N>
-	void unary(const N& e, Domain (*fcst)(const Domain&));
-	template<class N>
-	void binary(const N& e, Domain (*fcst)(const Domain&,const Domain&));
+	/*
+	 * Unary operator "op"
+	 * \param e    - the expression node
+	 * \param fcst - the corresponding Domain function
+	 * \param fctr - the constructor for "op"
+	 * \param index_distributive - if true, then op(x)[i] = op(x[i]).
+	 */
+	void unary(const ExprUnaryOp& e,
+			//Domain (*fcst)(const Domain&),
+			std::function<Domain(const Domain&)> fcst,
+			std::function<const ExprNode&(const ExprNode&)> fctr,
+			bool index_distributive);
+
+	/*
+	 * Binary operator "op"
+	 * \param e    - the expression node
+	 * \param fcst - the corresponding Domain function
+	 * \param fctr - the constructor for "op"
+	 * \param index_distributive - if true, then op(x,y)[i] = op(x[i],y[i]).
+	 */
+	void binary(const ExprBinaryOp& e,
+			//Domain (*fcst)(const Domain&,const Domain&),
+			std::function<Domain(const Domain&, const Domain&)> fcst,
+			std::function<const ExprNode&(const ExprNode&, const ExprNode&)> fctr,
+			bool index_distributive);
 
 	void visit_add_sub(const ExprBinaryOp& e, bool sign);
 
