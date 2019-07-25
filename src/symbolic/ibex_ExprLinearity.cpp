@@ -185,8 +185,8 @@ void ExprLinearity::visit(const ExprMul& e) {
 	Array<Domain>& l=*(_coeffs[e.left].first);
 	Array<Domain>& r=*(_coeffs[e.right].first);
 
-	nodetype left_type = _coeffs[e.left].second;
-	nodetype right_type = _coeffs[e.right].second;
+//	nodetype left_type = _coeffs[e.left].second;
+//	nodetype right_type = _coeffs[e.right].second;
 
 	for (int i=0; i<n+1; i++) {
 		d->set_ref(i,*new Domain(e.dim));

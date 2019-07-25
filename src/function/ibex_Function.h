@@ -668,11 +668,18 @@ public:
 	IntervalMatrix eval_matrix(const IntervalVector& x) const;
 
 	/**
-	 * \brief Calculate f(x) using interval arithmetic.
+	 * \brief Calculate some rows of f(x) using interval arithmetic.
 	 *
 	 * \pre f must be matrix-valued.
 	 */
-	virtual IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows) const;
+	IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows) const;
+
+	/**
+	 * \brief Calculate a submatrix of f(x) using interval arithmetic.
+	 *
+	 * \pre f must be matrix-valued.
+	 */
+	virtual IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows, const BitSet& cols) const;
 
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.
@@ -1021,18 +1028,24 @@ inline Interval Function::eval(int i, const IntervalVector& box) const {
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
-	return eval_vector(box, BitSet::all(image_dim()));
+	// --> commented to avoid treating each component separately
+	// (note that in this case, the root node of the expression is not evaluated)
+	//return eval_vector(box, BitSet::all(image_dim()));
+	// --------------------------------------------------
+	assert(!_image_dim.is_matrix());
+	return _image_dim.is_scalar() ?
+			IntervalVector(1,eval(box)) :
+			((Function*) this)->_eval->eval(box).v();
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box, const BitSet& components) const {
 	assert(!_image_dim.is_matrix());
 	return _image_dim.is_scalar() ?
 			IntervalVector(1,eval(box)) :
-			((Function*) this)->_eval->eval(box,components).v();
-}
-
-inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
-	return eval_matrix(box, BitSet::all(_image_dim.nb_rows()));
+			components.size()==1 ?
+					IntervalVector(1,((Function*) this)->_eval->eval(box,components).i())
+					:
+					((Function*) this)->_eval->eval(box,components).v();
 }
 
 template<class V>

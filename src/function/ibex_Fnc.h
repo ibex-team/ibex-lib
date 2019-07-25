@@ -102,20 +102,25 @@ public:
 	/**
 	 * \brief Calculate f(x) using interval arithmetic.
 	 *
-	 * Default implementation: return [-oo,oo]x...x[-oo,oo].
-	 *
 	 * \pre f must be matrix-valued
 	 */
 	IntervalMatrix eval_matrix(const IntervalVector& x) const;
 
 	/**
-	 * \brief Calculate f(x) using interval arithmetic.
-	 *
-	 * Default implementation: return [-oo,oo]x...x[-oo,oo].
+	 * \brief Calculate some rows of f(x) using interval arithmetic.
 	 *
 	 * \pre f must be matrix-valued
 	 */
-	virtual IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows) const;
+	IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows) const;
+
+	/**
+	 * \brief Calculate f(x) using interval arithmetic.
+	 *
+	 * Default implementation: return a matrix of [-oo,oo].
+	 *
+	 * \pre f must be matrix-valued
+	 */
+	virtual IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows, const BitSet& cols) const;
 
 	/**
 	 * \brief Calculate the gradient of f.
@@ -288,10 +293,25 @@ inline IntervalMatrix Fnc::eval_matrix(const IntervalVector& box) const {
 		M.set_col(0,eval_vector(box));
 		return M;
 	} else
-		return eval_matrix(box, BitSet::all(image_dim()));
+		return eval_matrix(box, BitSet::all(_image_dim.nb_rows()));
 }
 
 inline IntervalMatrix Fnc::eval_matrix(const IntervalVector& box, const BitSet& rows) const {
+	if (_image_dim.type()==Dim::SCALAR) {
+		return IntervalMatrix(1,1,eval(box));
+	} else if (_image_dim.type()==Dim::ROW_VECTOR) {
+		IntervalMatrix M(1,_image_dim.nb_cols());
+		M.set_row(0,eval_vector(box));
+		return M;
+	} else if (_image_dim.type()==Dim::COL_VECTOR) {
+		IntervalMatrix M(rows.size(),1);
+		M.set_col(0,eval_vector(box,rows));
+		return M;
+	} else
+		return eval_matrix(box, rows, BitSet::all(image_dim()));
+}
+
+inline IntervalMatrix Fnc::eval_matrix(const IntervalVector& box, const BitSet& rows, const BitSet& cols) const {
 	ibex_error("Fnc: 'eval_matrix' called with no implementation.");
 	return IntervalMatrix(_image_dim.nb_rows(), _image_dim.nb_cols());
 }

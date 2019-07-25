@@ -61,7 +61,6 @@ namespace ibex {
 
     
   BisectionPoint SmearFunction::choose_var(const Cell& cell) {
-    int last_var=cell.bisected_var;
     const IntervalVector& box=cell.box;
     
     IntervalMatrix J(sys.f_ctrs.image_dim(), sys.nb_var);

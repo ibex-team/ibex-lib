@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Eval Tests
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Apr 02, 2012
+ * Last update : Jul 10, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_EVAL_H__
@@ -35,6 +36,7 @@ public:
 	CPPUNIT_TEST(issue242);
 	CPPUNIT_TEST(eval_components01);
 	CPPUNIT_TEST(eval_components02);
+	CPPUNIT_TEST(matrix_components);
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -51,6 +53,9 @@ public:
 	void issue242();
 	void eval_components01();
 	void eval_components02();
+
+	// check in particular that the components that are not selected are not computed uselessly
+	void matrix_components();
 
 private:
 	void check_deco(Function& f, const ExprNode& e);

@@ -232,6 +232,11 @@ public:
 	 */
 	iterator end() const;
 
+	/**
+	 * \brief Capacity
+	 */
+	size_t capacity() const;
+
 protected:
 
 	bool initialized() const;
@@ -293,6 +298,7 @@ inline bool BitSet::operator!=(const BitSet& b) {
 
 inline BitSet& BitSet::operator=(const BitSet& b) {
 	assert(initialized() && b.initialized());
+	if (capacity()<b.capacity()) resize(b.capacity());
 	bitset=b.bitset;
 	return *this;
 }
@@ -305,6 +311,7 @@ inline BitSet& BitSet::operator&=(const BitSet& b) {
 
 inline BitSet& BitSet::operator|=(const BitSet& b) {
 	assert(initialized() && b.initialized());
+	if (capacity()<b.capacity()) resize(b.capacity());
 	bitset.union_with(b.bitset);
 	return *this;
 }
@@ -367,6 +374,18 @@ inline BitSet::iterator::operator int() const {
 
 inline bool BitSet::initialized() const {
 	return bitset.table!=NULL;
+}
+
+inline size_t BitSet::capacity() const {
+	// Mistral has no documentation and the code is opaque.
+	// Not sure this is the correct value...
+	// :(
+#ifdef _BIT64
+	// note: *8 because 8 bits in a byte
+	return (bitset.pos_words - bitset.neg_words)*sizeof(unsigned long long int)*8;
+#else
+	return (bitset.pos_words - bitset.neg_words)*sizeof(unsigned int)*8;
+#endif
 }
 
 } // end namespace ibex

@@ -59,7 +59,7 @@ ExtendedSystem& DefaultOptimizer::get_ext_sys(const System& sys, double eps_h) {
 
 DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed, double eps_x) :
 		Optimizer(sys.nb_var,
-			  ctc(get_ext_sys(sys,eps_h)), // warning: we don't know which argument is evaluated first
+			  ctc(sys,eps_h,rigor),
 //			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
 
 			  rec(new LSmear(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
@@ -80,8 +80,19 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double a
 
 }
 
-Ctc&  DefaultOptimizer::ctc(const ExtendedSystem& ext_sys) {
-	Array<Ctc> ctc_list(3);
+Ctc&  DefaultOptimizer::ctc(const System& sys, double eps_h, bool rigor) {
+
+	const ExtendedSystem& ext_sys = get_ext_sys(sys, eps_h);
+
+	// check if KKT can be applied
+	// (equalities are allowed only in rigor mode)
+	bool kkt=true;
+	if (!rigor) {
+		for (int i=0; i<sys.nb_ctr; i++)
+			if (sys.ops[i]==EQ) { kkt=false; break; }
+	}
+
+	Array<Ctc> ctc_list(kkt? 4 : 3);
 
 	// first contractor on ext_sys : incremental HC4 (propag ratio=0.01)
 	ctc_list.set_ref(0, rec(new CtcHC4 (ext_sys,0.01,true)));
@@ -97,6 +108,9 @@ Ctc&  DefaultOptimizer::ctc(const ExtendedSystem& ext_sys) {
 	} else {
 		ctc_list.set_ref(2,rec(new CtcLinearRelax(ext_sys)));
 	}
+
+	if (kkt)
+		ctc_list.set_ref(3,rec(new CtcKhunTucker(get_norm_sys(sys, eps_h),true)));
 
 	return rec(new CtcCompo(ctc_list));
 }
