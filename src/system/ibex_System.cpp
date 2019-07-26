@@ -254,9 +254,9 @@ bool __is_inactive(const Interval& gx, CmpOp op) {
 	bool inactive;
 	switch (op) {
 	case LT:  inactive=gx.ub()<0; break;
-	case LEQ: inactive=gx.ub()<=0; break;
+	case LEQ: inactive=gx.ub()<0; break;
 	case EQ:  inactive=(gx==Interval::zero()); break;
-	case GEQ: inactive=gx.lb()>=0; break;
+	case GEQ: inactive=gx.lb()>0; break;
 	case GT:  inactive=gx.lb()>0; break;
 	}
 	return inactive;
