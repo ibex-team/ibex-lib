@@ -57,9 +57,9 @@ ExtendedSystem& DefaultOptimizer::get_ext_sys(const System& sys, double eps_h) {
 	}
 }
 
-DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed, double eps_x) :
+DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, bool kkt, double random_seed, double eps_x) :
 		Optimizer(sys.nb_var,
-			  ctc(sys,eps_h,rigor),
+			  ctc(sys,eps_h,rigor,kkt),
 //			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
 
 			  rec(new LSmear(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
@@ -80,14 +80,13 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double a
 
 }
 
-Ctc&  DefaultOptimizer::ctc(const System& sys, double eps_h, bool rigor) {
+Ctc&  DefaultOptimizer::ctc(const System& sys, double eps_h, bool rigor, bool kkt) {
 
 	const ExtendedSystem& ext_sys = get_ext_sys(sys, eps_h);
 
 	// check if KKT can be applied
 	// (equalities are allowed only in rigor mode)
-	bool kkt=true;
-	if (!rigor) {
+	if (kkt && !rigor) {
 		for (int i=0; i<sys.nb_ctr; i++)
 			if (sys.ops[i]==EQ) { kkt=false; break; }
 	}

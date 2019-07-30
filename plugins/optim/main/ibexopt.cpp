@@ -47,6 +47,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
 			"optimization data in the COV (binary) format. See --format", {'o',"output"});
 	args::Flag rigor(parser, "rigor", "Activate rigor mode (certify feasibility of equalities).", {"rigor"});
+	args::Flag kkt(parser, "kkt", "Activate contractor based on Khun-Tucker conditions.", {"kkt"});
 	args::Flag output_no_obj(parser, "output-no-obj", "Generate a COV with domains of variables only (not objective values).", {"output-no-obj"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
@@ -149,6 +150,11 @@ int main(int argc, char** argv) {
 				cout << "  rigor mode:\t\tON\t(feasibility of equalities certified)" << endl;
 		}
 
+		if (kkt) {
+			if (!quiet)
+				cout << "  KKT contractor:\tON" << endl;
+		}
+
 		if (initial_loup) {
 			if (!quiet)
 				cout << "  initial loup:\t\t" << initial_loup.Get() << " (a priori upper bound of the minimum)" << endl;
@@ -211,7 +217,7 @@ int main(int argc, char** argv) {
 				rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f,
 				abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f,
 				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
-				rigor, inHC4,
+				rigor, inHC4, kkt.Get(),
 				random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed,
 				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x
 				);

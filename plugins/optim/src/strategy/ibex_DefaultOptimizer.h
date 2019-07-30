@@ -39,6 +39,7 @@ public:
 	 * \param random_seed - The sequence of random numbers is reinitialized with
 	 *                      this seed before calling optimize(..) (useful for
 	 *                      reproducibility). Set by default to #default_random_seed.
+	 * \param kkt         - If true, Khun-Tucker contractor is used (false by default)
 	 * \param eps_x       - Stopping criterion for box splitting (absolute precision).
 	 *                      (**deprecated**).
 	 */
@@ -46,7 +47,7 @@ public:
     		double rel_eps_f=Optimizer::default_rel_eps_f,
 			double abs_eps_f=Optimizer::default_abs_eps_f,
 			double eps_h=NormalizedSystem::default_eps_h,
-			bool rigor=false, bool inHC4=true,
+			bool rigor=false, bool inHC4=true, bool kkt=false,
 			double random_seed=default_random_seed,
     		double eps_x=Optimizer::default_eps_x);
 
@@ -58,7 +59,7 @@ private:
     /**
      * The contractor: HC4 + acid(HC4) + X-Newton
      */
-	Ctc& ctc(const System& sys, double eps_h, bool rigor);
+	Ctc& ctc(const System& sys, double eps_h, bool rigor, bool kkt);
 
 	NormalizedSystem& get_norm_sys(const System& sys, double eps_h);
 
