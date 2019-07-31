@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 31, 2013
-// Last Update : May 31, 2013
+// Last Update : Jul 31, 2019
 //============================================================================
 
 #ifndef __IBEX_FRITZ_JOHN_COND_H__
@@ -26,7 +26,7 @@ class FritzJohnCond : public System {
 
 public:
 
-	FritzJohnCond(const System& sys);
+	FritzJohnCond(const System& sys, bool copy_ineq);
 
 	/** Number of basic variables */
 	const int n;
