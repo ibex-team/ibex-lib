@@ -25,6 +25,7 @@
 #include "ibex_Random.h"
 #include "ibex_CellBeamSearch.h"
 #include "ibex_CellHeap.h"
+#include "ibex_CtcKhunTuckerLP.h"
 
 using namespace std;
 
@@ -108,9 +109,10 @@ Ctc&  DefaultOptimizer::ctc(const System& sys, double eps_h, bool rigor, bool kk
 		ctc_list.set_ref(2,rec(new CtcLinearRelax(ext_sys)));
 	}
 
-	if (kkt)
-		ctc_list.set_ref(3,rec(new CtcKhunTucker(get_norm_sys(sys, eps_h),true)));
-
+	if (kkt) {
+		//ctc_list.set_ref(3, rec(new CtcKhunTucker(get_norm_sys(sys,eps_h),true)));
+		ctc_list.set_ref(3, rec(new CtcKhunTuckerLP(get_norm_sys(sys,eps_h),true)));
+	}
 	return rec(new CtcCompo(ctc_list));
 }
 
