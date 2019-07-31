@@ -95,7 +95,9 @@ void TestOptimizer::issue50_1() {
 }
 
 void TestOptimizer::issue50_2() {
-	CPPUNIT_ASSERT(issue50(1e-10, 0)==Optimizer::SUCCESS);
+	// fail because of constraint activity, see comment before
+	// System::_is_inactive
+	CPPUNIT_ASSERT(issue50(1e-10, 0)==Optimizer::UNREACHED_PREC);
 }
 
 void TestOptimizer::issue50_3() {
