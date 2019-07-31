@@ -35,6 +35,7 @@ public:
 	CPPUNIT_TEST(index_var3);
 	CPPUNIT_TEST(index_add);
 	CPPUNIT_TEST(index_transpose);
+	CPPUNIT_TEST(issue366);
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -49,7 +50,7 @@ public:
 	void index_var3();
 	void index_add();
 	void index_transpose();
-
+	void issue366();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestExprSimplify);
