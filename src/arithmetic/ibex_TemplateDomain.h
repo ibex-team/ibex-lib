@@ -61,16 +61,20 @@ public:
 	/**
 	 * \brief Creates a reference to an interval vector.
 	 *
+	 *  \pre v.size()>1
+	 *
 	 *  The internal domain will point to \a v.
 	 */
-	explicit TemplateDomain(typename D::VECTOR& v1, bool in_row);
+	explicit TemplateDomain(typename D::VECTOR& v, bool in_row);
 
 	/**
 	 * \brief Creates a reference to an interval matrix.
 	 *
+	 * \pre m.nb_rows()>1 and m.nb_cols()>1
+	 *
 	 *  The internal domain will point to \a m.
 	 */
-	explicit TemplateDomain(typename D::MATRIX& m1);
+	explicit TemplateDomain(typename D::MATRIX& m);
 
 	/**
 	 * \brief Creates a reference to an interval.
@@ -439,11 +443,13 @@ inline TemplateDomain<D>::TemplateDomain(typename D::SCALAR& itv) : dim(), is_re
 
 template<class D>
 inline TemplateDomain<D>::TemplateDomain(typename D::VECTOR& v1, bool in_row) : dim(in_row? Dim::row_vec(v1.size()) : Dim::col_vec(v1.size())), is_reference(true) {
+	assert(v1.size()>1);
 	domain = &v1;
 }
 
 template<class D>
 inline TemplateDomain<D>::TemplateDomain(typename D::MATRIX& m1) : dim(Dim::matrix(m1.nb_rows(),m1.nb_cols())), is_reference(true) {
+	assert(m1.nb_rows()>1 && m1.nb_cols()>1);
 	domain = &m1;
 }
 
