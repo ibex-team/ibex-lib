@@ -250,6 +250,21 @@ System::~System() {
 
 namespace {
 
+/*
+ * Note:
+ *  A constraint g(x)<=0 is considered as potentially active
+ *  if [g]([x])<=0, to conform with the definition of activity
+ *  in the context of optimization.
+ *  Otherwise (that is, if the constraint was considered as inactive
+ *  in this case), the KKT contractor would be incorrect (losing
+ *  solutions).
+ *  An alternative would be to create two different concepts:
+ *  activity:      g(x)<=0 is inactive if [g]([x])<0
+ *  effectiveness: g(x)<=0 is ineffective if [g]([x])<=0 (for
+ *                 contractors like HC4).
+ *  However, the case where a constraint is not effective but
+ *  active almost never happens.
+ */
 bool __is_inactive(const Interval& gx, CmpOp op) {
 	bool inactive;
 	switch (op) {
