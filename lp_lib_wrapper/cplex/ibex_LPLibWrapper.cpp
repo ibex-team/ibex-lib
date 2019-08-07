@@ -1,8 +1,6 @@
 #include "ibex_LPSolver.h"
 
-
 namespace ibex {
-
 
 LPSolver::LPSolver(int nb_vars1, int max_iter, double max_time_out, double eps) :
 		nb_vars(nb_vars1), nb_rows(0), boundvar(nb_vars1), sense(LPSolver::MINIMIZE),

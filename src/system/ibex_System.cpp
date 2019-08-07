@@ -258,23 +258,26 @@ std::string System::toAmpl() const {
 	s << '\n';
 
 	if (goal) {
-		s << goal->toAmpl() << ";\n\n";
+		s << goal->toAmpl() << "\n";
 	}
 
 	if (nb_ctr>0) {
-		s << f_ctrs.toAmpl() << ";\n\n";
+		for (int i=0; i<nb_ctr; i++) {
+			s << f_ctrs[i].toAmpl();
+		}
 	}
-
+	s << "\n";
 	if (goal) {
 		s << "minimize GOAL:" << goal->name << ";\n\n";
 	}
 
 	if (nb_ctr>0) {
 		for (int i=0; i<nb_ctr; i++) {
-			s << "subject to ctrs_" << f_ctrs.name << "[" << i<< "] : ";
-			s << f_ctrs.name << "["<< i <<"] " << ops[i] << "0 ;\n\n";
+			s << "subject to ctrs_" << f_ctrs[i].name << " : ";
+			s << f_ctrs[i].name <<" " << ops[i] << " 0 ;\n";
 		}
 	}
+	s << "\n";
 	s << "option ibexopt_auxfiles rc; \n";
 	s << "option solver ibexopt; \n";
 	s << "solve; \n\n ";
@@ -363,13 +366,28 @@ System::~System() {
 
 namespace {
 
+/*
+ * Note:
+ *  A constraint g(x)<=0 is considered as potentially active
+ *  if [g]([x])<=0, to conform with the definition of activity
+ *  in the context of optimization.
+ *  Otherwise (that is, if the constraint was considered as inactive
+ *  in this case), the KKT contractor would be incorrect (losing
+ *  solutions).
+ *  An alternative would be to create two different concepts:
+ *  activity:      g(x)<=0 is inactive if [g]([x])<0
+ *  effectiveness: g(x)<=0 is ineffective if [g]([x])<=0 (for
+ *                 contractors like HC4).
+ *  However, the case where a constraint is not effective but
+ *  active almost never happens.
+ */
 bool __is_inactive(const Interval& gx, CmpOp op) {
 	bool inactive;
 	switch (op) {
 	case LT:  inactive=gx.ub()<0; break;
-	case LEQ: inactive=gx.ub()<=0; break;
+	case LEQ: inactive=gx.ub()<0; break;
 	case EQ:  inactive=(gx==Interval::zero()); break;
-	case GEQ: inactive=gx.lb()>=0; break;
+	case GEQ: inactive=gx.lb()>0; break;
 	case GT:  inactive=gx.lb()>0; break;
 	}
 	return inactive;
