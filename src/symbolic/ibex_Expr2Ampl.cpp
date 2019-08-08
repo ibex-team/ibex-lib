@@ -39,11 +39,9 @@ void Expr2Ampl::print(std::ostream& os, const ExprNode& e) {
 		}
 	}
 
-	os << "  return ";
-
 	visit(e);
 
-	os << ";";
+	//os << ";"<< std::endl;
 }
 
 void Expr2Ampl::visit(const ExprNode& e) {
@@ -54,17 +52,59 @@ void Expr2Ampl::visit(const ExprNode& e) {
 }
 
 
+void Expr2Ampl::visit(const ExprApply& a) {
+	assert(false);
+	ibex_warning("Expr2Ampl::visit(const ExprApply& a): to do...");
+}
+
+void Expr2Ampl::visit(const ExprVector& e){
+	assert(false);
+	ibex_warning("Expr2Ampl::visit(const ExprVector& a): to do...");
+}
 
 
+void Expr2Ampl::visit(const ExprChi& a){
+	assert(false);
+	ibex_warning("Expr2Ampl::visit(const ExprChi& a): to do...");
+}
+
+void Expr2Ampl::visit(const ExprConstant& e){
+	print_domain(e.get());
+}
 
 
+void Expr2Ampl::visit(const ExprIndex& e) {
+	(*os) << e.expr;
+
+	if (not(e.index.all())) {
+
+		(*os) << "[";
+		switch (e.index.dim.type()) {
+		case Dim::ROW_VECTOR:
+			if (e.index.one_col()) (*os) << e.index.first_col()+1;
+			else (*os) << e.index.first_col()+1 << ":" << e.index.last_col()+1;
+			break;
+		case Dim::COL_VECTOR:
+			if (e.index.one_row()) (*os) << e.index.first_row()+1;
+			else (*os) << e.index.first_row()+1 << ":" << e.index.last_row()+1;
+			break;
+		default:
+			assert(e.index.dim.is_matrix());
+			if (e.index.all_rows()) (*os) << ":";
+			else if (e.index.one_row()) (*os) << e.index.first_row()+1;
+			else (*os) << e.index.first_row()+1 << ":" << e.index.last_row()+1;
+			(*os) << ",";
+			if (e.index.all_cols()) (*os) << ":";
+			else if (e.index.one_col()) (*os) << e.index.first_col()+1;
+			else (*os) << e.index.first_col()+1 << ":" << e.index.last_col()+1;
+		}
+		(*os) << "]";
+	}
+
+}
 
 
-
-
-
-
-void ExprPrinter::print_domain(const Domain& d) {
+void Expr2Ampl::print_domain(const Domain& d) {
 	switch (d.dim.type()) {
 	case Dim::SCALAR:
 		print_itv(d.i());
@@ -82,58 +122,33 @@ void ExprPrinter::print_domain(const Domain& d) {
 	}
 }
 
-void ExprPrinter::print_dbl(double x) {
+void Expr2Ampl::print_dbl(double x) {
 	if (x==NEG_INFINITY)
 		// note: we could also use hexa representation of +/- infinity...
-		(*os) << "-oo";
+		(*os) << "-Infinity";
 	else if (x==POS_INFINITY)
-		(*os) << "+oo";
-	else if (human)
+		(*os) << "Infinity";
+	else
 		(*os) << x;
-	else {
-		assert(sizeof(double)==8);
-		uint64_t u;
-		if (x>=0) {
-			memcpy(&u, &x, 8);
-			(*os) << '#' << std::hex << u;
-		} else {
-			double minus_x=-x;
-			memcpy(&u, &minus_x, 8);
-			(*os) << "-#" << std::hex << u;
-		}
-	}
 }
 
-void ExprPrinter::print_itv(const Interval& x) {
-	if (x.is_empty())
-		(*os) << "(empty)";
-	else if (x.is_degenerated())
+void Expr2Ampl::print_itv(const Interval& x) {
+	if (x.is_degenerated())
 		print_dbl(x.mid());
 	else {
-		(*os) << '[';
-		print_dbl(x.lb());
-		(*os) << ",";
-		print_dbl(x.ub());
-		(*os) << ']';
+		assert(false);
+		ibex_warning("Expr2Ampl::print_itv: to do...");
 	}
 }
 
-void ExprPrinter::print_itv_vec(const IntervalVector& v, bool in_row) {
-	(*os) << '(';
-	for (int i=0; i<v.size(); i++) {
-		print_itv(v[i]);
-		if (i<v.size()-1) (*os) << (in_row ? " , " : " ; ");
-	}
-	(*os) << ')';
+void Expr2Ampl::print_itv_vec(const IntervalVector& v, bool in_row) {
+	assert(false);
+	ibex_warning("Expr2Ampl::print_itv_vec: to do...");
 }
 
-void ExprPrinter::print_itv_mat(const IntervalMatrix& m) {
-	(*os) << '(';
-	for (int i=0; i<m.nb_rows(); i++) {
-		print_itv_vec(m.row(i), true);
-		if (i<m.nb_rows()-1) (*os) << " ; ";
-	}
-	(*os) << ')';
+void Expr2Ampl::print_itv_mat(const IntervalMatrix& m) {
+	assert(false);
+	ibex_warning("Expr2Ampl::print_itv_mat: to do...");
 }
 
 

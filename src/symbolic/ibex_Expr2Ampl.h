@@ -37,14 +37,22 @@ protected:
 	void visit(const ExprVector& e);
 	void visit(const ExprChi& a);
 	void visit(const ExprConstant& e);
-	void visit(const ExprSymbol& e);
-	void visit(const ExprMul& e);
-
-
+	void visit(const ExprIndex& e);
+	//void visit(const ExprSymbol& e);
+	//void visit(const ExprMul& e);
 
 
 	// Associate a subexpression to a temporary symbol number
 	NodeMap<int> map;
+
+
+
+private:
+	void print_domain(const Domain& d);
+	void print_dbl(double x);
+	void print_itv(const Interval& x);
+	void print_itv_vec(const IntervalVector& v, bool in_row);
+	void print_itv_mat(const IntervalMatrix& m);
 };
 
 } // namespace ibex

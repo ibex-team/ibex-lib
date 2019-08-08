@@ -20,43 +20,43 @@ using namespace std;
 
 namespace ibex {
 
-static System* sysex1() {
-	SystemFactory fac;
-	Variable x(3,"x");
-	Variable A(3,3,"A");
-	Variable y("y");
-
-	fac.add_var(x);
-	fac.add_var(A);
-	fac.add_var(y,Interval(-1,1));
-	fac.add_goal(y-cos(x[1]));
-	IntervalVector a(3,0);
-	fac.add_ctr(A*x=a);
-	fac.add_ctr(y>=x[0]);
-
-	return new System(fac);
-}
+//static System* sysex1() {
+//	SystemFactory fac;
+//	Variable x(3,"x");
+//	Variable A(3,3,"A");
+//	Variable y("y");
+//
+//	fac.add_var(x);
+//	fac.add_var(A);
+//	fac.add_var(y,Interval(-1,1));
+//	fac.add_goal(y-cos(x[1]));
+//	IntervalVector a(3,0);
+//	fac.add_ctr(A*x=a);
+//	fac.add_ctr(y>=x[0]);
+//
+//	return new System(fac);
+//}
 
 static System* ampl_sysex1() {
 	AmplInterface interface(SRCDIR_TESTS "/../plugins/ampl/tests/ex_ampl/ex1.nl");
 	return new System(interface);
 }
 
-static System* sysex2() {
-	SystemFactory fac;
-	Variable x(3,"x");
-	Variable y("y");
-
-	fac.add_var(x);
-	fac.add_var(y);
-	fac.add_goal(y-cos(x[1]));
-	IntervalVector a(3,0);
-	fac.add_ctr(x[0]+x[1]>=0);
-	fac.add_ctr(x[1]+x[2]<=y);
-	fac.add_ctr(y>=x[0]);
-
-	return new System(fac);
-}
+//static System* sysex2() {
+//	SystemFactory fac;
+//	Variable x(3,"x");
+//	Variable y("y");
+//
+//	fac.add_var(x);
+//	fac.add_var(y);
+//	fac.add_goal(y-cos(x[1]));
+//	IntervalVector a(3,0);
+//	fac.add_ctr(x[0]+x[1]>=0);
+//	fac.add_ctr(x[1]+x[2]<=y);
+//	fac.add_ctr(y>=x[0]);
+//
+//	return new System(fac);
+//}
 
 
 static System* ampl_sysex2() {
@@ -65,20 +65,20 @@ static System* ampl_sysex2() {
 }
 
 
-static System* sysex3() {
-	SystemFactory fac;
-	Variable x("x");
-	Variable y("y");
-
-	fac.add_var(x);
-	fac.add_var(y);
-	fac.add_ctr(x+y=Interval(-1,1));
-	fac.add_ctr(x-y<=1);
-	fac.add_ctr(x-y>=-1);
-	fac.add_ctr(x=y);
-
-	return new System(fac);
-}
+//static System* sysex3() {
+//	SystemFactory fac;
+//	Variable x("x");
+//	Variable y("y");
+//
+//	fac.add_var(x);
+//	fac.add_var(y);
+//	fac.add_ctr(x+y=Interval(-1,1));
+//	fac.add_ctr(x-y<=1);
+//	fac.add_ctr(x-y>=-1);
+//	fac.add_ctr(x=y);
+//
+//	return new System(fac);
+//}
 
 
 static System* ampl_sysex3() {
