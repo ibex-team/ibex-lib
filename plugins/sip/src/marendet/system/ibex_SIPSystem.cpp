@@ -196,6 +196,15 @@ Function* SIPSystem::copyGoal() {
 		return NULL;
 	}
 	Array<const ExprSymbol> varSymbols = getVarSymbols(ibex_system_->goal);
+	Array<const ExprSymbol> usedParamSymbols = getUsedParamSymbols(ibex_system_->goal);
+	if(usedParamSymbols.size() > 0) {
+		std::string error_msg = "Quantified parameter(s) in objective function:";
+		for(int i = 0; i < usedParamSymbols.size(); ++i) {
+			error_msg += " " + std::string(usedParamSymbols[i].name);
+		}
+		error_msg += ".";
+		ibex_error(error_msg.c_str());
+	}
 	Array<const ExprSymbol> varCopy(varSymbols.size());
 	varcopy(varSymbols, varCopy);
 	const ExprNode& copy = ExprCopy().copy(varSymbols, varCopy, ibex_system_->goal->expr());
