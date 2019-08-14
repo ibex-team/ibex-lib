@@ -228,9 +228,15 @@ Array<const ExprSymbol> SIPSystem::getUsedParamSymbols(const Function* fun) {
  */
 IntervalVector SIPSystem::extractInitialBox() const {
 	// All var symbols
-	Array<const ExprSymbol> varSymbols = getVarSymbols(&ibex_system_->f_ctrs);
-	VarSet tmp(ibex_system_->f_ctrs, varSymbols);
-	return tmp.var_box(ibex_system_->box);
+	if(ibex_system_->ctrs.size() == 0) {
+		Array<const ExprSymbol> varSymbols = getVarSymbols(ibex_system_->goal);
+		VarSet tmp(*ibex_system_->goal, varSymbols);
+		return tmp.var_box(ibex_system_->box);
+	} else {
+		Array<const ExprSymbol> varSymbols = getVarSymbols(&ibex_system_->f_ctrs);
+		VarSet tmp(ibex_system_->f_ctrs, varSymbols);
+		return tmp.var_box(ibex_system_->box);
+	}
 }
 
 vector<SIConstraintCache> SIPSystem::getInitialNodeCaches() const {
