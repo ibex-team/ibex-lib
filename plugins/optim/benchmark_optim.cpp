@@ -139,7 +139,7 @@ do_benchs_iter (System &sys, DecimalFP prec, double time_limit,
 		/* Build the default optimizer */
 		double random_seed = DefaultOptimizer::default_random_seed + (double) i;
 		DefaultOptimizer DefOpt (sys, eps, eps, NormalizedSystem::default_eps_h,
-		                         false, true, random_seed, 0.0);
+		                         false, true, false, random_seed, 0.0);
 
 		/* Set the time limit */
 		DefOpt.timeout = time_limit;

@@ -311,7 +311,10 @@ ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
   : ExprLeaf(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())),
     value(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())) {
 
-	value.v() = v;
+	if (dim.type()==Dim::SCALAR) // the vector may actually be a scalar
+		value.i()=v[0];
+	else
+		value.v() = v;
 }
 
 ExprConstant::ExprConstant(const IntervalMatrix& m)

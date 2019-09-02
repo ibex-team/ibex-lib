@@ -30,6 +30,7 @@ void TestBitSet::initialise() {
 	b.add(3);
 	b.add(7);
 	b.add(9);
+	CPPUNIT_ASSERT(b.capacity()>=10);
 	CPPUNIT_ASSERT(b==bitset1);
 }
 
@@ -52,6 +53,7 @@ void TestBitSet::add01() {
 	b.add(3);
 	b.add(7);
 	b.add(9);
+	CPPUNIT_ASSERT(b.capacity()>=10);
 	CPPUNIT_ASSERT(b==bitset1);
 }
 
@@ -62,6 +64,7 @@ void TestBitSet::add02() {
 	b.add(7);
 	b.add(7); // try redundant addition
 	b.add(7);
+	CPPUNIT_ASSERT(b.capacity()>=10);
 	CPPUNIT_ASSERT(b==bitset1);
 }
 
@@ -77,6 +80,7 @@ void TestBitSet::size01() {
 	CPPUNIT_ASSERT(b.size()==3);
 	b.remove(7);
 	CPPUNIT_ASSERT(b.size()==2);
+	CPPUNIT_ASSERT(b.capacity()>=10);
 
 	CPPUNIT_ASSERT(bitset2.size()==2);
 	CPPUNIT_ASSERT(bitset3.size()==4);
@@ -85,19 +89,22 @@ void TestBitSet::size01() {
 void TestBitSet::size02() {
 	BitSet b(bitset1);
 	b.clear();
+	CPPUNIT_ASSERT(b.capacity()>=bitset1.capacity());
 	CPPUNIT_ASSERT(b.size()==0);
 }
 
 void TestBitSet::resize() {
 	BitSet b(1);
-	b.resize(100);
+	b.resize(200);
 	for (int i=0; i<100; i++) b.add(i);
+	CPPUNIT_ASSERT(b.capacity()>=200);
 	CPPUNIT_ASSERT(b.size()==100);
 }
 
 void TestBitSet::inter01() {
 	BitSet b(bitset1);
 	b&=bitset2;
+	CPPUNIT_ASSERT(b.capacity()>=bitset1.capacity());
 	CPPUNIT_ASSERT(b==BitSet::singleton(1,7));
 }
 
@@ -112,6 +119,17 @@ void TestBitSet::union02() {
 	BitSet b2(BitSet::empty(10));
 	b|=b2;
 	CPPUNIT_ASSERT(b==bitset1);
+}
+
+void TestBitSet::union03() {
+	BitSet b(1000);
+	for (int i=1; i<1000; i++) b.add(i);
+	BitSet b2(2);
+	b2.add(0);
+
+	BitSet b3 = b2 | b;
+	CPPUNIT_ASSERT(b3.capacity()>=1000);
+	CPPUNIT_ASSERT(b3.size()==1000);
 }
 
 void TestBitSet::next() {

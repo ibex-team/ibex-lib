@@ -11,10 +11,6 @@
 
 #include "ibex.h"
 
-#ifndef _IBEX_WITH_SOLVER_
-#error "You need to install the IbexSolve plugin (--with-solver)."
-#endif
-
 #ifndef IBEX_BENCHS_DIR
 #define IBEX_BENCHS_DIR "../plugins/solver/benchs"
 #endif

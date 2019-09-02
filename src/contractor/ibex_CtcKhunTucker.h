@@ -5,6 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 19, 2017
+// Created     : Jul 11, 2019
 //============================================================================
 
 #ifndef __IBEX_CTC_KHUN_TUCKER_H__
@@ -12,6 +13,7 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_NormalizedSystem.h"
+#include "ibex_FncKhunTucker.h"
 
 namespace ibex {
 
@@ -26,7 +28,13 @@ public:
 	/**
 	 * \brief Build the contractor for a given NLP problem.
 	 *
+	 * The contractor takes a normalized system in argument but expects
+	 * an "extended" box in the "contract" function (in order to be uniform with
+	 * all other contractors in optimization).
+	 *
 	 * \warning: building this object is **costly** in both time and memory!
+	 *           (symbolic derivation of all constraints, because Ibex does not
+	 *           have automatic hessian computation).
 	 *           Don't build this contractor on-the-fly.
 	 *
 	 * \warning: sys.box should be properly set before calling this constructor.
@@ -42,7 +50,11 @@ public:
 	CtcKhunTucker(const NormalizedSystem& sys, bool reject_unbounded=true);
 
 	/**
-	 * \see #Ctc
+	 * \see Contract function (see #Ctc).
+	 *
+	 * \param box: an "extended" box (in order to be uniform with
+	 *             all other contractors in optimization).
+	 *
 	 */
 	virtual void contract(IntervalVector& box);
 

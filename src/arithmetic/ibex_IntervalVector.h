@@ -20,6 +20,7 @@
 #include "ibex_Vector.h"
 #include "ibex_Matrix.h"
 #include "ibex_Array.h"
+#include "ibex_BitSet.h"
 
 namespace ibex {
 
@@ -130,6 +131,11 @@ public:
 	 * i^th component (i starts from 0)
 	 */
 	Interval& operator[](int i);
+
+	/**
+	 * \brief Return some specific components
+	 */
+	IntervalVector operator[](const BitSet& components) const;
 
 	/**
 	 * \brief Set this IntervalVector to the empty IntervalVector
@@ -842,6 +848,14 @@ inline const Interval& IntervalVector::operator[](int i) const {
 inline Interval& IntervalVector::operator[](int i) {
 	assert(i>=0 && i<n);
 	return vec[i];
+}
+
+inline IntervalVector IntervalVector::operator[](const BitSet& components) const {
+	IntervalVector res(components.size());
+	int j=0;
+	for (BitSet::const_iterator i=components.begin(); i!=components.end(); ++i)
+		res[j++]=(*this)[i];
+	return res;
 }
 
 inline void IntervalVector::clear() {

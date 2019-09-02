@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Eval Tests
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Apr 02, 2012
+ * Last update : Jul 10, 2019
  * ---------------------------------------------------------------------------- */
 
 #include "TestEval.h"
@@ -270,4 +271,35 @@ void TestEval::eval_components02() {
 	CPPUNIT_ASSERT(res[3]==19);
 }
 
+void TestEval::matrix_components() {
+	const ExprSymbol& x = ExprSymbol::new_();
+	Function f(x,Return(
+			Return(x  ,x+1,x+2,ExprVector::ROW),
+			Return(x+3,x+4,x+5,ExprVector::ROW),
+			Return(x+6,x+7,x+8,ExprVector::ROW),
+			ExprVector::COL));
+
+	double _M1[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+
+	CPPUNIT_ASSERT(f.eval_matrix(IntervalVector(1,Interval::ZERO)) == Matrix(3,3,_M1));
+
+	ExprSubNodes nodes(f.expr());
+
+	const ExprVector& vec = (const ExprVector&) f.expr();
+	int rank_row_1=nodes.rank(vec.arg(1));
+	double _row1[] = { 3, 4, 5 };
+	Vector row1(3,_row1);
+	CPPUNIT_ASSERT(f.basic_evaluator().d[rank_row_1].v()==row1);
+
+	// perform another evaluation
+	double _M2[] = { 9, 10, 11, 15, 16, 17 };
+	BitSet bitset(3);
+	bitset.add(0);
+	bitset.add(2);
+	CPPUNIT_ASSERT(f.eval_matrix(IntervalVector(1,Interval(9,9)),bitset) == Matrix(2,3,_M2));
+
+	// check that the 1st row in the evaluator hasn't changed
+	CPPUNIT_ASSERT(f.basic_evaluator().d[rank_row_1].v()==row1);
 }
+
+} // end namespace

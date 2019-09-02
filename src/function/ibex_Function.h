@@ -664,7 +664,21 @@ public:
 	 *
 	 * \pre f must be matrix-valued.
 	 */
-	virtual IntervalMatrix eval_matrix(const IntervalVector& x) const;
+	IntervalMatrix eval_matrix(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate some rows of f(x) using interval arithmetic.
+	 *
+	 * \pre f must be matrix-valued.
+	 */
+	IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows) const;
+
+	/**
+	 * \brief Calculate a submatrix of f(x) using interval arithmetic.
+	 *
+	 * \pre f must be matrix-valued.
+	 */
+	virtual IntervalMatrix eval_matrix(const IntervalVector& x, const BitSet& rows, const BitSet& cols) const;
 
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.
@@ -1009,38 +1023,29 @@ inline Interval Function::eval(const IntervalVector& box) const {
 }
 
 inline Interval Function::eval(int i, const IntervalVector& box) const {
-	return Fnc::eval(i, box);
+	return ((Function*) this)->_eval->eval(box,BitSet::singleton(_image_dim.size(),i)).i();
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
-	return Fnc::eval_vector(box);
+	// --> commented to avoid treating each component separately
+	// (note that in this case, the root node of the expression is not evaluated)
+	//return eval_vector(box, BitSet::all(image_dim()));
+	// --------------------------------------------------
+	assert(!_image_dim.is_matrix());
+	return _image_dim.is_scalar() ?
+			IntervalVector(1,eval(box)) :
+			((Function*) this)->_eval->eval(box).v();
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box, const BitSet& components) const {
-	return ((Function*) this)->_eval->eval(box,components);
+	assert(!_image_dim.is_matrix());
+	return _image_dim.is_scalar() ?
+			IntervalVector(1,eval(box)) :
+			components.size()==1 ?
+					IntervalVector(1,((Function*) this)->_eval->eval(box,components).i())
+					:
+					((Function*) this)->_eval->eval(box,components).v();
 }
-
-inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
-	switch (expr().dim.type()) {
-	case Dim::SCALAR     :
-		return IntervalMatrix(1,1,eval_domain(box).i());
-	case Dim::ROW_VECTOR : {
-		IntervalMatrix M(image_dim(),1);
-		M.set_row(0,eval_domain(box).v());
-		return M;
-	}
-	case Dim::COL_VECTOR : {
-		IntervalMatrix M(1,image_dim());
-		M.set_col(0,eval_domain(box).v());
-		return M;
-	}
-	case Dim::MATRIX: return eval_domain(box).m();
-	default : {
-		throw std::logic_error("should not reach");
-	}
-	}
-}
-
 
 template<class V>
 inline void Function::backward(const V& algo) const {

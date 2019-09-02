@@ -32,9 +32,6 @@ def configure (conf):
 	if not conf.env.ENABLE_SHARED:
 		conf.fatal ("To install the Java plugin, you must set the option --enable-shared")
 
-	if not conf.options.WITH_SOLVER:
-		conf.fatal ("The Java plugin requires IbexSolve (--with-solver)")
-
 	# Load java tools, detect binaries and jni headers
 	conf.load ("waf_java_utils")
 

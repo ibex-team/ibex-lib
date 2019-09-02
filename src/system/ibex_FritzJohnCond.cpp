@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 31, 2013
-// Last Update : May 31, 2013
+// Last Update : Jul 31, 2019
 //============================================================================
 
 #include "ibex_FritzJohnCond.h"
@@ -17,6 +17,8 @@ namespace ibex {
 
 #define LB 0
 #define UB 1
+
+using namespace std;
 
 namespace {
 
@@ -72,7 +74,7 @@ public:
 	int R; // number of equalities
 	int K; // number of bound constraints
 
-	FritzJohnFactory(const System& sys) {
+	FritzJohnFactory(const System& sys, bool copy_ineq) {
 
 		n=sys.nb_var;
 		int N=sys.args.size(); // warning N<>n (maybe)
@@ -161,8 +163,15 @@ public:
 		if (R>0) vars.set_ref(i++,*mu);
 		if (K>0) vars.set_ref(i++,*bmult);
 
-		add_var(vars);
+		IntervalVector newbox(n+M+R+K+1);
+		newbox.put(0,sys.box);
+		newbox.put(n,IntervalVector(M+1,Interval(0,1)));
+		if (R>0) newbox.put(n+M+1,IntervalVector(R,Interval(-1,1)));
+		if (K>0) newbox.put(n+M+R+1,IntervalVector(K,Interval(0,1)));
+
+		add_var(vars,newbox);
 		// --------------------------------------------------------------------------
+		std::vector<const ExprNode*> to_clean;
 
 		// -------------  Normalization constraint ----------------------------------
 		const ExprNode* e=&u;
@@ -174,7 +183,9 @@ public:
 			e = &(*e + (*bmult)[k]);
 		const ExprNode& norm_expr=*e-1;
 		add_ctr(ExprCtr(norm_expr,EQ));
-		cleanup(norm_expr,false);
+
+		to_clean.push_back(&norm_expr);
+
 		// --------------------------------------------------------------------------
 
 
@@ -184,9 +195,6 @@ public:
 		const ExprNode* dg=NULL;
 		if (M>0 || R>0) dg=&ExprDiff(sys.f_ctrs.args(), vars).diff(sys.f_ctrs.expr(), sys.f_ctrs.args());
 
-		// to ease memory cleanup, we represent all
-		// constraints with a single multivalued function
-		std::vector<const ExprNode*> to_clean;
 		to_clean.push_back(&df);
 		to_clean.push_back(dg);
 
@@ -271,10 +279,15 @@ public:
 		for (int i=0; i<sys.nb_ctr; i++) {
 			const ExprNode* gi=&ExprCopy().copy(sys.ctrs[i].f.args(), vars, sys.ctrs[i].f.expr());
 
-			if (sys.ctrs[i].op!=EQ)
+			if (sys.ctrs[i].op!=EQ) {
+				if (copy_ineq)
+					add_ctr(ExprCtr(*gi,sys.ctrs[i].op));
+
 				gi = & ((*lambda)[m++]*(*gi));
+			}
 
 			add_ctr(ExprCtr(*gi,EQ));
+
 			// don't cleanup *gi!
 			to_clean.push_back(gi);
 		}
@@ -291,7 +304,9 @@ public:
 			else
 				bk = & ((*bmult)[k]*(xj-sys.box[j].ub()));
 
-			add_ctr(ExprCtr(bk->simplify(),EQ));
+			bk=&bk->simplify();
+
+			add_ctr(ExprCtr(*bk,EQ));
 
 			to_clean.push_back(bk);
 		}
@@ -311,9 +326,9 @@ public:
 	}
 };
 
-FritzJohnCond::FritzJohnCond(const System& sys) : n(0), M(0), R(0), K(0) /* TMP */ {
+FritzJohnCond::FritzJohnCond(const System& sys, bool copy_ineq) : n(0), M(0), R(0), K(0) /* TMP */ {
 
-	FritzJohnFactory fac(sys);
+	FritzJohnFactory fac(sys, copy_ineq);
 
 	init(fac);
 

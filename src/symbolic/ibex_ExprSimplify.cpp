@@ -5,6 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 19, 2016
+// Last update : Jul 18, 2019
 //============================================================================
 
 #include "ibex_ExprSimplify.h"
@@ -74,11 +75,6 @@ bool is_identity(const ExprNode& e) {
 
 const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 	ExprSubNodes old_nodes(e);
-	// the list of fathers has to be recalculated.
-	for (int i=0; i<old_nodes.size(); i++) {
-		((ExprNode&) old_nodes[i]).fathers.clear();
-		((ExprNode&) old_nodes[i]).fathers.resize(0);
-	}
 
 	idx = DoubleIndex::all(e.dim);
 	e.acceptVisitor(*this);
@@ -121,6 +117,28 @@ const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 			!new_nodes.found(*it->first) &&
 			!lock.found(*it->first)) {
 			delete it->first;
+		} else {
+			// the list of fathers has to be recalculated.
+			((ExprNode*) it->first)->fathers.clear();
+			((ExprNode*) it->first)->fathers.resize(0);
+		}
+	}
+
+	for (int i=0; i<new_nodes.size(); i++) {
+		if (dynamic_cast<const ExprNAryOp*>(&new_nodes[i])) {
+			const ExprNAryOp& nary=(const ExprNAryOp&) new_nodes[i];
+			for (int j=0; j<nary.nb_args; j++)
+				((ExprNode&) nary.args[j]).fathers.add(nary);
+		} else if (dynamic_cast<const ExprBinaryOp*>(&new_nodes[i])) {
+			const ExprBinaryOp& b=(const ExprBinaryOp&) new_nodes[i];
+			((ExprNode&) b.left).fathers.add(b);
+			((ExprNode&) b.right).fathers.add(b);
+		} else if (dynamic_cast<const ExprUnaryOp*>(&new_nodes[i])) {
+			const ExprUnaryOp& u=(const ExprUnaryOp&) new_nodes[i];
+			((ExprNode&) u.expr).fathers.add(u);
+		} else if (dynamic_cast<const ExprIndex*>(&new_nodes[i])) {
+			const ExprIndex& index=(const ExprIndex&) new_nodes[i];
+			((ExprNode&) index.expr).fathers.add(index);
 		}
 	}
 
@@ -210,8 +228,6 @@ void ExprSimplify::visit(const ExprVector& e) {
 			arg_cst.set_ref(i, to_cst(*res[i]));
 		insert(e, ExprConstant::new_(Domain(arg_cst, e.row_vector())));
 	} else if (((int) res.size())==e.nb_args && all_same) {
-		for (int i=0; i<e.nb_args; i++)
-			((Array<const ExprNode>&) e.arg(i).fathers).add(e);
 		insert(e, e);
 	} else
 		insert(e, ExprVector::new_(res,e.orient));
@@ -226,8 +242,6 @@ void ExprSimplify::visit(const ExprIndex& e) {
 
 	const ExprNode& expr=get(e.expr,e_idx);
 
-	if (&expr==&e.expr)
-		((Array<const ExprNode>&) expr.fathers).add(e);
 	insert(e, expr);
 }
 
@@ -332,8 +346,6 @@ void ExprSimplify::visit_add_sub(const ExprBinaryOp& e, bool sign) {
 	else {
 		// no constants at all ----> no simplification
 		if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
-			((Array<const ExprNode>&) e.left.fathers).add(e);
-			((Array<const ExprNode>&) e.right.fathers).add(e);
 			insert(e, e);
 		} else if (sign)
 			insert(e, l+r);
@@ -450,8 +462,6 @@ void ExprSimplify::visit(const ExprMul& e) {
 			// note: l and left(r) and right(r) may not be scalar.
 			insert(e, ExprConstant::new_(to_cst(l)*to_cst(left(r)))*(right(r)));
 		else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
-			((Array<const ExprNode>&) e.left.fathers).add(e);
-			((Array<const ExprNode>&) e.right.fathers).add(e);
 			insert(e, e);
 		} else
 			insert(e, l*r);
@@ -475,8 +485,6 @@ void ExprSimplify::visit(const ExprMul& e) {
 		else if (is_mul(r) && is_cst(left(r)) && left(r).dim.is_scalar())
 			insert(e, left(r)*(l*right(r)));
 		else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
-			((Array<const ExprNode>&) e.left.fathers).add(e);
-			((Array<const ExprNode>&) e.right.fathers).add(e);
 			insert(e, e);
 		} else
 			insert(e, l*r);
@@ -495,8 +503,6 @@ void ExprSimplify::visit(const ExprDiv& e) {
 	else if (is_cst(l) && is_cst(r))
 		insert(e, ExprConstant::new_(to_cst(l)/to_cst(r)));
 	else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
-		((Array<const ExprNode>&) e.left.fathers).add(e);
-		((Array<const ExprNode>&) e.right.fathers).add(e);
 		insert(e, e);
 	} else
 		insert(e, l/r);
@@ -511,36 +517,58 @@ void ExprSimplify::visit(const ExprDiv& e) {
 //}
 
 
-typedef Domain (*dom_func2)(const Domain&, const Domain&);
-template<class N>
-void ExprSimplify::binary(const N& e, dom_func2 fcst) {
+void ExprSimplify::binary(const ExprBinaryOp& e,
+		//Domain (*fcst)(const Domain&, const Domain&), //
+		std::function<Domain(const Domain&, const Domain&)> fcst,
+		std::function<const ExprNode&(const ExprNode&, const ExprNode&)> fctr,
+		bool index_distributive) {
 
-	const ExprNode& l=get(e.left, idx);
-	const ExprNode& r=get(e.right, idx);
+	if (index_distributive) {
+		const ExprNode& l=get(e.left, idx);
+		const ExprNode& r=get(e.right, idx);
 
-	if (is_cst(l) && is_cst(r))
-		insert(e, ExprConstant::new_(fcst(to_cst(l),to_cst(r))));
-	else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
-		((Array<const ExprNode>&) e.left.fathers).add(e);
-		((Array<const ExprNode>&) e.right.fathers).add(e);
-		insert(e, e);
-	} else
-		insert(e, N::new_(l,r));
+		if (is_cst(l) && is_cst(r))
+			insert(e, ExprConstant::new_(fcst(to_cst(l),to_cst(r))));
+		else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
+			insert(e, e);
+		} else
+			insert(e, fctr(l,r));
+	} else {
+		if (is_cst(e.left) && is_cst(e.right))
+			insert(e, ExprConstant::new_(fcst(to_cst(e.left),to_cst(e.right))[idx]));
+		else {
+			if (idx.all())
+				insert(e, e);
+			else
+				insert(e, e[idx]);
+		}
+	}
 }
 
-template<class N>
-void ExprSimplify::unary(const N& e, Domain (*fcst)(const Domain&)) {
+void ExprSimplify::unary(const ExprUnaryOp& e,
+		std::function<Domain(const Domain&)> fcst,
+		std::function<const ExprNode&(const ExprNode&)> fctr, bool index_distributive) {
+	if (index_distributive) {
+		const ExprNode& expr=get(e.expr, idx);
 
-	const ExprNode& expr=get(e.expr, idx);
-
-	if (is_cst(expr))
-		/* evaluate the constant expression on-the-fly */
-		insert(e, ExprConstant::new_(fcst(to_cst(expr))));
-	else if (&e.expr == &expr) { // if nothing changed
-		((Array<const ExprNode>&) e.expr.fathers).add(e);
-		insert(e, e);
-	} else
-		insert(e, N::new_(expr));
+		if (is_cst(expr))
+			/* evaluate the constant expression on-the-fly */
+			insert(e, ExprConstant::new_(fcst(to_cst(expr))));
+		else if (&e.expr == &expr) { // if nothing changed
+			insert(e, e);
+		} else
+			insert(e, fctr(expr));
+	} else {
+		if (is_cst(e.expr))
+			/* evaluate the constant expression on-the-fly */
+			insert(e, ExprConstant::new_(fcst(to_cst(e.expr))[idx]));
+		else {
+			if (idx.all()) // if nothing changed
+				insert(e, e);
+			else
+				insert(e, e[idx]);
+		}
+	}
 }
 
 // Implemented by Soonho
@@ -561,9 +589,6 @@ void ExprSimplify::visit(const ExprChi& e) {
 			return;
 		}
 	} else {
-		((Array<const ExprNode>&) e.args[0].fathers).add(e);
-		((Array<const ExprNode>&) e.args[1].fathers).add(e);
-		((Array<const ExprNode>&) e.args[2].fathers).add(e);
 		insert(e, e);
 	}
 }
@@ -573,52 +598,32 @@ void ExprSimplify::visit(const ExprApply& e) {
 }
 
 void ExprSimplify::visit(const ExprPower& e) {
-
-	const ExprNode& expr=get(e.expr, idx);
-
-	if (is_cst(expr))
-		/* evaluate the constant expression on-the-fly */
-		insert(e, ExprConstant::new_(pow(to_cst(expr),e.expon)));
-	else if (&e.expr == &expr) { // if nothing changed
-		((Array<const ExprNode>&) e.expr.fathers).add(e);
-		insert(e, e);
-	}
-	else
-		insert(e, ExprPower::new_(expr,e.expon));
+	unary(  e,
+			[&e](const Domain& d)->Domain            { return pow(d,e.expon); },
+			[&e](const ExprNode& x)->const ExprNode& { return ExprPower::new_(x,e.expon); },
+			false
+	);
 }
 
 void ExprSimplify::visit(const ExprGenericBinaryOp& e) {
-
-	const ExprNode& l=get(e.left, idx);
-	const ExprNode& r=get(e.right, idx);
-
-	if (is_cst(l) && is_cst(r))
-		insert(e, ExprConstant::new_(e.eval(to_cst(l),to_cst(r))));
-	else if ((&l == &e.left) && (&r == &e.right)) { // nothing changed
-		((Array<const ExprNode>&) e.left.fathers).add(e);
-		((Array<const ExprNode>&) e.right.fathers).add(e);
-		insert(e, e);
-	} else
-		insert(e, ExprGenericBinaryOp::new_(e.name,l,r));
+	binary( e,
+			e.eval,
+			[&e](const ExprNode& x,const ExprNode& y)->const ExprNode& { return ExprGenericBinaryOp::new_(e.name,x,y);},
+			false);
 }
 
-void ExprSimplify::visit(const ExprGenericUnaryOp& e) {
-	const ExprNode& expr=get(e.expr, idx);
+// Note: I don't understand why I have to do these casts.
+// The compiler should directly convert arguments to
+//      std::function<Domain(const Domain&)>
+// or
+//      std::function<Domain(const Domain&, const Domain&)>
+typedef Domain (*_domain_una_op)(const Domain&);
+typedef Domain (*_domain_bin_op)(const Domain&,const Domain&);
 
-	if (is_cst(expr)) {
-		/* evaluate the constant expression on-the-fly */
-		insert(e, ExprConstant::new_(e.eval(to_cst(expr))));
-	} else if (&e.expr == &expr) { // if nothing changed
-		((Array<const ExprNode>&) e.expr.fathers).add(e);
-		insert(e, e);
-	} else
-		insert(e, ExprGenericUnaryOp::new_(e.name, expr));
-}
-
-void ExprSimplify::visit(const ExprMax& e)   { binary(e,max); }
-void ExprSimplify::visit(const ExprMin& e)   { binary(e,min); }
-void ExprSimplify::visit(const ExprAtan2& e) { binary(e,atan2); }
-void ExprSimplify::visit(const ExprMinus& e) { unary(e,operator-); }
+void ExprSimplify::visit(const ExprMax& e)   { binary(e, (_domain_bin_op) max,      ExprMax::new_,true); }
+void ExprSimplify::visit(const ExprMin& e)   { binary(e, (_domain_bin_op) min,      ExprMin::new_,true); }
+void ExprSimplify::visit(const ExprAtan2& e) { binary(e, (_domain_bin_op) atan2,    ExprAtan2::new_,false); }
+void ExprSimplify::visit(const ExprMinus& e) { unary(e,  (_domain_una_op) operator-,ExprMinus::new_,true); }
 
 void ExprSimplify::visit(const ExprTrans& e) {
 	const ExprNode& expr=get(e.expr, idx.transpose());
@@ -629,29 +634,34 @@ void ExprSimplify::visit(const ExprTrans& e) {
 	else if (expr.dim.is_scalar())
 		insert(e,expr);
 	else if (&e.expr == &expr) { // if nothing changed
-		((Array<const ExprNode>&) e.expr.fathers).add(e);
 		insert(e, e);
 	} else
 		insert(e, ExprTrans::new_(expr));
 }
 
-void ExprSimplify::visit(const ExprSign& e)  { unary(e,sign); }
-void ExprSimplify::visit(const ExprAbs& e)   { unary(e,abs); }
-void ExprSimplify::visit(const ExprSqr& e)   { unary(e,sqr); }
-void ExprSimplify::visit(const ExprSqrt& e)  { unary(e,sqrt); }
-void ExprSimplify::visit(const ExprExp& e)   { unary(e,exp); }
-void ExprSimplify::visit(const ExprLog& e)   { unary(e,log); }
-void ExprSimplify::visit(const ExprCos& e)   { unary(e,cos); }
-void ExprSimplify::visit(const ExprSin& e)   { unary(e,sin); }
-void ExprSimplify::visit(const ExprTan& e)   { unary(e,tan); }
-void ExprSimplify::visit(const ExprCosh& e)  { unary(e,cosh); }
-void ExprSimplify::visit(const ExprSinh& e)  { unary(e,sinh); }
-void ExprSimplify::visit(const ExprTanh& e)  { unary(e,tanh); }
-void ExprSimplify::visit(const ExprAcos& e)  { unary(e,acos); }
-void ExprSimplify::visit(const ExprAsin& e)  { unary(e,asin); }
-void ExprSimplify::visit(const ExprAtan& e)  { unary(e,atan); }
-void ExprSimplify::visit(const ExprAcosh& e) { unary(e,acosh); }
-void ExprSimplify::visit(const ExprAsinh& e) { unary(e,asinh); }
-void ExprSimplify::visit(const ExprAtanh& e) { unary(e,atanh); }
+void ExprSimplify::visit(const ExprGenericUnaryOp& e) {
+	unary(e, e.eval,
+			[&e](const ExprNode& x)->const ExprNode& { return ExprGenericUnaryOp::new_(e.name,x);},
+			false);
+}
+
+void ExprSimplify::visit(const ExprSign& e)  { unary(e, (_domain_una_op) sign, ExprSign::new_, true); }
+void ExprSimplify::visit(const ExprAbs& e)   { unary(e, (_domain_una_op) abs,  ExprAbs::new_,  true); }
+void ExprSimplify::visit(const ExprSqr& e)   { unary(e, (_domain_una_op) sqr,  ExprSqr::new_,  false); }
+void ExprSimplify::visit(const ExprSqrt& e)  { unary(e, (_domain_una_op) sqrt, ExprSqrt::new_, false); }
+void ExprSimplify::visit(const ExprExp& e)   { unary(e, (_domain_una_op) exp,  ExprExp::new_,  false); }
+void ExprSimplify::visit(const ExprLog& e)   { unary(e, (_domain_una_op) log,  ExprLog::new_,  false); }
+void ExprSimplify::visit(const ExprCos& e)   { unary(e, (_domain_una_op) cos,  ExprCos::new_,  false); }
+void ExprSimplify::visit(const ExprSin& e)   { unary(e, (_domain_una_op) sin,  ExprSin::new_,  false); }
+void ExprSimplify::visit(const ExprTan& e)   { unary(e, (_domain_una_op) tan,  ExprTan::new_,  false); }
+void ExprSimplify::visit(const ExprCosh& e)  { unary(e, (_domain_una_op) cosh, ExprCosh::new_, false); }
+void ExprSimplify::visit(const ExprSinh& e)  { unary(e, (_domain_una_op) sinh, ExprSinh::new_, false); }
+void ExprSimplify::visit(const ExprTanh& e)  { unary(e, (_domain_una_op) tanh, ExprTanh::new_, false); }
+void ExprSimplify::visit(const ExprAcos& e)  { unary(e, (_domain_una_op) acos, ExprAcos::new_, false); }
+void ExprSimplify::visit(const ExprAsin& e)  { unary(e, (_domain_una_op) asin, ExprAsin::new_, false); }
+void ExprSimplify::visit(const ExprAtan& e)  { unary(e, (_domain_una_op) atan, ExprAtan::new_, false); }
+void ExprSimplify::visit(const ExprAcosh& e) { unary(e, (_domain_una_op) acosh,ExprAcosh::new_,false); }
+void ExprSimplify::visit(const ExprAsinh& e) { unary(e, (_domain_una_op) asinh,ExprAsinh::new_,false); }
+void ExprSimplify::visit(const ExprAtanh& e) { unary(e, (_domain_una_op) atanh,ExprAtanh::new_,false); }
 
 } /* namespace ibex */

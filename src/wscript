@@ -28,6 +28,9 @@ def configure (conf):
 	ibex_hdr =[ f.path_from (conf.path) for f in ibex_hdr ]
 	conf.env.append_unique ('IBEX_HDR', ibex_hdr)
 
+	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
+	conf.check_cxx (cxxflags="-U__STRICT_ANSI__", uselib_store="IBEX")
+
 def build (bld):
 	# Do substitution in files ending with .in
 	for f in bld.env.IBEX_SRC + bld.env.IBEX_HDR:
@@ -47,3 +50,11 @@ def build (bld):
 	# install headers
 	ibex_hdr = [ f[:-3] if f.endswith(".in") else f for f in bld.env.IBEX_HDR ]
 	bld.install_files (bld.env.INCDIR_HDR, ibex_hdr)
+
+  # build ibexsolve
+	bld.program (
+		target = "ibexsolve",
+		use = [ "ibex" ],
+		source = bld.path.ant_glob ("bin/ibexsolve.cpp"),
+		install_path = bld.env.BINDIR,
+		)

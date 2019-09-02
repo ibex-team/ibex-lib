@@ -27,8 +27,11 @@ public:
 	/**
 	 * \brief Build the function.
 	 *
+	 * \param df - (optional) the differential of fnc. If this argument is
+	 *             provided, the derivative of this function will be calculated
+	 *             through df instead of fnc.
 	 */
-	FncProj(const Fnc& fnc, const BitSet& components);
+	FncProj(const Fnc& fnc, const BitSet& components, const Fnc* df=NULL);
 
 	/**
 	 * \brief Evaluation of the function.
@@ -54,6 +57,11 @@ public:
 	 * \brief The components
 	 */
 	const BitSet components;
+
+	/**
+	 * \brief The differential (NULL if not supplied)
+	 */
+	const Fnc* df;
 
 };
 

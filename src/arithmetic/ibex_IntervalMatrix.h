@@ -179,6 +179,11 @@ public:
 	const IntervalVector& operator[](int i) const;
 
 	/**
+	 * \brief Return some specific rows
+	 */
+	IntervalMatrix operator[](const BitSet& rows) const;
+
+	/**
 	 * \brief Set this IntervalMatrix to the empty IntervalMatrix
 	 *
 	 * The dimensions remain the same.
@@ -692,6 +697,14 @@ inline IntervalVector& IntervalMatrix::operator[](int i) {
 inline const IntervalVector& IntervalMatrix::operator[](int i) const {
 	assert(i>=0 && i<nb_rows());
 	return M[i];
+}
+
+inline IntervalMatrix IntervalMatrix::operator[](const BitSet& rows) const {
+	IntervalMatrix res(rows.size(),nb_cols());
+	int j=0;
+	for (BitSet::const_iterator i=rows.begin(); i!=rows.end(); ++i)
+		res[j++]=(*this)[i];
+	return res;
 }
 
 inline void IntervalMatrix::clear() {

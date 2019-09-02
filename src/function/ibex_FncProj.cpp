@@ -15,7 +15,7 @@ using namespace std;
 
 namespace ibex {
 
-FncProj::FncProj(const Fnc& fnc, const BitSet& components) : Fnc(fnc.nb_var(), components.size()), fnc(fnc), components(components) {
+FncProj::FncProj(const Fnc& fnc, const BitSet& components, const Fnc* df) : Fnc(fnc.nb_var(), components.size()), fnc(fnc), components(components), df(df) {
 
 }
 
@@ -29,7 +29,14 @@ IntervalVector FncProj::eval_vector(const IntervalVector& x, const BitSet& compo
 }
 
 void FncProj::jacobian(const IntervalVector& x, IntervalMatrix& J, const BitSet& components2, int v) const {
-	fnc.jacobian(x, J, components.compose(components2),v);
+	BitSet bitset=components.compose(components2);
+	if (df)
+		if (v==-1)
+			J=df->eval_matrix(x, bitset);
+		else
+			J.set_col(v,df->eval_matrix(x, bitset, BitSet::singleton(_image_dim.nb_cols(),v)).row(0));
+	else
+		fnc.jacobian(x, J, bitset, v);
 }
 
 } /* namespace ibex */

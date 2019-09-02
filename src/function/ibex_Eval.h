@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Function basic evaluation
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Jan 14, 2012
+ * Last update : Jul 10, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef __IBEX_EVAL_H__
@@ -60,9 +61,18 @@ public:
 	 * (Specific for vector-valued functions).
 	 *
 	 * \pre components must be non empty and contain indices in
-	 *      [0,f.image_dim()-1].
+	 *      [0,f.image_dim()-1] in case of a vector-valued function
+	 *      [0,f.expr().dim.nb_rows()] in case of a matrix-valued function.
 	 */
-	IntervalVector eval(const IntervalVector& box, const BitSet& components);
+	Domain eval(const IntervalVector& box, const BitSet& components);
+
+	/**
+	 * \brief Evaluate a submatrix.
+	 *
+	 * (Specific for matrix_valued functions).
+	 *
+	 */
+	Domain eval(const IntervalVector& box, const BitSet& rows, const BitSet& cols);
 
 protected:
 	/**
@@ -127,8 +137,10 @@ public: // because called from CompiledFunction
 
 	Function& f;
 	ExprDomain d;
-	Agenda** fwd_agenda; // one agenda for each component
-	Agenda** bwd_agenda; // one agenda for each component
+	Agenda** fwd_agenda;         // one agenda for each vector component/matrix row
+	Agenda** bwd_agenda;         // one agenda for each vector component/matrix row
+	Agenda*** matrix_fwd_agenda; // one agenda for each matrix element
+	Agenda*** matrix_bwd_agenda; // one agenda for each matrix element
 };
 
 /* ============================================================================

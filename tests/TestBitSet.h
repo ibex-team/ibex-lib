@@ -7,7 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Dec 07, 2011
- * Last Update : Aug 19, 2014
+ * Last Update : Jul 10, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_BITSET_H__
@@ -32,6 +32,7 @@ public:
 	CPPUNIT_TEST(resize);
 	CPPUNIT_TEST(union01);
 	CPPUNIT_TEST(union02);
+	CPPUNIT_TEST(union03); // check union resizes if necessary
 	CPPUNIT_TEST(next);
 	CPPUNIT_TEST(clear);
 	CPPUNIT_TEST(remove);
@@ -53,6 +54,7 @@ private:
 	void inter01();
 	void union01();
 	void union02();
+	void union03();
 	void next();
 	void clear();
 	void remove();

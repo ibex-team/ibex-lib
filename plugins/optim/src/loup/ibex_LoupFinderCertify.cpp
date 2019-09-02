@@ -8,7 +8,7 @@
 //============================================================================
 
 #include "ibex_PdcHansenFeasibility.h"
-#include "ibex_FncActivation.h"
+#include "ibex_FncActiveCtrs.h"
 #include "ibex_LoupFinderCertify.h"
 #include "ibex_NormalizedSystem.h"
 
@@ -31,69 +31,83 @@ LoupFinderCertify::LoupFinderCertify(const System& sys, LoupFinder& finder) : sy
 //pair<IntervalVector, double> LoupCorrection::find(double loup, const Vector& loup_point, double pseudo_loup) {
 std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
 
-	// may throw NotFound
-	pair<IntervalVector,double> p=finder.find(box,loup_point,loup);
+	IntervalVector epsbox(box.size());
+	bool pseudo_loup_found=true;
+	pair<IntervalVector,double> p;
 
-	if (!has_equality)
-		return p;
-
-	// TODO : how to fix detection threshold in a more adaptative way?
-	//        maybe, we should replace eps_h by something else!
-	FncActivation af(sys,p.first.lb(),NormalizedSystem::default_eps_h);
-
-	if (af.image_dim()==0) {
-		return p;
+	try {
+		p=finder.find(box,loup_point,loup);
+		epsbox = p.first;
+	} catch(NotFound&) {
+		pseudo_loup_found=false;
+		epsbox=box.mid();
 	}
 
-	IntervalVector epsbox(p.first);
+	if (pseudo_loup_found && !has_equality)
+		return p;
 
-	// ====================================================
-	// solution #1: we inflate the loup-point and
-	//              call Hansen test in contracting mode.
-	//	epsbox.inflate(NormalizedSystem::default_eps_h);
-	//	PdcHansenFeasibility pdc(af, false);
-	// ====================================================
+	try {
 
-	// ====================================================
-	// solution #2: we call Hansen test in inflating mode.
-	PdcHansenFeasibility pdc(af, true);
-	// ====================================================
 
-	// TODO: maybe we should check first if the epsbox is inner...
-	// otherwise the probability to get a feasible point is
-	// perhaps too small?
+		// TODO : how to fix detection threshold in a more adaptative way?
+		//        maybe, we should replace eps_h by something else!
+		FncActiveCtrs af(sys,epsbox.lb(),NormalizedSystem::default_eps_h,false);
 
-	// TODO: HansenFeasibility uses midpoint
-	//       but maybe we should use random
+		//cout << " #active: " << af.image_dim() << endl;
+		// ====================================================
+		// solution #1: we inflate the loup-point and
+		//              call Hansen test in contracting mode.
+		//	epsbox.inflate(NormalizedSystem::default_eps_h);
+		//	PdcHansenFeasibility pdc(af, false);
+		// ====================================================
 
-	if (pdc.test(epsbox)==YES) {
-		Interval resI = sys.goal->eval(pdc.solution());
-		if (!resI.is_empty()) {
-			double res=resI.ub();
-			if (res<loup) {
-				//note: don't call is_inner because it would check again all equalities (which is useless
-				// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
-				bool satisfy_inequalities=true;
-				for (int j=0; j<sys.f_ctrs.image_dim(); j++) {
-					if (!af.activated()[j])
-						if (((sys.ops[j]==LEQ || sys.ops[j]==LT)
-							  && sys.f_ctrs.eval(j,pdc.solution()).ub()>0)
-								||
-							((sys.ops[j]==GEQ || sys.ops[j]==GT)
-							  && sys.f_ctrs.eval(j,pdc.solution()).lb()<0)) {
+		// ====================================================
+		// solution #2: we call Hansen test in inflating mode.
+		PdcHansenFeasibility pdc(af, true);
+		// ====================================================
 
-						/* TODO: && !entailed->original(j)*/
+		// TODO: maybe we should check first if the epsbox is inner...
+		// otherwise the probability to get a feasible point is
+		// perhaps too small?
 
-							satisfy_inequalities=false;
-							break;
-						}
-				}
-				if (satisfy_inequalities) {
-					return make_pair(pdc.solution(), res);
+		// TODO: HansenFeasibility uses midpoint
+		//       but maybe we should use random
+
+		if (pdc.test(epsbox)==YES) {
+			Interval resI = sys.goal->eval(pdc.solution());
+			if (!resI.is_empty()) {
+				double res=resI.ub();
+				if (res<loup) {
+					//note: don't call is_inner because it would check again all equalities (which is useless
+					// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
+					bool satisfy_inequalities=true;
+					for (int j=0; j<sys.f_ctrs.image_dim(); j++) {
+						if (!af.active_ctr[j])
+							if (((sys.ops[j]==LEQ || sys.ops[j]==LT)
+									&& sys.f_ctrs.eval(j,pdc.solution()).ub()>0)
+									||
+									((sys.ops[j]==GEQ || sys.ops[j]==GT)
+											&& sys.f_ctrs.eval(j,pdc.solution()).lb()<0)) {
+
+								/* TODO: && !entailed->original(j)*/
+
+								satisfy_inequalities=false;
+								break;
+							}
+					}
+					if (satisfy_inequalities) {
+						return make_pair(pdc.solution(), res);
+					}
 				}
 			}
 		}
+	} catch(FncActiveCtrs::NothingActive&) {
+		if (pseudo_loup_found)
+			return p;
+		else
+			throw NotFound();
 	}
+
 	//===========================================================
 	throw NotFound();
 }

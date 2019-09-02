@@ -32,7 +32,7 @@ void TestFritzJohn::test01() {
 
 	System sys(fac);
 
-	FritzJohnCond fj(sys);
+	FritzJohnCond fj(sys,false);
 
 	CtcHC4 hc4(fj.ctrs);
 	//double s=::sqrt(2)/2.0;

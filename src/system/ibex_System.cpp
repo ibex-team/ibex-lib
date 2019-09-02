@@ -103,7 +103,7 @@ System::System(int n, const char* syntax) : id(next_id()), nb_var(n), /* NOT TMP
 	UNLOCK;
 }
 
-System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), func(0), ops(NULL), box(1) {
+System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) {
 
 	switch(mode) {
 	case COPY :      init(SystemCopy(sys,COPY)); break;
@@ -232,8 +232,6 @@ void System::load(FILE* fd) {
 }
 
 System::~System() {
-	for (int i=0; i<func.size(); i++)
-		delete &func[i];
 
 	if (goal) delete goal;
 
@@ -252,13 +250,28 @@ System::~System() {
 
 namespace {
 
+/*
+ * Note:
+ *  A constraint g(x)<=0 is considered as potentially active
+ *  if [g]([x])<=0, to conform with the definition of activity
+ *  in the context of optimization.
+ *  Otherwise (that is, if the constraint was considered as inactive
+ *  in this case), the KKT contractor would be incorrect (losing
+ *  solutions).
+ *  An alternative would be to create two different concepts:
+ *  activity:      g(x)<=0 is inactive if [g]([x])<0
+ *  effectiveness: g(x)<=0 is ineffective if [g]([x])<=0 (for
+ *                 contractors like HC4).
+ *  However, the case where a constraint is not effective but
+ *  active almost never happens.
+ */
 bool __is_inactive(const Interval& gx, CmpOp op) {
 	bool inactive;
 	switch (op) {
 	case LT:  inactive=gx.ub()<0; break;
-	case LEQ: inactive=gx.ub()<=0; break;
+	case LEQ: inactive=gx.ub()<0; break;
 	case EQ:  inactive=(gx==Interval::zero()); break;
-	case GEQ: inactive=gx.lb()>=0; break;
+	case GEQ: inactive=gx.lb()>0; break;
 	case GT:  inactive=gx.lb()>0; break;
 	}
 	return inactive;

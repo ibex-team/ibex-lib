@@ -5,6 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 03, 2018
+// Last update : Jul 18, 2019
 //============================================================================
 
 #ifndef __IBEX_TRACE_H__
@@ -38,16 +39,22 @@ public:
 	/** Backward evaluation. */
 	static void bwd(const IntervalVector& y, IntervalMatrix& x) {
 		int n=x.nb_rows();
-		for (int i=0; i<n; i++)
+		for (int i=0; i<n; i++) {
 			x[i][i] &= y[i];
+			if (x[i][i].is_empty()) {
+				x.set_empty();
+				break;
+			}
+		}
 	}
 
 	/** Backward numerical derivative. */
 	static IntervalMatrix diff(const IntervalMatrix& x, const IntervalVector& g) {
 		int n=x.nb_rows();
 		IntervalMatrix M=Matrix::zeros(n);
-		for (int i=0; i<n; i++)
-			M[i][i] &= g[i];
+		for (int i=0; i<n; i++) {
+			M[i][i] = g[i];
+		}
 		return M;
 	}
 

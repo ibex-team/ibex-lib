@@ -121,7 +121,7 @@ public:
 } // end anonymous namespace
 
 
-System::System(const System& sys1, const System& sys2) : id(next_id()), nb_var(0), nb_ctr(0), func(0), ops(NULL), box(1) {
+System::System(const System& sys1, const System& sys2) : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) {
 	init(SystemMerge(sys1,sys2));
 }
 

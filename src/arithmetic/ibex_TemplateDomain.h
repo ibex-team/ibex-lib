@@ -61,16 +61,20 @@ public:
 	/**
 	 * \brief Creates a reference to an interval vector.
 	 *
+	 *  \pre v.size()>1
+	 *
 	 *  The internal domain will point to \a v.
 	 */
-	explicit TemplateDomain(typename D::VECTOR& v1, bool in_row);
+	explicit TemplateDomain(typename D::VECTOR& v, bool in_row);
 
 	/**
 	 * \brief Creates a reference to an interval matrix.
 	 *
+	 * \pre m.nb_rows()>1 and m.nb_cols()>1
+	 *
 	 *  The internal domain will point to \a m.
 	 */
-	explicit TemplateDomain(typename D::MATRIX& m1);
+	explicit TemplateDomain(typename D::MATRIX& m);
 
 	/**
 	 * \brief Creates a reference to an interval.
@@ -439,11 +443,13 @@ inline TemplateDomain<D>::TemplateDomain(typename D::SCALAR& itv) : dim(), is_re
 
 template<class D>
 inline TemplateDomain<D>::TemplateDomain(typename D::VECTOR& v1, bool in_row) : dim(in_row? Dim::row_vec(v1.size()) : Dim::col_vec(v1.size())), is_reference(true) {
+	assert(v1.size()>1);
 	domain = &v1;
 }
 
 template<class D>
 inline TemplateDomain<D>::TemplateDomain(typename D::MATRIX& m1) : dim(Dim::matrix(m1.nb_rows(),m1.nb_cols())), is_reference(true) {
+	assert(m1.nb_rows()>1 && m1.nb_cols()>1);
 	domain = &m1;
 }
 
@@ -611,35 +617,32 @@ TemplateDomain<D>& TemplateDomain<D>::operator&=(const TemplateDomain<D>& d) {
 }
 
 template<class D>
-void TemplateDomain<D>::put(int ii, int j, const TemplateDomain<D>& d) {
+void TemplateDomain<D>::put(int i, int j, const TemplateDomain<D>& d) {
 	switch(dim.type()) {
 	case Dim::SCALAR:
-		i()=d.i();
+		this->i()=d.i();
 		break;
 	case Dim::ROW_VECTOR:
 		if (d.dim.is_scalar()) v()[j]=d.i();
 		else v().put(j,d.v());
 		break;
 	case Dim::COL_VECTOR:
-		if (d.dim.is_scalar()) v()[ii]=d.i();
-		else v().put(ii,d.v());
+		if (d.dim.is_scalar()) v()[i]=d.i();
+		else v().put(i,d.v());
 		break;
 	case Dim::MATRIX:
 		switch(d.dim.type()) {
 		case Dim::SCALAR:
-			m()[ii][j]=d.i();
+			m()[i][j]=d.i();
 			break;
 		case Dim::ROW_VECTOR:
-			m()[ii].put(j,d.v());
+			m().put(i,j,d.v(),true);
 			break;
 		case Dim::COL_VECTOR:
-		{
-			IntervalMatrix tmp(d.dim.vec_size(),1);
-			m().put(ii,j,tmp);
+			m().put(i,j,d.v(),false);
 			break;
-		}
 		case Dim::MATRIX:
-			m().put(ii,j,d.m());
+			m().put(i,j,d.m());
 			break;
 		}
 	}

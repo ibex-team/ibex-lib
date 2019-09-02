@@ -40,7 +40,27 @@ void TestLinear::lu_partial_underctr() {
 }
 
 void TestLinear::lu_complete_underctr() {
-
+	int *pr=new int[5];
+	int *pc=new int[3];
+    double _A[]={ 1, 0, 0,
+		          0, 0, 0,
+		          0, 0, 0,
+		          0, 0, 1,
+		          0, 1, 0 };
+	IntervalMatrix A(Matrix(5,3,_A));
+	IntervalMatrix LU(5,3);
+	interval_LU(A,LU,pr,pc);
+	CPPUNIT_ASSERT(LU==A);
+	CPPUNIT_ASSERT(pr[0]==0);
+	CPPUNIT_ASSERT(pr[1]==3);
+	CPPUNIT_ASSERT(pr[2]==4);
+	CPPUNIT_ASSERT(pr[3]==1);
+	CPPUNIT_ASSERT(pr[4]==2);
+	CPPUNIT_ASSERT(pc[0]==0);
+	CPPUNIT_ASSERT(pc[1]==2);
+	CPPUNIT_ASSERT(pc[2]==1);
+	delete[] pr;
+	delete[] pc;
 }
 
 void TestLinear::gauss_seidel01() {

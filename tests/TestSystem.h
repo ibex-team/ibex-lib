@@ -27,22 +27,22 @@ class TestSystem : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestSystem);
-	
-		CPPUNIT_TEST(factory01);
-		CPPUNIT_TEST(factory02);
-		CPPUNIT_TEST(copy01);
-		CPPUNIT_TEST(copy02);
-		CPPUNIT_TEST(ineq_only01);
-		CPPUNIT_TEST(eq_only01);
-//		CPPUNIT_TEST(normalize01);
-//		CPPUNIT_TEST(normalize02);
-		CPPUNIT_TEST(extend01);
-		CPPUNIT_TEST(extend02);
-//		CPPUNIT_TEST(extend02);
-		CPPUNIT_TEST(merge01);
-		CPPUNIT_TEST(merge02);
-		CPPUNIT_TEST(merge03);
-		CPPUNIT_TEST(merge04);
+
+	CPPUNIT_TEST(factory01);
+	CPPUNIT_TEST(factory02);
+	CPPUNIT_TEST(copy01);
+	CPPUNIT_TEST(copy02);
+	CPPUNIT_TEST(ineq_only01);
+	CPPUNIT_TEST(eq_only01);
+	//		CPPUNIT_TEST(normalize01);
+	//		CPPUNIT_TEST(normalize02);
+	CPPUNIT_TEST(extend01);
+	CPPUNIT_TEST(extend02);
+	//		CPPUNIT_TEST(extend02);
+	CPPUNIT_TEST(merge01);
+	CPPUNIT_TEST(merge02);
+	CPPUNIT_TEST(merge03);
+	CPPUNIT_TEST(merge04);
 	CPPUNIT_TEST_SUITE_END();
 
 	void factory01();
