@@ -65,7 +65,12 @@ Optimizer::~Optimizer() {
 // the heap and the current box are contracted with y <= ymax
 double Optimizer::compute_ymax() {
 	if (anticipated_upper_bounding) {
-		double ymax = loup - rel_eps_f*fabs(loup);
+		//double ymax = loup - rel_eps_f*fabs(loup); ---> wrong :the relative precision must be correct for ymax (not loup)
+		double ymax = loup>0 ?
+				1/(1+rel_eps_f)*loup
+		:
+				1/(1-rel_eps_f)*loup;
+
 		if (loup - abs_eps_f < ymax)
 			ymax = loup - abs_eps_f;
 		return ymax;
