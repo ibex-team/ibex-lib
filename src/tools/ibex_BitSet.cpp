@@ -28,7 +28,7 @@ BitSet BitSet::compose(const BitSet& b) const {
 	assert(initialized() && b.initialized());
 	assert(b.bitset.empty() || b.bitset.max() < size());
 
-	BitSet b2(size());
+	BitSet b2(capacity());
 	int c;
 	for (int i=0; i<size(); i++) {
 		c = i==0? min() : next(c);
