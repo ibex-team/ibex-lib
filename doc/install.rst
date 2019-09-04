@@ -171,7 +171,7 @@ In particular, ``waf`` ``configure`` supports the following options:
 --with-solver           Enable IbexSolver (the plugin is installed by default)
 
 
---with-optim            Enable IbexOpt (the plugin is installed by default)					
+--with-optim            Enable IbexOpt				
 
 
 --lp-lib=soplex         Install Ibex with the LP solver Soplex. The plugin archive contains a version of soplex so it is 
@@ -182,7 +182,7 @@ In particular, ``waf`` ``configure`` supports the following options:
                         If you install your own version of Soplex, use the following argument::
                         
                           make ZLIB=false
-                        
+	                        
                         
                         and if Ibex is installed as a dynamic library (``--enable-shared``), Soplex must also be installed as a 
                         dynamic library. For this, add the option SHARED=true to the previous command::
@@ -194,7 +194,7 @@ In particular, ``waf`` ``configure`` supports the following options:
                         
                         .. 	Warning::
                         
-                            The current release of Ibex is not compatible with Soplex 2.0.
+                            The current release of Ibex is compatible with Soplex 3.1.1
 
 
 --soplex-path=PATH      Set the (absolute) path of Soplex to PATH (to be used with ``--lp-lib=soplex``). The plugin archive contains 

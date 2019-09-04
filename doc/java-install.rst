@@ -39,15 +39,11 @@ Uncompress the archive ibex-2.8.0.tar.gz in some Ibex folder::
 
 	~/Ibex/$ tar xvfz ibex-2.8.0.tar.gz
 
-Uncompress the archive ibex-java.tar.gz in the plugin folder::
-
-	~/Ibex/$ tar xvfz ibex-java.tar.gz --directory=ibex-2.8.0/plugins
-
 Set the environment variable ``JAVA_HOME``. Typical paths are ``/Library/Java/Home`` (MacOS) or ``/usr/lib/jvm/java-7-openjdk-i38`` (Linux). Example::
 
 	~/Ibex/$ export JAVA_HOME=/Library/Java/Home
 
-Under MinGW, the variable must be set in Liux-style (don't use backslash ("\\") as separator), e.g.::
+Under MinGW, the variable must be set in Linux-style (don't use backslash ("\\") as separator), e.g.::
 
 	~/Ibex/$ export JAVA_HOME=/c/Java/jdk1.7.1_17
 
