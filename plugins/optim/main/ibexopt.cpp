@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
 		bool inHC4=true;
 
 
-		if (!sys->f_ctrs.inhc4revise().implemented()) {
+		if (sys->nb_ctr>0 && !sys->f_ctrs.inhc4revise().implemented()) {
 			inHC4=false;
 		}
 
