@@ -19,6 +19,7 @@
 #endif
 
 #include "ibex_LinearizerXTaylor.h"
+#include "ibex_LinearizerParallelTaylor.h"
 
 namespace ibex {
 
@@ -39,7 +40,7 @@ public:
 	/**
 	 * TODO: add comment
 	 */
-	typedef enum { XNEWTON, TAYLOR, HANSEN, ART, AFFINE2, COMPO } linear_mode;
+	typedef enum { XNEWTON, TAYLOR, HANSEN, ART, AFFINE2, COMPO, PARALLEL, TAY_PAR, TAY_PAR_AFF} linear_mode;
 
 	/**
 	 * \brief Creates the combination
@@ -84,6 +85,8 @@ private:
 
 	/** XNewton  object to linearize	 */
 	LinearizerXTaylor *myxnewton;
+
+	LinearizerParallelTaylor *myp_taylor;
 
 #ifdef _IBEX_WITH_AFFINE_
 	/** ART object to linearize	 */

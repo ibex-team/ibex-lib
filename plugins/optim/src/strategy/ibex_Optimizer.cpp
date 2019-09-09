@@ -281,7 +281,6 @@ Optimizer::Status Optimizer::optimize(const char* cov_file, double obj_init_boun
 }
 
 void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
-
 	loup=obj_init_bound;
 
 	// Just to initialize the "loup" for the buffer
@@ -298,16 +297,12 @@ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 	Cell* root=new Cell(IntervalVector(n+1));
 
 	write_ext_box(init_box, root->box);
-
 	// add data required by the bisector
 	bsc.add_property(init_box, root->prop);
-
 	// add data required by the contractor
 	ctc.add_property(init_box, root->prop);
-
 	// add data required by the buffer
 	buffer.add_property(init_box, root->prop);
-
 	// add data required by the loup finder
 	loup_finder.add_property(init_box, root->prop);
 
@@ -318,7 +313,6 @@ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 
 	loup_point = init_box; //.set_empty();
 	time=0;
-
 	if (cov) delete cov;
 	cov = new CovOptimData(extended_COV? n+1 : n, extended_COV);
 	cov->data->_optim_time = 0;
@@ -607,6 +601,8 @@ void Optimizer::report() {
 	if (cov->nb_cells()!=nb_cells)
 		cout << " [total=" << cov->nb_cells() << "]";
 	cout << endl << endl;
+
+	cout << cov->time() << " " << cov->nb_cells() << " " << uplo << " " << loup << endl;
 }
 
 

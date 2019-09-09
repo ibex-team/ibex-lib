@@ -144,7 +144,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box, const BitSet& act
 			for (int i=0; i<active.size(); i++) {
 				c=(i==0? active.min() : active.next(c));
 
-				//cout << " add ctr n°" << c << endl;
+				//cout << " add ctr n��" << c << endl;
 
 				// only one corner for a linear constraint
 				if (k>0 && sys.f_ctrs.deriv_calculator().is_linear[c]) {

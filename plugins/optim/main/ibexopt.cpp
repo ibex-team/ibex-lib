@@ -13,6 +13,7 @@
 
 #include "ibex.h"
 #include "args.hxx"
+#include "ibex_LinearizerCombo.h"
 
 #include <sstream>
 
@@ -42,6 +43,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
 	args::ValueFlag<double> eps_x(parser, "float", _eps_x.str(), {"eps-x"});
 	args::ValueFlag<double> initial_loup(parser, "float", "Intial \"loup\" (a priori known upper bound).", {"initial-loup"});
+	args::ValueFlag<string> lin_method(parser, "string", "Linearization method (xn|aff|par|xn-aff|xn-par|xn-par-aff).", {"lm"});
 	args::ValueFlag<string> input_file(parser, "filename", "COV input file. The file contains "
 			"optimization data in the COV (binary) format.", {'i',"input"});
 	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
@@ -113,6 +115,7 @@ int main(int argc, char** argv) {
 		string output_cov_file; // cov output file
 		bool overwitten=false;  // is it overwritten?
 		string cov_copy;
+		LinearizerCombo::linear_mode lm=LinearizerCombo::XNEWTON;
 
 		if (!sys->goal) {
 			ibex_error(" input file has not goal (it is not an optimization problem).");
@@ -165,6 +168,20 @@ int main(int argc, char** argv) {
 			}
 		}
 
+		if(lin_method) {
+			if (!quiet) {
+				cout << "  Lineariztion Method:\t" << lin_method.Get().c_str() << "\n";
+			}
+			if(lin_method.Get()=="xn") lm=LinearizerCombo::XNEWTON;
+			else if(lin_method.Get()=="aff") lm=LinearizerCombo::AFFINE2;
+			else if(lin_method.Get()=="par") lm=LinearizerCombo::PARALLEL;
+			else if(lin_method.Get()=="xn-aff") lm=LinearizerCombo::COMPO;
+			else if(lin_method.Get()=="xn-par") lm=LinearizerCombo::TAY_PAR;
+			else if(lin_method.Get()=="xn-par-aff") lm=LinearizerCombo::TAY_PAR_AFF;
+			else cout << "  The lineariztion method:\t" << lin_method.Get().c_str() << "is not implemmented\n";
+
+		}
+
 		if (output_file) {
 			output_cov_file = output_file.Get();
 		} else {
@@ -212,7 +229,7 @@ int main(int argc, char** argv) {
 				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
 				rigor, inHC4,
 				random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed,
-				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x
+				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x, lm
 				);
 
 		// This option limits the search time
@@ -270,11 +287,12 @@ int main(int argc, char** argv) {
 
 		o.get_data().save(output_cov_file.c_str());
 
-		if (!quiet) {
+		if (false && !quiet) {
 			cout << " results written in " << output_cov_file << "\n";
 			if (overwitten)
 				cout << " (old file saved in " << cov_copy << ")\n";
 		}
+
 
 		delete sys;
 

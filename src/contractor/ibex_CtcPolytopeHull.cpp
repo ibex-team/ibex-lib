@@ -124,7 +124,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 		int i= ii/2;
 		if (nexti != -1) i=nexti;
-		//cout << "[polytope-hull]->[optimize] var n°"<< i << " infnexti=" << infnexti << " infbound=" << inf_bound[i] << " supbound=" << sup_bound[i] << endl;
+		//cout << "[polytope-hull]->[optimize] var n��"<< i << " infnexti=" << infnexti << " infbound=" << inf_bound[i] << " supbound=" << sup_bound[i] << endl;
 		//cout << "[polytope-hull]->[optimize] box before simplex: " << box << endl;
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{

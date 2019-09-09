@@ -15,7 +15,8 @@ namespace ibex {
 LinearizerCombo::LinearizerCombo(const System& sys, linear_mode lmode1) :
 			Linearizer(sys.nb_var),
 			lmode(lmode1),
-			myxnewton(NULL)
+			myxnewton(NULL),
+			myp_taylor(NULL)
 #ifdef _IBEX_WITH_AFFINE_
 			, myart(NULL)
 #endif
@@ -38,6 +39,18 @@ LinearizerCombo::LinearizerCombo(const System& sys, linear_mode lmode1) :
 		break;
 	}
 
+	case PARALLEL: {
+		myp_taylor = new LinearizerParallelTaylor(sys, LinearizerParallelTaylor::RELAX, LinearizerParallelTaylor::HANSEN);
+		break;
+	}
+
+	case TAY_PAR: {
+		// the default corner of XNewton linear relaxation
+		myxnewton = new LinearizerXTaylor(sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
+		myp_taylor = new LinearizerParallelTaylor(sys, LinearizerParallelTaylor::RELAX, LinearizerParallelTaylor::HANSEN);
+		break;
+	}
+
 #ifdef _IBEX_WITH_AFFINE_
 	case ART:
 	case AFFINE2: {
@@ -51,6 +64,17 @@ LinearizerCombo::LinearizerCombo(const System& sys, linear_mode lmode1) :
 		myxnewton = new LinearizerXTaylor(sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
 		break;
 	}
+
+
+	case TAY_PAR_AFF: {
+
+		myart = new LinearizerAffine2(sys);
+		myp_taylor = new LinearizerParallelTaylor(sys, LinearizerParallelTaylor::RELAX, LinearizerParallelTaylor::HANSEN);
+		// the default corner of XNewton linear relaxation
+		myxnewton = new LinearizerXTaylor(sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP, LinearizerXTaylor::HANSEN);
+		break;
+	}
+
 #else
 	case ART:
 		ibex_error("LinearRelaxCombo: ART mode requires \"--with-affine\" option");
@@ -68,6 +92,7 @@ LinearizerCombo::LinearizerCombo(const System& sys, linear_mode lmode1) :
 
 LinearizerCombo::~LinearizerCombo() {
 	if (myxnewton!=NULL) delete myxnewton;
+	if (myp_taylor)  delete myp_taylor;
 #ifdef _IBEX_WITH_AFFINE_
 	if (myart!=NULL) delete myart;
 #endif
@@ -75,6 +100,7 @@ LinearizerCombo::~LinearizerCombo() {
 
 void LinearizerCombo::add_property(const IntervalVector& init_box, BoxProperties& prop) {
 	if (myxnewton!=NULL) myxnewton->add_property(init_box,prop);
+	if (myp_taylor) myp_taylor->add_property(init_box,prop);
 #ifdef _IBEX_WITH_AFFINE_
 	if (myart!=NULL) myart->add_property(init_box,prop);
 #endif
@@ -88,12 +114,23 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver) {
 int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) {
 
 	int cont = 0;
-
+	int cont2 ;
 	switch (lmode) {
 	case XNEWTON:
 	case TAYLOR:
 	case HANSEN:
 		cont = myxnewton->linearize(box,lp_solver,prop);
+		break;
+
+	case PARALLEL:
+		cont = myp_taylor->linearize(box,lp_solver,prop);
+		break;
+
+	case TAY_PAR:
+		cont2 = myxnewton->linearize(box,lp_solver,prop);
+		if (cont2!=-1) cont+=cont2;
+		cont2 += myp_taylor->linearize(box,lp_solver,prop);
+		if (cont2!=-1) cont+=cont2;
 		break;
 
 #ifdef _IBEX_WITH_AFFINE_
@@ -102,13 +139,28 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver, B
 		cont = myart->linearize(box,lp_solver);
 		break;
 	case COMPO: {
-		cont = myxnewton->linearize(box,lp_solver,prop);
+		cont2 = myxnewton->linearize(box,lp_solver,prop);
+		if (cont2!=-1) cont+=cont2;
+		cont2 = myart->linearize(box,lp_solver);
+		if (cont2!=-1) cont+=cont2;
+		break;
+		/*
 		if (cont!=-1) {
 			int cont2 = myart->linearize(box,lp_solver);
 			if (cont2==-1) cont=-1;
 			else cont+=cont2;
-		}
+		}*/
 	}
+
+	case TAY_PAR_AFF:
+		int cont2 = myp_taylor->linearize(box,lp_solver,prop);
+		if (cont2!=-1) cont+=cont2;
+		cont2 = myxnewton->linearize(box,lp_solver,prop);
+		if (cont2!=-1) cont+=cont2;
+		cont2 = myart->linearize(box,lp_solver);
+		if (cont2!=-1) cont+=cont2;
+		break;
+
 #else
 	case ART:
 		ibex_error("LinearRelaxCombo: ART mode requires \"--with-affine\" option");

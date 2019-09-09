@@ -16,7 +16,7 @@ using namespace std;
 
 namespace ibex {
 
-CtcLinearRelax::CtcLinearRelax(const ExtendedSystem& sys) : CtcPolytopeHull(*new LinearizerCombo (sys,LinearizerCombo::XNEWTON)), sys(sys) {
+CtcLinearRelax::CtcLinearRelax(const ExtendedSystem& sys, LinearizerCombo::linear_mode lm) : CtcPolytopeHull(*new LinearizerCombo (sys,lm)), sys(sys) {
 
 }
 

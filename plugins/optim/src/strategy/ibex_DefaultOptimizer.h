@@ -16,6 +16,7 @@
 #include "ibex_Memory.h"
 #include "ibex_NormalizedSystem.h"
 #include "ibex_ExtendedSystem.h"
+#include "ibex_LinearizerCombo.h"
 
 namespace ibex {
 
@@ -48,7 +49,8 @@ public:
 			double eps_h=NormalizedSystem::default_eps_h,
 			bool rigor=false, bool inHC4=true,
 			double random_seed=default_random_seed,
-    		double eps_x=Optimizer::default_eps_x);
+    		double eps_x=Optimizer::default_eps_x,
+			LinearizerCombo::linear_mode lm=LinearizerCombo::XNEWTON);
 
 	/** Default random seed: 1.0. */
 	static constexpr double default_random_seed = 1.0;
@@ -58,7 +60,7 @@ private:
     /**
      * The contractor: HC4 + acid(HC4) + X-Newton
      */
-	Ctc& ctc(const ExtendedSystem& ext_sys);
+	Ctc& ctc(const ExtendedSystem& ext_sys, LinearizerCombo::linear_mode lm);
 
 	NormalizedSystem& get_norm_sys(const System& sys, double eps_h);
 

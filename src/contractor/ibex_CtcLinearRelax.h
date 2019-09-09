@@ -13,6 +13,7 @@
 
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_ExtendedSystem.h"
+#include "ibex_LinearizerCombo.h"
 
 namespace ibex {
 
@@ -28,7 +29,7 @@ public:
 	/**
 	 * \brief Build the contractor.
 	 */
-	CtcLinearRelax(const ExtendedSystem& sys);
+	CtcLinearRelax(const ExtendedSystem& sys, LinearizerCombo::linear_mode=LinearizerCombo::XNEWTON);
 
 	/**
 	 * \brief Delete this.

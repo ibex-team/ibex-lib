@@ -57,9 +57,10 @@ ExtendedSystem& DefaultOptimizer::get_ext_sys(const System& sys, double eps_h) {
 	}
 }
 
-DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed, double eps_x) :
+DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed, double eps_x,
+		LinearizerCombo::linear_mode lm) :
 		Optimizer(sys.nb_var,
-			  ctc(get_ext_sys(sys,eps_h)), // warning: we don't know which argument is evaluated first
+			  ctc(get_ext_sys(sys,eps_h),lm), // warning: we don't know which argument is evaluated first
 //			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
 
 			  rec(new LSmear(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
@@ -80,7 +81,7 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double a
 
 }
 
-Ctc&  DefaultOptimizer::ctc(const ExtendedSystem& ext_sys) {
+Ctc&  DefaultOptimizer::ctc(const ExtendedSystem& ext_sys, LinearizerCombo::linear_mode lm) {
 	Array<Ctc> ctc_list(3);
 
 	// first contractor on ext_sys : incremental HC4 (propag ratio=0.01)
@@ -92,10 +93,10 @@ Ctc&  DefaultOptimizer::ctc(const ExtendedSystem& ext_sys) {
 	if (ext_sys.nb_ctr > 1) {
 		ctc_list.set_ref(2,rec(new CtcFixPoint
 				(rec(new CtcCompo(
-						rec(new CtcLinearRelax(ext_sys)),
+						rec(new CtcLinearRelax(ext_sys,lm)),
 						rec(new CtcHC4(ext_sys,0.01)))), default_relax_ratio)));
 	} else {
-		ctc_list.set_ref(2,rec(new CtcLinearRelax(ext_sys)));
+		ctc_list.set_ref(2,rec(new CtcLinearRelax(ext_sys,lm)));
 	}
 
 	return rec(new CtcCompo(ctc_list));
