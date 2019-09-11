@@ -115,7 +115,7 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box, const BitSet& act
 	if (slope == TAYLOR) { // compute derivatives once for all
 		Df=cache? cache->active_ctrs_jacobian() : sys.f_ctrs.jacobian(box,active);
 
-		if (Df.is_empty()) return -1;
+		if (Df.is_empty()) return 0;
 	}
 
 	for(unsigned int k=0; k<corners.size(); k++) {

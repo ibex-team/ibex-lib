@@ -80,14 +80,14 @@ int LinearizerParallelTaylor::linear_relax(const IntervalVector& box, const BitS
 	IntervalMatrix Df_mid(ma,n); // derivatives over the midpoint
 
 	Df_mid = sys.f_ctrs.jacobian(box.mid(),active);
-	if (Df_mid.is_empty()) return -1;
+	if (Df_mid.is_empty()) return 0;
 	if (slope == TAYLOR)  // compute derivatives once for all
 		Df=sys.f_ctrs.jacobian(box,active);
 
 	else if (slope == HANSEN)
 		sys.f_ctrs.hansen_matrix(box,box.mid(),Df,active);
 
-	if (Df.is_empty()) return -1;
+	if (Df.is_empty()) return 0;
 
 	IntervalVector f(sys.f_ctrs.eval_vector(box.mid(),active));
 	if (f.is_empty()) return 0;

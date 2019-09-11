@@ -120,6 +120,7 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver, B
 	case TAYLOR:
 	case HANSEN:
 		cont = myxnewton->linearize(box,lp_solver,prop);
+		std::cout<< cont << std::endl;
 		break;
 
 	case PARALLEL:
@@ -129,20 +130,26 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver, B
 	case TAY_PAR:
 		cont2 = myxnewton->linearize(box,lp_solver,prop);
 		if (cont2!=-1) cont+=cont2;
+		else return -1;
 		cont2 += myp_taylor->linearize(box,lp_solver,prop);
 		if (cont2!=-1) cont+=cont2;
+		else return -1;
 		break;
 
 #ifdef _IBEX_WITH_AFFINE_
 	case ART:
 	case AFFINE2:
 		cont = myart->linearize(box,lp_solver);
+
 		break;
 	case COMPO: {
 		cont2 = myxnewton->linearize(box,lp_solver,prop);
 		if (cont2!=-1) cont+=cont2;
+		else return -1;
 		cont2 = myart->linearize(box,lp_solver);
 		if (cont2!=-1) cont+=cont2;
+		else return -1;
+
 		break;
 		/*
 		if (cont!=-1) {
@@ -155,10 +162,13 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver, B
 	case TAY_PAR_AFF:
 		int cont2 = myp_taylor->linearize(box,lp_solver,prop);
 		if (cont2!=-1) cont+=cont2;
+		else return -1;
 		cont2 = myxnewton->linearize(box,lp_solver,prop);
 		if (cont2!=-1) cont+=cont2;
+		else return -1;
 		cont2 = myart->linearize(box,lp_solver);
 		if (cont2!=-1) cont+=cont2;
+		else return -1;
 		break;
 
 #else
