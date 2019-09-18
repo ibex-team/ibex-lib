@@ -44,12 +44,15 @@ void CtcFirstOrderTest::contract(IntervalVector& box) {
 
 }
 void CtcFirstOrderTest::contract(IntervalVector& box, ContractContext& context) {
-	if(box.size() == 2) {
-		return;
-	}
 	BxpNodeData* node_data = (BxpNodeData*) context.prop[BxpNodeData::id];
 	if(node_data == nullptr) {
 		ibex_error("CtcFirstOrderTest: BxpNodeData must be set");
+	}
+	if(!box.is_interior_subset(node_data->init_box)) {
+		return;
+	}
+	if(box.size() == 2) {
+		return;
 	}
 	vector<IntervalVector> gradients;
 	for (int i = 0; i < system_.normal_constraints_.size() - 1; ++i) {

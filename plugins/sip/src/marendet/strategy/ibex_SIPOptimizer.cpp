@@ -124,9 +124,6 @@ SIPOptimizer::Status SIPOptimizer::optimize(const IntervalVector& box, double ob
 			}
 		}
 		updateUplo();
-		if (timeout > 0) {
-			timer.check(timeout);
-		}
 		time_ = timer.get_time();
 	}
 	time_ = timer.get_time();
