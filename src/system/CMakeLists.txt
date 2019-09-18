@@ -3,8 +3,8 @@
 list (APPEND IBEX_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExtendedSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExtendedSystem.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FncActivation.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FncActivation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FncActiveCtrs.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FncActiveCtrs.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FncKhunTucker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FncKhunTucker.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_FritzJohnCond.cpp
