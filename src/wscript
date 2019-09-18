@@ -31,6 +31,9 @@ def configure (conf):
 	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
 	conf.check_cxx (cxxflags="-U__STRICT_ANSI__", uselib_store="IBEX")
 
+  # Handle operators
+	conf.recurse ("operators")
+
 def build (bld):
 	# Do substitution in files ending with .in
 	for f in bld.env.IBEX_SRC + bld.env.IBEX_HDR:

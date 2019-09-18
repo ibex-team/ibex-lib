@@ -9,10 +9,10 @@ configure_file(
 )
 list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_BINARY_DIR})
 
-# Recurse on all subdirectories
-set (SUBDIR_LIST arithmetic bisector combinatorial contractor data function
-                 numeric parser predicate set solver strategy symbolic system
-                 tools)
+# Recurse on all subdirectories (with 'operators' first)
+set (SUBDIR_LIST operators arithmetic bisector combinatorial contractor data
+                 function numeric parser predicate set solver strategy symbolic
+                 system tools)
 
 foreach (subdir ${SUBDIR_LIST})
   add_subdirectory (${subdir})

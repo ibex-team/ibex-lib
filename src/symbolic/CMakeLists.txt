@@ -1,9 +1,5 @@
 # see arithmetic/CMakeLists.txt for comments
 
-#
-set (OPERATORS_MACRO_UNARY "")
-set (OPERATORS_MACRO_BINARY "")
-
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprOperators.cpp.in
   ${CMAKE_CURRENT_BINARY_DIR}/ibex_ExprOperators.cpp

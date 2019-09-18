@@ -79,10 +79,7 @@ class Operator (object):
 			self.data["cppfile"] = self.cppfile
 
 	@classmethod
-	def set_env (cls, conf, mainsrc):
-		for data in cls._all_ops:
-			conf.env.append_unique ("IBEX_SRC", data["cppfile"].path_from (mainsrc))
-
+	def set_env (cls, conf):
 		gen = (d["headername"] for d in cls._all_ops)
 		conf.env.append_unique ("OPERATORS_HEADERS", gen)
 
@@ -98,11 +95,9 @@ class Operator (object):
 		gen = (cls.macro_binary_fmt_out.format (**data) for data in binary_ops)
 		conf.env.OPERATORS_MACRO_BINARY = os.linesep.join (gen)
 
-		gen = (cls.inline_unary_fmt_out.format (**data) for data in unary_ops)
-		conf.env.OPERATORS_INLINE_UNARY = os.linesep.join (gen)
-
-		gen = (cls.inline_binary_fmt_out.format (**data) for data in binary_ops)
-		conf.env.OPERATORS_INLINE_BINARY = os.linesep.join (gen)
+		genu = (cls.inline_unary_fmt_out.format (**data) for data in unary_ops)
+		genb = (cls.inline_binary_fmt_out.format (**data) for data in binary_ops)
+		conf.env.OPERATORS_FCT_DEF = os.linesep.join (genu) + os.linesep + os.linesep.join (genb)
 
 
 def options (opt):
@@ -112,46 +107,8 @@ def options (opt):
 ##### configure ######
 ######################
 def configure (conf):
-	conf.env.WITH_OPERATORS = True
-
-	conf.start_msg ("plugin Operators")
-	if not conf.env.WITH_OPERATORS:
-		conf.end_msg ("not used")
-		return
-
-	conf.end_msg ("enabled")
-
-	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "OPERATORS")
-
-	# add OPERATORS plugin include directory
-	for f in conf.path.ant_glob ("src/** src", dir = True, src = False):
-		conf.env.append_unique("INCLUDES_OPERATORS", f.abspath())
-
-	# The build and install steps will be run from the main src/wscript script so
-	# we need to give path relative to the main src directory
-	mainsrc = conf.srcnode.make_node ("src")
-
 	# add operators headers
-	for headerfile in conf.path.ant_glob ("src/**/ibex_*.h"):
+	for headerfile in conf.path.ant_glob ("**/ibex_*.h"):
 		Operator (headerfile)
 
-	Operator.set_env (conf, mainsrc)
-	# The utest step will be run from the main tests/wscript script so we need to
-	# give path relative to the main tests directory
-	maintests = conf.srcnode.make_node ("tests")
-
-	# add OPERATORS test files
-	for f in conf.path.ant_glob ("tests/**/Test*.cpp"):
-		conf.env.append_unique ('TEST_SRC', f.path_from (maintests))
-
-	# Add operators/tests directory to list of INCLUDES for TESTS
-	testsnode = conf.path.make_node ("tests")
-	conf.env.append_unique ("INCLUDES_TESTS", testsnode.abspath ())
-	
-######################
-####### build ########
-######################
-def build (bld):
-	# install headers
-	headers = [ os.path.join ("src", f) for f in bld.env.OPERATORS_HEADERS ]
-	bld.install_files (bld.env.INCDIR_HDR, headers)
+	Operator.set_env (conf)
