@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.0.2)
 
 message (WARNING "CMake support is still experimental, use waf to build Ibex")
 
-project (IBEX VERSION 2.8.0 LANGUAGES CXX)
+project (IBEX VERSION 2.8.6 LANGUAGES CXX)
 set (IBEX_DESCRIPTION "A C++ library for interval-based algorithm design")
 set (IBEX_URL "http://www.ibex-lib.org/")
 
