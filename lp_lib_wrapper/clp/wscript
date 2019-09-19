@@ -13,6 +13,11 @@ def options (opt):
                     default = "",
                     help = "location of the Clp lib and include directories \
                             (by default use the one in 3rd directory)")
+    grp.add_option ("--coinutils-path", action="store", type="string",
+                    dest="COINUTILS_PATH", default = "",
+                    help = "location of the CoinUtils lib and include directories \
+                            (by default use the location of the Clp lib and \
+                            include directories)")
 
 ######################
 ##### configure ######
@@ -23,14 +28,26 @@ def configure (conf):
     conf.env["LP_LIB"] = "CLP"
 
     clp_dir = conf.options.CLP_PATH
+    coinutils_dir = conf.options.COINUTILS_PATH
     if clp_dir:
+        if not coinutils_dir:
+            coinutils_dir = clp_dir
         clp_include = os.path.join (clp_dir, "include")
-        # Cpl install everything in coin directory
-        coin_include = os.path.join (clp_include, "coin")
+        clp_include_clp = os.path.join (clp_include, "clp")
+        if os.path.exists (clp_include_clp):
+            clp_include = clp_include_clp
+        clp_include = os.path.join (clp_include, "coin")
+        coinutils_include = os.path.join (coinutils_dir, "include")
+        coinutils_include_coin = os.path.join (coinutils_include, "coinutils")
+        if os.path.exists (coinutils_include_coin):
+            coinutils_include = coinutils_include_coin
+        coinutils_include = os.path.join (coinutils_include, "coin")
         clp_lib = os.path.join (clp_dir, "lib")
+        coinutils_lib = os.path.join (coinutils_dir, "lib")
         conf.env.append_unique ("INCLUDES_IBEX_DEPS", clp_include)
-        conf.env.append_unique ("INCLUDES_IBEX_DEPS", coin_include)
+        conf.env.append_unique ("INCLUDES_IBEX_DEPS", coinutils_include)
         conf.env.append_unique ("LIBPATH_IBEX_DEPS", clp_lib)
+        conf.env.append_unique ("LIBPATH_IBEX_DEPS", coinutils_lib)
     else:
         clp_include = ""
         clp_lib = ""
@@ -55,10 +72,10 @@ def configure (conf):
             if clp_lib:
                 ## add to the environnement the path where clp.pc should be
                 clp_pc_install_path = os.path.join (clp_lib, "pkgconfig")
+                coinutils_pc_install_path = os.path.join (coinutils_lib, "pkgconfig")
                 if conf.env.env == []:
                     conf.env.env = {}
-                conf.env.env["PKG_CONFIG_PATH"] = clp_pc_install_path
-    
+                conf.env.env["PKG_CONFIG_PATH"] = ":".join ([clp_pc_install_path, coinutils_pc_install_path])
             clp_kwargs["mandatory"] = mandatory
             has_clp = conf.check_cfg (**clp_kwargs)
     
