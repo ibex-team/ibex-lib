@@ -76,6 +76,7 @@ file (APPEND ${IBEX_MAIN_HEADER} "\n#endif /* __IBEX_H__ */\n")
 install (TARGETS ibex DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install (FILES ${IBEX_MAIN_HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install (FILES ${IBEX_HDR} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex)
+install (FILES ${IBEX_OPS_HDR} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex)
 install (FILES ${IBEX_INL} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex)
 
 ################################################################################
