@@ -8,6 +8,7 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/ibex_Setting.h
 )
 list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_BINARY_DIR})
+list (APPEND IBEX_SRC ${CMAKE_CURRENT_BINARY_DIR}/ibex_Setting.h)
 
 # Recurse on all subdirectories (with 'operators' first)
 set (SUBDIR_LIST operators arithmetic bisector combinatorial contractor data
