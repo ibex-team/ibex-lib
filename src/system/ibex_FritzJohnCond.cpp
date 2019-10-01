@@ -196,7 +196,7 @@ public:
 		if (M>0 || R>0) dg=&ExprDiff(sys.f_ctrs.args(), vars).diff(sys.f_ctrs.expr(), sys.f_ctrs.args());
 
 		to_clean.push_back(&df);
-		to_clean.push_back(dg);
+		if (dg) to_clean.push_back(dg);
 
 		k=0;
 
