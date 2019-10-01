@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_CtcKhunTucker.cpp
+// File        : ibex_CtcKuhnTucker.cpp
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -8,8 +8,8 @@
 // Created     : Jul 11, 2019
 //============================================================================
 
-#include "ibex_CtcKhunTucker.h"
-#include "ibex_FncKhunTucker.h"
+#include "ibex_CtcKuhnTucker.h"
+#include "ibex_FncKuhnTucker.h"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_ExprDiff.h"
 #include "ibex_CtcNewton.h"
@@ -18,7 +18,7 @@ using namespace std;
 
 namespace ibex {
 
-CtcKhunTucker::CtcKhunTucker(const NormalizedSystem& sys, bool reject_unbounded) : Ctc(sys.nb_var+1 /* extended box expected*/), sys(sys), reject_unbounded(reject_unbounded) {
+CtcKuhnTucker::CtcKuhnTucker(const NormalizedSystem& sys, bool reject_unbounded) : Ctc(sys.nb_var+1 /* extended box expected*/), sys(sys), reject_unbounded(reject_unbounded) {
 	try {
 		df = new Function(*sys.goal,Function::DIFF);
 
@@ -41,7 +41,7 @@ CtcKhunTucker::CtcKhunTucker(const NormalizedSystem& sys, bool reject_unbounded)
 	}
 }
 
-CtcKhunTucker::~CtcKhunTucker() {
+CtcKuhnTucker::~CtcKuhnTucker() {
 	if (df) delete df;
 	if (dg!=NULL) {
 		for (int i=0; i<sys.f_ctrs.image_dim(); i++)
@@ -50,7 +50,7 @@ CtcKhunTucker::~CtcKhunTucker() {
 	}
 }
 
-void CtcKhunTucker::contract(IntervalVector& box) {
+void CtcKuhnTucker::contract(IntervalVector& box) {
 
 	assert(df!=NULL);
 
@@ -62,7 +62,7 @@ void CtcKhunTucker::contract(IntervalVector& box) {
 
 	IntervalVector x=box.subvector(0,n-1);
 
-	FncKhunTucker fkkt(sys,*df,dg,x);
+	FncKuhnTucker fkkt(sys,*df,dg,x);
 
 	if (fkkt.nb_mult==1) { // <=> no active constraint
 		// for unconstrained optimization we benefit from a cheap

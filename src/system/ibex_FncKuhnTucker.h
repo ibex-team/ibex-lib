@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_FncKhunTucker.h
+// File        : ibex_FncKuhnTucker.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -8,8 +8,8 @@
 // Last Update : Jul 11, 2019
 //============================================================================
 
-#ifndef __IBEX_FNC_KHUN_TUCKER_H__
-#define __IBEX_FNC_KHUN_TUCKER_H__
+#ifndef __IBEX_FNC_KUHN_TUCKER_H__
+#define __IBEX_FNC_KUHN_TUCKER_H__
 
 #include "ibex_NormalizedSystem.h"
 #include "ibex_FncActiveCtrs.h"
@@ -81,7 +81,7 @@ namespace ibex {
  *     r[ni+ne+nl+nr]*(x[k_nr]-r_nr)
  */
 
-class FncKhunTucker : public Fnc {
+class FncKuhnTucker : public Fnc {
 public:
 
 	/**
@@ -96,7 +96,7 @@ public:
 	 * \param box -    current box (not to be confused with the system "box", i.e., bounding constraints).
 	 *                 The current box is precisely used to determine active constraints.
  	 */
-	FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box);
+	FncKuhnTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box);
 
 	/**
 	 * \brief Build the KKT conditions function for a given box.
@@ -112,12 +112,12 @@ public:
 	 * \param active - (potentially) active inequalities on the box. Must be indices of the
 	 *                 components of sys.f_ctrs.
  	 */
-	FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box, const BitSet& active);
+	FncKuhnTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box, const BitSet& active);
 
 	/**
 	 * \brief Delete this.
 	 */
-	~FncKhunTucker();
+	~FncKuhnTucker();
 
 	/**
 	 * \brief Evaluation
@@ -230,7 +230,7 @@ public:
 	const int nb_mult;
 
 protected:
-	FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box, const BitSet* active);
+	FncKuhnTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box, const BitSet* active);
 
 	FncActiveCtrs* act;            // function of active constraints
 
@@ -245,34 +245,34 @@ protected:
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
-inline FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box, const BitSet& active) :
-		FncKhunTucker(sys,df,dg,box,&active) {
+inline FncKuhnTucker::FncKuhnTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box, const BitSet& active) :
+		FncKuhnTucker(sys,df,dg,box,&active) {
 }
 
-inline FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box) :
-		FncKhunTucker(sys,df,dg,box,NULL) {
+inline FncKuhnTucker::FncKuhnTucker(const NormalizedSystem& sys, Function& df, Function** dg, const IntervalVector& box) :
+		FncKuhnTucker(sys,df,dg,box,NULL) {
 }
 
-inline bool FncKhunTucker::qualified() const {
+inline bool FncKuhnTucker::qualified() const {
 	return act? act->qualified() : false;
 }
 
-inline bool FncKhunTucker::rejection_test(const IntervalVector& x) const {
+inline bool FncKuhnTucker::rejection_test(const IntervalVector& x) const {
 	return act? act->rejection_test(x) : false;
 }
 
-inline const BitSet& FncKhunTucker::active() const      { return act? act->active_ctr : nothing; }
+inline const BitSet& FncKuhnTucker::active() const      { return act? act->active_ctr : nothing; }
 
-inline const BitSet& FncKhunTucker::eq() const          { return act? act->eq : nothing; }
+inline const BitSet& FncKuhnTucker::eq() const          { return act? act->eq : nothing; }
 
-inline const BitSet& FncKhunTucker::ineq() const        { return act? act->ineq : nothing; }
+inline const BitSet& FncKuhnTucker::ineq() const        { return act? act->ineq : nothing; }
 
-inline const BitSet& FncKhunTucker::left_bound() const  { return act? act->active_left_bound : nothing; }
+inline const BitSet& FncKuhnTucker::left_bound() const  { return act? act->active_left_bound : nothing; }
 
-inline const BitSet& FncKhunTucker::right_bound() const { return act? act->active_right_bound : nothing; }
+inline const BitSet& FncKuhnTucker::right_bound() const { return act? act->active_right_bound : nothing; }
 
 
 
 } /* namespace ibex */
 
-#endif /* __IBEX_FNC_KHUN_TUCKER_H__ */
+#endif /* __IBEX_FNC_KUHN_TUCKER_H__ */

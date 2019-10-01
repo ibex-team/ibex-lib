@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Fritz-John contractor Tests
+ * I B E X - Kuhn-Tucker system Tests
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -9,8 +9,8 @@
  * Created     : May 07, 2013
  * ---------------------------------------------------------------------------- */
 
-#include "TestFritzJohn.h"
-#include "ibex_FritzJohnCond.h"
+#include "TestKuhnTuckerSystem.h"
+#include "ibex_KuhnTuckerSystem.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_SystemFactory.h"
 #include "ibex_SyntaxError.h"
@@ -19,7 +19,7 @@ using namespace std;
 
 namespace ibex {
 
-void TestFritzJohn::test01() {
+void TestKuhnTuckerSystem::test01() {
 	SystemFactory fac;
 
 	Variable x("x"),y("y");
@@ -32,7 +32,7 @@ void TestFritzJohn::test01() {
 
 	System sys(fac);
 
-	FritzJohnCond fj(sys,false);
+	KuhnTuckerSystem fj(sys,false);
 
 	CtcHC4 hc4(fj.ctrs);
 	//double s=::sqrt(2)/2.0;

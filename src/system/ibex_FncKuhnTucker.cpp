@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_FncKhunTucker.cpp
+// File        : ibex_FncKuhnTucker.cpp
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -11,13 +11,13 @@
 #include <stdlib.h>
 #include <cassert>
 
-#include "ibex_FncKhunTucker.h"
+#include "ibex_FncKuhnTucker.h"
 
 using namespace std;
 
 namespace ibex {
 
-FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Function** _dg, const IntervalVector& current_box, const BitSet* _active) :
+FncKuhnTucker::FncKuhnTucker(const NormalizedSystem& sys, Function& _df, Function** _dg, const IntervalVector& current_box, const BitSet* _active) :
 								Fnc(1,1), sys(sys), n(sys.nb_var), nb_mult(0), // **tmp**
 								act(NULL), df(_df), nothing(BitSet::empty(1)) {
 
@@ -53,11 +53,11 @@ FncKhunTucker::FncKhunTucker(const NormalizedSystem& sys, Function& _df, Functio
 	(Dim&) _image_dim = Dim(_nb_var, 1);
 }
 
-FncKhunTucker::~FncKhunTucker() {
+FncKuhnTucker::~FncKuhnTucker() {
 	if (act) delete act;
 }
 
-IntervalVector FncKhunTucker::multiplier_domain() const {
+IntervalVector FncKuhnTucker::multiplier_domain() const {
 	IntervalVector box(nb_mult, Interval(0,1));
 
 	if (act && !act->eq.empty())
@@ -66,11 +66,11 @@ IntervalVector FncKhunTucker::multiplier_domain() const {
 	return box;
 }
 
-IntervalVector FncKhunTucker::eval_vector(const IntervalVector& x_lambda, const BitSet& components) const {
+IntervalVector FncKuhnTucker::eval_vector(const IntervalVector& x_lambda, const BitSet& components) const {
 
 	if (components.size()!=n+nb_mult) {
 		// TODO
-		not_implemented("FncKhunTucker: 'eval_vector' for selected components");
+		not_implemented("FncKuhnTucker: 'eval_vector' for selected components");
 		//J.resize(n+nb_mult,n+nb_mult);
 	}
 
@@ -134,10 +134,10 @@ IntervalVector FncKhunTucker::eval_vector(const IntervalVector& x_lambda, const 
 	return res;
 }
 
-void FncKhunTucker::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const {
+void FncKuhnTucker::jacobian(const IntervalVector& x_lambda, IntervalMatrix& J, const BitSet& components, int v) const {
 
 	if (components.size()!=n+nb_mult) {
-		not_implemented("FncKhunTucker: 'jacobian' for selected components");
+		not_implemented("FncKuhnTucker: 'jacobian' for selected components");
 		//J.resize(n+nb_mult,n+nb_mult);
 	}
 

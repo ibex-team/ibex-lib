@@ -39,7 +39,7 @@ public:
 	 * \param random_seed - The sequence of random numbers is reinitialized with
 	 *                      this seed before calling optimize(..) (useful for
 	 *                      reproducibility). Set by default to #default_random_seed.
-	 * \param kkt         - If true, Khun-Tucker contractor is used (false by default)
+	 * \param kkt         - If true, Kuhn-Tucker contractor is used (false by default)
 	 * \param eps_x       - Stopping criterion for box splitting (absolute precision).
 	 *                      (**deprecated**).
 	 */

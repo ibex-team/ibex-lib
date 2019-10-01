@@ -18,11 +18,11 @@
 
 namespace ibex {
 
-class TestFritzJohn : public CppUnit::TestFixture {
+class TestKuhnTuckerSystem : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestFritzJohn);
+	CPPUNIT_TEST_SUITE(TestKuhnTuckerSystem);
 	
 		CPPUNIT_TEST(test01);
 	CPPUNIT_TEST_SUITE_END();
@@ -30,7 +30,7 @@ public:
 	void test01();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestFritzJohn);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestKuhnTuckerSystem);
 
 
 } // end namespace

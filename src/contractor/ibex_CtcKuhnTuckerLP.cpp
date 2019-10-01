@@ -1,23 +1,23 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_CtcKhunTuckerLP.cpp
+// File        : ibex_CtcKuhnTuckerLP.cpp
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 31, 2019
 //============================================================================
 
-#include "ibex_CtcKhunTuckerLP.h"
+#include "ibex_CtcKuhnTuckerLP.h"
 #include "ibex_LinearizerCombo.h"
 
 using namespace std;
 
 namespace ibex {
 
-CtcKhunTuckerLP::CtcKhunTuckerLP(const NormalizedSystem& _sys, bool reject_unbounded) : Ctc(_sys.nb_var+1 /* extended box expected*/),
+CtcKuhnTuckerLP::CtcKuhnTuckerLP(const NormalizedSystem& _sys, bool reject_unbounded) : Ctc(_sys.nb_var+1 /* extended box expected*/),
 		reject_unbounded(reject_unbounded) {
 	try {
-		kkt = new FritzJohnCond(_sys, true);
+		kkt = new KuhnTuckerSystem(_sys, true);
 		ph = new CtcPolytopeHull(*new LinearizerCombo (*kkt,LinearizerCombo::XNEWTON));
 	} catch(Exception&) {
 		//TODO: replace with ExprDiffException.
@@ -28,14 +28,14 @@ CtcKhunTuckerLP::CtcKhunTuckerLP(const NormalizedSystem& _sys, bool reject_unbou
 
 }
 
-CtcKhunTuckerLP::~CtcKhunTuckerLP() {
+CtcKuhnTuckerLP::~CtcKuhnTuckerLP() {
 	if (kkt) {
 		delete kkt;
 		delete ph;
 	}
 }
 
-void CtcKhunTuckerLP::contract(IntervalVector& box) {
+void CtcKuhnTuckerLP::contract(IntervalVector& box) {
 	if (kkt==NULL || box.is_empty()) return;
 
 	if (reject_unbounded && box.is_unbounded()) return;

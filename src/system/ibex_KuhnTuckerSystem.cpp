@@ -1,14 +1,14 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_FritzJohnCond.cpp
+// File        : ibex_KuhnTuckerSystem.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 31, 2013
 // Last Update : Jul 31, 2019
 //============================================================================
 
-#include "ibex_FritzJohnCond.h"
+#include "ibex_KuhnTuckerSystem.h"
 #include "ibex_SystemFactory.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprDiff.h"
@@ -56,7 +56,7 @@ const ExprNode& arg(const ExprNode& node, int i, int j) {
 
 } // end anonymous namespace
 
-class FritzJohnFactory : public SystemFactory {
+class KuhnTuckerSystemFactory : public SystemFactory {
 
 public:
 
@@ -74,7 +74,7 @@ public:
 	int R; // number of equalities
 	int K; // number of bound constraints
 
-	FritzJohnFactory(const System& sys, bool copy_ineq) {
+	KuhnTuckerSystemFactory(const System& sys, bool copy_ineq) {
 
 		n=sys.nb_var;
 		int N=sys.args.size(); // warning N<>n (maybe)
@@ -84,9 +84,9 @@ public:
 		int r=0; // counter of equalities
 
 		if (sys.nb_ctr!=sys.ctrs.size())
-			ibex_error("cannot use Fritz-John conditions with vector constraints");
+			ibex_error("cannot create Kuhn-Tucker system with vector constraints");
 		if (!sys.goal)
-			ibex_error("cannot use Fritz-John conditions without goal function");
+			ibex_error("cannot create Kuhn-Tucker system without goal function");
 
 		for (int i=0; i<sys.nb_ctr; i++) {
 			if (sys.ctrs[i].op==EQ) r++;
@@ -128,7 +128,7 @@ public:
 		// 2- a vector of m multipliers (one for each constraint, if any)
 	    // 3- a vector of K multipliers (one for each bound of the initial box, if any).
 
-		int N2=N+1; // default number of arguments of Fritz system
+		int N2=N+1; // default number of arguments of KKT system
 
 		const ExprSymbol* lambda=NULL;
 		if (M>0) {
@@ -318,7 +318,7 @@ public:
 		// TODO: try to simplify this ?
 	}
 
-	~FritzJohnFactory() {
+	~KuhnTuckerSystemFactory() {
 		delete[] bound_ctr;
 
 		for (int i=0; i<input_args.size(); i++)
@@ -326,9 +326,9 @@ public:
 	}
 };
 
-FritzJohnCond::FritzJohnCond(const System& sys, bool copy_ineq) : n(0), M(0), R(0), K(0) /* TMP */ {
+KuhnTuckerSystem::KuhnTuckerSystem(const System& sys, bool copy_ineq) : n(0), M(0), R(0), K(0) /* TMP */ {
 
-	FritzJohnFactory fac(sys, copy_ineq);
+	KuhnTuckerSystemFactory fac(sys, copy_ineq);
 
 	init(fac);
 

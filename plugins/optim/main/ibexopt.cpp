@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
 			"optimization data in the COV (binary) format. See --format", {'o',"output"});
 	args::Flag rigor(parser, "rigor", "Activate rigor mode (certify feasibility of equalities).", {"rigor"});
-	args::Flag kkt(parser, "kkt", "Activate contractor based on Khun-Tucker conditions.", {"kkt"});
+	args::Flag kkt(parser, "kkt", "Activate contractor based on Kuhn-Tucker conditions.", {"kkt"});
 	args::Flag output_no_obj(parser, "output-no-obj", "Generate a COV with domains of variables only (not objective values).", {"output-no-obj"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});

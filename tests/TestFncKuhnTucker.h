@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - TestFncKhunTucker
+ * I B E X - TestFncKuhnTucker
  * ============================================================================
  * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -10,8 +10,8 @@
  * Last Update : Jun 05, 2019
  * ---------------------------------------------------------------------------- */
 
-#ifndef __TEST_FNC_KHUN_TUCKER_H__
-#define __TEST_FNC_KHUN_TUCKER_H__
+#ifndef __TEST_FNC_KUHN_TUCKER_H__
+#define __TEST_FNC_KUHN_TUCKER_H__
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -28,10 +28,10 @@
 #include "ibex_CovSolverData.h"
 #include "ibex_Solver.h"
 
-class TestFncKhunTucker : public CppUnit::TestFixture {
+class TestFncKuhnTucker : public CppUnit::TestFixture {
 public:
 
-	CPPUNIT_TEST_SUITE(TestFncKhunTucker);
+	CPPUNIT_TEST_SUITE(TestFncKuhnTucker);
 
 	CPPUNIT_TEST(one_var);
 	CPPUNIT_TEST(one_var_1_bound);
@@ -48,6 +48,6 @@ private:
 	void two_vars_1_eq_1_ineq_2bounds();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestFncKhunTucker);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestFncKuhnTucker);
 
-#endif // __TEST_FNC_KHUN_TUCKER__
+#endif // __TEST_FNC_KUHN_TUCKER__

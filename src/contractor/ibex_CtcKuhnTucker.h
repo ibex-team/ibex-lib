@@ -1,19 +1,19 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_CtcKhunTuckerLP.h
+// File        : ibex_CtcKuhnTucker.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : Jul 31, 2019
+// Created     : Jul 19, 2017
+// Created     : Jul 11, 2019
 //============================================================================
 
-#ifndef __IBEX_CTC_KHUN_TUCKER_LP_H__
-#define __IBEX_CTC_KHUN_TUCKER_LP_H__
+#ifndef __IBEX_CTC_KUHN_TUCKER_H__
+#define __IBEX_CTC_KUHN_TUCKER_H__
 
 #include "ibex_Ctc.h"
 #include "ibex_NormalizedSystem.h"
-#include "ibex_FritzJohnCond.h"
-#include "ibex_CtcPolytopeHull.h"
+#include "ibex_FncKuhnTucker.h"
 
 namespace ibex {
 
@@ -21,13 +21,8 @@ namespace ibex {
  * \ingroup contractor
  *
  * \brief Contractor based on first-order (KKT) conditions (for NLP)
- *
- * This variant resorts to linear programming (CtcPolytopeHull) instead of
- * Newton (as in CtcKhunTucker). This avoids in particular pessimism due to
- * preconditioning.
- *
  */
-class CtcKhunTuckerLP : public Ctc {
+class CtcKuhnTucker : public Ctc {
 public:
 
 	/**
@@ -52,7 +47,7 @@ public:
 	 *        be lost by contraction (they do not satisfy KKT conditions). Set to
 	 *        'true' by default.
 	 */
-	CtcKhunTuckerLP(const NormalizedSystem& sys, bool reject_unbounded=true);
+	CtcKuhnTucker(const NormalizedSystem& sys, bool reject_unbounded=true);
 
 	/**
 	 * \see Contract function (see #Ctc).
@@ -66,16 +61,24 @@ public:
 	/**
 	 * \brief Delete this.
 	 */
-	virtual ~CtcKhunTuckerLP();
+	virtual ~CtcKuhnTucker();
 
 protected:
 
 	/**
-	 * \brief The KKT conditions
+	 * \brief The (normalized) NLP problem.
 	 */
-	const FritzJohnCond* kkt;
+	const NormalizedSystem& sys;
 
-	CtcPolytopeHull* ph;
+	/**
+	 * \brief Symbolic gradient of the objective.
+	 */
+	Function* df;
+
+	/**
+	 * \brief Symbolic gradient of constraints.
+	 */
+	Function** dg;
 
 	/**
 	 * \brief Whether unbounded boxes are rejected.
@@ -87,4 +90,4 @@ protected:
 
 } /* namespace ibex */
 
-#endif /* __IBEX_CTC_KHUN_TUCKER_LP_H__ */
+#endif /* __IBEX_CTC_KUHN_TUCKER_H__ */

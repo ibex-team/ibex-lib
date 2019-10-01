@@ -16,7 +16,6 @@
 #include "ibex_LoupFinder.h"
 #include "ibex_CellBufferOptim.h"
 //#include "ibex_EntailedCtr.h"
-#include "ibex_CtcKhunTucker.h"
 #include "ibex_CovOptimData.h"
 
 namespace ibex {
@@ -419,7 +418,7 @@ private:
 	//EntailedCtr* entailed;
 
 	//!! warning: sys.box should be properly set before call to constructor !!
-	//CtcKhunTucker kkt;
+	//CtcKuhnTucker kkt;
 
 	/* Remember return status of the last optimization. */
 	Status status;

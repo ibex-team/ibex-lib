@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : TestFncKhunTucker.cpp
+// File        : TestFncKuhnTucker.cpp
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -8,13 +8,13 @@
 // Last Update : Jun 05, 2019
 //============================================================================
 
-#include "TestFncKhunTucker.h"
-#include "ibex_FncKhunTucker.h"
+#include "TestFncKuhnTucker.h"
+#include "ibex_FncKuhnTucker.h"
 #include "ibex_SystemFactory.h"
 
 using namespace ibex;
 
-void TestFncKhunTucker::one_var() {
+void TestFncKuhnTucker::one_var() {
 	int n=1;
 
 	const ExprSymbol& _x=ExprSymbol::new_("x");
@@ -35,7 +35,7 @@ void TestFncKhunTucker::one_var() {
 
 	int m=1; // number of multipliers
 
-	FncKhunTucker fkt(nsys,df,NULL,x,BitSet::empty(1));
+	FncKuhnTucker fkt(nsys,df,NULL,x,BitSet::empty(1));
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
@@ -67,7 +67,7 @@ void TestFncKhunTucker::one_var() {
 
 // Test n°2
 // One variable, one active bound
-void TestFncKhunTucker::one_var_1_bound() {
+void TestFncKuhnTucker::one_var_1_bound() {
 	int n=1;
 
 	const ExprSymbol& _x=ExprSymbol::new_("x");
@@ -87,7 +87,7 @@ void TestFncKhunTucker::one_var_1_bound() {
 	x[0]=Interval(9,10);
 
 	int m=2; // number of multipliers
-	FncKhunTucker fkt(nsys,df,NULL,x,BitSet::empty(1));
+	FncKuhnTucker fkt(nsys,df,NULL,x,BitSet::empty(1));
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
@@ -122,7 +122,7 @@ void TestFncKhunTucker::one_var_1_bound() {
 	CPPUNIT_ASSERT(J[2][2]==x[0]-10);
 }
 
-void TestFncKhunTucker::one_var_1_ineq_1_rbound() {
+void TestFncKuhnTucker::one_var_1_ineq_1_rbound() {
 
 	int n=1;
 
@@ -147,7 +147,7 @@ void TestFncKhunTucker::one_var_1_ineq_1_rbound() {
 	x[0]=Interval(9,10);
 
 	int m=3; // number of multipliers
-	FncKhunTucker fkt(nsys,df,dg,x,BitSet::singleton(1,0));
+	FncKuhnTucker fkt(nsys,df,dg,x,BitSet::singleton(1,0));
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
@@ -175,7 +175,7 @@ void TestFncKhunTucker::one_var_1_ineq_1_rbound() {
 }
 
 
-void TestFncKhunTucker::one_var_1_eq_1_lbound() {
+void TestFncKuhnTucker::one_var_1_eq_1_lbound() {
 	int n=1;
 
 	const ExprSymbol& _x=ExprSymbol::new_("x");
@@ -199,7 +199,7 @@ void TestFncKhunTucker::one_var_1_eq_1_lbound() {
 	x[0]=Interval(-11,-9);
 
 	int m=3; // number of multipliers
-	FncKhunTucker fkt(nsys,df,dg,x,BitSet::singleton(1,0));
+	FncKuhnTucker fkt(nsys,df,dg,x,BitSet::singleton(1,0));
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
@@ -229,7 +229,7 @@ void TestFncKhunTucker::one_var_1_eq_1_lbound() {
 }
 
 
-void TestFncKhunTucker::two_vars_1_eq_1_ineq_2bounds() {
+void TestFncKuhnTucker::two_vars_1_eq_1_ineq_2bounds() {
 	int n=2;
 
 	const ExprSymbol& _x=ExprSymbol::new_("x");
@@ -268,7 +268,7 @@ void TestFncKhunTucker::two_vars_1_eq_1_ineq_2bounds() {
 	x[1]=Interval(1.5,2);
 
 	int m=6; // number of multipliers
-	FncKhunTucker fkt(nsys,df,dg,x,BitSet::all(3));
+	FncKuhnTucker fkt(nsys,df,dg,x,BitSet::all(3));
 
 	CPPUNIT_ASSERT(fkt.n == n);
 	CPPUNIT_ASSERT(fkt.nb_mult==m);
