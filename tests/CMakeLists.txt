@@ -17,7 +17,7 @@ set (TESTS_LIST TestAgenda TestArith TestBitSet TestBoolInterval
                 TestCtcNotIn TestDim TestDomain TestDoubleHeap TestDoubleIndex
                 TestEval TestExpr2DAG TestExpr2Minibex TestExprCmp TestExprCopy
                 TestExpr TestExprDiff TestExprLinearity TestExprSimplify
-                TestFncKhunTucker TestFritzJohn TestFunction TestGradient
+                TestFncKuhnTucker TestKuhnTuckerSystem TestFunction TestGradient
                 TestHC4Revise TestInHC4Revise TestInnerArith TestInterval
                 TestIntervalMatrix TestIntervalVector TestKernel TestLinear
                 TestLPSolver TestNewton TestNumConstraint TestParser
