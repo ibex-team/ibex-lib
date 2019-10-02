@@ -62,7 +62,9 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 
 		//std::cout << " simplex result " << prim[0] << " " << loup_point << std::endl;
 
-		if (!box.contains(loup_point)) throw NotFound();
+		// we allow finding a loup outside of the current box, but
+		// not outside of the system box.
+		if (!sys.box.contains(loup_point)) throw NotFound();
 
 		double new_loup=current_loup;
 

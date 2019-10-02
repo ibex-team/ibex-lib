@@ -249,9 +249,15 @@ public:
 
 			if (k<K && bound_ctr[k][0]==j) { // either for the lower or upper bound
 				if (e)
-					e = & (*e + (*bmult)[k]);
+					if (bound_ctr[k][1]==LB)
+						e = & (*e - (*bmult)[k]);
+					else
+						e = & (*e + (*bmult)[k]);
 				else
-					e = & (*bmult)[k];
+					if (bound_ctr[k][1]==LB)
+						e = & -(*bmult)[k];
+					else
+						e = & (*bmult)[k];
 				k++;
 			}
 
