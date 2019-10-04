@@ -94,7 +94,11 @@ const Interval& Interval::half_pi() {
 }
 
 std::ostream& operator<<(std::ostream& os, const Interval& x) {
-	return os << x.itv;
+	// Gaol fix precision to 16 and does not restore it
+	std::streamsize old_prec=os.precision();
+	os << x.itv;
+	os.precision(old_prec);
+	return os;
 }
 
 } // end namespace
