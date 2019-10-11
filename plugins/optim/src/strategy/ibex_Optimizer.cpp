@@ -49,12 +49,33 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 										eps_x(eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
 										trace(0), timeout(-1), extended_COV(true), anticipated_upper_bounding(true),
 										status(SUCCESS),
-										//kkt(normalized_user_sys),
 										uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
 										loup_point(IntervalVector::empty(n)), initial_loup(POS_INFINITY), loup_changed(false),
 										time(0), nb_cells(0), cov(NULL) {
 
 	if (trace) cout.precision(12);
+}
+
+
+Optimizer::Optimizer(OptimizerConfig& config) :
+		n(config.nb_var()),
+		goal_var(config.goal_var()),
+		ctc(config.get_ctc()),
+		bsc(config.get_bsc()),
+		loup_finder(config.get_loup_finder()),
+		buffer(config.get_cell_buffer()),
+		eps_x(config.get_eps_x()),
+		rel_eps_f(config.get_rel_eps_f()),
+		abs_eps_f(config.get_abs_eps_f()),
+		trace(0),
+		timeout(-1),
+		extended_COV(true),
+		anticipated_upper_bounding(true),
+		status(SUCCESS),
+		uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
+		loup_point(IntervalVector::empty(n)), initial_loup(POS_INFINITY), loup_changed(false),
+		time(0), nb_cells(0), cov(NULL) {
+
 }
 
 Optimizer::~Optimizer() {

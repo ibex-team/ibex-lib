@@ -26,10 +26,10 @@ using namespace ibex;
 int main(int argc, char** argv) {
 
 	stringstream _rel_eps_f, _abs_eps_f, _eps_h, _random_seed, _eps_x;
-	_rel_eps_f << "Relative precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_rel_eps_f)) << ".";
-	_abs_eps_f << "Absolute precision on the objective. Default value is 1e" << round(::log10(Optimizer::default_abs_eps_f)) << ".";
+	_rel_eps_f << "Relative precision on the objective. Default value is 1e" << round(::log10(OptimizerConfig::default_rel_eps_f)) << ".";
+	_abs_eps_f << "Absolute precision on the objective. Default value is 1e" << round(::log10(OptimizerConfig::default_abs_eps_f)) << ".";
 	_eps_h << "Equality relaxation value. Default value is 1e" << round(::log10(NormalizedSystem::default_eps_h)) << ".";
-	_random_seed << "Random seed (useful for reproducibility). Default value is " << DefaultOptimizer::default_random_seed << ".";
+	_random_seed << "Random seed (useful for reproducibility). Default value is " << DefaultOptimizerConfig::default_random_seed << ".";
 	_eps_x << "Precision on the variable (**Deprecated**). Default value is 0.";
 
 	args::ArgumentParser parser("********* IbexOpt (defaultoptimizer) *********.", "Solve a Minibex file.");
@@ -111,6 +111,8 @@ int main(int argc, char** argv) {
 			// Load a system of equations
 			sys = new System(filename.Get().c_str());
 
+		DefaultOptimizerConfig config(*sys);
+
 		string output_cov_file; // cov output file
 		bool overwitten=false;  // is it overwritten?
 		string cov_copy;
@@ -125,32 +127,39 @@ int main(int argc, char** argv) {
 		}
 
 		if (rel_eps_f) {
+			config.set_rel_eps_f(rel_eps_f.Get());
+
 			if (!quiet)
 				cout << "  rel-eps-f:\t\t" << rel_eps_f.Get() << "\t(relative precision on objective)" << endl;
 		}
 
 		if (abs_eps_f) {
+			config.set_abs_eps_f(abs_eps_f.Get());
 			if (!quiet)
 				cout << "  abs-eps-f:\t\t" << abs_eps_f.Get() << "\t(absolute precision on objective)" << endl;
 		}
 
 		if (eps_h) {
+			config.set_eps_h(eps_h.Get());
 			if (!quiet)
 				cout << "  eps-h:\t\t" << eps_h.Get() << "\t(equality thickening)" << endl;
 		}
 
 		if (eps_x) {
+			config.set_eps_x(eps_x.Get());
 			if (!quiet)
 				cout << "  eps-x:\t\t" << eps_x.Get() << "\t(precision on variables domain)" << endl;
 		}
 
 		// This option certifies feasibility with equalities
 		if (rigor) {
+			config.set_rigor(rigor.Get());
 			if (!quiet)
 				cout << "  rigor mode:\t\tON\t(feasibility of equalities certified)" << endl;
 		}
 
 		if (kkt) {
+			config.set_kkt(kkt.Get());
 			if (!quiet)
 				cout << "  KKT contractor:\tON" << endl;
 		}
@@ -162,6 +171,7 @@ int main(int argc, char** argv) {
 
 		// Fix the random seed for reproducibility.
 		if (random_seed) {
+			config.set_random_seed(random_seed.Get());
 			if (!quiet)
 				cout << "  random seed:\t\t" << random_seed.Get() << endl;
 		}
@@ -212,15 +222,10 @@ int main(int argc, char** argv) {
 			inHC4=false;
 		}
 
+		config.set_inHC4(inHC4);
+
 		// Build the default optimizer
-		DefaultOptimizer o(*sys,
-				rel_eps_f? rel_eps_f.Get() : Optimizer::default_rel_eps_f,
-				abs_eps_f? abs_eps_f.Get() : Optimizer::default_abs_eps_f,
-				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
-				rigor, inHC4, kkt.Get(),
-				random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed,
-				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x
-				);
+		Optimizer o(config);
 
 		// This option limits the search time
 		if (timeout) {
