@@ -84,7 +84,7 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 
 					if (!sys.box.intersects(pdc.solution()))
 						satisfy_inequalities=false;
-					else {
+					else if (sys.nb_ctr>0) {
 						for (int j=0; j<sys.f_ctrs.image_dim(); j++) {
 							if (!af.active_ctr[j])
 								if (((sys.ops[j]==LEQ || sys.ops[j]==LT)
