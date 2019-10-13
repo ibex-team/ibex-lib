@@ -175,6 +175,7 @@ int main(int argc, char** argv) {
 			if (!quiet)
 				cout << "  random seed:\t\t" << random_seed.Get() << endl;
 		}
+
 		if (input_file) {
 			if (!quiet) {
 				cout << "  input COV file:\t" << input_file.Get().c_str() << "\n";
@@ -217,28 +218,24 @@ int main(int argc, char** argv) {
 
 		bool inHC4=true;
 
-
 		if (sys->nb_ctr>0 && !sys->f_ctrs.inhc4revise().implemented()) {
 			inHC4=false;
 		}
 
 		config.set_inHC4(inHC4);
 
-		// Build the default optimizer
-		Optimizer o(config);
-
 		// This option limits the search time
 		if (timeout) {
 			if (!quiet)
 				cout << "  timeout:\t\t" << timeout.Get() << "s" << endl;
-			o.timeout=timeout.Get();
+			config.set_timeout(timeout.Get());
 		}
 
 		// This option prints each better feasible point when it is found
 		if (trace) {
 			if (!quiet)
 				cout << "  trace:\t\tON" << endl;
-			o.trace=trace.Get();
+			config.set_trace(trace.Get());
 		}
 
 		if (!inHC4) {
@@ -247,12 +244,15 @@ int main(int argc, char** argv) {
 
 		if (output_no_obj) {
 			cout << "  Generates COV with:\tvariable domains only\n";
-			o.extended_COV = false;
+			config.set_extended_cov(false);
 		}
 
 		if (!quiet) {
 			cout << "*******************************************************" << endl << endl;
 		}
+
+		// Build the default optimizer
+		Optimizer o(config);
 
 		// display solutions with up to 12 decimals
 		cout.precision(12);

@@ -28,6 +28,8 @@
 #include "ibex_CtcKuhnTucker.h"
 #include "ibex_CtcKuhnTuckerLP.h"
 
+using namespace std;
+
 namespace ibex {
 
 namespace {
@@ -47,7 +49,7 @@ DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys) {
 	// by defaut, we apply KKT hence rigor for unconstrained problems
 	// (not mandatory but strongly preferable in this case)
 	rigor = (sys.nb_ctr==0);
-	inHC4 = false;
+	inHC4 = default_inHC4;
 	// by defaut, we apply KKT for unconstrained problems
 	kkt  = (sys.nb_ctr==0);
 	random_seed = default_random_seed;
