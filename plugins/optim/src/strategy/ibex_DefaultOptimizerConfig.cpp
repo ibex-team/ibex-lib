@@ -44,18 +44,29 @@ enum { 	NORMALIZED_SYSTEM_TAG,
 }
 
 DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys) {
-	eps_h     = ExtendedSystem::default_eps_h;
-
+	set_eps_h(ExtendedSystem::default_eps_h);
 	// by defaut, we apply KKT hence rigor for unconstrained problems
 	// (not mandatory but strongly preferable in this case)
-	rigor = (sys.nb_ctr==0);
-	inHC4 = default_inHC4;
+	set_rigor(sys.nb_ctr==0);
+	set_inHC4(default_inHC4);
 	// by defaut, we apply KKT for unconstrained problems
-	kkt  = (sys.nb_ctr==0);
-	random_seed = default_random_seed;
+	set_kkt(sys.nb_ctr==0);
+	set_random_seed(default_random_seed);
+}
 
-	RNG::srand(random_seed);
+// note:deprecated.
+DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys, double rel_eps_f, double abs_eps_f,
+							double eps_h, bool rigor, bool inHC4, bool kkt,
+							double random_seed, double eps_x) : sys(sys) {
 
+	set_rel_eps_f(rel_eps_f);
+	set_abs_eps_f(abs_eps_f);
+	set_eps_h(eps_h);
+	set_rigor(rigor);
+	set_inHC4(inHC4);
+	set_kkt(kkt);
+	set_random_seed(random_seed);
+	set_eps_x(eps_x);
 }
 
 DefaultOptimizerConfig::~DefaultOptimizerConfig() {
@@ -68,6 +79,15 @@ void DefaultOptimizerConfig::set_eps_h(double _eps_h) {
 
 void DefaultOptimizerConfig::set_rigor(bool _rigor) {
 	rigor = _rigor;
+
+	if (!rigor && kkt) {
+		for (int i=0; i<sys.nb_ctr; i++)
+			if (sys.ctrs[i].op==EQ) {
+				kkt=false;
+				ibex_warning("[OptimizerConfig] KKT automatically disabled if rigor mode is switched off with equalities.");
+				return;
+			}
+	}
 }
 
 void DefaultOptimizerConfig::set_inHC4(bool _inHC4) {
@@ -75,14 +95,14 @@ void DefaultOptimizerConfig::set_inHC4(bool _inHC4) {
 }
 
 void DefaultOptimizerConfig::set_kkt(bool _kkt) {
+	kkt = _kkt;
+
 	// if KKT is applied with equalities, rigor mode is forced.
 	if (kkt && !rigor && sys.nb_ctr>1) {
 		rigor=true;
 		// mandatory with equalities and strongly preferable with inequalities only
 		ibex_warning("[OptimizerConfig] Rigor mode automatically activated with KKT.");
 	}
-
-	kkt = _kkt;
 }
 
 void DefaultOptimizerConfig::set_random_seed(double _random_seed) {

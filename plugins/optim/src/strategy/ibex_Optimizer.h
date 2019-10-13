@@ -406,6 +406,8 @@ protected:
 
 private:
 
+	Optimizer(const Optimizer&); // forbidden
+
 	/** Currently entailed constraints */
 	//EntailedCtr* entailed;
 

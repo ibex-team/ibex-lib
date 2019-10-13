@@ -36,6 +36,15 @@ public:
 	DefaultOptimizerConfig(const System& sys);
 
 	/**
+	 * \brief Create default configuration with legacy parameters
+	 *
+	 * \deprecated
+	 */
+	DefaultOptimizerConfig(	const System& sys, double rel_eps_f, double abs_eps_f,
+							double eps_h, bool rigor, bool inHC4, bool kkt,
+							double random_seed, double eps_x);
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~DefaultOptimizerConfig();
