@@ -76,9 +76,6 @@ Optimizer::Optimizer(OptimizerConfig& config) :
 		loup_point(IntervalVector::empty(n)), initial_loup(POS_INFINITY), loup_changed(false),
 		time(0), nb_cells(0), cov(NULL) {
 
-
-	cout << "rel=" << rel_eps_f << endl;
-	cout << "abs=" << abs_eps_f << endl;
 }
 
 Optimizer::~Optimizer() {
