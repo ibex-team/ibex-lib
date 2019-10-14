@@ -1,23 +1,63 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_StrategyParam.h
-// Author      : Gilles Chabert
+// File        : ibex_Optimizer04Config.h
+// Author      : Bertrand Neveu, Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 11, 2014
+// Last Update : Oct 14, 2019
 //============================================================================
 
-#ifndef __IBEX_STRATEGY_PARAM_H__
-#define __IBEX_STRATEGY_PARAM_H__
+#ifndef __IBEX_OPTIMIZER_04_CONFIG_
+#define __IBEX_OPTIMIZER_04_CONFIG_
 
-#include "ibex_Ctc.h"
-#include "ibex_Bsc.h"
-#include "ibex_System.h"
-#include "ibex_ExtendedSystem.h"
-#include "ibex_Memory.h"
+#include "ibex_DefaultOptimizerConfig.h"
 
 namespace ibex {
 
+
+class Optimizer04Config : public OptimizerConfig, protected Memory {
+public:
+
+	Optimizer04Config(int argc, char** argv);
+
+	/** Fix-point ratio for contraction based on linear relaxation. */
+	static constexpr double relax_ratio = 0.2;
+
+	/** The system */
+	System *sys;
+
+protected:
+
+	// ============================================================================
+	virtual unsigned int nb_var();
+
+	/*
+	 * Build the contractors
+	 */
+	virtual Ctc& get_ctc();
+
+	virtual Bsc& get_bsc();
+
+	virtual LoupFinder& get_loup_finder();
+
+	virtual CellBufferOptim& get_cell_buffer();
+
+	virtual int goal_var();
+	// ============================================================================
+
+	NormalizedSystem *norm_sys;
+	ExtendedSystem *ext_sys;
+	std::string filename;
+	std::string filtering;
+	std::string linearrelaxation;
+	std::string bisection;
+	std::string strategy;
+
+	int beamsize;
+};
+
+/*
 class StrategyParam : protected Memory {
 public:
 
@@ -48,14 +88,7 @@ protected:
 	double fixpoint_ratio;
 	bool optim;
 
-	/**
-	 * Return the system used in the construction
-	 * of the contractor and the bisector.
-	 *
-	 * By default: original system
-	 *
-	 * With optimizer: extended system
-	 */
+
 	virtual System& get_ext_sys();
 
 private:
@@ -79,7 +112,7 @@ protected:
 
 	virtual System& get_ext_sys();
 };
-
+*/
 } // namespace ibex
 
-#endif // __IBEX_STRATEGY_PARAM_H__
+#endif // __IBEX_OPTIMIZER_04_CONFIG_

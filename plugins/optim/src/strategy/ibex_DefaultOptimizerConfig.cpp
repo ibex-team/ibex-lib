@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 11, 2014
-// Last Update : Oct 11, 2019
+// Last Update : Oct 14, 2019
 //============================================================================
 
 #include "ibex_DefaultOptimizerConfig.h"
@@ -45,9 +45,7 @@ enum { 	NORMALIZED_SYSTEM_TAG,
 
 DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys) {
 	set_eps_h(ExtendedSystem::default_eps_h);
-	// by defaut, we apply KKT hence rigor for unconstrained problems
-	// (not mandatory but strongly preferable in this case)
-	set_rigor(sys.nb_ctr==0);
+	set_rigor(default_rigor);
 	set_inHC4(default_inHC4);
 	// by defaut, we apply KKT for unconstrained problems
 	set_kkt(sys.nb_ctr==0);
@@ -162,7 +160,7 @@ Ctc& DefaultOptimizerConfig::get_ctc() {
 		ctc_list.set_ref(3, rec(new CtcKuhnTucker(get_norm_sys(),true)));
 		//ctc_list.set_ref(3, rec(new CtcKuhnTuckerLP(get_norm_sys(sys,eps_h),true)));
 	}
-	return rec(new CtcCompo(ctc_list));
+	return rec(new CtcCompo(ctc_list), CTC_TAG);
 }
 
 
@@ -170,18 +168,20 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 	if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
 			return get<Bsc>(BSC_TAG);
 
-	return rec(new LSmear(get_ext_sys(),eps_x,rec(new OptimLargestFirst(get_ext_sys().goal_var(),eps_x,default_bisect_ratio))));
-
+	return rec(new LSmear(
+			get_ext_sys(),eps_x,
+			rec(new OptimLargestFirst(get_ext_sys().goal_var(),eps_x,default_bisect_ratio))),
+			BSC_TAG);
 }
 
 LoupFinder& DefaultOptimizerConfig::get_loup_finder() {
-	if (found(LOUP_FINDER_TAG)) // in practice, get_bsc() is only called once by Optimizer.
+	if (found(LOUP_FINDER_TAG)) // in practice, get_loup_finder() is only called once by Optimizer.
 			return get<LoupFinder>(LOUP_FINDER_TAG);
 
 	const NormalizedSystem& norm_sys = get_norm_sys();
 
 	return rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(norm_sys, inHC4))) :
-			(LoupFinder*) new LoupFinderDefault(norm_sys, inHC4));
+			(LoupFinder*) new LoupFinderDefault(norm_sys, inHC4), LOUP_FINDER_TAG);
 }
 
 CellBufferOptim& DefaultOptimizerConfig::get_cell_buffer() {
@@ -194,7 +194,7 @@ CellBufferOptim& DefaultOptimizerConfig::get_cell_buffer() {
 	return (CellBufferOptim&) rec (new  CellBeamSearch (
 			(CellHeap&) rec (new CellHeap (ext_sys)),
 			(CellHeap&) rec (new CellHeap (ext_sys)),
-			ext_sys));
+			ext_sys), CELL_BUFFER_TAG);
 }
 
 int DefaultOptimizerConfig::goal_var() {

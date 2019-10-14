@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 11, 2014
-// Last Update : Oct 13, 2019
+// Last Update : Oct 14, 2019
 //============================================================================
 
 #ifndef __IBEX_DEFAULT_OPTIMIZER_CONFIG_H__
@@ -25,7 +25,7 @@ namespace ibex {
  * The contractor is HC4 + acid(HC4) + X-Newton and the bisector is LSmear.
  *
  */
-class DefaultOptimizerConfig : public OptimizerConfig, public Memory {
+class DefaultOptimizerConfig : public OptimizerConfig, protected Memory {
 public:
 
 	/**
@@ -61,7 +61,7 @@ public:
 	 * \brief Activate/deactivate rigor mode.
 	 *
 	 * If true, feasibility of equalities is certified.
-	 * By default: true for unconstrained problems only.
+	 * By default: #default_rigor.
 	 */
 	void set_rigor(bool rigor);
 
@@ -76,7 +76,10 @@ public:
 	/**
 	 * \brief Activate/deactivate KKT contractor.
 	 *
-	 * By default, we apply KKT and rigor mode only for unconstrained problems.
+	 * By default, we apply KKT only for unconstrained problems.
+	 *
+	 * \note If KKT is enabled for constrained problems, the rigor mode is
+	 * automatically enforced.
 	 */
 	void set_kkt(bool kkt);
 
@@ -109,6 +112,9 @@ public:
 	/** Default random seed: 1.0. */
 	static constexpr double default_random_seed = 1.0;
 
+	/** Default rigor mode: false (disabled). */
+	static constexpr bool default_rigor = false;
+
 	/** Default inHC4 mode: true (enabled). */
 	static constexpr bool default_inHC4 = true;
 
@@ -120,8 +126,7 @@ public:
 
 protected:
 
-	// the following getters must be called only once the configuration
-	// is over (all basic CONFIGeters are set) => reserved for Optimizer.
+	// ============================================================================
 	virtual unsigned int nb_var();
 
 	virtual Ctc& get_ctc();
@@ -133,9 +138,18 @@ protected:
 	virtual CellBufferOptim& get_cell_buffer();
 
 	virtual int goal_var();
+	// ============================================================================
 
+	/**
+	 * Return the system used in the construction
+	 * of the loup finder.
+	 */
 	NormalizedSystem& get_norm_sys();
 
+	/**
+	 * Return the system used in the construction
+	 * of the contractor and the bisector.
+	 */
 	ExtendedSystem& get_ext_sys();
 
 	const System& sys;

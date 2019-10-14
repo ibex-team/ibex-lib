@@ -160,6 +160,7 @@ protected:
 
 	friend class Optimizer;
 
+	// ============================================================================
 	// the following getters must be called only once the configuration
 	// is over (all basic CONFIGeters are set) => reserved for Optimizer.
 	// ============================================================================

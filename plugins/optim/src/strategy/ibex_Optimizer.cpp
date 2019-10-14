@@ -58,17 +58,17 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 
 
 Optimizer::Optimizer(OptimizerConfig& config) :
-		n(config.nb_var()),
-		goal_var(config.goal_var()),
-		ctc(config.get_ctc()),
-		bsc(config.get_bsc()),
-		loup_finder(config.get_loup_finder()),
-		buffer(config.get_cell_buffer()),
-		eps_x(config.get_eps_x()),
-		rel_eps_f(config.get_rel_eps_f()),
-		abs_eps_f(config.get_abs_eps_f()),
-		trace(config.get_trace()),
-		timeout(config.get_timeout()),
+		n           (config.nb_var()),
+		goal_var    (config.goal_var()),
+		loup_finder (config.get_loup_finder()),
+		buffer      (config.get_cell_buffer()),
+		bsc         (config.get_bsc()),
+		ctc         (config.get_ctc()),
+		eps_x       (config.get_eps_x()),
+		rel_eps_f   (config.get_rel_eps_f()),
+		abs_eps_f   (config.get_abs_eps_f()),
+		trace       (config.get_trace()),
+		timeout     (config.get_timeout()),
 		extended_COV(config.with_extended_cov()),
 		anticipated_upper_bounding(config.with_anticipated_upper_bounding()),
 		status(SUCCESS),
@@ -76,6 +76,9 @@ Optimizer::Optimizer(OptimizerConfig& config) :
 		loup_point(IntervalVector::empty(n)), initial_loup(POS_INFINITY), loup_changed(false),
 		time(0), nb_cells(0), cov(NULL) {
 
+
+	cout << "rel=" << rel_eps_f << endl;
+	cout << "abs=" << abs_eps_f << endl;
 }
 
 Optimizer::~Optimizer() {
