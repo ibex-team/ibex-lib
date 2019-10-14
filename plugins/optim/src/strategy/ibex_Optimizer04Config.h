@@ -32,9 +32,6 @@ protected:
 	// ============================================================================
 	virtual unsigned int nb_var();
 
-	/*
-	 * Build the contractors
-	 */
 	virtual Ctc& get_ctc();
 
 	virtual Bsc& get_bsc();
@@ -57,62 +54,6 @@ protected:
 	int beamsize;
 };
 
-/*
-class StrategyParam : protected Memory {
-public:
-
-	StrategyParam(const char* filename, const char* ctc, const char* lin_relax,
-			const char* bsc, double prec, double time_limit, bool hc4_incremental,
-			double ratio_propag, double fixpoint_ratio, bool optim=false);
-
-	Ctc& get_ctc();
-
-	Bsc& get_bsc();
-
-	System& get_sys();
-
-	virtual ~StrategyParam();
-
-	double prec;
-
-	double time_limit;
-
-protected:
-
-	std::string filename;
-	std::string filtering;
-	std::string lin_relax;
-	std::string bisection;
-	bool hc4_incremental;
-	double ratio_propag;
-	double fixpoint_ratio;
-	bool optim;
-
-
-	virtual System& get_ext_sys();
-
-private:
-	void* data;
-};
-
-class OptimizerParam : public StrategyParam {
-
-public:
-	OptimizerParam(const char* filename, const char* ctc, const char* lin_relax,
-			const char* bsc, double prec, double time_limit, bool hc4_incremental,
-			double ratio_propag, double fixpoint_ratio,
-			double goal_rel_prec, double goal_abs_prec, int sample_size, double eq_eps);
-
-	double goal_rel_prec;
-	double goal_abs_prec;
-	int sample_size;
-	double eq_eps;
-
-protected:
-
-	virtual System& get_ext_sys();
-};
-*/
 } // namespace ibex
 
 #endif // __IBEX_OPTIMIZER_04_CONFIG_
