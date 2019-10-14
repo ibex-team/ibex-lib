@@ -1,0 +1,11 @@
+variables 
+
+x[4] in [0,10];
+
+minimize
+-(abs(cos(x(1))^4 + cos(x(2))^4 + cos(x(3))^4 + cos(x(4))^4- 2 * cos(x(1))^2 * cos(x(2))^2 * cos(x(3))^2 * cos(x(4))^2) / sqrt(x(1)^2 + 2 * x(2)^2 + 3 *x(3)^2 + 4 * x(4)^2 ));
+
+constraints
+x(1)*x(2)*x(3)*x(4)>= 0.75;
+x(1)+x(2)+x(3)+x(4) <= 30;
+end

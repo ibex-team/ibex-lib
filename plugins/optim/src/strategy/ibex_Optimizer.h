@@ -478,7 +478,7 @@ inline double Optimizer::get_obj_rel_prec() const {
 		if (uplo<0) return POS_INFINITY;
 		else return 0;
 	else
-		return (loup-uplo)/(fabs(loup));
+		return (loup-uplo)/(fabs(uplo));
 }
 
 inline double Optimizer::get_obj_abs_prec() const {

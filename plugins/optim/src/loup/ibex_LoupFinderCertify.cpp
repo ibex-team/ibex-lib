@@ -82,7 +82,7 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 					// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
 					bool satisfy_inequalities=true;
 
-					if (!sys.box.is_superset(pdc.solution()))
+					if (!sys.box.intersects(pdc.solution()))
 						satisfy_inequalities=false;
 					else {
 						for (int j=0; j<sys.f_ctrs.image_dim(); j++) {

@@ -73,7 +73,8 @@ double Optimizer::compute_ymax() {
 
 		if (loup - abs_eps_f < ymax)
 			ymax = loup - abs_eps_f;
-		return ymax;
+		//return ymax;
+		return next_float(ymax);
 	} else
 		return loup;
 }
