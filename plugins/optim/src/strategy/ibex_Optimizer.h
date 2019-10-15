@@ -11,11 +11,7 @@
 #ifndef __IBEX_OPTIMIZER_H__
 #define __IBEX_OPTIMIZER_H__
 
-#include "ibex_Ctc.h"
-#include "ibex_Bsc.h"
-#include "ibex_LoupFinder.h"
-#include "ibex_CellBufferOptim.h"
-//#include "ibex_EntailedCtr.h"
+#include "ibex_OptimizerConfig.h"
 #include "ibex_CovOptimData.h"
 
 namespace ibex {
@@ -78,9 +74,14 @@ public:
 	 */
 	Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder, CellBufferOptim& buffer,
 			int goal_var,
-			double eps_x=default_eps_x,
-			double rel_eps_f=default_rel_eps_f,
-			double abs_eps_f=default_abs_eps_f);
+			double eps_x=OptimizerConfig::default_eps_x,
+			double rel_eps_f=OptimizerConfig::default_rel_eps_f,
+			double abs_eps_f=OptimizerConfig::default_abs_eps_f);
+
+	/**
+	 * Todo: update comments
+	 */
+	Optimizer(OptimizerConfig& config);
 
 	/**
 	 * \brief Delete *this.
@@ -261,20 +262,11 @@ public:
 	/** Precision (bisection control) */
 	const double eps_x;
 
-	/** Default bisection precision: 0. */
-	static constexpr double default_eps_x = 0;
-
 	/** Relative precision on the objective */
 	const double rel_eps_f;
 
-	/** Default goal relative precision: 1e-3. */
-	static constexpr double default_rel_eps_f = 1e-03;
-
 	/** Absolute precision on the objective */
 	const double abs_eps_f;
-
-	/** Default goal absolute precision: 1e-7. */
-	static constexpr double default_abs_eps_f = 1e-07;;
 
 	/**
 	 * \brief Trace activation flag.
@@ -413,6 +405,8 @@ protected:
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
 private:
+
+	Optimizer(const Optimizer&); // forbidden
 
 	/** Currently entailed constraints */
 	//EntailedCtr* entailed;
