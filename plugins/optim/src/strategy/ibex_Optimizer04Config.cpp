@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 11, 2014
-// Last Update : Oct 14, 2019
+// Last Update : Oct 15, 2019
 //============================================================================
 
 #include "ibex_Optimizer04Config.h"
@@ -16,7 +16,9 @@
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcNewton.h"
 #include "ibex_CtcFixPoint.h"
+#include "ibex_CtcKuhnTucker.h"
 #include "ibex_LargestFirst.h"
+#include "ibex_LargestFirstNoObjective.h"
 #include "ibex_RoundRobin.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_LSmear.h"
@@ -28,8 +30,6 @@
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_CellBeamSearch.h"
 #include "ibex_LoupFinderDefault.h"
-#include "ibex_LinearizerCombo.h"
-#include "ibex_LinearizerXTaylor.h"
 #include "ibex_SyntaxError.h"
 
 #include <sstream>
@@ -148,13 +148,16 @@ Ctc& Optimizer04Config::get_ctc() {
 		lr = &rec(new LinearizerXTaylor(*ext_sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP));
 	//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
-	CtcFixPoint* cxn;
+	Ctc* cxn;
 	CtcPolytopeHull* cxn_poly;
 	CtcCompo* cxn_compo;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn") {
 		cxn_poly = &rec(new CtcPolytopeHull(*lr));
 		cxn_compo = &rec(new CtcCompo(*cxn_poly, *hc44xn));
-		cxn = &rec(new CtcFixPoint (*cxn_compo, relax_ratio));
+	        if (sys->nb_ctr==0)
+		  cxn = cxn_poly;
+		else
+		  cxn = &rec(new CtcFixPoint (*cxn_compo, relax_ratio));
 	}
 	//  the actual contractor  ctc + linear relaxation
 	Ctc* ctcxn;
@@ -162,6 +165,12 @@ Ctc& Optimizer04Config::get_ctc() {
 		ctcxn = &rec(new CtcCompo  (*ctc, *cxn));
 	else
 		ctcxn = ctc;
+	Ctc* ctckkt;
+
+	if (sys->nb_ctr == 0){
+	  ctckkt = &rec(new CtcKuhnTucker(*norm_sys, true));
+	  ctcxn = &rec(new CtcCompo  (*ctcxn, *ctckkt));
+	  }
 
 	return *ctcxn;
 }
@@ -174,7 +183,9 @@ Bsc& Optimizer04Config::get_bsc() {
 	if (bisection=="roundrobin")
 		bs = &rec(new RoundRobin (prec,0.5));
 	else if (bisection== "largestfirst")
-		bs = &rec(new LargestFirst(prec,0.5));
+                bs = &rec(new OptimLargestFirst(ext_sys->goal_var(),true,prec,0.5));
+	else if (bisection== "largestfirstnoobj")
+                bs = &rec(new OptimLargestFirst(ext_sys->goal_var(),false,prec,0.5));
 	else if (bisection=="smearsum")
 		bs = &rec(new SmearSum(*ext_sys,prec,0.5));
 	else if (bisection=="smearmax")
@@ -184,9 +195,12 @@ Bsc& Optimizer04Config::get_bsc() {
 	else if (bisection=="smearmaxrel")
 		bs = &rec(new SmearMaxRelative(*ext_sys,prec,0.5));
 	else if  (bisection=="lsmear")
-		bs = &rec(new LSmear(*ext_sys,prec,0.5,LSMEAR));
+                bs = &rec (new LSmear(*ext_sys,eps_x,
+				      rec(new OptimLargestFirst(ext_sys->goal_var(),prec,0.5)),
+				      LSMEAR));
 	else if (bisection=="lsmearmg")
-		bs = &rec(new LSmear(*ext_sys,prec,0.5));
+	        bs = &rec (new LSmear(*ext_sys,eps_x,
+				      rec(new OptimLargestFirst(ext_sys->goal_var(),prec,0.5))));
 	else {
 		stringstream ss;
 		ss << "[optimizer04] " << bisection << " is not an implemented  bisection mode ";

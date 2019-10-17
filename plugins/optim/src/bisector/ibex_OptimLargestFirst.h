@@ -4,8 +4,8 @@
 // Author      : Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : Dec 3, 201_
-// Last Update : May 3, 2019
+// Created     : Dec 3, 2018
+// Last Update : Oct 17, 2019
 //============================================================================
 
 #ifndef __IBEX_OPTIM_LARGEST_FIRST_H__
@@ -32,7 +32,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	OptimLargestFirst(int goal_var,double prec=0, double ratio=Bsc::default_ratio());
+  OptimLargestFirst(int goal_var,bool choose_obj,double prec=0, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Create a bisector with largest first heuristic.
@@ -41,7 +41,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	OptimLargestFirst(int goal_var,const Vector& prec, double ratio=Bsc::default_ratio());
+  OptimLargestFirst(int goal_var,bool choose_obj,const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Return next variable to be bisected.
@@ -57,7 +57,11 @@ public:
 	 * \brief The variable representing the objective 
 	 */
 	const int goal_var;
-
+         
+	/** 
+	 * \brief Boolean indicating whether the objective variable can be bisected.
+	 */
+	bool choose_obj;
  protected :
 /** 
 	  * \brief  Condition for not bisecting the variable i
