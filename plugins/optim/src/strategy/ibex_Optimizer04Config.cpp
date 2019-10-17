@@ -186,20 +186,24 @@ Bsc& Optimizer04Config::get_bsc() {
 	else if (bisection== "largestfirstnoobj")
                 bs = &rec(new OptimLargestFirst(ext_sys->goal_var(),false,prec,0.5));
 	else if (bisection=="smearsum")
-		bs = &rec(new SmearSum(*ext_sys,prec,0.5));
+		bs = &rec(new SmearSum(*ext_sys,prec,
+				       rec(new OptimLargestFirst(ext_sys->goal_var(),true,prec,0.5))));
 	else if (bisection=="smearmax")
-		bs = &rec(new SmearMax(*ext_sys,prec,0.5));
+		bs = &rec(new SmearMax(*ext_sys,prec,
+				       rec(new OptimLargestFirst(ext_sys->goal_var(),true,prec,0.5))));
 	else if (bisection=="smearsumrel")
-		bs = &rec(new SmearSumRelative(*ext_sys,prec,0.5));
+                bs = &rec(new SmearSumRelative(*ext_sys,prec,
+					       rec(new OptimLargestFirst(ext_sys->goal_var(),true,prec,0.5))));
 	else if (bisection=="smearmaxrel")
-		bs = &rec(new SmearMaxRelative(*ext_sys,prec,0.5));
+		bs = &rec(new SmearMaxRelative(*ext_sys,prec,
+					       rec(new OptimLargestFirst(ext_sys->goal_var(),true,prec,0.5))));
 	else if  (bisection=="lsmear")
-                bs = &rec (new LSmear(*ext_sys,eps_x,
-				      rec(new OptimLargestFirst(ext_sys->goal_var(),prec,0.5)),
+                bs = &rec (new LSmear(*ext_sys,prec,
+				      rec(new OptimLargestFirst(ext_sys->goal_var(),true,prec,0.5)),
 				      LSMEAR));
 	else if (bisection=="lsmearmg")
-	        bs = &rec (new LSmear(*ext_sys,eps_x,
-				      rec(new OptimLargestFirst(ext_sys->goal_var(),prec,0.5))));
+	        bs = &rec (new LSmear(*ext_sys,prec,
+				      rec(new OptimLargestFirst(ext_sys->goal_var(),true,prec,0.5))));
 	else {
 		stringstream ss;
 		ss << "[optimizer04] " << bisection << " is not an implemented  bisection mode ";
