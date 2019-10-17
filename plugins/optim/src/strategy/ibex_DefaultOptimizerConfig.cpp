@@ -170,7 +170,7 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 
 	return rec(new LSmear(
 			get_ext_sys(),eps_x,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),eps_x,default_bisect_ratio))),
+			rec(new OptimLargestFirst(get_ext_sys().goal_var(),true,eps_x,default_bisect_ratio))),
 			BSC_TAG);
 }
 
