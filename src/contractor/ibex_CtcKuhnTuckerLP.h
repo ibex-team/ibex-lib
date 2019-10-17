@@ -83,6 +83,8 @@ protected:
 	 * See constructor.
 	 */
 	bool reject_unbounded;
+
+	Linearizer* _lr; // kept for cleanup only
 };
 
 } /* namespace ibex */

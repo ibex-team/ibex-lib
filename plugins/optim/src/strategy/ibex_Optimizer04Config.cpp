@@ -111,7 +111,7 @@ unsigned int Optimizer04Config::nb_var() {
 }
 
 
-Linearizer& Optimizer04Config::get_linear_relax() {
+Linearizer* Optimizer04Config::get_linear_relax() {
 	Linearizer* lr;
 
 	if (linearrelaxation=="art")
@@ -123,8 +123,8 @@ Linearizer& Optimizer04Config::get_linear_relax() {
 	else if (linearrelaxation=="compo")
 #ifdef _IBEX_WITH_AFFINE_
 		lr = &rec(new LinearizerCompo(
-				rec(new LinearizerAffine2(*ext_sys)),
-				rec(new LinearizerXTaylor(sys))));
+				rec(new LinearizerXTaylor(*ext_sys)),
+				rec(new LinearizerAffine2(*ext_sys))));
 #else
 	ibex_error("[Optimizer04Config]: COMPO mode requires \"--with-affine\" option");
 #endif

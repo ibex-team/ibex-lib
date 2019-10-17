@@ -12,8 +12,8 @@
 
 namespace ibex {
 
-LinearizerCompo::LinearizerCompo(const Linearizer& l1, const Linearizer& l2) :
-		Linearizer(l1.nb_var()), l1(l1), l2(2) {
+LinearizerCompo::LinearizerCompo(Linearizer& l1, Linearizer& l2) :
+		Linearizer(l1.nb_var()), l1(l1), l2(l2) {
 
 	if (l1.nb_var()!=l2.nb_var())
 		ibex_error("[LinearizerCompo] cannot compose linearizers with different number of variables");

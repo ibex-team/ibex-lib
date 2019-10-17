@@ -18,7 +18,8 @@ CtcKuhnTuckerLP::CtcKuhnTuckerLP(const NormalizedSystem& _sys, bool reject_unbou
 		reject_unbounded(reject_unbounded) {
 	try {
 		kkt = new KuhnTuckerSystem(_sys, true);
-		ph = new CtcPolytopeHull(*new LinearizerXTaylor(*kkt));
+		_lr = new LinearizerXTaylor(*kkt);
+		ph = new CtcPolytopeHull(*_lr); // note: I would prefer to use CtcLinearRelax directly.
 
 	} catch(Exception&) {
 		//TODO: replace with ExprDiffException.
@@ -32,7 +33,7 @@ CtcKuhnTuckerLP::CtcKuhnTuckerLP(const NormalizedSystem& _sys, bool reject_unbou
 CtcKuhnTuckerLP::~CtcKuhnTuckerLP() {
 	if (kkt) {
 		delete kkt;
-		delete &ph->lr;
+		delete _lr;
 		delete ph;
 	}
 }

@@ -19,14 +19,14 @@ namespace ibex {
  *
  * \brief Composition of linearizations (logical AND).
  *
- * Allows to cumulate two linear programs in a single one.
+ * Allows to merge two linear programs in a single one.
  */
-class LinearizerCompo {
+class LinearizerCompo : public Linearizer {
 public:
 	/**
 	 * \brief Build a composition of two linearizers.
 	 */
-	LinearizerCompo(const Linearizer& l1, const Linearizer& l2);
+	LinearizerCompo(Linearizer& l1, Linearizer& l2);
 
 	/**
 	 * \brief Add constraints in a LP solver.
@@ -36,7 +36,7 @@ public:
 	 * \return the number of constraints (possibly 0) or -1 if the linear system is
 	 *         infeasible.
 	 */
-	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver)=0;
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
 
 	/**
 	 * \brief Add constraints in a LP solver.
