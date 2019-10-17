@@ -43,6 +43,8 @@ protected:
 	virtual int goal_var();
 	// ============================================================================
 
+	Linearizer& get_linear_relax();
+
 	NormalizedSystem *norm_sys;
 	ExtendedSystem *ext_sys;
 	std::string filename;

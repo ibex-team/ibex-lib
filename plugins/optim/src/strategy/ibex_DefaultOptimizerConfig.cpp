@@ -20,7 +20,6 @@
 #include "ibex_LSmear.h"
 #include "ibex_LoupFinderDefault.h"
 #include "ibex_LoupFinderCertify.h"
-#include "ibex_LinearizerCombo.h"
 #include "ibex_Array.h"
 #include "ibex_Random.h"
 #include "ibex_CellBeamSearch.h"

@@ -356,7 +356,7 @@ Interval AttractionRegion::find_level_set_optim(double cmin, double cmax, double
 	CtcAcid acid(ext_sys, hc4_2, true);
 
 #ifdef RELEASE_2_5
-	LinearizerCombo linear_relax(ext_sys,LinearizerCombo::XNEWTON);
+	LinearizerXTaylor linear_relax(ext_sys);
 	CtcPolytopeHull polytope(linear_relax);
 #else
 	LinearRelaxCombo linear_relax(ext_sys,LinearRelaxCombo::XNEWTON);

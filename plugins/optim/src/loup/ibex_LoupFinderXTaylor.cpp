@@ -15,7 +15,7 @@ using namespace std;
 namespace ibex {
 
 //TODO: remove this recipe for the argument of the max number of iterations of the LP solver
-LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT), lp_solver(sys.nb_var,
+LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT,LinearizerXTaylor::RANDOM), lp_solver(sys.nb_var,
 		sys.nb_var*3 > LPSolver::default_max_iter ? LPSolver::default_max_iter : sys.nb_var*3) {
 //	nb_simplex=0;
 //	diam_simplex=0;

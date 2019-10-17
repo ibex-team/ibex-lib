@@ -8,7 +8,7 @@
 //============================================================================
 
 #include "ibex_CtcKuhnTuckerLP.h"
-#include "ibex_LinearizerCombo.h"
+#include "ibex_LinearizerXTaylor.h"
 
 using namespace std;
 
@@ -18,7 +18,8 @@ CtcKuhnTuckerLP::CtcKuhnTuckerLP(const NormalizedSystem& _sys, bool reject_unbou
 		reject_unbounded(reject_unbounded) {
 	try {
 		kkt = new KuhnTuckerSystem(_sys, true);
-		ph = new CtcPolytopeHull(*new LinearizerCombo (*kkt,LinearizerCombo::XNEWTON));
+		ph = new CtcPolytopeHull(*new LinearizerXTaylor(*kkt));
+
 	} catch(Exception&) {
 		//TODO: replace with ExprDiffException.
 		// Currently, DimException is also sometimes raised.
@@ -31,6 +32,7 @@ CtcKuhnTuckerLP::CtcKuhnTuckerLP(const NormalizedSystem& _sys, bool reject_unbou
 CtcKuhnTuckerLP::~CtcKuhnTuckerLP() {
 	if (kkt) {
 		delete kkt;
+		delete &ph->lr;
 		delete ph;
 	}
 }

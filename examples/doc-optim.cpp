@@ -70,7 +70,7 @@ int main() {
 
   CtcAcid acid(ext_sys, hc4_2);
 
-  LinearizerCombo linear_relax(ext_sys,LinearizerCombo::XNEWTON);
+  LinearizerXTaylor linear_relax(ext_sys);
 
   CtcPolytopeHull polytope(linear_relax);
 

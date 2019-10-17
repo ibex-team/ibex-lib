@@ -24,12 +24,16 @@
 #include "ibex_Random.h"
 #include "ibex_NormalizedSystem.h"
 #include "ibex_LinearizerXTaylor.h"
-#include "ibex_LinearizerCombo.h"
+#include "ibex_LinearizerCompo.h"
 #include "ibex_CellHeap.h"
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_CellBeamSearch.h"
 #include "ibex_LoupFinderDefault.h"
 #include "ibex_SyntaxError.h"
+
+#ifdef _IBEX_WITH_AFFINE_
+#include "ibex_LinearizerAffine2.h"
+#endif
 
 #include <sstream>
 #include <vector>
@@ -106,6 +110,36 @@ unsigned int Optimizer04Config::nb_var() {
 	return sys->nb_var;
 }
 
+
+Linearizer& Optimizer04Config::get_linear_relax() {
+	Linearizer* lr;
+
+	if (linearrelaxation=="art")
+#ifdef _IBEX_WITH_AFFINE_
+		lr = &rec(new LinearizerAffine2(*ext_sys));
+#else
+	ibex_error("[Optimizer04Config]: ART mode requires \"--with-affine\" option");
+#endif
+	else if (linearrelaxation=="compo")
+#ifdef _IBEX_WITH_AFFINE_
+		lr = &rec(new LinearizerCompo(
+				rec(new LinearizerAffine2(*ext_sys)),
+				rec(new LinearizerXTaylor(sys))));
+#else
+	ibex_error("[Optimizer04Config]: COMPO mode requires \"--with-affine\" option");
+#endif
+	else if (linearrelaxation=="xn")
+		lr = &rec(new LinearizerXTaylor(*ext_sys));
+/*	else {
+			stringstream ss;
+			ss << "[optimizer04] " << linearrelaxation << " is not an implemented relaxation mode ";
+			ibex_error(ss.str().c_str());
+		}
+*/
+
+	return lr;
+}
+
 Ctc& Optimizer04Config::get_ctc() {
 
 	// the first contractor called
@@ -138,15 +172,7 @@ Ctc& Optimizer04Config::get_ctc() {
 		ibex_error(ss.str().c_str());
 	}
 
-	Linearizer* lr;
-	if (linearrelaxation=="art")
-		lr = &rec(new LinearizerCombo(*ext_sys,LinearizerCombo::ART));
-	else if (linearrelaxation=="compo")
-		lr = &rec(new LinearizerCombo(*ext_sys,LinearizerCombo::COMPO));
-	else if (linearrelaxation=="xn")
-		lr = &rec(new LinearizerXTaylor(*ext_sys, LinearizerXTaylor::RELAX, LinearizerXTaylor::RANDOM_OPP));
-	//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
-	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
+	Linearizer* lr = get_linear_relax();
 	Ctc* cxn;
 	CtcPolytopeHull* cxn_poly;
 	CtcCompo* cxn_compo;

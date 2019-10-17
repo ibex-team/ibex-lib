@@ -76,7 +76,7 @@ public:
 	 * \param max_diam_deriv  - The maximum diameter of the box for the linear solver (default value 1.e6).
 	 * 	  				        Soplex may lose solutions when it is called with "big" domains.
 	 */
-	LinearizerXTaylor(const System& sys, approx_mode mode, corner_policy corners=RANDOM, slope_formula slope=HANSEN);
+	LinearizerXTaylor(const System& sys, approx_mode mode, corner_policy corners=RANDOM_OPP, slope_formula slope=HANSEN);
 
 	/**
 	 * \brief Deletes this.
