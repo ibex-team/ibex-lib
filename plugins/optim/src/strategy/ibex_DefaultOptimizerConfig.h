@@ -12,7 +12,7 @@
 #define __IBEX_DEFAULT_OPTIMIZER_CONFIG_H__
 
 #include "ibex_OptimizerConfig.h"
-#include "ibex_Memory.h"
+#include "ibex_OptimMemory.h"
 #include "ibex_ExtendedSystem.h"
 
 namespace ibex {

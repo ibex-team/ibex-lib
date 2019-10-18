@@ -11,7 +11,9 @@
 #ifndef __IBEX_OPTIMIZER_04_CONFIG_
 #define __IBEX_OPTIMIZER_04_CONFIG_
 
-#include "ibex_DefaultOptimizerConfig.h"
+#include "ibex_OptimizerConfig.h"
+#include "ibex_OptimMemory.h"
+#include "ibex_ExtendedSystem.h"
 
 namespace ibex {
 

@@ -66,8 +66,6 @@ bool LoupFinderProbing::line_probing(Vector& loup_point, double& loup, const Int
 
 	int n=sys.nb_var;
 
-	bool loup_changed=false;
-
 	// ------------------------------------------------------------------------
 	// Calculates the gradient of f at the startpoint of the box (once for all)
 	// ------------------------------------------------------------------------
