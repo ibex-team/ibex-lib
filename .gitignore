@@ -17,7 +17,6 @@
 
 # Executables
 *.exe
-*.out
 *.app
 
 # eclipse settings

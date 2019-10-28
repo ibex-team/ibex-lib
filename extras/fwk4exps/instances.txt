@@ -61,7 +61,7 @@
 ../../plugins/optim/benchs/coconutbenchmark-library2/hs089.nl
 ../../plugins/optim/benchs/coconutbenchmark-library2/hs090.nl
 ../../plugins/optim/benchs/coconutbenchmark-library2/hs091.nl
-../../plugins/optim/benchs/coconutbenchmark-library2/hs092.nl
+../../plugins/optim/benchs/coconutbenchmark-library2/hs092.nl*
 ../../plugins/optim/benchs/coconutbenchmark-library2/hs093.nl
 ../../plugins/optim/benchs/coconutbenchmark-library2/hs095.nl
 ../../plugins/optim/benchs/coconutbenchmark-library2/hs096.nl
@@ -116,7 +116,7 @@
 ../../plugins/optim/benchs/coconutbenchmark-library2/prodpl0.nl
 ../../plugins/optim/benchs/coconutbenchmark-library2/prodpl1.nl
 ../../plugins/optim/benchs/coconutbenchmark-library2/rk23.nl
-../../plugins/optim/benchs/coconutbenchmark-library2/robot.nl
+../../plugins/optim/benchs/coconutbenchmark-library2/robot.nl*
 ../../plugins/optim/benchs/coconutbenchmark-library2/s365mod.nl
 ../../plugins/optim/benchs/coconutbenchmark-library2/ssnlbeam.nl
 ../../plugins/optim/benchs/coconutbenchmark-library2/synthes1.nl
@@ -225,9 +225,9 @@
 ../../plugins/optim/benchs/easy/test_infinity1.bch
 ../../plugins/optim/benchs/easy/test_infinity2.bch
 ../../plugins/optim/benchs/easy/wall.bch
-../../plugins/optim/benchs/hard/chem-1.bch
+../../plugins/optim/benchs/hard/chem-1.bch*
 ../../plugins/optim/benchs/hard/chem.bch
-../../plugins/optim/benchs/hard/chembis.bch
+../../plugins/optim/benchs/hard/chembis.bch*
 ../../plugins/optim/benchs/hard/ex6_1_3.bch
 ../../plugins/optim/benchs/hard/ex6_2_10.bch
 ../../plugins/optim/benchs/hard/ex8_5_1bis.bch

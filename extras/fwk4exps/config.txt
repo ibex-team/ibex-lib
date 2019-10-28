@@ -6,25 +6,38 @@ factors = 1 0.833 0.665 0.5 0.2 0.1
 sig_gain = 1.2
 max_seeds = 1
 min_seeds = 1
-algo_names = xn aff xn-aff
+algo_names = xn aff xn-aff par xn-par
 
 algos = xn aff par xn-aff xn-par xn-par-aff
 
+[par]
+exec = "../../__build__/plugins/optim/ibexopt"
+params = _INSTANCE --lm=par -a 1e-6 --eps-x=1e-7 -r 1e-6 -t 3600
+outputpos_times = 0
+outputpos_boxes = 0
+
 [xn]
 exec = "../../__build__/plugins/optim/ibexopt"
-params = _INSTANCE --lm=xn -a 1e-6 --eps-x=1e-7 -r 1e-6 -t 600
+params = _INSTANCE --lm=xn -a 1e-6 --eps-x=1e-7 -r 1e-6 -t 3600
 outputpos_times = 0
 outputpos_boxes = 0
 
 [aff]
 exec = "../../__build__/plugins/optim/ibexopt"
-params = _INSTANCE --lm=xn -a 1e-6 --eps-x=1e-7 -r 1e-6 -t 600
+params = _INSTANCE --lm=aff -a 1e-6 --eps-x=1e-7 -r 1e-6 -t 3600
 outputpos_times = 0
 outputpos_boxes = 0
 
 [xn-aff]
 exec = "../../__build__/plugins/optim/ibexopt"
-params = _INSTANCE --lm=xn -a 1e-6 --eps-x=1e-7 -r 1e-6 -t 600
+params = _INSTANCE --lm=xn-aff -a 1e-6 --eps-x=1e-7 -r 1e-6 -t 3600
 outputpos_times = 0
 outputpos_boxes = 0
+
+[xn-par]
+exec = "../../__build__/plugins/optim/ibexopt"
+params = _INSTANCE --lm=xn-aff -a 1e-6 --eps-x=1e-7 -r 1e-6 -t 3600
+outputpos_times = 0
+outputpos_boxes = 0
+
 
