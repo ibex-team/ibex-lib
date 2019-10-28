@@ -88,6 +88,19 @@ void DefaultOptimizerConfig::set_rigor(bool _rigor) {
 }
 
 void DefaultOptimizerConfig::set_inHC4(bool _inHC4) {
+	// check if inHC4 can be applied if it
+	// has not already been done.
+	if (!inHC4 && _inHC4 && sys.nb_ctr>0) {
+		// *******
+		// Warning: generates components of f_ctrs!!
+		//          (but LoupFinderInHC4 does anyway)
+		// *******
+		for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
+			if (!sys.f_ctrs[i].inhc4revise().implemented()) {
+				return;
+			}
+		}
+	}
 	inHC4 = _inHC4;
 }
 

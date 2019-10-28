@@ -70,6 +70,10 @@ public:
 	 *
 	 * If true, feasibility is also tried with LoupFinderInHC4.
 	 * By default: #default_inHC4.
+	 *
+	 * Currently, the mode may not be activated because
+	 * inHC4 is not implemented for all operators.
+	 * This can be checked using #with_inHC4.
 	 */
 	void set_inHC4(bool inHC4);
 

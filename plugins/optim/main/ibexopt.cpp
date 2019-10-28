@@ -216,14 +216,6 @@ int main(int argc, char** argv) {
 			cout << "  output COV file:\t" << output_cov_file << "\n";
 		}
 
-		bool inHC4=true;
-
-		if (sys->nb_ctr>0 && !sys->f_ctrs.inhc4revise().implemented()) {
-			inHC4=false;
-		}
-
-		config.set_inHC4(inHC4);
-
 		// This option limits the search time
 		if (timeout) {
 			if (!quiet)
@@ -238,7 +230,10 @@ int main(int argc, char** argv) {
 			config.set_trace(trace.Get());
 		}
 
-		if (!inHC4) {
+		// Question: is really inHC4 good?
+		config.set_inHC4(true);
+
+		if (!config.with_inHC4()) {
 			cerr << "\n  \033[33mwarning: inHC4 disabled\033[0m (unimplemented operator)" << endl;
 		}
 
