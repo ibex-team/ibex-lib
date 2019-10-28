@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
 	args::ValueFlag<double> eps_x(parser, "float", _eps_x.str(), {"eps-x"});
 	args::ValueFlag<double> initial_loup(parser, "float", "Intial \"loup\" (a priori known upper bound).", {"initial-loup"});
-	args::ValueFlag<string> lin_method(parser, "string", "Linearization method (xn|aff|par|xn-aff|xn-par|xn-par-aff).", {"lm"});
+	args::ValueFlag<string> lin_method(parser, "string", "Linearization method (xn|art|par|hyb|xn-par|xn-par-aff).", {"lm"});
 	args::ValueFlag<string> input_file(parser, "filename", "COV input file. The file contains "
 			"optimization data in the COV (binary) format.", {'i',"input"});
 	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
@@ -173,9 +173,9 @@ int main(int argc, char** argv) {
 				cout << "  Lineariztion Method:\t" << lin_method.Get().c_str() << "\n";
 			}
 			if(lin_method.Get()=="xn") lm=LinearizerCombo::XNEWTON;
-			else if(lin_method.Get()=="aff") lm=LinearizerCombo::AFFINE2;
+			else if(lin_method.Get()=="art") lm=LinearizerCombo::AFFINE2;
 			else if(lin_method.Get()=="par") lm=LinearizerCombo::PARALLEL;
-			else if(lin_method.Get()=="xn-aff") lm=LinearizerCombo::COMPO;
+			else if(lin_method.Get()=="hyb") lm=LinearizerCombo::COMPO;
 			else if(lin_method.Get()=="xn-par") lm=LinearizerCombo::TAY_PAR;
 			else if(lin_method.Get()=="xn-par-aff") lm=LinearizerCombo::TAY_PAR_AFF;
 			else cout << "  The lineariztion method:\t" << lin_method.Get().c_str() << "is not implemmented\n";

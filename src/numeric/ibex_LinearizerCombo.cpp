@@ -120,7 +120,6 @@ int LinearizerCombo::linearize(const IntervalVector& box, LPSolver& lp_solver, B
 	case TAYLOR:
 	case HANSEN:
 		cont = myxnewton->linearize(box,lp_solver,prop);
-		std::cout<< cont << std::endl;
 		break;
 
 	case PARALLEL:
