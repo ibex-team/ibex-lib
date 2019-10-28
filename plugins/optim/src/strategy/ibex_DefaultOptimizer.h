@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_DefaultOptimizer.h
 // Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
@@ -50,7 +50,9 @@ public:
 			bool rigor=false, bool inHC4=true,
 			double random_seed=default_random_seed,
     		double eps_x=Optimizer::default_eps_x,
-			LinearizerCombo::linear_mode lm=LinearizerCombo::XNEWTON);
+			LinearizerCombo::linear_mode lm=LinearizerCombo::XNEWTON,
+      bool ssr=false,
+      bool lbub=false );
 
 	/** Default random seed: 1.0. */
 	static constexpr double default_random_seed = 1.0;

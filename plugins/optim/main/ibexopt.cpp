@@ -44,6 +44,8 @@ int main(int argc, char** argv) {
 	args::ValueFlag<double> eps_x(parser, "float", _eps_x.str(), {"eps-x"});
 	args::ValueFlag<double> initial_loup(parser, "float", "Intial \"loup\" (a priori known upper bound).", {"initial-loup"});
 	args::ValueFlag<string> lin_method(parser, "string", "Linearization method (xn|art|par|hyb|xn-par|xn-par-aff).", {"lm"});
+	args::Flag lbub(parser, "string", "min_lbub instead of Feasible Diving.", {"lbub"});
+	args::Flag ssr(parser, "string", "SmearSumRel instead of lsmear.", {"ssr"});
 	args::ValueFlag<string> input_file(parser, "filename", "COV input file. The file contains "
 			"optimization data in the COV (binary) format.", {'i',"input"});
 	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
@@ -229,7 +231,7 @@ int main(int argc, char** argv) {
 				eps_h ?    eps_h.Get() :     NormalizedSystem::default_eps_h,
 				rigor, inHC4,
 				random_seed? random_seed.Get() : DefaultOptimizer::default_random_seed,
-				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x, lm
+				eps_x ?    eps_x.Get() :     Optimizer::default_eps_x, lm, ssr, lbub
 				);
 
 		// This option limits the search time

@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_DefaultOptimizer.cpp
 // Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -58,16 +58,18 @@ ExtendedSystem& DefaultOptimizer::get_ext_sys(const System& sys, double eps_h) {
 }
 
 DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double abs_eps_f, double eps_h, bool rigor, bool inHC4, double random_seed, double eps_x,
-		LinearizerCombo::linear_mode lm) :
+		LinearizerCombo::linear_mode lm, bool ssr, bool lbub ) :
 		Optimizer(sys.nb_var,
 			  ctc(get_ext_sys(sys,eps_h),lm), // warning: we don't know which argument is evaluated first
-//			  rec(new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
+			  rec(ssr?
+					new SmearSumRelative(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio))) :
+				  new LSmear(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
 
-			  rec(new LSmear(get_ext_sys(sys,eps_h),eps_x,rec(new OptimLargestFirst(get_ext_sys(sys,eps_h).goal_var(),eps_x,default_bisect_ratio)))),
 			  rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(get_norm_sys(sys,eps_h), inHC4))) :
 						 (LoupFinder*) new LoupFinderDefault(get_norm_sys(sys,eps_h), inHC4)),
-			  //			  (CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys(sys,eps_h)))
-			      (CellBufferOptim&) rec (new  CellBeamSearch (
+			      (CellBufferOptim&) rec (lbub?
+											 (CellBufferOptim*) new CellDoubleHeap(get_ext_sys(sys,eps_h)) :
+							         (CellBufferOptim*) new  CellBeamSearch (
 								       (CellHeap&) rec (new CellHeap (get_ext_sys(sys,eps_h))),
 								       (CellHeap&) rec (new CellHeap (get_ext_sys(sys,eps_h))),
 								       get_ext_sys(sys,eps_h))),
@@ -75,7 +77,7 @@ DefaultOptimizer::DefaultOptimizer(const System& sys, double rel_eps_f, double a
 			  eps_x,
 			  rel_eps_f,
 			  abs_eps_f) {
-  
+
 
 	RNG::srand(random_seed);
 
