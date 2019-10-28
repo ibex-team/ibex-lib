@@ -1,0 +1,10 @@
+../../plugins/optim/benchs/easy/ex5_2_2_case2.bch
+../../plugins/optim/benchs/unsolved/ex5_4_4.bch
+../../plugins/optim/benchs/blowup/ex7_2_4.bch
+../../plugins/optim/benchs/blowup/ex7_2_8.bch
+../../plugins/optim/benchs/easy/ex8_1_5.bch
+../../plugins/optim/benchs/unsolved/immun.bch
+../../plugins/optim/benchs/unsolved/linear.bch
+../../plugins/optim/benchs/coconutbenchmark-library2/hs104.nl
+../../plugins/optim/benchs/coconutbenchmark-library2/hs116.nl
+../../plugins/optim/benchs/easy/ex7_2_7.bch

@@ -1,0 +1,28 @@
+solved instances in standard strategy times
+mintime:0.000100
+<0.10 [0.10,0.20] [0.20,0.50] [0.50,0.67] [0.67,0.83] [0.83,1.00] [1.00,1.20] [1.20,1.50] [1.50,2.00] [2.00,5.00] [5.00,10.00] >10.00 
+       hyb   0   0   0   0   0   0  10  10   9   6   3   1 
+hyb 
+1.000000 10/0 
+1.200480 10/0 
+1.503759 9/0 
+2.000000 6/0 
+5.000000 3/0 
+10.000000 1/0 
+
+
+instances with significative gains (1.2)
+../../plugins/optim/benchs/easy/ex5_2_2_case2.bch 0 0 0 0 
+../../plugins/optim/benchs/unsolved/ex5_4_4.bch 1153 1153 669 669 
+../../plugins/optim/benchs/blowup/ex7_2_4.bch 140 140 22 22 
+../../plugins/optim/benchs/blowup/ex7_2_8.bch 60 60 21 21 
+../../plugins/optim/benchs/easy/ex8_1_5.bch 0 0 0 0 
+../../plugins/optim/benchs/unsolved/immun.bch 2884 2884 2235 2235 
+../../plugins/optim/benchs/unsolved/linear.bch 2496 2496 420 420 
+../../plugins/optim/benchs/coconutbenchmark-library2/hs104.nl 360 360 16 16 
+../../plugins/optim/benchs/coconutbenchmark-library2/hs116.nl 9 9 3 3 
+../../plugins/optim/benchs/easy/ex7_2_7.bch 1 1 0 0 
+
+gains
+0.000100 1.000000 10 2.670241 10 
+total time: 1.000000 2.097291 

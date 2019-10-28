@@ -1,7 +1,7 @@
-algos:xn aff xn-aff par xn-par 
-gains (average relative times):1.000000 1.226735 1.221480 0.674895 1.198216 
-gains (total time)            :1.000000 1.156166 1.144090 0.688392 1.142489 
-compared instances:228 231 230 234 232 
-runs    :311 311 311 311 311 
-L:  0  53  47 127  52 
-W:  0  86  74  30  69 
+algos:art hyb 
+gains (average relative times):1.000000 2.670241 
+gains (total time)            :1.000000 2.097291 
+compared instances: 10  10 
+runs    : 10  10 
+L:  0   0 
+W:  0  10 
