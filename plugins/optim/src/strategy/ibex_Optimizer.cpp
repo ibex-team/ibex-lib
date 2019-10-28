@@ -143,8 +143,8 @@ void Optimizer::update_uplo() {
 
 	if (! buffer.empty()) {
 		new_uplo= buffer.minimum();
-		if (new_uplo > loup) {
-			cout << " loup = " << loup << " new_uplo=" << new_uplo << endl;
+		if (new_uplo > loup && uplo_of_epsboxes > loup) {
+			cout << " loup = " << loup << " new_uplo=" << new_uplo <<  " uplo_of_epsboxes=" << uplo_of_epsboxes << endl;
 			ibex_error("optimizer: new_uplo>loup (please report bug)");
 		}
 		if (new_uplo < uplo) {
@@ -180,14 +180,14 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 
 	// the current box cannot be bisected.  ymin is a lower bound of the objective on this box
 	// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo,
-	//that indicates a lowerbound for the objective in all the small boxes
+	// that indicates a lowerbound for the objective in all the small boxes
 	// found by the precision criterion
 	assert (uplo_of_epsboxes >= uplo);
 	assert(ymin >= uplo);
 	if (uplo_of_epsboxes > ymin) {
 		uplo_of_epsboxes = ymin;
 		if (trace) {
-			cout << " unprocessable tiny box: now uplo<=" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
+			cout << " unprocessable tiny box: now uplo<=" << setprecision(12) <<  uplo_of_epsboxes << " uplo=" << uplo << endl;
 		}
 	}
 }
