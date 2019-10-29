@@ -143,15 +143,6 @@ public:
 	CPPUNIT_TEST(is_bisectable09);
 	CPPUNIT_TEST(is_bisectable10);
 
-	CPPUNIT_TEST(integer01);
-	CPPUNIT_TEST(integer02);
-	CPPUNIT_TEST(integer03);
-	CPPUNIT_TEST(integer04);
-	CPPUNIT_TEST(integer05);
-	CPPUNIT_TEST(integer06);
-	CPPUNIT_TEST(integer07);
-	CPPUNIT_TEST(integer08);
-
 	CPPUNIT_TEST(mid01);
 	CPPUNIT_TEST(mid02);
 	CPPUNIT_TEST(mid03);
@@ -360,15 +351,6 @@ private:
 	void distance21();
 	void distance22();
 	void distance23();
-
-	void integer01();
-	void integer02();
-	void integer03();
-	void integer04();
-	void integer05();
-	void integer06();
-	void integer07();
-	void integer08();
 
 	void mid01();
 	void mid02();

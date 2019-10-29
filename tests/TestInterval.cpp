@@ -242,35 +242,6 @@ void TestInterval::is_bisectable08()      {CPPUNIT_ASSERT(Interval(ibex::previou
 void TestInterval::is_bisectable09()      {CPPUNIT_ASSERT(!Interval(10,ibex::next_float(10)).is_bisectable()); }
 void TestInterval::is_bisectable10()      {CPPUNIT_ASSERT(!Interval(ibex::previous_float(0),0).is_bisectable()); }
 
-void TestInterval::integer01() {
-	Interval x=Interval::empty_set(); bwd_integer(x); check(x,Interval::empty_set());
-}
-void TestInterval::integer02() {
-	Interval x(NEG_INFINITY,-0.000001); bwd_integer(x); check(x,Interval(NEG_INFINITY,-1));
-}
-void TestInterval::integer03() {
-	Interval x(0.00000001,POS_INFINITY); bwd_integer(x); check(x,Interval(1.0,POS_INFINITY));
-}
-void TestInterval::integer04() {
-	Interval x=Interval::all_reals(); bwd_integer(x); check(x,Interval::all_reals());
-}
-
-void TestInterval::integer05() {
-	Interval x(0.01,2.99); bwd_integer(x); check(x,Interval(1,2));
-}
-
-void TestInterval::integer06() {
-	Interval x(-0.01,2.99); bwd_integer(x); check(x,Interval(0,2));
-}
-
-void TestInterval::integer07() {
-	Interval x(1.000000001,1.9999999999); bwd_integer(x); check(x,Interval::empty_set());
-}
-
-void TestInterval::integer08() {
-	Interval x(1e8, DBL_MAX); bwd_integer(x); check(x, Interval(1e8,DBL_MAX));
-}
-
 void TestInterval::mid01() {
 	check(Interval(0,2).mid(),1.0);
 }
