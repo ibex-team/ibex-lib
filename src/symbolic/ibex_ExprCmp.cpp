@@ -115,5 +115,8 @@ void ExprCmp::visit(const ExprAtan& e)  { visit_unary(e); }
 void ExprCmp::visit(const ExprAcosh& e) { visit_unary(e); }
 void ExprCmp::visit(const ExprAsinh& e) { visit_unary(e); }
 void ExprCmp::visit(const ExprAtanh& e) { visit_unary(e); }
+void ExprCmp::visit(const ExprFloor& e) { visit_unary(e); }
+void ExprCmp::visit(const ExprCeil& e)  { visit_unary(e); }
+
 
 } // namespace ibex

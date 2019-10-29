@@ -475,6 +475,14 @@ ExprAtanh::ExprAtanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
 	if (!expr.dim.is_scalar()) throw DimException("\"atanh\" expects a scalar argument");
 }
 
+ExprFloor::ExprFloor(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"floor\" expects a scalar argument");
+}
+
+ExprCeil::ExprCeil(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"ceil\" expects a scalar argument");
+}
+
 std::ostream& operator<<(std::ostream& os, const ExprNode& expr) {
   ExprPrinter().print(os,expr);
   return os;

@@ -79,6 +79,8 @@ protected:
 	void visit(const ExprAcosh& e);
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
+	void visit(const ExprFloor& e);
+	void visit(const ExprCeil& e);
 
 	DoubleIndex idx;
 	NodeMap<std::vector<std::pair<DoubleIndex, const ExprNode*> >*> idx_clones;

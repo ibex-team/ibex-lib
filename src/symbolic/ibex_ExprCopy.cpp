@@ -159,6 +159,8 @@ void ExprCopy::visit(const ExprAtan& e)  { visit(e.expr); clone.insert(e,&atan (
 void ExprCopy::visit(const ExprAcosh& e) { visit(e.expr); clone.insert(e,&acosh(EXPR)); }
 void ExprCopy::visit(const ExprAsinh& e) { visit(e.expr); clone.insert(e,&asinh(EXPR)); }
 void ExprCopy::visit(const ExprAtanh& e) { visit(e.expr); clone.insert(e,&atanh(EXPR)); }
+void ExprCopy::visit(const ExprFloor& e) { visit(e.expr); clone.insert(e,&floor(EXPR)); }
+void ExprCopy::visit(const ExprCeil& e)  { visit(e.expr); clone.insert(e,&ceil (EXPR)); }
 
 } // end ibex namespace
 

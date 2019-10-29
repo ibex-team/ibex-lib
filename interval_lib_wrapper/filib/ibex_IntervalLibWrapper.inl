@@ -532,7 +532,21 @@ inline Interval min(const Interval& x, const Interval& y) {
 }
 
 inline Interval integer(const Interval& x) {
-	return Interval(std::ceil(x.lb()),std::floor(x.ub()));
+	if (x.is_empty()) return Interval::empty_set();
+	double l= x.lb()==NEG_INFINITY? NEG_INFINITY : ceil(x.lb());
+	double r= x.ub()==POS_INFINITY? POS_INFINITY : floor(x.ub());
+	if (l>r) return Interval::empty_set();
+	else return Interval(l,r);
+}
+
+inline Interval floor(const Interval& x) {
+	if (x.is_empty()) return Interval::empty_set();
+	else return Interval(std::floor(x.lb()),std::floor(x.ub()));
+}
+
+inline Interval ceil(const Interval& x) {
+	if (x.is_empty()) return Interval::empty_set();
+	else return Interval(std::ceil(x.lb()),std::ceil(x.ub()));
 }
 
 inline bool bwd_mul(const Interval& y, Interval& x1, Interval& x2) {

@@ -418,5 +418,7 @@ void ExprLinearity::visit(const ExprAtan& e)   { unary(e,atan,false);}
 void ExprLinearity::visit(const ExprAcosh& e)  { unary(e,acosh,false);}
 void ExprLinearity::visit(const ExprAsinh& e)  { unary(e,asinh,false);}
 void ExprLinearity::visit(const ExprAtanh& e)  { unary(e,atanh,false);}
+void ExprLinearity::visit(const ExprFloor& e)  { unary(e,floor,false);}
+void ExprLinearity::visit(const ExprCeil& e)   { unary(e,ceil,false);}
 
 } /* namespace ibex */

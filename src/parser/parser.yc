@@ -56,7 +56,7 @@ using namespace std;
 %token TK_MIN TK_MAX TK_INF TK_MID TK_SUP TK_SIGN TK_ABS TK_SUM
 %token TK_SQRT TK_EXPO  TK_LOG 
 %token TK_COS  TK_SIN   TK_TAN  TK_ACOS  TK_ASIN  TK_ATAN TK_ATAN2
-%token TK_COSH TK_SINH  TK_TANH TK_ACOSH TK_ASINH TK_ATANH
+%token TK_COSH TK_SINH  TK_TANH TK_ACOSH TK_ASINH TK_ATANH TK_FLOOR TK_CEIL
 %token TK_LEQ  TK_GEQ   TK_EQU  TK_ASSIGN TK_CHI
 %token TK_BEGIN TK_END TK_FOR TK_FROM TK_TO TK_RETURN
 %token TK_CTRS TK_MINIMIZE
@@ -290,6 +290,8 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | TK_ACOSH '(' expr ')'           { $$ = acosh($3);     }
               | TK_ASINH '(' expr ')'           { $$ = asinh($3);     }
               | TK_ATANH '(' expr ')'           { $$ = atanh($3);     }
+              | TK_FLOOR '(' expr ')'           { $$ = floor($3);     }
+              | TK_CEIL  '(' expr ')'           { $$ = ceil($3);     }
               | TK_CHI '(' expr ',' expr ',' expr ')'  
                                                 { $$ = chi($3,$5,$7); }
               | '+' expr                        { $$ = $2; }

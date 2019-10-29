@@ -73,6 +73,8 @@ protected:
 	void visit(const ExprAcosh& e);
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
+	void visit(const ExprFloor& e);
+	void visit(const ExprCeil& e);
 
 	NodeMap<const ExprNode*> peer;
 

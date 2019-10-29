@@ -286,6 +286,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::ACOSH:    e.lab=new LabelConst(acosh(arg_cst[0])); break;
 			case P_ExprNode::ASINH:    e.lab=new LabelConst(asinh(arg_cst[0])); break;
 			case P_ExprNode::ATANH:    e.lab=new LabelConst(atanh(arg_cst[0])); break;
+			case P_ExprNode::FLOOR:    e.lab=new LabelConst(floor(arg_cst[0])); break;
+			case P_ExprNode::CEIL:     e.lab=new LabelConst(ceil(arg_cst[0])); break;
 			case P_ExprNode::DIFF:
 				throw SyntaxError("\"diff\" cannot be applied to constants"); break;
 			case P_ExprNode::INF:
@@ -361,6 +363,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::ACOSH:     node=&acosh(arg_node[0]); break;
 		case P_ExprNode::ASINH:     node=&asinh(arg_node[0]); break;
 		case P_ExprNode::ATANH:     node=&atanh(arg_node[0]); break;
+		case P_ExprNode::FLOOR:     node=&floor(arg_node[0]); break;
+		case P_ExprNode::CEIL:      node=&ceil (arg_node[0]); break;
 		case P_ExprNode::DIFF:      node=&diff (arg_node); break;
 		case P_ExprNode::INF:       throw SyntaxError("\"inf\" operator requires constant interval"); break;
 		case P_ExprNode::MID:       throw SyntaxError("\"mid\" operator requires constant interval"); break;
@@ -402,9 +406,9 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 		// try to see if the exponent is an integer
 		if (itv_right.is_degenerated()) {
 			double x=itv_right.mid();
-			if (floor(x)==x) {
+			if (std::floor(x)==x) {
 				right_type=IBEX_INTEGER;
-				int_right=(int)floor(x);
+				int_right=(int) std::floor(x);
 			}
 		}
 	} else

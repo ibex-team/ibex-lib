@@ -72,6 +72,7 @@ public:
 		SQR, SQRT, EXP, LOG,
 		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
 		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
+		FLOOR, CEIL,
 		INF, MID, SUP,  // deprecated??
 		DIFF, UNARY_OP, BINARY_OP
 	} operation;
@@ -452,6 +453,14 @@ inline const P_ExprNode* asinh(const P_ExprNode* exp) {
 
 inline const P_ExprNode* atanh(const P_ExprNode* exp) {
 	return new P_ExprNode(P_ExprNode::ATANH,*exp);
+}
+
+inline const P_ExprNode* floor(const P_ExprNode* exp) {
+	return new P_ExprNode(P_ExprNode::FLOOR,*exp);
+}
+
+inline const P_ExprNode* ceil(const P_ExprNode* exp) {
+	return new P_ExprNode(P_ExprNode::CEIL,*exp);
 }
 
 inline const P_ExprNode* operator-(const P_ExprNode& exp) {

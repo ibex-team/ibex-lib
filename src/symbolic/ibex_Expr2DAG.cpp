@@ -145,5 +145,7 @@ void Expr2DAG::visit(const ExprAtan& e)   { visit_unary(e); }
 void Expr2DAG::visit(const ExprAcosh& e)  { visit_unary(e); }
 void Expr2DAG::visit(const ExprAsinh& e)  { visit_unary(e); }
 void Expr2DAG::visit(const ExprAtanh& e)  { visit_unary(e); }
+void Expr2DAG::visit(const ExprFloor& e)  { visit_unary(e); }
+void Expr2DAG::visit(const ExprCeil& e)   { visit_unary(e); }
 
 } // namespace ibex

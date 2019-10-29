@@ -286,6 +286,18 @@ public:
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
+	/** Visit a floor (Implementation is not mandatory).
+	 * By default call init(const ExprUnaryOp&). */
+	virtual T* init(const ExprFloor& e, T& expr_deco) {
+		return init((const ExprUnaryOp&) e, expr_deco);
+	}
+
+	/** Visit a ceil (Implementation is not mandatory).
+	 * By default call init(const ExprUnaryOp&). */
+	virtual T* init(const ExprCeil& e, T& expr_deco) {
+		return init((const ExprUnaryOp&) e, expr_deco);
+	}
+
 //private:
 
 	template<class Node>
@@ -334,6 +346,8 @@ public:
 	virtual void visit(const ExprAcosh& e)           { __visit_unary<ExprAcosh>(e); }
 	virtual void visit(const ExprAsinh& e)           { __visit_unary<ExprAsinh>(e); }
 	virtual void visit(const ExprAtanh& e)           { __visit_unary<ExprAtanh>(e); }
+	virtual void visit(const ExprFloor& e)           { __visit_unary<ExprFloor>(e); }
+	virtual void visit(const ExprCeil& e)            { __visit_unary<ExprCeil>(e); }
 	virtual void visit(const ExprConstant& e)        { __visit_0ary<ExprConstant>(e); }
 	virtual void visit(const ExprSymbol& e)          { __visit_0ary<ExprSymbol>(e); }
 };

@@ -663,5 +663,7 @@ void ExprSimplify::visit(const ExprAtan& e)  { unary(e, (_domain_una_op) atan, E
 void ExprSimplify::visit(const ExprAcosh& e) { unary(e, (_domain_una_op) acosh,ExprAcosh::new_,false); }
 void ExprSimplify::visit(const ExprAsinh& e) { unary(e, (_domain_una_op) asinh,ExprAsinh::new_,false); }
 void ExprSimplify::visit(const ExprAtanh& e) { unary(e, (_domain_una_op) atanh,ExprAtanh::new_,false); }
+void ExprSimplify::visit(const ExprFloor& e) { unary(e, (_domain_una_op) floor,ExprFloor::new_,false); }
+void ExprSimplify::visit(const ExprCeil& e)  { unary(e, (_domain_una_op) ceil, ExprCeil::new_, false); }
 
 } /* namespace ibex */

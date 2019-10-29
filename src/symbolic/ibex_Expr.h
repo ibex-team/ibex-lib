@@ -1437,6 +1437,56 @@ private:
 	ExprAtanh(const ExprAtanh&); // copy constructor forbidden
 };
 
+/**
+ * \ingroup symbolic
+ * \brief Floor of an expression.
+ */
+class ExprFloor : public ExprUnaryOp {
+
+public:
+	/** Create an equality constraint Floor(expr)=expr. */
+	const ExprCtr& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint Floor(expr)=value. */
+	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
+
+	static const ExprFloor& new_(const ExprNode& expr) {
+		return *new ExprFloor(expr);
+	}
+
+private:
+	ExprFloor(const ExprNode& expr);
+	ExprFloor(const ExprFloor&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup symbolic
+ * \brief Ceil of an expression.
+ */
+class ExprCeil : public ExprUnaryOp {
+
+public:
+	/** Create an equality constraint Ceil(expr)=expr. */
+	const ExprCtr& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint Ceil(expr)=value. */
+	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
+
+	static const ExprCeil& new_(const ExprNode& expr) {
+		return *new ExprCeil(expr);
+	}
+
+private:
+	ExprCeil(const ExprNode& expr);
+	ExprCeil(const ExprCeil&); // copy constructor forbidden
+};
+
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
@@ -1715,6 +1765,12 @@ inline const ExprAsinh& asinh(const ExprNode& exp) { return ExprAsinh::new_(exp)
 
 /** Inverse hyperbolic tangent of an expression */
 inline const ExprAtanh& atanh(const ExprNode& exp) { return ExprAtanh::new_(exp); }
+
+/** Floor of an expression */
+inline const ExprFloor& floor(const ExprNode& exp) { return ExprFloor::new_(exp); }
+
+/** Ceil of an expression */
+inline const ExprCeil& ceil(const ExprNode& exp) { return ExprCeil::new_(exp); }
 
 /** Raises \a left to the power \a expnon.
     \note operator ^ is not used because its associativity and priority defined in C++ does
