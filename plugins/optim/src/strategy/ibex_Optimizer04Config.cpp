@@ -35,6 +35,10 @@
 #include "ibex_LinearizerAffine2.h"
 #endif
 
+#ifdef _IBEX_WITH_AMPL_
+#include "ibex_AmplInterface.h"
+#endif
+
 #include <sstream>
 #include <vector>
 
@@ -48,7 +52,7 @@ Optimizer04Config::Optimizer04Config(int argc, char** argv) {
 		if (argc<8) {
 			ibex_error("usage: optimizer04 filename filtering linear_relaxation bisection strategy [beamsize] prec goal_prec timelimit randomseed");
 		}
-#ifdef __IBEX_AMPL_INTERFACE_H__
+#ifdef _IBEX_WITH_AMPL_
 		std::size_t found = string(argv[1]).find(".nl");
 		if (found!=std::string::npos) {
 			AmplInterface interface (argv[1]);
