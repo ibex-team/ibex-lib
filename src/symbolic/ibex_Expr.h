@@ -1487,6 +1487,31 @@ private:
 	ExprCeil(const ExprCeil&); // copy constructor forbidden
 };
 
+/**
+ * \ingroup symbolic
+ * \brief Saw of an expression.
+ */
+class ExprSaw : public ExprUnaryOp {
+
+public:
+	/** Create an equality constraint Saw(expr)=expr. */
+	const ExprCtr& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint Saw(expr)=value. */
+	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
+
+	static const ExprSaw& new_(const ExprNode& expr) {
+		return *new ExprSaw(expr);
+	}
+
+private:
+	ExprSaw(const ExprNode& expr);
+	ExprSaw(const ExprSaw&); // copy constructor forbidden
+};
+
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
@@ -1771,6 +1796,9 @@ inline const ExprFloor& floor(const ExprNode& exp) { return ExprFloor::new_(exp)
 
 /** Ceil of an expression */
 inline const ExprCeil& ceil(const ExprNode& exp) { return ExprCeil::new_(exp); }
+
+/** Saw of an expression */
+inline const ExprSaw& saw(const ExprNode& exp) { return ExprSaw::new_(exp); }
 
 /** Raises \a left to the power \a expnon.
     \note operator ^ is not used because its associativity and priority defined in C++ does

@@ -483,6 +483,10 @@ ExprCeil::ExprCeil(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
 	if (!expr.dim.is_scalar()) throw DimException("\"ceil\" expects a scalar argument");
 }
 
+ExprSaw::ExprSaw(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"saw\" expects a scalar argument");
+}
+
 std::ostream& operator<<(std::ostream& os, const ExprNode& expr) {
   ExprPrinter().print(os,expr);
   return os;

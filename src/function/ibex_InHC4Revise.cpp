@@ -69,7 +69,8 @@ public:
 	void sub_V_fwd  (int x1, int x2, int y) { throw NotImplemented(); }
 	void sub_M_fwd  (int x1, int x2, int y) { throw NotImplemented(); }
 	void floor_fwd  (int x, int y) { throw NotImplemented(); }
-	void ceil_fwd  (int x, int y)  { throw NotImplemented(); }
+	void ceil_fwd   (int x, int y) { throw NotImplemented(); }
+	void saw_fwd    (int x, int y) { throw NotImplemented(); }
 };
 
 }

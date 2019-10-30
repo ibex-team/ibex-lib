@@ -115,6 +115,7 @@ public:
 	inline void atanh_fwd(int, int y)         { g[y].i()=0; }
 	inline void floor_fwd(int, int y)         { g[y].i()=0; }
 	inline void ceil_fwd(int, int y)          { g[y].i()=0; }
+	inline void saw_fwd(int, int y)           { g[y].i()=0; }
 	inline void add_V_fwd(int, int, int y)    { g[y].v().clear(); }
 	inline void add_M_fwd(int, int, int y)    { g[y].m().clear(); }
 	inline void mul_SV_fwd(int, int, int y)   { g[y].v().clear(); }
@@ -170,6 +171,7 @@ public:
 	inline void atanh_bwd (int x, int y) { g[x].i() += g[y].i() * 1.0 / (1.0-sqr(d[x].i())); }
 	inline void floor_bwd (int x, int y);
 	inline void ceil_bwd  (int x, int y);
+	inline void saw_bwd   (int x, int y);
 
 	inline void add_V_bwd (int x1, int x2, int y) { g[x1].v() += g[y].v();        g[x2].v() += g[y].v(); }
 	inline void add_M_bwd (int x1, int x2, int y) { g[x1].m() += g[y].m();        g[x2].m() += g[y].m(); }

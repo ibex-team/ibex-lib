@@ -181,6 +181,9 @@ protected:
 
 	/** TO BE DEFINED (by the subclass) */
 	void ceil_bwd(int x, int y);
+
+	/** TO BE DEFINED (by the subclass) */
+	void saw_bwd(int x, int y);
 };
 
 } // namespace ibex

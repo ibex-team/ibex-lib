@@ -8,7 +8,7 @@
  * Author(s)   : Gilles Chabert
  * Bug fixes   : Gilles Trombettoni, Bertrand Neveu
  * Created     : Dec 05, 2011
- * Last Update : Oct 29, 2019
+ * Last update : Oct 30, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef _IBEX_INTERVAL_H_
@@ -686,6 +686,14 @@ Interval floor(const Interval& x);
 /** \brief Ceil of [x]. */
 Interval ceil(const Interval& x);
 
+/**
+ * \brief The saw function is x->x-round(x)
+ *
+ * It allows to enforce integer constraint
+ * by writing saw(x)=0.
+ */
+Interval saw(const Interval& x);
+
 /** \brief Projection of y=x_1+x_2.
  *
  * Set ([x]_1,[x]_2) to \f$([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}\f$. */
@@ -834,6 +842,9 @@ bool bwd_floor(const Interval& y, Interval& x);
 
 /* \brief Contract x w.r.t. y=ceil(x). */
 bool bwd_ceil(const Interval& y, Interval& x);
+
+/* \brief Contract x w.r.t. y=saw(x). */
+bool bwd_saw(const Interval& y, Interval& x);
 
 /**
  * \brief Contract x and y w.r.t. the fact that they are equivalent modulo the period p.

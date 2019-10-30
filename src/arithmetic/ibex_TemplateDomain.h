@@ -434,6 +434,10 @@ TemplateDomain<D> floor(const TemplateDomain<D>& d);
 template<class D>
 TemplateDomain<D> ceil(const TemplateDomain<D>& d);
 
+/** Saw. */
+template<class D>
+TemplateDomain<D> saw(const TemplateDomain<D>& d);
+
 /*@}*/
 
 
@@ -1277,10 +1281,11 @@ TemplateDomain<D> asinh(const TemplateDomain<D>& d) { unary_func(asinh); }
 template<class D>
 TemplateDomain<D> atanh(const TemplateDomain<D>& d) { unary_func(atanh); }
 template<class D>
-TemplateDomain<D> floor(const TemplateDomain<D>& d)  { unary_func(floor); }
+TemplateDomain<D> floor(const TemplateDomain<D>& d) { unary_func(floor); }
 template<class D>
 TemplateDomain<D> ceil(const TemplateDomain<D>& d)  { unary_func(ceil); }
-
+template<class D>
+TemplateDomain<D> saw(const TemplateDomain<D>& d)   { unary_func(saw); }
 
 } // end namespace
 

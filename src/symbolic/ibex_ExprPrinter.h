@@ -88,6 +88,7 @@ protected:
 	void visit(const ExprAtanh& e);
 	void visit(const ExprFloor& e);
 	void visit(const ExprCeil& e);
+	void visit(const ExprSaw& e);
 
 private:
 	void print_domain(const Domain& d);

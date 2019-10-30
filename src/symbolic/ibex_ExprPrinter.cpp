@@ -132,7 +132,8 @@ void ExprPrinter::visit(const ExprAcosh& e) {(*os) << "acosh("; visit(e.expr); (
 void ExprPrinter::visit(const ExprAsinh& e) {(*os) << "asinh("; visit(e.expr); (*os) << ")";}
 void ExprPrinter::visit(const ExprAtanh& e) {(*os) << "atanh("; visit(e.expr); (*os) << ")";}
 void ExprPrinter::visit(const ExprFloor& e) {(*os) << "floor("; visit(e.expr); (*os) << ")";}
-void ExprPrinter::visit(const ExprCeil& e)  {(*os) << "ceil("; visit(e.expr); (*os) << ")";}
+void ExprPrinter::visit(const ExprCeil& e)  {(*os) << "ceil(";  visit(e.expr); (*os) << ")";}
+void ExprPrinter::visit(const ExprSaw& e)   {(*os) << "saw(";   visit(e.expr); (*os) << ")";}
 
 
 void ExprPrinter::print_domain(const Domain& d) {

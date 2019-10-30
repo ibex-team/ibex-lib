@@ -126,6 +126,7 @@ protected:
 	void visit(const ExprAtanh& e);
 	void visit(const ExprFloor& e);
 	void visit(const ExprCeil& e);
+	void visit(const ExprSaw& e);
 
 	const ExprNode& gradient(const ExprNode& y, const Array<const ExprSymbol>& x);
 

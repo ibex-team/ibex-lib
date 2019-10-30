@@ -288,6 +288,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::ATANH:    e.lab=new LabelConst(atanh(arg_cst[0])); break;
 			case P_ExprNode::FLOOR:    e.lab=new LabelConst(floor(arg_cst[0])); break;
 			case P_ExprNode::CEIL:     e.lab=new LabelConst(ceil(arg_cst[0])); break;
+			case P_ExprNode::SAW:      e.lab=new LabelConst(saw(arg_cst[0])); break;
 			case P_ExprNode::DIFF:
 				throw SyntaxError("\"diff\" cannot be applied to constants"); break;
 			case P_ExprNode::INF:
@@ -365,6 +366,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::ATANH:     node=&atanh(arg_node[0]); break;
 		case P_ExprNode::FLOOR:     node=&floor(arg_node[0]); break;
 		case P_ExprNode::CEIL:      node=&ceil (arg_node[0]); break;
+		case P_ExprNode::SAW:       node=&saw  (arg_node[0]); break;
 		case P_ExprNode::DIFF:      node=&diff (arg_node); break;
 		case P_ExprNode::INF:       throw SyntaxError("\"inf\" operator requires constant interval"); break;
 		case P_ExprNode::MID:       throw SyntaxError("\"mid\" operator requires constant interval"); break;

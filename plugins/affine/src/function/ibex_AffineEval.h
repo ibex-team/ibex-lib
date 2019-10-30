@@ -91,6 +91,7 @@ public:
 	void atanh_fwd  (int x, int y);
 	void floor_fwd  (int x, int y);
 	void ceil_fwd   (int x, int y);
+	void saw_fwd    (int x, int y);
 
 	void add_V_fwd  (int x1, int x2, int y);
 	void add_M_fwd  (int x1, int x2, int y);
@@ -452,6 +453,12 @@ inline void AffineEval<T>::floor_fwd(int x, int y) {
 template<class T>
 inline void AffineEval<T>::ceil_fwd(int x, int y) {
 	d[y].i()=ceil(d[x].i());
+	af2[y].i()= AffineMain<T>(d[y].i());
+}
+
+template<class T>
+inline void AffineEval<T>::saw_fwd(int x, int y) {
+	d[y].i()=saw(d[x].i());
 	af2[y].i()= AffineMain<T>(d[y].i());
 }
 

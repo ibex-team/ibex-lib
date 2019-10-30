@@ -76,6 +76,7 @@ void P_ExprPrinter::visit(const P_ExprNode& e) {
 	case P_ExprNode::ATANH:         os << "atanh"; print_arg_list(e);  break;
 	case P_ExprNode::FLOOR:         os << "floor"; print_arg_list(e);  break;
 	case P_ExprNode::CEIL:          os << "ceil";  print_arg_list(e);  break;
+	case P_ExprNode::SAW:           os << "saw";   print_arg_list(e);  break;
 	case P_ExprNode::INF:           os << "inf";   print_arg_list(e);  break;
 	case P_ExprNode::MID:           os << "mid";   print_arg_list(e);  break;
 	case P_ExprNode::SUP:           os << "sup";   print_arg_list(e);  break;

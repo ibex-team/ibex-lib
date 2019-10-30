@@ -126,6 +126,7 @@ public: // because called from CompiledFunction
 	inline void atanh_fwd  (int x, int y);
 	inline void floor_fwd  (int x, int y);
 	inline void ceil_fwd   (int x, int y);
+	inline void saw_fwd    (int x, int y);
 	inline void add_V_fwd  (int x1, int x2, int y);
 	inline void add_M_fwd  (int x1, int x2, int y);
 	inline void mul_SV_fwd (int x1, int x2, int y);
@@ -196,6 +197,7 @@ inline void Eval::asinh_fwd(int x, int y)          { d[y].i()=asinh(d[x].i()); }
 inline void Eval::atanh_fwd(int x, int y)          { if ((d[y].i()=atanh(d[x].i())).is_empty()) throw EmptyBoxException(); }
 inline void Eval::floor_fwd(int x, int y)          { if ((d[y].i()=floor(d[x].i())).is_empty()) throw EmptyBoxException(); }
 inline void Eval::ceil_fwd(int x, int y)           { if ((d[y].i()=ceil(d[x].i())).is_empty()) throw EmptyBoxException(); }
+inline void Eval::saw_fwd(int x, int y)            { if ((d[y].i()=saw(d[x].i())).is_empty()) throw EmptyBoxException(); }
 
 inline void Eval::trans_V_fwd(int x, int y)        { d[y].v()=d[x].v(); }
 inline void Eval::trans_M_fwd(int x, int y)        { d[y].m()=d[x].m().transpose(); }

@@ -135,6 +135,7 @@ public: // because called from CompiledFunction
 	inline void atanh_bwd  (int x, int y)          { if (!(bwd_atanh(d[y].i(),d[x].i()))) throw EmptyBoxException();  }
 	inline void floor_bwd  (int x, int y)          { if (!(bwd_floor(d[y].i(),d[x].i()))) throw EmptyBoxException();  }
 	inline void ceil_bwd  (int x, int y)           { if (!(bwd_ceil(d[y].i(),d[x].i()))) throw EmptyBoxException();  }
+	inline void saw_bwd  (int x, int y)            { if (!(bwd_saw(d[y].i(),d[x].i()))) throw EmptyBoxException();  }
 };
 
 } // namespace ibex

@@ -85,6 +85,7 @@ using namespace ibex::parser;
 "atanh"                          { return TK_ATANH; }
 "floor"                          { return TK_FLOOR; }
 "ceil"                           { return TK_CEIL; }
+"integer"                        { return TK_INTEGER; }
 "chi"                            { return TK_CHI; }
 "in"                             { return TK_IN;  }
 "inf"                            { return TK_INF; }
@@ -136,7 +137,7 @@ using namespace ibex::parser;
                                    memcpy(&ibexlval.real, &u, 8);
                                    return TK_FLOAT;
                                  }
-[0-9]+                           { ibexlval.itg = atoi(ibextext); return TK_INTEGER; }
+[0-9]+                           { ibexlval.itg = atoi(ibextext); return TK_INT_CST; }
 
 "//"[^\n\r]*                     { /* C++-like comments. Note: '.' also accepts CR characters (not LF).*/ }
 "/*"([^*]|("*"[^/]))*"*/"        { /* C-like comments */

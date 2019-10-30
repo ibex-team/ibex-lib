@@ -67,6 +67,7 @@ class ExprAsinh;
 class ExprAtanh;
 class ExprFloor;
 class ExprCeil;
+class ExprSaw;
 
 /*
  * \ingroup level1
@@ -343,6 +344,12 @@ class ExprVisitor {
   /** Visit a ceil (Implementation is not mandatory).
    * By default call visit(const ExprUnaryOp&). */
   virtual void visit(const ExprCeil& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
+
+  /** Visit a saw (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprSaw& e) {
 	  visit((const ExprUnaryOp&) e);
   }
 

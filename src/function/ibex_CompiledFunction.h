@@ -100,7 +100,7 @@ protected:
 		SQR, SQRT, EXP, LOG,
 		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
 		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
-		FLOOR,  CEIL,
+		FLOOR,  CEIL, SAW,
 
 		ADD_V, ADD_M, SUB_V, SUB_M,
 		MUL_SV, MUL_SM, MUL_VV, MUL_MV, MUL_MM, MUL_VM
@@ -158,6 +158,7 @@ private:
 	void visit(const ExprAtanh& e);
 	void visit(const ExprFloor& e);
 	void visit(const ExprCeil& e);
+	void visit(const ExprSaw& e);
 
 private:
 	template<class V>
@@ -262,6 +263,7 @@ void CompiledFunction::forward(const V& algo, int i) const {
 	case ATANH:  ((V&) algo).atanh_fwd  (args[i][0], i); break;
 	case FLOOR:  ((V&) algo).floor_fwd  (args[i][0], i); break;
 	case CEIL:   ((V&) algo).ceil_fwd   (args[i][0], i); break;
+	case SAW:    ((V&) algo).saw_fwd    (args[i][0], i); break;
 	default: 	 assert(false);
 	}
 }
@@ -341,6 +343,7 @@ void CompiledFunction::backward(const V& algo, int i) const {
 	case ATANH:  ((V&) algo).atanh_bwd  (args[i][0], i); break;
 	case FLOOR:  ((V&) algo).floor_bwd  (args[i][0], i); break;
 	case CEIL:   ((V&) algo).ceil_bwd   (args[i][0], i); break;
+	case SAW:    ((V&) algo).saw_bwd    (args[i][0], i); break;
 	default: 	 assert(false);
 	}
 }

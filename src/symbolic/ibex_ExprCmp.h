@@ -80,6 +80,7 @@ protected:
 	void visit(const ExprAtanh& e);
 	void visit(const ExprFloor& e);
 	void visit(const ExprCeil& e);
+	void visit(const ExprSaw& e);
 
 	template<class T>
 	void visit_nary(const T& e);

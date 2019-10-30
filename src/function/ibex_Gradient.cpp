@@ -462,6 +462,13 @@ void Gradient::ceil_bwd(int x, int y) {
 	else ; // nothing to do: derivative is zero
 }
 
+void Gradient::saw_bwd(int x, int y) {
+	if (round(d[x].i().lb()) == round(d[x].i().ub()))
+		g[x].i() += g[y].i();
+	else
+		g[x].i() += g[y].i()*Interval(NEG_INFINITY,1);
+}
+
 void Gradient::abs_bwd (int x, int y) {
 	if (d[x].i().lb()>0) g[x].i() += 1.0*g[y].i();
 	else if (d[x].i().ub()<0) g[x].i() += -1.0*g[y].i();
