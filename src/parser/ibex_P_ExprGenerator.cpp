@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_P_ExprGenerator.h"
+#include "ibex_P_Struct.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_Exception.h"
 #include "ibex_Expr.h"
@@ -21,8 +22,6 @@ using namespace std;
 namespace ibex {
 
 namespace parser {
-
-extern stack<Scope>& scopes();
 
 class LabelNode : public Label {
 public:
@@ -117,7 +116,7 @@ int to_integer(const Domain& d) {
 	assert(d.dim.is_scalar());
 	assert(d.i().is_degenerated());
 	double x=d.i().mid();
-	assert(floor(x)==x);
+	assert(std::floor(x)==x);
 	return (int)x;
 }
 
@@ -133,7 +132,11 @@ double to_double(const Domain& d, bool round_downward) {
 	return round_downward? d.i().lb() : d.i().ub();
 }
 
-ExprGenerator::ExprGenerator() : scope(scopes().top()) {
+ExprGenerator::ExprGenerator() : scope(pstruct->scopes.top()) {
+
+}
+
+ExprGenerator::ExprGenerator(P_Scope& scope) : scope(scope) {
 
 }
 

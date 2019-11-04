@@ -29,11 +29,9 @@ public:
 	P_Source();
 
 	/**
-	 * Delete the variables symbols.
-	 *
-	 * Not the functions (transmitted by reference to P_Result).
+	 * Delete everything.
 	 */
-	void cleanup();
+	~P_Source();
 
 	/** The functions */
 	std::vector<Function*> func;

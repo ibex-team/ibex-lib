@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_CtrGenerator.h
+// File        : ibex_P_CtrGenerator.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
@@ -8,8 +8,8 @@
 // Last Update : May 22, 2019
 //============================================================================
 
-#ifndef __IBEX_CTR_GENERATOR_H__
-#define __IBEX_CTR_GENERATOR_H__
+#ifndef __IBEX_PARSER_CTR_GENERATOR_H__
+#define __IBEX_PARSER_CTR_GENERATOR_H__
 
 #include <vector>
 #include <stack>
@@ -17,6 +17,7 @@
 
 #include "ibex_NumConstraint.h"
 #include "ibex_P_Expr.h"
+#include "ibex_P_Scope.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 #include "ibex_ExprSimplify.h"
@@ -33,9 +34,9 @@ class P_ConstraintLoop;
 class P_ThickEquality;
 class P_Source;
 
-class CtrGenerator {
+class P_CtrGenerator {
 public:
-	CtrGenerator();
+	P_CtrGenerator(std::stack<P_Scope>& scopes);
 
 	std::vector<ExprCtr*> generate(const P_ConstraintList& ctrs);
 
@@ -49,10 +50,10 @@ public:
 protected:
 	ExprSimplify s;
 	std::vector<ExprCtr*> ctrs;
-
+	std::stack<P_Scope>& scopes;
 };
 
 } // end namespace parser
 } // end namespace ibex
 
-#endif // __IBEX_CTR_GENERATOR_H__
+#endif // __IBEX_PARSER_CTR_GENERATOR_H__

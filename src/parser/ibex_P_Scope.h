@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_Scope.h
+// File        : ibex_P_Scope.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -8,8 +8,8 @@
 // Last Update : Jun 12, 2012
 //============================================================================
 
-#ifndef __IBEX_SCOPE_H__
-#define __IBEX_SCOPE_H__
+#ifndef __IBEX_PARSER_SCOPE_H__
+#define __IBEX_PARSER_SCOPE_H__
 
 #include <iostream>
 #include "ibex_P_Expr.h"
@@ -22,21 +22,21 @@ namespace parser {
 
 class P_ExprConstant;
 
-class Scope {
+class P_Scope {
 
 public:
 
 	/** New empty scope */
-	Scope();
+	P_Scope();
 
 	/** Duplicacte the scope */
-	Scope(const Scope& scope);
+	P_Scope(const P_Scope& scope);
 
 	/** Only copy global data (constants and functions) */
-	Scope(const Scope& scope, bool global);
+	P_Scope(const P_Scope& scope, bool global);
 
 	/** Delete this scope. */
-	~Scope();
+	~P_Scope();
 
 	/*------------- addition of new symbols in the current scope -----------*/
 	/** Add a constant */
@@ -139,14 +139,14 @@ private:
 	/** All the variables (in declaration order).*/
 	std::vector<S_Entity*> vars;
 
-	friend std::ostream& operator<<(std::ostream& os, const Scope& scope);
+	friend std::ostream& operator<<(std::ostream& os, const P_Scope& scope);
 
 	SymbolMap<S_Object*> tab;
 };
 
-std::ostream& operator<<(std::ostream& os, const Scope& scope);
+std::ostream& operator<<(std::ostream& os, const P_Scope& scope);
 
 } // end namespace parser
 } // end namespace ibex
 
-#endif // __IBEX_SCOPE_H__
+#endif // __IBEX_PARSER_SCOPE_H__

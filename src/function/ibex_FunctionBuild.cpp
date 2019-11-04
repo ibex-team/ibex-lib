@@ -23,6 +23,7 @@
 #include "ibex_String.h"
 #include "ibex_UnknownFileException.h"
 #include "ibex_SyntaxError.h"
+#include "ibex_P_Struct.h"
 
 #ifndef _WIN32 // MinGW does not support mutex
 #include <mutex>
@@ -235,11 +236,6 @@ extern FILE* ibexin;
 
 namespace ibex {
 
-namespace parser {
-extern Function* function;
-}
-
-
 Function::Function(const char* x, const char* y) {
 	build_from_string(Array<const char*>(x),y);
 }
@@ -347,12 +343,14 @@ void Function::build_from_string(const Array<const char*>& x, const char* y, con
 
 	LOCK;
 	try {
-		parser::function=this;
+		parser::pstruct = new parser::P_StructFunction(*this);
 		ibexparse_string(syntax);
-		parser::function=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		free(syntax);
 	} catch(SyntaxError& e) {
-		parser::function=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		free(syntax);
 		UNLOCK;
 		throw e;
@@ -370,12 +368,14 @@ Function::Function(const char* filename) {
 	ibexin = fd;
 
 	try {
-		parser::function=this;
+		parser::pstruct = new parser::P_StructFunction(*this);
 		ibexparse();
-		parser::function=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 	}
 	catch(SyntaxError& e) {
-		parser::function=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		fclose(fd);
 		ibexrestart(ibexin);
 		UNLOCK;
@@ -393,12 +393,14 @@ Function::Function(FILE* fd) {
 	ibexin = fd;
 
 	try {
-		parser::function=this;
+		parser::pstruct = new parser::P_StructFunction(*this);
 		ibexparse();
-		parser::function=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 	}
 	catch(SyntaxError& e) {
-		parser::function=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		ibexrestart(ibexin);
 		UNLOCK;
 		throw e;

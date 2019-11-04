@@ -19,7 +19,7 @@
 namespace ibex {
 
 namespace parser {
-class MainGenerator;
+class P_SysGenerator;
 }
 
 class SystemFactory;
@@ -271,7 +271,7 @@ protected:
 	void init(const SystemFactory&);
 
 private:
-	friend class parser::MainGenerator;
+	friend class parser::P_SysGenerator;
 	friend class NumConstraint; // NumConstraint requires to build a temporary system for parsing a string
 
 	void load(FILE* file);

@@ -14,6 +14,7 @@
 #include "ibex_UnknownFileException.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_Expr2Minibex.h"
+#include "ibex_P_Struct.h"
 #include "ibex_Domain.h"
 
 #include <stdio.h>
@@ -40,13 +41,6 @@ extern FILE* ibexin;
 using namespace std;
 
 namespace ibex {
-
-
-namespace parser {
-extern System* system;
-extern bool choco_start;
-}
-
 
 namespace {
 
@@ -91,12 +85,13 @@ System::System(int n, const char* syntax) : id(next_id()), nb_var(n), /* NOT TMP
 		                                    nb_ctr(0), ops(NULL), box(1) /* tmp */ {
 	LOCK;
 	try {
-		parser::choco_start=true;
-		parser::system=this;
+		parser::pstruct = new parser::P_StructSystem(*this);
 		ibexparse_string(syntax);
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 	} catch(SyntaxError& e) {
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		UNLOCK;
 		throw e;
 	}
@@ -213,13 +208,15 @@ void System::load(FILE* fd) {
 	ibexin = fd;
 
 	try {
-		parser::system=this;
+		parser::pstruct = new parser::P_StructSystem(*this);
 		ibexparse();
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 	}
 
 	catch(SyntaxError& e) {
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		fclose(fd);
 		ibexrestart(ibexin);
 		UNLOCK;

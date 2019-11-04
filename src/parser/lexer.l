@@ -16,12 +16,12 @@
 #define isatty _isatty
 #endif
 
-#include "ibex_Scope.h"
 #include "ibex_Interval.h"
 #include "ibex_Expr.h"
 #include "ibex_ExprOperators.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_P_NumConstraint.h"
+#include "ibex_P_Struct.h"
 
 #include "parser.tab.hh"
 
@@ -30,14 +30,6 @@
 #include <vector>
 #include <stdint.h>
 #include <cassert>
-
-namespace ibex {
-namespace parser {
-extern std::stack<Scope>& scopes();
-extern bool choco_start;
-
-} // end namespace
-} // end namespace
 
 int ibex_lineno = 1;
 
@@ -49,8 +41,7 @@ using namespace ibex::parser;
 %%
 
 %{
-  if (choco_start) {
-    choco_start = false; // reinit
+  if (pstruct->type()==P_Struct::CHOCO) {
     /* return pseudo-start token (to avoid shift/reduce conflict) */
     return TK_CHOCO;
   }
@@ -110,7 +101,7 @@ using namespace ibex::parser;
                                  }
 [_a-zA-Z][_a-zA-Z0-9]*	         { ibexlval.str = (char*) malloc(strlen(ibextext)+1);
                                    strcpy(ibexlval.str,ibextext);
-                                   if (scopes().empty())
+                                   if (pstruct->scopes.empty())
                                       // happens when the program starts by an identifier (an error). 
   									  // The lexer tries to retreive this identifier from the scope, which has not
   									  // been created yet -> seg fault
@@ -124,7 +115,7 @@ using namespace ibex::parser;
   								          ExprGenericBinaryOp::get_eval(ibextext); 
   								          return TK_BINARY_OP;
   								        } catch(SyntaxError&) {
-                                          return scopes().top().token(ibextext);
+                                          return pstruct->scopes.top().token(ibextext);
                                         }
                                       }
                                  }
@@ -158,7 +149,7 @@ using namespace ibex::parser;
 "="                              { return TK_EQU; }
 ":="                             { return TK_ASSIGN; }
 .			                     { return ibextext [0]; }
-<<EOF>>                          {YY_NEW_FILE; yyterminate();}
+<<EOF>>                          { YY_NEW_FILE; yyterminate(); }
 
 %%
 

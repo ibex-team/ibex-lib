@@ -99,6 +99,7 @@ public:
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	// Generate the expression with the current scope.
+	// Note: not very clean: used in parser.yc only for convenience
 	const ExprNode& generate() const;
 
 	// destroy labels recursively
@@ -176,7 +177,7 @@ public:
 /*
  * \brief Variable Symbol at parse time
  *
- * \see Scopes::get_cst().
+ * \see P_Scope::get_cst().
  */
 class P_ExprVarSymbol : public P_ExprNode {
 public:

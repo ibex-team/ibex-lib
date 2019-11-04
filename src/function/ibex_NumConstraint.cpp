@@ -13,6 +13,7 @@
 #include "ibex_System.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_Id.h"
+#include "ibex_P_Struct.h"
 
 #include <sstream>
 #include <mutex>
@@ -34,10 +35,6 @@ using namespace std;
 extern void ibexparse_string(const char* syntax);
 
 namespace ibex {
-
-namespace parser {
-extern System* system;
-}
 
 NumConstraint::NumConstraint(const char* filename) : id(next_id()), f(*new Function()), op(EQ), own_f(true) {
 	build_from_system(System(filename));
@@ -95,12 +92,14 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 
 	LOCK;
 	try {
-		parser::system=sys;
+		parser::pstruct = new parser::P_StructSystem(*sys);
 		ibexparse_string(syntax);
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		free(syntax);
 	} catch(SyntaxError& e) {
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		free(syntax);
 		UNLOCK;
 		throw e;

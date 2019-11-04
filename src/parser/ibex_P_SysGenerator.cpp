@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_MainGenerator.cpp
+// File        : ibex_P_SysGenerator.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -8,15 +8,14 @@
 // Last Update : Jun 19, 2012
 //============================================================================
 
-#include "ibex_MainGenerator.h"
-#include "ibex_ExprCopy.h"
-#include "ibex_CtrGenerator.h"
+#include "ibex_P_SysGenerator.h"
+#include "ibex_P_CtrGenerator.h"
 #include "ibex_P_ExprGenerator.h"
-#include "ibex_Scope.h"
+#include "ibex_P_Scope.h"
+#include "ibex_ExprCopy.h"
 #include "ibex_SystemFactory.h"
 
 #include <utility>
-#include <stack>
 
 using namespace std;
 
@@ -24,19 +23,21 @@ namespace ibex {
 
 namespace parser {
 
-extern stack<Scope>& scopes();
-
-void MainGenerator::add_garbage(NodeMap<bool>& garbage, const ExprNode& e) {
+void P_SysGenerator::add_garbage(NodeMap<bool>& garbage, const ExprNode& e) {
 	ExprSubNodes nodes(e);
 	for (int i=0; i<nodes.size(); i++)
 		if (!garbage.found(nodes[i]))
 			garbage.insert(nodes[i],true);
 }
 
-void MainGenerator::generate(const P_Source& source, System& sys) {
+P_SysGenerator::P_SysGenerator(std::stack<P_Scope>& scopes) : scopes(scopes) {
+
+}
+
+void P_SysGenerator::generate(P_Source& source, System& sys) {
 
 	SystemFactory fac;
-	Array<const ExprSymbol> vars = scopes().top().var_symbols();
+	Array<const ExprSymbol> vars = scopes.top().var_symbols();
 
 	//================= generate the variables & domains =====================
 	fac.add_var(vars);
@@ -54,7 +55,7 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 
 	if (source.ctrs!=NULL) { // not in case of unconstrained optimization
 
-		vector<ExprCtr*> ctrs = CtrGenerator().generate(*source.ctrs);
+		vector<ExprCtr*> ctrs = P_CtrGenerator(scopes).generate(*source.ctrs);
 
 		for (vector<ExprCtr*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
 			fac.add_ctr(**it); // by copy so...
@@ -71,14 +72,14 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 		add_garbage(garbage, vars[i]);
 
 	// same for constants
-	for (std::vector<const char*>::const_iterator it=scopes().top().cst.begin(); it!=scopes().top().cst.end(); it++) {
+	for (std::vector<const char*>::const_iterator it=scopes.top().cst.begin(); it!=scopes.top().cst.end(); it++) {
 		//cout << "[parser] remove cst " << *it << endl;
-		add_garbage(garbage, scopes().top().get_cst(*it));
+		add_garbage(garbage, scopes.top().get_cst(*it));
 	}
 
 	//================= set the domains =====================
 	sys.box.resize(sys.nb_var);
-	load(sys.box, scopes().top().var_domains());
+	load(sys.box, scopes.top().var_domains());
 
 	//==================== *** cleanup *** ====================
 	for (IBEX_NODE_MAP(bool)::const_iterator it=garbage.begin(); it!=garbage.end(); it++) {
