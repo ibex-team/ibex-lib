@@ -92,16 +92,16 @@ using namespace std;
 program       :                                 { pstruct->begin(); }
                 decl_opt_cst 
                 decl_opt_fncs
-                system_or_func
+                system_or_func                  { pstruct->end(); }
               |                                 { pstruct->begin(); } 
-                TK_CHOCO choco_ctr              { pstruct->end(); }
+                choco_ctr                       { pstruct->end(); }
               ; 
 
 system_or_func: TK_VARS decl_var_list ';'   
                 decl_opt_fncs
                 decl_opt_goal
-                decl_opt_ctrs                   { pstruct->end(); }
-              |                                 { pstruct->end(); }
+                decl_opt_ctrs                   
+              |
               ;
               
 choco_ctr     : ctr_blk_list                    

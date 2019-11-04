@@ -41,10 +41,6 @@ using namespace ibex::parser;
 %%
 
 %{
-  if (pstruct->type()==P_Struct::CHOCO) {
-    /* return pseudo-start token (to avoid shift/reduce conflict) */
-    return TK_CHOCO;
-  }
 %}
 
 "constants"|"Constants"|"CONSTANTS"	     { return TK_CONST; }
