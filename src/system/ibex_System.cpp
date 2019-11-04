@@ -85,7 +85,7 @@ System::System(int n, const char* syntax) : id(next_id()), nb_var(n), /* NOT TMP
 		                                    nb_ctr(0), ops(NULL), box(1) /* tmp */ {
 	LOCK;
 	try {
-		parser::pstruct = new parser::P_StructSystem(*this);
+		parser::pstruct = new parser::P_StructChoco(*this);
 		ibexparse_string(syntax);
 		delete parser::pstruct;
 		parser::pstruct = NULL;
