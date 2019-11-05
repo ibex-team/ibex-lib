@@ -1,6 +1,7 @@
 #include "ibex.h"
 
-#include "../src/ibex_AttractionRegion.h"
+#include "ibex_AttractionRegion.h"
+#include "ibex_P_StructLyapunov.h"
 
 using namespace ibex;
 using namespace std;
@@ -50,26 +51,31 @@ int main(int argc, char** argv) {
 		s << argv[1] << i << ".txt";
 
 		try {
-			System sys(s.str().c_str());
+			P_StructLyapunov struc(argv[1]);
 
-			Function& f=sys.func[0];
+			if (argc>2) {
+				eps_f = convert("eps_f",argv[2]);
+				cout << "**** eps_f set to " << eps_f << " ****.\n";
+			} else
+				eps_f = DEFAULT_EPSILON;
 
-			Function& v=sys.func[1];
+			// size of x
+			int n=struc.xhat.size();
 
-			Function& vminor=sys.func.size()<3? v : sys.func[2];
+			// size of theta
+			int p=struc.theta_sys.nb_var;
 
-			int n=sys.args[0].dim.vec_size();
-
-			int p=sys.args.size()==2? sys.args[1].dim.vec_size(): 0;
-
-			Vector x0_approx=sys.box.subvector(0,n-1).mid();
-
-			IntervalVector theta=p>0? sys.box.subvector(n,n+p-1) : /* ignored */ IntervalVector::empty(1);
-	
 			Timer timer;
 			timer.start();
-			
-			AttractionRegion l(f,v,vminor,x0_approx,theta,sys.ctrs);
+
+			AttractionRegion l(
+					struc.f,
+					struc.v,
+					struc.vminor,
+					struc.xhat,
+					struc.theta_sys.box,
+					struc.theta_sys.ctrs);
+
 			timer.stop();
 			double build_time = timer.get_time();
 

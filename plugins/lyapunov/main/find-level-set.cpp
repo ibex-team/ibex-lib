@@ -1,6 +1,7 @@
 #include "ibex.h"
 
 #include "ibex_AttractionRegion.h"
+#include "ibex_P_StructLyapunov.h"
 
 using namespace ibex;
 using namespace std;
@@ -28,11 +29,8 @@ int main(int argc, char** argv) {
 	}
 
 	try {
-		System sys(argv[1]);
 
-		if (sys.func.size()<2) {
-			ibex_error("functions ``f'' and ``v'' are required");
-		}
+		P_StructLyapunov struc(argv[1]);
 
 		if (argc>2) {
 			eps_f = convert("eps_f",argv[2]);
@@ -40,25 +38,23 @@ int main(int argc, char** argv) {
 		} else
 			eps_f = DEFAULT_EPSILON;
 
-		Function& f=sys.func[0];
-
-		Function& v=sys.func[1];
-
-		Function& vminor=sys.func.size()<3? v : sys.func[2];
-
 		// size of x
-		int n=sys.args[0].dim.vec_size();
+		int n=struc.xhat.size();
 
 		// size of theta
-		int p=sys.args.size()==2? sys.args[1].dim.vec_size(): 0;
-
-		Vector x0_approx=sys.box.subvector(0,n-1).mid();
-
-		IntervalVector theta=p>0? sys.box.subvector(n,n+p-1) : /* ignored */ IntervalVector::empty(1);
+		int p=struc.theta_sys.nb_var;
 
 		Timer timer;
 		timer.start();
-		AttractionRegion l(f,v,vminor,x0_approx,theta,sys.ctrs);
+
+		AttractionRegion l(
+				struc.f,
+				struc.v,
+				struc.vminor,
+				struc.xhat,
+				struc.theta_sys.box,
+				struc.theta_sys.ctrs);
+
 		timer.stop();
 		double build_time = timer.get_time();
 
