@@ -60,6 +60,14 @@ void init_symbol_domain(const char* destname, Domain& dest, const Domain& src) {
 	}
 }
 
+
+void init_function_by_copy(Function& dest, const Function& src) {
+	Array<const ExprSymbol> x(src.nb_arg());
+	varcopy(src.args(),x);
+	const ExprNode& y=ExprCopy().copy(src.args(),x,src.expr());
+	dest.init(x,y,src.name);
+}
+
 P_Struct::~P_Struct() {
 	// pop pending scopes in case of parsing error
 	while (!scopes.empty()) scopes.pop();
@@ -89,10 +97,6 @@ P_StructSystem::P_StructSystem(System& sys) : system(sys) {
 
 }
 
-P_Struct::ResultType P_StructSystem::type() const {
-	return SYSTEM;
-}
-
 void P_StructSystem::begin() {
 	P_Struct::begin();
 }
@@ -117,10 +121,6 @@ P_StructFunction::P_StructFunction(Function& f) : function(f) {
 
 }
 
-P_Struct::ResultType P_StructFunction::type() const {
-	return FUNCTION;
-}
-
 void P_StructFunction::begin() {
 	P_Struct::begin();
 }
@@ -133,12 +133,7 @@ void P_StructFunction::end() {
 	if (source.func.empty()) {
 		throw SyntaxError("no function declared in file");
 	}
-	const Function& f=(*source.func[0]);
-	Array<const ExprSymbol> x(f.nb_arg());
-	varcopy(f.args(),x);
-	const ExprNode& y=ExprCopy().copy(f.args(),x,f.expr());
-
-	function.init(x,y,f.name);
+	init_function_by_copy(function, *source.func[0]);
 
 	// TODO: see end_system()
 	P_Struct::end();
@@ -147,10 +142,6 @@ void P_StructFunction::end() {
 //---------------------------------------------------------------------------------------------------
 P_StructChoco::P_StructChoco(System& sys) : system(sys) {
 
-}
-
-P_Struct::ResultType P_StructChoco::type() const {
-	return CHOCO;
 }
 
 void P_StructChoco::begin() {
@@ -178,6 +169,7 @@ void P_StructChoco::end() {
 	// TODO: see end_system()
 	P_Struct::end();
 }
+
 
 } // end namespace parser
 

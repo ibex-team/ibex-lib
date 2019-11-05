@@ -16,7 +16,7 @@ using namespace std;
 namespace ibex {
 namespace parser {
 
-P_Source::P_Source() : goal(NULL), ctrs(NULL) {
+P_Source::P_Source() : goal(NULL), ctrs(NULL) { //, cleanup_func(true) {
 
 }
 
@@ -30,6 +30,7 @@ P_Source::~P_Source() {
 
 	// Note: Now that there is no more application nodes (ExprApply),
 	// we can safely destroy auxiliary functions.
+	//if (cleanup_func)
 	for (vector<Function*>::iterator it=func.begin(); it!=func.end(); ++it)
 		delete *it;
 }

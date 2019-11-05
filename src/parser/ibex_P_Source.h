@@ -41,6 +41,13 @@ public:
 
 	/** The constraints (NULL if none (pure optimization problem)) */
 	P_ConstraintList* ctrs;
+
+	/*
+	 * If true, destructor will destroy auxiliary functions.
+	 *
+	 * Set to true by default. Can be changed manually.
+	 */
+	//bool cleanup_func;
 };
 
 std::ostream& operator<<(std::ostream& os, const P_Source& source);

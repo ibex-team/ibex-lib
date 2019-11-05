@@ -13,8 +13,10 @@
 
 #include "ibex_P_NumConstraint.h"
 #include "ibex_P_Source.h"
-#include "ibex_System.h"
 #include "ibex_P_Scope.h"
+
+#include "ibex_System.h"
+#include "ibex_Package.h"
 
 #include <stack>
 
@@ -26,6 +28,10 @@ void ibexerror (const std::string& msg);
 namespace ibex {
 
 namespace parser {
+
+void init_symbol_domain(const char* destname, Domain& dest, const Domain& src);
+
+void init_function_by_copy(Function& dest, const Function& src);
 
 /**
  * \ingroup parser
@@ -45,21 +51,9 @@ public:
 	std::stack<P_Scope> scopes;
 
 	/**
-	 * Possible types of objects built
-	 */
-	typedef enum {
-		FUNCTION, SYSTEM, CHOCO, PACKAGE
-	} ResultType;
-
-	/**
 	 * Delete source and all scopes.
 	 */
 	virtual ~P_Struct();
-
-	/**
-	 * The type of result
-	 */
-	virtual ResultType type() const=0;
 
 	/**
 	 * Initialize parsing of a Minibex file
@@ -104,8 +98,6 @@ public:
 	 */
 	P_StructSystem(System& sys);
 
-	virtual ResultType type() const;
-
 	virtual void begin();
 
 	/**
@@ -135,8 +127,6 @@ public:
 	 */
 	P_StructFunction(Function& f);
 
-	virtual ResultType type() const;
-
 	virtual void begin();
 
 	/**
@@ -164,8 +154,6 @@ public:
 	 */
 	P_StructChoco(System& sys);
 
-	virtual ResultType type() const;
-
 	/**
 	 * Initialize parsing of CHOCO input constraint.
 	 */
@@ -184,7 +172,6 @@ public:
 	 */
 	System& system;
 };
-
 
 } // end namespace parser
 } // end namespace ibex
