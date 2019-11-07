@@ -16,7 +16,6 @@
 #include "ibex_P_Scope.h"
 
 #include "ibex_System.h"
-#include "ibex_Package.h"
 
 #include <stack>
 
