@@ -71,18 +71,18 @@ public:
 
 } // end anonymous namespace
 
-System::System() : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) /* tmp */ {
+System::System() : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
 
 }
 
-System::System(const char* filename) : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) /* tmp */ {
+System::System(const char* filename) : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
 	load(fd);
 }
 
 System::System(int n, const char* syntax) : id(next_id()), nb_var(n), /* NOT TMP (required by parser) */
-		                                    nb_ctr(0), ops(NULL), box(1) /* tmp */ {
+		                                    nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
 	LOCK;
 	try {
 		parser::pstruct = new parser::P_StructChoco(*this);
@@ -98,7 +98,7 @@ System::System(int n, const char* syntax) : id(next_id()), nb_var(n), /* NOT TMP
 	UNLOCK;
 }
 
-System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) {
+System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) {
 
 	switch(mode) {
 	case COPY :      init(SystemCopy(sys,COPY)); break;

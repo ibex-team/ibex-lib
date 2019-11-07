@@ -38,12 +38,6 @@ int main(int argc, char** argv) {
 		} else
 			eps_f = DEFAULT_EPSILON;
 
-		// size of x
-		int n=struc.xhat.size();
-
-		// size of theta
-		int p=struc.theta_sys.nb_var;
-
 		Timer timer;
 		timer.start();
 
@@ -52,8 +46,8 @@ int main(int argc, char** argv) {
 				struc.v,
 				struc.vminor,
 				struc.xhat,
-				struc.theta_sys.box,
-				struc.theta_sys.ctrs);
+				struc.theta,
+				struc.theta_ctrs);
 
 		timer.stop();
 		double build_time = timer.get_time();
@@ -74,7 +68,7 @@ int main(int argc, char** argv) {
 		Interval c1d=l.find_level_set_dichotomy(AttractionRegion::HESSIAN, time, CMAX, eps_f);
 		cout << "c_dichotomy_hessian=    " << c1d << " t=" << (1000.*(build_time+time)) << "ms" << endl;
 
-		Vector feasible(n);
+		Vector feasible(struc.xhat.size());
 		int nb_cells;
 
 		// TODO: if the problem is unfeasible, run with larger upper bound and so on.

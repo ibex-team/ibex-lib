@@ -65,10 +65,10 @@ def build (bld):
 	if bld.env.WITH_LYAPUNOV:
 		# build optim binary
 		bld.program (
-		target = "find-level-set",
+		target = "ibex-attracting-ellipsoid",
 		# gch: i don't know if specifying "IBEXOPT" is necessary here
 		use = [ "ibex", "IBEXOPT" ], # add dependency on ibex library
 		# note: the two other executables are not installed by default
-		source = bld.path.ant_glob ("main/find-level-set.cpp"),
+		source = bld.path.ant_glob ("main/ibex-attracting-ellipsoid.cpp"),
 		install_path = bld.env.BINDIR,
 		)

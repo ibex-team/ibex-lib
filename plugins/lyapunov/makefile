@@ -7,9 +7,9 @@ else
 CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-deprecated -frounding-math 
 endif
 
-all: find-level-set dicho-scalable optim-scalable
+all: ibex-attracting-ellipsoid dicho-scalable optim-scalable
 
-find-level-set : src/ibex_AttractionRegion.o main/find-level-set.cpp
+ibex-attracting-ellipsoid : src/ibex_AttractionRegion.o main/ibex-attracting-ellipsoid.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I../src -o $@ $^ $(LIBS)
 
 dicho-scalable : src/ibex_AttractionRegion.o main/dicho-scalable.cpp
@@ -22,5 +22,5 @@ src/ibex_AttractionRegion.o : src/ibex_AttractionRegion.cpp src/ibex_AttractionR
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm -f src/*.o find-level-set dicho-scalable optim-scalable
+	rm -f src/*.o ibex-attracting-ellipsoid dicho-scalable optim-scalable
 	

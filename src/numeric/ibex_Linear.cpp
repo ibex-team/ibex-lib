@@ -454,7 +454,12 @@ Interval det(const IntervalMatrix& A) {
 
 	IntervalMatrix LU(A);
 	int *p = new int[n];
-	interval_LU(A,LU,p);
+	try {
+		interval_LU(A,LU,p);
+	} catch(SingularMatrixException& e) {
+		delete[] p;
+		throw e;
+	}
 	Interval res=LU[p[0]][0];
 	for (int i=1; i<n; i++) {
 		res*=LU[p[i]][i];
@@ -474,7 +479,7 @@ Interval det(const IntervalMatrix& A) {
 		p[i]=p[tmp];
 		p[tmp]=tmp;
 	}
-
+	delete[] p;
 	return sign*res;
 }
 

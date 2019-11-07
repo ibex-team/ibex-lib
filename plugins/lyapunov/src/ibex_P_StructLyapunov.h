@@ -15,12 +15,6 @@
 
 namespace ibex {
 
-// Declared just for allowing default constructor.
-class ThetaDomain : public System {
-public:
-	ThetaDomain();
-};
-
 /**
  * \ingroup parser
  *
@@ -66,9 +60,22 @@ public:
 	Vector xhat;
 
 	/**
-	 * Uncertain parameter domain
+	 * Uncertain parameter initial domain
 	 */
-	ThetaDomain theta_sys;
+	IntervalVector theta;
+
+	/**
+	 * Uncertain parameter constraints
+	 */
+	Array<NumConstraint> theta_ctrs;
+
+private:
+	// Declared just for allowing default constructor.
+	class ParamSystem : public System {
+	public:
+		ParamSystem();
+	};
+	ParamSystem theta_sys;
 };
 
 } // end namespace ibex

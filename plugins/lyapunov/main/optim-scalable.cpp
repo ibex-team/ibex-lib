@@ -59,12 +59,6 @@ int main(int argc, char** argv) {
 			} else
 				eps_f = DEFAULT_EPSILON;
 
-			// size of x
-			int n=struc.xhat.size();
-
-			// size of theta
-			int p=struc.theta_sys.nb_var;
-
 			Timer timer;
 			timer.start();
 
@@ -73,13 +67,12 @@ int main(int argc, char** argv) {
 					struc.v,
 					struc.vminor,
 					struc.xhat,
-					struc.theta_sys.box,
-					struc.theta_sys.ctrs);
-
+					struc.theta,
+					struc.theta_ctrs);
 
 			l.timeout = timeout;
 
-			Vector feasible(n);
+			Vector feasible(struc.xhat.size());
 			double time;
 			int nb_cells;
 

@@ -314,18 +314,30 @@ Interval AttractionRegion::find_level_set_optim(double cmin, double cmax, double
 
 	fac.add_goal(c);
 
-	fac.add_ctr(vdot_xhat((Array<const ExprNode>&) xtheta)>=0);
+	Array<const ExprNode> garbage(2 + theta_ctr.size());
+	ExprCtr pos_lie_ctr(vdot_xhat((Array<const ExprNode>&) xtheta), GEQ);
 
-	fac.add_ctr(c=v(u).simplify());
+	garbage.set_ref(0,pos_lie_ctr.e);
+	fac.add_ctr(pos_lie_ctr);
+
+	ExprCtr level_set_ctr(c-v(u).simplify(),EQ);
+
+	garbage.set_ref(1,level_set_ctr.e);
+	fac.add_ctr(level_set_ctr);
 	// warning: previous "simplify" may have destroyed nodes of u!
 	// if you have to use u again, build it again...
 
-	for (int i=0; i<theta_ctr.size(); i++)
-		fac.add_ctr(ExprCtr(theta_ctr[i].f((Array<const ExprNode>&) xtheta),theta_ctr[i].op));
+	for (int i=0; i<theta_ctr.size(); i++) {
+		ExprCtr theta_ctr_i(theta_ctr[i].f((Array<const ExprNode>&) xtheta),theta_ctr[i].op);
+		fac.add_ctr(theta_ctr_i);
+		garbage.set_ref(2+i, theta_ctr_i.e);
+	}
 
 	//note: c>=vminor(u) will be enforced by the Ellipse contractor
 
 	System sys(fac);
+
+	cleanup(garbage,true);
 
 	//cout << "sys=" << sys << endl;
 

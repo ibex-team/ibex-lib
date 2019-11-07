@@ -34,7 +34,7 @@ using namespace std;
 
 namespace ibex {
 
-ThetaDomain::ThetaDomain() { }
+P_StructLyapunov::ParamSystem::ParamSystem() { }
 
 P_StructLyapunov::P_StructLyapunov(const char* filename) : xhat(1 /*tmp*/) {
 	FILE* fd = fopen(filename, "r");
@@ -86,33 +86,46 @@ void P_StructLyapunov::end() {
 	if (vminor.name==NULL)
 		parser::init_function_by_copy(vminor,v);
 
-	bool x_cst_found=false;
+	/* if x was declared as a constant... */
+	//	bool x_cst_found=false;
+	//	for (vector<const char*>::const_iterator it = scopes.top().cst.begin(); it !=scopes.top().cst.end(); ++it) {
+	//
+	//		if (strcmp(*it,"x")) {
+	//			Domain* d= new Domain(scopes.top().get_cst(*it).get());
+	//			switch (d->dim.type()) {
+	//			case Dim::SCALAR :
+	//				xhat.resize(1);
+	//				xhat[0]=d->i().lb();
+	//				break;
+	//			case Dim::ROW_VECTOR:
+	//			case Dim::COL_VECTOR:
+	//				xhat.resize(d->dim.vec_size());
+	//				xhat = d->v().lb();
+	//				break;
+	//			case Dim::MATRIX:
+	//				throw SyntaxError("unexpected matrix constant \"x\"");
+	//			}
+	//			x_cst_found = true;
+	//		}
+	//	}
+	//	if (!x_cst_found)
+	//		throw SyntaxError("input file must contain a constant named \"x\"");
 
-	for (vector<const char*>::const_iterator it = scopes.top().cst.begin(); it !=scopes.top().cst.end(); ++it) {
+	parser::P_SysGenerator(scopes).generate(source,theta_sys);
 
-		if (strcmp(*it,"x")) {
-			Domain* d= new Domain(scopes.top().get_cst(*it).get());
-			switch (d->dim.type()) {
-			case Dim::SCALAR :
-				xhat.resize(1);
-				xhat[0]=d->i().lb();
-				break;
-			case Dim::ROW_VECTOR:
-			case Dim::COL_VECTOR:
-				xhat.resize(d->dim.vec_size());
-				xhat = d->v().lb();
-				break;
-			case Dim::MATRIX:
-				throw SyntaxError("unexpected matrix constant \"x\"");
-			}
-			x_cst_found = true;
-		}
-	}
-	if (!x_cst_found)
-		throw SyntaxError("input file must contain a constant named \"x\"");
+	/* x declared as a variable */
+	// size of x
+	int n=theta_sys.args[0].dim.vec_size();
 
-	if (source.ctrs!=NULL)
-		parser::P_SysGenerator(scopes).generate(source,theta_sys);
+	// size of theta
+	int p=theta_sys.args.size()==2? theta_sys.args[1].dim.vec_size(): 0;
+
+	xhat.resize(n);
+	xhat=theta_sys.box.subvector(0,n-1).lb();
+
+	theta=p>0? theta_sys.box.subvector(n,n+p-1) : /* ignored */ IntervalVector::empty(1);
+
+	theta_ctrs.add(theta_sys.ctrs);
 
 	P_Struct::end();
 }
