@@ -79,15 +79,24 @@ def build (bld):
 		use = ["JAVA"],
 	)
 
-	# Generate C++ header with javah
 	java_ibex_header = "src/%s_Ibex.h" % bld.env.JAVA_SIGNATURE
-	bld (
-		features = "myjavah",
-		source = java_ibex_class,
-		target = java_ibex_header,
-		use = ["JAVA"],
-	)
-
+	
+	# Generate C++ header with javah
+	if bld.env.java_main_version<10:
+		bld (
+			features = "myjavah",
+			source = java_ibex_class,
+			target = java_ibex_header,
+			use = ["JAVA"],
+		)
+	else:
+		bld (
+			features = "myjavah",
+			source = "src/Ibex.java",
+			target = "src", # target directory only
+			use = ["JAVA"],
+		)
+	
 	# Generate jar
 	bld (
 		features = "myjar",
