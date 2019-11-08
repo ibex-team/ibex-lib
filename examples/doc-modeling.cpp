@@ -341,7 +341,7 @@ int main() {
 	output << sys;
 	output << "-------------------------"<< endl;
 
-	KuhnTuckerSystem kkt(sys);
+	KuhnTuckerSystem kkt(sys,true);
 
 	output << "kkt system:"       << endl;
 	output << "-------------------------"<< endl;

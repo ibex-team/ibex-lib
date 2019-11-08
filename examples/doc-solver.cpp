@@ -117,7 +117,7 @@ int main() {
 
 	CtcNewton newton(system.f_ctrs, 5e+08, 1e-07, 1e-04);
 
-    LinearizerXTaylor linear_relax(ext_sys);
+    LinearizerXTaylor linear_relax(system);
 
 	CtcPolytopeHull polytope(linear_relax);
 

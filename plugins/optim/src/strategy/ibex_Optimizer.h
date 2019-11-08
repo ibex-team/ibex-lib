@@ -296,7 +296,7 @@ public:
 	 * If false, the structure will be in the original space (variables
 	 * only).
 	 */
-	bool extended_COV;
+	bool extended_COV; // TODO: should be set in OptimizerConfig
 
 	/**
 	 * \brief Whether anticipated upper bounding has to be applied.
@@ -310,7 +310,7 @@ public:
 	 *
 	 * Default value: true.
 	 */
-	bool anticipated_upper_bounding;
+	bool anticipated_upper_bounding; // TODO: should be set in OptimizerConfig
 
 protected:
 	/*
