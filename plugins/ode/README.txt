@@ -1,8 +1,8 @@
 
 
-=============== Lyapunov plugin ========================
+=============== ODE plugin ========================
 
-Only the executable "find-level-set" is installed by default
+Only the executable "ibexode-attract-region" is installed by default
 on the "bin" folder of IBEX. 
 
 To run the "academic benchmark" of the paper:

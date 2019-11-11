@@ -1,0 +1,15 @@
+variables
+  x[2] in (0; 0);
+  t[2] in ([-1, 1];[-1, 1]);
+
+function f(x[2],t[2])
+  return(-2*x(1) - (1 - t(2))*x(1)^2 - x(2) + t(1)*x(1)*x(2); -2*x(1) - 3*x(2) - t(2)*x(1)*x(2) + (2 + t(1))*x(2)^2);
+end
+
+function v(u[2])
+  return(3*u(1)^2 + u(1)*u(2) + u(2)^2);
+end
+
+constraints
+  (-1 + t(1)^2 + t(2)^2)<=0;
+end

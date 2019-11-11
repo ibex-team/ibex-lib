@@ -1,0 +1,14 @@
+variables
+  x[2] in (0; 0);
+
+function f(x[2])
+  return(x(2); -x(1) - (1 - x(1)^2)*x(2));
+end
+
+function v(u[2])
+  return(u(1)^2 + u(1)^4 + u(1)*u(2) + u(2)^2 + u(1)^2*u(2)^2 + u(2)^4);
+end
+
+function vminor(u[2])
+  return(u(1)^2 + u(1)*u(2) + u(2)^2);
+end
