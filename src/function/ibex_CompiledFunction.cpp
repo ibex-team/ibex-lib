@@ -204,6 +204,12 @@ void CompiledFunction::visit(const ExprAsinh& e) { visit(e,ASINH); }
 
 void CompiledFunction::visit(const ExprAtanh& e) { visit(e,ATANH); }
 
+void CompiledFunction::visit(const ExprFloor& e) { visit(e,FLOOR); }
+
+void CompiledFunction::visit(const ExprCeil& e)  { visit(e,CEIL); }
+
+void CompiledFunction::visit(const ExprSaw& e)   { visit(e,SAW); }
+
 // for debug only
 const char* CompiledFunction::op(operation o) const {
 	switch (o) {
@@ -248,6 +254,9 @@ const char* CompiledFunction::op(operation o) const {
 	case ACOSH:  return "acosh";
 	case ASINH:  return "asinh";
 	case ATANH:  return "atanh";
+	case FLOOR:  return "floor";
+	case CEIL:   return "ceil";
+	case SAW:    return "saw";
 	default: assert(false); return "???";
 	}
 }

@@ -80,16 +80,18 @@ FncActiveCtrs::FncActiveCtrs(const System& sys, const Vector& pt, double activat
 
 	int m=0; // total number of active constraints (ineq, eq, left and right bounds)
 
-	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
-		if (sys.ops[i]==EQ) {
-			((BitSet&) active_ctr).add(i);
-			((BitSet&) eq).add(m++);
-		}
-		else {
-			if (sys.f_ctrs.eval(i,pt).mag() < activation_threshold) {
-				//cout << " activate inequality n°" << i << endl;
+	if (sys.nb_ctr>0) {
+		for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
+			if (sys.ops[i]==EQ) {
 				((BitSet&) active_ctr).add(i);
-				((BitSet&) ineq).add(m++);
+				((BitSet&) eq).add(m++);
+			}
+			else {
+				if (sys.f_ctrs.eval(i,pt).mag() < activation_threshold) {
+					//cout << " activate inequality n°" << i << endl;
+					((BitSet&) active_ctr).add(i);
+					((BitSet&) ineq).add(m++);
+				}
 			}
 		}
 	}

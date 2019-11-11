@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - Interval definition
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Dec 05, 2011
+ * Last update : Oct 30, 2019
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Interval.h"
@@ -134,6 +135,85 @@ bool Interval::div2_inter(const Interval& num, const Interval& div, Interval& ou
 		*this = out1;
 		return true;
 	}
+}
+
+Interval saw(const Interval& x) {
+	double u = round(x.ub());
+	double l = round(x.lb());
+
+	assert(l<=u);
+
+	if (l<u) return Interval(-1,1);
+	else {
+		fpu_round_up();
+		double du  = x.ub()-u;
+		double dl  = l-x.lb();
+
+		return Interval(-dl,du);
+	}
+}
+
+bool bwd_saw(const Interval& y_, Interval& x) {
+
+	if (y_.is_empty()) {
+		x.set_empty();
+		return false;
+	}
+
+	if (y_.lb()==0 && y_.ub()==0) {
+		// a very very frequent case,
+		// handled separately just for efficiency
+		// note: the interval [ceil(x.lb()),floor(x.ub())] can be empty (reversed bounds)
+		return !(x &= Interval(std::ceil(x.lb()),std::floor(x.ub()))).is_empty();
+	}
+
+	assert(sizeof(double)==64); // |mantissa|=53
+	// 2^51 is a rough bound. Troubles start when |x|~2^53
+	// that is, when we start jumping integers in the
+	// double representation. In this case, no contraction
+	// can be expected unless x is degenerated
+	// or y is empty.
+	// And we actually requires 2^51 and not 2^52 because we
+	// need below to have midpoints between integers representable.
+	if (x.mag()>=std::pow(2,52)) {
+		if (x.is_degenerated() && !y_.contains(0)) {
+			x.set_empty();
+			return false;
+		} else
+			return true;
+	}
+
+	double l = round(x.lb());
+	double u = round(x.ub());
+
+	double half=1/2.0; // nice: 1/2 is exactly representable.
+
+	Interval y = y_ & Interval(-half,half);
+
+	fpu_round_up();
+
+	double xl;
+
+	if (x.lb() > l+y.ub()) { // l+y.ub() rounded upward
+		xl = -(-(l+1)        // l+1=the next integer, no rounding should occur (see above)
+		       - y.lb());    // note: (l+1)+y.lb() cannot be less than (l+1)-0.5, which is representable
+		assert(xl>=x.lb());  // hence xl>=x.lb()
+	} else {
+		xl = -(-l - y.lb()); // l+y.lb() rounded downward
+	}
+
+	double xu;
+
+	if (x.ub() < -(-u-y.lb())) { // u+y.lb() rounded downward
+		xu = (u-1)          // the previous integer, no rounding should occur (see above)
+		     + y.ub();      // note: (u-1)+y.ub() cannot exceed (u-1)+0.5, which is representable
+		assert(xu<=x.ub()); // hence xu<=x.ub()
+	} else {
+		xu = u + y.ub();
+	}
+
+	// note: [xl,xu] can be empty if xl>xu.
+	return !(x &= Interval(xl,xu)).is_empty();
 }
 
 double Interval::delta(const Interval& x) const {

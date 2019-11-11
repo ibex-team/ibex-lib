@@ -47,4 +47,58 @@ void TestCtcInteger::test02() {
 	CPPUNIT_ASSERT(box.is_empty());
 }
 
+void TestCtcInteger::test03() {
+	IntervalVector x(1,Interval::empty_set());
+	CtcInteger c(1,BitSet::all(1));
+	c.contract(x);
+	check(x,Interval::empty_set());
+}
+
+void TestCtcInteger::test04() {
+	IntervalVector x(1,Interval(NEG_INFINITY,-0.000001));
+	CtcInteger c(1,BitSet::all(1));
+	c.contract(x);
+	check(x,Interval(NEG_INFINITY,-1));
+}
+void TestCtcInteger::test05() {
+	IntervalVector x(1,Interval(0.00000001,POS_INFINITY));
+	CtcInteger c(1,BitSet::all(1));
+	c.contract(x);
+	check(x,Interval(1.0,POS_INFINITY));
+}
+
+void TestCtcInteger::test06() {
+	IntervalVector x(1,Interval::all_reals());
+	CtcInteger c(1,BitSet::all(1));
+	c.contract(x);
+	check(x,Interval::all_reals());
+}
+
+void TestCtcInteger::test07() {
+	IntervalVector x(1,Interval(0.01,2.99));
+	CtcInteger c(1,BitSet::all(1));
+	c.contract(x);
+	check(x,Interval(1,2));
+}
+
+void TestCtcInteger::test08() {
+	IntervalVector x(1,Interval(-0.01,2.99));
+	CtcInteger c(1,BitSet::all(1));
+	c.contract(x);
+	check(x,Interval(0,2));
+}
+
+void TestCtcInteger::test09() {
+	IntervalVector x(1,Interval(1.000000001,1.9999999999));
+	CtcInteger c(1,BitSet::all(1));
+	c.contract(x);
+	check(x,Interval::empty_set());
+}
+
+void TestCtcInteger::test10() {
+	IntervalVector x(1,Interval(1e8, DBL_MAX));
+	CtcInteger c(1,BitSet::all(1));
+	c.contract(x);
+	check(x, Interval(1e8,DBL_MAX));
+}
 } // end namespace

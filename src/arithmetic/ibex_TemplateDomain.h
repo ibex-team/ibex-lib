@@ -426,6 +426,24 @@ TemplateDomain<D> asinh(const TemplateDomain<D>& d);
 template<class D>
 TemplateDomain<D> atanh(const TemplateDomain<D>& d);
 
+/** Floor. */
+template<class D>
+TemplateDomain<D> floor(const TemplateDomain<D>& d);
+
+/** Ceil. */
+template<class D>
+TemplateDomain<D> ceil(const TemplateDomain<D>& d);
+
+/** Saw. */
+template<class D>
+TemplateDomain<D> saw(const TemplateDomain<D>& d);
+
+/**
+ * \brief Return a domain created as a "ball" midpoint +radius.
+ */
+template<class D>
+TemplateDomain<D> ball(const TemplateDomain<D>& mid, double rad);
+
 /*@}*/
 
 
@@ -1268,7 +1286,32 @@ template<class D>
 TemplateDomain<D> asinh(const TemplateDomain<D>& d) { unary_func(asinh); }
 template<class D>
 TemplateDomain<D> atanh(const TemplateDomain<D>& d) { unary_func(atanh); }
+template<class D>
+TemplateDomain<D> floor(const TemplateDomain<D>& d) { unary_func(floor); }
+template<class D>
+TemplateDomain<D> ceil(const TemplateDomain<D>& d)  { unary_func(ceil); }
+template<class D>
+TemplateDomain<D> saw(const TemplateDomain<D>& d)   { unary_func(saw); }
 
+
+template<class D>
+TemplateDomain<D> ball(const TemplateDomain<D>& mid, double rad) {
+	TemplateDomain<D> d(mid,false);
+
+	switch (d.dim.type()) {
+	case Dim::SCALAR:
+		d.i().inflate(rad);
+		break;
+	case Dim::COL_VECTOR:
+	case Dim::ROW_VECTOR:
+		d.v().inflate(rad);
+		break;
+	case Dim::MATRIX:
+		d.m().inflate(rad);
+		break;
+	}
+	return d;
+}
 
 } // end namespace
 

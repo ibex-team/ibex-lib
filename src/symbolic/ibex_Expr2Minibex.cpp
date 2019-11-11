@@ -31,7 +31,7 @@ void Expr2Minibex::print(std::ostream& os, const ExprNode& e, bool human) {
 				if (!c || c->dim.is_scalar()) continue;
 			}
 
-			os << "  _tmp_" << tmp << "_ = ";
+			os << "  _tmp_" << std::dec << tmp << "_ = ";
 			visit(node);
 			os << ";" << std::endl;
 			map.insert(node, tmp++);
@@ -47,7 +47,7 @@ void Expr2Minibex::print(std::ostream& os, const ExprNode& e, bool human) {
 
 void Expr2Minibex::visit(const ExprNode& e) {
 	if (map.found(e))
-		(*os) << "_tmp_" << map[e] << "_";
+		(*os) << "_tmp_" << std::dec << map[e] << "_";
 	else
 		e.acceptVisitor(*this);
 }

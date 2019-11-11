@@ -15,7 +15,7 @@
 #endif
 
 #ifndef IBEX_BENCHS_DIR
-  #define IBEX_BENCHS_DIR "../plugins/solver/benchs"
+  #define IBEX_BENCHS_DIR "../benchs/solver"
 #endif
 
 using namespace std;
@@ -117,7 +117,7 @@ int main() {
 
 	CtcNewton newton(system.f_ctrs, 5e+08, 1e-07, 1e-04);
 
-	LinearizerCombo linear_relax(system,LinearizerCombo::XNEWTON);
+    LinearizerXTaylor linear_relax(system);
 
 	CtcPolytopeHull polytope(linear_relax);
 

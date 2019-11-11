@@ -545,6 +545,15 @@ They are a separated by semi-colon. Here is an example::
     x-y<=2;
   end
   
+The following operator are allowed between 2 expressions:
+
+- <
+- <=
+- =      
+- >=
+- >
+
+
 .. _mod-minibex-ctrs-loop:
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

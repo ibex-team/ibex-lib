@@ -438,5 +438,8 @@ void ExprDiff::visit(const ExprAtan& e)  { add_grad_expr(e.expr, (*grad[e])/(1.0
 void ExprDiff::visit(const ExprAcosh& e) { add_grad_expr(e.expr, (*grad[e])/sqrt(sqr(e.expr) -1.0)); }
 void ExprDiff::visit(const ExprAsinh& e) { add_grad_expr(e.expr, (*grad[e])/sqrt(1.0+sqr(e.expr))); }
 void ExprDiff::visit(const ExprAtanh& e) { add_grad_expr(e.expr, (*grad[e])/(1.0-sqr(e.expr))); }
+void ExprDiff::visit(const ExprFloor& e) { add_grad_expr(e.expr, (*grad[e])*chi(e.expr-floor(e.expr),ALL_REALS,ZERO)); }
+void ExprDiff::visit(const ExprCeil& e)  { add_grad_expr(e.expr, (*grad[e])*chi(e.expr-floor(e.expr),ALL_REALS,ZERO)); }
+void ExprDiff::visit(const ExprSaw& e)   { throw ExprDiffException("differentiation of \"saw\""); }
 
 } // end namespace ibex

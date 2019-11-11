@@ -16,11 +16,11 @@ using namespace std;
 namespace ibex {
 namespace parser {
 
-P_Source::P_Source() : goal(NULL), ctrs(NULL) {
+P_Source::P_Source() : goal(NULL), ctrs(NULL) { //, cleanup_func(true) {
 
 }
 
-void P_Source::cleanup() {
+P_Source::~P_Source() {
 
 	if (goal) delete goal;
 
@@ -28,15 +28,11 @@ void P_Source::cleanup() {
 		      // or if the system is unconstrained.
 		delete ctrs; // will recursively delete all the constraints
 
-	// important! re-init to NULL for the next file to be parsed:
-
 	// Note: Now that there is no more application nodes (ExprApply),
-	// we could copy auxiliary functions in MainGenerator
-	// and safely destroy them here.
-	func.clear();
-
-	goal=NULL;
-	ctrs=NULL;
+	// we can safely destroy auxiliary functions.
+	//if (cleanup_func)
+	for (vector<Function*>::iterator it=func.begin(); it!=func.end(); ++it)
+		delete *it;
 }
 
 ostream& operator<<(ostream& os, const P_Source& source) {

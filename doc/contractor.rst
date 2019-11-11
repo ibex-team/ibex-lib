@@ -568,7 +568,7 @@ There exists some built-in linearization techniques, namely:
 
 - ``LinearizerXTaylor``: a corner-based Taylor relaxation :ref:`[Araya & al., 2012] <Araya12>`.
 - ``LinearizerAffine2``: a relaxation based on affine arithmetic :ref:`[Ninin & Messine, 2009] <Ninin09>`.
-- ``LinearizerCombo``: a combination of the two previous techniques (the polytope is basically the intersection of the polytopes
+- ``LinearizerCompo``: a combination of several techniques (the polytope is the intersection of the polytopes
   calculated by each technique)
 - ``LinearizerFixed``: a fixed linear system (as shown in the example above)
 

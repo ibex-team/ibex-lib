@@ -137,12 +137,19 @@ do_benchs_iter (System &sys, DecimalFP prec, double time_limit,
 	for (unsigned int i = 0; i < iter; i++)
 	{
 		/* Build the default optimizer */
-		double random_seed = DefaultOptimizer::default_random_seed + (double) i;
-		DefaultOptimizer DefOpt (sys, eps, eps, NormalizedSystem::default_eps_h,
-		                         false, true, false, random_seed, 0.0);
+		DefaultOptimizerConfig config(sys);
 
-		/* Set the time limit */
-		DefOpt.timeout = time_limit;
+		config.set_rel_eps_f(eps);
+		config.set_abs_eps_f(eps);
+		config.set_eps_h(NormalizedSystem::default_eps_h);
+		config.set_rigor(false);
+		config.set_inHC4(true);
+		config.set_kkt(false);
+		config.set_random_seed(config.default_random_seed + (double) i);
+		config.set_eps_x(0.0);
+		config.set_timeout(time_limit); /* Set the time limit */
+
+		Optimizer DefOpt(config);
 
 		/* Do the actual computation */
 		Optimizer::Status status = DefOpt.optimize (sys.box);
@@ -154,7 +161,7 @@ do_benchs_iter (System &sys, DecimalFP prec, double time_limit,
 		          << " ; nb_cells = " << DefOpt.get_nb_cells()
 		          << " ; uplo = " << DefOpt.get_uplo()
 		          << " ; loup = " << DefOpt.get_loup()
-		          << " ; random_seed = " << random_seed
+		          << " ; random_seed = " << config.get_random_seed()
 		          << std::endl;
 
 		tot_time += DefOpt.get_time();

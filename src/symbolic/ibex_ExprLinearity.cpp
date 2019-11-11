@@ -402,21 +402,24 @@ void ExprLinearity::visit(const ExprAtan2& e)  { binary(e,atan2,false); }
 
 void ExprLinearity::visit(const ExprAbs& e)    { unary(e,abs,false); }
 void ExprLinearity::visit(const ExprSign& e)   { unary(e,sign,false); }
-void ExprLinearity::visit(const ExprSqr& e)    { unary(e,sqr,false);}
-void ExprLinearity::visit(const ExprSqrt& e)   { unary(e,sqrt,false);}
-void ExprLinearity::visit(const ExprExp& e)    { unary(e,exp,false);}
-void ExprLinearity::visit(const ExprLog& e)    { unary(e,log,false);}
-void ExprLinearity::visit(const ExprCos& e)    { unary(e,cos,false);}
-void ExprLinearity::visit(const ExprSin& e)    { unary(e,sin,false);}
-void ExprLinearity::visit(const ExprTan& e)    { unary(e,tan,false);}
-void ExprLinearity::visit(const ExprCosh& e)   { unary(e,cosh,false);}
-void ExprLinearity::visit(const ExprSinh& e)   { unary(e,sinh,false);}
-void ExprLinearity::visit(const ExprTanh& e)   { unary(e,tanh,false);}
-void ExprLinearity::visit(const ExprAcos& e)   { unary(e,acos,false);}
-void ExprLinearity::visit(const ExprAsin& e)   { unary(e,asin,false);}
-void ExprLinearity::visit(const ExprAtan& e)   { unary(e,atan,false);}
-void ExprLinearity::visit(const ExprAcosh& e)  { unary(e,acosh,false);}
-void ExprLinearity::visit(const ExprAsinh& e)  { unary(e,asinh,false);}
-void ExprLinearity::visit(const ExprAtanh& e)  { unary(e,atanh,false);}
+void ExprLinearity::visit(const ExprSqr& e)    { unary(e,sqr,false); }
+void ExprLinearity::visit(const ExprSqrt& e)   { unary(e,sqrt,false); }
+void ExprLinearity::visit(const ExprExp& e)    { unary(e,exp,false); }
+void ExprLinearity::visit(const ExprLog& e)    { unary(e,log,false); }
+void ExprLinearity::visit(const ExprCos& e)    { unary(e,cos,false); }
+void ExprLinearity::visit(const ExprSin& e)    { unary(e,sin,false); }
+void ExprLinearity::visit(const ExprTan& e)    { unary(e,tan,false); }
+void ExprLinearity::visit(const ExprCosh& e)   { unary(e,cosh,false); }
+void ExprLinearity::visit(const ExprSinh& e)   { unary(e,sinh,false); }
+void ExprLinearity::visit(const ExprTanh& e)   { unary(e,tanh,false); }
+void ExprLinearity::visit(const ExprAcos& e)   { unary(e,acos,false); }
+void ExprLinearity::visit(const ExprAsin& e)   { unary(e,asin,false); }
+void ExprLinearity::visit(const ExprAtan& e)   { unary(e,atan,false); }
+void ExprLinearity::visit(const ExprAcosh& e)  { unary(e,acosh,false); }
+void ExprLinearity::visit(const ExprAsinh& e)  { unary(e,asinh,false); }
+void ExprLinearity::visit(const ExprAtanh& e)  { unary(e,atanh,false); }
+void ExprLinearity::visit(const ExprFloor& e)  { unary(e,floor,false); }
+void ExprLinearity::visit(const ExprCeil& e)   { unary(e,ceil,false); }
+void ExprLinearity::visit(const ExprSaw& e)    { unary(e,saw,false); }
 
 } /* namespace ibex */

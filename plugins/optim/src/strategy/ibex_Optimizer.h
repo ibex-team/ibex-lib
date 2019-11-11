@@ -11,12 +11,7 @@
 #ifndef __IBEX_OPTIMIZER_H__
 #define __IBEX_OPTIMIZER_H__
 
-#include "ibex_Ctc.h"
-#include "ibex_Bsc.h"
-#include "ibex_LoupFinder.h"
-#include "ibex_CellBufferOptim.h"
-//#include "ibex_EntailedCtr.h"
-#include "ibex_CtcKhunTucker.h"
+#include "ibex_OptimizerConfig.h"
 #include "ibex_CovOptimData.h"
 
 namespace ibex {
@@ -79,9 +74,14 @@ public:
 	 */
 	Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder, CellBufferOptim& buffer,
 			int goal_var,
-			double eps_x=default_eps_x,
-			double rel_eps_f=default_rel_eps_f,
-			double abs_eps_f=default_abs_eps_f);
+			double eps_x=OptimizerConfig::default_eps_x,
+			double rel_eps_f=OptimizerConfig::default_rel_eps_f,
+			double abs_eps_f=OptimizerConfig::default_abs_eps_f);
+
+	/**
+	 * Todo: update comments
+	 */
+	Optimizer(OptimizerConfig& config);
 
 	/**
 	 * \brief Delete *this.
@@ -262,20 +262,11 @@ public:
 	/** Precision (bisection control) */
 	const double eps_x;
 
-	/** Default bisection precision: 0. */
-	static constexpr double default_eps_x = 0;
-
 	/** Relative precision on the objective */
 	const double rel_eps_f;
 
-	/** Default goal relative precision: 1e-3. */
-	static constexpr double default_rel_eps_f = 1e-03;
-
 	/** Absolute precision on the objective */
 	const double abs_eps_f;
-
-	/** Default goal absolute precision: 1e-7. */
-	static constexpr double default_abs_eps_f = 1e-07;;
 
 	/**
 	 * \brief Trace activation flag.
@@ -305,7 +296,7 @@ public:
 	 * If false, the structure will be in the original space (variables
 	 * only).
 	 */
-	bool extended_COV;
+	bool extended_COV; // TODO: should be set in OptimizerConfig
 
 	/**
 	 * \brief Whether anticipated upper bounding has to be applied.
@@ -319,7 +310,7 @@ public:
 	 *
 	 * Default value: true.
 	 */
-	bool anticipated_upper_bounding;
+	bool anticipated_upper_bounding; // TODO: should be set in OptimizerConfig
 
 protected:
 	/*
@@ -415,11 +406,13 @@ protected:
 
 private:
 
+	Optimizer(const Optimizer&); // forbidden
+
 	/** Currently entailed constraints */
 	//EntailedCtr* entailed;
 
 	//!! warning: sys.box should be properly set before call to constructor !!
-	//CtcKhunTucker kkt;
+	//CtcKuhnTucker kkt;
 
 	/* Remember return status of the last optimization. */
 	Status status;
@@ -479,7 +472,7 @@ inline double Optimizer::get_obj_rel_prec() const {
 		if (uplo<0) return POS_INFINITY;
 		else return 0;
 	else
-		return (loup-uplo)/(fabs(loup));
+		return (loup-uplo)/(fabs(uplo));
 }
 
 inline double Optimizer::get_obj_abs_prec() const {

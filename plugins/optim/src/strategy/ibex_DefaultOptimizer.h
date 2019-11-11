@@ -1,21 +1,18 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_DefaultOptimizer.h
 // Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Jul 25, 2017
+// Last Update : Oct 13, 2019
 //============================================================================
 
 #ifndef __IBEX_DEFAULT_OPTIMIZER_H__
 #define __IBEX_DEFAULT_OPTIMIZER_H__
 
+#include "ibex_DefaultOptimizerConfig.h"
 #include "ibex_Optimizer.h"
-#include "ibex_CtcCompo.h"
-#include "ibex_Memory.h"
-#include "ibex_NormalizedSystem.h"
-#include "ibex_ExtendedSystem.h"
 
 namespace ibex {
 
@@ -23,8 +20,12 @@ namespace ibex {
  * \ingroup optim
  *
  * \brief Default optimizer.
+ *
+ * \deprecated. Use DefaultOptimizerConfig.
  */
-class DefaultOptimizer : private Memory, public Optimizer {
+class DefaultOptimizer :
+		protected DefaultOptimizerConfig /* --> for memory */,
+		public Optimizer {
 public:
 	/**
 	 * \brief Create a default optimizer.
@@ -44,28 +45,28 @@ public:
 	 *                      (**deprecated**).
 	 */
     DefaultOptimizer(const System& sys,
-    		double rel_eps_f=Optimizer::default_rel_eps_f,
-			double abs_eps_f=Optimizer::default_abs_eps_f,
+    		double rel_eps_f=OptimizerConfig::default_rel_eps_f,
+			double abs_eps_f=OptimizerConfig::default_abs_eps_f,
 			double eps_h=NormalizedSystem::default_eps_h,
-			bool rigor=false, bool inHC4=true, bool kkt=false,
-			double random_seed=default_random_seed,
-    		double eps_x=Optimizer::default_eps_x);
-
-	/** Default random seed: 1.0. */
-	static constexpr double default_random_seed = 1.0;
-
-private:
-
-    /**
-     * The contractor: HC4 + acid(HC4) + X-Newton
-     */
-	Ctc& ctc(const System& sys, double eps_h, bool rigor, bool kkt);
-
-	NormalizedSystem& get_norm_sys(const System& sys, double eps_h);
-
-	ExtendedSystem& get_ext_sys(const System& sys, double eps_h);
-
+			bool rigor=false,
+			bool inHC4=DefaultOptimizerConfig::default_inHC4,
+		    bool kkt=false,
+			double random_seed=DefaultOptimizerConfig::default_random_seed,
+    		double eps_x=OptimizerConfig::default_eps_x);
 };
+
+inline DefaultOptimizer::DefaultOptimizer(const System& sys,
+		double rel_eps_f,
+		double abs_eps_f,
+		double eps_h,
+		bool rigor,
+		bool inHC4,
+	    bool kkt,
+		double random_seed,
+		double eps_x) :
+				DefaultOptimizerConfig(sys,rel_eps_f,abs_eps_f,eps_h,rigor,inHC4,kkt,random_seed,eps_x),
+				Optimizer((DefaultOptimizerConfig&) *this) {
+}
 
 } // end namespace ibex
 

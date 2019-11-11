@@ -1,13 +1,14 @@
 /* ============================================================================
  * I B E X - Interval definition
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Bug fixes   : Gilles Trombettoni, Bertrand Neveu
  * Created     : Dec 05, 2011
+ * Last update : Oct 30, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef _IBEX_INTERVAL_H_
@@ -676,10 +677,22 @@ Interval sign(const Interval& x);
  * \remark  chi([a],[b],[c]) =[b] if [a]<=0, [c] if [a]>0, hull \{[b], [c]\} else.  */
 Interval chi(const Interval& a, const Interval& b, const Interval& c);
 
-/**
- * \brief Return the largest integer interval included in x.
- */
+/** \brief Return the largest integer interval included in x. */
 Interval integer(const Interval& x);
+
+/** \brief Floor of [x]. */
+Interval floor(const Interval& x);
+
+/** \brief Ceil of [x]. */
+Interval ceil(const Interval& x);
+
+/**
+ * \brief The saw function is x->x-round(x)
+ *
+ * It allows to enforce integer constraint
+ * by writing saw(x)=0.
+ */
+Interval saw(const Interval& x);
 
 /** \brief Projection of y=x_1+x_2.
  *
@@ -824,13 +837,17 @@ bool bwd_sign(const Interval& y, Interval& x);
 /** \brief Projection of f=chi(a,b,c). */
 bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c);
 
-/** \brief Contract x w.r.t. the fact that it must be integral.
- *
- */
-bool bwd_integer(Interval& x);
+/** \brief Contract x w.r.t. y=floor(x). */
+bool bwd_floor(const Interval& y, Interval& x);
 
-/** \brief Contract x and y w.r.t. the fact that they are equivalent modulo the period p.
- *
+/* \brief Contract x w.r.t. y=ceil(x). */
+bool bwd_ceil(const Interval& y, Interval& x);
+
+/* \brief Contract x w.r.t. y=saw(x). */
+bool bwd_saw(const Interval& y, Interval& x);
+
+/**
+ * \brief Contract x and y w.r.t. the fact that they are equivalent modulo the period p.
  */
 bool bwd_imod(Interval& x, Interval& y, const double& p);
 
@@ -878,8 +895,6 @@ inline Interval& Interval::operator=(double x) {
 		itv = x;
 	return *this;
 }
-
-
 
 inline Interval& Interval::operator=(const Interval& x) {
 	itv = x.itv;
@@ -1407,8 +1422,40 @@ inline bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 }
 
 
-inline bool bwd_integer(Interval& x) {
-	return !(x = integer(x)).is_empty();
+inline bool bwd_floor(const Interval& y, Interval& x) {
+	if (y.is_empty()) {
+		x.set_empty();
+		return false;
+	} else {
+		double r=std::floor(y.ub());
+		double l=std::ceil(y.lb());
+		if (r<l) {
+			x.set_empty();
+			return false;
+		}
+		else {
+			x &= Interval(l,r) + Interval(0,1);
+			return !x.is_empty();
+		}
+	}
+}
+
+inline bool bwd_ceil(const Interval& y, Interval& x) {
+	if (y.is_empty()) {
+		x.set_empty();
+		return false;
+	} else {
+		double r=std::floor(y.ub());
+		double l=std::ceil(y.lb());
+		if (r<l) {
+			x.set_empty();
+			return false;
+		}
+		else {
+			x &= Interval(l,r) + Interval(-1,0);
+			return !x.is_empty();
+		}
+	}
 }
 
 // Implements interval modulo with double period:  x = y mod(p)

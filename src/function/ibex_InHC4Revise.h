@@ -102,6 +102,9 @@ public: // because called from CompiledFunction
 	inline void acosh_bwd  (int , int)              { not_implemented("Inner projection of \"acosh\""); }
 	inline void asinh_bwd  (int , int)              { not_implemented("Inner projection of \"asinh\""); }
 	inline void atanh_bwd  (int , int)              { not_implemented("Inner projection of \"atanh\""); }
+	inline void floor_bwd  (int , int)              { not_implemented("Inner projection of \"floor\""); }
+	inline void ceil_bwd   (int , int)              { not_implemented("Inner projection of \"ceil\""); }
+	inline void saw_bwd   (int , int)               { not_implemented("Inner projection of \"saw\""); }
 };
 
 } // end namespace ibex

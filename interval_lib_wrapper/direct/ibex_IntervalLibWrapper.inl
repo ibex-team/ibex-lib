@@ -842,6 +842,16 @@ inline Interval integer(const Interval& x) {
 	else return Interval(l,r);
 }
 
+inline Interval floor(const Interval& x) {
+	if (x.is_empty()) return Interval::empty_set();
+	else return Interval(std::floor(x.lb()),std::floor(x.ub()));
+}
+
+inline Interval ceil(const Interval& x) {
+	if (x.is_empty()) return Interval::empty_set();
+	else return Interval(std::ceil(x.lb()),std::ceil(x.ub()));
+}
+
 inline bool bwd_mul(const Interval& y, Interval& x1, Interval& x2) {
 	if (y.contains(0)) {
 		if (!x2.contains(0))                           // if y and x2 contains 0, x1 can be any double number.

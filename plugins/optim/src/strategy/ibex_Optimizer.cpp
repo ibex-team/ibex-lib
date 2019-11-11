@@ -49,12 +49,33 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 										eps_x(eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
 										trace(0), timeout(-1), extended_COV(true), anticipated_upper_bounding(true),
 										status(SUCCESS),
-										//kkt(normalized_user_sys),
 										uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
 										loup_point(IntervalVector::empty(n)), initial_loup(POS_INFINITY), loup_changed(false),
 										time(0), nb_cells(0), cov(NULL) {
 
 	if (trace) cout.precision(12);
+}
+
+
+Optimizer::Optimizer(OptimizerConfig& config) :
+		n           (config.nb_var()),
+		goal_var    (config.goal_var()),
+		ctc         (config.get_ctc()),
+		bsc         (config.get_bsc()),
+		loup_finder (config.get_loup_finder()),
+		buffer      (config.get_cell_buffer()),
+		eps_x       (config.get_eps_x()),
+		rel_eps_f   (config.get_rel_eps_f()),
+		abs_eps_f   (config.get_abs_eps_f()),
+		trace       (config.get_trace()),
+		timeout     (config.get_timeout()),
+		extended_COV(config.with_extended_cov()),
+		anticipated_upper_bounding(config.with_anticipated_upper_bounding()),
+		status(SUCCESS),
+		uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
+		loup_point(IntervalVector::empty(n)), initial_loup(POS_INFINITY), loup_changed(false),
+		time(0), nb_cells(0), cov(NULL) {
+
 }
 
 Optimizer::~Optimizer() {
@@ -73,7 +94,8 @@ double Optimizer::compute_ymax() {
 
 		if (loup - abs_eps_f < ymax)
 			ymax = loup - abs_eps_f;
-		return ymax;
+		//return ymax;
+		return next_float(ymax);
 	} else
 		return loup;
 }
@@ -121,8 +143,8 @@ void Optimizer::update_uplo() {
 
 	if (! buffer.empty()) {
 		new_uplo= buffer.minimum();
-		if (new_uplo > loup) {
-			cout << " loup = " << loup << " new_uplo=" << new_uplo << endl;
+		if (new_uplo > loup && uplo_of_epsboxes > loup) {
+			cout << " loup = " << loup << " new_uplo=" << new_uplo <<  " uplo_of_epsboxes=" << uplo_of_epsboxes << endl;
 			ibex_error("optimizer: new_uplo>loup (please report bug)");
 		}
 		if (new_uplo < uplo) {
@@ -158,14 +180,14 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 
 	// the current box cannot be bisected.  ymin is a lower bound of the objective on this box
 	// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo,
-	//that indicates a lowerbound for the objective in all the small boxes
+	// that indicates a lowerbound for the objective in all the small boxes
 	// found by the precision criterion
 	assert (uplo_of_epsboxes >= uplo);
 	assert(ymin >= uplo);
 	if (uplo_of_epsboxes > ymin) {
 		uplo_of_epsboxes = ymin;
 		if (trace) {
-			cout << " unprocessable tiny box: now uplo<=" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
+			cout << " unprocessable tiny box: now uplo<=" << setprecision(12) <<  uplo_of_epsboxes << " uplo=" << uplo << endl;
 		}
 	}
 }

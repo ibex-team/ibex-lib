@@ -6,10 +6,10 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Apr 11, 2018
+// Last Update : Nov 03, 2019
 //===========================================================================
 
-#include "parser.h"
+#include "ibex_P_Struct.h"
 
 using namespace ibex;
 using namespace parser;
@@ -46,7 +46,7 @@ using namespace std;
 %token <str> TK_BINARY_OP              // generic (user-defined) binary operator
 
 %token <str> TK_STRING
-%token <itg> TK_INTEGER
+%token <itg> TK_INT_CST
 %token <real> TK_FLOAT
 %token TK_PI TK_INFINITY
 %token <_bool> TK_BOOL
@@ -56,7 +56,7 @@ using namespace std;
 %token TK_MIN TK_MAX TK_INF TK_MID TK_SUP TK_SIGN TK_ABS TK_SUM
 %token TK_SQRT TK_EXPO  TK_LOG 
 %token TK_COS  TK_SIN   TK_TAN  TK_ACOS  TK_ASIN  TK_ATAN TK_ATAN2
-%token TK_COSH TK_SINH  TK_TANH TK_ACOSH TK_ASINH TK_ATANH
+%token TK_COSH TK_SINH  TK_TANH TK_ACOSH TK_ASINH TK_ATANH TK_FLOOR TK_CEIL TK_INTEGER
 %token TK_LEQ  TK_GEQ   TK_EQU  TK_ASSIGN TK_CHI
 %token TK_BEGIN TK_END TK_FOR TK_FROM TK_TO TK_RETURN
 %token TK_CTRS TK_MINIMIZE
@@ -89,24 +89,19 @@ using namespace std;
 %%
 
 
-program       :                                 { begin(); }
+program       :                                 { pstruct->begin(); }
                 decl_opt_cst 
-                system_or_func
-              |                                 { begin(); 
-                                                  begin_choco(); } 
-                TK_CHOCO choco_ctr              { end_choco(); }
+                decl_opt_fncs
+                system_or_func                  { pstruct->end(); }
+              |                                 { pstruct->begin(); } 
+                choco_ctr                       { pstruct->end(); }
               ; 
 
-system_or_func: function decl_opt_fncs
-                TK_VARS decl_var_list ';'   
+system_or_func: TK_VARS decl_var_list ';'   
                 decl_opt_fncs
                 decl_opt_goal
-                decl_opt_ctrs                   { end_system(); }
-              | TK_VARS decl_var_list ';'   
-                decl_opt_fncs
-                decl_opt_goal
-                decl_opt_ctrs                   { end_system(); }
-              | function                        { end_function(); }
+                decl_opt_ctrs                   
+              |
               ;
               
 choco_ctr     : ctr_blk_list                    
@@ -126,11 +121,11 @@ decl_cst_list : decl_cst
               ;
 
 decl_cst      : TK_NEW_SYMBOL dimension 
-                TK_EQU expr                     { scopes().top().add_cst($1, $2, $4->_2domain()); 
+                TK_EQU expr                     { pstruct->scopes.top().add_cst($1, $2, $4->_2domain()); 
                                                   free($1); delete $2; delete $4; }
                                                       
               | TK_NEW_SYMBOL dimension 
-                TK_IN expr                      { scopes().top().add_cst($1, $2, $4->_2domain()); 
+                TK_IN expr                      { pstruct->scopes.top().add_cst($1, $2, $4->_2domain()); 
                                                   free($1); delete $2; delete $4; }
               ;
  
@@ -139,10 +134,10 @@ decl_var_list : decl_var
               | decl_var_list ',' decl_var           
               ;
   
-decl_var      : TK_NEW_SYMBOL dimension         { scopes().top().add_var($1,$2);  
+decl_var      : TK_NEW_SYMBOL dimension         { pstruct->scopes.top().add_var($1,$2);  
 		                                          free($1); delete $2; }
               | TK_NEW_SYMBOL dimension 
-	            TK_IN expr                      { scopes().top().add_var($1,$2,$4->_2domain()); 
+	            TK_IN expr                      { pstruct->scopes.top().add_var($1,$2,$4->_2domain()); 
 						                          free($1); delete $2; delete $4; }
               ; 
 
@@ -165,17 +160,17 @@ decl_opt_fncs : decl_opt_fncs function
               | 
               ;
 
-function      : TK_FUNCTION                     { scopes().push(Scope(scopes().top(),true)); }
+function      : TK_FUNCTION                     { pstruct->scopes.push(P_Scope(pstruct->scopes.top(),true)); }
                 TK_NEW_SYMBOL
                 '(' fnc_inpt_list ')'
                 fnc_code
                 TK_RETURN expr semicolon_opt
                 TK_END                          { 
                 								  // TODO: simplify the expression (beware of constants that should be "locked")
-                								  Function* f=new Function(scopes().top().var_symbols(),$9->generate(),$3);        
-                                                  scopes().pop();
-                                                  scopes().top().add_func($3,f);
-                                                  source().func.push_back(f);
+                								  Function* f=new Function(pstruct->scopes.top().var_symbols(),$9->generate(),$3);        
+                                                  pstruct->scopes.pop();
+                                                  pstruct->scopes.top().add_func($3,f);
+                                                  pstruct->source.func.push_back(f);
                                                   free($3); delete $9;
                                                  }
               ;
@@ -186,7 +181,7 @@ fnc_inpt_list : fnc_inpt_list ',' fnc_input
               | fnc_input                       
               ;
 
-fnc_input     : TK_NEW_SYMBOL dimension         { scopes().top().add_var($1,$2);
+fnc_input     : TK_NEW_SYMBOL dimension         { pstruct->scopes.top().add_var($1,$2);
                                                   free($1); delete $2; }
               ;
 
@@ -195,17 +190,17 @@ fnc_code      : fnc_code fnc_assign ';'
               ;
 
 fnc_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* TODO: if this tmp symbol is not used, the generated expr will never be deleted */
-                                                  scopes().top().add_expr_tmp_symbol($1,&$3->generate()); free($1); delete $3; }
+                                                  pstruct->scopes.top().add_expr_tmp_symbol($1,&$3->generate()); free($1); delete $3; }
               | TK_CONSTANT TK_EQU expr         { cerr << "Warning: line " << ibex_lineno << ", local variable " << $1 << " shadows the constant of the same name\n"; 
-                                                  scopes().top().rem_cst($1);
-                                                  scopes().top().add_expr_tmp_symbol($1,&$3->generate()); free($1); delete $3; } 
+                                                  pstruct->scopes.top().rem_cst($1);
+                                                  pstruct->scopes.top().add_expr_tmp_symbol($1,&$3->generate()); free($1); delete $3; } 
               ;
 
 /**********************************************************************************************************************/
 /*                                                  GOAL                                                              */
 /**********************************************************************************************************************/
-decl_opt_goal :                                 { source().goal = NULL; }
-              | TK_MINIMIZE expr semicolon_opt  { source().goal = $2; }
+decl_opt_goal :                                 { pstruct->source.goal = NULL; }
+              | TK_MINIMIZE expr semicolon_opt  { pstruct->source.goal = $2; }
               ;
 
 /**********************************************************************************************************************/
@@ -213,11 +208,11 @@ decl_opt_goal :                                 { source().goal = NULL; }
 /**********************************************************************************************************************/
 
 decl_opt_ctrs : 
-              | TK_CTRS                         { scopes().push(scopes().top()); /* new scope for temporary symbols */ } 
-                ctr_blk_list TK_END             { scopes().pop(); }
+              | TK_CTRS                         { pstruct->scopes.push(pstruct->scopes.top()); /* new scope for temporary symbols */ } 
+                ctr_blk_list TK_END             { pstruct->scopes.pop(); }
 	          ;
 	          
-ctr_blk_list  : ctr_blk_list_ semicolon_opt     { source().ctrs=new P_ConstraintList($1); }
+ctr_blk_list  : ctr_blk_list_ semicolon_opt     { pstruct->source.ctrs=new P_ConstraintList($1); }
               ;
 
 ctr_blk_list_ : ctr_blk_list_ ';' ctr_blk       { $1->push_back($3); $$ = $1; }
@@ -230,11 +225,11 @@ ctr_blk       : ctr_loop                        { $$ = $1; }
               ;
 
 ctr_loop      : TK_FOR TK_NEW_SYMBOL TK_EQU
-				expr ':' expr ';'               { scopes().push(scopes().top());
-						       					 scopes().top().add_iterator($2); }
+				expr ':' expr ';'               { pstruct->scopes.push(pstruct->scopes.top());
+						       					  pstruct->scopes.top().add_iterator($2); }
                 ctr_blk_list_ semicolon_opt 
                 TK_END                          { $$ = new P_ConstraintLoop($2, $4, $6, $9); 
-						                          scopes().pop();
+						                          pstruct->scopes.pop();
 		                                          free($2); }
               ;
 
@@ -244,9 +239,10 @@ ctr           : expr TK_EQU expr                { $$ = new P_OneConstraint($1,EQ
               | expr   '<'  expr                { $$ = new P_OneConstraint($1,LT,$3); }
               | expr   '>'  expr                { $$ = new P_OneConstraint($1,GT,$3); }
               | expr TK_IN  expr                { $$ = new P_ThickEquality($1,$3->_2itv()); delete $3; }
+              | TK_INTEGER  '(' expr ')'        { $$ = new P_OneConstraint(saw($3),EQ,NULL); }
               | '(' ctr ')'                     { $$ = $2; }
               | TK_NEW_SYMBOL TK_EQU expr       { $$ = new P_TmpSymbolDecl($1,$3); 
-                                                  scopes().top().add_expr_tmp_symbol($1); free($1); }
+                                                  pstruct->scopes.top().add_expr_tmp_symbol($1); free($1); }
               ; 
               
 /**********************************************************************************************************************/
@@ -261,13 +257,13 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | TK_MIN '(' expr_row ')'         { $$ = min($3);       }
               | TK_SUM '(' TK_NEW_SYMBOL TK_EQU expr ':' expr ','
                                               { 
-                                                scopes().push(scopes().top());
-                                                scopes().top().add_iterator($3);
+                                                pstruct->scopes.push(pstruct->scopes.top());
+                                                pstruct->scopes.top().add_iterator($3);
                                               }
                 expr ')'  
                                               {
                                                 $$ = sum($10, $3, $5, $7);
-                                                scopes().pop();
+                                                pstruct->scopes.pop();
                                                 free($3);
                                               }
               | TK_ATAN2 '(' expr ',' expr ')'  { $$ = atan2($3,$5);  }
@@ -290,6 +286,8 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | TK_ACOSH '(' expr ')'           { $$ = acosh($3);     }
               | TK_ASINH '(' expr ')'           { $$ = asinh($3);     }
               | TK_ATANH '(' expr ')'           { $$ = atanh($3);     }
+              | TK_FLOOR '(' expr ')'           { $$ = floor($3);     }
+              | TK_CEIL  '(' expr ')'           { $$ = ceil($3);      }
               | TK_CHI '(' expr ',' expr ',' expr ')'  
                                                 { $$ = chi($3,$5,$7); }
               | '+' expr                        { $$ = $2; }
@@ -303,17 +301,17 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | '(' expr_row ')'                { $$ = row_vec($2); delete $2; }
               | '(' expr_col ')'                { $$ = col_vec($2); delete $2; }
               | TK_ENTITY                       { $$ = new P_ExprVarSymbol($1); free($1); /* cannot happen inside a function expr */}
-              | '{' TK_INTEGER '}'              { $$ = new P_ExprVarSymbol(scopes().top().var($2));   /* CHOCO variable symbols */ }
+              | '{' TK_INT_CST '}'              { $$ = new P_ExprVarSymbol(pstruct->scopes.top().var($2));   /* CHOCO variable symbols */ }
               | TK_ITERATOR                     { $$ = new P_ExprIter($1); free($1); }
-              | TK_EXPR_TMP_SYMBOL              { $$ = new P_ExprTmpSymbol($1); free($1); /* not this (we do **not** build DAG with P_ExprNodes!) ---> &scopes().top().get_expr_tmp_expr($1); */ }
+              | TK_EXPR_TMP_SYMBOL              { $$ = new P_ExprTmpSymbol($1); free($1); /* not this (we do **not** build DAG with P_ExprNodes!) ---> &pstruct->scopes.top().get_expr_tmp_expr($1); */ }
               | TK_CONSTANT                     { $$ = new P_ExprCstSymbol($1); free($1); }
-              | TK_FUNC_SYMBOL '(' expr ')'     { $$ = apply(scopes().top().get_func($1), *$3); free($1); }
-              | TK_FUNC_SYMBOL '(' expr_row ')' { $$ = apply(scopes().top().get_func($1), *$3); free($1); delete $3; }
+              | TK_FUNC_SYMBOL '(' expr ')'     { $$ = apply(pstruct->scopes.top().get_func($1), *$3); free($1); }
+              | TK_FUNC_SYMBOL '(' expr_row ')' { $$ = apply(pstruct->scopes.top().get_func($1), *$3); free($1); delete $3; }
 //              | TK_NEW_SYMBOL                   { ibexerror("unknown symbol"); }
               | TK_FLOAT                        { $$ = new P_ExprConstant($1); }
               | TK_PI                           { $$ = new P_ExprConstant(Interval::pi()); }
               | TK_INFINITY                     { $$ = dbl_infinity(); }              
-              | TK_INTEGER                      { $$ = new P_ExprConstant($1); }
+              | TK_INT_CST                      { $$ = new P_ExprConstant($1); }
               | interval                        { $$ = new P_ExprConstant(*$1); delete $1; }
               | TK_INF '(' expr ')'             { $$ = inf($3); }
               | TK_MID '(' expr ')'             { $$ = mid($3); }

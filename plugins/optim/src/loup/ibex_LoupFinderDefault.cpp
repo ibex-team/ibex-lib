@@ -65,7 +65,7 @@ std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& 
 		if (argmin && argmin->argmin()) {
 			Vector loup_point = p.first.lb();
 			double loup = p.second;
-			bool new_loup_found=LoupFinderProbing(finder_x_taylor.sys).dichotomic_line_search(loup_point, loup, *argmin->argmin(), false);
+			LoupFinderProbing(finder_x_taylor.sys).dichotomic_line_search(loup_point, loup, *argmin->argmin(), false);
 			//cout << "better loup found! " << loup << endl;
 			p=make_pair(loup_point,loup);
 		}

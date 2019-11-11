@@ -254,13 +254,13 @@ We get the following display:
    :start-after: sys-extended-O
    :end-before: sys-extended-O
 
-.. _mod-sys-transfo-fritz-john:
+.. _mod-sys-transfo-kkt:
 
 --------------------------------------------------------
-Fritz-John (Khun-Tucker) conditions
+Kuhn-Tucker conditions
 --------------------------------------------------------
 
-The generalized Khun-Tucker (aka Fritz-John) conditions can be obtained from a system.
+The generalized Kuhn-Tucker (aka kkt) conditions can be obtained from a system.
 This produces a new system of **n+M+R+K+1** variables where
 
 - n is the number of basic variables (the ones of the original system)
@@ -271,20 +271,20 @@ This produces a new system of **n+M+R+K+1** variables where
 - The last variable is the "special coefficient" of the goal function that is equal to 0 in the case where constraint
   qualification (linear independency of constraints gradients) does not hold.
 
-Generation of the Fritz-John conditions is based on :ref:`mod-func-symbolic-diff`.
+Generation of the KKT conditions is based on :ref:`mod-func-symbolic-diff`.
 
 Example:
 
 .. literalinclude:: ../examples/doc-modeling.cpp
    :language: cpp
-   :start-after: sys-fritz-john-C
-   :end-before: sys-fritz-john-C
+   :start-after: sys-kkt-C
+   :end-before: sys-kkt-C
 
 We get the following display. The variable ``_u`` is the coefficient of the goal function. The variable ``_l``
 is the multiplier of the constraint.
 
 .. literalinclude:: ../examples/doc-modeling.txt
-   :start-after: sys-fritz-john-O
-   :end-before: sys-fritz-john-O
+   :start-after: sys-kkt-O
+   :end-before: sys-kkt-O
 
 

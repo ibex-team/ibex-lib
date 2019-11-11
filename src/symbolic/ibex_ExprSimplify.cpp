@@ -645,8 +645,8 @@ void ExprSimplify::visit(const ExprGenericUnaryOp& e) {
 			false);
 }
 
-void ExprSimplify::visit(const ExprSign& e)  { unary(e, (_domain_una_op) sign, ExprSign::new_, true); }
-void ExprSimplify::visit(const ExprAbs& e)   { unary(e, (_domain_una_op) abs,  ExprAbs::new_,  true); }
+void ExprSimplify::visit(const ExprSign& e)  { unary(e, (_domain_una_op) sign, ExprSign::new_, true);  }
+void ExprSimplify::visit(const ExprAbs& e)   { unary(e, (_domain_una_op) abs,  ExprAbs::new_,  true);  }
 void ExprSimplify::visit(const ExprSqr& e)   { unary(e, (_domain_una_op) sqr,  ExprSqr::new_,  false); }
 void ExprSimplify::visit(const ExprSqrt& e)  { unary(e, (_domain_una_op) sqrt, ExprSqrt::new_, false); }
 void ExprSimplify::visit(const ExprExp& e)   { unary(e, (_domain_una_op) exp,  ExprExp::new_,  false); }
@@ -663,5 +663,8 @@ void ExprSimplify::visit(const ExprAtan& e)  { unary(e, (_domain_una_op) atan, E
 void ExprSimplify::visit(const ExprAcosh& e) { unary(e, (_domain_una_op) acosh,ExprAcosh::new_,false); }
 void ExprSimplify::visit(const ExprAsinh& e) { unary(e, (_domain_una_op) asinh,ExprAsinh::new_,false); }
 void ExprSimplify::visit(const ExprAtanh& e) { unary(e, (_domain_una_op) atanh,ExprAtanh::new_,false); }
+void ExprSimplify::visit(const ExprFloor& e) { unary(e, (_domain_una_op) floor,ExprFloor::new_,false); }
+void ExprSimplify::visit(const ExprCeil& e)  { unary(e, (_domain_una_op) ceil, ExprCeil::new_, false); }
+void ExprSimplify::visit(const ExprSaw& e)   { unary(e, (_domain_una_op) saw,  ExprSaw::new_, false);  }
 
 } /* namespace ibex */

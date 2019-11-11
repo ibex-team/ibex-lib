@@ -36,7 +36,7 @@ void CtcInteger::contract(IntervalVector& box, ContractContext& context) {
 
 	for (int i=0; i<nb_var; i++) {
 		if (is_int[i] && context.impact[i]) {
-			if (!bwd_integer(box[i])) {
+			if ((box[i] &= integer(box[i])).is_empty()) {
 				box.set_empty();
 				context.output_flags.add(FIXPOINT);
 				return;

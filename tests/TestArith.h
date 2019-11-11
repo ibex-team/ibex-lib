@@ -1,13 +1,13 @@
 /* ============================================================================
  * I B E X - Test of interval operations
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Dec 07, 2011
- * Last Update : Jul 16, 2012
+ * Last Update : Oct 29, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_ARITH_H__
@@ -25,334 +25,390 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestArith);
 	
-		CPPUNIT_TEST(tan_issue248);
+	CPPUNIT_TEST(tan_issue248);
 
-		CPPUNIT_TEST(float01);
-		CPPUNIT_TEST(float02);
-		CPPUNIT_TEST(float03);
-		CPPUNIT_TEST(float04);
-		CPPUNIT_TEST(float05);
-		CPPUNIT_TEST(float06);
-		CPPUNIT_TEST(float07);
-		CPPUNIT_TEST(float08);
-		CPPUNIT_TEST(float09);
-		/*CPPUNIT_TEST(float10); disabled temporarily due to bug between Gaol and elibc (used by Travis CI) */
-
-
-		CPPUNIT_TEST(minus01);
-		CPPUNIT_TEST(minus02);
-		CPPUNIT_TEST(minus03);
-		CPPUNIT_TEST(minus04);
-
-		CPPUNIT_TEST(add01);
-		CPPUNIT_TEST(add02);
-		CPPUNIT_TEST(add03);
-		CPPUNIT_TEST(add04);
-		CPPUNIT_TEST(add05);
-		CPPUNIT_TEST(add06);
-		CPPUNIT_TEST(add07);
-		CPPUNIT_TEST(add08);
-		CPPUNIT_TEST(add09);
-		CPPUNIT_TEST(add10);
-		CPPUNIT_TEST(add11);
-		CPPUNIT_TEST(add12);
-		CPPUNIT_TEST(add13);
-		CPPUNIT_TEST(add14);
-		CPPUNIT_TEST(add15);
-		CPPUNIT_TEST(add16);
-		CPPUNIT_TEST(add17);
-		CPPUNIT_TEST(add18);
-		CPPUNIT_TEST(add19);
-
-		CPPUNIT_TEST(mul01);
-		CPPUNIT_TEST(mul02);
-		CPPUNIT_TEST(mul03);
-		CPPUNIT_TEST(mul04);
-		CPPUNIT_TEST(mul05);
-		CPPUNIT_TEST(mul06);
-		CPPUNIT_TEST(mul07);
-		CPPUNIT_TEST(mul08);
-		CPPUNIT_TEST(mul09);
-		CPPUNIT_TEST(mul10);
-		CPPUNIT_TEST(mul11);
-		CPPUNIT_TEST(mul12);
-		CPPUNIT_TEST(mul13);
-		CPPUNIT_TEST(mul14);
-		CPPUNIT_TEST(mul15);
-		CPPUNIT_TEST(mul16);
-		CPPUNIT_TEST(mul17);
-		CPPUNIT_TEST(mul18);
-		CPPUNIT_TEST(mul19);
-
-		CPPUNIT_TEST(mulMM01);
-
-		CPPUNIT_TEST(div01);
-		CPPUNIT_TEST(div02);
-		CPPUNIT_TEST(div03);
-		CPPUNIT_TEST(div04);
-		CPPUNIT_TEST(div05);
-		CPPUNIT_TEST(div06);
-		CPPUNIT_TEST(div07);
-		CPPUNIT_TEST(div08);
-		CPPUNIT_TEST(div09);
-		CPPUNIT_TEST(div10);
-		CPPUNIT_TEST(div11);
-		CPPUNIT_TEST(div12);
-		CPPUNIT_TEST(div13);
-		CPPUNIT_TEST(div14);
-		CPPUNIT_TEST(div15);
-		CPPUNIT_TEST(div16);
-		CPPUNIT_TEST(div17);
-
-		CPPUNIT_TEST(div2_01);
-		CPPUNIT_TEST(div2_02);
-		CPPUNIT_TEST(div2_03);
-		CPPUNIT_TEST(div2_04);
-		CPPUNIT_TEST(div2_05);
-		CPPUNIT_TEST(div2_06);
-		CPPUNIT_TEST(div2_07);
-		CPPUNIT_TEST(div2_08);
-		CPPUNIT_TEST(div2_09);
-		CPPUNIT_TEST(div2_10);
-		CPPUNIT_TEST(div2_11);
-		CPPUNIT_TEST(div2_12);
-		CPPUNIT_TEST(div2_13);
-
-		CPPUNIT_TEST(log01);
-		CPPUNIT_TEST(log02);
-		CPPUNIT_TEST(log03);
-		CPPUNIT_TEST(log04);
-		CPPUNIT_TEST(log05);
-		CPPUNIT_TEST(log06);
-		CPPUNIT_TEST(log07);
-		CPPUNIT_TEST(log08);
-		CPPUNIT_TEST(log09);
-		CPPUNIT_TEST(log10);
-		CPPUNIT_TEST(log11);
-
-		CPPUNIT_TEST(exp01);
-		CPPUNIT_TEST(exp02);
-		CPPUNIT_TEST(exp03);
-		CPPUNIT_TEST(exp04);
-		CPPUNIT_TEST(exp05);
-		CPPUNIT_TEST(exp06);
-		CPPUNIT_TEST(exp07);
-		CPPUNIT_TEST(exp08);
-		CPPUNIT_TEST(exp09);
-
-		CPPUNIT_TEST(sin01);
-		CPPUNIT_TEST(sin02);
-		CPPUNIT_TEST(sin03);
-		CPPUNIT_TEST(sin04);
-		CPPUNIT_TEST(sin05);
-		CPPUNIT_TEST(sin06);
-		CPPUNIT_TEST(sin07);
-		CPPUNIT_TEST(sin08);
-		CPPUNIT_TEST(sin09);
-		CPPUNIT_TEST(sin10);
-		CPPUNIT_TEST(sin11);
-		CPPUNIT_TEST(sin12);
-		CPPUNIT_TEST(sin13);
-
-		CPPUNIT_TEST(tan01);
-		CPPUNIT_TEST(tan02);
-		CPPUNIT_TEST(tan03);
-		CPPUNIT_TEST(tan04);
-		CPPUNIT_TEST(tan05);
-
-		CPPUNIT_TEST(pow01);
-		CPPUNIT_TEST(pow02);
-		CPPUNIT_TEST(pow03);
-		CPPUNIT_TEST(pow04);
-		CPPUNIT_TEST(pow05);
-		CPPUNIT_TEST(pow06);
-		CPPUNIT_TEST(pow07);
-		CPPUNIT_TEST(pow08);
-		CPPUNIT_TEST(pow09);
-		CPPUNIT_TEST(pow10);
-		CPPUNIT_TEST(pow11);
-		CPPUNIT_TEST(pow12);
-		CPPUNIT_TEST(pow13);
-
-		CPPUNIT_TEST(root01);
-		CPPUNIT_TEST(root02);
-		CPPUNIT_TEST(root03);
-		CPPUNIT_TEST(root04);
-
-		CPPUNIT_TEST(sqrt01);
-		CPPUNIT_TEST(sqrt02);
-		CPPUNIT_TEST(sqrt03);
-		CPPUNIT_TEST(sqrt04);
-		CPPUNIT_TEST(sqrt05);
-
-		CPPUNIT_TEST(sinh01);
-		CPPUNIT_TEST(sinh02);
-		CPPUNIT_TEST(sinh03);
-		CPPUNIT_TEST(sinh04);
-		CPPUNIT_TEST(sinh05);
-		CPPUNIT_TEST(sinh06);
-		CPPUNIT_TEST(sinh07);
-
-		CPPUNIT_TEST(cosh01);
-		CPPUNIT_TEST(cosh02);
-		CPPUNIT_TEST(cosh03);
-		CPPUNIT_TEST(cosh04);
-		CPPUNIT_TEST(cosh05);
-		CPPUNIT_TEST(cosh06);
-		CPPUNIT_TEST(cosh07);
-
-		CPPUNIT_TEST(atan2_01);
-		CPPUNIT_TEST(atan2_02);
-		CPPUNIT_TEST(atan2_03);
-		CPPUNIT_TEST(atan2_04);
-		CPPUNIT_TEST(atan2_05);
-		CPPUNIT_TEST(atan2_06);
-		CPPUNIT_TEST(atan2_07);
-		CPPUNIT_TEST(atan2_08);
-		CPPUNIT_TEST(atan2_09);
-		CPPUNIT_TEST(atan2_10);
-		CPPUNIT_TEST(atan2_11);
-		CPPUNIT_TEST(atan2_12);
-		CPPUNIT_TEST(atan2_13);
-		CPPUNIT_TEST(atan2_14);
-		CPPUNIT_TEST(atan2_15);
-
-		CPPUNIT_TEST(bwd_mul01);
-		CPPUNIT_TEST(bwd_mul02);
-		CPPUNIT_TEST(bwd_mul03);
-		CPPUNIT_TEST(bwd_mul04);
-		CPPUNIT_TEST(bwd_mul05);
-
-		CPPUNIT_TEST(bwd_mulVV01);
-		CPPUNIT_TEST(bwd_mulMV01);
+	CPPUNIT_TEST(float01);
+	CPPUNIT_TEST(float02);
+	CPPUNIT_TEST(float03);
+	CPPUNIT_TEST(float04);
+	CPPUNIT_TEST(float05);
+	CPPUNIT_TEST(float06);
+	CPPUNIT_TEST(float07);
+	CPPUNIT_TEST(float08);
+	CPPUNIT_TEST(float09);
+	/*CPPUNIT_TEST(float10); disabled temporarily due to bug between Gaol and elibc (used by Travis CI) */
 
 
-		CPPUNIT_TEST(bwd_div01);
-		CPPUNIT_TEST(bwd_div02);
-		CPPUNIT_TEST(bwd_div03);
-		CPPUNIT_TEST(bwd_div04);
-		CPPUNIT_TEST(bwd_div05);
-		CPPUNIT_TEST(bwd_div06);
-		CPPUNIT_TEST(bwd_div07);
-		CPPUNIT_TEST(bwd_div08);
-		CPPUNIT_TEST(bwd_div09);
+	CPPUNIT_TEST(minus01);
+	CPPUNIT_TEST(minus02);
+	CPPUNIT_TEST(minus03);
+	CPPUNIT_TEST(minus04);
 
-		CPPUNIT_TEST(bwd_maxmin01);
-		CPPUNIT_TEST(bwd_maxmin02);
-		CPPUNIT_TEST(bwd_maxmin03);
-		CPPUNIT_TEST(bwd_maxmin04);
-		CPPUNIT_TEST(bwd_maxmin05);
+	CPPUNIT_TEST(add01);
+	CPPUNIT_TEST(add02);
+	CPPUNIT_TEST(add03);
+	CPPUNIT_TEST(add04);
+	CPPUNIT_TEST(add05);
+	CPPUNIT_TEST(add06);
+	CPPUNIT_TEST(add07);
+	CPPUNIT_TEST(add08);
+	CPPUNIT_TEST(add09);
+	CPPUNIT_TEST(add10);
+	CPPUNIT_TEST(add11);
+	CPPUNIT_TEST(add12);
+	CPPUNIT_TEST(add13);
+	CPPUNIT_TEST(add14);
+	CPPUNIT_TEST(add15);
+	CPPUNIT_TEST(add16);
+	CPPUNIT_TEST(add17);
+	CPPUNIT_TEST(add18);
+	CPPUNIT_TEST(add19);
 
-		CPPUNIT_TEST(bwd_sqr01);
-		CPPUNIT_TEST(bwd_sqr02);
-		CPPUNIT_TEST(bwd_sqr03);
-		CPPUNIT_TEST(bwd_sqr04);
-		CPPUNIT_TEST(bwd_sqr05);
-		CPPUNIT_TEST(bwd_sqr06);
-		CPPUNIT_TEST(bwd_sqr07);
+	CPPUNIT_TEST(mul01);
+	CPPUNIT_TEST(mul02);
+	CPPUNIT_TEST(mul03);
+	CPPUNIT_TEST(mul04);
+	CPPUNIT_TEST(mul05);
+	CPPUNIT_TEST(mul06);
+	CPPUNIT_TEST(mul07);
+	CPPUNIT_TEST(mul08);
+	CPPUNIT_TEST(mul09);
+	CPPUNIT_TEST(mul10);
+	CPPUNIT_TEST(mul11);
+	CPPUNIT_TEST(mul12);
+	CPPUNIT_TEST(mul13);
+	CPPUNIT_TEST(mul14);
+	CPPUNIT_TEST(mul15);
+	CPPUNIT_TEST(mul16);
+	CPPUNIT_TEST(mul17);
+	CPPUNIT_TEST(mul18);
+	CPPUNIT_TEST(mul19);
 
-		CPPUNIT_TEST(bwd_log01);
-		CPPUNIT_TEST(bwd_log02);
-		CPPUNIT_TEST(bwd_log03);
-		CPPUNIT_TEST(bwd_log04);
-		CPPUNIT_TEST(bwd_log05);
-		CPPUNIT_TEST(bwd_log06);
-		CPPUNIT_TEST(bwd_log07);
-		CPPUNIT_TEST(bwd_log08);
+	CPPUNIT_TEST(mulMM01);
 
-		CPPUNIT_TEST(bwd_sin01);
-		CPPUNIT_TEST(bwd_sin02);
-		CPPUNIT_TEST(bwd_sin03);
-		CPPUNIT_TEST(bwd_sin04);
-		CPPUNIT_TEST(bwd_sin05);
-		CPPUNIT_TEST(bwd_sin06);
-		CPPUNIT_TEST(bwd_sin07);
-		CPPUNIT_TEST(bwd_sin08);
-		CPPUNIT_TEST(bwd_sin09);
-		CPPUNIT_TEST(bwd_sin10);
-		CPPUNIT_TEST(bwd_sin11);
-		CPPUNIT_TEST(bwd_sin12);
-		CPPUNIT_TEST(bwd_sin13);
-		CPPUNIT_TEST(bwd_sin14);
-		CPPUNIT_TEST(bwd_sin15);
-		CPPUNIT_TEST(bwd_sin16);
-		CPPUNIT_TEST(bwd_sin17);
-		CPPUNIT_TEST(bwd_sin18);
-		CPPUNIT_TEST(bwd_sin19);
-		CPPUNIT_TEST(bwd_sin20);
-		CPPUNIT_TEST(bwd_sin21);
-		CPPUNIT_TEST(bwd_sin22);
-		CPPUNIT_TEST(bwd_sin23);
-		CPPUNIT_TEST(bwd_sin24);
+	CPPUNIT_TEST(div01);
+	CPPUNIT_TEST(div02);
+	CPPUNIT_TEST(div03);
+	CPPUNIT_TEST(div04);
+	CPPUNIT_TEST(div05);
+	CPPUNIT_TEST(div06);
+	CPPUNIT_TEST(div07);
+	CPPUNIT_TEST(div08);
+	CPPUNIT_TEST(div09);
+	CPPUNIT_TEST(div10);
+	CPPUNIT_TEST(div11);
+	CPPUNIT_TEST(div12);
+	CPPUNIT_TEST(div13);
+	CPPUNIT_TEST(div14);
+	CPPUNIT_TEST(div15);
+	CPPUNIT_TEST(div16);
+	CPPUNIT_TEST(div17);
 
-		CPPUNIT_TEST(bwd_pow01);
-		CPPUNIT_TEST(bwd_pow02);
-		CPPUNIT_TEST(bwd_pow03);
-		CPPUNIT_TEST(bwd_pow04);
-		CPPUNIT_TEST(bwd_pow05);
-		CPPUNIT_TEST(bwd_pow06);
-		CPPUNIT_TEST(bwd_pow07);
-		CPPUNIT_TEST(bwd_pow08);
-		CPPUNIT_TEST(bwd_pow09);
-		CPPUNIT_TEST(bwd_pow10);
-		CPPUNIT_TEST(bwd_pow11);
-		CPPUNIT_TEST(bwd_pow12);
-		CPPUNIT_TEST(bwd_pow13);
-		CPPUNIT_TEST(bwd_pow14);
-		CPPUNIT_TEST(bwd_pow15);
-		CPPUNIT_TEST(bwd_pow16);
-		CPPUNIT_TEST(bwd_pow17);
+	CPPUNIT_TEST(div2_01);
+	CPPUNIT_TEST(div2_02);
+	CPPUNIT_TEST(div2_03);
+	CPPUNIT_TEST(div2_04);
+	CPPUNIT_TEST(div2_05);
+	CPPUNIT_TEST(div2_06);
+	CPPUNIT_TEST(div2_07);
+	CPPUNIT_TEST(div2_08);
+	CPPUNIT_TEST(div2_09);
+	CPPUNIT_TEST(div2_10);
+	CPPUNIT_TEST(div2_11);
+	CPPUNIT_TEST(div2_12);
+	CPPUNIT_TEST(div2_13);
 
-		// ===== temporarily commented ===============
-		CPPUNIT_TEST(bwd_atan2_01);
-		CPPUNIT_TEST(bwd_atan2_02);
-		CPPUNIT_TEST(bwd_atan2_03);
-		CPPUNIT_TEST(bwd_atan2_04);
-		CPPUNIT_TEST(bwd_atan2_05);
-		CPPUNIT_TEST(bwd_atan2_06);
-		CPPUNIT_TEST(bwd_atan2_07);
-		CPPUNIT_TEST(bwd_atan2_08);
-		CPPUNIT_TEST(bwd_atan2_09); // commented waiting for an optimal contractor.
-		CPPUNIT_TEST(bwd_atan2_10);
-		CPPUNIT_TEST(bwd_atan2_issue134);
+	CPPUNIT_TEST(log01);
+	CPPUNIT_TEST(log02);
+	CPPUNIT_TEST(log03);
+	CPPUNIT_TEST(log04);
+	CPPUNIT_TEST(log05);
+	CPPUNIT_TEST(log06);
+	CPPUNIT_TEST(log07);
+	CPPUNIT_TEST(log08);
+	CPPUNIT_TEST(log09);
+	CPPUNIT_TEST(log10);
+	CPPUNIT_TEST(log11);
 
-		CPPUNIT_TEST(bwd_sqrt01);
-		CPPUNIT_TEST(bwd_sqrt02);
-		CPPUNIT_TEST(bwd_sqrt03);
-		CPPUNIT_TEST(bwd_sqrt04);
-		CPPUNIT_TEST(bwd_sqrt05);
-		CPPUNIT_TEST(bwd_sqrt06);
-		CPPUNIT_TEST(bwd_sqrt07);
+	CPPUNIT_TEST(exp01);
+	CPPUNIT_TEST(exp02);
+	CPPUNIT_TEST(exp03);
+	CPPUNIT_TEST(exp04);
+	CPPUNIT_TEST(exp05);
+	CPPUNIT_TEST(exp06);
+	CPPUNIT_TEST(exp07);
+	CPPUNIT_TEST(exp08);
+	CPPUNIT_TEST(exp09);
 
-		CPPUNIT_TEST(bwd_atan01);
-		CPPUNIT_TEST(bwd_atan02);
-		CPPUNIT_TEST(bwd_atan03);
-		CPPUNIT_TEST(bwd_atan04);
-		CPPUNIT_TEST(bwd_atan05);
-		CPPUNIT_TEST(bwd_atan06);
-		CPPUNIT_TEST(bwd_atan07);
-		CPPUNIT_TEST(bwd_atan08);
+	CPPUNIT_TEST(sin01);
+	CPPUNIT_TEST(sin02);
+	CPPUNIT_TEST(sin03);
+	CPPUNIT_TEST(sin04);
+	CPPUNIT_TEST(sin05);
+	CPPUNIT_TEST(sin06);
+	CPPUNIT_TEST(sin07);
+	CPPUNIT_TEST(sin08);
+	CPPUNIT_TEST(sin09);
+	CPPUNIT_TEST(sin10);
+	CPPUNIT_TEST(sin11);
+	CPPUNIT_TEST(sin12);
+	CPPUNIT_TEST(sin13);
 
-		CPPUNIT_TEST(bwd_add01);
-		CPPUNIT_TEST(bwd_add02);
-		CPPUNIT_TEST(bwd_add03);
-		CPPUNIT_TEST(bwd_add04);
-		CPPUNIT_TEST(bwd_add05);
+	CPPUNIT_TEST(tan01);
+	CPPUNIT_TEST(tan02);
+	CPPUNIT_TEST(tan03);
+	CPPUNIT_TEST(tan04);
+	CPPUNIT_TEST(tan05);
 
-		CPPUNIT_TEST(bwd_sub01);
-		CPPUNIT_TEST(bwd_sub02);
-		CPPUNIT_TEST(bwd_sub03);
-		CPPUNIT_TEST(bwd_sub04);
-		CPPUNIT_TEST(bwd_sub05);
+	CPPUNIT_TEST(pow01);
+	CPPUNIT_TEST(pow02);
+	CPPUNIT_TEST(pow03);
+	CPPUNIT_TEST(pow04);
+	CPPUNIT_TEST(pow05);
+	CPPUNIT_TEST(pow06);
+	CPPUNIT_TEST(pow07);
+	CPPUNIT_TEST(pow08);
+	CPPUNIT_TEST(pow09);
+	CPPUNIT_TEST(pow10);
+	CPPUNIT_TEST(pow11);
+	CPPUNIT_TEST(pow12);
+	CPPUNIT_TEST(pow13);
 
-		CPPUNIT_TEST(bwd_imod_01);
-		CPPUNIT_TEST(bwd_imod_02);
-		CPPUNIT_TEST(bwd_imod_03);
-		CPPUNIT_TEST(bwd_imod_04);
-		CPPUNIT_TEST(bwd_imod_05);
-		CPPUNIT_TEST(bwd_imod_06);
-		CPPUNIT_TEST(bwd_imod_07);
-		CPPUNIT_TEST(bwd_imod_08);
+	CPPUNIT_TEST(root01);
+	CPPUNIT_TEST(root02);
+	CPPUNIT_TEST(root03);
+	CPPUNIT_TEST(root04);
+
+	CPPUNIT_TEST(sqrt01);
+	CPPUNIT_TEST(sqrt02);
+	CPPUNIT_TEST(sqrt03);
+	CPPUNIT_TEST(sqrt04);
+	CPPUNIT_TEST(sqrt05);
+
+	CPPUNIT_TEST(sinh01);
+	CPPUNIT_TEST(sinh02);
+	CPPUNIT_TEST(sinh03);
+	CPPUNIT_TEST(sinh04);
+	CPPUNIT_TEST(sinh05);
+	CPPUNIT_TEST(sinh06);
+	CPPUNIT_TEST(sinh07);
+
+	CPPUNIT_TEST(cosh01);
+	CPPUNIT_TEST(cosh02);
+	CPPUNIT_TEST(cosh03);
+	CPPUNIT_TEST(cosh04);
+	CPPUNIT_TEST(cosh05);
+	CPPUNIT_TEST(cosh06);
+	CPPUNIT_TEST(cosh07);
+
+	CPPUNIT_TEST(atan2_01);
+	CPPUNIT_TEST(atan2_02);
+	CPPUNIT_TEST(atan2_03);
+	CPPUNIT_TEST(atan2_04);
+	CPPUNIT_TEST(atan2_05);
+	CPPUNIT_TEST(atan2_06);
+	CPPUNIT_TEST(atan2_07);
+	CPPUNIT_TEST(atan2_08);
+	CPPUNIT_TEST(atan2_09);
+	CPPUNIT_TEST(atan2_10);
+	CPPUNIT_TEST(atan2_11);
+	CPPUNIT_TEST(atan2_12);
+	CPPUNIT_TEST(atan2_13);
+	CPPUNIT_TEST(atan2_14);
+	CPPUNIT_TEST(atan2_15);
+
+	CPPUNIT_TEST(floor01);
+	CPPUNIT_TEST(floor02);
+	CPPUNIT_TEST(floor03);
+	CPPUNIT_TEST(floor04);
+	CPPUNIT_TEST(floor05);
+	CPPUNIT_TEST(floor06);
+	CPPUNIT_TEST(floor07);
+	CPPUNIT_TEST(floor08);
+
+	CPPUNIT_TEST(ceil01);
+	CPPUNIT_TEST(ceil02);
+	CPPUNIT_TEST(ceil03);
+	CPPUNIT_TEST(ceil04);
+	CPPUNIT_TEST(ceil05);
+	CPPUNIT_TEST(ceil06);
+	CPPUNIT_TEST(ceil07);
+	CPPUNIT_TEST(ceil08);
+
+	CPPUNIT_TEST(integer01);
+	CPPUNIT_TEST(integer02);
+	CPPUNIT_TEST(integer03);
+	CPPUNIT_TEST(integer04);
+	CPPUNIT_TEST(integer05);
+	CPPUNIT_TEST(integer06);
+	CPPUNIT_TEST(integer07);
+	CPPUNIT_TEST(integer08);
+
+	CPPUNIT_TEST(bwd_mul01);
+	CPPUNIT_TEST(bwd_mul02);
+	CPPUNIT_TEST(bwd_mul03);
+	CPPUNIT_TEST(bwd_mul04);
+	CPPUNIT_TEST(bwd_mul05);
+
+	CPPUNIT_TEST(bwd_mulVV01);
+	CPPUNIT_TEST(bwd_mulMV01);
+
+
+	CPPUNIT_TEST(bwd_div01);
+	CPPUNIT_TEST(bwd_div02);
+	CPPUNIT_TEST(bwd_div03);
+	CPPUNIT_TEST(bwd_div04);
+	CPPUNIT_TEST(bwd_div05);
+	CPPUNIT_TEST(bwd_div06);
+	CPPUNIT_TEST(bwd_div07);
+	CPPUNIT_TEST(bwd_div08);
+	CPPUNIT_TEST(bwd_div09);
+
+	CPPUNIT_TEST(bwd_maxmin01);
+	CPPUNIT_TEST(bwd_maxmin02);
+	CPPUNIT_TEST(bwd_maxmin03);
+	CPPUNIT_TEST(bwd_maxmin04);
+	CPPUNIT_TEST(bwd_maxmin05);
+
+	CPPUNIT_TEST(bwd_sqr01);
+	CPPUNIT_TEST(bwd_sqr02);
+	CPPUNIT_TEST(bwd_sqr03);
+	CPPUNIT_TEST(bwd_sqr04);
+	CPPUNIT_TEST(bwd_sqr05);
+	CPPUNIT_TEST(bwd_sqr06);
+	CPPUNIT_TEST(bwd_sqr07);
+
+	CPPUNIT_TEST(bwd_log01);
+	CPPUNIT_TEST(bwd_log02);
+	CPPUNIT_TEST(bwd_log03);
+	CPPUNIT_TEST(bwd_log04);
+	CPPUNIT_TEST(bwd_log05);
+	CPPUNIT_TEST(bwd_log06);
+	CPPUNIT_TEST(bwd_log07);
+	CPPUNIT_TEST(bwd_log08);
+
+	CPPUNIT_TEST(bwd_sin01);
+	CPPUNIT_TEST(bwd_sin02);
+	CPPUNIT_TEST(bwd_sin03);
+	CPPUNIT_TEST(bwd_sin04);
+	CPPUNIT_TEST(bwd_sin05);
+	CPPUNIT_TEST(bwd_sin06);
+	CPPUNIT_TEST(bwd_sin07);
+	CPPUNIT_TEST(bwd_sin08);
+	CPPUNIT_TEST(bwd_sin09);
+	CPPUNIT_TEST(bwd_sin10);
+	CPPUNIT_TEST(bwd_sin11);
+	CPPUNIT_TEST(bwd_sin12);
+	CPPUNIT_TEST(bwd_sin13);
+	CPPUNIT_TEST(bwd_sin14);
+	CPPUNIT_TEST(bwd_sin15);
+	CPPUNIT_TEST(bwd_sin16);
+	CPPUNIT_TEST(bwd_sin17);
+	CPPUNIT_TEST(bwd_sin18);
+	CPPUNIT_TEST(bwd_sin19);
+	CPPUNIT_TEST(bwd_sin20);
+	CPPUNIT_TEST(bwd_sin21);
+	CPPUNIT_TEST(bwd_sin22);
+	CPPUNIT_TEST(bwd_sin23);
+	CPPUNIT_TEST(bwd_sin24);
+
+	CPPUNIT_TEST(bwd_pow01);
+	CPPUNIT_TEST(bwd_pow02);
+	CPPUNIT_TEST(bwd_pow03);
+	CPPUNIT_TEST(bwd_pow04);
+	CPPUNIT_TEST(bwd_pow05);
+	CPPUNIT_TEST(bwd_pow06);
+	CPPUNIT_TEST(bwd_pow07);
+	CPPUNIT_TEST(bwd_pow08);
+	CPPUNIT_TEST(bwd_pow09);
+	CPPUNIT_TEST(bwd_pow10);
+	CPPUNIT_TEST(bwd_pow11);
+	CPPUNIT_TEST(bwd_pow12);
+	CPPUNIT_TEST(bwd_pow13);
+	CPPUNIT_TEST(bwd_pow14);
+	CPPUNIT_TEST(bwd_pow15);
+	CPPUNIT_TEST(bwd_pow16);
+	CPPUNIT_TEST(bwd_pow17);
+
+	// ===== temporarily commented ===============
+			CPPUNIT_TEST(bwd_atan2_01);
+	CPPUNIT_TEST(bwd_atan2_02);
+	CPPUNIT_TEST(bwd_atan2_03);
+	CPPUNIT_TEST(bwd_atan2_04);
+	CPPUNIT_TEST(bwd_atan2_05);
+	CPPUNIT_TEST(bwd_atan2_06);
+	CPPUNIT_TEST(bwd_atan2_07);
+	CPPUNIT_TEST(bwd_atan2_08);
+	CPPUNIT_TEST(bwd_atan2_09); // commented waiting for an optimal contractor.
+	CPPUNIT_TEST(bwd_atan2_10);
+	CPPUNIT_TEST(bwd_atan2_issue134);
+
+	CPPUNIT_TEST(bwd_sqrt01);
+	CPPUNIT_TEST(bwd_sqrt02);
+	CPPUNIT_TEST(bwd_sqrt03);
+	CPPUNIT_TEST(bwd_sqrt04);
+	CPPUNIT_TEST(bwd_sqrt05);
+	CPPUNIT_TEST(bwd_sqrt06);
+	CPPUNIT_TEST(bwd_sqrt07);
+
+	CPPUNIT_TEST(bwd_atan01);
+	CPPUNIT_TEST(bwd_atan02);
+	CPPUNIT_TEST(bwd_atan03);
+	CPPUNIT_TEST(bwd_atan04);
+	CPPUNIT_TEST(bwd_atan05);
+	CPPUNIT_TEST(bwd_atan06);
+	CPPUNIT_TEST(bwd_atan07);
+	CPPUNIT_TEST(bwd_atan08);
+
+	CPPUNIT_TEST(bwd_add01);
+	CPPUNIT_TEST(bwd_add02);
+	CPPUNIT_TEST(bwd_add03);
+	CPPUNIT_TEST(bwd_add04);
+	CPPUNIT_TEST(bwd_add05);
+
+	CPPUNIT_TEST(bwd_sub01);
+	CPPUNIT_TEST(bwd_sub02);
+	CPPUNIT_TEST(bwd_sub03);
+	CPPUNIT_TEST(bwd_sub04);
+	CPPUNIT_TEST(bwd_sub05);
+
+	CPPUNIT_TEST(bwd_imod_01);
+	CPPUNIT_TEST(bwd_imod_02);
+	CPPUNIT_TEST(bwd_imod_03);
+	CPPUNIT_TEST(bwd_imod_04);
+	CPPUNIT_TEST(bwd_imod_05);
+	CPPUNIT_TEST(bwd_imod_06);
+	CPPUNIT_TEST(bwd_imod_07);
+	CPPUNIT_TEST(bwd_imod_08);
+
+	CPPUNIT_TEST(bwd_floor_01);
+	CPPUNIT_TEST(bwd_floor_02);
+	CPPUNIT_TEST(bwd_floor_03);
+	CPPUNIT_TEST(bwd_floor_04);
+	CPPUNIT_TEST(bwd_floor_05);
+	CPPUNIT_TEST(bwd_floor_06);
+	CPPUNIT_TEST(bwd_floor_07);
+	CPPUNIT_TEST(bwd_floor_08);
+	CPPUNIT_TEST(bwd_floor_09);
+	CPPUNIT_TEST(bwd_floor_10);
+	CPPUNIT_TEST(bwd_floor_11);
+	CPPUNIT_TEST(bwd_floor_12);
+	CPPUNIT_TEST(bwd_floor_13);
+
+	CPPUNIT_TEST(bwd_ceil_01);
+	CPPUNIT_TEST(bwd_ceil_02);
+	CPPUNIT_TEST(bwd_ceil_03);
+	CPPUNIT_TEST(bwd_ceil_04);
+	CPPUNIT_TEST(bwd_ceil_05);
+	CPPUNIT_TEST(bwd_ceil_06);
+	CPPUNIT_TEST(bwd_ceil_07);
+	CPPUNIT_TEST(bwd_ceil_08);
+	CPPUNIT_TEST(bwd_ceil_09);
+	CPPUNIT_TEST(bwd_ceil_10);
+	CPPUNIT_TEST(bwd_ceil_11);
+	CPPUNIT_TEST(bwd_ceil_12);
+	CPPUNIT_TEST(bwd_ceil_13);
+
 	CPPUNIT_TEST_SUITE_END();
 private:
 	/* test:
@@ -594,6 +650,33 @@ private:
 	void atan2_14();
 	void atan2_15();
 
+	void floor01();
+	void floor02();
+	void floor03();
+	void floor04();
+	void floor05();
+	void floor06();
+	void floor07();
+	void floor08();
+
+	void ceil01();
+	void ceil02();
+	void ceil03();
+	void ceil04();
+	void ceil05();
+	void ceil06();
+	void ceil07();
+	void ceil08();
+
+	void integer01();
+	void integer02();
+	void integer03();
+	void integer04();
+	void integer05();
+	void integer06();
+	void integer07();
+	void integer08();
+
 	/* test: bwd_mul */
 	void bwd_mul01();
 	void bwd_mul02();
@@ -733,6 +816,34 @@ private:
 	void bwd_imod_07();
 	void bwd_imod_08();
 
+	void bwd_floor_01();
+	void bwd_floor_02();
+	void bwd_floor_03();
+	void bwd_floor_04();
+	void bwd_floor_05();
+	void bwd_floor_06();
+	void bwd_floor_07();
+	void bwd_floor_08();
+	void bwd_floor_09();
+	void bwd_floor_10();
+	void bwd_floor_11();
+	void bwd_floor_12();
+	void bwd_floor_13();
+
+	void bwd_ceil_01();
+	void bwd_ceil_02();
+	void bwd_ceil_03();
+	void bwd_ceil_04();
+	void bwd_ceil_05();
+	void bwd_ceil_06();
+	void bwd_ceil_07();
+	void bwd_ceil_08();
+	void bwd_ceil_09();
+	void bwd_ceil_10();
+	void bwd_ceil_11();
+	void bwd_ceil_12();
+	void bwd_ceil_13();
+
 	void tan_issue248();
 
 
@@ -760,6 +871,9 @@ private:
 	bool checkbwd_sub(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	bool checkbwd_imod(const double& period, const Interval& x_bef, const Interval& y_bef,
 								const Interval& x_aft, const Interval& y_aft);
+
+	bool checkbwd_floor(const Interval& y, const Interval& xbefore, const Interval& x_after_expected);
+	bool checkbwd_ceil(const Interval& y, const Interval& xbefore, const Interval& x_after_expected);
 
 };
 

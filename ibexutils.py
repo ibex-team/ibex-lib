@@ -135,9 +135,14 @@ def to_unicode (s):
 
 @conf
 def path_pc_remove_prefix (conf, path):
-    if path.startswith (conf.env.PREFIX + "/"):
-      path = path[len(conf.env.PREFIX)+1:]
-    return escape_backslash_on_win32 (path)
+    if Utils.is_win32:
+      if path.startswith (conf.env.PREFIX + "\\"):
+        path = path[len(conf.env.PREFIX)+1:]
+      path = escape_backslash_on_win32 (path)
+    else:
+      if path.startswith (conf.env.PREFIX + "/"):
+        path = path[len(conf.env.PREFIX)+1:]
+    return path
 
 @conf
 def path_pc (conf, path):

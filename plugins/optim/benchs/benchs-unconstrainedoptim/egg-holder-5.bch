@@ -1,0 +1,10 @@
+variables
+x[5] in [-512,512];
+
+
+minimize
+-((x(2)+47) * sin(sqrt(abs(x(2)+47+(x(1)/2)))) + x(1) * sin (sqrt(abs(x(1)-(x(2)+47)))) +
+  (x(3)+47) * sin(sqrt(abs(x(3)+47+(x(2)/2)))) + x(2) * sin (sqrt(abs(x(2)-(x(3)+47)))) +
+  (x(4)+47) * sin(sqrt(abs(x(4)+47+(x(3)/2)))) + x(3) * sin (sqrt(abs(x(3)-(x(4)+47)))) +
+  (x(5)+47) * sin(sqrt(abs(x(5)+47+(x(4)/2)))) + x(4) * sin (sqrt(abs(x(4)-(x(5)+47)))) 
+);

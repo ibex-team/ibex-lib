@@ -13,8 +13,8 @@ list (APPEND IBEX_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LinearException.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Linearizer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Linearizer.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LinearizerCombo.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LinearizerCombo.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LinearizerCompo.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LinearizerCompo.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LinearizerDuality.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LinearizerDuality.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LinearizerFixed.cpp

@@ -50,7 +50,7 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 	this->sigma=eps/::sqrt((double)(n+1));
 
 	// parameter to update the trust region radius
-	double gamma00 = 0.05;
+	//double gamma00 = 0.05;
 	double gamma0 = 0.5;
 	double gamma2 = 2;
 
