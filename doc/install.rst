@@ -120,6 +120,7 @@ The full list of options supported by ``waf configure`` can be obtained with::
 	
 This will display the full list of installed interval/LP libraries and plugins with their specific options,
 as well as benchmarking features.
+See the current list of available plugins in the `download page of Ibex <http://www.ibex-lib.org/download>`_.
 
 In particular, ``waf`` ``configure`` supports the following options:
                     
@@ -167,9 +168,6 @@ In particular, ``waf`` ``configure`` supports the following options:
                         
 --interval-lib=direct   Use non-rigorous interval arithmetic (essentially for embedded systems with specific processor architectures that
                         do not support rounding modes) (experimental: support not guaranteed)
-
---with-solver           Enable IbexSolver (the plugin is installed by default)
-
 
 --with-optim            Enable IbexOpt				
 
