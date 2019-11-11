@@ -4,16 +4,19 @@
 ODE plugin
 ============
 
+By G. Chabert and A. Goldsztejn
+
 This plugin is intended to gather several tools for
-the simulation and anaylsis of ODEs.
+the simulation and analysis of ODEs.
 
 Currently, it contains a single program ``ibexode-attract-region``, 
-that allows to calculate a region inside wich all points converge to a
+that allows to calculate a region inside which all points converge to an
 (exponentially) stable point of a dynamical system.
 
 The principle is as follows.
 
 The user gives as input:
+
 - an ODE under the form x'=f(x);
 - a Lyapunov function v(x);
 - an approximation of the fixpoint x* of f;
@@ -66,28 +69,44 @@ The output is::
   (0.461418 ; 0.329046 ; 0.321177)
 
 
-The 4 first lines gives the estimated value of "c" by 4 different methods.
+The 4 first lines gives the estimated value of "c" by 4 different methods. Each time, the value
+of "c" is given under the form of a rigorous enclosing interval but only the lower bound should
+actually be of interest for you.
+The more interesting estimation is of course the last one, ``c_optimizer``, as it is larger than
+all others. However, the optimizer-based method can be prohibitively long when the dimension
+of the problem increases. For this reason, it is recommended to run ``ibexode-attract-region``
+with the ``timeout`` option (try ``ibexode-attract-region --help``).
 
-The last line gives a point that violates the non-positiveness of the
+The last line of the output gives a point that violates the non-positiveness of the
 Lie derivative.
 
 To use this executable on your own problem, just copy-paste one of the Minibex examples
-and adapt it to your problem. The Minibex file must contains:
-
-- a function f(x) that represents your **vector field**, i.e. the mapping of your ODE x'=f(x).  
-  Note that x can be a vector argument of any size. So you can declare a function f(x[3]) for instance .
-  The function f can have an extra argument "theta" (i.e. we have f(x[...],theta[...])) if your vector field has an uncertain parameter "theta".
-  This argument can also be a vector. See the paper for more details on how uncertainty is considered in this tool.
-- a function v(x) that represents the chosen **Lyapunov function**.
-- a **quadratic** function vminor(x) **minoring** v(x), if v(x) is not already quadratic. The function vminor is ignored if v is already quadratic.
-- a declaration of a (vector) variable x with an approximation of **the fixpoint** of as domain. The variable is declared just as in a
-  standard Minibex system of equations.
-- a declaration of a (vector) variable theta if the system has an uncertain parameter theta, with potentially an initial domain
-- optionally, constraints on the uncertain parameter theta, in complement with the initial domain
+and adapt it to your problem. 
 
 ***************
 Advanced
 ***************
+
+In more details, the input Minibex file of ``ibexode-attract-region`` must contain the declaration of:
+
+- A function f(x) that represents your **vector field**, i.e. the mapping of your ODE x'=f(x).  
+  Note that x can be a vector argument of any size. So you can declare a function f(x[3]) for instance .
+  The function f can also have an extra argument "theta" (i.e. we have ``f(x[...],theta[...])``) if your vector field has an uncertain parameter "theta".
+  This argument can also be a vector. See the paper for more details on how uncertainty is considered in this tool. An example problem with uncertain
+  parameter is ``MicrobialGrowthProcess.txt``.
+  
+- A function v(x) that represents the chosen **Lyapunov function**.
+
+- A **quadratic** function vminor(x) **minoring** v(x), if v(x) is not already quadratic. The function vminor is ignored if v is already quadratic.
+  An example problem with non-quadratic Lyapunov function is ``Hu2005-4.txt``.
+  
+- A (vector) variable x with an approximation of **the fixpoint** as domain. The variable is declared just as in a
+  standard Minibex system of equations.
+
+- Optionally, a (vector) variable theta if the system has an uncertain parameter theta, with potentially an initial domain
+
+- Optionally, constraints on the uncertain parameter theta, in complement with the initial domain
+
 
 To run the scalable "academic benchmark" of the paper::
 
