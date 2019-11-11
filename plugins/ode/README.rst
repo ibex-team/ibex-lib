@@ -4,8 +4,6 @@
 ODE plugin
 ============
 
-By G. Chabert and A. Goldsztejn
-
 This plugin is intended to gather several tools for
 the simulation and analysis of ODEs.
 
