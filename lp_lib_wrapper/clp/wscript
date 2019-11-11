@@ -69,7 +69,7 @@ def configure (conf):
     has_clp = []
     for mandatory in ([ False, True ] if not clp_dir else [True]):
         if not has_clp:
-            if clp_lib:
+            if clp_lib!= "":
                 ## add to the environnement the path where clp.pc should be
                 clp_pc_install_path = os.path.join (clp_lib, "pkgconfig")
                 coinutils_pc_install_path = os.path.join (coinutils_lib, "pkgconfig")
