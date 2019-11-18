@@ -91,7 +91,12 @@ public:
 
 	int token() const { return TK_EXPR_TMP_SYMBOL; }
 
-	void print(ostream& os) const { os << "expression tmp " << *expr; }
+	void print(ostream& os) const {
+		if (expr)
+			os << "expression tmp " << *expr;
+		else
+			os << "expression tmp (NULL)";
+	}
 
 	const ExprNode* expr;
 };

@@ -93,8 +93,10 @@ program       :                                 { pstruct->begin(); }
                 decl_opt_cst 
                 decl_opt_fncs
                 system_or_func                  { pstruct->end(); }
-              |                                 { pstruct->begin(); } 
-                choco_ctr                       { pstruct->end(); }
+              |                                 { pstruct->begin(); 
+                                                  pstruct->scopes.push(pstruct->scopes.top()); /* new scope for temporary symbols */} 
+                choco_ctr                       { pstruct->scopes.pop();
+                                                  pstruct->end(); }
               ; 
 
 system_or_func: TK_VARS decl_var_list ';'   
