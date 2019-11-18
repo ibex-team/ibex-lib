@@ -12,8 +12,10 @@
 #ifndef __IBEX_INDEX_H__
 #define __IBEX_INDEX_H__
 
-#include <math.h>
 #include "ibex_Dim.h"
+
+#include <math.h>
+#include <cassert>
 
 namespace ibex {
 
@@ -38,6 +40,9 @@ public:
 	DoubleIndex(const Dim& d, int first_row, int last_row, int first_col, int last_col);
 
 	DoubleIndex(const DoubleIndex&);
+
+	/** \brief Composition */
+	DoubleIndex operator[](const DoubleIndex&) const;
 
 	DoubleIndex transpose() const;
 
@@ -164,6 +169,17 @@ inline bool DoubleIndex::operator==(const DoubleIndex& idx) const {
 }
 inline bool DoubleIndex::operator!=(const DoubleIndex& idx) const { return !(*this==idx); }
 inline bool DoubleIndex::domain_ref() const { return all() || (one_row() && (all_cols() || one_col())); }
+
+inline DoubleIndex DoubleIndex::operator[](const DoubleIndex& idx) const {
+	assert(nb_rows()==idx.dim.nb_rows());
+	assert(nb_cols()==idx.dim.nb_cols());
+
+	return DoubleIndex(dim,
+				first_row()+idx.first_row(),
+				first_row()+idx.last_row(),
+				first_col()+idx.first_col(),
+				first_col()+idx.last_col());
+}
 
 } /* namespace ibex */
 

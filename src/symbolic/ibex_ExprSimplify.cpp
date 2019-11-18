@@ -71,6 +71,42 @@ bool is_identity(const ExprNode& e) {
 	}
 }
 
+/*
+ * This function checks if an expression is a "selection" vector,
+ * e.g., (0,0,1,0,0,0).
+ * If yes, returns the index selected (in the example:2).
+ * Otherwise, returns -1.
+ */
+int is_selection(const ExprNode& e) {
+	if (is_cst(e)) {
+		const Domain& d = to_cst(e);
+		switch(d.dim.type()) {
+		case Dim::SCALAR:
+			return -1;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:
+		{
+			int index=-1;
+			for (int j=0; j<d.dim.vec_size(); j++) {
+				const Interval& dij=d[j].i();
+				if (dij.lb()!=0 || dij.ub()!=0) {
+					if (index>=0 || // more than one 0 in this row
+							dij.lb()!=1 || dij.ub()!=1) //
+						return -1;
+					else
+						index=j;
+				}
+			}
+			return index;
+		}
+		default:
+			return -1;
+		}
+	} else {
+		return -1;
+	}
+}
+
 } // end anonymous namespace
 
 const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
@@ -155,6 +191,7 @@ void ExprSimplify::insert(const ExprNode& e, const ExprNode& e2) {
 }
 
 const ExprNode& ExprSimplify::get(const ExprNode& e, const DoubleIndex& idx2) {
+	assert(e.dim==idx2.dim);
 	// first time we access to node e:
 	if (!idx_clones.found(e)) {
 		idx_clones.insert(e,new CLONE_VEC());
@@ -234,13 +271,8 @@ void ExprSimplify::visit(const ExprVector& e) {
 }
 
 void ExprSimplify::visit(const ExprIndex& e) {
-	DoubleIndex e_idx=DoubleIndex(e.expr.dim,
-			e.index.first_row()+idx.first_row(),
-			e.index.first_row()+idx.last_row(),
-			e.index.first_col()+idx.first_col(),
-			e.index.first_col()+idx.last_col());
 
-	const ExprNode& expr=get(e.expr,e_idx);
+	const ExprNode& expr=get(e.expr,e.index[idx]);
 
 	insert(e, expr);
 }
@@ -450,11 +482,20 @@ void ExprSimplify::visit(const ExprMul& e) {
 
 	const ExprNode& l=get(e.left, l_idx);
 	const ExprNode& r=get(e.right, r_idx);
+	int index;
 
 	if (is_identity(l) || (is_cst(r) && to_cst(r).is_zero()))
 		insert(e, r);
 	else if (is_identity(r) || (is_cst(l) && to_cst(l).is_zero()))
 		insert(e, l);
+	else if ((index=is_selection(l))!=-1) {
+		const ExprNode& r2=get(e.right, r_idx[DoubleIndex::one_row(r.dim,index)]);
+		insert(e, r2);
+	}
+	else if ((index=is_selection(r))!=-1) {
+		const ExprNode& l2=get(e.left, l_idx[DoubleIndex::one_col(l.dim,index)]);
+		insert(e, l2);
+	}
 	else if (is_cst(l)) {
 		if (is_cst(r))
 			insert(e, ExprConstant::new_(to_cst(l)*to_cst(r)));
