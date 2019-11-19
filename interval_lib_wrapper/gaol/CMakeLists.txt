@@ -30,7 +30,12 @@ else()
                         PREFIX mathlib-2.1.0
                         URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/mathlib-2.1.0.tar.gz
                         BUILD_IN_SOURCE 1
-                        CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR>)
+                        CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR>
+                        LOG_DOWNLOAD 1
+                        LOG_CONFIGURE 1
+                        LOG_BUILD 1
+                        LOG_INSTALL 1
+                      )
   ExternalProject_Get_Property (libultim_3rd INSTALL_DIR)
   set (LIBULTIM_LIBDIR "${INSTALL_DIR}/lib")
   set (LIBULTIM_INCDIR "${INSTALL_DIR}/include")
@@ -78,6 +83,13 @@ if (NOT gaol_INCLUDE_DIR OR NOT gaol_LIBRARY OR NOT gdtoa_LIBRARY)
   if (TARGET libultim_3rd)
     set (_gaol_depends "DEPENDS" "libultim_3rd")
   endif ()
+  set (GAOL_CONFIG_ARGS "--disable-preserve-rounding" "--enable-optimize" "--disable-verbose-mode")
+  if (WIN32)
+    # On windows, we disable SSE instructions (it can generate failures during
+    # execution). You can enable SSE instructions by deleting the next line,
+    # do it at your own risk.
+    set (GAOL_CONFIG_ARGS "${GAOL_CONFIG_ARGS}" "--disable-simd")
+  endif ()
   ExternalProject_Add (libgaol_3rd
                         PREFIX gaol-4.2.0
                         ${_gaol_depends}
@@ -85,7 +97,13 @@ if (NOT gaol_INCLUDE_DIR OR NOT gaol_LIBRARY OR NOT gdtoa_LIBRARY)
                         BUILD_IN_SOURCE 1
                         CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR>
                                       --with-mathlib-include=${LIBULTIM_INCDIR}
-                                          --with-mathlib-lib=${LIBULTIM_LIBDIR})
+                                      --with-mathlib-lib=${LIBULTIM_LIBDIR}
+                                      ${GAOL_CONFIG_ARGS}
+                        LOG_DOWNLOAD 1
+                        LOG_CONFIGURE 1
+                        LOG_BUILD 1
+                        LOG_INSTALL 1
+                      )
   ExternalProject_Get_Property (libgaol_3rd INSTALL_DIR)
   # install headers and set build and install include directory
   set (_incdir ${INSTALL_DIR}/include)
@@ -135,6 +153,3 @@ if (COMPILER_SUPPORTS_WNO_DEPRECATED)
   set_target_properties (gaol PROPERTIES
                               INTERFACE_COMPILE_OPTIONS -Wno-deprecated)
 endif()
-
-#TODO -ffloat-store on win32
-# TODO -msse2 -msse3 ??
