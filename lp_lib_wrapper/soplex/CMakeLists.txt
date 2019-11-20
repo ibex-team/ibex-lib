@@ -58,7 +58,9 @@ if (NOT soplex_INCLUDE_DIR OR NOT soplex_LIBRARY)
                         BUILD_COMMAND make GMP=false ZLIB=false USRCPPFLAGS=-fPIC INSTALLDIR=<INSTALL_DIR> install
                         INSTALL_COMMAND ""
                         BUILD_IN_SOURCE 1
-                        )
+                        LOG_DOWNLOAD 1
+                        LOG_BUILD 1
+                      )
   ExternalProject_Get_Property (libsoplex_3rd INSTALL_DIR)
   # install headers and set build and install include directory
   set (_incdir ${INSTALL_DIR}/include)
