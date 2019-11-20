@@ -48,9 +48,11 @@ endif()
 
 if (NOT filib_INCLUDE_DIR OR NOT filib_LIBRARY)
   message (STATUS "Will install and use library Filib from 3rd/ subdirectory")
+  set (FILIB_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/3rd/filibsrc-3.0.2.2.all.all.patch")
   ExternalProject_Add (libfilib_3rd
                         PREFIX filib-3.0.2.2
                         URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/filibsrc-3.0.2.2.tar.gz
+                        PATCH_COMMAND patch -p1 -i ${FILIB_PATCH}
                         BUILD_IN_SOURCE 1
                         CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR>
                         LOG_DOWNLOAD 1

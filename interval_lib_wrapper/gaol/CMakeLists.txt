@@ -90,10 +90,12 @@ if (NOT gaol_INCLUDE_DIR OR NOT gaol_LIBRARY OR NOT gdtoa_LIBRARY)
     # do it at your own risk.
     set (GAOL_CONFIG_ARGS "${GAOL_CONFIG_ARGS}" "--disable-simd")
   endif ()
+  set (GAOL_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/3rd/gaol-4.2.0.all.all.patch")
   ExternalProject_Add (libgaol_3rd
                         PREFIX gaol-4.2.0
                         ${_gaol_depends}
                         URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/gaol-4.2.0.tar.gz
+                        PATCH_COMMAND patch -p1 -i ${GAOL_PATCH}
                         BUILD_IN_SOURCE 1
                         CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR>
                                       --with-mathlib-include=${LIBULTIM_INCDIR}
