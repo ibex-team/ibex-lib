@@ -138,7 +138,6 @@ unsigned int Cov::read_pos_int(ifstream& f) {
 	uint32_t x;
 	f.read((char*) &x, sizeof(x)); //f >> x;
 	if (f.eof()) ibex_error("[Cov]: unexpected end of file.");
-	if (x<0) ibex_error("[Cov]: negative integer unexpected");
 	return x;
 }
 
