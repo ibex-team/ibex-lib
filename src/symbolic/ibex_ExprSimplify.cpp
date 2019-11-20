@@ -600,14 +600,15 @@ void ExprSimplify::unary(const ExprUnaryOp& e,
 		} else
 			insert(e, fctr(expr));
 	} else {
-		if (is_cst(e.expr))
+		const ExprNode& expr=get(e.expr, DoubleIndex::all(e.expr.dim));
+		if (is_cst(expr))
 			/* evaluate the constant expression on-the-fly */
-			insert(e, ExprConstant::new_(fcst(to_cst(e.expr))[idx]));
+			insert(e, ExprConstant::new_(fcst(to_cst(expr))[idx]));
 		else {
 			if (idx.all()) // if nothing changed
-				insert(e, e);
+				insert(e, fctr(expr));
 			else
-				insert(e, e[idx]);
+				insert(e, fctr(expr)[idx]);
 		}
 	}
 }
