@@ -18,7 +18,7 @@ LPSolver::LPSolver(int nb_vars1, int max_iter, double max_time_out, double eps) 
 	mysoplex->setRealParam(SoPlex::FEASTOL, eps);
 	mysoplex->setRealParam(SoPlex::OPTTOL, eps);
 	mysoplex->setIntParam(SoPlex::SOLVEMODE, SoPlex::SOLVEMODE_REAL);
-	
+
 	// initialize the number of variables of the LP
 	soplex::DSVectorReal col1(0);
 	for (int j=0; j<nb_vars; j++){
@@ -41,7 +41,7 @@ LPSolver::~LPSolver() {
 	delete mysoplex;
 }
 
-LPSolver::Status_Sol LPSolver::solve() {
+LPSolver::LPSolverStatus LPSolver::solve() {
 	obj_value = Interval::all_reals();
 
 
@@ -219,7 +219,7 @@ double LPSolver::get_epsilon() const {
 	return mysoplex->realParam(SoPlex::FEASTOL);
 }
 
-void LPSolver::clean_ctrs() {
+void LPSolver::clear_ctrs() {
 
 	try {
 		status_prim = false;

@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_CtcPolytopeHull.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -78,14 +78,14 @@ void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 		//mylinearsolver.writeFile("LP.lp");
 		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
-		mylinearsolver.clean_ctrs();
+		mylinearsolver.clear_ctrs();
 	}
 	catch(LPException&) {
-		mylinearsolver.clean_ctrs();
+		mylinearsolver.clear_ctrs();
 	}
 	catch(PolytopeHullEmptyBoxException& e) {
 		box.set_empty(); // empty the box before exiting
-		mylinearsolver.clean_ctrs();
+		mylinearsolver.clear_ctrs();
 	}
 
 	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
@@ -115,7 +115,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 	int nexti=-1;   // the next variable to be contracted
 	int infnexti=0; // the bound to be contracted contract  infnexti=0 for the lower bound, infnexti=1 for the upper bound
-	LPSolver::Status_Sol stat=LPSolver::UNKNOWN;
+	LPSolver::LPSolverStatus stat=LPSolver::UNKNOWN;
 
 	// Update the bounds the variables
 	mylinearsolver.set_bounds(box);

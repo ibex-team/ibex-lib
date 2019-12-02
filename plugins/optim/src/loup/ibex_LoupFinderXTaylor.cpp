@@ -33,7 +33,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 
 	int n=sys.nb_var;
 
-	lp_solver.clean_ctrs();
+	lp_solver.clear_ctrs();
 	lp_solver.set_bounds(box);
 
 	IntervalVector ig=sys.goal->gradient(box.mid());
@@ -50,11 +50,11 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 	int count = lr.linearize(box,lp_solver,prop);
 
 	if (count==-1) {
-		lp_solver.clean_ctrs();
+		lp_solver.clear_ctrs();
 		throw NotFound();
 	}
 
-	LPSolver::Status_Sol stat = lp_solver.solve();
+	LPSolver::LPSolverStatus stat = lp_solver.solve();
 
 	if (stat == LPSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated

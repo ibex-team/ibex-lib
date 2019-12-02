@@ -8,7 +8,7 @@
  * Author(s)   : Antoine Marendet
  * Created     : Nov 12, 2018
  * ---------------------------------------------------------------------------- */
- 
+
 #include "ibex_LoupFinderRestrictionsRelax.h"
 
 #include "ibex_utils.h"
@@ -46,7 +46,7 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const Interv
 	if (d < LPSolver::min_box_diam || d > LPSolver::max_box_diam)
 		throw NotFound();
 
-	lp_solver_->clean_ctrs();
+	lp_solver_->clear_ctrs();
 	lp_solver_->set_bounds(box);
 	IntervalVector ig = system_.goal_function_->gradient(box.mid());
 	if(ig.is_empty()) {
@@ -64,7 +64,7 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const Interv
 	}
 	//lp_solver_->write_file();
 	//cout << "beforesolve" << endl;
-	LPSolver::Status_Sol stat = lp_solver_->solve_proved();
+	LPSolver::LPSolverStatus stat = lp_solver_->solve_proved();
 	//cout << "aftersolve" << endl;
 	if(stat == LPSolver::OPTIMAL_PROVED) {
 		//Vector loup_point(box_without_goal.size());

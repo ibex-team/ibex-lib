@@ -8,7 +8,7 @@
  * Author(s)   : Antoine Marendet
  * Created     : July 11, 2018
  * ---------------------------------------------------------------------------- */
- 
+
 #include "ibex_CtcBisectActiveParameters.h"
 
 #include "ibex_GoldsztejnSICBisector.h"
@@ -19,8 +19,8 @@
 namespace ibex {
 
 CtcBisectActiveParameters::CtcBisectActiveParameters(const SIPSystem& sys)
-: Ctc(sys.ext_nb_var), sys_(sys), 
-linearizer_(sys_, RelaxationLinearizerSIP::CornerPolicy::random, false), 
+: Ctc(sys.ext_nb_var), sys_(sys),
+linearizer_(sys_, RelaxationLinearizerSIP::CornerPolicy::random, false),
 lp_solver_(sys.ext_nb_var) {
 
 }
@@ -40,7 +40,7 @@ void CtcBisectActiveParameters::contract(IntervalVector& box) {
 
 }
 void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& context) {
-    lp_solver_.clean_ctrs();
+    lp_solver_.clear_ctrs();
 	lp_solver_.set_bounds(box);
 	lp_solver_.set_obj_var(sys_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
@@ -50,7 +50,7 @@ void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& c
 	//lp_solver_.write_file();
 
 	auto return_code = lp_solver_.solve();
-	if (return_code != LPSolver::Status_Sol::OPTIMAL) {
+	if (return_code != LPSolver::LPSolverStatus::OPTIMAL) {
 		return;
 	}
 	//Vector sol(box.mid());

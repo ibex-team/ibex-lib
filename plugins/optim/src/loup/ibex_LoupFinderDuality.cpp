@@ -48,7 +48,7 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 
 	int n=sys.nb_var;
 
-	lp_solver.clean_ctrs();
+	lp_solver.clear_ctrs();
 	init_box.put(0, box);
 	lp_solver.set_bounds(init_box);
 
@@ -71,7 +71,7 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 	for (; j<nb_LP_var; j++)
 		lp_solver.set_obj_var(j,0);
 
-	LPSolver::Status_Sol stat = lp_solver.solve();
+	LPSolver::LPSolverStatus stat = lp_solver.solve();
 
 	if (stat == LPSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated

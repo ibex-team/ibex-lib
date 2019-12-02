@@ -51,7 +51,7 @@ public :
 			lsmear_mode lsmode=LSMEAR_MG);
 
 	/*
-	 * \brief Variant with an OptimLargestFirst bisector as default bisector 
+	 * \brief Variant with an OptimLargestFirst bisector as default bisector
 	 * used by default optimizer
 	 */
 	LSmear (ExtendedSystem& sys, double prec, OptimLargestFirst& lf,lsmear_mode lsmode=LSMEAR_MG);
@@ -79,7 +79,7 @@ public :
 	 * \param x 	- the current box
 	 * \param dual 	- the dual solution that will be returned
 	 */
-	LPSolver::Status_Sol getdual(IntervalMatrix& J,const IntervalVector& x, Vector& dual) const;
+	LPSolver::LPSolverStatus getdual(IntervalMatrix& J,const IntervalVector& x, Vector& dual) const;
 
 	/**
 	 * \brief The linear solver
@@ -90,7 +90,7 @@ public :
 	 * \brief The lsmear variant (LSMEAR or LSMEAR_MG)
 	 */
 	lsmear_mode lsmode;
-	
+
 
 };
 
