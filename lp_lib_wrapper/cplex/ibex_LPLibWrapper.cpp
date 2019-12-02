@@ -225,7 +225,7 @@ LPSolver::~LPSolver() {
 	delete[] r_matind;
 }
 
-LPSolver::Status_Sol LPSolver::solve() {
+LPSolver::LPSolverStatus LPSolver::solve() {
 	obj_value = Interval::all_reals();
 
 	try {
@@ -424,7 +424,7 @@ Vector LPSolver::get_infeasible_dir() const {
 	}
 }
 
-void LPSolver::clean_ctrs() {
+void LPSolver::clear_ctrs() {
 
 	try {
 		status_prim = false;
@@ -724,10 +724,10 @@ LPSolver::~LPSolver() {
 
 }
 
-LPSolver::Status_Sol LPSolver::solve() {
+LPSolver::LPSolverStatus LPSolver::solve() {
 	obj_value = Interval::all_reals();
 
-	LPSolver::Status_Sol res = UNKNOWN;
+	LPSolver::LPSolverStatus res = UNKNOWN;
 	try {
 		// Optimize the problem and obtain solution.
 		if ( mycplex->solve() ) {

@@ -13,7 +13,7 @@ LPSolver::LPSolver(int nb_vars, int max_iter, double max_time_out, double eps):
 LPSolver::~LPSolver() {
 }
 
-LPSolver::Status_Sol LPSolver::solve() {
+LPSolver::LPSolverStatus LPSolver::solve() {
 	return LPSolver::UNKNOWN;
 }
 
@@ -45,7 +45,7 @@ double LPSolver::get_epsilon() const{
 	throw LPException();
 }
 
-void LPSolver::clean_ctrs(){
+void LPSolver::clear_ctrs(){
 	throw LPException();
 }
 

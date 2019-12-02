@@ -172,12 +172,12 @@ bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& D
 		}
 
 		linsolve.set_obj_var(0,1);
-		
+
 		// note : "-1" just to have a strict minorant of the objective
-		LPSolver::Status_Sol stat = linsolve.solve(); //run_simplex(LPSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
+		LPSolver::LPSolverStatus stat = linsolve.solve(); //run_simplex(LPSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
 		//cout << "  status=" << stat << endl;
 
-		linsolve.clean_ctrs();
+		linsolve.clear_ctrs();
 
 		if (stat != LPSolver::OPTIMAL) {
 			result=false;

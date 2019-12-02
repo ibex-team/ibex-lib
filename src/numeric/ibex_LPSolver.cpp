@@ -14,7 +14,7 @@
 namespace ibex {
 
 /** \brief Stream out \a x. */
-std::ostream& operator<<(std::ostream& os, const LPSolver::Status_Sol x){
+std::ostream& operator<<(std::ostream& os, const LPSolver::LPSolverStatus x){
 
 	switch(x) {
 	case(LPSolver::OPTIMAL) :{
@@ -50,8 +50,8 @@ std::ostream& operator<<(std::ostream& os, const LPSolver::Status_Sol x){
 
 }
 
-LPSolver::Status_Sol LPSolver::solve_proved() {
-	LPSolver::Status_Sol stat = solve();
+LPSolver::LPSolverStatus LPSolver::solve_proved() {
+	LPSolver::LPSolverStatus stat = solve();
 	switch (stat) {
 	case LPSolver::OPTIMAL : {
 		// Neumaier - Shcherbina postprocessing
@@ -92,18 +92,18 @@ void LPSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs ) 
 }
 
 
-void LPSolver::clean_bounds() {
+void LPSolver::clear_bounds() {
 	set_bounds(IntervalVector(nb_vars));
 }
 
-void LPSolver::clean_obj() {
+void LPSolver::clear_obj() {
 	set_obj(ibex::Vector::zeros(nb_vars));
 }
 
-void LPSolver::clean_all() {
-	clean_ctrs();
-	clean_obj();
-	clean_bounds();
+void LPSolver::clear_all() {
+	clear_ctrs();
+	clear_obj();
+	clear_bounds();
 }
 
 ibex::Vector LPSolver::get_primal_sol() const {
@@ -132,10 +132,10 @@ ibex::Vector LPSolver::get_dual_sol() const {
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-LPSolver::Status_Sol LPSolver::solve_var(LPSolver::Sense s, int var, Interval& obj) {
+LPSolver::LPSolverStatus LPSolver::solve_var(LPSolver::Sense s, int var, Interval& obj) {
 	assert((0<=var)&&(var<=nb_vars));
 
-	LPSolver::Status_Sol stat = LPSolver::UNKNOWN;	
+	LPSolver::LPSolverStatus stat = LPSolver::UNKNOWN;
 	set_sense(LPSolver::MINIMIZE);
 
 

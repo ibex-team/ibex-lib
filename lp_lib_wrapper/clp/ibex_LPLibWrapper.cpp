@@ -67,7 +67,7 @@ LPSolver::~LPSolver() {
 	delete [] _col1Index;
 }
 
-LPSolver::Status_Sol LPSolver::solve() {
+LPSolver::LPSolverStatus LPSolver::solve() {
 	obj_value = Interval::all_reals();
 	//int stat = -1;
 
@@ -283,7 +283,7 @@ Vector LPSolver::get_infeasible_dir() const {
 	return sol;
 }
 
-void LPSolver::clean_ctrs() {
+void LPSolver::clear_ctrs() {
 	try {
 		status_prim = false;
 		status_dual = false;

@@ -64,16 +64,16 @@ public:
 
 	/** Default minimal diameter of ??, set to 1e-14  **/
 	static constexpr double min_box_diam = 1e-14;
-	
-	/** 
-	 * TODO: Default maximal diameter of ... what exactly? 
-	 *   In LoupFinderXTaylor: -> the box
-	 *   In LinearizerXTaylor : -> the derivative enclosure 
-	 * Set to 1e6. 
-	 */
-	static constexpr double max_box_diam = 1e6; 
 
-	typedef enum  {OPTIMAL=1, INFEASIBLE=2, OPTIMAL_PROVED=3, INFEASIBLE_PROVED=4, UNKNOWN=0, TIME_OUT=-1, MAX_ITER=-2} Status_Sol;
+	/**
+	 * TODO: Default maximal diameter of ... what exactly?
+	 *   In LoupFinderXTaylor: -> the box
+	 *   In LinearizerXTaylor : -> the derivative enclosure
+	 * Set to 1e6.
+	 */
+	static constexpr double max_box_diam = 1e6;
+
+	typedef enum  {OPTIMAL=1, INFEASIBLE=2, OPTIMAL_PROVED=3, INFEASIBLE_PROVED=4, UNKNOWN=0, TIME_OUT=-1, MAX_ITER=-2} LPSolverStatus;
 
 	typedef enum  {MINIMIZE, MAXIMIZE} Sense;
 
@@ -91,7 +91,7 @@ public:
 	 *
 	 * \return OPTIMAL, INFEASIBLE, UNKNOWN, TIME_OUT or MAX_ITER
 	 */
-	Status_Sol solve();
+	LPSolverStatus solve();
 
 	/**
 	 * \brief Solve the LP and try to prove the result.
@@ -101,7 +101,7 @@ public:
 	 * \note only certify the objective (not the solution point)
 	 * \return all possible status, including OPTIMAL_PROVED and INFEASIBLE_PROVED
 	 */
-	Status_Sol solve_proved();
+	LPSolverStatus solve_proved();
 
 
 	void write_file(const char* name="IBEX_save_LP.lp");
@@ -116,7 +116,7 @@ public:
 	 *
 	 */
 	int get_nb_rows() const;
-	
+
 	ibex::Matrix get_rows() const;
 
 	ibex::Matrix get_rows_trans() const;
@@ -146,21 +146,21 @@ public:
 	 * \brief Delete the constraints
 	 *
 	 * Do not modify the bound constraints
-	 * (use clean_bounds or set_bounds)
+	 * (use clear_bounds or set_bounds)
 	 */
-	void clean_ctrs();
+	void clear_ctrs();
 
 	/**
 	 * \brief Delete the bound constraints
 	 *
 	 */
-	void clean_bounds();
+	void clear_bounds();
 
 	/**
 	 * \brief Set all the objective coefficients to 0.
 	 *
 	 */
-	void clean_obj();
+	void clear_obj();
 
 	/**
 	 * \brief Clean all the Linear Program
@@ -168,7 +168,7 @@ public:
 	 * Delete all constraints, including bound constraints
 	 * and set the coefficients of the objective function to 0.
 	 */
-	void clean_all();
+	void clear_all();
 
 	void set_max_iter(int max);
 
@@ -197,7 +197,7 @@ private:
 	friend class CtcPolytopeHull;
 
 	/**  Call to linear solver to optimize one variable */
-	Status_Sol solve_var(Sense sense, int var, Interval & obj);
+	LPSolverStatus solve_var(Sense sense, int var, Interval & obj);
 
 	/**
 	 * Neumaier Shcherbina postprocessing in case of optimal solution found :
@@ -237,7 +237,7 @@ private:
 };
 
 /** \brief Stream out \a x. */
-std::ostream& operator<<(std::ostream& os, const LPSolver::Status_Sol x);
+std::ostream& operator<<(std::ostream& os, const LPSolver::LPSolverStatus x);
 
 
 } // end namespace ibex

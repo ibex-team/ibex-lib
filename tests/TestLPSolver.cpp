@@ -62,7 +62,7 @@ void TestLinearSolver::kleemin( int n) {
 		lp.add_constraint(v,LEQ, ::pow(10,i-1));
 	}
 
-	LPSolver::Status_Sol res = lp.solve_proved();
+	LPSolver::LPSolverStatus res = lp.solve_proved();
 	CPPUNIT_ASSERT(res==LPSolver::OPTIMAL_PROVED);
 
 	double eps = lp.get_epsilon();
@@ -96,7 +96,7 @@ void TestLinearSolver::kleemin30() {
 		v[i-1] =1;
 		lp.add_constraint(v,LEQ, ::pow(10,i-1));
 	}
-	LPSolver::Status_Sol res;
+	LPSolver::LPSolverStatus res;
 	CPPUNIT_ASSERT_ASSERTION_PASS(
 	 res = lp.solve_proved()
 	);
