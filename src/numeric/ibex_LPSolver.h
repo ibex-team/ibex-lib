@@ -133,7 +133,6 @@ public:
 
 	ibex::Vector get_dual_sol() const;
 
-
 	/**
 	 * \throw LPExpcetion if not infeasible
 	 */
@@ -190,6 +189,17 @@ public:
 	void add_constraint(const ibex::Vector & row, CmpOp sign, double rhs );
 
 	void add_constraint(const ibex::Matrix & A, CmpOp sign, const ibex::Vector& rhs );
+
+	/**
+	 * \brief Add a column (i.e. a variable) to the linear program.
+	 * \return the index of the new column.
+	 */
+	//int add_column(double obj, ibex::Vector& col, const Interval& bounds);
+
+	/**
+	 * \brief Remove a column (i.e. a variable) from the linear program.
+	 */
+	//void remove_column(int index);
 
 
 private:

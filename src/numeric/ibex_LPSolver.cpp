@@ -224,35 +224,27 @@ Interval LPSolver::neumaier_shcherbina_postprocessing_var (int var, LPSolver::Se
 
 
 Interval LPSolver::neumaier_shcherbina_postprocessing() {
-	try {
-		// the dual solution : used to compute the bound
-		ibex::Vector dual = get_dual_sol();
-
-		ibex::Matrix A_trans = get_rows_trans();
-
-		IntervalVector B = get_lhs_rhs();
-
-		ibex::Vector obj = get_coef_obj();
+	// the dual solution : used to compute the bound
+	ibex::Vector dual = get_dual_sol();
+	ibex::Matrix A_trans = get_rows_trans();
+	IntervalVector B = get_lhs_rhs();
+	ibex::Vector obj = get_coef_obj();
 
 
-		//cout <<" BOUND_test "<< endl;
-		IntervalVector Rest(nb_vars);
-		IntervalVector Lambda(dual);
-		Rest = A_trans * Lambda ;
+	//cout <<" BOUND_test "<< endl;
+	IntervalVector Rest(nb_vars);
+	IntervalVector Lambda(dual);
+	Rest = A_trans * Lambda ;
+	Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
+	return (Lambda * B - Rest * boundvar);
+
+	Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
+	if (sense==LPSolver::MINIMIZE) {
 		Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
 		return (Lambda * B - Rest * boundvar);
-
-		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-		if (sense==LPSolver::MINIMIZE) {
-			Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
-			return (Lambda * B - Rest * boundvar);
-		} else {
-			Rest += obj;   // Rest = Transpose(As) * Lambda - obj
-			return -(Lambda * B - Rest * boundvar);
-		}
-
-	} catch (...) {
-		throw LPException();
+	} else {
+		Rest += obj;   // Rest = Transpose(As) * Lambda - obj
+		return -(Lambda * B - Rest * boundvar);
 	}
 }
 
