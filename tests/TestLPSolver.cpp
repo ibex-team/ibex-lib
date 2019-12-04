@@ -40,8 +40,7 @@ void TestLinearSolver::test01() {
 
 }
 
-
-void TestLinearSolver::kleemin( int n) {
+LPSolver TestLinearSolver::create_kleemin(int n) {
 	LPSolver lp(n);
 	Vector v(n);
 
@@ -61,6 +60,12 @@ void TestLinearSolver::kleemin( int n) {
 		v[i-1] =1;
 		lp.add_constraint(v,LEQ, ::pow(10,i-1));
 	}
+
+	return lp;
+}
+
+void TestLinearSolver::kleemin( int n) {
+	LPSolver lp(create_kleemin(n));
 
 	LPSolver::LPSolverStatus res = lp.solve_proved();
 	CPPUNIT_ASSERT(res==LPSolver::OPTIMAL_PROVED);
@@ -138,7 +143,28 @@ void TestLinearSolver::kleemin30() {
 		default:
 			CPPUNIT_ASSERT(false);
 	}
+}
 
+void TestLinearSolver::add_column() {
+	LPSolver lp_ref(create_kleemin(8));
+	LPSolver::LPSolverStatus res_ref = lp_ref.solve_proved();
+
+
+	LPSolver lp(create_kleemin(8));
+	Vector v(lp.get_nb_rows());
+	lp.add_column(1, v, Interval(-1, 1));
+	int n = lp.get_nb_vars();
+	lp.set_bounds_var(n-1, Interval(-2, 2));
+	LPSolver::LPSolverStatus res = lp.solve_proved();
+	CPPUNIT_ASSERT(res==LPSolver::OPTIMAL_PROVED);
+
+	//lp.write_file("coucou.lp");
+	//lp_ref.write_file("coucou_ref.lp");
+	Vector primalsol = lp.get_primal_sol();
+	Vector primalsol_ref(n);
+	primalsol_ref.put(0, lp.get_primal_sol());
+	primalsol_ref[n-1] = primalsol[n-1];
+	CPPUNIT_ASSERT(primalsol_ref == primalsol);
 }
 
 } // end namespace
