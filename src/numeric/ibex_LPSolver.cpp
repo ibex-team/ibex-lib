@@ -79,6 +79,10 @@ int LPSolver::get_nb_rows() const {
 	return nb_rows;
 }
 
+int LPSolver::get_nb_vars() const {
+	return nb_vars;
+}
+
 Interval LPSolver::get_obj_value() const {
 	return obj_value;
 }

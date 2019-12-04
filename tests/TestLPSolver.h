@@ -30,9 +30,11 @@ public:
 	CPPUNIT_TEST(kleemin6);
 	CPPUNIT_TEST(kleemin8);
 	CPPUNIT_TEST(kleemin30);
+	CPPUNIT_TEST(add_column);
 #endif
 
 	CPPUNIT_TEST_SUITE_END();
+	LPSolver create_kleemin(int n);
 	void kleemin(int n);
 
 	void test01();
@@ -40,6 +42,8 @@ public:
 	void kleemin6() {kleemin(6);};
 	void kleemin8() {kleemin(8);};
 	void kleemin30();
+
+	void add_column();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestLinearSolver);

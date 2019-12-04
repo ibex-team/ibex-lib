@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <map>
 #include "ibex_Vector.h"
 #include "ibex_Matrix.h"
 #include "ibex_IntervalVector.h"
@@ -117,6 +118,8 @@ public:
 	 */
 	int get_nb_rows() const;
 
+	int get_nb_vars() const;
+
 	ibex::Matrix get_rows() const;
 
 	ibex::Matrix get_rows_trans() const;
@@ -194,7 +197,7 @@ public:
 	 * \brief Add a column (i.e. a variable) to the linear program.
 	 * \return the index of the new column.
 	 */
-	//int add_column(double obj, ibex::Vector& col, const Interval& bounds);
+	int add_column(double obj, ibex::Vector& col, const Interval& bounds);
 
 	/**
 	 * \brief Remove a column (i.e. a variable) from the linear program.
@@ -226,6 +229,9 @@ private:
 	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
 	 */
 	bool neumaier_shcherbina_infeasibilitytest();
+
+	/* Map variables to their bound constraint in the LP */
+	std::map<int, int> variable_to_bound_constraint;
 
 	/** Definition of the LP */
 	int nb_vars;              // number of variables

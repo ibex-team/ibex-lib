@@ -30,6 +30,7 @@ LPSolver::LPSolver(int nb_vars1, int max_iter, double max_time_out, double eps) 
 	for (int j=0; j<nb_vars; j++){
 		row1.add (j,1.0);
 		mysoplex->addRowReal(soplex::LPRowReal(-soplex::infinity, row1, soplex::infinity));
+		variable_to_bound_constraint.emplace(std::make_pair(j, j));
 		row1.clear();
 	}
 
@@ -57,6 +58,7 @@ LPSolver::LPSolverStatus LPSolver::solve() {
 
 			// the primal solution : used by choose_next_variable
 			DVectorReal primal(nb_vars);
+			primal_solution.resize(nb_vars);
 			mysoplex->getPrimalReal(primal);
 			status_prim = true;
 			for (int i=0; i< nb_vars ; i++) {
@@ -211,14 +213,14 @@ void LPSolver::set_obj_var(int var, double coef) {
 void LPSolver::set_bounds(const IntervalVector& bounds) {
 	for (int j=0; j<nb_vars; j++){
 		// Change the LHS and RHS of each constraint associated to the bounds of the variable
-		mysoplex->changeRangeReal(j, bounds[j].lb(), bounds[j].ub());
+		mysoplex->changeRangeReal(variable_to_bound_constraint[j], bounds[j].lb(), bounds[j].ub());
 		mysoplex->changeBoundsReal(j ,bounds[j].lb(),bounds[j].ub());
 	}
 	boundvar = bounds;
 }
 
 void LPSolver::set_bounds_var(int var, const Interval& bound) {
-	mysoplex->changeRangeReal(var, bound.lb(), bound.ub());
+	mysoplex->changeRangeReal(variable_to_bound_constraint[var], bound.lb(), bound.ub());
 	mysoplex->changeBoundsReal(var ,bound.lb(),bound.ub());
 	boundvar[var] = bound;
 }
@@ -249,13 +251,23 @@ void LPSolver::add_constraint(const ibex::Vector& row, CmpOp sign, double rhs) {
 	}
 }
 
-/*int LPSolver::add_column(double obj, ibex::Vector& col, const Interval& bounds) {
-	soplex::DSVectorReal soplex_col(nb_rows());
+int LPSolver::add_column(double obj, ibex::Vector& col, const Interval& bounds) {
+	assert(col.size() == mysoplex->numRowsReal);
+	soplex::DSVectorReal soplex_col(nb_rows);
 	for(int i = 0; i < col.size(); ++i) {
 		soplex_col.add(i, col[i]);
 	}
-	mysoplex->addColReal(LPColReal(obj, soplex_col, bounds.lb(), bounds.ub()));
+	mysoplex->addColReal(LPColReal(obj, soplex_col, bounds.ub(), bounds.lb()));
+	boundvar.resize(boundvar.size()+1);
+	boundvar[nb_vars] = bounds;
+	// Add bound constraint
+	soplex::DSVectorReal soplex_row(mysoplex->numColsReal());
+	soplex_row.add(mysoplex->numColsReal()-1, 1);
+	mysoplex->addRowReal(LPRowReal(bounds.lb(), soplex_row, bounds.ub()));
+	variable_to_bound_constraint.emplace(std::make_pair(mysoplex->numColsReal()-1, mysoplex->numRowsReal()-1));
+	nb_vars++;
+	nb_rows++;
 	return mysoplex->numColsReal()-1;
-}*/
+}
 
 } /* end namespace ibex */
