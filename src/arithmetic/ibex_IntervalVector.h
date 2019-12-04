@@ -15,6 +15,7 @@
 #include <cassert>
 #include <iostream>
 #include <utility>
+#include <initializer_list>
 #include "ibex_Interval.h"
 #include "ibex_InvalidIntervalVectorOp.h"
 #include "ibex_Vector.h"
@@ -88,6 +89,14 @@ public:
 	 * \pre n>0
 	 */
 	IntervalVector(int n, double  bounds[][2]);
+
+	/**
+	 * \brief Create the IntervalVector from a list of Interval.
+	 *
+	 * \param list a list of Interval
+	 * \pre list not empty
+	 */
+	IntervalVector(std::initializer_list<Interval> list);
 
 	/**
 	 * \brief Create the degenerated IntervalVector x

@@ -29,6 +29,7 @@ public:
 	CPPUNIT_TEST(cons03);
 	CPPUNIT_TEST(cons04);
 	CPPUNIT_TEST(cons05);
+	CPPUNIT_TEST(consCppArray);
 
 	CPPUNIT_TEST(eq01);
 	CPPUNIT_TEST(eq02);
@@ -191,6 +192,8 @@ private:
 	void cons03();
 	void cons04();
 	void cons05();
+	/* Uses C++ fixed-size array */
+	void consCppArray();
 
 	/* test
 	 * =========

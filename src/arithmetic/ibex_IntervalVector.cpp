@@ -46,6 +46,11 @@ IntervalVector::IntervalVector(int n1, double bounds[][2]) : n(n1), vec(new Inte
 			vec[i]=Interval(bounds[i][0],bounds[i][1]);
 }
 
+IntervalVector::IntervalVector(std::initializer_list<Interval> list) : n(list.size()), vec(new Interval[n]) {
+	assert(n >= 1);
+	std::copy(list.begin(), list.end(), vec);
+}
+
 IntervalVector::IntervalVector(const Vector& x) : n(x.size()), vec(new Interval[n]) {
 	for (int i=0; i<n; i++) vec[i]=x[i];
 }

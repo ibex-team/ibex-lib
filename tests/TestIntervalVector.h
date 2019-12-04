@@ -30,6 +30,7 @@ public:
 	CPPUNIT_TEST(cons03);
 	CPPUNIT_TEST(cons04);
 	CPPUNIT_TEST(cons05);
+	CPPUNIT_TEST(consInitList);
 
 	CPPUNIT_TEST(set_empty01);
 
@@ -190,6 +191,8 @@ public:
 	void cons04();
 	// test: empty(int n)
 	void cons05();
+	// test: IntervalVector(std::initializer_list<Interval>)
+	void consInitList();
 	// test: set_empty()
 	void set_empty01();
 

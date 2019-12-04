@@ -55,6 +55,17 @@ IntervalMatrix::IntervalMatrix(int m, int n, double bounds[][2]) : _nb_rows(m), 
 	}
 }
 
+IntervalMatrix::IntervalMatrix(std::initializer_list<IntervalVector> list): _nb_rows(list.size()) {
+	assert(_nb_rows > 0);
+	M = new IntervalVector[_nb_rows];
+	_nb_cols = list.begin()->size();
+	int i = 0;
+	for(const IntervalVector& v : list) {
+		assert(v == _nb_cols);
+		M[i++] = v;
+	}
+}
+
 IntervalMatrix::IntervalMatrix(const IntervalMatrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	M = new IntervalVector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
