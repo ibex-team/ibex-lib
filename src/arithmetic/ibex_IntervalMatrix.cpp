@@ -61,7 +61,7 @@ IntervalMatrix::IntervalMatrix(std::initializer_list<IntervalVector> list): _nb_
 	_nb_cols = list.begin()->size();
 	int i = 0;
 	for(const IntervalVector& v : list) {
-		assert(v == _nb_cols);
+		assert(v.size() == _nb_cols);
 		M[i++] = v;
 	}
 }
