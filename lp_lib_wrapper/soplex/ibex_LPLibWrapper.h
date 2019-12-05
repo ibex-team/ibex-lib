@@ -12,6 +12,6 @@
 	#include "soplex.h"
 #endif
 
-#define IBEX_LPSOLVER_WRAPPER_ATTRIBUTES soplex::SoPlex *mysoplex
+#define IBEX_LPSOLVER_WRAPPER_ATTRIBUTES soplex::SoPlex *mysoplex; std::vector<int> bounds_ctrs_
 
 #endif /* _IBEX_LPLIBWRAPPER_H_ */
