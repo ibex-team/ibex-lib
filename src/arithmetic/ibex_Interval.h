@@ -891,13 +891,9 @@ inline Interval::Interval(double a) : itv(a,a) {
 	if (a==NEG_INFINITY || a==POS_INFINITY) *this=EMPTY_SET;
 }
 
-inline Interval::Interval(std::array<double, 1> array): itv(array[0], array[0]) {
-    if (array[0]==NEG_INFINITY || array[0]==POS_INFINITY) *this=EMPTY_SET;
-}
+inline Interval::Interval(std::array<double, 1> array): Interval(array[0]) {}
 
-inline Interval::Interval(std::array<double, 2> array): itv(array[0], array[1]) {
-    if (array[0]==POS_INFINITY || array[1]==NEG_INFINITY || array[0]>array[1]) *this=EMPTY_SET;
-}
+inline Interval::Interval(std::array<double, 2> array): Interval(array[0], array[1]) {}
 
 inline bool Interval::operator==(const Interval& x) const {
 	return (is_empty() && x.is_empty()) || (lb()==x.lb() && ub()==x.ub());
