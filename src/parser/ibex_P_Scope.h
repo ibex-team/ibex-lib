@@ -29,11 +29,10 @@ public:
 	/** New empty scope */
 	P_Scope();
 
-	/** Duplicacte the scope */
-	P_Scope(const P_Scope& scope);
-
-	/** Only copy global data (constants and functions) */
-	P_Scope(const P_Scope& scope, bool global);
+	/** Duplicate the scope.
+	 *
+	 * \param global - if true, only copy "global" data (constants and functions) */
+	P_Scope(const P_Scope& scope, bool global=false);
 
 	/** Delete this scope. */
 	~P_Scope();

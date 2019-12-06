@@ -29,7 +29,6 @@ message (STATUS "Running on system ${CMAKE_HOST_SYSTEM} with processor ${CMAKE_H
 message (STATUS "Using CMake ${CMAKE_VERSION}")
 message (STATUS "Configuring Ibex ${IBEX_VERSION}")
 message (STATUS "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-# TODO handle different type of build
 
 ################################################################################
 # Options for shared or static library
@@ -46,12 +45,24 @@ endif ()
 ################################################################################
 include(CheckCXXCompilerFlag)
 
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-if(COMPILER_SUPPORTS_CXX11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-else()
-  message(FATAL_ERROR "Ibex needs a compiler with C++11 support")
-endif()
+CHECK_CXX_COMPILER_FLAG ("-std=c++11" COMPILER_SUPPORTS_CXX11)
+if (COMPILER_SUPPORTS_CXX11)
+  add_compile_options ("-std=c++11")
+else ()
+  message (FATAL_ERROR "Ibex needs a compiler with C++11 support")
+endif ()
+
+################################################################################
+# Set flags and build type (release or debug)
+################################################################################
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message (STATUS "Setting build type to 'Release' as none was specified.")
+  set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build" FORCE)
+  set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+endif ()
+
+add_compile_options ("$<$<CONFIG:Release>:-O3;-DNDEBUG>"
+                     "$<$<CONFIG:Debug>:-O0;-g;-pg;-Wall;-DDEBUG>")
 
 if (WIN32)
   # We need this for strdup under Windows (see issue #287)
@@ -86,9 +97,8 @@ if (BUILD_TESTING)
 endif ()
 
 ################################################################################
-# TODO examples and benchs
+# TODO benchs
 ################################################################################
-#add_subdirectory (examples)
 #add_subdirectory (benchs)
 
 ################################################################################

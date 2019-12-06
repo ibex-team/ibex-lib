@@ -93,8 +93,10 @@ program       :                                 { pstruct->begin(); }
                 decl_opt_cst 
                 decl_opt_fncs
                 system_or_func                  { pstruct->end(); }
-              |                                 { pstruct->begin(); } 
-                choco_ctr                       { pstruct->end(); }
+              |                                 { pstruct->begin(); 
+                                                  pstruct->scopes.push(pstruct->scopes.top()); /* new scope for temporary symbols */} 
+                choco_ctr                       { pstruct->scopes.pop();
+                                                  pstruct->end(); }
               ; 
 
 system_or_func: TK_VARS decl_var_list ';'   
@@ -301,7 +303,6 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | '(' expr_row ')'                { $$ = row_vec($2); delete $2; }
               | '(' expr_col ')'                { $$ = col_vec($2); delete $2; }
               | TK_ENTITY                       { $$ = new P_ExprVarSymbol($1); free($1); /* cannot happen inside a function expr */}
-              | '{' TK_INT_CST '}'              { $$ = new P_ExprVarSymbol(pstruct->scopes.top().var($2));   /* CHOCO variable symbols */ }
               | TK_ITERATOR                     { $$ = new P_ExprIter($1); free($1); }
               | TK_EXPR_TMP_SYMBOL              { $$ = new P_ExprTmpSymbol($1); free($1); /* not this (we do **not** build DAG with P_ExprNodes!) ---> &pstruct->scopes.top().get_expr_tmp_expr($1); */ }
               | TK_CONSTANT                     { $$ = new P_ExprCstSymbol($1); free($1); }

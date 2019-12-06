@@ -91,7 +91,12 @@ public:
 
 	int token() const { return TK_EXPR_TMP_SYMBOL; }
 
-	void print(ostream& os) const { os << "expression tmp " << *expr; }
+	void print(ostream& os) const {
+		if (expr)
+			os << "expression tmp " << *expr;
+		else
+			os << "expression tmp (NULL)";
+	}
 
 	const ExprNode* expr;
 };
@@ -134,18 +139,26 @@ public:
 
 P_Scope::P_Scope() { }
 
-P_Scope::P_Scope(const P_Scope& scope) {
-  for (IBEXMAP(S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); it++) {
-      tab.insert_new(it->first, it->second->copy());
-  }
-}
-
 P_Scope::P_Scope(const P_Scope& scope, bool global) {
-  for (IBEXMAP(S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); it++) {
-    if (global && it->second->token()!=TK_ENTITY)
-      tab.insert_new(it->first, it->second->copy());
-  }
-  /** TODO copy of vars/csts */
+	for (IBEXMAP(S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); ++it) {
+		switch (it->second->token()) {
+		case TK_ENTITY:
+			if (!global) {
+				S_Entity* _copy=(S_Entity*) it->second->copy();
+				tab.insert_new(it->first, _copy);
+				vars.push_back(_copy);
+			}
+			break;
+		case TK_CONST:
+			{
+				const char* id_copy=tab.insert_new(it->first, it->second->copy());
+				cst.push_back(id_copy);
+			}
+			break;
+		default:
+			tab.insert_new(it->first, it->second->copy());
+		}
+	}
 }
 
 P_Scope::~P_Scope() {

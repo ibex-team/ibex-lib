@@ -36,6 +36,11 @@ public:
 	CPPUNIT_TEST(index_add);
 	CPPUNIT_TEST(index_transpose);
 	CPPUNIT_TEST(issue366);
+	CPPUNIT_TEST(issue425_01);
+	CPPUNIT_TEST(issue425_02);
+	CPPUNIT_TEST(issue425_03);
+	CPPUNIT_TEST(issue425_04);
+	CPPUNIT_TEST(issue425_05);
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -51,6 +56,11 @@ public:
 	void index_add();
 	void index_transpose();
 	void issue366();
+	void issue425_01();
+	void issue425_02();
+	void issue425_03();
+	void issue425_04();
+	void issue425_05();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestExprSimplify);
