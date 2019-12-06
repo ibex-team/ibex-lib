@@ -67,7 +67,7 @@ LPSolver::~LPSolver() {
 	delete [] _col1Index;
 }
 
-LPSolver::LPSolverStatus LPSolver::solve() {
+LPSolver::Status LPSolver::solve() {
 	obj_value = Interval::all_reals();
 	//int stat = -1;
 

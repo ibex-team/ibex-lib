@@ -68,7 +68,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	box_ = box;
 	delete_node_data_ = false;
 	ext_box_ = sip_to_ext_box(box, system_.goal_function_->eval(box));
-	lp_solver_.clear_ctrs();
+	lp_solver_.clear_constraints();
 	lp_solver_.set_bounds(ext_box_);
 	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
 	if(linearizer_.linearize(ext_box_, lp_solver_, prop) < 0) {
@@ -77,7 +77,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	//lp_solver_.write_file();
 
 	auto return_code = lp_solver_.solve();
-	if (return_code != LPSolver::LPSolverStatus::OPTIMAL) {
+	if (return_code != LPSolver::Status::OPTIMAL) {
 		throw NotFound();
 	}
 	//Vector sol(box.mid());
@@ -218,7 +218,7 @@ bool LoupFinderLineSearch::relaxations_direction(Vector& direction, double& obj,
 		// That happens when the linear solver does not return a point in a corner of the relaxation
 		return false;
 	}
-	dir_solver_.clear_ctrs();
+	dir_solver_.clear_constraints();
 	for(int i = 0; i < active_constraints.size(); ++i) {
     	Vector row(system_.nb_var + 1);
         row.put(0, active_constraints[i]);
@@ -232,8 +232,8 @@ bool LoupFinderLineSearch::relaxations_direction(Vector& direction, double& obj,
 
 	dir_solver_.set_obj_var(system_.nb_var, 1);
 	//std::cout << dir_solver.get_rows() << std::endl;
-	LPSolver::LPSolverStatus dir_solver_status = dir_solver_.solve();
-	if (dir_solver_status != LPSolver::LPSolverStatus::OPTIMAL) {
+	LPSolver::Status dir_solver_status = dir_solver_.solve();
+	if (dir_solver_status != LPSolver::Status::OPTIMAL) {
 		return false;
 	}
 	direction = dir_solver_.get_primal_sol().subvector(0, system_.nb_var-1);
@@ -242,7 +242,7 @@ bool LoupFinderLineSearch::relaxations_direction(Vector& direction, double& obj,
 }
 
 bool LoupFinderLineSearch::blankenship_direction(Vector& direction, double& obj) {
-	dir_solver_.clear_ctrs();
+	dir_solver_.clear_constraints();
 	blankenship(relax_point_, system_, node_data_);
 	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
         const auto& sic = system_.sic_constraints_[i];
@@ -269,8 +269,8 @@ bool LoupFinderLineSearch::blankenship_direction(Vector& direction, double& obj)
 
 	dir_solver_.set_obj_var(system_.nb_var, 1);
 	//std::cout << dir_solver.get_rows() << std::endl;
-	LPSolver::LPSolverStatus dir_solver_status = dir_solver_.solve();
-	if (dir_solver_status != LPSolver::LPSolverStatus::OPTIMAL) {
+	LPSolver::Status dir_solver_status = dir_solver_.solve();
+	if (dir_solver_status != LPSolver::Status::OPTIMAL) {
 		return false;
 	}
 	direction = dir_solver_.get_primal_sol().subvector(0, system_.nb_var-1);
@@ -279,7 +279,7 @@ bool LoupFinderLineSearch::blankenship_direction(Vector& direction, double& obj)
 }
 
 bool LoupFinderLineSearch::stein_direction(Vector& direction, double& obj) {
-	dir_solver_.clear_ctrs();
+	dir_solver_.clear_constraints();
 	blankenship(relax_point_, system_, node_data_);
 	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
         const auto& sic = system_.sic_constraints_[i];
@@ -305,8 +305,8 @@ bool LoupFinderLineSearch::stein_direction(Vector& direction, double& obj) {
 
 	dir_solver_.set_obj_var(system_.nb_var, 1);
 	//std::cout << dir_solver.get_rows() << std::endl;
-	LPSolver::LPSolverStatus dir_solver_status = dir_solver_.solve();
-	if (dir_solver_status != LPSolver::LPSolverStatus::OPTIMAL) {
+	LPSolver::Status dir_solver_status = dir_solver_.solve();
+	if (dir_solver_status != LPSolver::Status::OPTIMAL) {
 		return false;
 	}
 	direction = dir_solver_.get_primal_sol().subvector(0, system_.nb_var-1);
@@ -409,9 +409,9 @@ bool LoupFinderLineSearch::corner_restrictions(Vector& loup_point) {
 	}
 	//lp_solver_->write_file();
 	//cout << "beforesolve" << endl;
-	LPSolver::LPSolverStatus stat = corner_solver_->solve_proved();
+	LPSolver::Status stat = corner_solver_->solve_proved();
 	//cout << "aftersolve" << endl;
-	if(stat == LPSolver::OPTIMAL_PROVED) {
+	if(stat == LPSolver::Status::Optimal_PROVED) {
 		//Vector loup_point(box_without_goal.size());
 		loup_point = corner_solver_->get_primal_sol();
 		if(!box_.contains(loup_point)) {

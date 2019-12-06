@@ -13,7 +13,7 @@ LPSolver::LPSolver(int nb_vars, int max_iter, double max_time_out, double eps):
 LPSolver::~LPSolver() {
 }
 
-LPSolver::LPSolverStatus LPSolver::solve() {
+LPSolver::Status LPSolver::solve() {
 	return LPSolver::UNKNOWN;
 }
 

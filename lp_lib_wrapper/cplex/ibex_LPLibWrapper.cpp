@@ -225,7 +225,7 @@ LPSolver::~LPSolver() {
 	delete[] r_matind;
 }
 
-LPSolver::LPSolverStatus LPSolver::solve() {
+LPSolver::Status LPSolver::solve() {
 	obj_value = Interval::all_reals();
 
 	try {
@@ -724,10 +724,10 @@ LPSolver::~LPSolver() {
 
 }
 
-LPSolver::LPSolverStatus LPSolver::solve() {
+LPSolver::Status LPSolver::solve() {
 	obj_value = Interval::all_reals();
 
-	LPSolver::LPSolverStatus res = UNKNOWN;
+	LPSolver::Status res = UNKNOWN;
 	try {
 		// Optimize the problem and obtain solution.
 		if ( mycplex->solve() ) {

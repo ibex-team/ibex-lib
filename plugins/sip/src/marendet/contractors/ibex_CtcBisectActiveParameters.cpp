@@ -40,7 +40,7 @@ void CtcBisectActiveParameters::contract(IntervalVector& box) {
 
 }
 void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& context) {
-    lp_solver_.clear_ctrs();
+    lp_solver_.clear_constraints();
 	lp_solver_.set_bounds(box);
 	lp_solver_.set_obj_var(sys_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
@@ -50,7 +50,7 @@ void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& c
 	//lp_solver_.write_file();
 
 	auto return_code = lp_solver_.solve();
-	if (return_code != LPSolver::LPSolverStatus::OPTIMAL) {
+	if (return_code != LPSolver::Status::OPTIMAL) {
 		return;
 	}
 	//Vector sol(box.mid());
