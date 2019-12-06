@@ -1,283 +1,84 @@
-//============================================================================
-//                                  I B E X
-// Interface with the linear solver
-// File        : ibex_LPSolver.cpp
-// Author      : Jordan Ninin
-// License     : See the LICENSE file
-// Created     : May 15, 2013
-// Last Update : May 15, 2013
-//============================================================================
-
-#include  <cfloat>
 #include "ibex_LPSolver.h"
 
 namespace ibex {
 
 /** \brief Stream out \a x. */
-std::ostream& operator<<(std::ostream& os, const LPSolver::LPSolverStatus x){
+std::ostream& operator<<(std::ostream& os, const LPSolver::Status x){
 
 	switch(x) {
-	case(LPSolver::OPTIMAL) :{
+	case(LPSolver::Status::Optimal) :{
 			os << "OPTIMAL";
 			break;
 	}
-	case(LPSolver::INFEASIBLE) :{
+	case(LPSolver::Status::Infeasible) :{
 			os << "INFEASIBLE";
 			break;
 	}
-	case(LPSolver::OPTIMAL_PROVED) :{
+	case(LPSolver::Status::OptimalProved) :{
 			os << "OPTIMAL_PROVED";
 			break;
 	}
-	case(LPSolver::INFEASIBLE_PROVED) :{
+	case(LPSolver::Status::InfeasibleProved) :{
 			os << "INFEASIBLE_PROVED";
 			break;
 	}
-	case(LPSolver::TIME_OUT) :{
+	case(LPSolver::Status::Timeout) :{
 			os << "TIME_OUT";
 			break;
 	}
-	case(LPSolver::MAX_ITER) :{
+	case(LPSolver::Status::MaxIter) :{
 			os << "MAX_ITER";
 			break;
 	}
-	case(LPSolver::UNKNOWN) :{
+	case(LPSolver::Status::Unbounded) :{
+			os << "UNBOUNDED";
+			break;
+	}
+	case(LPSolver::Status::Unknown) :{
 		os << "UNKNOWN";
 		break;
 	}
 	}
 	return os;
-
 }
 
-LPSolver::LPSolverStatus LPSolver::solve_proved() {
-	LPSolver::LPSolverStatus stat = solve();
-	switch (stat) {
-	case LPSolver::OPTIMAL : {
-		// Neumaier - Shcherbina postprocessing
-		Interval obj = neumaier_shcherbina_postprocessing();
-		obj_value = Interval(obj.lb(),obj_value.ub());
-		stat = LPSolver::OPTIMAL_PROVED;
-		break;
-	}
-	case  LPSolver::INFEASIBLE: {
-		// infeasibility test  cf Neumaier Shcherbina paper
-		if (neumaier_shcherbina_infeasibilitytest()) {
-			stat = LPSolver::INFEASIBLE_PROVED;
-		}
-		break;
-	}
-	default:
-		stat = LPSolver::UNKNOWN;
-		break;
-	}
-	return stat;
+bool LPSolver::neumaier_shcherbina_postprocessing() {
+    Matrix A_trans = rows_transposed();
+    IntervalVector b = lhs_rhs();
 
+    IntervalVector rest = A_trans*uncertified_dual_;
+    if(sense_ == LPSolver::Sense::Minimize) {
+        rest -= obj_vec();
+    } else {
+        rest += obj_vec();
+    }
+    certified_obj_ = new Interval(uncertified_dual_*b - rest*ivec_bounds_);
+	return true;
 }
 
-int LPSolver::get_nb_rows() const {
-	return nb_rows;
-}
+bool LPSolver::neumaier_shcherbina_infeasibility_test() {
+    ibex::Matrix A_trans = rows_transposed();
+    IntervalVector b = lhs_rhs();
+    Vector lambda(1);
+    bool infeasible_dir_found = uncertified_infeasible_dir(lambda);
+    if(!infeasible_dir_found) {
+        return false;
+    }
 
-int LPSolver::get_nb_vars() const {
-	return nb_vars;
-}
 
-Interval LPSolver::get_obj_value() const {
-	return obj_value;
-}
+    IntervalVector rest = A_trans * lambda ;
+    Interval d = rest * ivec_bounds_ - lambda * b;
 
-void LPSolver::add_constraint(const Matrix & A, CmpOp sign, const Vector& rhs ) {
-	for (int i=0; i<A.nb_rows(); i++) {
-		try {
-			add_constraint(A[i],sign,rhs[i]);
-		} catch (LPException&) { }
-	}
+    // if 0 does not belong to d, the infeasibility is proved
+    return !d.contains(0.0);
 }
 
 
-void LPSolver::clear_bounds() {
-	set_bounds(IntervalVector(nb_vars));
+void LPSolver::invalidate() {
+    status_ = LPSolver::Status::Unknown;
+    has_solution_ = false;
+    delete uncertified_infeasible_dir_;
+    delete certified_obj_;
 }
 
-void LPSolver::clear_obj() {
-	set_obj(ibex::Vector::zeros(nb_vars));
-}
-
-void LPSolver::clear_all() {
-	clear_ctrs();
-	clear_obj();
-	clear_bounds();
-}
-
-ibex::Vector LPSolver::get_primal_sol() const {
-	try {
-		if (status_prim) {
-			return primal_solution;
-		} else
-			throw LPException();
-	}
-	catch(...) {
-		throw LPException();
-	}
-}
-
-ibex::Vector LPSolver::get_dual_sol() const {
-	try {
-		if (status_dual) {
-			return dual_solution;
-		} else
-			throw LPException();
-	}
-	catch(...) {
-		throw LPException();
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-
-LPSolver::LPSolverStatus LPSolver::solve_var(LPSolver::Sense s, int var, Interval& obj) {
-	assert((0<=var)&&(var<=nb_vars));
-
-	LPSolver::LPSolverStatus stat = LPSolver::UNKNOWN;
-	set_sense(LPSolver::MINIMIZE);
-
-
-	try {
-		// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
-		if(s==LPSolver::MINIMIZE)
-			set_obj_var(var, 1.0);
-		else
-			set_obj_var(var, -1.0);
-
-		//	mylinearsolver->write_file("coucou.lp");
-		//	system("cat coucou.lp");
-		stat = solve();
-		// std::cout << "[polytope-hull]->[run_simplex] solver returns " << stat << std::endl;
-		switch (stat) {
-		case LPSolver::OPTIMAL : {
-			// Neumaier - Shcherbina postprocessing
-			obj_value = neumaier_shcherbina_postprocessing_var(var, s);
-			obj = obj_value;
-			stat = LPSolver::OPTIMAL_PROVED;
-			break;
-		}
-		case  LPSolver::INFEASIBLE: {
-			// infeasibility test  cf Neumaier Shcherbina paper
-			if (neumaier_shcherbina_infeasibilitytest()) {
-				stat = LPSolver::INFEASIBLE_PROVED;
-			}
-			break;
-		}
-		default:
-			stat = LPSolver::UNKNOWN;
-			break;
-		}
-		// Reset the objective of the LP solver
-		set_obj_var(var, 0.0);
-	}
-	catch (LPException&) {
-		stat = LPSolver::UNKNOWN;
-		// Reset the objective of the LP solver
-		set_obj_var(var, 0.0);
-	}
-
-	return stat;
-
-}
-
-Interval LPSolver::neumaier_shcherbina_postprocessing_var (int var, LPSolver::Sense s) {
-	try {
-		// the dual solution : used to compute the bound
-		ibex::Vector dual = get_dual_sol();
-
-		ibex::Matrix A_trans = get_rows_trans();
-
-		IntervalVector B = get_lhs_rhs();
-
-
-		//cout <<" BOUND_test "<< endl;
-		IntervalVector Rest(nb_vars);
-		IntervalVector Lambda(dual);
-		//		std::cout << " A_t " << A_trans << std::endl;
-		//		std::cout << " B " << B << std::endl;
-		//		std::cout << " dual " << Lambda << std::endl;
-		//		std::cout << " box " << boundvar << std::endl;
-		//		std::cout << " dual B " << Lambda * B << std::endl;
-
-
-		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-		if (s==LPSolver::MINIMIZE) {
-			Rest[var] -=1; // because C is a vector of zero except for the coef "var"
-			return (Lambda * B - Rest * boundvar);
-		} else {
-			Rest[var] +=1;
-			return -(Lambda * B - Rest * boundvar);
-		}
-
-		//cout << " Rest " << Rest << endl;
-		//cout << " dual " << Lambda << endl;
-		//cout << " dual B " << Lambda * B << endl;
-		//cout << " rest box " << Rest * box  << endl;
-
-
-	} catch (...) {
-		throw LPException();
-	}
-}
-
-
-Interval LPSolver::neumaier_shcherbina_postprocessing() {
-	// the dual solution : used to compute the bound
-	ibex::Vector dual = get_dual_sol();
-	ibex::Matrix A_trans = get_rows_trans();
-	IntervalVector B = get_lhs_rhs();
-	ibex::Vector obj = get_coef_obj();
-
-
-	//cout <<" BOUND_test "<< endl;
-	IntervalVector Rest(nb_vars);
-	IntervalVector Lambda(dual);
-	Rest = A_trans * Lambda ;
-	Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
-	return (Lambda * B - Rest * boundvar);
-
-	Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-	if (sense==LPSolver::MINIMIZE) {
-		Rest -= obj;   // Rest = Transpose(As) * Lambda - obj
-		return (Lambda * B - Rest * boundvar);
-	} else {
-		Rest += obj;   // Rest = Transpose(As) * Lambda - obj
-		return -(Lambda * B - Rest * boundvar);
-	}
-}
-
-
-bool LPSolver::neumaier_shcherbina_infeasibilitytest() {
-	try {
-		ibex::Vector infeasible_dir = get_infeasible_dir();
-
-		ibex::Matrix A_trans = get_rows_trans();
-
-		IntervalVector B = get_lhs_rhs();
-
-		IntervalVector Lambda(infeasible_dir);
-
-		IntervalVector Rest(nb_vars);
-		Rest = A_trans * Lambda ;
-		Interval d= Rest * boundvar - Lambda * B;
-
-		// if 0 does not belong to d, the infeasibility is proved
-
-		if (d.contains(0.0))
-			return false;
-		else
-			return true;
-
-	} catch (LPException&) {
-		return false;
-	}
-
-}
-}
- // end namespace ibex
+}  // end namespace ibex

@@ -55,7 +55,7 @@ void CtcLinearRelax::contract(IntervalVector& box, ContractContext& context) {
 		sys.read_ext_vec(arg_min(sys.goal_var(),true), p->_argmin);
 		p->inside = true;
 		context.prop.propagate(*p);
-	} catch(LPException&) {
+	} catch(Exception&) {
 	}
 }
 

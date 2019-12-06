@@ -79,7 +79,7 @@ public :
 	 * \param x 	- the current box
 	 * \param dual 	- the dual solution that will be returned
 	 */
-	LPSolver::LPSolverStatus getdual(IntervalMatrix& J,const IntervalVector& x, Vector& dual) const;
+	LPSolver::Status getdual(IntervalMatrix& J,const IntervalVector& x, Vector& dual) const;
 
 	/**
 	 * \brief The linear solver

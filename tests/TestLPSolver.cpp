@@ -67,13 +67,13 @@ LPSolver TestLinearSolver::create_kleemin(int n) {
 void TestLinearSolver::kleemin( int n) {
 	LPSolver lp(create_kleemin(n));
 
-	LPSolver::LPSolverStatus res = lp.solve_proved();
-	CPPUNIT_ASSERT(res==LPSolver::OPTIMAL_PROVED);
+	LPSolver::Status res = lp.optimize();
+	CPPUNIT_ASSERT(res==LPSolver::Status::OptimalProved);
+	double eps = lp.tolerance();
+	lp.write_to_file("coucou" + std::to_string(n) + ".lp");
 
-	double eps = lp.get_epsilon();
-
-	Vector dualsol = lp.get_dual_sol();
-	Vector primalsol = lp.get_primal_sol();
+	Vector dualsol = lp.uncertified_dual_sol();
+	Vector primalsol = lp.uncertified_primal_sol();
 	Vector vrai(n);
 	vrai[n-1] = ::pow(10,n-1);
 	check_relatif(vrai,primalsol,1.e-9);
@@ -101,39 +101,41 @@ void TestLinearSolver::kleemin30() {
 		v[i-1] =1;
 		lp.add_constraint(v,LEQ, ::pow(10,i-1));
 	}
-	LPSolver::LPSolverStatus res;
+	LPSolver::Status res;
 	CPPUNIT_ASSERT_ASSERTION_PASS(
-	 res = lp.solve_proved()
-	);
-	CPPUNIT_ASSERT(res!=LPSolver::INFEASIBLE_PROVED);
-
-	CPPUNIT_ASSERT_ASSERTION_PASS(
+	 res = lp.optimize()
 	);
 
+	CPPUNIT_ASSERT(res!=LPSolver::Status::InfeasibleProved);
+
 	CPPUNIT_ASSERT_ASSERTION_PASS(
-	double eps = lp.get_epsilon()
+	lp.write_to_file("coucou.lp")
+	);
+
+	CPPUNIT_ASSERT_ASSERTION_PASS(
+	double eps = lp.tolerance()
 	);
 	switch (res) {
-		case (LPSolver::INFEASIBLE):
-		case (LPSolver::UNKNOWN): {
+		case (LPSolver::Status::Infeasible):
+		case (LPSolver::Status::Unknown): {
 			CPPUNIT_ASSERT_THROW(
-			Vector dualsol = lp.get_dual_sol(),
+			Vector dualsol = lp.uncertified_dual_sol(),
 			LPException
 			);
 			CPPUNIT_ASSERT_THROW(
-			Vector primalsol = lp.get_primal_sol(),
+			Vector primalsol = lp.uncertified_primal_sol(),
 			LPException
 			);
 			break;
 		}
-		case (LPSolver::OPTIMAL):
-		case (LPSolver::OPTIMAL_PROVED): {
+		case (LPSolver::Status::Optimal):
+		case (LPSolver::Status::OptimalProved): {
 			CPPUNIT_ASSERT_ASSERTION_PASS(
-			Vector dualsol = lp.get_dual_sol()
+			Vector dualsol = lp.uncertified_dual_sol()
 			);
 			Vector primalsol(n);
 			CPPUNIT_ASSERT_ASSERTION_PASS(
-			primalsol = lp.get_primal_sol()
+			primalsol = lp.uncertified_primal_sol()
 			);
 			Vector vrai(n);
 			vrai[n-1] = ::pow(10,n-1);
@@ -146,17 +148,17 @@ void TestLinearSolver::kleemin30() {
 }
 
 void TestLinearSolver::add_column() {
-	LPSolver lp_ref(create_kleemin(8));
-	LPSolver::LPSolverStatus res_ref = lp_ref.solve_proved();
+/*	LPSolver lp_ref(create_kleemin(8));
+	LPSolver::Status res_ref = lp_ref.optimize();
 
 
 	LPSolver lp(create_kleemin(8));
-	Vector v(lp.get_nb_rows());
+	Vector v(lp.rows_count());
 	lp.add_column(1, v, Interval(-1, 1));
 	int n = lp.get_nb_vars();
 	lp.set_bounds_var(n-1, Interval(-2, 2));
-	LPSolver::LPSolverStatus res = lp.solve_proved();
-	CPPUNIT_ASSERT(res==LPSolver::OPTIMAL_PROVED);
+	LPSolver::Status res = lp.solve_proved();
+	CPPUNIT_ASSERT(res==LPSolver::Status::Optimal_PROVED);
 
 	//lp.write_file("coucou.lp");
 	//lp_ref.write_file("coucou_ref.lp");
@@ -164,7 +166,7 @@ void TestLinearSolver::add_column() {
 	Vector primalsol_ref(n);
 	primalsol_ref.put(0, lp.get_primal_sol());
 	primalsol_ref[n-1] = primalsol[n-1];
-	CPPUNIT_ASSERT(primalsol_ref == primalsol);
+	CPPUNIT_ASSERT(primalsol_ref == primalsol);*/
 }
 
 } // end namespace

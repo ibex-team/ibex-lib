@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_CtcART.cpp
 // Author      : Ignacio Araya, Bertrand Neveu , Gilles Trombettoni
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -220,7 +220,7 @@ int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver)
 				case EQ:
 					if (!ev.contains(0.0)) return -1;
 					else {
-						if (ev.diam()>2*lp_solver.get_epsilon()) {
+						if (ev.diam()>2*lp_solver.tolerance()) {
 							try {
 								lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
 								cont++;

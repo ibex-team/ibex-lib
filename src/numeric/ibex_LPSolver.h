@@ -1,69 +1,33 @@
-//============================================================================
-//                                  I B E X
-// Interface with the linear solver
-// File        : ibex_LPSolver.h
-// Author      : Jordan Ninin
-// License     : See the LICENSE file
-// Created     : May 15, 2013
-// Last Update : May 15, 2013
-//============================================================================
-
 #ifndef __IBEX_LP_SOLVER_H__
 #define __IBEX_LP_SOLVER_H__
 
-#include "ibex_Setting.h"
+#include <vector>
+#include <string>
 
-
-#include <string.h>
-#include <stdio.h>
-#include <map>
-#include "ibex_Vector.h"
-#include "ibex_Matrix.h"
-#include "ibex_IntervalVector.h"
-#include "ibex_IntervalMatrix.h"
-#include "ibex_Interval.h"
 #include "ibex_CmpOp.h"
-#include "ibex_Exception.h"
+#include "ibex_Interval.h"
+#include "ibex_Vector.h"
+#include "ibex_IntervalVector.h"
+#include "ibex_Matrix.h"
+#include "ibex_LPLibWrapper.h"
 #include "ibex_LPException.h"
 
-#include "ibex_LPLibWrapper.h"
-
 namespace ibex {
-
-/**
- * \ingroup numeric
- *
- * \brief LP solver.
- *
- * Solve a linear problem
- *
- *     Minimizer c^T x               --> objective
- *     s.t. lhs <= Ax <= rhs         --> constraints
- *           l  < x <= u             --> bounds
- *
- * The same LP solver can be used to solve several problems
- * as long as they all share the same number of variables.
- * The number of constraints may differ and the bounds of variables as well.
- *
- */
 
 class LPSolver {
 
 public:
 
-	/** the default precision on the objective, set to 1e-10. */
-	static constexpr double default_eps = 1e-9;
-
-	/** the maximal bound of the variable, set to 1e20. */
-	static constexpr double default_max_bound = 1e20;
+    /** the default precision on the objective, set to 1e-10. */
+	static constexpr double default_tolerance = 1e-9;
 
     /** Default max_time_out, set to 100s  */
-    static constexpr int default_max_time_out = 100;
+    static constexpr double default_timeout = 100;
 
     /** Default max_iter, set to 100 iterations */
     static constexpr int default_max_iter = 100;
 
-	/** Default minimal diameter of ??, set to 1e-14  **/
+    /** Default minimal diameter of ??, set to 1e-14  **/
 	static constexpr double min_box_diam = 1e-14;
 
 	/**
@@ -74,187 +38,110 @@ public:
 	 */
 	static constexpr double max_box_diam = 1e6;
 
-	typedef enum  {OPTIMAL=1, INFEASIBLE=2, OPTIMAL_PROVED=3, INFEASIBLE_PROVED=4, UNKNOWN=0, TIME_OUT=-1, MAX_ITER=-2} LPSolverStatus;
+    enum class Status { Optimal, OptimalProved, Infeasible, InfeasibleProved, Unbounded, Timeout, MaxIter, Unknown };
+    enum class Sense { Maximize, Minimize };
+    enum class PostProcessing { None, NeumaierShcherbina };
 
-	typedef enum  {MINIMIZE, MAXIMIZE} Sense;
+    LPSolver(int vars_count=0, LPSolver::Sense sense=LPSolver::Sense::Minimize, double tolerance=default_tolerance,
+        double timeout=default_timeout, int max_iter=default_max_iter);
+    ~LPSolver();
 
+    void add_variable(const Interval& bounds, double obj);
+    void add_variable(const Vector& col, const Interval& bounds, double obj);
+    void add_variables(const IntervalVector& bounds, const Vector& obj);
+    void add_variables(const Matrix& cols, const IntervalVector& bounds, const Vector& obj);
 
-	/**
-	 * \param max_time_out - Control the number of iterations inside the linear solver
-	 */
-	LPSolver(int nb_vars, int max_iter= default_max_iter,
-			double max_time_out= default_max_time_out, double eps=default_eps);
+    int add_constraint(double lhs, const Vector& row, double rhs);
+    int add_constraint(const Vector& row, CmpOp op, double rhs);
+    void add_constraints(const Vector& lhs, const Matrix& rows, const Vector& rhs);
+    void add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs);
 
-	~LPSolver();
+    Status optimize(PostProcessing pp = PostProcessing::NeumaierShcherbina);
 
-	/**
-	 * \brief Solve the Linear Program.
-	 *
-	 * \return OPTIMAL, INFEASIBLE, UNKNOWN, TIME_OUT or MAX_ITER
-	 */
-	LPSolverStatus solve();
-
-	/**
-	 * \brief Solve the LP and try to prove the result.
-	 *
-	 * Call Neumaier-Shcherbina post-processing.
-	 *
-	 * \note only certify the objective (not the solution point)
-	 * \return all possible status, including OPTIMAL_PROVED and INFEASIBLE_PROVED
-	 */
-	LPSolverStatus solve_proved();
-
-
-	void write_file(const char* name="IBEX_save_LP.lp");
+    void set_sense(LPSolver::Sense sense);
+    void set_obj(const Vector& obj);
+    void set_var_obj(int index, double value);
+    void set_bounds(const IntervalVector& bounds);
+    void set_var_bounds(int var, const Interval& bounds);
+    void set_tolerance(double tolerance);
+    void set_timeout(double timeout);
+    void set_max_iter(int max_iter);
 
 
-// GET
+    int rows_count() const;
+    int vars_count() const;
+    double tolerance() const;
+    int max_iter() const;
+    double timeout() const;
+    Status status() const;
 
-	/**
-	 * \brief Total number of rows
-	 *
-	 * Rows correspond to all constraints, including bound constraints
-	 *
-	 */
-	int get_nb_rows() const;
+    Matrix rows() const;
+    Vector row(int index) const;
+    Matrix rows_transposed() const;
+    Vector col(int index) const;
 
-	int get_nb_vars() const;
+    Vector lhs() const;
+    double lhs(int index) const;
+    Vector rhs() const;
+    double rhs(int index) const;
+    IntervalVector lhs_rhs() const;
+    Interval lhs_rhs(int index) const;
+    IntervalVector bounds() const;
+    Interval bounds(int index) const;
 
-	ibex::Matrix get_rows() const;
+    Vector obj_vec() const;
+    Vector var_obj(int index) const;
 
-	ibex::Matrix get_rows_trans() const;
+    bool has_solution() const;
+    Interval certified_obj() const;
+    Interval uncertified_obj() const;
 
-	ibex::IntervalVector get_lhs_rhs() const;
+    Vector uncertified_primal_sol() const;
+    Vector uncertified_dual_sol() const ;
 
-	ibex::Vector get_coef_obj() const;
+    bool uncertified_infeasible_dir(Vector& infeasible_dir) const;
 
-	double get_epsilon() const;
+    bool is_inner_point(const Vector& point) const;
 
-	ibex::Interval get_obj_value() const;
+    void write_to_file(const std::string& filename) const;
 
-	ibex::Vector get_primal_sol() const;
-
-	ibex::Vector get_dual_sol() const;
-
-	/**
-	 * \throw LPExpcetion if not infeasible
-	 */
-	ibex::Vector  get_infeasible_dir() const;
-
-
-// SET
-
-	/**
-	 * \brief Delete the constraints
-	 *
-	 * Do not modify the bound constraints
-	 * (use clear_bounds or set_bounds)
-	 */
-	void clear_ctrs();
-
-	/**
-	 * \brief Delete the bound constraints
-	 *
-	 */
-	void clear_bounds();
-
-	/**
-	 * \brief Set all the objective coefficients to 0.
-	 *
-	 */
-	void clear_obj();
-
-	/**
-	 * \brief Clean all the Linear Program
-	 *
-	 * Delete all constraints, including bound constraints
-	 * and set the coefficients of the objective function to 0.
-	 */
-	void clear_all();
-
-	void set_max_iter(int max);
-
-	void set_max_time_out(double time);
-
-	void set_sense(Sense s);
-
-
-	void set_obj(const ibex::Vector& coef);
-
-	void set_obj_var(int var, double coef);
-
-	void set_bounds(const IntervalVector& bounds);
-
-	void set_bounds_var(int var, const Interval& bound);
-
-	void set_epsilon(double eps);
-
-	void add_constraint(const ibex::Vector & row, CmpOp sign, double rhs );
-
-	void add_constraint(const ibex::Matrix & A, CmpOp sign, const ibex::Vector& rhs );
-
-	/**
-	 * \brief Add a column (i.e. a variable) to the linear program.
-	 * \return the index of the new column.
-	 */
-	int add_column(double obj, ibex::Vector& col, const Interval& bounds);
-
-	/**
-	 * \brief Remove a column (i.e. a variable) from the linear program.
-	 */
-	//void remove_column(int index);
+    // Clear functions
+    void clear_obj();
+    void clear_constraints();
+    void clear_bounds();
 
 
 private:
+    LPSolver::Sense sense_;
+    LPSolver::Status status_;
 
-	friend class CtcPolytopeHull;
+    // LP solution is cached
+    bool has_solution_ = false;
+    Vector uncertified_primal_{1};
+    Vector uncertified_dual_{1};
+    Interval uncertified_obj_;
 
-	/**  Call to linear solver to optimize one variable */
-	LPSolverStatus solve_var(Sense sense, int var, Interval & obj);
+    Vector* uncertified_infeasible_dir_ = nullptr;
+    Interval* certified_obj_ = nullptr;
 
-	/**
-	 * Neumaier Shcherbina postprocessing in case of optimal solution found :
-	 * the result "obj_value" is made reliable.
-	 *
-	 * A more efficient variant than NeumaierShcherbina_postprocessing()
-	 *
-	 * The solution point is *not* made reliable
-	 */
-	Interval  neumaier_shcherbina_postprocessing_var(int var, Sense sense);
+    IntervalVector ivec_bounds_{1};
 
+    bool neumaier_shcherbina_postprocessing();
+    bool neumaier_shcherbina_infeasibility_test();
 
-	Interval  neumaier_shcherbina_postprocessing();
+    void invalidate();
 
-	/**
-	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
-	 */
-	bool neumaier_shcherbina_infeasibilitytest();
+    void add_bound_constraint(int var, const Interval& bounds);
 
-	/* Map variables to their bound constraint in the LP */
-	std::map<int, int> variable_to_bound_constraint;
-
-	/** Definition of the LP */
-	int nb_vars;              // number of variables
-	int nb_rows;              // total number of rows
-	IntervalVector boundvar;  // bound constraints
-	Sense sense;              // Minimize or maximize the objective function
-
-	/** =================== Results of the last call to solve() ==================== */
-	Interval obj_value;       // (certified or not) enclosure of the minimum
-	ibex::Vector primal_solution;
-	ibex::Vector dual_solution;
-	bool status_prim; // return status of the primal solving (implementation-specific)
-	bool status_dual; // return status of the dual solving (implementation-specific)
-	/**===============================================================================*/
-
-	/* This is a macro that should be defined in ibex_LPLibWrapper.h */
+    /* This is a macro that should be defined in ibex_LPLibWrapper.h */
 	IBEX_LPSOLVER_WRAPPER_ATTRIBUTES;
+
+    std::vector<int> bounds_ctrs_;
 
 };
 
 /** \brief Stream out \a x. */
-std::ostream& operator<<(std::ostream& os, const LPSolver::LPSolverStatus x);
-
+std::ostream& operator<<(std::ostream& os, const LPSolver::Status x);
 
 } // end namespace ibex
 

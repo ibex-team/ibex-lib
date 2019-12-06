@@ -15,8 +15,8 @@ using namespace std;
 namespace ibex {
 
 //TODO: remove this recipe for the argument of the max number of iterations of the LP solver
-LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT,LinearizerXTaylor::RANDOM), lp_solver(sys.nb_var,
-		sys.nb_var*3 > LPSolver::default_max_iter ? LPSolver::default_max_iter : sys.nb_var*3) {
+LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT,LinearizerXTaylor::RANDOM), lp_solver(sys.nb_var) {
+	lp_solver.set_max_iter(std::min(sys.nb_var*3, LPSolver::default_max_iter));
 //	nb_simplex=0;
 //	diam_simplex=0;
 }
@@ -33,7 +33,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 
 	int n=sys.nb_var;
 
-	lp_solver.clear_ctrs();
+	lp_solver.clear_constraints();
 	lp_solver.set_bounds(box);
 
 	IntervalVector ig=sys.goal->gradient(box.mid());
@@ -45,20 +45,20 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 	// set the objective coefficient
 	// TODO: replace with lp_solver.set_obj(g) when implemented
 	for (int j=0; j<n; j++)
-		lp_solver.set_obj_var(j,g[j]);
+		lp_solver.set_var_obj(j,g[j]);
 
 	int count = lr.linearize(box,lp_solver,prop);
 
 	if (count==-1) {
-		lp_solver.clear_ctrs();
+		lp_solver.clear_constraints();
 		throw NotFound();
 	}
 
-	LPSolver::LPSolverStatus stat = lp_solver.solve();
+	LPSolver::Status stat = lp_solver.optimize();
 
-	if (stat == LPSolver::OPTIMAL) {
+	if (stat == LPSolver::Status::Optimal) {
 		//the linear solution is mapped to intervals and evaluated
-		Vector loup_point = lp_solver.get_primal_sol();
+		Vector loup_point = lp_solver.uncertified_primal_sol();
 
 		//std::cout << " simplex result " << prim[0] << " " << loup_point << std::endl;
 
