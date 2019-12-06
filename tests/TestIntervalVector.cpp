@@ -60,13 +60,24 @@ void TestIntervalVector::cons05() {
 	CPPUNIT_ASSERT((IntervalVector(2)=x).is_empty());
 }
 
+void TestIntervalVector::consInitList() {
+	IntervalVector x{
+		{1.0, 2.0},
+		{2.0, 3.0},
+		{4}
+	};
+	CPPUNIT_ASSERT(x.size() == 3);
+	CPPUNIT_ASSERT(x[0] == Interval(1.0, 2.0));
+	CPPUNIT_ASSERT(x[1] == Interval(2.0, 3.0));
+	CPPUNIT_ASSERT(x[2] == Interval(4.0, 4.0));
+}
+
 void TestIntervalVector::set_empty01() {
 	IntervalVector x(2);
 	CPPUNIT_ASSERT(!x.is_empty());
 	x.set_empty();
 	CPPUNIT_ASSERT(x.is_empty());
 }
-
 
 void TestIntervalVector::is_empty01() {
 	CPPUNIT_ASSERT(IntervalVector::empty(2).is_empty());

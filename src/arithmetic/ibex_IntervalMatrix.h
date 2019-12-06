@@ -15,6 +15,7 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_Matrix.h"
 
+#include <initializer_list>
 #include <iostream>
 
 namespace ibex {
@@ -62,6 +63,12 @@ public:
 	 */
 	IntervalMatrix(int m, int n, double x[][2]);
 
+	/**
+	 * Create a matrix from a list of Vector.
+	 *
+	 * \pre list.size() > 0, all Vectors of list must be of the same size.
+	 */
+	IntervalMatrix(std::initializer_list<IntervalVector> list);
 	/**
 	 * \brief Delete *this.
 	 */
