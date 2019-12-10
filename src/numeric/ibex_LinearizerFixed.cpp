@@ -15,9 +15,9 @@ namespace ibex {
 LinearizerFixed::LinearizerFixed(const Matrix& A, const Vector& b) : Linearizer(A.nb_cols()), A(A), b(b) { }
 
 int LinearizerFixed::linearize(const IntervalVector& box, LPSolver& lp_solver)  {
-	int start = lp_solver.rows_count();
+	int start = lp_solver.nb_rows();
 	lp_solver.add_constraints(A,LEQ,b);
-	return lp_solver.rows_count() - start;
+	return lp_solver.nb_rows() - start;
 }
 
 

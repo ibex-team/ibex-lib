@@ -16,7 +16,7 @@ namespace ibex {
 
 //TODO: remove this recipe for the argument of the max number of iterations of the LP solver
 LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT,LinearizerXTaylor::RANDOM), lp_solver(sys.nb_var) {
-	lp_solver.set_max_iter(std::min(sys.nb_var*3, LPSolver::default_max_iter));
+	lp_solver.set_max_iter(std::min(sys.nb_var*3, int(LPSolver::default_max_iter)));
 //	nb_simplex=0;
 //	diam_simplex=0;
 }
@@ -53,14 +53,11 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 		lp_solver.clear_constraints();
 		throw NotFound();
 	}
-
 	LPSolver::Status stat = lp_solver.optimize();
 
 	if (stat == LPSolver::Status::Optimal) {
 		//the linear solution is mapped to intervals and evaluated
 		Vector loup_point = lp_solver.uncertified_primal_sol();
-
-		//std::cout << " simplex result " << prim[0] << " " << loup_point << std::endl;
 
 		// we allow finding a loup outside of the current box, but
 		// not outside of the system box.
