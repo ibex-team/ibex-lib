@@ -67,7 +67,7 @@ LPSolver TestLinearSolver::create_kleemin(int n) {
 void TestLinearSolver::kleemin( int n) {
 	LPSolver lp(create_kleemin(n));
 
-	LPSolver::Status res = lp.optimize();
+	LPSolver::Status res = lp.optimize_proved();
 	CPPUNIT_ASSERT(res==LPSolver::Status::OptimalProved);
 	double eps = lp.tolerance();
 	lp.write_to_file("coucou" + std::to_string(n) + ".lp");
@@ -103,7 +103,7 @@ void TestLinearSolver::kleemin30() {
 	}
 	LPSolver::Status res;
 	CPPUNIT_ASSERT_ASSERTION_PASS(
-	 res = lp.optimize()
+	 res = lp.optimize_proved()
 	);
 
 	CPPUNIT_ASSERT(res!=LPSolver::Status::InfeasibleProved);
@@ -153,7 +153,7 @@ void TestLinearSolver::add_column() {
 
 
 	LPSolver lp(create_kleemin(8));
-	Vector v(lp.rows_count());
+	Vector v(lp.nb_rows());
 	lp.add_column(1, v, Interval(-1, 1));
 	int n = lp.get_nb_vars();
 	lp.set_bounds_var(n-1, Interval(-2, 2));

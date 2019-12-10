@@ -77,7 +77,7 @@ LSmear::~LSmear() {
 
 		if (stat == LPSolver::Status::Optimal) {
 		  // the dual solution : used to compute the bound
-		  Vector dual_solution(mylinearsolver->rows_count());  //
+		  Vector dual_solution(mylinearsolver->nb_rows());  //
 		  dual_solution = mylinearsolver->uncertified_dual_sol();
 
 		  int k=0; //number of multipliers != 0
@@ -145,7 +145,7 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 
 			lsmear*=(box[j].diam());
 
-			if (lsmear.mag() > 1e-10  && (j!=goal_var() || mylinearsolver->uncertified_obj().mid() > box[goal_var()].lb() )) {
+			if (lsmear.mag() > 1e-10  && (j!=goal_var() || mylinearsolver->uncertified_minimum().mid() > box[goal_var()].lb() )) {
 				k++;
 				if (lsmear.mag() > max_Lmagn) {
 					max_Lmagn = lsmear.mag();

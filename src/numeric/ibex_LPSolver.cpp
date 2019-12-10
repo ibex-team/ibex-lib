@@ -45,14 +45,12 @@ std::ostream& operator<<(std::ostream& os, const LPSolver::Status x){
 bool LPSolver::neumaier_shcherbina_postprocessing() {
     Matrix A_trans = rows_transposed();
     IntervalVector b = lhs_rhs();
-
     IntervalVector rest = A_trans*uncertified_dual_;
-    if(sense_ == LPSolver::Sense::Minimize) {
-        rest -= obj_vec();
-    } else {
-        rest += obj_vec();
-    }
-    certified_obj_ = new Interval(uncertified_dual_*b - rest*ivec_bounds_);
+	rest -= obj_vec();
+	Interval certified_obj_raw = uncertified_dual_*b - rest*ivec_bounds_;
+	//certified_obj_ = Interval(certified_obj_raw.lb(), uncertified_obj_.ub());
+    certified_obj_ = uncertified_dual_*b - rest*ivec_bounds_;
+	has_certified_obj_ = true;
 	return true;
 }
 
@@ -60,6 +58,8 @@ bool LPSolver::neumaier_shcherbina_infeasibility_test() {
     ibex::Matrix A_trans = rows_transposed();
     IntervalVector b = lhs_rhs();
     Vector lambda(1);
+	// It is possible that the solver does not find an infeasible direction
+	// even when the problem is infeasible.
     bool infeasible_dir_found = uncertified_infeasible_dir(lambda);
     if(!infeasible_dir_found) {
         return false;
@@ -77,8 +77,12 @@ bool LPSolver::neumaier_shcherbina_infeasibility_test() {
 void LPSolver::invalidate() {
     status_ = LPSolver::Status::Unknown;
     has_solution_ = false;
-    delete uncertified_infeasible_dir_;
-    delete certified_obj_;
+    has_infeasible_dir_ = false;
+	has_certified_obj_ = false;
+}
+
+LPSolver::Status LPSolver::optimize_proved() {
+	return optimize(LPSolver::PostProcessing::NeumaierShcherbina);
 }
 
 }  // end namespace ibex
