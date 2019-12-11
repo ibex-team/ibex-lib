@@ -98,6 +98,13 @@ public:
      */
     LPSolver(int nb_vars=0, double tolerance=default_tolerance,
         double timeout=default_timeout, int max_iter=default_max_iter);
+
+
+    /**
+     * \brief Read a model file
+     */
+    LPSolver(std::string filename);
+
     ~LPSolver();
 
     /*
@@ -115,6 +122,7 @@ public:
      * \brief Add a constraint of the type row.x op rhs, where op is <= or >=.
      */
     int add_constraint(const Vector& row, CmpOp op, double rhs);
+    __attribute__((visibility("default")))
     void add_constraints(const Vector& lhs, const Matrix& rows, const Vector& rhs);
     void add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs);
 
@@ -235,7 +243,7 @@ public:
     void reset_with_new_vars(int nb_vars);
 
 private:
-    LPSolver::Status status_;
+    LPSolver::Status status_{LPSolver::Status::Unknown};
 
     // LP solution is cached
     bool has_solution_ = false;
@@ -248,22 +256,20 @@ private:
     bool has_certified_obj_ = false;
     Interval certified_obj_;
 
+    bool has_changed = true;
+
     // Bounds on variable in ibex::IntervalVector format.
     IntervalVector ivec_bounds_{1};
 
+    void init(double tolerance, double timeout, int max_iter);
     bool neumaier_shcherbina_postprocessing();
     bool neumaier_shcherbina_infeasibility_test();
     bool uncertified_infeasible_dir(Vector& infeasible_dir) const;
 
     void invalidate();
 
-    //void add_bound_constraint(int var, const Interval& bounds);
-
     /* This is a macro that should be defined in ibex_LPLibWrapper.h */
 	IBEX_LPSOLVER_WRAPPER_ATTRIBUTES;
-
-    //std::vector<int> bounds_ctrs_;
-
 };
 
 /** \brief Stream out \a x. */

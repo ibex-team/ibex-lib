@@ -19,24 +19,24 @@ ibex::Vector dsvec2ivec(const soplex::DSVectorReal& dsvec, int size) {
 }
 
 soplex::DVectorReal ivec2dvec(const ibex::Vector& ivec) {
-    soplex::DVectorReal dvec(ivec.size());
+    /*soplex::DVectorReal dvec(ivec.size());
     for(int i = 0; i < ivec.size(); ++i) {
         dvec[i] = ivec[i];
     }
-    return dvec;
-    //ibex::Vector ivec_copy(ivec);
-    //return soplex::DVectorReal(soplex::VectorReal(ivec.size(), ivec_copy.raw()));
+    return dvec;*/
+    ibex::Vector ivec_copy(ivec);
+    return soplex::DVectorReal(soplex::VectorReal(ivec.size(), ivec_copy.raw()));
 }
 
 ibex::Vector dvec2ivec(const soplex::DVectorReal& dvec) {
-    ibex::Vector ivec(dvec.dim());
+    /*ibex::Vector ivec(dvec.dim());
     for(int i = 0 ; i < ivec.size(); ++i) {
         ivec[i] = dvec[i];
     }
-    return ivec;
-    //double copy[dvec.dim()];
-    //std::copy(dvec.get_const_ptr(), dvec.get_const_ptr()+dvec.dim(), copy);
-    //return ibex::Vector(dvec.dim(), copy);
+    return ivec;*/
+    double copy[dvec.dim()];
+    std::copy(dvec.get_const_ptr(), dvec.get_const_ptr()+dvec.dim(), copy);
+    return ibex::Vector(dvec.dim(), copy);
 }
 
 /*ibex::Vector rawvec2ivec(const soplex::VectorReal& dvec) {
@@ -69,36 +69,40 @@ namespace ibex {
 using namespace soplex;
 
 LPSolver::LPSolver(int nb_vars, double tolerance,
-        double timeout, int max_iter) : status_(LPSolver::Status::Unknown)
+        double timeout, int max_iter)
 {
     assert(nb_vars > 0);
-    mysoplex = new soplex::SoPlex();
-	mysoplex->setIntParam(SoPlex::VERBOSITY, SoPlex::VERBOSITY_ERROR);
+    init(tolerance, timeout, max_iter);
 
-	mysoplex->setIntParam(SoPlex::ITERLIMIT, max_iter);
-	mysoplex->setRealParam(SoPlex::TIMELIMIT, timeout);
-	mysoplex->setRealParam(SoPlex::FEASTOL, tolerance);
-	mysoplex->setRealParam(SoPlex::OPTTOL, tolerance);
-	mysoplex->setIntParam(SoPlex::SOLVEMODE, SoPlex::SOLVEMODE_REAL);
 
     reset_with_new_vars(nb_vars);
-    // First variable
-    /*DSVectorReal dscol(0);
-    mysoplex->addColReal(LPColReal(0, dscol, soplex::infinity, -soplex::infinity));
-    ivec_bounds_.resize(1);
-    ivec_bounds_[0] = Interval::ALL_REALS;*/
+}
 
-    // Add bound constraint to the LP
-    //bounds_ctrs_.emplace_back(-1);
-    //add_bound_constraint(0, Interval::ALL_REALS);
-
-    /*if(nb_vars > 1) {
-        add_variables(IntervalVector(nb_vars-1, Interval::ALL_REALS), Vector(nb_vars-1, 0.0));
-    }*/
+LPSolver::LPSolver(std::string filename) {
+    init(LPSolver::default_tolerance, LPSolver::default_timeout, LPSolver::default_max_iter);
+    mysoplex->setIntParam(SoPlex::READMODE, SoPlex::READMODE_REAL);
+    bool result = mysoplex->readFile(filename.c_str());
+    if(!result) {
+        throw LPException();
+    }
+    ivec_bounds_ = IntervalVector(nb_vars());
+    for(int i = 0; i < ivec_bounds_.size(); ++i) {
+        ivec_bounds_[i] = Interval(mysoplex->lowerReal(i), mysoplex->upperReal(i));
+    }
 }
 
 LPSolver::~LPSolver() {
     delete mysoplex;
+}
+
+void LPSolver::init(double tolerance, double timeout, int max_iter) {
+    mysoplex = new soplex::SoPlex();
+    mysoplex->setIntParam(SoPlex::VERBOSITY, SoPlex::VERBOSITY_ERROR);
+    mysoplex->setIntParam(SoPlex::ITERLIMIT, max_iter);
+	mysoplex->setRealParam(SoPlex::TIMELIMIT, timeout);
+	mysoplex->setRealParam(SoPlex::FEASTOL, tolerance);
+	mysoplex->setRealParam(SoPlex::OPTTOL, tolerance);
+	mysoplex->setIntParam(SoPlex::SOLVEMODE, SoPlex::SOLVEMODE_REAL);
 }
 
 /*void LPSolver::add_variable(const Interval& bounds, double obj) {
@@ -135,12 +139,16 @@ void LPSolver::add_variables(const Matrix& cols, const IntervalVector& bounds, c
 
 int LPSolver::add_constraint(double lhs, const Vector& row, double rhs) {
     assert(row.size() == nb_vars());
+
+    has_changed = true;
     mysoplex->addRowReal(LPRowReal(lhs, ivec2dsvec(row), rhs));
     return nb_rows()-1;
 }
 
 int LPSolver::add_constraint(const Vector& row, CmpOp op, double rhs) {
     assert(row.size() == nb_vars());
+
+    has_changed = true;
     using Type = soplex::LPRowReal::Type;
     Type type = cmpop2type(op);
     DSVectorReal dsrow = ivec2dsvec(row);
@@ -154,13 +162,13 @@ int LPSolver::add_constraint(const Vector& row, CmpOp op, double rhs) {
     dsrow.add(var, 1);
     mysoplex->addRowReal(LPRowReal(bounds.lb(), dsrow, bounds.ub()));
     bounds_ctrs_[var] = nb_rows()-1;
-}
+}*/
 
 void LPSolver::add_constraints(const Vector& lhs, const Matrix& rows, const Vector& rhs) {
     for(int i = 0; i < lhs.size(); ++i) {
         add_constraint(lhs[i], rows.row(i), rhs[i]);
     }
-}*/
+}
 
 void LPSolver::add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs) {
     for(int i = 0; i < rhs.size(); ++i) {
@@ -182,12 +190,6 @@ LPSolver::Status LPSolver::optimize(PostProcessing pp) {
             uncertified_obj_ = mysoplex->objValueReal();
 
             uncertified_dual_ = dvec2ivec(dvec_dual);
-            /*for (int i=0; i<nb_rows(); i++) {
-				if 	( ((mysoplex->rhsReal(i) >=  default_max_bound) && (uncertified_dual_[i]<=0)) ||
-						((mysoplex->lhsReal(i) <= -default_max_bound) && (uncertified_dual_[i]>=0))   ) {
-					uncertified_dual_[i]=0;
-				}
-			}*/
             uncertified_primal_ = dvec2ivec(dvec_primal);
             has_solution_ = true;
             if(pp == PostProcessing::NeumaierShcherbina) {
@@ -235,16 +237,19 @@ LPSolver::Status LPSolver::optimize(PostProcessing pp) {
 
 void LPSolver::set_obj(const Vector& obj) {
     assert(obj.size() == nb_vars());
+    has_changed = true;
     mysoplex->changeObjReal(ivec2dvec(obj));
 }
 
 void LPSolver::set_var_obj(int index, double value) {
     assert(index >= 0 && index < nb_vars());
+    has_changed = true;
     mysoplex->changeObjReal(index, value);
 }
 
 void LPSolver::set_bounds(const IntervalVector& bounds) {
     assert(bounds.size() == nb_vars());
+    has_changed = true;
     // The bounds have to be changed in 3 places: ivec_bounds_,
     // in soplex variable bounds, and in bounds constraints.
     ivec_bounds_ = bounds;
@@ -257,21 +262,25 @@ void LPSolver::set_bounds(const IntervalVector& bounds) {
 
 void LPSolver::set_var_bounds(int var, const Interval& bounds) {
     assert(var >= 0 && var < nb_vars());
+    has_changed = true;
     ivec_bounds_[var] = bounds;
     mysoplex->changeBoundsReal(var, bounds.lb(), bounds.ub());
     mysoplex->changeRangeReal(var, bounds.lb(), bounds.ub());
 }
 
 void LPSolver::set_tolerance(double tolerance) {
+    has_changed = true;
 	mysoplex->setRealParam(SoPlex::FEASTOL, tolerance);
 	mysoplex->setRealParam(SoPlex::OPTTOL, tolerance);
 }
 
 void LPSolver::set_timeout(double timeout) {
+    has_changed = true;
     mysoplex->setRealParam(SoPlex::TIMELIMIT, timeout);
 }
 
 void LPSolver::set_max_iter(int max_iter) {
+    has_changed = true;
 	mysoplex->setIntParam(SoPlex::ITERLIMIT, max_iter);
 }
 
@@ -425,10 +434,6 @@ void LPSolver::clear_obj() {
 
 void LPSolver::clear_constraints() {
     mysoplex->removeRowRangeReal(nb_vars(), nb_rows()-1);
-    /*const int n = nb_vars();
-    for(int i = 0; i < n; ++i) {
-        add_bound_constraint(i, ivec_bounds_[i]);
-    }*/
 }
 
 void LPSolver::clear_bounds() {
