@@ -117,6 +117,7 @@ void TestLinearSolver::kleemin30() {
 	);
 	switch (res) {
 		case (LPSolver::Status::Infeasible):
+		case (LPSolver::Status::Unbounded):
 		case (LPSolver::Status::Unknown): {
 			CPPUNIT_ASSERT_THROW(
 			Vector dualsol = lp.uncertified_dual_sol(),
