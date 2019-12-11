@@ -122,7 +122,10 @@ public:
      * \brief Add a constraint of the type row.x op rhs, where op is <= or >=.
      */
     int add_constraint(const Vector& row, CmpOp op, double rhs);
-    __attribute__((visibility("default")))
+
+    /**
+     * \brief Add multiple constraints.
+     */
     void add_constraints(const Vector& lhs, const Matrix& rows, const Vector& rhs);
     void add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs);
 
