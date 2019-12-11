@@ -147,26 +147,55 @@ void TestLinearSolver::kleemin30() {
 	}
 }
 
-void TestLinearSolver::add_column() {
-/*	LPSolver lp_ref(create_kleemin(8));
-	LPSolver::Status res_ref = lp_ref.optimize();
-
-
+void TestLinearSolver::reset() {
 	LPSolver lp(create_kleemin(8));
-	Vector v(lp.nb_rows());
-	lp.add_column(1, v, Interval(-1, 1));
-	int n = lp.get_nb_vars();
-	lp.set_bounds_var(n-1, Interval(-2, 2));
-	LPSolver::Status res = lp.solve_proved();
-	CPPUNIT_ASSERT(res==LPSolver::Status::Optimal_PROVED);
+	int n = 3;
+	lp.reset_with_new_vars(n);
 
-	//lp.write_file("coucou.lp");
-	//lp_ref.write_file("coucou_ref.lp");
-	Vector primalsol = lp.get_primal_sol();
-	Vector primalsol_ref(n);
-	primalsol_ref.put(0, lp.get_primal_sol());
-	primalsol_ref[n-1] = primalsol[n-1];
-	CPPUNIT_ASSERT(primalsol_ref == primalsol);*/
+	// copy-past kleemin to
+	Vector v(n);
+
+	for (int j=1;j<=n;j++) {
+		v[j-1]= ::pow(10,n-j);
+	}
+	lp.set_obj(-v);
+
+	IntervalVector bound (n, Interval::pos_reals());
+	lp.set_bounds(bound);
+
+	for (int i=1;i<=n;i++) {
+		v=Vector::zeros(n);
+		for (int j=1;j<=i-1;j++) {
+			v[j-1]= 2*(::pow(10,i-j));
+		}
+		v[i-1] =1;
+		lp.add_constraint(v,LEQ, ::pow(10,i-1));
+	}
+
+	LPSolver::Status res = lp.optimize_proved();
+	CPPUNIT_ASSERT(res==LPSolver::Status::OptimalProved);
+	double eps = lp.tolerance();
+	lp.write_to_file("coucou" + std::to_string(n) + ".lp");
+
+	Vector dualsol = lp.uncertified_dual_sol();
+	Vector primalsol = lp.uncertified_primal_sol();
+	Vector vrai(n);
+	vrai[n-1] = ::pow(10,n-1);
+	check_relatif(vrai,primalsol,1.e-9);
 }
+
+void TestLinearSolver::test_known_problem(std::string filename, double optimal) {
+	LPSolver lp_ref(filename);
+
+	LPSolver lp(lp_ref.nb_vars());
+	lp.add_constraints(lp_ref.lhs(), lp_ref.rows(), lp_ref.rhs());
+	lp.set_bounds(lp_ref.bounds());
+	lp.set_obj(lp_ref.obj_vec());
+	lp.set_tolerance(1e-9);
+	lp.optimize();
+	double obj = lp.uncertified_minimum().lb();
+	check_relatif(obj, optimal, 1e-9);
+}
+
 
 } // end namespace

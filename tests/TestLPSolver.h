@@ -30,7 +30,9 @@ public:
 	CPPUNIT_TEST(kleemin6);
 	CPPUNIT_TEST(kleemin8);
 	CPPUNIT_TEST(kleemin30);
-	CPPUNIT_TEST(add_column);
+	CPPUNIT_TEST(reset);
+	CPPUNIT_TEST(afiro);
+	CPPUNIT_TEST(adlittle);
 #endif
 
 	CPPUNIT_TEST_SUITE_END();
@@ -42,8 +44,12 @@ public:
 	void kleemin6() {kleemin(6);};
 	void kleemin8() {kleemin(8);};
 	void kleemin30();
+	void reset();
 
-	void add_column();
+	void test_known_problem(std::string filename, double optimal);
+	void afiro() { test_known_problem("../../tests/lp-test-problems/afiro.mps",  -4.6475314286E+02);};
+	void adlittle() { test_known_problem("../../tests/lp-test-problems/adlittle.mps", 2.2549496316E+05);};
+
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestLinearSolver);
