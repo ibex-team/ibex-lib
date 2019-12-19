@@ -187,16 +187,28 @@ void TestLinearSolver::reset() {
 
 void TestLinearSolver::test_known_problem(std::string filename, double optimal) {
 	LPSolver lp_ref(filename);
-
 	LPSolver lp(lp_ref.nb_vars());
+	double scaling=1e3;
 	lp.add_constraints(lp_ref.lhs(), lp_ref.rows(), lp_ref.rhs());
 	lp.set_bounds(lp_ref.bounds());
-	lp.set_obj(lp_ref.obj_vec());
+	lp.set_obj(scaling*lp_ref.obj_vec());
 	lp.set_tolerance(1e-9);
+	lp.set_max_iter(-1);
 	lp.optimize();
+	CPPUNIT_ASSERT(lp.status() == LPSolver::Status::Optimal);
+	lp.optimize_proved();
+	CPPUNIT_ASSERT(lp.status() == LPSolver::Status::OptimalProved);
 	double obj = lp.uncertified_minimum().lb();
-	check_relatif(obj, optimal, 1e-9);
+	check_relatif(obj, scaling*optimal, 1e-9);
 }
 
+/*
+ * x <= 0
+ * y >= 0
+ * y <= a x + eps
+ * a: 1 -> 0
+ * critere: tester cycling, scaling
+ * c = x - beta y + beta
+ * beta: 0 -> 1/alpha
 
 } // end namespace

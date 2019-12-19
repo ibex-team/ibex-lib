@@ -68,7 +68,7 @@ public:
      * additional certification step has numerically certified that an optimal value has indeed been found,
      * - Infeasible: the problem is infeasible,
      * - InfeasibleProved: the problem has been numerically proved to be infeasible,
-     * - Unbounded: the problem is unbounded,
+     * - Unbounded: the problem is unbounded (not proved),
      * - Timeout: abort due to timeout,
      * - MaxIter: abort due to maximum number of iterations reached,
      * - Unknown: the solver is in an unexpected state.
@@ -96,6 +96,7 @@ public:
      * \param timeout maximum solving time
      * \param max_iter maximum number of iterations
      */
+     // TODO Determiner à la création si certifié ou pas
     LPSolver(int nb_vars=0, double tolerance=default_tolerance,
         double timeout=default_timeout, int max_iter=default_max_iter);
 
@@ -129,6 +130,14 @@ public:
     void add_constraints(const Vector& lhs, const Matrix& rows, const Vector& rhs);
     void add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs);
 
+    // minimize()
+    /*
+     * Solve the LP with the current set of constraints,
+     * the current objective and bounds.
+     * The LP can be modified between two calls to optimze(...)
+     * The same instance of the underlying LP solver is updated.
+     *
+     */
     Status optimize(PostProcessing pp = PostProcessing::None);
     Status optimize_proved();
 
@@ -136,7 +145,7 @@ public:
      * \brief Set the objective function vector.
      */
     void set_obj(const Vector& obj);
-    // set_obj(int index,...)
+    // TODO set_obj(int index,...)
     /**
      * \brief Set the objective function coefficient for a variable.
      *
@@ -149,7 +158,7 @@ public:
      * \brief Set the bounds of the of the variable
      */
     void set_bounds(const IntervalVector& bounds);
-    // set_bounds(int index,...)
+    // TODO set_bounds(int index,...)
     /**
      * \brief Set the bounds on a variable
      */
@@ -188,6 +197,7 @@ public:
     /**
      * \brief Wether the system has a solution stored.
      */
+     //TODO is_feasible
     bool has_solution() const;
     // TODO relancer automatiquement le solveur
     /**
@@ -212,7 +222,7 @@ public:
     Vector uncertified_dual_sol() const ;
 
     // A voir
-    bool is_inner_point(const Vector& point) const;
+    bool is_point_feasible(const Vector& point) const;
 
     /**
      * \brief Write the linear problem to a file.
@@ -227,11 +237,13 @@ public:
     /**
      * \brief Reset the objective to zero for all variables.
      */
+     // TODO set_obj_to_zero()
     void clear_obj();
     /**
      * \brief Remove all constraints, except bound constraints.
      */
     void clear_constraints();
+
     /**
      * \brief Set all variable bounds to ]-oo, +oo[.
      */
@@ -243,6 +255,7 @@ public:
      * Remove constraints, bounds, objective, and change the number of variables
      * to nb_vars.
      */
+     // TODO reset(int nb_vars)
     void reset_with_new_vars(int nb_vars);
 
 private:
