@@ -72,7 +72,7 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 	for (; j<nb_LP_var; j++)
 		lp_solver.set_var_obj(j,0);
 
-	LPSolver::Status stat = lp_solver.optimize();
+	LPSolver::Status stat = lp_solver.minimize();
 
 	if (stat == LPSolver::Status::Optimal) {
 		//the linear solution is mapped to intervals and evaluated

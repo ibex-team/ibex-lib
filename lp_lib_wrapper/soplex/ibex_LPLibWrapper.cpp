@@ -68,18 +68,18 @@ namespace ibex {
 
 using namespace soplex;
 
-LPSolver::LPSolver(int nb_vars, double tolerance,
+LPSolver::LPSolver(int nb_vars, LPSolver::Mode mode, double tolerance,
         double timeout, int max_iter)
 {
     assert(nb_vars > 0);
-    init(tolerance, timeout, max_iter);
+    init(mode, tolerance, timeout, max_iter);
 
 
-    reset_with_new_vars(nb_vars);
+    reset(nb_vars);
 }
 
 LPSolver::LPSolver(std::string filename) {
-    init(LPSolver::default_tolerance, LPSolver::default_timeout, LPSolver::default_max_iter);
+    init(LPSolver::Mode::NotCertified, LPSolver::default_tolerance, LPSolver::default_timeout, LPSolver::default_max_iter);
     mysoplex->setIntParam(SoPlex::READMODE, SoPlex::READMODE_REAL);
     bool result = mysoplex->readFile(filename.c_str());
     if(!result) {
@@ -95,8 +95,9 @@ LPSolver::~LPSolver() {
     delete mysoplex;
 }
 
-void LPSolver::init(double tolerance, double timeout, int max_iter) {
+void LPSolver::init(LPSolver::Mode mode, double tolerance, double timeout, int max_iter) {
     mysoplex = new soplex::SoPlex();
+    mode_ = mode;
     mysoplex->setIntParam(SoPlex::VERBOSITY, SoPlex::VERBOSITY_ERROR);
     mysoplex->setIntParam(SoPlex::ITERLIMIT, max_iter);
 	mysoplex->setRealParam(SoPlex::TIMELIMIT, timeout);
@@ -176,7 +177,7 @@ void LPSolver::add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs) 
     }
 }
 
-LPSolver::Status LPSolver::optimize(PostProcessing pp) {
+LPSolver::Status LPSolver::minimize() {
     invalidate();
     SPxSolver::Status soplex_status = mysoplex->solve();
     status_ = LPSolver::Status::Unknown;
@@ -187,12 +188,12 @@ LPSolver::Status LPSolver::optimize(PostProcessing pp) {
             DVectorReal dvec_dual(nb_rows());
             mysoplex->getPrimalReal(dvec_primal);
             mysoplex->getDualReal(dvec_dual);
-            uncertified_obj_ = mysoplex->objValueReal();
+            obj_ = mysoplex->objValueReal();
 
             uncertified_dual_ = dvec2ivec(dvec_dual);
             uncertified_primal_ = dvec2ivec(dvec_primal);
             has_solution_ = true;
-            if(pp == PostProcessing::NeumaierShcherbina) {
+            if(mode_ == LPSolver::Mode::Certified) {
                 // Neumaier Shcherbina cannot fail
                 neumaier_shcherbina_postprocessing();
                 status_ = LPSolver::Status::OptimalProved;
@@ -216,7 +217,7 @@ LPSolver::Status LPSolver::optimize(PostProcessing pp) {
                 uncertified_infeasible_dir_ = dvec2ivec(dual_farkas);
                 has_infeasible_dir_ = true;
             }
-            if(pp == PostProcessing::NeumaierShcherbina) {
+            if(mode_ == LPSolver::Mode::Certified) {
                 bool infeasible_proved = neumaier_shcherbina_infeasibility_test();
                 if(infeasible_proved) {
                     status_ = LPSolver::Status::InfeasibleProved;
@@ -382,18 +383,11 @@ Vector LPSolver::var_obj(int index) const {
     return mysoplex->objReal(index);
 }
 
-Interval LPSolver::certified_minimum() const {
-    if(!has_certified_obj_) {
-        throw LPException();
-    }
-    return certified_obj_;
-}
-
-Interval LPSolver::uncertified_minimum() const {
+Interval LPSolver::minimum() const {
     if(!has_solution_) {
         throw LPException();
     }
-    return uncertified_obj_;
+    return obj_;
 }
 
 Vector LPSolver::uncertified_primal_sol() const {
@@ -417,7 +411,7 @@ bool LPSolver::uncertified_infeasible_dir(Vector& infeasible_dir) const {
     return false;
 }
 
-bool LPSolver::is_inner_point(const Vector& point) const {
+bool LPSolver::is_feasible_point(const Vector& point) const {
     not_implemented("Not implemented");
 }
 
@@ -426,7 +420,7 @@ void LPSolver::write_to_file(const std::string& filename) const {
 }
 
 // Clear functions
-void LPSolver::clear_obj() {
+void LPSolver::set_obj_to_zero() {
     DVectorReal new_obj(nb_vars());
     new_obj.clear();
     mysoplex->changeObjReal(new_obj);
@@ -441,7 +435,7 @@ void LPSolver::clear_bounds() {
     set_bounds(new_bounds);
 }
 
-void LPSolver::reset_with_new_vars(int nb_vars) {
+void LPSolver::reset(int nb_vars) {
     assert(nb_vars > 0);
     invalidate();
     mysoplex->clearLPReal();
