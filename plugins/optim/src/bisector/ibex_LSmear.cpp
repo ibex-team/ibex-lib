@@ -73,7 +73,7 @@ LSmear::~LSmear() {
 	try {
 		mylinearsolver->set_var_obj(_goal_var, (minimize)? 1.0:-1.0);
 
-		stat = mylinearsolver->optimize();
+		stat = mylinearsolver->minimize();
 
 		if (stat == LPSolver::Status::Optimal) {
 		  // the dual solution : used to compute the bound
@@ -145,7 +145,7 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 
 			lsmear*=(box[j].diam());
 
-			if (lsmear.mag() > 1e-10  && (j!=goal_var() || mylinearsolver->uncertified_minimum().mid() > box[goal_var()].lb() )) {
+			if (lsmear.mag() > 1e-10  && (j!=goal_var() || mylinearsolver->minimum().mid() > box[goal_var()].lb() )) {
 				k++;
 				if (lsmear.mag() > max_Lmagn) {
 					max_Lmagn = lsmear.mag();

@@ -27,7 +27,7 @@ class PolytopeHullEmptyBoxException { };
 CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(lr.nb_var()), lr(lr),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
-		mylinearsolver(nb_var, eps, time_out, max_iter),
+		mylinearsolver(nb_var, LPSolver::Mode::Certified, eps, time_out, max_iter),
 		contracted_vars(BitSet::all(nb_var)), own_lr(false), primal_sols(2*nb_var, nb_var),
 		primal_sol_found(2*nb_var) {
 
@@ -36,7 +36,7 @@ CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, dou
 CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(A.nb_cols()), lr(*new LinearizerFixed(A,b)),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
-		mylinearsolver(nb_var, eps, time_out, max_iter),
+		mylinearsolver(nb_var, LPSolver::Mode::Certified, eps, time_out, max_iter),
 		contracted_vars(BitSet::all(nb_var)), own_lr(true), primal_sols(2*nb_var, nb_var),
 		primal_sol_found(2*nb_var) {
 
@@ -130,11 +130,11 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		{
 			inf_bound[i]=1;
 			mylinearsolver.set_var_obj(i, 1.0);
-			stat = mylinearsolver.optimize_proved();
+			stat = mylinearsolver.minimize();
 			mylinearsolver.set_var_obj(i, 0.0);
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat << endl;
 			if (stat == LPSolver::Status::OptimalProved) {
-				opt = mylinearsolver.certified_minimum();
+				opt = mylinearsolver.minimum();
 				//std::cout << "opt=" << opt << endl;
 				if(opt.lb()>box[i].ub()) {
 					delete[] inf_bound;
@@ -184,11 +184,11 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
 			mylinearsolver.set_var_obj(i, -1.0);
-			stat= mylinearsolver.optimize_proved();
+			stat= mylinearsolver.minimize();
 			mylinearsolver.set_var_obj(i, 0.0);
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << endl;
 			if( stat == LPSolver::Status::OptimalProved) {
-				opt = -mylinearsolver.certified_minimum();
+				opt = -mylinearsolver.minimum();
 				//std::cout << "opt=" << opt << endl;
 				if(opt.ub() <box[i].lb()) {
 					delete[] inf_bound;

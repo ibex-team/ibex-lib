@@ -27,7 +27,7 @@ namespace ibex {
  * The number of variables is fixed at the creation of the LP.
  * However, to avoid reinstantiating a new solver if the number of variables change,
  * which can be heavy depending on the underlying LP library,
- * you can use reset_with_new_vars(int) to construct a new LP problem with a different number of variables.
+ * you can use reset(int) to construct a new LP problem with a different number of variables.
  *
  * The solver provides a infeasibility certification and a objective value enclosure certification
  * using the Neumaier-Shcherbina procedure.
@@ -86,8 +86,9 @@ public:
      * This procedure is from
      * [Neumaier, A. & Shcherbina, O. Math. Program., Ser. A (2004) 99: 283](https://doi.org/10.1007/s10107-003-0433-3).
      */
-    enum class PostProcessing { None, NeumaierShcherbina };
+    //enum class PostProcessing { None, NeumaierShcherbina };
 
+    enum class Mode { Certified, NotCertified };
     /**
      * \brief Build a LPSolver with nb_vars variables.
      *
@@ -96,8 +97,7 @@ public:
      * \param timeout maximum solving time
      * \param max_iter maximum number of iterations
      */
-     // TODO Determiner à la création si certifié ou pas
-    LPSolver(int nb_vars=0, double tolerance=default_tolerance,
+    LPSolver(int nb_vars, LPSolver::Mode mode=LPSolver::Mode::NotCertified, double tolerance=default_tolerance,
         double timeout=default_timeout, int max_iter=default_max_iter);
 
 
@@ -138,8 +138,7 @@ public:
      * The same instance of the underlying LP solver is updated.
      *
      */
-    Status optimize(PostProcessing pp = PostProcessing::None);
-    Status optimize_proved();
+    Status minimize();
 
     /**
      * \brief Set the objective function vector.
@@ -195,22 +194,18 @@ public:
     Vector var_obj(int index) const;
 
     /**
-     * \brief Wether the system has a solution stored.
+     * \brief Wether the last call to minimize() found a feasible point.
      */
-     //TODO is_feasible
-    bool has_solution() const;
+    bool is_feasible() const;
     // TODO relancer automatiquement le solveur
     /**
-     * \brief Return a certified enclosure for the minimum.
+     * \brief Return an enclosure for the minimum.
+     *
+     * The enclosure is certified or not depending one the mode defined
+     * in the LPSolver constructor.
      */
-    Interval certified_minimum() const;
-    // TODO relancer automatiquement le solveur
-    /**
-     * \brief Return an uncertified enclosure for the minimum.
-     */
-    Interval uncertified_minimum() const;
+    Interval minimum() const;
 
-    // TODO relancer automatiquement le solveur
     /**
      * \brief Return an uncertified primal solution (a minimizer).
      */
@@ -222,7 +217,7 @@ public:
     Vector uncertified_dual_sol() const ;
 
     // A voir
-    bool is_point_feasible(const Vector& point) const;
+    bool is_feasible_point(const Vector& point) const;
 
     /**
      * \brief Write the linear problem to a file.
@@ -237,8 +232,7 @@ public:
     /**
      * \brief Reset the objective to zero for all variables.
      */
-     // TODO set_obj_to_zero()
-    void clear_obj();
+    void set_obj_to_zero();
     /**
      * \brief Remove all constraints, except bound constraints.
      */
@@ -255,29 +249,26 @@ public:
      * Remove constraints, bounds, objective, and change the number of variables
      * to nb_vars.
      */
-     // TODO reset(int nb_vars)
-    void reset_with_new_vars(int nb_vars);
+    void reset(int nb_vars);
 
 private:
     LPSolver::Status status_{LPSolver::Status::Unknown};
-
+    LPSolver::Mode mode_;
     // LP solution is cached
     bool has_solution_ = false;
     Vector uncertified_primal_{1};
     Vector uncertified_dual_{1};
-    Interval uncertified_obj_;
 
     bool has_infeasible_dir_ = false;
     Vector uncertified_infeasible_dir_{1};
-    bool has_certified_obj_ = false;
-    Interval certified_obj_;
+    Interval obj_;
 
     bool has_changed = true;
 
     // Bounds on variable in ibex::IntervalVector format.
     IntervalVector ivec_bounds_{1};
 
-    void init(double tolerance, double timeout, int max_iter);
+    void init(LPSolver::Mode mode, double tolerance, double timeout, int max_iter);
     bool neumaier_shcherbina_postprocessing();
     bool neumaier_shcherbina_infeasibility_test();
     bool uncertified_infeasible_dir(Vector& infeasible_dir) const;

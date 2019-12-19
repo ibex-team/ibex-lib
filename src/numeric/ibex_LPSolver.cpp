@@ -47,10 +47,9 @@ bool LPSolver::neumaier_shcherbina_postprocessing() {
     IntervalVector b = lhs_rhs();
     IntervalVector rest = A_trans*uncertified_dual_;
 	rest -= obj_vec();
-	Interval certified_obj_raw = uncertified_dual_*b - rest*ivec_bounds_;
+	//Interval certified_obj_raw = uncertified_dual_*b - rest*ivec_bounds_;
 	//certified_obj_ = Interval(certified_obj_raw.lb(), uncertified_obj_.ub());
-    certified_obj_ = uncertified_dual_*b - rest*ivec_bounds_;
-	has_certified_obj_ = true;
+    obj_ = uncertified_dual_*b - rest*ivec_bounds_;
 	return true;
 }
 
@@ -78,11 +77,6 @@ void LPSolver::invalidate() {
     status_ = LPSolver::Status::Unknown;
     has_solution_ = false;
     has_infeasible_dir_ = false;
-	has_certified_obj_ = false;
-}
-
-LPSolver::Status LPSolver::optimize_proved() {
-	return optimize(LPSolver::PostProcessing::NeumaierShcherbina);
 }
 
 }  // end namespace ibex

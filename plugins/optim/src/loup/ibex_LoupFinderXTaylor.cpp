@@ -53,7 +53,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 		lp_solver.clear_constraints();
 		throw NotFound();
 	}
-	LPSolver::Status stat = lp_solver.optimize();
+	LPSolver::Status stat = lp_solver.minimize();
 
 	if (stat == LPSolver::Status::Optimal) {
 		//the linear solution is mapped to intervals and evaluated
