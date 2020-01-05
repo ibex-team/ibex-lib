@@ -22,8 +22,8 @@ def options (opt):
 	# -> will use gcc by default
 	import waflib.Tools.compiler_c
 	import waflib.Tools.compiler_cxx
-	waflib.Tools.compiler_c.c_compiler["win32"].remove ("msvc")
-	waflib.Tools.compiler_cxx.cxx_compiler["win32"].remove ("msvc")
+	waflib.Tools.compiler_c.c_compiler["win32"]= ["g++"]
+	waflib.Tools.compiler_cxx.cxx_compiler["win32"]= ["g++"]
 
 	opt.load ("compiler_cxx compiler_c javaw")
 	opt.load ("waf_benchmarks", tooldir='.')

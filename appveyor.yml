@@ -1,8 +1,7 @@
 version: build{build}
 image: Visual Studio 2015
-
-platform:
-  - x64 
+configuration: Release
+platform: x64 
   
 environment:
   matrix:
@@ -11,25 +10,25 @@ environment:
 
 install:
   - cmd: echo %Platform%
-  - cmd: set MINGW-W64_BASE=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
-  - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;C:\msys64\usr\bin;%PATH%
+  - cmd: set MINGW-W64_BASE=c:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
+  - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;c:\msys64\usr\bin;%PATH%
   - cmd: uname -a
   - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-cppunit
-  - cmd: set CPATH=%CPATH%;C:\msys64\mingw32\include
-  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;C:\msys64\mingw32\lib
+  - cmd: set CPATH=%CPATH%;c:\msys64\mingw32\include
+  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;c:\msys64\mingw32\lib
   - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
 
 build_script:
-  - cmd: python -x %cd%\waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug --with-ampl
-  - cmd: python -x %cd%\waf build install clean
+  - cmd: python -x waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug --with-optim  --lp-lib=soplex --with-ampl
+  - cmd: python -x waf install clean
 
 test_script:
   - cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
   # We need to add the path to libcppunit in PATH
-  - cmd: set PATH=%PATH%;C:\msys64\mingw32\bin
-  - cmd: python -x %cd%\waf utest
+  - cmd: set PATH=%PATH%;c:\msys64\mingw32\bin
+  - cmd: python -x waf utest
 
 on_failure:
-  - cmd: cat %cd%\__build__\config.log
-  - cmd: cat %cd%\__build__\utest_config.log
-  - cmd: cat %cd%\__build__\utest_run.log
+  - cmd: cat __build__\config.log
+  - cmd: cat __build__\utest_config.log
+  - cmd: cat __build__\utest_run.log
