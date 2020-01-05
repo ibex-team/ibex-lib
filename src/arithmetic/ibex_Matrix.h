@@ -14,6 +14,7 @@
 
 #include "ibex_Vector.h"
 #include <iostream>
+#include <initializer_list>
 
 namespace ibex {
 
@@ -54,6 +55,13 @@ public:
 	 * \pre m>0, n>0
 	 */
 	Matrix(int m, int n, double x[]);
+
+	/**
+	 * Create a matrix from a list of Vector.
+	 *
+	 * \pre x.size() > 0, all Vectors of x must be of the same size.
+	 */
+	Matrix(std::initializer_list<Vector> x);
 
 	/**
 	 * \brief Delete *this.

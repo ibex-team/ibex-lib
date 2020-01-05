@@ -11,16 +11,20 @@ from waflib.Tools import ccroot
 def configure (conf):
 	conf.load ("javaw")
 	pathdir = os.path.dirname (conf.env.JAVAC[0])
-	conf.find_program ("javah", var = "JAVAH", path_list = pathdir)
+ 
 	conf.check_jni_headers()
 
 	# Define rule for compiling with javac
 	run_str = "${JAVAC} -cp ${CLASSPATH} -d ${OUTDIR} ${JAVACFLAGS} ${SRC}"
 	conf.env.JAVAC_RUN_STR = run_str
 
-	# Define rule for compiling with javah (${_CLASS} is computed from ${SRC})
-	conf.env.JAVAH_RUN_STR = "${JAVAH} -jni -cp ${CLASSPATH} -o ${TGT} ${_CLASS}"
-	
+	if os.path.exists(pathdir+"/bin/javah"): # valid for JDK<10
+		conf.find_program ("javah", var = "JAVAH", path_list = pathdir)
+		# Define rule for compiling with javah (${_CLASS} is computed from ${SRC})
+		conf.env.JAVAH_RUN_STR = "${JAVAH} -jni -cp ${CLASSPATH} -o ${TGT} ${_CLASS}"
+	else:
+		conf.env.JAVAH_RUN_STR = "${JAVAC} -cp ${CLASSPATH} ${SRC} -h ${TGT}"
+		
 	# Define rule for compiling with jar (${JAROPTS} is computed from ${SRC})
 	conf.env.JAR_RUN_STR = "${JAR} ${JARCREATE} ${TGT} ${JAROPTS}"
 	if not conf.env.JARCREATE:

@@ -5,7 +5,7 @@
 Installation (Release 2.8)
 ***************************
 
-
+.. _MacPorts: https://www.macports.org
 .. _Gaol: http://sourceforge.net/projects/gaol
 .. _Filib: http://www2.math.uni-wuppertal.de/~xsc/software/filib.html
 .. _Profil/Bias: http://www.ti3.tu-harburg.de/keil/profil/index_e.html
@@ -28,16 +28,20 @@ as of today is Filib (this will be changed in the future).
 Linux and MacOS
 ---------------
 
+If you are on MacOS and use the `MacPorts`_ package manager, you can install Ibex by simply executing::
+
+  sudo port install ibex-lib
+  
+Otherwise, you can install Ibex from source with the following instructions.
 The installation assumes your system meets some `requirements`_.
 
-Save the archive ``ibex-2.8.0.tar.gz`` in some ``Ibex`` folder and::
+Save the archive ``ibex-2.8.6.tar.gz`` in some ``Ibex`` folder and::
 
-  ~/Ibex/$ tar xvfz ibex-2.8.0.tar.gz 
-  ~/Ibex/$ cd ibex-2.8.0 
-  ~/Ibex/ibex-2.8.0/$ ./waf configure
-  ~/Ibex/ibex-2.8.0/$ sudo ./waf install
+  ~/Ibex/$ tar xvfz ibex-2.8.6.tar.gz 
+  ~/Ibex/$ cd ibex-2.8.6 
+  ~/Ibex/ibex-2.8.6/$ ./waf configure
+  ~/Ibex/ibex-2.8.6/$ sudo ./waf install
     
-
 
 -----------------
 Windows
@@ -68,19 +72,19 @@ Windows
 
   We will assume now that this folder is the root folder of ibex.
 
-- Save the archive ``ibex-2.8.0.tar.gz`` in ``C:\MinGW\msys\1.0\home\[user]\Ibex``
+- Save the archive ``ibex-2.8.6.tar.gz`` in ``C:\MinGW\msys\1.0\home\[user]\Ibex``
 - Configure Ibex (still in the shell of MinGW)::
 
   ~/Ibex/$ export PATH="$PATH:/c/Python27" 
-  ~/Ibex/$ tar xvfz ibex-2.8.0.tar.gz 
-  ~/Ibex/$ cd ibex-2.8.0 
-  ~/Ibex/ibex-2.8.0/$ ./waf configure --prefix=/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.8.0 
+  ~/Ibex/$ tar xvfz ibex-2.8.6.tar.gz 
+  ~/Ibex/$ cd ibex-2.8.6 
+  ~/Ibex/ibex-2.8.6/$ ./waf configure --prefix=/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.8.6 
   
   **Note:** the paths must be entered in Linux-style (don't use backslash ("\\") as separator).
   
 - Install Ibex::
 
-  ~/Ibex/ibex-2.8.0/$ ./waf install
+  ~/Ibex/ibex-2.8.6/$ ./waf install
 
 .. note:: 
 
@@ -116,10 +120,11 @@ Configuration options
 
 The full list of options supported by ``waf configure`` can be obtained with::
 
-	~/Ibex/ibex-2.8.0/$ ./waf --help
+	~/Ibex/ibex-2.8.6/$ ./waf --help
 	
 This will display the full list of installed interval/LP libraries and plugins with their specific options,
 as well as benchmarking features.
+See the current list of available plugins in the `download page of Ibex <http://www.ibex-lib.org/download>`_.
 
 In particular, ``waf`` ``configure`` supports the following options:
                     
@@ -135,11 +140,11 @@ In particular, ``waf`` ``configure`` supports the following options:
 
                         Under MinGW::
                         
-                        $ export PATH=$PATH:/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.8.0/lib
+                        $ export PATH=$PATH:/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.8.6/lib
                         
                         Under a Windows command window::
                         
-                        > set PATH=%PATH%;C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.8.0\lib;C:\MinGW\bin
+                        > set PATH=%PATH%;C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.8.6\lib;C:\MinGW\bin
                         
                         
 
@@ -168,10 +173,7 @@ In particular, ``waf`` ``configure`` supports the following options:
 --interval-lib=direct   Use non-rigorous interval arithmetic (essentially for embedded systems with specific processor architectures that
                         do not support rounding modes) (experimental: support not guaranteed)
 
---with-solver           Enable IbexSolver (the plugin is installed by default)
-
-
---with-optim            Enable IbexOpt (the plugin is installed by default)					
+--with-optim            Enable IbexOpt				
 
 
 --lp-lib=soplex         Install Ibex with the LP solver Soplex. The plugin archive contains a version of soplex so it is 
@@ -182,7 +184,7 @@ In particular, ``waf`` ``configure`` supports the following options:
                         If you install your own version of Soplex, use the following argument::
                         
                           make ZLIB=false
-                        
+	                        
                         
                         and if Ibex is installed as a dynamic library (``--enable-shared``), Soplex must also be installed as a 
                         dynamic library. For this, add the option SHARED=true to the previous command::
@@ -194,7 +196,7 @@ In particular, ``waf`` ``configure`` supports the following options:
                         
                         .. 	Warning::
                         
-                            The current release of Ibex is not compatible with Soplex 2.0.
+                            The current release of Ibex is compatible with Soplex 3.1.1
 
 
 --soplex-path=PATH      Set the (absolute) path of Soplex to PATH (to be used with ``--lp-lib=soplex``). The plugin archive contains 
@@ -203,11 +205,11 @@ In particular, ``waf`` ``configure`` supports the following options:
                     
                         If Ibex is compiled as a shared library, you must also add the libpath of Soplex in ``LD_LIBRARY_PATH``::
 						
-							~/Ibex/ibex-2.8.0/$ export LD_LIBRARY_PATH=[prefix]/lib/:[soplex-path]/lib/
+							~/Ibex/ibex-2.8.6/$ export LD_LIBRARY_PATH=[prefix]/lib/:[soplex-path]/lib/
 					
                         Under Windows, if you run a program from a command window, the ``PATH`` variable must also be updated::
 					
-							> set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.8.0
+							> set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.8.6
 							> set SOPLEX_PATH=...
 							> set PATH=%PATH%;%IBEX_PATH%\lib;%SOPLEX_PATH%\lib;C:\MinGW\bin
 					
@@ -222,6 +224,12 @@ In particular, ``waf`` ``configure`` supports the following options:
                         PATH is the absolute path where CLP is installed (don’t use relative path like ``--clp-path=../clp-xx``).       
                         If Ibex is compiled as a shared library, you must also add the libpath of CLP in ``LD_LIBRARY_PATH``.
                         
+
+--coinutils-path=PATH   Set the (absolute) path of CoinUtils to PATH (to be used with ``--lp-lib=clp`` and ``--clp-path``). The plugin archive contains 
+                        a version of CLP that includes CoinUtils so this option is not required.
+                        PATH is the absolute path where CoinUtils is installed (don’t use relative path like ``--coinutils-path=../coinutils-xx``).       
+                        If Ibex is compiled as a shared library, you must also add the libpath of CoinUtils in ``LD_LIBRARY_PATH``.
+
 
 --lp-lib=cplex          Install Ibex with the LP Solver CPLEX. The path of CPLEX must be provided with the ``--cplex-path`` option.
                         This option is **experimental**, i.e., support for installation issues may not be guaranteed. 
@@ -258,22 +266,22 @@ To install ``pkg-config`` under MinGW, follow the steps given `here <http://stac
 
 So, place the file ``foo.cpp`` in the ``examples/`` folder and::
 
-  ~/Ibex/ibex-2.8.0/$ cd examples 
-  ~/Ibex/ibex-2.8.0/examples$ make foo 
-  ~/Ibex/ibex-2.8.0/examples$ ./foo 
+  ~/Ibex/ibex-2.8.6/$ cd examples 
+  ~/Ibex/ibex-2.8.6/examples$ make foo 
+  ~/Ibex/ibex-2.8.6/examples$ ./foo 
   
 .. note::
    
    1. It may be necessary to set the ``PKG_CONFIG_PATH`` to *[prefix]*\ ``/share/pkgconfig`` where *[prefix]* is 
       ``/usr/local`` by default or whatever path specified via ``--prefix``::
 
-        ~/Ibex/ibex-2.8.0/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
+        ~/Ibex/ibex-2.8.6/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
 
 
 Under Windows, if you have compiled Ibex with ``--enable--shared`` you can run the program from a command window. 
 Just update the path to dynamically link against Ibex::
 
-	 > set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.8.0
+	 > set IBEX_PATH=C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.8.6
 	 > set PATH=%PATH%;%IBEX_PATH%\lib;C:\MinGW\bin
 	 > cd %IBEX_PATH%\examples
 	 > foo.exe
@@ -285,15 +293,15 @@ You can also run the whole unit tests suite with the **installed** version of Ib
 
 To this end, you must install first the `cppunit library <https://sourceforge.net/projects/cppunit/>`_. Then run::
 
-	~/Ibex/ibex-2.8.0/$ ./waf utest
+	~/Ibex/ibex-2.8.6/$ ./waf utest
 	
 Note also the following command::
 
-	~/Ibex/ibex-2.8.0/$ ./waf check
+	~/Ibex/ibex-2.8.6/$ ./waf check
 	
 as a handy shortcut for::
 
-	~/Ibex/ibex-2.8.0/$ ./waf build install clean utest
+	~/Ibex/ibex-2.8.6/$ ./waf build install clean utest
 
 
 =============
@@ -302,8 +310,8 @@ Uninstall
 
 Simply type in the path of IBEX (under the shell of MinGW for Windows)::
 
-  ~/Ibex/ibex-2.8.0$ sudo ./waf uninstall  
-  ~/Ibex/ibex-2.8.0$ ./waf distclean  
+  ~/Ibex/ibex-2.8.6$ sudo ./waf uninstall  
+  ~/Ibex/ibex-2.8.6$ ./waf distclean  
 
 **Note:** sudo is useless under MinGW or if Ibex is installed in a local folder.
 

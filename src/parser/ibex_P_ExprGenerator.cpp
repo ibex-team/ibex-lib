@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_P_ExprGenerator.h"
+#include "ibex_P_Struct.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_Exception.h"
 #include "ibex_Expr.h"
@@ -21,8 +22,6 @@ using namespace std;
 namespace ibex {
 
 namespace parser {
-
-extern stack<Scope>& scopes();
 
 class LabelNode : public Label {
 public:
@@ -117,7 +116,7 @@ int to_integer(const Domain& d) {
 	assert(d.dim.is_scalar());
 	assert(d.i().is_degenerated());
 	double x=d.i().mid();
-	assert(floor(x)==x);
+	assert(std::floor(x)==x);
 	return (int)x;
 }
 
@@ -133,7 +132,11 @@ double to_double(const Domain& d, bool round_downward) {
 	return round_downward? d.i().lb() : d.i().ub();
 }
 
-ExprGenerator::ExprGenerator() : scope(scopes().top()) {
+ExprGenerator::ExprGenerator() : scope(pstruct->scopes.top()) {
+
+}
+
+ExprGenerator::ExprGenerator(P_Scope& scope) : scope(scope) {
 
 }
 
@@ -286,6 +289,9 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::ACOSH:    e.lab=new LabelConst(acosh(arg_cst[0])); break;
 			case P_ExprNode::ASINH:    e.lab=new LabelConst(asinh(arg_cst[0])); break;
 			case P_ExprNode::ATANH:    e.lab=new LabelConst(atanh(arg_cst[0])); break;
+			case P_ExprNode::FLOOR:    e.lab=new LabelConst(floor(arg_cst[0])); break;
+			case P_ExprNode::CEIL:     e.lab=new LabelConst(ceil(arg_cst[0])); break;
+			case P_ExprNode::SAW:      e.lab=new LabelConst(saw(arg_cst[0])); break;
 			case P_ExprNode::DIFF:
 				throw SyntaxError("\"diff\" cannot be applied to constants"); break;
 			case P_ExprNode::INF:
@@ -361,6 +367,9 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::ACOSH:     node=&acosh(arg_node[0]); break;
 		case P_ExprNode::ASINH:     node=&asinh(arg_node[0]); break;
 		case P_ExprNode::ATANH:     node=&atanh(arg_node[0]); break;
+		case P_ExprNode::FLOOR:     node=&floor(arg_node[0]); break;
+		case P_ExprNode::CEIL:      node=&ceil (arg_node[0]); break;
+		case P_ExprNode::SAW:       node=&saw  (arg_node[0]); break;
 		case P_ExprNode::DIFF:      node=&diff (arg_node); break;
 		case P_ExprNode::INF:       throw SyntaxError("\"inf\" operator requires constant interval"); break;
 		case P_ExprNode::MID:       throw SyntaxError("\"mid\" operator requires constant interval"); break;
@@ -402,9 +411,9 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 		// try to see if the exponent is an integer
 		if (itv_right.is_degenerated()) {
 			double x=itv_right.mid();
-			if (floor(x)==x) {
+			if (std::floor(x)==x) {
 				right_type=IBEX_INTEGER;
-				int_right=(int)floor(x);
+				int_right=(int) std::floor(x);
 			}
 		}
 	} else

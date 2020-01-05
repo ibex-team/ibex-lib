@@ -19,7 +19,7 @@
 
 namespace ibex {
 
-class FncKhunTucker;
+class FncKuhnTucker;
 
 /**
  * \ingroup system

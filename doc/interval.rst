@@ -76,17 +76,17 @@ Interval Constants
 
 Some commonly used intervals are already defined as static variables:
 
-=======================  ==================================
-``Interval::pi()``         a thin enclosure of :math:`\pi`
-``Interval::two_pi()``     a thin enclosure of :math:`\pi`
-``Interval::half_pi()``    a thin enclosure of :math:`\pi/2`
-``Interval::empty_set()``  :math:`\emptyset`
-``Interval::all_reals()``  :math:`(-\infty,+\infty)`
-``Interval::zero()``       :math:`[0,0]`
-``Interval::one()``        :math:`[1,1]`
-``Interval::pos_reals()``  :math:`[0,+\infty)`
-``Interval::neg_reals()``  :math:`(-\infty,0]`
-=======================  ==================================
+==========================  ==================================
+``Interval::pi()``           a thin enclosure of :math:`\pi`
+``Interval::two_pi()``       a thin enclosure of :math:`\pi`
+``Interval::half_pi()``      a thin enclosure of :math:`\pi/2`
+``Interval::empty_set()``    :math:`\emptyset`
+``Interval::all_reals()``    :math:`(-\infty,+\infty)`
+``Interval::zero()``         :math:`[0,0]`
+``Interval::one()``          :math:`[1,1]`
+``Interval::pos_reals()``    :math:`[0,+\infty)`
+``Interval::neg_reals()``    :math:`(-\infty,0]`
+==========================  ==================================
 
 Let us print all these constants:
 

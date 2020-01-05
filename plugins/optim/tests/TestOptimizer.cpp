@@ -29,12 +29,13 @@ void TestOptimizer::vec_problem01() {
 	f.add_goal(x*x);
 	System sys(f);
 
-	double prec=1e-3;
 	DefaultOptimizer o(sys,
-			Optimizer::default_rel_eps_f,
-			Optimizer::default_abs_eps_f,
+			DefaultOptimizerConfig::default_rel_eps_f,
+			DefaultOptimizerConfig::default_abs_eps_f,
 			NormalizedSystem::default_eps_h, false, false); // no INHC4
 	Optimizer::Status status=o.optimize(IntervalVector(3,Interval(0,10)));
+
+	o.report();
 
 	CPPUNIT_ASSERT(status==Optimizer::SUCCESS);
 	CPPUNIT_ASSERT(o.get_loup()>=3 && o.get_uplo()<=3);
@@ -56,15 +57,13 @@ void TestOptimizer::vec_problem02() {
 	f.add_goal(v*x);
 	System sys(f);
 
-	double prec=1e-3;
 	DefaultOptimizer o(sys,
-			Optimizer::default_rel_eps_f,
-			Optimizer::default_abs_eps_f,
+			DefaultOptimizerConfig::default_rel_eps_f,
+			DefaultOptimizerConfig::default_abs_eps_f,
 			NormalizedSystem::default_eps_h, false, false); // no INHC4
 
 	IntervalVector box=cart_prod(Interval(-1,1)*Interval::pi(), Interval(-10,10), Interval(-10,10));
 	Optimizer::Status status=o.optimize(box);
-	o.report();
 
 	CPPUNIT_ASSERT(status==Optimizer::SUCCESS);
 	CPPUNIT_ASSERT(o.get_loup()>=-20 && o.get_uplo()<=-20);

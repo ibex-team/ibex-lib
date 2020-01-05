@@ -7,7 +7,7 @@ from waflib import Scripting, Logs, Options, Utils
 import ibexutils
 
 # The following variable is used to build ibex.pc and by "waf dist"
-VERSION="2.8.2"
+VERSION="2.8.6"
 # The following variable is used only by "waf dist"
 APPNAME='ibex-lib'
 
@@ -73,14 +73,14 @@ def configure (conf):
 	# Optimised compilation flags
 	if conf.options.DEBUG:
 		Logs.info("Enabling debug mode")
-		# note: -Wno-int-in-bool-context for Gaol
+		# note: -Wno-int-in-bool-context for Gaol (but unknown option by clang...)
 		flags = "-std=c++11 -O0 -g -pg -Wall -Wno-int-in-bool-context"
 		flags += " -fmessage-length=0"
 		conf.define ("DEBUG", 1)
 		conf.env.DEBUG = True
 	else:
 		# note: -Wno-int-in-bool-context for Gaol
-		flags = "-std=c++11 -O3 -Wno-deprecated -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function -Wno-int-in-bool-context"
+		flags = "-std=c++11 -O3 -Wno-deprecated -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-function"
 		conf.define ("NDEBUG", 1)
 		conf.env.DEBUG = False
 	for f in flags.split():

@@ -66,7 +66,6 @@ void TestLinearSolver::kleemin( int n) {
 	CPPUNIT_ASSERT(res==LPSolver::OPTIMAL_PROVED);
 
 	double eps = lp.get_epsilon();
-	lp.write_file("coucou.lp");
 
 	Vector dualsol = lp.get_dual_sol();
 	Vector primalsol = lp.get_primal_sol();
@@ -104,7 +103,6 @@ void TestLinearSolver::kleemin30() {
 	CPPUNIT_ASSERT(res!=LPSolver::INFEASIBLE_PROVED);
 
 	CPPUNIT_ASSERT_ASSERTION_PASS(
-	lp.write_file("coucou.lp")
 	);
 
 	CPPUNIT_ASSERT_ASSERTION_PASS(

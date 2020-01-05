@@ -157,8 +157,9 @@ opt.box[1]=Interval(-100,100);
 
 //! [cov-ex3-optim-run-C]
 // solve it
-DefaultOptimizer optim(opt); // 1 is a very coarse precision
-optim.timeout = 1;
+DefaultOptimizerConfig optim_config(opt); // 1 is a very coarse precision
+Optimizer optim(optim_config);
+optim.timeout=1;
 optim.extended_COV = false;
 optim.optimize(opt.box);
 //! [cov-ex3-optim-run-C]

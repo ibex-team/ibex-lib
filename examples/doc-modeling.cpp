@@ -334,22 +334,22 @@ int main() {
 
 	System sys(fac);
 
-	output << "![sys-fritz-john-O]" << endl;
-	// ![sys-fritz-john-C]
+	output << "![sys-kkt-O]" << endl;
+	// ![sys-kkt-C]
 	output << "original system:"         << endl;
 	output << "-------------------------"<< endl;
 	output << sys;
 	output << "-------------------------"<< endl;
 
-	FritzJohnCond fj(sys);
+	KuhnTuckerSystem kkt(sys,true);
 
-	output << "Fritz-John system:"       << endl;
+	output << "kkt system:"       << endl;
 	output << "-------------------------"<< endl;
-	output << fj << endl;
+	output << kkt << endl;
 	output << "-------------------------"<< endl;
-	output << "  number of variables:" << fj.nb_var << endl;
-	// ![sys-fritz-john-C]
-	output << "![sys-fritz-john-O]" << endl;
+	output << "  number of variables:" << kkt.nb_var << endl;
+	// ![sys-kkt-C]
+	output << "![sys-kkt-O]" << endl;
 	}
 	output.close();
 

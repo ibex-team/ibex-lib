@@ -15,7 +15,7 @@ using namespace std;
 namespace ibex {
 
 //TODO: remove this recipe for the argument of the max number of iterations of the LP solver
-LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT), lp_solver(sys.nb_var,
+LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,LinearizerXTaylor::RESTRICT,LinearizerXTaylor::RANDOM), lp_solver(sys.nb_var,
 		sys.nb_var*3 > LPSolver::default_max_iter ? LPSolver::default_max_iter : sys.nb_var*3) {
 //	nb_simplex=0;
 //	diam_simplex=0;
@@ -62,7 +62,9 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 
 		//std::cout << " simplex result " << prim[0] << " " << loup_point << std::endl;
 
-		if (!box.contains(loup_point)) throw NotFound();
+		// we allow finding a loup outside of the current box, but
+		// not outside of the system box.
+		if (!sys.box.contains(loup_point)) throw NotFound();
 
 		double new_loup=current_loup;
 

@@ -410,8 +410,16 @@ inline Interval min(const Interval& x, const Interval& y) {
 	return gaol::min(x.itv,y.itv);
 }
 
+inline Interval floor(const Interval& x) {
+	return gaol::floor(x.itv);
+}
+
 inline Interval integer(const Interval& x) {
 	return gaol::integer(x.itv);
+}
+
+inline Interval ceil(const Interval& x) {
+	return gaol::ceil(x.itv);
 }
 
 inline bool bwd_mul(const Interval& y, Interval& x1, Interval& x2) {

@@ -1,4 +1,3 @@
-diff -Naur gaol-4.2.0/gaol/gaol_allocator.h gaol-4.2.0/gaol/gaol_allocator.h
 --- gaol-4.2.0/gaol/gaol_allocator.h	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_allocator.h	2019-06-21 11:08:57.446030219 +0200
 @@ -89,7 +89,7 @@
@@ -10,7 +9,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_allocator.h gaol-4.2.0/gaol/gaol_allocator.h
  		{
  			void *buf;
  			if ( MEMALIGN( buf,16,num*sizeof ( value_type ) ) )   // Allocation error?
-diff -Naur gaol-4.2.0/gaol/gaol_double_op_apmathlib.h gaol-4.2.0/gaol/gaol_double_op_apmathlib.h
 --- gaol-4.2.0/gaol/gaol_double_op_apmathlib.h	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_double_op_apmathlib.h	2019-06-21 12:25:08.036229637 +0200
 @@ -112,7 +112,7 @@
@@ -55,7 +53,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_double_op_apmathlib.h gaol-4.2.0/gaol/gaol_doubl
  	}
        }
      }
-diff -Naur gaol-4.2.0/gaol/gaol_double_op_crlibm.h gaol-4.2.0/gaol/gaol_double_op_crlibm.h
 --- gaol-4.2.0/gaol/gaol_double_op_crlibm.h	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_double_op_crlibm.h	2019-06-21 12:25:28.901056220 +0200
 @@ -88,7 +88,7 @@
@@ -100,7 +97,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_double_op_crlibm.h gaol-4.2.0/gaol/gaol_double_o
  	}
        }
      }
-diff -Naur gaol-4.2.0/gaol/gaol_double_op_m.h gaol-4.2.0/gaol/gaol_double_op_m.h
 --- gaol-4.2.0/gaol/gaol_double_op_m.h	2009-03-01 14:53:01.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_double_op_m.h	2019-06-21 12:25:46.817473387 +0200
 @@ -115,7 +115,7 @@
@@ -145,7 +141,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_double_op_m.h gaol-4.2.0/gaol/gaol_double_op_m.h
  	}
        }
      }
-diff -Naur gaol-4.2.0/gaol/gaol_interval2f.cpp gaol-4.2.0/gaol/gaol_interval2f.cpp
 --- gaol-4.2.0/gaol/gaol_interval2f.cpp	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_interval2f.cpp	2019-06-21 11:10:43.842842834 +0200
 @@ -40,7 +40,7 @@
@@ -175,7 +170,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_interval2f.cpp gaol-4.2.0/gaol/gaol_interval2f.c
  	{
  		if ((unsigned long long)p % 16 != 0) {
  			throw std::bad_alloc();
-diff -Naur gaol-4.2.0/gaol/gaol_interval2f.h gaol-4.2.0/gaol/gaol_interval2f.h
 --- gaol-4.2.0/gaol/gaol_interval2f.h	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_interval2f.h	2019-06-21 11:10:17.773582939 +0200
 @@ -94,13 +94,13 @@
@@ -195,7 +189,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_interval2f.h gaol-4.2.0/gaol/gaol_interval2f.h
        __GAOL_PUBLIC__ void operator delete(void *p, void *place) throw();
  
  			friend interval2f pow(const interval2f& I, int n);
-diff -Naur gaol-4.2.0/gaol/gaol_interval.h gaol-4.2.0/gaol/gaol_interval.h
 --- gaol-4.2.0/gaol/gaol_interval.h	2015-05-21 09:00:45.000000000 +0200
 +++ gaol-4.2.0/gaol/gaol_interval.h	2019-06-21 11:08:27.704865552 +0200
 @@ -32,6 +32,7 @@
@@ -223,7 +216,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_interval.h gaol-4.2.0/gaol/gaol_interval.h
      void operator delete(void *p, void *place) throw();
  
  #else // !USING_SSE2_INSTRUCTIONS
-diff -Naur gaol-4.2.0/gaol/gaol_interval_sse.cpp gaol-4.2.0/gaol/gaol_interval_sse.cpp
 --- gaol-4.2.0/gaol/gaol_interval_sse.cpp	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_interval_sse.cpp	2019-06-21 11:57:38.571567641 +0200
 @@ -35,7 +35,7 @@
@@ -254,7 +246,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_interval_sse.cpp gaol-4.2.0/gaol/gaol_interval_s
  		if ((unsigned long long)p % 16 != 0) {
  			throw std::bad_alloc();
  		}
-diff -Naur gaol-4.2.0/gaol/gaol_port.cpp gaol-4.2.0/gaol/gaol_port.cpp
 --- gaol-4.2.0/gaol/gaol_port.cpp	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_port.cpp	2019-06-21 12:00:06.181266269 +0200
 @@ -35,6 +35,12 @@
@@ -270,7 +261,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_port.cpp gaol-4.2.0/gaol/gaol_port.cpp
    int gaol_signbit(double d)
    {
      // The explicit test '!=0' ensures that either 0 or 1 is returned
-diff -Naur gaol-4.2.0/gaol/gaol_port.h gaol-4.2.0/gaol/gaol_port.h
 --- gaol-4.2.0/gaol/gaol_port.h	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_port.h	2019-06-21 12:24:29.653533877 +0200
 @@ -89,9 +89,9 @@
@@ -298,7 +288,6 @@ diff -Naur gaol-4.2.0/gaol/gaol_port.h gaol-4.2.0/gaol/gaol_port.h
  #endif
  
    // #define GAOL_INFINITY std::numeric_limits<double>::infinity()
-diff -Naur gaol-4.2.0/gdtoa/dtoa.c gaol-4.2.0/gdtoa/dtoa.c
 --- gaol-4.2.0/gdtoa/dtoa.c	2009-02-17 17:39:38.000000000 +0100
 +++ gaol-4.2.0/gdtoa/dtoa.c	2019-06-21 10:39:11.771631058 +0200
 @@ -73,7 +73,7 @@

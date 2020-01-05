@@ -15,11 +15,6 @@
 #include "ibex_Bsc.h"
 #include "ibex_Ctc.h"
 #include "ibex_CellBuffer.h"
-
-#ifdef _IBEX_WITH_OPTIM_ // TODO make Memory::Object more generic
-#include "ibex_LoupFinder.h"
-#endif
-
 #include "ibex_Linearizer.h"
 
 #include <stdlib.h>
@@ -59,24 +54,25 @@ public:
 	class Object {
 	public:
 		const void* data;
+		int type;
 
 		/* Note: if we had a root class IbexObject for all classes (Ctc, Bsc,
 		 * etc.) the implementation would be more direct.
 		 * We need to record the type of the object (because the "delete" operator
 		 * requires static type cast).
 		 */
-		enum { CTC, BSC, SYSTEM, LOUP_FINDER, CELL_BUFFER, LINEARIZER } type;
+		enum { CTC, BSC, SYSTEM, CELL_BUFFER, LINEARIZER, __NB_TAGS__ };
 
 		Object(const Ctc* obj) : data(obj), type(CTC) { }
 		Object(const Bsc* obj) : data(obj), type(BSC) { }
 		Object(const System* obj) : data(obj), type(SYSTEM) { }
-#ifdef _IBEX_WITH_OPTIM_
-		Object(const LoupFinder* obj) : data(obj), type(LOUP_FINDER) { }
-#endif
 		Object(const CellBuffer* obj) : data(obj), type(CELL_BUFFER) { }
 		Object(const Linearizer* obj) : data(obj), type(LINEARIZER) { }
 
-		~Object();
+		// constructor for Object subclasses
+		Object(const void* obj, int type) : data(obj), type(type) { }
+
+		virtual ~Object();
 	};
 
 
@@ -93,7 +89,7 @@ public:
 
 	~Memory();
 
-private:
+protected:
 	std::list<Object*> objs;
 
 #ifdef __GNUC__

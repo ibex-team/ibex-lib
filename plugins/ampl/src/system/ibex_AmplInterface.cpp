@@ -29,20 +29,26 @@
 
 
 // The different option of IBEXOPT in Ampl
-double rel_eps_f=0,abs_eps_f=0,eps_h=0, eps_x=0, initial_loup=0, timeout=0;
-int random_seed=0, trace2=0, rigor=0;
+double rel_eps_f=0, abs_eps_f=0,initial_loup=0, timeout=0, eps_x=0, bisect_ratio=0, eps_h=0, relax_ratio=0;
+int trace2=0,  extended_COV=0, anticipated_UB=0, inHC4=0, rigor=0, random_seed=0, kkt=0;
 
 static
 keyword keywds[] = { // must be alphabetical order
-		KW(const_cast<char*>("abs_eps_f"), D_val, &abs_eps_f, const_cast<char*>("Absolute precision on the objective.")),
-		KW(const_cast<char*>("eps_h"), D_val, &eps_h, const_cast<char*>("Equality relaxation value.")),
-		KW(const_cast<char*>("eps_x"), D_val, &eps_x, const_cast<char*>("Precision on the variable (**Deprecated**).")),
-		KW(const_cast<char*>("initial_loup"), D_val, &initial_loup, const_cast<char*>("Intial loup (a priori known upper bound).")),
-		KW(const_cast<char*>("random_seed"), I_val, &random_seed, const_cast<char*>("Random seed (useful for reproducibility).")),
-		KW(const_cast<char*>("rel_eps_f"), D_val, &rel_eps_f, const_cast<char*>("Relative precision on the objective.")),
-		KW(const_cast<char*>("rigor"), I_val, &rigor, const_cast<char*>("Activate rigor mode (certify feasibility of equalities).")),
-		KW(const_cast<char*>("timeout"), D_val, &timeout, const_cast<char*>("Timeout (time in seconds). Default value is +oo.")),
-		KW(const_cast<char*>("trace"), I_val, &trace2, const_cast<char*>("Activate trace. Updates of lower and upper bound are printed while minimizing."))
+		KW(const_cast<char*>("abs_eps_f"), D_val, &abs_eps_f, const_cast<char*>("Absolute precision on the objective function. Default: 1.e-7. ")),
+		KW(const_cast<char*>("anticipated_UB"), I_val, &anticipated_UB, const_cast<char*>("If true, the search space is not only contracted w.r.t. f(x)<=loup, but f(x)<=loup-eps. Default: true (enable). ")),
+		KW(const_cast<char*>("bisect_ratio"), D_val, &bisect_ratio, const_cast<char*>("Ratio for choosing bisection point. Default: 0.5. ")),
+		KW(const_cast<char*>("eps_h"), D_val, &eps_h, const_cast<char*>("Relaxation value of the equality constraints. Default: 1.e-8. ")),
+		KW(const_cast<char*>("eps_x"), D_val, &eps_x, const_cast<char*>("Precision on the variable (**Deprecated**). Default: 0. ")),
+		KW(const_cast<char*>("extended_COV"), I_val, &extended_COV, const_cast<char*>("Extended COV output file. Default: true (extended).")),
+		KW(const_cast<char*>("inHC4"), I_val, &inHC4, const_cast<char*>("Activate inHC4. Default: true. ")),
+		KW(const_cast<char*>("initial_loup"), D_val, &initial_loup, const_cast<char*>("Initilization of the upper bound with a known value. ")),
+		KW(const_cast<char*>("kkt"), I_val, &kkt, const_cast<char*>("Activate KKT contractor. Default: true for unconstrained problems. ")),
+		KW(const_cast<char*>("random_seed"), I_val, &random_seed, const_cast<char*>("Random seed (useful for reproducibility). Default: 0. ")),
+		KW(const_cast<char*>("rel_eps_f"), D_val, &rel_eps_f, const_cast<char*>("Relative precision on the objective function. Default: 1.e-3. ")),
+		KW(const_cast<char*>("relax_ratio"), D_val, &relax_ratio, const_cast<char*>("Fix-point ratio for contraction based on linear relaxation. Default: 0.2. ")),
+		KW(const_cast<char*>("rigor"), I_val, &rigor, const_cast<char*>("Activate rigor mode (certify feasibility of equalities). If true, feasibility of equalities is certified. Default: false. ")),
+		KW(const_cast<char*>("timeout"), D_val, &timeout, const_cast<char*>("Timeout (time in seconds). Default: -1 (none). ")),
+		KW(const_cast<char*>("trace"), I_val, &trace2, const_cast<char*>("Activate trace. Updates of lower and upper bound are printed while minimizing. Default: -1 (none). "))
 };
 
 static
@@ -148,27 +154,41 @@ namespace ibex {
 #ifdef	_IBEX_WITH_OPTIM_
 
 AmplOption::AmplOption():
-		abs_eps_f(Optimizer::default_abs_eps_f),
-		eps_h(NormalizedSystem::default_eps_h),
-		eps_x(0),
+		abs_eps_f(OptimizerConfig::default_abs_eps_f),
+		anticipated_UB(OptimizerConfig::default_anticipated_UB),
+		bisect_ratio(DefaultOptimizerConfig::default_bisect_ratio)
+		eps_h(ExtendedSystem::default_eps_h),
+		eps_x(OptimizerConfig::default_eps_x),
+		extended_COV(OptimizerConfig::default_extended_COV),
+		inHC4(DefaultOptimizerConfig::default_inHC4),
 		initial_loup(POS_INFINITY),
-		random_seed(DefaultOptimizer::default_random_seed),
-		rel_eps_f(Optimizer::default_rel_eps_f),
-		rigor(false),
-		trace(false),
-		timeout(0) {}
+		kkt(false),
+		random_seed(DefaultOptimizerConfig::default_random_seed),
+		rel_eps_f(OptimizerConfig::default_rel_eps_f),
+		relax_ratio(DefaultOptimizerConfig::default_relax_ratio),
+		rigor(DefaultOptimizerConfig::default_rigor),
+		trace(OptimizerConfig::default_trace),
+		timeout(OptimizerConfig::default_timeout)  {}
+
 #else
 
 AmplOption::AmplOption():
-		abs_eps_f(1.e-6),
-		eps_h(1.e-8),
+		abs_eps_f(1.e-07),
+		anticipated_UB(true),
+		bisect_ratio(0.5),
+		eps_h(ExtendedSystem::default_eps_h),
 		eps_x(0),
+		extended_COV(true),
+		inHC4(true),
 		initial_loup(POS_INFINITY),
-		random_seed(1),
-		rel_eps_f(1.e-7),
+		kkt(false),
+		random_seed(0),
+		rel_eps_f(1.e-03),
+		relax_ratio(0.2),
 		rigor(false),
-		trace(false),
-		timeout(0) {}
+		trace(0),
+		timeout(-1) {}
+
 #endif
 
 AmplInterface::AmplInterface(std::string nlfile) : asl(NULL), _nlfile(nlfile), _x(NULL), option(){

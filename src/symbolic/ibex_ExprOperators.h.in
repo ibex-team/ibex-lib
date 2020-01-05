@@ -120,8 +120,7 @@ public:
 
 namespace ibex {
 
-@OPERATORS_INLINE_UNARY@
-@OPERATORS_INLINE_BINARY@
+@OPERATORS_FCT_DEF@
 
 /**
  * \ingroup symbolic

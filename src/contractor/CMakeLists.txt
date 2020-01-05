@@ -28,8 +28,8 @@ list (APPEND IBEX_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcInteger.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcInverse.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcInverse.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcKhunTucker.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcKhunTucker.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcKuhnTucker.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcKuhnTucker.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcLinearRelax.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcLinearRelax.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcNewton.cpp

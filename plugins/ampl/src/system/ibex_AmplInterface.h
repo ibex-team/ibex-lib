@@ -15,6 +15,7 @@
 #include "ibex_SystemFactory.h"
 #include "ibex_Expr.h"
 #include "ibex_Interval.h"
+#include "ibex_ExtendedSystem.h"
 #include "ibex_Setting.h"
 
 #ifdef __GNUC__
@@ -33,9 +34,7 @@
 #endif
 
 #ifdef	_IBEX_WITH_OPTIM_
-#include "ibex_Optimizer.h"
-#include "ibex_DefaultOptimizer.h"
-#include "ibex_NormalizedSystem.h"
+#include "ibex_OptimizerConfig.h"
 #endif
 
 struct ASL;
@@ -46,14 +45,33 @@ class AmplOption {
 public:
 	AmplOption();
 
+	/** Goal absolute precision: 1e-7. */
 	double abs_eps_f;
+	/** Anticipated upper bounding : true (enabled). */
+	bool anticipated_UB;
+	/** Ratio for choosing bisection point. */
+	double bisect_ratio;
+	/**  Equality thickness. */
 	double eps_h;
+	/** Bisection precision: 0. */
 	double eps_x;
+	/** COV output mode: extended (enabled). */
+	bool extended_COV;
+	/** inHC4 mode: true (enabled). */
+	bool inHC4;
+	/** Initial value of the upper bound */
 	double initial_loup;
+	bool kkt;
 	int random_seed;
+	/** Goal relative precision: 1e-3. */
 	double rel_eps_f;
+	/** Fix-point ratio for contraction based on linear relaxation. */
+	double relax_ratio;
+	/** Activate/deactivate rigor mode. If true, feasibility of equalities is certified. */
 	bool rigor;
-	bool trace;
+	/** Trace mode: 0 (none). */
+	int trace;
+	/** Timeout: -1 (none). */
 	double timeout;
 };
 

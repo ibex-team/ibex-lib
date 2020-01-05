@@ -14,6 +14,7 @@
 #include "ibex_UnknownFileException.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_Expr2Minibex.h"
+#include "ibex_P_Struct.h"
 #include "ibex_Domain.h"
 
 #include <stdio.h>
@@ -40,13 +41,6 @@ extern FILE* ibexin;
 using namespace std;
 
 namespace ibex {
-
-
-namespace parser {
-extern System* system;
-extern bool choco_start;
-}
-
 
 namespace {
 
@@ -77,33 +71,34 @@ public:
 
 } // end anonymous namespace
 
-System::System() : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) /* tmp */ {
+System::System() : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
 
 }
 
-System::System(const char* filename) : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) /* tmp */ {
+System::System(const char* filename) : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
 	load(fd);
 }
 
 System::System(int n, const char* syntax) : id(next_id()), nb_var(n), /* NOT TMP (required by parser) */
-		                                    nb_ctr(0), ops(NULL), box(1) /* tmp */ {
+		                                    nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
 	LOCK;
 	try {
-		parser::choco_start=true;
-		parser::system=this;
+		parser::pstruct = new parser::P_StructChoco(*this);
 		ibexparse_string(syntax);
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 	} catch(SyntaxError& e) {
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		UNLOCK;
 		throw e;
 	}
 	UNLOCK;
 }
 
-System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), ops(NULL), box(1) {
+System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) {
 
 	switch(mode) {
 	case COPY :      init(SystemCopy(sys,COPY)); break;
@@ -389,13 +384,15 @@ void System::load(FILE* fd) {
 	ibexin = fd;
 
 	try {
-		parser::system=this;
+		parser::pstruct = new parser::P_StructSystem(*this);
 		ibexparse();
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 	}
 
 	catch(SyntaxError& e) {
-		parser::system=NULL;
+		delete parser::pstruct;
+		parser::pstruct = NULL;
 		fclose(fd);
 		ibexrestart(ibexin);
 		UNLOCK;

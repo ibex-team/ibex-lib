@@ -9,14 +9,15 @@
 //============================================================================
 
 #include "ibex_CtcLinearRelax.h"
-#include "ibex_LinearizerCombo.h"
+#include "ibex_LinearizerXTaylor.h"
 #include "ibex_BxpLinearRelaxArgMin.h"
 
 using namespace std;
 
 namespace ibex {
 
-CtcLinearRelax::CtcLinearRelax(const ExtendedSystem& sys) : CtcPolytopeHull(*new LinearizerCombo (sys,LinearizerCombo::XNEWTON)), sys(sys) {
+CtcLinearRelax::CtcLinearRelax(const ExtendedSystem& sys) : CtcPolytopeHull(
+		*new LinearizerXTaylor(sys)), sys(sys) {
 
 }
 

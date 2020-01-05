@@ -13,7 +13,7 @@
 
 #include "ibex_P_ExprVisitor.h"
 #include "ibex_Expr.h"
-#include "ibex_Scope.h"
+#include "ibex_P_Scope.h"
 #include "ibex_DoubleIndex.h"
 
 namespace ibex {
@@ -26,6 +26,16 @@ namespace parser {
 
 class ExprGenerator : public virtual P_ExprVisitor {
 public:
+
+	ExprGenerator(P_Scope& scope);
+
+	/*
+	 * Use default scope.
+	 * (pstruct->scopes.top()).
+	 *
+	 * This constructor is not necessary but kept for simplicity
+	 * (it is not very clean to use the static variable pstruct)
+	 */
 	ExprGenerator();
 
 	Domain generate_cst(const P_ExprNode& y);
@@ -51,7 +61,7 @@ protected:
 	DoubleIndex visit_index(const Dim& dim, const P_ExprNode& idx1, bool matlab_style);
 	DoubleIndex visit_index(const Dim& dim, const P_ExprNode& idx1, const P_ExprNode& idx2, bool matlab_style);
 
-	Scope& scope;
+	P_Scope& scope;
 };
 
 #ifdef __clang__

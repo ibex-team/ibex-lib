@@ -72,6 +72,7 @@ public:
 		SQR, SQRT, EXP, LOG,
 		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
 		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
+		FLOOR, CEIL, SAW,
 		INF, MID, SUP,  // deprecated??
 		DIFF, UNARY_OP, BINARY_OP
 	} operation;
@@ -98,6 +99,7 @@ public:
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	// Generate the expression with the current scope.
+	// Note: not very clean: used in parser.yc only for convenience
 	const ExprNode& generate() const;
 
 	// destroy labels recursively
@@ -175,7 +177,7 @@ public:
 /*
  * \brief Variable Symbol at parse time
  *
- * \see Scopes::get_cst().
+ * \see P_Scope::get_cst().
  */
 class P_ExprVarSymbol : public P_ExprNode {
 public:
@@ -452,6 +454,18 @@ inline const P_ExprNode* asinh(const P_ExprNode* exp) {
 
 inline const P_ExprNode* atanh(const P_ExprNode* exp) {
 	return new P_ExprNode(P_ExprNode::ATANH,*exp);
+}
+
+inline const P_ExprNode* floor(const P_ExprNode* exp) {
+	return new P_ExprNode(P_ExprNode::FLOOR,*exp);
+}
+
+inline const P_ExprNode* ceil(const P_ExprNode* exp) {
+	return new P_ExprNode(P_ExprNode::CEIL,*exp);
+}
+
+inline const P_ExprNode* saw(const P_ExprNode* exp) {
+	return new P_ExprNode(P_ExprNode::SAW,*exp);
 }
 
 inline const P_ExprNode* operator-(const P_ExprNode& exp) {

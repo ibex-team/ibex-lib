@@ -1,18 +1,20 @@
 /* ============================================================================
  * I B E X - Interval definition
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Bug fixes   : Gilles Trombettoni, Bertrand Neveu
  * Created     : Dec 05, 2011
+ * Last update : Oct 30, 2019
  * ---------------------------------------------------------------------------- */
 
 #ifndef _IBEX_INTERVAL_H_
 #define _IBEX_INTERVAL_H_
 
+#include <array>
 #include <math.h>
 #include "ibex_Exception.h"
 
@@ -108,6 +110,12 @@ class Interval {
 
     /** \brief Create [a,a]. */
     Interval(double a);
+
+    /** \brief Create [a, a] from a fixed-sized array of size 1. */
+    Interval(std::array<double, 1> array);
+
+    /** \brief Create [a, b] from a fixed-sized array of size 2. */
+    Interval(std::array<double, 2> array);
 
     /** \brief True iff *this and x are exactly the same intervals. */
     bool operator==(const Interval& x) const;
@@ -438,71 +446,71 @@ class Interval {
      *  Deprecated. Use pi().
      */
     static const Interval PI;
-    
+
      /** \brief pi. */
     static const Interval& pi();
-    
+
     /** \brief 2*pi.
      *  Deprecated. Use two_pi().
      */
     static const Interval TWO_PI;
- 
+
     /** \brief 2*pi. */
     static const Interval& two_pi();
-    
+
     /** \brief pi/2.
      *  Deprecated. Use half_pi().
      */
     static const Interval HALF_PI;
-    
+
     /** \brief pi/2. */
     static const Interval& half_pi();
-    
-    /** \brief the empty interval. 
+
+    /** \brief the empty interval.
      *  Deprecated. Use empty_set().
      */
     static const Interval EMPTY_SET;
-    
+
     /** \brief the empty interval. */
     static const Interval& empty_set();
-    
-    /** \brief (-oo,oo). 
+
+    /** \brief (-oo,oo).
      *  Deprecated. Use all_reals().
      */
     static const Interval ALL_REALS;
-    
+
     /** \brief (-oo,oo). */
     static const Interval& all_reals();
-    
-    /** \brief [0,0]. 
+
+    /** \brief [0,0].
      *  Deprecated. Use zero().
      */
     static const Interval ZERO;
-    
+
     /** \brief [0,0]. */
     static const Interval& zero();
-    
-    /** \brief [1,1]. 
+
+    /** \brief [1,1].
      *  Deprecated. Use one().
      */
     static const Interval ONE;
-    
+
     /** \brief [1,1]. */
     static const Interval& one();
-    
-    /** \brief [0,+oo). 
+
+    /** \brief [0,+oo).
      *  Deprecated. Use pos_reals().
      */
     static const Interval POS_REALS;
-    
+
     /** \brief [0,+oo). */
     static const Interval& pos_reals();
-    
-    /** \brief (-oo,0]. 
+
+    /** \brief (-oo,0].
      *  Deprecated. Use neg_reals().
      */
     static const Interval NEG_REALS;
-    
+
     /** \brief (-oo,0]. */
     static const Interval& neg_reals();
 
@@ -676,10 +684,22 @@ Interval sign(const Interval& x);
  * \remark  chi([a],[b],[c]) =[b] if [a]<=0, [c] if [a]>0, hull \{[b], [c]\} else.  */
 Interval chi(const Interval& a, const Interval& b, const Interval& c);
 
-/**
- * \brief Return the largest integer interval included in x.
- */
+/** \brief Return the largest integer interval included in x. */
 Interval integer(const Interval& x);
+
+/** \brief Floor of [x]. */
+Interval floor(const Interval& x);
+
+/** \brief Ceil of [x]. */
+Interval ceil(const Interval& x);
+
+/**
+ * \brief The saw function is x->x-round(x)
+ *
+ * It allows to enforce integer constraint
+ * by writing saw(x)=0.
+ */
+Interval saw(const Interval& x);
 
 /** \brief Projection of y=x_1+x_2.
  *
@@ -824,13 +844,17 @@ bool bwd_sign(const Interval& y, Interval& x);
 /** \brief Projection of f=chi(a,b,c). */
 bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c);
 
-/** \brief Contract x w.r.t. the fact that it must be integral.
- *
- */
-bool bwd_integer(Interval& x);
+/** \brief Contract x w.r.t. y=floor(x). */
+bool bwd_floor(const Interval& y, Interval& x);
 
-/** \brief Contract x and y w.r.t. the fact that they are equivalent modulo the period p.
- *
+/* \brief Contract x w.r.t. y=ceil(x). */
+bool bwd_ceil(const Interval& y, Interval& x);
+
+/* \brief Contract x w.r.t. y=saw(x). */
+bool bwd_saw(const Interval& y, Interval& x);
+
+/**
+ * \brief Contract x and y w.r.t. the fact that they are equivalent modulo the period p.
  */
 bool bwd_imod(Interval& x, Interval& y, const double& p);
 
@@ -867,6 +891,10 @@ inline Interval::Interval(double a) : itv(a,a) {
 	if (a==NEG_INFINITY || a==POS_INFINITY) *this=EMPTY_SET;
 }
 
+inline Interval::Interval(std::array<double, 1> array): Interval(array[0]) {}
+
+inline Interval::Interval(std::array<double, 2> array): Interval(array[0], array[1]) {}
+
 inline bool Interval::operator==(const Interval& x) const {
 	return (is_empty() && x.is_empty()) || (lb()==x.lb() && ub()==x.ub());
 }
@@ -878,8 +906,6 @@ inline Interval& Interval::operator=(double x) {
 		itv = x;
 	return *this;
 }
-
-
 
 inline Interval& Interval::operator=(const Interval& x) {
 	itv = x.itv;
@@ -1407,8 +1433,40 @@ inline bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 }
 
 
-inline bool bwd_integer(Interval& x) {
-	return !(x = integer(x)).is_empty();
+inline bool bwd_floor(const Interval& y, Interval& x) {
+	if (y.is_empty()) {
+		x.set_empty();
+		return false;
+	} else {
+		double r=std::floor(y.ub());
+		double l=std::ceil(y.lb());
+		if (r<l) {
+			x.set_empty();
+			return false;
+		}
+		else {
+			x &= Interval(l,r) + Interval(0,1);
+			return !x.is_empty();
+		}
+	}
+}
+
+inline bool bwd_ceil(const Interval& y, Interval& x) {
+	if (y.is_empty()) {
+		x.set_empty();
+		return false;
+	} else {
+		double r=std::floor(y.ub());
+		double l=std::ceil(y.lb());
+		if (r<l) {
+			x.set_empty();
+			return false;
+		}
+		else {
+			x &= Interval(l,r) + Interval(-1,0);
+			return !x.is_empty();
+		}
+	}
 }
 
 // Implements interval modulo with double period:  x = y mod(p)

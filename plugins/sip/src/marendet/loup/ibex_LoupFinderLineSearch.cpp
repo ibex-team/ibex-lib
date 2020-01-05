@@ -147,6 +147,9 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 
 inline
 bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVector& box, const BxpNodeData* local_node_data, int kmax) {
+	if(!local_node_data->init_box.is_superset(box)) {
+		return false;
+	}
 	for(int i = 0; i < system_.normal_constraints_.size()-1; ++i) {
 		if(!system_.normal_constraints_[i].isSatisfied(box)) {
 			return false;

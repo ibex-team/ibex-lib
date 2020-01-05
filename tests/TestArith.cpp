@@ -335,6 +335,33 @@ void TestArith::tan05() { check(tan(Interval::pi()/2.0),Interval::all_reals()); 
 void TestArith::tan06() { check(tan(-Interval::pi()),Interval::all_reals()); }
 void TestArith::tan07() { check(tan(3*Interval::pi()/4.0 | 5*Interval::pi()/4.0), Interval(-1,1)); }
 
+void TestArith::floor01() { CPPUNIT_ASSERT(floor(Interval::empty_set())==Interval::empty_set()); }
+void TestArith::floor02() { CPPUNIT_ASSERT(floor(Interval(NEG_INFINITY,-0.000001))==Interval(NEG_INFINITY,-1)); }
+void TestArith::floor03() { CPPUNIT_ASSERT(floor(Interval(0.00000001,POS_INFINITY))==Interval::pos_reals()); }
+void TestArith::floor04() { CPPUNIT_ASSERT(floor(Interval::all_reals())==Interval::all_reals()); }
+void TestArith::floor05() { CPPUNIT_ASSERT(floor(Interval(0.01,2.99))==Interval(0,2)); }
+void TestArith::floor06() { CPPUNIT_ASSERT(floor(Interval(-0.01,2.99))==Interval(-1,2)); }
+void TestArith::floor07() { CPPUNIT_ASSERT(floor(Interval(1.000000001,1.9999999999))==Interval::one()); }
+void TestArith::floor08() { CPPUNIT_ASSERT(floor(Interval(1e8, DBL_MAX))==Interval(1e8,DBL_MAX)); }
+
+void TestArith::ceil01() { CPPUNIT_ASSERT(ceil(Interval::empty_set())==Interval::empty_set()); }
+void TestArith::ceil02() { CPPUNIT_ASSERT(ceil(Interval(NEG_INFINITY,-0.000001))==Interval::neg_reals()); }
+void TestArith::ceil03() { CPPUNIT_ASSERT(ceil(Interval(0.00000001,POS_INFINITY))==Interval(1.0,POS_INFINITY)); }
+void TestArith::ceil04() { CPPUNIT_ASSERT(ceil(Interval::all_reals())==Interval::all_reals()); }
+void TestArith::ceil05() { CPPUNIT_ASSERT(ceil(Interval(0.01,2.99))==Interval(1,3)); }
+void TestArith::ceil06() { CPPUNIT_ASSERT(ceil(Interval(-0.01,2.99))==Interval(0,3)); }
+void TestArith::ceil07() { CPPUNIT_ASSERT(ceil(Interval(1.000000001,1.9999999999))==Interval(2,2)); }
+void TestArith::ceil08() { CPPUNIT_ASSERT(ceil(Interval(1e8, DBL_MAX))==Interval(1e8,DBL_MAX)); }
+
+void TestArith::integer01() { CPPUNIT_ASSERT(integer(Interval::empty_set())==Interval::empty_set()); }
+void TestArith::integer02() { CPPUNIT_ASSERT(integer(Interval(NEG_INFINITY,-0.000001))==Interval(NEG_INFINITY,-1)); }
+void TestArith::integer03() { CPPUNIT_ASSERT(integer(Interval(0.00000001,POS_INFINITY))==Interval(1.0,POS_INFINITY)); }
+void TestArith::integer04() { CPPUNIT_ASSERT(integer(Interval::all_reals())==Interval::all_reals()); }
+void TestArith::integer05() { CPPUNIT_ASSERT(integer(Interval(0.01,2.99))==Interval(1,2)); }
+void TestArith::integer06() { CPPUNIT_ASSERT(integer(Interval(-0.01,2.99))==Interval(0,2)); }
+void TestArith::integer07() { CPPUNIT_ASSERT(integer(Interval(1.000000001,1.9999999999))==Interval::empty_set()); }
+void TestArith::integer08() { CPPUNIT_ASSERT(integer(Interval(1e8, DBL_MAX))==Interval(1e8,DBL_MAX)); }
+
 void TestArith::atan2_01() { check(atan2(Interval::all_reals(),Interval::empty_set()),Interval::empty_set()); }
 void TestArith::atan2_02() { check(atan2(Interval::one(),Interval::one()),     Interval::pi()/4.0); }
 void TestArith::atan2_03() { check(atan2(-Interval::one(),-Interval::one()),-3*Interval::pi()/4.0); }
@@ -967,6 +994,46 @@ void TestArith::bwd_imod_07() {
 void TestArith::bwd_imod_08() {
 	CPPUNIT_ASSERT(checkbwd_imod(2.*M_PI,Interval(7.*M_PI/4.,8.*M_PI/3),Interval(-M_PI/2,M_PI/2.),Interval(7.*M_PI/4.,5.*M_PI/2.),Interval(-M_PI/4,M_PI/2.)));
 }
+
+bool TestArith::checkbwd_floor(const Interval& y, const Interval& xbefore, const Interval& x_after_expected) {
+	Interval x(xbefore);
+	bwd_floor(y,x);
+	return x==x_after_expected;
+}
+
+void TestArith::bwd_floor_01() { CPPUNIT_ASSERT(checkbwd_floor(Interval::empty_set(), Interval::all_reals(), Interval::empty_set())); }
+void TestArith::bwd_floor_02() { CPPUNIT_ASSERT(checkbwd_floor(Interval(NEG_INFINITY,-1), Interval(NEG_INFINITY,-0.000001), Interval(NEG_INFINITY,-0.000001))); }
+void TestArith::bwd_floor_03() { CPPUNIT_ASSERT(checkbwd_floor(Interval(NEG_INFINITY,-1), Interval(NEG_INFINITY, 0.000001), Interval::neg_reals())); }
+void TestArith::bwd_floor_04() { CPPUNIT_ASSERT(checkbwd_floor(Interval(NEG_INFINITY,-0.000001), Interval(NEG_INFINITY, 0.000001), Interval::neg_reals())); }
+void TestArith::bwd_floor_05() { CPPUNIT_ASSERT(checkbwd_floor(Interval(1,POS_INFINITY), Interval(0.000001, POS_INFINITY), Interval(1,POS_INFINITY))); }
+void TestArith::bwd_floor_06() { CPPUNIT_ASSERT(checkbwd_floor(Interval(1,POS_INFINITY), Interval(-0.000001, POS_INFINITY), Interval(1,POS_INFINITY))); }
+void TestArith::bwd_floor_07() { CPPUNIT_ASSERT(checkbwd_floor(Interval(0.000001,POS_INFINITY), Interval(-0.000001, POS_INFINITY), Interval(1,POS_INFINITY))); }
+void TestArith::bwd_floor_08() { CPPUNIT_ASSERT(checkbwd_floor(Interval(1,2), Interval(0.01,2.99), Interval(1,2.99))); }
+void TestArith::bwd_floor_09() { CPPUNIT_ASSERT(checkbwd_floor(Interval(1,2), Interval(2.99,3.01), Interval(2.99,3))); }
+void TestArith::bwd_floor_10() { CPPUNIT_ASSERT(checkbwd_floor(Interval(1,2), Interval(3.01,3.99), Interval::empty_set())); }
+void TestArith::bwd_floor_11() { CPPUNIT_ASSERT(checkbwd_floor(Interval(0.01,2.99), Interval(0.01,2.99), Interval(1,2.99))); }
+void TestArith::bwd_floor_12() { /*CPPUNIT_ASSERT(checkbwd_floor(Interval(0,numeric_limits<double>::max()), Interval(numeric_limits<double>::max(),POS_INFINITY), Interval(numeric_limits<double>::max(),numeric_limits<double>::max()))); */}
+void TestArith::bwd_floor_13() { /*CPPUNIT_ASSERT(checkbwd_floor(Interval(numeric_limits<double>::min(),0), Interval(NEG_INFINITY,numeric_limits<double>::min()), Interval(numeric_limits<double>::min(),numeric_limits<double>::min()))); */ }
+
+bool TestArith::checkbwd_ceil(const Interval& y, const Interval& xbefore, const Interval& x_after_expected) {
+	Interval x(xbefore);
+	bwd_ceil(y,x);
+	return x==x_after_expected;
+}
+
+void TestArith::bwd_ceil_01() { CPPUNIT_ASSERT(checkbwd_ceil(Interval::empty_set(), Interval::all_reals(), Interval::empty_set())); }
+void TestArith::bwd_ceil_02() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(NEG_INFINITY,-1), Interval(NEG_INFINITY,-0.000001), Interval(NEG_INFINITY,-1))); }
+void TestArith::bwd_ceil_03() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(NEG_INFINITY,-1), Interval(NEG_INFINITY, 0.000001), Interval(NEG_INFINITY,-1))); }
+void TestArith::bwd_ceil_04() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(NEG_INFINITY,-0.000001), Interval(NEG_INFINITY, 0.000001), Interval(NEG_INFINITY,-1))); }
+void TestArith::bwd_ceil_05() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(1,POS_INFINITY), Interval(0.000001, POS_INFINITY), Interval(0.000001,POS_INFINITY))); }
+void TestArith::bwd_ceil_06() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(1,POS_INFINITY), Interval(-0.000001, POS_INFINITY), Interval::pos_reals())); }
+void TestArith::bwd_ceil_07() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(0.000001,POS_INFINITY), Interval(-0.000001, POS_INFINITY), Interval::pos_reals())); }
+void TestArith::bwd_ceil_08() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(1,2), Interval(0.01,2.99), Interval(0.01,2))); }
+void TestArith::bwd_ceil_09() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(1,2), Interval(-0.01,0.01), Interval(0,0.01))); }
+void TestArith::bwd_ceil_10() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(1,2), Interval(-1.01,-0.01), Interval::empty_set())); }
+void TestArith::bwd_ceil_11() { CPPUNIT_ASSERT(checkbwd_ceil(Interval(0.01,2.99), Interval(0.01,2.99), Interval(0.01,2))); }
+void TestArith::bwd_ceil_12() { /*CPPUNIT_ASSERT(checkbwd_ceil(Interval(0,numeric_limits<double>::max()), Interval(numeric_limits<double>::max(),POS_INFINITY), Interval(numeric_limits<double>::max(),numeric_limits<double>::max()))); */}
+void TestArith::bwd_ceil_13() { /*CPPUNIT_ASSERT(checkbwd_ceil(Interval(numeric_limits<double>::min(),0), Interval(NEG_INFINITY,numeric_limits<double>::min()), Interval(numeric_limits<double>::min(),numeric_limits<double>::min()))); */}
 
 void TestArith::tan_issue248() {
 	//Interval itv = Interval(-Interval::pi().lb()/2,3*Interval::pi().ub()/8);

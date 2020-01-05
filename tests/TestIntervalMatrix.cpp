@@ -188,6 +188,14 @@ void TestIntervalMatrix::cons04() {
 	CPPUNIT_ASSERT(m==M1());
 }
 
+void TestIntervalMatrix::consInitList() {
+	IntervalMatrix m{
+		{{0,1}, {0,2}, {0,3}},
+		{{-1,0},{-2,0},{-3,0}}
+	};
+	CPPUNIT_ASSERT(m == M1());
+}
+
 void TestIntervalMatrix::empty01() {
 
 	CPPUNIT_ASSERT(IntervalMatrix::empty(2,3).nb_rows()==2);

@@ -4,8 +4,8 @@
 // Author      : Bertrand Neveu, Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : May 19, 2012
-// Last Update : Dec 25, 2017
+// Created     : Dec 3, 2018
+// Last Update : Oct 17, 2019
 //============================================================================
 #include "float.h"
 #include "ibex_OptimLargestFirst.h"
@@ -17,10 +17,10 @@ namespace ibex {
 
   double objectivebisect_ratiolimit=1.e10;
 
-  OptimLargestFirst::OptimLargestFirst(int goal_var,double prec,  double ratio) : LargestFirst(prec, ratio), goal_var(goal_var)  {
+  OptimLargestFirst::OptimLargestFirst(int goal_var,bool choose_obj, double prec,  double ratio) : LargestFirst(prec, ratio), goal_var(goal_var), choose_obj(choose_obj)  {
 }
 
-  OptimLargestFirst::OptimLargestFirst(int goal_var,const Vector& prec,double ratio) :LargestFirst(prec, ratio), goal_var(goal_var) {
+  OptimLargestFirst::OptimLargestFirst(int goal_var,bool choose_obj,const Vector& prec,double ratio) :LargestFirst(prec, ratio), goal_var(goal_var), choose_obj(choose_obj) {
 
 }
 
@@ -40,10 +40,13 @@ BisectionPoint OptimLargestFirst::choose_var(const Cell& cell) {
   // supplementary sufficient condition for not bisecting the objective (not bounded or too big :max_diam_nobj is the maximum diameter for the other variables)
   bool OptimLargestFirst::nobisectable(const IntervalVector& box, int i) const {
     return (LargestFirst::nobisectable ( box, i) 
-	     ||
-	    (i == goal_var // to avoid bisecting a no bounded objective
-	     && max_diam_nobj < DBL_MAX
-	     && box[i].diam()/max_diam_nobj > objectivebisect_ratiolimit)
+	    ||
+	    (i == goal_var && 
+	     ((choose_obj==false) // the objective should not be chosen
+	      ||  // to avoid bisecting a no bounded objective
+	      (max_diam_nobj < DBL_MAX
+	       && box[i].diam()/max_diam_nobj > objectivebisect_ratiolimit))
+	     )
 	    );
   }
 

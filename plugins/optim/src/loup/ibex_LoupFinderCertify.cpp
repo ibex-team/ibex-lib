@@ -81,19 +81,24 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 					//note: don't call is_inner because it would check again all equalities (which is useless
 					// and perhaps wrong as the solution box may violate the relaxed inequality (still, very unlikely))
 					bool satisfy_inequalities=true;
-					for (int j=0; j<sys.f_ctrs.image_dim(); j++) {
-						if (!af.active_ctr[j])
-							if (((sys.ops[j]==LEQ || sys.ops[j]==LT)
-									&& sys.f_ctrs.eval(j,pdc.solution()).ub()>0)
-									||
-									((sys.ops[j]==GEQ || sys.ops[j]==GT)
-											&& sys.f_ctrs.eval(j,pdc.solution()).lb()<0)) {
 
-								/* TODO: && !entailed->original(j)*/
+					if (!sys.box.intersects(pdc.solution()))
+						satisfy_inequalities=false;
+					else if (sys.nb_ctr>0) {
+						for (int j=0; j<sys.f_ctrs.image_dim(); j++) {
+							if (!af.active_ctr[j])
+								if (((sys.ops[j]==LEQ || sys.ops[j]==LT)
+										&& sys.f_ctrs.eval(j,pdc.solution()).ub()>0)
+										||
+										((sys.ops[j]==GEQ || sys.ops[j]==GT)
+												&& sys.f_ctrs.eval(j,pdc.solution()).lb()<0)) {
 
-								satisfy_inequalities=false;
-								break;
-							}
+									/* TODO: && !entailed->original(j)*/
+
+									satisfy_inequalities=false;
+									break;
+								}
+						}
 					}
 					if (satisfy_inequalities) {
 						return make_pair(pdc.solution(), res);
