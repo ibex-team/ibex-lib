@@ -34,7 +34,7 @@
 #endif
 
 #ifdef	_IBEX_WITH_OPTIM_
-#include "ibex_OptimizerConfig.h"
+#include "ibex_Optimizer.h"
 #endif
 
 struct ASL;
