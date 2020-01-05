@@ -20,16 +20,16 @@ install:
   - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
 
 build_script:
-  - cmd: python -x %cd%\waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug --with-ampl
-  - cmd: python -x %cd%\waf build install clean
+  - cmd: python -x waf configure --prefix=%PREFIX%  --interval-lib=%TEST_INTERVAL_LIB%--with-debug --with-ampl --with-optim
+  - cmd: python -x waf build install clean
 
 test_script:
   - cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
   # We need to add the path to libcppunit in PATH
   - cmd: set PATH=%PATH%;C:\msys64\mingw32\bin
-  - cmd: python -x %cd%\waf utest
+  - cmd: python -x waf utest
 
 on_failure:
-  - cmd: cat %cd%\__build__\config.log
-  - cmd: cat %cd%\__build__\utest_config.log
-  - cmd: cat %cd%\__build__\utest_run.log
+  - cmd: cat __build__\config.log
+  - cmd: cat __build__\utest_config.log
+  - cmd: cat __build__\utest_run.log
