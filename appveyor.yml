@@ -20,7 +20,7 @@ install:
   - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
 
 build_script:
-  - cmd: python -x waf configure --prefix=%PREFIX%  --interval-lib=%TEST_INTERVAL_LIB%--with-debug --with-ampl --with-optim
+  - cmd: python -x waf configure --prefix=%PREFIX%  --interval-lib=%TEST_INTERVAL_LIB%  --with-debug --with-ampl --with-optim
   - cmd: python -x waf build install clean
 
 test_script:
