@@ -10,12 +10,20 @@
 
 #include "ibex_AmplInterface.h"
 #include "ibex_Exception.h"
+#include "ibex_ExtendedSystem.h"
+
+
+#ifdef	_IBEX_WITH_OPTIM_
+#include "ibex_DefaultOptimizerConfig.h"
+#endif
 
 #include "amplsolvers/asl.h"
 #include "amplsolvers/nlp.h"
 #include "amplsolvers/getstub.h"
 #include "amplsolvers/opcode.hd"
 #include <stdint.h>
+#include <string>
+#include <math.h>
 
 
 #define OBJ_DE    ((const ASL_fg *) asl) -> I.obj_de_
@@ -29,37 +37,47 @@
 
 
 // The different option of IBEXOPT in Ampl
-double rel_eps_f=0, abs_eps_f=0,initial_loup=0, timeout=0, eps_x=0, bisect_ratio=0, eps_h=0, relax_ratio=0;
-int trace2=0,  extended_COV=0, anticipated_UB=0, inHC4=0, rigor=0, random_seed=0, kkt=0;
+double ibex_rel_eps_f=0, ibex_abs_eps_f=0, ibex_initial_loup=INFINITY, ibex_timeout=0, ibex_eps_x=0, ibex_bisect_ratio=0, ibex_eps_h=-1, ibex_relax_ratio=0;
+int ibex_trace2=-10, ibex_random_seed=0, ibex_objno=1;
+int	ibex_extended_COV=-1, ibex_anticipated_UB=-1, ibex_inHC4=-1, ibex_rigor=-1, ibex_kkt=-1 ;
 
 static
 keyword keywds[] = { // must be alphabetical order
-		KW(const_cast<char*>("abs_eps_f"), D_val, &abs_eps_f, const_cast<char*>("Absolute precision on the objective function. Default: 1.e-7. ")),
-		KW(const_cast<char*>("anticipated_UB"), I_val, &anticipated_UB, const_cast<char*>("If true, the search space is not only contracted w.r.t. f(x)<=loup, but f(x)<=loup-eps. Default: true (enable). ")),
-		KW(const_cast<char*>("bisect_ratio"), D_val, &bisect_ratio, const_cast<char*>("Ratio for choosing bisection point. Default: 0.5. ")),
-		KW(const_cast<char*>("eps_h"), D_val, &eps_h, const_cast<char*>("Relaxation value of the equality constraints. Default: 1.e-8. ")),
-		KW(const_cast<char*>("eps_x"), D_val, &eps_x, const_cast<char*>("Precision on the variable (**Deprecated**). Default: 0. ")),
-		KW(const_cast<char*>("extended_COV"), I_val, &extended_COV, const_cast<char*>("Extended COV output file. Default: true (extended).")),
-		KW(const_cast<char*>("inHC4"), I_val, &inHC4, const_cast<char*>("Activate inHC4. Default: true. ")),
-		KW(const_cast<char*>("initial_loup"), D_val, &initial_loup, const_cast<char*>("Initilization of the upper bound with a known value. ")),
-		KW(const_cast<char*>("kkt"), I_val, &kkt, const_cast<char*>("Activate KKT contractor. Default: true for unconstrained problems. ")),
-		KW(const_cast<char*>("random_seed"), I_val, &random_seed, const_cast<char*>("Random seed (useful for reproducibility). Default: 0. ")),
-		KW(const_cast<char*>("rel_eps_f"), D_val, &rel_eps_f, const_cast<char*>("Relative precision on the objective function. Default: 1.e-3. ")),
-		KW(const_cast<char*>("relax_ratio"), D_val, &relax_ratio, const_cast<char*>("Fix-point ratio for contraction based on linear relaxation. Default: 0.2. ")),
-		KW(const_cast<char*>("rigor"), I_val, &rigor, const_cast<char*>("Activate rigor mode (certify feasibility of equalities). If true, feasibility of equalities is certified. Default: false. ")),
-		KW(const_cast<char*>("timeout"), D_val, &timeout, const_cast<char*>("Timeout (time in seconds). Default: -1 (none). ")),
-		KW(const_cast<char*>("trace"), I_val, &trace2, const_cast<char*>("Activate trace. Updates of lower and upper bound are printed while minimizing. Default: -1 (none). "))
+		KW(const_cast<char*>("abs_eps_f"), D_val, &ibex_abs_eps_f, const_cast<char*>("Absolute precision on the objective function. Default: 1.e-7. ")),
+//		KW(const_cast<char*>("anticipated_UB"), I_val, &ibex_anticipated_UB, const_cast<char*>("If true, the search space is not only contracted w.r.t. f(x)<=loup, but f(x)<=loup-eps. Default: 1 (enable). ")),
+//		KW(const_cast<char*>("bisect_ratio"), D_val, &ibex_bisect_ratio, const_cast<char*>("Ratio for choosing bisection point. Default: 0.5. ")),
+		KW(const_cast<char*>("eps_h"), D_val, &ibex_eps_h, const_cast<char*>("Relaxation value of the equality constraints. Default: 1.e-8. ")),
+		KW(const_cast<char*>("eps_x"), D_val, &ibex_eps_x, const_cast<char*>("Precision on the variable (**Deprecated**). Default: 0. ")),
+		KW(const_cast<char*>("extended_COV"), I_val, &ibex_extended_COV, const_cast<char*>("Extended COV output file. Default: 1 (extended).")),
+		KW(const_cast<char*>("inHC4"), I_val, &ibex_inHC4, const_cast<char*>("Activate inHC4. Default: true. ")),
+		KW(const_cast<char*>("initial_loup"), D_val, &ibex_initial_loup, const_cast<char*>("Initilization of the upper bound with a known value. ")),
+//		KW(const_cast<char*>("kkt"), I_val, &ibex_kkt, const_cast<char*>("Activate KKT contractor. Default: true for unconstrained problems. ")),
+		KW(const_cast<char*>("objno"),  I_val, &ibex_objno, const_cast<char*>("Choose which objective function of the AMPL model: 0 = none, 1 = first. Default: 1.")),
+		KW(const_cast<char*>("random_seed"), I_val, &ibex_random_seed, const_cast<char*>("Random seed (useful for reproducibility). Default: 0. ")),
+		KW(const_cast<char*>("rel_eps_f"), D_val, &ibex_rel_eps_f, const_cast<char*>("Relative precision on the objective function. Default: 1.e-3. ")),
+//		KW(const_cast<char*>("relax_ratio"), D_val, &ibex_relax_ratio, const_cast<char*>("Fix-point ratio for contraction based on linear relaxation. Default: 0.2. ")),
+		KW(const_cast<char*>("rigor"), I_val, &ibex_rigor, const_cast<char*>("Activate rigor mode (certify feasibility of equalities). If true, feasibility of equalities is certified. Default: false. ")),
+		KW(const_cast<char*>("timeout"), D_val, &ibex_timeout, const_cast<char*>("Timeout (time in seconds). Default: -1 (none). ")),
+		KW(const_cast<char*>("outlev"), I_val, &ibex_trace2, const_cast<char*>("Activate trace. Updates of lower and upper bound are printed while minimizing. Default: -1 (none). ")),
+		KW(const_cast<char*>("version"), Ver_val, 0, const_cast<char*>("report version")),
+		KW(const_cast<char*>("wantsol"), WS_val, 0, WS_desc_ASL+5)
+/** TODO
+	KW("timing",  I_val, &timing,  "report I/O and solution times: 1 = stdout, 2 = stderr, 3 = both"),
+	*/
 };
+
+
+static std::string xxxvers = (std::string)("AMPL/IBEXopt interface Version ")+ (_IBEX_RELEASE_) + (std::string)("\n");
 
 static
 Option_Info Oinfo = {
-		const_cast<char*>("ibexopt"),
-		const_cast<char*>("IBEXOPT "),
-		const_cast<char*>("ibexopt_options"),
-		keywds,
-		nkeywds,
-		0,
-		const_cast<char*>(_IBEX_RELEASE_)
+		const_cast<char*>("ibexopt"),          /* invocation name of solver */
+		const_cast<char*>("IBEXOPT "),         /* solver name in startup "banner" */
+		const_cast<char*>("ibexopt_options"),  /* name of solver_options environment var */
+		keywds,                                /* key words */
+		nkeywds,                               /* number of key words */
+		0,                                     /* whether funcadd will be called */
+		const_cast<char*>(xxxvers.c_str())     /*  for -v and Ver_key_ASL() */
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -155,17 +173,17 @@ namespace ibex {
 
 AmplOption::AmplOption():
 		abs_eps_f(OptimizerConfig::default_abs_eps_f),
-		anticipated_UB(OptimizerConfig::default_anticipated_UB),
-		bisect_ratio(DefaultOptimizerConfig::default_bisect_ratio)
+//		anticipated_UB(OptimizerConfig::default_anticipated_UB),
+//		bisect_ratio(DefaultOptimizerConfig::default_bisect_ratio),
 		eps_h(ExtendedSystem::default_eps_h),
 		eps_x(OptimizerConfig::default_eps_x),
-		extended_COV(OptimizerConfig::default_extended_COV),
+		extended_COV(OptimizerConfig::default_extended_cov),
 		inHC4(DefaultOptimizerConfig::default_inHC4),
 		initial_loup(POS_INFINITY),
-		kkt(false),
+//		kkt(false),
 		random_seed(DefaultOptimizerConfig::default_random_seed),
 		rel_eps_f(OptimizerConfig::default_rel_eps_f),
-		relax_ratio(DefaultOptimizerConfig::default_relax_ratio),
+//		relax_ratio(DefaultOptimizerConfig::default_relax_ratio),
 		rigor(DefaultOptimizerConfig::default_rigor),
 		trace(OptimizerConfig::default_trace),
 		timeout(OptimizerConfig::default_timeout)  {}
@@ -174,17 +192,17 @@ AmplOption::AmplOption():
 
 AmplOption::AmplOption():
 		abs_eps_f(1.e-07),
-		anticipated_UB(true),
-		bisect_ratio(0.5),
+//		anticipated_UB(true),
+//		bisect_ratio(0.5),
 		eps_h(ExtendedSystem::default_eps_h),
 		eps_x(0),
 		extended_COV(true),
 		inHC4(true),
 		initial_loup(POS_INFINITY),
-		kkt(false),
+//		kkt(false),
 		random_seed(0),
 		rel_eps_f(1.e-03),
-		relax_ratio(0.2),
+//		relax_ratio(0.2),
 		rigor(false),
 		trace(0),
 		timeout(-1) {}
@@ -221,23 +239,23 @@ AmplInterface::~AmplInterface() {
 #ifdef	_IBEX_WITH_OPTIM_
 bool AmplInterface::writeSolution(Optimizer& o) {
 	std::stringstream message;
-	message << "IBEXOPT  "<< _IBEX_RELEASE_ << " finish : ";
+	message << "IBEXopt  "<< _IBEX_RELEASE_ << " finish : ";
 	Optimizer::Status status =o.get_status();
 	switch(status) {
 		case Optimizer::SUCCESS:
-			message << " optimization successful!" ;
+			message << " OPTIMIZATION SUCCESS! \n The global minimum (with respect to the precision required) has been found. In particular, at least one feasible point has been found, less than obj_init_bound, and in the time limit." ;
 			solve_result_num=0;
 			break;
 		case Optimizer::INFEASIBLE:
-			message << " infeasible problem" ;
+			message << " INFEASIBLE PORBLEM. \n No feasible point exist less than obj_init_bound. In particular, the function returns INFEASIBLE if the initial bound \"obj_init_bound\" is LESS than the true minimum (this case is only possible if obj_abs_prec and obj_rel_prec are 0). In the latter case, there may exist feasible points." ;
 			solve_result_num=200;
 			break;
 		case Optimizer::NO_FEASIBLE_FOUND:
-			message << " no feasible point found (the problem may be infeasible)";
+			message << " NO FEASIBLE POINT FOUND. \n No feasible point could be found less than obj_init_bound. Contrary to INFEASIBLE, infeasibility is not proven here. Warning: this return value is sensitive to the abs_eps_f and rel_eps_f parameters. The upperbounding makes the optimizer only looking for points less than min{ (1-rel_eps_f)*obj_init_bound, obj_init_bound - abs_eps_f }.";
 			solve_result_num=201;
 			break;
 		case Optimizer::UNBOUNDED_OBJ:
-			message << " possibly unbounded objective (f*=-oo)";
+			message << " UNBOUNDED OBJECTIVE FONCTION. \n The objective function seems unbounded (tends to -oo).";
 			solve_result_num=300;
 			break;
 		case Optimizer::TIME_OUT:
@@ -245,7 +263,7 @@ bool AmplInterface::writeSolution(Optimizer& o) {
 			solve_result_num=400;
 			break;
 		case Optimizer::UNREACHED_PREC:
-			message << " unreached precision" ;
+			message << " UNREACHED PRECISION. \n The search is over but the resulting interval [uplo,loup] does not satisfy the precision requirements. There are several possible reasons: the goal function may be too pessimistic or the constraints function may be too pessimistic with respect to the precision requirement (which can be too stringent). This results in tiny boxes that can neither be contracted nor used as new loup candidates. Finally, the eps_x parameter may be too large." ;
 			solve_result_num=402;
 			break;
 		}
@@ -303,32 +321,51 @@ bool AmplInterface::readASLfg() {
 
 // Reads the solver option from the .nl file through the ASL methods
 bool AmplInterface::readoption() {
-	if (abs_eps_f) {
-		option.abs_eps_f = abs_eps_f;
+	if (ibex_abs_eps_f) {
+		option.abs_eps_f = ibex_abs_eps_f;
 	}
-	if (rel_eps_f) {
-		option.rel_eps_f = rel_eps_f;
+//	if (ibex_anticipated_UB!=-1) {
+//		option.anticipated_UB = (ibex_anticipated_UB!=0);
+//	}
+//	if (ibex_bisect_ratio) {
+//		option.bisect_ratio = ibex_bisect_ratio;
+//	}
+	if (ibex_eps_h!=-1) {
+		option.eps_h = ibex_eps_h;
 	}
-	if (trace2) {
-		option.trace = true;
+	if (ibex_eps_x) {
+		option.eps_x = ibex_eps_x;
 	}
-	if (rigor) {
-		option.rigor = true;
+	if (ibex_extended_COV!=-1) {
+		option.extended_COV = (ibex_extended_COV!=0);
 	}
-	if (eps_h) {
-		option.eps_h = eps_h;
+	if (ibex_inHC4!=-1) {
+		option.inHC4 = (ibex_inHC4!=0);
 	}
-	if (eps_x) {
-		option.eps_x = eps_x;
+	if (ibex_initial_loup < POS_INFINITY) {
+		option.initial_loup = ibex_initial_loup;
 	}
-	if (initial_loup) {
-		option.initial_loup = initial_loup;
+
+//	if (ibex_kkt!=-1) {
+//		option.kkt = (ibex_kkt!=0);
+//	}
+	if (ibex_random_seed) {
+		option.random_seed = ibex_random_seed;
 	}
-	if (random_seed) {
-		option.random_seed = random_seed;
+	if (ibex_rel_eps_f) {
+		option.rel_eps_f = ibex_rel_eps_f;
 	}
-	if (timeout) {
-		option.timeout = timeout;
+//	if (ibex_relax_ratio) {
+//		option.relax_ratio = ibex_relax_ratio;
+//	}
+	if (ibex_rigor!=-1) {
+		option.rigor = (ibex_rigor!=0);
+	}
+	if (ibex_trace2!=-10) {
+		option.trace = ibex_trace2;
+	}
+	if (ibex_timeout) {
+		option.timeout = ibex_timeout;
 	}
 
 	return true;
@@ -379,9 +416,11 @@ bool AmplInterface::readnl() {
 		//add_var(*_x, bound);
 
 	// objective functions /////////////////////////////////////////////////////////////
-		if (n_obj>1) {ibex_error("Error AmplInterface: too much objective function in the ampl model."); return false;}
+		//if (n_obj>1) {ibex_error("Error AmplInterface: too much objective function in the ampl model."); return false;}
 
-		for (int i = 0; i < n_obj; i++) {
+		//for (int i = 0; i < n_obj; i++) {
+		if (ibex_objno) {
+			int i = ibex_objno;
 			///////////////////////////////////////////////////
 			//  the nonlinear part
 			const ExprNode *body = &(nl2expr (OBJ_DE [i] . e));

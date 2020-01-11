@@ -15,7 +15,6 @@
 #include "args.hxx"
 
 #include <sstream>
-#define _IBEX_WITH_AMPL_ 1
 #ifndef _IBEX_WITH_OPTIM_
 #error "You need to install the IbexOpt plugin (--with-optim)."
 #endif
@@ -111,7 +110,7 @@ int main(int argc, char** argv) {
 			option_ampl = true;
 			quiet =true;
 #else
-			cerr << "\n\033[31mCannot read \".nl\" files: AMPL plugin required \033[0m(try reconfigure with --with-ampl)\n\n";
+			cerr << "\n\033[31mCannot read \".nl\" files: AMPL plugin required \033[0m(try reconfigure ibex with option --with-ampl)\n\n";
 			exit(0);
 #endif
 	}
@@ -148,20 +147,20 @@ int main(int argc, char** argv) {
 #ifdef _IBEX_WITH_AMPL_
 		if (extension == "nl" || option_ampl) {
 
-			config.set_bisect_ratio(ampl->option.bisect_ratio);
-			config.set_relax_ratio(ampl->option.relax_ratio);
-			config.set_anticipated_UB(ampl->option.anticipated_UB);
+			//config.set_bisect_ratio(ampl->option.bisect_ratio);
+			//config.set_relax_ratio(ampl->option.relax_ratio);
+			//config.set_anticipated_UB(ampl->option.anticipated_UB);
 			config.set_rel_eps_f(ampl->option.rel_eps_f);
 			config.set_abs_eps_f(ampl->option.abs_eps_f);
 			config.set_eps_h(ampl->option.eps_h);
 			config.set_eps_x(ampl->option.eps_x);
 			config.set_rigor(ampl->option.rigor);
-			config.set_kkt(ampl->option.kkt);
+			//config.set_kkt(ampl->option.kkt);
 			config.set_random_seed(ampl->option.random_seed);
 			config.set_timeout(ampl->option.timeout);
 			config.set_trace(ampl->option.trace);
 			config.set_inHC4(ampl->option.inHC4);
-			config.set_extended_cov(ampl->option.extended_cov);
+			config.set_extended_cov(ampl->option.extended_COV);
 
 			initial_loup1 = ampl->option.initial_loup;
 		}

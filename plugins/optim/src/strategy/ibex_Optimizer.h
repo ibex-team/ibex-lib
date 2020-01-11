@@ -102,7 +102,7 @@ public:
 	 *
 	 *         INFEASIBLE          if no feasible point exist less than obj_init_bound. In particular, the function returns INFEASIBLE
 	 *                             if the initial bound "obj_init_bound" is LESS than the true minimum (this case is only possible if
-	 *                             goal_abs_prec and goal_rel_prec are 0). In the latter case, there may exist feasible points.
+	 *                             obj_abs_prec and obj_rel_prec are 0). In the latter case, there may exist feasible points.
 	 *
 	 *         NO_FEASIBLE_FOUND   if no feasible point could be found less than obj_init_bound. Contrary to INFEASIBLE,
 	 *                             infeasibility is not proven here. Warning: this return value is sensitive to the abs_eps_f and

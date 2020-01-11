@@ -15,7 +15,6 @@
 #include "ibex_SystemFactory.h"
 #include "ibex_Expr.h"
 #include "ibex_Interval.h"
-#include "ibex_ExtendedSystem.h"
 #include "ibex_Setting.h"
 
 #ifdef __GNUC__
@@ -47,10 +46,10 @@ public:
 
 	/** Goal absolute precision: 1e-7. */
 	double abs_eps_f;
-	/** Anticipated upper bounding : true (enabled). */
-	bool anticipated_UB;
-	/** Ratio for choosing bisection point. */
-	double bisect_ratio;
+//	/** Anticipated upper bounding : true (enabled). */
+//	bool anticipated_UB;
+//	/** Ratio for choosing bisection point. */
+//	double bisect_ratio;
 	/**  Equality thickness. */
 	double eps_h;
 	/** Bisection precision: 0. */
@@ -61,12 +60,12 @@ public:
 	bool inHC4;
 	/** Initial value of the upper bound */
 	double initial_loup;
-	bool kkt;
+//	bool kkt;
 	int random_seed;
 	/** Goal relative precision: 1e-3. */
 	double rel_eps_f;
-	/** Fix-point ratio for contraction based on linear relaxation. */
-	double relax_ratio;
+//	/** Fix-point ratio for contraction based on linear relaxation. */
+//	double relax_ratio;
 	/** Activate/deactivate rigor mode. If true, feasibility of equalities is certified. */
 	bool rigor;
 	/** Trace mode: 0 (none). */

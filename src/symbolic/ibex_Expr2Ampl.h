@@ -39,7 +39,7 @@ protected:
 	void visit(const ExprConstant& e);
 	void visit(const ExprIndex& e);
 	//void visit(const ExprSymbol& e);
-	//void visit(const ExprMul& e);
+	//void visit(const ExprMul& e);  ATTENTION IL N'Y A PAS DE PRODSCALAIRE EN AMPL.......
 
 
 	// Associate a subexpression to a temporary symbol number
