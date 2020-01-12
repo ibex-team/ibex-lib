@@ -11,12 +11,12 @@ environment:
 install:
   - cmd: echo %Platform%
   - cmd: set MINGW-W64_BASE=c:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
-  - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;c:\msys64\usr\bin;%PATH%
+  - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;%PATH%  #;c:\msys64\usr\bin;%PATH%
   - cmd: uname -a
   - cmd: pacman --noconfirm -S mingw-w64-x86_64-cppunit
-#  - cmd: pacman --noconfirm -S mingw-w64-x86_64-lapack
-  - cmd: set CPATH=%CPATH%;c:\msys64\mingw32\include
-  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;c:\msys64\mingw32\lib
+  - cmd: pacman --noconfirm -S mingw-w64-x86_64-lapack
+  - cmd: set CPATH=%CPATH%;%MINGW-W64_BASE%\mingw32\include   #;c:\msys64\mingw32\include
+  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;%MINGW-W64_BASE%\mingw32\include  #;c:\msys64\mingw32\lib
   - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
 
 build_script:
