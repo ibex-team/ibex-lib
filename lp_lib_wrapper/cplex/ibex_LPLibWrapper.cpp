@@ -516,7 +516,7 @@ void LPSolver::set_sense(Sense s) {
 	return ;
 }
 
-void LPSolver::set_obj_var(int var, double coef) {
+void LPSolver::set_cost(int var, double coef) {
 
 	try {
 
@@ -532,7 +532,7 @@ void LPSolver::set_obj_var(int var, double coef) {
 	return ;
 }
 
-void LPSolver::set_obj(const Vector& coef) {
+void LPSolver::set_cost(const Vector& coef) {
 
 	try {
 

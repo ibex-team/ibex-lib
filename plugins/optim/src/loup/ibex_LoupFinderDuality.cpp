@@ -68,9 +68,9 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 
 	size_t j=0;
 	for (; j<(size_t) n; j++)
-		lp_solver.set_var_obj(j,goal[j]);
+		lp_solver.set_cost(j,goal[j]);
 	for (; j<nb_LP_var; j++)
-		lp_solver.set_var_obj(j,0);
+		lp_solver.set_cost(j,0);
 
 	LPSolver::Status stat = lp_solver.minimize();
 

@@ -24,7 +24,7 @@ void TestLinearSolver::test01() {
 	for (int j=1;j<=n;j++) {
 		v[j-1]= ::pow(10,n-j);
 	}
-	lp.set_obj(-v);
+	lp.set_cost(-v);
 
 	IntervalVector bound (n, Interval(-30,30));
 	lp.set_bounds(bound);
@@ -47,7 +47,7 @@ LPSolver TestLinearSolver::create_kleemin(int n) {
 	for (int j=1;j<=n;j++) {
 		v[j-1]= ::pow(10,n-j);
 	}
-	lp.set_obj(-v);
+	lp.set_cost(-v);
 
 	IntervalVector bound (n, Interval::pos_reals());
 	lp.set_bounds(bound);
@@ -88,7 +88,7 @@ void TestLinearSolver::kleemin30() {
 	for (int j=1;j<=n;j++) {
 		v[j-1]= ::pow(10,n-j);
 	}
-	lp.set_obj(-v);
+	lp.set_cost(-v);
 
 	IntervalVector bound (n, Interval::pos_reals());
 	lp.set_bounds(bound);
@@ -159,7 +159,7 @@ void TestLinearSolver::reset() {
 	for (int j=1;j<=n;j++) {
 		v[j-1]= ::pow(10,n-j);
 	}
-	lp.set_obj(-v);
+	lp.set_cost(-v);
 
 	IntervalVector bound (n, Interval::pos_reals());
 	lp.set_bounds(bound);
@@ -191,13 +191,49 @@ void TestLinearSolver::test_known_problem(std::string filename, double optimal) 
 	double scaling=1;
 	lp.add_constraints(lp_ref.lhs(), lp_ref.rows(), lp_ref.rhs());
 	lp.set_bounds(lp_ref.bounds());
-	lp.set_obj(scaling*lp_ref.obj_vec());
+	lp.set_cost(scaling*lp_ref.cost());
 	lp.set_tolerance(1e-9);
 	lp.set_max_iter(-1);
 	lp.minimize();
 	CPPUNIT_ASSERT(lp.status() == LPSolver::Status::Optimal);
 	double obj = lp.minimum().lb();
 	check_relatif(obj, scaling*optimal, 1e-9);
+}
+
+/*
+ * The problem is
+ * min x
+ * s.t. y <= ax + a
+ *      y >= 0
+ *      x <= 0
+ *
+ * a = 1e-7 is the smallest value where the optimum is found under SoPlex 3.1.1
+ */
+void TestLinearSolver::nearly_parallel_constraints() {
+	LPSolver lp(2, LPSolver::Mode::Certified);
+	lp.set_bounds(0, Interval::NEG_REALS);
+	lp.set_bounds(1, Interval::POS_REALS);
+	double a = 1e-7;
+	lp.add_constraint({-a, 1}, CmpOp::LEQ, a);
+	lp.set_cost({1, 0});
+	LPSolver::Status status = lp.minimize();
+	CPPUNIT_ASSERT(status == LPSolver::Status::OptimalProved);
+	double obj = lp.minimum().lb();
+	check_relatif(obj, -1, 1e-9);
+}
+
+void TestLinearSolver::cost_parallel_to_constraint() {
+	LPSolver lp(2, LPSolver::Mode::Certified);
+	lp.set_bounds(0, Interval::NEG_REALS);
+	lp.set_bounds(1, Interval::POS_REALS);
+	double a = 1e-15; // a: 1 -> 0
+	double b = 1/a; // b: 0 -> 1/a
+	lp.add_constraint({-a, 1}, CmpOp::LEQ, a);
+	lp.set_cost({1, -b});
+	LPSolver::Status status = lp.minimize();
+	CPPUNIT_ASSERT(status == LPSolver::Status::OptimalProved);
+	double obj = lp.minimum().lb();
+	check_relatif(obj, -1, 1e-9);
 }
 
 /*

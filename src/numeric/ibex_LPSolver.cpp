@@ -46,7 +46,7 @@ bool LPSolver::neumaier_shcherbina_postprocessing() {
     Matrix A_trans = rows_transposed();
     IntervalVector b = lhs_rhs();
     IntervalVector rest = A_trans*uncertified_dual_;
-	rest -= obj_vec();
+	rest -= cost();
 	//Interval certified_obj_raw = uncertified_dual_*b - rest*ivec_bounds_;
 	//certified_obj_ = Interval(certified_obj_raw.lb(), uncertified_obj_.ub());
     obj_ = uncertified_dual_*b - rest*ivec_bounds_;

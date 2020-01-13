@@ -70,7 +70,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	ext_box_ = sip_to_ext_box(box, system_.goal_function_->eval(box));
 	lp_solver_.clear_constraints();
 	lp_solver_.set_bounds(ext_box_);
-	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
+	lp_solver_.set_cost(system_.ext_nb_var - 1, 1.0);
 	if(linearizer_.linearize(ext_box_, lp_solver_, prop) < 0) {
 		throw NotFound();
 	}
@@ -230,7 +230,7 @@ bool LoupFinderLineSearch::relaxations_direction(Vector& direction, double& obj,
 	bounds[system_.nb_var] = Interval::all_reals();
 	dir_solver_.set_bounds(bounds);
 
-	dir_solver_.set_obj_var(system_.nb_var, 1);
+	dir_solver_.set_cost(system_.nb_var, 1);
 	//std::cout << dir_solver.get_rows() << std::endl;
 	LPSolver::Status dir_solver_status = dir_solver_.solve();
 	if (dir_solver_status != LPSolver::Status::OPTIMAL) {
@@ -267,7 +267,7 @@ bool LoupFinderLineSearch::blankenship_direction(Vector& direction, double& obj)
 	bounds[system_.nb_var] = Interval::all_reals();
 	dir_solver_.set_bounds(bounds);
 
-	dir_solver_.set_obj_var(system_.nb_var, 1);
+	dir_solver_.set_cost(system_.nb_var, 1);
 	//std::cout << dir_solver.get_rows() << std::endl;
 	LPSolver::Status dir_solver_status = dir_solver_.solve();
 	if (dir_solver_status != LPSolver::Status::OPTIMAL) {
@@ -303,7 +303,7 @@ bool LoupFinderLineSearch::stein_direction(Vector& direction, double& obj) {
 	bounds[system_.nb_var] = Interval::all_reals();
 	dir_solver_.set_bounds(bounds);
 
-	dir_solver_.set_obj_var(system_.nb_var, 1);
+	dir_solver_.set_cost(system_.nb_var, 1);
 	//std::cout << dir_solver.get_rows() << std::endl;
 	LPSolver::Status dir_solver_status = dir_solver_.solve();
 	if (dir_solver_status != LPSolver::Status::OPTIMAL) {
@@ -398,9 +398,9 @@ bool LoupFinderLineSearch::corner_restrictions(Vector& loup_point) {
 		return false;
 	}
 	Vector g = ig.mid();
-	//lp_solver_->set_obj(g);
+	//lp_solver_->set_cost(g);
 	for(int i = 0; i < g.size(); ++i) {
-		corner_solver_->set_obj_var(i, g[i]);
+		corner_solver_->set_cost(i, g[i]);
 	}
 	corner_solver_->set_sense(LPSolver::MINIMIZE);
 	int count = corner_linearizer_->linearize(ext_box_, *corner_solver_, *prop_);

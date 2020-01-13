@@ -43,9 +43,9 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 	Vector g=ig.mid();
 
 	// set the objective coefficient
-	// TODO: replace with lp_solver.set_obj(g) when implemented
+	// TODO: replace with lp_solver.set_cost(g) when implemented
 	for (int j=0; j<n; j++)
-		lp_solver.set_var_obj(j,g[j]);
+		lp_solver.set_cost(j,g[j]);
 
 	int count = lr.linearize(box,lp_solver,prop);
 

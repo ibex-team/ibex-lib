@@ -93,6 +93,7 @@ public:
      * \brief Build a LPSolver with nb_vars variables.
      *
      * \param nb_vars number of variables of the linear problem
+     * \param mode in certified mode, the result may still be uncertified
      * \param tolerance primal and dual tolerance
      * \param timeout maximum solving time
      * \param max_iter maximum number of iterations
@@ -102,18 +103,11 @@ public:
 
 
     /**
-     * \brief Read a model file
+     * \brief Read a model file. The accepted format depends on the underlying solver, e.g. for SoPlex .lp and .mps files.
      */
     LPSolver(std::string filename);
 
     ~LPSolver();
-
-    /*
-    void add_variable(const Interval& bounds, double obj);
-    void add_variable(const Vector& col, const Interval& bounds, double obj);
-    void add_variables(const IntervalVector& bounds, const Vector& obj);
-    void add_variables(const Matrix& cols, const IntervalVector& bounds, const Vector& obj);
-    */
 
     /**
      * \brief Add a constraint of the type lhs <= row.x <= rhs.
@@ -130,11 +124,10 @@ public:
     void add_constraints(const Vector& lhs, const Matrix& rows, const Vector& rhs);
     void add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs);
 
-    // minimize()
-    /*
+    /**
      * Solve the LP with the current set of constraints,
      * the current objective and bounds.
-     * The LP can be modified between two calls to optimze(...)
+     * The LP can be modified between two calls to minimize(...)
      * The same instance of the underlying LP solver is updated.
      *
      */
@@ -143,25 +136,25 @@ public:
     /**
      * \brief Set the objective function vector.
      */
-    void set_obj(const Vector& obj);
-    // TODO set_obj(int index,...)
+    void set_cost(const Vector& obj);
+
     /**
      * \brief Set the objective function coefficient for a variable.
      *
      * \param var the variable index
      * \param value the coefficient
      */
-    void set_var_obj(int var, double value);
+    void set_cost(int var, double value);
 
     /**
      * \brief Set the bounds of the of the variable
      */
     void set_bounds(const IntervalVector& bounds);
-    // TODO set_bounds(int index,...)
+
     /**
      * \brief Set the bounds on a variable
      */
-    void set_var_bounds(int var, const Interval& bounds);
+    void set_bounds(int var, const Interval& bounds);
     void set_tolerance(double tolerance);
     void set_timeout(double timeout);
     void set_max_iter(int max_iter);
@@ -171,6 +164,9 @@ public:
     double tolerance() const;
     int max_iter() const;
     double timeout() const;
+    /**
+     * Return the status of the last call to minimize, or Unknown if minimize has not been called.
+     */
     Status status() const;
 
     // matrix ?
@@ -188,35 +184,45 @@ public:
     IntervalVector bounds() const;
     Interval bounds(int index) const;
 
-    // obj
-    Vector obj_vec() const;
-    // obj(int)
-    Vector var_obj(int index) const;
+    Vector cost() const;
+    double cost(int index) const;
 
     /**
+     * TODO CHECK
      * \brief Wether the last call to minimize() found a feasible point.
+     *
+     * Return true only if:
+     * - in certified mode, status is FeasibleProved
+     * - in uncertified mode, status is Feasible
      */
     bool is_feasible() const;
     // TODO relancer automatiquement le solveur
     /**
      * \brief Return an enclosure for the minimum.
      *
+     * This is the minimum of the last call to minimize.
      * The enclosure is certified or not depending one the mode defined
      * in the LPSolver constructor.
+     * \throws LPException if either minimize() has not been called or the status is not Feasible or FeasibleProved.
      */
     Interval minimum() const;
 
+    // TODO uncertified -> not proved
     /**
      * \brief Return an uncertified primal solution (a minimizer).
      */
     Vector uncertified_primal_sol() const;
-    // TODO relancer automatiquement le solveur
+
     /**
      * \brief Return an uncertified dual solution.
      */
     Vector uncertified_dual_sol() const ;
 
     // A voir
+    /**
+     * Return true only if point is proved to be inside the feasible polytope,
+     * (even in non certified mode).
+     */
     bool is_feasible_point(const Vector& point) const;
 
     /**
@@ -228,6 +234,7 @@ public:
      */
     void write_to_file(const std::string& filename) const;
 
+    //TODO obj->cost
     // Clear functions
     /**
      * \brief Reset the objective to zero for all variables.

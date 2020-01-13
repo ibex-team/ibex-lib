@@ -61,11 +61,11 @@ void LPSolver::set_sense(Sense s){
 	throw LPException();
 }
 
-void LPSolver::set_obj(const Vector& coef){
+void LPSolver::set_cost(const Vector& coef){
 	throw LPException();
 }
 
-void LPSolver::set_obj_var(int var, double coef){
+void LPSolver::set_cost(int var, double coef){
 	throw LPException();
 }
 

@@ -34,6 +34,8 @@ public:
 	CPPUNIT_TEST(afiro);
 	CPPUNIT_TEST(adlittle);
 	CPPUNIT_TEST(p25fv47);
+	CPPUNIT_TEST(nearly_parallel_constraints);
+	CPPUNIT_TEST(cost_parallel_to_constraint);
 #endif
 
 	CPPUNIT_TEST_SUITE_END();
@@ -47,6 +49,8 @@ public:
 	void kleemin30();
 	void reset();
 
+	void nearly_parallel_constraints();
+	void cost_parallel_to_constraint();
 	void test_known_problem(std::string filename, double optimal);
 	void afiro() { test_known_problem("../../tests/lp-test-problems/afiro.mps",  -4.6475314286E+02);};
     void adlittle() { test_known_problem("../../tests/lp-test-problems/adlittle.mps", 2.2549496316E+05);};
