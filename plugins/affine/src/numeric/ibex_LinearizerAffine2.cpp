@@ -56,12 +56,12 @@ bool LinearizerAffine2::goal_linearization(const IntervalVector& box, LPSolver& 
 				tmp = box[i].rad();
 				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
 					if (af2.val(i+1)==0)
-						lp_solver.set_obj_var(i, 0);
+						lp_solver.set_cost(i, 0);
 					else {
 						return false; // sensible case to avoid
 					}
 				} else {
-					lp_solver.set_obj_var(i, af2.val(i+1) / tmp);
+					lp_solver.set_cost(i, af2.val(i+1) / tmp);
 				}
 			}
 		}

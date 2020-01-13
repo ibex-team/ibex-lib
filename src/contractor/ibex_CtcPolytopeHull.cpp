@@ -129,9 +129,9 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{
 			inf_bound[i]=1;
-			mylinearsolver.set_var_obj(i, 1.0);
+			mylinearsolver.set_cost(i, 1.0);
 			stat = mylinearsolver.minimize();
-			mylinearsolver.set_var_obj(i, 0.0);
+			mylinearsolver.set_cost(i, 0.0);
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat << endl;
 			if (stat == LPSolver::Status::OptimalProved) {
 				opt = mylinearsolver.minimum();
@@ -146,7 +146,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 				if(opt.lb() > box[i].lb()) {
 					box[i]=Interval(opt.lb(),box[i].ub());
-					mylinearsolver.set_var_bounds(i,box[i]);
+					mylinearsolver.set_bounds(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {
@@ -183,9 +183,9 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		}
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
-			mylinearsolver.set_var_obj(i, -1.0);
+			mylinearsolver.set_cost(i, -1.0);
 			stat= mylinearsolver.minimize();
-			mylinearsolver.set_var_obj(i, 0.0);
+			mylinearsolver.set_cost(i, 0.0);
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << endl;
 			if( stat == LPSolver::Status::OptimalProved) {
 				opt = -mylinearsolver.minimum();
@@ -201,7 +201,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 				if (opt.ub() < box[i].ub()) {
 					box[i] =Interval( box[i].lb(), opt.ub());
-					mylinearsolver.set_var_bounds(i,box[i]);
+					mylinearsolver.set_bounds(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {

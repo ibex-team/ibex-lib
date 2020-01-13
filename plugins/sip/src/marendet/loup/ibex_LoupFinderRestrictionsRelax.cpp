@@ -53,9 +53,9 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const Interv
 		throw NotFound();
 	}
 	Vector g = ig.mid();
-	//lp_solver_->set_obj(g);
+	//lp_solver_->set_cost(g);
 	for(int i = 0; i < g.size(); ++i) {
-		lp_solver_->set_obj_var(i, g[i]);
+		lp_solver_->set_cost(i, g[i]);
 	}
 	lp_solver_->set_sense(LPSolver::MINIMIZE);
 	int count = linearizer_.linearize(ext_box, *lp_solver_, prop);

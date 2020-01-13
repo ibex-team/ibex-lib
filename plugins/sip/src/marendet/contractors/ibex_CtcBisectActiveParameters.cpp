@@ -42,7 +42,7 @@ void CtcBisectActiveParameters::contract(IntervalVector& box) {
 void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& context) {
     lp_solver_.clear_constraints();
 	lp_solver_.set_bounds(box);
-	lp_solver_.set_obj_var(sys_.ext_nb_var - 1, 1.0);
+	lp_solver_.set_cost(sys_.ext_nb_var - 1, 1.0);
 	lp_solver_.set_sense(LPSolver::MINIMIZE);
 	if(linearizer_.linearize(box, lp_solver_, context.prop) < 0) {
 		return;

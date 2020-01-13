@@ -236,13 +236,13 @@ LPSolver::Status LPSolver::minimize() {
     return status_;
 }
 
-void LPSolver::set_obj(const Vector& obj) {
+void LPSolver::set_cost(const Vector& obj) {
     assert(obj.size() == nb_vars());
     has_changed = true;
     mysoplex->changeObjReal(ivec2dvec(obj));
 }
 
-void LPSolver::set_var_obj(int index, double value) {
+void LPSolver::set_cost(int index, double value) {
     assert(index >= 0 && index < nb_vars());
     has_changed = true;
     mysoplex->changeObjReal(index, value);
@@ -261,7 +261,7 @@ void LPSolver::set_bounds(const IntervalVector& bounds) {
     }
 }
 
-void LPSolver::set_var_bounds(int var, const Interval& bounds) {
+void LPSolver::set_bounds(int var, const Interval& bounds) {
     assert(var >= 0 && var < nb_vars());
     has_changed = true;
     ivec_bounds_[var] = bounds;
@@ -373,13 +373,13 @@ Interval LPSolver::bounds(int index) const {
     return ivec_bounds_[index];
 }
 
-Vector LPSolver::obj_vec() const {
+Vector LPSolver::cost() const {
     DVectorReal vec(nb_vars());
     mysoplex->getObjReal(vec);
     return dvec2ivec(vec);
 }
 
-Vector LPSolver::var_obj(int index) const {
+double LPSolver::cost(int index) const {
     return mysoplex->objReal(index);
 }
 
