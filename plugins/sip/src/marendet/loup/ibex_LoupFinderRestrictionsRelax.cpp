@@ -25,9 +25,9 @@ namespace ibex {
 LoupFinderRestrictionsRelax::LoupFinderRestrictionsRelax(
 		const SIPSystem& system, Linearizer& linearizer) :
 		LoupFinderSIP(system), linearizer_(linearizer), lp_solver_(
-				new LPSolver(linearizer_.nb_var())) {
+				new LPSolver(linearizer_.nb_var(), LPSolver::Mode::Certified)) {
 	lp_solver_->set_max_iter(10000000);
-	lp_solver_->set_max_time_out(1000000);
+	lp_solver_->set_timeout(1000000);
 }
 
 LoupFinderRestrictionsRelax::~LoupFinderRestrictionsRelax() {
@@ -46,29 +46,25 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const Interv
 	if (d < LPSolver::min_box_diam || d > LPSolver::max_box_diam)
 		throw NotFound();
 
-	lp_solver_->clear_ctrs();
+	lp_solver_->clear_constraints();
 	lp_solver_->set_bounds(box);
 	IntervalVector ig = system_.goal_function_->gradient(box.mid());
 	if(ig.is_empty()) {
 		throw NotFound();
 	}
 	Vector g = ig.mid();
-	//lp_solver_->set_cost(g);
-	for(int i = 0; i < g.size(); ++i) {
-		lp_solver_->set_cost(i, g[i]);
-	}
-	lp_solver_->set_sense(LPSolver::MINIMIZE);
+	lp_solver_->set_cost(g);
 	int count = linearizer_.linearize(ext_box, *lp_solver_, prop);
 	if(count < 0) {
 		throw NotFound();
 	}
 	//lp_solver_->write_file();
 	//cout << "beforesolve" << endl;
-	LPSolver::Status stat = lp_solver_->solve_proved();
+	LPSolver::Status stat = lp_solver_->minimize();
 	//cout << "aftersolve" << endl;
-	if(stat == LPSolver::Status::Optimal_PROVED) {
+	if(stat == LPSolver::Status::OptimalProved) {
 		//Vector loup_point(box_without_goal.size());
-		Vector loup_point = lp_solver_->get_primal_sol();
+		Vector loup_point = lp_solver_->uncertified_primal_sol();
 		if(!box.contains(loup_point)) {
 			throw NotFound();
 		}
