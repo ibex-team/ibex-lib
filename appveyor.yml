@@ -15,12 +15,11 @@ install:
  # - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;%PATH%#;C:\msys64\usr\bin
   - cmd: uname -a
   - cmd: mkdir C:\ibex
-  - cmd: C:\MinGW\msys\1.0\postinstall\pi.bat
-  - cmd: C:\MinGW\msys\1.0\msys.bat
+  - cmd:  set MINGW_BASE=C:\MinGW\
  # - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-cppunit
  # - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-lapack
- # - cmd: set CPATH=%CPATH%;%MINGW-W64_BASE%\mingw32\include;C:\msys64\mingw32\include
- # - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;%MINGW-W64_BASE%\mingw32\lib;C:\msys64\mingw32\lib
+  - cmd: set CPATH=%CPATH%;%MINGW_BASE%\include
+  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;%MINGW_BASE%\lib
  # - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
   - cmd: set PREFIX=C:\ibex
 
