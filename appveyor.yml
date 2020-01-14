@@ -12,14 +12,14 @@ install:
   - cmd: echo %Platform%
  # - cmd: set MINGW-W64_BASE=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0 
  # - cmd: set MINGW-W64_BASE=C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
- # - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;%PATH%#;C:\msys64\usr\bin
   - cmd: uname -a
   - cmd: mkdir C:\ibex
   - cmd:  set MINGW_BASE=C:\MinGW\
- # - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-cppunit
- # - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-lapack
+  - cmd: set PATH=%PATH%;%MINGW_BASE%\bin
   - cmd: set CPATH=%CPATH%;%MINGW_BASE%\include
   - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;%MINGW_BASE%\lib
+ # - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-cppunit
+ # - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-lapack
  # - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
   - cmd: set PREFIX=C:\ibex
 
