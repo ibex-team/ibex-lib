@@ -150,7 +150,7 @@ bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& D
 	Matrix Jsup=Dg.ub();
 	Vector Jsup_pinf= Jsup * pinf;
 
-	LPSolver linsolve(p, k);
+	LPSolver linsolve(p);
 
 	Interval opt(0.0); // store the optimum (unused)
 
