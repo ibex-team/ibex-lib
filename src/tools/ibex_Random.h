@@ -66,7 +66,7 @@ namespace ibex {
 		 *  This function sets the seed for random number generation \c
 		 *  \return A boolean if the seed is acceptable, that is in [0,UINT32_MAX].
 		 */
-		static void srand(int s);
+		static void srand(uint32_t s);
 
 		/** \brief Get a random integer as uint32
 		 * This function serves to obtain a random number \c
