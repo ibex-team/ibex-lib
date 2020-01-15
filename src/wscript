@@ -32,6 +32,7 @@ def configure (conf):
 
 	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
 	conf.check_cxx (cxxflags="-U__STRICT_ANSI__", uselib_store="IBEX")
+	conf.check_cxx(cxxflags = "-std=c++11", uselib_store="IBEXsss")
 
   # Handle operators
 	conf.recurse ("operators")
