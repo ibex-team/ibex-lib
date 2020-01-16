@@ -24,9 +24,10 @@ install:
  # - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
   - cmd: set PREFIX=C:\ibex
   - cmd: cd C:\projects\ && git clone git://anongit.freedesktop.org/git/libreoffice/cppunit/ 
-  - sh: cd C:\projects\cppunit && autogen.sh && configure && make && make check && make install
+  - sh: cd C:\projects\cppunit && bash autogen.sh && bash configure && make && make check && make install
   - cmd: set CPATH=%CPATH%;C:\projects\cppunit\include
   - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;C:\projects\cppunit\lib
+  - cmd: cd
   
 
 build_script:
