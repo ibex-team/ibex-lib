@@ -23,18 +23,17 @@ install:
  # - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-lapack
  # - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
   - cmd: set PREFIX=C:\ibex
-  - cmd: cd C:\projects\ && git clone git://anongit.freedesktop.org/git/libreoffice/cppunit/ 
-  - cmd: cd C:\projects\cppunit
-  - cmd: sh autogen.sh && sh configure && make && make check && make install
-  - cmd: set CPATH=%CPATH%;C:\projects\cppunit\include
-  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;C:\projects\cppunit\lib
-  - cmd: cd
+ # - cmd: cd C:\projects\ && git clone git://anongit.freedesktop.org/git/libreoffice/cppunit/ 
+ # - cmd: cd C:\projects\cppunit
+ # - cmd: sh autogen.sh && sh configure && make && make check && make install
+ # - cmd: set CPATH=%CPATH%;C:\projects\cppunit\include
+ # - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;C:\projects\cppunit\lib
+ # - cmd: cd
   
 
 build_script:
-  - cmd: python -x waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug --with-ampl #--with-optim  --lp-lib=clp
+  - cmd: python -x waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug --with-ampl --with-optim  --lp-lib=clp
   - cmd: python -x waf install
-  - cmd: python -x waf clean
 
 test_script:
   - cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
