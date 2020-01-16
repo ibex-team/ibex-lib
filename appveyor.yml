@@ -5,18 +5,18 @@ platform: x64
   
 environment:
   matrix:
-#    - TEST_INTERVAL_LIB: "gaol"
-#      MSYS_BASE: "C:\MinGW\msys\1.0"
-#      MSYS_BASE_BIN: "C:\MinGW\msys\1.0"
-#      MINGW_BASE: "C:\MinGW"
-#    - TEST_INTERVAL_LIB: "filib"
-#      MSYS_BASE: "C:\MinGW\msys\1.0"
-#      MSYS_BASE_BIN: "C:\MinGW\msys\1.0"
-#      MINGW_BASE: "C:\MinGW"
+    - TEST_INTERVAL_LIB: "gaol"
+      MSYS_BASE: C:\MinGW\msys\1.0
+      MSYS_BASE_BIN: C:\MinGW\msys\1.0
+      MINGW_BASE: C:\MinGW
     - TEST_INTERVAL_LIB: "filib"
-      MSYS_BASE: "C:\msys64\mingw32"
-      MSYS_BASE_BIN: "C:\msys64\usr"
-      MINGW_BASE: "C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1"
+      MSYS_BASE: C:\MinGW\msys\1.0
+      MSYS_BASE_BIN: C:\MinGW\msys\1.0
+      MINGW_BASE: C:\MinGW
+    - TESTINTERVAL_LIB: "filib"
+      MSYS_BASE_BIN: C:\msys64\usr
+      MSYS_BASE: C:\msys64\mingw32
+      MINGW_BASE: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
 
 install:
   - cmd: echo %Platform%
