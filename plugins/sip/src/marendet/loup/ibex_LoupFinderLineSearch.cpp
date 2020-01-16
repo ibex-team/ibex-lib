@@ -31,9 +31,9 @@ const double LoupFinderLineSearch::default_sigma = 0.9;
 
 LoupFinderLineSearch::LoupFinderLineSearch(const SIPSystem& system, const std::set<InnerPointStrategy>& strategies) :
 		LoupFinderSIP(system), strategies_(strategies), linearizer_(system, RelaxationLinearizerSIP::CornerPolicy::random, false), lp_solver_(
-				system.ext_nb_var, LPSolver::Mode::Certified, 10000, 10000), relax_point_(system.ext_nb_var),
-				dir_solver_(system.ext_nb_var, LPSolver::Mode::NotCertified, 10000, 10000),
-				corner_solver_(new LPSolver(system.nb_var, LPSolver::Mode::Certified, 10000, 10000)),
+				system.ext_nb_var, LPSolver::Mode::Certified, 1e-9, 10000, 10000), relax_point_(system.ext_nb_var),
+				dir_solver_(system.ext_nb_var, LPSolver::Mode::NotCertified, 1e-9, 10000, 10000),
+				corner_solver_(new LPSolver(system.nb_var, LPSolver::Mode::Certified, 1e-9, 10000, 10000)),
 				corner_linearizer_(new RestrictionLinearizerSIP(system, RestrictionLinearizerSIP::CornerPolicy::random)),
 				sigma_(default_sigma) {
 }
