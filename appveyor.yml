@@ -1,7 +1,7 @@
 version: build{build}
 image: Visual Studio 2015
 configuration: Release
-platform: x64 
+platform: x86
   
 environment:
   matrix:
