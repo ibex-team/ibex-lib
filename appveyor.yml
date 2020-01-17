@@ -7,11 +7,14 @@ environment:
   matrix:
     - TEST_INTERVAL_LIB: "gaol"
       MSYS_BASE: C:\MinGW\msys\1.0
+      MSYS_BASE_BIN: C:\MinGW\msys\1.0
       MINGW_BASE: C:\MinGW
     - TEST_INTERVAL_LIB: "filib"
       MSYS_BASE: C:\MinGW\msys\1.0
+      MSYS_BASE_BIN: C:\MinGW\msys\1.0
       MINGW_BASE: C:\MinGW
     - TEST_INTERVAL_LIB: "filib" 
+      MSYS_BASE_BIN: C:\msys64\usr
       MSYS_BASE: C:\msys64\mingw32
       MINGW_BASE: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
 
@@ -21,7 +24,7 @@ install:
  # - cmd: set MINGW-W64_BASE=C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
   - cmd: uname -a
   - cmd: mkdir C:\ibex
-  - cmd: set PATH=%PATH%;%MINGW_BASE%\bin;%MSYS_BASE%\bin
+  - cmd: set PATH=%PATH%;%MINGW_BASE%\bin;%MSYS_BASE_BIN%\bin;%MSYS_BASE%\bin
   - cmd: set CPATH=%CPATH%;%MINGW_BASE%\include;%MSYS_BASE%\include
   - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;%MINGW_BASE%\lib;%MSYS_BASE%\lib
  # - cmd: pacman --noconfirm -S mingw-w64-i686-cppunit
