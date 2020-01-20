@@ -28,7 +28,7 @@ public:
 	 *
 	 * \param human : see #ExprPrinter::print(std::ostream& os, const ExprNode&).
 	 */
-	void print(std::ostream& os, const ExprNode&);
+	void print(std::ostream& os, const ExprNode& e);
 
 protected:
 	void visit(const ExprNode& e);

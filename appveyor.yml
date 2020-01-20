@@ -29,15 +29,13 @@ environment:
 
 install:
   - cmd: echo %Platform%
- # - cmd: set MINGW-W64_BASE=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0 
- # - cmd: set MINGW-W64_BASE=C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
   - cmd: uname -a
-  - cmd: mkdir C:\ibex
+  - cmd: mkdir C:\projects\ibex
   - cmd: set PATH=%PATH%;%MINGW_BASE_BIN%;%MSYS_BASE_BIN%
   - cmd: set CPATH=%CPATH%;%MINGW_BASE_INCLUDE%;%MSYS_BASE_INCLUDE%
   - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;%MINGW_BASE_LIB%;%MSYS_BASE_LIB%
- # - cmd: pacman --noconfirm -S mingw-w64-i686-cppunit
- # - cmd: pacman --noconfirm -S mingw-w64-i686-lapack
+  - cmd: IF %MSYS_BASE_LIB%=="C:\msys64\mingw32\lib" (CALL C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S mingw-w64-i686-cppunit")
+  - cmd: IF %MSYS_BASE_LIB%=="C:\msys64\mingw32\lib" (CALL C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S mingw-w64-i686-lapack")
   - cmd: set PREFIX=C:\projects\ibex
   
 

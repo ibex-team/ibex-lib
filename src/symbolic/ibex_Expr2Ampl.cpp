@@ -54,18 +54,18 @@ void Expr2Ampl::visit(const ExprNode& e) {
 
 void Expr2Ampl::visit(const ExprApply& a) {
 	assert(false);
-	ibex_warning("Expr2Ampl::visit(const ExprApply& a): to do...");
+	ibex_warning("Expr2Ampl::visit(const ExprApply& a): to do...");//TODO
 }
 
 void Expr2Ampl::visit(const ExprVector& e){
 	assert(false);
-	ibex_warning("Expr2Ampl::visit(const ExprVector& a): to do...");
+	ibex_warning("Expr2Ampl::visit(const ExprVector& a): to do...");//TODO
 }
 
 
 void Expr2Ampl::visit(const ExprChi& a){
 	assert(false);
-	ibex_warning("Expr2Ampl::visit(const ExprChi& a): to do...");
+	ibex_warning("Expr2Ampl::visit(const ExprChi& a): to do...");//TODO
 }
 
 void Expr2Ampl::visit(const ExprConstant& e){
@@ -137,18 +137,18 @@ void Expr2Ampl::print_itv(const Interval& x) {
 		print_dbl(x.mid());
 	else {
 		assert(false);
-		ibex_warning("Expr2Ampl::print_itv: to do...");
+		ibex_warning("Expr2Ampl::print_itv: to do..."); //TODO
 	}
 }
 
 void Expr2Ampl::print_itv_vec(const IntervalVector& v, bool in_row) {
 	assert(false);
-	ibex_warning("Expr2Ampl::print_itv_vec: to do...");
+	ibex_warning("Expr2Ampl::print_itv_vec: to do...");//TODO
 }
 
 void Expr2Ampl::print_itv_mat(const IntervalMatrix& m) {
 	assert(false);
-	ibex_warning("Expr2Ampl::print_itv_mat: to do...");
+	ibex_warning("Expr2Ampl::print_itv_mat: to do...");//TODO
 }
 
 

@@ -626,7 +626,7 @@ std::string Function::toAmpl() const {
 	s << "var "<< name <<" = ";
 //	Expr2Minibex().print(s,expr());
 	Expr2Ampl().print(s,expr());
-	s << ";\n";
+	s << ";"<< endl;
 	s.flush();
 	return s.str();
 }
