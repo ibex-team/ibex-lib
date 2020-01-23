@@ -18,6 +18,8 @@ list (APPEND IBEX_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2DAG.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Minibex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Minibex.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Ampl.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Ampl.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCmp.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCmp.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCopy.cpp
