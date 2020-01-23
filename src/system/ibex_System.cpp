@@ -14,6 +14,7 @@
 #include "ibex_UnknownFileException.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_Expr2Minibex.h"
+#include "ibex_Expr2Ampl.h"
 #include "ibex_P_Struct.h"
 #include "ibex_Domain.h"
 

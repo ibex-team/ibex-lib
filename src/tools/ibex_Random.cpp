@@ -87,7 +87,7 @@ void RNG::srand()
 	}
 }
 
-void RNG::srand(uint32_t s)
+void RNG::srand(int s)
 {
 	/** This function sets the seed for random number generation \c 
 	 \return A boolean if the seed is acceptable, that is in [0,UINT32_MAX].
