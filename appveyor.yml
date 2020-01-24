@@ -40,15 +40,15 @@ install:
   
 
 build_script:
-  - cmd: python -x waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug --with-ampl --with-optim  --lp-lib=soplex
-  - cmd: python -x waf install
-  #- cmd: mkdir build && cd build && cmake -DINTERVAL_LIB=%TEST_INTERVAL_LIB% .. && make && make check
+  #- cmd: python -x waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug --with-ampl --with-optim  --lp-lib=soplex
+  #- cmd: python -x waf install
+  - cmd: mkdir build && cd build && cmake -DINTERVAL_LIB=%TEST_INTERVAL_LIB% .. && make && make check
 
 test_script:
-  - cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
+  #- cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
   # We need to add the path to libcppunit in PATH
   #- cmd: set PATH=%PATH%;C:\msys64\mingw32\bin
-  - cmd: python -x waf utest
+  #- cmd: python -x waf utest
 
 on_failure:  
   - cmd: cat __build__\config.log
