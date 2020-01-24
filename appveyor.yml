@@ -6,43 +6,43 @@ platform: x64
 environment:
   matrix:
     - TEST_INTERVAL_LIB: "gaol"
-      MSYS_BASE_LIB: C:\MinGW\msys\1.0\lib
-      MSYS_BASE_BIN: C:\MinGW\msys\1.0\bin
-      MSYS_BASE_INCLUDE: C:\MinGW\msys\1.0\include
-      MINGW_BASE_BIN: C:\MinGW\bin
-      MINGW_BASE_LIB: C:\MinGW\lib
-      MINGW_BASE_INCLUDE: C:\MinGW\include      
+#      MSYS_BASE_LIB: C:\MinGW\msys\1.0\lib
+#      MSYS_BASE_BIN: C:\MinGW\msys\1.0\bin
+#      MSYS_BASE_INCLUDE: C:\MinGW\msys\1.0\include
+#      MINGW_BASE_BIN: C:\MinGW\bin
+#      MINGW_BASE_LIB: C:\MinGW\lib
+#      MINGW_BASE_INCLUDE: C:\MinGW\include      
     - TEST_INTERVAL_LIB: "filib"
-      MSYS_BASE_LIB: C:\MinGW\msys\1.0\lib
-      MSYS_BASE_BIN: C:\MinGW\msys\1.0\bin
-      MSYS_BASE_INCLUDE: C:\MinGW\msys\1.0\include
-      MINGW_BASE_BIN: C:\MinGW\bin
-      MINGW_BASE_LIB: C:\MinGW\lib
-      MINGW_BASE_INCLUDE: C:\MinGW\include  
-    - TEST_INTERVAL_LIB: "filib" 
-      MSYS_BASE_LIB: C:\msys64\mingw64\lib
-      MSYS_BASE_BIN: C:\msys64\usr\bin;C:\msys64\mingw64\bin
-      MSYS_BASE_INCLUDE: C:\msys64\mingw64\include
-      MINGW_BASE_BIN: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin
-      MINGW_BASE_LIB: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\lib
-      MINGW_BASE_INCLUDE: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\include  
+#      MSYS_BASE_LIB: C:\MinGW\msys\1.0\lib
+#      MSYS_BASE_BIN: C:\MinGW\msys\1.0\bin
+#      MSYS_BASE_INCLUDE: C:\MinGW\msys\1.0\include
+#      MINGW_BASE_BIN: C:\MinGW\bin
+#      MINGW_BASE_LIB: C:\MinGW\lib
+#      MINGW_BASE_INCLUDE: C:\MinGW\include  
+#    - TEST_INTERVAL_LIB: "filib" 
+#      MSYS_BASE_LIB: C:\msys64\mingw64\lib
+#      MSYS_BASE_BIN: C:\msys64\usr\bin;C:\msys64\mingw64\bin
+#      MSYS_BASE_INCLUDE: C:\msys64\mingw64\include
+#      MINGW_BASE_BIN: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin
+#      MINGW_BASE_LIB: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\lib
+#      MINGW_BASE_INCLUDE: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\include  
 
 install:
   - cmd: echo %Platform%
   - cmd: uname -a
-  - cmd: mkdir C:\projects\ibex
-  - cmd: set PATH=%MINGW_BASE_BIN%;%MSYS_BASE_BIN%;%PATH%
-  - cmd: set CPATH=%CPATH%;%MINGW_BASE_INCLUDE%;%MSYS_BASE_INCLUDE%
-  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;%MINGW_BASE_LIB%;%MSYS_BASE_LIB%
-  - cmd: IF %MSYS_BASE_LIB%=="C:\msys64\mingw32\lib" (CALL C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S mingw-w64-i686-cppunit")
-  - cmd: IF %MSYS_BASE_LIB%=="C:\msys64\mingw32\lib" (CALL C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S mingw-w64-i686-lapack")
-  - cmd: set PREFIX=C:\projects\ibex
+#  - cmd: mkdir C:\projects\ibex
+#  - cmd: set PATH=%MINGW_BASE_BIN%;%MSYS_BASE_BIN%;%PATH%
+#  - cmd: set CPATH=%CPATH%;%MINGW_BASE_INCLUDE%;%MSYS_BASE_INCLUDE%
+#  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;%MINGW_BASE_LIB%;%MSYS_BASE_LIB%
+#  - cmd: IF %MSYS_BASE_LIB%=="C:\msys64\mingw32\lib" (CALL C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S mingw-w64-i686-cppunit")
+#  - cmd: IF %MSYS_BASE_LIB%=="C:\msys64\mingw32\lib" (CALL C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S mingw-w64-i686-lapack")
+#  - cmd: set PREFIX=C:\projects\ibex
   
 
 build_script:
   #- cmd: python -x waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug --with-ampl --with-optim  --lp-lib=soplex
   #- cmd: python -x waf install
-  - cmd: mkdir build && cd build && cmake -DINTERVAL_LIB=${TEST_INTERVAL_LIB} .. && make && make check
+  - cmd: mkdir build && cd build && cmake -DINTERVAL_LIB=%TEST_INTERVAL_LIB% .. && make && make check
 
 test_script:
   # - cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
