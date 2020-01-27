@@ -125,7 +125,7 @@ public:
     void add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs);
 
     /**
-     * Solve the LP with the current set of constraints,
+     * \brief Solve the LP with the current set of constraints,
      * the current objective and bounds.
      * The LP can be modified between two calls to minimize(...)
      * The same instance of the underlying LP solver is updated.
@@ -152,54 +152,110 @@ public:
     void set_bounds(const IntervalVector& bounds);
 
     /**
-     * \brief Set the bounds on a variable
+     * \brief Set the bounds on a variable.
      */
     void set_bounds(int var, const Interval& bounds);
+	/**
+	 * \brief Set both feasibility and optimality tolerance.
+	 *
+	 * For Cplex, this value must be between 1e-9 and 1e-1. The value is cropped if necessary.
+	 * For Soplex, this value must be > 0.
+	 */
     void set_tolerance(double tolerance);
+	/**
+	 * \brief Set the maximum computation time in seconds for a call to minimize().
+	 */
     void set_timeout(double timeout);
+	/**
+	 * \brief Set the maximum number of simplex iterations for a call to minimize().
+	 */
     void set_max_iter(int max_iter);
 
+	/**
+	 * \brief Number of rows in the LP.
+	 * This number includes bounds constraints, so before any call to add_constraint,
+	 * this will be equal to nb_vars().
+	 */
     int nb_rows() const;
+	/**
+	 * \brief Number of variables in the LP.
+	 */
     int nb_vars() const;
+	/**
+	 * \brief Feasibility and optimality tolerance.
+	 */
     double tolerance() const;
+	/**
+	 * \brief Maximum number of iterations for a call to minimize().
+	 */
     int max_iter() const;
+	/**
+	 * \brief Maximum computation time for a call to minimize().
+	 */
     double timeout() const;
     /**
-     * Return the status of the last call to minimize, or Unknown if minimize has not been called.
+     * \brief Status of the last call to minimize, or Unknown if minimize has not been called.
      */
     Status status() const;
 
+	/**
+	 * \brief Return the constraints matrix, e.g A in lhs <= Ax <= rhs.
+	 */
     Matrix rows() const;
+	/**
+	 * \brief Return a specific row.
+	 */
     Vector row(int index) const;
+	/**
+	 * \brief Return the transposed constraints matrix, A^T.
+	 */
     Matrix rows_transposed() const;
+	/**
+	 * \brief Return a specific column of the constraints matrix.
+	 */
     Vector col(int index) const;
 
 	/**
-	 * Return the left hand side of the constraints.
+	 * \brief Return the left hand side of the constraints.
 	 */
     Vector lhs() const;
+	/**
+	 * \brief Return the left hand side of constraint index.
+	 */
     double lhs(int index) const;
 	/**
-	 * Return the right hand side of the constraints.
+	 * \brief Return the right hand side of the constraints.
 	 */
     Vector rhs() const;
+	/**
+	 * \brief Return the right hand side of constraint index.
+	 */
     double rhs(int index) const;
 	/**
-	 * Return the left hand side and right of side of the constraints as an IntervalVector,
+	 * \brief Return the left hand side and right of side of the constraints as an IntervalVector,
 	 * each row corresponding to one constraint.
 	 */
     IntervalVector lhs_rhs() const;
+	/**
+	 * \brief Return the left hand side and right hand side of as an Interval for constraint index.
+	 */
     Interval lhs_rhs(int index) const;
 	/**
-	 * Return the bounds on the variables.
+	 * \brief Return the bounds on the variables.
 	 */
     IntervalVector bounds() const;
+	/**
+	 * \brief Return the bounds on variable index.
+	 */
     Interval bounds(int index) const;
 
 	/**
-	 * Return the cost vector.
+	 * \brief Return the cost vector.
 	 */
     Vector cost() const;
+	/**
+	 * \brief Return the cost for variable index.
+	 */
     double cost(int index) const;
 
     /**
