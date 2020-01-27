@@ -45,17 +45,17 @@ public:
     /** Default max_iter, set to 100 iterations */
     static constexpr int default_max_iter = 100;
 
-    /** Default minimal diameter of ??, set to 1e-14  **/
+    /** Default minimal diameter of ??, set to 1e-14
+	 * Deprecated, kept for compatibility with optim and sip plugins.
+	 */
 	static constexpr double min_box_diam = 1e-14;
-
-    /** the maximal bound of the variable, set to 1e20. */
-	static constexpr double default_max_bound = 1e20;
 
 	/**
 	 * TODO: Default maximal diameter of ... what exactly?
 	 *   In LoupFinderXTaylor: -> the box
 	 *   In LinearizerXTaylor : -> the derivative enclosure
-	 * Set to 1e6.
+	 *  Set to 1e6.
+	 *  Deprecated, kept for compatibility with optim and sip plugins.
 	 */
 	static constexpr double max_box_diam = 1e6;
 
@@ -169,26 +169,40 @@ public:
      */
     Status status() const;
 
-    // matrix ?
     Matrix rows() const;
     Vector row(int index) const;
     Matrix rows_transposed() const;
     Vector col(int index) const;
 
+	/**
+	 * Return the left hand side of the constraints.
+	 */
     Vector lhs() const;
     double lhs(int index) const;
+	/**
+	 * Return the right hand side of the constraints.
+	 */
     Vector rhs() const;
     double rhs(int index) const;
+	/**
+	 * Return the left hand side and right of side of the constraints as an IntervalVector,
+	 * each row corresponding to one constraint.
+	 */
     IntervalVector lhs_rhs() const;
     Interval lhs_rhs(int index) const;
+	/**
+	 * Return the bounds on the variables.
+	 */
     IntervalVector bounds() const;
     Interval bounds(int index) const;
 
+	/**
+	 * Return the cost vector.
+	 */
     Vector cost() const;
     double cost(int index) const;
 
     /**
-     * TODO CHECK
      * \brief Wether the last call to minimize() found a feasible point.
      *
      * Return true only if:
@@ -196,7 +210,7 @@ public:
      * - in uncertified mode, status is Feasible
      */
     bool is_feasible() const;
-    // TODO relancer automatiquement le solveur
+
     /**
      * \brief Return an enclosure for the minimum.
      *
@@ -207,39 +221,37 @@ public:
      */
     Interval minimum() const;
 
-    // TODO uncertified -> not proved
     /**
      * \brief Return an uncertified primal solution (a minimizer).
      */
-    Vector uncertified_primal_sol() const;
+    Vector not_proved_primal_sol() const;
 
     /**
      * \brief Return an uncertified dual solution.
      */
-    Vector uncertified_dual_sol() const ;
+    Vector not_proved_dual_sol() const ;
 
     // A voir
     /**
      * Return true only if point is proved to be inside the feasible polytope,
      * (even in non certified mode).
      */
-    bool is_feasible_point(const Vector& point) const;
+    //bool is_feasible_point(const Vector& point) const;
 
     /**
      * \brief Write the linear problem to a file.
      *
      * The behaviour of this function depends on the lp-lib used.
      * For SoPlex, the format depends on the extension of the file.
-     * TODO supported formats
+     * Supported formats include LP and MPS.
      */
     void write_to_file(const std::string& filename) const;
 
-    //TODO obj->cost
     // Clear functions
     /**
      * \brief Reset the objective to zero for all variables.
      */
-    void set_obj_to_zero();
+    void set_cost_to_zero();
     /**
      * \brief Remove all constraints, except bound constraints.
      */

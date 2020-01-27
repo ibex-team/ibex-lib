@@ -76,7 +76,7 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 
 	if (stat == LPSolver::Status::Optimal) {
 		//the linear solution is mapped to intervals and evaluated
-		Vector loup_point = lp_solver.uncertified_primal_sol().subvector(0,n-1);
+		Vector loup_point = lp_solver.not_proved_primal_sol().subvector(0,n-1);
 
 		if (!box.contains(loup_point)) throw NotFound();
 

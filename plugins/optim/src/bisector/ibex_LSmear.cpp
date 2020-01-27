@@ -78,7 +78,7 @@ LSmear::~LSmear() {
 		if (stat == LPSolver::Status::Optimal) {
 		  // the dual solution : used to compute the bound
 		  Vector dual_solution(mylinearsolver->nb_rows());  //
-		  dual_solution = mylinearsolver->uncertified_dual_sol();
+		  dual_solution = mylinearsolver->not_proved_dual_sol();
 
 		  int k=0; //number of multipliers != 0
 		  int ii=0;

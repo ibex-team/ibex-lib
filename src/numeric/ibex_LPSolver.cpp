@@ -79,4 +79,9 @@ void LPSolver::invalidate() {
     has_infeasible_dir_ = false;
 }
 
+bool LPSolver::is_feasible() const {
+	return (status_ == LPSolver::Status::Optimal && mode_ == LPSolver::Mode::NotCertified)
+	|| (status_ == LPSolver::Status::OptimalProved && mode_ == LPSolver::Mode::Certified);
+}
+
 }  // end namespace ibex

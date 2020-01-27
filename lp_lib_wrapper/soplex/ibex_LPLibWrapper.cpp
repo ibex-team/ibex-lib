@@ -390,13 +390,13 @@ Interval LPSolver::minimum() const {
     return obj_;
 }
 
-Vector LPSolver::uncertified_primal_sol() const {
+Vector LPSolver::not_proved_primal_sol() const {
     if(!has_solution_) {
         throw LPException();
     }
     return uncertified_primal_;
 }
-Vector LPSolver::uncertified_dual_sol() const {
+Vector LPSolver::not_proved_dual_sol() const {
     if(!has_solution_) {
         throw LPException();
     }
@@ -411,16 +411,12 @@ bool LPSolver::uncertified_infeasible_dir(Vector& infeasible_dir) const {
     return false;
 }
 
-bool LPSolver::is_feasible_point(const Vector& point) const {
-    not_implemented("Not implemented");
-}
-
 void LPSolver::write_to_file(const std::string& filename) const {
     mysoplex->writeFileReal(filename.c_str(), NULL, NULL, NULL);
 }
 
 // Clear functions
-void LPSolver::set_obj_to_zero() {
+void LPSolver::set_cost_to_zero() {
     DVectorReal new_obj(nb_vars());
     new_obj.clear();
     mysoplex->changeObjReal(new_obj);

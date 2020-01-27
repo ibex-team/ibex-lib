@@ -53,10 +53,10 @@ void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& c
 		return;
 	}
 	//Vector sol(box.mid());
-	Vector sol = lp_solver_.uncertified_primal_sol();
+	Vector sol = lp_solver_.not_proved_primal_sol();
 	Vector sol_without_goal = sol.subvector(0, sys_.nb_var - 1);
 	//Vector dual(lp_solver_.get_nb_rows());
-	Vector dual = lp_solver_.uncertified_dual_sol();
+	Vector dual = lp_solver_.not_proved_dual_sol();
 	//IntervalVector rhs(dual.size());
 	IntervalVector rhs = lp_solver_.lhs_rhs();
 	//Matrix A(lp_solver_.get_nb_rows(), system_.ext_nb_var);

@@ -57,7 +57,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 
 	if (stat == LPSolver::Status::Optimal) {
 		//the linear solution is mapped to intervals and evaluated
-		Vector loup_point = lp_solver.uncertified_primal_sol();
+		Vector loup_point = lp_solver.not_proved_primal_sol();
 
 		// we allow finding a loup outside of the current box, but
 		// not outside of the system box.

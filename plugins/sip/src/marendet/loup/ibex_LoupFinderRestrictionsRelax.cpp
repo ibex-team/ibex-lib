@@ -64,7 +64,7 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const Interv
 	//cout << "aftersolve" << endl;
 	if(stat == LPSolver::Status::OptimalProved) {
 		//Vector loup_point(box_without_goal.size());
-		Vector loup_point = lp_solver_->uncertified_primal_sol();
+		Vector loup_point = lp_solver_->not_proved_primal_sol();
 		if(!box.contains(loup_point)) {
 			throw NotFound();
 		}

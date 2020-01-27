@@ -72,8 +72,8 @@ void TestLinearSolver::kleemin( int n) {
 	double eps = lp.tolerance();
 	//lp.write_to_file("coucou" + std::to_string(n) + ".lp");
 
-	Vector dualsol = lp.uncertified_dual_sol();
-	Vector primalsol = lp.uncertified_primal_sol();
+	Vector dualsol = lp.not_proved_dual_sol();
+	Vector primalsol = lp.not_proved_primal_sol();
 	Vector vrai(n);
 	vrai[n-1] = ::pow(10,n-1);
 	check_relatif(vrai,primalsol,1.e-9);
@@ -119,11 +119,11 @@ void TestLinearSolver::kleemin30() {
 		case (LPSolver::Status::Unbounded):
 		case (LPSolver::Status::Unknown): {
 			CPPUNIT_ASSERT_THROW(
-			Vector dualsol = lp.uncertified_dual_sol(),
+			Vector dualsol = lp.not_proved_dual_sol(),
 			LPException
 			);
 			CPPUNIT_ASSERT_THROW(
-			Vector primalsol = lp.uncertified_primal_sol(),
+			Vector primalsol = lp.not_proved_primal_sol(),
 			LPException
 			);
 			break;
@@ -131,11 +131,11 @@ void TestLinearSolver::kleemin30() {
 		case (LPSolver::Status::Optimal):
 		case (LPSolver::Status::OptimalProved): {
 			CPPUNIT_ASSERT_ASSERTION_PASS(
-			Vector dualsol = lp.uncertified_dual_sol()
+			Vector dualsol = lp.not_proved_dual_sol()
 			);
 			Vector primalsol(n);
 			CPPUNIT_ASSERT_ASSERTION_PASS(
-			primalsol = lp.uncertified_primal_sol()
+			primalsol = lp.not_proved_primal_sol()
 			);
 			Vector vrai(n);
 			vrai[n-1] = ::pow(10,n-1);
@@ -177,8 +177,8 @@ void TestLinearSolver::reset() {
 	double eps = lp.tolerance();
 	//lp.write_to_file("coucou" + std::to_string(n) + ".lp");
 
-	Vector dualsol = lp.uncertified_dual_sol();
-	Vector primalsol = lp.uncertified_primal_sol();
+	Vector dualsol = lp.not_proved_dual_sol();
+	Vector primalsol = lp.not_proved_primal_sol();
 	Vector vrai(n);
 	vrai[n-1] = ::pow(10,n-1);
 	check_relatif(vrai,primalsol,1.e-9);
