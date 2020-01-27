@@ -70,14 +70,13 @@ void TestLinearSolver::kleemin( int n) {
 	LPSolver::Status res = lp.minimize();
 	CPPUNIT_ASSERT(res==LPSolver::Status::OptimalProved);
 	double eps = lp.tolerance();
-	lp.write_to_file("coucou" + std::to_string(n) + ".lp");
+	//lp.write_to_file("coucou" + std::to_string(n) + ".lp");
 
 	Vector dualsol = lp.uncertified_dual_sol();
 	Vector primalsol = lp.uncertified_primal_sol();
 	Vector vrai(n);
 	vrai[n-1] = ::pow(10,n-1);
 	check_relatif(vrai,primalsol,1.e-9);
-
 }
 
 void TestLinearSolver::kleemin30() {
@@ -108,9 +107,9 @@ void TestLinearSolver::kleemin30() {
 
 	CPPUNIT_ASSERT(res!=LPSolver::Status::InfeasibleProved);
 
-	CPPUNIT_ASSERT_ASSERTION_PASS(
-	lp.write_to_file("coucou.lp")
-	);
+	//CPPUNIT_ASSERT_ASSERTION_PASS(
+	//lp.write_to_file("coucou.lp")
+	//);
 
 	CPPUNIT_ASSERT_ASSERTION_PASS(
 	double eps = lp.tolerance()
@@ -176,7 +175,7 @@ void TestLinearSolver::reset() {
 	LPSolver::Status res = lp.minimize();
 	CPPUNIT_ASSERT(res==LPSolver::Status::OptimalProved);
 	double eps = lp.tolerance();
-	lp.write_to_file("coucou" + std::to_string(n) + ".lp");
+	//lp.write_to_file("coucou" + std::to_string(n) + ".lp");
 
 	Vector dualsol = lp.uncertified_dual_sol();
 	Vector primalsol = lp.uncertified_primal_sol();
@@ -226,7 +225,7 @@ void TestLinearSolver::cost_parallel_to_constraint() {
 	LPSolver lp(2, LPSolver::Mode::Certified);
 	lp.set_bounds(0, Interval::NEG_REALS);
 	lp.set_bounds(1, Interval::POS_REALS);
-	double a = 1e-15; // a: 1 -> 0
+	double a = 1e-12; // a: 1 -> 0
 	double b = 1/a; // b: 0 -> 1/a
 	lp.add_constraint({-a, 1}, CmpOp::LEQ, a);
 	lp.set_cost({1, -b});
