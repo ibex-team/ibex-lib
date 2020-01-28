@@ -332,20 +332,20 @@ double LPSolver::cost(int index) const {
 
 Interval LPSolver::minimum() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver::minimum() called with no stored solution.");
     }
     return obj_;
 }
 
 Vector LPSolver::not_proved_primal_sol() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver::not_proved_primal_sol() called with no stored solution.");
     }
     return uncertified_primal_;
 }
 Vector LPSolver::not_proved_dual_sol() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver::not_proved_dual_sol() called with no stored solution.");
     }
     return uncertified_dual_;
 }

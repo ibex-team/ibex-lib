@@ -83,7 +83,8 @@ LPSolver::LPSolver(std::string filename) {
     mysoplex->setIntParam(SoPlex::READMODE, SoPlex::READMODE_REAL);
     bool result = mysoplex->readFile(filename.c_str());
     if(!result) {
-        throw LPException();
+        std::string error_msg = "LPSolver: SoPlex could not read file " + filename;
+        ibex_error(error_msg.c_str());
     }
     ivec_bounds_ = IntervalVector(nb_vars());
     for(int i = 0; i < ivec_bounds_.size(); ++i) {
@@ -385,20 +386,20 @@ double LPSolver::cost(int index) const {
 
 Interval LPSolver::minimum() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver::minimum() called with no stored solution.");
     }
     return obj_;
 }
 
 Vector LPSolver::not_proved_primal_sol() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver::not_proved_primal_sol() called with no stored solution.");
     }
     return uncertified_primal_;
 }
 Vector LPSolver::not_proved_dual_sol() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver::not_proved_dual_sol() called with no stored solution.");
     }
     return uncertified_dual_;
 }
