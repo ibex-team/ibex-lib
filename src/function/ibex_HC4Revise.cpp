@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Dec 31, 2011
-// Last Update : 
+// Last update : Jan 28, 2020
 //============================================================================
 
 #include "ibex_Function.h"
@@ -54,15 +54,10 @@ bool HC4Revise::backward(const Domain& y) {
 
 	Domain& root=*d.top;
 
-	if (root.is_empty())
-		throw EmptyBoxException();
-
-	switch(y.dim.type()) {
-	case Dim::SCALAR:       if (root.i().is_subset(y.i())) return true; break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:   if (root.v().is_subset(y.v())) return true; break;
-	case Dim::MATRIX:       if (root.m().is_subset(y.m())) return true; break;
-	}
+	// note: we can't just return "true" if the domain of the root
+	// is a subset of y, because the domains of variables may also
+	// be outside of the definition domain of the function.
+	// See issue #431.
 
 	root &= y;
 

@@ -1,12 +1,13 @@
 /* ============================================================================
  * I B E X - HC4Revise Tests
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
  * Created     : Apr 03, 2012
+ * Last update : Jan 28, 2020
  * ---------------------------------------------------------------------------- */
 
 #include "TestHC4Revise.h"
@@ -129,6 +130,13 @@ void TestHC4Revise::dist02() {
 						{1,1}, {2,2} };
 	IntervalVector boxR(4,res_xy);
 	check(box, boxR);
+}
+
+void TestHC4Revise::issue431() {
+	Function f("x","(sqrt(x))");
+	IntervalVector x(1,Interval(-5,0));
+	f.backward(Interval::zero(), x);
+	CPPUNIT_ASSERT(x[0]==Interval::zero());
 }
 
 } // end namespace
