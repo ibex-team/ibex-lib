@@ -66,7 +66,7 @@ void TestExprSimplify::index_var2() {
 	const ExprSymbol& x=ExprSymbol::new_("x",d);
 	CPPUNIT_ASSERT(sameExpr(x[1][0].simplify(),"x(2,1)"));
 	CPPUNIT_ASSERT(sameExpr(x[DoubleIndex::one_col(d,1)][0].simplify(),"x(1,2)"));
-	CPPUNIT_ASSERT(sameExpr(x[DoubleIndex::rows(d,1,3)][DoubleIndex::one_row(d,0)].simplify(),"x(2,:)"));
+	CPPUNIT_ASSERT(sameExpr(x[DoubleIndex::rows(d,1,3)][DoubleIndex::one_row(Dim::matrix(3,3),0)].simplify(),"x(2,:)"));
 }
 
 void TestExprSimplify::index_var3() {
@@ -98,5 +98,44 @@ void TestExprSimplify::issue366() {
 	CPPUNIT_ASSERT(e.left.fathers.size()==1);
 	CPPUNIT_ASSERT(e.right.fathers.size()==1);
 }
+
+void TestExprSimplify::issue425_01() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::col_vec(3));
+	Vector v(3);
+	v[0]=1; v[1]=0; v[2]=0;
+	const ExprNode& e=v*x;
+	CPPUNIT_ASSERT(sameExpr(e.simplify(),"x(1)"));
+}
+
+void TestExprSimplify::issue425_02() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
+	Vector v(3);
+	v[0]=1; v[1]=0; v[2]=0;
+	const ExprNode& e=v*x;
+	CPPUNIT_ASSERT(sameExpr(e.simplify(),"x(1,:)"));
+}
+
+void TestExprSimplify::issue425_03() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::col_vec(3));
+	const ExprNode& e=Matrix::eye(3)*x;
+	CPPUNIT_ASSERT(sameExpr(e[0].simplify(),"x(1)"));
+}
+
+void TestExprSimplify::issue425_04() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::row_vec(3));
+	Vector v(3);
+	v[0]=1; v[1]=0; v[2]=0;
+	const ExprNode& e=x*v;
+	CPPUNIT_ASSERT(sameExpr(e.simplify(),"x(1)"));
+}
+
+void TestExprSimplify::issue425_05() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(4,3));
+	Vector v(3);
+	v[0]=1; v[1]=0; v[2]=0;
+	const ExprNode& e=x*v;
+	CPPUNIT_ASSERT(sameExpr(e.simplify(),"x(:,1)"));
+}
+
 
 } // end namespace

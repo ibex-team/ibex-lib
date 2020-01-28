@@ -8,7 +8,7 @@
  * Author(s)   : Antoine Marendet
  * Created     : Nov 12, 2018
  * ---------------------------------------------------------------------------- */
- 
+
 #include "ibex_LoupFinderLineSearch.h"
 
 #include "ibex_SIConstraint.h"
@@ -31,13 +31,11 @@ const double LoupFinderLineSearch::default_sigma = 0.9;
 
 LoupFinderLineSearch::LoupFinderLineSearch(const SIPSystem& system, const std::set<InnerPointStrategy>& strategies) :
 		LoupFinderSIP(system), strategies_(strategies), linearizer_(system, RelaxationLinearizerSIP::CornerPolicy::random, false), lp_solver_(
-				system.ext_nb_var, 10000, 10000), relax_point_(system.ext_nb_var),
-				dir_solver_(system.ext_nb_var, 10000, 10000),
-				corner_solver_(new LPSolver(system.nb_var, 10000, 10000)),
+				system.ext_nb_var, LPSolver::Mode::Certified, 1e-9, 10000, 10000), relax_point_(system.ext_nb_var),
+				dir_solver_(system.ext_nb_var, LPSolver::Mode::NotCertified, 1e-9, 10000, 10000),
+				corner_solver_(new LPSolver(system.nb_var, LPSolver::Mode::Certified, 1e-9, 10000, 10000)),
 				corner_linearizer_(new RestrictionLinearizerSIP(system, RestrictionLinearizerSIP::CornerPolicy::random)),
 				sigma_(default_sigma) {
-	dir_solver_.set_sense(LPSolver::MINIMIZE);
-	lp_solver_.set_sense(LPSolver::MINIMIZE);
 }
 
 LoupFinderLineSearch::~LoupFinderLineSearch() {
@@ -68,20 +66,20 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	box_ = box;
 	delete_node_data_ = false;
 	ext_box_ = sip_to_ext_box(box, system_.goal_function_->eval(box));
-	lp_solver_.clean_ctrs();
+	lp_solver_.clear_constraints();
 	lp_solver_.set_bounds(ext_box_);
-	lp_solver_.set_obj_var(system_.ext_nb_var - 1, 1.0);
+	lp_solver_.set_cost(system_.ext_nb_var - 1, 1.0);
 	if(linearizer_.linearize(ext_box_, lp_solver_, prop) < 0) {
 		throw NotFound();
 	}
 	//lp_solver_.write_file();
 
-	auto return_code = lp_solver_.solve();
-	if (return_code != LPSolver::Status_Sol::OPTIMAL) {
+	auto return_code = lp_solver_.minimize();
+	if (return_code != LPSolver::Status::Optimal) {
 		throw NotFound();
 	}
 	//Vector sol(box.mid());
-	relax_point_ = lp_solver_.get_primal_sol();
+	relax_point_ = lp_solver_.not_proved_primal_sol();
 	Vector sol_without_goal = relax_point_.subvector(0, system_.nb_var - 1);
 	if(is_inner_with_paving_simplification(relax_point_, initial_node_data_)) {
 		if(check(system_, sol_without_goal, loup, true, prop)) {
@@ -91,7 +89,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	//Vector dual(lp_solver_.get_nb_rows());
 	//IntervalVector rhs(dual.size());
 	//Matrix A(lp_solver_.get_nb_rows(), system_.ext_nb_var);
-	
+
 	/****************** DIRECTION **********************/
 
 	double g_relax_point = system_.max_constraints(relax_point_, *node_data_);
@@ -109,7 +107,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	}
 	if(do_strategy(ACTIVE_RELAXATIONS) && relaxations_direction(direction, obj, true)) {
 			double tk = -1./sigma_*g_relax_point/obj;
-			Vector end_point = sol_without_goal + tk*direction;			
+			Vector end_point = sol_without_goal + tk*direction;
 			bool b = line_search(sol_without_goal, end_point, best_loup_point, best_loup);
 			loup_found = b || loup_found;
 	}
@@ -172,7 +170,7 @@ bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVec
 			simplify_paving(sic, cache, box, true);
 		}
 	}
-	
+
 	for(int cst_index = 0; cst_index < system_.sic_constraints_.size(); ++cst_index) {
 		const auto& sic = system_.sic_constraints_[cst_index];
 		auto& cache = node_data_copy.sic_constraints_caches[cst_index];
@@ -184,9 +182,9 @@ bool LoupFinderLineSearch::is_inner_with_paving_simplification(const IntervalVec
 }
 
 bool LoupFinderLineSearch::relaxations_direction(Vector& direction, double& obj, bool actives_only, bool with_sides) {
-	Matrix A = lp_solver_.get_rows();
-	Vector dual = lp_solver_.get_dual_sol();
-	IntervalVector rhs = lp_solver_.get_lhs_rhs();
+	Matrix A = lp_solver_.rows();
+	Vector dual = lp_solver_.not_proved_dual_sol();
+	IntervalVector rhs = lp_solver_.lhs_rhs();
 	vector<Vector> active_constraints;
 
 	for (int i = system_.ext_nb_var + 1; i < A.nb_rows(); ++i) {
@@ -218,7 +216,7 @@ bool LoupFinderLineSearch::relaxations_direction(Vector& direction, double& obj,
 		// That happens when the linear solver does not return a point in a corner of the relaxation
 		return false;
 	}
-	dir_solver_.clean_ctrs();
+	dir_solver_.clear_constraints();
 	for(int i = 0; i < active_constraints.size(); ++i) {
     	Vector row(system_.nb_var + 1);
         row.put(0, active_constraints[i]);
@@ -230,19 +228,19 @@ bool LoupFinderLineSearch::relaxations_direction(Vector& direction, double& obj,
 	bounds[system_.nb_var] = Interval::all_reals();
 	dir_solver_.set_bounds(bounds);
 
-	dir_solver_.set_obj_var(system_.nb_var, 1);
+	dir_solver_.set_cost(system_.nb_var, 1);
 	//std::cout << dir_solver.get_rows() << std::endl;
-	LPSolver::Status_Sol dir_solver_status = dir_solver_.solve();
-	if (dir_solver_status != LPSolver::Status_Sol::OPTIMAL) {
+	LPSolver::Status dir_solver_status = dir_solver_.minimize();
+	if (dir_solver_status != LPSolver::Status::Optimal) {
 		return false;
 	}
-	direction = dir_solver_.get_primal_sol().subvector(0, system_.nb_var-1);
-	obj = dir_solver_.get_obj_value().mid();
+	direction = dir_solver_.not_proved_primal_sol().subvector(0, system_.nb_var-1);
+	obj = dir_solver_.minimum().mid();
 	return true;
 }
 
 bool LoupFinderLineSearch::blankenship_direction(Vector& direction, double& obj) {
-	dir_solver_.clean_ctrs();
+	dir_solver_.clear_constraints();
 	blankenship(relax_point_, system_, node_data_);
 	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
         const auto& sic = system_.sic_constraints_[i];
@@ -267,19 +265,19 @@ bool LoupFinderLineSearch::blankenship_direction(Vector& direction, double& obj)
 	bounds[system_.nb_var] = Interval::all_reals();
 	dir_solver_.set_bounds(bounds);
 
-	dir_solver_.set_obj_var(system_.nb_var, 1);
+	dir_solver_.set_cost(system_.nb_var, 1);
 	//std::cout << dir_solver.get_rows() << std::endl;
-	LPSolver::Status_Sol dir_solver_status = dir_solver_.solve();
-	if (dir_solver_status != LPSolver::Status_Sol::OPTIMAL) {
+	LPSolver::Status dir_solver_status = dir_solver_.minimize();
+	if (dir_solver_status != LPSolver::Status::Optimal) {
 		return false;
 	}
-	direction = dir_solver_.get_primal_sol().subvector(0, system_.nb_var-1);
-	obj = dir_solver_.get_obj_value().mid();
+	direction = dir_solver_.not_proved_primal_sol().subvector(0, system_.nb_var-1);
+	obj = dir_solver_.minimum().mid();
 	return true;
 }
 
 bool LoupFinderLineSearch::stein_direction(Vector& direction, double& obj) {
-	dir_solver_.clean_ctrs();
+	dir_solver_.clear_constraints();
 	blankenship(relax_point_, system_, node_data_);
 	for(int i = 0; i < system_.sic_constraints_.size(); ++i) {
         const auto& sic = system_.sic_constraints_[i];
@@ -303,20 +301,20 @@ bool LoupFinderLineSearch::stein_direction(Vector& direction, double& obj) {
 	bounds[system_.nb_var] = Interval::all_reals();
 	dir_solver_.set_bounds(bounds);
 
-	dir_solver_.set_obj_var(system_.nb_var, 1);
+	dir_solver_.set_cost(system_.nb_var, 1);
 	//std::cout << dir_solver.get_rows() << std::endl;
-	LPSolver::Status_Sol dir_solver_status = dir_solver_.solve();
-	if (dir_solver_status != LPSolver::Status_Sol::OPTIMAL) {
+	LPSolver::Status dir_solver_status = dir_solver_.minimize();
+	if (dir_solver_status != LPSolver::Status::Optimal) {
 		return false;
 	}
-	direction = dir_solver_.get_primal_sol().subvector(0, system_.nb_var-1);
-	obj = dir_solver_.get_obj_value().mid();
+	direction = dir_solver_.not_proved_primal_sol().subvector(0, system_.nb_var-1);
+	obj = dir_solver_.minimum().mid();
 	return true;
 }
 
 Interval LoupFinderLineSearch::t_value(const Vector& direction) {
 	/* t value in the direction using linear restrictions */
-	
+
 	Interval t = Interval::pos_reals();
 	for(int sic_index = 0; sic_index < system_.sic_constraints_.size(); ++sic_index) {
 	//for (const auto& constraint : system_.sic_constraints_) {
@@ -347,7 +345,7 @@ bool LoupFinderLineSearch::line_search(const Vector& start_point, const Vector& 
 	bool loup_found = false;
 	bool is_right_inner = false;
 	Vector point = inner_point;
-	
+
 	Vector ext_point = sip_to_ext_box(point, system_.goal_ub(point));
 	if (!ext_box_.subvector(0, system_.nb_var-1).contains(point)) {
 		local_node_data = initial_node_data_;
@@ -391,29 +389,25 @@ bool LoupFinderLineSearch::corner_restrictions(Vector& loup_point) {
 	if (d < LPSolver::min_box_diam || d > LPSolver::max_box_diam)
 		return false;
 
-	corner_solver_->clean_ctrs();
+	corner_solver_->clear_constraints();
 	corner_solver_->set_bounds(box_);
 	IntervalVector ig = system_.goal_function_->gradient(box_.mid());
 	if(ig.is_empty()) {
 		return false;
 	}
 	Vector g = ig.mid();
-	//lp_solver_->set_obj(g);
-	for(int i = 0; i < g.size(); ++i) {
-		corner_solver_->set_obj_var(i, g[i]);
-	}
-	corner_solver_->set_sense(LPSolver::MINIMIZE);
+	corner_solver_->set_cost(g);
 	int count = corner_linearizer_->linearize(ext_box_, *corner_solver_, *prop_);
 	if(count < 0) {
 		return false;
 	}
 	//lp_solver_->write_file();
 	//cout << "beforesolve" << endl;
-	LPSolver::Status_Sol stat = corner_solver_->solve_proved();
+	LPSolver::Status stat = corner_solver_->minimize();
 	//cout << "aftersolve" << endl;
-	if(stat == LPSolver::OPTIMAL_PROVED) {
+	if(stat == LPSolver::Status::OptimalProved) {
 		//Vector loup_point(box_without_goal.size());
-		loup_point = corner_solver_->get_primal_sol();
+		loup_point = corner_solver_->not_proved_primal_sol();
 		if(!box_.contains(loup_point)) {
 			return false;
 		}

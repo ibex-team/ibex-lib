@@ -1,4 +1,4 @@
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_Optimizer.cpp
 // Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
@@ -420,10 +420,10 @@ Optimizer::Status Optimizer::optimize() {
 
 	try {
 	     while (!buffer.empty()) {
-		  
+
 			loup_changed=false;
 			// for double heap , choose randomly the buffer : top  has to be called before pop
-			Cell *c = buffer.top(); 
+			Cell *c = buffer.top();
 			if (trace >= 2) cout << " current box " << c->box << endl;
 
 			try {
@@ -433,7 +433,7 @@ Optimizer::Status Optimizer::optimize() {
 				delete c; // deletes the cell.
 
 				nb_cells+=2;  // counting the cells handled ( in previous versions nb_cells was the number of cells put into the buffer after being handled)
-                
+
 				handle_cell(*new_cells.first);
 				handle_cell(*new_cells.second);
 
@@ -450,7 +450,7 @@ Optimizer::Status Optimizer::optimize() {
 					double ymax=compute_ymax();
 
 					buffer.contract(ymax);
-				
+
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
 					// TODO: check if happens. What is the return code in this case?
@@ -573,22 +573,22 @@ void Optimizer::report() {
 	}
 
 	switch(status) {
-	case SUCCESS: 
+	case SUCCESS:
 		cout << green() << " optimization successful!" << endl;
 		break;
-	case INFEASIBLE: 
+	case INFEASIBLE:
 		cout << red() << " infeasible problem" << endl;
 		break;
-	case NO_FEASIBLE_FOUND: 
+	case NO_FEASIBLE_FOUND:
 		cout << red() << " no feasible point found (the problem may be infeasible)" << endl;
 		break;
-	case UNBOUNDED_OBJ: 
+	case UNBOUNDED_OBJ:
 		cout << red() << " possibly unbounded objective (f*=-oo)" << endl;
 		break;
-	case TIME_OUT: 
+	case TIME_OUT:
 		cout << red() << " time limit " << timeout << "s. reached " << endl;
 		break;
-	case UNREACHED_PREC: 
+	case UNREACHED_PREC:
 		cout << red() << " unreached precision" << endl;
 		break;
 	}

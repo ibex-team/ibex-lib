@@ -35,6 +35,8 @@ public:
 	CPPUNIT_TEST(cons03);
 	CPPUNIT_TEST(cons04);
 
+	CPPUNIT_TEST(consInitList);
+
 	CPPUNIT_TEST(empty01);
 	CPPUNIT_TEST(is_empty01);
 	CPPUNIT_TEST(is_empty02);
@@ -115,6 +117,8 @@ public:
 	void cons03();
 	// test: IntervalMatrix(int m, int n, double x[][2])
 	void cons04();
+	// test: IntervalMatrix(std::initializer_list<IntervalVector>)
+	void consInitList();
 
 	// test: static IntervalMatrix empty(int m, int n)
 	void empty01();

@@ -12,6 +12,7 @@
 #include "ibex_P_CtrGenerator.h"
 #include "ibex_P_ExprGenerator.h"
 #include "ibex_P_Scope.h"
+#include "ibex_SyntaxError.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_SystemFactory.h"
 
@@ -40,6 +41,9 @@ void P_SysGenerator::generate(P_Source& source, System& sys) {
 	Array<const ExprSymbol> vars = scopes.top().var_symbols();
 
 	//================= generate the variables & domains =====================
+	if (vars.is_empty())
+		throw SyntaxError("System with no variable");
+
 	fac.add_var(vars);
 
 	NodeMap<bool> garbage;

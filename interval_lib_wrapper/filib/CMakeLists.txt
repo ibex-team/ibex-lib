@@ -48,11 +48,18 @@ endif()
 
 if (NOT filib_INCLUDE_DIR OR NOT filib_LIBRARY)
   message (STATUS "Will install and use library Filib from 3rd/ subdirectory")
+  set (FILIB_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/3rd/filibsrc-3.0.2.2.all.all.patch")
   ExternalProject_Add (libfilib_3rd
                         PREFIX filib-3.0.2.2
                         URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/filibsrc-3.0.2.2.tar.gz
+                        PATCH_COMMAND patch -p1 -i ${FILIB_PATCH}
                         BUILD_IN_SOURCE 1
-                        CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR>)
+                        CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR>
+                        LOG_DOWNLOAD 1
+                        LOG_CONFIGURE 1
+                        LOG_BUILD 1
+                        LOG_INSTALL 1
+                      )
   ExternalProject_Get_Property (libfilib_3rd INSTALL_DIR)
   # install headers and set build and install include directory
   set (_incdir ${INSTALL_DIR}/include)
@@ -108,5 +115,3 @@ foreach (flag "-frounding-math" "-ffloat-store")
                      "You may get incorrect/inconsistent results.")
   endif()
 endforeach ()
-
-# TODO -msse2 -msse3 ??

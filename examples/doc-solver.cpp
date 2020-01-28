@@ -10,10 +10,6 @@
 
 #include "ibex.h"
 
-#ifndef _IBEX_WITH_OPTIM_
-#error "You need the IbexOpt plugin to run this example."
-#endif
-
 #ifndef IBEX_BENCHS_DIR
   #define IBEX_BENCHS_DIR "../benchs/solver"
 #endif

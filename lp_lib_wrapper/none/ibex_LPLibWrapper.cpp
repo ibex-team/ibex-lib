@@ -13,7 +13,7 @@ LPSolver::LPSolver(int nb_vars, int max_iter, double max_time_out, double eps):
 LPSolver::~LPSolver() {
 }
 
-LPSolver::Status_Sol LPSolver::solve() {
+LPSolver::Status LPSolver::solve() {
 	return LPSolver::UNKNOWN;
 }
 
@@ -45,7 +45,7 @@ double LPSolver::get_epsilon() const{
 	throw LPException();
 }
 
-void LPSolver::clean_ctrs(){
+void LPSolver::clear_ctrs(){
 	throw LPException();
 }
 
@@ -61,11 +61,11 @@ void LPSolver::set_sense(Sense s){
 	throw LPException();
 }
 
-void LPSolver::set_obj(const Vector& coef){
+void LPSolver::set_cost(const Vector& coef){
 	throw LPException();
 }
 
-void LPSolver::set_obj_var(int var, double coef){
+void LPSolver::set_cost(int var, double coef){
 	throw LPException();
 }
 

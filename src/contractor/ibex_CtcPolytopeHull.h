@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_CtcPolytopeHull.h
 // Authors     : Jordan Ninin, Bertrand Neveu, Gilles Chabert
 // Copyright   : IMT Atlantique (France)
@@ -38,7 +38,7 @@ public:
 	 */
 
 	CtcPolytopeHull(Linearizer& lr, int max_iter=LPSolver::default_max_iter,
-			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
+			int time_out=LPSolver::default_timeout, double eps=LPSolver::default_tolerance,
 			Interval limit_diam=Interval(LPSolver::min_box_diam,LPSolver::max_box_diam));
 
 	/**
@@ -52,7 +52,7 @@ public:
 	 * \param limit_diam - The contractor does nothing if the diameter does not respect these bounds
 	 */
 	CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter=LPSolver::default_max_iter,
-			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
+			int time_out=LPSolver::default_timeout, double eps=LPSolver::default_tolerance,
 			Interval limit_diam=Interval(LPSolver::min_box_diam,LPSolver::max_box_diam));
 
 	/**
@@ -163,7 +163,7 @@ private:
 inline const Vector& CtcPolytopeHull::arg_min(int i, bool left) {
 	if (primal_sol_found[left? 2*i : 2*i+1])
 		return primal_sols[left? 2*i : 2*i+1];
-	else throw LPException();
+	else throw Exception();
 }
 
 } // end namespace ibex

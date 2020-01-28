@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_Newton.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -116,6 +116,7 @@ bool inflating_newton(const Fnc& f, const VarSet& vars, const IntervalVector& bo
  *                        parameters of the returned varset.
  */
 VarSet get_newton_vars(const Fnc& f, const Vector& pt, const VarSet& forced_params);
+VarSet get_newton_vars(const Fnc& f, const Vector& pt, const BitSet& forced_params);
 
 } // end namespace ibex
 #endif // __IBEX_NEWTON_H__

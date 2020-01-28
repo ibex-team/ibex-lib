@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_Vector.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -18,6 +18,12 @@ namespace ibex {
 Vector::Vector(int nn) : n(nn), vec(new double[nn]) {
 	assert(nn>=1);
 	for (int i=0; i<nn; i++) vec[i]=0;
+}
+
+Vector::Vector(std::initializer_list<double> list): n(list.size()) {
+	assert(n >= 1);
+	vec = new double[n];
+	std::copy(list.begin(), list.end(), vec);
 }
 
 Vector::Vector(int nn, double x) : n(nn), vec(new double[nn]) {

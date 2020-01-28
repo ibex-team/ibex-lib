@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_Newton.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -320,6 +320,11 @@ bool inflating_newton(const Fnc& f, const IntervalVector& full_box, IntervalVect
 
 bool inflating_newton(const Fnc& f, const VarSet& vars, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
 	return inflating_newton(f,&vars,full_box,box_existence,box_unicity,k_max,mu_max,delta,chi);
+}
+
+VarSet get_newton_vars(const Fnc& f, const Vector& pt, const BitSet& forced_params) {
+	VarSet v(forced_params.size(), forced_params);
+	return get_newton_vars(f, pt, v);
 }
 
 VarSet get_newton_vars(const Fnc& f, const Vector& pt, const VarSet& forced_params) {
