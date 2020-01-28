@@ -48,31 +48,27 @@ bool LinearizerAffine2::goal_linearization(const IntervalVector& box, LPSolver& 
 	if (af2.is_empty()) {
 		return false;
 	}
-	try {
-		if (af2.size() == sys.nb_var) { // if the affine2 form is valid
-			// convert the epsilon variables to the original box
-			double tmp=0;
-			for (int i =0; i <sys.nb_var; i++) {
-				tmp = box[i].rad();
-				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
-					if (af2.val(i+1)==0)
-						lp_solver.set_cost(i, 0);
-					else {
-						return false; // sensible case to avoid
-					}
-				} else {
-					lp_solver.set_cost(i, af2.val(i+1) / tmp);
+
+	if (af2.size() == sys.nb_var) { // if the affine2 form is valid
+		// convert the epsilon variables to the original box
+		double tmp=0;
+		for (int i =0; i <sys.nb_var; i++) {
+			tmp = box[i].rad();
+			if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
+				if (af2.val(i+1)==0)
+					lp_solver.set_cost(i, 0);
+				else {
+					return false; // sensible case to avoid
 				}
+			} else {
+				lp_solver.set_cost(i, af2.val(i+1) / tmp);
 			}
 		}
-		else {
-			return false;
-		}
-		return true;
-
-	} catch (LPException&) {
+	}
+	else {
 		return false;
 	}
+	return true;
 }
 
 
@@ -118,20 +114,16 @@ int LinearizerAffine2::inlinearization(const IntervalVector& box, LPSolver& lp_s
 				case LEQ:
 				case LT: {
 					if (0.0 < ev.ub()) {
-						try {// TODO TO CHECK
-							lp_solver.add_constraint(rowconst, LEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
-							cont++;
-						} catch (LPException&) { }
+						lp_solver.add_constraint(rowconst, LEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+						cont++;
 					}
 					break;
 				}
 				case GEQ:
 				case GT: {
 					if (ev.lb() < 0.0) {
-						try {// TODO TO CHECK
-							lp_solver.add_constraint(rowconst, GEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
-							cont++;
-						} catch (LPException&) { }
+						lp_solver.add_constraint(rowconst, GEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+						cont++;
 					}
 					break;
 				}
@@ -200,10 +192,8 @@ int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver)
 				case LEQ:
 					if (0.0 < ev.lb()) return -1;
 					else if (0.0 < ev.ub()) {
-						try {
-							lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
-							cont++;
-						} catch (LPException&) { }
+						lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+						cont++;
 					}
 					break;
 				case GT:
@@ -211,22 +201,18 @@ int LinearizerAffine2::linearize(const IntervalVector& box, LPSolver& lp_solver)
 				case GEQ:
 					if (ev.ub() < 0.0) return -1;
 					else if (ev.lb() < 0.0) {
-						try {
-							lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
-							cont++;
-						} catch (LPException&) { }
+						lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+						cont++;
 					}
 					break;
 				case EQ:
 					if (!ev.contains(0.0)) return -1;
 					else {
 						if (ev.diam()>2*lp_solver.tolerance()) {
-							try {
-								lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
-								cont++;
-								lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
-								cont++;
-							} catch (LPException&) { }
+							lp_solver.add_constraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+							cont++;
+							lp_solver.add_constraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+							cont++;
 						}
 					}
 					break;
