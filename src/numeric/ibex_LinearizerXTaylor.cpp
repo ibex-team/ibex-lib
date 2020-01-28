@@ -29,6 +29,8 @@ class NoCornerPoint : public Exception { };
 
 class Unsatisfiability : public Exception { };
 
+class BadConstraint : public Exception { };
+
 }
 
 LinearizerXTaylor::LinearizerXTaylor(const System& _sys, approx_mode _mode, corner_policy policy,
@@ -161,6 +163,8 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box, const BitSet& act
 					if (sys.ops[c]==GEQ || sys.ops[c]==GT || sys.ops[c]==EQ) // && c!=goal_ctr))
 						count += linearize_leq_corner(box,corner,-Df[i],-g_corner[i]);
 
+				} catch (BadConstraint&) {
+					continue; // just skip this constraint
 				} catch (Unsatisfiability&) {
 					return -1;
 				}
@@ -212,6 +216,8 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box, const BitSet& 
 					count += linearize_leq_corner(box,corner,J[i],g_corner[i]);
 				else
 					count += linearize_leq_corner(box,corner,-J[i],-g_corner[i]);
+			} catch (BadConstraint&) {
+				return -1;
 			} catch (Unsatisfiability&) {
 				return -1;
 			}
@@ -275,6 +281,10 @@ IntervalVector LinearizerXTaylor::get_corner_point(const IntervalVector& box) {
 
 int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalVector& corner, const IntervalVector& dg_box, const Interval& g_corner) {
 	Vector a(n); // vector of coefficients
+
+	if (dg_box.is_unbounded()) {
+		throw BadConstraint();
+	}
 
 	// ========= compute matrix of coefficients ===========
 	// Fix each coefficient to the lower/upper bound of the
