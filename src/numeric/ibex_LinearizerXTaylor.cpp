@@ -280,11 +280,6 @@ IntervalVector LinearizerXTaylor::get_corner_point(const IntervalVector& box) {
 int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalVector& corner, const IntervalVector& dg_box, const Interval& g_corner) {
 	Vector a(n); // vector of coefficients
 
-	if (dg_box.max_diam() > LPSolver::max_box_diam) {
-		// we also also avoid this way to deal with infinite bounds (see below)
-		throw LPException();
-	}
-
 	// ========= compute matrix of coefficients ===========
 	// Fix each coefficient to the lower/upper bound of the
 	// constraint gradient, depending on the position of the

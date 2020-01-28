@@ -24,18 +24,16 @@ class PolytopeHullEmptyBoxException { };
 
 #ifndef  _IBEX_WITH_NOLP_
 
-CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
+CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps) :
 		Ctc(lr.nb_var()), lr(lr),
-		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
 		mylinearsolver(nb_var, LPSolver::Mode::Certified, eps, time_out, max_iter),
 		contracted_vars(BitSet::all(nb_var)), own_lr(false), primal_sols(2*nb_var, nb_var),
 		primal_sol_found(2*nb_var) {
 
 }
 
-CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
+CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps) :
 		Ctc(A.nb_cols()), lr(*new LinearizerFixed(A,b)),
-		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
 		mylinearsolver(nb_var, LPSolver::Mode::Certified, eps, time_out, max_iter),
 		contracted_vars(BitSet::all(nb_var)), own_lr(true), primal_sols(2*nb_var, nb_var),
 		primal_sol_found(2*nb_var) {
@@ -57,10 +55,6 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 	primal_sol_found.clear();
-
-	if (!(limit_diam_box.contains(box.max_diam()))) return;
-	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
-	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
 
 	try {
 
@@ -305,10 +299,10 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, in
 
 #else
 
-CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
+CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps) :
 		Ctc(lr.nb_var()) { }
 
-CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
+CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps) :
 		Ctc(A.nb_cols()) { }
 
 CtcPolytopeHull::~CtcPolytopeHull() { }

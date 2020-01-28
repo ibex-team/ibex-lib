@@ -43,10 +43,6 @@ void LoupFinderDuality::add_property(const IntervalVector& init_box, BoxProperti
 
 std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& box, const IntervalVector&, double current_loup, BoxProperties& prop) {
 
-	double d=box.max_diam();
-	if (d < LPSolver::min_box_diam || d > LPSolver::max_box_diam)
-		throw NotFound();
-
 	int n=sys.nb_var;
 
 	lp_solver.clear_constraints();

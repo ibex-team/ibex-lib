@@ -1,3 +1,13 @@
+//============================================================================
+//                                  I B E X
+// File        : ibex_LPSolver.h
+// Author      : Antoine Marendet
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : May 15, 2013 (Jordan Ninin)
+// Last update : Jan 28, 2020
+//============================================================================
+
 #ifndef __IBEX_LP_SOLVER_H__
 #define __IBEX_LP_SOLVER_H__
 
@@ -45,20 +55,6 @@ public:
     /** Default max_iter, set to 100 iterations */
     static constexpr int default_max_iter = 100;
 
-    /** Default minimal diameter of ??, set to 1e-14
-	 * Deprecated, kept for compatibility with optim and sip plugins.
-	 */
-	static constexpr double min_box_diam = 1e-14;
-
-	/**
-	 * TODO: Default maximal diameter of ... what exactly?
-	 *   In LoupFinderXTaylor: -> the box
-	 *   In LinearizerXTaylor : -> the derivative enclosure
-	 *  Set to 1e6.
-	 *  Deprecated, kept for compatibility with optim and sip plugins.
-	 */
-	static constexpr double max_box_diam = 1e6;
-
     /**
      * \brief Status of the linear program solver.
      *
@@ -66,7 +62,7 @@ public:
      * - Optimal: the problem has been solved to optimality, with no numerical guarantee,
      * - OptimalProved: the problem has been solved to optimality, and an
      * additional certification step has numerically certified that an optimal value has indeed been found,
-     * - Infeasible: the problem is infeasible,
+     * - Infeasible: the problem is infeasible, with no numerical guarantee,
      * - InfeasibleProved: the problem has been numerically proved to be infeasible,
      * - Unbounded: the problem is unbounded (not proved),
      * - Timeout: abort due to timeout,
