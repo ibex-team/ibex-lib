@@ -2,86 +2,180 @@
 
 namespace ibex {
 
-LPSolver::LPSolver(int nb_vars, int max_iter, double max_time_out, double eps):
-	nb_vars(0), nb_rows(0), boundvar(1), sense(LPSolver::MINIMIZE),
-	obj_value(POS_INFINITY), primal_solution(1), dual_solution(1 /*tmp*/),
-	status_prim(false), status_dual(false)
+LPSolver::LPSolver(int nb_vars, LPSolver::Mode mode, double tolerance,
+	double timeout, int max_iter)
 {
 	ibex_warning("No LP Solver available (use --lp-lib option in waf configure). ");
+}
+
+LPSolver::LPSolver(std::string filename) {
+	throw LPException();
 }
 
 LPSolver::~LPSolver() {
 }
 
-LPSolver::Status LPSolver::solve() {
-	return LPSolver::UNKNOWN;
-}
-
-void LPSolver::write_file(const char* name) {
+int LPSolver::add_constraint(double lhs, const Vector& row, double rhs) {
 	throw LPException();
 }
 
-Vector LPSolver::get_infeasible_dir() const {
+int LPSolver::add_constraint(const Vector& row, CmpOp op, double rhs) {
 	throw LPException();
 }
 
-Matrix LPSolver::get_rows() const{
+void LPSolver::add_constraints(const Vector& lhs, const Matrix& rows, const Vector& rhs) {
 	throw LPException();
 }
 
-Matrix LPSolver::get_rows_trans() const{
+void LPSolver::add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs) {
 	throw LPException();
 }
 
-IntervalVector LPSolver::get_lhs_rhs() const{
+LPSolver::Status LPSolver::minimize() {
 	throw LPException();
 }
 
-Vector LPSolver::get_coef_obj() const{
+void LPSolver::set_cost(const Vector& obj) {
 	throw LPException();
 }
 
-double LPSolver::get_epsilon() const{
+void LPSolver::set_cost(int var, double value) {
 	throw LPException();
 }
 
-void LPSolver::clear_ctrs(){
+void LPSolver::set_bounds(const IntervalVector& bounds) {
 	throw LPException();
 }
 
-void LPSolver::set_max_iter(int max){
+void LPSolver::set_bounds(int var, const Interval& bounds) {
 	throw LPException();
 }
 
-void LPSolver::set_max_time_out(double time){
+void LPSolver::set_tolerance(double tolerance) {
 	throw LPException();
 }
 
-void LPSolver::set_sense(Sense s){
+void LPSolver::set_timeout(double timeout) {
 	throw LPException();
 }
 
-void LPSolver::set_cost(const Vector& coef){
+void LPSolver::set_max_iter(int max_iter) {
 	throw LPException();
 }
 
-void LPSolver::set_cost(int var, double coef){
+int LPSolver::nb_rows() const {
 	throw LPException();
 }
 
-void LPSolver::set_bounds(const IntervalVector& bounds){
+int LPSolver::nb_vars() const {
 	throw LPException();
 }
 
-void LPSolver::set_bounds_var(int var, const Interval& bound){
+double LPSolver::tolerance() const {
 	throw LPException();
 }
 
-void LPSolver::set_epsilon(double eps){
+int LPSolver::max_iter() const {
 	throw LPException();
 }
 
-void LPSolver::add_constraint(const Vector & row, CmpOp sign, double rhs ){
+double LPSolver::timeout() const {
+	throw LPException();
+}
+
+LPSolver::Status LPSolver::status() const {
+	throw LPException();
+}
+
+Matrix LPSolver::rows() const {
+	throw LPException();
+}
+
+Vector LPSolver::row(int index) const {
+	throw LPException();
+}
+
+Matrix LPSolver::rows_transposed() const {
+	throw LPException();
+}
+
+Vector LPSolver::col(int index) const {
+	throw LPException();
+}
+
+Vector LPSolver::lhs() const {
+	throw LPException();
+}
+
+double LPSolver::lhs(int index) const {
+	throw LPException();
+}
+
+Vector LPSolver::rhs() const {
+	throw LPException();
+}
+
+double LPSolver::rhs(int index) const {
+	throw LPException();
+}
+
+IntervalVector LPSolver::lhs_rhs() const {
+	throw LPException();
+}
+
+Interval LPSolver::lhs_rhs(int index) const {
+	throw LPException();
+}
+
+IntervalVector LPSolver::bounds() const {
+	throw LPException();
+}
+
+Interval LPSolver::bounds(int index) const {
+	throw LPException();
+}
+
+Vector LPSolver::cost() const {
+	throw LPException();
+}
+
+double LPSolver::cost(int index) const {
+	throw LPException();
+}
+
+bool LPSolver::is_feasible() const {
+	throw LPException();
+}
+
+Interval LPSolver::minimum() const {
+	throw LPException();
+}
+
+Vector LPSolver::not_proved_primal_sol() const {
+	throw LPException();
+}
+
+Vector LPSolver::not_proved_dual_sol() const  {
+	throw LPException();
+}
+
+void LPSolver::write_to_file(const std::string& filename) const {
+	throw LPException();
+}
+
+void LPSolver::set_cost_to_zero() {
+	throw LPException();
+}
+
+void LPSolver::clear_constraints() {
+	throw LPException();
+}
+
+void LPSolver::clear_bounds() {
+	throw LPException();
+}
+
+void LPSolver::reset(int nb_vars) {
 	throw LPException();
 }
 
