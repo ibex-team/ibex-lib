@@ -57,7 +57,6 @@ void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 	primal_sol_found.clear();
 
 	try {
-
 		//returns the number of constraints in the linearized system
 		int cont = lr.linearize(box, mylinearsolver, context.prop);
 
@@ -72,9 +71,6 @@ void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 		//mylinearsolver.writeFile("LP.lp");
 		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
-		mylinearsolver.clear_constraints();
-	}
-	catch(LPException&) {
 		mylinearsolver.clear_constraints();
 	}
 	catch(PolytopeHullEmptyBoxException& e) {
@@ -237,62 +233,47 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, int & infnexti, int* inf_bound, int* sup_bound) {
 
 	bool found = false;
+	// the primal solution : used by choose_next_variable
+	Vector primal_solution = mylinearsolver.not_proved_primal_sol();
+	//cout << " primal " << primal_solution << endl;
 
-	try {
-		// the primal solution : used by choose_next_variable
-		Vector primal_solution = mylinearsolver.not_proved_primal_sol();
-		//cout << " primal " << primal_solution << endl;
+	// The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
+	// and updating the indicators if a bound has been found feasible (with the precision prec_bound)
+	// called only when a primal solution is found by the LP solver (use of primal_solution)
 
-		// The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
-		// and updating the indicators if a bound has been found feasible (with the precision prec_bound)
-		// called only when a primal solution is found by the LP solver (use of primal_solution)
+	// double prec_bound = mylinearsolver.getEpsilon(); // relative precision for the indicators TODO change with the precision of the optimizer ??
+	double prec_bound = 1.e-8; // relative precision for the indicators      :  compatibility for testing  BNE
+	double delta=1.e100;
+	double deltaj=delta;
 
-		// double prec_bound = mylinearsolver.getEpsilon(); // relative precision for the indicators TODO change with the precision of the optimizer ??
-		double prec_bound = 1.e-8; // relative precision for the indicators      :  compatibility for testing  BNE
-		double delta=1.e100;
-		double deltaj=delta;
+	for (int j=0; j<nb_var; j++)	{
 
-		for (int j=0; j<nb_var; j++)	{
-
-			if (inf_bound[j]==0) {
-				deltaj= fabs(primal_solution[j]- box[j].lb());
-				if ((fabs (box[j].lb()) < 1 && deltaj < prec_bound) ||
-						(fabs (box[j].lb()) >= 1 && fabs (deltaj /(box[j].lb())) < prec_bound))	{
-					inf_bound[j]=1;
-				}
-				if (inf_bound[j]==0 && deltaj < delta) 	{
-					nexti=j; infnexti=0;delta=deltaj; found =true;
-				}
+		if (inf_bound[j]==0) {
+			deltaj= fabs(primal_solution[j]- box[j].lb());
+			if ((fabs (box[j].lb()) < 1 && deltaj < prec_bound) ||
+					(fabs (box[j].lb()) >= 1 && fabs (deltaj /(box[j].lb())) < prec_bound))	{
+				inf_bound[j]=1;
 			}
-
-			if (sup_bound[j]==0) {
-				deltaj = fabs (primal_solution[j]- box[j].ub());
-
-
-				if ((fabs (box[j].ub()) < 1 && deltaj < prec_bound) 	||
-						(fabs (box[j].ub()) >= 1 && fabs (deltaj/(box[j].ub())) < prec_bound)) {
-					sup_bound[j]=1;
-				}
-				if (sup_bound[j]==0 && deltaj < delta) {
-					nexti=j; infnexti=1;delta=deltaj;  found =true;
-				}
-
-			}
-
-
-		}
-	} catch (LPException& ) {
-		// Default if the primal solution is not available.
-		for (int j=0; j<nb_var; j++) {
-			if (inf_bound[j]==0) {
-				nexti=j;   infnexti=0; found = true;
-				break;
-			}
-			else if  (sup_bound[j]==0) {
-				nexti=j;  infnexti=1; found = true;
-				break;
+			if (inf_bound[j]==0 && deltaj < delta) 	{
+				nexti=j; infnexti=0;delta=deltaj; found =true;
 			}
 		}
+
+		if (sup_bound[j]==0) {
+			deltaj = fabs (primal_solution[j]- box[j].ub());
+
+
+			if ((fabs (box[j].ub()) < 1 && deltaj < prec_bound) 	||
+					(fabs (box[j].ub()) >= 1 && fabs (deltaj/(box[j].ub())) < prec_bound)) {
+				sup_bound[j]=1;
+			}
+			if (sup_bound[j]==0 && deltaj < delta) {
+				nexti=j; infnexti=1;delta=deltaj;  found =true;
+			}
+
+		}
+
+
 	}
 	return found;
 }

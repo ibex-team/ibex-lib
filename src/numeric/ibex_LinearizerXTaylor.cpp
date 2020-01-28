@@ -161,8 +161,6 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box, const BitSet& act
 					if (sys.ops[c]==GEQ || sys.ops[c]==GT || sys.ops[c]==EQ) // && c!=goal_ctr))
 						count += linearize_leq_corner(box,corner,-Df[i],-g_corner[i]);
 
-				} catch (LPException&) {
-					continue;  // just skip this constraint
 				} catch (Unsatisfiability&) {
 					return -1;
 				}
@@ -214,8 +212,6 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box, const BitSet& 
 					count += linearize_leq_corner(box,corner,J[i],g_corner[i]);
 				else
 					count += linearize_leq_corner(box,corner,-J[i],-g_corner[i]);
-			} catch (LPException&) {
-				return -1;
 			} catch (Unsatisfiability&) {
 				return -1;
 			}
@@ -297,7 +293,7 @@ int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalV
 
 	double b = mode==RESTRICT? rhs.lb() - lp_solver->tolerance() : rhs.ub();
 
-	// may throw Unsatisfiability and LPException
+	// may throw Unsatisfiability
 	return check_and_add_constraint(box,a,b);
 }
 
@@ -315,7 +311,7 @@ int LinearizerXTaylor::check_and_add_constraint(const IntervalVector& box, const
 		return 0;
 	} else {
 		//cout << "add constraint " << a << "*x<=" << b << endl;
-		lp_solver->add_constraint(a, LEQ, b); // note: may throw LPException
+		lp_solver->add_constraint(a, LEQ, b);
 		return 1;
 	}
 }

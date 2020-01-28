@@ -70,39 +70,37 @@ LSmear::~LSmear() {
 
 	//the linear system is solved
 	LPSolver::Status stat=LPSolver::Status::Unknown;
-	try {
-		mylinearsolver->set_cost(_goal_var, (minimize)? 1.0:-1.0);
 
-		stat = mylinearsolver->minimize();
+	mylinearsolver->set_cost(_goal_var, (minimize)? 1.0:-1.0);
 
-		if (stat == LPSolver::Status::Optimal) {
-		  // the dual solution : used to compute the bound
-		  Vector dual_solution(mylinearsolver->nb_rows());  //
-		  dual_solution = mylinearsolver->not_proved_dual_sol();
+	stat = mylinearsolver->minimize();
 
-		  int k=0; //number of multipliers != 0
-		  int ii=0;
-		  // writing the dual solution in the dual Vector of dimension +
-		  for (int i=0; i< sys.nb_var; i++)
-		    dual[i]=dual_solution[i];
-		  for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
-		    if (nb_lctrs[i]==2) {
-		      dual[sys.nb_var+i]=dual_solution[sys.nb_var+ii]+dual_solution[sys.nb_var+ii+1]; ii+=2;
-		    }
-		    else  if (nb_lctrs[i]==1) {
-		      dual[sys.nb_var+i]=dual_solution[sys.nb_var+ii]; ii++;
-		    }
-		    else {
-		      dual[sys.nb_var+i]=0.0;
-		    }
-		    if (std::abs(dual[sys.nb_var+i])>1e-10) k++;
-		  }
+	if (stat == LPSolver::Status::Optimal) {
+		// the dual solution : used to compute the bound
+		Vector dual_solution(mylinearsolver->nb_rows());  //
+		dual_solution = mylinearsolver->not_proved_dual_sol();
 
-		  if(k<2) { stat = LPSolver::Status::Unknown; }
+		int k=0; //number of multipliers != 0
+		int ii=0;
+		// writing the dual solution in the dual Vector of dimension +
+		for (int i=0; i< sys.nb_var; i++)
+			dual[i]=dual_solution[i];
+		for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
+			if (nb_lctrs[i]==2) {
+				dual[sys.nb_var+i]=dual_solution[sys.nb_var+ii]+dual_solution[sys.nb_var+ii+1]; ii+=2;
+			}
+			else  if (nb_lctrs[i]==1) {
+				dual[sys.nb_var+i]=dual_solution[sys.nb_var+ii]; ii++;
+			}
+			else {
+				dual[sys.nb_var+i]=0.0;
+			}
+			if (std::abs(dual[sys.nb_var+i])>1e-10) k++;
 		}
-	} catch (LPException&) {
-		stat = LPSolver::Status::Unknown;
+
+		if(k<2) { stat = LPSolver::Status::Unknown; }
 	}
+
 	return stat;
 }
 

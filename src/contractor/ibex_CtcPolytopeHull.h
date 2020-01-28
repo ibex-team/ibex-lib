@@ -96,10 +96,10 @@ public:
 	 * (resp. maximizing) the left (resp. right
 	 * bound) of the ith variable.
 	 * If no argmin were found for this LP problem
-	 * (the primal problem has failed), a LPException
+	 * (the primal problem has failed), a Exception
 	 * is thrown.
 	 *
-	 * \throw LPException
+	 * \throw Exception
 	 */
 	const Vector& arg_min(int i, bool left);
 
