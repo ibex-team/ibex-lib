@@ -320,6 +320,14 @@ IntervalVector& IntervalVector::inflate(double delta, double chi) {
 	return *this;
 }
 
+Interval IntervalVector::sqnorm2() const {
+	Interval d=Interval::zero();
+	for (int i=0; i<size(); i++) {
+		d+=pow((*this)[i],2);
+	}
+	return d;
+}
+
 double infinite_norm(const IntervalVector& v) {
 	assert(!v.is_empty());
     double norm = v[0].mag();

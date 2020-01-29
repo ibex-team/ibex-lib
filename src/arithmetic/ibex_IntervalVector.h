@@ -497,6 +497,16 @@ public:
 	 */
 	double perimeter() const;
 
+	/**
+	 * \brief Return an enclosure of the square of the Euclidian norm.
+	 */
+	Interval sqnorm2() const;
+
+	/**
+	 * \brief Return an enclosure of the Euclidian norm.
+	 */
+	Interval norm2() const;
+
 	 /**
 	  * \brief Return max of the delta, for x\subseteq *this [deprecated]
 	  *
@@ -910,6 +920,10 @@ inline double IntervalVector::max_diam() const {
 
 inline double IntervalVector::min_diam() const {
 	return (*this)[extr_diam_index(true)].diam();
+}
+
+inline Interval IntervalVector::norm2() const {
+	return sqrt(sqnorm2());
 }
 
 inline IntervalVector& IntervalVector::operator+=(const Vector& x) {
