@@ -151,18 +151,21 @@ public:
      * \brief Set the bounds on a variable.
      */
     void set_bounds(int var, const Interval& bounds);
-	/**
+
+    /**
 	 * \brief Set both feasibility and optimality tolerance.
 	 *
 	 * For Cplex, this value must be between 1e-9 and 1e-1. The value is cropped if necessary.
 	 * For Soplex, this value must be > 0.
 	 */
     void set_tolerance(double tolerance);
-	/**
+
+    /**
 	 * \brief Set the maximum computation time in seconds for a call to minimize().
 	 */
     void set_timeout(double timeout);
-	/**
+
+    /**
 	 * \brief Set the maximum number of simplex iterations for a call to minimize().
 	 */
     void set_max_iter(int max_iter);
@@ -173,22 +176,27 @@ public:
 	 * this will be equal to nb_vars().
 	 */
     int nb_rows() const;
-	/**
+
+    /**
 	 * \brief Number of variables in the LP.
 	 */
     int nb_vars() const;
-	/**
+
+    /**
 	 * \brief Feasibility and optimality tolerance.
 	 */
     double tolerance() const;
-	/**
+
+    /**
 	 * \brief Maximum number of iterations for a call to minimize().
 	 */
     int max_iter() const;
-	/**
+
+    /**
 	 * \brief Maximum computation time for a call to minimize().
 	 */
     double timeout() const;
+
     /**
      * \brief Status of the last call to minimize, or Unknown if minimize has not been called.
      */
@@ -198,48 +206,63 @@ public:
 	 * \brief Return the constraints matrix, e.g A in lhs <= Ax <= rhs.
 	 */
     Matrix rows() const;
+
 	/**
 	 * \brief Return a specific row.
 	 */
     Vector row(int index) const;
+
 	/**
 	 * \brief Return the transposed constraints matrix, A^T.
 	 */
     Matrix rows_transposed() const;
+
 	/**
 	 * \brief Return a specific column of the constraints matrix.
 	 */
     Vector col(int index) const;
 
 	/**
-	 * \brief Return the left hand side of the constraints.
+	 * \brief Return the left hand side of the constraints
+	 *        (including bounds).
 	 */
     Vector lhs() const;
+
 	/**
-	 * \brief Return the left hand side of constraint index.
+	 * \brief Return the left hand side of constraint index
+	 *        (including bounds).
 	 */
     double lhs(int index) const;
-	/**
-	 * \brief Return the right hand side of the constraints.
+
+    /**
+	 * \brief Return the right hand side of the constraints
+	 *        (including bounds).
 	 */
     Vector rhs() const;
+
 	/**
-	 * \brief Return the right hand side of constraint index.
+	 * \brief Return the right hand side of constraint index
+	 *        (including bounds).
 	 */
     double rhs(int index) const;
-	/**
+
+    /**
 	 * \brief Return the left hand side and right of side of the constraints as an IntervalVector,
-	 * each row corresponding to one constraint.
+	 *        each row corresponding to one constraint (including bounds).
 	 */
     IntervalVector lhs_rhs() const;
-	/**
-	 * \brief Return the left hand side and right hand side of as an Interval for constraint index.
+
+    /**
+	 * \brief Return the left hand side and right hand side of as an Interval for constraint index
+	 *        (including bounds).
 	 */
     Interval lhs_rhs(int index) const;
-	/**
+
+    /**
 	 * \brief Return the bounds on the variables.
 	 */
     IntervalVector bounds() const;
+
 	/**
 	 * \brief Return the bounds on variable index.
 	 */
@@ -249,6 +272,7 @@ public:
 	 * \brief Return the cost vector.
 	 */
     Vector cost() const;
+
 	/**
 	 * \brief Return the cost for variable index.
 	 */
