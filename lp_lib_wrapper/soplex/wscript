@@ -85,7 +85,7 @@ def configure (conf):
                 "ZLIB=false",
                 "USRCPPFLAGS=-fPIC"]
             soplex_ret = conf.configure_3rd_party_with_autotools (soplex_archive,
-                    without_configure = True, without_make_install = False, make_args=make_args)
+                    without_configure = True, without_make_install = True, make_args=make_args)
             soplex_srcdir, soplex_include, soplex_lib = soplex_ret
             conf.env.INSTALL_3RD = True
             from_3rd = True
