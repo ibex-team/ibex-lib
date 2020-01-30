@@ -18,6 +18,15 @@ ibex::Vector ilonumarray2ivec(const IloNumArray array) {
 	return ivec;
 }
 
+bool isfinite(const ibex::Vector& v) {
+    for(int i = 0; i < v.size(); ++i) {
+        if(!std::isfinite(v[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // end anonymous namespace
 
 namespace ibex {
@@ -62,6 +71,8 @@ void LPSolver::init(LPSolver::Mode mode, double tolerance, double timeout, int m
 
 int LPSolver::add_constraint(double lhs, const Vector& row, double rhs) {
     assert(row.size() == nb_vars());
+    assert(std::isfinite(lhs) && std::isfinite(rhs));
+    assert(isfinite(row));
 
     has_changed = true;
 	IloRange range(env, lhs, rhs);
@@ -73,6 +84,9 @@ int LPSolver::add_constraint(double lhs, const Vector& row, double rhs) {
 
 int LPSolver::add_constraint(const Vector& row, CmpOp op, double rhs) {
     assert(row.size() == nb_vars());
+    assert(std::isfinite(rhs));
+    assert(isfinite(row));
+
     has_changed = true;
 	IloRange range(env, -IloInfinity, IloInfinity);
 	switch(op) {
@@ -109,6 +123,8 @@ void LPSolver::add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs) 
 
 LPSolver::Status LPSolver::minimize() {
     invalidate();
+    assert(!ivec_bounds_.is_unbounded());
+
 	cplex.extract(model);
 	cplex.solve();
     IloCplex::CplexStatus cplex_status = cplex.getCplexStatus();
@@ -176,18 +192,23 @@ LPSolver::Status LPSolver::minimize() {
 
 void LPSolver::set_cost(const Vector& obj) {
     assert(obj.size() == nb_vars());
+    assert(isfinite(obj));
+
     has_changed = true;
 	cost_.setLinearCoefs(x, ivec2ilonumarray(env, obj));
 }
 
 void LPSolver::set_cost(int index, double value) {
     assert(index >= 0 && index < nb_vars());
+    assert(std::isfinite(value));
+
     has_changed = true;
     cost_.setLinearCoef(x[index], value);
 }
 
 void LPSolver::set_bounds(const IntervalVector& bounds) {
     assert(bounds.size() == nb_vars());
+    assert(!bounds.is_unbounded());
     has_changed = true;
     for(int i = 0; i < nb_vars(); ++i) {
 		set_bounds(i, bounds[i]);
@@ -196,6 +217,8 @@ void LPSolver::set_bounds(const IntervalVector& bounds) {
 
 void LPSolver::set_bounds(int var, const Interval& bounds) {
     assert(var >= 0 && var < nb_vars());
+    assert(!bounds.is_unbounded());
+
     has_changed = true;
     ivec_bounds_[var] = bounds;
 	x[var].setBounds(bounds.lb(), bounds.ub());
@@ -288,6 +311,7 @@ Vector LPSolver::lhs() const {
 }
 
 double LPSolver::lhs(int index) const {
+    assert(index >= 0 && index < nb_rows());
 	return constraints[index].getLB();
 }
 
@@ -299,6 +323,7 @@ Vector LPSolver::rhs() const {
 	return ivec;
 }
 double LPSolver::rhs(int index) const {
+    assert(index >= 0 && index < nb_rows());
     return constraints[index].getUB();
 }
 
@@ -311,6 +336,7 @@ IntervalVector LPSolver::lhs_rhs() const {
 }
 
 Interval LPSolver::lhs_rhs(int index) const {
+    assert(index >= 0 && index < nb_rows());
     return Interval(lhs(index), rhs(index));
 }
 
@@ -319,6 +345,7 @@ IntervalVector LPSolver::bounds() const {
 }
 
 Interval LPSolver::bounds(int index) const {
+    assert(index >= 0 && index < nb_vars());
     return ivec_bounds_[index];
 }
 
@@ -327,25 +354,26 @@ Vector LPSolver::cost() const {
 }
 
 double LPSolver::cost(int index) const {
+    assert(index >= 0 && index < nb_vars());
     return cost()[index];
 }
 
 Interval LPSolver::minimum() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver: no solution stored. Check solver status with LPSolver::status().");
     }
     return obj_;
 }
 
 Vector LPSolver::not_proved_primal_sol() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver: no solution stored. Check solver status with LPSolver::status().");
     }
     return uncertified_primal_;
 }
 Vector LPSolver::not_proved_dual_sol() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver: no solution stored. Check solver status with LPSolver::status().");
     }
     return uncertified_dual_;
 }

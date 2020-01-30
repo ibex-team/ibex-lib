@@ -79,13 +79,13 @@ def configure (conf):
             # We necessarily have mandatory = False, or else conf.check_cxx () would
             # have failed.
             conf.msg ("Using library Soplex from", "3rd/ subdirectory")
-            soplex_archive = "soplex-3.1.1.tar"
+            soplex_archive = "soplex-4.0.2.tar"
             make_args = [
                 "GMP=false",
                 "ZLIB=false",
                 "USRCPPFLAGS=-fPIC"]
             soplex_ret = conf.configure_3rd_party_with_autotools (soplex_archive,
-                    without_configure = True, without_make_install = True, make_args=make_args)
+                    without_configure = True, without_make_install = False, make_args=make_args)
             soplex_srcdir, soplex_include, soplex_lib = soplex_ret
             conf.env.INSTALL_3RD = True
             from_3rd = True
@@ -106,6 +106,11 @@ def configure (conf):
                 fullpath = os.path.join (soplex_srcdir, "src", filename)
                 if filename.endswith (".h") and os.path.isfile (fullpath):
                     shutil.copy2 (fullpath, soplex_include)
+            for filename in os.listdir (os.path.join (soplex_srcdir, "src", "soplex")):
+                fullpath = os.path.join (soplex_srcdir, "src", "soplex", filename)
+                soplex_soplex_include = os.path.join(soplex_include, "soplex")
+                if filename.endswith (".h") and os.path.isfile (fullpath):
+                    shutil.copy2 (fullpath, soplex_soplex_include)
             conf.end_msg("done")
 
     if conf.options.DEBUG:

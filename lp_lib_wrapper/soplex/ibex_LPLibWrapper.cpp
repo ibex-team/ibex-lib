@@ -62,6 +62,15 @@ soplex::LPRowReal::Type cmpop2type(ibex::CmpOp op) {
 
 }
 
+bool isfinite(const ibex::Vector& v) {
+    for(int i = 0; i < v.size(); ++i) {
+        if(!std::isfinite(v[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } /* end anonymous namespace */
 
 namespace ibex {
@@ -83,7 +92,8 @@ LPSolver::LPSolver(std::string filename) {
     mysoplex->setIntParam(SoPlex::READMODE, SoPlex::READMODE_REAL);
     bool result = mysoplex->readFile(filename.c_str());
     if(!result) {
-        throw LPException();
+        std::string msg = "LPSolver: file " + filename + " could not be read.";
+        ibex_error(msg.c_str());
     }
     ivec_bounds_ = IntervalVector(nb_vars());
     for(int i = 0; i < ivec_bounds_.size(); ++i) {
@@ -104,6 +114,7 @@ void LPSolver::init(LPSolver::Mode mode, double tolerance, double timeout, int m
 	mysoplex->setRealParam(SoPlex::FEASTOL, tolerance);
 	mysoplex->setRealParam(SoPlex::OPTTOL, tolerance);
 	mysoplex->setIntParam(SoPlex::SOLVEMODE, SoPlex::SOLVEMODE_REAL);
+    mysoplex->setIntParam(SoPlex::OBJSENSE, SoPlex::OBJSENSE_MINIMIZE);
 }
 
 /*void LPSolver::add_variable(const Interval& bounds, double obj) {
@@ -140,6 +151,8 @@ void LPSolver::add_variables(const Matrix& cols, const IntervalVector& bounds, c
 
 int LPSolver::add_constraint(double lhs, const Vector& row, double rhs) {
     assert(row.size() == nb_vars());
+    assert(std::isfinite(lhs) && std::isfinite(rhs));
+    assert(isfinite(row));
 
     has_changed = true;
     mysoplex->addRowReal(LPRowReal(lhs, ivec2dsvec(row), rhs));
@@ -148,6 +161,8 @@ int LPSolver::add_constraint(double lhs, const Vector& row, double rhs) {
 
 int LPSolver::add_constraint(const Vector& row, CmpOp op, double rhs) {
     assert(row.size() == nb_vars());
+    assert(isfinite(row));
+    assert(std::isfinite(rhs));
 
     has_changed = true;
     using Type = soplex::LPRowReal::Type;
@@ -179,7 +194,11 @@ void LPSolver::add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs) 
 
 LPSolver::Status LPSolver::minimize() {
     invalidate();
-    SPxSolver::Status soplex_status = mysoplex->solve();
+    assert(!ivec_bounds_.is_unbounded());
+
+    mysoplex->solve();
+    mysoplex->ignoreUnscaledViolations();
+    SPxSolver::Status soplex_status = mysoplex->status();
     status_ = LPSolver::Status::Unknown;
     switch(soplex_status) {
     case SPxSolver::OPTIMAL:
@@ -238,18 +257,22 @@ LPSolver::Status LPSolver::minimize() {
 
 void LPSolver::set_cost(const Vector& obj) {
     assert(obj.size() == nb_vars());
+    assert(isfinite(obj));
     has_changed = true;
     mysoplex->changeObjReal(ivec2dvec(obj));
 }
 
 void LPSolver::set_cost(int index, double value) {
     assert(index >= 0 && index < nb_vars());
+    assert(std::isfinite(value));
     has_changed = true;
     mysoplex->changeObjReal(index, value);
 }
 
 void LPSolver::set_bounds(const IntervalVector& bounds) {
     assert(bounds.size() == nb_vars());
+    assert(!bounds.is_unbounded());
+
     has_changed = true;
     // The bounds have to be changed in 3 places: ivec_bounds_,
     // in soplex variable bounds, and in bounds constraints.
@@ -263,6 +286,7 @@ void LPSolver::set_bounds(const IntervalVector& bounds) {
 
 void LPSolver::set_bounds(int var, const Interval& bounds) {
     assert(var >= 0 && var < nb_vars());
+    assert(!bounds.is_unbounded());
     has_changed = true;
     ivec_bounds_[var] = bounds;
     mysoplex->changeBoundsReal(var, bounds.lb(), bounds.ub());
@@ -329,6 +353,7 @@ Matrix LPSolver::rows_transposed() const {
 }
 
 Vector LPSolver::col(int index) const {
+    assert(index >= 0 && index < nb_vars());
     DSVectorReal dscol(nb_rows());
     mysoplex->getColVectorReal(index, dscol);
     return dsvec2ivec(dscol, nb_rows());
@@ -341,6 +366,7 @@ Vector LPSolver::lhs() const {
 }
 
 double LPSolver::lhs(int index) const {
+    assert(index >= 0 && index < nb_rows());
     return mysoplex->lhsReal(index);
 }
 
@@ -350,6 +376,7 @@ Vector LPSolver::rhs() const {
     return dvec2ivec(dcol);
 }
 double LPSolver::rhs(int index) const {
+    assert(index >= 0 && index < nb_rows());
     return mysoplex->rhsReal(index);
 }
 
@@ -362,6 +389,7 @@ IntervalVector LPSolver::lhs_rhs() const {
 }
 
 Interval LPSolver::lhs_rhs(int index) const {
+    assert(index >= 0 && index < nb_rows());
     return Interval(mysoplex->lhsReal(index), mysoplex->rhsReal(index));
 }
 
@@ -370,6 +398,7 @@ IntervalVector LPSolver::bounds() const {
 }
 
 Interval LPSolver::bounds(int index) const {
+    assert(index >= 0 && index < nb_vars());
     return ivec_bounds_[index];
 }
 
@@ -380,25 +409,26 @@ Vector LPSolver::cost() const {
 }
 
 double LPSolver::cost(int index) const {
+    assert(index >= 0 && index < nb_vars());
     return mysoplex->objReal(index);
 }
 
 Interval LPSolver::minimum() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver: no solution stored. Check solver status with LPSolver::status().");
     }
     return obj_;
 }
 
 Vector LPSolver::not_proved_primal_sol() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver: no solution stored. Check solver status with LPSolver::status().");
     }
     return uncertified_primal_;
 }
 Vector LPSolver::not_proved_dual_sol() const {
     if(!has_solution_) {
-        throw LPException();
+        ibex_error("LPSolver: no solution stored. Check solver status with LPSolver::status().");
     }
     return uncertified_dual_;
 }

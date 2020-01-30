@@ -49,7 +49,7 @@ LPSolver TestLinearSolver::create_kleemin(int n) {
 	}
 	lp.set_cost(-v);
 
-	IntervalVector bound (n, Interval::pos_reals());
+	IntervalVector bound (n, Interval(0, 1e200));
 	lp.set_bounds(bound);
 
 	for (int i=1;i<=n;i++) {
@@ -161,7 +161,7 @@ void TestLinearSolver::reset() {
 	}
 	lp.set_cost(-v);
 
-	IntervalVector bound (n, Interval::pos_reals());
+	IntervalVector bound (n, Interval(0, 1e200));
 	lp.set_bounds(bound);
 
 	for (int i=1;i<=n;i++) {
@@ -211,8 +211,8 @@ void TestLinearSolver::test_known_problem(std::string filename, double optimal) 
  */
 void TestLinearSolver::nearly_parallel_constraints() {
 	LPSolver lp(2, LPSolver::Mode::Certified);
-	lp.set_bounds(0, Interval::NEG_REALS);
-	lp.set_bounds(1, Interval::POS_REALS);
+	lp.set_bounds(0, Interval(-1e200, 0));
+	lp.set_bounds(1, Interval(0, 1e200));
 	double a = 1e-7;
 	lp.add_constraint({-a, 1}, CmpOp::LEQ, a);
 	lp.set_cost({1, 0});
