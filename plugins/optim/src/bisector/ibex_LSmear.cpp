@@ -39,6 +39,11 @@ LSmear::~LSmear() {
 
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 
+		if (J[i].is_unbounded()) {
+			nb_lctrs[i]=0;
+			continue;
+		}
+
 		Vector row1(sys.nb_var);
 		Interval ev(0.0);
 		for (int j=0; j<sys.nb_var; j++) {
@@ -49,7 +54,7 @@ LSmear::~LSmear() {
 
 		nb_lctrs[i]=1;
 		if (i!=goal_ctr()) {
-		  if (sys.ops[i] == LEQ || sys.ops[i] == LT){
+		  if (sys.ops[i] == LEQ || sys.ops[i] == LT) {
 		    mylinearsolver->add_constraint( row1, sys.ops[i], (-ev).ub());
 		  }
 		  else if (sys.ops[i] == GEQ || sys.ops[i] == GT)
@@ -108,6 +113,9 @@ LSmear::~LSmear() {
 int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
   int lvar = -1;
 
+	if (box.is_unbounded()) {
+		return SmearSumRelative::var_to_bisect(J, box);
+	}
 	//Linearization
 	LPSolver::Status stat = LPSolver::Status::Unknown;
 
