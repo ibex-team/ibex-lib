@@ -89,7 +89,7 @@ void TestLinearSolver::kleemin30() {
 	}
 	lp.set_cost(-v);
 
-	IntervalVector bound (n, Interval::pos_reals());
+	IntervalVector bound (n, Interval(0, 1e200));
 	lp.set_bounds(bound);
 
 	for (int i=1;i<=n;i++) {
@@ -224,8 +224,8 @@ void TestLinearSolver::nearly_parallel_constraints() {
 
 void TestLinearSolver::cost_parallel_to_constraint() {
 	LPSolver lp(2, LPSolver::Mode::Certified);
-	lp.set_bounds(0, Interval::NEG_REALS);
-	lp.set_bounds(1, Interval::POS_REALS);
+	lp.set_bounds(0, Interval(-1e200, 0));
+	lp.set_bounds(1, Interval(0, 1e200));
 	double a = 1e-12; // a: 1 -> 0
 	double b = 1/a; // b: 0 -> 1/a
 	lp.add_constraint({-a, 1}, CmpOp::LEQ, a);
