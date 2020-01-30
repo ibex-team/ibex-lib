@@ -56,6 +56,8 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 	primal_sol_found.clear();
 
+	if (box.is_unbounded()) return;
+
 	try {
 		//returns the number of constraints in the linearized system
 		int cont = lr.linearize(box, mylinearsolver, context.prop);
