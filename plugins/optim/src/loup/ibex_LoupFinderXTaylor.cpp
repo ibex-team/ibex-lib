@@ -1,4 +1,4 @@
-//============================================================================
+	//============================================================================
 //                                  I B E X
 // File        : ibex_LoupFinderXTaylor.cpp
 // Author      : Gilles Chabert, Ignacio Araya, Bertrand Neveu
@@ -28,6 +28,9 @@ void LoupFinderXTaylor::add_property(const IntervalVector& init_box, BoxProperti
 std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup, BoxProperties& prop) {
 
 	int n=sys.nb_var;
+
+	if (box.is_unbounded())
+		throw NotFound();
 
 	lp_solver.clear_constraints();
 	lp_solver.set_bounds(box);

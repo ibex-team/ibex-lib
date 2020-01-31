@@ -45,6 +45,9 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 
 	int n=sys.nb_var;
 
+	if (box.is_unbounded())
+		throw NotFound();
+
 	lp_solver.clear_constraints();
 	init_box.put(0, box);
 	lp_solver.set_bounds(init_box);
