@@ -115,6 +115,7 @@ void LPSolver::init(LPSolver::Mode mode, double tolerance, double timeout, int m
 	mysoplex->setRealParam(SoPlex::OPTTOL, tolerance);
 	mysoplex->setIntParam(SoPlex::SOLVEMODE, SoPlex::SOLVEMODE_REAL);
     mysoplex->setIntParam(SoPlex::OBJSENSE, SoPlex::OBJSENSE_MINIMIZE);
+    mysoplex->setBoolParam(SoPlex::ENSURERAY, true);
 }
 
 /*void LPSolver::add_variable(const Interval& bounds, double obj) {
