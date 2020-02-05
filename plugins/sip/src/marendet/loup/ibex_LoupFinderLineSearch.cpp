@@ -75,7 +75,7 @@ std::pair<IntervalVector, double> LoupFinderLineSearch::find(const IntervalVecto
 	//lp_solver_.write_file();
 
 	auto return_code = lp_solver_.minimize();
-	if (return_code != LPSolver::Status::Optimal) {
+	if (return_code != LPSolver::Status::OptimalProved) {
 		throw NotFound();
 	}
 	//Vector sol(box.mid());

@@ -9,174 +9,174 @@ LPSolver::LPSolver(int nb_vars, LPSolver::Mode mode, double tolerance,
 }
 
 LPSolver::LPSolver(std::string filename) {
-	throw LPException();
+	ibex_error("LPSolver method called but LPSolver has not been configured");
 }
 
 LPSolver::~LPSolver() {
 }
 
 int LPSolver::add_constraint(double lhs, const Vector& row, double rhs) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 int LPSolver::add_constraint(const Vector& row, CmpOp op, double rhs) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::add_constraints(const Vector& lhs, const Matrix& rows, const Vector& rhs) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 LPSolver::Status LPSolver::minimize() {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::set_cost(const Vector& obj) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::set_cost(int var, double value) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::set_bounds(const IntervalVector& bounds) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::set_bounds(int var, const Interval& bounds) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::set_tolerance(double tolerance) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::set_timeout(double timeout) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::set_max_iter(int max_iter) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 int LPSolver::nb_rows() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 int LPSolver::nb_vars() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 double LPSolver::tolerance() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 int LPSolver::max_iter() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 double LPSolver::timeout() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 LPSolver::Status LPSolver::status() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Matrix LPSolver::rows() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Vector LPSolver::row(int index) const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Matrix LPSolver::rows_transposed() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Vector LPSolver::col(int index) const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Vector LPSolver::lhs() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 double LPSolver::lhs(int index) const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Vector LPSolver::rhs() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 double LPSolver::rhs(int index) const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 IntervalVector LPSolver::lhs_rhs() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Interval LPSolver::lhs_rhs(int index) const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 IntervalVector LPSolver::bounds() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Interval LPSolver::bounds(int index) const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Vector LPSolver::cost() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 double LPSolver::cost(int index) const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 bool LPSolver::is_feasible() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Interval LPSolver::minimum() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Vector LPSolver::not_proved_primal_sol() const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 Vector LPSolver::not_proved_dual_sol() const  {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::write_to_file(const std::string& filename) const {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::set_cost_to_zero() {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::clear_constraints() {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::clear_bounds() {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 void LPSolver::reset(int nb_vars) {
-	throw LPException();
+	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
 } /* end namespace ibex */
