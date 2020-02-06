@@ -223,10 +223,10 @@ int main(int argc, char** argv) {
 		if (!quiet)
 			cout << "running............" << endl << endl;
 
-#ifdef IBEX_SIGNALS
-		ibex::signals::set_catch_SIGINT(true);
-		s.allow_sigint = true;
-#endif
+		if(ibex::signals::support_signals()) {
+			ibex::signals::set_catch_SIGINT(true);
+			s.allow_sigint = true;
+		}
 
 		// Get the solutions
 		if (input_file)
