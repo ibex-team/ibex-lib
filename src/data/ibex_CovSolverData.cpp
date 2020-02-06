@@ -188,6 +188,8 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::sta
 		case 2: cov.data->_solver_solver_status = (unsigned int) Solver::NOT_ALL_VALIDATED; break;
 		case 3: cov.data->_solver_solver_status = (unsigned int) Solver::TIME_OUT;          break;
 		case 4: cov.data->_solver_solver_status = (unsigned int) Solver::CELL_OVERFLOW;     break;
+		case 5: cov.data->_solver_solver_status = (unsigned int) Solver::USER_ABORT;     	break;
+
 		default: ibex_error("[CovSolverData]: invalid solver status.");
 		}
 

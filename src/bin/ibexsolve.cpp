@@ -13,7 +13,7 @@
 
 #include "ibex.h"
 #include "ibexsolve.h"
-
+#include "ibex_signals.h"
 #include <sstream>
 
 using namespace std;
@@ -223,6 +223,11 @@ int main(int argc, char** argv) {
 		if (!quiet)
 			cout << "running............" << endl << endl;
 
+#ifdef IBEX_SIGNALS
+		ibex::signals::set_catch_SIGINT(true);
+		s.allow_sigint = true;
+#endif
+
 		// Get the solutions
 		if (input_file)
 			s.solve(input_file.Get().c_str());
@@ -257,3 +262,4 @@ int main(int argc, char** argv) {
 		cout << e << endl;
 	}
 }
+
