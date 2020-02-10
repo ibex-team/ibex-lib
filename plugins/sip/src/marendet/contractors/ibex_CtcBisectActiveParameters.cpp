@@ -8,7 +8,7 @@
  * Author(s)   : Antoine Marendet
  * Created     : July 11, 2018
  * ---------------------------------------------------------------------------- */
- 
+
 #include "ibex_CtcBisectActiveParameters.h"
 
 #include "ibex_GoldsztejnSICBisector.h"
@@ -19,9 +19,9 @@
 namespace ibex {
 
 CtcBisectActiveParameters::CtcBisectActiveParameters(const SIPSystem& sys)
-: Ctc(sys.ext_nb_var), sys_(sys), 
-linearizer_(sys_, RelaxationLinearizerSIP::CornerPolicy::random, false), 
-lp_solver_(sys.ext_nb_var) {
+: Ctc(sys.ext_nb_var), sys_(sys),
+linearizer_(sys_, RelaxationLinearizerSIP::CornerPolicy::random, false),
+lp_solver_(sys.ext_nb_var, LPSolver::Mode::NotCertified) {
 
 }
 
@@ -40,28 +40,27 @@ void CtcBisectActiveParameters::contract(IntervalVector& box) {
 
 }
 void CtcBisectActiveParameters::contract(IntervalVector& box, ContractContext& context) {
-    lp_solver_.clean_ctrs();
+    lp_solver_.clear_constraints();
 	lp_solver_.set_bounds(box);
-	lp_solver_.set_obj_var(sys_.ext_nb_var - 1, 1.0);
-	lp_solver_.set_sense(LPSolver::MINIMIZE);
+	lp_solver_.set_cost(sys_.ext_nb_var - 1, 1.0);
 	if(linearizer_.linearize(box, lp_solver_, context.prop) < 0) {
 		return;
 	}
 	//lp_solver_.write_file();
 
-	auto return_code = lp_solver_.solve();
-	if (return_code != LPSolver::Status_Sol::OPTIMAL) {
+	auto return_code = lp_solver_.minimize();
+	if (return_code != LPSolver::Status::Optimal) {
 		return;
 	}
 	//Vector sol(box.mid());
-	Vector sol = lp_solver_.get_primal_sol();
+	Vector sol = lp_solver_.not_proved_primal_sol();
 	Vector sol_without_goal = sol.subvector(0, sys_.nb_var - 1);
 	//Vector dual(lp_solver_.get_nb_rows());
-	Vector dual = lp_solver_.get_dual_sol();
+	Vector dual = lp_solver_.not_proved_dual_sol();
 	//IntervalVector rhs(dual.size());
-	IntervalVector rhs = lp_solver_.get_lhs_rhs();
+	IntervalVector rhs = lp_solver_.lhs_rhs();
 	//Matrix A(lp_solver_.get_nb_rows(), system_.ext_nb_var);
-	Matrix A = lp_solver_.get_rows();
+	Matrix A = lp_solver_.rows();
 
 	BxpNodeData* node_data = (BxpNodeData*) context.prop[BxpNodeData::id];
 	if(node_data == nullptr) {

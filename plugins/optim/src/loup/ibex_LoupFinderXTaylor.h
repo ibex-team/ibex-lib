@@ -13,6 +13,7 @@
 
 #include "ibex_LinearizerXTaylor.h"
 #include "ibex_LoupFinder.h"
+#include "ibex_LPSolver.h"
 
 namespace ibex {
 /**

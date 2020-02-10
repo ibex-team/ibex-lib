@@ -35,6 +35,11 @@ void TestInterval::cons05() {
 	check((Interval())=Interval(1,0), Interval::empty_set());
 } // reverse bounds
 
+void TestInterval::consCppArray() {
+	check(Interval{1.0}, Interval(1.0, 1.0));
+	check(Interval{1.0, 2.0}, Interval(1.0, 2.0));
+}
+
 void TestInterval::check_eq(const Interval& x, const Interval& y, bool is_eq) {
 	CPPUNIT_ASSERT(is_eq? x==y : !(x==y));
 	CPPUNIT_ASSERT(is_eq? !(x!=y) : x!=y);

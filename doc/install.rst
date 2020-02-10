@@ -5,7 +5,7 @@
 Installation (Release 2.8)
 ***************************
 
-
+.. _MacPorts: https://www.macports.org
 .. _Gaol: http://sourceforge.net/projects/gaol
 .. _Filib: http://www2.math.uni-wuppertal.de/~xsc/software/filib.html
 .. _Profil/Bias: http://www.ti3.tu-harburg.de/keil/profil/index_e.html
@@ -28,6 +28,11 @@ as of today is Filib (this will be changed in the future).
 Linux and MacOS
 ---------------
 
+If you are on MacOS and use the `MacPorts`_ package manager, you can install Ibex by simply executing::
+
+  sudo port install ibex-lib
+  
+Otherwise, you can install Ibex from source with the following instructions.
 The installation assumes your system meets some `requirements`_.
 
 Save the archive ``ibex-2.8.6.tar.gz`` in some ``Ibex`` folder and::
@@ -37,7 +42,6 @@ Save the archive ``ibex-2.8.6.tar.gz`` in some ``Ibex`` folder and::
   ~/Ibex/ibex-2.8.6/$ ./waf configure
   ~/Ibex/ibex-2.8.6/$ sudo ./waf install
     
-
 
 -----------------
 Windows

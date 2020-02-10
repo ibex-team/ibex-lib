@@ -23,16 +23,18 @@ class TestHC4Revise : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestHC4Revise);
-	
-		CPPUNIT_TEST(id01);
-		CPPUNIT_TEST(add01);
-		CPPUNIT_TEST(add02);
-		CPPUNIT_TEST(add03);
-		CPPUNIT_TEST(add04);
-		CPPUNIT_TEST(mul01);
-		CPPUNIT_TEST(min01);
-		CPPUNIT_TEST(dist01);
-		CPPUNIT_TEST(dist02);
+	CPPUNIT_TEST(id01);
+	CPPUNIT_TEST(add01);
+	CPPUNIT_TEST(add02);
+	CPPUNIT_TEST(add03);
+	CPPUNIT_TEST(add04);
+	CPPUNIT_TEST(mul01);
+	CPPUNIT_TEST(min01);
+	CPPUNIT_TEST(dist01);
+	CPPUNIT_TEST(dist02);
+	CPPUNIT_TEST(vec01);
+	CPPUNIT_TEST(vec02);
+	CPPUNIT_TEST(vec03);
 	CPPUNIT_TEST_SUITE_END();
 	void id01();
 	void add01();
@@ -45,6 +47,9 @@ public:
 
 	void dist01();
 	void dist02();
+	void vec01();
+	void vec02();
+	void vec03();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestHC4Revise);

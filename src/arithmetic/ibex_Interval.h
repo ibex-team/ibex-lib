@@ -14,6 +14,7 @@
 #ifndef _IBEX_INTERVAL_H_
 #define _IBEX_INTERVAL_H_
 
+#include <array>
 #include <math.h>
 #include "ibex_Exception.h"
 
@@ -109,6 +110,12 @@ class Interval {
 
     /** \brief Create [a,a]. */
     Interval(double a);
+
+    /** \brief Create [a, a] from a fixed-sized array of size 1. */
+    Interval(std::array<double, 1> array);
+
+    /** \brief Create [a, b] from a fixed-sized array of size 2. */
+    Interval(std::array<double, 2> array);
 
     /** \brief True iff *this and x are exactly the same intervals. */
     bool operator==(const Interval& x) const;
@@ -439,71 +446,71 @@ class Interval {
      *  Deprecated. Use pi().
      */
     static const Interval PI;
-    
+
      /** \brief pi. */
     static const Interval& pi();
-    
+
     /** \brief 2*pi.
      *  Deprecated. Use two_pi().
      */
     static const Interval TWO_PI;
- 
+
     /** \brief 2*pi. */
     static const Interval& two_pi();
-    
+
     /** \brief pi/2.
      *  Deprecated. Use half_pi().
      */
     static const Interval HALF_PI;
-    
+
     /** \brief pi/2. */
     static const Interval& half_pi();
-    
-    /** \brief the empty interval. 
+
+    /** \brief the empty interval.
      *  Deprecated. Use empty_set().
      */
     static const Interval EMPTY_SET;
-    
+
     /** \brief the empty interval. */
     static const Interval& empty_set();
-    
-    /** \brief (-oo,oo). 
+
+    /** \brief (-oo,oo).
      *  Deprecated. Use all_reals().
      */
     static const Interval ALL_REALS;
-    
+
     /** \brief (-oo,oo). */
     static const Interval& all_reals();
-    
-    /** \brief [0,0]. 
+
+    /** \brief [0,0].
      *  Deprecated. Use zero().
      */
     static const Interval ZERO;
-    
+
     /** \brief [0,0]. */
     static const Interval& zero();
-    
-    /** \brief [1,1]. 
+
+    /** \brief [1,1].
      *  Deprecated. Use one().
      */
     static const Interval ONE;
-    
+
     /** \brief [1,1]. */
     static const Interval& one();
-    
-    /** \brief [0,+oo). 
+
+    /** \brief [0,+oo).
      *  Deprecated. Use pos_reals().
      */
     static const Interval POS_REALS;
-    
+
     /** \brief [0,+oo). */
     static const Interval& pos_reals();
-    
-    /** \brief (-oo,0]. 
+
+    /** \brief (-oo,0].
      *  Deprecated. Use neg_reals().
      */
     static const Interval NEG_REALS;
-    
+
     /** \brief (-oo,0]. */
     static const Interval& neg_reals();
 
@@ -883,6 +890,10 @@ inline Interval::Interval(double a, double b) : itv(a,b) {
 inline Interval::Interval(double a) : itv(a,a) {
 	if (a==NEG_INFINITY || a==POS_INFINITY) *this=EMPTY_SET;
 }
+
+inline Interval::Interval(std::array<double, 1> array): Interval(array[0]) {}
+
+inline Interval::Interval(std::array<double, 2> array): Interval(array[0], array[1]) {}
 
 inline bool Interval::operator==(const Interval& x) const {
 	return (is_empty() && x.is_empty()) || (lb()==x.lb() && ub()==x.ub());

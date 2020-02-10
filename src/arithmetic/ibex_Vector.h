@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_Vector.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -13,6 +13,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <initializer_list>
 
 namespace ibex {
 
@@ -36,6 +37,13 @@ public:
 	 * \pre n>0
 	 */
 	Vector(int n);
+
+	/**
+	 * \brief Create a vector from a list of double.
+	 *
+	 * \pre list not empty
+	 */
+	Vector(std::initializer_list<double> list);
 
 	/**
 	 * \brief Create [x; ....; x]

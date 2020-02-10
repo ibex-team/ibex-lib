@@ -15,6 +15,7 @@
 #include <cassert>
 #include <iostream>
 #include <utility>
+#include <initializer_list>
 #include "ibex_Interval.h"
 #include "ibex_InvalidIntervalVectorOp.h"
 #include "ibex_Vector.h"
@@ -88,6 +89,14 @@ public:
 	 * \pre n>0
 	 */
 	IntervalVector(int n, double  bounds[][2]);
+
+	/**
+	 * \brief Create the IntervalVector from a list of Interval.
+	 *
+	 * \param list a list of Interval
+	 * \pre list not empty
+	 */
+	IntervalVector(std::initializer_list<Interval> list);
 
 	/**
 	 * \brief Create the degenerated IntervalVector x
@@ -487,6 +496,16 @@ public:
 	 * \note Return \c POS_INFINITY if unbounded.
 	 */
 	double perimeter() const;
+
+	/**
+	 * \brief Return an enclosure of the square of the Euclidian norm.
+	 */
+	Interval sqnorm2() const;
+
+	/**
+	 * \brief Return an enclosure of the Euclidian norm.
+	 */
+	Interval norm2() const;
 
 	 /**
 	  * \brief Return max of the delta, for x\subseteq *this [deprecated]
@@ -901,6 +920,10 @@ inline double IntervalVector::max_diam() const {
 
 inline double IntervalVector::min_diam() const {
 	return (*this)[extr_diam_index(true)].diam();
+}
+
+inline Interval IntervalVector::norm2() const {
+	return sqrt(sqnorm2());
 }
 
 inline IntervalVector& IntervalVector::operator+=(const Vector& x) {

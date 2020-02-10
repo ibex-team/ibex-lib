@@ -56,6 +56,17 @@ Matrix::Matrix(int m, int n, double x[]) : _nb_rows(m), _nb_cols(n) {
 	}
 }
 
+Matrix::Matrix(std::initializer_list<Vector> list): _nb_rows(list.size()) {
+	assert(_nb_rows > 0);
+	M = new Vector[_nb_rows];
+	_nb_cols = list.begin()->size();
+	int i = 0;
+	for(const Vector& v : list) {
+		assert(v.size() == _nb_cols);
+		M[i++] = v;
+	}
+}
+
 Matrix::Matrix(const Matrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	M = new Vector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {

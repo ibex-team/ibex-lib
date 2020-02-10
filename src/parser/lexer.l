@@ -115,6 +115,14 @@ using namespace ibex::parser;
                                         }
                                       }
                                  }
+"{"[0-9]+"}"                     {
+                                    // ------------- CHOCO variable ----------------
+                                    ibexlval.str = (char*) malloc(strlen(ibextext)+1);
+                                    strcpy(ibexlval.str,ibextext);
+                                    // There is no scope yet because lexer is one token ahead !
+                                    // TODO: check that the variable exists...
+                                    return TK_ENTITY;
+                                 }
 ([0-9]{6,10}[0-9]*|([0-9][0-9]*\.[0-9]*)|(\.[0-9]+))(e(\-|\+)?[0-9]+)?|([0-9]{1,5}e(\-|\+)?[0-9]+)  {
                                    ibexlval.real = atof(ibextext); return TK_FLOAT;
                                  }
