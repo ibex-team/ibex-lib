@@ -220,7 +220,8 @@ ctr_blk_list  : ctr_blk_list_ semicolon_opt     { pstruct->source.ctrs=new P_Con
 ctr_blk_list_ : ctr_blk_list_ ';' ctr_blk       { $1->push_back($3); $$ = $1; }
               | ctr_blk                         { $$ = new vector<P_NumConstraint*>();
               								      $$->push_back($1); }
-              ;
+              |                                 { $$ = new vector<P_NumConstraint*>(); }
+              ; 
 
 ctr_blk       : ctr_loop                        { $$ = $1; }
               | ctr                             { $$ = $1; }

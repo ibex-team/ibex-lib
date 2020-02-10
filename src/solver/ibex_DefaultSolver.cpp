@@ -18,6 +18,7 @@
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcFixPoint.h"
+#include "ibex_CtcIdentity.h"
 #include "ibex_CellStack.h"
 #include "ibex_CellList.h"
 #include "ibex_Array.h"
@@ -67,6 +68,9 @@ System* get_square_eq_sys(Memory& memory, System& sys) {
 }*/
 
 Ctc* DefaultSolver::ctc (System& sys, double prec) {
+
+	if (sys.nb_ctr==0) return new CtcIdentity(sys.nb_var);
+
 	Array<Ctc> ctc_list(4);
 
 	// first contractor : non incremental hc4
