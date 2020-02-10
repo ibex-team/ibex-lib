@@ -42,7 +42,7 @@ public:
     LinearizationVector& operator[](int i) { return rows[i]; }
 };
 
-typedef ExprTemplateDomain<Linearization> ExprLinearizationData;
+typedef ExprTemplateDomain<TemplateDomain<Linearization>> ExprLinearizationData;
 
 } // namespace ibex
 
