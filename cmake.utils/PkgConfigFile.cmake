@@ -50,4 +50,5 @@ Version: ${IBEX_VERSION}
 Cflags: -I$<JOIN:${incdirs}, -I>
 Libs: $<JOIN:${Libs}, >
 ")
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ibex.pc DESTINATION ${CMAKE_INSTALL_PKGCONFIG})
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/ibex.pc
+         DESTINATION ${CMAKE_INSTALL_PKGCONFIG} COMPONENT devtools)
