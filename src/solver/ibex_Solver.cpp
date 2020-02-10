@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_Solver.cpp
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
@@ -13,6 +13,7 @@
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_LinearException.h"
 #include "ibex_CovSolverData.h"
+#include "ibex_signals.h"
 
 #include <cassert>
 
@@ -285,11 +286,16 @@ Solver::Status Solver::solve() {
 
 			if (status==CovSolverData::UNKNOWN)
 				final_status=NOT_ALL_VALIDATED;
+			if (allow_sigint)
+				ibex::signals::check_SIGINT();
 		}
 	} catch(CellLimitException&) {
 		final_status=CELL_OVERFLOW;
 	} catch(TimeOutException&) {
 		final_status=TIME_OUT;
+	} catch(ibex::signals::SignalSIGINT&) {
+		std::cout << "ibex::Solver: SIGINT received, aborting search..." << std::endl;
+		final_status=USER_ABORT;
 	}
 
 	manif->set_solver_status(final_status);
@@ -509,20 +515,24 @@ const char* white() {
 void Solver::report() {
 
 	switch ((Status) manif->solver_status()) {
-	case SUCCESS: 
+	case SUCCESS:
 		cout << green() << " solving successful!" << endl;
 		break;
-	case INFEASIBLE: 
+	case INFEASIBLE:
 		cout << red() << " infeasible problem" << endl;
 		break;
-	case NOT_ALL_VALIDATED: 
+	case NOT_ALL_VALIDATED:
 		cout << red() << " done! but some boxes have 'unknown' status." << endl;
 		break;
-	case TIME_OUT: 
+	case TIME_OUT:
 		cout << red() << " time limit " << time_limit << "s. reached " << endl;
 		break;
-	case CELL_OVERFLOW: 
+	case CELL_OVERFLOW:
 		cout << red() << " cell overflow" << endl;
+		break;
+	case USER_ABORT:
+		cout << red() << " user abort" << endl;
+		break;
 	}
 
 	cout << white() << endl;

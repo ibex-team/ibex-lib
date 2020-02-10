@@ -85,9 +85,13 @@ def configure (conf):
 		conf.env.DEBUG = False
 	for f in flags.split():
 		conf.check_cxx(cxxflags=f, use="IBEX", mandatory=False, uselib_store="IBEX")
-	
+
 	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
 	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEX")
+
+	# Check for unistd.h and signal.h compliance
+	conf.check_cxx(header_name="unistd.h", mandatory=False, uselib_store="IBEX")
+	conf.check_cxx(header_name="signal.h", mandatory=False, uselib_store="IBEX")
 
 	# Build as shared lib is asked
 	conf.start_msg ("Ibex will be built as a")

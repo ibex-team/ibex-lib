@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_Solver.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
@@ -47,7 +47,7 @@ public:
 	 *
 	 * See comments for solve(...) below.
 	 */
-	typedef enum { SUCCESS, INFEASIBLE, NOT_ALL_VALIDATED, TIME_OUT, CELL_OVERFLOW } Status;
+	typedef enum { SUCCESS, INFEASIBLE, NOT_ALL_VALIDATED, TIME_OUT, CELL_OVERFLOW, USER_ABORT } Status;
 
 	/**
 	 * \brief Boundary test strength
@@ -90,7 +90,7 @@ public:
 	 * \brief Solve the system (non-interactive mode).
 	 *
 	 * \param init_box - the initial box (the search space)
-	 * 
+	 *
 	 * \return Possible values:
 	 *
 	 *   SUCCESS:           (complete search) all solutions found and all
@@ -107,6 +107,7 @@ public:
 	 *   CELL_OVERFLOW:     (incomplete search) cell overflow : the number of
 	 *                      cell has exceeded the limit.
 	 *
+	 *   USER_ABORT:		(incomplete search) search has been aborted by the user.
 	 * The vector of "solutions" (output boxes) found by the solver
 	 * are retrieved with #get_solutions().
 	 */
@@ -206,7 +207,7 @@ public:
 	 * generally, a sequence (with or without fixpoint) of different contractors (HC4,
 	 * Acid, Newton, a linear relaxation, ... )
 	 *
-	 */ 
+	 */
 	Ctc& ctc;
 
 	/**
@@ -261,6 +262,12 @@ public:
 	 *       each time a new solution is found, it is printed.
 	 */
 	int trace;
+
+	/**
+	 * \brief Wether SIGINT catching is allowed, using SignalHandler.
+	 * Should always be false in a multithreaded context.
+	 */
+	bool allow_sigint = false;
 
 
 protected:
