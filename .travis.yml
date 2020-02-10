@@ -66,7 +66,7 @@ install:
 # TODO: add nonreg tests
 script:
   - ./waf utest
-  - mkdir build && cd build && cmake -DINTERVAL_LIB=${TEST_INTERVAL_LIB} .. && make && make check
+  - mkdir build && cd build && cmake -DINTERVAL_LIB=${TEST_INTERVAL_LIB} .. && make && make check && make package
 #  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
 
 after_failure:
