@@ -155,6 +155,10 @@ Vector LPSolver::not_proved_dual_sol() const  {
 	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
+bool LPSolver::uncertified_infeasible_dir(Vector& infeasible_dir) const {
+	ibex_error("LPSolver method called but no LPSolver has been configured");
+}
+
 void LPSolver::write_to_file(const std::string& filename) const {
 	ibex_error("LPSolver method called but no LPSolver has been configured");
 }

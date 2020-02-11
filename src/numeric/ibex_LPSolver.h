@@ -30,9 +30,9 @@ namespace ibex {
  *
  * Solve a linear problem of the form
  *
- *     Minimizer c^T x               --> objective
- *     s.t. lhs <= Ax <= rhs         --> constraints
- *           l  < x <= u             --> bounds
+ *     Minimizer c^T x              --> objective
+*      s.t. l  < x <= u             --> bounds
+ *          lhs <= Ax <= rhs        --> constraints
  *
  * The number of variables is fixed at the creation of the LP.
  * However, to avoid reinstantiating a new solver if the number of variables change,
@@ -41,6 +41,11 @@ namespace ibex {
  *
  * The solver provides a infeasibility certification and a objective value enclosure certification
  * using the Neumaier-Shcherbina procedure.
+ *
+ * Be aware that variables bounds are included as constraints in the LP on the nb_vars first rows.
+ * So, for example LPSolver::row(0) will return the bounds constraints for the first variable.
+ * The first 'real' constraint will appear only on row nb_vars() (for example, if the problem has 3 variables,
+ * you can query the first constraint with row(3)).
  */
 class LPSolver {
 
