@@ -143,10 +143,6 @@ double LPSolver::cost(int index) const {
 	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
 
-bool LPSolver::is_feasible() const {
-	ibex_error("LPSolver method called but no LPSolver has been configured");
-}
-
 Interval LPSolver::minimum() const {
 	ibex_error("LPSolver method called but no LPSolver has been configured");
 }
