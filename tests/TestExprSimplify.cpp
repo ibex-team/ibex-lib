@@ -90,7 +90,6 @@ void TestExprSimplify::index_transpose() {
 
 void TestExprSimplify::issue366() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
-	const ExprSymbol& y=ExprSymbol::new_("y");
 	const ExprNode& e0=x+1-0;
 	const ExprBinaryOp& e=(const ExprBinaryOp&) e0.simplify();
 

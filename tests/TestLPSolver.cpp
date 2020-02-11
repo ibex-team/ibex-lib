@@ -69,8 +69,6 @@ void TestLinearSolver::kleemin( int n) {
 
 	LPSolver::Status res = lp.minimize();
 	CPPUNIT_ASSERT(res==LPSolver::Status::OptimalProved);
-	double eps = lp.tolerance();
-	//lp.write_to_file("coucou" + std::to_string(n) + ".lp");
 
 	Vector dualsol = lp.not_proved_dual_sol();
 	Vector primalsol = lp.not_proved_primal_sol();
@@ -107,13 +105,6 @@ void TestLinearSolver::kleemin30() {
 
 	CPPUNIT_ASSERT(res!=LPSolver::Status::InfeasibleProved);
 
-	//CPPUNIT_ASSERT_ASSERTION_PASS(
-	//lp.write_to_file("coucou.lp")
-	//);
-
-	CPPUNIT_ASSERT_ASSERTION_PASS(
-	double eps = lp.tolerance()
-	);
 	switch (res) {
 		case (LPSolver::Status::Infeasible):
 		case (LPSolver::Status::Unbounded):
@@ -175,8 +166,6 @@ void TestLinearSolver::reset() {
 
 	LPSolver::Status res = lp.minimize();
 	CPPUNIT_ASSERT(res==LPSolver::Status::OptimalProved);
-	double eps = lp.tolerance();
-	//lp.write_to_file("coucou" + std::to_string(n) + ".lp");
 
 	Vector dualsol = lp.not_proved_dual_sol();
 	Vector primalsol = lp.not_proved_primal_sol();

@@ -70,6 +70,11 @@ static System* sysex3() {
 	return new System(fac);
 }
 
+void TestSystem::empty() {
+	System sys(SRCDIR_TESTS "/minibex/empty.mbx");
+	CPPUNIT_ASSERT(sys.nb_ctr==0);
+}
+
 void TestSystem::factory01() {
 
 	System& sys(*sysex1());

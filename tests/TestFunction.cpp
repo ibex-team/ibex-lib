@@ -507,7 +507,6 @@ void TestFunction::minibex01() {
 	const ExprNode& e=e1+e1;
 	Function f(x,y,e,"f");
 	std::string m = f.minibex();
-	char* d=strdup(m.c_str());
 	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
 }
 

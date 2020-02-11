@@ -626,9 +626,6 @@ void TestGradient::jacobian_components02() {
 	const ExprSymbol& y = ExprSymbol::new_("y",Dim::col_vec(3));
 	const ExprSymbol& z = ExprSymbol::new_("z",Dim::col_vec(3));
 	Function f(x,y,z,Return(x+y,x+z,y+z));
-	double vx=1.0;
-	double vy=2.0;
-	double vz=3.0;
 	IntervalVector box(9);
 	for (int i=0; i<9; i++) box[i]=Interval(i,i);
 
