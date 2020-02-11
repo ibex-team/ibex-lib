@@ -11,8 +11,11 @@
 
 #include "TestSinc.h"
 #include "ibex_ExprOperators.h"
-#include "ibex_DefaultSolver.h"
+#include "ibex_Solver.h"
 #include "ibex_SystemFactory.h"
+#include "ibex_CtcFwdBwd.h"
+#include "ibex_RoundRobin.h"
+#include "ibex_CellStack.h"
 
 using namespace std;
 
@@ -83,7 +86,11 @@ void TestSinc::solve() {
     fac.add_ctr(y=Interval(0.5,0.5));
     System sys(fac);
 
-    DefaultSolver solver(sys,1e-7,1e-7);
+    CtcFwdBwd c(sys.f_ctrs[0]);
+    RoundRobin rr(1e-7);
+    CellStack stack;
+
+	Solver solver(sys, c, rr, stack, 1e-7,1e-7);
 	solver.solve(IntervalVector(1,Interval(-100,100)));
 
     CPPUNIT_ASSERT(solver.get_data().nb_solution()==2);
