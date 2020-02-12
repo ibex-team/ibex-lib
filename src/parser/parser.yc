@@ -212,10 +212,10 @@ decl_opt_goal :                                 { pstruct->source.goal = NULL; }
 decl_opt_ctrs : 
               | TK_CTRS                         { pstruct->scopes.push(pstruct->scopes.top()); /* new scope for temporary symbols */ } 
                 ctr_blk_list TK_END             { pstruct->scopes.pop(); }
+              | TK_CTRS semicolon_opt TK_END    { pstruct->source.ctrs=new P_ConstraintList(new vector<P_NumConstraint*>()); }
 	          ;
 	          
 ctr_blk_list  : ctr_blk_list_ semicolon_opt     { pstruct->source.ctrs=new P_ConstraintList($1); }
-              | semicolon_opt                   { pstruct->source.ctrs=new P_ConstraintList(new vector<P_NumConstraint*>()); }
               ;
 
 ctr_blk_list_ : ctr_blk_list_ ';' ctr_blk       { $1->push_back($3); $$ = $1; }
