@@ -167,7 +167,7 @@ bool bwd_saw(const Interval& y_, Interval& x) {
 		return !(x &= Interval(std::ceil(x.lb()),std::floor(x.ub()))).is_empty();
 	}
 
-	assert(sizeof(double)==64); // |mantissa|=53
+	assert(sizeof(double)==8); // |mantissa|=53
 	// 2^51 is a rough bound. Troubles start when |x|~2^53
 	// that is, when we start jumping integers in the
 	// double representation. In this case, no contraction
