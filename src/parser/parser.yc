@@ -318,7 +318,7 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | TK_INF '(' expr ')'             { $$ = inf($3); }
               | TK_MID '(' expr ')'             { $$ = mid($3); }
               | TK_SUP '(' expr ')'             { $$ = sup($3); }
-              | TK_DIFF '(' expr_row ')'        { $$ = diff($3); }
+              | TK_DIFF '(' expr_row ')'        { $$ = diff($3); delete $3; }
               | TK_UNARY_OP '(' expr ')'        { $$ = new P_ExprGenericUnaryOp($1,*$3); free($1); }
               | TK_BINARY_OP '(' expr ',' expr ')'      
                                                 { $$ = new P_ExprGenericBinaryOp($1,*$3,*$5); free($1); }

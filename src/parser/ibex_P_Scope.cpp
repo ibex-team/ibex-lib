@@ -249,6 +249,17 @@ const ExprNode* P_Scope::get_expr_tmp_expr(const char* id) const {
 	return ((const S_ExprTmp&) s).expr;
 }
 
+std::vector<const ExprNode*> P_Scope::get_all_tmp_expr() const {
+	std::vector<const ExprNode*> vec;
+	for (IBEXMAP(P_Scope::S_Object*)::const_iterator it=tab.begin(); it!=tab.end(); ++it) {
+		if (it->second->token()==TK_EXPR_TMP_SYMBOL) {
+			cout << " add expression " << *((const S_ExprTmp&) *(it->second)).expr <<endl;
+			vec.push_back(((const S_ExprTmp&) *(it->second)).expr);
+		}
+	}
+	return vec;
+}
+
 std::pair<const ExprSymbol*,const Domain*> P_Scope::get_var(const char* id) const {
 	const S_Object& o=*tab[id];
 	assert(o.token()==TK_ENTITY);
@@ -319,7 +330,7 @@ int P_Scope::token(const char* id) const {
 ostream& operator<<(ostream& os, const P_Scope& scope) {
 	os << "current scope :\n";
 	os << "--------------------\n";
-	for (IBEXMAP(P_Scope::S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); it++) {
+	for (IBEXMAP(P_Scope::S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); ++it) {
 		os << "  " << it->first << " ";
 		it->second->print(os);
 		os << endl;

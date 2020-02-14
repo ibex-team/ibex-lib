@@ -84,6 +84,9 @@ public:
 	/* Return the expression bound to a tmp symbol */
 	const ExprNode* get_expr_tmp_expr(const char* id) const;
 
+	/* Return all the expressions bound to tmp symbols. */
+	std::vector<const ExprNode*> get_all_tmp_expr() const;
+
 	/* Return the symbol attached to a string */
 	std::pair<const ExprSymbol*,const Domain*> get_var(const char* id) const;
 

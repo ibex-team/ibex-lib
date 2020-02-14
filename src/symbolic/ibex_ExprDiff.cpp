@@ -69,7 +69,9 @@ const ExprNode& ExprDiff::diff(const ExprNode& y, const Array<const ExprSymbol>&
 		throw ExprDiffException("differentiation of matrix-valued functions");
 	}
 
-	return res->simplify();
+	ExprSimplify s;
+	s.lock.insert(lock); // only meaningful with the default (non-copy variant of) constructor.
+	return s.simplify(*res);
 }
 
 const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymbol>& x) {
@@ -175,9 +177,10 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 		ExprSubNodes gnodes(groots);
 
 		for (int i=0; i<gnodes.size(); i++) {
-			if (!nodes.found(gnodes[i])        // if it is not in the expression
+			if (!nodes.found(gnodes[i])        // if it is not in the original expression
 					&& !leaks.found(gnodes[i]) // and not yet collected
 			) {
+				// then it is a new node. Since we have copied the result, we can delete it.
 				leaks.insert(gnodes[i],true);
 			}
 		}
@@ -199,13 +202,19 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 		// to destroy all the leaking nodes.
 		groots.push_back(&y);
 
+
+
+
 		ExprSubNodes gnodes(groots);
 
 		// Destroy the dead branches (nodes created by
 		// the diff process, but unused) + leaking nodes of "y"
 		for (int i=0; i<gnodes.size(); i++) {
-			if (!df_nodes.found(gnodes[i])           // if it not in the result of differentiation
+			if (!df_nodes.found(gnodes[i])     // if it not in the result of differentiation
 					&& !leaks.found(gnodes[i]) // and not yet collected
+					&& !dynamic_cast<const ExprSymbol*>(&gnodes[i]) // and not a symbol (of the original expression) that would
+																	 // not appear in the differentiation (ex: ExprDiff().diff(x,x))
+					&& !lock.found(gnodes[i])  // and not a locked node of the original expression
 			) {
 				leaks.insert(gnodes[i],true);
 			}

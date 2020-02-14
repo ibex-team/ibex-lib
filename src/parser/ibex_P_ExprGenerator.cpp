@@ -630,7 +630,20 @@ const ExprNode& ExprGenerator::diff(const Array<const ExprNode>& args) {
 		}
 		x.set_ref(i,*xi);
 	}
-	return ExprDiff().diff(y,x);
+
+	ExprDiff d;
+	/*
+	 * All expressions (and their sub-expressions) resulting from temporary
+	 * symbols, once generated, should not be deleted by the simplification
+	 * process of "diff".
+	 */
+	std::vector<const ExprNode*> tmp_expr=scope.get_all_tmp_expr();
+
+	ExprSubNodes tmp_expr_nodes(tmp_expr);
+	for (int i=0; i<tmp_expr_nodes.size(); i++)
+		d.lock.insert(tmp_expr_nodes[i],true);
+
+	return d.diff(y,x);
 }
 
 } // end namespace parser

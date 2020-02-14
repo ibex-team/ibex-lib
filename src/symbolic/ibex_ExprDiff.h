@@ -51,6 +51,7 @@ public:
 	 * \warning: used this way, nodes of the original expression
 	 * ("y" below) that do not appear in the resulting expression are
 	 * destroyed (see ExprSimplify), which may include the node y itself.
+	 * Symbols and all nodes in \a lock are preserved.
 	 */
 	ExprDiff();
 
@@ -85,6 +86,16 @@ public:
 	 * This may be useful in particular for indexed symbols.
 	 */
 	const ExprNode& diff(const ExprNode& y, const Array<const ExprSymbol>& x);
+
+	/*
+	 * If some nodes should not be removed although they
+	 * do not belong to the simplified expression, add
+	 * them in this map. (note: this is a kind of hack,
+	 * a better solution could be found). See also ExprSimplify.
+	 * Ex: useful in the parser to keep expressions associated
+	 *     to temporary symbols.
+	 */
+	NodeMap<bool> lock;
 
 protected:
 	void visit(const ExprNode& e);
