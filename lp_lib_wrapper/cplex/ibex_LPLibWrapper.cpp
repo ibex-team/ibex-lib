@@ -183,8 +183,9 @@ LPSolver::Status LPSolver::minimize() {
         status_ = LPSolver::Status::Unbounded;
         break;
     default:
-        std::string error_msg = "LPSolver: solve status is an internal Cplex status (" + std::to_string(cplex_status) + "). This is probably an error for you.";
-        ibex_warning(error_msg.c_str());
+    	// TODO: we need an option to log such warnings, see issue #440.
+        //std::string error_msg = "LPSolver: solve status is an internal Cplex status (" + std::to_string(cplex_status) + "). This is probably an error for you.";
+        //ibex_warning(error_msg.c_str());
         status_ = LPSolver::Status::Unknown;
     }
     return status_;

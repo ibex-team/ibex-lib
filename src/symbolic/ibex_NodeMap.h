@@ -77,6 +77,13 @@ public:
 	}
 
 	/**
+	 * \brief Insert all pairs from another map.
+	 *
+	 * Values are passed by copy.
+	 * */
+	void insert(const NodeMap<T>& map);
+
+	/**
 	 * \brief Remove a pair <e,value>.
 	 *
 	 */
@@ -136,6 +143,13 @@ protected:
 };
 
 /*============================================ inline implementation ============================================ */
+
+template <typename T>
+void NodeMap<T>::insert(const NodeMap<T>& map) {
+	for (typename IBEX_NODE_MAP(T)::const_iterator it=map.begin(); it!=map.end(); ++it) {
+		insert(*(it->first),it->second);
+	}
+}
 
 template <typename T>
 inline std::ostream& operator<<(std::ostream& os, const NodeMap<T> map) {
