@@ -42,8 +42,7 @@ std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const Interv
 std::pair<IntervalVector, double> LoupFinderRestrictionsRelax::find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop) {
 	IntervalVector ext_box = sip_to_ext_box(box, system_.goal_function_->eval(box));
 
-	double d=box.max_diam();
-	if (d < LPSolver::min_box_diam || d > LPSolver::max_box_diam)
+	if (box.is_unbounded())
 		throw NotFound();
 
 	lp_solver_->clear_constraints();

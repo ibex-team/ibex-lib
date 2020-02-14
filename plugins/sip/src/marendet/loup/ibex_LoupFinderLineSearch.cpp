@@ -385,8 +385,7 @@ bool LoupFinderLineSearch::line_search(const Vector& start_point, const Vector& 
 
 bool LoupFinderLineSearch::corner_restrictions(Vector& loup_point) {
 
-	double d=box_.max_diam();
-	if (d < LPSolver::min_box_diam || d > LPSolver::max_box_diam)
+	if (box_.is_unbounded())
 		return false;
 
 	corner_solver_->clear_constraints();
