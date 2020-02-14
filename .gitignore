@@ -1,3 +1,7 @@
+
+# ... because it depends on the branch:
+.travis.yml
+
 # Compiled Object files
 *.slo
 *.lo
