@@ -28,6 +28,14 @@ soplex::DVectorReal ivec2dvec(const ibex::Vector& ivec) {
     return soplex::DVectorReal(soplex::VectorReal(ivec.size(), ivec_copy.raw()));
 }
 
+soplex::DSVectorReal isvec2dsvec(const ibex::SparseVector& isvec) {
+    soplex::DSVectorReal dsvec(isvec.size());
+    for(auto it = isvec.cbegin(); it != isvec.cend(); it++) {
+        dsvec.add(it->first, it->second);
+    }
+    return dsvec;
+}
+
 ibex::Vector dvec2ivec(const soplex::DVectorReal& dvec) {
     /*ibex::Vector ivec(dvec.dim());
     for(int i = 0 ; i < ivec.size(); ++i) {
@@ -169,6 +177,19 @@ int LPSolver::add_constraint(const Vector& row, CmpOp op, double rhs) {
     using Type = soplex::LPRowReal::Type;
     Type type = cmpop2type(op);
     DSVectorReal dsrow = ivec2dsvec(row);
+    mysoplex->addRowReal(LPRowReal(dsrow, type, rhs));
+    return nb_rows()-1;
+}
+
+int LPSolver::add_constraint(const SparseVector& row, CmpOp op, double rhs) {
+    assert(row.size() == nb_vars());
+    assert(isfinite(row));
+    assert(std::isfinite(rhs));
+
+    has_changed = true;
+    using Type = soplex::LPRowReal::Type;
+    Type type = cmpop2type(op);
+    DSVectorReal dsrow = isvec2dsvec(row);
     mysoplex->addRowReal(LPRowReal(dsrow, type, rhs));
     return nb_rows()-1;
 }

@@ -21,6 +21,7 @@
 #include "ibex_Matrix.h"
 #include "ibex_LPLibWrapper.h"
 #include "ibex_LPException.h"
+#include "ibex_SparseVector.h"
 
 namespace ibex {
 
@@ -118,6 +119,7 @@ public:
      * \brief Add a constraint of the type row.x op rhs, where op is <= or >=.
      */
     int add_constraint(const Vector& row, CmpOp op, double rhs);
+    int add_constraint(const SparseVector& row, CmpOp op, double rhs);
 
     /**
      * \brief Add multiple constraints.
