@@ -92,6 +92,7 @@ private:
 
     Vector filter_variables(const Vector& solver_result) const;
     int node_index_to_first_var(int index) const;
+    int node_index_to_first_lin(int index) const;
 };
 
 inline void AVM::vector_fwd(int* x, int y) {
@@ -143,11 +144,13 @@ inline void AVM::add_fwd(int x1, int x2, int y)   {
     int yvar = node_index_to_first_var(y);
     int x1var = node_index_to_first_var(x1);
     int x2var = node_index_to_first_var(x2);
+    int lin = node_index_to_first_lin(y);
     SparseVector vec;
     vec[yvar] = -1;
     vec[x1var] = 1;
     vec[x2var] = 1;
-    solver_->add_constraint(vec, CmpOp::EQ, 0.0);
+    solver_->set_row(lin, vec);
+    solver_->set_lhs_rhs(lin, 0, 0);
     load_node_bounds_in_solver(y);
 }
 inline void AVM::mul_fwd(int x1, int x2, int y)   {
@@ -161,19 +164,22 @@ inline void AVM::mul_fwd(int x1, int x2, int y)   {
     int yvar = node_index_to_first_var(y);
     int x1var = node_index_to_first_var(x1);
     int x2var = node_index_to_first_var(x2);
-
+    int lin = node_index_to_first_lin(y);
     SparseVector vec;
     double rhs;
     vec[x2var] = d_[x1].i().ub();
     vec[x1var] = d_[x2].i().ub();
     vec[yvar] = -1;
     rhs = d_[x1].i().ub()*d_[x2].i().ub();
-    solver_->add_constraint(vec, CmpOp::LEQ, rhs);
+    solver_->set_row(lin, vec);
+    solver_->set_rhs(lin, rhs);
+    lin++;
     vec[x2var] = d_[x1].i().lb();
     vec[x1var] = d_[x2].i().lb();
     vec[yvar] = -1;
     rhs = d_[x1].i().lb()*d_[x2].i().lb();
-    solver_->add_constraint(vec, CmpOp::LEQ, rhs);
+    solver_->set_row(lin, vec);
+    solver_->set_rhs(lin, rhs);
     load_node_bounds_in_solver(y);
 }
 inline void AVM::sub_fwd(int x1, int x2, int y)   {
@@ -181,11 +187,13 @@ inline void AVM::sub_fwd(int x1, int x2, int y)   {
     int yvar = node_index_to_first_var(y);
     int x1var = node_index_to_first_var(x1);
     int x2var = node_index_to_first_var(x2);
+    int lin = node_index_to_first_lin(y);
     SparseVector vec;
     vec[yvar] = -1;
     vec[x1var] = 1;
     vec[x2var] = -1;
-    solver_->add_constraint(vec, CmpOp::EQ, 0.0);
+    solver_->set_row(lin, vec);
+    solver_->set_lhs_rhs(lin, 0, 0);
     load_node_bounds_in_solver(y);
 }
 inline void AVM::div_fwd(int x1, int x2, int y)   {
@@ -233,19 +241,22 @@ inline void AVM::power_fwd(int x, int y, int p)   {
     // d[y].i()=pow(d[x].i(),p);
     not_implemented("Power not implemented for AVM");
 }
+
 inline void AVM::sqr_fwd(int x, int y)            {
     // 0 >= x^2 = y >= lin
+    assert(avm_d_[y].lin_count == 5);
     int yvar = node_index_to_first_var(y);
     int xvar = node_index_to_first_var(x);
-    SparseVector vec;
-    double rhs;
+    int lin = node_index_to_first_lin(y);
     auto linearize = [&](double x_point) {
-        vec[yvar] = -1;
-        vec[xvar] = 2*x_point;
-        rhs = x_point*x_point;
-        solver_->add_constraint(vec, CmpOp::LEQ, rhs);
+        solver_->set_coef(lin, yvar, -1);
+        solver_->set_coef(lin, xvar, 2*x_point);
+        solver_->set_rhs(lin, x_point*x_point);
+        lin++;
     };
+
     const Interval& itv = d_[x].i();
+
     if(itv.contains(0)) {
         linearize(0.0);
         linearize(Interval(0.0, itv.ub()).mid());

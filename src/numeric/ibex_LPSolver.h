@@ -137,6 +137,31 @@ public:
     Status minimize();
 
     /**
+     * \brief Set a coefficient in the matrix
+     */
+    void set_coef(int row, int col, double value);
+
+    /**
+     * \brief Set row of the matrix
+     */
+    void set_row(int row, const SparseVector& value);
+
+    /**
+     * \brief Set rhs.
+     */
+    void set_rhs(int row, double value);
+
+    /**
+     * \brief Set lhs.
+     */
+    void set_lhs(int row, double value);
+
+    /**
+     * \brief Set lhs and rhs.
+     */
+    void set_lhs_rhs(int row, double lhs, double rhs);
+
+    /**
      * \brief Set the objective function vector.
      */
     void set_cost(const Vector& obj);

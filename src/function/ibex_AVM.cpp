@@ -6,6 +6,15 @@ AVM::AVM(Eval& eval)
 : eval_(eval), f_(eval.f), d_(eval.d), avm_d_(ExprDataAVM(f_)) {
     //new_variables_count_ = f_.nb_nodes();
     solver_ = new LPSolver(avm_d_.nb_var, LPSolver::Mode::Certified);
+    for(int i = 0; i < avm_d_.nb_lin; ++i) {
+        solver_->add_constraint(SparseVector(), CmpOp::LEQ, 0.0);
+    }
+    for(int i = avm_d_.top->begin_index; i < avm_d_.top->end_index; ++i) {
+        SparseVector vec;
+        // TODO temporary to test for f(x) <= 0
+        vec[i] = 1.0;
+        solver_->add_constraint(vec, CmpOp::LEQ, 0.0);
+    }
 }
 
 AVM::~AVM() {
@@ -13,14 +22,8 @@ AVM::~AVM() {
 }
 
 LPSolver::Status AVM::minimize(const IntervalVector& box) {
-    solver_->clear_constraints();
     eval_.eval(box);
     f_.forward<decltype(*this)>(*this);
-    for(int i = avm_d_.top->begin_index; i < avm_d_.top->end_index; ++i) {
-        SparseVector vec;
-        vec[i] = 1.0;
-        solver_->add_constraint(vec, CmpOp::LEQ, 0.0);
-    }
     solver_->write_to_file("lp.lp");
     return solver_->minimize();
 }
@@ -62,6 +65,10 @@ void AVM::load_node_bounds_in_solver(int y) {
 
 int AVM::node_index_to_first_var(int index) const {
     return avm_d_[index].begin_index;
+}
+
+int AVM::node_index_to_first_lin(int index) const {
+    return avm_d_[index].begin_lin_index + avm_d_.nb_var;
 }
 
 } // namespace ibex

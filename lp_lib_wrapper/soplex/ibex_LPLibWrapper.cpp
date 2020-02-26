@@ -277,6 +277,44 @@ LPSolver::Status LPSolver::minimize() {
     return status_;
 }
 
+void LPSolver::set_coef(int row, int col, double value) {
+    assert(row >= 0 && row < nb_rows());
+    assert(col >= 0 && col < nb_vars());
+    assert(std::isfinite(value));
+    has_changed = true;
+    mysoplex->changeElementReal(row, col, value);
+}
+
+void LPSolver::set_row(int row, const SparseVector& value) {
+    assert(row >= 0 && row < nb_rows());
+    has_changed = true;
+    for(auto it = value.cbegin(); it != value.cend(); it++) {
+        assert(it->first >= 0 && it->first < nb_vars());
+        mysoplex->changeElementReal(row, it->first, it->second);
+    }
+}
+
+void LPSolver::set_rhs(int row, double value) {
+    assert(row >= 0 && row < nb_rows());
+    assert(std::isfinite(value));
+    has_changed = true;
+    mysoplex->changeRhsReal(row, value);
+}
+
+void LPSolver::set_lhs(int row, double value) {
+    assert(row >= 0 && row < nb_rows());
+    assert(std::isfinite(value));
+    has_changed = true;
+    mysoplex->changeLhsReal(row, value);
+}
+
+void LPSolver::set_lhs_rhs(int row, double lhs, double rhs) {
+    assert(row >= 0 && row < nb_rows());
+    assert(std::isfinite(lhs) && std::isfinite(rhs));
+    has_changed = true;
+    mysoplex->changeRangeReal(row, lhs, rhs);
+}
+
 void LPSolver::set_cost(const Vector& obj) {
     assert(obj.size() == nb_vars());
     assert(isfinite(obj));
