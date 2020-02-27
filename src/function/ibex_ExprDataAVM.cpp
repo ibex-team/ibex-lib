@@ -24,11 +24,14 @@ AVMData* ExprDataAVMFactory::init(const type& e, AVMData&, AVMData&) {\
 IMPL_FACT_0ARY(ExprSymbol, 0)
 IMPL_FACT_0ARY(ExprConstant, 0)
 
-IMPL_FACT_UNARY(ExprSqr, 5)
+//IMPL_FACT_UNARY(ExprIndex, 0);
+IMPL_FACT_UNARY(ExprMinus, 1)
+IMPL_FACT_UNARY(ExprSqr, 6)
+IMPL_FACT_UNARY(ExprSqrt, 4)
 
 IMPL_FACT_BINARY(ExprAdd, 1)
 IMPL_FACT_BINARY(ExprSub, 1)
-IMPL_FACT_BINARY(ExprMul, 5)
+IMPL_FACT_BINARY(ExprMul, 6)
 
 #undef IMPL_FACT_UNARY
 #undef IMPL_FACT_BINARY

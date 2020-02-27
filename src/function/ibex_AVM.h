@@ -27,6 +27,8 @@ public:
 
     void load_node_bounds_in_solver(int y);
 
+
+
     inline void vector_fwd (int* x, int y);
 	inline void apply_fwd  (int* x, int y);
 	inline void idx_fwd    (int x, int y);
@@ -93,7 +95,65 @@ private:
     Vector filter_variables(const Vector& solver_result) const;
     int node_index_to_first_var(int index) const;
     int node_index_to_first_lin(int index) const;
+    double node_d_ub(int y) const;
+    double node_d_lb(int y) const;
+
+    struct coef_pair {
+        int var;
+        double coef;
+    };
+    void binary_linearization(int lin, coef_pair&& y, coef_pair&& x1, coef_pair&& x2, double rhs);
+    void unary_linearization(int lin, coef_pair&& y, coef_pair&& x, double rhs);
+
+    template<typename T, typename D>
+    inline void unary_convex_underestimator(double x, T& func, D& deriv, double& y_coef, double& x_coef, double& rhs);
+    template<typename T>
+    inline void unary_convex_overestimator(Interval x, T& func, double& y_coef, double& x_coef, double& rhs);
+    template<typename T, typename D>
+    inline void unary_concave_overestimator(double x, T& func, D& deriv, double& y_coef, double& x_coef, double& rhs);
+    template<typename T>
+    inline void unary_concave_underestimator(Interval x, T& func, double& y_coef, double& x_coef, double& rhs);
+
 };
+
+template<typename T, typename D>
+inline void AVM::unary_convex_underestimator(double x, T& func, D& deriv, double& y_coef, double& x_coef, double& rhs) {
+    Interval grad = deriv(x);
+    Interval value = func(x);
+    y_coef = -1;
+    x_coef = grad.lb();
+    rhs = (grad*x - value).lb();
+}
+
+template<typename T>
+inline void AVM::unary_convex_overestimator(Interval x, T& func, double& y_coef, double& x_coef, double& rhs) {
+    y_coef = 1;
+    Interval fub = func(x.ub());
+    Interval flb = func(x.lb());
+    Interval a = (fub - flb)/(x.ub()-x.lb());
+    x_coef = -a.ub();
+    rhs = (fub - a*x.ub()).ub();
+}
+
+template<typename T, typename D>
+inline void AVM::unary_concave_overestimator(double x, T& func, D& deriv, double& y_coef, double& x_coef, double& rhs) {
+    Interval grad = deriv(x);
+    Interval value = func(x);
+    y_coef = 1;
+    x_coef = -grad.ub();
+    rhs = (value - grad*x).ub();
+}
+
+template<typename T>
+inline void AVM::unary_concave_underestimator(Interval x, T& func, double& y_coef, double& x_coef, double& rhs) {
+    y_coef = -1;
+    Interval fub = func(x.ub());
+    Interval flb = func(x.lb());
+    Interval a = (fub - flb)/(x.ub()-x.lb());
+    x_coef = a.lb();
+    rhs = (a*x.ub()-fub).lb();
+}
+
 
 inline void AVM::vector_fwd(int* x, int y) {
     /* nothing to do */
@@ -140,19 +200,16 @@ inline void AVM::gen2_fwd(int x1, int x2, int y) {
 }
 
 inline void AVM::add_fwd(int x1, int x2, int y)   {
-    // - y + x1 + x2 <= 0
-    int yvar = node_index_to_first_var(y);
-    int x1var = node_index_to_first_var(x1);
-    int x2var = node_index_to_first_var(x2);
-    int lin = node_index_to_first_lin(y);
-    SparseVector vec;
-    vec[yvar] = -1;
-    vec[x1var] = 1;
-    vec[x2var] = 1;
-    solver_->set_row(lin, vec);
-    solver_->set_lhs_rhs(lin, 0, 0);
+    // - y + x1 + x2 = 0
+    const int yvar = node_index_to_first_var(y);
+    const int x1var = node_index_to_first_var(x1);
+    const int x2var = node_index_to_first_var(x2);
+    const int lin = node_index_to_first_lin(y);
+    binary_linearization(lin, {yvar, -1}, {x1var, 1}, {x2var, 1}, 0.0);
+    solver_->set_lhs(lin, 0.0);
     load_node_bounds_in_solver(y);
 }
+
 inline void AVM::mul_fwd(int x1, int x2, int y)   {
     if(x1 == x2) {
         sqr_fwd(x1, y);
@@ -161,39 +218,36 @@ inline void AVM::mul_fwd(int x1, int x2, int y)   {
     // d[y].i()=d[x1].i()*d[x2].i();
     // - y + ub(x1)*x2 + ub(x2)*x1 <= ub(x1)*ub(x2)
     // - y + lb(x1)*x2 + lb(x2)*x1 <= lb(x1)*lb(x2)
-    int yvar = node_index_to_first_var(y);
-    int x1var = node_index_to_first_var(x1);
-    int x2var = node_index_to_first_var(x2);
+
+    const int yvar = node_index_to_first_var(y);
+    const int x1var = node_index_to_first_var(x1);
+    const int x2var = node_index_to_first_var(x2);
     int lin = node_index_to_first_lin(y);
-    SparseVector vec;
-    double rhs;
-    vec[x2var] = d_[x1].i().ub();
-    vec[x1var] = d_[x2].i().ub();
-    vec[yvar] = -1;
-    rhs = d_[x1].i().ub()*d_[x2].i().ub();
-    solver_->set_row(lin, vec);
-    solver_->set_rhs(lin, rhs);
-    lin++;
-    vec[x2var] = d_[x1].i().lb();
-    vec[x1var] = d_[x2].i().lb();
-    vec[yvar] = -1;
-    rhs = d_[x1].i().lb()*d_[x2].i().lb();
-    solver_->set_row(lin, vec);
-    solver_->set_rhs(lin, rhs);
+    const double x1u = node_d_ub(x1);
+    const double x1l = node_d_lb(x1);
+    const double x2u = node_d_ub(x2);
+    const double x2l = node_d_lb(x2);
+    /*
+     * Convex/Concave enveloppe for bilinear terms
+     * - y + x2u x1 + x1u x2 <= x1u*x2u
+     * - y + x2l x1 + x1l x2 <= x1l*x2l
+     *   y - x2u x1 - x1l x2 <= -x1l*x2u
+     *   y - x2l x1 - x1u x2 <= -x1u*x2l
+     */
+    binary_linearization(lin++, {yvar, -1}, {x1var, x2u}, {x2var, x1u}, x1u*x2u);
+    binary_linearization(lin++, {yvar, -1}, {x1var, x2l}, {x2var, x1l}, x1l*x2l);
+    binary_linearization(lin++, {yvar, 1}, {x1var, -x2u}, {x2var, -x1l}, -x1l*x2u);
+    binary_linearization(lin, {yvar, 1}, {x1var, -x2l}, {x2var, -x1u}, -x1u*x2l);
     load_node_bounds_in_solver(y);
 }
 inline void AVM::sub_fwd(int x1, int x2, int y)   {
     // - y + x1 - x2 <= 0
-    int yvar = node_index_to_first_var(y);
-    int x1var = node_index_to_first_var(x1);
-    int x2var = node_index_to_first_var(x2);
-    int lin = node_index_to_first_lin(y);
-    SparseVector vec;
-    vec[yvar] = -1;
-    vec[x1var] = 1;
-    vec[x2var] = -1;
-    solver_->set_row(lin, vec);
-    solver_->set_lhs_rhs(lin, 0, 0);
+    const int yvar = node_index_to_first_var(y);
+    const int x1var = node_index_to_first_var(x1);
+    const int x2var = node_index_to_first_var(x2);
+    const int lin = node_index_to_first_lin(y);
+    binary_linearization(lin, {yvar, -1}, {x1var, 1}, {x2var, -1}, 0.0);
+    solver_->set_lhs(lin, 0.0);
     load_node_bounds_in_solver(y);
 }
 inline void AVM::div_fwd(int x1, int x2, int y)   {
@@ -219,7 +273,13 @@ inline void AVM::gen1_fwd(int x, int y) {
 
 inline void AVM::minus_fwd(int x, int y)          {
     // d[y].i()=-d[x].i();
-    not_implemented("Minus not implemented for AVM");
+    const int yvar = node_index_to_first_var(y);
+    const int xvar = node_index_to_first_var(x);
+    const int lin = node_index_to_first_lin(y);
+    solver_->set_coef(lin, yvar, 1);
+    solver_->set_coef(lin, xvar, 1);
+    solver_->set_lhs_rhs(lin, 0, 0);
+    load_node_bounds_in_solver(y);
 }
 inline void AVM::minus_V_fwd(int x, int y)        {
     // d[y].v()=-d[x].v();
@@ -244,19 +304,26 @@ inline void AVM::power_fwd(int x, int y, int p)   {
 
 inline void AVM::sqr_fwd(int x, int y)            {
     // 0 >= x^2 = y >= lin
-    assert(avm_d_[y].lin_count == 5);
-    int yvar = node_index_to_first_var(y);
-    int xvar = node_index_to_first_var(x);
+    assert(avm_d_[y].lin_count >= 6);
+    const int yvar = node_index_to_first_var(y);
+    const int xvar = node_index_to_first_var(x);
     int lin = node_index_to_first_lin(y);
-    auto linearize = [&](double x_point) {
-        solver_->set_coef(lin, yvar, -1);
-        solver_->set_coef(lin, xvar, 2*x_point);
-        solver_->set_rhs(lin, x_point*x_point);
-        lin++;
+
+    auto func = [](double x_pt) { return sqr(Interval(x_pt)); };
+    auto deriv = [](double x_pt) { return 2*Interval(x_pt); };
+
+    auto linearize = [&](double x_pt) {
+        double y_coef, x_coef, rhs;
+        unary_convex_underestimator(x_pt, func, deriv, y_coef, x_coef, rhs);
+        unary_linearization(lin++, {yvar, y_coef}, {xvar, x_coef}, rhs);
     };
 
     const Interval& itv = d_[x].i();
-
+    {
+        double y_coef, x_coef, rhs;
+        unary_convex_overestimator(itv, func, y_coef, x_coef, rhs);
+        unary_linearization(lin++, {yvar, y_coef}, {xvar, x_coef}, rhs);
+    }
     if(itv.contains(0)) {
         linearize(0.0);
         linearize(Interval(0.0, itv.ub()).mid());
@@ -274,8 +341,36 @@ inline void AVM::sqr_fwd(int x, int y)            {
 }
 inline void AVM::sqrt_fwd(int x, int y)           {
     // if ((d[y].i()=sqrt(d[x].i())).is_empty()) throw EmptyBoxException();
-    not_implemented("Sqrt not implemented for AVM");
+    const int yvar = node_index_to_first_var(y);
+    const int xvar = node_index_to_first_var(x);
+    int lin = node_index_to_first_lin(y);
+
+    auto func = [](double x_pt) { return sqrt(Interval(x_pt)); };
+    auto deriv = [](double x_pt) { return 1/(2*sqrt(Interval(x_pt))); };
+
+    auto linearize = [&](double x_pt) {
+        double y_coef, x_coef, rhs;
+        unary_concave_overestimator(x_pt, func, deriv, y_coef, x_coef, rhs);
+        unary_linearization(lin++, {yvar, y_coef}, {xvar, x_coef}, rhs);
+    };
+
+    Interval itv = d_[x].i();
+    itv = Interval(std::max(+0.0, itv.lb()), itv.ub());
+    {
+        double y_coef, x_coef, rhs;
+        unary_concave_underestimator(itv, func, y_coef, x_coef, rhs);
+        unary_linearization(lin++, {yvar, y_coef}, {xvar, x_coef}, rhs);
+    }
+    if(itv.lb() == 0) {
+        unary_linearization(lin++, {yvar, 0.0}, {xvar, -1}, 0.0);
+    } else {
+        linearize(itv.lb());
+    }
+    linearize(itv.mid());
+    linearize(itv.ub());
+    load_node_bounds_in_solver(y);
 }
+
 inline void AVM::exp_fwd(int x, int y)            {
     // d[y].i()=exp(d[x].i());
     not_implemented("Exp not implemented for AVM");

@@ -71,4 +71,25 @@ int AVM::node_index_to_first_lin(int index) const {
     return avm_d_[index].begin_lin_index + avm_d_.nb_var;
 }
 
+double AVM::node_d_ub(int y) const {
+    return d_[y].i().ub();
+}
+
+double AVM::node_d_lb(int y) const {
+    return d_[y].i().lb();
+}
+
+void AVM::binary_linearization(int lin, coef_pair&& y, coef_pair&& x1, coef_pair&& x2, double rhs) {
+    solver_->set_coef(lin, y.var, y.coef);
+    solver_->set_coef(lin, x1.var, x1.coef);
+    solver_->set_coef(lin, x2.var, x2.coef);
+    solver_->set_rhs(lin, rhs);
+}
+
+void AVM::unary_linearization(int lin, coef_pair&& y, coef_pair&& x, double rhs) {
+    solver_->set_coef(lin, y.var, y.coef);
+    solver_->set_coef(lin, x.var, x.coef);
+    solver_->set_rhs(lin, rhs);
+}
+
 } // namespace ibex
