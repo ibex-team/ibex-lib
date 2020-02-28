@@ -56,6 +56,33 @@ Vector AVM::filter_variables(const Vector& solver_result) const {
     return result;
 }
 
+void AVM::setup_node(int x, int y) {
+    xvar_ = node_index_to_first_var(x);
+    yvar_ = node_index_to_first_var(y);
+    lin_ = node_index_to_first_lin(y);
+    load_node_bounds_in_solver(y);
+}
+
+void AVM::setup_node(int x1, int x2, int y) {
+    x1var_ = node_index_to_first_var(x1);
+    x2var_ = node_index_to_first_var(x2);
+    yvar_ = node_index_to_first_var(y);
+    lin_ = node_index_to_first_lin(y);
+    load_node_bounds_in_solver(y);
+}
+
+void AVM::finish_node(int x, int y) {
+    while(lin_ != avm_d_[y].end_lin_index) {
+        load_constraint(lin_++, {{yvar_, 0}, {xvar_, 0}}, 0.0);
+    }
+}
+
+void AVM::finish_node(int x1, int x2, int y) {
+    while(lin_ != avm_d_[y].end_lin_index) {
+        load_constraint(lin_++, {{yvar_, 0}, {x1var_, 0}, {x2var_, 0}}, 0.0);
+    }
+}
+
 void AVM::load_node_bounds_in_solver(int y) {
     const AVMData& data = avm_d_[y];
     for(int i = data.begin_index, j = 0; i < data.end_index; ++i, ++j) {
@@ -79,17 +106,18 @@ double AVM::node_d_lb(int y) const {
     return d_[y].i().lb();
 }
 
-void AVM::binary_linearization(int lin, coef_pair&& y, coef_pair&& x1, coef_pair&& x2, double rhs) {
-    solver_->set_coef(lin, y.var, y.coef);
-    solver_->set_coef(lin, x1.var, x1.coef);
-    solver_->set_coef(lin, x2.var, x2.coef);
+void AVM::load_constraint(int lin, const std::vector<coef_pair>& list, double rhs) {
+    for(const coef_pair& z : list) {
+        solver_->set_coef(lin, z.var, z.coef);
+    }
     solver_->set_rhs(lin, rhs);
 }
 
-void AVM::unary_linearization(int lin, coef_pair&& y, coef_pair&& x, double rhs) {
-    solver_->set_coef(lin, y.var, y.coef);
-    solver_->set_coef(lin, x.var, x.coef);
-    solver_->set_rhs(lin, rhs);
+void AVM::load_constraint(int lin, const std::vector<coef_pair>& list, double lhs, double rhs) {
+    for(const coef_pair& z : list) {
+        solver_->set_coef(lin, z.var, z.coef);
+    }
+    solver_->set_lhs_rhs(lin, lhs, rhs);
 }
 
 } // namespace ibex
