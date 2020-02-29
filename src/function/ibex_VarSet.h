@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_VarSet.h
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
@@ -154,26 +154,32 @@ public:
 	 * \brief Extend the box to a "full box" with the parameters
 	 */
 	IntervalVector full_box(const IntervalVector& var_box, const IntervalVector& param_box) const;
+	Vector full_vector(const Vector& var_box, const Vector& param_box) const;
 
 	/**
 	 * \brief Extract the domain of variables from the "full box"
 	 */
 	IntervalVector var_box(const IntervalVector& full_box) const;
+	Vector var_vector(const Vector& full_box) const;
 
 	/**
 	 * \brief Set the domain of variables in a "full box"
 	 */
 	void set_var_box(IntervalVector& full_box, const IntervalVector& var_box) const;
+	void set_var_vector(Vector& full_box, const Vector& var_box) const;
 
 	/**
 	 * \brief Set the domain of parameters in a "full box"
 	 */
 	void set_param_box(IntervalVector& full_box, const IntervalVector& param_box) const;
+	void set_param_vector(Vector& full_box, const Vector& param_box) const;
 
 	/**
 	 * \brief Extract the domain of parameters from the "full box"
 	 */
 	IntervalVector param_box(const IntervalVector& full_box) const;
+	Vector param_vector(const Vector& full_box) const;
+
 
 	/**
 	 * \brief Retun the ith variable

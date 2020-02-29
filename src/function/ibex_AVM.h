@@ -215,7 +215,7 @@ inline void AVM::add_fwd(int x1, int x2, int y)   {
     } else {
         load_constraint(lin_, {{yvar_, -1}, {x1var_, 1}, {x2var_, 1}}, 0.0, 0.0);
     }
-    finish_node(x1? x2, y);
+    finish_node(x1, x2, y);
 }
 
 inline void AVM::mul_fwd(int x1, int x2, int y)   {
@@ -407,36 +407,27 @@ inline void AVM::cos_fwd(int x, int y)            {
     Interval itv(d_[x].i());
     auto func = [](double x_pt) { return cos(Interval(x_pt)); };
     auto deriv = [](double x_pt) { return -sin(Interval(x_pt)); };
-    /*Interval left_eval = func(itv.lb());
+    Interval left_eval = func(itv.lb());
     Interval right_eval = func(itv.ub());
-    Interval full_eval = func(itv);
-    if(itv.diam() >= Interval::two_pi()) {
+    if(itv.diam() >= Interval::two_pi().lb()) {
         load_constraint(lin_++, {{yvar_, 1}, {xvar_, 0}}, 1);
         load_constraint(lin_++, {{yvar_, -1},{xvar_, 0}}, 1);
-    } else if(full_eval.lb() >= 0) {
-        unary_concave_overestimator(lin_++, itv.lb(), func, deriv);
-        unary_concave_overestimator(lin_++, itv.ub(), func, deriv);
-        unary_concave_overestimator(lin_++, itv.mid(), func, deriv);
-        unary_concave_underestimator(lin_++, itv, func);
-    } else if(full_eval.ub() <= 0) {
-        unary_convex_underestimator(lin_++, itv.lb(), func, deriv);
-        unary_convex_underestimator(lin_++, itv.ub(), func, deriv);
-        unary_convex_underestimator(lin_++, itv.mid(), func, deriv);
-        unary_convex_overestimator(lin_++, itv, func);
-    } else {
-        if(left_eval.lb() >= 0) {
-            VarSet varset(cos_tangent_point, cos_tangent_point.arg(0), true);
-            IntervalVector full_box(2);
-            full_box[0] = itv;
-            full_box[1] = Interval(itv.ub());
-            bool success = newton(cos_tangent_point, varset, full_box);
-            if(success) {
-                unary_convex_overestimator(lin_++, Interval(itv.lb(), ), func);
-            } else {
-
-            }
+        finish_node(x, y);
+        return;
+    }
+    /*int k = ibex::ceil(-(1+itv.lb()/Interval::pi())/2.);
+    double xlb1 = (itv.lb() + k*2*Interval::two_pi()).lb();
+    double xub1 = (itv.ub() + k*2*Interval::two_pi()).ub();
+    //on veut -pi <xlb1 < pi =>  xlb1 < xub1 < xlb1 + 2pi < 3pi
+    // d'abord, gauche et over
+    if(xlb1 < -pi/2) { // xub < 3pi/2
+        if(xub1 < -pi/2) {
+            // convexe...
+        } else if(xub > pi/2) {
+            // over:si secante(xlb), pt_secante_over_gauche, sinon pt_secante_over_gauche=xub
         }
-    }*/
+    } else if(pi/2 < xlb1 < 0)
+    } else if()
     /*const int yvar_ = node_index_to_first_var(y);
     const int xvar = node_index_to_first_var(x);
     int lin = node_index_to_first_lin(y);

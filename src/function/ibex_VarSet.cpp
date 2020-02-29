@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_VarSet.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -209,6 +209,21 @@ IntervalVector VarSet::full_box(const IntervalVector& var_box, const IntervalVec
 	return full_box;
 }
 
+Vector VarSet::full_vector(const Vector& var_box, const Vector& param_box) const {
+	assert(var_box.size()==nb_var);
+	assert(param_box.size() == nb_param);
+
+	Vector full_box(nb_var+nb_param);
+	int jx=0;
+	int jy=0;
+
+	for (int i=0; i<nb_var+nb_param; i++) {
+		if (is_var[i]) full_box[i]=var_box[jx++];
+		else         full_box[i]=param_box[jy++];
+	}
+	return full_box;
+}
+
 IntervalVector VarSet::var_box(const IntervalVector& full_box) const {
 	assert(full_box.size()==nb_param+nb_var);
 	IntervalVector var_box(nb_var);
@@ -223,6 +238,17 @@ IntervalVector VarSet::var_box(const IntervalVector& full_box) const {
 	return var_box;
 }
 
+Vector VarSet::var_vector(const Vector& full_box) const {
+	assert(full_box.size()==nb_param+nb_var);
+	Vector var_box(nb_var);
+
+	int j=0;
+	for (int i=0; i<nb_var+nb_param && j<nb_var; i++) {
+		if (is_var[i]) var_box[j++]=full_box[i];
+	}
+	return var_box;
+}
+
 IntervalVector VarSet::param_box(const IntervalVector& full_box) const {
 	assert(full_box.size()==nb_param+nb_var);
 	IntervalVector param_box(nb_param);
@@ -233,6 +259,17 @@ IntervalVector VarSet::param_box(const IntervalVector& full_box) const {
 		for (int i=0; i<nb_var+nb_param && j<nb_param; i++) {
 			if (!is_var[i]) param_box[j++]=full_box[i];
 		}
+	}
+	return param_box;
+}
+
+Vector VarSet::param_vector(const Vector& full_box) const {
+	assert(full_box.size()==nb_param+nb_var);
+	Vector param_box(nb_param);
+
+	int j=0;
+	for (int i=0; i<nb_var+nb_param && j<nb_param; i++) {
+		if (!is_var[i]) param_box[j++]=full_box[i];
 	}
 	return param_box;
 }
@@ -252,6 +289,16 @@ void VarSet::set_var_box(IntervalVector& full_box, const IntervalVector& var_box
 	}
 }
 
+void VarSet::set_var_vector(Vector& full_box, const Vector& var_box) const {
+	assert(var_box.size()==nb_var);
+	assert(full_box.size()==nb_var+nb_param);
+
+	int j=0;
+	for (int i=0; i<nb_var+nb_param && j<nb_var; i++) {
+		if (is_var[i]) full_box[i]=var_box[j++];
+	}
+}
+
 void VarSet::set_param_box(IntervalVector& full_box, const IntervalVector& param_box) const {
 	assert(param_box.size()==nb_param);
 	assert(full_box.size()==nb_var+nb_param);
@@ -264,6 +311,16 @@ void VarSet::set_param_box(IntervalVector& full_box, const IntervalVector& param
 		for (int i=0; i<nb_var+nb_param && j<nb_param; i++) {
 			if (!is_var[i]) full_box[i]=param_box[j++];
 		}
+	}
+}
+
+void VarSet::set_param_vector(Vector& full_box, const Vector& param_box) const {
+	assert(param_box.size()==nb_param);
+	assert(full_box.size()==nb_var+nb_param);
+
+	int j=0;
+	for (int i=0; i<nb_var+nb_param && j<nb_param; i++) {
+		if (!is_var[i]) full_box[i]=param_box[j++];
 	}
 }
 
