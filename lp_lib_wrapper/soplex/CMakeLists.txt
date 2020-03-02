@@ -13,9 +13,9 @@ include (IbexUtils)
 # Looking for Soplex, install it if not found
 ################################################################################
 # Looking for soplex.h, result is written in SOPLEX_INCDIR
-find_header_custom (SOPLEX "soplex.h" "${SOPLEX_DIR}")
+find_header_custom (SOPLEX "soplex.h" PATHS "${SOPLEX_DIR}")
 # Looking for soplex library, result is written in SOPLEX_LIB
-find_library_custom (SOPLEX "soplex" "${SOPLEX_DIR}")
+find_library_custom (SOPLEX "soplex" PATHS "${SOPLEX_DIR}")
 
 if (SOPLEX_INCDIR AND SOPLEX_LIB)
   create_target_import_and_export (soplex ${SOPLEX_LIB} NAMESPACE Ibex::

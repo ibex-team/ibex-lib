@@ -3,18 +3,30 @@ include (ibex-config-utils)
 ################################################################################
 ################################################################################
 ################################################################################
-function (FIND_HEADER_CUSTOM prefix hdrname hdr_paths)
+function (FIND_HEADER_CUSTOM prefix hdrname)
+  set (opt "")
+  set (oneArgs "")
+  set (multiArgs PATHS)
+
+  cmake_parse_arguments(FHC "${opt}" "${oneArgs}" "${multiArgs}" ${ARGN})
+
+  if(FHC_UNPARSED_ARGUMENTS)
+    message (FATAL_ERROR "Unknown keywords given to find_header_custom(): \"${FHC_UNPARSED_ARGUMENTS}\"")
+  endif()
+
   set (MSG "Looking for ${hdrname}")
   message (STATUS "${MSG}")
 
-  # First look only in ${hdr_paths}
-  find_path (${prefix}_INCDIR ${hdrname} PATHS ${hdr_paths}
-                  DOC "Set to exact include directory to bypass internal test"
-                  PATH_SUFFIXES include NO_DEFAULT_PATH)
+  # First look only in PATHS if given
+  if (FHC_PATHS)
+    find_path (${prefix}_INCDIR ${hdrname} PATHS ${FHC_PATHS}
+                    DOC "Set to exact include directory to bypass internal test"
+                    PATH_SUFFIXES include NO_DEFAULT_PATH)
+  endif ()
 
   if (NOT ${prefix}_INCDIR)
     # Now look with system and cmake paths
-    find_path (${prefix}_INCDIR ${hdrname} PATHS ${hdr_paths}
+    find_path (${prefix}_INCDIR ${hdrname}
                     DOC "Set to exact include directory to bypass internal test"
                     PATH_SUFFIXES include)
     if (${prefix}_INCDIR)
@@ -37,18 +49,30 @@ endfunction ()
 ################################################################################
 ################################################################################
 ################################################################################
-function (FIND_LIBRARY_CUSTOM prefix libname lib_paths)
+function (FIND_LIBRARY_CUSTOM prefix libname)
+  set (opt "")
+  set (oneArgs "")
+  set (multiArgs PATHS)
+
+  cmake_parse_arguments(FLC "${opt}" "${oneArgs}" "${multiArgs}" ${ARGN})
+
+  if(FLC_UNPARSED_ARGUMENTS)
+    message (FATAL_ERROR "Unknown keywords given to find_library_custom(): \"${FLC_UNPARSED_ARGUMENTS}\"")
+  endif()
+
   set (MSG "Looking for ${libname}")
   message (STATUS "${MSG}")
 
-  # First look only in ${lib_paths}
-  find_library (${prefix}_LIB ${libname} PATHS ${lib_paths}
-                      DOC "Set to exact lib directory to bypass internal test"
-                      PATH_SUFFIXES lib NO_DEFAULT_PATH)
+  # First look only in PATHS if given
+  if (FLC_PATHS)
+    find_library (${prefix}_LIB ${libname} PATHS ${FLC_PATHS}
+                        DOC "Set to exact lib directory to bypass internal test"
+                        PATH_SUFFIXES lib NO_DEFAULT_PATH)
+  endif ()
 
   if (NOT ${prefix}_LIB)
     # Now look with system and cmake paths
-    find_library (${prefix}_LIB ${libname} PATHS ${lib_paths}
+    find_library (${prefix}_LIB ${libname}
                         DOC "Set to exact lib directory to bypass internal test"
                         PATH_SUFFIXES lib)
   endif ()
