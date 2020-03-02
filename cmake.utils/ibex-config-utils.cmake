@@ -119,16 +119,22 @@ endfunction ()
 # the following command in the same scope as the main CMakeLists.txt file
 macro (ADD_MAKE_TARGET_FOR_CTEST tgtname)
   include (CTest)
+
   if (ARGN)
     set (_depends DEPENDS ${ARGN})
   else ()
     set (_depends "")
   endif ()
 
+  if ("${CMAKE_GENERATOR}" STREQUAL "Unix Makefiles")
+    set (_cmd ${CMAKE_CTEST_COMMAND} --output-on-failure $(ARGS))
+  else ()
+    set (_cmd ${CMAKE_CTEST_COMMAND} --output-on-failure)
+  endif ()
+
   if (BUILD_TESTING)
-    add_custom_target (${tgtname}
-                      COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure $(ARGS)
-                      ${_depends} COMMENT "Running the tests")
+    add_custom_target (${tgtname} COMMAND ${_cmd} ${_depends}
+                                  COMMENT "Running the tests")
     add_subdirectory (tests EXCLUDE_FROM_ALL)
   endif ()
 endmacro ()
