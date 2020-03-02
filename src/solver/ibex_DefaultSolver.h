@@ -34,7 +34,7 @@ public:
 	 * \param eps_x_max - Criterion for forcing bisection  (absolute precision)
 	 * \param dfs       - true: depth-first search. false: breadth-first search
 	 */
-    DefaultSolver(System& sys, double eps_x_min=default_eps_x_min, double eps_x_max=default_eps_x_max, bool dfs=true, double random_seed=default_random_seed);
+    DefaultSolver(const System& sys, double eps_x_min=default_eps_x_min, double eps_x_max=default_eps_x_max, bool dfs=true, double random_seed=default_random_seed);
 
     /**
 	 * \brief Create a default solver.
@@ -45,7 +45,7 @@ public:
 	 * \param eps_x_max - Criterion for forcing bisection  (absolute precision)
 	 * \param dfs       - true: depth-first search. false: breadth-first search
 	 */
-    DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max=default_eps_x_max, bool dfs=true, double random_seed=default_random_seed);
+    DefaultSolver(const System& sys, const Vector& eps_x_min, double eps_x_max=default_eps_x_max, bool dfs=true, double random_seed=default_random_seed);
 
 	/**
 	 * \brief Default minimal width: 1e-6.
@@ -66,14 +66,14 @@ public:
 	 */
 	static constexpr double default_random_seed = 1.0;
 
-	System& sys;
+	const System& sys;
 
 private:
 
 	/**
 	 * The contractor: hc4 + acid(hc4) + newton (if the system is square) + xnewton
 	 */
-	Ctc* ctc(System& sys, double prec);
+	Ctc* ctc(const System& sys, double prec);
 
 //	std::vector<CtcXNewton::corner_point>* default_corners ();
 
