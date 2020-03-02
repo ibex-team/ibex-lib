@@ -46,6 +46,7 @@ endif ()
 
 if (FILIB_INCDIR AND FILIB_LIB)
   create_target_import_and_export (prim ${FILIB_LIB} ${filib_compile_option}
+                                        NAMESPACE Ibex::
                                         TARGET_NAME filib
                                         INCLUDE_DIRECTORIES ${FILIB_INCDIR})
 else ()
@@ -79,6 +80,7 @@ else ()
   #
   set (_incdir $<BUILD_INTERFACE:${FILIB_INCDIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR_3RD}>)
   create_target_import_and_export (prim ${FILIB_LIB} ${filib_compile_option}
+                                        NAMESPACE Ibex::
                                         TARGET_NAME filib
                                         INSTALL
                                         INCLUDE_DIRECTORIES ${_incdir}

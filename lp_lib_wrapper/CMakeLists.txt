@@ -29,7 +29,7 @@ foreach (f ${LP_LIB_REQUIRED_FILES})
 endforeach ()
 
 # The name of the target that ibex should depend on
-set (LP_LIB_TARGET ${LP_LIB} PARENT_SCOPE)
+set (LP_LIB_TARGET Ibex::${LP_LIB} PARENT_SCOPE)
 
 # Add directory of wrapper in list of included directory
 list (APPEND IBEX_INCDIRS ${LP_LIB_ABSPATH})

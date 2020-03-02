@@ -74,7 +74,7 @@ install (FILES ${IBEX_INL} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex
 
 # export ibex target in ibex-config.cmake
 install (EXPORT ibexExport FILE ibex-config.cmake
-                           NAMESPACE ${IBEX_CMAKE_TARGET_EXPORT_PREFIX}
+                           NAMESPACE Ibex::
                            DESTINATION ${CMAKE_INSTALL_CONFIGCMAKE}
                            COMPONENT devtools)
 

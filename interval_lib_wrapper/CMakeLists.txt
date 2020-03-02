@@ -31,7 +31,7 @@ foreach (f ${ITVLIB_REQUIRED_FILES})
 endforeach ()
 
 # The name of the target that ibex should depend on
-set (INTERVAL_LIB_TARGET ${INTERVAL_LIB} PARENT_SCOPE)
+set (INTERVAL_LIB_TARGET Ibex::${INTERVAL_LIB} PARENT_SCOPE)
 
 # Add directory of wrapper in list of included directory
 list (APPEND IBEX_INCDIRS ${ITVLIB_ABSPATH})

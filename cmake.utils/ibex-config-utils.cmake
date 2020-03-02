@@ -237,7 +237,7 @@ define_property (TARGET PROPERTY IMPORTED_PKG_LIBS
 
 function (CREATE_TARGET_IMPORT_AND_EXPORT libname libabspath)
   set (opt NO_EXPORT INSTALL)
-  set (oneArgs TARGET_EXPORT_PREFIX TARGET_NAME COMPONENT)
+  set (oneArgs NAMESPACE TARGET_NAME COMPONENT)
   set (multiArgs INCLUDE_DIRECTORIES LINK_LIBRARIES COMPILE_OPTIONS DEPENDS)
   
   cmake_parse_arguments(CTIE "${opt}" "${oneArgs}" "${multiArgs}" ${ARGN})
@@ -249,16 +249,11 @@ function (CREATE_TARGET_IMPORT_AND_EXPORT libname libabspath)
   ##############################################################################
   # Default values for some arguments
   ##############################################################################
-  if (NOT CTIE_TARGET_EXPORT_PREFIX)
-    set (CTIE_TARGET_EXPORT_PREFIX ${IBEX_CMAKE_TARGET_EXPORT_PREFIX})
-  endif ()
   if (CTIE_TARGET_NAME)
-    set (target ${CTIE_TARGET_NAME})
+    set (target ${CTIE_NAMESPACE}${CTIE_TARGET_NAME})
   else ()
-    set (target ${libname})
+    set (target ${CTIE_NAMESPACE}${libname})
   endif ()
-
-  set (target_export_name ${CTIE_TARGET_EXPORT_PREFIX}${target})
 
   ##############################################################################
   # Get type of library (SHARED|STATIC|MODULE|UNKNOWN)
@@ -321,33 +316,26 @@ function (CREATE_TARGET_IMPORT_AND_EXPORT libname libabspath)
   if (NOT CTIE_NO_EXPORT)
     set (CFG_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/ibex-config-${libname}.cmake)
     # FIXME do we really need global ?
-    set (CFG_CONTENT "add_library (${target_export_name} ${libtype} IMPORTED GLOBAL)")
+    set (CFG_CONTENT "add_library (${target} ${libtype} IMPORTED GLOBAL)")
     if (libabspath)
       generators_expression_replace_for_build (_path "${installpath}")
       set (CFG_CONTENT "${CFG_CONTENT}
-set_target_properties (${target_export_name} PROPERTIES IMPORTED_LOCATION ${_path})")
+set_target_properties (${target} PROPERTIES IMPORTED_LOCATION ${_path})")
     endif ()
     if (CTIE_INCLUDE_DIRECTORIES)
       generators_expression_replace_for_build (_prop "${CTIE_INCLUDE_DIRECTORIES}")
       set (CFG_CONTENT "${CFG_CONTENT}
-set_target_properties (${target_export_name} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES \"${_prop}\")")
+set_target_properties (${target} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES \"${_prop}\")")
     endif ()
     if (CTIE_LINK_LIBRARIES)
       generators_expression_replace_for_build (_prop "${CTIE_LINK_LIBRARIES}")
-      foreach (_p ${_prop})
-        if (TARGET ${_p})
-          list (APPEND _nprop ${CTIE_TARGET_EXPORT_PREFIX}${_p})
-        else ()
-          list (APPEND _nprop ${_p})
-        endif ()
-      endforeach ()
       set (CFG_CONTENT "${CFG_CONTENT}
-set_target_properties (${target_export_name} PROPERTIES INTERFACE_LINK_LIBRARIES \"${_nprop}\")")
+set_target_properties (${target} PROPERTIES INTERFACE_LINK_LIBRARIES \"${_prop}\")")
     endif ()
     if (CTIE_COMPILE_OPTIONS)
       generators_expression_replace_for_build (_prop "${CTIE_COMPILE_OPTIONS}")
       set (CFG_CONTENT "${CFG_CONTENT}
-set_target_properties (${target_export_name} PROPERTIES INTERFACE_COMPILE_OPTIONS \"${_prop}\")")
+set_target_properties (${target} PROPERTIES INTERFACE_COMPILE_OPTIONS \"${_prop}\")")
     endif ()
 
     file (GENERATE OUTPUT ${CFG_FILENAME} CONTENT "${CFG_CONTENT}
