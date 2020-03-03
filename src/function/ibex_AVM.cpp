@@ -1,4 +1,9 @@
 #include "ibex_AVM.h"
+#include "ibex_Newton.h"
+#include <queue>
+#include "ibex_System.h"
+#include "ibex_SystemFactory.h"
+#include "ibex_DefaultSolver.h"
 
 namespace ibex {
 
@@ -107,9 +112,12 @@ double AVM::node_d_lb(int y) const {
 }
 
 void AVM::load_constraint(int lin, const std::vector<coef_pair>& list, double rhs) {
+    // std::cout << "load " << lin << " = ";
     for(const coef_pair& z : list) {
+        // std::cout << z.coef << " x" << z.var << " + ";
         solver_->set_coef(lin, z.var, z.coef);
     }
+    // std::cout << " <= " << rhs << std::endl;
     solver_->set_rhs(lin, rhs);
 }
 
@@ -119,5 +127,44 @@ void AVM::load_constraint(int lin, const std::vector<coef_pair>& list, double lh
     }
     solver_->set_lhs_rhs(lin, lhs, rhs);
 }
+Interval AVM::find_cos_secante(double x_start, double search_lb, double search_ub) {
+    SystemFactory fac;
+    Variable x;
+    fac.add_var(x);
+    const ExprConstant& cst = ExprConstant::new_scalar(x_start);
+    fac.add_ctr(cos_secante_point_(x, cst) = 0);
+    System sys(fac);
+    DefaultSolver s(sys);
+    s.solve(Interval(search_lb, search_ub));
+    if(s.get_data().nb_solution() > 0) {
+        return s.get_data().solution(0)[0];
+    } else {
+        return x_start;
+    }
+    /*VarSet varset(cos_secante_point_, cos_secante_point_.arg(0));
+    std::cout << search_lb << " " << search_ub << std::endl;
+    IntervalVector box = varset.full_box(IntervalVector{{search_lb, search_ub}}, IntervalVector{{x_start}});
+    std::queue<IntervalVector> search_stack;
+    auto pair = box.bisect(0);
+    search_stack.push(pair.first);
+    search_stack.push(pair.second);
+    bool success = false;
+    while(!success) {
+        IntervalVector sbox = search_stack.front();
+        search_stack.pop();
+        success = newton(cos_secante_point_, varset, sbox);
+        if(sbox.is_empty() || !success) {
+            continue;
+        } else if(success) {
+            return sbox[0];
+        } else {
+            pair = sbox.bisect(0);
+            search_stack.push(pair.first);
+            search_stack.push(pair.second);
+        }
+    }
+    // error*/
+}
+
 
 } // namespace ibex

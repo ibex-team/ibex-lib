@@ -115,6 +115,9 @@ private:
 
     void load_constraint(int lin, const std::vector<coef_pair>& list, double rhs);
     void load_constraint(int lin, const std::vector<coef_pair>& list, double lhs, double rhs);
+
+    inline void unary_line_over(int lin_index, double x1, double y1, double x2, double y2);
+    inline void unary_line_under(int lin_index, double x1, double y1, double x2, double y2);
     template<typename T, typename D>
     inline void unary_convex_underestimator(int lin_index, double x, T& func, D& deriv);
     template<typename T>
@@ -125,8 +128,26 @@ private:
     inline void unary_concave_underestimator(int lin_index, Interval x, T& func);
 
     // Helper Ibex functions
-    Function cos_tangent_point = Function("x", "xp", "sin(x)*(x-xp) + cos(x) - cos(xp)");
+    Function cos_secante_point_ = Function("x", "xp", "sin(x)*(x-xp) + cos(x) - cos(xp)");
+    Interval find_cos_secante(double x_start, double search_lb, double search_ub);
+    void cos_over(int x, int y, Interval offset, bool negate);
 };
+
+inline void AVM::unary_line_over(int lin_index, double x1, double y1, double x2, double y2) {
+    double y_coef = 1;
+    Interval a = (Interval(y2) - y1)/(Interval(x2)-x1);
+    double x_coef = -a.ub();
+    double rhs = (y2 - a*x2).ub();
+    load_constraint(lin_index, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
+}
+
+inline void AVM::unary_line_under(int lin_index, double x1, double y1, double x2, double y2) {
+    double y_coef = -1;
+    Interval a = (Interval(y2) - y1)/(Interval(x2)-x1);
+    double x_coef = a.lb();
+    double rhs = (a*x2-y2).lb();
+    load_constraint(lin_index, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
+}
 
 template<typename T, typename D>
 inline void AVM::unary_convex_underestimator(int lin_index, double x, T& func, D& deriv) {
@@ -402,52 +423,83 @@ inline void AVM::log_fwd(int x, int y)            {
     finish_node(x, y);
 }
 
-inline void AVM::cos_fwd(int x, int y)            {
-    setup_node(x, y);
-    Interval itv(d_[x].i());
-    auto func = [](double x_pt) { return cos(Interval(x_pt)); };
-    auto deriv = [](double x_pt) { return -sin(Interval(x_pt)); };
-    Interval left_eval = func(itv.lb());
-    Interval right_eval = func(itv.ub());
-    if(itv.diam() >= Interval::two_pi().lb()) {
-        load_constraint(lin_++, {{yvar_, 1}, {xvar_, 0}}, 1);
-        load_constraint(lin_++, {{yvar_, -1},{xvar_, 0}}, 1);
-        finish_node(x, y);
+inline void AVM::cos_over(int x, int y, Interval offset, bool negate) {
+    double xlb = (node_d_lb(x) + offset).lb();
+    double xub = (node_d_ub(x) + offset).ub();
+
+    auto secante_over = [&](Interval x_pt) {
+        double x_coef = ibex::sin(x_pt).ub();
+        double rhs = (ibex::cos(x_pt)+ibex::sin(x_pt)*x_pt - x_coef*offset).ub();
+        double y_coef = 1;
+        if(negate) {
+            y_coef = -1;
+        }
+        load_constraint(lin_++, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
+    };
+
+    // TODO exact modulo
+    Interval xlb_mod = Interval(std::fmod(xlb, Interval::two_pi().lb()));
+    Interval xub_mod = Interval(std::fmod(xub, Interval::two_pi().lb()));
+    const Interval _3pi_over_2 = 3*Interval::half_pi();
+    // bwd_imod(xlb_mod, xlb_itv, Interval::two_pi().lb());
+    // bwd_imod(xub_mod, xub_itv, Interval::two_pi().lb());
+    // std::cout << xlb << " " << xlb_mod << std::endl;
+    // std::cout << xub << " " << xub_mod << std::endl;
+    Interval secante_left = xlb;
+    Interval secante_right = xub;
+    if(xlb_mod.lb() <= _3pi_over_2.ub()) {
+        const Interval search_left = xlb + _3pi_over_2 - xlb_mod;
+        const Interval search_right = xlb + Interval::two_pi() - xlb_mod;
+        secante_left = find_cos_secante(xlb, search_left.lb(), search_right.ub());
+    }
+    if(xub_mod.ub() >= Interval::half_pi().lb()) {
+        const Interval search_left = xub - xub_mod;
+        const Interval search_right = xub + Interval::half_pi() - xub_mod;
+        secante_right = find_cos_secante(xub, search_left.lb(), search_right.ub());
+    }
+    // std::cout << "secleft=" << secante_left << std::endl;
+    // std::cout << "secright=" << secante_right << std::endl;
+    const bool sec_left_gt_xub = secante_left.lb() >= xub;
+    const bool sec_right_lt_xlb = secante_right.ub() <= xlb;
+    if(sec_left_gt_xub && sec_right_lt_xlb) {
+        if(negate) {
+            unary_line_under(lin_++, xlb, ibex::cos(xlb).lb(), xub, ibex::cos(xub).lb());
+        } else {
+            unary_line_over(lin_++, xlb, ibex::cos(xlb).ub(), xub, ibex::cos(xub).ub());
+        }
         return;
     }
-    /*int k = ibex::ceil(-(1+itv.lb()/Interval::pi())/2.);
-    double xlb1 = (itv.lb() + k*2*Interval::two_pi()).lb();
-    double xub1 = (itv.ub() + k*2*Interval::two_pi()).ub();
-    //on veut -pi <xlb1 < pi =>  xlb1 < xub1 < xlb1 + 2pi < 3pi
-    // d'abord, gauche et over
-    if(xlb1 < -pi/2) { // xub < 3pi/2
-        if(xub1 < -pi/2) {
-            // convexe...
-        } else if(xub > pi/2) {
-            // over:si secante(xlb), pt_secante_over_gauche, sinon pt_secante_over_gauche=xub
-        }
-    } else if(pi/2 < xlb1 < 0)
-    } else if()
-    /*const int yvar_ = node_index_to_first_var(y);
-    const int xvar = node_index_to_first_var(x);
-    int lin = node_index_to_first_lin(y);
-
-    auto func = [](double x_pt) { return cos(Interval(x_pt)); };
-    auto deriv = [](double x_pt) { return -sin(Interval(x_pt)); };
-
-    auto linearize = [&](double x_pt) {
-        double y_coef, x_coef, rhs;
-        unary_concave_overestimator(x_pt, func, deriv, y_coef, x_coef, rhs);
-        unary_linearization(lin_,++, {yvar_, y_coef}, {xvar, x_coef}, rhs);
-    };
-    */
-    finish_node(x, y);
-    not_implemented("Cos not implemented for AVM");
+    if(sec_right_lt_xlb) {
+        secante_over(xub);
+    } else {
+        secante_over(secante_right);
+    }
+    if(sec_left_gt_xub) {
+        secante_over(xlb);
+    } else {
+        secante_over(secante_left);
+    }
+    const Interval sec_itv = secante_left|secante_right;
+    if(!sec_itv.is_empty() && sec_itv.diam() <= Interval::pi().lb()) {
+        secante_over(sec_itv.mid());
+    }
 }
+
+inline void AVM::cos_fwd(int x, int y)            {
+    setup_node(x, y);
+    cos_over(x, y, Interval(0), false);
+    cos_over(x, y, Interval::pi(), true);
+
+    finish_node(x, y);
+}
+
 inline void AVM::sin_fwd(int x, int y)            {
-    // d[y].i()=sin(d[x].i());
+    setup_node(x, y);
+    cos_over(x, y, -Interval::half_pi(), false);
+    cos_over(x, y, Interval::half_pi(), true);
     not_implemented("Sin not implemented for AVM");
 }
+
 inline void AVM::tan_fwd(int x, int y)            {
     // if ((d[y].i()=tan(d[x].i())).is_empty()) throw EmptyBoxException();
     not_implemented("Tan not implemented for AVM");

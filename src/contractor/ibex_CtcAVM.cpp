@@ -22,14 +22,14 @@ void CtcAVM::contract(IntervalVector& box, ContractContext& context) {
         cost[i] = 1;
         avm_->set_cost(cost);
         LPSolver::Status status = avm_->minimize(box);
-        std::cout << status << std::endl;
+        // std::cout << status << std::endl;
         if(status == LPSolver::Status::OptimalProved) {
             box[i] = Interval(avm_->minimum().lb(), box[i].ub());
         }
         cost[i] = -1;
         avm_->set_cost(cost);
         status = avm_->minimize(box);
-        std::cout << status << std::endl;
+        // std::cout << status << std::endl;
         if(status == LPSolver::Status::OptimalProved) {
             box[i] = Interval(box[i].lb(), -avm_->minimum().lb());
         }
