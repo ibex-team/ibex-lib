@@ -29,7 +29,8 @@ AVM::~AVM() {
 LPSolver::Status AVM::minimize(const IntervalVector& box) {
     eval_.eval(box);
     f_.forward<decltype(*this)>(*this);
-    solver_->write_to_file("lp.lp");
+    std::string filename = "lp" + std::to_string(solve_count++) + ".lp";
+    solver_->write_to_file(filename.c_str());
     return solver_->minimize();
 }
 
@@ -82,6 +83,7 @@ void AVM::finish_node(int x, int y) {
     while(lin_ < avm_d_[y].end_lin_index) {
         solver_->set_coef(lin_, yvar_, 0);
         solver_->set_coef(lin_, xvar_, 0);
+        lin_++;
     }
 }
 
@@ -90,6 +92,7 @@ void AVM::finish_node(int x1, int x2, int y) {
         solver_->set_coef(lin_, yvar_, 0);
         solver_->set_coef(lin_, x1var_, 0);
         solver_->set_coef(lin_, x2var_, 0);
+        lin_++;
     }
 }
 

@@ -98,6 +98,7 @@ private:
     int x1var_;
     int x2var_;
     AVMData* avm_data_;
+    int solve_count = 0;
 
     void setup_node(int x, int y);
     void setup_node(int x1, int x2, int y);
