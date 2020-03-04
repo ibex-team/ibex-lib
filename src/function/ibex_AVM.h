@@ -8,6 +8,7 @@
 #include "ibex_LPSolver.h"
 #include "ibex_Eval.h"
 #include "ibex_SparseVector.h"
+#include "ibex_ConvexEnvelope.h"
 
 namespace ibex {
 
@@ -92,6 +93,7 @@ private:
 
     int lin_;
     int yvar_;
+    std::vector<int> xvars_;
     int xvar_;
     int x1var_;
     int x2var_;
@@ -105,92 +107,10 @@ private:
     Vector filter_variables(const Vector& solver_result) const;
     int node_index_to_first_var(int index) const;
     int node_index_to_first_lin(int index) const;
-    double node_d_ub(int y) const;
-    double node_d_lb(int y) const;
 
-    struct coef_pair {
-        int var;
-        double coef;
-    };
-
-    void load_constraint(int lin, const std::vector<coef_pair>& list, double rhs);
-    void load_constraint(int lin, const std::vector<coef_pair>& list, double lhs, double rhs);
-
-    inline void unary_line_over(int lin_index, double x1, double y1, double x2, double y2);
-    inline void unary_line_under(int lin_index, double x1, double y1, double x2, double y2);
-    template<typename T, typename D>
-    inline void unary_convex_underestimator(int lin_index, double x, T& func, D& deriv);
-    template<typename T>
-    inline void unary_convex_overestimator(int lin_index, Interval x, T& func);
-    template<typename T, typename D>
-    inline void unary_concave_overestimator(int lin_index, double x, T& func, D& deriv);
-    template<typename T>
-    inline void unary_concave_underestimator(int lin_index, Interval x, T& func);
-
-    // Helper Ibex functions
-    Function cos_secante_point_ = Function("x", "xp", "sin(x)*(x-xp) + cos(x) - cos(xp)");
-    Interval find_cos_secante(double x_start, double search_lb, double search_ub);
-    void cos_over(int x, int y, Interval offset, bool negate);
+    void load_envelope(const ConvexEnvelope& ce);
+    void load_constraint(int lin, const ConvexEnvelope::LinearConstraint& lc);
 };
-
-inline void AVM::unary_line_over(int lin_index, double x1, double y1, double x2, double y2) {
-    double y_coef = 1;
-    Interval a = (Interval(y2) - y1)/(Interval(x2)-x1);
-    double x_coef = -a.ub();
-    double rhs = (y2 - a*x2).ub();
-    load_constraint(lin_index, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
-}
-
-inline void AVM::unary_line_under(int lin_index, double x1, double y1, double x2, double y2) {
-    double y_coef = -1;
-    Interval a = (Interval(y2) - y1)/(Interval(x2)-x1);
-    double x_coef = a.lb();
-    double rhs = (a*x2-y2).lb();
-    load_constraint(lin_index, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
-}
-
-template<typename T, typename D>
-inline void AVM::unary_convex_underestimator(int lin_index, double x, T& func, D& deriv) {
-    Interval grad = deriv(x);
-    Interval value = func(x);
-    double y_coef = -1;
-    double x_coef = grad.lb();
-    double rhs = (grad*x - value).lb();
-    load_constraint(lin_index, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
-}
-
-template<typename T>
-inline void AVM::unary_convex_overestimator(int lin_index, Interval x, T& func) {
-    double y_coef = 1;
-    Interval fub = func(x.ub());
-    Interval flb = func(x.lb());
-    Interval a = (fub - flb)/(x.ub()-x.lb());
-    double x_coef = -a.ub();
-    double rhs = (fub - a*x.ub()).ub();
-    load_constraint(lin_index, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
-}
-
-template<typename T, typename D>
-inline void AVM::unary_concave_overestimator(int lin_index, double x, T& func, D& deriv) {
-    Interval grad = deriv(x);
-    Interval value = func(x);
-    double y_coef = 1;
-    double x_coef = -grad.ub();
-    double rhs = (value - grad*x).ub();
-    load_constraint(lin_index, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
-}
-
-template<typename T>
-inline void AVM::unary_concave_underestimator(int lin_index, Interval x, T& func) {
-    double y_coef = -1;
-    Interval fub = func(x.ub());
-    Interval flb = func(x.lb());
-    Interval a = (fub - flb)/(x.ub()-x.lb());
-    double x_coef = a.lb();
-    double rhs = (a*x.ub()-fub).lb();
-    load_constraint(lin_index, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
-}
-
 
 inline void AVM::vector_fwd(int* x, int y) {
     /* nothing to do */
@@ -232,11 +152,14 @@ inline void AVM::add_fwd(int x1, int x2, int y)   {
     // - y + x1 + x2 = 0
     setup_node(x1, x2, y);
     if(x1 == x2) {
-        load_constraint(lin_, {{yvar_, -1}, {x1var_, 2}}, 0.0, 0.0);
+        ConvexEnvelope ce = convex_envelope::int_mul(2, d_[x1].i());
+        load_envelope(ce);
     } else {
-        load_constraint(lin_, {{yvar_, -1}, {x1var_, 1}, {x2var_, 1}}, 0.0, 0.0);
+        ConvexEnvelope ce = convex_envelope::add(d_[x1].i(), d_[x2].i());
+        load_envelope(ce);
     }
     finish_node(x1, x2, y);
+
 }
 
 inline void AVM::mul_fwd(int x1, int x2, int y)   {
@@ -244,35 +167,20 @@ inline void AVM::mul_fwd(int x1, int x2, int y)   {
         sqr_fwd(x1, y);
         return;
     }
-    // d[y].i()=d[x1].i()*d[x2].i();
-    // - y + ub(x1)*x2 + ub(x2)*x1 <= ub(x1)*ub(x2)
-    // - y + lb(x1)*x2 + lb(x2)*x1 <= lb(x1)*lb(x2)
-
     setup_node(x1, x2, y);
-    const double x1u = node_d_ub(x1);
-    const double x1l = node_d_lb(x1);
-    const double x2u = node_d_ub(x2);
-    const double x2l = node_d_lb(x2);
-    /*
-     * Convex/Concave enveloppe for bilinear terms
-     * - y + x2u x1 + x1u x2 <= x1u*x2u
-     * - y + x2l x1 + x1l x2 <= x1l*x2l
-     *   y - x2u x1 - x1l x2 <= -x1l*x2u
-     *   y - x2l x1 - x1u x2 <= -x1u*x2l
-     */
-    load_constraint(lin_++, {{yvar_,-1}, {x1var_, x2u}, {x2var_, x1u}}, x1u*x2u);
-    load_constraint(lin_++, {{yvar_,-1}, {x1var_, x2l}, {x2var_, x1l}}, x1l*x2l);
-    load_constraint(lin_++, {{yvar_, 1}, {x1var_,-x2u}, {x2var_,-x1l}},-x1l*x2u);
-    load_constraint(lin_,   {{yvar_, 1}, {x1var_,-x2l}, {x2var_,-x1u}},-x1u*x2l);
+    ConvexEnvelope ce = convex_envelope::mul(d_[x1].i(), d_[x2].i());
+    load_envelope(ce);
     finish_node(x1, x2, y);
 }
 inline void AVM::sub_fwd(int x1, int x2, int y)   {
     // - y + x1 - x2 <= 0
     setup_node(x1, x2, y);
     if(x1 == x2) {
-        load_constraint(lin_, {{yvar_, 1}, {x1var_, 0}}, 0.0, 0.0);
+        ConvexEnvelope ce = convex_envelope::int_mul(0, d_[x1].i());
+        load_envelope(ce);
     } else {
-        load_constraint(lin_, {{yvar_, -1}, {x1var_, 1}, {x2var_, -1}}, 0.0, 0.0);
+        ConvexEnvelope ce = convex_envelope::sub(d_[x1].i(), d_[x2].i());
+        load_envelope(ce);
     }
     finish_node(x1, x2, y);
 }
@@ -298,9 +206,9 @@ inline void AVM::gen1_fwd(int x, int y) {
 }
 
 inline void AVM::minus_fwd(int x, int y)          {
-    // d[y].i()=-d[x].i();
     setup_node(x, y);
-    load_constraint(lin_, {{yvar_, 1}, {xvar_, 1}}, 0.0, 0.0);
+    ConvexEnvelope ce = convex_envelope::int_mul(-1, d_[x].i());
+    load_envelope(ce);
     finish_node(x, y);
 }
 inline void AVM::minus_V_fwd(int x, int y)        {
@@ -328,193 +236,71 @@ inline void AVM::sqr_fwd(int x, int y)            {
     // 0 >= x^2 = y >= lin
     assert(avm_d_[y].lin_count >= 6);
     setup_node(x, y);
-
-    auto func = [](double x_pt) { return sqr(Interval(x_pt)); };
-    auto deriv = [](double x_pt) { return 2*Interval(x_pt); };
-
-    auto linearize = [&](double x_pt) {
-        unary_convex_underestimator(lin_++, x_pt, func, deriv);
-    };
-
-    const Interval& itv = d_[x].i();
-    unary_convex_overestimator(lin_++, itv, func);
-    if(itv.contains(0)) {
-        linearize(0.0);
-        linearize(Interval(0.0, itv.ub()).mid());
-        linearize(Interval(itv.lb(), 0.0).mid());
-    } else {
-        linearize(itv.mid());
-        auto pair = itv.bisect();
-        linearize(pair.first.mid());
-        linearize(pair.second.mid());
-    }
-    linearize(itv.lb());
-    linearize(itv.ub());
+    ConvexEnvelope ce = convex_envelope::sqr(d_[x].i());
+    load_envelope(ce);
     finish_node(x, y);
 }
 inline void AVM::sqrt_fwd(int x, int y)           {
     // if ((d[y].i()=sqrt(d[x].i())).is_empty()) throw EmptyBoxException();
     setup_node(x, y);
-
-    auto func = [](double x_pt) { return sqrt(Interval(x_pt)); };
-    auto deriv = [](double x_pt) { return 1/(2*sqrt(Interval(x_pt))); };
-
-    auto linearize = [&](double x_pt) {
-        unary_concave_overestimator(lin_++, x_pt, func, deriv);
-    };
-
-    Interval itv = d_[x].i();
-    itv = Interval(std::max(+0.0, itv.lb()), itv.ub());
-    unary_concave_underestimator(lin_++, itv, func);
-    if(itv.lb() == 0) {
-        load_constraint(lin_++, {{yvar_, 0.0}, {xvar_, -1}}, 0.0);
-    } else {
-        linearize(itv.lb());
-    }
-    linearize(itv.mid());
-    linearize(itv.ub());
+    ConvexEnvelope ce = convex_envelope::sqrt(d_[x].i());
+    load_envelope(ce);
     finish_node(x, y);
 }
 
 inline void AVM::exp_fwd(int x, int y)            {
     // d[y].i()=exp(d[x].i());
     setup_node(x, y);
-
-    auto func = [](double x_pt) { return exp(Interval(x_pt)); };
-    auto deriv = [](double x_pt) { return exp(Interval(x_pt)); };
-
-    auto linearize = [&](double x_pt) {
-        unary_convex_underestimator(lin_++, x_pt, func, deriv);
-    };
-
-    const Interval& itv = d_[x].i();
-    unary_convex_overestimator(lin_++, itv, func);
-
-    linearize(itv.mid());
-    linearize(itv.lb());
-    linearize(itv.ub());
+    ConvexEnvelope ce = convex_envelope::exp(d_[x].i());
+    load_envelope(ce);
     finish_node(x, y);
 }
 inline void AVM::log_fwd(int x, int y)            {
     // if ((d[y].i()=log(d[x].i())).is_empty()) throw EmptyBoxException();
     setup_node(x, y);
-
-    auto func = [](double x_pt) { return log(Interval(x_pt)); };
-    auto deriv = [](double x_pt) { return 1/(Interval(x_pt)); };
-
-    auto linearize = [&](double x_pt) {
-        unary_concave_overestimator(lin_++, x_pt, func, deriv);
-    };
-
-    Interval itv = d_[x].i();
-    itv = Interval(std::max(+0.0, itv.lb()), itv.ub());
-    if(itv.lb() == 0.0) {
-        load_constraint(lin_++, {{yvar_, 0}, {xvar_, 1}}, itv.ub());
-    } else {
-        unary_concave_underestimator(lin_++, itv, func);
-    }
-    if(itv.lb() == 0.0) {
-        load_constraint(lin_++, {{yvar_, 0.0}, {xvar_, -1}}, 0.0);
-    } else {
-        linearize(itv.lb());
-    }
-    linearize(itv.mid());
-    linearize(itv.ub());
+    ConvexEnvelope ce = convex_envelope::log(d_[x].i());
+    load_envelope(ce);
     finish_node(x, y);
-}
-
-inline void AVM::cos_over(int x, int y, Interval offset, bool negate) {
-    double xlb = (node_d_lb(x) + offset).lb();
-    double xub = (node_d_ub(x) + offset).ub();
-
-    auto secante_over = [&](Interval x_pt) {
-        double x_coef = ibex::sin(x_pt).ub();
-        double rhs = (ibex::cos(x_pt)+ibex::sin(x_pt)*x_pt - x_coef*offset).ub();
-        double y_coef = 1;
-        if(negate) {
-            y_coef = -1;
-        }
-        load_constraint(lin_++, {{yvar_, y_coef}, {xvar_, x_coef}}, rhs);
-    };
-
-    // TODO exact modulo
-    Interval xlb_mod = Interval(std::fmod(xlb, Interval::two_pi().lb()));
-    Interval xub_mod = Interval(std::fmod(xub, Interval::two_pi().lb()));
-    const Interval _3pi_over_2 = 3*Interval::half_pi();
-    // bwd_imod(xlb_mod, xlb_itv, Interval::two_pi().lb());
-    // bwd_imod(xub_mod, xub_itv, Interval::two_pi().lb());
-    // std::cout << xlb << " " << xlb_mod << std::endl;
-    // std::cout << xub << " " << xub_mod << std::endl;
-    Interval secante_left = xlb;
-    Interval secante_right = xub;
-    if(xlb_mod.lb() <= _3pi_over_2.ub()) {
-        const Interval search_left = xlb + _3pi_over_2 - xlb_mod;
-        const Interval search_right = xlb + Interval::two_pi() - xlb_mod;
-        secante_left = find_cos_secante(xlb, search_left.lb(), search_right.ub());
-    }
-    if(xub_mod.ub() >= Interval::half_pi().lb()) {
-        const Interval search_left = xub - xub_mod;
-        const Interval search_right = xub + Interval::half_pi() - xub_mod;
-        secante_right = find_cos_secante(xub, search_left.lb(), search_right.ub());
-    }
-    // std::cout << "secleft=" << secante_left << std::endl;
-    // std::cout << "secright=" << secante_right << std::endl;
-    const bool sec_left_gt_xub = secante_left.lb() >= xub;
-    const bool sec_right_lt_xlb = secante_right.ub() <= xlb;
-    if(sec_left_gt_xub && sec_right_lt_xlb) {
-        if(negate) {
-            unary_line_under(lin_++, xlb, ibex::cos(xlb).lb(), xub, ibex::cos(xub).lb());
-        } else {
-            unary_line_over(lin_++, xlb, ibex::cos(xlb).ub(), xub, ibex::cos(xub).ub());
-        }
-        return;
-    }
-    if(sec_right_lt_xlb) {
-        secante_over(xub);
-    } else {
-        secante_over(secante_right);
-    }
-    if(sec_left_gt_xub) {
-        secante_over(xlb);
-    } else {
-        secante_over(secante_left);
-    }
-    const Interval sec_itv = secante_left|secante_right;
-    if(!sec_itv.is_empty() && sec_itv.diam() <= Interval::pi().lb()) {
-        secante_over(sec_itv.mid());
-    }
 }
 
 inline void AVM::cos_fwd(int x, int y)            {
     setup_node(x, y);
-    cos_over(x, y, Interval(0), false);
-    cos_over(x, y, Interval::pi(), true);
-
+    ConvexEnvelope ce = convex_envelope::cos(d_[x].i());
+    load_envelope(ce);
     finish_node(x, y);
 }
 
 inline void AVM::sin_fwd(int x, int y)            {
     setup_node(x, y);
-    cos_over(x, y, -Interval::half_pi(), false);
-    cos_over(x, y, Interval::half_pi(), true);
-    not_implemented("Sin not implemented for AVM");
+    ConvexEnvelope ce = convex_envelope::sin(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 
 inline void AVM::tan_fwd(int x, int y)            {
-    // if ((d[y].i()=tan(d[x].i())).is_empty()) throw EmptyBoxException();
-    not_implemented("Tan not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::tan(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
+
 inline void AVM::cosh_fwd(int x, int y)           {
-    // d[y].i()=cosh(d[x].i());
-    not_implemented("Cosh not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::cosh(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::sinh_fwd(int x, int y)           {
-    // d[y].i()=sinh(d[x].i());
-    not_implemented("Sinh not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::sinh(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);;
 }
 inline void AVM::tanh_fwd(int x, int y)           {
-    // d[y].i()=tanh(d[x].i());
-    not_implemented("Tanh not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::tanh(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::acos_fwd(int x, int y)           {
     // if ((d[y].i()=acos(d[x].i())).is_empty()) throw EmptyBoxException();
@@ -541,16 +327,22 @@ inline void AVM::atanh_fwd(int x, int y)          {
     not_implemented("Atanh not implemented for AVM");
 }
 inline void AVM::floor_fwd(int x, int y)          {
-    // if ((d[y].i()=floor(d[x].i())).is_empty()) throw EmptyBoxException();
-    not_implemented("Floor not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::floor(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::ceil_fwd(int x, int y)           {
-    // if ((d[y].i()=ceil(d[x].i())).is_empty()) throw EmptyBoxException();
-    not_implemented("Ceil not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::ceil(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::saw_fwd(int x, int y)            {
-    // if ((d[y].i()=saw(d[x].i())).is_empty()) throw EmptyBoxException();
-    not_implemented("Saw not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::saw(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 
 inline void AVM::trans_V_fwd(int x, int y)        {
