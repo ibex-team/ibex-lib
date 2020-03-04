@@ -1,0 +1,12 @@
+constants
+
+ c=2;
+ 
+variables
+ x;
+ 
+ 
+constraints
+ x*c-c=0;
+ x*c+c=0;
+end

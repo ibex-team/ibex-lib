@@ -357,5 +357,10 @@ void TestParser::diff_lock() {
 	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"((2*x);((x^2+y)-3))"));
 }
 
+void TestParser::issue365() {
+	System sys(SRCDIR_TESTS "/minibex/issue365.mbx");
+	CPPUNIT_ASSERT(sys.f_ctrs.expr().size==7);
+}
+
 
 } // end namespace
