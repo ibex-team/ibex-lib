@@ -94,8 +94,23 @@ public:
 	/* Return the expression bound to a tmp symbol */
 	const ExprNode* get_tmp_expr_node(const char* id) const;
 
-	/* Return all the expressions bound to tmp symbols. */
-	std::vector<const ExprNode*> get_all_tmp_expr() const;
+	/*
+	 * Return all the expression nodes that exist so far in the scope
+	 * (either bound to tmp symbols or constant symbols).
+	 *
+	 * This function is useful to prevent these nodes from being
+	 * destroyed if the appear in (non-const) expression that
+	 * are generated and simplified on-the-fly (happens with "diff"
+	 * operator).
+	 *
+	 * Does not include variables (but it could) as simplification of
+	 * expression does not destroy variables.
+	 *
+	 * Note: nodes are not created for constants. They are only included
+	 * in the vector if they already exist (i.e., if constants are already
+	 * "generated" in a non-const expression).
+	 */
+	std::vector<const ExprNode*> get_all_existing_nodes() const;
 
 	/* Return the symbol attached to a string */
 	std::pair<const ExprSymbol*,const Domain*> get_var(const char* id) const;

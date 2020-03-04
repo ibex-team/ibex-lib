@@ -65,6 +65,10 @@ public:
 		return *_node;
 	}
 
+	bool node_built() const {
+		return _node!=NULL;
+	}
+
 	S_Object* copy() const {
 		return new S_Cst(*this);
 	}
@@ -277,13 +281,16 @@ const ExprNode* P_Scope::get_tmp_expr_node(const char* id) const {
 	return ((const S_ExprTmp&) s).expr;
 }
 
-std::vector<const ExprNode*> P_Scope::get_all_tmp_expr() const {
+std::vector<const ExprNode*> P_Scope::get_all_existing_nodes() const {
 	std::vector<const ExprNode*> vec;
 	for (list<SymbolMap<S_Object*> >::const_iterator it=tab.begin(); it!=tab.end(); ++it) {
 		for (IBEXMAP(P_Scope::S_Object*)::const_iterator it2=it->begin(); it2!=it->end(); ++it2) {
-			if (it2->second->token()==TK_EXPR_TMP_SYMBOL) {
+			S_Object& o=*it2->second;
+			if (o.token()==TK_EXPR_TMP_SYMBOL) {
 				//cout << " add expression " << *((const S_ExprTmp&) *(it2->second)).expr <<endl;
-				vec.push_back(((const S_ExprTmp&) *(it2->second)).expr);
+				vec.push_back(((const S_ExprTmp&) o).expr);
+			} else if (o.token()==TK_CONSTANT && ((const S_Cst&) o).node_built()) {
+				vec.push_back((const ExprNode*) &(((S_Cst&) o).node()));
 			}
 		}
 	}

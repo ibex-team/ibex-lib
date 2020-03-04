@@ -1,0 +1,18 @@
+
+/*
+ check that expression nodes of constants and temporary symbols
+ are not destroyed by "diff"
+ This example should also be checked with valgrind to check
+ memory leaks.
+ */
+constants
+c=3;
+
+variables 
+x,y;
+
+constraints
+  tmp=x^2+y;
+  diff(tmp+c,x)=0;
+  tmp=c;
+end

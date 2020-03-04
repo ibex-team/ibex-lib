@@ -660,10 +660,21 @@ const ExprNode& ExprGenerator::diff(const Array<const ExprNode>& args) {
 	ExprDiff d;
 	/*
 	 * All expressions (and their sub-expressions) resulting from temporary
-	 * symbols, once generated, should not be deleted by the simplification
-	 * process of "diff".
+	 * symbols or constants generation, should not be deleted by the
+	 * simplification process of "diff".
+	 *
+	 * TODO: If these symbols are not used elsewhere -> memory leak.
+	 * Example:
+	 *
+	 * constants
+	 *   c=1;
+	 * variables
+	 *   x;
+	 * constraints
+	 *   diff(x+c,x)=1;  // -> memory leak
+	 * end
 	 */
-	std::vector<const ExprNode*> tmp_expr=scope.get_all_tmp_expr();
+	std::vector<const ExprNode*> tmp_expr=scope.get_all_existing_nodes();
 
 	ExprSubNodes tmp_expr_nodes(tmp_expr);
 	for (int i=0; i<tmp_expr_nodes.size(); i++)

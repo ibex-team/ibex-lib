@@ -49,6 +49,7 @@ public:
 	CPPUNIT_TEST(sum03);
 	CPPUNIT_TEST(sum04);
 	CPPUNIT_TEST(temp_in_loop);
+	CPPUNIT_TEST(diff_lock);
 
 	//		CPPUNIT_TEST(error01);
 	CPPUNIT_TEST_SUITE_END();
@@ -77,6 +78,7 @@ public:
 	void sum04();
 
 	void temp_in_loop(); // issue #380
+	void diff_lock();    // see issue #365
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestParser);
