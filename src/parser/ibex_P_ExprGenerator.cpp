@@ -16,6 +16,7 @@
 #include "ibex_ExprDiff.h"
 
 #include <sstream>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -57,41 +58,63 @@ public:
 		return new LabelConst(NEG_INF);
 	}
 
-	LabelConst(int v) : _domain(Dim::scalar()), num_type(OTHER), cst(NULL) {
+	LabelConst(int v) : _domain(Dim::scalar()), num_type(OTHER), scope(NULL), name(NULL), cst(NULL) {
 		_domain.i()=Interval(v,v);
 	}
 
-	LabelConst(const Interval& itv) : _domain(Dim::scalar()), num_type(OTHER), cst(NULL) {
+	LabelConst(const Interval& itv) : _domain(Dim::scalar()), num_type(OTHER), scope(NULL), name(NULL), cst(NULL) {
 		_domain.i()=itv;
 	}
 
-	LabelConst(const Domain& d, bool ref=false) : _domain(d,ref), num_type(OTHER), cst(NULL) {
+	LabelConst(const Domain& d, bool ref=false) : _domain(d,ref), num_type(OTHER), scope(NULL), name(NULL), cst(NULL) {
 
 	}
 
-	// Label of a constant symbol.
-//	LabelConst(std::pair<const ExprConstant*, const Domain*>& p) : _domain(*p.second,true), num_type(OTHER), cst(p.first) {
-//
-//	}
-//
-	LabelConst(const ExprConstant& node) : _domain(node.get(),true), num_type(OTHER), cst(NULL) {
+	// Label of a constant symbol
+	LabelConst(P_Scope& scope, const char* name) : _domain(scope.get_cst(name),true), num_type(OTHER), scope(&scope), name(strdup(name)), cst(NULL) {
 
 	}
 
+	~LabelConst() {
+		if (name) free(name);
+	}
 
+	/**
+	 * Create a node associated to the constant.
+	 *
+	 * Created only when really necessary to avoid memory leaks.
+	 * In particular, the node of a constant symbol is not created
+	 * automatically in the constructor (that is, when the constant
+	 * is "generated"), because this constant may only appear in a
+	 * constant expression that do not belong to the final expression.
+	 *
+	 * E.g., in the bounds of an interval:
+	 *   constants c=[0,1];
+	 *   variables x in [c,c];
+	 *
+	 * or in the iterator values:
+	 *   constants c=10;
+	 *   variables x(10);
+	 *   constraints
+	 *   for i=1:c
+	 *     x(i)=i;
+	 *   end
+	 *
+	 * In both cases, the constant expression is generated and deleted
+	 * on-the-fly.
+	 */
 	virtual const ExprNode& node() const {
 
-		if (cst==NULL) {
+		if (name==NULL) {
 			if (num_type!=OTHER)
 				throw SyntaxError("Unexpected infinity symbol \"oo\"");
 
-			// The final node domain is *not* a reference to
-			// the constant domain: all objects created
-			// during parsing can be safely deleted
-
 			((LabelConst*) this)->cst = &ExprConstant::new_(_domain, false);
 
+		} else {
+			cst = &scope->get_cst_node(name);
 		}
+
 		return *cst;
 	}
 
@@ -103,10 +126,12 @@ public:
 
 	Domain _domain;
 	number_type num_type;
-	const ExprConstant* cst; // only built if necessary
+	P_Scope* scope;            // only for P_ExprCstSymbol (NULL for numeric constants)
+	char* name;                // only for P_ExprCstSymbol (NULL for numeric constants)
+	mutable const ExprConstant* cst;
 
 private:
-	LabelConst(number_type num_type) : _domain(Dim::scalar()), num_type(num_type), cst(NULL) {
+	LabelConst(number_type num_type) : _domain(Dim::scalar()), num_type(num_type), scope(NULL), name(NULL), cst(NULL) {
 		_domain.set_empty();
 	}
 
@@ -132,7 +157,7 @@ double to_double(const Domain& d, bool round_downward) {
 	return round_downward? d.i().lb() : d.i().ub();
 }
 
-ExprGenerator::ExprGenerator() : scope(pstruct->scopes.top()) {
+ExprGenerator::ExprGenerator() : scope(pstruct->scope()) {
 
 }
 
@@ -246,8 +271,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			switch(e.op) {
 			case P_ExprNode::INFTY:      e.lab=LabelConst::pos_infinity(); break;
 			case P_ExprNode::VAR_SYMBOL: e.lab=new LabelNode(scope.get_var(((P_ExprVarSymbol&) e).name).first); break;
-			case P_ExprNode::CST_SYMBOL: e.lab=new LabelConst(scope.get_cst(((P_ExprCstSymbol&) e).name)); break;
-			case P_ExprNode::TMP_SYMBOL: e.lab=new LabelNode(scope.get_expr_tmp_expr(((P_ExprTmpSymbol&) e).name)); break;
+			case P_ExprNode::CST_SYMBOL: e.lab=new LabelConst(scope, ((P_ExprCstSymbol&) e).name); break;
+			case P_ExprNode::TMP_SYMBOL: e.lab=new LabelNode(scope.get_tmp_expr_node(((P_ExprTmpSymbol&) e).name)); break;
 			case P_ExprNode::CST:        e.lab=new LabelConst(((P_ExprConstant&) e).value,true); break;
 			case P_ExprNode::ITER:       e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;
 			case P_ExprNode::IDX:
@@ -466,6 +491,7 @@ void ExprGenerator::visit(const P_ExprSum& e) {
 		s << "First value must be >= end value.";
 		throw SyntaxError(s.str());
 	}
+	scope.push();
 	scope.add_iterator(name);
 	const ExprNode* node;
 
@@ -500,7 +526,7 @@ void ExprGenerator::visit(const P_ExprSum& e) {
 		e.lab = new LabelNode(node);
 	}
 	delete domain;
-	scope.rem_iterator(name);
+	scope.pop();
 }
 
 pair<int,int> ExprGenerator::visit_index_tmp(const Dim& dim, const P_ExprNode& idx, bool matlab_style) {

@@ -185,6 +185,8 @@ void TestParser::func02() {
 			CPPUNIT_ASSERT(!box.is_empty());
 			check(box.subvector(6,7),subbox); // check x2
 		}
+		for (int i=0; i<sys.ctrs.size(); i++)
+			delete c[i];
 
 	} catch(SyntaxError& e) {
 		cout << e << endl;

@@ -11,10 +11,12 @@
 #ifndef __IBEX_PARSER_SCOPE_H__
 #define __IBEX_PARSER_SCOPE_H__
 
-#include <iostream>
 #include "ibex_P_Expr.h"
 #include "ibex_Expr.h"
 #include "ibex_SymbolMap.h"
+
+#include <iostream>
+#include <list>
 
 namespace ibex {
 
@@ -26,13 +28,27 @@ class P_Scope {
 
 public:
 
-	/** New empty scope */
+	/**
+	 * Create the stack of scopes, add the "bottom" scope
+	 * and duplicates constants and function declared in
+	 * another scope.
+	 */
+	P_Scope(const P_Scope&);
+
+	/**
+	 * Create a stack of scopes and push a new one.
+	 */
 	P_Scope();
 
-	/** Duplicate the scope.
-	 *
-	 * \param global - if true, only copy "global" data (constants and functions) */
-	P_Scope(const P_Scope& scope, bool global=false);
+	/**
+	 * Create a new scope.
+	 */
+	void push();
+
+	/**
+	 * Pop a scope
+	 */
+	void pop();
 
 	/** Delete this scope. */
 	~P_Scope();
@@ -43,10 +59,6 @@ public:
 
 	/** Add a constant */
 	void add_cst(const char* id, const Dim* d, const Domain& dom);
-
-	/** Remove a constant (constants can be overridden
-	 * by local variables in functions)*/
-	void rem_cst(const char* id);
 
 	/** Add a function. */
 	void add_func(const char* id, Function* f);
@@ -64,37 +76,29 @@ public:
 	/** Add an (uninitialized) iterator. */
 	void add_iterator(const char* id);
 
-	/** Remove an iterator
-	 */
-	void rem_iterator(const char* id);
-
-	//void add_operator(const char* id);
-
 	/*------------- get data associated to symbols in the current scope -----------*/
+	/*
+	 * Return the domain associated to a constant.
+	 */
+	const Domain& get_cst(const char* id) const;
 
-//	/* Bind an ExprNode object to a constant symbol */
-//	void bind_cst_node(const char* id, const ExprConstant&);
-
-	/* Return the constant */
-	const ExprConstant& get_cst(const char* id) const;
+	/*
+	 * Return the expression node associated to a constant.
+	 * The node is created on first call.
+	 */
+	const ExprConstant& get_cst_node(const char* id);
 
 	/* Return the function */
 	Function& get_func(const char* id);
 
 	/* Return the expression bound to a tmp symbol */
-	const ExprNode* get_expr_tmp_expr(const char* id) const;
+	const ExprNode* get_tmp_expr_node(const char* id) const;
 
 	/* Return all the expressions bound to tmp symbols. */
 	std::vector<const ExprNode*> get_all_tmp_expr() const;
 
 	/* Return the symbol attached to a string */
 	std::pair<const ExprSymbol*,const Domain*> get_var(const char* id) const;
-
-	/** Name of the ith variable (for CHOCO) */
-	const char* var(int i) const;
-
-	/** Number of variables. */
-	int nb_var() const;
 
 	/** All the variable domains (in declaration order). */
 	Array<const Domain> var_domains() const;
@@ -126,24 +130,38 @@ public:
 	/* Return if id is the symbol of an interator */
 	bool is_iter_symbol(const char* id) const;
 
-	/** All the constant symbols (in declaration order).*/
-	std::vector<const char*> cst;
-
 private:
+
 	/* classes used to contain objects bound to symbols */
 	class S_Object;
-	class S_Entity;
+	class S_Var;
 	class S_Cst;
 	class S_Func;
 	class S_ExprTmp;
 	class S_Iterator;
 
-	/** All the variables (in declaration order).*/
-	std::vector<S_Entity*> vars;
+	/*
+	 * Look up for and id, from top to bottom scope.
+	 * Return NULL if not found.
+	 */
+	S_Object* lookup(const char* id);
+
+	const S_Object* lookup(const char* id) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const P_Scope& scope);
 
-	SymbolMap<S_Object*> tab;
+	/*
+	 * The list is filled in reverse order so that the
+	 * "top" scope (the last created) is always front().
+	 * This allows traversing scopes in the right order
+	 * (the more recent first) by iterating in the list.
+	 */
+	std::list<SymbolMap<S_Object*> > tab;
+
+	/**
+	 * All the variables (in declaration order)
+	 */
+	std::vector<S_Var*> vars;
 };
 
 std::ostream& operator<<(std::ostream& os, const P_Scope& scope);

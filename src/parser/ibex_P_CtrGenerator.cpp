@@ -25,12 +25,9 @@ namespace ibex {
 
 namespace parser {
 
-P_CtrGenerator::P_CtrGenerator(std::stack<P_Scope>& scopes) : scopes(scopes) {
+P_CtrGenerator::P_CtrGenerator(P_Scope& scopes) : scopes(scopes) {
 	// probably not anymore useful since commit:
 
-	for (vector<const char*>::iterator it=scopes.top().cst.begin(); it!=scopes.top().cst.end(); it++) {
-		s.lock.insert(scopes.top().get_cst(*it),true);
-	}
 }
 
 std::vector<ExprCtr*> P_CtrGenerator::generate(const P_ConstraintList& ctrs) {
@@ -58,8 +55,9 @@ void P_CtrGenerator::visit(const P_OneConstraint& c) {
 	try {
 		// do not simplify the expression here because some ExprNode
 		// may be shared between different generated constraints
-		// (use of temporary expressions + symbolic constants?)
-		ExprCtr* e=new ExprCtr(ExprGenerator(scopes.top()).generate(c.expr),c.op);
+		// (use of temporary expressions or constants)
+		// The simplification will be done by the factory.
+		ExprCtr* e=new ExprCtr(ExprGenerator(scopes).generate(c.expr),c.op);
 		//cout << "[parser] generated ctr: " << *e << endl;
 		ctrs.push_back(e);
 	} catch(DimException& e) {
@@ -70,7 +68,7 @@ void P_CtrGenerator::visit(const P_OneConstraint& c) {
 void P_CtrGenerator::visit(const P_TmpSymbolDecl& tmp) {
 	// TODO: if the temporary symbol is never used,
 	// the generated expression is a memory leak
-	scopes.top().add_expr_tmp_symbol(tmp.symbol, &ExprGenerator(scopes.top()).generate(tmp.expr));
+	scopes.add_expr_tmp_symbol(tmp.symbol, &ExprGenerator(scopes).generate(tmp.expr));
 }
 
 void P_CtrGenerator::visit(const P_ConstraintList& list) {
@@ -86,9 +84,9 @@ void P_CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	int end=loop.last_value._2int();
 
 	for (int i=begin; i<=end; i++) {
-		scopes.push(scopes.top());
-		scopes.top().add_iterator(name);
-		scopes.top().set_iter_value(name,i);
+		scopes.push();
+		scopes.add_iterator(name);
+		scopes.set_iter_value(name,i);
 		visit(loop.ctrs);
 		scopes.pop();
 	}
@@ -96,7 +94,7 @@ void P_CtrGenerator::visit(const P_ConstraintLoop& loop) {
 
 void P_CtrGenerator::visit(const P_ThickEquality& eq) {
 	try {
-		const ExprNode& e=ExprGenerator(scopes.top()).generate(eq.expr);
+		const ExprNode& e=ExprGenerator(scopes).generate(eq.expr);
 		//cout << "[parser] generated ctr: " << *e << endl;
 		ctrs.push_back(new ExprCtr(e-eq.d.lb(),GEQ));
 		ctrs.push_back(new ExprCtr(e-eq.d.ub(),LEQ));

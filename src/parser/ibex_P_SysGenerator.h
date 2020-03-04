@@ -20,7 +20,7 @@ namespace parser {
 
 class P_SysGenerator {
 public:
-	P_SysGenerator(std::stack<P_Scope>& scopes);
+	P_SysGenerator(P_Scope& scopes);
 
 	void generate(P_Source& source, System& result);
 
@@ -31,7 +31,7 @@ private:
 	// temporary symbols, whence this structure.
 	void add_garbage(NodeMap<bool>& garbage, const ExprNode& e);
 
-	std::stack<P_Scope>& scopes;
+	P_Scope& scopes;
 };
 
 } // end namespace parser

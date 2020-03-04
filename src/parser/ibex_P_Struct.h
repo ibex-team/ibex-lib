@@ -39,15 +39,13 @@ void init_function_by_copy(Function& dest, const Function& src);
  */
 class P_Struct {
 public:
-	/**
-	 * The Minibex source
-	 */
-	P_Source source;
 
-	/*
-	 * The stack of all scopes
+	P_Struct();
+
+	/**
+	 * Get the current scope.
 	 */
-	std::stack<P_Scope> scopes;
+	P_Scope& scope();
 
 	/**
 	 * Delete source and all scopes.
@@ -62,11 +60,50 @@ public:
 	virtual void begin();
 
 	/**
+	 * Create a new scope for a function declaration
+	 */
+	void begin_function();
+
+	/**
 	 * End of parsing
 	 *
 	 * Generates the result.
 	 */
 	virtual void end();
+
+	/**
+	 * Cleanup the scope created for the function
+	 * and set the current scope to the global one.
+	 */
+	void end_function(const char* name, const P_ExprNode& y);
+
+	/**
+	 * The Minibex source
+	 */
+	P_Source source;
+
+protected:
+	/*
+	 * The stack of all scopes
+	 *
+	 * A bottom scope is automatically created and is
+	 * kept for both parsing and generation (the constants and functions
+	 * are shared by the two steps)
+	 *
+	 * note: other scopes are created for parsing the constraints block,
+	 * to store temporary variables and iterators.
+	 */
+	P_Scope scopes;
+
+	/**
+	 * Stack of scopes for function declaration;
+	 */
+	P_Scope* func_scope;
+
+	/**
+	 * Current stack of scopes.
+	 */
+	P_Scope* current_scope;
 };
 
 

@@ -36,7 +36,7 @@ class P_Source;
 
 class P_CtrGenerator {
 public:
-	P_CtrGenerator(std::stack<P_Scope>& scopes);
+	P_CtrGenerator(P_Scope& scopes);
 
 	std::vector<ExprCtr*> generate(const P_ConstraintList& ctrs);
 
@@ -48,9 +48,8 @@ public:
 	void visit(const P_ThickEquality& e);
 
 protected:
-	ExprSimplify s;
 	std::vector<ExprCtr*> ctrs;
-	std::stack<P_Scope>& scopes;
+	P_Scope& scopes;
 };
 
 } // end namespace parser

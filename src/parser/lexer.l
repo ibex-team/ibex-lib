@@ -97,23 +97,17 @@ using namespace ibex::parser;
                                  }
 [_a-zA-Z][_a-zA-Z0-9]*	         { ibexlval.str = (char*) malloc(strlen(ibextext)+1);
                                    strcpy(ibexlval.str,ibextext);
-                                   if (pstruct->scopes.empty())
-                                      // happens when the program starts by an identifier (an error). 
-  									  // The lexer tries to retreive this identifier from the scope, which has not
-  									  // been created yet -> seg fault
-  									  return TK_NEW_SYMBOL;
-  								   else 
-  								      try {
-  								        ExprGenericUnaryOp::get_eval(ibextext); 
-  								        return TK_UNARY_OP;
-  								      } catch(SyntaxError&) {
-  								        try {
-  								          ExprGenericBinaryOp::get_eval(ibextext); 
-  								          return TK_BINARY_OP;
-  								        } catch(SyntaxError&) {
-                                          return pstruct->scopes.top().token(ibextext);
-                                        }
-                                      }
+                                   try {
+                                     ExprGenericUnaryOp::get_eval(ibextext); 
+                                     return TK_UNARY_OP;
+                                   } catch(SyntaxError&) {
+                                     try {
+                                       ExprGenericBinaryOp::get_eval(ibextext); 
+                                       return TK_BINARY_OP;
+                                     } catch(SyntaxError&) {
+                                       return pstruct->scope().token(ibextext);
+                                     }
+                                   }
                                  }
 "{"[0-9]+"}"                     {
                                     // ------------- CHOCO variable ----------------
