@@ -12,9 +12,13 @@
 
 #include "TestParser.h"
 #include "ibex_System.h"
+#include "ibex_SystemFactory.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_CtcFwdBwd.h"
+#include "ibex_DefaultSolver.h"
+
 #include "Ponts30.h"
+
 #include <cstdio>
 
 using namespace std;
@@ -362,5 +366,49 @@ void TestParser::issue365() {
 	CPPUNIT_ASSERT(sys.f_ctrs.expr().size==7);
 }
 
+void TestParser::mutable_cst_1() {
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	Interval _c1(1);
+	IntervalVector _c2(2);
+	const ExprConstant& c1=ExprConstant::new_mutable(_c1);
+	const ExprConstant& c2=ExprConstant::new_mutable(_c2,true);
+	_c1=1; _c2[0]=2; _c2[1]=3;
+	SystemFactory fac;
+	fac.add_var(x,Interval(0,10));
+	const ExprCtr& ctr=(x-c1)*(x-c2[0])*(x-c2[1])=0;
+	fac.add_ctr(ctr);
+	System sys(fac);
+	DefaultSolver solver(sys);
+
+	_c1=4; _c2[0]=5; _c2[1]=6;
+	solver.solve(sys.box);
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(6));
+	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(5));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(4));
+
+	_c1=7; _c2[0]=8; _c2[1]=9;
+	solver.solve(sys.box);
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(9));
+	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(8));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(7));
+	cleanup(ctr.e,true);
+	delete &ctr;
+}
+
+void TestParser::mutable_cst_2() {
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	Interval _c(1);
+	const ExprConstant& c=ExprConstant::new_mutable(_c);
+	const ExprNode& y=c*x;
+
+	Function f(x,y);
+	_c=2;
+
+	CPPUNIT_ASSERT(f.gradient(IntervalVector(1,1))[0]==2);
+	CPPUNIT_ASSERT(f.jacobian(IntervalVector(1,1))[0][0]==2);
+	_c=3;
+	CPPUNIT_ASSERT(f.gradient(IntervalVector(1,1))[0]==3);
+	CPPUNIT_ASSERT(f.jacobian(IntervalVector(1,1))[0][0]==3);
+}
 
 } // end namespace

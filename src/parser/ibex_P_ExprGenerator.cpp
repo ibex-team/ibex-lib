@@ -109,7 +109,7 @@ public:
 			if (num_type!=OTHER)
 				throw SyntaxError("Unexpected infinity symbol \"oo\"");
 
-			((LabelConst*) this)->cst = &ExprConstant::new_(_domain, false);
+			((LabelConst*) this)->cst = &ExprConstant::new_(_domain);
 
 		} else {
 			cst = &scope->get_cst_node(name);
@@ -118,7 +118,9 @@ public:
 		return *cst;
 	}
 
-	virtual bool is_const() const { return true; }
+	virtual bool is_const() const {
+		return name==NULL || !scope->is_mutable_cst_symbol(name);
+	}
 
 	virtual const Domain& domain() const { return _domain; }
 

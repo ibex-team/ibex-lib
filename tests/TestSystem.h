@@ -43,6 +43,7 @@ public:
 	CPPUNIT_TEST(merge02);
 	CPPUNIT_TEST(merge03);
 	CPPUNIT_TEST(merge04);
+	CPPUNIT_TEST(mutable_cst);
 	CPPUNIT_TEST_SUITE_END();
 
 	void empty();
@@ -61,6 +62,7 @@ public:
 	void merge02();
 	void merge03();
 	void merge04();
+	void mutable_cst();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestSystem);

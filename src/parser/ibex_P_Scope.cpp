@@ -41,7 +41,8 @@ public:
 	/*
 	 * Initial constant creation
 	 *
-	 * Note: the domain is passed by copy and the future
+	 * --- Note for non-mutable constants: --
+	 * The domain is passed by copy and the future
 	 * node's domain will not be a reference to none of both:
 	 * all objects created during parsing can be safely deleted.
 	 *
@@ -50,7 +51,7 @@ public:
 	 * copy because the domain in argument is built (parsed
 	 * an generated) on the fly and will not remain in memory.
 	 */
-	S_Cst(const Domain& domain) : domain(domain), _node(NULL) { }
+	S_Cst(const Domain& domain, bool _mutable) : domain(domain, _mutable), is_mutable(_mutable), _node(NULL) { }
 
 	/*
 	 * Creates and return the expression node.
@@ -61,7 +62,12 @@ public:
 	 * all unused constants will have their node lost in memory).
 	 */
 	const ExprConstant& node() {
-		if (!_node) _node = &ExprConstant::new_(domain); // not a reference, see comment in constructor
+		if (!_node) {
+			if (is_mutable)
+				_node = &ExprConstant::new_mutable(domain);
+			else
+				_node = &ExprConstant::new_(domain); // not a reference, see comment in constructor
+		}
 		return *_node;
 	}
 
@@ -79,6 +85,8 @@ public:
 
 	Domain domain;
 
+	const bool is_mutable;
+
 private:
 
 	/**
@@ -88,7 +96,7 @@ private:
 	 * object (-> a function), so constants nodes must be re-created.
 	 * By default: set to NULL to avoid memory leaks.
 	 */
-	S_Cst(const S_Cst& c) : domain(c.domain), _node(NULL) { }
+	S_Cst(const S_Cst& c) : domain(c.domain, c.is_mutable), is_mutable(c.is_mutable), _node(NULL) { }
 
 	const ExprConstant* _node;
 
@@ -213,16 +221,9 @@ const P_Scope::S_Object* P_Scope::lookup(const char* id) const {
 	return ((P_Scope*) this)->lookup(id);
 }
 
-void P_Scope::add_cst(const char* id, const Domain& domain) {
+void P_Scope::add_cst(const char* id, const Domain& domain, bool is_mutable) {
 	//cout << "[parser] add cst " << id << "=" << domain << endl;
-	tab.front().insert_new(id, new S_Cst(domain));
-}
-
-void P_Scope::add_cst(const char* id, const Dim* dim, const Domain& dom) {
-	Domain tmp(*dim);
-	//cout << "[parser] add cst " << id << "=" << dom.dim << "<>" << *dim << endl;
-	init_symbol_domain(id, tmp, dom);
-	tab.front().insert_new(id, new S_Cst(tmp));
+	tab.front().insert_new(id, new S_Cst(domain, is_mutable));
 }
 
 void P_Scope::add_func(const char* id, Function* f) {
@@ -342,6 +343,11 @@ void P_Scope::set_iter_value(const char* id, int value) {
 
 bool P_Scope::is_cst_symbol(const char* id) const {
 	return lookup(id)->token()==TK_CONSTANT;
+}
+
+bool P_Scope::is_mutable_cst_symbol(const char* id) const {
+	const S_Object& s=*lookup(id);
+	return s.token()==TK_CONSTANT && ((const S_Cst&) s).domain.is_reference;
 }
 
 bool P_Scope::is_iter_symbol(const char* id) const {

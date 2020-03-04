@@ -345,7 +345,7 @@ bool ExprConstant::is_zero() const {
 }
 
 const ExprConstant& ExprConstant::copy() const {
-	return new_(value);
+	return is_mutable()? new_mutable(value) : new_(value);
 }
 
 ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim) :

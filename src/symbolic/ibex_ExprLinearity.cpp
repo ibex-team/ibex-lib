@@ -145,7 +145,8 @@ void ExprLinearity::visit(const ExprIndex& e) {
 }
 
 void ExprLinearity::visit(const ExprConstant& e) {
-	insert_coeff_and_check(e, build_cst(e.get()));
+	insert_coeff_and_check(e, build_cst(e.is_mutable()?
+			Domain(e.dim) /* (-oo,oo) */ : e.get()));
 }
 
 void ExprLinearity::visit(const ExprVector& e) {

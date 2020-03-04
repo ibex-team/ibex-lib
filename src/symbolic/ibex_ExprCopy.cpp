@@ -85,7 +85,7 @@ void ExprCopy::visit(const ExprIndex& i) {
 
 void ExprCopy::visit(const ExprSymbol& x) {
 	stringstream s;
-	s << "[ExprCopy] no destination symbol for " << x;
+	s << "[ExprCopy] no destination node for symbol" << x;
 	ibex_error(s.str().c_str());
 }
 

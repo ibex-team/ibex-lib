@@ -123,16 +123,21 @@ decl_cst_list : decl_cst
               ;
 
 decl_cst      : TK_NEW_SYMBOL dimension 
-                TK_EQU expr                     { pstruct->scope().add_cst($1, $2, $4->_2domain()); 
+                equ_or_in expr                  { Domain* d=new Domain(*$2);
+                                                  init_symbol_domain($1, *d, $4->_2domain());
+                                                  pstruct->scope().add_cst($1, *d, false); 
+                                                  delete d;
                                                   free($1); delete $2; delete $4; }
               | '*' TK_NEW_SYMBOL dimension 
-                TK_EQU expr                     { pstruct->scope().add_cst($2, $3, $5->_2domain()); 
+                equ_or_in expr                  { Domain* d=new Domain(*$3);
+                                                  init_symbol_domain($2, *d, $5->_2domain());
+                                                  pstruct->source.mutable_constants.insert_new($2,d);
+                                                  pstruct->scope().add_cst($2, *d, true); 
+                                                  // note: d will be deleted by ~System().
                                                   free($2); delete $3; delete $5; }
-                                                      
-              | TK_NEW_SYMBOL dimension 
-                TK_IN expr                      { pstruct->scope().add_cst($1, $2, $4->_2domain()); 
-                                                  free($1); delete $2; delete $4; }
               ;
+              
+equ_or_in     : TK_EQU | TK_IN ;
  
 decl_var_list : decl_var                             
               | decl_var_list ';' decl_var           

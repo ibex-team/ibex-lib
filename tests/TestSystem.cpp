@@ -15,6 +15,7 @@
 #include "ibex_SystemFactory.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_NormalizedSystem.h"
+#include "ibex_DefaultSolver.h"
 
 #include <sstream>
 
@@ -389,6 +390,29 @@ void TestSystem::merge04() {
 		CPPUNIT_ASSERT(sameExpr(sys3.ctrs[i].f.expr(),sys1.ctrs[i].f.expr()));
 	for (int i=0; i<sys2.nb_ctr; i++)
 		CPPUNIT_ASSERT(sameExpr(sys3.ctrs[sys1.nb_ctr+i].f.expr(),sys2.ctrs[i].f.expr()));
+}
+
+void TestSystem::mutable_cst() {
+	System sys(SRCDIR_TESTS "/minibex/mutable_cst.mbx");
+	sys.constant("a").i()=4;
+	sys.constant("b").v()[0]=5;
+	sys.constant("b").v()[1]=6;
+	cout << sys.f_ctrs.cf << endl;
+
+	DefaultSolver solver(sys);
+	solver.solve(sys.box);
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(6));
+	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(5));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(4));
+
+	sys.constant("a").i()=7;
+	sys.constant("b").v()[0]=8;
+	sys.constant("b").v()[1]=9;
+
+	solver.solve(sys.box);
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(9));
+	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(8));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(7));
 }
 
 } // end namespace

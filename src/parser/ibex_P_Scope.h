@@ -55,10 +55,7 @@ public:
 
 	/*------------- addition of new symbols in the current scope -----------*/
 	/** Add a constant */
-	void add_cst(const char* id, const Domain& domain);
-
-	/** Add a constant */
-	void add_cst(const char* id, const Dim* d, const Domain& dom);
+	void add_cst(const char* id, const Domain& domain, bool is_mutable);
 
 	/** Add a function. */
 	void add_func(const char* id, Function* f);
@@ -134,13 +131,16 @@ public:
 	 *    TK_CONSTANT:         symbol of a constant (from the "constants" block)
 	 *    TK_FUNC_SYMBOL:      name of a function declared in minibex.
 	 *    TK_EXPR_TMP_SYMBOL:  left-hand symbol in an expression assignment like expr=f(x)
-	 *    TK_ITERATOR:         name of an iterator in a "for" constraint loop
+	 *    TK_ITERATOR:         name of an iterator in a "for" constraint loop or "sum" expression
 	 */
 	int token(const char* id) const;
 	/*---------------------------------------------------------------------*/
 
-	/* Return if id is the symbol of a constant */
+	/* Return true if id is the symbol of a constant (mutable or not). */
 	bool is_cst_symbol(const char* id) const;
+
+	/* Return true if id is a mutable constant. */
+	bool is_mutable_cst_symbol(const char* id) const;
 
 	/* Return if id is the symbol of an interator */
 	bool is_iter_symbol(const char* id) const;

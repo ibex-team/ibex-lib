@@ -71,6 +71,10 @@ void P_SysGenerator::generate(P_Source& source, System& sys) {
 
 	sys.init(fac);
 
+	//================= add mutable constants =====================
+	sys.mutable_constants.import(source.mutable_constants);
+
+
 	// add the original variables in the garbage
 	// (in case some are not used)
 	for (int i=0;i<vars.size(); i++)

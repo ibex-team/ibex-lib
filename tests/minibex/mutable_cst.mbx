@@ -1,0 +1,11 @@
+constants
+* a = 1;
+* b[2] = (2;3);
+z = 0;
+
+variables
+ x in [0,10];
+
+constraints
+	(x-a)*(x-b(1))*(x-b(2))=z;
+end

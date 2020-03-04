@@ -20,12 +20,14 @@ namespace ibex {
 
 
 #ifdef _MSC_VER
-
+void ibex_error(const std::string& message);
 void ibex_error(const char*);
 void ibex_warning(const char*);
 void not_implemented(const char*);
 
 #else
+
+void ibex_error(const std::string&) __attribute__ ((noreturn));
 
 void ibex_error(const char*) __attribute__ ((noreturn));
 
