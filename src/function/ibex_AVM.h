@@ -310,24 +310,34 @@ inline void AVM::acos_fwd(int x, int y)           {
     finish_node(x, y);
 }
 inline void AVM::asin_fwd(int x, int y)           {
-    // if ((d[y].i()=asin(d[x].i())).is_empty()) throw EmptyBoxException();
-    not_implemented("Asin not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::asin(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::atan_fwd(int x, int y)           {
-    // d[y].i()=atan(d[x].i());
-    not_implemented("Atan not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::atan(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::acosh_fwd(int x, int y)          {
-    // if ((d[y].i()=acosh(d[x].i())).is_empty()) throw EmptyBoxException();
-    not_implemented("Acosh not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::acosh(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::asinh_fwd(int x, int y)          {
-    // d[y].i()=asinh(d[x].i());
-    not_implemented("Asinh not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::asinh(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::atanh_fwd(int x, int y)          {
-    // if ((d[y].i()=atanh(d[x].i())).is_empty()) throw EmptyBoxException();
-    not_implemented("Atanh not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::atanh(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::floor_fwd(int x, int y)          {
     setup_node(x, y);
