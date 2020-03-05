@@ -26,6 +26,7 @@ public:
     virtual AVMData* init(const ExprExp& e, AVMData&) override;
     virtual AVMData* init(const ExprLog& e, AVMData&) override;
     virtual AVMData* init(const ExprCos& e, AVMData&) override;
+    virtual AVMData* init(const ExprAcos& e, AVMData&) override;
     virtual AVMData* init(const ExprSin& e, AVMData&) override;
     virtual AVMData* init(const ExprTanh& e, AVMData&) override;
     virtual AVMData* init(const ExprAdd&, AVMData&, AVMData&) override;

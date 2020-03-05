@@ -304,8 +304,10 @@ inline void AVM::tanh_fwd(int x, int y)           {
     finish_node(x, y);
 }
 inline void AVM::acos_fwd(int x, int y)           {
-    // if ((d[y].i()=acos(d[x].i())).is_empty()) throw EmptyBoxException();
-    not_implemented("Acos not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::acos(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::asin_fwd(int x, int y)           {
     // if ((d[y].i()=asin(d[x].i())).is_empty()) throw EmptyBoxException();

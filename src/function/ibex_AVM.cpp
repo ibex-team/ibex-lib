@@ -29,8 +29,8 @@ AVM::~AVM() {
 LPSolver::Status AVM::minimize(const IntervalVector& box) {
     eval_.eval(box);
     f_.forward<decltype(*this)>(*this);
-    std::string filename = "lp" + std::to_string(solve_count++) + ".lp";
-    solver_->write_to_file(filename.c_str());
+    //std::string filename = "lp" + std::to_string(solve_count++) + ".lp";
+    //solver_->write_to_file(filename.c_str());
     return solver_->minimize();
 }
 
