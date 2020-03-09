@@ -186,16 +186,22 @@ inline void AVM::sub_fwd(int x1, int x2, int y)   {
     finish_node(x1, x2, y);
 }
 inline void AVM::div_fwd(int x1, int x2, int y)   {
-    // d[y].i()=d[x1].i()/d[x2].i();
-    not_implemented("Div not implemented for AVM");
+    setup_node(x1, x2, y);
+    ConvexEnvelope ce = convex_envelope::div_from_mul(d_[x1].i(), d_[x2].i(), d_[y].i());
+    load_envelope(ce);
+    finish_node(x1, x2, y);
 }
 inline void AVM::max_fwd(int x1, int x2, int y)   {
-    // d[y].i()=max(d[x1].i(),d[x2].i());
-    not_implemented("Max not implemented for AVM");
+    setup_node(x1, x2, y);
+    ConvexEnvelope ce = convex_envelope::max(d_[x1].i(), d_[x2].i());
+    load_envelope(ce);
+    finish_node(x1, x2, y);
 }
 inline void AVM::min_fwd(int x1, int x2, int y)   {
-    // d[y].i()=min(d[x1].i(),d[x2].i());
-    not_implemented("Min not implemented for AVM");
+    setup_node(x1, x2, y);
+    ConvexEnvelope ce = convex_envelope::max(d_[x1].i(), d_[x2].i());
+    load_envelope(ce);
+    finish_node(x1, x2, y);
 }
 inline void AVM::atan2_fwd(int x1, int x2, int y) {
     // d[y].i()=atan2(d[x1].i(),d[x2].i());
@@ -221,21 +227,26 @@ inline void AVM::minus_M_fwd(int x, int y)        {
     not_implemented("Minus_M not implemented for AVM");
 }
 inline void AVM::sign_fwd(int x, int y)           {
-    // d[y].i()=sign(d[x].i());
-    not_implemented("Sign not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::sign(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::abs_fwd(int x, int y)            {
-    // d[y].i()=abs(d[x].i());
-    not_implemented("Abs not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::abs(d_[x].i());
+    load_envelope(ce);
+    finish_node(x, y);
 }
 inline void AVM::power_fwd(int x, int y, int p)   {
-    // d[y].i()=pow(d[x].i(),p);
-    not_implemented("Power not implemented for AVM");
+    setup_node(x, y);
+    ConvexEnvelope ce = convex_envelope::power(d_[x].i(), p);
+    load_envelope(ce);
+    finish_node(x, y);
 }
 
 inline void AVM::sqr_fwd(int x, int y)            {
     // 0 >= x^2 = y >= lin
-    assert(avm_d_[y].lin_count >= 6);
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::sqr(d_[x].i());
     load_envelope(ce);

@@ -16,22 +16,28 @@ void CtcAVM::contract(IntervalVector& box) {
 }
 
 void CtcAVM::contract(IntervalVector& box, ContractContext& context) {
-    if(box.is_unbounded()) return;
+    if(box.is_unbounded()||box.is_empty()) return;
     Vector cost(nb_var, 0.0);
     for(int i = 0; i < nb_var; ++i) {
         cost[i] = 1;
         avm_->set_cost(cost);
         LPSolver::Status status = avm_->minimize(box);
-        // std::cout << status << std::endl;
+        std::cout << status << std::endl;
         if(status == LPSolver::Status::OptimalProved) {
             box[i] = Interval(avm_->minimum().lb(), box[i].ub());
+        } else if(status == LPSolver::Status::InfeasibleProved) {
+            box.set_empty();
+            return;
         }
         cost[i] = -1;
         avm_->set_cost(cost);
         status = avm_->minimize(box);
-        // std::cout << status << std::endl;
+        std::cout << status << std::endl;
         if(status == LPSolver::Status::OptimalProved) {
             box[i] = Interval(box[i].lb(), -avm_->minimum().lb());
+        } else if(status == LPSolver::Status::InfeasibleProved) {
+            box.set_empty();
+            return;
         }
         cost[i] = 0;
     }

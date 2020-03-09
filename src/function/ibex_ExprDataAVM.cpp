@@ -1,5 +1,5 @@
 #include "ibex_ExprDataAVM.h"
-
+#include "ibex_ConvexEnvelope.h"
 
 namespace ibex {
 
@@ -21,22 +21,30 @@ AVMData* ExprDataAVMFactory::init(const type& e, AVMData&, AVMData&) {\
     return create_data(d.size(), n); \
 }
 
+#define GET_MAX_LIN(name) convex_envelope::MAX_LIN_##name
 IMPL_FACT_0ARY(ExprSymbol, 0)
 IMPL_FACT_0ARY(ExprConstant, 0)
 
 //IMPL_FACT_UNARY(ExprIndex, 0);
-IMPL_FACT_UNARY(ExprMinus, 1)
-IMPL_FACT_UNARY(ExprSqr, 6)
-IMPL_FACT_UNARY(ExprSqrt, 4)
-IMPL_FACT_UNARY(ExprExp, 4)
-IMPL_FACT_UNARY(ExprLog, 4)
-IMPL_FACT_UNARY(ExprCos, 6)
-IMPL_FACT_UNARY(ExprAcos, 6);
-IMPL_FACT_UNARY(ExprSin, 6)
-IMPL_FACT_UNARY(ExprTanh, 6)
-IMPL_FACT_BINARY(ExprAdd, 1)
-IMPL_FACT_BINARY(ExprSub, 1)
-IMPL_FACT_BINARY(ExprMul, 6)
+IMPL_FACT_UNARY(ExprMinus, GET_MAX_LIN(int_mul))
+IMPL_FACT_UNARY(ExprSqr, GET_MAX_LIN(sqr))
+IMPL_FACT_UNARY(ExprSqrt, GET_MAX_LIN(sqrt))
+IMPL_FACT_UNARY(ExprExp, GET_MAX_LIN(exp))
+IMPL_FACT_UNARY(ExprLog, GET_MAX_LIN(log))
+IMPL_FACT_UNARY(ExprCos, GET_MAX_LIN(cos))
+IMPL_FACT_UNARY(ExprAcos, GET_MAX_LIN(acos))
+IMPL_FACT_UNARY(ExprSin, GET_MAX_LIN(sin))
+IMPL_FACT_UNARY(ExprSinh, GET_MAX_LIN(cosh))
+IMPL_FACT_UNARY(ExprCosh, GET_MAX_LIN(cosh))
+IMPL_FACT_UNARY(ExprTan, GET_MAX_LIN(tan))
+IMPL_FACT_UNARY(ExprTanh, GET_MAX_LIN(tanh))
+IMPL_FACT_UNARY(ExprPower, GET_MAX_LIN(power))
+IMPL_FACT_UNARY(ExprSign, GET_MAX_LIN(sign))
+IMPL_FACT_UNARY(ExprAbs, GET_MAX_LIN(abs))
+IMPL_FACT_BINARY(ExprAdd, GET_MAX_LIN(add))
+IMPL_FACT_BINARY(ExprSub, GET_MAX_LIN(sub))
+IMPL_FACT_BINARY(ExprMul, GET_MAX_LIN(mul))
+IMPL_FACT_BINARY(ExprDiv, GET_MAX_LIN(div_from_mul))
 
 #undef IMPL_FACT_UNARY
 #undef IMPL_FACT_BINARY

@@ -30,7 +30,7 @@ LPSolver::Status AVM::minimize(const IntervalVector& box) {
     eval_.eval(box);
     f_.forward<decltype(*this)>(*this);
     //std::string filename = "lp" + std::to_string(solve_count++) + ".lp";
-    //solver_->write_to_file(filename.c_str());
+    solver_->write_to_file("lp.lp");
     return solver_->minimize();
 }
 
@@ -83,6 +83,7 @@ void AVM::finish_node(int x, int y) {
     while(lin_ < avm_d_[y].end_lin_index) {
         solver_->set_coef(lin_, yvar_, 0);
         solver_->set_coef(lin_, xvar_, 0);
+        solver_->set_lhs_rhs(lin_, 0, 0);
         lin_++;
     }
 }
@@ -92,6 +93,7 @@ void AVM::finish_node(int x1, int x2, int y) {
         solver_->set_coef(lin_, yvar_, 0);
         solver_->set_coef(lin_, x1var_, 0);
         solver_->set_coef(lin_, x2var_, 0);
+        solver_->set_lhs_rhs(lin_, 0, 0);
         lin_++;
     }
 }
@@ -112,6 +114,7 @@ int AVM::node_index_to_first_lin(int index) const {
 }
 
 void AVM::load_envelope(const ConvexEnvelope& ce) {
+    std::cout << ce << std::endl;
     for(int i = 0; i < ce.nb_envelope(); ++i) {
         load_constraint(lin_++, ce[i]);
     }

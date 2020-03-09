@@ -104,11 +104,22 @@ static const Function secante_cos("x", "xp", "sin(x)*(x-xp) + cos(x) - cos(xp)")
 static const Function secante_sinh("x", "xp", "-cosh(x)*(x-xp) + sinh(x) - sinh(xp)");
 static const Function secante_tanh("x", "xp", "-1/cosh(x)^2*(x-xp) + tanh(x) - tanh(xp)");
 static const Function secante_atanh("x", "xp", "1/(x^2-1)*(x-xp) + atanh(x) - atanh(xp)");
-static const Function secante_tan("x", "xp", "1/cos(x)^2*(x-xp) + tan(x) - tan(xp)");
+static const Function secante_tan("x", "xp", "-1/cos(x)^2*(x-xp) + tan(x) - tan(xp)");
 static const Function secante_acos("x", "xp", "1/sqrt(1-x^2)*(x-xp) + acos(x) - acos(xp)");
 static const Function secante_atan("x", "xp", "-1/(1+x^2)*(x-xp) + atan(x) - atan(xp)");
 static const Function secante_asinh("x", "xp", "-1/sqrt(1+x^2)*(x-xp) + asinh(x) - asinh(xp)");
 static const Function secante_asin("x", "xp", "-1/(sqrt(1-x^2)*(x-xp) + asin(x) - asin(xp))");
+static const Function secante_power("x", "xp", "p", "-p*x^(p-1)*(x-xp) + x^p - xp^p");
+
+#define DEFINE_MAX_LIN_CONST(name, value) const int MAX_LIN_##name = value;
+
+DEFINE_MAX_LIN_CONST(CONCAVE, 4)
+DEFINE_MAX_LIN_CONST(CONVEX, 4)
+// Must be >= CONVEX
+DEFINE_MAX_LIN_CONST(CONCAVE_CONVEX, 4)
+DEFINE_MAX_LIN_CONST(CONVEX_CONCAVE, 4)
+
+DEFINE_MAX_LIN_CONST(add, 1)
 ConvexEnvelope add(const Interval& x1, const Interval& x2) {
     // y = x1 + x2
     ConvexEnvelope ce(2);
@@ -117,6 +128,7 @@ ConvexEnvelope add(const Interval& x1, const Interval& x2) {
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(sub, 1)
 ConvexEnvelope sub(const Interval& x1, const Interval& x2) {
     // y = x1 - x2
     ConvexEnvelope ce(2);
@@ -125,6 +137,7 @@ ConvexEnvelope sub(const Interval& x1, const Interval& x2) {
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(int_mul, 1)
 ConvexEnvelope int_mul(int a, const Interval& x) {
     // y = a x
     ConvexEnvelope ce(2);
@@ -133,16 +146,21 @@ ConvexEnvelope int_mul(int a, const Interval& x) {
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(mul, 4)
 ConvexEnvelope mul(const Interval& x1, const Interval& x2) {
     using LC = ConvexEnvelope::LinearConstraint;
     const Interval uu = Interval(x1.ub())*x2.ub();
-    const Interval ll = Interval(x1.lb())*x1.lb();
+    const Interval ll = Interval(x1.lb())*x2.lb();
     const Interval lu = Interval(x1.lb())*x2.ub();
     const Interval ul = Interval(x1.ub())*x2.lb();
-    LC lc1{-1, {x1.ub(), x2.ub()}, uu.ub(), CmpOp::LEQ};
-    LC lc2{-1, {x1.lb(), x2.lb()}, ll.ub(), CmpOp::LEQ};
-    LC lc3{1, {-x1.ub(), -x2.lb()}, -ul.lb(), CmpOp::LEQ};
-    LC lc4{1, {-x1.lb(), -x2.ub()}, -lu.lb(), CmpOp::LEQ};
+    // y >= x2u x1 + x1u x2 - x2u x1u
+    // y >= x2l x1 + x1l x2 - x2l x1l
+    // y <= x2u x1 + x1l x2 - x2u x1l
+    // y <= x2l x1 + x1u x2 - x2l x1u
+    LC lc1{-1, {x2.ub(), x1.ub()}, uu.ub(), CmpOp::LEQ};
+    LC lc2{-1, {x2.lb(), x1.lb()}, ll.ub(), CmpOp::LEQ};
+    LC lc3{1, {-x2.ub(), -x1.lb()}, -lu.lb(), CmpOp::LEQ};
+    LC lc4{1, {-x2.lb(), -x1.ub()}, -ul.lb(), CmpOp::LEQ};
     ConvexEnvelope ce(2);
     ce.add_linear_constraint(lc1);
     ce.add_linear_constraint(lc2);
@@ -151,12 +169,14 @@ ConvexEnvelope mul(const Interval& x1, const Interval& x2) {
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(sqr, MAX_LIN_CONVEX)
 ConvexEnvelope sqr(const Interval& x, int count) {
     auto func = [](const Interval& xpt) { return ibex::sqr(xpt); };
     auto deriv = [](const Interval& xpt) { return 2*xpt; };
     return convex_function(x, func, deriv);
 }
 
+DEFINE_MAX_LIN_CONST(sqrt, MAX_LIN_CONCAVE)
 ConvexEnvelope sqrt(const Interval& x, int count) {
     auto func = [](const Interval& xpt) { return ibex::sqrt(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./(2*xpt); };
@@ -167,12 +187,14 @@ ConvexEnvelope sqrt(const Interval& x, int count) {
     }
 }
 
+DEFINE_MAX_LIN_CONST(exp, MAX_LIN_CONVEX)
 ConvexEnvelope exp(const Interval& x, int count) {
     auto func = [](const Interval& xpt) { return ibex::exp(xpt); };
     auto deriv = [](const Interval& xpt) { return ibex::exp(xpt); };
     return convex_function(x, func, deriv);
 }
 
+DEFINE_MAX_LIN_CONST(log, MAX_LIN_CONCAVE)
 ConvexEnvelope log(const Interval& x, int count) {
     auto func = [](const Interval& xpt) { return ibex::log(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./xpt; };
@@ -183,29 +205,49 @@ ConvexEnvelope log(const Interval& x, int count) {
     }
 }
 
+DEFINE_MAX_LIN_CONST(cos, 8)
 ConvexEnvelope cos(const Interval& x) {
     ConvexEnvelope ce1 = cos_offset(x, Interval(0), false);
     ConvexEnvelope ce2 = cos_offset(x, Interval::pi(), true);
     ce1.merge_envelope(ce2);
+    ce1.add_linear_constraint(bound_node(CmpOp::LEQ, 1));
+    ce1.add_linear_constraint(bound_node(CmpOp::GEQ, -1));
     return ce1;
 }
 
+DEFINE_MAX_LIN_CONST(sin, 8)
 ConvexEnvelope sin(const Interval& x) {
     ConvexEnvelope ce1 = cos_offset(x, -Interval::half_pi(), false);
     ConvexEnvelope ce2 = cos_offset(x, Interval::half_pi(), true);
     ce1.merge_envelope(ce2);
+    ce1.add_linear_constraint(bound_node(CmpOp::LEQ, 1));
+    ce1.add_linear_constraint(bound_node(CmpOp::GEQ, -1));
     return ce1;
 }
 
+DEFINE_MAX_LIN_CONST(tan, 4)
 ConvexEnvelope tan(const Interval& x) {
     ConvexEnvelope ce(1);
-    if(ibex::tan(x).is_unbounded()) {
+    if(x.diam() > Interval::pi().lb() || ibex::tan(x) == Interval::all_reals()) {
         return ce;
     }
-    auto deriv = [](const Interval x) {
-        return -1./ibex::sqr(ibex::cos(x));
+    auto func = [](const Interval& xpt) {
+        return ibex::tan(xpt);
     };
-    const double xlb = x.lb();
+    auto deriv = [](const Interval& xpt) {
+        return 1./ibex::sqr(ibex::cos(xpt));
+    };
+    const Interval ql = ibex::floor(x.lb()/Interval::pi());
+    const Interval qu = ibex::floor(x.ub()/Interval::pi());
+    const Interval xlb_mod = x.lb() - ql*Interval::pi();
+    const Interval xub_mod = x.ub() - qu*Interval::pi();
+    ConvexConcaveProperties prop;
+    prop.vertical_lb_tangente = xlb_mod.overlaps(Interval::half_pi());
+    prop.vertical_ub_tangente = xub_mod.overlaps(Interval::half_pi());
+    Interval x_inflexion = (ql+1)*Interval::pi();
+    return concave_convex_function(x, func, deriv, secante_tan, x_inflexion.mid(), prop);
+
+    /*const double xlb = x.lb();
     const double xub = x.ub();
     const Interval xlb_mod = Interval(std::fmod(xlb, Interval::two_pi().lb()));
     const Interval xub_mod = Interval(std::fmod(xub, Interval::two_pi().lb()));
@@ -225,15 +267,17 @@ ConvexEnvelope tan(const Interval& x) {
         ce.add_linear_constraint(tangente_over(secante_right, ibex::tan(secante_right), deriv(secante_right)));
         ce.add_linear_constraint(tangente_over(xlb, ibex::tan(xlb), deriv(xlb)));
     }
-    return ce;
+    return ce;*/
 }
 
+DEFINE_MAX_LIN_CONST(tanh, MAX_LIN_CONVEX_CONCAVE)
 ConvexEnvelope tanh(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::tanh(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./ibex::sqr(ibex::cosh(xpt)); };
     return convex_concave_function(x, func, deriv, secante_tanh, 0, ConvexConcaveProperties());
 }
 
+DEFINE_MAX_LIN_CONST(atanh, MAX_LIN_CONCAVE_CONVEX)
 ConvexEnvelope atanh(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::atanh(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./(1-ibex::sqr(xpt)); };
@@ -249,6 +293,7 @@ ConvexEnvelope atanh(const Interval& x) {
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(acos, MAX_LIN_CONVEX_CONCAVE)
 ConvexEnvelope acos(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::acos(xpt); };
     auto deriv = [](const Interval& xpt) { return -1./ibex::sqrt(1-ibex::sqr(xpt)); };
@@ -264,6 +309,7 @@ ConvexEnvelope acos(const Interval& x) {
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(asin, MAX_LIN_CONCAVE_CONVEX)
 ConvexEnvelope asin(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::asin(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./ibex::sqrt(1-ibex::sqr(xpt)); };
@@ -279,47 +325,40 @@ ConvexEnvelope asin(const Interval& x) {
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(atan, MAX_LIN_CONVEX_CONCAVE)
 ConvexEnvelope atan(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::atan(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./(1+ibex::sqr(xpt)); };
     return convex_concave_function(x, func, deriv, secante_atan, 0, ConvexConcaveProperties());
 }
 
+DEFINE_MAX_LIN_CONST(sinh, MAX_LIN_CONCAVE_CONVEX)
 ConvexEnvelope sinh(const Interval& x) {
-    ConvexEnvelope ce(1);
-    auto deriv = [](const Interval x) {
-        return ibex::cosh(x);
+    auto func = [](const Interval& xpt) {
+        return ibex::sinh(xpt);
     };
-    const Interval xlb = x.lb();
-    const Interval xub = x.ub();
-    {
-        Interval secante_left;
-        bool b = find_secante(x.lb(), x.lb(), x.ub(), secante_sinh, secante_left);
-        ce.add_linear_constraint(tangente_over(secante_left, ibex::sinh(secante_left), deriv(secante_left)));
-        ce.add_linear_constraint(tangente_over(xub, ibex::sinh(xub), deriv(xub)));
-    }
-    {
-        Interval secante_right;
-        bool b = find_secante(x.ub(), x.lb(), x.ub(), secante_sinh, secante_right);
-        ce.add_linear_constraint(tangente_under(secante_right, ibex::sinh(secante_right), deriv(secante_right)));
-        ce.add_linear_constraint(tangente_under(xlb, ibex::sinh(xlb), deriv(xlb)));
-    }
-    return ce;
+    auto deriv = [](const Interval xpt) {
+        return ibex::cosh(xpt);
+    };
+    return concave_convex_function(x, func, deriv, secante_sinh, 0, ConvexConcaveProperties());
 }
 
+DEFINE_MAX_LIN_CONST(asinh, MAX_LIN_CONVEX_CONCAVE)
 ConvexEnvelope asinh(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::asinh(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./ibex::sqrt(1+ibex::sqr(xpt)); };
     return convex_concave_function(x, func, deriv, secante_asinh, 0, ConvexConcaveProperties());
 }
 
+DEFINE_MAX_LIN_CONST(cosh, MAX_LIN_CONVEX)
 ConvexEnvelope cosh(const Interval& x, int count) {
     auto func = [](const Interval& xpt) { return ibex::cosh(xpt); };
     auto deriv = [](const Interval& xpt) { return ibex::sinh(xpt); };
     return convex_function(x, func, deriv);
 }
 
-ConvexEnvelope acosh(const Interval& x, int count) {
+DEFINE_MAX_LIN_CONST(acosh, MAX_LIN_CONCAVE)
+ConvexEnvelope acosh(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::acosh(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./(ibex::sqrt(xpt-1)*ibex::sqrt(xpt+1)); };
     if(x.lb() <= 1) {
@@ -329,20 +368,28 @@ ConvexEnvelope acosh(const Interval& x, int count) {
     }
 }
 
+DEFINE_MAX_LIN_CONST(floor, 4)
 ConvexEnvelope floor(const Interval& x) {
     ConvexEnvelope ce(1);
     ce.add_linear_constraint(line_over(0, 0, 1, 1));
     ce.add_linear_constraint(line_under(0, -1, 1, 0));
+    ce.add_linear_constraint(bound_node(CmpOp::LEQ, ibex::floor(x.ub()).ub()));
+    ce.add_linear_constraint(bound_node(CmpOp::GEQ, ibex::floor(x.lb()).lb()));
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(ceil, 4)
 ConvexEnvelope ceil(const Interval& x) {
     ConvexEnvelope ce(1);
     ce.add_linear_constraint(line_over(-1, 0, 0, 1));
     ce.add_linear_constraint(line_under(-1, -1, 0, 0));
+    ce.add_linear_constraint(bound_node(CmpOp::LEQ, ibex::ceil(x.ub()).ub()));
+    ce.add_linear_constraint(bound_node(CmpOp::GEQ, ibex::ceil(x.lb()).lb()));
+
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(saw, 4)
 ConvexEnvelope saw(const Interval& x) {
     ConvexEnvelope ce(1);
     const Interval xlb(x.lb());
@@ -351,9 +398,12 @@ ConvexEnvelope saw(const Interval& x) {
     const Interval xub_value = ibex::saw(xub);
     ce.add_linear_constraint(line_over(xlb, xlb_value, ibex::ceil(xlb), 1));
     ce.add_linear_constraint(line_under(ibex::floor(xub), 0, xub, xub_value));
+    ce.add_linear_constraint(bound_node(CmpOp::LEQ, 1));
+    ce.add_linear_constraint(bound_node(CmpOp::GEQ, 0));
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(abs, 3)
 ConvexEnvelope abs(const Interval& x) {
     ConvexEnvelope ce(1);
     if(x.lb() >= 0) {
@@ -370,6 +420,7 @@ ConvexEnvelope abs(const Interval& x) {
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(sign, 4)
 ConvexEnvelope sign(const Interval& x) {
     ConvexEnvelope ce(1);
     if(x.ub() <= 0) {
@@ -391,21 +442,27 @@ ConvexEnvelope sign(const Interval& x) {
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(max, 2)
 ConvexEnvelope max(const Interval& x1, const Interval& x2) {
     // y >= max(x1.lb, x2.lb)
     // y <= max(x1.ub, x2.ub)
     ConvexEnvelope ce(2);
     const ConvexEnvelope::LinearConstraint lc{-1, {0, 0}, -std::max(x1.lb(), x2.lb()), CmpOp::LEQ};
-    const ConvexEnvelope::LinearConstraint lc{1, {0, 0}, std::max(x1.ub(), x2.ub()), CmpOp::LEQ};
+    const ConvexEnvelope::LinearConstraint lc2{1, {0, 0}, std::max(x1.ub(), x2.ub()), CmpOp::LEQ};
+    ce.add_linear_constraint(lc);
+    ce.add_linear_constraint(lc2);
     return ce;
 }
 
+DEFINE_MAX_LIN_CONST(min, 2)
 ConvexEnvelope min(const Interval& x1, const Interval& x2) {
     // y >= max(x1.lb, x2.lb)
     // y <= max(x1.ub, x2.ub)
     ConvexEnvelope ce(2);
     const ConvexEnvelope::LinearConstraint lc{-1, {0, 0}, -std::min(x1.lb(), x2.lb()), CmpOp::LEQ};
-    const ConvexEnvelope::LinearConstraint lc{1, {0, 0}, std::min(x1.ub(), x2.ub()), CmpOp::LEQ};
+    const ConvexEnvelope::LinearConstraint lc2{1, {0, 0}, std::min(x1.ub(), x2.ub()), CmpOp::LEQ};
+    ce.add_linear_constraint(lc);
+    ce.add_linear_constraint(lc2);
     return ce;
 }
 
@@ -415,76 +472,154 @@ ConvexEnvelope div(const Interval& x1, const Interval& x2) {
     // concave(y) = 1/(yL*yU)min (yu x−xl y+xl yl ,yl x−xu y+ xu yu )
 }
 
+DEFINE_MAX_LIN_CONST(div_from_mul, MAX_LIN_mul)
+ConvexEnvelope div_from_mul(const Interval& x1, const Interval& x2, const Interval& y) {
+    // y = x1/x2
+    // y x2 = x1 (x1' x2' = y')
+    using LC = ConvexEnvelope::LinearConstraint;
+    const ConvexEnvelope mul_ce = mul(y, x2);
+    ConvexEnvelope ce(2);
+    for(int i = 0; i < mul_ce.nb_envelope(); ++i) {
+        // y = x1', x2 = x2', x1 = y'
+        const LC& lc = mul_ce[i];
+        LC newlc{lc.x[0], {lc.y, lc.x[1]}, lc.rhs, lc.op};
+        ce.add_linear_constraint(newlc);
+    }
+
+    return ce;
+}
+
+class FncPower : public Fnc {
+private:
+    int p_;
+public:
+    FncPower(int p): Fnc(2, 1), p_(p) {}
+
+    Interval eval(const IntervalVector& box) const override {
+        const Interval& x = box[0];
+        const Interval& xp = box[1];
+        return -p_*ibex::pow(x, p_-1)*(x-xp) + ibex::pow(x, p_) - ibex::pow(xp, p_);
+    }
+
+    IntervalVector eval_vector(const IntervalVector& box, const BitSet& components) const override {
+        return eval(box);
+    }
+
+    void jacobian(const IntervalVector& box, IntervalMatrix& J, const BitSet& components, int v=-1) const override {
+        const Interval& x = box[0];
+        const Interval& xp = box[1];
+        //{-(-1 + p) p x^(-2 + p) (x - xp), p x^(-1 + p) - p xp^(-1 + p)}
+        if(components[0])
+            J[0] = -(p_-1)*p_*ibex::pow(x, p_-2)*(x-xp);
+        if(components[1])
+            J[1] = p_*(ibex::pow(x, p_-1) - ibex::pow(xp, p_-1));
+    }
+};
+
+DEFINE_MAX_LIN_CONST(power, MAX_LIN_CONCAVE_CONVEX)
+ConvexEnvelope power(const Interval& x, int p) {
+    auto func = [p](const Interval& xpt) {
+        return pow(xpt, p);
+    };
+    auto deriv = [p](const Interval& xpt) {
+        return p*pow(xpt, p-1);
+    };
+    if(p % 2 == 0) {
+        return convex_function(x, func, deriv);
+    } else {
+        const FncPower secante_pow(p);
+        auto ce = concave_convex_function(x, func, deriv, secante_pow, 0, ConvexConcaveProperties());
+        std::cout << ce << std::endl;
+        return ce;
+    }
+}
+
 ConvexEnvelope cos_offset(const Interval& x, const Interval& offset, bool negate) {
     double xlb = (x.lb() + offset).lb();
     double xub = (x.ub() + offset).ub();
     ConvexEnvelope ce(1);
-    auto secante_over = [&](Interval x_pt) {
-        double x_coef = ibex::sin(x_pt).ub();
-        double rhs = (ibex::cos(x_pt)+ibex::sin(x_pt)*x_pt - x_coef*offset).ub();
-        double y_coef = 1;
+    auto func = [](const Interval& xpt) { return ibex::cos(xpt); };
+    auto deriv = [](const Interval& xpt) { return -ibex::sin(xpt); };
+    auto local_tangente_over = [&](const Interval& x_pt, const Interval& x_value, const Interval& x_deriv) {
+        auto lc = tangente_over(x_pt, x_value, x_deriv);
+        lc.rhs = (lc.rhs - lc.x[0]*offset).ub();
         if(negate) {
-            y_coef = -1;
+            lc.y = -lc.y;
         }
-        const ConvexEnvelope::LinearConstraint lc{y_coef, {x_coef}, rhs, CmpOp::LEQ};
+        ce.add_linear_constraint(lc);
+    };
+    auto local_line_over = [&](const Interval& x_l, const Interval& x_u) {
+        auto lc = line_over(x_l, func(x_l), x_u, func(x_u));
+        lc.rhs = (lc.rhs - lc.x[0]*offset).ub();
+        if(negate) {
+            lc.y = -lc.y;
+        }
         ce.add_linear_constraint(lc);
     };
 
-    // TODO exact modulo
-    Interval xlb_mod = Interval(std::fmod(xlb, Interval::two_pi().lb()));
-    Interval xub_mod = Interval(std::fmod(xub, Interval::two_pi().lb()));
-    const Interval _3pi_over_2 = 3*Interval::half_pi();
-    Interval secante_left = xlb;
-    Interval secante_right = xub;
-    if(xlb_mod.lb() <= _3pi_over_2.ub()) {
-        const Interval search_left = xlb + _3pi_over_2 - xlb_mod;
-        const Interval search_right = xlb + Interval::two_pi() - xlb_mod;
-        bool b = find_secante(xlb, search_left.lb(), search_right.ub(), secante_cos, secante_left);
-        if(!b) secante_left = xlb;
+    const Interval ql = ibex::floor(xlb/Interval::two_pi());
+    const Interval qu = ibex::floor(xub/Interval::two_pi());
+    Interval secante_left, secante_right;
+    bool secante_left_found, secante_right_found;
+    Interval search_left = Interval::half_pi()*(3+4*ql);
+    Interval search_right = search_left+Interval::half_pi();
+    Interval search(search_left.lb(), search_right.ub());
+    if(search.is_superset(xlb)) {
+        secante_left_found = true;
+        secante_left = xlb;
+    } else {
+        secante_left_found = find_secante(xlb, search_left.lb(), search_right.ub(), secante_cos, secante_left, 10);
     }
-    if(xub_mod.ub() >= Interval::half_pi().lb()) {
-        const Interval search_left = xub - xub_mod;
-        const Interval search_right = xub + Interval::half_pi() - xub_mod;
-        bool b = find_secante(xub, search_left.lb(), search_right.ub(), secante_cos, secante_right);
-        if(!b) secante_right = xub;
+    search_left = Interval::two_pi()*qu;
+    search_right = search_left + Interval::half_pi();
+    search = Interval(search_left.lb(), search_right.ub());
+    if(search.is_superset(xub)) {
+        secante_right_found = true;
+        secante_right = xub;
+    } else {
+        secante_right_found = find_secante(xub, search_left.lb(), search_right.ub(), secante_cos, secante_right, 10);
     }
-    // std::cout << "secleft=" << secante_left << std::endl;
-    // std::cout << "secright=" << secante_right << std::endl;
-    const bool sec_left_gt_xub = secante_left.lb() >= xub;
-    const bool sec_right_lt_xlb = secante_right.ub() <= xlb;
-    if(sec_left_gt_xub && sec_right_lt_xlb) {
-        if(negate) {
-            ce.add_linear_constraint(line_under(xlb, ibex::cos(xlb), xub, ibex::cos(xub)));
+
+    if(secante_left_found && secante_right_found && secante_left.lb() >= xub && secante_right.ub() <= xlb) {
+        local_line_over(xlb, xub);
+    } else {
+        if(secante_left_found) {
+            local_tangente_over(secante_left, func(secante_left), deriv(secante_left));
         } else {
-            ce.add_linear_constraint(line_over(xlb, ibex::cos(xlb), xub, ibex::cos(xub)));
+            local_tangente_over(xlb, func(xlb), 1);
         }
-        return ce;
-    }
-    if(sec_right_lt_xlb) {
-        secante_over(xub);
-    } else {
-        secante_over(secante_right);
-    }
-    if(sec_left_gt_xub) {
-        secante_over(xlb);
-    } else {
-        secante_over(secante_left);
-    }
-    const Interval sec_itv = secante_left|secante_right;
-    if(!sec_itv.is_empty() && sec_itv.diam() <= Interval::pi().lb()) {
-        secante_over(sec_itv.mid());
+        if(secante_right_found) {
+            local_tangente_over(secante_right, func(secante_right), deriv(secante_right));
+        } else {
+            local_tangente_over(xub, func(xub), -1);
+        }
+        if(secante_left_found && secante_right_found) {
+            const Interval convex(
+                secante_left.lb() >= xub ? xlb : secante_left.lb(),
+                secante_right.ub() <= xlb ? xub : secante_right.ub()
+            );
+            if(!convex.is_empty()) {
+                const double mid = convex.mid();
+                local_tangente_over(mid, func(mid), deriv(mid));
+            }
+        }
     }
     return ce;
 }
 
-bool find_secante(double x_start, double search_lb, double search_ub, const Function& f, Interval& solution, int max_iter) {
+bool find_secante(double x_start, double search_lb, double search_ub, const Fnc& f, Interval& solution, int max_iter) {
     // TODO FIXME Faux, temporaire
     //Function cos_secante_point_ = Function("x", "xp", "sin(x)*(x-xp) + cos(x) - cos(xp)");
     // std::cout << "Contract "  << " in " << Interval(search_lb, search_ub) << std::endl;
-    Variable x;
-    const ExprConstant& cst = ExprConstant::new_scalar(x_start);
-    Function newf(x, f(x, cst));
-    IntervalVector search{{search_lb, search_ub}};
+    // std::cout << "x_start: " << x_start << std::endl;
+    // Variable x;
+    // const ExprConstant& cst = ExprConstant::new_scalar(x_start);
+    // const Function& asfunc = dynamic_cast<const Function&>(f);
+    // Function newf(x, asfunc(x, cst));
+    IntervalVector search{{search_lb, search_ub}, x_start};
+    BitSet bitset(2);
+    bitset.add(0);
+    VarSet varset(2, bitset, true);
     if(!search.is_bisectable()) {
         solution.set_empty();
         return false;
@@ -500,13 +635,14 @@ bool find_secante(double x_start, double search_lb, double search_ub, const Func
         search_queue.pop();
         IntervalVector unicity;
         IntervalVector existence;
-        bool b = inflating_newton(newf, search, existence, unicity);
+        bool b = inflating_newton(f, varset, search, existence, unicity);
         if(search.is_empty()) {
             continue;
         }
         if(b) {
             solution = existence[0];
-            return true;
+            std::cout << existence << std::endl;
+            return !solution.is_empty();
         } else if(search.is_bisectable()) {
             pair = search.bisect(0);
             search_queue.push(pair.first);
