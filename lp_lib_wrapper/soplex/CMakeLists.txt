@@ -25,8 +25,8 @@ else ()
   # The installation of soplex via CMake does not work for us (linking error
   # when compiling ibexsolve)
   ExternalProject_Add (libsoplex_3rd
-                        PREFIX soplex-3.1.1
-                        URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/soplex-3.1.1.tar
+                        PREFIX soplex-4.0.2
+                        URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/soplex-4.0.2.tar
                         CONFIGURE_COMMAND ""
                         BUILD_COMMAND make GMP=false ZLIB=false USRCPPFLAGS=-fPIC INSTALLDIR=<INSTALL_DIR> install
                         INSTALL_COMMAND ""

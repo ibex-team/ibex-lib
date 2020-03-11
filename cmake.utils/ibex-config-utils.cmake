@@ -365,7 +365,7 @@ function (IBEX_INIT_COMMON)
 
   set (CMAKE_INSTALL_INCLUDEDIR_3RD ${CMAKE_INSTALL_INCLUDEDIR}/ibex/3rd PARENT_SCOPE)
   set (CMAKE_INSTALL_LIBDIR_3RD ${CMAKE_INSTALL_LIBDIR}/ibex/3rd PARENT_SCOPE)
-  set (CMAKE_INSTALL_CONFIGCMAKE "${CMAKE_INSTALL_LIBDIR}/cmake" PARENT_SCOPE)
+  set (CMAKE_INSTALL_CONFIGCMAKE "share/ibex/cmake" PARENT_SCOPE)
 
   ##############################################################################
   # Print information (to ease debugging)
