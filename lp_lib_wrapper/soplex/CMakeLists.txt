@@ -24,9 +24,11 @@ else ()
   message (STATUS "Will install and use library Filib from 3rd/ subdirectory")
   # The installation of soplex via CMake does not work for us (linking error
   # when compiling ibexsolve)
+  set (SOPLEX_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/3rd/soplex-4.0.2.all.all.patch")
   ExternalProject_Add (libsoplex_3rd
                         PREFIX soplex-4.0.2
                         URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/soplex-4.0.2.tar
+                        PATCH_COMMAND patch -p1 -i ${SOPLEX_PATCH}
                         CONFIGURE_COMMAND ""
                         BUILD_COMMAND make GMP=false ZLIB=false USRCPPFLAGS=-fPIC INSTALLDIR=<INSTALL_DIR> install
                         INSTALL_COMMAND ""

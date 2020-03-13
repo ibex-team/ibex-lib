@@ -1,0 +1,13 @@
+--- soplex-4.0.2/make/make.install	2019-06-28 15:48:00.000000000 +0200
++++ soplex-4.0.2/make/make.install	2020-03-13 16:12:41.131803815 +0100
+@@ -29,7 +29,9 @@
+ ifneq ($(INSTALLDIR),)
+ 		@echo "-> install SoPlex headers into INSTALLDIR <$(INSTALLDIR)>"
+ 		@-install -m 755 -d $(INSTALLDIR)/$(INCLUDEDIR)/
+-		@-install -m 644 -p $(LIBSRCHEADER) $(INSTALLDIR)/$(INCLUDEDIR)/
++		@-install -m 755 -d $(INSTALLDIR)/$(INCLUDEDIR)/soplex/
++		@-install -m 644 -p $(SRCDIR)/soplex.h $(INSTALLDIR)/$(INCLUDEDIR)/
++		@-install -m 644 -p $(filter-out $(SRCDIR)/soplex.h,$(LIBSRCHEADER)) $(INSTALLDIR)/$(INCLUDEDIR)/soplex/
+ else
+ 		@echo "no installation directory specified - use make install INSTALLDIR=<dir>, e.g., make install INSTALLDIR=/usr/local"
+ endif
