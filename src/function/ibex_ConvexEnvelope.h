@@ -121,8 +121,14 @@ namespace convex_envelope {
 
     ConvexEnvelope cos_offset(const Interval& x, const Interval& offset, bool negate);
     bool find_secante(double x_start, double search_lb, double search_ub, const Fnc& f, Interval& solution, int max_iter=100);
+
+    enum class EnvelopeType {Over, Under};
+    enum class IntervalSide {Left, Right};
+
+    ConvexEnvelope::LinearConstraint tangente(const Interval& x, const Interval& x_value, const Interval& x_deriv, EnvelopeType env_type);
     ConvexEnvelope::LinearConstraint tangente_under(const Interval& x, const Interval& x_value, const Interval& x_deriv);
     ConvexEnvelope::LinearConstraint tangente_over(const Interval& x, const Interval& x_value, const Interval& x_deriv);
+    ConvexEnvelope::LinearConstraint line(const Interval& x1, const Interval& x_value1, const Interval& x2, const Interval& x_value2, EnvelopeType env_type);
     ConvexEnvelope::LinearConstraint line_under(const Interval& x1, const Interval& x_value1, const Interval& x2, const Interval& x_value2);
     ConvexEnvelope::LinearConstraint line_over(const Interval& x1, const Interval& x_value1, const Interval& x2, const Interval& x_value2);
     ConvexEnvelope::LinearConstraint bound(CmpOp op, double rhs);
@@ -133,6 +139,12 @@ namespace convex_envelope {
         bool infinite_ub = false;
         bool vertical_lb_tangente = false;
         bool vertical_ub_tangente = false;
+        Interval inflection_point = 0.0;
+        const Fnc& secante_func;
+
+        ConvexConcaveProperties(const Interval& inflection_point, const Fnc& secante_func)
+            : inflection_point(inflection_point), secante_func(secante_func) {
+        }
     };
 
     DECLARE_MAX_LIN_CONST(CONVEX)
@@ -207,84 +219,140 @@ namespace convex_envelope {
         }
     }
 
+    template<typename Func, typename Deriv>
+    ConvexEnvelope::LinearConstraint centered_form(const Interval& x, const Func& func, const Deriv& deriv, const EnvelopeType envelope_type, const IntervalSide side, bool vertical_tangente) {
+        if(vertical_tangente) {
+            if(side == IntervalSide::Left) {
+                return bound(CmpOp::GEQ, x.lb());
+            } else {
+                return bound(CmpOp::LEQ, x.ub());
+            }
+        }
+        double x_coef;
+        double rhs;
+        double y_coef;
+        Interval d = deriv(x);
+        double my_x;
+        double my_d;
+        if(envelope_type == EnvelopeType::Over) {
+            // Over y <= ...
+            switch(side) {
+            case IntervalSide::Left:
+                my_d = d.ub();
+                my_x = x.lb();
+                break;
+            case IntervalSide::Right:
+                my_d = d.lb();
+                my_x = x.ub();
+                break;
+            }
+            y_coef = 1;
+            x_coef = -my_d;
+            rhs = (func(x).ub() - Interval(my_d)*my_x).ub();
+        } else {
+            // Under y >= ...
+            switch(side) {
+            case IntervalSide::Left:
+                my_d = d.lb();
+                my_x = x.lb();
+                break;
+            case IntervalSide::Right:
+                my_d = d.ub();
+                my_x = x.ub();
+                break;
+            }
+            y_coef = -1;
+            x_coef = my_d;
+            rhs = -((func(x).lb() - Interval(my_d)*my_x).lb());
+        }
+        return ConvexEnvelope::LinearConstraint{y_coef, {x_coef}, rhs, CmpOp::LEQ};
+    }
+
+    template<typename Func, typename Deriv>
+    void left_part(const Interval& x, const Func& func, const Deriv& deriv, const ConvexConcaveProperties& prop, EnvelopeType env_type, ConvexEnvelope& ce) {
+        using LC = ConvexEnvelope::LinearConstraint;
+        if(prop.infinite_lb) {
+                ce.add_linear_constraint(bound(CmpOp::GEQ, x.lb()));
+        } else {
+            /* We need an upper bound not to large for the newton to effective.
+            Upper bound -x.lb() is an heuristic derived from tanh,
+            visually we see that the secante point in always less than -x.lb().
+            Since the other functions have some sort of symmetries around 0,
+            this seems to be a good choice: x.lb() and secante_left seem
+            to always meet at 0. Maybe TODO set ub for secante search for each function.
+            idem for the secante_right */
+            Interval secante_left;
+            bool secante_found = find_secante(x.lb(), (prop.inflection_point).ub(), (2*prop.inflection_point-x.lb()).lb(), prop.secante_func, secante_left);
+            // std::cout <<"secl" << secante_left << std::endl;
+            if(secante_found && secante_left.lb() >= x.ub()) {
+                const LC lc = line(x.lb(), func(x.lb()), x.ub(), func(x.ub()), env_type);
+                ce.add_linear_constraint(lc);
+            } else if(secante_found) {
+                const LC lc = tangente(secante_left, func(secante_left), deriv(secante_left), env_type);
+                ce.add_linear_constraint(lc);
+                if(secante_left.ub() <= x.ub()) {
+                    if(prop.vertical_ub_tangente) {
+                        ce.add_linear_constraint(bound(CmpOp::LEQ, x.ub()));
+                    } else {
+                        const LC lc2 = tangente(x.ub(), func(x.ub()), deriv(x.ub()), env_type);
+                        ce.add_linear_constraint(lc2);
+                    }
+                }
+                // + middle ?
+            } else {
+                // default to centered form
+                IntervalSide side = IntervalSide::Left;
+                ce.add_linear_constraint(centered_form(x, func, deriv, env_type, side, prop.vertical_lb_tangente));
+            }
+        }
+    }
+
+    template<typename Func, typename Deriv>
+    void right_part(const Interval& x, const Func& func, const Deriv& deriv, const ConvexConcaveProperties& prop, EnvelopeType env_type, ConvexEnvelope& ce) {
+        using LC = ConvexEnvelope::LinearConstraint;
+        if(prop.infinite_ub) {
+                ce.add_linear_constraint(bound(CmpOp::LEQ, x.ub()));
+        } else {
+            Interval secante_right;
+            bool secante_found = find_secante(x.ub(), (2*prop.inflection_point-x.ub()).ub(), prop.inflection_point.lb(), prop.secante_func, secante_right);
+            // std::cout <<"secr" << secante_right << std::endl;
+            if(secante_found && secante_right.ub() <= x.lb()) {
+                const LC lc = line(x.lb(), func(x.lb()), x.ub(), func(x.ub()), env_type);
+                ce.add_linear_constraint(lc);
+            } else if(secante_found) {
+                const LC lc = tangente(secante_right, func(secante_right), deriv(secante_right), env_type);
+                ce.add_linear_constraint(lc);
+                if(secante_right.lb() >= x.lb()) {
+                    if(prop.vertical_lb_tangente) {
+                        ce.add_linear_constraint(bound(CmpOp::GEQ, x.lb()));
+                    } else {
+                        const LC lc2 = tangente(x.lb(), func(x.lb()), deriv(x.lb()), env_type);
+                        ce.add_linear_constraint(lc2);
+                    }
+                }
+                // + middle ?
+            } else {
+                // default to centered form
+                IntervalSide side = IntervalSide::Right;
+                ce.add_linear_constraint(centered_form(x, func, deriv, env_type, side, prop.vertical_ub_tangente));
+            }
+        }
+    }
+
     DECLARE_MAX_LIN_CONST(CONVEX_CONCAVE)
     template<typename Func, typename Deriv>
     ConvexEnvelope convex_concave_function(
         const Interval& x, const Func& func, const Deriv& deriv,
-        const Fnc& secante_func,
-        const double x_inflexion, const ConvexConcaveProperties& prop) {
+        const ConvexConcaveProperties& prop) {
         // acos-like functions
-        using LC = ConvexEnvelope::LinearConstraint;
-        if(x.ub() <= x_inflexion) {
+        if(x.ub() <= prop.inflection_point.lb()) {
             return convex_function(x, func, deriv, prop.vertical_lb_tangente, prop.vertical_ub_tangente);
-        } else if(x.lb() >= x_inflexion) {
+        } else if(x.lb() >= prop.inflection_point.ub()) {
             return concave_function(x, func, deriv, prop.vertical_lb_tangente, prop.vertical_ub_tangente);
         } else {
             ConvexEnvelope ce(1);
-            if(prop.infinite_lb) {
-                ce.add_linear_constraint(bound(CmpOp::GEQ, x.lb()));
-            } else {
-                /* We need an upper bound not to large for the newton to effective.
-                Upper bound -x.lb() is an heuristic derived from tanh,
-                visually we see that the secante point in always less than -x.lb().
-                Since the other functions have some sort of symmetries around 0,
-                this seems to be a good choice: x.lb() and secante_left seem
-                to always meet at 0. Maybe TODO set ub for secante search for each function.
-                idem for the secante_right */
-                Interval secante_left;
-                bool secante_found = find_secante(x.lb(), x_inflexion, 2*x_inflexion-x.lb(), secante_func, secante_left);
-                // std::cout <<"secl" << secante_left << std::endl;
-                if(secante_found && secante_left.lb() >= x.ub()) {
-                    const LC lc = line_over(x.lb(), func(x.lb()), x.ub(), func(x.ub()));
-                    ce.add_linear_constraint(lc);
-                } else if(secante_found) {
-                    const LC lc = tangente_over(secante_left, func(secante_left), deriv(secante_left));
-                    ce.add_linear_constraint(lc);
-                    if(secante_left.ub() <= x.ub()) {
-                        if(prop.vertical_ub_tangente) {
-                            ce.add_linear_constraint(bound(CmpOp::LEQ, x.ub()));
-                        } else {
-                            const LC lc2 = tangente_over(x.ub(), func(x.ub()), deriv(x.ub()));
-                            ce.add_linear_constraint(lc2);
-                        }
-                    }
-                        // + middle ?
-                } else {
-                    // default to centered form
-                    const LC lc = tangente_over(x.lb(), func(x.lb()), deriv(x).lb());
-                    ce.add_linear_constraint(lc);
-                    ce.add_linear_constraint(bound_node(CmpOp::LEQ, func(x.ub()).ub()));
-                }
-            }
-            if(prop.infinite_ub) {
-                ce.add_linear_constraint(bound(CmpOp::LEQ, x.ub()));
-            } else {
-                Interval secante_right;
-                bool secante_found = find_secante(x.ub(), 2*x_inflexion-x.ub(), x_inflexion, secante_func, secante_right);
-                // std::cout <<"secr" << secante_right << std::endl;
-                if(secante_found && secante_right.ub() <= x.lb()) {
-                    const LC lc = line_under(x.lb(), func(x.lb()), x.ub(), func(x.ub()));
-                    ce.add_linear_constraint(lc);
-                } else if(secante_found) {
-                    const LC lc = tangente_under(secante_right, func(secante_right), deriv(secante_right));
-                    ce.add_linear_constraint(lc);
-                    if(secante_right.lb() >= x.lb()) {
-                        if(prop.vertical_lb_tangente) {
-                            ce.add_linear_constraint(bound(CmpOp::GEQ, x.lb()));
-                        } else {
-                            const LC lc2 = tangente_under(x.lb(), func(x.lb()), deriv(x.lb()));
-                            ce.add_linear_constraint(lc2);
-                        }
-                    }
-                    // + middle ?
-                } else {
-                    // default to centered form
-                    const LC lc = tangente_under(x.ub(), func(x.ub()), deriv(x).ub());
-                    ce.add_linear_constraint(lc);
-                    ce.add_linear_constraint(bound_node(CmpOp::GEQ, func(x.lb()).lb()));
-                }
-            }
-            std::cout << ce << std::endl;
+            left_part(x, func, deriv, prop, EnvelopeType::Over, ce);
+            right_part(x, func, deriv, prop, EnvelopeType::Under, ce);
             return ce;
         }
     }
@@ -293,83 +361,20 @@ namespace convex_envelope {
     template<typename Func, typename Deriv>
     ConvexEnvelope concave_convex_function(
         const Interval& x, const Func& func, const Deriv& deriv,
-        const Fnc& secante_func,
-        const Interval& x_inflexion, const ConvexConcaveProperties& prop) {
+        const ConvexConcaveProperties& prop) {
 
         using LC = ConvexEnvelope::LinearConstraint;
-        if(x.ub() <= x_inflexion.lb()) {
+        if(x.ub() <= prop.inflection_point.lb()) {
             return concave_function(x, func, deriv, prop.vertical_lb_tangente, prop.vertical_ub_tangente);
-        } else if(x.lb() >= x_inflexion.ub()) {
+        } else if(x.lb() >= prop.inflection_point.ub()) {
             return convex_function(x, func, deriv, prop.vertical_lb_tangente, prop.vertical_ub_tangente);
         } else {
             ConvexEnvelope ce(1);
-            if(prop.infinite_lb) {
-                ce.add_linear_constraint(bound(CmpOp::GEQ, x.lb()));
-            } else {
-                /* We need an upper bound not to large for the newton to effective.
-                Upper bound -x.lb() is an heuristic derived from tanh,
-                visually we see that the secante point in always less than -x.lb().
-                Since the other functions have some sort of symmetries around 0,
-                this seems to be a good choice: x.lb() and secante_left seem
-                to always meet at 0. Maybe TODO set ub for secante search for each function.
-                idem for the secante_right */
-                Interval secante_left;
-                bool secante_found = find_secante(x.lb(), x_inflexion.ub(), 2*x_inflexion.lb()-x.lb(), secante_func, secante_left);
-                // std::cout <<"secl" << secante_left << std::endl;
-                if(secante_found && secante_left.lb() >= x.ub()) {
-                    const LC lc = line_under(x.lb(), func(x.lb()), x.ub(), func(x.ub()));
-                    ce.add_linear_constraint(lc);
-                } else if(secante_found) {
-                    const LC lc = tangente_under(secante_left, func(secante_left), deriv(secante_left));
-                    ce.add_linear_constraint(lc);
-                    if(secante_left.ub() <= x.ub()) {
-                        if(prop.vertical_ub_tangente) {
-                            ce.add_linear_constraint(bound(CmpOp::LEQ, x.ub()));
-                        } else {
-                            const LC lc2 = tangente_under(x.ub(), func(x.ub()), deriv(x.ub()));
-                            ce.add_linear_constraint(lc2);
-                        }
-                    }
-                        // + middle ?
-                } else {
-                    // default to centered form
-                    const LC lc = tangente_under(x.lb(), func(x.lb()), deriv(x).lb());
-                    ce.add_linear_constraint(lc);
-                    ce.add_linear_constraint(bound_node(CmpOp::LEQ, func(x.ub()).ub()));
-                }
-            }
-            if(prop.infinite_ub) {
-                ce.add_linear_constraint(bound(CmpOp::LEQ, x.ub()));
-            } else {
-                Interval secante_right;
-                bool secante_found = find_secante(x.ub(), 2*x_inflexion.ub()-x.ub(), x_inflexion.lb(), secante_func, secante_right);
-                // std::cout <<"secr" << secante_right << std::endl;
-                if(secante_found && secante_right.ub() <= x.lb()) {
-                    const LC lc = line_over(x.lb(), func(x.lb()), x.ub(), func(x.ub()));
-                    ce.add_linear_constraint(lc);
-                } else if(secante_found) {
-                    const LC lc = tangente_over(secante_right, func(secante_right), deriv(secante_right));
-                    ce.add_linear_constraint(lc);
-                    if(secante_right.lb() >= x.lb()) {
-                        if(prop.vertical_lb_tangente) {
-                            ce.add_linear_constraint(bound(CmpOp::GEQ, x.lb()));
-                        } else {
-                            const LC lc2 = tangente_over(x.lb(), func(x.lb()), deriv(x.lb()));
-                            ce.add_linear_constraint(lc2);
-                        }
-                    }
-                    // + middle ?
-                } else {
-                    // default to centered form
-                    const LC lc = tangente_over(x.ub(), func(x.ub()), deriv(x).ub());
-                    ce.add_linear_constraint(lc);
-                    ce.add_linear_constraint(bound_node(CmpOp::GEQ, func(x.lb()).lb()));
-                }
-            }
+            left_part(x, func, deriv, prop, EnvelopeType::Under, ce);
+            right_part(x, func, deriv, prop, EnvelopeType::Over, ce);
             return ce;
         }
     }
-
 
 #undef DECLARE_MAX_LIN_CONST
 } // end namespace convex_envelope

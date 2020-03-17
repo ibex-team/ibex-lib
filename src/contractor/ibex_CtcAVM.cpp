@@ -29,6 +29,7 @@ void CtcAVM::contract(IntervalVector& box, ContractContext& context) {
             box.set_empty();
             return;
         }
+        std::cout << box << std::endl;
         cost[i] = -1;
         avm_->set_cost(cost);
         status = avm_->minimize(box);
@@ -39,6 +40,7 @@ void CtcAVM::contract(IntervalVector& box, ContractContext& context) {
             box.set_empty();
             return;
         }
+        std::cout << box << std::endl;
         cost[i] = 0;
     }
 }

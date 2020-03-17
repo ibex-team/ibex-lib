@@ -241,11 +241,11 @@ ConvexEnvelope tan(const Interval& x) {
     const Interval qu = ibex::floor(x.ub()/Interval::pi());
     const Interval xlb_mod = x.lb() - ql*Interval::pi();
     const Interval xub_mod = x.ub() - qu*Interval::pi();
-    ConvexConcaveProperties prop;
+    const Interval inflection_point = (ql+1)*Interval::pi();
+    ConvexConcaveProperties prop(inflection_point, secante_tan);
     prop.vertical_lb_tangente = xlb_mod.overlaps(Interval::half_pi());
     prop.vertical_ub_tangente = xub_mod.overlaps(Interval::half_pi());
-    Interval x_inflexion = (ql+1)*Interval::pi();
-    return concave_convex_function(x, func, deriv, secante_tan, x_inflexion.mid(), prop);
+    return concave_convex_function(x, func, deriv, prop);
 
     /*const double xlb = x.lb();
     const double xub = x.ub();
@@ -274,14 +274,14 @@ DEFINE_MAX_LIN_CONST(tanh, MAX_LIN_CONVEX_CONCAVE)
 ConvexEnvelope tanh(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::tanh(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./ibex::sqr(ibex::cosh(xpt)); };
-    return convex_concave_function(x, func, deriv, secante_tanh, 0, ConvexConcaveProperties());
+    return convex_concave_function(x, func, deriv, ConvexConcaveProperties(0, secante_tanh));
 }
 
 DEFINE_MAX_LIN_CONST(atanh, MAX_LIN_CONCAVE_CONVEX)
 ConvexEnvelope atanh(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::atanh(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./(1-ibex::sqr(xpt)); };
-    ConvexConcaveProperties prop;
+    ConvexConcaveProperties prop(0, secante_atanh);
     if(x.lb() <= -1.0) {
         prop.vertical_lb_tangente = true;
     }
@@ -289,7 +289,7 @@ ConvexEnvelope atanh(const Interval& x) {
         prop.vertical_ub_tangente = true;
     }
     Interval new_x(std::max(x.lb(), -1.0), std::min(x.ub(), 1.0));
-    ConvexEnvelope ce = concave_convex_function(new_x, func, deriv, secante_atanh, 0, prop);
+    ConvexEnvelope ce = concave_convex_function(new_x, func, deriv, prop);
     return ce;
 }
 
@@ -297,7 +297,7 @@ DEFINE_MAX_LIN_CONST(acos, MAX_LIN_CONVEX_CONCAVE)
 ConvexEnvelope acos(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::acos(xpt); };
     auto deriv = [](const Interval& xpt) { return -1./ibex::sqrt(1-ibex::sqr(xpt)); };
-    ConvexConcaveProperties prop;
+    ConvexConcaveProperties prop(0, secante_acos);
     if(x.lb() <= -1.0) {
         prop.vertical_lb_tangente = true;
     }
@@ -305,7 +305,7 @@ ConvexEnvelope acos(const Interval& x) {
         prop.vertical_ub_tangente = true;
     }
     Interval new_x(std::max(x.lb(), -1.0), std::min(x.ub(), 1.0));
-    ConvexEnvelope ce = convex_concave_function(new_x, func, deriv, secante_acos, 0, prop);
+    ConvexEnvelope ce = convex_concave_function(new_x, func, deriv, prop);
     return ce;
 }
 
@@ -313,7 +313,7 @@ DEFINE_MAX_LIN_CONST(asin, MAX_LIN_CONCAVE_CONVEX)
 ConvexEnvelope asin(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::asin(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./ibex::sqrt(1-ibex::sqr(xpt)); };
-    ConvexConcaveProperties prop;
+    ConvexConcaveProperties prop(0, secante_asin);
     if(x.lb() <= -1.0) {
         prop.vertical_lb_tangente = true;
     }
@@ -321,7 +321,7 @@ ConvexEnvelope asin(const Interval& x) {
         prop.vertical_ub_tangente = true;
     }
     Interval new_x(std::max(x.lb(), -1.0), std::min(x.ub(), 1.0));
-    ConvexEnvelope ce = concave_convex_function(new_x, func, deriv, secante_asin, 0, prop);
+    ConvexEnvelope ce = concave_convex_function(new_x, func, deriv, prop);
     return ce;
 }
 
@@ -329,7 +329,7 @@ DEFINE_MAX_LIN_CONST(atan, MAX_LIN_CONVEX_CONCAVE)
 ConvexEnvelope atan(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::atan(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./(1+ibex::sqr(xpt)); };
-    return convex_concave_function(x, func, deriv, secante_atan, 0, ConvexConcaveProperties());
+    return convex_concave_function(x, func, deriv, ConvexConcaveProperties(0, secante_atan));
 }
 
 DEFINE_MAX_LIN_CONST(sinh, MAX_LIN_CONCAVE_CONVEX)
@@ -340,14 +340,14 @@ ConvexEnvelope sinh(const Interval& x) {
     auto deriv = [](const Interval xpt) {
         return ibex::cosh(xpt);
     };
-    return concave_convex_function(x, func, deriv, secante_sinh, 0, ConvexConcaveProperties());
+    return concave_convex_function(x, func, deriv, ConvexConcaveProperties(0, secante_sinh));
 }
 
 DEFINE_MAX_LIN_CONST(asinh, MAX_LIN_CONVEX_CONCAVE)
 ConvexEnvelope asinh(const Interval& x) {
     auto func = [](const Interval& xpt) { return ibex::asinh(xpt); };
     auto deriv = [](const Interval& xpt) { return 1./ibex::sqrt(1+ibex::sqr(xpt)); };
-    return convex_concave_function(x, func, deriv, secante_asinh, 0, ConvexConcaveProperties());
+    return convex_concave_function(x, func, deriv, ConvexConcaveProperties(0, secante_asinh));
 }
 
 DEFINE_MAX_LIN_CONST(cosh, MAX_LIN_CONVEX)
@@ -528,7 +528,7 @@ ConvexEnvelope power(const Interval& x, int p) {
         return convex_function(x, func, deriv);
     } else {
         const FncPower secante_pow(p);
-        auto ce = concave_convex_function(x, func, deriv, secante_pow, 0, ConvexConcaveProperties());
+        auto ce = concave_convex_function(x, func, deriv, ConvexConcaveProperties(0, secante_pow));
         std::cout << ce << std::endl;
         return ce;
     }
@@ -633,15 +633,18 @@ bool find_secante(double x_start, double search_lb, double search_ub, const Fnc&
         iter++;
         search = search_queue.front();
         search_queue.pop();
+        // std::cout << "search: " << search << std::endl;
         IntervalVector unicity;
         IntervalVector existence;
         bool b = inflating_newton(f, varset, search, existence, unicity);
+        // std::cout << "after: " << search << std::endl;
         if(search.is_empty()) {
             continue;
         }
         if(b) {
             solution = existence[0];
-            std::cout << existence << std::endl;
+            // std::cout << "existence: " << existence << std::endl;
+            // std::cout << "unicity: " << unicity << std::endl;
             return !solution.is_empty();
         } else if(search.is_bisectable()) {
             pair = search.bisect(0);
@@ -656,6 +659,14 @@ bool find_secante(double x_start, double search_lb, double search_ub, const Fnc&
     ibex_error("Unreachable");
 }
 
+ConvexEnvelope::LinearConstraint tangente(const Interval& x_pt, const Interval& x_value, const Interval& x_deriv, EnvelopeType env_type) {
+    switch(env_type) {
+    case EnvelopeType::Over:
+        return tangente_over(x_pt, x_value, x_deriv);
+    case EnvelopeType::Under:
+        return tangente_under(x_pt, x_value, x_deriv);
+    }
+}
 
 ConvexEnvelope::LinearConstraint tangente_under(const Interval& x_pt, const Interval& x_value, const Interval& x_deriv) {
     // y >= x_value + x_deriv(x - x_pt)
@@ -671,6 +682,15 @@ ConvexEnvelope::LinearConstraint tangente_over(const Interval& x_pt, const Inter
     const double coef = -x_deriv.ub();
     const double rhs = (x_value -x_deriv*x_pt).ub();
     return ConvexEnvelope::LinearConstraint{1, {coef}, rhs, CmpOp::LEQ};
+}
+
+ConvexEnvelope::LinearConstraint line(const Interval& x1, const Interval& x_value1, const Interval& x2, const Interval& x_value2, EnvelopeType env_type) {
+    switch(env_type) {
+    case EnvelopeType::Over:
+        return line_over(x1, x_value1, x2, x_value2);
+    case EnvelopeType::Under:
+        return line_under(x1, x_value1, x2, x_value2);
+    }
 }
 
 ConvexEnvelope::LinearConstraint line_under(const Interval& x1, const Interval& y1, const Interval& x2, const Interval& y2) {
