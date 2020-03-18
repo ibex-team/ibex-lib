@@ -414,3 +414,25 @@ function (IBEX_INIT_COMMON)
   endif ()
 
 endfunction ()
+
+################################################################################
+################################################################################
+################################################################################
+# To be used by plugin, target Ibex::ibex should exist
+# return 1 if an Linear Programming library was used when Ibex was compiled
+# else return 0
+function (IBEX_CHECK_HAVE_LP_LIB resultvar)
+  include (CheckCXXSymbolExists)
+  set (_bak ${CMAKE_REQUIRED_INCLUDES}) # backup
+  get_target_property (_incs Ibex::ibex INTERFACE_INCLUDE_DIRECTORIES)
+  set (CMAKE_REQUIRED_INCLUDES "${_incs}")
+  set (symbol "__IBEX_NO_LP_SOLVER__")
+  set (header "ibex_LPLibWrapper.h")
+  CHECK_CXX_SYMBOL_EXISTS (${symbol} ${header} HAVE_NO_LP_LIB)
+  if (HAVE_NO_LP_LIB)
+    set (${resultvar} 0 PARENT_SCOPE)
+  else ()
+    set (${resultvar} 1 PARENT_SCOPE)
+  endif ()
+  set (CMAKE_REQUIRED_INCLUDES "${_bak}") # restore backup
+endfunction ()
