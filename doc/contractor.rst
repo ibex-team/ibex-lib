@@ -120,7 +120,7 @@ We present in this chapter the basic or "numerical" contractors (built from a co
 Forward-Backward
 ------------------------------
 
-Forward-	backward (also known as HC4Revise) is a classical algorithm in constraint programming for 
+Forward-backward (also known as HC4Revise) is a classical algorithm in constraint programming for 
 contracting quickly with respect to an equality or inequality. See, e.g.,
 :ref:`[Benhamou & Granvilliers 2006] <Benhamou06>`, :ref:`[Benhamou et al. 1999] <Benhamou99>`,
 :ref:`[Collavizza 1998] <Collavizza98>`. However, the more occurrences of variables in the expression
