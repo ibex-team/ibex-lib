@@ -80,7 +80,7 @@ On Ubuntu, you can install all you need with::
 Configuration options
 ==============================	
 
-``cmake install`` supports the following projet-specific options:
+``cmake`` supports the following options:
                     
 ======================  ======================================================================================
 Option					Description
@@ -89,7 +89,9 @@ MAKE_INSTALL_PREFIX     Ex: ``-DCMAKE_INSTALL_PREFIX=$HOME``
                          
                         Set the folder where Ibex must be installed (by default, ``/usr/local`` under Linux).
 
-INTERVAL_LIB            Set the underlying interval library. Ex: ``-DINTERVAL_LIB=filib``.
+INTERVAL_LIB            Ex: ``-DINTERVAL_LIB=filib``
+                        
+                        Set the underlying interval library.
 
                         Possible values are either ``gaol``, ``filib`` or ``direct``. Default is ``gaol''.  
                         The ``direct`` library is a simple non-rigorous interval arithmetic, designed 
@@ -98,7 +100,9 @@ INTERVAL_LIB            Set the underlying interval library. Ex: ``-DINTERVAL_LI
 						
                         **TODO**: ``direct`` mode.
                        
-LP_LIB                  Set the linear programming library. Ex: ``-DLP_LIB=soplex``. 
+LP_LIB                  Ex: ``-DLP_LIB=soplex``
+                        
+                        Set the linear programming library. 
 
                         Possible values are either ``soplex``, ``cplex`` or ``none``. Default is ``none``. 
                         **TODO**: ``cplex``.
@@ -286,7 +290,33 @@ Plugins
 
 *(to be completed)*
 
-See the current list of available plugins in the `download page of Ibex <http://www.ibex-lib.org/download>`_.
+The same steps must be done to compile a plugin. See the current list of available plugins in the `download page of Ibex <http://www.ibex-lib.org/download>`_.
+
+
+We assume here that the plugin to be installed is ibex-optim::
+
+  ~/Ibex/ibex-optim$
+  ~/Ibex/ibex-optim$ mkdir build
+  ~/Ibex/ibex-optim$ cd build
+  ~/Ibex/ibex-optim$ cmake ..
+  ~/Ibex/ibex-optim$ make
+  ~/Ibex/ibex-optim$ sudo make install
+  
+The ``MAKE_INSTALL_PREFIX`` option allows to install the plugin locally, ex::
+
+  ~/Ibex/ibex-optim$ cmake .. -DMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim
+
+In this case the ``sudo`` before ``make install`` is unecessary.
+
+If Ibex has been installed in a local folder, say ``~/Ibex/ibex-2.8.7`` you need to indicate this 
+path using the ``CMAKE_PREFIX_PATH`` option::
+
+  ~/Ibex/ibex-optim$ cmake .. -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7
+  
+Of course, you can combine both::
+
+	~/Ibex/ibex-optim$ cmake .. -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 -DMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim
+
 
 =======================================
 Running unit tests
