@@ -10,8 +10,8 @@ set (IBEX_URL "http://www.ibex-lib.org/")
 ################################################################################
 # Add cmake.utils to the list of CMAKE_MODULE_PATH
 ################################################################################
-set (MODULE_DIR "cmake.utils")
-list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_DIR}")
+set (MODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake.utils")
+list (APPEND CMAKE_MODULE_PATH "${MODULE_DIR}")
 
 ################################################################################
 # Run common init function and install the module so plugins can use it
@@ -19,8 +19,6 @@ list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_DIR}")
 message (STATUS "Configuring Ibex ${IBEX_VERSION}")
 include (ibex-config-utils)
 ibex_init_common ()
-install (FILES "${MODULE_DIR}/ibex-config-utils.cmake"
-                    DESTINATION ${CMAKE_INSTALL_CONFIGCMAKE} COMPONENT devtools)
 
 ################################################################################
 # Configure the libraries for interval arithmetic and linear programming
@@ -48,6 +46,16 @@ add_make_target_for_ctest (check)
 # TODO benchs
 ################################################################################
 #add_subdirectory (benchs)
+
+################################################################################
+# We add this file last in the hope that the install script will run it last.
+# Specifically, we want this to be run after the line
+# install (EXPORT ibex...
+# from src/CMakeLists.txt because this line can, in some cases, remove files
+# matching ${CMAKE_INSTALL_CONFIGCMAKE}/ibex-config-*.cmake even if they were
+# just installed.
+################################################################################
+add_subdirectory (install)
 
 ################################################################################
 # archives and packages

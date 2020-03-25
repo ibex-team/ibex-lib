@@ -241,7 +241,7 @@ define_property (TARGET PROPERTY IMPORTED_PKG_LIBS
                   BRIEF_DOCS "Libs for pkg-config file"
                   FULL_DOCS "String to add to 'Libs:' in pkg-config file")
 
-function (CREATE_TARGET_IMPORT_AND_EXPORT libname libabspath)
+function (CREATE_TARGET_IMPORT_AND_EXPORT libname libabspath cfgfilename_var)
   set (opt NO_EXPORT INSTALL)
   set (oneArgs NAMESPACE TARGET_NAME COMPONENT)
   set (multiArgs INCLUDE_DIRECTORIES LINK_LIBRARIES COMPILE_OPTIONS DEPENDS)
@@ -346,8 +346,8 @@ set_target_properties (${target} PROPERTIES INTERFACE_COMPILE_OPTIONS \"${_prop}
 
     file (GENERATE OUTPUT ${CFG_FILENAME} CONTENT "${CFG_CONTENT}
 ")
-    install (FILES ${CFG_FILENAME} DESTINATION ${CMAKE_INSTALL_CONFIGCMAKE}
-                                   COMPONENT devtools)
+    #
+    set (${cfgfilename_var} "${CFG_FILENAME}" PARENT_SCOPE)
   endif ()
 endfunction ()
 

@@ -18,7 +18,8 @@ find_header_custom (SOPLEX "soplex.h" PATHS "${SOPLEX_DIR}")
 find_library_custom (SOPLEX "soplex" PATHS "${SOPLEX_DIR}")
 
 if (SOPLEX_INCDIR AND SOPLEX_LIB)
-  create_target_import_and_export (soplex ${SOPLEX_LIB} NAMESPACE Ibex::
+  create_target_import_and_export (soplex ${SOPLEX_LIB} SOPLEX_EXPORTFILE
+                                          NAMESPACE Ibex::
                                           INCLUDE_DIRECTORIES ${SOPLEX_INCDIR})
 else ()
   message (STATUS "Will install and use library Filib from 3rd/ subdirectory")
@@ -52,9 +53,13 @@ else ()
 
   # 
   set (_incdir $<BUILD_INTERFACE:${SOPLEX_INCDIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR_3RD}>)
-  create_target_import_and_export (soplex ${SOPLEX_LIB} INSTALL NAMESPACE Ibex::
+  create_target_import_and_export (soplex ${SOPLEX_LIB} SOPLEX_EXPORTFILE
+                                        INSTALL NAMESPACE Ibex::
                                         INCLUDE_DIRECTORIES ${_incdir}
                                         COMPONENT devtools
                                         DEPENDS libsoplex_3rd)
   unset (INSTALL_DIR)
 endif ()
+
+list (APPEND EXPORTFILES "${SOPLEX_EXPORTFILE}")
+set (EXPORTFILES "${EXPORTFILES}" PARENT_SCOPE)
