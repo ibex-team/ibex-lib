@@ -20,7 +20,8 @@ find_library_custom (MATHLIB "ultim" PATHS "${MATHLIB_DIR}" "${GAOL_DIR}")
 
 if (MATHLIB_INCDIR AND MATHLIB_LIB)
   get_filename_component (MATHLIB_LIBDIR "${MATHLIB_LIB}" DIRECTORY)
-  create_target_import_and_export (ultim ${MATHLIB_LIB} NAMESPACE Ibex::
+  create_target_import_and_export (ultim ${MATHLIB_LIB} MATHLIB_EXPORTFILE
+                                        NAMESPACE Ibex::
                                         INCLUDE_DIRECTORIES ${MATHLIB_INCDIR})
 else()
   message (STATUS "Will install and use mathlib from 3rd/ subdirectory")
@@ -50,7 +51,8 @@ else()
 
   #
   set (_incdir $<BUILD_INTERFACE:${MATHLIB_INCDIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR_3RD}>)
-  create_target_import_and_export (ultim ${MATHLIB_LIB} INSTALL NAMESPACE Ibex::
+  create_target_import_and_export (ultim ${MATHLIB_LIB} MATHLIB_EXPORTFILE
+                                                INSTALL NAMESPACE Ibex::
                                                 INCLUDE_DIRECTORIES ${_incdir}
                                                 COMPONENT devtools
                                                 DEPENDS libultim_3rd)
@@ -75,13 +77,15 @@ if (COMPILER_SUPPORTS_WNO_DEPRECATED)
 endif()
 
 if (GAOL_INCDIR AND GAOL_LIB AND GDTOA_LIB)
-  create_target_import_and_export (gdtoa ${GDTOA_LIB} NAMESPACE Ibex::
-                                ${gaol_compile_option}
-                                INCLUDE_DIRECTORIES ${GAOL_INCDIR})
-  create_target_import_and_export (gaol ${GAOL_LIB} NAMESPACE Ibex::
-                                ${gaol_compile_option}
-                                INCLUDE_DIRECTORIES ${GAOL_INCDIR}
-                                LINK_LIBRARIES Ibex::gdtoa Ibex::ultim)
+  create_target_import_and_export (gdtoa ${GDTOA_LIB} GDTOA_EXPORTFILE
+                                    NAMESPACE Ibex::
+                                    ${gaol_compile_option}
+                                    INCLUDE_DIRECTORIES ${GAOL_INCDIR})
+  create_target_import_and_export (gaol ${GAOL_LIB} GAOL_EXPORTFILE
+                                    NAMESPACE Ibex::
+                                    ${gaol_compile_option}
+                                    INCLUDE_DIRECTORIES ${GAOL_INCDIR}
+                                    LINK_LIBRARIES Ibex::gdtoa Ibex::ultim)
 else ()
   message (STATUS "Will install and use library gaol from 3rd/ subdirectory")
   if (TARGET libultim_3rd)
@@ -127,16 +131,21 @@ else ()
 
   #
   set (_incdir $<BUILD_INTERFACE:${_incdir}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR_3RD}>)
-  create_target_import_and_export (gdtoa ${GDTOA_LIB} INSTALL NAMESPACE Ibex::
+  create_target_import_and_export (gdtoa ${GDTOA_LIB} GDTOA_EXPORTFILE INSTALL
+                                    NAMESPACE Ibex::
                                     ${gaol_compile_option}
                                     INCLUDE_DIRECTORIES ${_incdir}
                                     COMPONENT devtools
                                     DEPENDS libgaol_3rd)
-  create_target_import_and_export (gaol ${GAOL_LIB} INSTALL NAMESPACE Ibex::
-                                ${gaol_compile_option}
-                                COMPONENT devtools
-                                INCLUDE_DIRECTORIES ${_incdir}
-                                LINK_LIBRARIES Ibex::gdtoa Ibex::ultim
-                                DEPENDS libgaol_3rd)
+  create_target_import_and_export (gaol ${GAOL_LIB} GAOL_EXPORTFILE INSTALL
+                                    NAMESPACE Ibex::
+                                    ${gaol_compile_option}
+                                    COMPONENT devtools
+                                    INCLUDE_DIRECTORIES ${_incdir}
+                                    LINK_LIBRARIES Ibex::gdtoa Ibex::ultim
+                                    DEPENDS libgaol_3rd)
   unset (INSTALL_DIR)
 endif ()
+
+list (APPEND EXPORTFILES "${MATHLIB_EXPORTFILE}" "${GDTOA_EXPORTFILE}" "${GAOL_EXPORTFILE}")
+set (EXPORTFILES "${EXPORTFILES}" PARENT_SCOPE)
