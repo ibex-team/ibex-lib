@@ -19,6 +19,8 @@ list (APPEND CMAKE_MODULE_PATH "${MODULE_DIR}")
 message (STATUS "Configuring Ibex ${IBEX_VERSION}")
 include (ibex-config-utils)
 ibex_init_common ()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC"   )
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC"   )
 
 ################################################################################
 # Configure the libraries for interval arithmetic and linear programming

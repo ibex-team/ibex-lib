@@ -50,4 +50,5 @@ doc/_build
 **/examples/*
 !**/examples/*cpp
 !**/examples/makefile
+build*/**
 
