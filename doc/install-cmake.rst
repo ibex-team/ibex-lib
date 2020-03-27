@@ -93,7 +93,7 @@ INTERVAL_LIB            Ex: ``-DINTERVAL_LIB=filib``
                         
                         Set the underlying interval library.
 
-                        Possible values are either ``gaol``, ``filib`` or ``direct``. Default is ``gaol''.  
+                        Possible values are either ``gaol``, ``filib`` or ``direct``. Default is ``gaol``.  
                         The ``direct`` library is a simple non-rigorous interval arithmetic, designed 
                         essentially for embedded systems with specific processor architectures that do not 
                         support rounding modes.
@@ -150,6 +150,8 @@ MATHLIB_DIR             Ex: ``-DINTERVAL_LIB=goal -DMATHLIB_DIR=$HOME/matlib``
                         Note that the plugin archive embeds a version of Gaol so it is not necessary to have 
                         Goal already installed on your system. Default value is "" (means: use embedded version).
 					
+                        Only to be used with ``-DINTERVAL_LIB=goal``.
+                        
 FILIB_DIR               Ex: ``-DINTERVAL_LIB=filib -DFILIB_DIR=$HOME/filib``
 
                         Set the path of Filib when using Ibex with your own version of Filib. 
