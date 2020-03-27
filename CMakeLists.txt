@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.0.2)
 # CMake doc can be found at https://cmake.org/cmake/help/v3.0/
 
-message (WARNING "CMake support is still experimental, use waf to build Ibex")
+message (WARNING "CMake support is in beta, please report all bugs to https://github.com/ibex-team/ibex-lib/issues/")
 
 project (IBEX VERSION 2.8.6 LANGUAGES CXX)
 set (IBEX_DESCRIPTION "A C++ library for interval-based algorithm design")
