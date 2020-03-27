@@ -40,14 +40,14 @@ Save the archive ``ibex-2.8.7.tar.gz`` in some ``Ibex`` folder and::
   ~/Ibex$ tar xvfz ibex-2.8.7.tar.gz 
   ~/Ibex$ cd ibex-2.8.7 
   ~/Ibex/ibex-2.8.7$ mkdir build
-  ~/Ibex/ibex-2.8.7$ cd build
-  ~/Ibex/ibex-2.8.7$ cmake ..
-  ~/Ibex/ibex-2.8.7$ make
-  ~/Ibex/ibex-2.8.7$ sudo make install
+  ~/Ibex/ibex-2.8.7/build$ cd build
+  ~/Ibex/ibex-2.8.7/build$ cmake ..
+  ~/Ibex/ibex-2.8.7/build$ make
+  ~/Ibex/ibex-2.8.7/build$ sudo make install
       
 If you want to install Ibex in a local folder, use ``-DCMAKE_INTSALL_PREFIX``, ex::
 
-	~/Ibex/ibex-2.8.7$ cmake .. -DCMAKE_INSTALL_PREFIX=$HOME
+	~/Ibex/ibex-2.8.7/build$ cmake -DCMAKE_INSTALL_PREFIX=$HOME ..
 
 See the :ref:`options <install-options>`.
 
@@ -297,27 +297,26 @@ The same steps must be done to compile a plugin. See the current list of availab
 
 We assume here that the plugin to be installed is ibex-optim::
 
-  ~/Ibex/ibex-optim$
   ~/Ibex/ibex-optim$ mkdir build
   ~/Ibex/ibex-optim$ cd build
-  ~/Ibex/ibex-optim$ cmake ..
-  ~/Ibex/ibex-optim$ make
-  ~/Ibex/ibex-optim$ sudo make install
+  ~/Ibex/ibex-optim/build$ cmake ..
+  ~/Ibex/ibex-optim/build$ make
+  ~/Ibex/ibex-optim/build$ sudo make install
   
 The ``MAKE_INSTALL_PREFIX`` option allows to install the plugin locally, ex::
 
-  ~/Ibex/ibex-optim$ cmake .. -DMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim
+  ~/Ibex/ibex-optim$ cmake -DMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim ..
 
 In this case the ``sudo`` before ``make install`` is unecessary.
 
 If Ibex has been installed in a local folder, say ``~/Ibex/ibex-2.8.7`` you need to indicate this 
 path using the ``CMAKE_PREFIX_PATH`` option::
 
-  ~/Ibex/ibex-optim$ cmake .. -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7
+  ~/Ibex/ibex-optim$ cmake -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 ..
   
 Of course, you can combine both::
 
-	~/Ibex/ibex-optim$ cmake .. -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 -DMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim
+	~/Ibex/ibex-optim$ cmake -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 -DMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim ..
 
 
 =======================================
@@ -336,32 +335,20 @@ Uninstall
 
 .. _cmake_faq_clean: 
 
-Uninstall has to be done manually
-(for interested readers, here is an `explanation <https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#cmake-does-not-generate-a-make-distclean-target-why>`_).
-
 ---------------
 Linux/Macos
 ---------------
 
-First, clean up build directory::
+After running ``make install`` you can uninstall by running::
 
-$ cd ~/Ibex/ibex-2.8.7
-$ rm -Rf build
+	~/Ibex$ cd ibex-2.8.7/build
+	~/Ibex/ibex-2.8.7/build$ make uninstall
 
-Next, you need to remove the installed include/lib/executables.
 
-If you have installed Ibex in default system folders, do::
+Then, you can remove the build directory::
 
-$ sudo rm -Rf /usr/local/lib/ibex
-$ sudo rm -f /usr/local/lib/libibex.*
-$ sudo rm -f /usr/local/bin/ibex*
-$ sudo rm -Rf /usr/local/include/ibex
-$ sudo rm -f /usr/local/include/ibex.h
-
-If you have installed Ibex locally, say, in ``~/Ibex/ibex-2.8.7``, do::
-
-$ cd ~/Ibex/ibex-2.8.7
-$ rm -Rf include lib bin
+  ~/Ibex$ cd ~/Ibex/ibex-2.8.7
+  ~/Ibex/ibex-2-8-7$ rm -Rf build
 
 ---------------
 Windows
