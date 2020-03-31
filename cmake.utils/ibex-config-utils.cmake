@@ -12,7 +12,7 @@ function (SUBDIR_LIST resultvar)
   set (opt RELATIVE)
   set (oneArgs WDIR)
   set (multiArgs "")
-  
+
   cmake_parse_arguments(SL "${opt}" "${oneArgs}" "${multiArgs}" ${ARGN})
 
   if(SL_UNPARSED_ARGUMENTS)
@@ -110,6 +110,45 @@ function (LIB_GET_ABSPATH_FROM_NAME var libdir libname)
     set (_suf ${CMAKE_STATIC_LIBRARY_SUFFIX})
   endif ()
   set (${var} "${libdir}/${_pre}${libname}${_suf}" PARENT_SCOPE)
+endfunction ()
+
+################################################################################
+################################################################################
+################################################################################
+function (EXECUTE_PROCESS_CHECK)
+  set (opt "")
+  set (oneArgs WORKING_DIRECTORY MSG LOGBASENAME STATUS_PREFIX)
+  set (multiArgs COMMAND)
+
+  cmake_parse_arguments(EPC "${opt}" "${oneArgs}" "${multiArgs}" ${ARGN})
+
+  if(EPC_UNPARSED_ARGUMENTS)
+    message (FATAL_ERROR "Unknown keywords given to execute_process_check(): \"${EPC_UNPARSED_ARGUMENTS}\"")
+  endif()
+
+  # Check mandatory arguments
+  foreach (arg "COMMAND" "MSG" "LOGBASENAME")
+    if (NOT EPC_${arg})
+      message (FATAL_ERROR "Missing mandatory argument ${arg} in execute_process_check")
+    endif ()
+  endforeach ()
+
+  # use working dir if given
+  if (EPC_WORKING_DIRECTORY)
+    set (_workingdir WORKING_DIRECTORY ${EPC_WORKING_DIRECTORY})
+  endif ()
+
+  message (STATUS "${EPC_STATUS_PREFIX}${EPC_MSG}")
+  execute_process (COMMAND ${EPC_COMMAND} ${_workingdir}
+                   RESULT_VARIABLE ret
+                   OUTPUT_FILE "${EPC_LOGBASENAME}-out.log"
+                   ERROR_FILE "${EPC_LOGBASENAME}-err.log"
+                   )
+
+  if (ret)
+    message (FATAL_ERROR "An error occurs while ${EPC_MSG}\n"
+                          "See also\n${EPC_LOGBASENAME}-*.log\n")
+  endif ()
 endfunction ()
 
 ################################################################################
