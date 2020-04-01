@@ -410,6 +410,10 @@ function (IBEX_INIT_COMMON)
   # Print information (to ease debugging)
   ##############################################################################
   message (STATUS "Running on system ${CMAKE_HOST_SYSTEM} with processor ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+  if (NOT ${CMAKE_HOST_SYSTEM} STREQUAL ${CMAKE_SYSTEM} OR
+      NOT ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL ${CMAKE_SYSTEM_PROCESSOR})
+    message (STATUS "Targeting system ${CMAKE_SYSTEM} with processor ${CMAKE_SYSTEM_PROCESSOR}")
+  endif ()
   message (STATUS "Using CMake ${CMAKE_VERSION}")
   message (STATUS "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 
@@ -430,7 +434,7 @@ function (IBEX_INIT_COMMON)
 
   CHECK_CXX_COMPILER_FLAG ("-std=c++11" COMPILER_SUPPORTS_CXX11)
   if (COMPILER_SUPPORTS_CXX11)
-    add_compile_options ("-std=c++11")
+    set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
   else ()
     message (FATAL_ERROR "A compiler with C++11 support is needed")
   endif ()
@@ -444,14 +448,14 @@ function (IBEX_INIT_COMMON)
     set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
   endif ()
 
-  add_compile_options ("$<$<CONFIG:Release>:-O3;-DNDEBUG>"
-                       "$<$<CONFIG:Debug>:-O0;-g;-pg;-Wall;-DDEBUG>")
+  set (CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" PARENT_SCOPE)
+  set (CMAKE_CXX_FLAGS_DEBUG "-O0 -g -pg -Wall -DDEBUG" PARENT_SCOPE)
 
   if (WIN32)
-    # We need this for strdup under Windows (see issue #287)
-    add_definitions(-U__STRICT_ANSI__)
+    set (CMAKE_CXX_FLAGS "-U__STRICT_ANSI__ ${CMAKE_CXX_FLAGS}")
   endif ()
 
+  set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} PARENT_SCOPE)
 endfunction ()
 
 ################################################################################
