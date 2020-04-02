@@ -428,20 +428,15 @@ function (IBEX_INIT_COMMON)
   endif ()
 
   ##############################################################################
-  # Check that the compiler supports c++11
+  # Ibex and its plugins need c++11
   ##############################################################################
-  include(CheckCXXCompilerFlag)
-
-  CHECK_CXX_COMPILER_FLAG ("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  if (COMPILER_SUPPORTS_CXX11)
-    set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-  else ()
-    message (FATAL_ERROR "A compiler with C++11 support is needed")
-  endif ()
+  set (CMAKE_CXX_STANDARD 11)
+  set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
   ##############################################################################
   # Set flags and build type (release or debug)
   ##############################################################################
+  include(CheckCXXCompilerFlag)
   if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message (STATUS "Setting build type to 'Release' as none was specified.")
     set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose type of build" FORCE)
@@ -450,12 +445,6 @@ function (IBEX_INIT_COMMON)
 
   set (CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" PARENT_SCOPE)
   set (CMAKE_CXX_FLAGS_DEBUG "-O0 -g -pg -Wall -DDEBUG" PARENT_SCOPE)
-
-  if (WIN32)
-    set (CMAKE_CXX_FLAGS "-U__STRICT_ANSI__ ${CMAKE_CXX_FLAGS}")
-  endif ()
-
-  set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} PARENT_SCOPE)
 endfunction ()
 
 ################################################################################
