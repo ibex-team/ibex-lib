@@ -430,8 +430,8 @@ function (IBEX_INIT_COMMON)
   ##############################################################################
   # Ibex and its plugins need c++11
   ##############################################################################
-  set (CMAKE_CXX_STANDARD 11)
-  set (CMAKE_CXX_STANDARD_REQUIRED ON)
+  set (CMAKE_CXX_STANDARD 11 PARENT_SCOPE)
+  set (CMAKE_CXX_STANDARD_REQUIRED ON PARENT_SCOPE)
 
   ##############################################################################
   # Set flags and build type (release or debug)
