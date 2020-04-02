@@ -12,7 +12,7 @@ function (SUBDIR_LIST resultvar)
   set (opt RELATIVE)
   set (oneArgs WDIR)
   set (multiArgs "")
-  
+
   cmake_parse_arguments(SL "${opt}" "${oneArgs}" "${multiArgs}" ${ARGN})
 
   if(SL_UNPARSED_ARGUMENTS)
@@ -110,6 +110,45 @@ function (LIB_GET_ABSPATH_FROM_NAME var libdir libname)
     set (_suf ${CMAKE_STATIC_LIBRARY_SUFFIX})
   endif ()
   set (${var} "${libdir}/${_pre}${libname}${_suf}" PARENT_SCOPE)
+endfunction ()
+
+################################################################################
+################################################################################
+################################################################################
+function (EXECUTE_PROCESS_CHECK)
+  set (opt "")
+  set (oneArgs WORKING_DIRECTORY MSG LOGBASENAME STATUS_PREFIX)
+  set (multiArgs COMMAND)
+
+  cmake_parse_arguments(EPC "${opt}" "${oneArgs}" "${multiArgs}" ${ARGN})
+
+  if(EPC_UNPARSED_ARGUMENTS)
+    message (FATAL_ERROR "Unknown keywords given to execute_process_check(): \"${EPC_UNPARSED_ARGUMENTS}\"")
+  endif()
+
+  # Check mandatory arguments
+  foreach (arg "COMMAND" "MSG" "LOGBASENAME")
+    if (NOT EPC_${arg})
+      message (FATAL_ERROR "Missing mandatory argument ${arg} in execute_process_check")
+    endif ()
+  endforeach ()
+
+  # use working dir if given
+  if (EPC_WORKING_DIRECTORY)
+    set (_workingdir WORKING_DIRECTORY ${EPC_WORKING_DIRECTORY})
+  endif ()
+
+  message (STATUS "${EPC_STATUS_PREFIX}${EPC_MSG}")
+  execute_process (COMMAND ${EPC_COMMAND} ${_workingdir}
+                   RESULT_VARIABLE ret
+                   OUTPUT_FILE "${EPC_LOGBASENAME}-out.log"
+                   ERROR_FILE "${EPC_LOGBASENAME}-err.log"
+                   )
+
+  if (ret)
+    message (FATAL_ERROR "An error occurs while ${EPC_MSG}\n"
+                          "See also\n${EPC_LOGBASENAME}-*.log\n")
+  endif ()
 endfunction ()
 
 ################################################################################
@@ -371,6 +410,10 @@ function (IBEX_INIT_COMMON)
   # Print information (to ease debugging)
   ##############################################################################
   message (STATUS "Running on system ${CMAKE_HOST_SYSTEM} with processor ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+  if (NOT ${CMAKE_HOST_SYSTEM} STREQUAL ${CMAKE_SYSTEM} OR
+      NOT ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL ${CMAKE_SYSTEM_PROCESSOR})
+    message (STATUS "Targeting system ${CMAKE_SYSTEM} with processor ${CMAKE_SYSTEM_PROCESSOR}")
+  endif ()
   message (STATUS "Using CMake ${CMAKE_VERSION}")
   message (STATUS "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 
@@ -385,34 +428,23 @@ function (IBEX_INIT_COMMON)
   endif ()
 
   ##############################################################################
-  # Check that the compiler supports c++11
+  # Ibex and its plugins need c++11
   ##############################################################################
-  include(CheckCXXCompilerFlag)
-
-  CHECK_CXX_COMPILER_FLAG ("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  if (COMPILER_SUPPORTS_CXX11)
-    add_compile_options ("-std=c++11")
-  else ()
-    message (FATAL_ERROR "A compiler with C++11 support is needed")
-  endif ()
+  set (CMAKE_CXX_STANDARD 11 PARENT_SCOPE)
+  set (CMAKE_CXX_STANDARD_REQUIRED ON PARENT_SCOPE)
 
   ##############################################################################
   # Set flags and build type (release or debug)
   ##############################################################################
+  include(CheckCXXCompilerFlag)
   if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message (STATUS "Setting build type to 'Release' as none was specified.")
     set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose type of build" FORCE)
     set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
   endif ()
 
-  add_compile_options ("$<$<CONFIG:Release>:-O3;-DNDEBUG>"
-                       "$<$<CONFIG:Debug>:-O0;-g;-pg;-Wall;-DDEBUG>")
-
-  if (WIN32)
-    # We need this for strdup under Windows (see issue #287)
-    add_definitions(-U__STRICT_ANSI__)
-  endif ()
-
+  set (CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" PARENT_SCOPE)
+  set (CMAKE_CXX_FLAGS_DEBUG "-O0 -g -pg -Wall -DDEBUG" PARENT_SCOPE)
 endfunction ()
 
 ################################################################################

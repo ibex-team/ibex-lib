@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 3.0.2)
-# CMake doc can be found at https://cmake.org/cmake/help/v3.0/
+cmake_minimum_required (VERSION 3.5.1)
+# CMake doc can be found at https://cmake.org/cmake/help/v3.5/
 
 message (WARNING "CMake support is in beta, please report all bugs to https://github.com/ibex-team/ibex-lib/issues/")
 
@@ -68,7 +68,11 @@ add_subdirectory (install)
 ################################################################################
 # archives and packages
 ################################################################################
-set (CPACK_GENERATOR "TGZ" "ZIP" "DEB")
+if (UNIX)
+  set (CPACK_GENERATOR "TGZ" "ZIP" "DEB")
+else ()
+  set (CPACK_GENERATOR "TGZ" "ZIP")
+endif ()
 string (TOLOWER "${CMAKE_PROJECT_NAME}" CPACK_PACKAGE_NAME)
 set (CPACK_PACKAGE_VENDOR "IbexTeam")
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${IBEX_DESCRIPTION})
