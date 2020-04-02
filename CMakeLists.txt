@@ -63,7 +63,7 @@ add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${UNINSTALL_SCRIPT}")
 # matching ${CMAKE_INSTALL_CONFIGCMAKE}/ibex-config-*.cmake even if they were
 # just installed.
 ################################################################################
-add_subdirectory (install)
+add_subdirectory (cmake.install)
 
 ################################################################################
 # archives and packages
