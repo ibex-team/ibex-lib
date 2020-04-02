@@ -152,7 +152,7 @@ public:
 	const System& sys;
 
 	/**
-	 * Wheter inequalities appear first.
+	 * Whether inequalities appear first.
 	 */
 	const bool ineq_first;
 
@@ -195,8 +195,6 @@ public:
 	const BitSet active_right_bound;
 
 protected:
-
-	void init(const System& sys, const BitSet& active);
 
 	FncActiveCtrs(const System& sys, const IntervalVector& box, const BitSet* active, bool ineq_first, const Function* df_ctrs=NULL);
 

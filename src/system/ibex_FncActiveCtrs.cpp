@@ -59,7 +59,10 @@ FncActiveCtrs::FncActiveCtrs(const System& sys, const IntervalVector& box, const
 
 	}
 
-	if (m==0) throw NothingActive(); // otherwise the function would be "undefined"
+	if (m==0) {
+		if (fact) delete fact; // would leak otherwise (other members should be automatically deleted)
+		throw NothingActive(); // otherwise the function would be "undefined"
+	}
 
 	(Dim&) _image_dim = Dim(m, 1);
 
@@ -114,7 +117,10 @@ FncActiveCtrs::FncActiveCtrs(const System& sys, const Vector& pt, double activat
 
 	}
 
-	if (m==0) throw NothingActive(); // otherwise the function would be "undefined"
+	if (m==0) {
+		if (fact) delete fact; // would leak otherwise (other members should be automatically deleted)
+		throw NothingActive(); // otherwise the function would be "undefined"
+	}
 
 	(Dim&) _image_dim = Dim(m, 1);
 

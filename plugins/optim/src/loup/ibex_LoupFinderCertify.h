@@ -52,6 +52,12 @@ public:
 		return true;
 	}
 
+	/**
+	 * Minimal threshold for an inequality
+	 * to be considered as active.
+	 */
+	const double min_activity_thershold = 1e-20;
+
 protected:
 
 	/**
