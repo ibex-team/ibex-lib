@@ -49,7 +49,7 @@ If you want to install Ibex in a local folder, use ``-DCMAKE_INTSALL_PREFIX``, e
 
 	~/Ibex/ibex-2.8.7/build$ cmake -DCMAKE_INSTALL_PREFIX=$HOME ..
 
-See the :ref:`options <install-options>`.
+See the :ref:`options <install-options>`. The folder full path must not contain any **white space** or wierd characters like ``'"\()`*[]``.
 
 -----------------
 Windows
@@ -88,6 +88,10 @@ Option					Description
 MAKE_INSTALL_PREFIX     Ex: ``-DCMAKE_INSTALL_PREFIX=$HOME``
                          
                         Set the folder where Ibex must be installed (by default, ``/usr/local`` under Linux).
+                        
+                        .. warning::
+                        
+                          The full path of the folder must not contain white space or weird characters like ``'"\()`*[]``.
 
 INTERVAL_LIB            Ex: ``-DINTERVAL_LIB=filib``
                         
@@ -150,8 +154,6 @@ MATHLIB_DIR             Ex: ``-DINTERVAL_LIB=goal -DMATHLIB_DIR=$HOME/matlib``
                         Note that the plugin archive embeds a version of Gaol so it is not necessary to have 
                         Goal already installed on your system. Default value is "" (means: use embedded version).
 					
-                        Only to be used with ``-DINTERVAL_LIB=goal``.
-                        
 FILIB_DIR               Ex: ``-DINTERVAL_LIB=filib -DFILIB_DIR=$HOME/filib``
 
                         Set the path of Filib when using Ibex with your own version of Filib. 
