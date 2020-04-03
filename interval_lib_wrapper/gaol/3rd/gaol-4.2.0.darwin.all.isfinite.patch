@@ -11,7 +11,7 @@
  
  // Alignment on an 'nbytes' bytes boundary
  #if defined(_MSC_VER)
-@@ -194,11 +192,7 @@
+@@ -192,11 +190,7 @@
     */
    INLINE int is_finite(double d)
    {
