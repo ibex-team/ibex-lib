@@ -1,6 +1,6 @@
-cmake_minimum_required (VERSION 3.0.2)
+cmake_minimum_required (VERSION 3.5.1)
 
-project (FILIB VERSION 3.0.2.2 LANGUAGES C CXX)
+project (FILIB VERSION 3.0.2.2 LANGUAGES CXX)
 
 message (STATUS "Running on system ${CMAKE_HOST_SYSTEM} with processor ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 if (NOT ${CMAKE_HOST_SYSTEM} STREQUAL ${CMAKE_SYSTEM} OR
@@ -18,14 +18,14 @@ set (VERSION 3.0.2)
 
 # Looking for headers (for config.h.in)
 option (STDC_HEADERS "Set to OFF if you do not have standard headers" ON)
-include (CheckIncludeFiles)
+include (CheckIncludeFileCXX)
 foreach (name "dlfcn" "stdint" "inttypes" "stdlib" "strings" "string" "memory"
               "sys/stat" "sys/types" "unistd")
   string (TOUPPER "${name}" uppername)
   string (REPLACE "/" "_" uppername "${uppername}")
   set (header "${name}.h")
   set (var "HAVE_${uppername}_H")
-  check_include_files ("${header}" "${var}")
+  check_include_file_cxx ("${header}" "${var}")
 endforeach ()
 
 # config.h.in -> config.h
@@ -39,7 +39,7 @@ check_cxx_compiler_flag ("-ffloat-store" COMPILER_SUPPORTS_FFLOAT_STORE)
 # Setting HAVE_SSE and HAVE_X87
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
 	set(HAVE_SSE ON)
-elseif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i686")
+elseif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i.86")
 	set(HAVE_X87 ON)
 endif ()
 
