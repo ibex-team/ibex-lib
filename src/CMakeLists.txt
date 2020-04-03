@@ -24,10 +24,10 @@ target_include_directories (ibex PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINAR
 # source files from interval_lib and lp_lib wrappers
 target_sources (ibex PRIVATE ${IBEX_SRC})
 
-# Caveat: operators must be done before symbolic
+# Note: operators subdir is handled by CMakeLists.txt from symbolic
 foreach (subdir arithmetic bisector combinatorial contractor data function
-                numeric operators parser predicate set solver strategy symbolic
-                system tools)
+                numeric parser predicate set solver strategy symbolic system
+                tools)
   add_subdirectory (${subdir})
 endforeach()
 
@@ -73,7 +73,9 @@ target_include_directories (ibex PUBLIC
 get_target_property (IBEX_SRC ibex SOURCES)
 list_filter (IBEX_HDR "\\.(h|hpp)$" ${IBEX_SRC})
 list_filter (IBEX_OPS_HDR "operators/.*\\.h" ${IBEX_SRC})
-list (REMOVE_ITEM IBEX_HDR ${IBEX_OPS_HDR}) # remove operators headers
+if (IBEX_OPS_HDR)
+  list (REMOVE_ITEM IBEX_HDR ${IBEX_OPS_HDR}) # remove operators headers
+endif ()
 
 # Generate ibex.h
 set (IBEX_MAIN_HEADER ${CMAKE_CURRENT_BINARY_DIR}/ibex.h)
