@@ -6,10 +6,10 @@ foreach (op ${OPERATORS_LIST})
   set (hdr "ibex_${op}.h")
   set (cpp "ibex_${op}.cpp")
 
-  # Handles includes and IBEX_SRC
+  # Handles includes
   string (CONCAT OPERATORS_INCLUDES ${OPERATORS_INCLUDES} "#include \"${hdr}\"\n")
-  list (APPEND IBEX_OPS_HDR ${CMAKE_CURRENT_SOURCE_DIR}/${hdr})
-  list (APPEND IBEX_SRC ${CMAKE_CURRENT_SOURCE_DIR}/${cpp})
+  target_sources (ibex PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${cpp}
+                               ${CMAKE_CURRENT_SOURCE_DIR}/${hdr})
   
   # Parse header
   file (STRINGS ${hdr} line REGEX "^class [BU]i?naryOperator<" LIMIT_COUNT 1)
@@ -43,12 +43,10 @@ foreach (op ${OPERATORS_LIST})
                                 "${inline_pre}${CMAKE_MATCH_1}${inline_post}")
 endforeach()
 
-list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories (ibex PUBLIC
+                              "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
 
 # Propagate new values to parent scope
-set (IBEX_SRC ${IBEX_SRC} PARENT_SCOPE)
-set (IBEX_OPS_HDR ${IBEX_OPS_HDR} PARENT_SCOPE)
-set (IBEX_INCDIRS ${IBEX_INCDIRS} PARENT_SCOPE)
 set (OPERATORS_INCLUDES "${OPERATORS_INCLUDES}" PARENT_SCOPE)
 set (OPERATORS_MACRO_UNARY "${OPERATORS_MACRO_UNARY}" PARENT_SCOPE)
 set (OPERATORS_MACRO_BINARY "${OPERATORS_MACRO_BINARY}" PARENT_SCOPE)

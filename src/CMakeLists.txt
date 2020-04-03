@@ -1,46 +1,10 @@
 ################################################################################
 # libibex
 ################################################################################
+add_library (ibex "")
 
-# Generate ibex_Setting.h and add its path to the list of include directories
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Setting.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/ibex_Setting.h
-)
-list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_BINARY_DIR})
-list (APPEND IBEX_SRC ${CMAKE_CURRENT_BINARY_DIR}/ibex_Setting.h)
+target_include_directories (ibex PUBLIC "$<BUILD_INTERFACE:${IBEX_INCDIRS}>")
 
-# Recurse on all subdirectories (with 'operators' first)
-set (SUBDIR_LIST operators arithmetic bisector combinatorial contractor data
-                 function numeric parser predicate set solver strategy symbolic
-                 system tools)
-
-foreach (subdir ${SUBDIR_LIST})
-  add_subdirectory (${subdir})
-endforeach()
-
-# Configure flex and bison for the parser
-find_package(BISON)
-find_package(FLEX)
-FLEX_TARGET(Lexer
-  ${CMAKE_CURRENT_SOURCE_DIR}/parser/lexer.l
-  ${CMAKE_CURRENT_BINARY_DIR}/parser/lexer.lex.cc
-  COMPILE_FLAGS "-Pibex")
-list (APPEND IBEX_SRC ${FLEX_Lexer_OUTPUTS})
-BISON_TARGET(Parser
-  ${CMAKE_CURRENT_SOURCE_DIR}/parser/parser.yc
-  ${CMAKE_CURRENT_BINARY_DIR}/parser/parser.tab.cc
-  COMPILE_FLAGS "--name-prefix=ibex --report=all --file-prefix=parser")
-list (APPEND IBEX_SRC ${BISON_Parser_OUTPUTS})
-
-ADD_FLEX_BISON_DEPENDENCY (Lexer Parser)
-list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_BINARY_DIR}/parser)
-
-# Create the target for libibex
-add_library (ibex ${IBEX_SRC})
-target_include_directories(ibex PUBLIC "$<BUILD_INTERFACE:${IBEX_INCDIRS}>")
-target_include_directories(ibex PUBLIC "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-target_include_directories(ibex PUBLIC "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/ibex>")
 target_link_libraries (ibex PUBLIC ${INTERVAL_LIB_TARGET} ${LP_LIB_TARGET})
 if (WIN32)
   # We (may) need this for strdup under Windows (see issue #287)
@@ -48,33 +12,87 @@ if (WIN32)
 endif ()
 
 ################################################################################
-# ibex.h
+# ibex_Setting.h
 ################################################################################
-# Get list of header and inl files
-list_filter_header (IBEX_HDR ${IBEX_SRC})
-list_filter_inl (IBEX_INL ${IBEX_SRC})
+configure_file (ibex_Setting.h.in ibex_Setting.h)
+target_sources (ibex PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ibex_Setting.h)
+target_include_directories (ibex PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>")
 
-# remove parser.h from IBEX_HDR (internal header, should not be distributed)
-list (REMOVE_ITEM IBEX_HDR ${CMAKE_CURRENT_SOURCE_DIR}/parser/parser.h)
+################################################################################
+# Recurse on all subdirectories to add source files
+################################################################################
+# source files from interval_lib and lp_lib wrappers
+target_sources (ibex PRIVATE ${IBEX_SRC})
+
+# Caveat: operators must be done before symbolic
+foreach (subdir arithmetic bisector combinatorial contractor data function
+                numeric operators parser predicate set solver strategy symbolic
+                system tools)
+  add_subdirectory (${subdir})
+endforeach()
+
+################################################################################
+# Parser with Flex and Bison
+################################################################################
+# Note: we handle the parser here as target_sources does not handle well
+# generated files in subdirectory
+
+# FLEX
+set (FLEX_FLAGS "-Pibex")
+if (WIN32)
+  find_package (FLEX 2.5.6) # We need version >= 2.5.6 to have --nounistd
+  string (APPEND FLEX_FLAGS " --nounistd")
+else ()
+  find_package (FLEX)
+endif ()
+if (NOT FLEX_FOUND)
+  message (FATAL_ERROR "Flex is needed to build the parser")
+endif ()
+flex_target (Flex parser/lexer.l ${CMAKE_CURRENT_BINARY_DIR}/parser/lexer.lex.cc
+                                                  COMPILE_FLAGS "${FLEX_FLAGS}")
+
+# BISON
+find_package (BISON)
+if (NOT BISON_FOUND)
+  message (FATAL_ERROR "Flex is needed to build the parser")
+endif ()
+bison_target (Parser parser/parser.yc
+                  ${CMAKE_CURRENT_BINARY_DIR}/parser/parser.tab.cc
+                  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parser/parser.tab.hh
+                  COMPILE_FLAGS "--name-prefix=ibex --report=all")
+add_flex_bison_dependency (Flex Parser)
+
+target_sources (ibex PRIVATE ${FLEX_Flex_OUTPUTS} ${BISON_Parser_OUTPUTS})
+target_include_directories (ibex PUBLIC
+                        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/parser>")
+
+################################################################################
+# ibex.h and ibex_Setting.h
+################################################################################
+# Get list of headers
+get_target_property (IBEX_SRC ibex SOURCES)
+list_filter (IBEX_HDR "\\.(h|hpp)$" ${IBEX_SRC})
+list_filter (IBEX_OPS_HDR "operators/.*\\.h" ${IBEX_SRC})
+list (REMOVE_ITEM IBEX_HDR ${IBEX_OPS_HDR}) # remove operators headers
 
 # Generate ibex.h
 set (IBEX_MAIN_HEADER ${CMAKE_CURRENT_BINARY_DIR}/ibex.h)
-generate_main_header (${IBEX_MAIN_HEADER} "ibex_Setting.h" ${IBEX_HDR}
-                                                        WITH_GUARD "__IBEX_H__")
+generate_main_header (${IBEX_MAIN_HEADER} ${IBEX_HDR} WITH_GUARD "__IBEX_H__")
 
 ################################################################################
 # installation
 ################################################################################
+target_include_directories (ibex PUBLIC
+                        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+                        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/ibex>")
+
 install (TARGETS ibex EXPORT ibexExport DESTINATION ${CMAKE_INSTALL_LIBDIR}
                                                             COMPONENT devtools)
 install (FILES ${IBEX_MAIN_HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
                                                             COMPONENT devtools)
-install (FILES ${IBEX_HDR} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex
-                                                            COMPONENT devtools)
-install (FILES ${IBEX_OPS_HDR} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex
-                                                            COMPONENT devtools)
-install (FILES ${IBEX_INL} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex
-                                                            COMPONENT devtools)
+list_filter (IBEX_SRC_INSTALLABLE "\\.(h|hpp|inl)$" ${IBEX_SRC})
+install (FILES ${IBEX_SRC_INSTALLABLE}
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ibex COMPONENT devtools)
 
 # export ibex target in ibex-config.cmake
 install (EXPORT ibexExport FILE ibex-config.cmake

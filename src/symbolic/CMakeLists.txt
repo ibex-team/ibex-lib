@@ -1,15 +1,9 @@
 # see arithmetic/CMakeLists.txt for comments
 
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprOperators.cpp.in
-  ${CMAKE_CURRENT_BINARY_DIR}/ibex_ExprOperators.cpp
-)
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprOperators.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/ibex_ExprOperators.h
-)
+configure_file (ibex_ExprOperators.cpp.in ibex_ExprOperators.cpp)
+configure_file (ibex_ExprOperators.h.in ibex_ExprOperators.h)
 
-list (APPEND IBEX_SRC
+target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CmpOp.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CmpOp.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr.cpp
@@ -38,12 +32,11 @@ list (APPEND IBEX_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprSubNodes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprSubNodes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprVisitor.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_InputNodeMap.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_InputNodeMap.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_NodeMap.h
   )
 
-list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_SOURCE_DIR}
-                          ${CMAKE_CURRENT_BINARY_DIR})
-
-# Propagate new values of list to parent scope
-set (IBEX_SRC ${IBEX_SRC} PARENT_SCOPE)
-set (IBEX_INCDIRS ${IBEX_INCDIRS} PARENT_SCOPE)
+target_include_directories (ibex PUBLIC
+                              "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+                              "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>")

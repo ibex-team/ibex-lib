@@ -1,6 +1,6 @@
 # see arithmetic/CMakeLists.txt for comments
 
-list (APPEND IBEX_SRC
+target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ContractContext.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Ctc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Ctc.h
@@ -30,6 +30,8 @@ list (APPEND IBEX_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcInverse.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcKuhnTucker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcKuhnTucker.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcKuhnTuckerLP.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcKuhnTuckerLP.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcLinearRelax.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcLinearRelax.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcNewton.cpp
@@ -48,8 +50,5 @@ list (APPEND IBEX_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcUnion.h
   )
 
-list (APPEND IBEX_INCDIRS ${CMAKE_CURRENT_SOURCE_DIR})
-
-# Propagate new values of list to parent scope
-set (IBEX_SRC ${IBEX_SRC} PARENT_SCOPE)
-set (IBEX_INCDIRS ${IBEX_INCDIRS} PARENT_SCOPE)
+target_include_directories (ibex PUBLIC
+                              "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")

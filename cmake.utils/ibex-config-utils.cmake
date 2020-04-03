@@ -1,5 +1,3 @@
-include (CMakeParseArguments)
-
 ################################################################################
 ################################################################################
 ################################################################################
@@ -43,31 +41,20 @@ endfunction()
 ################################################################################
 ################################################################################
 ################################################################################
-# filter the input list(s) and return only elements ending with .h of .hpp
-function (LIST_FILTER_HEADER resultvar)
+# filter the input list(s) and return only elements matching regex
+function (LIST_FILTER resultvar regex)
   foreach (filelist ${ARGN})
     foreach (file ${filelist})
-      if (file MATCHES "\\.h$" OR file MATCHES "\\.hpp$")
-        list (APPEND hdrlist ${file})
+      if (file MATCHES "${regex}")
+        list (APPEND _list ${file})
       endif ()
     endforeach()
   endforeach()
-  set (${resultvar} ${hdrlist} PARENT_SCOPE)
+  set (${resultvar} ${_list} PARENT_SCOPE)
 endfunction ()
 
-################################################################################
-################################################################################
-################################################################################
-# filter the input list(s) and return only elements ending with .inl
-function (LIST_FILTER_INL resultvar)
-  foreach (filelist ${ARGN})
-    foreach (file ${filelist})
-      if (file MATCHES "\\.inl$")
-        list (APPEND inllist ${file})
-      endif ()
-    endforeach()
-  endforeach()
-  set (${resultvar} ${inllist} PARENT_SCOPE)
+function (LIST_FILTER_HEADER resultvar)
+  list_filter (resultvar "\\.(h|hpp)$" ${ARGN})
 endfunction ()
 
 ################################################################################
