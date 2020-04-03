@@ -47,7 +47,7 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 	 * Variables x[ind[i]] take successively the lower bounds of these intervals,
 	 * either in the increasing or decreasing order.
 	 * Hence, the index variable ind[i] varies within [0,size[i]-1]. */
-	int size[n];
+	std::vector<int> size(n);
 
 	for (int i=0; i<n; i++) {
 		x[i] = new double[2*p]; // by default, there are 2*p distinct bounds

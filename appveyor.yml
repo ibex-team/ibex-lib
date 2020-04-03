@@ -1,35 +1,57 @@
 version: build{build}
 image: Visual Studio 2015
+clone_folder: C:\projects\ibex-lib
+test: off
+configuration:
+    - Release
 
-platform:
-  - x64 
-  
 environment:
   matrix:
-    - TEST_INTERVAL_LIB: "gaol"
-    - TEST_INTERVAL_LIB: "filib"
+    - CMAKE_PLATFORM: "Visual Studio 14 2015"
+      CPACK_PATH: 'C:\\Program Files (x86)\\CMake\\bin'
+      platform: x86
+      CPPUNIT_DIR: C:\tools\vcpkg\installed\x86-windows
+    - CMAKE_PLATFORM: "Visual Studio 14 2015 Win64"
+      CPACK_PATH: 'C:\\Program Files (x86)\\CMake\\bin'
+      platform: x64
+      CPPUNIT_DIR: C:\tools\vcpkg\installed\x64-windows
 
+init:
+    - cmd: vcpkg cache
+cache:
+    - C:\tools\vcpkg\installed\
 install:
-  - cmd: echo %Platform%
-  - cmd: set MINGW-W64_BASE=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
-  - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;C:\msys64\usr\bin;%PATH%
-  - cmd: uname -a
-  - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-cppunit
-  - cmd: set CPATH=%CPATH%;C:\msys64\mingw32\include
-  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;C:\msys64\mingw32\lib
-  - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
+    - vcpkg install cppunit:"%platform%"-windows
+    - choco install winflexbison
 
 build_script:
-  - cmd: python -x %cd%\waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX% --with-debug --with-ampl
-  - cmd: python -x %cd%\waf build install clean
+  - echo Running cmake...
+  - cd c:\projects\ibex-lib
+  - mkdir build
+  - cd build
+  - cmake -G "%CMAKE_PLATFORM%" -DCMAKE_BUILD_TYPE=Release -DINTERVAL_LIB=filib -DCPPUNIT_DIR="%CPPUNIT_DIR%" ../
+  - set MSBuildLogger="C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - set MSBuildOptions=/v:m /p:Configuration=%Configuration% /logger:%MSBuildLogger%
+  - msbuild %MSBuildOptions% PACKAGE.vcxproj
+  - set PATH=%CPACK_PATH%;%PATH% # conflit with choco pack alias. need to put cpack.exe first
+  - CPack.exe -G ZIP
 
-test_script:
-  - cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
-  # We need to add the path to libcppunit in PATH
-  - cmd: set PATH=%PATH%;C:\msys64\mingw32\bin
-  - cmd: python -x %cd%\waf utest
+artifacts:
+- path: build\ibex*.exe
+  name: ibex-lib
+- path: build\ibex*.zip
+  name: ibex-lib-zip
 
-on_failure:
-  - cmd: cat %cd%\__build__\config.log
-  - cmd: cat %cd%\__build__\utest_config.log
-  - cmd: cat %cd%\__build__\utest_run.log
+# deploy:
+#   release: ibex-lib-v$(appveyor_build_version)
+#   description: 'ibexlib'
+#   provider: GitHub
+#   auth_token:
+#     secure: *******************************************
+
+#   artifact: ibex-lib,ibex-lib-zip
+#   draft: true
+#   prerelease: false
+#   on:
+#     branch: develop_test_appveyor      # release from master branch only
+#     appveyor_repo_tag: false        # deploy on tag push only
