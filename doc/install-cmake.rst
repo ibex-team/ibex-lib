@@ -45,7 +45,7 @@ Save the archive ``ibex-2.8.7.tar.gz`` in some ``Ibex`` folder and::
   ~/Ibex/ibex-2.8.7/build$ make
   ~/Ibex/ibex-2.8.7/build$ sudo make install
       
-If you want to install Ibex in a local folder, use ``-DCMAKE_INTSALL_PREFIX``, ex::
+If you want to install Ibex in a local folder, use ``-DCMAKE_INSTALL_PREFIX``, ex::
 
 	~/Ibex/ibex-2.8.7/build$ cmake -DCMAKE_INSTALL_PREFIX=$HOME ..
 
@@ -83,9 +83,9 @@ Configuration options
 ``cmake`` supports the following options:
                     
 ======================  ======================================================================================
-Option					Description
+Option                  Description
 ======================  ======================================================================================
-MAKE_INSTALL_PREFIX     Ex: ``-DCMAKE_INSTALL_PREFIX=$HOME``
+CMAKE_INSTALL_PREFIX    Ex: ``-DCMAKE_INSTALL_PREFIX=$HOME``
                          
                         Set the folder where Ibex must be installed (by default, ``/usr/local`` under Linux).
                         
