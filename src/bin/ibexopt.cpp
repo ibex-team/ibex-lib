@@ -12,13 +12,9 @@
 //============================================================================
 
 #include "ibex.h"
-#include "args.hxx"
+#include "ibexopt.h"
 
 #include <sstream>
-
-#ifndef _IBEX_WITH_OPTIM_
-#error "You need to install the IbexOpt plugin (--with-optim)."
-#endif
 
 using namespace std;
 using namespace ibex;

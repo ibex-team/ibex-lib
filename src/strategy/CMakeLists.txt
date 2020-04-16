@@ -13,14 +13,6 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_BxpLinearRelaxArgMin.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_BxpSystemCache.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_BxpSystemCache.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Cell.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Cell.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellBuffer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellBuffer.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellList.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellList.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellStack.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellStack.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Paver.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Paver.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_SetImage.cpp

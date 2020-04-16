@@ -11,6 +11,8 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovList.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovManifold.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovManifold.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovOptimData.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovOptimData.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovSolverData.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CovSolverData.h
   )

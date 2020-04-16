@@ -41,7 +41,8 @@ if (DO_TEST)
                   TestNewton TestNumConstraint TestParser
                   TestPdcHansenFeasibility TestRoundRobin TestSeparator TestSet
                   TestSinc TestSolver TestString TestSymbolMap TestSystem
-                  TestTimer TestTrace TestVarSet)
+                  TestTimer TestTrace TestVarSet
+                  TestCellHeap TestCtcPolytopeHull TestOptimizer TestUnconstrainedLocalSearch)
 
   foreach (test ${TESTS_LIST})
     # /!\ The test and the target building the executable have the same name

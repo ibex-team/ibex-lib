@@ -25,8 +25,8 @@ target_include_directories (ibex PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINAR
 target_sources (ibex PRIVATE ${IBEX_SRC})
 
 # Note: operators subdir is handled by CMakeLists.txt from symbolic
-foreach (subdir arithmetic bisector combinatorial contractor data function
-                numeric parser predicate set solver strategy symbolic system
+foreach (subdir arithmetic bisector cell combinatorial contractor data function
+                loup numeric optim parser predicate set solver strategy symbolic system
                 tools)
   add_subdirectory (${subdir})
 endforeach()

@@ -38,6 +38,8 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcNewton.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcNotIn.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcNotIn.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcOptimShaving.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcOptimShaving.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcPolytopeHull.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcPolytopeHull.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CtcPropag.cpp

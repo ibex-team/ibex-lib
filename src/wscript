@@ -63,3 +63,11 @@ def build (bld):
 		source = bld.path.ant_glob ("bin/ibexsolve.cpp"),
 		install_path = bld.env.BINDIR,
 		)
+
+  # build ibexopt
+	bld.program (
+		target = "ibexopt",
+		use = [ "ibex" ],
+		source = bld.path.ant_glob ("bin/ibexopt.cpp"),
+		install_path = bld.env.BINDIR,
+		)

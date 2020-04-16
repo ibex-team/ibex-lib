@@ -307,7 +307,7 @@ We assume here that the plugin to be installed is ibex-optim::
   
 The ``MAKE_INSTALL_PREFIX`` option allows to install the plugin locally, ex::
 
-  ~/Ibex/ibex-optim$ cmake -DMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim ..
+  ~/Ibex/ibex-optim$ cmake -DCMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim ..
 
 In this case the ``sudo`` before ``make install`` is unecessary.
 
@@ -318,7 +318,7 @@ path using the ``CMAKE_PREFIX_PATH`` option::
   
 Of course, you can combine both::
 
-	~/Ibex/ibex-optim$ cmake -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 -DMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim ..
+	~/Ibex/ibex-optim$ cmake -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 -DCMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim ..
 
 
 =======================================
@@ -351,7 +351,7 @@ Then, you can remove the build directory::
 
   ~/Ibex$ cd ~/Ibex/ibex-2.8.7
   ~/Ibex/ibex-2-8-7$ rm -Rf build
-
+	
 ---------------
 Windows
 ---------------
