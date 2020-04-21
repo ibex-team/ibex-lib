@@ -190,6 +190,8 @@ function (GENERATORS_EXPRESSION_REPLACE_FOR_BUILD resultvar input_str)
   endif ()
 
   string(REPLACE "$<BUILD_INTERFACE:" "$<0:" input_str "${input_str}")
+  string(REPLACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}" "$<1:${GERFB_INCLUDEDIR}" input_str "${input_str}")
+  string(REPLACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_LIBDIR}" "$<1:${GERFB_LIBDIR}" input_str "${input_str}")
   string(REPLACE "$<INSTALL_INTERFACE:" "$<1:" input_str "${input_str}")
 
   string(REPLACE "$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}" "${GERFB_INCLUDEDIR}" input_str "${input_str}")
