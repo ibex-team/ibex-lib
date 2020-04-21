@@ -103,8 +103,6 @@ def configure (conf):
 	conf.recurse ("lp_lib_wrapper")
 
 	# recurse
-	Logs.pprint ("BLUE", "Configuration of the plugins")
-	conf.recurse ("plugins")
 	Logs.pprint ("BLUE", "Configuration of the src directory")
 	conf.recurse ("src")
 	Logs.pprint ("BLUE", "Configuration of the tests")
@@ -152,7 +150,7 @@ def configure (conf):
 ####### build ########
 ######################
 def build (bld):
-	bld.recurse ("plugins src")
+	bld.recurse ("src")
 
 	# Generate ibex.pc, the pkg-config file
 	bld (features = "subst", source = "ibex.pc.in", target = "ibex.pc",
@@ -190,8 +188,6 @@ def build (bld):
 def dist (ctx):
 	files_patterns = "wscript benchs/** src/** examples/** waf"
 	files_patterns += " COPYING.LESSER LICENSE ibexutils.py"
-	files_patterns += " plugins/wscript plugins/interval_lib_gaol/"
-	files_patterns += " plugins/lp_lib_none/"
 	ctx.files = ctx.path.ant_glob(files_patterns)
 
 ######################
@@ -208,7 +204,7 @@ def utest (tst):
 	'''run the unitary tests'''
 	logfile = os.path.join (tst.bldnode.abspath(), "utest_config.log")
 	tst.logger = Logs.make_logger (logfile, "utest_config")
-	tst.recurse ("tests plugins", mandatory = False)
+	tst.recurse ("tests", mandatory = False)
 	Logs.free_logger (tst.logger)
 	tst.logger = None
 
@@ -224,4 +220,4 @@ def benchmarks (bch):
 	# load benchmarks tools
 	bch.load ("waf_benchmarks")
 
-	bch.recurse ("benchmarks plugins", mandatory = False)
+	bch.recurse ("benchmarks", mandatory = False)
