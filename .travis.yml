@@ -9,7 +9,6 @@ matrix:
         - LP_LIB=soplex
         - STATIC_OR_SHARED=
         - STATIC_OR_SHARED_CMAKE=
-        - PLUGINS="--with-optim"
     - os: linux
       compiler: gcc
       env:
@@ -17,7 +16,6 @@ matrix:
         - LP_LIB=none
         - STATIC_OR_SHARED=--enable-shared
         - STATIC_OR_SHARED_CMAKE=-DBUILD_SHARED_LIBS=ON
-        - PLUGINS=
     - os: linux
       compiler: gcc
       env:
@@ -25,7 +23,6 @@ matrix:
         - LP_LIB=soplex
         - STATIC_OR_SHARED=
         - STATIC_OR_SHARED_CMAKE=
-        - PLUGINS="--with-optim"
     - os: osx
       compiler: clang
       osx_image: xcode8.3
@@ -34,7 +31,6 @@ matrix:
         - LP_LIB=soplex
         - STATIC_OR_SHARED=
         - STATIC_OR_SHARED_CMAKE=
-        - PLUGINS="--with-optim"
         - CXXFLAGS=-std=c++11
     - os: osx
       compiler: clang
@@ -44,7 +40,6 @@ matrix:
         - LP_LIB=none
         - STATIC_OR_SHARED=--enable-shared
         - STATIC_OR_SHARED_CMAKE=-DBUILD_SHARED_LIBS=ON
-        - PLUGINS=
         - CXXFLAGS=-std=c++11
 
 # only works on linux
@@ -62,7 +57,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ] ; then brew update ; brew install flex bison cppunit; fi
 
 install:
-  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${INTERVAL_LIB} --lp-lib=${LP_LIB} ${PLUGINS} || cat __build__/*.log
+  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${INTERVAL_LIB} --lp-lib=${LP_LIB} || cat __build__/*.log
   - ./waf build install clean
 
 # command to run tests
