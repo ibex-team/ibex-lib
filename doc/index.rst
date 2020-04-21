@@ -63,6 +63,16 @@ Java Plugin (for Choco)
    
    java-install
 
+------------------------
+For developers
+------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   plugins-dev
+   packages
+
 ==================
 Indices and tables
 ==================
