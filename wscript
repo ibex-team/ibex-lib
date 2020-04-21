@@ -37,9 +37,6 @@ def options (opt):
 	opt.recurse ("interval_lib_wrapper")
 	opt.recurse ("lp_lib_wrapper")
 
-	# recurse on plugins directory
-	opt.recurse("plugins")
-
 ######################
 ##### configure ######
 ######################
