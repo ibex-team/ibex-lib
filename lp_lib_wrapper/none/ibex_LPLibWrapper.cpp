@@ -6,6 +6,7 @@ LPSolver::LPSolver(int nb_vars, LPSolver::Mode mode, double tolerance,
 	double timeout, int max_iter)
 {
 	ibex_warning("No LP Solver available (use --lp-lib option in waf configure). ");
+  // TODO adapt for CMake
 }
 
 LPSolver::LPSolver(std::string filename) {

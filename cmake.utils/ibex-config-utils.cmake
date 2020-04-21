@@ -190,6 +190,8 @@ function (GENERATORS_EXPRESSION_REPLACE_FOR_BUILD resultvar input_str)
   endif ()
 
   string(REPLACE "$<BUILD_INTERFACE:" "$<0:" input_str "${input_str}")
+  string(REPLACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}" "$<1:${GERFB_INCLUDEDIR}" input_str "${input_str}")
+  string(REPLACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_LIBDIR}" "$<1:${GERFB_LIBDIR}" input_str "${input_str}")
   string(REPLACE "$<INSTALL_INTERFACE:" "$<1:" input_str "${input_str}")
 
   string(REPLACE "$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}" "${GERFB_INCLUDEDIR}" input_str "${input_str}")
@@ -440,6 +442,9 @@ endfunction ()
 # To be used by plugin, target Ibex::ibex should exist
 # return 1 if an Linear Programming library was used when Ibex was compiled
 # else return 0
+# MAYBE more general function: can return LP LIB or ITV lib (using macro in
+# src/ibex_Setting.h
+# framework: include ibex.h link with Ibex::ibex and test for a given symbol)
 function (IBEX_CHECK_HAVE_LP_LIB resultvar)
   include (CheckCXXSymbolExists)
   set (_bak ${CMAKE_REQUIRED_INCLUDES}) # backup
