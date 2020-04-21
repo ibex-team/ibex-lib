@@ -12,7 +12,7 @@
 //============================================================================
 
 #include "ibex.h"
-#include "ibexopt.h"
+#include "parse_args.h"
 
 #include <sstream>
 

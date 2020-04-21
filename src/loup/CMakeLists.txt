@@ -1,7 +1,4 @@
-# This file is written to be used via 'add_subdirectory' not 'include'
-# Following advice from https://cmake.org/cmake/help/v3.0/command/file.html, the
-# command FILE (GLOB ...) should not be used to set these variables.
-# Paths to files should be absolute.
+# see arithmetic/CMakeLists.txt for comments
 
 target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderCertify.cpp

@@ -15,6 +15,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
+#include "ibex_LPSolver.h"
 
 namespace ibex {
 
@@ -23,7 +24,7 @@ class TestOptimizer : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestOptimizer);
-#ifndef _IBEX_WITH_NOLP_
+#ifndef __IBEX_NO_LP_SOLVER__
 	CPPUNIT_TEST(vec_problem01);
 	CPPUNIT_TEST(vec_problem02);
 	CPPUNIT_TEST(issue50_1);

@@ -13,6 +13,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
+#include "ibex_LPSolver.h"
 
 namespace ibex {
 
@@ -22,7 +23,7 @@ public:
 	CPPUNIT_TEST_SUITE(TestCtcPolytopeHull);
 	
 
-#ifndef _IBEX_WITH_NOLP_
+#ifndef __IBEX_NO_LP_SOLVER__
 
 		CPPUNIT_TEST(lp01);
 		CPPUNIT_TEST(fixbug01);

@@ -1,5 +1,5 @@
-add_executable (ibexsolve ibexsolve.cpp ibexsolve.h)
-add_executable (ibexopt ibexopt.cpp ibexopt.h)
+add_executable (ibexsolve ibexsolve.cpp parse_args.h)
+add_executable (ibexopt ibexopt.cpp parse_args.h)
 target_link_libraries (ibexsolve ibex)
 target_link_libraries (ibexopt ibex)
 set_target_properties (ibexsolve PROPERTIES RUNTIME_OUTPUT_DIRECTORY
