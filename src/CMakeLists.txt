@@ -3,8 +3,6 @@
 ################################################################################
 add_library (ibex "")
 
-# TODO IBEX_INCDIRS should be empty, interval_lib and lp_lib incdirs must be
-# dealt with via incdirs of INTERFACE targets
 target_include_directories (ibex PUBLIC "$<BUILD_INTERFACE:${IBEX_INCDIRS}>")
 
 target_link_libraries (ibex PUBLIC ${INTERVAL_LIB_TARGET} ${LP_LIB_TARGET})
