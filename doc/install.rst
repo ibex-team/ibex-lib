@@ -225,8 +225,8 @@ In particular, ``waf`` ``configure`` supports the following options:
                         If Ibex is compiled as a shared library, you must also add the libpath of CLP in ``LD_LIBRARY_PATH``.
                         
 
---coinutils-path=PATH   Set the (absolute) path of CoinUtils to PATH (to be used with ``--lp-lib=clp`` and ``--clp-path``). The plugin archive contains 
-                        a version of CLP that includes CoinUtils so this option is not required.
+--coinutils-path=PATH   **Deprecated. Only available up to ibex 2.8.6** Set the (absolute) path of CoinUtils to PATH (to be used with ``--lp-lib=clp`` and ``--clp-path``). 
+						The plugin archive contains a version of CLP that includes CoinUtils so this option is not required.
                         PATH is the absolute path where CoinUtils is installed (don’t use relative path like ``--coinutils-path=../coinutils-xx``).       
                         If Ibex is compiled as a shared library, you must also add the libpath of CoinUtils in ``LD_LIBRARY_PATH``.
 
