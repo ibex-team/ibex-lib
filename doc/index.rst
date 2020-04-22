@@ -72,6 +72,7 @@ For developers
 
    plugins-dev
    packages
+   dev-misc
 
 ==================
 Indices and tables

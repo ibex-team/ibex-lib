@@ -21,9 +21,12 @@ directory::
 
   $ make package
 
-It will produce 4 files called ibex-<version>-<System>-binaries.deb,
-ibex-<version>-<System>-devtools.deb, ibex-<version>-<System>.tar.gz and
-ibex-<version>-<System>.zip.
+It will produce 4 files called:
+
+* ibex-<version>-<System>-binaries.deb
+* ibex-<version>-<System>-devtools.deb
+* ibex-<version>-<System>.tar.gz and
+* ibex-<version>-<System>.zip.
 
 ===============================
 Debian package
@@ -42,12 +45,8 @@ the following commands::
 
 
 
-.. _deb-wiki-packaging https://wiki.debian.org/Packaging
-.. _deb-manual-debmake https://www.debian.org/doc/manuals/debmake-doc/index.en.html
-.. _deb-manual-list https://www.debian.org/doc/devel-manuals
-.. _deb-manual-tuto https://www.debian.org/doc/devel-manuals#packaging-tutorial
-
-
-References on debian packaging: `here <deb-wiki-packaging>`,
-`here <deb-manual-debmake>`, `here <deb-manual-list>` and
-`here <deb-manual-tuto>`.
+References on debian packaging:
+`here <https://wiki.debian.org/Packaging>`_,
+`here <https://www.debian.org/doc/manuals/debmake-doc/index.en.html>`_,
+`here <https://www.debian.org/doc/devel-manuals>`_ and
+`here <https://www.debian.org/doc/devel-manuals#packaging-tutorial>`_.
