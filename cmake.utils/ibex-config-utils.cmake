@@ -382,6 +382,37 @@ endfunction ()
 ################################################################################
 ################################################################################
 ################################################################################
+function (ADD_UNINSTALL_COMMAND UNINSTALL_SCRIPT)
+  file (GENERATE OUTPUT ${UNINSTALL_SCRIPT} CONTENT "\
+if(NOT EXISTS \"${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt\")\n\
+  message(FATAL_ERROR \"Cannot find install manifest: \\\"${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt\\\"\")\n\
+endif()\n\
+\n\
+file(READ \"${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt\" files)\n\
+string(REPLACE \"\\n\" \";\" files \"\${files}\")\n\
+foreach(file \${files})\n\
+  message(STATUS \"Uninstalling \\\"\$ENV{DESTDIR}\${file}\\\"\")\n\
+  if(EXISTS \"\$ENV{DESTDIR}\${file}\")\n\
+    exec_program(\n\
+      \"${CMAKE_COMMAND}\" ARGS \"-E remove -f \\\"\$ENV{DESTDIR}\${file}\\\"\"\n\
+      OUTPUT_VARIABLE rm_out\n\
+      RETURN_VALUE rm_retval\n\
+      )\n\
+    if(\"\${rm_retval}\" STREQUAL 0)\n\
+    else()\n\
+      message(FATAL_ERROR \"Problem when removing \\\"\$ENV{DESTDIR}\${file}\\\": \${rm_out}\")\n\
+    endif()\n\
+  else()\n\
+    message(STATUS \"File \\\"\$ENV{DESTDIR}\${file}\\\" does not exist.\")\n\
+  endif()\n\
+endforeach()\n\
+")
+  add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${UNINSTALL_SCRIPT}")
+endfunction ()
+
+################################################################################
+################################################################################
+################################################################################
 function (IBEX_INIT_COMMON)
   ##############################################################################
   # Options for install directory
@@ -434,6 +465,11 @@ function (IBEX_INIT_COMMON)
 
   set (CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" PARENT_SCOPE)
   set (CMAKE_CXX_FLAGS_DEBUG "-O0 -g -pg -Wall -DDEBUG" PARENT_SCOPE)
+
+  ##############################################################################
+  # add uninstall command
+  ##############################################################################
+  add_uninstall_command ("${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 endfunction ()
 
 ################################################################################

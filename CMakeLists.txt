@@ -48,14 +48,6 @@ add_make_target_for_ctest (check)
 #add_subdirectory (benchs)
 
 ################################################################################
-# Add the uninstall support
-################################################################################
-set (UNINSTALL_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
-configure_file("${MODULE_DIR}/cmake_uninstall.cmake.in" "${UNINSTALL_SCRIPT}"
-                                                                          @ONLY)
-add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${UNINSTALL_SCRIPT}")
-
-################################################################################
 # We add this file last in the hope that the install script will run it last.
 # Specifically, we want this to be run after the line
 # install (EXPORT ibex...
