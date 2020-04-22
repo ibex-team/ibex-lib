@@ -10,8 +10,8 @@
 
 #include "ibex.h"
 
-#ifndef _IBEX_WITH_OPTIM_
-#error "You need the IbexOpt plugin to run this example."
+#ifdef __IBEX_NO_LP_SOLVER__
+#error "You need a LP solver to run this example (use -DLP_LIB=... in cmake)"
 #endif
 
 #define IBEX_OPTIM_BENCHS_DIR "../plugins/optim/benchs"

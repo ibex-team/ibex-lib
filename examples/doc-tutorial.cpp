@@ -11,9 +11,9 @@
 
 #include "ibex.h"
 
-#ifndef _IBEX_WITH_OPTIM_
-#error "You need the plugin Optim to run this example."
-#endif
+//#ifndef _IBEX_WITH_OPTIM_
+//#error "You need the plugin Optim to run this example."
+//#endif
 
 #ifndef IBEX_BENCHS_DIR
   #define IBEX_BENCHS_DIR "../plugins/solver/benchs"
