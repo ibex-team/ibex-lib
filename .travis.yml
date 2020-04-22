@@ -48,8 +48,6 @@ matrix:
         - STATIC_OR_SHARED=--enable-shared
         - STATIC_OR_SHARED_CMAKE=-DBUILD_SHARED_LIBS=ON
         - CXXFLAGS=-std=c++11
-
-jobs:
   allow_failures:
     - os: linux
       compiler: gcc
