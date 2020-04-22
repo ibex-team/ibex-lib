@@ -14,7 +14,7 @@
 #error "You need a LP solver to run this example (use -DLP_LIB=... in cmake)"
 #endif
 
-#define IBEX_OPTIM_BENCHS_DIR "../plugins/optim/benchs"
+#define IBEX_OPTIM_BENCHS_DIR "../benchs/optim"
 
 using namespace std;
 using namespace ibex;
