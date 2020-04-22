@@ -23,6 +23,13 @@ matrix:
         - LP_LIB=soplex
         - STATIC_OR_SHARED=
         - STATIC_OR_SHARED_CMAKE=
+    - os: linux
+      compiler: gcc
+      env:
+        - INTERVAL_LIB=direct
+        - LP_LIB=soplex
+        - STATIC_OR_SHARED=
+        - STATIC_OR_SHARED_CMAKE=
     - os: osx
       compiler: clang
       osx_image: xcode8.3
@@ -41,6 +48,16 @@ matrix:
         - STATIC_OR_SHARED=--enable-shared
         - STATIC_OR_SHARED_CMAKE=-DBUILD_SHARED_LIBS=ON
         - CXXFLAGS=-std=c++11
+
+jobs:
+  allow_failures:
+    - os: linux
+      compiler: gcc
+      env:
+        - INTERVAL_LIB=direct
+        - LP_LIB=soplex
+        - STATIC_OR_SHARED=
+        - STATIC_OR_SHARED_CMAKE=
 
 # only works on linux
 addons:
