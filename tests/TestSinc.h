@@ -23,13 +23,11 @@ class TestSinc : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestSinc);
-#ifndef _IBEX_WITH_NOLP_
 	CPPUNIT_TEST(eval1);
 	CPPUNIT_TEST(simplify);
 	CPPUNIT_TEST(callbacks);
 	CPPUNIT_TEST(gradient);
 	CPPUNIT_TEST(solve);
-#endif
 	CPPUNIT_TEST_SUITE_END();
 
 	void eval1();

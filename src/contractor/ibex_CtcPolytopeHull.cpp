@@ -22,8 +22,6 @@ class PolytopeHullEmptyBoxException { };
 
 }
 
-#ifndef  _IBEX_WITH_NOLP_
-
 CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps) :
 		Ctc(lr.nb_var()), lr(lr),
 		mylinearsolver(nb_var, LPSolver::Mode::Certified, eps, time_out, max_iter),
@@ -279,24 +277,5 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, in
 	}
 	return found;
 }
-
-#else
-
-CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps) :
-		Ctc(lr.nb_var()) { }
-
-CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps) :
-		Ctc(A.nb_cols()) { }
-
-CtcPolytopeHull::~CtcPolytopeHull() { }
-
-void CtcPolytopeHull::set_contracted_vars(const BitSet& vars) { }
-
-void CtcPolytopeHull::contract(IntervalVector& box) { }
-
-#endif /// end _IBEX_WITH_NOLP_
-
-
-
 
 } // end namespace ibex

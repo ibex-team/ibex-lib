@@ -23,10 +23,7 @@ class TestTrace : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestTrace);
-#ifndef _IBEX_WITH_NOLP_
 	CPPUNIT_TEST(eval1);
-
-#endif
 	CPPUNIT_TEST_SUITE_END();
 
 	void eval1();

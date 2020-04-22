@@ -21,6 +21,11 @@ using namespace ibex;
 
 int main(int argc, char** argv) {
 
+#ifdef __IBEX_NO_LP_SOLVER__
+	ibex_error("ibexopt requires a LP Solver (use -DLP_LIB=... in cmake)");
+	exit(1);
+#endif
+
 	stringstream _rel_eps_f, _abs_eps_f, _eps_h, _random_seed, _eps_x;
 	_rel_eps_f << "Relative precision on the objective. Default value is 1e" << round(::log10(OptimizerConfig::default_rel_eps_f)) << ".";
 	_abs_eps_f << "Absolute precision on the objective. Default value is 1e" << round(::log10(OptimizerConfig::default_abs_eps_f)) << ".";
