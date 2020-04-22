@@ -34,7 +34,7 @@ Debian package
 
 .. note::
 
-  Debian package can only be build on Unix machines
+  Debian package can only be built on Unix machines
 
 
 If you are under Debian or Ubuntu, you can inspect the generated deb files with
