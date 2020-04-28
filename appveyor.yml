@@ -11,9 +11,16 @@ environment:
       CPACK_PATH: 'C:\\Program Files (x86)\\CMake\\bin'
       platform: x86
       CPPUNIT_DIR: C:\tools\vcpkg\installed\x86-windows
+      LP_SOLVER: 'none'
     - CMAKE_PLATFORM: "Visual Studio 14 2015 Win64"
       CPACK_PATH: 'C:\\Program Files (x86)\\CMake\\bin'
       platform: x64
+      CPPUNIT_DIR: C:\tools\vcpkg\installed\x64-windows
+      LP_SOLVER: 'none'
+    - CMAKE_PLATFORM: "Visual Studio 14 2015 Win64"
+      CPACK_PATH: 'C:\\Program Files (x86)\\CMake\\bin'
+      platform: x64
+      LP_SOLVER: 'soplex'
       CPPUNIT_DIR: C:\tools\vcpkg\installed\x64-windows
 
 init:
@@ -29,12 +36,12 @@ build_script:
   - cd c:\projects\ibex-lib
   - mkdir build
   - cd build
-  - cmake -G "%CMAKE_PLATFORM%" -DCMAKE_BUILD_TYPE=Release -DINTERVAL_LIB=filib -DCPPUNIT_DIR="%CPPUNIT_DIR%" ../
+  - cmake -G "%CMAKE_PLATFORM%" -DCMAKE_BUILD_TYPE=Release -DLP_LIB=%LP_SOLVER% -DINTERVAL_LIB=filib -DCPPUNIT_DIR="%CPPUNIT_DIR%" ../
   - set MSBuildLogger="C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
   - set MSBuildOptions=/v:m /p:Configuration=%Configuration% /logger:%MSBuildLogger%
   - msbuild %MSBuildOptions% PACKAGE.vcxproj
   - set PATH=%CPACK_PATH%;%PATH% # conflit with choco pack alias. need to put cpack.exe first
-  - CPack.exe -G ZIP
+  - CPack.exe
 
 artifacts:
 - path: build\ibex*.exe
@@ -54,5 +61,5 @@ deploy:
   draft: true
   prerelease: false
   on:
-    branch: develop      # release from master branch only
+    branch: msvc_release_test      # release from master branch only
     appveyor_repo_tag: false        # deploy on tag push only
