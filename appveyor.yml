@@ -41,7 +41,8 @@ build_script:
   - set MSBuildOptions=/v:m /p:Configuration=%Configuration% /logger:%MSBuildLogger%
   - msbuild %MSBuildOptions% PACKAGE.vcxproj
   - set PATH=%CPACK_PATH%;%PATH% # conflit with choco pack alias. need to put cpack.exe first
-  - CPack.exe
+  - CPack.exe -G NSIS
+  - CPack.exe -G ZIP
 
 artifacts:
 - path: build\ibex*.exe
