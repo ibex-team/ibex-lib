@@ -42,16 +42,17 @@ artifacts:
 - path: build\ibex*.zip
   name: ibex-lib-zip
 
-# deploy:
-#   release: ibex-lib-v$(appveyor_build_version)
-#   description: 'ibexlib'
-#   provider: GitHub
-#   auth_token:
-#     secure: *******************************************
 
-#   artifact: ibex-lib,ibex-lib-zip
-#   draft: true
-#   prerelease: false
-#   on:
-#     branch: develop_test_appveyor      # release from master branch only
-#     appveyor_repo_tag: false        # deploy on tag push only
+deploy:
+  release: ibex-lib-v$(appveyor_build_version)
+  description: 'ibexlib compiled without lp solver'
+  provider: GitHub
+  auth_token:
+    secure: Bu9kqyFD6errPkHu23iueJXI5x7JZ/8ZHVwoYNB1ZijEQ7KOySfC/sJ0fKBDgFOA
+
+  artifact: ibex-lib,ibex-lib-zip
+  draft: true
+  prerelease: false
+  on:
+    branch: develop      # release from master branch only
+    appveyor_repo_tag: false        # deploy on tag push only
