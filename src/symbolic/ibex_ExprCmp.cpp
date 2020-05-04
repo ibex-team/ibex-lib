@@ -22,7 +22,7 @@ bool ExprCmp::compare(const ExprNode& e1, const ExprNode& e2) {
 
 void ExprCmp::visit(const ExprNode& e) {
 	if (&e==e2) return; // are_equal remains true
-	else e.acceptVisitor(*this);
+	else e.accept_visitor(*this);
 }
 
 void ExprCmp::visit(const ExprIndex& e) {
@@ -30,10 +30,10 @@ void ExprCmp::visit(const ExprIndex& e) {
 	are_equal &= e3!=NULL && e.index!=e3->index && ExprCmp().compare(e.expr,e3->expr);
 }
 
-void ExprCmp::visit(const ExprNAryOp& e)   { e.acceptVisitor(*this); } // (useless so far)
-void ExprCmp::visit(const ExprLeaf& e)     { e.acceptVisitor(*this); } // (useless so far)
-void ExprCmp::visit(const ExprBinaryOp& e) { e.acceptVisitor(*this); } // (useless so far)
-void ExprCmp::visit(const ExprUnaryOp& e)  { e.acceptVisitor(*this); } // (useless so far)
+void ExprCmp::visit(const ExprNAryOp& e)   { e.accept_visitor(*this); } // (useless so far)
+void ExprCmp::visit(const ExprLeaf& e)     { e.accept_visitor(*this); } // (useless so far)
+void ExprCmp::visit(const ExprBinaryOp& e) { e.accept_visitor(*this); } // (useless so far)
+void ExprCmp::visit(const ExprUnaryOp& e)  { e.accept_visitor(*this); } // (useless so far)
 
 void ExprCmp::visit(const ExprSymbol& e) {
 	//const ExprSymbol* e3=dynamic_cast<const ExprSymbol*>(e2);

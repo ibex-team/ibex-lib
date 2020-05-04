@@ -34,7 +34,7 @@ void CompiledFunction::compile(Function& f) {
 	nb_args=new int[n];
 
 	for (ptr=n-1; ptr>=0; ptr--) {
-		(*nodes)[ptr].acceptVisitor(*this);
+		(*nodes)[ptr].accept_visitor(*this);
 	}
 	//cout << f.name << " : n=" << n << " nb_args[" << 0 << "]=" << nb_args[0] << endl;
 }
@@ -60,7 +60,7 @@ Agenda* CompiledFunction::agenda(int rank) const {
 }
 
 void CompiledFunction::visit(const ExprNode& e) {
-	e.acceptVisitor(*this);
+	e.accept_visitor(*this);
 }
 
 void CompiledFunction::visit(const ExprIndex& i) {

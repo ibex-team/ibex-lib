@@ -229,7 +229,7 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 }
 
 void ExprDiff::visit(const ExprNode& e) {
-	e.acceptVisitor(*this);
+	e.accept_visitor(*this);
 }
 
 void ExprDiff::visit(const ExprIndex& i) {

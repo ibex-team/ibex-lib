@@ -239,7 +239,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 	if (e.op==P_ExprNode::POWER ||
 		e.op==P_ExprNode::EXPR_WITH_IDX ||
 		e.op==P_ExprNode::SUM) {
-		e.acceptVisitor(*this);
+		e.accept_visitor(*this);
 		return;
 	}
 

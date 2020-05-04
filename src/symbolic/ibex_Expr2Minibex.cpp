@@ -49,7 +49,7 @@ void Expr2Minibex::visit(const ExprNode& e) {
 	if (map.found(e))
 		(*os) << "_tmp_" << std::dec << map[e] << "_";
 	else
-		e.acceptVisitor(*this);
+		e.accept_visitor(*this);
 }
 
 

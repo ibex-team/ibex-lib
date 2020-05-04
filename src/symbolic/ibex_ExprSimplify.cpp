@@ -114,7 +114,7 @@ const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 	ExprSubNodes old_nodes(e);
 
 	idx = DoubleIndex::all(e.dim);
-	e.acceptVisitor(*this);
+	e.accept_visitor(*this);
 	const ExprNode& result = get(e,idx);
 
 	// If a node does not appear in the final expression
@@ -205,7 +205,7 @@ const ExprNode& ExprSimplify::get(const ExprNode& e, const DoubleIndex& idx2) {
 	if (i==v.size()) { // idx2 not found in the clone list
 		DoubleIndex old_idx=idx;
 		idx=idx2;
-		e.acceptVisitor(*this);
+		e.accept_visitor(*this);
 		idx=old_idx;
 		assert(v.back().first==idx2);
 	}

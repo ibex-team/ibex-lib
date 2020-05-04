@@ -96,7 +96,7 @@ public:
 
 	virtual ~P_ExprNode();
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	// Generate the expression with the current scope.
 	// Note: not very clean: used in parser.yc only for convenience
@@ -140,7 +140,7 @@ public:
 
 	P_ExprWithIndex(const P_ExprNode& expr, const P_ExprNode& row, const P_ExprNode& col, bool matlab_style);
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	bool matlab_style;
 };
@@ -156,7 +156,7 @@ class P_ExprPower : public P_ExprNode {
 public:
 	P_ExprPower(const P_ExprNode& expr, const P_ExprNode& power);
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 };
 
 /**
@@ -169,7 +169,7 @@ public:
 
 	~P_ExprSum();
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	const char* iter;
 };
@@ -186,7 +186,7 @@ public:
 
 	~P_ExprVarSymbol();
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	const char* name;
 };
@@ -207,7 +207,7 @@ public:
 
 	~P_ExprCstSymbol();
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	const char* name;
 };
@@ -222,7 +222,7 @@ public:
 
 	~P_ExprTmpSymbol();
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	const char* name;
 };
@@ -255,7 +255,7 @@ public:
 	 */
 	P_ExprConstant(const Domain& d);
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	Domain value;
 };
@@ -269,7 +269,7 @@ public:
 
 	virtual ~P_ExprIter();
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	const char* name;
 };
@@ -281,7 +281,7 @@ class P_ExprApply : public P_ExprNode {
 public:
 	P_ExprApply(const Function& f, const Array<const P_ExprNode>& args);
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	const Function& f;
 };
@@ -295,7 +295,7 @@ public:
 
 	~P_ExprGenericUnaryOp();
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	const char* name;
 };
@@ -309,7 +309,7 @@ public:
 
 	~P_ExprGenericBinaryOp();
 
-	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+	virtual void accept_visitor(P_ExprVisitor& v) const { v.visit(*this); }
 
 	const char* name;
 };

@@ -25,7 +25,7 @@ namespace ibex {
  * be the same (this is not a deep comparison in this case). A deep comparison
  * could also be implemented (TODO).
  */
-class ExprCmp : public virtual ExprVisitor {
+class ExprCmp : public virtual ExprVisitor<void> {
 public:
 	/**
 	 * \brief True iff e1 and e2 are the same

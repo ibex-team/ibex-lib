@@ -52,7 +52,7 @@ const char* DIFF_PREFIX = "d"; // when the differential of a function is generat
  * Find the components used in the function
  * \pre the symbol keys must have been set
  */
-class FindInputsUsed: public ExprVisitor {
+class FindInputsUsed: public ExprVisitor<void> {
 public:
 	BitSet& is_used;
 	int* symbol_index;
@@ -99,7 +99,7 @@ public:
 
 	virtual void visit(const ExprNode& e)     {
 		if (visited.found(e)) return;
-		e.acceptVisitor(*this);
+		e.accept_visitor(*this);
 		visited.insert(e,true);
 	}
 

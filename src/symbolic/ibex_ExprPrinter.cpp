@@ -36,7 +36,7 @@ void ExprPrinter::print(std::ostream& os, const Domain& d, bool human) {
 }
 
 void ExprPrinter::visit(const ExprNode& e) {
-	e.acceptVisitor(*this);
+	e.accept_visitor(*this);
 }
 
 void ExprPrinter::visit(const ExprIndex& e) {
