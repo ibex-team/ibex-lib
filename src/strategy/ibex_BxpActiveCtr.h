@@ -92,7 +92,7 @@ protected:
 	const IntervalVector& box;
 	bool _active;
 	bool up2date;
-	static Map<long,false>& ids();
+	static Map<long,long,false>& ids();
 };
 
 /*================================== inline implementations ========================================*/
