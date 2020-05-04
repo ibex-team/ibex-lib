@@ -339,7 +339,7 @@ protected:
 };
 
 template<typename T, typename ... ArgTypes>
-T ExprNode::accept_visitor(ExprVisitor<T>& v, ArgTypes... args) const {
+T ExprNode::accept_visitor(ExprVisitor<T,ArgTypes...>& v, ArgTypes&&... args) const {
 	switch(type_id()) {
 	case NumExprIndex: 			return v.visit((const ExprIndex&) *this, args...); break;
 	case NumExprSymbol: 		return v.visit((const ExprSymbol&) *this, args...); break;

@@ -58,7 +58,7 @@ public:
 
 	/** Accept an #ibex::ExprVisitor visitor. */
 	template<typename T, typename ... ArgTypes>
-	T accept_visitor(ExprVisitor<T>& v, ArgTypes... args) const;
+	T accept_visitor(ExprVisitor<T,ArgTypes...>& v, ArgTypes&&... args) const;
 
 	friend class Visitor;
 
