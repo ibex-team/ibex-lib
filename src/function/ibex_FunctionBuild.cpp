@@ -139,7 +139,7 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL),
+Function::Function() : name(NULL), comp(NULL), df(NULL), _def_domain(NULL), zero(NULL),
 		_eval(NULL), _hc4revise(NULL), _grad(NULL), _inhc4revise(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
@@ -505,6 +505,7 @@ void Function::generate_comp() {
 void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) {
 
 	df=NULL;
+	_def_domain=NULL;
 	comp=NULL;
 	zero=NULL;
 

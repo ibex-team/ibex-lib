@@ -65,6 +65,7 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCopy.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCopy.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCtr.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprFuncDomain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprDiff.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprDiff.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprLinearity.cpp
