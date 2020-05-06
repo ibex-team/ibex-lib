@@ -79,14 +79,14 @@ void ExprFuncDomain::visit(const ExprSqr& e)   { visit(e.expr); }
 
 void ExprFuncDomain::visit(const ExprSqrt& e) {
 	visit(e.expr);
-	fac.add_ctr(ExprCtr(e,GEQ)); // no new node created -> no garbage
+	fac.add_ctr(ExprCtr(e.expr,GEQ)); // no new node created -> no garbage
 }
 
 void ExprFuncDomain::visit(const ExprExp& e) { visit(e.expr); }
 
 void ExprFuncDomain::visit(const ExprLog& e) {
 	visit(e.expr);
-	fac.add_ctr(ExprCtr(e,GEQ)); // no new node created -> no garbage
+	fac.add_ctr(ExprCtr(e.expr,GEQ)); // no new node created -> no garbage
 }
 
 void ExprFuncDomain::visit(const ExprCos& e)  { visit(e.expr);}
@@ -104,12 +104,12 @@ void ExprFuncDomain::visit(const ExprTanh& e) { visit(e.expr);}
 void ExprFuncDomain::visit(const ExprAcos& e) {
 	visit(e.expr);
 
-	const ExprCtr& c1=e>=-1;
+	const ExprCtr& c1=e.expr>=-1;
 	fac.add_ctr(c1);
 	garbage.push_back(&c1.e);
 	delete &c1;
 
-	const ExprCtr& c2=e<=1;
+	const ExprCtr& c2=e.expr<=1;
 	fac.add_ctr(c2);
 	garbage.push_back(&c2.e);
 	delete &c2;
@@ -118,12 +118,12 @@ void ExprFuncDomain::visit(const ExprAcos& e) {
 void ExprFuncDomain::visit(const ExprAsin& e) {
 	visit(e.expr);
 
-	const ExprCtr& c1=e>=-1;
+	const ExprCtr& c1=e.expr>=-1;
 	fac.add_ctr(c1);
 	garbage.push_back(&c1.e);
 	delete &c1;
 
-	const ExprCtr& c2=e<=1;
+	const ExprCtr& c2=e.expr<=1;
 	fac.add_ctr(c2);
 	garbage.push_back(&c2.e);
 	delete &c2;
@@ -134,7 +134,7 @@ void ExprFuncDomain::visit(const ExprAtan& e) { visit(e.expr);}
 void ExprFuncDomain::visit(const ExprAcosh& e) {
 	visit(e.expr);
 
-	const ExprCtr& c=e>=1;
+	const ExprCtr& c=e.expr>=1;
 	fac.add_ctr(c);
 	garbage.push_back(&c.e);
 	delete &c;
@@ -145,12 +145,12 @@ void ExprFuncDomain::visit(const ExprAsinh& e) { visit(e.expr); }
 void ExprFuncDomain::visit(const ExprAtanh& e) {
 	visit(e.expr);
 
-	const ExprCtr& c1=e>=-1;
+	const ExprCtr& c1=e.expr>=-1;
 	fac.add_ctr(c1);
 	garbage.push_back(&c1.e);
 	delete &c1;
 
-	const ExprCtr& c2=e<=1;
+	const ExprCtr& c2=e.expr<=1;
 	fac.add_ctr(c2);
 	garbage.push_back(&c2.e);
 	delete &c2;
