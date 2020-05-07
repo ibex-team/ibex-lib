@@ -216,8 +216,10 @@ bool Solver::next(CovSolverData::BoxStatus& status, const IntervalVector** sol) 
 				pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 
 				delete buffer.pop();
-				buffer.push(new_cells.first);
+				// note: more natural to push first the second, so that
+				// solutions in a 1-dimensional problem come in increasing order
 				buffer.push(new_cells.second);
+				buffer.push(new_cells.first);
 				nb_cells+=2;
 				if (cell_limit >=0 && nb_cells>=cell_limit) {
 					flush();
