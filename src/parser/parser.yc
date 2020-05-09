@@ -221,13 +221,14 @@ decl_opt_ctrs :
 ctr_blk_list  : ctr_blk_list_ semicolon_opt     { pstruct->source.ctrs=new P_ConstraintList($1); }
               ;
 
-ctr_blk_list_ : ctr_blk_list_ ';' ctr_blk       { $1->push_back($3); $$ = $1; }
+ctr_blk_list_ : ctr_blk_list_ 
+                semicolon_opt ctr_blk           { $1->push_back($3); $$ = $1; }
               | ctr_blk                         { $$ = new vector<P_NumConstraint*>();
               								      $$->push_back($1); }
               ; 
 
 ctr_blk       : ctr_loop                        { $$ = $1; }
-              | ctr                             { $$ = $1; }
+              | ctr ';'                         { $$ = $1; }
               ;
 
 ctr_loop      : TK_FOR TK_NEW_SYMBOL TK_EQU
