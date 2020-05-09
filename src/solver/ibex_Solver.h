@@ -47,7 +47,7 @@ public:
 	 *
 	 * See comments for solve(...) below.
 	 */
-	typedef enum { SUCCESS, INFEASIBLE, NOT_ALL_VALIDATED, TIME_OUT, CELL_OVERFLOW } Status;
+	typedef enum { SUCCESS, INFEASIBLE, NOT_ALL_VALIDATED, TIME_OUT, CELL_OVERFLOW, USER_BREAK } Status;
 
 	/**
 	 * \brief Boundary test strength
@@ -89,8 +89,11 @@ public:
 	/**
 	 * \brief Solve the system (non-interactive mode).
 	 *
-	 * \param init_box - the initial box (the search space)
-	 * 
+	 * \param init_box      - The initial box (the search space)
+	 * \param stop_at_first - If true, stop after the first box found
+	 *                        (either solution, boundary or unknown).
+	 *                        Always return USER_BREAK in this case.
+
 	 * \return Possible values:
 	 *
 	 *   SUCCESS:           (complete search) all solutions found and all
@@ -107,24 +110,27 @@ public:
 	 *   CELL_OVERFLOW:     (incomplete search) cell overflow : the number of
 	 *                      cell has exceeded the limit.
 	 *
+	 *   USER_BREAK:        (incomplete search) user break (Control-C) or parameter
+	 *                      #stop_at_first set to true.
+	 *
 	 * The vector of "solutions" (output boxes) found by the solver
 	 * are retrieved with #get_solutions().
 	 */
-	Status solve(const IntervalVector& init_box);
+	Status solve(const IntervalVector& init_box, bool stop_at_first=false);
 
 	/**
 	 * \brief Continue solving of the system.
 	 *
 	 * \param cov - COV data structure containing the input paving;
 	 */
-	Status solve(const CovSolverData& cov);
+	Status solve(const CovSolverData& cov, bool stop_at_first=false);
 
 	/**
 	 * \brief Continue solving of the system.
 	 *
 	 * \param filename - Name of the file containing the input paving;
 	 */
-	Status solve(const char* filename);
+	Status solve(const char* filename, bool stop_at_first=false);
 
 	/**
 	 * \brief Solve the system
@@ -266,8 +272,9 @@ public:
 protected:
 	/**
 	 * \brief Call "next" until search is over.
+	 *
 	 */
-	Status solve();
+	Status solve(bool stop_at_first);
 
 	/*
 	 * \brief Return a new "output box" that potentially contains solutions.

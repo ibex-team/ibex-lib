@@ -21,7 +21,7 @@ const unsigned int CovSolverData::FORMAT_VERSION = 1;
 
 const unsigned int CovSolverData::subformat_level = 5;
 
-const unsigned int CovSolverData::subformat_number = 0;
+const unsigned int CovSolverData::subformat_number = 1;
 
 CovSolverData::CovSolverData(size_t n, size_t m, size_t nb_ineq, BoundaryType boundary_type, const vector<string>& var_names) :
 		CovManifold(n, m, nb_ineq, boundary_type), data(new Data()), own_data(true) {
@@ -188,6 +188,7 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::sta
 		case 2: cov.data->_solver_solver_status = (unsigned int) Solver::NOT_ALL_VALIDATED; break;
 		case 3: cov.data->_solver_solver_status = (unsigned int) Solver::TIME_OUT;          break;
 		case 4: cov.data->_solver_solver_status = (unsigned int) Solver::CELL_OVERFLOW;     break;
+		case 5: cov.data->_solver_solver_status = (unsigned int) Solver::USER_BREAK;        break;
 		default: ibex_error("[CovSolverData]: invalid solver status.");
 		}
 
@@ -282,6 +283,7 @@ void CovSolverData::format(stringstream& ss, const string& title, std::stack<uns
 	<< space << "                     (--eps-min) reached\n"
 	<< space << "                   - 3=incomplete search: time out\n"
 	<< space << "                   - 4=incomplete search: buffer overflow\n"
+	<< space << "                   - 5=incomplete search: user break\n"
 	<< space << " - 1 real value:   time (in seconds)\n"
 	<< space << " - 1 integer:      the number of cells.\n"
 	<< space << " - 1 value:        the number Np of pending boxes\n"
