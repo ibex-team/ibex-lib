@@ -13,10 +13,16 @@ This page describes IbexOpt, the plugin installed with the ``--with-optim`` opti
 Getting started
 =================
 
-IbexOpt is a end-user program that solves a NLP problem (non-linear programming).
-It minimizes a (nonlinear) objective function under (nonlinear) inequality and equality constraints.
-It resorts to
-a unique black-box strategy (whatever the input problem is) and with a very limited 
+IbexOpt is a end-user program that solves a standard NLP problem (non-linear programming), i.e.,
+it minimizes a (nonlinear) objective function under (nonlinear) inequality and equality constraints:
+
+.. math::
+
+	{\mbox Minimize} \ f(x)
+	
+	{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0.
+	
+IbexOpt resorts to a unique black-box strategy (whatever the input problem is) and with a very limited 
 number of parameters. Needless to say, this strategy is a kind of compromise and not the 
 best one for a given problem.
 
@@ -57,6 +63,55 @@ The following result should be displayed::
 The program has proved that the minimum of the objective lies in a small interval enclosing -310. It also gives
 a point close to (5 ; 1 ; 5 ; 0 ; 5 ; 10) which satisfies the constraints and for which
 the value taken by the objective function is inside this interval. The process took less than 0.005 seconds.
+
+
+.. _optim-return:
+
+================== 
+Return status
+================== 
+
+When the optimizer terminates, the following possible status are:
+
+- **success**:    
+              An enclosure of the minimum respecting the precision requirements (``--a`` and ``--r``)
+              has been found as well as a global minimizer .
+              In standard mode (without ``--rigor``), equalities are relaxed and the global minimizer is
+              a point x* satisfying
+              :math:`-\varepsilon_h\leq h(^*)\leq\varepsilon_h`. In rigor mode (``--rigor``), the
+              global minimizer is a box  :math:`[x^*]` such that, for some x* inside we do have :math:`h(x^*)=0`.
+              In both cases, for the (explicit or implicit) point x*, f(x*) is also sufficiently closed
+              to the real global minimum, according to the precision criteria.
+- **infeasible**: 
+              This return status actually corresponds to two different situations. Either the constraints
+              are not satisfiable (that is, there is not point x simultaneously satisfying all equalities
+              and inequalities) or the feasible points are all outside the definition domain of the
+              objective funnction f.
+- **no feasible point found**:
+              The optimizer could not be able to find a feasible point. This status typically arises
+              if you control the precision of the bisection (``--eps-x``). Indeed, it may happen, in this case,
+              that the search stops and no box explored was enough bisected to find a feasible point inside. So the
+              search is over but the problem was not solved. It may also arise when an inequality
+              is actually an equality (e.g., :math:`x^2\leq 0`), because in non-rigor mode, neither a relaxation nor
+              an equality satisfaction proof is enforced in this case.
+- **unbounded objective**:
+              The optimizer could not find a lower bound of the minimum. This means that the objective is very
+              likely to be unbounded. 
+- **time out**:  
+              The time specified with ``-t`` is reached. Note that this time is only for the solving process itself and
+              does not count for the system loading step. This means that if the system (the Minibex file) is very big, 
+              you may actually wait longer.
+- **unreached precision**:
+              This status happens when the search is over but the enclosure on the minimum does not respect the
+              precision requirements (``--a`` and ``--r``). It is a similar but slightly better situation than 
+              when the status is ``no feasible point found``. The difference is that some feasible points have 
+              been found but some part of the search space could not be processed (neither rejected nor proven
+              as containing a solution), preventing a good minimum enclosure. An example is when minimizing x
+              under the constraint :math:`x^2(x-1)(x-2)\leq0` in non-rigor mode. Feasible points in the interval
+              [1,2] are quickly found so that the loup is quickly set to 1. But the lower bound is stuck to 0
+              as :math:`x^2\leq 0` contains a solution (0) which is not found. The problem does not happen in 
+              rigor mode.
+
 
 .. _optim-options:
 
