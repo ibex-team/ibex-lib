@@ -401,18 +401,18 @@ void TestSystem::mutable_cst() {
 
 	DefaultSolver solver(sys);
 	solver.solve(sys.box);
-	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(6));
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(4));
 	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(5));
-	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(4));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(6));
 
 	sys.constant("a").i()=7;
 	sys.constant("b").v()[0]=8;
 	sys.constant("b").v()[1]=9;
 
 	solver.solve(sys.box);
-	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(9));
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(7));
 	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(8));
-	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(7));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(9));
 }
 
 } // end namespace

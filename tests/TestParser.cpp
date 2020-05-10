@@ -382,15 +382,15 @@ void TestParser::mutable_cst_1() {
 
 	_c1=4; _c2[0]=5; _c2[1]=6;
 	solver.solve(sys.box);
-	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(6));
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(4));
 	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(5));
-	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(4));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(6));
 
 	_c1=7; _c2[0]=8; _c2[1]=9;
 	solver.solve(sys.box);
-	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(9));
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(7));
 	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(8));
-	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(7));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(9));
 	cleanup(ctr.e,true);
 	delete &ctr;
 }

@@ -40,8 +40,8 @@ void TestSolver::circle1() {
 	f.add_ctr(sqr(x-1)+sqr(y)=1);
 	double cospi6=0.5;
 	double sinpi6=::sqrt(3)/2;
-	double _sol1[]={cospi6,sinpi6};
-	double _sol2[]={cospi6,-sinpi6};
+	double _sol1[]={cospi6,-sinpi6};
+	double _sol2[]={cospi6,sinpi6};
 
 	Vector sol1(2,_sol1);
 	Vector sol2(2,_sol2);
@@ -118,8 +118,8 @@ void TestSolver::circle3() {
 	double sinpi6=(sqrt(Interval(3))/2).lb();
 	f.add_ctr(4*y*abs(y)<=3); // a rigorous way to impose y<=sin(pi/6).
 
-	double _sol1[]={cospi6,sinpi6};
-	double _sol2[]={cospi6,-sinpi6};
+	double _sol1[]={cospi6,-sinpi6};
+	double _sol2[]={cospi6,sinpi6};
 
 	Vector sol1(2,_sol1);
 	Vector sol2(2,_sol2);
@@ -137,15 +137,15 @@ void TestSolver::circle3() {
 
 	bool res=solver.next(status);
 	CPPUNIT_ASSERT(res);
-	CPPUNIT_ASSERT(status==CovSolverData::UNKNOWN);
-	CPPUNIT_ASSERT(solver.get_data().nb_unknown()==1);
-	CPPUNIT_ASSERT(solver.get_data().unknown(0).is_superset(sol1));
+	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
+	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol1));
 
 	res=solver.next(status);
 	CPPUNIT_ASSERT(res);
-	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
-	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
-	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol2));
+	CPPUNIT_ASSERT(status==CovSolverData::UNKNOWN);
+	CPPUNIT_ASSERT(solver.get_data().nb_unknown()==1);
+	CPPUNIT_ASSERT(solver.get_data().unknown(0).is_superset(sol2));
 
 	res=solver.next(status);
 	CPPUNIT_ASSERT(!res);
@@ -166,8 +166,8 @@ void TestSolver::circle4() {
 	double cospi6=0.5;
 	double sinpi6=::sqrt(3)/2;
 
-	double _sol1[]={cospi6,sinpi6,1};
-	double _sol2[]={cospi6,-sinpi6,1};
+	double _sol1[]={cospi6,-sinpi6,1};
+	double _sol2[]={cospi6,sinpi6,1};
 
 	Vector sol1(3,_sol1);
 	Vector sol2(3,_sol2);
