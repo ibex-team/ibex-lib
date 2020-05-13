@@ -124,7 +124,7 @@ ExprNode::ExprNode(int height, int size, const Dim& dim) :
 }
 
 bool ExprNode::operator==(const ExprNode& e) const {
-	return ExprCmp().compare(*this, e);
+	return ExprCmp().compare(*this, e)==0;
 }
 
 bool ExprNode::operator!=(const ExprNode& e) const {
