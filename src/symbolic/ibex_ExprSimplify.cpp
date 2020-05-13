@@ -156,28 +156,35 @@ const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 			delete it->first;
 		} else {
 			// the list of fathers has to be recalculated.
-			((ExprNode*) it->first)->fathers.clear();
-			((ExprNode*) it->first)->fathers.resize(0);
+//			((ExprNode*) it->first)->fathers.clear();
+//			((ExprNode*) it->first)->fathers.resize(0);
 		}
 	}
 
-	for (int i=0; i<new_nodes.size(); i++) {
-		if (dynamic_cast<const ExprNAryOp*>(&new_nodes[i])) {
-			const ExprNAryOp& nary=(const ExprNAryOp&) new_nodes[i];
-			for (int j=0; j<nary.nb_args; j++)
-				((ExprNode&) nary.args[j]).fathers.add(nary);
-		} else if (dynamic_cast<const ExprBinaryOp*>(&new_nodes[i])) {
-			const ExprBinaryOp& b=(const ExprBinaryOp&) new_nodes[i];
-			((ExprNode&) b.left).fathers.add(b);
-			((ExprNode&) b.right).fathers.add(b);
-		} else if (dynamic_cast<const ExprUnaryOp*>(&new_nodes[i])) {
-			const ExprUnaryOp& u=(const ExprUnaryOp&) new_nodes[i];
-			((ExprNode&) u.expr).fathers.add(u);
-		} else if (dynamic_cast<const ExprIndex*>(&new_nodes[i])) {
-			const ExprIndex& index=(const ExprIndex&) new_nodes[i];
-			((ExprNode&) index.expr).fathers.add(index);
-		}
-	}
+	// NOTE: the list of fathers must also be recalculated
+	// for old nodes alive !!
+	// and this is not as simple as the next commented loop
+	// as the old nodes may have fathers "alive"
+	// that do not belong to the new nodes.
+
+
+//	for (int i=0; i<new_nodes.size(); i++) {
+//		if (dynamic_cast<const ExprNAryOp*>(&new_nodes[i])) {
+//			const ExprNAryOp& nary=(const ExprNAryOp&) new_nodes[i];
+//			for (int j=0; j<nary.nb_args; j++)
+//				((ExprNode&) nary.args[j]).fathers.add(nary);
+//		} else if (dynamic_cast<const ExprBinaryOp*>(&new_nodes[i])) {
+//			const ExprBinaryOp& b=(const ExprBinaryOp&) new_nodes[i];
+//			((ExprNode&) b.left).fathers.add(b);
+//			((ExprNode&) b.right).fathers.add(b);
+//		} else if (dynamic_cast<const ExprUnaryOp*>(&new_nodes[i])) {
+//			const ExprUnaryOp& u=(const ExprUnaryOp&) new_nodes[i];
+//			((ExprNode&) u.expr).fathers.add(u);
+//		} else if (dynamic_cast<const ExprIndex*>(&new_nodes[i])) {
+//			const ExprIndex& index=(const ExprIndex&) new_nodes[i];
+//			((ExprNode&) index.expr).fathers.add(index);
+//		}
+//	}
 
 	idx_clones.clean();
 	return result;

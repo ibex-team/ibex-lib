@@ -161,7 +161,7 @@ void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 
 ExprIndex::ExprIndex(const ExprNode& subexpr, const DoubleIndex& index)
 : ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim(index)), expr(subexpr), index(index) {
-	((ExprNode&) (subexpr)).fathers.add(*this);
+//	((ExprNode&) (subexpr)).fathers.add(*this);
 }
 
 bool ExprIndex::indexed_symbol() const {
@@ -238,9 +238,9 @@ ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
 		ExprNode(max_height(_args)+1, ExprSize().nary_size(_args), dim),
 		args(_args), nb_args(_args.size()) {
 
-	for (int i=0; i<nb_args; i++) {
-		((ExprNode&) args[i]).fathers.add(*this);
-	}
+//	for (int i=0; i<nb_args; i++) {
+//		((ExprNode&) args[i]).fathers.add(*this);
+//	}
 }
 
 ExprVector::ExprVector(const Array<const ExprNode>& comp, ExprVector::Orientation o) :
@@ -416,8 +416,8 @@ ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Di
 					dim ),
 		left(left), right(right) {
 
-	((ExprNode&) left).fathers.add(*this);
-	((ExprNode&) right).fathers.add(*this);
+//	((ExprNode&) left).fathers.add(*this);
+//	((ExprNode&) right).fathers.add(*this);
 }
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
@@ -462,7 +462,7 @@ ExprPower::ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.di
 
 ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
 				ExprNode(subexpr.height+1, subexpr.size+1, dim), expr(subexpr) {
-	((ExprNode&) expr).fathers.add(*this);
+//	((ExprNode&) expr).fathers.add(*this);
 }
 
 ExprSign::ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {

@@ -114,8 +114,12 @@ public:
 	 * several times in \a fathers.
 	 * E.g., in the expression x+x where x is the same node, x has two fathers
 	 * which are both references to the node "+".
+	 *
+	 * Currently disabled because it was barely used (only in Expr2Minibex) and
+	 * somehow heavy. Managing properly fathers in the expression simplification
+	 * would require a cookery.
 	 * */
-	Array<const ExprNode> fathers;
+	//Array<const ExprNode> fathers;
 
 	/** Return true if this subexpression is the constant 0. */
 	virtual bool is_zero() const;

@@ -88,15 +88,15 @@ void TestExprSimplify::index_transpose() {
 	CPPUNIT_ASSERT(sameExpr(e.simplify(),"x(2)"));
 }
 
-void TestExprSimplify::issue366() {
-	const ExprSymbol& x=ExprSymbol::new_("x");
-	const ExprNode& e0=x+1-0;
-	const ExprBinaryOp& e=(const ExprBinaryOp&) e0.simplify();
-
-	CPPUNIT_ASSERT(e.fathers.size()==0);
-	CPPUNIT_ASSERT(e.left.fathers.size()==1);
-	CPPUNIT_ASSERT(e.right.fathers.size()==1);
-}
+//void TestExprSimplify::issue366() {
+//	const ExprSymbol& x=ExprSymbol::new_("x");
+//	const ExprNode& e0=x+1-0;
+//	const ExprBinaryOp& e=(const ExprBinaryOp&) e0.simplify();
+//
+//	CPPUNIT_ASSERT(e.fathers.size()==0);
+//	CPPUNIT_ASSERT(e.left.fathers.size()==1);
+//	CPPUNIT_ASSERT(e.right.fathers.size()==1);
+//}
 
 void TestExprSimplify::issue425_01() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::col_vec(3));

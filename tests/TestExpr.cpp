@@ -47,7 +47,7 @@ void TestExpr::symbol() {
 	CPPUNIT_ASSERT(strcmp(x.name,"x")==0);
 	CPPUNIT_ASSERT(x.size==1);
 	//CPPUNIT_ASSERT(x.deco.d-	bool same_mask(int, int, bool**,bool**);>dim==x.dim);
-	CPPUNIT_ASSERT(x.fathers.size()==0);
+	//CPPUNIT_ASSERT(x.fathers.size()==0);
 	CPPUNIT_ASSERT(!x.is_zero());
 	CPPUNIT_ASSERT(x.type()==Dim::SCALAR);
 	CPPUNIT_ASSERT(sameExpr(x,"x"));
@@ -70,10 +70,10 @@ void TestExpr::addxy01() {
 	CPPUNIT_ASSERT(e.id==y.id+1);
 	CPPUNIT_ASSERT(e.size==3);
 	//CPPUNIT_ASSERT(e.deco.d->dim==e.dim);
-	CPPUNIT_ASSERT(x.fathers.size()==1);
-	CPPUNIT_ASSERT(&x.fathers[0]==&e);
-	CPPUNIT_ASSERT(y.fathers.size()==1);
-	CPPUNIT_ASSERT(&y.fathers[0]==&e);
+	//CPPUNIT_ASSERT(x.fathers.size()==1);
+	//CPPUNIT_ASSERT(&x.fathers[0]==&e);
+	//CPPUNIT_ASSERT(y.fathers.size()==1);
+	//CPPUNIT_ASSERT(&y.fathers[0]==&e);
 	CPPUNIT_ASSERT(!e.is_zero());
 	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
 	CPPUNIT_ASSERT(sameExpr(e,"(x+y)"));
@@ -126,9 +126,9 @@ void TestExpr::addxx01() {
 	CPPUNIT_ASSERT(e.height==1);
 	CPPUNIT_ASSERT(e.size==2);
 	//CPPUNIT_ASSERT(e.deco.d->dim==e.dim);
-	CPPUNIT_ASSERT(x.fathers.size()==2);
-	CPPUNIT_ASSERT(&x.fathers[0]==&e);
-	CPPUNIT_ASSERT(&x.fathers[1]==&e);
+	//CPPUNIT_ASSERT(x.fathers.size()==2);
+	//CPPUNIT_ASSERT(&x.fathers[0]==&e);
+	//CPPUNIT_ASSERT(&x.fathers[1]==&e);
 	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
 
 	CPPUNIT_ASSERT(sameExpr(e,"(x+x)"));
@@ -272,20 +272,20 @@ void TestExpr::dag01() {
 	CPPUNIT_ASSERT(e4.size==7);
 
 
-	CPPUNIT_ASSERT(x.fathers.size()==2);
-	CPPUNIT_ASSERT(&x.fathers[0]==&e0);
-	CPPUNIT_ASSERT(&x.fathers[1]==&e2);
-	CPPUNIT_ASSERT(y.fathers.size()==1);
-	CPPUNIT_ASSERT(&y.fathers[0]==&e0);
-	CPPUNIT_ASSERT(e1.fathers.size()==2);
-	CPPUNIT_ASSERT(&e1.fathers[0]==&e2);
-	CPPUNIT_ASSERT(&e1.fathers[1]==&e3);
-	CPPUNIT_ASSERT(e2.fathers.size()==2);
-	CPPUNIT_ASSERT(&e2.fathers[0]==&e3);
-	CPPUNIT_ASSERT(&e2.fathers[1]==&e4);
-	CPPUNIT_ASSERT(e3.fathers.size()==1);
-	CPPUNIT_ASSERT(&e3.fathers[0]==&e4);
-	CPPUNIT_ASSERT(e4.fathers.size()==0);
+	//CPPUNIT_ASSERT(x.fathers.size()==2);
+	//CPPUNIT_ASSERT(&x.fathers[0]==&e0);
+	//CPPUNIT_ASSERT(&x.fathers[1]==&e2);
+	//CPPUNIT_ASSERT(y.fathers.size()==1);
+	//CPPUNIT_ASSERT(&y.fathers[0]==&e0);
+	//CPPUNIT_ASSERT(e1.fathers.size()==2);
+	//CPPUNIT_ASSERT(&e1.fathers[0]==&e2);
+	//CPPUNIT_ASSERT(&e1.fathers[1]==&e3);
+	//CPPUNIT_ASSERT(e2.fathers.size()==2);
+	//CPPUNIT_ASSERT(&e2.fathers[0]==&e3);
+	//CPPUNIT_ASSERT(&e2.fathers[1]==&e4);
+	//CPPUNIT_ASSERT(e3.fathers.size()==1);
+	//CPPUNIT_ASSERT(&e3.fathers[0]==&e4);
+	//CPPUNIT_ASSERT(e4.fathers.size()==0);
 
 	CPPUNIT_ASSERT(sameExpr(e4,"(((x-(x+y)^2)*(x+y)^2)+(x-(x+y)^2))"));
 }
