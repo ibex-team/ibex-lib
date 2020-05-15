@@ -34,7 +34,7 @@ if (DO_TEST)
                   TestCtcNotIn TestDim TestDomain TestDoubleHeap TestDoubleIndex
                   TestEval TestExpr2DAG TestExpr2Minibex TestExprCmp
                   TestExprCopy TestExpr TestExprDiff TestExprLinearity TestExprMonomial
-                  TestExprPolynomial TestExprSimplify TestFncKuhnTucker TestKuhnTuckerSystem
+                  TestExprPolynomial TestExprSimplify TestExprSimplify2 TestFncKuhnTucker TestKuhnTuckerSystem
                   TestFunction TestGradient TestHC4Revise TestInHC4Revise
                   TestInnerArith TestInterval TestIntervalMatrix
                   TestIntervalVector TestKernel TestLinear TestLPSolver
