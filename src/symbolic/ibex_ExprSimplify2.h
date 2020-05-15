@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Mar 27, 2020
-// Last update : Apr 15, 2020
+// Last update : May 15, 2020
 //============================================================================
 
 #ifndef __IBEX_EXPR_SIMPLIFY_2_H__

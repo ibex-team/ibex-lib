@@ -172,6 +172,28 @@ void TestExprSimplify2::poly_05() {
 	cleanup(e2,true);
 }
 
+void TestExprSimplify2::poly_06() {
+	const ExprSymbol& A=ExprSymbol::new_("A",Dim::matrix(3,3));
+	const ExprSymbol& B=ExprSymbol::new_("B",Dim::matrix(3,3));
+
+	const ExprNode& e=A+B+B;
+
+	const ExprNode& e2=ExprSimplify2().simplify(e);
+	CPPUNIT_ASSERT(sameExpr(e2,"(A+(2*B))"));
+	cleanup(e2,true);
+}
+
+void TestExprSimplify2::poly_07() {
+	const ExprSymbol& A=ExprSymbol::new_("A",Dim::col_vec(3));
+	const ExprSymbol& B=ExprSymbol::new_("B",Dim::col_vec(3));
+
+	const ExprNode& e=(A+ExprConstant::new_vector(Vector::ones(3),false))+B;
+
+	const ExprNode& e2=ExprSimplify2().simplify(e);
+	CPPUNIT_ASSERT(sameExpr(e2,"(((1+A(1))+B(1));((1+A(2))+B(2));((1+A(3))+B(3)))"));
+	cleanup(e2,true);
+}
+
 //void TestExprSimplify2::issue366() {
 //	const ExprSymbol& x=ExprSymbol::new_("x");
 //	const ExprNode& e0=x+1-0;

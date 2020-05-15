@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Mar 27, 2020
-// Last update : Apr 15, 2020
+// Last update : May 15, 2020
 //============================================================================
 
 #include "ibex_ExprSimplify2.h"
@@ -288,7 +288,8 @@ const ExprNode* ExprSimplify2::binary(const ExprBinaryOp& e,
 
 	if (is_cst(*l2) && is_cst(*r2)) {
 		return &rec(ExprConstant::new_(fcst(to_cst(*l2), to_cst(*r2))));
-	} else if (!e.dim.is_scalar()) { // for ADD and SUB --> distribute addition / vector
+	} else if ((!l2->dim.is_scalar() && (is_vec(*l2) || is_cst(*l2)))
+			|| (!r2->dim.is_scalar() && (is_vec(*r2) || is_cst(*r2)))) { // for ADD and SUB --> distribute addition / vector
 
 		Array<const ExprNode> rows(e.dim.nb_rows());
 		Array<const ExprNode> col (e.dim.nb_cols());
@@ -372,7 +373,8 @@ const ExprNode* ExprSimplify2::visit(const ExprMul& e)   {
 
 	if (is_cst(*l2) && is_cst(*r2)) {
 		return &rec(ExprConstant::new_(to_cst(*l2) * to_cst(*r2)));
-	} else if (!l2->dim.is_scalar() || !r2->dim.is_scalar()) {
+	} else if ((!l2->dim.is_scalar() && (is_vec(*l2) || is_cst(*l2)))
+			|| (!r2->dim.is_scalar() && (is_vec(*r2) || is_cst(*r2)))) { // distribute multiplication / vector
 
 		Array<const ExprNode> rows(l2->dim.nb_rows());
 		Array<const ExprNode> col (r2->dim.nb_cols());
