@@ -78,8 +78,11 @@ public:
 
 	/**
 	 * Generates an equivalent expression
+	 *
+	 * New nodes are pushed in the record
+	 * vector to ease memory cleanup.
 	 */
-	const ExprNode& to_expr() const;
+	const ExprNode& to_expr(std::vector<const ExprNode*>& record) const;
 
 	/**
 	 * Count the total number of symbol occurrences.

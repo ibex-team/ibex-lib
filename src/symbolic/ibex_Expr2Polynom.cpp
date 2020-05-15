@@ -21,22 +21,27 @@ using namespace std;
 
 namespace ibex {
 
-Expr2Polynom::Expr2Polynom(bool develop) : develop(develop) {
+Expr2Polynom::Expr2Polynom(std::vector<const ExprNode*>& record, bool develop) : develop(develop), record(record) {
 
 }
 
 Expr2Polynom::~Expr2Polynom() {
-	for (IBEX_NODE_MAP(const ExprPolynomial*)::iterator it=cache.begin(); it!=cache.end(); ++it)
-		delete it->second;
+	cleanup();
+}
+
+const ExprNode& Expr2Polynom::rec(const ExprNode& e) {
+	record.push_back(&e);
+	return e;
 }
 
 const ExprPolynomial* Expr2Polynom::get(const ExprNode& e) {
 	return visit(e);
 }
 
-void Expr2Polynom::cleanup(const ExprNode& e) {
-	delete cache.find(e)->second;
-	cache.erase(e);
+void Expr2Polynom::cleanup() {
+	for (IBEX_NODE_MAP(const ExprPolynomial*)::iterator it=cache.begin(); it!=cache.end(); ++it)
+		delete it->second;
+	cache.clean();
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprNode& e) {
@@ -77,14 +82,14 @@ const ExprPolynomial* Expr2Polynom::unary(const ExprUnaryOp& e,
 		std::function<const ExprUnaryOp&(const ExprNode&)> f) {
 
 	const ExprPolynomial& pe = *visit(e.expr);
-	return new ExprPolynomial(f(pe.to_expr()));
+	return new ExprPolynomial(rec(f(pe.to_expr(record))));
 }
 
 const ExprPolynomial* Expr2Polynom::binary(const ExprBinaryOp& e,
 		std::function<const ExprBinaryOp&(const ExprNode&, const ExprNode&)> f) {
 	const ExprPolynomial* pl = visit(e.left);
 	const ExprPolynomial* pr = visit(e.right);
-	return new ExprPolynomial(f(pl->to_expr(),pr->to_expr()));
+	return new ExprPolynomial(rec(f(pl->to_expr(record),pr->to_expr(record))));
 }
 
 const ExprPolynomial* Expr2Polynom::nary(const ExprNAryOp& e,
@@ -93,18 +98,18 @@ const ExprPolynomial* Expr2Polynom::nary(const ExprNAryOp& e,
 	Array<const ExprNode> new_args(e.nb_args);
 
 	for (int i=0; i<e.nb_args; i++) {
-		new_args.set_ref(i,visit(e.arg(i))->to_expr());
+		new_args.set_ref(i,visit(e.arg(i))->to_expr(record));
 	}
 
-	return new ExprPolynomial(f(new_args));
+	return new ExprPolynomial(rec(f(new_args)));
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprVector& e) {
-	return nary(e, [&e](const Array<const ExprNode>& args) { return ExprVector::new_(args,e.orient); });
+	return nary(e, [&e](const Array<const ExprNode>& args)->const ExprVector& { return ExprVector::new_(args,e.orient); });
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprApply& e) {
-	return nary(e, [&e](const Array<const ExprNode>& args) { return ExprApply::new_(*e.f,args); });
+	return nary(e, [&e](const Array<const ExprNode>& args)->const ExprApply& { return ExprApply::new_(*e.f,args); });
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprChi& e) {
@@ -117,7 +122,7 @@ const ExprPolynomial* Expr2Polynom::visit(const ExprMul& e) {
 	if (develop || l->is_constant() || r->is_constant() || (l->one_monomial() && r->one_monomial()))
 		return l->mul(r);
 	else
-		return new ExprPolynomial(l->to_expr()*r->to_expr());
+		return new ExprPolynomial(rec(l->to_expr(record) * r->to_expr(record)));
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprGenericBinaryOp& e) {
@@ -142,7 +147,7 @@ const ExprPolynomial* Expr2Polynom::visit(const ExprDiv& e)   {
 	} else if (l->mono.empty())
 		return new ExprPolynomial(Dim::scalar());
 	else
-		return new ExprPolynomial(l->to_expr() / r->to_expr());
+		return new ExprPolynomial(rec(l->to_expr(record) / r->to_expr(record)));
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprMax& e)   { return binary(e, ExprMax::new_); }
@@ -155,7 +160,7 @@ const ExprPolynomial* Expr2Polynom::visit(const ExprMinus& e) {
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprPower& e) {
 	// note: no development with higher powers ?
-	return new ExprPolynomial(ExprPower::new_(visit(e.expr)->to_expr(), e.expon));
+	return new ExprPolynomial(rec(pow(visit(e.expr)->to_expr(record), e.expon)));
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprGenericUnaryOp& e) {
@@ -163,7 +168,7 @@ const ExprPolynomial* Expr2Polynom::visit(const ExprGenericUnaryOp& e) {
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprIndex& e) {
-	return new ExprPolynomial(ExprIndex::new_(visit(e.expr)->to_expr(), e.index));
+	return new ExprPolynomial(rec(ExprIndex::new_(visit(e.expr)->to_expr(record), e.index)));
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprSqr& e)   {

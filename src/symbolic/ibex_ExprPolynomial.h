@@ -113,8 +113,18 @@ public:
 	 * Will create new nodes except for the
 	 * original nodes (that plays the role
 	 * of the polynomial variables).
+	 *
+	 * New nodes are pushed in the record
+	 * vector to ease memory cleanup.
+	 *
+	 * Note: Keeping track of nodes is complicated
+	 * because simplification occurs when we
+	 * build a polynomial and polynomials are
+	 * built at different levels in Expr2Polynom
+	 * (some expressions become terms of new
+	 * polynomials that may simplified in turn).
 	 */
-	const ExprNode& to_expr() const;
+	const ExprNode& to_expr(std::vector<const ExprNode*>& record) const;
 
 	/**
 	 * Sum of polynomials (dynamic variant)

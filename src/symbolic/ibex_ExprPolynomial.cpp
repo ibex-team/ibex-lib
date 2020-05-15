@@ -183,16 +183,20 @@ ExprPolynomial::operator string() const {
 	return ss.str();
 }
 
-const ExprNode& ExprPolynomial::to_expr() const {
+const ExprNode& ExprPolynomial::to_expr(std::vector<const ExprNode*>& record) const {
 	const ExprNode* this_expr;
-	if (mono.empty())
+	if (mono.empty()) {
 		this_expr = &ExprConstant::new_matrix(Matrix::zeros(dim.nb_rows(), dim.nb_cols()));
+		record.push_back(this_expr);
+	}
 	else
 		for (list<ExprMonomial>::const_iterator it=mono.begin(); it!=mono.end(); ++it) {
 			if (it==mono.begin())
-				this_expr = &it->to_expr();
-			else
-				this_expr = &(*this_expr + it->to_expr());
+				this_expr = &it->to_expr(record);
+			else {
+				this_expr = &(*this_expr + it->to_expr(record));
+				record.push_back(this_expr);
+			}
 		}
 	return *this_expr;
 }
