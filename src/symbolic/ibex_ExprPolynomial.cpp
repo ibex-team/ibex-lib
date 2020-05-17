@@ -194,7 +194,13 @@ const ExprNode& ExprPolynomial::to_expr(std::vector<const ExprNode*>* record) co
 			if (it==mono.begin())
 				this_expr = &it->to_expr(record);
 			else {
-				this_expr = &(*this_expr + it->to_expr(record));
+				if (it->coeff.ub()<0) {
+					// trick to replace x+(-y) by x-y
+					(Interval&) it->coeff = -it->coeff;
+					this_expr = &(*this_expr - it->to_expr(record));
+					(Interval&) it->coeff = -it->coeff;
+				} else
+					this_expr = &(*this_expr + it->to_expr(record));
 				if (record) record->push_back(this_expr);
 			}
 		}
