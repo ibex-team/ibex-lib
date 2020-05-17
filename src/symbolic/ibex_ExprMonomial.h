@@ -19,6 +19,8 @@
 
 namespace ibex {
 
+class ExprSimplify2;
+
 /**
  * \ingroup symbolic
  *
@@ -80,9 +82,21 @@ public:
 	 * Generates an equivalent expression
 	 *
 	 * New nodes are pushed in the record
-	 * vector to ease memory cleanup.
+	 * vector to ease memory cleanup, if
+	 * provided. Otherwise: memory leaks!
 	 */
-	const ExprNode& to_expr(std::vector<const ExprNode*>& record) const;
+	const ExprNode& to_expr(std::vector<const ExprNode*>* record=NULL) const;
+
+	/**
+	 * Multiplication.
+	 *
+	 * The ExprSimplify2 argument is necessary because
+	 * the transposition of some expressions can be made
+	 * to allow factorization of dot products.
+	 * If NULL -> no simplification and memory leak in such
+	 * cases.
+	 */
+	ExprMonomial mul(const ExprMonomial& m, ExprSimplify2* s=NULL) const;
 
 	/**
 	 * Count the total number of symbol occurrences.

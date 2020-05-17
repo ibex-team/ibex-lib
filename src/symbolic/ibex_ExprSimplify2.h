@@ -29,8 +29,8 @@ public:
 	ExprSimplify2(bool develop=false);
 
 	/**
-	 * \warning The function cleanup all unused nodes which
-	 * may include e itself (so the node "e" may not exist
+	 * \warning The function destroys all unused nodes which
+	 * may include "e" itself (so the node "e" may not exist
 	 * after calling this function).
 	 * However, it does not delete symbols.
 	 */
@@ -45,6 +45,8 @@ public:
 	NodeMap<bool> lock;
 
 protected:
+	friend class ExprMonomial;
+	friend class Expr2Polynom;
 
 	const ExprNode* visit(const ExprNode& e);
 	const ExprNode* visit(const ExprIndex& i);

@@ -86,7 +86,7 @@ const ExprNode& expr(const ExprNode& e) {
 
 } // end anonymous namespace
 
-ExprSimplify2::ExprSimplify2(bool develop) : _2polynom(record, develop) {
+ExprSimplify2::ExprSimplify2(bool develop) : _2polynom(*this, develop) {
 
 }
 
@@ -98,7 +98,7 @@ const ExprNode& ExprSimplify2::rec(const ExprNode& e) {
 const ExprNode& ExprSimplify2::simplify(const ExprNode& e) {
 	 const ExprNode& _result = *visit(e);
 	 //cout  << "result=" << _result << endl;
-	 const ExprNode& result = _2polynom.get(_result)->to_expr(record);
+	 const ExprNode& result = _2polynom.get(_result)->to_expr(&record);
 
 	 // If a node does not appear in the final expression
 	 // AND is not a node of the original expression, it has to be freed.
@@ -178,13 +178,13 @@ const ExprNode* ExprSimplify2::visit(const ExprIndex& e) {
 		const ExprIndex* id2= (const ExprIndex*) expr2;
 		return &rec(id2->expr[id2->index[e.index]]);
 	} else if (is_minus(*expr2)) {
-		return visit(rec(-(expr(*expr2)[e.index])));
+		return visit(rec(-rec(expr(*expr2)[e.index])));
 	} else if (is_trans(*expr2)) {
 		return visit(rec(expr(*expr2)[e.index.transpose()]));
 	} else if (is_add(*expr2)) {
-		return visit(rec(left(*expr2)[e.index] + right(*expr2)[e.index]));
+		return visit(rec(rec(left(*expr2)[e.index]) + rec(right(*expr2)[e.index])));
 	} else if (is_sub(*expr2)) {
-		return visit(rec(left(*expr2)[e.index] - right(*expr2)[e.index]));
+		return visit(rec(rec(left(*expr2)[e.index]) - rec(right(*expr2)[e.index])));
 	} else if (is_mul(*expr2)) {
 		return visit(rec(
 				rec(left(*expr2)[e.index.rows(left(*expr2).dim,e.index.first_row(),e.index.last_row())]) *

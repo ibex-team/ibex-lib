@@ -1,12 +1,12 @@
 /* ============================================================================
  * I B E X - ExprSimplify Tests
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
- * Created     : June 7, 2016
+ * Created     : May 17, 2020
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_EXPR_SIMPLIFY_2_H__
@@ -42,6 +42,8 @@ public:
 	CPPUNIT_TEST(poly_05);
 	CPPUNIT_TEST(poly_06);
 	CPPUNIT_TEST(poly_07);
+	CPPUNIT_TEST(poly_08);
+	CPPUNIT_TEST(poly_09);
 	//CPPUNIT_TEST(issue366);
 	CPPUNIT_TEST(issue425_01);
 	CPPUNIT_TEST(issue425_02);
@@ -69,6 +71,8 @@ public:
 	void poly_05();
 	void poly_06();
 	void poly_07();
+	void poly_08();
+	void poly_09();
 	//void issue366();
 	void issue425_01();
 	void issue425_02();

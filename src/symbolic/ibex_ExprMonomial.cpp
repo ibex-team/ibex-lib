@@ -10,6 +10,7 @@
 
 #include "ibex_ExprMonomial.h"
 #include "ibex_NodeMap.h"
+#include "ibex_ExprSimplify2.h"
 
 #include <sstream>
 
@@ -51,7 +52,7 @@ public:
 
 	virtual string to_string() const=0;
 
-	virtual const ExprNode& to_expr(std::vector<const ExprNode*>& record) const=0;
+	virtual const ExprNode& to_expr(std::vector<const ExprNode*>* record) const=0;
 
 	virtual TermType type() const=0;
 
@@ -108,7 +109,7 @@ public:
 
 	virtual string to_string() const;
 
-	virtual const ExprNode& to_expr(std::vector<const ExprNode*>& record) const;
+	virtual const ExprNode& to_expr(std::vector<const ExprNode*>* record) const;
 
 	/**
 	 * Sub-expression ("symbol" of the polynomial)
@@ -142,7 +143,7 @@ public:
 
 	virtual string to_string() const;
 
-	virtual const ExprNode& to_expr(std::vector<const ExprNode*>& record) const;
+	virtual const ExprNode& to_expr(std::vector<const ExprNode*>* record) const;
 
 	const IntervalVector v1;
 
@@ -174,7 +175,7 @@ public:
 
 	virtual string to_string() const;
 
-	virtual const ExprNode& to_expr(std::vector<const ExprNode*>& record) const;
+	virtual const ExprNode& to_expr(std::vector<const ExprNode*>* record) const;
 
 	virtual Matrix count_occ(const ExprOccCounter& c) const;
 
@@ -207,7 +208,7 @@ public:
 
 	virtual string to_string() const;
 
-	virtual const ExprNode& to_expr(std::vector<const ExprNode*>& record) const;
+	virtual const ExprNode& to_expr(std::vector<const ExprNode*>* record) const;
 
 	/**
 	 * Sub-expression ("symbol" of the polynomial)
@@ -239,7 +240,7 @@ public:
 
 	virtual string to_string() const;
 
-	virtual const ExprNode& to_expr(std::vector<const ExprNode*>& record) const;
+	virtual const ExprNode& to_expr(std::vector<const ExprNode*>* record) const;
 
 	virtual Matrix count_occ(const ExprOccCounter& c) const;
 
@@ -303,11 +304,11 @@ string ExprMonomial::ScalarTerm::to_string() const {
 	return ss.str();
 }
 
-const ExprNode& ExprMonomial::ScalarTerm::to_expr(std::vector<const ExprNode*>& record) const {
+const ExprNode& ExprMonomial::ScalarTerm::to_expr(std::vector<const ExprNode*>* record) const {
 	const ExprNode* res = &e;
 	if (power!=1) {
 		res = & (pow(*res,power));
-		record.push_back(res);
+		if (record) record->push_back(res);
 	}
 	return *res;
 }
@@ -371,12 +372,12 @@ string ExprMonomial::HalfCstDotProduct::to_string() const {
 	return ss.str();
 }
 
-const ExprNode& ExprMonomial::HalfCstDotProduct::to_expr(std::vector<const ExprNode*>& record) const {
+const ExprNode& ExprMonomial::HalfCstDotProduct::to_expr(std::vector<const ExprNode*>* record) const {
 	const ExprNode* res = &(ExprConstant::new_vector(v1,true)*(e2));
-	record.push_back(res);
+	if (record) record->push_back(res);
 	if (power!=1) {
 		res = & (pow(*res,power));
-		record.push_back(res);
+		if (record) record->push_back(res);
 	}
 	return *res;
 }
@@ -446,12 +447,12 @@ string ExprMonomial::DotProduct::to_string() const {
 	return ss.str();
 }
 
-const ExprNode& ExprMonomial::DotProduct::to_expr(std::vector<const ExprNode*>& record) const {
+const ExprNode& ExprMonomial::DotProduct::to_expr(std::vector<const ExprNode*>* record) const {
 	const ExprNode* res = &(e1*e2);
-	record.push_back(res);
+	if (record) record->push_back(res);
 	if (power!=1) {
 		res = & (pow(*res,power));
-		record.push_back(res);
+		if (record) record->push_back(res);
 	}
 	return *res;
 }
@@ -496,7 +497,7 @@ string ExprMonomial::MatrixTerm::to_string() const {
 	return ss.str();
 }
 
-const ExprNode& ExprMonomial::MatrixTerm::to_expr(std::vector<const ExprNode*>& record) const {
+const ExprNode& ExprMonomial::MatrixTerm::to_expr(std::vector<const ExprNode*>* record) const {
 	return e;
 }
 
@@ -558,9 +559,9 @@ string ExprMonomial::CstMatrixTerm::to_string() const {
 	return ss.str();
 }
 
-const ExprNode& ExprMonomial::CstMatrixTerm::to_expr(std::vector<const ExprNode*>& record) const {
+const ExprNode& ExprMonomial::CstMatrixTerm::to_expr(std::vector<const ExprNode*>* record) const {
 	const ExprNode& expr = ExprConstant::new_matrix(m);
-	record.push_back(&expr);
+	if (record) record->push_back(&expr);
 	return expr;
 }
 
@@ -802,9 +803,13 @@ pair<int,bool> ExprMonomial::cmp_and_add(const ExprMonomial& m2, ExprMonomial* m
 }
 
 ExprMonomial operator*(const ExprMonomial& m1, const ExprMonomial& m2) {
+	return m1.mul(m2);
+}
 
-	if (&m1==&m2) return m1.square(); // to avoid mix with iterators
+ExprMonomial ExprMonomial::mul(const ExprMonomial& m2, ExprSimplify2* s) const {
+	if (this==&m2) return square(); // to avoid mix with iterators
 
+	const ExprMonomial& m1=*this;
 	ExprMonomial m;
 	ExprCmp cmp;
 
@@ -875,17 +880,15 @@ ExprMonomial operator*(const ExprMonomial& m1, const ExprMonomial& m2) {
 			} else if ((*it2)->type()==ExprMonomial::Term::CST_MATRIX) {
 				const ExprMonomial::CstMatrixTerm& t2=(const ExprMonomial::CstMatrixTerm&) **it2;
 				const ExprMonomial::MatrixTerm& t1=(const ExprMonomial::MatrixTerm&) **last1;
-				// TODO: apply Simplify to transpose(t1.e) + memory leak
-				//  BUT this case is not happening in practice because the order
-				//  is handled in Simplify2.
-				m.insert(new ExprMonomial::HalfCstDotProduct(t2.m.col(0), transpose(t1.e), 1));
+				// note: only systematic simplification (no recursive call to Expr2Polynom)
+				const ExprNode& e1T = s? *s->visit(s->rec(transpose(t1.e))) :
+						(const ExprNode&) transpose(t1.e); // no simplification / memory leak
+				m.insert(new ExprMonomial::HalfCstDotProduct(t2.m.col(0), e1T, 1));
 			} else {
 				const ExprMonomial::MatrixTerm& t1=(const ExprMonomial::MatrixTerm&) **last1;
 				const ExprMonomial::MatrixTerm& t2=(const ExprMonomial::MatrixTerm&) **it2;
-				// TODO: apply Simplify to transpose(e1T) + memory leak
-				//  BUT this case is not happening in practice because the order
-				//  is handled in Simplify2.
-				const ExprNode& e1T=transpose(t1.e);
+				const ExprNode& e1T= s? *s->visit(s->rec(transpose(t1.e))) :
+						(const ExprNode&) transpose(t1.e); // no simplification / memory leak
 				if (cmp.compare(e1T,t2.e)<0)
 					m.insert(new ExprMonomial::DotProduct(e1T, t2.e, 1));
 				else
@@ -990,30 +993,30 @@ ExprMonomial::operator string() const {
 	return ss.str();
 }
 
-const ExprNode& ExprMonomial::to_expr(std::vector<const ExprNode*>& record) const {
+const ExprNode& ExprMonomial::to_expr(std::vector<const ExprNode*>* record) const {
 	const ExprNode* e = NULL;
 	for (list<Term*>::const_iterator it=terms.begin();  it!=terms.end(); ++it) {
 		if ((*it)->type()==Term::CST_MATRIX && ((CstMatrixTerm*) *it)->is_identity) continue;
 		if (e) {
 			e = & (*e * (*it)->to_expr(record));
-			record.push_back(e);
+			if (record) record->push_back(e);
 		} else
 			e = & (*it)->to_expr(record);
 	}
 	if (!e) {
 		e = & ExprConstant::new_scalar(coeff);
-		record.push_back(e);
+		if (record) record->push_back(e);
 	}
 	else
 		if (coeff.lb()!=1 || coeff.ub()!=1) {
 			if (coeff.lb()==-1 && coeff.ub()==-1) {
 				e = & (-*e);
-				record.push_back(e);
+				if (record) record->push_back(e);
 			} else {
 				const ExprConstant& c=ExprConstant::new_scalar(coeff);
-				record.push_back(&c);
+				if (record) record->push_back(&c);
 				e = & (c * (*e));
-				record.push_back(e);
+				if (record) record->push_back(e);
 			}
 		}
 	return *e;

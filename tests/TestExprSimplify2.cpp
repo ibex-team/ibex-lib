@@ -1,16 +1,16 @@
 /* ============================================================================
  * I B E X - ExprSimplify Tests
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * Copyright   : IMT Atlantique (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
- * Created     : June 7, 2016
+ * Created     : May 17, 2020
  * ---------------------------------------------------------------------------- */
 
 #include "TestExprSimplify2.h"
-#include "ibex_Expr.h"
+#include "ibex_ExprSimplify2.h"
 #include <sstream>
 
 using namespace std;
@@ -194,6 +194,30 @@ void TestExprSimplify2::poly_07() {
 	cleanup(e2,true);
 }
 
+void TestExprSimplify2::poly_08() {
+	const ExprSymbol& u=ExprSymbol::new_("u",Dim::col_vec(3));
+	const ExprSymbol& v=ExprSymbol::new_("v",Dim::col_vec(3));
+
+	const ExprNode& e=transpose(u)*v + transpose(v)*u;
+
+	const ExprNode& e2=ExprSimplify2().simplify(e);
+	CPPUNIT_ASSERT(sameExpr(e2,"(2*((u)'*v))"));
+	cleanup(e2,true);
+}
+
+void TestExprSimplify2::poly_09() {
+	const ExprSymbol& u1=ExprSymbol::new_("u1",Dim::col_vec(3));
+	const ExprSymbol& u2=ExprSymbol::new_("u2",Dim::col_vec(3));
+	const ExprSymbol& v1=ExprSymbol::new_("v1",Dim::col_vec(3));
+	const ExprSymbol& v2=ExprSymbol::new_("v2",Dim::col_vec(3));
+
+	const ExprNode& e=transpose(u1+u2)*(v1+v2) + transpose(v1+v2)*(u1+u2);
+
+	const ExprNode& e2=ExprSimplify2().simplify(e);
+	CPPUNIT_ASSERT(sameExpr(e2,"(2*(((u1+u2))'*(v1+v2)))"));
+	cleanup(e2,true);
+}
+
 //void TestExprSimplify2::issue366() {
 //	const ExprSymbol& x=ExprSymbol::new_("x");
 //	const ExprNode& e0=x+1-0;
@@ -251,7 +275,5 @@ void TestExprSimplify2::issue425_05() {
 	CPPUNIT_ASSERT(sameExpr(e2,"(x(1,1);x(2,1);x(3,1);x(4,1))"));
 	cleanup(e2,true);
 }
-
-
 
 } // end namespace

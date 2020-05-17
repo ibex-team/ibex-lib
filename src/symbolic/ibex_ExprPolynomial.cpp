@@ -158,14 +158,14 @@ ExprPolynomial& ExprPolynomial::init_mult(const Interval& c, const ExprPolynomia
 	return *this;
 }
 
-ExprPolynomial& ExprPolynomial::init_mult(const ExprPolynomial& p1, const ExprPolynomial& p2) {
+ExprPolynomial& ExprPolynomial::init_mult(const ExprPolynomial& p1, const ExprPolynomial& p2, ExprSimplify2* s) {
 	assert(dim==mul_dim(p1.dim,p2.dim));
 	if (&p1==&p2) return init_square(p1); // to avoid mix with iterators
 
 	for (list<ExprMonomial>::const_iterator it1=p1.mono.begin(); it1!=p1.mono.end(); ++it1) {
 		for (list<ExprMonomial>::const_iterator it2=p2.mono.begin(); it2!=p2.mono.end(); ++it2) {
 			// order or monomials is not necessarily preserved, ex: (x(1,2)+(1,2))*(y(1;2)+(1;2)) -> 5 + ...
-			(*this) += (*it1)*(*it2);
+			(*this) += it1->mul(*it2,s);
 		}
 	}
 	return *this;
@@ -183,11 +183,11 @@ ExprPolynomial::operator string() const {
 	return ss.str();
 }
 
-const ExprNode& ExprPolynomial::to_expr(std::vector<const ExprNode*>& record) const {
+const ExprNode& ExprPolynomial::to_expr(std::vector<const ExprNode*>* record) const {
 	const ExprNode* this_expr;
 	if (mono.empty()) {
 		this_expr = &ExprConstant::new_matrix(Matrix::zeros(dim.nb_rows(), dim.nb_cols()));
-		record.push_back(this_expr);
+		if (record) record->push_back(this_expr);
 	}
 	else
 		for (list<ExprMonomial>::const_iterator it=mono.begin(); it!=mono.end(); ++it) {
@@ -195,7 +195,7 @@ const ExprNode& ExprPolynomial::to_expr(std::vector<const ExprNode*>& record) co
 				this_expr = &it->to_expr(record);
 			else {
 				this_expr = &(*this_expr + it->to_expr(record));
-				record.push_back(this_expr);
+				if (record) record->push_back(this_expr);
 			}
 		}
 	return *this_expr;

@@ -115,7 +115,8 @@ public:
 	 * of the polynomial variables).
 	 *
 	 * New nodes are pushed in the record
-	 * vector to ease memory cleanup.
+	 * vector to ease memory cleanup if
+	 * provided. Otherwise: memory leaks!
 	 *
 	 * Note: Keeping track of nodes is complicated
 	 * because simplification occurs when we
@@ -124,7 +125,7 @@ public:
 	 * (some expressions become terms of new
 	 * polynomials that may simplified in turn).
 	 */
-	const ExprNode& to_expr(std::vector<const ExprNode*>& record) const;
+	const ExprNode& to_expr(std::vector<const ExprNode*>* record=NULL) const;
 
 	/**
 	 * Sum of polynomials (dynamic variant)
@@ -144,7 +145,7 @@ public:
 	/**
 	 * Multiplication of polynomials (dynamic variant)
 	 */
-	ExprPolynomial* mul(const ExprPolynomial* p2) const;
+	ExprPolynomial* mul(const ExprPolynomial* p2, ExprSimplify2* s) const;
 
 	/*
 	 * Minus operator (dynamic variant)
@@ -184,7 +185,7 @@ protected:
 	/*
 	 * Initialize an (empty) polynom to p1*p2
 	 */
-	ExprPolynomial& init_mult(const ExprPolynomial& p1, const ExprPolynomial& p2);
+	ExprPolynomial& init_mult(const ExprPolynomial& p1, const ExprPolynomial& p2, ExprSimplify2* s);
 
 	/*
 	 * Initialize an (empty) polynom to p^2
@@ -283,11 +284,11 @@ inline ExprPolynomial* ExprPolynomial::mul(const Interval& c) const {
 }
 
 inline ExprPolynomial operator*(const ExprPolynomial& p1, const ExprPolynomial& p2) {
-	return ExprPolynomial(mul_dim(p1.dim,p2.dim)).init_mult(p1,p2);
+	return ExprPolynomial(mul_dim(p1.dim,p2.dim)).init_mult(p1,p2,NULL);
 }
 
-inline ExprPolynomial* ExprPolynomial::mul(const ExprPolynomial* p2) const {
-	return &((new ExprPolynomial(mul_dim(dim,p2->dim)))->init_mult(*this,*p2));
+inline ExprPolynomial* ExprPolynomial::mul(const ExprPolynomial* p2, ExprSimplify2* s) const {
+	return &((new ExprPolynomial(mul_dim(dim,p2->dim)))->init_mult(*this,*p2,s));
 }
 
 inline ExprPolynomial operator-(const ExprPolynomial& p1) {
