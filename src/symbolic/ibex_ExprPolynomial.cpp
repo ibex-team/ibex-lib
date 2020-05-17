@@ -110,7 +110,7 @@ void ExprPolynomial::add_or_sub(const ExprPolynomial& p2, bool add) {
 				++it1; // already present, skip
 			} else {
 				assert(result.first==1);
-				mono.insert(it1, *it2);
+				mono.insert(it1, add? *it2 : -(*it2));
 				++it2;
 			}
 		} catch(ExprMonomial::NullResult&) {
@@ -118,7 +118,7 @@ void ExprPolynomial::add_or_sub(const ExprPolynomial& p2, bool add) {
 			++it2;
 		}
 	}
-	for (; it2!=p2.mono.end(); ++it2) add_monomial(add? (*it2) : -1*(*it2));
+	for (; it2!=p2.mono.end(); ++it2) add_monomial(add? (*it2) : -(*it2));
 }
 
 ExprPolynomial& ExprPolynomial::operator+=(const ExprPolynomial& p) {

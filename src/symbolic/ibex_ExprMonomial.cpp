@@ -964,9 +964,8 @@ ExprMonomial operator-(const ExprMonomial& m1, const ExprMonomial& m2) {
 }
 
 ExprMonomial operator-(const ExprMonomial& m1) {
-	ExprMonomial m;
-	m.coeff        = -m1.coeff;
-	m.terms        = m1.terms; // deep copy
+	ExprMonomial m(m1); // deep copy
+	m.coeff = -m.coeff;
 	return m;
 }
 

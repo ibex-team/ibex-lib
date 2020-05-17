@@ -44,6 +44,7 @@ public:
 	CPPUNIT_TEST(poly_07);
 	CPPUNIT_TEST(poly_08);
 	CPPUNIT_TEST(poly_09);
+	CPPUNIT_TEST(poly_10);
 	//CPPUNIT_TEST(issue366);
 	CPPUNIT_TEST(issue425_01);
 	CPPUNIT_TEST(issue425_02);
@@ -73,6 +74,7 @@ public:
 	void poly_07();
 	void poly_08();
 	void poly_09();
+	void poly_10();
 	//void issue366();
 	void issue425_01();
 	void issue425_02();

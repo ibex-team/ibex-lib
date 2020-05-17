@@ -41,7 +41,7 @@ public:
 	/**
 	 * Build a scalar/matrix monomial "e".
 	 */
-	ExprPolynomial(const ExprNode& e);
+	explicit ExprPolynomial(const ExprNode& e);
 
 	/**
 	 * Build a single-monomial polynomial.
