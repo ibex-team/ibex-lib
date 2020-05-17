@@ -576,7 +576,8 @@ bool ExprMonomial::is_constant() const {
 }
 
 ExprMonomial::ExprMonomial(const ExprNode& e, int power) : coeff(Interval::one()), _dim(e.dim) {
-	assert(!dynamic_cast<const ExprConstant*>(&e));
+	assert(!dynamic_cast<const ExprConstant*>(&e)
+			|| (dynamic_cast<const ExprConstant*>(&e)->is_mutable()));
 	if (e.dim.is_scalar())
 		terms.push_back(new ScalarTerm(e,power));
 	else {

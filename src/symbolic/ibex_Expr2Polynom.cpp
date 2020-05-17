@@ -54,6 +54,12 @@ const ExprPolynomial* Expr2Polynom::visit(const ExprSymbol& e) {
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprConstant& e) {
+
+	// no simplification with mutable constants
+	// *but* several occurrences of the same
+	// constant is considered as the same real value
+	if (e.is_mutable()) return new ExprPolynomial(e);
+
 	switch (e.dim.type()) {
 	case Dim::SCALAR:
 		return new ExprPolynomial(e.get_value());

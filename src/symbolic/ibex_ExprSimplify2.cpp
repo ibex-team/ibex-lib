@@ -28,6 +28,10 @@ bool is_cst(const ExprNode& e) {
 	return dynamic_cast<const ExprConstant*>(&e)!=NULL;
 }
 
+bool is_mutable(const ExprNode& e) {
+	return ((const ExprConstant&) e).is_mutable();
+}
+
 bool is_index(const ExprNode& e) {
 	return dynamic_cast<const ExprIndex*>(&e)!=NULL;
 }
@@ -171,7 +175,10 @@ const ExprNode* ExprSimplify2::visit(const ExprIndex& e) {
 	const ExprNode* expr2 = visit(e.expr);
 
 	if (is_cst(*expr2)) {
-		return &rec(ExprConstant::new_((to_cst(*expr2))[e.index]));
+		if (is_mutable(*expr2))
+			return &rec(ExprConstant::new_mutable(to_cst(*expr2)[e.index]));
+		else
+			return &rec(ExprConstant::new_(to_cst(*expr2)[e.index]));
 	} else if (e.index.all()) {
 		return &*expr2;
 	} else if (is_index(*expr2)) {
@@ -262,7 +269,10 @@ const ExprNode* ExprSimplify2::unary(const ExprUnaryOp& e,
 	const ExprNode* expr2=visit(e.expr);
 
 	if (is_cst(*expr2)) {
-		return &rec(ExprConstant::new_(fcst(to_cst(*expr2))));
+		if (is_mutable(*expr2))
+			return &rec(fctr(*expr2));
+		else
+			return &rec(ExprConstant::new_(fcst(to_cst(*expr2))));
 	} else if (!e.dim.is_scalar()) { // for MINUS --> distribute over components
 		bool row = e.dim.is_matrix() || e.dim.type()==Dim::ROW_VECTOR;
 		// note: if e.expr is a vector, we don't necessarily iterate over
@@ -286,7 +296,7 @@ const ExprNode* ExprSimplify2::binary(const ExprBinaryOp& e,
 	const ExprNode* r2=visit(e.right);
 	bool all_same = (l2==&e.left && r2==&e.right);
 
-	if (is_cst(*l2) && is_cst(*r2)) {
+	if (is_cst(*l2) && !is_mutable(*l2) && is_cst(*r2) && !is_mutable(*r2)) {
 		return &rec(ExprConstant::new_(fcst(to_cst(*l2), to_cst(*r2))));
 	} else if ((!l2->dim.is_scalar() && (is_vec(*l2) || is_cst(*l2)))
 			|| (!r2->dim.is_scalar() && (is_vec(*r2) || is_cst(*r2)))) { // for ADD and SUB --> distribute addition / vector
@@ -326,7 +336,7 @@ const ExprNode* ExprSimplify2::nary(const ExprNAryOp& e,
 	Array<const ExprNode> args2(e.nb_args);
 	for (int i=0; i<e.nb_args; i++) {
 		args2.set_ref(i,*visit(e.arg(i)));
-		all_cst &= is_cst(args2[i]);
+		all_cst &= ( is_cst(args2[i]) && !is_mutable(args2[i]) );
 		all_same &= (&args2[i]==&e.arg(i));
 	}
 
@@ -371,7 +381,7 @@ const ExprNode* ExprSimplify2::visit(const ExprMul& e)   {
 	const ExprNode* r2=visit(e.right);
 	bool all_same = (l2==&e.left && r2==&e.right);
 
-	if (is_cst(*l2) && is_cst(*r2)) {
+	if (is_cst(*l2) && !is_mutable(*l2) && is_cst(*r2) && !is_mutable(*r2)) {
 		return &rec(ExprConstant::new_(to_cst(*l2) * to_cst(*r2)));
 	} else if ((!l2->dim.is_scalar() && (is_vec(*l2) || is_cst(*l2)))
 			|| (!r2->dim.is_scalar() && (is_vec(*r2) || is_cst(*r2)))) { // distribute multiplication / vector
@@ -432,7 +442,7 @@ const ExprNode* ExprSimplify2::visit(const ExprTrans& e) {
 
 	const ExprNode* expr2 = visit(e.expr);
 
-	if (is_cst(*expr2)) {
+	if (is_cst(*expr2) && !is_mutable(*expr2)) {
 		return &rec(ExprConstant::new_(transpose(to_cst(*expr2))));
 	} else if (is_trans(*expr2)) {
 		return &expr(*expr2); // no need to visit again
