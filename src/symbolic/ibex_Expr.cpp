@@ -13,7 +13,7 @@
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 #include "ibex_ExprPrinter.h"
-#include "ibex_ExprSimplify.h"
+#include "ibex_ExprSimplify2.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_ExprSize.h"
 #include "ibex_ExprCmp.h"
@@ -132,7 +132,7 @@ bool ExprNode::operator!=(const ExprNode& e) const {
 }
 
 const ExprNode& ExprNode::simplify() const {
-	return ExprSimplify().simplify(*this);
+	return ExprSimplify2().simplify(*this);
 }
 
 namespace {

@@ -100,70 +100,70 @@ const ExprNode& ExprSimplify2::rec(const ExprNode& e) {
 }
 
 const ExprNode& ExprSimplify2::simplify(const ExprNode& e) {
-	 const ExprNode& _result = *visit(e);
-	 //cout  << "result=" << _result << endl;
-	 const ExprNode& result = _2polynom.get(_result)->to_expr(&record);
+	const ExprNode& _result = *visit(e);
+	//cout  << "result=" << _result << endl;
+	const ExprNode& result = _2polynom.get(_result)->to_expr(&record);
 
-	 // If a node does not appear in the final expression
-	 // AND is not a node of the original expression, it has to be freed.
+	// If a node does not appear in the final expression
+	// AND is not a node of the original expression, it has to be freed.
 
-	 ExprSubNodes old_nodes(e);
-	 ExprSubNodes new_nodes(result);
+	ExprSubNodes old_nodes(e);
+	ExprSubNodes new_nodes(result);
 
-	 /* All the new nodes created in the simplification process
-	  * and that does not appear in the final expression have just
-	  * to be deleted
-	  */
-	 for (vector<const ExprNode*>::iterator it=record.begin(); it!=record.end(); ++it) {
-		 if (!new_nodes.found(**it)) {
-			 delete *it;
-		 }
-	 }
-	 record.clear(); // important for next call to simplify()
+	/* All the new nodes created in the simplification process
+	 * and that does not appear in the final expression have just
+	 * to be deleted
+	 */
+	for (vector<const ExprNode*>::iterator it=record.begin(); it!=record.end(); ++it) {
+		if (!new_nodes.found(**it)) {
+			delete *it;
+		}
+	}
+	record.clear(); // important for next call to simplify()
 
-	 vector<const ExprNode*> expr_symbols;
+	vector<const ExprNode*> expr_symbols;
 
-	 /** All the old nodes that are neither symbols, locked
-	  * or in the final expression also have to be deleted
-	  */
-	 for (int i=0; i<old_nodes.size(); i++) {
-		 if (!dynamic_cast<const ExprSymbol*>(&old_nodes[i]) &&
-				 !new_nodes.found(old_nodes[i]) &&
-				 !lock.found(old_nodes[i])) {
-			 delete &old_nodes[i];
-		 }
-		 // the list of fathers must also be recalculated
-		 // for all these nodes !!
-		 // and this is not as simple as the next commented loop
-		 // as  the old nodes may have fathers "alive"
-		 // that do not belong to the new nodes.
-		 //			 ((ExprNode&) old_nodes[i]).fathers.clear();
-	 }
+	/** All the old nodes that are neither symbols, locked
+	 * or in the final expression also have to be deleted
+	 */
+	for (int i=0; i<old_nodes.size(); i++) {
+		if (!dynamic_cast<const ExprSymbol*>(&old_nodes[i]) &&
+				!new_nodes.found(old_nodes[i]) &&
+				!lock.found(old_nodes[i])) {
+			delete &old_nodes[i];
+		}
+		// the list of fathers must also be recalculated
+		// for all these nodes !!
+		// and this is not as simple as the next commented loop
+		// as  the old nodes may have fathers "alive"
+		// that do not belong to the new nodes.
+		//			 ((ExprNode&) old_nodes[i]).fathers.clear();
+	}
 
 
-//	 for (int i=0; i<new_nodes.size(); i++) {
-//		 if (dynamic_cast<const ExprNAryOp*>(&new_nodes[i])) {
-//			 const ExprNAryOp& nary=(const ExprNAryOp&) new_nodes[i];
-//			 for (int j=0; j<nary.nb_args; j++)
-//				 ((ExprNode&) nary.args[j]).fathers.add(nary);
-//		 } else if (dynamic_cast<const ExprBinaryOp*>(&new_nodes[i])) {
-//			 const ExprBinaryOp& b=(const ExprBinaryOp&) new_nodes[i];
-//			 ((ExprNode&) b.left).fathers.add(b);
-//			 ((ExprNode&) b.right).fathers.add(b);
-//		 } else if (dynamic_cast<const ExprUnaryOp*>(&new_nodes[i])) {
-//			 const ExprUnaryOp& u=(const ExprUnaryOp&) new_nodes[i];
-//			 ((ExprNode&) u.expr).fathers.add(u);
-//		 } else if (dynamic_cast<const ExprIndex*>(&new_nodes[i])) {
-//			 const ExprIndex& index=(const ExprIndex&) new_nodes[i];
-//			 ((ExprNode&) index.expr).fathers.add(index);
-//		 }
-//	 }
+	//	 for (int i=0; i<new_nodes.size(); i++) {
+	//		 if (dynamic_cast<const ExprNAryOp*>(&new_nodes[i])) {
+	//			 const ExprNAryOp& nary=(const ExprNAryOp&) new_nodes[i];
+	//			 for (int j=0; j<nary.nb_args; j++)
+	//				 ((ExprNode&) nary.args[j]).fathers.add(nary);
+	//		 } else if (dynamic_cast<const ExprBinaryOp*>(&new_nodes[i])) {
+	//			 const ExprBinaryOp& b=(const ExprBinaryOp&) new_nodes[i];
+	//			 ((ExprNode&) b.left).fathers.add(b);
+	//			 ((ExprNode&) b.right).fathers.add(b);
+	//		 } else if (dynamic_cast<const ExprUnaryOp*>(&new_nodes[i])) {
+	//			 const ExprUnaryOp& u=(const ExprUnaryOp&) new_nodes[i];
+	//			 ((ExprNode&) u.expr).fathers.add(u);
+	//		 } else if (dynamic_cast<const ExprIndex*>(&new_nodes[i])) {
+	//			 const ExprIndex& index=(const ExprIndex&) new_nodes[i];
+	//			 ((ExprNode&) index.expr).fathers.add(index);
+	//		 }
+	//	 }
 
-	 //important: clear the cache, some nodes have been deleted!
-	 cache.clean();
-	 _2polynom.cleanup();
+	//important: clear the cache, some nodes have been deleted!
+	cache.clean();
+	_2polynom.cleanup();
 
-	 return result;
+	return result;
 }
 
 const ExprNode* ExprSimplify2::visit(const ExprNode& e) {
@@ -354,9 +354,32 @@ const ExprNode* ExprSimplify2::nary(const ExprNAryOp& e,
 }
 
 const ExprNode* ExprSimplify2::visit(const ExprVector& e) {
-	return nary(e,
-			[&e](Array<const Domain>& args) { return Domain(args, e.row_vector()); },
-			[&e](Array<const ExprNode>& args)->const ExprVector& { return ExprVector::new_(args, e.orient); });
+	// this block copy-pasted from nary(...)
+	// <<--------------
+	bool all_cst = true;
+	bool all_same = true;
+	Array<const ExprNode> args2(e.nb_args);
+	for (int i=0; i<e.nb_args; i++) {
+		args2.set_ref(i,*visit(e.arg(i)));
+		all_cst &= ( is_cst(args2[i]) && !is_mutable(args2[i]) );
+		all_same &= (&args2[i]==&e.arg(i));
+	}
+
+	if (all_cst) {
+		Array<const Domain> arg_cst(e.nb_args);
+		for (int i=0; i<e.nb_args; i++) {
+			arg_cst.set_ref(i, to_cst(args2[i]));
+		}
+		return &rec(ExprConstant::new_(Domain(arg_cst, e.row_vector())));
+	}
+	// -------------->>
+	else if (args2.size()==1)
+		return &args2[0]; // no rec here!
+	else if (all_same) {
+		return &e;
+	} else {
+		return &rec(ExprVector::new_(args2, e.orient));
+	}
 }
 
 const ExprNode* ExprSimplify2::visit(const ExprChi& e) {
@@ -434,8 +457,8 @@ const ExprNode* ExprSimplify2::visit(const ExprAtan2& e) { return binary(e, (_do
 
 const ExprNode* ExprSimplify2::visit(const ExprPower& e) {
 	return unary(e,
-				[&e](const Domain& x)->Domain { return pow(x,e.expon); },
-				[&e](const ExprNode& expr)->const ExprNode& { return ibex::pow(expr,e.expon); });
+			[&e](const Domain& x)->Domain { return pow(x,e.expon); },
+			[&e](const ExprNode& expr)->const ExprNode& { return ibex::pow(expr,e.expon); });
 }
 
 const ExprNode* ExprSimplify2::visit(const ExprTrans& e) {

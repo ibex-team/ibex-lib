@@ -176,8 +176,9 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended)
 				const ExprNode* _fc=&ExprCopy().copy(fc.args(), argsc, fc.expr());
 
 				if (opc==GT || opc==GEQ) {
-					_fc = & (- (*_fc)); // reverse the inequality
+					_fc = & (- (*_fc)).simplify(); // reverse the inequality
 				}
+
 				_ctrs.push_back(new NumConstraint(argsc,ExprCtr(*_fc,norm(opc))));
 
 				for (int j=0; j<fc.expr().dim.size(); j++) {
