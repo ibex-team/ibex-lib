@@ -571,7 +571,7 @@ void TestFunction::def_domain01() {
 void TestFunction::def_domain02() {
 	Function f("x","y","acos(x*sqrt(y))+y");
 	const System& sys=f.def_domain();
-	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"(y;((x*sqrt(y))--1);((x*sqrt(y))-1))"));
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"(y;(1+(x*sqrt(y)));(-1+(x*sqrt(y))))"));
 }
 
 } // end namespace

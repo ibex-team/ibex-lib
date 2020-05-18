@@ -124,7 +124,7 @@ void TestExprPolynomial::test02() {
 	CPPUNIT_ASSERT(!px_y.one_monomial());
 
 	CPPUNIT_ASSERT(((string) -px_y)=="-x+-y");
-	CPPUNIT_ASSERT(sameExpr((-px_y).to_expr(),"((-x)+(-y))"));
+	CPPUNIT_ASSERT(sameExpr((-px_y).to_expr(),"((-x)-y)"));
 
 	CPPUNIT_ASSERT(((string) px_y.square())=="x^2+2xy+y^2");
 
@@ -133,7 +133,7 @@ void TestExprPolynomial::test02() {
 
 	px_y-=2*py;
 	CPPUNIT_ASSERT(((string) px_y)=="2x+-y");
-	CPPUNIT_ASSERT(sameExpr(px_y.to_expr(),"((2*x)+(-y))"));
+	CPPUNIT_ASSERT(sameExpr(px_y.to_expr(),"((2*x)-y)"));
 }
 
 void TestExprPolynomial::test03() {

@@ -252,7 +252,7 @@ void Ponts30::build_equ() {
 	equ.set_ref(i++,(	A_y ));
 	equ.set_ref(i++,(	A_x ));
 
-	f =  new Function(symbols,ExprVector::new_col(equ),"ponts30");
+	f =  new Function(symbols,ExprVector::new_col(equ).simplify(),"ponts30");
 }
 
 Ponts30::Ponts30() : init_box(30), hc4r_box(30,30), hc4_box(30) {
