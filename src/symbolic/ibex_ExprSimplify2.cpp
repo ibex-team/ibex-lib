@@ -173,6 +173,7 @@ const ExprNode* ExprSimplify2::visit(const ExprNode& e) {
 const ExprNode* ExprSimplify2::visit(const ExprIndex& e) {
 
 	const ExprNode* expr2 = visit(e.expr);
+	assert(expr2->dim==e.expr.dim);
 
 	if (is_cst(*expr2)) {
 		if (is_mutable(*expr2))
@@ -267,6 +268,7 @@ const ExprNode* ExprSimplify2::unary(const ExprUnaryOp& e,
 		std::function<const ExprNode&(const ExprNode&)> fctr) {
 
 	const ExprNode* expr2=visit(e.expr);
+	assert(expr2->dim==e.expr.dim);
 
 	if (is_cst(*expr2)) {
 		if (is_mutable(*expr2))
@@ -293,7 +295,10 @@ const ExprNode* ExprSimplify2::binary(const ExprBinaryOp& e,
 		std::function<const ExprBinaryOp&(const ExprNode&, const ExprNode&)> fctr) {
 
 	const ExprNode* l2=visit(e.left);
+	assert(l2->dim==e.left.dim);
 	const ExprNode* r2=visit(e.right);
+	assert(r2->dim==e.right.dim);
+
 	bool all_same = (l2==&e.left && r2==&e.right);
 
 	if (is_cst(*l2) && !is_mutable(*l2) && is_cst(*r2) && !is_mutable(*r2)) {
@@ -401,7 +406,10 @@ const ExprNode* ExprSimplify2::visit(const ExprSub& e)   { return binary(e, (_do
 
 const ExprNode* ExprSimplify2::visit(const ExprMul& e)   {
 	const ExprNode* l2=visit(e.left);
+	assert(l2->dim==e.left.dim);
 	const ExprNode* r2=visit(e.right);
+	assert(r2->dim==e.right.dim);
+
 	bool all_same = (l2==&e.left && r2==&e.right);
 
 	if (is_cst(*l2) && !is_mutable(*l2) && is_cst(*r2) && !is_mutable(*r2)) {
@@ -409,39 +417,52 @@ const ExprNode* ExprSimplify2::visit(const ExprMul& e)   {
 	} else if ((!l2->dim.is_scalar() && (is_vec(*l2) || is_cst(*l2)))
 			|| (!r2->dim.is_scalar() && (is_vec(*r2) || is_cst(*r2)))) { // distribute multiplication / vector
 
-		Array<const ExprNode> rows(l2->dim.nb_rows());
-		Array<const ExprNode> col (r2->dim.nb_cols());
-
-		for (int i=0; i<l2->dim.nb_rows(); i++) {
-			col.clear();
+		Array<const ExprNode> cols(r2->dim.nb_cols());
+		if (l2->dim.is_scalar()) { // scalar*vector/matrix case
+			// note: a row ExprVector of column is more efficient than a column ExprVector of rows.
+			Array<const ExprNode> col (r2->dim.nb_rows());
 			for (int j=0; j<r2->dim.nb_cols(); j++) {
-				const ExprNode* e=NULL;
-				for (int k=0; k<l2->dim.nb_cols(); k++) {
-					if (e)
-						e = & rec(*e +
-								rec(rec((*l2)[DoubleIndex::one_elt(l2->dim,i,k)])*
-										rec((*r2)[DoubleIndex::one_elt(r2->dim,k,j)]))
-						);
-					else
-						e = & rec(
-								rec((*l2)[DoubleIndex::one_elt(l2->dim,i,k)])*
-								rec((*r2)[DoubleIndex::one_elt(r2->dim,k,j)])
-						);
+				col.clear();
+				for (int i=0; i<r2->dim.nb_rows(); i++) {
+					col.set_ref(i, rec((*l2)*rec((*r2)[DoubleIndex::one_elt(r2->dim,i,j)])));
 				}
-				col.set_ref(j,*e);
+				if (r2->dim.nb_rows()>1)
+					cols.set_ref(j, rec(ExprVector::new_(col,ExprVector::COL)));
+				else
+					cols.set_ref(j, col[0]);
 			}
-			if (r2->dim.nb_cols()>1)
-				rows.set_ref(i, rec(ExprVector::new_(col,ExprVector::ROW)));
-			else
-				rows.set_ref(i, col[0]);
+		} else {
+			Array<const ExprNode> col (l2->dim.nb_rows());
+			for (int j=0; j<r2->dim.nb_cols(); j++) {
+				col.clear();
+				for (int i=0; i<l2->dim.nb_rows(); i++) {
+					const ExprNode* e=NULL;
+
+					for (int k=0; k<l2->dim.nb_cols(); k++) {
+						if (e)
+							e = & rec(*e +
+									rec(rec((*l2)[DoubleIndex::one_elt(l2->dim,i,k)])*
+											rec((*r2)[DoubleIndex::one_elt(r2->dim,k,j)]))
+							);
+						else
+							e = & rec(
+									rec((*l2)[DoubleIndex::one_elt(l2->dim,i,k)])*
+									rec((*r2)[DoubleIndex::one_elt(r2->dim,k,j)])
+							);
+					}
+					col.set_ref(i,*e);
+				}
+				if (l2->dim.nb_rows()>1)
+					cols.set_ref(j, rec(ExprVector::new_(col,ExprVector::COL)));
+				else
+					cols.set_ref(j, col[0]);
+			}
 		}
-
-		if (l2->dim.nb_rows()>1) {
-			return visit(rec(ExprVector::new_(rows,ExprVector::COL)));
-
+		if (r2->dim.nb_cols()>1) {
+			return visit(rec(ExprVector::new_(cols,ExprVector::ROW)));
 		}
 		else
-			return visit(rows[0]);
+			return visit(cols[0]);
 	} else if (all_same) {
 		return &e;
 	} else
