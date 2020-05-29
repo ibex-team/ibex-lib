@@ -147,14 +147,33 @@ int ExprCmp::visit(const ExprConstant& e, const ExprNode& e2) {
 	if (result==0) {
 		const ExprConstant* e3=dynamic_cast<const ExprConstant*>(&e2);
 		assert(e3);
+
 		if ((result=cmp(e.dim.nb_rows(),e3->dim.nb_rows()))==0) {
 			if ((result=cmp(e.dim.nb_cols(),e3->dim.nb_cols()))==0) {
-				switch(e.dim.type()) {
-				case Dim::SCALAR     : result = compare(e.get_value(), e3->get_value()); break;
-				case Dim::ROW_VECTOR :
-				case Dim::COL_VECTOR : result = compare(e.get_vector_value(), e3->get_vector_value()); break;
-				case Dim::MATRIX     : result = compare(e.get_matrix_value(), e3->get_matrix_value()); break;
-				default              : assert(false);
+
+				if (e.is_mutable()) {
+					if (!e3->is_mutable()) return -1;
+					else {
+						switch(e.dim.type()) {
+						case Dim::SCALAR     : if (&e.get_value()==&e3->get_value()) return 0; break;
+						case Dim::ROW_VECTOR :
+						case Dim::COL_VECTOR : if (&e.get_vector_value()==&e3->get_vector_value()) return 0; break;
+						case Dim::MATRIX     : if (&e.get_matrix_value()==&e3->get_matrix_value()) return 0; break;
+						default              : assert(false);
+						}
+						return cmp(e.id, e2.id);
+					}
+				}
+				else if (e3->is_mutable())
+					return 1;
+				else {
+					switch(e.dim.type()) {
+					case Dim::SCALAR     : result = compare(e.get_value(), e3->get_value()); break;
+					case Dim::ROW_VECTOR :
+					case Dim::COL_VECTOR : result = compare(e.get_vector_value(), e3->get_vector_value()); break;
+					case Dim::MATRIX     : result = compare(e.get_matrix_value(), e3->get_matrix_value()); break;
+					default              : assert(false);
+					}
 				}
 			}
 		}

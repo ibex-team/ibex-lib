@@ -194,7 +194,13 @@ const ExprNode* ExprSimplify2::visit(const ExprIndex& e) {
 	} else if (is_sub(*expr2)) {
 		return visit(rec(rec(left(*expr2)[e.index]) - rec(right(*expr2)[e.index])));
 	} else if (is_mul(*expr2)) {
-		return visit(rec(
+		if (left(*expr2).dim.is_scalar())
+			if (is_cst(*expr2) && !is_mutable(*expr2) && to_cst(*expr2).is_zero())
+				return &rec(ExprConstant::new_matrix(Matrix::zeros(e.dim.nb_rows(),e.dim.nb_cols())));
+			else
+				return visit(rec(left(*expr2) * rec(right(*expr2)[e.index])));
+		else
+			return visit(rec(
 				rec(left(*expr2)[e.index.rows(left(*expr2).dim,e.index.first_row(),e.index.last_row())]) *
 				rec(right(*expr2)[e.index.cols(right(*expr2).dim,e.index.first_col(),e.index.last_col())])));
 	} else if (is_vec(*expr2)) {
@@ -276,6 +282,7 @@ const ExprNode* ExprSimplify2::unary(const ExprUnaryOp& e,
 		else
 			return &rec(ExprConstant::new_(fcst(to_cst(*expr2))));
 	} else if (!e.dim.is_scalar()) { // for MINUS --> distribute over components
+		assert(dynamic_cast<const ExprMinus*>(&e));
 		bool row = e.dim.is_matrix() || e.dim.type()==Dim::ROW_VECTOR;
 		// note: if e.expr is a vector, we don't necessarily iterate over
 		// arguments of v, because dimensions may be non homogeneous (we let
@@ -420,6 +427,9 @@ const ExprNode* ExprSimplify2::visit(const ExprMul& e)   {
 		Array<const ExprNode> cols(r2->dim.nb_cols());
 		if (l2->dim.is_scalar()) { // scalar*vector/matrix case
 			// note: a row ExprVector of column is more efficient than a column ExprVector of rows.
+			if (is_cst(*l2) && !is_mutable(*l2) && to_cst(*l2).is_zero())
+				return &rec(ExprConstant::new_matrix(Matrix::zeros(r2->dim.nb_rows(),r2->dim.nb_cols())));
+
 			Array<const ExprNode> col (r2->dim.nb_rows());
 			for (int j=0; j<r2->dim.nb_cols(); j++) {
 				col.clear();
