@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
 			cout << "*****************************************************************" << endl << endl;
 		}
 
-		if (_IBEX_LP_LIB_=="NONE") {
+		if (strcmp(_IBEX_LP_LIB_,"NONE")==0) {
 			ibex_warning("No LP solver available, which may impact performances \n\t\t(try cmake with -DLP_LIB=...)");
 			cout << endl;
 		}

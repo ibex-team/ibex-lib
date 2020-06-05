@@ -87,7 +87,7 @@ Ctc* DefaultSolver::ctc (const System& sys, double prec) {
 	}
 
 	//System& norm_sys=rec(new NormalizedSystem(sys));
-	if (_IBEX_LP_LIB_!="NONE")
+	if (strcmp(_IBEX_LP_LIB_,"NONE")!=0)
 		ctc_list.set_ref(index++,rec(new CtcFixPoint(rec(new CtcCompo(
 				rec(new CtcPolytopeHull(rec(new LinearizerXTaylor(sys)))),
 				rec(new CtcHC4 (sys.ctrs,0.01)))))));
