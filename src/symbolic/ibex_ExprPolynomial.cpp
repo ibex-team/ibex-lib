@@ -137,11 +137,11 @@ ExprPolynomial& ExprPolynomial::init_square(const ExprPolynomial& p) {
 
 	for (list<ExprMonomial>::const_iterator it1=p.mono.begin(); it1!=p.mono.end(); ++it1) {
 		for (list<ExprMonomial>::const_iterator it2=it1; it2!=p.mono.end(); ++it2) {
-			// note: monomial order is preserved.
+			// order or monomials is not necessarily preserved, ex: (x(1,2)+(1,2))*(x(1;2)+(1;2)) -> 5 + ...
 			if (it1==it2)
-				add_monomial(it1->square());
+				(*this) +=(it1->square());
 			else
-				add_monomial(2*(*it1)*(*it2));
+				(*this) +=(2*(*it1)*(*it2));
 		}
 	}
 	return *this;
