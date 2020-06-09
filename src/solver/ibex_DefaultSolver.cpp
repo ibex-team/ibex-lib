@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_DefaultSolver.cpp
 // Author      : Bertrand Neveu, Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -11,6 +11,7 @@
 #include "ibex_DefaultSolver.h"
 
 #include "ibex_LinearizerXTaylor.h"
+#include "ibex_LinearizerAVM.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"

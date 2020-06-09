@@ -22,7 +22,52 @@ AVMData* ExprDataAVMFactory::init(const type& e, AVMData&, AVMData&) {\
 }
 
 #define GET_MAX_LIN(name) convex_envelope::MAX_LIN_##name
-IMPL_FACT_0ARY(ExprSymbol, 0)
+
+AVMData* ExprDataAVMFactory::init(const ExprSymbol& e) {
+    int var_count = e.dim.size();
+    AVMData* new_data = new AVMData;
+    for(int i = 0; i < var_count; ++i) {
+        new_data->x_indexes.emplace_back(current_var_index);
+        current_var_index++;
+    }
+    /*new_data->begin_index = current_var_index;
+    new_data->size = var_count;
+    current_var_index += var_count;
+    new_data->end_index = current_var_index;*/
+    new_data->begin_lin_index = current_lin_index;
+    new_data->lin_count = 0;
+    new_data->end_lin_index = current_lin_index;
+    return new_data;
+}
+
+AVMData* ExprDataAVMFactory::init(const ExprVector& e, Array<AVMData>& args_deco) {
+    assert(e.dim.size() == args_deco.size());
+    AVMData* new_data = new AVMData;
+    for(int i = 0; i < args_deco.size(); ++i) {
+        assert(args_deco[i].x_indexes.size() == 1);
+        new_data->x_indexes.emplace_back(args_deco[i].x_indexes[0]);
+    }
+    new_data->begin_lin_index = current_lin_index;
+    new_data->lin_count = 0;
+    new_data->end_lin_index = current_lin_index;
+    return new_data;
+}
+
+//AVMData* ExprDataAVMFactory::init(const ExprIndex& e, AVMData& data) {
+    /*const DoubleIndex& index = e.index;
+    const Dim& dim = e.dim;
+    if(index.domain_ref()) {
+        if(index.all()) {
+            return &data;
+        } else {
+            switch(dim.type()) {
+            case Dim::ROW_VECTOR:
+
+            }
+        }
+    }*/
+//}
+
 IMPL_FACT_0ARY(ExprConstant, 0)
 
 //IMPL_FACT_UNARY(ExprIndex, 0);
@@ -57,10 +102,14 @@ IMPL_FACT_BINARY(ExprDiv, GET_MAX_LIN(div_from_mul))
 
 AVMData* ExprDataAVMFactory::create_data(int var_count, int lin_count) {
     AVMData* new_data = new AVMData;
-    new_data->begin_index = current_index;
+    for(int i = 0; i < var_count; ++i) {
+        new_data->x_indexes.emplace_back(current_index);
+        current_index++;
+    }
+    /*new_data->begin_index = current_index;
     new_data->size = var_count;
     current_index += var_count;
-    new_data->end_index = current_index;
+    new_data->end_index = current_index;*/
     new_data->begin_lin_index = current_lin_index;
     new_data->lin_count = lin_count;
     current_lin_index += lin_count;
@@ -69,14 +118,15 @@ AVMData* ExprDataAVMFactory::create_data(int var_count, int lin_count) {
 }
 
 
-ExprDataAVM::ExprDataAVM(const Function& f) : ExprData<AVMData>(f, create_avm_f()) {
+ExprDataAVM::ExprDataAVM(const Function& f) : ExprData<AVMData>(f, create_avm_f(f.nb_var())) {
     nb_var = avm_f_->current_index;
     nb_lin = avm_f_->current_lin_index;
     delete avm_f_;
 }
 
-ExprDataAVMFactory& ExprDataAVM::create_avm_f() {
+ExprDataAVMFactory& ExprDataAVM::create_avm_f(int nb_var) {
     avm_f_ = new ExprDataAVMFactory();
+    avm_f_->current_index = nb_var;
     return *avm_f_;
 }
 

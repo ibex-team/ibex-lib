@@ -103,7 +103,8 @@ public:
     LPSolver(int nb_vars, LPSolver::Mode mode=LPSolver::Mode::NotCertified, double tolerance=default_tolerance,
         double timeout=default_timeout, int max_iter=default_max_iter);
 
-
+    LPSolver(int nb_vars, int nb_intermediate_vars, int nb_ctrs, LPSolver::Mode mode=LPSolver::Mode::NotCertified, double tolerance=default_tolerance,
+        double timeout=default_timeout, int max_iter=default_max_iter);
     /**
      * \brief Read a model file. The accepted format depends on the underlying solver, e.g. for SoPlex .lp and .mps files.
      */
@@ -376,7 +377,7 @@ public:
      * Remove constraints, bounds, objective, and change the number of variables
      * to nb_vars.
      */
-    void reset(int nb_vars);
+    void reset(int nb_vars, int nb_ctr=0);
 
 private:
     LPSolver::Status status_{LPSolver::Status::Unknown};

@@ -69,6 +69,21 @@ public:
 	int nb_var() const;
 
 	/**
+	 * \brief Number of intermediate variables
+	 */
+	virtual int nb_intermediate_var() const {
+		return 0;
+	}
+
+	virtual int nb_initial_lin() const {
+		return 0;
+	}
+
+	virtual bool must_clear_constraints() const {
+		return true;
+	}
+
+	/**
 	 * \brief Identifying number.
 	 */
 	const long id;

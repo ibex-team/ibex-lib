@@ -1,3 +1,14 @@
+/* ============================================================================
+ * I B E X - ConvexEnvelope.cpp
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * ---------------------------------------------------------------------------- */
+
+
 #include "ibex_ConvexEnvelope.h"
 #include "ibex_TemplateVector.h"
 #include "ibex_TemplateMatrix.h"
@@ -82,7 +93,11 @@ ConvexEnvelopeVector ConvexEnvelopeMatrix::col(int index) const {
 }
 
 int ConvexEnvelopeMatrix::nb_rows() const {
-    return rows_.size();
+    return nb_rows_;
+}
+
+int ConvexEnvelopeMatrix::nb_cols() const {
+    return nb_cols_;
 }
 
 ConvexEnvelopeMatrix ConvexEnvelopeMatrix::submatrix(int first_row, int last_row, int first_col, int last_col) const {
@@ -118,6 +133,13 @@ DEFINE_MAX_LIN_CONST(CONVEX, 4)
 // Must be >= CONVEX
 DEFINE_MAX_LIN_CONST(CONCAVE_CONVEX, 4)
 DEFINE_MAX_LIN_CONST(CONVEX_CONCAVE, 4)
+
+ConvexEnvelope equal() {
+    ConvexEnvelope ce(0);
+    ConvexEnvelope::LinearConstraint lc{1, {-1}, 0, CmpOp::EQ };
+    ce.add_linear_constraint(lc);
+    return ce;
+}
 
 DEFINE_MAX_LIN_CONST(add, 1)
 ConvexEnvelope add(const Interval& x1, const Interval& x2) {
@@ -529,7 +551,6 @@ ConvexEnvelope power(const Interval& x, int p) {
     } else {
         const FncPower secante_pow(p);
         auto ce = concave_convex_function(x, func, deriv, ConvexConcaveProperties(0, secante_pow));
-        std::cout << ce << std::endl;
         return ce;
     }
 }

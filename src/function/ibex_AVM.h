@@ -1,3 +1,14 @@
+/* ============================================================================
+ * I B E X - Interface for Auxiliary Variable Method algorithms
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * ---------------------------------------------------------------------------- */
+
+
 #ifndef __IBEX_AVM_H__
 #define __IBEX_AVM_H__
 
@@ -12,23 +23,29 @@
 
 namespace ibex {
 
+/**
+ * \ingroup symbolic
+ * \brief This class implements an Auxiliary Variable Method.
+ *
+ * Each node in the expression is linearized.
+ * Users of this class must implement the methods emit(), setup_node() and finish_node().
+ */
 class AVM : public FwdAlgorithm {
 public:
     AVM(Eval& eval);
     ~AVM();
 
-    struct Result {
-        double uplo;
-        Vector point;
-    };
+    /**
+     * \brief Linearize the expression in a box.
+     */
+    void linearize(const IntervalVector& box);
 
-    void set_cost(const Vector& vec);
-    LPSolver::Status minimize(const IntervalVector& box);
-    Interval minimum() const;
-
-    void load_node_bounds_in_solver(int y);
-
-
+    /**
+     * \brief This function is called every time a ConvexEnvelope object is created.
+     * It can be called multiple times in a node.
+     * The ConvexEnvelope contains the linearization.
+     */
+    virtual void emit(const ConvexEnvelope& ce) = 0;
 
     inline void vector_fwd (int* x, int y);
 	inline void apply_fwd  (int* x, int y);
@@ -84,38 +101,37 @@ public:
 	inline void sub_V_fwd  (int x1, int x2, int y);
 	inline void sub_M_fwd  (int x1, int x2, int y);
 
-private:
+protected:
     Eval& eval_;
     Function& f_;
     const ExprDomain& d_; // = eval_.d
     ExprDataAVM avm_d_;
-    LPSolver* solver_;
 
-    int lin_;
-    int yvar_;
-    std::vector<int> xvars_;
-    int xvar_;
-    int x1var_;
-    int x2var_;
-    AVMData* avm_data_;
-    int solve_count = 0;
+private:
+    /**
+     * \brief Setup node functions are called when entering a node.
+     */
+    virtual void setup_node(int y) = 0;
+    virtual void setup_node(int x, int y) = 0;
+    virtual void setup_node(int x1, int x2, int y) = 0;
+    virtual void setup_node(int* x, int y) = 0;
 
-    void setup_node(int x, int y);
-    void setup_node(int x1, int x2, int y);
-    void finish_node(int x, int y);
-    void finish_node(int x1, int x2, int y);
+    /**
+     * \brief Finish node functions are called when exiting a node.
+     */
+    virtual void finish_node(int y) = 0;
+    virtual void finish_node(int x, int y) = 0;
+    virtual void finish_node(int x1, int x2, int y) = 0;
+    virtual void finish_node(int* x, int y) = 0;
 
-    Vector filter_variables(const Vector& solver_result) const;
-    int node_index_to_first_var(int index) const;
-    int node_index_to_first_lin(int index) const;
 
-    void load_envelope(const ConvexEnvelope& ce);
-    void load_constraint(int lin, const ConvexEnvelope::LinearConstraint& lc);
+
 };
 
 inline void AVM::vector_fwd(int* x, int y) {
     /* nothing to do */
-    not_implemented("Vector not implemented for AVM");
+    setup_node(x, y);
+    finish_node(x, y);
 }
 
 inline void AVM::apply_fwd(int* x, int y) {
@@ -132,11 +148,13 @@ inline void AVM::idx_cp_fwd(int x, int y) {
 }
 
 inline void AVM::symbol_fwd(int y) {
-    load_node_bounds_in_solver(y);
+    setup_node(y);
+    finish_node(y);
 }
 
 inline void AVM::cst_fwd(int y) {
-    load_node_bounds_in_solver(y);
+    setup_node(y);
+    finish_node(y);
 }
 
 inline void AVM::chi_fwd(int x1, int x2, int x3, int y) {
@@ -154,10 +172,10 @@ inline void AVM::add_fwd(int x1, int x2, int y)   {
     setup_node(x1, x2, y);
     if(x1 == x2) {
         ConvexEnvelope ce = convex_envelope::int_mul(2, d_[x1].i());
-        load_envelope(ce);
+        emit(ce);
     } else {
         ConvexEnvelope ce = convex_envelope::add(d_[x1].i(), d_[x2].i());
-        load_envelope(ce);
+        emit(ce);
     }
     finish_node(x1, x2, y);
 
@@ -170,7 +188,7 @@ inline void AVM::mul_fwd(int x1, int x2, int y)   {
     }
     setup_node(x1, x2, y);
     ConvexEnvelope ce = convex_envelope::mul(d_[x1].i(), d_[x2].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x1, x2, y);
 }
 inline void AVM::sub_fwd(int x1, int x2, int y)   {
@@ -178,29 +196,29 @@ inline void AVM::sub_fwd(int x1, int x2, int y)   {
     setup_node(x1, x2, y);
     if(x1 == x2) {
         ConvexEnvelope ce = convex_envelope::int_mul(0, d_[x1].i());
-        load_envelope(ce);
+        emit(ce);
     } else {
         ConvexEnvelope ce = convex_envelope::sub(d_[x1].i(), d_[x2].i());
-        load_envelope(ce);
+        emit(ce);
     }
     finish_node(x1, x2, y);
 }
 inline void AVM::div_fwd(int x1, int x2, int y)   {
     setup_node(x1, x2, y);
     ConvexEnvelope ce = convex_envelope::div_from_mul(d_[x1].i(), d_[x2].i(), d_[y].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x1, x2, y);
 }
 inline void AVM::max_fwd(int x1, int x2, int y)   {
     setup_node(x1, x2, y);
     ConvexEnvelope ce = convex_envelope::max(d_[x1].i(), d_[x2].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x1, x2, y);
 }
 inline void AVM::min_fwd(int x1, int x2, int y)   {
     setup_node(x1, x2, y);
     ConvexEnvelope ce = convex_envelope::max(d_[x1].i(), d_[x2].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x1, x2, y);
 }
 inline void AVM::atan2_fwd(int x1, int x2, int y) {
@@ -215,12 +233,18 @@ inline void AVM::gen1_fwd(int x, int y) {
 inline void AVM::minus_fwd(int x, int y)          {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::int_mul(-1, d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::minus_V_fwd(int x, int y)        {
     // d[y].v()=-d[x].v();
-    not_implemented("Minus_V not implemented for AVM");
+    const int dim = d_[y].dim.size();
+    setup_node(x, y);
+    for(int i = 0; i < dim; ++i) {
+        ConvexEnvelope ce = convex_envelope::int_mul(-1, d_[x].v()[i]);
+        emit(ce);
+    }
+    finish_node(x, y);
 }
 inline void AVM::minus_M_fwd(int x, int y)        {
     // d[y].m()=-d[x].m();
@@ -229,19 +253,19 @@ inline void AVM::minus_M_fwd(int x, int y)        {
 inline void AVM::sign_fwd(int x, int y)           {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::sign(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::abs_fwd(int x, int y)            {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::abs(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::power_fwd(int x, int y, int p)   {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::power(d_[x].i(), p);
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 
@@ -249,14 +273,14 @@ inline void AVM::sqr_fwd(int x, int y)            {
     // 0 >= x^2 = y >= lin
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::sqr(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::sqrt_fwd(int x, int y)           {
     // if ((d[y].i()=sqrt(d[x].i())).is_empty()) throw EmptyBoxException();
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::sqrt(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 
@@ -264,108 +288,108 @@ inline void AVM::exp_fwd(int x, int y)            {
     // d[y].i()=exp(d[x].i());
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::exp(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::log_fwd(int x, int y)            {
     // if ((d[y].i()=log(d[x].i())).is_empty()) throw EmptyBoxException();
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::log(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 
 inline void AVM::cos_fwd(int x, int y)            {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::cos(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 
 inline void AVM::sin_fwd(int x, int y)            {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::sin(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 
 inline void AVM::tan_fwd(int x, int y)            {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::tan(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 
 inline void AVM::cosh_fwd(int x, int y)           {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::cosh(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::sinh_fwd(int x, int y)           {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::sinh(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);;
 }
 inline void AVM::tanh_fwd(int x, int y)           {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::tanh(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::acos_fwd(int x, int y)           {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::acos(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::asin_fwd(int x, int y)           {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::asin(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::atan_fwd(int x, int y)           {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::atan(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::acosh_fwd(int x, int y)          {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::acosh(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::asinh_fwd(int x, int y)          {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::asinh(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::atanh_fwd(int x, int y)          {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::atanh(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::floor_fwd(int x, int y)          {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::floor(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::ceil_fwd(int x, int y)           {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::ceil(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 inline void AVM::saw_fwd(int x, int y)            {
     setup_node(x, y);
     ConvexEnvelope ce = convex_envelope::saw(d_[x].i());
-    load_envelope(ce);
+    emit(ce);
     finish_node(x, y);
 }
 
@@ -379,7 +403,20 @@ inline void AVM::trans_M_fwd(int x, int y)        {
 }
 inline void AVM::add_V_fwd(int x1, int x2, int y) {
     // d[y].v()=d[x1].v()+d[x2].v();
-    not_implemented("Add_V not implemented for AVM");
+    const int dim = d_[y].dim.size();
+    setup_node(x1, x2, y);
+    if(x1 == x2) {
+        for(int i = 0; i < dim; ++i) {
+            ConvexEnvelope ce = convex_envelope::int_mul(2, d_[x1].v()[i]);
+            emit(ce);
+        }
+    } else {
+        for(int i = 0; i < dim; ++i) {
+            ConvexEnvelope ce = convex_envelope::add(d_[x1].v()[i], d_[x2].v()[i]);
+            emit(ce);
+        }
+    }
+    finish_node(x1, x2, y);
 }
 inline void AVM::add_M_fwd(int x1, int x2, int y) {
     // d[y].m()=d[x1].m()+d[x2].m();

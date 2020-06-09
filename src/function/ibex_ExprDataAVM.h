@@ -1,3 +1,14 @@
+/* ============================================================================
+ * I B E X - ExprData for storage of AVM data
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * ---------------------------------------------------------------------------- */
+
+
 #ifndef __IBEX_EXPR_DATA_AVM_H__
 #define __IBEX_EXPR_DATA_AVM_H__
 
@@ -6,10 +17,12 @@
 
 namespace ibex {
 
+/**
+ * \brief Structure containing indexes of variables of the node,
+ * and the span of linearizations reserved for this node
+ */
 struct AVMData {
-    int begin_index;
-    int size;
-    int end_index;
+    std::vector<int> x_indexes;
     int lin_count;
     int begin_lin_index;
     int end_lin_index;
@@ -44,8 +57,13 @@ public:
     virtual AVMData* init(const ExprAdd&, AVMData&, AVMData&) override;
     virtual AVMData* init(const ExprSub&, AVMData&, AVMData&) override;
     virtual AVMData* init(const ExprMul&, AVMData&, AVMData&) override;
-    int current_index;
-    int current_lin_index;
+
+    //virtual AVMData* init(const ExprIndex&, AVMData&) override;
+    AVMData* init(const ExprVector& e, Array<AVMData>& args_deco) override;
+
+    int current_index = 0;
+    int current_lin_index = 0;
+    int current_var_index = 0;
 
     AVMData* create_data(int var_count, int lin_count);
 };
@@ -58,7 +76,7 @@ public:
     int nb_lin = 0;
 
 private:
-    ExprDataAVMFactory& create_avm_f();
+    ExprDataAVMFactory& create_avm_f(int nb_var);
 
     ExprDataAVMFactory* avm_f_;
 };

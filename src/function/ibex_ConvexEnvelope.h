@@ -1,3 +1,13 @@
+/* ============================================================================
+ * I B E X - Collection of functions for creating convex envelopes defined by linear constraints
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Antoine Marendet
+ * ---------------------------------------------------------------------------- */
+
 #ifndef __IBEX_CONVEX_ENVELOPE_H__
 #define __IBEX_CONVEX_ENVELOPE_H__
 
@@ -9,6 +19,9 @@
 
 namespace ibex {
 
+/**
+ * \brief Store a convex envelope (a simplex) defined by linear constraints.
+ */
 class ConvexEnvelope {
 public:
 
@@ -58,7 +71,10 @@ inline std::ostream& operator<<(std::ostream& os, const ConvexEnvelope& ce) {
 }
 
 namespace convex_envelope {
+
 #define DECLARE_MAX_LIN_CONST(name) extern const int MAX_LIN_##name;
+
+    ConvexEnvelope equal();
 
     DECLARE_MAX_LIN_CONST(add)
     ConvexEnvelope add(const Interval& x1, const Interval& x2);
@@ -403,6 +419,7 @@ public:
     const ConvexEnvelopeVector& row(int index) const;
     ConvexEnvelopeVector col(int index) const;
     int nb_rows() const;
+    int nb_cols() const;
     ConvexEnvelopeMatrix submatrix(int first_row, int last_row, int first_col, int last_col) const;
     const ConvexEnvelopeVector& operator[](int i) const;
     ConvexEnvelopeVector& operator[](int i);
@@ -412,6 +429,18 @@ private:
     int nb_rows_;
     int nb_cols_;
 };
+
+inline bool ___is_empty(const ConvexEnvelope& ce) {
+    return false;
+}
+
+inline bool ___is_empty(const ConvexEnvelopeVector& ce) {
+    return false;
+}
+
+inline bool ___is_empty(const ConvexEnvelopeMatrix& ce) {
+    return false;
+}
 
 } // end namespace ibex
 

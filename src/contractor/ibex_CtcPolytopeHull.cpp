@@ -26,7 +26,7 @@ class PolytopeHullEmptyBoxException { };
 
 CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps) :
 		Ctc(lr.nb_var()), lr(lr),
-		mylinearsolver(nb_var, LPSolver::Mode::Certified, eps, time_out, max_iter),
+		mylinearsolver(nb_var, lr.nb_intermediate_var(), lr.nb_initial_lin(), LPSolver::Mode::Certified, eps, time_out, max_iter),
 		contracted_vars(BitSet::all(nb_var)), own_lr(false), primal_sols(2*nb_var, nb_var),
 		primal_sol_found(2*nb_var) {
 
@@ -61,7 +61,7 @@ void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 	try {
 		//returns the number of constraints in the linearized system
 		int cont = lr.linearize(box, mylinearsolver, context.prop);
-
+//		mylinearsolver.write_to_file("interm.lp");
 		//cout << "[polytope-hull] end of LR" << endl;
 
 		if (cont==-1) throw PolytopeHullEmptyBoxException();
@@ -73,11 +73,13 @@ void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 		//mylinearsolver.writeFile("LP.lp");
 		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
-		mylinearsolver.clear_constraints();
+		if(lr.must_clear_constraints())
+			mylinearsolver.clear_constraints();
 	}
 	catch(PolytopeHullEmptyBoxException& e) {
 		box.set_empty(); // empty the box before exiting
-		mylinearsolver.clear_constraints();
+		if(lr.must_clear_constraints())
+			mylinearsolver.clear_constraints();
 	}
 
 	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
@@ -122,6 +124,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		{
 			inf_bound[i]=1;
 			mylinearsolver.set_cost(i, 1.0);
+			//mylinearsolver.write_to_file("lp.lp");
 			stat = mylinearsolver.minimize();
 			mylinearsolver.set_cost(i, 0.0);
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat << endl;
@@ -176,6 +179,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
 			mylinearsolver.set_cost(i, -1.0);
+			//mylinearsolver.write_to_file("lp2.lp");
 			stat= mylinearsolver.minimize();
 			mylinearsolver.set_cost(i, 0.0);
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << endl;

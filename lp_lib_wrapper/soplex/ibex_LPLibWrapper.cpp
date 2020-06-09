@@ -95,6 +95,16 @@ LPSolver::LPSolver(int nb_vars, LPSolver::Mode mode, double tolerance,
     reset(nb_vars);
 }
 
+LPSolver::LPSolver(int nb_vars, int nb_intermediate_var, int nb_ctr, LPSolver::Mode mode, double tolerance,
+        double timeout, int max_iter)
+{
+    assert(nb_vars > 0);
+    init(mode, tolerance, timeout, max_iter);
+
+
+    reset(nb_vars+nb_intermediate_var, nb_ctr);
+}
+
 LPSolver::LPSolver(std::string filename) {
     init(LPSolver::Mode::NotCertified, LPSolver::default_tolerance, LPSolver::default_timeout, LPSolver::default_max_iter);
     mysoplex->setIntParam(SoPlex::READMODE, SoPlex::READMODE_REAL);
@@ -182,8 +192,6 @@ int LPSolver::add_constraint(const Vector& row, CmpOp op, double rhs) {
 }
 
 int LPSolver::add_constraint(const SparseVector& row, CmpOp op, double rhs) {
-    assert(row.size() == nb_vars());
-    assert(isfinite(row));
     assert(std::isfinite(rhs));
 
     has_changed = true;
@@ -330,18 +338,22 @@ void LPSolver::set_cost(int index, double value) {
 }
 
 void LPSolver::set_bounds(const IntervalVector& bounds) {
-    assert(bounds.size() == nb_vars());
+    assert(bounds.size() <= nb_vars());
     assert(!bounds.is_unbounded());
-
+    for(int i = 0; i < bounds.size(); ++i) {
+        set_bounds(i, bounds[i]);
+    }
+    /*IntervalVector mybounds(nb_vars());
+    mybounds.put(0,bounds);
     has_changed = true;
     // The bounds have to be changed in 3 places: ivec_bounds_,
     // in soplex variable bounds, and in bounds constraints.
-    ivec_bounds_ = bounds;
-    mysoplex->changeBoundsReal(ivec2dvec(bounds.lb()), ivec2dvec(bounds.ub()));
+    ivec_bounds_ = mybounds;
+    mysoplex->changeBoundsReal(ivec2dvec(mybounds.lb()), ivec2dvec(mybounds.ub()));
     const int n = nb_vars();
     for(int i = 0; i < n; ++i) {
-        mysoplex->changeRangeReal(i, bounds[i].lb(), bounds[i].ub());
-    }
+        mysoplex->changeRangeReal(i, mybounds[i].lb(), mybounds[i].ub());
+    }*/
 }
 
 void LPSolver::set_bounds(int var, const Interval& bounds) {
@@ -521,7 +533,7 @@ void LPSolver::clear_bounds() {
     set_bounds(new_bounds);
 }
 
-void LPSolver::reset(int nb_vars) {
+void LPSolver::reset(int nb_vars, int nb_ctr) {
     assert(nb_vars > 0);
     invalidate();
     mysoplex->clearLPReal();
@@ -538,6 +550,9 @@ void LPSolver::reset(int nb_vars) {
         dsrow.add(i, 1);
         mysoplex->addRowReal(LPRowReal(-soplex::infinity, dsrow, soplex::infinity));
         dsrow.clear();
+    }
+    for(int i = 0; i < nb_ctr; ++i) {
+        add_constraint(SparseVector(), CmpOp::LEQ, 0.0);
     }
     ivec_bounds_ = IntervalVector(nb_vars, Interval::ALL_REALS);
 }
