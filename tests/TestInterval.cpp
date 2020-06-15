@@ -448,3 +448,10 @@ void TestInterval::diff17() {
 	Interval(1,1).diff(Interval(0,2),c1,c2,false);
 	CPPUNIT_ASSERT(c1.is_empty() && c2.is_empty());
 }
+
+void TestInterval::issue_463() {
+	Interval a = Interval(3,8);
+	Interval b = Interval(1,3) & Interval(6,7); // [b] is empty
+	Interval c = a+b;
+	CPPUNIT_ASSERT(c.is_empty());
+}
