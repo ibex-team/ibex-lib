@@ -52,7 +52,7 @@ const char* DIFF_PREFIX = "d"; // when the differential of a function is generat
  * Find the components used in the function
  * \pre the symbol keys must have been set
  */
-class FindInputsUsed: public ExprVisitor {
+class FindInputsUsed: public ExprVisitor<void> {
 public:
 	BitSet& is_used;
 	int* symbol_index;
@@ -99,7 +99,7 @@ public:
 
 	virtual void visit(const ExprNode& e)     {
 		if (visited.found(e)) return;
-		e.acceptVisitor(*this);
+		e.accept_visitor(*this);
 		visited.insert(e,true);
 	}
 
@@ -139,7 +139,7 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL),
+Function::Function() : name(NULL), comp(NULL), df(NULL), _def_domain(NULL), zero(NULL),
 		_eval(NULL), _hc4revise(NULL), _grad(NULL), _inhc4revise(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
@@ -505,6 +505,7 @@ void Function::generate_comp() {
 void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) {
 
 	df=NULL;
+	_def_domain=NULL;
 	comp=NULL;
 	zero=NULL;
 

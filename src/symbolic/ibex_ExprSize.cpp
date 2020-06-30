@@ -2,10 +2,10 @@
 //                                  I B E X                                   
 // File        : ibex_ExprSize.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 26, 2012
-// Last Update : Jun 26, 2012
+// Last Update : May 04, 2020
 //============================================================================
 
 #include "ibex_ExprSize.h"
@@ -15,35 +15,33 @@ using namespace std;
 
 namespace ibex {
 
-int bin_size(const ExprNode& left, const ExprNode& right) {
-	return ExprSize(left,right).size+1;
+int ExprSize::bin_size(const ExprNode& l, const ExprNode& r) {
+	return visit(l) + visit(r) +1;
 }
 
-int nary_size(const Array<const ExprNode>& args) {
-	return ExprSize(args).size+1;
+int ExprSize::nary_size(const Array<const ExprNode>& args) {
+	int acc=0;
+	for (int i=0; i<args.size(); i++) acc+=visit(args[i]);
+	return acc +1;
 }
-
-ExprSize::ExprSize(const ExprNode& l, const ExprNode& r) : size(0) {
-	visit(l);
-	visit(r);
-}
-
-ExprSize::ExprSize(const Array<const ExprNode>& args) : size(0) {
-	for (int i=0; i<args.size(); i++) visit(args[i]);
-}
-
-void ExprSize::visit(const ExprNode& e) {
-	if (!map.found(e)) {
-		map.insert(e,true);
-		size++;
-		e.acceptVisitor(*this);
+int ExprSize::visit(const ExprNode& e)     {
+	IBEX_NODE_MAP(int)::iterator it = cache.find(e);
+	if (it==cache.end()) {
+		int size=e.accept_visitor(*this);
+		cache.insert(e, size); // but the value will never be read again, in fact
+		return size;
+	} else {
+		return 0;
 	}
 }
-
-void ExprSize::visit(const ExprIndex& e)    { visit(e.expr); }
-void ExprSize::visit(const ExprLeaf& e)     { }
-void ExprSize::visit(const ExprNAryOp& e)   { for (int i=0; i<e.nb_args; i++) visit(e.arg(i)); }
-void ExprSize::visit(const ExprBinaryOp& e) { visit(e.left); visit(e.right); }
-void ExprSize::visit(const ExprUnaryOp& e)  { visit(e.expr); }
+int ExprSize::visit(const ExprIndex& e)    { return visit(e.expr) +1; }
+int ExprSize::visit(const ExprLeaf& e)     { return 1; }
+int ExprSize::visit(const ExprNAryOp& e)   {
+	int acc=0;
+	for (int i=0; i<e.nb_args; i++) acc+=visit(e.arg(i));
+	return acc+1;
+}
+int ExprSize::visit(const ExprBinaryOp& e) { return visit(e.left) + visit(e.right) +1; }
+int ExprSize::visit(const ExprUnaryOp& e)  { return visit(e.expr) +1; }
 
 } // end namespace ibex

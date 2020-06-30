@@ -5,7 +5,7 @@ namespace ibex {
 LPSolver::LPSolver(int nb_vars, LPSolver::Mode mode, double tolerance,
 	double timeout, int max_iter)
 {
-	ibex_warning("No LP Solver available (use --lp-lib option in waf configure). ");
+	ibex_warning("No LP Solver available (use -DLP_LIB=... in cmake). ");
 }
 
 LPSolver::LPSolver(std::string filename) {

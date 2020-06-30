@@ -15,10 +15,17 @@
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
+#include "ibex_ExprFuncDomain.h"
 
 using namespace std;
 
 namespace ibex {
+
+const System& Function::def_domain() const {
+	if (!_def_domain)
+		(System*&) _def_domain = ExprFuncDomain(*this).get();
+	return *_def_domain;
+}
 
 Function::~Function() {
 
@@ -55,6 +62,8 @@ Function::~Function() {
 	}
 
 	if (df!=NULL) delete df;
+
+	if (_def_domain!=NULL) delete _def_domain;
 
 	if (name!=NULL) { // name==NULL if init/build_from_string was never called.
 		free((char*) name);

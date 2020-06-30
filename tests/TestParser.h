@@ -50,7 +50,8 @@ public:
 	CPPUNIT_TEST(sum04);
 	CPPUNIT_TEST(temp_in_loop);
 	CPPUNIT_TEST(diff_lock);
-	CPPUNIT_TEST(issue365);
+	// requires DAGification:
+	//CPPUNIT_TEST(issue365);
 	CPPUNIT_TEST(mutable_cst_1);
 	CPPUNIT_TEST(mutable_cst_2);
 

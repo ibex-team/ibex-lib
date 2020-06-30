@@ -13,12 +13,14 @@
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 #include "ibex_ExprPrinter.h"
-#include "ibex_ExprSimplify.h"
+#include "ibex_ExprSimplify2.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_ExprSize.h"
 #include "ibex_ExprCmp.h"
 #include "ibex_String.h"
 #include "ibex_Id.h"
+#include "ibex_Map.h"
+
 #include <sstream>
 #include <limits.h>
 #include <stdio.h>
@@ -30,6 +32,51 @@ using namespace std;
 namespace ibex {
 
 namespace {
+
+class ExprTypeMap : public Map<size_t,ExprNode::ExprTypeId,false> {
+public:
+	ExprTypeMap() {
+		insert_new(typeid(ExprIndex).hash_code(), ExprNode::NumExprIndex);
+		insert_new(typeid(ExprSymbol).hash_code(), ExprNode::NumExprSymbol);
+		insert_new(typeid(ExprConstant).hash_code(), ExprNode::NumExprConstant);
+		insert_new(typeid(ExprVector).hash_code(), ExprNode::NumExprVector);
+		insert_new(typeid(ExprApply).hash_code(), ExprNode::NumExprApply);
+		insert_new(typeid(ExprChi).hash_code(), ExprNode::NumExprChi);
+		insert_new(typeid(ExprGenericBinaryOp).hash_code(), ExprNode::NumExprGenericBinaryOp);
+		insert_new(typeid(ExprAdd).hash_code(), ExprNode::NumExprAdd);
+		insert_new(typeid(ExprMul).hash_code(), ExprNode::NumExprMul);
+		insert_new(typeid(ExprSub).hash_code(), ExprNode::NumExprSub);
+		insert_new(typeid(ExprDiv).hash_code(), ExprNode::NumExprDiv);
+		insert_new(typeid(ExprMax).hash_code(), ExprNode::NumExprMax);
+		insert_new(typeid(ExprMin).hash_code(), ExprNode::NumExprMin);
+		insert_new(typeid(ExprAtan2).hash_code(), ExprNode::NumExprAtan2);
+		insert_new(typeid(ExprGenericUnaryOp).hash_code(), ExprNode::NumExprGenericUnaryOp);
+		insert_new(typeid(ExprMinus).hash_code(), ExprNode::NumExprMinus);
+		insert_new(typeid(ExprTrans).hash_code(), ExprNode::NumExprTrans);
+		insert_new(typeid(ExprSign).hash_code(), ExprNode::NumExprSign);
+		insert_new(typeid(ExprAbs).hash_code(), ExprNode::NumExprAbs);
+		insert_new(typeid(ExprPower).hash_code(), ExprNode::NumExprPower);
+		insert_new(typeid(ExprSqr).hash_code(), ExprNode::NumExprSqr);
+		insert_new(typeid(ExprSqrt).hash_code(), ExprNode::NumExprSqrt);
+		insert_new(typeid(ExprExp).hash_code(), ExprNode::NumExprExp);
+		insert_new(typeid(ExprLog).hash_code(), ExprNode::NumExprLog);
+		insert_new(typeid(ExprCos).hash_code(), ExprNode::NumExprCos);
+		insert_new(typeid(ExprSin).hash_code(), ExprNode::NumExprSin);
+		insert_new(typeid(ExprTan).hash_code(), ExprNode::NumExprTan);
+		insert_new(typeid(ExprCosh).hash_code(), ExprNode::NumExprCosh);
+		insert_new(typeid(ExprSinh).hash_code(), ExprNode::NumExprSinh);
+		insert_new(typeid(ExprTanh).hash_code(), ExprNode::NumExprTanh);
+		insert_new(typeid(ExprAcos).hash_code(), ExprNode::NumExprAcos);
+		insert_new(typeid(ExprAsin).hash_code(), ExprNode::NumExprAsin);
+		insert_new(typeid(ExprAtan).hash_code(), ExprNode::NumExprAtan);
+		insert_new(typeid(ExprAcosh).hash_code(), ExprNode::NumExprAcosh);
+		insert_new(typeid(ExprAsinh).hash_code(), ExprNode::NumExprAsinh);
+		insert_new(typeid(ExprAtanh).hash_code(), ExprNode::NumExprAtanh);
+		insert_new(typeid(ExprFloor).hash_code(), ExprNode::NumExprFloor);
+		insert_new(typeid(ExprCeil).hash_code(), ExprNode::NumExprCeil);
+		insert_new(typeid(ExprSaw).hash_code(), ExprNode::NumExprSaw);
+	}
+};
 
 int max_height(const ExprNode& n1, const ExprNode& n2) {
 	if (n1.height>n2.height) return n1.height;
@@ -77,7 +124,7 @@ ExprNode::ExprNode(int height, int size, const Dim& dim) :
 }
 
 bool ExprNode::operator==(const ExprNode& e) const {
-	return ExprCmp().compare(*this, e);
+	return ExprCmp().compare(*this, e)==0;
 }
 
 bool ExprNode::operator!=(const ExprNode& e) const {
@@ -85,7 +132,22 @@ bool ExprNode::operator!=(const ExprNode& e) const {
 }
 
 const ExprNode& ExprNode::simplify() const {
-	return ExprSimplify().simplify(*this);
+	return ExprSimplify2().simplify(*this);
+}
+
+namespace {
+ExprNode::ExprTypeId _type_num(const ExprNode& e) {
+	static ExprTypeMap map;
+	try {
+		return map[typeid(e).hash_code()];
+	} catch(Map<size_t,ExprNode::ExprTypeId,false>::NotFound&) {
+		ibex_error("ExprNode: unknown expression id (please report bug!)");
+	}
+}
+}
+
+ExprNode::ExprTypeId ExprNode::type_id() const {
+	return _type_num(*this);
 }
 
 void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
@@ -99,7 +161,7 @@ void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 
 ExprIndex::ExprIndex(const ExprNode& subexpr, const DoubleIndex& index)
 : ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim(index)), expr(subexpr), index(index) {
-	((ExprNode&) (subexpr)).fathers.add(*this);
+//	((ExprNode&) (subexpr)).fathers.add(*this);
 }
 
 bool ExprIndex::indexed_symbol() const {
@@ -173,12 +235,12 @@ pair<const ExprSymbol*, bool**> ExprIndex::symbol_mask() const {
 }
 
 ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
-		ExprNode(max_height(_args)+1, nary_size(_args), dim),
+		ExprNode(max_height(_args)+1, ExprSize().nary_size(_args), dim),
 		args(_args), nb_args(_args.size()) {
 
-	for (int i=0; i<nb_args; i++) {
-		((ExprNode&) args[i]).fathers.add(*this);
-	}
+//	for (int i=0; i<nb_args; i++) {
+//		((ExprNode&) args[i]).fathers.add(*this);
+//	}
 }
 
 ExprVector::ExprVector(const Array<const ExprNode>& comp, ExprVector::Orientation o) :
@@ -350,12 +412,12 @@ const ExprConstant& ExprConstant::copy() const {
 
 ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim) :
 		ExprNode(	max_height(left,right)+1,
-					bin_size(left,right),
+					ExprSize().bin_size(left,right),
 					dim ),
 		left(left), right(right) {
 
-	((ExprNode&) left).fathers.add(*this);
-	((ExprNode&) right).fathers.add(*this);
+//	((ExprNode&) left).fathers.add(*this);
+//	((ExprNode&) right).fathers.add(*this);
 }
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
@@ -400,7 +462,7 @@ ExprPower::ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.di
 
 ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
 				ExprNode(subexpr.height+1, subexpr.size+1, dim), expr(subexpr) {
-	((ExprNode&) expr).fathers.add(*this);
+//	((ExprNode&) expr).fathers.add(*this);
 }
 
 ExprSign::ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {

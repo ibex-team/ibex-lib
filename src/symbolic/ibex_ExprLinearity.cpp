@@ -113,7 +113,7 @@ void ExprLinearity::visit(const ExprSymbol& e, int k) {
 
 void ExprLinearity::visit(const ExprNode& e) {
 	if (!_coeffs.found(e))
-		e.acceptVisitor(*this);
+		e.accept_visitor(*this);
 }
 
 void ExprLinearity::visit(const ExprIndex& e) {

@@ -22,6 +22,10 @@ namespace ibex {
  * \brief Contract the bounds of a box with respect to a polytope.
  *
  * The polytope is obtained by linearizing a system.
+ *
+ * \warning This contractor can only be used if ibex is installed with
+ * a LP solver (-DLP_LIB).
+ *
  * \see #LinearRelax.
  */
 class CtcPolytopeHull : public Ctc {
@@ -103,8 +107,6 @@ public:
 	 */
 	const Vector& arg_min(int i, bool left);
 
-#ifndef _IBEX_WITH_NOLP_
-
 protected:
 
 	/**
@@ -147,8 +149,6 @@ private:
 	 *  solution has been found.
 	 */
 	BitSet primal_sol_found;
-
-#endif /// end _IBEX_WITH_NOLP_
 };
 
 /*================================== inline implementations ========================================*/

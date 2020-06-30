@@ -49,7 +49,7 @@ If you want to install Ibex in a local folder, use ``-DCMAKE_INSTALL_PREFIX``, e
 
 	~/Ibex/ibex-2.8.7/build$ cmake -DCMAKE_INSTALL_PREFIX=$HOME ..
 
-See the :ref:`options <install-options>`. The folder full path must not contain any **white space** or wierd characters like ``'"\()`*[]``.
+See the :ref:`options <install-cmake-options>`. The folder full path must not contain any **white space** or wierd characters like ``'"\()`*[]``.
 
 -----------------
 Windows
@@ -74,7 +74,7 @@ On Ubuntu, you can install all you need with::
 
   ~$ sudo apt-get install -y g++ gcc flex bison cmake pkg-config
   
-.. _install-options:
+.. _install-cmake-options:
 
 ==============================
 Configuration options
@@ -297,28 +297,28 @@ Plugins
 The same steps must be done to compile a plugin. See the current list of available plugins in the `download page of Ibex <http://www.ibex-lib.org/download>`_.
 
 
-We assume here that the plugin to be installed is ibex-optim::
+We assume here that the plugin to be installed is ibex-ampl::
 
-  ~/Ibex/ibex-optim$ mkdir build
-  ~/Ibex/ibex-optim$ cd build
-  ~/Ibex/ibex-optim/build$ cmake ..
-  ~/Ibex/ibex-optim/build$ make
-  ~/Ibex/ibex-optim/build$ sudo make install
+  ~/Ibex/ibex-ampl$ mkdir build
+  ~/Ibex/ibex-ampl$ cd build
+  ~/Ibex/ibex-ampl/build$ cmake ..
+  ~/Ibex/ibex-ampl/build$ make
+  ~/Ibex/ibex-ampl/build$ sudo make install
   
 The ``MAKE_INSTALL_PREFIX`` option allows to install the plugin locally, ex::
 
-  ~/Ibex/ibex-optim$ cmake -DCMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim ..
+  ~/Ibex/ibex-ampl$ cmake -DCMAKE_INSTALL_PREFIX=~/Ibex/ibex-ampl ..
 
 In this case the ``sudo`` before ``make install`` is unecessary.
 
 If Ibex has been installed in a local folder, say ``~/Ibex/ibex-2.8.7`` you need to indicate this 
 path using the ``CMAKE_PREFIX_PATH`` option::
 
-  ~/Ibex/ibex-optim$ cmake -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 ..
+  ~/Ibex/ibex-ampl$ cmake -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 ..
   
 Of course, you can combine both::
 
-	~/Ibex/ibex-optim$ cmake -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 -DCMAKE_INSTALL_PREFIX=~/Ibex/ibex-optim ..
+	~/Ibex/ibex-ampl$ cmake -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 -DCMAKE_INSTALL_PREFIX=~/Ibex/ibex-ampl ..
 
 
 =======================================

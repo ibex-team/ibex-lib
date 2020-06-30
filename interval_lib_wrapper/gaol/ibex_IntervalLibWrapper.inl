@@ -166,7 +166,10 @@ inline double Interval::mag() const {
 }
 
 inline Interval operator&(const Interval& x1, const Interval& x2) {
-	return x1.itv & x2.itv;
+	if (x1.is_empty() || x2.is_empty() || x1.ub()<x2.lb())
+		return Interval::empty_set();
+	else
+		return x1.itv & x2.itv;
 }
 
 inline Interval operator|(const Interval& x1, const Interval& x2) {

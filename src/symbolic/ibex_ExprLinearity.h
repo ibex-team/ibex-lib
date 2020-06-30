@@ -29,7 +29,7 @@ namespace ibex {
  * Note: should be faster (and more robust) than using symbolic differentiation.
  *
  */
-class ExprLinearity : public virtual ExprVisitor {
+class ExprLinearity : public virtual ExprVisitor<void> {
 public:
 	/**
 	 * \brief Check the linearity of y (and all its subexpressions).

@@ -38,7 +38,7 @@ std::vector<ExprCtr*> P_CtrGenerator::generate(const P_ConstraintList& ctrs) {
 }
 
 void P_CtrGenerator::visit(const P_NumConstraint& c) {
-	c.acceptVisitor(*this);
+	c.accept_visitor(*this);
 }
 
 void P_CtrGenerator::visit(const P_OneConstraint& c) {

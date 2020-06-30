@@ -204,7 +204,7 @@ protected:
 	// Note: Not very clean. To be fixed at some point...
 	int goal_var;
 
-	static Map<long,false>& ids();
+	static Map<long,long,false>& ids();
 };
 
 /*================================== inline implementations ========================================*/

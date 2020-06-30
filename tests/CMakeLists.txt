@@ -33,8 +33,8 @@ if (DO_TEST)
                   TestCtcForAll TestCtcFwdBwd TestCtcHC4 TestCtcInteger
                   TestCtcNotIn TestDim TestDomain TestDoubleHeap TestDoubleIndex
                   TestEval TestExpr2DAG TestExpr2Minibex TestExprCmp
-                  TestExprCopy TestExpr TestExprDiff TestExprLinearity
-                  TestExprSimplify TestFncKuhnTucker TestKuhnTuckerSystem
+                  TestExprCopy TestExpr TestExprDiff TestExprLinearity TestExprMonomial
+                  TestExprPolynomial TestExprSimplify TestExprSimplify2 TestFncKuhnTucker TestKuhnTuckerSystem
                   TestFunction TestGradient TestHC4Revise TestInHC4Revise
                   TestInnerArith TestInterval TestIntervalMatrix
                   TestIntervalVector TestKernel TestLinear TestLPSolver

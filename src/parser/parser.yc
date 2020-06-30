@@ -74,8 +74,9 @@ using namespace std;
 %type<dim>        dimension
 
 /* constraints */
-%type<constraints>  ctr_blk_list_ // ctr_blk_list without ending semicolon
-%type<constraint>   ctr_blk
+%type<constraints>  ctr_blk_list 
+%type<constraints>  ctr_blk_list1 // ctr list ended by a constraint (must be followed by semicolon)
+%type<constraints>  ctr_blk_list2 // ctr list ended by a loop (semicolon is optional)
 %type<constraint>   ctr_loop
 %type<constraint>   ctr 
  
@@ -106,7 +107,7 @@ system_or_func: TK_VARS decl_var_list ';'
               |
               ;
               
-choco_ctr     : ctr_blk_list                    
+choco_ctr     : ctr_blk_list                    { pstruct->source.ctrs=new P_ConstraintList($1); }
               ;
 
 /**********************************************************************************************************************/
@@ -214,26 +215,32 @@ decl_opt_goal :                                 { pstruct->source.goal = NULL; }
 
 decl_opt_ctrs : 
               | TK_CTRS                         { pstruct->scope().push(); /* new scope for temporary symbols */ } 
-                ctr_blk_list TK_END             { pstruct->scope().pop(); }
+                ctr_blk_list TK_END             { pstruct->source.ctrs=new P_ConstraintList($3);
+                                                  pstruct->scope().pop(); }
               | TK_CTRS semicolon_opt TK_END    { pstruct->source.ctrs=new P_ConstraintList(new vector<P_NumConstraint*>()); }
 	          ;
 	          
-ctr_blk_list  : ctr_blk_list_ semicolon_opt     { pstruct->source.ctrs=new P_ConstraintList($1); }
-              ;
+ctr_blk_list  : ctr_blk_list1 semicolon_opt     { $$ = $1; }
+              | ctr_blk_list2 semicolon_opt     { $$ = $1; }
+      		  ;
 
-ctr_blk_list_ : ctr_blk_list_ ';' ctr_blk       { $1->push_back($3); $$ = $1; }
-              | ctr_blk                         { $$ = new vector<P_NumConstraint*>();
-              								      $$->push_back($1); }
-              ; 
-
-ctr_blk       : ctr_loop                        { $$ = $1; }
-              | ctr                             { $$ = $1; }
-              ;
+ctr_blk_list1 : ctr_blk_list1 ';' ctr           { $1->push_back($3); $$ = $1; }
+			  | ctr_blk_list2 semicolon_opt ctr { $1->push_back($3); $$ = $1; }
+              | ctr                             { $$ = new vector<P_NumConstraint*>();
+                                                  $$->push_back($1); }
+      		  ;
+      		  
+ctr_blk_list2 : ctr_blk_list1 ';' ctr_loop      { $1->push_back($3); $$ = $1; }
+			  | ctr_blk_list2 semicolon_opt ctr_loop 
+			                                    { $1->push_back($3); $$ = $1; }
+              | ctr_loop                        { $$ = new vector<P_NumConstraint*>();
+                                                  $$->push_back($1); }
+      		  ;
 
 ctr_loop      : TK_FOR TK_NEW_SYMBOL TK_EQU
                 expr ':' expr ';'               { pstruct->scope().push();
                                                   pstruct->scope().add_iterator($2); }
-                ctr_blk_list_ semicolon_opt 
+                ctr_blk_list 
                 TK_END                          { $$ = new P_ConstraintLoop($2, $4, $6, $9); 
                                                   pstruct->scope().pop();
                                                   free($2); }

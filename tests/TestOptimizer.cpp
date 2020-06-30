@@ -35,8 +35,6 @@ void TestOptimizer::vec_problem01() {
 			NormalizedSystem::default_eps_h, false, false); // no INHC4
 	Optimizer::Status status=o.optimize(IntervalVector(3,Interval(0,10)));
 
-	o.report();
-
 	CPPUNIT_ASSERT(status==Optimizer::SUCCESS);
 	CPPUNIT_ASSERT(o.get_loup()>=3 && o.get_uplo()<=3);
 	CPPUNIT_ASSERT(almost_eq(o.get_loup_point(),Vector::ones(3),0.1));

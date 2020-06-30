@@ -20,31 +20,31 @@ namespace {
 
 struct DepComparator {
 
-	DepComparator(const Map<int,false>& level) : level(level) { }
+	DepComparator(const Map<long,int,false>& level) : level(level) { }
 
 	bool operator()(Bxp* x, Bxp* y) {
 		return level[x->id] < level[y->id];
 	}
 
-	const Map<int,false>& level;
+	const Map<long,int,false>& level;
 };
 
 } // end anonymous namespace
 
-int BoxProperties::topo_sort_rec(const Bxp& el, Map<int,false>& level) const {
+int BoxProperties::topo_sort_rec(const Bxp& el, Map<long,int,false>& level) const {
 	int l;
 	try {
 		l = level[el.id];
 		if (l==-1) // means: father node
 			throw CircualDependency();
-	} catch(Map<int,false>::NotFound&) {
+	} catch(Map<long,int,false>::NotFound&) {
 		l=0;
 		level.insert_new(el.id, -1); // -1 means: in visit
 		for (std::vector<long>::const_iterator it=el.dependencies.begin(); it!=el.dependencies.end(); it++) {
 			try {
 				int l2=topo_sort_rec(map[*it], level);
 				if (l2>=l) l=l2+1;
-			} catch(Map<Bxp>::NotFound&) {
+			} catch(Map<long,Bxp>::NotFound&) {
 				throw PropertyNotFound();
 			}
 		}
@@ -56,9 +56,9 @@ int BoxProperties::topo_sort_rec(const Bxp& el, Map<int,false>& level) const {
 void BoxProperties::topo_sort() const {
 	dep.clear();
 
-	Map<int,false> level;
+	Map<long,int,false> level;
 
-	for (Map<Bxp>::const_iterator it=map.begin(); it!=map.end(); it++) {
+	for (Map<long,Bxp>::const_iterator it=map.begin(); it!=map.end(); it++) {
 		// push the property in the dependency array
 		dep.push_back(it->second);
 		// and determine its level
@@ -85,7 +85,7 @@ void BoxProperties::add(Bxp* prop) {
 const Bxp* BoxProperties::operator[](long id) const {
 	try {
 		return &map[id];
-	} catch(Map<Bxp>::NotFound&) {
+	} catch(Map<long,Bxp>::NotFound&) {
 		return NULL; //throw PropertyNotFound();
 	}
 }
@@ -160,13 +160,13 @@ BoxProperties::BoxProperties(const IntervalVector& box, const BoxProperties& p) 
 }
 
 BoxProperties::~BoxProperties() {
-	for (Map<Bxp>::iterator it=map.begin(); it!=map.end(); it++)
+	for (Map<long,Bxp>::iterator it=map.begin(); it!=map.end(); it++)
 		delete it->second;
 }
 
 ostream& operator<<(ostream& os, const BoxProperties& p) {
 	os << "{\n";
-	for (Map<Bxp>::const_iterator it=p.map.begin(); it!=p.map.end(); it++) {
+	for (Map<long,Bxp>::const_iterator it=p.map.begin(); it!=p.map.end(); it++) {
 		os << "  " << it->second->to_string() << endl;
 	}
 	os << "}";

@@ -222,6 +222,73 @@ public:
 	 */
 	void clear();
 
+
+	/**
+	 * \brief Array iterator
+	 *
+	 * Iterates over the array
+	 */
+	class iterator {
+	public:
+		iterator(Array& a, int i);
+
+		iterator& operator++();
+
+		iterator operator++(int);
+
+		bool operator==(const iterator& it) const;
+
+		bool operator!=(const iterator& it) const;
+
+		T& operator*();
+
+		Array* a;
+		int i;
+	};
+
+	/**
+	 * \brief Array const iterator
+	 *
+	 * Iterates over the array
+	 */
+	class const_iterator {
+	public:
+		const_iterator(const Array& a, int i);
+
+		const_iterator& operator++();
+
+		const_iterator operator++(int);
+
+		bool operator==(const const_iterator& it) const;
+
+		bool operator!=(const const_iterator& it) const;
+
+		const T& operator*();
+
+		const Array* a;
+		int i;
+	};
+
+	/**
+	 * \brief First iterator
+	 */
+	iterator begin();
+
+	/**
+	 * \brief Past-the-end iterator
+	 */
+	iterator end();
+
+	/**
+	 * \brief First iterator
+	 */
+	const_iterator begin() const;
+
+	/**
+	 * \brief Past-the-end iterator
+	 */
+	const_iterator end() const;
+
 protected:
 	int _nb;
 
@@ -649,5 +716,92 @@ void Array<T>::clear() {
 		array[i] = NULL;
 	}
 }
+
+template<class T>
+typename Array<T>::iterator Array<T>::begin() {
+	return iterator(*this,0);
+}
+
+template<class T>
+typename Array<T>::iterator Array<T>::end() {
+	return iterator(*this,size());
+}
+
+template<class T>
+Array<T>::iterator::iterator(Array<T>& a, int i) : a(&a), i(i) {
+
+}
+
+template<class T>
+typename Array<T>::iterator& Array<T>::iterator::operator++() {
+	i++;
+	return *this;
+}
+
+template<class T>
+typename Array<T>::iterator Array<T>::iterator::operator++(int) {
+	Array<T>::iterator it(*this);
+	++(*this);
+	return it;
+}
+
+template<class T>
+bool Array<T>::iterator::operator==(const iterator& it) const {
+	return a==it.a && i==it.i;
+}
+
+template<class T>
+bool Array<T>::iterator::operator!=(const iterator& it) const {
+	return !((*this)==it);
+}
+
+template<class T>
+T& Array<T>::iterator::operator*() {
+	return (*a)[i];
+}
+
+template<class T>
+typename Array<T>::const_iterator Array<T>::begin() const {
+	return const_iterator(*this,0);
+}
+
+template<class T>
+typename Array<T>::const_iterator Array<T>::end() const {
+	return const_iterator(*this,size());
+}
+
+template<class T>
+Array<T>::const_iterator::const_iterator(const Array<T>& a, int i) : a(&a), i(i) {
+
+}
+
+template<class T>
+typename Array<T>::const_iterator& Array<T>::const_iterator::operator++() {
+	i++;
+	return *this;
+}
+
+template<class T>
+typename Array<T>::const_iterator Array<T>::const_iterator::operator++(int) {
+	Array<T>::const_iterator it(*this);
+	++(*this);
+	return it;
+}
+
+template<class T>
+const T& Array<T>::const_iterator::operator*() {
+	return (*a)[i];
+}
+
+template<class T>
+bool Array<T>::const_iterator::operator==(const const_iterator& it) const {
+	return a==it.a && i==it.i;
+}
+
+template<class T>
+bool Array<T>::const_iterator::operator!=(const const_iterator& it) const {
+	return !((*this)==it);
+}
+
 } // namespace ibex
 #endif // __IBEX_ARRAY_H__

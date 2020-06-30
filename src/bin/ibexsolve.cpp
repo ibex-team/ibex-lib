@@ -42,6 +42,7 @@ int main(int argc, char** argv) {
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexSolve", {"format"});
 	args::Flag bfs(parser, "bfs", "Perform breadth-first search (instead of depth-first search, by default)", {"bfs"});
 	args::Flag trace(parser, "trace", "Activate trace. \"Solutions\" (output boxes) are displayed as and when they are found.", {"trace"});
+	args::Flag stop_at_first(parser, "stop-a-first", "Stop at first solution/boundary/unknown box found.", {"stop-at-first"});
 	args::ValueFlag<string> boundary_test_arg(parser, "true|full-rank|half-ball|false", "Boundary test strength. Possible values are:\n"
 			"\t\t* true:\talways satisfied. Set by default for under constrained problems (0<m<n).\n"
 			"\t\t* full-rank:\tthe gradients of all constraints (equalities and potentially activated inequalities) must be linearly independent.\n"
@@ -113,6 +114,9 @@ int main(int argc, char** argv) {
 
 			if (bfs)
 				cout << "  bfs:\t\t\tON" << endl;
+
+			if (stop_at_first)
+				cout << "  stop at first box found" << endl;
 		}
 
 		if (output_file) {
@@ -220,14 +224,19 @@ int main(int argc, char** argv) {
 			cout << "*****************************************************************" << endl << endl;
 		}
 
+		if (strcmp(_IBEX_LP_LIB_,"NONE")==0) {
+			ibex_warning("No LP solver available, which may impact performances \n\t\t(try cmake with -DLP_LIB=...)");
+			cout << endl;
+		}
+
 		if (!quiet)
 			cout << "running............" << endl << endl;
 
 		// Get the solutions
 		if (input_file)
-			s.solve(input_file.Get().c_str());
+			s.solve(input_file.Get().c_str(), stop_at_first.Get());
 		else
-			s.solve(sys.box);
+			s.solve(sys.box, stop_at_first.Get());
 
 		if (trace) cout << endl;
 

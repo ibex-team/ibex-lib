@@ -18,7 +18,7 @@ namespace ibex {
 
 namespace {
 
-class ExprNodes : public virtual ExprVisitor {
+class ExprNodes : public virtual ExprVisitor<void> {
 public:
 	vector<const ExprNode*> nodes;
 	NodeMap<bool> visited;
@@ -46,7 +46,7 @@ public:
 
 	void visit(const ExprNode& e)     {
 		if (!visited.found(e)) {
-			e.acceptVisitor(*this);
+			e.accept_visitor(*this);
 			nodes.push_back(&e);
 			visited.insert(e,true);
 		}

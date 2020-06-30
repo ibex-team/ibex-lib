@@ -241,7 +241,7 @@ void TestParser::choco01() {
 	CPPUNIT_ASSERT(strcmp(sys.args[1].name,"{1}")==0);
 	CPPUNIT_ASSERT(sys.box.size()==2);
 	CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==2);
-	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"({1}+{0})"));
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"({0}+{1})"));
 	CPPUNIT_ASSERT(sys.ctrs.size()==1);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f_ctrs.expr()));
 }
@@ -249,34 +249,36 @@ void TestParser::choco01() {
 void TestParser::loop01() {
 	try {
 		System sys(SRCDIR_TESTS "/quimper/loop01.qpr");
+		cout << sys << endl;
 		double a = 1;
 		double b = 2;
 		int c=0;
 		double error=1e-15;
 
 		for (int i=1;i<=3;i++) {
-		    for (int j=1; j<=i; j++) {
+			for (int j=1; j<=i; j++) {
 
-		      for (int k=j; k<=i; k++) {
-		    	  const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
+				for (int k=j; k<=i; k++) {
+					CPPUNIT_ASSERT(dynamic_cast<const ExprAdd*>(&sys.ctrs[c].f.expr()));
+					const ExprAdd& add=(const ExprAdd&) sys.ctrs[c++].f.expr();
+					// note: ExprSimplify will move constant on the right side
+					const ExprConstant& cst=(const ExprConstant&) add.left;
+					CPPUNIT_ASSERT_DOUBLES_EQUAL(-(a+i+j*k),cst.get_value().mid(),error);
+				}
+			}
 
-		    	  // note: ExprSimplify will move constant on the right side
-		    	  const ExprConstant& cst=(const ExprConstant&) sub.right;
-		    	  CPPUNIT_ASSERT_DOUBLES_EQUAL(a+i+j*k,cst.get_value().mid(),error);
-		      }
-		    }
+			for (int j=1; j<=i; j++) {
+				if (i+j-b==0) {
+					CPPUNIT_ASSERT(sameExpr(sys.ctrs[c++].f.expr(),"x"));
+				} else {
+					CPPUNIT_ASSERT(dynamic_cast<const ExprAdd*>(&sys.ctrs[c].f.expr()));
+					const ExprAdd& add=(const ExprAdd&) sys.ctrs[c++].f.expr();
 
-		    for (int j=1; j<=i; j++) {
-		    	if (i+j-b==0) {
-		    		CPPUNIT_ASSERT(sameExpr(sys.ctrs[c++].f.expr(),"x"));
-		    	} else {
-		    		const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
-
-		    		 // note: ExprSimplify will move constant on the right side
-		    		const ExprConstant& cst=(const ExprConstant&) sub.right;
-		    		CPPUNIT_ASSERT_DOUBLES_EQUAL(i+j-b,cst.get_value().mid(),error);
-		    	}
-		    }
+					// note: ExprSimplify will move constant on the right side
+					const ExprConstant& cst=(const ExprConstant&) add.left;
+					CPPUNIT_ASSERT_DOUBLES_EQUAL(-(i+j-b),cst.get_value().mid(),error);
+				}
+			}
 		}
 
 	} catch(SyntaxError& s)  {
@@ -299,7 +301,7 @@ void TestParser::issue245_2() {
 
 void TestParser::issue245_3() {
 	System sys(SRCDIR_TESTS "/minibex/issue245_3.mbx");
-	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(((3*x^2)+y^2)-3)"));
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((-3+(3*x^2))+y^2)"));
 }
 
 void TestParser::nary_max() {
@@ -353,12 +355,12 @@ void TestParser::sum04() {
 
 void TestParser::temp_in_loop() {
 	System sys(SRCDIR_TESTS "/minibex/issue380.mbx");
-	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"((x(1)-1);(x(2)-2);(x(3)-3);(x(4)-4))"));
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"((-1+x(1));(-2+x(2));(-3+x(3));(-4+x(4)))"));
 }
 
 void TestParser::diff_lock() {
 	System sys(SRCDIR_TESTS "/minibex/diff_lock.mbx");
-	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"((2*x);((x^2+y)-3))"));
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"((2*x);((-3+y)+x^2))"));
 }
 
 void TestParser::issue365() {
@@ -382,15 +384,15 @@ void TestParser::mutable_cst_1() {
 
 	_c1=4; _c2[0]=5; _c2[1]=6;
 	solver.solve(sys.box);
-	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(6));
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(4));
 	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(5));
-	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(4));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(6));
 
 	_c1=7; _c2[0]=8; _c2[1]=9;
 	solver.solve(sys.box);
-	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(9));
+	CPPUNIT_ASSERT(solver.get_data().solution(0)[0]==Interval(7));
 	CPPUNIT_ASSERT(solver.get_data().solution(1)[0]==Interval(8));
-	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(7));
+	CPPUNIT_ASSERT(solver.get_data().solution(2)[0]==Interval(9));
 	cleanup(ctr.e,true);
 	delete &ctr;
 }

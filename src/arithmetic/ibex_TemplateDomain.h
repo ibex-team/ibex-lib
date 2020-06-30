@@ -1266,6 +1266,13 @@ TemplateDomain<D> min(const Array<const TemplateDomain<D> >& args) {
 }
 
 template<class D>
+TemplateDomain<D> chi(const TemplateDomain<D>& a, const TemplateDomain<D>& b, const TemplateDomain<D>& c) {
+	TemplateDomain<D> _chi(Dim::scalar());
+	_chi.i() = chi(a.i(),b.i(),c.i());
+	return _chi;
+}
+
+template<class D>
 TemplateDomain<D> sign(const TemplateDomain<D>& d)  { unary_func(sign); }
 template<class D>
 TemplateDomain<D> abs(const TemplateDomain<D>& d)   { unary_func(abs); }

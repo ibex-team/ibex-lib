@@ -16,6 +16,7 @@ The Core Library
    
    intro
    install
+   install-cmake
    tutorial
    interval
    function

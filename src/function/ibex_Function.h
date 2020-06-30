@@ -349,6 +349,11 @@ public:
 	char* serialize() const;
 
 	/**
+	 * \brief Definition domain
+	 */
+	const System& def_domain() const;
+
+	/**
 	 * \brief Apply this function to the argument
 	 *
 	 * Works only if it is a unary function.
@@ -926,6 +931,12 @@ private:
 	// if at some point, symbolic differentiation is needed for this function,
 	// we store the resulting function for future usage.
 	Function* df;
+
+	/*
+	 * Definition domain. If required at some point, we store the system
+	 * for future usage. Otherwise, equals NULL.
+	 */
+	System* _def_domain;
 
 	// When the Jacobian matrix of the function is sparse, there may be a lot of
 	// zero functions appearing. To avoid memory blow-up, all the zero functions

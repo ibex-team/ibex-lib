@@ -60,21 +60,32 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2DAG.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Minibex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Minibex.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Polynom.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Polynom.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCmp.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCmp.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCopy.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCopy.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCtr.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprMonomial.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprMonomial.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprFuncDomain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprDiff.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprDiff.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprLinearity.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprLinearity.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprOccCounter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprOccCounter.h
   ${CMAKE_CURRENT_BINARY_DIR}/ibex_ExprOperators.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/ibex_ExprOperators.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprPolynomial.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprPolynomial.h	
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprPrinter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprPrinter.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprSimplify.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprSimplify.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprSimplify2.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprSimplify2.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprSize.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprSize.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprSubNodes.cpp

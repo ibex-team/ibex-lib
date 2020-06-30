@@ -22,7 +22,7 @@ namespace parser {
 
 class P_NumConstraint {
 public:
-	virtual void acceptVisitor(P_CtrGenerator& g) const=0;
+	virtual void accept_visitor(P_CtrGenerator& g) const=0;
 
 	virtual void print(std::ostream& os) const=0;
 
@@ -36,7 +36,7 @@ class P_OneConstraint : public P_NumConstraint {
 public:
 	P_OneConstraint(const P_ExprNode* left, CmpOp op, const P_ExprNode* right);
 
-	virtual void acceptVisitor(P_CtrGenerator& g) const {
+	virtual void accept_visitor(P_CtrGenerator& g) const {
 		g.visit(*this);
 	}
 
@@ -55,7 +55,7 @@ class P_TmpSymbolDecl : public P_NumConstraint {
 public:
 	P_TmpSymbolDecl(const char* symbol, const P_ExprNode* expr);
 
-	virtual void acceptVisitor(P_CtrGenerator& g) const {
+	virtual void accept_visitor(P_CtrGenerator& g) const {
 		g.visit(*this);
 	}
 
@@ -72,7 +72,7 @@ class P_ConstraintList : public P_NumConstraint {
 public:
 	P_ConstraintList(std::vector<P_NumConstraint*>* ctrs);
 
-	virtual void acceptVisitor(P_CtrGenerator& g) const {
+	virtual void accept_visitor(P_CtrGenerator& g) const {
 		g.visit(*this);
 	}
 
@@ -91,7 +91,7 @@ class P_ConstraintLoop : public P_NumConstraint {
 public:
 	P_ConstraintLoop(const char* iter, const P_ExprNode* first_value, const P_ExprNode* last_value, std::vector<P_NumConstraint*>* ctrs);
 
-	virtual void acceptVisitor(P_CtrGenerator& g) const {
+	virtual void accept_visitor(P_CtrGenerator& g) const {
 		g.visit(*this);
 	}
 
@@ -123,7 +123,7 @@ public:
 	 */
 	~P_ThickEquality();
 
-	virtual void acceptVisitor(P_CtrGenerator& g) const {
+	virtual void accept_visitor(P_CtrGenerator& g) const {
 		g.visit(*this);
 	}
 

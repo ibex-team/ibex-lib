@@ -28,7 +28,7 @@ public:
 		CPPUNIT_TEST(lp01);
 		CPPUNIT_TEST(fixbug01);
 
-#endif //_IBEX_WITH_NOLP_
+#endif //__IBEX_NO_LP_SOLVER__
 
 	CPPUNIT_TEST_SUITE_END();
 

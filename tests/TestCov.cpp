@@ -100,11 +100,11 @@ void TestCov::write_cov(ofstream& f, ScenarioType scenario, unsigned int level, 
 	write(f,(uint32_t) level);      // subformat level
 	for (unsigned int i=0; i<=level; i++) // format sequence
 		write(f, (uint32_t) 0);
-	for (unsigned int i=0; i<=level; i++) // format version
+	for (unsigned int i=0; i<=level; i++) // format version --> in reverse order
 		if (!right_version && i==level)
-			write(f, (uint32_t) 2); // test a wrong version at last level
+			write(f, (uint32_t) (i==5? 3 : 2)); // test a wrong version at last level
 		else
-			write(f, (uint32_t) 1);
+			write(f, (uint32_t) (i==5? 2 : 1));
 
 	write(f,(uint32_t) n);          // box dimension
 }

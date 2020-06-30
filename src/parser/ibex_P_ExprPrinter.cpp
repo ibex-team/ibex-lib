@@ -16,7 +16,7 @@ namespace ibex {
 namespace parser {
 
 P_ExprPrinter::P_ExprPrinter(std::ostream& os, const P_ExprNode& e) : os(os) {
-	e.acceptVisitor(*this);
+	e.accept_visitor(*this);
 }
 
 
@@ -40,7 +40,7 @@ void P_ExprPrinter::visit(const P_ExprNode& e) {
 	case P_ExprNode::IDX:			visit(e.arg[0]); break;
 	case P_ExprNode::IDX_RANGE:		visit(e.arg[0]); os << ":"; visit(e.arg[1]); break;
 	case P_ExprNode::IDX_ALL:		os << ":";      break;
-	case P_ExprNode::EXPR_WITH_IDX: e.acceptVisitor(*this);  break;
+	case P_ExprNode::EXPR_WITH_IDX: e.accept_visitor(*this);  break;
 	case P_ExprNode::ROW_VEC:		print_arg_list(e);  break;
 	case P_ExprNode::COL_VEC:		print_arg_list(e,false);  break;
 	case P_ExprNode::APPLY:			os << ((P_ExprApply&) e).f.name << "("; print_arg_list(e); os << ")";  break;
@@ -53,7 +53,7 @@ void P_ExprPrinter::visit(const P_ExprNode& e) {
 	case P_ExprNode::MIN:			os << "min";   print_arg_list(e);  break;
 	case P_ExprNode::ATAN2:         os << "atan2"; print_arg_list(e);  break;
 	case P_ExprNode::POWER:         visit(e.arg[0]); os << "^"; visit(e.arg[1]); break;
-	case P_ExprNode::SUM:			e.acceptVisitor(*this); 		   break;
+	case P_ExprNode::SUM:			e.accept_visitor(*this); 		   break;
 	case P_ExprNode::MINUS:         os << "-" ; visit(e.arg[0]);       break;
 	case P_ExprNode::TRANS:         print_arg_list(e); os << "'";      break;
 	case P_ExprNode::SIGN:          os << "sign";  print_arg_list(e);  break;

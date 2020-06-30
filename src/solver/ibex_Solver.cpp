@@ -30,7 +30,7 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0),
 		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL),
 		  params(sys.nb_var,BitSet::empty(sys.nb_var),false) /* no forced parameter by default */,
-		  manif(NULL), time(0), nb_cells(0) {
+		  manif(NULL), time(0), old_time(0), nb_cells(0), old_nb_cells(0) {
 
 	assert(sys.box.size()==ctc.nb_var);
 
@@ -216,8 +216,10 @@ bool Solver::next(CovSolverData::BoxStatus& status, const IntervalVector** sol) 
 				pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 
 				delete buffer.pop();
-				buffer.push(new_cells.first);
+				// note: more natural to push first the second, so that
+				// solutions in a 1-dimensional problem come in increasing order
 				buffer.push(new_cells.second);
+				buffer.push(new_cells.first);
 				nb_cells+=2;
 				if (cell_limit >=0 && nb_cells>=cell_limit) {
 					flush();
@@ -251,22 +253,22 @@ bool Solver::next(CovSolverData::BoxStatus& status, const IntervalVector** sol) 
 	return false;
 }
 
-Solver::Status Solver::solve(const IntervalVector& init_box) {
+Solver::Status Solver::solve(const IntervalVector& init_box, bool stop_at_first) {
 	start(init_box);
-	return solve();
+	return solve(stop_at_first);
 }
 
-Solver::Status Solver::solve(const CovSolverData& data) {
+Solver::Status Solver::solve(const CovSolverData& data, bool stop_at_first) {
 	start(data);
-	return solve();
+	return solve(stop_at_first);
 }
 
-Solver::Status Solver::solve(const char* init_paving) {
+Solver::Status Solver::solve(const char* init_paving, bool stop_at_first) {
 	start(init_paving);
-	return solve();
+	return solve(stop_at_first);
 }
 
-Solver::Status Solver::solve() {
+Solver::Status Solver::solve(bool stop_at_first) {
 
 	Solver::Status final_status;
 
@@ -285,6 +287,12 @@ Solver::Status Solver::solve() {
 
 			if (status==CovSolverData::UNKNOWN)
 				final_status=NOT_ALL_VALIDATED;
+
+			if (stop_at_first) {
+				if (!buffer.empty()) final_status=USER_BREAK;
+				flush();
+				break;
+			}
 		}
 	} catch(CellLimitException&) {
 		final_status=CELL_OVERFLOW;
@@ -523,6 +531,9 @@ void Solver::report() {
 		break;
 	case CELL_OVERFLOW: 
 		cout << red() << " cell overflow" << endl;
+		break;
+	case USER_BREAK:
+		cout << red() << " user break" << endl;
 	}
 
 	cout << white() << endl;

@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Feb 27, 2013
-// Last Update : Feb 27, 2013
+// Last Update : May 04, 2020
 //============================================================================
 
 #ifndef __IBEX_NODE_MAP_H__
@@ -15,16 +15,16 @@
 #include <functional>
 
 #ifdef __GNUC__
-#include <ciso646> // just to initialize _LIBCPP_VERSION
-#ifdef _LIBCPP_VERSION
+//#include <ciso646> // just to initialize _LIBCPP_VERSION
+//#ifdef _LIBCPP_VERSION
 #include <unordered_map>
 #define IBEX_HASH std::hash
 #define IBEX_NODE_MAP(T) std::unordered_map<const ExprNode*,T,hash_node,same_node>
-#else
-#include <tr1/unordered_map>
-#define IBEX_HASH std::tr1::hash
-#define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
-#endif
+//#else
+//#include <tr1/unordered_map>
+//#define IBEX_HASH std::tr1::hash
+//#define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
+//#endif
 #else
 #if (_MSC_VER >= 1600)
 #include <unordered_map>
@@ -68,12 +68,20 @@ public:
 	}
 
 	/**
+	 * \brief Find operator
+	 */
+	typename IBEX_NODE_MAP(T)::iterator find(const ExprNode& e) {
+		return map.find(&e);
+	}
+
+
+	/**
 	 * \brief Insert a pair <e,value>.
 	 *
 	 * The value is passed by copy.
 	 */
-	void insert(const ExprNode& e, const T& value) {
-		map.insert(std::pair<const ExprNode*,T>(&e,value));
+	T& insert(const ExprNode& e, const T& value) {
+		return map.insert(std::make_pair(&e,value)).first->second;
 	}
 
 	/**

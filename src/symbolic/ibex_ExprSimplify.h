@@ -22,7 +22,7 @@
 
 namespace ibex {
 
-class ExprSimplify : public ExprVisitor {
+class ExprSimplify : public ExprVisitor<void> {
 public:
 
 	/**
