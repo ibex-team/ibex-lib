@@ -34,7 +34,7 @@ else ()
                         URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/soplex-4.0.2.tar
                         PATCH_COMMAND patch -p1 -i ${SOPLEX_PATCH}
                         CONFIGURE_COMMAND ""
-                        BUILD_COMMAND make GMP=false ZLIB=false ${_shared} INSTALLDIR=<INSTALL_DIR> install
+                        BUILD_COMMAND make CXXFLAGS=${CMAKE_CXX_FLAGS} GMP=false ZLIB=false ${_shared} INSTALLDIR=<INSTALL_DIR> install
                         INSTALL_COMMAND ""
                         BUILD_IN_SOURCE 1
                         LOG_DOWNLOAD 1
