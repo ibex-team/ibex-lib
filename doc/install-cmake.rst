@@ -289,15 +289,16 @@ Just update the path to dynamically link against Ibex::
 
 
 =======================================
-Plugins
+Plugins/Packages
 =======================================
 
-*(to be completed)*
+There are many developments based on ibex which offer additional functionalities, typically algorithms tailored to some class of problems (e.g., parameter estimation, semi-infinite programming, etc.).
 
-The same steps must be done to compile a plugin. See the current list of available plugins in the `download page of Ibex <http://www.ibex-lib.org/download>`_.
+Up to release 2.8.6, there were disributed under the form of *plugins* as they were installed and compiled with the core library. Now, with Cmake, they are compiled separately and generate their own libraries. So we call them here *packages*.
 
+The same steps must be done to compile a package as for the core library. See the current list of available plugins/packages in the `download page of Ibex <http://www.ibex-lib.org/download>`_.
 
-We assume here that the plugin to be installed is ibex-ampl::
+We assume here that the package to be installed is ibex-ampl::
 
   ~/Ibex/ibex-ampl$ mkdir build
   ~/Ibex/ibex-ampl$ cd build
@@ -305,7 +306,7 @@ We assume here that the plugin to be installed is ibex-ampl::
   ~/Ibex/ibex-ampl/build$ make
   ~/Ibex/ibex-ampl/build$ sudo make install
   
-The ``MAKE_INSTALL_PREFIX`` option allows to install the plugin locally, ex::
+The ``CMAKE_INSTALL_PREFIX`` option allows to install the package locally, ex::
 
   ~/Ibex/ibex-ampl$ cmake -DCMAKE_INSTALL_PREFIX=~/Ibex/ibex-ampl ..
 
@@ -320,6 +321,10 @@ Of course, you can combine both::
 
 	~/Ibex/ibex-ampl$ cmake -DCMAKE_PREFIX_PATH=~/Ibex/ibex-2.8.7 -DCMAKE_INSTALL_PREFIX=~/Ibex/ibex-ampl ..
 
+As said above, packages result in separate libraries. To link you own code with a package, you will 
+have to add the following line in the ``CMakeLists.txt`` file of your project::
+
+    find_package(ibex-ampl REQUIRED)
 
 =======================================
 Running unit tests
