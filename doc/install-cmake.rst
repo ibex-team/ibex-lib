@@ -306,7 +306,7 @@ We assume here that the package to be installed is ibex-ampl::
   ~/Ibex/ibex-ampl/build$ make
   ~/Ibex/ibex-ampl/build$ sudo make install
   
-The ``MAKE_INSTALL_PREFIX`` option allows to install the package locally, ex::
+The ``CMAKE_INSTALL_PREFIX`` option allows to install the package locally, ex::
 
   ~/Ibex/ibex-ampl$ cmake -DCMAKE_INSTALL_PREFIX=~/Ibex/ibex-ampl ..
 
