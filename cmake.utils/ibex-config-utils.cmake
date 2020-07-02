@@ -54,7 +54,7 @@ function (LIST_FILTER resultvar regex)
 endfunction ()
 
 function (LIST_FILTER_HEADER resultvar)
-  list_filter (resultvar "\\.(h|hpp)$" ${ARGN})
+  list_filter (${resultvar} "\\.(h|hpp)$" ${ARGN})
 endfunction ()
 
 ################################################################################
@@ -478,6 +478,9 @@ endfunction ()
 # To be used by plugin, target Ibex::ibex should exist
 # return 1 if an Linear Programming library was used when Ibex was compiled
 # else return 0
+# MAYBE more general function: can return LP LIB or ITV lib (using macro in
+# src/ibex_Setting.h
+# framework: include ibex.h link with Ibex::ibex and test for a given symbol)
 function (IBEX_CHECK_HAVE_LP_LIB resultvar)
   include (CheckCXXSymbolExists)
   set (_bak ${CMAKE_REQUIRED_INCLUDES}) # backup
