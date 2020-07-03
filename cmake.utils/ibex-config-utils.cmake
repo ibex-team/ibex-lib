@@ -55,6 +55,7 @@ endfunction ()
 
 function (LIST_FILTER_HEADER resultvar)
   list_filter (${resultvar} "\\.(h|hpp)$" ${ARGN})
+  set (${resultvar} ${${resultvar}} PARENT_SCOPE)
 endfunction ()
 
 ################################################################################
