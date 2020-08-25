@@ -60,7 +60,7 @@ add_subdirectory (cmake.install)
 ################################################################################
 # archives and packages
 ################################################################################
-if (UNIX)
+if (CMAKE_HOST_SYSTEM_NAME EQUAL "Linux")
   set (CPACK_GENERATOR "TGZ" "ZIP" "DEB")
 else ()
   set (CPACK_GENERATOR "TGZ" "ZIP")
