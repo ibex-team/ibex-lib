@@ -32,7 +32,6 @@ matrix:
         - STATIC_OR_SHARED_CMAKE=
     - os: osx
       compiler: clang
-      osx_image: xcode8.3
       env:
         - INTERVAL_LIB=gaol
         - LP_LIB=soplex
@@ -41,7 +40,6 @@ matrix:
         - CXXFLAGS=-std=c++11
     - os: osx
       compiler: clang
-      osx_image: xcode8.3
       env:
         - INTERVAL_LIB=gaol
         - LP_LIB=none
