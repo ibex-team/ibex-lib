@@ -376,7 +376,7 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
 	//cout << " ====== inflating Gauss-Seidel ========= " << endl;
 	//double red;
 	IntervalVector xold(n);
-	Interval proj;
+	Interval proj, tmp;
 	double d=DBL_MAX; // Hausdorff distances between 2 iterations
 	double dold;
 	double mu; // ratio of dist(x_k,x_{k-1)) / dist(x_{k-1},x_{k-2}).
@@ -386,7 +386,8 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
 		for (int i=0; i<n; i++) {
 			proj = b[i];
 			for (int j=0; j<n; j++)	if (j!=i) proj -= A[i][j]*x[j];
-			x[i] = proj/A[i][i];
+			if (!A[i][i].contains(0)) x[i] = proj/A[i][i];
+			else x[i] = Interval::all_reals();
 		}
 		d=distance(xold,x);
 		mu=d/dold;
