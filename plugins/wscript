@@ -1,0 +1,43 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import ibexutils
+
+from waflib import Configure
+
+######################
+###### options #######
+######################
+def options (opt):
+	# Call "options" for each surdir
+	opt.recurse (ibexutils.get_dirlist (opt.path))
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	# Call "configure" for each surdir
+	conf.recurse (ibexutils.get_dirlist (conf.path))
+
+######################
+####### build ########
+######################
+def build (bld):
+	# Call "build" for each surdir
+	bld.recurse (ibexutils.get_dirlist (bld.path))
+
+######################
+####### utest ########
+######################
+def utest (tst):
+	# Call "utest" for each surdir
+	# Plugin may not have tests so we add "mandatory = False"
+	tst.recurse (ibexutils.get_dirlist (tst.path), mandatory = False)
+
+######################
+##### benchmarks #####
+######################
+def benchmarks (bch):
+	# Call "benchmarks" for each surdir
+	# Plugin may not have benchmarks so we add "mandatory = False"
+	bch.recurse (ibexutils.get_dirlist (bch.path), mandatory = False)
