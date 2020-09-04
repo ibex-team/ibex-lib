@@ -54,7 +54,7 @@ using namespace std;
 %token TK_PARAM TK_CONST TK_VARS TK_FUNCTION 
 %token TK_DIFF 
 %token TK_MIN TK_MAX TK_INF TK_MID TK_SUP TK_SIGN TK_ABS TK_SUM
-%token TK_SQRT TK_EXPO  TK_LOG 
+%token TK_SQRT TK_SQR TK_POW TK_EXPO  TK_LOG 
 %token TK_COS  TK_SIN   TK_TAN  TK_ACOS  TK_ASIN  TK_ATAN TK_ATAN2
 %token TK_COSH TK_SINH  TK_TANH TK_ACOSH TK_ASINH TK_ATANH TK_FLOOR TK_CEIL TK_INTEGER
 %token TK_LEQ  TK_GEQ   TK_EQU  TK_ASSIGN TK_CHI
@@ -280,6 +280,8 @@ expr          : expr '+' expr	                { $$ = *$1 + *$3;     }
               | TK_SIGN '(' expr ')'            { $$ = sign ($3);     }
               | expr '\''	                    { $$ = transpose($1); }
               | TK_SQRT '(' expr ')'            { $$ = sqrt ($3);     }
+              | TK_SQR '(' expr ')'             { $$ = sqr ($3);      }
+              | TK_POW '(' expr ',' expr ')'    { $$ = pow($3, $5);   }
               | TK_EXPO '(' expr ')'            { $$ = exp  ($3);     }
               | TK_LOG '(' expr ')'             { $$ = log  ($3);     }
               | TK_COS '(' expr ')'             { $$ = cos  ($3);     }
