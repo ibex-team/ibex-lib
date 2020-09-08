@@ -189,7 +189,8 @@ const ExprPolynomial* Expr2Polynom::visit(const ExprIndex& e) {
 }
 
 const ExprPolynomial* Expr2Polynom::visit(const ExprSqr& e)   {
-	if (develop)
+	const ExprPolynomial* p = visit(e.expr);
+	if (develop || p->one_monomial())
 		return visit(e.expr)->square_();
 	else
 		return unary(e, ExprSqr::new_);
