@@ -244,7 +244,7 @@ bool inflating_newton(const Fnc& f, const VarSet* vars, const IntervalVector& fu
 
 		IntervalVector box2=mid-y;
 
-		if (box2.is_interior_subset(box)) {
+		if (box2.is_subset(box)) {
 
 			assert(!box2.is_empty());
 
