@@ -25,6 +25,8 @@ using namespace std;
 
 namespace ibex {
 
+static const int simpl = 2;
+
 void TestParser::var01() {
 	System sys(SRCDIR_TESTS "/quimper/var01.qpr");
 	CPPUNIT_ASSERT(sys.args.size()==1);
@@ -235,7 +237,7 @@ void TestParser::ponts() {
 }
 
 void TestParser::choco01() {
-	System sys(2,"{1}+{0}=0");
+	System sys(2,"{1}+{0}=0", simpl);
 	CPPUNIT_ASSERT(sys.args.size()==2);
 	CPPUNIT_ASSERT(strcmp(sys.args[0].name,"{0}")==0);
 	CPPUNIT_ASSERT(strcmp(sys.args[1].name,"{1}")==0);
@@ -248,7 +250,7 @@ void TestParser::choco01() {
 
 void TestParser::loop01() {
 	try {
-		System sys(SRCDIR_TESTS "/quimper/loop01.qpr");
+		System sys(SRCDIR_TESTS "/quimper/loop01.qpr", simpl);
 		cout << sys << endl;
 		double a = 1;
 		double b = 2;
@@ -287,7 +289,7 @@ void TestParser::loop01() {
 }
 
 void TestParser::error01() {
-	CPPUNIT_ASSERT_THROW(System(SRCDIR_TESTS "/quimper/error01.qpr"),SyntaxError);
+	CPPUNIT_ASSERT_THROW(System(SRCDIR_TESTS "/quimper/error01.qpr", simpl),SyntaxError);
 }
 
 void TestParser::issue245_1() {
@@ -296,11 +298,11 @@ void TestParser::issue245_1() {
 }
 
 void TestParser::issue245_2() {
-	CPPUNIT_ASSERT_THROW(System(SRCDIR_TESTS "/minibex/issue245_2.mbx"),SyntaxError);
+	CPPUNIT_ASSERT_THROW(System(SRCDIR_TESTS "/minibex/issue245_2.mbx", simpl),SyntaxError);
 }
 
 void TestParser::issue245_3() {
-	System sys(SRCDIR_TESTS "/minibex/issue245_3.mbx");
+	System sys(SRCDIR_TESTS "/minibex/issue245_3.mbx", simpl);
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((-3+(3*x^2))+y^2)"));
 }
 
@@ -354,17 +356,17 @@ void TestParser::sum04() {
 }
 
 void TestParser::temp_in_loop() {
-	System sys(SRCDIR_TESTS "/minibex/issue380.mbx");
+	System sys(SRCDIR_TESTS "/minibex/issue380.mbx", simpl);
 	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"((-1+x(1));(-2+x(2));(-3+x(3));(-4+x(4)))"));
 }
 
 void TestParser::diff_lock() {
-	System sys(SRCDIR_TESTS "/minibex/diff_lock.mbx");
-	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"((2*x);((-3+y)+x^2))"));
+	System sys(SRCDIR_TESTS "/minibex/diff_lock.mbx", simpl);
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"((2*x);((-3+x^2)+y))"));
 }
 
 void TestParser::issue365() {
-	System sys(SRCDIR_TESTS "/minibex/issue365.mbx");
+	System sys(SRCDIR_TESTS "/minibex/issue365.mbx", simpl);
 	CPPUNIT_ASSERT(sys.f_ctrs.expr().size==7);
 }
 

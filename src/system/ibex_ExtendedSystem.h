@@ -44,7 +44,7 @@ public:
 	 *
 	 * The goal of the extended system is "y".
 	 */
-	explicit ExtendedSystem(const System& sys, double eps=0);
+	explicit ExtendedSystem(const System& sys, double eps=0, int simpl_level=ExprNode::default_simpl_level);
 
 	/**
 	 * \brief Name of the goal variable ("y").

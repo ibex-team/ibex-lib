@@ -17,8 +17,8 @@ const char* ExtendedSystem::goal_name() {
 	return _goal_name;
 }
 
-ExtendedSystem::ExtendedSystem(const System& sys, double eps) :
-	NormalizedSystem(sys,eps,true) {
+ExtendedSystem::ExtendedSystem(const System& sys, double eps, int simpl_level) :
+	NormalizedSystem(sys, eps, true, simpl_level) {
 }
 
 void ExtendedSystem::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) const {

@@ -57,7 +57,7 @@ CmpOp norm(CmpOp op) {
 
 } // end namespace
 
-NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended) : original_sys_id(sys.id) {
+NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended, int simpl_level) : original_sys_id(sys.id) {
 
 	int nb_arg;
 	int k=0; // index of components of sys.f_ctrs
@@ -155,9 +155,9 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended)
 
 				set_lb_ub(rhs, l, u, eps);
 
-				// simplification level 1 is enough for constant simplification
-				const ExprNode& ctrl = ((*fu)-ExprConstant::new_(u)).simplify(ExprNode::default_simpl_level);
-				const ExprNode& ctru = (ExprConstant::new_(l)-(*fl)).simplify(ExprNode::default_simpl_level);
+				// TODO: is running the full simplification process really necessary for just adding a constant?
+				const ExprNode& ctrl = ((*fu)-ExprConstant::new_(u)).simplify(simpl_level);
+				const ExprNode& ctru = (ExprConstant::new_(l)-(*fl)).simplify(simpl_level);
 				_ctrs.push_back(new NumConstraint(argsl,ExprCtr(ctrl,LEQ)));
 				_ctrs.push_back(new NumConstraint(argsu,ExprCtr(ctru,LEQ)));
 
@@ -177,7 +177,7 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended)
 				const ExprNode* _fc=&ExprCopy().copy(fc.args(), argsc, fc.expr());
 
 				if (opc==GT || opc==GEQ) {
-					_fc = & (- (*_fc)).simplify(ExprNode::default_simpl_level); // reverse the inequality
+					_fc = & (- (*_fc)).simplify(simpl_level); // reverse the inequality
 				}
 
 				_ctrs.push_back(new NumConstraint(argsc,ExprCtr(*_fc,norm(opc))));
@@ -215,7 +215,8 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended)
 	}
 
 	if (m>0) {
-		f_ctrs.init(args, ExprVector::new_col(Array<const ExprNode>(_f_ctr)).simplify(ExprNode::default_simpl_level));
+		//TODO: does simplify do anything here?
+		f_ctrs.init(args, ExprVector::new_col(Array<const ExprNode>(_f_ctr)).simplify(simpl_level));
 		assert(f_ctrs.expr().dim.size()==m);
 	}
 }

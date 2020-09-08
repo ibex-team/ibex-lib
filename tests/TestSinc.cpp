@@ -58,7 +58,7 @@ void TestSinc::simplify() {
     Interval cst(2,2);
   	const ExprConstant& x=ExprConstant::new_scalar(cst);
 	const ExprNode& y=ExprGenericUnaryOp::new_("sinc",x);
-	const ExprNode& z=y.simplify();
+	const ExprNode& z=y.simplify(ExprNode::default_simpl_level);
 	const ExprConstant* zz=dynamic_cast<const ExprConstant*>(&z);
 	CPPUNIT_ASSERT(zz!=NULL);
 	CPPUNIT_ASSERT(zz->get_value()==sinc(Interval(2,2)));

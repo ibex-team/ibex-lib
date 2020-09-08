@@ -23,8 +23,12 @@ using namespace std;
 
 namespace ibex {
 
+static const int simpl = 2;
+
 static System* sysex1() {
 	SystemFactory fac;
+	fac.set_simplification_level(simpl);
+
 	Variable x(3,"x");
 	Variable A(3,3,"A");
 	Variable y("y");
@@ -42,6 +46,8 @@ static System* sysex1() {
 
 static System* sysex2() {
 	SystemFactory fac;
+	fac.set_simplification_level(simpl);
+
 	Variable x(3,"x");
 	Variable y("y");
 
@@ -58,6 +64,8 @@ static System* sysex2() {
 
 static System* sysex3() {
 	SystemFactory fac;
+	fac.set_simplification_level(simpl);
+
 	Variable x("x");
 	Variable y("y");
 
@@ -72,7 +80,7 @@ static System* sysex3() {
 }
 
 void TestSystem::empty() {
-	System sys(SRCDIR_TESTS "/minibex/empty.mbx");
+	System sys(SRCDIR_TESTS "/minibex/empty.mbx", simpl);
 	CPPUNIT_ASSERT(sys.nb_ctr==0);
 }
 
@@ -109,7 +117,7 @@ void TestSystem::factory01() {
 
 
 void TestSystem::factory02() {
-System sys(SRCDIR_TESTS "/quimper/unconstrained.qpr");
+System sys(SRCDIR_TESTS "/quimper/unconstrained.qpr", simpl);
 
 CPPUNIT_ASSERT(sys.nb_ctr==0);
 CPPUNIT_ASSERT(sys.nb_var==2);
@@ -145,7 +153,7 @@ CPPUNIT_ASSERT(sys.ctrs[1].op==GEQ);
 }
 
 void TestSystem::copy02() {
-System _sys(SRCDIR_TESTS "/quimper/unconstrained.qpr");
+System _sys(SRCDIR_TESTS "/quimper/unconstrained.qpr", simpl);
 System sys(_sys, System::COPY);
 
 CPPUNIT_ASSERT(sys.nb_ctr==0);
@@ -193,7 +201,7 @@ CPPUNIT_ASSERT(sys.ctrs[1].op==EQ);
 
 void TestSystem::extend01() {
 System& _sys(*sysex2());
-ExtendedSystem sys(_sys);
+ExtendedSystem sys(_sys,0,simpl);
 delete &_sys;
 
 CPPUNIT_ASSERT(sys.nb_ctr==4);
@@ -206,7 +214,6 @@ CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"__goal__"));
 //CPPUNIT_ASSERT(sys.goal==NULL);
 
 CPPUNIT_ASSERT(sys.box.size()==5);
-
 CPPUNIT_ASSERT(sys.ctrs.size()==4);
 CPPUNIT_ASSERT(sys.f_ctrs.nb_arg()==3);
 CPPUNIT_ASSERT(sys.f_ctrs.nb_var()==5);
@@ -222,8 +229,8 @@ CPPUNIT_ASSERT(sys.ctrs[3].op==LEQ);
 }
 
 void TestSystem::extend02() {
-System _sys(SRCDIR_TESTS "/quimper/unconstrained.qpr");
-ExtendedSystem sys(_sys);
+System _sys(SRCDIR_TESTS "/quimper/unconstrained.qpr", simpl);
+ExtendedSystem sys(_sys,0,simpl);
 
 CPPUNIT_ASSERT(sys.nb_ctr==1);
 CPPUNIT_ASSERT(sys.nb_var==3);
@@ -239,7 +246,7 @@ CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
 
 void TestSystem::normalize01() {
 	System& _sys(*sysex3());
-	NormalizedSystem sys(_sys,0.5);
+	NormalizedSystem sys(_sys,0.5,false,simpl);
 	delete &_sys;
 
 	CPPUNIT_ASSERT(sys.nb_ctr==6);
@@ -252,10 +259,14 @@ void TestSystem::normalize01() {
 
 //	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((-1+x)+y)"));
 //	CPPUNIT_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((-1-x)-y)"));
+
+	// simpl=2
+
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[2].f.expr(),"((-1+x)-y)"));
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"((-1-x)+y)"));
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[4].f.expr(),"((-0.5+x)-y)"));
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[5].f.expr(),"((-0.5-x)+y)"));
+
 	CPPUNIT_ASSERT(sys.ctrs[0].op==LEQ);
 	CPPUNIT_ASSERT(sys.ctrs[1].op==LEQ);
 	CPPUNIT_ASSERT(sys.ctrs[2].op==LEQ);
@@ -270,6 +281,7 @@ void TestSystem::normalize02() {
 	  const ExprSymbol& y=ExprSymbol::new_("y");
 
 	  SystemFactory fac;
+	  fac.set_simplification_level(simpl);
 	  fac.add_var(x);
 	  fac.add_var(y);
 	  const ExprNode& e=x+y;
@@ -277,7 +289,7 @@ void TestSystem::normalize02() {
 	  v[0]=1; v[1]=2;
 	  fac.add_ctr(((const ExprNode&) ExprVector::new_col(e,e))=ExprConstant::new_vector(v,false));
 	  System sys(fac);
-	  NormalizedSystem nsys(sys,1);
+	  NormalizedSystem nsys(sys,1,false,simpl);
 	  //CPPUNIT_ASSERT(sys.f_ctrs.expr().size==12); // the DAG structure not kept anymore with ExprSimplify2
 	  CPPUNIT_ASSERT(sameExpr(nsys.ctrs[0].f.expr(),"(((-2+x)+y);((-3+x)+y))"));
 	  CPPUNIT_ASSERT(sameExpr(nsys.ctrs[1].f.expr(),"(((-x)-y);((1-x)-y))"));
@@ -285,6 +297,7 @@ void TestSystem::normalize02() {
 
 void TestSystem::merge01() {
 	SystemFactory fac1;
+	fac1.set_simplification_level(simpl);
 	{
 		Variable x("x");
 		Variable y(2,"y");
@@ -295,6 +308,7 @@ void TestSystem::merge01() {
 	System sys1(fac1);
 
 	SystemFactory fac2;
+	fac2.set_simplification_level(simpl);
 	{
 		Variable x("x");
 		Variable y(2,"y");
@@ -315,6 +329,7 @@ void TestSystem::merge01() {
 
 void TestSystem::merge02() {
 	SystemFactory fac1;
+	fac1.set_simplification_level(simpl);
 	{
 		Variable x("x");
 		fac1.add_var(x);
@@ -323,6 +338,7 @@ void TestSystem::merge02() {
 	System sys1(fac1);
 
 	SystemFactory fac2;
+	fac2.set_simplification_level(simpl);
 	{
 		Variable x("x");
 		Variable y(2,"y");
@@ -353,6 +369,7 @@ void TestSystem::merge02() {
 
 void TestSystem::merge03() {
 	SystemFactory fac1;
+	fac1.set_simplification_level(simpl);
 	{
 		Variable x("x");
 		fac1.add_var(x);
@@ -361,6 +378,7 @@ void TestSystem::merge03() {
 	System sys1(fac1);
 
 	SystemFactory fac2;
+	fac2.set_simplification_level(simpl);
 	{
 		Variable y(2,"y");
 		fac2.add_var(y);
@@ -378,9 +396,10 @@ void TestSystem::merge03() {
 
 
 void TestSystem::merge04() {
-	System sys1(SRCDIR_TESTS "/minibex/I5.bch");
-	System sys2(SRCDIR_TESTS "/minibex/alkyl.bch");
+	System sys1(SRCDIR_TESTS "/minibex/I5.bch", simpl);
+	System sys2(SRCDIR_TESTS "/minibex/alkyl.bch", simpl);
 	System sys3(sys1,sys2);
+
 	CPPUNIT_ASSERT(strcmp(sys3.args[0].name,"x1")==0);
 	CPPUNIT_ASSERT(strcmp(sys3.args[9].name,"x10")==0);
 	CPPUNIT_ASSERT(strcmp(sys3.args[10].name,"x11")==0);
@@ -395,7 +414,7 @@ void TestSystem::merge04() {
 }
 
 void TestSystem::mutable_cst() {
-	System sys(SRCDIR_TESTS "/minibex/mutable_cst.mbx");
+	System sys(SRCDIR_TESTS "/minibex/mutable_cst.mbx", simpl);
 	sys.constant("a").i()=4;
 	sys.constant("b").v()[0]=5;
 	sys.constant("b").v()[1]=6;
