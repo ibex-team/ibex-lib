@@ -36,9 +36,12 @@ P_SysGenerator::P_SysGenerator(P_Scope& scopes) : scopes(scopes) {
 
 }
 
-void P_SysGenerator::generate(P_Source& source, System& sys) {
+void P_SysGenerator::generate(P_Source& source, System& sys, int simpl_level) {
 
 	SystemFactory fac;
+
+	fac.set_simplification_level(simpl_level);
+
 	Array<const ExprSymbol> vars = scopes.var_symbols();
 
 	//================= generate the variables & domains =====================

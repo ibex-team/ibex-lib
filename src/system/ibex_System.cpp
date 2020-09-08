@@ -76,17 +76,17 @@ System::System() : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), b
 
 }
 
-System::System(const char* filename) : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
+System::System(const char* filename, int simpl_level) : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
-	load(fd);
+	load(fd, simpl_level);
 }
 
-System::System(int n, const char* syntax) : id(next_id()), nb_var(n), /* NOT TMP (required by parser) */
+System::System(int n, const char* syntax, int simpl_level) : id(next_id()), nb_var(n), /* NOT TMP (required by parser) */
 		                                    nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
 	LOCK;
 	try {
-		parser::pstruct = new parser::P_StructChoco(*this);
+		parser::pstruct = new parser::P_StructChoco(*this, simpl_level);
 		ibexparse_string(syntax);
 		delete parser::pstruct;
 		parser::pstruct = NULL;
@@ -212,14 +212,14 @@ Domain& System::constant(const std::string& name) {
 	}
 }
 
-void System::load(FILE* fd) {
+void System::load(FILE* fd, int simpl_level) {
 
 	LOCK;
 
 	ibexin = fd;
 
 	try {
-		parser::pstruct = new parser::P_StructSystem(*this);
+		parser::pstruct = new parser::P_StructSystem(*this, simpl_level);
 		ibexparse();
 		delete parser::pstruct;
 		parser::pstruct = NULL;
