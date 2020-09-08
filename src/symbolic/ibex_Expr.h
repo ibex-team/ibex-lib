@@ -127,8 +127,19 @@ public:
 	/** Return the type of this subexpression. */
 	Dim::Type type() const;
 
-	/** Simplify the expression. */
-	const ExprNode& simplify() const;
+	/** Simplify the expression.
+	 * \param level
+	 *    0 - no simplification at all (fast)
+	 *    1 - basic simplifications (fairly fast)
+	 *    2 - more advanced simplifications without developing (can be slow)
+	 *    3 - simplifications with full polynomial developing (can blow up)
+	 * */
+	const ExprNode& simplify(int level) const;
+
+	/**
+	 * Default simplification level.
+	 */
+	static constexpr int default_simpl_level = 1;
 
 	/** Indexing */
 	const ExprIndex& operator[](int i) const;

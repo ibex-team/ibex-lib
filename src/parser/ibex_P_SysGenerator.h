@@ -22,7 +22,7 @@ class P_SysGenerator {
 public:
 	P_SysGenerator(P_Scope& scopes);
 
-	void generate(P_Source& source, System& result);
+	void generate(P_Source& source, System& result, int simpl_level);
 
 private:
 	// to cleanup all expressions (that are copied by the factory)

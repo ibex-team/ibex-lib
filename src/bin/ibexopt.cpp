@@ -22,7 +22,7 @@ using namespace ibex;
 int main(int argc, char** argv) {
 
 #ifdef __IBEX_NO_LP_SOLVER__
-	ibex_error("ibexopt requires a LP Solver (use -DLP_LIB=... in cmake)");
+	ibex_error("ibexopt requires a LP Solver (use --lp-lib with waf or -DLP_LIB with cmake)");
 	exit(1);
 #endif
 
@@ -42,6 +42,12 @@ int main(int argc, char** argv) {
 	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo.", {'t', "timeout"});
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
 	args::ValueFlag<double> eps_x(parser, "float", _eps_x.str(), {"eps-x"});
+	args::ValueFlag<int>    simpl_level(parser, "int", "Expression simplification level. Possible values are:\n"
+			"\t\t* 0:\tno simplification at all (fast).\n"
+			"\t\t* 1:\tbasic simplifications (fairly fast). E.g. x+1+1 --> x+2\n"
+			"\t\t* 2:\tmore advanced simplifications without developing (can be slow). E.g. x*x + x^2 --> 2x^2\n"
+			"\t\t* 3:\tsimplifications with full polynomial developing (can blow up!). E.g. x*(x-1) + x --> x^2\n"
+			"Default value is : 1.", {"simpl"});
 	args::ValueFlag<double> initial_loup(parser, "float", "Intial \"loup\" (a priori known upper bound).", {"initial-loup"});
 	args::ValueFlag<string> input_file(parser, "filename", "COV input file. The file contains "
 			"optimization data in the COV (binary) format.", {'i',"input"});
@@ -102,6 +108,8 @@ int main(int argc, char** argv) {
 
 #ifdef _IBEX_WITH_AMPL_
 			AmplInterface ampl(filename.Get());
+			if (simpl_level)
+				ampl.set_simplification_level(simpl_level.Get());
 			sys = new System(ampl);
 #else
 			cerr << "\n\033[31mCannot read \".nl\" files: AMPL plugin required \033[0m(try reconfigure with --with-ampl)\n\n";
@@ -110,7 +118,7 @@ int main(int argc, char** argv) {
 		}
 		else
 			// Load a system of equations
-			sys = new System(filename.Get().c_str());
+			sys = new System(filename.Get().c_str(), simpl_level? simpl_level.Get() : ExprNode::default_simpl_level);
 
 		DefaultOptimizerConfig config(*sys);
 
@@ -164,6 +172,9 @@ int main(int argc, char** argv) {
 			if (!quiet)
 				cout << "  KKT contractor:\tON" << endl;
 		}
+
+		if (simpl_level)
+			cout << "  symbolic simpl level:\t" << simpl_level.Get() << "\t" << endl;
 
 		if (initial_loup) {
 			if (!quiet)

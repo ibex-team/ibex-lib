@@ -188,7 +188,7 @@ const ExprNode& parse_indexed_symbol(const SymbolMap<const ExprSymbol*>& symbols
 	try {
 		DoubleIndex double_index=parse_double_index(x.dim, double_index_str, matlab_style);
 
-		return x[double_index].simplify();
+		return x[double_index].simplify(ExprNode::default_simpl_level);
 
 	} catch(DimException&) {// problem with DoubleIndex
 		throw_invalid_variable(str);

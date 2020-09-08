@@ -454,7 +454,8 @@ void Function::generate_comp() {
 		Array<const ExprSymbol> x(nb_arg());
 		varcopy(symbs,x);
 		const ExprIndex& yi_tmp=expr()[i];
-		const ExprNode& yi=ExprCopy().copy(symbs, x, yi_tmp).simplify();
+		// simplification level 1 should be enough here
+		const ExprNode& yi=ExprCopy().copy(symbs, x, yi_tmp).simplify(ExprNode::default_simpl_level);
 		delete &yi_tmp;
 		Function* fi=new Function(x,yi);
 		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fi->expr()));
