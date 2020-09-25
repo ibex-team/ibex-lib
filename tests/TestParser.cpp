@@ -370,6 +370,10 @@ void TestParser::issue365() {
 	CPPUNIT_ASSERT(sys.f_ctrs.expr().size==7);
 }
 
+void TestParser::issue474() {
+	CPPUNIT_ASSERT_NO_THROW(System(SRCDIR_TESTS "/minibex/issue474.mbx", simpl));
+}
+
 void TestParser::mutable_cst_1() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	Interval _c1(1);

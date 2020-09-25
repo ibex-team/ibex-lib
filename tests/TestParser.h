@@ -87,6 +87,7 @@ public:
 	void temp_in_loop(); // issue #380
 	void diff_lock();    // see issue #365
 	void issue365();
+	void issue474();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestParser);
