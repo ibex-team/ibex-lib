@@ -456,7 +456,7 @@ Here are the functions that can be applied to an **interval [x]**, seen as a seg
 +------------------+-------------------+----------------------------------------------------------------------+
 | double           | x.mid()           |  the midpoint, (:math:`(\underline{x}+\overline{x})/2`)              |
 +------------------+-------------------+----------------------------------------------------------------------+
-| Interval         | x.inflate(eps)    |  an interval with the same midpoint and radius increased by eps%     |
+| Interval         | x.inflate(eps)    |  an interval with the same midpoint and radius increased by eps      |
 |                  |                   |                                                                      |
 |                  | *(double eps)*    |                                                                      |
 +------------------+-------------------+----------------------------------------------------------------------+
