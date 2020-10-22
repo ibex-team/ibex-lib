@@ -189,6 +189,8 @@ int main(int argc, char** argv) {
 		}
 
 		if (forced_params) {
+			if (!quiet)
+				cout << "  forced params:\t";
 			SymbolMap<const ExprSymbol*> symbols;
 			for (int i=0; i<sys.args.size(); i++)
 				symbols.insert_new(sys.args[i].name, &sys.args[i]);
@@ -205,7 +207,10 @@ int main(int argc, char** argv) {
  				} else {
  					params.push_back(&parse_indexed_symbol(symbols,vars));
  				}
+				if (!quiet) cout << *params.back() << ' ';
 			} while (j!=-1);
+
+			if (!quiet) cout << endl;
 
 			if (!params.empty()) {
 				s.set_params(VarSet(sys.f_ctrs,params,false)); //Array<const ExprNode>(params)));
