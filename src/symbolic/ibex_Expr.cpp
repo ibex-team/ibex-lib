@@ -13,6 +13,7 @@
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 #include "ibex_ExprPrinter.h"
+#include "ibex_ExprSimplify.h"
 #include "ibex_ExprSimplify2.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_ExprSize.h"
@@ -131,8 +132,14 @@ bool ExprNode::operator!=(const ExprNode& e) const {
 	return !(*this==e);
 }
 
-const ExprNode& ExprNode::simplify() const {
-	return ExprSimplify2().simplify(*this);
+const ExprNode& ExprNode::simplify(int level) const {
+	switch (level) {
+	case 0 : return *this;
+	case 1 : return ExprSimplify().simplify(*this);
+	case 2 : return ExprSimplify2(false).simplify(*this);
+	case 3 : return ExprSimplify2(true).simplify(*this);
+	default : ibex_error("incorrect simplification level");
+	}
 }
 
 namespace {

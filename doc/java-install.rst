@@ -4,7 +4,7 @@
 ****************************************************
 
 .. _Choco: http://www.emn.fr/z-info/choco-solver
-
+.. _last release of the ibex-java plugin: https://github.com/ibex-team/ibex-java/releases
 
    +-----------------------------+---------------------+------------------------------+
    | .. image:: images/ibex.jpg  |                     |  .. image:: images/choco.png |
@@ -39,54 +39,65 @@ The installation of the plugin will generate, in addition to the Ibex library, t
 ------------
 Linux/MacOS
 ------------
-Uncompress the archive ibex-2.8.7.tar.gz in some Ibex folder::
+- Uncompress the archive ibex-2.8.8.tar.gz in some Ibex folder::
 
-	~/Ibex/$ tar xvfz ibex-2.8.7.tar.gz
+	~/Ibex/$ tar xvfz ibex-2.8.8.tar.gz
 
-Set the environment variable ``JAVA_HOME``. Typical paths are ``/Library/Java/Home`` (MacOS) or ``/usr/lib/jvm/java-7-openjdk-i38`` (Linux). Example::
+- Download the `last release of the ibex-java plugin`_ (1.0.0)
+
+- Uncompress the archive ``ibex-java-1.0.0.tar.gz``
+
+- Rename the folder ``ibex-java-1.0.0`` to ``ibex-java`` and place this folder under ``~/Ibex/ibex-2.8.8/plugins``
+
+- Set the environment variable ``JAVA_HOME``. Typical paths are ``/Library/Java/Home`` (MacOS) or ``/usr/lib/jvm/java-7-openjdk-i38`` (Linux). Example::
 
 	~/Ibex/$ export JAVA_HOME=/Library/Java/Home
 
-Then configure and install Ibex as follows::
+- Then configure and install Ibex as follows::
 
-	~/Ibex/$ cd ibex-2.8.7
-	~/Ibex/ibex-2.8.7/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
-	~/Ibex/ibex-2.8.7/$ ./waf install
+    ~/Ibex/$ cd ibex-2.8.8
+    ~/Ibex/ibex-2.8.8/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
+    ~/Ibex/ibex-2.8.8/$ ./waf install
 	
-**Note**: the ``--enable-shared`` option is mandatory. 
+  **Note**: the ``--enable-shared`` option is mandatory. 
 
 ------------
 Windows
 ------------
 
-Open a MinGW prompt window. 
+- Open a MinGW prompt window. 
 
+- Uncompress the archive ibex-2.8.8.tar.gz in some Ibex folder::
 
-Uncompress the archive ibex-2.8.7.tar.gz in some Ibex folder::
+	~/Ibex/$ tar xvfz ibex-2.8.8.tar.gz
 
-	~/Ibex/$ tar xvfz ibex-2.8.7.tar.gz
+- Download the `last release of the ibex-java plugin`_ (1.0.0)
 
-Set the environment variable ``JAVA_HOME`` to the home directory of the 32 bits JDK. The variable must be set in Linux-style (don't use backslash ("\\") as separator), e.g.::
+- Uncompress the archive ``ibex-java-1.0.0.tar.gz``
+
+- Rename the folder ``ibex-java-1.0.0`` to ``ibex-java`` and place this folder under ``~/Ibex/ibex-2.8.8/plugins``
+
+- Set the environment variable ``JAVA_HOME`` to the home directory of the 32 bits JDK. The variable must be set in Linux-style (don't use backslash ("\\") as separator), e.g.::
 
 	~/Ibex/$ export JAVA_HOME=/c/Java/jdk1.7.1_17
 
-Update the path as follows::
+- Update the path as follows::
 
 	~/Ibex/$ set PATH=%PATH%;[prefix]\lib;C:\MinGW\bin
 	
-where *[prefix]* is the path specified via ``--prefix``
+  where *[prefix]* is the path specified via ``--prefix``
 	
-.. Warning:
+  .. Warning:
 
-   The path must not contain white spaces, like ”/c/Program Files/...”. Create a symbolik link of your Java directory if necessary.
+     The path must not contain white spaces, like ”/c/Program Files/...”. Create a symbolik link of your Java directory if necessary.
 
-Then configure Ibex as follows::
+- Then configure Ibex as follows::
 
-	~/Ibex/$ cd ibex-2.8.7
-	~/Ibex/ibex-2.8.7/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
-	~/Ibex/ibex-2.8.7/$ ./waf install
+	~/Ibex/$ cd ibex-2.8.8
+	~/Ibex/ibex-2.8.8/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
+	~/Ibex/ibex-2.8.8/$ ./waf install
     
-**Note**: the ``--enable-shared`` option is mandatory. 
+  **Note**: the ``--enable-shared`` option is mandatory. 
 
 
 ============================

@@ -132,7 +132,7 @@ public:
 	 *
 	 * \param sys - the (uninitialized) system to be built
 	 */
-	P_StructSystem(System& sys);
+	P_StructSystem(System& sys, int simpl_level);
 
 	virtual void begin();
 
@@ -143,6 +143,9 @@ public:
 
 	/* system to be built */
 	System& system;
+
+	/* simplification level */
+	int simpl_level;
 };
 
 /**
@@ -188,7 +191,7 @@ public:
 	 *
 	 * \param sys - the (uninitialized) system to be built
 	 */
-	P_StructChoco(System& sys);
+	P_StructChoco(System& sys, int simpl_level);
 
 	/**
 	 * Initialize parsing of CHOCO input constraint.
@@ -207,6 +210,9 @@ public:
 	 * the field system->nb_var must be set *before* calling the parser
 	 */
 	System& system;
+
+	/* simplification level */
+	int simpl_level;
 };
 
 } // end namespace parser

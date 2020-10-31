@@ -63,7 +63,7 @@ Here are examples of interval defintions.
 In particular, it is possible to give a single value to define a degenerated interval (reduced to a point).
 Note the usage of the constants ``NEG_INFINITY`` and ``POS_INFINITY`` for infinite bounds.
 
-**Note:** In Ibex, an interval should never contains a "NaN" (*not a number*), whatever operation you perform with it. If this occurs, something is wrong.
+**Note:** In Ibex, an interval should never contain a "NaN" (*not a number*), whatever operation you perform with it. If this occurs, something is wrong.
 
 .. literalinclude:: ../examples/doc-arithmetic.cpp 
    :language: cpp
@@ -292,7 +292,7 @@ Set-membership operations
 ============================
 
 The operations described here are valid for any "sets" [x] and [y] and
-any "point" p, where a "set" designates here on object of either of the following classes:
+any "point" p, where a "set" designates here one object of either of the following classes:
 
 - ``Interval``
 - ``IntervalVector``
@@ -319,19 +319,19 @@ predicates currently available in Ibex (from release |release|) and their mathem
 +-------------------------------+------------------------------------------------------+------------------+
 |x.is_subset(y)                 | :math:`[x]\subseteq [y]`                             |                  |
 +-------------------------------+------------------------------------------------------+------------------+
-|x.is_strict_subset(y)          | :math:`[x]\subseteq  [y]\wedge x\neq [y]`            |                  |
+|x.is_strict_subset(y)          | :math:`[x]\subseteq  [y]\wedge [x]\neq [y]`          |                  |
 +-------------------------------+------------------------------------------------------+------------------+
 |x.is_interior_subset(y)        |  :math:`[x]\subseteq \mathring{[y]}`                 | release |release||
 +-------------------------------+------------------------------------------------------+------------------+
-|x.is_strict_interior_subset(y) | :math:`[x]\subseteq \mathring{[y]}\wedge x\neq [y]`  | release |release||
+|x.is_strict_interior_subset(y) | :math:`[x]\subseteq \mathring{[y]}\wedge [x]\neq [y]`| release |release||
 +-------------------------------+------------------------------------------------------+------------------+
 |x.is_superset(y)               | :math:`[x]\supseteq [y]`                             |                  |
 +-------------------------------+------------------------------------------------------+------------------+
 |x.is_strict_superset(y)        | :math:`[x]\supseteq [y]\wedge [x]\neq [y]`           |                  |
 +-------------------------------+------------------------------------------------------+------------------+
-|x.contains(p)                  | :math:`d\in [x]`                                     |                  |
+|x.contains(p)                  | :math:`p\in [x]`                                     |                  |
 +-------------------------------+------------------------------------------------------+------------------+
-|x.interior_contains(p)         | :math:`d\in \mathring{[x]}`                          | release |release||
+|x.interior_contains(p)         | :math:`p\in \mathring{[x]}`                          | release |release||
 +-------------------------------+------------------------------------------------------+------------------+
 |x.intersects(y)                | :math:`[x]\cap [y]\neq\emptyset`                     | release |release||
 +-------------------------------+------------------------------------------------------+------------------+
@@ -638,7 +638,7 @@ Possible multiplications are:
 *C++ code*                        *Meaning*
 ------------------------------- --------------------------------------------------
 x*y                             multiplication of two "scalars" (double/intervals)
-x*=y                            mulitplication and assignment
+x*=y                            multiplication and assignment
 x*v                             scalar multiplication of a vector
 x*A                             scalar multiplication of a matrix
 v*w                             dot product (:math:`v^Tw`)

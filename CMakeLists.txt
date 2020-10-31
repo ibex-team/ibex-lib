@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.5.1)
 
 message (WARNING "CMake support is in beta, please report all bugs to https://github.com/ibex-team/ibex-lib/issues/")
 
-project (IBEX VERSION 2.8.6 LANGUAGES CXX)
+project (IBEX VERSION 2.8.8 LANGUAGES CXX)
 set (IBEX_DESCRIPTION "A C++ library for interval-based algorithm design")
 set (IBEX_URL "http://www.ibex-lib.org/")
 
@@ -60,7 +60,7 @@ add_subdirectory (cmake.install)
 ################################################################################
 # archives and packages
 ################################################################################
-if (UNIX)
+if (CMAKE_HOST_SYSTEM_NAME EQUAL "Linux")
   set (CPACK_GENERATOR "TGZ" "ZIP" "DEB")
 else ()
   set (CPACK_GENERATOR "TGZ" "ZIP")

@@ -54,7 +54,8 @@ function (LIST_FILTER resultvar regex)
 endfunction ()
 
 function (LIST_FILTER_HEADER resultvar)
-  list_filter (resultvar "\\.(h|hpp)$" ${ARGN})
+  list_filter (${resultvar} "\\.(h|hpp)$" ${ARGN})
+  set (${resultvar} ${${resultvar}} PARENT_SCOPE)
 endfunction ()
 
 ################################################################################
@@ -450,8 +451,11 @@ function (IBEX_INIT_COMMON)
   ##############################################################################
   # Ibex and its plugins need c++11
   ##############################################################################
-  set (CMAKE_CXX_STANDARD 11 PARENT_SCOPE)
-  set (CMAKE_CXX_STANDARD_REQUIRED ON PARENT_SCOPE)
+  # we do not override (nor check!) the value if a choice was already made
+  if (NOT CMAKE_CXX_STANDARD)
+    set (CMAKE_CXX_STANDARD 11 PARENT_SCOPE)
+    set (CMAKE_CXX_STANDARD_REQUIRED ON PARENT_SCOPE)
+  endif ()
 
   ##############################################################################
   # Set flags and build type (release or debug)

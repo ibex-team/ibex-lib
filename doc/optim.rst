@@ -5,8 +5,6 @@
               IbexOpt
 **************************************
 
-This page describes IbexOpt, the plugin installed with the ``--with-optim`` option.
-
 .. _optim-run-default:
 
 =================

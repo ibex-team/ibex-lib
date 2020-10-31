@@ -4,9 +4,6 @@
 **************************************
              IbexSolve
 **************************************
-
-This page describes IbexSolve, the plugin installed with the ``--with-solver`` option.
-
 .. _solver-run-default:
 
 =================
@@ -77,13 +74,27 @@ Options
 | -t<*float*>, --timeout=<*float*>     | Timeout (time in seconds). Default value is +oo (none).                      |
 |                                      |                                                                              |
 +--------------------------------------+------------------------------------------------------------------------------+
-| -i<*filename*>, --input=<*filename*> | Manifold input file. The file contains a (intermediate) description of the   |
-|                                      | manifold with boxes in the MNF (binary) format.                              |
+| -i<*filename*>, --input=<*filename*> | COV input file. The file contains a (intermediate) description of the        |
+|                                      | manifold with boxes in the COV (binary) format.                              |
 |                                      |                                                                              |
 +--------------------------------------+------------------------------------------------------------------------------+      
-| -o<*filename*>, --output=<*filename*>| Manifold output file. The file will contain the description of the manifold  |
-|                                      | with boxes in the MNF (binary) format.                                       |
+| -o<*filename*>, --output=<*filename*>| COV output file. The file will contain the description of the manifold       |
+|                                      | with boxes in the COV (binary) format.                                       |
 |                                      |                                                                              |
++--------------------------------------+------------------------------------------------------------------------------+
+| --simpl=...                          | Expression simplification level. Possible values are:                        |
+|                                      |                                                                              |
+|                                      | - 0: no simplification at all (fast).                                        |
+|                                      | - 1: basic simplifications (fairly fast).                                    |
+|                                      |      E.g. x+1+1 --> x+2                                                      |
+|                                      | - 2: more advanced simplifications without developing (can be slow).         |
+|                                      |      E.g. x*x + x^2 --> 2x^2.                                                |
+|                                      |      Note that the DAG structure can be lost.                                |
+|                                      | - 3: simplifications with full polynomial developing (can blow up!).         |
+|                                      |      E.g. x*(x-1) + x --> x^2.                                               |
+|                                      |      Note that the DAG structure can be lost.                                |
+|                                      |                                                                              |
+|                                      | Default value is : 1.                                                        |
 +--------------------------------------+------------------------------------------------------------------------------+
 | -s, --sols                           | Display the "solutions" (output boxes) on the standard output.               |
 |                                      |                                                                              |

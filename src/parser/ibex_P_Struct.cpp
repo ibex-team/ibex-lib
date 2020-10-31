@@ -106,7 +106,7 @@ void P_Struct::end_function(const char* name, const P_ExprNode& y) {
 }
 
 //---------------------------------------------------------------------------------------------------
-P_StructSystem::P_StructSystem(System& sys) : system(sys) {
+P_StructSystem::P_StructSystem(System& sys, int simpl_level) : system(sys), simpl_level(simpl_level) {
 
 }
 
@@ -121,7 +121,7 @@ void P_StructSystem::end() {
 		throw SyntaxError("not a system");
 	}
 
-	P_SysGenerator(scope()).generate(source,system);
+	P_SysGenerator(scope()).generate(source,system,simpl_level);
 
 	// TODO: we have to cleanup the data in case of Syntax Error
 	// this probably requires garbage collector during parsing
@@ -153,7 +153,7 @@ void P_StructFunction::end() {
 }
 
 //---------------------------------------------------------------------------------------------------
-P_StructChoco::P_StructChoco(System& sys) : system(sys) {
+P_StructChoco::P_StructChoco(System& sys, int simpl_level) : system(sys), simpl_level(simpl_level) {
 
 }
 
@@ -177,7 +177,7 @@ void P_StructChoco::end() {
 		throw SyntaxError("constraint declaration required");
 	}
 
-	P_SysGenerator(scope()).generate(source,system);
+	P_SysGenerator(scope()).generate(source, system, simpl_level);
 
 	// TODO: see end_system()
 	P_Struct::end();

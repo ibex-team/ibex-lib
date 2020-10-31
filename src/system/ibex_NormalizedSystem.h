@@ -40,7 +40,7 @@ public:
 	 *              inequalities: f<=eps and -f<=eps. If eps==0
 	 *              equalities are duplicated.
 	 */
-	explicit NormalizedSystem(const System& sys, double eps=0, bool extended=false);
+	explicit NormalizedSystem(const System& sys, double eps=0, bool extended=false, int simpl_level=ExprNode::default_simpl_level);
 
 	/** Default epsilon applied to equations: 1e-8. */
 	static constexpr double default_eps_h = 1e-08;
