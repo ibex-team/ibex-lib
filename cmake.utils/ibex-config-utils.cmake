@@ -467,8 +467,13 @@ function (IBEX_INIT_COMMON)
     set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
   endif ()
 
+  if(MSVC)
+  set (CMAKE_CXX_FLAGS_RELEASE "/D NDEBUG /D _CRT_SECURE_NO_WARNINGS" PARENT_SCOPE)
+  set (CMAKE_CXX_FLAGS_DEBUG "/D DEBUG /D _CRT_SECURE_NO_WARNINGS" PARENT_SCOPE)
+  else()
   set (CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" PARENT_SCOPE)
   set (CMAKE_CXX_FLAGS_DEBUG "-O0 -g -pg -Wall -DDEBUG" PARENT_SCOPE)
+  endif()
 
   ##############################################################################
   # add uninstall command
