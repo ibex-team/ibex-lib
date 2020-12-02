@@ -273,7 +273,7 @@ define_property (TARGET PROPERTY IMPORTED_PKG_LIBS
 function (CREATE_TARGET_IMPORT_AND_EXPORT libname libabspath cfgfilename_var)
   set (opt NO_EXPORT INSTALL)
   set (oneArgs NAMESPACE TARGET_NAME COMPONENT)
-  set (multiArgs INCLUDE_DIRECTORIES LINK_LIBRARIES COMPILE_OPTIONS DEPENDS)
+  set (multiArgs INCLUDE_DIRECTORIES LINK_LIBRARIES COMPILE_OPTIONS DEPENDS EXTRA_INSTALL_LIBS)
   
   cmake_parse_arguments(CTIE "${opt}" "${oneArgs}" "${multiArgs}" ${ARGN})
 
@@ -329,6 +329,7 @@ function (CREATE_TARGET_IMPORT_AND_EXPORT libname libabspath cfgfilename_var)
   ##############################################################################
   # install the library
   ##############################################################################
+  get_filename_component (libdir "${libabspath}" DIRECTORY)
   if (CTIE_INSTALL)
     get_filename_component (libfilename "${libabspath}" NAME)
     set (installpath "$<INSTALL_PREFIX>/${CMAKE_INSTALL_LIBDIR_3RD}/${libfilename}") 
@@ -336,11 +337,13 @@ function (CREATE_TARGET_IMPORT_AND_EXPORT libname libabspath cfgfilename_var)
       set (_cn COMPONENT ${CTIE_COMPONENT})
     endif ()
     install (FILES ${libabspath} DESTINATION ${CMAKE_INSTALL_LIBDIR_3RD} ${_cn})
+    foreach (_extra ${CTIE_EXTRA_INSTALL_LIBS})
+      install (FILES ${libdir}/${_extra} DESTINATION ${CMAKE_INSTALL_LIBDIR_3RD} ${_cn})
+    endforeach ()
     set_target_properties (${target} PROPERTIES IMPORTED_PKG_LIBS "-L\${prefix}/${CMAKE_INSTALL_LIBDIR_3RD};-l${libname}")
   else ()
     set (installpath ${libabspath})
     if (libabspath)
-      get_filename_component (libdir "${libabspath}" DIRECTORY)
       set_target_properties (${target} PROPERTIES IMPORTED_PKG_LIBS "-L${libdir};-l${libname}")
     endif ()
   endif ()

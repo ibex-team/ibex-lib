@@ -51,11 +51,15 @@ else()
                                     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR_3RD})
 
   #
+  if (BUILD_SHARED_LIBS)
+    set (_extra libultim-2.1.so.0.0.0 libultim-2.1.so.0)
+  endif ()
   set (_incdir $<BUILD_INTERFACE:${MATHLIB_INCDIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR_3RD}>)
   create_target_import_and_export (ultim ${MATHLIB_LIB} MATHLIB_EXPORTFILE
                                                 INSTALL NAMESPACE Ibex::
                                                 INCLUDE_DIRECTORIES ${_incdir}
                                                 COMPONENT devtools
+                                                EXTRA_INSTALL_LIBS ${_extra}
                                                 DEPENDS libultim_3rd)
   unset (INSTALL_DIR)
 endif()
@@ -133,12 +137,17 @@ else ()
                                  COMPONENT devtools)
 
   #
+  if (BUILD_SHARED_LIBS)
+    set (gaol_extra libgaol-4.2.so.0.0.0 libgaol-4.2.so.0)
+    set (gdtoa_extra libgdtoa.so.0.0.0 libgdtoa.so.0)
+  endif ()
   set (_incdir $<BUILD_INTERFACE:${_incdir}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR_3RD}>)
   create_target_import_and_export (gdtoa ${GDTOA_LIB} GDTOA_EXPORTFILE INSTALL
                                     NAMESPACE Ibex::
                                     ${gaol_compile_option}
                                     INCLUDE_DIRECTORIES ${_incdir}
                                     COMPONENT devtools
+                                    EXTRA_INSTALL_LIBS ${gdtoa_extra}
                                     DEPENDS libgaol_3rd)
   create_target_import_and_export (gaol ${GAOL_LIB} GAOL_EXPORTFILE INSTALL
                                     NAMESPACE Ibex::
@@ -146,6 +155,7 @@ else ()
                                     COMPONENT devtools
                                     INCLUDE_DIRECTORIES ${_incdir}
                                     LINK_LIBRARIES Ibex::gdtoa Ibex::ultim
+                                    EXTRA_INSTALL_LIBS ${gaol_extra}
                                     DEPENDS libgaol_3rd)
   unset (INSTALL_DIR)
 endif ()
