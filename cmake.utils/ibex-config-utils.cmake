@@ -331,14 +331,11 @@ function (CREATE_TARGET_IMPORT_AND_EXPORT libname libabspath cfgfilename_var)
   ##############################################################################
   if (CTIE_INSTALL)
     get_filename_component (libfilename "${libabspath}" NAME)
-    get_filename_component (librealpath "${libabspath}" REALPATH)
     set (installpath "$<INSTALL_PREFIX>/${CMAKE_INSTALL_LIBDIR_3RD}/${libfilename}") 
     if (CTIE_COMPONENT)
       set (_cn COMPONENT ${CTIE_COMPONENT})
     endif ()
-    install (FILES ${librealpath} DESTINATION ${CMAKE_INSTALL_LIBDIR_3RD}
-                                  RENAME ${libfilename}
-                                  ${_cn})
+    install (FILES ${libabspath} DESTINATION ${CMAKE_INSTALL_LIBDIR_3RD} ${_cn})
     set_target_properties (${target} PROPERTIES IMPORTED_PKG_LIBS "-L\${prefix}/${CMAKE_INSTALL_LIBDIR_3RD};-l${libname}")
   else ()
     set (installpath ${libabspath})
