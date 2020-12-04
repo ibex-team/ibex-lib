@@ -17,6 +17,7 @@
 #include "ibex_CtcNewton.h"
 #include "ibex_CtcFixPoint.h"
 #include "ibex_CtcKuhnTucker.h"
+#include "ibex_Exception.h"
 #include "ibex_OptimLargestFirst.h"
 #include "ibex_RoundRobin.h"
 #include "ibex_SmearFunction.h"
@@ -24,16 +25,12 @@
 #include "ibex_Random.h"
 #include "ibex_NormalizedSystem.h"
 #include "ibex_LinearizerXTaylor.h"
-#include "ibex_LinearizerCompo.h"
 #include "ibex_CellHeap.h"
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_CellBeamSearch.h"
 #include "ibex_LoupFinderDefault.h"
 #include "ibex_SyntaxError.h"
 
-#ifdef _IBEX_WITH_AFFINE_
-#include "ibex_LinearizerAffine2.h"
-#endif
 
 #ifdef _IBEX_WITH_AMPL_
 #include "ibex_AmplInterface.h"
@@ -119,28 +116,17 @@ Linearizer* Optimizer04Config::get_linear_relax() {
 	Linearizer* lr;
 
 	if (linearrelaxation=="art")
-#ifdef _IBEX_WITH_AFFINE_
-		lr = &rec(new LinearizerAffine2(*ext_sys));
-#else
-	ibex_error("[Optimizer04Config]: ART mode requires \"--with-affine\" option");
-#endif
+		ibex_error("[Optimizer04Config]: ART mode available only in ibex-affine package\n");
 	else if (linearrelaxation=="compo")
-#ifdef _IBEX_WITH_AFFINE_
-		lr = &rec(new LinearizerCompo(
-				rec(new LinearizerXTaylor(*ext_sys)),
-				rec(new LinearizerAffine2(*ext_sys))));
-#else
-	ibex_error("[Optimizer04Config]: COMPO mode requires \"--with-affine\" option");
-#endif
+		ibex_error("[Optimizer04Config]: COMPO mode available only in ibex-affine package\n");
 	else if (linearrelaxation=="xn")
 		lr = &rec(new LinearizerXTaylor(*ext_sys));
-/*	else {
+	/*	else {
 			stringstream ss;
 			ss << "[optimizer04] " << linearrelaxation << " is not an implemented relaxation mode ";
 			ibex_error(ss.str().c_str());
 		}
 */
-
 	return lr;
 }
 

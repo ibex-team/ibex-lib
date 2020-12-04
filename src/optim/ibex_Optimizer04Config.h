@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 11, 2014
-// Last Update : Oct 14, 2019
+// Last Update : Dec 04, 2020
 //============================================================================
 
 #ifndef __IBEX_OPTIMIZER_04_CONFIG_
@@ -13,6 +13,7 @@
 
 #include "ibex_OptimizerConfig.h"
 #include "ibex_OptimMemory.h"
+#include "ibex_Linearizer.h"
 #include "ibex_ExtendedSystem.h"
 
 namespace ibex {
@@ -38,6 +39,8 @@ protected:
 
 	virtual Bsc& get_bsc();
 
+	virtual Linearizer* get_linear_relax();
+
 	virtual LoupFinder& get_loup_finder();
 
 	virtual CellBufferOptim& get_cell_buffer();
@@ -45,7 +48,6 @@ protected:
 	virtual int goal_var();
 	// ============================================================================
 
-	Linearizer* get_linear_relax();
 
 	NormalizedSystem *norm_sys;
 	ExtendedSystem *ext_sys;
