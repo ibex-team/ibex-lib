@@ -25,6 +25,19 @@ if (MATHLIB_INCDIR AND MATHLIB_LIB)
                                         INCLUDE_DIRECTORIES ${MATHLIB_INCDIR})
 else()
   message (STATUS "Will install and use mathlib from 3rd/ subdirectory")
+  if(MINGW)
+  ExternalProject_Add (libultim_3rd
+                        PREFIX mathlib-2.1.0
+                        URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/mathlib-2.1.0.tar.gz
+                        BUILD_IN_SOURCE 1
+                        CONFIGURE_COMMAND sh -c "./configure --prefix=<INSTALL_DIR>
+                                                      CFLAGS=${CMAKE_C_FLAGS}"
+                        LOG_DOWNLOAD 1
+                        LOG_CONFIGURE 1
+                        LOG_BUILD 1
+                        LOG_INSTALL 1
+                      )
+  else()
   ExternalProject_Add (libultim_3rd
                         PREFIX mathlib-2.1.0
                         URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/mathlib-2.1.0.tar.gz
@@ -36,6 +49,7 @@ else()
                         LOG_BUILD 1
                         LOG_INSTALL 1
                       )
+  endif()
   ExternalProject_Get_Property (libultim_3rd INSTALL_DIR)
   set (MATHLIB_LIBDIR "${INSTALL_DIR}/lib")
   set (MATHLIB_INCDIR "${INSTALL_DIR}/include")
@@ -104,6 +118,25 @@ else ()
     set (GAOL_CONFIG_ARGS "${GAOL_CONFIG_ARGS}" "--disable-simd")
   endif ()
   set (GAOL_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/3rd/gaol-4.2.0.all.all.patch")
+  if(MINGW)
+  ExternalProject_Add (libgaol_3rd
+                        PREFIX gaol-4.2.0
+                        ${_gaol_depends}
+                        URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/gaol-4.2.0.tar.gz
+                        PATCH_COMMAND patch -p1 -i ${GAOL_PATCH}
+                        BUILD_IN_SOURCE 1
+                        CONFIGURE_COMMAND sh -c "./configure --prefix=<INSTALL_DIR>
+                                      CFLAGS=${CMAKE_C_FLAGS}
+                                      CXXFLAGS=${CMAKE_CXX_FLAGS}
+                                      --with-mathlib-include=${MATHLIB_INCDIR}
+                                      --with-mathlib-lib=${MATHLIB_LIBDIR}
+                                      ${GAOL_CONFIG_ARGS}"
+                        LOG_DOWNLOAD 1
+                        LOG_CONFIGURE 1
+                        LOG_BUILD 1
+                        LOG_INSTALL 1
+                      )
+  else()
   ExternalProject_Add (libgaol_3rd
                         PREFIX gaol-4.2.0
                         ${_gaol_depends}
@@ -121,6 +154,7 @@ else ()
                         LOG_BUILD 1
                         LOG_INSTALL 1
                       )
+  endif()
   ExternalProject_Get_Property (libgaol_3rd INSTALL_DIR)
 
   set (_incdir ${INSTALL_DIR}/include)
