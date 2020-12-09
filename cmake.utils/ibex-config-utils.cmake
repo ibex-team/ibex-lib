@@ -482,6 +482,15 @@ function (IBEX_INIT_COMMON)
   # add uninstall command
   ##############################################################################
   add_uninstall_command ("${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+
+  ##############################################################################
+  # Append to CMAKE_MODULE_PATH dir containing installed CMake scripts from Ibex
+  ##############################################################################
+  if (IBEX_CONFIG) # not for the main Ibex script
+    get_filename_component (_cfgdir "${IBEX_CONFIG}" DIRECTORY)
+    list (APPEND CMAKE_MODULE_PATH "${_cfgdir}/cmake.utils")
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
+  endif ()
 endfunction ()
 
 ################################################################################
