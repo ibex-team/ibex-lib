@@ -1,3 +1,5 @@
+include (ibex-install-3rd)
+
 subdir_list (LP_LIB_LIST RELATIVE)
 
 set(LP_LIB "none" CACHE STRING "Library used for linear programming")
@@ -10,11 +12,23 @@ else ()
   message (STATUS "Library for linear programming: ${LP_LIB}")
 endif ()
 
+# LP_LIB in upper case
+string (TOUPPER "${LP_LIB}" LP_LIB_UPPER)
+
 # Absolute path of wrapper directory
 set (LP_LIB_ABSPATH ${CMAKE_CURRENT_SOURCE_DIR}/${LP_LIB})
 
 # Go into wrapper directory
 add_subdirectory (${LP_LIB})
+
+# The proper name of the linear programming lib
+set (LP_LIB_NAME ${${LP_LIB_UPPER}_NAME} PARENT_SCOPE)
+
+# The name of the target that ibex should depend on
+set (LP_LIB_TARGET ${${LP_LIB_UPPER}_TARGET} PARENT_SCOPE)
+
+# The version (if available) of the linear programming lib
+set (LP_LIB_VERSION ${${LP_LIB_UPPER}_VERSION} PARENT_SCOPE)
 
 # Check that mandatory file exists and add it in IBEX_SRC
 set (LP_LIB_REQUIRED_FILES ibex_LPLibWrapper.cpp ibex_LPLibWrapper.h)
@@ -28,13 +42,9 @@ foreach (f ${LP_LIB_REQUIRED_FILES})
   endif ()
 endforeach ()
 
-# The name of the target that ibex should depend on
-set (LP_LIB_TARGET Ibex::${LP_LIB} PARENT_SCOPE)
-
 # Add directory of wrapper in list of included directory
 list (APPEND IBEX_INCDIRS ${LP_LIB_ABSPATH})
 
 # Propagate new values of list to parent scope
 set (IBEX_INCDIRS ${IBEX_INCDIRS} PARENT_SCOPE)
 set (IBEX_SRC ${IBEX_SRC} PARENT_SCOPE)
-set (EXPORTFILES "${EXPORTFILES}" PARENT_SCOPE)

@@ -1,198 +1,117 @@
-################################################################################
-# Options
-################################################################################
-set (MATHLIB_DIR "" CACHE PATH "Path to the Mathlib/ultim lib and include directories")
-set (GAOL_DIR "" CACHE PATH "Path to the Gaol lib and include directories")
+set (GAOL_NAME "Gaol")
+set (GAOL_NAME ${GAOL_NAME} PARENT_SCOPE)
 
-################################################################################
-# May be needed to install missing dependencies
-################################################################################
-include (ExternalProject)
-include (IbexUtils)
+# Look for Mathlib
+include (FindMathlib.cmake)
 
-################################################################################
-# Looking for Mathlib/libultim, install it if not found
-################################################################################
-# Looking for MathLib.h, result is written in MATHLIB_INCDIR
-find_header_custom (MATHLIB "MathLib.h" PATHS "${MATHLIB_DIR}" "${GAOL_DIR}")
-# Looking for ultim library, result is written in MATHLIB_LIB
-find_library_custom (MATHLIB "ultim" PATHS "${MATHLIB_DIR}" "${GAOL_DIR}")
+if (MATHLIB_FOUND)
+  set (MATHLIB_TARGET "Mathlib::Mathlib")
+  # install FindMathlib.cmake file
+  install (FILES FindMathlib.cmake
+            DESTINATION ${CMAKE_INSTALL_CONFIGCMAKE}/cmake.utils
+            COMPONENT devtools)
+  # Write CMake file containing path hint and install it
+  generate_path_hints_file (Mathlib INSTALL)
 
-if (MATHLIB_INCDIR AND MATHLIB_LIB)
-  get_filename_component (MATHLIB_LIBDIR "${MATHLIB_LIB}" DIRECTORY)
-  create_target_import_and_export (ultim ${MATHLIB_LIB} MATHLIB_EXPORTFILE
-                                        NAMESPACE Ibex::
-                                        INCLUDE_DIRECTORIES ${MATHLIB_INCDIR})
-else()
-  message (STATUS "Will install and use mathlib from 3rd/ subdirectory")
-  if(MINGW)
-  ExternalProject_Add (libultim_3rd
-                        PREFIX mathlib-2.1.0
-                        URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/mathlib-2.1.0.tar.gz
-                        BUILD_IN_SOURCE 1
-                        CONFIGURE_COMMAND sh -c "./configure --prefix=<INSTALL_DIR>
-                                                      CFLAGS=${CMAKE_C_FLAGS}"
-                        LOG_DOWNLOAD 1
-                        LOG_CONFIGURE 1
-                        LOG_BUILD 1
-                        LOG_INSTALL 1
-                      )
-  else()
-  ExternalProject_Add (libultim_3rd
-                        PREFIX mathlib-2.1.0
-                        URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/mathlib-2.1.0.tar.gz
-                        BUILD_IN_SOURCE 1
-                        CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR>
-                                                      CFLAGS=${CMAKE_C_FLAGS}
-                        LOG_DOWNLOAD 1
-                        LOG_CONFIGURE 1
-                        LOG_BUILD 1
-                        LOG_INSTALL 1
-                      )
-  endif()
-  ExternalProject_Get_Property (libultim_3rd INSTALL_DIR)
-  set (MATHLIB_LIBDIR "${INSTALL_DIR}/lib")
-  set (MATHLIB_INCDIR "${INSTALL_DIR}/include")
-
-  # absolute path to the library
-  lib_get_abspath_from_name (MATHLIB_LIB ${MATHLIB_LIBDIR} ultim)
-
-  # this directory needs to exist during generation step to avoid CMake errors
-  file (MAKE_DIRECTORY "${MATHLIB_INCDIR}")
-
-  # install headers
-  install (DIRECTORY ${MATHLIB_INCDIR}/ COMPONENT devtools
-                                    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR_3RD})
-
-  #
-  if (BUILD_SHARED_LIBS)
-    set (_extra libultim-2.1.so.0.0.0 libultim-2.1.so.0)
+  # Look for Gaol
+  include (FindGaol.cmake)
+  if (GAOL_FOUND)
+    set (GAOL_TARGET "Gaol::Gaol;${MATHLIB_TARGET}" PARENT_SCOPE)
+    # Install FindGaol.cmake file
+    install (FILES FindGaol.cmake
+              DESTINATION ${CMAKE_INSTALL_CONFIGCMAKE}/cmake.utils
+              COMPONENT devtools)
+    # Write CMake file containing path hint and install it
+    generate_path_hints_file (Gaol INSTALL)
   endif ()
-  set (_incdir $<BUILD_INTERFACE:${MATHLIB_INCDIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR_3RD}>)
-  create_target_import_and_export (ultim ${MATHLIB_LIB} MATHLIB_EXPORTFILE
-                                                INSTALL NAMESPACE Ibex::
-                                                INCLUDE_DIRECTORIES ${_incdir}
-                                                COMPONENT devtools
-                                                EXTRA_INSTALL_LIBS ${_extra}
-                                                DEPENDS libultim_3rd)
-  unset (INSTALL_DIR)
-endif()
-
-################################################################################
-# Looking for Gaol, install it if not found
-################################################################################
-# Looking for gaol/gaol.h, result is written in GAOL_INCDIR
-find_header_custom (GAOL "gaol/gaol.h" PATHS "${GAOL_DIR}")
-# Looking for gdtoa library, result is written in GDTOA_LIB
-find_library_custom (GDTOA "gdtoa" PATHS "${GAOL_DIR}")
-# Looking for gaol library, result is written in GAOL_LIB
-find_library_custom (GAOL "gaol" PATHS "${GAOL_DIR}")
-
-# With Gaol, we add "-Wno-deprecated" to remove lots of warnings generated by
-# a function definition in gaol_interval.h
-CHECK_CXX_COMPILER_FLAG ("-Wno-deprecated" COMPILER_SUPPORTS_WNO_DEPRECATED)
-if (COMPILER_SUPPORTS_WNO_DEPRECATED)
-  set (gaol_compile_option COMPILE_OPTIONS -Wno-deprecated)
-endif()
-
-if (GAOL_INCDIR AND GAOL_LIB AND GDTOA_LIB)
-  create_target_import_and_export (gdtoa ${GDTOA_LIB} GDTOA_EXPORTFILE
-                                    NAMESPACE Ibex::
-                                    ${gaol_compile_option}
-                                    INCLUDE_DIRECTORIES ${GAOL_INCDIR})
-  create_target_import_and_export (gaol ${GAOL_LIB} GAOL_EXPORTFILE
-                                    NAMESPACE Ibex::
-                                    ${gaol_compile_option}
-                                    INCLUDE_DIRECTORIES ${GAOL_INCDIR}
-                                    LINK_LIBRARIES Ibex::gdtoa Ibex::ultim)
 else ()
-  message (STATUS "Will install and use library gaol from 3rd/ subdirectory")
-  if (TARGET libultim_3rd)
-    set (_gaol_depends "DEPENDS" "libultim_3rd")
-  endif ()
-  set (GAOL_CONFIG_ARGS "--disable-preserve-rounding" "--enable-optimize" "--disable-verbose-mode")
+  message (STATUS "Will install and use library Mathlib from 3rd/ subdirectory")
+
+  ###
+  set (MATHLIB_NAME "Mathlib")
+  set (MATHLIB_VERSION "2.1.0")
+  set (mathlib_basename "mathlib-${MATHLIB_VERSION}")
+  set (mathlib_archive_name "${mathlib_basename}.tar.gz")
+  set (mathlib_archive "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${mathlib_archive_name}")
+  set (wdir "${CMAKE_CURRENT_BINARY_DIR}/${mathlib_basename}")
+  set (logdir "${CMAKE_CURRENT_BINARY_DIR}/log")
+
+  file (MAKE_DIRECTORY "${logdir}")
+
+  ### Extract
+  execute_process_check (COMMAND ${CMAKE_COMMAND} -E tar xzf ${mathlib_archive}
+                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                         MSG "extracting ${mathlib_archive_name}"
+                         LOGBASENAME "${logdir}/extract"
+                         STATUS_PREFIX "${MATHLIB_NAME}: ")
+
+  ### Apply patch
   if (WIN32)
-    # On windows, we disable SSE instructions (it can generate failures during
-    # execution). You can enable SSE instructions by deleting the next line,
-    # do it at your own risk.
-    set (GAOL_CONFIG_ARGS "${GAOL_CONFIG_ARGS}" "--disable-simd")
+    patch ("${MATHLIB_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
+            "${logdir}" "${mathlib_basename}.win32.all.patch")
   endif ()
-  set (GAOL_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/3rd/gaol-4.2.0.all.all.patch")
-  if(MINGW)
-  ExternalProject_Add (libgaol_3rd
-                        PREFIX gaol-4.2.0
-                        ${_gaol_depends}
-                        URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/gaol-4.2.0.tar.gz
-                        PATCH_COMMAND patch -p1 -i ${GAOL_PATCH}
-                        BUILD_IN_SOURCE 1
-                        CONFIGURE_COMMAND sh -c "./configure --prefix=<INSTALL_DIR>
-                                      CFLAGS=${CMAKE_C_FLAGS}
-                                      CXXFLAGS=${CMAKE_CXX_FLAGS}
-                                      --with-mathlib-include=${MATHLIB_INCDIR}
-                                      --with-mathlib-lib=${MATHLIB_LIBDIR}
-                                      ${GAOL_CONFIG_ARGS}"
-                        LOG_DOWNLOAD 1
-                        LOG_CONFIGURE 1
-                        LOG_BUILD 1
-                        LOG_INSTALL 1
-                      )
-  else()
-  ExternalProject_Add (libgaol_3rd
-                        PREFIX gaol-4.2.0
-                        ${_gaol_depends}
-                        URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/gaol-4.2.0.tar.gz
-                        PATCH_COMMAND patch -p1 -i ${GAOL_PATCH}
-                        BUILD_IN_SOURCE 1
-                        CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR>
-                                      CFLAGS=${CMAKE_C_FLAGS}
-                                      CXXFLAGS=${CMAKE_CXX_FLAGS}
-                                      --with-mathlib-include=${MATHLIB_INCDIR}
-                                      --with-mathlib-lib=${MATHLIB_LIBDIR}
-                                      ${GAOL_CONFIG_ARGS}
-                        LOG_DOWNLOAD 1
-                        LOG_CONFIGURE 1
-                        LOG_BUILD 1
-                        LOG_INSTALL 1
-                      )
-  endif()
-  ExternalProject_Get_Property (libgaol_3rd INSTALL_DIR)
 
-  set (_incdir ${INSTALL_DIR}/include)
+  ### Copy files
+  copy ("${MATHLIB_NAME}: "
+        "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${mathlib_basename}" "${wdir}"
+        "${logdir}" "CMakeLists.txt" "src/mathlib_configuration.h.in")
 
-  # absolute path to the library
-  lib_get_abspath_from_name (GAOL_LIB ${INSTALL_DIR}/lib gaol)
-  lib_get_abspath_from_name (GDTOA_LIB ${INSTALL_DIR}/lib gdtoa)
+  ### Configure
+  message (STATUS "${MATHLIB_NAME}: configure")
+  # Original values will be restored at the end of this file
+  set (CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR_3RD})
+  set (CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR_3RD})
+  add_subdirectory (${wdir} ${wdir}-build)
+  message (STATUS "${MATHLIB_NAME}: configure - done")
 
-  # this directory needs to exist during generation step to avoid CMake errors
-  file (MAKE_DIRECTORY "${_incdir}")
-
-  # install headers
-  install (DIRECTORY ${_incdir}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR_3RD}
-                                 COMPONENT devtools)
-
-  #
-  if (BUILD_SHARED_LIBS)
-    set (gaol_extra libgaol-4.2.so.0.0.0 libgaol-4.2.so.0)
-    set (gdtoa_extra libgdtoa.so.0.0.0 libgdtoa.so.0)
-  endif ()
-  set (_incdir $<BUILD_INTERFACE:${_incdir}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR_3RD}>)
-  create_target_import_and_export (gdtoa ${GDTOA_LIB} GDTOA_EXPORTFILE INSTALL
-                                    NAMESPACE Ibex::
-                                    ${gaol_compile_option}
-                                    INCLUDE_DIRECTORIES ${_incdir}
-                                    COMPONENT devtools
-                                    EXTRA_INSTALL_LIBS ${gdtoa_extra}
-                                    DEPENDS libgaol_3rd)
-  create_target_import_and_export (gaol ${GAOL_LIB} GAOL_EXPORTFILE INSTALL
-                                    NAMESPACE Ibex::
-                                    ${gaol_compile_option}
-                                    COMPONENT devtools
-                                    INCLUDE_DIRECTORIES ${_incdir}
-                                    LINK_LIBRARIES Ibex::gdtoa Ibex::ultim
-                                    EXTRA_INSTALL_LIBS ${gaol_extra}
-                                    DEPENDS libgaol_3rd)
-  unset (INSTALL_DIR)
+  ###
+  set (MATHLIB_TARGET "ultim")
 endif ()
 
-list (APPEND EXPORTFILES "${MATHLIB_EXPORTFILE}" "${GDTOA_EXPORTFILE}" "${GAOL_EXPORTFILE}")
-set (EXPORTFILES "${EXPORTFILES}" PARENT_SCOPE)
+if (NOT GAOL_FOUND)
+  ###########################################################################
+  message (STATUS "Will install and use library gaol from 3rd/ subdirectory")
+  set (GAOL_VERSION "4.2.0")
+  set (gaol_basename "gaol-${GAOL_VERSION}")
+  set (gaol_archive_name "${gaol_basename}.tar.gz")
+  set (gaol_archive "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${gaol_archive_name}")
+  set (wdir "${CMAKE_CURRENT_BINARY_DIR}/${gaol_basename}")
+  set (logdir "${CMAKE_CURRENT_BINARY_DIR}/log")
+
+  file (MAKE_DIRECTORY "${logdir}")
+
+  ### Extract
+  execute_process_check (COMMAND ${CMAKE_COMMAND} -E tar xzf ${gaol_archive}
+                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                         MSG "extracting ${gaol_archive_name}"
+                         LOGBASENAME "${logdir}/extract"
+                         STATUS_PREFIX "${GAOL_NAME}: ")
+
+  ### Apply patch
+  set (GAOL_PATCHES "${gaol_basename}.all.all.patch")
+  if (WIN32)
+    list (APPEND GAOL_PATCHES "${gaol_basename}.win32.all.patch")
+  endif ()
+  if (APPLE)
+    list (APPEND GAOL_PATCHES "${gaol_basename}.darwin.all.isfinite.patch")
+  endif ()
+  patch ("${GAOL_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
+          "${logdir}" ${GAOL_PATCHES})
+
+  ### Copy files
+  copy ("${GAOL_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${gaol_basename}"
+        "${wdir}" "${logdir}" "CMakeLists.txt" "gaol/gaol_configuration.h.in"
+                                                                "test_sse.cpp")
+
+  ### Configure
+  message (STATUS "${GAOL_NAME}: configure")
+  # Original values will be restored at the end of this file
+  set (CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR_3RD})
+  set (CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR_3RD})
+  add_subdirectory (${wdir} ${wdir}-build)
+  message (STATUS "${GAOL_NAME}: configure - done")
+
+  ###
+  set (GAOL_TARGET "gaol;gdtoa;${MATHLIB_TARGET}" PARENT_SCOPE)
+endif ()
+set (GAOL_VERSION ${GAOL_VERSION} PARENT_SCOPE)

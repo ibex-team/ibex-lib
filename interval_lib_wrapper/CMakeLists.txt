@@ -1,3 +1,5 @@
+include (ibex-install-3rd)
+
 subdir_list (INTERVAL_LIB_LIST RELATIVE)
 
 if(WIN32)
@@ -14,11 +16,23 @@ else ()
   message (STATUS "Library for interval arithmetic: ${INTERVAL_LIB}")
 endif ()
 
+# INTERVAL_LIB in upper case
+string (TOUPPER "${INTERVAL_LIB}" INTERVAL_LIB_UPPER)
+
 # Absolute path of wrapper directory
 set (ITVLIB_ABSPATH ${CMAKE_CURRENT_SOURCE_DIR}/${INTERVAL_LIB})
 
 # Go into wrapper directory
 add_subdirectory (${INTERVAL_LIB})
+
+# The proper name of the interval lib
+set (INTERVAL_LIB_NAME ${${INTERVAL_LIB_UPPER}_NAME} PARENT_SCOPE)
+
+# The name of the target that ibex should depend on
+set (INTERVAL_LIB_TARGET ${${INTERVAL_LIB_UPPER}_TARGET} PARENT_SCOPE)
+
+# The version (if available) of the interval lib
+set (INTERVAL_LIB_VERSION ${${INTERVAL_LIB_UPPER}_VERSION} PARENT_SCOPE)
 
 # Check that mandatory files exist and add them in IBEX_SRC
 set (ITVLIB_REQUIRED_FILES ibex_IntervalLibWrapper.cpp ibex_IntervalLibWrapper.h
@@ -33,13 +47,9 @@ foreach (f ${ITVLIB_REQUIRED_FILES})
   endif ()
 endforeach ()
 
-# The name of the target that ibex should depend on
-set (INTERVAL_LIB_TARGET Ibex::${INTERVAL_LIB} PARENT_SCOPE)
-
 # Add directory of wrapper in list of included directory
 list (APPEND IBEX_INCDIRS ${ITVLIB_ABSPATH})
 
 # Propagate new values of list to parent scope
 set (IBEX_INCDIRS ${IBEX_INCDIRS} PARENT_SCOPE)
 set (IBEX_SRC ${IBEX_SRC} PARENT_SCOPE)
-set (EXPORTFILES "${EXPORTFILES}" PARENT_SCOPE)
