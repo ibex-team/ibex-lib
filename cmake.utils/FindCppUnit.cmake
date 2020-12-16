@@ -34,10 +34,10 @@ get_filename_component (_libdir "${CPPUNIT_LIBRARY}" PATH)
 # Look for the include directory
 find_path (CPPUNIT_INC_DIR NAMES cppunit/Test.h
                            HINTS "${_libdir}/.." "${CPPUNIT_DIR}"
-                           PATH_SUFFIXES include/)
+                           PATH_SUFFIXES include)
 
 include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args (cppunit DEFAULT_MSG CPPUNIT_LIBRARY
+find_package_handle_standard_args (CppUnit DEFAULT_MSG CPPUNIT_LIBRARY
                                                        CPPUNIT_INC_DIR)
 
 if (CPPUNIT_FOUND)

@@ -3,9 +3,11 @@ cmake_minimum_required (VERSION 3.5.1)
 
 message (WARNING "CMake support is in beta, please report all bugs to https://github.com/ibex-team/ibex-lib/issues/")
 
-project (IBEX VERSION 2.8.8 LANGUAGES CXX)
+project (IBEX VERSION 2.8.9.1 LANGUAGES CXX)
 set (IBEX_DESCRIPTION "A C++ library for interval-based algorithm design")
 set (IBEX_URL "http://www.ibex-lib.org/")
+set (IBEX_NAMESPACE "Ibex") # TODO use it everywhere
+set (IBEX_CMAKE_PATH_FILES_PREFIX ibex-path-hints)
 
 ################################################################################
 # Add cmake.utils to the list of CMAKE_MODULE_PATH
@@ -14,10 +16,11 @@ set (MODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake.utils")
 list (APPEND CMAKE_MODULE_PATH "${MODULE_DIR}")
 
 ################################################################################
-# Run common init function and install the module so plugins can use it
+# Run common init function (the module is installed later so plugins can use it)
 ################################################################################
 message (STATUS "Configuring Ibex ${IBEX_VERSION}")
-include (ibex-config-utils)
+set (IBEX_DEV_UTILS_FILENAME ibex-dev-utils)
+include (${IBEX_DEV_UTILS_FILENAME})
 ibex_init_common ()
 
 ################################################################################
@@ -34,28 +37,27 @@ add_subdirectory (src)
 ################################################################################
 # Generate ibex.pc
 ################################################################################
-include (IbexUtils)
+include (ibex-gen-pkgconfig)
 ibex_generate_pkgconfig_file (ibex)
+
+################################################################################
+# Install some CMake utils files that are use for detecting dependencies in
+# cmake-config.cmake module and can be useful in plugins.
+################################################################################
+install (FILES "${MODULE_DIR}/${IBEX_DEV_UTILS_FILENAME}.cmake"
+               "${MODULE_DIR}/FindCppUnit.cmake"
+          DESTINATION ${CMAKE_INSTALL_CONFIGCMAKE}/cmake.utils
+          COMPONENT devtools)
 
 ################################################################################
 # Tests
 ################################################################################
-add_make_target_for_ctest (check)
+ibex_add_make_target_for_ctest (check)
 
 ################################################################################
 # TODO benchs
 ################################################################################
 #add_subdirectory (benchs)
-
-################################################################################
-# We add this file last in the hope that the install script will run it last.
-# Specifically, we want this to be run after the line
-# install (EXPORT ibex...
-# from src/CMakeLists.txt because this line can, in some cases, remove files
-# matching ${CMAKE_INSTALL_CONFIGCMAKE}/ibex-config-*.cmake even if they were
-# just installed.
-################################################################################
-add_subdirectory (cmake.install)
 
 ################################################################################
 # archives and packages
