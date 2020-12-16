@@ -34,8 +34,7 @@ find_path (MATHLIB_INC_DIR NAMES MathLib.h
 if (MATHLIB_INC_DIR)
   file (READ "${MATHLIB_INC_DIR}/mathlib_configuration.h" _content)
   string (REGEX MATCH "mathlib [0-9]+\.[0-9]+\.[0-9]+" _match "${_content}")
-  string(SUBSTRING "${_match}" 8 -1 _version)
-  set (MATHLIB_VERSION ${_version} PARENT_SCOPE)
+  string (SUBSTRING "${_match}" 8 -1 MATHLIB_VERSION)
 endif ()
 
 include (FindPackageHandleStandardArgs)

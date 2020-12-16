@@ -37,12 +37,11 @@ find_path (GAOL_INC_DIR NAMES gaol/gaol.h
 if (GAOL_INC_DIR)
   file (READ "${GAOL_INC_DIR}/gaol/gaol_configuration.h" _content)
   string (REGEX MATCH "gaol \"[0-9]+\.[0-9]+\.[0-9]+" _match "${_content}")
-  string(SUBSTRING "${_match}" 6 -1 _version)
-  set (GAOL_VERSION ${_version} PARENT_SCOPE)
+  string (SUBSTRING "${_match}" 6 -1 GAOL_VERSION)
 endif ()
 
 include (FindPackageHandleStandardArgs)
-if(_version VERSION_LESS 4.2.3)
+if (GAOL_VERSION VERSION_LESS 4.2.3)
   find_package_handle_standard_args (Gaol DEFAULT_MSG GAOL_LIBRARY GDTOA_LIBRARY
                                                        GAOL_INC_DIR)
 else ()
