@@ -14,6 +14,9 @@ APPNAME='ibex-lib'
 top = '.'
 out = '__build__'
 
+plugins = {}
+plugins_dependencies = {}
+
 ######################
 ###### options #######
 ######################
@@ -37,8 +40,16 @@ def options (opt):
 	opt.recurse ("interval_lib_wrapper")
 	opt.recurse ("lp_lib_wrapper")
 
+	opt.plugins = {}
+	opt.plugins_dependencies = {}
+	
 	# recurse on plugins directory
 	opt.recurse("plugins")
+	
+	# added by gch
+	plugins.update(opt.plugins)
+	plugins_dependencies.update(opt.plugins_dependencies)
+	
 
 ######################
 ##### configure ######
@@ -47,6 +58,16 @@ def configure (conf):
 	conf.load ('compiler_cxx compiler_c bison flex')
 
 	conf.prepare_env(conf.env)
+
+	# added by gch
+	for plugin in plugins_dependencies.keys():
+		if getattr(conf.options, plugin) == True:
+			for dependency in plugins_dependencies[plugin]:
+				if not dependency in plugins.keys():
+					conf.fatal (dependency+" required but plugin not found")
+				else:
+					Logs.info("Enabling dependency "+dependency);
+					setattr(conf.options, plugins[dependency], True)
 
 	# For information
 	conf.msg ("sys.platform", sys.platform)
