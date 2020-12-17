@@ -4,8 +4,6 @@ set (CLP_NAME ${CLP_NAME} PARENT_SCOPE)
 # Look for Clp
 include (FindClp.cmake)
 
-message (STATUS "######## ${CLP_FOUND} ${CLP_VERSION}")
-
 if (CLP_FOUND)
   set (CLP_TARGET "Clp::Clp" PARENT_SCOPE)
   # Install FindClp.cmake file
@@ -18,9 +16,9 @@ else ()
   message (STATUS "Will install and use library Clp from 3rd/ subdirectory")
 
   ###
-  set (CLP_VERSION "4.0.2")
-  set (clp_basename "clp-${CLP_VERSION}")
-  set (clp_archive_name "${clp_basename}.tar")
+  set (CLP_VERSION "1.15.6")
+  set (clp_basename "Clp-${CLP_VERSION}")
+  set (clp_archive_name "${clp_basename}.tgz")
   set (clp_archive "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${clp_archive_name}")
   set (wdir "${CMAKE_CURRENT_BINARY_DIR}/${clp_basename}")
   set (logdir "${CMAKE_CURRENT_BINARY_DIR}/log")
@@ -34,9 +32,10 @@ else ()
                          LOGBASENAME "${logdir}/extract"
                          STATUS_PREFIX "${CLP_NAME}: ")
 
-  ### Apply patch
-  patch ("${CLP_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
-          "${logdir}" "${clp_basename}.CMake.patch")
+  ### Copy files
+  copy ("${CLP_NAME}: "
+        "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${clp_basename}" "${wdir}"
+        "${logdir}" "CMakeLists.txt")# "src/mathlib_configuration.h.in")
 
   ### Configure
   message (STATUS "${CLP_NAME}: configure")
