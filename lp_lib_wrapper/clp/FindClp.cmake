@@ -19,16 +19,26 @@ include(CheckCXXCompilerFlag)
 
 set (CLP_DIR "${CLP_DIR}" CACHE PATH "Directory to search for Clp")
 
+find_package (PkgConfig)
+pkg_check_modules (CLP_PKG QUIET clp)
+
 # Look for the library
-find_library (CLP_LIBRARY NAMES Clp HINTS "${CLP_DIR}" PATH_SUFFIXES lib)
+find_library (CLP_LIBRARY NAMES Clp
+                          HINTS "${CLP_DIR}" ${CLP_PKG_LIBRARY_DIRS}
+                          PATH_SUFFIXES lib)
+find_library (COINUTILS_LIBRARY NAMES CoinUtils
+                                HINTS "${CLP_DIR}" ${CLP_PKG_LIBRARY_DIRS}
+                                PATH_SUFFIXES lib)
 
 # Might want to look close to the library first for the includes.
 get_filename_component (_libdir "${CLP_LIBRARY}" PATH)
+get_filename_component (_libdir2 "${COINUTILS_LIBRARY}" PATH)
 
 # Look for the include directory
 find_path (CLP_INC_DIR NAMES ClpConfig.h
-                         HINTS "${_libdir}/.." "${CLP_DIR}"
-                         PATH_SUFFIXES include include/coin)
+                       HINTS "${_libdir}/.." "${_libdir2}/.." "${CLP_DIR}"
+                              ${CLP_PKG_INCLUDE_DIRS}
+                       PATH_SUFFIXES include include/coin)
 
 if (CLP_INC_DIR)
   file (READ "${CLP_INC_DIR}/ClpConfig.h" _content)
@@ -37,10 +47,11 @@ if (CLP_INC_DIR)
 endif ()
 
 include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args (Clp DEFAULT_MSG CLP_LIBRARY CLP_INC_DIR)
+find_package_handle_standard_args (Clp DEFAULT_MSG CLP_LIBRARY COINUTILS_LIBRARY
+                                                                    CLP_INC_DIR)
 
 if (CLP_FOUND)
-  set (CLP_LIBRARIES ${CLP_LIBRARY})
+  set (CLP_LIBRARIES "${CLP_LIBRARY}" "${COINUTILS_LIBRARY}" "m")
 	set (CLP_INCLUDE_DIRS "${CLP_INC_DIR}")
   mark_as_advanced (CLP_DIR)
   if (NOT TARGET Clp::Clp)
