@@ -50,7 +50,7 @@ void LPSolver::init(LPSolver::Mode mode, double tolerance, double timeout, int m
     // no log
     myclp->setLogLevel(0);
     /// Direction of optimization (1 - minimize, -1 - maximize, 0 - ignore
-    myclp->setOptimizationDirection(1)
+    myclp->setOptimizationDirection(1);
     
     myclp->setMaximumIterations(max_iter);
     myclp->setMaximumSeconds(timeout);
