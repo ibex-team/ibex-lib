@@ -70,11 +70,8 @@ addons:
       - bison
       - libcppunit-dev
 
-# need this to install dependencies on osx
-before_install:
-  - uname -a
-
 install:
+  - uname -a
   - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${INTERVAL_LIB} --lp-lib=${LP_LIB} || cat __build__/*.log
   - ./waf build install clean
 
