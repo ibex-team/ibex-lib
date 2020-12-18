@@ -1,0 +1,16 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import os, shutil
+
+######################
+###### options #######
+######################
+def options (opt):
+    pass
+
+######################
+##### configure ######
+######################
+def configure (conf):
+    conf.fatal ("Clp not currently supported with Waf")

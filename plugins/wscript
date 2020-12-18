@@ -10,21 +10,21 @@ from waflib import Configure
 ######################
 def options (opt):
 	# Call "options" for each surdir
-	opt.recurse (ibexutils.get_dirlist (opt.path))
+	opt.recurse (ibexutils.get_dirlist (opt.path), mandatory=False)
 
 ######################
 ##### configure ######
 ######################
 def configure (conf):
 	# Call "configure" for each surdir
-	conf.recurse (ibexutils.get_dirlist (conf.path))
+	conf.recurse (ibexutils.get_dirlist (conf.path), mandatory=False)
 
 ######################
 ####### build ########
 ######################
 def build (bld):
 	# Call "build" for each surdir
-	bld.recurse (ibexutils.get_dirlist (bld.path))
+	bld.recurse (ibexutils.get_dirlist (bld.path), mandatory=False)
 
 ######################
 ####### utest ########
