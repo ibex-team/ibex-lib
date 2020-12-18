@@ -46,6 +46,12 @@ matrix:
         - STATIC_OR_SHARED=--enable-shared
         - STATIC_OR_SHARED_CMAKE=-DBUILD_SHARED_LIBS=ON
         - CXXFLAGS=-std=c++11
+      before_install:
+        - brew update
+        - brew list flex &>/dev/null || brew install flex
+        - brew list bison &>/dev/null || brew install bison
+        - brew list cppunit &>/dev/null || brew install cppunit
+
   allow_failures:
     - os: linux
       compiler: gcc
@@ -67,7 +73,6 @@ addons:
 # need this to install dependencies on osx
 before_install:
   - uname -a
-  - if [ "$TRAVIS_OS_NAME" = "osx" ] ; then brew update ; brew install flex bison cppunit; fi
 
 install:
   - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${INTERVAL_LIB} --lp-lib=${LP_LIB} || cat __build__/*.log
