@@ -46,11 +46,6 @@ matrix:
         - STATIC_OR_SHARED=--enable-shared
         - STATIC_OR_SHARED_CMAKE=-DBUILD_SHARED_LIBS=ON
         - CXXFLAGS=-std=c++11
-      before_install:
-        - brew update
-        - brew list flex &>/dev/null || brew install flex
-        - brew list bison &>/dev/null || brew install bison
-        - brew list cppunit &>/dev/null || brew install cppunit
 
   allow_failures:
     - os: linux
@@ -69,6 +64,11 @@ addons:
       - flex
       - bison
       - libcppunit-dev
+  homebrew:
+    packages:
+    - flex
+    - bison
+    - cppunit
 
 install:
   - uname -a
