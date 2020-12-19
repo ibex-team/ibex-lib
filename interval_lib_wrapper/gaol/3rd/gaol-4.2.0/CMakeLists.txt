@@ -142,9 +142,9 @@ set (GAOL_USING_ASM ON)
 set (GAOL_VERBOSE_MODE OFF)
 
 #
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set (GAOL_DEBUGGING ON)
-endif ()
+#if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#  set (GAOL_DEBUGGING ON)
+#endif ()
 
 include (CheckTypeSize)
 CHECK_TYPE_SIZE(int SIZEOF_INT BUILTIN_TYPES_ONLY)
