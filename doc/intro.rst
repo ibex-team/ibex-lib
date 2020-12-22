@@ -113,3 +113,12 @@ System solving and global optimization
 Finally, Ibex supplies two executables: IbexSolve and IbexOpt whihch are dedicated to system solving and optimization, and come both
 with a default black-box solver and global optimizer for immediate usage. See the :ref:`IbexSolve <solver>` and :ref:`IbexOpt <optim>` documentations.
 
+.. _ibex team : https://github.com/ibex-team
+
+Ibex proposes two top-level applications: IbexSolve and IbexOpt, which are dedicated to system solving and optimization respectively; they
+are both default black-box strategies for immediate usage. See the :ref:`IbexSolve <solver>` and :ref:`IbexOpt <optim>` documentations.
+
+Finally, there exist plugins (or packages with cmake) that propose interesting extensions of the library, such as affine arithmetic,
+AMPL compatibility, semi-infinite programming, etc. Visit the `ibex team`_ page on Github.
+
+
