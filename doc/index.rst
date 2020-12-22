@@ -36,6 +36,7 @@ Programmer guide
    contractor
    strategy
    solver-prog
+   optim-prog
    separator
    set
    reference
