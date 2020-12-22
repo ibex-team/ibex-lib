@@ -288,15 +288,18 @@ protected:
 	Status solve(bool stop_at_first);
 
 	/*
-	 * \brief Return a new "output box" that potentially contains solutions.
-	 * \throw An exception otherwise (no solution inside).
+	 * \brief Check if a box is solution/boundary and
+	 *        if it is the case, add it in the manifold
+	 *        (CovSolverData structure).
+	 *
+	 * \throw EmptyBoxException if it is proven that there
+	 *        is no solution inside the box.
 	 *
 	 * \param box - input box
-	 * \param sol - output box.
 	 *
-	 * If the status of the return box is INNER, the box may have
+	 * If the status of the return box is SOLUTION, the box may have
 	 * slightly changed (due to inflating Newton) and the actual "solution"
-	 * is stored in the existence box of the output.
+	 * is stored in the existence box.
 	 */
 	CovSolverData::BoxStatus check_sol(const IntervalVector& box);
 
