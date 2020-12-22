@@ -172,9 +172,9 @@ Now the result is::
  cpu time used:			2.38774s
  number of cells:		41139
 
-Below is the plot of all solution boxes (on the left), the plot of all unknown boxes (on the middle) and a zoom on a fraction of unknonw boxes (right). 
+Below is the plot of all solution boxes (on the left), the plot of all unknown boxes (on the right). 
 
-|solver-intro_ex3-pic1|   |solver-intro_ex3-pic2|  |solver-intro_ex3-pic3|
+|solver-intro_ex3-pic1|   |solver-intro_ex3-pic2|
 
 .. |solver-intro_ex3-pic1| image:: images/disc4-ibexsolve-1.svg
    :width: 300 px
@@ -182,6 +182,10 @@ Below is the plot of all solution boxes (on the left), the plot of all unknown b
 .. |solver-intro_ex3-pic2| image:: images/disc4-ibexsolve-2.svg
    :width: 300 px
    
+Here is a zoom on a fraction of unknown boxes:
+
+|solver-intro_ex3-pic3|
+
 .. |solver-intro_ex3-pic3| image:: images/disc4-ibexsolve-3.svg
    :width: 300 px
 
@@ -369,14 +373,16 @@ So far, the following policices exist:
 
 - ``true`` : any box is considered as a boundary. This policy is set by default for under-constrained systems, see the :ref:`solver strategy <solver-strategy>`.
 - ``false``: all boxes are considered as boundary.  This policy is set by default for inequalities, see the :ref:`solver strategy <solver-strategy>`.
-- ``full-rank``: some inequalities are **potentially** active and the gradients of all constraints (equalities and potentially activated inequalities) are linearly independent.   
-                 This situation typically corresponds to *constraint qualification* in the realm of optimization. However, in the current state of development the inequality activation
-                 is not proved (we don't certify that f=0 and :math:`g_i=0` are simultaneously satisfied inside the box). This is still in development. 
+- ``full-rank``: some inequalities are **potentially** active and the gradients of all constraints (equalities and potentially activated inequalities) are linearly independent.
+
+  This situation typically corresponds to *constraint qualification* in the realm of optimization. However, in the current state of development the inequality activation
+  is not proved (we don't certify that f=0 and :math:`g_i=0` are simultaneously satisfied inside the box). This is still in development. 
+
 - ``half-ball``: this option is not available yet. This policy means that the manifold inside the box is homeomorphic to the half-unit ball:
                  .. math::
                     B^+:=\{x \in\mathbb{R}^{n-m}, \|x\|<1, \|x_1\|\geq 0\}.
                  
-                 This is still in development.
+  This is still in development.
 
 .. _solver-output-unknown:
 
