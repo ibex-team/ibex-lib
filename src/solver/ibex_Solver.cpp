@@ -198,7 +198,7 @@ bool Solver::next(CovSolverData::BoxStatus& status, const IntervalVector** sol) 
 
 			// 2nd condition: certification is performed at
 			// each intermediate step only if the system is under constrained
-			if (m==0 || (m<n && !is_too_large(c->box))) {
+			if (m<n && !is_too_large(c->box)) {
 				// note: cannot return PENDING status
 				status=check_sol(c->box);
 				if (status!=CovSolverData::UNKNOWN) { // <=> solution or boundary
