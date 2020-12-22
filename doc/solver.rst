@@ -5,15 +5,15 @@
              IbexSolve
 **************************************
 
+This documentation is for using IbexSolve with the command prompt.
+
+To use IbexSolve in C++ or program your own solver with Ibex, see the :ref:`programmer guide <solver-prog>`.
+
 .. _solver-intro:
 
 ============================
 Getting started
 ============================
-
-This documentation is for using IbexSolve with the command prompt.
-
-To use IbexSolve in C++ or program your own solver with Ibex, see the :ref:`programmer guide <solver-prog>`.
 
 ----------------------------
 The very basic idea
