@@ -252,7 +252,7 @@ Let us first formally define what a system is. We call a **system** the given of
 
       \forall i\in\{1,\ldots,p\}, \quad g_i(x)\leq0
 
-   or, in short, g(x)<=0, with :math:`g:\mathbb{R}^n\to\mathbb{R}^p`. If *p=0* then g(x)=<0 is a tautology and can be omitted.
+   or, in short, g(x)<=0, with :math:`g:\mathbb{R}^n\to\mathbb{R}^p`. If *p=0* then g(x)<=0 is a tautology and can be omitted.
 
 In the sequel:
 

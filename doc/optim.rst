@@ -24,32 +24,38 @@ it minimizes a (nonlinear) objective function under (nonlinear) inequality and e
 	{\mbox Minimize} \ f(x)
 	
 	{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0.
-	
-IbexOpt resorts to a unique black-box strategy (whatever the input problem is) and with a very limited 
-number of parameters. Needless to say, this strategy is a kind of compromise and not the 
-best one for a given problem.
 
-Note that this program is based on the :ref:`generic optimizer <optim-generic>`, a C++ class
-that allows to build a more customizable optimizer.
+In the previous formula, *f* is a real-valued function, but *h* and *g* can be multivariate.
+The right-hand sides 0 are therefore vectors of corresponding dimension, and the equality and inequality sign applies componentwise. 
+
+This notation convention is kept for the whole document.
+
+
+.. note::
+    
+   IbexOpt resorts to a unique black-box strategy (whatever the input problem is) and with a very limited 
+   number of parameters. Needless to say, this strategy is a kind of compromise and not the best one for a given problem.
+
+   If you are a C++ programmer, the design of the Ibex library allows you to customize IbexOpt or even build your own optimizer from high-level algorithmic bricks.
+   See the developer guide.
 
 You can directly apply this optimizer on one of the benchmark problems 
 distributed with Ibex. 
-The benchmarks are all written in the :ref:`Minibex syntax <mod-minibex>` and stored in an arborescence under ``plugins/optim/benchs/``.
-If you compare the Minibex syntax of these files with the ones given to IbexSolve, you will see that a "minimize"
+The benchmarks are all written in the :ref:`Minibex syntax <mod-minibex>` and stored in an arborescence under ``benchs/optim/``.
+If you compare the Minibex syntax of these files with the ones given to :ref:`IbexSolve <solver>`, you will see that a ``minimize``
 keyword has appeared.
 
 .. _Minibex syntax: #func-minibex
 
-Open a terminal, move to the ``bin`` subfolder and run IbexSolve with, for example, the problem named ex3_1_3 located at the specified path::
+Open a terminal (move to the ``bin`` subfolder of Ibex if necessary) and run IbexSolve with, for example, the problem named ex3_1_3 located at the specified path::
 
-  ~/ibex-2.8.7$ cd bin
-  ~/ibex-2.8.7/bin$ ./ibexopt ../plugins/optim/benchs/easy/ex3_1_3.bch
+  $ ./ibexopt ../plugins/optim/benchs/easy/ex3_1_3.bch
 	
 The following result should be displayed::
 
 
  ************************ setup ************************
-   file loaded:	../plugins/optim/benchs/easy/ex3_1_3.bch
+   file loaded:	../benchs/optim/easy/ex3_1_3.bch
  *******************************************************
 
  running............
@@ -68,22 +74,116 @@ a point close to (5 ; 1 ; 5 ; 0 ; 5 ; 10) which satisfies the constraints and fo
 the value taken by the objective function is inside this interval. The process took less than 0.005 seconds.
 
 
+.. _optim-output:
+
+============================
+The output of IbexOpt 
+============================
+
+.. _ULPs : https://en.wikipedia.org/wiki/Unit_in_the_last_place
+
+We denote now x\* the global minimizer and f\*=f(x\*) the global minimum of a NLP.
+
+IbexOpt can be run in two different *modes* and the precise meaning of the output depends on the chosen mode.
+
+- In the **relaxed** mode (the default mode), the NLP which is solved is actually
+  
+  .. math::
+
+     {\mbox Minimize} \ f(x)
+	
+     {\mbox s.t.} \ |h(x)|\leq \varepsilon_h  \wedge g(x)\leq 0.
+	
+  where :math:`\varepsilon_h` is a parameter. By default it is set to 1e-8 but the user can fix it differently
+  using the ``--eps-h`` option. We will call this NLP the *relaxed NLP*. Notice that it only contains inequalities.
+  
+  IbexOpt returns then a vector x (not a box) and an interval [y]. It is proven that:
+  
+    1. [y] is an enclosure of f\* (the global minimum of the relaxed NLP) respecting one :ref:`precision criterion <optim-obj-prec>`.
+    2. x is feasible, i.e., satisfies all the inequalities 
+    3. f(x) belongs to [y].
+
+  A consequence of these properties is that x is "almost" a global minimum in the sense that it is a feasible point which image
+  f(x) is close to the real minimum f\* (according to one :ref:`precision criterion <optim-obj-prec>`); but x may not be close to 
+  x\* itself. It can even be arbitrarly far away, although this happens in practice only on pathological cases.
+  
+- In the **rigor** mode, ibex solves the original NLP, with strict equations.
+  
+  It returns a box [x] and and interval [y]. It is proven that:
+  
+    1. [y] is an enclosure of f\* (the global minimum of the NLP) respecting the :ref:`precision criteria <optim-obj-prec>`.
+    2. [x] contains at least one feasible point, i.e., a point x which satisfies all the constraints (equations and inequalities)
+    3. for all x in [x], f(x) belongs to [y].
+    
+  The same observation can be made as for the relaxed case: it is proven that [x] contains a point that is "almost" a global
+  minimum (according to one :ref:`precision criterion <optim-obj-prec>`) but there is no information about the distance between
+  x and x\*.
+  
+  A further remark is about the size of [x]. We have not explicitly mentionned that it has to be small. Indeed, in theory,
+  we can't bound its size. But, in practice, if IbexOpt succeeds, the size of this box is very tiny, just about a few `ULPs`_.
+  Notice also that conditions 1 and 3 together somehow also impose [x] to be small. But, again, this is true only in practice (consider for instance
+  a constant objective function as a counter-example).
+  
+Note that for a problem without equations, the relaxed and rigor modes are the same.
+
+We advice to rather use the relaxed mode, should you have to set a very small precision :math:`\varepsilon_h`.
+The rigor mode is useful only if strict satisfaction of equalities are required.
+It can take longer and may sometimes fails were the relaxed mode succeeds. In fact, the rigor mode is still under active development.
+
+
+.. _optim-obj-prec:
+
+============================
+Objective precision criteria
+============================
+
+Remind that Ibexopt returns an interval [y] which encloses f\* and a feasible point x (surrounded by a tiny box in rigor mode) such 
+that :math:`f(x)\in[y]`.
+
+We note :math:`y^-` and :math:`y^+` the lower and upper bounds of [y].
+
+There are two precision criteria for the objective: an absolute and a relative one.
+IbexSolve stops if one of the criterion is fulfilled (not both).
+
+The absolute precision :math:`\varepsilon_{f}^{abs}` can be set with the ``--abs-eps-f`` (or ``-a`` in short) option.
+The default value is 1e-7.
+
+This criterion is fulfilled when :math:`y^+\leq y^- + \varepsilon_{f}^{abs}`.
+This therefore ensures
+
+.. math::
+   |f(x)-f^*|\leq \varepsilon_f^{abs}.
+
+The relative precision :math:`\varepsilon_{f}^{rel}` can be set with the ``--rel-eps-f`` (or ``-r`` in short) option.
+The default value is 1e-3.
+
+There are several cases:
+
+- If [y] contains 0 or has an infinite bound, the criterion is not satisfied.
+- If :math:`y^->0`, the criterion is satisfied if :math:`y^+ \leq (1+\varepsilon_{f}^{rel}) y^-`.
+- If :math:`y^+<0`, the criterion is satisfied if :math:`y^- \geq (1+\varepsilon_{f}^{rel}) y^+`.
+
+This therefore ensures
+
+.. math::
+   |f(x)-f^*|\leq \varepsilon_f^{rel}|f^*|.
+
 .. _optim-return:
 
-================== 
+============================
 Return status
-================== 
+============================
 
 When the optimizer terminates, the following possible status are:
 
-- **success**:    
-              An enclosure of the minimum respecting the precision requirements (``--a`` and ``--r``)
-              has been found as well as a global minimizer .
+- **success**:  
+              An enclosure of the minimum respecting one of the precision requirements (``--a`` or ``--r``)
+              has been found as well as a pseudo-global minimizer, as explained :ref:`above <optim-output>`.
               In standard mode (without ``--rigor``), equalities are relaxed and the global minimizer is
-              a point x* satisfying
-              :math:`-\varepsilon_h\leq h(^*)\leq\varepsilon_h`. In rigor mode (``--rigor``), the
-              global minimizer is a box  :math:`[x^*]` such that, for some x* inside we do have :math:`h(x^*)=0`.
-              In both cases, for the (explicit or implicit) point x*, f(x*) is also sufficiently closed
+              a point x satisfying
+              :math:`-\varepsilon_h\leq h(x)\leq\varepsilon_h`. In rigor mode (``--rigor``), the
+              global minimizer is a box  :math:`[x]` such that, for some x inside we do have :math:`h(x)=0`.
+              In both cases, for the (explicit or implicit) point x, f(x) is also sufficiently closed
               to the real global minimum, according to the precision criteria.
 - **infeasible**: 
               This return status actually corresponds to two different situations. Either the constraints
@@ -131,13 +231,38 @@ Options
 +--------------------------------------+------------------------------------------------------------------------------+
 | -t<*float*>, --timeout=<*float*>     | Timeout (time in seconds). Default value is +oo.                             |
 +--------------------------------------+------------------------------------------------------------------------------+
+| --simpl=...                          | Expression simplification level. Possible values are:                        |
+|                                      |                                                                              |
+|                                      | - 0: no simplification at all (fast).                                        |
+|                                      | - 1: basic simplifications (fairly fast).                                    |
+|                                      |      E.g. x+1+1 --> x+2                                                      |
+|                                      | - 2: more advanced simplifications without developing (can be slow).         |
+|                                      |      E.g. x*x + x^2 --> 2x^2.                                                |
+|                                      |      Note that the DAG structure can be lost.                                |
+|                                      | - 3: simplifications with full polynomial developing (can blow up!).         |
+|                                      |      E.g. x*(x-1) + x --> x^2.                                               |
+|                                      |      Note that the DAG structure can be lost.                                |
+|                                      |                                                                              |
+|                                      | Default value is : 1.                                                        |
++--------------------------------------+------------------------------------------------------------------------------+
 | --random-seed=<*float*>              | Random seed (useful for reproducibility). Default value is 1.                |
 +--------------------------------------+------------------------------------------------------------------------------+
 | --eps-x=<*float*>                    | Precision on the variable (**Deprecated**). Default value is 0.              |
 +--------------------------------------+------------------------------------------------------------------------------+
 | --initial-loup=<*float*>             | Initial "loup" (a priori known upper bound).                                 |
 +--------------------------------------+------------------------------------------------------------------------------+
+| -i<*filename*>, --input=<*filename*> | COV input file. The file contains optimization data in the COV (binary)      |
+|                                      | format.                                                                      |
++--------------------------------------+------------------------------------------------------------------------------+      
+| -o<*filename*>, --output=<*filename*>| COV output file. The file will contain the optimization data in the COV      |
+|                                      | (binary) format. See --format                                                |
+|                                      |                                                                              |
++--------------------------------------+------------------------------------------------------------------------------+
 | --rigor                              | Activate rigor mode (certify feasibility of equalities).                     |
 +--------------------------------------+------------------------------------------------------------------------------+
+| --kkt                                | Activate contractor based on Kuhn-Tucker conditions (rigor mode only).       | 
++--------------------------------------+------------------------------------------------------------------------------+
 | --trace                              | Activate trace. Updates of loup/uplo are printed while minimizing.           |
++--------------------------------------+------------------------------------------------------------------------------+
+| -q, --quiet                          | Print no report on the standard output.                                      |
 +--------------------------------------+------------------------------------------------------------------------------+

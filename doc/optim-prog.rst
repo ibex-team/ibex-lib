@@ -1,9 +1,10 @@
 
 .. _optim-prog:
 
-=====================
+**************************************
 Optimizers
-=====================
+**************************************
+
 
 This documentation is for using and building global optimizers in C++.
 
@@ -11,9 +12,9 @@ You should first know how global optimization works in Ibex. Read for this the :
 
 .. _optim-call-default:
 
-------------------------------------
+==========================================
 Calling IbexOpt from C++
-------------------------------------
+==========================================
 
 Calling the default optimizer is as simple as for the :ref:`default solver <solver>`.
 The loaded system must simply correspond to an optimization problem. The default optimizer
