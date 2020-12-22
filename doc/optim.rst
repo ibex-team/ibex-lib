@@ -26,7 +26,7 @@ it minimizes a (nonlinear) objective function under (nonlinear) inequality and e
 	{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0.
 
 In the previous formula, *f* is a real-valued function, but *h* and *g* can be multivariate.
-The right-hand sides 0 are therefore vectors of corresponding dimension, and the equality and inequality sign applies componentwise. 
+The right-hand sides 0 are therefore vectors and the equality and inequality sign applies componentwise. 
 
 This notation convention is kept for the whole document.
 
@@ -47,31 +47,32 @@ keyword has appeared.
 
 .. _Minibex syntax: #func-minibex
 
-Open a terminal (move to the ``bin`` subfolder of Ibex if necessary) and run IbexSolve with, for example, the problem named ex3_1_3 located at the specified path::
+Open a terminal (move to the ``bin`` subfolder of Ibex if it is installed locally) and run IbexOpt with, for example, the problem named ex3_1_3 located at the specified path::
 
-  $ ./ibexopt ../plugins/optim/benchs/easy/ex3_1_3.bch
+  $ ./ibexopt [ibex-lib-path]/benchs/optim/easy/ex3_1_3.bch
 	
 The following result should be displayed::
 
-
- ************************ setup ************************
-   file loaded:	../benchs/optim/easy/ex3_1_3.bch
- *******************************************************
-
  running............
 
-  optimization successful!
+ optimization successful!
 
-  best bound in: [-310.309999984,-309.999999984]
-  relative precision obtained on objective function: 0.001  [passed]
-  absolute precision obtained on objective function: 0.309999999985  [failed]
-  best feasible point: (4.9999999999 ; 1 ; 5 ; 0 ; 5 ; 10)
-  cpu time used: 0.00400000000001s.
-  number of cells: 1
+ f* in	[-310.011436309,-309.999999842]
+	    (best bound)
+
+ x* =	(4.99999999901 ; 1.00000000001 ; 5 ; 9.99996530027e-10 ; 5 ; 10)
+	    (best feasible point)
+
+ relative precision on f*:	3.6890471184e-05 [passed] 
+ absolute precision on f*:	0.0114364679579
+ cpu time used:			0.00209500000001s
+ number of cells:		4
 
 The program has proved that the minimum of the objective lies in a small interval enclosing -310. It also gives
 a point close to (5 ; 1 ; 5 ; 0 ; 5 ; 10) which satisfies the constraints and for which
-the value taken by the objective function is inside this interval. The process took less than 0.005 seconds.
+the value taken by the objective function is inside this interval. The process took less than 0.003 seconds.
+The number of "cells" is also reported. This number basically corresponds to the total number of hypothesis (bisections) that was 
+required to solve the problem. It gives an indication of its complexity. 
 
 
 .. _optim-output:
@@ -86,7 +87,7 @@ We denote now x\* the global minimizer and f\*=f(x\*) the global minimum of a NL
 
 IbexOpt can be run in two different *modes* and the precise meaning of the output depends on the chosen mode.
 
-- In the **relaxed** mode (the default mode), the NLP which is solved is actually
+- In the **relaxed** mode (the default one), the NLP which is solved is actually
   
   .. math::
 
@@ -107,7 +108,7 @@ IbexOpt can be run in two different *modes* and the precise meaning of the outpu
   f(x) is close to the real minimum f\* (according to one :ref:`precision criterion <optim-obj-prec>`); but x may not be close to 
   x\* itself. It can even be arbitrarly far away, although this happens in practice only on pathological cases.
   
-- In the **rigor** mode, ibex solves the original NLP, with strict equations.
+- In the **rigor** mode, IbexOpt solves the original NLP, with strict equations.
   
   It returns a box [x] and and interval [y]. It is proven that:
   
@@ -128,7 +129,7 @@ Note that for a problem without equations, the relaxed and rigor modes are the s
 
 We advice to rather use the relaxed mode, should you have to set a very small precision :math:`\varepsilon_h`.
 The rigor mode is useful only if strict satisfaction of equalities are required.
-It can take longer and may sometimes fails were the relaxed mode succeeds. In fact, the rigor mode is still under active development.
+It can take longer and may sometimes fails were the relaxed mode succeeds. In fact, the rigor mode is still under development.
 
 
 .. _optim-obj-prec:
@@ -145,7 +146,7 @@ We note :math:`y^-` and :math:`y^+` the lower and upper bounds of [y].
 There are two precision criteria for the objective: an absolute and a relative one.
 IbexSolve stops if one of the criterion is fulfilled (not both).
 
-The absolute precision :math:`\varepsilon_{f}^{abs}` can be set with the ``--abs-eps-f`` (or ``-a`` in short) option.
+The **absolute** precision :math:`\varepsilon_{f}^{abs}` can be set with the ``--abs-eps-f`` (or ``-a`` in short) option.
 The default value is 1e-7.
 
 This criterion is fulfilled when :math:`y^+\leq y^- + \varepsilon_{f}^{abs}`.
@@ -154,7 +155,7 @@ This therefore ensures
 .. math::
    |f(x)-f^*|\leq \varepsilon_f^{abs}.
 
-The relative precision :math:`\varepsilon_{f}^{rel}` can be set with the ``--rel-eps-f`` (or ``-r`` in short) option.
+The **relative** precision :math:`\varepsilon_{f}^{rel}` can be set with the ``--rel-eps-f`` (or ``-r`` in short) option.
 The default value is 1e-3.
 
 There are several cases:
