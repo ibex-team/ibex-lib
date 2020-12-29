@@ -46,7 +46,7 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 	if (pseudo_loup_found && !has_equality)
 		return p;
 
-	// Loop while the number of active constraints is less
+	// Loop until the number of active constraints is less
 	// than the number of variables (we cannot make proofs
 	// with overconstrained sytems)
 
@@ -70,6 +70,8 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 	} while (af->image_dim() > sys.nb_var && eps_h>min_activity_thershold);
 	if (af->image_dim() > sys.nb_var) {
 		ibex_warning("too many active constraints, cannot prove feasibility -> loup lost!");
+		delete af;
+		throw NotFound();
 	}
 
 	// ====================================================
