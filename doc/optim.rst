@@ -267,3 +267,27 @@ Options
 +--------------------------------------+------------------------------------------------------------------------------+
 | -q, --quiet                          | Print no report on the standard output.                                      |
 +--------------------------------------+------------------------------------------------------------------------------+
+
+====================
+FAQ
+====================
+
+---------------------------------------
+warning: too many active constraints
+---------------------------------------
+
+ When I run IbexOpt in rigor mode, the program never ends and prints the following warning in loop::
+
+   warning: too many active constraints, cannot prove feasibility -> loup lost!
+ 
+
+.. topic:: Answer
+
+   This means that, very likely, your problem has a redundant equality. It is impossible to certify feasibility 
+   in this case. So, as IbexOpt never finds a feasible point, the upper bound on the objective is 
+   stuck to infinty and the program runs forever.
+
+   The only solution in this case (beside using relaxed mode) is to revise your model. A redundant equality
+   is somehow a modeling issue.
+
+
