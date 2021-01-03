@@ -19,7 +19,7 @@ Getting started
 The very basic idea
 ----------------------------
 
-Ibexsolve solves systems of equation in a *complete* and *validated* way.
+IbexSolve solves systems of equation in a *complete* and *validated* way.
 
 If you have an equation, say,
 
@@ -109,7 +109,7 @@ You may expect to obtain a bunch of boxes in return enclosing the curve, like in
    :width: 300 px
    :align: center
 
-Ibexsolve can calculate that. But this means that you expect a fine description of the curve and that you
+IbexSolve can calculate that. But this means that you expect a fine description of the curve and that you
 accept to pay the inevitable price of a voluminous output (especially in higher dimension). 
 
 A different and opposite strategy would be to expect in return a single box enclosing the curve,
@@ -127,7 +127,7 @@ In the circle example, IbexSolve will just produce 11 solutions. They are depict
 As you can seen, the paving with the boxes is a rough description of the circle. Still, we see that the overall shape
 is captured. This paving clearly looks differently than if we had solve, say, a linear equation.
 
-In more precise terms, each *solution box* has the proprety to be crossed by the curve in a regular way.
+In more precise terms, each *solution box* has the property to be crossed by the curve in a regular way.
 Look for instance at the gray box. The curve makes no loop or u-turn whatsoever inside the box and crosses it
 from side to side along the y-axis.
 
@@ -145,7 +145,7 @@ more horizontal or vertical. This information is given in the :ref:`output data 
 Of course, all this generalizes to any dimension.
 
 If you need to refine the paving, that is, to have boxes of smaller size, use for this the :ref:`eps-max parameter <solver-options-eps-max>`.
-For instancce, if we run IbexSolve using ``-E 0.5``  (or equivalently, ``--eps-max=0.5``) we obtain the following paving:
+For instance, if we run IbexSolve using ``-E 0.5``  (or equivalently, ``--eps-max=0.5``) we obtain the following paving:
 
 .. figure:: images/disc3-ibexsolve.svg
    :width: 300 px
@@ -212,7 +212,7 @@ For instance, if you IbexSolve using ``-e 0.1`` (or equivalently, ``--eps-min=0.
 Scope and limits
 ---------------------
  
-As illustrated by our previous examples, Ibexsolve can solve any system of nonlinear equations and inequalities
+As illustrated by our previous examples, IbexSolve can solve any system of nonlinear equations and inequalities
 in a complete and validated way, including underconstrained systems. 
 
 All usual operators are allowed, including **trigonometric** functions but also **sign**, **absolute value** and **min/max** operators.
@@ -222,7 +222,7 @@ a unique black-box strategy (whatever the input problem is) and with a very limi
 number of parameters. Needless to say, this strategy is a kind of compromise and not the 
 best one for a specific problem.
 
-For programers, the core library actually offers a :ref:`generic solver <solver-generic>`, a C++ class
+For programmers, the core library actually offers a :ref:`generic solver <solver-generic>`, a C++ class
 that allows to easily build your own solver.
 
 The main shortcoming of IbexSolve is that time is not bounded. This solver is not appropriate for online computations. 
@@ -257,13 +257,13 @@ Let us first formally define what a system is. We call a **system** the given of
 In the sequel:
 
 - *n* will denote the number of variables
-- *m* the number of equalities (can be zero)
+- *m* the number of equations (can be zero)
 - *p* the number of inequalities (can be zero). 
 
 
 We call *manifold* the set *M* of solution points of a given system.
 
-Ibexsolve produces 4 different types of boxes:
+IbexSolve produces 4 different types of boxes:
 
 - the set *S* of *solution* boxes
 - the set *B* of *boundary* boxes
@@ -288,9 +288,9 @@ In the case of a square system of equations, a solution box corresponds to the u
 
 We shall give here a more general definition that also embraces the case of underconstrained systems.
 
-In the general case, and as illustrated in the :ref:`circle example <solver-intro_ex2>`, the idea behing IbexSolve is to compute boxes that capture the local "topology" of the manifold.
+In the general case, and as illustrated in the :ref:`circle example <solver-intro_ex2>`, the idea behind IbexSolve is to compute boxes that capture the local "topology" of the manifold.
 
-More precisely, we consider a box as solution when there exists an homemorphism between the part of the manifold enclosed by a box and the unit open ball 
+More precisely, we consider a box as solution when there exists an homeomorphism between the part of the manifold enclosed by a box and the unit open ball 
 
 .. math::
 
@@ -367,17 +367,17 @@ Boundary boxes
 A boundary box intuitively corresponds to a box which intersects an inequality boundary. 
 This should not be confused with the boundary of the manifold. For instance, in the circle example in introduction, there is no inequality hence no boundary box.
 
-We may require additional propreties on such boxes; for instance, that the inequality surface is not tangential to the boundary-free manifold f(x)=0. 
-But checking such propreties has a computational price. Sometimes, like in our :ref:`disk example <solver-intro_ex3>`, we have a large number of boundary boxes and we
+We may require additional properties on such boxes; for instance, that the inequality surface is not tangential to the boundary-free manifold f(x)=0. 
+But checking such properties has a computational price. Sometimes, like in our :ref:`disk example <solver-intro_ex3>`, we have a large number of boundary boxes and we
 prefer a weaker but cheaper boundary test.
 
 For this reason, we have introduced in IbexSolve different boundary policies. The policy is set thanks to the ``--boundary`` option.
 
-So far, the following policices exist:
+So far, the following policies exist:
 
 - ``true`` : any box is considered as a boundary. This policy is set by default for under-constrained systems, see the :ref:`solver strategy <solver-strategy>`.
 - ``false``: all boxes are considered as boundary.  This policy is set by default for inequalities, see the :ref:`solver strategy <solver-strategy>`.
-- ``full-rank``: some inequalities are **potentially** active and the gradients of all constraints (equalities and potentially activated inequalities) are linearly independent.
+- ``full-rank``: some inequalities are **potentially** active and the gradients of all constraints (equations and potentially activated inequalities) are linearly independent.
 
   This situation typically corresponds to *constraint qualification* in the realm of optimization. However, in the current state of development the inequality activation
   is not proved (we don't certify that f=0 and :math:`g_i=0` are simultaneously satisfied inside the box). This is still in development. 
@@ -418,10 +418,10 @@ The solving strategy depends on the type of systems
 
 - **inequalities only** (m=0).
   For this type of systems,  IbexSolve will try to cover the manifold with either solution or boundary boxes, indifferently. We don't try
-  to priorize one type because they are not comparable. Indeed, solution boxes fully satisy inequalities g(x)<0 while boundary boxes crosses 
+  to prioritize one type because they are not comparable. Indeed, solution boxes fully satisy inequalities g(x)<0 while boundary boxes crosses 
   g(x)=0. We may be more interested in either one. However, the default boundary policy is ``false``, which means that, by default, we prioritize
   solution boxes. In fact, we even refuse to consider a box as boundary with this policy which means that the paving will finely cover the
-  manifold boundary with unknwon boxes, as shown in our :ref:`disk example <solver-intro_ex3>`. Note that for this type of problems, the :ref:`eps-max parameter <solver-options-eps-max>` 
+  manifold boundary with unknown boxes, as shown in our :ref:`disk example <solver-intro_ex3>`. Note that for this type of problems, the :ref:`eps-max parameter <solver-options-eps-max>` 
   applies to both boxes. 
   
 - **under-constrained systems** (0<m<n).
@@ -450,7 +450,7 @@ Options
 The eps-min parameter
 -----------------------
 
-This paramater basically allows to control the solution accuracy. 
+This parameter basically allows to control the solution accuracy. 
 
 It imposes the minimal width of validated boxes (boundary or solution) or, said differently, the maximal width of non-validated boxes.
 So this is a criterion to *stop* bisection: a non-validated box will not be larger than :math:`\varepsilon_{min}`. 
@@ -472,7 +472,7 @@ the :ref:`solver strategy <solver-strategy>`).
 
 So let us get back again to our :ref:`disk example <solver-intro_ex3>`.
 
-If we use the ``--boundary=true`` option, the program immediately stops with one boundary box. This is ok because the first box handled by the solver satisfies one of the criterion (either solution or boundary) and since :math:`\varepsilon_{max}` is set by default to +oo, the size of this box is less than :math:`\varepsilon_{max}`, so the search is over.
+If we use the ``--boundary=true`` option, the program immediately stops with one boundary box. This is OK because the first box handled by the solver satisfies one of the criterion (either solution or boundary) and since :math:`\varepsilon_{max}` is set by default to +oo, the size of this box is less than :math:`\varepsilon_{max}`, so the search is over.
 
 Now, if we set :math:`\varepsilon_{max}` to 1 we obtain graphically the following result:
             
@@ -495,12 +495,12 @@ and using ``-E 0.1``:
    :width: 300 px
    :align: center
 
-You can control this way the accuarcy of the description. Of course, as before, the more accurate, the more boxes you have and the longer it takes.
+You can control this way the accuracy of the description. Of course, as before, the more accurate, the more boxes you have and the longer it takes.
 
 
 In the case of a system with both equations and inequalities, the parameter
 :math:`\varepsilon_{max}` will apply for both inner and boundary boxes.
-If we consider now the following minibex code::
+If we consider now the following Minibex code::
 
   variables 
     x,y;
@@ -578,7 +578,7 @@ Overview
 |                                      |                                                                              |
 |                                      | - ``true``: always satisfied. Set by default for under constrained problems  |
 |                                      |   (0<m<n).                                                                   |
-|                                      | - ``full-rank``: the gradients of all constraints (equalities and potentially|
+|                                      | - ``full-rank``: the gradients of all constraints (equations and potentially |
 |                                      |   activated inequalities) must be linearly independent.                      |
 |                                      | - ``half-ball``: (**not implemented yet**) the intersection of the box and   |
 |                                      |   the solution set is homeomorphic to a half-ball of R^n                     |

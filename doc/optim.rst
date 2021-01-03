@@ -17,7 +17,7 @@ Getting started
 =================
 
 IbexOpt is a end-user program that solves a standard NLP problem (non-linear programming), i.e.,
-it minimizes a (nonlinear) objective function under (nonlinear) inequality and equality constraints:
+it minimizes a (nonlinear) objective function under (nonlinear) inequality and equation constraints:
 
 .. math::
 
@@ -26,7 +26,7 @@ it minimizes a (nonlinear) objective function under (nonlinear) inequality and e
 	{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0.
 
 In the previous formula, *f* is a real-valued function, but *h* and *g* can be multivariate.
-The right-hand sides 0 are therefore vectors and the equality and inequality sign applies componentwise. 
+The right-hand sides 0 are therefore vectors and the equation and inequality sign applies component-wise. 
 
 This notation convention is kept for the whole document.
 
@@ -41,7 +41,7 @@ This notation convention is kept for the whole document.
 
 You can directly apply this optimizer on one of the benchmark problems 
 distributed with Ibex. 
-The benchmarks are all written in the :ref:`Minibex syntax <mod-minibex>` and stored in an arborescence under ``benchs/optim/``.
+The benchmarks are all written in the :ref:`Minibex syntax <mod-minibex>` and stored under ``benchs/optim/``.
 If you compare the Minibex syntax of these files with the ones given to :ref:`IbexSolve <solver>`, you will see that a ``minimize``
 keyword has appeared.
 
@@ -106,7 +106,7 @@ IbexOpt can be run in two different *modes* and the precise meaning of the outpu
 
   A consequence of these properties is that x is "almost" a global minimum in the sense that it is a feasible point which image
   f(x) is close to the real minimum f\* (according to one :ref:`precision criterion <optim-obj-prec>`); but x may not be close to 
-  x\* itself. It can even be arbitrarly far away, although this happens in practice only on pathological cases.
+  x\* itself. It can even be arbitrarily far away, although this happens in practice only on pathological cases.
   
 - In the **rigor** mode, IbexOpt solves the original NLP, with strict equations.
   
@@ -120,7 +120,7 @@ IbexOpt can be run in two different *modes* and the precise meaning of the outpu
   minimum (according to one :ref:`precision criterion <optim-obj-prec>`) but there is no information about the distance between
   x and x\*.
   
-  A further remark is about the size of [x]. We have not explicitly mentionned that it has to be small. Indeed, in theory,
+  A further remark is about the size of [x]. We have not explicitly mentioned that it has to be small. Indeed, in theory,
   we can't bound its size. But, in practice, if IbexOpt succeeds, the size of this box is very tiny, just about a few `ULPs`_.
   Notice also that conditions 1 and 3 together somehow also impose [x] to be small. But, again, this is true only in practice (consider for instance
   a constant objective function as a counter-example).
@@ -128,8 +128,9 @@ IbexOpt can be run in two different *modes* and the precise meaning of the outpu
 Note that for a problem without equations, the relaxed and rigor modes are the same.
 
 We advice to rather use the relaxed mode, should you have to set a very small precision :math:`\varepsilon_h`.
-The rigor mode is useful only if strict satisfaction of equalities are required.
-It can take longer and may sometimes fails were the relaxed mode succeeds. In fact, the rigor mode is still under development.
+The rigor mode is useful only if strict satisfaction of equations are required.
+It can take longer and may sometimes fails were the relaxed mode succeeds, typically because of redundancies; see
+the :ref:`FAQ <optim-faq>`. 
 
 
 .. _optim-obj-prec:
@@ -138,7 +139,7 @@ It can take longer and may sometimes fails were the relaxed mode succeeds. In fa
 Objective precision criteria
 ============================
 
-Remind that Ibexopt returns an interval [y] which encloses f\* and a feasible point x (surrounded by a tiny box in rigor mode) such 
+Remind that IbexOpt returns an interval [y] which encloses f\* and a feasible point x (surrounded by a tiny box in rigor mode) such 
 that :math:`f(x)\in[y]`.
 
 We note :math:`y^-` and :math:`y^+` the lower and upper bounds of [y].
@@ -180,7 +181,7 @@ When the optimizer terminates, the following possible status are:
 - **success**:  
               An enclosure of the minimum respecting one of the precision requirements (``--a`` or ``--r``)
               has been found as well as a pseudo-global minimizer, as explained :ref:`above <optim-output>`.
-              In standard mode (without ``--rigor``), equalities are relaxed and the global minimizer is
+              In standard mode (without ``--rigor``), equations are relaxed and the global minimizer is
               a point x satisfying
               :math:`-\varepsilon_h\leq h(x)\leq\varepsilon_h`. In rigor mode (``--rigor``), the
               global minimizer is a box  :math:`[x]` such that, for some x inside we do have :math:`h(x)=0`.
@@ -188,7 +189,7 @@ When the optimizer terminates, the following possible status are:
               to the real global minimum, according to the precision criteria.
 - **infeasible**: 
               This return status actually corresponds to two different situations. Either the constraints
-              are not satisfiable (that is, there is not point x simultaneously satisfying all equalities
+              are not feasible (that is, there is not point x simultaneously satisfying all equations
               and inequalities) or the feasible points are all outside the definition domain of the
               objective function f.
 - **no feasible point found**:
@@ -196,8 +197,8 @@ When the optimizer terminates, the following possible status are:
               if you control the precision of the bisection (``--eps-x``). Indeed, it may happen, in this case,
               that the search stops and no box explored was enough bisected to find a feasible point inside. So the
               search is over but the problem was not solved. It may also arise when an inequality
-              is actually an equality (e.g., :math:`x^2\leq 0`), because in non-rigor mode, neither a relaxation nor
-              an equality satisfaction proof is enforced in this case.
+              is actually an equation (e.g., :math:`x^2\leq 0`), because in non-rigor mode, neither a relaxation nor
+              an equation satisfaction proof is enforced in this case.
 - **unbounded objective**:
               The optimizer could not find a lower bound of the minimum. This means that the objective is very
               likely to be unbounded. 
@@ -259,7 +260,7 @@ Options
 |                                      | (binary) format. See --format                                                |
 |                                      |                                                                              |
 +--------------------------------------+------------------------------------------------------------------------------+
-| --rigor                              | Activate rigor mode (certify feasibility of equalities).                     |
+| --rigor                              | Activate rigor mode (certify feasibility of equations).                      |
 +--------------------------------------+------------------------------------------------------------------------------+
 | --kkt                                | Activate contractor based on Kuhn-Tucker conditions (rigor mode only).       | 
 +--------------------------------------+------------------------------------------------------------------------------+
@@ -269,6 +270,8 @@ Options
 +--------------------------------------+------------------------------------------------------------------------------+
 
 
+.. _optim-faq:
+
 ====================
 FAQ
 ====================
@@ -277,18 +280,18 @@ FAQ
 warning: too many active constraints
 ---------------------------------------
 
- When I run IbexOpt in rigor mode, the program never ends and prints the following warning repeatidly:
+ When I run IbexOpt in rigor mode, the program never ends and prints the following warning repeatedly:
 
    warning: too many active constraints, cannot prove feasibility -> loup lost!
  
 
 .. topic:: Answer
 
-   This means that, very likely, your problem has a redundant equality. It is impossible to certify feasibility 
+   This means that, very likely, your problem has a redundant equation. It is impossible to certify feasibility 
    in this case. So, as IbexOpt never finds a feasible point, the upper bound on the objective is 
-   stuck to infinty and the program runs forever.
+   stuck to infinity and the program runs forever.
 
-   The only solution in this case (beside using relaxed mode) is to revise your model. A redundant equality
+   The only solution in this case (beside using relaxed mode) is to revise your model. A redundant equation
    is somehow a modeling issue.
 
 
@@ -309,7 +312,7 @@ The problem is solved in relaxed but not rigor mode
   
   When the number of active constraints exceed the number of variables, IbexOpt detects it and displays the warning `too many active constraints` (see
   the previous FAQ).
-  So, in this case, you have an hint that your problem has a redundancy. The warning message must appear repeatidly though, otherwise, the warning may
+  So, in this case, you have an hint that your problem has a redundancy. The warning message must appear repeatedly though, otherwise, the warning may
   only reflect a local singularity. Typically, we may have two inequalities that get tangential in some region (while being distant from each other elsewhere). 
 
   But if the number of active constraints is less than the number of variables, there is no way for IbexOpt to detect a redundancy. Because IbexOpt is a  numerical tool dedicated to
@@ -321,14 +324,14 @@ The problem is solved in relaxed but not rigor mode
 
   We suggest the following strategy for analyzing your problem:
   
-  1. Try to see if there is an obvious redundancy in the equalities of your model. If not:
+  1. Try to see if there is an obvious redundancy in the equations of your model. If not:
   
-  2. Calculate the pseudo-global minimum in relaxed mode with a tigh relaxation parameter (ex: ``eps-h=1e-14``). See which inequalities and bounds are active at 
+  2. Calculate the pseudo-global minimum in relaxed mode with a tight relaxation parameter (ex: ``eps-h=1e-14``). See which inequalities and bounds are active at 
      this pseudo-minimum. Then try to see if there is a redundancy among all the active constraints
-     (including equalities of course). If not:
+     (including equations of course). If not:
   
   3. Calculate the jacobian of these active constraints and check that it is not full-rank. This just confirms that the LICQ conditions are not satisfied, hence
-     a normal behaviour of IbexOpt (if the matrix is full-rank, please, submit a bug report!)
+     a normal behavior of IbexOpt (if the matrix is full-rank, please, submit a bug report!)
   
   4. Run again IbexSolve in rigor mode and activate the trace (``--trace``).
      Two situation occurs:
@@ -345,7 +348,7 @@ The problem is solved in relaxed but not rigor mode
   - **sambal**: step 1: there are 8 linear equations and the rank of the matrix is 7. So one constraint is redundant. Of course, in this particular case of
     linear constraints, IbexOpt could easily detect the redundancy itself. Such test has not been implemented yes (IbexOpt is rather dedicated to nonlinear problems).
   - **harker**: step 1: there are 20 linear constraints and the rank of the matrix is 18. Same remark as above. 
-  - **immun** : step 2: there is `x16^2` in the objective function, so the bound constraint `x16=0` is active at the minmum. Constraint `-x10=-x16` enforces then `x10=0`, which 
+  - **immun** : step 2: there is `x16^2` in the objective function, so the bound constraint `x16=0` is active at the minimum. Constraint `-x10=-x16` enforces then `x10=0`, which 
     is also a bound constraint. So we have 3 constraints: `-x10-x16=0`, `x16=0` and `x10=0` with one redundant.
   - **ex7_3_5**: step 4: this case is more complicated. We suspect again a redundancy because IbexOpt never finds feasible points (and the jacobian is not full-rank at the pseudo-global minimum).
 
