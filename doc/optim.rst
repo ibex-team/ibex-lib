@@ -190,7 +190,7 @@ When the optimizer terminates, the following possible status are:
               This return status actually corresponds to two different situations. Either the constraints
               are not satisfiable (that is, there is not point x simultaneously satisfying all equalities
               and inequalities) or the feasible points are all outside the definition domain of the
-              objective funnction f.
+              objective function f.
 - **no feasible point found**:
               The optimizer could not be able to find a feasible point. This status typically arises
               if you control the precision of the bisection (``--eps-x``). Indeed, it may happen, in this case,
@@ -268,6 +268,7 @@ Options
 | -q, --quiet                          | Print no report on the standard output.                                      |
 +--------------------------------------+------------------------------------------------------------------------------+
 
+
 ====================
 FAQ
 ====================
@@ -276,7 +277,7 @@ FAQ
 warning: too many active constraints
 ---------------------------------------
 
- When I run IbexOpt in rigor mode, the program never ends and prints the following warning in loop::
+ When I run IbexOpt in rigor mode, the program never ends and prints the following warning repeatidly:
 
    warning: too many active constraints, cannot prove feasibility -> loup lost!
  
@@ -289,5 +290,63 @@ warning: too many active constraints
 
    The only solution in this case (beside using relaxed mode) is to revise your model. A redundant equality
    is somehow a modeling issue.
+
+
+-------------------------------------------------------
+The problem is solved in relaxed but not rigor mode
+-------------------------------------------------------
+
+.. _LICQ : https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions#Regularity_conditions_(or_constraint_qualifications)
+
+ **Short answer** : likely, there is a redundant constraint in your problem. Try to fix it.
+ 
+ **Long answer**
+
+  The rigor mode relies on a numerical algorithm (an interval variant of the Newton iteration) that requires
+  linear independence constraint qualification, in short `LICQ`_.
+
+  In particular, the LICQ condition cannot be fulfilled with redundant constraints. And most of the time, this is what happens.
+  
+  When the number of active constraints exceed the number of variables, IbexOpt detects it and displays the warning `too many active constraints` (see
+  the previous FAQ).
+  So, in this case, you have an hint that your problem has a redundancy. The warning message must appear repeatidly though, otherwise, the warning may
+  only reflect a local singularity. Typically, we may have two inequalities that get tangential in some region (while being distant from each other elsewhere). 
+
+  But if the number of active constraints is less than the number of variables, there is no way for IbexOpt to detect a redundancy. Because IbexOpt is a  numerical tool dedicated to
+  non-linear problems, it can only observe in a given box that the LICQ condition is not respected. It cannot conclude that there is a
+  singularity at the model level, and even less, a redundancy. But, again, most of the time, there is.
+
+  This situation happens in some of the benchmark problems supplied with IbexOpt (see the files under `benchs/optim`):
+  **sambal**, **harker**, **immun** and **ex7_3_5**.
+
+  We suggest the following strategy for analyzing your problem:
+  
+  1. Try to see if there is an obvious redundancy in the equalities of your model. If not:
+  
+  2. Calculate the pseudo-global minimum in relaxed mode with a tigh relaxation parameter (ex: ``eps-h=1e-14``). See which inequalities and bounds are active at 
+     this pseudo-minimum. Then try to see if there is a redundancy among all the active constraints
+     (including equalities of course). If not:
+  
+  3. Calculate the jacobian of these active constraints and check that it is not full-rank. This just confirms that the LICQ conditions are not satisfied, hence
+     a normal behaviour of IbexOpt (if the matrix is full-rank, please, submit a bug report!)
+  
+  4. Run again IbexSolve in rigor mode and activate the trace (``--trace``).
+     Two situation occurs:
+     
+     - some feasible points (aka *loup*) are found (they appear on the screen as they are found). This means that your problem has a local singularity right at the
+       global minimum! Your are not lucky: this is something that happens rarely in practice, and nothing proves that there is a redundancy (i.e., that you
+       can fix this problem easily).
+     
+     - feasible points seem never to be found by IbexOpt. Then, your problem has probably a redundancy. Try to fix it. 
+  
+
+  Let us apply this strategy to the aforementioned problems:
+
+  - **sambal**: step 1: there are 8 linear equations and the rank of the matrix is 7. So one constraint is redundant. Of course, in this particular case of
+    linear constraints, IbexOpt could easily detect the redundancy itself. Such test has not been implemented yes (IbexOpt is rather dedicated to nonlinear problems).
+  - **harker**: step 1: there are 20 linear constraints and the rank of the matrix is 18. Same remark as above. 
+  - **immun** : step 2: there is `x16^2` in the objective function, so the bound constraint `x16=0` is active at the minmum. Constraint `-x10=-x16` enforces then `x10=0`, which 
+    is also a bound constraint. So we have 3 constraints: `-x10-x16=0`, `x16=0` and `x10=0` with one redundant.
+  - **ex7_3_5**: step 4: this case is more complicated. We suspect again a redundancy because IbexOpt never finds feasible points (and the jacobian is not full-rank at the pseudo-global minimum).
 
 
