@@ -69,7 +69,7 @@ function (get_target_libs outvarname target)
     if (NOT is_imported)
       get_target_property (_propvalue ${target} NAME)
       if (NOT target STREQUAL "ibex")
-        list (APPEND Libs "-L\${libdir}/3rd;-l${_propvalue}")
+        list (APPEND Libs "-L\${libdir}/ibex/3rd;-l${_propvalue}")
       else ()
         list (APPEND Libs "-L\${libdir};-l${_propvalue}")
       endif ()
@@ -104,7 +104,7 @@ function (ibex_generate_pkgconfig_file tgtname)
   get_target_libs (_Libs ${tgtname})
   list (REMOVE_DUPLICATES _Libs)
   generators_expression_replace_for_build (Libs "${_Libs}" PREFIX "\${prefix}"
-                                                        LIBDIR "\${includedir}")
+                                                            LIBDIR "\${libdir}")
   string (REPLACE "\${prefix}/${CMAKE_INSTALL_LIBDIR}" "\${libdir}" Libs "${Libs}")
   
   file (GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ibex.pc
