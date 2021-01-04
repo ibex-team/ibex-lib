@@ -115,5 +115,5 @@
 +install (FILES soplex.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 +install (FILES ${headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/soplex)
 +install (TARGETS soplex EXPORT ibexExport
-+                        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++                        DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +                        COMPONENT devtools)
