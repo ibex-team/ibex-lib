@@ -36,6 +36,12 @@ public:
 	CPPUNIT_TEST(p25fv47);
 	CPPUNIT_TEST(nearly_parallel_constraints);
 	CPPUNIT_TEST(cost_parallel_to_constraint);
+    CPPUNIT_TEST(test_easy_feasible);
+    CPPUNIT_TEST(test_easy_feasible_certified);
+    CPPUNIT_TEST(test_unbounded);
+    CPPUNIT_TEST(test_unbounded_certified);
+    CPPUNIT_TEST(test_infeasible);
+    CPPUNIT_TEST(test_infeasible_certified);
 #endif
 
 	CPPUNIT_TEST_SUITE_END();
@@ -56,7 +62,13 @@ public:
     void adlittle() { test_known_problem("../../tests/lp-test-problems/adlittle.mps", 2.2549496316E+05);};
 	void p25fv47() { test_known_problem("../../tests/lp-test-problems/25fv47.mps", 5.5018458883E+03);};
 
-
+    
+    void test_easy_feasible();
+    void test_unbounded();
+    void test_infeasible();
+    void test_easy_feasible_certified();
+    void test_unbounded_certified();
+    void test_infeasible_certified();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestLinearSolver);
