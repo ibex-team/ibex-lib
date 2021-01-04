@@ -234,4 +234,183 @@ void TestLinearSolver::cost_parallel_to_constraint() {
  * c = x - beta y + beta
  * beta: 0 -> 1/alpha
  */
+
+
+void TestLinearSolver::test_easy_feasible() {
+    /**
+     maximize 3*x1 + 2*x2
+     st:
+        x1 + 2*x2 <= 4
+        x1 - x2 <= 1
+        x1,x2 >= 0
+     
+     Minimum at (2,1) with objective of 8
+     **/
+    LPSolver lp(2,LPSolver::Mode::NotCertified);
+    
+    IntervalVector x(2);
+    for(int i=0;i<x.size();i++){
+        x[i]=Interval::pos_reals();
+    }
+    
+    lp.set_bounds(x);
+    
+    Vector row1(2);row1[0]=1;row1[1]=2;
+    lp.add_constraint(NEG_INFINITY,row1,4);
+    Vector row2(2);row2[0]=1;row2[1]=-1;
+    lp.add_constraint(NEG_INFINITY,row2,1);
+
+    Vector obj(2);obj[0]=-3;obj[1]=-2;
+    lp.set_cost(obj);
+    
+    lp.minimize();
+
+    CPPUNIT_ASSERT(lp.status() == LPSolver::Status::Optimal);
+    //cout<<lp.minimum()<<endl;
+    check_relatif(lp.minimum().mid(),-8,1.e-9);
+}
+
+void TestLinearSolver::test_easy_feasible_certified() {
+    /**
+     maximize 3*x1 + 2*x2
+     st:
+        x1 + 2*x2 <= 4
+        x1 - x2 <= 1
+        x1,x2 >= 0
+     
+     Minimum at (2,1) with objective of 8
+     **/
+    LPSolver lp_cert(2,LPSolver::Mode::Certified);
+    
+    IntervalVector x(2);
+    for(int i=0;i<x.size();i++){
+        x[i]=Interval::pos_reals();
+    }
+    
+    lp_cert.set_bounds(x);
+    
+    Vector row1(2);row1[0]=1;row1[1]=2;
+    lp_cert.add_constraint(NEG_INFINITY,row1,4);
+    Vector row2(2);row2[0]=1;row2[1]=-1;
+    lp_cert.add_constraint(NEG_INFINITY,row2,1);
+
+    Vector obj(2);obj[0]=-3;obj[1]=-2;
+    lp_cert.set_cost(obj);
+    
+    lp_cert.minimize();
+
+    CPPUNIT_ASSERT(lp_cert.status() == LPSolver::Status::OptimalProved);
+    //cout<<lp_cert.minimum()<<endl;
+    check_relatif(lp_cert.minimum().lb(),-8,1.e-9);
+}
+
+void TestLinearSolver::test_unbounded() {
+    LPSolver lp(2,LPSolver::Mode::NotCertified);
+    
+    IntervalVector x(2);
+    for(int i=0;i<x.size();i++){
+        x[i]=Interval::pos_reals();
+    }
+    
+    lp.set_bounds(x);
+    
+    Vector row1(2);row1[0]=1;row1[1]=2;
+    lp.add_constraint(4,row1,POS_INFINITY);
+    Vector row2(2);row2[0]=3;row2[1]=1;
+    lp.add_constraint(7,row2,POS_INFINITY);
+
+    Vector obj(2);obj[0]=-4;obj[1]=-2;
+    lp.set_cost(obj);
+    
+    lp.minimize();
+    CPPUNIT_ASSERT(lp.status() == LPSolver::Status::Unbounded);
+}
+
+void TestLinearSolver::test_unbounded_certified() {
+    LPSolver lp_cert(2,LPSolver::Mode::Certified);
+    
+    IntervalVector x(2);
+    for(int i=0;i<x.size();i++){
+        x[i]=Interval::pos_reals();
+    }
+    
+    lp_cert.set_bounds(x);
+    
+    Vector row1(2);row1[0]=1;row1[1]=2;
+    lp_cert.add_constraint(4,row1,POS_INFINITY);
+    Vector row2(2);row2[0]=3;row2[1]=1;
+    lp_cert.add_constraint(7,row2,POS_INFINITY);
+
+    Vector obj(2);obj[0]=-4;obj[1]=-2;
+    lp_cert.set_cost(obj);
+    
+    lp_cert.minimize();
+    
+    CPPUNIT_ASSERT(lp_cert.status() == LPSolver::Status::Unbounded);
+}
+
+void TestLinearSolver::test_infeasible() {
+    /**
+     maximize 3*x1 + 2*x2
+     st:
+        x1 + 2*x2 <= -4
+        x1 - x2 >= 1
+        x1,x2 >= 0
+     
+     Minimum at (2,1) with objective of 8
+     **/
+    
+    LPSolver lp(2,LPSolver::Mode::NotCertified);
+    
+    IntervalVector x(2);
+    for(int i=0;i<x.size();i++){
+        x[i]=Interval::pos_reals();
+    }
+    
+    lp.set_bounds(x);
+    
+    Vector row1(2);row1[0]=1;row1[1]=2;
+    lp.add_constraint(NEG_INFINITY,row1,-4);
+    Vector row2(2);row2[0]=1;row2[1]=-1;
+    lp.add_constraint(1,row2,POS_INFINITY);
+
+    Vector obj(2);obj[0]=-3;obj[1]=-2;
+    lp.set_cost(obj);
+    
+    lp.minimize();
+    CPPUNIT_ASSERT(lp.status() == LPSolver::Status::Infeasible);
+}
+
+void TestLinearSolver::test_infeasible_certified() {
+    /**
+     maximize 3*x1 + 2*x2
+     st:
+        x1 + 2*x2 <= -4
+        x1 - x2 >= 1
+        x1,x2 >= 0
+     
+     Minimum at (2,1) with objective of 8
+     **/
+    
+    LPSolver lp_cert(2,LPSolver::Mode::Certified);
+    
+    IntervalVector x(2);
+    for(int i=0;i<x.size();i++){
+        x[i]=Interval::pos_reals();
+    }
+    
+    lp_cert.set_bounds(x);
+    
+    Vector row1(2);row1[0]=1;row1[1]=2;
+    lp_cert.add_constraint(NEG_INFINITY,row1,-4);
+    Vector row2(2);row2[0]=1;row2[1]=-1;
+    lp_cert.add_constraint(1,row2,POS_INFINITY);
+
+    Vector obj(2);obj[0]=-3;obj[1]=-2;
+    lp_cert.set_cost(obj);
+    
+    lp_cert.minimize();
+    CPPUNIT_ASSERT(lp_cert.status() == LPSolver::Status::InfeasibleProved);
+}
+
 } // end namespace
