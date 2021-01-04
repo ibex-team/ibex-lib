@@ -157,6 +157,7 @@ LPSolver::Status LPSolver::minimize() {
                 for(int i=0;i<nb_rows();i++){
                     uncertified_dual_[i]=dual[i];
                 }
+                
                 has_solution_ = true;
                 if(mode_ == LPSolver::Mode::Certified) {
                     // Neumaier Shcherbina cannot fail
@@ -209,7 +210,7 @@ LPSolver::Status LPSolver::minimize() {
             //ibex_warning(error_msg.c_str());
             status_ = LPSolver::Status::Unknown;
     }
-    std::cout<<"Minimize done! "<<status_<<std::endl;
+    //std::cout<<"Minimize done! "<<status_<<std::endl;
     return status_;
 }
 
@@ -430,9 +431,9 @@ Interval LPSolver::bounds(int index) const {
 
 Vector LPSolver::cost() const {
     Vector vec(nb_vars());
-    const double* rhs_=myclp->getObjCoefficients();
-    for(int i=0;i<nb_rows();i++){
-        vec[i]=rhs_[i];
+    const double* cost_=myclp->getObjCoefficients();
+    for(int i=0;i<nb_vars();i++){
+        vec[i]=cost_[i];
     }
     return vec;
 }
