@@ -22,6 +22,10 @@ namespace ibex {
  * \brief Hansen feasibility test for equality (under-)constrained problems
  *
  * Inspired by the sections §12.3 -> §12.5 of his 1992 book.
+ *
+ * In the case of an overconstrained system, the test is performed on a square
+ * subset of equations.
+ *
  */
 class PdcHansenFeasibility : public Pdc {
 public:

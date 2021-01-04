@@ -157,6 +157,7 @@ LPSolver::Status LPSolver::minimize() {
                 for(int i=0;i<nb_rows();i++){
                     uncertified_dual_[i]=dual[i];
                 }
+                
                 has_solution_ = true;
                 if(mode_ == LPSolver::Mode::Certified) {
                     // Neumaier Shcherbina cannot fail
@@ -209,7 +210,7 @@ LPSolver::Status LPSolver::minimize() {
             //ibex_warning(error_msg.c_str());
             status_ = LPSolver::Status::Unknown;
     }
-    std::cout<<"Minimize done! "<<status_<<std::endl;
+    //std::cout<<"Minimize done! "<<status_<<std::endl;
     return status_;
 }
 
@@ -430,9 +431,9 @@ Interval LPSolver::bounds(int index) const {
 
 Vector LPSolver::cost() const {
     Vector vec(nb_vars());
-    const double* rhs_=myclp->getObjCoefficients();
-    for(int i=0;i<nb_rows();i++){
-        vec[i]=rhs_[i];
+    const double* cost_=myclp->getObjCoefficients();
+    for(int i=0;i<nb_vars();i++){
+        vec[i]=cost_[i];
     }
     return vec;
 }
@@ -481,8 +482,9 @@ void LPSolver::set_cost_to_zero() {
     }
 }
 
+// remove all constraints except bound constraints
 void LPSolver::clear_constraints() {
-    myclp->resize(0,nb_vars());
+    myclp->resize(nb_vars(),nb_vars());
 }
 
 void LPSolver::clear_bounds() {
@@ -494,21 +496,21 @@ void LPSolver::reset(int nb_vars) {
     assert(nb_vars > 0);
     invalidate();
     
-    // define the number of variables and reset constraints
+    // define the number of variables and reset all constraints
     myclp->resize(0,nb_vars);
     
     ivec_bounds_ = IntervalVector(nb_vars, Interval::ALL_REALS);
     
     // define bounds on variables
     for(int i=0;i<nb_vars;i++){
-        myclp->setColumnBounds(i,ivec_bounds_[i].lb(), ivec_bounds_[i].ub());
+        myclp->setColumnBounds(i,COIN_DBL_MIN, COIN_DBL_MAX);
     }
     
     // Adding explicit constraints for bounds
     Vector rowValue(nb_vars,0.0);
     for(int i = 0; i < nb_vars; i++) {
         rowValue[i]=1.0;
-        add_constraint(ivec_bounds_[i].lb(),rowValue,ivec_bounds_[i].ub());
+        add_constraint(COIN_DBL_MIN,rowValue,COIN_DBL_MAX);
         rowValue[i]=0.0;
     }
 }
