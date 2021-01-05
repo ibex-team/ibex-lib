@@ -380,7 +380,7 @@ T ExprNode::accept_visitor(ExprVisitor<T,ArgTypes...>& v, ArgTypes&&... args) co
 	case NumExprFloor:			return v.visit((const ExprFloor&) *this, args...); break;
 	case NumExprCeil:			return v.visit((const ExprCeil&) *this, args...); break;
 	case NumExprSaw:			return v.visit((const ExprSaw&) *this, args...); break;
-	default:					assert(false);
+	default:					ibex_error("unexpected expression node type identifier");
 	}
 }
 
