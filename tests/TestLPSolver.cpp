@@ -305,6 +305,15 @@ void TestLinearSolver::test_easy_feasible_certified() {
 }
 
 void TestLinearSolver::test_unbounded() {
+    /**
+     maximize 3*x1 + 2*x2
+     st:
+        x1 + 2*x2 >= 4
+        x1 - x2 >= 1
+        x1,x2 >= 0
+     
+     Unbounded
+     **/
     LPSolver lp(2,LPSolver::Mode::NotCertified);
     
     IntervalVector x(2);
@@ -316,10 +325,10 @@ void TestLinearSolver::test_unbounded() {
     
     Vector row1(2);row1[0]=1;row1[1]=2;
     lp.add_constraint(4,row1,POS_INFINITY);
-    Vector row2(2);row2[0]=3;row2[1]=1;
-    lp.add_constraint(7,row2,POS_INFINITY);
+    Vector row2(2);row2[0]=1;row2[1]=-1;
+    lp.add_constraint(1,row2,POS_INFINITY);
 
-    Vector obj(2);obj[0]=-4;obj[1]=-2;
+    Vector obj(2);obj[0]=-3;obj[1]=-2;
     lp.set_cost(obj);
     
     lp.minimize();
@@ -338,10 +347,10 @@ void TestLinearSolver::test_unbounded_certified() {
     
     Vector row1(2);row1[0]=1;row1[1]=2;
     lp_cert.add_constraint(4,row1,POS_INFINITY);
-    Vector row2(2);row2[0]=3;row2[1]=1;
-    lp_cert.add_constraint(7,row2,POS_INFINITY);
+    Vector row2(2);row2[0]=1;row2[1]=-1;
+    lp_cert.add_constraint(1,row2,POS_INFINITY);
 
-    Vector obj(2);obj[0]=-4;obj[1]=-2;
+    Vector obj(2);obj[0]=-3;obj[1]=-2;
     lp_cert.set_cost(obj);
     
     lp_cert.minimize();
@@ -412,5 +421,128 @@ void TestLinearSolver::test_infeasible_certified() {
     lp_cert.minimize();
     CPPUNIT_ASSERT(lp_cert.status() == LPSolver::Status::InfeasibleProved);
 }
+
+
+void TestLinearSolver::test_model(){
+    /**
+     maximize 3*x1 + 2*x2
+     st:
+        x1 + 2*x2 <= 4
+        x1 - x2 <= 1
+        x1,x2 >= 0
+     
+     Minimum at (2,1) with objective of 8
+     **/
+    LPSolver lp(2,LPSolver::Mode::Certified);
+    
+    IntervalVector x(2);
+    for(int i=0;i<x.size();i++){
+        x[i]=Interval::pos_reals();
+    }
+    
+    lp.set_bounds(x);
+    
+    Vector row1(2);row1[0]=1;row1[1]=2;
+    lp.add_constraint(NEG_INFINITY,row1,4);
+    Vector row2(2);row2[0]=1;row2[1]=-1;
+    lp.add_constraint(NEG_INFINITY,row2,1);
+
+    Vector obj(2);obj[0]=-3;obj[1]=-2;
+    lp.set_cost(obj);
+    
+    lp.minimize();
+    
+    Matrix A = lp.rows();
+    for (int i=0;i<lp.nb_vars();i++){
+        CPPUNIT_ASSERT(A[i][i] == 1);
+    }
+    CPPUNIT_ASSERT(A[lp.nb_vars()][0] == 1);
+    CPPUNIT_ASSERT(A[lp.nb_vars()][1] == 2);
+    CPPUNIT_ASSERT(A[lp.nb_vars()+1][0] == 1);
+    CPPUNIT_ASSERT(A[lp.nb_vars()+1][1] == -1);
+    
+    CPPUNIT_ASSERT(lp.row(0)[0] == 1);
+    Vector row_0 = lp.row(lp.nb_vars());
+    Vector row_1 = lp.row(lp.nb_vars()+1);
+    CPPUNIT_ASSERT(row_0[0] == 1);
+    CPPUNIT_ASSERT(row_0[1] == 2);
+    CPPUNIT_ASSERT(row_1[0] == 1);
+    CPPUNIT_ASSERT(row_1[1] == -1);
+    
+    Vector col_0 = lp.col(0);
+    CPPUNIT_ASSERT(col_0[0] == 1);
+    CPPUNIT_ASSERT(col_0[1] == 0);
+    CPPUNIT_ASSERT(col_0[2] == 1);
+    CPPUNIT_ASSERT(col_0[3] == 1);
+    
+    Vector col_1 = lp.col(1);
+    CPPUNIT_ASSERT(col_1[0] == 0);
+    CPPUNIT_ASSERT(col_1[1] == 1);
+    CPPUNIT_ASSERT(col_1[2] == 2);
+    CPPUNIT_ASSERT(col_1[3] == -1);
+    
+    
+    Matrix AT = lp.rows_transposed();
+    for (int i=0;i<lp.nb_vars();i++){
+        CPPUNIT_ASSERT(AT[i][i] == 1);
+    }
+    CPPUNIT_ASSERT(AT[0][lp.nb_vars()] == 1);
+    CPPUNIT_ASSERT(AT[1][lp.nb_vars()] == 2);
+    CPPUNIT_ASSERT(AT[0][lp.nb_vars()+1] == 1);
+    CPPUNIT_ASSERT(AT[1][lp.nb_vars()+1] == -1);
+    
+    Vector lhs = lp.lhs();
+    CPPUNIT_ASSERT(lhs[0] == 0);
+    CPPUNIT_ASSERT(lhs[1] == 0);
+    CPPUNIT_ASSERT(lhs[2] <= -1e308);
+    CPPUNIT_ASSERT(lhs[3] <= -1e308);
+    
+    Vector rhs = lp.rhs();
+    CPPUNIT_ASSERT(rhs[0] >= 1e308);
+    CPPUNIT_ASSERT(rhs[1] >= 1e308);
+    CPPUNIT_ASSERT(rhs[2] == 4);
+    CPPUNIT_ASSERT(rhs[3] == 1);
+    
+    IntervalVector lhs_rhs = lp.lhs_rhs();
+    CPPUNIT_ASSERT(lhs_rhs[0].lb() == 0);
+    CPPUNIT_ASSERT(lhs_rhs[1].lb() == 0);
+    CPPUNIT_ASSERT(lhs_rhs[2].lb() <= -1e308);
+    CPPUNIT_ASSERT(lhs_rhs[3].lb() <= -1e308);
+    CPPUNIT_ASSERT(lhs_rhs[0].ub() >= 1e308);
+    CPPUNIT_ASSERT(lhs_rhs[1].ub() >= 1e308);
+    CPPUNIT_ASSERT(lhs_rhs[2].ub() == 4);
+    CPPUNIT_ASSERT(lhs_rhs[3].ub() == 1);
+    
+    Vector cost = lp.cost();
+    CPPUNIT_ASSERT(cost[0] == -3);
+    CPPUNIT_ASSERT(cost[1] == -2);
+    
+    IntervalVector bnds = lp.bounds();
+    CPPUNIT_ASSERT(bnds[0].lb() == 0);
+    CPPUNIT_ASSERT(bnds[1].lb() == 0);
+    CPPUNIT_ASSERT(bnds[0].ub() == POS_INFINITY);
+    CPPUNIT_ASSERT(bnds[1].ub() == POS_INFINITY);
+    
+    Interval bnd_0 = lp.bounds(0);
+    CPPUNIT_ASSERT(bnd_0.lb() == 0);
+    CPPUNIT_ASSERT(bnd_0.ub() == POS_INFINITY);
+    
+    lp.clear_constraints();
+    CPPUNIT_ASSERT(lp.nb_rows() == lp.nb_vars());
+    
+    lp.clear_bounds();
+    CPPUNIT_ASSERT(lp.bounds()[0] == Interval::ALL_REALS);
+    CPPUNIT_ASSERT(lp.bounds()[1] == Interval::ALL_REALS);
+    
+    lp.reset(lp.nb_vars());
+    CPPUNIT_ASSERT(lp.status() == LPSolver::Status::Unknown);
+    CPPUNIT_ASSERT(lp.cost()[0] == 0);
+    CPPUNIT_ASSERT(lp.cost()[1] == 0);
+    CPPUNIT_ASSERT(lp.nb_rows() == lp.nb_vars());
+    CPPUNIT_ASSERT(lp.bounds()[0] == Interval::ALL_REALS);
+    CPPUNIT_ASSERT(lp.bounds()[1] == Interval::ALL_REALS);
+    
+}
+
 
 } // end namespace
