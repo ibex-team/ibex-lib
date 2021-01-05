@@ -56,6 +56,7 @@ function (ibex_init_common)
   set (CMAKE_INSTALL_LIBDIR "lib" CACHE PATH "object code libraries (lib)")
   set (CMAKE_INSTALL_BINDIR "bin" CACHE PATH "user executables (bin)")
   set (CMAKE_INSTALL_PKGCONFIG "share/pkgconfig" CACHE PATH "pkg files (share/pkgconfig)")
+  set (CMAKE_INSTALL_JARDIR "share/java" CACHE PATH "jar archives (share/java)")
 
   set (CMAKE_INSTALL_INCLUDEDIR_3RD ${CMAKE_INSTALL_INCLUDEDIR}/ibex/3rd PARENT_SCOPE)
   set (CMAKE_INSTALL_LIBDIR_3RD ${CMAKE_INSTALL_LIBDIR}/ibex/3rd PARENT_SCOPE)
