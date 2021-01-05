@@ -168,13 +168,15 @@ LPSolver::Status LPSolver::minimize() {
                 }
             }
             break;
-        case 1: case 2:
+        case 1:
             {
                 status_ = LPSolver::Status::Infeasible;
+                has_infeasible_dir_ = false;
                 if(myclp->isProvenPrimalInfeasible() || myclp->isProvenDualInfeasible()){
-                    has_infeasible_dir_ = true;
                     double* ray = myclp->infeasibilityRay(true);
-                    if(ray!=NULL){
+                    if(ray!=NULL && myclp->rayExists()){
+                        has_infeasible_dir_ = true;
+                        uncertified_infeasible_dir_.resize(nb_rows());
                         for(int i=0;i<nb_rows();i++){
                             uncertified_infeasible_dir_[i]=ray[i];
                         }
@@ -186,9 +188,6 @@ LPSolver::Status LPSolver::minimize() {
                         }
                     }
                 }
-                else{
-                    has_infeasible_dir_ = false;
-                }
             }
             break;
         case 3:
@@ -197,10 +196,13 @@ LPSolver::Status LPSolver::minimize() {
         case 4:
             status_ = LPSolver::Status::Timeout;
             break;
-        case 5:
+        case 5:  case 2:
             {
                 if(myclp->unboundedRay()){
                     status_ = LPSolver::Status::Unbounded;
+                }
+                else {
+                    status_ = LPSolver::Status::Unknown;
                 }
             }
             break;
@@ -311,8 +313,6 @@ Matrix LPSolver::rows() const {
     Matrix A(nb_rows(),nb_vars(),0.0);
     try {
         CoinPackedMatrix * mat=myclp->matrix();
-        // see mat.getCorefficient()
-        //A = Matrix::zeros(nb_rows,nb_vars);
         if (mat->isColOrdered()) {
             for (int cc=0;cc<nb_vars(); cc++){
                 CoinBigIndex j;
@@ -339,20 +339,20 @@ Matrix LPSolver::rows() const {
 
 Vector LPSolver::row(int index) const {
     assert(index >= 0 && index < nb_rows());
-    bool tr=false;
     if (myclp->matrix()->isColOrdered()) {
-        myclp->matrix()->transpose();
-        tr=true;
+        myclp->matrix()->reverseOrdering();
     }
     Vector Ai(nb_vars(),0.0);
-    const CoinShallowPackedVector& rowi = myclp->matrix()->getVector(index);
-    const int* idx=rowi.getIndices();
-    for(int j=0;j<rowi.getNumElements();j++){
-        Ai[idx[j]] = rowi.getElements()[j];
+    
+    CoinPackedMatrix * mat=myclp->matrix();
+    const double* Ar = mat->getElements();
+    const int* idx = mat->getIndices();
+    int row_start = mat->getVectorStarts()[index];
+    int nb_idx = mat->getVectorSize(index);
+    for(int j=0;j<nb_idx;j++){
+        Ai[idx[row_start+j]]=Ar[row_start+j];
     }
-    if(tr){
-        myclp->matrix()->transpose();
-    }
+    
     return Ai;
 }
 
@@ -362,19 +362,17 @@ Matrix LPSolver::rows_transposed() const {
 
 Vector LPSolver::col(int index) const {
     assert(index >= 0 && index < nb_vars());
-    bool tr=false;
     if (!myclp->matrix()->isColOrdered()) {
-        myclp->matrix()->transpose();
-        tr=true;
+        myclp->matrix()->reverseOrdering();
     }
     Vector Aj(nb_rows(),0.0);
-    const CoinShallowPackedVector& colj =myclp->matrix()->getVector(index);
-    const int* idx=colj.getIndices();
-    for(int i=0;i<colj.getNumElements();i++){
-        Aj[idx[i]] = colj.getElements()[i];
-    }
-    if(tr){
-        myclp->matrix()->transpose();
+    CoinPackedMatrix * mat=myclp->matrix();
+    const double* Ac = mat->getElements();
+    const int* idx = mat->getIndices();
+    int col_start = mat->getVectorStarts()[index];
+    int nb_idx = mat->getVectorSize(index);
+    for(int i=0;i<nb_idx;i++){
+        Aj[idx[col_start+i]]=Ac[col_start+i];
     }
     
     return Aj;
@@ -495,6 +493,8 @@ void LPSolver::clear_bounds() {
 void LPSolver::reset(int nb_vars) {
     assert(nb_vars > 0);
     invalidate();
+    
+    set_cost_to_zero();
     
     // define the number of variables and reset all constraints
     myclp->resize(0,nb_vars);
