@@ -3,7 +3,7 @@
 @@ -19,8 +19,8 @@
  set(CPACK_PACKAGE_VENDOR "Zuse Institute Berlin")
  include(CPack)
- 
+
 -option(ZLIB "Use ZLIB" ON)
 -option(GMP "Use GMP" ON)
 +option(ZLIB "Use ZLIB" OFF)
@@ -11,6 +11,17 @@
  option(STATIC_GMP "Prefer static GMP lib" OFF)
  option(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "Export all symbols into the DLL" ON)
  option(MT "use static runtime libraries for Visual Studio compiler" OFF)
+@@ -49,10 +49,6 @@
+ # use C++11 standard
+ set(CMAKE_CXX_STANDARD 11)
+
+-# set function visibility default to hidden
+-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+-set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+-
+ # create a target for updating the current git hash
+ file(WRITE ${CMAKE_BINARY_DIR}/soplex_update_githash.cmake "
+ find_program(GIT git)
 --- soplex-4.0.2/src/CMakeLists.txt	2019-06-28 15:48:00.000000000 +0200
 +++ soplex-4.0.2/src/CMakeLists.txt	2020-12-10 16:21:43.523863588 +0100
 @@ -1,5 +1,3 @@
