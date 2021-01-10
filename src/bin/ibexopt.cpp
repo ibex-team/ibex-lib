@@ -105,16 +105,8 @@ int main(int argc, char** argv) {
 
 		string extension = filename.Get().substr(filename.Get().find_last_of('.')+1);
 		if (extension == "nl") {
-
-#ifdef _IBEX_WITH_AMPL_
-			AmplInterface ampl(filename.Get());
-			if (simpl_level)
-				ampl.set_simplification_level(simpl_level.Get());
-			sys = new System(ampl);
-#else
-			cerr << "\n\033[31mCannot read \".nl\" files: AMPL plugin required \033[0m(try reconfigure with --with-ampl)\n\n";
+			cerr << "\n\033[31mAMPL files can only be read with optimizer04 (ibex-opt-extra package).\n\n";
 			exit(0);
-#endif
 		}
 		else
 			// Load a system of equations

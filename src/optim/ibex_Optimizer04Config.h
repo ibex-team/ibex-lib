@@ -33,6 +33,8 @@ public:
 protected:
 
 	// ============================================================================
+	virtual void load_sys(const char* filename);
+
 	virtual unsigned int nb_var();
 
 	virtual Ctc& get_ctc();
