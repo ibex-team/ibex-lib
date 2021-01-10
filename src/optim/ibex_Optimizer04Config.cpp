@@ -31,11 +31,6 @@
 #include "ibex_LoupFinderDefault.h"
 #include "ibex_SyntaxError.h"
 
-
-#ifdef _IBEX_WITH_AMPL_
-#include "ibex_AmplInterface.h"
-#endif
-
 #include <sstream>
 #include <vector>
 
@@ -49,19 +44,15 @@ Optimizer04Config::Optimizer04Config(int argc, char** argv) {
 		if (argc<8) {
 			ibex_error("usage: optimizer04 filename filtering linear_relaxation bisection strategy [beamsize] prec goal_prec timelimit randomseed");
 		}
-#ifdef _IBEX_WITH_AMPL_
-		std::size_t found = string(argv[1]).find(".nl");
-		if (found!=std::string::npos) {
-			AmplInterface interface (argv[1]);
-			sys = &rec(new System(interface));
-		} else
-			sys = &rec(new System(argv[1]));
-#else
-		sys = &rec(new System(argv[1]));
-#endif
+
+		load_sys(argv[1]);
+
 	} catch(SyntaxError& e) {
 		ibex_error(e.msg.c_str());
 	}
+
+//	if (simpl_level)
+//		sys->set_simplification_level(simpl_level.Get());
 
 	filtering = argv[2];
 	linearrelaxation = argv[3];
@@ -111,6 +102,15 @@ unsigned int Optimizer04Config::nb_var() {
 	return sys->nb_var;
 }
 
+void Optimizer04Config::load_sys(const char* filename) {
+	std::size_t found = string(filename).find(".nl");
+
+	if (found!=std::string::npos) {
+		cerr << "\n\033[31mAMPL files can only be read with optimizer04 (ibex-opt-extra package).\n\n";
+		exit(0);
+	} else
+		sys = &rec(new System(filename));
+}
 
 Linearizer* Optimizer04Config::get_linear_relax() {
 	Linearizer* lr;
