@@ -61,9 +61,9 @@ public:
 	void nearly_parallel_constraints();
 	void cost_parallel_to_constraint();
 	void test_known_problem(std::string filename, double optimal);
-	void afiro() { test_known_problem("../../tests/lp-test-problems/afiro.mps",  -4.6475314286E+02);};
-    void adlittle() { test_known_problem("../../tests/lp-test-problems/adlittle.mps", 2.2549496316E+05);};
-	void p25fv47() { test_known_problem("../../tests/lp-test-problems/25fv47.mps", 5.5018458883E+03);};
+	void afiro() { test_known_problem(SRCDIR_TESTS "/lp-test-problems/afiro.mps",  -4.6475314286E+02);};
+    void adlittle() { test_known_problem(SRCDIR_TESTS "/lp-test-problems/adlittle.mps", 2.2549496316E+05);};
+	void p25fv47() { test_known_problem(SRCDIR_TESTS "/lp-test-problems/25fv47.mps", 5.5018458883E+03);};
 
     
     void test_easy_feasible();
