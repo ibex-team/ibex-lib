@@ -1,0 +1,16 @@
+/* src/config_clp.h.in.  */
+
+/* Define to 1, 2, 3, or 4 if Aboca should be build. */
+#cmakedefine CLP_HAS_ABC @CLP_HAS_ABC@
+
+/* Version number of project */
+#define CLP_VERSION "@CLP_VERSION@"
+
+/* Major Version number of project */
+#define CLP_VERSION_MAJOR @CLP_VERSION_MAJOR@
+
+/* Minor Version number of project */
+#define CLP_VERSION_MINOR @CLP_VERSION_MINOR@
+
+/* Release Version number of project */
+#define CLP_VERSION_RELEASE @CLP_VERSION_RELEASE@
