@@ -86,5 +86,4 @@ else ()
 endif ()
 
 add_subdirectory (CoinUtils)
-add_subdirectory (Osi)
 add_subdirectory (Clp)

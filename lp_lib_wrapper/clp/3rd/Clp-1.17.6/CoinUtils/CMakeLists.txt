@@ -28,42 +28,18 @@ configure_file (src/config.h.in src/config.h @ONLY)
 # We DO NOT follow advice from https://cmake.org/cmake/help/v3.0/command/file.html,
 # and we use the command FILE (GLOB ...) to find all headers and sources files
 # because we assume that no file will be added in this directory.
-# If one wants to use this CMakeLists.txt file to develop Filib, one can expand
+# If one wants to use this CMakeLists.txt file to develop Clp, one can expand
 # theses variables by hand as done in ibex/src/*/CMakeLists.txt files.
-file (GLOB_RECURSE SRCS *.cpp)
-file (GLOB_RECURSE HEADERS *.h *.hpp)
+file (GLOB_RECURSE SRCS src/*.cpp)
+file (GLOB_RECURSE HEADERS src/*.hpp)
 
 # CoinUtils library
 add_library (CoinUtils ${SRCS} ${HEADERS})
+set_target_properties (CoinUtils PROPERTIES VERSION 3.11.4 SOVERSION 3)
 
 # define some macros
 target_compile_definitions (CoinUtils PUBLIC HAVE_CONFIG_H
                                       PRIVATE COINUTILS_BUILD)
-#if (WIN32)
-#  target_compile_definitions (CoinUtils PRIVATE -D_CRT_SECURE_NO_WARNINGS
-#                                                -D_CRT_SECURE_NO_DEPRECATE)
-#endif ()
-
-#if(ZLIB_FOUND)
-  #  target_link_libraries(CoinUtils PRIVATE	ZLIB::ZLIB)
-#endif()
-#if(CMAKE_USE_PTHREADS_INIT)
-  # target_link_libraries(CoinUtils PRIVATE	Threads::Threads)
-  #endif()
-#set_target_properties(CoinUtils PROPERTIES
-  #  PUBLIC_HEADER "${_HDRS};${CMAKE_CURRENT_BINARY_DIR}/config_coinutils.h"
- #  VERSION ${PROJECT_VERSION}
-  #  SOVERSION ${PROJECT_VERSION_MAJOR})
-#add_library(Coin::CoinUtils ALIAS CoinUtils)
-
-## Install
-#include(GNUInstallDirs)
-#install(TARGETS CoinUtils
-#  EXPORT ${PROJECT_NAME}Targets
-#  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/coin
-#  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#  )
 
 # include directories
 set (incdirs "${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -80,9 +56,9 @@ install (TARGETS CoinUtils
 
 # install headers
 install (FILES ${HEADERS}
-         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/coin
+         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
          COMPONENT devtools)
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/src/config_coinutils.h
-         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/coin
+         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
          RENAME CoinUtilsConfig.h
          COMPONENT devtools)
