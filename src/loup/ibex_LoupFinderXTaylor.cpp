@@ -173,10 +173,6 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::postproc(const Vector& x, d
 		//if ((Aitv*new_candidate).is_subset(b)) { // ---> a faster but stronger condition!
 		if (check(sys,new_candidate,new_loup,false)) {
 			return std::make_pair(new_candidate,new_loup);
-		} else {
-			if (sys.goal_ub(new_candidate)>=current_loup) {
-				cout <<"        (above loup)\n";
-			}
 		}
 	}
 
