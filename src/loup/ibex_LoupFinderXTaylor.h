@@ -65,6 +65,10 @@ public:
 
 protected:
 
+	/** Post-processing in case LP solver
+	 * does not give an (exactly) feasible point. */
+	std::pair<IntervalVector, double> postproc(double current_loup);
+
 	/** Linearization technique. */
 	LinearizerXTaylor lr;
 

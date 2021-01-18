@@ -16,7 +16,7 @@
 #include <stack>
 
 #define TOO_LARGE 1e30
-#define TOO_SMALL 1e-10
+#define TOO_SMALL 1e-20
 
 using namespace std;
 
@@ -166,15 +166,18 @@ void LU_solve(const M& LU, const int* p, const V& b, V& x) {
     }
 
     // solve Uy=x
-    if (_mig(LU[p[n - 1]][n - 1]) <= TOO_SMALL)
+    if (_mig(LU[p[n - 1]][n - 1]) <= TOO_SMALL) {
+    	cout << "LU[p[n - 1]][n - 1]=" << LU[p[n - 1]][n - 1] << endl;
         throw SingularMatrixException();
-    x[n - 1] /= LU[p[n - 1]][n - 1];
+    } x[n - 1] /= LU[p[n - 1]][n - 1];
     for (int i = n - 2; i >= 0; --i) {
         for (int j = i + 1; j < n; ++j) {
             x[i] -= LU[p[i]][j] * x[j];
         }
-        if (_mig(LU[p[i]][i]) <= TOO_SMALL)
+        if (_mig(LU[p[i]][i]) <= TOO_SMALL) {
+        	cout << "LU[p[n - 1]][n - 1]=" << LU[p[i]][i] << endl;
             throw SingularMatrixException();
+        }
         x[i] /= LU[p[i]][i];
     }
 }

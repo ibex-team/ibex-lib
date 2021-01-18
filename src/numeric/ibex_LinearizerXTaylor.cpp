@@ -301,7 +301,7 @@ int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalV
 
 	Interval rhs = -g_corner + a*corner;
 
-	double b = mode==RESTRICT? rhs.lb() - lp_solver->tolerance() : rhs.ub();
+	double b = mode==RESTRICT? rhs.lb() : rhs.ub();
 
 	// may throw Unsatisfiability
 	return check_and_add_constraint(box,a,b);
