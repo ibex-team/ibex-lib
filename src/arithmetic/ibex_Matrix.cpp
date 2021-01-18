@@ -137,6 +137,14 @@ void Matrix::resize(int nb_rows1, int nb_cols1) {
 	_nb_cols = nb_cols1;
 }
 
+Matrix Matrix::operator[](const BitSet& rows) const {
+	Matrix res(rows.size(),nb_cols());
+	int j=0;
+	for (BitSet::const_iterator i=rows.begin(); i!=rows.end(); ++i)
+		res[j++]=(*this)[i];
+	return res;
+}
+
 Matrix Matrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const {
 	return _submatrix(*this, row_start_index,row_end_index,col_start_index,col_end_index);
 }
