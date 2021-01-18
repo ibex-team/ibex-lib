@@ -63,6 +63,14 @@ void Vector::resize(int n2) {
 	vec = newVec;
 }
 
+inline Vector Vector::operator[](const BitSet& components) const {
+	Vector res(components.size());
+	int j=0;
+	for (BitSet::const_iterator i=components.begin(); i!=components.end(); ++i)
+		res[j++]=(*this)[i];
+	return res;
+}
+
 double Vector::min() const {
 	double res=DBL_MAX;
 	for (int i=0; i<n; i++)

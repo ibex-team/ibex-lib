@@ -15,6 +15,8 @@
 #include <iostream>
 #include <initializer_list>
 
+#include "ibex_BitSet.h"
+
 namespace ibex {
 
 class Matrix; // declared only for friendship
@@ -87,6 +89,12 @@ public:
 	 * i^th component (i starts from 0)
 	 */
 	double& operator[](int i);
+
+
+	/**
+	 * \brief Return some specific components
+	 */
+	Vector operator[](const BitSet& components) const;
 
 	/**
 	 * \brief Resize this Vector.
