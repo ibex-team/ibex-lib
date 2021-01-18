@@ -16,7 +16,7 @@ else ()
   message (STATUS "Will install and use library Clp from 3rd/ subdirectory")
 
   ###
-  set (CLP_VERSION "1.15.6")
+  set (CLP_VERSION "1.17.6")
   set (clp_basename "Clp-${CLP_VERSION}")
   set (clp_archive_name "${clp_basename}.tgz")
   set (clp_archive "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${clp_archive_name}")
@@ -35,17 +35,20 @@ else ()
   ### Copy files
   copy ("${CLP_NAME}: "
         "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${clp_basename}" "${wdir}"
-        "${logdir}" "CMakeLists.txt")# "src/mathlib_configuration.h.in")
+        "${logdir}" "CMakeLists.txt" "CoinUtils/CMakeLists.txt"
+        "CoinUtils/src/config.h.in" "CoinUtils/src/config_coinutils.h.in"
+        "Clp/CMakeLists.txt" "Clp/src/config.h.in" "Clp/src/config_clp.h.in"
+        )
 
   ### Configure
   message (STATUS "${CLP_NAME}: configure")
   # Original values will be restored at the end of this file
-  set (CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR_3RD})
+  set (CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR_3RD}/coin)
   set (CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR_3RD})
   add_subdirectory (${wdir} ${wdir}-build)
   message (STATUS "${CLP_NAME}: configure - done")
 
   ###
-  set (CLP_TARGET "clp" PARENT_SCOPE)
+  set (CLP_TARGET "ClpSolver" PARENT_SCOPE)
   set (CLP_VERSION ${CLP_VERSION} PARENT_SCOPE)
 endif ()
