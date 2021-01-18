@@ -29,18 +29,16 @@ void LoupFinderXTaylor::add_property(const IntervalVector& init_box, BoxProperti
 }
 
 
-std::pair<IntervalVector, double> LoupFinderXTaylor::postproc(double current_loup) {
+std::pair<IntervalVector, double> LoupFinderXTaylor::postproc(const Vector& x, double current_loup) {
 
-	Vector x = lp_solver.not_proved_primal_sol();
+	// Will be normalized
 	Matrix A = lp_solver.rows();
+
+	// Will be normalized
+	IntervalVector b = lp_solver.lhs_rhs();
+
 	uint n = sys.nb_var;
 	uint m = A.nb_rows();
-
-	// same matrix but intervalized. Will be further normalized
-	IntervalMatrix Aitv = A;
-
-	// Will be further normalized
-	IntervalVector b = lp_solver.lhs_rhs();
 
 	// Vector of normalized pseudo-satisfiability errors a_i*x -b_i.
 	// Can correspond to either a violation or a false inactivation
@@ -61,7 +59,6 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::postproc(double current_lou
 		// normalize constraints
 		double inv_norm_a = 1./norm(A.row(i));
 		A[i]    *= inv_norm_a;
-		Aitv[i] *= inv_norm_a;
 		b[i]    *= inv_norm_a;
 
 		// calculate max delta
@@ -69,7 +66,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::postproc(double current_lou
 		bool lb_violated = false;
 
 		if (b[i].lb()>NEG_INFINITY) {
-			delta_lb = ((Aitv.row(i)*x)-b[i].lb()).lb();
+			delta_lb = A.row(i)*x-b[i].lb();
 			if (delta_lb<0) lb_violated = true;
 		}
 
@@ -77,7 +74,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::postproc(double current_lou
 		bool ub_violated = false;
 
 		if (b[i].ub()<POS_INFINITY) {
-			delta_ub = ((Aitv.row(i)*x)-b[i].ub()).ub();
+			delta_ub = A.row(i)*x-b[i].ub();
 			if (delta_ub>0) ub_violated = true;
 		}
 
@@ -102,6 +99,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::postproc(double current_lou
 			error[i] = delta_ub; // false activation = negative value
 		}
 
+		//cout << "a=" << A[i] << " error=" << error[i] << endl;
 	}
 
 	std::sort(indices,indices+m,[error](uint i1,uint i2)->bool { return error[i1]>error[i2]; });
@@ -127,46 +125,64 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::postproc(double current_lou
 	// consider the active constraints as the n first
 	// with min error.
 	Matrix Aact(n,n);
-	Vector b2(n);
+	Vector db(n);
+	uint nb_violated=0; // for debug
+
 	for (uint i=0; i<n; i++) {
 		uint c=indices[i];
+		if (error[c]>0) nb_violated++;
 		Aact[i]=A[c];
 		if (lhs_active[c])
-			b2[i] = b[c].lb()+1;
+			db[i] = +1;
 		else
-			b2[i] = b[c].ub()-1;
+			db[i] = -1;
 	}
 
 	delete[] lhs_active;
 	delete[] indices;
 
 	// build feasible direction from x
-
-	// solve the shifted linear system
-	Vector x2(n);
+	Vector dx(n);
 	try {
+		// solve the shifted linear system
 		Matrix LU(n,n);
 		int* p=new int[n]; // will be ignored
 		real_LU(Aact,LU,p);
-		real_LU_solve(LU, p, b2, x2);
+		real_LU_solve(LU, p, db, dx);
 	} catch(SingularMatrixException&) {
+		//cout << "singularity (#violated=" << nb_violated << ")\n";
 		throw NotFound();
 	}
 
-	// new candidate point is x+1.1*max_error*(x2-x)
-	Vector new_candidate = 1.1*max_error*x2 + (1-1.1*max_error)*x;
+	// normalize the direction
+	dx *= 1./norm(dx);
 
-	// we allow finding a loup outside of the current box, but
-	// not outside of the system box.
-	if (!sys.box.contains(new_candidate)) {
-		throw NotFound();
+	// try different moves
+	for (double eps=1; eps>=1e-20; eps/=2) {
+
+		Vector new_candidate = x+eps*dx;
+
+		for (uint i=0; i<n; i++) {
+			// simple fix if out of bounds
+			if (new_candidate[i] < sys.box[i].lb()) new_candidate[i] = sys.box[i].lb();
+			if (new_candidate[i] > sys.box[i].ub()) new_candidate[i] = sys.box[i].ub();
+		}
+
+		double new_loup = current_loup;
+
+		//if ((Aitv*new_candidate).is_subset(b)) { // ---> a faster but stronger condition!
+		if (check(sys,new_candidate,new_loup,false)) {
+			return std::make_pair(new_candidate,new_loup);
+		} else {
+			if (sys.goal_ub(new_candidate)>=current_loup) {
+				cout <<"        (above loup)\n";
+			}
+		}
 	}
 
-	double new_loup = current_loup;
-	if (check(sys,new_candidate,new_loup,false)) {
-		return std::make_pair(new_candidate,new_loup);
-	} else
-		throw NotFound();
+	// means: we could not find a candidate inside system or
+	//        the cost is above the current loup.
+	throw NotFound();
 }
 
 
@@ -207,11 +223,19 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 
 		// we allow finding a loup outside of the current box, but
 		// not outside of the system box.
-		if (sys.box.contains(loup_point) && check(sys,loup_point,new_loup,false)) {
+		if (!sys.box.contains(loup_point)) {
+			// try simple fix (the loup point is lost anyway)
+			for (uint i=0; i<n; i++) {
+				if (loup_point[i] < sys.box[i].lb()) loup_point[i] = sys.box[i].lb();
+				if (loup_point[i] > sys.box[i].ub()) loup_point[i] = sys.box[i].ub();
+			}
+		}
+
+		if (check(sys,loup_point,new_loup,false)) {
 			return std::make_pair(loup_point,new_loup);
 		} else {
 			//throw NotFound();
-			return postproc(current_loup); // try to correct the loup-point. May throw NotFound
+			return postproc(loup_point, current_loup); // try to correct the loup-point. May throw NotFound
 		}
 	}
 

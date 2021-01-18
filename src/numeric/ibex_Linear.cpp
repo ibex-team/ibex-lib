@@ -16,7 +16,7 @@
 #include <stack>
 
 #define TOO_LARGE 1e30
-#define TOO_SMALL 1e-20
+#define TOO_SMALL 1e-30
 
 using namespace std;
 

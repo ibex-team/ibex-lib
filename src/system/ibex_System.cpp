@@ -338,8 +338,20 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 
 bool System::is_inner(const IntervalVector& box) const {
 
-	return active_ctrs(box).empty();
+	if (nb_ctr==0) return true;
 
+	IntervalVector gx = f_ctrs.eval_vector(box);
+
+	for (int c=0; c<f_ctrs.image_dim(); c++) {
+		switch (ops[c]) {
+		case LT:  if (gx[c].ub()>=0)           return false; break;
+		case LEQ: if (gx[c].ub()>0)            return false; break;
+		case EQ:  if (gx[c]!=Interval::zero()) return false; break;
+		case GEQ: if (gx[c].lb()<0)            return false; break;
+		case GT:  if (gx[c].lb()<=0)           return false; break;
+		}
+	}
+	return true;
 }
 
 vector<string> System::var_names() const {

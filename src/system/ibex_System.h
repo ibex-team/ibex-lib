@@ -187,7 +187,11 @@ public:
 	/**
 	 * \brief Quick check that the box is inside g(x)<=0.
 	 *
-	 * \return True only if all the constraints are inactive
+	 * \warning Inner does not mean that no constraint is active.
+	 *          To check that no constraint is active in the box
+	 *          use the following test:
+	 *
+	 *             active_ctrs(box).is_empty()
 	 */
 	bool is_inner(const IntervalVector& box) const;
 
