@@ -1,0 +1,420 @@
+--- filibsrc-3.0.2.2/ieee/primitive.hpp	2016-07-19 15:50:07.000000000 +0200
++++ filibsrc-3.0.2.2/ieee/primitive.hpp	2020-12-15 15:29:32.310420551 +0100
+@@ -659,50 +659,50 @@
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif
+-	void readBitSet(std::istream & in, unsigned int n0, unsigned char * a) throw(interval_io_exception);
++	void readBitSet(std::istream & in, unsigned int n0, unsigned char * a);
+ 
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif
+-	void readHexSet(std::istream & in, unsigned int n0, unsigned char * a) throw(interval_io_exception);
++	void readHexSet(std::istream & in, unsigned int n0, unsigned char * a);
+ 
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif
+-	void readChar(std::istream& in, char c0) throw(interval_io_exception);
++	void readChar(std::istream& in, char c0);
+ 
+ 	template <typename N>
+-	N constructFromBitSet(std::istream & in) throw(interval_io_exception)
++	N constructFromBitSet(std::istream & in)
+ 	{
+ 		throw interval_io_exception("constructFromBitSet() called for unsupported type");
+ 	}
+ 	template <typename N>
+-	N constructFromBitSet(std::string & in) throw(interval_io_exception)
++	N constructFromBitSet(std::string & in)
+ 	{
+ 		throw interval_io_exception("constructFromBitSet() called for unsupported type");
+ 	}
+ 	template <typename N>
+-	N constructFromBitSet(char const * in) throw(interval_io_exception)
++	N constructFromBitSet(char const * in)
+ 	{
+ 		throw interval_io_exception("constructFromBitSet() called for unsupported type");
+ 	}
+ 
+ 	template <typename N>
+-	N constructFromHexSet(std::istream & in) throw(interval_io_exception)
++	N constructFromHexSet(std::istream & in)
+ 	{
+ 		throw interval_io_exception("constructFromHexSet() called for unsupported type");
+ 	}
+ 	template <typename N>
+-	N constructFromHexSet(std::string & in) throw(interval_io_exception)
++	N constructFromHexSet(std::string & in)
+ 	{
+ 		throw interval_io_exception("constructFromHexSet() called for unsupported type");
+ 	}
+ 	template <typename N>
+-	N constructFromHexSet(char const * in) throw(interval_io_exception)
++	N constructFromHexSet(char const * in)
+ 	{
+ 		throw interval_io_exception("constructFromHexSet() called for unsupported type");
+ 	}
+@@ -736,61 +736,61 @@
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif
+-	double constructFromBitSet<double>(std::istream & in) throw(interval_io_exception);
++	double constructFromBitSet<double>(std::istream & in);
+ 	template <>
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif
+-	float constructFromBitSet<float>(std::istream & in) throw(interval_io_exception);
++	float constructFromBitSet<float>(std::istream & in);
+ 	template <>
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif
+-	float constructFromBitSet<float>(std::string & in) throw(interval_io_exception);
++	float constructFromBitSet<float>(std::string & in);
+ 	template <>
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif
+-	double constructFromBitSet<double>(std::string & in) throw(interval_io_exception);
++	double constructFromBitSet<double>(std::string & in);
+ 	template <>
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif
+-	float constructFromBitSet<float>(char const * in) throw(interval_io_exception);
++	float constructFromBitSet<float>(char const * in);
+ 	template <>
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif
+-	double constructFromBitSet<double>(char const * in) throw(interval_io_exception);
++	double constructFromBitSet<double>(char const * in);
+ 
+ 	template <>
+-	double constructFromHexSet<double>(std::istream & in) throw(interval_io_exception);
++	double constructFromHexSet<double>(std::istream & in);
+ 	template <>
+-	float constructFromHexSet<float>(std::istream & in) throw(interval_io_exception);
++	float constructFromHexSet<float>(std::istream & in);
+ 	template <>
+-	float constructFromHexSet<float>(std::string & in) throw(interval_io_exception);
++	float constructFromHexSet<float>(std::string & in);
+ 	template <>
+-	double constructFromHexSet<double>(std::string & in) throw(interval_io_exception);
++	double constructFromHexSet<double>(std::string & in);
+ 	template <>
+-	float constructFromHexSet<float>(char const * in) throw(interval_io_exception);
++	float constructFromHexSet<float>(char const * in);
+ 	template <>
+-	double constructFromHexSet<double>(char const * in) throw(interval_io_exception);
++	double constructFromHexSet<double>(char const * in);
+ 
+ 	template<>
+ 	int whitespace<char>::isSpace(int arg);
+ 
+ 	template <typename N, bool upDo>
+-	N inferFromString(std::string const &) throw(interval_io_exception)
++	N inferFromString(std::string const &)
+ 	{
+ 		throw interval_io_exception("inferFromString() called for unsupported type");
+ 	}
+@@ -800,32 +800,28 @@
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif	
+-	double inferFromString<double,false>(std::string const & )
+-	throw(interval_io_exception);
++	double inferFromString<double,false>(std::string const & );
+ 	template <>
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif	
+-	double inferFromString<double,true>(std::string const & )
+-	throw(interval_io_exception);
++	double inferFromString<double,true>(std::string const & );
+ 	template <>
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif	
+-	float inferFromString<float,false>(std::string const & )
+-	throw(interval_io_exception);
++	float inferFromString<float,false>(std::string const & );
+ 	template <>
+ #if defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && defined(FILIB_DLL)
+ 	__declspec(dllexport)
+ #elif defined(_MSC_VER) && defined(FILIB_BUILD_DLL) && ! defined(FILIB_DLL)
+ 	__declspec(dllimport)
+ #endif	
+-	float inferFromString<float,true>(std::string const & )
+-	throw(interval_io_exception);
++	float inferFromString<float,true>(std::string const & );
+ } // namespace filib
+ 
+ #endif // PRIMITIVE
+--- filibsrc-3.0.2.2/ieee/primitive.cpp	2016-07-19 15:50:07.000000000 +0200
++++ filibsrc-3.0.2.2/ieee/primitive.cpp	2020-12-15 15:31:21.462520233 +0100
+@@ -281,7 +281,7 @@
+ 	float const primitive::one_fsucc   = primitive::composef(0,127,1);
+ 
+ 	template <>
+-	double constructFromBitSet<double>(std::istream & in) throw(interval_io_exception)
++	double constructFromBitSet<double>(std::istream & in)
+ 	{
+ 		unsigned char signBit[1];
+ 		unsigned char expBits[11];
+@@ -321,7 +321,7 @@
+ 	}
+ 
+ 	template <>
+-	float constructFromBitSet<float>(std::istream & in) throw(interval_io_exception)
++	float constructFromBitSet<float>(std::istream & in)
+ 	{
+ 		unsigned char signBit[1];
+ 		unsigned char expBits[8];
+@@ -354,7 +354,7 @@
+ 	}
+ 
+ 	template <>
+-	double constructFromHexSet<double>(std::istream & in) throw(interval_io_exception)
++	double constructFromHexSet<double>(std::istream & in)
+ 	{
+ 		unsigned char signHex[1];
+ 		unsigned char expHex[3];
+@@ -400,7 +400,7 @@
+ 	}
+ 
+ 	template <>
+-	float constructFromHexSet<float>(std::istream & in) throw(interval_io_exception)
++	float constructFromHexSet<float>(std::istream & in)
+ 	{
+ 		unsigned char signHex[1];
+ 		unsigned char expHex[2];
+@@ -445,7 +445,6 @@
+ 	}
+ 
+ 	static double checkedToDouble(std::string const & s)
+-	throw(interval_io_exception)
+ 	{
+ 		char * endptr = 0;
+ 		char const * nptr = s.c_str();
+@@ -458,20 +457,17 @@
+ 	}
+ 	template <>
+ 	double inferFromString<double,false>(std::string const & s)
+-	throw(interval_io_exception)
+ 	{
+ 		return primitive::basic_pred(checkedToDouble(s)) ;
+ 	}
+ 	template <>
+ 	double inferFromString<double,true>(std::string const & s)
+-	throw(interval_io_exception)
+ 	{
+ 		return primitive::basic_succ(checkedToDouble(s)) ;
+ 
+ 	}
+ 	template <>
+ 	float inferFromString<float,false>(std::string const & s)
+-	throw(interval_io_exception)
+ 	{
+ 		float tval = static_cast<float>(checkedToDouble(s));
+ 		
+@@ -484,7 +480,6 @@
+ 	}
+ 	template <>
+ 	float inferFromString<float,true>(std::string const & s)
+-	throw(interval_io_exception)
+ 	{
+ 		float tval = static_cast<float>(checkedToDouble(s));
+ 		
+@@ -499,7 +494,7 @@
+ 	void readBitSet(
+ 		std::istream & in, 
+ 		unsigned int n0,
+-		unsigned char * s) throw(interval_io_exception)
++		unsigned char * s)
+ 	{
+ 		size_t pos = 0;
+ 		size_t n = n0;
+@@ -529,7 +524,7 @@
+ 	void readHexSet(
+ 		std::istream & in, 
+ 		unsigned int n0,
+-		unsigned char * s) throw(interval_io_exception)
++		unsigned char * s)
+ 	{
+ 		size_t pos = 0;
+ 		size_t n = n0;
+@@ -589,7 +584,7 @@
+ 		}
+ 	}
+ 
+-	void readChar(std::istream& in, char c0) throw(interval_io_exception)
++	void readChar(std::istream& in, char c0)
+ 	{
+ 		char c = in.get();
+ 		
+@@ -602,7 +597,7 @@
+ 	}
+ 
+ 	template <>
+-	float constructFromBitSet<float>(std::string & in) throw(interval_io_exception)
++	float constructFromBitSet<float>(std::string & in)
+ 	{
+ 		#if defined(__GNUC__) && __GNUC__ < 3
+ 		std::istrstream istr(in.c_str());
+@@ -612,7 +607,7 @@
+ 		return constructFromBitSet<float>(istr);
+ 	}
+ 	template <>
+-	double constructFromBitSet<double>(std::string & in) throw(interval_io_exception)
++	double constructFromBitSet<double>(std::string & in)
+ 	{
+ 		#if defined(__GNUC__) && __GNUC__ < 3
+ 		std::istrstream istr(in.c_str());
+@@ -623,7 +618,7 @@
+ 	}
+ 
+ 	template <>
+-	float constructFromBitSet<float>(char const * in) throw(interval_io_exception)
++	float constructFromBitSet<float>(char const * in)
+ 	{
+ 		#if defined(__GNUC__) && __GNUC__ < 3
+ 		std::istrstream istr(in);
+@@ -633,7 +628,7 @@
+ 		return constructFromBitSet<float>(istr);
+ 	}
+ 	template <>
+-	double constructFromBitSet<double>(char const * in) throw(interval_io_exception)
++	double constructFromBitSet<double>(char const * in)
+ 	{
+ 		#if defined(__GNUC__) && __GNUC__ < 3
+ 		std::istrstream istr(in);
+@@ -644,7 +639,7 @@
+ 	}
+ 
+ 	template <>
+-	float constructFromHexSet<float>(std::string & in) throw(interval_io_exception)
++	float constructFromHexSet<float>(std::string & in)
+ 	{
+ 		#if defined(__GNUC__) && __GNUC__ < 3
+ 		std::istrstream istr(in.c_str());
+@@ -654,7 +649,7 @@
+ 		return constructFromHexSet<float>(istr);
+ 	}
+ 	template <>
+-	double constructFromHexSet<double>(std::string & in) throw(interval_io_exception)
++	double constructFromHexSet<double>(std::string & in)
+ 	{
+ 		#if defined(__GNUC__) && __GNUC__ < 3
+ 		std::istrstream istr(in.c_str());
+@@ -665,7 +660,7 @@
+ 	}
+ 
+ 	template <>
+-	float constructFromHexSet<float>(char const * in) throw(interval_io_exception)
++	float constructFromHexSet<float>(char const * in)
+ 	{
+ 		#if defined(__GNUC__) && __GNUC__ < 3
+ 		std::istrstream istr(in);
+@@ -675,7 +670,7 @@
+ 		return constructFromHexSet<float>(istr);
+ 	}
+ 	template <>
+-	double constructFromHexSet<double>(char const * in) throw(interval_io_exception)
++	double constructFromHexSet<double>(char const * in)
+ 	{
+ 		#if defined(__GNUC__) && __GNUC__ < 3
+ 		std::istrstream istr(in);
+--- filibsrc-3.0.2.2/interval/interval.hpp	2016-07-19 15:50:06.000000000 +0200
++++ filibsrc-3.0.2.2/interval/interval.hpp	2020-12-15 15:33:41.986619472 +0100
+@@ -379,9 +379,7 @@
+ 	template < typename N, rounding_strategy K, interval_mode E >
+ 	std::istream & operator >>(
+ 		std::istream & out,
+-		interval<N,K,E> & a)
+-	throw(interval_io_exception)
+-	;
++		interval<N,K,E> & a);
+ 
+ 	/**
+ 	 Returns an interval enclosure of the inverse cosine of the interval x.
+@@ -627,8 +625,7 @@
+ 				N const & rl, N const & ru, char const &);
+ 
+ 			inline interval(
+-				std::string const & infs, std::string const & sups)
+-			throw(interval_io_exception);
++				std::string const & infs, std::string const & sups);
+ 
+ 			/**
+ 			 check for infinity (?)
+@@ -1210,10 +1207,8 @@
+ 			 */
+ 			inline N amax() const;
+ 
+-			static interval<N,K,E> readBitImage(std::istream &) 
+-				throw(interval_io_exception);
+-			static interval<N,K,E> readHexImage(std::istream &) 
+-				throw(interval_io_exception);
++			static interval<N,K,E> readBitImage(std::istream &);
++			static interval<N,K,E> readHexImage(std::istream &);
+ 	};
+ 
+ 	template <typename N, rounding_strategy K, interval_mode E>
+--- filibsrc-3.0.2.2/interval/interval.icc	2016-07-19 15:50:06.000000000 +0200
++++ filibsrc-3.0.2.2/interval/interval.icc	2020-12-15 15:34:26.706653972 +0100
+@@ -74,8 +74,7 @@
+ 	template <typename N,rounding_strategy K,interval_mode E>
+ 	inline interval<N,K,E>::interval(
+ 		std::string const & infs, std::string const & sups
+-	) throw(interval_io_exception)
+-		: 
++  ) : 
+ 		INF(inferFromString<N,false>(infs)),
+ 		SUP(inferFromString<N,true> (sups))
+ 	{
+@@ -1157,7 +1156,6 @@
+ 
+ 	template<typename N, rounding_strategy K, interval_mode E>
+ 	interval<N,K,E> interval<N,K,E>::readBitImage(std::istream & in)
+-		throw(interval_io_exception)
+ 	{
+ 		eatWS< whitespace<char> >(in);
+ 
+@@ -1176,7 +1174,6 @@
+ 
+ 	template<typename N, rounding_strategy K, interval_mode E>
+ 	interval<N,K,E> interval<N,K,E>::readHexImage(std::istream & in)
+-		throw(interval_io_exception)
+ 	{
+ 		eatWS< whitespace<char> >(in);
+ 
+@@ -1195,7 +1192,6 @@
+ 
+ 	template <typename N, rounding_strategy K, interval_mode E>
+ 	std::istream &operator >>(std::istream &is, interval<N,K,E> &x)
+-	throw(interval_io_exception)
+ 	{
+ 		N inf, sup;
+ 		std::string s;

@@ -1,60 +1,53 @@
-################################################################################
-# Options
-################################################################################
-set (SOPLEX_DIR "" CACHE PATH "Path to the Soplex lib and include directories")
+set (SOPLEX_NAME "SoPlex")
+set (SOPLEX_NAME ${SOPLEX_NAME} PARENT_SCOPE)
 
-################################################################################
-# May be needed to install missing dependencies
-################################################################################
-include (ExternalProject)
-include (IbexUtils)
+# Look for SoPlex
+# TODO: can we somehow use the fact that SoPlex 4 offers install a
+# soplex-config.cmake file IF SoPlex was compiled with CMake. And use the
+# following include as fallback.
+include (FindSoPlex.cmake)
 
-################################################################################
-# Looking for Soplex, install it if not found
-################################################################################
-# Looking for soplex.h, result is written in SOPLEX_INCDIR
-find_header_custom (SOPLEX "soplex.h" PATHS "${SOPLEX_DIR}")
-# Looking for soplex library, result is written in SOPLEX_LIB
-find_library_custom (SOPLEX "soplex" PATHS "${SOPLEX_DIR}")
-
-if (SOPLEX_INCDIR AND SOPLEX_LIB)
-  create_target_import_and_export (soplex ${SOPLEX_LIB} NAMESPACE Ibex::
-                                          INCLUDE_DIRECTORIES ${SOPLEX_INCDIR})
+if (SOPLEX_FOUND)
+  set (SOPLEX_TARGET "SoPlex::SoPlex" PARENT_SCOPE)
+  # Install FindSoPlex.cmake file
+  install (FILES FindSoPlex.cmake
+            DESTINATION ${CMAKE_INSTALL_CONFIGCMAKE}/cmake.utils
+            COMPONENT devtools)
+  # Write CMake file containing path hint and install it
+  generate_path_hints_file (SoPlex INSTALL)
 else ()
-  message (STATUS "Will install and use library Filib from 3rd/ subdirectory")
-  # The installation of soplex via CMake does not work for us (linking error
-  # when compiling ibexsolve)
-  set (SOPLEX_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/3rd/soplex-4.0.2.all.all.patch")
-  ExternalProject_Add (libsoplex_3rd
-                        PREFIX soplex-4.0.2
-                        URL ${CMAKE_CURRENT_SOURCE_DIR}/3rd/soplex-4.0.2.tar
-                        PATCH_COMMAND patch -p1 -i ${SOPLEX_PATCH}
-                        CONFIGURE_COMMAND ""
-                        BUILD_COMMAND make GMP=false ZLIB=false USRCPPFLAGS=-fPIC INSTALLDIR=<INSTALL_DIR> install
-                        INSTALL_COMMAND ""
-                        BUILD_IN_SOURCE 1
-                        LOG_DOWNLOAD 1
-                        LOG_BUILD 1
-                      )
-  ExternalProject_Get_Property (libsoplex_3rd INSTALL_DIR)
-  set (SOPLEX_LIBDIR "${INSTALL_DIR}/lib")
-  set (SOPLEX_INCDIR "${INSTALL_DIR}/include")
+  message (STATUS "Will install and use library SoPlex from 3rd/ subdirectory")
 
-  # absolute path to the library
-  lib_get_abspath_from_name (SOPLEX_LIB ${SOPLEX_LIBDIR} soplex)
+  ###
+  set (SOPLEX_VERSION "4.0.2")
+  set (soplex_basename "soplex-${SOPLEX_VERSION}")
+  set (soplex_archive_name "${soplex_basename}.tar")
+  set (soplex_archive "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${soplex_archive_name}")
+  set (wdir "${CMAKE_CURRENT_BINARY_DIR}/${soplex_basename}")
+  set (logdir "${CMAKE_CURRENT_BINARY_DIR}/log")
 
-  # this directory needs to exist during generation step to avoid CMake errors
-  file (MAKE_DIRECTORY "${SOPLEX_INCDIR}")
+  file (MAKE_DIRECTORY "${logdir}")
 
-  # install headers
-  install (DIRECTORY ${SOPLEX_INCDIR}/ COMPONENT devtools
-                                    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR_3RD})
+  ### Extract
+  execute_process_check (COMMAND ${CMAKE_COMMAND} -E tar xzf ${soplex_archive}
+                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                         MSG "extracting ${soplex_archive_name}"
+                         LOGBASENAME "${logdir}/extract"
+                         STATUS_PREFIX "${SOPLEX_NAME}: ")
 
-  # 
-  set (_incdir $<BUILD_INTERFACE:${SOPLEX_INCDIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR_3RD}>)
-  create_target_import_and_export (soplex ${SOPLEX_LIB} INSTALL NAMESPACE Ibex::
-                                        INCLUDE_DIRECTORIES ${_incdir}
-                                        COMPONENT devtools
-                                        DEPENDS libsoplex_3rd)
-  unset (INSTALL_DIR)
+  ### Apply patch
+  patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
+          "${logdir}" "${soplex_basename}.CMake.patch")
+
+  ### Configure
+  message (STATUS "${SOPLEX_NAME}: configure")
+  # Original values will be restored at the end of this file
+  set (CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR_3RD})
+  set (CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR_3RD})
+  add_subdirectory (${wdir} ${wdir}-build)
+  message (STATUS "${SOPLEX_NAME}: configure - done")
+
+  ###
+  set (SOPLEX_TARGET "soplex" PARENT_SCOPE)
+  set (SOPLEX_VERSION ${SOPLEX_VERSION} PARENT_SCOPE)
 endif ()

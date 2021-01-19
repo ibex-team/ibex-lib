@@ -8,14 +8,25 @@ Welcome to IBEX's documentation!
 ================================
 
 -------------------
-The Core Library
+User guide
+-------------------
+.. toctree::
+   :maxdepth: 2
+   
+   install
+   install-cmake
+   solver
+   optim
+   java-install
+   
+-------------------
+Programmer guide
 -------------------
 
 .. toctree::
    :maxdepth: 2
    
    intro
-   install
    tutorial
    interval
    function
@@ -23,45 +34,25 @@ The Core Library
    system
    minibex
    contractor
+   strategy
+   solver-prog
+   optim-prog
    separator
    set
-   strategy
    reference
    example-slam
    lab
 
-.. _solver-plugin:
-
--------------------
-IbexSolve
--------------------
+-----------------------------
+For Ibex developers
+-----------------------------
 
 .. toctree::
    :maxdepth: 2
-   
-   solver
-   
-.. _optim-plugin:
 
--------------------
-IbexOpt
--------------------
-
-.. toctree::
-   :maxdepth: 2
-   
-   optim
-   
-.. _java-plugin:
-
-------------------------
-Java Plugin (for Choco)
-------------------------
-
-.. toctree::
-   :maxdepth: 2
-   
-   java-install
+   plugins-dev
+   packages
+   dev-misc
 
 ==================
 Indices and tables

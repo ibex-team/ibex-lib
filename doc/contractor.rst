@@ -120,7 +120,7 @@ We present in this chapter the basic or "numerical" contractors (built from a co
 Forward-Backward
 ------------------------------
 
-Forward-	backward (also known as HC4Revise) is a classical algorithm in constraint programming for 
+Forward-backward (also known as HC4Revise) is a classical algorithm in constraint programming for 
 contracting quickly with respect to an equality or inequality. See, e.g.,
 :ref:`[Benhamou & Granvilliers 2006] <Benhamou06>`, :ref:`[Benhamou et al. 1999] <Benhamou99>`,
 :ref:`[Collavizza 1998] <Collavizza98>`. However, the more occurrences of variables in the expression
@@ -562,12 +562,14 @@ In case of a non-linear system, it is also possible to call the ``CtcPolytopeHul
 Linearizations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. _affine: https://github.com/ibex-team/ibex-affine
+
 Linearization procedures in Ibex are embbeded in a class inheriting the ``Linearizer`` interface.
 
 There exists some built-in linearization techniques, namely:
 
 - ``LinearizerXTaylor``: a corner-based Taylor relaxation :ref:`[Araya & al., 2012] <Araya12>`.
-- ``LinearizerAffine2``: a relaxation based on affine arithmetic :ref:`[Ninin & Messine, 2009] <Ninin09>`.
+- ``LinearizerAffine2``: a relaxation based on affine arithmetic :ref:`[Ninin & Messine, 2009] <Ninin09>`. This relaxation is only available in the  `affine`_ plugin.
 - ``LinearizerCompo``: a combination of several techniques (the polytope is the intersection of the polytopes
   calculated by each technique)
 - ``LinearizerFixed``: a fixed linear system (as shown in the example above)

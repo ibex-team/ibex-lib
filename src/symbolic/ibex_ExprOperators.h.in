@@ -144,9 +144,6 @@ public:
 	/** Create an equality constraint op(expr)=value. */
 	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
 
-	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
-
 	/** Type of the "dim" function. */
 	typedef Dim (*dim_func)(const Dim& x1, const Dim& x2);
 
@@ -215,9 +212,6 @@ public:
 
 	/** Create an equality constraint op(expr)=value. */
 	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
-
-	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	/** Type of the "dim" function. */
 	typedef Dim (*dim_func)(const Dim& x);

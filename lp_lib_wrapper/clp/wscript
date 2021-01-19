@@ -1,99 +1,117 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import os
+#===============================================================================
+# <<<<<<< HEAD
+# import os
+# 
+# ######################
+# ###### options #######
+# ######################
+# def options (opt):
+#     grp_name = "Clp options (when --lp-lib=clp is used)"
+#     grp = opt.add_option_group (grp_name)
+#     grp.add_option ("--clp-path", action="store", type="string", dest="CLP_PATH",
+#                     default = "",
+#                     help = "location of the Clp lib and include directories \
+#                             (by default use the one in 3rd directory)")
+#     grp.add_option ("--coinutils-path", action="store", type="string",
+#                     dest="COINUTILS_PATH", default = "",
+#                     help = "location of the CoinUtils lib and include directories \
+#                             (by default use the location of the Clp lib and \
+#                             include directories)")
+# 
+# ######################
+# ##### configure ######
+# ######################
+# def configure (conf):
+#     if conf.env["LP_LIB"]:
+#         conf.fatal ("Trying to configure a second library for LP")
+#     conf.env["LP_LIB"] = "CLP"
+# 
+#     clp_dir = conf.options.CLP_PATH
+#     coinutils_dir = conf.options.COINUTILS_PATH
+#     if clp_dir:
+#         if not coinutils_dir:
+#             coinutils_dir = clp_dir
+#         clp_include = os.path.join (clp_dir, "include")
+#         clp_include_clp = os.path.join (clp_include, "clp")
+#         if os.path.exists (clp_include_clp):
+#             clp_include = clp_include_clp
+#         clp_include = os.path.join (clp_include, "coin")
+#         coinutils_include = os.path.join (coinutils_dir, "include")
+#         coinutils_include_coin = os.path.join (coinutils_include, "coinutils")
+#         if os.path.exists (coinutils_include_coin):
+#             coinutils_include = coinutils_include_coin
+#         coinutils_include = os.path.join (coinutils_include, "coin")
+#         clp_lib = os.path.join (clp_dir, "lib")
+#         coinutils_lib = os.path.join (coinutils_dir, "lib")
+#         conf.env.append_unique ("INCLUDES_IBEX_DEPS", clp_include)
+#         conf.env.append_unique ("INCLUDES_IBEX_DEPS", coinutils_include)
+#         conf.env.append_unique ("LIBPATH_IBEX_DEPS", clp_lib)
+#         conf.env.append_unique ("LIBPATH_IBEX_DEPS", coinutils_lib)
+#     else:
+#         clp_include = ""
+#         clp_lib = ""
+#         coinutils_lib = ""
+# 
+#     # Using pkg-config to retrieve info on Clp
+#     clp_kwargs = { "package": "clp", "args": "--cflags --libs",
+#             "uselib_store": "LP_LIB" }
+# 
+#     env_env_bak = conf.env.env
+# 
+#     from_3rd = False # boolean, does clp comes from 3rd subdirectory
+# 
+#     # If --clp-path is given, we run the loop only one time with mandatory=true
+#     # because we must find the header and library for clp. If the option is not
+#     # given, we run the loop twice: the first time we try to find clp on the
+#     # system, if we find it, we continue without doing the second loop, if not
+#     # we install it from 3rd subdirectory and do the loop again to check that
+#     # the installation worked.
+#     has_clp = []
+#     for mandatory in ([ False, True ] if not clp_dir else [True]):
+#         if not has_clp:
+#             if clp_lib!= "":
+#                 ## add to the environnement the path where clp.pc should be
+#                 clp_pc_install_path = os.path.join (clp_lib, "pkgconfig")
+#                 coinutils_pc_install_path = os.path.join (coinutils_lib, "pkgconfig")
+#                 if conf.env.env == []:
+#                     conf.env.env = {}
+#                 conf.env.env["PKG_CONFIG_PATH"] = ":".join ([clp_pc_install_path, coinutils_pc_install_path])
+#             clp_kwargs["mandatory"] = mandatory
+#             has_clp = conf.check_cfg (**clp_kwargs)
+#     
+#             if has_clp: # Clp was found
+#                 if from_3rd:
+#                     conf.env.append_unique ("LIB_3RD_LIST", "Clp")
+#             else:
+#                 # We necessarily have mandatory = False, or else conf.check_cfg () would
+#                 # have failed.
+#                 conf.msg ("Using library CLP from", "3rd/ subdirectory")
+#                 clp_archive = "Clp-1.15.6.tgz"
+#                 args = "--disable-zlib --disable-bzlib --without-lapack --without-blas"
+#                 clp_ret = conf.configure_3rd_party_with_autotools (clp_archive, conf_args = args)
+#                 _, clp_include, clp_lib = clp_ret
+#                 conf.env.INSTALL_3RD = True
+#                 from_3rd = True
+#                 # Cpl install everything in coin directory
+#                 conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_3RD)
+# 
+#     conf.env.env = env_env_bak
+# =======
+#===============================================================================
+import os, shutil
 
 ######################
 ###### options #######
 ######################
 def options (opt):
-    grp_name = "Clp options (when --lp-lib=clp is used)"
-    grp = opt.add_option_group (grp_name)
-    grp.add_option ("--clp-path", action="store", type="string", dest="CLP_PATH",
-                    default = "",
-                    help = "location of the Clp lib and include directories \
-                            (by default use the one in 3rd directory)")
-    grp.add_option ("--coinutils-path", action="store", type="string",
-                    dest="COINUTILS_PATH", default = "",
-                    help = "location of the CoinUtils lib and include directories \
-                            (by default use the location of the Clp lib and \
-                            include directories)")
+    pass
 
 ######################
 ##### configure ######
 ######################
 def configure (conf):
-    if conf.env["LP_LIB"]:
-        conf.fatal ("Trying to configure a second library for LP")
-    conf.env["LP_LIB"] = "CLP"
-
-    clp_dir = conf.options.CLP_PATH
-    coinutils_dir = conf.options.COINUTILS_PATH
-    if clp_dir:
-        if not coinutils_dir:
-            coinutils_dir = clp_dir
-        clp_include = os.path.join (clp_dir, "include")
-        clp_include_clp = os.path.join (clp_include, "clp")
-        if os.path.exists (clp_include_clp):
-            clp_include = clp_include_clp
-        clp_include = os.path.join (clp_include, "coin")
-        coinutils_include = os.path.join (coinutils_dir, "include")
-        coinutils_include_coin = os.path.join (coinutils_include, "coinutils")
-        if os.path.exists (coinutils_include_coin):
-            coinutils_include = coinutils_include_coin
-        coinutils_include = os.path.join (coinutils_include, "coin")
-        clp_lib = os.path.join (clp_dir, "lib")
-        coinutils_lib = os.path.join (coinutils_dir, "lib")
-        conf.env.append_unique ("INCLUDES_IBEX_DEPS", clp_include)
-        conf.env.append_unique ("INCLUDES_IBEX_DEPS", coinutils_include)
-        conf.env.append_unique ("LIBPATH_IBEX_DEPS", clp_lib)
-        conf.env.append_unique ("LIBPATH_IBEX_DEPS", coinutils_lib)
-    else:
-        clp_include = ""
-        clp_lib = ""
-        coinutils_lib = ""
-
-    # Using pkg-config to retrieve info on Clp
-    clp_kwargs = { "package": "clp", "args": "--cflags --libs",
-            "uselib_store": "LP_LIB" }
-
-    env_env_bak = conf.env.env
-
-    from_3rd = False # boolean, does clp comes from 3rd subdirectory
-
-    # If --clp-path is given, we run the loop only one time with mandatory=true
-    # because we must find the header and library for clp. If the option is not
-    # given, we run the loop twice: the first time we try to find clp on the
-    # system, if we find it, we continue without doing the second loop, if not
-    # we install it from 3rd subdirectory and do the loop again to check that
-    # the installation worked.
-    has_clp = []
-    for mandatory in ([ False, True ] if not clp_dir else [True]):
-        if not has_clp:
-            if clp_lib!= "":
-                ## add to the environnement the path where clp.pc should be
-                clp_pc_install_path = os.path.join (clp_lib, "pkgconfig")
-                coinutils_pc_install_path = os.path.join (coinutils_lib, "pkgconfig")
-                if conf.env.env == []:
-                    conf.env.env = {}
-                conf.env.env["PKG_CONFIG_PATH"] = ":".join ([clp_pc_install_path, coinutils_pc_install_path])
-            clp_kwargs["mandatory"] = mandatory
-            has_clp = conf.check_cfg (**clp_kwargs)
-    
-            if has_clp: # Clp was found
-                if from_3rd:
-                    conf.env.append_unique ("LIB_3RD_LIST", "Clp")
-            else:
-                # We necessarily have mandatory = False, or else conf.check_cfg () would
-                # have failed.
-                conf.msg ("Using library CLP from", "3rd/ subdirectory")
-                clp_archive = "Clp-1.15.6.tgz"
-                args = "--disable-zlib --disable-bzlib --without-lapack --without-blas"
-                clp_ret = conf.configure_3rd_party_with_autotools (clp_archive, conf_args = args)
-                _, clp_include, clp_lib = clp_ret
-                conf.env.INSTALL_3RD = True
-                from_3rd = True
-                # Cpl install everything in coin directory
-                conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_3RD)
-
-    conf.env.env = env_env_bak
+    conf.fatal ("Clp not currently supported with Waf")
+>>>>>>> branch 'develop' of https://github.com/ibex-team/ibex-lib.git

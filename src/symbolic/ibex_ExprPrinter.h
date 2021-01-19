@@ -21,7 +21,7 @@ namespace ibex {
 /**
  * \brief Print an expression into an ostream.
  */
-class ExprPrinter : public virtual ExprVisitor {
+class ExprPrinter : public virtual ExprVisitor<void> {
 public:
 	/**
 	 * \brief Print an expression on a given output stream.

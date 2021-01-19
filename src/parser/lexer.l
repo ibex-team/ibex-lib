@@ -57,6 +57,8 @@ using namespace ibex::parser;
 "abs"                            { return TK_ABS; }
 "exp"                            { return TK_EXPO; }
 "ln"                             { return TK_LOG; }
+"sqr"                            { return TK_SQR; }
+"pow"                            { return TK_POW; }
 "sqrt"                           { return TK_SQRT; }
 "cos"                            { return TK_COS; }
 "sin"                            { return TK_SIN; }

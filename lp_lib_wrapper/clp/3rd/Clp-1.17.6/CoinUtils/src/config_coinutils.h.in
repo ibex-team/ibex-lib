@@ -1,0 +1,33 @@
+/* inc/config_coinutils.h.in.  */
+
+#ifndef __CONFIG_COINUTILS_H__
+#define __CONFIG_COINUTILS_H__
+
+/* Define to 1 if stdint.h is available for CoinUtils */
+#cmakedefine COINUTILS_HAS_STDINT_H 1
+
+/* Define to 1 if stdint.h is available for CoinUtils */
+#cmakedefine COINUTILS_HAS_CSTDINT 1
+
+/* Version number of project */
+#define COINUTILS_VERSION "@COINUTILS_VERSION@"
+
+/* Major Version number of project */
+#define COINUTILS_VERSION_MAJOR @COINUTILS_VERSION_MAJOR@
+
+/* Minor Version number of project */
+#define COINUTILS_VERSION_MINOR @COINUTILS_VERSION_MINOR@
+
+/* Release Version number of project */
+#define COINUTILS_VERSION_RELEASE @COINUTILS_VERSION_RELEASE@
+
+/* Define to 64bit integer type */
+#define COIN_INT64_T @COIN_INT64_T@
+
+/* Define to integer type capturing pointer */
+#define COIN_INTPTR_T @COIN_INTPTR_T@
+
+/* Define to 64bit unsigned integer type */
+#define COIN_UINT64_T @COIN_UINT64_T@
+
+#endif

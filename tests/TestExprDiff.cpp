@@ -236,8 +236,7 @@ void TestExprDiff::mul01() {
 	const ExprVector& v2=ExprVector::new_col(x,Interval(2,2));
 	Function f(x,v1*v2);
 	Function df(f,Function::DIFF);
-	//CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+2)+x)"));
-	CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+x)+2)"));
+	CPPUNIT_ASSERT(sameExpr(df.expr(),"(2+(2*x))"));
 }
 
 void TestExprDiff::mul02() {
@@ -246,8 +245,7 @@ void TestExprDiff::mul02() {
 	const ExprVector& v2=ExprVector::new_col(x,Interval(2,2));
 	Function f(x,transpose(v1)*v2);
 	Function df(f,Function::DIFF);
-	//CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+2)+x)"));
-	CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+x)+2)"));
+	CPPUNIT_ASSERT(sameExpr(df.expr(),"(2+(2*x))"));
 }
 
 void TestExprDiff::mul03() {

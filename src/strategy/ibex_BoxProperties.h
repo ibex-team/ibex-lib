@@ -128,7 +128,7 @@ protected:
 	/*
 	 * Recursively called by topo_sort()
 	 */
-	int topo_sort_rec(const Bxp& el, Map<int,false>& level) const;
+	int topo_sort_rec(const Bxp& el, Map<long,int,false>& level) const;
 
 	/*
 	 * Update #dep with a topological sort of the map
@@ -138,7 +138,7 @@ protected:
 	/*
 	 * The map that allows to retrieve a property by its id.
 	 */
-	Map<Bxp> map;
+	Map<long,Bxp> map;
 
 	/*
 	 * Array of properties sorted by dependency level

@@ -5,37 +5,58 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - TEST_INTERVAL_LIB=gaol
+        - INTERVAL_LIB=gaol
+        - LP_LIB=soplex
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --lp-lib=soplex"
+        - STATIC_OR_SHARED_CMAKE=
     - os: linux
       compiler: gcc
       env:
-        - TEST_INTERVAL_LIB=gaol
+        - INTERVAL_LIB=gaol
+        - LP_LIB=none
         - STATIC_OR_SHARED=--enable-shared
-        - PLUGINS=
+        - STATIC_OR_SHARED_CMAKE=-DBUILD_SHARED_LIBS=ON
     - os: linux
       compiler: gcc
       env:
-        - TEST_INTERVAL_LIB=filib
+        - INTERVAL_LIB=filib
+        - LP_LIB=soplex
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --lp-lib=soplex"
-    - os: osx
-      compiler: clang
-      osx_image: xcode8.3
+        - STATIC_OR_SHARED_CMAKE=
+    - os: linux
+      compiler: gcc
       env:
-        - TEST_INTERVAL_LIB=gaol
+        - INTERVAL_LIB=direct
+        - LP_LIB=soplex
         - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --lp-lib=soplex"
+        - STATIC_OR_SHARED_CMAKE=
+    - os: osx
+      osx_image: xcode11
+      compiler: clang
+      env:
+        - INTERVAL_LIB=gaol
+        - LP_LIB=soplex
+        - STATIC_OR_SHARED=
+        - STATIC_OR_SHARED_CMAKE=
         - CXXFLAGS=-std=c++11
     - os: osx
+      osx_image: xcode11
       compiler: clang
-      osx_image: xcode8.3
       env:
-        - TEST_INTERVAL_LIB=gaol
+        - INTERVAL_LIB=gaol
+        - LP_LIB=none
         - STATIC_OR_SHARED=--enable-shared
-        - PLUGINS=
+        - STATIC_OR_SHARED_CMAKE=-DBUILD_SHARED_LIBS=ON
         - CXXFLAGS=-std=c++11
+
+  allow_failures:
+    - os: linux
+      compiler: gcc
+      env:
+        - INTERVAL_LIB=direct
+        - LP_LIB=soplex
+        - STATIC_OR_SHARED=
+        - STATIC_OR_SHARED_CMAKE=
 
 # only works on linux
 addons:
@@ -45,21 +66,26 @@ addons:
       - flex
       - bison
       - libcppunit-dev
-
-# need this to install dependencies on osx
-before_install:
-  - uname -a
-  - if [ "$TRAVIS_OS_NAME" = "osx" ] ; then brew update ; brew install flex bison cppunit; fi
+  homebrew:
+    packages:
+    - flex
+    - bison
+    - cppunit
 
 install:
-  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${TEST_INTERVAL_LIB} ${PLUGINS} --with-ampl || cat __build__/*.log
+  - uname -a
+  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${INTERVAL_LIB} --lp-lib=${LP_LIB} || cat __build__/*.log
   - ./waf build install clean
 
 # command to run tests
 # TODO: add nonreg tests
 script:
   - ./waf utest
-  - mkdir build && cd build && cmake -DINTERVAL_LIB=${TEST_INTERVAL_LIB} .. && make && make check && make package
+  - mkdir build
+  - cd build
+  - cmake ${STATIC_OR_SHARED_CMAKE} -DINTERVAL_LIB=${INTERVAL_LIB} -DLP_LIB=${LP_LIB} ..
+  - make
+  - make check
 #  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
 
 after_failure:

@@ -1,3 +1,14 @@
+--- gaol-4.2.0/gaol/gaol_interval.cpp	2015-05-23 14:50:28.000000000 +0200
++++ gaol-4.2.0/gaol/gaol_interval.cpp	2020-12-11 17:41:32.758471488 +0100
+@@ -1106,7 +1106,7 @@
+   }
+
+
+-  interval::operator string() const
++  interval::operator std::string() const
+   {
+     std::ostringstream output;
+     output.precision(interval::precision());
 --- gaol-4.2.0/gaol/gaol_allocator.h	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_allocator.h	2019-06-21 11:08:57.446030219 +0200
 @@ -89,7 +89,7 @@
@@ -246,21 +257,6 @@
  		if ((unsigned long long)p % 16 != 0) {
  			throw std::bad_alloc();
  		}
---- gaol-4.2.0/gaol/gaol_port.cpp	2012-03-06 18:08:58.000000000 +0100
-+++ gaol-4.2.0/gaol/gaol_port.cpp	2019-06-21 12:00:06.181266269 +0200
-@@ -35,6 +35,12 @@
- 
- namespace gaol {
- 
-+
-+  uintdouble NaN_val() {
-+	  static uintdouble _NaN_val = {{IFBIGENDIAN(0x7ff80000, 0x0)}};
-+	  return _NaN_val;
-+  }
-+
-   int gaol_signbit(double d)
-   {
-     // The explicit test '!=0' ensures that either 0 or 1 is returned
 --- gaol-4.2.0/gaol/gaol_port.h	2012-03-06 18:08:58.000000000 +0100
 +++ gaol-4.2.0/gaol/gaol_port.h	2019-06-21 12:24:29.653533877 +0200
 @@ -89,9 +89,9 @@
@@ -275,16 +271,13 @@
  #endif // HAVE_ROUNDING_MATH_OPTION
  
    /*!
-@@ -144,9 +144,10 @@
- #  define HI_UINTDOUBLE(a) ((a).i[1])
+@@ -145,8 +145,7 @@
  #endif
  
-+uintdouble NaN_val();
-+
  #ifndef GAOL_NAN
 -  static uintdouble NaN_val = {{IFBIGENDIAN(0x7ff80000, 0x0)}};
 -#define GAOL_NAN (gaol::NaN_val.d)
-+#define GAOL_NAN (gaol::NaN_val().d)
++#define GAOL_NAN (((uintdouble) {{IFBIGENDIAN(0x7ff80000, 0x0)}}).d)
  #endif
  
    // #define GAOL_INFINITY std::numeric_limits<double>::infinity()
@@ -299,3 +292,14 @@
  
   char *
  dtoa
+--- gaol-4.2.0/gaol/gaol_interval_parser.cpp	2014-02-24 16:09:16.000000000 +0100
++++ gaol-4.2.0/gaol/gaol_interval_parser.cpp	2020-12-11 17:56:46.944820383 +0100
+@@ -1942,7 +1942,7 @@
+                                           	(yyval.itv).l=gaol_result_of_parsing->left();
+ 					  						(yyval.itv).r=gaol_result_of_parsing->right();
+ 											if ((yyval.itv).l != (yyval.itv).r) {
+-												gaol_ERROR(input_format_error, std::string("bounds of degenerate interval do not evaluate to the same value"));
++												gaol_ERROR(input_format_error, "bounds of degenerate interval do not evaluate to the same value");
+ 											}
+ 										}
+     break;

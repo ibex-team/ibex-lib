@@ -73,7 +73,7 @@ protected:
 
 	Vector _argmin;
 	bool inside;
-	static Map<long,false>& ids();
+	static Map<long,long,false>& ids();
 };
 
 

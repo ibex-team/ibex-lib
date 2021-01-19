@@ -17,7 +17,7 @@ using namespace std;
 
 namespace ibex {
 
-const unsigned int CovSolverData::FORMAT_VERSION = 1;
+const unsigned int CovSolverData::FORMAT_VERSION = 2;
 
 const unsigned int CovSolverData::subformat_level = 5;
 
@@ -169,6 +169,7 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::sta
 	size_t nb_pending;
 
 	if (format_id.empty() || format_id.top()!=subformat_number || format_version.top()!=FORMAT_VERSION) {
+		cout << "here\n";
 		cov.data->_solver_solver_status = (unsigned int) Solver::SUCCESS;
 		cov.data->_solver_time = -1;
 		cov.data->_solver_nb_cells = 0;
@@ -188,6 +189,7 @@ ifstream* CovSolverData::read(const char* filename, CovSolverData& cov, std::sta
 		case 2: cov.data->_solver_solver_status = (unsigned int) Solver::NOT_ALL_VALIDATED; break;
 		case 3: cov.data->_solver_solver_status = (unsigned int) Solver::TIME_OUT;          break;
 		case 4: cov.data->_solver_solver_status = (unsigned int) Solver::CELL_OVERFLOW;     break;
+		case 5: cov.data->_solver_solver_status = (unsigned int) Solver::USER_BREAK;        break;
 		default: ibex_error("[CovSolverData]: invalid solver status.");
 		}
 
@@ -282,6 +284,7 @@ void CovSolverData::format(stringstream& ss, const string& title, std::stack<uns
 	<< space << "                     (--eps-min) reached\n"
 	<< space << "                   - 3=incomplete search: time out\n"
 	<< space << "                   - 4=incomplete search: buffer overflow\n"
+	<< space << "                   - 5=incomplete search: user break\n"
 	<< space << " - 1 real value:   time (in seconds)\n"
 	<< space << " - 1 integer:      the number of cells.\n"
 	<< space << " - 1 value:        the number Np of pending boxes\n"

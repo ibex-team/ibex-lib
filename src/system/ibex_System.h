@@ -49,8 +49,11 @@ public:
 
 	/**
 	 * \brief Load a system from a file.
+	 *
+	 * \param simpl_level : expression simplification level.
+	 * \see #ExprNode::simplify(int level).
 	 */
-	System(const char* filename);
+	System(const char* filename, int simpl_level=ExprNode::default_simpl_level);
 
 	/**
 	 * \brief Load a stand-alone conjunction of constraints
@@ -62,7 +65,7 @@ public:
 	 * \remark Used by Choco.
 	 * \param n    Number of variables.
 	 */
-	System(int n, const char* syntax);
+	System(int n, const char* syntax, int simpl_level=ExprNode::default_simpl_level);
 
 	/**
 	 * \brief Create a system with a goal function and
@@ -292,11 +295,11 @@ private:
 	friend class parser::P_SysGenerator;
 	friend class NumConstraint; // NumConstraint requires to build a temporary system for parsing a string
 
-	void load(FILE* file);
+	void load(FILE* file, int simpl_level);
 
 	// initialize f and ops from the constraints in ctrs,
 	// once *all* the other fields are set (including args and nb_ctr).
-	void init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs);
+	void init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs, int simpl_level);
 };
 
 std::ostream& operator<<(std::ostream&, const System&);

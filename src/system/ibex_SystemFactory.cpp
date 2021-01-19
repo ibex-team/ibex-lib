@@ -17,7 +17,7 @@ using std::vector;
 
 namespace ibex {
 
-SystemFactory::SystemFactory() : nb_arg(0), nb_var(0), input_args(0), sys_args(0), goal(NULL), system_built(false) { }
+SystemFactory::SystemFactory() : nb_arg(0), nb_var(0), simpl_level(ExprNode::default_simpl_level), input_args(0), sys_args(0), goal(NULL), system_built(false) { }
 
 
 SystemFactory::~SystemFactory() {
@@ -104,8 +104,7 @@ void SystemFactory::add_goal(const ExprNode& goal, const char* name) {
 
 	Array<const ExprSymbol> goal_vars(input_args.size());
 	varcopy(input_args,goal_vars);
-
-	const ExprNode& goal_expr=ExprCopy().copy(input_args, goal_vars, goal).simplify();
+	const ExprNode& goal_expr=ExprCopy().copy(input_args, goal_vars, goal).simplify(simpl_level);
 	this->goal = new Function(goal_vars, goal_expr, name);
 }
 
@@ -124,7 +123,7 @@ void SystemFactory::add_ctr(const ExprCtr& ctr, const char* name) {
 
 	Array<const ExprSymbol> ctr_args(input_args.size());
 	varcopy(input_args,ctr_args);
-	const ExprNode& ctr_expr=ExprCopy().copy(input_args, ctr_args, ctr.e).simplify();
+	const ExprNode& ctr_expr=ExprCopy().copy(input_args, ctr_args, ctr.e).simplify(simpl_level);
 
 	ctrs.push_back(new NumConstraint(*new Function(ctr_args, ctr_expr, name), ctr.op, true));
 
@@ -144,7 +143,7 @@ void SystemFactory::add_ctr(const NumConstraint& ctr) {
 }
 
 // precondition: nb_ctr > 0
-void System::init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs) {
+void System::init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs, int simpl_level) {
 
 	if (fac_f_ctrs.empty()) {
 		// don't delete the symbols now because
@@ -223,7 +222,7 @@ void System::init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs) {
 	}
 	assert(i==total_output_size);
 
-	f_ctrs.init(args, total_output_size>1? ExprVector::new_col(image).simplify() : image[0].simplify());
+	f_ctrs.init(args, total_output_size>1? ExprVector::new_col(image).simplify(simpl_level) : image[0].simplify(simpl_level));
 }
 
 
@@ -280,7 +279,7 @@ void System::init(const SystemFactory& fac) {
 	// so we do the contrary: we generate first the constraints,
 	// and build f with the components of all constraints' functions.
 
-	init_f_ctrs(fac.f_ctrs);
+	init_f_ctrs(fac.f_ctrs, fac.simpl_level);
 }
 
 } // end namespace

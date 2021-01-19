@@ -17,8 +17,8 @@ using namespace std;
 
 namespace ibex {
 
-Map<long,false>& BxpSystemCache::ids() {
-	static Map<long,false> _ids;
+Map<long,long,false>& BxpSystemCache::ids() {
+	static Map<long,long,false> _ids;
 	return _ids;
 }
 
@@ -57,7 +57,7 @@ BxpSystemCache* BxpSystemCache::copy(const IntervalVector& box, const BoxPropert
 long BxpSystemCache::get_id(const System& sys) {
 	try {
 		return ids()[sys.id];
-	} catch(Map<long,false>::NotFound&) {
+	} catch(Map<long,long,false>::NotFound&) {
 		long new_id=next_id();
 		ids().insert_new(sys.id, new_id);
 		return new_id;

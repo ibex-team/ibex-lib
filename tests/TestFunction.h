@@ -91,6 +91,8 @@ public:
 	CPPUNIT_TEST(minibex01);
 	CPPUNIT_TEST(minibex02);
 	CPPUNIT_TEST(minibex03);
+	CPPUNIT_TEST(def_domain01);
+	CPPUNIT_TEST(def_domain02);
 	CPPUNIT_TEST_SUITE_END();
 
 	void parser_symbol_01();
@@ -151,6 +153,9 @@ public:
 	void minibex01();
 	void minibex02();
 	void minibex03();
+
+	void def_domain01();
+	void def_domain02();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestFunction);

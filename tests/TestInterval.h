@@ -174,7 +174,7 @@ public:
 	CPPUNIT_TEST(diff15);
 	CPPUNIT_TEST(diff16);
 	CPPUNIT_TEST(diff17);
-
+	CPPUNIT_TEST(issue_463);
 	CPPUNIT_TEST_SUITE_END();
 private:
 
@@ -406,6 +406,8 @@ private:
 	void check_eq(const Interval& x, const Interval& y, bool);
 	void check_hull(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_inter(const Interval& x, const Interval& z, const Interval& y_expected);
+
+	void issue_463();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestInterval);

@@ -25,6 +25,8 @@ public:
 
 	SystemMerge(const System& sys1, const System& sys2) {
 
+		set_simplification_level(0); // constraints do not need to be simplified again
+
 		SymbolMap<const ExprSymbol*> map;
 
 		/* the set of symbols of the resulting system,

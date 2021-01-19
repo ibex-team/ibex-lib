@@ -92,7 +92,8 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 
 	LOCK;
 	try {
-		parser::pstruct = new parser::P_StructSystem(*sys);
+		// TODO: should we allow different simplification level?
+		parser::pstruct = new parser::P_StructSystem(*sys, ExprNode::default_simpl_level);
 		ibexparse_string(syntax);
 		delete parser::pstruct;
 		parser::pstruct = NULL;

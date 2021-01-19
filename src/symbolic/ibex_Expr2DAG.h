@@ -24,7 +24,7 @@ namespace ibex {
  * The expression can be a tree or, partially, a DAG.
  *
  */
-class Expr2DAG : public virtual ExprVisitor {
+class Expr2DAG : public virtual ExprVisitor<void> {
 public:
 	/**
 	 * \brief Transform y to a DAG

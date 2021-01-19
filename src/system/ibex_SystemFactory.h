@@ -93,6 +93,15 @@ public:
 	 */
 	void add_ctr_eq (const ExprNode& exp);
 
+	/*
+	 * How expressions are symbolically simplified:
+	 *    0 - no simplification at all (fast)
+	 *    1 - basic simplifications (fairly fast)
+	 *    2 - more advanced simplifications without developing (can be slow)
+	 *    3 - simplifications with full polynomial developing (can blow up)
+	 */
+	void set_simplification_level(int level);
+
 protected:
 	friend class System;
 
@@ -100,6 +109,9 @@ protected:
 	int nb_arg;
 	// total number of variables
 	int nb_var;
+
+	// simplification level
+	int simpl_level;
 
 	// Domains of arguments
 	std::vector<IntervalVector> boxes;
@@ -130,6 +142,10 @@ inline void SystemFactory::add_ctr_eq (const ExprNode& exp) {
 	return add_ctr(ExprCtr(exp,EQ));
 }
 
+inline void SystemFactory::set_simplification_level(int level) {
+	assert(level>=0 && level<=3);
+	simpl_level = level;
+}
 
 } // end namespace ibex
 #endif // __IBEX_SYSTEM_FACTORY_H__

@@ -14,6 +14,7 @@
 #include "ibex_Function.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_Expr.h"
+#include "ibex_System.h"
 #include "ibex_SyntaxError.h"
 #include <sstream>
 #include <cstdio>
@@ -559,6 +560,19 @@ void TestFunction::issue43_bis() {
 	Variable x,y;
 	Function f(x,y,x);
 	Function g(x,y,f(x,y));
+}
+
+void TestFunction::def_domain01() {
+	Function f("x","y","ln(x)+sqrt(x+y)");
+	const System& sys=f.def_domain();
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"(x;(x+y))"));
+}
+
+void TestFunction::def_domain02() {
+	Function f("x","y","acos(x*sqrt(y))+y");
+	const System& sys=f.def_domain();
+	CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"(y;((x*sqrt(y))--1);((x*sqrt(y))-1))")); // simpl = 1
+	//CPPUNIT_ASSERT(sameExpr(sys.f_ctrs.expr(),"(y;(1+(x*sqrt(y)));(-1+(x*sqrt(y))))")); // simpl = 2
 }
 
 } // end namespace

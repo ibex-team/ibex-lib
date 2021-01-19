@@ -1,9 +1,18 @@
 #ifndef _IBEX_LPLIBWRAPPER_H_
 #define _IBEX_LPLIBWRAPPER_H_
 
-#include "coin/ClpSimplex.hpp"
 
-#define IBEX_LPSOLVER_WRAPPER_ATTRIBUTES ClpSimplex *myclp;\
-                                         int * _col1Index
+#ifdef DEBUG
+	#undef DEBUG
+	#ifndef DEBUGGING
+		#define DEBUGGING
+	#endif
+	#include "ClpSimplex.hpp"
+	#define DEBUG
+#else
+    #include "ClpSimplex.hpp"
+#endif
+
+#define IBEX_LPSOLVER_WRAPPER_ATTRIBUTES ClpSimplex *myclp
 
 #endif /* _IBEX_LPLIBWRAPPER_H_ */

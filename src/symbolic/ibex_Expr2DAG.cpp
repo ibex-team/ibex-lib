@@ -102,13 +102,13 @@ void Expr2DAG::visit_unary(const T& e) {
 	peer[e]=&T::new_(*peer[e.expr]);
 }
 
-void Expr2DAG::visit(const ExprNode& e) { e.acceptVisitor(*this); }
+void Expr2DAG::visit(const ExprNode& e) { e.accept_visitor(*this); }
 void Expr2DAG::visit(const ExprIndex& i) { /* TODO: nothing here?? */ }
 
-void Expr2DAG::visit(const ExprNAryOp& e)   { e.acceptVisitor(*this); } // (useless so far)
-void Expr2DAG::visit(const ExprLeaf& e)     { e.acceptVisitor(*this); } // (useless so far)
-void Expr2DAG::visit(const ExprBinaryOp& e) { e.acceptVisitor(*this); } // (useless so far)
-void Expr2DAG::visit(const ExprUnaryOp& e)  { e.acceptVisitor(*this); } // (useless so far)
+void Expr2DAG::visit(const ExprNAryOp& e)   { e.accept_visitor(*this); } // (useless so far)
+void Expr2DAG::visit(const ExprLeaf& e)     { e.accept_visitor(*this); } // (useless so far)
+void Expr2DAG::visit(const ExprBinaryOp& e) { e.accept_visitor(*this); } // (useless so far)
+void Expr2DAG::visit(const ExprUnaryOp& e)  { e.accept_visitor(*this); } // (useless so far)
 void Expr2DAG::visit(const ExprSymbol& x)   { assert(false); }
 void Expr2DAG::visit(const ExprConstant& c) { assert(false); }
 

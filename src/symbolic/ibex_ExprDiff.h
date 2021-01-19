@@ -41,7 +41,7 @@ std::ostream& operator<< (std::ostream& os, const ExprDiffException& e);
  * \brief Differentiate an expression.
  *
  */
-class ExprDiff : public virtual ExprVisitor {
+class ExprDiff : public virtual ExprVisitor<void> {
 
 public:
 

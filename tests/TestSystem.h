@@ -34,11 +34,10 @@ public:
 	CPPUNIT_TEST(copy02);
 	CPPUNIT_TEST(ineq_only01);
 	CPPUNIT_TEST(eq_only01);
-	//		CPPUNIT_TEST(normalize01);
-	//		CPPUNIT_TEST(normalize02);
+	CPPUNIT_TEST(normalize01);
+	CPPUNIT_TEST(normalize02);
 	CPPUNIT_TEST(extend01);
 	CPPUNIT_TEST(extend02);
-	//		CPPUNIT_TEST(extend02);
 	CPPUNIT_TEST(merge01);
 	CPPUNIT_TEST(merge02);
 	CPPUNIT_TEST(merge03);

@@ -13,6 +13,7 @@
 #define __IBEX_MATRIX_H__
 
 #include "ibex_Vector.h"
+#include "ibex_BitSet.h"
 #include <iostream>
 #include <initializer_list>
 
@@ -112,6 +113,11 @@ public:
 	 * Use (*this)[i][j] to get a reference to the element M(i,j).
 	 */
 	const Vector& operator[](int i) const;
+
+	/**
+	 * \brief Return some specific rows
+	 */
+	Matrix operator[](const BitSet& rows) const;
 
 	/**
 	 * \brief Return a submatrix.

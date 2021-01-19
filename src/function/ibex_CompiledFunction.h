@@ -32,7 +32,7 @@ class ExprData;
  * \brief A low-level representation of a function for speeding up forward/backward algorithms.
  *
  */
-class CompiledFunction : public ExprVisitor {
+class CompiledFunction : public ExprVisitor<void> {
 public:
 
 	CompiledFunction();

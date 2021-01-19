@@ -11,7 +11,7 @@
 #ifndef __IBEX_PARSER_EXPR_VISITOR_H__
 #define __IBEX_PARSER_EXPR_VISITOR_H__
 
-#include "ibex_ExprVisitor.h"
+#include "ibex_Exception.h"
 
 namespace ibex {
 
@@ -32,7 +32,7 @@ class P_ExprApply;
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
 #endif
 
-class P_ExprVisitor : public virtual ExprVisitor {
+class P_ExprVisitor {
 public:
 
 	virtual ~P_ExprVisitor() {

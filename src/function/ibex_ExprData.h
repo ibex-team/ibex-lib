@@ -20,7 +20,7 @@ class ExprData;
  *
  */
 template<class T>
-class ExprDataFactory : public ExprVisitor {
+class ExprDataFactory : public ExprVisitor<void> {
 public:
 	// The object to build
 	ExprData<T>* data;
@@ -432,7 +432,7 @@ void ExprDataFactory<T>::build(ExprData<T>& data) const {
 
 	int n=data.f.nodes.size();
 	for (int ptr=n-1; ptr>=0; ptr--) {
-		data.f.nodes[ptr].acceptVisitor((ExprDataFactory<T>&) *this);
+		data.f.nodes[ptr].accept_visitor((ExprDataFactory<T>&) *this);
 	}
 
 	for (int i=0; i<data.f.nb_arg(); i++) {

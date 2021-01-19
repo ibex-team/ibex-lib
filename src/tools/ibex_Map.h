@@ -16,18 +16,18 @@
 #include <ciso646> // just to initialize _LIBCPP_VERSION
 #ifdef _LIBCPP_VERSION
 #include <unordered_map>
-#define __ibex_map__(T) std::unordered_map<long, T>
+#define __ibex_map__(K,T) std::unordered_map<K, T>
 #else
 #include <tr1/unordered_map>
-#define __ibex_map__(T) std::tr1::unordered_map<long, T>
+#define __ibex_map__(K,T) std::tr1::unordered_map<K, T>
 #endif
 #else
 #if (_MSC_VER >= 1600)
 #include <unordered_map>
-#define __ibex_map__(T) std::unordered_map<long, T>
+#define __ibex_map__(K,T) std::unordered_map<K, T>
 #else
 #include <unordered_map>
-#define __ibex_map__(T) std::tr1::unordered_map<long, T>
+#define __ibex_map__(K,T) std::tr1::unordered_map<K, T>
 #endif // (_MSC_VER >= 1600)
 #endif
 
@@ -43,11 +43,11 @@ namespace ibex {
  *
  * \brief Map a number to something, either by reference or copy.
  *
- * Generic map structure where the key is a number (long)
+ * Generic map structure where the key is a number (of type K)
  * and the value a reference/copy to an object of class T.
  *
  */
-template<class T, bool REF=true>
+template<typename K, class T, bool REF=true>
 class Map {
 public:
 	// T& -> by reference or T -> by copy
@@ -57,20 +57,20 @@ public:
 	/**
 	 * \brief Iterator
 	 *
-	 * If REF==true, the iterator points to a pair <long,T*>
-	 * If REF==false, the iterator points to a pair <long,T>
+	 * If REF==true, the iterator points to a pair <K,T*>
+	 * If REF==false, the iterator points to a pair <K,T>
 	 */
-	typedef typename __ibex_map__(StorageType)::iterator iterator;
+	typedef typename __ibex_map__(K,StorageType)::iterator iterator;
 
 	/**
 	 * \brief Const iterator.
 	 *
-	 * If REF==true, the iterator points to a pair <long,T*>
-	 * If REF==false, the iterator points to a pair <long,T>
+	 * If REF==true, the iterator points to a pair <K,T*>
+	 * If REF==false, the iterator points to a pair <K,T>
 	 */
-	typedef typename __ibex_map__(StorageType)::const_iterator const_iterator;
+	typedef typename __ibex_map__(K,StorageType)::const_iterator const_iterator;
 
-	__ibex_map__(StorageType) map;
+	__ibex_map__(K,StorageType) map;
 
 	/**
 	 * \brief Thrown when the identifier does not exist.
@@ -80,7 +80,7 @@ public:
 	/**
 	 * \brief True if id is in the map
 	 */
-	bool found(long id) const {
+	bool found(K id) const {
 		return map.find(id)!=map.end();
 	}
 
@@ -90,7 +90,7 @@ public:
 	 * If REF==true, p is passed by reference (T&).
 	 * If REF==false, p is passed by copy (T).
 	 */
-	void insert_new(long id, RefOrCopy p) {
+	void insert_new(K id, RefOrCopy p) {
 		assert(!found(id));
 
 		map.insert(std::make_pair(id,
@@ -102,7 +102,7 @@ public:
 	 *
 	 * \throw - A NotFound exception if no element with \id exists.
 	 */
-	const T& operator[](long id) const {
+	const T& operator[](K id) const {
 		const_iterator it = map.find (id);
 		if (it == map.end()) throw NotFound();
 		return deref_or_ref(it->second, typename std::conditional<REF,std::true_type,std::false_type>::type());
@@ -113,7 +113,7 @@ public:
 	 *
 	 * \throw - A NotFound exception if no element with \id exists.
 	 */
-	T& operator[](long id) {
+	T& operator[](K id) {
 		return (RefOrCopy&) ((const Map*) this)->operator[](id);
 	}
 

@@ -1,0 +1,18 @@
+In file included from ../plugins/affine/src/function/ibex_AffineEval.h:17:0,
+                 from ../plugins/affine/src/function/ibex_AffineEval.cpp:12:
+../plugins/affine/src/arithmetic/ibex_AffineDomain.h:37:121: error: invalid use of incomplete type ‘class ibex::TemplateDomain<ibex::AffineMain<T> >’
+ Array< TemplateDomain< AffineMain<T> > > TemplateDomain< AffineMain<T> >::convert_to_affinedomain(const Array<Domain>& d) {
+                                                                                                                         ^
+In file included from ../src/arithmetic/ibex_Domain.h:16:0,
+                 from ../src/symbolic/ibex_Expr.h:25,
+                 from ../src/function/ibex_Function.h:15,
+                 from ../plugins/affine/src/function/ibex_AffineEval.h:14,
+                 from ../plugins/affine/src/function/ibex_AffineEval.cpp:12:
+../src/arithmetic/ibex_TemplateDomain.h:34:7: error: declaration of ‘class ibex::TemplateDomain<ibex::AffineMain<T> >’
+ class TemplateDomain  {
+       ^
+
+Build failed
+ -> task in 'ibex' failed (exit status 1): 
+	{task 140534112642544: cxx ibex_AffineEval.cpp -> ibex_AffineEval.cpp.3.o}
+['/usr/bin/g++', '-O0', '-g', '-pg', '-Wall', '-Wno-unknown-pragmas', '-Wno-unused-variable', '-Wno-unused-function', '-fmessage-length=0', '-frounding-math', '-ffloat-store', '-msse3', '-I.', '-I../src/arithmetic', '-Isrc/arithmetic', '-I../src/bisector', '-Isrc/bisector', '-I../src/combinatorial', '-Isrc/combinatorial', '-I../src/contractor', '-Isrc/contractor', '-I../src/function', '-Isrc/function', '-I../src/numeric', '-Isrc/numeric', '-I../src/parser', '-Isrc/parser', '-I../src/predicate', '-Isrc/predicate', '-I../src/set', '-Isrc/set', '-I../src/strategy', '-Isrc/strategy', '-I../src/symbolic', '-Isrc/symbolic', '-I../src/system', '-Isrc/system', '-I../src/tools', '-Isrc/tools', '-I../../../../../../../Logiciel/filib/include', '-I../plugins/affine/src/arithmetic', '-I../plugins/affine/src/function', '-DDEBUG=1', '-DHAVE_INTERVAL_INTERVAL_HPP=1', '-DHAVE_CPPUNIT=1', '-DHAVE_FMEMOPEN=1', '../plugins/affine/src/function/ibex_AffineEval.cpp', '-c', '-o/home/jninin/Documents/WORK/DEV/IBEX/GIT3/ibex-lib/__build__/plugins/affine/src/function/ibex_AffineEval.cpp.3.o']

@@ -177,7 +177,7 @@ P_Scope::P_Scope(const P_Scope& scope) {
 	push();
 	// we know that constants are necessarily in the bottom scope
 	for (IBEXMAP(S_Object*)::const_iterator it=scope.tab.back().begin(); it!=scope.tab.back().end(); ++it) {
-		if (it->second->token()==TK_CONSTANT || it->second->token()==TK_FUNCTION) {
+		if (it->second->token()==TK_CONSTANT || it->second->token()==TK_FUNC_SYMBOL) {
 			tab.front().insert_new(it->first, it->second->copy());
 		}
 	}

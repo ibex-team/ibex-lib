@@ -71,27 +71,29 @@ Ctc* DefaultSolver::ctc (const System& sys, double prec) {
 
 	if (sys.nb_ctr==0) return new CtcIdentity(sys.nb_var);
 
-	Array<Ctc> ctc_list(4);
+	Array<Ctc> ctc_list(4); // 4 is the maximum of sub contractors
+
+	int index=0;
 
 	// first contractor : non incremental hc4
-	ctc_list.set_ref(0, rec(new CtcHC4 (sys.ctrs,0.01)));
+	ctc_list.set_ref(index++, rec(new CtcHC4 (sys.ctrs,0.01)));
 	// second contractor : acid (hc4)
-	ctc_list.set_ref(1, rec(new CtcAcid (sys, rec(new CtcHC4 (sys.ctrs,0.1,true)))));
-	int index=2;
+	ctc_list.set_ref(index++, rec(new CtcAcid (sys, rec(new CtcHC4 (sys.ctrs,0.1,true)))));
+
 	// if the system is a square system of equations, the third contractor is Newton
 	System* eqs=get_square_eq_sys(*this, sys);
 	if (eqs) {
-		ctc_list.set_ref(index,rec(new CtcNewton(eqs->f_ctrs,5e8,prec,1.e-4)));
-		index++;
+		ctc_list.set_ref(index++,rec(new CtcNewton(eqs->f_ctrs,5e8,prec,1.e-4)));
 	}
 
 	//System& norm_sys=rec(new NormalizedSystem(sys));
-
-	ctc_list.set_ref(index,rec(new CtcFixPoint(rec(new CtcCompo(
-			rec(new CtcPolytopeHull(rec(new LinearizerXTaylor(sys)))),
-			rec(new CtcHC4 (sys.ctrs,0.01)))))));
-
-	ctc_list.resize(index+1); // in case the system is not square.
+	if (strcmp(_IBEX_LP_LIB_,"NONE")!=0)
+		ctc_list.set_ref(index++,rec(new CtcFixPoint(rec(new CtcCompo(
+				rec(new CtcPolytopeHull(rec(new LinearizerXTaylor(sys)))),
+				rec(new CtcHC4 (sys.ctrs,0.01)))))));
+	// in case the system is not square, or if no LP solver is
+	// available, there may be only 2 or 3 sub-contractors.
+	ctc_list.resize(index);
 
 	return new CtcCompo (ctc_list);
 }

@@ -16,6 +16,8 @@
 #include "ibex_Domain.h"
 #include "ibex_NodeMap.h"
 
+#include <functional>
+
 namespace ibex {
 
 
@@ -45,7 +47,7 @@ const ExprNode& var_component(const Array<const ExprSymbol>& args, int i);
 /**
  * \brief Duplicate an expression
  */
-class ExprCopy : public virtual ExprVisitor {
+class ExprCopy : public virtual ExprVisitor<const ExprNode*> {
 
 public:
 	/*
@@ -77,49 +79,49 @@ public:
 	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool shared=false);
 
 protected:
-	void visit(const ExprNode& e);
-	void visit(const ExprIndex& i);
-	void visit(const ExprSymbol& x);
-	void visit(const ExprConstant& c);
-	void visit(const ExprVector& e);
-	void visit(const ExprApply& e);
-	void visit(const ExprChi& e);
-	void visit(const ExprGenericBinaryOp& e);
-	void visit(const ExprAdd& e);
-	void visit(const ExprMul& e);
-	void visit(const ExprSub& e);
-	void visit(const ExprDiv& e);
-	void visit(const ExprMax& e);
-	void visit(const ExprMin& e);
-	void visit(const ExprAtan2& e);
-	void visit(const ExprGenericUnaryOp& e);
-	void visit(const ExprMinus& e);
-	void visit(const ExprTrans& e);
-	void visit(const ExprSign& e);
-	void visit(const ExprAbs& e);
-	void visit(const ExprPower& e);
-	void visit(const ExprSqr& e);
-	void visit(const ExprSqrt& e);
-	void visit(const ExprExp& e);
-	void visit(const ExprLog& e);
-	void visit(const ExprCos& e);
-	void visit(const ExprSin& e);
-	void visit(const ExprTan& e);
-	void visit(const ExprCosh& e);
-	void visit(const ExprSinh& e);
-	void visit(const ExprTanh& e);
-	void visit(const ExprAcos& e);
-	void visit(const ExprAsin& e);
-	void visit(const ExprAtan& e);
-	void visit(const ExprAcosh& e);
-	void visit(const ExprAsinh& e);
-	void visit(const ExprAtanh& e);
-	void visit(const ExprFloor& e);
-	void visit(const ExprCeil& e);
-	void visit(const ExprSaw& e);
+	const ExprNode* nary(const ExprNAryOp& e, std::function<const ExprNAryOp&(const Array<const ExprNode>&)> f);
 
-public:
-	NodeMap<const ExprNode*> clone;
+	const ExprNode* visit(const ExprNode& e);
+	const ExprNode* visit(const ExprIndex& i);
+	const ExprNode* visit(const ExprSymbol& x);
+	const ExprNode* visit(const ExprConstant& c);
+	const ExprNode* visit(const ExprVector& e);
+	const ExprNode* visit(const ExprApply& e);
+	const ExprNode* visit(const ExprChi& e);
+	const ExprNode* visit(const ExprGenericBinaryOp& e);
+	const ExprNode* visit(const ExprAdd& e);
+	const ExprNode* visit(const ExprMul& e);
+	const ExprNode* visit(const ExprSub& e);
+	const ExprNode* visit(const ExprDiv& e);
+	const ExprNode* visit(const ExprMax& e);
+	const ExprNode* visit(const ExprMin& e);
+	const ExprNode* visit(const ExprAtan2& e);
+	const ExprNode* visit(const ExprGenericUnaryOp& e);
+	const ExprNode* visit(const ExprMinus& e);
+	const ExprNode* visit(const ExprTrans& e);
+	const ExprNode* visit(const ExprSign& e);
+	const ExprNode* visit(const ExprAbs& e);
+	const ExprNode* visit(const ExprPower& e);
+	const ExprNode* visit(const ExprSqr& e);
+	const ExprNode* visit(const ExprSqrt& e);
+	const ExprNode* visit(const ExprExp& e);
+	const ExprNode* visit(const ExprLog& e);
+	const ExprNode* visit(const ExprCos& e);
+	const ExprNode* visit(const ExprSin& e);
+	const ExprNode* visit(const ExprTan& e);
+	const ExprNode* visit(const ExprCosh& e);
+	const ExprNode* visit(const ExprSinh& e);
+	const ExprNode* visit(const ExprTanh& e);
+	const ExprNode* visit(const ExprAcos& e);
+	const ExprNode* visit(const ExprAsin& e);
+	const ExprNode* visit(const ExprAtan& e);
+	const ExprNode* visit(const ExprAcosh& e);
+	const ExprNode* visit(const ExprAsinh& e);
+	const ExprNode* visit(const ExprAtanh& e);
+	const ExprNode* visit(const ExprFloor& e);
+	const ExprNode* visit(const ExprCeil& e);
+	const ExprNode* visit(const ExprSaw& e);
+
 };
 
 

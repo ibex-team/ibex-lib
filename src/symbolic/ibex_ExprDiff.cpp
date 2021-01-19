@@ -12,7 +12,7 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_Expr.h"
-#include "ibex_ExprSimplify.h"
+#include "ibex_ExprSimplify2.h"
 
 using namespace std;
 
@@ -69,7 +69,7 @@ const ExprNode& ExprDiff::diff(const ExprNode& y, const Array<const ExprSymbol>&
 		throw ExprDiffException("differentiation of matrix-valued functions");
 	}
 
-	ExprSimplify s;
+	ExprSimplify2 s;
 	s.lock.insert(lock); // only meaningful with the default (non-copy variant of) constructor.
 	return s.simplify(*res);
 }
@@ -229,7 +229,7 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 }
 
 void ExprDiff::visit(const ExprNode& e) {
-	e.acceptVisitor(*this);
+	e.accept_visitor(*this);
 }
 
 void ExprDiff::visit(const ExprIndex& i) {

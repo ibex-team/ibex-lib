@@ -13,10 +13,6 @@
 
 #include "ibex_IntervalVector.h"
 
-// ignored warning : comparison between signed and unsigned integer expressions in this file
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
-
 #include "ibex_Array.h"
 #include "ibex_IntStack.h"
 
@@ -35,6 +31,4 @@ IntervalVector qinter(const Array<IntervalVector>& boxes, int q);
 } // end namespace ibex
 
 
-// Restore warning : comparison between signed and unsigned integer expressions in this file
-#pragma GCC diagnostic pop
 #endif // __IBEX_Q_INTER_H__

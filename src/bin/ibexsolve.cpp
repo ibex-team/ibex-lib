@@ -12,7 +12,7 @@
 //============================================================================
 
 #include "ibex.h"
-#include "ibexsolve.h"
+#include "parse_args.h"
 
 #include <sstream>
 
@@ -35,6 +35,12 @@ int main(int argc, char** argv) {
 	args::ValueFlag<double> eps_x_min(parser, "float", _eps_x_min.str(), {'e', "eps-min"});
 	args::ValueFlag<double> eps_x_max(parser, "float", _eps_x_max.str(), {'E', "eps-max"});
 	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo (none).", {'t', "timeout"});
+	args::ValueFlag<int>    simpl_level(parser, "int", "Expression simplification level. Possible values are:\n"
+			"\t\t* 0:\tno simplification at all (fast).\n"
+			"\t\t* 1:\tbasic simplifications (fairly fast). E.g. x+1+1 --> x+2\n"
+			"\t\t* 2:\tmore advanced simplifications without developing (can be slow). E.g. x*x + x^2 --> 2x^2\n"
+			"\t\t* 3:\tsimplifications with full polynomial developing (can blow up!). E.g. x*(x-1) + x --> x^2\n"
+			"Default value is : 1.", {"simpl"});
 	args::ValueFlag<string> input_file(parser, "filename", "COV input file. The file contains a "
 			"(intermediate) description of the manifold with boxes in the COV (binary) format.", {'i',"input"});
 	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
@@ -42,6 +48,7 @@ int main(int argc, char** argv) {
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexSolve", {"format"});
 	args::Flag bfs(parser, "bfs", "Perform breadth-first search (instead of depth-first search, by default)", {"bfs"});
 	args::Flag trace(parser, "trace", "Activate trace. \"Solutions\" (output boxes) are displayed as and when they are found.", {"trace"});
+	args::Flag stop_at_first(parser, "stop-a-first", "Stop at first solution/boundary/unknown box found.", {"stop-at-first"});
 	args::ValueFlag<string> boundary_test_arg(parser, "true|full-rank|half-ball|false", "Boundary test strength. Possible values are:\n"
 			"\t\t* true:\talways satisfied. Set by default for under constrained problems (0<m<n).\n"
 			"\t\t* full-rank:\tthe gradients of all constraints (equalities and potentially activated inequalities) must be linearly independent.\n"
@@ -93,13 +100,6 @@ int main(int argc, char** argv) {
 
 	try {
 
-		// Load a system of equations
-		System sys(filename.Get().c_str());
-
-		string output_manifold_file; // manifold output file
-		bool overwitten=false;       // is it overwritten?
-		string manifold_copy;
-
 		if (!quiet) {
 			cout << endl << "***************************** setup *****************************" << endl;
 			cout << "  file loaded:\t\t" << filename.Get() << endl;
@@ -107,13 +107,26 @@ int main(int argc, char** argv) {
 			if (eps_x_min)
 				cout << "  eps-x:\t\t" << eps_x_min.Get() << "\t(precision on variables domain)" << endl;
 
+			if (simpl_level)
+				cout << "  symbolic simpl level:\t" << simpl_level.Get() << "\t" << endl;
+
 			// Fix the random seed for reproducibility.
 			if (random_seed)
-				cout << "  random seed:\t\t" << random_seed.Get() << endl;
+				cout << "  random-seed:\t\t" << random_seed.Get() << endl;
 
 			if (bfs)
 				cout << "  bfs:\t\t\tON" << endl;
+
+			if (stop_at_first)
+				cout << "  stop at first box found" << endl;
 		}
+
+		// Load a system of equations
+		System sys(filename.Get().c_str(), simpl_level? simpl_level.Get() : ExprNode::default_simpl_level);
+
+		string output_manifold_file; // manifold output file
+		bool overwitten=false;       // is it overwritten?
+		string manifold_copy;
 
 		if (output_file) {
 			output_manifold_file = output_file.Get();
@@ -176,6 +189,8 @@ int main(int argc, char** argv) {
 		}
 
 		if (forced_params) {
+			if (!quiet)
+				cout << "  forced params:\t";
 			SymbolMap<const ExprSymbol*> symbols;
 			for (int i=0; i<sys.args.size(); i++)
 				symbols.insert_new(sys.args[i].name, &sys.args[i]);
@@ -192,7 +207,10 @@ int main(int argc, char** argv) {
  				} else {
  					params.push_back(&parse_indexed_symbol(symbols,vars));
  				}
+				if (!quiet) cout << *params.back() << ' ';
 			} while (j!=-1);
+
+			if (!quiet) cout << endl;
 
 			if (!params.empty()) {
 				s.set_params(VarSet(sys.f_ctrs,params,false)); //Array<const ExprNode>(params)));
@@ -220,14 +238,19 @@ int main(int argc, char** argv) {
 			cout << "*****************************************************************" << endl << endl;
 		}
 
+		if (strcmp(_IBEX_LP_LIB_,"NONE")==0) {
+			ibex_warning("No LP solver available, which may impact performances \n\t\t(try cmake with -DLP_LIB=...)");
+			cout << endl;
+		}
+
 		if (!quiet)
 			cout << "running............" << endl << endl;
 
 		// Get the solutions
 		if (input_file)
-			s.solve(input_file.Get().c_str());
+			s.solve(input_file.Get().c_str(), stop_at_first.Get());
 		else
-			s.solve(sys.box);
+			s.solve(sys.box, stop_at_first.Get());
 
 		if (trace) cout << endl;
 

@@ -7,12 +7,15 @@ from waflib import Scripting, Logs, Options, Utils
 import ibexutils
 
 # The following variable is used to build ibex.pc and by "waf dist"
-VERSION="2.8.7"
+VERSION="2.8.9"
 # The following variable is used only by "waf dist"
 APPNAME='ibex-lib'
 
 top = '.'
 out = '__build__'
+
+plugins = {}
+plugins_dependencies = {}
 
 ######################
 ###### options #######
@@ -39,8 +42,16 @@ def options (opt):
 	opt.recurse ("interval_lib_wrapper")
 	opt.recurse ("lp_lib_wrapper")
 
+	opt.plugins = {}
+	opt.plugins_dependencies = {}
+	
 	# recurse on plugins directory
 	opt.recurse("plugins")
+	
+	# added by gch
+	plugins.update(opt.plugins)
+	plugins_dependencies.update(opt.plugins_dependencies)
+	
 
 ######################
 ##### configure ######
@@ -49,6 +60,16 @@ def configure (conf):
 	conf.load ('compiler_cxx compiler_c bison flex')
 
 	conf.prepare_env(conf.env)
+
+	# added by gch
+	for plugin in plugins_dependencies.keys():
+		if getattr(conf.options, plugin) == True:
+			for dependency in plugins_dependencies[plugin]:
+				if not dependency in plugins.keys():
+					conf.fatal (dependency+" required but plugin not found")
+				else:
+					Logs.info("Enabling dependency "+dependency);
+					setattr(conf.options, plugins[dependency], True)
 
 	# For information
 	conf.msg ("sys.platform", sys.platform)
@@ -195,8 +216,8 @@ def build (bld):
 def dist (ctx):
 	files_patterns = "wscript benchs/** src/** examples/** waf"
 	files_patterns += " COPYING.LESSER LICENSE ibexutils.py"
-	files_patterns += " plugins/wscript plugins/interval_lib_gaol/"
-	files_patterns += " plugins/lp_lib_none/"
+	files_patterns += " interval_lib_wrapper/wscript interval_lib_wrapper/gaol"
+	files_patterns += " lp_lib_wrapper/wscript lp_lib_wrapper/none"
 	ctx.files = ctx.path.ant_glob(files_patterns)
 
 ######################

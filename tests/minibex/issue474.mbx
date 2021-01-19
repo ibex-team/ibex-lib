@@ -1,0 +1,16 @@
+constants
+delta = 10.0;
+
+variables
+x in [-delta,delta];
+y in [-delta,delta];
+
+function f1(x,y)
+return x^2+y^2
+end
+
+function f2(x,y)
+return (x-y)*f1(x,y)
+end
+
+minimize f2(x,y);

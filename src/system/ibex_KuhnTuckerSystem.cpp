@@ -310,7 +310,7 @@ public:
 			else
 				bk = & ((*bmult)[k]*(xj-sys.box[j].ub()));
 
-			bk=&bk->simplify();
+			bk=&bk->simplify(simpl_level);
 
 			add_ctr(ExprCtr(*bk,EQ));
 

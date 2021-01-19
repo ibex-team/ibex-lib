@@ -1,0 +1,93 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+C_UPPER_SRCS := 
+CXX_SRCS := 
+CPP__SRCS := 
+C++_SRCS := 
+OBJ_SRCS := 
+CC_SRCS := 
+ASM_SRCS := 
+CPP_SRCS := 
+C_SRCS := 
+O_SRCS := 
+S_UPPER_SRCS := 
+CC_DEPS := 
+C++_DEPS := 
+EXECUTABLES := 
+CPP__DEPS := 
+C_UPPER_DEPS := 
+CXX_DEPS := 
+OBJS := 
+CPP_DEPS := 
+C_DEPS := 
+
+# Every subdirectory with source files must be described here
+SUBDIRS := \
+examples \
+examples/slam \
+interval_lib_wrapper/bias \
+interval_lib_wrapper/direct \
+interval_lib_wrapper/filib \
+interval_lib_wrapper/gaol \
+lp_lib_wrapper/cplex \
+lp_lib_wrapper/none \
+lp_lib_wrapper/soplex \
+plugins/affine/examples \
+plugins/affine/src/arithmetic \
+plugins/affine/src/function \
+plugins/affine/src/numeric \
+plugins/affine/tests \
+plugins/affine-extended/examples \
+plugins/affine-extended/src/arithmetic \
+plugins/ampl/examples \
+plugins/ampl/src/system \
+plugins/ampl/tests \
+plugins/continuation/examples \
+plugins/continuation/src \
+plugins/continuation/tests \
+plugins/ensta-robotics/src \
+plugins/ensta-robotics/tests \
+plugins/ode/main \
+plugins/ode/src \
+plugins/optim \
+plugins/optim/main \
+plugins/optim/src/bisector \
+plugins/optim/src/contractor \
+plugins/optim/src/data \
+plugins/optim/src/loup \
+plugins/optim/src/strategy \
+plugins/optim/tests \
+plugins/param-estim/examples \
+plugins/param-estim/src/cliquer \
+plugins/param-estim/src \
+plugins/param-estim/tests \
+plugins/sip/main \
+plugins/sip/src \
+plugins/sip/src/marendet/contractors \
+plugins/sip/src/marendet/loup \
+plugins/sip/src/marendet/numeric \
+plugins/sip/src/marendet/strategy \
+plugins/sip/src/marendet/system \
+plugins/sip/src/marendet/tools \
+plugins/sip/src/mitsos \
+src/arithmetic \
+src/bin \
+src/bisector \
+src/combinatorial \
+src/contractor \
+src/data \
+src/function \
+src/numeric \
+src/operators \
+src/parser \
+src/predicate \
+src/set \
+src/solver \
+src/strategy \
+src/symbolic \
+src/system \
+src/tools \
+tests \
+

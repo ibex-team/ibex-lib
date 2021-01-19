@@ -31,8 +31,8 @@ int get_original_nb_var(const System& sys) {
 
 }
 
-Map<long,false>& BxpLinearRelaxArgMin::ids() {
-	static Map<long,false> _ids;
+Map<long,long,false>& BxpLinearRelaxArgMin::ids() {
+	static Map<long,long,false> _ids;
 	return _ids;
 }
 
@@ -75,7 +75,7 @@ long BxpLinearRelaxArgMin::get_id(const System& sys) {
 	long sys_id = norm_sys? norm_sys->original_sys_id : sys.id;
 	try {
 		return ids()[sys_id];
-	} catch(Map<long,false>::NotFound&) {
+	} catch(Map<long,long,false>::NotFound&) {
 		long new_id=next_id();
 		ids().insert_new(sys_id, new_id);
 		return new_id;

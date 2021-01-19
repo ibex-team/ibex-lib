@@ -78,7 +78,7 @@ public:
 protected:
 	void _update(const BoxProperties& prop);
 	BitSet ineq;   // constraints that are inequalities
-	static Map<long,false>& ids();
+	static Map<long,long,false>& ids();
 };
 
 /*================================== inline implementations ========================================*/
