@@ -460,15 +460,30 @@ inline TemplateDomain<D>::TemplateDomain(typename D::SCALAR& itv) : dim(), is_re
 }
 
 template<class D>
+inline TemplateDomain<D>::TemplateDomain(const typename D::SCALAR& itv) : TemplateDomain<D>((typename D::SCALAR&) itv) {
+	// void* loses "const" ; we don't record constness
+}
+
+template<class D>
 inline TemplateDomain<D>::TemplateDomain(typename D::VECTOR& v1, bool in_row) : dim(in_row? Dim::row_vec(v1.size()) : Dim::col_vec(v1.size())), is_reference(true) {
 	assert(v1.size()>1);
 	domain = &v1;
 }
 
 template<class D>
+inline TemplateDomain<D>::TemplateDomain(const typename D::VECTOR& v1, bool in_row) : TemplateDomain<D>((typename D::VECTOR&) v1, in_row) {
+	// void* loses "const" ; we don't record constness
+}
+
+template<class D>
 inline TemplateDomain<D>::TemplateDomain(typename D::MATRIX& m1) : dim(Dim::matrix(m1.nb_rows(),m1.nb_cols())), is_reference(true) {
 	assert(m1.nb_rows()>1 && m1.nb_cols()>1);
 	domain = &m1;
+}
+
+template<class D>
+inline TemplateDomain<D>::TemplateDomain(const typename D::MATRIX& m1) : TemplateDomain<D>((typename D::MATRIX&) m1) {
+	// void* loses "const" ; we don't record constness
 }
 
 template<class D>

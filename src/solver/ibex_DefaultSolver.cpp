@@ -18,6 +18,7 @@
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcFixPoint.h"
+#include "ibex_CtcIdentity.h"
 #include "ibex_CellStack.h"
 #include "ibex_CellList.h"
 #include "ibex_Array.h"
@@ -34,7 +35,7 @@ double DefaultSolver::default_eps_x_max = POS_INFINITY;
 
 namespace {
 
-System* get_square_eq_sys(Memory& memory, System& sys) {
+System* get_square_eq_sys(Memory& memory, const System& sys) {
 	if (memory.found(SQUARE_EQ_SYSTEM_TAG))
 		return &memory.get<System>(SQUARE_EQ_SYSTEM_TAG);
 	else {
@@ -66,7 +67,10 @@ System* get_square_eq_sys(Memory& memory, System& sys) {
 	return x;
 }*/
 
-Ctc* DefaultSolver::ctc (System& sys, double prec) {
+Ctc* DefaultSolver::ctc (const System& sys, double prec) {
+
+	if (sys.nb_ctr==0) return new CtcIdentity(sys.nb_var);
+
 	Array<Ctc> ctc_list(4);
 
 	// first contractor : non incremental hc4
@@ -92,7 +96,7 @@ Ctc* DefaultSolver::ctc (System& sys, double prec) {
 	return new CtcCompo (ctc_list);
 }
 
-DefaultSolver::DefaultSolver(System& sys, double eps_x_min, double eps_x_max,
+DefaultSolver::DefaultSolver(const System& sys, double eps_x_min, double eps_x_max,
 		bool dfs, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min)),
 		get_square_eq_sys(*this, sys)!=NULL?
 				(Bsc&) rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :
@@ -106,7 +110,7 @@ DefaultSolver::DefaultSolver(System& sys, double eps_x_min, double eps_x_max,
 }
 
 // Note: we set the precision for Newton to the minimum of the precisions.
-DefaultSolver::DefaultSolver(System& sys, const Vector& eps_x_min, double eps_x_max,
+DefaultSolver::DefaultSolver(const System& sys, const Vector& eps_x_min, double eps_x_max,
 		bool dfs, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min.min())),
 		get_square_eq_sys(*this, sys)!=NULL?
 				(Bsc&) rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :

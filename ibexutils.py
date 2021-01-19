@@ -79,7 +79,7 @@ def apply_patch (conf, patch_abspath):
 
 @conf
 def extract_archive (conf, archive_path, name, destnode):
-    # path is the destination folder where the file will be extracted 
+    # path is the destination folder where the file will be extracted
     path = os.path.join (destnode.abspath (), name)
 
     conf.start_msg("Extracting %s" % os.path.basename(archive_path))
@@ -171,7 +171,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 
     conf.find_program ("make")
 
-    # Apply patches 
+    # Apply patches
     conf.apply_all_relevant_patches (name)
 
     # always build static library, even if ibex is built as a shared library.
@@ -185,9 +185,9 @@ def configure_3rd_party_with_autotools (conf, archive_name,
     else:
         cflags = os.getenv("CFLAGS", "")
         cxxflags = os.getenv("CXXFLAGS", "")
-        os.environ["CFLAGS"] = cflags + " " + cflags_args 
+        os.environ["CFLAGS"] = cflags + " " + cflags_args
         os.environ["CXXFLAGS"] = cxxflags+" "
-        
+
 
     if Utils.is_win32:
         conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspath ())
@@ -198,7 +198,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
         conf_args += " --prefix=%s" % destnode.abspath ()
         cmd_conf = "./configure %s" % (conf_args)
         cmd_make = conf.env.MAKE + ["-j%d"%conf.options.jobs] + make_args
-    cmd_install = conf.env.MAKE + ["install"] 
+    cmd_install = conf.env.MAKE + ["install"]
 
     stages = []
     if not without_configure:
@@ -208,7 +208,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
         stages += [ (cmd_install, "install") ]
     for cmd, stage in stages:
         conf.start_msg("Calling %s" % stage)
-        try: 
+        try:
             out = conf.cmd_and_log (cmd, cwd=srcdir, env=os.environ)
             conf.end_msg("done")
         except Errors.WafError as e:

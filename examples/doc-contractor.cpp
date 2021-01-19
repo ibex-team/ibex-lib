@@ -129,8 +129,8 @@ public:
 
 	Count(const NumConstraint& ctr) : CtcFwdBwd(ctr) { }
 
-	void contract(IntervalVector& box) {
-		CtcFwdBwd::contract(box);
+	void contract(IntervalVector& box, ContractContext& context) {
+		CtcFwdBwd::contract(box,context);
 		count++;
 	}
 };
@@ -157,8 +157,8 @@ public:
 		}
 	}
 
-	void contract(IntervalVector& box) {
-		CtcFwdBwd::contract(box);
+	void contract(IntervalVector& box, ContractContext& context) {
+		CtcFwdBwd::contract(box,context);
 		count++;
 	}
 };

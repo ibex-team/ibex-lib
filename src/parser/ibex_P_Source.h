@@ -42,6 +42,9 @@ public:
 	/** The constraints (NULL if none (pure optimization problem)) */
 	P_ConstraintList* ctrs;
 
+	/** Mutable constants */
+	SymbolMap<Domain*> mutable_constants;
+
 	/*
 	 * If true, destructor will destroy auxiliary functions.
 	 *

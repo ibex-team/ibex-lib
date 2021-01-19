@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'IBEX'
-copyright = u'2018, IMT Atlantique'
+copyright = u'2007-2020, IMT Atlantique'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

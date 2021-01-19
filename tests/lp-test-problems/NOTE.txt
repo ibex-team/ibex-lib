@@ -1,0 +1,3 @@
+These test problems are taken from http://www.netlib.org/lp/data/index.html,
+and decompressed using the emps.c utility given on the website.
+Optimal solutions are in http://www.netlib.org/lp/data/readme.

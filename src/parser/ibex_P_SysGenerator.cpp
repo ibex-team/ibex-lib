@@ -27,18 +27,19 @@ namespace parser {
 void P_SysGenerator::add_garbage(NodeMap<bool>& garbage, const ExprNode& e) {
 	ExprSubNodes nodes(e);
 	for (int i=0; i<nodes.size(); i++)
-		if (!garbage.found(nodes[i]))
+		if (!garbage.found(nodes[i])) {
 			garbage.insert(nodes[i],true);
+		}
 }
 
-P_SysGenerator::P_SysGenerator(std::stack<P_Scope>& scopes) : scopes(scopes) {
+P_SysGenerator::P_SysGenerator(P_Scope& scopes) : scopes(scopes) {
 
 }
 
 void P_SysGenerator::generate(P_Source& source, System& sys) {
 
 	SystemFactory fac;
-	Array<const ExprSymbol> vars = scopes.top().var_symbols();
+	Array<const ExprSymbol> vars = scopes.var_symbols();
 
 	//================= generate the variables & domains =====================
 	if (vars.is_empty())
@@ -63,27 +64,25 @@ void P_SysGenerator::generate(P_Source& source, System& sys) {
 
 		for (vector<ExprCtr*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
 			fac.add_ctr(**it); // by copy so...
-			add_garbage(garbage,(*it)->e);
+			add_garbage(garbage,(*it)->e); // ... clean it up
 			delete *it;
 		}
 	}
 
 	sys.init(fac);
 
+	//================= add mutable constants =====================
+	sys.mutable_constants.import(source.mutable_constants);
+
+
 	// add the original variables in the garbage
 	// (in case some are not used)
 	for (int i=0;i<vars.size(); i++)
 		add_garbage(garbage, vars[i]);
 
-	// same for constants
-	for (std::vector<const char*>::const_iterator it=scopes.top().cst.begin(); it!=scopes.top().cst.end(); it++) {
-		//cout << "[parser] remove cst " << *it << endl;
-		add_garbage(garbage, scopes.top().get_cst(*it));
-	}
-
 	//================= set the domains =====================
 	sys.box.resize(sys.nb_var);
-	load(sys.box, scopes.top().var_domains());
+	load(sys.box, scopes.var_domains());
 
 	//==================== *** cleanup *** ====================
 	for (IBEX_NODE_MAP(bool)::const_iterator it=garbage.begin(); it!=garbage.end(); it++) {

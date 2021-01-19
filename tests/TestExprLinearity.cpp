@@ -81,7 +81,6 @@ void TestExprLinearity::test05() {
 	const ExprSymbol& x=ExprSymbol::new_();
 	const ExprSymbol& y=ExprSymbol::new_();
 	Array<const ExprSymbol> args(x,y);
-	const ExprConstant& c=ExprConstant::new_scalar(0);
 	const ExprNode& e1=2*x;
 	const ExprNode& e=sin(x)*e1+y;
 	ExprLinearity lin(args,e);

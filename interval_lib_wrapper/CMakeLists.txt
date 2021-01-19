@@ -1,4 +1,3 @@
-include (SubDirList)
 subdir_list (INTERVAL_LIB_LIST RELATIVE)
 
 # TODO filib on Windows ??
@@ -30,6 +29,9 @@ foreach (f ${ITVLIB_REQUIRED_FILES})
     list (APPEND IBEX_SRC ${CMAKE_CURRENT_SOURCE_DIR}/${INTERVAL_LIB}/${f})
   endif ()
 endforeach ()
+
+# The name of the target that ibex should depend on
+set (INTERVAL_LIB_TARGET Ibex::${INTERVAL_LIB} PARENT_SCOPE)
 
 # Add directory of wrapper in list of included directory
 list (APPEND IBEX_INCDIRS ${ITVLIB_ABSPATH})

@@ -33,8 +33,8 @@ keyword has appeared.
 
 Open a terminal, move to the ``bin`` subfolder and run IbexSolve with, for example, the problem named ex3_1_3 located at the specified path::
 
-  ~/ibex-2.8.0$ cd bin
-  ~/ibex-2.8.0/bin$ ./ibexopt ../plugins/optim/benchs/easy/ex3_1_3.bch
+  ~/ibex-2.8.7$ cd bin
+  ~/ibex-2.8.7/bin$ ./ibexopt ../plugins/optim/benchs/easy/ex3_1_3.bch
 	
 The following result should be displayed::
 

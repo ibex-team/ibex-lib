@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_LinearizerDuality.cpp
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
@@ -83,7 +83,7 @@ int LinearizerDuality::linearize(const IntervalVector& box, LPSolver& lp_solver,
 					row[j]=1;
 					row[n + c*n +j]=1;
 
-					double rhs = pt[j] - lp_solver.get_epsilon();
+					double rhs = pt[j] - lp_solver.tolerance();
 
 					lp_solver.add_constraint(row, LEQ, rhs);
 					nb_ctr++;
@@ -104,7 +104,7 @@ int LinearizerDuality::linearize(const IntervalVector& box, LPSolver& lp_solver,
 
 			row.put(n + c*n,-diam_correctly_rounded);
 
-			double rhs = (-gx[i] + (gl*pt)).lb()- lp_solver.get_epsilon();
+			double rhs = (-gx[i] + (gl*pt)).lb()- lp_solver.tolerance();
 
 			lp_solver.add_constraint(row, LEQ, rhs);
 			nb_ctr++;

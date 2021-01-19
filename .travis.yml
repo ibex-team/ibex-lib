@@ -20,12 +20,6 @@ matrix:
         - TEST_INTERVAL_LIB=filib
         - STATIC_OR_SHARED=
         - PLUGINS="--with-optim --lp-lib=soplex"
-    - os: linux
-      compiler: gcc
-      env:
-        - TEST_INTERVAL_LIB=filib
-        - STATIC_OR_SHARED=
-        - PLUGINS="--with-optim --lp-lib=clp"
     - os: osx
       compiler: clang
       osx_image: xcode8.3
@@ -57,7 +51,6 @@ before_install:
   - uname -a
   - if [ "$TRAVIS_OS_NAME" = "osx" ] ; then brew update ; brew install flex bison cppunit; fi
 
-# TODO add --affine when tests are fixed
 install:
   - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${TEST_INTERVAL_LIB} ${PLUGINS} --with-ampl || cat __build__/*.log
   - ./waf build install clean
@@ -66,7 +59,7 @@ install:
 # TODO: add nonreg tests
 script:
   - ./waf utest
-  - mkdir build && cd build && cmake -DINTERVAL_LIB=${TEST_INTERVAL_LIB} .. && make && make check
+  - mkdir build && cd build && cmake -DINTERVAL_LIB=${TEST_INTERVAL_LIB} .. && make && make check && make package
 #  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
 
 after_failure:

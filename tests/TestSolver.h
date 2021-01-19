@@ -12,6 +12,10 @@
 #ifndef __TEST_SOLVER_H__
 #define __TEST_SOLVER_H__
 
+#ifndef SRCDIR_TESTS
+  #define SRCDIR_TESTS "."
+#endif
+
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Solver.h"
@@ -24,12 +28,14 @@ class TestSolver : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestSolver);
+	CPPUNIT_TEST(empty);
 	CPPUNIT_TEST(circle1);
 	CPPUNIT_TEST(circle2);
 	CPPUNIT_TEST(circle3);
 	CPPUNIT_TEST(circle4);
 	CPPUNIT_TEST_SUITE_END();
 
+	void empty();
 	void circle1();
 	void circle2();
 	void circle3();

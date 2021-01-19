@@ -108,7 +108,7 @@ void ExprLinearity::visit(const ExprSymbol& e, int k) {
 		break;
 	}
 
-	_coeffs.insert(e, make_pair(d,LINEAR));
+	insert_coeff_and_check(e, make_pair(d,LINEAR));
 }
 
 void ExprLinearity::visit(const ExprNode& e) {
@@ -123,7 +123,7 @@ void ExprLinearity::visit(const ExprIndex& e) {
 	nodetype expr_type=_coeffs[e.expr].second;
 
 	if (expr_type==CONSTANT)
-		_coeffs.insert(e,build_cst(expr_d[n][e.index]));
+		insert_coeff_and_check(e,build_cst(expr_d[n][e.index]));
 	else {
 		Array<Domain>* d=new Array<Domain>(n+1);
 		nodetype type=CONSTANT; // by default
@@ -140,12 +140,13 @@ void ExprLinearity::visit(const ExprIndex& e) {
 					type=expr_type;
 			}
 		}
-		_coeffs.insert(e, make_pair(d,type));
+		insert_coeff_and_check(e, make_pair(d,type));
 	}
 }
 
 void ExprLinearity::visit(const ExprConstant& e) {
-	_coeffs.insert(e, build_cst(e.get()));
+	insert_coeff_and_check(e, build_cst(e.is_mutable()?
+			Domain(e.dim) /* (-oo,oo) */ : e.get()));
 }
 
 void ExprLinearity::visit(const ExprVector& e) {
@@ -172,7 +173,7 @@ void ExprLinearity::visit(const ExprVector& e) {
 		d->set_ref(i,*new Domain(array, e.row_vector()));
 	}
 
-	_coeffs.insert(e, make_pair(d,type));
+	insert_coeff_and_check(e, make_pair(d,type));
 }
 
 void ExprLinearity::visit(const ExprMul& e) {
@@ -222,7 +223,7 @@ void ExprLinearity::visit(const ExprMul& e) {
 		}
 	}
 
-	_coeffs.insert(e, make_pair(d,type));
+	insert_coeff_and_check(e, make_pair(d,type));
 }
 
 void ExprLinearity::visit(const ExprDiv& e) {
@@ -235,9 +236,10 @@ void ExprLinearity::visit(const ExprDiv& e) {
 	nodetype left_type = _coeffs[e.left].second;
 	nodetype right_type = _coeffs[e.right].second;
 
-	if (left_type==CONSTANT && right_type==CONSTANT)
-		_coeffs.insert(e,build_cst(l[n] / r[n]));
-	else {
+	if (left_type==CONSTANT && right_type==CONSTANT) {
+		assert(!(r[n].is_zero()));
+		insert_coeff_and_check(e,build_cst(l[n] / r[n]));
+	} else {
 		Array<Domain>* d=new Array<Domain>(n+1);
 		nodetype type=LINEAR; // by default
 
@@ -259,7 +261,7 @@ void ExprLinearity::visit(const ExprDiv& e) {
 						type=NONLINEAR;
 			}
 		}
-		_coeffs.insert(e, make_pair(d,type));
+		insert_coeff_and_check(e, make_pair(d,type));
 	}
 }
 
@@ -274,7 +276,7 @@ void ExprLinearity::binary(const ExprBinaryOp& e, Domain (*fcst)(const Domain&,c
 	nodetype right_type = _coeffs[e.right].second;
 
 	if (left_type==CONSTANT && right_type==CONSTANT)
-		_coeffs.insert(e,build_cst(fcst(l[n],r[n])));
+		insert_coeff_and_check(e,build_cst(fcst(l[n],r[n])));
 	else {
 		Array<Domain>* d=new Array<Domain>(n+1);
 
@@ -301,7 +303,7 @@ void ExprLinearity::binary(const ExprBinaryOp& e, Domain (*fcst)(const Domain&,c
 			}
 		}
 
-		_coeffs.insert(e, make_pair(d,type));
+		insert_coeff_and_check(e, make_pair(d,type));
 	}
 }
 
@@ -312,7 +314,7 @@ void ExprLinearity::unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), b
 	nodetype expr_type=_coeffs[e.expr].second;
 
 	if (expr_type==CONSTANT)
-		_coeffs.insert(e,build_cst(fcst(expr_d[n])));
+		insert_coeff_and_check(e,build_cst(fcst(expr_d[n])));
 	else {
 		Array<Domain>* d=new Array<Domain>(n+1);
 
@@ -336,7 +338,7 @@ void ExprLinearity::unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), b
 			}
 		}
 
-		_coeffs.insert(e, make_pair(d,type));
+		insert_coeff_and_check(e, make_pair(d,type));
 	}
 }
 
@@ -347,7 +349,7 @@ void ExprLinearity::visit(const ExprPower& e) {
 	nodetype expr_type=_coeffs[e.expr].second;
 
 	if (expr_type==CONSTANT)
-		_coeffs.insert(e,build_cst(pow(expr_d[n],e.expon)));
+		insert_coeff_and_check(e,build_cst(pow(expr_d[n],e.expon)));
 	else {
 		Array<Domain>* d=new Array<Domain>(n+1);
 
@@ -358,7 +360,7 @@ void ExprLinearity::visit(const ExprPower& e) {
 			if (i<n && expr_d[i].is_zero()) (*d)[i].clear();
 		}
 
-		_coeffs.insert(e, make_pair(d,NONLINEAR));
+		insert_coeff_and_check(e, make_pair(d,NONLINEAR));
 	}
 }
 
@@ -380,7 +382,7 @@ void ExprLinearity::visit(const ExprChi& e) {
 			(*d)[i].clear();
 	}
 
-	_coeffs.insert(e, make_pair(d,NONLINEAR));
+	insert_coeff_and_check(e, make_pair(d,NONLINEAR));
 }
 
 void ExprLinearity::visit(const ExprSymbol& e) { assert(false); }

@@ -98,11 +98,8 @@ public:
 	 * \brief Copy constructor.
 	 *
 	 * Duplicate all symbols of the table \a tab. */
-	SymbolMap(const SymbolMap<T>& tab) {
-		typename IBEXMAP(T)::const_iterator it=tab.map.begin();
-		for(; it!=tab.map.end(); it++) {
-			insert_new(it->first, it->second);
-		}
+	SymbolMap(const SymbolMap<T>& map) {
+		import(map);
 	}
 
 	/**
@@ -157,6 +154,18 @@ public:
 		char* copy = strdup(id);
 		map.insert(std::pair<const char*,T>(copy, data));
 		return copy;
+	}
+
+	/**
+	 * \brief Insert all pairs from another map.
+	 *
+	 * Keys in \a map must not already exist in this map.
+	 */
+	void import(const SymbolMap<T>& map) {
+		typename IBEXMAP(T)::const_iterator it=map.map.begin();
+		for(; it!=map.map.end(); it++) {
+			insert_new(it->first, it->second);
+		}
 	}
 
 	/**

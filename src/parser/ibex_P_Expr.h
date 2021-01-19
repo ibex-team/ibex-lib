@@ -177,7 +177,7 @@ public:
 /*
  * \brief Variable Symbol at parse time
  *
- * \see P_Scope::get_cst().
+ * \see P_Scope::get_var().
  */
 class P_ExprVarSymbol : public P_ExprNode {
 public:

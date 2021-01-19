@@ -7,7 +7,7 @@ from waflib import Scripting, Logs, Options, Utils
 import ibexutils
 
 # The following variable is used to build ibex.pc and by "waf dist"
-VERSION="2.8.6"
+VERSION="2.8.7"
 # The following variable is used only by "waf dist"
 APPNAME='ibex-lib'
 
@@ -87,7 +87,7 @@ def configure (conf):
 		conf.env.DEBUG = False
 	for f in flags.split():
 		conf.check_cxx(cxxflags=f, use="IBEX", mandatory=False, uselib_store="IBEX")
-	
+		
 	# To fix Windows compilation problem (strdup with std=c++11, see issue #287)
 	conf.check_cxx(cxxflags = "-U__STRICT_ANSI__", uselib_store="IBEX")
 

@@ -638,10 +638,39 @@ public:
 	static const ExprConstant& new_matrix(const IntervalMatrix& value);
 
 	/** Create a constant from a domain. */
-	static const ExprConstant& new_(const Domain& d, bool reference=false);
+	static const ExprConstant& new_(const Domain& d);
+
+	/**
+	 * Create a mutable constant from a domain.
+	 *
+	 *
+	 * \warning A copy of this node will point to the same domain \a d. So
+	 *          this domain must persist in memory for all direct and *indirect*
+	 *          use of the enclosing expression (would it be by copy, differentiation,
+	 *          etc.). For instance, contractors like CtcFwdBwd creates their
+	 *          own copy of expressions.
+	 * */
+	static const ExprConstant& new_mutable(const Domain& d);
+
+	/**
+	 * \see #new_mutable(const Domain&).
+	 */
+	static const ExprConstant& new_mutable(const Interval& x);
+
+	/**
+	 * \see #new_mutable(const Domain&).
+	 */
+	static const ExprConstant& new_mutable(const IntervalVector& v, bool in_row);
+
+	/**
+	 * \see #new_mutable(const Domain&).
+	 */
+	static const ExprConstant& new_mutable(const IntervalMatrix& m);
 
 	/** Return true if this constant is either 0, the null vector or the null matrix. */
 	virtual bool is_zero() const;
+
+	bool is_mutable() const;
 
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
@@ -676,6 +705,7 @@ private:
 	/** Duplicate this constant: forbidden. */
 	ExprConstant(const ExprConstant& c);
 
+	// The domain is a reference iff the constant is mutable.
 	Domain value;
 };
 
@@ -1595,8 +1625,28 @@ inline const ExprConstant& ExprConstant::new_matrix(const IntervalMatrix& value)
 	return *new ExprConstant(value);
 }
 
-inline const ExprConstant& ExprConstant::new_(const Domain& value, bool reference) {
-	return *new ExprConstant(value,reference);
+inline const ExprConstant& ExprConstant::new_(const Domain& value) {
+	return *new ExprConstant(value,false);
+}
+
+inline const ExprConstant& ExprConstant::new_mutable(const Domain& d) {
+	return *new ExprConstant(d,true);
+}
+
+inline const ExprConstant& ExprConstant::new_mutable(const Interval& x) {
+	return new_mutable(Domain(x));
+}
+
+inline const ExprConstant& ExprConstant::new_mutable(const IntervalVector& x, bool in_row) {
+	return new_mutable(Domain(x, in_row));
+}
+
+inline const ExprConstant& ExprConstant::new_mutable(const IntervalMatrix& x) {
+	return new_mutable(Domain(x));
+}
+
+inline bool ExprConstant::is_mutable() const {
+	return get().is_reference;
 }
 
 inline const Interval& ExprConstant::get_value() const {

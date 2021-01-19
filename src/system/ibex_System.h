@@ -107,7 +107,13 @@ public:
 	 */
 	System(const System& sys1, const System& sys2);
 
-	/** \brief Delete *this. */
+	/** \brief Delete *this.
+	 *
+	 * \warning The domains corresponding to mutable constants are
+	 *          deleted. If, for example, the system has been copied,
+	 *          the copied system is corrupted. This may be improved
+	 *          in the future using smart pointers in TemplateDomain.
+	 */
 	virtual ~System();
 
 	/**
@@ -215,6 +221,14 @@ public:
 	std::string toAmpl () const;
 
 	/**
+	 * \brief Domain associated to a mutable constant
+	 *
+	 * Only useful if the system has been loaded from a Minibex file.
+	 * Otherwise, mutable constant are directly accessible in C++.
+	 */
+	Domain& constant(const std::string& name);
+
+	/**
 	 * \brief Identifying number.
 	 */
 	const long id;
@@ -264,12 +278,15 @@ public:
 	 * this array is zero-sized. */
 	Array<NumConstraint> ctrs;
 
+
 protected:
 	/** Uninitialized system */
 	System();
 
 	/** Initialize the system with a factory. */
 	void init(const SystemFactory&);
+
+	SymbolMap<Domain*> mutable_constants;
 
 private:
 	friend class parser::P_SysGenerator;

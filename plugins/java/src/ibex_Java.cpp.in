@@ -290,7 +290,7 @@ JNIEXPORT jboolean JNICALL Java_@JAVA_SIGNATURE@_Ibex_build(JNIEnv* env, jobject
 	}
 }
 
-JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DI(JNIEnv* env, jobject obj, jint n, jdoubleArray _d, jint reif) {
+JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DID(JNIEnv* env, jobject obj, jint n, jdoubleArray _d, jint reif, jdouble rel_eps) {
 
 	
 	Instance& inst = *get_instance(env,obj);
@@ -323,7 +323,7 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DI(JNIEnv* env, j
 		}
 
 		else {
-			if (reif==TRUE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
+			if (reif==TRUE_ && savebox.rel_distance(box) >= rel_eps) {
 
 				//cout << " [ibex] --> CONTRACT to " << box << "\n";
 				savebox = box;
@@ -354,7 +354,7 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DI(JNIEnv* env, j
 			result=ENTAILED;
 		} else {
 
-			if (reif==FALSE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
+			if (reif==FALSE_ && savebox.rel_distance(box) >= rel_eps) {
 				savebox = box;
 				result=CONTRACT; // temporary assignment (final result may be FAIL)
 			}
@@ -374,8 +374,8 @@ JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DI(JNIEnv* env, j
 	return result;
 }
 
-JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3D(JNIEnv* env, jobject obj, jint n, jdoubleArray _d) {
-	return Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DI(env,obj,n,_d,1);
+JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DD(JNIEnv* env, jobject obj, jint n, jdoubleArray _d, jdouble rel_eps) {
+	return Java_@JAVA_SIGNATURE@_Ibex_contract__I_3DID(env,obj,n,_d,1,rel_eps);
 }
 
 JNIEXPORT jint JNICALL Java_@JAVA_SIGNATURE@_Ibex_inflate(JNIEnv* env, jobject obj, jint n, jdoubleArray _din, jdoubleArray _d, jboolean in) {

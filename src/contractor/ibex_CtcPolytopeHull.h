@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_CtcPolytopeHull.h
 // Authors     : Jordan Ninin, Bertrand Neveu, Gilles Chabert
 // Copyright   : IMT Atlantique (France)
@@ -38,8 +38,7 @@ public:
 	 */
 
 	CtcPolytopeHull(Linearizer& lr, int max_iter=LPSolver::default_max_iter,
-			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
-			Interval limit_diam=Interval(LPSolver::min_box_diam,LPSolver::max_box_diam));
+			int time_out=LPSolver::default_timeout, double eps=LPSolver::default_tolerance);
 
 	/**
 	 * \brief Creates the contractor w.r.t. Ax<=b
@@ -52,8 +51,7 @@ public:
 	 * \param limit_diam - The contractor does nothing if the diameter does not respect these bounds
 	 */
 	CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter=LPSolver::default_max_iter,
-			int time_out=LPSolver::default_max_time_out, double eps=LPSolver::default_eps,
-			Interval limit_diam=Interval(LPSolver::min_box_diam,LPSolver::max_box_diam));
+			int time_out=LPSolver::default_timeout, double eps=LPSolver::default_tolerance);
 
 	/**
 	 * \brief Delete this.
@@ -98,10 +96,10 @@ public:
 	 * (resp. maximizing) the left (resp. right
 	 * bound) of the ith variable.
 	 * If no argmin were found for this LP problem
-	 * (the primal problem has failed), a LPException
+	 * (the primal problem has failed), a Exception
 	 * is thrown.
 	 *
-	 * \throw LPException
+	 * \throw Exception
 	 */
 	const Vector& arg_min(int i, bool left);
 
@@ -123,11 +121,6 @@ protected:
 	 * \brief The linearization technique
 	 */
 	Linearizer& lr;
-
-	/**
-	 * TODO: add comment
-	 */
-	const Interval limit_diam_box;
 
 	/**
 	 * \brief  The linear solver that will be used
@@ -163,7 +156,7 @@ private:
 inline const Vector& CtcPolytopeHull::arg_min(int i, bool left) {
 	if (primal_sol_found[left? 2*i : 2*i+1])
 		return primal_sols[left? 2*i : 2*i+1];
-	else throw LPException();
+	else throw Exception();
 }
 
 } // end namespace ibex

@@ -67,7 +67,7 @@ void TestBoolInterval::test_inter1(){
 }
 
 void TestBoolInterval::test_inter2(){
-	BoolInterval a(MAYBE), b(YES), c(NO);
+	BoolInterval a(MAYBE), b(YES);
 	a &= b;
 	CPPUNIT_ASSERT(a == YES);	
 }
@@ -80,10 +80,9 @@ void TestBoolInterval::test_union1(){
 }
 
 void TestBoolInterval::test_union2(){
-	BoolInterval a(MAYBE), b(YES), c(NO);
+	BoolInterval a(MAYBE), b(YES);
 	a |= b;
 	CPPUNIT_ASSERT(a == MAYBE);	
-
 }
 
 void TestBoolInterval::test_and(){

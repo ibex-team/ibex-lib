@@ -14,7 +14,7 @@ class Test {
 		System.out.println("Before contract:");
 		System.out.println("(["+domains[0]+","+domains[1]+"] ; ["+domains[2]+","+domains[3]+"])");
 		
-		int result=ibex.contract(0,domains);
+		int result=ibex.contract(0,domains,1e-3);
 		
 		if (result==Ibex.FAIL) {
 			System.out.println("Failed!");

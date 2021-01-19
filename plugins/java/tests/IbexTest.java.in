@@ -8,6 +8,7 @@ import java.util.*;
 public class IbexTest {
 	
 	public final static double DEFAULT_DELTA=1e-10;
+	public final static double DEFAULT_REL_EPS=1e-3;
 	
 	public static String strDomain(double[] a) {
 		String s="";
@@ -37,13 +38,13 @@ public class IbexTest {
 
         double domains[] = {1.0, 10.0, 1.0, 10.0};
      
-        Assert.assertEquals(Ibex.NOT_BUILT, ibex.contract(0, domains));
+        Assert.assertEquals(Ibex.NOT_BUILT, ibex.contract(0, domains, DEFAULT_REL_EPS));
         
         Assert.assertTrue(ibex.build());
         		
         Assert.assertFalse(ibex.add_ctr("{0}=0")); // already built
         
-        int result = ibex.contract(0, domains);
+        int result = ibex.contract(0, domains, DEFAULT_REL_EPS);
         
         Assert.assertEquals(Ibex.CONTRACT, result);
         		
@@ -64,28 +65,28 @@ public class IbexTest {
         double vv = Math.sqrt(2.) / 2.;
         	
         // CASE 1: the boolean is set to TRUE
-        Assert.assertEquals(Ibex.FAIL, ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.TRUE));
-        Assert.assertEquals(Ibex.ENTAILED, ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.TRUE));
+        Assert.assertEquals(Ibex.FAIL, ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.TRUE, DEFAULT_REL_EPS));
+        Assert.assertEquals(Ibex.ENTAILED, ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.TRUE, DEFAULT_REL_EPS));
         domains = new double[]{-2., 1., -2., 1.};
-        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, domains, Ibex.TRUE));
+        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, domains, Ibex.TRUE, DEFAULT_REL_EPS));
         cmpDomains(domains, new double[]{-1., 1., -1., 1.});
-        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, domains, Ibex.TRUE));
+        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, domains, Ibex.TRUE, DEFAULT_REL_EPS));
 
 
         // CASE 2: the boolean is set to FALSE
-        Assert.assertEquals(Ibex.FAIL, ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE));
-        Assert.assertEquals(Ibex.ENTAILED, ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE));
-        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE));
+        Assert.assertEquals(Ibex.FAIL, ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE, DEFAULT_REL_EPS));
+        Assert.assertEquals(Ibex.ENTAILED, ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE, DEFAULT_REL_EPS));
+        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE, DEFAULT_REL_EPS));
         domains = new double[]{0., 2., -vv, vv};
-        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, domains, Ibex.FALSE));
+        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, domains, Ibex.FALSE, DEFAULT_REL_EPS));
         cmpDomains(domains, new double[]{vv, 2., -vv, vv});
 
         // CASE 3: the boolean is set to UNKNOWN
-        Assert.assertEquals(Ibex.FAIL, ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE_OR_TRUE));
-        Assert.assertEquals(Ibex.ENTAILED, ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE_OR_TRUE));
-        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE_OR_TRUE));
+        Assert.assertEquals(Ibex.FAIL, ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE_OR_TRUE, DEFAULT_REL_EPS));
+        Assert.assertEquals(Ibex.ENTAILED, ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE_OR_TRUE, DEFAULT_REL_EPS));
+        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE_OR_TRUE, DEFAULT_REL_EPS));
         domains = new double[]{0., 2., -vv, vv};
-        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, domains, Ibex.FALSE_OR_TRUE));
+        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, domains, Ibex.FALSE_OR_TRUE, DEFAULT_REL_EPS));
         cmpDomains(domains, new double[]{0., 2., -vv, vv});
 
         ibex.release();
@@ -239,6 +240,26 @@ public class IbexTest {
 		ibex.release();
 	}
 	
+	@Test
+	public void test_rel_prec() {
+		// see issue #435
+		Ibex ibex = new Ibex(new double[]{1e-3,1e-3});
+		ibex.add_ctr("{0}={1}");
+
+		Assert.assertTrue(ibex.build());
+
+		double domains[]={0,1,0,0.899999};
+		Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, domains, 0.5));
+		cmpDomains(new double[]{0,1,0,0.899999}, domains);
+		Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, domains, 0.11));
+		cmpDomains(new double[]{0,1,0,0.899999}, domains);
+		Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, domains, 0.1));
+		cmpDomains(new double[]{0,0.899999,0,0.899999}, domains);
+
+		ibex.release();
+
+	}
+
 	public static void main(String args[]) {
         org.junit.runner.JUnitCore.main("IbexTest");
       }

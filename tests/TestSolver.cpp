@@ -11,7 +11,7 @@
 
 #include "TestSolver.h"
 #include "ibex_SystemFactory.h"
-#include "ibex_Solver.h"
+#include "ibex_DefaultSolver.h"
 #include "ibex_RoundRobin.h"
 #include "ibex_CellStack.h"
 #include "ibex_CtcHC4.h"
@@ -19,6 +19,15 @@
 using namespace std;
 
 namespace ibex {
+
+void TestSolver::empty() {
+	System sys(SRCDIR_TESTS "/minibex/empty.mbx");
+	DefaultSolver solver(sys);
+	Solver::Status status=solver.solve(sys.box);
+	CPPUNIT_ASSERT(status==Solver::SUCCESS);
+	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
+	CPPUNIT_ASSERT(solver.get_data().solution(0)==sys.box);
+}
 
 void TestSolver::circle1() {
 	const ExprSymbol& x=ExprSymbol::new_("x");

@@ -68,9 +68,14 @@ void init_function_by_copy(Function& dest, const Function& src) {
 	dest.init(x,y,src.name);
 }
 
+P_Struct::P_Struct() : func_scope(NULL), current_scope(&scopes) { }
+
 P_Struct::~P_Struct() {
-	// pop pending scopes in case of parsing error
-	while (!scopes.empty()) scopes.pop();
+	// destructor of P_Scope will destroy pending scopes in case of parsing error
+}
+
+P_Scope& P_Struct::scope() {
+	return *current_scope;
 }
 
 void P_Struct::begin() {
@@ -79,17 +84,25 @@ void P_Struct::begin() {
 		ibexerror("platform does not support \"C\" locale");
 
 	ibex_lineno=1;
+}
 
-	// Bottom scope.
-	// Kept for both parsing and generation (the constants are shared by the two steps)
-	scopes.push(P_Scope());
-
-	// note: a second scope is created for parsing the constraints block,
-	// to store temporary variables.
+void P_Struct::begin_function() {
+	func_scope = new P_Scope(scopes);
+	current_scope = func_scope;
 }
 
 void P_Struct::end() {
 	scopes.pop();
+}
+
+void P_Struct::end_function(const char* name, const P_ExprNode& y) {
+	Function* f=new Function(scope().var_symbols(),y.generate(),name);
+	delete func_scope;
+	func_scope = NULL;
+	current_scope = &scopes;
+
+	scopes.add_func(name,f);
+	source.func.push_back(f);
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -108,7 +121,7 @@ void P_StructSystem::end() {
 		throw SyntaxError("not a system");
 	}
 
-	P_SysGenerator(scopes).generate(source,system);
+	P_SysGenerator(scope()).generate(source,system);
 
 	// TODO: we have to cleanup the data in case of Syntax Error
 	// this probably requires garbage collector during parsing
@@ -153,7 +166,7 @@ void P_StructChoco::begin() {
 	x.i()=Interval::all_reals();
 	for (int i=0; i<system.nb_var; i++) {
 		char* name=append_index("\0",'{','}',i);
-		scopes.top().add_var(name,&dim,x);
+		scope().add_var(name,&dim,x);
 		free(name);
 	}
 }
@@ -164,7 +177,7 @@ void P_StructChoco::end() {
 		throw SyntaxError("constraint declaration required");
 	}
 
-	P_SysGenerator(scopes).generate(source,system);
+	P_SysGenerator(scope()).generate(source,system);
 
 	// TODO: see end_system()
 	P_Struct::end();

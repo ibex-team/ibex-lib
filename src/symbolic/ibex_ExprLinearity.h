@@ -17,6 +17,7 @@
 #include "ibex_NodeMap.h"
 
 #include <utility>
+#include <cassert>
 
 namespace ibex {
 
@@ -122,6 +123,8 @@ protected:
 	void binary(const ExprBinaryOp& e, Domain (*fcst)(const Domain&,const Domain&), bool linear_op);
 	void unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), bool linear_op);
 
+	void insert_coeff_and_check(const ExprNode& e, LinData expr);
+
 	int n; // number of variables
 
 
@@ -143,6 +146,13 @@ protected:
 inline bool ExprLinearity::is_linear(const ExprNode& e) const {
 	return _coeffs.found(e) &&
 			_coeffs[e].second<NONLINEAR;
+}
+
+inline void ExprLinearity::insert_coeff_and_check(const ExprNode& e, LinData data) {
+	for (int i=0; i<n+1; i++) {
+		assert(!(*data.first)[i].is_empty());
+	}
+	_coeffs.insert(e, data);
 }
 
 } /* namespace ibex */

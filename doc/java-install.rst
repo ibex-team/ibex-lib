@@ -35,29 +35,58 @@ The installation of the plugin will generate, in addition to the Ibex library, t
 
    The following instructions must be typed in the shell of MinGW.
 
-Uncompress the archive ibex-2.8.0.tar.gz in some Ibex folder::
 
-	~/Ibex/$ tar xvfz ibex-2.8.0.tar.gz
+------------
+Linux/MacOS
+------------
+Uncompress the archive ibex-2.8.7.tar.gz in some Ibex folder::
+
+	~/Ibex/$ tar xvfz ibex-2.8.7.tar.gz
 
 Set the environment variable ``JAVA_HOME``. Typical paths are ``/Library/Java/Home`` (MacOS) or ``/usr/lib/jvm/java-7-openjdk-i38`` (Linux). Example::
 
 	~/Ibex/$ export JAVA_HOME=/Library/Java/Home
 
-Under MinGW, the variable must be set in Linux-style (don't use backslash ("\\") as separator), e.g.::
+Then configure and install Ibex as follows::
+
+	~/Ibex/$ cd ibex-2.8.7
+	~/Ibex/ibex-2.8.7/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
+	~/Ibex/ibex-2.8.7/$ ./waf install
+	
+**Note**: the ``--enable-shared`` option is mandatory. 
+
+------------
+Windows
+------------
+
+Open a MinGW prompt window. 
+
+
+Uncompress the archive ibex-2.8.7.tar.gz in some Ibex folder::
+
+	~/Ibex/$ tar xvfz ibex-2.8.7.tar.gz
+
+Set the environment variable ``JAVA_HOME`` to the home directory of the 32 bits JDK. The variable must be set in Linux-style (don't use backslash ("\\") as separator), e.g.::
 
 	~/Ibex/$ export JAVA_HOME=/c/Java/jdk1.7.1_17
 
+Update the path as follows::
+
+	~/Ibex/$ set PATH=%PATH%;[prefix]\lib;C:\MinGW\bin
+	
+where *[prefix]* is the path specified via ``--prefix``
+	
 .. Warning:
 
    The path must not contain white spaces, like ”/c/Program Files/...”. Create a symbolik link of your Java directory if necessary.
 
 Then configure Ibex as follows::
 
-	~/Ibex/$ cd ibex-2.8.0
-	~/Ibex/ibex-2.8.0/$ ./waf configure [...] --enable-shared --with-solver --with-jni --java-package-name=org.chocosolver.solver.constraints.real
-
-**Note**: the ``--enable-shared`` option is mandatory. The ``-with-solver`` option can be ommited as this plugin
-is automatically installed (with Release 2.8.0). 
+	~/Ibex/$ cd ibex-2.8.7
+	~/Ibex/ibex-2.8.7/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
+	~/Ibex/ibex-2.8.7/$ ./waf install
+    
+**Note**: the ``--enable-shared`` option is mandatory. 
 
 
 ============================
@@ -99,5 +128,5 @@ JAVA_HOME does not seem to be set properly
 
 I get this message when running waf configure.
 
-Solution: The ``JAVA_HOME`` must be the path of the JDK and contain a subdirectoy include which, in turn, contains the jni.h header file. 
+Solution: The ``JAVA_HOME`` must be the path of the JDK and contain a subdirectoy include which, in turn, contains the jni.h header file (for Java versions <10). 
 On MacOS this path can be ``/Library/Java/JavaVirtualMachines/jdkXXXX.jdk/Contents/Home``.

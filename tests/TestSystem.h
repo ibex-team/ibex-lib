@@ -27,7 +27,7 @@ class TestSystem : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestSystem);
-
+	CPPUNIT_TEST(empty);
 	CPPUNIT_TEST(factory01);
 	CPPUNIT_TEST(factory02);
 	CPPUNIT_TEST(copy01);
@@ -43,8 +43,10 @@ public:
 	CPPUNIT_TEST(merge02);
 	CPPUNIT_TEST(merge03);
 	CPPUNIT_TEST(merge04);
+	CPPUNIT_TEST(mutable_cst);
 	CPPUNIT_TEST_SUITE_END();
 
+	void empty();
 	void factory01();
 	void factory02();
 	void copy01();
@@ -60,6 +62,7 @@ public:
 	void merge02();
 	void merge03();
 	void merge04();
+	void mutable_cst();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestSystem);

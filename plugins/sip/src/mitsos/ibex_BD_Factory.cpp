@@ -108,8 +108,7 @@ void BD_Factory::add_discretized_ctr(double eps_g) {
 					new_args.set_ref(K,new_vars[I++]);
 				else
 					// a parameter becomes a constant
-					// (note: can have a reference because the expression is copied afterward)
-					new_args.set_ref(K,ExprConstant::new_(sip.p_domain[J++],true));
+					new_args.set_ref(K,ExprConstant::new_(sip.p_domain[J++]));
 			}
 			const ExprNode* expr_ctr_tmp=&sip.sys.ctrs[c].f(new_args);
 
@@ -156,7 +155,7 @@ void BD_Factory::add_gaol(double f_RES) {
 		else
 			// necessary for applying goal function but ignored at the end
 			// (there is no parameter in the goal function):
-			new_args.set_ref(K,ExprConstant::new_(sip.p_domain[J++],true));
+			new_args.set_ref(K,ExprConstant::new_(sip.p_domain[J++]));
 	}
 	const ExprNode* goal_node=&((*sip.sys.goal)(new_args));
 

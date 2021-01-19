@@ -29,6 +29,8 @@ class NoCornerPoint : public Exception { };
 
 class Unsatisfiability : public Exception { };
 
+class BadConstraint : public Exception { };
+
 }
 
 LinearizerXTaylor::LinearizerXTaylor(const System& _sys, approx_mode _mode, corner_policy policy,
@@ -161,8 +163,8 @@ int LinearizerXTaylor::linear_relax(const IntervalVector& box, const BitSet& act
 					if (sys.ops[c]==GEQ || sys.ops[c]==GT || sys.ops[c]==EQ) // && c!=goal_ctr))
 						count += linearize_leq_corner(box,corner,-Df[i],-g_corner[i]);
 
-				} catch (LPException&) {
-					continue;  // just skip this constraint
+				} catch (BadConstraint&) {
+					continue; // just skip this constraint
 				} catch (Unsatisfiability&) {
 					return -1;
 				}
@@ -214,7 +216,7 @@ int LinearizerXTaylor::linear_restrict(const IntervalVector& box, const BitSet& 
 					count += linearize_leq_corner(box,corner,J[i],g_corner[i]);
 				else
 					count += linearize_leq_corner(box,corner,-J[i],-g_corner[i]);
-			} catch (LPException&) {
+			} catch (BadConstraint&) {
 				return -1;
 			} catch (Unsatisfiability&) {
 				return -1;
@@ -280,9 +282,8 @@ IntervalVector LinearizerXTaylor::get_corner_point(const IntervalVector& box) {
 int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalVector& corner, const IntervalVector& dg_box, const Interval& g_corner) {
 	Vector a(n); // vector of coefficients
 
-	if (dg_box.max_diam() > LPSolver::max_box_diam) {
-		// we also also avoid this way to deal with infinite bounds (see below)
-		throw LPException();
+	if (dg_box.is_unbounded()) {
+		throw BadConstraint();
 	}
 
 	// ========= compute matrix of coefficients ===========
@@ -300,9 +301,9 @@ int LinearizerXTaylor::linearize_leq_corner(const IntervalVector& box, IntervalV
 
 	Interval rhs = -g_corner + a*corner;
 
-	double b = mode==RESTRICT? rhs.lb() - lp_solver->get_epsilon() : rhs.ub();
+	double b = mode==RESTRICT? rhs.lb() - lp_solver->tolerance() : rhs.ub();
 
-	// may throw Unsatisfiability and LPException
+	// may throw Unsatisfiability
 	return check_and_add_constraint(box,a,b);
 }
 
@@ -320,7 +321,7 @@ int LinearizerXTaylor::check_and_add_constraint(const IntervalVector& box, const
 		return 0;
 	} else {
 		//cout << "add constraint " << a << "*x<=" << b << endl;
-		lp_solver->add_constraint(a, LEQ, b); // note: may throw LPException
+		lp_solver->add_constraint(a, LEQ, b);
 		return 1;
 	}
 }

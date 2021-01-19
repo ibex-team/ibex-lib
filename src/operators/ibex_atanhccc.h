@@ -67,6 +67,7 @@ private:
 
     static Interval _atanhccc(double x_double) {
         if (x_double<=-1 || x_double>=1) return Interval(std::numeric_limits<double>::max(),std::numeric_limits<double>::infinity()); // Not optimal but easy to implement. Should not have any impact.
+        if (x_double==0.0) return Interval(1.)/Interval(3.);
         Interval x(x_double);
         // 4th order Taylor Expansion (remainder valid for all x in [-1,1])
         Interval taylor_4 = Interval(1.)/Interval(3.) + sqr(x)*( Interval(1.)/Interval(5.) + sqr(x)/Interval(7.) ) + Interval(-1.,1.)*(pow(x,6)/(Interval(1.)-sqr(x)));
@@ -76,6 +77,7 @@ private:
     static Interval _datanhccc(double x_double) {
         if(x_double<=-1) return Interval(-std::numeric_limits<double>::infinity(),-std::numeric_limits<double>::max()); // Not optimal but easy to implement. Should not have any impact.
         if(x_double>=1) return Interval(std::numeric_limits<double>::max(),std::numeric_limits<double>::infinity()); // Not optimal but easy to implement. Should not have any impact.
+        if (x_double==0.0) return Interval(0.0);
         Interval x(x_double);
         // 3th order Taylor Expansion (remainder valid for all x in [-1,1])
         Interval taylor_3 = x*(Interval(2.)/Interval(5.) + Interval(4.)/Interval(7.)*sqr(x)) + Interval(-1.,1.)*(pow(x,5)/(Interval(1.)-sqr(x)));

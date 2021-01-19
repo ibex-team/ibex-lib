@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_CtcPolytopeHull.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -24,19 +24,17 @@ class PolytopeHullEmptyBoxException { };
 
 #ifndef  _IBEX_WITH_NOLP_
 
-CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
+CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps) :
 		Ctc(lr.nb_var()), lr(lr),
-		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
-		mylinearsolver(nb_var, max_iter, time_out, eps),
+		mylinearsolver(nb_var, LPSolver::Mode::Certified, eps, time_out, max_iter),
 		contracted_vars(BitSet::all(nb_var)), own_lr(false), primal_sols(2*nb_var, nb_var),
 		primal_sol_found(2*nb_var) {
 
 }
 
-CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
+CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps) :
 		Ctc(A.nb_cols()), lr(*new LinearizerFixed(A,b)),
-		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()),
-		mylinearsolver(nb_var, max_iter, time_out, eps),
+		mylinearsolver(nb_var, LPSolver::Mode::Certified, eps, time_out, max_iter),
 		contracted_vars(BitSet::all(nb_var)), own_lr(true), primal_sols(2*nb_var, nb_var),
 		primal_sol_found(2*nb_var) {
 
@@ -58,12 +56,9 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 	primal_sol_found.clear();
 
-	if (!(limit_diam_box.contains(box.max_diam()))) return;
-	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
-	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
+	if (box.is_unbounded()) return;
 
 	try {
-
 		//returns the number of constraints in the linearized system
 		int cont = lr.linearize(box, mylinearsolver, context.prop);
 
@@ -78,14 +73,11 @@ void CtcPolytopeHull::contract(IntervalVector& box, ContractContext& context) {
 		//mylinearsolver.writeFile("LP.lp");
 		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
-		mylinearsolver.clean_ctrs();
-	}
-	catch(LPException&) {
-		mylinearsolver.clean_ctrs();
+		mylinearsolver.clear_constraints();
 	}
 	catch(PolytopeHullEmptyBoxException& e) {
 		box.set_empty(); // empty the box before exiting
-		mylinearsolver.clean_ctrs();
+		mylinearsolver.clear_constraints();
 	}
 
 	context.prop.update(BoxEvent(box,BoxEvent::CONTRACT));
@@ -115,7 +107,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 	int nexti=-1;   // the next variable to be contracted
 	int infnexti=0; // the bound to be contracted contract  infnexti=0 for the lower bound, infnexti=1 for the upper bound
-	LPSolver::Status_Sol stat=LPSolver::UNKNOWN;
+	LPSolver::Status stat=LPSolver::Status::Unknown;
 
 	// Update the bounds the variables
 	mylinearsolver.set_bounds(box);
@@ -129,39 +121,43 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{
 			inf_bound[i]=1;
-			stat = mylinearsolver.solve_var(LPSolver::MINIMIZE, i, opt);
-			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
-			if (stat == LPSolver::OPTIMAL_PROVED) {
+			mylinearsolver.set_cost(i, 1.0);
+			stat = mylinearsolver.minimize();
+			mylinearsolver.set_cost(i, 0.0);
+			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat << endl;
+			if (stat == LPSolver::Status::OptimalProved) {
+				opt = mylinearsolver.minimum();
+				//std::cout << "opt=" << opt << endl;
 				if(opt.lb()>box[i].ub()) {
 					delete[] inf_bound;
 					delete[] sup_bound;
 					throw PolytopeHullEmptyBoxException();
 				}
-				primal_sols[2*i]=mylinearsolver.get_primal_sol();
+				primal_sols[2*i]=mylinearsolver.not_proved_primal_sol();
 				primal_sol_found.add(2*i);
 
 				if(opt.lb() > box[i].lb()) {
 					box[i]=Interval(opt.lb(),box[i].ub());
-					mylinearsolver.set_bounds_var(i,box[i]);
+					mylinearsolver.set_bounds(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {
 					break;
 				}
 			}
-			else if (stat == LPSolver::INFEASIBLE_PROVED) {
+			else if (stat == LPSolver::Status::InfeasibleProved) {
 				delete[] inf_bound;
 				delete[] sup_bound;
 				// the infeasibility is proved, the EmptyBox exception is raised
 				throw PolytopeHullEmptyBoxException();
 			}
 
-			else if (stat == LPSolver::INFEASIBLE) {
+			else if (stat == LPSolver::Status::Infeasible) {
 				// the infeasibility is found but not proved, no other call is needed
 				break;
 			}
 
-			else if (stat == LPSolver::UNKNOWN) {
+			else if (stat == LPSolver::Status::Unknown) {
 				int next=-1;
 				for (int j=0;j<nb_var;j++) {
 					if (inf_bound[j]==0) {
@@ -179,39 +175,43 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		}
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
-			stat= mylinearsolver.solve_var(LPSolver::MAXIMIZE, i, opt);
-			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << " opt=" << opt << endl;
-			if( stat == LPSolver::OPTIMAL_PROVED) {
+			mylinearsolver.set_cost(i, -1.0);
+			stat= mylinearsolver.minimize();
+			mylinearsolver.set_cost(i, 0.0);
+			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << endl;
+			if( stat == LPSolver::Status::OptimalProved) {
+				opt = -mylinearsolver.minimum();
+				//std::cout << "opt=" << opt << endl;
 				if(opt.ub() <box[i].lb()) {
 					delete[] inf_bound;
 					delete[] sup_bound;
 					throw PolytopeHullEmptyBoxException();
 				}
 
-				primal_sols[2*i+1]=mylinearsolver.get_primal_sol();
+				primal_sols[2*i+1]=mylinearsolver.not_proved_primal_sol();
 				primal_sol_found.add(2*i+1);
 
 				if (opt.ub() < box[i].ub()) {
 					box[i] =Interval( box[i].lb(), opt.ub());
-					mylinearsolver.set_bounds_var(i,box[i]);
+					mylinearsolver.set_bounds(i,box[i]);
 				}
 
 				if (!choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound)) {
 					break;
 				}
 			}
-			else if(stat == LPSolver::INFEASIBLE_PROVED) {
+			else if(stat == LPSolver::Status::InfeasibleProved) {
 				delete[] inf_bound;
 				delete[] sup_bound;
 				// the infeasibility is proved,  the EmptyBox exception is raised
 				throw PolytopeHullEmptyBoxException();
 			}
-			else if (stat == LPSolver::INFEASIBLE) {
+			else if (stat == LPSolver::Status::Infeasible) {
 				// the infeasibility is found but not proved, no other call is needed
 				break;
 			}
 
-			else if (stat == LPSolver::UNKNOWN) {
+			else if (stat == LPSolver::Status::Unknown) {
 				int next=-1;
 				for (int j=0;j<nb_var;j++) {
 					if (inf_bound[j]==0) {
@@ -235,72 +235,57 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, int & infnexti, int* inf_bound, int* sup_bound) {
 
 	bool found = false;
+	// the primal solution : used by choose_next_variable
+	Vector primal_solution = mylinearsolver.not_proved_primal_sol();
+	//cout << " primal " << primal_solution << endl;
 
-	try {
-		// the primal solution : used by choose_next_variable
-		Vector primal_solution = mylinearsolver.get_primal_sol();
-		//cout << " primal " << primal_solution << endl;
+	// The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
+	// and updating the indicators if a bound has been found feasible (with the precision prec_bound)
+	// called only when a primal solution is found by the LP solver (use of primal_solution)
 
-		// The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
-		// and updating the indicators if a bound has been found feasible (with the precision prec_bound)
-		// called only when a primal solution is found by the LP solver (use of primal_solution)
+	// double prec_bound = mylinearsolver.getEpsilon(); // relative precision for the indicators TODO change with the precision of the optimizer ??
+	double prec_bound = 1.e-8; // relative precision for the indicators      :  compatibility for testing  BNE
+	double delta=1.e100;
+	double deltaj=delta;
 
-		// double prec_bound = mylinearsolver.getEpsilon(); // relative precision for the indicators TODO change with the precision of the optimizer ??
-		double prec_bound = 1.e-8; // relative precision for the indicators      :  compatibility for testing  BNE
-		double delta=1.e100;
-		double deltaj=delta;
+	for (int j=0; j<nb_var; j++)	{
 
-		for (int j=0; j<nb_var; j++)	{
-
-			if (inf_bound[j]==0) {
-				deltaj= fabs(primal_solution[j]- box[j].lb());
-				if ((fabs (box[j].lb()) < 1 && deltaj < prec_bound) ||
-						(fabs (box[j].lb()) >= 1 && fabs (deltaj /(box[j].lb())) < prec_bound))	{
-					inf_bound[j]=1;
-				}
-				if (inf_bound[j]==0 && deltaj < delta) 	{
-					nexti=j; infnexti=0;delta=deltaj; found =true;
-				}
+		if (inf_bound[j]==0) {
+			deltaj= fabs(primal_solution[j]- box[j].lb());
+			if ((fabs (box[j].lb()) < 1 && deltaj < prec_bound) ||
+					(fabs (box[j].lb()) >= 1 && fabs (deltaj /(box[j].lb())) < prec_bound))	{
+				inf_bound[j]=1;
 			}
-
-			if (sup_bound[j]==0) {
-				deltaj = fabs (primal_solution[j]- box[j].ub());
-
-
-				if ((fabs (box[j].ub()) < 1 && deltaj < prec_bound) 	||
-						(fabs (box[j].ub()) >= 1 && fabs (deltaj/(box[j].ub())) < prec_bound)) {
-					sup_bound[j]=1;
-				}
-				if (sup_bound[j]==0 && deltaj < delta) {
-					nexti=j; infnexti=1;delta=deltaj;  found =true;
-				}
-
-			}
-
-
-		}
-	} catch (LPException& ) {
-		// Default if the primal solution is not available.
-		for (int j=0; j<nb_var; j++) {
-			if (inf_bound[j]==0) {
-				nexti=j;   infnexti=0; found = true;
-				break;
-			}
-			else if  (sup_bound[j]==0) {
-				nexti=j;  infnexti=1; found = true;
-				break;
+			if (inf_bound[j]==0 && deltaj < delta) 	{
+				nexti=j; infnexti=0;delta=deltaj; found =true;
 			}
 		}
+
+		if (sup_bound[j]==0) {
+			deltaj = fabs (primal_solution[j]- box[j].ub());
+
+
+			if ((fabs (box[j].ub()) < 1 && deltaj < prec_bound) 	||
+					(fabs (box[j].ub()) >= 1 && fabs (deltaj/(box[j].ub())) < prec_bound)) {
+				sup_bound[j]=1;
+			}
+			if (sup_bound[j]==0 && deltaj < delta) {
+				nexti=j; infnexti=1;delta=deltaj;  found =true;
+			}
+
+		}
+
+
 	}
 	return found;
 }
 
 #else
 
-CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps, Interval limit_diam) :
+CtcPolytopeHull::CtcPolytopeHull(Linearizer& lr, int max_iter, int time_out, double eps) :
 		Ctc(lr.nb_var()) { }
 
-CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
+CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps) :
 		Ctc(A.nb_cols()) { }
 
 CtcPolytopeHull::~CtcPolytopeHull() { }

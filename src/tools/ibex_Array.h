@@ -293,7 +293,7 @@ void Array<T>::add(const std::vector<T*>& vec) {
 	resize(n+vec.size());
 
 	int i=0;
-	for (typename std::vector<T*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
+	for (typename std::vector<T*>::const_iterator it=vec.begin(); it!=vec.end(); ++it) {
 		set_ref(n+i, **it);
 		i++;
 	}
@@ -309,10 +309,8 @@ Array<T>::Array(T** a, int n) : _nb(n), array(new T*[n]) {
 
 template<class T>
 Array<T>::Array(const std::vector<T*>& vec) : _nb(vec.size()), array(new T*[vec.size()]) {
-
-	assert(vec.size()>0);
 	int i=0;
-	for (typename std::vector<T*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
+	for (typename std::vector<T*>::const_iterator it=vec.begin(); it!=vec.end(); ++it) {
 		array[i++] = *it;
 	}
 }

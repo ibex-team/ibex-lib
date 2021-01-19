@@ -13,16 +13,7 @@
 #include "ibex_P_NumConstraint.h"
 #include "parser.tab.hh"
 
-/*
-extern int TK_CONSTANT;
-
-extern const int TK_FUNC_SYMBOL;
-extern const int TK_FUNC_RET_SYMBOL;
-extern const int TK_EXPR_TMP_SYMBOL;
-
-extern const int TK_ENTITY;
-extern const int TK_ITERATOR;
- */
+#include <sstream>
 
 using namespace std;
 
@@ -47,27 +38,68 @@ public:
 class P_Scope::S_Cst : public P_Scope::S_Object {
 public:
 
-	S_Cst(const Domain& domain) : node(ExprConstant::new_(domain)), cst(domain) { }
+	/*
+	 * Initial constant creation
+	 *
+	 * --- Note for non-mutable constants: --
+	 * The domain is passed by copy and the future
+	 * node's domain will not be a reference to none of both:
+	 * all objects created during parsing can be safely deleted.
+	 *
+	 * Caveat: domains are copied twice - could be heavy for
+	 * large data. We cannot pass by reference here to avoid a
+	 * copy because the domain in argument is built (parsed
+	 * an generated) on the fly and will not remain in memory.
+	 */
+	S_Cst(const Domain& domain, bool _mutable) : domain(domain, _mutable), is_mutable(_mutable), _node(NULL) { }
 
-//	void bind(const ExprConstant& c) { node = &c; }
+	/*
+	 * Creates and return the expression node.
+	 *
+	 * The creation is made on demand to avoid memory leaks
+	 * (ex: when opening the scope of a function, all constants
+	 * are duplicated. If nodes were created at this point,
+	 * all unused constants will have their node lost in memory).
+	 */
+	const ExprConstant& node() {
+		if (!_node) {
+			if (is_mutable)
+				_node = &ExprConstant::new_mutable(domain);
+			else
+				_node = &ExprConstant::new_(domain); // not a reference, see comment in constructor
+		}
+		return *_node;
+	}
 
-	S_Object* copy() const { return new S_Cst(*this); }
+	bool node_built() const {
+		return _node!=NULL;
+	}
+
+	S_Object* copy() const {
+		return new S_Cst(*this);
+	}
 
 	int token() const { return TK_CONSTANT; }
 
-	void print(ostream& os) const { os << "constant " << cst; }
+	void print(ostream& os) const { os << "constant " << domain; }
 
-	const ExprConstant& node;
-	Domain cst;
+	Domain domain;
+
+	const bool is_mutable;
 
 private:
+
 	/**
-	 * Important: since, in the parser expressions, constants are ExprConstantRef
-	 * instead of ExprConstant, we must keep the same references when duplicating constants here.
-	 * Otherwise, in a "for" block, the ExprConstantRef inside expressions will point to domains
-	 * that will no longer exist after parsing (that is, once the scope of the "for" will be deleted).
+	 * Copy constructor.
+	 *
+	 * Copies of constants are made for parsing an other and independent
+	 * object (-> a function), so constants nodes must be re-created.
+	 * By default: set to NULL to avoid memory leaks.
 	 */
-	S_Cst(const S_Cst& c) : node(c.node), cst(c.cst,true) { }
+	S_Cst(const S_Cst& c) : domain(c.domain, c.is_mutable), is_mutable(c.is_mutable), _node(NULL) { }
+
+	const ExprConstant* _node;
+
 };
 
 class P_Scope::S_Func : public P_Scope::S_Object {
@@ -101,24 +133,24 @@ public:
 	const ExprNode* expr;
 };
 
-class P_Scope::S_Entity : public P_Scope::S_Object {
+class P_Scope::S_Var : public P_Scope::S_Object {
 public:
 
-	S_Entity(const char* name, const Dim* dim, const Domain& value) : symbol(ExprSymbol::new_(name,*dim)), d(*dim) {
+	S_Var(const char* name, const Dim* dim, const Domain& value) : symbol(ExprSymbol::new_(name,*dim)), d(*dim) {
 		init_symbol_domain(name, (Domain&) d, value);
 	}
 
-	S_Object* copy() const { return new S_Entity(*this); }
+	S_Object* copy() const { return new S_Var(*this); }
 
 	int token() const { return TK_ENTITY; }
 
-	void print(ostream& os) const { os << "entity"; }
+	void print(ostream& os) const { os << "var " << symbol.name; }
 
 	const ExprSymbol& symbol;
 	const Domain d;
 
 private:
-	S_Entity(const S_Entity& e) : symbol(e.symbol), d(e.d) {  }
+	S_Var(const S_Var& e) : symbol(e.symbol), d(e.d) {  }
 };
 
 class P_Scope::S_Iterator : public P_Scope::S_Object {
@@ -137,72 +169,75 @@ public:
 /*====================================================================================================*/
 
 
-P_Scope::P_Scope() { }
+P_Scope::P_Scope() {
+	push();
+}
 
-P_Scope::P_Scope(const P_Scope& scope, bool global) {
-	for (IBEXMAP(S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); ++it) {
-		switch (it->second->token()) {
-		case TK_ENTITY:
-			if (!global) {
-				S_Entity* _copy=(S_Entity*) it->second->copy();
-				tab.insert_new(it->first, _copy);
-				vars.push_back(_copy);
-			}
-			break;
-		case TK_CONST:
-			{
-				const char* id_copy=tab.insert_new(it->first, it->second->copy());
-				cst.push_back(id_copy);
-			}
-			break;
-		default:
-			tab.insert_new(it->first, it->second->copy());
+P_Scope::P_Scope(const P_Scope& scope) {
+	push();
+	// we know that constants are necessarily in the bottom scope
+	for (IBEXMAP(S_Object*)::const_iterator it=scope.tab.back().begin(); it!=scope.tab.back().end(); ++it) {
+		if (it->second->token()==TK_CONSTANT || it->second->token()==TK_FUNCTION) {
+			tab.front().insert_new(it->first, it->second->copy());
 		}
 	}
 }
 
+void P_Scope::push() {
+	tab.push_front(SymbolMap<S_Object*>());
+}
+
+void P_Scope::pop() {
+	if (tab.empty()) {
+		ibex_error("P_Scope: empty stack (please report bug)");
+	}
+
+	for (IBEXMAP(P_Scope::S_Object*)::const_iterator it2=tab.front().begin(); it2!=tab.front().end(); ++it2) {
+		delete it2->second;
+	}
+
+	tab.pop_front();
+}
+
 P_Scope::~P_Scope() {
-  for (IBEXMAP(S_Object*)::const_iterator it=tab.begin(); it!=tab.end(); it++)
-    delete it->second;
+	while (!tab.empty()) pop();
 }
 
-/*====================================================================================================*/
+P_Scope::S_Object* P_Scope::lookup(const char* id) {
+	list<SymbolMap<S_Object*> >::iterator it=tab.begin();
+	while (it!=tab.end()) {
+		try {
+			S_Object* o=(*it)[id];
+			return o;
+		} catch(SymbolMap<S_Object*>::SymbolNotFound& e) {
+			// try next scope below
+			++it;
+		}
+	}
+	return NULL;
+}
 
+const P_Scope::S_Object* P_Scope::lookup(const char* id) const {
+	return ((P_Scope*) this)->lookup(id);
+}
 
-void P_Scope::add_cst(const char* id, const Domain& domain) {
+void P_Scope::add_cst(const char* id, const Domain& domain, bool is_mutable) {
 	//cout << "[parser] add cst " << id << "=" << domain << endl;
-	const char* id_copy=tab.insert_new(id, new S_Cst(domain));
-	cst.push_back(id_copy);
-}
-
-void P_Scope::add_cst(const char* id, const Dim* dim, const Domain& dom) {
-	Domain tmp(*dim);
-	//cout << "[parser] add cst " << id << "=" << dom.dim << "<>" << *dim << endl;
-	init_symbol_domain(id, tmp, dom);
-	const char* id_copy=tab.insert_new(id, new S_Cst(tmp));
-	cst.push_back(id_copy);
-}
-
-//void P_Scope::bind_cst_node(const char* id, const ExprConstant& node) {
-//	const S_Object& s=*tab[id];
-//	assert(s.token()==TK_CONSTANT);
-//	((S_Cst&) s).bind(node);
-//}
-
-void P_Scope::rem_cst(const char* id) {
-	assert(tab[id]->token()==TK_CONSTANT);
-	delete &get_cst(id);
-	delete tab[id];
-	tab.erase(id);
+	tab.front().insert_new(id, new S_Cst(domain, is_mutable));
 }
 
 void P_Scope::add_func(const char* id, Function* f) {
-	tab.insert_new(id, new S_Func(f));
+	tab.front().insert_new(id, new S_Func(f));
 	//cout << "[parser] add function " << *f << endl;
 }
 
 void P_Scope::add_expr_tmp_symbol(const char* id, const ExprNode* expr) {
-	tab.insert_new(id, new S_ExprTmp(expr));
+	if (tab.front().used(id)) {
+		ostringstream s;
+		s << "P_Scope: temporary symbol \"" << id << "\" re-assigned in the same scope (please report bug)";
+		ibex_error(s.str().c_str());
+	}
+	tab.front().insert_new(id, new S_ExprTmp(expr)); // can hide something declared in wider scope
 }
 
 void P_Scope::add_var(const char* id, const Dim* dim) {
@@ -213,55 +248,61 @@ void P_Scope::add_var(const char* id, const Dim* dim) {
 }
 
 void P_Scope::add_var(const char* id, const Dim* d, const Domain& domain) {
-	S_Entity* s = new S_Entity(id,d,domain);
-	tab.insert_new(id,s);
+	S_Var* s = new S_Var(id,d,domain);
+	tab.front().insert_new(id,s);
 	vars.push_back(s);
 }
 
 void P_Scope::add_iterator(const char* id) {
-	tab.insert_new(id, new S_Iterator(-1));
+	tab.front().insert_new(id, new S_Iterator(-1));
 }
 
-void P_Scope::rem_iterator(const char* id) {
-	assert(tab[id]->token()==TK_ITERATOR);
-	delete tab[id];
-	tab.erase(id);
-}
-
-//std::pair<const ExprConstant*, const Domain*> P_Scope::get_cst(const char* id) const {
-const ExprConstant& P_Scope::get_cst(const char* id) const {
-	const S_Object& o=*tab[id];
+const Domain& P_Scope::get_cst(const char* id) const {
+	const S_Object& o=*lookup(id);
 	assert(o.token()==TK_CONSTANT);
-	const S_Cst& s=(const S_Cst&) o;
-	//return std::pair<const ExprConstant*,const Domain*>(s.node,&s.cst);
-	return s.node;
+	return ((const S_Cst&) o).domain;
+}
+
+const ExprConstant& P_Scope::get_cst_node(const char* id) {
+	S_Object& o=*lookup(id);
+	assert(o.token()==TK_CONSTANT);
+	return ((S_Cst&) o).node();
+
 }
 
 Function& P_Scope::get_func(const char* id) {
-	S_Object& s=*tab[id];
+	S_Object& s=*lookup(id);
 	assert(s.token()==TK_FUNC_SYMBOL);
 	return *((const S_Func&) s).f;
 }
 
-const ExprNode* P_Scope::get_expr_tmp_expr(const char* id) const {
-	const S_Object& s=*tab[id];
+const ExprNode* P_Scope::get_tmp_expr_node(const char* id) const {
+	const S_Object& s=*lookup(id);
 	assert(s.token()==TK_EXPR_TMP_SYMBOL);
 	return ((const S_ExprTmp&) s).expr;
 }
 
+std::vector<const ExprNode*> P_Scope::get_all_existing_nodes() const {
+	std::vector<const ExprNode*> vec;
+	for (list<SymbolMap<S_Object*> >::const_iterator it=tab.begin(); it!=tab.end(); ++it) {
+		for (IBEXMAP(P_Scope::S_Object*)::const_iterator it2=it->begin(); it2!=it->end(); ++it2) {
+			S_Object& o=*it2->second;
+			if (o.token()==TK_EXPR_TMP_SYMBOL) {
+				//cout << " add expression " << *((const S_ExprTmp&) *(it2->second)).expr <<endl;
+				vec.push_back(((const S_ExprTmp&) o).expr);
+			} else if (o.token()==TK_CONSTANT && ((const S_Cst&) o).node_built()) {
+				vec.push_back((const ExprNode*) &(((S_Cst&) o).node()));
+			}
+		}
+	}
+	return vec;
+}
+
 std::pair<const ExprSymbol*,const Domain*> P_Scope::get_var(const char* id) const {
-	const S_Object& o=*tab[id];
+	const S_Object& o=*lookup(id);
 	assert(o.token()==TK_ENTITY);
-	const S_Entity& s=(const S_Entity&) o;
+	const S_Var& s=(const S_Var&) o;
 	return std::pair<const ExprSymbol*,const Domain*>(&s.symbol,&s.d);
-}
-
-const char* P_Scope::var(int i) const {
-	return vars[i]->symbol.name;
-}
-
-int P_Scope::nb_var() const {
-	return vars.size();
 }
 
 Array<const Domain> P_Scope::var_domains() const {
@@ -287,44 +328,52 @@ const P_Scope::S_Iterator& P_Scope::get_iterator(const char* id) const {
 }*/
 
 int P_Scope::get_iter_value(const char* id) const {
-	const S_Object& s=*tab[id];
+	const S_Object& s=*lookup(id);
 	assert(s.token()==TK_ITERATOR);
 	return ((const S_Iterator&) s).value;
 }
 
 
 void P_Scope::set_iter_value(const char* id, int value) {
-	S_Object& s=*tab[id];
+	S_Object& s=*lookup(id);
 	assert(s.token()==TK_ITERATOR);
 	((S_Iterator&) s).value=value;
 }
 
 
 bool P_Scope::is_cst_symbol(const char* id) const {
-	return tab[id]->token()==TK_CONSTANT;
+	return lookup(id)->token()==TK_CONSTANT;
+}
+
+bool P_Scope::is_mutable_cst_symbol(const char* id) const {
+	const S_Object& s=*lookup(id);
+	return s.token()==TK_CONSTANT && ((const S_Cst&) s).domain.is_reference;
 }
 
 bool P_Scope::is_iter_symbol(const char* id) const {
-	return tab[id]->token()==TK_ITERATOR;
+	return lookup(id)->token()==TK_ITERATOR;
 }
 
 int P_Scope::token(const char* id) const {
-  if (tab.used(id))
-    return tab[id]->token();
-  else
-    return TK_NEW_SYMBOL;
+	const S_Object* o=lookup(id);
+	if (o)
+		return o->token();
+	else
+		return TK_NEW_SYMBOL;
 }
 
 
 ostream& operator<<(ostream& os, const P_Scope& scope) {
-	os << "current scope :\n";
-	os << "--------------------\n";
-	for (IBEXMAP(P_Scope::S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); it++) {
-		os << "  " << it->first << " ";
-		it->second->print(os);
-		os << endl;
+	os << "Scopes :\n";
+	for (list<SymbolMap<P_Scope::S_Object*> >::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); ++it) {
+		os << "----------------------------------------\n";
+		for (IBEXMAP(P_Scope::S_Object*)::const_iterator it2=it->begin(); it2!=it->end(); ++it2) {
+			os << "  " << it2->first << " ";
+			it2->second->print(os);
+			os << endl;
+		}
+		os << "----------------------------------------\n";
 	}
-	os << "--------------------\n";
 	return os;
 }
 

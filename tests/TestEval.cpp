@@ -17,35 +17,35 @@
 
 using namespace std;
 
-namespace {
-
-IntervalMatrix M1() {
-	IntervalMatrix m(2,3);
-	double _r1[][2]={{0,1},{0,2},{0,3}};
-	double _r2[][2]={{-1,0},{-2,0},{-3,0}};
-	IntervalVector r1(3,_r1);
-	IntervalVector r2(3,_r2);
-	m[0]=r1;
-	m[1]=r2;
-	return m;
-}
-
-
-IntervalMatrix M2() { // the transpose of M1
-	IntervalMatrix m(3,2);
-	double _c1[][2]={{0,1},{-1,0}};
-	double _c2[][2]={{0,2},{-2,0}};
-	double _c3[][2]={{0,3},{-3,0}};
-	IntervalVector c1(2,_c1);
-	IntervalVector c2(2,_c2);
-	IntervalVector c3(2,_c3);
-	m[0]=c1;
-	m[1]=c2;
-	m[2]=c3;
-	return m;
-}
-
-}
+//namespace {
+//
+//IntervalMatrix M1() {
+//	IntervalMatrix m(2,3);
+//	double _r1[][2]={{0,1},{0,2},{0,3}};
+//	double _r2[][2]={{-1,0},{-2,0},{-3,0}};
+//	IntervalVector r1(3,_r1);
+//	IntervalVector r2(3,_r2);
+//	m[0]=r1;
+//	m[1]=r2;
+//	return m;
+//}
+//
+//
+//IntervalMatrix M2() { // the transpose of M1
+//	IntervalMatrix m(3,2);
+//	double _c1[][2]={{0,1},{-1,0}};
+//	double _c2[][2]={{0,2},{-2,0}};
+//	double _c3[][2]={{0,3},{-3,0}};
+//	IntervalVector c1(2,_c1);
+//	IntervalVector c2(2,_c2);
+//	IntervalVector c3(2,_c3);
+//	m[0]=c1;
+//	m[1]=c2;
+//	m[2]=c3;
+//	return m;
+//}
+//
+//}
 
 namespace ibex {
 
@@ -225,9 +225,8 @@ void TestEval::eval_components01() {
 	const ExprSymbol& z = ExprSymbol::new_("z");
 	const ExprNode& e1=x+3*y;
 	const ExprNode& e2=y-2*x;
-	const ExprNode& e3=y+z;
-	const ExprNode& e4=e1*e2;
-	Function f(x,y,z,Return(e4+1,e2+3,e4-2,e4-4));
+	const ExprNode& e3=e1*e2;
+	Function f(x,y,z,Return(e3+1,e2+3,e3-2,e3-4));
 
 	Interval vx=Interval::one();
 	Interval vy=2*Interval::one();

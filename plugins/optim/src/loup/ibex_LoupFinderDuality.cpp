@@ -18,8 +18,9 @@ namespace ibex {
 //TODO: remove this recipe for the argument of the max number of iterations of the LP solver
 LoupFinderDuality::LoupFinderDuality(const NormalizedSystem& sys) : sys(sys),
 		nb_LP_var(sys.nb_var*(1+sys.f_ctrs.image_dim())),
-		lr(sys), lp_solver(nb_LP_var, nb_LP_var*3),
+		lr(sys), lp_solver(nb_LP_var),
 		init_box(nb_LP_var, Interval::neg_reals() /*note: the domain of variables will be overwritten) */) {
+	lp_solver.set_max_iter(nb_LP_var*3);
 
 }
 
@@ -42,13 +43,12 @@ void LoupFinderDuality::add_property(const IntervalVector& init_box, BoxProperti
 
 std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& box, const IntervalVector&, double current_loup, BoxProperties& prop) {
 
-	double d=box.max_diam();
-	if (d < LPSolver::min_box_diam || d > LPSolver::max_box_diam)
-		throw NotFound();
-
 	int n=sys.nb_var;
 
-	lp_solver.clean_ctrs();
+	if (box.is_unbounded())
+		throw NotFound();
+
+	lp_solver.clear_constraints();
 	init_box.put(0, box);
 	lp_solver.set_bounds(init_box);
 
@@ -67,15 +67,15 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 
 	size_t j=0;
 	for (; j<(size_t) n; j++)
-		lp_solver.set_obj_var(j,goal[j]);
+		lp_solver.set_cost(j,goal[j]);
 	for (; j<nb_LP_var; j++)
-		lp_solver.set_obj_var(j,0);
+		lp_solver.set_cost(j,0);
 
-	LPSolver::Status_Sol stat = lp_solver.solve();
+	LPSolver::Status stat = lp_solver.minimize();
 
-	if (stat == LPSolver::OPTIMAL) {
+	if (stat == LPSolver::Status::Optimal) {
 		//the linear solution is mapped to intervals and evaluated
-		Vector loup_point = lp_solver.get_primal_sol().subvector(0,n-1);
+		Vector loup_point = lp_solver.not_proved_primal_sol().subvector(0,n-1);
 
 		if (!box.contains(loup_point)) throw NotFound();
 

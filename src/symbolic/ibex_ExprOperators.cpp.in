@@ -157,7 +157,7 @@ const ExprGenericBinaryOp& ExprGenericBinaryOp::new_(const char* op_name, const 
 }
 
 ExprGenericBinaryOp::ExprGenericBinaryOp(const char* op_name, const ExprNode& left, const ExprNode& right) :
-		ExprBinaryOp(left, right, get_binary_op(op_name).dim(left.dim,right.dim)), name(strdup(name)) {
+		ExprBinaryOp(left, right, get_binary_op(op_name).dim(left.dim,right.dim)), name(strdup(op_name)) {
 
 	BinaryOperatorDef def=get_binary_op(op_name);
 	eval = def.eval;

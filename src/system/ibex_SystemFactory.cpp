@@ -104,7 +104,8 @@ void SystemFactory::add_goal(const ExprNode& goal, const char* name) {
 
 	Array<const ExprSymbol> goal_vars(input_args.size());
 	varcopy(input_args,goal_vars);
-	const ExprNode& goal_expr=ExprCopy().copy(input_args, goal_vars, goal);
+
+	const ExprNode& goal_expr=ExprCopy().copy(input_args, goal_vars, goal).simplify();
 	this->goal = new Function(goal_vars, goal_expr, name);
 }
 

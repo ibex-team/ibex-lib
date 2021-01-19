@@ -22,7 +22,8 @@ namespace ibex {
 namespace {
 
 bool is_cst(const ExprNode& e) {
-	return dynamic_cast<const ExprConstant*>(&e)!=NULL;
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&e);
+	return c!=NULL && !c->is_mutable();
 }
 
 bool is_mul(const ExprNode& e) {
@@ -284,14 +285,15 @@ void ExprSimplify::visit(const ExprSymbol& x) {
 		insert(x,x[idx]);
 }
 
-
 void ExprSimplify::visit(const ExprConstant& c) {
 	if (idx.all())
 		insert(c,c);
 	else
-		insert(c,ExprConstant::new_(c.get()[idx]));
+		if (c.is_mutable())
+			insert(c,c[idx]); // no simplification allowed
+		else
+			insert(c,ExprConstant::new_(c.get()[idx]));
 }
-
 
 void ExprSimplify::visit_add_sub(const ExprBinaryOp& e, bool sign) {
 

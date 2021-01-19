@@ -376,6 +376,11 @@ protected:
 /*============================================ inline implementation ============================================ */
 
 inline const CovSolverData& Solver::get_data() const {
+	if (manif==NULL) { // not started yet
+		ibex_warning("ibexsolve: \"get_data\" called before \"solve\" (nothing done)");
+		((Solver*) this)->start(solve_init_box);
+		((Solver*) this)->flush();
+	}
 	return *manif;
 }
 

@@ -17,6 +17,7 @@
 #include "ibex_Expr2Ampl.h"
 #include "ibex_P_Struct.h"
 #include "ibex_Domain.h"
+#include "ibex_Exception.h"
 
 #include <stdio.h>
 #include <sstream>
@@ -378,6 +379,16 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 	return os;
 }
 
+Domain& System::constant(const std::string& name) {
+	const char* _name=name.c_str();
+	try {
+		Domain* domain = mutable_constants[_name];
+		return *domain;
+	} catch (SymbolMap<Domain*>::SymbolNotFound&) {
+		ibex_error("No mutable constant named \""+name+"\")");
+	}
+}
+
 void System::load(FILE* fd) {
 
 	LOCK;
@@ -419,6 +430,10 @@ System::~System() {
 	}
 
 	if (ops) delete[] ops;
+
+	for (IBEXMAP(Domain*)::iterator it=mutable_constants.begin(); it!=mutable_constants.end(); ++it) {
+		delete it->second;
+	}
 }
 
 
