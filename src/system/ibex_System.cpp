@@ -14,6 +14,7 @@
 #include "ibex_UnknownFileException.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_Expr2Minibex.h"
+#include "ibex_Expr2Ampl.h"
 #include "ibex_P_Struct.h"
 #include "ibex_Domain.h"
 #include "ibex_Exception.h"
@@ -161,6 +162,182 @@ std::string System::minibex(bool human) const {
 		}
 	}
 	s << "end";
+	s.flush();
+
+	for (int i=0; i<args.size(); i++) {
+		delete &domains[i];
+	}
+
+	return s.str();
+}
+
+
+std::string System::toAmpl() const {
+	stringstream s;
+	s << "# Build with IBEX " << _IBEX_RELEASE_ << "\n";
+
+	Array<Domain> domains(args.size());
+	for (int i=0; i<args.size(); i++) {
+		domains.set_ref(i,*new Domain(args[i].dim));
+	}
+
+	ibex::load(domains, box);
+
+	for (int i=0; i<args.size(); i++) {
+		const ExprSymbol& x=args[i];
+		switch(domains[i].dim.type()) {
+		case Dim::SCALAR:{
+			s << "var " << x.name << " ";
+			Interval tmp = domains[i].i();
+			if (tmp.lb() > NEG_INFINITY) {
+				s << " >= " << tmp.lb();
+				if (tmp.ub() < POS_INFINITY) s << " , ";
+			}
+			if (tmp.ub() < POS_INFINITY) {
+				s << " <= " << tmp.ub();
+			}
+			s << "; \n";
+			break;
+		}
+
+		case Dim::COL_VECTOR:
+		case Dim::ROW_VECTOR:{
+			int n = (x.dim.nb_rows()>1) ? x.dim.nb_rows() : x.dim.nb_cols();
+			s << "set S"<<i<< " = {0.." << n-1 << "}; \n";
+			s << "param lower_bounds"<< i  << " {S"<<i<<"}; \n";
+			s << "param upper_bounds"<< i  << " {S"<<i<<"}; \n";
+
+			s << "var " << x.name << "{p in S"<<i<<"} >= lower_bounds"<<i<<"[p] , <= upper_bounds"<<i <<"[p] ;\n\n";
+			break;
+		}
+		case Dim::MATRIX: {
+			s << "set S1"<<i<< " = {0.." << x.dim.nb_rows()-1 << "}; \n";
+			s << "set S2"<<i<< " = {0.." << x.dim.nb_cols()-1 << "}; \n";
+			s << "param lower_bounds"<< i  << " {S1"<<i<<", S2"<<i<< " }; \n";
+			s << "param upper_bounds"<< i  << " {S1"<<i<<", S2"<<i<< " }; \n";
+
+			s << "var " << x.name << "{p in S1"<<i<<", k in S2"<< i <<"} >= lower_bounds"<<i<<"[p,k] , <= upper_bounds"<<i <<"[p,k] ;\n\n";
+			break;
+		}
+
+		}
+	}
+
+	s << '\n';
+
+	if (goal) {
+		s << goal->toAmpl() << "\n";
+	}
+
+	if (nb_ctr>0) {
+		for (int i=0; i<nb_ctr; i++) {
+			s << f_ctrs[i].toAmpl();
+		}
+	}
+	s << "\n";
+	if (goal) {
+		s << "minimize GOAL:" << goal->name << ";\n\n";
+	}
+
+	if (nb_ctr>0) {
+		for (int i=0; i<nb_ctr; i++) {
+			s << "subject to ctrs_" << f_ctrs[i].name << " : ";
+			s << f_ctrs[i].name <<" " << ops[i] << " 0 ;\n";
+		}
+	}
+	s << "\n";
+	s << "option ibexopt_auxfiles rc; \n";
+	s << "option solver ibexopt; \n";
+	s << "solve; \n\n ";
+
+
+
+
+	s << "data; \n";
+	for (int i=0; i<args.size(); i++) {
+		const ExprSymbol& x=args[i];
+		switch(domains[i].dim.type()) {
+		case Dim::SCALAR:{
+
+			break;
+		}
+
+		case Dim::COL_VECTOR:
+		case Dim::ROW_VECTOR:{
+			int n = (x.dim.nb_rows()>1) ? x.dim.nb_rows() : x.dim.nb_cols();
+			//s << "set S"<<i<< " = {0.." << n-1 << "}; \n";
+			//s << "param lower_bounds"<< i  << " {S"<<i<<"}; \n";
+			//s << "param upper_bounds"<< i  << " {S"<<i<<"}; \n";
+			s << "param lower_bounds" << i <<" := \n";
+			for (int j =0; j<n; j++) {
+				if (domains[i].v()[j].lb() > NEG_INFINITY)
+					s << j << "  " << domains[i].v()[j].lb()<< "  \n";
+				else
+					s << j << " -Infinity  \n";
+
+			}
+			s <<";\n";
+			s << "param  upper_bounds"<< i  <<" := \n";
+			for (int j =0; j<n; j++) {
+				if (domains[i].v()[j].ub() < POS_INFINITY)
+					s <<  j << " " << domains[i].v()[j].ub() << " \n";
+				else
+					s <<  j <<  " Infinity \n";
+
+			}
+			s <<";\n";
+			//s << "var " << x.name << "{p in S"<<i<<"} >= lower_bounds"<<i<<"[p] , <= upper_bounds"<<i <<"[p] ;\n\n";
+			break;
+		}
+		case Dim::MATRIX: {
+			//s << "set S1"<<i<< " = {0.." << x.dim.nb_rows()-1 << "}; \n";
+			//s << "set S2"<<i<< " = {0.." << x.dim.nb_cols()-1 << "}; \n";
+			//s << "param lower_bounds"<< i  << " {S1"<<i<<", S2"<<i<< " }; \n";
+			//s << "param upper_bounds"<< i  << " {S1"<<i<<", S2"<<i<< " }; \n";
+			s << "param lower_bounds"<< i<< " : ";
+			for (int ii=0 ; ii < x.dim.nb_cols(); ii++) {
+				s << ii << " ";
+			}
+			s << " : = \n ";
+			for (int ii=0 ; ii < x.dim.nb_rows(); ii++) {
+				s << ii << " ";
+				for (int jj=0 ; jj < x.dim.nb_cols(); jj++) {
+					if (domains[i].m()[ii][jj].lb() > NEG_INFINITY)
+						s  << domains[i].m()[ii][jj].lb()<< "  ";
+					else
+						s << "-Infinity  ";
+				}
+				s <<"\n";
+			}
+			s << ";\n";
+			s << "param upper_bounds"<< i<< " : ";
+			for (int ii=0 ; ii < x.dim.nb_cols(); ii++) {
+				s << ii << " ";
+			}
+			s << " := \n ";
+			for (int ii=0 ; ii < x.dim.nb_rows(); ii++) {
+				s << ii << " ";
+				for (int jj=0 ; jj < x.dim.nb_cols(); jj++) {
+					if (domains[i].m()[ii][jj].ub() < POS_INFINITY)
+						s << domains[i].m()[ii][jj].ub() << " ";
+					else
+						s << "Infinity  ";
+				}
+				s <<"\n";
+			}
+			s << ";\n";
+			//s << "var " << x.name << "{p in S1"<<i<<", k in S2"<< i <<"} >= lower_bounds"<<i<<"[p,k] , <= upper_bounds"<<i <<"[p,k] ;\n\n";
+			break;
+		}
+
+		}
+	}
+
+
+
+
+
+
 	s.flush();
 
 	for (int i=0; i<args.size(); i++) {

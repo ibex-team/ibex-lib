@@ -60,6 +60,8 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2DAG.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Minibex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Minibex.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Ampl.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Ampl.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Polynom.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Expr2Polynom.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_ExprCmp.cpp

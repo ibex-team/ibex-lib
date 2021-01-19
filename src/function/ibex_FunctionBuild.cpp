@@ -17,6 +17,7 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprDiff.h"
 #include "ibex_Expr2Minibex.h"
+#include "ibex_Expr2Ampl.h"
 #include "ibex_Eval.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_Gradient.h"
@@ -617,6 +618,16 @@ std::string Function::minibex(bool human) const {
 
 	Expr2Minibex().print(s,expr(),human);
 	s << endl << "end";
+	s.flush();
+	return s.str();
+}
+
+
+std::string Function::toAmpl() const {
+	stringstream s;
+	s << "var "<< name <<" = ";
+	Expr2Ampl().print(s,expr());
+	s << ";"<< endl;
 	s.flush();
 	return s.str();
 }
