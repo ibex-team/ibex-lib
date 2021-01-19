@@ -78,24 +78,80 @@ void Expr2Ampl::visit(const ExprNode& e) {
 
 void Expr2Ampl::visit(const ExprApply& a) {
 	assert(false);
-	ibex_warning("Expr2Ampl::visit(const ExprApply& a): to do...");//TODO
+	ibex_warning("Expr2Ampl::visit(const ExprApply& a): to do...");
+	//TODO Je pense que c'est possible
+	// On ecrit l'expression de la fonction dans un os temporaire puis on remplace les noms de variable par les arguments de la fonction
 }
 
-void Expr2Ampl::visit(const ExprVector& e){
+
+void Expr2Ampl::visit(const ExprTrans& e){
 	assert(false);
-	ibex_warning("Expr2Ampl::visit(const ExprVector& a): to do...");//TODO
+	ibex_warning("Expr2Ampl: they is no transpose function in AMPL");
 }
 
-
-void Expr2Ampl::visit(const ExprChi& a){
+void Expr2Ampl::visit(const ExprVector& e) {
 	assert(false);
-	ibex_warning("Expr2Ampl::visit(const ExprChi& a): to do...");//TODO
+	ibex_warning("Expr2Ampl: they is no vector representation in AMPL");
 }
 
-void Expr2Ampl::visit(const ExprConstant& e){
+
+
+void Expr2Ampl::visit(const ExprMul& e)   {
+	if (e.left.dim.is_scalar() && e.right.dim.is_scalar()) {
+		(*os) << "("; visit(e.left); (*os) << "*"; visit(e.right); (*os) << ")";
+	} else if (e.left.dim.is_vector() && e.right.dim.is_vector() &&
+			e.left.dim.type()==Dim::ROW_VECTOR && e.right.dim.type()==Dim::COL_VECTOR) {
+		// dot product
+		const ExprVector& rr = static_cast<const ExprVector&>(e.right);
+		const ExprVector& ll = static_cast<const ExprVector&>(e.left);
+		(*os) << "(";
+		for (int i=0; i<ll.length(); i++) {
+			(*os) << "(";
+			visit(ll.get(i));
+			(*os) << "*";
+			visit(rr.get(i));
+			if (i < ll.length()-1) {
+				(*os) << ")+";
+			} else {
+				(*os) << ")";
+			}
+		}
+		(*os) << ")";
+	} else {
+		assert(false);
+		ibex_warning("Expr2Ampl: ExprMul - they is no vector representation in AMPL");
+	}
+}
+
+
+void Expr2Ampl::visit(const ExprConstant& e) {
 	print_domain(e.get());
 }
 
+void Expr2Ampl::visit(const ExprChi& a){
+	(*os) << "( if ((";
+	visit(a.args[0]);
+	(*os) << ") <=0) then (";
+	visit(a.args[1]);
+	(*os) << ") else (";
+	visit(a.args[2]);
+	(*os) << " ))";
+}
+
+void Expr2Ampl::visit(const ExprSaw& e){
+	(*os) << "( ";
+	visit(e);
+	(*os) << " - round(";
+	visit(e);
+	(*os) << " ))";
+}
+
+
+void Expr2Ampl::visit(const ExprSign& e){
+	(*os) << "( if ((";
+	visit(e);
+	(*os) << ") <=0) then ( -1 ) else ( 1 ))";
+}
 
 void Expr2Ampl::visit(const ExprIndex& e) {
 	(*os) << e.expr;
@@ -108,14 +164,14 @@ void Expr2Ampl::visit(const ExprIndex& e) {
 			if (e.index.one_col()) (*os) << e.index.first_col()+1;
 			else {
 				assert(false);
-				ibex_warning("Expr2Ampl::visit(const ExExprIndex& a): Multi index col, to do...");//TODO
+				ibex_warning("Expr2Ampl::visit(const ExprIndex& a): Multi index col, to do...");//TODO
 			}
 			break;
 		case Dim::COL_VECTOR:
 			if (e.index.one_row()) (*os) << e.index.first_row()+1;
 			else {
 				assert(false);
-				ibex_warning("Expr2Ampl::visit(const ExExprIndex& a): Multi index row, to do...");//TODO
+				ibex_warning("Expr2Ampl::visit(const ExprIndex& a): Multi index row, to do...");//TODO
 			}
 			break;
 		default:
@@ -123,13 +179,13 @@ void Expr2Ampl::visit(const ExprIndex& e) {
 			if (e.index.one_row()) (*os) << e.index.first_row()+1;
 			else {
 				assert(false);
-				ibex_warning("Expr2Ampl::visit(const ExExprIndex& a): Multi index matirx row, to do...");//TODO
+				ibex_warning("Expr2Ampl::visit(const ExprIndex& a): Multi index matirx row, to do...");//TODO
 			}
 			(*os) << ",";
 			if (e.index.one_col()) (*os) << e.index.first_col()+1;
 			else {
 				assert(false);
-				ibex_warning("Expr2Ampl::visit(const ExExprIndex& a): Multi index matrix col, to do...");//TODO
+				ibex_warning("Expr2Ampl::visit(const ExprIndex& a): Multi index matrix col, to do...");//TODO
 			}
 		}
 		(*os) << "]";
@@ -171,18 +227,18 @@ void Expr2Ampl::print_itv(const Interval& x) {
 		print_dbl(x.mid());
 	else {
 		assert(false);
-		ibex_warning("Expr2Ampl::print_itv: to do..."); //TODO
+		ibex_warning("Expr2Ampl::print_itv - there is no Interval in AMPL"); //TODO
 	}
 }
 
 void Expr2Ampl::print_itv_vec(const IntervalVector& v, bool in_row) {
 	assert(false);
-	ibex_warning("Expr2Ampl::print_itv_vec: to do...");//TODO
+	ibex_warning("Expr2Ampl::print_itv_vec - there is no Interval nor Vector in AMPL");//TODO
 }
 
 void Expr2Ampl::print_itv_mat(const IntervalMatrix& m) {
 	assert(false);
-	ibex_warning("Expr2Ampl::print_itv_mat: to do...");//TODO
+	ibex_warning("Expr2Ampl::print_itv_mat - there is no Interval nor Vector in AMPL");//TODO
 }
 
 
