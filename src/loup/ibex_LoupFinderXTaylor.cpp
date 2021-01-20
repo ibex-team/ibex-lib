@@ -58,9 +58,14 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 		//the linear solution is mapped to intervals and evaluated
 		Vector loup_point = lp_solver.not_proved_primal_sol();
 
-		// we allow finding a loup outside of the current box, but
+		// we allow a loup to be outside of the current box, but
 		// not outside of the system box.
-		if (!sys.box.contains(loup_point)) throw NotFound();
+		// To deal with the latter case, we apply the following
+		// simple change to the loup point (which would be lost anyway)
+		for (uint i=0; i<n; i++) {
+			if (loup_point[i] < sys.box[i].lb()) loup_point[i] = sys.box[i].lb();
+			if (loup_point[i] > sys.box[i].ub()) loup_point[i] = sys.box[i].ub();
+		}
 
 		double new_loup=current_loup;
 
