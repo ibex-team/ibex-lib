@@ -125,7 +125,14 @@ LPSolver::Status LPSolver::minimize() {
     assert(!ivec_bounds_.is_unbounded());
     
     // solve
-    myclp->dual();
+    fpu_round_down();
+    myclp->primal();
+    if (_IBEX_INTERVAL_LIB_=="gaol") {
+    	fpu_round_up();
+    } else
+    	fpu_round_near();
+
+  //  myclp->dual();
     
     int clp_status = myclp->status();
     /** Status of problem:
