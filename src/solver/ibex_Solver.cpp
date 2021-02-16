@@ -316,20 +316,24 @@ bool Solver::check_ineq(const IntervalVector& box) {
 	if (!ineqs)
 		return true;
 
-	Interval y,r;
-
 	bool not_inner=false;
 
-	for (int i=0; i<ineqs->nb_ctr; i++) {
-		NumConstraint& c=ineqs->ctrs[i];
-		assert(c.f.image_dim()==1);
-		y=c.f.eval(box);
-		r=c.right_hand_side().i();
+	IntervalVector y=ineqs->f_ctrs.eval_vector(box);
 
-		if (y.is_disjoint(r)) {
+	Interval right_cst;
+
+	for (int i=0; i<nb_ineq; i++) {
+		switch (ineqs->ops[i]) {
+		case LT :
+		case LEQ : right_cst=Interval::neg_reals(); break;
+		case EQ  : right_cst=Interval::zero();      break;
+		case GEQ :
+		case GT  : right_cst=Interval::pos_reals();  break;
+		}
+		if (y[i].is_disjoint(right_cst)) {
 			throw EmptyBoxException();
 		}
-		else if (!y.is_subset(r)) {
+		else if (!y[i].is_subset(right_cst)) {
 			not_inner=true;
 		}
 	}
