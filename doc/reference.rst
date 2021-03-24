@@ -42,22 +42,25 @@ Articles in Journal and Conferences
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    | Author(s)                    | Title                           | Journal/Conference      | Year | Link                |
 +====================+==============================+=================================+=========================+======+=====================+
-| | | | | | |
-| .. _Araya18:  | **I. Araya, B. Neveu** | *Lsmear: A Variable Selection Strategy*    |  Journal of Global | 2018 |    |
-|                          |                                 |  *for Interval Branch and Bound Solvers*  |   Optimization      |          |    |
-| [Araya & Neveu 2018]  |                          |                                                              |                             |          |     |
+|                    |                              |                                 |                         |      |                     |
+| .. _Araya18:       | **I. Araya, B. Neveu**       | *Lsmear: A Variable Selection   | Journal of Global       | 2018 |                     |
+|                    |                              |   Strategy for Interval Branch  | Optimization            |      |                     |
+|                    |                              |   and Bound Solvers*            |                         |      |                     |
+|[Araya & Neveu 2018]|                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
-| | | | | | |
-| .. _Neveu16:  | **B. Neveu, G. Trombettoni** | *Node Selection Strategies in Interval* |  Journal of Global | 2016 |  |Neveu16-pdf|_  |
-|                       | **I. Araya**                             |  *Branch and Bound Algorithms*          | Optimization       |          |                              |
-| [Neveu et al. 2016] |                                        |                                                              |                             |          |                              |
+|                    |                              |                                 |                         |      |                     |
+| .. _Neveu16:       | **B. Neveu, G. Trombettoni,**| *Node Selection Strategies      | Journal of Global       | 2016 | |Neveu16-pdf|_      |
+|                    | **I. Araya**                 | in Interval Branch and Bound    | Optimization            |      |                     |
+|                    |                              | Algorithms*                     |                         |      |                     |
+| [Neveu et al. 2016]|                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
-| | | | | | |
-| .. _Neveu15:  | **B. Neveu, G. Trombettoni** | *Adaptive Constructive interval Disjunction: * |  Constraints | 2015 |  |Neveu15-pdf|_  |
-|                       | **I. Araya**                             |  *Algorithms and Experiments*                        |                      |          |                             |
-| [Neveu et al. 2015] |                                        |                                                                         |                       |          |                              |
+|                    |                              |                                 |                         |      |                     |
+| .. _Neveu15:       | **B. Neveu, G. Trombettoni,**| *Adaptive Constructive interval |  Constraints            | 2015 |  |Neveu15-pdf|_     |
+|                    | **I. Araya**                 | Disjunction: Algorithms         |                         |      |                     |
+|                    |                              | and Experiments*                |                         |      |                     |
+| [Neveu et al. 2015]|                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
-|                    |                              |                                 |                         |      |                    |
+|                    |                              |                                 |                         |      |                     |
 | .. _Jaulin14:      | **L. Jaulin, B. Desrochers** | *Introduction to the Algebra of | Engineering Applications| 2014 | |Jaulin14-pdf|_     |
 |                    |                              | Separators with Application to  | of Artificial           |      |                     |
 | [Jaulin &          |                              | Path Planning*                  | Intelligence            |      |                     |
@@ -70,7 +73,7 @@ Articles in Journal and Conferences
 |                    |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
-| .. _Jaulin12:      | **L. Jaulin**                | *Solving set-valued constraint  | Computing               | 2012 | |Jaulin12-pdf|_    |
+| .. _Jaulin12:      | **L. Jaulin**                | *Solving set-valued constraint  | Computing               | 2012 | |Jaulin12-pdf|_     |
 |                    |                              | satisfaction problem*           |                         |      |                     |
 | [Jaulin 2012]      |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
