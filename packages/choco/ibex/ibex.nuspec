@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>ibex</id>
+    <version>2</version>
+    <packageSourceUrl>https://github.com/lebarsfa/ibex-lib/tree/actions/packages/choco/ibex/</packageSourceUrl>
+    <owners>lebarsfa</owners>
+    <title>IBEX</title>
+    <authors>IBEX Team</authors>
+    <projectUrl>http://www.ibex-lib.org/</projectUrl>
+    <iconUrl>http://www.ibex-lib.org/home_files/IBEX_small_rvb.jpg</iconUrl>
+    <licenseUrl>https://github.com/ibex-team/ibex-lib/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/ibex-team/ibex-lib</projectSourceUrl>
+    <tags>ibex</tags>
+    <summary>IBEX is a C++ library for constraint processing over real numbers.</summary>
+    <description>IBEX is a C++ library for constraint processing over real numbers.</description>
+    <releaseNotes>https://github.com/ibex-team/ibex-lib/releases</releaseNotes>
+    <dependencies>
+      <dependency id="winflexbison" version="2.4.9.20170215" />
+      <dependency id="mingw" version="[8.1.0]" />
+    </dependencies>
+  </metadata>
+</package>

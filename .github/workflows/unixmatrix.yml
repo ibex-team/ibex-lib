@@ -1,0 +1,89 @@
+on:
+    push:
+        branches: '**'
+#        tags: '' # Restrict to blank tags
+    pull_request:
+
+jobs:
+ # This job may be commented if a new release should not be created...
+ deploy:
+    runs-on: ubuntu-latest
+    steps: 
+    - uses: actions/create-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        draft: true
+        tag_name: autotagname
+        release_name: autotagname
+
+ unixmatrix:
+    runs-on: ${{ matrix.cfg.os }}
+    defaults:
+        run:
+            shell: ${{ matrix.cfg.shell }}
+    strategy:
+        matrix:
+            cfg:
+            - { os: windows-2019, shell: cmd, arch: x64, runtime: mingw8, cmake_params: '-G "MSYS Makefiles"', cmake_flags: '-fPIC', desc: 'Windows MinGW 8.1.0 x64' }
+            - { os: ubuntu-20.04, shell: bash, arch: amd64, runtime: focal, cmake_flags: '-fPIC', desc: 'Ubuntu 20.04' }
+            - { os: ubuntu-18.04, shell: bash, arch: amd64, runtime: bionic, cmake_flags: '-fPIC', desc: 'Ubuntu 18.04' }
+            - { os: ubuntu-16.04, shell: bash, arch: amd64, runtime: xenial, cmake_flags: '-fPIC', desc: 'Ubuntu 16.04' }
+    name: ${{ matrix.cfg.desc }}
+    steps: 
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        fetch-depth: 0
+        clean: false
+      # See https://askubuntu.com/questions/620533/what-is-the-meaning-of-the-xubuntuy-string-in-ubuntu-package-names
+    - run: |
+        echo "SOFTWARE_VERSION=2.8.9" >> $GITHUB_ENV
+        echo "DEBIAN_PACKAGE_REV=0" >> $GITHUB_ENV
+        echo "PACKAGE_REV=0" >> $GITHUB_ENV
+      shell: bash
+    - run: echo "PACKAGE_VERSION=$SOFTWARE_VERSION-${DEBIAN_PACKAGE_REV}${{ matrix.cfg.runtime }}$PACKAGE_REV" >> $GITHUB_ENV
+      shell: bash
+      if: runner.os == 'Linux'
+    - run: choco install -y wget winflexbison make patch zip
+      if: runner.os == 'Windows'
+    - run: |
+        mkdir build ; cd build
+        cmake ${{ matrix.cfg.cmake_params }} -D CMAKE_INSTALL_PREFIX=../packages/choco/ibex -D CMAKE_CXX_FLAGS="${{ matrix.cfg.cmake_flags }}" -D CMAKE_C_FLAGS="${{ matrix.cfg.cmake_flags }}" .. ; cmake --build . ${{ matrix.cfg.cmake_config }} --target install
+        cd ../packages/choco
+        sed_param=s/\<version\>2\<\\/version\>/\<version\>${SOFTWARE_VERSION}\<\\/version\>/
+        sed -i "$sed_param" ibex/ibex.nuspec
+        mv -f ibex ibex.$SOFTWARE_VERSION
+        cd ibex.$SOFTWARE_VERSION
+        choco pack
+        mv -f ibex.$SOFTWARE_VERSION.nupkg ../../../
+      shell: bash
+      if: matrix.cfg.runtime=='mingw8'
+    - run: |
+        sudo apt-get -q update ; sudo apt-get -y install flex bison dpkg-dev || true
+        mkdir build ; cd build
+        cmake ${{ matrix.cfg.cmake_params }} -D CMAKE_INSTALL_PREFIX=../packages/${{ matrix.cfg.runtime }}/${{ matrix.cfg.arch }}/libibex-dev/usr -D CMAKE_CXX_FLAGS="${{ matrix.cfg.cmake_flags }}" -D CMAKE_C_FLAGS="${{ matrix.cfg.cmake_flags }}" .. ; cmake --build . ${{ matrix.cfg.cmake_config }} --target install
+        cd ../packages/${{ matrix.cfg.runtime }}/${{ matrix.cfg.arch }}
+        sed_param=s/\\/home\\/runner\\/work\\/ibex-lib\\/ibex-lib\\/packages\\/${{ matrix.cfg.runtime }}\\/${{ matrix.cfg.arch }}\\/libibex-dev//
+        sed -i "$sed_param" libibex-dev/usr/share/ibex/cmake/*.cmake
+        sed_param=s/Version:\ .*/Version:\ ${PACKAGE_VERSION}/
+        sed -i "$sed_param" libibex-dev/DEBIAN/control
+        sed_param=s/Architecture:\ .*/Architecture:\ ${{ matrix.cfg.arch }}/
+        sed -i "$sed_param" libibex-dev/DEBIAN/control
+        if [ "${{ matrix.cfg.runtime }}" = "focal" ]; then
+            sed_param=s/libgcc1/libgccs-1/  
+            sed -i "$sed_param" libibex-dev/DEBIAN/control
+        fi
+        chmod 775 libibex-dev/DEBIAN
+        dpkg-deb --build libibex-dev
+        mv -f libibex-dev.deb ../../../libibex-dev-$PACKAGE_VERSION\_${{ matrix.cfg.arch }}.deb
+      shell: bash
+      if: runner.os == 'Linux'
+    - uses: xresloader/upload-to-github-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        file: "*.nupkg;*.deb"
+        overwrite: true
+        tag_name: autotagname
