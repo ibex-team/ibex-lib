@@ -1,7 +1,7 @@
 Package: libibex-dev
 Version: 2
 Architecture: amd64
-Depends: flex, bison, libstdc++6, libgcc1, libc6
+Depends: libstdc++6, libgcc1, libc6
 Section: math
 Priority: optional
 Description: IBEX is a C++ library for constraint processing over real numbers

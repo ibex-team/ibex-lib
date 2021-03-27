@@ -1,7 +1,8 @@
 on:
     push:
         branches: '**'
-#        tags: '' # Restrict to blank tags
+#        branches: 'master'
+        tags: '' # Restrict to blank tags
     pull_request:
 
 jobs:
@@ -42,44 +43,53 @@ jobs:
         echo "SOFTWARE_VERSION=2.8.9" >> $GITHUB_ENV
         echo "DEBIAN_PACKAGE_REV=0" >> $GITHUB_ENV
         echo "PACKAGE_REV=0" >> $GITHUB_ENV
+        echo "CHOCO_PACKAGE_REV=" >> $GITHUB_ENV
       shell: bash
+    - run: if [ -z "$CHOCO_PACKAGE_REV" ]; then echo "PACKAGE_VERSION=$SOFTWARE_VERSION" >> $GITHUB_ENV ; else echo "PACKAGE_VERSION=$SOFTWARE_VERSION.$CHOCO_PACKAGE_REV" >> $GITHUB_ENV ; fi
+      shell: bash
+      if: runner.os=='Windows'
     - run: echo "PACKAGE_VERSION=$SOFTWARE_VERSION-${DEBIAN_PACKAGE_REV}${{ matrix.cfg.runtime }}$PACKAGE_REV" >> $GITHUB_ENV
       shell: bash
-      if: runner.os == 'Linux'
+      if: runner.os=='Linux'
     - run: choco install -y wget winflexbison make patch zip
-      if: runner.os == 'Windows'
+      if: runner.os=='Windows'
+    - run: sudo apt-get -q update ; sudo apt-get -y install flex bison dpkg-dev || true
+      if: runner.os=='Linux'
     - run: |
         mkdir build ; cd build
-        cmake ${{ matrix.cfg.cmake_params }} -D CMAKE_INSTALL_PREFIX=../packages/choco/ibex -D CMAKE_CXX_FLAGS="${{ matrix.cfg.cmake_flags }}" -D CMAKE_C_FLAGS="${{ matrix.cfg.cmake_flags }}" .. ; cmake --build . ${{ matrix.cfg.cmake_config }} --target install
-        cd ../packages/choco
-        sed_param=s/\<version\>2\<\\/version\>/\<version\>${SOFTWARE_VERSION}\<\\/version\>/
+        cmake ${{ matrix.cfg.cmake_params }} -D CMAKE_INSTALL_PREFIX=../ibex -D CMAKE_CXX_FLAGS="${{ matrix.cfg.cmake_flags }}" -D CMAKE_C_FLAGS="${{ matrix.cfg.cmake_flags }}" ..
+        cmake --build . ${{ matrix.cfg.cmake_config }} --target install
+        cd ..
+      shell: bash
+    - run: |
+        cd packages/choco
+        cp -Rf ../../ibex/* ibex
+        sed_param=s/\<version\>2\<\\/version\>/\<version\>${PACKAGE_VERSION}\<\\/version\>/
         sed -i "$sed_param" ibex/ibex.nuspec
-        mv -f ibex ibex.$SOFTWARE_VERSION
-        cd ibex.$SOFTWARE_VERSION
+        mv -f ibex ibex.$PACKAGE_VERSION
+        cd ibex.$PACKAGE_VERSION
         choco pack
-        mv -f ibex.$SOFTWARE_VERSION.nupkg ../../../
+        mv -f ibex.$PACKAGE_VERSION.nupkg ../../../
+        cd ../../..
+        choco source add -n=current-directory -s . --priority=100
+        choco install -y ibex
       shell: bash
       if: matrix.cfg.runtime=='mingw8'
     - run: |
-        sudo apt-get -q update ; sudo apt-get -y install flex bison dpkg-dev || true
-        mkdir build ; cd build
-        cmake ${{ matrix.cfg.cmake_params }} -D CMAKE_INSTALL_PREFIX=../packages/${{ matrix.cfg.runtime }}/${{ matrix.cfg.arch }}/libibex-dev/usr -D CMAKE_CXX_FLAGS="${{ matrix.cfg.cmake_flags }}" -D CMAKE_C_FLAGS="${{ matrix.cfg.cmake_flags }}" .. ; cmake --build . ${{ matrix.cfg.cmake_config }} --target install
-        cd ../packages/${{ matrix.cfg.runtime }}/${{ matrix.cfg.arch }}
-        sed_param=s/\\/home\\/runner\\/work\\/ibex-lib\\/ibex-lib\\/packages\\/${{ matrix.cfg.runtime }}\\/${{ matrix.cfg.arch }}\\/libibex-dev//
-        sed -i "$sed_param" libibex-dev/usr/share/ibex/cmake/*.cmake
-        sed_param=s/Version:\ .*/Version:\ ${PACKAGE_VERSION}/
-        sed -i "$sed_param" libibex-dev/DEBIAN/control
-        sed_param=s/Architecture:\ .*/Architecture:\ ${{ matrix.cfg.arch }}/
-        sed -i "$sed_param" libibex-dev/DEBIAN/control
-        if [ "${{ matrix.cfg.runtime }}" = "focal" ]; then
-            sed_param=s/libgcc1/libgccs-1/  
-            sed -i "$sed_param" libibex-dev/DEBIAN/control
-        fi
-        chmod 775 libibex-dev/DEBIAN
-        dpkg-deb --build libibex-dev
-        mv -f libibex-dev.deb ../../../libibex-dev-$PACKAGE_VERSION\_${{ matrix.cfg.arch }}.deb
+        cd packages
+        chmod +x ./genlibibex-dev.sh
+        ./genlibibex-dev.sh ubuntu ${{ matrix.cfg.runtime }} ${{ matrix.cfg.arch }} $SOFTWARE_VERSION $DEBIAN_PACKAGE_REV $PACKAGE_REV
+        cd ..
+        sudo dpkg -i libibex-dev-$PACKAGE_VERSION\_${{ matrix.cfg.arch }}.deb
       shell: bash
-      if: runner.os == 'Linux'
+      if: runner.os=='Linux'
+    - run: |
+        rm -Rf ibex
+        cd tests/test_ibex
+        cmake ${{ matrix.cfg.cmake_params }} .
+        cmake --build . ${{ matrix.cfg.cmake_config }}
+        ./${{ matrix.cfg.test_config }}my_project
+      shell: bash
     - uses: xresloader/upload-to-github-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
