@@ -392,6 +392,7 @@ inline Interval asinh(const Interval& x) {
 		gaol::interval y2=gaol::asinh(gaol::interval(0,-x.lb()));
 		res=Interval(-y2.right(),y1.right());
 	}
+	fpu_round_up();
 	return res;
 }
 
@@ -479,28 +480,34 @@ inline bool bwd_sin(const Interval& y,  Interval& x) {
 		std::cout << "bug x=" << x.itv << " y=" << y.itv << " tmp=" << tmp << std::endl;
 	}*/
 	x &= gaol::asin_rel(y.itv,x.itv);
-
+	fpu_round_up();
 	return !x.is_empty();
 }
 
 inline bool bwd_tan(const Interval& y,  Interval& x) {
 	x = gaol::atan_rel(y.itv,x.itv);
+	fpu_round_up();
 	return !x.is_empty();
 }
 
 inline bool bwd_cosh(const Interval& y,  Interval& x) {
-	x = gaol::acosh_rel(y.itv,x.itv);
+	//x = gaol::acosh_rel(y.itv,x.itv);
+	x &= acosh(y);
+	fpu_round_up();
 	return !x.is_empty();
 }
 
 inline bool bwd_sinh(const Interval& y,  Interval& x) {
 	//x = gaol::asinh_rel(y.itv,x.itv);
 	x &= asinh(y);
+	fpu_round_up();
 	return !x.is_empty();
 }
 
 inline bool bwd_tanh(const Interval& y,  Interval& x) {
-	x = gaol::atanh_rel(y.itv,x.itv);
+	//x = gaol::atanh_rel(y.itv,x.itv);
+	x &= atanh(y);
+	fpu_round_up();
 	return !x.is_empty();
 }
 
