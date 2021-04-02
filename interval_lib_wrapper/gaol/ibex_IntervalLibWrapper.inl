@@ -492,7 +492,12 @@ inline bool bwd_tan(const Interval& y,  Interval& x) {
 
 inline bool bwd_cosh(const Interval& y,  Interval& x) {
 	//x = gaol::acosh_rel(y.itv,x.itv);
-	x &= acosh(y);
+	Interval proj=acosh(y);
+	Interval pos_proj= proj & x;
+	Interval neg_proj = (-proj) & x;
+
+	x = pos_proj | neg_proj;
+
 	fpu_round_up();
 	return !x.is_empty();
 }
