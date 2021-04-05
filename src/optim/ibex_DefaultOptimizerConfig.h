@@ -42,7 +42,7 @@ public:
 	 */
 	DefaultOptimizerConfig(	const System& sys, double rel_eps_f, double abs_eps_f,
 							double eps_h, bool rigor, bool inHC4, bool kkt,
-							double random_seed, double eps_x);
+							double random_seed, const Vector& eps_x);
 
 	/**
 	 * \brief Delete this.

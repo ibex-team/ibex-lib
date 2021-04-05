@@ -73,6 +73,16 @@ const ExprNode& parse_indexed_symbol(const SymbolMap<const ExprSymbol*>& symbols
 
 
 /**
+ * \brief Parse a list of (indexed) symbols, separated by '+'
+ *
+ * Example: x+y[0]
+ *
+ * \note If the result contains indexed symbols, they have
+ *       to be freed (call "cleanup(...,false)").
+ */
+std::vector<const ExprNode*> parse_symbols_list(const Array<const ExprSymbol>& args, const std::string& vars);
+
+/**
  * \brief Alpha-numeric random string
  *
  * \param len - length of the string. A null

@@ -85,7 +85,7 @@ Optimizer04Config::Optimizer04Config(int argc, char** argv) {
 	cout << " randomseed " << randomseed << endl;
 	 */
 
-	set_eps_x(prec);
+	set_eps_x(Vector(sys->nb_var,prec));
 	set_rel_eps_f(goalprec);
 	set_abs_eps_f(goalprec);
 
@@ -193,7 +193,18 @@ Ctc& Optimizer04Config::get_ctc() {
 Bsc& Optimizer04Config::get_bsc() {
 	Bsc* bs;
 
-	double prec = get_eps_x();
+	const Vector& eps_x=get_eps_x();
+	Vector prec(ext_sys->nb_var);
+
+	if (eps_x.size()==1) // not really initialized
+		ext_sys->write_ext_vec(Vector(ext_sys->nb_var,eps_x[0]), prec);
+	else
+		ext_sys->write_ext_vec(eps_x, prec);
+
+	// TODO: should the following value be set to "abs_eps_f" instead?
+	// This question is probably related to the discussion #400
+	prec[ext_sys->goal_var()] = OptimizerConfig::default_eps_x;
+
 
 	if (bisection=="roundrobin")
 		bs = &rec(new RoundRobin (prec,0.5));

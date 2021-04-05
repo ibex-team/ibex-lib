@@ -176,7 +176,7 @@ public:
 	IntervalVector param_box(const IntervalVector& full_box) const;
 
 	/**
-	 * \brief Retun the ith variable
+	 * \brief Return the ith variable
 	 *
 	 * Return the index of the ith variable in all the dimensions
 	 * of the "full box".

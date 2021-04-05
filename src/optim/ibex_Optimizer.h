@@ -259,8 +259,10 @@ public:
 	 */
 	CellBufferOptim& buffer;
 
-	/** Precision (bisection control) */
-	const double eps_x;
+	/** Precision on variables (bisection control).
+	 *  Vector of size n. The goal variable precision
+	 *  is controlled #via abs_eps_f. */
+	const Vector eps_x;
 
 	/** Relative precision on the objective */
 	const double rel_eps_f;

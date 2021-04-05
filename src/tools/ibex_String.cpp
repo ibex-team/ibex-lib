@@ -195,6 +195,27 @@ const ExprNode& parse_indexed_symbol(const SymbolMap<const ExprSymbol*>& symbols
 	}
 }
 
+vector<const ExprNode*> parse_symbols_list(const Array<const ExprSymbol>& args, const string& _vars) {
+	string vars=_vars;
+	SymbolMap<const ExprSymbol*> symbols;
+	for (int i=0; i<args.size(); i++)
+		symbols.insert_new(args[i].name, &args[i]);
+
+	vector<const ExprNode*> res;
+	int j;
+	do {
+		j=vars.find("+");
+		if (j!=-1) {
+			res.push_back(&parse_indexed_symbol(symbols,vars.substr(0,j)));
+			vars=vars.substr(j+1,vars.size()-j-1);
+		} else {
+			res.push_back(&parse_indexed_symbol(symbols,vars));
+		}
+	} while (j!=-1);
+
+	return res;
+}
+
 char* random_alphanum_string(int len) {
     static const char alphanum[] =
         "0123456789"
