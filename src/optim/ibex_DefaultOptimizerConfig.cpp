@@ -54,7 +54,7 @@ DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys), kk
 // note:deprecated.
 DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys, double rel_eps_f, double abs_eps_f,
 							double eps_h, bool rigor, bool inHC4, bool kkt,
-							double random_seed, double eps_x) : sys(sys) {
+							double random_seed, const Vector& eps_x) : sys(sys) {
 
 	set_rel_eps_f(rel_eps_f);
 	set_abs_eps_f(abs_eps_f);
@@ -180,9 +180,23 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 	if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
 			return get<Bsc>(BSC_TAG);
 
+	ExtendedSystem& ext_sys=get_ext_sys();
+
+	const Vector& eps_x=get_eps_x();
+	Vector eps_x_extended(ext_sys.nb_var);
+
+	if (eps_x.size()==1) // not initialized
+		ext_sys.write_ext_vec(Vector(sys.nb_var,eps_x[0]), eps_x_extended);
+	else
+		ext_sys.write_ext_vec(eps_x, eps_x_extended);
+
+	// TODO: should the following value be set to "abs_eps_f" instead?
+	// This question is probably related to the discussion #400
+	eps_x_extended[ext_sys.goal_var()] = OptimizerConfig::default_eps_x;
+
 	return rec(new LSmear(
-			get_ext_sys(),eps_x,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),true,eps_x,default_bisect_ratio))),
+			ext_sys, eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
 			BSC_TAG);
 }
 

@@ -27,7 +27,7 @@ Bsc::Bsc(double prec) : _prec(1,prec) {
 
 Bsc::Bsc(const Vector& prec) : _prec(prec) {
 	for (int i=0; i<prec.size(); i++)
-		if (prec[i]<=0) ibex_error("precision must be a nonnegative number");
+		if (prec[i]<0) ibex_error("precision must be a nonnegative number");
 }
 
 void Bsc::add_property(const IntervalVector& init_box, BoxProperties& map) {

@@ -68,7 +68,7 @@ public:
 	 *
 	 * \deprecated. Should be 0.
 	 */
-	void set_eps_x(double eps_x);
+	void set_eps_x(const Vector& eps_x);
 
 	/**
 	 * \brief Set trace activation flag.
@@ -120,8 +120,11 @@ public:
 	/** see #set_abs_eps_f(). */
 	double get_abs_eps_f() const;
 
-	/** see #set_eps_x(). */
-	double get_eps_x() const;
+	/** see #set_eps_x().
+	 *
+	 * \warning A 1-sized vector if not initialized explicitly (TODO)
+	 */
+	const Vector& get_eps_x() const;
 
 	/** see #set_trace(). */
 	int get_trace() const;
@@ -179,17 +182,17 @@ protected:
 
 	double rel_eps_f;
 	double abs_eps_f;
-	double eps_x;
+	Vector eps_x; // some component may be +oo (to skip bisection)
 	int trace;
 	double timeout;
 	bool extended_COV;
 	bool anticipated_UB;
 };
 
-inline OptimizerConfig::OptimizerConfig() {
+inline OptimizerConfig::OptimizerConfig() : eps_x(1) {
 	rel_eps_f      = OptimizerConfig::default_rel_eps_f;
 	abs_eps_f      = OptimizerConfig::default_abs_eps_f;
-	eps_x          = OptimizerConfig::default_eps_x;
+	eps_x[0]       = OptimizerConfig::default_eps_x;
 	trace          = OptimizerConfig::default_trace;
 	timeout        = OptimizerConfig::default_timeout;
 	extended_COV   = OptimizerConfig::default_extended_cov;
@@ -200,7 +203,7 @@ inline void OptimizerConfig::set_rel_eps_f(double _rel_eps_f)     { rel_eps_f = 
 
 inline void OptimizerConfig::set_abs_eps_f(double _abs_eps_f)     { abs_eps_f = _abs_eps_f; }
 
-inline void OptimizerConfig::set_eps_x(double _eps_x)             { eps_x = _eps_x; }
+inline void OptimizerConfig::set_eps_x(const Vector& _eps_x)      { eps_x = _eps_x; }
 
 inline void OptimizerConfig::set_trace(int _trace)                { trace = _trace; }
 
@@ -214,7 +217,7 @@ inline double OptimizerConfig::get_rel_eps_f() const                 { return re
 
 inline double OptimizerConfig::get_abs_eps_f() const                 { return abs_eps_f; }
 
-inline double OptimizerConfig::get_eps_x() const                     { return eps_x; }
+inline const Vector& OptimizerConfig::get_eps_x() const              { return eps_x; }
 
 inline int OptimizerConfig::get_trace() const                        { return trace; }
 

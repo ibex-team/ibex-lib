@@ -46,7 +46,7 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 		int goal_var, double eps_x, double rel_eps_f, double abs_eps_f) :
                 						n(n), goal_var(goal_var),
 										ctc(ctc), bsc(bsc), loup_finder(finder), buffer(buffer),
-										eps_x(eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
+										eps_x(n, eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
 										trace(0), timeout(-1), extended_COV(true), anticipated_upper_bounding(true),
 										status(SUCCESS),
 										uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
@@ -270,10 +270,10 @@ void Optimizer::contract_and_bound(Cell& c) {
 	// Note: there are three different cases of "epsilon" box,
 	// - NoBisectableVariableException raised by the bisector (---> see optimize(...)) which
 	//   is independent from the optimizer
-	// - the width of the box is less than the precision given to the optimizer ("prec" for the original variables
-	//   and "goal_abs_prec" for the goal variable)
-	// - the extended box has no bisectable domains (if prec=0 or <1 ulp)
-	if ((tmp_box.max_diam()<=eps_x && y.diam() <=abs_eps_f) || !c.box.is_bisectable()) {
+	// - the width of the box is less than the precision given to the optimizer ("eps_x" for
+	//   the original variables and "abs_eps_f" for the goal variable)
+	// - the extended box has no bisectable domains (if eps_x=0 or <1 ulp)
+	if (((tmp_box.diam()-eps_x).max()<=0 && y.diam() <=abs_eps_f) || !c.box.is_bisectable()) {
 		update_uplo_of_epsboxes(y.lb());
 		c.box.set_empty();
 		return;
