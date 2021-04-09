@@ -36,7 +36,7 @@ find_path (GAOL_INC_DIR NAMES gaol/gaol.h
 
 if (GAOL_INC_DIR)
   file (READ "${GAOL_INC_DIR}/gaol/gaol_configuration.h" _content)
-  string (REGEX MATCH "gaol \"[0-9]+\.[0-9]+\.[0-9]+" _match "${_content}")
+  string (REGEX MATCH "gaol \"[0-9]+[.][0-9]+[.][0-9]+" _match "${_content}")
   string (SUBSTRING "${_match}" 6 -1 GAOL_VERSION)
 endif ()
 

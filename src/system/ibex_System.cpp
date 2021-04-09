@@ -17,6 +17,7 @@
 #include "ibex_P_Struct.h"
 #include "ibex_Domain.h"
 #include "ibex_Exception.h"
+#include "ibex_String.h"
 
 #include <stdio.h>
 #include <sstream>
@@ -151,14 +152,18 @@ std::string System::minibex(bool human) const {
 
 	if (nb_ctr>0) {
 		s << "constraints\n";
-		for (int i=0; i<nb_ctr; i++) {
-			s << " " << f_ctrs.name << '(';
-			for (int i=0; i<args.size(); i++) {
-				if (i>0) s << ',';
-				s << args[i];
-			}
-			s << ')' << '[' << i << ']'<< ops[i] << "0;\n";
+		char* main_node = next_generated_var_name();
+		s <<  main_node << "=" << f_ctrs.name << '(';
+		for (int i=0; i<args.size(); i++) {
+			if (i>0) s << ',';
+			s << args[i];
 		}
+		s << ");\n";
+		for (int i=0; i<f_ctrs.image_dim(); i++) {
+			 s << main_node << '[' << i << ']'<< ops[i] << "0;\n";
+		}
+
+		free(main_node);
 	}
 	s << "end";
 	s.flush();

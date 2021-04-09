@@ -53,7 +53,9 @@ public:
 	SmearFunction(System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
 
 	SmearFunction(System& sys, const Vector& prec,LargestFirst& lf);
+
 	~SmearFunction();
+
 	/**
 	 * \brief Return next variable to be bisected.
 	 *
@@ -86,12 +88,13 @@ protected :
 
 	int nbvars;
 	System& sys;
-        int goal_ctr () const;
-        int goal_var () const;
+	int goal_ctr () const;
+	int goal_var () const;
 	bool constraint_to_consider(int i, const IntervalVector & box) const;
 	bool goal_to_consider( const IntervalMatrix& J, int i) const;
- private :
-        bool lftodelete; // = true means that  default bisector has to be deleted by the destuctor when the it has been allocated by the constructor.
+
+private :
+	bool lftodelete; // = true means that  default bisector has to be deleted by the destuctor when the it has been allocated by the constructor.
 	bool _goal_to_consider;
 };
 
@@ -322,7 +325,11 @@ inline SmearSumRelative::SmearSumRelative(System& sys, const Vector& prec, doubl
 
 }
 
- inline SmearSumRelative::SmearSumRelative(System& sys,  double prec, LargestFirst& lf) : SmearFunction(sys,prec,lf) {
+inline SmearSumRelative::SmearSumRelative(System& sys, const Vector& prec, LargestFirst& lf) : SmearFunction(sys,prec,lf) {
+
+}
+
+inline SmearSumRelative::SmearSumRelative(System& sys,  double prec, LargestFirst& lf) : SmearFunction(sys,prec,lf) {
 
 }
 

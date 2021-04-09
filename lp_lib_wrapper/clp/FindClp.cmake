@@ -56,7 +56,7 @@ find_path (CLP_INC_DIR NAMES ClpConfig.h
                        PATH_SUFFIXES include include/coin)
 
 # Look for the version
-set (_version_match "VERSION \"[0-9]+\.[0-9]+\.[0-9]+")
+set (_version_match "VERSION \"[0-9]+[.][0-9]+[.][0-9]+")
 if (COINUTILS_INC_DIR)
   file (READ "${COINUTILS_INC_DIR}/CoinUtilsConfig.h" _content)
   string (REGEX MATCH "COINUTILS_${_version_match}" _match "${_content}")
