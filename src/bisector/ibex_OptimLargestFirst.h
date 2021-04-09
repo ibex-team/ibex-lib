@@ -26,8 +26,10 @@ class OptimLargestFirst : public LargestFirst {
 public:
 
 	/**
-	 * \brief Create a bisector with largest-first heuristic.
+	 * \brief Create a bisector with largest-first heuristic  specialized for optimization problems
 	 *
+         * \param goal_var         - integer indicating the variable representing the objective
+         * \param choose_obj       - boolean indicating if the objective can be bisected (1 for bisectable)
 	 * \param prec             - see #Bsc::Bsc(double). By default, 0 which means an endless uniform bisection process.
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
@@ -37,21 +39,23 @@ public:
 	/**
 	 * \brief Create a bisector with largest first heuristic.
 	 *
+         * \param goal_var         - integer indicating the variable representing the objective
+         * \param choose_obj       - boolean indicating if the objective can be bisected (1 for bisectable)
 	 * \param prec             - see #Bsc::Bsc(double).
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-  OptimLargestFirst(int goal_var,bool choose_obj,const Vector& prec, double ratio=Bsc::default_ratio());
+        OptimLargestFirst(int goal_var,bool choose_obj,const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Return next variable to be bisected.
 	 *
 	 * called by Bsc::bisect(...)
 	 */
-	virtual BisectionPoint choose_var(const Cell& cell);
+	BisectionPoint choose_var(const Cell& cell);
 
 
-	
+protected:	
 
         /** 
 	 * \brief The variable representing the objective 
@@ -62,14 +66,7 @@ public:
 	 * \brief Boolean indicating whether the objective variable can be bisected.
 	 */
 	bool choose_obj;
- protected :
-/** 
-	  * \brief  Condition for not bisecting the variable i
-	  */
-	bool nobisectable(const IntervalVector& box, int i) const;
-
- private :
-	double max_diam_nobj;
+	 
 	  
 };
 

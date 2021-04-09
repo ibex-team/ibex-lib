@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 3, 2018
-// Last Update : Oct 17, 2019
+// Last Update : Apr 9, 2021
 //============================================================================
 #include "float.h"
 #include "ibex_OptimLargestFirst.h"
@@ -24,30 +24,43 @@ namespace ibex {
 
 }
 
-  
+
 BisectionPoint OptimLargestFirst::choose_var(const Cell& cell) {
-  const IntervalVector& box=cell.box;
-	max_diam_nobj=0;
+const IntervalVector& box=cell.box;
+	int var =-1;
+	double l=0.0;
 	for (int i=0; i< box.size(); i++){
-	  if (i != goal_var)
-	    max_diam_nobj=std::max(max_diam_nobj,box[i].diam());
+	  if (i!= goal_var){
+	    if ( ! nobisectable (box,i)){
+	      if (var==-1) {
+		var=i;
+		l = uniform_prec()? box[i].diam() : (box[i].diam()/prec(i));
+	      }
+	      else {
+		double l_tmp = uniform_prec()? box[i].diam() : (box[i].diam()/prec(i));
+		if (l_tmp>l) {
+		  var = i;
+		  l = l_tmp;
+		}
+	      }
+	    }
+	  }
 	}
-	return LargestFirst::choose_var(cell) ;
+	// special conditions for choosing the objective as variable to bisect	
+  if ((choose_obj == true)
+      &&  !(nobisectable (box,goal_var))
+      && (l < box[goal_var].diam())
+      && box[goal_var].diam()/l < objectivebisect_ratiolimit)
+    var=goal_var;
+  //  cout << " bisected var " << var  << " l " << l << endl ;
+  if (var !=-1){
+    return BisectionPoint(var,ratio,true);
+  }
+  else {
+    throw NoBisectableVariableException();
+  }
+
 }
   
-
-
-  // supplementary sufficient condition for not bisecting the objective (not bounded or too big :max_diam_nobj is the maximum diameter for the other variables)
-  bool OptimLargestFirst::nobisectable(const IntervalVector& box, int i) const {
-    return (LargestFirst::nobisectable ( box, i) 
-	    ||
-	    (i == goal_var && 
-	     ((choose_obj==false) // the objective should not be chosen
-	      ||  // to avoid bisecting a no bounded objective
-	      (max_diam_nobj < DBL_MAX
-	       && box[i].diam()/max_diam_nobj > objectivebisect_ratiolimit))
-	     )
-	    );
-  }
 
 } // end namespace ibex
