@@ -1,0 +1,24 @@
+variables
+i2 in [12,60];
+i3 in [12,60];
+i4 in [12,60];
+i5 in [12,60];
+y6 in [12,60];
+y7 in [12,60];
+y8 in [12,60];
+y9 in [12,60];
+
+minimize
+(0.14427932477276 - (y6*y7)/(y8*y9))^2;
+
+constraints
+integer(i2);
+integer(i3);
+integer(i4);
+integer(i5);
+i2=y6;
+i3=y7;
+i4=y8;
+i5=y9;
+
+end

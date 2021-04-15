@@ -1,0 +1,13 @@
+variables
+i1 in [0,200];
+i2 in [0,200];
+
+minimize
+(1.5 - i1*(1 - i2))^2 + (2.25 - (1 - i2^2)*i1)^2 + (2.625 - (1
+            - i2^3)*i1)^2 ;
+
+constraints
+integer(i1);
+integer(i2);
+
+end

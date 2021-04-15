@@ -1,0 +1,15 @@
+variables
+i1 in [1,200];
+i2 in [1,200];
+x3 in [0.,0.2];
+
+minimize
+ -(0.00201*i1^4*i2*x3^2);
+
+constraints
+
+-i1^2*i2 >= -675;
+-0.1*i1^2*x3^2 >= -0.419;
+integer(i1);
+integer(i2);
+end
