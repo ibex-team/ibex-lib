@@ -1,0 +1,12 @@
+    variables
+    x2 in [0,1.e8];
+    i3 in [0,1.e8];
+    minimize
+     1.1*(((-10) + 2*x2)^2 + ((-5) + i3)^2) + sin(((-10) + 2*x2)^2
+             + ((-5) + i3)^2);
+    constraints
+    integer(i3);
+    0.7*x2 + i3 <= 7;
+    2.5*x2 + i3 <= 19;
+    
+   end
