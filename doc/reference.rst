@@ -9,9 +9,9 @@ Articles in Journal and Conferences
 -------------------------------------
 
 .. |Neveu16-pdf| replace:: PDF
-.. _Neveu16: http://www.lirmm.fr/~trombetton/publis/nodeselection_jogo_2015.pdf
+.. _Neveu16-pdf: http://www.lirmm.fr/~trombetton/publis/nodeselection_jogo_2015.pdf
 .. |Neveu15-pdf| replace:: PDF
-.. _Neveu15: http://www.lirmm.fr/~trombetton/publis/acid_constraints_2015.pdf
+.. _Neveu15-pdf: http://www.lirmm.fr/~trombetton/publis/acid_constraints_2015.pdf
 .. |Jaulin14-pdf| replace:: PDF
 .. _Jaulin14-pdf: https://www.ensta-bretagne.fr/jaulin/paper_seppath.pdf
 .. |Araya14-pdf| replace:: PDF
@@ -44,8 +44,8 @@ Articles in Journal and Conferences
 +====================+==============================+=================================+=========================+======+=====================+
 |                    |                              |                                 |                         |      |                     |
 | .. _Araya18:       | **I. Araya, B. Neveu**       | *Lsmear: A Variable Selection   | Journal of Global       | 2018 |                     |
-|                    |                              |   Strategy for Interval Branch  | Optimization            |      |                     |
-|                    |                              |   and Bound Solvers*            |                         |      |                     |
+|                    |                              | Strategy for Interval Branch    | Optimization            |      |                     |
+|                    |                              | and Bound Solvers*              |                         |      |                     |
 |[Araya & Neveu 2018]|                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
