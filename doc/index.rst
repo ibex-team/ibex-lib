@@ -17,7 +17,9 @@ User guide
    install-cmake
    solver
    optim
+   minibex
    java-install
+   resources
    
 -------------------
 Programmer guide
@@ -32,7 +34,6 @@ Programmer guide
    function
    constraint
    system
-   minibex
    contractor
    strategy
    solver-prog

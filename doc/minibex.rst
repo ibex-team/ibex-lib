@@ -5,7 +5,7 @@
 The Minibex Language
 =====================
 
-
+If you speak French, check also this `introduction to Minibex <http://www.ibex-lib.org/formation_minibex.pdf>`_ by the OGRE team of LS2N (PDF).
 
 .. _mod-into-cpp-vs-minibex:
 
