@@ -28,6 +28,7 @@ jobs:
         matrix:
             cfg:
             - { os: windows-2019, shell: cmd, arch: x64, runtime: mingw8, cmake_params: '-G "MSYS Makefiles"', cmake_flags: '-fPIC', desc: 'Windows MinGW 8.1.0 x64' }
+            - { os: windows-2019, shell: cmd, arch: x86, runtime: mingw8, cmake_params: '-G "MSYS Makefiles"', cmake_flags: '-fPIC', choco_flags: '--x86', desc: 'Windows MinGW 8.1.0 x86' }
             - { os: ubuntu-20.04, shell: bash, arch: amd64, runtime: focal, cmake_flags: '-fPIC', desc: 'Ubuntu 20.04' }
             - { os: ubuntu-18.04, shell: bash, arch: amd64, runtime: bionic, cmake_flags: '-fPIC', desc: 'Ubuntu 18.04' }
             - { os: ubuntu-16.04, shell: bash, arch: amd64, runtime: xenial, cmake_flags: '-fPIC', desc: 'Ubuntu 16.04' }
@@ -51,7 +52,11 @@ jobs:
     - run: echo "PACKAGE_VERSION=$SOFTWARE_VERSION-${DEBIAN_PACKAGE_REV}${{ matrix.cfg.runtime }}$PACKAGE_REV" >> $GITHUB_ENV
       shell: bash
       if: runner.os=='Linux'
-    - run: choco install -y wget winflexbison make patch zip
+    - run: |
+        choco install -y -r --no-progress mingw --version=8.1.0 --force ${{ matrix.cfg.choco_flags }}
+        echo C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin>>%GITHUB_PATH%
+      if: matrix.cfg.runtime=='mingw8' && matrix.cfg.arch=='x86'
+    - run: choco install -y -r --no-progress checksum wget winflexbison make patch zip ${{ matrix.cfg.choco_flags }}
       if: runner.os=='Windows'
     - run: sudo apt-get -q update ; sudo apt-get -y install flex bison dpkg-dev || true
       if: runner.os=='Linux'
@@ -71,8 +76,10 @@ jobs:
         choco pack
         mv -f ibex.$PACKAGE_VERSION.nupkg ../../../
         cd ../../..
+        checksum -f=ibex.$PACKAGE_VERSION.nupkg -t=sha256
         choco source add -n=current-directory -s . --priority=100
-        choco install -y ibex
+        choco install -y -r --no-progress ibex
+        mv -f ibex.$PACKAGE_VERSION.nupkg ibex.$PACKAGE_VERSION${{ matrix.cfg.choco_flags }}.nupkg
       shell: bash
       if: matrix.cfg.runtime=='mingw8'
     - run: |
