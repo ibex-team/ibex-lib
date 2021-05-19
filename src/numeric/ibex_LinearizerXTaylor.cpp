@@ -78,7 +78,7 @@ int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver
 
 int LinearizerXTaylor::linearize(const IntervalVector& box, LPSolver& _lp_solver, BoxProperties& prop) {
 	lp_solver = &_lp_solver;
-
+	lp_solver->set_bounds(box);
 	// ========= get active constraints ===========
 	BitSet* active;
 
