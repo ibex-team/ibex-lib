@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>ibex</id>
+    <version>2</version>
+    <packageSourceUrl>https://github.com/lebarsfa/ibex-lib/tree/actions/packages/choco/ibex/</packageSourceUrl>
+    <owners>lebarsfa</owners>
+    <title>IBEX</title>
+    <authors>IBEX Team</authors>
+    <projectUrl>http://www.ibex-lib.org/</projectUrl>
+    <iconUrl>https://cdn.statically.io/gh/lebarsfa/Packages/23ed816/choco/icons/IBEX_small_rvb.png</iconUrl>
+    <licenseUrl>https://github.com/ibex-team/ibex-lib/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/ibex-team/ibex-lib</projectSourceUrl>
+    <tags>ibex interval contraints contractor C++ CPP</tags>
+    <summary>IBEX is a C++ library for constraint processing over real numbers.</summary>
+    <description>
+IBEX is a C++ library for constraint processing over real numbers.
+
+## Quick start
+- After [installing Chocolatey](https://chocolatey.org/install), run `choco install -y ibex cmake make qtcreator` in PowerShell and then launch Qt Creator and choose Open Project, open `test_ibex\CMakelists.txt` (get the folder from https://www.ensta-bretagne.fr/lebars/Share/test_ibex.zip), ensure Desktop is selected and click Configure Project, wait 10 s then click on the big bottom green Run button, finally check that "My first interval:[0, 1]" appears.
+
+## Troubleshooting
+- Check that all packages and their dependencies were installed, if one failed (e.g. due to network-related errors) try to reinstall it using --force or try a previous version...
+- 32 bit versions of latest Qt Creator do not seem available, if needed use `choco install -y qtcreator --version=4.13.3 --x86 --force`
+- If multiple compilers are already installed, Qt Creator might show multiple possibilities in the Configure Project panel, ensure you choose one compatible with https://chocolatey.org/packages/ibex#dependencies.
+    </description>
+    <releaseNotes>https://github.com/ibex-team/ibex-lib/releases</releaseNotes>
+    <dependencies>
+      <dependency id="mingw" version="[8.1.0]" />
+    </dependencies>
+  </metadata>
+</package>
