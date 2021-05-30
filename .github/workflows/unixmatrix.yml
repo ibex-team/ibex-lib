@@ -39,9 +39,12 @@ jobs:
         submodules: true
         fetch-depth: 0
         clean: false
+      # From https://github.com/Munkei/VersionFromGit.cmake/blob/master/VersionFromGit.cmake
+    - run: echo "git_tag=`git describe --tags --abbrev=0`" >> $GITHUB_ENV
+      shell: bash
       # See https://askubuntu.com/questions/620533/what-is-the-meaning-of-the-xubuntuy-string-in-ubuntu-package-names
     - run: |
-        echo "SOFTWARE_VERSION=2.8.9" >> $GITHUB_ENV
+        echo "SOFTWARE_VERSION=${git_tag:5}" >> $GITHUB_ENV
         echo "DEBIAN_PACKAGE_REV=0" >> $GITHUB_ENV
         echo "PACKAGE_REV=0" >> $GITHUB_ENV
         echo "CHOCO_PACKAGE_REV=" >> $GITHUB_ENV
@@ -55,7 +58,7 @@ jobs:
     - run: |
         choco install -y -r --no-progress mingw --version=8.1.0 --force ${{ matrix.cfg.choco_flags }}
         echo C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin>>%GITHUB_PATH%
-      if: matrix.cfg.runtime=='mingw8' && matrix.cfg.arch=='x86'
+      if: (runner.os=='Windows')&&(matrix.cfg.runtime=='mingw8')&&(matrix.cfg.arch=='x86')
     - run: choco install -y -r --no-progress checksum wget winflexbison make patch zip ${{ matrix.cfg.choco_flags }}
       if: runner.os=='Windows'
     - run: sudo apt-get -q update ; sudo apt-get -y install flex bison dpkg-dev || true
@@ -81,7 +84,7 @@ jobs:
         choco install -y -r --no-progress ibex
         mv -f ibex.$PACKAGE_VERSION.nupkg ibex.$PACKAGE_VERSION${{ matrix.cfg.choco_flags }}.nupkg
       shell: bash
-      if: matrix.cfg.runtime=='mingw8'
+      if: (runner.os=='Windows')&&(matrix.cfg.runtime=='mingw8')
     - run: |
         cd packages
         chmod +x ./genlibibex-dev.sh
