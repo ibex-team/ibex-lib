@@ -37,7 +37,7 @@ foreach (flag "-frounding-math" "-ffloat-store")
   if (COMPILER_SUPPORTS${upperflag})
     list (APPEND FILIB_FLAGS ${flag})
   else ()
-    message (WARNING "The compiler does not the flag ${flag} needed by Filib. "
+    message (WARNING "The compiler does not support the flag ${flag} needed by Filib. "
                      "You may get incorrect/inconsistent results.")
   endif()
 endforeach ()
@@ -71,8 +71,13 @@ else ()
                          LOGBASENAME "${logdir}/extract"
                          STATUS_PREFIX "${_prefix}")
 
-  # TODO apply patch
-  #set (FILIB_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/3rd/filibsrc-3.0.2.2.all.all.patch")
+  # apply patch
+  set (FILIB_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/3rd/filibsrc-3.0.2.2.all.all.patch")
+  execute_process_check (COMMAND patch -p1 -i ${FILIB_PATCH}
+                         WORKING_DIRECTORY ${wdir}
+                         MSG "patching ${filib_archive_name}"
+                         LOGBASENAME "${logdir}/patch"
+                         STATUS_PREFIX "${_prefix}")
 
   # copy files
   foreach (file "CMakeLists.txt" "config.h.in" "rounding_control/rounding_control_config.hpp.in")
