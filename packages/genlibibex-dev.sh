@@ -8,7 +8,7 @@ DIST=$2
 ARCH=$3
 VER=$4
 DREV=$5
-REV=$5
+REV=$6
 
 #sudo apt-get -y install dpkg-dev
 

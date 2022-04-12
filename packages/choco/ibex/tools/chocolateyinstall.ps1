@@ -14,5 +14,5 @@ if (Test-Path "$env:ChocolateyPackageFolder\x86") {
 	Remove-Item -Recurse -Force "$env:ChocolateyPackageFolder\x86"
 }
 
-Install-BinFile -Name libprim.a -Path "$env:ChocolateyPackageFolder\lib\ibex\3rd"
-Install-BinFile -Name libibex.a -Path "$env:ChocolateyPackageFolder\lib"
+#Install-BinFile -Name libprim.a -Path "$env:ChocolateyPackageFolder\lib\ibex\3rd"
+#Install-BinFile -Name libibex.a -Path "$env:ChocolateyPackageFolder\lib"
