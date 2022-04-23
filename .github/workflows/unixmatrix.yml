@@ -28,10 +28,13 @@ jobs:
     strategy:
         matrix:
             cfg:
+            - { os: windows-2019, shell: cmd, arch: x64, runtime: vc16, cmake_params: '-G "Visual Studio 16" -A x64', cmake_flags: ' /wd4267 /wd4244 /wd4305 /wd4996', cmake_config: '--config Release', test_config: 'Release/', desc: 'Windows Visual Studio 2019 x64' }
             - { os: windows-2019, shell: cmd, arch: x64, runtime: mingw8, cmake_params: '-G "MSYS Makefiles"', cmake_flags: '-fPIC', desc: 'Windows MinGW 8.1.0 x64' }
             - { os: windows-2019, shell: cmd, arch: x86, runtime: mingw8, cmake_params: '-G "MSYS Makefiles"', cmake_flags: '-fPIC', choco_flags: '--x86', desc: 'Windows MinGW 8.1.0 x86' }
             - { os: ubuntu-20.04, shell: bash, arch: amd64, runtime: focal, cmake_flags: '-fPIC', desc: 'Ubuntu 20.04' }
             - { os: ubuntu-18.04, shell: bash, arch: amd64, runtime: bionic, cmake_flags: '-fPIC', desc: 'Ubuntu 18.04' }
+            - { os: macos-11, shell: bash, arch: amd64, runtime: bigsur, cmake_flags: '-fPIC', desc: 'macOS Big Sur' }
+            - { os: macos-10.15, shell: bash, arch: amd64, runtime: catalina, cmake_flags: '-fPIC', desc: 'macOS Catalina' }
     name: ${{ matrix.cfg.desc }}
     steps: 
     - uses: actions/checkout@v2
@@ -48,6 +51,7 @@ jobs:
         echo "DEBIAN_PACKAGE_REV=0" >> $GITHUB_ENV
         echo "PACKAGE_REV=0" >> $GITHUB_ENV
         echo "CHOCO_PACKAGE_REV=" >> $GITHUB_ENV
+        echo "VERBOSE=1" >> $GITHUB_ENV
       shell: bash
     - run: if [ -z "$CHOCO_PACKAGE_REV" ]; then echo "PACKAGE_VERSION=$SOFTWARE_VERSION" >> $GITHUB_ENV ; else echo "PACKAGE_VERSION=$SOFTWARE_VERSION.$CHOCO_PACKAGE_REV" >> $GITHUB_ENV ; fi
       shell: bash
@@ -59,7 +63,6 @@ jobs:
         choco install -y -r --no-progress mingw --version=8.1.0 --force ${{ matrix.cfg.choco_flags }}
         echo C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin>>%GITHUB_PATH%
       if: (runner.os=='Windows')&&(matrix.cfg.runtime=='mingw8')&&(matrix.cfg.arch=='x86')
-      # winflexbison provides win_flex.exe and win_bison.exe so it might not be these ones that are used in practice...?
     - run: choco install -y -r --no-progress checksum wget winflexbison make patch zip ${{ matrix.cfg.choco_flags }}
       if: runner.os=='Windows'
     - run: sudo apt-get -q update ; sudo apt-get -y install flex bison dpkg-dev || true
@@ -101,6 +104,14 @@ jobs:
         cmake --build . ${{ matrix.cfg.cmake_config }}
         ./${{ matrix.cfg.test_config }}my_project
       shell: bash
+      if: ((runner.os=='Windows')&&(matrix.cfg.runtime=='mingw8'))||(runner.os=='Linux')
+    - run: |
+        cd tests/test_ibex
+        cmake ${{ matrix.cfg.cmake_params }} -D CMAKE_PREFIX_PATH="../../ibex" .
+        cmake --build . ${{ matrix.cfg.cmake_config }}
+        ./${{ matrix.cfg.test_config }}my_project
+      shell: bash
+      if: ((runner.os!='Windows')||(matrix.cfg.runtime!='mingw8'))&&(runner.os!='Linux')
     - uses: xresloader/upload-to-github-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -108,4 +119,4 @@ jobs:
         file: "*.nupkg;*.deb"
         overwrite: true
         tag_name: autotagname-${{ github.sha }}
-      if: github.event_name != 'pull_request'
+      if: (github.event_name != 'pull_request')&&(((runner.os=='Windows')&&(matrix.cfg.runtime=='mingw8'))||(runner.os=='Linux'))
