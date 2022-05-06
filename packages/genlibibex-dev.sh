@@ -21,7 +21,7 @@ sed_param=s/Architecture:\ .*/Architecture:\ ${ARCH}/
 sed -i "$sed_param" libibex-dev/DEBIAN/control
 sed_param=s/\\/home\\/runner\\/work\\/ibex-lib\\/ibex-lib\\/ibex/\\/usr/
 sed -i "$sed_param" libibex-dev/usr/share/ibex/cmake/*.cmake
-if [ "$DIST" = "focal" ]; then
+if [ "$DIST" = "focal" ] || [ "$(lsb_release -cs)" = "jammy" ]; then
     sed_param=s/libgcc1/libgccs-1/  
     sed -i "$sed_param" libibex-dev/DEBIAN/control
 fi
