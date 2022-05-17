@@ -46,12 +46,13 @@ inline void fpu_round_zero() {
 	filib::fp_traits<FI_BASE,FI_ROUNDING>::tozero();
 }
 
-inline Interval::Interval(const FI_INTERVAL& x)  : itv(x)  { 
+inline Interval::Interval(const FI_INTERVAL& x)  : itv(x), NaN(false)  { 
 
 }
 
 inline Interval& Interval::operator=(const FI_INTERVAL& x) {
 	this->itv = x;
+	this->NaN = false;
 	return *this;
 }
 
@@ -91,80 +92,127 @@ inline Interval& Interval::operator/=(double d) {
 
 inline Interval& Interval::operator+=(const Interval& x) {
 	itv+=x.itv;
+	NaN = NaN || x.NaN;
 	return *this;
 }
 
 inline Interval& Interval::operator-=(const Interval& x) {
 	itv-=x.itv;
+	NaN = NaN || x.NaN;
 	return *this;
 }
 
 inline Interval& Interval::operator*=(const Interval& y) {
 
 	FI_INTERVAL r;
-
-	if (is_empty()) return *this;
-	if (y.is_empty()) { *this=Interval::empty_set(); return *this; }
+	bool saveNaN = this->NaN;
+	
+	if (is_empty()) {
+		this->NaN = saveNaN || y.NaN;
+		return *this;
+	}
+	if (y.is_empty()) { 
+		this->set_empty(); 
+		this->NaN = saveNaN || y.NaN;
+		return *this; 
+	}
 
 	const FI_BASE& a(lb());
 	const FI_BASE& b(ub());
 	const FI_BASE& c(y.lb());
 	const FI_BASE& d(y.ub());
 
-	if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0,0.0); return *this; }
+	if ((a==0 && b==0) || (c==0 && d==0)) { 
+		*this=Interval(0.0,0.0); 
+		this->NaN = saveNaN || y.NaN;
+		return *this; 
+	}
 
-	if (((a<0) && (b>0)) && (c==NEG_INFINITY || d==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+	if (((a<0) && (b>0)) && (c==NEG_INFINITY || d==POS_INFINITY)) { 
+		*this=Interval(NEG_INFINITY, POS_INFINITY); 
+		this->NaN = saveNaN || y.NaN;
+		return *this; 
+	}
 
-	if (((c<0) && (d>0)) && (a==NEG_INFINITY || b==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+	if (((c<0) && (d>0)) && (a==NEG_INFINITY || b==POS_INFINITY)) { 
+		*this=Interval(NEG_INFINITY, POS_INFINITY); 
+		this->NaN = saveNaN || y.NaN;
+		return *this; 
+	}
 
 	// [-inf, _] x [_ 0] ou [0,_] x [_, +inf]
 	if (((a==NEG_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (a==0))) {
-		if ((b<=0) || (c>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
-		else {
+		if ((b<=0) || (c>=0)) { 
+			*this=Interval(0.0, POS_INFINITY); 
+			this->NaN = saveNaN || y.NaN;
+			return *this; 
+		} else {
 			r = FI_INTERVAL(b)*FI_INTERVAL(c);
 			*this=Interval(r.inf(), POS_INFINITY);
+			this->NaN = saveNaN || y.NaN;
 			return *this;
 		}
 	}
 
 	// [-inf, _] x [0, _] ou [0, _] x [-inf, _]
 	if (((a==NEG_INFINITY) && (c==0)) || ((c==NEG_INFINITY) && (a==0))) {
-		if ((b<=0) || (d<=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
-		else {
+		if ((b<=0) || (d<=0)) { 
+			*this=Interval(NEG_INFINITY, 0.0); 
+			this->NaN = saveNaN || y.NaN;
+			return *this; 
+		} else {
 			r = FI_INTERVAL(b)*FI_INTERVAL(d);
 			*this=Interval(NEG_INFINITY, r.sup());
+			this->NaN = saveNaN || y.NaN;
 			return *this;
 		}
 	}
 
 	// [_,0] x [-inf, _] ou [_, +inf] x [0,_]
 	if (((c==NEG_INFINITY) && (b==0)) || ((b==POS_INFINITY) && (c==0))) {
-		if ((d<=0) || (a>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
-		else {
+		if ((d<=0) || (a>=0)) { 
+			*this=Interval(0.0, POS_INFINITY); 
+			this->NaN = saveNaN || y.NaN;
+			return *this; 
+		} else {
 			r = FI_INTERVAL(a)*FI_INTERVAL(d);
 			*this=Interval(r.inf(), POS_INFINITY);
+			this->NaN = saveNaN || y.NaN;
 			return *this;
 		}
 	}
 
 	// [_, +inf] x [_,0] ou [_,0] x [_, +inf]
 	if (((b==POS_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (b==0))) {
-		if ((a>=0) || (c>=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
-		else {
+		if ((a>=0) || (c>=0)) { 
+			*this=Interval(NEG_INFINITY, 0.0); 
+			this->NaN = saveNaN || y.NaN;
+			return *this; 
+		} else {
 			r = FI_INTERVAL(a)*FI_INTERVAL(c);
 			*this=Interval(NEG_INFINITY, r.sup());
+			this->NaN = saveNaN || y.NaN;
 			return *this;
 		}
 	}
 	*this= itv*y.itv;
+	this->NaN = saveNaN || y.NaN;
 	return *this;
 }
 
 
 inline Interval& Interval::operator/=(const Interval& y) {
-
-	if (is_empty()) return *this;
-	if (y.is_empty()) { *this=Interval::empty_set(); return *this; }
+	bool saveNaN = this->NaN;
+	
+	if (is_empty()) {
+		this->NaN = saveNaN || y.NaN;
+		return *this;
+	}
+	if (y.is_empty()) { 
+		this->set_empty(); 
+		this->NaN = saveNaN || y.NaN;
+		return *this; 
+	}
 
 	const FI_BASE& a(lb());
 	const FI_BASE& b(ub());
@@ -174,55 +222,65 @@ inline Interval& Interval::operator/=(const Interval& y) {
 	FI_INTERVAL r;
 
 	if (c==0 && d==0) {
-		*this=Interval::empty_set();
+		this->set_empty(); 
+		this->NaN = true; // TODO TO CHECK
 		return *this;
 	}
 
 	if (a==0 && b==0) {
 		// TODO: 0/0 can also be 1...
+		this->NaN = saveNaN || y.NaN;
 		return *this;
 	}
 
 	if (c>0 || d<0) {
 		*this= itv / y.itv;
+		this->NaN = saveNaN || y.NaN;
 		return *this;
 	}
 
 	if ((b<=0) && d==0) {
 		r = FI_INTERVAL(b) / FI_INTERVAL(c);
 		*this=Interval(r.inf(), POS_INFINITY);
+		this->NaN = saveNaN || y.NaN;
 		return *this;
 	}
 
 	if (b<=0 && c<0 && d<0) {
 		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		this->NaN = saveNaN || y.NaN;
 		return *this;
 	}
 
 	if (b<=0 && c==0) {
 		r = FI_INTERVAL(b) / FI_INTERVAL(d);		
 		*this=Interval(NEG_INFINITY, r.sup());
+		this->NaN = saveNaN||y.NaN;
 		return *this;
 	}
 
 	if (a>=0 && d==0) {
 		r = FI_INTERVAL(a) / FI_INTERVAL(c);
 		*this=Interval(NEG_INFINITY, r.sup());
+		this->NaN = saveNaN||y.NaN;
 		return *this;
 	}
 
 	if (a>=0 && c<0 && d>0) {
 		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		this->NaN = saveNaN||y.NaN;
 		return *this;
 	}
 
 	if (a>=0 && c==0) {
 		r = FI_INTERVAL(a) / FI_INTERVAL(d);
 		*this=Interval(r.inf(), POS_INFINITY);
+		this->NaN = saveNaN||y.NaN;
 		return *this;
 	}
 
 	*this=Interval(NEG_INFINITY, POS_INFINITY); // a<0<b et c<=0<=d
+	this->NaN = saveNaN||y.NaN;
 	return *this;
 
 }
@@ -232,7 +290,9 @@ inline Interval& Interval::operator/=(const Interval& y) {
 }*/
 
 inline Interval Interval:: operator-() const {
-	return -itv;
+	Interval res(-itv);
+	res.NaN = this->NaN;
+	return res;
 }
 
 inline Interval& Interval::div2_inter(const Interval& x, const Interval& y) {
@@ -242,16 +302,20 @@ inline Interval& Interval::div2_inter(const Interval& x, const Interval& y) {
 }
 
 inline void Interval::set_empty() {
-	*this = EMPTY_SET;
+	bool save = this->NaN;
+	*this = Interval::empty_set();
+	this->NaN = save;
 }
 
 inline Interval& Interval::operator&=(const Interval& x) {
 	itv = itv.intersect(x.itv);
+	NaN = NaN && x.NaN;
 	return *this;
 }
 
 inline Interval& Interval::operator|=(const Interval& x) {
 	itv=itv.hull(x.itv);
+	NaN = NaN || x.NaN;
 	return *this;
 }
 
@@ -303,14 +367,19 @@ inline double Interval::mag() const {
 }
 
 inline Interval operator&(const Interval& x1, const Interval& x2) {
-	return x1.itv.intersect(x2.itv);
+	Interval res= x1.itv.intersect(x2.itv);
+	res.NaN = x1.NaN && x2.NaN;
+	return res;
 }
 
 
 inline Interval operator|(const Interval& x1, const Interval& x2) {
-	if (x1.is_empty()) return x2;
-	if (x2.is_empty()) return x1;
-	return x1.itv.hull(x2.itv);
+	Interval res;
+	if (x1.is_empty()) res = x2;
+	else if (x2.is_empty()) res = x1;
+	else res = x1.itv.hull(x2.itv);
+	res.NaN = x1.NaN || x2.NaN;
+	return res;
 }
 
 inline double hausdorff(const Interval &x1, const Interval &x2) {
@@ -318,75 +387,101 @@ inline double hausdorff(const Interval &x1, const Interval &x2) {
 }
 
 inline Interval operator+(const Interval& x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::empty_set();
-	else
-		return x.itv+d;
+	if(d==NEG_INFINITY || d==POS_INFINITY) {
+		Interval res = Interval::empty_set();
+		res.NaN = x.NaN;
+		return res;
+	} else {
+		Interval res(x);
+		return res+=d;
+	}
 }
 
 inline Interval operator-(const Interval& x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::empty_set();
-	else
-		return x.itv-d;
+	if(d==NEG_INFINITY || d==POS_INFINITY) {
+		Interval res = Interval::empty_set();
+		res.NaN = x.NaN;
+		return res;
+	} else {
+		Interval res(x);
+		return res-=d;
+	}
 }
 
 inline Interval operator*(const Interval& x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::empty_set();
-	else {
+	if(d==NEG_INFINITY || d==POS_INFINITY) {
+		Interval res = Interval::empty_set();
+		res.NaN = x.NaN;
+		return res;
+	} else {
 		Interval res(d);
 		return res*=x;
 	}
 }
 
 inline Interval operator/(const Interval& x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::empty_set();
-	else{
+	if(d==NEG_INFINITY || d==POS_INFINITY){
+		Interval res = Interval::empty_set();
+		res.NaN = x.NaN;
+		return res;
+	} else {
 		Interval res(x);
 		return res/=Interval(d);
 	}
 }
 
 inline Interval operator+(double d,const Interval& x) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::empty_set();
-	else
-		return d+x.itv;
+	if(d==NEG_INFINITY || d==POS_INFINITY){
+		Interval res = Interval::empty_set();
+		res.NaN = x.NaN;
+		return res;
+	} else {
+		Interval res(x);
+		return res+=d;
+	}
 }
 
 inline Interval operator-(double d, const Interval& x) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::empty_set();
-	else
-		return d-x.itv;
+	if(d==NEG_INFINITY || d==POS_INFINITY){
+		Interval res = Interval::empty_set();
+		res.NaN = x.NaN;
+		return res;
+	} else {
+		Interval res(d);
+		return res-=x;
+	}
 }
 
 inline Interval operator*(double d, const Interval& x) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::empty_set();
-	else {
+	if(d==NEG_INFINITY || d==POS_INFINITY){
+		Interval res = Interval::empty_set();
+		res.NaN = x.NaN;
+		return res;
+	} else {
 		Interval res(d);
 		return res*=x;
 	}
 }
 
 inline Interval operator/(double d, const Interval& x) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::empty_set();
-	else{
+	if(d==NEG_INFINITY || d==POS_INFINITY){
+		Interval res = Interval::empty_set();
+		res.NaN = x.NaN;
+		return res;
+	} else {
 		Interval res(d);
 		return res/=x;
 	}
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {
-	return x1.itv+x2.itv;
+	Interval res(x1);
+	return res+=x2;
 }
 
 inline Interval operator-(const Interval& x1, const Interval& x2) {
-	return x1.itv-x2.itv;
+	Interval res(x1);
+	return res-=x2;
 }
 
 inline Interval operator*(const Interval& x1, const Interval& x2) {
@@ -400,153 +495,235 @@ inline Interval operator/(const Interval& x1, const Interval& x2) {
 }
 
 inline Interval sqr(const Interval& x) {
-	return filib::sqr(x.itv);
+	Interval res(filib::sqr(x.itv));
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval sqrt(const Interval& x) {
-	return filib::sqrt(x.itv) & Interval::pos_reals();
+	Interval res(filib::sqrt(x.itv) & Interval::pos_reals());
+	res.NaN = x.NaN || (x.lb()<0);
+	return res;
 }
 
 inline Interval pow(const Interval& x, int n) {
+	Interval res;
 	if (n==0)
-		return Interval::one();
+		res = Interval::one();
 	else if (n<0)
-		return 1.0/Interval(filib::power(x.itv,-n));
+		res = 1.0/Interval(filib::power(x.itv,-n));
 	else 
-		return filib::power(x.itv,n);
+		res = filib::power(x.itv,n);
+	res.NaN = res.NaN || x.NaN;
+	return res;
 }
 
 inline Interval pow(const Interval &x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::empty_set();
-	else if (d==0)
-		return Interval::one();
-	else if (d<0)
-		return 1.0/pow(x,-d);
+	Interval res;
+	if(d==NEG_INFINITY || d==POS_INFINITY) {
+		res = Interval::empty_set();
+	} else if (d==0) {
+		res = Interval::one();
+	} else if (d<0)
+		res = 1.0/pow(x,-d);
 	else
-		return pow(x,Interval(d));
+		res = pow(x,Interval(d));
+	res.NaN = res.NaN || x.NaN;
+	return res;
+	
 }
 
 inline Interval pow(const Interval &x, const Interval &y) {
-	return filib::pow(x.itv, y.itv);
+	Interval res = filib::pow(x.itv, y.itv);
+	res.NaN = x.NaN || y.NaN || (x.lb()<=0);
+	return res;
 }
 
 
 
 inline Interval root(const Interval& x, int n) {
-
-	if (x.is_empty()) return Interval::empty_set();
-	if (x.lb()==0 && x.ub()==0) return Interval::zero();
-	if (n==0) return Interval::one();
-	if (n<0) return 1.0/root(x,-n);
-	if (n==1) return x;
-
-	if (n%2==0) {
-		return pow(x,Interval::one()/n);   // the negative part of x should be removed
+	Interval res;
+	if (x.is_empty()) res= Interval::empty_set();
+	else if (x.lb()==0 && x.ub()==0) res = Interval::zero();
+	else if (n==0) 		res = Interval::one();
+	else if (n<0) 		res = 1.0/root(x,-n);
+	else if (n==1) 		res = x;
+	else if (n%2==0) {
+		res = pow(x,Interval::one()/n);   // the negative part of x should be removed
 	} else {
-		return pow(x,Interval::one()/n) |  // the negative part of x should be removed
+		res = pow(x,Interval::one()/n) |  // the negative part of x should be removed
 	    (-pow(-x,Interval::one()/n)); // the positive part of x should be removed
 	}
-
+	
+	res.NaN = res.NaN || x.NaN;
+	return res;
 }
 
 
 
 inline Interval exp(const Interval& x) {
-	return filib::exp(x.itv);
+	Interval res = filib::exp(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval log(const Interval& x) {
-	if (x.ub()<=0) // filib returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
-		return Interval::empty_set();
-	else if (x.ub()<=next_float(0))
-		return Interval(NEG_INFINITY,filib::filib_consts<FI_BASE>::q_minr);
-	else
-		return filib::log(x.itv);
+	if (x.ub()<=0) { // filib returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
+		Interval res = Interval::empty_set();
+		res.NaN = true;
+		return res;
+	} else if (x.ub()<=next_float(0)) {
+		Interval res(NEG_INFINITY,filib::filib_consts<FI_BASE>::q_minr);
+		res.NaN = (x.lb()<0);
+		return res;
+	} else {
+		Interval res = filib::log(x.itv);
+		res.NaN = (x.lb()<0);
+		return res;
+	}
 }
 
 inline Interval cos(const Interval& x) {
-	return filib::cos(x.itv);
+	Interval res = filib::cos(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval sin(const Interval& x) {
-	return filib::sin(x.itv);
+	Interval res =filib::sin(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval tan(const Interval& x) {
 	Interval res =  filib::tan(x.itv);
 	if (res.is_empty()&& (!x.is_empty())) {
-		return Interval::all_reals();
-	} else
-		return res;
+		res = Interval::all_reals();
+	}
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval acos(const Interval& x) {
-	return filib::acos(x.itv);
+	Interval res = filib::acos(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval asin(const Interval& x) {
-	return filib::asin(x.itv);
+	Interval res = filib::asin(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval atan(const Interval& x) {
-	return filib::atan(x.itv);
+	Interval res = filib::atan(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval cosh(const Interval& x) {
-	return filib::cosh(x.itv);
+	Interval res = filib::cosh(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval sinh(const Interval& x) {
-	return filib::sinh(x.itv);
+	Interval res = filib::sinh(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval tanh(const Interval& x) {
-	return filib::tanh(x.itv);
+	Interval res = filib::tanh(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval acosh(const Interval& x) {
-	return filib::acosh(x.itv);
+	Interval res = filib::acosh(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval asinh(const Interval& x) {
-	return filib::asinh(x.itv);
+	Interval res = filib::asinh(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval atanh(const Interval& x) {
-	return filib::atanh(x.itv);
+	Interval res = filib::atanh(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval abs(const Interval &x) {
-	return filib::abs(x.itv);
+	Interval res = filib::abs(x.itv);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval max(const Interval& x, const Interval& y) {
-	if (x.is_empty()||y.is_empty()) return Interval::empty_set();
-	else return x.itv.imax(y.itv);
+	Interval res;
+	if (x.is_empty()||y.is_empty()) {
+		res = Interval::empty_set();
+	} else {
+		res = x.itv.imax(y.itv);
+	}
+	res.NaN = x.NaN || y.NaN;
+	return res;
 }
 
 inline Interval min(const Interval& x, const Interval& y) {
-	if (x.is_empty()||y.is_empty()) return Interval::empty_set();
-	else return x.itv.imin(y.itv);
+	Interval res;
+	if (x.is_empty()||y.is_empty()) {
+		res = Interval::empty_set();
+	} else {
+		res = x.itv.imin(y.itv);
+	}
+	res.NaN = x.NaN || y.NaN;
+	return res;
 }
 
 inline Interval integer(const Interval& x) {
-	if (x.is_empty()) return Interval::empty_set();
-	double l= x.lb()==NEG_INFINITY? NEG_INFINITY : std::ceil(x.lb());
-	double r= x.ub()==POS_INFINITY? POS_INFINITY : std::floor(x.ub());
-	if (l>r) return Interval::empty_set();
-	else return Interval(l,r);
+	Interval res;
+	if (x.is_empty()) {
+		res = Interval::empty_set();
+	} else {
+		double l= x.lb()==NEG_INFINITY? NEG_INFINITY : std::ceil(x.lb());
+		double r= x.ub()==POS_INFINITY? POS_INFINITY : std::floor(x.ub());
+		if (l>r) {
+			res = Interval::empty_set();
+		} else {
+			res = Interval(l,r);
+		}
+	}
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval floor(const Interval& x) {
-	if (x.is_empty()) return Interval::empty_set();
-	else return Interval(std::floor(x.lb()),std::floor(x.ub()));
+	Interval res;
+	if (x.is_empty()) {
+		res = Interval::empty_set();
+	} else {
+		 res = Interval(std::floor(x.lb()),std::floor(x.ub()));
+	}
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval ceil(const Interval& x) {
-	if (x.is_empty()) return Interval::empty_set();
-	else return Interval(std::ceil(x.lb()),std::ceil(x.ub()));
+	Interval res;
+	if (x.is_empty()) {
+		res = Interval::empty_set();
+	}
+	else {
+		res = Interval(std::ceil(x.lb()),std::ceil(x.ub()));
+	}
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline bool bwd_mul(const Interval& y, Interval& x1, Interval& x2) {

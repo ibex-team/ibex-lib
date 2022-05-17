@@ -531,6 +531,9 @@ class Interval {
     Interval& operator=(const interval_type_wrapper& x);
 
     interval_type_wrapper itv;
+
+	/* \brief Flag to know if there exist some definition problem with a Not_a_Number */
+    bool NaN;
 };
 
 /** \ingroup arithmetic */
@@ -879,16 +882,16 @@ inline Interval ___abs(const Interval& x)   { return abs(x);}
 inline double ___mag(double x)              { return fabs(x);}
 inline double ___mag(const Interval& x)     { return x.mag();}
 
-inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY) {
+inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY), NaN(false) {
 
 }
 
-inline Interval::Interval(double a, double b) : itv(a,b) {
-	if (a==POS_INFINITY || b==NEG_INFINITY || a>b) *this=EMPTY_SET;
+inline Interval::Interval(double a, double b) : itv(a,b) , NaN(false) {
+	if (a==POS_INFINITY || b==NEG_INFINITY || a>b) *this=Interval::empty_set();
 }
 
-inline Interval::Interval(double a) : itv(a,a) {
-	if (a==NEG_INFINITY || a==POS_INFINITY) *this=EMPTY_SET;
+inline Interval::Interval(double a) : itv(a,a), NaN(false)  {
+	if (a==NEG_INFINITY || a==POS_INFINITY) *this=Interval::empty_set();
 }
 
 inline Interval::Interval(std::array<double, 1> array): Interval(array[0]) {}
@@ -901,14 +904,16 @@ inline bool Interval::operator==(const Interval& x) const {
 
 inline Interval& Interval::operator=(double x) {
 	if (x==NEG_INFINITY || x==POS_INFINITY)
-		*this=EMPTY_SET;
+		*this=Interval::empty_set();
 	else
 		itv = x;
+	NaN = false;
 	return *this;
 }
 
 inline Interval& Interval::operator=(const Interval& x) {
 	itv = x.itv;
+	NaN = x.NaN;
 	return *this;
 }
 
@@ -983,7 +988,9 @@ inline double distance(const Interval &x1, const Interval &x2) {
 }
 
 inline Interval sign(const Interval& x) {
-	return x.ub()<0 ? Interval(-1,-1) : x.lb()>0 ? Interval(1,1) : Interval(-1,1);
+	Interval res = x.ub()<0 ? Interval(-1,-1) : x.lb()>0 ? Interval(1,1) : Interval(-1,1);
+	res.NaN = x.NaN;
+	return res;
 }
 
 inline Interval chi(const Interval& a, const Interval& b, const Interval& c){
@@ -997,49 +1004,54 @@ inline Interval chi(const Interval& a, const Interval& b, const Interval& c){
 }
 
 inline Interval atan2(const Interval& y, const Interval& x) {
-
+	Interval res;
 	if (y.is_empty() || x.is_empty()) return Interval::empty_set();
 
 	// we handle the special case x=[0,0] separately
 	else if (x==Interval::zero()) {
 		if (y.lb()>=0)
-			if (y.ub()==0) return Interval::empty_set(); // atan2(0,0) is undefined.
-			else return Interval::half_pi();
-		else if (y.ub()<=0) return -Interval::half_pi();
-		else return Interval(-1,1)*Interval::half_pi();
+			if (y.ub()==0) {
+				res = Interval::empty_set(); // atan2(0,0) is undefined.
+				res.NaN = true;  // TODO  TO CHECK
+			}
+			else res = Interval::half_pi();
+		else if (y.ub()<=0) res = -Interval::half_pi();
+		else  	res = Interval(-1,1)*Interval::half_pi();
 	}
 
 	else if (x.lb()>=0) {
-		return atan(y/x); // now, x.ub()>0 -> atan does not give an empty set
+		res = atan(y/x); // now, x.ub()>0 -> atan does not give an empty set
 	}
 	else if (x.ub()<=0) {
 		if (y.lb()>=0)
-			return atan(y/x)+Interval::pi(); // x.lb()<0
+			res = atan(y/x)+Interval::pi(); // x.lb()<0
 		else if (y.ub()<0)
-			return atan(y/x)-Interval::pi();
+			res = atan(y/x)-Interval::pi();
 		else
-			return Interval(-1,1)*Interval::pi();
+			res = Interval(-1,1)*Interval::pi();
 	} else {
 		if (y.lb()>=0)
-			return atan(y/x.ub()) | (atan(y/x.lb()) + Interval::pi());
+			res = atan(y/x.ub()) | (atan(y/x.lb()) + Interval::pi());
 		else if (y.ub()<=0){
 			if(x.lb()!=NEG_INFINITY){
 				if(x.ub()!=POS_INFINITY){
-					return (atan(y/x.lb())-Interval::pi()) | atan(y/x.ub());
+					res = (atan(y/x.lb())-Interval::pi()) | atan(y/x.ub());
 				}
 				else
-					return (atan(y/x.lb())-Interval::pi()) | Interval::zero();
+					res = (atan(y/x.lb())-Interval::pi()) | Interval::zero();
 			}
 			else{
 				if(x.ub()!=POS_INFINITY)
-					return (-Interval::pi()) | atan(y/x.ub());
+					res = (-Interval::pi()) | atan(y/x.ub());
 				else
-					return -Interval::pi() | Interval::zero();
+					res = -Interval::pi() | Interval::zero();
 			}
 		}
 		else
-			return Interval(-1,1)*Interval::pi();
+			res = Interval(-1,1)*Interval::pi();
 	}
+	res.NaN= (res.NaN || y.NaN || x.NaN );
+	return res;
 }
 
 inline bool bwd_add(const Interval& y, Interval& x1, Interval& x2) {
