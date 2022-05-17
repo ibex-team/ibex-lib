@@ -899,7 +899,7 @@ inline Interval::Interval(std::array<double, 1> array): Interval(array[0]) {}
 inline Interval::Interval(std::array<double, 2> array): Interval(array[0], array[1]) {}
 
 inline bool Interval::operator==(const Interval& x) const {
-	return (is_empty() && x.is_empty()) || (lb()==x.lb() && ub()==x.ub());
+	return (is_empty() && x.is_empty()) || (lb()==x.lb() && ub()==x.ub()); // TODO est-ce qu'il faut comparer les NaN?? JN:non je pense
 }
 
 inline Interval& Interval::operator=(double x) {
@@ -1005,8 +1005,9 @@ inline Interval chi(const Interval& a, const Interval& b, const Interval& c){
 
 inline Interval atan2(const Interval& y, const Interval& x) {
 	Interval res;
-	if (y.is_empty() || x.is_empty()) return Interval::empty_set();
-
+	if (y.is_empty() || x.is_empty()) {
+		res = Interval::empty_set();
+	}
 	// we handle the special case x=[0,0] separately
 	else if (x==Interval::zero()) {
 		if (y.lb()>=0)
@@ -1032,23 +1033,22 @@ inline Interval atan2(const Interval& y, const Interval& x) {
 	} else {
 		if (y.lb()>=0)
 			res = atan(y/x.ub()) | (atan(y/x.lb()) + Interval::pi());
-		else if (y.ub()<=0){
-			if(x.lb()!=NEG_INFINITY){
-				if(x.ub()!=POS_INFINITY){
+		else if (y.ub()<=0) {
+			if (x.lb()!=NEG_INFINITY) {
+				if (x.ub()!=POS_INFINITY) {
 					res = (atan(y/x.lb())-Interval::pi()) | atan(y/x.ub());
-				}
-				else
+				} else {
 					res = (atan(y/x.lb())-Interval::pi()) | Interval::zero();
-			}
-			else{
-				if(x.ub()!=POS_INFINITY)
+				}
+			} else {
+				if (x.ub()!=POS_INFINITY)
 					res = (-Interval::pi()) | atan(y/x.ub());
 				else
 					res = -Interval::pi() | Interval::zero();
 			}
-		}
-		else
+		} else {
 			res = Interval(-1,1)*Interval::pi();
+		}
 	}
 	res.NaN= (res.NaN || y.NaN || x.NaN );
 	return res;

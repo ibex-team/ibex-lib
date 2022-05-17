@@ -302,7 +302,7 @@ inline Interval& Interval::div2_inter(const Interval& x, const Interval& y) {
 }
 
 inline void Interval::set_empty() {
-	bool save = this->NaN;
+	bool save = this->NaN; // TODO to check
 	*this = Interval::empty_set();
 	this->NaN = save;
 }
@@ -475,23 +475,23 @@ inline Interval operator/(double d, const Interval& x) {
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {
-	Interval res(x1);
+	Interval res=x1;
 	return res+=x2;
 }
 
 inline Interval operator-(const Interval& x1, const Interval& x2) {
-	Interval res(x1);
+	Interval res=x1;
 	return res-=x2;
 }
 
 inline Interval operator*(const Interval& x1, const Interval& x2) {
-	Interval res(x1);
+	Interval res=x1;
 	return res*=x2;
 }
 
 inline Interval operator/(const Interval& x1, const Interval& x2) {
-	Interval res(x1);
-	return res/=Interval(x2);
+	Interval res=x1;
+	return res/=x2;
 }
 
 inline Interval sqr(const Interval& x) {
@@ -514,6 +514,7 @@ inline Interval pow(const Interval& x, int n) {
 		res = 1.0/Interval(filib::power(x.itv,-n));
 	else 
 		res = filib::power(x.itv,n);
+	
 	res.NaN = res.NaN || x.NaN;
 	return res;
 }
@@ -528,6 +529,7 @@ inline Interval pow(const Interval &x, double d) {
 		res = 1.0/pow(x,-d);
 	else
 		res = pow(x,Interval(d));
+	
 	res.NaN = res.NaN || x.NaN;
 	return res;
 	
@@ -535,7 +537,7 @@ inline Interval pow(const Interval &x, double d) {
 
 inline Interval pow(const Interval &x, const Interval &y) {
 	Interval res = filib::pow(x.itv, y.itv);
-	res.NaN = x.NaN || y.NaN || (x.lb()<=0);
+	res.NaN = x.NaN || y.NaN || (x.lb()<0);
 	return res;
 }
 
@@ -553,6 +555,7 @@ inline Interval root(const Interval& x, int n) {
 	} else {
 		res = pow(x,Interval::one()/n) |  // the negative part of x should be removed
 	    (-pow(-x,Interval::one()/n)); // the positive part of x should be removed
+		res.NaN = x.NaN;
 	}
 	
 	res.NaN = res.NaN || x.NaN;
@@ -569,7 +572,7 @@ inline Interval exp(const Interval& x) {
 
 inline Interval log(const Interval& x) {
 	if (x.ub()<=0) { // filib returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
-		Interval res = Interval::empty_set();
+		Interval res = Interval::empty_set(); // TODO to check
 		res.NaN = true;
 		return res;
 	} else if (x.ub()<=next_float(0)) {

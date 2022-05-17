@@ -140,17 +140,20 @@ bool Interval::div2_inter(const Interval& num, const Interval& div, Interval& ou
 Interval saw(const Interval& x) {
 	double u = round(x.ub());
 	double l = round(x.lb());
-
+	Interval res;
 	assert(l<=u);
 
-	if (l<u) return Interval(-1,1);
-	else {
+	if (l<u) {
+		res = Interval(-1,1);
+	} else {
 		fpu_round_up();
 		double du  = x.ub()-u;
 		double dl  = l-x.lb();
 
-		return Interval(-dl,du);
+		res = Interval(-dl,du);
 	}
+	res.NaN = x.NaN;
+	return res;
 }
 
 bool bwd_saw(const Interval& y_, Interval& x) {
