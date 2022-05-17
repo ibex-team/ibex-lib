@@ -514,7 +514,6 @@ inline Interval pow(const Interval& x, int n) {
 		res = 1.0/Interval(filib::power(x.itv,-n));
 	else 
 		res = filib::power(x.itv,n);
-	
 	res.NaN = res.NaN || x.NaN;
 	return res;
 }
@@ -529,7 +528,6 @@ inline Interval pow(const Interval &x, double d) {
 		res = 1.0/pow(x,-d);
 	else
 		res = pow(x,Interval(d));
-	
 	res.NaN = res.NaN || x.NaN;
 	return res;
 	
