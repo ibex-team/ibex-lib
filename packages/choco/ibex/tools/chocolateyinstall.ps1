@@ -1,7 +1,7 @@
 ﻿$ErrorActionPreference = 'Stop'; # Stop on all errors.
 
-# Source registry key values which are shared between install and uninstall.
-. $PSScriptRoot\regKeys.ps1
+# Source variables which are shared between install and uninstall.
+. $PSScriptRoot\sharedVars.ps1
 
 New-Item "$CMakeSystemRepositoryPath\$CMakePackageName" -ItemType directory -Force
 New-ItemProperty -Name "CMakePackageDir" -PropertyType String -Value "$env:ChocolateyPackageFolder\share\$CMakePackageName\cmake" -Path "$CMakeSystemRepositoryPath\$CMakePackageName" -Force
