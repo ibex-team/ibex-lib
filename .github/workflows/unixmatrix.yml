@@ -35,8 +35,8 @@ jobs:
             - { os: ubuntu-22.04, shell: bash, arch: amd64, runtime: jammy, cmake_flags: '-fPIC', desc: 'Ubuntu 22.04' }
             - { os: ubuntu-20.04, shell: bash, arch: amd64, runtime: focal, cmake_flags: '-fPIC', desc: 'Ubuntu 20.04' }
             - { os: ubuntu-18.04, shell: bash, arch: amd64, runtime: bionic, cmake_flags: '-fPIC', desc: 'Ubuntu 18.04' }
+            - { os: macos-12, shell: bash, arch: amd64, runtime: monterey, cmake_flags: '-fPIC', desc: 'macOS Monterey' }
             - { os: macos-11, shell: bash, arch: amd64, runtime: bigsur, cmake_flags: '-fPIC', desc: 'macOS Big Sur' }
-            - { os: macos-10.15, shell: bash, arch: amd64, runtime: catalina, cmake_flags: '-fPIC', desc: 'macOS Catalina' }
     name: ${{ matrix.cfg.desc }}
     steps: 
     - uses: actions/checkout@v2
