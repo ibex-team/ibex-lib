@@ -3,9 +3,11 @@ cmake_minimum_required (VERSION 3.5.1)
 project (FILIB VERSION 3.0.2.2 LANGUAGES CXX)
 
 message (STATUS "Running on system ${CMAKE_HOST_SYSTEM} with processor ${CMAKE_HOST_SYSTEM_PROCESSOR}")
-if (NOT ${CMAKE_HOST_SYSTEM} STREQUAL ${CMAKE_SYSTEM} OR
-    NOT ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL ${CMAKE_SYSTEM_PROCESSOR})
-  message (STATUS "Targeting system ${CMAKE_SYSTEM} with processor ${CMAKE_SYSTEM_PROCESSOR}")
+if (CMAKE_SYSTEM AND CMAKE_SYSTEM_PROCESSOR)
+  if ((DEFINED CMAKE_SYSTEM AND DEFINED CMAKE_SYSTEM_PROCESSOR) AND (NOT ${CMAKE_HOST_SYSTEM} STREQUAL ${CMAKE_SYSTEM} OR
+      NOT ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL ${CMAKE_SYSTEM_PROCESSOR}))
+    message (STATUS "Targeting system ${CMAKE_SYSTEM} with processor ${CMAKE_SYSTEM_PROCESSOR}")
+  endif ()
 endif ()
 
 # options and command-line arguments
@@ -37,10 +39,12 @@ check_cxx_compiler_flag ("-frounding-math" COMPILER_SUPPORTS_FROUNDING_MATH)
 check_cxx_compiler_flag ("-ffloat-store" COMPILER_SUPPORTS_FFLOAT_STORE)
 
 # Setting HAVE_SSE and HAVE_X87
-if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+if (CMAKE_SYSTEM_PROCESSOR)
+  if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
 	set(HAVE_SSE ON)
-elseif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i.86")
+  elseif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i.86")
 	set(HAVE_X87 ON)
+  endif ()
 endif ()
 
 # rounding_control_config.hpp.in -> rounding_control_config.hpp

@@ -134,7 +134,7 @@ function (EXECUTE_PROCESS_CHECK)
                    )
 
   if (ret)
-    message (FATAL_ERROR "An error occurs while ${EPC_MSG}\n"
+    message (FATAL_ERROR "An error occurred while ${EPC_MSG}\n"
                           "See also\n${EPC_LOGBASENAME}-*.log\n")
   endif ()
 endfunction ()
@@ -431,9 +431,11 @@ function (IBEX_INIT_COMMON)
   # Print information (to ease debugging)
   ##############################################################################
   message (STATUS "Running on system ${CMAKE_HOST_SYSTEM} with processor ${CMAKE_HOST_SYSTEM_PROCESSOR}")
-  if (NOT ${CMAKE_HOST_SYSTEM} STREQUAL ${CMAKE_SYSTEM} OR
+  if (CMAKE_SYSTEM AND CMAKE_SYSTEM_PROCESSOR)
+    if (NOT ${CMAKE_HOST_SYSTEM} STREQUAL ${CMAKE_SYSTEM} OR
       NOT ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL ${CMAKE_SYSTEM_PROCESSOR})
-    message (STATUS "Targeting system ${CMAKE_SYSTEM} with processor ${CMAKE_SYSTEM_PROCESSOR}")
+      message (STATUS "Targeting system ${CMAKE_SYSTEM} with processor ${CMAKE_SYSTEM_PROCESSOR}")
+    endif ()
   endif ()
   message (STATUS "Using CMake ${CMAKE_VERSION}")
   message (STATUS "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
