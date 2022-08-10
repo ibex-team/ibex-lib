@@ -24,8 +24,18 @@ IBEX is a C++ library for constraint processing over real numbers.
 - Check that all the packages and their dependencies were installed, if one failed (e.g. due to network-related errors) try to reinstall it using `--force` or try a previous version...
 - 32 bit versions of Qt Creator do not seem available any more, see https://github.com/AdmiringWorm/chocolatey-packages/issues/362.
 - If multiple compilers are already installed, Qt Creator might show multiple possibilities in the Configure Project panel, ensure you choose one compatible with https://chocolatey.org/packages/ibex#dependencies.
+
+## Package parameters
+The following package parameters can be set:
+- `/url:URL` - Will install the specified binary package, see versions from https://github.com/lebarsfa/ibex-lib/releases (the Windows `PATH` might need to be updated manually, etc.). By default, only the MinGW libraries compatible with the corresponding MinGW Chocolatey package dependency are installed. Use the standard parameter `choco install --ignore-dependencies ...` to avoid installing MinGW Chocolatey package dependency if needed.
+- `/NoPath` - Will not try to update Windows PATH.
+- `/NoRegistry` - Will not try to update Windows registry.
+To pass package parameters, use `--params "''"` (e.g. `choco install ibex --params "'/NoPath /NoRegistry'"`), e.g.
+```
+choco install -y -f --ignore-dependencies ibex --params "'/url:https://github.com/lebarsfa/ibex-lib/releases/download/ibex-2.8.9.20220812/ibex_x86_vc15.zip'"
+```
     </description>
-    <releaseNotes>https://github.com/ibex-team/ibex-lib/releases</releaseNotes>
+    <releaseNotes>https://github.com/lebarsfa/ibex-lib/releases</releaseNotes>
     <dependencies>
       <dependency id="mingw" version="[8.1.0]" />
     </dependencies>
