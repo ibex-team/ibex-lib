@@ -60,7 +60,8 @@ jobs:
       shell: bash
       # See https://askubuntu.com/questions/620533/what-is-the-meaning-of-the-xubuntuy-string-in-ubuntu-package-names
     - run: |
-        echo "SOFTWARE_VERSION=${git_tag:5}.20220809" >> $GITHUB_ENV
+        #echo "SOFTWARE_VERSION=${git_tag:5}" >> $GITHUB_ENV
+        echo "SOFTWARE_VERSION=2.8.9.20220812" >> $GITHUB_ENV
         echo "DEBIAN_PACKAGE_REV=0" >> $GITHUB_ENV
         echo "PACKAGE_REV=0" >> $GITHUB_ENV
         echo "CHOCO_PACKAGE_REV=" >> $GITHUB_ENV
