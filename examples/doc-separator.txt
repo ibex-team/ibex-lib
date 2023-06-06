@@ -1,0 +1,11 @@
+================= this file is generated ==============
+! [sep-ctc-pair-O]
+! [sep-ctc-pair-O]
+! [sep-fwd-bwd-O]
+result of inner contraction=([1, 3] ; [1, 2])
+result of outer contraction=([0, 2] ; [1, 2])
+! [sep-fwd-bwd-O]
+! [sep-boundary-O]
+result of inner contraction=([1, 3] ; [1, 2])
+result of outer contraction=([0, 3] ; [1, 2])
+! [sep-boundary-O]

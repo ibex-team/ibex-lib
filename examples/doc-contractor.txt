@@ -1,0 +1,47 @@
+================= this file is generated ==============
+! [ctc-propag-O]
+ Number of contractions with simple fixpoint=700
+ Number of contractions with propagation=121
+ Are the results the same? YES
+! [ctc-propag-O]
+! [ctc-input-output-O]
+ Number of contractions with propagation=700
+! [ctc-input-output-O]
+! [ctc-hc4-O]
+ Box before HC4:([-0.9000000000000001, -0.7] ; [-0.03000000000000001, -0.01] ; [-2.700000000000001, -2.6] ; [0.7, 0.8000000000000001] ; [1.35, 1.450000000000001] ; [6.9, 7] ; [1.15, 1.25])
+ Box after HC4:([-0.8544702651561549, -0.776666666666666] ; [-0.03000000000000001, -0.01] ; [-2.700000000000001, -2.6] ; [0.7, 0.8000000000000001] ; [1.35, 1.450000000000001] ; [6.9, 7] ; [1.15, 1.25])
+! [ctc-hc4-O]
+! [ctc-inv-O]
+contracted box (first time):([0, 3.141592653589794])
+contracted box (second time):([0, 1.570796326794897])
+! [ctc-inv-O]
+! [ctc-polytope-1-O]
+box before contraction=([-1, 1] ; [-1, 1])
+box after contraction=([-1, 0] ; [-1, 1])
+! [ctc-polytope-1-O]
+! [ctc-exist-1-O]
+box before contraction=([-10, 10])
+box after contraction=([-1, 1])
+! [ctc-exist-1-O]
+! [ctc-exist-2-O]
+epsilon=1e-0 box after contraction=([-1, 1])
+epsilon=1e-1 box after contraction=([-0.7876891814830961, 0.753733646234449])
+epsilon=1e-2 box after contraction=([-0.7282133915055162, 0.7125648694394637])
+epsilon=1e-3 box after contraction=([-0.7078382851418078, 0.7078470747715983])
+epsilon=1e-4 box after contraction=([-0.7071415397622109, 0.7071379889246125])
+epsilon=1e-5 box after contraction=([-0.7071134425561116, 0.7071112646559279])
+epsilon=1e-6 box after contraction=([-0.7071073875766052, 0.7071069117102449])
+epsilon=1e-7 box after contraction=([-0.7071069839675348, 0.7071068778997553])
+epsilon=1e-8 box after contraction=([-0.7071069839675348, 0.7071067826254732])
+! [ctc-exist-2-O]
+! [ctc-exist-3-O]
+epsilon=1e-0 box after contraction=([-0.9974937185533101, 0.9237635498752691])
+epsilon=1e-1 box after contraction=([-0.7105000111038531, 0.717159647201955])
+epsilon=1e-2 box after contraction=([-0.7085191318530563, 0.7081440747898437])
+epsilon=1e-3 box after contraction=([-0.7072537910993831, 0.7072034883921635])
+epsilon=1e-4 box after contraction=([-0.7071128637729426, 0.7071156260245542])
+epsilon=1e-5 box after contraction=([-0.7071077816302066, 0.707107587705308])
+epsilon=1e-6 box after contraction=([-0.7071068901987889, 0.7071068546978915])
+epsilon=1e-7 box after contraction=([-0.7071067909156146, 0.7071067878864685])
+epsilon=1e-8 box after contraction=([-0.7071067825315514, 0.7071067817971828])
+! [ctc-exist-3-O]

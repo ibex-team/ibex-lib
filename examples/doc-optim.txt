@@ -1,0 +1,12 @@
+================= this file is generated ==============
+! [optim-call-default-O]
+interval for the minimum: [-310.0000308420031, -309.999999842]
+minimizer: (<4.999999999, 4.999999999000001> ; <1, 1.000000000000001> ; <5, 5> ; <9.999965300266921e-10, 9.999965300266922e-10> ; <5, 5> ; <10, 10>)
+! [optim-call-default-O]
+! [optim-implem-default-O]
+f* in [-310.0071528102475, -309.935905801148]
+cpu time used=0.002611s.
+number of cells=4
+! [optim-implem-default-O]
+! [optim-all-minima-O]
+! [optim-all-minima-O]
