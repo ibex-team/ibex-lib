@@ -1,0 +1,1062 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Do it Yourself! &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="IbexSolve" href="solver.html" />
+    <link rel="prev" title="A complete Example: SLAM with outliers" href="example-slam.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="solver.html" title="IbexSolve"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="example-slam.html" title="A complete Example: SLAM with outliers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="do-it-yourself">
+<h1>Do it Yourself!<a class="headerlink" href="#do-it-yourself" title="Permalink to this headline">¶</a></h1>
+<p>The examples in this page are presented under the form of “labs” so that you can use them for practicing.</p>
+<p>The complete source codes are available under the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> folder.</p>
+<p>In these labs, we use Vibes to plot boxes but you can easily adapt the code to
+use your own graphical tool.</p>
+<p>Fast instructions for installing and using Vibes are given <a class="reference internal" href="set.html#set-explore"><span class="std std-ref">here</span></a>.</p>
+<div class="section" id="set-image">
+<h2>Set image<a class="headerlink" href="#set-image" title="Permalink to this headline">¶</a></h2>
+<p>The complete code can be found here: <code class="docutils literal notranslate"><span class="pre">examples/lab/lab1.cpp</span></code>.</p>
+<p><strong>Introduction</strong></p>
+<p>The goal of this first lab is to calculate the image of a box by a function using interval arithmetic:</p>
+<p>If we denote by f the function and [x] the initial box, then the set S
+to calculate is:</p>
+<div class="math notranslate nohighlight">
+\[S := \{ f(x), x\in[x] \}.\]</div>
+<p>Applying directly an <a class="reference internal" href="tutorial.html#tuto-func-eval"><span class="std std-ref">interval evaluation</span></a>
+of the function f to [x] will give a single box that only represents an enclosure of S.</p>
+<p>To fight with the wrapping effect, we will split [x] into smaller boxes and evaluate
+the function with every little box as argument. This will result in a better description
+of the set that will eventually converge to S as the size of the boxes tend to zero.</p>
+<p>This will consist in three tasks:</p>
+<ul class="simple">
+<li><p>creating the function f</p></li>
+<li><p>creating the initial box [x] and splitting it into small boxes</p></li>
+<li><p>evaluating the function of every boxes</p></li>
+<li><p>plotting the results</p></li>
+</ul>
+<p><strong>Question 1</strong></p>
+<p>Create in the <code class="docutils literal notranslate"><span class="pre">main</span></code> the function</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}f:(x,y)\in\mathbb{R}^2\mapsto \begin{pmatrix}\sin(x+y)\\\cos(x+0.9\times y)\end{pmatrix}.\end{split}\]</div>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock1'))">show/hide solution</a><br /><div id="hiddencodeblock1" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">),</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mf">0.9</span><span class="o">*</span><span class="n">y</span><span class="p">)));</span>
+</pre></div>
+</div>
+</div><p><strong>Question 2</strong></p>
+<p>Create the box ([x],[y])=([0,6],[0,6]) and split each dimension into n slices, where n is a constant.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock2'))">show/hide solution</a><br /><div id="hiddencodeblock2" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">));</span>
+
+<span class="c1">// size of the &quot;slice&quot; on each dimension (x and y)</span>
+<span class="kt">double</span> <span class="n">deltax</span><span class="o">=</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">diam</span><span class="p">()</span><span class="o">/</span><span class="n">n</span><span class="p">;</span>
+<span class="kt">double</span> <span class="n">deltay</span><span class="o">=</span><span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">diam</span><span class="p">()</span><span class="o">/</span><span class="n">n</span><span class="p">;</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">IntervalVector</span> <span class="n">box2</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+    <span class="n">box2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">lb</span><span class="p">()</span><span class="o">+</span><span class="n">i</span><span class="o">*</span><span class="n">deltax</span><span class="p">,</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">lb</span><span class="p">()</span><span class="o">+</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">deltax</span><span class="p">);</span>
+    <span class="n">box2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">lb</span><span class="p">()</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="n">deltay</span><span class="p">,</span><span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">lb</span><span class="p">()</span><span class="o">+</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">deltay</span><span class="p">);</span>
+
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div><p><strong>Question 3</strong></p>
+<p>Evaluate the function on each box and plot the result with Vibes.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock3'))">show/hide solution</a><br /><div id="hiddencodeblock3" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">...</span>
+  <span class="k">for</span> <span class="p">...</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="n">IntervalVector</span> <span class="n">y</span><span class="o">=</span><span class="n">f</span><span class="p">.</span><span class="n">eval_vector</span><span class="p">(</span><span class="n">box2</span><span class="p">);</span>
+    <span class="c1">// &quot;b[b]&quot; means that both the border and the interior of the box</span>
+    <span class="c1">// is painted in blue</span>
+    <span class="n">vibes</span><span class="o">::</span><span class="n">drawBox</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">lb</span><span class="p">(),</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">ub</span><span class="p">(),</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">lb</span><span class="p">(),</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">ub</span><span class="p">(),</span> <span class="s">&quot;b[b]&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div><p><strong>Question 4</strong></p>
+<p>Compare the result with n=15, n=80 and n=500.</p>
+<p>You should obtain the following pictures:</p>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 32%" />
+<col style="width: 34%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><a class="reference internal image-reference" href="_images/lab1-15.png"><img alt="_images/lab1-15.png" src="_images/lab1-15.png" style="width: 183.0px; height: 194.1px;" /></a>
+</td>
+<td><a class="reference internal image-reference" href="_images/lab1-80.png"><img alt="_images/lab1-80.png" src="_images/lab1-80.png" style="width: 183.6px; height: 194.1px;" /></a>
+</td>
+<td><a class="reference internal image-reference" href="_images/lab1-500.png"><img alt="_images/lab1-500.png" src="_images/lab1-500.png" style="width: 177.0px; height: 193.2px;" /></a>
+</td>
+</tr>
+<tr class="row-even"><td><p>n=15</p></td>
+<td><p>n=80</p></td>
+<td><p>n=500</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="section" id="set-inversion-basic">
+<h2>Set inversion (basic)<a class="headerlink" href="#set-inversion-basic" title="Permalink to this headline">¶</a></h2>
+<p>The complete code can be found here: <code class="docutils literal notranslate"><span class="pre">examples/lab/lab2.cpp</span></code>.</p>
+<p><strong>Introduction</strong></p>
+<p>The goal of this lab is to program <strong>Sivia</strong> (<em>set inversion with interval analysis</em>) <a class="reference internal" href="reference.html#jaulin93"><span class="std std-ref">[Jaulin &amp; Walter 1993]</span></a> <a class="reference internal" href="reference.html#jaulin01"><span class="std std-ref">[Jaulin 2001]</span></a>, an algorithm that draws a paving
+representing a set E defined implicitely as the preimage of an interval [z] by a non-linear function <span class="math notranslate nohighlight">\(f:\mathbb{R}^n\to\mathbb{R}\)</span> (here n=2).</p>
+<div class="math notranslate nohighlight">
+\[E:=\{(x,y)\in\mathbb{R}^2, \ f(x,y)\in[z] \}.\]</div>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/sivia-basic.png"><img alt="_images/sivia-basic.png" src="_images/sivia-basic.png" style="width: 300px;" /></a>
+<p class="caption"><span class="caption-text"><strong>Sivia (basic variant)</strong>. <em>Result obtained with f(x,y)=sin(x+y)-0.1xy and [z]=[0,2], by simply alternating an evaluation and bisection phase.
+For a precision of</em> <span class="math notranslate nohighlight">\(\varepsilon=0.1\)</span>, <em>the number of boxes generated by the algorithm is</em> <strong>11891</strong>.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>The Sivia algorithm performs a recursive exploration of the initial box by applying the following steps:</p>
+<ul class="simple">
+<li><p><strong>inner test</strong>: if the image of ([x],[y]) by f is a subset of [z], the box is painted in green;</p></li>
+<li><p><strong>outer test</strong>: if the image does not intersect [z], the box is painted in red;</p></li>
+<li><p>if none of these test succeeds and if ([x],[y]) has a maximal diameter greater than <span class="math notranslate nohighlight">\(\varepsilon\)</span>, the box
+is split and the procedure is recursively called on the two subboxes.</p></li>
+</ul>
+<p><strong>Question 1 (Initialisation)</strong></p>
+<p>Create the <code class="docutils literal notranslate"><span class="pre">Function</span></code> object that represents</p>
+<div class="math notranslate nohighlight">
+\[(x,y)\mapsto \sin(x+y)-0.1\times x\times y.\]</div>
+<p>and the initial bounding box ([-10,10],[-10,10]).</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock4'))">show/hide solution</a><br /><div id="hiddencodeblock4" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>     <span class="c1">// Create the function we want to apply SIVIA on.</span>
+     <span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+     <span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span><span class="o">-</span><span class="mf">0.1</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">);</span>
+
+     <span class="c1">// Build the initial box</span>
+     <span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+     <span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">);</span>
+     <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 2 (Initialisation)</strong></p>
+<p>We shall use a <a class="reference external" href="http://en.wikipedia.org/wiki/Stack_%28abstract_data_type%29">stack</a> for implementing the recursivity.
+This stack is a container that will be used to store boxes.</p>
+<p>Create a <a class="reference external" href="http://www.cplusplus.com/reference/stack/stack">C++ stack</a> and set the precision of bisection to 0.1.</p>
+<p>Push the initial box in the stack. Define the image interval [z] and initialize it to [0,2].</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock5'))">show/hide solution</a><br /><div id="hiddencodeblock5" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Create a stack (for depth-first search)</span>
+<span class="n">stack</span><span class="o">&lt;</span><span class="n">IntervalVector</span><span class="o">&gt;</span> <span class="n">s</span><span class="p">;</span>
+
+<span class="c1">// Precision (boxes of size less than eps are not processed)</span>
+<span class="kt">double</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.1</span><span class="p">;</span>
+
+<span class="c1">// Push the initial box in the stack</span>
+<span class="n">s</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+<span class="n">Interval</span> <span class="n">z</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 3</strong></p>
+<p>Create the loop that pop boxes from the stack until it is empty.
+Define a local variable <code class="docutils literal notranslate"><span class="pre">box</span></code> to be the current box (the one on top of the stack).</p>
+<p><em>Hint: use the top() and pop() functions of the</em> <code class="docutils literal notranslate"><span class="pre">stack</span></code> <em>class</em>.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock6'))">show/hide solution</a><br /><div id="hiddencodeblock6" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+  <span class="n">IntervalVector</span> <span class="n">box</span><span class="o">=</span><span class="n">s</span><span class="p">.</span><span class="n">top</span><span class="p">();</span>
+  <span class="n">s</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div><p><strong>Question 4</strong></p>
+<p>Implement the inner test (see above).</p>
+<p><em>Hint</em>: use <a class="reference internal" href="interval.html#itv-set-membership"><span class="std std-ref">is_subset</span></a>.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock7'))">show/hide solution</a><br /><div id="hiddencodeblock7" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+  <span class="n">IntervalVector</span> <span class="n">box</span><span class="o">=</span><span class="n">s</span><span class="p">.</span><span class="n">top</span><span class="p">();</span>
+  <span class="n">s</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+
+  <span class="n">Interval</span> <span class="n">fxy</span><span class="o">=</span><span class="n">f</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">fxy</span><span class="p">.</span><span class="n">is_subset</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+    <span class="n">vibes</span><span class="o">::</span><span class="n">drawBox</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">lb</span><span class="p">(),</span> <span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">ub</span><span class="p">(),</span> <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">lb</span><span class="p">(),</span> <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">ub</span><span class="p">(),</span> <span class="s">&quot;k[g]&quot;</span><span class="p">);</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div><p><strong>Question 5</strong></p>
+<p>Implement the outer test (see above).</p>
+<p><em>Hint</em>: use <a class="reference internal" href="interval.html#itv-set-membership"><span class="std std-ref">intersects</span></a>.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock8'))">show/hide solution</a><br /><div id="hiddencodeblock8" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">fxy</span><span class="p">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+    <span class="n">vibes</span><span class="o">::</span><span class="n">drawBox</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">lb</span><span class="p">(),</span> <span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">ub</span><span class="p">(),</span> <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">lb</span><span class="p">(),</span> <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">ub</span><span class="p">(),</span> <span class="s">&quot;k[r]&quot;</span><span class="p">);</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div><p><strong>Question 6</strong></p>
+<p>If none of these test succeeds, split the box. We will split the box on the axis of its largest size.
+Finally, the two subboxes are pushed on the stack.</p>
+<p><em>Hint</em>: use <a class="reference internal" href="interval.html#itv-geom"><span class="std std-ref">extr_diam_index</span></a> and <a class="reference internal" href="interval.html#itv-bisect"><span class="std std-ref">bisect</span></a>.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock9'))">show/hide solution</a><br /><div id="hiddencodeblock9" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">box</span><span class="p">.</span><span class="n">max_diam</span><span class="p">()</span><span class="o">&gt;</span><span class="n">eps</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// get the index of the dimension of maximal size (false stands for &quot;max&quot;)</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="n">box</span><span class="p">.</span><span class="n">extr_diam_index</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+    <span class="n">pair</span><span class="o">&lt;</span><span class="n">IntervalVector</span><span class="p">,</span><span class="n">IntervalVector</span><span class="o">&gt;</span> <span class="n">p</span><span class="o">=</span><span class="n">box</span><span class="p">.</span><span class="n">bisect</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="n">s</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+    <span class="n">s</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></div>
+<div class="section" id="set-inversion-with-contractors">
+<h2>Set inversion (with contractors)<a class="headerlink" href="#set-inversion-with-contractors" title="Permalink to this headline">¶</a></h2>
+<p>The complete code can be found here: <code class="docutils literal notranslate"><span class="pre">examples/lab/lab3.cpp</span></code>.</p>
+<p><strong>Introduction</strong></p>
+<p>We will improve the <strong>Sivia</strong> algorithm by replacing in the loop the inner and outer tests by contractions.
+This leads to a more compact paving and a smaller number of boxes (see figure below).</p>
+<p>The first part of the code is unchanged:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">vibes</span><span class="o">::</span><span class="n">beginDrawing</span> <span class="p">();</span>
+  <span class="n">vibes</span><span class="o">::</span><span class="n">newFigure</span><span class="p">(</span><span class="s">&quot;lab3&quot;</span><span class="p">);</span>
+
+  <span class="c1">// Create the function we want to apply SIVIA on.</span>
+  <span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+  <span class="n">Function</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span><span class="o">-</span><span class="mf">0.1</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">);</span>
+
+  <span class="c1">// Build the initial box</span>
+  <span class="n">IntervalVector</span> <span class="n">box</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+  <span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">);</span>
+  <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">);</span>
+
+  <span class="c1">// Create a stack (for depth-first search)</span>
+  <span class="n">stack</span><span class="o">&lt;</span><span class="n">IntervalVector</span><span class="o">&gt;</span> <span class="n">s</span><span class="p">;</span>
+
+  <span class="c1">// Precision (boxes of size less than eps are not processed)</span>
+  <span class="kt">double</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.1</span><span class="p">;</span>
+
+  <span class="c1">// Push the initial box in the stack</span>
+  <span class="n">s</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+  <span class="p">...</span>
+</pre></div>
+</div>
+<p>The idea is to contract the current box either with respect to the constraint</p>
+<div class="math notranslate nohighlight">
+\[f(x,y)\in[z],\]</div>
+<p>in which case the contracted part will be painted in red, or</p>
+<div class="math notranslate nohighlight">
+\[f(x)\not\in[z],\]</div>
+<p>in which case the contracted part will be painted in green.</p>
+<p>Given a contractor c, the contracted part is also called the <em>trace</em> of the contraction and is defined as <span class="math notranslate nohighlight">\([x]\backslash c([x])\)</span>.</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="_images/sivia-full.png"><img alt="_images/sivia-full.png" src="_images/sivia-full.png" style="width: 300px;" /></a>
+<p class="caption"><span class="caption-text"><strong>Sivia (with contractors)</strong>. <em>Result obtained with f(x,y)=sin(x+y)-0.1xy and [z]=[0,2].
+For a precision of</em> <span class="math notranslate nohighlight">\(\varepsilon=0.1\)</span>, <em>the number of boxes generated by the algorithm is</em> <strong>5165</strong>.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>Question 1</strong></p>
+<p>Build forward-backward contractors for the four constraints (see <a class="reference internal" href="tutorial.html#tuto-fwd-bwd"><span class="std std-ref">the tutorial</span></a>):</p>
+<div class="math notranslate nohighlight">
+\[f(x)&lt;0, \quad f(x)\ge0, \quad f(x)\le2 \quad \mbox{and} \quad f(x)&gt;2.\]</div>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock10'))">show/hide solution</a><br /><div id="hiddencodeblock10" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">NumConstraint</span> <span class="nf">c1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">NumConstraint</span> <span class="nf">c2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">NumConstraint</span> <span class="nf">c3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">NumConstraint</span> <span class="nf">c4</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="c1">// Create contractors with respect to each</span>
+<span class="c1">// of the previous constraints.</span>
+<span class="n">CtcFwdBwd</span> <span class="nf">out1</span><span class="p">(</span><span class="n">c1</span><span class="p">);</span>
+<span class="n">CtcFwdBwd</span> <span class="nf">out2</span><span class="p">(</span><span class="n">c2</span><span class="p">);</span>
+<span class="n">CtcFwdBwd</span> <span class="nf">in1</span><span class="p">(</span><span class="n">c3</span><span class="p">);</span>
+<span class="n">CtcFwdBwd</span> <span class="nf">in2</span><span class="p">(</span><span class="n">c4</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 2</strong></p>
+<p>Thanks to the <a class="reference internal" href="tutorial.html#tuto-inter-union-compo"><span class="std std-ref">composition</span></a>, build a contractor w.r.t. <span class="math notranslate nohighlight">\(f(x)\in[0,2]\)</span>.</p>
+<p>Similarly, thanks to the union, build a contractor w.r.t. <span class="math notranslate nohighlight">\(f(x)\not\in[0,2]\)</span>.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock11'))">show/hide solution</a><br /><div id="hiddencodeblock11" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Create a contractor that removes all the points</span>
+<span class="c1">// that do not satisfy either f(x,y)&lt;=2 or f(x,y)&gt;=0.</span>
+<span class="c1">// These points are &quot;outside&quot; of the solution set.</span>
+<span class="n">CtcCompo</span> <span class="nf">outside</span><span class="p">(</span><span class="n">out1</span><span class="p">,</span><span class="n">out2</span><span class="p">);</span>
+
+<span class="c1">// Create a contractor that removes all the points</span>
+<span class="c1">// that do not satisfy both f(x,y)&gt;2 or f(x,y)&lt;0.</span>
+<span class="c1">// These points are &quot;inside&quot; the solution set.</span>
+<span class="n">CtcUnion</span> <span class="nf">inside</span><span class="p">(</span><span class="n">in1</span><span class="p">,</span><span class="n">in2</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 3</strong></p>
+<p>Create the function <code class="docutils literal notranslate"><span class="pre">contract_and_draw</span></code> with the following signature:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">contract_and_draw</span><span class="p">(</span><span class="n">Ctc</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">color</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This function must contract the box <code class="docutils literal notranslate"><span class="pre">box</span></code> in argument with the contractor <code class="docutils literal notranslate"><span class="pre">c</span></code> and plot the trace of the contraction (see above) with Vibes,
+with the specified color <code class="docutils literal notranslate"><span class="pre">color</span></code>.</p>
+<p><em>Hints: use the</em> <a class="reference internal" href="interval.html#itv-diff"><span class="std std-ref">diff</span></a> <em>function of</em> <code class="docutils literal notranslate"><span class="pre">IntervalVector</span></code> <em>to calculate the set difference between two boxes.</em></p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock12'))">show/hide solution</a><br /><div id="hiddencodeblock12" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">contract_and_draw</span><span class="p">(</span><span class="n">Ctc</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">color</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Variables used to calculate the &quot;diff&quot; between 2 boxes and store the result.</span>
+  <span class="n">IntervalVector</span> <span class="n">savebox</span><span class="o">=</span><span class="n">box</span><span class="p">;</span>
+  <span class="n">IntervalVector</span> <span class="o">*</span><span class="n">result</span><span class="p">;</span>
+
+  <span class="n">c</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+  <span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="n">savebox</span><span class="p">.</span><span class="n">diff</span><span class="p">(</span><span class="n">box</span><span class="p">,</span><span class="n">result</span><span class="p">);</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">vibes</span><span class="o">::</span><span class="n">drawBox</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="n">lb</span><span class="p">(),</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="n">ub</span><span class="p">(),</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">].</span><span class="n">lb</span><span class="p">(),</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">].</span><span class="n">ub</span><span class="p">(),</span> <span class="n">color</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">delete</span><span class="p">[]</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div><p><strong>Question 4</strong></p>
+<p>Replace in the loop the inner/outer tests by contractions.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock13'))">show/hide solution</a><br /><div id="hiddencodeblock13" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+  <span class="n">IntervalVector</span> <span class="n">box</span><span class="o">=</span><span class="n">s</span><span class="p">.</span><span class="n">top</span><span class="p">();</span>
+  <span class="n">s</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+  <span class="n">contract_and_draw</span><span class="p">(</span><span class="n">outside</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="s">&quot;k[r]&quot;</span><span class="p">);</span>
+  <span class="n">contract_and_draw</span><span class="p">(</span><span class="n">inside</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="s">&quot;k[g]&quot;</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">box</span><span class="p">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">box</span><span class="p">.</span><span class="n">max_diam</span><span class="p">()</span><span class="o">&gt;</span><span class="n">eps</span><span class="p">)</span> <span class="p">{</span>
+     <span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="n">box</span><span class="p">.</span><span class="n">extr_diam_index</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+     <span class="n">pair</span><span class="o">&lt;</span><span class="n">IntervalVector</span><span class="p">,</span><span class="n">IntervalVector</span><span class="o">&gt;</span> <span class="n">p</span><span class="o">=</span><span class="n">box</span><span class="p">.</span><span class="n">bisect</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+     <span class="n">s</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+     <span class="n">s</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></div>
+<div class="section" id="set-inversion-using-sets">
+<span id="lab-set-inversion-sets"></span><h2>Set Inversion (using “Sets”)<a class="headerlink" href="#set-inversion-using-sets" title="Permalink to this headline">¶</a></h2>
+<p>The complete code can be found here: <code class="docutils literal notranslate"><span class="pre">examples/lab/lab4.cpp</span></code>.</p>
+<p><strong>Introduction</strong></p>
+<p>The purpose of this exercice is just to get familiar with the structure proposed in Ibex
+for representing sets (or pavings).</p>
+<p>The set inversion is naturally one of the main features proposed in this part of the library.
+We will solve the same problem as before but this time with the <code class="docutils literal notranslate"><span class="pre">Set</span></code> class directly.
+This will take only a few lines of code.</p>
+<p>Give first a look at the <a class="reference internal" href="set.html#set"><span class="std std-ref">documentation on sets</span></a>.</p>
+<p><strong>Question 1</strong></p>
+<p>Create the function <span class="math notranslate nohighlight">\((x,y)\mapsto \sin(x+y)-0.1\times x\times y\)</span> and the
+<a class="reference internal" href="separator.html#sep-ctr"><span class="std std-ref">forward-backward separator</span></a> associated to the constraint</p>
+<div class="math notranslate nohighlight">
+\[0\le f(x,y) \le 2.\]</div>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock14'))">show/hide solution</a><br /><div id="hiddencodeblock14" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>     <span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="s">&quot;y&quot;</span><span class="p">,</span><span class="s">&quot;sin(x+y)</span><span class="o">-</span><span class="mf">0.1</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="s">&quot;)</span><span class="p">;</span>
+
+     <span class="c1">// Create a separator for 0&lt;=f(x,y)&lt;=2</span>
+     <span class="n">SepFwdBwd</span> <span class="nf">sep</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
+</pre></div>
+</div>
+</div><p><strong>Question 2</strong></p>
+<p>Build the initial set [-10,10]x[-10,10] and contract it with the separator
+with a precision of 0.1.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock15'))">show/hide solution</a><br /><div id="hiddencodeblock15" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>     <span class="c1">// Build the initial set [-10,10]x[-10,10]</span>
+     <span class="n">Set</span> <span class="nf">set</span><span class="p">(</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)));</span>
+
+     <span class="c1">// Contract the set with the separator</span>
+     <span class="n">sep</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">set</span><span class="p">,</span><span class="mf">0.1</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 3</strong></p>
+<p>Plot the set with Vibes using a <code class="docutils literal notranslate"><span class="pre">SetVisitor</span></code>.</p>
+<p>Solution: copy-paste the code given <a class="reference internal" href="set.html#set-plot"><span class="std std-ref">here</span></a>.</p>
+</div>
+<div class="section" id="parameter-estimation">
+<h2>Parameter Estimation<a class="headerlink" href="#parameter-estimation" title="Permalink to this headline">¶</a></h2>
+<p>The complete code can be found here: <code class="docutils literal notranslate"><span class="pre">examples/lab/lab5.cpp</span></code>.</p>
+<p><strong>Introduction</strong></p>
+<p>This exercice is inspired by this <a class="reference external" href="https://www.youtube.com/watch?v=Uq3VGMmRSXk&amp;index=5&amp;list=PLWjVweRFajXvmhiKdQKosUlqn9xLMx2YA">video</a>.</p>
+<p>The problem is to find the values of two parameters <span class="math notranslate nohighlight">\((p_1,p_2)\)</span> of a physical process that are consistent with some measurements.
+Measurements are subject to error and we want a garanteed enclosure of all the feasible parameters values.</p>
+<p>The physical process is modeled by a function <span class="math notranslate nohighlight">\(f_{p_1,p_2}:t\mapsto y\)</span> and a measurement is a couple of input-ouput <span class="math notranslate nohighlight">\((t_i,y_i)\)</span>.
+We assume the input has no error. The error on the output is represented by an interval.</p>
+<p>The model is:</p>
+<div class="math notranslate nohighlight">
+\[f_{p_1,p_2}:t \mapsto 20\exp(-p_1t)-8\exp(-p_2t).\]</div>
+<p>We have the following series of measurements:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 82%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>t</p></th>
+<th class="head"><p>y</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>[4.5,7.5]</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>[0.67,4.6]</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>[-1,2.8]</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>[-1.7,1.7]</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>[-1.9,0.93]</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>[-1.8,0.5]</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>[-1.6,0.24]</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>[-1.4,0.09]</p></td>
+</tr>
+<tr class="row-even"><td><p>9</p></td>
+<td><p>[-1.2,0.0089]</p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>[-1,-0.031]</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Question 1</strong></p>
+<p>Build the function f as a mapping of 3 variables, p1, p2 and t.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock16'))">show/hide solution</a><br /><div id="hiddencodeblock16" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;p1&quot;</span><span class="p">,</span><span class="s">&quot;p2&quot;</span><span class="p">,</span><span class="s">&quot;t&quot;</span><span class="p">,</span><span class="s">&quot;20*exp(-p_1*t)</span><span class="o">-</span><span class="mi">8</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">p_2</span><span class="o">*</span><span class="n">t</span><span class="p">)</span><span class="s">&quot;)</span><span class="p">;</span>
+</pre></div>
+</div>
+</div><p><strong>Question 2</strong></p>
+<p>Build two interval vectors <code class="docutils literal notranslate"><span class="pre">t</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> of size 10 that contain the measurements data (even if the input has no error, we will enter times as
+degenerated intervals).</p>
+<p><em>Hint:</em> build interval vectors <a class="reference internal" href="interval.html#itv-vector-boxes"><span class="std std-ref">from array of double</span></a>.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock17'))">show/hide solution</a><br /><div id="hiddencodeblock17" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">const</span> <span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">;</span>
+
+<span class="kt">double</span> <span class="n">_t</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">},</span> <span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">},</span> <span class="p">{</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">},</span> <span class="p">{</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">},</span> <span class="p">{</span><span class="mi">7</span><span class="p">,</span><span class="mi">7</span><span class="p">},</span> <span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">},</span> <span class="p">{</span><span class="mi">9</span><span class="p">,</span><span class="mi">9</span><span class="p">},</span> <span class="p">{</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">}};</span>
+<span class="kt">double</span> <span class="n">_y</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mf">4.5</span><span class="p">,</span><span class="mf">7.5</span><span class="p">},</span> <span class="p">{</span><span class="mf">0.67</span><span class="p">,</span><span class="mf">4.6</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mf">2.8</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.7</span><span class="p">,</span><span class="mf">1.7</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.9</span><span class="p">,</span><span class="mf">0.93</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.8</span><span class="p">,</span><span class="mf">0.5</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.6</span><span class="p">,</span><span class="mf">0.24</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.4</span><span class="p">,</span><span class="mf">0.09</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.2</span><span class="p">,</span><span class="mf">0.0089</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.031</span><span class="p">}};</span>
+
+<span class="n">IntervalVector</span> <span class="nf">t</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">_t</span><span class="p">);</span>
+<span class="n">IntervalVector</span> <span class="nf">y</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">_y</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 3</strong></p>
+<p>Build a system using a <a class="reference internal" href="system.html#mod-sys-cpp"><span class="std std-ref">system factory</span></a>.
+The system must contain the 10 constraints that represent each measurements and the additional bound constraints on the parameters:</p>
+<div class="math notranslate nohighlight">
+\[0\le p_1\le 1, \quad 0\le p_2\le 1.\]</div>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock18'))">show/hide solution</a><br /><div id="hiddencodeblock18" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>     <span class="n">Variable</span> <span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">;</span>
+     <span class="n">SystemFactory</span> <span class="n">fac</span><span class="p">;</span>
+     <span class="n">fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">p1</span><span class="p">);</span>
+     <span class="n">fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">p2</span><span class="p">);</span>
+     <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+             <span class="n">fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">,</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+
+     <span class="c1">// add bound constraints</span>
+     <span class="n">fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">p1</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">);</span>
+     <span class="n">fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">p1</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
+     <span class="n">fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">p2</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">);</span>
+     <span class="n">fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">p2</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
+
+     <span class="n">System</span> <span class="nf">sys</span><span class="p">(</span><span class="n">fac</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 4</strong></p>
+<p>Calculate the parameter values using set inversion (see <a class="reference internal" href="#lab-set-inversion-sets"><span class="std std-ref">lab n°4</span></a>).
+You should obtain the following picture:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/param-estim.png"><img alt="_images/param-estim.png" src="_images/param-estim.png" style="width: 300px;" /></a>
+</div>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock19'))">show/hide solution</a><br /><div id="hiddencodeblock19" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Set</span> <span class="nf">set</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span><span class="mf">0.001</span><span class="p">);</span>
+
+<span class="n">ToVibes</span> <span class="nf">to_vibes</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">set</span><span class="p">.</span><span class="n">visit</span><span class="p">(</span><span class="n">to_vibes</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></div>
+<div class="section" id="parameter-estimation-advanced">
+<h2>Parameter Estimation (advanced)<a class="headerlink" href="#parameter-estimation-advanced" title="Permalink to this headline">¶</a></h2>
+<p>The complete code can be found here: <code class="docutils literal notranslate"><span class="pre">examples/lab/lab6.cpp</span></code>.</p>
+<p><strong>Introduction</strong></p>
+<p>This lab is a follow-up of the previous one.</p>
+<p>We now introduce uncertainty on the input variable t. However, we will try somehow to make our parameter
+estimation <em>robust</em> with respect to this uncertainty. This means that the values of our parameters should
+be consistent with our output whatever is the actual value of the input. Mathematically, we require
+p1 and p2 to respect the following constraints.</p>
+<div class="math notranslate nohighlight">
+\[\forall i, \quad  \forall t\in[t_i], \quad f(p_1,p_2, t) \in [y_i].\]</div>
+<p>As a contractor-oriented library, Ibex does not provide quantifiers at the modeling stage. This means that
+you cannot write directly a constraint like this one. You have to build contractors and apply “quantifiers”
+on contractors. Read the documentation about <a class="reference internal" href="contractor.html#ctc-quantif"><span class="std std-ref">contractors and quantifiers</span></a>.</p>
+<p><strong>Question 1</strong></p>
+<p>Like in the previous lab, create the function and the vector of measurements.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock20'))">show/hide solution</a><br /><div id="hiddencodeblock20" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;p1&quot;</span><span class="p">,</span><span class="s">&quot;p2&quot;</span><span class="p">,</span><span class="s">&quot;t&quot;</span><span class="p">,</span><span class="s">&quot;20*exp(-p1*t)</span><span class="o">-</span><span class="mi">8</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">p2</span><span class="o">*</span><span class="n">t</span><span class="p">)</span><span class="s">&quot;)</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">;</span>
+
+<span class="kt">double</span> <span class="n">_t</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">},</span> <span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">},</span> <span class="p">{</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">},</span> <span class="p">{</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">},</span> <span class="p">{</span><span class="mi">7</span><span class="p">,</span><span class="mi">7</span><span class="p">},</span> <span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">},</span> <span class="p">{</span><span class="mi">9</span><span class="p">,</span><span class="mi">9</span><span class="p">},</span> <span class="p">{</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">}};</span>
+<span class="kt">double</span> <span class="n">_y</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mf">4.5</span><span class="p">,</span><span class="mf">7.5</span><span class="p">},</span> <span class="p">{</span><span class="mf">0.67</span><span class="p">,</span><span class="mf">4.6</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mf">2.8</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.7</span><span class="p">,</span><span class="mf">1.7</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.9</span><span class="p">,</span><span class="mf">0.93</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.8</span><span class="p">,</span><span class="mf">0.5</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.6</span><span class="p">,</span><span class="mf">0.24</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.4</span><span class="p">,</span><span class="mf">0.09</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mf">1.2</span><span class="p">,</span><span class="mf">0.0089</span><span class="p">},</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.031</span><span class="p">}};</span>
+
+<span class="n">IntervalVector</span> <span class="nf">t</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">_t</span><span class="p">);</span>
+<span class="n">IntervalVector</span> <span class="nf">y</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">_y</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p>Then, define a constant <code class="docutils literal notranslate"><span class="pre">delta_t</span></code> (the uncertainty on time) and <a class="reference internal" href="interval.html#itv-geom"><span class="std std-ref">inflate</span></a> the
+vector of representing input times by this constant:</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock21'))">show/hide solution</a><br /><div id="hiddencodeblock21" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span> <span class="n">tdelta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">;</span>
+<span class="n">t</span><span class="p">.</span><span class="n">inflate</span><span class="p">(</span><span class="n">tdelta</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 2</strong></p>
+<p>We will use the <a class="reference internal" href="contractor.html#ctc-quantif-generic"><span class="std std-ref">generic constructor</span></a> of <code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code>.
+Create a bitset that will indicate among the arguments of the function f which ones will be treated as variables
+and which ones will be treated as quantified parameters.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock22'))">show/hide solution</a><br /><div id="hiddencodeblock22" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Used to represent which variables are &quot;quantified&quot;</span>
+<span class="n">BitSet</span> <span class="nf">vars</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">BitSet</span><span class="o">::</span><span class="n">empt</span><span class="p">);</span>
+<span class="c1">// add &quot;p1&quot; as variable</span>
+<span class="n">vars</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="c1">// add &quot;p2&quot; as variable</span>
+<span class="n">vars</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 3</strong></p>
+<p>Create the inner and outer contractor for the “robust” parameter estimation problem.
+Set the splitting precision <span class="math notranslate nohighlight">\(\varepsilon\)</span> of the parameter to <code class="docutils literal notranslate"><span class="pre">tdelta</span></code>/5.</p>
+<p><em>Hints: follow the same idea as in the contractor variant of set inversion</em> (see <a class="reference internal" href="#lab-set-inversion-sets"><span class="std std-ref">lab n°3</span></a>).
+<em>Also, we need here to deal with n inner/outer contractors. To perform the composition/union of several
+contractors, see</em> <a class="reference internal" href="contractor.html#ctc-compo"><span class="std std-ref">here</span></a>.</p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock23'))">show/hide solution</a><br /><div id="hiddencodeblock23" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Array</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">&gt;</span> <span class="n">_c_out</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+<span class="n">Array</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">&gt;</span> <span class="n">_c_in</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">IntervalVector</span> <span class="n">ti</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+  <span class="n">c_out</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcForAll</span><span class="p">(</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span><span class="n">vars</span><span class="p">,</span><span class="n">ti</span><span class="p">,</span><span class="n">tdelta</span><span class="o">/</span><span class="mi">5</span><span class="p">));</span>
+  <span class="n">c_in</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcExist</span><span class="p">(</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcNotIn</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span><span class="n">vars</span><span class="p">,</span><span class="n">ti</span><span class="p">,</span><span class="n">tdelta</span><span class="o">/</span><span class="mi">5</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="n">CtcCompo</span> <span class="n">c_out</span><span class="p">(</span><span class="n">_c_out</span><span class="p">);</span>
+<span class="n">CtcUnion</span> <span class="nf">c_in</span><span class="p">(</span><span class="n">_c_in</span><span class="p">);</span>
+</pre></div>
+</div>
+</div><p><strong>Question 4</strong></p>
+<ul class="simple">
+<li><p>Create a <a class="reference internal" href="separator.html#sep-ctc-pair"><span class="std std-ref">separator from the two contractors</span></a>;</p></li>
+<li><p>Create a <a class="reference internal" href="set.html#set-creation"><span class="std std-ref">set from the box</span></a> [0,1]x[0,1];</p></li>
+<li><p><a class="reference internal" href="set.html#set-contract"><span class="std std-ref">Contract the set</span></a> with the separator.</p></li>
+</ul>
+<p>The pictures below show the results obtained for increasing values of <code class="docutils literal notranslate"><span class="pre">deltat</span></code>
+(0,0.1,0.2 and 0.3).
+As expected, the larger the error on input, the smaller the set of feasible
+parameters.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><div class="figure align-center">
+<a class="reference internal image-reference" href="_images/param-estim-1.png"><img alt="_images/param-estim-1.png" src="_images/param-estim-1.png" style="width: 200px;" /></a>
+</div>
+</td>
+<td><div class="figure align-center">
+<a class="reference internal image-reference" href="_images/param-estim-2.png"><img alt="_images/param-estim-2.png" src="_images/param-estim-2.png" style="width: 200px;" /></a>
+</div>
+</td>
+<td><div class="figure align-center">
+<a class="reference internal image-reference" href="_images/param-estim-3.png"><img alt="_images/param-estim-3.png" src="_images/param-estim-3.png" style="width: 200px;" /></a>
+</div>
+</td>
+<td><div class="figure align-center">
+<a class="reference internal image-reference" href="_images/param-estim-4.png"><img alt="_images/param-estim-4.png" src="_images/param-estim-4.png" style="width: 200px;" /></a>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p>deltat=0</p></td>
+<td><p>deltat=0.1</p></td>
+<td><p>deltat=0.2</p></td>
+<td><p>deltat=0.3</p></td>
+</tr>
+</tbody>
+</table>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock24'))">show/hide solution</a><br /><div id="hiddencodeblock24" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SepCtcPair</span> <span class="nf">sep</span><span class="p">(</span><span class="n">c_in</span><span class="p">,</span><span class="n">c_out</span><span class="p">);</span>
+
+<span class="n">Set</span> <span class="nf">set</span><span class="p">(</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)));</span>
+
+<span class="n">sep</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">set</span><span class="p">,</span><span class="n">eps</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></div>
+<div class="section" id="stability">
+<h2>Stability<a class="headerlink" href="#stability" title="Permalink to this headline">¶</a></h2>
+<p>The complete code can be found here: <code class="docutils literal notranslate"><span class="pre">examples/lab/lab7.cpp</span></code>.</p>
+<p><strong>Introduction</strong></p>
+<p>The goal of this lab is to cast a classical problem in control theory into a set inversion problem.</p>
+<p>We have a dynamical system y(t) governed by the following linear differential equation:</p>
+<div class="math notranslate nohighlight">
+\[y^{(4)}(t)+a y^{(3)}(t)+b y^{(2)}(t)+(1-b) y'(t) + a y(t)=0.\]</div>
+<p>where a and b are two unknown parameters.</p>
+<p>Our goal is to find the set of couples (a,b) that makes the origin y=0 stable. It is depicted in the figure:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/stability.png"><img alt="_images/stability.png" src="_images/stability.png" style="width: 300px;" /></a>
+</div>
+<p><em>Hint: apply the Routh-Hurwitz criterion to the caracteristic polynomial of the system.</em></p>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock25'))">show/hide solution</a><br /><div id="hiddencodeblock25" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.001</span><span class="p">;</span>
+
+<span class="n">Variable</span> <span class="n">p</span><span class="p">,</span><span class="n">q</span><span class="p">;</span>
+
+<span class="c1">// The following function returns the first column</span>
+<span class="c1">// of the Routh table</span>
+<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="n">q</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">q</span><span class="p">),(</span><span class="n">p</span><span class="o">*</span><span class="n">q</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">q</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">q</span><span class="p">)</span><span class="o">-</span><span class="n">pow</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">3</span><span class="p">)));</span>
+
+<span class="c1">// We require these coefficients to be all positive,</span>
+<span class="c1">// i.e., the image of f to be in [0,+oo)x[0,+oo)</span>
+<span class="n">SepFwdBwd</span> <span class="nf">sep</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="o">::</span><span class="n">pos_reals</span><span class="p">()));</span>
+
+<span class="c1">// Build the initial box</span>
+<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+
+<span class="n">Set</span> <span class="nf">set</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+<span class="n">sep</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">set</span><span class="p">,</span><span class="n">eps</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></div>
+<div class="section" id="unstructured-mapping">
+<h2>Unstructured Mapping<a class="headerlink" href="#unstructured-mapping" title="Permalink to this headline">¶</a></h2>
+<p>The complete code can be found here: <code class="docutils literal notranslate"><span class="pre">examples/lab/lab8.cpp</span></code>.</p>
+<p><strong>Introduction</strong></p>
+<p>A robot is moving in a rectangular area [-L,L]x[-L,L] (with L=2) and tries to build a map
+while avoiding obstacles. The map is precisely the shape of obstacles inside the area.</p>
+<p>The only information we have is when its euclidian distance to an obstacle
+get smaller than 0.9. It receives an alert, a vector of measurements which contain
+its own position (named <code class="docutils literal notranslate"><span class="pre">x_rob</span></code> and <code class="docutils literal notranslate"><span class="pre">y_rob</span></code> in the code)
+and the position of the detected obstacle point
+(named <code class="docutils literal notranslate"><span class="pre">x_obs</span></code> and <code class="docutils literal notranslate"><span class="pre">y_obs</span></code> in the code). We also know that
+all the points that are less distant than 0.1 from the detected point belong to the obstacle.</p>
+<p>The robot has a series of n=10 measurements. The goal is to build an approximation
+of the map using <a class="reference internal" href="set.html#set-interval"><span class="std std-ref">set intervals</span></a>.</p>
+<p>You can first copy-paste the data:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// positions of the robot</span>
+<span class="kt">double</span> <span class="n">x_rob</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mf">1.61803</span><span class="p">,</span> <span class="mf">0.618034</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.618034</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.61803</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.61803</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.618034</span><span class="p">,</span> <span class="mf">0.618034</span><span class="p">,</span> <span class="mf">1.61803</span><span class="p">};</span>
+<span class="kt">double</span> <span class="n">y_rob</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.17557</span><span class="p">,</span> <span class="mf">1.90211</span><span class="p">,</span> <span class="mf">1.90211</span><span class="p">,</span> <span class="mf">1.17557</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.17557</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.90211</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.90211</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.17557</span><span class="p">};</span>
+<span class="c1">// positions of the obstacle point</span>
+<span class="kt">double</span> <span class="n">x_obs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.728115</span><span class="p">,</span> <span class="mf">0.278115</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.278115</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.728115</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.728115</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.278115</span><span class="p">,</span> <span class="mf">0.278115</span><span class="p">,</span> <span class="mf">0.728115</span><span class="p">};</span>
+<span class="kt">double</span> <span class="n">y_obs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.529007</span><span class="p">,</span> <span class="mf">0.855951</span><span class="p">,</span> <span class="mf">0.855951</span><span class="p">,</span> <span class="mf">0.529007</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.529007</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.855951</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.855951</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.529007</span><span class="p">};</span>
+</pre></div>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/mapping.png"><img alt="_images/mapping.png" src="_images/mapping.png" style="width: 300px;" /></a>
+</div>
+<script type="text/javascript">
+    function showhide(element){
+        if (!document.getElementById)
+            return
+
+        if (element.style.display == "block")
+            element.style.display = "none"
+        else
+            element.style.display = "block"
+    };
+</script>
+<a href="javascript:showhide(document.getElementById('hiddencodeblock26'))">show/hide solution</a><br /><div id="hiddencodeblock26" style="display: none"><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.01</span><span class="p">;</span>
+<span class="kt">double</span> <span class="n">L</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+
+<span class="c1">// Distance function</span>
+<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+<span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">));</span>
+
+<span class="c1">// Build the initial box</span>
+<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="n">L</span><span class="p">,</span><span class="n">L</span><span class="p">));</span>
+
+<span class="c1">// Create the initial i-set [emptyset,[box]]</span>
+<span class="n">SetInterval</span> <span class="nf">set</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+   <span class="n">NumConstraint</span> <span class="n">ctr1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">x_rob</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">y_rob</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">&gt;=</span><span class="mf">0.81</span><span class="p">);</span>
+   <span class="n">SepFwdBwd</span> <span class="nf">sep1</span><span class="p">(</span><span class="n">ctr1</span><span class="p">);</span>
+   <span class="n">sep1</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">set</span><span class="p">,</span><span class="n">eps</span><span class="p">,</span><span class="n">MAYBE</span><span class="p">,</span><span class="n">NO</span><span class="p">);</span>
+
+   <span class="n">NumConstraint</span> <span class="nf">ctr2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">x_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">y_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">&lt;=</span><span class="mf">0.01</span><span class="p">);</span>
+   <span class="n">SepFwdBwd</span> <span class="nf">sep2</span><span class="p">(</span><span class="n">ctr2</span><span class="p">);</span>
+   <span class="n">sep2</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">set</span><span class="p">,</span><span class="n">eps</span><span class="p">,</span><span class="n">YES</span><span class="p">,</span><span class="n">MAYBE</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Do it Yourself!</a><ul>
+<li><a class="reference internal" href="#set-image">Set image</a></li>
+<li><a class="reference internal" href="#set-inversion-basic">Set inversion (basic)</a></li>
+<li><a class="reference internal" href="#set-inversion-with-contractors">Set inversion (with contractors)</a></li>
+<li><a class="reference internal" href="#set-inversion-using-sets">Set Inversion (using “Sets”)</a></li>
+<li><a class="reference internal" href="#parameter-estimation">Parameter Estimation</a></li>
+<li><a class="reference internal" href="#parameter-estimation-advanced">Parameter Estimation (advanced)</a></li>
+<li><a class="reference internal" href="#stability">Stability</a></li>
+<li><a class="reference internal" href="#unstructured-mapping">Unstructured Mapping</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="example-slam.html"
+                        title="previous chapter">A complete Example: SLAM with outliers</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="solver.html"
+                        title="next chapter">IbexSolve</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/lab.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="solver.html" title="IbexSolve"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="example-slam.html" title="A complete Example: SLAM with outliers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

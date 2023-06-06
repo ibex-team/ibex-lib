@@ -1,0 +1,698 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>The Minibex Language &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Contractors" href="contractor.html" />
+    <link rel="prev" title="Systems" href="system.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="contractor.html" title="Contractors"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="system.html" title="Systems"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-minibex-language">
+<span id="mod-minibex"></span><h1>The Minibex Language<a class="headerlink" href="#the-minibex-language" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<span id="mod-into-cpp-vs-minibex"></span><h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>There are three possible alternatives for modeling.</p>
+<ul class="simple">
+<li><p>First, you can write C++ code. Variables, functions, constraints
+and systems are C++ object that you declare yourself
+and build by calling the constructors of the corresponding classes</p></li>
+<li><p>Entering mathematic formulas programmatically is usually not very convenient.
+You may prefer to separate the model of the problem from the algorithms
+you use to solve it. In this way, you can run the same program with different
+variants of your model without recompiling it each time.
+IBEX provides such possibility. You can directly load a <a class="reference internal" href="function.html#mod-func"><span class="std std-ref">function</span></a>, a <a class="reference internal" href="constraint.html#mod-sys-ctrs"><span class="std std-ref">constraint</span></a> or a <a class="reference internal" href="system.html#mod-sys"><span class="std std-ref">system</span></a> from a (plain text) input file, following the (very intuitive) Minibex syntax.</p></li>
+<li><p>However, files I/O operations are not always welcome. The third possibility is a kind of compromise.
+You can initialize a <code class="docutils literal notranslate"><span class="pre">Function</span></code> or <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code> objects with a string (<code class="docutils literal notranslate"><span class="pre">char*</span></code>)
+that contains the Minibex code. The syntax is exactly the same (see examples in the tutorial).</p></li>
+</ul>
+<p>In all cases, you will access and use the data in the same way.
+For instance, you will calculate the interval derivative of a function
+by the same code, would it be created in your C++ program or loaded
+from a Minibex file.</p>
+<p>Here are simple examples where the syntax talks for itself.</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="function">
+<span id="mod-func-minibex"></span><h3>Function<a class="headerlink" href="#function" title="Permalink to this headline">¶</a></h3>
+<p>Copy-paste the text below in a file named, say, <code class="docutils literal notranslate"><span class="pre">function.txt</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>Then, in your C++ program, just write:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;function.txt&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>and the function you get is (x,y)-&gt;x+y.</p>
+</div>
+<div class="section" id="constraint">
+<h3>Constraint<a class="headerlink" href="#constraint" title="Permalink to this headline">¶</a></h3>
+<p>Copy-paste the text below in a file named, say, <code class="docutils literal notranslate"><span class="pre">constraint.txt</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Variables</span>
+  <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+
+<span class="n">Constraints</span>
+  <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>Then, in your C++ program, just write:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">NumConstraint</span> <span class="nf">ctr</span><span class="p">(</span><span class="s">&quot;constraint.txt&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>and the constraint you get is x^2+y^2&lt;=1. Notice that the keyword <code class="docutils literal notranslate"><span class="pre">constraints</span></code> has an “s” at the end because the Minibex syntax
+allows several constraints declaration.
+If you load a constraint from a Minibex file that contains several constraints, only the first one is considered.</p>
+</div>
+<div class="section" id="system">
+<h3>System<a class="headerlink" href="#system" title="Permalink to this headline">¶</a></h3>
+<p>Copy-paste the text below in a file named, say, <code class="docutils literal notranslate"><span class="pre">system.txt</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Variables</span>
+  <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">];</span>
+  <span class="n">y</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">];</span>
+
+<span class="n">Minimize</span>
+  <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">;</span>
+
+<span class="n">Constraints</span>
+  <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>Then, in your C++ program, just write:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">System</span> <span class="nf">sys</span><span class="p">(</span><span class="s">&quot;system.txt&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>and the system you get is:</p>
+<blockquote>
+<div><p>Minimize <span class="math notranslate nohighlight">\(x+y,\)</span></p>
+<p><span class="math notranslate nohighlight">\(x \in[-1,1], y\in[-1,1]\)</span></p>
+<p>such that</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(x^2+y^2\le1\)</span></p>
+<p><span class="math notranslate nohighlight">\(y\ge x^2\)</span>.</p>
+</div></blockquote>
+</div></blockquote>
+<p>Next sections details the mini-language of these input files.</p>
+</div>
+</div>
+<div class="section" id="overall-structure">
+<span id="mod-minibex-struct"></span><h2>Overall structure<a class="headerlink" href="#overall-structure" title="Permalink to this headline">¶</a></h2>
+<p>First of all, the input file is a sequence of declaration blocks that must respect the following order:</p>
+<ul class="simple">
+<li><p>constants</p></li>
+<li><p>variables</p></li>
+<li><p>auxiliary functions</p></li>
+<li><p>goal function</p></li>
+<li><p>constraints</p></li>
+</ul>
+<p>Next paragraph gives the basic format of numbers and intervals.
+The subsequent paragraphs detail each declaration blocks.</p>
+</div>
+<div class="section" id="real-and-intervals">
+<span id="mod-minibex-reals"></span><h2>Real and Intervals<a class="headerlink" href="#real-and-intervals" title="Permalink to this headline">¶</a></h2>
+<p>A real is represented with the usual English format, that is
+with a dot separating the integral from the decimal part,
+and, possibly, using scientific notation.</p>
+<p>Here are some valid examples of reals in the syntax:</p>
+<blockquote>
+<div><p>0</p>
+<p>3.14159</p>
+<p>-0.0001</p>
+<p>1.001e-10</p>
+<p>+70.0000</p>
+</div></blockquote>
+<p>An interval are two reals separated by a comma
+and surrounded by square brackets. The special symbol
+<code class="docutils literal notranslate"><span class="pre">oo</span></code> (two consecutive “o”) represents the infinity <span class="math notranslate nohighlight">\(\infty\)</span>.
+Note that, even with infinity bounds, the brackets
+must be squared (and not parenthesis as it should be since the
+bound is open). Here are some examples:</p>
+<blockquote>
+<div><p>[0,1]</p>
+<p>[0,+oo]</p>
+<p>[-oo,oo]</p>
+<p>[1.01e-02,1.02e-02]</p>
+</div></blockquote>
+<p>There is a predefined interval constant <code class="docutils literal notranslate"><span class="pre">pi</span></code> representing <span class="math notranslate nohighlight">\(\pi\)</span>.</p>
+</div>
+<div class="section" id="constants">
+<span id="mod-minibex-constants"></span><h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h2>
+<p>Constants are all defined in the same declaration block,
+started with the <code class="docutils literal notranslate"><span class="pre">Constants</span></code> keyword. This block is always optionnal.</p>
+<p>A constant value can depends on other (previously defined) constants value. Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Constants</span>
+  <span class="n">e</span><span class="o">=</span><span class="mf">0.5772156649</span><span class="p">;</span>
+  <span class="n">y</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">;</span>
+  <span class="n">z</span><span class="o">=</span><span class="n">sin</span><span class="p">(</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>You can give a constant an interval enclosure rather than a single fixed value.
+This interval will be embedded in all subsequent computations.
+Following the previous example, we can give <code class="docutils literal notranslate"><span class="pre">e</span></code> a valid enclosure as below.
+We just have to replace “=” by “in”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Constants</span>
+  <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.577215664</span><span class="p">,</span><span class="mf">0.577215665</span><span class="p">];</span>
+  <span class="n">y</span><span class="o">=</span><span class="n">e</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Constants can also be vectors, matrices or array of matrices.
+You need to specify the dimensions of the constant in square brackets.
+For instance <code class="docutils literal notranslate"><span class="pre">x</span></code> below is a column vector with 2 components, the first component is equal
+to 0 and the second to 1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Constants</span>
+  <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">;</span> <span class="mi">1</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Writing <code class="docutils literal notranslate"><span class="pre">x[2]</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">x[2][1]</span></code> because a column vector is also a 2x1 matrix.
+A row vector is a 1x2 matrix so a row vector has to be declared as follows.
+On the right side, note that we use commas instead of periods:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Constants</span>
+  <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>important</strong> remark.
+The reason why the syntax for declaring row vectors differs here from Matlab is that a 2-sized row vector surrounded
+by brackets would conflict with an interval. So, do note confuse
+<code class="docutils literal notranslate"><span class="pre">[0,1]</span></code> with <code class="docutils literal notranslate"><span class="pre">(0,1)</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(0,1)</span></code> is a 2-dimensional row vector of two reals, namely 0 and 1.
+This is <strong>not</strong> an open interval.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[0,1]</span></code> is the 1-dimensional interval [0,1]. This is <strong>not</strong> a 2-dimensional row vector.</p></li>
+</ul>
+<p>Of course, you can mix vector with intervals. For instance:
+<code class="docutils literal notranslate"><span class="pre">([-oo,0];[0,+oo])</span></code> is a column vector of 2 intervals, <span class="math notranslate nohighlight">\((-\infty,0]\)</span> and <span class="math notranslate nohighlight">\([0,+\infty)\)</span>.</p>
+<p>Here is an example of matrix constant declaration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Constants</span>
+  <span class="n">M</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="mi">0</span> <span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">;</span> <span class="p">(</span><span class="mi">0</span> <span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="p">;</span> <span class="p">(</span><span class="mi">1</span> <span class="p">,</span> <span class="mi">0</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>This will create the constant matrix <code class="docutils literal notranslate"><span class="pre">M</span></code> with 3 rows and 2 columns equal to</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left(\begin{array}{cc}
+0 &amp; 0 \\
+0 &amp; 1 \\
+1 &amp; 0 \\
+\end{array}\right).\end{split}\]</div>
+<p>You can also declare array of matrices:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Constants</span>
+ <span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="p">(((</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span> <span class="p">;</span> <span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">);</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">)));</span>
+</pre></div>
+</div>
+<p>It is possible to define up to three dimensional vectors, but not more.</p>
+<p>When all the components of a multi-dimensional constant share the same interval, you
+don’t need to duplicate it on the right side. Here is an example of a 10x;10 matrix where all
+components are [0,0]:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Constants</span>
+ <span class="n">c</span><span class="p">[</span><span class="mi">10</span><span class="p">][</span><span class="mi">10</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">];</span>
+</pre></div>
+</div>
+<p>Ibex intializes the 100 entries of the matrix <code class="docutils literal notranslate"><span class="pre">c</span></code> to <span class="math notranslate nohighlight">\([0,0]\)</span>.</p>
+<p>Finally, the following table summarizes the possibility for declaring constants
+through different examples.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 82%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">in</span> <span class="pre">[-oo,0]</span></code></p></td>
+<td><p>declares a constant <span class="math notranslate nohighlight">\(x\in(-\infty,0]\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">in</span> <span class="pre">[0,1]</span></code></p></td>
+<td><p>declares an constant <span class="math notranslate nohighlight">\(x\in[0,1]\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">in</span> <span class="pre">[0,0]</span></code></p></td>
+<td><p>declares a constant <span class="math notranslate nohighlight">\(x\in[0,0]\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">0</span></code></p></td>
+<td><p>declares a real constant x equal to 0</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">100*sin(0.1)</span></code></p></td>
+<td><p>declares a constant x equal to 100*sin(0.1)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">x[10]</span> <span class="pre">in</span> <span class="pre">[-oo,0]</span></code></p></td>
+<td><p>declares a 10-sized constant vector x,
+with each component <span class="math notranslate nohighlight">\(x_i\in(-\infty,0]\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">x[2]</span> <span class="pre">in</span> <span class="pre">([-oo,0];[0,+oo])</span></code></p></td>
+<td><p>declares a 2-sized constant vector x with
+<span class="math notranslate nohighlight">\(x_1\in(-\infty,0]\)</span> and <span class="math notranslate nohighlight">\(x_2\in[0,+\infty)\)</span></p></td>
+</tr>
+<tr class="row-even"><td><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">x[3][3]</span> <span class="pre">in</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">(([0,1],0,0);</span></code>
+<code class="docutils literal notranslate"><span class="pre">(0,[0,1],0);</span></code>
+<code class="docutils literal notranslate"><span class="pre">(0,0,[0,1]))</span></code></p>
+</dd>
+</dl>
+</td>
+<td><p>declares a constrant matrix <span class="math notranslate nohighlight">\(x\in\left(\begin{array}{ccc}[0,1] &amp; 0 &amp; 0 \\0 &amp; [0,1] &amp; 0 \\0 &amp;  0 &amp; [0,1] \\\end{array}\right)\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">x[10][5]</span> <span class="pre">in</span> <span class="pre">[0,1]</span></code></p></td>
+<td><p>declares a matrix x with each entry <span class="math notranslate nohighlight">\(x_{ij}\in[0,1]\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">x[2][10][5]</span> <span class="pre">in</span> <span class="pre">[0,1]</span></code></p></td>
+<td><p>declares an array of two 10x5 matrices with each entry <span class="math notranslate nohighlight">\(x_{ijk}\in[0,1]\)</span>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="variables">
+<span id="mod-minibex-vars"></span><h2>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h2>
+<p>Variables need to be declared in two situations:</p>
+<ul>
+<li><p>when you create a function. In this case, the variables are the arguments of the function and
+they are only visible inside the body of the function. Let us call them <em>local variables</em>.
+Here is an example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="o">//</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">local</span> <span class="n">variable</span>
+      <span class="o">...</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+</li>
+<li><p>when you create a constraint or a system of constraints. In this case, the variables are declared
+globally in a specific block and shared by all the constraints. Let us call them <em>global variables</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">variables</span>
+   <span class="n">x</span><span class="p">;</span>          <span class="o">//</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">a</span> <span class="k">global</span> <span class="n">variable</span>
+   <span class="o">...</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Note that global variables are not visible inside the (auxiliary) functions and conversely. So there is no possible confusion between the
+global and the local variables.</p>
+<p>Local and global variables can be vectors and matrices. Declaring vector and matrix variables follow exactly the
+same rules as for vector and matrix <a class="reference internal" href="#mod-minibex-constants"><span class="std std-ref">constants</span></a>. Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">f1</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>  <span class="o">//</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">vector</span> <span class="n">of</span> <span class="mi">3</span> <span class="n">components</span>
+  <span class="o">...</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>It is possible to define up to three dimensional vectors.</p>
+<p>Global variables can also be given a domain to initialize each
+component with. The following examples are valid:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">variables</span>
+
+  <span class="n">x</span><span class="p">[</span><span class="mi">10</span><span class="p">][</span><span class="mi">5</span><span class="p">][</span><span class="mi">4</span><span class="p">];</span>
+  <span class="n">y</span><span class="p">[</span><span class="mi">10</span><span class="p">][</span><span class="mi">5</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">];</span>
+</pre></div>
+</div>
+<p>Whenever domains are not specified, they are set by default to <span class="math notranslate nohighlight">\((-\infty,+\infty)\)</span>.</p>
+</div>
+<div class="section" id="expressions">
+<span id="mod-minibex-expr"></span><h2>Expressions<a class="headerlink" href="#expressions" title="Permalink to this headline">¶</a></h2>
+<p>The expressions are built by applying operators on constants and variables.</p>
+<p>In the following, we assume that:</p>
+<ul class="simple">
+<li><p>e, e1, e2,… are expressions</p></li>
+<li><p>real-cst is a constant expression (not involving variables)</p></li>
+<li><p>int-cst is a constant integer expression</p></li>
+<li><p>func is the name of an auxiliary function (see below)</p></li>
+</ul>
+<p>You can use parenthesis and any space characters inside the expression, including new line.</p>
+<p>Operators for real-valued expressions are:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 66%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>-e</p></td>
+<td><p>opposite</p></td>
+</tr>
+<tr class="row-even"><td><p>e1+e2</p></td>
+<td><p>sum</p></td>
+</tr>
+<tr class="row-odd"><td><p>e1-e2</p></td>
+<td><p>subtraction</p></td>
+</tr>
+<tr class="row-even"><td><p>e1*e2</p></td>
+<td><p>multiplication</p></td>
+</tr>
+<tr class="row-odd"><td><p>e1/e2</p></td>
+<td><p>division</p></td>
+</tr>
+<tr class="row-even"><td><p>e1^e2</p></td>
+<td><p>power</p></td>
+</tr>
+<tr class="row-odd"><td><p>e^int-cst</p></td>
+<td><p>power (note: faster than previous op.)</p></td>
+</tr>
+<tr class="row-even"><td><p>max(e1,e2,…)</p></td>
+<td><p>max</p></td>
+</tr>
+<tr class="row-odd"><td><p>min(e1,e2,…)</p></td>
+<td><p>min</p></td>
+</tr>
+<tr class="row-even"><td><p>atan2(e1,e2)</p></td>
+<td><p>atan2</p></td>
+</tr>
+<tr class="row-odd"><td><p>sign(e)</p></td>
+<td><p>sign of e</p></td>
+</tr>
+<tr class="row-even"><td><p>abs(e)</p></td>
+<td><p>absolute value</p></td>
+</tr>
+<tr class="row-odd"><td><p>exp(e)</p></td>
+<td><p>exponential</p></td>
+</tr>
+<tr class="row-even"><td><p>ln(e)</p></td>
+<td><p>neperian logarithm</p></td>
+</tr>
+<tr class="row-odd"><td><p>sqrt(e)</p></td>
+<td><p>square root</p></td>
+</tr>
+<tr class="row-even"><td><p>cos(e)</p></td>
+<td><p>cosine</p></td>
+</tr>
+<tr class="row-odd"><td><p>sin(e)</p></td>
+<td><p>sine</p></td>
+</tr>
+<tr class="row-even"><td><p>tan(e)</p></td>
+<td><p>tangent</p></td>
+</tr>
+<tr class="row-odd"><td><p>acos(e)</p></td>
+<td><p>inverse cosine</p></td>
+</tr>
+<tr class="row-even"><td><p>asin(e)</p></td>
+<td><p>inverse sine</p></td>
+</tr>
+<tr class="row-odd"><td><p>atan(e)</p></td>
+<td><p>inverse tangent</p></td>
+</tr>
+<tr class="row-even"><td><p>cosh(e)</p></td>
+<td><p>hyperbolic cosine</p></td>
+</tr>
+<tr class="row-odd"><td><p>sinh(e)</p></td>
+<td><p>hyperbolic sine</p></td>
+</tr>
+<tr class="row-even"><td><p>tanh(e)</p></td>
+<td><p>hyperbolic tangent</p></td>
+</tr>
+<tr class="row-odd"><td><p>acosh(e)</p></td>
+<td><p>inverse hyperbolic cosine</p></td>
+</tr>
+<tr class="row-even"><td><p>asinh(e)</p></td>
+<td><p>inverse hyperbolic sine</p></td>
+</tr>
+<tr class="row-odd"><td><p>atanh(e)</p></td>
+<td><p>inverse hyperbolic tangent</p></td>
+</tr>
+<tr class="row-even"><td><p>func(e1,e2,…)</p></td>
+<td><p>apply the function “func” to the arguments</p></td>
+</tr>
+<tr class="row-odd"><td><p>(e1,e2,…)</p></td>
+<td><p>create a row vector of expressions</p></td>
+</tr>
+<tr class="row-even"><td><p>(e1;e2;…)</p></td>
+<td><p>create a column vector of expressions</p></td>
+</tr>
+</tbody>
+</table>
+<p>Operators for vector/matrix-valued expressions are:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 77%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>e’</p></td>
+<td><p>transposition (like in Matlab)</p></td>
+</tr>
+<tr class="row-even"><td><p>-e</p></td>
+<td><p>opposite</p></td>
+</tr>
+<tr class="row-odd"><td><p>e1+e2</p></td>
+<td><p>sum</p></td>
+</tr>
+<tr class="row-even"><td><p>e1-e2</p></td>
+<td><p>subtraction</p></td>
+</tr>
+<tr class="row-odd"><td><p>e1*e2</p></td>
+<td><p>matrix-vector multiplication or dot/Hadamard product</p></td>
+</tr>
+<tr class="row-even"><td><p>e(int-cst)</p></td>
+<td><p>get the ith component of a vector or the ith row of a matrix</p></td>
+</tr>
+<tr class="row-odd"><td><p>e(int-cst,int-cst)</p></td>
+<td><p>get the (i,j)th entry of a matrix expression</p></td>
+</tr>
+<tr class="row-even"><td><p>(e1,e2,…)</p></td>
+<td><p>create a matrix from column vectors</p></td>
+</tr>
+<tr class="row-odd"><td><p>(e1;e2;…)</p></td>
+<td><p>create a matrix from row vectors</p></td>
+</tr>
+</tbody>
+</table>
+<p>So, indexing vector or matrix variables follow Matlab convention and, remember, indices start from 1.</p>
+<p>Ex:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Variables</span>
+  <span class="n">x</span><span class="p">[</span><span class="mi">10</span><span class="p">][</span><span class="mi">10</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">oo</span><span class="p">];</span>
+<span class="n">Constraints</span>
+  <span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<div class="section" id="some-differences-with-c">
+<span id="mod-minibex-cpp"></span><h3>Some differences with C++<a class="headerlink" href="#some-differences-with-c" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Vectors indices are surrounded by parenthesis (not brackets),</p></li>
+<li><p>Indices start by 1 instead of 0,</p></li>
+<li><p>You have to use the “^” symbol (instead of <code class="docutils literal notranslate"><span class="pre">sqr</span></code> or <code class="docutils literal notranslate"><span class="pre">pow</span></code>).</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="functions">
+<span id="mod-minibex-func"></span><h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<p>A function declared in a Minibex file may have two different usage.</p>
+<ul class="simple">
+<li><p>You need to handle this function in your C++ program.
+In this case, your Minibex file should only contain that function.
+The file can then be loaded with the appropriate <a class="reference internal" href="#mod-func-minibex"><span class="std std-ref">constructor</span></a> of the Function class.</p></li>
+<li><p>You have several constraints that involve the same expression repeatidly. Then, it may be
+convenient for you to put this expression once for all in a separate
+function and to invoke this function inside the constraints expressions. We shall talk in
+this case about <em>auxiliary functions</em>.</p></li>
+</ul>
+<p>Assume for instance that your constraints intensively use the following expression</p>
+<div class="math notranslate nohighlight">
+\[\sqrt{(x_a-x_b)^2+(y_a-y_b)^2)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(x_a,\ldots y_b\)</span> are various sub-expressions, like in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sqrt</span><span class="p">((</span><span class="n">xA</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">yA</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">;</span>
+<span class="n">sqrt</span><span class="p">((</span><span class="n">xA</span><span class="o">-</span><span class="p">(</span><span class="n">xB</span><span class="o">+</span><span class="n">xC</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">yA</span><span class="o">-</span><span class="p">(</span><span class="n">yB</span><span class="o">+</span><span class="n">yC</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>You can declare the distance function as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">distance</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span><span class="n">ya</span><span class="p">,</span><span class="n">xb</span><span class="p">,</span><span class="n">yb</span><span class="p">)</span>
+ <span class="k">return</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">xa</span><span class="o">-</span><span class="n">xb</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">ya</span><span class="o">-</span><span class="n">yb</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>You will then be able to simplify the writing of constraints:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">distance</span><span class="p">(</span><span class="n">xA</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="n">yA</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">;</span>
+<span class="n">distance</span><span class="p">(</span><span class="n">xA</span><span class="p">,</span><span class="n">xB</span><span class="o">+</span><span class="n">xC</span><span class="p">,</span><span class="n">yA</span><span class="p">,</span><span class="n">yB</span><span class="o">+</span><span class="n">yC</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>As you may expect, this will result in the creation of a <a class="reference internal" href="function.html#mod-func"><span class="std std-ref">Function</span></a> object that
+you can access from your C++ program via the <code class="docutils literal notranslate"><span class="pre">System</span></code> class. See <a class="reference internal" href="system.html#mod-sys-auxfunc"><span class="std std-ref">auxiliary functions</span></a>.</p>
+<p>A function can return a single value, a vector
+or a matrix. Similarly, it can take real, vectors or matrix arguments.
+You can also write some minimal “code” inside the function before
+returning the final expression.</p>
+<p>This code is however limited to be a sequence of assignments.</p>
+<p>Let us now illustrate all this with a more sophisticated example.
+We write below the function that calculates the rotation matrix
+from the three Euler angles, <span class="math notranslate nohighlight">\(\phi, \theta\)</span> and <span class="math notranslate nohighlight">\(\psi\)</span> :</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}R : (\phi,\psi,\theta) \mapsto
+\left(\begin{array}{ccc}
+\cos(\theta)\cos(\psi) &amp; -\cos(\phi)\sin(\psi)+\sin(\theta)\cos(\psi)\sin(\phi) &amp; \sin(\psi)\sin(\phi)+\sin(\theta)\cos(\psi)\cos(\phi)\\
+\cos(\theta)\sin(\psi) &amp; \cos(\psi)\cos(\phi)+\sin(\theta)\sin(\psi)\sin(\phi) &amp; -\cos(\psi)\sin(\phi)+\sin(\theta)\cos(\phi)\sin(\psi)\\
+-\sin(\theta) &amp; \cos(\theta)\sin(\phi) &amp; \cos(\theta)\cos(\phi)
+\end{array}\right)\end{split}\]</div>
+<p>As you can see, there are many occurrences of the same subexpression
+like <span class="math notranslate nohighlight">\(\cos(\theta)\)</span> so a good idea for both readibility and (actually) efficiency
+is to precalculate such pattern and put the result into an intermediate variable.</p>
+<p>Here is the way we propose to define this function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/*</span> <span class="n">Computes</span> <span class="n">the</span> <span class="n">rotation</span> <span class="n">matrix</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">Euler</span> <span class="n">angles</span><span class="p">:</span>
+   <span class="n">roll</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">the</span> <span class="n">pitch</span> <span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">yaw</span> <span class="p">(</span><span class="n">psi</span><span class="p">)</span>  <span class="o">*/</span>
+<span class="n">function</span> <span class="n">euler</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">psi</span><span class="p">)</span>
+  <span class="n">cphi</span>   <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">);</span>
+  <span class="n">sphi</span>   <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">);</span>
+  <span class="n">ctheta</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">);</span>
+  <span class="n">stheta</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">);</span>
+  <span class="n">cpsi</span>   <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">);</span>
+  <span class="n">spsi</span>   <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">psi</span><span class="p">);</span>
+
+  <span class="k">return</span>
+  <span class="p">(</span> <span class="p">(</span><span class="n">ctheta</span><span class="o">*</span><span class="n">cpsi</span><span class="p">,</span> <span class="o">-</span><span class="n">cphi</span><span class="o">*</span><span class="n">spsi</span><span class="o">+</span><span class="n">stheta</span><span class="o">*</span><span class="n">cpsi</span><span class="o">*</span><span class="n">sphi</span><span class="p">,</span>
+                   <span class="n">spsi</span><span class="o">*</span><span class="n">sphi</span><span class="o">+</span><span class="n">stheta</span><span class="o">*</span><span class="n">cpsi</span><span class="o">*</span><span class="n">cphi</span><span class="p">)</span> <span class="p">;</span>
+    <span class="p">(</span><span class="n">ctheta</span><span class="o">*</span><span class="n">spsi</span><span class="p">,</span> <span class="n">cpsi</span><span class="o">*</span><span class="n">cphi</span><span class="o">+</span><span class="n">stheta</span><span class="o">*</span><span class="n">spsi</span><span class="o">*</span><span class="n">sphi</span><span class="p">,</span>
+                 <span class="o">-</span><span class="n">cpsi</span><span class="o">*</span><span class="n">sphi</span><span class="o">+</span><span class="n">stheta</span><span class="o">*</span><span class="n">cphi</span><span class="o">*</span><span class="n">spsi</span><span class="p">)</span> <span class="p">;</span>
+    <span class="p">(</span><span class="o">-</span><span class="n">stheta</span><span class="p">,</span> <span class="n">ctheta</span><span class="o">*</span><span class="n">sphi</span><span class="p">,</span> <span class="n">ctheta</span><span class="o">*</span><span class="n">cphi</span><span class="p">)</span> <span class="p">);</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p><strong>Remark.</strong> Introducing temporary variables like <code class="docutils literal notranslate"><span class="pre">cphi</span></code> amouts to build a DAG instead of
+a tree for the function expression. It is also possible (and easy) to <a class="reference internal" href="function.html#mod-func-dag"><span class="std std-ref">build a DAG</span></a> when you directly create
+a <code class="docutils literal notranslate"><span class="pre">Function</span></code> object in C++.</p>
+</div>
+<div class="section" id="constraints">
+<span id="mod-minibex-ctrs"></span><h2>Constraints<a class="headerlink" href="#constraints" title="Permalink to this headline">¶</a></h2>
+<p>Constraints are simply written in sequence.
+The sequence starts with the keword <code class="docutils literal notranslate"><span class="pre">constraints</span></code> and terminates with the keyword <code class="docutils literal notranslate"><span class="pre">end</span></code>.
+They are a separated by semi-colon. Here is an example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Variables</span>
+  <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">oo</span><span class="p">];</span>
+<span class="n">Constraints</span>
+  <span class="o">//</span><span class="n">you</span> <span class="n">can</span> <span class="n">use</span> <span class="n">C</span><span class="o">++</span> <span class="n">comments</span>
+  <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="o">&gt;=-</span><span class="mi">1</span><span class="p">;</span>
+  <span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="o">&lt;=</span><span class="mi">2</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>The following operator are allowed between 2 expressions:</p>
+<ul class="simple">
+<li><p>&lt;</p></li>
+<li><p>&lt;=</p></li>
+<li><p>=</p></li>
+<li><p>&gt;=</p></li>
+<li><p>&gt;</p></li>
+</ul>
+<div class="section" id="loops">
+<span id="mod-minibex-ctrs-loop"></span><h3>Loops<a class="headerlink" href="#loops" title="Permalink to this headline">¶</a></h3>
+<p>You can resort to loops in a Matlab-like syntax to define constraints. Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Variables</span>
+  <span class="n">x</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+
+<span class="n">Constraints</span>
+  <span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">;</span>
+    <span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">i</span><span class="p">;</span>
+  <span class="n">end</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Minibex Language</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#function">Function</a></li>
+<li><a class="reference internal" href="#constraint">Constraint</a></li>
+<li><a class="reference internal" href="#system">System</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#overall-structure">Overall structure</a></li>
+<li><a class="reference internal" href="#real-and-intervals">Real and Intervals</a></li>
+<li><a class="reference internal" href="#constants">Constants</a></li>
+<li><a class="reference internal" href="#variables">Variables</a></li>
+<li><a class="reference internal" href="#expressions">Expressions</a><ul>
+<li><a class="reference internal" href="#some-differences-with-c">Some differences with C++</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#constraints">Constraints</a><ul>
+<li><a class="reference internal" href="#loops">Loops</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="system.html"
+                        title="previous chapter">Systems</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="contractor.html"
+                        title="next chapter">Contractors</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/minibex.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="contractor.html" title="Contractors"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="system.html" title="Systems"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

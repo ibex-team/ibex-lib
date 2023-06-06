@@ -1,0 +1,682 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Functions &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Constraints" href="constraint.html" />
+    <link rel="prev" title="Interval Computations" href="interval.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="constraint.html" title="Constraints"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="interval.html" title="Interval Computations"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="functions">
+<span id="mod-func"></span><h1>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The purpose of this chapter is to show how to create and manipulate
+objects corresponding to the mathematical concept of <em>function</em>.</p>
+<div class="section" id="what-we-mean-by-variable-and-function">
+<span id="mod-intro-mean"></span><h3>What we mean by “variable” and “function”<a class="headerlink" href="#what-we-mean-by-variable-and-function" title="Permalink to this headline">¶</a></h3>
+<p>Let us rule out a potential ambiguity.</p>
+<p>Since we are in the C++ programming language, the term <em>variable</em> and
+<em>function</em> already refers to something precise. For instance, the following
+piece of code introduces a <em>function</em> <cite>sum</cite> and a <em>variable</em> <cite>x</cite>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="nf">sum</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="n">x</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The variable <cite>x</cite> may represent, say, the balance of a bank account.
+The account number is what we call the <em>semantic</em> of <cite>x</cite>, that is, what <cite>x</cite> is supposed
+to represent in the user’s mind. So, on one side, we have <em>what we write</em>, that is, a program with variables and functions, and on the other side, <em>what we represent</em>, that is, concepts
+like a bank account.</p>
+<p>With IBEX, we write programs to represent mathematical concepts
+that are also called <em>variables</em> and <em>functions</em>.
+The mapping <span class="math notranslate nohighlight">\((x,y)\mapsto\sin(x+y)\)</span> is an example of function that
+we want to represent. It shall not be confused with the function <cite>sum</cite>
+above.</p>
+<p>To avoid ambiguity, we shall talk about <em>mathematical</em>
+variables (resp. functions) versus <em>program</em> variables (resp. functions).
+We will also use italic symbol like <em>x</em> to denote a mathematical variable
+and postscript symbols like <cite>x</cite> for program variables.
+In most of our discussions, variables and functions will refer
+to the mathematical objects so that the mathematical meaning will be the implicit one.</p>
+<p>Mathematical functions are represented by objects of the class <code class="docutils literal notranslate"><span class="pre">Function</span></code>.</p>
+</div>
+<div class="section" id="arguments-versus-variables">
+<span id="mod-intro-arg-vs-var"></span><h3>Arguments versus variables<a class="headerlink" href="#arguments-versus-variables" title="Permalink to this headline">¶</a></h3>
+<p>A (mathematical) variable does not necessarily represent a single real value.
+It can also be a vector or a matrix.
+One can, e.g., build the following function</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{cccc}
+  f: &amp; \mathbb{R}^2\times\mathbb{R}^3 &amp; \to &amp; \mathbb{R}\\
+     &amp; (x,y) &amp; \mapsto &amp; x_1\times y_1+x_2\times y_2 - x_3
+\end{array}.\end{split}\]</div>
+<p>In this case, <em>x</em> and <em>y</em> are vector variables with 2 and 3 components respectively.</p>
+<p>We see, at this point, that the term <em>variable</em> becomes ambiguous.
+For instance, if I say that the function <em>f</em> takes 2 variables, we don’t really know if
+it means that the function takes two arguments (that might be vectors or matrices) or if
+the total input size is a vector of <span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span>.</p>
+<p>For this reason, from now on, we will call <strong>argument</strong> the formal parameters
+or input symbols the function has been defined with and <strong>variable</strong> a component of the
+latters.</p>
+<p>Hence, the function <em>f</em> in the previous paragraphs has two arguments, <em>x</em> and <em>y</em>
+and 5 variables <span class="math notranslate nohighlight">\(x_1, x_2, y_1, y_2\)</span> and <span class="math notranslate nohighlight">\(y_3\)</span>.</p>
+<p>Note that, as a consequence, variables are always real-valued.</p>
+</div>
+<div class="section" id="arguments">
+<span id="mod-func-arg"></span><h3>Arguments<a class="headerlink" href="#arguments" title="Permalink to this headline">¶</a></h3>
+<p>Before telling you which class represents the arguments of a function, let us say first that
+this class does not play a big role.
+Indeed, the only purpose of declaring an argument <em>x</em> in IBEX is
+for building a function right after, like <span class="math notranslate nohighlight">\(x\mapsto x+1\)</span>.
+Functions play, in contrast, a big role.</p>
+<p>In other words, <em>x</em> is nothing but a syntaxic leaf in the expression
+of the function. In particular, an argument is not a slot for
+representing domain.
+E.g, if you want to calculate the range of <em>f</em> for <span class="math notranslate nohighlight">\(x\in[0,1]\)</span>,
+you just call a (program) function <code class="docutils literal notranslate"><span class="pre">eval</span></code> with a plain box in argument.
+It’s just as if <em>f</em> was the function that takes one argument and
+increment it, whatever the name of this argument is.</p>
+<p>Once <em>f</em> has been built, we can almost say that <em>x</em> is no longer useful.
+Arguments must be seen only as temporary objects, in the process of function construction.</p>
+<p>Before going on, let us slightly moderate this point.
+We have assumed here that, as a user of IBEX the operations you are interested in are: <em>evaluate</em> <em>f</em> on a box,
+calculate <em>f’</em> on a box, solve <em>f(x)=0</em> and so on. All these operations can be qualified as numerical: they take
+intervals and return intervals. You don’t need to deal again with the expression of the function, once built.
+But if you need to handle, for any reason, the symbolic form of the function then you have to inspect the syntax
+and arguments appear again.</p>
+<div class="section" id="dimensions-and-ordering">
+<span id="mod-func-arg-dim"></span><h4>Dimensions and ordering<a class="headerlink" href="#dimensions-and-ordering" title="Permalink to this headline">¶</a></h4>
+<p>We have said in the previous paragraph that an argument <em>x</em> can actually represent
+n variables <span class="math notranslate nohighlight">\(x_1,\ldots,x_n\)</span>. So each argument has some associated information about
+its dimension(s).</p>
+<p>Let us consider again this function:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{cccc}
+f: &amp; \mathbb{R}^2\times\mathbb{R}^3 &amp; \to &amp; \mathbb{R}\\
+   &amp;  (x,y) &amp; \mapsto &amp; x_1\times y_1+x_2\times y_2 - x_3
+\end{array}.\end{split}\]</div>
+<p>From the user standpoint, the function <em>f</em> (once built) is “flattened” (or “serialized”) to a mapping from <span class="math notranslate nohighlight">\(\mathbb{R}^5\)</span> to <span class="math notranslate nohighlight">\(\mathbb{R}\)</span>.
+Each C++ function (eval, etc.) expects a 5-dimensional box as parameter.</p>
+<p>The way intervals are mapped to the variables components follows a straightforward ordering:
+everytime we call a (program) function of <em>f</em> with the box <span class="math notranslate nohighlight">\([b]=([b]_1,\ldots,[b]_5)\)</span> in argument, we simply enforce</p>
+<div class="math notranslate nohighlight">
+\[x\in[b]_1\times[b]_2 \quad \mbox{and} \quad y\in[b]_3\times[b]_4\times[b]_5.\]</div>
+<p>If you don’t want to create functions in C++, you can move now to <a class="reference internal" href="#mod-func-op"><span class="std std-ref">function operations</span></a>.</p>
+</div>
+<div class="section" id="class-name-and-fields">
+<span id="mod-func-arg-fiels"></span><h4>Class name and fields<a class="headerlink" href="#class-name-and-fields" title="Permalink to this headline">¶</a></h4>
+<p>As we have just said, arguments are just symbols in expression. For this reason,
+they are represented by a class named <code class="docutils literal notranslate"><span class="pre">ExprSymbol</span></code>.
+In fact, there is also another class we introduced for convenience, called <code class="docutils literal notranslate"><span class="pre">Variable</span></code>.
+It is, of course, a very confusing name from the programer’s viewpoint since a <code class="docutils literal notranslate"><span class="pre">Variable</span></code>
+does actually not represent <a class="reference internal" href="#mod-intro-arg-vs-var"><span class="std std-ref">a variable but an argument</span></a>. However, from the user’s viewpoint,
+this distinction is not visible and “variable” is more meaningful than “argument”.
+Anyway, the programer never has to deal with a “Variable” object. Without going further into details, the <code class="docutils literal notranslate"><span class="pre">Variable</span></code>
+class must be seen as a kind of “macro” that generates <code class="docutils literal notranslate"><span class="pre">ExprSymbol</span></code> objects.
+This macro is only useful if you <a class="reference internal" href="#mod-func-arg-cpp"><span class="std std-ref">build arguments in C++</span></a>.</p>
+<p>Once built, an argument is always typed <code class="docutils literal notranslate"><span class="pre">ExprSymbol</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">x</span></code> is an <code class="docutils literal notranslate"><span class="pre">ExprSymbol</span></code> object, you can obtain the information about its dimensions via <code class="docutils literal notranslate"><span class="pre">x</span></code>.dim.
+The <code class="docutils literal notranslate"><span class="pre">dim</span></code> field is of type <code class="docutils literal notranslate"><span class="pre">Dim</span></code>, a class that simply contains 3 integers (one for each dimension, see
+the API for further details).</p>
+<p>Finally, an argument also has a name, that is only useful for displaying. It is a
+regular C string (<code class="docutils literal notranslate"><span class="pre">char*</span></code>) stored in the field <code class="docutils literal notranslate"><span class="pre">name</span></code>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="interval-computations">
+<span id="mod-func-op"></span><h2>Interval Computations<a class="headerlink" href="#interval-computations" title="Permalink to this headline">¶</a></h2>
+<p>Various interval computations can be performed with a function. We detail below the main ones.</p>
+<div class="section" id="evaluation-forward-computation">
+<span id="mod-func-op-fwd"></span><h3>Evaluation (forward computation)<a class="headerlink" href="#evaluation-forward-computation" title="Permalink to this headline">¶</a></h3>
+<p>Take a look first at the <a class="reference internal" href="tutorial.html#tuto-func-eval"><span class="std std-ref">tutorial</span></a> for introductory examples.</p>
+<p id="mod-func-op-bwd">Since function overloading does not work for return types in C++, you have to either
+call <code class="docutils literal notranslate"><span class="pre">eval</span></code>, <code class="docutils literal notranslate"><span class="pre">eval_vector</span></code> or <code class="docutils literal notranslate"><span class="pre">eval_matrix</span></code> depending if your function
+respectively returns a scalar, a vector or a matrix.</p>
+<p>All <code class="docutils literal notranslate"><span class="pre">eval_XXX</span></code> functions expects a single box in argument that represents all the arguments (scalars, vectors, matrices) stored in a single flat array (see <a class="reference internal" href="#mod-func-arg-dim"><span class="std std-ref">Dimensions and ordering</span></a>).</p>
+<p>To build this vector, the best is to use <em>backward projection functions</em>.</p>
+<p>Here is an example with f(A,B,C)=A+B-C where A, B and C are matrices.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="k">const</span> <span class="kt">int</span> <span class="n">nb_rows</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+	<span class="k">const</span> <span class="kt">int</span> <span class="n">nb_cols</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+
+	<span class="n">Variable</span> <span class="nf">a</span><span class="p">(</span><span class="n">nb_rows</span><span class="p">,</span><span class="n">nb_cols</span><span class="p">),</span><span class="n">b</span><span class="p">(</span><span class="n">nb_rows</span><span class="p">,</span><span class="n">nb_cols</span><span class="p">),</span><span class="n">c</span><span class="p">(</span><span class="n">nb_rows</span><span class="p">,</span><span class="n">nb_cols</span><span class="p">);</span>
+
+	<span class="n">Function</span> <span class="nf">pA</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">pB</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">pC</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="p">);</span>
+
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">));</span>
+
+	<span class="kt">double</span> <span class="n">_A</span><span class="p">[</span><span class="n">nb_rows</span><span class="o">*</span><span class="n">nb_cols</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">},{</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">}};</span>
+	<span class="n">IntervalMatrix</span> <span class="nf">MA</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">_A</span><span class="p">);</span>
+
+	<span class="kt">double</span> <span class="n">_B</span><span class="p">[</span><span class="n">nb_rows</span><span class="o">*</span><span class="n">nb_cols</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">}};</span>
+	<span class="n">IntervalMatrix</span> <span class="nf">MB</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">_B</span><span class="p">);</span>
+
+	<span class="kt">double</span> <span class="n">_C</span><span class="p">[</span><span class="n">nb_rows</span><span class="o">*</span><span class="n">nb_cols</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">}};</span>
+	<span class="n">IntervalMatrix</span> <span class="nf">MC</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">_C</span><span class="p">);</span>
+
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">nb_rows</span><span class="o">*</span><span class="n">nb_cols</span><span class="p">);</span>
+
+	<span class="c1">// the backward call on pA will force the sub-vector of</span>
+	<span class="c1">// &quot;box&quot; that represents the domain of &quot;a&quot; to contain the</span>
+	<span class="c1">// interval matrix &quot;MA&quot;.</span>
+	<span class="n">pA</span><span class="p">.</span><span class="n">backward</span><span class="p">(</span><span class="n">MA</span><span class="p">,</span><span class="n">box</span><span class="p">);</span>
+
+	<span class="c1">// idem</span>
+	<span class="n">pB</span><span class="p">.</span><span class="n">backward</span><span class="p">(</span><span class="n">MB</span><span class="p">,</span><span class="n">box</span><span class="p">);</span>
+	<span class="n">pC</span><span class="p">.</span><span class="n">backward</span><span class="p">(</span><span class="n">MC</span><span class="p">,</span><span class="n">box</span><span class="p">);</span>
+
+	<span class="n">IntervalMatrix</span> <span class="n">M</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="n">eval_matrix</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;A+B-C=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">M</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="backward">
+<h3>Backward<a class="headerlink" href="#backward" title="Permalink to this headline">¶</a></h3>
+<p>One of the main feature of Ibex is the ability to <em>contract</em> a box representing the domain of a variable
+x with respect to the constraint that f(x) belongs to a restricted input range [y].
+The range [y] can be any constant (real value, interval, inteval vector, etc.).
+Rigorously, given two intervals [x] and [y], the contraction gives a new interval [z] such that</p>
+<div class="math notranslate nohighlight">
+\[\forall x\in[x], \quad f(x)\in[y] \Longrightarrow x \in[z] \subseteq [x].\]</div>
+<p>One way to do this is by using the famous <em>forward-backward</em> (alias <code class="docutils literal notranslate"><span class="pre">HC4Revise</span></code>).
+It is quick since it runs in linear time w.r.t. the size
+of the constraint syntax and optimal when arguments have all one occurrence
+in this syntax.
+This algorithm does not return a new interval [z] but contract the input interval [x] which is therefore
+an input-output argument.</p>
+<p>In the following snippet we require the function sin(x+y) to take the value -1 (a degenerated interval).
+With an initial box (x,y)=[1,2],[3,4], we obtain the result that (x,y) must lie in the subdomain
+([1, 1.7123] ; [3, 3.7124]).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+	<span class="n">Variable</span> <span class="n">y</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">));</span>
+
+	<span class="kt">double</span> <span class="n">_box</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">}};</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">_box</span><span class="p">);</span>
+
+	<span class="cm">/* the backward sets box to ([1, 1.7123] ; [3, 3.7124]) */</span>
+	<span class="n">f</span><span class="p">.</span><span class="n">backward</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">box</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>One can indeed check that the resulting box is a consistent narrowing
+of the initial one.</p>
+</div>
+<div class="section" id="gradient">
+<span id="mod-func-op-grad"></span><h3>Gradient<a class="headerlink" href="#gradient" title="Permalink to this headline">¶</a></h3>
+<p>Consider <span class="math notranslate nohighlight">\(f:(x,y)\mapsto x\times y\)</span>.
+The first and most simple way of calculating the gradient is:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span> <span class="n">init_xy</span><span class="p">[][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">}</span> <span class="p">};</span>
+<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">init_xy</span><span class="p">);</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;gradient=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">f</span><span class="p">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">box</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Since <span class="math notranslate nohighlight">\(\frac{\partial{f}}{\partial{x}}=y\)</span> and <span class="math notranslate nohighlight">\(\frac{\partial{f}}{\partial{y}}=x\)</span> we get:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">gradient</span><span class="o">=</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>In this first variant, the returned vector is a new object created each time the function is called.
+When we have to compute many times different values of the gradient for the same function, we can
+also build a vector once for all and ask the <code class="docutils literal notranslate"><span class="pre">gradient</span></code> to store the result in this slot:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">IntervalVector</span> <span class="nf">g</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<span class="n">f</span><span class="p">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">box</span><span class="p">,</span><span class="n">g</span><span class="p">);</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;gradient=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">g</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="jacobian-and-hansen-s-matrix">
+<span id="mod-func-op-jac"></span><h3>Jacobian and Hansen’s matrix<a class="headerlink" href="#jacobian-and-hansen-s-matrix" title="Permalink to this headline">¶</a></h3>
+<p>The interval Jacobian matrix of a function <em>f</em> on a box <em>[x]</em> is</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}J=\left(\begin{array}{ccc}
+\frac{\partial{f_1}}{\partial{x_1}}([x]) &amp; \ldots &amp; \frac{\partial{f_1}}{\partial{x_n}}([x])\\
+\vdots \\
+\frac{\partial{f_m}}{\partial{x_1}}([x]) &amp; \ldots &amp; \frac{\partial{f_m}}{\partial{x_n}}([x])\\
+\end{array}\right)\end{split}\]</div>
+<p>The interval Jacobian matrix is obtained exactly as for the gradient.
+Just write:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">f</span><span class="p">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to get an <code class="docutils literal notranslate"><span class="pre">IntervalMatrix</span></code> containing an enclosure of the Jacobian matrix of <em>f</em> on the box in argument.</p>
+<p>There is also a variant where the matrix is passed as parameter
+(as for the gradient) in order to avoid allocating memory for the calculated matrix:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">f</span><span class="p">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">box</span><span class="p">,</span><span class="n">J</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also compute with IBEX the “Hansen matrix”. This matrix
+is another <em>slope</em> matrix, thiner than the interval Jacobian (but slower to be calculated).
+It is, for example, used inside the interval Newton operator.
+The Hansen matrix corresponds to the following matrix, where <span class="math notranslate nohighlight">\((x_1,\ldots,x_n)\)</span> denotes
+the midvector of <span class="math notranslate nohighlight">\([x]\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left(\begin{array}{cccc}
+\frac{\partial{f_1}}{\partial{x_1}}([x]_1,x_2,\ldots,x_n) &amp;
+\frac{\partial{f_1}}{\partial{x_2}}([x]_1,[x]_2,\ldots,x_n) &amp;
+\ldots &amp;
+\frac{\partial{f_1}}{\partial{x_n}}([x]_1,[x]_2,\ldots,[x]_n) \\
+\vdots &amp; \\
+\frac{\partial{f_m}}{\partial{x_1}}([x]_1,x_2,\ldots,x_n) &amp;
+\frac{\partial{f_n}}{\partial{x_2}}([x]_1,[x]_2,\ldots,x_n) &amp;
+\ldots &amp;
+\frac{\partial{f_m}}{\partial{x_n}}([x]_1,[x]_2,\ldots,[x]_n) \\
+\end{array}\right)\end{split}\]</div>
+<p>Here is an example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">y</span><span class="p">,</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">));</span>
+	<span class="n">IntervalMatrix</span> <span class="nf">H</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
+	<span class="n">f</span><span class="p">.</span><span class="n">hansen_matrix</span><span class="p">(</span><span class="n">box</span><span class="p">,</span><span class="n">H</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Hansen matrix:</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">H</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The display is:</p>
+</div>
+</div>
+<div class="section" id="creating-functions-in-c">
+<span id="mod-func-cpp"></span><h2>Creating functions (in C++)<a class="headerlink" href="#creating-functions-in-c" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Function</span></code> objects are very easy to build.</p>
+<p>This section explains how to build them
+using C++ operator overloading but using
+the <a class="reference internal" href="minibex.html#mod-minibex"><span class="std std-ref">Minibex</span></a> syntax is even simpler.</p>
+<div class="section" id="creating-arguments-in-c">
+<span id="mod-func-arg-cpp"></span><h3>Creating arguments (in C++)<a class="headerlink" href="#creating-arguments-in-c" title="Permalink to this headline">¶</a></h3>
+<p>The following piece of code creates an argument <code class="docutils literal notranslate"><span class="pre">x</span></code> and prints it:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The first instruction creates a (program) variable <code class="docutils literal notranslate"><span class="pre">x</span></code>. It is initialized by default, since
+nothing is given here to the constructor.
+By default, the argument is real (or <em>scalar)</em>, meaning it is not a vector nor a matrix.
+Furthermore, the argument has a name that is automatically
+generated. Of course, the name of the argument does not necessarily correspond to the name of the
+program variable.
+For instance, <code class="docutils literal notranslate"><span class="pre">x</span></code> is the name of a C++ variable but the corresponding argument is named <em>_x_0</em>.
+The second instruction prints the name of the argument on the standard output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_x_0</span>
+</pre></div>
+</div>
+<p>It is possible to rename arguments, see below.</p>
+</div>
+<div class="section" id="creating-vector-and-matrix-arguments-in-c">
+<span id="mod-func-arg-vec-cpp"></span><h3>Creating vector and matrix arguments (in C++)<a class="headerlink" href="#creating-vector-and-matrix-arguments-in-c" title="Permalink to this headline">¶</a></h3>
+<p>To create a n-dimensional vector argument, just
+give the number n as a parameter to the constructor:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="nf">y</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>   <span class="c1">// creates a 3-dimensional vector</span>
+</pre></div>
+</div>
+<p>To create a mxn matrix, give m (number of rows) and n (number of columns) as parameters:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="nf">z</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>   <span class="c1">// creates a 2*3-dimensional matrix</span>
+</pre></div>
+</div>
+<p>We can go like this up to 3 dimensional arrays:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="nf">t</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span>   <span class="c1">// creates a 2*3*4-dimensional array</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="renaming-arguments">
+<span id="mod-func-arg-rename"></span><h3>Renaming arguments<a class="headerlink" href="#renaming-arguments" title="Permalink to this headline">¶</a></h3>
+<p>Usually, you don’t really care about the names of arguments since you handle
+program variables in your code.
+However, if you want a more user-friendly display, you can specify
+the name of the argument as a last parameter to the constructor.</p>
+<p>In the following example, we create a scalar, a vector and a matrix argument each
+time with a chosen name.:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">);</span>     <span class="c1">// creates a real argument named &quot;x&quot;</span>
+<span class="n">Variable</span> <span class="nf">y</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="s">&quot;y&quot;</span><span class="p">);</span>   <span class="c1">// creates a vector argument named &quot;y&quot;</span>
+<span class="n">Variable</span> <span class="nf">z</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s">&quot;z&quot;</span><span class="p">);</span> <span class="c1">// creates a matrix argument named &quot;z&quot;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">y</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">z</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Now, the display is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="n">y</span> <span class="n">z</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<p>The following piece of code creates the function <span class="math notranslate nohighlight">\((x,y)\mapsto \sin(x+y)\)</span>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="nf">y</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">));</span> <span class="c1">// create the function (x,y)-&gt;sin(x+y)</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">f</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The display is:</p>
+<p>You can directly give up to 20 variables in argument of the <code class="docutils literal notranslate"><span class="pre">Function</span></code> constructor:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">f</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">_f</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="n">e</span><span class="o">+</span><span class="n">f</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>If more than 20 variables are needed, you need to build an intermediate array for collecting the arguments.
+More precisely, this intermediate object is an <code class="docutils literal notranslate"><span class="pre">Array&lt;const</span> <span class="pre">ExprSymbol&gt;</span></code>. The usage is summarized below. In this
+example, we have 7 variables. But instead of creating the function</p>
+<div class="math notranslate nohighlight">
+\[x\mapsto x_1+\ldots+x_7\]</div>
+<p>with one argument (a vector with 7 components), we decide to create the function</p>
+<div class="math notranslate nohighlight">
+\[(x_1,\ldots,x_7)\mapsto x_1+\ldots+x_7.\]</div>
+<p>with 7 arguments (7 scalar variables):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">[</span><span class="mi">7</span><span class="p">];</span> <span class="c1">// not to be confused with x(7)</span>
+	<span class="n">Array</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">ExprSymbol</span><span class="o">&gt;</span> <span class="n">vars</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">7</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+	<span class="n">vars</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">vars</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">f</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The display is:</p>
+<p><strong>Note:</strong> Because of a potential conflict with <code class="docutils literal notranslate"><span class="pre">std::min</span></code> (or <code class="docutils literal notranslate"><span class="pre">std::max</span></code>), you might be forced to prefix the min (max) function with <code class="docutils literal notranslate"><span class="pre">ibex::</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">ibex</span><span class="o">::</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">));</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">f</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="functions-with-vector-arguments">
+<span id="mod-func-cpp-vecargs"></span><h3>Functions with vector arguments<a class="headerlink" href="#functions-with-vector-arguments" title="Permalink to this headline">¶</a></h3>
+<p>If arguments are vectors, you can refer to the component
+of an argument using square brackets. Indices start by 0,
+following the convention of the C language.</p>
+<p>We rewrite here the previous distance function using 2-dimensional
+arguments <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> instead:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="nf">a</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="nf">b</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span><span class="s">&quot;dist&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="vector-valued-functions">
+<span id="mod-func-cpp-vecvalued"></span><h3>Vector-valued functions<a class="headerlink" href="#vector-valued-functions" title="Permalink to this headline">¶</a></h3>
+<p>To define a vector-valued function, the <code class="docutils literal notranslate"><span class="pre">Return</span></code> keword allows
+you to list the function’s components.</p>
+<p>See the example in the <a class="reference internal" href="tutorial.html#tuto-func-vec-value"><span class="std std-ref">tutorial</span></a>.</p>
+</div>
+<div class="section" id="advanced-examples">
+<span id="mod-func-ex"></span><h3>Advanced examples<a class="headerlink" href="#advanced-examples" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="building-dags-directed-acyclic-graphs">
+<span id="mod-func-dag"></span><h4>Building DAGs (directed acyclic graphs)<a class="headerlink" href="#building-dags-directed-acyclic-graphs" title="Permalink to this headline">¶</a></h4>
+<p>C++ operator overloading allows you to create a DAG instead of an expression tree. This will result in a gain in performance.
+For that, you need to handle references of shared subexpressions with variables types <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">ExprNode&amp;</span></code>.</p>
+<p>In the following example we create the function :</p>
+<div class="math notranslate nohighlight">
+\[f:x\mapsto ((\cos(x)+1)^2, (\cos(x)+1)^3)\]</div>
+<p>and we want the subexpression cos(x)+1 to be shared:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+	<span class="k">const</span> <span class="n">ExprNode</span><span class="o">&amp;</span> <span class="n">e</span><span class="o">=</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">pow</span><span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">pow</span><span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="mi">3</span><span class="p">)));</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="iterated-sum">
+<span id="mod-func-ex-iterated-sum"></span><h4>Iterated sum<a class="headerlink" href="#iterated-sum" title="Permalink to this headline">¶</a></h4>
+<p>Let us build a function that returns the sum of the square of <code class="docutils literal notranslate"><span class="pre">N</span></code> variables, where <code class="docutils literal notranslate"><span class="pre">N</span></code> is some constant.</p>
+<p>The only difficulty is that we cannot assign references in C++, so we need to use pointers to <code class="docutils literal notranslate"><span class="pre">(const</span> <span class="pre">ExprNode&amp;</span></code>) instead:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="kt">int</span> <span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">;</span>
+	<span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="s">&quot;x&quot;</span><span class="p">);</span>
+
+	<span class="k">const</span> <span class="n">ExprNode</span><span class="o">*</span> <span class="n">e</span><span class="o">=&amp;</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]));</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+		<span class="n">e</span> <span class="o">=</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">*</span><span class="n">e</span> <span class="o">+</span> <span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]));</span>
+
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="o">*</span><span class="n">e</span><span class="p">,</span><span class="s">&quot;f&quot;</span><span class="p">);</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">f</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The display is:</p>
+</div>
+</div>
+<div class="section" id="renaming-functions">
+<span id="mod-func-cpp-renaming"></span><h3>Renaming functions<a class="headerlink" href="#renaming-functions" title="Permalink to this headline">¶</a></h3>
+<p>By default, function names are also generated. But you can also set your own function name, as the last parameter of the constructor:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">),</span><span class="s">&quot;f&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="allowed-symbols">
+<span id="mod-func-cpp-symbols"></span><h3>Allowed symbols<a class="headerlink" href="#allowed-symbols" title="Permalink to this headline">¶</a></h3>
+<p>The following symbols are allowed in expressions:</p>
+<p><strong>sign, min, max,
+sqr, sqrt, exp, log, pow,
+cos, sin, tan, acos, asin, atan,
+cosh, sinh, tanh, acosh, asinh, atanh
+atan2.</strong></p>
+<p>Power symbols <code class="docutils literal notranslate"><span class="pre">^</span></code> are not allowed. You must
+either use <code class="docutils literal notranslate"><span class="pre">pow(x,y)</span></code>, or simply <code class="docutils literal notranslate"><span class="pre">sqr(x)</span></code> for the square function.</p>
+<p>Here is an example of the distance function between <code class="docutils literal notranslate"><span class="pre">(xa,ya)</span></code> and <code class="docutils literal notranslate"><span class="pre">(xb,yb)</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">xa</span><span class="p">,</span><span class="n">xb</span><span class="p">,</span><span class="n">ya</span><span class="p">,</span><span class="n">yb</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span><span class="n">xb</span><span class="p">,</span><span class="n">ya</span><span class="p">,</span><span class="n">yb</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">xa</span><span class="o">-</span><span class="n">xb</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">ya</span><span class="o">-</span><span class="n">yb</span><span class="p">)));</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="serialization">
+<h3>Serialization<a class="headerlink" href="#serialization" title="Permalink to this headline">¶</a></h3>
+<p>(to do)</p>
+</div>
+</div>
+<div class="section" id="operations-on-functions">
+<h2>Operations on Functions<a class="headerlink" href="#operations-on-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="composition">
+<span id="mod-func-cpp-compo"></span><h3>Composition<a class="headerlink" href="#composition" title="Permalink to this headline">¶</a></h3>
+<p>You can compose functions. Each argument of the called function can be substitued
+by an argument of the calling function, a subexpression or a constant value.</p>
+<p>See the example in the <a class="reference internal" href="tutorial.html#tuto-func-compo"><span class="std std-ref">tutorial</span></a>.</p>
+</div>
+<div class="section" id="applying-a-function-with-numerous-arguments">
+<span id="mod-func-symbolic-diff"></span><h3>Applying a function with numerous arguments<a class="headerlink" href="#applying-a-function-with-numerous-arguments" title="Permalink to this headline">¶</a></h3>
+<p>We have explained how to create a function with  <a class="reference internal" href="#mod-func-cpp"><span class="std std-ref">an arbitrary number of arguments</span></a>.
+We explain now how to call (perform composition) with such function.</p>
+<p>It is as simple as storing all the actual arguments in an array structure, namely, a structure
+of expression nodes (typed <code class="docutils literal notranslate"><span class="pre">Array&lt;const</span> <span class="pre">ExprNode&gt;</span></code>).</p>
+<p>However, when an actual argument is not a formal expression but a numerical constant (data), it is necessary to
+explicitly encapsulate this constant in a expression node. This is what the <code class="docutils literal notranslate"><span class="pre">ExprConstant</span></code> class stands for.</p>
+<p>Here is an example. We create the function <span class="math notranslate nohighlight">\(f:(x,y)\mapsto x+y\)</span> and apply it to the hybrid couple (z,1) where
+z is another variable. We do it in the generic way, using arrays:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+
+	<span class="c1">// formal arguments</span>
+	<span class="n">Array</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">ExprSymbol</span><span class="o">&gt;</span> <span class="n">vars</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+
+	<span class="n">vars</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">x</span><span class="p">);</span>
+	<span class="n">vars</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">y</span><span class="p">);</span>
+
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">vars</span><span class="p">,</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">,</span><span class="s">&quot;f&quot;</span><span class="p">);</span>
+
+	<span class="c1">// actual arguments</span>
+	<span class="k">const</span> <span class="n">ExprSymbol</span><span class="o">&amp;</span> <span class="n">z</span><span class="o">=</span><span class="n">ExprSymbol</span><span class="o">::</span><span class="n">new_</span><span class="p">(</span><span class="s">&quot;z&quot;</span><span class="p">);</span>  <span class="c1">// &lt;=&gt; &quot;Variable z&quot; (but more &quot;safe&quot;)</span>
+	<span class="k">const</span> <span class="n">ExprConstant</span><span class="o">&amp;</span> <span class="n">c</span><span class="o">=</span><span class="n">ExprConstant</span><span class="o">::</span><span class="n">new_scalar</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span>
+
+	<span class="c1">// =============================================</span>
+	<span class="c1">// before release 2.1.6:</span>
+<span class="c1">//	const ExprNode* args[2];</span>
+<span class="c1">//	args[0]=&amp;z;</span>
+<span class="c1">//	args[1]=&amp;c;</span>
+	<span class="c1">// before release 2.1.6:</span>
+
+	<span class="c1">// from release 2.1.6 and subsequents:</span>
+	<span class="n">Array</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">ExprNode</span><span class="o">&gt;</span> <span class="n">args</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">args</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">z</span><span class="p">);</span>
+	<span class="n">args</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">);</span>
+	<span class="c1">// =============================================</span>
+
+	<span class="n">Function</span> <span class="nf">g</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">args</span><span class="p">),</span><span class="s">&quot;g&quot;</span><span class="p">);</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">g</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The display is:</p>
+<p>You can also use this construct with vector/matrix variables and mix functions declared with different style:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	
+	<span class="c1">// Here is a function that performs a matrix-vector multiplication,</span>
+	<span class="c1">// declared in the usual way (with a list of arguments):</span>
+	<span class="n">Variable</span> <span class="nf">R</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">R</span><span class="o">*</span><span class="n">x</span><span class="p">);</span> 
+
+	<span class="c1">// Here is a function declared in the generic way (with an array of symbols)</span>
+	<span class="c1">// that applies the function &#39;f&#39; to the array:</span>
+	<span class="n">Array</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">ExprSymbol</span><span class="o">&gt;</span> <span class="n">vars</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">vars</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">ExprSymbol</span><span class="o">::</span><span class="n">new_</span><span class="p">(</span><span class="s">&quot;R&quot;</span><span class="p">,</span><span class="n">Dim</span><span class="o">::</span><span class="n">matrix</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)));</span> <span class="c1">// note: giving &quot;R&quot; is optional</span>
+	<span class="n">vars</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">ExprSymbol</span><span class="o">::</span><span class="n">new_</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="n">Dim</span><span class="o">::</span><span class="n">col_vec</span><span class="p">(</span><span class="mi">3</span><span class="p">)));</span>
+	
+	<span class="n">Function</span> <span class="nf">g</span><span class="p">(</span><span class="n">vars</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">vars</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">vars</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="s">&quot;g&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="symbolic-differentiation">
+<h3>Symbolic differentiation<a class="headerlink" href="#symbolic-differentiation" title="Permalink to this headline">¶</a></h3>
+<p>Differentiation of a function is another function.
+So symbolic differentiation is obtained via a copy constructor where the copy “mode” is set to the special value <code class="docutils literal notranslate"><span class="pre">Function::DIFF</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="s">&quot;y&quot;</span><span class="p">,</span><span class="s">&quot;z&quot;</span><span class="p">,</span><span class="s">&quot;x*y*z&quot;</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">df</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">Function</span><span class="o">::</span><span class="n">DIFF</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;df=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">df</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Functions</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#what-we-mean-by-variable-and-function">What we mean by “variable” and “function”</a></li>
+<li><a class="reference internal" href="#arguments-versus-variables">Arguments versus variables</a></li>
+<li><a class="reference internal" href="#arguments">Arguments</a><ul>
+<li><a class="reference internal" href="#dimensions-and-ordering">Dimensions and ordering</a></li>
+<li><a class="reference internal" href="#class-name-and-fields">Class name and fields</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#interval-computations">Interval Computations</a><ul>
+<li><a class="reference internal" href="#evaluation-forward-computation">Evaluation (forward computation)</a></li>
+<li><a class="reference internal" href="#backward">Backward</a></li>
+<li><a class="reference internal" href="#gradient">Gradient</a></li>
+<li><a class="reference internal" href="#jacobian-and-hansen-s-matrix">Jacobian and Hansen’s matrix</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-functions-in-c">Creating functions (in C++)</a><ul>
+<li><a class="reference internal" href="#creating-arguments-in-c">Creating arguments (in C++)</a></li>
+<li><a class="reference internal" href="#creating-vector-and-matrix-arguments-in-c">Creating vector and matrix arguments (in C++)</a></li>
+<li><a class="reference internal" href="#renaming-arguments">Renaming arguments</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#functions-with-vector-arguments">Functions with vector arguments</a></li>
+<li><a class="reference internal" href="#vector-valued-functions">Vector-valued functions</a></li>
+<li><a class="reference internal" href="#advanced-examples">Advanced examples</a><ul>
+<li><a class="reference internal" href="#building-dags-directed-acyclic-graphs">Building DAGs (directed acyclic graphs)</a></li>
+<li><a class="reference internal" href="#iterated-sum">Iterated sum</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#renaming-functions">Renaming functions</a></li>
+<li><a class="reference internal" href="#allowed-symbols">Allowed symbols</a></li>
+<li><a class="reference internal" href="#serialization">Serialization</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#operations-on-functions">Operations on Functions</a><ul>
+<li><a class="reference internal" href="#composition">Composition</a></li>
+<li><a class="reference internal" href="#applying-a-function-with-numerous-arguments">Applying a function with numerous arguments</a></li>
+<li><a class="reference internal" href="#symbolic-differentiation">Symbolic differentiation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="interval.html"
+                        title="previous chapter">Interval Computations</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="constraint.html"
+                        title="next chapter">Constraints</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/function.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="constraint.html" title="Constraints"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="interval.html" title="Interval Computations"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

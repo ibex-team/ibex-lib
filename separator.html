@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Separators &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sets" href="set.html" />
+    <link rel="prev" title="Contractors" href="contractor.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="set.html" title="Sets"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="contractor.html" title="Contractors"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="separators">
+<span id="sep"></span><h1>Separators<a class="headerlink" href="#separators" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>A separator is an operator that performs two independent and
+complementary contractions. The separator is associated with
+a set (noted <span class="math notranslate nohighlight">\(\mathcal{S}\)</span>) and the first contraction (called “inner”)
+removes points inside <span class="math notranslate nohighlight">\(\mathcal{S}\)</span>. The second contraction (called
+“outer”) removes points outside S. See <a class="reference internal" href="reference.html#jaulin14"><span class="std std-ref">[Jaulin &amp; Desrochers 2014]</span></a>.</p>
+<p>In concrete terms, given a box <span class="math notranslate nohighlight">\([\mathbf{x}]\)</span>, the separator produces two sub-boxes
+<span class="math notranslate nohighlight">\([\mathbf{x}_{in}]\)</span> and <span class="math notranslate nohighlight">\([\mathbf{x}_{out}]\)</span> that verify:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{l}
+([\mathbf{x}] \setminus [\mathbf{x}_{in}]) \subset S \\
+([\mathbf{x}] \setminus [\mathbf{x}_{out}]) \cap S = \emptyset
+\end{array}\end{split}\]</div>
+<p>For efficiency reasons, the <em>separate(…)</em> function takes
+two input-output arguments, &lt;x_in&gt; and &lt;x_out&gt;, each containing
+initially a copy of the box <span class="math notranslate nohighlight">\([\mathbf{x}]\)</span>.</p>
+<p>The first and more natural way to build a separator is to do it from a set implicitly defined by a constraint.
+See <a class="reference internal" href="#sep-ctr"><span class="std std-ref">Separator from a constraint</span></a>.</p>
+<p>Since a separator can be viewed a as pair of contractors, another natural way to build a separator is from two complementary contractors.
+See <a class="reference internal" href="#sep-ctc-pair"><span class="std std-ref">Separator from complementary contractors</span></a>.</p>
+<p>A separator is however not necessarily built this way.
+A separator can also be built from a contractor and a predicate. In this case, the contractor is assumed to work with respect to the boundary of a set (that is, it removes both inner and outer points) and the predicate is assumed to state if a given box is either inside, outside or crossing the boundary of the same set. See <a class="reference internal" href="#sep-boundary"><span class="std std-ref">Boundary-Based Separator</span></a>.</p>
+<div class="section" id="separator-from-a-constraint">
+<span id="sep-ctr"></span><h3>Separator from a constraint<a class="headerlink" href="#separator-from-a-constraint" title="Permalink to this headline">¶</a></h3>
+<p>When the set <span class="math notranslate nohighlight">\(\mathcal{S}\)</span> corresponds to an inequality f(x)&lt;0, a separator with respect to the set <span class="math notranslate nohighlight">\(\mathcal{S}\)</span> can therefore be automatically derived using forward / backward techniques for both contractions. This is what the <code class="docutils literal notranslate"><span class="pre">SepFwdBwd</span></code> class stands for.
+The outer (resp. inner) contractor is simply a forward-backward with respect to f&lt;0 (resp. f&gt;=0).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="c1">// Define the function</span>
+  <span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span> <span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="s">&quot;x - y&quot;</span><span class="p">);</span>
+
+  <span class="c1">// Build the separator for the set X = {x, y | x - y &lt; 0}</span>
+  <span class="n">SepFwdBwd</span> <span class="nf">s</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">LT</span><span class="p">);</span>
+
+  <span class="c1">// Note: in a similar way, it is possible to define the separator</span>
+  <span class="c1">// for the complementary set  :  X = {x, y | x - y &gt;= 0}</span>
+  <span class="c1">//SepFwdBwd s_compl(f, GEQ);</span>
+
+  <span class="kt">double</span> <span class="n">_box</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">}};</span>
+  <span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">_box</span><span class="p">);</span>
+  <span class="n">IntervalVector</span> <span class="n">x_in</span><span class="o">=</span><span class="n">box</span><span class="p">;</span>
+  <span class="n">IntervalVector</span> <span class="n">x_out</span><span class="o">=</span><span class="n">box</span><span class="p">;</span>
+
+  <span class="n">s</span><span class="p">.</span><span class="n">separate</span><span class="p">(</span><span class="n">x_in</span><span class="p">,</span><span class="n">x_out</span><span class="p">);</span>
+
+  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;result of inner contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">x_in</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;result of outer contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">x_out</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The result is:</p>
+</div>
+<div class="section" id="separator-from-complementary-contractors">
+<span id="sep-ctc-pair"></span><h3>Separator from complementary contractors<a class="headerlink" href="#separator-from-complementary-contractors" title="Permalink to this headline">¶</a></h3>
+<p>If two complementary contractors <span class="math notranslate nohighlight">\(\mathcal{C}_{in}\)</span> and  <span class="math notranslate nohighlight">\(\mathcal{C}_{out}\)</span>
+are available, the separator can build using the <code class="docutils literal notranslate"><span class="pre">SepCtcPair</span></code> class.</p>
+<p><strong>(to be completed)</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Ctc</span> <span class="n">c_in</span> <span class="o">=</span> <span class="p">...</span>
+<span class="n">Ctc</span> <span class="n">c_out</span> <span class="o">=</span> <span class="p">...</span>
+<span class="c1">// Build a separator from two complementary contractors</span>
+<span class="n">SepCtcPair</span> <span class="n">s</span><span class="p">(</span><span class="n">c_in</span><span class="p">,</span> <span class="n">c_out</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="boundary-based-separator">
+<span id="sep-boundary"></span><h3>Boundary-Based Separator<a class="headerlink" href="#boundary-based-separator" title="Permalink to this headline">¶</a></h3>
+<p>Sometimes, we only have contractors with respect to the boundary of a set <span class="math notranslate nohighlight">\(\mathcal{S}\)</span>. Isolating the inner and the outer contractor is not possible, or not easy. It is still possible to build a separator in this case, providing that we can also test whether a point belongs to the set or not.</p>
+<p>Let us consider a contractor C w.r.t. the boundary of a set <span class="math notranslate nohighlight">\(\mathcal{S}\)</span>. The main idea behind the separator is, first, to contract the input box using C and, second, to test for each box in <span class="math notranslate nohighlight">\(\neg C\)</span> if it belongs to <span class="math notranslate nohighlight">\(\mathcal{S}\)</span> or not.</p>
+<p>The test is performed for a given box by picking randomly one point and calling a <em>predicate</em>. A predicate is an object of a class extending <code class="docutils literal notranslate"><span class="pre">Pdc</span></code>. It must implements a method <code class="docutils literal notranslate"><span class="pre">test(IntervalVector&amp;)</span></code> that returns a boolean interval, that is, either <code class="docutils literal notranslate"><span class="pre">YES</span></code>, <code class="docutils literal notranslate"><span class="pre">NO</span></code> or <code class="docutils literal notranslate"><span class="pre">MAYBE</span></code> (see <code class="docutils literal notranslate"><span class="pre">BoolInterval</span></code>). In the case of a separator, the predicate must be an operator T such that:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{cccl}
+        T: &amp; \mathbb{IR}^n &amp; \longrightarrow &amp; \{yes, no, maybe\}\\
+        &amp;\mathbf{[x]} &amp; \longmapsto &amp;
+                \left\{
+                        \begin{array}{ll}
+                                yes &amp; \text{ if } \mathbf{[x]} \subseteq \mathcal{S} \\
+                                no &amp; \text{ if } \mathbf{[x]}\cap \mathcal{S}=\emptyset \\
+                                maybe &amp; \text{otherwise}
+                        \end{array}
+                \right.
+\end{array}\end{split}\]</div>
+<p>A separator is built from a contractor and a predicate using the <code class="docutils literal notranslate"><span class="pre">SepBoundaryCtc</span></code> class.</p>
+<p><strong>Note:</strong> the predicate is called by <code class="docutils literal notranslate"><span class="pre">SepBoundaryCtc</span></code> only with points (degenerated boxes) but the interface for <code class="docutils literal notranslate"><span class="pre">Pdc</span></code> has been made to deal with a more general situation.</p>
+<p>The <a class="reference internal" href="#sep-polygon"><span class="std std-ref">separator for the constraint “points in polygon”</span></a> is an illustraction of this type of separator.</p>
+<p>As an illustration of the concept, we build here a separator for an inequality using <code class="docutils literal notranslate"><span class="pre">SepBoundaryCtc</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="c1">// Define the function</span>
+  <span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span> <span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="s">&quot;x - y&quot;</span><span class="p">);</span>
+
+  <span class="c1">// Build a contractor for the boundary</span>
+  <span class="n">CtcFwdBwd</span> <span class="nf">c</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">EQ</span><span class="p">);</span>
+
+  <span class="c1">// Build a predicate for the inside</span>
+  <span class="n">PdcFwdBwd</span> <span class="nf">p</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">LEQ</span><span class="p">);</span>
+
+  <span class="c1">// Build the separator for the set X = {x, y | x - y &lt; 0}</span>
+  <span class="n">SepBoundaryCtc</span> <span class="nf">s</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">p</span><span class="p">);</span>
+
+  <span class="kt">double</span> <span class="n">_box</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">},{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">}};</span>
+  <span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">_box</span><span class="p">);</span>
+  <span class="n">IntervalVector</span> <span class="n">x_in</span><span class="o">=</span><span class="n">box</span><span class="p">;</span>
+  <span class="n">IntervalVector</span> <span class="n">x_out</span><span class="o">=</span><span class="n">box</span><span class="p">;</span>
+
+  <span class="n">s</span><span class="p">.</span><span class="n">separate</span><span class="p">(</span><span class="n">x_in</span><span class="p">,</span><span class="n">x_out</span><span class="p">);</span>
+
+  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;result of inner contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">x_in</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;result of outer contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">x_out</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The result is:</p>
+</div>
+</div>
+<div class="section" id="separator-algebra">
+<h2>Separator Algebra<a class="headerlink" href="#separator-algebra" title="Permalink to this headline">¶</a></h2>
+<p>The Separator algebra is a direct extension of the set algebra.
+E.g., the intersection of two separators w.r.t <span class="math notranslate nohighlight">\(\mathcal{S}_1\)</span> and <span class="math notranslate nohighlight">\(\mathcal{S}_2\)</span>
+is a separator w.r.t. <span class="math notranslate nohighlight">\(\mathcal{S}_1\cap\mathcal{S}_2\)</span>.</p>
+<p>Here are the available operations and the way they are performed.
+Separators are viewed as pair of contractors denoted <span class="math notranslate nohighlight">\(\mathcal{S}_i = (\mathcal{S}_i^{in}, \mathcal{S}_i^{out})\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{cccc}
+\overline{\mathcal{S}} &amp; = &amp; ( \mathcal{S}^{\text{out}},\mathcal{S}^{\text{in}} ) &amp; \text{(Negation)} \\
+\mathcal{S}_{1}\cap \mathcal{S}_{2} &amp; = &amp; ( \mathcal{S}_{1}^{\text{in}%
+}\cup \mathcal{S}_{2}^{\text{in}},\mathcal{S}_{1}^{\text{out}}\cap \mathcal{S%
+}_{2}^{\text{out}})  &amp; \text{(intersection)} \\
+\mathcal{S}_{1}\cup \mathcal{S}_{2} &amp; = &amp; ( \mathcal{S}_{1}^{\text{in}%
+}\cap \mathcal{S}_{2}^{\text{in}},\mathcal{S}_{1}^{\text{out}}\cup \mathcal{S%
+}_{2}^{\text{out}})  &amp; \text{(union)} \\
+\bigcap\limits^{\{q\}}\mathcal{S}_{i} &amp; = &amp; (
+\bigcap\limits^{\{m-q-1\}}\mathcal{S}_{i}^{\text{in}},\bigcap\limits^{\{q%
+\}}\mathcal{S}_{i}^{\text{out}})  &amp; \text{(relaxed intersection)} \\
+\mathcal{S}_{1}\setminus \mathcal{S}_{2} &amp; = &amp; \mathcal{S}_{1}\cap
+\overline{\mathcal{S}_{2}}. &amp; \text{(difference)}%
+\end{array}\end{split}\]</div>
+<p>The following example shows how to combine separator for finding the union and intersection of 3 rings.</p>
+<p><strong>(to be completed)</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// define the center of circle</span>
+<span class="kt">double</span> <span class="n">ax</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">};</span>
+<span class="kt">double</span> <span class="n">ay</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">};</span>
+<span class="kt">double</span> <span class="n">dist</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">};</span>
+
+
+ <span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+
+ <span class="c1">// Rings definitions</span>
+ <span class="n">Function</span> <span class="nf">f1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">ay</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span>
+ <span class="n">SepFwdBwd</span> <span class="nf">S1</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span><span class="n">dist</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+
+ <span class="n">Function</span> <span class="nf">f2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">ay</span><span class="p">[</span><span class="mi">1</span><span class="p">])));</span>
+ <span class="n">SepFwdBwd</span> <span class="nf">S2</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span><span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+
+ <span class="n">Function</span> <span class="nf">f3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">ay</span><span class="p">[</span><span class="mi">2</span><span class="p">])));</span>
+ <span class="n">SepFwdBwd</span> <span class="nf">S3</span><span class="p">(</span><span class="n">f3</span><span class="p">,</span><span class="n">dist</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+
+ <span class="c1">// Negation of separator</span>
+ <span class="n">SepNot</span> <span class="nf">S4</span><span class="p">(</span><span class="n">S3</span><span class="p">);</span>
+
+ <span class="c1">// union of separators</span>
+ <span class="n">Array</span><span class="o">&lt;</span><span class="n">Sep</span><span class="o">&gt;</span> <span class="n">AS</span><span class="p">(</span><span class="n">S1</span><span class="p">,</span><span class="n">S2</span><span class="p">,</span><span class="n">S3</span><span class="p">);</span>
+ <span class="n">SepUnion</span> <span class="n">SUL</span> <span class="o">=</span> <span class="n">SepUnion</span><span class="p">(</span><span class="n">AS</span><span class="p">);</span>                       <span class="c1">// Union from an array of separators</span>
+ <span class="n">SepUnion</span> <span class="n">SU2</span> <span class="o">=</span> <span class="n">SepUnion</span><span class="p">(</span><span class="n">S1</span><span class="p">,</span><span class="n">S2</span><span class="p">);</span>            <span class="c1">// Union from two separators</span>
+ <span class="n">SepUnion</span> <span class="n">SU3</span> <span class="o">=</span> <span class="n">SepUnion</span><span class="p">(</span><span class="n">S1</span><span class="p">,</span><span class="n">S2</span><span class="p">,</span><span class="n">S3</span><span class="p">);</span>
+
+ <span class="c1">// intersection of separators</span>
+ <span class="n">SepInter</span> <span class="n">SIL</span> <span class="o">=</span> <span class="n">SepInter</span><span class="p">(</span><span class="n">AS</span><span class="p">);</span>
+ <span class="n">SepInter</span> <span class="n">SI2</span> <span class="o">=</span> <span class="n">SepInter</span><span class="p">(</span><span class="n">S1</span><span class="p">,</span><span class="n">S2</span><span class="p">);</span>
+ <span class="n">SepInter</span> <span class="n">SI3</span> <span class="o">=</span> <span class="n">SepInter</span><span class="p">(</span><span class="n">S1</span><span class="p">,</span><span class="n">S2</span><span class="p">,</span><span class="n">S4</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="separator-for-a-polygon">
+<h2>Separator for a Polygon<a class="headerlink" href="#separator-for-a-polygon" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This separator is avalaible in the ENSTA Robotics plugin (–with-ensta-robotics).</p>
+</div>
+<p><strong>(under construction)</strong></p>
+<div class="section" id="contractor-for-a-segment">
+<h3>Contractor for a Segment<a class="headerlink" href="#contractor-for-a-segment" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">CtcSegment</span></code> class allows to contract a box w.r.t. a segment (in the plane), that is, w.r.t. to the constraint</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{x}\in\left[\mathbf{a},\mathbf{b}\right]\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{a}\in\mathbb{R}^2,\mathbf{b}\in\mathbb{R}^2\)</span>.</p>
+<p>The contractor works by consider the following equivalent constraints :</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left\{
+\begin{array}{c}
+\det \left( \mathbf{b} - \mathbf{a}, \mathbf{a} - \mathbf{x}  \right) =0 \\
+\min \left( \mathbf{a},\mathbf{b}\right) \leq \mathbf{x}\leq \max \left(
+\mathbf{a},\mathbf{b}\right) .%
+\end{array}%
+\right.\end{split}\]</div>
+<p>the <em>min</em> and the <em>max</em> being interpreted componentwise.</p>
+<p><em>Remark</em>: The first constraint is an equality <span class="math notranslate nohighlight">\(\mathbf{f}(x) = 0\)</span> and the associated contractor will contract only on the boundary. We only have an approximation of <span class="math notranslate nohighlight">\(\mathbb{X}^+\)</span> because there is no inner part.</p>
+</div>
+<div class="section" id="point-inside-a-polygon">
+<span id="sep-polygon"></span><h3>Point Inside a Polygon<a class="headerlink" href="#point-inside-a-polygon" title="Permalink to this headline">¶</a></h3>
+<p>We consider an oriented polygon <span class="math notranslate nohighlight">\(\mathcal{P}\)</span>, convex or not, without self interaction, composed of N segments. The boundary <span class="math notranslate nohighlight">\(\partial\mathcal{P}\)</span> of the polygon satisfies the following constraint:</p>
+<div class="math notranslate nohighlight">
+\[\partial\mathcal{P} = \left\{ \mathbf{m} \in \mathbb{R}^2 ,\
+        \exists i \in [\![1,N]\!], \mathbf{m} \in \left[\mathbf{a}_i,
+        \mathbf{b}_i \right]   \right\}\]</div>
+<p>Let’s us take  <span class="math notranslate nohighlight">\(\mathcal{C}_{a_i,b_i}\)</span> as a contractor for the segment  <span class="math notranslate nohighlight">\(\left[\mathbf{a_i},\mathbf{b_i}\right]\)</span>, the contractor for  <span class="math notranslate nohighlight">\(\partial\mathcal{P}\)</span> is:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{C}_{\partial\mathcal{P}} = \bigcup\limits^{N}_{i=1} \mathcal{C}_{a_i,b_i}\]</div>
+<p><em>Remark</em>: Because the union of minimal contractor is minimal, <span class="math notranslate nohighlight">\(\mathcal{C}_{\partial\mathcal{P}}\)</span> is a minimal contractor for the border of the polygon <span class="math notranslate nohighlight">\(\mathcal{P}\)</span>.</p>
+<p>To identify which part is inside and outside we use a test based on the <em>Winding Number</em> which represents the total number of times that curve travels counterclockwise around the point. The winding number depends on the orientation of the curve, and is negative if the curve travels around the point clockwise.
+Let us take a polygon <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> with vertices’s <span class="math notranslate nohighlight">\(V_1, V_2, \dots, V_n = V_1\)</span> and <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> a point not on the border of P. The Winding Number is defined by:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{wn}(\mathbf{m},P) = \frac{1}{2\pi}\sum_{i=1}^{n}\theta_i = \frac{1}{2\pi}\sum_{i=1}^{n} \arccos\left(\frac{(V_i -       \mathbf{m}).(V_{i+1}-\mathbf{m})}{\| (V_i - \mathbf{m})\| \|(V_{i+1} - \mathbf{m})\|}\right)\]</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 53%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><em>m is inside P</em></p>
+<a class="reference internal image-reference" href="_images/T_PointInPoly.png"><img alt="_images/T_PointInPoly.png" src="_images/T_PointInPoly.png" style="width: 300px;" /></a>
+</td>
+<td><p><em>m is outside P</em></p>
+<a class="reference internal image-reference" href="_images/T_PointOutPoly.png"><img alt="_images/T_PointOutPoly.png" src="_images/T_PointOutPoly.png" style="width: 300px;" /></a>
+</td>
+</tr>
+</tbody>
+</table>
+<p>So, if m is outside P we will have <span class="math notranslate nohighlight">\(\mathbf{wn}(\mathbf{m},P) = 0\)</span>, otherwise if <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> is inside, <span class="math notranslate nohighlight">\(\mathbf{wn}(\mathbf{m},P) = 1\)</span>.</p>
+<p>The class implementing a separator for a polygon is <code class="docutils literal notranslate"><span class="pre">SepPolygon</span></code>.</p>
+<p><strong>(to be completed)</strong></p>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<p>Let <span class="math notranslate nohighlight">\(\mathcal{S}_P\)</span> be the polygon described in figure …</p>
+<p>The following snippet shows how to build the associated separator and make operations with:</p>
+<p><strong>(to be completed)</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Polygone convex</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">walls_xa</span><span class="p">,</span><span class="n">walls_xb</span><span class="p">,</span><span class="n">walls_ya</span><span class="p">,</span><span class="n">walls_yb</span><span class="p">;</span>
+
+<span class="n">walls_xa</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>  <span class="n">walls_ya</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">);</span>   <span class="n">walls_xb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>  <span class="n">walls_yb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">9</span><span class="p">);</span>
+<span class="n">walls_xa</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>  <span class="n">walls_ya</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">9</span><span class="p">);</span>   <span class="n">walls_xb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>  <span class="n">walls_yb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+<span class="n">walls_xa</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>  <span class="n">walls_ya</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>    <span class="n">walls_xb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">);</span> <span class="n">walls_yb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
+<span class="n">walls_xa</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">);</span> <span class="n">walls_ya</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>    <span class="n">walls_xb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">8</span><span class="p">);</span> <span class="n">walls_yb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">);</span>
+<span class="n">walls_xa</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">8</span><span class="p">);</span> <span class="n">walls_ya</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">);</span>   <span class="n">walls_xb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>  <span class="n">walls_yb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">);</span>
+
+<span class="n">SepPolygon</span> <span class="nf">S1</span><span class="p">(</span><span class="n">walls_xa</span><span class="p">,</span> <span class="n">walls_ya</span><span class="p">,</span> <span class="n">walls_xb</span><span class="p">,</span> <span class="n">walls_yb</span><span class="p">);</span>
+
+<span class="c1">// Make a hole inside the first one</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">walls_xa2</span><span class="p">,</span><span class="n">walls_xb2</span><span class="p">,</span><span class="n">walls_ya2</span><span class="p">,</span><span class="n">walls_yb2</span><span class="p">;</span>
+<span class="n">walls_xa2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">);</span> <span class="n">walls_ya2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>   <span class="n">walls_xb2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mf">3.5</span><span class="p">);</span>  <span class="n">walls_yb2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">walls_xa2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mf">3.5</span><span class="p">);</span> <span class="n">walls_ya2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>   <span class="n">walls_xb2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>  <span class="n">walls_yb2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">);</span>
+<span class="n">walls_xa2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span> <span class="n">walls_ya2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">);</span>   <span class="n">walls_xb2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">);</span>  <span class="n">walls_yb2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">);</span>
+<span class="n">walls_xa2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">);</span> <span class="n">walls_ya2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">);</span>   <span class="n">walls_xb2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">);</span>  <span class="n">walls_yb2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+
+<span class="n">SepPolygon</span> <span class="nf">S2</span><span class="p">(</span><span class="n">walls_xa2</span><span class="p">,</span> <span class="n">walls_ya2</span><span class="p">,</span> <span class="n">walls_xb2</span><span class="p">,</span> <span class="n">walls_yb2</span><span class="p">);</span>
+<span class="n">SepNot</span> <span class="nf">S3</span><span class="p">(</span><span class="n">S2</span><span class="p">);</span>
+
+<span class="c1">// Separator for the polygon with a hole in it</span>
+<span class="n">SepInter</span> <span class="nf">S</span><span class="p">(</span><span class="n">S1</span><span class="p">,</span> <span class="n">S3</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Using a paver, the previous separator will produce the following figure :</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/Poly.png"><img alt="_images/Poly.png" src="_images/Poly.png" style="width: 400px;" /></a>
+<p class="caption"><span class="caption-text"><em>Point inside the polygon are in dark gray.</em></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Separators</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#separator-from-a-constraint">Separator from a constraint</a></li>
+<li><a class="reference internal" href="#separator-from-complementary-contractors">Separator from complementary contractors</a></li>
+<li><a class="reference internal" href="#boundary-based-separator">Boundary-Based Separator</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#separator-algebra">Separator Algebra</a></li>
+<li><a class="reference internal" href="#separator-for-a-polygon">Separator for a Polygon</a><ul>
+<li><a class="reference internal" href="#contractor-for-a-segment">Contractor for a Segment</a></li>
+<li><a class="reference internal" href="#point-inside-a-polygon">Point Inside a Polygon</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="contractor.html"
+                        title="previous chapter">Contractors</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="set.html"
+                        title="next chapter">Sets</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/separator.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="set.html" title="Sets"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="contractor.html" title="Contractors"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

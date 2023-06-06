@@ -1,0 +1,916 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Tutorial &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Interval Computations" href="interval.html" />
+    <link rel="prev" title="Installation with Cmake (experimental)" href="install-cmake.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="interval.html" title="Interval Computations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="install-cmake.html" title="Installation with Cmake (experimental)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorial">
+<span id="tuto"></span><h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This tutorial is for the Ibex core library.
+If you just want to solve <strong>equations</strong> or an <strong>optimization problem</strong>,
+jump to the documentation of the <a class="reference internal" href="solver.html#solver"><span class="std std-ref">IbexSolve</span></a> or <a class="reference internal" href="optim.html#optim"><span class="std std-ref">IbexOpt</span></a> plugins.</p>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="section" id="basic-interval-computations">
+<h2>Basic Interval computations<a class="headerlink" href="#basic-interval-computations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="start-a-program">
+<h3>Start a program<a class="headerlink" href="#start-a-program" title="Permalink to this headline">¶</a></h3>
+<p>To write a program with Ibex, use the following canvas:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;ibex.h&quot;</span><span class="cp"></span>
+
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">ibex</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+
+<span class="c1">// write your own code here</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>You can execute by yourself all the code snippets of this tutorial, using this canvas.</p>
+<p>To compile a program, the easiest way is to copy-paste the <code class="docutils literal notranslate"><span class="pre">makefile</span></code> of the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> subfolder of Ibex.
+See also <a class="reference internal" href="install-cmake.html#install-compiling-running"><span class="std std-ref">Compiling a Test Program</span></a>.</p>
+</div>
+<div class="section" id="creating-intervals">
+<h3>Creating intervals<a class="headerlink" href="#creating-intervals" title="Permalink to this headline">¶</a></h3>
+<p>Here are examples of intervals</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Interval</span> <span class="nf">x</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>                <span class="c1">// create the interval [1,2]</span>
+	<span class="n">Interval</span> <span class="n">y</span><span class="p">;</span>                     <span class="c1">// create the interval (-oo,oo)</span>
+	<span class="n">Interval</span> <span class="n">z</span><span class="o">=</span><span class="n">Interval</span><span class="o">::</span><span class="n">all_reals</span><span class="p">();</span> <span class="c1">// create the interval (-oo,oo)</span>
+	<span class="n">Interval</span> <span class="n">w</span><span class="o">=</span><span class="n">Interval</span><span class="o">::</span><span class="n">empty_set</span><span class="p">();</span> <span class="c1">// create the empty interval</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="operation-between-intervals">
+<h3>Operation between intervals<a class="headerlink" href="#operation-between-intervals" title="Permalink to this headline">¶</a></h3>
+<p>C++ operator overloading allows you to calculate the sum of two
+intervals by using directly the “+” symbol:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// - create the inteval x=[1,2] and y=[3,4]</span>
+	<span class="c1">// - calculate the interval sum x+y</span>
+	<span class="n">Interval</span> <span class="nf">x</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Interval</span> <span class="nf">y</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;x+y=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="c1">// display [4,6]</span>
+</pre></div>
+</div>
+<p>You can use the other operators similarly (<code class="docutils literal notranslate"><span class="pre">-</span></code>, <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">/</span></code>).</p>
+</div>
+<div class="section" id="applying-a-function-to-an-interval">
+<h3>Applying a function to an interval<a class="headerlink" href="#applying-a-function-to-an-interval" title="Permalink to this headline">¶</a></h3>
+<p>All the elementary functions can be applied to intervals, and composed in an arbitrarly way:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Interval</span> <span class="nf">x</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+	<span class="n">Interval</span> <span class="n">y</span><span class="o">=</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span> <span class="c1">//y is [1,7.389...]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="interval-vectors">
+<h3>Interval vectors<a class="headerlink" href="#interval-vectors" title="Permalink to this headline">¶</a></h3>
+<p>You can create an interval vector by using an intermediate array of n*2 <code class="docutils literal notranslate"><span class="pre">double</span></code>, representing the lower and
+uppoer bounds of each components.
+The first argument of the constructor of <code class="docutils literal notranslate"><span class="pre">IntervalVector</span> <span class="pre">in</span> <span class="pre">this</span> <span class="pre">case</span> <span class="pre">is</span> <span class="pre">the</span> <span class="pre">dimension</span> <span class="pre">(here,</span> <span class="pre">3),</span>
+<span class="pre">the</span> <span class="pre">second</span> <span class="pre">the</span> <span class="pre">array</span> <span class="pre">of</span> <span class="pre">``double</span></code>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="kt">double</span> <span class="n">_x</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">},{</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">}};</span>
+	<span class="n">IntervalVector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">_x</span><span class="p">);</span> <span class="c1">//create ([0,1],[2,3],[4,5])</span>
+</pre></div>
+</div>
+<p>You can also create an interval vector by duplicating a given interval or simply create the empty interval vector.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">IntervalVector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>         <span class="c1">//create ([1,2],[1,2],[1,2])</span>
+	<span class="n">IntervalVector</span> <span class="n">y</span><span class="o">=</span><span class="n">IntervalVector</span><span class="o">::</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span> <span class="c1">//create a vector of 3 empty intervals</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="interval-matrices">
+<h3>Interval matrices<a class="headerlink" href="#interval-matrices" title="Permalink to this headline">¶</a></h3>
+<p>Interval matrices can be created in a similar way. However, since we cannot build 3-dimensional arrays in C++,
+all the bounds must be set in a single n*2 array representing the matrix row by row (and n is the total number of entries
+of the matrix). The two first arguments of the constructor are the number of rows and columns respectively. The last one
+is the array of <code class="docutils literal notranslate"><span class="pre">double</span></code>.
+Here is an example of a 3x3 matrix:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="kt">double</span> <span class="n">_M</span><span class="p">[</span><span class="mi">9</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+	                 <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},</span>
+	                 <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">}};</span>
+	<span class="n">IntervalMatrix</span> <span class="nf">M</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">_M</span><span class="p">);</span>
+	<span class="c1">//create (([0,1] [0,1] [0,1]) ; ([0,2] [0,2] [0,2]) ; ([0,3] [0,3] [0,3]))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="operations-between-matrices-and-vectors">
+<h3>Operations between matrices and vectors<a class="headerlink" href="#operations-between-matrices-and-vectors" title="Permalink to this headline">¶</a></h3>
+<p>You can use the usual operations of linear algebra between matrices and vectors (<em>sum of vectors,
+transpose of vectors, sum of matrices, left multiplication of a matrix by a scalar, etc.</em>).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// ------------------------------------------------</span>
+	<span class="c1">// Vector/matrix interval arithmetic</span>
+	<span class="c1">// - create an interval vector x</span>
+	<span class="c1">// - create an interval matrix M</span>
+	<span class="c1">// - calculate M*x</span>
+	<span class="c1">// - calculate M&#39;*x, where M&#39; is the transpose of M</span>
+	<span class="c1">// ------------------------------------------------</span>
+
+	<span class="kt">double</span> <span class="n">_x</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">},{</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">}};</span>
+	<span class="n">IntervalVector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">_x</span><span class="p">);</span>
+
+	<span class="kt">double</span> <span class="n">_M</span><span class="p">[</span><span class="mi">9</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="c1">// 3*3 matrix of intervals</span>
+	                 <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},</span>
+	                 <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">}};</span>
+
+	<span class="n">IntervalMatrix</span> <span class="nf">M</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">_M</span><span class="p">);</span>
+	<span class="n">IntervalVector</span> <span class="n">y</span><span class="o">=</span><span class="n">M</span><span class="o">*</span><span class="n">x</span><span class="p">;</span>            <span class="c1">// matrix-vector multiplication</span>
+	<span class="n">IntervalMatrix</span> <span class="n">N</span><span class="o">=</span><span class="n">M</span><span class="p">.</span><span class="n">transpose</span><span class="p">();</span>  <span class="c1">// N is M^T</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="midpoint-radius-magnitude-etc">
+<h3>Midpoint, radius, magnitude, etc.<a class="headerlink" href="#midpoint-radius-magnitude-etc" title="Permalink to this headline">¶</a></h3>
+<p>These usual properties can be obtained for intervals. They are also all extended to interval vectors or matrices
+componentwise. For instance, the radius of an interval matrix is the (real) matrix of the radii.</p>
+<p>As a consequence, Ibex also has classes to handle real (versus interval) vectors and matrices.
+Mathematical Operations (like the sum) can also be applied to these objects but, of course, using this times
+floating-point arithmetic (not interval).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// ------------------------------------------------</span>
+	<span class="c1">// Mixing real/interval vector/matrices</span>
+	<span class="c1">// - calculate the magnitude of an interval matrix (a real matrix)</span>
+	<span class="c1">// - calculate the midvector of an interval vector (a real vector)</span>
+	<span class="c1">// - multiply the latters (floating point arithmetic)</span>
+	<span class="c1">// ------------------------------------------------</span>
+
+	<span class="kt">double</span> <span class="n">_x</span><span class="p">[][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">}};</span>
+	<span class="n">IntervalVector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">_x</span><span class="p">);</span>
+
+	<span class="kt">double</span> <span class="n">_M</span><span class="p">[</span><span class="mi">9</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+	                 <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},</span>
+	                 <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">}};</span>
+	<span class="n">IntervalMatrix</span> <span class="nf">M</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">_M</span><span class="p">);</span>
+
+	<span class="n">Matrix</span> <span class="n">M2</span><span class="o">=</span><span class="n">M</span><span class="p">.</span><span class="n">mag</span><span class="p">();</span>   <span class="c1">// the matrix of magnitudes</span>
+	<span class="n">Vector</span> <span class="n">x2</span><span class="o">=</span><span class="n">x</span><span class="p">.</span><span class="n">mid</span><span class="p">();</span>   <span class="c1">// the vector of midpoints</span>
+	<span class="n">Vector</span> <span class="n">y</span><span class="o">=</span><span class="n">M2</span><span class="o">*</span><span class="n">x2</span><span class="p">;</span>      <span class="c1">// a matrix-vector product (subject to roundoff errors)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="creating-functions">
+<h3>Creating functions<a class="headerlink" href="#creating-functions" title="Permalink to this headline">¶</a></h3>
+<p>The easiest way to create a function is with a string directly:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="s">&quot;y&quot;</span><span class="p">,</span><span class="s">&quot;sin(x+y)&quot;)</span><span class="p">;</span> <span class="c1">// create the function (x,y)-&gt;sin(x+y)</span>
+</pre></div>
+</div>
+<p>However, this has some limitations (see <a class="reference internal" href="function.html#mod-func-ex"><span class="std std-ref">Advanced examples</span></a>).
+Another (more flexible) way to create function is using C++ operator overloading.
+The only difference is that you must have to first build <em>variables</em>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="nf">y</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">));</span> <span class="c1">// create the function (x,y)-&gt;sin(x+y)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="constants-inside-functions">
+<h3>Constants inside functions<a class="headerlink" href="#constants-inside-functions" title="Permalink to this headline">¶</a></h3>
+<p>You can insert interval constants in the expresion of a function, even in C++-style.
+For instance, if you want to create the function <span class="math notranslate nohighlight">\(x\mapsto\sin(2x)\)</span>, just write:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">));</span> <span class="c1">// create the function (x,y)-&gt;sin(2*x)</span>
+</pre></div>
+</div>
+<p>Assume now that the function to be created is <span class="math notranslate nohighlight">\(x\mapsto\sin(\pi x)\)</span>. It is still possible to
+use a <code class="docutils literal notranslate"><span class="pre">double</span></code> representing approximately <span class="math notranslate nohighlight">\(\pi\)</span>; but to keep
+numerical reliability, it is required in this case to use an interval constant enclosing
+<span class="math notranslate nohighlight">\(\pi\)</span>. Next function must be seen as a “thick” function that rigorously encloses <span class="math notranslate nohighlight">\(\sin(\pi x)\)</span>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Interval</span> <span class="nf">pi</span><span class="p">(</span><span class="mf">3.1415</span><span class="p">,</span><span class="mf">3.1416</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">));</span> <span class="c1">// create the function (x,y)-&gt;sin(π*x)</span>
+</pre></div>
+</div>
+<p>Or with strings directly:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="s">&quot;sin([3.1415,3.1416]*x)&quot;)</span><span class="p">;</span> <span class="c1">// create the function (x,y)-&gt;sin(π*x)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="functions-with-vector-arguments">
+<h3>Functions with vector arguments<a class="headerlink" href="#functions-with-vector-arguments" title="Permalink to this headline">¶</a></h3>
+<p>Arguments of a function are not necessarily scalar variables. They can also be vectors
+or matrices. In the following example, we build the distance function:
+<span class="math notranslate nohighlight">\(dist:(a,b)\mapsto\| a-b \|\)</span>
+where a and b are 2-dimensional vectors.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="nf">a</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="nf">b</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])));</span>
+</pre></div>
+</div>
+<p>We can also create the same function with string directly (note that the syntax quite <a class="reference internal" href="minibex.html#mod-minibex-cpp"><span class="std std-ref">differs</span></a>).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="s">&quot;a[2]&quot;</span><span class="p">,</span><span class="s">&quot;b[2]&quot;</span><span class="p">,</span><span class="s">&quot;sqrt((a(1)</span><span class="o">-</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">a</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="s">&quot;)</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><em>Note</em>: <a class="reference internal" href="#tuto-func-eval"><span class="std std-ref">Evaluation</span></a> of a thick function will necessarily result in an interval with non-null diameter, even if the argument is reduced to a point.</p>
+</div>
+<div class="section" id="composing-functions">
+<span id="tuto-func-compo"></span><h3>Composing functions<a class="headerlink" href="#composing-functions" title="Permalink to this headline">¶</a></h3>
+<p>You can compose functions to build new functions. We build here the function that maps a vector x
+to its distance with a constant point (1,2). To this end, we first define a generic distance function
+dist(a,b) as above.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="cm">/* create the distance function with 2 arguments */</span>
+	<span class="n">Variable</span> <span class="nf">a</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="nf">b</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])));</span>
+
+	<span class="cm">/* create the constant vector pt=(1,2) */</span>
+	<span class="n">Vector</span> <span class="nf">pt</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+	<span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+
+	<span class="cm">/* create the function x-&gt;dist(x,pt). */</span>
+	<span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">pt</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>The display is as folllows. Note that constant values like 0 are automatically replaced
+by degenerated intervals (like [0,0]):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span><span class="p">:(</span><span class="n">x</span><span class="p">)</span><span class="o">-&gt;</span><span class="p">(</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,(</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">));</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,(</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="vector-valued-functions">
+<span id="tuto-func-vec-value"></span><h3>Vector-valued functions<a class="headerlink" href="#vector-valued-functions" title="Permalink to this headline">¶</a></h3>
+<p>Let us start with a basic example: the function <span class="math notranslate nohighlight">\(x\mapsto(x-1,x+1)\)</span>.</p>
+<p>With strings:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="s">&quot;(x-1,x+1)&quot;)</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>With operator overloading:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">));</span>
+</pre></div>
+</div>
+<p><em>Note:</em> The <code class="docutils literal notranslate"><span class="pre">Return</span></code> keyword is only necessary when the output of a function is a vector (or a matrix).</p>
+<p>Now, in line with the previous sections, let us define a more complicated example:
+the function that associates to a vector x its distance with two fixed points <code class="docutils literal notranslate"><span class="pre">pt1</span></code> and <code class="docutils literal notranslate"><span class="pre">pt2</span></code>
+initialized in our program to (0,0) and (1,1):</p>
+<div class="math notranslate nohighlight">
+\[f:x\mapsto(\| x-(1,1)\|, \| x-(0,0)\|).\]</div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// ------------------------------------------------</span>
+	<span class="c1">// Vector-valued functions</span>
+	<span class="c1">// ------------------------------------------------</span>
+	<span class="cm">/* create the distance function with 2 arguments */</span>
+	<span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s">&quot;x&quot;</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="nf">pt</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s">&quot;p&quot;</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">pt</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span><span class="s">&quot;dist&quot;</span><span class="p">);</span>
+
+	<span class="cm">/* create the two constant vectors */</span>
+	<span class="n">Vector</span> <span class="n">pt1</span><span class="o">=</span><span class="n">Vector</span><span class="o">::</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Vector</span> <span class="n">pt2</span><span class="o">=</span><span class="n">Vector</span><span class="o">::</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+
+	<span class="cm">/* create the function x-&gt;(dist(x,pt1),dist(x,pt2)). */</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">pt1</span><span class="p">),</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">pt2</span><span class="p">)),</span><span class="s">&quot;f&quot;</span><span class="p">);</span>
+
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">f</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The last construction is much more cumbersome with strings.</p>
+</div>
+<div class="section" id="matrix-valued-functions">
+<h3>Matrix-valued functions<a class="headerlink" href="#matrix-valued-functions" title="Permalink to this headline">¶</a></h3>
+<p>You can also create functions that return matrices.
+Here is an example of a function from <span class="math notranslate nohighlight">\(R\)</span> to <span class="math notranslate nohighlight">\(R^{2\times 2}\)</span> where:</p>
+<div class="math notranslate nohighlight">
+\[f: x \mapsto ( (2x, -x) ; (-x,3x) ).\]</div>
+<p>With strings:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>	<span class="n">Function</span> <span class="n">f</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="s2">&quot;((2*x,x);(-x,3*x))&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>With C++ operator overloading:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">Return</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">ExprVector</span><span class="o">::</span><span class="n">ROW</span><span class="p">),</span><span class="n">Return</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">,</span><span class="n">ExprVector</span><span class="o">::</span><span class="n">ROW</span><span class="p">)));</span>
+</pre></div>
+</div>
+<p>The boolean value <code class="docutils literal notranslate"><span class="pre">true</span></code> given here to the two embedded <code class="docutils literal notranslate"><span class="pre">Return</span></code>
+means that, each time, the two components must be put in rows, and not in column as it is by default.
+In contrast, the enclosing <code class="docutils literal notranslate"><span class="pre">Return</span></code> keeps the default behaviour since the two rows are
+put in column in order to form a 2x2 matrix.</p>
+</div>
+<div class="section" id="using-the-minibex-syntax">
+<h3>Using the Minibex syntax<a class="headerlink" href="#using-the-minibex-syntax" title="Permalink to this headline">¶</a></h3>
+<p>To create sophisticated functions we advice you to use an intermediate “minibex” input file as follows instead of
+embedding the function directly in your C++ program.
+The previous example can be written in a plain text file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+  <span class="k">return</span> <span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="p">);(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">));</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>Save this file under the name “myfunction.txt”. Now, you can load this function in your C++ program:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Function</span> <span class="n">f</span><span class="p">(</span><span class="s2">&quot;myfunction.txt&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="minibex-syntax-with-intermediate-variables">
+<h3>Minibex syntax with intermediate variables<a class="headerlink" href="#minibex-syntax-with-intermediate-variables" title="Permalink to this headline">¶</a></h3>
+<p>When several occurrences of the same subexpression occur in a function, it
+is a good idea for readibility (and, actually, efficiency) to put
+this subexpression into intermediate variables.</p>
+<p>The following example is the function thar returns the rotation matrix
+from the three Euler angles. In this function an experssion like cos(phi)
+occurs several times.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/*</span> <span class="n">Computes</span> <span class="n">the</span> <span class="n">rotation</span> <span class="n">matrix</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">Euler</span> <span class="n">angles</span><span class="p">:</span>
+   <span class="n">roll</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">the</span> <span class="n">pitch</span> <span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">yaw</span> <span class="p">(</span><span class="n">psi</span><span class="p">)</span>  <span class="o">*/</span>
+
+<span class="n">function</span> <span class="n">euler</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">psi</span><span class="p">)</span>
+  <span class="n">cphi</span>   <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">);</span>
+  <span class="n">sphi</span>   <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">);</span>
+  <span class="n">ctheta</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">);</span>
+  <span class="n">stheta</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">);</span>
+  <span class="n">cpsi</span>   <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">);</span>
+  <span class="n">spsi</span>   <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">psi</span><span class="p">);</span>
+
+  <span class="k">return</span>
+   <span class="p">(</span> <span class="p">(</span><span class="n">ctheta</span><span class="o">*</span><span class="n">cpsi</span><span class="p">,</span> <span class="o">-</span><span class="n">cphi</span><span class="o">*</span><span class="n">spsi</span><span class="o">+</span><span class="n">stheta</span><span class="o">*</span><span class="n">cpsi</span><span class="o">*</span><span class="n">sphi</span><span class="p">,</span> <span class="n">spsi</span><span class="o">*</span><span class="n">sphi</span><span class="o">+</span><span class="n">stheta</span><span class="o">*</span><span class="n">cpsi</span><span class="o">*</span><span class="n">cphi</span><span class="p">)</span> <span class="p">;</span>
+     <span class="p">(</span><span class="n">ctheta</span><span class="o">*</span><span class="n">spsi</span><span class="p">,</span> <span class="n">cpsi</span><span class="o">*</span><span class="n">cphi</span><span class="o">+</span><span class="n">stheta</span><span class="o">*</span><span class="n">spsi</span><span class="o">*</span><span class="n">sphi</span><span class="p">,</span> <span class="o">-</span><span class="n">cpsi</span><span class="o">*</span><span class="n">sphi</span><span class="o">+</span><span class="n">stheta</span><span class="o">*</span><span class="n">cphi</span><span class="o">*</span><span class="n">spsi</span><span class="p">)</span> <span class="p">;</span>
+     <span class="p">(</span><span class="o">-</span><span class="n">stheta</span><span class="p">,</span>     <span class="n">ctheta</span><span class="o">*</span><span class="n">sphi</span><span class="p">,</span>                 <span class="n">ctheta</span><span class="o">*</span><span class="n">cphi</span><span class="p">)</span> <span class="p">);</span>
+  <span class="n">end</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="evaluation-over-floating-point-numbers">
+<h3>Evaluation over floating-point numbers<a class="headerlink" href="#evaluation-over-floating-point-numbers" title="Permalink to this headline">¶</a></h3>
+<p>Given input <code class="docutils literal notranslate"><span class="pre">double</span></code> values x, you can obtain a rigorous inclusion of f(x) either using
+<code class="docutils literal notranslate"><span class="pre">eval</span></code>, <code class="docutils literal notranslate"><span class="pre">eval_vector</span></code> or <code class="docutils literal notranslate"><span class="pre">eval_matrix</span></code>.
+These functions return interval enclosures of the true result.</p>
+<p>These functions are presented below in a more general setting where the inputs are intervals as well.</p>
+<p>So, to get the image by f of fixed floating-point values, simply create degenerated intervals in the
+next examples.</p>
+</div>
+<div class="section" id="interval-evaluation">
+<span id="tuto-func-eval"></span><h3>Interval evaluation<a class="headerlink" href="#interval-evaluation" title="Permalink to this headline">¶</a></h3>
+<p>The interval evaluation of f is the image of the given input interval vector [x] by f, this range being noted by f([x]):</p>
+<div class="math notranslate nohighlight">
+\[f([x]) := \{ f(x), x\in[x] \}.\]</div>
+<p>Let us start with a real-valued function f with scalar arguments:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+	<span class="n">Variable</span> <span class="n">y</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">));</span>
+
+	<span class="kt">double</span> <span class="n">_x</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">}};</span>
+	<span class="n">IntervalVector</span> <span class="nf">xy</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">_x</span><span class="p">);</span> <span class="c1">// build xy=([1,2],[3,4])</span>
+	<span class="n">Interval</span> <span class="n">z</span><span class="o">=</span><span class="n">f</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xy</span><span class="p">);</span> <span class="c1">// z=f(xy)=sin([4,6])=[-1, -0.27941]</span>
+</pre></div>
+</div>
+<p>The sine function is not monotonic on [4,6] and actually reaches its
+minimum at <span class="math notranslate nohighlight">\(3\pi/2\)</span>.</p>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">eval</span></code> takes an <code class="docutils literal notranslate"><span class="pre">IntervalVector</span></code>
+as argument, even if there is only one variable. So, in the latter case, you have to build a vector
+reduced to a single component.</p>
+<p>We consider now a vector-valued function.
+Since the return type of an evaluation is not anymore an <code class="docutils literal notranslate"><span class="pre">Interval</span></code> but
+an <code class="docutils literal notranslate"><span class="pre">IntervalVector</span></code>, we have to use a method with a different
+signature, namely, <code class="docutils literal notranslate"><span class="pre">eval_vector</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">a</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="o">-</span><span class="n">a</span><span class="p">));</span>
+
+	<span class="n">IntervalVector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span> <span class="c1">// build x=([1,2])</span>
+
+	<span class="cm">/* calculate y=f(x)=([1, 4] ; [-2, -1]) */</span>
+	<span class="n">IntervalVector</span> <span class="n">y</span><span class="o">=</span><span class="n">f</span><span class="p">.</span><span class="n">eval_vector</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Finally, for a matrix-valued function, the evaluation is obtained via <code class="docutils literal notranslate"><span class="pre">eval_matrix</span></code>.
+We assume again that the following matrix-valued function</p>
+<div class="math notranslate nohighlight">
+\[f: x \mapsto ( (2x, -x) ; (-x,3x) )\]</div>
+<p>has been written in a “minibex” input file (see above).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;myfunction.txt&quot;</span><span class="p">);</span>
+
+	<span class="n">IntervalVector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">));</span>
+
+	<span class="c1">// calculate M=f(x)=(([0, 2] , [-1, -0]) ; ([-1, -0] , [0, 3]))</span>
+	<span class="n">IntervalMatrix</span> <span class="n">M</span><span class="o">=</span><span class="n">f</span><span class="p">.</span><span class="n">eval_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="interval-gradient">
+<h3>Interval gradient<a class="headerlink" href="#interval-gradient" title="Permalink to this headline">¶</a></h3>
+<p>For a scalar-valued function, you can get an interval enclosure of the gradient:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">+</span><span class="n">z</span><span class="o">*</span><span class="n">y</span><span class="p">);</span>
+
+	<span class="kt">double</span> <span class="n">_xyz</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">}};</span>
+	<span class="n">IntervalVector</span> <span class="nf">xyz</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">_xyz</span><span class="p">);</span>
+
+	<span class="cm">/* calculate g=grad_f(x)=(y,x+z,y)=[0, 2] ; [0, 4] ; [0, 2]) */</span>
+	<span class="n">IntervalVector</span> <span class="n">g</span><span class="o">=</span><span class="n">f</span><span class="p">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">xyz</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="interval-jacobian-matrix">
+<h3>Interval Jacobian matrix<a class="headerlink" href="#interval-jacobian-matrix" title="Permalink to this headline">¶</a></h3>
+<p>For a vector-valued function, you can get an interval enclosure of the Jacobian matrix:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// ------------------------------------------------</span>
+	<span class="c1">// Vector-valued functions, Jacobian matrix</span>
+	<span class="c1">//</span>
+	<span class="c1">// &gt; create the function dist:(x,pt)-&gt;||x-pt||</span>
+	<span class="c1">// &gt; create the function f:x-&gt;(dist(x,pt1),dist(x,pt2)</span>
+	<span class="c1">// &gt; calculate the Jacobian matrix of f over the box</span>
+	<span class="c1">// ------------------------------------------------</span>
+
+	<span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s">&quot;x&quot;</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="nf">pt</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s">&quot;p&quot;</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">pt</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span><span class="s">&quot;dist&quot;</span><span class="p">);</span>
+
+	<span class="n">Vector</span> <span class="n">pt1</span><span class="o">=</span><span class="n">Vector</span><span class="o">::</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Vector</span> <span class="n">pt2</span><span class="o">=</span><span class="n">Vector</span><span class="o">::</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">pt1</span><span class="p">),</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">pt2</span><span class="p">)));</span>
+
+	<span class="kt">double</span> <span class="n">init_box</span><span class="p">[][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">},{</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">}</span> <span class="p">};</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">init_box</span><span class="p">);</span>
+
+	<span class="cm">/* calculate J as a m*n interval enclosure of the Jacobian matrix */</span>
+	<span class="n">IntervalMatrix</span> <span class="n">J</span><span class="o">=</span><span class="n">f</span><span class="p">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+	<span class="c1">// ------------------------------------------------</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="backward-or-contraction">
+<h3>Backward (or contraction)<a class="headerlink" href="#backward-or-contraction" title="Permalink to this headline">¶</a></h3>
+<p>One of the main feature of Ibex is the ability to <em>contract</em> a box representing the domain of a variable
+x with respect to the constraint that f(x) belongs to a restricted input range [y].
+Rigorously, given two intervals [x] and [y], the contraction gives a new interval [z] such that</p>
+<div class="math notranslate nohighlight">
+\[\forall x\in[x], \quad f(x)\in[y] \Longrightarrow x \in[z] \subseteq [x]\]</div>
+<p>One way to do this is by using the famous <em>backward</em> algorithm.
+This algorithm does not return a new interval [z] but contract the input interval [x] which is therefore
+an input-output argument.</p>
+<p>In the following snippet we require the function sin(x+y) to take the value -1 (a degenerated interval).
+With an initial box (x,y)=([1,2],[3,4]), we obtain the result that (x,y) must lie in the subdomain
+([1, 1.7123] ; [3, 3.7124]).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+	<span class="n">Variable</span> <span class="n">y</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">));</span>
+
+	<span class="kt">double</span> <span class="n">_box</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">},{</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">}};</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">_box</span><span class="p">);</span>
+
+	<span class="cm">/* the backward sets box to ([1, 1.7123] ; [3, 3.7124]) */</span>
+	<span class="n">f</span><span class="p">.</span><span class="n">backward</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">box</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="constraints">
+<span id="tuto-ctr"></span><h2>Constraints<a class="headerlink" href="#constraints" title="Permalink to this headline">¶</a></h2>
+<p>To create a constraint, you can also either use strings or C++ objects:</p>
+<p>With strings:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="s">&quot;y&quot;</span><span class="p">,</span><span class="s">&quot;z&quot;</span><span class="p">,</span><span class="s">&quot;x+y&lt;=z&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>With C++ objects:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">;</span>
+	<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="o">&lt;=</span><span class="n">z</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>You can also refer to a previously defined function f to create, e.g., f(x)&lt;=0:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="o">-</span><span class="n">z</span><span class="p">);</span>
+	<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">LEQ</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="contractors">
+<span id="tuto-ctc"></span><h2>Contractors<a class="headerlink" href="#contractors" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="what-is-a-contractor-programming">
+<h3>What is a contractor programming?<a class="headerlink" href="#what-is-a-contractor-programming" title="Permalink to this headline">¶</a></h3>
+<p>The key idea behind <em>contractor programming</em> <a class="reference internal" href="reference.html#chabert09a"><span class="std std-ref">[Chabert &amp; Jaulin, 2009]</span></a> is to abstract the algorithm
+from the underlying constraint and to view it a function “C”:</p>
+<div class="math notranslate nohighlight">
+\[C: \mathbb{IR}^n \to \mathbb{IR}^n \ \mbox{such that} \ C([x])\subseteq[x],\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbb{IR}\)</span> denotes the set of real intervals.</p>
+<p>In other word, we take as primary concept the <em>operational</em> definition of a constraint.</p>
+<p>In this way, operators (like the intersection and the others below) can be extended to contractors.</p>
+<p>Since contractors implicitly represent sets, the fundamental advantage of extending operations
+to contractors is that we actually extend these operations to sets.</p>
+<p>All contractors in Ibex are algorithms represented by different classes.
+See the <a class="reference external" href="http://en.wikipedia.org/wiki/Strategy_pattern">strategy pattern</a> for more information on this design choice.
+Classes representing contractors are prefixed by <code class="docutils literal notranslate"><span class="pre">Ctc</span></code>.</p>
+</div>
+<div class="section" id="forward-backward">
+<span id="tuto-fwd-bwd"></span><h3>Forward-Backward<a class="headerlink" href="#forward-backward" title="Permalink to this headline">¶</a></h3>
+<p>The standard way to contract with respect to a constraint is by using the <em>forward-bacwkard</em> algorithm.
+The corresponding class is <code class="docutils literal notranslate"><span class="pre">CtcFwdBwd</span></code>.</p>
+<p>A constraint has to be built first using the <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code> class.
+In the following piece of code, we build a forward-backward contractor with respect to x+y=z.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">;</span>
+	<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">ctc</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Of course, the expression of a constraint can involve a previously defined function.
+Furthermore, if the constraint is simply “f=0”, where f is a <code class="docutils literal notranslate"><span class="pre">Function</span></code> object, it is not
+necessary in this case to build an intermediate <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code> object.
+One can directly give the function f that has to be nullify to <code class="docutils literal notranslate"><span class="pre">CtcFwdBwd</span></code>.
+In the next example, we consider the problem of finding the point which distance from
+both (0,0) and (1,1) is sqrt(2)/2. The solution is (0.5,0.5).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+	<span class="kt">double</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="mf">1.0</span><span class="p">))</span><span class="o">-</span><span class="n">d</span><span class="p">));</span>
+
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">));</span>
+
+	<span class="cm">/* we give f directly (means that the constraint is f=0) */</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">c</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+	<span class="n">c</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+	<span class="cm">/* display ([0.2929, 0.7072] ; [0.2929, 0.7072]) */</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Of course, the result is rather crude. Remember that the purpose of <code class="docutils literal notranslate"><span class="pre">CtcFwdBwd</span></code>
+is to contract <em>quickly</em> with respect to <em>any</em> numerical constraint: it is widely applicable and takes
+a time that is only proportional to the expression size. In the other hand, it is not accurate in general.</p>
+<p><a class="reference internal" href="contractor.html#ctc-fwd-bwd"><span class="std std-ref">See more</span></a></p>
+</div>
+<div class="section" id="fixpoint">
+<span id="tuto-fixpoint"></span><h3>Fixpoint<a class="headerlink" href="#fixpoint" title="Permalink to this headline">¶</a></h3>
+<p>The fixpoint operator applies a contractor C iteratively:</p>
+<div class="math notranslate nohighlight">
+\[fixpoint(C): [x] \mapsto C(\ldots C([x])\ldots),\]</div>
+<p>while the “gain” is more than the given <code class="docutils literal notranslate"><span class="pre">ratio</span></code>. More precisely, the “gain”
+is the relative Hausdorff distance between the input box [x] and the output box C([x]) but, often, you can ignore
+the precise meaning of this gain and just consider that the procedure will loop until the contracted box
+will roughly differ “by ratio” from the input one.</p>
+<p>Let us now follow the previous example. As said, the solution is (0.5,0.5). We can see that simply embedding
+the <code class="docutils literal notranslate"><span class="pre">CtcFwdBwd</span></code> contractor in a fixpoint loop (with a <code class="docutils literal notranslate"><span class="pre">ratio</span></code>
+set to 0.1) gives a box with sharp bounds.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+	<span class="kt">double</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="mf">1.0</span><span class="p">))</span><span class="o">-</span><span class="n">d</span><span class="p">));</span>
+
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">));</span>
+
+	<span class="n">CtcFwdBwd</span> <span class="nf">c</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+	<span class="n">CtcFixPoint</span> <span class="nf">fp</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="mf">1e-03</span><span class="p">);</span>
+
+	<span class="n">fp</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+	<span class="cm">/* display ([0.4990, 0.5001] ; [0.4990, 0.5001]) */</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;box after fixpoint=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="intersection-union-composition">
+<span id="tuto-inter-union-compo"></span><h3>Intersection, union &amp; composition<a class="headerlink" href="#intersection-union-composition" title="Permalink to this headline">¶</a></h3>
+<p>Given two of more contractors, we can apply the two logical operators <em>union</em> and <em>intersection</em>:</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}union(C_1,\ldots,C_n): [x] \mapsto C_1([x]) \cup\ldots\cup C_n([x]).\\inter(C_1,\ldots,C_n): [x] \mapsto C_1([x]) \cap\ldots\cap C_n([x]).\end{aligned}\end{align} \]</div>
+<p>However, the latter operation is barely used and usually replaced by the <em>composition</em>:</p>
+<div class="math notranslate nohighlight">
+\[compo(C_1,\ldots,C_n): [x] \mapsto C_n(\ldots(C_1([x])\ldots).\]</div>
+<p>Indeed, one can see that the composition amounts to the same logical operation (the intersection of each contractor’s set),
+but in a more efficient way since we take advantage of the contraction performed by <span class="math notranslate nohighlight">\(C_1,...,C_{i-1}\)</span> when contracting with <span class="math notranslate nohighlight">\(C_i\)</span>.
+In contrast, the intersection operator calls each contractor independently on the same initial box.</p>
+<p>The corresponding classes are <code class="docutils literal notranslate"><span class="pre">CtcUnion</span></code> and <code class="docutils literal notranslate"><span class="pre">CtcCompo</span></code>.</p>
+<p>As a rule of thumb, use <code class="docutils literal notranslate"><span class="pre">CtcUnion</span></code> for the union of two contractors and <code class="docutils literal notranslate"><span class="pre">CtcComp</span></code> for the intersection.
+Here is an example with the union:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+	<span class="n">NumConstraint</span> <span class="nf">c1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">&lt;=-</span><span class="mi">1</span><span class="p">);</span>
+	<span class="n">NumConstraint</span> <span class="nf">c2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">ctc1</span><span class="p">(</span><span class="n">c1</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">ctc2</span><span class="p">(</span><span class="n">c2</span><span class="p">);</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">Interval</span><span class="o">::</span><span class="n">pos_reals</span><span class="p">());</span> <span class="c1">// the box [0,oo)</span>
+
+	<span class="n">CtcUnion</span> <span class="nf">ctc3</span><span class="p">(</span><span class="n">ctc1</span><span class="p">,</span><span class="n">ctc2</span><span class="p">);</span> <span class="c1">// a contractor w.r.t. (x&lt;=-1 or x&gt;=1)</span>
+	<span class="n">ctc3</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span> <span class="c1">// box will be contracted to [1,oo)</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Here is an example with the intersection (composition):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+	<span class="n">NumConstraint</span> <span class="nf">c1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">&gt;=-</span><span class="mi">1</span><span class="p">);</span>
+	<span class="n">NumConstraint</span> <span class="nf">c2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">ctc1</span><span class="p">(</span><span class="n">c1</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">ctc2</span><span class="p">(</span><span class="n">c2</span><span class="p">);</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">Interval</span><span class="o">::</span><span class="n">all_reals</span><span class="p">());</span>  <span class="c1">// the box (-oo,oo)</span>
+	<span class="n">CtcCompo</span> <span class="nf">ctc3</span><span class="p">(</span><span class="n">ctc1</span><span class="p">,</span><span class="n">ctc2</span><span class="p">);</span>  <span class="c1">// a contractor w.r.t. (x&gt;=-1 and x&lt;=1)</span>
+	<span class="n">ctc3</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>  <span class="c1">// box will be contracted to [-1,1]</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="interval-newton">
+<span id="tuto-newton"></span><h3>Interval Newton<a class="headerlink" href="#interval-newton" title="Permalink to this headline">¶</a></h3>
+<p>When a function is “square” (the dimension is the same as the codimension, i.e., <span class="math notranslate nohighlight">\(f:\mathbb{R}^n\to\mathbb{R}^n\)</span>), you can contract a
+box with respect to the constraint f(x)=0 using the interval Newton iteration.</p>
+<p>You just have to build a <code class="docutils literal notranslate"><span class="pre">CtcNewton</span></code> object with the function and call <code class="docutils literal notranslate"><span class="pre">contract</span></code>.</p>
+<p>This operator can give extremly accurate bounds proving that the input box is already “sufficiently” small (that is,
+“inside the convergence basin” of Newton’s iteration). In the following example, we give a box that encloses the
+solution (1,0) with a radius of 10^-3. Newton’s iteration contracts this box downto the maximal precision:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="mf">1.0</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span><span class="p">));</span>
+	<span class="kt">double</span> <span class="n">init_box</span><span class="p">[][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mf">0.999</span><span class="p">,</span><span class="mf">1.001</span><span class="p">},{</span><span class="o">-</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.001</span><span class="p">}};</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">init_box</span><span class="p">);</span>
+
+	<span class="c1">// Build an interval Newton iteration</span>
+	<span class="c1">// for solving f(x)=0 where f is</span>
+	<span class="c1">// a vector-valued function representing</span>
+	<span class="c1">// the system.</span>
+	<span class="n">CtcNewton</span> <span class="nf">newton</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+
+	<span class="cm">/* Contract the box with Newton */</span>
+	<span class="n">newton</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+	<span class="cm">/* display a very small box enclosing (1,0) */</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="propagation">
+<span id="tuto-propag"></span><h3>Propagation<a class="headerlink" href="#propagation" title="Permalink to this headline">¶</a></h3>
+<p>The <em>propagation</em> operator calculates the fixpoint of (the composition of) n contractors by using a more
+sophisticated (“incremental”) strategy than a simple loop.
+So, semantically, the propagation operator can be defined as follows:</p>
+<div class="math notranslate nohighlight">
+\[propagation(C_1,\ldots,C_n):=fixpoint(compo(C_1,\ldots,C_n)).\]</div>
+<p>(see above for the definition of the fixpoint and composition operators).</p>
+<p>The key idea behind this operator is to avoid calling contractors that will certainly leave the box intact.
+Contractors that can potentially enforce a contraction are determined typically from the syntax of their
+underlying constraint. Consider for instance two contractors, C1 w.r.t. f(x,z)=0 and C2 w.r.t. g(x,y)=0.
+Assume that the fixpoint for C1 is reached with the current box ([x],[y],[z]). If a call to C2 only
+contracts the second interval (the one corresponding to y), it is then useless to call C1 again.</p>
+<p>So, by using such principle, the propagation calculates the fixpoint by “awaking” contractors only when
+necessary. Of course, the more sparse the constraint system, the more valuable the propagation, when
+compared to a simple fixpoint.</p>
+<p><a class="reference internal" href="contractor.html#ctc-propag"><span class="std std-ref">See more</span></a></p>
+</div>
+<div class="section" id="q-intersection-robustness-w-r-t-outliers">
+<h3>Q-Intersection (robustness w.r.t. outliers)<a class="headerlink" href="#q-intersection-robustness-w-r-t-outliers" title="Permalink to this headline">¶</a></h3>
+<p>The Q-intersection is typically used in a context where we have a set of contractors that result
+from measurements (each measurement enforces a constraint), some of which can be incorrect.</p>
+<p>If we are sure that at least q measurements are correct (which amounts to say that the number of
+outliers is bounded by N-q) then we can contract the box in a robust way, by calculating the union
+of the boxes resulting from the contraction with all combinaisons of q contractors among N.</p>
+<p>Mathematicaly, with <span class="math notranslate nohighlight">\((i_1 , . . . , i_q)\)</span> ranging over the set of all q distinct indices between 0 and N-1:</p>
+<div class="math notranslate nohighlight">
+\[q-inter(C_1,\ldots,C_n,q):=union(\ldots,inter(C_{i_1},\ldots,C_{i_q}),\ldots)\]</div>
+<p>Here is a simple example inspired from parameter estimation.</p>
+<p>We assume a point (x,y) has to be localized. We measure 4 distances “bD” from 6 (approximately known) points (bX,bY).
+Each position bX, bY and each distance bD has an uncertainty [-0.1,0.1]. We also know there may be at most one outlier.</p>
+<p>The solution point is: x=6.32193 y=5.49908</p>
+<p>First of all, let us enter the coordinates of the points (bX,bY) and the distances. This data will simulate our measurements.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="k">const</span> <span class="kt">int</span> <span class="n">N</span><span class="o">=</span><span class="mi">6</span><span class="p">;</span>
+	<span class="cm">/* The measurements (coordinates of the points and distances) */</span>
+	<span class="kt">double</span> <span class="n">bx</span><span class="p">[</span><span class="n">N</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mf">5.09392</span><span class="p">,</span><span class="mf">4.51835</span><span class="p">,</span><span class="mf">0.76443</span><span class="p">,</span><span class="mf">7.6879</span><span class="p">,</span><span class="mf">0.823486</span><span class="p">,</span><span class="mf">1.70958</span><span class="p">};</span>
+	<span class="kt">double</span> <span class="n">by</span><span class="p">[</span><span class="n">N</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mf">0.640775</span><span class="p">,</span><span class="mf">7.25862</span><span class="p">,</span><span class="mf">0.417032</span><span class="p">,</span><span class="mf">8.74453</span><span class="p">,</span><span class="mf">3.48106</span><span class="p">,</span><span class="mf">4.42533</span><span class="p">};</span>
+	<span class="kt">double</span> <span class="n">bd</span><span class="p">[</span><span class="n">N</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mf">5.0111</span><span class="p">,</span><span class="mf">2.5197</span><span class="p">,</span><span class="mf">7.5308</span><span class="p">,</span><span class="mf">3.52119</span><span class="p">,</span><span class="mf">5.85707</span><span class="p">,</span><span class="mf">4.73568</span><span class="p">};</span>
+</pre></div>
+</div>
+<p>define the measurement intervals (with uncertainty taken into account)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Interval</span> <span class="n">bX</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+	<span class="n">Interval</span> <span class="n">bY</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+	<span class="n">Interval</span> <span class="n">bD</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+	<span class="cm">/* add uncertainty on measurements */</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">bX</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">bx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.1</span><span class="p">);</span>
+		<span class="n">bY</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">by</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.1</span><span class="p">);</span>
+		<span class="n">bD</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">bd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.1</span><span class="p">);</span>
+	<span class="p">}</span>
+</pre></div>
+</div>
+<p>Now, we artificially introduce an outlier by shifting the interval for one measurement (here, x position n°5) by a
+large value:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">bX</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">+=</span><span class="mi">10</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Now, all our simulated data is set up. We just have to define the contractors.
+We first declare the distance function and then 6 contractors corresponding to
+the distance with each (bX,bY):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Variable</span> <span class="n">px</span><span class="p">,</span><span class="n">py</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">px</span><span class="p">,</span><span class="n">py</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">px</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">py</span><span class="p">)));</span>
+
+	<span class="n">Function</span> <span class="nf">f0</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">bX</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">bY</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="n">bD</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+	<span class="n">Function</span> <span class="nf">f1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">bX</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">bY</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="n">bD</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+	<span class="n">Function</span> <span class="nf">f2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">bX</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">bY</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">-</span><span class="n">bD</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+	<span class="n">Function</span> <span class="nf">f3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">bX</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">bY</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">-</span><span class="n">bD</span><span class="p">[</span><span class="mi">3</span><span class="p">]);</span>
+	<span class="n">Function</span> <span class="nf">f4</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">bX</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">bY</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">-</span><span class="n">bD</span><span class="p">[</span><span class="mi">4</span><span class="p">]);</span>
+	<span class="n">Function</span> <span class="nf">f5</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">bX</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span><span class="n">bY</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">-</span><span class="n">bD</span><span class="p">[</span><span class="mi">5</span><span class="p">]);</span>
+
+	<span class="n">CtcFwdBwd</span> <span class="nf">c0</span><span class="p">(</span><span class="n">f0</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">c1</span><span class="p">(</span><span class="n">f1</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">c2</span><span class="p">(</span><span class="n">f2</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">c3</span><span class="p">(</span><span class="n">f3</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">c4</span><span class="p">(</span><span class="n">f4</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">c5</span><span class="p">(</span><span class="n">f5</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>We can contract now a box with the q-intersection of these contractors:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="cm">/* The initial box: [0,10]x[0,10] */</span>
+	<span class="n">IntervalVector</span> <span class="nf">initbox</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">));</span>
+
+	<span class="cm">/* Create the array of all the contractors */</span>
+	<span class="n">Array</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">&gt;</span> <span class="n">array</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span><span class="p">,</span><span class="n">c4</span><span class="p">,</span><span class="n">c5</span><span class="p">);</span>
+	<span class="cm">/* Create the q-intersection of the N contractors */</span>
+	<span class="n">CtcQInter</span> <span class="nf">q</span><span class="p">(</span><span class="n">array</span><span class="p">,</span><span class="mi">5</span><span class="p">);</span> <span class="c1">// 2 is the number of variables, 5 the number of correct measurement</span>
+	<span class="cm">/* Perform a first contraction */</span>
+	<span class="n">IntervalVector</span> <span class="n">box</span><span class="o">=</span><span class="n">initbox</span><span class="p">;</span>
+	<span class="n">q</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;after q-inter =&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The displayed result is ([3.9667, 7.2381] ; [4.5389, 8.1479]). Of course, we can do better by calculating a fixpoint of the q-intersection:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="cm">/* Build a Fix-point of the q-intersection */</span>
+	<span class="n">CtcFixPoint</span> <span class="nf">fix</span><span class="p">(</span><span class="n">q</span><span class="p">);</span>
+
+	<span class="cm">/* Perform a stronger contraction with the fixpoint */</span>
+	<span class="n">fix</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;after fix+q-inter =&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The displayed result is ([5.9277, 6.8836] ; [5.0914, 5.7996]) which, indeed, better encloses the solution point x=6.32193 y=5.49908.</p>
+</div>
+<div class="section" id="build-your-own-contractor">
+<h3>Build your own contractor<a class="headerlink" href="#build-your-own-contractor" title="Permalink to this headline">¶</a></h3>
+<p>To create a contractor, you just have to
+- declare a class that extends <code class="docutils literal notranslate"><span class="pre">Ctc</span></code>
+- create inside a function <code class="docutils literal notranslate"><span class="pre">contract</span></code> that takes a reference to a box (<code class="docutils literal notranslate"><span class="pre">IntervalVector&amp;</span></code>) and contracts it. The function returns <code class="docutils literal notranslate"><span class="pre">void</span></code>.</p>
+<p>In the following example, we create a contractor that simply divides by two the radius of each component.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="k">class</span> <span class="nc">MyContractor</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Ctc</span> <span class="p">{</span>
+
+	<span class="k">public</span><span class="o">:</span>
+		<span class="n">MyContractor</span><span class="p">(</span><span class="kt">int</span> <span class="n">nb_var</span><span class="p">)</span> <span class="o">:</span> <span class="n">Ctc</span><span class="p">(</span><span class="n">nb_var</span><span class="p">)</span> <span class="p">{}</span>
+
+		<span class="kt">void</span> <span class="n">contract</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box</span><span class="p">)</span> <span class="p">{</span>
+			<span class="n">box</span><span class="o">=</span><span class="n">box</span><span class="p">.</span><span class="n">mid</span><span class="p">()</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">box</span><span class="p">.</span><span class="n">rad</span><span class="p">();</span>
+		<span class="p">}</span>
+
+	<span class="p">};</span>
+</pre></div>
+</div>
+<p>Then, if we create this contractor and applies it several time to the same box, we can observe the expected result:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="cm">/* build the contractor for 3-dimensional boxes. */</span>
+	<span class="n">MyContractor</span> <span class="nf">c</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+
+	<span class="cm">/* create the box [0,1]x[0,1]x[0,1] */</span>
+	<span class="n">IntervalVector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">));</span>
+
+	<span class="n">c</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span><span class="c1">// ([0.25, 0.75] ; [0.25, 0.75] ; [0.25, 0.75])</span>
+
+	<span class="n">c</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span><span class="c1">// ([0.375, 0.625] ; [0.375, 0.625] ; [0.375, 0.625])</span>
+
+	<span class="n">c</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span><span class="c1">// ([0.4375, 0.5625] ; [0.4375, 0.5625] ; [0.4375, 0.5625])</span>
+</pre></div>
+</div>
+<p>This contractor can now be combined with the ones built-in. For instance, we can decide to calculate the fixpoint.  Then, the result is a small box enclosing (0.5,0.5,0.5):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">CtcFixPoint</span> <span class="nf">fp</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="mf">0.001</span><span class="p">);</span>
+	<span class="n">fp</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span><span class="c1">// ([0.4999999999999999, 0.5000000000000001], ...</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#basic-interval-computations">Basic Interval computations</a><ul>
+<li><a class="reference internal" href="#start-a-program">Start a program</a></li>
+<li><a class="reference internal" href="#creating-intervals">Creating intervals</a></li>
+<li><a class="reference internal" href="#operation-between-intervals">Operation between intervals</a></li>
+<li><a class="reference internal" href="#applying-a-function-to-an-interval">Applying a function to an interval</a></li>
+<li><a class="reference internal" href="#interval-vectors">Interval vectors</a></li>
+<li><a class="reference internal" href="#interval-matrices">Interval matrices</a></li>
+<li><a class="reference internal" href="#operations-between-matrices-and-vectors">Operations between matrices and vectors</a></li>
+<li><a class="reference internal" href="#midpoint-radius-magnitude-etc">Midpoint, radius, magnitude, etc.</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#creating-functions">Creating functions</a></li>
+<li><a class="reference internal" href="#constants-inside-functions">Constants inside functions</a></li>
+<li><a class="reference internal" href="#functions-with-vector-arguments">Functions with vector arguments</a></li>
+<li><a class="reference internal" href="#composing-functions">Composing functions</a></li>
+<li><a class="reference internal" href="#vector-valued-functions">Vector-valued functions</a></li>
+<li><a class="reference internal" href="#matrix-valued-functions">Matrix-valued functions</a></li>
+<li><a class="reference internal" href="#using-the-minibex-syntax">Using the Minibex syntax</a></li>
+<li><a class="reference internal" href="#minibex-syntax-with-intermediate-variables">Minibex syntax with intermediate variables</a></li>
+<li><a class="reference internal" href="#evaluation-over-floating-point-numbers">Evaluation over floating-point numbers</a></li>
+<li><a class="reference internal" href="#interval-evaluation">Interval evaluation</a></li>
+<li><a class="reference internal" href="#interval-gradient">Interval gradient</a></li>
+<li><a class="reference internal" href="#interval-jacobian-matrix">Interval Jacobian matrix</a></li>
+<li><a class="reference internal" href="#backward-or-contraction">Backward (or contraction)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#constraints">Constraints</a></li>
+<li><a class="reference internal" href="#contractors">Contractors</a><ul>
+<li><a class="reference internal" href="#what-is-a-contractor-programming">What is a contractor programming?</a></li>
+<li><a class="reference internal" href="#forward-backward">Forward-Backward</a></li>
+<li><a class="reference internal" href="#fixpoint">Fixpoint</a></li>
+<li><a class="reference internal" href="#intersection-union-composition">Intersection, union &amp; composition</a></li>
+<li><a class="reference internal" href="#interval-newton">Interval Newton</a></li>
+<li><a class="reference internal" href="#propagation">Propagation</a></li>
+<li><a class="reference internal" href="#q-intersection-robustness-w-r-t-outliers">Q-Intersection (robustness w.r.t. outliers)</a></li>
+<li><a class="reference internal" href="#build-your-own-contractor">Build your own contractor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="install-cmake.html"
+                        title="previous chapter">Installation with Cmake (experimental)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="interval.html"
+                        title="next chapter">Interval Computations</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tutorial.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="interval.html" title="Interval Computations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="install-cmake.html" title="Installation with Cmake (experimental)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

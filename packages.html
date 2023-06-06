@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Building packages &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Miscellaneous for developers" href="dev-misc.html" />
+    <link rel="prev" title="Writing a plugin for Ibex" href="plugins-dev.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="dev-misc.html" title="Miscellaneous for developers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plugins-dev.html" title="Writing a plugin for Ibex"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="building-packages">
+<span id="ibex-packages"></span><h1>Building packages<a class="headerlink" href="#building-packages" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section of the documentation is for developers. If you just want to use
+Ibex as a library or via binaries, you can skip this section entirely</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To build packages, you need to <a class="reference internal" href="install-cmake.html#ibex-install-cmake"><span class="std std-ref">use CMake to build Ibex</span></a>.</p>
+</div>
+<p>To build the package, execute the following command from the <strong>build</strong>
+directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ make package
+</pre></div>
+</div>
+<p>It will produce 4 files called:</p>
+<ul class="simple">
+<li><p>ibex-&lt;version&gt;-&lt;System&gt;-binaries.deb</p></li>
+<li><p>ibex-&lt;version&gt;-&lt;System&gt;-devtools.deb</p></li>
+<li><p>ibex-&lt;version&gt;-&lt;System&gt;.tar.gz and</p></li>
+<li><p>ibex-&lt;version&gt;-&lt;System&gt;.zip.</p></li>
+</ul>
+<div class="section" id="debian-package">
+<h2>Debian package<a class="headerlink" href="#debian-package" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Debian package can only be built on Unix machines</p>
+</div>
+<p>If you are under Debian or Ubuntu, you can inspect the generated deb files with
+the following commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ dpkg-deb -I &lt;package.deb&gt; # print information about the package
+$ dpkg-deb -c &lt;package.deb&gt; # print directories and files inside the package
+</pre></div>
+</div>
+<p>References on debian packaging:
+<a class="reference external" href="https://wiki.debian.org/Packaging">here</a>,
+<a class="reference external" href="https://www.debian.org/doc/manuals/debmake-doc/index.en.html">here</a>,
+<a class="reference external" href="https://www.debian.org/doc/devel-manuals">here</a> and
+<a class="reference external" href="https://www.debian.org/doc/devel-manuals#packaging-tutorial">here</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Building packages</a><ul>
+<li><a class="reference internal" href="#debian-package">Debian package</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plugins-dev.html"
+                        title="previous chapter">Writing a plugin for Ibex</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dev-misc.html"
+                        title="next chapter">Miscellaneous for developers</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/packages.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="dev-misc.html" title="Miscellaneous for developers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plugins-dev.html" title="Writing a plugin for Ibex"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

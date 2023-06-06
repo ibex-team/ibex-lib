@@ -1,0 +1,1534 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Interval Computations &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Functions" href="function.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="function.html" title="Functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interval-computations">
+<h1>Interval Computations<a class="headerlink" href="#interval-computations" title="Permalink to this headline">¶</a></h1>
+<p>This chapter present the basic structures used to represent sets and the operations directly related to them.</p>
+<div class="section" id="intervals-vectors-and-matrices">
+<h2>Intervals, vectors and matrices<a class="headerlink" href="#intervals-vectors-and-matrices" title="Permalink to this headline">¶</a></h2>
+<p>Ibex allows you to create interval, interval vectors, interval matrices and array of interval matrices.
+All these objects represent sets. These objects are respectively of the following classes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Interval</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IntervalVector</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IntervalMatrix</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IntervalMatrixArray</span></code>.</p></li>
+</ul>
+<p>It should be emphasized that, mainly for efficiency reasons, the previous list is not an inheritance hierarchy.
+So, an <code class="docutils literal notranslate"><span class="pre">Interval</span></code> is <strong>not</strong> a particular <code class="docutils literal notranslate"><span class="pre">IntervalVector</span></code> and so on, altough one might legitimately expect this
+(this would also be a perfectly valid design). This is in contrast with Matlab, where, basically, everything is
+an array of interval matrices.</p>
+<p>Some functions return points, not intervals; this is typically the case for the function <cite>mid()</cite> that, given
+an interval, returns the midpoint. The returned type of <code class="docutils literal notranslate"><span class="pre">Interval::mid()</span></code> is theferore <code class="docutils literal notranslate"><span class="pre">double</span></code>.
+In the case of an interval vector, the function <cite>mid()</cite> returns a vector of points. In order to keep our system
+homogeneous, a type has been introduced to represent a vector of reals, namely, <code class="docutils literal notranslate"><span class="pre">Vector</span></code> and similarly for matrices
+or matrices arrays.</p>
+<p>So the following types allow to represent real (floating-point) values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">double</span></code> (primitive type)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Vector</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Matrix</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MatrixArray</span></code>.</p></li>
+</ul>
+<div class="section" id="the-empty-set">
+<span id="itv-empty-set"></span><h3>The empty set<a class="headerlink" href="#the-empty-set" title="Permalink to this headline">¶</a></h3>
+<p>One unpleasant consequence of our inheritance-free design is that the empty set does not have a unique representation in Ibex. The empty set is “typed” so that
+an empty interval is not the same object as an empty interval vector or an empty interval matrix. But, of course, they can all be interpreted as the same
+mathematical object, <em>the empty set</em>.</p>
+<p>Worse, an empty interval vector has a size just as any other vectors (and similarly, an empty interval matrix has a certain number of rows/columns, etc.).
+So the empty vector of 3 components is not the same object as the empty vector of 4 components.
+Imposing a size for the empty vector may seem clumsy at first glance, but it actually simplifies programming in several situations.
+For instance, if one asks for the complementary of the empty set represented by a n-sized vector, the result will be the n-dimensional box <span class="math notranslate nohighlight">\((-\infty,\infty)\times\ldots\times(-\infty,\infty)\)</span>.
+Anyway, this multiple representation is harmless in practice because we always manipulate sets of a priori known dimensions.</p>
+<p>It holds the same with matrices and arrays of matrices.</p>
+</div>
+<div class="section" id="intervals">
+<h3>Intervals<a class="headerlink" href="#intervals" title="Permalink to this headline">¶</a></h3>
+<p>Intervals are represented by the class  <code class="docutils literal notranslate"><span class="pre">Interval</span></code> (this class wraps the actual class of the underlying sub-library that implements interval arithmetic).</p>
+<p>Here are examples of interval defintions.
+In particular, it is possible to give a single value to define a degenerated interval (reduced to a point).
+Note the usage of the constants <code class="docutils literal notranslate"><span class="pre">NEG_INFINITY</span></code> and <code class="docutils literal notranslate"><span class="pre">POS_INFINITY</span></code> for infinite bounds.</p>
+<p><strong>Note:</strong> In Ibex, an interval should never contain a “NaN” (<em>not a number</em>), whatever operation you perform with it. If this occurs, something is wrong.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Interval</span> <span class="n">x1</span><span class="p">;</span>                      <span class="c1">// (-oo,+oo)</span>
+	<span class="n">Interval</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>                   <span class="c1">// [2,2]</span>
+	<span class="n">Interval</span> <span class="nf">x3</span><span class="p">(</span><span class="n">x2</span><span class="p">);</span>                  <span class="c1">// [2,2]</span>
+	<span class="n">Interval</span> <span class="n">x4</span><span class="o">=</span><span class="n">x2</span><span class="p">;</span>                   <span class="c1">// [2,2]</span>
+
+	<span class="n">Interval</span> <span class="nf">x5</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>                 <span class="c1">// [1,2]</span>
+
+	<span class="n">Interval</span> <span class="nf">x6</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">POS_INFINITY</span><span class="p">);</span>      <span class="c1">// [1,+oo)</span>
+	<span class="n">Interval</span> <span class="nf">x7</span><span class="p">(</span><span class="n">NEG_INFINITY</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>     <span class="c1">// (-oo,-1]</span>
+	<span class="n">Interval</span> <span class="n">x8</span><span class="o">=</span><span class="n">Interval</span><span class="o">::</span><span class="n">empty_set</span><span class="p">();</span>  <span class="c1">// empty set</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="interval-constants">
+<h3>Interval Constants<a class="headerlink" href="#interval-constants" title="Permalink to this headline">¶</a></h3>
+<p>Some commonly used intervals are already defined as static variables:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 57%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Interval::pi()</span></code></p></td>
+<td><p>a thin enclosure of <span class="math notranslate nohighlight">\(\pi\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Interval::two_pi()</span></code></p></td>
+<td><p>a thin enclosure of <span class="math notranslate nohighlight">\(\pi\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Interval::half_pi()</span></code></p></td>
+<td><p>a thin enclosure of <span class="math notranslate nohighlight">\(\pi/2\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Interval::empty_set()</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\emptyset\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Interval::all_reals()</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\((-\infty,+\infty)\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Interval::zero()</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\([0,0]\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Interval::one()</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\([1,1]\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Interval::pos_reals()</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\([0,+\infty)\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Interval::neg_reals()</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\((-\infty,0]\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p>Let us print all these constants:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; EMPTY_SET =</span><span class="se">\t</span><span class="s"> &quot;</span> <span class="o">&lt;&lt;</span>  <span class="n">Interval</span><span class="o">::</span><span class="n">empty_set</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; PI =</span><span class="se">\t\t</span><span class="s"> &quot;</span>      <span class="o">&lt;&lt;</span>  <span class="n">Interval</span><span class="o">::</span><span class="n">pi</span><span class="p">()</span> <span class="o">&lt;&lt;</span>  <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; 2 PI =</span><span class="se">\t\t</span><span class="s"> &quot;</span>    <span class="o">&lt;&lt;</span>  <span class="n">Interval</span><span class="o">::</span><span class="n">two_pi</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; 1/2 PI =</span><span class="se">\t</span><span class="s"> &quot;</span>    <span class="o">&lt;&lt;</span>  <span class="n">Interval</span><span class="o">::</span><span class="n">half_pi</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; ONE =</span><span class="se">\t\t</span><span class="s"> &quot;</span>     <span class="o">&lt;&lt;</span>  <span class="n">Interval</span><span class="o">::</span><span class="n">one</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; ZERO =</span><span class="se">\t\t</span><span class="s"> &quot;</span>    <span class="o">&lt;&lt;</span>  <span class="n">Interval</span><span class="o">::</span><span class="n">zero</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; ALL_REALS =</span><span class="se">\t</span><span class="s"> &quot;</span> <span class="o">&lt;&lt;</span>  <span class="n">Interval</span><span class="o">::</span><span class="n">all_reals</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; POS_REALS =</span><span class="se">\t</span><span class="s"> &quot;</span> <span class="o">&lt;&lt;</span>  <span class="n">Interval</span><span class="o">::</span><span class="n">pos_reals</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; NEG_REALS =</span><span class="se">\t</span><span class="s"> &quot;</span> <span class="o">&lt;&lt;</span>  <span class="n">Interval</span><span class="o">::</span><span class="n">neg_reals</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+</div>
+<div class="section" id="vectors-or-boxes">
+<span id="itv-vector-boxes"></span><h3>Vectors or Boxes<a class="headerlink" href="#vectors-or-boxes" title="Permalink to this headline">¶</a></h3>
+<p>Vectors of reals are represented by the class <code class="docutils literal notranslate"><span class="pre">Vector</span></code> and interval vectors (or “boxes”) are represented by the class  <code class="docutils literal notranslate"><span class="pre">IntervalVector</span></code>.</p>
+<p>Creation and initialization of interval vectors can either be done separately (you first create a vector of the desired size and then fill it with the intervals) or
+simultaneously, by giving an array of <code class="docutils literal notranslate"><span class="pre">double</span></code> in argument of the constructor.
+The following example creates twice ([0,1],[2,3],[4,5]):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// creates ([0,1],[2,3],[4,5]) in several steps.</span>
+	<span class="n">IntervalVector</span> <span class="nf">x1</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span> <span class="c1">// so far x1 is ((-oo,oo),(-oo,oo),(-oo,oo))</span>
+	<span class="n">x1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>  <span class="c1">// we initialize each component</span>
+	<span class="n">x1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+	<span class="n">x1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">);</span>
+
+	<span class="c1">// creates the same vector in two steps only</span>
+	<span class="kt">double</span> <span class="n">_x2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},{</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">},{</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">}};</span>
+	<span class="n">IntervalVector</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">_x2</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This is the same for vectors:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// creates (0.1,0.2,0.3) in several steps.</span>
+	<span class="n">Vector</span> <span class="nf">x1</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>  <span class="c1">// so far x1 is (0,0,0)</span>
+	<span class="n">x1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">0.1</span><span class="p">;</span>     <span class="c1">// we initialize each component</span>
+	<span class="n">x1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mf">0.2</span><span class="p">;</span>
+	<span class="n">x1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mf">0.3</span><span class="p">;</span>
+
+	<span class="c1">// creates the same vector in two steps only</span>
+	<span class="kt">double</span> <span class="n">_x2</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">};</span>
+	<span class="n">Vector</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">_x2</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>You can also create an (interval) vector by duplicating n times the same double/interval and copy another (interval) vector:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">IntervalVector</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>         <span class="c1">// create ([1,2],[1,2],[1,2])</span>
+	<span class="n">IntervalVector</span> <span class="nf">x3</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mf">0.1</span><span class="p">);</span>                   <span class="c1">// create ([0.1,0.1],[0.1,0.1],[0.1,0.1])</span>
+	<span class="n">Vector</span>         <span class="nf">x4</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mf">0.1</span><span class="p">);</span>                   <span class="c1">// create (0.1,0.1,0.1)</span>
+
+	<span class="n">IntervalVector</span> <span class="nf">x5</span><span class="p">(</span><span class="n">x2</span><span class="p">);</span>                      <span class="c1">// create a copy of x2</span>
+	<span class="n">Vector</span> <span class="nf">x6</span><span class="p">(</span><span class="n">x4</span><span class="p">);</span>                              <span class="c1">// create a copy of x4</span>
+</pre></div>
+</div>
+<p>Finally, you can create an empty interval vector of a given size (see <a class="reference internal" href="#itv-empty-set"><span class="std std-ref">The empty set</span></a>) or create a degenerated box from a vector of reals:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">IntervalVector</span> <span class="n">x1</span><span class="o">=</span><span class="n">IntervalVector</span><span class="o">::</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span> <span class="c1">// create a vector of 3 empty intervals</span>
+
+	<span class="n">Vector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mf">0.1</span><span class="p">);</span>
+	<span class="n">IntervalVector</span> <span class="nf">x2</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>                       <span class="c1">// create ([0.1,0.1],[0.1,0.1],[0.1,0.1])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="matrices-and-array-of-matrices">
+<h3>Matrices and Array of matrices<a class="headerlink" href="#matrices-and-array-of-matrices" title="Permalink to this headline">¶</a></h3>
+<p>They work exactly the same way as vectors.
+Here are first listed different ways to build a <code class="docutils literal notranslate"><span class="pre">Matrix</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// create [(1,2,3);(4,5,6)] in several steps.</span>
+	<span class="n">Matrix</span> <span class="nf">m1</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>   <span class="c1">// a 2x3 matrix filled with zeros</span>
+	<span class="n">m1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>       <span class="c1">// we initialize each component</span>
+	<span class="n">m1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+	<span class="n">m1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mi">3</span><span class="p">;</span>
+	<span class="n">m1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">4</span><span class="p">;</span>
+	<span class="n">m1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">5</span><span class="p">;</span>
+	<span class="n">m1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mi">6</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;m1=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">m1</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="c1">// create the same matrix in two steps only</span>
+	<span class="kt">double</span> <span class="n">_m2</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span>
+			 <span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">};</span>
+	<span class="n">Matrix</span> <span class="nf">m2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">_m2</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;m2=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">m2</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="c1">// create a 2x3 matrix filled with ones</span>
+	<span class="n">Matrix</span> <span class="nf">m3</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;m3=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">m3</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="c1">// the same matrix using a built-in static function</span>
+	<span class="n">Matrix</span> <span class="n">m4</span><span class="o">=</span><span class="n">Matrix</span><span class="o">::</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+
+	<span class="c1">// create a copy of m3</span>
+	<span class="n">Matrix</span> <span class="nf">m5</span><span class="p">(</span><span class="n">m3</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;m5=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">m5</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+<p>Now, for interval matrices, we shall take as example a matrix that frequently appears, the “perturbed” idendity, that is:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{pmatrix}
+[1-\varepsilon,1+\varepsilon]    &amp; \ldots    &amp;  [-\varepsilon,\varepsilon] \\
+\vdots                           &amp; \ddots &amp; \vdots\\
+[-\varepsilon,\varepsilon]       &amp; \ldots &amp; [1-\varepsilon,1+\varepsilon]
+\end{pmatrix}\end{split}\]</div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="kt">double</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-02</span><span class="p">;</span>
+
+	<span class="c1">// create in several steps.</span>
+	<span class="n">IntervalMatrix</span> <span class="nf">m1</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>                   <span class="c1">// a 3x3 matrix filled with (-oo,oo)</span>
+	<span class="n">m1</span><span class="o">=</span><span class="n">Matrix</span><span class="o">::</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>                        <span class="c1">// set m1 to the identity matrix</span>
+	<span class="n">m1</span><span class="o">+=</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="n">eps</span><span class="p">)</span><span class="o">*</span><span class="n">Matrix</span><span class="o">::</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>   <span class="c1">// add [-eps,eps] to each component</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;m1=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">m1</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="c1">// create the same matrix with a matrix of double</span>
+	<span class="c1">// warning: the matrix of double has a number of rows</span>
+	<span class="c1">// equal to the total number of components (9) and</span>
+	<span class="c1">// 2 columns (left bound, right bound).</span>
+	<span class="kt">double</span> <span class="n">_m2</span><span class="p">[</span><span class="mi">3</span><span class="o">*</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{{</span><span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="mi">1</span><span class="o">+</span><span class="n">eps</span><span class="p">},{</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="n">eps</span><span class="p">},{</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="n">eps</span><span class="p">},</span>
+	                   <span class="p">{</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="n">eps</span><span class="p">},{</span><span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="mi">1</span><span class="o">+</span><span class="n">eps</span><span class="p">},{</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="n">eps</span><span class="p">},</span>
+	                   <span class="p">{</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="n">eps</span><span class="p">},{</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="n">eps</span><span class="p">},{</span><span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="mi">1</span><span class="o">+</span><span class="n">eps</span><span class="p">}};</span>
+
+	<span class="n">IntervalMatrix</span> <span class="nf">m2</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">_m2</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;m2=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">m2</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="c1">// create a 3x3 matrix filled with [-eps,eps]</span>
+	<span class="n">IntervalMatrix</span> <span class="nf">m3</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span><span class="n">eps</span><span class="p">));</span>
+	<span class="n">m3</span><span class="o">+=</span><span class="n">Matrix</span><span class="o">::</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;m3=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">m3</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="c1">// create a copy of m3</span>
+	<span class="n">IntervalMatrix</span> <span class="nf">m4</span><span class="p">(</span><span class="n">m3</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;m4=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">m4</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+</div>
+</div>
+<div class="section" id="container-operations">
+<h2>Container operations<a class="headerlink" href="#container-operations" title="Permalink to this headline">¶</a></h2>
+<p>This section presents operations on interval vectors and interval matrices viewed as containers.</p>
+<p>Most of the operations are also possible with vectors (<code class="docutils literal notranslate"><span class="pre">Vector</span></code>) and matrices (<code class="docutils literal notranslate"><span class="pre">Matrix</span></code>) by
+replacing <code class="docutils literal notranslate"><span class="pre">Interval</span></code> with <code class="docutils literal notranslate"><span class="pre">double</span></code> and so on. They are not detailed again here, please refer
+to the API.</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Container operations for an interval vector x</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 30%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Return type</p></th>
+<th class="head"><p><em>C++ code</em></p></th>
+<th class="head"><p><em>Meaning</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>int</p></td>
+<td><p>x.size()</p></td>
+<td><p>The size (number of components)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Interval&amp;</p></td>
+<td><p>x[i]</p>
+<p><em>(int i)</em></p>
+</td>
+<td><p>The ith component. By reference.</p></td>
+</tr>
+<tr class="row-even"><td><p>IntervalVector</p></td>
+<td><p>x.subvector(i,j)</p>
+<p><em>(int i, int j)</em></p>
+</td>
+<td><p>Return the subvector of length (j-i+1) starting at
+index i and ending at index j (both included).
+By copy. [x] must be <strong>non-empty.</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>void</p></td>
+<td><p>x.resize(n)</p>
+<p><em>(int n)</em></p>
+</td>
+<td><p>Resize the vector. If the vector has been enlarged
+the extra components are set to
+<span class="math notranslate nohighlight">\((-\infty,+\infty)\)</span> even if the vector is empty.</p></td>
+</tr>
+<tr class="row-even"><td><p>void</p></td>
+<td><p>x.put(i, y)</p>
+<p><em>(int i, IntervalVector&amp; y)</em></p>
+</td>
+<td><p>Write the vector [y] in [x] at index i.</p></td>
+</tr>
+<tr class="row-odd"><td><p>void</p></td>
+<td><p>x.clear()</p></td>
+<td><p>Set all the elements to [0,0] (even if [x] is empty).
+Emptiness is “overridden”.</p></td>
+</tr>
+<tr class="row-even"><td><p>void</p></td>
+<td><p>x.init(y)</p>
+<p><em>(Interval&amp; y)</em></p>
+</td>
+<td><p>Set all the elements to [y] (even if [x] is empty).
+Emptiness is “overridden”.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Container operations for an interval matrix m</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 30%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Return type</p></th>
+<th class="head"><p><em>C++ code</em></p></th>
+<th class="head"><p><em>Meaning</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>int</p></td>
+<td><p>m.nb_rows()</p></td>
+<td><p>Number of rows</p></td>
+</tr>
+<tr class="row-odd"><td><p>int</p></td>
+<td><p>m.nb_cols()</p></td>
+<td><p>Number of column</p></td>
+</tr>
+<tr class="row-even"><td><p>Interval&amp;</p></td>
+<td><p>m[i][j]</p>
+<p><em>(int i, int j)</em></p>
+</td>
+<td><p>The (i,j)th entry. By reference.</p></td>
+</tr>
+<tr class="row-odd"><td><p>IntervalVector&amp;</p></td>
+<td><p>m.row(i)</p>
+<p><em>(int i)</em></p>
+</td>
+<td><p>The ith row. By <strong>reference</strong> (fast).</p></td>
+</tr>
+<tr class="row-even"><td><p>IntervalVector</p></td>
+<td><p>m.col(j)</p>
+<p><em>(int j)</em></p>
+</td>
+<td><p>The jth column. By <strong>copy</strong> (slow, in O(n))</p></td>
+</tr>
+<tr class="row-odd"><td><p>IntervalMatrix</p></td>
+<td><p>m.rows(i1,i2)</p>
+<p><em>(int i1, int i2)</em></p>
+</td>
+<td><p>The submatrix obtained by selecting rows between
+index i1 and i2. By copy.</p></td>
+</tr>
+<tr class="row-even"><td><p>IntervalMatrix</p></td>
+<td><p>m.cols(j1,j2)</p>
+<p><em>(int j1, int j2)</em></p>
+</td>
+<td><p>The submatrix obtained by selecting columns between
+index j1 and j2. By copy.</p></td>
+</tr>
+<tr class="row-odd"><td><p>IntervalMatrix</p></td>
+<td><p>m.submatrix(i1,i2,j1,j2)</p>
+<p><em>(int i1, int i2,
+int j1, int j2)</em></p>
+</td>
+<td><p>The submatrix by selecting rows from index i1
+to i2 (both included) and columns from index j1 to j2
+(both included).</p></td>
+</tr>
+<tr class="row-even"><td><p>void</p></td>
+<td><p>m.resize(n1,n2)</p>
+<p><em>(int n1, int n2)</em></p>
+</td>
+<td><p>Resize the matrix to a n1xn2 matrix. Extra components
+are set to <span class="math notranslate nohighlight">\((-\infty,+\infty)\)</span> even if the
+matrix is empty.</p></td>
+</tr>
+<tr class="row-odd"><td><p>void</p></td>
+<td><p>m.set_row(i, y)</p>
+<p><em>(int i, IntervalVector&amp; y)</em></p>
+</td>
+<td><p>Write the vector [y] in the ith row of [m].</p></td>
+</tr>
+<tr class="row-even"><td><p>void</p></td>
+<td><p>m.set_col(i, y)</p>
+<p><em>(int i, IntervalVector&amp; y)</em></p>
+</td>
+<td><p>Write the vector [y] in the ith column of [m].</p></td>
+</tr>
+<tr class="row-odd"><td><p>void</p></td>
+<td><p>m.put(i,j,m2)</p>
+<p><em>(int i, int j,
+IntervalMatrix&amp; m2)</em></p>
+</td>
+<td><p>Write the matrix [m2] in [m] at (i,j) and subsequent
+indices</p></td>
+</tr>
+<tr class="row-even"><td><p>void</p></td>
+<td><p>m.put(i,j,v,b)</p>
+<p><em>(int i, int j,
+IntervalVector&amp; v, bool b)</em></p>
+</td>
+<td><p>Write the vector at (i,j) either in row (if b==true)
+or in column (if b==false).</p></td>
+</tr>
+<tr class="row-odd"><td><p>void</p></td>
+<td><p>m.clear()</p></td>
+<td><p>Set all the elements to [0,0] (even if [m] is empty).
+Emptiness is “overridden”.</p></td>
+</tr>
+<tr class="row-even"><td><p>void</p></td>
+<td><p>m.init(y)</p>
+<p><em>(Interval&amp; y)</em></p>
+</td>
+<td><p>Set all the elements to [y] (even if [m] is empty).
+Emptiness is “overridden”.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="set-membership-operations">
+<span id="itv-set-membership"></span><h2>Set-membership operations<a class="headerlink" href="#set-membership-operations" title="Permalink to this headline">¶</a></h2>
+<p>The operations described here are valid for any “sets” [x] and [y] and
+any “point” p, where a “set” designates here one object of either of the following classes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Interval</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IntervalVector</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IntervalMatrix</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IntervalMatrixArray</span></code>.</p></li>
+</ul>
+<p>Similarly, a “point” either refers to a <code class="docutils literal notranslate"><span class="pre">double</span></code> or an instance of:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Vector</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Matrix</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MatrixArray</span></code>.</p></li>
+</ul>
+<p>Given equidimensional sets [x], [y] and a point p, the following table gives the set-membership
+predicates currently available in Ibex (from release 2.8) and their mathematical intepretation:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 52%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><em>C++ code</em></p></th>
+<th class="head"><p><em>Meaning</em></p></th>
+<th class="head"><p>available from</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x==y</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]=[y]\)</span></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>x!=y</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\neq [y]\)</span></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>x.is_empty()</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]=\emptyset\)</span></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>x.is_subset(y)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\subseteq [y]\)</span></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>x.is_strict_subset(y)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\subseteq  [y]\wedge [x]\neq [y]\)</span></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>x.is_interior_subset(y)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\subseteq \mathring{[y]}\)</span></p></td>
+<td><p>release 2.8</p></td>
+</tr>
+<tr class="row-even"><td><p>x.is_strict_interior_subset(y)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\subseteq \mathring{[y]}\wedge [x]\neq [y]\)</span></p></td>
+<td><p>release 2.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>x.is_superset(y)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\supseteq [y]\)</span></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>x.is_strict_superset(y)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\supseteq [y]\wedge [x]\neq [y]\)</span></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>x.contains(p)</p></td>
+<td><p><span class="math notranslate nohighlight">\(p\in [x]\)</span></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>x.interior_contains(p)</p></td>
+<td><p><span class="math notranslate nohighlight">\(p\in \mathring{[x]}\)</span></p></td>
+<td><p>release 2.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>x.intersects(y)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\cap [y]\neq\emptyset\)</span></p></td>
+<td><p>release 2.8</p></td>
+</tr>
+<tr class="row-even"><td><p>x.overlaps(y)</p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathring{[x]}\cap \mathring{[y]}\neq\emptyset\)</span></p></td>
+<td><p>release 2.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>x.is_disjoint(y)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\cap [y]=\emptyset\)</span></p></td>
+<td><p>release 2.8</p></td>
+</tr>
+</tbody>
+</table>
+<p>Possible set-membership operations between sets are:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 62%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><em>C++ code</em></p></td>
+<td><p><em>Meaning</em></p></td>
+</tr>
+<tr class="row-even"><td><p>x&amp;y</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\cap [y]\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>x|y</p></td>
+<td><p><span class="math notranslate nohighlight">\(\square([x]\cup [y])\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>x.set_empty()</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\leftarrow \emptyset\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>x=y</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\leftarrow [y]\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>x&amp;=y</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\leftarrow ([x]\cap [y])\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>x|=y</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\leftarrow \square([x] \cup [y])\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p>Finally, given two interval vectors [x] and [y] one can call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cart_prod</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to create the Cartesian product.</p>
+<div class="section" id="complementary-and-set-difference">
+<span id="itv-diff"></span><h3>Complementary and set difference<a class="headerlink" href="#complementary-and-set-difference" title="Permalink to this headline">¶</a></h3>
+<p>These set operations are only available for intervals (from release 2.8) and interval vectors.</p>
+<p>In the case of intervals, the function <code class="docutils literal notranslate"><span class="pre">complementary</span></code>  stores the complementary of <code class="docutils literal notranslate"><span class="pre">*this</span></code> in two intervals <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>. More exactly, the result is the
+closure of the complementary since open bounds are not representable (except for infinity and minus infinity). E.g, the “complementary” of <span class="math notranslate nohighlight">\((-\infty,0]\)</span>
+is <span class="math notranslate nohighlight">\([0,+\infty)\)</span>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Interval</span> <span class="nf">x</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+	<span class="n">Interval</span> <span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">;</span> <span class="c1">// to store the result</span>
+
+	<span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="n">x</span><span class="p">.</span><span class="n">complementary</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;complementary of &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">c1</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">)</span> <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; and &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">c2</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+<p>In the case of interval vectors, the function <code class="docutils literal notranslate"><span class="pre">complementary</span></code> calculates the complementary under the form of a union of non-overlapping interval vectors,
+and stores this union into an array that is allocated by the function itself (the variable <code class="docutils literal notranslate"><span class="pre">result</span></code> in the code below). The function returns the size of the union/array.</p>
+<p>To illustrate this, let us first build a function that prints the complementary of an interval vector:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">print_compl</span><span class="p">(</span><span class="k">const</span> <span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">IntervalVector</span><span class="o">*</span> <span class="n">result</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="n">x</span><span class="p">.</span><span class="n">complementary</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;complementary of &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="k">delete</span><span class="p">[]</span> <span class="n">result</span><span class="p">;</span> <span class="c1">// don&#39;t forget to free memory!</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>We can call it now with different vectors. Note that when the vector is the empty set with n components, the complementary is
+a n-dimensional box: <span class="math notranslate nohighlight">\((-\infty,\infty)\times\ldots\times(-\infty,\infty)\)</span>.
+Note also that if the difference is empty, <code class="docutils literal notranslate"><span class="pre">result</span></code> is an array of one element set to the empty box. It is <em>not</em> a zero-sized array containing no element
+(this is illegal in ISO C++). However the returned number is 0 (not 1). The interesting point is that you can call <code class="docutils literal notranslate"><span class="pre">delete[]</span></code> safely, in all cases.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">print_compl</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">::</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+
+	<span class="n">print_compl</span><span class="p">(</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+
+	<span class="n">print_compl</span><span class="p">(</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)));</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+<p>The set difference works exactly the same way except that the function takes as first argument another set [y].</p>
+<p>Example with intervals:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// set difference between two intervals</span>
+	<span class="n">Interval</span> <span class="nf">x</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+	<span class="n">Interval</span> <span class="nf">y</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">Interval</span> <span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">;</span> <span class="c1">// to store the result</span>
+
+	<span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="n">x</span><span class="p">.</span><span class="n">diff</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; </span><span class="se">\\</span><span class="s"> &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">y</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">c1</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">)</span> <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; and &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">c2</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Example with interval vectors:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// set difference between two boxes</span>
+	<span class="n">IntervalVector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">));</span>
+	<span class="n">IntervalVector</span> <span class="nf">y</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
+	<span class="n">IntervalVector</span><span class="o">*</span> <span class="n">result</span><span class="p">;</span> <span class="c1">// to store the result</span>
+
+	<span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="n">x</span><span class="p">.</span><span class="n">diff</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">result</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; </span><span class="se">\\</span><span class="s"> &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">y</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">delete</span><span class="p">[]</span> <span class="n">result</span><span class="p">;</span> <span class="c1">// don&#39;t forget to free memory!</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="geometric-operations">
+<span id="itv-geom"></span><h2>Geometric operations<a class="headerlink" href="#geometric-operations" title="Permalink to this headline">¶</a></h2>
+<p>Here are the functions that can be applied to an <strong>interval [x]</strong>, seen as a segment of the line.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 18%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><em>Return type</em></p></th>
+<th class="head"><p><em>C++ code</em></p></th>
+<th class="head"><p><em>Meaning</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>double</p></td>
+<td><p>x.lb()</p></td>
+<td><p><span class="math notranslate nohighlight">\(\underline{x}\)</span>, the lower (left) bound of [x]</p></td>
+</tr>
+<tr class="row-odd"><td><p>double</p></td>
+<td><p>x.ub()</p></td>
+<td><p><span class="math notranslate nohighlight">\(\overline{x}\)</span>, the upper (right) bound of [x]</p></td>
+</tr>
+<tr class="row-even"><td><p>double</p></td>
+<td><p>x.diam()</p></td>
+<td><p>diameter, <span class="math notranslate nohighlight">\(|\overline{x}-\underline{x}|\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>double</p></td>
+<td><p>x.rad()</p></td>
+<td><p>radius, half of the diameter</p></td>
+</tr>
+<tr class="row-even"><td><p>double</p></td>
+<td><p>x.mid()</p></td>
+<td><p>the midpoint, (<span class="math notranslate nohighlight">\((\underline{x}+\overline{x})/2\)</span>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Interval</p></td>
+<td><p>x.inflate(eps)</p>
+<p><em>(double eps)</em></p>
+</td>
+<td><p>an interval with the same midpoint and radius increased by eps</p></td>
+</tr>
+<tr class="row-even"><td><p>double</p></td>
+<td><p>distance(x,y)</p>
+<p><em>(Interval&amp; y)</em></p>
+</td>
+<td><p>the (Hausdorff) distance between [x] and [y]. The distance is 0
+iff [x]==[y]. Otherwise, it returns the minimal value by which one of
+the intervals ([x] or [y)) has to be inflated so that it entirely
+overlaps the other interval.</p></td>
+</tr>
+<tr class="row-odd"><td><p>double</p></td>
+<td><p>x.rel_distance(y)</p>
+<p><em>(Interval&amp; y)</em></p>
+</td>
+<td><p>the “relative” distance, that is, distance(x,y)/x.diam()</p></td>
+</tr>
+<tr class="row-even"><td><p>bool</p></td>
+<td><p>x.is_unbounded()</p></td>
+<td><p>true iff [x] has one of its bounds infinite.</p></td>
+</tr>
+<tr class="row-odd"><td><p>bool</p></td>
+<td><p>x.is_bisectable()</p></td>
+<td><p>true iff [x], as an interval of floating point numbers, can be
+bisected in two non-degenerated intervals of floating point numbers.
+The empty interval or an interval of two consecutive floating points
+are not bisectable.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Here are the functions that can be applied to an <strong>interval vector [x]</strong>, seen as a box.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 22%" />
+<col style="width: 62%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><em>Return type</em></p></th>
+<th class="head"><p><em>C++ code</em></p></th>
+<th class="head"><p><em>Meaning</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Vector</p></td>
+<td><p>x.lb()</p></td>
+<td><p>lower-left corner (vector of  lower bounds of [x])</p></td>
+</tr>
+<tr class="row-odd"><td><p>Vector</p></td>
+<td><p>x.ub()</p></td>
+<td><p>upper-right corner (vector of  upper bounds of [x])</p></td>
+</tr>
+<tr class="row-even"><td><p>Vector</p></td>
+<td><p>x.diam()</p></td>
+<td><p>vector of diameters, <span class="math notranslate nohighlight">\(|\overline{x_i}-\underline{x_i}|\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>double</p></td>
+<td><p>x.min_diam()</p></td>
+<td><p>minimal diameter, among all components of [x]</p></td>
+</tr>
+<tr class="row-even"><td><p>double</p></td>
+<td><p>x.max_diam()</p></td>
+<td><p>maximal diameter, among all components of [x]</p></td>
+</tr>
+<tr class="row-odd"><td><p>int</p></td>
+<td><p>x.extr_diam_index(b)</p>
+<p><em>(bool b)</em></p>
+</td>
+<td><dl class="simple">
+<dt>the index of a component with minimal (if b==true) or maximal</dt><dd><p>(if b==false) diameter.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><p>void</p></td>
+<td><p>x.sort_indices(b, tab)</p>
+<p><em>(bool b, int tab[])</em></p>
+</td>
+<td><p>Write into <code class="docutils literal notranslate"><span class="pre">tab</span></code> the indices of all the components, sorted by
+increasing (if b==true) /decreasing (if b==false) diameters.</p>
+<p>The array <code class="docutils literal notranslate"><span class="pre">tab</span></code> must have been allocated before calling this
+function.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Vector</p></td>
+<td><p>x.rad()</p></td>
+<td><p>vector of radii  (halves of diameters)</p></td>
+</tr>
+<tr class="row-even"><td><p>Vector</p></td>
+<td><p>x.mid()</p></td>
+<td><p>the midpoint, (<span class="math notranslate nohighlight">\((\underline{x}+\overline{x})/2\)</span>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>double</p></td>
+<td><p>x.volume()</p></td>
+<td><p>the volume of the box</p></td>
+</tr>
+<tr class="row-even"><td><p>double</p></td>
+<td><p>x.perimeter()</p></td>
+<td><p>the perimeter of the box</p></td>
+</tr>
+<tr class="row-odd"><td><p>bool</p></td>
+<td><p>x.is_flat()</p></td>
+<td><p>true if the volume is null (one dimension is degenerated)</p></td>
+</tr>
+<tr class="row-even"><td><p>IntervalVector</p></td>
+<td><p>x.inflate(eps)</p>
+<p><em>(double eps)</em></p>
+</td>
+<td><p>a box  with the same midpoint and each radius increased by eps%</p></td>
+</tr>
+<tr class="row-odd"><td><p>double</p></td>
+<td><p>distance(x,y)</p>
+<p><em>(IntervalVector&amp; y)</em></p>
+</td>
+<td><p>the (Hausdorff) distance between [x] and [y]. The distance is 0
+iff [x]==[y]. Otherwise, it returns the minimal value by which one of
+the boxes ([x] or [y]) has to be inflated so that it
+entirely overlaps the other box.</p></td>
+</tr>
+<tr class="row-even"><td><p>double</p></td>
+<td><p>x.rel_distance(y)</p>
+<p><em>(IntervalVector&amp; y)</em></p>
+</td>
+<td><p>the “relative” distance, that is, distance(x,y)/x.max_diam()</p></td>
+</tr>
+<tr class="row-odd"><td><p>bool</p></td>
+<td><p>x.is_unbounded()</p></td>
+<td><p>true iff [x] has one of its bounds infinite.</p></td>
+</tr>
+<tr class="row-even"><td><p>bool</p></td>
+<td><p>x.is_bisectable()</p></td>
+<td><p>true iff at least one component of [x] is bisectable (see above).</p></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="bisection">
+<span id="itv-bisect"></span><h3>Bisection<a class="headerlink" href="#bisection" title="Permalink to this headline">¶</a></h3>
+<p>Bisecting a box is a fundamental operation in Ibex. The choice of the component to be bisected is often critical
+and defining a strategy for chosing this component is the purpose of <a class="reference internal" href="strategy.html#strategy-bisectors"><span class="std std-ref">Bisectors</span></a>.</p>
+<p>To bisect the ith component, the <code class="docutils literal notranslate"><span class="pre">bisect</span></code> function can be used.
+The first arugment is the index of the dimension i along which the box has to be splitted.
+The second argument is optionnal and gives at which point the ith interval is bisected.
+This argument is entered as a ratio of the interval diameter, 0.5 means “midpoint” (and the default value is precisely 0.5).
+Example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">IntervalVector</span> <span class="nf">x</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">));</span> <span class="c1">// [0,1]x[0,1]x[0,1]</span>
+
+	<span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">IntervalVector</span><span class="p">,</span><span class="n">IntervalVector</span><span class="o">&gt;</span> <span class="n">p</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">bisect</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.4</span><span class="p">);</span> <span class="c1">// bisect the second component with ratio 0.4</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;first box=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">p</span><span class="p">.</span><span class="n">first</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;second box=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">p</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+</div>
+</div>
+<div class="section" id="miscellaneous">
+<h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h2>
+<p>Given an interval [x]:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 86%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><em>C++ code</em></p></th>
+<th class="head"><p><em>Meaning</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x.mig()</p></td>
+<td><p>Mignitude, <span class="math notranslate nohighlight">\(\min_{x\in[x]} |x|\)</span> (a double). Also exists for
+interval vectors and matrices (gives a vector or matrix of mignitudes).</p></td>
+</tr>
+<tr class="row-odd"><td><p>x.mag()</p></td>
+<td><p>Magnitude, <span class="math notranslate nohighlight">\(\max_{x\in[x]} |x|\)</span> (a double). Also exists for
+interval vectors and matrices (gives a vector or matrix of magnitudes).</p></td>
+</tr>
+<tr class="row-even"><td><p>integer(x)</p></td>
+<td><p>The largest interval [a,b] of integers included in [x].</p></td>
+</tr>
+</tbody>
+</table>
+<p>Finally, for an interval vector [v]:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 86%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>v.random()</p></td>
+<td><p>A random point inside x</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="interval-arithmetic">
+<span id="itv-arith"></span><h2>Interval arithmetic<a class="headerlink" href="#interval-arithmetic" title="Permalink to this headline">¶</a></h2>
+<p>Interval arithmetic is the main device upon wich Ibex is built.</p>
+<p>For a complete introduction of interval arithmetic and interval analysis, see <a class="reference internal" href="reference.html#moore66"><span class="std std-ref">[Moore 1966]</span></a>, <a class="reference internal" href="reference.html#neumaier90"><span class="std std-ref">[Neumaier 1990]</span></a> or <a class="reference internal" href="reference.html#jaulin01"><span class="std std-ref">[Jaulin et al. 2001]</span></a>.</p>
+<p>The interval arithmetic defines for each elementary function <span class="math notranslate nohighlight">\(f:\mathbb{R}^n\to\mathbb{R}\)</span> an interval function
+<span class="math notranslate nohighlight">\([f]:\mathbb{IR}^n\to\mathbb{IR}\)</span> according to the formula:</p>
+<div class="math notranslate nohighlight">
+\[[f]([x]) \supseteq \square\{f(\alpha), \ \alpha\in [x] \}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\square\)</span> (the “hull” symbol) in front of a set means “the smallest box enclosing this set”.
+The hull symbol is here to highlight the fact that an enclosure of the possibly discontinuous set is returned. Note that, among all the functions below,
+only <code class="docutils literal notranslate"><span class="pre">tan</span></code> and <code class="docutils literal notranslate"><span class="pre">sign</span></code> fail to be continuous. So, in the other cases, the “hull” operator can be ommitted.
+The possible roundoff error accounts for the <span class="math notranslate nohighlight">\(\supseteq\)</span> symbol.</p>
+<p>The function [f] is called an “interval extension” of the original function f (applied on real numbers).</p>
+<p>We start by detailing the binary operators (+,-,*,/) and then proceed with the nonlinear ones.</p>
+<div class="section" id="addition-subtraction-multiplication">
+<h3>Addition, subtraction, multiplication<a class="headerlink" href="#addition-subtraction-multiplication" title="Permalink to this headline">¶</a></h3>
+<p>The following tables sumarize the basic operations of linear algebra in Ibex.
+It is important to notice that (so far?), theses operations are <strong>not</strong> optimized, as compared to
+specialized softwares like <a class="reference external" href="http://www.ti3.tu-harburg.de/rump/intlab/">Intlab</a>. They are all based on naive implementations.</p>
+<ul class="simple">
+<li><p>Symbols x and y denote scalars (<code class="docutils literal notranslate"><span class="pre">double</span></code> or instances of <code class="docutils literal notranslate"><span class="pre">Interval</span></code>);</p></li>
+<li><p>Symbols v and w denote vectors (instances of <code class="docutils literal notranslate"><span class="pre">Vector</span></code> or <code class="docutils literal notranslate"><span class="pre">IntervalVector</span></code>)</p></li>
+<li><p>Symbols A and B denotes matrices (instances of <code class="docutils literal notranslate"><span class="pre">Matrix</span></code> or <code class="docutils literal notranslate"><span class="pre">IntervalMatrix</span></code>).</p></li>
+</ul>
+<p>Notice that it is not possible (at least in the current release) to appply such operations with objects of type <code class="docutils literal notranslate"><span class="pre">IntervalMatrixArray</span></code>, the latter
+being considered as a pure “set” or, more pragmmatically, as a matrix container. In other words, arrays of interval matrices are not a 3rd order tensor.</p>
+<p>Possible additions and subtractions (with optionally assignments) are:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>-x</p></td>
+<td><p>x+y</p></td>
+<td><p>x-y</p></td>
+<td><p>x+=y</p></td>
+<td><p>x-=y</p></td>
+</tr>
+<tr class="row-even"><td><p>-v</p></td>
+<td><p>v+w</p></td>
+<td><p>v-w</p></td>
+<td><p>v+=w</p></td>
+<td><p>v-=w</p></td>
+</tr>
+<tr class="row-odd"><td><p>-A</p></td>
+<td><p>A+B</p></td>
+<td><p>A-B</p></td>
+<td><p>A+=B</p></td>
+<td><p>A-=B</p></td>
+</tr>
+</tbody>
+</table>
+<p>Possible multiplications are:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 62%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><em>C++ code</em></p></td>
+<td><p><em>Meaning</em></p></td>
+</tr>
+<tr class="row-even"><td><p>x*y</p></td>
+<td><p>multiplication of two “scalars” (double/intervals)</p></td>
+</tr>
+<tr class="row-odd"><td><p>x*=y</p></td>
+<td><p>multiplication and assignment</p></td>
+</tr>
+<tr class="row-even"><td><p>x*v</p></td>
+<td><p>scalar multiplication of a vector</p></td>
+</tr>
+<tr class="row-odd"><td><p>x*A</p></td>
+<td><p>scalar multiplication of a matrix</p></td>
+</tr>
+<tr class="row-even"><td><p>v*w</p></td>
+<td><p>dot product (<span class="math notranslate nohighlight">\(v^Tw\)</span>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>hadamard_product(v,w)</p></td>
+<td><p><span class="math notranslate nohighlight">\((v_1w_1,\ldots,v_nw_n)\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>outer_product(v,w)</p></td>
+<td><p>outer product (<span class="math notranslate nohighlight">\(vw^T\)</span>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>A*x</p></td>
+<td><p>matrix-vector product</p></td>
+</tr>
+<tr class="row-even"><td><p>A*B</p></td>
+<td><p>matrix product</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="division">
+<h3>Division<a class="headerlink" href="#division" title="Permalink to this headline">¶</a></h3>
+<p>First, it is possile to use division between two interval/doubles using C++ operator overloading, as for the previous operators.
+You can either write <code class="docutils literal notranslate"><span class="pre">x/y</span></code> (division) or <code class="docutils literal notranslate"><span class="pre">x/=y</span></code> (division and assignment).</p>
+<p>However, as a set-membership operator, and because the division of reals is non-continuous, dividing two intevals may result in a union of two intervals.
+E.g.,</p>
+<div class="math notranslate nohighlight">
+\[\,\![2,3] / [-1,2] =  \{ x/y, x\in[2,3], y\in[-1,2] \} = (-\infty,-2]\cup[1,+\infty)\]</div>
+<p>This variant of the interval division is called “generalized division” in the litterature.
+The previous division operator / simply gives (in Ibex) the hull of this union. So, in C++, [2,3] / [-1,2] gives
+<span class="math notranslate nohighlight">\((-\infty,\infty)\)</span>. If you want to handle the possible outcome of two intervals,
+you have to call the “div2” function.</p>
+<p>Given four intervals [x],[y], [out1] and [out2]:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">div2(x,y,out1,out2)</span></code></p>
+</div></blockquote>
+<p>will store the union representing [x]/[y] in [out1] and [out2]. If the result is a single interval, [out2] is set to the empty interval.
+If the result is the empty set, both [out1] and [out2] are set to the empty interval.</p>
+<p><strong>Note:</strong> Contrary to the “cset” theory, the result is empty if y=[0,0] (whatever [x] is).</p>
+<p>For convenience, there is also a function in the <code class="docutils literal notranslate"><span class="pre">Interval</span></code> class that simultaneously performs divsion and intersection:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">bool</span> <span class="n">div2_inter</span><span class="p">(</span><span class="n">const</span> <span class="n">Interval</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span> <span class="n">const</span> <span class="n">Interval</span><span class="o">&amp;</span> <span class="n">y</span><span class="p">,</span> <span class="n">Interval</span><span class="o">&amp;</span> <span class="n">out2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This function sets <code class="docutils literal notranslate"><span class="pre">*this</span></code> to the intersection of itself with the division of two others, [x] and [y].</p>
+<p>In return, <code class="docutils literal notranslate"><span class="pre">*this</span></code> and [out2] contains the lower and upper part respectively of the division.
+If the result of the generalized division and intersection is a single interval, [out2] is set to the empty interval.</p>
+<p>The function returns true if the intersection is non empty.</p>
+<p>Example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Interval</span> <span class="nf">intv</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">);</span>
+	<span class="n">Interval</span> <span class="n">out2</span><span class="p">;</span>
+	<span class="kt">bool</span> <span class="n">result</span><span class="o">=</span><span class="n">intv</span><span class="p">.</span><span class="n">div2_inter</span><span class="p">(</span><span class="n">Interval</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">out2</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;the intersection is &quot;</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">result</span><span class="o">?</span> <span class="s">&quot;not&quot;</span><span class="o">:</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; empty&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;left part=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">intv</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; right part=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">out2</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="non-linear-elementary-functions">
+<h3>Non-linear elementary functions<a class="headerlink" href="#non-linear-elementary-functions" title="Permalink to this headline">¶</a></h3>
+<p>The following operations are allowed for an interval [x].</p>
+<div class="section" id="power-and-roots">
+<h4>Power and roots<a class="headerlink" href="#power-and-roots" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 77%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><em>C++ code</em></p></td>
+<td><p><em>Meaning</em></p></td>
+</tr>
+<tr class="row-even"><td><p>sqr(x)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]^2\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>sqrt(x)</p></td>
+<td><p><span class="math notranslate nohighlight">\(\sqrt{[x]}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>pow(x,n)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]^n\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>pow(x,y)</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]^{[y]} = e^{[y]\log([x])}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>root(x,n)</p></td>
+<td><p><span class="math notranslate nohighlight">\(\sqrt[n]{[x]}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="exponenial-logarithm">
+<h4>Exponenial, logarithm<a class="headerlink" href="#exponenial-logarithm" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 56%" />
+<col style="width: 44%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>exp(x)</p></td>
+<td><p>log(x)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="trigonometric-and-hyperbolic-functions">
+<h4>Trigonometric and hyperbolic functions<a class="headerlink" href="#trigonometric-and-hyperbolic-functions" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 31%" />
+<col style="width: 31%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>cos(x)</p></td>
+<td><p>sin(x)</p></td>
+<td><p>tan(x)</p></td>
+</tr>
+<tr class="row-even"><td><p>acos(x)</p></td>
+<td><p>asin(x)</p></td>
+<td><p>atan(x)</p></td>
+</tr>
+<tr class="row-odd"><td><p>cosh(x)</p></td>
+<td><p>sinh(x)</p></td>
+<td><p>tanh(x)</p></td>
+</tr>
+<tr class="row-even"><td><p>acosh(x)</p></td>
+<td><p>asinh(x)</p></td>
+<td><p>atanh(x)</p></td>
+</tr>
+<tr class="row-odd"><td><p>atan2(y,x)</p></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="max-min-and-miscellaneous">
+<h4>Max, min and miscellaneous<a class="headerlink" href="#max-min-and-miscellaneous" title="Permalink to this headline">¶</a></h4>
+<p>The sign function below is the interval extension of</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}sign(\alpha) := \left\{\begin{array}{ll} -1  &amp; \mbox{if} \ \alpha&lt;0 \\
+                                          0  &amp; \mbox{if} \ \alpha=0 \\
+                                          1  &amp; \mbox{if} \ \alpha&gt;0 \\
+                       \end{array}\right.\end{split}\]</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 86%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><em>C++ code</em></p></th>
+<th class="head"><p><em>Meaning</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>abs(x)</p></td>
+<td><p>interval extension of the absolute value. Not to be confused with
+magnitude; e.g. with [x]=[-2,1], abs([x])=[0,2] and the magnitude is 2.</p></td>
+</tr>
+<tr class="row-odd"><td><p>max(x,y)</p></td>
+<td><p>interval extension of the maximum. Not to be confused with
+<span class="math notranslate nohighlight">\(\max ([x]\cup [y])\)</span>; e.g., max([0,3],[1,2])=[1,3].</p></td>
+</tr>
+<tr class="row-even"><td><p>min(x,y)</p></td>
+<td><p>interval extension of the minimum. Not to be confused with
+<span class="math notranslate nohighlight">\(\min ([x]\cup [y])\)</span>; e.g., min([0,3],[1,2])=[0,2].</p></td>
+</tr>
+<tr class="row-odd"><td><p>sign(x)</p></td>
+<td><p>(see above)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section" id="backward-arithmetic">
+<span id="itv-bwd-arith"></span><h2>Backward arithmetic<a class="headerlink" href="#backward-arithmetic" title="Permalink to this headline">¶</a></h2>
+<p>The “backward” or “relationnal” arithmetic consists in contraction operators for elementary constraints like</p>
+<div class="math notranslate nohighlight">
+\[y= x_1+x_2.\]</div>
+<p>More precisely, given a function <span class="math notranslate nohighlight">\(f:\mathbb{R}\to\mathbb{R}\)</span> (<span class="math notranslate nohighlight">\(\sin, \cos, \exp\, \ldots\)</span>) the backward operator of f
+is an interval function <span class="math notranslate nohighlight">\([f]_{bwd}:\mathbb{IR}^2\to\mathbb{IR}\)</span> that satisfies:</p>
+<div class="math notranslate nohighlight">
+\[[f]_{bwd}([x],[y]) \supseteq \{ x\in [x] \ | \ \exists y\in [y], \quad y=f(x) \}.\]</div>
+<p>Similarly, given a binary function <span class="math notranslate nohighlight">\(f:\mathbb{R}^2\to\mathbb{R}\)</span> (<span class="math notranslate nohighlight">\(+, -, \times, \max, \ldots\)</span>) the backward operator
+is a function <span class="math notranslate nohighlight">\([f]_{bwd}:\mathbb{IR}^2\to\mathbb{IR}\)</span> that satisfies:</p>
+<div class="math notranslate nohighlight">
+\[[f]_{bwd}([x]_1,[x]_2,[y])\supseteq\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=f(x_1,x_2)\}.\]</div>
+<p>In practice, backward operators in Ibex do not return an interval, they directly contracts the input interval [x] (in case of unary functions), that is:</p>
+<div class="math notranslate nohighlight">
+\[[x] \leftarrow [f]_{bwd}([x],[y])\]</div>
+<p>or the two intervals [x1], [x2] (in case of binary functions):</p>
+<div class="math notranslate nohighlight">
+\[([x]_1,[x]_2) \leftarrow [f]_{bwd}([x]_1,[x]_2,[y]).\]</div>
+<p>So the bwd_* functions below all return <code class="docutils literal notranslate"><span class="pre">void</span></code>.</p>
+<p><strong>Note:</strong> One important feature in Ibex is the ability to contract with respect to any constraints and, in particular, with constraints under the form</p>
+<div class="math notranslate nohighlight">
+\[y=f(x_1,\ldots,x_n)\]</div>
+<p>where f is an arbirary <a class="reference internal" href="function.html#mod-func"><span class="std std-ref">function</span></a>. So, as a user, there is probably little interset for you to call the low-level routines presented here.
+Moreover, these routines only contracts the “pre-image argument” [x]; they <strong>don’t contract the “image argument” [y]</strong>. This is in contrast with high-level contractors
+like <a class="reference internal" href="contractor.html#ctc-fwd-bwd"><span class="std std-ref">Forward-Backward</span></a> that do both contractions (on [x] and [y]).</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" rowspan="2"><p><em>C++ code</em></p></th>
+<th class="head" rowspan="2"><p><em>Relation</em></p></th>
+</tr>
+<tr class="row-even"></tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td rowspan="2"><p>bwd_add(y,x1,x2)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=x_1+x_2\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_sub(y,x1,x2)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=x_1-x_2\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_mul(y,x1,x2)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=x_1\times x_2\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_div(y,x1,x2)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=x_1/x_2\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_sqr(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=x^2\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_sqrt(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\sqrt{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_pow(y,n,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=x^n\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_pow(y,x1,x2)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=x_1^{x_2}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_root(y,n,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\sqrt[n]{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_exp(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\exp{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_log(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\ln{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_cos(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\cos{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_sin(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\sin{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_tan(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\tan{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_acos(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\arccos{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_asin(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\arcsin{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_atan(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\arctan{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_cosh(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\cosh{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_sinh(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\sinh{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_tanh(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\tanh{x}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_acosh(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\operatorname{arcosh}(x)\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_asinh(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\operatorname{arsinh}(x)\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_atanh(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\operatorname{artanh}(x)\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_atan2(y,x1,x2)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=atan2(x_1,x_2)\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_abs(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=|x|\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_sign(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=sign(x)\)</span> (see def. above)</p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_integer(y,x)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=x \wedge x\in\mathbb{N}\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_min(y,x1,x2)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\min(x_1,x_2)\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+<tr class="row-odd"><td rowspan="2"><p>bwd_max(y,x1,x2)</p></td>
+<td rowspan="2"><p><span class="math notranslate nohighlight">\(y=\max(x_1,x_2)\)</span></p></td>
+</tr>
+<tr class="row-even"></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="inner-arithmetic">
+<span id="itv-inner-arith"></span><h2>Inner arithmetic<a class="headerlink" href="#inner-arithmetic" title="Permalink to this headline">¶</a></h2>
+<p>The inner arithmetic  <a class="reference internal" href="reference.html#chabert10"><span class="std std-ref">[Chabert &amp; Beldiceanu 2010]</span></a> <a class="reference internal" href="reference.html#araya14"><span class="std std-ref">[Araya et al 2014]</span></a> consists in two types of operators.
+Given a function <span class="math notranslate nohighlight">\(f:\mathbb{R}^n\to\mathbb{R}\)</span>:</p>
+<ul>
+<li><p>the <strong>forward inner operator</strong> is an interval function
+<span class="math notranslate nohighlight">\(]f[:\mathbb{IR}^n\to\mathbb{IR}\)</span> that satisfies the formula:</p>
+<div class="math notranslate nohighlight">
+\[]f[([x]) \subseteq \{f(\alpha), \ \alpha\in [x] \}\]</div>
+</li>
+<li><p>the <strong>backward inner operator</strong> is an interval function
+<span class="math notranslate nohighlight">\(]f[_{bwd}:\mathbb{IR}^{n+1}\to\mathbb{IR}\)</span> that satisfies the formula:</p>
+<div class="math notranslate nohighlight">
+\[]f[_{bwd}([x],[y]) \subseteq \{ x\in [x] \ | \ \exists y\in [y], \quad y=f(x) \}.\]</div>
+</li>
+</ul>
+<p>Notice that the inclusion symbol has just been reversed, as compared to the classical interval (forward) and backward arithmetic.</p>
+<div class="section" id="forward-operators">
+<h3>Forward operators<a class="headerlink" href="#forward-operators" title="Permalink to this headline">¶</a></h3>
+<p><strong>Note:</strong> The inner operators are not implemented for all elementary functions yet.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><em>C++ code</em></p></th>
+<th class="head"><p><em>Function</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>iadd(x1,x2)</p></td>
+<td><p>x1+x2</p></td>
+</tr>
+<tr class="row-odd"><td><p>isub(x1,x2)</p></td>
+<td><p>x1-x2</p></td>
+</tr>
+<tr class="row-even"><td><p>imul(x1,x2)</p></td>
+<td><p>x1*x2</p></td>
+</tr>
+<tr class="row-odd"><td><p>idiv(x1,x2)</p></td>
+<td><p>x1/x2</p></td>
+</tr>
+<tr class="row-even"><td><p>isqr(x)</p></td>
+<td><p>x^2</p></td>
+</tr>
+<tr class="row-odd"><td><p>iminus(x)</p></td>
+<td><p>-x</p></td>
+</tr>
+<tr class="row-even"><td><p>ilog(x)</p></td>
+<td><p>ln(x)</p></td>
+</tr>
+<tr class="row-odd"><td><p>iexp(x)</p></td>
+<td><p>exp(x)</p></td>
+</tr>
+<tr class="row-even"><td><p>iacos(x)</p></td>
+<td><p>cos(x)</p></td>
+</tr>
+<tr class="row-odd"><td><p>iasin(x)</p></td>
+<td><p>sin(x)</p></td>
+</tr>
+<tr class="row-even"><td><p>iatan(x)</p></td>
+<td><p>tan(x)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="backward-operators">
+<h3>Backward operators<a class="headerlink" href="#backward-operators" title="Permalink to this headline">¶</a></h3>
+<p>Let us denote</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\mathcal{S}:=\{ x\in [x] \ | \ \exists y\in [y], \quad y=f(x) \}.\]</div>
+</div></blockquote>
+<p>The backward operator also takes an optional argument <code class="docutils literal notranslate"><span class="pre">xin</span></code> that represents an “inner” box, that is a box which already satisfies</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[[x]_{in} \subseteq \mathcal{S}.\]</div>
+</div></blockquote>
+<p>If this argument is set, the operator guarantees that the contracted box [x] will enclose [xin]. The operator works in this case as an <em>inflator</em>, the
+inner box [xin] is indeed “inflated” to a larger inner box [x]. More precisely, we have:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[[x]_{in} \ \subseteq \ ]f[_{bwd}([x],[y],[x]_{in}) \subseteq ([x] \cap \mathcal{S}).\]</div>
+</div></blockquote>
+<p><strong>Note:</strong> The inner operators are not implemented for all elementary functions yet.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 36%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p><em>C++ code</em></p></th>
+<th class="head"><p><em>Relation</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td colspan="2"><p>ibwd_add(y,x1,x2,xin1,xin2)</p></td>
+<td><p>y=x1+x2</p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p>ibwd_sub(y,x1,x2,xin1,xin2)</p></td>
+<td><p>y=x1-x2</p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p>ibwd_mul(y,x1,x2,xin1,xin2)</p></td>
+<td><p>y=x1*x2</p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p>ibwd_div(y,x1,x2,xin1,xin2)</p></td>
+<td><p>y=x1/x2</p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p>ibwd_sqr(y,x,xin)</p></td>
+<td><p>y=x^2</p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p>ibwd_sqrt(y,x,xin)</p></td>
+<td><p><span class="math notranslate nohighlight">\(y=\sqrt{x}\)</span></p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p>ibwd_minus(y,x,xin)</p></td>
+<td><p>y=-x</p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p>ibwd_abs(y,x,xin)</p></td>
+<td><p><span class="math notranslate nohighlight">\(y=|x|\)</span></p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p>ibwd_pow(y,x,p,xin)</p></td>
+<td><p>y=x^p</p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p>ibwd_log(y,x,xin)</p></td>
+<td><p>y=ln(x)</p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p>ibwd_exp(y,x,xin)</p></td>
+<td><p>y=exp(x)</p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p>ibwd_cos(y,x,xin)</p></td>
+<td><p>y=cos(x)</p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p>ibwd_sin(y,x,xin)</p></td>
+<td><p>y=sin(x)</p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p>ibwd_tan(y,x,xin)</p></td>
+<td><p>y=tan(x)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Interval Computations</a><ul>
+<li><a class="reference internal" href="#intervals-vectors-and-matrices">Intervals, vectors and matrices</a><ul>
+<li><a class="reference internal" href="#the-empty-set">The empty set</a></li>
+<li><a class="reference internal" href="#intervals">Intervals</a></li>
+<li><a class="reference internal" href="#interval-constants">Interval Constants</a></li>
+<li><a class="reference internal" href="#vectors-or-boxes">Vectors or Boxes</a></li>
+<li><a class="reference internal" href="#matrices-and-array-of-matrices">Matrices and Array of matrices</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#container-operations">Container operations</a></li>
+<li><a class="reference internal" href="#set-membership-operations">Set-membership operations</a><ul>
+<li><a class="reference internal" href="#complementary-and-set-difference">Complementary and set difference</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#geometric-operations">Geometric operations</a><ul>
+<li><a class="reference internal" href="#bisection">Bisection</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#miscellaneous">Miscellaneous</a></li>
+<li><a class="reference internal" href="#interval-arithmetic">Interval arithmetic</a><ul>
+<li><a class="reference internal" href="#addition-subtraction-multiplication">Addition, subtraction, multiplication</a></li>
+<li><a class="reference internal" href="#division">Division</a></li>
+<li><a class="reference internal" href="#non-linear-elementary-functions">Non-linear elementary functions</a><ul>
+<li><a class="reference internal" href="#power-and-roots">Power and roots</a></li>
+<li><a class="reference internal" href="#exponenial-logarithm">Exponenial, logarithm</a></li>
+<li><a class="reference internal" href="#trigonometric-and-hyperbolic-functions">Trigonometric and hyperbolic functions</a></li>
+<li><a class="reference internal" href="#max-min-and-miscellaneous">Max, min and miscellaneous</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#backward-arithmetic">Backward arithmetic</a></li>
+<li><a class="reference internal" href="#inner-arithmetic">Inner arithmetic</a><ul>
+<li><a class="reference internal" href="#forward-operators">Forward operators</a></li>
+<li><a class="reference internal" href="#backward-operators">Backward operators</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="function.html"
+                        title="next chapter">Functions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/interval.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="function.html" title="Functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

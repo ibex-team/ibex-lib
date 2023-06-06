@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Miscellaneous for developers &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Building packages" href="packages.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="packages.html" title="Building packages"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="miscellaneous-for-developers">
+<span id="ibex-dev-misc"></span><h1>Miscellaneous for developers<a class="headerlink" href="#miscellaneous-for-developers" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section of the documentation is for developers. If you just want to use
+Ibex as a library or via binaries, you can skip this section entirely</p>
+</div>
+<div class="section" id="using-ninja-instead-of-make-with-cmake">
+<h2>Using Ninja instead of Make with CMake<a class="headerlink" href="#using-ninja-instead-of-make-with-cmake" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Currently, using Ninja does not work when Ibex needs to install Gaol or
+Soplex.
+It seems that the CMake function used to do the installation
+(ExternalProject_Add from the module ExternalProject) does not works well
+with ninja (in particular with the detection of dependencies between
+targets).</p>
+</div>
+<p>To use Ninja build system instead of Makefiles you need to do the following:</p>
+<ol class="arabic simple">
+<li><p>Install Ninja (for example, by installing the ninja-build package on Debian)</p></li>
+<li><p>Add, in the CMake command line the following parameter:</p></li>
+</ol>
+<blockquote>
+<div><p>-G Ninja</p>
+</div></blockquote>
+<ol class="arabic">
+<li><p>Replace the command make by the command ninja, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ninja # to compile the library and the binaries
+$ ninja check # to run the checks
+$ ninja install # to install Ibex
+$ ninja uninstall # to uninstall it
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="building-the-doc">
+<h2>Building the doc<a class="headerlink" href="#building-the-doc" title="Permalink to this headline">¶</a></h2>
+<p>Run the following command from the root directory of Ibex’s source tree:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sphinx-build doc/ &lt;output directory&gt;
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Miscellaneous for developers</a><ul>
+<li><a class="reference internal" href="#using-ninja-instead-of-make-with-cmake">Using Ninja instead of Make with CMake</a></li>
+<li><a class="reference internal" href="#building-the-doc">Building the doc</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="packages.html"
+                        title="previous chapter">Building packages</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dev-misc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="packages.html" title="Building packages"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

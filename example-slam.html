@@ -1,0 +1,616 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>A complete Example: SLAM with outliers &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Do it Yourself!" href="lab.html" />
+    <link rel="prev" title="References" href="reference.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="lab.html" title="Do it Yourself!"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="References"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="a-complete-example-slam-with-outliers">
+<h1>A complete Example: SLAM with outliers<a class="headerlink" href="#a-complete-example-slam-with-outliers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<span id="slam-intro"></span><h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The goal of this example is to implement a simple contractor strategy
+for a SLAM problem with the IBEX library. SLAM means <em>simultaneous localization and map building</em>
+and is a classical problem in mobile robotics.</p>
+<p>We will see that contractor programmming with Ibex basically amounts to:</p>
+<ul class="simple">
+<li><p>enter your mathematical model using <a class="reference internal" href="function.html#mod-func"><span class="std std-ref">Functions</span></a> and <a class="reference internal" href="constraint.html#mod-sys-ctrs"><span class="std std-ref">Constraints</span></a>;</p></li>
+<li><p>build basic contractors (<code class="docutils literal notranslate"><span class="pre">CtcFwdBwd</span></code> in general) with respect to the equations;</p></li>
+<li><p>apply operators to these contractors to yield new (more sophisticated) contractors.</p></li>
+</ul>
+<p>The code we build here will eventually involve 5 different contrators:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CtcFwdBwd</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CtcCompo</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CtcFixPoint</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CtcQInter</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CtcInverse</span></code>.</p></li>
+</ul>
+<p>We shall implement a strategy that is similar to a predictor-corrector approach (like the Kalman filter for instance)
+in the sense that we also use odometry and observation to reduce the uncertainty on the robot’s position.
+However, both information as considered on the same footing and there is no distinction such as <em>prediction</em> versus <em>correction</em>.
+They are just contractors that can be used in any order and we will even calculate a fixpoint of them (so the strategy
+is not a <em>recursive</em> filter).</p>
+<p><strong>note</strong> For the sake of simplicity, we shall always use dynamic <em>allocation</em>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">MyClass</span><span class="o">*</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MyClass</span><span class="p">(...)</span>
+</pre></div>
+</div>
+<p>just to avoid potential memory fault when pointing to temporary objects.
+Of course, all these objects should be disallocated afterwards.</p>
+<div class="section" id="download">
+<span id="slam-intro-download"></span><h3>Download<a class="headerlink" href="#download" title="Permalink to this headline">¶</a></h3>
+<p>The full code can be found under <code class="docutils literal notranslate"><span class="pre">.../examples/slam</span></code> (this subfolder is included in the Ibex package).</p>
+</div>
+<div class="section" id="problem-description">
+<span id="slam-intro-prob-desc"></span><h3>Problem description<a class="headerlink" href="#problem-description" title="Permalink to this headline">¶</a></h3>
+<p>The goal is to charaterize the trajectory of an autonomous robot by enclosing in a box its position x[t]
+for each time step t=0…T.</p>
+<a class="reference internal image-reference" href="images/loc.png"><img alt="images/loc.png" src="images/loc.png" style="width: 400px;" /></a>
+<p>We have no direct information on its position (including the initial one) but the robot measures
+at each time step:</p>
+<ul class="simple">
+<li><p>its distance from a set of N fixed beacons (<span class="math notranslate nohighlight">\(\rightarrow\)</span> N measurements) as if it was equipped with a telemeter;</p></li>
+<li><p>its “speed” (delta) vector v[t]=x[t+1]-x[t].</p></li>
+</ul>
+<p>Each measurement is subject to uncertainty: <em>distances and speed vector</em>
+but also the position of the beacons, that is supposed to be measured a priori.</p>
+<p>Furthermore, we shall consider outliers.</p>
+<p>First of all, let us assume that the measurements are all simulated in a seperate unit.
+The header file of this unit contains:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*================================ data ==================================*/</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">N</span><span class="p">;</span>               <span class="c1">// number of beacons</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">T</span><span class="p">;</span>               <span class="c1">// number of time steps</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="kt">double</span> <span class="n">L</span><span class="p">;</span>            <span class="c1">// limit of the environment (the</span>
+                                  <span class="c1">// robot is in the area [0,L]x[0,L])</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">NB_OUTLIERS</span><span class="p">;</span>     <span class="c1">// maximal number of outliers per</span>
+                                  <span class="c1">// time units</span>
+<span class="k">extern</span> <span class="n">IntervalMatrix</span> <span class="n">beacons</span><span class="p">;</span>    <span class="c1">// (a Nx2 matrix) beacons[i] is the</span>
+                                  <span class="c1">// position (x,y) of the ith beacon</span>
+
+<span class="k">extern</span> <span class="n">IntervalMatrix</span> <span class="n">d</span><span class="p">;</span>          <span class="c1">// (a TxN matrix) d[t][i]=distance</span>
+                                  <span class="c1">// between x[t] and the ith beacon</span>
+
+<span class="k">extern</span> <span class="n">IntervalMatrix</span> <span class="n">v</span><span class="p">;</span>          <span class="c1">// (a Tx2 matrix) v[t] is the delta</span>
+				  <span class="c1">// vector between x[t+1] and x[t].</span>
+<span class="cm">/*========================================================================*/</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="first-strategy-no-outlier">
+<span id="slam-strat1"></span><h2>First strategy (no outlier)<a class="headerlink" href="#first-strategy-no-outlier" title="Permalink to this headline">¶</a></h2>
+<p>First, we consider no outlier. A simple strategy consists in :</p>
+<ul class="simple">
+<li><p>creating a contractor for each measurement,</p></li>
+<li><p>calling all these contractors in sequence (composition)</p></li>
+<li><p>performing a fixpoint loop</p></li>
+</ul>
+<p>Let us start by creating contractors for measurements,
+that is, those related to equations.</p>
+<div class="section" id="entering-equations-and-functions">
+<span id="slam-strat1-eq"></span><h3>Entering equations and functions<a class="headerlink" href="#entering-equations-and-functions" title="Permalink to this headline">¶</a></h3>
+<p>A measurement is an equation.</p>
+<p>To enter an equation in Ibex, we use the <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code> class (see <a class="reference internal" href="constraint.html#mod-sys-ctrs"><span class="std std-ref">Constraints</span></a>).
+A <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code> object contains a mathematical condition, or “constraint”.</p>
+<p>To define a constraint mathematically, we must specify how many variables it relates
+and in which order these variables must be taken.</p>
+<p>That is why we need to create first some <code class="docutils literal notranslate"><span class="pre">Variable</span></code> objects.
+But keep in mind that these objects are just a C++ trick for the only purpose of
+declaring a constraint.</p>
+<p>Once declared, a constraint is self-contained and depends on nothing else.</p>
+<p><em>Example:</em> For creating the equations:</p>
+<div class="math notranslate nohighlight">
+\[\forall t&lt;T, \ x[t+1]-x[t]=v[t]\]</div>
+<p>The corresponding code in Ibex is:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>  <span class="c1">// create a Tx2 variable</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">t</span><span class="o">&lt;</span><span class="n">T</span><span class="p">;</span> <span class="n">t</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">]);</span>
+    <span class="p">...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>note</strong> Here, <code class="docutils literal notranslate"><span class="pre">v</span></code> is not a variable but a constant (see <code class="docutils literal notranslate"><span class="pre">data.h</span></code>).</p>
+<p>Sometimes, different constraints are based on the same pattern. It is then often convenient
+to declare first a <code class="docutils literal notranslate"><span class="pre">Function</span></code> object.</p>
+<p><em>Example:</em> For distance constraints, we may first declare the distance function:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="c1">// create the distance function beforehand</span>
+  <span class="n">Variable</span> <span class="nf">a</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>       <span class="c1">// &quot;local&quot; variable</span>
+  <span class="n">Variable</span> <span class="nf">b</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+  <span class="n">Function</span> <span class="nf">dist</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])));</span>
+</pre></div>
+</div>
+<p>and then the equation for each time step and each beacon:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">t</span><span class="o">&lt;</span><span class="n">T</span><span class="p">;</span> <span class="n">t</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span>
+          <span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">],</span><span class="n">beacons</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">i</span><span class="p">]);</span>
+  <span class="p">...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-basic-contractors">
+<span id="slam-strat1-basic-ctc"></span><h3>Creating basic contractors<a class="headerlink" href="#creating-basic-contractors" title="Permalink to this headline">¶</a></h3>
+<p>We can create now contractors.</p>
+<p>To create a contractor with respect to an equation we
+use the <code class="docutils literal notranslate"><span class="pre">CtcFwdBwd</span></code> class (see <a class="reference internal" href="contractor.html#ctc-fwd-bwd"><span class="std std-ref">Forward-Backward</span></a>).</p>
+<p><em>Example:</em> With the constraint x=1:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+<span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">Ctc</span><span class="o">*</span> <span class="n">ctc</span><span class="o">=</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Note:</strong> The <code class="docutils literal notranslate"><span class="pre">Ctc</span></code> prefix indicates that this class is a contractor (i.e.,
+it can be composed with other contractors). <code class="docutils literal notranslate"><span class="pre">Ctc</span></code> is also the name of
+the generic contractor class.</p>
+</div>
+<div class="section" id="combining-contractors">
+<span id="slam-strat1-comb"></span><h3>Combining contractors<a class="headerlink" href="#combining-contractors" title="Permalink to this headline">¶</a></h3>
+<p>We are now ready to build our first strategy. We create all the contractors
+and push them in a vector <code class="docutils literal notranslate"><span class="pre">ctc</span></code> (this vector will be necessary for the composition):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="n">vector</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">*&gt;</span> <span class="n">ctc</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">t</span><span class="o">&lt;</span><span class="n">T</span><span class="p">;</span> <span class="n">t</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">*&gt;</span> <span class="n">cdist</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">b</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">b</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="n">b</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Push the contractor corresponding to </span>
+      <span class="c1">// the detection of beacon n°b at time t</span>
+      <span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span>
+               <span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span><span class="n">beacons</span><span class="p">[</span><span class="n">b</span><span class="p">])</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">b</span><span class="p">]);</span>
+      <span class="n">ctc</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Push the contractor corresponding to</span>
+      <span class="c1">// the speed measurement at time t</span>
+      <span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">=</span><span class="n">transpose</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">]));</span>
+      <span class="n">ctc</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+<p>Now, we can create the composition of all these contractors using <code class="docutils literal notranslate"><span class="pre">CtcCompo</span></code>
+(the vector <code class="docutils literal notranslate"><span class="pre">ctc</span></code> being given in argument) and a fixpoint of the latter using <code class="docutils literal notranslate"><span class="pre">CtcFixPoint</span></code>. This gives:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="c1">// Composition</span>
+  <span class="n">CtcCompo</span> <span class="nf">compo</span><span class="p">(</span><span class="n">ctc</span><span class="p">);</span>
+
+  <span class="c1">// FixPoint</span>
+  <span class="n">CtcFixPoint</span> <span class="nf">fix</span><span class="p">(</span><span class="n">compo</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>We are done. We just have to call the top-level contractor on the initial box.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="c1">// the initial box [0,L]x[0,L]x[0,L]x[0,L]</span>
+  <span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">L</span><span class="p">));</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  initial box =&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">fix</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  final box =&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="result">
+<span id="slam-strat1-res"></span><h3>Result<a class="headerlink" href="#result" title="Permalink to this headline">¶</a></h3>
+<p>The execution shows that the final box contains the real trajectory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">initial</span> <span class="n">box</span> <span class="o">=</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+<span class="n">final</span> <span class="n">box</span> <span class="o">=</span><span class="p">([</span><span class="mf">8.592079632938807</span><span class="p">,</span> <span class="mf">9.009246227143752</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.4364101205434934</span><span class="p">,</span> <span class="mf">0.8936036705218675</span><span class="p">]</span> <span class="p">;</span> <span class="o">...</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>The real positions are:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{lclc}
+x_0= &amp; 8.806965820867086 &amp; y_0= &amp; 0.6934996231894474\\
+x_1= &amp; 8.240950936914649 &amp; y_1= &amp; 1.517894644489497\\
+x_2= &amp; 8.553965973529273 &amp; y_2= &amp; 0.5681464742605957\\
+&amp; \vdots &amp; &amp; \vdots
+\end{array}\end{split}\]</div>
+</div>
+</div>
+<div class="section" id="second-strategy-with-outliers">
+<span id="slam-strat2"></span><h2>Second strategy (with outliers)<a class="headerlink" href="#second-strategy-with-outliers" title="Permalink to this headline">¶</a></h2>
+<p>We consider now that at most NB_OUTLIERS outliers may occur for
+each time step.</p>
+<p>To contract rigorously despite of outliers, we must use the “q-intersection”
+operator that basically consider all possible combinations of (N-NB_OUTLIERS)
+contractors among N:</p>
+<p>Ibex provides the <code class="docutils literal notranslate"><span class="pre">CtcQInter</span></code> contractor.</p>
+<div class="section" id="q-intersection">
+<span id="slam-strat2-qinter"></span><h3>Q-intersection<a class="headerlink" href="#q-intersection" title="Permalink to this headline">¶</a></h3>
+<p>We must only place all the contractors
+related to the same time step in another temporary vector (called <code class="docutils literal notranslate"><span class="pre">cdist)</span></code>
+and give this vector in argument of <code class="docutils literal notranslate"><span class="pre">CtcQInter:</span></code></p>
+<p>Let us see what happens if we do this.</p>
+<p>Let us replace:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+   <span class="c1">// Push the contractor corresponding to</span>
+   <span class="c1">// the speed measurement at time t</span>
+   <span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">]);</span>
+   <span class="n">ctc</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>by:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>    <span class="c1">// create a temporary subvector</span>
+    <span class="c1">// for collecting all the contractors corresponding</span>
+    <span class="c1">// to the detections at time t</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">*&gt;</span> <span class="n">cdist</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">b</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">b</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="n">b</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span>
+          <span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">],</span><span class="n">beacons</span><span class="p">[</span><span class="n">b</span><span class="p">])</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">b</span><span class="p">]);</span>
+      <span class="c1">// push the detection of beacon n°b</span>
+      <span class="n">cdist</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">));</span>
+    <span class="p">}</span>
+    <span class="c1">// Push the q-intersection of all</span>
+    <span class="c1">// the contractors in &quot;cdist&quot; in the main</span>
+    <span class="c1">// vector &quot;ctc&quot;</span>
+    <span class="n">ctc</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="k">new</span> <span class="n">CtcQInter</span><span class="p">(</span><span class="n">cdist</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">NB_OUTLIERS</span><span class="p">));</span>
+</pre></div>
+</div>
+<p><strong>Problem</strong>: the program runs almost endlessly! … Why?</p>
+<p>… because the q-intersection
+runs exponentially in the dimension of the input box, which is 2T.</p>
+<p>Of course, the implementation should take advantage of the fact
+that only 2 variables are actually impacted. But the current code
+is not optimized in this way.</p>
+<p>Anyway, it is often necessary to apply a contractor strategy to
+only a subset of variables (here, to the two components of x[t]).</p>
+<p>For this end, we will make use of the <a class="reference internal" href="contractor.html#ctc-inverse"><span class="std std-ref">Inverse contractor</span></a>.</p>
+</div>
+<div class="section" id="projection-using-the-inverse-contractor">
+<span id="slam-strat2-inverse"></span><h3>Projection using the inverse contractor<a class="headerlink" href="#projection-using-the-inverse-contractor" title="Permalink to this headline">¶</a></h3>
+<p>Applying the q-intersection on the subset of variables x_t amounts to apply
+the inverse of this contractor by the projection function <span class="math notranslate nohighlight">\(x\mapsto x[t]\)</span>.</p>
+<p>We replace:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>    <span class="c1">// create a temporary subvector</span>
+    <span class="c1">// for collecting all the contractors corresponding</span>
+    <span class="c1">// to the detections at time t</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">*&gt;</span> <span class="n">cdist</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">b</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">b</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="n">b</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span>
+          <span class="n">x</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">],</span><span class="n">beacons</span><span class="p">[</span><span class="n">b</span><span class="p">])</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">b</span><span class="p">]);</span>
+      <span class="c1">// push the detection of beacon n°b</span>
+      <span class="n">cdist</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">));</span>
+    <span class="p">}</span>
+    <span class="c1">// Push the q-intersection of all</span>
+    <span class="c1">// the contractors in &quot;cdist&quot; in the main</span>
+    <span class="c1">// vector &quot;ctc&quot;</span>
+    <span class="n">ctc</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="k">new</span> <span class="n">CtcQInter</span><span class="p">(</span><span class="n">cdist</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">NB_OUTLIERS</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>By:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>    <span class="n">vector</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">*&gt;</span> <span class="n">cdist</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">b</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">b</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="n">b</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Create the distance constraint with 2</span>
+      <span class="c1">// (instead of 2*T) variables</span>
+      <span class="n">Variable</span> <span class="n">xt</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+      <span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span>
+               <span class="n">xt</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span><span class="n">beacons</span><span class="p">[</span><span class="n">b</span><span class="p">])</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">b</span><span class="p">]);</span>
+      <span class="n">cdist</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="c1">// q-intersection with 2 variables only</span>
+    <span class="n">CtcQInter</span><span class="o">*</span> <span class="n">q</span><span class="o">=</span><span class="k">new</span> <span class="n">CtcQInter</span><span class="p">(</span><span class="n">cdist</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">NB_OUTLIERS</span><span class="p">);</span>
+    <span class="c1">// Push in the main vector &quot;ctc&quot; the application</span>
+    <span class="c1">// of the latter contractor to x[t]</span>
+    <span class="n">ctc</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="k">new</span> <span class="n">CtcInverse</span><span class="p">(</span><span class="o">*</span><span class="n">q</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">Function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">])));</span>
+</pre></div>
+</div>
+<p>And now, the program terminates instantaneously.
+With <code class="docutils literal notranslate"><span class="pre">NB_OUTLIERS</span></code> set to 1, the dispaly shows a slightly larger box:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">initial</span> <span class="n">box</span> <span class="o">=</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+<span class="n">final</span> <span class="n">box</span> <span class="o">=</span><span class="p">([</span><span class="mf">8.542599451371126</span><span class="p">,</span> <span class="mf">9.032225305125761</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.3807126686643456</span><span class="p">,</span> <span class="mf">1.002241041162326</span><span class="p">]</span> <span class="p">;</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="third-strategy-how-can-this-scale">
+<span id="slam-strat3"></span><h2>Third strategy (how can this scale?)<a class="headerlink" href="#third-strategy-how-can-this-scale" title="Permalink to this headline">¶</a></h2>
+<p>The program we have proposed so far does not really scale. For example, setting T=200000 in <code class="docutils literal notranslate"><span class="pre">data.cpp</span></code> will make
+the program run for a long time and crash after a memory overflow.
+We see now a more efficient variant. This variant, however, will be less concise. We will also partially lose the
+elegancy of contractor programming. In particular, we will do ourselves the loop that compose the contractors
+as time increases. But, after all, a programming language is always a compromise between efficiency and elegancy
+so if you really look for efficiency, you should accept to sacrify a little bit of elegancy.</p>
+<p>Let us first explain why the current program does not scale. In the program, we build a <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code> object for most of the contractors and each of these <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code> objects builds (silently) a <code class="docutils literal notranslate"><span class="pre">Function</span></code> object.
+For instance, by writing:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">NumConstraint</span><span class="o">*</span> <span class="n">c</span><span class="o">=</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span><span class="n">dist</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span><span class="n">beacons</span><span class="p">[</span><span class="n">b</span><span class="p">])</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">b</span><span class="p">]);</span>
+</pre></div>
+</div>
+<p>The following function is created somewhere</p>
+<div class="math notranslate nohighlight">
+\[x \mapsto dist(x[t],beacons[b])-d[t][b]\]</div>
+<p>Now, you must be aware that the construction of <code class="docutils literal notranslate"><span class="pre">Function</span></code> objects is both time and memory consuming. The good point however is that, once built, these objects are fast to use (evaluation, gradient, etc.).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">CtcQInter</span></code> objects are also costly because each contains a set of N references.</p>
+<p>It is clear in our context that the we keep on creating the same contractors again and again, with only one of the parameters changing with time (in our previous example, d[t][b]). The key idea is to factorize all these contractors and create a “parametrized” contractor where the time is set dynamically. Let us start with the detection constraints.</p>
+<div class="section" id="detection-contractor">
+<span id="slam-strat3-detect"></span><h3>Detection contractor<a class="headerlink" href="#detection-contractor" title="Permalink to this headline">¶</a></h3>
+<p>The following class declares a contractor for the detection of a given beacon. This is a handcrafted contractor so we need to create a new class that extends <code class="docutils literal notranslate"><span class="pre">Ctc</span></code> and implements the <code class="docutils literal notranslate"><span class="pre">contract()</span></code> function. Time (contrary to the beacon number) is not set at construction so that one instance of this contractor can be used
+for any time:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * Contractor for the detection of beacon n°b.</span>
+<span class="cm"> *</span>
+<span class="cm"> * This is a contractor parametrized by the time &quot;t&quot;.</span>
+<span class="cm"> * It means that a call to contract() must be</span>
+<span class="cm"> * preceded by a call to set_time(t).</span>
+<span class="cm"> */</span>
+<span class="k">class</span> <span class="nc">Detection</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Ctc</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+	<span class="cm">/*</span>
+<span class="cm">	 * The contractor is for a specific beacon &quot;b&quot; which</span>
+<span class="cm">	 * is specified in argument of the constructor.</span>
+<span class="cm">	 */</span>
+	<span class="n">Detection</span><span class="p">(</span><span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="o">:</span> <span class="n">Ctc</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">b</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">Variable</span> <span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+		<span class="c1">// This function will be created once for the T time steps!</span>
+		<span class="n">dist</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">beacons</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">beacons</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="mi">1</span><span class="p">])));</span>
+	<span class="p">}</span>
+
+	<span class="cm">/*</span>
+<span class="cm">	 * Allow to set the time dynamically</span>
+<span class="cm">	 */</span>
+	<span class="kt">void</span> <span class="n">set_time</span><span class="p">(</span><span class="kt">int</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">this</span><span class="o">-&gt;</span><span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="kt">void</span> <span class="n">contract</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+		<span class="c1">// by simplicity, we call the backward</span>
+		<span class="c1">// operator on the function directly</span>
+		<span class="n">dist</span><span class="o">-&gt;</span><span class="n">backward</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">b</span><span class="p">],</span><span class="n">x</span><span class="p">);</span>
+	<span class="p">}</span>
+
+
+<span class="k">protected</span><span class="o">:</span>
+	<span class="kt">int</span> <span class="n">b</span><span class="p">;</span>          <span class="c1">// beacon number</span>
+	<span class="kt">int</span> <span class="n">t</span><span class="p">;</span>          <span class="c1">// time number</span>
+	<span class="n">Function</span><span class="o">*</span> <span class="n">dist</span><span class="p">;</span> <span class="c1">// distance function</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="speed-contractor">
+<span id="slam-strat3-speed"></span><h3>Speed contractor<a class="headerlink" href="#speed-contractor" title="Permalink to this headline">¶</a></h3>
+<p>We do the same with the second set of time-dependant constraints, namely the “speed” or “delta” constraints between two consecutive time steps.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * Contractor for the &quot;speed&quot; constraint.</span>
+<span class="cm"> *</span>
+<span class="cm"> * This is a contractor parametrized by the time &quot;t&quot;.</span>
+<span class="cm"> * It means that a call to contract() must be</span>
+<span class="cm"> * preceded by a call to set_time(t).</span>
+<span class="cm"> */</span>
+<span class="k">class</span> <span class="nc">Speed</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Ctc</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+	<span class="n">Speed</span><span class="p">()</span> <span class="o">:</span> <span class="n">Ctc</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">Variable</span> <span class="n">a</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+		<span class="n">Variable</span> <span class="nf">b</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+		<span class="n">delta</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Function</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="kt">void</span> <span class="n">contract</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">delta</span><span class="o">-&gt;</span><span class="n">backward</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">],</span><span class="n">x</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="kt">void</span> <span class="n">set_time</span><span class="p">(</span><span class="kt">int</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">this</span><span class="o">-&gt;</span><span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">;</span>
+	<span class="p">}</span>
+
+<span class="k">protected</span><span class="o">:</span>
+	<span class="kt">int</span> <span class="n">t</span><span class="p">;</span>
+	<span class="n">Function</span><span class="o">*</span> <span class="n">delta</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="scan-contractor-q-intersection">
+<span id="slam-strat3-scan"></span><h3>Scan contractor (q-intersection)<a class="headerlink" href="#scan-contractor-q-intersection" title="Permalink to this headline">¶</a></h3>
+<p>Again, we create a parametrized contractor for the q-intersection of the N detections occuring at a given time.
+This set of measurements somehow forms a scanning of the environment so we name this contractor <code class="docutils literal notranslate"><span class="pre">Scan:</span></code></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * Scanning contractor that aggregates</span>
+<span class="cm"> * the N detections occurring at a given time t.</span>
+<span class="cm"> */</span>
+<span class="k">class</span> <span class="nc">Scan</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Ctc</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+	<span class="n">Scan</span><span class="p">()</span> <span class="o">:</span> <span class="n">Ctc</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+
+		<span class="c1">// The N detections</span>
+		<span class="n">detect</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Detection</span><span class="o">*</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+		<span class="c1">// The q-intersection is created as before,</span>
+		<span class="c1">// using a temporary vector &quot;cdist&quot;</span>
+		<span class="n">vector</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">*&gt;</span> <span class="n">cdist</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">b</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">b</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="n">b</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+			<span class="n">cdist</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">detect</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="o">=</span><span class="k">new</span> <span class="n">Detection</span><span class="p">(</span><span class="n">b</span><span class="p">));</span>
+		<span class="p">}</span>
+		<span class="n">qinter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">CtcQInter</span><span class="p">(</span><span class="n">cdist</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">NB_OUTLIERS</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="kt">void</span> <span class="n">contract</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">qinter</span><span class="o">-&gt;</span><span class="n">contract</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="kt">void</span> <span class="n">set_time</span><span class="p">(</span><span class="kt">int</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+		<span class="c1">// we set the time of each sub-contractor</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+			<span class="n">detect</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">set_time</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+	<span class="p">}</span>
+
+<span class="k">protected</span><span class="o">:</span>
+	<span class="n">Detection</span><span class="o">**</span> <span class="n">detect</span><span class="p">;</span>
+	<span class="n">CtcQInter</span><span class="o">*</span> <span class="n">qinter</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="n">t</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="trajectory">
+<span id="slam-strat3-traj"></span><h3>Trajectory<a class="headerlink" href="#trajectory" title="Permalink to this headline">¶</a></h3>
+<p>We can create now the final contractor that calls 2T times an instance of the <code class="docutils literal notranslate"><span class="pre">Scan</span></code> and <code class="docutils literal notranslate"><span class="pre">Speed</span></code> contractors (there is only one instance of each). A call to <code class="docutils literal notranslate"><span class="pre">set_time()</span></code> precedes every call to <code class="docutils literal notranslate"><span class="pre">contract()</span></code>. Note that a fix-point would not be reasonable here.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * The contractor for the whole trajectory.</span>
+<span class="cm"> *</span>
+<span class="cm"> * It will contract every positions of the robot using</span>
+<span class="cm"> * detections and speed data, in a single pass (no</span>
+<span class="cm"> * fixpoint).</span>
+<span class="cm"> */</span>
+<span class="k">class</span> <span class="nc">Trajectory</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Ctc</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+	<span class="n">Trajectory</span><span class="p">()</span> <span class="o">:</span> <span class="n">Ctc</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+
+	<span class="kt">void</span> <span class="n">contract</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">t</span><span class="o">&lt;</span><span class="n">T</span><span class="p">;</span> <span class="n">t</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+			<span class="c1">// Get a copy of the domain of x[t]</span>
+			<span class="n">IntervalVector</span> <span class="n">xt</span><span class="o">=</span><span class="n">x</span><span class="p">.</span><span class="n">subvector</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+			<span class="c1">// Set the time</span>
+			<span class="n">scan</span><span class="p">.</span><span class="n">set_time</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+			<span class="c1">// Contract with the scanning</span>
+			<span class="n">scan</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">xt</span><span class="p">);</span>
+			<span class="c1">// Update the box &quot;x&quot; with the new domain for x[t]</span>
+			<span class="n">x</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="n">xt</span><span class="p">);</span>
+
+			<span class="k">if</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+				<span class="c1">// Get a copy of the domain of x[t] and x[t+1]</span>
+				<span class="n">IntervalVector</span> <span class="n">xtt1</span><span class="o">=</span><span class="n">x</span><span class="p">.</span><span class="n">subvector</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+				<span class="c1">// Set the time</span>
+				<span class="n">speed</span><span class="p">.</span><span class="n">set_time</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+				<span class="c1">// Contract with the speed vector</span>
+				<span class="n">speed</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">xtt1</span><span class="p">);</span>
+				<span class="c1">// Update the box</span>
+				<span class="n">x</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="n">xtt1</span><span class="p">);</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="n">Scan</span> <span class="n">scan</span><span class="p">;</span>
+	<span class="n">Speed</span> <span class="n">speed</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">A complete Example: SLAM with outliers</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#download">Download</a></li>
+<li><a class="reference internal" href="#problem-description">Problem description</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#first-strategy-no-outlier">First strategy (no outlier)</a><ul>
+<li><a class="reference internal" href="#entering-equations-and-functions">Entering equations and functions</a></li>
+<li><a class="reference internal" href="#creating-basic-contractors">Creating basic contractors</a></li>
+<li><a class="reference internal" href="#combining-contractors">Combining contractors</a></li>
+<li><a class="reference internal" href="#result">Result</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#second-strategy-with-outliers">Second strategy (with outliers)</a><ul>
+<li><a class="reference internal" href="#q-intersection">Q-intersection</a></li>
+<li><a class="reference internal" href="#projection-using-the-inverse-contractor">Projection using the inverse contractor</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#third-strategy-how-can-this-scale">Third strategy (how can this scale?)</a><ul>
+<li><a class="reference internal" href="#detection-contractor">Detection contractor</a></li>
+<li><a class="reference internal" href="#speed-contractor">Speed contractor</a></li>
+<li><a class="reference internal" href="#scan-contractor-q-intersection">Scan contractor (q-intersection)</a></li>
+<li><a class="reference internal" href="#trajectory">Trajectory</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference.html"
+                        title="previous chapter">References</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="lab.html"
+                        title="next chapter">Do it Yourself!</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/example-slam.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="lab.html" title="Do it Yourself!"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="References"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

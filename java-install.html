@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Java Plugin (for Choco) &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Writing a plugin for Ibex" href="plugins-dev.html" />
+    <link rel="prev" title="IbexOpt" href="optim.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="plugins-dev.html" title="Writing a plugin for Ibex"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="optim.html" title="IbexOpt"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="java-plugin-for-choco">
+<h1>Java Plugin (for Choco)<a class="headerlink" href="#java-plugin-for-choco" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 36%" />
+<col style="width: 26%" />
+<col style="width: 38%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><a class="reference internal image-reference" href="_images/ibex.jpg"><img alt="_images/ibex.jpg" src="_images/ibex.jpg" style="width: 200px;" /></a>
+</td>
+<td></td>
+<td><a class="reference internal image-reference" href="_images/choco.png"><img alt="_images/choco.png" src="_images/choco.png" style="width: 200px;" /></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The Java plugin of Ibex allows to use Ibex with <a class="reference external" href="http://www.emn.fr/z-info/choco-solver">Choco</a>, for solving mixed integer-continuous CSP
+(constraint satisfaction problems).</p>
+<div class="section" id="installation-with-ibex-2-8">
+<h2>Installation (with Ibex 2.8)<a class="headerlink" href="#installation-with-ibex-2-8" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Read how to <a class="reference internal" href="install.html#ibex-install"><span class="std std-ref">install Ibex</span></a> before installing this plugin.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The option <code class="docutils literal notranslate"><span class="pre">--with-java-package</span></code> has been changed to <code class="docutils literal notranslate"><span class="pre">--java-package-name</span></code></p>
+</div>
+<p>The installation of the plugin will generate, in addition to the Ibex library, the libibex-java library that contains the glue code between C++ and Java.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Under Windows, Ibex is compiled as a 32-bit library although the platform is 64 bits (this is mainly because the MinGW environment is 32-bits). Hence, Java will fail in loading Ibex unless you have a 32-bits JVM.</p>
+<p>The following instructions must be typed in the shell of MinGW.</p>
+</div>
+<div class="section" id="linux-macos">
+<h3>Linux/MacOS<a class="headerlink" href="#linux-macos" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Uncompress the archive ibex-2.8.8.tar.gz in some Ibex folder:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/$ tar xvfz ibex-2.8.8.tar.gz
+</pre></div>
+</div>
+</li>
+<li><p>Download the <a class="reference external" href="https://github.com/ibex-team/ibex-java/releases">last release of the ibex-java plugin</a> (1.0.0)</p></li>
+<li><p>Uncompress the archive <code class="docutils literal notranslate"><span class="pre">ibex-java-1.0.0.tar.gz</span></code></p></li>
+<li><p>Rename the folder <code class="docutils literal notranslate"><span class="pre">ibex-java-1.0.0</span></code> to <code class="docutils literal notranslate"><span class="pre">ibex-java</span></code> and place this folder under <code class="docutils literal notranslate"><span class="pre">~/Ibex/ibex-2.8.8/plugins</span></code></p></li>
+<li><p>Set the environment variable <code class="docutils literal notranslate"><span class="pre">JAVA_HOME</span></code>. Typical paths are <code class="docutils literal notranslate"><span class="pre">/Library/Java/Home</span></code> (MacOS) or <code class="docutils literal notranslate"><span class="pre">/usr/lib/jvm/java-7-openjdk-i38</span></code> (Linux). Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/$ export JAVA_HOME=/Library/Java/Home
+</pre></div>
+</div>
+</li>
+<li><p>Then configure and install Ibex as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/$ cd ibex-2.8.8
+~/Ibex/ibex-2.8.8/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
+~/Ibex/ibex-2.8.8/$ ./waf install
+</pre></div>
+</div>
+<p><strong>Note</strong>: the <code class="docutils literal notranslate"><span class="pre">--enable-shared</span></code> option is mandatory.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Open a MinGW prompt window.</p></li>
+<li><p>Uncompress the archive ibex-2.8.8.tar.gz in some Ibex folder:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/$ tar xvfz ibex-2.8.8.tar.gz
+</pre></div>
+</div>
+</li>
+<li><p>Download the <a class="reference external" href="https://github.com/ibex-team/ibex-java/releases">last release of the ibex-java plugin</a> (1.0.0)</p></li>
+<li><p>Uncompress the archive <code class="docutils literal notranslate"><span class="pre">ibex-java-1.0.0.tar.gz</span></code></p></li>
+<li><p>Rename the folder <code class="docutils literal notranslate"><span class="pre">ibex-java-1.0.0</span></code> to <code class="docutils literal notranslate"><span class="pre">ibex-java</span></code> and place this folder under <code class="docutils literal notranslate"><span class="pre">~/Ibex/ibex-2.8.8/plugins</span></code></p></li>
+<li><p>Set the environment variable <code class="docutils literal notranslate"><span class="pre">JAVA_HOME</span></code> to the home directory of the 32 bits JDK. The variable must be set in Linux-style (don’t use backslash (“&quot;) as separator), e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/$ export JAVA_HOME=/c/Java/jdk1.7.1_17
+</pre></div>
+</div>
+</li>
+<li><p>Update the path as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/$ set PATH=%PATH%;[prefix]\lib;C:\MinGW\bin
+</pre></div>
+</div>
+<p>where <em>[prefix]</em> is the path specified via <code class="docutils literal notranslate"><span class="pre">--prefix</span></code></p>
+</li>
+<li><p>Then configure Ibex as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/$ cd ibex-2.8.8
+~/Ibex/ibex-2.8.8/$ ./waf configure [...] --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
+~/Ibex/ibex-2.8.8/$ ./waf install
+</pre></div>
+</div>
+<p><strong>Note</strong>: the <code class="docutils literal notranslate"><span class="pre">--enable-shared</span></code> option is mandatory.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="configuration-options">
+<h2>Configuration options<a class="headerlink" href="#configuration-options" title="Permalink to this headline">¶</a></h2>
+<p>The IbexOpt plugin supports the following options (to be used with waf configure) :</p>
+<dl class="option-list">
+<dt><kbd><span class="option">--with-jni</span></kbd></dt>
+<dd><p>Activate the Java plugin.</p>
+</dd>
+<dt><kbd><span class="option">--java-package-name=<var>PACKAGE_NAME</var></span></kbd></dt>
+<dd><p>The plugin will create the PACKAGE_NAME.jar file. This file is put into the <code class="docutils literal notranslate"><span class="pre">[prefix]/share/java</span></code>
+where [prefix] is <code class="docutils literal notranslate"><span class="pre">/usr/local</span></code> by default or whatever path specified via <code class="docutils literal notranslate"><span class="pre">--prefix</span></code>.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="unsatisfiedlinkerror-with-choco">
+<h3>UnsatisfiedLinkError with Choco<a class="headerlink" href="#unsatisfiedlinkerror-with-choco" title="Permalink to this headline">¶</a></h3>
+<p>When running the “CycloHexan” example from Choco using Ibex, the following error appears:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Exception</span> <span class="ow">in</span> <span class="n">thread</span> <span class="s2">&quot;main&quot;</span> <span class="n">java</span><span class="o">.</span><span class="n">lang</span><span class="o">.</span><span class="n">UnsatisfiedLinkError</span><span class="p">:</span> <span class="n">org</span><span class="o">.</span><span class="n">chocosolver</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">Ibex</span><span class="o">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">ILjava</span><span class="o">/</span><span class="n">lang</span><span class="o">/</span><span class="n">String</span><span class="p">;</span><span class="n">I</span><span class="p">)</span><span class="n">V</span>
+<span class="n">at</span> <span class="n">org</span><span class="o">.</span><span class="n">chocosolver</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">Ibex</span><span class="o">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">Native</span> <span class="n">Method</span><span class="p">)</span>
+<span class="n">at</span> <span class="n">org</span><span class="o">.</span><span class="n">chocosolver</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">propagators</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">RealPropagator</span><span class="o">.&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">init</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;(</span><span class="n">RealPropagator</span><span class="o">.</span><span class="n">java</span><span class="p">:</span><span class="mi">77</span><span class="p">)</span>
+<span class="n">at</span> <span class="n">org</span><span class="o">.</span><span class="n">chocosolver</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">RealConstraint</span><span class="o">.</span><span class="n">addFunction</span><span class="p">(</span><span class="n">RealConstraint</span><span class="o">.</span><span class="n">java</span><span class="p">:</span><span class="mi">82</span><span class="p">)</span>
+<span class="n">at</span> <span class="n">samples</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">CycloHexan</span><span class="o">.</span><span class="n">buildModel</span><span class="p">(</span><span class="n">CycloHexan</span><span class="o">.</span><span class="n">java</span><span class="p">:</span><span class="mi">87</span><span class="p">)</span>
+<span class="n">at</span> <span class="n">samples</span><span class="o">.</span><span class="n">AbstractProblem</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">AbstractProblem</span><span class="o">.</span><span class="n">java</span><span class="p">:</span><span class="mi">130</span><span class="p">)</span>
+<span class="n">at</span> <span class="n">samples</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">CycloHexan</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">CycloHexan</span><span class="o">.</span><span class="n">java</span><span class="p">:</span><span class="mi">134</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Solution: You probably did not set the Java package properly. The java package of the Ibex class in Choco is org.chocosolver.solver.constraints.real, try:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">waf</span> <span class="n">configure</span> <span class="p">[</span><span class="o">....</span><span class="p">]</span> <span class="o">--</span><span class="n">java</span><span class="o">-</span><span class="n">package</span><span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">chocosolver</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">real</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="java-home-does-not-seem-to-be-set-properly">
+<h3>JAVA_HOME does not seem to be set properly<a class="headerlink" href="#java-home-does-not-seem-to-be-set-properly" title="Permalink to this headline">¶</a></h3>
+<p>I get this message when running waf configure.</p>
+<p>Solution: The <code class="docutils literal notranslate"><span class="pre">JAVA_HOME</span></code> must be the path of the JDK and contain a subdirectoy include which, in turn, contains the jni.h header file (for Java versions &lt;10).
+On MacOS this path can be <code class="docutils literal notranslate"><span class="pre">/Library/Java/JavaVirtualMachines/jdkXXXX.jdk/Contents/Home</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Java Plugin (for Choco)</a><ul>
+<li><a class="reference internal" href="#installation-with-ibex-2-8">Installation (with Ibex 2.8)</a><ul>
+<li><a class="reference internal" href="#linux-macos">Linux/MacOS</a></li>
+<li><a class="reference internal" href="#windows">Windows</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration-options">Configuration options</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#unsatisfiedlinkerror-with-choco">UnsatisfiedLinkError with Choco</a></li>
+<li><a class="reference internal" href="#java-home-does-not-seem-to-be-set-properly">JAVA_HOME does not seem to be set properly</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="optim.html"
+                        title="previous chapter">IbexOpt</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plugins-dev.html"
+                        title="next chapter">Writing a plugin for Ibex</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/java-install.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="plugins-dev.html" title="Writing a plugin for Ibex"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="optim.html" title="IbexOpt"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

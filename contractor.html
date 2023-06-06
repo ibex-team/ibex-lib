@@ -1,0 +1,990 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Contractors &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Separators" href="separator.html" />
+    <link rel="prev" title="The Minibex Language" href="minibex.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="separator.html" title="Separators"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="minibex.html" title="The Minibex Language"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="contractors">
+<span id="ctc"></span><h1>Contractors<a class="headerlink" href="#contractors" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The concept of <em>contractor</em> is directly inspired from the ubiquituous concept of <em>filtering algorithm</em> in constraint programming.</p>
+<p>Given a constraint c relating a set of variables x, an algorithm C is called a filtering algorithm if, given a box (and more
+generally a “domain” for x, i.e., a set of potential tuples variable can be assigned to):</p>
+<div class="math notranslate nohighlight">
+\[C([x])\subseteq [x] \ \wedge  \ \forall x \in [x], \ c(x) \Rightarrow x \in C([x]).\]</div>
+<p>This relation means that:</p>
+<ol class="arabic simple">
+<li><p>Filtering gives a sub-domain of the input domain [x];</p></li>
+<li><p>The resulting subdomain C([x]) contains all the feasible points with respect to the constraint c. No solution is “lost”.</p></li>
+</ol>
+<p>This illustrated in the next picture. The constraint c (i.e., the set of points satisfying c) is represented by a green shape.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="images/filtering.png"><img alt="images/filtering.png" src="images/filtering.png" style="width: 300px;" /></a>
+</div>
+<p>Constraint programming is the context where this concept has been formalized and intensively used. But constraint programming is by no means
+the only paradigm where algorithms complying with this definition have been developed.
+The most significant example is interval analysis, where a Newton-like iteration has been developed since the 1960’s <a class="reference internal" href="reference.html#moore66"><span class="std std-ref">[Moore 1966]</span></a> that corresponds
+exactly to a filtering algorithm in the case of a constraint c of the following form:</p>
+<div class="math notranslate nohighlight">
+\[c(x) \iff f(x)=0\]</div>
+<p>where f is any (non-linear) differentiable function from <span class="math notranslate nohighlight">\(\mathbb{R}^n\to\mathbb{R}^n\)</span>. The most famous variant of this Newton iteration is probably the Hansen-Sengupta
+algorithm <a class="reference internal" href="reference.html#hansen80"><span class="std std-ref">[Hansen &amp; Sengupta 1980]</span></a>.</p>
+<p>Another important example is in picture processing, where there exist algorithms able to reduce the size of a picture to some <em>region of interest</em>.
+This kind of alorithm is today implemented in almost every digital cameras, for an automatic focus adjustment.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="images/ladybug.png"><img alt="images/ladybug.png" src="images/ladybug.png" style="width: 400px;" /></a>
+</div>
+<p>In this example, the constraint c is:</p>
+<blockquote>
+<div><p>c(x) <span class="math notranslate nohighlight">\(\iff\)</span> x <em>belongs to a region of interest</em></p>
+</div></blockquote>
+<p>Here, it is clear that the constraint is more a consequence of the algorithm than in the other way around.
+This last example suggests the next definition.</p>
+<p>An algorithm C is called <em>a contractor</em> if:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{ll}
+\forall [x]\in \mathbb{IR}^{n},\mathcal{C}([x])\subseteq [x] &amp; \text{(contraction)} \\
+\left(x\in [x], \mathcal{C}(\{x\})= \{x\} \right) \Rightarrow x\in \mathcal{C}([x]) &amp; \text{(consistency)} \\
+C(\{x\} )=\emptyset
+\Leftrightarrow \left( \exists \varepsilon &gt;0,\forall [x]\subseteq
+B\left(x,\varepsilon \right) ,\mathcal{C}([x])=\emptyset
+\right)  &amp; \text{(continuity)}
+\end{array}\end{split}\]</div>
+<ul class="simple">
+<li><p>The first condition is the same as before.</p></li>
+<li><p>The second condition, the one related to the underlying constraint, has been dropped.
+In fact, the constraint c has been replaced by the set of <em>insensitive</em> points, those satisfying <span class="math notranslate nohighlight">\(C(\{x\})=\{x\}\)</span>.
+So the constraint still exists, but implicitely. With this in mind, it is clear now the second condition here
+states again that “no solution is lost”.</p></li>
+<li><p>The last condition is important for some convergence issues only.</p></li>
+</ul>
+<p>Withdrawing the link to the constraint from the definition forces one to view the contractor as a pure function:</p>
+<div class="math notranslate nohighlight">
+\[C: \mathbb{IR}^n \to \mathbb{IR}^n,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbb{IR}\)</span> denotes the set of real intervals. “Pure” means that the execution of the contractor does not depend on
+a context and does not produce side effects.
+In the former definition of <em>filtering algorithm</em>, the operator was depending on constraints and, in practice, constraints are external objects sharing
+some structures representing domains of variables. This means that the execution was depending on the context and producing side effects.
+This centralized architecture is often met in discrete constraint programming. It allows the implementation of many code optimization techniques,
+but at a price of a huge programming complexity.</p>
+<p>In contrast, <em>contractor programming</em> is so simple that anyone can build a solver in a few lines.
+Here is the interface for contractors. As one can see, it could not be more minimalist:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Ctc</span> <span class="p">{</span>
+  <span class="k">public</span><span class="o">:</span>
+
+  <span class="c1">// Build a contractor on nb_var variables.</span>
+  <span class="n">Ctc</span><span class="p">(</span><span class="kt">int</span> <span class="n">nb_var</span><span class="p">);</span>
+
+  <span class="c1">// Performs contraction.</span>
+  <span class="c1">// This is the only function that must be implemented in a subclass of Ctc.</span>
+  <span class="c1">// The box in argument is contracted in-place (in-out argument).</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">contract</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>That’s all. Another advantage of removing the constraint from the definition is that it makes natural the cooperation of heterogenous contractors (would they be linked internally to a numerical constraint, a picture processing algorithm, a combinatorial problem, etc.).</p>
+<p>The good news is that some important constraint programming techniques like <a class="reference internal" href="#ctc-propag"><span class="std std-ref">propagation</span></a>, <a class="reference internal" href="#ctc-shaving"><span class="std std-ref">shaving</span></a> or <a class="reference internal" href="#ctc-acid"><span class="std std-ref">constructive disjunction</span></a> can actually be
+generalized to contractors. They don’t intrinsically need the concept of constraint.</p>
+<p>These operators all take a set of contractors as input and produce a new (more sophisticated) contractor.
+The design of a solver simply amouts to the composition of such operators. All these operators form a little functionnal language, where contractors are first-class citizens.
+This is what is called contractor programming <a class="reference internal" href="reference.html#chabert09a"><span class="std std-ref">[Chabert &amp; Jaulin 2009]</span></a>.</p>
+<p>We present in this chapter the basic or “numerical” contractors (built from a constraint, etc.) and the operators.</p>
+</div>
+<div class="section" id="forward-backward">
+<span id="ctc-fwd-bwd"></span><h2>Forward-Backward<a class="headerlink" href="#forward-backward" title="Permalink to this headline">¶</a></h2>
+<p>Forward-backward (also known as HC4Revise) is a classical algorithm in constraint programming for
+contracting quickly with respect to an equality or inequality. See, e.g.,
+<a class="reference internal" href="reference.html#benhamou06"><span class="std std-ref">[Benhamou &amp; Granvilliers 2006]</span></a>, <a class="reference internal" href="reference.html#benhamou99"><span class="std std-ref">[Benhamou et al. 1999]</span></a>,
+<a class="reference internal" href="reference.html#collavizza98"><span class="std std-ref">[Collavizza 1998]</span></a>. However, the more occurrences of variables in the expression
+of the (in)equality, the less accurate the contraction.
+Hence, this contractor is often used as an “atomic” contractor embedded in an higher-level operator like <a class="reference internal" href="#ctc-propag"><span class="std std-ref">Propagation</span></a> or <a class="reference internal" href="#ctc-shaving"><span class="std std-ref">Shaving</span></a>.</p>
+<p>The algorithm works in two steps. The <strong>forward step</strong> apply <a class="reference internal" href="interval.html#itv-arith"><span class="std std-ref">Interval arithmetic</span></a> to each operator of the <a class="reference internal" href="function.html#mod-func"><span class="std std-ref">function</span></a> expression, from
+the leaves of the expression (variable domains) upto the root node.</p>
+<p>This is illustrated in the next picture with the constraint <span class="math notranslate nohighlight">\((x-y)^2-z=0\)</span> with <span class="math notranslate nohighlight">\(x\in[0,10], \ y\in[0,4]\)</span> and <span class="math notranslate nohighlight">\(z\in[9,16]\)</span>:</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="images/fwd.png"><img alt="images/fwd.png" src="images/fwd.png" style="width: 400px;" /></a>
+<p class="caption"><span class="caption-text"><em>Forward step</em></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>The <strong>backward step</strong> sets the interval associated to the root node to [0,0] (imposes constraint satisfaction) and, then, apply <a class="reference internal" href="interval.html#itv-bwd-arith"><span class="std std-ref">Backward arithmetic</span></a> from the root downto the leaves:</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="images/bwd.png"><img alt="images/bwd.png" src="images/bwd.png" style="width: 400px;" /></a>
+<p class="caption"><span class="caption-text"><em>Backward step</em></span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>This contractor can either be built with a <a class="reference internal" href="constraint.html#mod-sys-ctrs"><span class="std std-ref">NumConstraint</span></a> object or directly with a function f. In the latter case, the constraint f=0 is implicitely considered.</p>
+<p>See <strong>examples in the</strong> <a class="reference internal" href="tutorial.html#tuto-fwd-bwd"><span class="std std-ref">tutorial</span></a>.</p>
+</div>
+<div class="section" id="intersection-union-etc">
+<span id="ctc-compo"></span><h2>Intersection, Union, etc.<a class="headerlink" href="#intersection-union-etc" title="Permalink to this headline">¶</a></h2>
+<p>Basic operators on contractors are :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 9%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Class name</p></th>
+<th class="head"><p>arity</p></th>
+<th class="head"><p>Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CtcIdentity</p></td>
+<td><p>0</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\mapsto[x]\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>CtcCompo</p></td>
+<td><p>n</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\mapsto(C_1\circ\ldots\circ C_n)([x])\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>CtcUnion</p></td>
+<td><p>n</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\mapsto \square C_1([x])\cup\ldots\cup C_n([x])\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>CtcFixpoint</p></td>
+<td><p>1</p></td>
+<td><p><span class="math notranslate nohighlight">\([x]\mapsto C^\infty([x])\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p>Basic examples are given in the <a class="reference internal" href="tutorial.html#tuto-inter-union-compo"><span class="std std-ref">tutorial</span></a>.</p>
+<p>To create a union or a composition of an arbitrary number of contractors, you
+need first to store all the contractors references into an <code class="docutils literal notranslate"><span class="pre">Array</span></code>.
+This is illustrated in the next example where we create a contractor for the intersection
+of n half-spaces (delimiting a polygon) and its complementary (see the picture below where the
+two contractors are used to build a <a class="reference internal" href="set.html#set"><span class="std std-ref">set</span></a>).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// Create the function corresponding to an</span>
+	<span class="c1">// hyperplane of angle alpha</span>
+	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">alpha</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">alpha</span><span class="p">,</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">sin</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="n">y</span><span class="p">);</span>
+
+	<span class="c1">// Size of the polygon</span>
+	<span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="mi">7</span><span class="p">;</span>
+
+	<span class="c1">// Array to store constraints (for cleanup)</span>
+	<span class="n">Array</span><span class="o">&lt;</span><span class="n">NumConstraint</span><span class="o">&gt;</span> <span class="n">ctrs</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
+
+	<span class="c1">// Arrays to store contractors</span>
+	<span class="n">Array</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">&gt;</span> <span class="n">ctc_out</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">ctc_in</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="c1">// create the constraints of the two half-spaces</span>
+		<span class="c1">// delimited by f(x,y,i*2pi/n)=0</span>
+		<span class="c1">// and store them in the array</span>
+		<span class="n">ctrs</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">,</span>  <span class="o">*</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">i</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">Interval</span><span class="o">::</span><span class="n">pi</span><span class="p">()</span><span class="o">/</span><span class="n">n</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">));</span>
+		<span class="n">ctrs</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">NumConstraint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">i</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">Interval</span><span class="o">::</span><span class="n">pi</span><span class="p">()</span><span class="o">/</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">));</span>
+
+		<span class="c1">// create the contractors for these constraints</span>
+		<span class="c1">// and place them in the arrays</span>
+		<span class="n">ctc_out</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="n">ctrs</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">]));</span>
+		<span class="n">ctc_in</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="o">*</span><span class="k">new</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="n">ctrs</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]));</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Composition of the &quot;outer&quot; contractors</span>
+	<span class="n">CtcCompo</span> <span class="n">ctc_polygon_out</span><span class="p">(</span><span class="n">ctc_out</span><span class="p">);</span>
+	<span class="c1">// Union of the &quot;inner&quot; contractors</span>
+	<span class="n">CtcUnion</span> <span class="nf">ctc_polygon_in</span><span class="p">(</span><span class="n">ctc_in</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/ctc-compo.png"><img alt="_images/ctc-compo.png" src="_images/ctc-compo.png" style="width: 400px;" /></a>
+</div>
+<p><strong>Note</strong>: in this example, we have created constraints and contractors dynamically. We have to delete
+all these pointers after usage:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// ************ cleanup ***************</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">delete</span> <span class="o">&amp;</span><span class="n">ctc_in</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+		<span class="k">delete</span> <span class="o">&amp;</span><span class="n">ctc_out</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+	<span class="p">}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">delete</span> <span class="o">&amp;</span><span class="n">ctrs</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+	<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="propagation">
+<span id="ctc-propag"></span><h2>Propagation<a class="headerlink" href="#propagation" title="Permalink to this headline">¶</a></h2>
+<p>Propagation <a class="reference internal" href="reference.html#bessiere06"><span class="std std-ref">[Bessiere 2006]</span></a> is another classical algorithm of constraint programming.</p>
+<p>The basic idea is to calculate the fixpoint of a set of n contractors <span class="math notranslate nohighlight">\(C_1\ldots,C_n\)</span>, that is:</p>
+<div class="math notranslate nohighlight">
+\[(C_1\circ\ldots\circ C_n)^\infty\]</div>
+<p>without calling a contractor when it is unecessary (as it is explained in the <a class="reference internal" href="tutorial.html#tuto-propag"><span class="std std-ref">tutorial</span></a>).</p>
+<p>Let us first introduce for a contractor C two sets of indices: the <em>input</em> and <em>output</em> dimensions of C:</p>
+<p>If:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\exists [x]\in\mathbb{IR}^n,\exists [y]\in\mathbb{IR}^n, \quad \forall j\!\neq\!i \ [x]_j=[y]_j \wedge
+\left\{\begin{array}{l}
+C([x])_i\neq[x]_i \vee\\
+C([y])_i\neq[y]_i \vee\\
+\exists j\!\neq\!i \ C([x])_j\neq C([y])_j
+\end{array}\right.\end{split}\]</div>
+<p>Then i is in the <strong>input</strong> of C.</p>
+<p>If:</p>
+<div class="math notranslate nohighlight">
+\[\exists [x]\in\mathbb{IR}^n,\ C([x])_i\neq [x]_i\]</div>
+<p>Then i is in the <strong>output</strong> of C.</p>
+<p>Basically, <em>input(C)</em> contains the variables that <strong>potentially impacts</strong> the result of the contractor while <em>ouput(C)</em>
+contains the variables that are <strong>potentially impacted by</strong> the contractor.</p>
+<p>We will explain further how this information is set in Ibex.</p>
+<p>The propagation works as follows. It creates and maintain a set of <em>active</em> contractors <span class="math notranslate nohighlight">\(\mathcal{A}\)</span> (called “agenda”).
+The agenda is initialized to the full set:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{A}:=\{C_1,\ldots,C_n\};\]</div>
+<p>And the algorithm is:</p>
+<ol class="arabic simple">
+<li><p>Pop a contractor C from <span class="math notranslate nohighlight">\(\mathcal{A}\)</span></p></li>
+<li><p>Perform contraction: <span class="math notranslate nohighlight">\([x]:=C([x])\)</span>.</p></li>
+<li><p>If the contraction was effective, push into  <span class="math notranslate nohighlight">\(\mathcal{A}\)</span> all the contractors C’ such that <span class="math notranslate nohighlight">\(input(C')\cap output(C)\neq\emptyset\)</span></p></li>
+<li><p>Return to step 1 until  <span class="math notranslate nohighlight">\(\mathcal{A}=\emptyset\)</span>.</p></li>
+</ol>
+<p><strong>Note:</strong> The algorithm could be improved by not pushing again in the agenda a contractor C that is idempotent (<em>under development</em>).</p>
+<p>To illustrate how the propagation can be used and the benefit it provides, we compare in the next example the number of times contractors
+(that we chose to be forward-backward) are called in a simple fixpoint loop with the number obtained in a propagation loop.</p>
+<p>To this aim, we need to increment a counter each time a forward-backward is called. The easiest way to do this is simply to create a
+subclass of <code class="docutils literal notranslate"><span class="pre">CtcFwdBwd</span></code> that just call the parent contraction function and increments a global counter (static variable named <code class="docutils literal notranslate"><span class="pre">count</span></code>).</p>
+<p>Here is the class:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Count</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CtcFwdBwd</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+	<span class="k">static</span> <span class="kt">int</span> <span class="n">count</span><span class="p">;</span>
+
+	<span class="n">Count</span><span class="p">(</span><span class="k">const</span> <span class="n">NumConstraint</span><span class="o">&amp;</span> <span class="n">ctr</span><span class="p">)</span> <span class="o">:</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="n">ctr</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+
+	<span class="kt">void</span> <span class="n">contract</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box</span><span class="p">,</span> <span class="n">ContractContext</span><span class="o">&amp;</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">CtcFwdBwd</span><span class="o">::</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">,</span><span class="n">context</span><span class="p">);</span>
+		<span class="n">count</span><span class="o">++</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">int</span> <span class="n">Count</span><span class="o">::</span><span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Now, we load a set of constraints from a file. We chose on purpose a large but very sparse problem (makes propagation advantageous) and
+create our “counting” contractor for each constraint:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// Load a system of constraints</span>
+	<span class="n">System</span> <span class="nf">sys</span><span class="p">(</span><span class="n">IBEX_BENCHS_DIR</span> <span class="s">&quot;/polynom/DiscreteBoundary-0100.bch&quot;</span><span class="p">);</span>
+
+	<span class="c1">// The array of contractors we will use</span>
+	<span class="n">Array</span><span class="o">&lt;</span><span class="n">Ctc</span><span class="o">&gt;</span> <span class="n">ctc</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">nb_ctr</span><span class="p">);</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">sys</span><span class="p">.</span><span class="n">nb_ctr</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+		<span class="c1">// Create contractors from constraints and store them in &quot;ctc&quot;</span>
+		<span class="n">ctc</span><span class="p">.</span><span class="n">set_ref</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">Count</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">ctrs</span><span class="p">[</span><span class="n">i</span><span class="p">]));</span>
+</pre></div>
+</div>
+<div class="section" id="fixpoint-ratio">
+<h3>Fixpoint ratio<a class="headerlink" href="#fixpoint-ratio" title="Permalink to this headline">¶</a></h3>
+<p>The two contractors (<code class="docutils literal notranslate"><span class="pre">CtFixPoint</span></code> and <code class="docutils literal notranslate"><span class="pre">CtcPropag</span></code>) take also as argument a “fixpoint ratio”.
+The principle is that if a contraction does not remove more that</p>
+<blockquote>
+<div><p>(ratio <span class="math notranslate nohighlight">\(\times\)</span> the diameter of a variable domain),</p>
+</div></blockquote>
+<p>then this reduction is not propagated. The default value is 0.01 in the case of propagation, 0.1 in the case of fixpoint.</p>
+<p><strong>Warning:</strong> In theory (and sometimes in practice), the fixpoint ratio gives no information on the “distance”
+between the real fixpoint and the one we calculate.</p>
+<p>Here we fix the ratio to 1e-03 for both:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="kt">double</span> <span class="n">prec</span><span class="o">=</span><span class="mf">1e-03</span><span class="p">;</span>            <span class="c1">// Precision upto which we calculate the fixpoint</span>
+</pre></div>
+</div>
+<p>We can finally build the two strategies, call them on the same box and observe the number of calls.
+We also check that the final boxes are equal, up to the precision required.</p>
+<p>With a fix point:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// =============================== with simple fixpoint ==============================</span>
+	<span class="n">Count</span><span class="o">::</span><span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>               <span class="c1">// initialize the counter</span>
+
+	<span class="n">CtcCompo</span> <span class="nf">compo</span><span class="p">(</span><span class="n">ctc</span><span class="p">);</span>          <span class="c1">// make the composition of all contractors</span>
+	<span class="n">CtcFixPoint</span> <span class="nf">fix</span><span class="p">(</span><span class="n">compo</span><span class="p">,</span><span class="n">prec</span><span class="p">);</span>  <span class="c1">// make the fixpoint</span>
+
+	<span class="n">IntervalVector</span> <span class="n">box</span><span class="o">=</span><span class="n">sys</span><span class="p">.</span><span class="n">box</span><span class="p">;</span>   <span class="c1">// tested box (load domains written in the file)</span>
+
+	<span class="n">fix</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; Number of contractions with simple fixpoint=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">Count</span><span class="o">::</span><span class="n">count</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>With a propagation:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// ================================= with propagation =================================</span>
+	<span class="n">Count</span><span class="o">::</span><span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>                            <span class="c1">// initialize the counter</span>
+
+	<span class="n">CtcPropag</span> <span class="nf">propag</span><span class="p">(</span><span class="n">ctc</span><span class="p">,</span> <span class="n">prec</span><span class="p">);</span>   <span class="c1">// Propagation of all contractors</span>
+
+	<span class="n">IntervalVector</span> <span class="n">box2</span><span class="o">=</span><span class="n">sys</span><span class="p">.</span><span class="n">box</span><span class="p">;</span>               <span class="c1">// tested box (load domains written in the file)</span>
+
+	<span class="n">propag</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box2</span><span class="p">);</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; Number of contractions with propagation=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">Count</span><span class="o">::</span><span class="n">count</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; Are the results the same? &quot;</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">box</span><span class="p">.</span><span class="n">rel_distance</span><span class="p">(</span><span class="n">box2</span><span class="p">)</span><span class="o">&lt;</span><span class="n">prec</span><span class="o">?</span> <span class="s">&quot;YES&quot;</span> <span class="o">:</span> <span class="s">&quot;NO&quot;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The display is:</p>
+</div>
+<div class="section" id="input-and-output-variables">
+<h3>Input and Output variables<a class="headerlink" href="#input-and-output-variables" title="Permalink to this headline">¶</a></h3>
+<p>The input variables (the ones that potentially impacts the contractor) and the
+output variables (the ones that are potentially impacted) are two lists of variables stored under the form of “bitsets”.</p>
+<p>A biset is nothing but an (efficiently structured) list of integers.</p>
+<p>These bitsets are the two following fields of the``Ctc`` class:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * The input variables (NULL pointer means &quot;unspecified&quot;)</span>
+<span class="cm"> */</span>
+<span class="n">BitSet</span><span class="o">*</span> <span class="n">input</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * The output variables NULL pointer means &quot;unspecified&quot;)</span>
+<span class="cm"> */</span>
+<span class="n">BitSet</span><span class="o">*</span> <span class="n">output</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>These fields are not built by default. One reason is for allowing the distinction between an empty bitset and <em>no bitset</em> (information not provided).
+The other is that, in some applications, the number of variables is too large so that one prefers not to build these data structures even if they
+are very compacted.</p>
+<p>To show the usage of these bitsets and their impact on propagation, we consider the same example as before.
+Let us now force the input/output bitsets of each contractors to contain every variable:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Count2</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CtcFwdBwd</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+	<span class="k">static</span> <span class="kt">int</span> <span class="n">count</span><span class="p">;</span>
+
+	<span class="n">Count2</span><span class="p">(</span><span class="k">const</span> <span class="n">NumConstraint</span><span class="o">&amp;</span> <span class="n">ctr</span><span class="p">)</span> <span class="o">:</span> <span class="n">CtcFwdBwd</span><span class="p">(</span><span class="n">ctr</span><span class="p">)</span> <span class="p">{</span>
+
+		<span class="c1">// The input bitset should have been created</span>
+		<span class="c1">// by the constructor CtcFwdBwd</span>
+		<span class="n">assert</span><span class="p">(</span><span class="n">input</span><span class="o">!=</span><span class="nb">NULL</span><span class="p">);</span>
+
+		<span class="c1">// overwrite the input and output lists calculated</span>
+		<span class="c1">// by CtcFwdBwd by adding all the variables</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">nb_var</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+			<span class="n">input</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+			<span class="n">output</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="kt">void</span> <span class="n">contract</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box</span><span class="p">,</span> <span class="n">ContractContext</span><span class="o">&amp;</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">CtcFwdBwd</span><span class="o">::</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">,</span><span class="n">context</span><span class="p">);</span>
+		<span class="n">count</span><span class="o">++</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">int</span> <span class="n">Count2</span><span class="o">::</span><span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>We observe now that the fixpoint with <code class="docutils literal notranslate"><span class="pre">CtcPropag</span></code> is reached with as many iterations as without <code class="docutils literal notranslate"><span class="pre">CtcPropag</span></code>:</p>
+<p>If you build a contractor from scratch (not inheriting a built-in contractor like we have just done), don’t forget to
+create the bitsets before using them with <code class="docutils literal notranslate"><span class="pre">add/remove</span></code>.</p>
+<p>Here is a final example. Imagine that we have implemented a contraction algorithm for the following constraint (over 100 variables):</p>
+<div class="math notranslate nohighlight">
+\[\forall i, 0\le i \le 49, \quad  x[2\times i]&gt;0 \Longrightarrow x[2\times i+1]=0.\]</div>
+<p>The the input (resp. output) variables is the set of even (resp. odd) numbers. Here is how the initialization could be done:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyCtc</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Ctc</span> <span class="p">{</span>
+
+	<span class="n">MyCtc</span><span class="p">()</span> <span class="o">:</span> <span class="n">Ctc</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// my contractor works on 100 variables</span>
+
+		<span class="c1">// create the input list with all the variables set by default</span>
+		<span class="n">input</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BitSet</span><span class="p">(</span><span class="n">BitSet</span><span class="o">::</span><span class="n">all</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span>
+		<span class="c1">// remove all the odd variables</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">2</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="n">input</span><span class="o">-&gt;</span><span class="n">remove</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+
+		<span class="c1">// create the output list with all the variables unset by default</span>
+		<span class="n">output</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BitSet</span><span class="p">(</span><span class="n">BitSet</span><span class="o">::</span><span class="n">empty</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span>
+		<span class="c1">// add all the odd variables</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">2</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="n">output</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+	<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-accumulate-flag">
+<h3>The <code class="docutils literal notranslate"><span class="pre">accumulate</span></code> flag<a class="headerlink" href="#the-accumulate-flag" title="Permalink to this headline">¶</a></h3>
+<p>The accumate flag is a subtle tuning parameter you may ignore on first reading.</p>
+<p>As you know now, one annoyance with continuous variables is that we have to stop the fixpoint before it is actually reached,
+which means that unsignificant contractions are not propagated.</p>
+<p>Now, to measure the significance of a contractor, we look at the intervals after contraction and compare them to
+the intervals just before contraction.</p>
+<p>One little risk with this strategy is when a lot of unsignificant contractions gradually contracts domains to a point
+where the overall contraction has become significant. The propagation algorithm may stop despite of this significant contraction.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">accumulate</span></code> flag avoids this by comparing not with the intervals just before the current contraction, but the intervals
+obtained after the last significant one. The drawback, however, is that all the unsignificant contractions are cumulated
+and attributed to the current contraction, whence a little loss of efficiency.</p>
+<p>To set the accumulate flag, just write:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">CtcPropag</span> <span class="nf">propag</span><span class="p">(...);</span>
+<span class="n">propag</span><span class="p">.</span><span class="n">accumulate</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Often, in practice, setting the <code class="docutils literal notranslate"><span class="pre">accumulate</span></code> flag results in a sligthly better contraction with a little more time.</p>
+</div>
+</div>
+<div class="section" id="hc4">
+<span id="ctc-hc4"></span><h2>HC4<a class="headerlink" href="#hc4" title="Permalink to this headline">¶</a></h2>
+<p>HC4 is the classical “constraint propagation” loop that we found in the literature <a class="reference internal" href="reference.html#benhamou99"><span class="std std-ref">[Benhamou &amp; al., 1999]</span></a>.
+It allows to contract with respect to a <a class="reference internal" href="system.html#mod-sys"><span class="std std-ref">system</span></a> of constraints.</p>
+<p>In Ibex, the <code class="docutils literal notranslate"><span class="pre">CtcHC4</span></code> contractor is simply a direct specialization of <code class="docutils literal notranslate"><span class="pre">CtcPropag</span></code> (the <a class="reference internal" href="#ctc-propag"><span class="std std-ref">propagation contractor</span></a>).</p>
+<p>The contractors that are propagated are nothing but the default (<a class="reference internal" href="#ctc-fwd-bwd"><span class="std std-ref">Forward-Backward</span></a>) contractors associated to every constraint of the system.</p>
+<p>Here is an example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// Load a system of equations</span>
+	<span class="n">System</span> <span class="nf">sys</span><span class="p">(</span><span class="n">IBEX_BENCHS_DIR</span> <span class="s">&quot;/others/hayes1.bch&quot;</span><span class="p">);</span>
+	<span class="c1">// Create the HC4 propagation loop with this system</span>
+	<span class="n">CtcHC4</span> <span class="nf">hc4</span><span class="p">(</span><span class="n">sys</span><span class="p">);</span>
+
+	<span class="c1">// Test the contraction</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">box</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; Box before HC4:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">hc4</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; Box after HC4:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>And the result:</p>
+</div>
+<div class="section" id="inverse-contractor">
+<span id="ctc-inverse"></span><h2>Inverse contractor<a class="headerlink" href="#inverse-contractor" title="Permalink to this headline">¶</a></h2>
+<p>Given</p>
+<ul class="simple">
+<li><p>a function <span class="math notranslate nohighlight">\(f:\mathbb{R}^n\to\mathbb{R}^m\)</span></p></li>
+<li><p>a contractor <span class="math notranslate nohighlight">\(C:\mathbb{IR}^m\to\mathbb{IR}^m\)</span></p></li>
+</ul>
+<p>The <strong>inverse</strong> of C by f is a contractor from <span class="math notranslate nohighlight">\(\mathbb{IR}^n\to\mathbb{IR}^n\)</span> denoted by <span class="math notranslate nohighlight">\(f^{-1}(C)\)</span> that satisfies:</p>
+<div class="math notranslate nohighlight">
+\[\forall [x]\in\mathbb{IR}^n, \quad \Bigl(f^{-1}(C)\Bigr)[x] \supseteq \{ x \in[x], \exists y\in C(f([x])) \}.\]</div>
+<p>To illustrate this we shall consider the function</p>
+<div class="math notranslate nohighlight">
+\[t\mapsto (\cos(t),\sin(t))\]</div>
+<p>and a contractor with respect to the constraint</p>
+<div class="math notranslate nohighlight">
+\[x\ge0, y\ge 0\]</div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// Build a contractor on R² wrt (x&gt;=0 and y&gt;=0).</span>
+
+	<span class="n">Function</span> <span class="nf">gx</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="s">&quot;y&quot;</span><span class="p">,</span><span class="s">&quot;x&quot;</span><span class="p">);</span>   <span class="c1">// build (x,y)-&gt;x</span>
+	<span class="n">Function</span> <span class="nf">gy</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="s">&quot;y&quot;</span><span class="p">,</span><span class="s">&quot;y&quot;</span><span class="p">);</span>   <span class="c1">// build (x,y)-&gt;y</span>
+
+	<span class="n">NumConstraint</span> <span class="nf">geqx</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span><span class="n">GEQ</span><span class="p">);</span> <span class="c1">// build x&gt;=0</span>
+	<span class="n">NumConstraint</span> <span class="nf">geqy</span><span class="p">(</span><span class="n">gy</span><span class="p">,</span><span class="n">GEQ</span><span class="p">);</span> <span class="c1">// build y&gt;=0</span>
+
+	<span class="n">CtcFwdBwd</span> <span class="nf">cx</span><span class="p">(</span><span class="n">geqx</span><span class="p">);</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">cy</span><span class="p">(</span><span class="n">geqy</span><span class="p">);</span>
+
+	<span class="n">CtcCompo</span> <span class="nf">compo</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span><span class="n">cy</span><span class="p">);</span>     <span class="c1">// final contractor wrt (x&gt;=0, y&gt;=0)</span>
+
+	<span class="c1">// Build a mapping from R to R²</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="s">&quot;t&quot;</span><span class="p">,</span><span class="s">&quot;(cos(t)</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="s">&quot;)</span><span class="p">;</span>
+
+	<span class="c1">// Build the inverse contractor</span>
+	<span class="n">CtcInverse</span> <span class="nf">inv</span><span class="p">(</span><span class="n">compo</span><span class="p">,</span><span class="n">f</span><span class="p">);</span>
+
+	<span class="kt">double</span> <span class="n">pi</span><span class="o">=</span><span class="mf">3.14</span><span class="p">;</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="p">));</span>
+
+	<span class="n">inv</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;contracted box (first time):&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="n">inv</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;contracted box (second time):&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This gives:</p>
+</div>
+<div class="section" id="shaving">
+<span id="ctc-shaving"></span><h2>Shaving<a class="headerlink" href="#shaving" title="Permalink to this headline">¶</a></h2>
+<p>The shaving operator consists in calling a contractor C onto sub-parts (“slices”) of the input box. If a slice is entirely eliminated by C,
+the input box can be contracted by removing the slice from the box.</p>
+<p>This operator can be viewed as a generalization of the SAC algorithm in discrete domains <a class="reference internal" href="reference.html#bessiere04"><span class="std std-ref">[Bessiere and Debruyne 2004]</span></a>.
+The concept with continuous constraint was first introduced in <a class="reference internal" href="reference.html#lhomme93"><span class="std std-ref">[Lhomme 1993]</span></a> with the “3B” algorithm. In this paper, the
+sub-contractor C was <a class="reference internal" href="#ctc-hc4"><span class="std std-ref">HC4</span></a>.</p>
+<p><strong>(to be completed)</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><blockquote>
+<div><img alt="images/shaving0.png" src="images/shaving0.png" />
+</div></blockquote>
+<p>initial box</p>
+</td>
+<td><img alt="images/shaving1.png" src="images/shaving1.png" />
+</td>
+<td><img alt="images/shaving2.png" src="images/shaving2.png" />
+</td>
+<td><img alt="images/shaving3.png" src="images/shaving3.png" />
+</td>
+</tr>
+<tr class="row-even"><td><img alt="images/shaving4.png" src="images/shaving4.png" />
+</td>
+<td><img alt="images/shaving5.png" src="images/shaving5.png" />
+</td>
+<td><img alt="images/shaving6.png" src="images/shaving6.png" />
+</td>
+<td><img alt="images/shaving7.png" src="images/shaving7.png" />
+</td>
+</tr>
+</tbody>
+</table>
+<img alt="images/shaving8.png" class="align-center" src="images/shaving8.png" />
+</div>
+<div class="section" id="acid-3bcid">
+<span id="ctc-acid"></span><h2>Acid &amp; 3BCid<a class="headerlink" href="#acid-3bcid" title="Permalink to this headline">¶</a></h2>
+<p><em>(to be completed)</em></p>
+</div>
+<div class="section" id="polytope-hull">
+<span id="ctc-polytope-hull"></span><h2>Polytope Hull<a class="headerlink" href="#polytope-hull" title="Permalink to this headline">¶</a></h2>
+<p>Consider first a system of linear inequalities.
+Ibex gives you the possibility to contract a box to the <a class="reference internal" href="interval.html#itv-arith"><span class="std std-ref">hull</span></a> of the polytope (the set of feasible points).
+This is what the contractor <code class="docutils literal notranslate"><span class="pre">CtcPolytopeHull</span></code> stands for.</p>
+<p>This contractor calls the linear solver Ibex has been configured with (Soplex, Cplex, CLP) to calculate for
+each variable <span class="math notranslate nohighlight">\(x_i\)</span>, the following bounds:</p>
+<div class="math notranslate nohighlight">
+\[\min_{A x \le b \wedge x\in[x]} \{ x_i \} \quad \mbox{and} \quad \max_{A x \le b \wedge x\in[x]} \{ x_i \}.\]</div>
+<p>where [x] is the box to be contracted. Consider for instance</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left\{\begin{array}{l}x_1+x_2\le 0\\ x_1-x_2\le 0\\\end{array}\right.\end{split}\]</div>
+<p>Let [x] be [-1,1]x[-1,1]. The following picture depicts the polytope (which is rather a polyhedron in this case) in green, the initial box and the result of the contraction (dashed box).</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/polytope.png"><img alt="_images/polytope.png" src="_images/polytope.png" style="width: 300px;" /></a>
+</div>
+<p>The corresponding program is:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// build the matrix</span>
+	<span class="kt">double</span> <span class="n">_A</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">};</span>
+	<span class="n">Matrix</span> <span class="nf">A</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">_A</span><span class="p">);</span>
+
+	<span class="c1">// build the vector</span>
+	<span class="n">Vector</span> <span class="n">b</span><span class="o">=</span><span class="n">Vector</span><span class="o">::</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+
+	<span class="c1">// create the linear system (with fixed matrix/vector)</span>
+	<span class="n">LinearizerFixed</span> <span class="nf">lin</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">b</span><span class="p">);</span>
+
+	<span class="c1">// create the contractor w.r.t the linear system</span>
+	<span class="n">CtcPolytopeHull</span> <span class="nf">ctc</span><span class="p">(</span><span class="n">lin</span><span class="p">);</span>
+
+	<span class="c1">// create a box</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">));</span>
+
+	<span class="c1">// contract it</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;box before contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">ctc</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;box after contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+<p>In case of a non-linear system, it is also possible to call the <code class="docutils literal notranslate"><span class="pre">CtcPolytopeHull</span></code> contractor, providing that you give a way to <em>linearize</em> the non-linear system. Next section describes linearization techniques and gives an example of <code class="docutils literal notranslate"><span class="pre">CtcPolytopeHull</span></code> with a non-linear system.</p>
+<div class="section" id="linearizations">
+<span id="ctc-linear-relax"></span><h3>Linearizations<a class="headerlink" href="#linearizations" title="Permalink to this headline">¶</a></h3>
+<p>Linearization procedures in Ibex are embbeded in a class inheriting the <code class="docutils literal notranslate"><span class="pre">Linearizer</span></code> interface.</p>
+<p>There exists some built-in linearization techniques, namely:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LinearizerXTaylor</span></code>: a corner-based Taylor relaxation <a class="reference internal" href="reference.html#araya12"><span class="std std-ref">[Araya &amp; al., 2012]</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LinearizerAffine2</span></code>: a relaxation based on affine arithmetic <a class="reference internal" href="reference.html#ninin09"><span class="std std-ref">[Ninin &amp; Messine, 2009]</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LinearizerCompo</span></code>: a combination of several techniques (the polytope is the intersection of the polytopes
+calculated by each technique)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LinearizerFixed</span></code>: a fixed linear system (as shown in the example above)</p></li>
+</ul>
+<p>This <code class="docutils literal notranslate"><span class="pre">Linearizer</span></code> interface only imposes to implement a virtual function called <code class="docutils literal notranslate"><span class="pre">linearize</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Linearizer</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+
+     <span class="cm">/**</span>
+<span class="cm">      * Build a linearization procedure on nb_var variables.</span>
+<span class="cm">      */</span>
+     <span class="n">Linearizer</span><span class="p">(</span><span class="kt">int</span> <span class="n">nb_var</span><span class="p">);</span>
+
+     <span class="cm">/**</span>
+<span class="cm">      * Add constraints in a LP solver.</span>
+<span class="cm">      *</span>
+<span class="cm">      * The constraints correspond to a linearization of the</span>
+<span class="cm">      * underlying system, on the given box.</span>
+<span class="cm">      *</span>
+<span class="cm">      * This function must be implemented in the subclasses.</span>
+<span class="cm">      *</span>
+<span class="cm">      * \return the number of constraints (possibly 0) or -1 if the linear system is</span>
+<span class="cm">      *         infeasible.</span>
+<span class="cm">      */</span>
+     <span class="k">virtual</span> <span class="kt">int</span> <span class="nf">linearize</span><span class="p">(</span><span class="k">const</span> <span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box</span><span class="p">,</span> <span class="n">LinearSolver</span><span class="o">&amp;</span> <span class="n">lp_solver</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">linearizer</span></code> takes as argument a box because, most of the time, the way you linearize a nonlinear system depends on the domain of the variables. In other words, adding the 2*n bound constraints that represent the box to the system allow to build a far smaller polytope.</p>
+<p>The second argument is the linear solver. This is only for efficiency reason: instead of building a matrix A and a vector b, the function directly enters the constraints in the linear solver. Let us now give an example.</p>
+<p>Giving an algorithm to linearize a non-linear system is beyond the scope of this documentation so we shall here artificially <em>linearize a linear system</em>. The algorithm becomes trivial but this is enough to show you how to implement this interface.
+So let us take the same linear system as above and replace the <code class="docutils literal notranslate"><span class="pre">LinearizerFixed</span></code> instace by an instance of a home-made class:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * My own linear relaxation of a system</span>
+<span class="cm"> */</span>
+<span class="k">class</span> <span class="nc">MyLinearRelax</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Linearizer</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+	<span class="cm">/**</span>
+<span class="cm">	 * We actually only accept linear systems Ax&lt;=b :)</span>
+<span class="cm">	 */</span>
+	<span class="n">MyLinearRelax</span><span class="p">(</span><span class="k">const</span> <span class="n">Matrix</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">,</span> <span class="k">const</span> <span class="n">Vector</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span> <span class="o">:</span> <span class="n">Linearizer</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">A</span><span class="p">(</span><span class="n">A</span><span class="p">),</span> <span class="n">b</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+
+	<span class="k">virtual</span> <span class="kt">int</span> <span class="n">linearize</span><span class="p">(</span><span class="k">const</span> <span class="n">IntervalVector</span> <span class="o">&amp;</span> <span class="n">box</span><span class="p">,</span> <span class="n">LPSolver</span><span class="o">&amp;</span> <span class="n">lp_solver</span><span class="p">)</span>  <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">A</span><span class="p">.</span><span class="n">nb_rows</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+			<span class="c1">// add the constraint in the LP solver</span>
+			<span class="n">lp_solver</span><span class="p">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">LEQ</span><span class="p">,</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+
+		<span class="c1">// we return the number of constraints</span>
+		<span class="k">return</span> <span class="n">A</span><span class="p">.</span><span class="n">nb_rows</span><span class="p">();</span>
+	<span class="p">}</span>
+
+	<span class="n">Matrix</span> <span class="n">A</span><span class="p">;</span>
+	<span class="n">Vector</span> <span class="n">b</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Replacing the <code class="docutils literal notranslate"><span class="pre">LinearizerFixed</span></code> instance by an instance of <code class="docutils literal notranslate"><span class="pre">MyLinearizer</span></code> gives exactly the same result.</p>
+</div>
+</div>
+<div class="section" id="exists-and-forall">
+<span id="ctc-quantif"></span><h2>Exists and ForAll<a class="headerlink" href="#exists-and-forall" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> and <code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> contractors allow to deal with quantifiers in constraints, in a generic way.</p>
+<p>Assume we have built a contractor C w.r.t. a constraint c(x,y) (note that we have deliberatly split here the variables of c into two sub-sets: <span class="math notranslate nohighlight">\(x=(x_1,\ldots)\)</span> and <span class="math notranslate nohighlight">\(y=(y_1,\ldots)\)</span>).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> operator produces from C a contractor with respect to the constraint c where the variable y has
+been <em>existantially quantified</em>. More precsiely, the result is a contractor w.r.t. to the constraint c’ defined as follows:</p>
+<div class="math notranslate nohighlight">
+\[c'(x) \iff \exists y\in[y], \ c(x,y).\]</div>
+<p>where [y] is a a user-defined box.</p>
+<p>Similarly, <code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> produces a contractor w.r.t.:</p>
+<div class="math notranslate nohighlight">
+\[\forall y\in[y], \ c(x,y).\]</div>
+<p>It is important to notice that the contractor <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code>/<code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> expects as input two boxes, each playing a different role:</p>
+<ul class="simple">
+<li><p>a box that represents <strong>the domain of y</strong>. This box is read or written in a specific field of <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code>/<code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> called <code class="docutils literal notranslate"><span class="pre">y_init</span></code>.
+The domain of y is a parameter that must be initialized priori to contractions. It can also be dynamically updated between two contractions
+but it is considered as fixed during one contraction.</p></li>
+<li><p>a box that represents <strong>the domain of x</strong>: this is the box that <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code>/<code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> waits as a contractor. This box
+is the one in argument of the <code class="docutils literal notranslate"><span class="pre">contract(...)</span></code> function.</p></li>
+</ul>
+<p>The contractors work as depicted on the following pictures (which illustrate the principles of the algorithms, but the actual implementation is a little more clever).</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 53%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><a class="reference internal image-reference" href="images/ctcquantif1.png"><img alt="images/ctcquantif1.png" src="images/ctcquantif1.png" style="width: 350px;" /></a>
+<p><strong>CtcExist. (a)</strong> The domain of y is
+split until a precision of
+<span class="math notranslate nohighlight">\(\varepsilon\)</span> is reached.</p>
+</td>
+<td><blockquote>
+<div><a class="reference internal image-reference" href="images/ctcquantif3.png"><img alt="images/ctcquantif3.png" src="images/ctcquantif3.png" style="width: 350px;" /></a>
+</div></blockquote>
+<p><strong>CtcExist. (b)</strong> each box is contracted with
+the sub-contractor and projected onto x.
+The result is the union (hull) of all these
+projections (the interval in green).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 53%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><a class="reference internal image-reference" href="images/ctcquantif4.png"><img alt="images/ctcquantif4.png" src="images/ctcquantif4.png" style="width: 350px;" /></a>
+<p><strong>CtcForAll. (a)</strong> The domain of y is
+split until a precision of
+<span class="math notranslate nohighlight">\(\varepsilon\)</span> is reached. A box is
+then formed by taking the midpoint for y.</p>
+</td>
+<td><blockquote>
+<div><a class="reference internal image-reference" href="images/ctcquantif5.png"><img alt="images/ctcquantif5.png" src="images/ctcquantif5.png" style="width: 350px;" /></a>
+</div></blockquote>
+<p><strong>CtcForAll. (b)</strong> each box is contracted with
+the sub-contractor and projected onto x.
+The result is the intersection of all these
+projections (the interval in green).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Here is a first example. We consider the constraint <span class="math notranslate nohighlight">\(c(x,y)\iff x^2+y^2\le 1\)</span>.
+When a constraint is given directly to a <code class="docutils literal notranslate"><span class="pre">CtCExist</span></code>/<code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> operator, this constraint
+is automatically transformed to a <code class="docutils literal notranslate"><span class="pre">CtcFwdBwd</span></code> contractor.</p>
+<p>If the domain for y is set to [-1,1], the set of all x such that it exists y in [-1,1] with
+(x,y) satisfying the constraint is also [-1,1]. This can be observed in the following program:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// create a constraint on (x,y)</span>
+	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+	<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
+
+	<span class="c1">// create domains for x and y</span>
+	<span class="n">IntervalVector</span> <span class="nf">box_x</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">));</span>
+	<span class="n">IntervalVector</span> <span class="nf">box_y</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">));</span>
+
+	<span class="c1">// set the precision that controls how much y will be bisected</span>
+	<span class="kt">double</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+
+	<span class="c1">// create a contractor on x by transforming y into an</span>
+	<span class="c1">// existentially-quantified parameter.</span>
+	<span class="n">CtcExist</span> <span class="nf">exist_y</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">box_y</span><span class="p">,</span><span class="n">epsilon</span><span class="p">);</span>
+
+	<span class="c1">// contract the domain of x</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;box before contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box_x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">exist_y</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box_x</span><span class="p">);</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;box after contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box_x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+<p>In this example, we have set the value of <span class="math notranslate nohighlight">\(\varepsilon\)</span> to 1.0 which is a very crude precision.
+In fact, the result would have been the same with an arbitrarly large precision, simply because the contraction of
+the full box [-10,10]x[-1,1] is optimal in this case. In other words, splitting y (i.e., using the <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> operator)
+is so far totally superfluous.</p>
+<p>To create a more interesting example (where optimiality of a single contraction is lost) we consider two constraints:</p>
+<div class="math notranslate nohighlight">
+\[x^2+y^2\le 1 \ \wedge \ x=y.\]</div>
+<p>The set of solutions is the segment depicted in the figure below.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="images/ctcquantif6.png"><img alt="images/ctcquantif6.png" src="images/ctcquantif6.png" style="width: 200px;" /></a>
+</div>
+<p>Now the value of <span class="math notranslate nohighlight">\(\varepsilon\)</span> has an impact on the accuracy of the result, as the next program illustrates:</p>
+<dl class="simple">
+<dt><strong>Note</strong>: to create a conjunction of two constraints, we introduce a vector-valued function because the current</dt><dd><p>constructor of <code class="docutils literal notranslate"><span class="pre">CtCExist</span></code> does not accept a <code class="docutils literal notranslate"><span class="pre">System</span></code> (this shall be fixed in a future release).
+You may also consider in this situation building <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> directly <a class="reference internal" href="#ctc-quantif-generic"><span class="std std-ref">from a contractor</span></a>.</p>
+</dd>
+</dl>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// create a conjunction of two constraint on (x,y)</span>
+	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">y</span><span class="o">-</span><span class="n">y</span><span class="p">),</span><span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="p">));</span>
+	<span class="n">IntervalVector</span> <span class="nf">z</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+	<span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+	<span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">Interval</span><span class="o">::</span><span class="n">zero</span><span class="p">();</span>
+	<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="n">z</span><span class="p">);</span>
+
+	<span class="c1">// create domains for y</span>
+	<span class="n">IntervalVector</span> <span class="nf">box_y</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">));</span>
+
+	<span class="c1">// observe the result of the contraction for</span>
+	<span class="c1">// different precision epsilon=10^{-_log}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">_log</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">_log</span><span class="o">&lt;=</span><span class="mi">8</span><span class="p">;</span> <span class="n">_log</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="c1">// create the domain for x</span>
+		<span class="n">IntervalVector</span> <span class="n">box_x</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">));</span>
+
+		<span class="c1">// create the exist-contractor with the new precision</span>
+		<span class="n">CtcExist</span> <span class="nf">exist_y</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">box_y</span><span class="p">,</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="o">-</span><span class="n">_log</span><span class="p">));</span>
+
+		<span class="c1">// contract the box</span>
+		<span class="n">exist_y</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box_x</span><span class="p">);</span>
+
+		<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;epsilon=1e-&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">_log</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; box after contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box_x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="p">}</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+<p><strong>Warning</strong>: As we have explained, both <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> and <code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> deploy internally a search tree on the variables y until some precision
+<span class="math notranslate nohighlight">\(\varepsilon\)</span> is reached (the precision is uniform so far).
+The complexity of <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> and <code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> are therefore exponential in the number <span class="math notranslate nohighlight">\(n_y\)</span> of variables y
+and with potentially a ‘’big constant’’. Roughly, the complexity is in <span class="math notranslate nohighlight">\(O\Bigl(\Bigl[\frac{max_i \ rad(y_i)}{\varepsilon}\Bigr]^{n_y}\Bigr)\)</span>. A good way to alleviate this high complexity is to use an <a class="reference internal" href="#ctc-quantif-adapt"><span class="std std-ref">adaptative precision</span></a>.
+but it is anyway strongly recommended to limit the number of quantified parameters.</p>
+<div class="section" id="the-generic-constructor">
+<span id="ctc-quantif-generic"></span><h3>The generic constructor<a class="headerlink" href="#the-generic-constructor" title="Permalink to this headline">¶</a></h3>
+<p>If you want to use a specific contractor (either because forward-backward is not appropriate or because your constraint is something more exotic), you can resort to the generic constructor. This constructor simply takes a contractor C in argument instead of a constraint. There is however another slight difference. Since there is no constraint aynmore, you cannot directly specify the parameters as symbols directly: <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> cannot map itself these symbols to components of boxes contracted by C (remember that contractors are pure numerical functions). So you need to explicitly state the indices of variables that are transformed into parameters. This indices are given in a bitset structure. Here is a “generic variant” of the last example. Note that we take benefit of this generic constructor to give a <a class="reference internal" href="#ctc-hc4"><span class="std std-ref">HC4</span></a>  contractor instead of a simple forward-backward, whence a slightly better contraction.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// create a system</span>
+	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+	<span class="n">SystemFactory</span> <span class="n">fac</span><span class="p">;</span>
+	<span class="n">fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+	<span class="n">fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+	<span class="n">fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">y</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
+	<span class="n">fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">y</span><span class="p">);</span>
+
+	<span class="n">System</span> <span class="nf">sys</span><span class="p">(</span><span class="n">fac</span><span class="p">);</span>
+
+	<span class="n">CtcHC4</span> <span class="nf">hc4</span><span class="p">(</span><span class="n">sys</span><span class="p">);</span>
+
+	<span class="c1">// create domains for y</span>
+	<span class="n">IntervalVector</span> <span class="nf">box_y</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">));</span>
+
+	<span class="c1">// Creates the bitset structure that indicates which</span>
+	<span class="c1">// component are &quot;quantified&quot;. The indices vary</span>
+	<span class="c1">// from 0 to 1 (2 variables only). The bitset is</span>
+	<span class="c1">// initially empty which means that, by default,</span>
+	<span class="c1">// all the variables are parameters.</span>
+	<span class="n">BitSet</span> <span class="nf">vars</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+
+	<span class="c1">// Add &quot;x&quot; as variable.</span>
+	<span class="n">vars</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+	<span class="c1">// observe the result of the contraction for</span>
+	<span class="c1">// different precision epsilon=10^{-_log}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">_log</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">_log</span><span class="o">&lt;=</span><span class="mi">8</span><span class="p">;</span> <span class="n">_log</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="c1">// create the domain for x</span>
+		<span class="n">IntervalVector</span> <span class="n">box_x</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">));</span>
+
+		<span class="c1">// create the exist-contractor with the new precision</span>
+		<span class="n">CtcExist</span> <span class="nf">exist_y</span><span class="p">(</span><span class="n">hc4</span><span class="p">,</span><span class="n">vars</span><span class="p">,</span><span class="n">box_y</span><span class="p">,</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="o">-</span><span class="n">_log</span><span class="p">));</span>
+
+		<span class="c1">// contract the box</span>
+		<span class="n">exist_y</span><span class="p">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box_x</span><span class="p">);</span>
+
+		<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;epsilon=1e-&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">_log</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; box after contraction=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">box_x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="p">}</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+</div>
+<div class="section" id="adaptative-precision">
+<span id="ctc-quantif-adapt"></span><h3>Adaptative precision<a class="headerlink" href="#adaptative-precision" title="Permalink to this headline">¶</a></h3>
+<p>When a <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> contractor is embedded in a search, one naturally asks for an adptative precision.
+Indeed, when the domain of [x] is large, it is counter-productive to split [y] downto maximal precision.
+More generally, the idea of adptative precision is to dynamically set the precision <span class="math notranslate nohighlight">\(\varepsilon\)</span>
+accordingly to the size of the contracted box [x].</p>
+<p>You may find suprising that such adptative precision is not part of the <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code>/<code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> interface.
+This is because the adptative behavior can be easily produced thanks to the contractor paradigm. The idea is to
+create a contractor that wraps <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> and simply update the precision. Next program illustrates the concept.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyCtcExist</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Ctc</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+
+	<span class="cm">/*</span>
+<span class="cm">	 * Create MyCtcExist. The number of variables</span>
+<span class="cm">	 * is the number of bits set to &quot;true&quot; in the</span>
+<span class="cm">	 * &quot;vars&quot; structure; this number is obtained</span>
+<span class="cm">	 *  via vars.size().</span>
+<span class="cm">	 */</span>
+	<span class="n">MyCtcExist</span><span class="p">(</span><span class="n">Ctc</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="k">const</span> <span class="n">BitSet</span><span class="o">&amp;</span> <span class="n">vars</span><span class="p">,</span> <span class="k">const</span> <span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box_y</span><span class="p">)</span> <span class="o">:</span>
+		<span class="n">Ctc</span><span class="p">(</span><span class="n">vars</span><span class="p">.</span><span class="n">size</span><span class="p">()),</span> <span class="n">c</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">vars</span><span class="p">(</span><span class="n">vars</span><span class="p">),</span> <span class="n">box_y</span><span class="p">(</span><span class="n">box_y</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+
+	<span class="kt">void</span> <span class="n">contract</span><span class="p">(</span><span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box_x</span><span class="p">)</span> <span class="p">{</span>
+		<span class="c1">// Create a CtcExist contractor on-the-fly</span>
+		<span class="c1">// and set the splitting precision on y</span>
+		<span class="c1">// to one tenth of the maximal diameter of x.</span>
+		<span class="c1">// The box_x is then contracted</span>
+		<span class="n">CtcExist</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">vars</span><span class="p">,</span><span class="n">box_y</span><span class="p">,</span><span class="n">box_x</span><span class="p">.</span><span class="n">max_diam</span><span class="p">()</span><span class="o">/</span><span class="mi">10</span><span class="p">).</span><span class="n">contract</span><span class="p">(</span><span class="n">box_x</span><span class="p">);</span>
+	<span class="p">}</span>
+
+
+	<span class="c1">// The sub-contractor</span>
+	<span class="n">Ctc</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">;</span>
+	<span class="c1">// The variables indices</span>
+	<span class="k">const</span> <span class="n">BitSet</span><span class="o">&amp;</span> <span class="n">vars</span><span class="p">;</span>
+	<span class="c1">// The parameters domain</span>
+	<span class="k">const</span> <span class="n">IntervalVector</span><span class="o">&amp;</span> <span class="n">box_y</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>It suffices now to replace a <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> object by a <code class="docutils literal notranslate"><span class="pre">MyCtcExist</span></code> one.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Contractors</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#forward-backward">Forward-Backward</a></li>
+<li><a class="reference internal" href="#intersection-union-etc">Intersection, Union, etc.</a></li>
+<li><a class="reference internal" href="#propagation">Propagation</a><ul>
+<li><a class="reference internal" href="#fixpoint-ratio">Fixpoint ratio</a></li>
+<li><a class="reference internal" href="#input-and-output-variables">Input and Output variables</a></li>
+<li><a class="reference internal" href="#the-accumulate-flag">The <code class="docutils literal notranslate"><span class="pre">accumulate</span></code> flag</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#hc4">HC4</a></li>
+<li><a class="reference internal" href="#inverse-contractor">Inverse contractor</a></li>
+<li><a class="reference internal" href="#shaving">Shaving</a></li>
+<li><a class="reference internal" href="#acid-3bcid">Acid &amp; 3BCid</a></li>
+<li><a class="reference internal" href="#polytope-hull">Polytope Hull</a><ul>
+<li><a class="reference internal" href="#linearizations">Linearizations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#exists-and-forall">Exists and ForAll</a><ul>
+<li><a class="reference internal" href="#the-generic-constructor">The generic constructor</a></li>
+<li><a class="reference internal" href="#adaptative-precision">Adaptative precision</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="minibex.html"
+                        title="previous chapter">The Minibex Language</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="separator.html"
+                        title="next chapter">Separators</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/contractor.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="separator.html" title="Separators"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="minibex.html" title="The Minibex Language"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

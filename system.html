@@ -1,0 +1,393 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Systems &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The Minibex Language" href="minibex.html" />
+    <link rel="prev" title="Constraints" href="constraint.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="minibex.html" title="The Minibex Language"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="constraint.html" title="Constraints"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="systems">
+<span id="mod-sys"></span><h1>Systems<a class="headerlink" href="#systems" title="Permalink to this headline">¶</a></h1>
+<p>A <em>system</em> in IBEX is a set of <a class="reference internal" href="constraint.html#mod-sys-ctrs"><span class="std std-ref">constraints</span></a> (equalities or inequalities) with, optionnaly, a goal function to minimize
+and an initial domain for variables.
+It corresponds to the usual concept of system in mathematical programming.
+Here is an example of system:</p>
+<blockquote>
+<div><p>Minimize <span class="math notranslate nohighlight">\(x+y,\)</span></p>
+<p><span class="math notranslate nohighlight">\(x \in[-1,1], y\in[-1,1]\)</span></p>
+<p>such that</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(x^2+y^2\le1\)</span></p>
+<p><span class="math notranslate nohighlight">\(y\ge x^2\)</span>.</p>
+</div></blockquote>
+</div></blockquote>
+<p>One is usually interested in solving the system while minimizing the criterion, if any.</p>
+<div class="section" id="class-and-fields">
+<h2>Class and Fields<a class="headerlink" href="#class-and-fields" title="Permalink to this headline">¶</a></h2>
+<p>The class for representing a system is <code class="docutils literal notranslate"><span class="pre">System</span></code>.</p>
+<div class="section" id="systems-fields">
+<h3>Systems fields<a class="headerlink" href="#systems-fields" title="Permalink to this headline">¶</a></h3>
+<p>A system is not as simple as a collection of <em>any</em> constraints because
+each constraint must exactly relates the same set of arguments. And this set must
+also coincide with that of the goal function.
+Many algorithms of IBEX are based on this assumption.
+This is why they requires a system as argument (and not just an array of constraints).
+This makes systems a central concept in IBEX.</p>
+<p>A system is an object of the <code class="docutils literal notranslate"><span class="pre">System</span></code> class. This object is made of several fields
+that are detailed below.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int</span> <span class="pre">nb_var</span></code>: the total number of variables or, in other words, the
+<em>size</em> of the problem. This number is basically the sum of all arguments’ components. For instance,
+if one declares an argument <em>x</em> with 10 components and an argument <em>y</em> with 5, the value of this field
+will be 15.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int</span> <span class="pre">nb_ctr</span></code>: the number of constraints.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Function*</span> <span class="pre">goal</span></code>: a pointer to the goal function. If there is no goal function, this
+pointer is <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Function</span> <span class="pre">f</span></code>: the (usually vector-valued) function representing the constraints.
+For instance, if one defines three constraints: <span class="math notranslate nohighlight">\(x+y\leq0,\ x-y=1\)</span>, and <span class="math notranslate nohighlight">\(x-y\geq0\)</span>, the function f will be
+<span class="math notranslate nohighlight">\((x,y)\mapsto (x+y,x-y-1,x-y)\)</span>. Note that the constraints are automatically transformed so that the right side
+is 0 but, however, without changing the comparison sign. It is however possible to <a class="reference internal" href="#mod-sys-transfo-normalize"><span class="std std-ref">normalize</span></a> a system so that
+all inequalities are defined with the <span class="math notranslate nohighlight">\(\le\)</span> sign (see ).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IntervalVector</span> <span class="pre">box</span></code>: when a system is <a class="reference internal" href="minibex.html#mod-minibex"><span class="std std-ref">loaded from a file</span></a>,
+a initial box can be specified. It is contained in this field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Array&lt;NumConstraint&gt;</span> <span class="pre">ctrs</span></code>: the array of constraints. The <code class="docutils literal notranslate"><span class="pre">Array</span></code> class of IBEX can
+be used as a regular C array.</p></li>
+</ul>
+</div>
+<div class="section" id="auxiliary-functions">
+<span id="mod-sys-auxfunc"></span><h3>Auxiliary functions<a class="headerlink" href="#auxiliary-functions" title="Permalink to this headline">¶</a></h3>
+<p><em>(to be completed)</em></p>
+</div>
+</div>
+<div class="section" id="creating-systems-in-c">
+<span id="mod-sys-cpp"></span><h2>Creating systems (in C++)<a class="headerlink" href="#creating-systems-in-c" title="Permalink to this headline">¶</a></h2>
+<p>The first alternative for creating a system is to do it programmatically, that is, directly in your C++ program.
+Creating a system in C++ resorts to a temporary object called a <em>system factory</em>. The task is done in a few simple steps:</p>
+<ul class="simple">
+<li><p>declare a new system factory (an object of <code class="docutils literal notranslate"><span class="pre">SystemFactory</span></code>)</p></li>
+<li><p>add arguments in the factory using <code class="docutils literal notranslate"><span class="pre">add_var</span></code>.</p></li>
+<li><p>(optional) add the expression of the goal function using <code class="docutils literal notranslate"><span class="pre">add_goal</span></code></p></li>
+<li><p>add the constraints using <code class="docutils literal notranslate"><span class="pre">add_ctr</span></code></p></li>
+<li><p>create the system simply by passing the factory to the constructor of <code class="docutils literal notranslate"><span class="pre">System</span></code></p></li>
+</ul>
+<p>Here is an example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+
+<span class="n">SystemFactory</span> <span class="n">fac</span><span class="p">;</span>
+<span class="n">fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<span class="n">fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+<span class="n">fac</span><span class="p">.</span><span class="n">add_goal</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">);</span>
+<span class="n">fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="n">System</span> <span class="nf">sys</span><span class="p">(</span><span class="n">fac</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>If you compare the declaration of the constraint here with the examples given <a class="reference internal" href="constraint.html#mod-sys-ctrs-cpp"><span class="std std-ref">here</span></a>,
+you notice that we do not list here the arguments before writing <code class="docutils literal notranslate"><span class="pre">sqr(x)+sqr(y)&lt;=1</span></code>.
+The reason is simply that, as said above, the goal function and the constraints in a system
+share all the same list of arguments. This list is defined via <code class="docutils literal notranslate"><span class="pre">add_var</span></code> once for all.</p>
+</div>
+<div class="section" id="system-transformation">
+<span id="mod-sys-transfo"></span><h2>System Transformation<a class="headerlink" href="#system-transformation" title="Permalink to this headline">¶</a></h2>
+<p>We present in this section the different transformations that can be applied to a system.</p>
+<div class="section" id="copy">
+<span id="mod-sys-transfo-copy"></span><h3>Copy<a class="headerlink" href="#copy" title="Permalink to this headline">¶</a></h3>
+<p>The first transformation you can apply on a system is a simple copy. Of course, this is done via
+the copy constructor of the <code class="docutils literal notranslate"><span class="pre">System</span></code> class.</p>
+<p>When calling the copy constructor, you can decide to copy everything,
+only the equations or only the inequalities. For this, set the second parameter of the
+constructor to either:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 77%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>value</p></th>
+<th class="head"><p>def</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>COPY</p></td>
+<td><p>duplicate all the constraints</p></td>
+</tr>
+<tr class="row-odd"><td><p>INEQ_ONLY</p></td>
+<td><p>duplicate only inequalities</p></td>
+</tr>
+<tr class="row-even"><td><p>EQ_ONLY</p></td>
+<td><p>duplicate only equalities</p></td>
+</tr>
+</tbody>
+</table>
+<p>The first argument of the constructor is the system to copy of course.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;original system:&quot;</span>         <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">sys</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="n">System</span> <span class="nf">sys2</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span><span class="n">System</span><span class="o">::</span><span class="n">INEQ_ONLY</span><span class="p">);</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;system with only inequalities&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">sys2</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The display is:</p>
+</div>
+<div class="section" id="normalization">
+<span id="mod-sys-transfo-normalize"></span><h3>Normalization<a class="headerlink" href="#normalization" title="Permalink to this headline">¶</a></h3>
+<p>It is confortable in some situations to assume that a system is made of inequalities only, and
+that each inequality is under the forme <span class="math notranslate nohighlight">\(g(x)\le0\)</span>, that is, it is a “less or equal” inequality.
+This is called a “normalized” system.</p>
+<p>This need arises, e.g., in optimization methods where the calculation of
+Lagrange multipliers is simplified when the normalization assumption holds.</p>
+<p>It is possible to automatically transform a system into a normalized one.
+The process is immediate.
+If a constraint is:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><span class="math notranslate nohighlight">\(g(x)\le0\)</span></dt><dd><p>it is already normalized so it is left unchanged.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><span class="math notranslate nohighlight">\(g(x)&lt;0\)</span></dt><dd><p>it is replaced by <span class="math notranslate nohighlight">\(g(x)\le0\)</span> (yes, there is a little loss of precision here)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><span class="math notranslate nohighlight">\(g(x)&gt;0\)</span> or <span class="math notranslate nohighlight">\(g(x)\ge0\)</span></dt><dd><p>it is replaced by <span class="math notranslate nohighlight">\(-g(x)\le0\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><span class="math notranslate nohighlight">\(g(x)=0\)</span></dt><dd><p>it is replaced by two constraints: <span class="math notranslate nohighlight">\(g(x)\le0\)</span> and <span class="math notranslate nohighlight">\(-g(x)\le0\)</span>.
+It is also possible to introduce an inflation value or “thickness”, that is, to replace
+the equality by <span class="math notranslate nohighlight">\(g(x)\le\varepsilon\)</span> and <span class="math notranslate nohighlight">\(-g(x)\le \varepsilon\)</span>
+where <span class="math notranslate nohighlight">\(\varepsilon\)</span> can be fixed to any value.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Note:</strong> There is a special treatment for “thick equalities”, that is, equations of the form
+<span class="math notranslate nohighlight">\(g(x)=[l,u]\)</span>. This kind of equations appear often in, e.g., robust parameter estimation problems.
+In this case, the equality is replaced by two inequalities, <span class="math notranslate nohighlight">\(g(x)\le u\)</span> and <span class="math notranslate nohighlight">\(-g(x)\le-l\)</span>,
+and the <span class="math notranslate nohighlight">\(\varepsilon\)</span>-inflation is not applied unless <span class="math notranslate nohighlight">\(|u-l|&lt;\varepsilon\)</span>.</p>
+<p>Normalization is done by calling the constructor of <code class="docutils literal notranslate"><span class="pre">NormalizedSystem</span></code>, a sub-class of <code class="docutils literal notranslate"><span class="pre">System</span></code>.
+Here is an example where <code class="docutils literal notranslate"><span class="pre">sys</span></code> is a system built previously:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;original system:&quot;</span>         <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">sys</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="c1">// normalize the system with a &quot;thickness&quot;</span>
+	<span class="c1">// set to 0.1</span>
+	<span class="n">NormalizedSystem</span> <span class="nf">norm_sys</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span><span class="mf">0.1</span><span class="p">);</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;normalized system:&quot;</span>       <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">norm_sys</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>We get the following display:</p>
+</div>
+<div class="section" id="extended-system">
+<span id="mod-sys-transfo-extend"></span><h3>Extended System<a class="headerlink" href="#extended-system" title="Permalink to this headline">¶</a></h3>
+<p>An extended system is a system where the goal function is transformed into a constraint.</p>
+<p>For instance, the extension of the system given above:</p>
+<blockquote>
+<div><p>Minimize <span class="math notranslate nohighlight">\(x+y,\)</span></p>
+<p><span class="math notranslate nohighlight">\(x \in[-1,1], y\in[-1,1]\)</span></p>
+<p>such that</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(x^2+y^2\le1\)</span></p>
+<p><span class="math notranslate nohighlight">\(y\ge x^2\)</span>.</p>
+</div></blockquote>
+</div></blockquote>
+<p>is the following unconstrained system of constraints:</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(x \in[-1,1], y\in[-1,1], \mbox{__goal__}\in(-\infty,\infty)\)</span></p>
+<p>such that</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(x+y=\mbox{__goal__}\)</span></p>
+<p><span class="math notranslate nohighlight">\(x^2+y^2\le1\)</span></p>
+<p><span class="math notranslate nohighlight">\(y\ge x^2\)</span></p>
+</div></blockquote>
+</div></blockquote>
+<p>Once built, an extended system is a system like any other one, but it has also some extra information:</p>
+<ul class="simple">
+<li><p>the name of the goal variable which is automatically generated (it is “__goal__” in our previous example).</p></li>
+<li><p>the index of the goal variable (the last (2) in our previous example)</p></li>
+<li><p>the index of the “goal constraint” (the first (0) in our previous example)</p></li>
+</ul>
+<p>For this reason, an extended system is represented by a subclass of <code class="docutils literal notranslate"><span class="pre">System</span></code> named <code class="docutils literal notranslate"><span class="pre">ExtendedSystem</span></code>.</p>
+<p>To create an extended system just use the constructor of <code class="docutils literal notranslate"><span class="pre">ExtendedSystem</span></code>.
+We assume in the following example that the variable <code class="docutils literal notranslate"><span class="pre">sys</span></code> is a <code class="docutils literal notranslate"><span class="pre">System</span></code> previously built.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;original system:&quot;</span>         <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">sys</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  number of variables:&quot;</span>   <span class="o">&lt;&lt;</span> <span class="n">sys</span><span class="p">.</span><span class="n">nb_var</span>  <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  number of constraints:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">sys</span><span class="p">.</span><span class="n">nb_ctr</span>  <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="n">ExtendedSystem</span> <span class="nf">ext_sys</span><span class="p">(</span><span class="n">sys</span><span class="p">);</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;extended system:&quot;</span>         <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">ext_sys</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  number of variables:&quot;</span>   <span class="o">&lt;&lt;</span> <span class="n">ext_sys</span><span class="p">.</span><span class="n">nb_var</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  number of constraints:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">ext_sys</span><span class="p">.</span><span class="n">nb_ctr</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  goal name:&quot;</span>             <span class="o">&lt;&lt;</span> <span class="n">ext_sys</span><span class="p">.</span><span class="n">goal_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  goal variable:&quot;</span>         <span class="o">&lt;&lt;</span> <span class="n">ext_sys</span><span class="p">.</span><span class="n">goal_var</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  goal constraint:&quot;</span>       <span class="o">&lt;&lt;</span> <span class="n">ext_sys</span><span class="p">.</span><span class="n">goal_ctr</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>We get the following display:</p>
+</div>
+<div class="section" id="kuhn-tucker-conditions">
+<span id="mod-sys-transfo-kkt"></span><h3>Kuhn-Tucker conditions<a class="headerlink" href="#kuhn-tucker-conditions" title="Permalink to this headline">¶</a></h3>
+<p>The generalized Kuhn-Tucker (aka kkt) conditions can be obtained from a system.
+This produces a new system of <strong>n+M+R+K+1</strong> variables where</p>
+<ul class="simple">
+<li><p>n is the number of basic variables (the ones of the original system)</p></li>
+<li><p>M is the number of Lagrange multipliers for inequalities (i.e., the number of inequalities in the original system)</p></li>
+<li><p>R is the number of Lagrange multipliers for equalities (i.e., the number of equalities in the original system)</p></li>
+<li><p>K is the number of Lagrange multipliers for bounding constraints. These bounding constraints correspond to the <code class="docutils literal notranslate"><span class="pre">box</span></code>
+field of the original system which is taken into account as 2n additional inequalities.</p></li>
+<li><p>The last variable is the “special coefficient” of the goal function that is equal to 0 in the case where constraint
+qualification (linear independency of constraints gradients) does not hold.</p></li>
+</ul>
+<p>Generation of the KKT conditions is based on <a class="reference internal" href="function.html#mod-func-symbolic-diff"><span class="std std-ref">Applying a function with numerous arguments</span></a>.</p>
+<p>Example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;original system:&quot;</span>         <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">sys</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="n">KuhnTuckerSystem</span> <span class="nf">kkt</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kkt system:&quot;</span>       <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">kkt</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;-------------------------&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;  number of variables:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kkt</span><span class="p">.</span><span class="n">nb_var</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>We get the following display. The variable <code class="docutils literal notranslate"><span class="pre">_u</span></code> is the coefficient of the goal function. The variable <code class="docutils literal notranslate"><span class="pre">_l</span></code>
+is the multiplier of the constraint.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Systems</a><ul>
+<li><a class="reference internal" href="#class-and-fields">Class and Fields</a><ul>
+<li><a class="reference internal" href="#systems-fields">Systems fields</a></li>
+<li><a class="reference internal" href="#auxiliary-functions">Auxiliary functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-systems-in-c">Creating systems (in C++)</a></li>
+<li><a class="reference internal" href="#system-transformation">System Transformation</a><ul>
+<li><a class="reference internal" href="#copy">Copy</a></li>
+<li><a class="reference internal" href="#normalization">Normalization</a></li>
+<li><a class="reference internal" href="#extended-system">Extended System</a></li>
+<li><a class="reference internal" href="#kuhn-tucker-conditions">Kuhn-Tucker conditions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="constraint.html"
+                        title="previous chapter">Constraints</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="minibex.html"
+                        title="next chapter">The Minibex Language</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/system.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="minibex.html" title="The Minibex Language"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="constraint.html" title="Constraints"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

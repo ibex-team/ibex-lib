@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Constraints &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Systems" href="system.html" />
+    <link rel="prev" title="Functions" href="function.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="system.html" title="Systems"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="function.html" title="Functions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="constraints">
+<span id="mod-sys-ctrs"></span><h1>Constraints<a class="headerlink" href="#constraints" title="Permalink to this headline">¶</a></h1>
+<p>In this section, we do not present <em>constraints</em> in their full generality
+but <em>numerical constraints</em> (the ones you are the most likely interested in).</p>
+<p>A numerical constraint in IBEX is either a relation like
+<span class="math notranslate nohighlight">\(f(x)&lt;0\)</span>, <span class="math notranslate nohighlight">\(f(x)\le0\)</span>, <span class="math notranslate nohighlight">\(f(x)=0\)</span>, <span class="math notranslate nohighlight">\(f(x)\ge0\)</span> or <span class="math notranslate nohighlight">\(f(x)&gt;0\)</span>,
+where <em>f</em> is a function as introduced in the previous section. If <em>f</em> is vector-valued, then
+0 must be a vector.</p>
+<p>Surprisingly, constraints do not play an important role in IBEX.
+It sounds a little bit contraditory for a <em>constraint</em> programming library.
+The point is that IBEX is rather a <em>contractor</em> programming library meaning that
+we build, apply and compose contractors rather than constraints directly.</p>
+<p>As a programer, you may actually face two different situations.</p>
+<p>Either you indeed want to use a constraint as a contractor in which case you
+build a <code class="docutils literal notranslate"><span class="pre">Ctc</span></code> object with this constraint (the actual class depending
+on the algorithm you chose, as explained in <a class="reference internal" href="tutorial.html#tuto-ctc"><span class="std std-ref">the tutorial</span></a> –by default, it is <a class="reference internal" href="contractor.html#ctc-fwd-bwd"><span class="std std-ref">Forward-Backward</span></a>–).
+Either you need to do something else, say, like calculating the Jacobian matrix of the
+function <em>f</em>. In this case, you just need to get a reference to this function
+and call <code class="docutils literal notranslate"><span class="pre">jacobian</span></code>. In fact, all the information inherent to a constraint
+(except the comparison operator of course) is contained in the underlying function so that there
+is little specific code related to the constraint itself.</p>
+<p>For these reasons, the only operations you actually do with a constraint is either
+to read its field or wrap it into a contractor.</p>
+<div class="section" id="class-and-fields">
+<span id="mod-sys-ctrs-fields"></span><h2>Class and Fields<a class="headerlink" href="#class-and-fields" title="Permalink to this headline">¶</a></h2>
+<p>The class for representing a numerical constraint is <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code>.
+The first field in this class is a reference to the function:</p>
+<blockquote>
+<div><p>Function&amp; f;</p>
+</div></blockquote>
+<p>The second field is the comparison operator:</p>
+<blockquote>
+<div><p>CmpOp op;</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">CmpOp</span></code> is just an <code class="docutils literal notranslate"><span class="pre">enum</span></code> (integer) with the following values:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Op</p></th>
+<th class="head"><p>def</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LT</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(&lt;\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">LEQ</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\le\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EQ</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(=\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GEQ</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\ge\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GT</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(&gt;\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="creating-constraints-in-c">
+<span id="mod-sys-ctrs-cpp"></span><h2>Creating constraints (in C++)<a class="headerlink" href="#creating-constraints-in-c" title="Permalink to this headline">¶</a></h2>
+<p>To create a numerical constraint, you can build the function <em>f</em> first and
+call the constructor of <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code> as in the following example.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">LEQ</span><span class="p">);</span> <span class="c1">// the constraint x+1&lt;=0</span>
+</pre></div>
+</div>
+<p>But you can also write directly:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>which gives the same result. The only difference is that, in the second case,
+the object <code class="docutils literal notranslate"><span class="pre">c.f</span></code> is “owned” (and destroyed) by the constraint whereas
+in the first case, <code class="docutils literal notranslate"><span class="pre">c.f</span></code> is only a reference to <code class="docutils literal notranslate"><span class="pre">f</span></code>.</p>
+<p>Note that the constant 0 is automatically interpreted as a vector (resp. matrix),
+if the left-hand side expression is a vector (resp. matrix). However, it does not
+work for other constants: you have to build the constant with the proper dimension,
+e.g.,</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="nf">x</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">));</span> <span class="c1">// the constraint x=(1,1)</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;c=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The display is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">_x_0</span><span class="o">-</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>In case of several variables, the constructor of <code class="docutils literal notranslate"><span class="pre">NumConstraint</span></code> works as for functions.
+Up to 6 variables can be passed as arguments:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">g</span><span class="p">;</span>
+<span class="n">NumConstraint</span> <span class="nf">c</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="n">e</span><span class="o">+</span><span class="n">f</span><span class="o">+</span><span class="n">g</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>And if more variables are necessary, you need to build an <code class="docutils literal notranslate"><span class="pre">Array&lt;const</span> <span class="pre">ExprSymbol&gt;</span></code> first, like <a class="reference internal" href="function.html#mod-func-cpp"><span class="std std-ref">here</span></a>.</p>
+<p id="mod-sys-fields"><strong>Note:</strong> There is currently the important restriction that inequalities can only be formed with real-valued (called “scalar”) functions.
+It could be possible, in theory, to write <span class="math notranslate nohighlight">\(f(x)\le0\)</span> with f vector-valued by interpreting the operator componentwise but this
+is not supporter by Ibex.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Constraints</a><ul>
+<li><a class="reference internal" href="#class-and-fields">Class and Fields</a></li>
+<li><a class="reference internal" href="#creating-constraints-in-c">Creating constraints (in C++)</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="function.html"
+                        title="previous chapter">Functions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="system.html"
+                        title="next chapter">Systems</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/constraint.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="system.html" title="Systems"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="function.html" title="Functions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,449 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Installation (Release 2.8) &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation with Cmake (experimental)" href="install-cmake.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="install-cmake.html" title="Installation with Cmake (experimental)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation-release-2-8">
+<span id="ibex-install"></span><h1>Installation (Release 2.8)<a class="headerlink" href="#installation-release-2-8" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="standard-install">
+<h2>Standard install<a class="headerlink" href="#standard-install" title="Permalink to this headline">¶</a></h2>
+<p><strong>Note:</strong> Ibex can either be compiled with <a class="reference external" href="http://sourceforge.net/projects/gaol">Gaol</a>, <a class="reference external" href="http://www2.math.uni-wuppertal.de/~xsc/software/filib.html">Filib</a> or <a class="reference external" href="http://www.ti3.tu-harburg.de/keil/profil/index_e.html">Profil/Bias</a>.
+The library installed by default is Gaol, since our experiments have shown that this library prevails over the others.
+So the standard installation will automatically extract and build the Gaol library (and its dependencies) from the bundle.
+However, because of some installation problems with Gaol under Windows, the library installed by default under this platform
+as of today is Filib (this will be changed in the future).</p>
+<div class="section" id="linux-and-macos">
+<h3>Linux and MacOS<a class="headerlink" href="#linux-and-macos" title="Permalink to this headline">¶</a></h3>
+<p>If you are on MacOS and use the <a class="reference external" href="https://www.macports.org">MacPorts</a> package manager, you can install Ibex by simply executing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">port</span> <span class="n">install</span> <span class="n">ibex</span><span class="o">-</span><span class="n">lib</span>
+</pre></div>
+</div>
+<p>Otherwise, you can install Ibex from source with the following instructions.
+The installation assumes your system meets some <a class="reference internal" href="#requirements">requirements</a>.</p>
+<p>Save the archive <code class="docutils literal notranslate"><span class="pre">ibex-2.8.9.tgz</span></code> in some <code class="docutils literal notranslate"><span class="pre">Ibex</span></code> folder and:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/$ tar xvfz ibex-2.8.9.tgz
+~/Ibex/$ cd ibex-2.8.9
+~/Ibex/ibex-2.8.9/$ sudo ./waf configure --lp-lib=soplex
+~/Ibex/ibex-2.8.9/$ sudo ./waf install
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Soplex is a tierce library under <a class="reference external" href="http://scip.zib.de/academic.txt">ZIB</a> licence, not LGPL. By configuring
+Ibex with Soplex, you implicitely accept the terms of this licence.</p>
+<p>If you don’t accept these terms, you can configure Ibex without Soplex:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ sudo ./waf configure
+</pre></div>
+</div>
+<p><strong>however</strong> the performances will be strongly degraded, especially for the global optimizer.</p>
+</div>
+</div>
+<div class="section" id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><dl class="simple">
+<dt>Install <a class="reference external" href="https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/">MinGW+Msys</a>.</dt><dd><p>Select the following components to be installed:</p>
+<ul class="simple">
+<li><p>A MSYS Installation for MinGW Developers</p></li>
+<li><p>A Basic MinGW Installation</p></li>
+<li><p>The GNU C++ Compiler</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>With recent releases of MinGW, you have to run the executable <code class="docutils literal notranslate"><span class="pre">pi.bat</span></code> in <code class="docutils literal notranslate"><span class="pre">C:\MinGW\msys\1.0\postinstall</span></code></p></li>
+<li><p>Install <a class="reference external" href="https://www.python.org/download/releases/2.7.3/">Python2</a> (<strong>warning</strong>: the script are currently not compatible with python3)</p></li>
+<li><p>Create a new directory <code class="docutils literal notranslate"><span class="pre">Ibex</span></code> in the shell of MinGW (to open the shell of MinGW, click on <code class="docutils literal notranslate"><span class="pre">Start</span> <span class="pre">-&gt;</span> <span class="pre">MinGW</span> <span class="pre">-&gt;</span> <span class="pre">MinGWShell</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">Ibex</span>
+</pre></div>
+</div>
+<p><strong>Note:</strong> if you don’t have MinGW in your Start menu, run the executable file <code class="docutils literal notranslate"><span class="pre">msys.bat</span></code> in <code class="docutils literal notranslate"><span class="pre">C:\MinGW\msys\1.0</span></code>.</p>
+</li>
+<li><p>Assuming you have installed MinGW in <code class="docutils literal notranslate"><span class="pre">C:\</span></code>, the <code class="docutils literal notranslate"><span class="pre">Ibex</span></code> directory you have created should be located on your system here:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="n">MinGW</span>\<span class="n">msys</span>\<span class="mf">1.0</span>\<span class="n">home</span>\<span class="p">[</span><span class="n">user</span><span class="p">]</span>\<span class="n">Ibex</span>
+</pre></div>
+</div>
+<p>We will assume now that this folder is the root folder of ibex.</p>
+</li>
+<li><p>Save the archive <code class="docutils literal notranslate"><span class="pre">ibex-2.8.9.tgz</span></code> in <code class="docutils literal notranslate"><span class="pre">C:\MinGW\msys\1.0\home\[user]\Ibex</span></code></p></li>
+<li><p>Configure Ibex (still in the shell of MinGW):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/$ export PATH=&quot;$PATH:/c/Python27&quot;
+~/Ibex/$ tar xvfz ibex-2.8.9.tgz
+~/Ibex/$ cd ibex-2.8.9
+~/Ibex/ibex-2.8.9/$ ./waf configure --prefix=/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.8.9 --lp-lib=soplex
+</pre></div>
+</div>
+<p><strong>Note:</strong> the paths must be entered in Linux-style (don’t use backslash (“&quot;) as separator).</p>
+<blockquote>
+<div><div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Soplex is a tierce library under <a class="reference external" href="http://scip.zib.de/academic.txt">ZIB</a> licence, not LGPL. By configuring
+Ibex with Soplex, you implicitely accept the terms of this licence.</p>
+<p>If you don’t accept these terms, you can configure Ibex without Soplex:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ ./waf configure --prefix=/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.8.9
+</pre></div>
+</div>
+<p><strong>however</strong> the performances will be strongly degraded, especially for the global optimizer.</p>
+</div>
+</div></blockquote>
+</li>
+<li><p>Install Ibex:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ ./waf install
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For mysterious reasons, the command sometimes gets frozen (this was observed while compiling Filib). Use Control-C to interrupt the command and run it again. Do this several times until compilation is over.</p>
+</div>
+<p><strong>Note:</strong> if g++ is not found, it probably means that you have not run the “postinstall” script of MinGW (see above).</p>
+</div>
+<div class="section" id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h3>
+<p>The following applications must be installed.</p>
+<ul class="simple">
+<li><p>g++</p></li>
+<li><p>gcc</p></li>
+<li><p>flex</p></li>
+<li><p>bison</p></li>
+<li><p>python2.x (<strong>warning</strong>: the script are currently not compatible with python3)</p></li>
+<li><p>make</p></li>
+<li><p>pkg-config (<em>optionnal</em>)</p></li>
+</ul>
+<p>On Ubuntu, you can install all you need with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~$ sudo apt-get install -y python2.7 flex bison gcc g++ make pkg-config
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="configuration-options">
+<span id="install-options"></span><h2>Configuration options<a class="headerlink" href="#configuration-options" title="Permalink to this headline">¶</a></h2>
+<p>The full list of options supported by <code class="docutils literal notranslate"><span class="pre">waf</span> <span class="pre">configure</span></code> can be obtained with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ ./waf --help
+</pre></div>
+</div>
+<p>This will display the full list of installed interval/LP libraries and plugins with their specific options,
+as well as benchmarking features.
+See the current list of available plugins in the <a class="reference external" href="http://www.ibex-lib.org/download">download page of Ibex</a>.</p>
+<p>In particular, <code class="docutils literal notranslate"><span class="pre">waf</span></code> <code class="docutils literal notranslate"><span class="pre">configure</span></code> supports the following options:</p>
+<dl class="option-list">
+<dt><kbd><span class="option">--enable-shared</span></kbd></dt>
+<dd><p>Compile Ibex as a dynamic library.</p>
+<p>If Ibex is compiled as a dynamic library in a local folder, you must set the library path accordingly to execute a program. Under Linux:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export LD_LIBRARY_PATH=[prefix]/lib/
+</pre></div>
+</div>
+<p>Under MacOS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export DYLD_LIBRARY_PATH=[prefix]/lib
+</pre></div>
+</div>
+<p>Under MinGW:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export PATH=$PATH:/c/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.8.9/lib
+</pre></div>
+</div>
+<p>Under a Windows command window:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="nb">set</span> <span class="n">PATH</span><span class="o">=%</span><span class="n">PATH</span><span class="o">%</span><span class="p">;</span><span class="n">C</span><span class="p">:</span>\<span class="n">MinGW</span>\<span class="n">msys</span>\<span class="mf">1.0</span>\<span class="n">home</span>\<span class="p">[</span><span class="n">user</span><span class="p">]</span>\<span class="n">Ibex</span>\<span class="n">ibex</span><span class="o">-</span><span class="mf">2.8</span><span class="o">.</span><span class="mi">9</span>\<span class="n">lib</span><span class="p">;</span><span class="n">C</span><span class="p">:</span>\<span class="n">MinGW</span>\<span class="nb">bin</span>
+</pre></div>
+</div>
+</dd>
+<dt><kbd><span class="option">--prefix=<var>PREFIX</var></span></kbd></dt>
+<dd><p>Set the folder where Ibex must be installed (by default, <code class="docutils literal notranslate"><span class="pre">/usr/local</span></code>).</p>
+<p>You can use this option to install Ibex in a local folder.</p>
+</dd>
+<dt><kbd><span class="option">--with-debug</span></kbd></dt>
+<dd><p>Compile Ibex in debug mode</p>
+<p>Compiler optimizations are all discarded (<code class="docutils literal notranslate"><span class="pre">-O0</span></code>), low-level assertions in the code are activated and debug information is stored (<code class="docutils literal notranslate"><span class="pre">-g</span> <span class="pre">-pg</span></code>)</p>
+<p>Once Ibex has been compiled with this option, you should also compile your executable in debug mode. If you use the <code class="docutils literal notranslate"><span class="pre">makefile</span></code> of <code class="docutils literal notranslate"><span class="pre">examples/</span></code>, simply write:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">DEBUG</span><span class="o">=</span><span class="n">yes</span> <span class="o">...</span>
+</pre></div>
+</div>
+</dd>
+<dt><kbd><span class="option">--interval-lib=<var>gaol</var></span></kbd></dt>
+<dd><p>Use Gaol as interval library (recommended)</p>
+</dd>
+<dt><kbd><span class="option">--interval-lib=<var>filib</var></span></kbd></dt>
+<dd><p>Use Filib as interval library</p>
+</dd>
+<dt><kbd><span class="option">--interval-lib=<var>bias</var></span></kbd></dt>
+<dd><p>Use Profil/Bias as interval library (legacy: support not guaranteed)</p>
+</dd>
+<dt><kbd><span class="option">--interval-lib=<var>direct</var></span></kbd></dt>
+<dd><p>Use non-rigorous interval arithmetic (essentially for embedded systems with specific processor architectures that
+do not support rounding modes) (experimental: support not guaranteed)</p>
+</dd>
+<dt><kbd><span class="option">--with-optim</span></kbd></dt>
+<dd><p>Enable IbexOpt</p>
+</dd>
+<dt><kbd><span class="option">--lp-lib=<var>soplex</var></span></kbd></dt>
+<dd><p>Install Ibex with the LP solver Soplex. The plugin archive contains a version of soplex so it is
+not necessary to have Soplex already installed on your system.
+Soplex is under <a class="reference external" href="http://scip.zib.de/academic.txt">ZIB</a> academic licence. If you intend to use Ibex with Soplex commercially,
+you may consider contacting Soplex for a commercial licence.</p>
+<p>If you install your own version of Soplex, use the following argument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">ZLIB</span><span class="o">=</span><span class="n">false</span>
+</pre></div>
+</div>
+<p>and if Ibex is installed as a dynamic library (<code class="docutils literal notranslate"><span class="pre">--enable-shared</span></code>), Soplex must also be installed as a
+dynamic library. For this, add the option SHARED=true to the previous command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">ZLIB</span><span class="o">=</span><span class="n">false</span> <span class="n">SHARED</span><span class="o">=</span><span class="n">true</span>
+</pre></div>
+</div>
+<p>Under Windows, add also <code class="docutils literal notranslate"><span class="pre">SHAREDLIBEXT=dll</span></code> to the previous command.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The current release of Ibex is compatible with Soplex 3.1.1</p>
+</div>
+</dd>
+<dt><kbd><span class="option">--soplex-path=<var>PATH</var></span></kbd></dt>
+<dd><p>Set the (absolute) path of Soplex to PATH (to be used with <code class="docutils literal notranslate"><span class="pre">--lp-lib=soplex</span></code>). The plugin archive contains
+a version of Soplex so this option is not required.
+PATH is the absolute path where Soplex is installed (don’t use relative path like <code class="docutils literal notranslate"><span class="pre">--soplex-path=../soplex-xx</span></code>).</p>
+<p>If Ibex is compiled as a shared library, you must also add the libpath of Soplex in <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ export LD_LIBRARY_PATH=[prefix]/lib/:[soplex-path]/lib/
+</pre></div>
+</div>
+<p>Under Windows, if you run a program from a command window, the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> variable must also be updated:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="nb">set</span> <span class="n">IBEX_PATH</span><span class="o">=</span><span class="n">C</span><span class="p">:</span>\<span class="n">MinGW</span>\<span class="n">msys</span>\<span class="mf">1.0</span>\<span class="n">home</span>\<span class="p">[</span><span class="n">user</span><span class="p">]</span>\<span class="n">Ibex</span>\<span class="n">ibex</span><span class="o">-</span><span class="mf">2.8</span><span class="o">.</span><span class="mi">9</span>
+<span class="o">&gt;</span> <span class="nb">set</span> <span class="n">SOPLEX_PATH</span><span class="o">=...</span>
+<span class="o">&gt;</span> <span class="nb">set</span> <span class="n">PATH</span><span class="o">=%</span><span class="n">PATH</span><span class="o">%</span><span class="p">;</span><span class="o">%</span><span class="n">IBEX_PATH</span><span class="o">%</span>\<span class="n">lib</span><span class="p">;</span><span class="o">%</span><span class="n">SOPLEX_PATH</span><span class="o">%</span>\<span class="n">lib</span><span class="p">;</span><span class="n">C</span><span class="p">:</span>\<span class="n">MinGW</span>\<span class="nb">bin</span>
+</pre></div>
+</div>
+</dd>
+<dt><kbd><span class="option">--lb-lib=<var>clp</var></span></kbd></dt>
+<dd><p><strong>Deprecated. Only available up to ibex 2.8.6</strong> Install Ibex with the LP solver CLP (from the COIN-OR project). The plugin archive contains a version of CLP so it is
+not necessary to have CLP already installed on your system.
+This option is <strong>experimental</strong>, i.e., support for installation issues may not be guaranteed.</p>
+</dd>
+<dt><kbd><span class="option">--clp-path=<var>PATH</var></span></kbd></dt>
+<dd><p><strong>Deprecated. Only available up to ibex 2.8.6</strong> Set the (absolute) path of CLP to PATH (to be used with <code class="docutils literal notranslate"><span class="pre">--lp-lib=clp</span></code>). The plugin archive contains
+a version of CLP so this option is not required.
+PATH is the absolute path where CLP is installed (don’t use relative path like <code class="docutils literal notranslate"><span class="pre">--clp-path=../clp-xx</span></code>).
+If Ibex is compiled as a shared library, you must also add the libpath of CLP in <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code>.</p>
+</dd>
+<dt><kbd><span class="option">--coinutils-path=<var>PATH</var></span></kbd></dt>
+<dd><dl class="simple">
+<dt><strong>Deprecated. Only available up to ibex 2.8.6</strong> Set the (absolute) path of CoinUtils to PATH (to be used with <code class="docutils literal notranslate"><span class="pre">--lp-lib=clp</span></code> and <code class="docutils literal notranslate"><span class="pre">--clp-path</span></code>).</dt><dd><p>The plugin archive contains a version of CLP that includes CoinUtils so this option is not required.</p>
+</dd>
+</dl>
+<p>PATH is the absolute path where CoinUtils is installed (don’t use relative path like <code class="docutils literal notranslate"><span class="pre">--coinutils-path=../coinutils-xx</span></code>).
+If Ibex is compiled as a shared library, you must also add the libpath of CoinUtils in <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code>.</p>
+</dd>
+<dt><kbd><span class="option">--lp-lib=<var>cplex</var></span></kbd></dt>
+<dd><p>Install Ibex with the LP Solver CPLEX. The path of CPLEX must be provided with the <code class="docutils literal notranslate"><span class="pre">--cplex-path</span></code> option.
+This option is <strong>experimental</strong>, i.e., support for installation issues may not be guaranteed.</p>
+</dd>
+<dt><kbd><span class="option">--cplex-path=<var>PATH</var></span></kbd></dt>
+<dd><p>Set the path of CPLEX (to be used with <code class="docutils literal notranslate"><span class="pre">--lp-lib=cplex</span></code>).
+PATH is the absolute path where CPLEX is installed (don’t use relative path).
+If Ibex is compiled as a shared library, you must also add the libpath of CPLEX in <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code>.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="compiling-a-test-program">
+<span id="install-compiling-running"></span><h2>Compiling a Test Program<a class="headerlink" href="#compiling-a-test-program" title="Permalink to this headline">¶</a></h2>
+<p>Copy-paste the following example code in a file named <code class="docutils literal notranslate"><span class="pre">foo.cpp</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#include &quot;ibex.h&quot;</span>
+<span class="c1">#include &lt;iostream&gt;</span>
+
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">ibex</span><span class="p">;</span>
+
+<span class="nb">int</span> <span class="n">main</span><span class="p">(</span><span class="nb">int</span> <span class="n">argc</span><span class="p">,</span> <span class="n">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Interval</span> <span class="n">x</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;My first interval:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>There is a simple “makefile” in the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder that you can use to compile your own programs (note: this makefile uses the extended syntax of GNU make).</p>
+<p>This makefile however assumes <code class="docutils literal notranslate"><span class="pre">pkg-config</span></code> is installed on your system, which is done by default on many Linux distribution).
+To install <code class="docutils literal notranslate"><span class="pre">pkg-config</span></code> under MinGW, follow the steps given <a class="reference external" href="http://stackoverflow.com/questions/1710922/how-to-install-pkg-config-in-windows/22363820#22363820">here</a>.</p>
+<p>So, place the file <code class="docutils literal notranslate"><span class="pre">foo.cpp</span></code> in the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> folder and:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ cd examples
+~/Ibex/ibex-2.8.9/examples$ make foo
+~/Ibex/ibex-2.8.9/examples$ ./foo
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="arabic">
+<li><p>It may be necessary to set the <code class="docutils literal notranslate"><span class="pre">PKG_CONFIG_PATH</span></code> to <em>[prefix]</em><code class="docutils literal notranslate"><span class="pre">/share/pkgconfig</span></code> where <em>[prefix]</em> is
+<code class="docutils literal notranslate"><span class="pre">/usr/local</span></code> by default or whatever path specified via <code class="docutils literal notranslate"><span class="pre">--prefix</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<p>Under Windows, if you have compiled Ibex with <code class="docutils literal notranslate"><span class="pre">--enable--shared</span></code> you can run the program from a command window.
+Just update the path to dynamically link against Ibex:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="nb">set</span> <span class="n">IBEX_PATH</span><span class="o">=</span><span class="n">C</span><span class="p">:</span>\<span class="n">MinGW</span>\<span class="n">msys</span>\<span class="mf">1.0</span>\<span class="n">home</span>\<span class="p">[</span><span class="n">user</span><span class="p">]</span>\<span class="n">Ibex</span>\<span class="n">ibex</span><span class="o">-</span><span class="mf">2.8</span><span class="o">.</span><span class="mi">9</span>
+<span class="o">&gt;</span> <span class="nb">set</span> <span class="n">PATH</span><span class="o">=%</span><span class="n">PATH</span><span class="o">%</span><span class="p">;</span><span class="o">%</span><span class="n">IBEX_PATH</span><span class="o">%</span>\<span class="n">lib</span><span class="p">;</span><span class="n">C</span><span class="p">:</span>\<span class="n">MinGW</span>\<span class="nb">bin</span>
+<span class="o">&gt;</span> <span class="n">cd</span> <span class="o">%</span><span class="n">IBEX_PATH</span><span class="o">%</span>\<span class="n">examples</span>
+<span class="o">&gt;</span> <span class="n">foo</span><span class="o">.</span><span class="n">exe</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-unit-tests">
+<h2>Running unit tests<a class="headerlink" href="#running-unit-tests" title="Permalink to this headline">¶</a></h2>
+<p>You can also run the whole unit tests suite with the <strong>installed</strong> version of Ibex.</p>
+<p>To this end, you must install first the <a class="reference external" href="https://sourceforge.net/projects/cppunit/">cppunit library</a>. Then run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ ./waf utest
+</pre></div>
+</div>
+<p>Note also the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ ./waf check
+</pre></div>
+</div>
+<p>as a handy shortcut for:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9/$ ./waf build install clean utest
+</pre></div>
+</div>
+</div>
+<div class="section" id="uninstall">
+<h2>Uninstall<a class="headerlink" href="#uninstall" title="Permalink to this headline">¶</a></h2>
+<p>Simply type in the path of IBEX (under the shell of MinGW for Windows):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/Ibex/ibex-2.8.9$ sudo ./waf uninstall
+~/Ibex/ibex-2.8.9$ ./waf distclean
+</pre></div>
+</div>
+<p><strong>Note:</strong> sudo is useless under MinGW or if Ibex is installed in a local folder.</p>
+<p>It is highly recommended to uninstall Ibex like this before upgrading to a new release or installing a plugin.</p>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="headers-of-gaol-not-found">
+<h3>Headers of Gaol not found<a class="headerlink" href="#headers-of-gaol-not-found" title="Permalink to this headline">¶</a></h3>
+<p>When running <code class="docutils literal notranslate"><span class="pre">waf</span> <span class="pre">configure</span></code>, I get messages like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Checking</span> <span class="k">for</span> <span class="n">header</span> <span class="p">[</span><span class="s1">&#39;gaol/gaol.h&#39;</span><span class="p">,</span> <span class="s1">&#39;gaol/gaol_interval.h&#39;</span><span class="p">]</span>   <span class="p">:</span> <span class="ow">not</span> <span class="n">found</span>
+ <span class="o">...</span>
+</pre></div>
+</div>
+<p>Does it mean that Ibex is not properly installed?</p>
+<p><strong>Answer:</strong> No, this mesage simply indicates that gaol was not found on your system and that it will be automatically extracted from the bundle. It is not an error message.</p>
+</div>
+<div class="section" id="linking-problem-with-coinor">
+<h3>Linking problem with CoinOR<a class="headerlink" href="#linking-problem-with-coinor" title="Permalink to this headline">¶</a></h3>
+<p>If the linker fails with undefined reference to dgetrf and dgetrs, it is probably because you have installed Lapack. You can either:</p>
+<blockquote>
+<div><p>try to adapt the makefile to link with Lapack.
+Remove Lapack, reinstall Ibex and reinstall Lapack (in this order).</p>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation (Release 2.8)</a><ul>
+<li><a class="reference internal" href="#standard-install">Standard install</a><ul>
+<li><a class="reference internal" href="#linux-and-macos">Linux and MacOS</a></li>
+<li><a class="reference internal" href="#windows">Windows</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration-options">Configuration options</a></li>
+<li><a class="reference internal" href="#compiling-a-test-program">Compiling a Test Program</a></li>
+<li><a class="reference internal" href="#running-unit-tests">Running unit tests</a></li>
+<li><a class="reference internal" href="#uninstall">Uninstall</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#headers-of-gaol-not-found">Headers of Gaol not found</a></li>
+<li><a class="reference internal" href="#linking-problem-with-coinor">Linking problem with CoinOR</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="install-cmake.html"
+                        title="next chapter">Installation with Cmake (experimental)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/install.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="install-cmake.html" title="Installation with Cmake (experimental)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

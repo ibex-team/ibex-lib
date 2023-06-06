@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Introduction &#8212; IBEX 2.8 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation (Release 2.8)" href="install.html" />
+    <link rel="prev" title="Welcome to IBEX’s documentation!" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation (Release 2.8)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to IBEX’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Ibex is a C++ numerical library based on <strong>interval arithmetic</strong> and <strong>constraint programming</strong>.</p>
+<p>It can be used to solve a variety of problems that can roughly be formulated as:</p>
+<blockquote>
+<div><p><em>Find a reliable characterization with boxes (Cartesian product of intervals) of sets implicitely defined by constraints</em></p>
+</div></blockquote>
+<p><em>Reliable</em> means that all sources of uncertainty should be taken into account, including:</p>
+<ul class="simple">
+<li><p>approximation of real numbers by floating-point numbers</p></li>
+<li><p>round-off errors</p></li>
+<li><p>linearization truncatures</p></li>
+<li><p>model parameter uncertainty</p></li>
+<li><p>measurement noise</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/prob02.png"><img alt="_images/prob02.png" src="_images/prob02.png" style="width: 300px;" /></a>
+<p><strong>Example of problem</strong>: Given a set of nonlinear inequalities <span class="math notranslate nohighlight">\(f_1\leq0,\ldots,f_n\leq0\)</span>, find two sets of boxes S<sub>1</sub> and S<sub>2</sub> such that</p>
+<div class="math notranslate nohighlight">
+\[S_1\subseteq \{ x, f_1(x)\leq0 \wedge \ldots \wedge f_n(x)\leq0\}\subseteq S_2\]</div>
+<div class="section" id="the-api">
+<h2>The API<a class="headerlink" href="#the-api" title="Permalink to this headline">¶</a></h2>
+<p>The API of Ibex can be broken into three layers:</p>
+<ul class="simple">
+<li><p>An extended (symbolic-numeric) interval calculator</p></li>
+<li><p>A contractor programming library</p></li>
+<li><p>A system solver / global optimizer (supplied as plugins since Release 2.2)</p></li>
+</ul>
+<p>Each usage corresponds to a different layer and each layer is built on top of the previous one.</p>
+<p>Ibex does not include low-level interval arithmetic but uses a third library (Ibex is currently
+automatically compiled either with <a class="reference external" href="http://sourceforge.net/projects/gaol">Gaol</a> or <a class="reference external" href="http://www2.math.uni-wuppertal.de/~xsc/software/filib.html">Filib</a> , depending on your platform).</p>
+</div>
+<div class="section" id="an-extended-interval-calculator">
+<h2>An extended interval calculator<a class="headerlink" href="#an-extended-interval-calculator" title="Permalink to this headline">¶</a></h2>
+<p>Ibex allows you to declare symbolically a mathematical function and to perform interval computations with it. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="n">x</span><span class="p">;</span>
+<span class="n">Function</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>defines the “mathematical” object <span class="math notranslate nohighlight">\(x \mapsto sin(x)+1\)</span>.</p>
+<p><strong>Note:</strong> <em>Functions</em> (as well as equalities or inequalities) can either be entered programmatically (using C++ operator overloading) or using a parser of an AMPL-like language called Minibex. Functions accept vector or matrix variables or values; similarities with Matlab are shared on purpose. See the modeling guide.</p>
+<p>Now that functions are built, you can use them to perform interval or symbolic operations. Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Interval</span> <span class="n">x</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">Interval</span> <span class="n">y</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>            <span class="o">//</span> <span class="n">calculate</span> <span class="n">the</span> <span class="n">image</span> <span class="n">of</span> <span class="n">x</span> <span class="n">by</span> <span class="n">f</span>
+<span class="n">Function</span> <span class="n">df</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">Function</span><span class="p">::</span><span class="n">DIFF</span><span class="p">);</span>   <span class="o">//</span> <span class="n">derivate</span> <span class="n">f</span>
+<span class="n">Interval</span> <span class="n">z</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">eval_affine</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>    <span class="o">//</span> <span class="n">calculate</span> <span class="n">the</span> <span class="n">image</span> <span class="n">of</span> <span class="n">x</span> <span class="n">by</span> <span class="n">df</span> <span class="n">using</span> <span class="n">affine</span> <span class="n">forms</span>
+</pre></div>
+</div>
+<p>All the classical operations with intervals can be performed with the previously defined functions, including relational (backward) operators, inner arithmetics, automatic differentiation, affine arithmetic, etc.</p>
+</div>
+<div class="section" id="contractor-programming">
+<h2>Contractor programming<a class="headerlink" href="#contractor-programming" title="Permalink to this headline">¶</a></h2>
+<p>Ibex gives you the ability to build high-level interval-based algorithms declaratively through the <em>contractor programming</em> paradigm  <a class="reference internal" href="reference.html#chabert09a"><span class="std std-ref">[Chabert &amp; Jaulin, 2009]</span></a>.</p>
+<p>A contractor is basically an operator that transforms a box to a smaller (included) box, by safely removing points with respect to some mathematical property.</p>
+<p>The first property one usually wants to enforce is a numerical constraint, like an equation or inequality:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">;</span>
+<span class="n">Function</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="o">...</span><span class="p">);</span>
+<span class="n">NumConstraint</span> <span class="n">c</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">CtcFwdBwd</span> <span class="n">ctc</span><span class="p">(</span><span class="n">c</span><span class="p">);</span> <span class="o">//</span> <span class="n">build</span> <span class="n">the</span> <span class="n">contractor</span> <span class="n">w</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">t</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>Contraction is performed with a call to the function <code class="docutils literal notranslate"><span class="pre">contract(...)</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IntervalVector</span> <span class="n">box</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span> <span class="o">//</span> <span class="n">build</span> <span class="n">a</span> <span class="n">box</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">and</span> <span class="n">z</span>
+<span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=...</span><span class="p">;</span>
+<span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=...</span><span class="p">;</span>
+<span class="n">box</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=...</span><span class="p">;</span>
+<span class="n">ctc</span><span class="o">.</span><span class="n">contract</span><span class="p">(</span><span class="n">box</span><span class="p">);</span> <span class="o">//</span> <span class="n">contract</span> <span class="n">the</span> <span class="n">box</span>
+</pre></div>
+</div>
+<p><strong>Note</strong>: A <em>contractor</em> is the equivalent of a propagator in finite domain solvers except that it is a pure numerical function (no state).</p>
+<p>More complex properties are obtained by combining contractors. For instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ctc</span><span class="o">&amp;</span> <span class="n">c1</span><span class="o">=...</span> <span class="p">;</span>
+<span class="n">Ctc</span><span class="o">&amp;</span> <span class="n">c2</span><span class="o">=...</span> <span class="p">;</span>
+<span class="n">Ctc</span><span class="o">&amp;</span> <span class="n">c3</span><span class="o">=...</span> <span class="p">;</span>
+<span class="n">CtcUnion</span> <span class="n">u</span><span class="p">(</span><span class="n">CtcInter</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">),</span><span class="n">c3</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>will define the contractor <span class="math notranslate nohighlight">\(((C_1 \cap C_2) \cup C_3))\)</span>.</p>
+<p>Ibex contains a variety of built-in operators (HC4, Shaving, ACID, X-newton, q-intersection, etc.).</p>
+</div>
+<div class="section" id="system-solving-and-global-optimization">
+<h2>System solving and global optimization<a class="headerlink" href="#system-solving-and-global-optimization" title="Permalink to this headline">¶</a></h2>
+<p>Finally, Ibex proposes various plugins. In particular, the IbexSolve and IbexOpt plugins are dedicated to system solving and optimization, and come both
+with a default black-box solver and global optimizer for immediate usage. See the <a class="reference internal" href="solver.html#solver"><span class="std std-ref">IbexSolve</span></a> and <a class="reference internal" href="optim.html#optim"><span class="std std-ref">IbexOpt</span></a> documentations.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#the-api">The API</a></li>
+<li><a class="reference internal" href="#an-extended-interval-calculator">An extended interval calculator</a></li>
+<li><a class="reference internal" href="#contractor-programming">Contractor programming</a></li>
+<li><a class="reference internal" href="#system-solving-and-global-optimization">System solving and global optimization</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to IBEX’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="next chapter">Installation (Release 2.8)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/intro.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation (Release 2.8)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to IBEX’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>
