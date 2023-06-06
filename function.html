@@ -309,6 +309,11 @@ the midvector of <span class="math notranslate nohighlight">\([x]\)</span>.</p>
 </pre></div>
 </div>
 <p>The display is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Hansen</span> <span class="n">matrix</span><span class="p">:</span>
+<span class="p">(([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="p">(</span><span class="o">&lt;</span><span class="mf">2.25</span><span class="p">,</span> <span class="mf">2.25</span><span class="o">&gt;</span> <span class="p">;</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">]))</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="creating-functions-in-c">
@@ -382,6 +387,9 @@ time with a chosen name.:</p>
 </pre></div>
 </div>
 <p>The display is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_f_5</span><span class="p">:(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">sin</span><span class="p">((</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">))</span>
+</pre></div>
+</div>
 <p>You can directly give up to 20 variables in argument of the <code class="docutils literal notranslate"><span class="pre">Function</span></code> constructor:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">f</span><span class="p">;</span>
 	<span class="n">Function</span> <span class="nf">_f</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="n">e</span><span class="o">+</span><span class="n">f</span><span class="p">);</span>
@@ -407,6 +415,9 @@ example, we have 7 variables. But instead of creating the function</p>
 </pre></div>
 </div>
 <p>The display is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_f_7</span><span class="p">:(</span><span class="n">_x_11</span><span class="p">,</span><span class="n">_x_12</span><span class="p">,</span><span class="n">_x_13</span><span class="p">,</span><span class="n">_x_14</span><span class="p">,</span><span class="n">_x_15</span><span class="p">,</span><span class="n">_x_16</span><span class="p">,</span><span class="n">_x_17</span><span class="p">)</span><span class="o">-&gt;</span><span class="p">((((((</span><span class="n">_x_11</span><span class="o">+</span><span class="n">_x_12</span><span class="p">)</span><span class="o">+</span><span class="n">_x_13</span><span class="p">)</span><span class="o">+</span><span class="n">_x_14</span><span class="p">)</span><span class="o">+</span><span class="n">_x_15</span><span class="p">)</span><span class="o">+</span><span class="n">_x_16</span><span class="p">)</span><span class="o">+</span><span class="n">_x_17</span><span class="p">)</span>
+</pre></div>
+</div>
 <p><strong>Note:</strong> Because of a potential conflict with <code class="docutils literal notranslate"><span class="pre">std::min</span></code> (or <code class="docutils literal notranslate"><span class="pre">std::max</span></code>), you might be forced to prefix the min (max) function with <code class="docutils literal notranslate"><span class="pre">ibex::</span></code>:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
 	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">ibex</span><span class="o">::</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">));</span>
@@ -466,6 +477,9 @@ For that, you need to handle references of shared subexpressions with variables 
 </pre></div>
 </div>
 <p>The display is:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="nl">f</span><span class="p">:(</span><span class="n">x</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span><span class="o">-&gt;</span><span class="p">(((((((((</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">x</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">x</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">x</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">x</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">x</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">x</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">x</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">x</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="renaming-functions">
@@ -547,6 +561,9 @@ z is another variable. We do it in the generic way, using arrays:</p>
 </pre></div>
 </div>
 <p>The display is:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="nl">g</span><span class="p">:(</span><span class="n">z</span><span class="p">)</span><span class="o">-&gt;</span><span class="p">(</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>You can also use this construct with vector/matrix variables and mix functions declared with different style:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	
 	<span class="c1">// Here is a function that performs a matrix-vector multiplication,</span>
@@ -575,6 +592,9 @@ So symbolic differentiation is obtained via a copy constructor where the copy â€
 </pre></div>
 </div>
 <p>The output is</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">=</span><span class="n">d_f_12</span><span class="p">:(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span><span class="o">-&gt;</span><span class="p">((</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">),(</span><span class="n">x</span><span class="o">*</span><span class="n">z</span><span class="p">),(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">))</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>

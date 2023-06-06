@@ -177,7 +177,25 @@ node by returning true (default) or false.</p>
 <col style="width: 46%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td></td>
+<tr class="row-odd"><td><div class="highlight-default notranslate"><div class="highlight"><pre><span></span>([-inf, -9] ; [-inf, inf]) : out
+([-9, 9] ; [-inf, -9]) : out
+([-9, -4.5] ; [-9, 0]) : ?
+([-4.5, 0] ; [-9, -8]) : ?
+([-4.5, 0] ; [-8, 0]) : in
+([-9, -4.5] ; [0, 9]) : ?
+([-4.5, 0] ; [0, 8]) : in
+([-4.5, 0] ; [8, 9]) : ?
+([0, 4.5] ; [-9, -8]) : ?
+([0, 4.5] ; [-8, 0]) : in
+([4.5, 9] ; [-9, 0]) : ?
+([0, 4.5] ; [0, 8]) : in
+([0, 4.5] ; [8, 9]) : ?
+([4.5, 9] ; [0, 9]) : ?
+([-9, 9] ; [9, inf]) : out
+([9, inf] ; [-inf, inf]) : out
+</pre></div>
+</div>
+</td>
 <td><div class="figure align-center">
 <a class="reference internal image-reference" href="_images/set-visit.png"><img alt="_images/set-visit.png" src="_images/set-visit.png" style="width: 300px;" /></a>
 </div>

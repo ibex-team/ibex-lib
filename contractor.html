@@ -356,6 +356,11 @@ We also check that the final boxes are equal, up to the precision required.</p>
 </pre></div>
 </div>
 <p>The display is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> Number of contractions with simple fixpoint=700
+ Number of contractions with propagation=121
+ Are the results the same? YES
+</pre></div>
+</div>
 </div>
 <div class="section" id="input-and-output-variables">
 <h3>Input and Output variables<a class="headerlink" href="#input-and-output-variables" title="Permalink to this headline">¶</a></h3>
@@ -407,6 +412,9 @@ Let us now force the input/output bitsets of each contractors to contain every v
 </pre></div>
 </div>
 <p>We observe now that the fixpoint with <code class="docutils literal notranslate"><span class="pre">CtcPropag</span></code> is reached with as many iterations as without <code class="docutils literal notranslate"><span class="pre">CtcPropag</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">Number</span> <span class="n">of</span> <span class="n">contractions</span> <span class="k">with</span> <span class="n">propagation</span><span class="o">=</span><span class="mi">700</span>
+</pre></div>
+</div>
 <p>If you build a contractor from scratch (not inheriting a built-in contractor like we have just done), don’t forget to
 create the bitsets before using them with <code class="docutils literal notranslate"><span class="pre">add/remove</span></code>.</p>
 <p>Here is a final example. Imagine that we have implemented a contraction algorithm for the following constraint (over 100 variables):</p>
@@ -472,6 +480,10 @@ It allows to contract with respect to a <a class="reference internal" href="syst
 </pre></div>
 </div>
 <p>And the result:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">Box</span> <span class="n">before</span> <span class="n">HC4</span><span class="p">:([</span><span class="o">-</span><span class="mf">0.9000000000000001</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.03000000000000001</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.01</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">2.700000000000001</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.6</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.8000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">1.35</span><span class="p">,</span> <span class="mf">1.450000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">6.9</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">1.15</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">])</span>
+ <span class="n">Box</span> <span class="n">after</span> <span class="n">HC4</span><span class="p">:([</span><span class="o">-</span><span class="mf">0.8544702651561549</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.776666666666666</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.03000000000000001</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.01</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">2.700000000000001</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.6</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.8000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">1.35</span><span class="p">,</span> <span class="mf">1.450000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">6.9</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">1.15</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">])</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="inverse-contractor">
 <span id="ctc-inverse"></span><h2>Inverse contractor<a class="headerlink" href="#inverse-contractor" title="Permalink to this headline">¶</a></h2>
@@ -519,6 +531,10 @@ It allows to contract with respect to a <a class="reference internal" href="syst
 </pre></div>
 </div>
 <p>This gives:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">contracted</span> <span class="n">box</span> <span class="p">(</span><span class="n">first</span> <span class="n">time</span><span class="p">):([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">3.141592653589794</span><span class="p">])</span>
+<span class="n">contracted</span> <span class="n">box</span> <span class="p">(</span><span class="n">second</span> <span class="n">time</span><span class="p">):([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.570796326794897</span><span class="p">])</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="shaving">
 <span id="ctc-shaving"></span><h2>Shaving<a class="headerlink" href="#shaving" title="Permalink to this headline">¶</a></h2>
@@ -605,6 +621,10 @@ each variable <span class="math notranslate nohighlight">\(x_i\)</span>, the fol
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">box</span> <span class="n">before</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
 <p>In case of a non-linear system, it is also possible to call the <code class="docutils literal notranslate"><span class="pre">CtcPolytopeHull</span></code> contractor, providing that you give a way to <em>linearize</em> the non-linear system. Next section describes linearization techniques and gives an example of <code class="docutils literal notranslate"><span class="pre">CtcPolytopeHull</span></code> with a non-linear system.</p>
 <div class="section" id="linearizations">
 <span id="ctc-linear-relax"></span><h3>Linearizations<a class="headerlink" href="#linearizations" title="Permalink to this headline">¶</a></h3>
@@ -765,6 +785,10 @@ is automatically transformed to a <code class="docutils literal notranslate"><sp
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">box</span> <span class="n">before</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
 <p>In this example, we have set the value of <span class="math notranslate nohighlight">\(\varepsilon\)</span> to 1.0 which is a very crude precision.
 In fact, the result would have been the same with an arbitrarly large precision, simply because the contraction of
 the full box [-10,10]x[-1,1] is optimal in this case. In other words, splitting y (i.e., using the <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> operator)
@@ -810,6 +834,17 @@ You may also consider in this situation building <code class="docutils literal n
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-0</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-1</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7876891814830961</span><span class="p">,</span> <span class="mf">0.753733646234449</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-2</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7282133915055162</span><span class="p">,</span> <span class="mf">0.7125648694394637</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-3</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7078382851418078</span><span class="p">,</span> <span class="mf">0.7078470747715983</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-4</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071415397622109</span><span class="p">,</span> <span class="mf">0.7071379889246125</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-5</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071134425561116</span><span class="p">,</span> <span class="mf">0.7071112646559279</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071073875766052</span><span class="p">,</span> <span class="mf">0.7071069117102449</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-7</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071069839675348</span><span class="p">,</span> <span class="mf">0.7071068778997553</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-8</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071069839675348</span><span class="p">,</span> <span class="mf">0.7071067826254732</span><span class="p">])</span>
+</pre></div>
+</div>
 <p><strong>Warning</strong>: As we have explained, both <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> and <code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> deploy internally a search tree on the variables y until some precision
 <span class="math notranslate nohighlight">\(\varepsilon\)</span> is reached (the precision is uniform so far).
 The complexity of <code class="docutils literal notranslate"><span class="pre">CtcExist</span></code> and <code class="docutils literal notranslate"><span class="pre">CtcForAll</span></code> are therefore exponential in the number <span class="math notranslate nohighlight">\(n_y\)</span> of variables y
@@ -860,6 +895,17 @@ but it is anyway strongly recommended to limit the number of quantified paramete
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-0</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.9974937185533101</span><span class="p">,</span> <span class="mf">0.9237635498752691</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-1</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7105000111038531</span><span class="p">,</span> <span class="mf">0.717159647201955</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-2</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7085191318530563</span><span class="p">,</span> <span class="mf">0.7081440747898437</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-3</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7072537910993831</span><span class="p">,</span> <span class="mf">0.7072034883921635</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-4</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071128637729426</span><span class="p">,</span> <span class="mf">0.7071156260245542</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-5</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071077816302066</span><span class="p">,</span> <span class="mf">0.707107587705308</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071068901987889</span><span class="p">,</span> <span class="mf">0.7071068546978915</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-7</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071067909156146</span><span class="p">,</span> <span class="mf">0.7071067878864685</span><span class="p">])</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-8</span> <span class="n">box</span> <span class="n">after</span> <span class="n">contraction</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mf">0.7071067825315514</span><span class="p">,</span> <span class="mf">0.7071067817971828</span><span class="p">])</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="adaptative-precision">
 <span id="ctc-quantif-adapt"></span><h3>Adaptative precision<a class="headerlink" href="#adaptative-precision" title="Permalink to this headline">¶</a></h3>

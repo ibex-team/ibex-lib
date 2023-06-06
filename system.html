@@ -169,6 +169,35 @@ constructor to either:</p>
 </pre></div>
 </div>
 <p>The display is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">original</span> <span class="n">system</span><span class="p">:</span>
+<span class="o">-------------------------</span>
+<span class="n">variables</span><span class="p">:</span> 
+  <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+<span class="n">box</span><span class="p">:</span> 
+  <span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+<span class="n">goal</span><span class="p">:</span> 
+  <span class="p">(</span><span class="n">none</span><span class="p">)</span>
+<span class="n">constraints</span><span class="p">:</span>
+  <span class="p">((</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+  <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">0</span>
+  <span class="p">((</span><span class="n">y</span><span class="o">+</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span>
+<span class="o">-------------------------</span>
+
+<span class="n">system</span> <span class="k">with</span> <span class="n">only</span> <span class="n">inequalities</span>
+<span class="o">-------------------------</span>
+<span class="n">variables</span><span class="p">:</span> 
+  <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+<span class="n">box</span><span class="p">:</span> 
+  <span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+<span class="n">goal</span><span class="p">:</span> 
+  <span class="p">(</span><span class="n">none</span><span class="p">)</span>
+<span class="n">constraints</span><span class="p">:</span>
+  <span class="p">((</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+  <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">0</span>
+<span class="o">-------------------------</span>
+
+</pre></div>
+</div>
 </div>
 <div class="section" id="normalization">
 <span id="mod-sys-transfo-normalize"></span><h3>Normalization<a class="headerlink" href="#normalization" title="Permalink to this headline">¶</a></h3>
@@ -227,6 +256,36 @@ Here is an example where <code class="docutils literal notranslate"><span class=
 </pre></div>
 </div>
 <p>We get the following display:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">original</span> <span class="n">system</span><span class="p">:</span>
+<span class="o">-------------------------</span>
+<span class="n">variables</span><span class="p">:</span> 
+  <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+<span class="n">box</span><span class="p">:</span> 
+  <span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+<span class="n">goal</span><span class="p">:</span> 
+  <span class="p">(</span><span class="n">none</span><span class="p">)</span>
+<span class="n">constraints</span><span class="p">:</span>
+  <span class="p">((</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+  <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">0</span>
+  <span class="p">((</span><span class="n">y</span><span class="o">+</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span>
+<span class="o">-------------------------</span>
+
+<span class="n">normalized</span> <span class="n">system</span><span class="p">:</span>
+<span class="o">-------------------------</span>
+<span class="n">variables</span><span class="p">:</span> 
+  <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+<span class="n">box</span><span class="p">:</span> 
+  <span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+<span class="n">goal</span><span class="p">:</span> 
+  <span class="p">(</span><span class="n">none</span><span class="p">)</span>
+<span class="n">constraints</span><span class="p">:</span>
+  <span class="p">((</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+  <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">))</span><span class="o">&lt;=</span><span class="mi">0</span>
+  <span class="p">((</span><span class="n">y</span><span class="o">+</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="p">[</span><span class="o">-</span><span class="mf">1.1</span><span class="p">,</span><span class="o">-</span><span class="mf">1.09999</span><span class="p">])</span><span class="o">&lt;=</span><span class="mi">0</span>
+  <span class="p">((</span><span class="o">-</span><span class="p">(</span><span class="n">y</span><span class="o">+</span><span class="n">x</span><span class="p">))</span><span class="o">+</span><span class="p">[</span><span class="mf">0.9</span><span class="p">,</span><span class="mf">0.900001</span><span class="p">])</span><span class="o">&lt;=</span><span class="mi">0</span>
+<span class="o">-------------------------</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="extended-system">
 <span id="mod-sys-transfo-extend"></span><h3>Extended System<a class="headerlink" href="#extended-system" title="Permalink to this headline">¶</a></h3>
@@ -281,6 +340,41 @@ We assume in the following example that the variable <code class="docutils liter
 </pre></div>
 </div>
 <p>We get the following display:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">original</span> <span class="n">system</span><span class="p">:</span>
+<span class="o">-------------------------</span>
+<span class="n">variables</span><span class="p">:</span> 
+  <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+<span class="n">box</span><span class="p">:</span> 
+  <span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+<span class="n">goal</span><span class="p">:</span> 
+  <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span>
+<span class="n">constraints</span><span class="p">:</span>
+  <span class="p">((</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+  <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+<span class="o">-------------------------</span>
+  <span class="n">number</span> <span class="n">of</span> <span class="n">variables</span><span class="p">:</span><span class="mi">2</span>
+  <span class="n">number</span> <span class="n">of</span> <span class="n">constraints</span><span class="p">:</span><span class="mi">2</span>
+
+<span class="n">extended</span> <span class="n">system</span><span class="p">:</span>
+<span class="o">-------------------------</span>
+<span class="n">variables</span><span class="p">:</span> 
+  <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">__goal__</span>
+<span class="n">box</span><span class="p">:</span> 
+  <span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+<span class="n">goal</span><span class="p">:</span> 
+  <span class="n">__goal__</span>
+<span class="n">constraints</span><span class="p">:</span>
+  <span class="p">((</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span><span class="o">-</span><span class="n">__goal__</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span>
+  <span class="p">((</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+  <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+<span class="o">-------------------------</span>
+  <span class="n">number</span> <span class="n">of</span> <span class="n">variables</span><span class="p">:</span><span class="mi">3</span>
+  <span class="n">number</span> <span class="n">of</span> <span class="n">constraints</span><span class="p">:</span><span class="mi">3</span>
+  <span class="n">goal</span> <span class="n">name</span><span class="p">:</span><span class="n">__goal__</span>
+  <span class="n">goal</span> <span class="n">variable</span><span class="p">:</span><span class="mi">2</span>
+  <span class="n">goal</span> <span class="n">constraint</span><span class="p">:</span><span class="mi">0</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="kuhn-tucker-conditions">
 <span id="mod-sys-transfo-kkt"></span><h3>Kuhn-Tucker conditions<a class="headerlink" href="#kuhn-tucker-conditions" title="Permalink to this headline">¶</a></h3>
@@ -313,6 +407,36 @@ qualification (linear independency of constraints gradients) does not hold.</p><
 </div>
 <p>We get the following display. The variable <code class="docutils literal notranslate"><span class="pre">_u</span></code> is the coefficient of the goal function. The variable <code class="docutils literal notranslate"><span class="pre">_l</span></code>
 is the multiplier of the constraint.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">original</span> <span class="n">system</span><span class="p">:</span>
+<span class="o">-------------------------</span>
+<span class="n">variables</span><span class="p">:</span> 
+  <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+<span class="n">box</span><span class="p">:</span> 
+  <span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+<span class="n">goal</span><span class="p">:</span> 
+  <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span>
+<span class="n">constraints</span><span class="p">:</span>
+  <span class="p">((</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+<span class="o">-------------------------</span>
+<span class="n">kkt</span> <span class="n">system</span><span class="p">:</span>
+<span class="o">-------------------------</span>
+<span class="n">variables</span><span class="p">:</span> 
+  <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_u</span><span class="p">,</span> <span class="n">_l</span>
+<span class="n">box</span><span class="p">:</span> 
+  <span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">goal</span><span class="p">:</span> 
+  <span class="p">(</span><span class="n">none</span><span class="p">)</span>
+<span class="n">constraints</span><span class="p">:</span>
+  <span class="p">((</span><span class="n">_u</span><span class="o">+</span><span class="n">_l</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span>
+  <span class="p">(</span><span class="n">_u</span><span class="o">+</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">_l</span><span class="o">*</span><span class="n">x</span><span class="p">)))</span><span class="o">=</span><span class="mi">0</span>
+  <span class="p">(</span><span class="n">_u</span><span class="o">+</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">_l</span><span class="o">*</span><span class="n">y</span><span class="p">)))</span><span class="o">=</span><span class="mi">0</span>
+  <span class="p">((</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">0</span>
+  <span class="p">(</span><span class="n">_l</span><span class="o">*</span><span class="p">((</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">=</span><span class="mi">0</span>
+
+<span class="o">-------------------------</span>
+  <span class="n">number</span> <span class="n">of</span> <span class="n">variables</span><span class="p">:</span><span class="mi">4</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>

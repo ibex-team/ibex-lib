@@ -153,6 +153,17 @@ Note the usage of the constants <code class="docutils literal notranslate"><span
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">EMPTY_SET</span> <span class="o">=</span>	 <span class="p">[</span><span class="n">empty</span><span class="p">]</span>
+ <span class="n">PI</span> <span class="o">=</span>		 <span class="p">[</span><span class="mf">3.141592653589793</span><span class="p">,</span> <span class="mf">3.141592653589794</span><span class="p">]</span>
+ <span class="mi">2</span> <span class="n">PI</span> <span class="o">=</span>		 <span class="p">[</span><span class="mf">6.283185307179586</span><span class="p">,</span> <span class="mf">6.283185307179588</span><span class="p">]</span>
+ <span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="n">PI</span> <span class="o">=</span>	 <span class="p">[</span><span class="mf">1.570796326794896</span><span class="p">,</span> <span class="mf">1.570796326794897</span><span class="p">]</span>
+ <span class="n">ONE</span> <span class="o">=</span>		 <span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">&gt;</span>
+ <span class="n">ZERO</span> <span class="o">=</span>		 <span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;</span>
+ <span class="n">ALL_REALS</span> <span class="o">=</span>	 <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span>
+ <span class="n">POS_REALS</span> <span class="o">=</span>	 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span>
+ <span class="n">NEG_REALS</span> <span class="o">=</span>	 <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="vectors-or-boxes">
 <span id="itv-vector-boxes"></span><h3>Vectors or Boxes<a class="headerlink" href="#vectors-or-boxes" title="Permalink to this headline">¶</a></h3>
@@ -233,6 +244,19 @@ Here are first listed different ways to build a <code class="docutils literal no
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span><span class="o">=</span><span class="p">((</span><span class="mi">1</span> <span class="p">;</span> <span class="mi">2</span> <span class="p">;</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">4</span> <span class="p">;</span> <span class="mi">5</span> <span class="p">;</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">m2</span><span class="o">=</span><span class="p">((</span><span class="mi">1</span> <span class="p">;</span> <span class="mi">2</span> <span class="p">;</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">4</span> <span class="p">;</span> <span class="mi">5</span> <span class="p">;</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">m3</span><span class="o">=</span><span class="p">((</span><span class="mi">1</span> <span class="p">;</span> <span class="mi">1</span> <span class="p">;</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span> <span class="p">;</span> <span class="mi">1</span> <span class="p">;</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">m5</span><span class="o">=</span><span class="p">((</span><span class="mi">1</span> <span class="p">;</span> <span class="mi">1</span> <span class="p">;</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span> <span class="p">;</span> <span class="mi">1</span> <span class="p">;</span> <span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
 <p>Now, for interval matrices, we shall take as example a matrix that frequently appears, the “perturbed” idendity, that is:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{pmatrix}
@@ -270,6 +294,23 @@ Here are first listed different ways to build a <code class="docutils literal no
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span><span class="o">=</span><span class="p">(([</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">])</span>
+<span class="p">([</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">])</span>
+<span class="p">([</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]))</span>
+
+<span class="n">m2</span><span class="o">=</span><span class="p">(([</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">])</span>
+<span class="p">([</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">])</span>
+<span class="p">([</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]))</span>
+
+<span class="n">m3</span><span class="o">=</span><span class="p">(([</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">])</span>
+<span class="p">([</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">])</span>
+<span class="p">([</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]))</span>
+
+<span class="n">m4</span><span class="o">=</span><span class="p">(([</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">])</span>
+<span class="p">([</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">])</span>
+<span class="p">([</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01000000000000001</span><span class="p">,</span> <span class="mf">0.01000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.9899999999999999</span><span class="p">,</span> <span class="mf">1.010000000000001</span><span class="p">]))</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="container-operations">
@@ -592,6 +633,9 @@ is <span class="math notranslate nohighlight">\([0,+\infty)\)</span>.</p>
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">complementary</span> <span class="n">of</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span>
+</pre></div>
+</div>
 <p>In the case of interval vectors, the function <code class="docutils literal notranslate"><span class="pre">complementary</span></code> calculates the complementary under the form of a union of non-overlapping interval vectors,
 and stores this union into an array that is allocated by the function itself (the variable <code class="docutils literal notranslate"><span class="pre">result</span></code> in the code below). The function returns the size of the union/array.</p>
 <p>To illustrate this, let us first build a function that prints the complementary of an interval vector:</p>
@@ -619,6 +663,18 @@ Note also that if the difference is empty, <code class="docutils literal notrans
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">complementary</span> <span class="n">of</span> <span class="n">empty</span> <span class="n">vector</span> <span class="o">=</span> 
+	<span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+<span class="n">complementary</span> <span class="n">of</span> <span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span> <span class="o">=</span> 
+<span class="n">complementary</span> <span class="n">of</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">=</span> 
+	<span class="p">([</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+	<span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+	<span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+	<span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">inf</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+	<span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+	<span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">inf</span><span class="p">])</span>
+</pre></div>
+</div>
 <p>The set difference works exactly the same way except that the function takes as first argument another set [y].</p>
 <p>Example with intervals:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// set difference between two intervals</span>
@@ -630,6 +686,9 @@ Note also that if the difference is empty, <code class="docutils literal notrans
 	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; </span><span class="se">\\</span><span class="s"> &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">y</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">c1</span><span class="p">;</span>
 	<span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">)</span> <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; and &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">c2</span><span class="p">;</span>
 	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> \ <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Example with interval vectors:</p>
@@ -644,6 +703,13 @@ Note also that if the difference is empty, <code class="docutils literal notrans
 		<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
 	<span class="p">}</span>
 	<span class="k">delete</span><span class="p">[]</span> <span class="n">result</span><span class="p">;</span> <span class="c1">// don&#39;t forget to free memory!</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span> \ <span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">=</span> 
+	<span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+	<span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+	<span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+	<span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -841,6 +907,10 @@ Example:</p>
 </pre></div>
 </div>
 <p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">first</span> <span class="n">box</span><span class="o">=</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.4000000000000001</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">second</span> <span class="n">box</span><span class="o">=</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="miscellaneous">
@@ -1012,6 +1082,10 @@ If the result of the generalized division and intersection is a single interval,
 	<span class="kt">bool</span> <span class="n">result</span><span class="o">=</span><span class="n">intv</span><span class="p">.</span><span class="n">div2_inter</span><span class="p">(</span><span class="n">Interval</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">Interval</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">out2</span><span class="p">);</span>
 	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;the intersection is &quot;</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">result</span><span class="o">?</span> <span class="s">&quot;not&quot;</span><span class="o">:</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; empty&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
 	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;left part=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">intv</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; right part=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">out2</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">the</span> <span class="n">intersection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">empty</span>
+<span class="n">left</span> <span class="n">part</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="n">right</span> <span class="n">part</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
