@@ -32,7 +32,7 @@ The API of Ibex can be broken into three layers:
 
 - An extended (symbolic-numeric) interval calculator
 - A contractor programming library
-- A system solver / global optimizer (supplied as plugins since Release 2.2)
+- A system solver / global optimizer
 
 Each usage corresponds to a different layer and each layer is built on top of the previous one.
 
@@ -110,13 +110,8 @@ Ibex contains a variety of built-in operators (HC4, Shaving, ACID, X-newton, q-i
 Applications and extensions
 --------------------------------------
 
-
-.. _ibex team : https://github.com/ibex-team
-
 Ibex proposes two top-level applications: IbexSolve and IbexOpt, which are dedicated to system solving and optimization respectively; they
 are both default black-box strategies for immediate usage. See the :ref:`IbexSolve <solver>` and :ref:`IbexOpt <optim>` documentations.
 
 Finally, there exist plugins (or packages with cmake) that propose interesting extensions of the library, such as affine arithmetic,
 AMPL compatibility, semi-infinite programming, etc. Visit the `ibex team`_ page on Github.
-
-

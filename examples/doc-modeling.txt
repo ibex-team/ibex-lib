@@ -1,0 +1,152 @@
+================= this file is generated ==============
+! [func-eval-O]
+A+B-C=((<2, 2> ; <-2, -2>)
+(<-0, 0> ; <2, 2>))
+! [func-eval-O]
+! [func-hansen-O]
+Hansen matrix:
+(([3, 6] ; [1, 4])
+(<2.25, 2.25> ; [2, 8]))
+! [func-hansen-O]
+! [func-cpp1-O]
+_f_5:(x,y)->sin((x+y))
+! [func-cpp1-O]
+! [func-cpp3-O]
+_f_7:(_x_11,_x_12,_x_13,_x_14,_x_15,_x_16,_x_17)->((((((_x_11+_x_12)+_x_13)+_x_14)+_x_15)+_x_16)+_x_17)
+! [func-cpp3-O]
+! [func-cpp4-O]
+_f_8:(_x_18,_x_19)->min(_x_18,_x_19)
+! [func-cpp4-O]
+![func-iterated-sum-O]
+f:(x[10])->(((((((((x(1)^2+x(2)^2)+x(3)^2)+x(4)^2)+x(5)^2)+x(6)^2)+x(7)^2)+x(8)^2)+x(9)^2)+x(10)^2)
+![func-iterated-sum-O]
+![func-apply-array-O]
+g:(z)->(z+1)
+![func-apply-array-O]
+![func-diff-O]
+df=d_f_12:(x,y,z)->((y*z),(x*z),(x*y))
+![func-diff-O]
+![sys-copy-O]
+original system:
+-------------------------
+variables: 
+  x, y
+box: 
+  ([-inf, inf] ; [-inf, inf])
+goal: 
+  (none)
+constraints:
+  ((x^2+y^2)-1)<=0
+  (y-x^2)>=0
+  ((y+x)-1)=0
+-------------------------
+
+system with only inequalities
+-------------------------
+variables: 
+  x, y
+box: 
+  ([-inf, inf] ; [-inf, inf])
+goal: 
+  (none)
+constraints:
+  ((x^2+y^2)-1)<=0
+  (y-x^2)>=0
+-------------------------
+
+![sys-copy-O]
+![sys-normalize-O]
+original system:
+-------------------------
+variables: 
+  x, y
+box: 
+  ([-inf, inf] ; [-inf, inf])
+goal: 
+  (none)
+constraints:
+  ((x^2+y^2)-1)<=0
+  (y-x^2)>=0
+  ((y+x)-1)=0
+-------------------------
+
+normalized system:
+-------------------------
+variables: 
+  x, y
+box: 
+  ([-inf, inf] ; [-inf, inf])
+goal: 
+  (none)
+constraints:
+  ((x^2+y^2)-1)<=0
+  (-(y-x^2))<=0
+  ((y+x)+[-1.1,-1.09999])<=0
+  ((-(y+x))+[0.9,0.900001])<=0
+-------------------------
+![sys-normalize-O]
+![sys-extended-O]
+original system:
+-------------------------
+variables: 
+  x, y
+box: 
+  ([-inf, inf] ; [-inf, inf])
+goal: 
+  (x+y)
+constraints:
+  ((x^2+y^2)-1)<=0
+  (y-x^2)<=0
+-------------------------
+  number of variables:2
+  number of constraints:2
+
+extended system:
+-------------------------
+variables: 
+  x, y, __goal__
+box: 
+  ([-inf, inf] ; [-inf, inf] ; [-inf, inf])
+goal: 
+  __goal__
+constraints:
+  ((x+y)-__goal__)=0
+  ((x^2+y^2)-1)<=0
+  (y-x^2)<=0
+-------------------------
+  number of variables:3
+  number of constraints:3
+  goal name:__goal__
+  goal variable:2
+  goal constraint:0
+![sys-extended-O]
+![sys-kkt-O]
+original system:
+-------------------------
+variables: 
+  x, y
+box: 
+  ([-inf, inf] ; [-inf, inf])
+goal: 
+  (x+y)
+constraints:
+  ((x^2+y^2)-1)<=0
+-------------------------
+kkt system:
+-------------------------
+variables: 
+  x, y, _u, _l
+box: 
+  ([-inf, inf] ; [-inf, inf] ; [0, 1] ; [0, 1])
+goal: 
+  (none)
+constraints:
+  ((_u+_l)-1)=0
+  (_u+(2*(_l*x)))=0
+  (_u+(2*(_l*y)))=0
+  ((x^2+y^2)-1)<=0
+  (_l*((x^2+y^2)-1))=0
+
+-------------------------
+  number of variables:4
+![sys-kkt-O]
