@@ -113,7 +113,7 @@ void InHC4Revise::iproj(const Domain& y, IntervalVector& x, const IntervalVector
 		return;
 	}
 
-	*d.top = y;
+	*d.top &= y;
 
 	try {
 		f.backward<InHC4Revise>(*this);
