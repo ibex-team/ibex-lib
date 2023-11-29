@@ -313,8 +313,8 @@ Solver::Status Solver::solve(bool stop_at_first) {
 }
 
 bool Solver::check_ineq(const IntervalVector& box) {
-	if (!ineqs)
-		return true;
+  	if (!ineqs || ineqs->nb_ctr==0)
+	  return true;
 
 	bool not_inner=false;
 
