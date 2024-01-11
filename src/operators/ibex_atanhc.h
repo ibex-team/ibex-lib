@@ -11,6 +11,7 @@
 #ifndef __IBEX_ATANHC_H__
 #define __IBEX_ATANHC_H__
 
+#include <limits>
 #include "ibex_ExprOperators.h"
 
 namespace ibex {
