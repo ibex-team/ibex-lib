@@ -33,7 +33,7 @@ if (IPOPT_DIR)
   set (ENV{PKG_CONFIG_PATH} "${IPOPT_DIR}/lib/pkgconfig:${PKG_CONFIG_PATH}")
 endif ()
 
-pkg_check_modules (IPOPT REQUIRED ipopt>=3)
+pkg_check_modules (IPOPT REQUIRED QUIET ipopt>=3)
 
 include (FindPackageHandleStandardArgs)
 find_package_handle_standard_args (IpOpt REQUIRED_VARS IPOPT_FOUND
