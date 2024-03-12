@@ -7,7 +7,7 @@ set_property(CACHE LP_LIB PROPERTY STRINGS ${LP_LIB_LIST})
 
 list(FIND LP_LIB_LIST ${LP_LIB} is_valid)
 if (is_valid LESS 0)
-  message (FATAL_ERROR "Unsupported library for interval arithmetic: ${LP_LIB}")
+  message (FATAL_ERROR "Unsupported library for linear programming: ${LP_LIB}")
 else ()
   message (STATUS "Library for linear programming: ${LP_LIB}")
 endif ()
