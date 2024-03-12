@@ -60,6 +60,7 @@ int main(int argc, char** argv) {
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
 	args::ValueFlag<string> no_split_arg(parser, "vars","Prevent some variables to be bisected, separated by '+'.\nExample: --no-split=x+y",{"no-split"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
+	args::ValueFlag<string> bisector(parser, "bisector", "bisection policy",{"bisector"});
 
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
@@ -213,6 +214,11 @@ int main(int argc, char** argv) {
 			if (!quiet) {
 				cout << "  input COV file:\t" << input_file.Get().c_str() << "\n";
 			}
+		}
+
+		if (bisector){
+		  cout << "  bisector: " << bisector.Get() << endl;
+		  config.set_bisector(bisector.Get());
 		}
 
 		if (output_file) {

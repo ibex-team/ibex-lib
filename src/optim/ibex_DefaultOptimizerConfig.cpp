@@ -26,6 +26,7 @@
 #include "ibex_CellHeap.h"
 #include "ibex_CtcKuhnTucker.h"
 #include "ibex_CtcKuhnTuckerLP.h"
+#include "ibex_RoundRobin.h"
 
 using namespace std;
 
@@ -49,6 +50,7 @@ DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys), kk
 	// by defaut, we apply KKT for unconstrained problems
 	set_kkt(sys.nb_ctr==0);
 	set_random_seed(default_random_seed);
+	set_bisector(bisector);
 }
 
 // note:deprecated.
@@ -115,6 +117,10 @@ void DefaultOptimizerConfig::set_kkt(bool _kkt) {
 	}
 }
 
+void DefaultOptimizerConfig::set_bisector(string& _bisector) {
+	bisector= _bisector;
+}
+
 void DefaultOptimizerConfig::set_random_seed(double _random_seed) {
 	random_seed = _random_seed;
 	RNG::srand(random_seed);
@@ -178,7 +184,7 @@ Ctc& DefaultOptimizerConfig::get_ctc() {
 
 Bsc& DefaultOptimizerConfig::get_bsc() {
 	if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
-			return get<Bsc>(BSC_TAG);
+		return get<Bsc>(BSC_TAG);
 
 	ExtendedSystem& ext_sys=get_ext_sys();
 
@@ -194,10 +200,46 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 	// This question is probably related to the discussion #400
 	eps_x_extended[ext_sys.goal_var()] = OptimizerConfig::default_eps_x;
 
-	return rec(new LSmear(
-			ext_sys, eps_x_extended,
-			rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
+  /* bisector selection */
+	if (get_bisector()=="smearsumnoobj"){
+		return rec(new SmearSum(
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
 			BSC_TAG);
+	}
+	else if (get_bisector()=="smearsum"){
+		return rec(new SmearSum(
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
+			BSC_TAG);
+	}
+	else if (get_bisector()=="smearsumrelnoobj"){
+		return rec(new SmearSumRelative(
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
+			BSC_TAG);
+	}
+	else if (get_bisector()=="smearsumrel"){
+		return rec(new SmearSumRelative(
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
+			BSC_TAG);
+	}
+	else if (get_bisector()=="roundrobin"){
+		return rec(new RoundRobin(eps_x_extended,default_bisect_ratio),BSC_TAG);
+	}
+	else if (get_bisector()=="largestfirst"){
+		return rec(new OptimLargestFirst (ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio),BSC_TAG);
+	}
+	else if (get_bisector()=="largestfirstnoobj"){
+		return rec(new OptimLargestFirst (ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio),BSC_TAG);
+	}
+	else{                        // default strategy for continuous optimization
+		return rec(new LSmear(
+				ext_sys, eps_x_extended,
+				rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
+			BSC_TAG);
+	}
 }
 
 LoupFinder& DefaultOptimizerConfig::get_loup_finder() {

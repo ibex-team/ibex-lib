@@ -14,6 +14,7 @@
 #include "ibex_OptimizerConfig.h"
 #include "ibex_OptimMemory.h"
 #include "ibex_ExtendedSystem.h"
+#include <string>
 
 namespace ibex {
 
@@ -86,6 +87,9 @@ public:
 	 * automatically enforced.
 	 */
 	void set_kkt(bool kkt);
+
+	void set_bisector(std::string& bisector);
+	std::string get_bisector();
 
 	/**
 	 * \brief Set random seed
@@ -163,6 +167,7 @@ protected:
 	bool inHC4;
 	bool kkt;
 	double random_seed;
+	std::string bisector="";
 };
 
 
@@ -175,6 +180,8 @@ inline bool DefaultOptimizerConfig::with_inHC4() { return inHC4; }
 inline bool DefaultOptimizerConfig::with_kkt() { return kkt; }
 
 inline double DefaultOptimizerConfig::get_random_seed() { return random_seed; }
+
+inline std::string DefaultOptimizerConfig::get_bisector() { return bisector; }
 
 } /* namespace ibex */
 
