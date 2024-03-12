@@ -6,5 +6,6 @@
 #define _IBEX_RELEASE_ "@IBEX_VERSION@"
 #define _IBEX_INTERVAL_LIB_ "@INTERVAL_LIB@"
 #define _IBEX_LP_LIB_ "@LP_LIB@"
+#cmakedefine USING_IPTOP 1
 
 #endif /* __IBEX_SETTING_H__ */
