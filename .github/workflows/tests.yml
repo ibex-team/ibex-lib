@@ -13,8 +13,14 @@ jobs:
           mkdir build
           cd build
           cmake -DINTERVAL_LIB=${{ matrix.interval_lib }} -DLP_LIB=${{ matrix.lp_lib }} ..
-      - run: make
-      - run: make check
+      - name: make
+        run: |
+          cd build
+          make
+      - name: make check
+        run: |
+          cd build
+          make check
     strategy:
       matrix:
         interval_lib: [gaol, filib]
