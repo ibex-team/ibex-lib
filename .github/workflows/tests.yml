@@ -12,7 +12,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DINTERVAL_LIB=${{ matrix.interval_lib }} -DLP_LIB={{ matrix.lp_lib }} ..
+          cmake -DINTERVAL_LIB=${{ matrix.interval_lib }} -DLP_LIB=${{ matrix.lp_lib }} ..
       - run: make
       - run: make check
     strategy:
