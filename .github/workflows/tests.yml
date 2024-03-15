@@ -6,6 +6,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
+      - name: Install dependencies
+        run: apt install -y flex bison libcppunit-dev
       - name: CMake
         run: |
           mkdir build
@@ -16,4 +18,4 @@ jobs:
     strategy:
       matrix:
         interval_lib: [gaol, filib]
-        lp_lib: [none]
+        lp_lib: [none, soplex]
