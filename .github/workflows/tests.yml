@@ -1,0 +1,19 @@
+name: Tests
+on: push
+jobs:
+  cmake-build-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+      - name: CMake
+        run: |
+          mkdir build
+          cd build
+          cmake -DINTERVAL_LIB=${{ matrix.interval_lib }} -DLP_LIB={{ matrix.lp_lib }} ..
+      - run: make
+      - run: make check
+    strategy:
+      matrix:
+        interval_lib: [gaol, filib]
+        lp_lib: [none]
