@@ -7,7 +7,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
       - name: Install dependencies
-        run: apt install -y flex bison libcppunit-dev
+        run: sudo apt install -y flex bison libcppunit-dev
       - name: CMake
         run: |
           mkdir build
