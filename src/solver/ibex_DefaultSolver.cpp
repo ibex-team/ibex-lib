@@ -24,6 +24,7 @@
 #include "ibex_Array.h"
 #include "ibex_Random.h"
 #include "ibex_NormalizedSystem.h"
+#include "ibex_RoundRobin.h"
 
 using namespace std;
 
