@@ -1,8 +1,10 @@
 name: Tests
 on: push
+env:
+  CHECKSUM: 0681e85c15171a07e77d2e9146e1692d012a8af28f77002eed5bc9085484e6ba97fb6401709c17867702b5c7973f9daa44a62f4ed6d1af8eefe942600c26c3e9
 jobs:
   cmake-build-and-check:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
