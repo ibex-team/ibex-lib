@@ -1,7 +1,7 @@
 name: Tests
 on: push
 env:
-  CHECKSUM: a4e303a3e4634c4d5bbd197c27994f19461d000eef913f264bf8850d110e41390e35f05b22c6fd14cff0d4234c803d5c20cf4a8ea77bf8963f4b5727bd3fe01f
+  CHECKSUM: 8d5073dbf287eb947e2a5da3fd246b4a4ce764114bf097700f0cf19eba98973501cbde87113058faf3f96080b3d079c1bc118be08c2e73febe656439b5a922cd
 jobs:
   cmake-build-and-check:
     runs-on: self-hosted
@@ -13,7 +13,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt update
-          apt install -y flex bison libcppunit-dev cmake
+          apt install -y gcc g++ cmake flex bison libcppunit-dev
       - name: CMake
         run: |
           mkdir build
