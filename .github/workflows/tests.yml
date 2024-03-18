@@ -1,7 +1,7 @@
 name: Tests
 on: push
 env:
-  CHECKSUM: ee247257d816198f799e50184cfde8a92d0b70c075a7b7cbbbac50a6a06370558967a0202fa95862d0207abcf63341b362ffeb55cd4167bd83f73e379de8a4f7
+  CHECKSUM: dc934e7fe68bfd27e4224c94791ac9b79a27b50a98ebba28fba75678072428f02b1b47c218544820d3fe6cc021b9d7e8513177f25bff8c0ea9e0840d6e0ff5a0
 jobs:
   cmake-build-and-check:
     runs-on: self-hosted
@@ -11,7 +11,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
       - name: Install dependencies
-        run: sudo apt install -y flex bison libcppunit-dev
+        run: |
+          apt update
+          apt install -y flex bison libcppunit-dev
       - name: CMake
         run: |
           mkdir build
