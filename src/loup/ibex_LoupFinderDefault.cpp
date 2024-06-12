@@ -13,20 +13,23 @@
 #include "ibex_LoupFinderFwdBwd.h"
 #include "ibex_BxpLinearRelaxArgMin.h"
 #include "ibex_LoupFinderProbing.h"
+#include "ibex_LinearizerXTaylor.h"
+#include "ibex_LinearizerAbsTaylor.h" //borrar
+
 
 using namespace std;
 
 namespace ibex {
 
 LoupFinderDefault::LoupFinderDefault(const System& sys, bool inHC4) :
-	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
-	finder_x_taylor(sys) {
-
+	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)) {
+	LinearizerXTaylor* lr = new LinearizerXTaylor(sys,LinearizerXTaylor::RESTRICT,LinearizerXTaylor::RANDOM);
+	finder_x_taylor = new LoupFinderIP(sys,lr);
 }
 
 void LoupFinderDefault::add_property(const IntervalVector& init_box, BoxProperties& prop) {
 	finder_probing.add_property(init_box,prop);
-	finder_x_taylor.add_property(init_box,prop);
+	finder_x_taylor->add_property(init_box,prop);
 
 	//--------------------------------------------------------------------------
 	/* Using line search from LP relaxation minimizer seems not interesting. */
@@ -51,7 +54,7 @@ std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& 
 	try {
 		// TODO
 		// in_x_taylor.set_inactive_ctr(entailed->norm_entailed);
-		p=finder_x_taylor.find(box,p.first,p.second,prop);
+		p=finder_x_taylor->find(box,p.first,p.second);
 		found=true;
 	} catch(NotFound&) { }
 
@@ -65,7 +68,7 @@ std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& 
 		if (argmin && argmin->argmin()) {
 			Vector loup_point = p.first.lb();
 			double loup = p.second;
-			LoupFinderProbing(finder_x_taylor.sys).dichotomic_line_search(loup_point, loup, *argmin->argmin(), false);
+			LoupFinderProbing(finder_x_taylor->sys).dichotomic_line_search(loup_point, loup, *argmin->argmin(), false);
 			//cout << "better loup found! " << loup << endl;
 			p=make_pair(loup_point,loup);
 		}
