@@ -20,9 +20,13 @@ Documentation
 
 [The documentation is available here](http://ibex-team.github.io/ibex-lib/)
 
+Guestbook (2010--2020)
+---------------
+[Link to the guestbook from previous website](https://ibex-team.github.io/ibex-lib/old/guestbook.html)
+
 Credits
 ---------------
-The Ibex project started in 2007. It grew up after various prototypes developed by Gilles Chabert during its thesis and was mainly developed by him during his tenure at IMT Atlantique in LS2N (UMR 6004) between 2008 and 2018. It is in standy-by since 2020.
+The Ibex project started in 2007. It grew up after various prototypes developed by Gilles Chabert during its thesis and was mainly developed by him during his tenure at IMT Atlantique in LS2N (UMR 6004) between 2008 and 2018.
 
 Some people brought great help, in particular Luc Jaulin (UMR 6285, ENSTA Bretagne), Gilles Trombettoni (UMR 5506, Univ. Montpellier) and Alexandre Goldsztejn (UMR 6004, CNRS) for the underlying concepts and algorithms, Bertrand Neveu (UMR 8049, ENPC, Paris) for the development of global optimization routines and benchmarking, Cyril Bouvier (UMR 5506, Univ. Montpellier) for the Python installation scripts.
 
