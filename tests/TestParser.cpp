@@ -306,6 +306,26 @@ void TestParser::issue245_3() {
 	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((-3+(3*x^2))+y^2)"));
 }
 
+void TestParser::issue545_1() {
+	System sys(SRCDIR_TESTS "/minibex/issue545_1.mbx", simpl);
+	CPPUNIT_ASSERT_EQUAL(sys.box[0],Interval(0,1));
+	CPPUNIT_ASSERT_EQUAL(sys.box[1],Interval(0,1));
+	CPPUNIT_ASSERT_EQUAL(sys.box[2],Interval(0,1));
+}
+
+void TestParser::issue545_2() {
+	CPPUNIT_ASSERT_THROW(System(SRCDIR_TESTS "/minibex/issue545_2.mbx", simpl),SyntaxError);
+}
+
+void TestParser::issue545_3() {
+	System sys(SRCDIR_TESTS "/minibex/issue545_3.mbx", simpl);	
+	double _x[][2]={{0,1},{3,4},{0,1},{3,4},{0,1},{3,4}};
+	CPPUNIT_ASSERT_EQUAL(sys.box, IntervalVector(6,_x));
+	CPPUNIT_ASSERT(sys.args[0].dim==Dim::col_vec(2));
+	CPPUNIT_ASSERT(sys.args[1].dim==Dim::col_vec(2));
+	CPPUNIT_ASSERT(sys.args[2].dim==Dim::col_vec(2));
+}
+
 void TestParser::nary_max() {
 	Function f("x","y","z","max(x,y,z)");
 

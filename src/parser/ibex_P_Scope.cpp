@@ -253,6 +253,18 @@ void P_Scope::add_var(const char* id, const Dim* d, const Domain& domain) {
 	vars.push_back(s);
 }
 
+void P_Scope::add_var(const vector<string>* ids, const Dim* dim) {
+	Domain d(Dim::scalar());
+	d.i()=Interval::all_reals();
+	add_var(ids, dim, d);
+}
+
+void P_Scope::add_var(const vector<string>* ids, const Dim* dim, const Domain& domain) {
+	for (vector<string>::const_iterator it=ids->begin(); it!=ids->end(); ++it) {
+		add_var(it->c_str(),dim,domain);
+	}
+}
+
 void P_Scope::add_iterator(const char* id) {
 	tab.front().insert_new(id, new S_Iterator(-1));
 }

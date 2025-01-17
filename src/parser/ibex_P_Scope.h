@@ -70,6 +70,12 @@ public:
 	/** Add a variable symbol. */
 	void add_var(const char* id, const Dim* dim, const Domain& d);
 
+	/** Add variables symbols with the same domain (-oo,oo)x...). */
+	void add_var(const std::vector<std::string>* ids, const Dim* dim);
+
+	/** Add variables symbols with the same dimension & domain. */
+	void add_var(const std::vector<std::string>* ids, const Dim* dim, const Domain& d);
+
 	/** Add an (uninitialized) iterator. */
 	void add_iterator(const char* id);
 

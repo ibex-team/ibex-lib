@@ -26,6 +26,8 @@ using namespace std;
   
   ibex::Dim*      dim;
   
+  std::vector<std::string>*                     symbols;
+  
   ibex::parser::P_NumConstraint*                constraint;
   std::vector<ibex::parser::P_NumConstraint*>*  constraints;
 
@@ -72,6 +74,9 @@ using namespace std;
 /* --------------------------- Nonterminals types -------------------------- */
 
 %type<dim>        dimension
+
+/* variables */
+%type<symbols>      symbols_list
 
 /* constraints */
 %type<constraints>  ctr_blk_list 
@@ -142,15 +147,19 @@ equ_or_in     : TK_EQU | TK_IN ;
  
 decl_var_list : decl_var                             
               | decl_var_list ';' decl_var           
-              | decl_var_list ',' decl_var           
               ;
-  
-decl_var      : TK_NEW_SYMBOL dimension         { pstruct->scope().add_var($1,$2);  
-		                                          free($1); delete $2; }
-              | TK_NEW_SYMBOL dimension 
-	            TK_IN expr                      { pstruct->scope().add_var($1,$2,$4->_2domain()); 
-						                          free($1); delete $2; delete $4; }
+
+/* decl_var corresponds to a comma-separated list of variables which all share 
+   the same dimension/domain, the one specified for the last one. */
+decl_var      : symbols_list dimension         {  pstruct->scope().add_var($1, $2); 
+		                                          delete $1; delete $2; }
+              | symbols_list dimension 
+	            TK_IN expr                      { pstruct->scope().add_var($1, $2, $4->_2domain()); 
+						                          delete $1; delete $2; delete $4; }
               ; 
+
+symbols_list  : TK_NEW_SYMBOL                   { $$ = new std::vector<std::string>(); $$->push_back($1); free($1); }
+              | symbols_list ',' TK_NEW_SYMBOL  { $1->push_back($3); $$ = $1; free($3); }
 
 dimension     :                                 { $$=new Dim(); }
               | '[' expr ']'                    { $$=new Dim(Dim::col_vec($2->_2int())); 

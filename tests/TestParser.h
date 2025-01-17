@@ -43,6 +43,9 @@ public:
 	CPPUNIT_TEST(issue245_1);
 	CPPUNIT_TEST(issue245_2);
 	CPPUNIT_TEST(issue245_3);
+	CPPUNIT_TEST(issue545_1);
+	CPPUNIT_TEST(issue545_2);
+	CPPUNIT_TEST(issue545_3);
 	CPPUNIT_TEST(nary_max);
 	CPPUNIT_TEST(sum01);
 	CPPUNIT_TEST(sum02);
@@ -74,6 +77,9 @@ public:
 	void issue245_1();
 	void issue245_2();
 	void issue245_3();
+	void issue545_1();
+	void issue545_2();
+	void issue545_3();
 	void nary_max();
 
 	void sum01();
