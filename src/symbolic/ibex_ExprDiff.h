@@ -143,9 +143,13 @@ protected:
 
 	void add_grad_expr(const ExprNode& node, const ExprNode& expr);
 
-	const Array<const ExprSymbol>* old_symbols;
-	const Array<const ExprSymbol>* new_symbols;
+	void clean_memory(const ExprNode& y, const ExprNode& df);
 
+	// symbols of the current expression
+	const Array<const ExprSymbol>* old_symbols;
+	// correspoding symbols in the resulting expression (if differentiating with copy)
+	const Array<const ExprSymbol>* new_symbols;
+	// partial gradients of each original node
 	NodeMap<const ExprNode*> grad;
 
 	// ======== Information for cleanup only =========
