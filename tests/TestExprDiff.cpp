@@ -318,5 +318,21 @@ void TestExprDiff::issue247() {
 	CPPUNIT_ASSERT(g==Vector::ones(2));
 }
 
+void TestExprDiff::issue546() {
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim::col_vec(2));
+	const ExprNode& e = ExprVector::new_col(y[0]+y[1], y[1]-y[0]);
+	ExprDiff d;
+	const ExprNode& de = d.diff(e,y);
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&de);
+	double _expected[] = {1, 1 , -1, 1};
+
+	CPPUNIT_ASSERT(c!=NULL);
+	CPPUNIT_ASSERT(c->dim.type()==Dim::MATRIX);
+	CPPUNIT_ASSERT(c->get_matrix_value()==Matrix(2,2,_expected));
+
+	cleanup(de,false);
+	cleanup(y,true);
+}
+
 } // end namespace
 
