@@ -50,6 +50,8 @@ void ExprDiff::add_grad_expr(const ExprNode& node, const ExprNode& _expr_) {
 const ExprNode& ExprDiff::diff(const ExprNode& y, const Array<const ExprSymbol>& x) {
 	const ExprNode* res;
 
+	groots.clear();
+
 	if (y.dim.is_scalar()) {
 		res=&gradient(y,x); // already simplified
 	} else if (y.dim.is_vector()) {
@@ -71,13 +73,15 @@ const ExprNode& ExprDiff::diff(const ExprNode& y, const Array<const ExprSymbol>&
 
 	ExprSimplify2 s;
 	s.lock.insert(lock); // only meaningful with the default (non-copy variant of) constructor.
+	
+	clean_memory(y,*res);
+	
 	return s.simplify(*res);
 }
 
 const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymbol>& x) {
 
 	grad.clean();
-	groots.clear();
 
 	ExprSubNodes nodes(y);
 	//cout << "y =" << y;
@@ -116,7 +120,6 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 			switch (d.type()) {
 			case Dim::SCALAR:
 				dX.set_ref(k,*grad[x[i]]);
-				groots.push_back(&dX[k]);
 				k++;
 				break;
 			case Dim::ROW_VECTOR:
@@ -124,7 +127,6 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 				{
 					for (int j=0; j<d.vec_size(); j++) {
 						dX.set_ref(k,(*grad[x[i]])[j]);
-						groots.push_back(&dX[k]);
 						k++;
 					}
 				}
@@ -134,7 +136,6 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 			    	for (int j=0; j<d.nb_rows(); j++)
 			    		for (int j2=0; j2<d.nb_cols(); j2++) {
 			    			dX.set_ref(k,(*grad[x[i]])[DoubleIndex::one_elt(d,j,j2)]);
-			    			groots.push_back(&dX[k]);
 			    			k++;
 			    		}
 			    }
@@ -144,16 +145,10 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 		assert(k==nb_var);
 	}
 
-//	cout << "(";
-//	for (int k=0; k<old_x_vars.nb_var; k++) cout << dX[k] << " , ";
-//	cout << ")" << endl;
-
     // dX.size()==1 is the univariate case (the node df must be scalar)
 	const ExprNode& df=dX.size()==1? dX[0] : ExprVector::new_(dX,ExprVector::ROW);
-
-	// ====== for cleanup =====================================
-	NodeMap<bool> leaks;
-	// =========================================================
+	
+	groots.push_back(&df);
 
 	if (new_symbols!=NULL) {
 		// Note: it is better to proceed in this way: (1) differentiate
@@ -167,13 +162,26 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 
 		const ExprNode& result=ExprCopy().copy(*old_symbols, *new_symbols, df);
 
-		// ------------------------- CLEANUP -------------------------
 		// cleanup(df,true); // don't! some nodes are shared with y
 
 		// don't! some grad are references to nodes of y!
 		//	for (int i=0; i<n; i++)
 		//	  delete grad[*nodes[i]];
 
+		return result;
+	} else
+		return df;
+}
+
+void ExprDiff::clean_memory(const ExprNode& y, const ExprNode& df) {
+
+	ExprSubNodes nodes(y);
+
+	// ====== for cleanup =====================================
+	NodeMap<bool> leaks;
+	// =========================================================
+	
+	if (new_symbols!=NULL) {
 		ExprSubNodes gnodes(groots);
 
 		for (int i=0; i<gnodes.size(); i++) {
@@ -185,14 +193,6 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 			}
 		}
 
-		for (IBEX_NODE_MAP(bool)::const_iterator it=leaks.begin(); it!=leaks.end(); it++) {
-			delete it->first;
-		}
-
-		if (dX.size()>1) delete &df; // delete the Vector node
-
-		//cout << "   ---> grad:" << result << endl;
-		return result;
 	} else {
 		ExprSubNodes df_nodes(df);
 
@@ -201,9 +201,6 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 		// (as some nodes belong to df which is going to be simplified) it is safer
 		// to destroy all the leaking nodes.
 		groots.push_back(&y);
-
-
-
 
 		ExprSubNodes gnodes(groots);
 
@@ -220,11 +217,10 @@ const ExprNode& ExprDiff::gradient(const ExprNode& y, const Array<const ExprSymb
 			}
 		}
 
-		for (IBEX_NODE_MAP(bool)::const_iterator it=leaks.begin(); it!=leaks.end(); it++) {
-			delete it->first;
-		}
+	}
 
-		return df;
+	for (IBEX_NODE_MAP(bool)::const_iterator it=leaks.begin(); it!=leaks.end(); it++) {
+		delete it->first;
 	}
 }
 

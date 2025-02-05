@@ -45,6 +45,7 @@ public:
 	CPPUNIT_TEST(mul04);
 	CPPUNIT_TEST(apply_mul01);
 	CPPUNIT_TEST(issue247);
+	CPPUNIT_TEST(issue546);
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -104,6 +105,8 @@ public:
 	void apply_mul02();
 
 	void issue247();
+	
+	void issue546();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestExprDiff);
