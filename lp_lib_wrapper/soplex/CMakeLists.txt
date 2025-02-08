@@ -37,6 +37,9 @@ else ()
 
   ### Apply patch
   patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
+          "${logdir}" "${soplex_basename}.all.all.patch")
+  
+  patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
           "${logdir}" "${soplex_basename}.CMake.patch")
 
   ### Configure
