@@ -64,7 +64,7 @@ inline DefaultOptimizer::DefaultOptimizer(const System& sys,
 	    bool kkt,
 		double random_seed,
 		double eps_x) :
-				DefaultOptimizerConfig(sys,rel_eps_f,abs_eps_f,eps_h,rigor,inHC4,kkt,random_seed,eps_x),
+				DefaultOptimizerConfig(sys,rel_eps_f,abs_eps_f,eps_h,rigor,inHC4,kkt,random_seed,Vector(sys.nb_var,eps_x)),
 				Optimizer((DefaultOptimizerConfig&) *this) {
 }
 
