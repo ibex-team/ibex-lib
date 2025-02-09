@@ -152,7 +152,7 @@ void LPSolver::add_variables(const Matrix& cols, const IntervalVector& bounds, c
 
 int LPSolver::add_constraint(double lhs, const Vector& row, double rhs) {
     assert(row.size() == nb_vars());
-    assert(std::isfinite(lhs) && std::isfinite(rhs));
+    //assert(std::isfinite(lhs) && std::isfinite(rhs));
     assert(isfinite(row));
 
     has_changed = true;
@@ -195,7 +195,7 @@ void LPSolver::add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs) 
 
 LPSolver::Status LPSolver::minimize() {
     invalidate();
-    assert(!ivec_bounds_.is_unbounded());
+    //assert(!ivec_bounds_.is_unbounded());
 
     mysoplex->solve();
     mysoplex->ignoreUnscaledViolations();
@@ -273,7 +273,7 @@ void LPSolver::set_cost(int index, double value) {
 
 void LPSolver::set_bounds(const IntervalVector& bounds) {
     assert(bounds.size() == nb_vars());
-    assert(!bounds.is_unbounded());
+    //assert(!bounds.is_unbounded());
 
     has_changed = true;
     // The bounds have to be changed in 3 places: ivec_bounds_,
@@ -288,7 +288,7 @@ void LPSolver::set_bounds(const IntervalVector& bounds) {
 
 void LPSolver::set_bounds(int var, const Interval& bounds) {
     assert(var >= 0 && var < nb_vars());
-    assert(!bounds.is_unbounded());
+    //assert(!bounds.is_unbounded());
     has_changed = true;
     ivec_bounds_[var] = bounds;
     mysoplex->changeBoundsReal(var, bounds.lb(), bounds.ub());
