@@ -104,9 +104,10 @@ const Interval Interval::half_pi() =(filib::interval<FI_BASE,FI_ROUNDING,FI_MODE
 std::ostream& operator<<(std::ostream& os, const Interval& x) {
 	if (x.is_empty())
 		return os << "[ empty ]";
-	else
+	else {
 		filib::interval<FI_BASE,FI_ROUNDING,FI_MODE>::precision(os.precision());
 		return os << x.itv;
+	}
 }
 
 } // end namespace
