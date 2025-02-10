@@ -12,6 +12,7 @@
 #include "ibex_Solver.h"
 
 #include <algorithm>
+#include <limits>
 
 using namespace std;
 

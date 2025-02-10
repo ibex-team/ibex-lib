@@ -13,6 +13,7 @@
 #include <sstream>
 #include <cassert>
 #include <algorithm>
+#include <limits>
 
 using namespace std;
 
