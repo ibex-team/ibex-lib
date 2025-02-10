@@ -1,7 +1,25 @@
 #ifndef _IBEX_INTERVALLIBWRAPPER_H_
 #define _IBEX_INTERVALLIBWRAPPER_H_
 
+#if defined(_WIN32)
+	#pragma warning( push )
+	#pragma warning( disable : 4244 )
+	#pragma warning( disable : 4800 )
+#elif defined(__GNUC__)
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wmisleading-indentation"
+	#pragma GCC diagnostic ignored "-Wint-in-bool-context"
+	#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+
 #include "interval/interval.hpp"
+
+#if defined(_WIN32)
+	#pragma warning( pop )
+#elif defined(__GNUC__)
+	#pragma GCC diagnostic pop
+#endif
+
 
 #define IBEX_INTERVAL_LIB_NEG_INFINITY filib::primitive::compose(1,0x7FF,0,0)
 #define IBEX_INTERVAL_LIB_POS_INFINITY filib::primitive::compose(0,0x7FF,0,0)

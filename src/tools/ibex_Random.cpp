@@ -93,7 +93,7 @@ void RNG::srand(int s)
 	 \return A boolean if the seed is acceptable, that is in [0,UINT32_MAX].
 	 */
 
-    if( 0<=s && s<UINT32_MAX ) {
+    if( 0<=s && ((unsigned int) s)<UINT32_MAX ) {
     	seed = s;
     	x = x0;
     	y = y0;

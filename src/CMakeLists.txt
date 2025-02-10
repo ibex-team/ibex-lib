@@ -11,6 +11,8 @@ if (WIN32)
   target_compile_options (ibex PUBLIC "-U__STRICT_ANSI__")
 endif ()
 
+target_compile_options (ibex PUBLIC "-Wno-unknown-pragmas")
+
 ################################################################################
 # ibex_Setting.h
 ################################################################################

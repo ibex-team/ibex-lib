@@ -62,7 +62,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 		// not outside of the system box.
 		// To deal with the latter case, we apply the following
 		// simple change to the loup point (which would be lost anyway)
-		for (uint i=0; i<n; i++) {
+		for (int i=0; i<n; i++) {
 			if (loup_point[i] < sys.box[i].lb()) loup_point[i] = sys.box[i].lb();
 			if (loup_point[i] > sys.box[i].ub()) loup_point[i] = sys.box[i].ub();
 		}

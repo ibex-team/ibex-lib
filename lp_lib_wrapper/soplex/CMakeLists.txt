@@ -7,6 +7,9 @@ set (SOPLEX_NAME ${SOPLEX_NAME} PARENT_SCOPE)
 # following include as fallback.
 include (FindSoPlex.cmake)
 
+# Avoid overflowing display with warnings
+add_compile_options(-Wno-unknown-pragmas -Wno-class-memaccess)
+
 if (SOPLEX_FOUND)
   set (SOPLEX_TARGET "SoPlex::SoPlex" PARENT_SCOPE)
   # Install FindSoPlex.cmake file
