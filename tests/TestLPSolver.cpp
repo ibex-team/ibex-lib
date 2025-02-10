@@ -283,6 +283,14 @@ void TestLinearSolver::test_easy_feasible_certified() {
     LPSolver lp_cert(2,LPSolver::Mode::Certified);
     
     IntervalVector x(2);
+    
+    // NOTE: next instruction allows to have the
+    // same behaviour using Filib as using Gaol.
+    // For this test, the side effects of rounding 
+    // to nearest in the simplex eventually leads to
+    // a failure. 
+    fpu_round_up();
+    
     for(int i=0;i<x.size();i++){
         x[i]=Interval::pos_reals();
     }
