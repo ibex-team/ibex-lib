@@ -1,5 +1,3 @@
-#include "gaol/gaol.h"
-
 #include "ibex_Interval.h"
 
 namespace ibex {
