@@ -11,7 +11,12 @@ if (WIN32)
   target_compile_options (ibex PUBLIC "-U__STRICT_ANSI__")
 endif ()
 
-target_compile_options (ibex PUBLIC "-Wno-unknown-pragmas")
+if (WIN32)
+	target_compile_options (ibex PUBLIC "/wd4267 /wd4244 /wd4800 /wd4018 /wd4101 /wd4715 /wd4996 /wd4065")
+else ()
+	target_compile_options (ibex PUBLIC "-Wno-unknown-pragmas")
+endif ()
+	
 
 ################################################################################
 # ibex_Setting.h

@@ -3,7 +3,7 @@
 
 #if defined(_WIN32)
 	#pragma warning( push )
-	#pragma warning( disable : 4800 )
+	#pragma warning( disable )
 #elif defined(__GNUC__)
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wint-in-bool-context"
