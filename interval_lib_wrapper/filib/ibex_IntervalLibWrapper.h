@@ -2,8 +2,7 @@
 #define _IBEX_INTERVALLIBWRAPPER_H_
 
 #if defined(_WIN32)
-	#pragma warning( push )
-	#pragma warning( disable )
+	#pragma warning( push, 0 )
 #elif defined(__GNUC__)
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wmisleading-indentation"
