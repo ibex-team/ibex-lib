@@ -5,7 +5,11 @@ set (FILIB_NAME ${FILIB_NAME} PARENT_SCOPE)
 include (FindFilib.cmake)
 
 # Avoid overflowing display with warnings
-add_compile_options(-Wno-unknown-pragmas -Wno-misleading-indentation -Wno-int-in-bool-context -Wno-class-memaccess)
+if (WIN32)
+	add_compile_options("/wd4244")
+else ()
+	add_compile_options(-w)
+endif ()
 
 if (FILIB_FOUND)
   set (FILIB_TARGET "Filib::Filib" PARENT_SCOPE)

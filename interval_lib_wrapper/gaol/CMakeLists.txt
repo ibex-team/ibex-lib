@@ -5,7 +5,9 @@ set (GAOL_NAME ${GAOL_NAME} PARENT_SCOPE)
 include (FindMathlib.cmake)
 
 # Avoid overflowing display with warnings
-add_compile_options(-w)
+if (NOT WIN32)
+	add_compile_options(-w)
+endif ()
 
 if (MATHLIB_FOUND)
   set (MATHLIB_TARGET "Mathlib::Mathlib")
