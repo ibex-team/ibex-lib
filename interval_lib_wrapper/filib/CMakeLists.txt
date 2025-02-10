@@ -4,6 +4,9 @@ set (FILIB_NAME ${FILIB_NAME} PARENT_SCOPE)
 # Look for Filib
 include (FindFilib.cmake)
 
+# Avoid overflowing display with warnings
+add_compile_options(-Wno-unknown-pragmas -Wno-misleading-indentation -Wno-int-in-bool-context -Wno-class-memaccess)
+
 if (FILIB_FOUND)
   set (FILIB_TARGET "Filib::Filib" PARENT_SCOPE)
   # Install FindFilib.cmake file
@@ -54,3 +57,4 @@ else ()
   set (FILIB_TARGET "prim" PARENT_SCOPE)
   set (FILIB_VERSION ${FILIB_VERSION} PARENT_SCOPE)
 endif ()
+
