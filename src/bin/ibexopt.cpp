@@ -22,7 +22,7 @@ using namespace ibex;
 int main(int argc, char** argv) {
 
 #ifdef __IBEX_NO_LP_SOLVER__
-	ibex_error("ibexopt requires a LP Solver (use --lp-lib with waf or -DLP_LIB with cmake)");
+	ibex_error("ibexopt requires a LP Solver (use -DLP_LIB with cmake)");
 	exit(1);
 #endif
 
