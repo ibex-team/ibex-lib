@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.5.1)
 
 message (WARNING "CMake support is in beta, please report all bugs to https://github.com/ibex-team/ibex-lib/issues/")
 
-project (IBEX VERSION 2.8.9.1 LANGUAGES CXX)
+project (IBEX VERSION 2.9.0.0 LANGUAGES CXX)
 set (IBEX_DESCRIPTION "A C++ library for interval-based algorithm design")
 set (IBEX_URL "http://www.ibex-lib.org/")
 set (IBEX_NAMESPACE "Ibex") # TODO use it everywhere

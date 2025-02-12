@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.5.1)
 
 project (IBEX_EXAMPLES LANGUAGES CXX)
 
-find_package (IBEX 2.8.9.1 REQUIRED)
+find_package (IBEX 2.9.0.0 REQUIRED)
 message (STATUS "Found Ibex version ${IBEX_VERSION}")
 ibex_init_common () # Ibex should have installed this function
 
