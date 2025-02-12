@@ -2,7 +2,7 @@
 .. _ibex-install-cmake:
 
 *******************************************
-Installation with Cmake (experimental)
+Installation
 *******************************************
 
 .. _MacPorts: https://www.macports.org
