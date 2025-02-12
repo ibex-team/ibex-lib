@@ -4,7 +4,7 @@ PNG=$(SVG:.svg=.png)
 main: $(PNG)
 
 %.png : %.svg
-	inkscape -D -e $@ $^
+	inkscape -D -o $@ $^
 
 clean:
 	@rm -f $(PNG)

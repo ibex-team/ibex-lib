@@ -108,9 +108,11 @@ LP_LIB                  Ex: ``-DLP_LIB=soplex``
                         
                         Set the linear programming library. 
 
-                        Possible values are either ``soplex``, ``cplex`` or ``none``. Default is ``none``. 
-                        **TODO**: ``cplex``.
-                        The archive contains a version of Soplex so it is not necessary to have Soplex 
+                        Possible values are either ``soplex``, ``clp`` or ``none``. Default is ``none``. 
+                        
+                        We recommend to use soplex (the default one).
+                        
+                        The archive contains a version of Soplex and CLP so it is not necessary to have Soplex or CLP
                         already installed on your system. 
 
 						.. warning::
@@ -133,9 +135,7 @@ LP_LIB                  Ex: ``-DLP_LIB=soplex``
                         
                         .. 	note::
 						                     
-							- The current release of Ibex (>=2.9.0) is compatible with Soplex 4.
-							- The link with cplex is **experimental**, i.e., support for installation issues 
-							  may not be guaranteed. 
+							 The current release of Ibex (>=2.9.0) is compatible with Soplex 4.
 
 
 GAOL_DIR                Ex: ``-DINTERVAL_LIB=goal -DGAOL_DIR=$HOME/gaol``
@@ -183,19 +183,15 @@ SOPLEX_DIR              Ex: ``-DLP_LIB=soplex -DSOPLEX_DIR=$HOME/soplex``
 							
                         Only to be used with ``-DLP_LIB=soplex``.
 						
-									
-CPLEX_DIR               Ex: ``-DLP_LIB=cplex -DCPLEX_DIR=$HOME/cplex``
+CLP_DIR                 Ex: ``-DLP_LIB=clp -DCLP_DIR=$HOME/clp``
 
-                        **TODO**
-
-                        Set the path of Cplex when using Ibex with your own version of Cplex. 
+                        Set the path of CLP when using Ibex with your own version of CLP. 
+                        Note that the plugin archive embeds a version of CLP so it is not necessary to have 
+                        CLP already installed on your system. Default value is "" 
+                        (means: use embedded version).
 						
-                        If Ibex is compiled as a shared library, you must also add the libpath of Cplex in 
-                        ``LD_LIBRARY_PATH``.
-                        
-                        Only to be used with ``-DLP_LIB=cplex``.
-
-
+                        Only to be used with ``-DLP_LIB=clp``.
+									
                         
 CMAKE_BUILD_TYPE        Ex: ``-DCMAKE_BUILD_TYPE=Debug``
 
