@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 01, 2012
-// Last Update : May 01, 2012
+// Last Update : Feb 13, 2025
 //============================================================================
 
 #include "ibex_CtcFixPoint.h"
@@ -62,6 +62,10 @@ void CtcFixPoint::contract(IntervalVector& box, ContractContext& context) {
 	flags.clear();
 	if (fixpoint) flags.add(FIXPOINT);
 	if (inactive && init_box==box) flags.add(INACTIVE);
+}
+
+void CtcFixPoint::enable_statistics(Statistics& stats, const string& op_name) {
+	ctc.enable_statistics(stats, op_name+"/FixPoint");
 }
 
 } // end namespace ibex

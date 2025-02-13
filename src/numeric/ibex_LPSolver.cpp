@@ -1,3 +1,12 @@
+//============================================================================
+//                                  I B E X
+// File        : ibex_LPSolver.cpp
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : May 15, 2013 (Jordan Ninin)
+// Last update : Feb 13, 2025 (Gilles Chabert)
+//============================================================================
+
 #include "ibex_LPSolver.h"
 
 namespace ibex {
@@ -82,6 +91,11 @@ void LPSolver::invalidate() {
 bool LPSolver::is_feasible() const {
 	return (status_ == LPSolver::Status::Optimal && mode_ == LPSolver::Mode::NotCertified)
 	|| (status_ == LPSolver::Status::OptimalProved && mode_ == LPSolver::Mode::Certified);
+}
+
+void LPSolver::enable_statistics(Statistics& sts, const string& op_name) {
+	if (!statistics) 
+		sts.add(statistics = new StsLPSolver(op_name + "/LP Solver"));
 }
 
 }  // end namespace ibex

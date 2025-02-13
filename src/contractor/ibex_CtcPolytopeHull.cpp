@@ -2,10 +2,10 @@
 //                                  I B E X
 // File        : ibex_CtcPolytopeHull.cpp
 // Author      : Gilles Chabert
-// Copyright   : Ecole des Mines de Nantes (France)
+// Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 31, 2013
-// Last update : Aug 01, 2018
+// Last update : Feb 13, 2025
 //============================================================================
 
 #include "ibex_CtcPolytopeHull.h"
@@ -44,6 +44,10 @@ CtcPolytopeHull::~CtcPolytopeHull() {
 
 void CtcPolytopeHull::add_property(const IntervalVector& init_box, BoxProperties& map) {
 	lr.add_property(init_box, map);
+}
+
+void CtcPolytopeHull::enable_statistics(Statistics& stats, const string& op_name) {
+	mylinearsolver.enable_statistics(stats, op_name + "/PolytopeHull");
 }
 
 void CtcPolytopeHull::contract(IntervalVector& box) {

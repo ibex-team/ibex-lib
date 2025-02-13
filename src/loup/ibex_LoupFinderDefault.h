@@ -5,6 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 09, 2017
+// Last Update : Feb 13, 2025
 //============================================================================
 
 #ifndef __IBEX_LOUP_FINDER_DEFAULT_H__
@@ -71,7 +72,13 @@ public:
 	 */
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
 
-	/*
+	/**
+	 * \brief Enable statistics.
+	 * \see #LoupFinder::enable_statistics.
+	 */
+	virtual void enable_statistics(Statistics& stats, const string& op_name) override;
+	
+	/**
 	 * Loup finder using inner boxes.
 	 *
 	 * Either HC4 or CtcUnion (of CtcFwdBwd).

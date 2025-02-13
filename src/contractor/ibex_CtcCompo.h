@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Apr 25, 2012
-// Last Update : Apr 25, 2012
+// Last Update : Feb 13, 2025
 //============================================================================
 
 #ifndef __IBEX_CTC_COMPO_H__
@@ -91,6 +91,12 @@ public:
 	 * \brief Add sub-contractors properties to the map
 	 */
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
+
+	/**
+	 * \brief Enable statistics.
+	 * \see #Ctc::enable_statistics.
+	 */
+	virtual void enable_statistics(Statistics& stats, const string& op_name) override;
 
 	/** The list of sub-contractors */
 	Array<Ctc> list;

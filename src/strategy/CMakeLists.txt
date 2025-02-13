@@ -17,6 +17,11 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Paver.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_SetImage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_SetImage.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Statistics.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Statistics.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_Sts.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_StsLPSolver.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_StsLPSolver.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_SubPaving.h
   )
 

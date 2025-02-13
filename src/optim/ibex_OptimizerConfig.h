@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Dec 11, 2014
-// Last Update : Oct 13, 2019
+// Last Update : Feb 13, 2025
 //============================================================================
 
 #ifndef __IBEX_OPTIMIZER_CONFIG_H__
@@ -113,6 +113,11 @@ public:
 	 * Default value: true.
 	 */
 	void set_anticipated_upper_bounding(bool antipated_upper_bounding);
+	
+	/**
+	 * \brief Set whether statistics must be enabled.
+	 */
+	void set_statistics(bool statistics);
 
 	/** see #set_rel_eps_f(). */
 	double get_rel_eps_f() const;
@@ -137,6 +142,9 @@ public:
 
 	/** see #set_anticipated_upper_bounding(). */
 	bool with_anticipated_upper_bounding() const;
+
+	/** see #set_statistics(). */
+	bool with_statistics() const;
 
 	/** Default goal relative precision: 1e-3. */
 	static constexpr double default_rel_eps_f = 1e-03;
@@ -187,6 +195,7 @@ protected:
 	double timeout;
 	bool extended_COV;
 	bool anticipated_UB;
+	bool statistics;
 };
 
 inline OptimizerConfig::OptimizerConfig() : eps_x(1) {
@@ -213,6 +222,8 @@ inline void OptimizerConfig::set_extended_cov(bool _extended_COV) { extended_COV
 
 inline void OptimizerConfig::set_anticipated_upper_bounding(bool _antipated_UB) { anticipated_UB = _antipated_UB; }
 
+inline void OptimizerConfig::set_statistics(bool _statistics)     { statistics = _statistics; }
+
 inline double OptimizerConfig::get_rel_eps_f() const                 { return rel_eps_f; }
 
 inline double OptimizerConfig::get_abs_eps_f() const                 { return abs_eps_f; }
@@ -226,6 +237,8 @@ inline double OptimizerConfig::get_timeout() const                   { return ti
 inline bool OptimizerConfig::with_extended_cov()  const              { return extended_COV; }
 
 inline bool OptimizerConfig::with_anticipated_upper_bounding() const { return anticipated_UB; }
+
+inline bool OptimizerConfig::with_statistics() const                 { return statistics; }
 
 } /* namespace ibex */
 

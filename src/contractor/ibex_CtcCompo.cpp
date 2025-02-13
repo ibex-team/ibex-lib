@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Apr 25, 2012
-// Last Update : Apr 25, 2012
+// Last update : Feb 13, 2025
 //============================================================================
 
 #include "ibex_CtcCompo.h"
@@ -216,6 +216,12 @@ void CtcCompo::contract(IntervalVector& box, ContractContext& context) {
 	if (inactive) context.output_flags.add(INACTIVE);
 
 	context.impact = input_impact; // restored--> useful?
+}
+
+void CtcCompo::enable_statistics(Statistics& stats, const string& op_name) {
+	for (int i=0; i<list.size(); i++) {	
+		list[i].enable_statistics(stats, op_name+"/Compo");
+	}
 }
 
 } // end namespace ibex

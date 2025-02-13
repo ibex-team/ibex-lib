@@ -1,3 +1,11 @@
+//============================================================================
+//                                  I B E X
+// File        : ibex_LPLibWrapper.cpp
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Last update : Feb 13, 2025 (Gilles Chabert)
+//============================================================================
+
 #include "ibex_LPSolver.h"
 
 namespace {
@@ -125,6 +133,7 @@ LPSolver::Status LPSolver::minimize() {
     assert(!ivec_bounds_.is_unbounded());
     
     // solve
+    if (statistics!=NULL) statistics->add_call();
     myclp->dual();
     
     int clp_status = myclp->status();
@@ -207,9 +216,7 @@ LPSolver::Status LPSolver::minimize() {
             }
             break;
         default:
-            // TODO: we need an option to log such warnings, see issue #440.
-            //std::string error_msg = "LPSolver: solve status is an internal Soplex status (" + std::to_string(soplex_status) + "). This is probably an error for you.";
-            //ibex_warning(error_msg.c_str());
+            if (statistics!=NULL) statistics->add_unexpected_status(clp_status);     
             status_ = LPSolver::Status::Unknown;
     }
     //std::cout<<"Minimize done! "<<status_<<std::endl;

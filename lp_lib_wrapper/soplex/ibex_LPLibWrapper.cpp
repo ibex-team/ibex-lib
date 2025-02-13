@@ -1,3 +1,11 @@
+//============================================================================
+//                                  I B E X
+// File        : ibex_LPLibWrapper.cpp
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Last update : Feb 13, 2025 (Gilles Chabert)
+//============================================================================
+
 #include "ibex_LPSolver.h"
 
 namespace {
@@ -106,6 +114,7 @@ LPSolver::~LPSolver() {
 }
 
 void LPSolver::init(LPSolver::Mode mode, double tolerance, double timeout, int max_iter) {
+	statistics = NULL; // by default
     mysoplex = new soplex::SoPlex();
     mode_ = mode;
     mysoplex->setIntParam(SoPlex::VERBOSITY, SoPlex::VERBOSITY_ERROR);
@@ -196,7 +205,7 @@ void LPSolver::add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs) 
 LPSolver::Status LPSolver::minimize() {
     invalidate();
     //assert(!ivec_bounds_.is_unbounded());
-
+	if (statistics!=NULL) statistics->add_call();
     mysoplex->solve();
     mysoplex->ignoreUnscaledViolations();
     SPxSolver::Status soplex_status = mysoplex->status();
@@ -249,9 +258,7 @@ LPSolver::Status LPSolver::minimize() {
         status_ = LPSolver::Status::Unbounded;
         break;
     default:
-    	// TODO: we need an option to log such warnings, see issue #440.
-        //std::string error_msg = "LPSolver: solve status is an internal Soplex status (" + std::to_string(soplex_status) + "). This is probably an error for you.";
-        //ibex_warning(error_msg.c_str());
+		if (statistics!=NULL) statistics->add_unexpected_status(soplex_status);        
         status_ = LPSolver::Status::Unknown;
     }
     return status_;

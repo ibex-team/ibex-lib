@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
-// Last Update : Jul 24, 2017
+// Last Update : Feb 13, 2025
 //============================================================================
 
 #ifndef __IBEX_OPTIMIZER_H__
@@ -63,9 +63,11 @@ public:
 	 *   \param goal_var - index of the goal variable in an extended box.
 	 *
 	 * And optionally:
-	 *   \param eps_x         - absolute precision for the boxes (bisection control)
-	 *   \param rel_eps_f     - relative precision of the objective (the optimizer stops once reached).
-	 *   \pram  abs_eps_f     - absolute precision of the objective (the optimizer stops once reached).
+	 *   \param eps_x             Absolute precision for the boxes (bisection control)
+	 *   \param rel_eps_f         Relative precision of the objective (the optimizer stops once reached).
+	 *   \param abs_eps_f         Absolute precision of the objective (the optimizer stops once reached).
+	 *   \param enable_statistics If true, statistics are enabled. This might slightly deteriorate performances. 
+	 *                            See #getStatistics.
 	 *
 	 * \warning The optimizer relies on the contractor \a ctc to contract the domain of the goal variable
 	 *          and increase the uplo. If this contractor never contracts this goal variable,
@@ -76,10 +78,12 @@ public:
 			int goal_var,
 			double eps_x=OptimizerConfig::default_eps_x,
 			double rel_eps_f=OptimizerConfig::default_rel_eps_f,
-			double abs_eps_f=OptimizerConfig::default_abs_eps_f);
+			double abs_eps_f=OptimizerConfig::default_abs_eps_f,
+			bool enable_statistics=false);
 
 	/**
-	 * Todo: update comments
+	 * \brief Create an optimizer.
+	 * \param config	All optimizer configuration paramaters.
 	 */
 	Optimizer(OptimizerConfig& config);
 
@@ -453,6 +457,9 @@ private:
 
 	/** Result. */
 	CovOptimData* cov;
+	
+	/** Statistics. */
+	Statistics* statistics;
 };
 
 inline Optimizer::Status Optimizer::get_status() const { return status; }

@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
-// Last Update : Jul 09, 2017
+// Last Update : Feb 13, 2025
 //============================================================================
 
 #include "ibex_LoupFinderXTaylor.h"
@@ -23,6 +23,10 @@ LoupFinderXTaylor::LoupFinderXTaylor(const System& sys) : sys(sys), lr(sys,Linea
 
 void LoupFinderXTaylor::add_property(const IntervalVector& init_box, BoxProperties& prop) {
 	lr.add_property(init_box,prop);
+}
+
+void LoupFinderXTaylor::enable_statistics(Statistics& stats, const string& op_name) {
+	lp_solver.enable_statistics(stats, op_name+"/XTaylor");
 }
 
 std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup, BoxProperties& prop) {

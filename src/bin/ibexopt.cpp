@@ -8,7 +8,7 @@
 // Author      : Gilles Chabert
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Last Update : Jul 09, 2017
+// Last Update : Feb 13, 2025
 //============================================================================
 
 #include "ibex.h"
@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
 	args::Flag kkt(parser, "kkt", "Activate contractor based on Kuhn-Tucker conditions.", {"kkt"});
 	args::Flag output_no_obj(parser, "output-no-obj", "Generate a COV with domains of variables only (not objective values).", {"output-no-obj"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
+	args::Flag stats(parser, "stats", "Enable statistics. Note: This may slightly deteriorate performances. Only statistics for the LP solver exist so far.", {"stats"});
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
 	args::ValueFlag<string> no_split_arg(parser, "vars","Prevent some variables to be bisected, separated by '+'.\nExample: --no-split=x+y",{"no-split"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
@@ -263,6 +264,13 @@ int main(int argc, char** argv) {
 			config.set_trace(trace.Get());
 		}
 
+		// This option enables statistics
+		if (stats) {
+			if (!quiet)
+				cout << "  statistics:\t\tON" << endl;
+			config.set_statistics(stats.Get());
+		}
+
 		// Question: is really inHC4 good?
 		config.set_inHC4(true);
 
@@ -306,7 +314,7 @@ int main(int argc, char** argv) {
 		// Report some information (computation time, etc.)
 
 		if (!quiet)
-			o.report();
+			o.report(); // will include statistics if they are enabled
 
 		o.get_data().save(output_cov_file.c_str());
 

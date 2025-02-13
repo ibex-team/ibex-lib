@@ -42,6 +42,7 @@ lib
 include
 share
 bin
+doc/images/*.png
 doc/_build
 
 *~

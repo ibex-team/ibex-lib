@@ -5,6 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 09, 2017
+// Last update : Feb 13, 2025
 //============================================================================
 
 #ifndef __IBEX_LOUP_FINDER__
@@ -14,6 +15,7 @@
 #include "ibex_Exception.h"
 #include "ibex_System.h"
 #include "ibex_BoxProperties.h"
+#include "ibex_Statistics.h"
 
 #include <utility>
 
@@ -82,6 +84,19 @@ public:
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
 
 	/**
+	 * \brief Enable statistics.
+	 * 
+	 * Create the statistics structure for this loup finder add it
+	 * into \c stats.
+	 * Enabling statistics may slightly affect performances.
+	 * Implementation is optional (by default: does nothing).
+	 * 
+	 * \param stats    The collection of all statistics 
+	 * \param op_name  Name associated to this loup finder (for reporting)
+	 */
+	virtual void enable_statistics(Statistics& stats, const string& op_name);
+	
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~LoupFinder();
@@ -122,6 +137,10 @@ protected:
 
 inline std::pair<IntervalVector, double> LoupFinder::find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop) {
 	return find(box,loup_point,loup);
+}
+
+inline void LoupFinder::enable_statistics(Statistics& stats, const string& op_name) {
+
 }
 
 } /* namespace ibex */

@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
-// Last Update : Jul 09, 2017
+// Last Update : Feb 13, 2025
 //============================================================================
 
 #ifndef __IBEX_LOUP_FINDER_X_TAYLOR_H__
@@ -57,6 +57,12 @@ public:
 	 * \brief Add properties required by this loup finder.
 	 */
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+
+	/**
+	 * \brief Enable statistics.
+	 * \see #LoupFinder::enable_statistics.
+	 */
+	virtual void enable_statistics(Statistics& stats, const string& op_name) override;
 
 	/**
 	 * \brief The NLP problem.

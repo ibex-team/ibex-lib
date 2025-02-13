@@ -4,7 +4,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
-// Last Update : Apr 08, 2019
+// Last Update : Feb 13, 2025
 //============================================================================
 
 #include "ibex_Optimizer.h"
@@ -43,7 +43,8 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 		CellBufferOptim& buffer,
-		int goal_var, double eps_x, double rel_eps_f, double abs_eps_f) :
+		int goal_var, double eps_x, double rel_eps_f, double abs_eps_f,
+		bool enable_statistics) :
                 						n(n), goal_var(goal_var),
 										ctc(ctc), bsc(bsc), loup_finder(finder), buffer(buffer),
 										eps_x(n, eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
@@ -54,32 +55,39 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 										time(0), nb_cells(0), cov(NULL) {
 
 	if (trace) cout.precision(12);
+	
+	if (enable_statistics) {
+		statistics = new Statistics();
+		// TODO: enable statistics for other operators (bisector, etc.)
+		ctc.enable_statistics(*statistics, "Ctc"); 
+		loup_finder.enable_statistics(*statistics, "LoupFinder"); 
+	} else
+		statistics = NULL;
 }
 
-
 Optimizer::Optimizer(OptimizerConfig& config) :
-		n           (config.nb_var()),
-		goal_var    (config.goal_var()),
-		ctc         (config.get_ctc()),
-		bsc         (config.get_bsc()),
-		loup_finder (config.get_loup_finder()),
-		buffer      (config.get_cell_buffer()),
-		eps_x       (config.get_eps_x()),
-		rel_eps_f   (config.get_rel_eps_f()),
-		abs_eps_f   (config.get_abs_eps_f()),
-		trace       (config.get_trace()),
-		timeout     (config.get_timeout()),
-		extended_COV(config.with_extended_cov()),
-		anticipated_upper_bounding(config.with_anticipated_upper_bounding()),
-		status(SUCCESS),
-		uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
-		loup_point(IntervalVector::empty(n)), initial_loup(POS_INFINITY), loup_changed(false),
-		time(0), nb_cells(0), cov(NULL) {
+	Optimizer(
+		config.nb_var(), 
+		config.get_ctc(), 
+		config.get_bsc(), 
+		config.get_loup_finder(),
+		config.get_cell_buffer(),
+		config.goal_var(),
+		OptimizerConfig::default_eps_x, // tmp, see below
+		config.get_rel_eps_f(),
+		config.get_abs_eps_f(),
+		config.with_statistics()) {
 
+	(Vector&) eps_x				= config.get_eps_x();
+	trace						= config.get_trace();
+	timeout						= config.get_timeout();
+	extended_COV				= config.with_extended_cov();
+	anticipated_upper_bounding	= config.with_anticipated_upper_bounding();
 }
 
 Optimizer::~Optimizer() {
 	if (cov) delete cov;
+	if (statistics) delete statistics;
 }
 
 // compute the value ymax (decreasing the loup with the precision)
@@ -634,6 +642,9 @@ void Optimizer::report() {
 	if (cov->nb_cells()!=nb_cells)
 		cout << " [total=" << cov->nb_cells() << "]";
 	cout << endl << endl;
+	
+	if (statistics) 
+		cout << "  ===== Statistics ====" << endl << endl << *statistics << endl;
 }
 
 

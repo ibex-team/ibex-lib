@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 09, 2017
-// Last update : Aug 01, 2018
+// Last update : Feb 13, 2025
 //============================================================================
 
 #include "ibex_LoupFinderDefault.h"
@@ -76,6 +76,11 @@ std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& 
 
 LoupFinderDefault::~LoupFinderDefault() {
 	delete &finder_probing;
+}
+
+void LoupFinderDefault::enable_statistics(Statistics& stats, const string& op_name) {
+	finder_probing.enable_statistics(stats, op_name);
+	finder_x_taylor.enable_statistics(stats, op_name);
 }
 
 } /* namespace ibex */

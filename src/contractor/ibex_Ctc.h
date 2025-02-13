@@ -7,7 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Feb 27, 2012
- * Last update : Jul 06, 2018
+ * Last update : Feb 13, 2025
  * ---------------------------------------------------------------------------- */
 
 #ifndef __IBEX_CONTRACTOR_H__
@@ -19,6 +19,7 @@
 #include "ibex_Array.h"
 #include "ibex_ContractContext.h"
 #include "ibex_Set.h"
+#include "ibex_Statistics.h"
 
 namespace ibex {
 
@@ -43,8 +44,6 @@ protected:
 	 * \brief Build a contractor for (size of the contractor inside l)-dimensional boxes
 	 */
 	Ctc(const Array<Ctc>& l);
-
-
 
 public:
 	/**
@@ -124,6 +123,19 @@ public:
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
 
 	/**
+	 * \brief Enable statistics.
+	 * 
+	 * Create the statistics structure for this contractor add it
+	 * into \c stats.
+	 * Enabling statistics may slightly affect performances.
+	 * Implementation is optional (by default: does nothing).
+	 * 
+	 * \param stats    The collection of all statistics 
+	 * \param op_name  Name associated to this contractor (for reporting)
+	 */
+	virtual void enable_statistics(Statistics& stats, const string& op_name);
+	 
+	/**
 	 * \brief The number of variables this contractor works with.
 	 */
 	const int nb_var;
@@ -178,6 +190,10 @@ inline void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& fla
 }
 
 inline void Ctc::add_property(const IntervalVector&, BoxProperties&) {
+
+}
+
+inline void Ctc::enable_statistics(Statistics& stats, const string& op_name) {
 
 }
 

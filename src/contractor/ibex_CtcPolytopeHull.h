@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Oct 31, 2013
-// Last update : Aug 01, 2018
+// Last update : Feb 13, 2025
 //============================================================================
 
 #ifndef __IBEX_CTC_POLYTOPE_HULL_H__
@@ -80,6 +80,12 @@ public:
 	 */
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
+	/**
+	 * \brief Enable statistics.
+	 * \see #Ctc::enable_statistics.
+	 */
+	virtual void enable_statistics(Statistics& stats, const string& op_name) override;
+	
 	/**
 	 * \brief Set the variable to be contracted.
 	 *
