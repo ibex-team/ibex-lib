@@ -367,7 +367,7 @@ public:
 	 * into \c s, and enable statistics. This may slightly affect 
 	 * performances.
 	 */
-	 void enable_statistics(Statistics& s, const string& op_name);
+	 void enable_statistics(Statistics& s, const std::string& op_name);
 
 private:
 	LPSolver::Status status_{LPSolver::Status::Unknown};

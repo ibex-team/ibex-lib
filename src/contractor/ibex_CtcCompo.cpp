@@ -218,7 +218,7 @@ void CtcCompo::contract(IntervalVector& box, ContractContext& context) {
 	context.impact = input_impact; // restored--> useful?
 }
 
-void CtcCompo::enable_statistics(Statistics& stats, const string& op_name) {
+void CtcCompo::enable_statistics(Statistics& stats, const std::string& op_name) {
 	for (int i=0; i<list.size(); i++) {	
 		list[i].enable_statistics(stats, op_name+"/Compo");
 	}

@@ -84,7 +84,7 @@ public:
 	 * \brief Enable statistics.
 	 * \see #Ctc::enable_statistics.
 	 */
-	virtual void enable_statistics(Statistics& stats, const string& op_name) override;
+	virtual void enable_statistics(Statistics& stats, const std::string& op_name) override;
 	
 	/**
 	 * \brief Set the variable to be contracted.

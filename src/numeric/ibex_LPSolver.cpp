@@ -93,7 +93,7 @@ bool LPSolver::is_feasible() const {
 	|| (status_ == LPSolver::Status::OptimalProved && mode_ == LPSolver::Mode::Certified);
 }
 
-void LPSolver::enable_statistics(Statistics& sts, const string& op_name) {
+void LPSolver::enable_statistics(Statistics& sts, const std::string& op_name) {
 	if (!statistics) 
 		sts.add(statistics = new StsLPSolver(op_name + "/LP Solver"));
 }
