@@ -356,14 +356,16 @@ It should display::
 If this test works, you're ready to go with Choco.
 
 =======================================
-Plugins/Packages
+Additional Packages
 =======================================
 
 There are many developments based on ibex which offer additional functionalities, typically algorithms tailored to some class of problems (e.g., parameter estimation, semi-infinite programming, etc.).
 
-If Ibex is compiled with waf, they are rather *plugins* as they are installed and compiled with the core library. With Cmake, they are compiled separately and generate their own libraries. So we call them here *packages*.
+.. 	note::
+  
+    Up to release 2.8, Ibex is compiled with waf (instead of cmake) and packages are rather called *plugins* as they are installed and compiled with the core library. With Cmake, they are compiled separately and generate their own libraries.
 
-The same steps must be done to compile a package as for the core library. See the current list of available plugins/packages in the `download page of Ibex <http://www.ibex-lib.org/download>`_.
+The same steps must be done to compile a package as for the core library. See the current list of available packages on Github in the `ibex team page <https://github.com/ibex-team>`_.
 
 We assume here that the package to be installed is ibex-ampl::
 
