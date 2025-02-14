@@ -1,9 +1,9 @@
 //============================================================================
-//                                  I B E X
-// File        : ibex_LSmear.cpp
-// Author      : Ignacio Araya, Bertrand Neveu
-// License     : See the LICENSE file
-// Created     : May, 25 2017
+//								  I B E X
+// File		: ibex_LSmear.cpp
+// Author	  : Ignacio Araya, Bertrand Neveu
+// License	 : See the LICENSE file
+// Created	 : May, 25 2017
 // Last Update : May, 3 2019
 //============================================================================
 
@@ -21,14 +21,14 @@ LSmear::~LSmear() {
 }
 
 
-  LPSolver::Status LSmear::getdual(IntervalMatrix& J, const IntervalVector& box, Vector& dual) const {
+LPSolver::Status LSmear::getdual(IntervalMatrix& J, const IntervalVector& box, Vector& dual) const {
 
-    int  _goal_var = goal_var();
-    bool minimize=true;
-    if (_goal_var == -1){
-      _goal_var = RNG::rand()%box.size();
-      minimize=RNG::rand()%2;
-    }
+	int  _goal_var = goal_var();
+	bool minimize=true;
+	if (_goal_var == -1){
+		_goal_var = RNG::rand()%box.size();
+		minimize=RNG::rand()%2;
+	}
 
 	// The linear system is created
 	mylinearsolver->clear_constraints();
@@ -54,27 +54,25 @@ LSmear::~LSmear() {
 
 		nb_lctrs[i]=1;
 		if (i!=goal_ctr()) {
-		  if (sys.ops[i] == LEQ || sys.ops[i] == LT) {
-		    mylinearsolver->add_constraint( row1, sys.ops[i], (-ev).ub());
-		  }
-		  else if (sys.ops[i] == GEQ || sys.ops[i] == GT)
-				mylinearsolver->add_constraint( row1, sys.ops[i], (-ev).lb());
-		  else { //op=EQ
-				mylinearsolver->add_constraint( row1, LT, (-ev).ub());
-				mylinearsolver->add_constraint( row1, GT, (-ev).lb());
-				nb_lctrs[i]=2;
-		  }
+			if (sys.ops[i] == LEQ || sys.ops[i] == LT) {
+				mylinearsolver->add_constraint( row1, sys.ops[i], (-ev).ub());
 		}
-		else if (goal_to_consider(J,i) ||sys.f_ctrs.image_dim()==1 )
-		  mylinearsolver->add_constraint( row1, LEQ, (-ev).ub());
-		else // the goal is equal to a variable : the goal constraint is useless.
-		  nb_lctrs[i]=0;
-
+		else if (sys.ops[i] == GEQ || sys.ops[i] == GT)
+			mylinearsolver->add_constraint( row1, sys.ops[i], (-ev).lb());
+		else { //op=EQ
+			mylinearsolver->add_constraint( row1, LT, (-ev).ub());
+			mylinearsolver->add_constraint( row1, GT, (-ev).lb());
+			nb_lctrs[i]=2;
+		}
 	}
+	else if (goal_to_consider(J,i) ||sys.f_ctrs.image_dim()==1 )
+	  mylinearsolver->add_constraint( row1, LEQ, (-ev).ub());
+	else // the goal is equal to a variable : the goal constraint is useless.
+	  nb_lctrs[i]=0;
+}
 
-
-	//the linear system is solved
-	LPSolver::Status stat=LPSolver::Status::Unknown;
+//the linear system is solved
+LPSolver::Status stat=LPSolver::Status::Unknown;
 
 	mylinearsolver->set_cost(_goal_var, (minimize)? 1.0:-1.0);
 
@@ -111,7 +109,7 @@ LSmear::~LSmear() {
 
 
 int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
-  int lvar = -1;
+	int lvar = -1;
 
 	if (box.is_unbounded()) {
 		return SmearSumRelative::var_to_bisect(J, box);
@@ -163,12 +161,15 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 		if (k==1 && lvar==goal_var()) { lvar=-1; }
 	}
 	if (lvar==-1) {
-	  //	  std::cout << "ssr " << std::endl;
-	  lvar=SmearSumRelative::var_to_bisect(J, box);
+		//	  std::cout << "ssr " << std::endl;
+		lvar=SmearSumRelative::var_to_bisect(J, box);
 	}
 	//	std::cout << "lsmear " << lvar << std::endl;
 	return lvar;
 }
 
+void LSmear::enable_statistics(Statistics& stats, const std::string& prefix) {
+	mylinearsolver->enable_statistics(stats, prefix + "/LSmear");
+}
 
 } /* namespace ibex */

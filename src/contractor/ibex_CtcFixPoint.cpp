@@ -64,8 +64,8 @@ void CtcFixPoint::contract(IntervalVector& box, ContractContext& context) {
 	if (inactive && init_box==box) flags.add(INACTIVE);
 }
 
-void CtcFixPoint::enable_statistics(Statistics& stats, const std::string& op_name) {
-	ctc.enable_statistics(stats, op_name+"/FixPoint");
+void CtcFixPoint::enable_statistics(Statistics& stats, const std::string& prefix) {
+	ctc.enable_statistics(stats, prefix+"/FixPoint");
 }
 
 } // end namespace ibex

@@ -12,6 +12,7 @@
 #define __IBEX_BISECTOR_H__
 
 #include "ibex_Cell.h"
+#include "ibex_Statistics.h"
 
 #include <utility>
 
@@ -100,6 +101,19 @@ public:
 	 */
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
+	/**
+	 * \brief Enable statistics.
+	 * 
+	 * Create the statistics structure for this bisector add it
+	 * into \c stats.
+	 * Enabling statistics may slightly affect performances.
+	 * Implementation is optional (by default: does nothing).
+	 * 
+	 * \param stats    The collection of all statistics 
+	 * \param prefix   Prefix for the name associated to this bisector (for reporting)
+	 */
+	virtual void enable_statistics(Statistics& stats, const std::string& prefix);
+	
 	/**
 	 * \brief Default ratio (0.45)
 	 */

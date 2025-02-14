@@ -92,9 +92,9 @@ public:
 	 * Implementation is optional (by default: does nothing).
 	 * 
 	 * \param stats    The collection of all statistics 
-	 * \param op_name  Name associated to this loup finder (for reporting)
+	 * \param prefix   Prefix for the name associated to this loup finder (for reporting)
 	 */
-	virtual void enable_statistics(Statistics& stats, const std::string& op_name);
+	virtual void enable_statistics(Statistics& stats, const std::string& prefix);
 	
 	/**
 	 * \brief Delete this.
@@ -139,7 +139,7 @@ inline std::pair<IntervalVector, double> LoupFinder::find(const IntervalVector& 
 	return find(box,loup_point,loup);
 }
 
-inline void LoupFinder::enable_statistics(Statistics& stats, const std::string& op_name) {
+inline void LoupFinder::enable_statistics(Statistics& stats, const std::string& prefix) {
 
 }
 

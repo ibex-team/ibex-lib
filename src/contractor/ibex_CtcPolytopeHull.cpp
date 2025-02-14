@@ -46,8 +46,8 @@ void CtcPolytopeHull::add_property(const IntervalVector& init_box, BoxProperties
 	lr.add_property(init_box, map);
 }
 
-void CtcPolytopeHull::enable_statistics(Statistics& stats, const string& op_name) {
-	mylinearsolver.enable_statistics(stats, op_name + "/PolytopeHull");
+void CtcPolytopeHull::enable_statistics(Statistics& stats, const std::string& prefix) {
+	mylinearsolver.enable_statistics(stats, prefix + "/PolytopeHull");
 }
 
 void CtcPolytopeHull::contract(IntervalVector& box) {

@@ -58,7 +58,8 @@ Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 	
 	if (enable_statistics) {
 		statistics = new Statistics();
-		// TODO: enable statistics for other operators (bisector, etc.)
+		// TODO: enable statistics for missing operators (cell buffer)
+		bsc.enable_statistics(*statistics, "Bsc"); 
 		ctc.enable_statistics(*statistics, "Ctc"); 
 		loup_finder.enable_statistics(*statistics, "LoupFinder"); 
 	} else

@@ -25,8 +25,8 @@ void LoupFinderXTaylor::add_property(const IntervalVector& init_box, BoxProperti
 	lr.add_property(init_box,prop);
 }
 
-void LoupFinderXTaylor::enable_statistics(Statistics& stats, const string& op_name) {
-	lp_solver.enable_statistics(stats, op_name+"/XTaylor");
+void LoupFinderXTaylor::enable_statistics(Statistics& stats, const std::string& prefix) {
+	lp_solver.enable_statistics(stats, prefix+"/XTaylor");
 }
 
 std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& box, const IntervalVector&, double current_loup, BoxProperties& prop) {

@@ -82,6 +82,12 @@ public :
 	LPSolver::Status getdual(IntervalMatrix& J,const IntervalVector& x, Vector& dual) const;
 
 	/**
+	 * \brief Enable statistics.
+	 * \see #Bsc::enable_statistics.
+	 */
+	virtual void enable_statistics(Statistics& stats, const std::string& prefix) override;
+
+	/**
 	 * \brief The linear solver
 	 */
 	LPSolver* mylinearsolver;
@@ -90,8 +96,6 @@ public :
 	 * \brief The lsmear variant (LSMEAR or LSMEAR_MG)
 	 */
 	lsmear_mode lsmode;
-
-
 };
 
 /*============================================ inline implementation ============================================ */

@@ -96,7 +96,7 @@ public:
 	 * \brief Enable statistics.
 	 * \see #Ctc::enable_statistics.
 	 */
-	virtual void enable_statistics(Statistics& stats, const std::string& op_name) override;
+	virtual void enable_statistics(Statistics& stats, const std::string& prefix) override;
 
 	/** The list of sub-contractors */
 	Array<Ctc> list;

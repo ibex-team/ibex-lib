@@ -93,9 +93,9 @@ bool LPSolver::is_feasible() const {
 	|| (status_ == LPSolver::Status::OptimalProved && mode_ == LPSolver::Mode::Certified);
 }
 
-void LPSolver::enable_statistics(Statistics& sts, const std::string& op_name) {
+void LPSolver::enable_statistics(Statistics& sts, const std::string& prefix) {
 	if (!statistics) 
-		sts.add(statistics = new StsLPSolver(op_name + "/LP Solver"));
+		sts.add(statistics = new StsLPSolver(prefix + "/LP Solver"));
 }
 
 }  // end namespace ibex

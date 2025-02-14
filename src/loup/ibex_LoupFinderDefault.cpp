@@ -78,9 +78,9 @@ LoupFinderDefault::~LoupFinderDefault() {
 	delete &finder_probing;
 }
 
-void LoupFinderDefault::enable_statistics(Statistics& stats, const string& op_name) {
-	finder_probing.enable_statistics(stats, op_name);
-	finder_x_taylor.enable_statistics(stats, op_name);
+void LoupFinderDefault::enable_statistics(Statistics& stats, const std::string& prefix) {
+	finder_probing.enable_statistics(stats, prefix);
+	finder_x_taylor.enable_statistics(stats, prefix);
 }
 
 } /* namespace ibex */

@@ -34,6 +34,10 @@ void Bsc::add_property(const IntervalVector& init_box, BoxProperties& map) {
 
 }
 
+void Bsc::enable_statistics(Statistics& stats, const std::string& prefix) {
+
+}
+
 pair<IntervalVector,IntervalVector> Bsc::bisect(const IntervalVector& box) {
 	Cell cell(box);
 	pair<Cell*,Cell*> p=bisect(cell);

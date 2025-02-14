@@ -12,6 +12,7 @@
 #define __IBEX_CELL_BUFFER_H__
 
 #include "ibex_Cell.h"
+#include "ibex_Statistics.h"
 
 namespace ibex {
 
@@ -64,6 +65,19 @@ class CellBuffer {
 	 */
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
+	/**
+	 * \brief Enable statistics.
+	 * 
+	 * Create the statistics structure for this buffer add it
+	 * into \c stats.
+	 * Enabling statistics may slightly affect performances.
+	 * Implementation is optional (by default: does nothing).
+	 * 
+	 * \param stats    The collection of all statistics 
+	 * \param prefix   Prefix for the name associated to this buffer (for reporting)
+	 */
+	virtual void enable_statistics(Statistics& stats, const std::string& prefix);
+	
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
 	virtual void flush()=0;
@@ -102,6 +116,10 @@ std::ostream& operator<<(std::ostream& os, const CellBuffer& h);
 /*================================== inline implementations ========================================*/
 
 inline void CellBuffer::add_property(const IntervalVector& init_box, BoxProperties& map) {
+
+}
+
+inline void CellBuffer::enable_statistics(Statistics& stats, const std::string& prefix) {
 
 }
 

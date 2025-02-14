@@ -131,9 +131,9 @@ public:
 	 * Implementation is optional (by default: does nothing).
 	 * 
 	 * \param stats    The collection of all statistics 
-	 * \param op_name  Name associated to this contractor (for reporting)
+	 * \param prefix   Prefix for the name associated to this contractor (for reporting)
 	 */
-	virtual void enable_statistics(Statistics& stats, const std::string& op_name);
+	virtual void enable_statistics(Statistics& stats, const std::string& prefix);
 	 
 	/**
 	 * \brief The number of variables this contractor works with.
@@ -193,7 +193,7 @@ inline void Ctc::add_property(const IntervalVector&, BoxProperties&) {
 
 }
 
-inline void Ctc::enable_statistics(Statistics& stats, const std::string& op_name) {
+inline void Ctc::enable_statistics(Statistics& stats, const std::string& prefix) {
 
 }
 
