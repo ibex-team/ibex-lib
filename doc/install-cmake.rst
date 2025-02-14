@@ -13,6 +13,7 @@ Installation
 .. _Soplex 1.7.x: http://soplex.zib.de
 .. _CLP: https://projects.coin-or.org/Clp
 .. _ZIB: http://scip.zib.de/academic.txt
+.. _Choco: https://choco-solver.org/
 
 ===================================
 Standard install
@@ -229,13 +230,30 @@ BUILD_SHARED_LIBS       Ex: ``-DBUILD_SHARED_LIBS=1``.
                         Under a Windows command window::
                         
                         > set PATH=%PATH%;C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.9.0\lib;C:\MinGW\bin
+                        
+BUILD_JAVA_INTERFACE	Ex: ``-DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON``
+                        
+                        Enable the java interface. 
+                        The Java interface of Ibex allows to use Ibex with `Choco`_, for solving mixed integer-continuous CSP (constraint satisfaction problems).
+                        This option requires a JDK to be installed.
+                        
+                        **Note**
+                        
+                        - Up to ibex 2.8.9, the java interface comes as a separate `plugin <https://github.com/ibex-team/ibex-java/>`_. See instructions there.
+                        - building ibex as a dynamic library is mandatory for enabling the Java interface.
+                        
+                           
+JAVA_PACKAGE            Ex: ``-DJAVA_PACKAGE=org.chocosolver.solver.constraints.real``
+                        
+                        This option is only to be used with ``-DBUILD_JAVA_INTERFACE=ON``.
+                        
+                        Set the name of the Java package in which the ibex Java interface must be generated.
+                        This option will create a [package name].jar file and put it into ``[prefix]/share/java`` where [prefix] is 
+                        ``/usr/local`` by default or whatever path specified via ``CMAKE_INSTALL_PREFIX``
+                        
 ======================  ======================================================================================
 
                         
-                        
-
-
-   
 .. _install-compiling-running:
 
 =======================================
@@ -282,7 +300,60 @@ Just update the path to dynamically link against Ibex::
 	 > cd %IBEX_PATH%\examples
 	 > foo.exe
 
+.. _install-compiling-java:
 
+==========================================
+Compiling a Test Program (Java interface)
+==========================================
+
+Copy-paste the following example code in a file named ``Test.java``,
+possibly replacing the package name (here `ibex`) with the appropriate one
+(the one specified with the ``JAVA_PACKAGE`` option)::
+
+  import ibex.Ibex;
+
+
+  class Test {
+    public static void main(String[] args) {
+		
+      Ibex ibex=new Ibex(new double[]{1e-2,-1});
+      ibex.add_ctr("{0}-{1}=0"); 
+		
+		
+      double domains[]={1.5,10.5,5.5,12.0};
+      System.out.println("Before contract:");
+      System.out.println("(["+domains[0]+","+domains[1]+"] ; ["+domains[2]+","+domains[3]+"])");
+		
+      int result=ibex.contract(0,domains,1e-3);
+		
+      if (result==Ibex.FAIL) {
+        System.out.println("Failed!");
+      } else if (result==Ibex.CONTRACT) {
+        System.out.println("After contract #0:");
+        System.out.println("(["+domains[0]+","+domains[1]+"] ; ["+domains[2]+","+domains[3]+"])");
+      } else {
+        System.out.println("Nothing.");	
+      }		
+    }
+  }
+
+
+Compile it as follows (possibly replacing `/usr/local` by the folder you specified via ``CMAKE_INSTALL_PREFIX``)::
+
+  javac -cp /usr/local/share/java/ibex.jar Test.java 
+
+Then run the test program as follows::
+
+  export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd
+  java -cp .:/usr/local/share/java/ibex.jar Test
+
+It should display::
+
+  Before contract:
+  ([1.5,10.5] ; [5.5,12.0])
+  Nothing.
+  
+If this test works, you're ready to go with Choco.
 
 =======================================
 Plugins/Packages
@@ -358,7 +429,3 @@ Windows
 ---------------
 
 *(to be completed)*
-
-===============
-Troubleshooting
-===============

@@ -16,6 +16,8 @@ if (BUILD_JAVA_INTERFACE)
   # Compute JAVA_SIGNATURE from JAVA_PACKAGE
   string (REPLACE "." "_" JAVA_SIGNATURE ${JAVA_PACKAGE})
 
+  message (STATUS "Java package name: " ${JAVA_PACKAGE})
+  
   # Perform replacement in *.in files
   configure_file (ibex_Java.cpp.in ibex_Java.cpp @ONLY)
   configure_file (Ibex.java.in Ibex.java @ONLY)

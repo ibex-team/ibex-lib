@@ -17,7 +17,6 @@ User guide
    solver
    optim
    minibex
-   java-install
    resources
    
 -------------------
