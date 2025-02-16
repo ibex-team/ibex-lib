@@ -34,7 +34,18 @@ If you are on MacOS and use the `MacPorts`_ package manager, you can install Ibe
   sudo port install ibex-lib
   
 Otherwise, you can install Ibex from source with the following instructions.
-The installation assumes your system meets some `requirements`_.
+First, make sure the following applications are installed on your system:
+
+- g++
+- gcc
+- flex
+- bison
+- cmake
+- pkg-config (*optionnal but recommended*)
+
+On Ubuntu, you can install all you need with::
+
+  ~$ sudo apt-get install -y g++ gcc flex bison cmake pkg-config
 
 Save the archive ``ibex-2.9.0.tar.gz`` in some ``Ibex`` folder and::
 
@@ -56,24 +67,33 @@ See the :ref:`options <install-cmake-options>`. The folder full path must not co
 Windows
 -----------------
 
-*(to be completed)*
-  
----------------
-Requirements
----------------
+The following procedure works with Visual Studio and uses Powershell.
 
-The following applications must be installed.
+Note that only Filib is supported under Windows (which is unfortunately slower than Gaol, the interval library used by default under Linux and MacOS).
 
-- g++
-- gcc
-- flex
-- bison
-- cmake
-- pkg-config (*optionnal*)
+First, install `Git <https://git-scm.com>`_  and `Chocolatey <https://chocolatey.org/install>`_.
 
-On Ubuntu, you can install all you need with::
+Then, open a powershell with administrator privileges and type the following::
 
-  ~$ sudo apt-get install -y g++ gcc flex bison cmake pkg-config
+  cd [some-folder]
+  git clone https://github.com/ibex-team/ibex-lib.git
+  choco install winflexbison
+  cd ibex-lib
+  mkdir build
+  cd build
+  cmake -DCMAKE_BUILD_TYPE=Release -DINTERVAL_LIB=filib -DLP_LIB=soplex ..
+  msbuild .\INSTALL.vcxproj
+
+If `msbuild` is not found, it might be because the binary folder of Visual Studio is not in your path. Still under Powershell, do something like::
+
+  $env:PATH += ';C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin '
+
+and try again executing the last instruction.
+
+You can now run ibexsolve from any command window. It may be necessary to add the binary folder of Ibex to your path
+before; something like::
+
+  set PATH=%PATH%;C:\Program Files (x86)\IBEX\bin
   
 .. _install-cmake-options:
 
