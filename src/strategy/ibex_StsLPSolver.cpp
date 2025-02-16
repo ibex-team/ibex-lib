@@ -24,7 +24,7 @@ string StsLPSolver::report() const {
 	if (other_status.empty()) s += "\tnever\n";
 	else {
 		s += "\n";
-		for (map<int,uint>::const_iterator it = other_status.begin(); it!=other_status.end(); ++it) {
+		for (map<int,unsigned int>::const_iterator it = other_status.begin(); it!=other_status.end(); ++it) {
 			s += "\t   "+to_string(it->second) + " time(s) with status\t" + to_string(it->first) + "\n"; 
 		}
 	}
@@ -32,7 +32,7 @@ string StsLPSolver::report() const {
 }	
 
 void StsLPSolver::add_unexpected_status(int status) {
-	std::map<int,uint>::iterator it = other_status.find(status);
+	std::map<int,unsigned int>::iterator it = other_status.find(status);
 	if (it!=other_status.end())
 		it->second ++;
 	else

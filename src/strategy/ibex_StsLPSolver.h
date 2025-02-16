@@ -48,7 +48,7 @@ protected:
 	/*
 	 * Maps an internal status to the number of its occurrences.
 	 */
-	std::map<int, uint> other_status;
+	std::map<int, unsigned int> other_status;
 };
 
 } /* namespace ibex */
