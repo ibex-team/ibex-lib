@@ -42,9 +42,11 @@ ibex::Vector dvec2ivec(const soplex::DVectorReal& dvec) {
         ivec[i] = dvec[i];
     }
     return ivec;*/
-    double copy[dvec.dim()];
+    double* copy = new double[dvec.dim()];
     std::copy(dvec.get_const_ptr(), dvec.get_const_ptr()+dvec.dim(), copy);
-    return ibex::Vector(dvec.dim(), copy);
+    ibex::Vector v(dvec.dim(), copy);
+    delete[] copy;
+    return v;
 }
 
 /*ibex::Vector rawvec2ivec(const soplex::VectorReal& dvec) {
