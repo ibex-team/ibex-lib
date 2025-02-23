@@ -14,7 +14,7 @@ endif ()
 if (WIN32)
 	target_compile_options (ibex PUBLIC "/wd4267" "/wd4244" "/wd4800" "/wd4018" "/wd4101" "/wd4715" "/wd4996" "/wd4065")
 else ()
-	target_compile_options (ibex PUBLIC "-Wno-unknown-pragmas")
+	target_compile_options (ibex PUBLIC "-Wno-unknown-pragmas" "-Wno-undefined-var-template") # last warning appears with Filib on MacOS
 endif ()
 	
 
