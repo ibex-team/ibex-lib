@@ -86,7 +86,7 @@ Then, open a powershell with administrator privileges and type the following::
 
 If `msbuild` is not found, it might be because the binary folder of Visual Studio is not in your path. Still under Powershell, do something like::
 
-  $env:PATH += ';C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin '
+  $env:PATH += ';C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin'
 
 and try again executing the last instruction.
 
