@@ -154,7 +154,7 @@ void System::init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs, int sim
 
 	int total_output_size=0;
 
-	for (vector<const ExprNode*>::const_iterator it=fac_f_ctrs.begin(); it!=fac_f_ctrs.end(); it++) {
+	for (vector<const ExprNode*>::const_iterator it=fac_f_ctrs.begin(); it!=fac_f_ctrs.end(); ++it) {
 		total_output_size += (*it)->dim.size();
 	}
 
@@ -164,7 +164,7 @@ void System::init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs, int sim
 	// concatenate all the components of all the constraints function
 	int i=0;
 	int c=0;
-	for (vector<const ExprNode*>::const_iterator it=fac_f_ctrs.begin(); it!=fac_f_ctrs.end(); it++, c++) {
+	for (vector<const ExprNode*>::const_iterator it=fac_f_ctrs.begin(); it!=fac_f_ctrs.end(); ++it, c++) {
 
 		/*========= 1st variant ===============
 		 * will have the disadvantage that the DAG structure
@@ -262,7 +262,7 @@ void System::init(const SystemFactory& fac) {
 	// =========== init box ==============
 	box.resize(nb_var);
 	int i=0;
-	for (std::vector<IntervalVector>::const_iterator it=fac.boxes.begin(); it!=fac.boxes.end(); it++) {
+	for (std::vector<IntervalVector>::const_iterator it=fac.boxes.begin(); it!=fac.boxes.end(); ++it) {
 		box.put(i,*it);
 		i+=(*it).size();
 	}

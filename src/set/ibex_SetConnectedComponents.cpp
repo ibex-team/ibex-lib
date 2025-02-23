@@ -59,10 +59,10 @@ void init(ExtSetNode* n) {
 		n->left  = new ExtSetNode(b->left, lbox);
 		n->right = new ExtSetNode(b->right, rbox);
 
-		for (list<ExtSetNode*>::iterator it=n->adj.begin(); it!=n->adj.end(); it++) {
+		for (list<ExtSetNode*>::iterator it=n->adj.begin(); it!=n->adj.end(); ++it) {
 			ExtSetNode* n2=*it;
 			list<ExtSetNode*>::iterator it2=n2->adj.begin();
-			while ((*it2)!=n && it2!=n2->adj.end()) it2++;
+			while ((*it2)!=n && it2!=n2->adj.end()) ++it2;
 			assert(it2!=n2->adj.end());
 			n2->adj.erase(it2);
 
@@ -103,7 +103,7 @@ void fill_connected_component(vector<SetLeaf*>& comp, ExtSetNode* n, int num) {
 
 	comp.push_back(leaf);
 
-	for (list<ExtSetNode*>::iterator it=n->adj.begin(); it!=n->adj.end(); it++) {
+	for (list<ExtSetNode*>::iterator it=n->adj.begin(); it!=n->adj.end(); ++it) {
 		ExtSetNode* n2=*it;
 
 		SetLeaf* leaf2=dynamic_cast<SetLeaf*>(n2->node);

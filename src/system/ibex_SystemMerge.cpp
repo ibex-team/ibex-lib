@@ -73,7 +73,7 @@ public:
 		Array<const ExprSymbol> newvars(vars1);
 		IntervalVector newbound(n);
 		int i=0;
-		for (std::vector<IntervalVector>::const_iterator it=bound.begin(); it!=bound.end(); it++) {
+		for (std::vector<IntervalVector>::const_iterator it=bound.begin(); it!=bound.end(); ++it) {
 			newbound.put(i,*it);
 			i+=(*it).size();
 		}
@@ -114,7 +114,7 @@ public:
 			to_be_deleted.push_back(&e);
 		}
 
-		for (vector<const ExprNode*>::iterator it=to_be_deleted.begin(); it!=to_be_deleted.end(); it++) {
+		for (vector<const ExprNode*>::iterator it=to_be_deleted.begin(); it!=to_be_deleted.end(); ++it) {
 			cleanup(**it, false);
 		}
 	}

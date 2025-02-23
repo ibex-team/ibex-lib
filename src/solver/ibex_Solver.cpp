@@ -402,7 +402,7 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 			// the case of under-constrained systems (m<n).
 
 			// TODO
-			//		for (vector<QualifiedBox>::iterator it=manif->inner.begin(); it!=manif->inner.end(); it++) {
+			//		for (vector<QualifiedBox>::iterator it=manif->inner.begin(); it!=manif->inner.end(); ++it) {
 			//			if (it->unicity().is_superset(existence)) {
 			//				if (unicity) delete unicity;
 			//				if (varset) delete varset;

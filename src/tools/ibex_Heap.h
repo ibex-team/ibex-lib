@@ -145,7 +145,7 @@ Heap<T>::Heap(CostFunc<T>& costf) : costf(costf) {
 
 template<class T>
 Heap<T>::Heap(const Heap& heap) : costf(heap.costf) {
-	for(typename std::vector<std::pair<T*,double> >::const_iterator it=heap.l.begin(); it!=heap.l.end(); it++) {
+	for(typename std::vector<std::pair<T*,double> >::const_iterator it=heap.l.begin(); it!=heap.l.end(); ++it) {
 		l.push_back(make_pair(new T(*(it->first)), it->second));
 	}
 }
@@ -157,7 +157,7 @@ bool Heap<T>::operator()(const std::pair<T*,double>& c1, const std::pair<T*,doub
 
 template<class T>
 void Heap<T>::flush() {
-	for (typename std::vector<std::pair<T*,double> >::iterator it=l.begin(); it!=l.end(); it++)
+	for (typename std::vector<std::pair<T*,double> >::iterator it=l.begin(); it!=l.end(); ++it)
 		delete it->first;
 
 	l.clear();
@@ -230,7 +230,7 @@ double Heap<T>::cost(const T& data) const {
 template<class T>
 std::ostream& operator<<(std::ostream& os, const Heap<T>& heap) {
 	os << "[ ";
-	for (typename std::vector<std::pair<T*,double> >::const_iterator it=heap.l.begin(); it!=heap.l.end(); it++)
+	for (typename std::vector<std::pair<T*,double> >::const_iterator it=heap.l.begin(); it!=heap.l.end(); ++it)
 		os << (*it->first) << " ";
 	return os << "]";
 }

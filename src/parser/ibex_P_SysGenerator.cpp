@@ -65,7 +65,7 @@ void P_SysGenerator::generate(P_Source& source, System& sys, int simpl_level) {
 
 		vector<ExprCtr*> ctrs = P_CtrGenerator(scopes).generate(*source.ctrs);
 
-		for (vector<ExprCtr*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+		for (vector<ExprCtr*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); ++it) {
 			fac.add_ctr(**it); // by copy so...
 			add_garbage(garbage,(*it)->e); // ... clean it up
 			delete *it;
@@ -88,7 +88,7 @@ void P_SysGenerator::generate(P_Source& source, System& sys, int simpl_level) {
 	load(sys.box, scopes.var_domains());
 
 	//==================== *** cleanup *** ====================
-	for (IBEX_NODE_MAP(bool)::const_iterator it=garbage.begin(); it!=garbage.end(); it++) {
+	for (IBEX_NODE_MAP(bool)::const_iterator it=garbage.begin(); it!=garbage.end(); ++it) {
 		delete it->first;
 	}
 }

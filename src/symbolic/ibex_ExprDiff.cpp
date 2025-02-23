@@ -219,7 +219,7 @@ void ExprDiff::clean_memory(const ExprNode& y, const ExprNode& df) {
 
 	}
 
-	for (IBEX_NODE_MAP(bool)::const_iterator it=leaks.begin(); it!=leaks.end(); it++) {
+	for (IBEX_NODE_MAP(bool)::const_iterator it=leaks.begin(); it!=leaks.end(); ++it) {
 		delete it->first;
 	}
 }

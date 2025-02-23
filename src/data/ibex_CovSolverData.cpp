@@ -157,7 +157,7 @@ void CovSolverData::read_vars(ifstream& f, size_t n, vector<string>& var_names) 
 }
 
 void CovSolverData::write_vars(ofstream& f, const vector<string>& var_names) {
-	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); it++) {
+	for (vector<string>::const_iterator it=var_names.begin(); it!=var_names.end(); ++it) {
 		f.write(it->c_str(),it->size()*sizeof(char));
 		f.put('\0');
 	}

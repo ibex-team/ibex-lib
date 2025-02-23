@@ -31,7 +31,7 @@ ExprLinearity::ExprLinearity(const Array<const ExprSymbol> x, const ExprNode& y)
 }
 
 ExprLinearity::~ExprLinearity() {
-	for (IBEX_NODE_MAP(LinData)::const_iterator it=_coeffs.begin(); it!=_coeffs.end(); it++) {
+	for (IBEX_NODE_MAP(LinData)::const_iterator it=_coeffs.begin(); it!=_coeffs.end(); ++it) {
 		Array<Domain>& d=*(it->second.first);
 
 		for (int i=0; i<n+1; i++) {

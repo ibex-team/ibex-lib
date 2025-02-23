@@ -230,7 +230,7 @@ int main(int argc, char** argv) {
 
 			if (!params.empty()) {
 				s.set_params(VarSet(sys.f_ctrs,params,false)); //Array<const ExprNode>(params)));
-				for (vector<const ExprNode*>::iterator it=params.begin(); it!=params.end(); it++) {
+				for (vector<const ExprNode*>::iterator it=params.begin(); it!=params.end(); ++it) {
 					cleanup(**it,false);
 				}
 			}

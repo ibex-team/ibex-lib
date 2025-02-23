@@ -355,7 +355,7 @@ IntervalVector Set::node_box(const SetNode* node) const {
 	}
 	IntervalVector box=Rn;
 	// we go backward and apply the bisections recursively from the initial bounding box
-	for (list<pair<const SetBisect*,bool> >::const_iterator it=ancestors.begin(); it!=ancestors.end(); it++) {
+	for (list<pair<const SetBisect*,bool> >::const_iterator it=ancestors.begin(); it!=ancestors.end(); ++it) {
 		box = it->second ? it->first->left_box(box) : it->first->right_box(box);
 	}
 	return box;

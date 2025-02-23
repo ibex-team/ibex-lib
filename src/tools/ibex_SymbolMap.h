@@ -125,8 +125,8 @@ public:
 		if (map.size()>0) { // "this" to force the compiler to look for "size" when the template is instantiated.
 			typename IBEXMAP(T)::const_iterator it=map.begin();
 			typename IBEXMAP(T)::const_iterator it2=map.begin();
-			it++;
-			for(; it!=map.end(); it++) {
+			++it;
+			for(; it!=map.end(); ++it) {
 				free((char*) it2->first);; // it2 was introduced to avoid deleting the key [it] is pointing to
 				it2 = it;
 			}
@@ -163,7 +163,7 @@ public:
 	 */
 	void import(const SymbolMap<T>& map) {
 		typename IBEXMAP(T)::const_iterator it=map.map.begin();
-		for(; it!=map.map.end(); it++) {
+		for(; it!=map.map.end(); ++it) {
 			insert_new(it->first, it->second);
 		}
 	}
@@ -203,7 +203,7 @@ public:
 	 */
 	friend std::ostream& operator<<(std::ostream& os, const SymbolMap<T>& idtab) {
 		int i=0;
-		for (typename IBEXMAP(T)::const_iterator it=idtab.map.begin(); it!=idtab.map.end(); it++) {
+		for (typename IBEXMAP(T)::const_iterator it=idtab.map.begin(); it!=idtab.map.end(); ++it) {
 			os << it->first << " " << it->second << "    ";
 			if (++i%8==0) os << std::endl;
 		}

@@ -72,7 +72,7 @@ void P_CtrGenerator::visit(const P_TmpSymbolDecl& tmp) {
 }
 
 void P_CtrGenerator::visit(const P_ConstraintList& list) {
-	for (vector<P_NumConstraint*>::const_iterator it=list.ctrs.begin(); it!=list.ctrs.end(); it++) {
+	for (vector<P_NumConstraint*>::const_iterator it=list.ctrs.begin(); it!=list.ctrs.end(); ++it) {
 		visit(**it);
 	}
 }

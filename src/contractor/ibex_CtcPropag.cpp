@@ -60,7 +60,7 @@ void CtcPropag::contract(IntervalVector& box, ContractContext& context) {
 		for (int i=0; i<nb_var; i++) {
 			if (context.impact[i]) {
 				set<int> ctrs=g.output_ctrs(i);
-				for (set<int>::iterator c=ctrs.begin(); c!=ctrs.end(); c++)
+				for (set<int>::iterator c=ctrs.begin(); c!=ctrs.end(); ++c)
 					agenda.push(*c);
 			}
 		}
@@ -112,7 +112,7 @@ void CtcPropag::contract(IntervalVector& box, ContractContext& context) {
 		// ===================== fine propagation =========================
 		// reset the old box to the current domains just before contraction
 		if (!accumulate) {
-			for (set<int>::iterator v=vars.begin(); v!=vars.end(); v++) {
+			for (set<int>::iterator v=vars.begin(); v!=vars.end(); ++v) {
 				old_box[*v] = box[*v];
 			}
 		}
@@ -135,13 +135,13 @@ void CtcPropag::contract(IntervalVector& box, ContractContext& context) {
 			active.remove(c);
 		}
 
-		for (set<int>::iterator it=vars.begin(); it!=vars.end(); it++) {
+		for (set<int>::iterator it=vars.begin(); it!=vars.end(); ++it) {
 			int v=*it;
 			//cout << "   " << old_box[v] << " % " << box[v] << "   " << old_box[v].ratiodelta(box[v]) << endl;
 			//if (old_box[v].rel_distance(box[v])>=ratio) {
 			if (old_box[v].ratiodelta(box[v])>=ratio) {
 				set<int> ctrs=g.output_ctrs(v);
-				for (set<int>::iterator c2=ctrs.begin(); c2!=ctrs.end(); c2++) {
+				for (set<int>::iterator c2=ctrs.begin(); c2!=ctrs.end(); ++c2) {
 					if ((c!=*c2 && active[*c2]) || (c==*c2 && !context.output_flags[FIXPOINT]))
 						agenda.push(*c2);
 				}

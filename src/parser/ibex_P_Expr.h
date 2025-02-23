@@ -89,7 +89,7 @@ public:
 
 //	P_ExprNode(operation op, const std::vector<const P_ExprNode*>& vec) : op(op), arg(vec.size()), lab(NULL), line(ibex_lineno) {
 //		int i=0;
-//		for (std::vector<const P_ExprNode*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
+//		for (std::vector<const P_ExprNode*>::const_iterator it=vec.begin(); it!=vec.end(); ++it) {
 //			arg.set_ref(i++,**it);
 //		}
 //	}

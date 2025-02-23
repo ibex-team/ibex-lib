@@ -202,7 +202,7 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended,
 	ctrs.resize(nb_ctr);
 
 	vector<NumConstraint*>::iterator it=_ctrs.begin();
-	for (int i=0; i<nb_ctr; i++, it++) {
+	for (int i=0; i<nb_ctr; i++, ++it) {
 		ctrs.set_ref(i,**it);
 	}
 
@@ -210,7 +210,7 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended,
 
 	ops = m==0? NULL : new CmpOp[m];
 	vector<CmpOp>::iterator it2=_ops.begin();
-	for (int i=0; i<m; i++, it2++) {
+	for (int i=0; i<m; i++, ++it2) {
 		ops[i]=*it2;
 	}
 

@@ -133,8 +133,8 @@ const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 	NodeMap<bool> all_nodes;
 
 	for (IBEX_NODE_MAP(CLONE_VEC*)::const_iterator it=idx_clones.begin();
-			it!=idx_clones.end(); it++) {
-		for (CLONE_VEC::const_iterator it2=it->second->begin(); it2!=it->second->end(); it2++) {
+			it!=idx_clones.end(); ++it) {
+		for (CLONE_VEC::const_iterator it2=it->second->begin(); it2!=it->second->end(); ++it2) {
 			if (!all_nodes.found(*it2->second))
 				all_nodes.insert(*it2->second,true);
 		}
@@ -148,7 +148,7 @@ const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 	}
 	/*...............................*/
 
-	for (IBEX_NODE_MAP(bool)::const_iterator it=all_nodes.begin(); it!=all_nodes.end(); it++) {
+	for (IBEX_NODE_MAP(bool)::const_iterator it=all_nodes.begin(); it!=all_nodes.end(); ++it) {
 		if (/* auto-cleanup, so remove this ----> !old_nodes.found(*it->first) && */
 			!dynamic_cast<const ExprSymbol*>(it->first) &&
 			!new_nodes.found(*it->first) &&
