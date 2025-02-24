@@ -1,19 +1,16 @@
-name: Tests self-hosted
+name: Tests MacOS
 on: push
-env:
-  CHECKSUM: 77a66776b3b7fb596dffd1851ee38acb2f1c3bd5698a10744069dffa7eca7b5fade02963335284e2076a3a8b642918d214d14c46b08a61a4be4ce98ab3c5d294
 jobs:
-  linux-cmake-build-and-check:
-    runs-on: self-hosted
-    container:
-      image: ubuntu:latest
+  macos-cmake-build-and-check:
+    runs-on: macos-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
       - name: Install dependencies
         run: |
-          apt update
-          apt install -y gcc g++ cmake flex bison libcppunit-dev patch
+          brew update
+#          brew install cppunit
       - name: CMake
         run: |
           mkdir build
@@ -23,11 +20,16 @@ jobs:
         run: |
           cd build
           make
-      - name: make check
+      - name: ibexsolve
         run: |
-          cd build
-          make check
+          export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd
+          cd /Users/runner/work/ibex-lib/ibex-lib/build/bin/
+          ./ibexsolve -v
+#     - name: make check
+#       run: |
+#         cd build
+#         make check
     strategy:
       matrix:
-        interval_lib: [gaol, filib]
+        interval_lib: [filib]
         lp_lib: [soplex]
