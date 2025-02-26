@@ -34,7 +34,7 @@ else ()
 
   ###
   set (MATHLIB_NAME "Mathlib")
-  set (MATHLIB_VERSION "2.1.0")
+  set (MATHLIB_VERSION "2.1.1")
   set (mathlib_basename "mathlib-${MATHLIB_VERSION}")
   set (mathlib_archive_name "${mathlib_basename}.tar.gz")
   set (mathlib_archive "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${mathlib_archive_name}")
