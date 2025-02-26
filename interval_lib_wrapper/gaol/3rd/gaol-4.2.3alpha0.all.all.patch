@@ -1,0 +1,188 @@
+--- gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2015-05-23 14:50:28.000000000 +0200
++++ gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2020-12-11 17:41:32.758471488 +0100
+@@ -1105,7 +1105,7 @@
+   }
+
+
+-  interval::operator string() const
++  interval::operator std::string() const
+   {
+     std::ostringstream output;
+     output.precision(interval::precision());
+--- gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2012-03-06 18:08:58.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2019-06-21 12:25:08.036229637 +0200
+@@ -112,7 +112,7 @@
+     	for (;;) {
+       	if (odd(n)) {
+ 				n >>= 1;
+-				y = opposite(opposite(y)*z);
++				y = gaol_opposite(gaol_opposite(y)*z);
+ 				if (n == 0) {
+ 	  				GAOL_RND_LEAVE();
+ 	  				return y;
+@@ -120,7 +120,7 @@
+       	} else {
+ 				n>>=1;
+       	}
+-      	z = opposite(opposite(z)*z);
++      	z = gaol_opposite(gaol_opposite(z)*z);
+     	}
+ 	}
+ 
+@@ -134,9 +134,9 @@
+ 	return ipow_dn(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_dn(opposite(d),e);
++	  return ipow_dn(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_up(opposite(d),e));
++	  return gaol_opposite(ipow_up(gaol_opposite(d),e));
+ 	}
+       }
+     }
+@@ -151,9 +151,9 @@
+ 	return ipow_up(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_up(opposite(d),e);
++	  return ipow_up(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_dn(opposite(d),e));
++	  return gaol_opposite(ipow_dn(gaol_opposite(d),e));
+ 	}
+       }
+     }
+--- gaol-4.2.3alpha0/gaol/gaol_double_op_crlibm.h	2012-03-06 18:08:58.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_double_op_crlibm.h	2019-06-21 12:25:28.901056220 +0200
+@@ -88,7 +88,7 @@
+     	for (;;) {
+       	if (odd(n)) {
+ 			n >>= 1;
+-			y = opposite(opposite(y)*z);
++			y = gaol_opposite(gaol_opposite(y)*z);
+ 			if (n == 0) {
+ 	  			GAOL_RND_LEAVE();
+ 	  			return y;
+@@ -96,7 +96,7 @@
+       	} else {
+ 			n>>=1;
+       	}
+-      	z = opposite(opposite(z)*z);
++      	z = gaol_opposite(gaol_opposite(z)*z);
+     	}
+ 	}
+ 
+@@ -110,9 +110,9 @@
+ 	return ipow_dn(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_dn(opposite(d),e);
++	  return ipow_dn(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_up(opposite(d),e));
++	  return gaol_opposite(ipow_up(gaol_opposite(d),e));
+ 	}
+       }
+     }
+@@ -127,9 +127,9 @@
+ 	return ipow_up(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_up(opposite(d),e);
++	  return ipow_up(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_dn(opposite(d),e));
++	  return gaol_opposite(ipow_dn(gaol_opposite(d),e));
+ 	}
+       }
+     }
+--- gaol-4.2.3alpha0/gaol/gaol_double_op_m.h	2009-03-01 14:53:01.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_double_op_m.h	2019-06-21 12:25:46.817473387 +0200
+@@ -115,7 +115,7 @@
+     	for (;;) {
+       	if (odd(n)) {
+ 				n >>= 1;
+-				y = opposite(opposite(y)*z);
++				y = gaol_opposite(gaol_opposite(y)*z);
+ 				if (n == 0) {
+ 	  				GAOL_RND_LEAVE();
+ 	  				return y;
+@@ -123,7 +123,7 @@
+       	} else {
+ 				n>>=1;
+       	}
+-      	z = opposite(opposite(z)*z);
++      	z = gaol_opposite(gaol_opposite(z)*z);
+     	}
+ 	}
+ 
+@@ -137,9 +137,9 @@
+ 	return ipow_dn(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_dn(opposite(d),e);
++	  return ipow_dn(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_up(opposite(d),e));
++	  return gaol_opposite(ipow_up(gaol_opposite(d),e));
+ 	}
+       }
+     }
+@@ -154,9 +154,9 @@
+ 	return ipow_up(d,e);
+       } else { // d < 0
+ 	if (even(e)) {
+-	  return ipow_up(opposite(d),e);
++	  return ipow_up(gaol_opposite(d),e);
+ 	} else { // odd(e)
+-	  return opposite(ipow_dn(opposite(d),e));
++	  return gaol_opposite(ipow_dn(gaol_opposite(d),e));
+ 	}
+       }
+     }
+--- gaol-4.2.3alpha0/gaol/gaol_interval.h	2015-05-21 09:00:45.000000000 +0200
++++ gaol-4.2.3alpha0/gaol/gaol_interval.h	2019-06-21 11:08:27.704865552 +0200
+@@ -32,6 +32,7 @@
+ 
+ #include <cmath>
+ #include <iosfwd>
++#include <ios> /* for std::streamsize, patch from ibex */
+ #include <string>
+ #include <limits>
+ #include "gaol/gaol_config.h"
+--- gaol-4.2.3alpha0/gaol/gaol_port.h	2012-03-06 18:08:58.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_port.h	2019-06-21 12:24:29.653533877 +0200
+@@ -89,9 +89,9 @@
+ 
+ #if HAVE_ROUNDING_MATH_OPTION
+   INLINE double f_negate_simple(double x) { return -x; }
+-#  define opposite(x) f_negate_simple(x)
++#  define gaol_opposite(x) f_negate_simple(x)
+ #else
+-#  define opposite(x) f_negate(x)
++#  define gaol_opposite(x) f_negate(x)
+ #endif // HAVE_ROUNDING_MATH_OPTION
+ 
+   /*!
+@@ -145,8 +145,7 @@
+ #endif
+ 
+ #ifndef GAOL_NAN
+-  static uintdouble NaN_val = {{IFBIGENDIAN(0x7ff80000, 0x0)}};
+-#define GAOL_NAN (gaol::NaN_val.d)
++#define GAOL_NAN (((uintdouble) {{IFBIGENDIAN(0x7ff80000, 0x0)}}).d)
+ #endif
+ 
+   // #define GAOL_INFINITY std::numeric_limits<double>::infinity()
+--- gaol-4.2.3alpha0/gaol/gaol_interval_parser.cpp	2014-02-24 16:09:16.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_interval_parser.cpp	2020-12-11 17:56:46.944820383 +0100
+@@ -1779,7 +1779,7 @@
+                                          	(yyval.itv).l=gaol_result_of_parsing->left();
+					  						(yyval.itv).r=gaol_result_of_parsing->right();
+											if ((yyval.itv).l != (yyval.itv).r) {
+-												gaol_ERROR(input_format_error, std::string("bounds of degenerate interval do not evaluate to the same value"));
++												gaol_ERROR(input_format_error, "bounds of degenerate interval do not evaluate to the same value");
+											}
+										}
+     break;

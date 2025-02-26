@@ -22,12 +22,8 @@ set (GAOL_DIR "${GAOL_DIR}" CACHE PATH "Directory to search for Gaol")
 # Look for the library
 find_library (GAOL_LIBRARY NAMES gaol HINTS "${GAOL_DIR}" PATH_SUFFIXES lib)
 
-# Look for gdtoa
-find_library (GDTOA_LIBRARY NAMES gdtoa HINTS "${GAOL_DIR}" PATH_SUFFIXES lib)
-
 # Might want to look close to the library first for the includes.
 get_filename_component (_libdir "${GAOL_LIBRARY}" PATH)
-get_filename_component (_libdir2 "${GDTOA_LIBRARY}" PATH)
 
 # Look for the include directory
 find_path (GAOL_INC_DIR NAMES gaol/gaol.h
@@ -41,20 +37,13 @@ if (GAOL_INC_DIR)
 endif ()
 
 include (FindPackageHandleStandardArgs)
-if (GAOL_VERSION VERSION_LESS 4.2.3)
-  find_package_handle_standard_args (Gaol DEFAULT_MSG GAOL_LIBRARY GDTOA_LIBRARY
-                                                       GAOL_INC_DIR)
-else ()
-  find_package_handle_standard_args (Gaol DEFAULT_MSG GAOL_LIBRARY GAOL_INC_DIR)
-endif ()
+find_package_handle_standard_args (Gaol
+                                   REQUIRED_VARS GAOL_LIBRARY GAOL_INC_DIR
+                                   VERSION_VAR GAOL_VERSION)
 
 if (GAOL_FOUND)
-  if (GDTOA_LIBRARY) # is gdtoa lib required ?
-    set (GAOL_LIBRARIES ${GAOL_LIBRARY} ${GDTOA_LIBRARY})
-  else ()
-    set (GAOL_LIBRARIES ${GAOL_LIBRARY})
-  endif ()
-	set (GAOL_INCLUDE_DIRS "${GAOL_INC_DIR}")
+  set (GAOL_LIBRARIES ${GAOL_LIBRARY})
+  set (GAOL_INCLUDE_DIRS "${GAOL_INC_DIR}")
   mark_as_advanced (GAOL_DIR)
   if (NOT TARGET Gaol::Gaol)
     # For now we make the target global, because this file is included from a

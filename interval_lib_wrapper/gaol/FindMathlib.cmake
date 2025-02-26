@@ -38,8 +38,9 @@ if (MATHLIB_INC_DIR)
 endif ()
 
 include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args (Mathlib DEFAULT_MSG MATHLIB_LIBRARY
-                                                     MATHLIB_INC_DIR)
+find_package_handle_standard_args (Mathlib
+                                   REQUIRED_VARS MATHLIB_LIBRARY MATHLIB_INC_DIR
+                                   VERSION_VAR MATHLIB_VERSION)
 
 if (MATHLIB_FOUND)
 	set (MATHLIB_LIBRARIES ${MATHLIB_LIBRARY})

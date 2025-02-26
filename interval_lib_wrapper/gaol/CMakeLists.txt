@@ -1,8 +1,10 @@
 set (GAOL_NAME "Gaol")
 set (GAOL_NAME ${GAOL_NAME} PARENT_SCOPE)
 
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+
 # Look for Mathlib
-include (FindMathlib.cmake)
+find_package (Mathlib 2.1.1)
 
 # Avoid overflowing display with warnings
 if (NOT WIN32)
@@ -19,7 +21,7 @@ if (MATHLIB_FOUND)
   generate_path_hints_file (Mathlib INSTALL)
 
   # Look for Gaol
-  include (FindGaol.cmake)
+  find_package (Gaol 4.2.3)
   if (GAOL_FOUND)
     set (GAOL_TARGET "Gaol::Gaol;${MATHLIB_TARGET}" PARENT_SCOPE)
     # Install FindGaol.cmake file
@@ -76,7 +78,7 @@ endif ()
 if (NOT GAOL_FOUND)
   ###########################################################################
   message (STATUS "Will install and use library gaol from 3rd/ subdirectory")
-  set (GAOL_VERSION "4.2.0")
+  set (GAOL_VERSION "4.2.3alpha0")
   set (gaol_basename "gaol-${GAOL_VERSION}")
   set (gaol_archive_name "${gaol_basename}.tar.gz")
   set (gaol_archive "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${gaol_archive_name}")
@@ -117,6 +119,6 @@ if (NOT GAOL_FOUND)
   message (STATUS "${GAOL_NAME}: configure - done")
 
   ###
-  set (GAOL_TARGET "gaol;gdtoa;${MATHLIB_TARGET}" PARENT_SCOPE)
+  set (GAOL_TARGET "gaol;${MATHLIB_TARGET}" PARENT_SCOPE)
 endif ()
 set (GAOL_VERSION ${GAOL_VERSION} PARENT_SCOPE)
