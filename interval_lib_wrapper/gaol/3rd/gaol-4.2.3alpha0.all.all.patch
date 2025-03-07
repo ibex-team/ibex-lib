@@ -1,16 +1,5 @@
---- gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2015-05-23 14:50:28.000000000 +0200
-+++ gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2020-12-11 17:41:32.758471488 +0100
-@@ -1105,7 +1105,7 @@
-   }
-
-
--  interval::operator string() const
-+  interval::operator std::string() const
-   {
-     std::ostringstream output;
-     output.precision(interval::precision());
---- gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2012-03-06 18:08:58.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2019-06-21 12:25:08.036229637 +0200
+--- gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2022-02-01 12:40:40.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2025-03-08 00:37:50.585568767 +0100
 @@ -112,7 +112,7 @@
      	for (;;) {
        	if (odd(n)) {
@@ -53,8 +42,8 @@
  	}
        }
      }
---- gaol-4.2.3alpha0/gaol/gaol_double_op_crlibm.h	2012-03-06 18:08:58.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_double_op_crlibm.h	2019-06-21 12:25:28.901056220 +0200
+--- gaol-4.2.3alpha0/gaol/gaol_double_op_crlibm.h	2022-02-01 12:40:40.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_double_op_crlibm.h	2025-03-08 00:38:06.848553397 +0100
 @@ -88,7 +88,7 @@
      	for (;;) {
        	if (odd(n)) {
@@ -97,8 +86,8 @@
  	}
        }
      }
---- gaol-4.2.3alpha0/gaol/gaol_double_op_m.h	2009-03-01 14:53:01.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_double_op_m.h	2019-06-21 12:25:46.817473387 +0200
+--- gaol-4.2.3alpha0/gaol/gaol_double_op_m.h	2022-02-01 12:40:40.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_double_op_m.h	2025-03-08 00:38:17.143543648 +0100
 @@ -115,7 +115,7 @@
      	for (;;) {
        	if (odd(n)) {
@@ -141,18 +130,19 @@
  	}
        }
      }
---- gaol-4.2.3alpha0/gaol/gaol_interval.h	2015-05-21 09:00:45.000000000 +0200
-+++ gaol-4.2.3alpha0/gaol/gaol_interval.h	2019-06-21 11:08:27.704865552 +0200
-@@ -32,6 +32,7 @@
+--- gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2022-02-01 12:40:40.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2025-03-08 00:39:06.982496419 +0100
+@@ -1105,7 +1105,7 @@
+   }
  
- #include <cmath>
- #include <iosfwd>
-+#include <ios> /* for std::streamsize, patch from ibex */
- #include <string>
- #include <limits>
- #include "gaol/gaol_config.h"
---- gaol-4.2.3alpha0/gaol/gaol_port.h	2012-03-06 18:08:58.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_port.h	2019-06-21 12:24:29.653533877 +0200
+ 
+-  interval::operator string() const
++  interval::operator std::string() const
+   {
+     std::ostringstream output;
+     output.precision(interval::precision());
+--- gaol-4.2.3alpha0/gaol/gaol_port.h	2022-02-08 14:33:29.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_port.h	2025-03-08 00:40:24.629422564 +0100
 @@ -89,9 +89,9 @@
  
  #if HAVE_ROUNDING_MATH_OPTION
@@ -175,14 +165,3 @@
  #endif
  
    // #define GAOL_INFINITY std::numeric_limits<double>::infinity()
---- gaol-4.2.3alpha0/gaol/gaol_interval_parser.cpp	2014-02-24 16:09:16.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_interval_parser.cpp	2020-12-11 17:56:46.944820383 +0100
-@@ -1779,7 +1779,7 @@
-                                          	(yyval.itv).l=gaol_result_of_parsing->left();
-					  						(yyval.itv).r=gaol_result_of_parsing->right();
-											if ((yyval.itv).l != (yyval.itv).r) {
--												gaol_ERROR(input_format_error, std::string("bounds of degenerate interval do not evaluate to the same value"));
-+												gaol_ERROR(input_format_error, "bounds of degenerate interval do not evaluate to the same value");
-											}
-										}
-     break;
