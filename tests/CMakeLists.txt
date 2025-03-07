@@ -5,7 +5,8 @@ find_package (CppUnit)
 if (CPPUNIT_FOUND)
   # Compile common stuff for the tests
   add_library (test_common utest.cpp utils.cpp utils.h Ponts30.cpp Ponts30.h)
-  target_link_libraries (test_common PUBLIC ibex)
+  target_link_libraries (test_common PUBLIC ibex CppUnit::CppUnit)
+  
   set (srcdir_test_flag -DSRCDIR_TESTS="${CMAKE_CURRENT_SOURCE_DIR}")
 
   set (TESTS_LIST TestAgenda TestArith TestBitSet TestBoolInterval
@@ -28,7 +29,7 @@ if (CPPUNIT_FOUND)
   foreach (test ${TESTS_LIST})
     # /!\ The test and the target building the executable have the same name
     add_executable (${test} ${test}.cpp ${test}.h)
-    target_link_libraries (${test} test_common CppUnit::CppUnit)
+    target_link_libraries (${test} test_common ibex CppUnit::CppUnit)
     target_compile_definitions (${test} PRIVATE ${srcdir_test_flag})
     add_dependencies (check ${test})
     add_test (${test} ${test})
