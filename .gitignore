@@ -38,6 +38,7 @@
 __build__
 
 # ibex generated obj
+build
 lib
 include
 share
