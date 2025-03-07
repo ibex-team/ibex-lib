@@ -243,6 +243,8 @@ set (incdirs "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
 target_include_directories (gaol PUBLIC "$<BUILD_INTERFACE:${incdirs}>")
 target_include_directories (gaol PUBLIC "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 
+target_link_libraries(gaol PUBLIC ultim)
+
 # install headers
 install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/gaol/gaol"
                "${CMAKE_CURRENT_SOURCE_DIR}/gaol/gaol.h"
