@@ -10,26 +10,33 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-#          brew install cppunit
+          brew install cppunit pkg-config
       - name: CMake
         run: |
           mkdir build
           cd build
-          cmake -DINTERVAL_LIB=${{ matrix.interval_lib }} -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON -DLP_LIB=${{ matrix.lp_lib }} ..
+          cmake -DCMAKE_INSTALL_PREFIX=/Users/runner/work/ibex-lib/ibex-lib -DINTERVAL_LIB=${{ matrix.interval_lib }} -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON -DLP_LIB=${{ matrix.lp_lib }} ..
       - name: make
         run: |
           cd build
-          make
+          make install
+      - name: check_itv
+        run: |
+          cd examples
+          export PKG_CONFIG_PATH=/Users/runner/work/ibex-lib/ibex-lib/share/pkgconfig
+          make check_itv
+          export DYLD_LIBRARY_PATH=/Users/runner/work/ibex-lib/ibex-lib/lib/:/Users/runner/work/ibex-lib/ibex-lib/lib/ibex/3rd
+          ./check_itv
       - name: ibexsolve
         run: |
-          export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd
-          cd /Users/runner/work/ibex-lib/ibex-lib/build/bin/
+          cd build/bin/
           ./ibexsolve -v
-#     - name: make check
-#       run: |
-#         cd build
-#         make check
+      - name: make check
+        run: |
+          cd build
+          make check
     strategy:
       matrix:
-        interval_lib: [filib]
+        interval_lib: [gaol]
+#	interval_lib: [gaol,filib]
         lp_lib: [soplex]
