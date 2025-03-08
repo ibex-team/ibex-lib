@@ -55,6 +55,9 @@
 /* Define this if your system is SUN based */
 #cmakedefine MATHLIB_SUN 1
 
+/* Define this if your system is arch64 */
+#cmakedefine MATHLIB_AARCH64 1
+
 /* Name of package */
 #define PACKAGE "mathlib"
 
