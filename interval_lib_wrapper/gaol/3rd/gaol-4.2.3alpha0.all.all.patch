@@ -1,3 +1,26 @@
+--- gaol-4.2.3alpha0/gaol/gaol_common.cpp	2022-02-01 12:40:40.000000000 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_common.cpp	2025-03-09 12:59:58.483700407 +0100
+@@ -29,7 +29,7 @@
+ 
+ #include <iostream>
+ #include <cstdio>
+-#include <cmath>
++#include <cmath>
+ #include "gaol/gaol_config.h"
+ #include "gaol/gaol_fpu.h"
+ #include "gaol/gaol_common.h"
+@@ -75,7 +75,10 @@
+             save_fpu_state_crlibm = ::crlibm_init();
+ #endif
+ #if !GAOL_PRESERVE_ROUNDING
+-            reset_fpu_cw(GAOL_FPU_MASK); // 53 bits precision, all exceptions masked, rounding to +oo
++	fesetenv(FE_DFL_ENV);
++	round_upward();
++	// next instruction crashes on MacOS ARM64 platform
++	//reset_fpu_cw(GAOL_FPU_MASK); // 53 bits precision, all exceptions masked, rounding to +oo
+ #   if USING_SSE2_INSTRUCTIONS
+             round_upward_sse();
+ #   endif
 --- gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2022-02-01 12:40:40.000000000 +0100
 +++ gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2025-03-08 00:37:50.585568767 +0100
 @@ -112,7 +112,7 @@
