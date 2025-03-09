@@ -10,26 +10,31 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install cppunit pkg-config
+          brew install cppunit
       - name: CMake
         run: |
           mkdir build
           cd build
           cmake -DCMAKE_INSTALL_PREFIX=/Users/runner/work/ibex-lib/ibex-lib -DINTERVAL_LIB=${{ matrix.interval_lib }} -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON -DLP_LIB=${{ matrix.lp_lib }} ..
+      - name: Upload Gaol configuration file
+        uses: actions/upload-artifact@v4
+        with:
+          name: gaol configuration
+          path: build/interval_lib_wrapper/gaol/gaol-4.2.3alpha0-build/gaol/gaol_configuration.h
+      - name: Upload Mathlib configuration file
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathlib configuration
+          path: build/interval_lib_wrapper/gaol/mathlib-2.1.1-build/src/mathlib_configuration.h
       - name: make
         run: |
           cd build
-          make install
-      - name: check_itv
-        run: |
-          cd examples
-          export PKG_CONFIG_PATH=/Users/runner/work/ibex-lib/ibex-lib/share/pkgconfig
-          make check_itv
-          export DYLD_LIBRARY_PATH=/Users/runner/work/ibex-lib/ibex-lib/lib/:/Users/runner/work/ibex-lib/ibex-lib/lib/ibex/3rd
-          ./check_itv
+          make VERBOSE=1 install
       - name: ibexsolve
         run: |
           cd build/bin/
+          export PKG_CONFIG_PATH=/Users/runner/work/ibex-lib/ibex-lib/share/pkgconfig
+          export DYLD_LIBRARY_PATH=/Users/runner/work/ibex-lib/ibex-lib/lib/:/Users/runner/work/ibex-lib/ibex-lib/lib/ibex/3rd
           ./ibexsolve -v
       - name: make check
         run: |
@@ -37,6 +42,5 @@ jobs:
           make check
     strategy:
       matrix:
-        interval_lib: [gaol]
-#	interval_lib: [gaol,filib]
+        interval_lib: [gaol,filib]
         lp_lib: [soplex]
