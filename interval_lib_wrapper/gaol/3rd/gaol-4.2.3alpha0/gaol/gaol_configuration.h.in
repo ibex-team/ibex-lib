@@ -1,5 +1,8 @@
 /* gaol/gaol_configuration.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define this if your system is an AARCH64-based computer under Linux */
+#cmakedefine AARCH64_LINUX 1
+
 /* Define if building universal (internal helper macro) */
 #cmakedefine AC_APPLE_UNIVERSAL_BUILD 1
 
@@ -114,7 +117,7 @@
 #cmakedefine HAVE_REALLOC 1
 
 /* Define to 1 if you have the `rint' function. */
-#cmakedefine HAVE_RINT
+#cmakedefine HAVE_RINT 1
 
 /* Define to 1 if you have the `round' function. */
 #cmakedefine HAVE_ROUND 1
@@ -179,7 +182,7 @@
 /* Define this if your system is a Linux-based ix86 or compatible */
 #cmakedefine IX86_MACOSX 1
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
+/* Define to the sub-directory where libtool stores uninstalled libraries.
    */
 #define LT_OBJDIR ".libs/"
 
@@ -219,7 +222,9 @@
 /* Define this if your system is a SUN Sparc computer under Solaris */
 #cmakedefine SPARC_SOLARIS 1
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #cmakedefine STDC_HEADERS 1
 
 /* Define this to 1 if SSE2 instructions are to be used */
