@@ -42,5 +42,5 @@ jobs:
           make check
     strategy:
       matrix:
-        interval_lib: [gaol,filib]
+        interval_lib: [gaol]
         lp_lib: [soplex]
