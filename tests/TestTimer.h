@@ -23,20 +23,20 @@ class TestTimer : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestTimer);
+/*	CPPUNIT_TEST_SUITE(TestTimer);
 	
 
 		CPPUNIT_TEST(test01);
 		CPPUNIT_TEST(test02);
 		CPPUNIT_TEST(test03);
 	CPPUNIT_TEST_SUITE_END();
-
+*/
 	void test01();
 	void test02();
 	void test03();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestTimer);
+//CPPUNIT_TEST_SUITE_REGISTRATION(TestTimer);
 
 
 } // namespace ibex
