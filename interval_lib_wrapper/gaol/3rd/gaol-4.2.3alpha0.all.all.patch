@@ -131,8 +131,27 @@
        }
      }
 --- gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2022-02-01 12:40:40.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2025-03-08 00:39:06.982496419 +0100
-@@ -1105,7 +1105,7 @@
++++ gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2025-03-09 10:32:42.047131593 +0100
+@@ -243,7 +243,8 @@
+   {
+     //    double l = ((I.left()==0.0) ? 0.0  : I.left()); // Avoids printing -0
+     //    double r = ((I.right()==0.0) ? 0.0 : I.right());  // Avoids printing -0
+-    GAOL_RND_ENTER();
++    GAOL_RND_PRESERVE();
++	round_upward();
+ 
+     double l = I.left(), r = I.right();
+ 
+@@ -366,7 +367,7 @@
+ 				}
+       }
+     }
+-    GAOL_RND_LEAVE();
++    GAOL_RND_RESTORE();
+     return os;
+   }
+ 
+@@ -1105,7 +1106,7 @@
    }
  
  
@@ -141,6 +160,22 @@
    {
      std::ostringstream output;
      output.precision(interval::precision());
+@@ -1143,12 +1144,13 @@
+       return std::numeric_limits<double>::max();
+     }
+ 
+-    unsigned short int _save_state=get_fpu_cw(); round_nearest();
++    GAOL_RND_PRESERVE();
++    round_nearest();
+     double middle = 0.5*(left()+right());
+ 	 if (std::isinf(middle)) {
+ 		middle = 0.5*left() + 0.5*right();
+ 	 }
+-    GAOL_RND_LEAVE();
++    GAOL_RND_RESTORE();
+     return middle;
+   }
+ 
 --- gaol-4.2.3alpha0/gaol/gaol_port.h	2022-02-08 14:33:29.000000000 +0100
 +++ gaol-4.2.3alpha0/gaol/gaol_port.h	2025-03-08 00:40:24.629422564 +0100
 @@ -89,9 +89,9 @@
