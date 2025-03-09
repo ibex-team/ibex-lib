@@ -7,6 +7,12 @@ if (CMAKE_CROSSCOMPILING)
   message (STATUS "Targeting system ${CMAKE_SYSTEM} with processor ${CMAKE_SYSTEM_PROCESSOR}")
 endif ()
 
+# =========== Fixme! See issue #561# ====================================================================
+if (CMAKE_SYSTEM MATCHES "Darwin" AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
+	message (FATAL_ERROR "Ibex + Filib is not supported yet on MacOS arm64: try to use Gaol instead!")
+endif ()
+# =======================================================================================================
+
 # options and command-line arguments
 option (BUILD_SHARED_LIBS "Set to ON to build shared libraries" OFF)
 set (CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "C++ header files (include)")
