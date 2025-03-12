@@ -96,12 +96,6 @@ if (NOT GAOL_FOUND)
 
   ### Apply patch
   set (GAOL_PATCHES "${gaol_basename}.all.all.patch")
-#  if (WIN32)
-#    list (APPEND GAOL_PATCHES "${gaol_basename}.win32.all.patch")
-#  endif ()
-#  if (APPLE)
-#    list (APPEND GAOL_PATCHES "${gaol_basename}.darwin.all.isfinite.patch")
-#  endif ()
   patch ("${GAOL_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
           "${logdir}" ${GAOL_PATCHES})
 
