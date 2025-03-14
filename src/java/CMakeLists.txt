@@ -27,27 +27,20 @@ if (BUILD_JAVA_INTERFACE)
 
   # Build the jar
   add_jar (ibex-java-jar SOURCES ${CMAKE_CURRENT_BINARY_DIR}/Ibex.java
-                          OUTPUT_NAME ${JAVA_PACKAGE})
+                          OUTPUT_NAME ${JAVA_PACKAGE}
+                          GENERATE_NATIVE_HEADERS ibex-java-native)
 
-  # Generate header file
-  #set (Java_JAVAH_EXECUTABLE ${Java_JAVAC_EXECUTABLE})
-  if (Java_VERSION VERSION_LESS "10")
-    create_javah (TARGET ${JAVA_SIGNATURE}_Ibex.h
-      CLASSES ${JAVA_PACKAGE}.Ibex
-      DEPENDS ibex-java-jar)
-  else ()
-    add_custom_command (OUTPUT ${JAVA_SIGNATURE}_Ibex.h
-                        COMMAND "${Java_JAVAC_EXECUTABLE}" Ibex.java -h .
-                        DEPENDS ibex-java-jar
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                        COMMENT "Building C header files from classes...")
-    add_custom_target (ibex-java-header ALL
-                  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${JAVA_SIGNATURE}_Ibex.h)
-  endif ()
+  message(STATUS "Java version: " ${Java_VERSION})
 
   # Build the ibex-java lib
-  add_library (ibex-java ${CMAKE_CURRENT_BINARY_DIR}/ibex_Java.cpp
-                         ${CMAKE_CURRENT_BINARY_DIR}/${JAVA_SIGNATURE}_Ibex.h)
+  add_library (ibex-java ${CMAKE_CURRENT_BINARY_DIR}/ibex_Java.cpp)
+  
+  ## Next command fails on Appveyor with error message "INTERFACE_LIBRARY targets may only have whitelisted properties. The property "NATIVE_HEADERS_DIRECTORY" is not allowed"
+  #   target_include_directories(ibex-java PUBLIC $<TARGET_PROPERTY:ibex-java-native,NATIVE_HEADERS_DIRECTORY>)
+  ## so we use instead explicit folder:
+  target_include_directories(ibex-java PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ibex-java-jar.dir/native_headers")
+  ## ------------
+  
   target_include_directories (ibex-java PUBLIC "${JNI_INCLUDE_DIRS}")
   target_link_libraries (ibex-java ibex)
 
