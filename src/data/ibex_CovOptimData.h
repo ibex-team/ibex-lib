@@ -82,7 +82,7 @@ public:
 	/**
 	 * \brief COVOptimData file format version.
 	 */
-	static const unsigned int FORMAT_VERSION;
+	static constexpr unsigned int FORMAT_VERSION = 1;
 
 	/**
 	 * \brief Names of the variables.
@@ -172,12 +172,12 @@ protected:
 	/**
 	 * \brief Subformat level.
 	 */
-	static const unsigned int subformat_level;
+	static constexpr unsigned int subformat_level = 2;
 
 	/**
 	 * \brief Subformat identifying number.
 	 */
-	static const unsigned int subformat_number;
+	static constexpr unsigned int subformat_number = 1;
 
 	struct Data {
 		std::vector<std::string> _optim_var_names;

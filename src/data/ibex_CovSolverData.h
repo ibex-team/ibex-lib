@@ -204,7 +204,7 @@ public:
 	/**
 	 * \brief COVSolverData file format version.
 	 */
-	static const unsigned int FORMAT_VERSION;
+	static constexpr unsigned int FORMAT_VERSION = 2;
 
 protected:
 	friend class Solver;
@@ -230,12 +230,12 @@ protected:
 	/**
 	 * \brief Subformat level.
 	 */
-	static const unsigned int subformat_level;
+	static constexpr unsigned int subformat_level = 5;
 
 	/**
 	 * \brief Subformat identifying number.
 	 */
-	static const unsigned int subformat_number;
+	static constexpr unsigned int subformat_number = 0;
 
 	struct Data {
 		std::vector<std::string> _solver_var_names;
