@@ -17,12 +17,6 @@ using namespace std;
 
 namespace ibex {
 
-const unsigned int CovList::FORMAT_VERSION = 1;
-
-const unsigned int CovList::subformat_level = 1;
-
-const unsigned int CovList::subformat_number = 0;
-
 CovList::CovList(size_t n) : Cov(n), data(new Data()), own_data(true) {
 
 }

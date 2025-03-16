@@ -18,14 +18,6 @@ using namespace std;
 
 namespace ibex {
 
-const unsigned int  Cov::FORMAT_VERSION = 1;
-
-const unsigned int Cov::subformat_level = 0;
-
-const unsigned int Cov::subformat_number = 0;
-
-const size_t Cov::SIGNATURE_LENGTH = 20;
-const char* Cov::SIGNATURE = "IBEX COVERING FILE ";
 const string Cov::separator = "+-------------------+-----------------------------------------------------------\n";
 const string Cov::space     = "|                   |";
 

@@ -18,12 +18,6 @@ using namespace std;
 
 namespace ibex {
 
-const unsigned int CovManifold::FORMAT_VERSION = 1;
-
-const unsigned int CovManifold::subformat_level = 4;
-
-const unsigned int CovManifold::subformat_number = 0;
-
 CovManifold::CovManifold(size_t n, size_t m, size_t nb_ineq, BoundaryType boundary_type) :
 		CovIBUList(n, INNER_AND_OUTER_PT), data(new Data()), own_data(true) {
 

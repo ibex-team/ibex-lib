@@ -18,12 +18,6 @@ using namespace std;
 
 namespace ibex {
 
-const unsigned int CovIBUList::FORMAT_VERSION = 1;
-
-const unsigned int CovIBUList::subformat_level = 3;
-
-const unsigned int CovIBUList::subformat_number = 0;
-
 CovIBUList::CovIBUList(size_t n, BoundaryType boundary_type) : CovIUList(n), data(new Data()), own_data(true) {
 	data->_IBU_boundary_type = boundary_type;
 }

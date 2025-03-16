@@ -8,4 +8,14 @@
 #define _IBEX_LP_LIB_ "@LP_LIB@"
 #cmakedefine USING_IPTOP 1
 
+#ifdef _MSC_VER
+#ifdef _IBEX_BUILD_DLL_
+#define _IBEX_DLL_PORT_ __declspec(dllexport)
+#else
+#define _IBEX_DLL_PORT_ __declspec(dllimport)
+#endif
+#else
+#define _IBEX_DLL_PORT_
+#endif // _MSC_VER
+
 #endif /* __IBEX_SETTING_H__ */

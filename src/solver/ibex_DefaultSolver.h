@@ -59,7 +59,7 @@ public:
 	// TODO: constexpr definition not possible with FILIB (POS_INFINITY is not
 	// a constexpr with FILIB). 
 	//static constexpr double default_eps_x_max = POS_INFINITY;
-	static double default_eps_x_max;
+	_IBEX_DLL_PORT_ static double default_eps_x_max;
 	
 	/**
 	 * Default random seed: 1.0.

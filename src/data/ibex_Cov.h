@@ -67,7 +67,7 @@ public:
 	/**
 	 * \brief COV file format version.
 	 */
-	static const unsigned int FORMAT_VERSION;
+	static constexpr unsigned int FORMAT_VERSION = 1;
 
 	/**
 	 * \brief Number of variables
@@ -111,12 +111,12 @@ protected:
 	/**
 	 * \brief Subformat level.
 	 */
-	static const unsigned int subformat_level;
+	static constexpr unsigned int subformat_level = 0;
 
 	/**
 	 * \brief Subformat identifying number.
 	 */
-	static const unsigned int subformat_number;
+	static constexpr unsigned int subformat_number = 0;
 
 	/** for 'format' display */
 	static const std::string separator;
@@ -124,9 +124,9 @@ protected:
 	/** for 'format' display */
 	static const std::string space;
 
-	static const size_t SIGNATURE_LENGTH;
+	static constexpr size_t SIGNATURE_LENGTH = 20;
 
-	static const char*  SIGNATURE;
+	static constexpr const char* SIGNATURE = "IBEX COVERING FILE ";
 };
 
 } /* namespace ibex */

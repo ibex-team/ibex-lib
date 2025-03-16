@@ -136,7 +136,7 @@ public:
 	/**
 	 * \brief COVIBUList file format version.
 	 */
-	static const unsigned int FORMAT_VERSION;
+	static constexpr unsigned int FORMAT_VERSION = 1;
 
 	/**
 	 * \brief Type of boundary boxes.
@@ -164,12 +164,12 @@ protected:
 	/**
 	 * \brief Subformat level.
 	 */
-	static const unsigned int subformat_level;
+	static constexpr unsigned int subformat_level = 3;
 
 	/**
 	 * \brief Subformat identifying number.
 	 */
-	static const unsigned int subformat_number;
+	static constexpr unsigned int subformat_number = 0;
 
 	struct Data {
 		BoundaryType           _IBU_boundary_type;

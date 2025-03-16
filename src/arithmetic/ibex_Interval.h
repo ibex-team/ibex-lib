@@ -445,7 +445,7 @@ class Interval {
     /** \brief pi
      *  Deprecated. Use pi().
      */
-    static const Interval PI;
+    _IBEX_DLL_PORT_ static const Interval PI;
 
      /** \brief pi. */
     static const Interval& pi();
@@ -453,7 +453,7 @@ class Interval {
     /** \brief 2*pi.
      *  Deprecated. Use two_pi().
      */
-    static const Interval TWO_PI;
+    _IBEX_DLL_PORT_ static const Interval TWO_PI;
 
     /** \brief 2*pi. */
     static const Interval& two_pi();
@@ -461,7 +461,7 @@ class Interval {
     /** \brief pi/2.
      *  Deprecated. Use half_pi().
      */
-    static const Interval HALF_PI;
+    _IBEX_DLL_PORT_ static const Interval HALF_PI;
 
     /** \brief pi/2. */
     static const Interval& half_pi();
@@ -469,7 +469,7 @@ class Interval {
     /** \brief the empty interval.
      *  Deprecated. Use empty_set().
      */
-    static const Interval EMPTY_SET;
+    _IBEX_DLL_PORT_ static const Interval EMPTY_SET;
 
     /** \brief the empty interval. */
     static const Interval& empty_set();
@@ -477,7 +477,7 @@ class Interval {
     /** \brief (-oo,oo).
      *  Deprecated. Use all_reals().
      */
-    static const Interval ALL_REALS;
+    _IBEX_DLL_PORT_ static const Interval ALL_REALS;
 
     /** \brief (-oo,oo). */
     static const Interval& all_reals();
@@ -485,7 +485,7 @@ class Interval {
     /** \brief [0,0].
      *  Deprecated. Use zero().
      */
-    static const Interval ZERO;
+    _IBEX_DLL_PORT_ static const Interval ZERO;
 
     /** \brief [0,0]. */
     static const Interval& zero();
@@ -493,7 +493,7 @@ class Interval {
     /** \brief [1,1].
      *  Deprecated. Use one().
      */
-    static const Interval ONE;
+    _IBEX_DLL_PORT_ static const Interval ONE;
 
     /** \brief [1,1]. */
     static const Interval& one();
@@ -501,7 +501,7 @@ class Interval {
     /** \brief [0,+oo).
      *  Deprecated. Use pos_reals().
      */
-    static const Interval POS_REALS;
+    _IBEX_DLL_PORT_ static const Interval POS_REALS;
 
     /** \brief [0,+oo). */
     static const Interval& pos_reals();
@@ -509,7 +509,7 @@ class Interval {
     /** \brief (-oo,0].
      *  Deprecated. Use neg_reals().
      */
-    static const Interval NEG_REALS;
+    _IBEX_DLL_PORT_ static const Interval NEG_REALS;
 
     /** \brief (-oo,0]. */
     static const Interval& neg_reals();
