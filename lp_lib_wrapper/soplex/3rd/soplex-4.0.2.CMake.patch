@@ -1,9 +1,15 @@
---- soplex-4.0.2/CMakeLists.txt	2020-12-10 16:07:11.143036971 +0100
-+++ soplex-4.0.2/CMakeLists.txt 2019-06-28 15:47:59.000000000 +0200
+--- soplex-4.0.2/CMakeLists.txt	2019-06-28 15:47:59.000000000 +0200
++++ soplex-4.0.2/CMakeLists.txt	2025-03-16 12:14:54.562074862 +0100
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.3.0)
++cmake_minimum_required(VERSION 3.5.0)
+ 
+ set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_DEBUG} ${CMAKE_C_FLAGS_RELEASE}")
+ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_RELEASE}")
 @@ -19,8 +19,8 @@
  set(CPACK_PACKAGE_VENDOR "Zuse Institute Berlin")
  include(CPack)
-
+ 
 -option(ZLIB "Use ZLIB" ON)
 -option(GMP "Use GMP" ON)
 +option(ZLIB "Use ZLIB" OFF)
@@ -14,7 +20,7 @@
 @@ -49,10 +49,6 @@
  # use C++11 standard
  set(CMAKE_CXX_STANDARD 11)
-
+ 
 -# set function visibility default to hidden
 -set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 -set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
@@ -23,7 +29,7 @@
  file(WRITE ${CMAKE_BINARY_DIR}/soplex_update_githash.cmake "
  find_program(GIT git)
 --- soplex-4.0.2/src/CMakeLists.txt	2019-06-28 15:48:00.000000000 +0200
-+++ soplex-4.0.2/src/CMakeLists.txt	2020-12-10 16:21:43.523863588 +0100
++++ soplex-4.0.2/src/CMakeLists.txt	2025-03-16 19:08:48.595205956 +0100
 @@ -1,5 +1,3 @@
 -include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 -
