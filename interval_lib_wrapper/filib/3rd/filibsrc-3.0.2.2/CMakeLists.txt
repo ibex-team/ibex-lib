@@ -61,14 +61,17 @@ file (GLOB_RECURSE SRCS *.cpp)
 file (GLOB_RECURSE HEADERS *.icc *.hpp)
 list (APPEND HEADERS "${CMAKE_CURRENT_BINARY_DIR}/${RC_CONFIG}")
 
-# Filib library is called prim
-add_library (prim ${SRCS} ${HEADERS})
-set_target_properties (prim PROPERTIES VERSION 0.0.0 SOVERSION 0)
-
-
 if (WIN32 AND BUILD_SHARED_LIBS)
-  set_target_properties(prim PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+  # Filib library is called prim
+  add_library (prim STATIC ${SRCS} ${HEADERS})
+  set_target_properties(prim PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  set_target_properties(prim PROPERTIES LINK_FLAGS "/DEF:prim.def")
+else()
+  # Filib library is called prim
+  add_library (prim ${SRCS} ${HEADERS})
 endif()
+
+set_target_properties (prim PROPERTIES VERSION 0.0.0 SOVERSION 0)
 
 # Need source and binary dir (for rounding_control_config.hpp) in include dirs
 set (incdirs "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
