@@ -10,30 +10,8 @@ target_link_libraries (ibex PUBLIC ${INTERVAL_LIB_TARGET} ${LP_LIB_TARGET})
 if (WIN32)
 
   if (BUILD_SHARED_LIBS)
-    # --------------------------------------------------------------------------------
-    # directories where the archives files (.lib) are stored
-    #get_target_property(INTERVAL_LIB_ARCHIVE_DIR ${INTERVAL_LIB_TARGET} ARCHIVE_OUTPUT_DIRECTORY)
-    #get_target_property(LP_LIB_ARCHIVE_DIR ${LP_LIB_TARGET} ARCHIVE_OUTPUT_DIRECTORY)
-  
-    #if (INTERVAL_LIB_ARCHIVE_DIR)
-    #  target_link_directories(ibex PUBLIC "${INTERVAL_LIB_ARCHIVE_DIR}")
-    #else()
-    #  message(FATAL_ERROR "Could not retreive ARCHIVE_OUTPUT_DIRECTORY for target ${INTERVAL_LIB_TARGET}")
-    #endif()
-    
-    # directories where the archive files (.lib) are stored
-    target_link_directories(ibex PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/bin>")
-
-    #if (LP_LIB_ARCHIVE_DIR)
-    #  target_link_directories(ibex PUBLIC "${LP_LIB_ARCHIVE_DIR}")
-    #else()
-    #  message(FATAL_ERROR "Could not retreive ARCHIVE_OUTPUT_DIRECTORY for target ${LP_LIB_TARGET}")
-    #endif()
-
-    ## Note: we could use TARGET_LINKER_FILE_DIR instead:
-    #    target_link_directories(ibex PUBLIC "$<TARGET_LINKER_FILE_DIR:${INTERVAL_LIB_TARGET}>" "$<TARGET_LINKER_FILE_DIR:${LP_LIB_TARGET}>")
-    ## but this fails on Appveyor
-    # --------------------------------------------------------------------------------
+    target_compile_definitions(ibex PRIVATE _IBEX_BUILD_DLL_)   
+    set_target_properties(ibex PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)    
   endif()
   
   # We (may) need this for strdup under Windows (see issue #287)
