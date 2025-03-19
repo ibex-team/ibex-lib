@@ -19,6 +19,8 @@
 #include <stdlib.h>
 #include <cstdio>
 
+constexpr double TestCov::solver_time;
+	
 using namespace std;
 
 uint32_t TestCov::sol[nsol]             = { 1, 5, 8 };

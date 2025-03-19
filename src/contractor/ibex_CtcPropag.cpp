@@ -17,6 +17,8 @@ using namespace std;
 
 namespace ibex {
 
+constexpr double CtcPropag::default_ratio;
+
 CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  Ctc(cl), list(cl), ratio(ratio), incremental(incremental),
 		  accumulate(false), g(cl.size(), nb_var), agenda(cl.size()),

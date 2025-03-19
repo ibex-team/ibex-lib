@@ -18,6 +18,16 @@ using namespace std;
 
 namespace ibex {
 
+constexpr unsigned int Cov::FORMAT_VERSION;
+
+constexpr unsigned int Cov::subformat_level;
+
+constexpr unsigned int Cov::subformat_number;
+
+constexpr size_t Cov::SIGNATURE_LENGTH;
+
+constexpr const char* Cov::SIGNATURE;
+
 const string Cov::separator = "+-------------------+-----------------------------------------------------------\n";
 const string Cov::space     = "|                   |";
 

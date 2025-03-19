@@ -32,6 +32,8 @@ using namespace std;
 
 namespace ibex {
 
+constexpr int ExprNode::default_simpl_level;
+
 namespace {
 
 class ExprTypeMap : public Map<size_t,ExprNode::ExprTypeId,false> {

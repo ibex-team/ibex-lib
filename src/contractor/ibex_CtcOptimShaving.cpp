@@ -13,6 +13,8 @@
 
 namespace ibex {
 
+constexpr int CtcOptimShaving::LimitCIDDichotomy;
+	
 CtcOptimShaving::CtcOptimShaving(Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
 			Ctc3BCid (ctc,s3b,scid,vhandled,var_min_width) {
 }

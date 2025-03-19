@@ -13,6 +13,8 @@
 
 namespace ibex {
 
+constexpr double HC4Revise::RATIO;
+
 HC4Revise::HC4Revise(Eval& e) : f(e.f), eval(e), d(e.d) {
 
 }

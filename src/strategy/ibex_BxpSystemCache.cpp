@@ -17,6 +17,8 @@ using namespace std;
 
 namespace ibex {
 
+constexpr double BxpSystemCache::default_update_ratio;
+	
 Map<long,long,false>& BxpSystemCache::ids() {
 	static Map<long,long,false> _ids;
 	return _ids;

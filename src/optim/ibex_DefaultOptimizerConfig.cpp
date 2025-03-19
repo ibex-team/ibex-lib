@@ -31,6 +31,12 @@ using namespace std;
 
 namespace ibex {
 
+constexpr double DefaultOptimizerConfig::default_random_seed;
+constexpr bool DefaultOptimizerConfig::default_rigor;
+constexpr bool DefaultOptimizerConfig::default_inHC4;
+constexpr double DefaultOptimizerConfig::default_relax_ratio;
+constexpr double DefaultOptimizerConfig::default_bisect_ratio;
+
 namespace {
 
 enum { 	NORMALIZED_SYSTEM_TAG,

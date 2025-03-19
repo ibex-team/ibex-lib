@@ -14,6 +14,8 @@ using namespace std;
 
 namespace ibex {
 
+constexpr unsigned int CellBeamSearch::default_beamsize;
+
 CellBeamSearch::CellBeamSearch(CellHeap& currentbuffer, CellHeap& futurebuffer, const ExtendedSystem & sys, unsigned int beamsize) : CellHeap (sys), beamsize(beamsize), currentbuffer(currentbuffer), futurebuffer (futurebuffer) {
 
 }

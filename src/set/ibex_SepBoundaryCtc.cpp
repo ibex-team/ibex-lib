@@ -12,6 +12,8 @@
 
 namespace ibex {
 
+constexpr int SepBoundaryCtc::NB_SAMPLES;
+
 SepBoundaryCtc::SepBoundaryCtc(Ctc& _ctc_boundary, Pdc& _is_inside) : Sep(_is_inside.nb_var), ctc_boundary(_ctc_boundary), is_inside(_is_inside) {
 
 }

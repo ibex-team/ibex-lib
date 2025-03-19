@@ -12,6 +12,8 @@
 
 namespace ibex {
 
+constexpr int LoupFinderProbing::default_sample_size;
+
 LoupFinderProbing::LoupFinderProbing(const System& sys, int sample_size) : sys(sys), sample_size(sample_size)/*, loup_point(sys.nb_var), loup(POS_INFINITY) */{
 
 }
