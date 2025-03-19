@@ -19,6 +19,12 @@ using namespace std;
 
 namespace ibex {
 
+constexpr unsigned int CovIUList::FORMAT_VERSION;
+
+constexpr unsigned int CovIUList::subformat_level;
+
+constexpr unsigned int CovIUList::subformat_number;
+
 CovIUList::CovIUList(size_t n) : CovList(n), data(new Data()), own_data(true) {
 
 }

@@ -17,6 +17,12 @@ using namespace std;
 
 namespace ibex {
 
+constexpr unsigned int CovList::FORMAT_VERSION;
+
+constexpr unsigned int CovList::subformat_level;
+
+constexpr unsigned int CovList::subformat_number;
+
 CovList::CovList(size_t n) : Cov(n), data(new Data()), own_data(true) {
 
 }

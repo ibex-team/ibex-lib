@@ -14,6 +14,12 @@
 using namespace std;
 namespace ibex {
 
+constexpr int Ctc3BCid::default_s3b;
+constexpr int Ctc3BCid::default_scid;
+constexpr double Ctc3BCid::default_var_min_width;
+
+constexpr int LimitCIDDichotomy = 16;
+
 Ctc3BCid::Ctc3BCid(const BitSet& cid_vars, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
 									Ctc(ctc.nb_var), cid_vars(cid_vars), ctc(ctc), s3b(s3b), scid(scid),
 									vhandled(vhandled<=0? cid_vars.size():vhandled),

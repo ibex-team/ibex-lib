@@ -29,7 +29,11 @@ using namespace std;
 
 namespace ibex {
 
+constexpr double DefaultSolver::default_eps_x_min;
+
 double DefaultSolver::default_eps_x_max = POS_INFINITY;
+
+constexpr double DefaultSolver::default_random_seed;
 
 #define SQUARE_EQ_SYSTEM_TAG 1
 

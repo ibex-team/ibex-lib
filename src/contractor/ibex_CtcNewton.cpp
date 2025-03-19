@@ -13,6 +13,8 @@
 
 namespace ibex {
 
+constexpr double CtcNewton::default_ceil;
+	
 CtcNewton::CtcNewton(const Fnc& f, double ceil, double prec, double ratio) :
 		Ctc(f.nb_var()), f(f), vars(NULL), ceil(ceil), prec(prec), gauss_seidel_ratio(ratio) {
 

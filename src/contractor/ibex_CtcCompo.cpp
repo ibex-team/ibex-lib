@@ -12,6 +12,8 @@
 
 namespace ibex {
 
+constexpr double CtcCompo::default_ratio;
+
 void CtcCompo::init_impacts() {
 
 //	impacts = new BoolMask[list.size()];

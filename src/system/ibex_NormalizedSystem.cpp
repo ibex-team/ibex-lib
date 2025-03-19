@@ -16,6 +16,8 @@ using namespace std;
 
 namespace ibex {
 
+constexpr double NormalizedSystem::default_eps_h;
+	
 namespace {
 
 void set_lb_ub(const Domain& x, Domain& l, Domain& u, double eps_h) {

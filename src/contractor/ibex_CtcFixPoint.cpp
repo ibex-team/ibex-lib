@@ -12,6 +12,8 @@
 
 namespace ibex {
 
+constexpr double CtcFixPoint::default_ratio;
+	
 CtcFixPoint::CtcFixPoint(Ctc& ctc, double ratio) : Ctc(ctc.nb_var), ctc(ctc), ratio(ratio) {
 
 }

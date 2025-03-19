@@ -17,6 +17,12 @@ using namespace std;
 
 namespace ibex {
 
+constexpr unsigned int CovOptimData::FORMAT_VERSION;
+
+constexpr unsigned int CovOptimData::subformat_level;
+
+constexpr unsigned int CovOptimData::subformat_number;
+
 CovOptimData::CovOptimData(size_t n, bool is_extended_space) : CovList(n), data(new Data()), own_data(true) {
 	data->_optim_is_extended_space = is_extended_space;
 	data->_optim_optimizer_status = (unsigned int) Optimizer::SUCCESS; /* ? */

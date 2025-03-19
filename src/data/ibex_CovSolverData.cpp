@@ -18,6 +18,12 @@ using namespace std;
 
 namespace ibex {
 
+constexpr unsigned int CovSolverData::FORMAT_VERSION;
+
+constexpr unsigned int CovSolverData::subformat_level;
+
+constexpr unsigned int CovSolverData::subformat_number;
+
 CovSolverData::CovSolverData(size_t n, size_t m, size_t nb_ineq, BoundaryType boundary_type, const vector<string>& var_names) :
 		CovManifold(n, m, nb_ineq, boundary_type), data(new Data()), own_data(true) {
 

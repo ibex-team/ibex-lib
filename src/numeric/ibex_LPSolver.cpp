@@ -11,6 +11,12 @@
 
 namespace ibex {
 
+constexpr double LPSolver::default_tolerance;
+
+constexpr double LPSolver::default_timeout;
+
+constexpr int LPSolver::default_max_iter;
+
 /** \brief Stream out \a x. */
 std::ostream& operator<<(std::ostream& os, const LPSolver::Status x){
 
