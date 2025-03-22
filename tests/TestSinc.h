@@ -12,8 +12,8 @@
 #ifndef __TEST_SINC_H__
 #define __TEST_SINC_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -22,13 +22,15 @@ class TestSinc : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestSinc);
-	CPPUNIT_TEST(eval1);
-	CPPUNIT_TEST(simplify);
-	CPPUNIT_TEST(callbacks);
-	CPPUNIT_TEST(gradient);
-	CPPUNIT_TEST(solve);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		eval1();
+		simplify();
+		callbacks();
+		gradient();
+		solve();
+		tearDown();
+	}
 
 	void eval1();
 	void simplify();
@@ -37,7 +39,7 @@ public:
 	void solve();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestSinc);
+
 
 } // namespace ibex
 

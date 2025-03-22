@@ -12,8 +12,8 @@
 #ifndef __TEST_EXPR_LINEARITY_H__
 #define __TEST_EXPR_LINEARITY_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 
 #include "utils.h"
 
@@ -23,19 +23,21 @@ class TestExprLinearity : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestExprLinearity);
-	CPPUNIT_TEST(test01);
-	CPPUNIT_TEST(test02);
-	CPPUNIT_TEST(test03);
-	CPPUNIT_TEST(test04);
-	CPPUNIT_TEST(test05);
-	CPPUNIT_TEST(test06);
-	CPPUNIT_TEST(test07);
-	CPPUNIT_TEST(test08);
-	CPPUNIT_TEST(test09);
-	CPPUNIT_TEST(test10);
-	CPPUNIT_TEST(test11);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		test01();
+		test02();
+		test03();
+		test04();
+		test05();
+		test06();
+		test07();
+		test08();
+		test09();
+		test10();
+		test11();
+		tearDown();
+	}
 
 	void test01();
 	void test02();
@@ -50,7 +52,7 @@ public:
 	void test11();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestExprLinearity);
+
 
 
 } // end namespace

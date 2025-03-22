@@ -13,8 +13,8 @@
 #ifndef __TEST_BITSET_H__
 #define __TEST_BITSET_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 using namespace ibex;
@@ -22,26 +22,28 @@ using namespace ibex;
 class TestBitSet : public CppUnit::TestFixture {
 public:
 
-	CPPUNIT_TEST_SUITE(TestBitSet);
-	CPPUNIT_TEST(initialise);
-	CPPUNIT_TEST(contains01);
-	CPPUNIT_TEST(add01);
-	CPPUNIT_TEST(add02);
-	CPPUNIT_TEST(size01);
-	CPPUNIT_TEST(size02);
-	CPPUNIT_TEST(resize);
-	CPPUNIT_TEST(union01);
-	CPPUNIT_TEST(union02);
-	CPPUNIT_TEST(union03); // check union resizes if necessary
-	CPPUNIT_TEST(next);
-	CPPUNIT_TEST(clear);
-	CPPUNIT_TEST(remove);
-	CPPUNIT_TEST(fill01);
-	CPPUNIT_TEST(fill02);
-	CPPUNIT_TEST(all_bits);
-	CPPUNIT_TEST(set_minus_with01);
-	CPPUNIT_TEST(set_minus_with02);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		initialise();
+		contains01();
+		add01();
+		add02();
+		size01();
+		size02();
+		resize();
+		union01();
+		union02();
+		union03(); // check union resizes if necessary
+		next();
+		clear();
+		remove();
+		fill01();
+		fill02();
+		all_bits();
+		set_minus_with01();
+		set_minus_with02();
+		tearDown();
+	}
 	
 private:
 	void initialise();
@@ -65,7 +67,7 @@ private:
 	void set_minus_with02();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestBitSet);
+
 
 
 #endif // __TEST_BITSET__

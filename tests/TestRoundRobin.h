@@ -10,8 +10,8 @@
 #ifndef __TEST_ROUND_ROBIN_H__
 #define __TEST_ROUND_ROBIN_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_RoundRobin.h"
 #include "utils.h"
 
@@ -21,17 +21,19 @@ class TestRoundRobin : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestRoundRobin);
-	CPPUNIT_TEST(test01);
-	CPPUNIT_TEST(test02);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		test01();
+		test02();
+		tearDown();
+	}
 
 	void test01();
 	void test02();
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestRoundRobin);
+
 
 } // namespace ibex
 

@@ -16,8 +16,8 @@
   #define SRCDIR_TESTS "."
 #endif
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -26,24 +26,26 @@ class TestSystem : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestSystem);
-	CPPUNIT_TEST(empty);
-	CPPUNIT_TEST(factory01);
-	CPPUNIT_TEST(factory02);
-	CPPUNIT_TEST(copy01);
-	CPPUNIT_TEST(copy02);
-	CPPUNIT_TEST(ineq_only01);
-	CPPUNIT_TEST(eq_only01);
-	CPPUNIT_TEST(normalize01);
-	CPPUNIT_TEST(normalize02);
-	CPPUNIT_TEST(extend01);
-	CPPUNIT_TEST(extend02);
-	CPPUNIT_TEST(merge01);
-	CPPUNIT_TEST(merge02);
-	CPPUNIT_TEST(merge03);
-	CPPUNIT_TEST(merge04);
-	CPPUNIT_TEST(mutable_cst);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		empty();
+		factory01();
+		factory02();
+		copy01();
+		copy02();
+		ineq_only01();
+		eq_only01();
+		normalize01();
+		normalize02();
+		extend01();
+		extend02();
+		merge01();
+		merge02();
+		merge03();
+		merge04();
+		mutable_cst();
+		tearDown();
+	}
 
 	void empty();
 	void factory01();
@@ -64,7 +66,7 @@ public:
 	void mutable_cst();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestSystem);
+
 
 
 } // end namespace

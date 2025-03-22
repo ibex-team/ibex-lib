@@ -12,8 +12,8 @@
 #ifndef __TEST_BOOL_INTERVAL_H__
 #define __TEST_BOOL_INTERVAL_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_BoolInterval.h"
 #include "utils.h"
 
@@ -23,19 +23,21 @@ class TestBoolInterval : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestBoolInterval);
+	void testMe() {
+		setUp();
 	
-		CPPUNIT_TEST(test_constructor1);
-		CPPUNIT_TEST(test_constructor2);
-		CPPUNIT_TEST(test_constructor3);
-		CPPUNIT_TEST(test_assignement);
-		CPPUNIT_TEST(test_inter1);
-		CPPUNIT_TEST(test_inter2);
-		CPPUNIT_TEST(test_union1);
-		CPPUNIT_TEST(test_union2);
-		CPPUNIT_TEST(test_and);
-		CPPUNIT_TEST(test_or);	
-	CPPUNIT_TEST_SUITE_END();
+			test_constructor1();
+			test_constructor2();
+			test_constructor3();
+			test_assignement();
+			test_inter1();
+			test_inter2();
+			test_union1();
+			test_union2();
+			test_and();
+			test_or();	
+		tearDown();
+	}
 
 	void test_constructor1();
 	void test_constructor2();
@@ -52,7 +54,7 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestBoolInterval);
+
 
 
 } // namespace ibex

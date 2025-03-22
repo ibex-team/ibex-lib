@@ -12,8 +12,8 @@
 #ifndef __TEST_BXP_SYSTEM_CACHE_H__
 #define __TEST_BXP_SYSTEM_CACHE_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 
 #include "utils.h"
 
@@ -23,16 +23,18 @@ class TestBxpSystemCache : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestBxpSystemCache);
-	CPPUNIT_TEST(goal_eval01);
-	CPPUNIT_TEST(goal_gradient01);
-	CPPUNIT_TEST(ctrs_eval);
-	CPPUNIT_TEST(ctrs_jacobian);
-	CPPUNIT_TEST(active_ctrs);
-	CPPUNIT_TEST(is_inner);
-	CPPUNIT_TEST(active_ctrs_eval);
-	CPPUNIT_TEST(active_ctrs_jacobian);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		goal_eval01();
+		goal_gradient01();
+		ctrs_eval();
+		ctrs_jacobian();
+		active_ctrs();
+		is_inner();
+		active_ctrs_eval();
+		active_ctrs_jacobian();
+		tearDown();
+	}
 
 	void goal_eval01();
 	void goal_gradient01();
@@ -45,7 +47,7 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestBxpSystemCache);
+
 
 
 } // end namespace

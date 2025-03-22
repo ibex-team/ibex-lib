@@ -12,8 +12,8 @@
 #ifndef __TEST_GRADIENT_H__
 #define __TEST_GRADIENT_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 #include "ibex_Expr.h"
 
@@ -23,29 +23,31 @@ class TestGradient : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestGradient);
+	void testMe() {
+		setUp();
 
-	CPPUNIT_TEST(deco01);
-	CPPUNIT_TEST(deco02);
+		deco01();
+		deco02();
 
-	CPPUNIT_TEST(add01);
-	CPPUNIT_TEST(add02);
-	CPPUNIT_TEST(add03);
-	CPPUNIT_TEST(add04);
-	//CPPUNIT_TEST(add05);
-	CPPUNIT_TEST(dist);
-	CPPUNIT_TEST(jac01);
-	CPPUNIT_TEST(jac02);
-	CPPUNIT_TEST(jac03);
-	CPPUNIT_TEST(hansen01);
-	CPPUNIT_TEST(mulVV);
-	CPPUNIT_TEST(transpose01);
-	CPPUNIT_TEST(mulMV01);
-	CPPUNIT_TEST(mulVM01);
-	CPPUNIT_TEST(mulVM02);
-	CPPUNIT_TEST(jacobian_components01);
-	CPPUNIT_TEST(jacobian_components02);
-	CPPUNIT_TEST_SUITE_END();
+		add01();
+		add02();
+		add03();
+		add04();
+	//	add05();
+		dist();
+		jac01();
+		jac02();
+		jac03();
+		hansen01();
+		mulVV();
+		transpose01();
+		mulMV01();
+		mulVM01();
+		mulVM02();
+		jacobian_components01();
+		jacobian_components02();
+		tearDown();
+	}
 
 	void deco01();
 	void deco02();
@@ -74,7 +76,7 @@ private:
 	void check_deco(const ExprNode& e);
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestGradient);
+
 
 
 } // end namespace

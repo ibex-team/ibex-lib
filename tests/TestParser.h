@@ -17,8 +17,8 @@
   #define SRCDIR_TESTS "."
 #endif
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -27,36 +27,38 @@ class TestParser : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestParser);
+	void testMe() {
+		setUp();
 
-	CPPUNIT_TEST(var01);
+		var01();
 
-	CPPUNIT_TEST(const_var_idx);
+		const_var_idx();
 
-	CPPUNIT_TEST(ponts);
-	CPPUNIT_TEST(choco01);
-	CPPUNIT_TEST(func01);
-	CPPUNIT_TEST(func02);
-	CPPUNIT_TEST(func03);
-	CPPUNIT_TEST(loop01);
-	CPPUNIT_TEST(const08);
-	CPPUNIT_TEST(issue245_1);
-	CPPUNIT_TEST(issue245_2);
-	CPPUNIT_TEST(issue245_3);
-	CPPUNIT_TEST(nary_max);
-	CPPUNIT_TEST(sum01);
-	CPPUNIT_TEST(sum02);
-	CPPUNIT_TEST(sum03);
-	CPPUNIT_TEST(sum04);
-	CPPUNIT_TEST(temp_in_loop);
-	CPPUNIT_TEST(diff_lock);
+		ponts();
+		choco01();
+		func01();
+		func02();
+		func03();
+		loop01();
+		const08();
+		issue245_1();
+		issue245_2();
+		issue245_3();
+		nary_max();
+		sum01();
+		sum02();
+		sum03();
+		sum04();
+		temp_in_loop();
+		diff_lock();
 	// requires DAGification:
-	//CPPUNIT_TEST(issue365);
-	CPPUNIT_TEST(mutable_cst_1);
-	CPPUNIT_TEST(mutable_cst_2);
+	//	issue365();
+		mutable_cst_1();
+		mutable_cst_2();
 
-	//		CPPUNIT_TEST(error01);
-	CPPUNIT_TEST_SUITE_END();
+	//			error01();
+		tearDown();
+	}
 
 	void var01();
 
@@ -90,7 +92,7 @@ public:
 	void issue474();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestParser);
+
 
 
 } // end namespace

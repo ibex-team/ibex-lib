@@ -11,6 +11,7 @@
 #include "TestFncKuhnTucker.h"
 #include "ibex_FncKuhnTucker.h"
 #include "ibex_SystemFactory.h"
+#include <fstream>
 
 using namespace ibex;
 
@@ -315,11 +316,11 @@ void TestFncKuhnTucker::two_vars_1_eq_1_ineq_2bounds() {
 		J1=((Fnc&) fkt).jacobian(xlambda,i);
 		for (int j=0; j<n+m; j++) {
 			if (j==i)
-				CPPUNIT_ASSERT(J1.col(j)==J2.col(j));
+				CPPUNIT_ASSERT(J1.col(j)==J2.col(j))
 			else
 				// check that other columns are not
 				// uselessly computed:
-				CPPUNIT_ASSERT(J1.col(j)==IntervalVector(n+m));
+				CPPUNIT_ASSERT(J1.col(j)==IntervalVector(n+m))
 			}
 	}
 	// test selecting specific rows

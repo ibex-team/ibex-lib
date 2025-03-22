@@ -12,8 +12,8 @@
 #ifndef __TEST_CTC_DOUBLEHEAP_H__
 #define __TEST_CTC_DOUBLEHEAP_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_DoubleHeap.h"
 #include "utils.h"
 
@@ -24,13 +24,15 @@ class TestDoubleHeap : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestDoubleHeap);
-	CPPUNIT_TEST(test01);
-	CPPUNIT_TEST(test02);
-	CPPUNIT_TEST(test03);
-	CPPUNIT_TEST(test04);
-	CPPUNIT_TEST(test05);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		test01();
+		test02();
+		test03();
+		test04();
+		test05();
+		tearDown();
+	}
 
 	void test01();
 	void test02();
@@ -39,7 +41,7 @@ public:
 	void test05();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestDoubleHeap);
+
 
 
 } // namespace ibex

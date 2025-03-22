@@ -12,8 +12,8 @@
 #ifndef __TEST_EXPR_2_DAG_H__
 #define __TEST_EXPR_2_DAG_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -22,17 +22,19 @@ class TestExpr2DAG : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestExpr2DAG);
+	void testMe() {
+		setUp();
 	
-		CPPUNIT_TEST(test01);
-		CPPUNIT_TEST(test02);
-	CPPUNIT_TEST_SUITE_END();
+			test01();
+			test02();
+		tearDown();
+	}
 
 	void test01();
 	void test02();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestExpr2DAG);
+
 
 
 

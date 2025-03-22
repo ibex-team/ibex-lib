@@ -11,8 +11,8 @@
 #ifndef __TEST_SEPARATOR_H__
 #define __TEST_SEPARATOR_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_SepFwdBwd.h"
 #include "ibex_SepCtcPair.h"
 #include "ibex_SepInter.h"
@@ -30,16 +30,18 @@ class TestSeparator : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestSeparator);
+	void testMe() {
+		setUp();
 
-	CPPUNIT_TEST(SepFwdBwd_LT_LEQ);
-	CPPUNIT_TEST(SepFwdBwd_GT_GEQ);
-	CPPUNIT_TEST(test_SepCtcPair);
-	CPPUNIT_TEST(test_SepUnionInter);
-	CPPUNIT_TEST(test_SepNot);
-	CPPUNIT_TEST(test_SepQInter);
-	CPPUNIT_TEST(test_SepInverse);
-	CPPUNIT_TEST_SUITE_END();
+		SepFwdBwd_LT_LEQ();
+		SepFwdBwd_GT_GEQ();
+		test_SepCtcPair();
+		test_SepUnionInter();
+		test_SepNot();
+		test_SepQInter();
+		test_SepInverse();
+		tearDown();
+	}
 
 	void SepFwdBwd_LT_LEQ();
 	void SepFwdBwd_GT_GEQ();
@@ -51,7 +53,7 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestSeparator);
+
 
 
 } // end namespace ibex

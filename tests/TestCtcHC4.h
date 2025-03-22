@@ -11,8 +11,8 @@
 #ifndef __TEST_CTC_HC4_H__
 #define __TEST_CTC_HC4_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -20,15 +20,17 @@ namespace ibex {
 class TestCtcHC4 : public CppUnit::TestFixture {
 public:
 
-	CPPUNIT_TEST_SUITE(TestCtcHC4);
+	void testMe() {
+		setUp();
 	
-		CPPUNIT_TEST(ponts30);
-	CPPUNIT_TEST_SUITE_END();
+			ponts30();
+		tearDown();
+	}
 
 	void ponts30();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcHC4);
+
 
 
 } // end namespace ibex

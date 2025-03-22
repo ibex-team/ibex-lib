@@ -16,8 +16,8 @@
   #define SRCDIR_TESTS "."
 #endif
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Solver.h"
 #include "utils.h"
 
@@ -27,13 +27,15 @@ class TestSolver : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestSolver);
-	CPPUNIT_TEST(empty);
-	CPPUNIT_TEST(circle1);
-	CPPUNIT_TEST(circle2);
-	CPPUNIT_TEST(circle3);
-	CPPUNIT_TEST(circle4);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		empty();
+		circle1();
+		circle2();
+		circle3();
+		circle4();
+		tearDown();
+	}
 
 	void empty();
 	void circle1();
@@ -42,7 +44,7 @@ public:
 	void circle4();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestSolver);
+
 
 } // namespace ibex
 

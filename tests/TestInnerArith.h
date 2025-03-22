@@ -12,8 +12,8 @@
 #ifndef __TEST_INNER_ARITH_H__
 #define __TEST_INNER_ARITH_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 #include "ibex_Interval.h"
@@ -24,127 +24,129 @@ class TestInnerArith : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestInnerArith);
+	void testMe() {
+		setUp();
 	
 
-		CPPUNIT_TEST(add_sub01);
-		CPPUNIT_TEST(add_sub01_2);
-		CPPUNIT_TEST(add_sub01_3);
-		CPPUNIT_TEST(add_sub02);
-		CPPUNIT_TEST(add_sub02_2);
-		CPPUNIT_TEST(add_sub02_3);
-		CPPUNIT_TEST(add_sub03);
-		CPPUNIT_TEST(add_sub03_2);
-		CPPUNIT_TEST(add_sub04);
-		CPPUNIT_TEST(add_sub04_2);
-		CPPUNIT_TEST(add_sub04_3);
+			add_sub01();
+			add_sub01_2();
+			add_sub01_3();
+			add_sub02();
+			add_sub02_2();
+			add_sub02_3();
+			add_sub03();
+			add_sub03_2();
+			add_sub04();
+			add_sub04_2();
+			add_sub04_3();
 
-		CPPUNIT_TEST(add_sub05_1);
-		CPPUNIT_TEST(add_sub05_2);
-		CPPUNIT_TEST(add_sub05_3);
-		CPPUNIT_TEST(add_sub05_4);
-		CPPUNIT_TEST(add_sub05_5);
-		CPPUNIT_TEST(add_sub05_6);
-		CPPUNIT_TEST(add_sub05_7);
-		CPPUNIT_TEST(add_sub05_8);
-		CPPUNIT_TEST(add_sub05_9);
-		CPPUNIT_TEST(add_sub05_10);
-		CPPUNIT_TEST(add_sub05_11);
+			add_sub05_1();
+			add_sub05_2();
+			add_sub05_3();
+			add_sub05_4();
+			add_sub05_5();
+			add_sub05_6();
+			add_sub05_7();
+			add_sub05_8();
+			add_sub05_9();
+			add_sub05_10();
+			add_sub05_11();
 
-		CPPUNIT_TEST(add_sub06_1);
-		CPPUNIT_TEST(add_sub06_2);
+			add_sub06_1();
+			add_sub06_2();
 
-		CPPUNIT_TEST(add_sub07);
+			add_sub07();
 
-		CPPUNIT_TEST(mul_div_mono01);
-		CPPUNIT_TEST(mul_div_mono01_2);
-		CPPUNIT_TEST(mul_div_mono01_3);
-		CPPUNIT_TEST(mul_div_mono02);
-		CPPUNIT_TEST(mul_div_mono02_2);
-		CPPUNIT_TEST(mul_div_mono02_3);
-		CPPUNIT_TEST(mul_div_mono03);
-		CPPUNIT_TEST(mul_div_mono03_2);
-		CPPUNIT_TEST(mul_div_mono04);
-		CPPUNIT_TEST(mul_div_mono04_2);
-		CPPUNIT_TEST(mul_div_mono04_3);
+			mul_div_mono01();
+			mul_div_mono01_2();
+			mul_div_mono01_3();
+			mul_div_mono02();
+			mul_div_mono02_2();
+			mul_div_mono02_3();
+			mul_div_mono03();
+			mul_div_mono03_2();
+			mul_div_mono04();
+			mul_div_mono04_2();
+			mul_div_mono04_3();
 
-		CPPUNIT_TEST(mul_div_mono05_1);
-		CPPUNIT_TEST(mul_div_mono05_2);
-		CPPUNIT_TEST(mul_div_mono05_3);
-		CPPUNIT_TEST(mul_div_mono05_4);
-		CPPUNIT_TEST(mul_div_mono05_5);
-		CPPUNIT_TEST(mul_div_mono05_6);
-		CPPUNIT_TEST(mul_div_mono05_7);
-		CPPUNIT_TEST(mul_div_mono05_8);
-		CPPUNIT_TEST(mul_div_mono05_9);
-		CPPUNIT_TEST(mul_div_mono05_10);
-		CPPUNIT_TEST(mul_div_mono05_11);
-
-
-		CPPUNIT_TEST(mul_div_mono06_1);
-		CPPUNIT_TEST(mul_div_mono06_2);
-
-		CPPUNIT_TEST(mul_div_mono07);
-
-		CPPUNIT_TEST(mul08);
-		CPPUNIT_TEST(mul09);
-		CPPUNIT_TEST(mul10);
-		CPPUNIT_TEST(mul11);
-		CPPUNIT_TEST(mul12_1);
-		CPPUNIT_TEST(mul12_2);
-		CPPUNIT_TEST(mul12_3);
-		CPPUNIT_TEST(mul12_4);
-		CPPUNIT_TEST(mul13_1);
-		CPPUNIT_TEST(mul13_2);
-		CPPUNIT_TEST(mul13_3);
-		CPPUNIT_TEST(mul13_4);
-		CPPUNIT_TEST(mul14_1);
-		CPPUNIT_TEST(mul14_2);
-		CPPUNIT_TEST(mul14_3);
-
-		CPPUNIT_TEST(div08_1);
-		CPPUNIT_TEST(div08_2);
-		CPPUNIT_TEST(div09_1);
-		CPPUNIT_TEST(div09_2);
-
-		CPPUNIT_TEST(maxmin01);
-		CPPUNIT_TEST(maxmin02);
-		CPPUNIT_TEST(maxmin03);
-		CPPUNIT_TEST(maxmin04);
-		CPPUNIT_TEST(maxmin05);
-		CPPUNIT_TEST(maxmin06);
-		CPPUNIT_TEST(maxmin07);
-
-		CPPUNIT_TEST(abs01);
-		CPPUNIT_TEST(abs02);
-		CPPUNIT_TEST(abs03);
-		CPPUNIT_TEST(abs04);
-		CPPUNIT_TEST(abs05);
-
-		CPPUNIT_TEST(sqrt01);
-		CPPUNIT_TEST(sqrt02);
-		CPPUNIT_TEST(sqrt03);
-		CPPUNIT_TEST(sqrt04);
-		CPPUNIT_TEST(sqrt05);
-
-		CPPUNIT_TEST(pow01);
+			mul_div_mono05_1();
+			mul_div_mono05_2();
+			mul_div_mono05_3();
+			mul_div_mono05_4();
+			mul_div_mono05_5();
+			mul_div_mono05_6();
+			mul_div_mono05_7();
+			mul_div_mono05_8();
+			mul_div_mono05_9();
+			mul_div_mono05_10();
+			mul_div_mono05_11();
 
 
-		CPPUNIT_TEST(bugr894);
-		CPPUNIT_TEST(bugr899);
-		CPPUNIT_TEST(bugr902);
+			mul_div_mono06_1();
+			mul_div_mono06_2();
 
-		CPPUNIT_TEST(imul01);
-		CPPUNIT_TEST(imul02);
-		CPPUNIT_TEST(imul03);
-		CPPUNIT_TEST(imul04);
-		CPPUNIT_TEST(imul05);
-		CPPUNIT_TEST(imul06);
-		CPPUNIT_TEST(imul07);
-		CPPUNIT_TEST(imul08);
-		CPPUNIT_TEST(imul09);
-		CPPUNIT_TEST(imul10);
-	CPPUNIT_TEST_SUITE_END();
+			mul_div_mono07();
+
+			mul08();
+			mul09();
+			mul10();
+			mul11();
+			mul12_1();
+			mul12_2();
+			mul12_3();
+			mul12_4();
+			mul13_1();
+			mul13_2();
+			mul13_3();
+			mul13_4();
+			mul14_1();
+			mul14_2();
+			mul14_3();
+
+			div08_1();
+			div08_2();
+			div09_1();
+			div09_2();
+
+			maxmin01();
+			maxmin02();
+			maxmin03();
+			maxmin04();
+			maxmin05();
+			maxmin06();
+			maxmin07();
+
+			abs01();
+			abs02();
+			abs03();
+			abs04();
+			abs05();
+
+			sqrt01();
+			sqrt02();
+			sqrt03();
+			sqrt04();
+			sqrt05();
+
+			pow01();
+
+
+			bugr894();
+			bugr899();
+			bugr902();
+
+			imul01();
+			imul02();
+			imul03();
+			imul04();
+			imul05();
+			imul06();
+			imul07();
+			imul08();
+			imul09();
+			imul10();
+		tearDown();
+	}
 
 	// x+y<=z with contraction (no inflation)
 	void add_sub01();
@@ -357,7 +359,7 @@ private:
 	void check_imul(const Interval& x,  const Interval& y, const Interval& z);
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestInnerArith);
+
 
 
 } // namespace ibex

@@ -13,8 +13,8 @@
 #ifndef __TEST_FUNCTION_H__
 #define __TEST_FUNCTION_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -43,57 +43,59 @@ public:
 
 	void tearDown();
 
-	CPPUNIT_TEST_SUITE(TestFunction);
+	void testMe() {
+		setUp();
 
-	CPPUNIT_TEST(parser_symbol_01);
-	CPPUNIT_TEST(parser_symbol_02);
-	CPPUNIT_TEST(parser_symbol_vec_01);
-	CPPUNIT_TEST(parser_symbol_vec_02);
-	CPPUNIT_TEST(parser_symbol_mat_01);
-	CPPUNIT_TEST(parser_add_scalar);
-	CPPUNIT_TEST(parser_add_vector_01);
-	CPPUNIT_TEST(parser_add_vector_02);
-	CPPUNIT_TEST(parser_add_mat);
-	CPPUNIT_TEST(parser_mul_mat);
-	CPPUNIT_TEST(parser_row_vec);
-	CPPUNIT_TEST(parser_col_vec);
+		parser_symbol_01();
+		parser_symbol_02();
+		parser_symbol_vec_01();
+		parser_symbol_vec_02();
+		parser_symbol_mat_01();
+		parser_add_scalar();
+		parser_add_vector_01();
+		parser_add_vector_02();
+		parser_add_mat();
+		parser_mul_mat();
+		parser_row_vec();
+		parser_col_vec();
 
-	CPPUNIT_TEST(eval_symbol_01);
-	CPPUNIT_TEST(eval_symbol_02);
-	CPPUNIT_TEST(eval_symbol_vec_01);
-	CPPUNIT_TEST(eval_symbol_vec_02);
-	CPPUNIT_TEST(eval_symbol_mat_01);
-	CPPUNIT_TEST(eval_add_scalar);
-	CPPUNIT_TEST(eval_add_vector_01);
-	CPPUNIT_TEST(eval_add_vector_02);
-	CPPUNIT_TEST(eval_add_mat);
-	CPPUNIT_TEST(eval_mul_mat);
-	CPPUNIT_TEST(eval_row_vec);
-	CPPUNIT_TEST(eval_col_vec);
+		eval_symbol_01();
+		eval_symbol_02();
+		eval_symbol_vec_01();
+		eval_symbol_vec_02();
+		eval_symbol_mat_01();
+		eval_add_scalar();
+		eval_add_vector_01();
+		eval_add_vector_02();
+		eval_add_mat();
+		eval_mul_mat();
+		eval_row_vec();
+		eval_col_vec();
 
-	CPPUNIT_TEST(build01);
-	CPPUNIT_TEST(add_symbol);
-	CPPUNIT_TEST(copy);
-	CPPUNIT_TEST(generate_comp01);
-	CPPUNIT_TEST(generate_comp02);
-	CPPUNIT_TEST(generate_comp03);
+		build01();
+		add_symbol();
+		copy();
+		generate_comp01();
+		generate_comp02();
+		generate_comp03();
 
-	CPPUNIT_TEST(used);
-	CPPUNIT_TEST(used02);
-	CPPUNIT_TEST(numctr01);
-	CPPUNIT_TEST(apply01);
-	CPPUNIT_TEST(from_string01);
-	CPPUNIT_TEST(from_string02);
-	CPPUNIT_TEST(from_string03);
-	CPPUNIT_TEST(from_string04);
-	CPPUNIT_TEST(issue43);
-	CPPUNIT_TEST(issue43_bis);
-	CPPUNIT_TEST(minibex01);
-	CPPUNIT_TEST(minibex02);
-	CPPUNIT_TEST(minibex03);
-	CPPUNIT_TEST(def_domain01);
-	CPPUNIT_TEST(def_domain02);
-	CPPUNIT_TEST_SUITE_END();
+		used();
+		used02();
+		numctr01();
+		apply01();
+		from_string01();
+		from_string02();
+		from_string03();
+		from_string04();
+		issue43();
+		issue43_bis();
+		minibex01();
+		minibex02();
+		minibex03();
+		def_domain01();
+		def_domain02();
+		tearDown();
+	}
 
 	void parser_symbol_01();
 	void parser_symbol_02();
@@ -158,7 +160,7 @@ public:
 	void def_domain02();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestFunction);
+
 
 
 } // end namespace

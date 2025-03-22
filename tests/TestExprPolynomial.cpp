@@ -12,6 +12,7 @@
 
 #include "TestExprPolynomial.h"
 #include "ibex_ExprPolynomial.h"
+#include <sstream>
 
 using namespace std;
 

@@ -10,8 +10,8 @@
 #ifndef __TEST_SET_H__
 #define __TEST_SET_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -19,24 +19,26 @@ namespace ibex {
 class TestSet : public CppUnit::TestFixture {
 public:
 
-	CPPUNIT_TEST_SUITE(TestSet);
+	void testMe() {
+		setUp();
 	
-//		CPPUNIT_TEST(diff01);
-//		CPPUNIT_TEST(diff02);
-//		CPPUNIT_TEST(diff03);
-//		CPPUNIT_TEST(diff04);
-//		CPPUNIT_TEST(diff05);
-//		CPPUNIT_TEST(diff06);
-//		CPPUNIT_TEST(diff07);
-//		CPPUNIT_TEST(diff08);
-//		CPPUNIT_TEST(diff09);
-//		CPPUNIT_TEST(diff10);
-//		CPPUNIT_TEST(diff11);
-//		CPPUNIT_TEST(diff12);
-//		CPPUNIT_TEST(diff13);
-//		CPPUNIT_TEST(diff14);
-		CPPUNIT_TEST(diff15);
-	CPPUNIT_TEST_SUITE_END();
+//			diff01();
+//			diff02();
+//			diff03();
+//			diff04();
+//			diff05();
+//			diff06();
+//			diff07();
+//			diff08();
+//			diff09();
+//			diff10();
+//			diff11();
+//			diff12();
+//			diff13();
+//			diff14();
+			diff15();
+		tearDown();
+	}
 
 	void diff01();
 	void diff02();
@@ -56,7 +58,7 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestSet);
+
 
 
 } // end namespace ibex

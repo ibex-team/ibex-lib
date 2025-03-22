@@ -12,8 +12,8 @@
 #ifndef __TEST_SYMBOL_MAP_H__
 #define __TEST_SYMBOL_MAP_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_SymbolMap.h"
 #include "utils.h"
 
@@ -23,18 +23,20 @@ class TestSymbolMap : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestSymbolMap);
+	void testMe() {
+		setUp();
 	
 
-		CPPUNIT_TEST(test01);
-		CPPUNIT_TEST(test02);
-	CPPUNIT_TEST_SUITE_END();
+			test01();
+			test02();
+		tearDown();
+	}
 
 	void test01();
 	void test02();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestSymbolMap);
+
 
 
 } // namespace ibex

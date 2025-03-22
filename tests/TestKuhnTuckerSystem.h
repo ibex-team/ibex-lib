@@ -12,8 +12,8 @@
 #ifndef __TEST_FRITZ_JOHN_H__
 #define __TEST_FRITZ_JOHN_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -22,15 +22,17 @@ class TestKuhnTuckerSystem : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestKuhnTuckerSystem);
+	void testMe() {
+		setUp();
 	
-		CPPUNIT_TEST(test01);
-	CPPUNIT_TEST_SUITE_END();
+			test01();
+		tearDown();
+	}
 
 	void test01();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestKuhnTuckerSystem);
+
 
 
 } // end namespace

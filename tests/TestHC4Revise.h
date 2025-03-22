@@ -13,8 +13,8 @@
 #ifndef __TEST_HC4_REVISE_H__
 #define __TEST_HC4_REVISE_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -23,23 +23,25 @@ class TestHC4Revise : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestHC4Revise);
+	void testMe() {
+		setUp();
 	
-	CPPUNIT_TEST(id01);
-	CPPUNIT_TEST(add01);
-	CPPUNIT_TEST(add02);
-	CPPUNIT_TEST(add03);
-	CPPUNIT_TEST(add04);
-	CPPUNIT_TEST(mul01);
-	CPPUNIT_TEST(min01);
-	CPPUNIT_TEST(dist01);
-	CPPUNIT_TEST(dist02);
-	CPPUNIT_TEST(dist02);
-	CPPUNIT_TEST(vec01);
-	CPPUNIT_TEST(vec02);
-	CPPUNIT_TEST(vec03);
-	CPPUNIT_TEST(issue431);
-	CPPUNIT_TEST_SUITE_END();
+		id01();
+		add01();
+		add02();
+		add03();
+		add04();
+		mul01();
+		min01();
+		dist01();
+		dist02();
+		dist02();
+		vec01();
+		vec02();
+		vec03();
+		issue431();
+		tearDown();
+	}
 
 	void id01();
 	void add01();
@@ -63,7 +65,7 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestHC4Revise);
+
 
 
 } // end namespace

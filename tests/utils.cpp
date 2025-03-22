@@ -10,7 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "utils.h"
-#include <cppunit/TestAssert.h>
+//////////#include <cppunit/TestAssert.h>
 #include <math.h>
 #include <sstream>
 
@@ -154,9 +154,9 @@ void check_relatif(double y_actual, double y_expected, double err) {
 		CPPUNIT_ASSERT(y_actual!=POS_INFINITY);
 		CPPUNIT_ASSERT(y_actual!=NEG_INFINITY);
 		if (fabs(y_expected)<1)
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected,y_actual,err);
+			CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected,y_actual,err)
 		else
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected,y_actual,err*fabs(y_expected));
+			CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected,y_actual,err*fabs(y_expected))
 	}
 }
 
@@ -168,13 +168,13 @@ void check_relatif(const Interval& y_actual, const Interval& y_expected, double 
 	CPPUNIT_ASSERT(!std::isnan(y_actual.lb()));
 	CPPUNIT_ASSERT(!std::isnan(y_actual.ub()));
 	if (fabs(y_expected.lb())<1)
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.lb(),y_actual.lb(),err);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.lb(),y_actual.lb(),err)
 	else
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.lb(),y_actual.lb(),err*fabs(y_expected.lb()));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.lb(),y_actual.lb(),err*fabs(y_expected.lb()))
 	if (fabs(y_expected.ub())<1)
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.ub(),y_actual.ub(),err);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.ub(),y_actual.ub(),err)
 	else
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.ub(),y_actual.ub(),err*fabs(y_expected.ub()));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.ub(),y_actual.ub(),err*fabs(y_expected.ub()))
 }
 
 void check_relatif(const IntervalVector& y_actual, const IntervalVector& y_expected, double err) {
