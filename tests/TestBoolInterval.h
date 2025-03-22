@@ -9,8 +9,8 @@
  * Created     : Mar 2, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef __TEST_DOMAIN_H__
-#define __TEST_DOMAIN_H__
+#ifndef __TEST_BOOL_INTERVAL_H__
+#define __TEST_BOOL_INTERVAL_H__
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -56,4 +56,4 @@ CPPUNIT_TEST_SUITE_REGISTRATION(TestBoolInterval);
 
 
 } // namespace ibex
-#endif // __TEST_DOMAIN_H__
+#endif // __TEST_BOOL_INTERVAL_H__
