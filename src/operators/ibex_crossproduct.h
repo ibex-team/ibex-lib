@@ -14,7 +14,7 @@
 
 namespace ibex {
 
-extern const char CROSS_PRODUCT[];
+_IBEX_DLL_PORT_ extern const char CROSS_PRODUCT[];
 
 /**
  * \brief Cross product of two 3D vectors
