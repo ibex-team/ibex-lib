@@ -41,7 +41,7 @@ build_script:
   - set PATH=%PATH%;%IBEX_PATH%\bin;%IBEX_PATH%\lib
   - ibexsolve -v
   # FIXME: cppunit not found ---> can't build target check
-  #- cmake --build . --config Release --target check
+  - cmake --build . --config Release --target check
 
 artifacts:
 - path: build\ibex*.exe
