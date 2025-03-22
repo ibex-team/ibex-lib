@@ -18,6 +18,10 @@
 
 using namespace std;
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 void TestArith::check_add(const Interval& x, const Interval& z, const Interval& y_expected) {
 	Interval y_actual=x+z;
 	check(y_actual, y_expected);

@@ -339,7 +339,7 @@ void TestIntervalMatrix::minus01() {
 }
 
 void TestIntervalMatrix::minus02() {
-	CPPUNIT_ASSERT(-IntervalMatrix::empty(2,3).is_empty());
+	CPPUNIT_ASSERT((-IntervalMatrix::empty(2,3)).is_empty());
 }
 
 void TestIntervalMatrix::add01() {
