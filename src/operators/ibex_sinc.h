@@ -14,7 +14,7 @@
 
 namespace ibex {
 
-extern const char SINC[];
+_IBEX_DLL_PORT_ extern const char SINC[];
 
 /**
  * \brief Cardinal sine.

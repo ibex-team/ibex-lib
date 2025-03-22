@@ -19,7 +19,7 @@
 #include <vector>
 #include <cassert>
 
-extern int ibex_lineno;
+_IBEX_DLL_PORT_ extern int ibex_lineno;
 
 namespace ibex {
 

@@ -113,7 +113,7 @@ protected:
  * \brief Main parser structure
  * ================================================
  */
-extern P_Struct* pstruct;
+_IBEX_DLL_PORT_ extern P_Struct* pstruct;
 
 
 

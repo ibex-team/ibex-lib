@@ -19,12 +19,12 @@ namespace ibex {
 /**
  * \brief Default Newton precision
  */
-extern double default_newton_prec;
+_IBEX_DLL_PORT_ extern double default_newton_prec;
 
 /**
  * \brief Default Gauss Seidel ratio
  */
-extern double default_gauss_seidel_ratio;
+_IBEX_DLL_PORT_ extern double default_gauss_seidel_ratio;
 
 /** \ingroup numeric
  *

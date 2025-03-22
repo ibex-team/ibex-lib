@@ -15,7 +15,7 @@
 
 namespace ibex {
 
-extern const char ATANHCCC[];
+_IBEX_DLL_PORT_ extern const char ATANHCCC[];
 
 /**
  * \brief 3rd-order cardinal arctangent.

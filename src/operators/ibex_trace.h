@@ -15,7 +15,7 @@
 
 namespace ibex {
 
-extern const char TRACE[];
+_IBEX_DLL_PORT_ extern const char TRACE[];
 
 template<>
 class UnaryOperator<TRACE,IntervalMatrix,IntervalVector> {
