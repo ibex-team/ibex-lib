@@ -12,8 +12,8 @@
 #ifndef __TEST_LINEARSOLVER_H__
 #define __TEST_LINEARSOLVER_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 #include "ibex_LPSolver.h"
 
@@ -21,33 +21,35 @@ namespace ibex {
 
 class TestLinearSolver : public CppUnit::TestFixture {
 public:
-	CPPUNIT_TEST_SUITE(TestLinearSolver);
+	void testMe() {
+		setUp();
 
 
 #ifndef __IBEX_NO_LP_SOLVER__
-	CPPUNIT_TEST(test01);
-	CPPUNIT_TEST(kleemin3);
-	CPPUNIT_TEST(kleemin6);
-	CPPUNIT_TEST(kleemin8);
-	CPPUNIT_TEST(kleemin30);
-	CPPUNIT_TEST(reset);
-	CPPUNIT_TEST(afiro);
-	CPPUNIT_TEST(adlittle);
-	CPPUNIT_TEST(p25fv47);
-	CPPUNIT_TEST(nearly_parallel_constraints);
-	CPPUNIT_TEST(cost_parallel_to_constraint);
+		test01();
+		kleemin3();
+		kleemin6();
+		kleemin8();
+		kleemin30();
+		reset();
+		afiro();
+		adlittle();
+		p25fv47();
+		nearly_parallel_constraints();
+		cost_parallel_to_constraint();
  
-    CPPUNIT_TEST(test_easy_feasible);
-    CPPUNIT_TEST(test_easy_feasible_certified);
-    CPPUNIT_TEST(test_unbounded);
-    CPPUNIT_TEST(test_unbounded_certified);
-    CPPUNIT_TEST(test_infeasible);
-    CPPUNIT_TEST(test_infeasible_certified);
+    	test_easy_feasible();
+    	test_easy_feasible_certified();
+    	test_unbounded();
+    	test_unbounded_certified();
+    	test_infeasible();
+    	test_infeasible_certified();
     
-    CPPUNIT_TEST(test_model);
+    	test_model();
 #endif
 
-	CPPUNIT_TEST_SUITE_END();
+		tearDown();
+	}
 	LPSolver* create_kleemin(int n);
 	void kleemin(int n);
 
@@ -76,7 +78,7 @@ public:
     void test_model();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestLinearSolver);
+
 
 } // namespace ibex
 

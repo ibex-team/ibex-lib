@@ -12,8 +12,8 @@
 #ifndef __TEST_CELL_H__
 #define __TEST_CELL_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Bxp.h"
 #include "utils.h"
 
@@ -44,17 +44,19 @@ class TestCell : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestCell);
-	CPPUNIT_TEST(test01);
-	CPPUNIT_TEST(test02);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		test01();
+		test02();
+		tearDown();
+	}
 
 	void test01();
 	void test02();
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestCell);
+
 
 } // namespace ibex
 

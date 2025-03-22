@@ -12,8 +12,8 @@
 #ifndef __TEST_EXPR_SIMPLIFY_2_H__
 #define __TEST_EXPR_SIMPLIFY_2_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -22,37 +22,39 @@ class TestExprSimplify2 : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestExprSimplify2);
+	void testMe() {
+		setUp();
 	
-	CPPUNIT_TEST(add_zero);
-	CPPUNIT_TEST(sub_zero1);
-	CPPUNIT_TEST(sub_zero2);
-	CPPUNIT_TEST(mul_zero);
-	CPPUNIT_TEST(mul_one);
-	CPPUNIT_TEST(div_one);
-	CPPUNIT_TEST(index_var1);
-	CPPUNIT_TEST(index_var2);
-	CPPUNIT_TEST(index_var3);
-	CPPUNIT_TEST(index_add);
-	CPPUNIT_TEST(index_transpose);
-	CPPUNIT_TEST(poly_01);
-	CPPUNIT_TEST(poly_02);
-	CPPUNIT_TEST(poly_03);
-	CPPUNIT_TEST(poly_04);
-	CPPUNIT_TEST(poly_05);
-	CPPUNIT_TEST(poly_06);
-	CPPUNIT_TEST(poly_07);
-	CPPUNIT_TEST(poly_08);
-	CPPUNIT_TEST(poly_09);
-	CPPUNIT_TEST(poly_10);
-	//CPPUNIT_TEST(issue366);
-	CPPUNIT_TEST(issue425_01);
-	CPPUNIT_TEST(issue425_02);
-	CPPUNIT_TEST(issue425_03);
-	CPPUNIT_TEST(issue425_04);
-	CPPUNIT_TEST(issue425_05);
+		add_zero();
+		sub_zero1();
+		sub_zero2();
+		mul_zero();
+		mul_one();
+		div_one();
+		index_var1();
+		index_var2();
+		index_var3();
+		index_add();
+		index_transpose();
+		poly_01();
+		poly_02();
+		poly_03();
+		poly_04();
+		poly_05();
+		poly_06();
+		poly_07();
+		poly_08();
+		poly_09();
+		poly_10();
+	//	issue366();
+		issue425_01();
+		issue425_02();
+		issue425_03();
+		issue425_04();
+		issue425_05();
 
-	CPPUNIT_TEST_SUITE_END();
+		tearDown();
+	}
 
 	void add_zero();
 	void sub_zero1();
@@ -83,7 +85,7 @@ public:
 	void issue425_05();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestExprSimplify2);
+
 
 
 } // end namespace

@@ -1,0 +1,10 @@
+#/bin/sh
+
+git grep -l "#include <cppunit" | xargs sed -i"" -e"s/#include <cppunit/\/\/#include <cppunit/g"
+git grep -l CPPUNIT_TEST_SUITE_REGISTRATION | xargs sed -i"" -e"s/CPPUNIT_TEST_SUITE_REGISTRATION.*//g"
+git grep -l CPPUNIT_TEST_SUITE_END | xargs sed -i"" -e"s/CPPUNIT_TEST_SUITE_END.*/\ttearDown();\n\t}/g"
+git grep -l CPPUNIT_TEST_SUITE | xargs sed -i"" -e"s/CPPUNIT_TEST_SUITE.*/void testMe() {\n\t\tsetUp();/g"
+git grep -l CPPUNIT_TEST | xargs sed -i"" -e"s/CPPUNIT_TEST(\([^)]*\))/\t\1()/g"
+
+
+

@@ -13,8 +13,8 @@
 #ifndef __TEST_ARITH_H__
 #define __TEST_ARITH_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Interval.h"
 #include "utils.h"
 
@@ -23,393 +23,395 @@ using namespace ibex;
 class TestArith : public CppUnit::TestFixture {
 public:
 
-	CPPUNIT_TEST_SUITE(TestArith);
+	void testMe() {
+		setUp();
 	
-	CPPUNIT_TEST(tan_issue248);
+		tan_issue248();
 
-	CPPUNIT_TEST(float01);
-	CPPUNIT_TEST(float02);
-	CPPUNIT_TEST(float03);
-	CPPUNIT_TEST(float04);
-	CPPUNIT_TEST(float05);
-	CPPUNIT_TEST(float06);
-	CPPUNIT_TEST(float07);
-	CPPUNIT_TEST(float08);
-	CPPUNIT_TEST(float09);
-	/*CPPUNIT_TEST(float10); disabled temporarily due to bug between Gaol and elibc (used by Travis CI) */
-
-
-	CPPUNIT_TEST(minus01);
-	CPPUNIT_TEST(minus02);
-	CPPUNIT_TEST(minus03);
-	CPPUNIT_TEST(minus04);
-
-	CPPUNIT_TEST(add01);
-	CPPUNIT_TEST(add02);
-	CPPUNIT_TEST(add03);
-	CPPUNIT_TEST(add04);
-	CPPUNIT_TEST(add05);
-	CPPUNIT_TEST(add06);
-	CPPUNIT_TEST(add07);
-	CPPUNIT_TEST(add08);
-	CPPUNIT_TEST(add09);
-	CPPUNIT_TEST(add10);
-	CPPUNIT_TEST(add11);
-	CPPUNIT_TEST(add12);
-	CPPUNIT_TEST(add13);
-	CPPUNIT_TEST(add14);
-	CPPUNIT_TEST(add15);
-	CPPUNIT_TEST(add16);
-	CPPUNIT_TEST(add17);
-	CPPUNIT_TEST(add18);
-	CPPUNIT_TEST(add19);
-
-	CPPUNIT_TEST(mul01);
-	CPPUNIT_TEST(mul02);
-	CPPUNIT_TEST(mul03);
-	CPPUNIT_TEST(mul04);
-	CPPUNIT_TEST(mul05);
-	CPPUNIT_TEST(mul06);
-	CPPUNIT_TEST(mul07);
-	CPPUNIT_TEST(mul08);
-	CPPUNIT_TEST(mul09);
-	CPPUNIT_TEST(mul10);
-	CPPUNIT_TEST(mul11);
-	CPPUNIT_TEST(mul12);
-	CPPUNIT_TEST(mul13);
-	CPPUNIT_TEST(mul14);
-	CPPUNIT_TEST(mul15);
-	CPPUNIT_TEST(mul16);
-	CPPUNIT_TEST(mul17);
-	CPPUNIT_TEST(mul18);
-	CPPUNIT_TEST(mul19);
-
-	CPPUNIT_TEST(mulMM01);
-
-	CPPUNIT_TEST(div01);
-	CPPUNIT_TEST(div02);
-	CPPUNIT_TEST(div03);
-	CPPUNIT_TEST(div04);
-	CPPUNIT_TEST(div05);
-	CPPUNIT_TEST(div06);
-	CPPUNIT_TEST(div07);
-	CPPUNIT_TEST(div08);
-	CPPUNIT_TEST(div09);
-	CPPUNIT_TEST(div10);
-	CPPUNIT_TEST(div11);
-	CPPUNIT_TEST(div12);
-	CPPUNIT_TEST(div13);
-	CPPUNIT_TEST(div14);
-	CPPUNIT_TEST(div15);
-	CPPUNIT_TEST(div16);
-	CPPUNIT_TEST(div17);
-
-	CPPUNIT_TEST(div2_01);
-	CPPUNIT_TEST(div2_02);
-	CPPUNIT_TEST(div2_03);
-	CPPUNIT_TEST(div2_04);
-	CPPUNIT_TEST(div2_05);
-	CPPUNIT_TEST(div2_06);
-	CPPUNIT_TEST(div2_07);
-	CPPUNIT_TEST(div2_08);
-	CPPUNIT_TEST(div2_09);
-	CPPUNIT_TEST(div2_10);
-	CPPUNIT_TEST(div2_11);
-	CPPUNIT_TEST(div2_12);
-	CPPUNIT_TEST(div2_13);
-
-	CPPUNIT_TEST(log01);
-	CPPUNIT_TEST(log02);
-	CPPUNIT_TEST(log03);
-	CPPUNIT_TEST(log04);
-	CPPUNIT_TEST(log05);
-	CPPUNIT_TEST(log06);
-	CPPUNIT_TEST(log07);
-	CPPUNIT_TEST(log08);
-	CPPUNIT_TEST(log09);
-	CPPUNIT_TEST(log10);
-	CPPUNIT_TEST(log11);
-
-	CPPUNIT_TEST(exp01);
-	CPPUNIT_TEST(exp02);
-	CPPUNIT_TEST(exp03);
-	CPPUNIT_TEST(exp04);
-	CPPUNIT_TEST(exp05);
-	CPPUNIT_TEST(exp06);
-	CPPUNIT_TEST(exp07);
-	CPPUNIT_TEST(exp08);
-	CPPUNIT_TEST(exp09);
-
-	CPPUNIT_TEST(sin01);
-	CPPUNIT_TEST(sin02);
-	CPPUNIT_TEST(sin03);
-	CPPUNIT_TEST(sin04);
-	CPPUNIT_TEST(sin05);
-	CPPUNIT_TEST(sin06);
-	CPPUNIT_TEST(sin07);
-	CPPUNIT_TEST(sin08);
-	CPPUNIT_TEST(sin09);
-	CPPUNIT_TEST(sin10);
-	CPPUNIT_TEST(sin11);
-	CPPUNIT_TEST(sin12);
-	CPPUNIT_TEST(sin13);
-
-	CPPUNIT_TEST(tan01);
-	CPPUNIT_TEST(tan02);
-	CPPUNIT_TEST(tan03);
-	CPPUNIT_TEST(tan04);
-	CPPUNIT_TEST(tan05);
-
-	CPPUNIT_TEST(pow01);
-	CPPUNIT_TEST(pow02);
-	CPPUNIT_TEST(pow03);
-	CPPUNIT_TEST(pow04);
-	CPPUNIT_TEST(pow05);
-	CPPUNIT_TEST(pow06);
-	CPPUNIT_TEST(pow07);
-	CPPUNIT_TEST(pow08);
-	CPPUNIT_TEST(pow09);
-	CPPUNIT_TEST(pow10);
-	CPPUNIT_TEST(pow11);
-	CPPUNIT_TEST(pow12);
-	CPPUNIT_TEST(pow13);
-
-	CPPUNIT_TEST(root01);
-	CPPUNIT_TEST(root02);
-	CPPUNIT_TEST(root03);
-	CPPUNIT_TEST(root04);
-
-	CPPUNIT_TEST(sqrt01);
-	CPPUNIT_TEST(sqrt02);
-	CPPUNIT_TEST(sqrt03);
-	CPPUNIT_TEST(sqrt04);
-	CPPUNIT_TEST(sqrt05);
-
-	CPPUNIT_TEST(sinh01);
-	CPPUNIT_TEST(sinh02);
-	CPPUNIT_TEST(sinh03);
-	CPPUNIT_TEST(sinh04);
-	CPPUNIT_TEST(sinh05);
-	CPPUNIT_TEST(sinh06);
-	CPPUNIT_TEST(sinh07);
-
-	CPPUNIT_TEST(cosh01);
-	CPPUNIT_TEST(cosh02);
-	CPPUNIT_TEST(cosh03);
-	CPPUNIT_TEST(cosh04);
-	CPPUNIT_TEST(cosh05);
-	CPPUNIT_TEST(cosh06);
-	CPPUNIT_TEST(cosh07);
-
-	CPPUNIT_TEST(atan2_01);
-	CPPUNIT_TEST(atan2_02);
-	CPPUNIT_TEST(atan2_03);
-	CPPUNIT_TEST(atan2_04);
-	CPPUNIT_TEST(atan2_05);
-	CPPUNIT_TEST(atan2_06);
-	CPPUNIT_TEST(atan2_07);
-	CPPUNIT_TEST(atan2_08);
-	CPPUNIT_TEST(atan2_09);
-	CPPUNIT_TEST(atan2_10);
-	CPPUNIT_TEST(atan2_11);
-	CPPUNIT_TEST(atan2_12);
-	CPPUNIT_TEST(atan2_13);
-	CPPUNIT_TEST(atan2_14);
-	CPPUNIT_TEST(atan2_15);
-
-	CPPUNIT_TEST(floor01);
-	CPPUNIT_TEST(floor02);
-	CPPUNIT_TEST(floor03);
-	CPPUNIT_TEST(floor04);
-	CPPUNIT_TEST(floor05);
-	CPPUNIT_TEST(floor06);
-	CPPUNIT_TEST(floor07);
-	CPPUNIT_TEST(floor08);
-
-	CPPUNIT_TEST(ceil01);
-	CPPUNIT_TEST(ceil02);
-	CPPUNIT_TEST(ceil03);
-	CPPUNIT_TEST(ceil04);
-	CPPUNIT_TEST(ceil05);
-	CPPUNIT_TEST(ceil06);
-	CPPUNIT_TEST(ceil07);
-	CPPUNIT_TEST(ceil08);
-
-	CPPUNIT_TEST(integer01);
-	CPPUNIT_TEST(integer02);
-	CPPUNIT_TEST(integer03);
-	CPPUNIT_TEST(integer04);
-	CPPUNIT_TEST(integer05);
-	CPPUNIT_TEST(integer06);
-	CPPUNIT_TEST(integer07);
-	CPPUNIT_TEST(integer08);
-
-	CPPUNIT_TEST(bwd_mul01);
-	CPPUNIT_TEST(bwd_mul02);
-	CPPUNIT_TEST(bwd_mul03);
-	CPPUNIT_TEST(bwd_mul04);
-	CPPUNIT_TEST(bwd_mul05);
-
-	CPPUNIT_TEST(bwd_mulVV01);
-	CPPUNIT_TEST(bwd_mulMV01);
+		float01();
+		float02();
+		float03();
+		float04();
+		float05();
+		float06();
+		float07();
+		float08();
+		float09();
+	/*	float10(); disabled temporarily due to bug between Gaol and elibc (used by Travis CI) */
 
 
-	CPPUNIT_TEST(bwd_div01);
-	CPPUNIT_TEST(bwd_div02);
-	CPPUNIT_TEST(bwd_div03);
-	CPPUNIT_TEST(bwd_div04);
-	CPPUNIT_TEST(bwd_div05);
-	CPPUNIT_TEST(bwd_div06);
-	CPPUNIT_TEST(bwd_div07);
-	CPPUNIT_TEST(bwd_div08);
-	CPPUNIT_TEST(bwd_div09);
+		minus01();
+		minus02();
+		minus03();
+		minus04();
 
-	CPPUNIT_TEST(bwd_maxmin01);
-	CPPUNIT_TEST(bwd_maxmin02);
-	CPPUNIT_TEST(bwd_maxmin03);
-	CPPUNIT_TEST(bwd_maxmin04);
-	CPPUNIT_TEST(bwd_maxmin05);
+		add01();
+		add02();
+		add03();
+		add04();
+		add05();
+		add06();
+		add07();
+		add08();
+		add09();
+		add10();
+		add11();
+		add12();
+		add13();
+		add14();
+		add15();
+		add16();
+		add17();
+		add18();
+		add19();
 
-	CPPUNIT_TEST(bwd_sqr01);
-	CPPUNIT_TEST(bwd_sqr02);
-	CPPUNIT_TEST(bwd_sqr03);
-	CPPUNIT_TEST(bwd_sqr04);
-	CPPUNIT_TEST(bwd_sqr05);
-	CPPUNIT_TEST(bwd_sqr06);
-	CPPUNIT_TEST(bwd_sqr07);
+		mul01();
+		mul02();
+		mul03();
+		mul04();
+		mul05();
+		mul06();
+		mul07();
+		mul08();
+		mul09();
+		mul10();
+		mul11();
+		mul12();
+		mul13();
+		mul14();
+		mul15();
+		mul16();
+		mul17();
+		mul18();
+		mul19();
 
-	CPPUNIT_TEST(bwd_log01);
-	CPPUNIT_TEST(bwd_log02);
-	CPPUNIT_TEST(bwd_log03);
-	CPPUNIT_TEST(bwd_log04);
-	CPPUNIT_TEST(bwd_log05);
-	CPPUNIT_TEST(bwd_log06);
-	CPPUNIT_TEST(bwd_log07);
-	CPPUNIT_TEST(bwd_log08);
+		mulMM01();
 
-	CPPUNIT_TEST(bwd_sin01);
-	CPPUNIT_TEST(bwd_sin02);
-	CPPUNIT_TEST(bwd_sin03);
-	CPPUNIT_TEST(bwd_sin04);
-	CPPUNIT_TEST(bwd_sin05);
-	CPPUNIT_TEST(bwd_sin06);
-	CPPUNIT_TEST(bwd_sin07);
-	CPPUNIT_TEST(bwd_sin08);
-	CPPUNIT_TEST(bwd_sin09);
-	CPPUNIT_TEST(bwd_sin10);
-	CPPUNIT_TEST(bwd_sin11);
-	CPPUNIT_TEST(bwd_sin12);
-	CPPUNIT_TEST(bwd_sin13);
-	CPPUNIT_TEST(bwd_sin14);
-	CPPUNIT_TEST(bwd_sin15);
-	CPPUNIT_TEST(bwd_sin16);
-	CPPUNIT_TEST(bwd_sin17);
-	CPPUNIT_TEST(bwd_sin18);
-	CPPUNIT_TEST(bwd_sin19);
-	CPPUNIT_TEST(bwd_sin20);
-	CPPUNIT_TEST(bwd_sin21);
-	CPPUNIT_TEST(bwd_sin22);
-	CPPUNIT_TEST(bwd_sin23);
-	CPPUNIT_TEST(bwd_sin24);
+		div01();
+		div02();
+		div03();
+		div04();
+		div05();
+		div06();
+		div07();
+		div08();
+		div09();
+		div10();
+		div11();
+		div12();
+		div13();
+		div14();
+		div15();
+		div16();
+		div17();
 
-	CPPUNIT_TEST(bwd_pow01);
-	CPPUNIT_TEST(bwd_pow02);
-	CPPUNIT_TEST(bwd_pow03);
-	CPPUNIT_TEST(bwd_pow04);
-	CPPUNIT_TEST(bwd_pow05);
-	CPPUNIT_TEST(bwd_pow06);
-	CPPUNIT_TEST(bwd_pow07);
-	CPPUNIT_TEST(bwd_pow08);
-	CPPUNIT_TEST(bwd_pow09);
-	CPPUNIT_TEST(bwd_pow10);
-	CPPUNIT_TEST(bwd_pow11);
-	CPPUNIT_TEST(bwd_pow12);
-	CPPUNIT_TEST(bwd_pow13);
-	CPPUNIT_TEST(bwd_pow14);
-	CPPUNIT_TEST(bwd_pow15);
-	CPPUNIT_TEST(bwd_pow16);
-	CPPUNIT_TEST(bwd_pow17);
+		div2_01();
+		div2_02();
+		div2_03();
+		div2_04();
+		div2_05();
+		div2_06();
+		div2_07();
+		div2_08();
+		div2_09();
+		div2_10();
+		div2_11();
+		div2_12();
+		div2_13();
+
+		log01();
+		log02();
+		log03();
+		log04();
+		log05();
+		log06();
+		log07();
+		log08();
+		log09();
+		log10();
+		log11();
+
+		exp01();
+		exp02();
+		exp03();
+		exp04();
+		exp05();
+		exp06();
+		exp07();
+		exp08();
+		exp09();
+
+		sin01();
+		sin02();
+		sin03();
+		sin04();
+		sin05();
+		sin06();
+		sin07();
+		sin08();
+		sin09();
+		sin10();
+		sin11();
+		sin12();
+		sin13();
+
+		tan01();
+		tan02();
+		tan03();
+		tan04();
+		tan05();
+
+		pow01();
+		pow02();
+		pow03();
+		pow04();
+		pow05();
+		pow06();
+		pow07();
+		pow08();
+		pow09();
+		pow10();
+		pow11();
+		pow12();
+		pow13();
+
+		root01();
+		root02();
+		root03();
+		root04();
+
+		sqrt01();
+		sqrt02();
+		sqrt03();
+		sqrt04();
+		sqrt05();
+
+		sinh01();
+		sinh02();
+		sinh03();
+		sinh04();
+		sinh05();
+		sinh06();
+		sinh07();
+
+		cosh01();
+		cosh02();
+		cosh03();
+		cosh04();
+		cosh05();
+		cosh06();
+		cosh07();
+
+		atan2_01();
+		atan2_02();
+		atan2_03();
+		atan2_04();
+		atan2_05();
+		atan2_06();
+		atan2_07();
+		atan2_08();
+		atan2_09();
+		atan2_10();
+		atan2_11();
+		atan2_12();
+		atan2_13();
+		atan2_14();
+		atan2_15();
+
+		floor01();
+		floor02();
+		floor03();
+		floor04();
+		floor05();
+		floor06();
+		floor07();
+		floor08();
+
+		ceil01();
+		ceil02();
+		ceil03();
+		ceil04();
+		ceil05();
+		ceil06();
+		ceil07();
+		ceil08();
+
+		integer01();
+		integer02();
+		integer03();
+		integer04();
+		integer05();
+		integer06();
+		integer07();
+		integer08();
+
+		bwd_mul01();
+		bwd_mul02();
+		bwd_mul03();
+		bwd_mul04();
+		bwd_mul05();
+
+		bwd_mulVV01();
+		bwd_mulMV01();
+
+
+		bwd_div01();
+		bwd_div02();
+		bwd_div03();
+		bwd_div04();
+		bwd_div05();
+		bwd_div06();
+		bwd_div07();
+		bwd_div08();
+		bwd_div09();
+
+		bwd_maxmin01();
+		bwd_maxmin02();
+		bwd_maxmin03();
+		bwd_maxmin04();
+		bwd_maxmin05();
+
+		bwd_sqr01();
+		bwd_sqr02();
+		bwd_sqr03();
+		bwd_sqr04();
+		bwd_sqr05();
+		bwd_sqr06();
+		bwd_sqr07();
+
+		bwd_log01();
+		bwd_log02();
+		bwd_log03();
+		bwd_log04();
+		bwd_log05();
+		bwd_log06();
+		bwd_log07();
+		bwd_log08();
+
+		bwd_sin01();
+		bwd_sin02();
+		bwd_sin03();
+		bwd_sin04();
+		bwd_sin05();
+		bwd_sin06();
+		bwd_sin07();
+		bwd_sin08();
+		bwd_sin09();
+		bwd_sin10();
+		bwd_sin11();
+		bwd_sin12();
+		bwd_sin13();
+		bwd_sin14();
+		bwd_sin15();
+		bwd_sin16();
+		bwd_sin17();
+		bwd_sin18();
+		bwd_sin19();
+		bwd_sin20();
+		bwd_sin21();
+		bwd_sin22();
+		bwd_sin23();
+		bwd_sin24();
+
+		bwd_pow01();
+		bwd_pow02();
+		bwd_pow03();
+		bwd_pow04();
+		bwd_pow05();
+		bwd_pow06();
+		bwd_pow07();
+		bwd_pow08();
+		bwd_pow09();
+		bwd_pow10();
+		bwd_pow11();
+		bwd_pow12();
+		bwd_pow13();
+		bwd_pow14();
+		bwd_pow15();
+		bwd_pow16();
+		bwd_pow17();
 
 	// ===== temporarily commented ===============
-			CPPUNIT_TEST(bwd_atan2_01);
-	CPPUNIT_TEST(bwd_atan2_02);
-	CPPUNIT_TEST(bwd_atan2_03);
-	CPPUNIT_TEST(bwd_atan2_04);
-	CPPUNIT_TEST(bwd_atan2_05);
-	CPPUNIT_TEST(bwd_atan2_06);
-	CPPUNIT_TEST(bwd_atan2_07);
-	CPPUNIT_TEST(bwd_atan2_08);
-	CPPUNIT_TEST(bwd_atan2_09); // commented waiting for an optimal contractor.
-	CPPUNIT_TEST(bwd_atan2_10);
-	CPPUNIT_TEST(bwd_atan2_issue134);
+				bwd_atan2_01();
+		bwd_atan2_02();
+		bwd_atan2_03();
+		bwd_atan2_04();
+		bwd_atan2_05();
+		bwd_atan2_06();
+		bwd_atan2_07();
+		bwd_atan2_08();
+		bwd_atan2_09(); // commented waiting for an optimal contractor.
+		bwd_atan2_10();
+		bwd_atan2_issue134();
 
-	CPPUNIT_TEST(bwd_sqrt01);
-	CPPUNIT_TEST(bwd_sqrt02);
-	CPPUNIT_TEST(bwd_sqrt03);
-	CPPUNIT_TEST(bwd_sqrt04);
-	CPPUNIT_TEST(bwd_sqrt05);
-	CPPUNIT_TEST(bwd_sqrt06);
-	CPPUNIT_TEST(bwd_sqrt07);
+		bwd_sqrt01();
+		bwd_sqrt02();
+		bwd_sqrt03();
+		bwd_sqrt04();
+		bwd_sqrt05();
+		bwd_sqrt06();
+		bwd_sqrt07();
 
-	CPPUNIT_TEST(bwd_atan01);
-	CPPUNIT_TEST(bwd_atan02);
-	CPPUNIT_TEST(bwd_atan03);
-	CPPUNIT_TEST(bwd_atan04);
-	CPPUNIT_TEST(bwd_atan05);
-	CPPUNIT_TEST(bwd_atan06);
-	CPPUNIT_TEST(bwd_atan07);
-	CPPUNIT_TEST(bwd_atan08);
+		bwd_atan01();
+		bwd_atan02();
+		bwd_atan03();
+		bwd_atan04();
+		bwd_atan05();
+		bwd_atan06();
+		bwd_atan07();
+		bwd_atan08();
 
-	CPPUNIT_TEST(bwd_add01);
-	CPPUNIT_TEST(bwd_add02);
-	CPPUNIT_TEST(bwd_add03);
-	CPPUNIT_TEST(bwd_add04);
-	CPPUNIT_TEST(bwd_add05);
+		bwd_add01();
+		bwd_add02();
+		bwd_add03();
+		bwd_add04();
+		bwd_add05();
 
-	CPPUNIT_TEST(bwd_sub01);
-	CPPUNIT_TEST(bwd_sub02);
-	CPPUNIT_TEST(bwd_sub03);
-	CPPUNIT_TEST(bwd_sub04);
-	CPPUNIT_TEST(bwd_sub05);
+		bwd_sub01();
+		bwd_sub02();
+		bwd_sub03();
+		bwd_sub04();
+		bwd_sub05();
 
-	CPPUNIT_TEST(bwd_imod_01);
-	CPPUNIT_TEST(bwd_imod_02);
-	CPPUNIT_TEST(bwd_imod_03);
-	CPPUNIT_TEST(bwd_imod_04);
-	CPPUNIT_TEST(bwd_imod_05);
-	CPPUNIT_TEST(bwd_imod_06);
-	CPPUNIT_TEST(bwd_imod_07);
-	CPPUNIT_TEST(bwd_imod_08);
+		bwd_imod_01();
+		bwd_imod_02();
+		bwd_imod_03();
+		bwd_imod_04();
+		bwd_imod_05();
+		bwd_imod_06();
+		bwd_imod_07();
+		bwd_imod_08();
 
-	CPPUNIT_TEST(bwd_floor_01);
-	CPPUNIT_TEST(bwd_floor_02);
-	CPPUNIT_TEST(bwd_floor_03);
-	CPPUNIT_TEST(bwd_floor_04);
-	CPPUNIT_TEST(bwd_floor_05);
-	CPPUNIT_TEST(bwd_floor_06);
-	CPPUNIT_TEST(bwd_floor_07);
-	CPPUNIT_TEST(bwd_floor_08);
-	CPPUNIT_TEST(bwd_floor_09);
-	CPPUNIT_TEST(bwd_floor_10);
-	CPPUNIT_TEST(bwd_floor_11);
-	CPPUNIT_TEST(bwd_floor_12);
-	CPPUNIT_TEST(bwd_floor_13);
+		bwd_floor_01();
+		bwd_floor_02();
+		bwd_floor_03();
+		bwd_floor_04();
+		bwd_floor_05();
+		bwd_floor_06();
+		bwd_floor_07();
+		bwd_floor_08();
+		bwd_floor_09();
+		bwd_floor_10();
+		bwd_floor_11();
+		bwd_floor_12();
+		bwd_floor_13();
 
-	CPPUNIT_TEST(bwd_ceil_01);
-	CPPUNIT_TEST(bwd_ceil_02);
-	CPPUNIT_TEST(bwd_ceil_03);
-	CPPUNIT_TEST(bwd_ceil_04);
-	CPPUNIT_TEST(bwd_ceil_05);
-	CPPUNIT_TEST(bwd_ceil_06);
-	CPPUNIT_TEST(bwd_ceil_07);
-	CPPUNIT_TEST(bwd_ceil_08);
-	CPPUNIT_TEST(bwd_ceil_09);
-	CPPUNIT_TEST(bwd_ceil_10);
-	CPPUNIT_TEST(bwd_ceil_11);
-	CPPUNIT_TEST(bwd_ceil_12);
-	CPPUNIT_TEST(bwd_ceil_13);
+		bwd_ceil_01();
+		bwd_ceil_02();
+		bwd_ceil_03();
+		bwd_ceil_04();
+		bwd_ceil_05();
+		bwd_ceil_06();
+		bwd_ceil_07();
+		bwd_ceil_08();
+		bwd_ceil_09();
+		bwd_ceil_10();
+		bwd_ceil_11();
+		bwd_ceil_12();
+		bwd_ceil_13();
 
-	CPPUNIT_TEST_SUITE_END();
+		tearDown();
+	}
 private:
 	/* test:
 	 * =======
@@ -877,7 +879,7 @@ private:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestArith);
+
 
 
 #endif // __TEST_ARITH__

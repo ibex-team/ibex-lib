@@ -13,8 +13,8 @@
 #ifndef __TEST_DIM_H__
 #define __TEST_DIM_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Dim.h"
 #include "utils.h"
 
@@ -24,15 +24,17 @@ class TestDim : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestDim);
-	CPPUNIT_TEST(scalar);
-	CPPUNIT_TEST(row_vec);
-	CPPUNIT_TEST(col_vec);
-	CPPUNIT_TEST(add);
-	CPPUNIT_TEST(mul);
-	CPPUNIT_TEST(vec);
-	CPPUNIT_TEST(index);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		scalar();
+		row_vec();
+		col_vec();
+		add();
+		mul();
+		vec();
+		index();
+		tearDown();
+	}
 
 	void scalar();
 	void row_vec();
@@ -44,7 +46,7 @@ public:
 	void index();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestDim);
+
 
 } // namespace ibex
 

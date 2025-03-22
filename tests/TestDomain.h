@@ -12,8 +12,8 @@
 #ifndef __TEST_DOMAIN_H__
 #define __TEST_DOMAIN_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Function.h"
 #include "ibex_Eval.h"
 #include "utils.h"
@@ -24,23 +24,25 @@ class TestDomain : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestDomain);
-	CPPUNIT_TEST(index_vec_elt);
-	CPPUNIT_TEST(index_vec_subrow);
-	CPPUNIT_TEST(index_vec_subcol);
-	CPPUNIT_TEST(index_mat_elt);
-	CPPUNIT_TEST(index_mat_subrow);
-	CPPUNIT_TEST(index_mat_row);
-	CPPUNIT_TEST(index_mat_subcol);
-	CPPUNIT_TEST(index_mat_col);
-	CPPUNIT_TEST(index_mat_rows);
-	CPPUNIT_TEST(index_mat_cols);
-	CPPUNIT_TEST(index_mat_submat);
-	CPPUNIT_TEST(load01);
-	CPPUNIT_TEST(load02);
-	CPPUNIT_TEST(load03);
-	CPPUNIT_TEST(load04);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		index_vec_elt();
+		index_vec_subrow();
+		index_vec_subcol();
+		index_mat_elt();
+		index_mat_subrow();
+		index_mat_row();
+		index_mat_subcol();
+		index_mat_col();
+		index_mat_rows();
+		index_mat_cols();
+		index_mat_submat();
+		load01();
+		load02();
+		load03();
+		load04();
+		tearDown();
+	}
 
 public:
 	virtual void setUp();
@@ -81,7 +83,7 @@ private:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestDomain);
+
 
 } // namespace ibex
 

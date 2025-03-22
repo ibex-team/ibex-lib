@@ -11,6 +11,7 @@
 
 #include "TestExprMonomial.h"
 #include "ibex_ExprMonomial.h"
+#include <sstream>
 
 using namespace std;
 

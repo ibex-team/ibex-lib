@@ -11,6 +11,7 @@
 
 #include "TestCtcInteger.h"
 #include "ibex_CtcInteger.h"
+#include <cfloat>
 
 using namespace std;
 

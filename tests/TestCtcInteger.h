@@ -13,8 +13,8 @@
 #ifndef __TEST_CTC_INTEGER_H__
 #define __TEST_CTC_INTEGER_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_CtcInteger.h"
 #include "utils.h"
 
@@ -24,18 +24,20 @@ class TestCtcInteger : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestCtcInteger);
-	CPPUNIT_TEST(test01);
-	CPPUNIT_TEST(test02);
-	CPPUNIT_TEST(test03);
-	CPPUNIT_TEST(test04);
-	CPPUNIT_TEST(test05);
-	CPPUNIT_TEST(test06);
-	CPPUNIT_TEST(test07);
-	CPPUNIT_TEST(test08);
-	CPPUNIT_TEST(test09);
-	CPPUNIT_TEST(test10);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		test01();
+		test02();
+		test03();
+		test04();
+		test05();
+		test06();
+		test07();
+		test08();
+		test09();
+		test10();
+		tearDown();
+	}
 
 	void test01();
 	void test02();
@@ -49,7 +51,7 @@ public:
 	void test10();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcInteger);
+
 
 
 } // namespace ibex

@@ -11,8 +11,8 @@
 #ifndef __TEST_LINEAR_H__
 #define __TEST_LINEAR_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Linear.h"
 #include "utils.h"
 
@@ -22,21 +22,23 @@ class TestLinear : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestLinear);
-	CPPUNIT_TEST(lu_partial_underctr);
-	CPPUNIT_TEST(lu_complete_underctr);
-	CPPUNIT_TEST(gauss_seidel01);
-	CPPUNIT_TEST(gauss_seidel02);
-	CPPUNIT_TEST(gauss_seidel03);
-	CPPUNIT_TEST(inflating_gauss_seidel01);
-	CPPUNIT_TEST(inflating_gauss_seidel02);
-	CPPUNIT_TEST(inflating_gauss_seidel03);
-	CPPUNIT_TEST(det01);
-	CPPUNIT_TEST(det02);
-	CPPUNIT_TEST(is_posdef_sylvester01);
-	CPPUNIT_TEST(is_posdef_rohn01);
-	CPPUNIT_TEST(is_diagonal_dominant01);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		lu_partial_underctr();
+		lu_complete_underctr();
+		gauss_seidel01();
+		gauss_seidel02();
+		gauss_seidel03();
+		inflating_gauss_seidel01();
+		inflating_gauss_seidel02();
+		inflating_gauss_seidel03();
+		det01();
+		det02();
+		is_posdef_sylvester01();
+		is_posdef_rohn01();
+		is_diagonal_dominant01();
+		tearDown();
+	}
 
 	void lu_partial_underctr();
 	void lu_complete_underctr();
@@ -63,7 +65,7 @@ public:
 	void is_diagonal_dominant01();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestLinear);
+
 
 
 } // end namespace ibex

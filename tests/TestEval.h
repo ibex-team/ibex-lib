@@ -13,8 +13,8 @@
 #ifndef __TEST_EVAL_H__
 #define __TEST_EVAL_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 #include "ibex_Expr.h"
 
@@ -24,21 +24,23 @@ class TestEval : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestEval);
+	void testMe() {
+		setUp();
 	
-	CPPUNIT_TEST(deco01);
-	CPPUNIT_TEST(deco02);
-	CPPUNIT_TEST(dist01);
-	CPPUNIT_TEST(apply01);
-	CPPUNIT_TEST(apply02);
-	CPPUNIT_TEST(apply03);
-	CPPUNIT_TEST(apply04);
-	CPPUNIT_TEST(issue242);
-	CPPUNIT_TEST(eval_components01);
-	CPPUNIT_TEST(eval_components02);
-	CPPUNIT_TEST(matrix_components);
+		deco01();
+		deco02();
+		dist01();
+		apply01();
+		apply02();
+		apply03();
+		apply04();
+		issue242();
+		eval_components01();
+		eval_components02();
+		matrix_components();
 
-	CPPUNIT_TEST_SUITE_END();
+		tearDown();
+	}
 
 	void deco01();
 	void deco02();
@@ -61,7 +63,7 @@ private:
 	void check_deco(Function& f, const ExprNode& e);
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestEval);
+
 
 
 } // end namespace

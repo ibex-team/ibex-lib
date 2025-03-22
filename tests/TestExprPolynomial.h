@@ -13,8 +13,8 @@
 #ifndef __TEST_EXPR_POLYNOMIAL_H__
 #define __TEST_EXPR_POLYNOMIAL_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -23,13 +23,15 @@ class TestExprPolynomial : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestExprPolynomial);
-	CPPUNIT_TEST(test00);
-	CPPUNIT_TEST(test01);
-	CPPUNIT_TEST(test02);
-	CPPUNIT_TEST(test03);
-	CPPUNIT_TEST(test04);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		test00();
+		test01();
+		test02();
+		test03();
+		test04();
+		tearDown();
+	}
 
 	void test00();
 	void test01();
@@ -38,7 +40,7 @@ public:
 	void test04();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestExprPolynomial);
+
 
 } // namespace ibex
 

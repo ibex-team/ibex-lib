@@ -12,8 +12,8 @@
 #ifndef __TEST_EXPR_DIFF_H__
 #define __TEST_EXPR_DIFF_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 
 #include "utils.h"
 
@@ -23,31 +23,33 @@ class TestExprDiff : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestExprDiff);
-	CPPUNIT_TEST(linear01);
-	CPPUNIT_TEST(poly01);
-	CPPUNIT_TEST(vec01);
-	CPPUNIT_TEST(vec02);
-	CPPUNIT_TEST(vec03);
-	CPPUNIT_TEST(row_vec);
-	CPPUNIT_TEST(one_var_one_func);
-	CPPUNIT_TEST(mat01);
-	CPPUNIT_TEST(mat02);
-	CPPUNIT_TEST(apply01);
-	CPPUNIT_TEST(apply02);
-	CPPUNIT_TEST(apply03);
-	CPPUNIT_TEST(cst_grad);
-	CPPUNIT_TEST(vecimg01);
-	CPPUNIT_TEST(vecimg02);
-	CPPUNIT_TEST(mul01);
-	CPPUNIT_TEST(mul02);
-	CPPUNIT_TEST(mul03);
-	CPPUNIT_TEST(mul04);
-	CPPUNIT_TEST(apply_mul01);
-	CPPUNIT_TEST(issue247);
-	CPPUNIT_TEST(issue546);
+	void testMe() {
+		setUp();
+		linear01();
+		poly01();
+		vec01();
+		vec02();
+		vec03();
+		row_vec();
+		one_var_one_func();
+		mat01();
+		mat02();
+		apply01();
+		apply02();
+		apply03();
+		cst_grad();
+		vecimg01();
+		vecimg02();
+		mul01();
+		mul02();
+		mul03();
+		mul04();
+		apply_mul01();
+		issue247();
+		issue546();
 
-	CPPUNIT_TEST_SUITE_END();
+		tearDown();
+	}
 
 	void linear01();
 
@@ -109,7 +111,7 @@ public:
 	void issue546();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestExprDiff);
+
 
 } // namespace ibex
 

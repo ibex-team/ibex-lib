@@ -11,8 +11,8 @@
 #ifndef __TEST_NEWTON_H__
 #define __TEST_NEWTON_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Newton.h"
 #include "utils.h"
 
@@ -22,14 +22,16 @@ class TestNewton : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestNewton);
+	void testMe() {
+		setUp();
 
-	CPPUNIT_TEST(newton01);
-	CPPUNIT_TEST(inflating_newton01);
-	CPPUNIT_TEST(inflating_newton02);
-	CPPUNIT_TEST(ctc_parameter01);
+		newton01();
+		inflating_newton01();
+		inflating_newton02();
+		ctc_parameter01();
 
-	CPPUNIT_TEST_SUITE_END();
+		tearDown();
+	}
 
 	void newton01();
 	void inflating_newton01();
@@ -37,7 +39,7 @@ public:
 	void ctc_parameter01();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestNewton);
+
 
 
 } // end namespace ibex

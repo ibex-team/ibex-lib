@@ -38,5 +38,25 @@ void check_relatif(const Interval& y_actual, const Interval& y_expected, double 
 void check_relatif(const IntervalVector& y_actual, const IntervalVector& y_expected, double err = ERROR);
 void check_relatif(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected, double err = ERROR);
 
+extern bool SUCCESS;
+
+namespace CppUnit {
+	
+class TestFixture {
+public:
+	virtual ~TestFixture() { }
+	virtual void setUp() { }
+	virtual void tearDown() { }
+};
+
+}
+
+#define FAILURE std::cerr << "Test fail in file " << __FILE__ << " at line " << __LINE__ << std::endl; SUCCESS = false;
+#define CPPUNIT_ASSERT(X) { if (!(X)) { FAILURE } }
+#define CPPUNIT_ASSERT_ASSERTION_PASS(X) X
+#define CPPUNIT_ASSERT_THROW(X,Y) { try { X; FAILURE } catch(Y& e) { } }
+#define CPPUNIT_ASSERT_NO_THROW(X) { try { X; } catch(...) { FAILURE } }
+#define CPPUNIT_ASSERT_DOUBLES_EQUAL(X,Y,e) { if (fabs((X)-(Y))>e) { FAILURE } }
+#define CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg,X,Y,e) { if (fabs((X)-(Y))>e) { FAILURE } }
 
 #endif // __UTILS_H__

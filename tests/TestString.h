@@ -13,8 +13,8 @@
 #ifndef __TEST_STRING_H__
 #define __TEST_STRING_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_String.h"
 #include "utils.h"
 
@@ -24,14 +24,16 @@ class TestString : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestString);
-	CPPUNIT_TEST(test01);
-	CPPUNIT_TEST(test02);
-	CPPUNIT_TEST(test_parse_indexed_symbol01);
-	CPPUNIT_TEST(test_parse_indexed_symbol02);
-	CPPUNIT_TEST(test_parse_indexed_symbol03);
-	CPPUNIT_TEST(test_parse_indexed_symbol04);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		test01();
+		test02();
+		test_parse_indexed_symbol01();
+		test_parse_indexed_symbol02();
+		test_parse_indexed_symbol03();
+		test_parse_indexed_symbol04();
+		tearDown();
+	}
 
 	void test01();
 	void test02();
@@ -44,7 +46,7 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestString);
+
 
 
 } // namespace ibex

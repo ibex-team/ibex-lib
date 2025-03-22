@@ -12,8 +12,8 @@
 #ifndef __TEST_CROSS_PRODUCT_H__
 #define __TEST_CROSS_PRODUCT_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -22,14 +22,16 @@ class TestCrossProduct : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestCrossProduct);
-	CPPUNIT_TEST(eval1);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		eval1();
+		tearDown();
+	}
 
 	void eval1();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestCrossProduct);
+
 
 } // namespace ibex
 

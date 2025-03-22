@@ -12,8 +12,8 @@
 #ifndef __TEST_INTERVAL_VECTOR_H__
 #define __TEST_INTERVAL_VECTOR_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_IntervalVector.h"
 #include "utils.h"
 
@@ -23,156 +23,158 @@ class TestIntervalVector : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestIntervalVector);
+	void testMe() {
+		setUp();
 
-	CPPUNIT_TEST(cons01);
-	CPPUNIT_TEST(cons02);
-	CPPUNIT_TEST(cons03);
-	CPPUNIT_TEST(cons04);
-	CPPUNIT_TEST(cons05);
-	CPPUNIT_TEST(consInitList);
+		cons01();
+		cons02();
+		cons03();
+		cons04();
+		cons05();
+		consInitList();
 
-	CPPUNIT_TEST(set_empty01);
+		set_empty01();
 
-	CPPUNIT_TEST(is_empty01);
-	CPPUNIT_TEST(is_empty02);
+		is_empty01();
+		is_empty02();
 
-	CPPUNIT_TEST(resize01);
-	CPPUNIT_TEST(resize02);
-	CPPUNIT_TEST(resize03);
-	CPPUNIT_TEST(resize04);
+		resize01();
+		resize02();
+		resize03();
+		resize04();
 
-	CPPUNIT_TEST(subvector01);
-	CPPUNIT_TEST(subvector02);
-	CPPUNIT_TEST(subvector03);
-	CPPUNIT_TEST(subvector04);
-	CPPUNIT_TEST(subvector05);
-	CPPUNIT_TEST(subvector06);
+		subvector01();
+		subvector02();
+		subvector03();
+		subvector04();
+		subvector05();
+		subvector06();
 
-	CPPUNIT_TEST(cart_prod01);
+		cart_prod01();
 
 
-	CPPUNIT_TEST(inter01);
-	CPPUNIT_TEST(inter02);
-	CPPUNIT_TEST(inter03);
-	CPPUNIT_TEST(inter04);
+		inter01();
+		inter02();
+		inter03();
+		inter04();
 
-	CPPUNIT_TEST(hull01);
-	CPPUNIT_TEST(hull02);
-	CPPUNIT_TEST(hull03);
-	CPPUNIT_TEST(hull04);
+		hull01();
+		hull02();
+		hull03();
+		hull04();
 
-	CPPUNIT_TEST(eq01);
-	CPPUNIT_TEST(eq02);
-	CPPUNIT_TEST(eq03);
-	CPPUNIT_TEST(eq04);
+		eq01();
+		eq02();
+		eq03();
+		eq04();
 
-	CPPUNIT_TEST(mid01);
+		mid01();
 
-	CPPUNIT_TEST(is_flat01);
-	CPPUNIT_TEST(is_flat02);
-	CPPUNIT_TEST(is_flat03);
-	CPPUNIT_TEST(is_flat04);
-	CPPUNIT_TEST(is_flat05);
+		is_flat01();
+		is_flat02();
+		is_flat03();
+		is_flat04();
+		is_flat05();
 
-	CPPUNIT_TEST(is_unbounded01);
-	CPPUNIT_TEST(is_unbounded02);
-	CPPUNIT_TEST(is_unbounded03);
-	CPPUNIT_TEST(is_unbounded04);
+		is_unbounded01();
+		is_unbounded02();
+		is_unbounded03();
+		is_unbounded04();
 
-	CPPUNIT_TEST(is_subset01);
-	CPPUNIT_TEST(is_subset02);
-	CPPUNIT_TEST(is_subset03);
-	CPPUNIT_TEST(is_subset04);
-	CPPUNIT_TEST(is_subset05);
-	CPPUNIT_TEST(is_subset06);
-	CPPUNIT_TEST(is_subset07);
+		is_subset01();
+		is_subset02();
+		is_subset03();
+		is_subset04();
+		is_subset05();
+		is_subset06();
+		is_subset07();
 
-	CPPUNIT_TEST(is_relative_interior01);
-	CPPUNIT_TEST(is_relative_interior02);
-	CPPUNIT_TEST(is_relative_interior03);
-	CPPUNIT_TEST(is_relative_interior04);
-	CPPUNIT_TEST(is_relative_interior05);
+		is_relative_interior01();
+		is_relative_interior02();
+		is_relative_interior03();
+		is_relative_interior04();
+		is_relative_interior05();
 
-	CPPUNIT_TEST(extr_diam_index01);
-	CPPUNIT_TEST(extr_diam_index02);
-	CPPUNIT_TEST(extr_diam_index03);
-	CPPUNIT_TEST(extr_diam_index04);
-	CPPUNIT_TEST(extr_diam_index05);
-	CPPUNIT_TEST(extr_diam_index06);
-	CPPUNIT_TEST(extr_diam_index07);
-	CPPUNIT_TEST(extr_diam_index08);
-	CPPUNIT_TEST(extr_diam_index09);
-	CPPUNIT_TEST(extr_diam_index10);
+		extr_diam_index01();
+		extr_diam_index02();
+		extr_diam_index03();
+		extr_diam_index04();
+		extr_diam_index05();
+		extr_diam_index06();
+		extr_diam_index07();
+		extr_diam_index08();
+		extr_diam_index09();
+		extr_diam_index10();
 
-	CPPUNIT_TEST(sort_indices01);
-	CPPUNIT_TEST(sort_indices02);
+		sort_indices01();
+		sort_indices02();
 
-	CPPUNIT_TEST(perimeter01);
-	CPPUNIT_TEST(perimeter02);
+		perimeter01();
+		perimeter02();
 
-	CPPUNIT_TEST(volume01);
-	CPPUNIT_TEST(volume02);
-	CPPUNIT_TEST(volume03);
+		volume01();
+		volume02();
+		volume03();
 
-	CPPUNIT_TEST(rel_distance01);
+		rel_distance01();
 
-	CPPUNIT_TEST(minus01);
-	CPPUNIT_TEST(minus02);
-	CPPUNIT_TEST(minus03);
+		minus01();
+		minus02();
+		minus03();
 
-	CPPUNIT_TEST(add01);
+		add01();
 
-	CPPUNIT_TEST(sub01);
+		sub01();
 
-	CPPUNIT_TEST(compl01);
-	CPPUNIT_TEST(compl02);
+		compl01();
+		compl02();
 
-	CPPUNIT_TEST(diff01);
-	CPPUNIT_TEST(diff02);
-	CPPUNIT_TEST(diff03);
-	CPPUNIT_TEST(diff04);
-	CPPUNIT_TEST(diff05);
-	CPPUNIT_TEST(diff06);
-	CPPUNIT_TEST(diff07);
-	CPPUNIT_TEST(diff08);
-	CPPUNIT_TEST(diff09);
-	CPPUNIT_TEST(diff10);
-	CPPUNIT_TEST(diff11);
-	CPPUNIT_TEST(diff12);
-	CPPUNIT_TEST(diff13);
-	CPPUNIT_TEST(diff14);
-	CPPUNIT_TEST(diff15);
-	CPPUNIT_TEST(diff16);
-	CPPUNIT_TEST(diff17);
-	CPPUNIT_TEST(diff18);
-	CPPUNIT_TEST(diff19);
-	CPPUNIT_TEST(diff20);
-	CPPUNIT_TEST(diff21);
-	CPPUNIT_TEST(diff22);
-	CPPUNIT_TEST(diff23);
-	CPPUNIT_TEST(diff24);
-	CPPUNIT_TEST(diff25);
-	CPPUNIT_TEST(diff26);
-	CPPUNIT_TEST(diff27);
-	CPPUNIT_TEST(diff28);
-	CPPUNIT_TEST(diff29);
-	CPPUNIT_TEST(diff30);
-	CPPUNIT_TEST(diff31);
-	CPPUNIT_TEST(diff32);
-	CPPUNIT_TEST(diff33);
-	CPPUNIT_TEST(diff34);
-	CPPUNIT_TEST(diff35);
-	CPPUNIT_TEST(diff36);
-	CPPUNIT_TEST(diff37);
-	CPPUNIT_TEST(diff38);
+		diff01();
+		diff02();
+		diff03();
+		diff04();
+		diff05();
+		diff06();
+		diff07();
+		diff08();
+		diff09();
+		diff10();
+		diff11();
+		diff12();
+		diff13();
+		diff14();
+		diff15();
+		diff16();
+		diff17();
+		diff18();
+		diff19();
+		diff20();
+		diff21();
+		diff22();
+		diff23();
+		diff24();
+		diff25();
+		diff26();
+		diff27();
+		diff28();
+		diff29();
+		diff30();
+		diff31();
+		diff32();
+		diff33();
+		diff34();
+		diff35();
+		diff36();
+		diff37();
+		diff38();
 
-	CPPUNIT_TEST(issue228);
+		issue228();
 
-	CPPUNIT_TEST(random01);
-	CPPUNIT_TEST(random02);
+		random01();
+		random02();
 
-	CPPUNIT_TEST_SUITE_END();
+		tearDown();
+	}
 
 	/* test:
 	 * =======
@@ -419,7 +421,7 @@ private:
 	bool test_diff(int n, double x[][2], double y[][2], int m, double z[][2], bool compactness=true, bool debug=false);
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestIntervalVector);
+
 
 
 #endif // __TEST_INTERVAL_VECTOR_H__

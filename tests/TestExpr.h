@@ -12,8 +12,8 @@
 #ifndef __TEST_EXPR_H__
 #define __TEST_EXPR_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -22,56 +22,58 @@ class TestExpr : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestExpr);
+	void testMe() {
+		setUp();
 
-	CPPUNIT_TEST(symbol);
-	CPPUNIT_TEST(addxy01);
-	CPPUNIT_TEST(addxy02);
-	CPPUNIT_TEST(addxy03);
-	CPPUNIT_TEST(addxy04);
+		symbol();
+		addxy01();
+		addxy02();
+		addxy03();
+		addxy04();
 
-	CPPUNIT_TEST(addxx01);
+		addxx01();
 
-	CPPUNIT_TEST(mulxy01);
-	CPPUNIT_TEST(mulxy02);
-	CPPUNIT_TEST(mulxy03);
-	CPPUNIT_TEST(mulxy04);
-	CPPUNIT_TEST(mulxy05);
-	CPPUNIT_TEST(mulxy06);
-	CPPUNIT_TEST(mulxy07);
-	CPPUNIT_TEST(mulxy08);
+		mulxy01();
+		mulxy02();
+		mulxy03();
+		mulxy04();
+		mulxy05();
+		mulxy06();
+		mulxy07();
+		mulxy08();
 
-	CPPUNIT_TEST(dag01);
+		dag01();
 
-	CPPUNIT_TEST(unaryOp);
-	CPPUNIT_TEST(binaryOp);
+		unaryOp();
+		binaryOp();
 
-	CPPUNIT_TEST(cst01);
-	CPPUNIT_TEST(cst02);
-	CPPUNIT_TEST(cst03);
-	CPPUNIT_TEST(cst04);
-	CPPUNIT_TEST(cst05);
+		cst01();
+		cst02();
+		cst03();
+		cst04();
+		cst05();
 
-	CPPUNIT_TEST(vector01);
-	CPPUNIT_TEST(vector02);
+		vector01();
+		vector02();
 
-	CPPUNIT_TEST(index01);
-	CPPUNIT_TEST(index02);
-	CPPUNIT_TEST(index03);
+		index01();
+		index02();
+		index03();
 
 	// deprecated, and don't work since r2.5
 	// because of ExprLinearity that does not
 	// manage ExprApply
-//	CPPUNIT_TEST(apply01);
-//	CPPUNIT_TEST(apply03);
+//		apply01();
+//		apply03();
 
-	CPPUNIT_TEST(subnodes01);
-	CPPUNIT_TEST(subnodes02);
-	CPPUNIT_TEST(subnodes03);
-	CPPUNIT_TEST(subnodes04);
+		subnodes01();
+		subnodes02();
+		subnodes03();
+		subnodes04();
 
-	CPPUNIT_TEST(bug81);
-	CPPUNIT_TEST_SUITE_END();
+		bug81();
+		tearDown();
+	}
 
 	void symbol();
 	void addxy01();
@@ -131,7 +133,7 @@ private:
 	bool same_mask(int, int, bool*, bool**);
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestExpr);
+
 
 
 } // end namespace

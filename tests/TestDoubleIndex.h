@@ -13,8 +13,8 @@
 #ifndef __TEST_DOUBLE_INDEX_H__
 #define __TEST_DOUBLE_INDEX_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_DoubleIndex.h"
 #include "utils.h"
 
@@ -24,23 +24,25 @@ class TestDoubleIndex : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestDoubleIndex);
-	CPPUNIT_TEST(matrix_one_elt);
-	CPPUNIT_TEST(matrix_sub_row);
-	CPPUNIT_TEST(matrix_sub_col);
-	CPPUNIT_TEST(matrix_one_row);
-	CPPUNIT_TEST(matrix_one_col);
-	CPPUNIT_TEST(matrix_rows);
-	CPPUNIT_TEST(matrix_cols);
-	CPPUNIT_TEST(matrix_all);
-	CPPUNIT_TEST(row_vec_one_elt);
-	CPPUNIT_TEST(row_vec_sub_row);
-	CPPUNIT_TEST(row_vec_all);
-	CPPUNIT_TEST(col_vec_one_elt);
-	CPPUNIT_TEST(col_vec_sub_col);
-	CPPUNIT_TEST(col_vec_all);
-	CPPUNIT_TEST(scalar_all);
-	CPPUNIT_TEST_SUITE_END();
+	void testMe() {
+		setUp();
+		matrix_one_elt();
+		matrix_sub_row();
+		matrix_sub_col();
+		matrix_one_row();
+		matrix_one_col();
+		matrix_rows();
+		matrix_cols();
+		matrix_all();
+		row_vec_one_elt();
+		row_vec_sub_row();
+		row_vec_all();
+		col_vec_one_elt();
+		col_vec_sub_col();
+		col_vec_all();
+		scalar_all();
+		tearDown();
+	}
 
 	void matrix_one_elt();
 	void matrix_sub_row();
@@ -62,7 +64,7 @@ public:
 	void scalar_all();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestDoubleIndex);
+
 
 } // namespace ibex
 

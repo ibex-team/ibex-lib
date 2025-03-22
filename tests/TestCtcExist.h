@@ -12,8 +12,8 @@
 #ifndef __TEST_CTC_EXIST_H__
 #define __TEST_CTC_EXIST_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_CtcExist.h"
 #include "utils.h"
 
@@ -23,14 +23,16 @@ class TestCtcExist : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestCtcExist);
+	void testMe() {
+		setUp();
 	
 
-		CPPUNIT_TEST(test01);
-		//CPPUNIT_TEST(test02);
-		//CPPUNIT_TEST(test03);
-		//CPPUNIT_TEST(test04);
-	CPPUNIT_TEST_SUITE_END();
+			test01();
+		//	test02();
+		//	test03();
+		//	test04();
+		tearDown();
+	}
 
 	void test01();
 	//void test02();
@@ -38,7 +40,7 @@ public:
 	//void test04();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcExist);
+
 
 
 } // namespace ibex

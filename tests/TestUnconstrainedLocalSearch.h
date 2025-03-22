@@ -11,8 +11,8 @@
 #ifndef __TEST_UNCONSTRAINED_LOCAL_SEARCH_H__
 #define __TEST_UNCONSTRAINED_LOCAL_SEARCH_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
@@ -20,16 +20,18 @@ namespace ibex {
 class TestUnconstrainedLocalSearch : public CppUnit::TestFixture {
 public:
 
-	CPPUNIT_TEST_SUITE(TestUnconstrainedLocalSearch);
+	void testMe() {
+		setUp();
 	
-		CPPUNIT_TEST(almost_diag);
-	CPPUNIT_TEST_SUITE_END();
+			almost_diag();
+		tearDown();
+	}
 
 	void simple01();
 	void almost_diag();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestUnconstrainedLocalSearch);
+
 
 
 } // end namespace ibex

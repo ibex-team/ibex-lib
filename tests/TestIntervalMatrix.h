@@ -12,8 +12,8 @@
 #ifndef __TEST_INTERVAL_MATRIX_H__
 #define __TEST_INTERVAL_MATRIX_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_IntervalMatrix.h"
 #include "utils.h"
 
@@ -23,62 +23,64 @@ class TestIntervalMatrix : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestIntervalMatrix);
+	void testMe() {
+		setUp();
 
-	CPPUNIT_TEST(eq01);
-	CPPUNIT_TEST(eq02);
-	CPPUNIT_TEST(eq03);
-	CPPUNIT_TEST(eq04);
+		eq01();
+		eq02();
+		eq03();
+		eq04();
 
-	CPPUNIT_TEST(cons01);
-	CPPUNIT_TEST(cons02);
-	CPPUNIT_TEST(cons03);
-	CPPUNIT_TEST(cons04);
+		cons01();
+		cons02();
+		cons03();
+		cons04();
 
-	CPPUNIT_TEST(consInitList);
+		consInitList();
 
-	CPPUNIT_TEST(empty01);
-	CPPUNIT_TEST(is_empty01);
-	CPPUNIT_TEST(is_empty02);
-	CPPUNIT_TEST(set_empty01);
+		empty01();
+		is_empty01();
+		is_empty02();
+		set_empty01();
 
-	CPPUNIT_TEST(inter01);
-	CPPUNIT_TEST(inter02);
-	CPPUNIT_TEST(inter03);
+		inter01();
+		inter02();
+		inter03();
 
-	CPPUNIT_TEST(set_col01);
+		set_col01();
 
-	CPPUNIT_TEST(rows01);
-	CPPUNIT_TEST(rows02);
-	CPPUNIT_TEST(rows03);
+		rows01();
+		rows02();
+		rows03();
 
-	CPPUNIT_TEST(cols01);
-	CPPUNIT_TEST(cols02);
-	CPPUNIT_TEST(cols03);
-	CPPUNIT_TEST(cols04);
-	CPPUNIT_TEST(cols05);
+		cols01();
+		cols02();
+		cols03();
+		cols04();
+		cols05();
 
-	CPPUNIT_TEST(resize01);
-	CPPUNIT_TEST(resize02);
-	CPPUNIT_TEST(resize03);
+		resize01();
+		resize02();
+		resize03();
 
-	CPPUNIT_TEST(minus01);
-	CPPUNIT_TEST(minus02);
+		minus01();
+		minus02();
 
-	CPPUNIT_TEST(add01);
-	CPPUNIT_TEST(add02);
+		add01();
+		add02();
 
-	CPPUNIT_TEST(sub01);
-	CPPUNIT_TEST(sub02);
+		sub01();
+		sub02();
 
-	CPPUNIT_TEST(mul01);
-	CPPUNIT_TEST(mul02);
+		mul01();
+		mul02();
 
-	CPPUNIT_TEST(put01);
-	CPPUNIT_TEST(rad01);
-	CPPUNIT_TEST(diam01);
+		put01();
+		rad01();
+		diam01();
 
-	CPPUNIT_TEST_SUITE_END();
+		tearDown();
+	}
 
 	// test:
 	//   operator==(const IntervalMatrix& m)
@@ -178,7 +180,7 @@ public:
 	void diam01();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestIntervalMatrix);
+
 
 
 #endif // __TEST_INTERVAL_MATRIX_H__

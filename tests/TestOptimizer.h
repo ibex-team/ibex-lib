@@ -12,8 +12,8 @@
 #ifndef __TEST_OPTIMIZER_H__
 #define __TEST_OPTIMIZER_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 #include "ibex_LPSolver.h"
 
@@ -23,17 +23,19 @@ class TestOptimizer : public CppUnit::TestFixture {
 
 public:
 
-	CPPUNIT_TEST_SUITE(TestOptimizer);
+	void testMe() {
+		setUp();
 #ifndef __IBEX_NO_LP_SOLVER__
-	CPPUNIT_TEST(vec_problem01);
-	CPPUNIT_TEST(vec_problem02);
-	CPPUNIT_TEST(issue50_1);
-	CPPUNIT_TEST(issue50_2);
-	CPPUNIT_TEST(issue50_3);
-	CPPUNIT_TEST(issue50_4);
-	CPPUNIT_TEST(unconstrained);
+		vec_problem01();
+		vec_problem02();
+		issue50_1();
+		issue50_2();
+		issue50_3();
+		issue50_4();
+		unconstrained();
 #endif
-	CPPUNIT_TEST_SUITE_END();
+		tearDown();
+	}
 
 	// problem with vector variables
 	void vec_problem01();
@@ -52,7 +54,7 @@ public:
 	void unconstrained(); // issue 333 and 335
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestOptimizer);
+
 
 } // namespace ibex
 

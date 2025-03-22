@@ -13,32 +13,23 @@
 #ifndef __TEST_FNC_KUHN_TUCKER_H__
 #define __TEST_FNC_KUHN_TUCKER_H__
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
-#include <fstream>
-
+//#include <cppunit/TestFixture.h>
+//#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
-
-#include "ibex_IntervalVector.h"
-#include "ibex_Cov.h"
-#include "ibex_CovList.h"
-#include "ibex_CovIUList.h"
-#include "ibex_CovIBUList.h"
-#include "ibex_CovManifold.h"
-#include "ibex_CovSolverData.h"
-#include "ibex_Solver.h"
 
 class TestFncKuhnTucker : public CppUnit::TestFixture {
 public:
 
-	CPPUNIT_TEST_SUITE(TestFncKuhnTucker);
+	void testMe() {
+		setUp();
 
-	CPPUNIT_TEST(one_var);
-	CPPUNIT_TEST(one_var_1_bound);
-	CPPUNIT_TEST(one_var_1_ineq_1_rbound);
-	CPPUNIT_TEST(one_var_1_eq_1_lbound);
-	CPPUNIT_TEST(two_vars_1_eq_1_ineq_2bounds);
-	CPPUNIT_TEST_SUITE_END();
+		one_var();
+		one_var_1_bound();
+		one_var_1_ineq_1_rbound();
+		one_var_1_eq_1_lbound();
+		two_vars_1_eq_1_ineq_2bounds();
+		tearDown();
+	}
 
 private:
 	void one_var();
@@ -48,6 +39,6 @@ private:
 	void two_vars_1_eq_1_ineq_2bounds();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestFncKuhnTucker);
+
 
 #endif // __TEST_FNC_KUHN_TUCKER__
