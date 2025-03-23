@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Optimizers &#8212; IBEX 2.9 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Separators" href="separator.html" />
+    <link rel="prev" title="Solvers" href="solver-prog.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="separator.html" title="Separators"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="solver-prog.html" title="Solvers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="optimizers">
+<span id="optim-prog"></span><h1>Optimizers<a class="headerlink" href="#optimizers" title="Permalink to this headline">¶</a></h1>
+<p>This documentation is for using and building global optimizers in C++.</p>
+<p>You should first know how global optimization works in Ibex. Read for this the <a class="reference internal" href="optim.html#optim"><span class="std std-ref">user guide</span></a>.</p>
+<div class="section" id="calling-ibexopt-from-c">
+<span id="optim-call-default"></span><h2>Calling IbexOpt from C++<a class="headerlink" href="#calling-ibexopt-from-c" title="Permalink to this headline">¶</a></h2>
+<p>Calling the default optimizer is as simple as for the <a class="reference internal" href="solver.html#solver"><span class="std std-ref">default solver</span></a>.
+The loaded system must simply correspond to an optimization problem. The default optimizer
+is an object of the class <code class="docutils literal notranslate"><span class="pre">DefaultOptimizer</span></code>.</p>
+<p>Once the optimizer has been executed(), the main information is stored in three fields,
+where f is the objective:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">loup</span></code> (“lo-up”) is the lowest upper bound known for min(f).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uplo</span></code> (“up-lo”) is the uppest lower bound known for min(f).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">loup_point</span></code> is the vector for which the value taken by f is less or equal to the loup.</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="cm">/* Build a constrained optimization problem from the file */</span>
+  <span class="n">System</span> <span class="nf">sys</span><span class="p">(</span><span class="n">IBEX_OPTIM_BENCHS_DIR</span> <span class="s">&quot;/easy/ex3_1_3.bch&quot;</span><span class="p">);</span>
+
+  <span class="cm">/* Build a default optimizer with a precision set to 1e-07 for f(x) */</span>
+  <span class="n">DefaultOptimizer</span> <span class="nf">o</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span><span class="mf">1e-07</span><span class="p">);</span>
+
+  <span class="n">o</span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">box</span><span class="p">);</span><span class="c1">// Run the optimizer</span>
+
+  <span class="cm">/* Display the result. */</span>
+  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;interval for the minimum: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">Interval</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">get_uplo</span><span class="p">(),</span><span class="n">o</span><span class="p">.</span><span class="n">get_loup</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;minimizer: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">o</span><span class="p">.</span><span class="n">get_loup_point</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interval</span> <span class="k">for</span> <span class="n">the</span> <span class="n">minimum</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">310.0000308420031</span><span class="p">,</span> <span class="o">-</span><span class="mf">309.999999842</span><span class="p">]</span>
+<span class="n">minimizer</span><span class="p">:</span> <span class="p">(</span><span class="o">&lt;</span><span class="mf">4.999999999</span><span class="p">,</span> <span class="mf">4.999999999000001</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.000000000000001</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mf">9.999965300266921e-10</span><span class="p">,</span> <span class="mf">9.999965300266922e-10</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="o">&gt;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-en-enclosure-of-all-global-minima">
+<span id="optim-argmin"></span><h2>Getting en enclosure of all global minima<a class="headerlink" href="#getting-en-enclosure-of-all-global-minima" title="Permalink to this headline">¶</a></h2>
+<p>Given a problem:</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}{\mbox Minimize} \ f(x)\\{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0\end{aligned}\end{align} \]</div>
+<p>IbexOpt gives  a feasible point that is <em>sufficiently</em> close to the real minimum <span class="math notranslate nohighlight">\(f^*\)</span> of the function, i.e., a point
+that satisfies</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}{\mbox uplo} \leq f(x)\leq {\mbox loup}\\{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0\end{aligned}\end{align} \]</div>
+<p>with <em>loup</em> and <em>uplo</em> are respectively a valid upper and lower bound of <span class="math notranslate nohighlight">\(f^*\)</span>, whose accuracy depend on the input precision parameter
+(note: validated feasibility with equalities requires ‘’rigor’’ mode).</p>
+<p>From this, it is possible, in a second step, to get an enclosure of all global minima thanks to <a class="reference internal" href="solver.html#solver"><span class="std std-ref">IbexSolve</span></a>.
+The idea is simply to ask for all the points that satisfy the previous constraints.
+We give now a code snippet that illustrate this.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="c1">// ========== 1st step ==========</span>
+  <span class="c1">// Build the original system: </span>
+  <span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+  <span class="n">SystemFactory</span> <span class="n">opt_fac</span><span class="p">;</span>
+  <span class="n">opt_fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+  <span class="n">opt_fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+  <span class="c1">// minimize f(x)=-x-y</span>
+  <span class="n">opt_fac</span><span class="p">.</span><span class="n">add_goal</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="p">);</span>
+  <span class="c1">// s.t. x^2+y^2&lt;=1</span>
+  <span class="n">opt_fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
+  <span class="n">System</span> <span class="nf">opt_sys</span><span class="p">(</span><span class="n">opt_fac</span><span class="p">);</span>
+  <span class="c1">// build the default optimizer</span>
+  <span class="n">DefaultOptimizer</span> <span class="nf">optimizer</span><span class="p">(</span><span class="n">opt_sys</span><span class="p">,</span><span class="mf">1e-01</span><span class="p">);</span>
+  <span class="c1">// run it with (x,y) in R^2</span>
+  <span class="n">optimizer</span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+
+  <span class="c1">// ========== 2nd step ==========</span>
+  <span class="c1">// Build the auxiliary system</span>
+  <span class="n">SystemFactory</span> <span class="n">sol_fac</span><span class="p">;</span>
+  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
+  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="o">&gt;=</span><span class="n">optimizer</span><span class="p">.</span><span class="n">get_uplo</span><span class="p">());</span>
+  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="o">&lt;=</span><span class="n">optimizer</span><span class="p">.</span><span class="n">get_loup</span><span class="p">());</span>
+  <span class="n">System</span> <span class="nf">sol_sys</span><span class="p">(</span><span class="n">sol_fac</span><span class="p">);</span>
+  <span class="n">DefaultSolver</span> <span class="nf">solver</span><span class="p">(</span><span class="n">sol_sys</span><span class="p">,</span><span class="mf">0.01</span><span class="p">);</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+  <span class="c1">// Get an enclosure of all minima, (under</span>
+  <span class="c1">// the form of manifold)</span>
+  <span class="k">const</span> <span class="n">CovSolverData</span><span class="o">&amp;</span> <span class="n">minima</span><span class="o">=</span><span class="n">solver</span><span class="p">.</span><span class="n">get_data</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-generic-optimizer">
+<span id="optim-generic"></span><h2>The generic optimizer<a class="headerlink" href="#the-generic-optimizer" title="Permalink to this headline">¶</a></h2>
+<p>Just like the <a class="reference internal" href="solver-prog.html#solver-generic"><span class="std std-ref">generic solver</span></a>, the generic optimizer is the main C++ class
+(named <code class="docutils literal notranslate"><span class="pre">Optimizer</span></code>) behind the implementation of IbexOpt.
+It takes as the solver:</p>
+<ul class="simple">
+<li><p>a <strong>contractor</strong></p></li>
+<li><p>a <strong>bisector</strong></p></li>
+<li><p>a <strong>cell buffer</strong></p></li>
+</ul>
+<p>but also requires an extra operator:</p>
+<ul class="simple">
+<li><p>a <strong>loup finder</strong>. A loup finder is in charge of the <em>goal upper bounding</em> step of the optimizer.</p></li>
+</ul>
+<p>We show below how to re-implement the default optimizer from the generic <code class="docutils literal notranslate"><span class="pre">Optimizer</span></code> class.</p>
+</div>
+<div class="section" id="implementing-ibexopt-the-default-optimizer">
+<span id="optim-implem-default"></span><h2>Implementing IbexOpt (the default optimizer)<a class="headerlink" href="#implementing-ibexopt-the-default-optimizer" title="Permalink to this headline">¶</a></h2>
+<p>The contraction performed by the default optimizer is the same as the default solver
+(see <a class="reference internal" href="solver-prog.html#solver-implem-default"><span class="std std-ref">Implementing IbexSolve (the default solver)</span></a>) except that it is not applied on the system
+itself but the <a class="reference internal" href="system.html#mod-sys-transfo-extend"><span class="std std-ref">Extended System</span></a>.</p>
+<p>The loup finder (<code class="docutils literal notranslate"><span class="pre">LoupFinderDefault</span></code>) is a mix of differents strategies. The basic idea is to
+create a continuum of feasible points (a box or a polyhedron) where the goal function can be evaluated quickly,
+that is, without checking for constraints satisfaction.
+The polyhedron (built by a <code class="docutils literal notranslate"><span class="pre">LinearizerXTaylor</span></code> object) corresponds to a <a class="reference internal" href="contractor.html#ctc-linear-relax"><span class="std std-ref">linerization technique</span></a> described in
+<a class="reference internal" href="reference.html#araya14"><span class="std std-ref">[Araya et al. 2014]</span></a> and <a class="reference internal" href="reference.html#trombettoni11"><span class="std std-ref">[Trombettoni et al. 2011]</span></a>, based on <em>inner region extraction</em>.
+It also resorts to the linerization offered by affine arithmetic (a <code class="docutils literal notranslate"><span class="pre">LinearizerAffine</span></code> object) if the affine plugin is installed.
+The box (built by a <code class="docutils literal notranslate"><span class="pre">LoupFinderInHC4</span></code> object) is a technique based on <a class="reference internal" href="interval.html#itv-inner-arith"><span class="std std-ref">inner arithmeric</span></a> also described in
+the aforementionned articles.</p>
+<p>Finally, by default, the cell buffer (<code class="docutils literal notranslate"><span class="pre">CellDoubleHeap</span></code>) is basically a sorted heap that allows to get in priority boxes minimizing
+either the lower or upper bound of the objective enclosure (see <a class="reference internal" href="strategy.html#strategy-cell-heap"><span class="std std-ref">Cell Heap</span></a>).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="n">System</span> <span class="nf">system</span><span class="p">(</span><span class="n">IBEX_OPTIM_BENCHS_DIR</span> <span class="s">&quot;/easy/ex3_1_3.bch&quot;</span><span class="p">);</span>
+
+  <span class="kt">double</span> <span class="n">prec</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">;</span> <span class="c1">// precision</span>
+
+  <span class="c1">// normalized system (all inequalities are &quot;&lt;=&quot;)</span>
+  <span class="n">NormalizedSystem</span> <span class="nf">norm_sys</span><span class="p">(</span><span class="n">system</span><span class="p">);</span>
+
+  <span class="c1">// extended system (the objective is transformed to a constraint y=f(x))</span>
+  <span class="n">ExtendedSystem</span> <span class="nf">ext_sys</span><span class="p">(</span><span class="n">system</span><span class="p">);</span>
+
+  <span class="cm">/* ============================ building contractors ========================= */</span>
+  <span class="n">CtcHC4</span> <span class="nf">hc4</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">,</span><span class="mf">0.01</span><span class="p">);</span>
+
+  <span class="n">CtcHC4</span> <span class="nf">hc4_2</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
+
+  <span class="n">CtcAcid</span> <span class="nf">acid</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">,</span> <span class="n">hc4_2</span><span class="p">);</span>
+
+  <span class="n">LinearizerXTaylor</span> <span class="nf">linear_relax</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">);</span>
+
+  <span class="n">CtcPolytopeHull</span> <span class="nf">polytope</span><span class="p">(</span><span class="n">linear_relax</span><span class="p">);</span>
+
+  <span class="n">CtcCompo</span> <span class="nf">polytope_hc4</span><span class="p">(</span><span class="n">polytope</span><span class="p">,</span> <span class="n">hc4</span><span class="p">);</span>
+
+  <span class="n">CtcFixPoint</span> <span class="nf">fixpoint</span><span class="p">(</span><span class="n">polytope_hc4</span><span class="p">);</span>
+
+  <span class="n">CtcCompo</span> <span class="nf">compo</span><span class="p">(</span><span class="n">hc4</span><span class="p">,</span><span class="n">acid</span><span class="p">,</span><span class="n">fixpoint</span><span class="p">);</span>
+  <span class="cm">/* =========================================================================== */</span>
+
+  <span class="cm">/* Create a smear-function bisection heuristic. */</span>
+  <span class="n">SmearSumRelative</span> <span class="nf">bisector</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">,</span> <span class="n">prec</span><span class="p">);</span>
+
+  <span class="cm">/** Create cell buffer (fix exploration ordering) */</span>
+  <span class="n">CellDoubleHeap</span> <span class="nf">buffer</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">);</span>
+
+  <span class="cm">/** Create a &quot;loup&quot; finder (find feasible points) */</span>
+  <span class="n">LoupFinderDefault</span> <span class="nf">loup_finder</span><span class="p">(</span><span class="n">norm_sys</span><span class="p">);</span>
+
+  <span class="cm">/* Create a solver with the previous objects */</span>
+  <span class="n">Optimizer</span> <span class="nf">o</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">nb_var</span><span class="p">,</span> <span class="n">compo</span><span class="p">,</span> <span class="n">bisector</span><span class="p">,</span> <span class="n">loup_finder</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">ext_sys</span><span class="p">.</span><span class="n">goal_var</span><span class="p">());</span>
+
+  <span class="cm">/* Run the optimizer */</span>
+  <span class="n">o</span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">box</span><span class="p">,</span><span class="n">prec</span><span class="p">);</span>
+
+  <span class="cm">/* Display a safe enclosure of the minimum */</span>
+  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;f* in &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">Interval</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">get_uplo</span><span class="p">(),</span><span class="n">o</span><span class="p">.</span><span class="n">get_loup</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="cm">/* Report performances */</span>
+  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;cpu time used=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">o</span><span class="p">.</span><span class="n">get_time</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;s.&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;number of cells=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">o</span><span class="p">.</span><span class="n">get_nb_cells</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Optimizers</a><ul>
+<li><a class="reference internal" href="#calling-ibexopt-from-c">Calling IbexOpt from C++</a></li>
+<li><a class="reference internal" href="#getting-en-enclosure-of-all-global-minima">Getting en enclosure of all global minima</a></li>
+<li><a class="reference internal" href="#the-generic-optimizer">The generic optimizer</a></li>
+<li><a class="reference internal" href="#implementing-ibexopt-the-default-optimizer">Implementing IbexOpt (the default optimizer)</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="solver-prog.html"
+                        title="previous chapter">Solvers</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="separator.html"
+                        title="next chapter">Separators</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/optim-prog.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="separator.html" title="Separators"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="solver-prog.html" title="Solvers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Solvers &#8212; IBEX 2.9 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Optimizers" href="optim-prog.html" />
+    <link rel="prev" title="Strategies" href="strategy.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="optim-prog.html" title="Optimizers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="strategy.html" title="Strategies"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="solvers">
+<span id="solver-prog"></span><h1>Solvers<a class="headerlink" href="#solvers" title="Permalink to this headline">¶</a></h1>
+<p>This documentation is for using and building solvers in C++.</p>
+<p>You should first know how solvers work in Ibex. Read for this the <a class="reference internal" href="solver.html#solver"><span class="std std-ref">user guide</span></a>.</p>
+<div class="section" id="calling-ibexsolve-from-c">
+<span id="solver-call-default"></span><h2>Calling IbexSolve from C++<a class="headerlink" href="#calling-ibexsolve-from-c" title="Permalink to this headline">¶</a></h2>
+<p>You can call IbexSolve (the default solver) and get the solutions from C++.</p>
+<p>Two objects must be built: the first represents the problem (namely, a <a class="reference internal" href="system.html#mod-sys"><span class="std std-ref">system</span></a>), the second
+the solver itself. Then, we just run the solver. Here is a simple example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="cm">/* Build a system of equations from the file */</span>
+	<span class="n">System</span> <span class="nf">system</span><span class="p">(</span><span class="n">IBEX_BENCHS_DIR</span> <span class="s">&quot;/others/kolev36.bch&quot;</span><span class="p">);</span>
+
+	<span class="cm">/* Build a default solver for the system and with a precision set to 1e-07 */</span>
+	<span class="n">DefaultSolver</span> <span class="nf">solver</span><span class="p">(</span><span class="n">system</span><span class="p">,</span><span class="mf">1e-07</span><span class="p">);</span>
+
+	<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">box</span><span class="p">);</span> <span class="c1">// Run the solver</span>
+
+	<span class="cm">/* Display the solutions. */</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">solver</span><span class="p">.</span><span class="n">get_data</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> solution n°1 = ([0.1173165676349099, 0.1173165676349106] ; [0.4999999999999989, 0.5000000000000014] ; [0.8826834323650891, 0.8826834323650912] ; [-0.2071067811865488, -0.2071067811865466] ; [1.207106781186544, 1.207106781186553] ; [-2.000000000000004, -1.999999999999998])
+
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-generic-solver">
+<span id="solver-generic"></span><h2>The generic solver<a class="headerlink" href="#the-generic-solver" title="Permalink to this headline">¶</a></h2>
+<p>The generic solver is the main C++ class behind the implementation of IbexSolve.
+It is a classical branch and prune algorithm that interleaves contraction and branching (bisection) until
+boxes get sufficiently small. However, it performs a more general task that just finding solution points of square
+systems of equations: it also knows how to deal with under-constrained systems and handle manifolds.</p>
+<p>Compared to IbexSolve, the generic solver allows the following additional operators as inputs:</p>
+<ol class="arabic">
+<li><p>a <strong>contractor</strong></p>
+<blockquote>
+<div><p>Operator that contracts boxes by removing non-solution points. The contraction operator must be compatible with the
+system given (equations/inequalities). The solver performs no check (it is the user responsability). See
+<a class="reference internal" href="contractor.html#ctc"><span class="std std-ref">Contractors</span></a>.</p>
+</div></blockquote>
+</li>
+<li><p>a <strong>bisector</strong></p>
+<blockquote>
+<div><p>Operator that splits a box. Note that some bisectors have a <em>precision</em> parameter: the box is bisected providing
+it is large enough. But this precision is not directly seen by the solver which has its own precision variables
+(see <code class="docutils literal notranslate"><span class="pre">-e`̀</span>&#160; <span class="pre">and</span> <span class="pre">``-E</span></code>). If however the bisector does not split a box, this will generate an exception caught by the solver,
+which will not continue the search and backtrack. So fixing the bisector internal precision gives basically the same effect
+as fixing it with <code class="docutils literal notranslate"><span class="pre">--e</span></code>. See <a class="reference internal" href="strategy.html#strategy-bisectors"><span class="std std-ref">Bisectors</span></a> for more details.</p>
+</div></blockquote>
+</li>
+<li><p>a <strong>cell buffer</strong></p>
+<blockquote>
+<div><p>Operator that manages the list of pending boxes (a <em>cell</em> is a box with a little bit of extra information used by the search).
+See <a class="reference internal" href="strategy.html#strategy-cell-buffers"><span class="std std-ref">Cell buffers</span></a> for more details.</p>
+</div></blockquote>
+</li>
+</ol>
+<p>Our next example creates a solver for the intersection of two circles of radius <span class="math notranslate nohighlight">\(d\)</span>,
+one centered on <span class="math notranslate nohighlight">\((0,0)\)</span> and the other in <span class="math notranslate nohighlight">\((1,0)\)</span>.</p>
+<p>To this end we first create a vector-valued function:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}(x,y) \mapsto \begin{pmatrix} x^2+y^2-d \\ (x-1)^2+y^2-d \end{pmatrix}\end{split}\]</div>
+<p>Then, we build two contractors; a <a class="reference internal" href="contractor.html#ctc-fwd-bwd"><span class="std std-ref">forward-bacwkard</span></a> contractor and (because the system is square),
+an <a class="reference internal" href="tutorial.html#tuto-newton"><span class="std std-ref">interval Newton</span></a> contractor.</p>
+<p>We chose as bisection operator the <em>round-robin</em> operator, that splits each component in turn.
+The precision of the solver is set to 1e-7.</p>
+<p>Finally, the cell buffer is a stack, which leads to a depth-first search.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="cm">/* Create the function (x,y)-&gt;( ||(x,y)||-d,  ||(x,y)-(1,0)||-d ) */</span>
+	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+	<span class="kt">double</span> <span class="n">d</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">-</span><span class="n">d</span><span class="p">,</span>
+		                  <span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">-</span><span class="n">d</span><span class="p">));</span>
+
+	<span class="cm">/* Create the system f(x,y)=0. */</span>
+	<span class="n">SystemFactory</span> <span class="n">factory</span><span class="p">;</span>
+	<span class="n">factory</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+	<span class="n">factory</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+	<span class="n">factory</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span><span class="p">);</span>
+	<span class="n">System</span> <span class="nf">system</span><span class="p">(</span><span class="n">factory</span><span class="p">);</span>
+
+	<span class="cm">/* Create the domain of variables */</span>
+	<span class="kt">double</span> <span class="n">init_box</span><span class="p">[][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">},{</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">}</span> <span class="p">};</span>
+	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">init_box</span><span class="p">);</span>
+
+	<span class="cm">/* Create a first contractor w.r.t f(x,y)=0 (forward-backward) */</span>
+	<span class="n">CtcFwdBwd</span> <span class="nf">fwdBwd</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+
+	<span class="cm">/* Create a second contractor (interval Newton) */</span>
+	<span class="n">CtcNewton</span> <span class="nf">newton</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+
+	<span class="cm">/* Compose the two contractors */</span>
+	<span class="n">CtcCompo</span> <span class="nf">compo</span><span class="p">(</span><span class="n">fwdBwd</span><span class="p">,</span><span class="n">newton</span><span class="p">);</span>
+
+	<span class="cm">/* Create a round-robin bisection heuristic and set the</span>
+<span class="cm">	 * precision of boxes to 0. */</span>
+	<span class="n">RoundRobin</span> <span class="nf">bisector</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+	<span class="cm">/* Create a &quot;stack of boxes&quot; (CellStack), which has the effect of</span>
+<span class="cm">	 * performing a depth-first search. */</span>
+	<span class="n">CellStack</span> <span class="n">buff</span><span class="p">;</span>
+
+	<span class="cm">/* Vector precisions required on variables */</span>
+	<span class="n">Vector</span> <span class="nf">prec</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">1e-07</span><span class="p">);</span>
+
+	<span class="cm">/* Create a solver with the previous objects */</span>
+	<span class="n">Solver</span> <span class="nf">s</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">compo</span><span class="p">,</span> <span class="n">bisector</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">prec</span><span class="p">);</span>
+
+	<span class="cm">/* Run the solver */</span>
+	<span class="n">s</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
+
+	<span class="cm">/* Display the solutions */</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get_data</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> solution n°1 = ([0.4999999999999996, 0.5000000000000003] ; [-0.8660254037844389, -0.8660254037844383])
+ solution n°2 = ([0.4999999999999998, 0.5000000000000005] ; [0.8660254037844383, 0.8660254037844389])
+
+</pre></div>
+</div>
+</div>
+<div class="section" id="implementing-ibexsolve-the-default-solver">
+<span id="solver-implem-default"></span><h2>Implementing IbexSolve (the default solver)<a class="headerlink" href="#implementing-ibexsolve-the-default-solver" title="Permalink to this headline">¶</a></h2>
+<p>IbexSolve is an instance of the generic solver with (almost) all parameters set by default.</p>
+<p>We already showed how to <a class="reference internal" href="#calling-ibexsolve-from-c">Calling IbexSolve from C++</a>.
+To give a further insight into the generic solver and its possible settings, we explain now how to re-create the default solver
+by yourself.</p>
+<p>The contractor of the default solver is obtained with the following receipe.
+This is a <a class="reference internal" href="tutorial.html#tuto-inter-union-compo"><span class="std std-ref">composition</span></a> of</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="contractor.html#ctc-hc4"><span class="std std-ref">HC4</span></a></p></li>
+<li><p><a class="reference internal" href="contractor.html#ctc-acid"><span class="std std-ref">ACID</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial.html#tuto-newton"><span class="std std-ref">Interval Newton</span></a> (only if it is a square system of equations)</p></li>
+<li><dl class="simple">
+<dt>A <a class="reference internal" href="tutorial.html#tuto-fixpoint"><span class="std std-ref">fixpoint</span></a> of the <a class="reference internal" href="contractor.html#ctc-polytope-hull"><span class="std std-ref">Polytope Hull</span></a> of two linear relaxations combined:</dt><dd><ul class="simple">
+<li><p>the relaxation called X-Taylor;</p></li>
+<li><p>the relaxation generated by affine arithmetic. See <a class="reference internal" href="contractor.html#ctc-linear-relax"><span class="std std-ref">Linearizations</span></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+<p>The bisector is based on the <a class="reference internal" href="strategy.html#strategy-smear-function"><span class="std std-ref">The Smear Function</span></a> with maximal relative impact.</p>
+<p>So the following program exactly reproduces the default solver.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">System</span> <span class="nf">system</span><span class="p">(</span><span class="n">IBEX_BENCHS_DIR</span> <span class="s">&quot;/others/kolev36.bch&quot;</span><span class="p">);</span>
+
+	<span class="cm">/* ============================ building contractors ========================= */</span>
+	<span class="n">CtcHC4</span> <span class="nf">hc4</span><span class="p">(</span><span class="n">system</span><span class="p">,</span><span class="mf">0.01</span><span class="p">);</span>
+
+	<span class="n">CtcHC4</span> <span class="nf">hc4_2</span><span class="p">(</span><span class="n">system</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
+
+	<span class="n">CtcAcid</span> <span class="nf">acid</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">hc4_2</span><span class="p">);</span>
+
+	<span class="n">CtcNewton</span> <span class="nf">newton</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">f_ctrs</span><span class="p">,</span> <span class="mf">5e+08</span><span class="p">,</span> <span class="mf">1e-07</span><span class="p">,</span> <span class="mf">1e-04</span><span class="p">);</span>
+
+    <span class="n">LinearizerXTaylor</span> <span class="nf">linear_relax</span><span class="p">(</span><span class="n">system</span><span class="p">);</span>
+
+	<span class="n">CtcPolytopeHull</span> <span class="nf">polytope</span><span class="p">(</span><span class="n">linear_relax</span><span class="p">);</span>
+
+	<span class="n">CtcCompo</span> <span class="nf">polytope_hc4</span><span class="p">(</span><span class="n">polytope</span><span class="p">,</span> <span class="n">hc4</span><span class="p">);</span>
+
+	<span class="n">CtcFixPoint</span> <span class="nf">fixpoint</span><span class="p">(</span><span class="n">polytope_hc4</span><span class="p">);</span>
+
+	<span class="n">CtcCompo</span> <span class="nf">compo</span><span class="p">(</span><span class="n">hc4</span><span class="p">,</span><span class="n">acid</span><span class="p">,</span><span class="n">newton</span><span class="p">,</span><span class="n">fixpoint</span><span class="p">);</span>
+	<span class="cm">/* =========================================================================== */</span>
+
+	<span class="cm">/* Create a smear-function bisection heuristic. */</span>
+	<span class="n">SmearSumRelative</span> <span class="nf">bisector</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="mf">1e-07</span><span class="p">);</span>
+
+	<span class="cm">/* Create a &quot;stack of boxes&quot; (CellStack) (depth-first search). */</span>
+	<span class="n">CellStack</span> <span class="n">buff</span><span class="p">;</span>
+
+	<span class="cm">/* Vector precisions required on variables */</span>
+	<span class="n">Vector</span> <span class="nf">prec</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">1e-07</span><span class="p">);</span>
+
+	<span class="cm">/* Create a solver with the previous objects */</span>
+	<span class="n">Solver</span> <span class="nf">s</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">compo</span><span class="p">,</span> <span class="n">bisector</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">prec</span><span class="p">);</span>
+
+	<span class="cm">/* Run the solver */</span>
+	<span class="n">s</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">box</span><span class="p">);</span>
+
+	<span class="cm">/* Display the solutions */</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get_data</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="cm">/* Report performances */</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;cpu time used=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get_time</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;s.&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;number of cells=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get_nb_cells</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parallelizing-search">
+<span id="solver-parallel"></span><h2>Parallelizing search<a class="headerlink" href="#parallelizing-search" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to parallelize the search by running (in parallel) solvers for different subboxes of the initial box.</p>
+<p>Be aware however that Ibex has not been designed (so far) to be parallelized and the following lines only reports our preliminary
+experiments.</p>
+<p>Here are the important observations:</p>
+<ul>
+<li><p>The sub-library gaol is <strong>not</strong> thread-safe. You must compile Ibex with <strong>filib</strong> which seems to be OK (see <span class="xref std std-ref">install-options</span>).</p></li>
+<li><p>The linear solver Soplex (we have not tested yet with Cplex) seems to be thread-safe but sometimes generates error messages on the
+console like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ISOLVE56</span> <span class="n">stop</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">basis</span> <span class="n">status</span><span class="p">:</span> <span class="n">PRIMAL</span> <span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">solver</span> <span class="n">status</span><span class="p">:</span> <span class="n">RUNNING</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>So, calling Soplex several times simultaneously seems not to be allowed, but Soplex at least manages the case properly, that is,
+stops. As far as we have observed, we don’t lose solutions even when this kind of message appear.</p>
+</li>
+<li><p>Ibex objects are not thread-safe which means that the solvers run in parallel must share no information. In particular,
+each solver must have its <strong>own copy</strong> of the system.</p></li>
+</ul>
+<p>Here is an example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// Get the system</span>
+	<span class="n">System</span> <span class="nf">sys1</span><span class="p">(</span><span class="n">IBEX_BENCHS_DIR</span> <span class="s">&quot;/polynom/ponts-geo.bch&quot;</span><span class="p">);</span>
+
+	<span class="c1">// Create a copy for the second solver</span>
+	<span class="n">System</span> <span class="nf">sys2</span><span class="p">(</span><span class="n">sys1</span><span class="p">,</span><span class="n">System</span><span class="o">::</span><span class="n">COPY</span><span class="p">);</span>
+
+	<span class="c1">// Precision of the solution boxes</span>
+	<span class="kt">double</span> <span class="n">prec</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">;</span>
+
+	<span class="c1">// Create two solvers</span>
+	<span class="n">DefaultSolver</span> <span class="nf">solver1</span><span class="p">(</span><span class="n">sys1</span><span class="p">,</span><span class="n">prec</span><span class="p">);</span>
+	<span class="n">DefaultSolver</span> <span class="nf">solver2</span><span class="p">(</span><span class="n">sys2</span><span class="p">,</span><span class="n">prec</span><span class="p">);</span>
+
+	<span class="c1">// Create a partition of the initial box into two subboxes,</span>
+	<span class="c1">// by bisecting any variable (here, n°4)</span>
+	<span class="n">pair</span><span class="o">&lt;</span><span class="n">IntervalVector</span><span class="p">,</span><span class="n">IntervalVector</span><span class="o">&gt;</span> <span class="n">pair</span><span class="o">=</span><span class="n">sys1</span><span class="p">.</span><span class="n">box</span><span class="p">.</span><span class="n">bisect</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+
+	<span class="c1">// =======================================================</span>
+	<span class="c1">// Run the solvers in parallel</span>
+	<span class="c1">// =======================================================</span>
+<span class="cp">#pragma omp parallel sections</span>
+	<span class="p">{</span>
+		<span class="n">solver1</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+<span class="cp">#pragma omp section</span>
+		<span class="n">solver2</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="c1">// =======================================================</span>
+
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;solver #1 found &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">solver1</span><span class="p">.</span><span class="n">get_data</span><span class="p">().</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;solver #2 found &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">solver2</span><span class="p">.</span><span class="n">get_data</span><span class="p">().</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>If I remove the <code class="docutils literal notranslate"><span class="pre">#pragma</span></code> the program displays:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">solver</span> <span class="c1">#1 found 64</span>
+<span class="n">solver</span> <span class="c1">#2 found 64</span>
+
+<span class="n">real</span>  <span class="mi">0</span><span class="n">m5</span><span class="o">.</span><span class="mi">121</span><span class="n">s</span>        <span class="o">//</span> <span class="o">&lt;--------</span> <span class="n">total</span> <span class="n">time</span>
+<span class="n">user</span>  <span class="mi">0</span><span class="n">m5</span><span class="o">.</span><span class="mi">088</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>With the <code class="docutils literal notranslate"><span class="pre">#pragma</span></code>, I obtain:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">solver</span> <span class="c1">#1 found 64</span>
+<span class="n">solver</span> <span class="c1">#2 found 64</span>
+
+<span class="n">real</span>  <span class="mi">0</span><span class="n">m2</span><span class="o">.</span><span class="mi">902</span><span class="n">s</span>        <span class="o">//</span> <span class="o">&lt;--------</span> <span class="n">total</span> <span class="n">time</span>
+<span class="n">user</span>  <span class="mi">0</span><span class="n">m5</span><span class="o">.</span><span class="mi">468</span><span class="n">s</span>
+</pre></div>
+</div>
+<p><strong>Note:</strong> It is pure luck that by bisecting the 4th variable, we obtain exactly half of the solutions on each sub-box.
+Also, looking for the 64 first solutions takes here around the same time than looking for the 64 subsequent ones, which
+is particular to this example. So, contrary to what this example seems to prove, splitting the box in two subboxes does
+not divide the running time by two in general. Of course :)</p>
+<p>If you are afraid about the messages of the linear solver, you can replace the <code class="docutils literal notranslate"><span class="pre">DefaultSolver</span></code> by your own dedicated solver
+that does not resort to the simplex, ex:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Vector</span> <span class="nf">eps_min</span><span class="p">(</span><span class="n">sys1</span><span class="p">.</span><span class="n">nb_var</span><span class="p">,</span><span class="n">prec</span><span class="p">);</span>
+	<span class="n">Vector</span> <span class="nf">eps_max</span><span class="p">(</span><span class="n">sys1</span><span class="p">.</span><span class="n">nb_var</span><span class="p">,</span><span class="n">POS_INFINITY</span><span class="p">);</span>
+	<span class="n">Solver</span> <span class="nf">solver1</span><span class="p">(</span><span class="n">sys1</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcCompo</span><span class="p">(</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcHC4</span><span class="p">(</span><span class="n">sys1</span><span class="p">),</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcNewton</span><span class="p">(</span><span class="n">sys1</span><span class="p">.</span><span class="n">f_ctrs</span><span class="p">)),</span> <span class="o">*</span><span class="k">new</span> <span class="n">RoundRobin</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span> <span class="o">*</span><span class="k">new</span> <span class="n">CellStack</span><span class="p">(),</span> <span class="n">eps_min</span><span class="p">,</span> <span class="n">eps_max</span><span class="p">);</span>
+	<span class="n">Solver</span> <span class="nf">solver2</span><span class="p">(</span><span class="n">sys2</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcCompo</span><span class="p">(</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcHC4</span><span class="p">(</span><span class="n">sys2</span><span class="p">),</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcNewton</span><span class="p">(</span><span class="n">sys2</span><span class="p">.</span><span class="n">f_ctrs</span><span class="p">)),</span> <span class="o">*</span><span class="k">new</span> <span class="n">RoundRobin</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span> <span class="o">*</span><span class="k">new</span> <span class="n">CellStack</span><span class="p">(),</span> <span class="n">eps_min</span><span class="p">,</span> <span class="n">eps_max</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Solvers</a><ul>
+<li><a class="reference internal" href="#calling-ibexsolve-from-c">Calling IbexSolve from C++</a></li>
+<li><a class="reference internal" href="#the-generic-solver">The generic solver</a></li>
+<li><a class="reference internal" href="#implementing-ibexsolve-the-default-solver">Implementing IbexSolve (the default solver)</a></li>
+<li><a class="reference internal" href="#parallelizing-search">Parallelizing search</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="strategy.html"
+                        title="previous chapter">Strategies</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="optim-prog.html"
+                        title="next chapter">Optimizers</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/solver-prog.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="optim-prog.html" title="Optimizers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="strategy.html" title="Strategies"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2007-2020, IMT Atlantique.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

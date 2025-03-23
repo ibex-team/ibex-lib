@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Interval Computations &#8212; IBEX 2.8 documentation</title>
+    <title>Interval Computations &#8212; IBEX 2.9 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="tutorial.html" title="Tutorial"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -510,7 +510,7 @@ any “point” p, where a “set” designates here one object of either of the
 <li><p><code class="docutils literal notranslate"><span class="pre">MatrixArray</span></code>.</p></li>
 </ul>
 <p>Given equidimensional sets [x], [y] and a point p, the following table gives the set-membership
-predicates currently available in Ibex (from release 2.8) and their mathematical intepretation:</p>
+predicates currently available in Ibex (from release 2.9) and their mathematical intepretation:</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 30%" />
@@ -546,11 +546,11 @@ predicates currently available in Ibex (from release 2.8) and their mathematical
 </tr>
 <tr class="row-odd"><td><p>x.is_interior_subset(y)</p></td>
 <td><p><span class="math notranslate nohighlight">\([x]\subseteq \mathring{[y]}\)</span></p></td>
-<td><p>release 2.8</p></td>
+<td><p>release 2.9</p></td>
 </tr>
 <tr class="row-even"><td><p>x.is_strict_interior_subset(y)</p></td>
 <td><p><span class="math notranslate nohighlight">\([x]\subseteq \mathring{[y]}\wedge [x]\neq [y]\)</span></p></td>
-<td><p>release 2.8</p></td>
+<td><p>release 2.9</p></td>
 </tr>
 <tr class="row-odd"><td><p>x.is_superset(y)</p></td>
 <td><p><span class="math notranslate nohighlight">\([x]\supseteq [y]\)</span></p></td>
@@ -566,19 +566,19 @@ predicates currently available in Ibex (from release 2.8) and their mathematical
 </tr>
 <tr class="row-even"><td><p>x.interior_contains(p)</p></td>
 <td><p><span class="math notranslate nohighlight">\(p\in \mathring{[x]}\)</span></p></td>
-<td><p>release 2.8</p></td>
+<td><p>release 2.9</p></td>
 </tr>
 <tr class="row-odd"><td><p>x.intersects(y)</p></td>
 <td><p><span class="math notranslate nohighlight">\([x]\cap [y]\neq\emptyset\)</span></p></td>
-<td><p>release 2.8</p></td>
+<td><p>release 2.9</p></td>
 </tr>
 <tr class="row-even"><td><p>x.overlaps(y)</p></td>
 <td><p><span class="math notranslate nohighlight">\(\mathring{[x]}\cap \mathring{[y]}\neq\emptyset\)</span></p></td>
-<td><p>release 2.8</p></td>
+<td><p>release 2.9</p></td>
 </tr>
 <tr class="row-odd"><td><p>x.is_disjoint(y)</p></td>
 <td><p><span class="math notranslate nohighlight">\([x]\cap [y]=\emptyset\)</span></p></td>
-<td><p>release 2.8</p></td>
+<td><p>release 2.9</p></td>
 </tr>
 </tbody>
 </table>
@@ -619,7 +619,7 @@ predicates currently available in Ibex (from release 2.8) and their mathematical
 <p>to create the Cartesian product.</p>
 <div class="section" id="complementary-and-set-difference">
 <span id="itv-diff"></span><h3>Complementary and set difference<a class="headerlink" href="#complementary-and-set-difference" title="Permalink to this headline">¶</a></h3>
-<p>These set operations are only available for intervals (from release 2.8) and interval vectors.</p>
+<p>These set operations are only available for intervals (from release 2.9) and interval vectors.</p>
 <p>In the case of intervals, the function <code class="docutils literal notranslate"><span class="pre">complementary</span></code>  stores the complementary of <code class="docutils literal notranslate"><span class="pre">*this</span></code> in two intervals <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>. More exactly, the result is the
 closure of the complementary since open bounds are not representable (except for infinity and minus infinity). E.g, the “complementary” of <span class="math notranslate nohighlight">\((-\infty,0]\)</span>
 is <span class="math notranslate nohighlight">\([0,+\infty)\)</span>.</p>
@@ -1597,7 +1597,7 @@ inner box [xin] is indeed “inflated” to a larger inner box [x]. More precise
         <li class="right" >
           <a href="tutorial.html" title="Tutorial"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

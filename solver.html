@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>IbexSolve &#8212; IBEX 2.8 documentation</title>
+    <title>IbexSolve &#8212; IBEX 2.9 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -18,7 +18,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="IbexOpt" href="optim.html" />
-    <link rel="prev" title="Do it Yourself!" href="lab.html" /> 
+    <link rel="prev" title="Installation" href="install-cmake.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -30,9 +30,9 @@
           <a href="optim.html" title="IbexOpt"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="lab.html" title="Do it Yourself!"
+          <a href="install-cmake.html" title="Installation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -43,49 +43,350 @@
             
   <div class="section" id="ibexsolve">
 <span id="solver"></span><h1>IbexSolve<a class="headerlink" href="#ibexsolve" title="Permalink to this headline">¶</a></h1>
+<p>This documentation is for using IbexSolve with the command prompt.</p>
+<p>To use IbexSolve in C++ or program your own solver with Ibex, see the <a class="reference internal" href="solver-prog.html#solver-prog"><span class="std std-ref">programmer guide</span></a>.</p>
 <div class="section" id="getting-started">
-<span id="solver-run-default"></span><h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
-<p>IbexSolve is a end-user program that solves a system of nonlinear equations rigorously
-(that is, it does not lose any solution and return each solution under the form of a
-small box enclosing the true value). It resorts to
+<span id="solver-intro"></span><h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="the-very-basic-idea">
+<h3>The very basic idea<a class="headerlink" href="#the-very-basic-idea" title="Permalink to this headline">¶</a></h3>
+<p>IbexSolve solves systems of equation in a <em>complete</em> and <em>validated</em> way.</p>
+<p>If you have an equation, say,</p>
+<div class="math notranslate nohighlight">
+\[x^2=1\]</div>
+<p>and you ask a traditional numerical algorithm to solve it, you will get an answer like:</p>
+<div class="math notranslate nohighlight">
+\[x=0.999...\]</div>
+<p>or maybe something close to the other root -1. But you will not get both roots
+and you will not know exactly how far the returned value is from the actual root.</p>
+<p>IbexSolve will give you the following answer:</p>
+<div class="math notranslate nohighlight">
+\[x \in [-1.001,-0.999]  \quad \mbox{or} \quad x\in[0.999,1.001].\]</div>
+<p>First, all solutions are returned: this is what we mean by <em>completeness</em>.</p>
+<p>Second, each actual solution is rigorously enclosed in an interval:
+this is what <em>validation</em> means.</p>
+</div>
+<div class="section" id="first-example-well-constrained">
+<span id="solver-intro-ex1"></span><h3>First example (well-constrained)<a class="headerlink" href="#first-example-well-constrained" title="Permalink to this headline">¶</a></h3>
+<p>Open a terminal (move to the <code class="docutils literal notranslate"><span class="pre">bin</span></code> subfolder if necessary) and run IbexSolve with, for example, the problem named <cite>Kin1.bch</cite> located at the specified path:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ibexsolve</span> <span class="p">[</span><span class="n">ibex</span><span class="o">-</span><span class="n">lib</span><span class="o">-</span><span class="n">path</span><span class="p">]</span><span class="o">/</span><span class="n">benchs</span><span class="o">/</span><span class="n">solver</span><span class="o">/</span><span class="n">non</span><span class="o">-</span><span class="n">polynom</span><span class="o">/</span><span class="n">Kin1</span><span class="o">.</span><span class="n">bch</span>
+</pre></div>
+</div>
+<p>After a short delay, the following result should be displayed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>solving successful!
+
+number of solution boxes:      16
+number of boundary boxes:      --
+number of unknown boxes:       --
+number of pending boxes:       --
+cpu time used:                 0.122523s
+number of cells:               47
+</pre></div>
+</div>
+<p>You see that IbexSolve has found 16 solutions. To obtain the solutions, just run the same command with the option <code class="docutils literal notranslate"><span class="pre">-s</span></code>. You will have each solution
+displayed as a list of thin intervals enclosing the components of the true solution:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>solution n°1 = ([0.3999964622870867, 0.3999964622870879] ; [0.819005889921108, 0.8190058899211153] ; ...)
+</pre></div>
+</div>
+<p>Also are reported here the CPU time (around a tenth of second in this case) and the number of “cells” required.
+This number basically corresponds to the total number of hypothesis (bisections) that was required to solve the problem.
+It gives an indication of its complexity.</p>
+<p>The file <cite>Kin1.bch</cite> is a plain text file, you can open it with any editor. You will see that it is a problem with 6 variables
+and 6 non-linear constraints, with sine and cosine operators. The file is written in the <a class="reference internal" href="minibex.html#mod-minibex"><span class="std std-ref">Minibex syntax</span></a>.</p>
+</div>
+<div class="section" id="second-example-under-constrained">
+<span id="solver-intro-ex2"></span><h3>Second example (under-constrained)<a class="headerlink" href="#second-example-under-constrained" title="Permalink to this headline">¶</a></h3>
+<p>One important originality of IbexSolve (compared to the other interval tools) is that it is not limited to square (well-constrained) systems
+as in the previous example.</p>
+<p>Open your editor and type the following text in a <cite>circle.mbx</cite> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">variables</span>
+  <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+
+<span class="n">constraints</span>
+  <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>The solution set in this case is a full curve in the plane, the unit circle.</p>
+<p>Then run IbexSolve to solve it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ibexsolve</span> <span class="n">circle</span><span class="o">.</span><span class="n">mbx</span>
+</pre></div>
+</div>
+<p>You may expect to obtain a bunch of boxes in return enclosing the curve, like in the picture below
+(we have superimposed the circle (in red) for clarity):</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/disc1-ibexsolve.svg"><img alt="_images/disc1-ibexsolve.svg" src="_images/disc1-ibexsolve.svg" width="300px" /></a>
+</div>
+<p>IbexSolve can calculate that. But this means that you expect a fine description of the curve and that you
+accept to pay the inevitable price of a voluminous output (especially in higher dimension).</p>
+<p>A different and opposite strategy would be to expect in return a single box enclosing the curve,
+that is, the square [0,1]x[0,1]. You would then have a minimal output but a very coarse description of the curve.</p>
+<p>The default behavior of IbexSolve is somehow a best compromise between these two extreme strategies. It tries to
+return a minimal number of boxes while capturing the “topology” of the solution set.</p>
+<p>In the circle example, IbexSolve will just produce 11 solutions. They are depicted below:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/disc2-ibexsolve.svg"><img alt="_images/disc2-ibexsolve.svg" src="_images/disc2-ibexsolve.svg" width="300px" /></a>
+</div>
+<p>As you can seen, the paving with the boxes is a rough description of the circle. Still, we see that the overall shape
+is captured. This paving clearly looks differently than if we had solve, say, a linear equation.</p>
+<p>In more precise terms, each <em>solution box</em> has the property to be crossed by the curve in a regular way.
+Look for instance at the gray box. The curve makes no loop or u-turn whatsoever inside the box and crosses it
+from side to side along the y-axis.</p>
+<p>Formally, it is proven for this box that for all values y in [y] there exists x in [x], and a single one,
+such that (x,y) is a point of the curve. More exactly, we have:</p>
+<div class="math notranslate nohighlight">
+\[\forall y\in\mathring{[y]} \quad \exists ! \ x\in\mathring{[x]} \quad x^2+y^2=1\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathring{\cdot}\)</span> stands for <em>the interior of</em>.</p>
+<p>All the 11 boxes have this property except that the roles of x and y can be switched, depending whether the box is
+more horizontal or vertical. This information is given in the <a class="reference internal" href="#solver-output"><span class="std std-ref">output data</span></a>.</p>
+<p>Of course, all this generalizes to any dimension.</p>
+<p>If you need to refine the paving, that is, to have boxes of smaller size, use for this the <a class="reference internal" href="#solver-options-eps-max"><span class="std std-ref">eps-max parameter</span></a>.
+For instance, if we run IbexSolve using <code class="docutils literal notranslate"><span class="pre">-E</span> <span class="pre">0.5</span></code>  (or equivalently, <code class="docutils literal notranslate"><span class="pre">--eps-max=0.5</span></code>) we obtain the following paving:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/disc3-ibexsolve.svg"><img alt="_images/disc3-ibexsolve.svg" src="_images/disc3-ibexsolve.svg" width="300px" /></a>
+</div>
+</div>
+<div class="section" id="third-example-inequalities">
+<span id="solver-intro-ex3"></span><h3>Third example (inequalities)<a class="headerlink" href="#third-example-inequalities" title="Permalink to this headline">¶</a></h3>
+<p>Let us now turn to a single inequality. Just change the “=” sign of the previous example by “&lt;=”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">variables</span>
+  <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+
+<span class="n">constraints</span>
+  <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>Now the result is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">number</span> <span class="n">of</span> <span class="n">solution</span> <span class="n">boxes</span><span class="p">:</span>      <span class="mi">11629</span>
+<span class="n">number</span> <span class="n">of</span> <span class="n">boundary</span> <span class="n">boxes</span><span class="p">:</span>      <span class="o">--</span>
+<span class="n">number</span> <span class="n">of</span> <span class="n">unknown</span> <span class="n">boxes</span><span class="p">:</span>       <span class="mi">8941</span>
+<span class="n">number</span> <span class="n">of</span> <span class="n">pending</span> <span class="n">boxes</span><span class="p">:</span>       <span class="o">--</span>
+<span class="n">cpu</span> <span class="n">time</span> <span class="n">used</span><span class="p">:</span>                 <span class="mf">2.38774</span><span class="n">s</span>
+<span class="n">number</span> <span class="n">of</span> <span class="n">cells</span><span class="p">:</span>               <span class="mi">41139</span>
+</pre></div>
+</div>
+<p>Below is the plot of all solution boxes (on the left), the plot of all unknown boxes (on the right).</p>
+<p><a class="reference internal" href="_images/disc4-ibexsolve-1.svg"><img alt="solver-intro_ex3-pic1" src="_images/disc4-ibexsolve-1.svg" width="300px" /></a>   <a class="reference internal" href="_images/disc4-ibexsolve-2.svg"><img alt="solver-intro_ex3-pic2" src="_images/disc4-ibexsolve-2.svg" width="300px" /></a></p>
+<p>Here is a zoom on a fraction of unknown boxes:</p>
+<p><a class="reference internal" href="_images/disc4-ibexsolve-3.svg"><img alt="solver-intro_ex3-pic3" src="_images/disc4-ibexsolve-3.svg" width="300px" /></a></p>
+<p>This times, the solution boxes are all entirely inside the disk and the so-called unknown boxes enclose the boundary.</p>
+<p>The choice of this terminology, and its consistency with the previous example, is justified <a class="reference internal" href="#solver-output"><span class="std std-ref">further</span></a>.</p>
+<p>Just notice that the full disk is covered by the union of solution and unknown boxes.</p>
+<p>It is possible to set the thickness of the boundary using the <a class="reference internal" href="#solver-options-eps-min"><span class="std std-ref">eps-min parameter</span></a>.</p>
+<p>For instance, if you IbexSolve using <code class="docutils literal notranslate"><span class="pre">-e</span> <span class="pre">0.1</span></code> (or equivalently, <code class="docutils literal notranslate"><span class="pre">--eps-min=0.1</span></code>), you obtain:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/disc5-ibexsolve.svg"><img alt="_images/disc5-ibexsolve.svg" src="_images/disc5-ibexsolve.svg" width="300px" /></a>
+</div>
+</div>
+<div class="section" id="scope-and-limits">
+<h3>Scope and limits<a class="headerlink" href="#scope-and-limits" title="Permalink to this headline">¶</a></h3>
+<p>As illustrated by our previous examples, IbexSolve can solve any system of nonlinear equations and inequalities
+in a complete and validated way, including underconstrained systems.</p>
+<p>All usual operators are allowed, including <strong>trigonometric</strong> functions but also <strong>sign</strong>, <strong>absolute value</strong> and <strong>min/max</strong> operators.</p>
+<p>Furthermore, IbexSolve is a end-user program cooked by the ibex team, that resorts to
 a unique black-box strategy (whatever the input problem is) and with a very limited
 number of parameters. Needless to say, this strategy is a kind of compromise and not the
-best one for a given problem.</p>
-<p>Note that this program is based on the <a class="reference internal" href="#solver-generic"><span class="std std-ref">generic solver</span></a>, a C++ class
-that allows to build a more customizable solver.</p>
-<p>You can directly apply this solver on one of the benchmark problems
-distributed with Ibex.
-The benchmarks are all written in the <a class="reference external" href="#func-minibex">Minibex syntax</a> and stored in an arborescence under <code class="docutils literal notranslate"><span class="pre">plugins/solver/benchs/</span></code>.</p>
-<p>Open a terminal, move to the <code class="docutils literal notranslate"><span class="pre">bin</span></code> subfolder and run IbexSolve with, for example, the problem named kolev36 located at the specified path:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/ibex-2.8.0$ cd bin
-~/ibex-2.8.0/bin$ ./ibexsolve ../plugins/solver/benchs/others/kolev36.bch
-</pre></div>
+best one for a specific problem.</p>
+<p>For programmers, the core library actually offers a <a class="reference internal" href="solver-prog.html#solver-generic"><span class="std std-ref">generic solver</span></a>, a C++ class
+that allows to easily build your own solver.</p>
+<p>The main shortcoming of IbexSolve is that time is not bounded. This solver is not appropriate for online computations.
+You may typically expect some seconds or minutes of computing for small-scaled problems (less than
+10 variables). But, beyond, it can takes hours or more.</p>
 </div>
-<p>The following result should be displayed:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>***************************** setup *****************************
-  file loaded:         ../plugins/solver/benchs/others/kolev36.bch
-  output file:         ../plugins/solver/benchs/others/kolev36.mnf
-*****************************************************************
-
-running............
-
-solving successful!
-
-number of inner boxes:         1
-number of boundary boxes:      0
-number of unknown boxes:       0
-number of pending boxes:       0
-cpu time used:                 0.0640001s
-number of cells:               25
-
-results written in ../plugins/solver/benchs/others/kolev36.mnf
-</pre></div>
 </div>
-<p>The number of “inner boxes” correspond to the number of solutions found (there is just one here). To see the solution, use the option <code class="docutils literal notranslate"><span class="pre">-s</span></code>.</p>
-<p>In the report, the “number of cells” correspond to the number of hypothesis (bisections) that was required to solve the problem.</p>
+<div class="section" id="the-output-of-ibexsolve">
+<span id="solver-output"></span><h2>The output of IbexSolve<a class="headerlink" href="#the-output-of-ibexsolve" title="Permalink to this headline">¶</a></h2>
+<p>Let us first formally define what a system is. We call a <strong>system</strong> the given of</p>
+<p>1- <em>m</em> equations</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\forall i\in\{1,\ldots,m\}, \quad f_i(x)=0\]</div>
+<p>or, in short, f(x)=0, with <span class="math notranslate nohighlight">\(f:\mathbb{R}^n\to\mathbb{R}^m\)</span>. If <em>m=0</em> then <span class="math notranslate nohighlight">\(\{1,\ldots,m\}=\emptyset\)</span> so the relation f(x)=0 becomes a tautology and can be omitted.</p>
+</div></blockquote>
+<p>2- <em>p</em> inequalities</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\forall i\in\{1,\ldots,p\}, \quad g_i(x)\leq0\]</div>
+<p>or, in short, g(x)&lt;=0, with <span class="math notranslate nohighlight">\(g:\mathbb{R}^n\to\mathbb{R}^p\)</span>. If <em>p=0</em> then g(x)&lt;=0 is a tautology and can be omitted.</p>
+</div></blockquote>
+<p>In the sequel:</p>
+<ul class="simple">
+<li><p><em>n</em> will denote the number of variables</p></li>
+<li><p><em>m</em> the number of equations (can be zero)</p></li>
+<li><p><em>p</em> the number of inequalities (can be zero).</p></li>
+</ul>
+<p>We call <em>manifold</em> the set <em>M</em> of solution points of a given system.</p>
+<p>IbexSolve produces 4 different types of boxes:</p>
+<ul class="simple">
+<li><p>the set <em>S</em> of <em>solution</em> boxes</p></li>
+<li><p>the set <em>B</em> of <em>boundary</em> boxes</p></li>
+<li><p>the set <em>U</em> of <em>unknown</em> boxes</p></li>
+<li><p>the set <em>P</em> of <em>pending</em> boxes</p></li>
+</ul>
+<p>The first important property is that the manifold is covered by these sets:</p>
+<div class="math notranslate nohighlight">
+\[M \subseteq S \cup B \cup U \cup P.\]</div>
+<p>The properties of each type of boxes are detailed right below and the <a class="reference internal" href="#solver-strategy"><span class="std std-ref">solver strategy</span></a> further.</p>
+</div>
+<div class="section" id="solution-boxes">
+<span id="solver-output-solutions"></span><h2>Solution boxes<a class="headerlink" href="#solution-boxes" title="Permalink to this headline">¶</a></h2>
+<p>In the case of a square system of equations, a solution box corresponds to the usual meaning, i.e., a box that is proved to contain a solution.</p>
+<p>We shall give here a more general definition that also embraces the case of underconstrained systems.</p>
+<p>In the general case, and as illustrated in the <a class="reference internal" href="#solver-intro-ex2"><span class="std std-ref">circle example</span></a>, the idea behind IbexSolve is to compute boxes that capture the local “topology” of the manifold.</p>
+<p>More precisely, we consider a box as solution when there exists an homeomorphism between the part of the manifold enclosed by a box and the unit open ball</p>
+<div class="math notranslate nohighlight">
+\[B:=\{x \in\mathbb{R}^{n-m}, \|x\|&lt;1\}.\]</div>
+<p>So, [x] <strong>is a solution</strong> box only if:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left\{\begin{array}{l}
+\forall x\in[x], \quad g(x)\leq 0\quad\mbox{and}\\
+\mathring{[x]}\cap M \quad \mbox{is homeomorphic to} \ B
+\end{array}\right.\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathring{[x]}\)</span> denotes the interior of [x]. Note that this definition imposes [x] to have a non-null radius on each of its components.</p>
+<div class="section" id="parametrization">
+<h3>Parametrization<a class="headerlink" href="#parametrization" title="Permalink to this headline">¶</a></h3>
+<p>When IbexSolve finds a solution, it does not only supply the box but also give an information on how the homeomorphism can be built.
+This is also illustrated with the gray box of our <a class="reference internal" href="#solver-intro-ex2"><span class="std std-ref">circle example</span></a> where, roughly speaking, one of the variable is identified as
+the leading direction of the curve.</p>
+<p>More generally, IbexSolve will give you a partition of the vector <em>x</em> into two subset of variables <em>u</em> (called <em>parameters</em>) and <em>v</em>.
+The size of <em>u</em> is n-m and the size of <em>v</em> is m.</p>
+<p>For simplicity, we assume that f(u,v) stands for f(x).</p>
+<p>Now, this partition must be interpreted as follows.
+First, because [x] (hence [u]) has a non-empty interior, there is an homeomorphism <span class="math notranslate nohighlight">\(\phi_1:B\to\mathring{[u]}\)</span>.
+Second, for every point <em>u*</em> in <span class="math notranslate nohighlight">\(\mathring{[u]}\)</span> a (classical) Newton iteration applied to f(u*,.)=0 starting for some
+value <em>v</em> in [v] will converge to some v* such that (u*,v*) is a point of M inside [x]. This is another homeomorphism <span class="math notranslate nohighlight">\(\phi_2:\mathring{[u]}\to \mathring{[x]}\cap M\)</span>.</p>
+<p>The sought homeomorphism is <span class="math notranslate nohighlight">\(\varphi_1 \circ \varphi_2\)</span>.</p>
+<p>This homeomorphism corresponds to the usual concept of <em>chart</em> and our partition gives indeed a local parametrization of the manifold.
+However, the parametrization involves a numerical algorithm (the Newton iteration) so it is only an implicit definition.
+But this makes sense from a practical standpoint. For instance, if one wants to plot the manifold, he/she knows that this
+can be easily done by sampling values in the parameter vector and compute corresponding point using a Newton iteration.</p>
+<p>In a sense, we can say that in a solution box the manifold is processable.</p>
+</div>
+<div class="section" id="case-of-n-m">
+<h3>Case of n=m<a class="headerlink" href="#case-of-n-m" title="Permalink to this headline">¶</a></h3>
+<p>In the case of a well-constrained system (n=m), v=x and our definition of solution box boils down to</p>
+<div class="math notranslate nohighlight">
+\[\exists ! \ x\in\mathring{[x]}, \quad f(x)=0,\]</div>
+<p>so that our definition of solution box in this case exactly matches the usual meaning of “solution box” in the interval community.</p>
+</div>
+<div class="section" id="case-of-n-0">
+<h3>Case of n=0<a class="headerlink" href="#case-of-n-0" title="Permalink to this headline">¶</a></h3>
+<p>In the case of a system without equation (m=0), u=x and our definition of solution box boils down to</p>
+<div class="math notranslate nohighlight">
+\[\forall x\in[x], \quad g(x)\leq 0.\]</div>
+<p>so that our definition of solution box in this case exactly matches the usual meaning of “inner box” in the interval community.</p>
+<p>This explains why the solution boxes in our <a class="reference internal" href="#solver-intro-ex3"><span class="std std-ref">introduction example</span></a> are inside the disk.</p>
+</div>
+</div>
+<div class="section" id="boundary-boxes">
+<span id="solver-output-boundary"></span><h2>Boundary boxes<a class="headerlink" href="#boundary-boxes" title="Permalink to this headline">¶</a></h2>
+<p>A boundary box intuitively corresponds to a box which intersects an inequality boundary.
+This should not be confused with the boundary of the manifold. For instance, in the circle example in introduction, there is no inequality hence no boundary box.</p>
+<p>We may require additional properties on such boxes; for instance, that the inequality surface is not tangential to the boundary-free manifold f(x)=0.
+But checking such properties has a computational price. Sometimes, like in our <a class="reference internal" href="#solver-intro-ex3"><span class="std std-ref">disk example</span></a>, we have a large number of boundary boxes and we
+prefer a weaker but cheaper boundary test.</p>
+<p>For this reason, we have introduced in IbexSolve different boundary policies. The policy is set thanks to the <code class="docutils literal notranslate"><span class="pre">--boundary</span></code> option.</p>
+<p>So far, the following policies exist:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">true</span></code> : any box is considered as a boundary. This policy is set by default for under-constrained systems, see the <a class="reference internal" href="#solver-strategy"><span class="std std-ref">solver strategy</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">false</span></code>: all boxes are considered as boundary.  This policy is set by default for inequalities, see the <a class="reference internal" href="#solver-strategy"><span class="std std-ref">solver strategy</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">full-rank</span></code>: some inequalities are <strong>potentially</strong> active and the gradients of all constraints (equations and potentially activated inequalities) are linearly independent.</p>
+<p>This situation typically corresponds to <em>constraint qualification</em> in the realm of optimization. However, in the current state of development the inequality activation
+is not proved (we don’t certify that f=0 and <span class="math notranslate nohighlight">\(g_i=0\)</span> are simultaneously satisfied inside the box). This is still in development.</p>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">half-ball</span></code>: this option is not available yet. This policy means that the manifold inside the box is homeomorphic to the half-unit ball:</dt><dd><div class="math notranslate nohighlight">
+\[B^+:=\{x \in\mathbb{R}^{n-m}, \|x\|&lt;1, \|x_1\|\geq 0\}.\]</div>
+</dd>
+</dl>
+<p>This is still in development.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="unknown-and-pending-boxes">
+<span id="solver-output-unknown"></span><h2>Unknown and pending boxes<a class="headerlink" href="#unknown-and-pending-boxes" title="Permalink to this headline">¶</a></h2>
+<p>The goal of IbexSolve is to describe a manifold with solution and boundary boxes. To this end, solution and boundary tests are used. These tests may however not apply on large boxes. Of course, one reason is that a large box may simply neither be a solution nor a boundary box. Another reason is that tests are just sufficient conditions. So the program splits recursively the initial box until one test succeeds. This leads to a classical binary search tree.</p>
+<p>However, it is frequent that no test will ever succeed in the vicinity of some points, whatever the size of the box is. This typically happens when f is singular. For this reason, the user has to fix a parameter value <span class="math notranslate nohighlight">\(\varepsilon_{min}\)</span> to <a class="reference internal" href="#solver-options-eps-min"><span class="std std-ref">stop bisection</span></a>. This parameter allows to prevent bisecting again, although no test has succeeded yet. A box [x] is not split anymore if all the components of [x] has a radius smaller than <span class="math notranslate nohighlight">\(\varepsilon_{min}\)</span>.</p>
+<p>But it is also possible to control the search by fixing some time limit T.</p>
+<p>As said before, when the process terminates successfully, only solution and boundary boxes are issued. Otherwise, so-called unknown or pending boxes can appear, depending on the failure reason:</p>
+<ul class="simple">
+<li><p>If both the solution and boundary tests do not apply on a box which cannot be split anymore (the precision <span class="math notranslate nohighlight">\(\varepsilon_{min}\)</span> being reached), the latter is classified as an unknown box.</p></li>
+<li><p>If a box has not been processed because of the timeout, it is classified as a pending box.</p></li>
+</ul>
+<p>The two types of boxes are distinguished as their semantic is quite different: a pending box can potentially be successfully processed providing a longer time limit, or even within the same time limit using a different exploration strategy. On the contrary, an unknown box cannot be processed successfuly whatever the time limit is. The only way is by decreasing <span class="math notranslate nohighlight">\(\varepsilon_{min}\)</span>.</p>
+</div>
+<div class="section" id="solving-strategy">
+<span id="solver-strategy"></span><h2>Solving strategy<a class="headerlink" href="#solving-strategy" title="Permalink to this headline">¶</a></h2>
+<p>The solving strategy depends on the type of systems</p>
+<ul class="simple">
+<li><p><strong>inequalities only</strong> (m=0).
+For this type of systems,  IbexSolve will try to cover the manifold with either solution or boundary boxes, indifferently. We don’t try
+to prioritize one type because they are not comparable. Indeed, solution boxes fully satisy inequalities g(x)&lt;0 while boundary boxes crosses
+g(x)=0. We may be more interested in either one. However, the default boundary policy is <code class="docutils literal notranslate"><span class="pre">false</span></code>, which means that, by default, we prioritize
+solution boxes. In fact, we even refuse to consider a box as boundary with this policy which means that the paving will finely cover the
+manifold boundary with unknown boxes, as shown in our <a class="reference internal" href="#solver-intro-ex3"><span class="std std-ref">disk example</span></a>. Note that for this type of problems, the <a class="reference internal" href="#solver-options-eps-max"><span class="std std-ref">eps-max parameter</span></a>
+applies to both boxes.</p></li>
+<li><p><strong>under-constrained systems</strong> (0&lt;m&lt;n).
+Note that this type of systems include at least one equality. IbexSolve will try to cover the manifold with as many solution boxes as possible.
+So it will bisect boxes until either a solution is found or the minimal precision <a class="reference internal" href="#solver-options-eps-min"><span class="std std-ref">eps-min parameter</span></a> is reached.
+This is only at this point that the solver will try to eventually enforce a boundary test. And if it fails, the box is marked as <em>unknown</em>.
+So, for this type of problems, the <a class="reference internal" href="#solver-options-eps-max"><span class="std std-ref">eps-max parameter</span></a> does not apply to boundary boxes.
+The default boundary policy is <code class="docutils literal notranslate"><span class="pre">true</span></code> (no time wasted to check boundary property).</p></li>
+<li><p><strong>well-constrained systems</strong> (m=n).
+For this type of systems, we don’t expect boundaries. If a solution of f(x)=0 also matches g(x)=0, the resulting box will be marked as <em>unknown</em>.
+In this case, the default boundary policy is <code class="docutils literal notranslate"><span class="pre">false</span></code> (no time wasted to check boundary property). The reason why it is not <code class="docutils literal notranslate"><span class="pre">true</span></code> as in the
+previous case is precisely because a boundary is now unexpected.</p></li>
+</ul>
 </div>
 <div class="section" id="options">
 <span id="solver-options"></span><h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="the-eps-min-parameter">
+<span id="solver-options-eps-min"></span><h3>The eps-min parameter<a class="headerlink" href="#the-eps-min-parameter" title="Permalink to this headline">¶</a></h3>
+<p>This parameter basically allows to control the solution accuracy.</p>
+<p>It imposes the minimal width of validated boxes (boundary or solution) or, said differently, the maximal width of non-validated boxes.
+So this is a criterion to <em>stop</em> bisection: a non-validated box will not be larger than <span class="math notranslate nohighlight">\(\varepsilon_{min}\)</span>.</p>
+<p>Default value is 1e-3.</p>
+</div>
+<div class="section" id="the-eps-max-parameter">
+<span id="solver-options-eps-max"></span><h3>The eps-max parameter<a class="headerlink" href="#the-eps-max-parameter" title="Permalink to this headline">¶</a></h3>
+<p>This parameter is the maximal width of validated boxes (boundary or solution). So this is a criterion to <em>force</em> bisection: a
+validated box will not be larger than <span class="math notranslate nohighlight">\(\varepsilon_{max}\)</span> (unless there is no equality and it is fully inside inequalities). Default value is +oo (none).</p>
+<p>The effect of the eps-max parameter is best illustrated in the case of pure inequalities, where solution and boundary boxes have equivalent roles (cf.
+the <a class="reference internal" href="#solver-strategy"><span class="std std-ref">solver strategy</span></a>).</p>
+<p>So let us get back again to our <a class="reference internal" href="#solver-intro-ex3"><span class="std std-ref">disk example</span></a>.</p>
+<p>If we use the <code class="docutils literal notranslate"><span class="pre">--boundary=true</span></code> option, the program immediately stops with one boundary box. This is OK because the first box handled by the solver satisfies one of the criterion (either solution or boundary) and since <span class="math notranslate nohighlight">\(\varepsilon_{max}\)</span> is set by default to +oo, the size of this box is less than <span class="math notranslate nohighlight">\(\varepsilon_{max}\)</span>, so the search is over.</p>
+<p>Now, if we set <span class="math notranslate nohighlight">\(\varepsilon_{max}\)</span> to 1 we obtain graphically the following result:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="images/disc6-ibexsolve.png"><img alt="images/disc6-ibexsolve.png" src="images/disc6-ibexsolve.png" style="width: 300px;" /></a>
+</div>
+<p>Note that by setting the boundary policy to <code class="docutils literal notranslate"><span class="pre">true</span></code>, no property at all is checked. This explains why the boundary boxes are bigger here than in the picture of
+the <a class="reference internal" href="#solver-intro-ex2"><span class="std std-ref">circle example</span></a>. Indeed, no bisection are required to enforce the boundary property. This is just governed by the <span class="math notranslate nohighlight">\(\varepsilon_{max}\)</span> parameter.</p>
+<p>If we run IbexSolve using <code class="docutils literal notranslate"><span class="pre">-E</span> <span class="pre">0.5</span></code>, we obtain:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="images/disc7-ibexsolve.png"><img alt="images/disc7-ibexsolve.png" src="images/disc7-ibexsolve.png" style="width: 300px;" /></a>
+</div>
+<p>and using <code class="docutils literal notranslate"><span class="pre">-E</span> <span class="pre">0.1</span></code>:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="images/disc8-ibexsolve.png"><img alt="images/disc8-ibexsolve.png" src="images/disc8-ibexsolve.png" style="width: 300px;" /></a>
+</div>
+<p>You can control this way the accuracy of the description. Of course, as before, the more accurate, the more boxes you have and the longer it takes.</p>
+<p>In the case of a system with both equations and inequalities, the parameter
+<span class="math notranslate nohighlight">\(\varepsilon_{max}\)</span> will apply for both inner and boundary boxes.
+If we consider now the following Minibex code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">variables</span>
+  <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
+
+<span class="n">constraints</span>
+  <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+  <span class="n">y</span><span class="o">+</span><span class="n">x</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>we obtain the following figures by using decreasing values of <span class="math notranslate nohighlight">\(\varepsilon_{max}\)</span> (namely 1, 0.5 and 0.1):</p>
+<p><a class="reference internal" href="_images/disc9-ibexsolve.svg"><img alt="solver-options-eps-max-pic1" src="_images/disc9-ibexsolve.svg" width="300px" /></a>   <a class="reference internal" href="_images/disc10-ibexsolve.svg"><img alt="solver-options-eps-max-pic2" src="_images/disc10-ibexsolve.svg" width="300px" /></a>  <a class="reference internal" href="_images/disc11-ibexsolve.svg"><img alt="solver-options-eps-max-pic3" src="_images/disc11-ibexsolve.svg" width="300px" /></a></p>
+</div>
+<div class="section" id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 33%" />
@@ -103,14 +404,6 @@ and it is fully inside inequalities). Default value is +oo (none)</p></td>
 </tr>
 <tr class="row-odd"><td><p>-t&lt;<em>float</em>&gt;, –timeout=&lt;<em>float</em>&gt;</p></td>
 <td><p>Timeout (time in seconds). Default value is +oo (none).</p></td>
-</tr>
-<tr class="row-even"><td><p>-i&lt;<em>filename</em>&gt;, –input=&lt;<em>filename</em>&gt;</p></td>
-<td><p>COV input file. The file contains a (intermediate) description of the
-manifold with boxes in the COV (binary) format.</p></td>
-</tr>
-<tr class="row-odd"><td><p>-o&lt;<em>filename</em>&gt;, –output=&lt;<em>filename</em>&gt;</p></td>
-<td><p>COV output file. The file will contain the description of the manifold
-with boxes in the COV (binary) format.</p></td>
 </tr>
 <tr class="row-even"><td><p>–simpl=…</p></td>
 <td><p>Expression simplification level. Possible values are:</p>
@@ -137,8 +430,16 @@ Note that the DAG structure can be lost.</p>
 <p>Default value is : 1.</p>
 </td>
 </tr>
-<tr class="row-odd"><td><p>-s, –sols</p></td>
-<td><p>Display the “solutions” (output boxes) on the standard output.</p></td>
+<tr class="row-odd"><td><p>-i&lt;<em>filename</em>&gt;, –input=&lt;<em>filename</em>&gt;</p></td>
+<td><p>COV input file. The file contains a (intermediate) description of the
+manifold with boxes in the COV (binary) format.</p></td>
+</tr>
+<tr class="row-even"><td><p>-o&lt;<em>filename</em>&gt;, –output=&lt;<em>filename</em>&gt;</p></td>
+<td><p>COV output file. The file will contain the description of the manifold
+with boxes in the COV (binary) format.</p></td>
+</tr>
+<tr class="row-odd"><td><p>–format</p></td>
+<td><p>Give a description of the COV format used by IbexSolve</p></td>
 </tr>
 <tr class="row-even"><td><p>–bfs</p></td>
 <td><p>Perform breadth-first search (instead of depth-first search, by default)</p></td>
@@ -147,12 +448,15 @@ Note that the DAG structure can be lost.</p>
 <td><p>Activate trace. “Solutions” (output boxes) are displayed as and when they
 are found.</p></td>
 </tr>
-<tr class="row-even"><td><p>–boundary=…</p></td>
-<td><p>Boundary test strength. Possible values are:</p>
+<tr class="row-even"><td><p>–stop-at-first</p></td>
+<td><p>Stop at first solution/boundary/unknown box found.</p></td>
+</tr>
+<tr class="row-odd"><td><p>–boundary=…</p></td>
+<td><p>Boundary policy. Possible values are:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">true</span></code>: always satisfied. Set by default for under constrained problems
 (0&lt;m&lt;n).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">full-rank</span></code>: the gradients of all constraints (equalities and potentially
+<li><p><code class="docutils literal notranslate"><span class="pre">full-rank</span></code>: the gradients of all constraints (equations and potentially
 activated inequalities) must be linearly independent.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">half-ball</span></code>: (<strong>not implemented yet</strong>) the intersection of the box and
 the solution set is homeomorphic to a half-ball of R^n</p></li>
@@ -161,285 +465,21 @@ only/square systems)</p></li>
 </ul>
 </td>
 </tr>
+<tr class="row-even"><td><p>-s, –sols</p></td>
+<td><p>Display the “solutions” (output boxes) on the standard output.</p></td>
+</tr>
 <tr class="row-odd"><td><p>–random-seed=&lt;<em>float</em>&gt;</p></td>
 <td><p>Random seed (useful for reproducibility). Default value is 1.</p></td>
 </tr>
 <tr class="row-even"><td><p>-q, –quiet</p></td>
 <td><p>Print no report on the standard output.</p></td>
 </tr>
+<tr class="row-odd"><td><p>–forced-params=&lt;<em>string</em>&gt;</p></td>
+<td><p>Force some variables to be parameters in the parametric proofs, separated by
+‘+’. Example: –forced-params=x+y</p></td>
+</tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="calling-ibexsolve-from-c">
-<span id="solver-call-default"></span><h2>Calling IbexSolve from C++<a class="headerlink" href="#calling-ibexsolve-from-c" title="Permalink to this headline">¶</a></h2>
-<p>You can call IbexSolve (the default solver) and get the solutions from C++.</p>
-<p>Two objects must be built: the first represents the problem (namely, a <a class="reference internal" href="system.html#mod-sys"><span class="std std-ref">system</span></a>), the second
-the solver itself. Then, we just run the solver. Here is a simple example:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="cm">/* Build a system of equations from the file */</span>
-	<span class="n">System</span> <span class="nf">system</span><span class="p">(</span><span class="n">IBEX_BENCHS_DIR</span> <span class="s">&quot;/others/kolev36.bch&quot;</span><span class="p">);</span>
-
-	<span class="cm">/* Build a default solver for the system and with a precision set to 1e-07 */</span>
-	<span class="n">DefaultSolver</span> <span class="nf">solver</span><span class="p">(</span><span class="n">system</span><span class="p">,</span><span class="mf">1e-07</span><span class="p">);</span>
-
-	<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">box</span><span class="p">);</span> <span class="c1">// Run the solver</span>
-
-	<span class="cm">/* Display the solutions. */</span>
-	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">solver</span><span class="p">.</span><span class="n">get_data</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>The output is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> solution n°1 = ([0.1173165676349099, 0.1173165676349106] ; [0.4999999999999989, 0.5000000000000014] ; [0.8826834323650891, 0.8826834323650912] ; [-0.2071067811865488, -0.2071067811865466] ; [1.207106781186544, 1.207106781186553] ; [-2.000000000000004, -1.999999999999998])
-
-</pre></div>
-</div>
-</div>
-<div class="section" id="the-generic-solver">
-<span id="solver-generic"></span><h2>The generic solver<a class="headerlink" href="#the-generic-solver" title="Permalink to this headline">¶</a></h2>
-<p>The generic solver is the main C++ class behind the implementation of <code class="docutils literal notranslate"><span class="pre">ibexsolve</span></code>.
-It is a classical branch and prune algorithm that interleaves contraction and branching (bisection) until
-boxes get sufficiently small. However, it performs a more general task that just finding solution points of square
-systems of equations: it also knows how to deal with under-constrained systems and handle manifolds.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>A more detailed documentation about under-constrained systems will be available soon.</p>
-</div>
-<p>Compared to <code class="docutils literal notranslate"><span class="pre">ibexsolve</span></code>, the generic solver allows the following additional operators as inputs:</p>
-<ol class="arabic">
-<li><p>a <strong>contractor</strong></p>
-<blockquote>
-<div><p>Operator that contracts boxes by removing non-solution points. The contraction operator must be compatible with the
-system given (equations/inequalities). The solver performs no check (it is the user responsability). See
-<a class="reference internal" href="contractor.html#ctc"><span class="std std-ref">Contractors</span></a>.</p>
-</div></blockquote>
-</li>
-<li><p>a <strong>bisector</strong></p>
-<blockquote>
-<div><p>Operator that splits a box. Note that some bisectors have a <em>precision</em> parameter: the box is bisected providing
-it is large enough. But this precision is not directly seen by the solver which has its own precision variables
-(see <code class="docutils literal notranslate"><span class="pre">-e`̀</span>&#160; <span class="pre">and</span> <span class="pre">``-E</span></code>). If however the bisector does not split a box, this will generate an exception caught by the solver,
-which will not continue the search and backtrack. So fixing the bisector internal precision gives basically the same effect
-as fixing it with <code class="docutils literal notranslate"><span class="pre">--e</span></code>. See <a class="reference internal" href="strategy.html#strategy-bisectors"><span class="std std-ref">Bisectors</span></a> for more details.</p>
-</div></blockquote>
-</li>
-<li><p>a <strong>cell buffer</strong></p>
-<blockquote>
-<div><p>Operator that manages the list of pending boxes (a <em>cell</em> is a box with a little bit of extra information used by the search).
-See <a class="reference internal" href="strategy.html#strategy-cell-buffers"><span class="std std-ref">Cell buffers</span></a> for more details.</p>
-</div></blockquote>
-</li>
-</ol>
-<p>Our next example creates a solver for the intersection of two circles of radius <span class="math notranslate nohighlight">\(d\)</span>,
-one centered on <span class="math notranslate nohighlight">\((0,0)\)</span> and the other in <span class="math notranslate nohighlight">\((1,0)\)</span>.</p>
-<p>To this end we first create a vector-valued function:</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}(x,y) \mapsto \begin{pmatrix} x^2+y^2-d \\ (x-1)^2+y^2-d \end{pmatrix}\end{split}\]</div>
-<p>Then, we build two contractors; a <a class="reference internal" href="contractor.html#ctc-fwd-bwd"><span class="std std-ref">forward-bacwkard</span></a> contractor and (because the system is square),
-an <a class="reference internal" href="tutorial.html#tuto-newton"><span class="std std-ref">interval Newton</span></a> contractor.</p>
-<p>We chose as bisection operator the <em>round-robin</em> operator, that splits each component in turn.
-The precision of the solver is set to 1e-7.</p>
-<p>Finally, the cell buffer is a stack, which leads to a depth-first search.</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="cm">/* Create the function (x,y)-&gt;( ||(x,y)||-d,  ||(x,y)-(1,0)||-d ) */</span>
-	<span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
-	<span class="kt">double</span> <span class="n">d</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
-	<span class="n">Function</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Return</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">-</span><span class="n">d</span><span class="p">,</span>
-		                  <span class="n">sqrt</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">-</span><span class="n">d</span><span class="p">));</span>
-
-	<span class="cm">/* Create the system f(x,y)=0. */</span>
-	<span class="n">SystemFactory</span> <span class="n">factory</span><span class="p">;</span>
-	<span class="n">factory</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-	<span class="n">factory</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
-	<span class="n">factory</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="mi">0</span><span class="p">);</span>
-	<span class="n">System</span> <span class="nf">system</span><span class="p">(</span><span class="n">factory</span><span class="p">);</span>
-
-	<span class="cm">/* Create the domain of variables */</span>
-	<span class="kt">double</span> <span class="n">init_box</span><span class="p">[][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">},{</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">}</span> <span class="p">};</span>
-	<span class="n">IntervalVector</span> <span class="nf">box</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">init_box</span><span class="p">);</span>
-
-	<span class="cm">/* Create a first contractor w.r.t f(x,y)=0 (forward-backward) */</span>
-	<span class="n">CtcFwdBwd</span> <span class="nf">fwdBwd</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
-
-	<span class="cm">/* Create a second contractor (interval Newton) */</span>
-	<span class="n">CtcNewton</span> <span class="nf">newton</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
-
-	<span class="cm">/* Compose the two contractors */</span>
-	<span class="n">CtcCompo</span> <span class="nf">compo</span><span class="p">(</span><span class="n">fwdBwd</span><span class="p">,</span><span class="n">newton</span><span class="p">);</span>
-
-	<span class="cm">/* Create a round-robin bisection heuristic and set the</span>
-<span class="cm">	 * precision of boxes to 0. */</span>
-	<span class="n">RoundRobin</span> <span class="nf">bisector</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-
-	<span class="cm">/* Create a &quot;stack of boxes&quot; (CellStack), which has the effect of</span>
-<span class="cm">	 * performing a depth-first search. */</span>
-	<span class="n">CellStack</span> <span class="n">buff</span><span class="p">;</span>
-
-	<span class="cm">/* Vector precisions required on variables */</span>
-	<span class="n">Vector</span> <span class="nf">prec</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">1e-07</span><span class="p">);</span>
-
-	<span class="cm">/* Create a solver with the previous objects */</span>
-	<span class="n">Solver</span> <span class="nf">s</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">compo</span><span class="p">,</span> <span class="n">bisector</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">prec</span><span class="p">);</span>
-
-	<span class="cm">/* Run the solver */</span>
-	<span class="n">s</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">box</span><span class="p">);</span>
-
-	<span class="cm">/* Display the solutions */</span>
-	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get_data</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>The output is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> solution n°1 = ([0.4999999999999996, 0.5000000000000003] ; [-0.8660254037844389, -0.8660254037844383])
- solution n°2 = ([0.4999999999999998, 0.5000000000000005] ; [0.8660254037844383, 0.8660254037844389])
-
-</pre></div>
-</div>
-</div>
-<div class="section" id="implementing-ibexsolve-the-default-solver">
-<span id="solver-implem-default"></span><h2>Implementing IbexSolve (the default solver)<a class="headerlink" href="#implementing-ibexsolve-the-default-solver" title="Permalink to this headline">¶</a></h2>
-<p>IbexSolve is an instance of the generic solver with (almost) all parameters set by default.</p>
-<p>We already showed how to <a class="reference internal" href="#calling-ibexsolve-from-c">Calling IbexSolve from C++</a>.
-To give a further insight into the generic solver and its possible settings, we explain now how to re-create the default solver
-by yourself.</p>
-<p>The contractor of the default solver is obtained with the following receipe.
-This is a <a class="reference internal" href="tutorial.html#tuto-inter-union-compo"><span class="std std-ref">composition</span></a> of</p>
-<ol class="arabic simple">
-<li><p><a class="reference internal" href="contractor.html#ctc-hc4"><span class="std std-ref">HC4</span></a></p></li>
-<li><p><a class="reference internal" href="contractor.html#ctc-acid"><span class="std std-ref">ACID</span></a></p></li>
-<li><p><a class="reference internal" href="tutorial.html#tuto-newton"><span class="std std-ref">Interval Newton</span></a> (only if it is a square system of equations)</p></li>
-<li><dl class="simple">
-<dt>A <a class="reference internal" href="tutorial.html#tuto-fixpoint"><span class="std std-ref">fixpoint</span></a> of the <a class="reference internal" href="contractor.html#ctc-polytope-hull"><span class="std std-ref">Polytope Hull</span></a> of two linear relaxations combined:</dt><dd><ul class="simple">
-<li><p>the relaxation called X-Taylor;</p></li>
-<li><p>the relaxation generated by affine arithmetic. See <a class="reference internal" href="contractor.html#ctc-linear-relax"><span class="std std-ref">Linearizations</span></a>.</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ol>
-<p>The bisector is based on the <a class="reference internal" href="strategy.html#strategy-smear-function"><span class="std std-ref">The Smear Function</span></a> with maximal relative impact.</p>
-<p>So the following program exactly reproduces the default solver.</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">System</span> <span class="nf">system</span><span class="p">(</span><span class="n">IBEX_BENCHS_DIR</span> <span class="s">&quot;/others/kolev36.bch&quot;</span><span class="p">);</span>
-
-	<span class="cm">/* ============================ building contractors ========================= */</span>
-	<span class="n">CtcHC4</span> <span class="nf">hc4</span><span class="p">(</span><span class="n">system</span><span class="p">,</span><span class="mf">0.01</span><span class="p">);</span>
-
-	<span class="n">CtcHC4</span> <span class="nf">hc4_2</span><span class="p">(</span><span class="n">system</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
-
-	<span class="n">CtcAcid</span> <span class="nf">acid</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">hc4_2</span><span class="p">);</span>
-
-	<span class="n">CtcNewton</span> <span class="nf">newton</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">f_ctrs</span><span class="p">,</span> <span class="mf">5e+08</span><span class="p">,</span> <span class="mf">1e-07</span><span class="p">,</span> <span class="mf">1e-04</span><span class="p">);</span>
-
-    <span class="n">LinearizerXTaylor</span> <span class="nf">linear_relax</span><span class="p">(</span><span class="n">system</span><span class="p">);</span>
-
-	<span class="n">CtcPolytopeHull</span> <span class="nf">polytope</span><span class="p">(</span><span class="n">linear_relax</span><span class="p">);</span>
-
-	<span class="n">CtcCompo</span> <span class="nf">polytope_hc4</span><span class="p">(</span><span class="n">polytope</span><span class="p">,</span> <span class="n">hc4</span><span class="p">);</span>
-
-	<span class="n">CtcFixPoint</span> <span class="nf">fixpoint</span><span class="p">(</span><span class="n">polytope_hc4</span><span class="p">);</span>
-
-	<span class="n">CtcCompo</span> <span class="nf">compo</span><span class="p">(</span><span class="n">hc4</span><span class="p">,</span><span class="n">acid</span><span class="p">,</span><span class="n">newton</span><span class="p">,</span><span class="n">fixpoint</span><span class="p">);</span>
-	<span class="cm">/* =========================================================================== */</span>
-
-	<span class="cm">/* Create a smear-function bisection heuristic. */</span>
-	<span class="n">SmearSumRelative</span> <span class="nf">bisector</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="mf">1e-07</span><span class="p">);</span>
-
-	<span class="cm">/* Create a &quot;stack of boxes&quot; (CellStack) (depth-first search). */</span>
-	<span class="n">CellStack</span> <span class="n">buff</span><span class="p">;</span>
-
-	<span class="cm">/* Vector precisions required on variables */</span>
-	<span class="n">Vector</span> <span class="nf">prec</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">1e-07</span><span class="p">);</span>
-
-	<span class="cm">/* Create a solver with the previous objects */</span>
-	<span class="n">Solver</span> <span class="nf">s</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">compo</span><span class="p">,</span> <span class="n">bisector</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">prec</span><span class="p">);</span>
-
-	<span class="cm">/* Run the solver */</span>
-	<span class="n">s</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">box</span><span class="p">);</span>
-
-	<span class="cm">/* Display the solutions */</span>
-	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get_data</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-
-	<span class="cm">/* Report performances */</span>
-	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;cpu time used=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get_time</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;s.&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;number of cells=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get_nb_cells</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="parallelizing-search">
-<span id="solver-parallel"></span><h2>Parallelizing search<a class="headerlink" href="#parallelizing-search" title="Permalink to this headline">¶</a></h2>
-<p>It is possible to parallelize the search by running (in parallel) solvers for different subboxes of the initial box.</p>
-<p>Be aware however that Ibex has not been designed (so far) to be parallelized and the following lines only reports our preliminary
-experiments.</p>
-<p>Here are the important observations:</p>
-<ul>
-<li><p>The sub-library gaol is <strong>not</strong> thread-safe. You must compile Ibex with <strong>filib</strong> which seems to be OK (see <a class="reference internal" href="install.html#install-options"><span class="std std-ref">Configuration options</span></a>).</p></li>
-<li><p>The linear solver Soplex (we have not tested yet with Cplex) seems to be thread-safe but sometimes generates error messages on the
-console like:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ISOLVE56</span> <span class="n">stop</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">basis</span> <span class="n">status</span><span class="p">:</span> <span class="n">PRIMAL</span> <span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">solver</span> <span class="n">status</span><span class="p">:</span> <span class="n">RUNNING</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>So, calling Soplex several times simultaneously seems not to be allowed, but Soplex at least manages the case properly, that is,
-stops. As far as we have observed, we don’t lose solutions even when this kind of message appear.</p>
-</li>
-<li><p>Ibex objects are not thread-safe which means that the solvers run in parallel must share no information. In particular,
-each solver must have its <strong>own copy</strong> of the system.</p></li>
-</ul>
-<p>Here is an example:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="c1">// Get the system</span>
-	<span class="n">System</span> <span class="nf">sys1</span><span class="p">(</span><span class="n">IBEX_BENCHS_DIR</span> <span class="s">&quot;/polynom/ponts-geo.bch&quot;</span><span class="p">);</span>
-
-	<span class="c1">// Create a copy for the second solver</span>
-	<span class="n">System</span> <span class="nf">sys2</span><span class="p">(</span><span class="n">sys1</span><span class="p">,</span><span class="n">System</span><span class="o">::</span><span class="n">COPY</span><span class="p">);</span>
-
-	<span class="c1">// Precision of the solution boxes</span>
-	<span class="kt">double</span> <span class="n">prec</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">;</span>
-
-	<span class="c1">// Create two solvers</span>
-	<span class="n">DefaultSolver</span> <span class="nf">solver1</span><span class="p">(</span><span class="n">sys1</span><span class="p">,</span><span class="n">prec</span><span class="p">);</span>
-	<span class="n">DefaultSolver</span> <span class="nf">solver2</span><span class="p">(</span><span class="n">sys2</span><span class="p">,</span><span class="n">prec</span><span class="p">);</span>
-
-	<span class="c1">// Create a partition of the initial box into two subboxes,</span>
-	<span class="c1">// by bisecting any variable (here, n°4)</span>
-	<span class="n">pair</span><span class="o">&lt;</span><span class="n">IntervalVector</span><span class="p">,</span><span class="n">IntervalVector</span><span class="o">&gt;</span> <span class="n">pair</span><span class="o">=</span><span class="n">sys1</span><span class="p">.</span><span class="n">box</span><span class="p">.</span><span class="n">bisect</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-
-	<span class="c1">// =======================================================</span>
-	<span class="c1">// Run the solvers in parallel</span>
-	<span class="c1">// =======================================================</span>
-<span class="cp">#pragma omp parallel sections</span>
-	<span class="p">{</span>
-		<span class="n">solver1</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
-<span class="cp">#pragma omp section</span>
-		<span class="n">solver2</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
-	<span class="p">}</span>
-	<span class="c1">// =======================================================</span>
-
-	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;solver #1 found &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">solver1</span><span class="p">.</span><span class="n">get_data</span><span class="p">().</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-	<span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;solver #2 found &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">solver2</span><span class="p">.</span><span class="n">get_data</span><span class="p">().</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>If I remove the <code class="docutils literal notranslate"><span class="pre">#pragma</span></code> the program displays:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">solver</span> <span class="c1">#1 found 64</span>
-<span class="n">solver</span> <span class="c1">#2 found 64</span>
-
-<span class="n">real</span>  <span class="mi">0</span><span class="n">m5</span><span class="o">.</span><span class="mi">121</span><span class="n">s</span>        <span class="o">//</span> <span class="o">&lt;--------</span> <span class="n">total</span> <span class="n">time</span>
-<span class="n">user</span>  <span class="mi">0</span><span class="n">m5</span><span class="o">.</span><span class="mi">088</span><span class="n">s</span>
-</pre></div>
-</div>
-<p>With the <code class="docutils literal notranslate"><span class="pre">#pragma</span></code>, I obtain:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">solver</span> <span class="c1">#1 found 64</span>
-<span class="n">solver</span> <span class="c1">#2 found 64</span>
-
-<span class="n">real</span>  <span class="mi">0</span><span class="n">m2</span><span class="o">.</span><span class="mi">902</span><span class="n">s</span>        <span class="o">//</span> <span class="o">&lt;--------</span> <span class="n">total</span> <span class="n">time</span>
-<span class="n">user</span>  <span class="mi">0</span><span class="n">m5</span><span class="o">.</span><span class="mi">468</span><span class="n">s</span>
-</pre></div>
-</div>
-<p><strong>Note:</strong> It is pure luck that by bisecting the 4th variable, we obtain exactly half of the solutions on each sub-box.
-Also, looking for the 64 first solutions takes here around the same time than looking for the 64 subsequent ones, which
-is particular to this example. So, contrary to what this example seems to prove, splitting the box in two subboxes does
-not divide the running time by two in general. Of course :)</p>
-<p>If you are afraid about the messages of the linear solver, you can replace the <code class="docutils literal notranslate"><span class="pre">DefaultSolver</span></code> by your own dedicated solver
-that does not resort to the simplex, ex:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>	<span class="n">Vector</span> <span class="nf">eps_min</span><span class="p">(</span><span class="n">sys1</span><span class="p">.</span><span class="n">nb_var</span><span class="p">,</span><span class="n">prec</span><span class="p">);</span>
-	<span class="n">Vector</span> <span class="nf">eps_max</span><span class="p">(</span><span class="n">sys1</span><span class="p">.</span><span class="n">nb_var</span><span class="p">,</span><span class="n">POS_INFINITY</span><span class="p">);</span>
-	<span class="n">Solver</span> <span class="nf">solver1</span><span class="p">(</span><span class="n">sys1</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcCompo</span><span class="p">(</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcHC4</span><span class="p">(</span><span class="n">sys1</span><span class="p">),</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcNewton</span><span class="p">(</span><span class="n">sys1</span><span class="p">.</span><span class="n">f_ctrs</span><span class="p">)),</span> <span class="o">*</span><span class="k">new</span> <span class="n">RoundRobin</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span> <span class="o">*</span><span class="k">new</span> <span class="n">CellStack</span><span class="p">(),</span> <span class="n">eps_min</span><span class="p">,</span> <span class="n">eps_max</span><span class="p">);</span>
-	<span class="n">Solver</span> <span class="nf">solver2</span><span class="p">(</span><span class="n">sys2</span><span class="p">,</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcCompo</span><span class="p">(</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcHC4</span><span class="p">(</span><span class="n">sys2</span><span class="p">),</span><span class="o">*</span><span class="k">new</span> <span class="n">CtcNewton</span><span class="p">(</span><span class="n">sys2</span><span class="p">.</span><span class="n">f_ctrs</span><span class="p">)),</span> <span class="o">*</span><span class="k">new</span> <span class="n">RoundRobin</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span> <span class="o">*</span><span class="k">new</span> <span class="n">CellStack</span><span class="p">(),</span> <span class="n">eps_min</span><span class="p">,</span> <span class="n">eps_max</span><span class="p">);</span>
-</pre></div>
 </div>
 </div>
 </div>
@@ -453,19 +493,37 @@ that does not resort to the simplex, ex:</p>
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">IbexSolve</a><ul>
-<li><a class="reference internal" href="#getting-started">Getting started</a></li>
-<li><a class="reference internal" href="#options">Options</a></li>
-<li><a class="reference internal" href="#calling-ibexsolve-from-c">Calling IbexSolve from C++</a></li>
-<li><a class="reference internal" href="#the-generic-solver">The generic solver</a></li>
-<li><a class="reference internal" href="#implementing-ibexsolve-the-default-solver">Implementing IbexSolve (the default solver)</a></li>
-<li><a class="reference internal" href="#parallelizing-search">Parallelizing search</a></li>
+<li><a class="reference internal" href="#getting-started">Getting started</a><ul>
+<li><a class="reference internal" href="#the-very-basic-idea">The very basic idea</a></li>
+<li><a class="reference internal" href="#first-example-well-constrained">First example (well-constrained)</a></li>
+<li><a class="reference internal" href="#second-example-under-constrained">Second example (under-constrained)</a></li>
+<li><a class="reference internal" href="#third-example-inequalities">Third example (inequalities)</a></li>
+<li><a class="reference internal" href="#scope-and-limits">Scope and limits</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-output-of-ibexsolve">The output of IbexSolve</a></li>
+<li><a class="reference internal" href="#solution-boxes">Solution boxes</a><ul>
+<li><a class="reference internal" href="#parametrization">Parametrization</a></li>
+<li><a class="reference internal" href="#case-of-n-m">Case of n=m</a></li>
+<li><a class="reference internal" href="#case-of-n-0">Case of n=0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#boundary-boxes">Boundary boxes</a></li>
+<li><a class="reference internal" href="#unknown-and-pending-boxes">Unknown and pending boxes</a></li>
+<li><a class="reference internal" href="#solving-strategy">Solving strategy</a></li>
+<li><a class="reference internal" href="#options">Options</a><ul>
+<li><a class="reference internal" href="#the-eps-min-parameter">The eps-min parameter</a></li>
+<li><a class="reference internal" href="#the-eps-max-parameter">The eps-max parameter</a></li>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="lab.html"
-                        title="previous chapter">Do it Yourself!</a></p>
+  <p class="topless"><a href="install-cmake.html"
+                        title="previous chapter">Installation</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="optim.html"
                         title="next chapter">IbexOpt</a></p>
@@ -500,9 +558,9 @@ that does not resort to the simplex, ex:</p>
           <a href="optim.html" title="IbexOpt"
              >next</a> |</li>
         <li class="right" >
-          <a href="lab.html" title="Do it Yourself!"
+          <a href="install-cmake.html" title="Installation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

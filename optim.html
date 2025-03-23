@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>IbexOpt &#8212; IBEX 2.8 documentation</title>
+    <title>IbexOpt &#8212; IBEX 2.9 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -17,7 +17,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Java Plugin (for Choco)" href="java-install.html" />
+    <link rel="next" title="The Minibex Language" href="minibex.html" />
     <link rel="prev" title="IbexSolve" href="solver.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -27,12 +27,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="java-install.html" title="Java Plugin (for Choco)"
+          <a href="minibex.html" title="The Minibex Language"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="solver.html" title="IbexSolve"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -43,69 +43,148 @@
             
   <div class="section" id="ibexopt">
 <span id="optim"></span><h1>IbexOpt<a class="headerlink" href="#ibexopt" title="Permalink to this headline">¶</a></h1>
+<p>This documentation is for using IbexOpt with the command prompt.</p>
+<p>To use IbexOpt in C++ or program your own global optimizer with Ibex, see the <a class="reference internal" href="optim-prog.html#optim-prog"><span class="std std-ref">programmer guide</span></a>.</p>
 <div class="section" id="getting-started">
 <span id="optim-run-default"></span><h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
 <p>IbexOpt is a end-user program that solves a standard NLP problem (non-linear programming), i.e.,
-it minimizes a (nonlinear) objective function under (nonlinear) inequality and equality constraints:</p>
+it minimizes a (nonlinear) objective function under (nonlinear) inequality and equation constraints:</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}{\mbox Minimize} \ f(x)\\{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0.\end{aligned}\end{align} \]</div>
+<p>In the previous formula, <em>f</em> is a real-valued function, but <em>h</em> and <em>g</em> can be multivariate.
+The right-hand sides 0 are therefore vectors and the equation and inequality sign applies component-wise.</p>
+<p>This notation convention is kept for the whole document.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p>IbexOpt resorts to a unique black-box strategy (whatever the input problem is) and with a very limited
-number of parameters. Needless to say, this strategy is a kind of compromise and not the
-best one for a given problem.</p>
-<p>Note that this program is based on the <a class="reference internal" href="#optim-generic"><span class="std std-ref">generic optimizer</span></a>, a C++ class
-that allows to build a more customizable optimizer.</p>
+number of parameters. Needless to say, this strategy is a kind of compromise and not the best one for a given problem.</p>
+<p>If you are a C++ programmer, the design of the Ibex library allows you to customize IbexOpt or even build your own optimizer from high-level algorithmic bricks.
+See the developer guide.</p>
+</div>
 <p>You can directly apply this optimizer on one of the benchmark problems
 distributed with Ibex.
-The benchmarks are all written in the <a class="reference internal" href="minibex.html#mod-minibex"><span class="std std-ref">Minibex syntax</span></a> and stored in an arborescence under <code class="docutils literal notranslate"><span class="pre">plugins/optim/benchs/</span></code>.
-If you compare the Minibex syntax of these files with the ones given to IbexSolve, you will see that a “minimize”
+The benchmarks are all written in the <a class="reference internal" href="minibex.html#mod-minibex"><span class="std std-ref">Minibex syntax</span></a> and stored under <code class="docutils literal notranslate"><span class="pre">benchs/optim/</span></code>.
+If you compare the Minibex syntax of these files with the ones given to <a class="reference internal" href="solver.html#solver"><span class="std std-ref">IbexSolve</span></a>, you will see that a <code class="docutils literal notranslate"><span class="pre">minimize</span></code>
 keyword has appeared.</p>
-<p>Open a terminal, move to the <code class="docutils literal notranslate"><span class="pre">bin</span></code> subfolder and run IbexSolve with, for example, the problem named ex3_1_3 located at the specified path:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/ibex-2.8.7$ cd bin
-~/ibex-2.8.7/bin$ ./ibexopt ../plugins/optim/benchs/easy/ex3_1_3.bch
+<p>Open a terminal (move to the <code class="docutils literal notranslate"><span class="pre">bin</span></code> subfolder of Ibex if it is installed locally) and run IbexOpt with, for example, the problem named ex3_1_3 located at the specified path:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ./ibexopt [ibex-lib-path]/benchs/optim/easy/ex3_1_3.bch
 </pre></div>
 </div>
 <p>The following result should be displayed:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>************************ setup ************************
-  file loaded: ../plugins/optim/benchs/easy/ex3_1_3.bch
-*******************************************************
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>running............
 
-running............
+optimization successful!
 
- optimization successful!
+f* in  [-310.011436309,-309.999999842]
+           (best bound)
 
- best bound in: [-310.309999984,-309.999999984]
- relative precision obtained on objective function: 0.001  [passed]
- absolute precision obtained on objective function: 0.309999999985  [failed]
- best feasible point: (4.9999999999 ; 1 ; 5 ; 0 ; 5 ; 10)
- cpu time used: 0.00400000000001s.
- number of cells: 1
+x* =   (4.99999999901 ; 1.00000000001 ; 5 ; 9.99996530027e-10 ; 5 ; 10)
+           (best feasible point)
+
+relative precision on f*:      3.6890471184e-05 [passed]
+absolute precision on f*:      0.0114364679579
+cpu time used:                 0.00209500000001s
+number of cells:               4
 </pre></div>
 </div>
 <p>The program has proved that the minimum of the objective lies in a small interval enclosing -310. It also gives
 a point close to (5 ; 1 ; 5 ; 0 ; 5 ; 10) which satisfies the constraints and for which
-the value taken by the objective function is inside this interval. The process took less than 0.005 seconds.</p>
+the value taken by the objective function is inside this interval. The process took less than 0.003 seconds.
+The number of “cells” is also reported. This number basically corresponds to the total number of hypothesis (bisections) that was
+required to solve the problem. It gives an indication of its complexity.</p>
+</div>
+<div class="section" id="the-output-of-ibexopt">
+<span id="optim-output"></span><h2>The output of IbexOpt<a class="headerlink" href="#the-output-of-ibexopt" title="Permalink to this headline">¶</a></h2>
+<p>We denote now x* the global minimizer and f*=f(x*) the global minimum of a NLP.</p>
+<p>IbexOpt can be run in two different <em>modes</em> and the precise meaning of the output depends on the chosen mode.</p>
+<ul>
+<li><p>In the <strong>relaxed</strong> mode (the default one), the NLP which is solved is actually</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}{\mbox Minimize} \ f(x)\\{\mbox s.t.} \ |h(x)|\leq \varepsilon_h  \wedge g(x)\leq 0.\end{aligned}\end{align} \]</div>
+<p>where <span class="math notranslate nohighlight">\(\varepsilon_h\)</span> is a parameter. By default it is set to 1e-8 but the user can fix it differently
+using the <code class="docutils literal notranslate"><span class="pre">--eps-h</span></code> option. We will call this NLP the <em>relaxed NLP</em>. Notice that it only contains inequalities.</p>
+<p>IbexOpt returns then a vector x (not a box) and an interval [y]. It is proven that:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>[y] is an enclosure of f* (the global minimum of the relaxed NLP) respecting one <a class="reference internal" href="#optim-obj-prec"><span class="std std-ref">precision criterion</span></a>.</p></li>
+<li><p>x is feasible, i.e., satisfies all the inequalities</p></li>
+<li><p>f(x) belongs to [y].</p></li>
+</ol>
+</div></blockquote>
+<p>A consequence of these properties is that x is “almost” a global minimum in the sense that it is a feasible point which image
+f(x) is close to the real minimum f* (according to one <a class="reference internal" href="#optim-obj-prec"><span class="std std-ref">precision criterion</span></a>); but x may not be close to
+x* itself. It can even be arbitrarily far away, although this happens in practice only on pathological cases.</p>
+</li>
+<li><p>In the <strong>rigor</strong> mode, IbexOpt solves the original NLP, with strict equations.</p>
+<p>It returns a box [x] and and interval [y]. It is proven that:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>[y] is an enclosure of f* (the global minimum of the NLP) respecting the <a class="reference internal" href="#optim-obj-prec"><span class="std std-ref">precision criteria</span></a>.</p></li>
+<li><p>[x] contains at least one feasible point, i.e., a point x which satisfies all the constraints (equations and inequalities)</p></li>
+<li><p>for all x in [x], f(x) belongs to [y].</p></li>
+</ol>
+</div></blockquote>
+<p>The same observation can be made as for the relaxed case: it is proven that [x] contains a point that is “almost” a global
+minimum (according to one <a class="reference internal" href="#optim-obj-prec"><span class="std std-ref">precision criterion</span></a>) but there is no information about the distance between
+x and x*.</p>
+<p>A further remark is about the size of [x]. We have not explicitly mentioned that it has to be small. Indeed, in theory,
+we can’t bound its size. But, in practice, if IbexOpt succeeds, the size of this box is very tiny, just about a few <a class="reference external" href="https://en.wikipedia.org/wiki/Unit_in_the_last_place">ULPs</a>.
+Notice also that conditions 1 and 3 together somehow also impose [x] to be small. But, again, this is true only in practice (consider for instance
+a constant objective function as a counter-example).</p>
+</li>
+</ul>
+<p>Note that for a problem without equations, the relaxed and rigor modes are the same.</p>
+<p>We advice to rather use the relaxed mode, should you have to set a very small precision <span class="math notranslate nohighlight">\(\varepsilon_h\)</span>.
+The rigor mode is useful only if strict satisfaction of equations are required.
+It can take longer and may sometimes fails were the relaxed mode succeeds, typically because of redundancies; see
+the <a class="reference internal" href="#optim-faq"><span class="std std-ref">FAQ</span></a>.</p>
+</div>
+<div class="section" id="objective-precision-criteria">
+<span id="optim-obj-prec"></span><h2>Objective precision criteria<a class="headerlink" href="#objective-precision-criteria" title="Permalink to this headline">¶</a></h2>
+<p>Remind that IbexOpt returns an interval [y] which encloses f* and a feasible point x (surrounded by a tiny box in rigor mode) such
+that <span class="math notranslate nohighlight">\(f(x)\in[y]\)</span>.</p>
+<p>We note <span class="math notranslate nohighlight">\(y^-\)</span> and <span class="math notranslate nohighlight">\(y^+\)</span> the lower and upper bounds of [y].</p>
+<p>There are two precision criteria for the objective: an absolute and a relative one.
+IbexSolve stops if one of the criterion is fulfilled (not both).</p>
+<p>The <strong>absolute</strong> precision <span class="math notranslate nohighlight">\(\varepsilon_{f}^{abs}\)</span> can be set with the <code class="docutils literal notranslate"><span class="pre">--abs-eps-f</span></code> (or <code class="docutils literal notranslate"><span class="pre">-a</span></code> in short) option.
+The default value is 1e-7.</p>
+<p>This criterion is fulfilled when <span class="math notranslate nohighlight">\(y^+\leq y^- + \varepsilon_{f}^{abs}\)</span>.
+This therefore ensures</p>
+<div class="math notranslate nohighlight">
+\[|f(x)-f^*|\leq \varepsilon_f^{abs}.\]</div>
+<p>The <strong>relative</strong> precision <span class="math notranslate nohighlight">\(\varepsilon_{f}^{rel}\)</span> can be set with the <code class="docutils literal notranslate"><span class="pre">--rel-eps-f</span></code> (or <code class="docutils literal notranslate"><span class="pre">-r</span></code> in short) option.
+The default value is 1e-3.</p>
+<p>There are several cases:</p>
+<ul class="simple">
+<li><p>If [y] contains 0 or has an infinite bound, the criterion is not satisfied.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(y^-&gt;0\)</span>, the criterion is satisfied if <span class="math notranslate nohighlight">\(y^+ \leq (1+\varepsilon_{f}^{rel}) y^-\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(y^+&lt;0\)</span>, the criterion is satisfied if <span class="math notranslate nohighlight">\(y^- \geq (1+\varepsilon_{f}^{rel}) y^+\)</span>.</p></li>
+</ul>
+<p>This therefore ensures</p>
+<div class="math notranslate nohighlight">
+\[|f(x)-f^*|\leq \varepsilon_f^{rel}|f^*|.\]</div>
 </div>
 <div class="section" id="return-status">
 <span id="optim-return"></span><h2>Return status<a class="headerlink" href="#return-status" title="Permalink to this headline">¶</a></h2>
 <p>When the optimizer terminates, the following possible status are:</p>
 <ul class="simple">
 <li><dl class="simple">
-<dt><strong>success</strong>:</dt><dd><p>An enclosure of the minimum respecting the precision requirements (<code class="docutils literal notranslate"><span class="pre">--a</span></code> and <code class="docutils literal notranslate"><span class="pre">--r</span></code>)
-has been found as well as a global minimizer .
-In standard mode (without <code class="docutils literal notranslate"><span class="pre">--rigor</span></code>), equalities are relaxed and the global minimizer is
-a point x* satisfying
-<span class="math notranslate nohighlight">\(-\varepsilon_h\leq h(^*)\leq\varepsilon_h\)</span>. In rigor mode (<code class="docutils literal notranslate"><span class="pre">--rigor</span></code>), the
-global minimizer is a box  <span class="math notranslate nohighlight">\([x^*]\)</span> such that, for some x* inside we do have <span class="math notranslate nohighlight">\(h(x^*)=0\)</span>.
-In both cases, for the (explicit or implicit) point x*, f(x*) is also sufficiently closed
+<dt><strong>success</strong>:</dt><dd><p>An enclosure of the minimum respecting one of the precision requirements (<code class="docutils literal notranslate"><span class="pre">--a</span></code> or <code class="docutils literal notranslate"><span class="pre">--r</span></code>)
+has been found as well as a pseudo-global minimizer, as explained <a class="reference internal" href="#optim-output"><span class="std std-ref">above</span></a>.
+In standard mode (without <code class="docutils literal notranslate"><span class="pre">--rigor</span></code>), equations are relaxed and the global minimizer is
+a point x satisfying
+<span class="math notranslate nohighlight">\(-\varepsilon_h\leq h(x)\leq\varepsilon_h\)</span>. In rigor mode (<code class="docutils literal notranslate"><span class="pre">--rigor</span></code>), the
+global minimizer is a box  <span class="math notranslate nohighlight">\([x]\)</span> such that, for some x inside we do have <span class="math notranslate nohighlight">\(h(x)=0\)</span>.
+In both cases, for the (explicit or implicit) point x, f(x) is also sufficiently closed
 to the real global minimum, according to the precision criteria.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
 <dt><strong>infeasible</strong>:</dt><dd><p>This return status actually corresponds to two different situations. Either the constraints
-are not satisfiable (that is, there is not point x simultaneously satisfying all equalities
+are not feasible (that is, there is not point x simultaneously satisfying all equations
 and inequalities) or the feasible points are all outside the definition domain of the
-objective funnction f.</p>
+objective function f.</p>
 </dd>
 </dl>
 </li>
@@ -114,8 +193,8 @@ objective funnction f.</p>
 if you control the precision of the bisection (<code class="docutils literal notranslate"><span class="pre">--eps-x</span></code>). Indeed, it may happen, in this case,
 that the search stops and no box explored was enough bisected to find a feasible point inside. So the
 search is over but the problem was not solved. It may also arise when an inequality
-is actually an equality (e.g., <span class="math notranslate nohighlight">\(x^2\leq 0\)</span>), because in non-rigor mode, neither a relaxation nor
-an equality satisfaction proof is enforced in this case.</p>
+is actually an equation (e.g., <span class="math notranslate nohighlight">\(x^2\leq 0\)</span>), because in non-rigor mode, neither a relaxation nor
+an equation satisfaction proof is enforced in this case.</p>
 </dd>
 </dl>
 </li>
@@ -167,184 +246,129 @@ rigor mode.</p>
 <tr class="row-even"><td><p>-t&lt;<em>float</em>&gt;, –timeout=&lt;<em>float</em>&gt;</p></td>
 <td><p>Timeout (time in seconds). Default value is +oo.</p></td>
 </tr>
-<tr class="row-odd"><td><p>–random-seed=&lt;<em>float</em>&gt;</p></td>
+<tr class="row-odd"><td><p>–simpl=…</p></td>
+<td><p>Expression simplification level. Possible values are:</p>
+<ul class="simple">
+<li><p>0: no simplification at all (fast).</p></li>
+<li><dl class="simple">
+<dt>1: basic simplifications (fairly fast).</dt><dd><p>E.g. x+1+1 –&gt; x+2</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>2: more advanced simplifications without developing (can be slow).</dt><dd><p>E.g. x*x + x^2 –&gt; 2x^2.
+Note that the DAG structure can be lost.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>3: simplifications with full polynomial developing (can blow up!).</dt><dd><p>E.g. x*(x-1) + x –&gt; x^2.
+Note that the DAG structure can be lost.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Default value is : 1.</p>
+</td>
+</tr>
+<tr class="row-even"><td><p>–random-seed=&lt;<em>float</em>&gt;</p></td>
 <td><p>Random seed (useful for reproducibility). Default value is 1.</p></td>
 </tr>
-<tr class="row-even"><td><p>–eps-x=&lt;<em>float</em>&gt;</p></td>
+<tr class="row-odd"><td><p>–eps-x=&lt;<em>float</em>&gt;</p></td>
 <td><p>Precision on the variable (<strong>Deprecated</strong>). Default value is 0.</p></td>
 </tr>
-<tr class="row-odd"><td><p>–initial-loup=&lt;<em>float</em>&gt;</p></td>
+<tr class="row-even"><td><p>–initial-loup=&lt;<em>float</em>&gt;</p></td>
 <td><p>Initial “loup” (a priori known upper bound).</p></td>
 </tr>
-<tr class="row-even"><td><p>–rigor</p></td>
-<td><p>Activate rigor mode (certify feasibility of equalities).</p></td>
+<tr class="row-odd"><td><p>-i&lt;<em>filename</em>&gt;, –input=&lt;<em>filename</em>&gt;</p></td>
+<td><p>COV input file. The file contains optimization data in the COV (binary)
+format.</p></td>
+</tr>
+<tr class="row-even"><td><p>-o&lt;<em>filename</em>&gt;, –output=&lt;<em>filename</em>&gt;</p></td>
+<td><p>COV output file. The file will contain the optimization data in the COV
+(binary) format. See –format</p></td>
+</tr>
+<tr class="row-odd"><td><p>–rigor</p></td>
+<td><p>Activate rigor mode (certify feasibility of equations).</p></td>
+</tr>
+<tr class="row-even"><td><p>–kkt</p></td>
+<td><p>Activate contractor based on Kuhn-Tucker conditions (rigor mode only).</p></td>
 </tr>
 <tr class="row-odd"><td><p>–trace</p></td>
 <td><p>Activate trace. Updates of loup/uplo are printed while minimizing.</p></td>
 </tr>
+<tr class="row-even"><td><p>-q, –quiet</p></td>
+<td><p>Print no report on the standard output.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="calling-ibexopt-from-c">
-<span id="optim-call-default"></span><h2>Calling IbexOpt from C++<a class="headerlink" href="#calling-ibexopt-from-c" title="Permalink to this headline">¶</a></h2>
-<p>Calling the default optimizer is as simple as for the <a class="reference internal" href="solver.html#solver"><span class="std std-ref">default solver</span></a>.
-The loaded system must simply correspond to an optimization problem. The default optimizer
-is an object of the class <code class="docutils literal notranslate"><span class="pre">DefaultOptimizer</span></code>.</p>
-<p>Once the optimizer has been executed(), the main information is stored in three fields,
-where f is the objective:</p>
+<div class="section" id="faq">
+<span id="optim-faq"></span><h2>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="warning-too-many-active-constraints">
+<h3>warning: too many active constraints<a class="headerlink" href="#warning-too-many-active-constraints" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>When I run IbexOpt in rigor mode, the program never ends and prints the following warning repeatedly:</p>
+<blockquote>
+<div><p>warning: too many active constraints, cannot prove feasibility -&gt; loup lost!</p>
+</div></blockquote>
+</div></blockquote>
+<div class="topic">
+<p class="topic-title">Answer</p>
+<p>This means that, very likely, your problem has a redundant equation. It is impossible to certify feasibility
+in this case. So, as IbexOpt never finds a feasible point, the upper bound on the objective is
+stuck to infinity and the program runs forever.</p>
+<p>The only solution in this case (beside using relaxed mode) is to revise your model. A redundant equation
+is somehow a modeling issue.</p>
+</div>
+</div>
+<div class="section" id="the-problem-is-solved-in-relaxed-but-not-rigor-mode">
+<h3>The problem is solved in relaxed but not rigor mode<a class="headerlink" href="#the-problem-is-solved-in-relaxed-but-not-rigor-mode" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p><strong>Short answer</strong> : likely, there is a redundant constraint in your problem. Try to fix it.</p>
+<p><strong>Long answer</strong></p>
+<blockquote>
+<div><p>The rigor mode relies on a numerical algorithm (an interval variant of the Newton iteration) that requires
+linear independence constraint qualification, in short <a class="reference external" href="https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions#Regularity_conditions_(or_constraint_qualifications)">LICQ</a>.</p>
+<p>In particular, the LICQ condition cannot be fulfilled with redundant constraints. And most of the time, this is what happens.</p>
+<p>When the number of active constraints exceed the number of variables, IbexOpt detects it and displays the warning <cite>too many active constraints</cite> (see
+the previous FAQ).
+So, in this case, you have an hint that your problem has a redundancy. The warning message must appear repeatedly though, otherwise, the warning may
+only reflect a local singularity. Typically, we may have two inequalities that get tangential in some region (while being distant from each other elsewhere).</p>
+<p>But if the number of active constraints is less than the number of variables, there is no way for IbexOpt to detect a redundancy. Because IbexOpt is a  numerical tool dedicated to
+non-linear problems, it can only observe in a given box that the LICQ condition is not respected. It cannot conclude that there is a
+singularity at the model level, and even less, a redundancy. But, again, most of the time, there is.</p>
+<p>This situation happens in some of the benchmark problems supplied with IbexOpt (see the files under <cite>benchs/optim</cite>):
+<strong>sambal</strong>, <strong>harker</strong>, <strong>immun</strong> and <strong>ex7_3_5</strong>.</p>
+<p>We suggest the following strategy for analyzing your problem:</p>
+<ol class="arabic simple">
+<li><p>Try to see if there is an obvious redundancy in the equations of your model. If not:</p></li>
+<li><p>Calculate the pseudo-global minimum in relaxed mode with a tight relaxation parameter (ex: <code class="docutils literal notranslate"><span class="pre">eps-h=1e-14</span></code>). See which inequalities and bounds are active at
+this pseudo-minimum. Then try to see if there is a redundancy among all the active constraints
+(including equations of course). If not:</p></li>
+<li><p>Calculate the jacobian of these active constraints and check that it is not full-rank. This just confirms that the LICQ conditions are not satisfied, hence
+a normal behavior of IbexOpt (if the matrix is full-rank, please, submit a bug report!)</p></li>
+<li><p>Run again IbexSolve in rigor mode and activate the trace (<code class="docutils literal notranslate"><span class="pre">--trace</span></code>).
+Two situation occurs:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">loup</span></code> (“lo-up”) is the lowest upper bound known for min(f).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">uplo</span></code> (“up-lo”) is the uppest lower bound known for min(f).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">loup_point</span></code> is the vector for which the value taken by f is less or equal to the loup.</p></li>
+<li><p>some feasible points (aka <em>loup</em>) are found (they appear on the screen as they are found). This means that your problem has a local singularity right at the
+global minimum! Your are not lucky: this is something that happens rarely in practice, and nothing proves that there is a redundancy (i.e., that you
+can fix this problem easily).</p></li>
+<li><p>feasible points seem never to be found by IbexOpt. Then, your problem has probably a redundancy. Try to fix it.</p></li>
 </ul>
-<p>Example:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="cm">/* Build a constrained optimization problem from the file */</span>
-  <span class="n">System</span> <span class="nf">sys</span><span class="p">(</span><span class="n">IBEX_OPTIM_BENCHS_DIR</span> <span class="s">&quot;/easy/ex3_1_3.bch&quot;</span><span class="p">);</span>
-
-  <span class="cm">/* Build a default optimizer with a precision set to 1e-07 for f(x) */</span>
-  <span class="n">DefaultOptimizer</span> <span class="nf">o</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span><span class="mf">1e-07</span><span class="p">);</span>
-
-  <span class="n">o</span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">box</span><span class="p">);</span><span class="c1">// Run the optimizer</span>
-
-  <span class="cm">/* Display the result. */</span>
-  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;interval for the minimum: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">Interval</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">get_uplo</span><span class="p">(),</span><span class="n">o</span><span class="p">.</span><span class="n">get_loup</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;minimizer: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">o</span><span class="p">.</span><span class="n">get_loup_point</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>The output is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interval</span> <span class="k">for</span> <span class="n">the</span> <span class="n">minimum</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">310.0000308420031</span><span class="p">,</span> <span class="o">-</span><span class="mf">309.999999842</span><span class="p">]</span>
-<span class="n">minimizer</span><span class="p">:</span> <span class="p">(</span><span class="o">&lt;</span><span class="mf">4.999999999</span><span class="p">,</span> <span class="mf">4.999999999000001</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.000000000000001</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mf">9.999965300266921e-10</span><span class="p">,</span> <span class="mf">9.999965300266922e-10</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="o">&gt;</span> <span class="p">;</span> <span class="o">&lt;</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="o">&gt;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="getting-en-enclosure-of-all-global-minima">
-<span id="optim-argmin"></span><h2>Getting en enclosure of all global minima<a class="headerlink" href="#getting-en-enclosure-of-all-global-minima" title="Permalink to this headline">¶</a></h2>
-<p>Given a problem:</p>
-<div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}{\mbox Minimize} \ f(x)\\{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0\end{aligned}\end{align} \]</div>
-<p>IbexOpt gives  a feasible point that is <em>sufficiently</em> close to the real minimum <span class="math notranslate nohighlight">\(f^*\)</span> of the function, i.e., a point
-that satisfies</p>
-<div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}{\mbox uplo} \leq f(x)\leq {\mbox loup}\\{\mbox s.t.} \ h(x)=0 \wedge g(x)\leq 0\end{aligned}\end{align} \]</div>
-<p>with <em>loup</em> and <em>uplo</em> are respectively a valid upper and lower bound of <span class="math notranslate nohighlight">\(f^*\)</span>, whose accuracy depend on the input precision parameter
-(note: validated feasibility with equalities requires ‘’rigor’’ mode).</p>
-<p>From this, it is possible, in a second step, to get an enclosure of all global minima thanks to <a class="reference internal" href="solver.html#solver"><span class="std std-ref">IbexSolve</span></a>.
-The idea is simply to ask for all the points that satisfy the previous constraints.
-We give now a code snippet that illustrate this.</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="c1">// ========== 1st step ==========</span>
-  <span class="c1">// Build the original system: </span>
-  <span class="n">Variable</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">;</span>
-  <span class="n">SystemFactory</span> <span class="n">opt_fac</span><span class="p">;</span>
-  <span class="n">opt_fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-  <span class="n">opt_fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
-  <span class="c1">// minimize f(x)=-x-y</span>
-  <span class="n">opt_fac</span><span class="p">.</span><span class="n">add_goal</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="p">);</span>
-  <span class="c1">// s.t. x^2+y^2&lt;=1</span>
-  <span class="n">opt_fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
-  <span class="n">System</span> <span class="nf">opt_sys</span><span class="p">(</span><span class="n">opt_fac</span><span class="p">);</span>
-  <span class="c1">// build the default optimizer</span>
-  <span class="n">DefaultOptimizer</span> <span class="nf">optimizer</span><span class="p">(</span><span class="n">opt_sys</span><span class="p">,</span><span class="mf">1e-01</span><span class="p">);</span>
-  <span class="c1">// run it with (x,y) in R^2</span>
-  <span class="n">optimizer</span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
-
-  <span class="c1">// ========== 2nd step ==========</span>
-  <span class="c1">// Build the auxiliary system</span>
-  <span class="n">SystemFactory</span> <span class="n">sol_fac</span><span class="p">;</span>
-  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
-  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="n">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">sqr</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">);</span>
-  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="o">&gt;=</span><span class="n">optimizer</span><span class="p">.</span><span class="n">get_uplo</span><span class="p">());</span>
-  <span class="n">sol_fac</span><span class="p">.</span><span class="n">add_ctr</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="o">&lt;=</span><span class="n">optimizer</span><span class="p">.</span><span class="n">get_loup</span><span class="p">());</span>
-  <span class="n">System</span> <span class="nf">sol_sys</span><span class="p">(</span><span class="n">sol_fac</span><span class="p">);</span>
-  <span class="n">DefaultSolver</span> <span class="nf">solver</span><span class="p">(</span><span class="n">sol_sys</span><span class="p">,</span><span class="mf">0.01</span><span class="p">);</span>
-  <span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">IntervalVector</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
-  <span class="c1">// Get an enclosure of all minima, (under</span>
-  <span class="c1">// the form of manifold)</span>
-  <span class="k">const</span> <span class="n">CovSolverData</span><span class="o">&amp;</span> <span class="n">minima</span><span class="o">=</span><span class="n">solver</span><span class="p">.</span><span class="n">get_data</span><span class="p">();</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="the-generic-optimizer">
-<span id="optim-generic"></span><h2>The generic optimizer<a class="headerlink" href="#the-generic-optimizer" title="Permalink to this headline">¶</a></h2>
-<p>Just like the <a class="reference internal" href="solver.html#solver-generic"><span class="std std-ref">generic solver</span></a>, the generic optimizer is the main C++ class
-(named <code class="docutils literal notranslate"><span class="pre">Optimizer</span></code>) behind the implementation of IbexOpt.
-It takes as the solver:</p>
+</li>
+</ol>
+<p>Let us apply this strategy to the aforementioned problems:</p>
 <ul class="simple">
-<li><p>a <strong>contractor</strong></p></li>
-<li><p>a <strong>bisector</strong></p></li>
-<li><p>a <strong>cell buffer</strong></p></li>
+<li><p><strong>sambal</strong>: step 1: there are 8 linear equations and the rank of the matrix is 7. So one constraint is redundant. Of course, in this particular case of
+linear constraints, IbexOpt could easily detect the redundancy itself. Such test has not been implemented yes (IbexOpt is rather dedicated to nonlinear problems).</p></li>
+<li><p><strong>harker</strong>: step 1: there are 20 linear constraints and the rank of the matrix is 18. Same remark as above.</p></li>
+<li><p><strong>immun</strong> : step 2: there is <cite>x16^2</cite> in the objective function, so the bound constraint <cite>x16=0</cite> is active at the minimum. Constraint <cite>-x10=-x16</cite> enforces then <cite>x10=0</cite>, which
+is also a bound constraint. So we have 3 constraints: <cite>-x10-x16=0</cite>, <cite>x16=0</cite> and <cite>x10=0</cite> with one redundant.</p></li>
+<li><p><strong>ex7_3_5</strong>: step 4: this case is more complicated. We suspect again a redundancy because IbexOpt never finds feasible points (and the jacobian is not full-rank at the pseudo-global minimum).</p></li>
 </ul>
-<p>but also requires an extra operator:</p>
-<ul class="simple">
-<li><p>a <strong>loup finder</strong>. A loup finder is in charge of the <em>goal upper bounding</em> step of the optimizer.</p></li>
-</ul>
-<p>We show below how to re-implement the default optimizer from the generic <code class="docutils literal notranslate"><span class="pre">Optimizer</span></code> class.</p>
-</div>
-<div class="section" id="implementing-ibexopt-the-default-optimizer">
-<span id="optim-implem-default"></span><h2>Implementing IbexOpt (the default optimizer)<a class="headerlink" href="#implementing-ibexopt-the-default-optimizer" title="Permalink to this headline">¶</a></h2>
-<p>The contraction performed by the default optimizer is the same as the default solver
-(see <a class="reference internal" href="solver.html#solver-implem-default"><span class="std std-ref">Implementing IbexSolve (the default solver)</span></a>) except that it is not applied on the system
-itself but the <a class="reference internal" href="system.html#mod-sys-transfo-extend"><span class="std std-ref">Extended System</span></a>.</p>
-<p>The loup finder (<code class="docutils literal notranslate"><span class="pre">LoupFinderDefault</span></code>) is a mix of differents strategies. The basic idea is to
-create a continuum of feasible points (a box or a polyhedron) where the goal function can be evaluated quickly,
-that is, without checking for constraints satisfaction.
-The polyhedron (built by a <code class="docutils literal notranslate"><span class="pre">LinearizerXTaylor</span></code> object) corresponds to a <a class="reference internal" href="contractor.html#ctc-linear-relax"><span class="std std-ref">linerization technique</span></a> described in
-<a class="reference internal" href="reference.html#araya14"><span class="std std-ref">[Araya et al. 2014]</span></a> and <a class="reference internal" href="reference.html#trombettoni11"><span class="std std-ref">[Trombettoni et al. 2011]</span></a>, based on <em>inner region extraction</em>.
-It also resorts to the linerization offered by affine arithmetic (a <code class="docutils literal notranslate"><span class="pre">LinearizerAffine</span></code> object) if the affine plugin is installed.
-The box (built by a <code class="docutils literal notranslate"><span class="pre">LoupFinderInHC4</span></code> object) is a technique based on <a class="reference internal" href="interval.html#itv-inner-arith"><span class="std std-ref">inner arithmeric</span></a> also described in
-the aforementionned articles.</p>
-<p>Finally, by default, the cell buffer (<code class="docutils literal notranslate"><span class="pre">CellDoubleHeap</span></code>) is basically a sorted heap that allows to get in priority boxes minimizing
-either the lower or upper bound of the objective enclosure (see <a class="reference internal" href="strategy.html#strategy-cell-heap"><span class="std std-ref">Cell Heap</span></a>).</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>  <span class="n">System</span> <span class="nf">system</span><span class="p">(</span><span class="n">IBEX_OPTIM_BENCHS_DIR</span> <span class="s">&quot;/easy/ex3_1_3.bch&quot;</span><span class="p">);</span>
-
-  <span class="kt">double</span> <span class="n">prec</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">;</span> <span class="c1">// precision</span>
-
-  <span class="c1">// normalized system (all inequalities are &quot;&lt;=&quot;)</span>
-  <span class="n">NormalizedSystem</span> <span class="nf">norm_sys</span><span class="p">(</span><span class="n">system</span><span class="p">);</span>
-
-  <span class="c1">// extended system (the objective is transformed to a constraint y=f(x))</span>
-  <span class="n">ExtendedSystem</span> <span class="nf">ext_sys</span><span class="p">(</span><span class="n">system</span><span class="p">);</span>
-
-  <span class="cm">/* ============================ building contractors ========================= */</span>
-  <span class="n">CtcHC4</span> <span class="nf">hc4</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">,</span><span class="mf">0.01</span><span class="p">);</span>
-
-  <span class="n">CtcHC4</span> <span class="nf">hc4_2</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
-
-  <span class="n">CtcAcid</span> <span class="nf">acid</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">,</span> <span class="n">hc4_2</span><span class="p">);</span>
-
-  <span class="n">LinearizerXTaylor</span> <span class="nf">linear_relax</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">);</span>
-
-  <span class="n">CtcPolytopeHull</span> <span class="nf">polytope</span><span class="p">(</span><span class="n">linear_relax</span><span class="p">);</span>
-
-  <span class="n">CtcCompo</span> <span class="nf">polytope_hc4</span><span class="p">(</span><span class="n">polytope</span><span class="p">,</span> <span class="n">hc4</span><span class="p">);</span>
-
-  <span class="n">CtcFixPoint</span> <span class="nf">fixpoint</span><span class="p">(</span><span class="n">polytope_hc4</span><span class="p">);</span>
-
-  <span class="n">CtcCompo</span> <span class="nf">compo</span><span class="p">(</span><span class="n">hc4</span><span class="p">,</span><span class="n">acid</span><span class="p">,</span><span class="n">fixpoint</span><span class="p">);</span>
-  <span class="cm">/* =========================================================================== */</span>
-
-  <span class="cm">/* Create a smear-function bisection heuristic. */</span>
-  <span class="n">SmearSumRelative</span> <span class="nf">bisector</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">,</span> <span class="n">prec</span><span class="p">);</span>
-
-  <span class="cm">/** Create cell buffer (fix exploration ordering) */</span>
-  <span class="n">CellDoubleHeap</span> <span class="nf">buffer</span><span class="p">(</span><span class="n">ext_sys</span><span class="p">);</span>
-
-  <span class="cm">/** Create a &quot;loup&quot; finder (find feasible points) */</span>
-  <span class="n">LoupFinderDefault</span> <span class="nf">loup_finder</span><span class="p">(</span><span class="n">norm_sys</span><span class="p">);</span>
-
-  <span class="cm">/* Create a solver with the previous objects */</span>
-  <span class="n">Optimizer</span> <span class="nf">o</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">nb_var</span><span class="p">,</span> <span class="n">compo</span><span class="p">,</span> <span class="n">bisector</span><span class="p">,</span> <span class="n">loup_finder</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">ext_sys</span><span class="p">.</span><span class="n">goal_var</span><span class="p">());</span>
-
-  <span class="cm">/* Run the optimizer */</span>
-  <span class="n">o</span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">box</span><span class="p">,</span><span class="n">prec</span><span class="p">);</span>
-
-  <span class="cm">/* Display a safe enclosure of the minimum */</span>
-  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;f* in &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">Interval</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">get_uplo</span><span class="p">(),</span><span class="n">o</span><span class="p">.</span><span class="n">get_loup</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-
-  <span class="cm">/* Report performances */</span>
-  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;cpu time used=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">o</span><span class="p">.</span><span class="n">get_time</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;s.&quot;</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-  <span class="n">output</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;number of cells=&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">o</span><span class="p">.</span><span class="n">get_nb_cells</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-</pre></div>
+</div></blockquote>
+</div></blockquote>
 </div>
 </div>
 </div>
@@ -359,12 +383,15 @@ either the lower or upper bound of the objective enclosure (see <a class="refere
   <ul>
 <li><a class="reference internal" href="#">IbexOpt</a><ul>
 <li><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li><a class="reference internal" href="#the-output-of-ibexopt">The output of IbexOpt</a></li>
+<li><a class="reference internal" href="#objective-precision-criteria">Objective precision criteria</a></li>
 <li><a class="reference internal" href="#return-status">Return status</a></li>
 <li><a class="reference internal" href="#options">Options</a></li>
-<li><a class="reference internal" href="#calling-ibexopt-from-c">Calling IbexOpt from C++</a></li>
-<li><a class="reference internal" href="#getting-en-enclosure-of-all-global-minima">Getting en enclosure of all global minima</a></li>
-<li><a class="reference internal" href="#the-generic-optimizer">The generic optimizer</a></li>
-<li><a class="reference internal" href="#implementing-ibexopt-the-default-optimizer">Implementing IbexOpt (the default optimizer)</a></li>
+<li><a class="reference internal" href="#faq">FAQ</a><ul>
+<li><a class="reference internal" href="#warning-too-many-active-constraints">warning: too many active constraints</a></li>
+<li><a class="reference internal" href="#the-problem-is-solved-in-relaxed-but-not-rigor-mode">The problem is solved in relaxed but not rigor mode</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -373,8 +400,8 @@ either the lower or upper bound of the objective enclosure (see <a class="refere
   <p class="topless"><a href="solver.html"
                         title="previous chapter">IbexSolve</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="java-install.html"
-                        title="next chapter">Java Plugin (for Choco)</a></p>
+  <p class="topless"><a href="minibex.html"
+                        title="next chapter">The Minibex Language</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -403,12 +430,12 @@ either the lower or upper bound of the objective enclosure (see <a class="refere
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="java-install.html" title="Java Plugin (for Choco)"
+          <a href="minibex.html" title="The Minibex Language"
              >next</a> |</li>
         <li class="right" >
           <a href="solver.html" title="IbexSolve"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -236,7 +236,7 @@ dist(a,b) as above.
    :start-after: func-compo
    :end-before: func-compo
 
-The display is as folllows. Note that constant values like 0 are automatically replaced
+The display is as follows. Note that constant values like 0 are automatically replaced
 by degenerated intervals (like [0,0])::
 
   f:(x)->(dist(x,(<0, 0> ; <0, 0>));dist(x,(<1, 1> ; <1, 1>)))

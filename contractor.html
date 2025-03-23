@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Contractors &#8212; IBEX 2.8 documentation</title>
+    <title>Contractors &#8212; IBEX 2.9 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -17,8 +17,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Separators" href="separator.html" />
-    <link rel="prev" title="The Minibex Language" href="minibex.html" /> 
+    <link rel="next" title="Strategies" href="strategy.html" />
+    <link rel="prev" title="Systems" href="system.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -27,12 +27,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="separator.html" title="Separators"
+          <a href="strategy.html" title="Strategies"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="minibex.html" title="The Minibex Language"
+          <a href="system.html" title="Systems"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -632,7 +632,7 @@ each variable <span class="math notranslate nohighlight">\(x_i\)</span>, the fol
 <p>There exists some built-in linearization techniques, namely:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">LinearizerXTaylor</span></code>: a corner-based Taylor relaxation <a class="reference internal" href="reference.html#araya12"><span class="std std-ref">[Araya &amp; al., 2012]</span></a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">LinearizerAffine2</span></code>: a relaxation based on affine arithmetic <a class="reference internal" href="reference.html#ninin09"><span class="std std-ref">[Ninin &amp; Messine, 2009]</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LinearizerAffine2</span></code>: a relaxation based on affine arithmetic <a class="reference internal" href="reference.html#ninin09"><span class="std std-ref">[Ninin &amp; Messine, 2009]</span></a>. This relaxation is only available in the  <a class="reference external" href="https://github.com/ibex-team/ibex-affine">affine</a> plugin.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">LinearizerCompo</span></code>: a combination of several techniques (the polytope is the intersection of the polytopes
 calculated by each technique)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">LinearizerFixed</span></code>: a fixed linear system (as shown in the example above)</p></li>
@@ -987,11 +987,11 @@ create a contractor that wraps <code class="docutils literal notranslate"><span 
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="minibex.html"
-                        title="previous chapter">The Minibex Language</a></p>
+  <p class="topless"><a href="system.html"
+                        title="previous chapter">Systems</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="separator.html"
-                        title="next chapter">Separators</a></p>
+  <p class="topless"><a href="strategy.html"
+                        title="next chapter">Strategies</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -1020,12 +1020,12 @@ create a contractor that wraps <code class="docutils literal notranslate"><span 
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="separator.html" title="Separators"
+          <a href="strategy.html" title="Strategies"
              >next</a> |</li>
         <li class="right" >
-          <a href="minibex.html" title="The Minibex Language"
+          <a href="system.html" title="Systems"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.8 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">IBEX 2.9 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

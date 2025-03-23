@@ -8,6 +8,10 @@
 Articles in Journal and Conferences
 -------------------------------------
 
+.. |Neveu16-pdf| replace:: PDF
+.. _Neveu16-pdf: http://www.lirmm.fr/~trombetton/publis/nodeselection_jogo_2015.pdf
+.. |Neveu15-pdf| replace:: PDF
+.. _Neveu15-pdf: http://www.lirmm.fr/~trombetton/publis/acid_constraints_2015.pdf
 .. |Jaulin14-pdf| replace:: PDF
 .. _Jaulin14-pdf: https://www.ensta-bretagne.fr/jaulin/paper_seppath.pdf
 .. |Araya14-pdf| replace:: PDF
@@ -38,6 +42,24 @@ Articles in Journal and Conferences
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    | Author(s)                    | Title                           | Journal/Conference      | Year | Link                |
 +====================+==============================+=================================+=========================+======+=====================+
+|                    |                              |                                 |                         |      |                     |
+| .. _Araya18:       | **I. Araya, B. Neveu**       | *Lsmear: A Variable Selection   | Journal of Global       | 2018 |                     |
+|                    |                              | Strategy for Interval Branch    | Optimization            |      |                     |
+|                    |                              | and Bound Solvers*              |                         |      |                     |
+|[Araya & Neveu 2018]|                              |                                 |                         |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
+|                    |                              |                                 |                         |      |                     |
+| .. _Neveu16:       | **B. Neveu, G. Trombettoni,**| *Node Selection Strategies      | Journal of Global       | 2016 | |Neveu16-pdf|_      |
+|                    | **I. Araya**                 | in Interval Branch and Bound    | Optimization            |      |                     |
+|                    |                              | Algorithms*                     |                         |      |                     |
+| [Neveu et al. 2016]|                              |                                 |                         |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
+|                    |                              |                                 |                         |      |                     |
+| .. _Neveu15:       | **B. Neveu, G. Trombettoni,**| *Adaptive Constructive interval |  Constraints            | 2015 |  |Neveu15-pdf|_     |
+|                    | **I. Araya**                 | Disjunction: Algorithms         |                         |      |                     |
+|                    |                              | and Experiments*                |                         |      |                     |
+| [Neveu et al. 2015]|                              |                                 |                         |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Jaulin14:      | **L. Jaulin, B. Desrochers** | *Introduction to the Algebra of | Engineering Applications| 2014 | |Jaulin14-pdf|_     |
 |                    |                              | Separators with Application to  | of Artificial           |      |                     |
