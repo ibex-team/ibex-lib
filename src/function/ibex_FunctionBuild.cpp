@@ -360,12 +360,18 @@ void Function::build_from_string(const Array<const char*>& x, const char* y, con
 
 Function::Function(const char* filename) {
 
-	LOCK;
-
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
 
-	ibexin = fd;
+	LOCK;
+
+	ibexrestart(fd);
+
+	if (ibexin == fd) {
+		rewind(fd);
+	}
+
+	ibexin = fd;	
 
 	try {
 		parser::pstruct = new parser::P_StructFunction(*this);
@@ -377,7 +383,6 @@ Function::Function(const char* filename) {
 		delete parser::pstruct;
 		parser::pstruct = NULL;
 		fclose(fd);
-		ibexrestart(ibexin);
 		UNLOCK;
 		throw e;
 	}

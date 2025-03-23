@@ -219,7 +219,15 @@ Domain& System::constant(const std::string& name) {
 
 void System::load(FILE* fd, int simpl_level) {
 
+	if (!fd) throw SyntaxError("Invalid file");
+
 	LOCK;
+		
+	ibexrestart(fd);
+
+	if (ibexin == fd) {
+		rewind(fd);
+	}
 
 	ibexin = fd;
 
@@ -234,7 +242,6 @@ void System::load(FILE* fd, int simpl_level) {
 		delete parser::pstruct;
 		parser::pstruct = NULL;
 		fclose(fd);
-		ibexrestart(ibexin);
 		UNLOCK;
 		throw e;
 	}
