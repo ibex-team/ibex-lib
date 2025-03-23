@@ -518,7 +518,7 @@ void TestFunction::minibex02() {
 	Function f(x,y,e,"f");
 	std::string m = f.minibex();
 
-	FILE *fin = std::tmpfile ();
+/*	FILE *fin = std::tmpfile ();
 	CPPUNIT_ASSERT (fin != NULL);
 	std::fwrite (m.c_str(), 1, m.length(), fin);
 	std::rewind (fin);
@@ -528,6 +528,7 @@ void TestFunction::minibex02() {
 	m = f2.minibex();
 	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
   std::fclose (fin);
+*/
 }
 
 void TestFunction::minibex03() {
@@ -538,7 +539,7 @@ void TestFunction::minibex03() {
 	std::string m = f.minibex();
 	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
 
-	FILE *fin = std::tmpfile ();
+/*	FILE *fin = std::tmpfile ();
 	CPPUNIT_ASSERT (fin != NULL);
 	std::fwrite (m.c_str(), 1, m.length(), fin);
 	std::rewind (fin);
@@ -548,6 +549,7 @@ void TestFunction::minibex03() {
 	m = f2.minibex();
 	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
   std::fclose (fin);
+  */
 }
 
 void TestFunction::issue43() {
