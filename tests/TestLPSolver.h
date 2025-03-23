@@ -48,7 +48,7 @@ public:
 #endif
 
 	CPPUNIT_TEST_SUITE_END();
-	LPSolver create_kleemin(int n);
+	LPSolver* create_kleemin(int n);
 	void kleemin(int n);
 
 	void test01();

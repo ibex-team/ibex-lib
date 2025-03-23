@@ -40,17 +40,17 @@ void TestLinearSolver::test01() {
 
 }
 
-LPSolver TestLinearSolver::create_kleemin(int n) {
-	LPSolver lp(n, LPSolver::Mode::Certified);
+LPSolver* TestLinearSolver::create_kleemin(int n) {
+	LPSolver* lp = new LPSolver(n, LPSolver::Mode::Certified);
 	Vector v(n);
 
 	for (int j=1;j<=n;j++) {
 		v[j-1]= ::pow(10,n-j);
 	}
-	lp.set_cost(-v);
+	lp->set_cost(-v);
 
-	IntervalVector bound (n, Interval(0, 1e200));
-	lp.set_bounds(bound);
+	IntervalVector bound (n, Interval(0,1e200));
+	lp->set_bounds(bound);
 
 	for (int i=1;i<=n;i++) {
 		v=Vector::zeros(n);
@@ -58,23 +58,24 @@ LPSolver TestLinearSolver::create_kleemin(int n) {
 			v[j-1]= 2*(::pow(10,i-j));
 		}
 		v[i-1] =1;
-		lp.add_constraint(v,LEQ, ::pow(10,i-1));
+		lp->add_constraint(v,LEQ, ::pow(10,i-1));
 	}
 
 	return lp;
 }
 
 void TestLinearSolver::kleemin( int n) {
-	LPSolver lp(create_kleemin(n));
+	LPSolver* lp = create_kleemin(n);
 
-	LPSolver::Status res = lp.minimize();
+	LPSolver::Status res = lp->minimize();
 	CPPUNIT_ASSERT(res==LPSolver::Status::OptimalProved);
 
-	Vector dualsol = lp.not_proved_dual_sol();
-	Vector primalsol = lp.not_proved_primal_sol();
+	Vector dualsol = lp->not_proved_dual_sol();
+	Vector primalsol = lp->not_proved_primal_sol();
 	Vector vrai(n);
 	vrai[n-1] = ::pow(10,n-1);
 	check_relatif(vrai,primalsol,1.e-9);
+	delete lp;
 }
 
 void TestLinearSolver::kleemin30() {
@@ -140,9 +141,9 @@ void TestLinearSolver::kleemin30() {
 }
 
 void TestLinearSolver::reset() {
-	LPSolver lp(create_kleemin(8));
+	LPSolver* lp = create_kleemin(8);
 	int n = 3;
-	lp.reset(n);
+	lp->reset(n);
 
 	// copy-past kleemin to
 	Vector v(n);
@@ -150,10 +151,10 @@ void TestLinearSolver::reset() {
 	for (int j=1;j<=n;j++) {
 		v[j-1]= ::pow(10,n-j);
 	}
-	lp.set_cost(-v);
+	lp->set_cost(-v);
 
 	IntervalVector bound (n, Interval(0, 1e200));
-	lp.set_bounds(bound);
+	lp->set_bounds(bound);
 
 	for (int i=1;i<=n;i++) {
 		v=Vector::zeros(n);
@@ -161,17 +162,18 @@ void TestLinearSolver::reset() {
 			v[j-1]= 2*(::pow(10,i-j));
 		}
 		v[i-1] =1;
-		lp.add_constraint(v,LEQ, ::pow(10,i-1));
+		lp->add_constraint(v,LEQ, ::pow(10,i-1));
 	}
 
-	LPSolver::Status res = lp.minimize();
+	LPSolver::Status res = lp->minimize();
 	CPPUNIT_ASSERT(res==LPSolver::Status::OptimalProved);
 
-	Vector dualsol = lp.not_proved_dual_sol();
-	Vector primalsol = lp.not_proved_primal_sol();
+	Vector dualsol = lp->not_proved_dual_sol();
+	Vector primalsol = lp->not_proved_primal_sol();
 	Vector vrai(n);
 	vrai[n-1] = ::pow(10,n-1);
 	check_relatif(vrai,primalsol,1.e-9);
+	delete lp;
 }
 
 void TestLinearSolver::test_known_problem(std::string filename, double optimal) {
