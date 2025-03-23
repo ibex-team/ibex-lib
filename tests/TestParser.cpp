@@ -142,15 +142,17 @@ void TestParser::const_var_idx() {
 }
 
 void TestParser::const08() {
-	FILE *fin = std::fopen (SRCDIR_TESTS "/minibex/const08.mbx", "r");
-	CPPUNIT_ASSERT (fin != NULL);
-	Function f(fin);
+	try {
+		Function f(SRCDIR_TESTS "/minibex/const08.mbx");
 
-	double x=0.1;
-	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f.expr());
-	CPPUNIT_ASSERT(c!=NULL);
-	CPPUNIT_ASSERT(c->get_value().mid()==x);
-  std::fclose (fin);
+		double x=0.1;
+		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f.expr());
+		CPPUNIT_ASSERT(c!=NULL);
+		CPPUNIT_ASSERT(c->get_value().mid()==x);
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		CPPUNIT_ASSERT(false);
+	}
 }
 
 void TestParser::func01() {
