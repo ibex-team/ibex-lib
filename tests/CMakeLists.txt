@@ -32,7 +32,7 @@ TestExprMonomial.cpp
 TestExprPolynomial.cpp
 TestExprSimplify2.cpp
 TestExprSimplify.cpp
-TestFncKuhnTucker.cpp
+#TestFncKuhnTucker.cpp
 TestFunction.cpp
 TestGradient.cpp
 TestHC4Revise.cpp

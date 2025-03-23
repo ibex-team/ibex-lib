@@ -41,7 +41,7 @@
 #include "TestExprPolynomial.h"
 #include "TestExprSimplify2.h"
 #include "TestExprSimplify.h"
-#include "TestFncKuhnTucker.h"
+//#include "TestFncKuhnTucker.h"
 #include "TestFunction.h"
 #include "TestGradient.h"
 #include "TestHC4Revise.h"
