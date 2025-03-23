@@ -14,11 +14,11 @@ configuration:
 environment:
   matrix:
     - CMAKE_PLATFORM: "Visual Studio 14 2015"
-      CPACK_PATH: 'C:\\Program Files (x86)\\CMake\\bin'
+      IBEX_PATH: 'C:\Program Files (x86)\IBEX'
       platform: x86
       CPPUNIT_DIR: C:\tools\vcpkg\installed\x86-windows
     - CMAKE_PLATFORM: "Visual Studio 14 2015 Win64"
-      CPACK_PATH: 'C:\\Program Files (x86)\\CMake\\bin'
+      IBEX_PATH: 'C:\Program Files\IBEX'
       platform: x64
       CPPUNIT_DIR: C:\tools\vcpkg\installed\x64-windows
 
@@ -38,7 +38,7 @@ build_script:
   - cmake -G "%CMAKE_PLATFORM%" -DBUILD_TESTING=1 -DCMAKE_BUILD_TYPE=Release -DINTERVAL_LIB=filib -DCPPUNIT_DIR="%CPPUNIT_DIR%" -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON ../
   - cmake --build . --config Release
   - cmake --install . --config Release
-  - set PATH=%PATH%;C:\Program Files (x86)\IBEX\bin;C:\Program Files (x86)\IBEX\lib
+  - set PATH=%PATH%;%IBEX_PATH%\bin;%IBEX_PATH%\lib
   - ibexsolve -v
   - cmake --build . --config Release --target check
 
