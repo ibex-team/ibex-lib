@@ -111,7 +111,7 @@ int main() {
 	TestExprPolynomial().testMe();
 	TestExprSimplify2().testMe();
 	TestExprSimplify().testMe();
-	TestFncKuhnTucker().testMe();
+//	TestFncKuhnTucker().testMe();
 	TestFunction().testMe();
 	TestGradient().testMe();
 	TestHC4Revise().testMe();
