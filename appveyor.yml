@@ -14,11 +14,11 @@ configuration:
 environment:
   matrix:
     - CMAKE_PLATFORM: "Visual Studio 14 2015"
-      CPACK_PATH: 'C:\\Program Files (x86)\\CMake\\bin'
+      IBEX_PATH: 'C:\Program Files (x86)\IBEX'
       platform: x86
       CPPUNIT_DIR: C:\tools\vcpkg\installed\x86-windows
     - CMAKE_PLATFORM: "Visual Studio 14 2015 Win64"
-      CPACK_PATH: 'C:\\Program Files (x86)\\CMake\\bin'
+      IBEX_PATH: 'C:\Program Files\IBEX'
       platform: x64
       CPPUNIT_DIR: C:\tools\vcpkg\installed\x64-windows
 
@@ -35,15 +35,13 @@ build_script:
   - cd c:\projects\ibex-lib
   - mkdir build
   - cd build
-  #- set VCPKG_ROOT=C:\tools\vcpkg
-  #- cmake -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake -DCMAKE_FIND_DEBUG_MODE=ON -G "%CMAKE_PLATFORM%" -DCMAKE_BUILD_TYPE=Release -DINTERVAL_LIB=filib -DCPPUNIT_DIR="%CPPUNIT_DIR%" -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON ../
-  - cmake -G "%CMAKE_PLATFORM%" -DCMAKE_BUILD_TYPE=Release -DINTERVAL_LIB=filib -DCPPUNIT_DIR="%CPPUNIT_DIR%" -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON ../
-  - set MSBuildLogger="C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - set MSBuildOptions=/v:m /p:Configuration=%Configuration% /logger:%MSBuildLogger%
-  - msbuild %MSBuildOptions% PACKAGE.vcxproj
-  - set PATH=%CPACK_PATH%;%PATH% # conflit with choco pack alias. need to put cpack.exe first
-  - CPack.exe -G ZIP
-  - cmake --build . --target test
+  - cmake -G "%CMAKE_PLATFORM%" -DBUILD_TESTING=1 -DCMAKE_BUILD_TYPE=Release -DINTERVAL_LIB=filib -DCPPUNIT_DIR="%CPPUNIT_DIR%" -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON ../
+  - cmake --build . --config Release
+  - cmake --install . --config Release
+  - set PATH=%PATH%;%IBEX_PATH%\bin;%IBEX_PATH%\lib
+  - ibexsolve -v
+  # FIXME: cppunit not found ---> can't build target check
+  #- cmake --build . --config Release --target check
 
 artifacts:
 - path: build\ibex*.exe
