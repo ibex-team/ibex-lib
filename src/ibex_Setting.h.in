@@ -6,16 +6,19 @@
 #define _IBEX_RELEASE_ "@IBEX_VERSION@"
 #define _IBEX_INTERVAL_LIB_ "@INTERVAL_LIB@"
 #define _IBEX_LP_LIB_ "@LP_LIB@"
+#cmakedefine _IBEX_AS_DYNAMIC_LIB_ 1
 #cmakedefine USING_IPTOP 1
 
 #ifdef _MSC_VER
-#ifdef _IBEX_BUILD_DLL_
-#define _IBEX_DLL_PORT_ __declspec(dllexport)
+  #ifdef _IBEX_BUILD_DLL_
+    #define _IBEX_DLL_PORT_ __declspec(dllexport)
+  #elif _IBEX_AS_DYNAMIC_LIB_
+    #define _IBEX_DLL_PORT_ __declspec(dllimport)
+  #else
+    #define _IBEX_DLL_PORT_
+  #endif
 #else
-#define _IBEX_DLL_PORT_ __declspec(dllimport)
-#endif
-#else
-#define _IBEX_DLL_PORT_
+  #define _IBEX_DLL_PORT_
 #endif // _MSC_VER
 
 #endif /* __IBEX_SETTING_H__ */

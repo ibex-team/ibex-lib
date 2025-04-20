@@ -28,6 +28,10 @@ endif ()
 ################################################################################
 # ibex_Setting.h
 ################################################################################
+if (BUILD_SHARED_LIBS)	
+	set(_IBEX_AS_DYNAMIC_LIB_ ON)
+endif ()
+
 configure_file (ibex_Setting.h.in ibex_Setting.h)
 target_sources (ibex PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ibex_Setting.h)
 target_include_directories (ibex PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>")
