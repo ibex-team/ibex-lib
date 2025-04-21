@@ -33,6 +33,7 @@ public:
 	CPPUNIT_TEST(circle2);
 	CPPUNIT_TEST(circle3);
 	CPPUNIT_TEST(circle4);
+	CPPUNIT_TEST(benchs);
 	CPPUNIT_TEST_SUITE_END();
 
 	void empty();
@@ -40,6 +41,7 @@ public:
 	void circle2();
 	void circle3();
 	void circle4();
+	void benchs();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestSolver);
