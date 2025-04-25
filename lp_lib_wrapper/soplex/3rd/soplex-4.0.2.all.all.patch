@@ -11,65 +11,35 @@
  else
  		@echo "no installation directory specified - use make install INSTALLDIR=<dir>, e.g., make install INSTALLDIR=/usr/local"
  endif
---- soplex-4.0.2/src/soplex/spxdefines.h	2019-06-28 15:48:01.000000000 +0200
-+++ soplex-4.0.2/src/soplex/spxdefines.h	2025-02-08 15:05:10.093119564 +0100
-@@ -22,7 +22,7 @@
-  * \ref soplex::SPxOut::INFO3 "INFO3" are set.
-  * If \c NDEBUG is not defined, the code within \#TRACE is used.
-  * If \c SOPLEX_DEBUG is defined, the code within
-- * \ref soplex::SPxOut::DEBUG "DEBUG" is also used.
-+ * \ref soplex::SPxOut::_SOLEX_DEBUG "DEBUG" is also used.
-  *
-  * If \c WITH_LONG_DOUBLE is defined, all Real numbers are of type
-  * long double instead of just double.
---- soplex-4.0.2/src/soplex/spxout.cpp	2019-06-28 15:48:01.000000000 +0200
-+++ soplex-4.0.2/src/soplex/spxout.cpp	2025-02-08 15:04:23.499336072 +0100
-@@ -28,7 +28,7 @@
-    m_streams = new(m_streams) std::ostream*[INFO3 + 1];
-    m_streams[ ERROR ] = m_streams[ WARNING ] = &std::cerr;
+--- soplex-4.0.2/src/soplex/datahashtable.h	Fri Jun 28 15:48:00 2019
++++ soplex-4.0.2/src/soplex/datahashtable.h	Sun Oct 20 16:43:46 2024
+@@ -19,7 +19,9 @@
+ #ifndef _DATAHASHTABLE_H_
+ #define _DATAHASHTABLE_H_
  
--   for(int i = DEBUG; i <= INFO3; ++i)
-+   for(int i = _SOLEX_DEBUG; i <= INFO3; ++i)
-       m_streams[ i ] = &std::cout;
- }
++#include <algorithm>
+ #include <iostream>
++#include <iterator>
+ #include <assert.h>
+ #include <limits.h>
  
-@@ -44,7 +44,7 @@
- {
-    m_verbosity = base.m_verbosity;
+@@ -344,7 +346,7 @@
+       m_memfactor = base.m_memfactor;
+       m_used = base.m_used;
+       m_hashsize = base.m_hashsize;
+-      primes = base.primes;
++      std::copy(std::begin(base.primes), std::end(base.primes), std::begin(primes));
+       nprimes = base.nprimes;
  
--   for(int i = DEBUG; i <= INFO3; ++i)
-+   for(int i = _SOLEX_DEBUG; i <= INFO3; ++i)
-       m_streams[ i ] = base.m_streams[ i ];
- 
-    return *this;
-@@ -58,7 +58,7 @@
-    m_streams = new(m_streams) std::ostream*[INFO3 + 1];
-    m_streams[ ERROR ] = m_streams[ WARNING ] = rhs.m_streams[ERROR];
- 
--   for(int i = DEBUG; i <= INFO3; ++i)
-+   for(int i = _SOLEX_DEBUG; i <= INFO3; ++i)
-       m_streams[ i ] = rhs.m_streams[ i ];
- }
- 
---- soplex-4.0.2/src/soplex/spxout.h	2019-06-28 15:48:01.000000000 +0200
-+++ soplex-4.0.2/src/soplex/spxout.h	2025-02-08 15:04:41.722933555 +0100
-@@ -76,7 +76,7 @@
-       // If you change this, change the implementation as well.
-       ERROR    = 0,
-       WARNING  = 1,
--      DEBUG    = 2,
-+      _SOLEX_DEBUG    = 2,
-       INFO1    = 3,
-       INFO2    = 4,
-       INFO3    = 5
---- soplex-4.0.2/src/soplex.cpp	2019-06-28 15:48:00.000000000 +0200
-+++ soplex-4.0.2/src/soplex.cpp	2025-02-08 15:03:35.577552988 +0100
-@@ -5974,7 +5974,7 @@
-          break;
- 
-       case 2:
--         spxout.setVerbosity(SPxOut::DEBUG);
-+         spxout.setVerbosity(SPxOut::_SOLEX_DEBUG);
-          break;
- 
-       case 3:
+       assert(m_memfactor > 1.0);
+@@ -359,9 +361,9 @@
+       , m_memfactor(base.m_memfactor)
+       , m_used(base.m_used)
+       , m_hashsize(base.m_hashsize)
+-      , primes(base.primes)
+       , nprimes(base.nprimes)
+    {
++      std::copy(std::begin(base.primes), std::end(base.primes), std::begin(primes));
+       assert(m_memfactor > 1.0);
+       assert(isConsistent());
+    }

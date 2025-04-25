@@ -45,6 +45,7 @@ if (BUILD_JAVA_INTERFACE)
   target_link_libraries (ibex-java ibex)
 
   # Installation
+  set (CMAKE_INSTALL_JARDIR "share/java" CACHE PATH "jar archives (share/java)")
   install_jar (ibex-java-jar DESTINATION ${CMAKE_INSTALL_JARDIR})
   install (TARGETS ibex-java DESTINATION ${CMAKE_INSTALL_LIBDIR})
 else ()

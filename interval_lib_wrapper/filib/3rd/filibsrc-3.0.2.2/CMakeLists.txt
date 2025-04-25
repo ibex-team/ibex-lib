@@ -3,15 +3,12 @@ cmake_minimum_required (VERSION 3.5.1)
 project (FILIB VERSION 3.0.2.2 LANGUAGES CXX)
 
 message (STATUS "Running on system ${CMAKE_HOST_SYSTEM} with processor ${CMAKE_HOST_SYSTEM_PROCESSOR}")
-if (CMAKE_CROSSCOMPILING)
-  message (STATUS "Targeting system ${CMAKE_SYSTEM} with processor ${CMAKE_SYSTEM_PROCESSOR}")
+if (CMAKE_SYSTEM AND CMAKE_SYSTEM_PROCESSOR)
+  if ((DEFINED CMAKE_SYSTEM AND DEFINED CMAKE_SYSTEM_PROCESSOR) AND (NOT ${CMAKE_HOST_SYSTEM} STREQUAL ${CMAKE_SYSTEM} OR
+      NOT ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL ${CMAKE_SYSTEM_PROCESSOR}))
+    message (STATUS "Targeting system ${CMAKE_SYSTEM} with processor ${CMAKE_SYSTEM_PROCESSOR}")
+  endif ()
 endif ()
-
-# =========== Fixme! See issue #561# ====================================================================
-if (CMAKE_SYSTEM MATCHES "Darwin" AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
-	message (FATAL_ERROR "Ibex + Filib is not supported yet on MacOS arm64: try to use Gaol instead!")
-endif ()
-# =======================================================================================================
 
 # options and command-line arguments
 option (BUILD_SHARED_LIBS "Set to ON to build shared libraries" OFF)
@@ -36,16 +33,16 @@ endforeach ()
 # config.h.in -> config.h
 configure_file (config.h.in config.h)
 
-# Checking for -frounding-math and -ffloat-store
 include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag ("-frounding-math" COMPILER_SUPPORTS_FROUNDING_MATH)
-check_cxx_compiler_flag ("-ffloat-store" COMPILER_SUPPORTS_FFLOAT_STORE)
 
+# To check if SSE can be detected accurately, especially when cross-compiling from Intel Mac to arm64...
 # Setting HAVE_SSE and HAVE_X87
-if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+if (CMAKE_SYSTEM_PROCESSOR)
+  if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
 	set(HAVE_SSE ON)
-elseif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i.86")
+  elseif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i.86")
 	set(HAVE_X87 ON)
+  endif ()
 endif ()
 
 # rounding_control_config.hpp.in -> rounding_control_config.hpp
@@ -61,30 +58,15 @@ file (GLOB_RECURSE SRCS *.cpp)
 file (GLOB_RECURSE HEADERS *.icc *.hpp)
 list (APPEND HEADERS "${CMAKE_CURRENT_BINARY_DIR}/${RC_CONFIG}")
 
-if (WIN32 AND BUILD_SHARED_LIBS)
-  # Filib library is called prim
-  add_library (prim STATIC ${SRCS} ${HEADERS})
-  set_target_properties(prim PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-  set_target_properties(prim PROPERTIES LINK_FLAGS "/DEF:prim.def")
-else()
-  # Filib library is called prim
-  add_library (prim ${SRCS} ${HEADERS})
-endif()
-
-set_target_properties (prim PROPERTIES VERSION 0.0.0 SOVERSION 0)
+# Filib library is called prim
+add_library (prim ${SRCS} ${HEADERS})
 
 # Need source and binary dir (for rounding_control_config.hpp) in include dirs
 set (incdirs "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
 target_include_directories (prim PUBLIC "$<BUILD_INTERFACE:${incdirs}>")
 target_include_directories (prim PUBLIC "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 
-# Add compile flags
-if (COMPILER_SUPPORTS_FROUNDING_MATH)
-  target_compile_options (prim PUBLIC "-frounding-math")
-endif ()
-if (COMPILER_SUPPORTS_FFLOAT_STORE AND NOT HAVE_SSE)
-  target_compile_options (prim PUBLIC "-ffloat-store")
-endif ()
+# See also flags in ibex-config-utils.cmake...
 
 # install headers
 install(DIRECTORY ieee fp_traits interval rounding_control COMPONENT devtools
