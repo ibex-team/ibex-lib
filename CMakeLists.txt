@@ -24,6 +24,13 @@ ibex_init_common ()
 ################################################################################
 # Configure the libraries for interval arithmetic and linear programming
 ################################################################################
+
+if (MSVC)
+  message(STATUS "Forcing /fp:strict")
+  # Filib looses correct rounding with /fp:fast or /fp:precise
+  add_compile_options("/fp:strict")
+endif()
+
 add_subdirectory (interval_lib_wrapper)
 add_subdirectory (lp_lib_wrapper)
 
