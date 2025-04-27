@@ -34,10 +34,10 @@ endif()
 add_subdirectory (interval_lib_wrapper)
 add_subdirectory (lp_lib_wrapper)
 
-option (USING_IPOPT "Set to ON to use IpOpt" OFF)
-if (USING_IPOPT)
-  find_package (IpOpt)
-endif()
+#option (USING_IPOPT "Set to ON to use IpOpt" OFF)
+#if (USING_IPOPT)
+#  find_package (IpOpt)
+#endif()
 
 ################################################################################
 # Go to src subdirectory that builds the libibex target
