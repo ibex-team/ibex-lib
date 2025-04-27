@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.5.1)
 # CMake doc can be found at https://cmake.org/cmake/help/v3.5/
 
-project (IBEX VERSION 2.9.0.0 LANGUAGES CXX)
+project (IBEX VERSION 2.9.1.0 LANGUAGES CXX)
 set (IBEX_DESCRIPTION "A C++ library for interval-based algorithm design")
 set (IBEX_URL "http://www.ibex-lib.org/")
 set (IBEX_NAMESPACE "Ibex") # TODO use it everywhere
