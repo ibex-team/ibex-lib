@@ -52,7 +52,7 @@ public:
 	/**
 	 * \brief Contract the box.
 	 */
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box) override;
 
 protected:
 	const Function& f;

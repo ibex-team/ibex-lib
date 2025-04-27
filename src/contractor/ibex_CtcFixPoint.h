@@ -39,7 +39,7 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box) override;
 
 	/**
 	 * \brief Contract a box.
@@ -47,12 +47,12 @@ public:
 	 * \note When the FIXPOINT output flag is set, this means a stronger
 	 *       property (the fixpoint is reached for a null ratio).
 	 */
-	virtual void contract(IntervalVector& box, ContractContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context) override;
 
 	/**
 	 * \brief Add sub-contractor properties to the map
 	 */
-	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map) override;
 
 	/**
 	 * \brief Enable statistics.

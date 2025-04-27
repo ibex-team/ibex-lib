@@ -78,9 +78,9 @@ public :
 	 *  the average gain (on all the dimensions of the current box) is less  than ct_ratio:
 	 *  this average number of variables (during the tuning phase) will become nbcidvar.
 	 */
-	virtual void contract(IntervalVector& box, ContractContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context) override;
 
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box) override;
 
 	double nbvar_stat();
 

@@ -44,12 +44,12 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box) override;
 
 	/**
 	 * \brief Contract a box.
 	 */
-	virtual void contract(IntervalVector& box, ContractContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context) override;
 
 	/**
 	 * \brief Delete this.

@@ -49,7 +49,7 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box) override;
 
 	/**
 	 * \brief Enforces propagation (e.g.: HC4 or BOX) fitering.
@@ -62,12 +62,12 @@ public:
 	 * \see #contract(IntervalVector&, const BitSet&).
 	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
 	 */
-	virtual void contract(IntervalVector& box, ContractContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context) override;
 
 	/**
 	 * \brief Add sub-contractors properties to the map
 	 */
-	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map) override;
 
 	/** The list of contractors to propagate */
 	Array<Ctc> list;

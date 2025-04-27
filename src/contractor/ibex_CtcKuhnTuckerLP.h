@@ -61,7 +61,7 @@ public:
 	 *             all other contractors in optimization).
 	 *
 	 */
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box) override;
 
 	/**
 	 * \brief Delete this.

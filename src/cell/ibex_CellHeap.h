@@ -46,39 +46,41 @@ public:
 	 *
 	 * All the remaining cells will be *deleted*
 	 */
-	virtual void flush();
+	virtual void flush() override;
 
 	/** \brief Return the size of the buffer. */
-	virtual unsigned int size() const;
+	virtual unsigned int size() const override;
 
 	/** \brief Return true if the buffer is empty. */
-	virtual bool empty() const;
+	virtual bool empty() const override;
 
 	/** \brief Push a new cell on the heap. */
-	virtual void push(Cell* cell);
+	virtual void push(Cell* cell) override;
 
 	/** \brief Pop the top cell from the heap and return it.*/
-	virtual Cell* pop();
+	virtual Cell* pop() override;
 
 	/** \brief Return the top cell (but does not pop it).*/
-	virtual Cell* top() const;
+	virtual Cell* top() const override;
 
-	virtual std::ostream& print(std::ostream& os) const;
+	virtual std::ostream& print(std::ostream& os) const override;
 
 	/**
 	 * \brief Return the minimum value of the heap
-	 *
+	 * 
+	 * Implements \ref CellBufferOptim.
 	 */
-	virtual double minimum() const;
+	virtual double minimum() const override;
 
 	/**
 	 * \brief Contract the heap
-	 *
+	 * 
+	 * Implements \ref CellBufferOptim.
 	 * Removes (and deletes) from the heap all the cells
 	 * with a cost (according to the cost function of the
 	 * heap) greater than \a loup.
 	 */
-	virtual void contract(double loup);
+	virtual void contract(double loup) override;
 
 	/**
 	 * \brief Cost function of the  heap

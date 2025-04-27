@@ -49,9 +49,9 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box) override;
 
-	void contract(IntervalVector& box, ContractContext& context);
+	void contract(IntervalVector& box, ContractContext& context) override;
 
 	/** The function. */
 	const Fnc& f;

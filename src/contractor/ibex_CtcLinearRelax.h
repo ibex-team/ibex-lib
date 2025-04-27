@@ -41,17 +41,17 @@ public:
 	 * Linearize the system and performs 2n calls to Simplex in order to reduce
 	 * the 2 bounds of each variable
 	 */
-	virtual void contract(IntervalVector& box);
+	virtual void contract(IntervalVector& box) override;
 
 	/**
 	 * \brief Contract the box.
 	 */
-	virtual void contract(IntervalVector& box, ContractContext& context);
+	virtual void contract(IntervalVector& box, ContractContext& context) override;
 
 	/**
 	 * \brief Add linearizer properties to the map + argmin of the linearization
 	 */
-	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map) override;
 
 	/**
 	 * \brief The Extended system

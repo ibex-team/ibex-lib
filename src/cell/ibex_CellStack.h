@@ -26,22 +26,22 @@ class CellStack : public CellBuffer {
  public:
   /** Flush the buffer.
    * All the remaining cells will be *deleted* */
-  void flush();
+  virtual void flush() override;
 
   /** Return the size of the buffer. */
-  unsigned int size() const;
+  virtual unsigned int size() const override;
 
   /** Return true if the buffer is empty. */
-  bool empty() const;
+  virtual bool empty() const override;
 
   /** push a new cell on the stack. */
-  void push(Cell* cell);
+  virtual void push(Cell* cell) override;
 
   /** Pop a cell from the stack and return it.*/
-  Cell* pop();
+  virtual Cell* pop() override;
 
   /** Return the next box (but does not pop it).*/
-  Cell* top() const;
+  virtual Cell* top() const override;
 
  private:
   /* Stack of cells */

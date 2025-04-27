@@ -49,14 +49,14 @@ public:
 	 *
 	 * The LP solver must be created with (m+1)*n variables.
 	 */
-	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver) override;
 
 	/**
 	 * \brief Add the inequalities in the LP solver.
 	 *
 	 * The LP solver must be created with (m+1)*n variables.
 	 */
-	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) override;
 
 	/**
 	 * \brief Return the point chosen in the last call to linearize(...)

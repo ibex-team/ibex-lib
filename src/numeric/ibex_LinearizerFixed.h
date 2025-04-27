@@ -29,7 +29,7 @@ public:
 	/**
 	 * \brief Add the inequalities in the LP solver.
 	 */
-	int linearize(const IntervalVector& box, LPSolver& lp_solver);
+	int linearize(const IntervalVector& box, LPSolver& lp_solver) override;
 
 protected:
 

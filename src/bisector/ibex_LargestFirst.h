@@ -47,7 +47,7 @@ public:
 	 *
 	 * called by Bsc::bisect(...)
 	 */
-	virtual BisectionPoint choose_var(const Cell& cell);
+	virtual BisectionPoint choose_var(const Cell& cell) override;
 
 	/**
 	 * \brief Ratio to choose the split point.
@@ -58,7 +58,7 @@ public:
 	const double ratio;
 
  protected :
-	virtual bool nobisectable (const IntervalVector& box, int i) const ;
+	bool nobisectable (const IntervalVector& box, int i) const;
 };
 
 } // end namespace ibex

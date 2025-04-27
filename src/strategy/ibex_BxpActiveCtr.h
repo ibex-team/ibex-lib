@@ -39,7 +39,7 @@ public:
 	/**
 	 * \brief Copy the property
 	 */
-	virtual BxpActiveCtr* copy(const IntervalVector& box, const BoxProperties& prop) const;
+	virtual BxpActiveCtr* copy(const IntervalVector& box, const BoxProperties& prop) const override;
 
 	/**
 	 * \brief Update the property after box modification.
@@ -48,14 +48,14 @@ public:
 	 * of the function if active=true. Use check() instead.
 	 * \see Bxp::update(...).
 	 */
-	virtual void update(const BoxEvent& event, const BoxProperties& prop);
+	virtual void update(const BoxEvent& event, const BoxProperties& prop) override;
 
 	/**
 	 * \brief To string
 	 *
 	 * By default: the id.
 	 */
-	virtual std::string to_string() const;
+	virtual std::string to_string() const override;
 
 	/**
 	 * \brief Check if the constraint is inactive

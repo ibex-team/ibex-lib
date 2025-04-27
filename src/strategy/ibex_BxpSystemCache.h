@@ -51,7 +51,7 @@ public:
 	/**
 	 * \brief Copy the property
 	 */
-	virtual BxpSystemCache* copy(const IntervalVector& box, const BoxProperties& prop) const;
+	virtual BxpSystemCache* copy(const IntervalVector& box, const BoxProperties& prop) const override;
 
 	/**
 	 * \brief Update the property after box modification.
@@ -63,14 +63,14 @@ public:
 	 * variables of the system, it means that the box actually
 	 * corresponds to the extended system! Fixed so far by a hack.
 	 */
-	virtual void update(const BoxEvent& event, const BoxProperties& prop);
+	virtual void update(const BoxEvent& event, const BoxProperties& prop) override;
 
 	/**
 	 * \brief To string
 	 *
 	 * By default: the id.
 	 */
-	virtual std::string to_string() const;
+	virtual std::string to_string() const override;
 
 	/**
 	 * \brief Interval evaluation of the goal.

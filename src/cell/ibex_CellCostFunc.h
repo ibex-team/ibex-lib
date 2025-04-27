@@ -92,7 +92,7 @@ public:
 	CellCostVarLB(const ExtendedSystem& sys, int goal_var) ;
 
 	/** The "cost" of a element. */
-	virtual double cost(const Cell& c) const;
+	virtual double cost(const Cell& c) const override;
 
 
 private:
@@ -112,7 +112,7 @@ public:
 	CellCostVarUB(const ExtendedSystem& sys, int ind_var) ;
 
 	/** The "cost" of a element. */
-	virtual double cost(const Cell& c) const;
+	virtual double cost(const Cell& c) const override;
 
 
 private:
@@ -140,20 +140,20 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual void set_loup(double lb) { loup = lb; }
+	virtual void set_loup(double lb) override { loup = lb; }
 
 	/** The "cost" of a element. */
-	virtual double cost(const Cell& c) const;
+	virtual double cost(const Cell& c) const override;
 
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(BoxProperties& map) override;
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c);
+	virtual void set_optim_data(Cell& c) override;
 private:
 
 	/** the lower upper bound. */
@@ -177,20 +177,20 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual void set_loup(double lb) { loup = lb; }
+	virtual void set_loup(double lb) override { loup = lb; }
 
 	/** The "cost" of a element. */
-	virtual double cost(const Cell& c) const;
+	virtual double cost(const Cell& c) const override;
 
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(BoxProperties& map) override;
 
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c);
+	virtual void set_optim_data(Cell& c) override;
 private:
 
 	/** the lower upper bound. */
@@ -212,20 +212,20 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual void set_loup(double lb) { loup = lb; }
+	virtual void set_loup(double lb) override { loup = lb; }
 
 	/** The "cost" of a element. */
-	virtual	double cost(const Cell& c) const;
+	virtual double cost(const Cell& c) const override;
 
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(BoxProperties& map) override;
 
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c);
+	virtual void set_optim_data(Cell& c) override;
 private:
 
 	/** the lower upper bound. */
@@ -242,17 +242,17 @@ public:
 	CellCostPU(const ExtendedSystem& sys);
 
 	/** The "cost" of a element. */
-	virtual	double cost(const Cell& c) const;
-
+	virtual double cost(const Cell& c) const override;
+	
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(BoxProperties& map) override;
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c);
+	virtual void set_optim_data(Cell& c) override;
 };
 
 
@@ -260,19 +260,18 @@ class CellCostPFlb: public CellCostFunc {
 public:
 	CellCostPFlb(const ExtendedSystem& sys);
 
+	/** The "cost" of a element. */
+	virtual double cost(const Cell& c) const override;
+
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(BoxProperties& map) override;
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c);
-
-	/** The "cost" of a element. */
-	virtual	double cost(const Cell& c) const;
-
+	virtual void set_optim_data(Cell& c) override;
 };
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -282,18 +281,18 @@ class CellCostPFub: public CellCostFunc {
 public:
 	CellCostPFub(const ExtendedSystem& sys);
 
+	/** The "cost" of a element. */
+	virtual double cost(const Cell& c) const override;
+
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(BoxProperties& map) override;
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c);
-
-	/** The "cost" of a element. */
-	virtual	double cost(const Cell& c) const;
+	virtual void set_optim_data(Cell& c) override;
 
 };
 
@@ -304,18 +303,18 @@ class CellCostMaxPFub: public CellCostFunc {
 public:
 	CellCostMaxPFub(const ExtendedSystem& sys);
 
+	/** The "cost" of a element. */
+	virtual double cost(const Cell& c) const override;
+
 	/**
 	 * \brief Add OptimData
 	 */
-	virtual void add_property(BoxProperties& map);
+	virtual void add_property(BoxProperties& map) override;
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
-	virtual void set_optim_data(Cell& c);
-
-	/** The "cost" of a element. */
-	virtual	double cost(const Cell& c) const;
+	virtual void set_optim_data(Cell& c) override;
 
 };
 

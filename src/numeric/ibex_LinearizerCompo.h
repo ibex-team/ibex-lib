@@ -36,21 +36,21 @@ public:
 	 * \return the number of constraints (possibly 0) or -1 if the linear system is
 	 *         infeasible.
 	 */
-	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver) override;
 
 	/**
 	 * \brief Add constraints in a LP solver.
 	 *
 	 * By default, call linearize(box, lp_solver).
 	 */
-	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) override;
 
 	/**
 	 * \brief Add properties of underlying linearizers.
 	 *
 	 *
 	 */
-	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop) override;
 
 	/**
 	 * \brief Delete this.

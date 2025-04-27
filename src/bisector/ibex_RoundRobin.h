@@ -55,7 +55,7 @@ public:
 	 * first one. In case all the variables have domain diameter less than \a w, a
 	 * NoBisectableVariableException is raised.
 	 */
-	virtual BisectionPoint choose_var(const Cell& cell);
+	virtual BisectionPoint choose_var(const Cell& cell) override;
 
 	/**
 	 * \brief Ratio to choose the split point.

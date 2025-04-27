@@ -42,7 +42,7 @@ public :
 	LSmear (ExtendedSystem& sys,  double prec, double ratio=Bsc::default_ratio(),
 			lsmear_mode lsmode=LSMEAR_MG);
 
-	/*
+	/**
 	 * \brief Variant with a vector of precisions.
 	 *
 	 * \see #LSmear(System&, double, double, lsmear_mode)
@@ -50,14 +50,14 @@ public :
 	LSmear (ExtendedSystem& sys, const Vector& prec, double ratio=Bsc::default_ratio(),
 			lsmear_mode lsmode=LSMEAR_MG);
 
-	/*
+	/**
 	 * \brief Variant with an OptimLargestFirst bisector as default bisector
 	 * used by default optimizer
 	 */
 	LSmear (ExtendedSystem& sys, double prec, OptimLargestFirst& lf,lsmear_mode lsmode=LSMEAR_MG);
-/*
-	 * \brief Variant with an OptimLargestFirst bisector as default bisector and a vector of precisions
 
+	/**
+	 * \brief Variant with an OptimLargestFirst bisector as default bisector and a vector of precisions
 	 */
 	LSmear (ExtendedSystem& sys,const Vector& prec, OptimLargestFirst& lf,lsmear_mode lsmode=LSMEAR_MG);
 	/**
@@ -68,7 +68,7 @@ public :
 	/**
 	 * \brief Returns the variable to bisect.
 	 */
-	virtual int var_to_bisect(IntervalMatrix& J,const IntervalVector& box) const;
+	virtual int var_to_bisect(IntervalMatrix& J,const IntervalVector& box) const override;
 
 	/**
 	 * \brief Computes the dual solution of the linear program mid(J).x<=0

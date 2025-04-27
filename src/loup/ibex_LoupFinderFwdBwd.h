@@ -43,7 +43,7 @@ public:
 	 *
 	 * \see comments in LoupFinder.
 	 */
-	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
+	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup) override;
 
 	/**
 	 * \brief Delete this.

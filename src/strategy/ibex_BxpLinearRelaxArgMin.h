@@ -36,17 +36,17 @@ public:
 	/**
 	 * \brief Copy the property
 	 */
-	virtual BxpLinearRelaxArgMin* copy(const IntervalVector& box, const BoxProperties& prop) const;
+	virtual BxpLinearRelaxArgMin* copy(const IntervalVector& box, const BoxProperties& prop) const override;
 
 	/**
 	 * \brief Update the property after box modification.
 	 */
-	virtual void update(const BoxEvent& event, const BoxProperties& prop);
+	virtual void update(const BoxEvent& event, const BoxProperties& prop) override;
 
 	/**
 	 * \brief To string
 	 */
-	virtual std::string to_string() const;
+	virtual std::string to_string() const override;
 
 	/**
 	 * \brief The system

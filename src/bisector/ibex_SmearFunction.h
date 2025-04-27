@@ -64,7 +64,7 @@ public:
 	 * In case the jacobian matrix could not be computed correctly, the box is split
 	 * with the \link ibex::RoundRobin::choose_var((const Cell&) round-robin strategy \endlink.
 	 */
-	virtual BisectionPoint choose_var(const Cell& cell);
+	virtual BisectionPoint choose_var(const Cell& cell) override;
 
 	/**
 	 * \brief Returns the variable to bisect.
@@ -78,7 +78,7 @@ public:
 	/**
 	 * \brief Add backtrackable data required by round robin.
 	 */
-	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map) override;
 
 	
 protected :
@@ -137,7 +137,7 @@ public :
 	 *
 	 * \param J the jacobian matrix J
 	 */
-	int var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const;
+	virtual int var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const;
 };
 
 /**
@@ -180,7 +180,7 @@ public :
 	 *
 	 * \param J the jacobian matrix J
 	 */
-	int var_to_bisect(IntervalMatrix& J, const IntervalVector& box ) const;
+	virtual int var_to_bisect(IntervalMatrix& J, const IntervalVector& box ) const;
 };
 
 
@@ -222,7 +222,7 @@ public :
 	 *
 	 * \param J the jacobian matrix J
 	 */
-	int var_to_bisect(IntervalMatrix & J, const IntervalVector& box ) const;
+	virtual int var_to_bisect(IntervalMatrix & J, const IntervalVector& box ) const;
 };
 
 
@@ -254,7 +254,7 @@ public :
 	 * Returns the variable to bisect : the variable i with the greatest normalized  impact over the constraints fj :  Dfj/Dxi * Diam (xi) / NC(fj) , where NC(fj) = sum(i) Abs(Dfj/Dxi) * Diam(xi)
 	 * \param J the jacobian matrix J
 	 */
-	int var_to_bisect(IntervalMatrix & J, const IntervalVector& box ) const;
+	virtual int var_to_bisect(IntervalMatrix & J, const IntervalVector& box ) const;
 };
 
 

@@ -86,17 +86,17 @@ public:
 	/**
 	 * \brief Generation of the linear inequalities
 	 */
-	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver);
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver) override;
 
 	/**
 	 * \brief Generation of the linear inequalities
 	 */
-	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop);
+	virtual int linearize(const IntervalVector& box, LPSolver& lp_solver, BoxProperties& prop) override;
 
 	/**
 	 * \brief Add BxpActiveCtrs
 	 */
-	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop) override;
 
 private:
 

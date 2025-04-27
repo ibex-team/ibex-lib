@@ -41,19 +41,19 @@ public:
 	 *
 	 * \see comments in LoupFinder.
 	 */
-	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
+	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup) override;
 
 	/**
 	 * \brief Find a new loup in a given box.
 	 *
 	 * \see comments in LoupFinder.
 	 */
-	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop);
+	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup, BoxProperties& prop) override;
 
 	/**
 	 * \brief Add properties required by finder_probing and finder_x_taylor.
 	 */
-	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop) override;
 
 	// statistics on upper bounding
 	//void report();

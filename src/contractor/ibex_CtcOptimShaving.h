@@ -26,15 +26,15 @@ public:
 	/**
 	 * \brief Contract a box.
 	 */
-	void contract(IntervalVector& box);
-	virtual void contract(IntervalVector& box, ContractContext& context);
+	virtual void contract(IntervalVector& box) override;
+	virtual void contract(IntervalVector& box, ContractContext& context) override;
 
 	static constexpr int LimitCIDDichotomy = 100;
 
 protected:
-	virtual bool var3BCID_dicho(IntervalVector& box, int var, double wv);
-	virtual bool var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval& dom);
-	virtual int limitCIDDichotomy();
+	virtual bool var3BCID_dicho(IntervalVector& box, int var, double wv) override;
+	virtual bool var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval& dom) override;
+	virtual int limitCIDDichotomy() override;
 };
 
 } // end namespace ibex

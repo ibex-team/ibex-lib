@@ -60,47 +60,48 @@ public:
 	/**
 	 * \brief Add properties required by this buffer.
 	 */
-	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map) override;
 
 	/**
 	 * \brief Flush the buffer.
 	 *
 	 * All the remaining cells will be *deleted*
 	 */
-	void flush();
+	virtual void flush() override;
 
 	/** \brief Return the size of the buffer. */
-	unsigned int size() const;
+	virtual unsigned int size() const override;
 
 	/** \brief Return true if the buffer is empty. */
-	bool empty() const;
+	virtual bool empty() const override;
 
 	/** \brief Push a new cell on the stack. */
-	void push(Cell* cell);
+	virtual void push(Cell* cell) override;
 
 	/** \brief Pop a cell from the stack and return it.*/
-	Cell* pop();
+	virtual Cell* pop() override;
 
 	/** \brief Return the next box (but does not pop it).*/
-	Cell* top() const;
+	virtual Cell* top() const override;
 
-
-	std::ostream& print(std::ostream& os) const;
+	virtual std::ostream& print(std::ostream& os) const override;
 
 	/**
 	 * \brief Return the minimum value of the heap
 	 *
+	 * Implements \ref CellBufferOptim.
 	 */
-	virtual double minimum() const;
+	virtual double minimum() const override;
 
 	/**
 	 * \brief Contract the heap
 	 *
+	 * Implements \ref CellBufferOptim.
 	 * Removes (and deletes) from the heap all the cells
 	 * with a cost (according to the cost function of the
 	 * first heap) greater than \a loup.
 	 */
-	virtual void contract(double loup);
+	virtual void contract(double loup) override;
 
 	/**
 	 * \brief Cost function of the first heap

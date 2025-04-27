@@ -131,17 +131,17 @@ public:
 protected:
 
 	// ============================================================================
-	virtual unsigned int nb_var();
+	virtual unsigned int nb_var() override;
 
-	virtual Ctc& get_ctc();
+	virtual Ctc& get_ctc() override;
 
-	virtual Bsc& get_bsc();
+	virtual Bsc& get_bsc() override;
 
-	virtual LoupFinder& get_loup_finder();
+	virtual LoupFinder& get_loup_finder() override;
 
-	virtual CellBufferOptim& get_cell_buffer();
+	virtual CellBufferOptim& get_cell_buffer() override;
 
-	virtual int goal_var();
+	virtual int goal_var() override;
 	// ============================================================================
 
 	/**
