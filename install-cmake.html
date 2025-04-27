@@ -281,11 +281,11 @@ Possibles values are 0 (<em>only static libraries</em>) or 1 (<em>static and
 dynamic libraries</em>).</p>
 <p>If Ibex is compiled as a dynamic library in a local folder, you must set the library
 path accordingly to execute a program. Under Linux:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export LD_LIBRARY_PATH=[prefix]/lib/
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export LD_LIBRARY_PATH=[prefix]/lib/:[prefix]/lib/ibex/3rd
 </pre></div>
 </div>
 <p>Under MacOS:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export DYLD_LIBRARY_PATH=[prefix]/lib
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export DYLD_LIBRARY_PATH=[prefix]/lib:[prefix]/lib/ibex/3rd
 </pre></div>
 </div>
 <p>Under Windows:</p>

@@ -260,11 +260,11 @@ BUILD_SHARED_LIBS       Ex: ``-DBUILD_SHARED_LIBS=1``.
                         If Ibex is compiled as a dynamic library in a local folder, you must set the library 
                         path accordingly to execute a program. Under Linux::
 
-                        $ export LD_LIBRARY_PATH=[prefix]/lib/
+                        $ export LD_LIBRARY_PATH=[prefix]/lib/:[prefix]/lib/ibex/3rd
 
                         Under MacOS::
 
-                        $ export DYLD_LIBRARY_PATH=[prefix]/lib
+                        $ export DYLD_LIBRARY_PATH=[prefix]/lib:[prefix]/lib/ibex/3rd
 
                         Under Windows::
                         
