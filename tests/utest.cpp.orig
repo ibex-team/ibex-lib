@@ -1,0 +1,91 @@
+/* ============================================================================
+ * I B E X - Main unit testing program
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Gilles Chabert
+ * Created     : Dec 07, 2011
+ * ---------------------------------------------------------------------------- */
+
+#include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/extensions/TestFactoryRegistry.h>
+
+int main() {
+<<<<<<< HEAD
+	CppUnit::TextUi::TestRunner runner;
+	CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
+	runner.addTest( registry.makeTest() );
+	bool wasSuccessful = runner.run( "", false );
+	return !wasSuccessful;
+=======
+
+	SUCCESS = true;
+	
+	TestAgenda().testMe();
+	TestArith().testMe();
+	TestBitSet().testMe();
+	TestBoolInterval().testMe();
+	TestBxpSystemCache().testMe();
+	TestCell().testMe();	
+	TestCellHeap().testMe();
+	TestCov().testMe();
+	TestCrossProduct().testMe();
+	TestCtcExist().testMe();
+	TestCtcForAll().testMe();
+	TestCtcFwdBwd().testMe();
+	TestCtcHC4().testMe();
+	TestCtcInteger().testMe();
+	TestCtcNotIn().testMe();
+	TestCtcPolytopeHull().testMe();
+	TestDim().testMe();
+	TestDomain().testMe();
+	TestDoubleHeap().testMe();
+	TestDoubleIndex().testMe();
+	TestEval().testMe();
+	TestExpr2DAG().testMe();
+	TestExpr2Minibex().testMe();
+	TestExprCmp().testMe();
+	TestExprCopy().testMe();
+	TestExpr().testMe();
+	TestExprDiff().testMe();
+	TestExprLinearity().testMe();
+	TestExprMonomial().testMe();
+	TestExprPolynomial().testMe();
+	TestExprSimplify2().testMe();
+	TestExprSimplify().testMe();
+//	TestFncKuhnTucker().testMe();
+	TestFunction().testMe();
+	TestGradient().testMe();
+	TestHC4Revise().testMe();
+	TestInHC4Revise().testMe();
+	TestInnerArith().testMe();
+	TestInterval().testMe();
+	TestIntervalMatrix().testMe();
+	TestIntervalVector().testMe();
+	TestKernel().testMe();
+	TestKuhnTuckerSystem().testMe();
+	TestLinear().testMe();
+	TestLinearSolver().testMe();
+	TestNewton().testMe();
+	TestNumConstraint().testMe();
+	TestOptimizer().testMe();
+	TestParser().testMe();
+	TestPdcHansenFeasibility().testMe();
+	TestRoundRobin().testMe();
+	TestSeparator().testMe();
+	TestSet().testMe();
+	TestSinc().testMe();
+	TestSolver().testMe();
+	TestString().testMe();
+	TestSymbolMap().testMe();
+	TestSystem().testMe();
+	//TestTimer().testMe();
+	TestTrace().testMe();
+	TestUnconstrainedLocalSearch().testMe();
+	TestVarSet().testMe();
+	
+	exit(SUCCESS ? 0 : 1);
+>>>>>>> 84298505 (Skip FncKuhnTucker)
+}

@@ -1,0 +1,114 @@
+# Looking for cppunit
+find_package (CppUnit)
+
+<<<<<<< HEAD
+# Only add the test targets if cppunit was found
+if (CPPUNIT_FOUND)
+  # Compile common stuff for the tests
+  add_library (test_common utest.cpp utils.cpp utils.h Ponts30.cpp Ponts30.h)
+  target_link_libraries (test_common PUBLIC ibex CppUnit::CppUnit)
+=======
+add_executable (utest utest.cpp utils.cpp Ponts30.cpp 
+TestAgenda.cpp
+TestArith.cpp
+TestBitSet.cpp
+TestBoolInterval.cpp
+TestBxpSystemCache.cpp
+TestCell.cpp	
+TestCellHeap.cpp
+TestCov.cpp
+TestCross.cpp
+TestCtcExist.cpp
+TestCtcForAll.cpp
+TestCtcFwdBwd.cpp
+TestCtcHC4.cpp
+TestCtcInteger.cpp
+TestCtcNotIn.cpp
+TestCtcPolytopeHull.cpp
+TestDim.cpp
+TestDomain.cpp
+TestDoubleHeap.cpp
+TestDoubleIndex.cpp
+TestEval.cpp
+TestExpr2DAG.cpp
+TestExpr2Minibex.cpp
+TestExprCmp.cpp
+TestExprCopy.cpp
+TestExpr.cpp
+TestExprDiff.cpp
+TestExprLinearity.cpp
+TestExprMonomial.cpp
+TestExprPolynomial.cpp
+TestExprSimplify2.cpp
+TestExprSimplify.cpp
+#TestFncKuhnTucker.cpp
+TestFunction.cpp
+TestGradient.cpp
+TestHC4Revise.cpp
+TestInHC4Revise.cpp
+TestInnerArith.cpp
+TestInterval.cpp
+TestIntervalMatrix.cpp
+TestIntervalVector.cpp
+TestKernel.cpp
+TestKuhnTuckerSystem.cpp
+TestLinear.cpp
+TestLPSolver.cpp
+TestNewton.cpp
+TestNumConstraint.cpp
+TestOptimizer.cpp
+TestParser.cpp
+TestPdcHansenFeasibility.cpp
+TestRoundRobin.cpp
+TestSeparator.cpp
+TestSet.cpp
+TestSinc.cpp
+TestSolver.cpp
+TestString.cpp
+TestSymbolMap.cpp
+TestSystem.cpp
+TestTimer.cpp
+TestTrace.cpp
+TestUnconstrainedLocalSearch.cpp
+TestVarSet.cpp
+)
+
+target_link_libraries (utest PUBLIC ibex)
+>>>>>>> 2d1109f9 (Do not compile FncKuhnTucker (weird linking issue under Appveyor))
+  
+  set (srcdir_test_flag -DSRCDIR_TESTS="${CMAKE_CURRENT_SOURCE_DIR}")
+
+  set (TESTS_LIST TestAgenda TestArith TestBitSet TestBoolInterval
+                  TestBxpSystemCache TestCell TestCov TestCross TestCtcExist
+                  TestCtcForAll TestCtcFwdBwd TestCtcHC4 TestCtcInteger
+                  TestCtcNotIn TestDim TestDomain TestDoubleHeap TestDoubleIndex
+                  TestEval TestExpr2DAG TestExpr2Minibex TestExprCmp
+                  TestExprCopy TestExpr TestExprDiff TestExprLinearity
+                  TestExprMonomial TestExprPolynomial TestExprSimplify
+                  TestExprSimplify2 TestFncKuhnTucker TestKuhnTuckerSystem
+                  TestFunction TestGradient TestHC4Revise TestInHC4Revise
+                  TestInnerArith TestInterval TestIntervalMatrix
+                  TestIntervalVector TestKernel TestLinear TestLPSolver
+                  TestNewton TestNumConstraint TestParser
+                  TestPdcHansenFeasibility TestRoundRobin TestSeparator TestSet
+                  TestSinc TestSolver TestString TestSymbolMap TestSystem
+                  TestTimer TestTrace TestVarSet
+                  TestCellHeap TestCtcPolytopeHull TestOptimizer TestUnconstrainedLocalSearch)
+
+  foreach (test ${TESTS_LIST})
+    # /!\ The test and the target building the executable have the same name
+    add_executable (${test} ${test}.cpp ${test}.h)
+    target_link_libraries (${test} test_common ibex CppUnit::CppUnit)
+    target_compile_definitions (${test} PRIVATE ${srcdir_test_flag})
+    add_dependencies (check ${test})
+    add_test (${test} ${test})
+  endforeach ()
+else ()
+  message (STATUS "Will not run tests, required cppunit library was not found")
+  set (MSG "No tests will be run as CMake failed to find the cppunit library \
+during the configuration step. If you want to run the tests, you need to \
+install cppunit. Then, you need to re-run the configuration step of CMake. You \
+can use the CPPUNIT_DIR variable to indicate to CMake were to find it")
+  add_custom_target (notest COMMAND ${CMAKE_COMMAND} -E echo ${MSG})
+  add_dependencies (check notest)
+endif ()

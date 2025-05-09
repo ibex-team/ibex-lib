@@ -28,12 +28,13 @@ public:
 	CPPUNIT_TEST(inflating_newton01);
 	CPPUNIT_TEST(inflating_newton02);
 	CPPUNIT_TEST(ctc_parameter01);
-
+	CPPUNIT_TEST(inflating_newton_issue558);
 	CPPUNIT_TEST_SUITE_END();
 
 	void newton01();
 	void inflating_newton01();
 	void inflating_newton02();
+	void inflating_newton_issue558();
 	void ctc_parameter01();
 };
 
