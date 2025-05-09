@@ -217,7 +217,17 @@ bool inflating_newton(const Fnc& f, const VarSet* vars, const IntervalVector& fu
 		if (vars) vars->set_var_box(full_mid, mid);
 
 		Fmid=f.eval_vector(full_mid);
-
+		
+		if (Fmid.is_empty()) {
+			break; // outside of definition domain of the function.
+			// We could apply here an algorithm that looks for another point inside the box (instead of mid) that belongs to the definition domain.
+			// Then we could pursue iterations with such a point instead of interrupting.
+			// This would be only useful in practice for solutions close to the boundary of the definition domain (for other solutions, bisection will 
+			// get another chance to find them later). Note that the inflation parameters (especially chi) could also be adapted (i.e., decreased) in 
+			// this case. Otherwise, inflation may lead to boxes exceeding the boundary and eventually invalid midpoints although the initial box 
+			// was plenty inside the domain (see for example issue558 test).
+		}
+		
 		// Use the jacobian % parameters to calculate
 		// a mean-value form for Fmid
 		if (vars) {
