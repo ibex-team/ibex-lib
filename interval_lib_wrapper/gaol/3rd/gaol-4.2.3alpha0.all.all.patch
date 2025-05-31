@@ -1,5 +1,5 @@
 --- gaol-4.2.3alpha0/gaol/gaol_common.cpp	2022-02-01 12:40:40.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_common.cpp	2025-03-09 12:59:58.483700407 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_common.cpp	2025-04-05 17:11:19.804478162 +0200
 @@ -29,7 +29,7 @@
  
  #include <iostream>
@@ -22,7 +22,7 @@
              round_upward_sse();
  #   endif
 --- gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2022-02-01 12:40:40.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2025-03-08 00:37:50.585568767 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_double_op_apmathlib.h	2025-04-05 17:11:19.805478163 +0200
 @@ -112,7 +112,7 @@
      	for (;;) {
        	if (odd(n)) {
@@ -66,7 +66,7 @@
        }
      }
 --- gaol-4.2.3alpha0/gaol/gaol_double_op_crlibm.h	2022-02-01 12:40:40.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_double_op_crlibm.h	2025-03-08 00:38:06.848553397 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_double_op_crlibm.h	2025-04-05 17:11:19.805478163 +0200
 @@ -88,7 +88,7 @@
      	for (;;) {
        	if (odd(n)) {
@@ -110,7 +110,7 @@
        }
      }
 --- gaol-4.2.3alpha0/gaol/gaol_double_op_m.h	2022-02-01 12:40:40.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_double_op_m.h	2025-03-08 00:38:17.143543648 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_double_op_m.h	2025-04-05 17:11:19.806478163 +0200
 @@ -115,7 +115,7 @@
      	for (;;) {
        	if (odd(n)) {
@@ -153,8 +153,19 @@
  	}
        }
      }
+--- gaol-4.2.3alpha0/gaol/gaol_fpu_fenv.h	2025-04-05 16:57:31.062367935 +0200
++++ gaol-4.2.3alpha0/gaol/gaol_fpu_fenv.h	2025-04-05 17:12:00.309526054 +0200
+@@ -42,7 +42,7 @@
+ // FIXME: Using an hexadecimal constant is not portable!
+ #define GAOL_FPU_MASK 0x0a3f
+ 
+-#if __APPLE__
++#if IX86_MACOSX
+ #   define CTRLWORD(v) (v).__control
+ #elif IX86_LINUX
+ #   define CTRLWORD(v) (v).__control_word
 --- gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2022-02-01 12:40:40.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2025-03-09 10:32:42.047131593 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_interval.cpp	2025-04-05 17:11:19.806478163 +0200
 @@ -243,7 +243,8 @@
    {
      //    double l = ((I.left()==0.0) ? 0.0  : I.left()); // Avoids printing -0
@@ -200,7 +211,7 @@
    }
  
 --- gaol-4.2.3alpha0/gaol/gaol_port.h	2022-02-08 14:33:29.000000000 +0100
-+++ gaol-4.2.3alpha0/gaol/gaol_port.h	2025-03-08 00:40:24.629422564 +0100
++++ gaol-4.2.3alpha0/gaol/gaol_port.h	2025-04-05 17:11:19.807478164 +0200
 @@ -89,9 +89,9 @@
  
  #if HAVE_ROUNDING_MATH_OPTION
