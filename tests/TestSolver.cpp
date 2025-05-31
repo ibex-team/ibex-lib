@@ -281,4 +281,17 @@ void  TestSolver::benchs() {
 	}
 }
 
+void TestSolver::issue558() {
+	double x0 = 1e-20; // some value close to 0 but not too close, so that the derivative of sqrt does not lead to LinearException
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	SystemFactory f;
+	f.add_var(x);
+	f.add_ctr(sqrt(x)=x0);
+	System sys(f);
+	sys.box[0] = sqr(Interval(x0)).inflate(1.01,0); // a box containing the solution
+	DefaultSolver solver(sys);
+	Solver::Status status = solver.solve(sys.box);	
+	CPPUNIT_ASSERT(status!=Solver::INFEASIBLE);
+}
+
 } // end namespace
