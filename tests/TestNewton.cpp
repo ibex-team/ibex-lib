@@ -157,4 +157,19 @@ void TestNewton::ctc_parameter01() {
 	CPPUNIT_ASSERT(box[0].diam()<=0.1);
 	CPPUNIT_ASSERT(box[1].diam()<=0.1);
 }
+
+void TestNewton::inflating_newton_issue558() {
+	double x0 = 1e-20; // some value close to 0 but not too close, so that the derivative of sqrt does not lead to LinearException
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	Function f(x, sqrt(x)-x0);
+	IntervalVector box(1);
+	box[0] = sqr(Interval(x0)).inflate(1.01,0); // a box containing the solution
+	
+	IntervalVector box_existence(1);
+	IntervalVector box_unicity(1);
+	bool res = inflating_newton(f, box, box_existence, box_unicity);
+	CPPUNIT_ASSERT(res==1);
+	CPPUNIT_ASSERT(box_existence[0].is_superset(sqr(Interval(x0))));
+}
+
 } // end namespace ibex
