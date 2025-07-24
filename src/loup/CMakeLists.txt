@@ -19,5 +19,11 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderXTaylor.h
 )
 
+if (USING_IPOPT)
+  target_sources (ibex PRIVATE
+    # put the name of sources files here using the same syntax as above
+  )
+endif()
+
 target_include_directories (ibex PUBLIC
                               "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
