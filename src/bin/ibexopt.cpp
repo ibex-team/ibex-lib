@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
 				cout << "  eps-x:\t\t" << eps_x_arg.Get() << "\t(precision on variables domain)" << endl;
 		}
 
-		Vector eps_x(sys->nb_var, eps_x_arg ? eps_x_arg.Get() : OptimizerConfig::default_eps_x);
+		ibex::Vector eps_x(sys->nb_var, eps_x_arg ? eps_x_arg.Get() : OptimizerConfig::default_eps_x);
 
 		if (no_split_arg) {
 			if (!quiet)

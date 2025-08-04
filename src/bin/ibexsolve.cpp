@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 			cout << "  output file:\t\t" << output_manifold_file << "\n";
 		}
 
-		Vector eps_x_min(sys.nb_var, eps_x_min_arg ? eps_x_min_arg.Get() : DefaultSolver::default_eps_x_min);
+		ibex::Vector eps_x_min(sys.nb_var, eps_x_min_arg ? eps_x_min_arg.Get() : DefaultSolver::default_eps_x_min);
 
 		if (no_split_arg) {
 			if (!quiet)

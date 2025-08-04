@@ -8,6 +8,7 @@
 // Last Update : Oct 14, 2019
 //============================================================================
 
+
 #include "ibex_DefaultOptimizerConfig.h"
 
 #include "ibex_CtcHC4.h"
@@ -18,7 +19,11 @@
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_LSmear.h"
+#ifdef USING_IPOPT
+#include "ibex_LoupFinderDefaultIpopt.h"
+#else
 #include "ibex_LoupFinderDefault.h"
+#endif
 #include "ibex_LoupFinderCertify.h"
 #include "ibex_Array.h"
 #include "ibex_Random.h"
@@ -207,13 +212,19 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 }
 
 LoupFinder& DefaultOptimizerConfig::get_loup_finder() {
+
+  	const ExtendedSystem& ext_sys = get_ext_sys();
 	if (found(LOUP_FINDER_TAG)) // in practice, get_loup_finder() is only called once by Optimizer.
 			return get<LoupFinder>(LOUP_FINDER_TAG);
 
 	const NormalizedSystem& norm_sys = get_norm_sys();
 
 	return rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(norm_sys, inHC4))) :
-			(LoupFinder*) new LoupFinderDefault(norm_sys, inHC4), LOUP_FINDER_TAG);
+		   #ifdef USING_IPOPT
+		   (LoupFinder*) new LoupFinderDefaultIpopt(sys,norm_sys,ext_sys, inHC4), LOUP_FINDER_TAG);
+                   #else	
+        	   (LoupFinder*) new LoupFinderDefault(norm_sys, inHC4), LOUP_FINDER_TAG);
+                   #endif
 }
 
 CellBufferOptim& DefaultOptimizerConfig::get_cell_buffer() {

@@ -21,6 +21,10 @@ target_sources (ibex PRIVATE
 
 if (USING_IPOPT)
   target_sources (ibex PRIVATE
+   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderIpopt.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderIpopt.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderDefaultIpopt.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderDefaultIpopt.h
     # put the name of sources files here using the same syntax as above
   )
 endif()

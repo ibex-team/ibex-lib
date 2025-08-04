@@ -193,6 +193,10 @@ public:
 	 */
 	const IntervalVector& get_loup_point() const;
 
+
+  void set_uplo(double uplo);
+  void set_loup(double loup);
+  void set_loup_point(const IntervalVector & v);
 	/**
 	 * \brief Get the time spent.
 	 *
@@ -318,6 +322,15 @@ public:
 	 */
 	bool anticipated_upper_bounding; // TODO: should be set in OptimizerConfig
 
+
+
+         /**
+         * \brief Computes and returns  the value ymax (the loup decreased with the precision)
+         * the heap and the current box are actually contracted with y <= ymax
+         *
+         */
+        double compute_ymax ();
+
 protected:
 	/*
 	 * \brief Initialize the optimizer from a single box.
@@ -380,12 +393,6 @@ protected:
 	 */
 	bool update_loup(const IntervalVector& box, BoxProperties& prop);
 
-	/**
-	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
-	 * the heap and the current box are actually contracted with y <= ymax
-	 *
-	 */
-	double compute_ymax ();
 
 	/**
 	 * \brief Check time is not out.
@@ -469,6 +476,10 @@ inline double Optimizer::get_uplo() const { return uplo; }
 inline double Optimizer::get_loup() const { return loup; }
 
 inline const IntervalVector& Optimizer::get_loup_point() const { return loup_point; }
+
+   inline void Optimizer::set_uplo(double up) {uplo=up;}
+   inline void Optimizer::set_loup(double lp) {loup=lp;}
+   inline void Optimizer::set_loup_point(const IntervalVector& v) {loup_point=v;}
 
 inline double Optimizer::get_time() const { return time; }
 
