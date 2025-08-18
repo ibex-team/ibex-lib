@@ -15,7 +15,6 @@
 #include "ibex_OptimMemory.h"
 #include "ibex_ExtendedSystem.h"
 
-#define USING_IPOPT
 namespace ibex {
 
 /**

@@ -21,10 +21,10 @@
 #include <sstream>
 #include <fstream>
 #include <stdio.h>
-#include "/usr/local/include/coin-or/IpTNLP.hpp"
-#include "/usr/local/include/coin-or/IpIpoptApplication.hpp"
-#include "/usr/local/include/coin-or/IpSolveStatistics.hpp"
-#include "/usr/local/include/coin-or/IpUtils.hpp"
+#include "IpTNLP.hpp"
+#include "IpIpoptApplication.hpp"
+#include "IpSolveStatistics.hpp"
+#include "IpUtils.hpp"
 
 #include "ibex_Optimizer.h"
 #include "ibex_CellHeap.h"
