@@ -7,6 +7,10 @@ target_include_directories (ibex PUBLIC "$<BUILD_INTERFACE:${IBEX_INCDIRS}>")
 
 target_link_libraries (ibex PUBLIC ${INTERVAL_LIB_TARGET} ${LP_LIB_TARGET})
 
+if (USING_IPOPT)
+  target_link_libraries(ibex PUBLIC IpOpt::IpOpt)
+endif()
+
 if (WIN32)
 
   if (BUILD_SHARED_LIBS)

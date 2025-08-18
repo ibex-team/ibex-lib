@@ -7,7 +7,7 @@
 #define _IBEX_INTERVAL_LIB_ "@INTERVAL_LIB@"
 #define _IBEX_LP_LIB_ "@LP_LIB@"
 #cmakedefine _IBEX_AS_DYNAMIC_LIB_ 1
-#cmakedefine USING_IPTOP 1
+#cmakedefine USING_IPOPT 1
 
 #ifdef _MSC_VER
   #ifdef _IBEX_BUILD_DLL_
