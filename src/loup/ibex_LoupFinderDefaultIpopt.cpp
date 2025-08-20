@@ -53,8 +53,12 @@ std::pair<IntervalVector, double> LoupFinderDefaultIpopt::find(const IntervalVec
 	try {   // if (!(finder_ipopt.recursive_call)) cout << " recursive box " << box << endl; 
 		p=finder_probing.find(box,p.first,p.second,prop);
 		found=true;
-			if (finder_ipopt.recursive_call) cout << "probing " << p.second << endl;
-		else cout << " probing recursive " << p.second << endl;
+		if (finder_ipopt.recursive_call){
+		    if (finder_ipopt.optimizer->trace)
+		      cout << "probing " << p.second << endl;
+		}
+		else if (finder_ipopt.optimizer->trace)
+		  cout << " probing recursive " << p.second << endl;
 	} catch(NotFound&) { }
         if (xtaylor){
 	try {
@@ -63,8 +67,13 @@ std::pair<IntervalVector, double> LoupFinderDefaultIpopt::find(const IntervalVec
 		p=finder_x_taylor.find(box,p.first,p.second,prop);
 		found=true;
 		
-			if (finder_ipopt.recursive_call) cout << "xtaylor " << p.second << endl;
-		else cout << " xtaylor recursive " << p.second << endl;
+		if (finder_ipopt.recursive_call){
+		    if (finder_ipopt.optimizer->trace)
+			  cout << "xtaylor " << p.second << endl;
+		}
+		else
+		    if (finder_ipopt.optimizer->trace)
+		      cout << " xtaylor recursive " << p.second << endl;
 		
 	} catch(NotFound&) { }
 	}

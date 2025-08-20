@@ -101,7 +101,7 @@ namespace ibex {
 	     )){
 	  nbcalls++;
 	  if (force) {nbcalls_after_loup++ ; after_loup=true;}
-	  if (force) cout << "ipopt after loup " << endl;
+	  //	  if (force) cout << "ipopt after loup " << endl;
 	  //	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
 	  ApplicationReturnStatus status = app->OptimizeTNLP(this);
 	  force=0;  // after ipopt call , force is reset to 0

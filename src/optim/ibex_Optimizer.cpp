@@ -1,3 +1,4 @@
+
 //                                  I B E X
 // File        : ibex_Optimizer.cpp
 // Author      : Gilles Chabert, Bertrand Neveu
@@ -17,6 +18,9 @@
 #include <float.h>
 #include <stdlib.h>
 #include <iomanip>
+#ifdef USING_IPOPT
+#include "ibex_LoupFinderDefaultIpopt.h"
+#endif
 
 using namespace std;
 
@@ -84,6 +88,9 @@ Optimizer::Optimizer(OptimizerConfig& config) :
 	timeout						= config.get_timeout();
 	extended_COV				= config.with_extended_cov();
 	anticipated_upper_bounding	= config.with_anticipated_upper_bounding();
+        #ifdef USING_IPOPT
+	((LoupFinderDefaultIpopt*) &loup_finder)->finder_ipopt.optimizer=this;
+	 #endif
 }
 
 Optimizer::~Optimizer() {
