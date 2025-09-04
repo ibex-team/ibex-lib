@@ -94,10 +94,7 @@ namespace ibex {
       if (recursive_call){
 	ipopt_calls++;  // at first call, ipopt_calls=0
 	if (
-	    //    (!sys.minlp ||box.max_diam()<= ipopt_diam)
-	    //	    &&
 	    (ipopt_calls%ipopt_frequency==0 || ipopt_calls==10 || ipopt_calls==20  || ipopt_calls==50 || (force && box.max_diam()<= ipopt_diam)
-	     //|| sys.minlp && all_integer_variables_fixed(box))
 	     )){
 	  nbcalls++;
 	  if (force) {nbcalls_after_loup++ ; after_loup=true;}
@@ -131,10 +128,7 @@ namespace ibex {
 		    
 		  }
 	    //            cout << " loup avant corr " << loup << endl;
-	    //	    if (sys.get_integer_variables()->size() < sys.nb_var){
-	    //	    else if (optimalValue< loup && sys.get_integer_variables()->size() < sys.nb_var){
-	      //	      cout << " solution " << solution << endl;
-	      //	      cout << " optimal value " << optimalValue << " loup " << loup << endl;
+	    //	      cout << " optimal value " << optimalValue << " loup " << loup << endl;
 		  double ipoptloup=POS_INFINITY;
 		  correct_ipopt_sol(solution, ipoptloup);
 		  //		  cout << " loup " << loup << " correct loup " << ipoptloup << endl;
@@ -165,19 +159,6 @@ namespace ibex {
 
 
   
-  /*
-  bool  LoupFinderIpopt::all_integer_variables_fixed(const IntervalVector & box)
-
-  { 
-    BitSet& b = *(sys.get_integer_variables());
-    for (int i=0; i< box.size(); i++)
-      {if (b[i] && box[i].lb() != box[i].ub())
-	  return false;
-      }
-    cout << "all integer fixed" << endl;
-    return true;
-  }
-  */  
     bool LoupFinderIpopt::get_nlp_info(int& n, int& m, int& nnz_jac_g,
 					int& nnz_h_lag, IndexStyleEnum& index_style)
     {
@@ -266,20 +247,6 @@ namespace ibex {
 	ibex::Vector v = the_box.mid();
 	//	cout << " force " << force << endl;
 
-	// making integer the starting point of integer variables (seems useless)
-	/*
-	BitSet& b = *(sys.get_integer_variables());
-	for (int i =0;i<n;i++){
-	  if (b[i]){
-	    if (RNG::rand() %2 == 0 &&
-		std::floor(v[i]) >= the_box[i].lb())
-	      v[i]=std::floor(v[i]);
-	    else if (std::ceil(v[i]) <= the_box[i].ub())
-	      v[i]=std::ceil(v[i]);
-	    cout << i << " v[i] " << v[i] << endl;
-	  }
-	}
-	*/
 	if (force)  v=solution;
 
 	//	cout << " v " << v << endl;
@@ -524,18 +491,6 @@ namespace ibex {
 
     }
 
-  /*
-  bool LoupFinderIpopt::integer_check(Vector& pt)
-           {return integer_and_bound_check(normsys,pt);}
-  */
-  /*
-  bool LoupFinderIpopt::is_inner(Vector& pt)
-           {return is_inner0(normsys,pt);}
-  double LoupFinderIpopt::goal_ub(Vector& pt)
-           {return goal_ub0(normsys,pt);}
-  void LoupFinderIpopt::sysbound(Vector& pt) {bound_check(normsys,pt);}
-    void LoupFinderIpopt::sysbound(IntervalVector& vec) {bound_check(normsys,vec);}
-  */
   // OK only for QP problems (quadratic objective and linear constraints)
   void LoupFinderIpopt::set_quadratic(bool quadra){
     if (quadra) app->Options()->SetStringValue("hessian_constant", "yes");
@@ -556,12 +511,12 @@ namespace ibex {
       }
       CellHeap buffer(extsys);
       //      LoupFinderDefault loupfind (normsys,true,integerobj);
-      LoupFinderProbing loupfind(normsys);
-      //      Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,optimizer->loup_finder,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
-      Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,loupfind,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
+      //      LoupFinderProbing loupfind(normsys);
+      Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,optimizer->loup_finder,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
+      //Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,loupfind,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
 
 
-      //      opt.integerobj=optimizer->integerobj;
+
 
       opt.set_uplo(optimizer->get_uplo());
       opt.set_loup(optimizer->get_loup());

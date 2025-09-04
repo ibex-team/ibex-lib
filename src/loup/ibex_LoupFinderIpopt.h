@@ -87,7 +87,6 @@ namespace ibex {
       int nbcalls_successfull_after_loup=0;
       bool after_loup=false;
       void correct_ipopt_sol (Vector&v, double& loup);
-      //      bool all_integer_variables_fixed(const IntervalVector & box);
 
       /**
       	 * \brief Find a new loup in a given box.
@@ -144,13 +143,7 @@ namespace ibex {
             int m, const Number* g, const Number* lambda, Number obj_value, const IpoptData* ip_data, IpoptCalculatedQuantities* ip_cq);
 
         /************************************************************************/
-      /*
-        bool integer_check(Vector& pt);
-        bool is_inner(Vector& pt);
-        double goal_ub(Vector& pt);
-        void sysbound(Vector& pt);
-        void sysbound(IntervalVector& vec);
-      */
+
         void set_quadratic(bool quadratic); // in case of QP problems, the hessian is called once.
         bool force=false; // when true it forces Ipopt call, i.e. after a new loup is found by another loup finder.
       
