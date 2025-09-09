@@ -56,6 +56,7 @@ ibex_generate_pkgconfig_file (ibex)
 ################################################################################
 install (FILES "${MODULE_DIR}/${IBEX_DEV_UTILS_FILENAME}.cmake"
                "${MODULE_DIR}/FindCppUnit.cmake"
+               "${MODULE_DIR}/FindCppIpOpt.cmake"
           DESTINATION ${CMAKE_INSTALL_CONFIGCMAKE}/cmake.utils
           COMPONENT devtools)
 
