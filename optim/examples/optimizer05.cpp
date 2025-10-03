@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
-// Last Update : Jul 12, 2012
+// Last Update : Oct 2, 2025
 //============================================================================
 
 
@@ -16,7 +16,9 @@
 #include "ibex_AmplInterface.h"
 
 const double default_relax_ratio = 0.2;
+#ifdef USING_IPOPT
 using namespace Ipopt;
+#endif
 using namespace std;
 using namespace ibex;
 
@@ -28,7 +30,7 @@ int main(int argc, char** argv){
 	try {
 	  Timer timer;
 	  timer.start();
-	if (argc<8) {
+	if (argc<10) {
 		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection loupfinder strategy [beamsize] prec goal_prec timelimit randomseed"  << endl;
 		exit(1);
 	}
@@ -72,12 +74,14 @@ int main(int argc, char** argv){
 	string bisection= argv[4];
 	string loupfindermethod = argv[5];
 	int nbinput=6;
+	#ifdef USING_IPOPT
 	int ipoptfrequency=1;
         int ipoptquadratic=0;
         if (loupfindermethod=="ipoptxn" || loupfindermethod=="ipoptxninhc4" || loupfindermethod=="ipoptprob"){
           ipoptfrequency=atoi(argv[nbinput++]);
           ipoptquadratic=atoi(argv[nbinput++]);
         }
+	#endif
         string strategy= argv[nbinput++];
 
 	int beamsize;
@@ -97,13 +101,18 @@ int main(int argc, char** argv){
 	//	cout << "nor_sys" << norm_sys << endl;
 
         LoupFinder* loupfinder = nullptr;
-        if (loupfindermethod=="ipoptxninhc4")
-          loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,true,true);
+        if (loupfindermethod=="xninhc4")
+	  loupfinder= new LoupFinderDefault (norm_sys,true);
+	
+	#ifdef USING_IPOPT
+	  if (loupfindermethod=="ipoptxninhc4")
+	    loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,true,true);
         else if (loupfindermethod=="ipoptxn")
           loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,false,true);
         else if (loupfindermethod=="ipoptprob")
           loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,false,false);
-        else if (loupfindermethod=="xninhc4")
+	#endif
+        if (loupfindermethod=="xninhc4")
           loupfinder = new LoupFinderDefault (norm_sys,true);
         else if (loupfindermethod=="xn")
           loupfinder = new LoupFinderDefault (norm_sys,false);
@@ -111,7 +120,8 @@ int main(int argc, char** argv){
           loupfinder = new LoupFinderProbing (norm_sys);
         else if (loupfindermethod=="inhc4")
           loupfinder = new LoupFinderInHC4 (norm_sys);
-        else
+	
+	if (loupfinder==nullptr)
 	  {cout << loupfindermethod <<  " is not an implemented  feasible point finding method "  << endl; return -1;}
 
 
@@ -241,12 +251,13 @@ int main(int argc, char** argv){
 	o.trace=1;
 
 	// ipopt : initialization of ipopt with the optimizer (for recursive calls)
-
+        #ifdef USING_IPOPT
         if (loupfindermethod=="ipoptxninhc4" || loupfindermethod=="ipoptxn" ||loupfindermethod=="ipoptprob" ){
           ((LoupFinderDefaultIpopt*) loupfinder)->finder_ipopt.optimizer= &o;
           ((LoupFinderDefaultIpopt*) loupfinder)->finder_ipopt.ipopt_frequency= ipoptfrequency;
           ((LoupFinderDefaultIpopt*) loupfinder)->finder_ipopt.set_quadratic(ipoptquadratic);
         }
+        #endif
 	// the allowed time for search
 	o.timeout=timelimit;
 
@@ -267,6 +278,7 @@ int main(int argc, char** argv){
 
 	  //      cout << "preprocessing ampl time " << o.preprocampltime << " ipopttime " << o.preprocipopttime << endl;
         cout << o.get_status() << " ; " << o.get_time() + presolve_time << " ; " << o.get_nb_cells()+1 << endl;
+	#ifdef USING_IPOPT
         if (loupfindermethod == "ipoptxn" || loupfindermethod =="ipoptxninhc4" || loupfindermethod =="ipoptprob" ){
           cout << " correction nodes " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.correction_nodes << " cor\
 rection time " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.correction_time << endl;
@@ -278,7 +290,8 @@ ndl;
           cout << "nbcalls_successfull_after_loup " <<  ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.nbcalls_suc\
 cessfull_after_loup << endl;
         }
-        cout << o.get_time() << "  " << o.get_nb_cells() << endl;
+	#endif
+        cout << o.get_time()+presolve_time << "  " << o.get_nb_cells()+1 << endl;
 
 	//	if (filtering == "acidhc4"  )
 	//cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;
@@ -288,9 +301,12 @@ cessfull_after_loup << endl;
 	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg")
 	  delete bs1;
 	// bs1 deleted by SmearFunction destructor  (TO CHANGE)
-	
-	
 
+	#ifdef USING_IPOPT
+	//	delete loupfinder;    error with ipopt destructors
+        #else
+	delete loupfinder;
+	#endif
 	delete buffer;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn") {
 		delete lr;

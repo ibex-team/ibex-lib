@@ -29,7 +29,7 @@ namespace ibex {
   double expansion_precisionB=1.e-6; // the expansion for the recursive call of optimizer
   double ipopt_diam=1.e8;  // the threshold for running Ipopt 
   double recursivecall_maxtime=1.0;  // the maximum time for the recursive call of optimizer
-  
+
   LoupFinderIpopt::LoupFinderIpopt(const System& sys,const System& normsys, const ExtendedSystem& extsys) : sys(sys), normsys(normsys), extsys(extsys), solution(sys.nb_var), the_box(sys.box), ipopt_box(sys.box) {
 	try {
 		df = new Function(*sys.goal,Function::DIFF);
@@ -79,15 +79,14 @@ namespace ibex {
       }
       }
 
-    LoupFinderIpopt::~LoupFinderIpopt()
-    {}
+    LoupFinderIpopt::~LoupFinderIpopt()    {}
 
 
     std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
       double loup0=loup;
       //      cout << " loup before ipopt " << loup << endl;
       if (ipopt_calls== -1) ipopt_box=box;  // initialization of ipopt_box before first call.
-      //      if (sys.minlp) ipopt_box=box;  // in case of Minlp, ipopt is run with the current box.
+
       the_box  = box;
       double newloup=false;
       IntervalVector loup_point0=loup_point;
@@ -97,8 +96,9 @@ namespace ibex {
 	    (ipopt_calls%ipopt_frequency==0 || ipopt_calls==10 || ipopt_calls==20  || ipopt_calls==50 || (force && box.max_diam()<= ipopt_diam)
 	     )){
 	  nbcalls++;
+	  //	  cout << " nbcalls " << nbcalls << "  force " << force << endl;
 	  if (force) {nbcalls_after_loup++ ; after_loup=true;}
-	  //	  if (force) cout << "ipopt after loup " << endl;
+
 	  //	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
 	  ApplicationReturnStatus status = app->OptimizeTNLP(this);
 	  force=0;  // after ipopt call , force is reset to 0
@@ -127,33 +127,34 @@ namespace ibex {
 		    if (after_loup) {nbcalls_successfull_after_loup ++; after_loup=false;}
 		    
 		  }
-	    //            cout << " loup avant corr " << loup << endl;
 	    //	      cout << " optimal value " << optimalValue << " loup " << loup << endl;
-		  double ipoptloup=POS_INFINITY;
-		  correct_ipopt_sol(solution, ipoptloup);
-		  //		  cout << " loup " << loup << " correct loup " << ipoptloup << endl;
-		  if (ipoptloup < loup)
-		    {
-		      loup_point0=solution;
-		      loup=ipoptloup;
-		      if (optimizer->trace)
-			cout << "*** ipopt+corr " ;
-		      newloup=true;
-		      if (after_loup) nbcalls_successfull_after_loup++;
-		    }
-	    }
+	    double ipoptloup=POS_INFINITY;
+	    correct_ipopt_sol(solution, ipoptloup);
+           //		  cout << " loup " << loup << " correct loup " << ipoptloup << endl;
+	    if (ipoptloup < loup)
+	      {
+		loup_point0=solution;
+		loup=ipoptloup;
+		if (optimizer->trace)
+		  cout << "*** ipopt+corr " ;
+		newloup=true;
+		if (after_loup) nbcalls_successfull_after_loup++;
+	      }
+	  }
 	
 	}
 	
-      }
+      
       //      cout << " fin ipopt " << " loup " << loup << " loup0 " << loup0 << endl; 
-      after_loup=false;
-      if (loup < loup0){
-	nbcalls_successfull++;
-	return std::make_pair(loup_point0, loup);
+	after_loup=false;
       }
-      else  throw NotFound();
-
+	if (loup < loup0){
+	  nbcalls_successfull++;
+	  return std::make_pair(loup_point0, loup);
+	}
+      
+	else  throw NotFound();
+      
 
     }
 
@@ -289,18 +290,10 @@ namespace ibex {
 	  }
 	ibex::IntervalVector gradiente(n);
   	gradiente= funcion->gradient(v);
-        //  gradiente= df->eval_vector(v);
-        //	  cout << " gradient " << gradiente << endl;
-	//        cout << " grad size " << gradiente.size() << endl;
-	//	cout << " v " << v << endl;
-        //        cout << "df[0] " << df[0] << endl;
-        //  cout << "df[0] val" << *df[0].eval(v)[0].mid() <<  " " << gradiente[0].mid() << endl;
+	//        cout << " apres gradient " << endl;
         for (int i = 0; i < n; i++)
         {
 	  grad_f[i] = gradiente[i].mid();
-	  //	  double val=df[i].eval(v).mid();
-	  //	  cout << i << " df[0] val" << val << " "  << gradiente[i].mid()        << endl;
-	  //	  grad_f[i] = df[i].eval(v).mid();
 
         }
 
@@ -359,6 +352,7 @@ namespace ibex {
             {
 
 	      IntervalVector grad(n);
+	      //	       cout << c << " "  << sys.ctrs[c].f  << endl;
 	      grad= sys.ctrs[c].f.gradient(v);
 	       //               cout << "restriccion:" << c << endl;
 	       //               cout <<grad<< endl;
@@ -510,7 +504,7 @@ namespace ibex {
 	boxsol[i]= sys.box[i] & Interval(v[i]- epsi, v[i]+ epsi);
       }
       CellHeap buffer(extsys);
-      //      LoupFinderDefault loupfind (normsys,true,integerobj);
+      //      LoupFinderDefault loupfind (normsys,true);
       //      LoupFinderProbing loupfind(normsys);
       Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,optimizer->loup_finder,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
       //Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,loupfind,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
@@ -526,11 +520,15 @@ namespace ibex {
       recursive_call=true;
       correction_nodes+=opt.get_nb_cells();
       correction_time+=opt.get_time();
+      /*
       if (optimizer->trace)
 	cout << " correction nodes " << correction_nodes << " correction_time " << correction_time << endl;
+      */
       if (opt.get_loup() < optimizer->get_loup()){
-	if (optimizer->trace)
+	/* if (optimizer->trace)
 	  cout << "new loup after correction " << opt.get_loup() << endl;
+	*/
+	  
 	loup= opt.get_loup();
 	v = opt.get_loup_point().mid();
       }

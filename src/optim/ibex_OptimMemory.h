@@ -32,8 +32,10 @@ public:
 	enum { LOUP_FINDER = __NB_TAGS__};
 
 	OptimObject(const LoupFinder* data) : Object(data, LOUP_FINDER) { }
-
-	~OptimObject() { delete (LoupFinder*) data; }
+ // this delete causes a bug when ipopt is used
+#ifndef USING_IPOPT 
+  ~OptimObject()  { delete (LoupFinder*) data; }
+#endif
 };
 
 template<>

@@ -60,6 +60,11 @@ namespace ibex {
        * \brief Symbolic gradient of constraints.
        */
       Function** dg=nullptr;;
+
+      int ipopt_calls=-1;
+      bool after_loup=false;
+
+      void correct_ipopt_sol (Vector&v, double& loup);
     public:
 
       double optimalValue = POS_INFINITY;
@@ -85,24 +90,24 @@ namespace ibex {
       int nbcalls_successfull=0;
       int nbcalls_after_loup=0;
       int nbcalls_successfull_after_loup=0;
-      bool after_loup=false;
-      void correct_ipopt_sol (Vector&v, double& loup);
+      
+
 
       /**
       	 * \brief Find a new loup in a given box.
       	 *
       	 * \see comments in LoupFinder.
       	 */
-      	virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
+      virtual std::pair<IntervalVector, double> find(const IntervalVector& box, const IntervalVector& loup_point, double loup);
 
-        /************ methods required  by IpOpt ***********/
+      /************ methods required  by IpOpt ***********/
 
         /** Method to return some info about the nlp */
       virtual bool get_nlp_info(int& n, int& m, int& nnz_jac_g, int& nnz_h_lag, IndexStyleEnum& index_style);
 
 
-        /** Method to return the bounds for my problem */
-        virtual bool get_bounds_info(int n, Number* x_l, Number* x_u,
+      /** Method to return the bounds for my problem */
+      virtual bool get_bounds_info(int n, Number* x_l, Number* x_u,
             int  m, Number* g_l, Number* g_u);
 
         /** Method to return the starting point for the algorithm */
@@ -162,8 +167,6 @@ namespace ibex {
         LoupFinderIpopt();
         LoupFinderIpopt(const LoupFinderIpopt&);
         LoupFinderIpopt& operator=(const LoupFinderIpopt&);
-
-        int ipopt_calls=-1; // 
 
 
 

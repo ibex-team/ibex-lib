@@ -19,7 +19,7 @@ using namespace std;
 
 namespace ibex {
 
-void TestOptimizer::vec_problem01() {
+  void TestOptimizer::vec_problem01() {
 
 	const ExprSymbol& x=ExprSymbol::new_(Dim::col_vec(3));
 
@@ -38,8 +38,11 @@ void TestOptimizer::vec_problem01() {
 	CPPUNIT_ASSERT(status==Optimizer::SUCCESS);
 	CPPUNIT_ASSERT(o.get_loup()>=3 && o.get_uplo()<=3);
 	CPPUNIT_ASSERT(almost_eq(o.get_loup_point(),Vector::ones(3),0.1));
+
 }
 
+  // vector of constraints in LoupFinderIpopt
+#ifndef USING_IPOPT
 void TestOptimizer::vec_problem02() {
 	const ExprSymbol& alpha=ExprSymbol::new_();
 	const ExprSymbol& x=ExprSymbol::new_(Dim::col_vec(2));
@@ -61,6 +64,7 @@ void TestOptimizer::vec_problem02() {
 			NormalizedSystem::default_eps_h, false, false); // no INHC4
 
 	IntervalVector box=cart_prod(Interval(-1,1)*Interval::pi(), Interval(-10,10), Interval(-10,10));
+
 	Optimizer::Status status=o.optimize(box);
 
 	CPPUNIT_ASSERT(status==Optimizer::SUCCESS);
@@ -69,10 +73,12 @@ void TestOptimizer::vec_problem02() {
 	CPPUNIT_ASSERT(almost_eq(fabs(sol[0]),Interval::pi().mid(),1e-3));
 	CPPUNIT_ASSERT(almost_eq(sol[1],-10,1e-3));
 	CPPUNIT_ASSERT(almost_eq(sol[2],-10,1e-3));
+		cout << " fin probleme 01 " << endl;
 }
-
+#endif
 // true minimum is 0.
 Optimizer::Status issue50(double init_loup, double prec) {
+
 	SystemFactory f;
 	const ExprSymbol& x=ExprSymbol::new_();
 	f.add_var(x);

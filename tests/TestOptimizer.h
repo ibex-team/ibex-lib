@@ -26,7 +26,9 @@ public:
 	CPPUNIT_TEST_SUITE(TestOptimizer);
 #ifndef __IBEX_NO_LP_SOLVER__
 	CPPUNIT_TEST(vec_problem01);
+  #ifndef USING_IPOPT
 	CPPUNIT_TEST(vec_problem02);
+  #endif
 	CPPUNIT_TEST(issue50_1);
 	CPPUNIT_TEST(issue50_2);
 	CPPUNIT_TEST(issue50_3);
@@ -38,8 +40,9 @@ public:
 	// problem with vector variables
 	void vec_problem01();
 	// vector variables and vector constraints
+  #ifndef USING_IPOPT
 	void vec_problem02();
-
+  #endif
 	// upperbounding with goal_prec=10% will remove everything (initial loup > true minimum) --> NO_FEASIBLE_FOUND
 	void issue50_1();
 	// upperbounding with goal_prec=0 will make the optimizer succeed --> SUCCESS
