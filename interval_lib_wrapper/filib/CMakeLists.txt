@@ -5,7 +5,7 @@ set (FILIB_NAME ${FILIB_NAME} PARENT_SCOPE)
 include (FindFilib.cmake)
 
 # Avoid overflowing display with warnings
-if (MSVC)
+if (MSVC) # [#573]
 	add_compile_options("/wd4244") # disable warning conversion from 'double' to '___', possible loss of data
 else ()
 	add_compile_options(-w)
