@@ -78,9 +78,12 @@ namespace ibex {
       	std::cout << std::endl << std::endl << "*** Error during initialization!" << std::endl;
       	exit(0);
       }
-      }
+  }
 
-    LoupFinderIpopt::~LoupFinderIpopt()    {}
+  LoupFinderIpopt::~LoupFinderIpopt() {
+    delete df;
+    if (sys.nb_ctr>0) delete [] dg;
+  }
 
 
     std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
@@ -101,7 +104,7 @@ namespace ibex {
 	  if (force) {nbcalls_after_loup++ ; after_loup=true;}
 
 	  //	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
-    	SmartPtr <TNLP> mynlp = new LoupFinderIpopt(sys,normsys,extsys);
+          SmartPtr <TNLP> mynlp = new LoupFinderIpopt(sys,normsys,extsys);
 	  ApplicationReturnStatus status = app->OptimizeTNLP(mynlp);
 	  force=0;  // after ipopt call , force is reset to 0
 	  //	  cout << " status " << status << endl;

@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
 
 		string extension = filename.Get().substr(filename.Get().find_last_of('.')+1);
 		if (extension == "nl") {
-			cerr << "\n\033[31mAMPL files can only be read with optimizer04 (ibex-opt-extra package).\n\n";
+			cerr << "\n\033[31mAMPL files can only be read with optimizer05 (with ibex-ampl).\n\n";
 			exit(0);
 		}
 		else
