@@ -302,11 +302,8 @@ cessfull_after_loup << endl;
 	  delete bs1;
 	// bs1 deleted by SmearFunction destructor  (TO CHANGE)
 
-	#ifdef USING_IPOPT
-	//	delete loupfinder;    error with ipopt destructors
-        #else
 	delete loupfinder;
-	#endif
+
 	delete buffer;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn") {
 		delete lr;

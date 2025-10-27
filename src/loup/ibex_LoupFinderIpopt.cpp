@@ -53,6 +53,7 @@ namespace ibex {
 		dg = NULL;
 	}
 	//The IpOPT initialization should be here
+
       app = IpoptApplicationFactory();
       app->RethrowNonIpoptException(true);
      
@@ -100,7 +101,8 @@ namespace ibex {
 	  if (force) {nbcalls_after_loup++ ; after_loup=true;}
 
 	  //	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
-	  ApplicationReturnStatus status = app->OptimizeTNLP(this);
+    	SmartPtr <TNLP> mynlp = new LoupFinderIpopt(sys,normsys,extsys);
+	  ApplicationReturnStatus status = app->OptimizeTNLP(mynlp);
 	  force=0;  // after ipopt call , force is reset to 0
 	  //	  cout << " status " << status << endl;
 	  if (status == Solve_Succeeded) {
