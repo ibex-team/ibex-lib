@@ -178,6 +178,8 @@ public:
 	CPPUNIT_TEST(root02);
 	CPPUNIT_TEST(root03);
 	CPPUNIT_TEST(root04);
+	CPPUNIT_TEST(root05);
+	CPPUNIT_TEST(root06);
 
 	CPPUNIT_TEST(sqrt01);
 	CPPUNIT_TEST(sqrt02);
@@ -609,6 +611,8 @@ private:
 	void root02();
 	void root03();
 	void root04();
+	void root05();
+	void root06();
 
 	/* test: sqrt(const Interval& x); */
 	void sqrt01();
