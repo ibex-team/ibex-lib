@@ -588,6 +588,13 @@ void TestGradient::hansen01() {
 
 }
 
+void TestGradient::pow_issue534() {
+	const ExprSymbol& x = ExprSymbol::new_("x");
+	Function f(x,pow(x,0));
+	IntervalVector zero(1,Interval::ZERO);
+	check(f.gradient(zero),zero);
+}
+
 void TestGradient::jacobian_components01() {
 	const ExprSymbol& x = ExprSymbol::new_("x");
 	const ExprSymbol& y = ExprSymbol::new_("y");

@@ -599,7 +599,8 @@ inline Interval root(const Interval& x, int den) {
 				return Interval(DIRECT_INTERVAL(previous_exact(-::pow(a1,1/m)),next_exact(-::pow(a2,1/m))));
 			}
 		}
-	}
+	} else if (den==0) 
+	  return x.contains(1.) ? Interval::all_reals() : Interval::empty_set();
 	else return Interval(1.0)/root(x,-den);
 }
 

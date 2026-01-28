@@ -148,11 +148,11 @@ public:
 	inline void minus_bwd  (int x, int y) { g[x].i() += -1.0*g[y].i(); }
 	inline void minus_V_bwd(int x, int y) { g[x].v() += -1.0*g[y].v(); }
 	inline void minus_M_bwd(int x, int y) { g[x].m() += -1.0*g[y].m(); }
-        inline void trans_V_bwd(int, int) { /* nothing to do because g[x].v() is a reference to g[y].v() */ }
-        inline void trans_M_bwd(int x, int y) { g[x].m() += g[y].m().transpose(); }
+	inline void trans_V_bwd(int, int) { /* nothing to do because g[x].v() is a reference to g[y].v() */ }
+	inline void trans_M_bwd(int x, int y) { g[x].m() += g[y].m().transpose(); }
 	       void sign_bwd   (int x, int y);
 	       void abs_bwd    (int x, int y);
-	inline void power_bwd  (int x, int y, int p) { g[x].i() += g[y].i() * p * pow(d[x].i(), p-1); }
+	inline void power_bwd  (int x, int y, int p) { g[x].i() += g[y].i() * (p!=0 ? p * pow(d[x].i(), p-1) : 0.); }
 	inline void sqr_bwd   (int x, int y) { g[x].i() += g[y].i() * 2.0 * d[x].i(); }
 	inline void sqrt_bwd  (int x, int y) { g[x].i() += g[y].i() * 0.5 / sqrt(d[x].i());  }
 	inline void exp_bwd   (int x, int y) { g[x].i() += g[y].i() * exp(d[x].i()); }

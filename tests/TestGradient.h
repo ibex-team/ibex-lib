@@ -43,6 +43,7 @@ public:
 	CPPUNIT_TEST(mulMV01);
 	CPPUNIT_TEST(mulVM01);
 	CPPUNIT_TEST(mulVM02);
+	CPPUNIT_TEST(pow_issue534);
 	CPPUNIT_TEST(jacobian_components01);
 	CPPUNIT_TEST(jacobian_components02);
 	CPPUNIT_TEST_SUITE_END();
@@ -67,7 +68,9 @@ public:
 	void mulMV01();
 	void mulVM01();
 	void mulVM02();
-
+	
+	void pow_issue534();
+	
 	void jacobian_components01();
 	void jacobian_components02();
 private:

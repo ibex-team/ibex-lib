@@ -431,13 +431,10 @@ inline Interval pow(const Interval &x, const Interval &y) {
 	return filib::pow(x.itv, y.itv);
 }
 
-
-
 inline Interval root(const Interval& x, int n) {
-
 	if (x.is_empty()) return Interval::empty_set();
+	if (n==0) return x.contains(1.) ? Interval::all_reals() : Interval::empty_set();
 	if (x.lb()==0 && x.ub()==0) return Interval::zero();
-	if (n==0) return Interval::one();
 	if (n<0) return 1.0/root(x,-n);
 	if (n==1) return x;
 
@@ -449,8 +446,6 @@ inline Interval root(const Interval& x, int n) {
 	}
 
 }
-
-
 
 inline Interval exp(const Interval& x) {
 	return filib::exp(x.itv);

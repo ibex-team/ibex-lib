@@ -311,6 +311,10 @@ inline Interval pow(const Interval &x, const Interval &y) {
 
 inline Interval root(const Interval& x, int n) {
 
+    // handle n=0 special case separately 
+    if (n==0) 
+      return x.contains(1.) ? Interval::all_reals() : Interval::empty_set();
+
 	// get the root of the positive part (gaol does
 	// not consider negative values to be in the definition
 	// domain of the root function)

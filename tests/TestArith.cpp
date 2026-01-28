@@ -405,6 +405,8 @@ void TestArith::root01() { check(root(Interval(0,1),-1), Interval(1.0,POS_INFINI
 void TestArith::root02() { CPPUNIT_ASSERT(almost_eq(root(Interval(-27,-8), 3),Interval(-3,-2),1e-10)); }
 void TestArith::root03() { check(root(Interval(-4,1),2), Interval(0,1)); }
 void TestArith::root04() { check(root(Interval(-8,1),3), Interval(-2,1)); }
+void TestArith::root05() { check(root(Interval(1.),0), Interval::all_reals()); }
+void TestArith::root06() { check(root(Interval::zero(),0), Interval::empty_set()); }
 
 #define checkproj(func,y,xbefore,xafter) { Interval x=xbefore; NAME2(bwd_,func)(y,x); check(x,xafter); }
 #define NAME2(a,b)         NAME2_HIDDEN(a,b)
