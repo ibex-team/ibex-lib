@@ -54,6 +54,7 @@ LPSolver::~LPSolver() {
 
 void LPSolver::init(LPSolver::Mode mode, double tolerance, double timeout, int max_iter) {
     
+    statistics = NULL; // by default, as in the soplex wrapper
     myclp = new ClpSimplex();
     mode_ = mode;
 
