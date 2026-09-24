@@ -277,6 +277,14 @@ int main(int argc, char** argv) {
 			+ MLOptimizerConfig::bisector_names() + ". Default: lsmear (what ibexopt uses).", {"bisector"});
 	args::ValueFlag<string> relax_arg(parser, "name", "Linear relaxation behind the X-Newton step. One of: "
 			+ MLOptimizerConfig::relaxation_names() + ". Default: xtaylor (what ibexopt uses).", {"relax"});
+	args::ValueFlag<string> loup_arg(parser, "name", "Upper bounding. One of: "
+			+ MLOptimizerConfig::loup_names() + ". Default: default (what ibexopt uses). "
+			"The ipopt* variants change the incumbent, so a run with one is not comparable "
+			"with a run without.", {"loup"});
+	args::ValueFlag<int> ipopt_freq(parser, "int", "Ipopt is called every N calls to the loup finder, "
+			"plus the 10th, 20th and 50th, plus whenever another finder improves the incumbent. Default: 100.", {"ipopt-freq"});
+	args::Flag ipopt_qp(parser, "ipopt-qp", "The problem is a QP (quadratic objective, linear constraints): "
+			"the Lagrangian hessian is then computed once instead of at every call.", {"ipopt-qp"});
 
 	// --- diving / sampling ---
 	args::ValueFlag<long>   budget(parser, "int", "Ceiling on the dive node budget. Default: 200.", {"budget"});
@@ -351,6 +359,14 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 
+		MLOptimizerConfig::LoupFinderKind loup = MLOptimizerConfig::LOUP_DEFAULT;
+		if (loup_arg && !MLOptimizerConfig::parse_loup(loup_arg.Get(), loup)) {
+			cerr << "unknown upper bounding '" << loup_arg.Get() << "'. One of: "
+			     << MLOptimizerConfig::loup_names() << endl;
+			delete sys;
+			return 1;
+		}
+
 		server = new MLNodeServer(*sys,
 				rel_eps_f ? rel_eps_f.Get() : OptimizerConfig::default_rel_eps_f,
 				abs_eps_f ? abs_eps_f.Get() : OptimizerConfig::default_abs_eps_f,
@@ -361,7 +377,10 @@ int main(int argc, char** argv) {
 				seed,
 				eps_x,
 				bisector,
-				relaxation);
+				relaxation,
+				loup,
+				ipopt_freq ? ipopt_freq.Get() : 100,
+				ipopt_qp.Get());
 
 		if (model_file) {
 			model = new MLModel(model_file.Get());
@@ -421,6 +440,8 @@ int main(int argc, char** argv) {
 			out.kv("time", server->elapsed());
 			out.kv("bisector", MLOptimizerConfig::bisector_name(bisector));
 			out.kv("relax", MLOptimizerConfig::relaxation_name(relaxation));
+			// not "loup": that key already carries the incumbent value above
+			out.kv("loup_finder", MLOptimizerConfig::loup_name(loup));
 			out.kv("rule", model!=NULL ? model->description()
 					: string(MLOptimizerConfig::bisector_name(bisector)));
 			if (server->guard_switched_at()>=-1)

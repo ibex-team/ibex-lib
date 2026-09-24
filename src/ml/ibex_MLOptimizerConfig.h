@@ -10,6 +10,7 @@
 #define __IBEX_ML_OPTIMIZER_CONFIG_H__
 
 #include "ibex_DefaultOptimizerConfig.h"
+#include "ibex_Optimizer.h"
 
 #include <string>
 
@@ -70,11 +71,32 @@ public:
 		RELAX_BOTH       //!< both, composed: more constraints, tighter hull
 	} Relaxation;
 
+	/**
+	 * \brief The upper-bounding strategy.
+	 *
+	 * The Ipopt variants call a local solver to look for feasible points, which
+	 * IbexOpt's own finders cannot always reach. Ipopt is expensive, so it runs
+	 * as a complement: every #ipopt_frequency calls, at the 10th, 20th and 50th,
+	 * and whenever another finder improves the incumbent. They are only
+	 * available when the library was built with -DIBEX_WITH_IPOPT=ON.
+	 *
+	 * They change the incumbent, and therefore the pruning at every node: a run
+	 * with Ipopt is not comparable with one without it.
+	 */
+	typedef enum {
+		LOUP_DEFAULT,        //!< LoupFinderDefault: what ibexopt uses
+		LOUP_IPOPT_PROB,     //!< probing, then Ipopt
+		LOUP_IPOPT_XN,       //!< probing + X-Taylor, then Ipopt
+		LOUP_IPOPT_XNINHC4   //!< inHC4 + X-Taylor, then Ipopt
+	} LoupFinderKind;
+
 	MLOptimizerConfig(const System& sys, double rel_eps_f, double abs_eps_f,
 			double eps_h, bool rigor, bool inHC4, bool kkt,
 			double random_seed, const Vector& eps_x,
 			Bisector bisector=BSC_LSMEAR_MG,
-			Relaxation relaxation=RELAX_XTAYLOR);
+			Relaxation relaxation=RELAX_XTAYLOR,
+			LoupFinderKind loup=LOUP_DEFAULT,
+			int ipopt_frequency=100, bool ipopt_quadratic=false);
 
 	/** \brief Which bisector this configuration builds. */
 	Bisector get_bisector() const;
@@ -104,15 +126,46 @@ public:
 	/** \brief All the accepted names, comma separated. */
 	static std::string relaxation_names();
 
+	/** \brief Which upper-bounding strategy this configuration builds. */
+	LoupFinderKind get_loup_kind() const;
+
+	/** \brief Its name, as accepted on the command line. */
+	static const char* loup_name(LoupFinderKind l);
+
+	/** \brief Parse a name. \return false if unknown, or if it needs Ipopt
+	 *         and the library was built without it. */
+	static bool parse_loup(const std::string& name, LoupFinderKind& out);
+
+	/** \brief All the accepted names, comma separated. */
+	static std::string loup_names();
+
+	/** \brief Whether this build has Ipopt. */
+	static bool with_ipopt();
+
+	/**
+	 * \brief Give the Ipopt finder the optimizer it needs.
+	 *
+	 * The finder certifies a point Ipopt returned by running a nested optimizer
+	 * on a tiny box around it, so it needs a pointer back to the enclosing one.
+	 * That pointer can only be set after construction. Does nothing when the
+	 * upper bounding is not an Ipopt one.
+	 */
+	void bind_ipopt(Optimizer& o);
+
 protected:
 
 	virtual Bsc& get_bsc() override;
 	virtual Ctc& get_ctc() override;
+	virtual LoupFinder& get_loup_finder() override;
 
 	Bisector bisector;
 	Relaxation relaxation;
+	LoupFinderKind loup_kind;
+	int ipopt_frequency;
+	bool ipopt_quadratic;
 	Bsc* bsc_cache;
 	Ctc* ctc_cache;
+	LoupFinder* loup_cache;
 };
 
 inline MLOptimizerConfig::Bisector MLOptimizerConfig::get_bisector() const {
@@ -121,6 +174,10 @@ inline MLOptimizerConfig::Bisector MLOptimizerConfig::get_bisector() const {
 
 inline MLOptimizerConfig::Relaxation MLOptimizerConfig::get_relaxation() const {
 	return relaxation;
+}
+
+inline MLOptimizerConfig::LoupFinderKind MLOptimizerConfig::get_loup_kind() const {
+	return loup_kind;
 }
 
 } // end namespace ibex

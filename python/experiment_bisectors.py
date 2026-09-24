@@ -48,10 +48,11 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ibexml import solve, BISECTORS, RELAXATIONS, DEFAULT_BINARY   # noqa: E402
+from ibexml import (solve, BISECTORS, RELAXATIONS, LOUP_FINDERS,   # noqa: E402
+                    DEFAULT_BINARY)
 
-FIELDS = ["instance", "set", "rule", "relax", "status", "nodes", "time", "loup",
-          "uplo", "timeout"]
+FIELDS = ["instance", "set", "rule", "relax", "ub", "status", "nodes", "time",
+          "loup", "uplo", "timeout"]
 
 #: A run in one of these states is finished whatever the limit: re-running it
 #: with more time cannot change the answer. "killed" is not among them -- it
@@ -120,10 +121,20 @@ def row_relax(r):
     return r.get("relax") or "xtaylor"
 
 
+def row_ub(r):
+    """The upper bounding a row was produced under (rows predating the column).
+
+    Every result recorded before the Ipopt loup finder existed was produced with
+    the default one, so that is what a missing column means.
+    """
+    return r.get("ub") or "default"
+
+
 def key(r):
-    """What identifies a run. The relaxation is part of it: the same bisector
-    under a different contraction is a different experiment, not a re-run."""
-    return (r["instance"], r["rule"], row_relax(r))
+    """What identifies a run. The relaxation and the upper bounding are part of
+    it: the same bisector under a different contraction, or against a different
+    incumbent, is a different experiment, not a re-run."""
+    return (r["instance"], r["rule"], row_relax(r), row_ub(r))
 
 
 def row_limit(r):
@@ -165,7 +176,7 @@ def better(a, b):
 
 
 def count_attempts(path):
-    """(instance, rule, relax) -> how many times the run produced no answer.
+    """(instance, rule, relax, ub) -> how many times the run produced no answer.
 
     An `error:` row carries no information about the instance, so it is worth
     retrying -- but only so often. A run that fails the same way every time
@@ -185,7 +196,7 @@ def count_attempts(path):
 
 
 def load_done(path):
-    """(instance, rule, relax) -> the most informative row recorded for it.
+    """(instance, rule, relax, ub) -> the most informative row recorded for it.
 
     Accepts one path or several; several are merged, which is how a run under
     one relaxation is compared with a run under another when they were written
@@ -221,11 +232,11 @@ def run(args):
     todo, kept, redo, gaveup = [], 0, 0, 0
     for f in files:
         for r in rules:
-            prev = done.get((f, r[0], args.relax))
+            prev = done.get((f, r[0], args.relax, args.ub))
             if prev is None:
                 todo.append((f, r))
             elif retryable(prev):
-                if attempts.get((f, r[0], args.relax), 0) >= args.max_retries:
+                if attempts.get((f, r[0], args.relax, args.ub), 0) >= args.max_retries:
                     gaveup += 1                # fails the same way every time
                 else:
                     todo.append((f, r))        # produced no answer at all
@@ -270,7 +281,7 @@ def run(args):
         path = os.path.join(args.dir, fname)
         try:
             r = solve(path, model=model, bisector=bisector, relax=args.relax,
-                      binary=args.binary, timeout=args.timeout,
+                      loup=args.ub, binary=args.binary, timeout=args.timeout,
                       random_seed=args.random_seed,
                       wall_timeout=args.timeout * args.wall_factor + 60.0)
         except Exception as e:
@@ -280,7 +291,7 @@ def run(args):
             r = {"status": "error: %s" % (why or type(e).__name__), "nodes": 0,
                  "time": 0.0, "loup": float("inf"), "uplo": float("-inf")}
         return {"instance": fname, "set": sets.get(fname, "?"), "rule": label,
-                "relax": args.relax,
+                "relax": args.relax, "ub": args.ub,
                 "status": r["status"], "nodes": r["nodes"], "time": r["time"],
                 "loup": r["loup"], "uplo": r["uplo"], "timeout": args.timeout}
 
@@ -315,12 +326,13 @@ def report(args):
     if args.only and os.path.exists(args.only):
         keep = {l.strip() for l in open(args.only) if l.strip()}
     rows = [r for r in by.values()
-            if row_relax(r) == args.relax and r["instance"] not in drop
+            if row_relax(r) == args.relax and row_ub(r) == args.ub
+            and r["instance"] not in drop
             and (keep is None or r["instance"] in keep)]
     if not rows:
-        have = sorted({row_relax(r) for r in by.values()})
-        raise SystemExit("no runs with --relax %s in %s (it holds: %s)"
-                         % (args.relax, args.csv, ", ".join(have)))
+        have = sorted({"%s/%s" % (row_relax(r), row_ub(r)) for r in by.values()})
+        raise SystemExit("no runs with --relax %s --ub %s in %s (it holds: %s)"
+                         % (args.relax, args.ub, args.csv, ", ".join(have)))
     by = {key(r): r for r in rows}
     if not rows:
         raise SystemExit("%s is empty" % args.csv)
@@ -363,7 +375,7 @@ def report(args):
               "   the common-set totals are undefined -- raise --timeout, or compare\n"
               "   fewer rules)")
     print("rules: %s   (baseline: %s)" % (", ".join(rules), baseline))
-    print("relaxation: %s%s%s" % (args.relax,
+    print("relaxation: %s   upper bounding: %s%s%s" % (args.relax, args.ub,
           ("   (%d excluded)" % len(drop)) if drop else "",
           ("   (restricted to %d named instances)" % len(keep)) if keep else ""))
     print("time limit: %s\n" % (", ".join("%gs" % x for x in limits) if limits else "?"))
@@ -493,7 +505,7 @@ def status(args):
     at_limit, redo, new, kept = [], 0, 0, 0
     for f in files:
         for u in rules:
-            p = done.get((f, u, args.relax))
+            p = done.get((f, u, args.relax, args.ub))
             if p is None:
                 new += 1
             elif retryable(p):
@@ -519,7 +531,8 @@ def status(args):
     # construction and useless as a prior. The rate observed across *every*
     # settled run is an upper bound instead -- some of those that ran out under
     # a smaller limit would finish under this one -- so the estimate is a range.
-    settled = [r for r in done.values() if row_relax(r) == args.relax]
+    settled = [r for r in done.values()
+               if row_relax(r) == args.relax and row_ub(r) == args.ub]
     rate = ((sum(1 for r in settled if r["status"] not in TERMINAL) / len(settled))
             if settled else 0.4)
     cheap = 20.0
@@ -536,7 +549,7 @@ def status(args):
         for f in files:
             c = sets.get(f, "?")
             for u in rules:
-                p = done.get((f, u, args.relax))
+                p = done.get((f, u, args.relax, args.ub))
                 a, b = per.get(c, (0, 0))
                 per[c] = (a + 1, b + (1 if (p is not None and
                           (p["status"] in TERMINAL or row_limit(p) >= args.timeout)) else 0))
@@ -567,7 +580,7 @@ def soundness(args):
         r["uplo"] = float(r["uplo"])
 
     def get(i, u, rel):
-        return by.get((i, u, rel))
+        return by.get((i, u, rel, args.ub))
 
     instances = sorted({r["instance"] for r in rows})
     rules = sorted({r["rule"] for r in rows})
@@ -622,13 +635,14 @@ def oracle(args):
     """
     by = load_done(args.csv)
     rules = args.rules
-    inst = sorted({i for (i, u, r) in by if r == args.relax})
+    inst = sorted({i for (i, u, rel, ub) in by
+                   if rel == args.relax and ub == args.ub})
     if args.only and os.path.exists(args.only):
         keep = {l.strip() for l in open(args.only) if l.strip()}
         inst = [i for i in inst if i in keep]
 
     def nodes(i, u):
-        r = by.get((i, u, args.relax))
+        r = by.get((i, u, args.relax, args.ub))
         return int(float(r["nodes"])) if r and solved(r) else None
 
     solv = {u: sum(1 for i in inst if nodes(i, u) is not None) for u in rules}
@@ -646,7 +660,8 @@ def oracle(args):
         if len(winners) == 1:
             uniq[winners[0]] = uniq.get(winners[0], 0) + 1
 
-    print("relaxation %s, %d instances, baseline %s\n" % (args.relax, len(inst), args.baseline))
+    print("relaxation %s, upper bounding %s, %d instances, baseline %s\n"
+          % (args.relax, args.ub, len(inst), args.baseline))
     print("%-16s %8s" % ("rule", "solved"))
     print("-" * 25)
     for u in sorted(rules, key=lambda u: -solv[u]):
@@ -688,6 +703,12 @@ def main():
                         "what ibexopt uses). It is an independent axis from the "
                         "bisector and is recorded per run, so one results file can "
                         "hold both without the rows becoming ambiguous")
+    r.add_argument("--ub", default="default", choices=LOUP_FINDERS,
+                   help="upper bounding (default: default, what ibexopt uses). "
+                        "The ipopt* ones need a build configured with "
+                        "-DIBEX_WITH_IPOPT=ON. A better incumbent found earlier "
+                        "prunes more, so this changes the node counts of every "
+                        "rule: it is a third axis, recorded per run like --relax")
     r.add_argument("--max-retries", type=int, default=2,
                    help="how many times a run that produces no answer is retried "
                         "before the sweep gives up on it (default: 2). Without a "
@@ -716,6 +737,7 @@ def main():
                             "smearmax", "smearmaxrel", "largestfirst", "roundrobin"])
     t.add_argument("--timeout", type=float, default=600.0)
     t.add_argument("--relax", default="xtaylor", choices=RELAXATIONS)
+    t.add_argument("--ub", default="default", choices=LOUP_FINDERS)
     t.add_argument("--jobs", type=int, default=DEFAULT_JOBS)
     t.add_argument("--by-set", action="store_true")
     t.set_defaults(func=status)
@@ -723,6 +745,7 @@ def main():
     o = sub.add_parser("oracle", help="the virtual best over a set of rules")
     o.add_argument("csv", nargs="+")
     o.add_argument("--relax", default="xtaylor", choices=RELAXATIONS)
+    o.add_argument("--ub", default="default", choices=LOUP_FINDERS)
     o.add_argument("--baseline", default="lsmear")
     o.add_argument("--only", help="file of instance names to restrict to")
     o.add_argument("--rules", nargs="+",
@@ -736,6 +759,9 @@ def main():
                    help="the relaxation under test")
     v.add_argument("--against", default="xtaylor", choices=RELAXATIONS,
                    help="the relaxation trusted as the reference")
+    v.add_argument("--ub", default="default", choices=LOUP_FINDERS,
+                   help="both sides of the cross-check are runs with this upper "
+                        "bounding; it is held fixed, not compared")
     v.add_argument("--tol", type=float, default=1e-6)
     v.add_argument("--write", help="write the quarantine list to this file")
     v.set_defaults(func=soundness)
@@ -747,6 +773,10 @@ def main():
     q.add_argument("--baseline", default="lsmear")
     q.add_argument("--relax", default="xtaylor", choices=RELAXATIONS,
                    help="which relaxation's runs to report on (default: xtaylor)")
+    q.add_argument("--ub", default="default", choices=LOUP_FINDERS,
+                   help="which upper bounding's runs to report on (default: "
+                        "default). Runs with Ipopt are a separate population: "
+                        "they are not comparable with runs without it")
     q.add_argument("--exclude", help="file of instance names to leave out, one per "
                                      "line (e.g. the quarantine list `soundness` writes)")
     q.add_argument("--only", help="file of instance names to restrict to, one per line")

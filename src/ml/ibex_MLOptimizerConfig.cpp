@@ -20,6 +20,9 @@
 #include "ibex_LinearizerAffine2.h"
 #include "ibex_LinearizerCompo.h"
 #include "ibex_LinearizerXTaylor.h"
+#ifdef __IBEX_WITH_IPOPT__
+#include "ibex_LoupFinderDefaultIpopt.h"
+#endif
 #include "ibex_OptimLargestFirst.h"
 #include "ibex_RoundRobin.h"
 #include "ibex_SmearFunction.h"
@@ -49,6 +52,17 @@ const Entry TABLE[] = {
 
 const int NB_ENTRIES = sizeof(TABLE)/sizeof(TABLE[0]);
 
+struct LEntry { const char* name; MLOptimizerConfig::LoupFinderKind value; };
+
+const LEntry LTABLE[] = {
+	{ "default",      MLOptimizerConfig::LOUP_DEFAULT      },
+	{ "ipoptprob",    MLOptimizerConfig::LOUP_IPOPT_PROB   },
+	{ "ipoptxn",      MLOptimizerConfig::LOUP_IPOPT_XN     },
+	{ "ipoptxninhc4", MLOptimizerConfig::LOUP_IPOPT_XNINHC4},
+};
+
+const int NB_LENTRIES = sizeof(LTABLE)/sizeof(LTABLE[0]);
+
 struct REntry { const char* name; MLOptimizerConfig::Relaxation value; };
 
 const REntry RTABLE[] = {
@@ -64,11 +78,92 @@ const int NB_RENTRIES = sizeof(RTABLE)/sizeof(RTABLE[0]);
 MLOptimizerConfig::MLOptimizerConfig(const System& sys,
 		double rel_eps_f, double abs_eps_f, double eps_h,
 		bool rigor, bool inHC4, bool kkt, double random_seed,
-		const Vector& eps_x, Bisector bisector, Relaxation relaxation) :
+		const Vector& eps_x, Bisector bisector, Relaxation relaxation,
+		LoupFinderKind loup, int ipopt_frequency, bool ipopt_quadratic) :
 			DefaultOptimizerConfig(sys, rel_eps_f, abs_eps_f, eps_h, rigor, inHC4,
 					kkt, random_seed, eps_x),
-			bisector(bisector), relaxation(relaxation),
-			bsc_cache(NULL), ctc_cache(NULL) {
+			bisector(bisector), relaxation(relaxation), loup_kind(loup),
+			ipopt_frequency(ipopt_frequency), ipopt_quadratic(ipopt_quadratic),
+			bsc_cache(NULL), ctc_cache(NULL), loup_cache(NULL) {
+}
+
+bool MLOptimizerConfig::with_ipopt() {
+#ifdef __IBEX_WITH_IPOPT__
+	return true;
+#else
+	return false;
+#endif
+}
+
+const char* MLOptimizerConfig::loup_name(LoupFinderKind l) {
+	for (int i=0; i<NB_LENTRIES; i++)
+		if (LTABLE[i].value==l) return LTABLE[i].name;
+	return "?";
+}
+
+bool MLOptimizerConfig::parse_loup(const string& name, LoupFinderKind& out) {
+	for (int i=0; i<NB_LENTRIES; i++)
+		if (name==LTABLE[i].name) {
+			if (LTABLE[i].value!=LOUP_DEFAULT && !with_ipopt()) return false;
+			out = LTABLE[i].value;
+			return true;
+		}
+	return false;
+}
+
+string MLOptimizerConfig::loup_names() {
+	ostringstream o;
+	for (int i=0; i<NB_LENTRIES; i++) {
+		if (LTABLE[i].value!=LOUP_DEFAULT && !with_ipopt()) continue;
+		if (o.tellp()>0) o << ", ";
+		o << LTABLE[i].name;
+	}
+	if (!with_ipopt()) o << " (built without Ipopt: rebuild with -DIBEX_WITH_IPOPT=ON for the rest)";
+	return o.str();
+}
+
+LoupFinder& MLOptimizerConfig::get_loup_finder() {
+
+	if (loup_cache!=NULL) return *loup_cache;
+
+	if (loup_kind==LOUP_DEFAULT) {
+		loup_cache = &DefaultOptimizerConfig::get_loup_finder();
+		return *loup_cache;
+	}
+
+#ifdef __IBEX_WITH_IPOPT__
+	// inHC4 and X-Taylor are what runs *before* Ipopt; Ipopt itself is the
+	// complement, called on a schedule rather than at every node.
+	bool inhc4   = (loup_kind==LOUP_IPOPT_XNINHC4);
+	bool xtaylor = (loup_kind!=LOUP_IPOPT_PROB);
+
+	// The finder stores a non-const System& because the AMPL-based sibling it was
+	// written next to had to write the box into it; this one does not modify it.
+	System& s = const_cast<System&>(sys);
+
+	LoupFinderDefaultIpopt* f =
+			new LoupFinderDefaultIpopt(s, get_norm_sys(), get_ext_sys(), inhc4, xtaylor);
+	// Memory::rec is only specialized for LoupFinder and LoupFinderDefault, so a
+	// subclass has to be recorded through the base pointer (see ibex_OptimMemory.h).
+	rec((LoupFinder*) f);
+	f->finder_ipopt.ipopt_frequency = ipopt_frequency;
+	f->finder_ipopt.set_quadratic(ipopt_quadratic);
+	loup_cache = f;
+#else
+	ibex_error("this build has no Ipopt: configure with -DIBEX_WITH_IPOPT=ON");
+	loup_cache = &DefaultOptimizerConfig::get_loup_finder();
+#endif
+	return *loup_cache;
+}
+
+void MLOptimizerConfig::bind_ipopt(Optimizer& o) {
+#ifdef __IBEX_WITH_IPOPT__
+	if (loup_kind==LOUP_DEFAULT || loup_cache==NULL) return;
+	LoupFinderDefaultIpopt* f = dynamic_cast<LoupFinderDefaultIpopt*>(loup_cache);
+	if (f!=NULL) f->finder_ipopt.optimizer = &o;
+#else
+	(void) o;
+#endif
 }
 
 const char* MLOptimizerConfig::relaxation_name(Relaxation r) {

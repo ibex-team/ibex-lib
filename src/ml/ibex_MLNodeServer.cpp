@@ -98,11 +98,13 @@ MLNodeServer::MLNodeServer(const System& sys,
 		double rel_eps_f, double abs_eps_f, double eps_h,
 		bool rigor, bool inHC4, bool kkt, double random_seed,
 		const Vector& eps_x, MLOptimizerConfig::Bisector bisector,
-		MLOptimizerConfig::Relaxation relaxation) :
+		MLOptimizerConfig::Relaxation relaxation,
+		MLOptimizerConfig::LoupFinderKind loup,
+		int ipopt_frequency, bool ipopt_quadratic) :
 			MLOptimizerConfig(sys, rel_eps_f, abs_eps_f, eps_h, rigor, inHC4, kkt,
 					random_seed,
 					eps_x.size()==1 ? Vector(sys.nb_var, eps_x[0]) : eps_x,
-					bisector, relaxation),
+					bisector, relaxation, loup, ipopt_frequency, ipopt_quadratic),
 			Optimizer((DefaultOptimizerConfig&) *this),
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
@@ -123,6 +125,11 @@ MLNodeServer::MLNodeServer(const System& sys,
 	ctc.enable_statistics(*stats, "Ctc");
 
 	collect_acid(ctc);
+
+	// The Ipopt finder certifies its points with a nested optimizer, so it needs
+	// a pointer back to this one. It can only be handed over now: during the base
+	// constructors this object does not exist yet.
+	bind_ipopt(*this);
 }
 
 void MLNodeServer::collect_acid(Ctc& c) {
@@ -873,6 +880,7 @@ void MLNodeServer::write_info(JsonOut& out) {
 	out.kv("bisect_ratio", (double) default_bisect_ratio);
 	out.kv("bisector", MLOptimizerConfig::bisector_name(get_bisector()));
 	out.kv("relaxation", MLOptimizerConfig::relaxation_name(get_relaxation()));
+	out.kv("loup_finder", MLOptimizerConfig::loup_name(get_loup_kind()));
 	out.kv("lsmear_mode", lsmear()!=NULL && lsmear()->lsmode==LSMEAR_MG ? "LSMEAR_MG" : "LSMEAR");
 	out.kv("nb_features", MLModel::NB_FEATURES);
 	out.key("model");

@@ -29,6 +29,7 @@ para que el barrido pueda retomarse.
 | `set` | directorio de origen: `easy`, `medium`, `hard`, `blowup`, `others`, `unsolved`, `coconutbenchmark-library2`. Es el único registro de qué tan difícil es |
 | `rule` | el bisector: `lsmear`, `lsmear-box`, `smearsumrel`, `smearsum`, `smearmax`, `smearmaxrel`, `largestfirst`, `roundrobin` |
 | `relax` | la relajación lineal del contractor: `xtaylor`, `affine`, `both` |
+| `ub` | el cálculo de la cota superior: `default` (el de `ibexopt`) o `ipoptprob`, `ipoptxn`, `ipoptxninhc4`. Las corridas de este archivo son todas anteriores al soporte de Ipopt, así que no traen la columna; el reporte las lee como `default`, que es lo que usaron |
 | `status` | cómo terminó la búsqueda (ver abajo) |
 | **`solved`** | **1 si encerró el óptimo con la precisión pedida, 0 si no** |
 | `nodes` | celdas tratadas |

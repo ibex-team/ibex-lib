@@ -29,6 +29,28 @@ This produces `build/bin/ibexopt-ml` next to the usual `ibexopt` and
 `ibexsolve`. The interval library defaults to Gaol, also bundled; nothing is
 downloaded.
 
+### Optional: Ipopt
+
+Upper bounding can call [Ipopt](https://github.com/coin-or/Ipopt) instead of
+relying only on Ibex's own probing and X-Taylor restriction. This is off by
+default and is the one part of the tree that needs something installed:
+
+```bash
+cmake .. -DLP_LIB=soplex -DIBEX_WITH_IPOPT=ON     # needs ipopt.pc on PKG_CONFIG_PATH
+```
+
+It adds `--loup ipoptprob|ipoptxn|ipoptxninhc4` to `ibexopt-ml` (with
+`--ipopt-freq` and `--ipopt-qp`) and builds a second binary, `ibexopt-ipopt`,
+which is the reference strategy the finder was written for, kept with its
+original positional command line. Without the flag everything still builds and
+`--loup` accepts only `default`.
+
+A local minimum found early prunes far more than a late one: on `hs071` the root
+node alone goes from no incumbent to one within 1e-5 of the optimum, and the
+dive under the same variable drops from 200 nodes to 14. It changes the node
+counts of *every* bisector, so runs with and without it are separate
+populations, not a before/after.
+
 ## Try it
 
 ```bash
@@ -63,8 +85,11 @@ costs, internals and known limitations.
 | `python/ibexml.py` | client, search drivers, tensor encoding, model export |
 | `python/collect_dataset.py` | dataset collection over a set of instances |
 | `python/make_package.py` | builds the standalone zip (binary + Python + benchmarks) |
+| `src/affine/` | the affine-arithmetic plugin (`ibex-affine`), vendored so that `--relax affine\|both` needs no separate install |
+| `src/ipopt/` | the Ipopt loup finder, ported from Bertrand Neveu's fork (see `src/ipopt/UPSTREAM`); built only with `-DIBEX_WITH_IPOPT=ON` |
+| `src/bin/ibexopt-ipopt.cpp` | the reference Ipopt strategy, kept runnable as its own binary |
 
-Four pre-existing files were modified, all additively and all documented in
+Six pre-existing files were modified, all additively and all documented in
 place; no public API changed:
 
 | file | change | why |
@@ -73,9 +98,11 @@ place; no public API changed:
 | `src/tools/ibex_Random.h/.cpp` | `RNG::get_state()` / `set_state()` | `srand(s)` repositions the stream by *drawing* s numbers, so resuming an arbitrary position costs O(s); this saves and restores it in constant time |
 | `src/contractor/ibex_CtcAcid.h` | `get_tuning()` / `set_tuning()` | ACID adapts across calls, so a speculative dive changes what the enclosing search does next unless its tuning is put back |
 | `src/strategy/ibex_Sts.h` | `calls()` | read a call counter without parsing a report |
+| `src/loup/ibex_LoupFinder.h/.cpp` | `bound_check*()`, `is_inner0()`, `goal_ub0()`, `ipopttime` / `ampltime` | helpers the ported Ipopt finder calls; they were free functions in the fork it comes from |
+| `src/optim/ibex_Optimizer.h` | `set_loup()`, `set_uplo()`, `set_loup_point()`, public `compute_ymax()` | the Ipopt finder certifies its point with a nested optimizer, which has to start from the enclosing search's bounds |
 
 `src/CMakeLists.txt` and `src/bin/CMakeLists.txt` were extended to build the new
-files.
+files, and the top-level `CMakeLists.txt` grew the `IBEX_WITH_IPOPT` option.
 
 Benchmarks are in `benchs/optim/` (`easy/`, `medium/`, `hard/`, …), in Minibex
 format.

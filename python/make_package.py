@@ -29,7 +29,7 @@ SECTION_2 = """## 2. What is in this package
 ```
 ibexopt-ml/
   bin/ibexopt-ml            the executable (links against libstdc++, libm,
-                            libgcc and libc only)
+                            libgcc and libc only%s)
   python/ibexml.py          client, Python branch & bound, tensor encoding
   python/collect_dataset.py dataset collection over a set of instances
   python/test_admissible.py safety net: a no-information model must terminate
@@ -165,14 +165,26 @@ def _flatten_bench_paths(s):
     return s
 
 
-def blackbox_readme(text):
+def links_ipopt(binary):
+    """True if this build needs libipopt at run time.
+
+    The package is meant to run anywhere with nothing installed, and a binary
+    built with -DIBEX_WITH_IPOPT=ON does not: better to say so in the README
+    than to let the recipient find out.
+    """
+    out = subprocess.run(["ldd", binary], capture_output=True, text=True)
+    return "libipopt" in out.stdout
+
+
+def blackbox_readme(text, ipopt_note=""):
     """Turn the source-tree README into the black-box one."""
     s = text
 
     s = s.replace(INTRO_OLD, INTRO_NEW)
 
     # section 2: building -> what is in this package
-    s = s.replace(s[s.index("## 2. Building"):s.index("## 3. Concepts")], SECTION_2)
+    s = s.replace(s[s.index("## 2. Building"):s.index("## 3. Concepts")],
+                  SECTION_2 % (ipopt_note or ""))
     s = s.replace("2. [Building](#2-building)",
                   "2. [What is in this package](#2-what-is-in-this-package)")
 
@@ -254,7 +266,10 @@ def main():
                   "experiment_bisectors.py"):
             shutil.copy2(os.path.join(ROOT, "python", f), os.path.join(pkg, "python", f))
 
-        readme = blackbox_readme(open(os.path.join(ROOT, "python", "README.md")).read())
+        note = ("" if not links_ipopt(args.binary) else
+                ", plus libipopt:\n                            this build has --loup ipopt* and needs Ipopt installed")
+        readme = blackbox_readme(
+            open(os.path.join(ROOT, "python", "README.md")).read(), note)
         check_readme(readme)
         open(os.path.join(pkg, "python", "README.md"), "w").write(readme)
 

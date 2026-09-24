@@ -118,8 +118,12 @@ class IbexOptML(object):
 
     def __init__(self, bch, binary=None, initial_loup=None, random_seed=None,
                  eps_x=None, rel_eps_f=None, abs_eps_f=None, eps_h=None,
-                 rigor=False, kkt=False, simpl=None, extra_args=()):
+                 rigor=False, kkt=False, simpl=None, loup=None,
+                 ipopt_freq=None, ipopt_qp=False, extra_args=()):
         argv = [binary or DEFAULT_BINARY]
+        if loup:                     argv += ["--loup", loup]
+        if ipopt_freq is not None:   argv += ["--ipopt-freq", str(ipopt_freq)]
+        if ipopt_qp:                 argv += ["--ipopt-qp"]
         if initial_loup is not None: argv += ["--initial-loup", repr(initial_loup)]
         if random_seed is not None:  argv += ["--random-seed", repr(random_seed)]
         if eps_x is not None:        argv += ["--eps-x", repr(eps_x)]
@@ -688,7 +692,8 @@ def run(bch, select_var, binary=None, sample_prob=0.0, on_sample=None, sample_wh
 
 
 def solve(bch, model=None, binary=None, max_nodes=0, timeout=0.0,
-          random_seed=None, bisector=None, relax=None, wall_timeout=None,
+          random_seed=None, bisector=None, relax=None, loup=None,
+          ipopt_freq=None, ipopt_qp=False, wall_timeout=None,
           extra_args=()):
     """Run the search to completion under LSmear or under `model`, and time it.
 
@@ -697,7 +702,11 @@ def solve(bch, model=None, binary=None, max_nodes=0, timeout=0.0,
     `bisector` selects the hand-written rule to run (see `BISECTORS`); `model`
     overrides it with a learned one. `relax` selects the linear relaxation the
     contractor's X-Newton step is built on (see `RELAXATIONS`) -- it changes the
-    contraction, not the branching, so it is an independent axis.
+    contraction, not the branching, so it is an independent axis. `loup` selects
+    the upper bounding (see `LOUP_FINDERS`); the ipopt* ones call Ipopt every
+    `ipopt_freq` calls and need a build configured with -DIBEX_WITH_IPOPT=ON.
+    They find better incumbents earlier, which prunes more, so a run with one is
+    not comparable with a run without -- it is a third axis, not a tweak.
 
     `timeout` is a limit on *CPU* seconds, and the solver checks it once per
     node -- so a single node whose contraction does not return escapes it
@@ -712,6 +721,9 @@ def solve(bch, model=None, binary=None, max_nodes=0, timeout=0.0,
     if model:                   argv += ["--model", model]
     if bisector:                argv += ["--bisector", bisector]
     if relax:                   argv += ["--relax", relax]
+    if loup:                    argv += ["--loup", loup]
+    if ipopt_freq is not None:  argv += ["--ipopt-freq", str(ipopt_freq)]
+    if ipopt_qp:                argv += ["--ipopt-qp"]
     if max_nodes:               argv += ["--max-nodes", str(max_nodes)]
     if timeout:                 argv += ["--timeout", repr(timeout)]
     if random_seed is not None: argv += ["--random-seed", repr(random_seed)]
@@ -725,7 +737,8 @@ def solve(bch, model=None, binary=None, max_nodes=0, timeout=0.0,
         # the solver blew through its own CPU limit: it is stuck inside one node
         return {"status": "killed", "loup": float("inf"), "uplo": float("-inf"),
                 "nodes": 0, "time": wall_timeout, "bisector": bisector or "",
-                "relax": relax or "xtaylor", "rule": model or bisector or ""}
+                "relax": relax or "xtaylor", "loup_finder": loup or "default",
+                "rule": model or bisector or ""}
     line = out.stdout.strip().splitlines()
     if not line:
         raise IbexError("no output from --solve: %s" % out.stderr)
@@ -742,6 +755,11 @@ def solve(bch, model=None, binary=None, max_nodes=0, timeout=0.0,
 
 #: The linear relaxations `solve()` and `--relax` accept.
 RELAXATIONS = ["xtaylor", "affine", "both"]
+
+#: The upper bounding methods `solve()` and `--loup` accept. Everything but
+#: "default" runs Ipopt and is only available in a build configured with
+#: -DIBEX_WITH_IPOPT=ON; the solver rejects the name otherwise.
+LOUP_FINDERS = ["default", "ipoptprob", "ipoptxn", "ipoptxninhc4"]
 
 #: The hand-written bisectors `solve()` and `--bisector` accept.
 BISECTORS = ["lsmear", "lsmear-box", "smearsumrel", "smearsum", "smearmax",

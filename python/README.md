@@ -367,6 +367,25 @@ ibexopt-ml [options] problem.bch
 | flag | default | meaning |
 |---|---|---|
 | `--model FILE` | LSmear | branch with this model, evaluated inside the solver |
+| `--bisector NAME` | `lsmear` | a hand-written rule instead (see §15) |
+
+### The rest of the strategy
+
+Two axes that are not the branching rule but change every node count, so a run
+under one is not comparable with a run under another:
+
+| flag | default | meaning |
+|---|---|---|
+| `--relax NAME` | `xtaylor` | the linear relaxation the X-Newton contraction is built on: `xtaylor` (what `ibexopt` uses), `affine` (affine arithmetic), `both` |
+| `--loup NAME` | `default` | upper bounding: `default` (what `ibexopt` uses), or `ipoptprob`, `ipoptxn`, `ipoptxninhc4` |
+| `--ipopt-freq INT` | `100` | Ipopt runs every N calls to the loup finder, plus the 10th, 20th and 50th, plus whenever another finder improves the incumbent |
+| `--ipopt-qp` | off | quadratic objective and linear constraints: the Lagrangian hessian is then computed once instead of per call |
+
+The `ipopt*` names exist only in a build configured with
+`-DIBEX_WITH_IPOPT=ON`; otherwise the solver rejects them and says so. They are
+worth the dependency: Ipopt returns a local minimum, so the incumbent arrives
+early -- on `hs071` the root node already holds a point within 1e-5 of the
+optimum, and the dive under the same variable falls from 200 nodes to 14.
 
 ### Diving and sampling
 
@@ -1184,6 +1203,26 @@ which is worse than either. `--solve` reports `guard_switched_at`, the decision
 at which the switch happened (-1: never).
 
 A learned rule joins the comparison as `label=path/to.model`.
+
+### The other two axes
+
+The bisector is not the only thing that decides how many nodes a search visits.
+`--relax` changes the contraction and `--ub` changes the upper bounding, and
+both are recorded per run, so one results file can hold every combination
+without the rows becoming ambiguous:
+
+```bash
+python3 python/experiment_bisectors.py run -o results/bisectors.csv \
+    --dir benchs/optim/all --rules lsmear roundrobin --ub ipoptxn
+python3 python/experiment_bisectors.py report results/bisectors.csv --ub ipoptxn
+```
+
+`report`, `status`, `oracle` and `soundness` all take `--relax` and `--ub` and
+look only at the rows matching them; the defaults (`xtaylor`, `default`) are
+what every run recorded before these axes existed used, so old files keep
+reading the same way. Comparing *across* an axis is a different question from
+comparing bisectors and the report deliberately does not mix them: Ipopt finds
+better incumbents earlier, which prunes more for every rule at once.
 
 ### Running it
 

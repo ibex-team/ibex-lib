@@ -227,7 +227,9 @@ public:
 			double random_seed=DefaultOptimizerConfig::default_random_seed,
 			const Vector& eps_x=Vector(1,OptimizerConfig::default_eps_x),
 			MLOptimizerConfig::Bisector bisector=MLOptimizerConfig::BSC_LSMEAR_MG,
-			MLOptimizerConfig::Relaxation relaxation=MLOptimizerConfig::RELAX_XTAYLOR);
+			MLOptimizerConfig::Relaxation relaxation=MLOptimizerConfig::RELAX_XTAYLOR,
+			MLOptimizerConfig::LoupFinderKind loup=MLOptimizerConfig::LOUP_DEFAULT,
+			int ipopt_frequency=100, bool ipopt_quadratic=false);
 
 	virtual ~MLNodeServer();
 
