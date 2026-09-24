@@ -119,6 +119,40 @@ protected:
 	bool check(const System& sys, const Vector& pt, double& loup, bool is_inner);
 
 	/**
+	 * \brief Clamp a point to the bounds of the system's box.
+	 *
+	 * A local solver called on a box may return a point a hair outside it, and
+	 * the check that follows would then reject an answer that is right. Clamping
+	 * component-wise costs nothing and keeps the point inside the domain the
+	 * caller asked about.
+	 */
+	static void bound_check(const System& sys, Vector& pt);
+
+	/** \brief #bound_check() on a single component. */
+	static void bound_check_i(const System& sys, Vector& pt, int i);
+
+	/** \brief #bound_check() for a box. */
+	static void bound_check(const System& sys, IntervalVector& vec);
+
+	/** \brief #bound_check() on a single component of a box. */
+	static void bound_check_i(const System& sys, IntervalVector& vec, int i);
+
+	/** \brief Whether a point satisfies every constraint of the system. */
+	static bool is_inner0(const System& sys, Vector& pt);
+
+	/** \brief The objective at a point, rounded up. */
+	static double goal_ub0(const System& sys, Vector& pt);
+
+public:
+	/** \brief Seconds spent in an external local solver, when one is used. */
+	double ipopttime = 0;
+
+	/** \brief Seconds spent writing/reading a modelling-language file, if any. */
+	double ampltime = 0;
+
+protected:
+
+	/**
 	 * \brief Monotonicity analysis.
 	 *
 	 * When f is increasing (resp. decreasing) w.r.t. variable x_i, the interval [x_i]

@@ -21,6 +21,32 @@ void LoupFinder::add_property(const IntervalVector& init_box, BoxProperties& pro
 
 }
 
+void LoupFinder::bound_check_i(const System& sys, Vector& pt, int i) {
+	if (pt[i] < sys.box[i].lb()) pt[i] = sys.box[i].lb();
+	if (pt[i] > sys.box[i].ub()) pt[i] = sys.box[i].ub();
+}
+
+void LoupFinder::bound_check(const System& sys, Vector& pt) {
+	for (int i=0; i<pt.size(); i++) bound_check_i(sys, pt, i);
+}
+
+void LoupFinder::bound_check_i(const System& sys, IntervalVector& vec, int i) {
+	if (vec[i].lb() < sys.box[i].lb()) vec[i] = Interval(sys.box[i].lb(), vec[i].ub());
+	if (vec[i].ub() > sys.box[i].ub()) vec[i] = Interval(vec[i].lb(), sys.box[i].ub());
+}
+
+void LoupFinder::bound_check(const System& sys, IntervalVector& vec) {
+	for (int i=0; i<vec.size(); i++) bound_check_i(sys, vec, i);
+}
+
+bool LoupFinder::is_inner0(const System& sys, Vector& pt) {
+	return sys.is_inner(IntervalVector(pt));
+}
+
+double LoupFinder::goal_ub0(const System& sys, Vector& pt) {
+	return sys.goal_ub(pt);
+}
+
 bool LoupFinder::check(const System& sys, const Vector& pt, double& loup, bool _is_inner) {
 
 	// "res" will contain an upper bound of the criterion

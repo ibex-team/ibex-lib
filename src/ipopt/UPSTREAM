@@ -1,0 +1,52 @@
+Ported from the Ipopt branch of Bertrand Neveu's Ibex fork.
+
+    repository  https://github.com/bneveu/ibex-lib
+    branch      qibex
+    commit      045ea97cbd053f2c148cc443439861cbffd8935d  (2024-03-07)
+    files       optim/examples-ipopt/ibex_LoupFinder{,Default}IpoptB.{h,cpp}
+                optim/examples-ipopt/optimizer04-ipopt.cpp
+                  -> src/bin/ibexopt-ipopt.cpp (see its header)
+
+Two deliberate differences from upstream:
+
+  * MINLP is out. The upstream files carry integer variables through
+    System::minlp and get_integer_variables(), which this tree does not have.
+    Every use was a guard at the edge, not structure: integer_and_bound_check()
+    already collapses to its own bound-check branch for continuous problems, so
+    removing it keeps the branch that was there rather than amputating one.
+
+  * The class is named LoupFinderIpopt, without the B. Upstream keeps both an
+    older finder that shells out to AMPL and this one that links Ipopt; only the
+    latter is ported, so the suffix distinguishes nothing here.
+
+The guided-diving work (CellDivingGuided, the dg* strategies, localbox >= 4 and
+the continuation counters) is deliberately NOT here. It is uncommitted work in
+the author's tree, and his own log records it as measured and neutral across
+four successive implementations.
+
+Two bugs were fixed rather than carried over:
+
+  * The finder is its own Ipopt::TNLP and hands a raw "this" to OptimizeTNLP().
+    Ipopt wraps it in SmartPtrs, and the last one released would "delete this"
+    on an object Ipopt does not own -- upstream's optimizer04-ipopt.cpp works
+    around it by never deleting the finder ("error with this delete in case of
+    ipoptxninhc4"). The constructor now takes one self-reference and the
+    destructor drops it after the application is gone, so the object can be
+    deleted normally.
+
+  * Ipopt prints its license banner on stdout at the first solve, which
+    print_level does not suppress. ibexopt-ml speaks a line-of-JSON protocol on
+    stdout, so the finder now sets Ipopt's own "sb yes" option.
+
+One trap when porting the strategy file (src/bin/ibexopt-ipopt.cpp): upstream's
+NormalizedSystem and ExtendedSystem take an extra third argument, relaxineq,
+which this tree does not have. Passing its "true" through unchanged silently
+means "extended" to NormalizedSystem here -- a normalized system with n+1
+variables, which overflows the X-Taylor loup finder's LP. Inequalities are
+therefore *not* relaxed by eps here, and node counts differ from the fork's for
+that reason.
+
+Four additive hooks were needed in this tree, all documented in place:
+LoupFinder::{bound_check,bound_check_i,is_inner0,goal_ub0} and the ipopttime /
+ampltime counters; Optimizer::{set_loup,set_uplo,set_loup_point} and a public
+compute_ymax().

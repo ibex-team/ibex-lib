@@ -44,8 +44,8 @@ target_sources (ibex PRIVATE ${IBEX_SRC})
 
 # Note: operators subdir is handled by CMakeLists.txt from symbolic
 foreach (subdir affine arithmetic bisector cell combinatorial contractor data function
-                loup ml numeric optim parser predicate set solver strategy symbolic system
-                tools)
+                ipopt loup ml numeric optim parser predicate set solver strategy symbolic
+                system tools)
   add_subdirectory (${subdir})
 endforeach()
 

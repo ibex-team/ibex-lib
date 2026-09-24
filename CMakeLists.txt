@@ -34,10 +34,15 @@ endif()
 add_subdirectory (interval_lib_wrapper)
 add_subdirectory (lp_lib_wrapper)
 
-#option (USING_IPOPT "Set to ON to use IpOpt" OFF)
-#if (USING_IPOPT)
-#  find_package (IpOpt)
-#endif()
+################################################################################
+# Ipopt (optional): enables the Ipopt loup finder in src/ipopt
+################################################################################
+option (IBEX_WITH_IPOPT "Set to ON to build the Ipopt loup finder" OFF)
+if (IBEX_WITH_IPOPT)
+  find_package (PkgConfig REQUIRED)
+  pkg_check_modules (IPOPT REQUIRED ipopt)
+  message (STATUS "Ipopt ${IPOPT_VERSION} found: the Ipopt loup finder is enabled")
+endif ()
 
 ################################################################################
 # Go to src subdirectory that builds the libibex target

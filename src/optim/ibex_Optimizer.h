@@ -222,6 +222,26 @@ public:
 	 */
 	const CovOptimData& get_data() const;
 
+	/**
+	 * \brief Seed the bounds before running.
+	 *
+	 * Meant for a nested optimizer: an operator that certifies a point found by
+	 * a local solver runs a second Optimizer on a tiny box, and starting it from
+	 * the bounds already known lets it prune immediately instead of rediscovering
+	 * them. Setting these on a running optimizer breaks its invariants.
+	 */
+	void set_loup(double loup);
+	void set_uplo(double uplo);
+	void set_loup_point(const IntervalVector& pt);
+
+	/**
+	 * \brief The bound actually enforced on the objective variable.
+	 *
+	 * The incumbent reduced by the required precision (anticipated upper
+	 * bounding).
+	 */
+	double compute_ymax();
+
 	/* =========================== Settings ============================= */
 
 	/**
@@ -380,12 +400,6 @@ protected:
 	 */
 	bool update_loup(const IntervalVector& box, BoxProperties& prop);
 
-	/**
-	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
-	 * the heap and the current box are actually contracted with y <= ymax
-	 *
-	 */
-	double compute_ymax ();
 
 	/**
 	 * \brief Check time is not out.
@@ -467,6 +481,12 @@ protected:
 	/** Statistics. */
 	Statistics* statistics;
 };
+
+inline void Optimizer::set_loup(double l) { loup = l; }
+
+inline void Optimizer::set_uplo(double u) { uplo = u; }
+
+inline void Optimizer::set_loup_point(const IntervalVector& pt) { loup_point = pt; }
 
 inline Optimizer::Status Optimizer::get_status() const { return status; }
 
