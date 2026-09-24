@@ -23,6 +23,17 @@
 //     the AMPL reader (this tree has no plugin for .nl files). The command line
 //     therefore has no "integerobj" argument.
 //   * LoupFinderDefaultIpoptB is LoupFinderDefaultIpopt here.
+//   * Two additions to the command line, so that this binary can be one arm of
+//     the same sweep as ibexopt-ml (neither touches the strategy):
+//       - goal_prec accepts "rel/abs" as well as a single number. Upstream
+//         passes one value as both the relative and the absolute precision on
+//         the objective, which cannot reproduce ibexopt's own defaults
+//         (1e-3 relative, 1e-7 absolute). Written as one argument, in the style
+//         upstream itself uses for maxiter, so the positional list is unchanged.
+//       - a trailing "--json" prints one line of JSON in the shape
+//         `ibexopt-ml --solve` prints, instead of leaving the caller to parse
+//         the report. It reports the search alone -- no presolve time, no extra
+//         cell -- because that is what the other binary reports.
 //   * Inequalities are not relaxed by eps. Upstream's ExtendedSystem and
 //     NormalizedSystem take a relaxineq flag that this tree does not have (see
 //     the comment where they are built); node counts differ from the fork's for
@@ -51,6 +62,9 @@
 //============================================================================
 
 #include "ibex.h"
+
+#include <cmath>
+#include <cstring>
 
 #include "ibex_LinearizerAffine2.h"
 #include "ibex_LoupFinderIpopt.h"
@@ -116,11 +130,21 @@ int main(int argc, char** argv) {
 	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(next_arg());}
 
 	double prec= atof(next_arg());
-	double goalprec= atof (next_arg());
+	// goal_prec is "rel" or "rel/abs" (see the header)
+	double goalprec, goalprec_abs;
+	{
+	  const char* a=next_arg();
+	  const char* slash=strchr(a,'/');
+	  goalprec = atof(a);
+	  goalprec_abs = slash ? atof(slash+1) : goalprec;
+	}
 	double tolerance= atof (next_arg());
 	double timelimit= atof(next_arg());
 
 	int randomseed = atoi(next_arg());
+
+	bool json = (nbinput<argc && string(argv[nbinput])=="--json");
+	if (json) nbinput++;
 
 	if (nbinput!=argc) {
 	  cerr << "too many arguments (" << argc-nbinput << " unread)" << endl;
@@ -167,7 +191,7 @@ int main(int argc, char** argv) {
 	  buffer = new CellBeamSearch  (currentbuffer, futurebuffer, ext_sys, beamsize);
 	else
 	  {cout << strategy << " is not an implemented  node selection strategy " << endl; return -1;}
-	cout << "file " << argv[1] << endl;
+	if (!json) cout << "file " << argv[1] << endl;
 
 	// Build the bisection heuristic
 	// --------------------------
@@ -292,10 +316,10 @@ int main(int argc, char** argv) {
 	  }
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	Optimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),prec,goalprec,goalprec);
+	Optimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),prec,goalprec,goalprec_abs);
 
 	// the trace
-	o.trace=1;
+	o.trace = json ? 0 : 1;
 	cout.precision(16);
 
 	// ipopt preprocessing
@@ -317,8 +341,37 @@ int main(int argc, char** argv) {
 
 	// printing the results
 	if (o.trace)	o.report();
+	if (json) {
+	  static const char* ST[] = {"complete","infeasible","no_feasible_found",
+				     "unbounded_obj","timeout","unreached_prec"};
+	  int st = (int) o.get_status();
+	  // an unbounded or never-improved bound is the normal case here, and
+	  // "inf" is not JSON that Python will read back: spell it as it does
+	  struct J {
+	    static string num(double x) {
+	      if (std::isnan(x)) return "NaN";
+	      if (x==POS_INFINITY) return "Infinity";
+	      if (x==NEG_INFINITY) return "-Infinity";
+	      char b[32]; snprintf(b,sizeof(b),"%.17g",x); return string(b);
+	    }
+	  };
+	  cout << "{\"status\":\"" << (st>=0 && st<6 ? ST[st] : "?")
+	       << "\",\"loup\":" << J::num(o.get_loup())
+	       << ",\"uplo\":" << J::num(o.get_uplo())
+	    // The human line below adds presolve_time and one cell, as upstream
+	    // does. The JSON does not: it exists to be compared with
+	    // `ibexopt-ml --solve`, which reports the search alone, and on an
+	    // instance that takes milliseconds the parsing would dominate the ratio.
+	       << ",\"nodes\":" << o.get_nb_cells()
+	       << ",\"time\":" << o.get_time()
+	       << ",\"bisector\":\"" << bisection
+	       << "\",\"relax\":\"" << linearrelaxation
+	       << "\",\"loup_finder\":\"" << loupfindermethod
+	       << "\",\"rule\":\"" << bisection << "\"}" << endl;
+	}
+	else
 	cout << o.get_status() << " ; " << o.get_time() + presolve_time << " ; " << o.get_nb_cells()+1 << endl;
-	if (ipoptmethod){
+	if (ipoptmethod && !json){
 	  cout << " correction nodes " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.correction_nodes
 	       << " correction time " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.correction_time << endl;
 	}

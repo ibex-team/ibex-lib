@@ -41,15 +41,17 @@ that reason.
 
 import argparse
 import csv
+import json
 import math
 import os
+import subprocess
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ibexml import (solve, BISECTORS, RELAXATIONS, LOUP_FINDERS,   # noqa: E402
-                    DEFAULT_BINARY)
+from ibexml import (solve, _env, BISECTORS, RELAXATIONS,          # noqa: E402
+                    LOUP_FINDERS, DEFAULT_BINARY)
 
 FIELDS = ["instance", "set", "rule", "relax", "ub", "status", "nodes", "time",
           "loup", "uplo", "timeout"]
@@ -99,8 +101,53 @@ def read_manifest(d):
         return {r["instance"]: r["set"] for r in csv.DictReader(f)}
 
 
+#: The strategy ported from Bertrand Neveu's fork, run through its own binary
+#: (src/bin/ibexopt-ipopt.cpp) rather than through ibexopt-ml. It is not a
+#: bisector: it is a whole hand-built strategy -- its own contractor assembly,
+#: its own node selection -- and it is in the comparison to answer whether the
+#: configuration ibexopt-ml builds gives anything away against the one the Ipopt
+#: finder was written for.
+REF_RULE = "ref-ipopt"
+
+REF_BINARY = os.path.join(os.path.dirname(DEFAULT_BINARY), "ibexopt-ipopt")
+
+#: How this runner's names for the two other axes are spelled there.
+_REF_RELAX = {"xtaylor": "xn", "affine": "art", "both": "compo"}
+_REF_UB = {"default": "xn", "ipoptprob": "ipoptprob", "ipoptxn": "ipoptxn",
+           "ipoptxninhc4": "ipoptxninhc4"}
+
+
+def solve_ref(path, relax, ub, timeout, random_seed, wall_timeout, binary=None):
+    """Run the copied strategy, and answer in the shape `solve()` answers.
+
+    Everything that can be held equal with the ibexopt-ml arms is: the same
+    relaxation, the same upper bounding, the same seed, and the same stopping
+    criterion (eps_x 0, 1e-3 relative and 1e-7 absolute on the objective, eps_h
+    1e-8 -- ibexopt's defaults). What cannot be held equal is the point: this
+    arm is acidhc4 + LSmear(MG) + best-first over its own hand-built contractor,
+    which is what makes it worth running.
+    """
+    argv = [binary or REF_BINARY, path, "acidhc4", _REF_RELAX[relax], "lsmearmg",
+            _REF_UB[ub]]
+    if ub.startswith("ipopt"):
+        argv += ["100", "0"]              # ipopt frequency, "this is a QP"
+    argv += ["bfs", "0", "1e-3/1e-7", "1e-8", repr(float(timeout)),
+             str(int(random_seed)), "--json"]
+    try:
+        out = subprocess.run(argv, capture_output=True, text=True,
+                             timeout=wall_timeout, env=_env())
+    except subprocess.TimeoutExpired:
+        return {"status": "killed", "loup": float("inf"), "uplo": float("-inf"),
+                "nodes": 0, "time": wall_timeout, "rule": REF_RULE}
+    line = [l for l in out.stdout.strip().splitlines() if l.startswith("{")]
+    if not line:
+        raise RuntimeError("no JSON from %s: %s"
+                           % (REF_RULE, " ".join((out.stdout + out.stderr).split())[:200]))
+    return json.loads(line[-1])
+
+
 def parse_rules(specs):
-    """Each spec is a bisector name, or ``label=model.file``."""
+    """Each spec is a bisector name, `ref-ipopt`, or ``label=model.file``."""
     rules = []
     for s in specs:
         label, _, model = s.partition("=")
@@ -108,10 +155,15 @@ def parse_rules(specs):
             if not os.path.exists(model):
                 raise SystemExit("no model file %r" % model)
             rules.append((label, None, model))
+        elif label == REF_RULE:
+            if not os.path.isfile(REF_BINARY):
+                raise SystemExit(
+                    "no %s -- it is only built with -DIBEX_WITH_IPOPT=ON" % REF_BINARY)
+            rules.append((label, label, None))
         else:
             if label not in BISECTORS:
-                raise SystemExit("unknown bisector %r (one of: %s)"
-                                 % (label, ", ".join(BISECTORS)))
+                raise SystemExit("unknown bisector %r (one of: %s, %s)"
+                                 % (label, ", ".join(BISECTORS), REF_RULE))
             rules.append((label, label, None))
     return rules
 
@@ -280,10 +332,14 @@ def run(args):
         fname, (label, bisector, model) = job
         path = os.path.join(args.dir, fname)
         try:
-            r = solve(path, model=model, bisector=bisector, relax=args.relax,
-                      loup=args.ub, binary=args.binary, timeout=args.timeout,
-                      random_seed=args.random_seed,
-                      wall_timeout=args.timeout * args.wall_factor + 60.0)
+            wall = args.timeout * args.wall_factor + 60.0
+            if label == REF_RULE:
+                r = solve_ref(path, args.relax, args.ub, args.timeout,
+                              args.random_seed, wall)
+            else:
+                r = solve(path, model=model, bisector=bisector, relax=args.relax,
+                          loup=args.ub, binary=args.binary, timeout=args.timeout,
+                          random_seed=args.random_seed, wall_timeout=wall)
         except Exception as e:
             # keep why it failed: "error:IbexError" alone cannot be diagnosed
             # from the results file, and these runs are the ones worth looking at

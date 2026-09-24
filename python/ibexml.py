@@ -109,6 +109,20 @@ def load_samples(path, strict=True):
 _NULLABLE = frozenset(("box", "var", "pos"))
 
 
+def _env():
+    """The environment every solver process is started in.
+
+    Ipopt links a threaded BLAS: on a multi-core machine it is not reproducible
+    unless it is held to one thread, and a sweep that runs N solvers at once
+    would also have each of them spawn a thread per core. The author of the
+    Ipopt strategy sets this in his own scripts for the first reason. A value
+    already in the environment is left alone.
+    """
+    e = dict(os.environ)
+    e.setdefault("OMP_NUM_THREADS", "1")
+    return e
+
+
 class IbexError(RuntimeError):
     """The server answered {"ok": false, ...}."""
 
@@ -142,7 +156,8 @@ class IbexOptML(object):
                 "ibexopt-ml not found at %r. Build it, put it in bin/ next to "
                 "this package, or set $IBEXOPT_ML." % argv[0])
         self.proc = subprocess.Popen(argv, stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE, text=True, bufsize=1)
+                                     stdout=subprocess.PIPE, text=True, bufsize=1,
+                                     env=_env())
         self.bch = bch
         self.info = self._call(cmd="info")["info"]
         self.nb_ext_var = self.info["nb_ext_var"]
@@ -650,7 +665,7 @@ def run(bch, select_var, binary=None, sample_prob=0.0, on_sample=None, sample_wh
         rng = _random.Random(0)
 
     proc = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                            text=True, bufsize=1)
+                            text=True, bufsize=1, env=_env())
     done = None
     try:
         for line in proc.stdout:
@@ -732,7 +747,7 @@ def solve(bch, model=None, binary=None, max_nodes=0, timeout=0.0,
 
     try:
         out = subprocess.run(argv, capture_output=True, text=True,
-                             timeout=wall_timeout)
+                             timeout=wall_timeout, env=_env())
     except subprocess.TimeoutExpired:
         # the solver blew through its own CPU limit: it is stuck inside one node
         return {"status": "killed", "loup": float("inf"), "uplo": float("-inf"),
