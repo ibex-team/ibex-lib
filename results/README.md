@@ -14,6 +14,8 @@ donde se indica, mismo loup finder, misma selección de nodos, misma semilla
 | `bisectors-both.csv` | crudo, relajación `both` |
 | `bisectors-affine.csv` | crudo, relajación `affine` (16 corridas, barrido abandonado) |
 | `pilot.csv` | piloto de 25 instancias bajo `affine` |
+| `bisectors-guard.csv` | crudo, `xtaylor`, el bisector `lsmear-guard` |
+| **`ipopt-compo.csv`** | **crudo, relajación `both` y cota superior `ipoptxn`**: cinco estrategias × 298 instancias, 600 s, 15 jobs. Es una población aparte: con Ipopt los conteos de nodos de *todas* las reglas bajan, así que no se compara fila a fila con los archivos de arriba |
 | `paper-instances.txt` | las 55 instancias nombradas en las tablas del paper de 2018 |
 
 Los archivos crudos son *append-only*: una corrida relanzada con más tiempo deja
@@ -55,6 +57,49 @@ para que el barrido pueda retomarse.
 > vaciaba el buffer aunque nunca hubiera encontrado un punto factible. `solved`
 > aplica el criterio correcto —`complete` **y** `loup` finito— y por eso vale
 > igual sobre las filas viejas y las nuevas.
+
+## El barrido con Ipopt (`ipopt-compo.csv`)
+
+Cinco brazos bajo la misma relajación `both` (compo) y la misma cota superior
+`ipoptxn`. Cuatro corren con `ibexopt-ml`; `ref-ipopt` es la estrategia portada
+del fork de Bertrand Neveu, corrida con su propio binario `ibexopt-ipopt`
+—contractor armado a mano, selección de nodos *best-first*— con la misma
+relajación, la misma cota, la misma semilla y el mismo criterio de parada.
+
+| regla | resueltas | PAR2 | geo.nodos | geo.tiempo |
+|---|---|---|---|---|
+| `ref-ipopt` | **224** | **311.8** | 1.16 | 1.94 |
+| `lsmear-guard` | 219 | 333.3 | 1.07 | 1.08 |
+| `roundrobin` | 213 | 355.2 | 1.31 | 1.11 |
+| `lsmear` | 207 | 375.4 | 1.00 | 1.00 |
+| `smearsumrel` | 204 | 391.0 | 1.02 | 1.17 |
+
+Lo que aporta Ipopt, comparando cada regla contra sí misma bajo `both` sin él
+(media geométrica del cociente por instancia, sobre las que ambas cierran):
+
+| regla | resueltas sin → con | geo.nodos | geo.tiempo |
+|---|---|---|---|
+| `lsmear` | 203 → 207 | 0.30 | 0.36 |
+| `roundrobin` | 206 → 213 | 0.29 | 0.36 |
+| `smearsumrel` | 201 → 204 | 0.29 | 0.38 |
+
+Tres cosas que hay que tener presentes al leer esa tabla:
+
+* `ref-ipopt` gana en instancias cerradas y en nodos totales sobre el conjunto
+  común, pero es ~1.9× más lento **por instancia** en media geométrica. No
+  aísla ningún ingrediente: es una estrategia entera, y el sospechoso obvio de
+  las dos cosas a la vez es el buffer (`bfs`, un `CellHeap` puro) frente al
+  `CellDoubleHeap` que arma `ibexopt`. Está sin comprobar.
+* 29 de las 1490 corridas terminaron en `killed`: la guarda de reloj de pared
+  mató un nodo cuya contracción no retorna. Se reparten parejo entre las cinco
+  reglas (5 a 7 cada una) y se concentran en instancias ya conocidas por esto
+  (`hs090`, `hs091`, `polak6`, `least`, `ex5_3_3`), así que no sesgan la
+  comparación.
+* `eigmaxc.bch` es la única de las 193 comunes donde los encierros se
+  contradicen: `lsmear-guard` termina con `loup = uplo = 0` y las otras cuatro
+  encierran −10.746. No es del guard ni de Ipopt: en el barrido anterior, sin
+  Ipopt, le pasó lo mismo a `smearmax`. Es la instancia, o un error que el
+  orden de recorrido destapa.
 
 ## Cómo leer la comparación
 
