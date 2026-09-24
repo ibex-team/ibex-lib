@@ -109,6 +109,15 @@ def read_manifest(d):
 #: finder was written for.
 REF_RULE = "ref-ipopt"
 
+#: The same strategy with ibexopt's node selection instead of its own. The two
+#: differ in one argument, and running both is what turns "the copied strategy
+#: closes more instances and costs more time" into a statement about which part
+#: of it does that: everything else it does is held identical between them.
+REF_RULE_DH = "ref-ipopt-dh"
+
+#: rule name -> the node selection passed to the binary
+_REF_BUFFER = {REF_RULE: "bfs", REF_RULE_DH: "dh"}
+
 REF_BINARY = os.path.join(os.path.dirname(DEFAULT_BINARY), "ibexopt-ipopt")
 
 #: How this runner's names for the two other axes are spelled there.
@@ -117,37 +126,40 @@ _REF_UB = {"default": "xn", "ipoptprob": "ipoptprob", "ipoptxn": "ipoptxn",
            "ipoptxninhc4": "ipoptxninhc4"}
 
 
-def solve_ref(path, relax, ub, timeout, random_seed, wall_timeout, binary=None):
+def solve_ref(path, relax, ub, timeout, random_seed, wall_timeout, binary=None,
+              rule=REF_RULE):
     """Run the copied strategy, and answer in the shape `solve()` answers.
 
     Everything that can be held equal with the ibexopt-ml arms is: the same
     relaxation, the same upper bounding, the same seed, and the same stopping
     criterion (eps_x 0, 1e-3 relative and 1e-7 absolute on the objective, eps_h
     1e-8 -- ibexopt's defaults). What cannot be held equal is the point: this
-    arm is acidhc4 + LSmear(MG) + best-first over its own hand-built contractor,
-    which is what makes it worth running.
+    arm is acidhc4 + LSmear(MG) + its own hand-built contractor, which is what
+    makes it worth running. `rule` picks the node selection: REF_RULE is the
+    strategy as written (best-first on a plain CellHeap), REF_RULE_DH swaps in
+    the CellDoubleHeap ibexopt builds.
     """
     argv = [binary or REF_BINARY, path, "acidhc4", _REF_RELAX[relax], "lsmearmg",
             _REF_UB[ub]]
     if ub.startswith("ipopt"):
         argv += ["100", "0"]              # ipopt frequency, "this is a QP"
-    argv += ["bfs", "0", "1e-3/1e-7", "1e-8", repr(float(timeout)),
+    argv += [_REF_BUFFER[rule], "0", "1e-3/1e-7", "1e-8", repr(float(timeout)),
              str(int(random_seed)), "--json"]
     try:
         out = subprocess.run(argv, capture_output=True, text=True,
                              timeout=wall_timeout, env=_env())
     except subprocess.TimeoutExpired:
         return {"status": "killed", "loup": float("inf"), "uplo": float("-inf"),
-                "nodes": 0, "time": wall_timeout, "rule": REF_RULE}
+                "nodes": 0, "time": wall_timeout, "rule": rule}
     line = [l for l in out.stdout.strip().splitlines() if l.startswith("{")]
     if not line:
         raise RuntimeError("no JSON from %s: %s"
-                           % (REF_RULE, " ".join((out.stdout + out.stderr).split())[:200]))
+                           % (rule, " ".join((out.stdout + out.stderr).split())[:200]))
     return json.loads(line[-1])
 
 
 def parse_rules(specs):
-    """Each spec is a bisector name, `ref-ipopt`, or ``label=model.file``."""
+    """Each spec is a bisector name, `ref-ipopt[-dh]`, or ``label=model.file``."""
     rules = []
     for s in specs:
         label, _, model = s.partition("=")
@@ -155,15 +167,15 @@ def parse_rules(specs):
             if not os.path.exists(model):
                 raise SystemExit("no model file %r" % model)
             rules.append((label, None, model))
-        elif label == REF_RULE:
+        elif label in _REF_BUFFER:
             if not os.path.isfile(REF_BINARY):
                 raise SystemExit(
                     "no %s -- it is only built with -DIBEX_WITH_IPOPT=ON" % REF_BINARY)
             rules.append((label, label, None))
         else:
             if label not in BISECTORS:
-                raise SystemExit("unknown bisector %r (one of: %s, %s)"
-                                 % (label, ", ".join(BISECTORS), REF_RULE))
+                raise SystemExit("unknown bisector %r (one of: %s, %s, %s)"
+                                 % (label, ", ".join(BISECTORS), REF_RULE, REF_RULE_DH))
             rules.append((label, label, None))
     return rules
 
@@ -333,9 +345,9 @@ def run(args):
         path = os.path.join(args.dir, fname)
         try:
             wall = args.timeout * args.wall_factor + 60.0
-            if label == REF_RULE:
+            if label in _REF_BUFFER:
                 r = solve_ref(path, args.relax, args.ub, args.timeout,
-                              args.random_seed, wall)
+                              args.random_seed, wall, rule=label)
             else:
                 r = solve(path, model=model, bisector=bisector, relax=args.relax,
                           loup=args.ub, binary=args.binary, timeout=args.timeout,
