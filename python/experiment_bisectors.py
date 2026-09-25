@@ -162,25 +162,35 @@ def solve_ref(path, relax, ub, timeout, random_seed, wall_timeout, binary=None,
     return json.loads(line[-1])
 
 
-def parse_rules(specs):
+#: Where ibexopt cuts a bisected domain. A run under any other ratio is recorded
+#: under a suffixed rule name ("roundrobin@0.45"), because it is a different rule
+#: as far as the comparison is concerned -- not a re-run of the same one.
+DEFAULT_BISECT_RATIO = 0.5
+
+
+def parse_rules(specs, bisect_ratio=DEFAULT_BISECT_RATIO):
     """Each spec is a bisector name, `ref-ipopt[-dh]`, or ``label=model.file``."""
     rules = []
+    suffix = "" if bisect_ratio == DEFAULT_BISECT_RATIO else "@%g" % bisect_ratio
     for s in specs:
         label, _, model = s.partition("=")
         if model:
             if not os.path.exists(model):
                 raise SystemExit("no model file %r" % model)
-            rules.append((label, None, model))
+            rules.append((label + suffix, None, model))
         elif label in _REF_BUFFER:
             if not os.path.isfile(REF_BINARY):
                 raise SystemExit(
                     "no %s -- it is only built with -DIBEX_WITH_IPOPT=ON" % REF_BINARY)
+            if suffix:
+                raise SystemExit("%s cannot be run at another bisection ratio: its "
+                                 "binary does not expose one" % label)
             rules.append((label, label, None))
         else:
             if label not in BISECTORS:
                 raise SystemExit("unknown bisector %r (one of: %s, %s, %s)"
                                  % (label, ", ".join(BISECTORS), REF_RULE, REF_RULE_DH))
-            rules.append((label, label, None))
+            rules.append((label + suffix, label, None))
     return rules
 
 
@@ -293,7 +303,7 @@ def run(args):
         raise SystemExit("no .bch under %s" % args.dir)
 
     sets = read_manifest(args.dir)
-    rules = parse_rules(args.rules)
+    rules = parse_rules(args.rules, args.bisect_ratio)
     done = load_done(args.output)
     attempts = count_attempts(args.output)
 
@@ -355,7 +365,9 @@ def run(args):
             else:
                 r = solve(path, model=model, bisector=bisector, relax=args.relax,
                           loup=args.ub, binary=args.binary, timeout=args.timeout,
-                          random_seed=args.random_seed, wall_timeout=wall)
+                          random_seed=args.random_seed, wall_timeout=wall,
+                          bisect_ratio=(None if args.bisect_ratio == DEFAULT_BISECT_RATIO
+                                        else args.bisect_ratio))
         except Exception as e:
             # keep why it failed: "error:IbexError" alone cannot be diagnosed
             # from the results file, and these runs are the ones worth looking at
@@ -781,6 +793,12 @@ def main():
                         "-DIBEX_WITH_IPOPT=ON. A better incumbent found earlier "
                         "prunes more, so this changes the node counts of every "
                         "rule: it is a third axis, recorded per run like --relax")
+    r.add_argument("--bisect-ratio", type=float, default=DEFAULT_BISECT_RATIO,
+                   help="where a bisected domain is cut (default: 0.5, what "
+                        "ibexopt uses; Ibex's own Bsc default is 0.45). Runs at "
+                        "another ratio are recorded as a separate rule, "
+                        "\"name@ratio\", so they sit in the same file and the same "
+                        "table as the 0.5 ones")
     r.add_argument("--max-retries", type=int, default=2,
                    help="how many times a run that produces no answer is retried "
                         "before the sweep gives up on it (default: 2). Without a "
