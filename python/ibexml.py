@@ -133,8 +133,10 @@ class IbexOptML(object):
     def __init__(self, bch, binary=None, initial_loup=None, random_seed=None,
                  eps_x=None, rel_eps_f=None, abs_eps_f=None, eps_h=None,
                  rigor=False, kkt=False, simpl=None, loup=None,
-                 ipopt_freq=None, ipopt_qp=False, extra_args=()):
+                 ipopt_freq=None, ipopt_qp=False, bisect_ratio=None,
+                 extra_args=()):
         argv = [binary or DEFAULT_BINARY]
+        if bisect_ratio is not None: argv += ["--bisect-ratio", repr(bisect_ratio)]
         if loup:                     argv += ["--loup", loup]
         if ipopt_freq is not None:   argv += ["--ipopt-freq", str(ipopt_freq)]
         if ipopt_qp:                 argv += ["--ipopt-qp"]
@@ -708,7 +710,7 @@ def run(bch, select_var, binary=None, sample_prob=0.0, on_sample=None, sample_wh
 
 def solve(bch, model=None, binary=None, max_nodes=0, timeout=0.0,
           random_seed=None, bisector=None, relax=None, loup=None,
-          ipopt_freq=None, ipopt_qp=False, wall_timeout=None,
+          ipopt_freq=None, ipopt_qp=False, bisect_ratio=None, wall_timeout=None,
           extra_args=()):
     """Run the search to completion under LSmear or under `model`, and time it.
 
@@ -722,6 +724,9 @@ def solve(bch, model=None, binary=None, max_nodes=0, timeout=0.0,
     `ipopt_freq` calls and need a build configured with -DIBEX_WITH_IPOPT=ON.
     They find better incumbents earlier, which prunes more, so a run with one is
     not comparable with a run without -- it is a third axis, not a tweak.
+    `bisect_ratio` is where a bisected domain is cut: 0.5, the middle, is what
+    ibexopt uses, while a bisector built without an explicit ratio gets Ibex's
+    own default of 0.45.
 
     `timeout` is a limit on *CPU* seconds, and the solver checks it once per
     node -- so a single node whose contraction does not return escapes it
@@ -739,6 +744,7 @@ def solve(bch, model=None, binary=None, max_nodes=0, timeout=0.0,
     if loup:                    argv += ["--loup", loup]
     if ipopt_freq is not None:  argv += ["--ipopt-freq", str(ipopt_freq)]
     if ipopt_qp:                argv += ["--ipopt-qp"]
+    if bisect_ratio is not None: argv += ["--bisect-ratio", repr(bisect_ratio)]
     if max_nodes:               argv += ["--max-nodes", str(max_nodes)]
     if timeout:                 argv += ["--timeout", repr(timeout)]
     if random_seed is not None: argv += ["--random-seed", repr(random_seed)]

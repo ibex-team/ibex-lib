@@ -100,11 +100,12 @@ MLNodeServer::MLNodeServer(const System& sys,
 		const Vector& eps_x, MLOptimizerConfig::Bisector bisector,
 		MLOptimizerConfig::Relaxation relaxation,
 		MLOptimizerConfig::LoupFinderKind loup,
-		int ipopt_frequency, bool ipopt_quadratic) :
+		int ipopt_frequency, bool ipopt_quadratic, double bisect_ratio) :
 			MLOptimizerConfig(sys, rel_eps_f, abs_eps_f, eps_h, rigor, inHC4, kkt,
 					random_seed,
 					eps_x.size()==1 ? Vector(sys.nb_var, eps_x[0]) : eps_x,
-					bisector, relaxation, loup, ipopt_frequency, ipopt_quadratic),
+					bisector, relaxation, loup, ipopt_frequency, ipopt_quadratic,
+					bisect_ratio),
 			Optimizer((DefaultOptimizerConfig&) *this),
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
@@ -877,7 +878,7 @@ void MLNodeServer::write_info(JsonOut& out) {
 	out.kv("inHC4", with_inHC4());
 	out.kv("kkt", with_kkt());
 	out.kv("random_seed", get_random_seed());
-	out.kv("bisect_ratio", (double) default_bisect_ratio);
+	out.kv("bisect_ratio", get_bisect_ratio());
 	out.kv("bisector", MLOptimizerConfig::bisector_name(get_bisector()));
 	out.kv("relaxation", MLOptimizerConfig::relaxation_name(get_relaxation()));
 	out.kv("loup_finder", MLOptimizerConfig::loup_name(get_loup_kind()));

@@ -229,7 +229,8 @@ public:
 			MLOptimizerConfig::Bisector bisector=MLOptimizerConfig::BSC_LSMEAR_MG,
 			MLOptimizerConfig::Relaxation relaxation=MLOptimizerConfig::RELAX_XTAYLOR,
 			MLOptimizerConfig::LoupFinderKind loup=MLOptimizerConfig::LOUP_DEFAULT,
-			int ipopt_frequency=100, bool ipopt_quadratic=false);
+			int ipopt_frequency=100, bool ipopt_quadratic=false,
+			double bisect_ratio=DefaultOptimizerConfig::default_bisect_ratio);
 
 	virtual ~MLNodeServer();
 

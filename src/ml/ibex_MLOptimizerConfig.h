@@ -96,10 +96,23 @@ public:
 			Bisector bisector=BSC_LSMEAR_MG,
 			Relaxation relaxation=RELAX_XTAYLOR,
 			LoupFinderKind loup=LOUP_DEFAULT,
-			int ipopt_frequency=100, bool ipopt_quadratic=false);
+			int ipopt_frequency=100, bool ipopt_quadratic=false,
+			double bisect_ratio=DefaultOptimizerConfig::default_bisect_ratio);
 
 	/** \brief Which bisector this configuration builds. */
 	Bisector get_bisector() const;
+
+	/**
+	 * \brief Where a bisected domain is cut.
+	 *
+	 * 0.5 is the middle and what ibexopt uses; Bsc's own default is 0.45, which
+	 * is what a bisector built without an explicit ratio gets -- the strategies
+	 * assembled by hand in the examples therefore cut asymmetrically without
+	 * saying so. It only reaches the rules that do not compute their own point:
+	 * the largest-first fallback, round robin, and LSmear when the LP gives it
+	 * nothing.
+	 */
+	double get_bisect_ratio() const;
 
 	/** \brief Its name, as accepted on the command line. */
 	static const char* bisector_name(Bisector b);
@@ -166,10 +179,15 @@ protected:
 	Bsc* bsc_cache;
 	Ctc* ctc_cache;
 	LoupFinder* loup_cache;
+	double bisect_ratio;
 };
 
 inline MLOptimizerConfig::Bisector MLOptimizerConfig::get_bisector() const {
 	return bisector;
+}
+
+inline double MLOptimizerConfig::get_bisect_ratio() const {
+	return bisect_ratio;
 }
 
 inline MLOptimizerConfig::Relaxation MLOptimizerConfig::get_relaxation() const {

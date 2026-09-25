@@ -79,12 +79,14 @@ MLOptimizerConfig::MLOptimizerConfig(const System& sys,
 		double rel_eps_f, double abs_eps_f, double eps_h,
 		bool rigor, bool inHC4, bool kkt, double random_seed,
 		const Vector& eps_x, Bisector bisector, Relaxation relaxation,
-		LoupFinderKind loup, int ipopt_frequency, bool ipopt_quadratic) :
+		LoupFinderKind loup, int ipopt_frequency, bool ipopt_quadratic,
+		double bisect_ratio) :
 			DefaultOptimizerConfig(sys, rel_eps_f, abs_eps_f, eps_h, rigor, inHC4,
 					kkt, random_seed, eps_x),
 			bisector(bisector), relaxation(relaxation), loup_kind(loup),
 			ipopt_frequency(ipopt_frequency), ipopt_quadratic(ipopt_quadratic),
-			bsc_cache(NULL), ctc_cache(NULL), loup_cache(NULL) {
+			bsc_cache(NULL), ctc_cache(NULL), loup_cache(NULL),
+			bisect_ratio(bisect_ratio) {
 }
 
 bool MLOptimizerConfig::with_ipopt() {
@@ -265,7 +267,7 @@ Bsc& MLOptimizerConfig::get_bsc() {
 
 	// The default path is left untouched, so that "lsmear" really is what
 	// ibexopt builds, down to the tag it is memoized under.
-	if (bisector==BSC_LSMEAR_MG) {
+	if (bisector==BSC_LSMEAR_MG && bisect_ratio==default_bisect_ratio) {
 		bsc_cache = &DefaultOptimizerConfig::get_bsc();
 		return *bsc_cache;
 	}
@@ -283,9 +285,14 @@ Bsc& MLOptimizerConfig::get_bsc() {
 
 	// the fallback every smear variant delegates to
 	OptimLargestFirst& lf = rec(new OptimLargestFirst(ext_sys.goal_var(), true,
-			eps_x_extended, default_bisect_ratio));
+			eps_x_extended, bisect_ratio));
 
 	switch (bisector) {
+	case BSC_LSMEAR_MG:
+		// only reached with a non-default ratio: otherwise the branch above
+		// delegates, so that "lsmear" stays byte for byte what ibexopt runs
+		bsc_cache = &rec(new LSmear(ext_sys, eps_x_extended, lf));
+		break;
 	case BSC_LSMEAR:
 		bsc_cache = &rec(new LSmear(ext_sys, eps_x_extended, lf, ibex::LSMEAR));
 		break;
@@ -302,12 +309,15 @@ Bsc& MLOptimizerConfig::get_bsc() {
 		bsc_cache = &rec(new SmearMaxRelative(ext_sys, eps_x_extended, lf));
 		break;
 	case BSC_ROUNDROBIN:
-		bsc_cache = &rec(new RoundRobin(eps_x_extended, default_bisect_ratio));
+		bsc_cache = &rec(new RoundRobin(eps_x_extended, bisect_ratio));
 		break;
 	case BSC_LSMEAR_GUARD:
 		// the primary is exactly what "lsmear" runs, tag included
-		bsc_cache = &rec(new BscHijackGuard(DefaultOptimizerConfig::get_bsc(),
-				rec(new RoundRobin(eps_x_extended, default_bisect_ratio)),
+		bsc_cache = &rec(new BscHijackGuard(
+				bisect_ratio==default_bisect_ratio ?
+						DefaultOptimizerConfig::get_bsc() :
+						rec(new LSmear(ext_sys, eps_x_extended, lf)),
+				rec(new RoundRobin(eps_x_extended, bisect_ratio)),
 				eps_x_extended));
 		break;
 	case BSC_LARGESTFIRST:

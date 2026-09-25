@@ -380,6 +380,7 @@ under one is not comparable with a run under another:
 | `--loup NAME` | `default` | upper bounding: `default` (what `ibexopt` uses), or `ipoptprob`, `ipoptxn`, `ipoptxninhc4` |
 | `--ipopt-freq INT` | `100` | Ipopt runs every N calls to the loup finder, plus the 10th, 20th and 50th, plus whenever another finder improves the incumbent |
 | `--ipopt-qp` | off | quadratic objective and linear constraints: the Lagrangian hessian is then computed once instead of per call |
+| `--bisect-ratio FLOAT` | `0.5` | where a bisected domain is cut. 0.5 is the middle and what `ibexopt` uses; Ibex's own `Bsc` default is 0.45, which is what a bisector built without an explicit ratio gets. It reaches only the rules that do not compute their own bisection point: the largest-first fallback, round robin, and LSmear when the LP gives it nothing |
 
 The `ipopt*` names exist only in a build configured with
 `-DIBEX_WITH_IPOPT=ON`; otherwise the solver rejects them and says so. They are

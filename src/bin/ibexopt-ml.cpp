@@ -277,6 +277,11 @@ int main(int argc, char** argv) {
 			+ MLOptimizerConfig::bisector_names() + ". Default: lsmear (what ibexopt uses).", {"bisector"});
 	args::ValueFlag<string> relax_arg(parser, "name", "Linear relaxation behind the X-Newton step. One of: "
 			+ MLOptimizerConfig::relaxation_names() + ". Default: xtaylor (what ibexopt uses).", {"relax"});
+	args::ValueFlag<double> ratio_arg(parser, "float", "Where a bisected domain is cut. "
+			"Default: 0.5 (the middle, what ibexopt uses). Ibex's own Bsc default is "
+			"0.45, which is what the hand-assembled strategies in the examples get: "
+			"they never pass a ratio. It reaches only the rules that do not compute "
+			"their own bisection point.", {"bisect-ratio"});
 	args::ValueFlag<string> loup_arg(parser, "name", "Upper bounding. One of: "
 			+ MLOptimizerConfig::loup_names() + ". Default: default (what ibexopt uses). "
 			"The ipopt* variants change the incumbent, so a run with one is not comparable "
@@ -359,6 +364,9 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 
+		double bisect_ratio = ratio_arg ? ratio_arg.Get()
+				: DefaultOptimizerConfig::default_bisect_ratio;
+
 		MLOptimizerConfig::LoupFinderKind loup = MLOptimizerConfig::LOUP_DEFAULT;
 		if (loup_arg && !MLOptimizerConfig::parse_loup(loup_arg.Get(), loup)) {
 			cerr << "unknown upper bounding '" << loup_arg.Get() << "'. One of: "
@@ -380,7 +388,8 @@ int main(int argc, char** argv) {
 				relaxation,
 				loup,
 				ipopt_freq ? ipopt_freq.Get() : 100,
-				ipopt_qp.Get());
+				ipopt_qp.Get(),
+				bisect_ratio);
 
 		if (model_file) {
 			model = new MLModel(model_file.Get());
@@ -442,6 +451,7 @@ int main(int argc, char** argv) {
 			out.kv("relax", MLOptimizerConfig::relaxation_name(relaxation));
 			// not "loup": that key already carries the incumbent value above
 			out.kv("loup_finder", MLOptimizerConfig::loup_name(loup));
+			out.kv("bisect_ratio", bisect_ratio);
 			out.kv("rule", model!=NULL ? model->description()
 					: string(MLOptimizerConfig::bisector_name(bisector)));
 			if (server->guard_switched_at()>=-1)
