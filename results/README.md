@@ -69,6 +69,7 @@ relajación, la misma cota, la misma semilla y el mismo criterio de parada.
 | regla | resueltas | PAR2 | geo.nodos | geo.tiempo |
 |---|---|---|---|---|
 | `ref-ipopt` | **224** | **311.8** | 1.16 | 1.94 |
+| `ref-ipopt-dh` | 223 | 315.0 | 1.22 | 1.94 |
 | `lsmear-guard` | 219 | 333.3 | 1.07 | 1.08 |
 | `roundrobin` | 213 | 355.2 | 1.31 | 1.11 |
 | `lsmear` | 207 | 375.4 | 1.00 | 1.00 |
@@ -87,9 +88,16 @@ Tres cosas que hay que tener presentes al leer esa tabla:
 
 * `ref-ipopt` gana en instancias cerradas y en nodos totales sobre el conjunto
   común, pero es ~1.9× más lento **por instancia** en media geométrica. No
-  aísla ningún ingrediente: es una estrategia entera, y el sospechoso obvio de
-  las dos cosas a la vez es el buffer (`bfs`, un `CellHeap` puro) frente al
-  `CellDoubleHeap` que arma `ibexopt`. Está sin comprobar.
+  aísla ningún ingrediente: es una estrategia entera. **No es el buffer**:
+  `ref-ipopt-dh` es la misma corrida con el `CellDoubleHeap` de `ibexopt` en
+  lugar de su `CellHeap`, y da 223 en lugar de 224 con el mismo tiempo. Tampoco
+  es el contractor KKT (solo 1 de las 21 que gana no tiene restricciones) ni el
+  recorte de la caja inicial a ±1e20 (toca 7 de las 21, contra 61 de las 207
+  que `lsmear` ya cierra: es la tasa base). Lo que queda es que las dos
+  configuraciones **bisectan en puntos distintos**: `ibexopt` parte por 0.5
+  (`DefaultOptimizerConfig::default_bisect_ratio`) y los bisectores armados a
+  mano de la estrategia copiada se quedan con el 0.45 de `Bsc::default_ratio()`,
+  porque nunca le pasan el ratio. Sin comprobar todavía.
 * 29 de las 1490 corridas terminaron en `killed`: la guarda de reloj de pared
   mató un nodo cuya contracción no retorna. Se reparten parejo entre las cinco
   reglas (5 a 7 cada una) y se concentran en instancias ya conocidas por esto

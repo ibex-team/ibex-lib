@@ -122,7 +122,11 @@ REF_BINARY = os.path.join(os.path.dirname(DEFAULT_BINARY), "ibexopt-ipopt")
 
 #: How this runner's names for the two other axes are spelled there.
 _REF_RELAX = {"xtaylor": "xn", "affine": "art", "both": "compo"}
-_REF_UB = {"default": "xn", "ipoptprob": "ipoptprob", "ipoptxn": "ipoptxn",
+#: "default" is ibexopt's own upper bounding, which has inHC4 *on*
+#: (DefaultOptimizerConfig::default_inHC4), so it is "xninhc4" there, not "xn".
+#: The ipopt* names mean the same thing on both sides: ipoptxn is probing plus
+#: X-Taylor with inHC4 off, ipoptxninhc4 is inHC4 plus X-Taylor.
+_REF_UB = {"default": "xninhc4", "ipoptprob": "ipoptprob", "ipoptxn": "ipoptxn",
            "ipoptxninhc4": "ipoptxninhc4"}
 
 
