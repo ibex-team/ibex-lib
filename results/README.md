@@ -68,12 +68,28 @@ relajación, la misma cota, la misma semilla y el mismo criterio de parada.
 
 | regla | resueltas | PAR2 | geo.nodos | geo.tiempo |
 |---|---|---|---|---|
-| `ref-ipopt` | **224** | **311.8** | 1.16 | 1.94 |
-| `ref-ipopt-dh` | 223 | 315.0 | 1.22 | 1.94 |
+| `ref-ipopt` | **224** | **311.8** | 1.17 | 1.95 |
+| `ref-ipopt-dh` | 223 | 315.0 | 1.22 | 1.95 |
 | `lsmear-guard` | 219 | 333.3 | 1.07 | 1.08 |
-| `roundrobin` | 213 | 355.2 | 1.31 | 1.11 |
+| `roundrobin@0.45` | 214 | 351.1 | 1.31 | 1.11 |
+| `roundrobin` | 213 | 355.2 | 1.30 | 1.10 |
 | `lsmear` | 207 | 375.4 | 1.00 | 1.00 |
+| `lsmear@0.45` | 207 | 376.7 | 1.03 | 1.03 |
 | `smearsumrel` | 204 | 391.0 | 1.02 | 1.17 |
+
+Los brazos `@0.45` bisecan por 0.45 del dominio en vez de por la mitad: es el
+default de `Bsc` que heredan los bisectores armados a mano, frente al 0.5 de
+`DefaultOptimizerConfig` que usa `ibexopt`. **El punto de corte no cambia
+nada.** Cara a cara, sobre las instancias que ambos cierran:
+
+| | resueltas | geo.nodos | geo.tiempo | gana | pierde | empata |
+|---|---|---|---|---|---|---|
+| `roundrobin@0.45` vs `roundrobin` | 214 vs 213 | 0.98 | 0.98 | 48 | 49 | 113 |
+| `lsmear@0.45` vs `lsmear` | 207 vs 207 | 1.03 | 1.03 | 46 | 37 | 123 |
+
+`roundrobin` es la prueba fuerte: no calcula su propio punto de corte, así que
+el ratio le aplica en **todos** los nodos, mientras que LSmear casi siempre saca
+el suyo del LP. Ni así se mueve. El 0.5 de `ibexopt` no está dejando nada.
 
 Lo que aporta Ipopt, comparando cada regla contra sí misma bajo `both` sin él
 (media geométrica del cociente por instancia, sobre las que ambas cierran):
@@ -94,10 +110,18 @@ Tres cosas que hay que tener presentes al leer esa tabla:
   es el contractor KKT (solo 1 de las 21 que gana no tiene restricciones) ni el
   recorte de la caja inicial a ±1e20 (toca 7 de las 21, contra 61 de las 207
   que `lsmear` ya cierra: es la tasa base). Lo que queda es que las dos
-  configuraciones **bisectan en puntos distintos**: `ibexopt` parte por 0.5
-  (`DefaultOptimizerConfig::default_bisect_ratio`) y los bisectores armados a
-  mano de la estrategia copiada se quedan con el 0.45 de `Bsc::default_ratio()`,
-  porque nunca le pasan el ratio. Sin comprobar todavía.
+  configuraciones bisectan en puntos distintos —`ibexopt` por 0.5, la estrategia
+  copiada por el 0.45 que hereda sin decirlo— **pero eso tampoco es**: medido
+  con `--bisect-ratio`, el 0.45 no reproduce a la estrategia copiada en ninguna
+  instancia de prueba (en `hs071`, que no tiene bornes raros, `ibexopt-ml` hace
+  118 nodos, con 0.45 hace 200, y la copiada 132), y sobre las 298 no mueve la
+  aguja (tabla de arriba). Descartados también la granularidad de HC4 (mismos
+  conteos construyéndolo desde el `System` o desde su array de restricciones) y
+  el nivel de simplificación (los dos binarios usan el mismo default). Queda el
+  recorte de la caja inicial a ±1e20, que sí cambia el problema en el 45% del
+  conjunto pero no se concentra en las que gana. **Ninguna perilla sola explica
+  las 17 instancias extra**: es diferencia acumulada, y separarla ya es
+  depuración instancia por instancia.
 * 29 de las 1490 corridas terminaron en `killed`: la guarda de reloj de pared
   mató un nodo cuya contracción no retorna. Se reparten parejo entre las cinco
   reglas (5 a 7 cada una) y se concentran en instancias ya conocidas por esto
