@@ -516,3 +516,8 @@ orthregb.bch,coconutbenchmark-library2,lsmear,both,ipoptxn,timeout,79902,310.006
 orthrege.bch,coconutbenchmark-library2,lsmear-guard:10,both,ipoptxn,timeout,63096,310.0080680000001,2.752617461030957,-2.9640000000000006e+17,310.0
 orthrege.bch,coconutbenchmark-library2,lsmear,both,ipoptxn,timeout,59762,310.0000960000001,2.7526174581254894,-2.9640000000000006e+17,310.0
 pentagon.bch,coconutbenchmark-library2,lsmear-guard:10,both,ipoptxn,complete,16596,10.966554000000004,0.00013652261632458672,0.00013638623009449227,310.0
+pentagon.bch,coconutbenchmark-library2,lsmear,both,ipoptxn,timeout,568140,310.0051780000001,0.00013743370828499902,9.158791822974091e-08,310.0
+polak1.bch,coconutbenchmark-library2,lsmear-guard:10,both,ipoptxn,complete,50,0.010331000000000003,2.718281829465142,2.7155662632019406,310.0
+polak1.bch,coconutbenchmark-library2,lsmear,both,ipoptxn,complete,4404,0.40252700000000013,2.718281866119934,2.7155662998201144,310.0
+polak2.bch,coconutbenchmark-library2,lsmear-guard:10,both,ipoptxn,complete,140,0.04088700000000002,54.598150034837,54.543606428408594,310.0
+polak2.bch,coconutbenchmark-library2,lsmear,both,ipoptxn,complete,22100,0.7910120000000003,54.59815025429668,54.543606647649035,310.0
