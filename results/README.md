@@ -389,7 +389,8 @@ padre-hijo no distingue aquí un secuestro dañino.
 **Nadie cierra 67**; en 12 ninguna regla ni `ref-ipopt` encuentra un punto
 factible (`discs`, `ex5_3_3`, `ex7_3_6`, `hs090`, `hs091`, `hs107`, `hs118`,
 `launch__coconut`, `minlphi`, `minlphi1`, `rk23`, `wall`). Ipopt resolvió la
-factibilidad de `robot`, `ship` y `hs089`, que sin él no tenían incumbente;
+factibilidad de `robot` (que ahora cierran 5 reglas), `ship` (7 de 13 con
+incumbente) y `hs089` (1 de 13), que sin él no tenían ninguno en 16 corridas;
 `rk23`, `hs091` y `minlphi` siguen sin él.
 
 **Lo que aporta Ipopt** (contra `both` sin Ipopt, sobre las que ambas cierran):
