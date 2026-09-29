@@ -110,7 +110,7 @@ MLNodeServer::MLNodeServer(const System& sys,
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
 			oracle_calls(0), oracle_fallbacks(0),
-			model(NULL), oracle(false), stats(new OpenStatistics()),
+			model(NULL), oracle(false), oracle_depth(false), stats(new OpenStatistics()),
 			last_time(0), last_decisions(0), last_status("not run") {
 
 	RNG::srand((int) random_seed);
@@ -1159,9 +1159,22 @@ int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 		SampleParams p = sp;
 		p.depth = (int) c.depth;
 		p.last_bisected_var = c.bisected_var;
+		if (oracle_depth) { p.prune = false; p.budget_start = 0; }  // same footing for all
 		SampleResult r = evaluate(c.box, p);         // leaves the search untouched
 		oracle_calls++;
 		int best = -1; long best_nodes = 0;
+		if (oracle_depth) {
+			int best_depth = 0;
+			for (size_t k=0; k<r.labels.size(); k++) {
+				const DiveResult& d = r.labels[k];
+				if (!d.valid) continue;
+				if (best<0 || d.max_depth < best_depth || (d.max_depth==best_depth && d.nodes < best_nodes)) {
+					best = d.var; best_depth = d.max_depth; best_nodes = d.nodes;
+				}
+			}
+			if (best<0) oracle_fallbacks++;
+			return best;
+		}
 		for (size_t k=0; k<r.labels.size(); k++) {
 			const DiveResult& d = r.labels[k];
 			if (!d.valid || d.censored) continue;

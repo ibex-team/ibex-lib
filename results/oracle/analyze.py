@@ -25,7 +25,7 @@ BN = B.pivot(index="instance", columns="rule", values="nodes")
 BS = B.pivot(index="instance", columns="rule", values="status")
 g = lambda x: float(np.exp(np.mean(np.log(x)))) if len(x) else float("nan")
 
-for arm, base in (("lsmear", "lsmear"), ("guard10", "lsmear-guard:10")):
+for arm, base in (("lsmear", "lsmear"), ("guard10", "lsmear-guard:10"), ("lazy50", "lsmear")):
     o = O[O.arm == arm].set_index("instance")
     if o.empty:
         continue
@@ -33,8 +33,8 @@ for arm, base in (("lsmear", "lsmear"), ("guard10", "lsmear-guard:10")):
     both = ok & (BS.reindex(o.index)[base] == "complete")
     r = (o.nodes[both] / BN.reindex(o.index)[base][both]).astype(float)
     fb = (o.fallbacks / o.calls.replace(0, np.nan)).astype(float)
-    print("oráculo con continuación %-16s %d corridas, cierra %d; decisiones sin ningún dive terminado: %.0f%% (mediana por instancia)"
-          % (base, len(o), ok.sum(), 100 * fb.median()))
+    print("[%-7s] continuación %-16s %d corridas, cierra %d; decisiones sin ningún dive terminado: %.0f%% (mediana por instancia)"
+          % (arm, base, len(o), ok.sum(), 100 * fb.median()))
     print("   nodos oráculo / %s sobre %d que ambos cierran: geo %.2f, mediana %.2f, p10 %.2f, p90 %.2f; peor en %d"
           % (base, both.sum(), g(r), r.median(), r.quantile(.1), r.quantile(.9), (r > 1.05).sum()))
     for other in ("lsmear", "lsmear-guard:10"):

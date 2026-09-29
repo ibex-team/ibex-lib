@@ -304,6 +304,18 @@ public:
 	 */
 	void set_oracle(bool on) { oracle = on; }
 
+	/**
+	 * \brief The lazy variant: rank by how deep each dive went, not by its size.
+	 *
+	 * Every candidate gets the same single budget (no pruning, no doubling), so
+	 * that the depth reached is comparable, and the one whose dive stayed
+	 * shallowest wins (ties: fewer nodes, then the default order). With a small
+	 * budget most dives do not close and depth is the only signal left; on the
+	 * unbiased samples the depth of a full dive ranks candidates almost like
+	 * its size (Spearman 0.80, regret 1.02 against 1.54 for LSmear).
+	 */
+	void set_oracle_depth(bool on) { oracle_depth = on; }
+
 	/** \brief Oracle decisions taken, and how many the bisector took instead. */
 	long oracle_calls, oracle_fallbacks;
 
@@ -586,6 +598,7 @@ protected:
 
 	MLModel* model;               //!< not owned
 	bool oracle;                  //!< see set_oracle()
+	bool oracle_depth;            //!< see set_oracle_depth()
 
 	OpenStatistics* stats;        //!< operator statistics (owned)
 

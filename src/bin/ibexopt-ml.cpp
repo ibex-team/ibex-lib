@@ -296,6 +296,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<long>   budget(parser, "int", "Ceiling on the dive node budget. Default: 200.", {"budget"});
 	args::ValueFlag<long>   budget_start(parser, "int", "First dive budget tried; doubled while every candidate stays censored. 0 disables. Default: 25.", {"budget-start"});
 	args::Flag oracle_arg(parser, "oracle", "Branch with the one-step oracle: dive on every candidate at every node (--budget, --budget-start, --no-prune apply) and bisect on the one that closes in the fewest nodes. Expensive.", {"oracle"});
+	args::ValueFlag<string> oracle_score(parser, "nodes|depth", "With --oracle: rank the dives by their size (nodes, the default) or, lazily, by how deep they went (depth: one fixed --budget for all, no pruning).", {"oracle-score"});
 	args::Flag no_prune(parser, "no-prune", "Give every candidate the full budget instead of the best result so far.", {"no-prune"});
 	args::ValueFlag<int>    max_depth(parser, "int", "Dive depth limit (0: none). Default: 0.", {"max-depth"});
 	args::ValueFlag<int>    topk(parser, "int", "Evaluate only the k most promising candidates (0: all). Default: 0.", {"topk"});
@@ -401,6 +402,10 @@ int main(int argc, char** argv) {
 		}
 
 		if (oracle_arg) server->set_oracle(true);
+		if (oracle_score) {
+			if (oracle_score.Get()=="depth") server->set_oracle_depth(true);
+			else if (oracle_score.Get()!="nodes") { cerr << "--oracle-score: nodes or depth" << endl; delete server; delete sys; return 1; }
+		}
 
 		if (model_file) {
 			model = new MLModel(model_file.Get());
