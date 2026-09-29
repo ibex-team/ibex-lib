@@ -1203,6 +1203,14 @@ to repeat it" stops measuring the hijack, and the two rules end up alternating,
 which is worse than either. `--solve` reports `guard_switched_at`, the decision
 at which the switch happened (-1: never).
 
+`--guard-horizon N` only lets the switch happen within the first N decisions;
+past them the guard stops watching and is `lsmear`. In `experiment_bisectors.py`
+the same rule is written `lsmear-guard:N`, which is also what the results file
+records. On the 298 benchmarks the switches that paid off happened at decision
+10 but one, and the late ones were false alarms: `lsmear-guard:10` is the
+recommended setting (see `results/README.md`, and note that it was chosen on
+that same data). The default, 0, is no horizon.
+
 A learned rule joins the comparison as `label=path/to.model`.
 
 ### The other two axes

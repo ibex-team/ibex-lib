@@ -169,7 +169,11 @@ DEFAULT_BISECT_RATIO = 0.5
 
 
 def parse_rules(specs, bisect_ratio=DEFAULT_BISECT_RATIO):
-    """Each spec is a bisector name, `ref-ipopt[-dh]`, or ``label=model.file``."""
+    """Each spec is a bisector name, `ref-ipopt[-dh]`, ``label=model.file``, or
+    ``lsmear-guard:H`` -- the guard with a horizon of H decisions.
+
+    Returns ``(label, bisector, model, extra_args)`` tuples; the label is what
+    the results file records as the rule."""
     rules = []
     suffix = "" if bisect_ratio == DEFAULT_BISECT_RATIO else "@%g" % bisect_ratio
     for s in specs:
@@ -177,20 +181,28 @@ def parse_rules(specs, bisect_ratio=DEFAULT_BISECT_RATIO):
         if model:
             if not os.path.exists(model):
                 raise SystemExit("no model file %r" % model)
-            rules.append((label + suffix, None, model))
-        elif label in _REF_BUFFER:
+            rules.append((label + suffix, None, model, ()))
+            continue
+        if label in _REF_BUFFER:
             if not os.path.isfile(REF_BINARY):
                 raise SystemExit(
                     "no %s -- it is only built with -DIBEX_WITH_IPOPT=ON" % REF_BINARY)
             if suffix:
                 raise SystemExit("%s cannot be run at another bisection ratio: its "
                                  "binary does not expose one" % label)
-            rules.append((label, label, None))
+            rules.append((label, label, None, ()))
+            continue
+        name, _, horizon = label.partition(":")
+        if name not in BISECTORS:
+            raise SystemExit("unknown bisector %r (one of: %s, %s, %s)"
+                             % (name, ", ".join(BISECTORS), REF_RULE, REF_RULE_DH))
+        if horizon:
+            if name != "lsmear-guard" or not horizon.isdigit():
+                raise SystemExit("%r: only lsmear-guard takes a horizon, "
+                                 "as lsmear-guard:N" % label)
+            rules.append((label + suffix, name, None, ("--guard-horizon", horizon)))
         else:
-            if label not in BISECTORS:
-                raise SystemExit("unknown bisector %r (one of: %s, %s, %s)"
-                                 % (label, ", ".join(BISECTORS), REF_RULE, REF_RULE_DH))
-            rules.append((label + suffix, label, None))
+            rules.append((label + suffix, name, None, ()))
     return rules
 
 
@@ -355,7 +367,7 @@ def run(args):
     t0 = time.time()
 
     def one(job):
-        fname, (label, bisector, model) = job
+        fname, (label, bisector, model, extra) = job
         path = os.path.join(args.dir, fname)
         try:
             wall = args.timeout * args.wall_factor + 60.0
@@ -365,7 +377,8 @@ def run(args):
             else:
                 r = solve(path, model=model, bisector=bisector, relax=args.relax,
                           loup=args.ub, binary=args.binary, timeout=args.timeout,
-                          random_seed=args.random_seed, wall_timeout=wall,
+                          random_seed=args.random_seed, extra_args=extra,
+                          wall_timeout=wall,
                           bisect_ratio=(None if args.bisect_ratio == DEFAULT_BISECT_RATIO
                                         else args.bisect_ratio))
         except Exception as e:

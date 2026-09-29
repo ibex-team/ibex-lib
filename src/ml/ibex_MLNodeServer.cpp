@@ -164,6 +164,18 @@ LSmear* MLNodeServer::lsmear() {
 
 BscHijackGuard* MLNodeServer::guard() { return dynamic_cast<BscHijackGuard*>(&bsc); }
 
+bool MLNodeServer::set_guard_horizon(long h) {
+	BscHijackGuard* g = guard();
+	if (g==NULL) return false;
+	g->set_horizon(h);
+	return true;
+}
+
+long MLNodeServer::guard_horizon() {
+	BscHijackGuard* g = guard();
+	return g!=NULL ? g->get_horizon() : -1;
+}
+
 long MLNodeServer::guard_switched_at() {
 	BscHijackGuard* g = guard();
 	return g!=NULL ? g->switched_at() : -2;

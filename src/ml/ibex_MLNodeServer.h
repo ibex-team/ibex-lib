@@ -600,6 +600,13 @@ public:
 	 *        (-1: never). -2 with any other bisector.
 	 */
 	long guard_switched_at();
+	/**
+	 * \brief With "lsmear-guard": only switch within the first \a h
+	 *        decisions (0: no horizon). \return false with another bisector.
+	 */
+	bool set_guard_horizon(long h);
+	/** \brief The guard's horizon; -1 with another bisector. */
+	long guard_horizon();
 };
 
 /*========================== inline implementation ==========================*/

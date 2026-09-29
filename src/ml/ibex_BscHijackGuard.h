@@ -38,6 +38,12 @@ namespace ibex {
  * either rule alone (ship-1: LSmear and the reversible guard time out,
  * RoundRobin closes in 222 nodes, this guard in 256).
  *
+ * A horizon H (set_horizon()) restricts the switch to the first H decisions:
+ * past them the guard stops watching and is plain #primary. On the 298
+ * benchmarks every switch that paid off but one happened at decision 10, the
+ * earliest possible, and the late ones were false alarms (see
+ * results/README.md). 0, the default, means no horizon.
+ *
  * The state (window + switch) is part of the search: save it with get_state()
  * around anything speculative, as MLNodeServer does around its dives.
  */
@@ -75,6 +81,12 @@ public:
 	/** \brief Whether the fallback has taken over. */
 	bool switched() const { return st.switched; }
 
+	/** \brief Only switch within the first \a h decisions (0: no horizon). */
+	void set_horizon(long h) { horizon = h; }
+
+	/** \brief See set_horizon(). */
+	long get_horizon() const { return horizon; }
+
 	/** \brief Decision index at which it did (-1: never). */
 	long switched_at() const { return st.switched_at; }
 
@@ -89,6 +101,7 @@ public:
 	const int warmup;
 
 protected:
+	long horizon;
 	State st;
 };
 

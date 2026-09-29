@@ -273,6 +273,7 @@ int main(int argc, char** argv) {
 
 	// --- the learned rule ---
 	args::ValueFlag<string> model_file(parser, "filename", "Branch with this model instead of the bisector (see MLModel for the format).", {"model"});
+	args::ValueFlag<long> guard_horizon(parser, "int", "With --bisector lsmear-guard: only switch to round-robin within the first N decisions. Default: 0 (no horizon).", {"guard-horizon"});
 	args::ValueFlag<string> bisector_arg(parser, "name", "Bisector to use. One of: "
 			+ MLOptimizerConfig::bisector_names() + ". Default: lsmear (what ibexopt uses).", {"bisector"});
 	args::ValueFlag<string> relax_arg(parser, "name", "Linear relaxation behind the X-Newton step. One of: "
@@ -391,6 +392,13 @@ int main(int argc, char** argv) {
 				ipopt_qp.Get(),
 				bisect_ratio);
 
+		if (guard_horizon && !server->set_guard_horizon(guard_horizon.Get())) {
+			cerr << "--guard-horizon needs --bisector lsmear-guard" << endl;
+			delete server;
+			delete sys;
+			return 1;
+		}
+
 		if (model_file) {
 			model = new MLModel(model_file.Get());
 			server->set_model(model);
@@ -454,8 +462,10 @@ int main(int argc, char** argv) {
 			out.kv("bisect_ratio", bisect_ratio);
 			out.kv("rule", model!=NULL ? model->description()
 					: string(MLOptimizerConfig::bisector_name(bisector)));
-			if (server->guard_switched_at()>=-1)
+			if (server->guard_switched_at()>=-1) {
+				out.kv("guard_horizon", server->guard_horizon());
 				out.kv("guard_switched_at", server->guard_switched_at());
+			}
 			out.end_obj();
 			cout << endl;
 

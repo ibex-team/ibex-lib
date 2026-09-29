@@ -14,9 +14,10 @@ donde se indica, mismo loup finder, misma selección de nodos, misma semilla
 | `bisectors-both.csv` | crudo, relajación `both` |
 | `bisectors-affine.csv` | crudo, relajación `affine` (16 corridas, barrido abandonado) |
 | `pilot.csv` | piloto de 25 instancias bajo `affine` |
-| `bisectors-guard.csv` | crudo, `xtaylor`, el bisector `lsmear-guard` |
+| `bisectors-guard.csv` | crudo, `lsmear-guard`, relajación `xtaylor`, **en otra máquina** (ver abajo) |
+| `guard-switch.txt` | en qué decisión cambia `lsmear-guard` a round-robin, por instancia (`--max-nodes 12000`) |
 | **`ipopt-compo-per-instance.csv`** | **la tabla completa detrás de los agregados: una fila por instancia, una columna por regla con los nodos que necesitó —o por qué no tiene ninguno— y otra con su tiempo**. La escribe `report --out`; se regenera cuando cambian los datos |
-| `ipopt-compo.csv` | crudo, relajación `both` y cota superior `ipoptxn`: cinco estrategias × 298 instancias, 600 s, 15 jobs. Es una población aparte: con Ipopt los conteos de nodos de *todas* las reglas bajan, así que no se compara fila a fila con los archivos de arriba |
+| `ipopt-compo.csv` | crudo, relajación `both` y cota superior `ipoptxn`: nueve bisectores y la estrategia copiada × 298 instancias, 600 s, 15 jobs. Es una población aparte: con Ipopt los conteos de nodos de *todas* las reglas bajan, así que no se compara fila a fila con los archivos de arriba |
 | `paper-instances.txt` | las 55 instancias nombradas en las tablas del paper de 2018 |
 
 Los archivos crudos son *append-only*: una corrida relanzada con más tiempo deja
@@ -252,3 +253,50 @@ SmearSumRelative por 1.04 en nodos; sobre las 55 nombradas en el paper de 2018,
 por 1.45. Esas 55 están seleccionadas por el paper con un filtro de razón ≥ 5
 entre la mejor y la peor estrategia, o sea elegidas para mostrar diferencias.
 Cualquier número que se cite tiene que decir sobre qué conjunto se midió.
+
+## `lsmear-guard`: LSmear hasta que lo secuestran, después round-robin
+
+`lsmear-guard` corre LSmear y mira sus últimas 20 decisiones; si con al menos 10
+registradas la mitad bisecta la variable del padre, pasa a round-robin por el
+resto de la búsqueda. Mismo protocolo que el resto (xtaylor, 600 s, semilla 1).
+
+**Corrió en otra máquina, ~1,9× más rápida.** Donde el guardián nunca cambió, sus
+nodos son exactamente los de `lsmear`; la mediana de la razón de tiempos sobre
+esas 37 corridas es 0,517. `python/compare_guard.py` divide los tiempos por ese
+factor y aplica el límite de 600 s en la escala de `all-results.csv`. Los nodos
+no necesitan corrección.
+
+| 289 instancias, xtaylor | PAR2 | resueltas | brecha lsmear→oráculo | coconut | resto | vs lsmear (>1,5× y >5 s) |
+|---|---|---|---|---|---|---|
+| `lsmear` | 116.383 | 195 | — | — | — | — |
+| `roundrobin` | 107.227 | 203 | 49,8 % | −9,4 % | 63,0 % | +16 −31 |
+| `lsmear-guard` | 103.416 | 206 | 70,5 % | 47,6 % | 75,6 % | +14 −14 |
+| `lsmear-guard`, horizonte H=10 | 102.790 | 207 | 73,9 % | 69,5 % | 74,9 % | +13 −4 |
+| oráculo de 8 reglas | 97.987 | 211 | 100 % | | | |
+
+**Los cambios tardíos son falsas alarmas.** Todas las ganancias salvo una cambian
+en la decisión 10, la primera posible. Las pérdidas (`ex6_2_10`, `hs093`,
+`ex6_2_6`, `ex6_2_8`, `ex6_1_3`, `ex14_1_7`, `bearing`…) cambian entre la 30 y la
+608. La excepción es `ex7_2_3`: secuestro tardío genuino (cambia en la decisión
+5287, pasa de timeout a ~11 s).
+
+**El horizonte se evalúa exacto sin correrlo.** "Cambiar solo si el secuestro
+aparece en las primeras H decisiones" es, antes del cambio, `lsmear` nodo por
+nodo; así que es la fila del guardián si cambió en una decisión ≤ H y la de
+`lsmear` si no. H entre 10 y 50 da lo mismo (73,5 %–73,9 %, +13 −4 a −6); desde
+H=100 vuelve a lo de sin horizonte. **Ojo:** el horizonte se eligió mirando esta
+misma tabla, así que no es una evaluación ciega. Con H=10 la regla se reduce a
+"mirar las 10 primeras decisiones de LSmear; si la mitad repite la variable del
+padre, round-robin", que es la regla con sonda del HANDOFF sin reinicio, y da lo
+mismo que ella (PAR2 102.551, 207 resueltas, 75,2 %).
+
+```bash
+python3 python/compare_guard.py results/bisectors-guard.csv results/guard-switch.txt
+```
+
+El horizonte está en el binario: `--bisector lsmear-guard --guard-horizon 10`, o
+`--rules lsmear-guard:10` en `experiment_bisectors.py`. Verificado en 7
+instancias contra la evaluación exacta: las que cambian lo hacen en la decisión
+10 con los mismos nodos que `lsmear-guard` (`ship-1` 256, `ex8_2_4` 808), y las
+falsas alarmas tardías (`ex6_2_8`, `ex6_2_9`, `ex14_1_7`, `bearing`) dan
+exactamente los nodos de `lsmear`.
