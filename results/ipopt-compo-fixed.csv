@@ -1153,3 +1153,6 @@ ex8_4_1.bch,unsolved,smearsumrel,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
 ex8_4_1.bch,unsolved,smearsum,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
 ex8_4_1bis.bch,unsolved,roundrobin,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
 ex8_4_1bis.bch,unsolved,ref-ipopt,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
+ex8_4_1bis.bch,unsolved,smearsumrel,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
+ex8_4_1bis.bch,unsolved,smearsum,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
+ex8_4_2.bch,unsolved,roundrobin,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
