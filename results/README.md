@@ -18,7 +18,7 @@ donde se indica, mismo loup finder, misma selección de nodos, misma semilla
 | `guard-switch.txt` | en qué decisión cambia `lsmear-guard` a round-robin, por instancia (`--max-nodes 12000`) |
 | **`ipopt-compo-per-instance.csv`** | **la tabla completa detrás de los agregados: una fila por instancia, una columna por regla con los nodos que necesitó —o por qué no tiene ninguno— y otra con su tiempo**. La escribe `report --out`; se regenera cuando cambian los datos |
 | `ipopt-compo.csv` | crudo, relajación `both` y cota superior `ipoptxn`: nueve bisectores y la estrategia copiada × 298 instancias, 600 s, 15 jobs. Es una población aparte: con Ipopt los conteos de nodos de *todas* las reglas bajan, así que no se compara fila a fila con los archivos de arriba |
-| `ipopt-compo-guard10.csv` | `lsmear-guard:10` y `lsmear` bajo `both` + `ipoptxn`, **las dos en la misma máquina y con los arreglos del LP**, 310 s de CPU (= 600 s en la máquina de `ipopt-compo.csv`, factor 0.52) |
+| `ipopt-compo-fixed.csv` | `lsmear-guard:10` y `lsmear` bajo `both` + `ipoptxn`, **las dos en la misma máquina y con los arreglos del LP**, 310 s de CPU (= 600 s en la máquina de `ipopt-compo.csv`, factor 0.52) |
 | `guard-switch-ipopt.txt` | lo mismo bajo `--relax both --loup ipoptxn` (`--max-nodes 2000`), medido con Ipopt 3.11.9 |
 | `paper-instances.txt` | las 55 instancias nombradas en las tablas del paper de 2018 |
 
@@ -424,7 +424,7 @@ incumbente) y `hs089` (1 de 13), que sin él no tenían ninguno en 16 corridas;
 0.28–0.30 en nodos, como arriba; en tiempo este script da 0.46–0.49 con un piso
 de 0.01 s, no 0.36 — depende de cómo se traten las corridas muy cortas.
 
-### `lsmear-guard:10` corrido de verdad (`ipopt-compo-guard10.csv`)
+### `lsmear-guard:10` corrido de verdad (`ipopt-compo-fixed.csv`)
 
 La confirmación directa de lo que la evaluación exacta predecía: `lsmear-guard:10`
 y `lsmear` en la misma máquina, el mismo binario (con los dos arreglos del LP),

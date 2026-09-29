@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """lsmear-guard:10 against lsmear under compo + ipoptxn, run on one machine.
 
-results/ipopt-compo-guard10.csv: both arms on the same machine and binary (the
+results/ipopt-compo-fixed.csv: both arms on the same machine and binary (the
 LP fixes included), 310 CPU seconds -- 600 on the machine ipopt-compo.csv ran
 on, at the measured factor of 0.52. Reports instances solved, PAR2, the
 pairwise score t(A)/max(t(A),t(B)) (2 for a timeout, 1 s floor, the instances
@@ -26,8 +26,9 @@ A, B = "lsmear-guard:10", "lsmear"
 
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "results", "ipopt-compo-guard10.csv")
+    path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "results", "ipopt-compo-fixed.csv")
     d = pd.read_csv(path).drop_duplicates(["instance", "rule"], keep="last")
+    d = d[d.rule.isin([A, B])]   # the file grows other rules
     d["ok"] = [solved(r) for r in d.to_dict("records")]
     T = d.pivot(index="instance", columns="rule", values="time").dropna()
     S = d.pivot(index="instance", columns="rule", values="ok").loc[T.index].astype(bool)

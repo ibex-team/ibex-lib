@@ -120,6 +120,12 @@ _REF_BUFFER = {REF_RULE: "bfs", REF_RULE_DH: "dh"}
 
 REF_BINARY = os.path.join(os.path.dirname(DEFAULT_BINARY), "ibexopt-ipopt")
 
+
+def ref_binary(binary=None):
+    """The ibexopt-ipopt that goes with `binary`: its sibling, so that
+    --binary switches both arms to the same build (DEFAULT_BINARY's otherwise)."""
+    return os.path.join(os.path.dirname(binary), "ibexopt-ipopt") if binary else REF_BINARY
+
 #: How this runner's names for the two other axes are spelled there.
 _REF_RELAX = {"xtaylor": "xn", "affine": "art", "both": "compo"}
 #: "default" is ibexopt's own upper bounding, which has inHC4 *on*
@@ -168,7 +174,7 @@ def solve_ref(path, relax, ub, timeout, random_seed, wall_timeout, binary=None,
 DEFAULT_BISECT_RATIO = 0.5
 
 
-def parse_rules(specs, bisect_ratio=DEFAULT_BISECT_RATIO):
+def parse_rules(specs, bisect_ratio=DEFAULT_BISECT_RATIO, binary=None):
     """Each spec is a bisector name, `ref-ipopt[-dh]`, ``label=model.file``, or
     ``lsmear-guard:H`` -- the guard with a horizon of H decisions.
 
@@ -184,9 +190,9 @@ def parse_rules(specs, bisect_ratio=DEFAULT_BISECT_RATIO):
             rules.append((label + suffix, None, model, ()))
             continue
         if label in _REF_BUFFER:
-            if not os.path.isfile(REF_BINARY):
+            if not os.path.isfile(ref_binary(binary)):
                 raise SystemExit(
-                    "no %s -- it is only built with -DIBEX_WITH_IPOPT=ON" % REF_BINARY)
+                    "no %s -- it is only built with -DIBEX_WITH_IPOPT=ON" % ref_binary(binary))
             if suffix:
                 raise SystemExit("%s cannot be run at another bisection ratio: its "
                                  "binary does not expose one" % label)
@@ -315,7 +321,7 @@ def run(args):
         raise SystemExit("no .bch under %s" % args.dir)
 
     sets = read_manifest(args.dir)
-    rules = parse_rules(args.rules, args.bisect_ratio)
+    rules = parse_rules(args.rules, args.bisect_ratio, args.binary)
     done = load_done(args.output)
     attempts = count_attempts(args.output)
 
@@ -373,7 +379,8 @@ def run(args):
             wall = args.timeout * args.wall_factor + 60.0
             if label in _REF_BUFFER:
                 r = solve_ref(path, args.relax, args.ub, args.timeout,
-                              args.random_seed, wall, rule=label)
+                              args.random_seed, wall, binary=ref_binary(args.binary),
+                              rule=label)
             else:
                 r = solve(path, model=model, bisector=bisector, relax=args.relax,
                           loup=args.ub, binary=args.binary, timeout=args.timeout,
