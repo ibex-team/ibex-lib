@@ -18,6 +18,25 @@ soplex::DSVectorReal ivec2dsvec(const ibex::Vector& ivec) {
     return dsvec;
 }
 
+// SoPlex stores an infinite side or bound as +/-soplex::infinity (1e100) and
+// hands that finite number back. Read back as such, a row "a.x <= b" gets a
+// left-hand side of -1e100 that Neumaier-Shcherbina takes at face value: with
+// variable bounds past 1e100, a.x can go below it, so the bound certified is
+// the bound of a smaller set, and CtcPolytopeHull cuts feasible points away
+// (eigmaxc.bch: the optimum lost at x1 <= 1e120, never at x1 <= 1e100). Every
+// side and bound read from SoPlex goes through this.
+static inline double from_soplex(double v) {
+    if (v <= -soplex::infinity) return NEG_INFINITY;
+    if (v >=  soplex::infinity) return POS_INFINITY;
+    return v;
+}
+
+static inline ibex::Vector from_soplex(const ibex::Vector& v) {
+    ibex::Vector w(v);
+    for (int i = 0; i < w.size(); ++i) w[i] = from_soplex(w[i]);
+    return w;
+}
+
 ibex::Vector dsvec2ivec(const soplex::DSVectorReal& dsvec, int size) {
     ibex::Vector ivec(size);
     for(int i = 0; i < dsvec.size(); ++i) {
@@ -107,7 +126,7 @@ LPSolver::LPSolver(std::string filename) {
     }
     ivec_bounds_ = IntervalVector(nb_vars());
     for(int i = 0; i < ivec_bounds_.size(); ++i) {
-        ivec_bounds_[i] = Interval(mysoplex->lowerReal(i), mysoplex->upperReal(i));
+        ivec_bounds_[i] = Interval(from_soplex(mysoplex->lowerReal(i)), from_soplex(mysoplex->upperReal(i)));
     }
 }
 
@@ -373,35 +392,35 @@ Vector LPSolver::col(int index) const {
 Vector LPSolver::lhs() const {
     DVectorReal dcol(nb_rows());
     mysoplex->getLhsReal(dcol);
-    return dvec2ivec(dcol);
+    return from_soplex(dvec2ivec(dcol));
 }
 
 double LPSolver::lhs(int index) const {
     assert(index >= 0 && index < nb_rows());
-    return mysoplex->lhsReal(index);
+    return from_soplex(mysoplex->lhsReal(index));
 }
 
 Vector LPSolver::rhs() const {
     DVectorReal dcol(nb_rows());
     mysoplex->getRhsReal(dcol);
-    return dvec2ivec(dcol);
+    return from_soplex(dvec2ivec(dcol));
 }
 double LPSolver::rhs(int index) const {
     assert(index >= 0 && index < nb_rows());
-    return mysoplex->rhsReal(index);
+    return from_soplex(mysoplex->rhsReal(index));
 }
 
 IntervalVector LPSolver::lhs_rhs() const {
     IntervalVector lhs_rhs_vec(nb_rows());
     for(int i = 0; i < lhs_rhs_vec.size(); ++i) {
-        lhs_rhs_vec[i] = Interval(mysoplex->lhsReal(i), mysoplex->rhsReal(i));
+        lhs_rhs_vec[i] = Interval(from_soplex(mysoplex->lhsReal(i)), from_soplex(mysoplex->rhsReal(i)));
     }
     return lhs_rhs_vec;
 }
 
 Interval LPSolver::lhs_rhs(int index) const {
     assert(index >= 0 && index < nb_rows());
-    return Interval(mysoplex->lhsReal(index), mysoplex->rhsReal(index));
+    return Interval(from_soplex(mysoplex->lhsReal(index)), from_soplex(mysoplex->rhsReal(index)));
 }
 
 IntervalVector LPSolver::bounds() const {

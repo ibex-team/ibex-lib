@@ -43,6 +43,7 @@ public:
     CPPUNIT_TEST(test_unbounded_certified);
     CPPUNIT_TEST(test_infeasible);
     CPPUNIT_TEST(test_infeasible_certified);
+    CPPUNIT_TEST(test_infinite_sides);
     
     CPPUNIT_TEST(test_model);
 #endif
@@ -72,6 +73,7 @@ public:
     void test_easy_feasible_certified();
     void test_unbounded_certified();
     void test_infeasible_certified();
+    void test_infinite_sides();
     
     void test_model();
 };

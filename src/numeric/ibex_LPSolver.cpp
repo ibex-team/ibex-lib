@@ -57,7 +57,24 @@ std::ostream& operator<<(std::ostream& os, const LPSolver::Status x){
 	return os;
 }
 
+// The two tests below are sound for any multipliers, but only finite ones: a
+// dual or Farkas vector with an infinite component (SoPlex returns them when
+// the coefficients reach 1e287, as in eigmaxc.bch) makes A^T*lambda contain
+// inf-inf, which interval arithmetic turns into the empty set. An empty
+// objective bound reads lb()=+oo and empties the box; an empty d "does not
+// contain 0" and proves an infeasibility that is not there. Either way a
+// feasible box is discarded. Such a certificate certifies nothing.
+static bool all_finite(const Vector& v) {
+    for (int i = 0; i < v.size(); ++i)
+        if (!std::isfinite(v[i])) return false;
+    return true;
+}
+
 bool LPSolver::neumaier_shcherbina_postprocessing() {
+    if (!all_finite(uncertified_dual_)) {
+        obj_ = Interval::all_reals();
+        return false;
+    }
     Matrix A_trans = rows_transposed();
     IntervalVector b = lhs_rhs();
     IntervalVector rest = A_trans*uncertified_dual_;
@@ -65,6 +82,10 @@ bool LPSolver::neumaier_shcherbina_postprocessing() {
 	//Interval certified_obj_raw = uncertified_dual_*b - rest*ivec_bounds_;
 	//certified_obj_ = Interval(certified_obj_raw.lb(), uncertified_obj_.ub());
     obj_ = uncertified_dual_*b - rest*ivec_bounds_;
+    if (obj_.is_empty()) {
+        obj_ = Interval::all_reals();
+        return false;
+    }
 	return true;
 }
 
@@ -80,11 +101,14 @@ bool LPSolver::neumaier_shcherbina_infeasibility_test() {
     }
 
 
+    if (!all_finite(lambda)) return false;
+
     IntervalVector rest = A_trans * lambda ;
     Interval d = rest * ivec_bounds_ - lambda * b;
 
-    // if 0 does not belong to d, the infeasibility is proved
-    return !d.contains(0.0);
+    // if 0 does not belong to d, the infeasibility is proved -- provided d
+    // was computed at all (see all_finite above)
+    return !d.is_empty() && !d.contains(0.0);
 }
 
 

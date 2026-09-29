@@ -555,4 +555,28 @@ void TestLinearSolver::test_model(){
 }
 
 
+// An infinite side must come back infinite, not as the LP library's own
+// stand-in (SoPlex: 1e100). Read as a finite number, it is what
+// Neumaier-Shcherbina certifies against, and with variable bounds past it the
+// certified bound excludes feasible points (eigmaxc.bch lost its optimum).
+void TestLinearSolver::test_infinite_sides() {
+    LPSolver lp(2, LPSolver::Mode::Certified);
+    lp.set_bounds(IntervalVector(2, Interval(-1e150, 1e150)));
+    Vector row(2); row[0]=1; row[1]=1;
+    lp.add_constraint(row, LEQ, 1);
+    lp.add_constraint(row, GEQ, -1e120);
+    lp.add_constraint(NEG_INFINITY, row, POS_INFINITY);
+    int n = lp.nb_rows();
+    CPPUNIT_ASSERT(lp.lhs_rhs(n-3).lb()==NEG_INFINITY);
+    CPPUNIT_ASSERT(lp.lhs_rhs(n-3).ub()==1);
+    // past the library's infinity a finite side is infinite to the solver too:
+    // it comes back as such, which only relaxes the row
+    CPPUNIT_ASSERT(lp.lhs_rhs(n-2).lb()==NEG_INFINITY);
+    CPPUNIT_ASSERT(lp.lhs_rhs(n-2).ub()==POS_INFINITY);
+    CPPUNIT_ASSERT(lp.lhs_rhs(n-1)==Interval::all_reals());
+    CPPUNIT_ASSERT(lp.lhs()[n-3]==NEG_INFINITY);
+    CPPUNIT_ASSERT(lp.rhs()[n-2]==POS_INFINITY);
+    CPPUNIT_ASSERT(lp.lhs_rhs()[n-1]==Interval::all_reals());
+}
+
 } // end namespace
