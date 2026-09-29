@@ -612,3 +612,5 @@ abelbis-1.bch,unsolved,ref-ipopt,both,ipoptxn,timeout,21032,309.9917250000001,22
 abelbis-1.bch,unsolved,smearsumrel,both,ipoptxn,timeout,26034,310.0202490000001,225.1945825741216,-129.20034648130718,310.0
 abelbis-1.bch,unsolved,smearsum,both,ipoptxn,timeout,26268,310.02392400000014,225.1945825741216,-288.90578214087964,310.0
 abelbis.bch,unsolved,roundrobin,both,ipoptxn,timeout,17796,310.03400500000015,225.19458257392074,-323953879202.6596,310.0
+abelbis.bch,unsolved,ref-ipopt,both,ipoptxn,timeout,85650,309.9965180000001,inf,-2.5298862757119777e+40,310.0
+abelbis.bch,unsolved,smearsumrel,both,ipoptxn,timeout,28580,310.0081470000001,225.19458257391958,-191.3710089307044,310.0
