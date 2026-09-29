@@ -295,6 +295,7 @@ int main(int argc, char** argv) {
 	// --- diving / sampling ---
 	args::ValueFlag<long>   budget(parser, "int", "Ceiling on the dive node budget. Default: 200.", {"budget"});
 	args::ValueFlag<long>   budget_start(parser, "int", "First dive budget tried; doubled while every candidate stays censored. 0 disables. Default: 25.", {"budget-start"});
+	args::Flag oracle_arg(parser, "oracle", "Branch with the one-step oracle: dive on every candidate at every node (--budget, --budget-start, --no-prune apply) and bisect on the one that closes in the fewest nodes. Expensive.", {"oracle"});
 	args::Flag no_prune(parser, "no-prune", "Give every candidate the full budget instead of the best result so far.", {"no-prune"});
 	args::ValueFlag<int>    max_depth(parser, "int", "Dive depth limit (0: none). Default: 0.", {"max-depth"});
 	args::ValueFlag<int>    topk(parser, "int", "Evaluate only the k most promising candidates (0: all). Default: 0.", {"topk"});
@@ -399,6 +400,8 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 
+		if (oracle_arg) server->set_oracle(true);
+
 		if (model_file) {
 			model = new MLModel(model_file.Get());
 			server->set_model(model);
@@ -462,6 +465,10 @@ int main(int argc, char** argv) {
 			out.kv("bisect_ratio", bisect_ratio);
 			out.kv("rule", model!=NULL ? model->description()
 					: string(MLOptimizerConfig::bisector_name(bisector)));
+			if (oracle_arg) {
+				out.kv("oracle_calls", server->oracle_calls);
+				out.kv("oracle_fallbacks", server->oracle_fallbacks);
+			}
 			if (server->guard_switched_at()>=-1) {
 				out.kv("guard_horizon", server->guard_horizon());
 				out.kv("guard_switched_at", server->guard_switched_at());

@@ -291,6 +291,23 @@ public:
 	MLModel* get_model() const;
 
 	/**
+	 * \brief Branch with the one-step oracle.
+	 *
+	 * At every node of the real search, dive on every candidate exactly as a
+	 * sample does (same budget, pruning and continuation) and bisect on the one
+	 * whose dive closed in the fewest nodes; when no dive closes, the bisector
+	 * decides. The dives leave the search as they found it, so the node count of
+	 * the search is the size of the tree this choice builds. It measures what a
+	 * perfect imitation of the dive labels would give end to end, which is
+	 * expensive: use it on instances that close in a few thousand nodes.
+	 * Takes precedence over a model.
+	 */
+	void set_oracle(bool on) { oracle = on; }
+
+	/** \brief Oracle decisions taken, and how many the bisector took instead. */
+	long oracle_calls, oracle_fallbacks;
+
+	/**
 	 * \brief The variable the model picks, or -1 if there is no model or no
 	 *        candidate.
 	 */
@@ -568,6 +585,7 @@ protected:
 	IntervalVector orig_box;      //!< what reset() was given, original space
 
 	MLModel* model;               //!< not owned
+	bool oracle;                  //!< see set_oracle()
 
 	OpenStatistics* stats;        //!< operator statistics (owned)
 
