@@ -1151,3 +1151,5 @@ ex8_4_1.bch,unsolved,roundrobin,both,ipoptxn,timeout,67728,310.00534100000016,0.
 ex8_4_1.bch,unsolved,ref-ipopt,both,ipoptxn,timeout,74036,309.9931680000001,0.6185727241815989,0.21251464520085112,310.0
 ex8_4_1.bch,unsolved,smearsumrel,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
 ex8_4_1.bch,unsolved,smearsum,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
+ex8_4_1bis.bch,unsolved,roundrobin,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
+ex8_4_1bis.bch,unsolved,ref-ipopt,both,ipoptxn,killed,0,525.0,inf,-inf,310.0
