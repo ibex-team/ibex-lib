@@ -18,6 +18,7 @@ donde se indica, mismo loup finder, misma selección de nodos, misma semilla
 | `guard-switch.txt` | en qué decisión cambia `lsmear-guard` a round-robin, por instancia (`--max-nodes 12000`) |
 | **`ipopt-compo-per-instance.csv`** | **la tabla completa detrás de los agregados: una fila por instancia, una columna por regla con los nodos que necesitó —o por qué no tiene ninguno— y otra con su tiempo**. La escribe `report --out`; se regenera cuando cambian los datos |
 | `ipopt-compo.csv` | crudo, relajación `both` y cota superior `ipoptxn`: nueve bisectores y la estrategia copiada × 298 instancias, 600 s, 15 jobs. Es una población aparte: con Ipopt los conteos de nodos de *todas* las reglas bajan, así que no se compara fila a fila con los archivos de arriba |
+| `ipopt-compo-guard10.csv` | `lsmear-guard:10` y `lsmear` bajo `both` + `ipoptxn`, **las dos en la misma máquina y con los arreglos del LP**, 310 s de CPU (= 600 s en la máquina de `ipopt-compo.csv`, factor 0.52) |
 | `guard-switch-ipopt.txt` | lo mismo bajo `--relax both --loup ipoptxn` (`--max-nodes 2000`), medido con Ipopt 3.11.9 |
 | `paper-instances.txt` | las 55 instancias nombradas en las tablas del paper de 2018 |
 
@@ -422,3 +423,37 @@ incumbente) y `hs089` (1 de 13), que sin él no tenían ninguno en 16 corridas;
 **Lo que aporta Ipopt** (contra `both` sin Ipopt, sobre las que ambas cierran):
 0.28–0.30 en nodos, como arriba; en tiempo este script da 0.46–0.49 con un piso
 de 0.01 s, no 0.36 — depende de cómo se traten las corridas muy cortas.
+
+### `lsmear-guard:10` corrido de verdad (`ipopt-compo-guard10.csv`)
+
+La confirmación directa de lo que la evaluación exacta predecía: `lsmear-guard:10`
+y `lsmear` en la misma máquina, el mismo binario (con los dos arreglos del LP),
+`both` + `ipoptxn`, 310 s de CPU. `python/compare_guard10_ipopt.py`.
+
+| 298 instancias | resueltas | coconut | resto | PAR2 medio (310 s) |
+|---|---|---|---|---|
+| `lsmear` | 207 | 54 | 153 | 194.0 |
+| **`lsmear-guard:10`** | **220** | **58** | **162** | **167.8** |
+
+Cara a cara (>1.5× y >5 s) gana 16 y pierde 3; en 193 hace exactamente los
+nodos de `lsmear` (no cambió). Con la métrica por pares t(A)/max(t(A), t(B))
+—2 si no termina, piso de 1 s, sin las instancias que ninguna resuelve— da 0.935
+contra 1.035, diferencia 0.101, IC95 [0.038, 0.173]. Pasan de no resueltas a
+resueltas 14 (`ship-1`, `schwefel5`, `schwefel5-abs`, la familia `ex8_5_*`,
+`ex8_4_5bis`, `ex8_2_4`, `pentagon`, `brownal`, `mconcon`, `robot`) y al revés
+una (`chenery-1`, 91 s con `lsmear`). La evaluación exacta sobre
+`ipopt-compo.csv` daba 221 contra 207: coincide.
+
+**`polak1` y `polak2` no eran pérdidas del guardián sino del LP.** Con el
+binario sin arreglar, en esta misma máquina, `lsmear-guard:10` y `roundrobin`
+agotan el tiempo sin un solo punto factible (4.7 M y 3.3 M nodos); con los
+arreglos cierran en 50 / 140 (`lsmear-guard:10`) y 18 / 112 (`roundrobin`)
+nodos. `polak3` pasa a tener incumbente. De las 22 corridas de
+`ipopt-compo.csv` que terminaron sin incumbente cuando otra regla sí lo tenía,
+esas 5 son las que el arreglo cambia; el resto (`robot`, casi todo `ex8_2_4`,
+`eigencco` con `largestfirst`) no. **`ipopt-compo.csv` subestima a
+`roundrobin` y al guardián en esas instancias**; conviene rehacer el barrido
+con el binario arreglado.
+
+`eigmaxc` cierra en −10.746 con las dos reglas. `haldmads` sigue sin cerrar
+(el problema de `affine` descrito arriba).
