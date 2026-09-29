@@ -66,16 +66,59 @@ del fork de Bertrand Neveu, corrida con su propio binario `ibexopt-ipopt`
 —contractor armado a mano, selección de nodos *best-first*— con la misma
 relajación, la misma cota, la misma semilla y el mismo criterio de parada.
 
-| regla | resueltas | PAR2 | geo.nodos | geo.tiempo |
-|---|---|---|---|---|
-| `ref-ipopt` | **224** | **311.8** | 1.17 | 1.95 |
-| `ref-ipopt-dh` | 223 | 315.0 | 1.22 | 1.95 |
-| `lsmear-guard` | 219 | 333.3 | 1.07 | 1.08 |
-| `roundrobin@0.45` | 214 | 351.1 | 1.31 | 1.11 |
-| `roundrobin` | 213 | 355.2 | 1.30 | 1.10 |
-| `lsmear` | 207 | 375.4 | 1.00 | 1.00 |
-| `lsmear@0.45` | 207 | 376.7 | 1.03 | 1.03 |
-| `smearsumrel` | 204 | 391.0 | 1.02 | 1.17 |
+### La tabla
+
+Los nueve bisectores bajo esa estrategia. `geo.nodos`, `geo.tiempo` y el
+recuento gana/pierde/empata son **cara a cara contra `lsmear`**, sobre las
+instancias que ese par cierra —no sobre el conjunto común a los nueve, que
+`largestfirst` reduce a 135 y deja de ser representativo—. Un triunfo exige al
+menos 5% menos nodos; dentro de esa banda es empate.
+
+| bisector | resueltas | PAR2 | ambas | geo.nodos | geo.tiempo | gana/pierde/empata | exclusivas |
+|---|---|---|---|---|---|---|---|
+| **`lsmear-guard`** | **219** | **333.3** | 203 | 1.08 | 1.08 | 11 / 26 / 166 | +16 −4 |
+| `roundrobin` | 213 | 355.2 | 198 | 1.31 | 1.11 | 31 / 82 / 85 | +15 −9 |
+| `smearsum` | 209 | 370.2 | 206 | 1.09 | 1.20 | 37 / 61 / 108 | +3 −1 |
+| `smearmax` | 208 | 373.9 | 205 | 1.09 | 1.22 | 34 / 57 / 114 | +3 −2 |
+| `lsmear` | 207 | 375.4 | — | 1.00 | 1.00 | — | — |
+| `lsmear-box` | 206 | 379.6 | 206 | 1.01 | 1.00 | 8 / 10 / 188 | +0 −1 |
+| `smearsumrel` | 204 | 391.0 | 203 | 1.04 | 1.18 | 34 / 39 / 130 | +1 −4 |
+| `smearmaxrel` | 189 | 450.3 | 188 | 1.30 | 1.45 | 25 / 49 / 114 | +1 −19 |
+| `largestfirst` | 142 | 636.4 | 141 | 1.49 | 1.23 | 15 / 33 / 93 | +1 −66 |
+
+Fuera de concurso, porque no es un bisector sino otra estrategia entera:
+`ref-ipopt` cierra **224** con PAR2 **311.8**, a costa de 1.9× el tiempo por
+instancia. Y los brazos `@0.45` del ratio de bisección: `roundrobin@0.45` 214 /
+351.1, `lsmear@0.45` 207 / 376.7.
+
+**`lsmear` no domina.** Es quinto en instancias cerradas y el mejor de los
+clásicos en nodos por instancia: todos los demás están en 1.01 o peor. Las dos
+cosas a la vez son el resultado: gana el nodo, pierde la instancia. `smearsumrel`
+—su rival en el paper de 2018— queda séptimo en cerradas pero empata en nodos
+(1.04) con 34 triunfos contra 39, que es la misma foto que ya habíamos visto sin
+Ipopt.
+
+### El oráculo
+
+Elegir perfectamente el bisector en cada instancia cerraría **226** (+19 sobre
+`lsmear`) con el **79%** de sus nodos. Quién aporta al portafolio:
+
+| bisector | mejor en | **único mejor en** |
+|---|---|---|
+| `smearsumrel` | 122 | **16** |
+| `lsmear-box` | 119 | **12** |
+| `smearsum` | 101 | **11** |
+| `smearmaxrel` | 104 | **8** |
+| `roundrobin` | 92 | **8** |
+| `smearmax` | 96 | **6** |
+| `largestfirst` | 95 | **6** |
+| `lsmear` | 121 | **4** |
+| `lsmear-guard` | 118 | **3** |
+
+"Único mejor" es el que cuenta: las instancias que el portafolio perdería si se
+sacara esa regla. `largestfirst` cierra 142 de 298 y aun así es el único mejor
+en 6 — ninguna regla es descartable, que es el argumento para elegir por nodo en
+vez de fijar una.
 
 Los brazos `@0.45` bisecan por 0.45 del dominio en vez de por la mitad: es el
 default de `Bsc` que heredan los bisectores armados a mano, frente al 0.5 de
