@@ -18,6 +18,7 @@ donde se indica, mismo loup finder, misma selección de nodos, misma semilla
 | `guard-switch.txt` | en qué decisión cambia `lsmear-guard` a round-robin, por instancia (`--max-nodes 12000`) |
 | **`ipopt-compo-per-instance.csv`** | **la tabla completa detrás de los agregados: una fila por instancia, una columna por regla con los nodos que necesitó —o por qué no tiene ninguno— y otra con su tiempo**. La escribe `report --out`; se regenera cuando cambian los datos |
 | `ipopt-compo.csv` | crudo, relajación `both` y cota superior `ipoptxn`: nueve bisectores y la estrategia copiada × 298 instancias, 600 s, 15 jobs. Es una población aparte: con Ipopt los conteos de nodos de *todas* las reglas bajan, así que no se compara fila a fila con los archivos de arriba |
+| `guard-switch-ipopt.txt` | lo mismo bajo `--relax both --loup ipoptxn` (`--max-nodes 2000`), medido con Ipopt 3.11.9 |
 | `paper-instances.txt` | las 55 instancias nombradas en las tablas del paper de 2018 |
 
 Los archivos crudos son *append-only*: una corrida relanzada con más tiempo deja
@@ -300,3 +301,40 @@ instancias contra la evaluación exacta: las que cambian lo hacen en la decisió
 10 con los mismos nodos que `lsmear-guard` (`ship-1` 256, `ex8_2_4` 808), y las
 falsas alarmas tardías (`ex6_2_8`, `ex6_2_9`, `ex14_1_7`, `bearing`) dan
 exactamente los nodos de `lsmear`.
+
+### El horizonte bajo compo + ipoptxn (`guard-switch-ipopt.txt`)
+
+H=10 se eligió sobre el barrido xtaylor sin Ipopt; `ipopt-compo.csv` es la
+primera mirada con datos sobre los que no se eligió (mismas 298 instancias,
+otra configuración). Se evalúa igual que antes, exacto sin correrlo: la fila
+`lsmear-guard` donde el guardián cambió en sus primeras 10 decisiones, la de
+`lsmear` si no. Los puntos de cambio se midieron en otra máquina, con Ipopt
+3.11.9 + MUMPS de la distribución (`--max-nodes 2000`).
+
+**¿Se transfieren?** Donde aquí no cambia y allá cierran las dos, la fila del
+guardián tiene los nodos de `lsmear` en 160 de 165; donde aquí cambia en ≤ 10,
+difiere de `lsmear` en 17 de 19. Transfieren en ~97% de los casos.
+
+| 298 instancias | resueltas | PAR2 (media) | vs lsmear (>1,5× y >5 s) |
+|---|---|---|---|
+| `lsmear` | 207 | 375.4 | — |
+| `roundrobin` | 213 | 355.2 | +17 −31 |
+| `lsmear-guard` | 219 | 333.3 | +17 −15 |
+| **`lsmear-guard:10`** | **221** | **326.1** | **+17 −5** |
+
+Cambian 61 instancias con H=10 y 25 más tarde. Las 12 donde el horizonte cambia
+el resultado son todas a favor: las falsas alarmas tardías de siempre (la
+familia `ex6_2_*`, `ex6_1_3`, `ex14_1_7`, `hs108`), con `ex6_2_10` (1200 → 115)
+y `ex6_2_13` (1200 → 579) pasando de timeout a resueltas. Ningún secuestro
+tardío genuino se pierde en este barrido.
+
+Salvedades: las filas `lsmear-guard` de `ipopt-compo.csv` se corrieron antes
+del arreglo que impide que la búsqueda anidada de `LoupFinderIpopt` le sume
+decisiones al guardián, y los puntos de cambio se midieron después; `hs088` y
+otras 3 no tienen punto de cambio (tiempo agotado midiendo) y cuentan como
+`lsmear`. Confirmación directa: correr `--rules lsmear-guard:10` bajo esta
+configuración.
+
+```bash
+python3 python/guard_horizon_ipopt.py results/ipopt-compo.csv results/guard-switch-ipopt.txt
+```
