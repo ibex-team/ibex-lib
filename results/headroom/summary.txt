@@ -1,0 +1,33 @@
+590 nodos informativos en 38 instancias; 155 nodos sin ningún dive terminado (en 25 instancias)
+candidatos por nodo: mediana 10; peor candidato / mejor: mediana 2.00
+
+regla             geo inst  geo nodo   =mejor     >=2x    >=10x
+lsmear-guard:10       1.58      1.47      37%      25%       3%
+lsmear                1.54      1.42      40%      21%       2%
+smearsumrel           1.60      1.46      36%      24%       2%
+roundrobin            1.67      1.52      34%      27%       2%
+
+mayor margen por instancia (geo del regret de lsmear-guard:10):
+             n  guard  lsmear
+instance                     
+chenery-1    1  35.71   35.71
+ex7_3_4     20   3.36    2.75
+ex8_5_1-1   20   2.66    1.83
+ex7_2_3     20   2.54    2.54
+launch       3   2.34    2.34
+dnieper     10   2.33    2.33
+himmel16    18   2.13    2.13
+ex7_3_4bis  19   2.11    1.76
+eigmaxc     20   2.06    2.06
+ship-1      13   2.03    1.97
+ex5_4_4      8   1.60    1.60
+ex8_5_1     20   1.47    1.26
+
+regret de lsmear-guard:10 por profundidad:
+       size  <lambda_0>
+dbin                   
+0-5      75        1.35
+6-15    328        1.47
+16-30   149        1.50
+31-60    27        1.71
+>60      11        1.34

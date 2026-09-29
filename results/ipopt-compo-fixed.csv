@@ -595,3 +595,20 @@ water1-abs.bch,unsolved,lsmear-guard:10,both,ipoptxn,timeout,13268,310.047955000
 water1-abs.bch,unsolved,lsmear,both,ipoptxn,timeout,13210,310.0021300000001,839.9409766340038,343.26673648045175,310.0
 water1.bch,unsolved,lsmear-guard:10,both,ipoptxn,timeout,18600,310.00599500000015,839.9409934894775,482.5590058807023,310.0
 water1.bch,unsolved,lsmear,both,ipoptxn,error: no output from --solve: [33mwarning: [OptimizerConfig] KKT automatically disabled if rigor mode is switched off with eq,0,0.0,inf,-inf,310.0
+3pk-borne.bch,coconutbenchmark-library2,roundrobin,both,ipoptxn,timeout,122896,310.0004920000001,1114.312789028022,-1101043.835884929,310.0
+3pk-borne.bch,coconutbenchmark-library2,ref-ipopt,both,ipoptxn,timeout,86688,309.9947890000001,1114.312788015722,-80243.04592308316,310.0
+3pk-borne.bch,coconutbenchmark-library2,smearsumrel,both,ipoptxn,timeout,87170,310.0036120000001,1114.3127881893636,-115575.73228532921,310.0
+3pk-borne.bch,coconutbenchmark-library2,smearsum,both,ipoptxn,timeout,86688,310.0065900000001,1114.3127881893636,-115683.36661537497,310.0
+3pk.bch,coconutbenchmark-library2,roundrobin,both,ipoptxn,unbounded,62,0.007479000000000013,5.270870301420892e+23,-inf,310.0
+3pk.bch,coconutbenchmark-library2,ref-ipopt,both,ipoptxn,timeout,79390,309.9953200000002,1.7201185696477046,-149129.9534321389,310.0
+3pk.bch,coconutbenchmark-library2,smearsumrel,both,ipoptxn,unbounded,62,0.007799999999999974,5.270870301420892e+23,-inf,310.0
+3pk.bch,coconutbenchmark-library2,smearsum,both,ipoptxn,unbounded,62,0.012379000000000029,5.270870301420892e+23,-inf,310.0
+abel.bch,unsolved,roundrobin,both,ipoptxn,timeout,35372,310.0201510000001,225.1945825741209,-1016299.4979804863,310.0
+abel.bch,unsolved,ref-ipopt,both,ipoptxn,timeout,64282,309.9945620000001,225.1945825741209,-1011994.6152706872,310.0
+abel.bch,unsolved,smearsumrel,both,ipoptxn,timeout,43080,310.0058240000001,225.1945825741209,-1129967.0556723326,310.0
+abel.bch,unsolved,smearsum,both,ipoptxn,timeout,58618,310.00316700000013,225.1945825741209,-830968.3503586767,310.0
+abelbis-1.bch,unsolved,roundrobin,both,ipoptxn,timeout,23840,310.00216300000017,225.1945825741216,-776.5564860199846,310.0
+abelbis-1.bch,unsolved,ref-ipopt,both,ipoptxn,timeout,21032,309.9917250000001,225.1945825741216,-70.67772626111974,310.0
+abelbis-1.bch,unsolved,smearsumrel,both,ipoptxn,timeout,26034,310.0202490000001,225.1945825741216,-129.20034648130718,310.0
+abelbis-1.bch,unsolved,smearsum,both,ipoptxn,timeout,26268,310.02392400000014,225.1945825741216,-288.90578214087964,310.0
+abelbis.bch,unsolved,roundrobin,both,ipoptxn,timeout,17796,310.03400500000015,225.19458257392074,-323953879202.6596,310.0
