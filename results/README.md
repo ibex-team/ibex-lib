@@ -15,7 +15,8 @@ donde se indica, mismo loup finder, misma selección de nodos, misma semilla
 | `bisectors-affine.csv` | crudo, relajación `affine` (16 corridas, barrido abandonado) |
 | `pilot.csv` | piloto de 25 instancias bajo `affine` |
 | `bisectors-guard.csv` | crudo, `xtaylor`, el bisector `lsmear-guard` |
-| **`ipopt-compo.csv`** | **crudo, relajación `both` y cota superior `ipoptxn`**: cinco estrategias × 298 instancias, 600 s, 15 jobs. Es una población aparte: con Ipopt los conteos de nodos de *todas* las reglas bajan, así que no se compara fila a fila con los archivos de arriba |
+| **`ipopt-compo-per-instance.csv`** | **la tabla completa detrás de los agregados: una fila por instancia, una columna por regla con los nodos que necesitó —o por qué no tiene ninguno— y otra con su tiempo**. La escribe `report --out`; se regenera cuando cambian los datos |
+| `ipopt-compo.csv` | crudo, relajación `both` y cota superior `ipoptxn`: cinco estrategias × 298 instancias, 600 s, 15 jobs. Es una población aparte: con Ipopt los conteos de nodos de *todas* las reglas bajan, así que no se compara fila a fila con los archivos de arriba |
 | `paper-instances.txt` | las 55 instancias nombradas en las tablas del paper de 2018 |
 
 Los archivos crudos son *append-only*: una corrida relanzada con más tiempo deja

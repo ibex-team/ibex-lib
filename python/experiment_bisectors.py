@@ -562,14 +562,43 @@ def report(args):
     for i, lo, hi in bad[:15]:
         print("   %-34s no value in [%.10g, %.10g]" % (i, lo, hi))
 
-    if args.per_instance:
-        print("\n%-34s %s" % ("instance", "".join("%12s" % u[:11] for u in rules)))
-        for i in full:
-            cells = []
-            for u in rules:
-                r = by[(i, u)]
-                cells.append("%12s" % (r["nodes"] if r["solved"] else "t/o"))
-            print("%-34s %s" % (i[:34], "".join(cells)))
+    if args.per_instance or args.out:
+        # A run that did not solve says nothing about how many nodes it needed,
+        # so the cell carries why instead. They are not the same failure: a
+        # timeout is about the limit, "kill" is the wall-clock guard firing on a
+        # node that never returns, and the rest are answers -- just not an
+        # enclosure.
+        WHY = {"timeout": "t/o", "killed": "kill", "infeasible": "infeas",
+               "no_feasible_found": "nofeas", "unreached_prec": "prec",
+               "unbounded": "unbnd", "unbounded_obj": "unbnd"}
+        def cell(r):
+            if r["solved"]:
+                return str(r["nodes"])
+            st = r["status"]
+            return WHY.get(st, "err" if st.startswith("error") else st[:6])
+
+        if args.per_instance:
+            print("\n%-34s %s" % ("instance", "".join("%12s" % u[:11] for u in rules)))
+            for i in full:
+                print("%-34s %s"
+                      % (i[:34], "".join("%12s" % cell(by[(i, u)]) for u in rules)))
+
+        if args.out:
+            # every instance, not only those every rule was run on: a missing
+            # cell is empty, which is not the same as a run that failed
+            with open(args.out, "w", newline="") as f:
+                w = csv.writer(f)
+                w.writerow(["instance", "set"]
+                           + [c % u for u in rules for c in ("%s", "%s_time")])
+                for i in instances:
+                    row = [i, sets.get(i, "?")]
+                    for u in rules:
+                        r = by.get((i, u))
+                        row += ["" if r is None else cell(r),
+                                "" if r is None else "%.3f" % float(r["time"])]
+                    w.writerow(row)
+            print("\n-> %s  (%d instances x %d rules: nodos, o por que no)"
+                  % (args.out, len(instances), len(rules)))
 
 
 def status(args):
@@ -878,7 +907,11 @@ def main():
                         "(default: 0.05). Inside the band it is a tie")
     q.add_argument("--tol", type=float, default=1e-6,
                    help="relative slack when checking that the enclosures agree")
-    q.add_argument("--per-instance", action="store_true")
+    q.add_argument("--per-instance", action="store_true",
+                   help="print the table behind the aggregates: one row per "
+                        "instance, the node count each rule needed, or why it "
+                        "has none")
+    q.add_argument("--out", help="write that same table as a csv")
     q.set_defaults(func=report)
 
     args = p.parse_args()
