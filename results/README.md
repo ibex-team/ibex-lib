@@ -338,3 +338,60 @@ configuración.
 ```bash
 python3 python/guard_horizon_ipopt.py results/ipopt-compo.csv results/guard-switch-ipopt.txt
 ```
+
+### Revisión del barrido con Ipopt (`python/review_ipopt_compo.py`)
+
+**Ranking, con `lsmear-guard:10` y descontando respuestas inválidas.** Siete
+respuestas "complete" no son la respuesta al problema:
+* `eigmaxc`, `lsmear-guard` (y por lo tanto `:10`): `loup = uplo = 0` con el
+  óptimo en −10.746. Reproducido aquí; también sin Ipopt y con xtaylor sola, y
+  no con `affine`. No es del guardián: en `all-results.csv` le pasa lo mismo a
+  `smearmax` (xtaylor y both) y a `smearmaxrel` (xtaylor). Es una falta de
+  solidez de Ibex en esa instancia que ciertos órdenes del árbol destapan.
+* `ref-ipopt` en `ex8_2_4` (encierra −1.4e21; el óptimo está en −1.4e9),
+  `test_infinity3`, `test_infinity4`, `ex8_4inf-1` (las demás reglas prueban
+  que no está acotado): es el reescalado de cotas a 1e20, otro problema.
+* `ref-ipopt` en `haldmads`: encierra 0.033 cuando hay un punto factible en
+  1.22e-4. Bajo `affine` sola, round robin termina con una cota inferior por
+  encima de ese punto, y bajo `both` + ipoptxn con `uplo > loup`: la parte
+  `affine` de la relajación no es sólida aquí (como el `infeasible` de arriba).
+
+Contra el consenso xtaylor de `all-results.csv`, de 2547 respuestas
+contrastables solo esas dos primeras están en conflicto.
+
+| 298 instancias | resueltas | válidas | PAR2 válido | coconut | resto |
+|---|---|---|---|---|---|
+| `ref-ipopt-dh` | 223 | 220 | 327.1 | 55 | 165 |
+| **`lsmear-guard:10`** | 221 | **220** | 330.1 | **56** | 164 |
+| `ref-ipopt` | 224 | 219 | 330.9 | 54 | 165 |
+| `lsmear-guard` | 219 | 218 | 337.3 | 56 | 162 |
+| `roundrobin` | 213 | 213 | 355.2 | 56 | 157 |
+| `lsmear` | 207 | 207 | 375.4 | 54 | 153 |
+
+Con eso, **`lsmear-guard:10` empata con la estrategia copiada** (PAR2
+`ref-ipopt` − `guard:10` sin descontar: −14, IC95 [−47, 16]) y le gana a
+`lsmear` por 49 s de PAR2 medio (IC95 [21, 82]) y a `roundrobin` por 29 (IC95
+[10, 51]). La brecha `lsmear` → oráculo de los nueve bisectores que cierra:
+69% (coconut 43%, resto 81%).
+
+**Son complementarios.** `ref-ipopt` cierra 9 que `guard:10` no (6 válidas:
+`ex8_4_5`, `hs093`, `hs110`, `polak1`, `polak2`, más `haldmads` inválida y las
+de cotas infinitas); `guard:10` cierra 6 que `ref-ipopt` no, todas coconut
+(`brownal`, `concon`, `dixchlng`, `eigencco`, `mconcon`, `odfits`), donde
+`ref-ipopt` necesita 30–100× más nodos. El portafolio de los dos cerraría 226
+válidas. En las 215 que cierran ambos, el tiempo es parejo (geo 1.06).
+
+**`polak1` y `polak2` son pérdidas reales del guardián** que el horizonte no
+arregla: cambia en la decisión 10 y, como round robin, no encuentra un punto
+factible en 20–27 M de nodos, cuando `lsmear` cierra en ~1 s. La repetición
+padre-hijo no distingue aquí un secuestro dañino.
+
+**Nadie cierra 67**; en 12 ninguna regla ni `ref-ipopt` encuentra un punto
+factible (`discs`, `ex5_3_3`, `ex7_3_6`, `hs090`, `hs091`, `hs107`, `hs118`,
+`launch__coconut`, `minlphi`, `minlphi1`, `rk23`, `wall`). Ipopt resolvió la
+factibilidad de `robot`, `ship` y `hs089`, que sin él no tenían incumbente;
+`rk23`, `hs091` y `minlphi` siguen sin él.
+
+**Lo que aporta Ipopt** (contra `both` sin Ipopt, sobre las que ambas cierran):
+0.28–0.30 en nodos, como arriba; en tiempo este script da 0.46–0.49 con un piso
+de 0.01 s, no 0.36 — depende de cómo se traten las corridas muy cortas.
