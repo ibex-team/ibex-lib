@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <limits>
 #include "ibex_LoupFinderIpopt.h"
+#include "ibex_BscHijackGuard.h"
 
 
 
@@ -538,7 +539,21 @@ namespace ibex {
       opt.set_loup(optimizer->get_loup());
       opt.timeout=1;
       //      cout << " boxsol " << boxsol << endl;
-      opt.optimize(boxsol);
+      // The nested search shares the enclosing one's bisector. A stateless
+      // bisector does not mind; lsmear-guard would count the nested decisions
+      // in its window and horizon, and since this search is cut by a CPU
+      // timeout, how many it adds depends on the machine. Its state belongs
+      // to the enclosing search: put it back.
+      BscHijackGuard* guard = dynamic_cast<BscHijackGuard*>(&optimizer->bsc);
+      BscHijackGuard::State guard_state;
+      if (guard) guard_state = guard->get_state();
+      try {
+        opt.optimize(boxsol);
+      } catch (...) {
+        if (guard) guard->set_state(guard_state);
+        throw;
+      }
+      if (guard) guard->set_state(guard_state);
       recursive_call=true;
       correction_nodes+=opt.get_nb_cells();
       correction_time+=opt.get_time();
