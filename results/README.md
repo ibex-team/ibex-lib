@@ -344,17 +344,24 @@ python3 python/guard_horizon_ipopt.py results/ipopt-compo.csv results/guard-swit
 **Ranking, con `lsmear-guard:10` y descontando respuestas inválidas.** Siete
 respuestas "complete" no son la respuesta al problema:
 * `eigmaxc`, `lsmear-guard` (y por lo tanto `:10`): `loup = uplo = 0` con el
-  óptimo en −10.746. Reproducido aquí; también sin Ipopt y con xtaylor sola, y
-  no con `affine`. No es del guardián: en `all-results.csv` le pasa lo mismo a
-  `smearmax` (xtaylor y both) y a `smearmaxrel` (xtaylor). Es una falta de
-  solidez de Ibex en esa instancia que ciertos órdenes del árbol destapan.
+  óptimo en −10.746; en `all-results.csv` le pasa lo mismo a `smearmax`
+  (xtaylor y both) y a `smearmaxrel` (xtaylor). **Eran dos bugs del LP
+  certificado, ya arreglados** (commit "lp: two ways the certified LP bound
+  discarded feasible boxes"): SoPlex devuelve su infinito como ±1e100 y
+  Neumaier-Shcherbina lo tomaba como finito, y con coeficientes ~1e287 los
+  vectores duales y de Farkas traen componentes infinitas que vaciaban la
+  cota o "probaban" infactibilidad. Los dos necesitan cotas de variable
+  por encima de 1e100 (x1 es no acotada). Con el arreglo las nueve reglas
+  cierran `eigmaxc` en −10.746.
 * `ref-ipopt` en `ex8_2_4` (encierra −1.4e21; el óptimo está en −1.4e9),
   `test_infinity3`, `test_infinity4`, `ex8_4inf-1` (las demás reglas prueban
   que no está acotado): es el reescalado de cotas a 1e20, otro problema.
-* `ref-ipopt` en `haldmads`: encierra 0.033 cuando hay un punto factible en
-  1.22e-4. Bajo `affine` sola, round robin termina con una cota inferior por
-  encima de ese punto, y bajo `both` + ipoptxn con `uplo > loup`: la parte
-  `affine` de la relajación no es sólida aquí (como el `infeasible` de arriba).
+* `ref-ipopt` en `haldmads`: encierra 0.033 cuando el óptimo conocido
+  (Hald–Madsen) es 1.2238e-4, el `loup` que Ipopt encuentra. Con ese incumbente,
+  round robin termina con `uplo = 6.8e-4` bajo `both` y `3.1e-3` bajo
+  `affine`: la parte `affine` no es sólida aquí. **Sin arreglar**: los dos
+  arreglos del LP no lo cambian, así que es otro mecanismo (linealizador
+  afín), y solo aparece con un buen incumbente.
 
 Contra el consenso xtaylor de `all-results.csv`, de 2547 respuestas
 contrastables solo esas dos primeras están en conflicto.
@@ -380,6 +387,25 @@ de cotas infinitas); `guard:10` cierra 6 que `ref-ipopt` no, todas coconut
 (`brownal`, `concon`, `dixchlng`, `eigencco`, `mconcon`, `odfits`), donde
 `ref-ipopt` necesita 30–100× más nodos. El portafolio de los dos cerraría 226
 válidas. En las 215 que cierran ambos, el tiempo es parejo (geo 1.06).
+
+**Un portafolio secuencial casi alcanza al oráculo de los dos.** Con el mismo
+presupuesto de 600 s, correr primero `ref-ipopt` unos segundos y, si no cerró,
+`lsmear-guard:10` con el resto (válidas, PAR2 medio):
+
+| estrategia | resueltas | PAR2 |
+|---|---|---|
+| `guard:10` solo | 220 | 330.1 |
+| `ref-ipopt` solo | 219 | 330.9 |
+| reparto 50/50 (300 s cada una) | 222 | 320.2 |
+| `guard:10` 10 s, luego `ref-ipopt` | 223 | 316.1 |
+| **`ref-ipopt` 10 s, luego `guard:10`** | **225** | **308.7** |
+| `ref-ipopt` 30–120 s, luego `guard:10` | 224 | 312–313 |
+| oráculo de los dos | 226 | 303.3 |
+
+El corte es post hoc, pero la meseta es ancha (224–225 entre 10 y 120 s). El
+orden importa: las victorias de `ref-ipopt` que `guard:10` no tiene son rápidas
+(`ex8_4_5` 0.6 s, `hs110` 4 s, `polak1` 0.0 s, `polak2` 2.4 s), las de
+`guard:10` no.
 
 **`polak1` y `polak2` son pérdidas reales del guardián** que el horizonte no
 arregla: cambia en la decisión 10 y, como round robin, no encuentra un punto

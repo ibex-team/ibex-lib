@@ -84,3 +84,26 @@ none=~S.drop(columns=['guard:10']).any(axis=1)
 noinc=none & ~fin.any(axis=1)
 print("\nnadie cierra: %d; de esas sin ningún punto factible en ninguna regla: %d"%(none.sum(),noinc.sum()))
 print(sorted(noinc[noinc].index))
+print("\n== 5. portafolio guard:10 + ref-ipopt, con los mismos 600 s ==")
+
+T=d.pivot(index='instance',columns='rule',values='time')
+tg=pd.Series(np.where(h.reindex(T.index).fillna(False),T['lsmear-guard'],T.lsmear),index=T.index)
+sg=S['guard:10']; sr=S['ref-ipopt'].copy()
+for i in ['ex8_2_4.bch','haldmads.bch','test_infinity3.bch','test_infinity4.bch','ex8_4inf-1.bch']: sr[i]=False
+sg['eigmaxc.bch']=False
+tr=T['ref-ipopt']
+def port(name, solved, cost):
+    print("%-44s resueltas %d  PAR2 %.1f"%(name, solved.sum(), np.where(solved,cost,2*L).mean()))
+port("guard:10 solo (600 s)", sg, tg)
+port("ref-ipopt solo (600 s)", sr, tr)
+# time slicing: both run concurrently on one core, each gets half the CPU
+s=(sg&(tg<=300))|(sr&(tr<=300)); c=2*np.minimum(np.where(sg,tg,np.inf),np.where(sr,tr,np.inf))
+port("reparto 50/50 (cada una 300 s de CPU)", s, pd.Series(c,index=T.index))
+for t0 in (10,30,60,120):
+    sa=sg&(tg<=t0); sb=sr&(tr<=L-t0)
+    c=np.where(sa,tg,t0+np.where(sb,tr,np.inf))
+    port("secuencial: guard:10 %3d s, luego ref-ipopt"%t0, sa|sb, pd.Series(c,index=T.index))
+    sa=sr&(tr<=t0); sb=sg&(tg<=L-t0)
+    c=np.where(sa,tr,t0+np.where(sb,tg,np.inf))
+    port("secuencial: ref-ipopt %3d s, luego guard:10"%t0, sa|sb, pd.Series(c,index=T.index))
+port("oráculo de los dos (cota superior)", sg|sr, pd.Series(np.minimum(np.where(sg,tg,np.inf),np.where(sr,tr,np.inf)),index=T.index))
