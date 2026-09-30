@@ -1,0 +1,15 @@
+[lsmear ] continuación lsmear           54 corridas, cierra 45; decisiones sin ningún dive terminado: 3% (mediana por instancia)
+   nodos oráculo / lsmear sobre 45 que ambos cierran: geo 0.67, mediana 0.77, p10 0.50, p90 1.01; peor en 3
+   nodos oráculo / lsmear-guard:10 sobre 45: geo 0.57
+   no cierra (9): dixchlng.bch (timeout, base complete), eigencco.bch (timeout, base complete), eigmaxc.bch (timeout, base complete), ex8_2_4.bch (timeout, base timeout), ex8_5_6.bch (timeout, base timeout), mconcon.bch (timeout, base timeout), schwefel5-abs.bch (timeout, base timeout), schwefel5.bch (timeout, base timeout), ship-1.bch (timeout, base timeout)
+
+[guard10] continuación lsmear-guard:10  54 corridas, cierra 48; decisiones sin ningún dive terminado: 2% (mediana por instancia)
+   nodos oráculo / lsmear-guard:10 sobre 48 que ambos cierran: geo 0.55, mediana 0.70, p10 0.20, p90 0.94; peor en 2
+   nodos oráculo / lsmear sobre 45: geo 0.63
+   no cierra (6): dixchlng.bch (timeout, base complete), ex8_2_4.bch (timeout, base complete), eigencco.bch (timeout, base complete), mconcon.bch (timeout, base complete), ship-1.bch (timeout, base complete), hs088.bch (timeout, base complete)
+
+[lazy50 ] continuación lsmear           54 corridas, cierra 47; decisiones sin ningún dive terminado: 0% (mediana por instancia)
+   nodos oráculo / lsmear sobre 45 que ambos cierran: geo 0.72, mediana 0.81, p10 0.48, p90 1.42; peor en 9
+   nodos oráculo / lsmear-guard:10 sobre 47: geo 0.62
+   no cierra (7): dixchlng.bch (killed, base complete), eigencco.bch (timeout, base complete), eigmaxc.bch (killed, base complete), ex8_2_4.bch (timeout, base timeout), schwefel5.bch (timeout, base timeout), schwefel5-abs.bch (timeout, base timeout), mconcon.bch (timeout, base timeout)
+

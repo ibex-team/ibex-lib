@@ -47,3 +47,41 @@ dives, así que no se sabe.
 Tres instancias (`dixchlng`, `eigencco`, `eigmaxc`) no cierran con ningún
 oráculo por costo: 40–400 nodos en 900 s, cada nodo con decenas de dives con
 Ipopt. No es tamaño de árbol.
+
+**Con continuación `lsmear-guard:10` se juntan las dos ventajas.** Cierra 48 de
+54. Sobre las 48 que cierran él y `lsmear-guard:10`: árboles de **0.55×** en
+media geométrica (mediana 0.70, p10 0.20), peor en 2 (`ex6_1_1` 2758 contra
+2588, `m4wd` 170 contra 84). Frente a `lsmear`, 0.63.
+
+En las secuestradas ya no hereda el secuestro:
+
+| instancia | `lsmear` | `lsmear-guard:10` | oráculo + LSmear | `lazy50` | **oráculo + guard:10** |
+|---|---|---|---|---|---|
+| schwefel5 | t/o | 956 | t/o | t/o | **590** |
+| schwefel5-abs | t/o | 882 | t/o | t/o | **838** |
+| ex8_5_6 | t/o | 2144 | t/o | 1140 | **1500** |
+| ship-1 | t/o | 490 | t/o | 544 | t/o (334 nodos en 500 s) |
+| ex8_2_4 | t/o | 424 | t/o | t/o | t/o (28 nodos en 900 s: costo) |
+| mconcon | t/o | 116 | t/o | t/o | t/o (826 nodos sin incumbente en 500 s) |
+
+`ship-1`, `mconcon` y `hs088` corrieron con 500 s en vez de 900 (el límite de
+las tareas en este entorno). `mconcon` es un fracaso genuino: el oráculo hace
+7× los nodos de `lsmear-guard:10` sin encontrar incumbente. En el oráculo, el
+guardián solo ve las decisiones que el oráculo le deja (cuando ningún dive
+cierra), así que su detección del secuestro en la búsqueda principal no opera;
+dentro de cada dive sí.
+
+## Conclusión para el paso 2
+
+* **El objetivo a imitar es "la mejor variable, suponiendo que después decide
+  `lsmear-guard:10`"**, no "que después decide LSmear". Con LSmear como
+  continuación, la etiqueta falla en las secuestradas; con el guardián, no.
+* **Imitado perfectamente, ese objetivo da árboles de ~0.55× los de
+  `lsmear-guard:10`** (mediana 0.70) en estas instancias. Es el techo de un
+  bisector por nodo entrenado con estas etiquetas, y es un margen real.
+* **El oráculo mismo no es usable**: cuesta decenas de dives por nodo (40× el
+  tiempo o más). Hace falta un modelo que lo aprenda, entrenado con dives que
+  continúen con `lsmear-guard:10`, y evaluado siempre de punta a punta.
+* Salvedades: instancias chicas (≤ 3000 nodos con `lsmear`), 54 elegidas sobre
+  datos ya mirados, presupuesto de dive 1000; en instancias grandes el oráculo
+  cae más seguido en la regla de continuación (aquí 1–3% de las decisiones).
