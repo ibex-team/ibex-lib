@@ -72,3 +72,6 @@ ship-1 breaks because the guard never sees the hijack: its repeat signal is
 was SB's. Letting the guard watch the SB-decided nodes too (now done when
 --oracle-max-depth is set) does not fix it (ship-1, D=5: 29358 nodes, no
 switch).
+With the guard watching (same instances): ship-1 29358 / timeout, dnieper
+timeout / 28, ex6_2_8 13740 / 13754 (was 68404 at D=10) -- the guard switches
+on none of them.
