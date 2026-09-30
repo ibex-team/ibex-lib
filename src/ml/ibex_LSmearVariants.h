@@ -36,28 +36,54 @@ public:
 };
 
 /**
+ * \brief The variables bisected by the last ancestors of a cell (LSmearTabu).
+ */
+class BxpTabu : public Bxp {
+public:
+	explicit BxpTabu(long id) : Bxp(id), pushed(-1) { }
+
+	virtual Bxp* copy(const IntervalVector&, const BoxProperties&) const override {
+		BxpTabu* p = new BxpTabu(id); p->hist = hist; p->pushed = pushed; return p;
+	}
+
+	virtual void update(const BoxEvent&, const BoxProperties&) override { }
+
+	std::vector<int> hist;   //!< oldest first, at most the tenure
+	int pushed;              //!< depth of the cell whose bisected_var is last in hist
+};
+
+/**
  * \ingroup ml
  *
- * \brief LSmear that never picks the variable the cell was produced by.
+ * \brief LSmear with a tabu list along the branch.
  *
- * The best LSmear candidate other than Cell::bisected_var: the fallback of
- * lsmear-guard-next, which on a hijack keeps LSmear's ranking and only drops
- * the variable that hijacks it. When the choice comes from one of LSmear's
- * fallbacks instead (an infinite derivative sends it to largest first, which
- * is what hijacks ship-1), the widest other variable relative to its
- * precision.
+ * A variable bisected by one of the last \a tenure ancestors of the cell is
+ * tabu: the best non-tabu LSmear candidate. When the choice comes from one of
+ * LSmear's fallbacks instead (an infinite derivative sends it to largest
+ * first, which is what hijacks ship-1) and is tabu, the widest non-tabu
+ * variable relative to its precision (widths when it is 0). If every
+ * variable is tabu, the list is ignored. tenure 1 (lsmear-avoid) never
+ * bisects the parent's variable again; it is the fallback of
+ * lsmear-guard-next.
+ *
+ * The history is a box property (BxpTabu); a cell made without
+ * add_property only knows its parent's variable.
  */
-class LSmearAvoidParent : public LSmear {
+class LSmearTabu : public LSmear {
 public:
-	LSmearAvoidParent(ExtendedSystem& sys, const Vector& prec, OptimLargestFirst& lf) :
-		LSmear(sys, prec, lf), avoid(-1) { }
+	LSmearTabu(ExtendedSystem& sys, const Vector& prec, OptimLargestFirst& lf, int tenure);
 
 	virtual BisectionPoint choose_var(const Cell& cell) override;
 
 	virtual int pick(const std::vector<double>& score) const override;
 
+	virtual void add_property(const IntervalVector& init_box, BoxProperties& map) override;
+
+	const int tenure;
+	const long bxp_id;
+
 protected:
-	mutable int avoid;
+	mutable const std::vector<char>* tabu;
 };
 
 /**

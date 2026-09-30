@@ -55,7 +55,8 @@ public:
 		BSC_ROUNDROBIN,    //!< RoundRobin: the naive baseline
 		BSC_LSMEAR_GUARD,  //!< LSmear until hijacked, then RoundRobin (BscHijackGuard)
 		BSC_LSMEAR_GUARD_NEXT, //!< LSmear until hijacked, then LSmear without the parent's variable
-		BSC_LSMEAR_AVOID,  //!< LSmear without the parent's variable (LSmearAvoidParent)
+		BSC_LSMEAR_AVOID,  //!< LSmear without the parent's variable (LSmearTabu, tenure 1)
+		BSC_LSMEAR_TABU,   //!< LSmear with a tabu list of the last tabu_tenure ancestors' variables
 		BSC_LSMEAR_GRASP,  //!< random among the LSmear candidates >= alpha*max (LSmearGrasp)
 		BSC_LSMEAR_LFFIX,  //!< LSmear whose largest-first fallback compares widths (OptimLargestFirstFixed)
 		BSC_LSMEAR_GUARD_LFFIX //!< lsmear-guard with that LSmear as primary
@@ -188,6 +189,8 @@ public:
 	static double grasp_alpha;
 	/** \brief Seed of lsmear-grasp's own generator. */
 	static unsigned int grasp_seed;
+	/** \brief Tenure of lsmear-tabu. */
+	static int tabu_tenure;
 
 protected:
 	Ctc* ctc_cache;

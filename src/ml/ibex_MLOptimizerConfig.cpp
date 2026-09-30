@@ -51,6 +51,7 @@ const Entry TABLE[] = {
 	{ "lsmear-guard",  MLOptimizerConfig::BSC_LSMEAR_GUARD},
 	{ "lsmear-guard-next", MLOptimizerConfig::BSC_LSMEAR_GUARD_NEXT},
 	{ "lsmear-avoid",  MLOptimizerConfig::BSC_LSMEAR_AVOID},
+	{ "lsmear-tabu",   MLOptimizerConfig::BSC_LSMEAR_TABU},
 	{ "lsmear-grasp",  MLOptimizerConfig::BSC_LSMEAR_GRASP},
 	{ "lsmear-lffix",  MLOptimizerConfig::BSC_LSMEAR_LFFIX},
 	{ "lsmear-guard-lffix", MLOptimizerConfig::BSC_LSMEAR_GUARD_LFFIX},
@@ -269,6 +270,7 @@ string MLOptimizerConfig::bisector_names() {
 
 double MLOptimizerConfig::grasp_alpha = 0.8;
 unsigned int MLOptimizerConfig::grasp_seed = 1;
+int MLOptimizerConfig::tabu_tenure = 2;
 
 Bsc& MLOptimizerConfig::get_bsc() {
 
@@ -334,11 +336,14 @@ Bsc& MLOptimizerConfig::get_bsc() {
 				bisect_ratio==default_bisect_ratio ?
 						DefaultOptimizerConfig::get_bsc() :
 						rec(new LSmear(ext_sys, eps_x_extended, lf)),
-				rec(new LSmearAvoidParent(ext_sys, eps_x_extended, lf)),
+				rec(new LSmearTabu(ext_sys, eps_x_extended, lf, 1)),
 				eps_x_extended));
 		break;
 	case BSC_LSMEAR_AVOID:
-		bsc_cache = &rec(new LSmearAvoidParent(ext_sys, eps_x_extended, lf));
+		bsc_cache = &rec(new LSmearTabu(ext_sys, eps_x_extended, lf, 1));
+		break;
+	case BSC_LSMEAR_TABU:
+		bsc_cache = &rec(new LSmearTabu(ext_sys, eps_x_extended, lf, tabu_tenure));
 		break;
 	case BSC_LSMEAR_GRASP:
 		bsc_cache = &rec(new LSmearGrasp(ext_sys, eps_x_extended, lf, grasp_alpha, grasp_seed));
