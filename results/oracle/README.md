@@ -102,7 +102,7 @@ dentro de cada dive sí.
     ex8_5_6    1188           1852    1500
     ship-1     timeout (270)  680     timeout
 
-Geometric mean over the 9 it closes: 0.59 (0.66 without dnieper). The
+Geometric mean over the 9 it closes: 0.55 (0.71 without dnieper). The
 headroom survives the fix; the oracle now closes mconcon and ex6_2_8. ship-1
 is out of its time budget (270 nodes, the dives are expensive there), not a
 hijack.
