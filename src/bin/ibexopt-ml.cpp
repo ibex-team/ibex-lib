@@ -273,6 +273,7 @@ int main(int argc, char** argv) {
 
 	// --- the learned rule ---
 	args::ValueFlag<string> model_file(parser, "filename", "Branch with this model instead of the bisector (see MLModel for the format).", {"model"});
+	args::ValueFlag<double> grasp_alpha(parser, "float", "With --bisector lsmear-grasp: choose among the candidates >= alpha * the best LSmear impact. Default: 0.8.", {"grasp-alpha"});
 	args::ValueFlag<long> guard_horizon(parser, "int", "With --bisector lsmear-guard: only switch to round-robin within the first N decisions. Default: 0 (no horizon).", {"guard-horizon"});
 	args::ValueFlag<string> bisector_arg(parser, "name", "Bisector to use. One of: "
 			+ MLOptimizerConfig::bisector_names() + ". Default: lsmear (what ibexopt uses).", {"bisector"});
@@ -379,6 +380,9 @@ int main(int argc, char** argv) {
 			delete sys;
 			return 1;
 		}
+
+		if (grasp_alpha) MLOptimizerConfig::grasp_alpha = grasp_alpha.Get();
+		MLOptimizerConfig::grasp_seed = (unsigned int) seed;
 
 		server = new MLNodeServer(*sys,
 				rel_eps_f ? rel_eps_f.Get() : OptimizerConfig::default_rel_eps_f,

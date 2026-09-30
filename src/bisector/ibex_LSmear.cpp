@@ -134,8 +134,8 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 
 
 	if (stat == LPSolver::Status::Optimal) {
-		double max_Lmagn = 0.0;
 		int k=0;
+		std::vector<double> score(sys.nb_var, -1.0);  // -1: not a candidate
 
 		for (int j=0; j<sys.nb_var; j++) {
 			Interval lsmear=Interval(0.0);
@@ -151,12 +151,11 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 
 			if (lsmear.mag() > 1e-10  && (j!=goal_var() || mylinearsolver->minimum().mid() > box[goal_var()].lb() )) {
 				k++;
-				if (lsmear.mag() > max_Lmagn) {
-					max_Lmagn = lsmear.mag();
-					lvar = j;
-				}
+				score[j] = lsmear.mag();
 			}
 		}
+
+		lvar = pick(score);
 
 		if (k==1 && lvar==goal_var()) { lvar=-1; }
 	}
@@ -165,6 +164,14 @@ int LSmear::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
 		lvar=SmearSumRelative::var_to_bisect(J, box);
 	}
 	//	std::cout << "lsmear " << lvar << std::endl;
+	return lvar;
+}
+
+int LSmear::pick(const std::vector<double>& score) const {
+	double max_Lmagn = 0.0;
+	int lvar = -1;
+	for (size_t j=0; j<score.size(); j++)
+		if (score[j] > max_Lmagn) { max_Lmagn = score[j]; lvar = (int) j; }
 	return lvar;
 }
 

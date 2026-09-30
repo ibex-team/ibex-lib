@@ -14,6 +14,8 @@
 #include "ibex_OptimLargestFirst.h"
 #include "ibex_LPSolver.h"
 #include "ibex_ExtendedSystem.h"
+
+#include <vector>
 namespace ibex {
 
 typedef enum{ LSMEAR=0, LSMEAR_MG } lsmear_mode;
@@ -79,6 +81,15 @@ public :
 	 * \param x 	- the current box
 	 * \param dual 	- the dual solution that will be returned
 	 */
+	/**
+	 * \brief Choose among the candidates.
+	 *
+	 * \a score[j] is the LSmear impact of variable j, or -1 if j is not a
+	 * candidate. Returns -1 for none (then SmearSumRelative decides). The
+	 * default is the candidate of largest impact (the first one on ties).
+	 */
+	virtual int pick(const std::vector<double>& score) const;
+
 	LPSolver::Status getdual(IntervalMatrix& J,const IntervalVector& x, Vector& dual) const;
 
 	/**

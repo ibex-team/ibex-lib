@@ -53,7 +53,12 @@ public:
 		BSC_SMEARMAXREL,   //!< SmearMaxRelative
 		BSC_LARGESTFIRST,  //!< OptimLargestFirst: widest domain, objective aware
 		BSC_ROUNDROBIN,    //!< RoundRobin: the naive baseline
-		BSC_LSMEAR_GUARD   //!< LSmear until hijacked, then RoundRobin (BscHijackGuard)
+		BSC_LSMEAR_GUARD,  //!< LSmear until hijacked, then RoundRobin (BscHijackGuard)
+		BSC_LSMEAR_GUARD_NEXT, //!< LSmear until hijacked, then LSmear without the parent's variable
+		BSC_LSMEAR_AVOID,  //!< LSmear without the parent's variable (LSmearAvoidParent)
+		BSC_LSMEAR_GRASP,  //!< random among the LSmear candidates >= alpha*max (LSmearGrasp)
+		BSC_LSMEAR_LFFIX,  //!< LSmear whose largest-first fallback compares widths (OptimLargestFirstFixed)
+		BSC_LSMEAR_GUARD_LFFIX //!< lsmear-guard with that LSmear as primary
 	} Bisector;
 
 	/**
@@ -177,6 +182,14 @@ protected:
 	int ipopt_frequency;
 	bool ipopt_quadratic;
 	Bsc* bsc_cache;
+
+public:
+	/** \brief alpha of lsmear-grasp (set before the bisector is built). */
+	static double grasp_alpha;
+	/** \brief Seed of lsmear-grasp's own generator. */
+	static unsigned int grasp_seed;
+
+protected:
 	Ctc* ctc_cache;
 	LoupFinder* loup_cache;
 	double bisect_ratio;

@@ -25,6 +25,7 @@
 #endif
 #include "ibex_OptimLargestFirst.h"
 #include "ibex_RoundRobin.h"
+#include "ibex_LSmearVariants.h"
 #include "ibex_SmearFunction.h"
 
 #include <sstream>
@@ -48,6 +49,11 @@ const Entry TABLE[] = {
 	{ "largestfirst",  MLOptimizerConfig::BSC_LARGESTFIRST},
 	{ "roundrobin",    MLOptimizerConfig::BSC_ROUNDROBIN  },
 	{ "lsmear-guard",  MLOptimizerConfig::BSC_LSMEAR_GUARD},
+	{ "lsmear-guard-next", MLOptimizerConfig::BSC_LSMEAR_GUARD_NEXT},
+	{ "lsmear-avoid",  MLOptimizerConfig::BSC_LSMEAR_AVOID},
+	{ "lsmear-grasp",  MLOptimizerConfig::BSC_LSMEAR_GRASP},
+	{ "lsmear-lffix",  MLOptimizerConfig::BSC_LSMEAR_LFFIX},
+	{ "lsmear-guard-lffix", MLOptimizerConfig::BSC_LSMEAR_GUARD_LFFIX},
 };
 
 const int NB_ENTRIES = sizeof(TABLE)/sizeof(TABLE[0]);
@@ -261,6 +267,9 @@ string MLOptimizerConfig::bisector_names() {
 	return o.str();
 }
 
+double MLOptimizerConfig::grasp_alpha = 0.8;
+unsigned int MLOptimizerConfig::grasp_seed = 1;
+
 Bsc& MLOptimizerConfig::get_bsc() {
 
 	if (bsc_cache!=NULL) return *bsc_cache;
@@ -320,6 +329,30 @@ Bsc& MLOptimizerConfig::get_bsc() {
 				rec(new RoundRobin(eps_x_extended, bisect_ratio)),
 				eps_x_extended));
 		break;
+	case BSC_LSMEAR_GUARD_NEXT:
+		bsc_cache = &rec(new BscHijackGuard(
+				bisect_ratio==default_bisect_ratio ?
+						DefaultOptimizerConfig::get_bsc() :
+						rec(new LSmear(ext_sys, eps_x_extended, lf)),
+				rec(new LSmearAvoidParent(ext_sys, eps_x_extended, lf)),
+				eps_x_extended));
+		break;
+	case BSC_LSMEAR_AVOID:
+		bsc_cache = &rec(new LSmearAvoidParent(ext_sys, eps_x_extended, lf));
+		break;
+	case BSC_LSMEAR_GRASP:
+		bsc_cache = &rec(new LSmearGrasp(ext_sys, eps_x_extended, lf, grasp_alpha, grasp_seed));
+		break;
+	case BSC_LSMEAR_LFFIX:
+	case BSC_LSMEAR_GUARD_LFFIX: {
+		OptimLargestFirst& lf2 = rec(new OptimLargestFirstFixed(ext_sys.goal_var(), true,
+				eps_x_extended, bisect_ratio));
+		LSmear& ls = rec(new LSmear(ext_sys, eps_x_extended, lf2));
+		if (bisector==BSC_LSMEAR_LFFIX) bsc_cache = &ls;
+		else bsc_cache = &rec(new BscHijackGuard(ls,
+				rec(new RoundRobin(eps_x_extended, bisect_ratio)), eps_x_extended));
+		break;
+	}
 	case BSC_LARGESTFIRST:
 	default:
 		bsc_cache = &lf;
