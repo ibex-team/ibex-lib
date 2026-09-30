@@ -85,3 +85,24 @@ dentro de cada dive sí.
 * Salvedades: instancias chicas (≤ 3000 nodos con `lsmear`), 54 elegidas sobre
   datos ya mirados, presupuesto de dive 1000; en instancias grandes el oráculo
   cae más seguido en la regla de continuación (aquí 1–3% de las decisiones).
+
+## Continuation lsmear-lffix (arm `lffix`, 10 instances, 300 s)
+
+`oracle-lffix-cloud.jsonl`. Nodes, oracle vs lsmear-lffix alone:
+
+    instance   oracle-lffix   lffix   (old oracle, guard10)
+    ex6_2_8    12568          13672   -
+    schwefel5  488            698     590
+    mconcon    18             18      timeout
+    avgasb     32             54      32
+    dipigri    110            212     38
+    avgasa     152            188     144
+    dnieper    30             434     18
+    dualc2     92             146     92
+    ex8_5_6    1188           1852    1500
+    ship-1     timeout (270)  680     timeout
+
+Geometric mean over the 9 it closes: 0.59 (0.66 without dnieper). The
+headroom survives the fix; the oracle now closes mconcon and ex6_2_8. ship-1
+is out of its time budget (270 nodes, the dives are expensive there), not a
+hijack.
