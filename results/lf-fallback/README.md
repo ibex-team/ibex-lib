@@ -65,3 +65,26 @@ guard:10 (with / without mconcon, where everything but guard:10 takes 18-20):
 A longer tenure is worse: forbidding more than the parent's variable
 overrides LSmear where it was right (ex6_2_8, which never takes the
 fallback, 2.8x-4.5x with k=2,3).
+
+## Tabu on capture (`lsmear-tabu --tabu-tenure T`)
+
+The rule above is now `lsmear-recent`. `lsmear-tabu` makes a variable tabu
+only when it captures LSmear (LSmear chooses the parent's variable again),
+for T levels along the branch; T=1 is lsmear-avoid. `tabu-capture-10.txt`,
+nodes (H: Ipopt hung inside one call, past the 120 s limit):
+
+    instance   guard:10  lffix  T=1    T=2    T=3    T=5    T=10
+    ship-1     486       680    834    1850   1994   1412   910
+    dnieper    434       434    422    634    314    606    T
+    ex6_2_8    13672     13672  15140  35792  75686  H      23534
+    schwefel5  956       698    754    618    684    H      612
+    mconcon    116       18     18     20     20     20     20
+    avgasb     54        54     54     54     54     54     54
+    dipigri    212       212    200    200    200    214    228
+    avgasa     188       188    182    182    182    182    182
+    dualc2     146       146    140    148    132    146    128
+    ex8_5_6    2144      1852   1272   1936   1614   2202   1738
+
+No tenure beats T=1: keeping a captured variable out after the capture point
+also keeps it out where LSmear is right to come back to it (ex6_2_8 has
+captures and needs the variable again: 2.6x-5.5x).

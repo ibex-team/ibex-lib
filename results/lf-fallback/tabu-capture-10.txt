@@ -1,0 +1,12 @@
+ship-1 | T=2 comp 1850 2.3s | T=3 comp 1994 2.6s | T=5 comp 1412 2.0s | T=10 comp 910 1.2s |
+dnieper | T=2 comp 634 7.1s | T=3 comp 314 4.2s | T=5 comp 606 6.8s | T=10 time 11014 120.0s |
+ex6_2_8 | T=2 comp 35792 14.7s | T=3 comp 75686 30.3s | T=5  | T=10 comp 23534 9.5s |
+schwefel5 | T=2 comp 618 0.4s | T=3 comp 684 0.4s | T=5  | T=10 comp 612 0.4s |
+mconcon | T=2 comp 20 0.1s | T=3 comp 20 0.1s | T=5 comp 20 0.1s | T=10 comp 20 0.1s |
+avgasb | T=2 comp 54 0.1s | T=3 comp 54 0.1s | T=5 comp 54 0.1s | T=10 comp 54 0.1s |
+dipigri | T=2 comp 200 0.3s | T=3 comp 200 0.3s | T=5 comp 214 0.3s | T=10 comp 228 0.3s |
+avgasa | T=2 comp 182 0.3s | T=3 comp 182 0.3s | T=5 comp 182 0.3s | T=10 comp 182 0.3s |
+dualc2 | T=2 comp 148 0.2s | T=3 comp 132 0.2s | T=5 comp 146 0.2s | T=10 comp 128 0.2s |
+ex8_5_6 | T=2 comp 1936 2.2s | T=3 comp 1614 1.9s | T=5 comp 2202 2.5s | T=10 comp 1738 2.2s |
+
+[exited with code 0]
