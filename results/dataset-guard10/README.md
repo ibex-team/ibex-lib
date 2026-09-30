@@ -19,11 +19,21 @@ muestreados corre un dive por candidato que continúa con `lsmear-guard:10`.
   `results/ipopt-compo-fixed.csv`), 131 familias; `instances.txt` trae la
   probabilidad de muestreo (~100 puntos repartidos por árbol) y la familia, para
   validar agrupando por familia.
-* Hasta 50 muestras por instancia, dives de hasta 1000 nodos, 3600 s por
-  instancia. Variables: `JOBS`, `TLIM`, `BUDGET`, `BUDGET_START`,
-  `MAX_SAMPLES`, `NOPRUNE=1` (todos los candidatos con el presupuesto completo:
-  etiquetas exactas para regresión, bastante más caro; con poda, las etiquetas
-  alcanzan para imitar al mejor y para rankings por pares).
+* Hasta 150 muestras por instancia, repartidas en todo el árbol
+  (p = min(1, 1.2·150 / decisiones del árbol de `lsmear-guard:10`)); dives de
+  hasta 1000 nodos **sin poda** (etiquetas exactas); 5400 s por instancia.
+  Variables: `JOBS`, `TLIM`, `BUDGET`, `BUDGET_START`, `MAX_SAMPLES`,
+  `PRUNE_ON=1` (poda: 2–3× más barato, etiquetas censuradas).
+* Estimado: ~12.600 muestras, ~60 h de CPU (cota pesimista), ~4 h en 16
+  núcleos. Estimado con el costo por muestra del paso 1 (0.7 s mediana, 7.8 s
+  p90 sin poda con 500 nodos) y el tamaño de los árboles en
+  `results/ipopt-compo-fixed.csv`. La mitad de las instancias tiene ≤ 8
+  decisiones y aporta pocas muestras; el grueso sale de ~90 instancias
+  grandes, sin que ninguna familia pase del 8% (`ex6_2`).
+* Probado en `ex6_2_8` (~6800 decisiones, p = 0.026): 150 muestras en 16 s,
+  profundidades 6–25 (mediana 14), 1% de muestras sin ningún dive cerrado
+  (23% con el presupuesto de 500 del paso 1), y la trayectoria intacta (13 672
+  nodos, igual que `--solve`).
 * Retoma: salta las instancias con `.jsonl` completo; los `.tmp` y `.log` no se
   versionan.
 * Formato de cada muestra: el mismo de `--collect` (`python/README.md`): el

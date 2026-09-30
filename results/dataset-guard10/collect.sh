@@ -6,10 +6,18 @@
 #   trayectoria : lsmear-guard:10, compo + ipoptxn (la búsqueda que se muestrea)
 #   etiquetas   : un dive por candidato, continuando con lsmear-guard:10
 #   presupuesto : 1000 nodos, arranca en 25 y duplica (BUDGET, BUDGET_START)
-#   poda        : sí por defecto; NOPRUNE=1 da a todos el presupuesto completo
-#                 (etiquetas exactas para regresión, bastante más caro)
-#   muestreo    : p por instancia (instances.txt) ~ 100 puntos repartidos en el
-#                 árbol, hasta 50 muestras (MAX_SAMPLES)
+#   poda        : no por defecto: todos los candidatos con el mismo presupuesto,
+#                 etiquetas exactas (sirven para imitar, ranking y regresión);
+#                 PRUNE_ON=1 corta cada dive en el mejor hasta ese momento (2-3x
+#                 más barato, etiquetas censuradas)
+#   muestreo    : hasta 150 muestras (MAX_SAMPLES) por instancia, con
+#                 p = min(1, 1.2*150/decisiones del árbol de lsmear-guard:10)
+#                 (instances.txt), así cubren todo el árbol y no solo su
+#                 primera mitad
+#
+# Estimado: ~12.600 muestras; ~60 h de CPU (cota pesimista), ~4 h en 16
+# núcleos. La mitad de las instancias son árboles de <= 8 decisiones y dan
+# pocas muestras; aportan sobre todo las ~90 grandes (ninguna familia > 8%).
 #
 # Instancias: las 221 que lsmear o lsmear-guard:10 cierran en
 # results/ipopt-compo-fixed.csv; la 3.ª columna es la familia, para validar
@@ -19,11 +27,11 @@
 cd "$(dirname "$0")/../.."
 BIN=${BIN:-build/bin/ibexopt-ml}
 JOBS=${JOBS:-8}
-TLIM=${TLIM:-3600}
+TLIM=${TLIM:-5400}
 BUDGET=${BUDGET:-1000}
 BUDGET_START=${BUDGET_START:-25}
-MAX_SAMPLES=${MAX_SAMPLES:-50}
-PRUNE=""; [ -n "$NOPRUNE" ] && PRUNE="--no-prune"
+MAX_SAMPLES=${MAX_SAMPLES:-150}
+PRUNE="--no-prune"; [ -n "$PRUNE_ON" ] && PRUNE=""
 OUT=results/dataset-guard10/samples
 mkdir -p $OUT
 export BIN TLIM BUDGET BUDGET_START MAX_SAMPLES PRUNE OUT
