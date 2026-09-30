@@ -13,7 +13,8 @@
 #   muestreo    : hasta 150 muestras (MAX_SAMPLES) por instancia, con
 #                 p = min(1, 1.2*150/decisiones del árbol de lsmear-guard:10)
 #                 (instances.txt), así cubren todo el árbol y no solo su
-#                 primera mitad
+#                 primera mitad; al llegar al tope la búsqueda termina
+#                 (--stop-at-max-samples): lo que viene después no se usa
 #
 # Estimado: ~12.600 muestras; ~60 h de CPU (cota pesimista), ~4 h en 16
 # núcleos. La mitad de las instancias son árboles de <= 8 decisiones y dan
@@ -41,6 +42,6 @@ cut -d' ' -f1,2 results/dataset-guard10/instances.txt | xargs -P $JOBS -n2 sh -c
   timeout $((TLIM+600)) $BIN benchs/optim/all/$i --collect -o "$f.tmp" \
      --bisector lsmear-guard --guard-horizon 10 --relax both --loup ipoptxn \
      --budget $BUDGET --budget-start $BUDGET_START $PRUNE \
-     --sample-prob $p --max-samples $MAX_SAMPLES --random-seed 1 --timeout $TLIM \
+     --sample-prob $p --max-samples $MAX_SAMPLES --stop-at-max-samples --random-seed 1 --timeout $TLIM \
      > "$f.log" 2>&1
   mv "$f.tmp" "$f"; echo "$i: $(grep -c . "$f") muestras"'

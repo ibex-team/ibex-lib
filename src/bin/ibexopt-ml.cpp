@@ -304,6 +304,7 @@ int main(int argc, char** argv) {
 
 	// --- search control ---
 	args::ValueFlag<double> sample_prob(parser, "float", "Probability of sampling a visited node in --collect mode. Default: 0.1.", {"sample-prob"});
+	args::Flag stop_at_max_samples(parser, "stop-at-max-samples", "In --collect mode, end the search once --max-samples are written (nothing after the last sample is used). Size --sample-prob so the cap is reached near the end of the tree, or the samples crowd its top.", {"stop-at-max-samples"});
 	args::ValueFlag<long>   max_samples(parser, "int", "Stop sampling after that many (the search keeps going; 0: no limit). Default: 1000.", {"max-samples"});
 	args::ValueFlag<long>   max_nodes(parser, "int", "Stop the search after that many nodes (0: no limit).", {"max-nodes"});
 	args::ValueFlag<double> timeout(parser, "float", "Time limit of the search, in seconds.", {'t',"timeout"});
@@ -426,6 +427,7 @@ int main(int argc, char** argv) {
 		MLNodeServer::RunParams rp;
 		rp.sample_prob = sample_prob ? sample_prob.Get() : 0.1;
 		rp.max_samples = max_samples ? max_samples.Get() : 1000;
+		rp.stop_at_max_samples = stop_at_max_samples;
 		rp.max_nodes   = max_nodes   ? max_nodes.Get()   : 0;
 		rp.timeout     = timeout     ? timeout.Get()     : 0;
 		rp.progress    = progress.Get();

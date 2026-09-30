@@ -77,7 +77,7 @@ MLNodeServer::SampleResult::SampleResult() : budget(0), rounds(0), nodes(0), tim
 }
 
 MLNodeServer::RunParams::RunParams() :
-		sample_prob(0.1), max_samples(1000), max_nodes(0), timeout(0),
+		sample_prob(0.1), stop_at_max_samples(false), max_samples(1000), max_nodes(0), timeout(0),
 		progress(false), features(true) {
 }
 
@@ -1228,7 +1228,9 @@ long MLNodeServer::collect(const IntervalVector& init_box, double obj_init_bound
 
 			// Reaching max_samples stops the sampling, not the search: the rest
 			// of the trajectory is still worth running, and stopping early
-			// would bias the data towards the top of the tree.
+			// would bias the data towards the top of the tree -- unless the
+			// sampling probability is sized so that the cap is only reached
+			// near the end, and then the rest is wasted (stop_at_max_samples).
 			bool want = (rp.max_samples<=0 || nsamples < rp.max_samples)
 					&& coin() < rp.sample_prob;
 
@@ -1241,6 +1243,10 @@ long MLNodeServer::collect(const IntervalVector& init_box, double obj_init_bound
 				out << "\n";
 				out.flush();
 				nsamples++;
+				if (rp.stop_at_max_samples && rp.max_samples>0 && nsamples>=rp.max_samples) {
+					status = "sample_limit";   // nothing after the last sample is used
+					break;
+				}
 				if (rp.progress)
 					std::cerr << "\r[collect] samples=" << nsamples
 					          << " nodes=" << nb_cells

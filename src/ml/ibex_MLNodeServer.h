@@ -408,6 +408,8 @@ public:
 		RunParams();
 
 		double sample_prob; //!< probability of turning a visited node into a sample
+		bool stop_at_max_samples; //!< end the search, not only the sampling,
+		                    //!< once #max_samples are written
 		long max_samples;   //!< stop *sampling* after that many (<=0: no limit);
 		                    //!< the search itself keeps going
 		long max_nodes;     //!< stop the search after that many nodes (<=0: no limit)

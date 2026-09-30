@@ -33,7 +33,9 @@ muestreados corre un dive por candidato que continúa con `lsmear-guard:10`.
 * Probado en `ex6_2_8` (~6800 decisiones, p = 0.026): 150 muestras en 16 s,
   profundidades 6–25 (mediana 14), 1% de muestras sin ningún dive cerrado
   (23% con el presupuesto de 500 del paso 1), y la trayectoria intacta (13 672
-  nodos, igual que `--solve`).
+  nodos, igual que `--solve`). Con `--stop-at-max-samples` (lo que usa el
+  script) las 150 muestras son idénticas y la búsqueda termina en 11 986
+  nodos en vez de 13 672.
 * Retoma: salta las instancias con `.jsonl` completo; los `.tmp` y `.log` no se
   versionan.
 * Formato de cada muestra: el mismo de `--collect` (`python/README.md`): el
