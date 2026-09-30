@@ -75,3 +75,29 @@ switch).
 With the guard watching (same instances): ship-1 29358 / timeout, dnieper
 timeout / 28, ex6_2_8 13740 / 13754 (was 68404 at D=10) -- the guard switches
 on none of them.
+
+### The guard under a depth-limited oracle
+
+The guard's repeat signal had to change for mixed policies. It now observes
+only nodes whose parent the primary bisected (BxpPrimaryChoice +
+not_primary(); guard alone unchanged). Comparing with the primary's own choice
+at the parent instead switched on nearly everything (ex6_2_8 D=5: 71634).
+Under SB near the root, the hijack shows up later than decision 10. With
+horizon 10 ship-1 still fails (D=5 147642, D=10 timeout); without a horizon:
+
+    instance    SB<=5 H=0          SB<=10 H=0         guard:10
+    ship-1      372   (sw 89)      170   (sw 31)      486
+    dnieper     timeout            28                 434
+    ex6_2_8     71488 (sw 22)      68390 (sw 10)      13672
+    schwefel5   2920  (sw 10)      3868  (sw 10)      956
+    mconcon     90                 84                 116
+    avgasb      42                 36                 54
+    dipigri     238                212                212
+    avgasa      160                156                188
+    dualc2      144                148                146
+    ex8_5_6     1894               1748               2144
+
+Geometric mean of nodes relative to guard:10: D=10 0.83, D=5 1.22 (without
+dnieper). This counts nodes only; one SB decision costs two dives. ex6_2_8 and
+schwefel5 get worse when the guard switches (the guard alone never switches
+on ex6_2_8).
