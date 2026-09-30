@@ -37,3 +37,38 @@ contraídos que trae cada etiqueta, sin aprender nada:
 Cierra ~60% de la distancia `lsmear-guard:10` → oráculo, y las elecciones
 malas (≥ 2×) bajan de 21% a 6%. Cuesta dos contracciones por candidato por
 nodo: `ibexopt-ml --oracle --oracle-score sb`.
+
+## Imitating strong branching, and strong branching near the root only
+
+`python/imitate_sb_offline.py` regresses each candidate's strong-branching key
+(children pruned, then log volume of the open ones) and picks the argmax.
+Grouped 5-fold CV by family, regret vs dive labels (geo per instance; picks
+the best; >=2x):
+
+    strong branching (label)              1.108  71%   6%
+    lsmear-guard:10                       1.266  52%  21%
+    model, features A                     1.300  54%  21%   (agrees with SB 47%)
+    model, A + constraint aggregates      1.295  54%  20%   (agrees with SB 47%)
+
+The cheap features do not predict the contraction of the children.
+
+`--oracle-max-depth D` (SB decides only at depth <= D, lsmear-guard:10 below),
+nodes:
+
+    instance    SB<=5        SB<=10       SB everywhere  guard:10
+    avgasb      42           36           36             54
+    dipigri     238          212          126            212
+    avgasa      160          156          156            188
+    dnieper     timeout      28           28             434
+    dualc2      144          148          152            146
+    ex6_2_8     13740        68404        15866          13672
+    ship-1      55192        timeout      24             486
+    schwefel5   2558         3292         36910          956
+    ex8_5_6     2224         1734         1268           2144
+    mconcon     88           84           678            116
+
+ship-1 breaks because the guard never sees the hijack: its repeat signal is
+"the primary wants the parent's variable", and above D the parent's variable
+was SB's. Letting the guard watch the SB-decided nodes too (now done when
+--oracle-max-depth is set) does not fix it (ship-1, D=5: 29358 nodes, no
+switch).
