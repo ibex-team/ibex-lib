@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""Offline: predict the one-step oracle's label (dive nodes, lsmear-guard:10
+continuation) from features that include what a strong-branching probe
+sees -- the two children after one contraction -- and pick the argmin.
+
+Per candidate, the probe features (2 contractions each, vs a whole dive):
+  pruned children; log volume of each open child relative to the node (goal
+  variable excluded; -100 if pruned), min/max/log-sum; the rise of the goal
+  lower bound in each child, as a fraction of the gap [node lb, loup]
+  (1 if pruned), min/max.
+Each also relative to the sample (value minus the sample's best), since only
+the order within a node matters.
+
+Feature sets: A (the 30 solver features), P (probe), A+P. Grouped 5-fold CV
+by family; out-of-fold regret against the dive labels (geo per instance;
+picks the best; >=2x).
+
+    python3 python/oracle_sbfeat_offline.py
+"""
+import glob, json, math, os, sys
+import numpy as np, pandas as pd
+from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.model_selection import GroupKFold
+HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+from ibexml import encode  # noqa
+DATA = os.path.join(HERE, "..", "results", "dataset-guard10")
+geo = lambda x: float(np.exp(np.mean(np.log(x))))
+
+
+def box(b):
+    return json.loads(b) if isinstance(b, str) else b
+
+
+def logvol(bx, parent, skip):
+    s = 0.0
+    for j, (a, b) in enumerate(bx):
+        if j == skip:
+            continue
+        pa, pb = parent[j]; dp = pb - pa; d = b - a
+        if not (math.isfinite(dp) and dp > 0 and math.isfinite(d)):
+            continue
+        s += math.log(max(d, 1e-300) / dp)
+    return max(s, -100.0)
+
+
+def probe(l, parent, gv, lb0, top):
+    st = [l["left_status"], l["right_status"]]
+    ch = [box(l["left"]), box(l["right"])]
+    lv, rise = [], []
+    for k in range(2):
+        if st[k] != "open" or not ch[k]:
+            lv.append(-100.0); rise.append(1.0); continue
+        lv.append(logvol(ch[k], parent, gv))
+        if gv >= 0 and math.isfinite(lb0) and math.isfinite(top) and top > lb0:
+            rise.append(min(1.0, max(0.0, (ch[k][gv][0] - lb0) / (top - lb0))))
+        else:
+            rise.append(0.0)
+    npr = sum(x != "open" for x in st)
+    return [npr, min(lv), max(lv), float(np.logaddexp(lv[0], lv[1])), min(rise), max(rise)]
+
+
+def load():
+    fam = {l.split()[0][:-4]: l.split()[2] for l in open(os.path.join(DATA, "instances.txt"))}
+    XA, XP, Y, rows = [], [], [], []
+    sid = 0
+    for f in sorted(glob.glob(os.path.join(DATA, "samples", "*.jsonl"))):
+        inst = os.path.basename(f)[:-6]
+        for line in open(f):
+            s = json.loads(line)
+            L = [l for l in s["labels"] if l["valid"]]
+            done = [l["nodes"] for l in L if not l["censored"]]
+            if len(L) < 2 or not done:
+                continue
+            best = min(done); n = s["node"]
+            Xv, _, _ = encode(n)
+            parent = [(v["lb"], v["ub"]) for v in n["vars"]]
+            gv = next((j for j, v in enumerate(n["vars"]) if v.get("is_goal")), -1)
+            lb0 = parent[gv][0] if gv >= 0 else float("nan")
+            top = n.get("ymax", n.get("loup"))
+            top = top if top is not None and math.isfinite(top) else (parent[gv][1] if gv >= 0 else float("nan"))
+            P = np.array([probe(l, parent, gv, lb0, top) for l in L])
+            # relative to the sample's best (pruned, rise: max is best; volume: min is best)
+            rel = np.stack([P[:, 0] - P[:, 0].max(), P[:, 1] - P[:, 1].min(), P[:, 2] - P[:, 2].min(),
+                            P[:, 3] - P[:, 3].min(), P[:, 4] - P[:, 4].max(), P[:, 5] - P[:, 5].max()], axis=1)
+            for k, l in enumerate(L):
+                y = l["nodes"] if not l["censored"] else 2 * l["budget_used"]
+                XA.append(Xv[l["var"]]); XP.append(np.concatenate([P[k], rel[k], [len(L)]]))
+                Y.append(math.log(max(y, 1) / best))
+                rows.append((sid, inst, fam.get(inst, inst), y / best, l["var"] == n.get("bisect_var"),
+                             100.0 * P[k, 0] - P[k, 3]))
+            sid += 1
+    R = pd.DataFrame(rows, columns=["sample", "instance", "family", "r", "guard", "sb"])
+    XA = np.nan_to_num(np.asarray(XA, float), nan=0.0, posinf=1e12, neginf=-1e12)
+    return XA, np.asarray(XP, float), np.asarray(Y), R
+
+
+def evaluate(R, score, name):
+    V = R.loc[R.assign(s=score).groupby("sample").s.idxmax()]
+    per = V.groupby("instance").r.apply(geo)
+    return name, geo(per), (V.r <= 1.0001).mean(), (V.r >= 2).mean()
+
+
+def main():
+    XA, XP, Y, R = load()
+    print("%d filas, %d muestras, %d instancias, %d familias" % (len(R), R["sample"].nunique(), R.instance.nunique(), R.family.nunique()))
+    out = [evaluate(R, -R.r.values, "oráculo (la etiqueta)"),
+           evaluate(R, R.sb.values, "strong branching (regla)"),
+           evaluate(R, R.guard.astype(float).values, "lsmear-guard:10")]
+    for fname, X in (("modelo A", XA), ("modelo P (sondeo)", XP), ("modelo A+P", np.hstack([XA, XP]))):
+        pred = np.zeros(len(Y))
+        for tr, te in GroupKFold(5).split(X, Y, R.family):
+            m = HistGradientBoostingRegressor(max_iter=300, learning_rate=0.05, max_leaf_nodes=31, random_state=0)
+            m.fit(X[tr], Y[tr]); pred[te] = m.predict(X[te])
+        out.append(evaluate(R, -pred, fname))
+    print("\nfuera de fold, regret contra las etiquetas de dive (geo por instancia; elige el mejor; >=2x):")
+    for name, gi, eq, ge2 in out:
+        print("  %-30s %.3f  %3.0f%%  %3.0f%%" % (name, gi, 100 * eq, 100 * ge2))
+
+
+if __name__ == "__main__":
+    main()

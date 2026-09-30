@@ -101,3 +101,23 @@ Geometric mean of nodes relative to guard:10: D=10 0.83, D=5 1.22 (without
 dnieper). This counts nodes only; one SB decision costs two dives. ex6_2_8 and
 schwefel5 get worse when the guard switches (the guard alone never switches
 on ex6_2_8).
+
+## Predicting the oracle with probe features
+
+`python/oracle_sbfeat_offline.py`: regress log(y/best) of the dive labels
+from A (30 solver features), P (what a strong-branching probe sees: the two
+children after one contraction -- pruned, log volumes, rise of the goal lower
+bound -- raw and relative to the sample) or A+P; pick the argmin. Grouped
+5-fold CV by family, out of fold:
+
+    oracle (label)          1.000  100%   0%
+    strong branching rule   1.108   71%   6%
+    lsmear-guard:10         1.266   52%  21%
+    model A                 1.276   58%  17%
+    model P                 1.109   72%   6%
+    model A+P               1.102   73%   5%
+
+The probe brings a model to strong branching's level and no further: what
+the oracle knows beyond it is not in one contraction of the children. It is
+not the upper bound either: in only 482 of 10928 samples do candidates differ
+in whether their dive finds a loup, and there the best one found it in 228.
