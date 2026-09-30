@@ -42,3 +42,26 @@ guard:10 on schwefel5, mconcon, ex8_5_6 and loses on ship-1. lsmear-avoid
 everywhere, except ex6_2_8. guard-next is worse than guard:10 when it
 matters. grasp, whose randomness only touches LSmear's own ranking, keeps the
 timeouts.
+
+## Tabu list along the branch (`lsmear-tabu --tabu-tenure k`)
+
+`tabu-10.txt`; k=1 is lsmear-avoid. Nodes, and geometric mean relative to
+guard:10 (with / without mconcon, where everything but guard:10 takes 18-20):
+
+    instance   guard:10  lffix  k=1    k=2    k=3    k=5
+    ship-1     486       680    834    2662   2832   756
+    dnieper    434       434    422    634    314    616
+    ex6_2_8    13672     13672  15140  37806  61426  22784
+    schwefel5  956       698    754    710    642    748
+    mconcon    116       18     18     20     20     18
+    avgasb     54        54     54     58     56     58
+    dipigri    212       212    200    204    192    260
+    avgasa     188       188    182    186    196    200
+    dualc2     146       146    140    142    134    126
+    ex8_5_6    2144      1852   1272   2064   2676   1924
+    geo        1         0.82   0.81   1.11   1.09   0.93
+    w/o mconc  1         0.99   0.97   1.36   1.34   1.14
+
+A longer tenure is worse: forbidding more than the parent's variable
+overrides LSmear where it was right (ex6_2_8, which never takes the
+fallback, 2.8x-4.5x with k=2,3).
