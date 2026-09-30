@@ -5,11 +5,14 @@
 # etiquetas originales) y continuación lsmear-guard:10. compo + ipoptxn.
 # Tercer brazo, lazy50 (ARMS=lazy50): presupuesto fijo de 50 nodos sin poda, y
 # se elige el candidato cuyo dive llegó menos profundo (--oracle-score depth).
+# Reparto entre máquinas: INSTANCES elige la lista y OUT el archivo de salida
+# (oracle-local.jsonl, oracle-cloud.jsonl); analyze.py lee todos los oracle*.jsonl.
 cd "$(dirname "$0")/../.."
 BIN=${BIN:-build-fix/bin/ibexopt-ml}
-OUT=results/oracle/oracle.jsonl
+OUT=${OUT:-results/oracle/oracle.jsonl}
+INSTANCES=${INSTANCES:-results/oracle/instances.txt}
 touch $OUT
-for arm in ${ARMS:-lsmear guard10}; do while read i; do echo "$arm $i"; done < results/oracle/instances.txt; done |
+for arm in ${ARMS:-lsmear guard10}; do while read i; do echo "$arm $i"; done < $INSTANCES; done |
 xargs -P ${JOBS:-2} -n2 sh -c '
   arm=$0; i=$1; grep -q "\"instance\": \"$i\", \"arm\": \"$arm\"" '"$OUT"' && exit 0
   case $arm in

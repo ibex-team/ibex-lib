@@ -15,7 +15,9 @@ import numpy as np
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-R = [json.loads(l) for l in open(os.path.join(HERE, "oracle.jsonl")) if l.strip()]
+import glob
+R = [json.loads(l) for f in sorted(glob.glob(os.path.join(HERE, "oracle*.jsonl")))
+     for l in open(f) if l.strip()]
 O = pd.DataFrame([{"instance": r["instance"], "arm": r["arm"],
                    "status": r["result"].get("status"), "nodes": r["result"].get("nodes"),
                    "calls": r["result"].get("oracle_calls"), "fallbacks": r["result"].get("oracle_fallbacks")}

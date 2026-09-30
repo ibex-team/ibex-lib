@@ -1,0 +1,14 @@
+ex8_5_3-1.bch
+m4wd.bch
+hs056.bch
+ex8_5_5.bch
+ex8_5_3.bch
+genhs28.bch
+ex8_5_4.bch
+haifas.bch
+hs116.bch
+hs104.bch
+hs100.bch
+meanvar.bch
+ex8_5_1bis.bch
+hs113.bch
