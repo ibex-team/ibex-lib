@@ -11,10 +11,20 @@
 
 namespace ibex {
 
+namespace {
+// Not next_id(): taking an id from the global counter shifts every id handed
+// out after it, and with them the order some maps are walked in -- enough to
+// change a search by a couple of nodes. These ids stay out of its range.
+long new_bxp_id() {
+	static long n = 0;
+	return (1L<<62) + n++;
+}
+}
+
 BscHijackGuard::BscHijackGuard(Bsc& primary, Bsc& fallback, const Vector& prec,
 		int window, double theta, int warmup) :
 				Bsc(prec), primary(primary), fallback(fallback),
-				window(window), theta(theta), warmup(warmup), horizon(0) {
+				window(window), theta(theta), warmup(warmup), bxp_id(new_bxp_id()), horizon(0) {
 	if (window<1) ibex_error("[BscHijackGuard] the window must be positive");
 	st.win.assign(window, 0);
 	st.head = 0;
@@ -36,7 +46,11 @@ BisectionPoint BscHijackGuard::choose_var(const Cell& cell) {
 	// past the horizon the primary has the last word: stop watching
 	if (horizon>0 && st.decisions>horizon) return bp;
 
-	char flag = (cell.bisected_var>=0 && bp.var==cell.bisected_var) ? 1 : 0;
+	int prev = cell.bisected_var;
+	BxpPrimaryChoice* pc = (BxpPrimaryChoice*) const_cast<BoxProperties&>(cell.prop)[bxp_id];
+	if (pc!=NULL) { prev = pc->var; pc->var = bp.var; }
+
+	char flag = (prev>=0 && bp.var==prev) ? 1 : 0;
 	st.repeats += flag - st.win[st.head];   // the slot is 0 until the window fills
 	st.win[st.head] = flag;
 	st.head = (st.head+1) % window;
@@ -53,6 +67,7 @@ BisectionPoint BscHijackGuard::choose_var(const Cell& cell) {
 }
 
 void BscHijackGuard::add_property(const IntervalVector& init_box, BoxProperties& map) {
+	if (!map[bxp_id]) map.add(new BxpPrimaryChoice(bxp_id));
 	primary.add_property(init_box, map);
 	fallback.add_property(init_box, map);
 }

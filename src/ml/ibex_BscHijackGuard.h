@@ -10,6 +10,7 @@
 #define __IBEX_BSC_HIJACK_GUARD_H__
 
 #include "ibex_Bsc.h"
+#include "ibex_Bxp.h"
 
 #include <vector>
 
@@ -44,9 +45,32 @@ namespace ibex {
  * earliest possible, and the late ones were false alarms (see
  * results/README.md). 0, the default, means no horizon.
  *
+ * The repeat test compares the primary's choice with the primary's own choice
+ * at the parent cell (kept in a box property, BxpPrimaryChoice), not with the
+ * variable the parent was actually bisected on. While the guard alone decides
+ * the two coincide; they differ when something else decided the parent (an
+ * oracle near the root), and then only the former still sees the hijack.
+ * Without the property (a cell made without add_property) it falls back to
+ * Cell::bisected_var.
+ *
  * The state (window + switch) is part of the search: save it with get_state()
  * around anything speculative, as MLNodeServer does around its dives.
  */
+class BxpPrimaryChoice : public Bxp {
+public:
+	explicit BxpPrimaryChoice(long id) : Bxp(id), var(-1) { }
+
+	/** Children inherit the value: at a child it is the parent's choice. */
+	virtual Bxp* copy(const IntervalVector&, const BoxProperties&) const override {
+		BxpPrimaryChoice* p = new BxpPrimaryChoice(id); p->var = var; return p;
+	}
+
+	virtual void update(const BoxEvent&, const BoxProperties&) override { }
+
+	/** The primary's choice at this cell, once asked; before, at the parent. */
+	int var;
+};
+
 class BscHijackGuard : public Bsc {
 public:
 
@@ -99,6 +123,9 @@ public:
 	const int window;
 	const double theta;
 	const int warmup;
+
+	/** \brief Id of the BxpPrimaryChoice property of this guard. */
+	const long bxp_id;
 
 protected:
 	long horizon;
