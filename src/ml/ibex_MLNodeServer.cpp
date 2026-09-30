@@ -113,7 +113,7 @@ MLNodeServer::MLNodeServer(const System& sys,
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
 			oracle_calls(0), oracle_fallbacks(0),
-			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), stats(new OpenStatistics()),
+			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), stats(new OpenStatistics()),
 			last_time(0), last_decisions(0), last_status("not run") {
 
 	RNG::srand((int) random_seed);
@@ -1168,6 +1168,8 @@ void MLNodeServer::write_outcome(JsonOut& out, const char* status, double time,
 /*=========================== whole-search modes ===========================*/
 
 int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
+	if (oracle && oracle_max_depth>0 && (int) c.depth > oracle_max_depth)
+		return -1;                                   // deep: the bisector decides
 	if (oracle) {
 		SampleParams p = sp;
 		p.depth = (int) c.depth;

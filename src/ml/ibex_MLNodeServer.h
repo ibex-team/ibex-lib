@@ -329,6 +329,14 @@ public:
 	 */
 	void set_oracle_sb(bool on) { oracle_sb = on; }
 
+	/**
+	 * \brief Only use the oracle (any score) at nodes up to this depth; deeper,
+	 *        the bisector decides (0: no limit). The large gains of strong
+	 *        branching come from a few decisions near the root, and its cost is
+	 *        per node.
+	 */
+	void set_oracle_max_depth(int d) { oracle_max_depth = d; }
+
 	/** \brief Oracle decisions taken, and how many the bisector took instead. */
 	long oracle_calls, oracle_fallbacks;
 
@@ -617,6 +625,7 @@ protected:
 	bool oracle;                  //!< see set_oracle()
 	bool oracle_depth;            //!< see set_oracle_depth()
 	bool oracle_sb;               //!< see set_oracle_sb()
+	int oracle_max_depth;         //!< see set_oracle_max_depth()
 
 	OpenStatistics* stats;        //!< operator statistics (owned)
 

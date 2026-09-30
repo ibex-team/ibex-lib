@@ -297,6 +297,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<long>   budget_start(parser, "int", "First dive budget tried; doubled while every candidate stays censored. 0 disables. Default: 25.", {"budget-start"});
 	args::Flag oracle_arg(parser, "oracle", "Branch with the one-step oracle: dive on every candidate at every node (--budget, --budget-start, --no-prune apply) and bisect on the one that closes in the fewest nodes. Expensive.", {"oracle"});
 	args::ValueFlag<string> oracle_score(parser, "nodes|depth", "With --oracle: rank the dives by their size (nodes, the default), lazily by how deep they went (depth: one fixed --budget for all, no pruning), or by strong branching (sb: contract both children only; more pruned children, then smaller total volume).", {"oracle-score"});
+	args::ValueFlag<int> oracle_depth_arg(parser, "int", "With --oracle: use it only at nodes up to this depth; deeper, the bisector decides (0: everywhere).", {"oracle-max-depth"});
 	args::Flag no_prune(parser, "no-prune", "Give every candidate the full budget instead of the best result so far.", {"no-prune"});
 	args::ValueFlag<int>    max_depth(parser, "int", "Dive depth limit (0: none). Default: 0.", {"max-depth"});
 	args::ValueFlag<int>    topk(parser, "int", "Evaluate only the k most promising candidates (0: all). Default: 0.", {"topk"});
@@ -403,6 +404,7 @@ int main(int argc, char** argv) {
 		}
 
 		if (oracle_arg) server->set_oracle(true);
+		if (oracle_depth_arg) server->set_oracle_max_depth(oracle_depth_arg.Get());
 		if (oracle_score) {
 			if (oracle_score.Get()=="depth") server->set_oracle_depth(true);
 			else if (oracle_score.Get()=="sb") server->set_oracle_sb(true);
