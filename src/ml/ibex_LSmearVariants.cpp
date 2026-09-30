@@ -37,8 +37,8 @@ long new_tabu_id() {
 }
 }
 
-LSmearTabu::LSmearTabu(ExtendedSystem& sys, const Vector& prec, OptimLargestFirst& lf, int tenure) :
-		LSmear(sys, prec, lf), tenure(tenure), bxp_id(new_tabu_id()), tabu(NULL) {
+LSmearTabu::LSmearTabu(ExtendedSystem& sys, const Vector& prec, OptimLargestFirst& lf, int tenure, Mode mode) :
+		LSmear(sys, prec, lf), tenure(tenure), mode(mode), bxp_id(new_tabu_id()), tabu(NULL) {
 	if (tenure<1) ibex_error("[LSmearTabu] the tenure must be positive");
 }
 
@@ -47,22 +47,8 @@ void LSmearTabu::add_property(const IntervalVector& init_box, BoxProperties& map
 	LSmear::add_property(init_box, map);
 }
 
-BisectionPoint LSmearTabu::choose_var(const Cell& cell) {
+BisectionPoint LSmearTabu::choose_with(const Cell& cell, const std::vector<char>& t) {
 	const IntervalVector& box = cell.box;
-	std::vector<char> t(box.size(), 0);
-
-	BxpTabu* h = (BxpTabu*) const_cast<BoxProperties&>(cell.prop)[bxp_id];
-	if (h!=NULL) {
-		// the parent's decision joins the history (once per cell)
-		if (cell.bisected_var>=0 && h->pushed!=(int) cell.depth) {
-			h->hist.push_back(cell.bisected_var);
-			if ((int) h->hist.size()>tenure) h->hist.erase(h->hist.begin());
-			h->pushed = (int) cell.depth;
-		}
-		for (size_t k=0; k<h->hist.size(); k++) t[h->hist[k]] = 1;
-	} else if (cell.bisected_var>=0)
-		t[cell.bisected_var] = 1;
-
 	tabu = &t;
 	BisectionPoint bp = LSmear::choose_var(cell);
 	tabu = NULL;
@@ -77,6 +63,48 @@ BisectionPoint LSmearTabu::choose_var(const Cell& cell) {
 		if (var==-1 || li>l) { var = i; l = li; }
 	}
 	return var==-1 ? bp : BisectionPoint(var, bp.rel_pos ? bp.pos : 0.5, true);
+}
+
+BisectionPoint LSmearTabu::choose_var(const Cell& cell) {
+	const IntervalVector& box = cell.box;
+	const int d = (int) cell.depth;
+	const int pv = cell.bisected_var;
+	std::vector<char> t(box.size(), 0);
+	BxpTabu* h = (BxpTabu*) const_cast<BoxProperties&>(cell.prop)[bxp_id];
+
+	if (mode==RECENT) {
+		if (h!=NULL) {
+			// the parent's decision joins the history (once per cell)
+			if (pv>=0 && h->pushed!=d) {
+				h->hist.push_back(pv);
+				if ((int) h->hist.size()>tenure) h->hist.erase(h->hist.begin());
+				h->pushed = d;
+			}
+			for (size_t k=0; k<h->hist.size(); k++) t[h->hist[k]] = 1;
+		} else if (pv>=0)
+			t[pv] = 1;
+		return choose_with(cell, t);
+	}
+
+	// CAPTURE: the variables that captured LSmear, until their tenure ends
+	if (h!=NULL)
+		for (size_t k=0; k<h->until.size(); k++)
+			if (h->until[k].second >= d) t[h->until[k].first] = 1;
+
+	BisectionPoint bp = choose_with(cell, t);
+	if (pv<0 || bp.var!=pv || t[pv]) return bp;
+
+	// LSmear wants the parent's variable again: tabu for this level and the
+	// tenure-1 below it, along this branch
+	if (h!=NULL) {
+		std::vector<std::pair<int,int> > keep;
+		for (size_t k=0; k<h->until.size(); k++)
+			if (h->until[k].second >= d) keep.push_back(h->until[k]);
+		keep.push_back(std::make_pair(pv, d+tenure-1));
+		h->until = keep;
+	}
+	t[pv] = 1;
+	return choose_with(cell, t);
 }
 
 int LSmearTabu::pick(const std::vector<double>& score) const {

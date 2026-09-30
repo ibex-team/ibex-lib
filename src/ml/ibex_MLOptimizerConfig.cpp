@@ -52,6 +52,7 @@ const Entry TABLE[] = {
 	{ "lsmear-guard-next", MLOptimizerConfig::BSC_LSMEAR_GUARD_NEXT},
 	{ "lsmear-avoid",  MLOptimizerConfig::BSC_LSMEAR_AVOID},
 	{ "lsmear-tabu",   MLOptimizerConfig::BSC_LSMEAR_TABU},
+	{ "lsmear-recent", MLOptimizerConfig::BSC_LSMEAR_RECENT},
 	{ "lsmear-grasp",  MLOptimizerConfig::BSC_LSMEAR_GRASP},
 	{ "lsmear-lffix",  MLOptimizerConfig::BSC_LSMEAR_LFFIX},
 	{ "lsmear-guard-lffix", MLOptimizerConfig::BSC_LSMEAR_GUARD_LFFIX},
@@ -344,6 +345,9 @@ Bsc& MLOptimizerConfig::get_bsc() {
 		break;
 	case BSC_LSMEAR_TABU:
 		bsc_cache = &rec(new LSmearTabu(ext_sys, eps_x_extended, lf, tabu_tenure));
+		break;
+	case BSC_LSMEAR_RECENT:
+		bsc_cache = &rec(new LSmearTabu(ext_sys, eps_x_extended, lf, tabu_tenure, LSmearTabu::RECENT));
 		break;
 	case BSC_LSMEAR_GRASP:
 		bsc_cache = &rec(new LSmearGrasp(ext_sys, eps_x_extended, lf, grasp_alpha, grasp_seed));

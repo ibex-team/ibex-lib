@@ -56,7 +56,8 @@ public:
 		BSC_LSMEAR_GUARD,  //!< LSmear until hijacked, then RoundRobin (BscHijackGuard)
 		BSC_LSMEAR_GUARD_NEXT, //!< LSmear until hijacked, then LSmear without the parent's variable
 		BSC_LSMEAR_AVOID,  //!< LSmear without the parent's variable (LSmearTabu, tenure 1)
-		BSC_LSMEAR_TABU,   //!< LSmear with a tabu list of the last tabu_tenure ancestors' variables
+		BSC_LSMEAR_TABU,   //!< LSmear; a variable that captures it is tabu for tabu_tenure levels
+		BSC_LSMEAR_RECENT, //!< LSmear; the last tabu_tenure ancestors' variables are tabu
 		BSC_LSMEAR_GRASP,  //!< random among the LSmear candidates >= alpha*max (LSmearGrasp)
 		BSC_LSMEAR_LFFIX,  //!< LSmear whose largest-first fallback compares widths (OptimLargestFirstFixed)
 		BSC_LSMEAR_GUARD_LFFIX //!< lsmear-guard with that LSmear as primary
