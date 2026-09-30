@@ -60,6 +60,15 @@ namespace ibex {
       Function** dg=nullptr;;
     public:
 
+      /**
+       * \brief The call schedule: when Ipopt runs depends on how many times the
+       *        finder was called (and on #force). A look-ahead search that calls
+       *        the finder must put it back, or it shifts the schedule of the
+       *        enclosing search (ibexopt-ml saves it around its dives).
+       */
+      std::pair<int,bool> get_schedule() const { return std::make_pair(ipopt_calls, force); }
+      void set_schedule(const std::pair<int,bool>& s) { ipopt_calls = s.first; force = s.second; }
+
       double optimalValue = POS_INFINITY;
 
         

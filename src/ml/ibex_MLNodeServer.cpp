@@ -7,6 +7,9 @@
 //============================================================================
 
 #include "ibex_MLNodeServer.h"
+#ifdef __IBEX_WITH_IPOPT__
+#include "ibex_LoupFinderDefaultIpopt.h"
+#endif
 
 #include "ibex_CtcCompo.h"
 #include "ibex_NoBisectableVariableException.h"
@@ -81,7 +84,7 @@ MLNodeServer::RunParams::RunParams() :
 MLNodeServer::State::State(int n) :
 		loup(POS_INFINITY), uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY),
 		loup_point(IntervalVector::empty(n)), loup_changed(false), nb_cells(0),
-		has_guard(false) {
+		has_guard(false), has_ipopt(false), ipopt(0,false) {
 	rng = RNG::get_state();
 }
 
@@ -211,6 +214,13 @@ MLNodeServer::State MLNodeServer::save() const {
 	const BscHijackGuard* g = dynamic_cast<const BscHijackGuard*>(&bsc);
 	s.has_guard = g!=NULL;
 	if (g!=NULL) s.guard = g->get_state();
+#ifdef __IBEX_WITH_IPOPT__
+	// Ipopt runs every N calls to the loup finder: a dive calls it too, and
+	// would shift when it runs in the enclosing search
+	const LoupFinderDefaultIpopt* li = dynamic_cast<const LoupFinderDefaultIpopt*>(&loup_finder);
+	s.has_ipopt = li!=NULL;
+	if (li!=NULL) s.ipopt = li->finder_ipopt.get_schedule();
+#endif
 	return s;
 }
 
@@ -224,6 +234,9 @@ void MLNodeServer::restore(const State& s) {
 	RNG::set_state(s.rng);
 	for (size_t k=0; k<acid.size() && k<s.acid.size(); k++) acid[k]->set_tuning(s.acid[k]);
 	if (s.has_guard) guard()->set_state(s.guard);
+#ifdef __IBEX_WITH_IPOPT__
+	if (s.has_ipopt) dynamic_cast<LoupFinderDefaultIpopt&>(loup_finder).finder_ipopt.set_schedule(s.ipopt);
+#endif
 }
 
 void MLNodeServer::reset(const IntervalVector& init_box, double obj_init_bound) {

@@ -574,6 +574,8 @@ protected:
 		std::vector<CtcAcid::TuningState> acid;
 		bool has_guard;
 		BscHijackGuard::State guard;
+		bool has_ipopt;
+		std::pair<int,bool> ipopt;   //!< Ipopt's call schedule (see LoupFinderIpopt::get_schedule())
 	};
 
 	State save() const;
