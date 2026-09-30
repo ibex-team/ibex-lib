@@ -1,0 +1,12 @@
+ship-1 | lsmear time 122072 120.0s | lsmear-lffix comp 680 1.2s | lsmear-guard comp 486 1.8s | lsmear-guard-lffix comp 680 1.2s | lsmear-guard-next comp 4034 5.7s | lsmear-avoid comp 834 1.7s | lsmear-grasp time 123842 120.0s |
+dnieper | lsmear comp 434 5.7s | lsmear-lffix comp 434 5.6s | lsmear-guard comp 434 5.8s | lsmear-guard-lffix comp 434 6.0s | lsmear-guard-next comp 434 5.6s | lsmear-avoid comp 422 5.7s | lsmear-grasp comp 556 7.2s |
+ex6_2_8 | lsmear comp 13672 6.7s | lsmear-lffix comp 13672 5.7s | lsmear-guard comp 13672 5.6s | lsmear-guard-lffix comp 13672 6.1s | lsmear-guard-next comp 13672 5.5s | lsmear-avoid comp 15140 6.1s | lsmear-grasp comp 13736 5.6s |
+schwefel5 | lsmear time 734874 120.0s | lsmear-lffix comp 698 0.4s | lsmear-guard comp 956 0.5s | lsmear-guard-lffix comp 698 0.4s | lsmear-guard-next comp 1996 0.8s | lsmear-avoid comp 754 0.4s | lsmear-grasp time 737712 120.0s |
+mconcon | lsmear time 38470 120.0s | lsmear-lffix comp 18 0.1s | lsmear-guard comp 116 0.2s | lsmear-guard-lffix comp 18 0.1s | lsmear-guard-next comp 2128 4.9s | lsmear-avoid comp 18 0.1s | lsmear-grasp time 38446 120.0s |
+avgasb | lsmear comp 54 0.1s | lsmear-lffix comp 54 0.1s | lsmear-guard comp 54 0.1s | lsmear-guard-lffix comp 54 0.1s | lsmear-guard-next comp 54 0.1s | lsmear-avoid comp 54 0.1s | lsmear-grasp comp 50 0.1s |
+dipigri | lsmear comp 212 0.3s | lsmear-lffix comp 212 0.3s | lsmear-guard comp 212 0.4s | lsmear-guard-lffix comp 212 0.4s | lsmear-guard-next comp 212 0.3s | lsmear-avoid comp 200 0.3s | lsmear-grasp comp 206 0.3s |
+avgasa | lsmear comp 188 0.3s | lsmear-lffix comp 188 0.3s | lsmear-guard comp 188 0.3s | lsmear-guard-lffix comp 188 0.3s | lsmear-guard-next comp 188 0.3s | lsmear-avoid comp 182 0.3s | lsmear-grasp comp 198 0.3s |
+dualc2 | lsmear comp 146 0.2s | lsmear-lffix comp 146 0.2s | lsmear-guard comp 146 0.2s | lsmear-guard-lffix comp 146 0.2s | lsmear-guard-next comp 146 0.2s | lsmear-avoid comp 140 0.2s | lsmear-grasp comp 152 0.2s |
+ex8_5_6 | lsmear time 156826 120.0s | lsmear-lffix comp 1852 2.1s | lsmear-guard comp 2144 2.5s | lsmear-guard-lffix comp 1852 2.1s | lsmear-guard-next comp 1362 1.8s | lsmear-avoid comp 1272 1.8s | lsmear-grasp time 156800 120.0s |
+
+[exited with code 0]
