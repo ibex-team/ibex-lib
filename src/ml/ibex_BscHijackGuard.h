@@ -45,13 +45,16 @@ namespace ibex {
  * earliest possible, and the late ones were false alarms (see
  * results/README.md). 0, the default, means no horizon.
  *
- * The repeat test compares the primary's choice with the primary's own choice
- * at the parent cell (kept in a box property, BxpPrimaryChoice), not with the
- * variable the parent was actually bisected on. While the guard alone decides
- * the two coincide; they differ when something else decided the parent (an
- * oracle near the root), and then only the former still sees the hijack.
- * Without the property (a cell made without add_property) it falls back to
- * Cell::bisected_var.
+ * Only nodes whose parent the primary bisected are observed: a box property
+ * (BxpPrimaryChoice) records at each cell the variable the primary chose, and
+ * whoever bisects a cell otherwise (an oracle near the root, a forced
+ * bisection) calls not_primary() first. At the children of such a cell the
+ * guard neither records a flag nor counts a decision, so the horizon counts
+ * observed decisions. Otherwise the first nodes below an oracle's region would
+ * fill the window with the oracle's variables, which the primary rarely
+ * repeats, and the hijack would go unseen (ship-1). While the guard alone
+ * decides, every node is observed and nothing changes. Without the property
+ * (a cell made without add_property) every node is observed.
  *
  * The state (window + switch) is part of the search: save it with get_state()
  * around anything speculative, as MLNodeServer does around its dives.
@@ -104,6 +107,9 @@ public:
 
 	/** \brief Whether the fallback has taken over. */
 	bool switched() const { return st.switched; }
+
+	/** \brief \a cell is about to be bisected by something else than this guard. */
+	void not_primary(const Cell& cell) const;
 
 	/** \brief Only switch within the first \a h decisions (0: no horizon). */
 	void set_horizon(long h) { horizon = h; }

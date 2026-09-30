@@ -1291,14 +1291,7 @@ long MLNodeServer::collect(const IntervalVector& init_box, double obj_init_bound
 
 			try {
 				int var = decide(*c, sp);
-				// With a depth limit the bisector takes over below it. A guard
-				// must have watched its primary on the decided nodes too, or
-				// its horizon is spent on the first nodes below the limit,
-				// scattered over subtrees whose parent variable the oracle
-				// chose -- and it never sees the hijack (ship-1).
-				if (var>=0 && oracle_max_depth>0 && guard()!=NULL) {
-					try { bsc.choose_var(*c); } catch (NoBisectableVariableException&) { }
-				}
+				if (var>=0 && guard()!=NULL) guard()->not_primary(*c);
 				pair<Cell*,Cell*> new_cells = (var>=0) ?
 						c->bisect(BisectionPoint(var, default_bisect_ratio, true)) :
 						bsc.bisect(*c);
@@ -1442,6 +1435,7 @@ long MLNodeServer::run_interactive(const IntervalVector& init_box, double obj_in
 
 			/*---------------- and carry it out ----------------*/
 			try {
+				if (var>=0 && !bsc.too_small(c->box, var) && guard()!=NULL) guard()->not_primary(*c);
 				pair<Cell*,Cell*> new_cells = (var>=0 && !bsc.too_small(c->box, var)) ?
 						c->bisect(BisectionPoint(var, default_bisect_ratio, true)) :
 						bsc.bisect(*c);

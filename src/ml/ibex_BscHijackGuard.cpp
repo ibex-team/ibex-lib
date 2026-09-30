@@ -37,17 +37,25 @@ BscHijackGuard::BscHijackGuard(Bsc& primary, Bsc& fallback, const Vector& prec,
 
 BisectionPoint BscHijackGuard::choose_var(const Cell& cell) {
 
-	st.decisions++;
+	BxpPrimaryChoice* pc = (BxpPrimaryChoice*) const_cast<BoxProperties&>(cell.prop)[bxp_id];
+
+	// The parent was bisected, but not by the primary (an oracle, a forced
+	// bisection): nothing to observe here. Not a decision either, so that the
+	// horizon counts the nodes where the hijack can be seen.
+	bool unobserved = pc!=NULL && cell.bisected_var>=0 && pc->var<0;
+
+	if (!unobserved) st.decisions++;
 
 	if (st.switched) return fallback.choose_var(cell);
 
 	BisectionPoint bp = primary.choose_var(cell);
 
+	if (unobserved) { pc->var = bp.var; return bp; }
+
 	// past the horizon the primary has the last word: stop watching
 	if (horizon>0 && st.decisions>horizon) return bp;
 
 	int prev = cell.bisected_var;
-	BxpPrimaryChoice* pc = (BxpPrimaryChoice*) const_cast<BoxProperties&>(cell.prop)[bxp_id];
 	if (pc!=NULL) { prev = pc->var; pc->var = bp.var; }
 
 	char flag = (prev>=0 && bp.var==prev) ? 1 : 0;
@@ -64,6 +72,11 @@ BisectionPoint BscHijackGuard::choose_var(const Cell& cell) {
 	}
 
 	return bp;
+}
+
+void BscHijackGuard::not_primary(const Cell& cell) const {
+	BxpPrimaryChoice* pc = (BxpPrimaryChoice*) const_cast<BoxProperties&>(cell.prop)[bxp_id];
+	if (pc!=NULL) pc->var = -1;
 }
 
 void BscHijackGuard::add_property(const IntervalVector& init_box, BoxProperties& map) {
