@@ -113,7 +113,7 @@ MLNodeServer::MLNodeServer(const System& sys,
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
 			oracle_calls(0), oracle_fallbacks(0),
-			model(NULL), oracle(false), oracle_depth(false), stats(new OpenStatistics()),
+			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), stats(new OpenStatistics()),
 			last_time(0), last_decisions(0), last_status("not run") {
 
 	RNG::srand((int) random_seed);
@@ -1173,9 +1173,43 @@ int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 		p.depth = (int) c.depth;
 		p.last_bisected_var = c.bisected_var;
 		if (oracle_depth) { p.prune = false; p.budget_start = 0; }  // same footing for all
+		if (oracle_sb) { p.prune = false; p.budget_start = 0; p.budget = 2; } // the two children only
 		SampleResult r = evaluate(c.box, p);         // leaves the search untouched
 		oracle_calls++;
 		int best = -1; long best_nodes = 0;
+		if (oracle_sb) {
+			const int gv = ext_goal_var();
+			int best_pruned = -1; double best_vol = POS_INFINITY;
+			for (size_t k=0; k<r.labels.size(); k++) {
+				const DiveResult& d = r.labels[k];
+				if (!d.valid) continue;
+				int np = (d.left_status!=OPEN) + (d.right_status!=OPEN);
+				// log of the total volume of the open children, relative to the node
+				double lv[2] = { NEG_INFINITY, NEG_INFINITY };
+				const IntervalVector* kid[2] = { &d.left, &d.right };
+				NodeStatus st[2] = { d.left_status, d.right_status };
+				for (int q=0; q<2; q++) {
+					if (st[q]!=OPEN) continue;
+					double v = 0;
+					for (int j=0; j<c.box.size(); j++) {
+						if (j==gv) continue;
+						double dp = c.box[j].diam(), dk = (*kid[q])[j].diam();
+						if (!(dp>0) || dp==POS_INFINITY || dk==POS_INFINITY) continue;
+						v += std::log(std::max(dk, 1e-300) / dp);
+					}
+					lv[q] = v;
+				}
+				double m = std::max(lv[0], lv[1]);
+				double vol = (m==NEG_INFINITY) ? NEG_INFINITY
+						: m + std::log(std::exp(lv[0]-m) + std::exp(lv[1]-m));
+				// strict: ties go to the earlier candidate, i.e. LSmear's order
+				if (np > best_pruned || (np==best_pruned && vol < best_vol)) {
+					best = d.var; best_pruned = np; best_vol = vol;
+				}
+			}
+			if (best<0) oracle_fallbacks++;
+			return best;
+		}
 		if (oracle_depth) {
 			int best_depth = 0;
 			for (size_t k=0; k<r.labels.size(); k++) {

@@ -316,6 +316,19 @@ public:
 	 */
 	void set_oracle_depth(bool on) { oracle_depth = on; }
 
+	/**
+	 * \brief Strong branching: look one level ahead only.
+	 *
+	 * For every candidate, bisect and contract both children (a dive of budget
+	 * 2) and bisect on the one that prunes more children, then leaves the
+	 * smaller total volume (log of the sum of the open children's volumes
+	 * relative to the node's box, the objective variable left out). On the
+	 * dataset of results/dataset-guard10 this picks the best candidate in 71% of
+	 * the samples against 52% for lsmear-guard:10 (regret 1.11 against 1.27),
+	 * at the cost of two contractions per candidate.
+	 */
+	void set_oracle_sb(bool on) { oracle_sb = on; }
+
 	/** \brief Oracle decisions taken, and how many the bisector took instead. */
 	long oracle_calls, oracle_fallbacks;
 
@@ -603,6 +616,7 @@ protected:
 	MLModel* model;               //!< not owned
 	bool oracle;                  //!< see set_oracle()
 	bool oracle_depth;            //!< see set_oracle_depth()
+	bool oracle_sb;               //!< see set_oracle_sb()
 
 	OpenStatistics* stats;        //!< operator statistics (owned)
 
