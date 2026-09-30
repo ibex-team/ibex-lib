@@ -104,5 +104,5 @@ dentro de cada dive sí.
 
 Geometric mean over the 9 it closes: 0.55 (0.71 without dnieper). The
 headroom survives the fix; the oracle now closes mconcon and ex6_2_8. ship-1
-is out of its time budget (270 nodes, the dives are expensive there), not a
-hijack.
+runs out of time at 270 nodes (about 1 s per node of dives there); why the
+dives are so slow on it is not checked yet.
