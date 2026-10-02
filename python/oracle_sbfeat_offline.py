@@ -159,9 +159,17 @@ def load():
 
 
 def evaluate(R, score, name):
+    """Geometric regret against the best (per instance, then geo), % best, %
+    >=2x; and the ratio that matters for a rule replacing the base bisector
+    everywhere: per instance, sum of the chosen candidates' dive nodes over the
+    sum for the base's own choice (geo over instances), with the share of
+    instances where it is > 1."""
     V = R.loc[R.assign(s=score).groupby("sample").s.idxmax()]
     per = V.groupby("instance").r.apply(geo)
-    return name, geo(per), (V.r <= 1.0001).mean(), (V.r >= 2).mean()
+    base = R[R.guard].groupby("sample").r.first()
+    V = V.set_index("sample").join(base.rename("rb"), how="inner")
+    ratio = V.groupby("instance").apply(lambda g: g.r.sum() / g.rb.sum())
+    return name, geo(per), (V.r <= 1.0001).mean(), (V.r >= 2).mean(), geo(ratio), (ratio > 1.0001).mean()
 
 
 def main():
@@ -181,9 +189,9 @@ def main():
             m = HistGradientBoostingRegressor(max_iter=300, learning_rate=0.05, max_leaf_nodes=31, random_state=0)
             m.fit(X[tr], Y[tr]); pred[te] = m.predict(X[te])
         out.append(evaluate(R, -pred, fname))
-    print("\nfuera de fold, regret contra las etiquetas de dive (geo por instancia; elige el mejor; >=2x):")
-    for name, gi, eq, ge2 in out:
-        print("  %-30s %.3f  %3.0f%%  %3.0f%%" % (name, gi, 100 * eq, 100 * ge2))
+    print("\nfuera de fold: regret geo vs el mejor; elige el mejor; >=2x;  suma vs elección del bisector base (geo por instancia); instancias donde suma > base")
+    for name, gi, eq, ge2, rb, worse in out:
+        print("  %-30s %.3f  %3.0f%%  %3.0f%%    %.3f  %3.0f%%" % (name, gi, 100 * eq, 100 * ge2, rb, 100 * worse))
 
 
 if __name__ == "__main__":

@@ -20,10 +20,8 @@ Samples collected along SB's own trajectory (`--collect --oracle
    `python/sb_regret_by_instance.py`): schwefel5 1.153, mconcon 1.071,
    dipigri 1.093, ex8_5_6 1.142.
 2. But summed, node by node, SB's choice is worse than lsmear-lffix's own
-   choice on the same nodes (sum of dive nodes, SB vs lffix choice):
-   schwefel5 5606 vs 4774, ex8_5_6 4804 vs 4184, mconcon 4632 vs 4504; and
-   on lffix's trajectory too on dipigri and ex8_5_6. The geometric mean hides
-   it: SB is better on many small subtrees and worse on the large ones.
+   choice on these nodes (sum of dive nodes, SB vs lffix choice):
+   schwefel5 5606 vs 4774, ex8_5_6 4804 vs 4184, mconcon 4632 vs 4504.
 3. The trees go deep: max sampled depth 148 (mconcon; lffix: 8) and 85
    (schwefel5; lffix: 65). A per-decision loss of a few percent over lffix
    compounds level after level.
@@ -33,9 +31,21 @@ Samples collected along SB's own trajectory (`--collect --oracle
    (tolerance 1e-6, kept in the code) barely changes it (mconcon 564,
    schwefel5 38654).
 
-So the offline metric was the wrong one. A rule replacing the base bisector
-everywhere must not be worse than the base's choice where subtrees are large
-(the policy-improvement condition): measure the arithmetic sum of label
-nodes against the base's choice, not the geometric regret against the best.
-The one-step oracle meets it exactly (0.55x); SB and the models imitating it
-do not.
+5. On lsmear-lffix's trajectory the same sum says SB is better than the base
+   (dataset-lffix, `python/oracle_sbfeat_offline.py`, last two columns: sum
+   of the choice's dive nodes over the base choice's, geo over instances, and
+   share of instances above 1):
+
+       oracle            0.757   0%
+       SB rule           0.846   8%
+       model A+P         0.848   6%
+       model A+P+P2      0.842  10%
+       model A           1.035  36%
+
+So it is a distribution shift, the classic one of imitation: judged on the
+nodes the base visits, SB improves on the base; deciding everywhere, it
+visits other nodes, where it is worse than the base (schwefel5 5606 vs 4774),
+and the deep trees compound it. Any offline score on dataset-lffix has the
+same blind spot. What would close it: collect on the rule's own trajectory and
+label with the base continuation, retrain on the union (DAgger); and/or
+deviate from the base only where the predicted gain is large.
