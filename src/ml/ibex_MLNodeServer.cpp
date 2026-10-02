@@ -165,7 +165,8 @@ MLNodeServer::ProbeResult MLNodeServer::hc4_probe(const IntervalVector& ext_box,
 		probe_owned.push_back(hull);
 		lp_ctc = new CtcCompo(*hc4_ctc, *hull);
 	}
-	Ctc& pc = ctc_kind==PROBE_FULL ? ctc : (ctc_kind==PROBE_LP ? *lp_ctc : *hc4_ctc);
+	Ctc& pc = (ctc_kind==PROBE_FULL || ctc_kind==PROBE_PROC) ? ctc : (ctc_kind==PROBE_LP ? *lp_ctc : *hc4_ctc);
+	State st = save();   // PROC moves the loup: the pieces of one candidate see each other's, the search does not
 	Timer timer; timer.start();
 	ProbeResult r; r.empties = 0; r.logvol = NEG_INFINITY; r.partners = partners;
 	const int gv = ext_goal_var();
@@ -183,8 +184,16 @@ MLNodeServer::ProbeResult MLNodeServer::hc4_probe(const IntervalVector& ext_box,
 			double w = x.diam()/parts;
 			b[dims[d]] = Interval(x.lb()+k*w, k==parts-1 ? x.ub() : x.lb()+(k+1)*w) & x;
 		}
-		pc.contract(b);
-		if (b.is_empty()) { r.empties++; continue; }
+		if (ctc_kind==PROBE_PROC) {
+			Cell* cell = new_cell(b);
+			NodeStatus stt;
+			try { stt = process(*cell, NULL); } catch (...) { delete cell; throw; }
+			b = cell->box; delete cell;
+			if (stt!=OPEN) { r.empties++; continue; }
+		} else {
+			pc.contract(b);
+			if (b.is_empty()) { r.empties++; continue; }
+		}
 		double v = 0;
 		for (int j=0; j<ext_box.size(); j++) {
 			if (j==gv) continue;
@@ -195,6 +204,7 @@ MLNodeServer::ProbeResult MLNodeServer::hc4_probe(const IntervalVector& ext_box,
 		r.logvol = (r.logvol==NEG_INFINITY) ? v
 				: std::max(r.logvol, v) + std::log(1 + std::exp(-std::fabs(r.logvol-v)));
 	}
+	if (ctc_kind==PROBE_PROC) restore(st);
 	timer.stop(); r.time = timer.get_time();
 	return r;
 }

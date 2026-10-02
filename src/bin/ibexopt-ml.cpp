@@ -185,7 +185,8 @@ bool run_command(MLNodeServer& server, const JsonValue& cmd,
 				cmd.get_int("dims", 1), cmd.get_int("parts", 4),
 				cmd.get_bool("include_goal", defaults.include_goal), cmd.get_int("topk", defaults.topk),
 				cmd.get_string("ctc", "hc4")=="lp" ? MLNodeServer::PROBE_LP :
-				(cmd.get_string("ctc", "hc4")=="full" ? MLNodeServer::PROBE_FULL : MLNodeServer::PROBE_HC4));
+				(cmd.get_string("ctc", "hc4")=="full" ? MLNodeServer::PROBE_FULL :
+				(cmd.get_string("ctc", "hc4")=="proc" ? MLNodeServer::PROBE_PROC : MLNodeServer::PROBE_HC4)));
 		out.obj();
 		out.kv("ok", true);
 		out.key("probes").arr();
@@ -299,7 +300,7 @@ int main(int argc, char** argv) {
 	args::Flag sb_vol_only(parser, "sb-vol-only", "With --sb-ratio: judge by the open volume alone, also when strong branching prunes more children.", {"sb-vol-only"});
 	args::ValueFlag<int> probe_dims(parser, "int", "With --oracle-score hc4: dimensions reduced per probe (the candidate plus N-1 partners from LSmear's ranking). Default: 1.", {"probe-dims"});
 	args::ValueFlag<int> probe_parts(parser, "int", "With --oracle-score hc4: slices per reduced dimension. Default: 4.", {"probe-parts"});
-	args::ValueFlag<string> probe_ctc(parser, "hc4|lp|full", "With --oracle-score hc4: the probe's contractor. hc4 (default); lp: one HC4 pass then one polytope hull (XTaylor+affine); full: the search's contractor.", {"probe-ctc"});
+	args::ValueFlag<string> probe_ctc(parser, "hc4|lp|full|proc", "With --oracle-score hc4: the probe's contractor. hc4 (default); lp: one HC4 pass then one polytope hull (XTaylor+affine); full: the search's contractor; proc: contraction and upper bounding, as a step of a dive.", {"probe-ctc"});
 	args::ValueFlag<long> guard_horizon(parser, "int", "With --bisector lsmear-guard: only switch to round-robin within the first N decisions. Default: 0 (no horizon).", {"guard-horizon"});
 	args::ValueFlag<string> bisector_arg(parser, "name", "Bisector to use. One of: "
 			+ MLOptimizerConfig::bisector_names() + ". Default: lsmear (what ibexopt uses).", {"bisector"});
@@ -443,8 +444,9 @@ int main(int argc, char** argv) {
 		if (probe_ctc) {
 			if (probe_ctc.Get()=="hc4") server->set_probe_ctc(MLNodeServer::PROBE_HC4);
 			else if (probe_ctc.Get()=="lp") server->set_probe_ctc(MLNodeServer::PROBE_LP);
-			else if (probe_ctc.Get()=="full") server->set_probe_ctc(MLNodeServer::PROBE_FULL);
-			else { cerr << "--probe-ctc: hc4, lp or full" << endl; delete server; delete sys; return 1; }
+ 			else if (probe_ctc.Get()=="full") server->set_probe_ctc(MLNodeServer::PROBE_FULL);
+			else if (probe_ctc.Get()=="proc") server->set_probe_ctc(MLNodeServer::PROBE_PROC);
+			else { cerr << "--probe-ctc: hc4, lp, full or proc" << endl; delete server; delete sys; return 1; }
 		}
 		if (oracle_score) {
 			if (oracle_score.Get()=="depth") server->set_oracle_depth(true);

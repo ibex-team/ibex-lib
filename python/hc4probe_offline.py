@@ -20,7 +20,7 @@ ROOT = os.path.join(HERE, "..")
 DATA = os.path.join(ROOT, "results", os.environ.get("DATASET", "dataset-lffix"))
 BIN = os.environ.get("BIN", os.path.join(ROOT, "build-fix", "bin", "ibexopt-ml"))
 CONFIGS = [c for c in (("hc4", 1, 2), ("hc4", 1, 4), ("hc4", 1, 8), ("hc4", 2, 2), ("hc4", 2, 4),
-                       ("lp", 1, 2), ("lp", 1, 4), ("full", 1, 2))
+                       ("lp", 1, 2), ("lp", 1, 4), ("full", 1, 2), ("proc", 1, 2))
            if not os.environ.get("CONFIGS") or "%s-%dx%d" % c in os.environ["CONFIGS"].split(",")]
 
 

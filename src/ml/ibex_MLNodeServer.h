@@ -367,7 +367,7 @@ public:
 
 	/** \brief Contractor of the probe: HC4 alone; one HC4 pass then one
 	 *  polytope hull (XTaylor+affine), no ACID, no fixpoint; the search's own. */
-	enum { PROBE_HC4=0, PROBE_LP=1, PROBE_FULL=2 };
+	enum { PROBE_HC4=0, PROBE_LP=1, PROBE_FULL=2, PROBE_PROC=3 };  // PROC: process() -- contraction and upper bounding, as a dive step
 	void set_probe_ctc(int k) { probe_ctc = k; }
 
 	/**
