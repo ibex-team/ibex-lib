@@ -90,13 +90,35 @@ def spread(l, parent, gv, var):
     return list(per.min(axis=0)) + list(per.max(axis=0))
 
 
+def probe2(c, parent, gv, lb0, top):
+    """Two-level probe (python/probe2_offline.py): pruned grandchildren (of 4),
+    log total volume of the open ones (-100 if none), and the rise of the goal
+    lower bound over the open ones (min, max; 1 if all pruned)."""
+    lv, rise, npr = [], [], 0
+    for g in c["grand"]:
+        if g["status"] != "open" or not g["box"]:
+            npr += 1; continue
+        lv.append(logvol(g["box"], parent, gv))
+        if gv >= 0 and math.isfinite(lb0) and math.isfinite(top) and top > lb0:
+            rise.append(min(1.0, max(0.0, (g["box"][gv][0] - lb0) / (top - lb0))))
+        else:
+            rise.append(0.0)
+    vol = float(np.logaddexp.reduce(lv)) if lv else -100.0
+    return [npr, vol, min(rise) if rise else 1.0, max(rise) if rise else 1.0]
+
+
 def load():
     fam = {l.split()[0][:-4]: l.split()[2] for l in open(os.path.join(DATA, "instances.txt"))}
-    XA, XP, XS, Y, rows = [], [], [], [], []
+    XA, XP, XS, X2, Y, rows = [], [], [], [], [], []
+    P2DIR = os.path.join(DATA, "probe2")
     sid = 0
     for f in sorted(glob.glob(os.path.join(DATA, "samples", "*.jsonl"))):
         inst = os.path.basename(f)[:-6]
-        for line in open(f):
+        p2f = os.path.join(P2DIR, inst + ".jsonl")
+        p2 = {json.loads(l)["sample"]: json.loads(l)["cands"] for l in open(p2f)} if os.path.exists(p2f) else None
+        if os.path.isdir(P2DIR) and p2 is None:
+            continue   # compare on the same samples
+        for ls, line in enumerate(open(f)):
             s = json.loads(line)
             L = [l for l in s["labels"] if l["valid"]]
             done = [l["nodes"] for l in L if not l["censored"]]
@@ -114,18 +136,26 @@ def load():
             rel = np.stack([P[:, 0] - P[:, 0].max(), P[:, 1] - P[:, 1].min(), P[:, 2] - P[:, 2].min(),
                             P[:, 3] - P[:, 3].min(), P[:, 4] - P[:, 4].max(), P[:, 5] - P[:, 5].max()], axis=1)
             S = np.array([spread(l, parent, gv, l["var"]) for l in L])
+            if p2 is not None:
+                cm = {c["var"]: c for c in p2[ls]}
+                Q = np.array([probe2(cm[l["var"]], parent, gv, lb0, top) for l in L])
+            else:
+                Q = np.zeros((len(L), 4))
+            Qrel = np.stack([Q[:, 0] - Q[:, 0].max(), Q[:, 1] - Q[:, 1].min(),
+                             Q[:, 2] - Q[:, 2].max(), Q[:, 3] - Q[:, 3].max()], axis=1)
             Srel = S - S.min(axis=0)
             for k, l in enumerate(L):
                 XS.append(np.concatenate([S[k], Srel[k]]))
+                X2.append(np.concatenate([Q[k], Qrel[k]]))
                 y = l["nodes"] if not l["censored"] else 2 * l["budget_used"]
                 XA.append(Xv[l["var"]]); XP.append(np.concatenate([P[k], rel[k], [len(L)]]))
                 Y.append(math.log(max(y, 1) / best))
                 rows.append((sid, inst, fam.get(inst, inst), y / best, l["var"] == n.get("bisect_var"),
-                             100.0 * P[k, 0] - P[k, 3]))
+                             100.0 * P[k, 0] - P[k, 3], 100.0 * Q[k, 0] - Q[k, 1]))
             sid += 1
-    R = pd.DataFrame(rows, columns=["sample", "instance", "family", "r", "guard", "sb"])
+    R = pd.DataFrame(rows, columns=["sample", "instance", "family", "r", "guard", "sb", "sb2"])
     XA = np.nan_to_num(np.asarray(XA, float), nan=0.0, posinf=1e12, neginf=-1e12)
-    return XA, np.asarray(XP, float), np.asarray(XS, float), np.asarray(Y), R
+    return XA, np.asarray(XP, float), np.asarray(XS, float), np.asarray(X2, float), np.asarray(Y), R
 
 
 def evaluate(R, score, name):
@@ -135,14 +165,17 @@ def evaluate(R, score, name):
 
 
 def main():
-    XA, XP, XS, Y, R = load()
+    XA, XP, XS, X2, Y, R = load()
     print("%d filas, %d muestras, %d instancias, %d familias" % (len(R), R["sample"].nunique(), R.instance.nunique(), R.family.nunique()))
     out = [evaluate(R, -R.r.values, "oráculo (la etiqueta)"),
            evaluate(R, R.sb.values, "strong branching (regla)"),
+           evaluate(R, R.sb2.values, "SB 2 niveles (regla)"),
            evaluate(R, R.guard.astype(float).values, "bisector de la trayectoria")]
     for fname, X in (("modelo A", XA), ("modelo P (sondeo)", XP), ("modelo A+P", np.hstack([XA, XP])),
                      ("modelo S (propagación)", XS), ("modelo P+S", np.hstack([XP, XS])),
-                     ("modelo A+P+S", np.hstack([XA, XP, XS]))):
+                     ("modelo A+P+S", np.hstack([XA, XP, XS])),
+                     ("modelo P2 (2 niveles)", X2), ("modelo P+P2", np.hstack([XP, X2])),
+                     ("modelo A+P+P2", np.hstack([XA, XP, X2]))):
         pred = np.zeros(len(Y))
         for tr, te in GroupKFold(5).split(X, Y, R.family):
             m = HistGradientBoostingRegressor(max_iter=300, learning_rate=0.05, max_leaf_nodes=31, random_state=0)
