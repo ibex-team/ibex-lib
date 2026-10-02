@@ -74,3 +74,28 @@ The schwefel5 blow-up is gone (494 vs 36910) and ex6_2_8 no longer loses;
 mconcon still does (deviations on "more pruned children", which r does not
 gate). Nodes only: every node is still probed, so time is far above lffix
 (dnieper 25 s vs 6 s, mconcon 12 s vs 0.1 s).
+
+`--sb-vol-only` (judge by open volume alone, also when SB prunes more):
+`sb-ratio-volonly-10.txt`. mconcon is not fixed (r=0.5: 564, r=0.1: 336, vs
+18); geo/lffix 0.87 and 0.91 (0.58 and 0.65 without mconcon): no better than
+the default rule.
+
+## Offline: can a model tell when to deviate, without probes?
+
+`python/deviate_offline.py` (dataset-lffix): predict t_j = log(y_j/y_base)
+per candidate, deviate to the argmin only if the prediction is below
+log(thr). Out of fold, by family; sum of the chosen candidates' dive nodes
+over the base's (geo over instances), instances above 1, deviation rate:
+
+    oracle                              0.757    0%   46%
+    conservative oracle thr=0.5         0.855    0%    9%
+    conservative oracle thr=0.7         0.773    0%   26%
+    model A (30 features)  thr=0.9      0.991   21%   12%
+    model A                thr=0.7      1.002    5%    1%
+    model A+P (probe)      thr=0.9      0.837    3%   23%
+    model A+P              thr=0.7      0.854    2%   15%
+
+The headroom of a conservative rule is real (deviating on 9% of the nodes is
+worth 0.855), but the 30 cheap features cannot find those nodes: the model
+either never deviates or deviates at random. With the probe it gets most of
+it, which is what --sb-ratio already does end to end, at the probe's cost.

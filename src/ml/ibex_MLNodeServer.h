@@ -346,6 +346,10 @@ public:
 	 */
 	void set_sb_ratio(double r) { sb_ratio = r; }
 
+	/** \brief With set_sb_ratio(): judge by the open volume alone (a pruned
+	 *  child has none), also when strong branching prunes more children. */
+	void set_sb_vol_only(bool b) { sb_vol_only = b; }
+
 	long oracle_deviations;       //!< conservative mode: decisions taken from the base
 
 	/** \brief Oracle decisions taken, and how many the bisector took instead. */
@@ -638,6 +642,7 @@ protected:
 	bool oracle_sb;               //!< see set_oracle_sb()
 	int oracle_max_depth;         //!< see set_oracle_max_depth()
 	double sb_ratio;              //!< see set_sb_ratio()
+	bool sb_vol_only;             //!< see set_sb_vol_only()
 
 	OpenStatistics* stats;        //!< operator statistics (owned)
 

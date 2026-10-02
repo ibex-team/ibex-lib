@@ -1,0 +1,12 @@
+mconcon | r=0.5 comp 564 17.5s dev=155/282 | r=0.1 comp 336 12.7s dev=62/168 |
+ship-1 | r=0.5 comp 538 13.0s dev=47/269 | r=0.1 comp 122 3.1s dev=2/61 |
+dnieper | r=0.5 comp 28 39.9s dev=11/14 | r=0.1 comp 162 123.1s dev=28/81 |
+ex6_2_8 | r=0.5 comp 13100 31.5s dev=253/6550 | r=0.1 comp 13172 32.0s dev=201/6586 |
+schwefel5 | r=0.5 comp 536 2.2s dev=70/268 | r=0.1 comp 608 2.4s dev=43/304 |
+avgasb | r=0.5 comp 38 0.9s dev=8/19 | r=0.1 comp 46 0.9s dev=2/23 |
+dipigri | r=0.5 comp 158 1.9s dev=19/79 | r=0.1 comp 168 2.0s dev=14/84 |
+avgasa | r=0.5 comp 132 2.3s dev=23/66 | r=0.1 comp 156 2.7s dev=15/78 |
+dualc2 | r=0.5 comp 116 1.9s dev=14/58 | r=0.1 comp 128 1.9s dev=8/64 |
+ex8_5_6 | r=0.5 comp 1332 15.5s dev=143/666 | r=0.1 comp 1460 16.4s dev=88/730 |
+
+[exited with code 0]

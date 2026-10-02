@@ -113,7 +113,7 @@ MLNodeServer::MLNodeServer(const System& sys,
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
 			oracle_calls(0), oracle_fallbacks(0),
-			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), sb_ratio(0), oracle_deviations(0), stats(new OpenStatistics()),
+			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), sb_ratio(0), sb_vol_only(false), oracle_deviations(0), stats(new OpenStatistics()),
 			last_time(0), last_decisions(0), last_status("not run") {
 
 	RNG::srand((int) random_seed);
@@ -1225,8 +1225,10 @@ int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 			// strong branching's is clearly better -- more pruned children, or
 			// as many and at most sb_ratio of the base's open volume.
 			if (sb_ratio>0 && best>=0 && best!=base_var) {
-				bool clear = base_pruned>=0 && (best_pruned > base_pruned ||
-						(best_pruned==base_pruned && best_vol <= base_vol + std::log(sb_ratio)));
+				bool clear = base_pruned>=0 && (sb_vol_only ?
+						best_vol <= base_vol + std::log(sb_ratio) :
+						(best_pruned > base_pruned ||
+						(best_pruned==base_pruned && best_vol <= base_vol + std::log(sb_ratio))));
 				if (!clear) return -1;
 				oracle_deviations++;
 			}
