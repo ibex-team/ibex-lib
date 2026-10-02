@@ -146,6 +146,7 @@ instead of every 100th:
     dnieper    434  8.3s     654  14.6s    434  28.3s
     mconcon    18   0.1s     18   0.1s     26   1.2s
     schwefel5  698  0.8s     698  0.9s     682  2.1s
+    dipigri    212  0.6s     224  0.7s     216  1.5s
 
 ship-1's gain under strong branching (24 nodes) was upper bounding: its 2n
 probes per node are 2n loup-finder calls. dnieper's (28 vs 434) is not: more
