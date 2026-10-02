@@ -337,6 +337,17 @@ public:
 	 */
 	void set_oracle_max_depth(int d) { oracle_max_depth = d; }
 
+	/**
+	 * \brief Conservative strong branching (--oracle-score sb): bisect where
+	 * strong branching says only when its probe is clearly better than the
+	 * base bisector's choice -- more pruned children, or as many and at most
+	 * \a r times the open volume; otherwise the base decides. 0: always strong
+	 * branching (the default).
+	 */
+	void set_sb_ratio(double r) { sb_ratio = r; }
+
+	long oracle_deviations;       //!< conservative mode: decisions taken from the base
+
 	/** \brief Oracle decisions taken, and how many the bisector took instead. */
 	long oracle_calls, oracle_fallbacks;
 
@@ -626,6 +637,7 @@ protected:
 	bool oracle_depth;            //!< see set_oracle_depth()
 	bool oracle_sb;               //!< see set_oracle_sb()
 	int oracle_max_depth;         //!< see set_oracle_max_depth()
+	double sb_ratio;              //!< see set_sb_ratio()
 
 	OpenStatistics* stats;        //!< operator statistics (owned)
 

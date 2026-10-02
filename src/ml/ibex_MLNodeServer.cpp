@@ -113,7 +113,7 @@ MLNodeServer::MLNodeServer(const System& sys,
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
 			oracle_calls(0), oracle_fallbacks(0),
-			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), stats(new OpenStatistics()),
+			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), sb_ratio(0), oracle_deviations(0), stats(new OpenStatistics()),
 			last_time(0), last_decisions(0), last_status("not run") {
 
 	RNG::srand((int) random_seed);
@@ -1182,6 +1182,12 @@ int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 		if (oracle_sb) {
 			const int gv = ext_goal_var();
 			int best_pruned = -1; double best_vol = POS_INFINITY;
+			// the base bisector's own choice, for the conservative mode
+			int base_var = -1, base_pruned = -1; double base_vol = POS_INFINITY;
+			if (sb_ratio>0) {
+				try { base_var = bsc.choose_var(c).var; }
+				catch (NoBisectableVariableException&) { }
+			}
 			for (size_t k=0; k<r.labels.size(); k++) {
 				const DiveResult& d = r.labels[k];
 				if (!d.valid) continue;
@@ -1204,7 +1210,6 @@ int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 				double m = std::max(lv[0], lv[1]);
 				double vol = (m==NEG_INFINITY) ? NEG_INFINITY
 						: m + std::log(std::exp(lv[0]-m) + std::exp(lv[1]-m));
-				// strict: ties go to the earlier candidate, i.e. LSmear's order
 				// Candidates come ranked by LSmear: on a tie the earlier one
 				// stays. Without contraction every split halves the volume and
 				// the keys differ by rounding only (~1e-12), which otherwise
@@ -1213,8 +1218,18 @@ int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 				if (np > best_pruned || (np==best_pruned && vol < best_vol - 1e-6)) {
 					best = d.var; best_pruned = np; best_vol = vol;
 				}
+				if (d.var==base_var) { base_pruned = np; base_vol = vol; }
 			}
 			if (best<0) oracle_fallbacks++;
+			// Conservative: leave the base's choice only when the probe says
+			// strong branching's is clearly better -- more pruned children, or
+			// as many and at most sb_ratio of the base's open volume.
+			if (sb_ratio>0 && best>=0 && best!=base_var) {
+				bool clear = base_pruned>=0 && (best_pruned > base_pruned ||
+						(best_pruned==base_pruned && best_vol <= base_vol + std::log(sb_ratio)));
+				if (!clear) return -1;
+				oracle_deviations++;
+			}
 			return best;
 		}
 		if (oracle_depth) {

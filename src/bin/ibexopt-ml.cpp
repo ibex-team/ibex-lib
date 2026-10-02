@@ -275,6 +275,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<string> model_file(parser, "filename", "Branch with this model instead of the bisector (see MLModel for the format).", {"model"});
 	args::ValueFlag<double> grasp_alpha(parser, "float", "With --bisector lsmear-grasp: choose among the candidates >= alpha * the best LSmear impact. Default: 0.8.", {"grasp-alpha"});
 	args::ValueFlag<int> tabu_tenure(parser, "int", "With --bisector lsmear-tabu: a variable that captures LSmear (it wants the parent's variable again) is tabu for N levels along the branch. With lsmear-recent: the variables of the last N ancestors are tabu. Default: 2.", {"tabu-tenure"});
+	args::ValueFlag<double> sb_ratio_arg(parser, "float", "With --oracle-score sb: leave the bisector's choice only if strong branching prunes more children, or as many with at most this fraction of the open volume. Default: 0 (always strong branching).", {"sb-ratio"});
 	args::ValueFlag<long> guard_horizon(parser, "int", "With --bisector lsmear-guard: only switch to round-robin within the first N decisions. Default: 0 (no horizon).", {"guard-horizon"});
 	args::ValueFlag<string> bisector_arg(parser, "name", "Bisector to use. One of: "
 			+ MLOptimizerConfig::bisector_names() + ". Default: lsmear (what ibexopt uses).", {"bisector"});
@@ -411,6 +412,7 @@ int main(int argc, char** argv) {
 
 		if (oracle_arg) server->set_oracle(true);
 		if (oracle_depth_arg) server->set_oracle_max_depth(oracle_depth_arg.Get());
+		if (sb_ratio_arg) server->set_sb_ratio(sb_ratio_arg.Get());
 		if (oracle_score) {
 			if (oracle_score.Get()=="depth") server->set_oracle_depth(true);
 			else if (oracle_score.Get()=="sb") server->set_oracle_sb(true);
@@ -484,6 +486,7 @@ int main(int argc, char** argv) {
 			if (oracle_arg) {
 				out.kv("oracle_calls", server->oracle_calls);
 				out.kv("oracle_fallbacks", server->oracle_fallbacks);
+				out.kv("oracle_deviations", server->oracle_deviations);
 			}
 			if (server->guard_switched_at()>=-1) {
 				out.kv("guard_horizon", server->guard_horizon());
