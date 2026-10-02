@@ -12,6 +12,7 @@
 #endif
 
 #include "ibex_CtcCompo.h"
+#include "ibex_CtcHC4.h"
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_Timer.h"
 
@@ -113,7 +114,7 @@ MLNodeServer::MLNodeServer(const System& sys,
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
 			oracle_calls(0), oracle_fallbacks(0),
-			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), sb_ratio(0), sb_vol_only(false), oracle_deviations(0), stats(new OpenStatistics()),
+			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), sb_ratio(0), sb_vol_only(false), oracle_hc4(false), probe_dims(1), probe_parts(4), hc4_ctc(NULL), oracle_deviations(0), stats(new OpenStatistics()),
 			last_time(0), last_decisions(0), last_status("not run") {
 
 	RNG::srand((int) random_seed);
@@ -146,7 +147,58 @@ void MLNodeServer::collect_acid(Ctc& c) {
 		for (int i=0; i<compo->list.size(); i++) collect_acid(compo->list[i]);
 }
 
+MLNodeServer::ProbeResult MLNodeServer::hc4_probe(const IntervalVector& ext_box, int var,
+		const std::vector<int>& partners, int parts) {
+	if (hc4_ctc==NULL) hc4_ctc = new CtcHC4(get_ext_sys());
+	Timer timer; timer.start();
+	ProbeResult r; r.empties = 0; r.logvol = NEG_INFINITY; r.partners = partners;
+	const int gv = ext_goal_var();
+	std::vector<int> dims(1, var);
+	dims.insert(dims.end(), partners.begin(), partners.end());
+	const int n = (int) dims.size();
+	long total = 1; for (int d=0; d<n; d++) total *= parts;
+	std::vector<int> idx(n, 0);
+	for (long t=0; t<total; t++) {
+		IntervalVector b(ext_box);
+		long q = t;
+		for (int d=0; d<n; d++) {
+			int k = q % parts; q /= parts;
+			const Interval& x = ext_box[dims[d]];
+			double w = x.diam()/parts;
+			b[dims[d]] = Interval(x.lb()+k*w, k==parts-1 ? x.ub() : x.lb()+(k+1)*w) & x;
+		}
+		hc4_ctc->contract(b);
+		if (b.is_empty()) { r.empties++; continue; }
+		double v = 0;
+		for (int j=0; j<ext_box.size(); j++) {
+			if (j==gv) continue;
+			double dp = ext_box[j].diam(), dk = b[j].diam();
+			if (!(dp>0) || dp==POS_INFINITY || dk==POS_INFINITY) continue;
+			v += std::log(std::max(dk, 1e-300)/dp);
+		}
+		r.logvol = (r.logvol==NEG_INFINITY) ? v
+				: std::max(r.logvol, v) + std::log(1 + std::exp(-std::fabs(r.logvol-v)));
+	}
+	timer.stop(); r.time = timer.get_time();
+	return r;
+}
+
+std::vector<std::pair<int,MLNodeServer::ProbeResult> > MLNodeServer::hc4_probes(
+		const IntervalVector& ext_box, int dims, int parts, bool include_goal, int topk) {
+	std::vector<std::pair<int,ProbeResult> > out;
+	vector<int> cand = candidates(ext_box, include_goal, topk);   // ranked by LSmear
+	if (cand.empty()) return out;
+	for (size_t k=0; k<cand.size(); k++) {
+		std::vector<int> partners;
+		for (size_t q=0; q<cand.size() && (int) partners.size()<dims-1; q++)
+			if (cand[q]!=cand[k]) partners.push_back(cand[q]);
+		out.push_back(make_pair(cand[k], hc4_probe(ext_box, cand[k], partners, parts)));
+	}
+	return out;
+}
+
 MLNodeServer::~MLNodeServer() {
+	delete hc4_ctc;
 	// safe: no operator dereferences its Sts during destruction
 	delete stats;
 }
@@ -1170,6 +1222,38 @@ void MLNodeServer::write_outcome(JsonOut& out, const char* status, double time,
 int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 	if (oracle && oracle_max_depth>0 && (int) c.depth > oracle_max_depth)
 		return -1;                                   // deep: the bisector decides
+	if (oracle && oracle_hc4) {
+		std::vector<std::pair<int,ProbeResult> > pr = hc4_probes(c.box, probe_dims, probe_parts,
+				sp.include_goal, sp.topk);
+		oracle_calls++;
+		int base_var = -1;
+		if (sb_ratio>0) {
+			try { base_var = bsc.choose_var(c).var; }
+			catch (NoBisectableVariableException&) { }
+			bool in = false;
+			for (size_t k=0; k<pr.size(); k++) in |= pr[k].first==base_var;
+			if (base_var>=0 && !in) {
+				std::vector<int> partners;
+				for (size_t q=0; q<pr.size() && (int) partners.size()<probe_dims-1; q++) partners.push_back(pr[q].first);
+				pr.push_back(make_pair(base_var, hc4_probe(c.box, base_var, partners, probe_parts)));
+			}
+		}
+		int best = -1, best_e = -1; double best_v = POS_INFINITY;
+		int base_e = -1; double base_v = POS_INFINITY;
+		for (size_t k=0; k<pr.size(); k++) {
+			int e = pr[k].second.empties; double v = pr[k].second.logvol;
+			if (e > best_e || (e==best_e && v < best_v - 1e-6)) { best = pr[k].first; best_e = e; best_v = v; }
+			if (pr[k].first==base_var) { base_e = e; base_v = v; }
+		}
+		if (best<0) { oracle_fallbacks++; return -1; }
+		if (sb_ratio>0 && best!=base_var) {
+			bool clear = base_e>=0 && (sb_vol_only ? best_v <= base_v + std::log(sb_ratio)
+					: (best_e > base_e || (best_e==base_e && best_v <= base_v + std::log(sb_ratio))));
+			if (!clear) return -1;
+			oracle_deviations++;
+		}
+		return best;
+	}
 	if (oracle) {
 		SampleParams p = sp;
 		p.depth = (int) c.depth;

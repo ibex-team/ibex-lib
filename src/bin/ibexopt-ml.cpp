@@ -180,6 +180,24 @@ bool run_command(MLNodeServer& server, const JsonValue& cmd,
 		server.write_dive(out, d);
 		out.end_obj();
 
+	} else if (what=="probe") {
+		vector<pair<int,MLNodeServer::ProbeResult> > pr = server.hc4_probes(read_box(server, cmd),
+				cmd.get_int("dims", 1), cmd.get_int("parts", 4),
+				cmd.get_bool("include_goal", defaults.include_goal), cmd.get_int("topk", defaults.topk));
+		out.obj();
+		out.kv("ok", true);
+		out.key("probes").arr();
+		for (size_t k=0; k<pr.size(); k++) {
+			out.obj();
+			out.kv("var", pr[k].first);
+			out.kv("empties", pr[k].second.empties);
+			out.kv("logvol", pr[k].second.logvol);
+			out.kv("time", pr[k].second.time);
+			out.end_obj();
+		}
+		out.end_arr();
+		out.end_obj();
+
 	} else if (what=="candidates") {
 		vector<int> c = server.candidates(read_box(server, cmd),
 				cmd.get_bool("include_goal", defaults.include_goal),
@@ -277,6 +295,8 @@ int main(int argc, char** argv) {
 	args::ValueFlag<int> tabu_tenure(parser, "int", "With --bisector lsmear-tabu: a variable that captures LSmear (it wants the parent's variable again) is tabu for N levels along the branch. With lsmear-recent: the variables of the last N ancestors are tabu. Default: 2.", {"tabu-tenure"});
 	args::ValueFlag<double> sb_ratio_arg(parser, "float", "With --oracle-score sb: leave the bisector's choice only if strong branching prunes more children, or as many with at most this fraction of the open volume. Default: 0 (always strong branching).", {"sb-ratio"});
 	args::Flag sb_vol_only(parser, "sb-vol-only", "With --sb-ratio: judge by the open volume alone, also when strong branching prunes more children.", {"sb-vol-only"});
+	args::ValueFlag<int> probe_dims(parser, "int", "With --oracle-score hc4: dimensions reduced per probe (the candidate plus N-1 partners from LSmear's ranking). Default: 1.", {"probe-dims"});
+	args::ValueFlag<int> probe_parts(parser, "int", "With --oracle-score hc4: slices per reduced dimension. Default: 4.", {"probe-parts"});
 	args::ValueFlag<long> guard_horizon(parser, "int", "With --bisector lsmear-guard: only switch to round-robin within the first N decisions. Default: 0 (no horizon).", {"guard-horizon"});
 	args::ValueFlag<string> bisector_arg(parser, "name", "Bisector to use. One of: "
 			+ MLOptimizerConfig::bisector_names() + ". Default: lsmear (what ibexopt uses).", {"bisector"});
@@ -415,10 +435,13 @@ int main(int argc, char** argv) {
 		if (oracle_depth_arg) server->set_oracle_max_depth(oracle_depth_arg.Get());
 		if (sb_ratio_arg) server->set_sb_ratio(sb_ratio_arg.Get());
 		if (sb_vol_only) server->set_sb_vol_only(true);
+		if (probe_dims) server->set_probe_dims(probe_dims.Get());
+		if (probe_parts) server->set_probe_parts(probe_parts.Get());
 		if (oracle_score) {
 			if (oracle_score.Get()=="depth") server->set_oracle_depth(true);
 			else if (oracle_score.Get()=="sb") server->set_oracle_sb(true);
-			else if (oracle_score.Get()!="nodes") { cerr << "--oracle-score: nodes, depth or sb" << endl; delete server; delete sys; return 1; }
+			else if (oracle_score.Get()=="hc4") server->set_oracle_hc4(true);
+			else if (oracle_score.Get()!="nodes") { cerr << "--oracle-score: nodes, depth, sb or hc4" << endl; delete server; delete sys; return 1; }
 		}
 
 		if (model_file) {

@@ -346,6 +346,41 @@ public:
 	 */
 	void set_sb_ratio(double r) { sb_ratio = r; }
 
+	/**
+	 * \brief What hc4_probe() returns for one candidate.
+	 */
+	struct ProbeResult {
+		int empties;          //!< sub-boxes HC4 emptied (of parts^dims)
+		double logvol;        //!< log of the total volume left, relative to the box (goal var left out)
+		std::vector<int> partners;  //!< the other dimensions reduced
+		double time;
+	};
+
+	/**
+	 * \brief Drastic probe: cut the box into \a parts slices along \a var (and
+	 * along each of \a partners), run HC4 alone on every piece, and report
+	 * how many pieces vanish and how much volume is left. Much cheaper than a
+	 * strong-branching probe (no LP): parts^(1+partners) HC4 calls.
+	 */
+	ProbeResult hc4_probe(const IntervalVector& ext_box, int var,
+			const std::vector<int>& partners, int parts);
+
+	/**
+	 * \brief hc4_probe() on every candidate of the box; the partners are the
+	 * \a dims-1 best variables of LSmear's ranking other than the candidate.
+	 */
+	std::vector<std::pair<int,ProbeResult> > hc4_probes(const IntervalVector& ext_box,
+			int dims, int parts, bool include_goal=true, int topk=0);
+
+	/**
+	 * \brief Decide with hc4_probes() (--oracle-score hc4): the candidate that
+	 * empties most pieces, then leaves the least volume; conservative with
+	 * set_sb_ratio() as for strong branching.
+	 */
+	void set_oracle_hc4(bool on) { oracle_hc4 = on; }
+	void set_probe_dims(int d) { probe_dims = d; }
+	void set_probe_parts(int p) { probe_parts = p; }
+
 	/** \brief With set_sb_ratio(): judge by the open volume alone (a pruned
 	 *  child has none), also when strong branching prunes more children. */
 	void set_sb_vol_only(bool b) { sb_vol_only = b; }
@@ -642,6 +677,9 @@ protected:
 	bool oracle_sb;               //!< see set_oracle_sb()
 	int oracle_max_depth;         //!< see set_oracle_max_depth()
 	double sb_ratio;              //!< see set_sb_ratio()
+	bool oracle_hc4;              //!< see set_oracle_hc4()
+	int probe_dims, probe_parts;  //!< see set_probe_dims(), set_probe_parts()
+	Ctc* hc4_ctc;                 //!< HC4 alone on the extended system, built on first use
 	bool sb_vol_only;             //!< see set_sb_vol_only()
 
 	OpenStatistics* stats;        //!< operator statistics (owned)
