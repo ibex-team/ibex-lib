@@ -19,12 +19,14 @@ from oracle_sbfeat_offline import geo  # noqa
 ROOT = os.path.join(HERE, "..")
 DATA = os.path.join(ROOT, "results", os.environ.get("DATASET", "dataset-lffix"))
 BIN = os.environ.get("BIN", os.path.join(ROOT, "build-fix", "bin", "ibexopt-ml"))
-CONFIGS = [(1, 2), (1, 4), (1, 8), (2, 2), (2, 4)]
+CONFIGS = [c for c in (("hc4", 1, 2), ("hc4", 1, 4), ("hc4", 1, 8), ("hc4", 2, 2), ("hc4", 2, 4),
+                       ("lp", 1, 2), ("lp", 1, 4), ("full", 1, 2))
+           if not os.environ.get("CONFIGS") or "%s-%dx%d" % c in os.environ["CONFIGS"].split(",")]
 
 
 def run(path):
     inst = os.path.basename(path)[:-6]
-    outs = {c: os.path.join(DATA, "hc4probe", "%dx%d" % c, inst + ".jsonl") for c in CONFIGS}
+    outs = {c: os.path.join(DATA, "hc4probe", "%s-%dx%d" % c, inst + ".jsonl") for c in CONFIGS}
     todo = {c: o for c, o in outs.items() if not os.path.exists(o)}
     if not todo:
         return inst, 0
@@ -38,9 +40,9 @@ def run(path):
         for sid, line in enumerate(open(path)):
             s = json.loads(line); node = s["node"]
             srv.set_loup(node["loup"] if node["loup"] is not None else ibexml.INF)
-            for (d, p), f in fs.items():
+            for (cc, d, p), f in fs.items():
                 try:
-                    pr = srv._call(cmd="probe", box=node["box"], dims=d, parts=p)["probes"]
+                    pr = srv._call(cmd="probe", box=node["box"], dims=d, parts=p, ctc=cc)["probes"]
                 except ibexml.IbexError:
                     pr = []
                 f.write(json.dumps({"sample": sid, "probes": pr}) + "\n")
@@ -59,12 +61,12 @@ def score(rows, name):
 
 def evaluate():
     lines = []
-    for d, p in CONFIGS:
+    for cc, d, p in CONFIGS:
         rules = {"siempre": []}
         for r in (0.5, 0.25, 0.1):
             rules["conservador r=%.2f" % r] = []
         tsum = 0.0; tn = 0
-        for f in sorted(glob.glob(os.path.join(DATA, "hc4probe", "%dx%d" % (d, p), "*.jsonl"))):
+        for f in sorted(glob.glob(os.path.join(DATA, "hc4probe", "%s-%dx%d" % (cc, d, p), "*.jsonl"))):
             inst = os.path.basename(f)[:-6]
             samples = [json.loads(l) for l in open(os.path.join(DATA, "samples", inst + ".jsonl"))]
             for l in open(f):
@@ -94,7 +96,7 @@ def evaluate():
                             (best["empties"] == base["empties"] and best["logvol"] <= base["logvol"] + math.log(r)))
                     ch = best["var"] if (best["var"] != bv and clear) else bv
                     rules["conservador r=%.2f" % r].append((inst, y(L[ch]), yb, ch != bv))
-        lines.append("dims=%d parts=%d   (%.1f ms por candidato)" % (d, p, 1000 * tsum / max(tn, 1)))
+        lines.append("ctc=%s dims=%d parts=%d   (%.1f ms por candidato)" % (cc, d, p, 1000 * tsum / max(tn, 1)))
         for name, rows in rules.items():
             if rows: lines.append(score(rows, name))
     print("\n".join(lines))

@@ -363,14 +363,19 @@ public:
 	 * strong-branching probe (no LP): parts^(1+partners) HC4 calls.
 	 */
 	ProbeResult hc4_probe(const IntervalVector& ext_box, int var,
-			const std::vector<int>& partners, int parts);
+			const std::vector<int>& partners, int parts, int ctc_kind=PROBE_HC4);
+
+	/** \brief Contractor of the probe: HC4 alone; one HC4 pass then one
+	 *  polytope hull (XTaylor+affine), no ACID, no fixpoint; the search's own. */
+	enum { PROBE_HC4=0, PROBE_LP=1, PROBE_FULL=2 };
+	void set_probe_ctc(int k) { probe_ctc = k; }
 
 	/**
 	 * \brief hc4_probe() on every candidate of the box; the partners are the
 	 * \a dims-1 best variables of LSmear's ranking other than the candidate.
 	 */
 	std::vector<std::pair<int,ProbeResult> > hc4_probes(const IntervalVector& ext_box,
-			int dims, int parts, bool include_goal=true, int topk=0);
+			int dims, int parts, bool include_goal=true, int topk=0, int ctc_kind=PROBE_HC4);
 
 	/**
 	 * \brief Decide with hc4_probes() (--oracle-score hc4): the candidate that
@@ -680,6 +685,9 @@ protected:
 	bool oracle_hc4;              //!< see set_oracle_hc4()
 	int probe_dims, probe_parts;  //!< see set_probe_dims(), set_probe_parts()
 	Ctc* hc4_ctc;                 //!< HC4 alone on the extended system, built on first use
+	Ctc* lp_ctc;                  //!< HC4 then polytope hull, built on first use
+	int probe_ctc;                //!< see set_probe_ctc()
+	std::vector<void*> probe_owned;  //!< linearizers and hull behind lp_ctc
 	bool sb_vol_only;             //!< see set_sb_vol_only()
 
 	OpenStatistics* stats;        //!< operator statistics (owned)

@@ -13,6 +13,10 @@
 
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcHC4.h"
+#include "ibex_CtcPolytopeHull.h"
+#include "ibex_LinearizerCompo.h"
+#include "ibex_LinearizerXTaylor.h"
+#include "ibex_LinearizerAffine2.h"
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_Timer.h"
 
@@ -114,7 +118,7 @@ MLNodeServer::MLNodeServer(const System& sys,
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
 			oracle_calls(0), oracle_fallbacks(0),
-			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), sb_ratio(0), sb_vol_only(false), oracle_hc4(false), probe_dims(1), probe_parts(4), hc4_ctc(NULL), oracle_deviations(0), stats(new OpenStatistics()),
+			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), sb_ratio(0), sb_vol_only(false), oracle_hc4(false), probe_dims(1), probe_parts(4), hc4_ctc(NULL), lp_ctc(NULL), probe_ctc(PROBE_HC4), oracle_deviations(0), stats(new OpenStatistics()),
 			last_time(0), last_decisions(0), last_status("not run") {
 
 	RNG::srand((int) random_seed);
@@ -148,8 +152,20 @@ void MLNodeServer::collect_acid(Ctc& c) {
 }
 
 MLNodeServer::ProbeResult MLNodeServer::hc4_probe(const IntervalVector& ext_box, int var,
-		const std::vector<int>& partners, int parts) {
+		const std::vector<int>& partners, int parts, int ctc_kind) {
 	if (hc4_ctc==NULL) hc4_ctc = new CtcHC4(get_ext_sys());
+	if (ctc_kind==PROBE_LP && lp_ctc==NULL) {
+		ExtendedSystem& es = get_ext_sys();
+		probe_owned.push_back(new LinearizerXTaylor(es));
+		probe_owned.push_back(new LinearizerAffine2(es));
+		Linearizer* lin = new LinearizerCompo(*(Linearizer*) probe_owned[probe_owned.size()-2],
+				*(Linearizer*) probe_owned.back());
+		probe_owned.push_back(lin);
+		Ctc* hull = new CtcPolytopeHull(*lin);
+		probe_owned.push_back(hull);
+		lp_ctc = new CtcCompo(*hc4_ctc, *hull);
+	}
+	Ctc& pc = ctc_kind==PROBE_FULL ? ctc : (ctc_kind==PROBE_LP ? *lp_ctc : *hc4_ctc);
 	Timer timer; timer.start();
 	ProbeResult r; r.empties = 0; r.logvol = NEG_INFINITY; r.partners = partners;
 	const int gv = ext_goal_var();
@@ -167,7 +183,7 @@ MLNodeServer::ProbeResult MLNodeServer::hc4_probe(const IntervalVector& ext_box,
 			double w = x.diam()/parts;
 			b[dims[d]] = Interval(x.lb()+k*w, k==parts-1 ? x.ub() : x.lb()+(k+1)*w) & x;
 		}
-		hc4_ctc->contract(b);
+		pc.contract(b);
 		if (b.is_empty()) { r.empties++; continue; }
 		double v = 0;
 		for (int j=0; j<ext_box.size(); j++) {
@@ -184,7 +200,7 @@ MLNodeServer::ProbeResult MLNodeServer::hc4_probe(const IntervalVector& ext_box,
 }
 
 std::vector<std::pair<int,MLNodeServer::ProbeResult> > MLNodeServer::hc4_probes(
-		const IntervalVector& ext_box, int dims, int parts, bool include_goal, int topk) {
+		const IntervalVector& ext_box, int dims, int parts, bool include_goal, int topk, int ctc_kind) {
 	std::vector<std::pair<int,ProbeResult> > out;
 	vector<int> cand = candidates(ext_box, include_goal, topk);   // ranked by LSmear
 	if (cand.empty()) return out;
@@ -192,12 +208,14 @@ std::vector<std::pair<int,MLNodeServer::ProbeResult> > MLNodeServer::hc4_probes(
 		std::vector<int> partners;
 		for (size_t q=0; q<cand.size() && (int) partners.size()<dims-1; q++)
 			if (cand[q]!=cand[k]) partners.push_back(cand[q]);
-		out.push_back(make_pair(cand[k], hc4_probe(ext_box, cand[k], partners, parts)));
+		out.push_back(make_pair(cand[k], hc4_probe(ext_box, cand[k], partners, parts, ctc_kind)));
 	}
 	return out;
 }
 
 MLNodeServer::~MLNodeServer() {
+	delete lp_ctc;
+	for (size_t k=0; k<probe_owned.size(); k++) delete probe_owned[k];
 	delete hc4_ctc;
 	// safe: no operator dereferences its Sts during destruction
 	delete stats;
@@ -1224,7 +1242,7 @@ int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 		return -1;                                   // deep: the bisector decides
 	if (oracle && oracle_hc4) {
 		std::vector<std::pair<int,ProbeResult> > pr = hc4_probes(c.box, probe_dims, probe_parts,
-				sp.include_goal, sp.topk);
+				sp.include_goal, sp.topk, probe_ctc);
 		oracle_calls++;
 		int base_var = -1;
 		if (sb_ratio>0) {
@@ -1235,7 +1253,7 @@ int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 			if (base_var>=0 && !in) {
 				std::vector<int> partners;
 				for (size_t q=0; q<pr.size() && (int) partners.size()<probe_dims-1; q++) partners.push_back(pr[q].first);
-				pr.push_back(make_pair(base_var, hc4_probe(c.box, base_var, partners, probe_parts)));
+				pr.push_back(make_pair(base_var, hc4_probe(c.box, base_var, partners, probe_parts, probe_ctc)));
 			}
 		}
 		int best = -1, best_e = -1; double best_v = POS_INFINITY;
