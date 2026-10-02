@@ -1205,7 +1205,12 @@ int MLNodeServer::decide(const Cell& c, const SampleParams& sp) {
 				double vol = (m==NEG_INFINITY) ? NEG_INFINITY
 						: m + std::log(std::exp(lv[0]-m) + std::exp(lv[1]-m));
 				// strict: ties go to the earlier candidate, i.e. LSmear's order
-				if (np > best_pruned || (np==best_pruned && vol < best_vol)) {
+				// Candidates come ranked by LSmear: on a tie the earlier one
+				// stays. Without contraction every split halves the volume and
+				// the keys differ by rounding only (~1e-12), which otherwise
+				// decided between them -- an arbitrary rule on 30-78% of the
+				// nodes (results/sb-trajectory).
+				if (np > best_pruned || (np==best_pruned && vol < best_vol - 1e-6)) {
 					best = d.var; best_pruned = np; best_vol = vol;
 				}
 			}
