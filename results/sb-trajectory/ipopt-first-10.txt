@@ -1,0 +1,12 @@
+ship-1 | first=0 comp 680 1.9s | first=5 comp 374 1.6s | first=20 comp 6 1.0s |
+dnieper | first=0 comp 434 8.5s | first=5 comp 592 11.0s | first=20 comp 550 11.6s |
+mconcon | first=0 comp 18 0.1s | first=5 comp 18 0.1s | first=20 comp 26 1.2s |
+schwefel5 | first=0 comp 698 0.8s | first=5 comp 716 0.8s | first=20 comp 682 0.8s |
+ex8_5_6 | first=0 comp 1852 3.7s | first=5 comp 1716 3.3s | first=20 comp 1716 3.4s |
+dipigri | first=0 comp 212 0.6s | first=5 comp 242 0.6s | first=20 comp 228 0.7s |
+avgasb | first=0 comp 54 0.2s | first=5 comp 42 0.2s | first=20 comp 48 0.3s |
+avgasa | first=0 comp 188 0.5s | first=5 comp 192 0.5s | first=20 comp 194 0.6s |
+dualc2 | first=0 comp 146 0.4s | first=5 comp 150 0.4s | first=20 comp 134 0.5s |
+ex6_2_8 | first=0 comp 13672 9.7s | first=5 comp 13692 10.0s | first=20 comp 13692 9.8s |
+
+[exited with code 0]

@@ -152,3 +152,20 @@ instead of every 100th:
 ship-1's gain under strong branching (24 nodes) was upper bounding: its 2n
 probes per node are 2n loup-finder calls. dnieper's (28 vs 434) is not: more
 Ipopt does nothing there, the branching does.
+
+### `--ipopt-first N` (Ipopt also at each of the first N loup-finder calls)
+
+Ipopt already runs at the root (call 0); ship-1 needs it on the first
+children too (a local solver started from other boxes). `ipopt-first-10.txt`,
+lsmear-lffix, nodes and time:
+
+    instance   N=0            N=5            N=20
+    ship-1     680   1.9s     374   1.6s     6     1.0s
+    dnieper    434   8.5s     592   11.0s    550   11.6s
+    mconcon    18    0.1s     18    0.1s     26    1.2s
+    schwefel5  698   0.8s     716   0.8s     682   0.8s
+    ex8_5_6    1852  3.7s     1716  3.3s     1716  3.4s
+    others     within noise (dipigri, avgasb, avgasa, dualc2, ex6_2_8)
+
+Not free: 20 Ipopt calls cost 1.1 s on mconcon (~55 ms each) and change
+dnieper's tree for the worse (+3 s). ship-1 is the only clear win.
