@@ -1,0 +1,12 @@
+avgasa    lffix no_f 174 0.5s | guard10 no_f 174 0.5s | sb no_f 162 3.3s | sbcons no_f 160 4.0s | oracle no_f 134 38.0s
+avgasb    lffix no_f 40 0.2s | guard10 no_f 40 0.2s | sb no_f 34 1.1s | sbcons no_f 36 1.0s | oracle no_f 38 9.0s
+dipigri   lffix comp 204 0.5s | guard10 comp 204 0.5s | sb comp 102 1.7s | sbcons comp 136 2.3s | oracle comp 78 18.2s
+dnieper   lffix comp 24058 235.0s | guard10 comp 24058 224.3s | sb comp 34 54.2s | sbcons comp 58 88.7s | oracle time 26 460.3s
+dualc2    lffix comp 140 0.4s | guard10 comp 140 0.4s | sb no_f 188 3.8s | sbcons comp 144 3.3s | oracle no_f 94 29.0s
+ex6_2_8   lffix no_f 13692 10.0s | guard10 no_f 13692 10.6s | sb no_f 15372 63.5s | sbcons no_f 13146 50.5s | oracle kill - 0.0s
+ex8_5_6   lffix no_f 1532 3.6s | guard10 comp 1810 4.4s | sb no_f 1144 23.5s | sbcons no_f 1330 22.6s | oracle no_f 946 215.2s
+mconcon   lffix comp 10 0.0s | guard10 comp 8 0.0s | sb comp 8 0.6s | sbcons comp 8 0.5s | oracle comp 8 1.0s
+schwefel5 lffix comp 730 0.8s | guard10 no_f 622 0.7s | sb no_f 440 3.1s | sbcons no_f 458 3.4s | oracle no_f 548 76.9s
+ship-1    lffix no_f 0 0.0s | guard10 no_f 0 0.0s | sb no_f 0 0.0s | sbcons no_f 0 0.0s | oracle no_f 0 0.0s
+
+[exited with code 0]
