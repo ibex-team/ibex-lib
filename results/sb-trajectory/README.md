@@ -49,3 +49,28 @@ and the deep trees compound it. Any offline score on dataset-lffix has the
 same blind spot. What would close it: collect on the rule's own trajectory and
 label with the base continuation, retrain on the union (DAgger); and/or
 deviate from the base only where the predicted gain is large.
+
+## Conservative strong branching (`--sb-ratio r`)
+
+Leave lsmear-lffix's choice only when SB's probe is clearly better than the
+base's: more pruned children, or as many with at most r times the open
+volume. `sb-ratio-10.txt` (300 s; dev = decisions taken from SB / probed):
+
+    instance   lffix  SB      r=0.7  r=0.5  r=0.3  r=0.1
+    ship-1     680    24      696    226    512    134
+    dnieper    434    28      28     28     28     22
+    ex6_2_8    13672  15866   13738  13146  13126  13126
+    schwefel5  698    36910   498    532    494    494
+    mconcon    18     678     560    564    556    334
+    avgasb     54     36      34     34     34     34
+    dipigri    212    126     130    98     152    170
+    avgasa     188    156     180    160    158    162
+    dualc2     146    152     130    132    140    146
+    ex8_5_6    1852   1268    1434   1212   1184   1424
+    geo/lffix  1      1.02    0.91   0.77   0.87   0.73
+    w/o mconc  1      0.68    0.61   0.51   0.58   0.51
+
+The schwefel5 blow-up is gone (494 vs 36910) and ex6_2_8 no longer loses;
+mconcon still does (deviations on "more pruned children", which r does not
+gate). Nodes only: every node is still probed, so time is far above lffix
+(dnieper 25 s vs 6 s, mconcon 12 s vs 0.1 s).

@@ -1,0 +1,12 @@
+ship-1 | r=0.7 comp 696 13.0s dev=188/348 | r=0.5 comp 226 4.9s dev=94/113 | r=0.3 comp 512 9.9s dev=142/256 | r=0.1 comp 134 3.8s dev=28/67 |
+dnieper | r=0.7 comp 28 41.0s dev=11/14 | r=0.5 comp 28 41.2s dev=11/14 | r=0.3 comp 28 40.7s dev=11/14 | r=0.1 comp 22 24.9s dev=10/11 |
+ex6_2_8 | r=0.7 comp 13738 33.6s dev=1053/6869 | r=0.5 comp 13146 31.1s dev=287/6573 | r=0.3 comp 13126 31.2s dev=281/6563 | r=0.1 comp 13126 31.0s dev=281/6563 |
+schwefel5 | r=0.7 comp 498 2.0s dev=122/249 | r=0.5 comp 532 2.1s dev=126/266 | r=0.3 comp 494 2.1s dev=103/247 | r=0.1 comp 494 2.1s dev=103/247 |
+mconcon | r=0.7 comp 560 16.9s dev=154/280 | r=0.5 comp 564 17.9s dev=155/282 | r=0.3 comp 556 17.1s dev=140/278 | r=0.1 comp 334 12.1s dev=66/167 |
+avgasb | r=0.7 comp 34 0.8s dev=11/17 | r=0.5 comp 34 0.8s dev=11/17 | r=0.3 comp 34 0.8s dev=11/17 | r=0.1 comp 34 0.8s dev=11/17 |
+dipigri | r=0.7 comp 130 2.1s dev=25/65 | r=0.5 comp 98 1.2s dev=27/49 | r=0.3 comp 152 1.7s dev=36/76 | r=0.1 comp 170 1.9s dev=30/85 |
+avgasa | r=0.7 comp 180 2.7s dev=53/90 | r=0.5 comp 160 2.5s dev=43/80 | r=0.3 comp 158 2.5s dev=36/79 | r=0.1 comp 162 2.9s dev=35/81 |
+dualc2 | r=0.7 comp 130 2.2s dev=36/65 | r=0.5 comp 132 2.1s dev=32/66 | r=0.3 comp 140 2.3s dev=30/70 | r=0.1 comp 146 2.2s dev=29/73 |
+ex8_5_6 | r=0.7 comp 1434 16.6s dev=280/717 | r=0.5 comp 1212 14.5s dev=207/606 | r=0.3 comp 1184 14.5s dev=170/592 | r=0.1 comp 1424 16.1s dev=166/712 |
+
+[exited with code 0]
