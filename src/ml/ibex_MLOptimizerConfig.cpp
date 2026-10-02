@@ -157,6 +157,7 @@ LoupFinder& MLOptimizerConfig::get_loup_finder() {
 	// subclass has to be recorded through the base pointer (see ibex_OptimMemory.h).
 	rec((LoupFinder*) f);
 	f->finder_ipopt.ipopt_frequency = ipopt_frequency;
+	f->finder_ipopt.ipopt_first = ipopt_first;
 	f->finder_ipopt.set_quadratic(ipopt_quadratic);
 	loup_cache = f;
 #else
@@ -272,6 +273,7 @@ string MLOptimizerConfig::bisector_names() {
 double MLOptimizerConfig::grasp_alpha = 0.8;
 unsigned int MLOptimizerConfig::grasp_seed = 1;
 int MLOptimizerConfig::tabu_tenure = 2;
+int MLOptimizerConfig::ipopt_first = 0;
 
 Bsc& MLOptimizerConfig::get_bsc() {
 

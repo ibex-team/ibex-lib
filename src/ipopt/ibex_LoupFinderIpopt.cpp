@@ -117,7 +117,7 @@ namespace ibex {
 	if (
 	    (box.max_diam() <= ipopt_diam)
 	    &&
-	    (ipopt_calls%ipopt_frequency==0 || ipopt_calls==10 || ipopt_calls==20  || ipopt_calls==50 || (force && box.max_diam()<= ipopt_diam) )
+	    (ipopt_calls%ipopt_frequency==0 || ipopt_calls<ipopt_first || ipopt_calls==10 || ipopt_calls==20  || ipopt_calls==50 || (force && box.max_diam()<= ipopt_diam) )
 	    ){
 	
 	  //	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;

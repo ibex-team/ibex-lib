@@ -85,6 +85,7 @@ namespace ibex {
       Optimizer* optimizer=nullptr; // optimizer data are used for building an optimizer for correcting the point returned by ipopt if it does not verify the constraints
       bool recursive_call=true; // boolean to prevent double recursion of optimizer ; when true, the optimizer can be recursevely called, and Ipopt will not be called.
       int ipopt_frequency=100; // frequency of Ipopt calls in number of loup finder calls.
+      int ipopt_first=0;       // also call Ipopt at each of the first ipopt_first loup finder calls (multi-start on the top of the tree)
 
       int correction_nodes=0;  // additional nodes for correcting the point given by ipopt
       double correction_time=0.0; // additional time for correcting the point given by ipopt

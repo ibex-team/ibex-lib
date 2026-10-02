@@ -301,6 +301,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<int> probe_dims(parser, "int", "With --oracle-score hc4: dimensions reduced per probe (the candidate plus N-1 partners from LSmear's ranking). Default: 1.", {"probe-dims"});
 	args::ValueFlag<int> probe_parts(parser, "int", "With --oracle-score hc4: slices per reduced dimension. Default: 4.", {"probe-parts"});
 	args::ValueFlag<string> probe_ctc(parser, "hc4|lp|full|proc", "With --oracle-score hc4: the probe's contractor. hc4 (default); lp: one HC4 pass then one polytope hull (XTaylor+affine); full: the search's contractor; proc: contraction and upper bounding, as a step of a dive.", {"probe-ctc"});
+	args::ValueFlag<int> ipopt_first(parser, "int", "With --loup ipoptxn: also call Ipopt at each of the first N loup-finder calls (a multi-start near the root). Default: 0.", {"ipopt-first"});
 	args::ValueFlag<long> guard_horizon(parser, "int", "With --bisector lsmear-guard: only switch to round-robin within the first N decisions. Default: 0 (no horizon).", {"guard-horizon"});
 	args::ValueFlag<string> bisector_arg(parser, "name", "Bisector to use. One of: "
 			+ MLOptimizerConfig::bisector_names() + ". Default: lsmear (what ibexopt uses).", {"bisector"});
@@ -410,6 +411,7 @@ int main(int argc, char** argv) {
 
 		if (grasp_alpha) MLOptimizerConfig::grasp_alpha = grasp_alpha.Get();
 		if (tabu_tenure) MLOptimizerConfig::tabu_tenure = tabu_tenure.Get();
+		if (ipopt_first) MLOptimizerConfig::ipopt_first = ipopt_first.Get();
 		MLOptimizerConfig::grasp_seed = (unsigned int) seed;
 
 		server = new MLNodeServer(*sys,

@@ -192,6 +192,8 @@ public:
 	static unsigned int grasp_seed;
 	/** \brief Tenure of lsmear-tabu. */
 	static int tabu_tenure;
+	/** \brief Ipopt also at each of the first N loup-finder calls (ipoptxn). */
+	static int ipopt_first;
 
 protected:
 	Ctc* ctc_cache;
