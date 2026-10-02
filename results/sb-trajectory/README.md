@@ -99,3 +99,24 @@ The headroom of a conservative rule is real (deviating on 9% of the nodes is
 worth 0.855), but the 30 cheap features cannot find those nodes: the model
 either never deviates or deviates at random. With the probe it gets most of
 it, which is what --sb-ratio already does end to end, at the probe's cost.
+
+## Cheaper probes (`--oracle-score hc4`, `--probe-ctc`, offline on dataset-lffix)
+
+`python/hc4probe_offline.py`, `hc4probe-offline.txt`. Slice the box along the
+candidate (parts) and dims-1 LSmear partners, contract each piece, score by
+pieces emptied then volume left; sum/base, conservative rules as before:
+
+    probe contractor                     ms/cand   always   cons. r=0.25
+    HC4 alone, 1x2 .. 2x4                0.2-1.0   1.05     1.02-1.04
+    HC4 + polytope hull, 1x2 / 1x4       8 / 12    1.05     1.04 / 1.03
+    the search's contractor, 1x2         13        1.007    0.984
+    strong-branching dive step (labels)  -         0.846    0.837
+
+None of them is the signal. Even the full contractor on the two children
+(0.984) is far from the dive step of the labels (0.846). What the dive step
+has and a contraction does not: the upper bounding (loup finder, Ipopt
+sometimes) and the loup propagating from one child to the next. Being tested
+as `--probe-ctc proc`.
+
+Also offline: scoring the children by the rise of the goal lower bound
+instead of volume is worse (0.869-0.887 vs 0.846).

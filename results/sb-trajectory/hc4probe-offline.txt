@@ -1,0 +1,58 @@
+process 3
+polak2 150
+ramseybis 1
+ramsey 1
+rastrigin 5
+robot 124
+schaffer 4
+schwefel5-abs 133
+schwefel5 131
+sambal 150
+ship-1 150
+synthes1 6
+test_infinity2 2
+srcpm 51
+hs088 92
+dims=1 parts=2   (0.1 ms por candidato)
+  siempre                      suma/base 1.035   instancias >1:  42%   >1.5x:   5%   desvía  64%
+  conservador r=0.50           suma/base 1.017   instancias >1:  26%   >1.5x:   2%   desvía  14%
+  conservador r=0.25           suma/base 1.023   instancias >1:  22%   >1.5x:   2%   desvía   9%
+  conservador r=0.10           suma/base 1.022   instancias >1:  22%   >1.5x:   2%   desvía   6%
+dims=1 parts=4   (0.2 ms por candidato)
+  siempre                      suma/base 1.052   instancias >1:  46%   >1.5x:   7%   desvía  68%
+  conservador r=0.50           suma/base 1.023   instancias >1:  31%   >1.5x:   4%   desvía  31%
+  conservador r=0.25           suma/base 1.020   instancias >1:  30%   >1.5x:   3%   desvía  21%
+  conservador r=0.10           suma/base 1.023   instancias >1:  29%   >1.5x:   3%   desvía  18%
+dims=1 parts=8   (0.5 ms por candidato)
+  siempre                      suma/base 1.065   instancias >1:  48%   >1.5x:   7%   desvía  71%
+  conservador r=0.50           suma/base 1.044   instancias >1:  40%   >1.5x:   5%   desvía  42%
+  conservador r=0.25           suma/base 1.037   instancias >1:  39%   >1.5x:   5%   desvía  34%
+  conservador r=0.10           suma/base 1.041   instancias >1:  40%   >1.5x:   5%   desvía  30%
+dims=2 parts=2   (0.2 ms por candidato)
+  siempre                      suma/base 1.050   instancias >1:  41%   >1.5x:   7%   desvía  68%
+  conservador r=0.50           suma/base 1.024   instancias >1:  35%   >1.5x:   3%   desvía  26%
+  conservador r=0.25           suma/base 1.020   instancias >1:  36%   >1.5x:   2%   desvía  20%
+  conservador r=0.10           suma/base 1.018   instancias >1:  35%   >1.5x:   2%   desvía  18%
+dims=2 parts=4   (1.0 ms por candidato)
+  siempre                      suma/base 1.063   instancias >1:  44%   >1.5x:   7%   desvía  74%
+  conservador r=0.50           suma/base 1.040   instancias >1:  41%   >1.5x:   3%   desvía  58%
+  conservador r=0.25           suma/base 1.039   instancias >1:  41%   >1.5x:   2%   desvía  57%
+  conservador r=0.10           suma/base 1.039   instancias >1:  40%   >1.5x:   2%   desvía  56%
+
+[exited with code 0]
+  siempre                      suma/base 1.050   instancias >1:  39%   >1.5x:   6%   desvía  66%
+  conservador r=0.50           suma/base 1.036   instancias >1:  28%   >1.5x:   5%   desvía  30%
+  conservador r=0.25           suma/base 1.038   instancias >1:  27%   >1.5x:   5%   desvía  20%
+  conservador r=0.10           suma/base 1.039   instancias >1:  30%   >1.5x:   5%   desvía  15%
+ctc=lp dims=1 parts=4   (11.6 ms por candidato)
+  siempre                      suma/base 1.045   instancias >1:  42%   >1.5x:   5%   desvía  65%
+  conservador r=0.50           suma/base 1.028   instancias >1:  37%   >1.5x:   4%   desvía  45%
+  conservador r=0.25           suma/base 1.028   instancias >1:  36%   >1.5x:   4%   desvía  40%
+  conservador r=0.10           suma/base 1.028   instancias >1:  35%   >1.5x:   4%   desvía  37%
+ctc=full dims=1 parts=2   (13.2 ms por candidato)
+  siempre                      suma/base 1.007   instancias >1:  39%   >1.5x:   4%   desvía  55%
+  conservador r=0.50           suma/base 0.988   instancias >1:  32%   >1.5x:   2%   desvía  39%
+  conservador r=0.25           suma/base 0.984   instancias >1:  29%   >1.5x:   2%   desvía  35%
+  conservador r=0.10           suma/base 0.984   instancias >1:  28%   >1.5x:   2%   desvía  33%
+
+[exited with code 0]
