@@ -11,7 +11,8 @@ Per candidate, the probe features (2 contractions each, vs a whole dive):
 Each also relative to the sample (value minus the sample's best), since only
 the order within a node matters.
 
-Feature sets: A (the 30 solver features), P (probe), A+P. Grouped 5-fold CV
+Feature sets: A (the 30 solver features), P (probe), S (how the probe's
+contraction propagated over the other variables, see spread()), and unions. Grouped 5-fold CV
 by family; out-of-fold regret against the dive labels (geo per instance;
 picks the best; >=2x).
 
@@ -59,9 +60,39 @@ def probe(l, parent, gv, lb0, top):
     return [npr, min(lv), max(lv), float(np.logaddexp(lv[0], lv[1])), min(rise), max(rise)]
 
 
+def spread(l, parent, gv, var):
+    """How a probe's contraction propagated: per child, over the variables
+    other than the bisected one and the goal, the fraction contracted by more
+    than 1%, 10%, 50%, the strongest contraction (min log ratio) and the mean
+    log ratio; and the bisected variable beyond the half (log of its width over
+    half the parent's). A pruned child counts as total contraction. Then
+    min/max over the two children."""
+    st = [l["left_status"], l["right_status"]]
+    ch = [box(l["left"]), box(l["right"])]
+    per = []
+    for k in range(2):
+        if st[k] != "open" or not ch[k]:
+            per.append([1.0, 1.0, 1.0, -30.0, -30.0, -30.0]); continue
+        r = []
+        for j, (a, b) in enumerate(ch[k]):
+            if j == gv or j == var:
+                continue
+            pa, pb = parent[j]; dp = pb - pa; d = b - a
+            if not (math.isfinite(dp) and dp > 0 and math.isfinite(d)):
+                continue
+            r.append(max(-30.0, math.log(max(d, 1e-300) / dp)))
+        r = np.array(r) if r else np.zeros(1)
+        pa, pb = parent[var]; a, b = ch[k][var]
+        own = max(-30.0, math.log(max(b - a, 1e-300) / ((pb - pa) / 2))) if math.isfinite(pb - pa) and pb > pa else 0.0
+        per.append([(r < math.log(0.99)).mean(), (r < math.log(0.9)).mean(), (r < math.log(0.5)).mean(),
+                    r.min(), r.mean(), own])
+    per = np.array(per)
+    return list(per.min(axis=0)) + list(per.max(axis=0))
+
+
 def load():
     fam = {l.split()[0][:-4]: l.split()[2] for l in open(os.path.join(DATA, "instances.txt"))}
-    XA, XP, Y, rows = [], [], [], []
+    XA, XP, XS, Y, rows = [], [], [], [], []
     sid = 0
     for f in sorted(glob.glob(os.path.join(DATA, "samples", "*.jsonl"))):
         inst = os.path.basename(f)[:-6]
@@ -82,7 +113,10 @@ def load():
             # relative to the sample's best (pruned, rise: max is best; volume: min is best)
             rel = np.stack([P[:, 0] - P[:, 0].max(), P[:, 1] - P[:, 1].min(), P[:, 2] - P[:, 2].min(),
                             P[:, 3] - P[:, 3].min(), P[:, 4] - P[:, 4].max(), P[:, 5] - P[:, 5].max()], axis=1)
+            S = np.array([spread(l, parent, gv, l["var"]) for l in L])
+            Srel = S - S.min(axis=0)
             for k, l in enumerate(L):
+                XS.append(np.concatenate([S[k], Srel[k]]))
                 y = l["nodes"] if not l["censored"] else 2 * l["budget_used"]
                 XA.append(Xv[l["var"]]); XP.append(np.concatenate([P[k], rel[k], [len(L)]]))
                 Y.append(math.log(max(y, 1) / best))
@@ -91,7 +125,7 @@ def load():
             sid += 1
     R = pd.DataFrame(rows, columns=["sample", "instance", "family", "r", "guard", "sb"])
     XA = np.nan_to_num(np.asarray(XA, float), nan=0.0, posinf=1e12, neginf=-1e12)
-    return XA, np.asarray(XP, float), np.asarray(Y), R
+    return XA, np.asarray(XP, float), np.asarray(XS, float), np.asarray(Y), R
 
 
 def evaluate(R, score, name):
@@ -101,12 +135,14 @@ def evaluate(R, score, name):
 
 
 def main():
-    XA, XP, Y, R = load()
+    XA, XP, XS, Y, R = load()
     print("%d filas, %d muestras, %d instancias, %d familias" % (len(R), R["sample"].nunique(), R.instance.nunique(), R.family.nunique()))
     out = [evaluate(R, -R.r.values, "oráculo (la etiqueta)"),
            evaluate(R, R.sb.values, "strong branching (regla)"),
            evaluate(R, R.guard.astype(float).values, "bisector de la trayectoria")]
-    for fname, X in (("modelo A", XA), ("modelo P (sondeo)", XP), ("modelo A+P", np.hstack([XA, XP]))):
+    for fname, X in (("modelo A", XA), ("modelo P (sondeo)", XP), ("modelo A+P", np.hstack([XA, XP])),
+                     ("modelo S (propagación)", XS), ("modelo P+S", np.hstack([XP, XS])),
+                     ("modelo A+P+S", np.hstack([XA, XP, XS]))):
         pred = np.zeros(len(Y))
         for tr, te in GroupKFold(5).split(X, Y, R.family):
             m = HistGradientBoostingRegressor(max_iter=300, learning_rate=0.05, max_leaf_nodes=31, random_state=0)

@@ -22,3 +22,17 @@ instance; picks the best; >=2x):
 Same picture as with the old labels: the 30 features do not beat the
 bisector; the probe (the two children after one contraction) brings a model
 to strong branching and no further.
+
+## Propagation features
+
+S: how the probe's contraction spread over the other variables (per child:
+fraction contracted by >1%, >10%, >50%, strongest and mean log ratio, the
+bisected variable beyond the half; min/max over the children; raw and
+relative to the sample).
+
+    model S         1.084  71%  5%
+    model P+S       1.087  71%  5%
+    model A+P+S     1.096  71%  5%
+
+The breakdown adds nothing over the aggregate probe: every one-step view of
+the contraction lands on strong branching's level.
