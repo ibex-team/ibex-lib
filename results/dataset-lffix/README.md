@@ -36,3 +36,23 @@ relative to the sample).
 
 The breakdown adds nothing over the aggregate probe: every one-step view of
 the contraction lands on strong branching's level.
+
+## Two-level probe
+
+`python/probe2_offline.py` (outputs in `probe2/`): for each candidate j, each
+open child of the probe is bisected on k_j, the best variable of the node's
+LSmear ranking other than j, and both grandchildren contracted. P2: pruned
+grandchildren (of 4), log total volume of the open ones, rise of the goal
+lower bound (min/max), raw and relative to the sample. SB2 rule: most pruned
+grandchildren, then least volume.
+
+    strong branching rule   1.085  71%   5%
+    SB 2 levels rule        1.170  58%  15%
+    model P2                1.181  60%  16%
+    model P+P2              1.080  73%   5%
+    model A+P+P2            1.080  74%   5%
+
+The second level alone is worse than the first: with k_j fixed from the
+node's ranking, the grandchildren mostly measure k_j, the same for most
+candidates, and blur j's own effect. On top of the first level it adds
+little (1.085 -> 1.080).
