@@ -1,0 +1,12 @@
+ship-1 | proc r0.1 comp 572 17.6s dev=138/286
+dnieper | proc r0.1 comp 26 48.3s dev=10/13
+ex6_2_8 | proc r0.1 comp 13000 50.0s dev=286/6500
+schwefel5 | proc r0.1 comp 458 3.2s dev=131/229
+mconcon | proc r0.1 comp 334 19.5s dev=61/167
+avgasb | proc r0.1 comp 40 1.3s dev=13/20
+dipigri | proc r0.1 comp 124 2.7s dev=29/62
+avgasa | proc r0.1 comp 166 4.5s dev=35/83
+dualc2 | proc r0.1 comp 120 2.8s dev=23/60
+ex8_5_6 | proc r0.1 comp 1346 25.5s dev=175/673
+
+[exited with code 0]

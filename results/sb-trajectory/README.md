@@ -120,3 +120,33 @@ as `--probe-ctc proc`.
 
 Also offline: scoring the children by the rise of the goal lower bound
 instead of volume is worse (0.869-0.887 vs 0.846).
+
+### The offline probe evaluation is not trustworthy for process-based probes
+
+End to end, `--probe-ctc proc --probe-parts 2 --sb-ratio 0.1` (contraction
+and upper bounding on the two halves, conservative) is the strong-branching
+conservative rule: `proc-e2e-10.txt` vs `sb-ratio-10.txt` r=0.1 -- dnieper
+26/22, ex6_2_8 13000/13126, schwefel5 458/494, mconcon 334/334, ex8_5_6
+1346/1424, dipigri 124/170, avgasb 40/34; only ship-1 differs (572 vs 134).
+Yet offline the same probe scores 0.962 and the labels' dive step 0.837: the
+offline harness replays each node from a saved state (Ipopt schedule, RNG,
+ACID tuning), which changes what the loup finder does in the children (the
+probe and the labels agree on the pruned count on 84% of the pairs and on
+the volume on 50%). Offline numbers for probes that call the loup finder are
+not comparable with the labels; the pure contractors (HC4, LP, full) do not
+call it and their "no signal" stands.
+
+### Upper bounding is part of what strong branching buys
+
+lsmear-lffix with Ipopt called at every loup-finder call (`--ipopt-freq 1`)
+instead of every 100th:
+
+    instance   /100          /10           /1
+    ship-1     680  1.9s     654  3.0s     6    1.0s
+    dnieper    434  8.3s     654  14.6s    434  28.3s
+    mconcon    18   0.1s     18   0.1s     26   1.2s
+    schwefel5  698  0.8s     698  0.9s     682  2.1s
+
+ship-1's gain under strong branching (24 nodes) was upper bounding: its 2n
+probes per node are 2n loup-finder calls. dnieper's (28 vs 434) is not: more
+Ipopt does nothing there, the branching does.
