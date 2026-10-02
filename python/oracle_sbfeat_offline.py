@@ -23,7 +23,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.model_selection import GroupKFold
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from ibexml import encode  # noqa
-DATA = os.path.join(HERE, "..", "results", "dataset-guard10")
+DATA = os.path.join(HERE, "..", "results", os.environ.get("DATASET", "dataset-guard10"))
 geo = lambda x: float(np.exp(np.mean(np.log(x))))
 
 
@@ -105,7 +105,7 @@ def main():
     print("%d filas, %d muestras, %d instancias, %d familias" % (len(R), R["sample"].nunique(), R.instance.nunique(), R.family.nunique()))
     out = [evaluate(R, -R.r.values, "oráculo (la etiqueta)"),
            evaluate(R, R.sb.values, "strong branching (regla)"),
-           evaluate(R, R.guard.astype(float).values, "lsmear-guard:10")]
+           evaluate(R, R.guard.astype(float).values, "bisector de la trayectoria")]
     for fname, X in (("modelo A", XA), ("modelo P (sondeo)", XP), ("modelo A+P", np.hstack([XA, XP]))):
         pred = np.zeros(len(Y))
         for tr, te in GroupKFold(5).split(X, Y, R.family):

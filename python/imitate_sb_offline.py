@@ -23,7 +23,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.model_selection import GroupKFold
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from ibexml import encode  # noqa
-DATA = os.path.join(HERE, "..", "results", "dataset-guard10")
+DATA = os.path.join(HERE, "..", "results", os.environ.get("DATASET", "dataset-guard10"))
 geo = lambda x: float(np.exp(np.mean(np.log(x))))
 
 
