@@ -346,6 +346,17 @@ public:
 	 */
 	void set_sb_ratio(double r) { sb_ratio = r; }
 
+	/** \brief Dives prune with this loup when it is lower than the search's
+	 *  (an optimum known in advance). +oo: the search's own loup. */
+	void set_dive_loup(double l) { dive_loup = l; }
+
+	/** \brief Current tuning state of the ACID contractors of the search. */
+	std::vector<CtcAcid::TuningState> acid_tuning() const {
+		std::vector<CtcAcid::TuningState> v;
+		for (size_t k=0; k<acid.size(); k++) v.push_back(acid[k]->get_tuning());
+		return v;
+	}
+
 	/**
 	 * \brief What hc4_probe() returns for one candidate.
 	 */
@@ -686,6 +697,7 @@ protected:
 	int probe_dims, probe_parts;  //!< see set_probe_dims(), set_probe_parts()
 	Ctc* hc4_ctc;                 //!< HC4 alone on the extended system, built on first use
 	Ctc* lp_ctc;                  //!< HC4 then polytope hull, built on first use
+	double dive_loup;             //!< see set_dive_loup()
 	int probe_ctc;                //!< see set_probe_ctc()
 	std::vector<void*> probe_owned;  //!< linearizers and hull behind lp_ctc
 	bool sb_vol_only;             //!< see set_sb_vol_only()

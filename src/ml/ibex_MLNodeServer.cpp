@@ -118,7 +118,7 @@ MLNodeServer::MLNodeServer(const System& sys,
 			init_ext_box(IntervalVector::empty(sys.nb_var+1)),
 			orig_box(IntervalVector::empty(sys.nb_var)),
 			oracle_calls(0), oracle_fallbacks(0),
-			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), sb_ratio(0), sb_vol_only(false), oracle_hc4(false), probe_dims(1), probe_parts(4), hc4_ctc(NULL), lp_ctc(NULL), probe_ctc(PROBE_HC4), oracle_deviations(0), stats(new OpenStatistics()),
+			model(NULL), oracle(false), oracle_depth(false), oracle_sb(false), oracle_max_depth(0), sb_ratio(0), sb_vol_only(false), oracle_hc4(false), probe_dims(1), probe_parts(4), hc4_ctc(NULL), lp_ctc(NULL), dive_loup(POS_INFINITY), probe_ctc(PROBE_HC4), oracle_deviations(0), stats(new OpenStatistics()),
 			last_time(0), last_decisions(0), last_status("not run") {
 
 	RNG::srand((int) random_seed);
@@ -737,6 +737,12 @@ MLNodeServer::DiveResult MLNodeServer::dive(const IntervalVector& ext_box, int v
 	r.valid = true;
 
 	State st = save();
+	// --dive-loup: the dive prunes with this upper bound (an optimum known in
+	// advance), so that its size measures the branching, not when the loup
+	// finder gets lucky. Only inside the dive: the search keeps its own loup,
+	// and ACID keeps the tuning the search gave it (a tight loup from the start
+	// can switch ACID off, results/fixed-loup/README.md).
+	if (dive_loup < loup) loup = dive_loup;
 
 	// Every candidate of a node must run against the same random stream, else
 	// their dive sizes would not be comparable. The caller's stream is saved in

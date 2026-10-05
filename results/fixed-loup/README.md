@@ -25,7 +25,12 @@ the 7 it closes (worst 0.95).
    the optimum known every rule takes 8-10 nodes.
 2. With the loup fixed, SB does not blow up anywhere (worst 1.34, dualc2);
    the conservative rule never loses more than 3%.
-3. dnieper is pure branching: lffix needs 24058 nodes, SB 34. (lffix needed
-   434 without the optimum: knowing the loup from the start makes it worse
-   there; not understood yet.)
+3. dnieper's 24058 under lffix is an artifact: with a tight loup from the
+   start ACID tunes itself to shave 0 variables (IBEX_ACID_TRACE: nbcidvar=0
+   after 24 tunings, vs 20 without the optimum) and the contraction weakens
+   for the whole search. Any initial loup within ~7% does it (20000 too);
+   1e9 does not (434). SB's gain there is real branching: it closes in ~30
+   nodes before ACID ends its first tuning phase, vs 434 for lffix with ACID
+   fully on. Hence the dataset fixes the loup inside the dives only
+   (--dive-loup), and the search tunes ACID as usual.
 4. The bisection headroom is real: the oracle at 0.68, SB at 0.83.

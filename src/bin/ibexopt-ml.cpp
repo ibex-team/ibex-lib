@@ -302,6 +302,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<int> probe_parts(parser, "int", "With --oracle-score hc4: slices per reduced dimension. Default: 4.", {"probe-parts"});
 	args::ValueFlag<string> probe_ctc(parser, "hc4|lp|full|proc", "With --oracle-score hc4: the probe's contractor. hc4 (default); lp: one HC4 pass then one polytope hull (XTaylor+affine); full: the search's contractor; proc: contraction and upper bounding, as a step of a dive.", {"probe-ctc"});
 	args::ValueFlag<int> ipopt_first(parser, "int", "With --loup ipoptxn: also call Ipopt at each of the first N loup-finder calls (a multi-start near the root). Default: 0.", {"ipopt-first"});
+	args::ValueFlag<double> dive_loup(parser, "float", "Dives (sampling, oracle) prune with this upper bound when it is lower than the search's: an optimum known in advance, so that the labels measure the branching alone. The search itself keeps its own loup.", {"dive-loup"});
 	args::ValueFlag<long> guard_horizon(parser, "int", "With --bisector lsmear-guard: only switch to round-robin within the first N decisions. Default: 0 (no horizon).", {"guard-horizon"});
 	args::ValueFlag<string> bisector_arg(parser, "name", "Bisector to use. One of: "
 			+ MLOptimizerConfig::bisector_names() + ". Default: lsmear (what ibexopt uses).", {"bisector"});
@@ -440,6 +441,7 @@ int main(int argc, char** argv) {
 		if (oracle_arg) server->set_oracle(true);
 		if (oracle_depth_arg) server->set_oracle_max_depth(oracle_depth_arg.Get());
 		if (sb_ratio_arg) server->set_sb_ratio(sb_ratio_arg.Get());
+		if (dive_loup) server->set_dive_loup(dive_loup.Get());
 		if (sb_vol_only) server->set_sb_vol_only(true);
 		if (probe_dims) server->set_probe_dims(probe_dims.Get());
 		if (probe_parts) server->set_probe_parts(probe_parts.Get());
@@ -521,6 +523,10 @@ int main(int argc, char** argv) {
 			out.kv("bisect_ratio", bisect_ratio);
 			out.kv("rule", model!=NULL ? model->description()
 					: string(MLOptimizerConfig::bisector_name(bisector)));
+			if (getenv("IBEX_ACID_TRACE")) for (size_t k=0; k<server->acid_tuning().size(); k++)
+				std::cerr << "acid " << k << " nbcidvar=" << server->acid_tuning()[k].nbcidvar
+				          << " nbcalls=" << server->acid_tuning()[k].nbcalls
+				          << " nbtuning=" << server->acid_tuning()[k].nbtuning << std::endl;
 			if (oracle_arg) {
 				out.kv("oracle_calls", server->oracle_calls);
 				out.kv("oracle_fallbacks", server->oracle_fallbacks);
