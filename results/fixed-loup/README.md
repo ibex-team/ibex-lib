@@ -34,3 +34,11 @@ the 7 it closes (worst 0.95).
    fully on. Hence the dataset fixes the loup inside the dives only
    (--dive-loup), and the search tunes ACID as usual.
 4. The bisection headroom is real: the oracle at 0.68, SB at 0.83.
+
+Check of --dive-loup (collect, 3 samples, lsmear-lffix):
+- ship-1 (loup at those nodes 1.043, optimum 0): without it the labels are
+  564-1000 nodes, 7-10 of 10 censored, 78 s; with --dive-loup 0 every
+  candidate closes in 2 nodes (both children pruned), 0.01 s. The old labels
+  measured the upper bounding; with the optimum all candidates tie.
+- dnieper root (the loup is already the optimum there): labels unchanged up
+  to noise (226-288 vs 216-300).
