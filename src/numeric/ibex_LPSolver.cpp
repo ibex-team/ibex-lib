@@ -119,6 +119,11 @@ void LPSolver::invalidate() {
     status_ = LPSolver::Status::Unknown;
     has_solution_ = false;
     has_infeasible_dir_ = false;
+    bound_at_stop_ = NEG_INFINITY;
+}
+
+double LPSolver::proved_bound_at_stop() const {
+    return bound_at_stop_;
 }
 
 bool LPSolver::is_feasible() const {

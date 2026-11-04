@@ -312,6 +312,17 @@ public:
 	Interval minimum() const;
 
 	/**
+	 * \brief Certified lower bound of the minimum when the last call to
+	 * minimize() stopped before optimality (MaxIter, Timeout or Unknown).
+	 *
+	 * The Neumaier-Shcherbina bound is valid for any vector of multipliers,
+	 * so the dual of the basis where the solver stopped still gives a valid
+	 * (possibly weak) bound. Return -oo if no such bound is available: no
+	 * dual solution stored, or uncertified mode.
+	 */
+	double proved_bound_at_stop() const;
+
+	/**
 	 * \brief Return an uncertified primal solution (a minimizer).
 	 */
 	Vector not_proved_primal_sol() const;
@@ -380,6 +391,10 @@ private:
 	bool has_infeasible_dir_ = false;
 	Vector uncertified_infeasible_dir_{1};
 	Interval obj_;
+	double bound_at_stop_ = NEG_INFINITY;
+
+	// Neumaier-Shcherbina bound from the dual of the basis where the solver stopped.
+	void bound_from_last_basis();
 
 	bool has_changed = true;
 
