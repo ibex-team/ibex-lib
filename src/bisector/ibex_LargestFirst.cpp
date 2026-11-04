@@ -34,6 +34,20 @@ BisectionPoint LargestFirst::choose_var(const Cell& cell) {
 
 	int var =-1;
 	double l=0.0;
+
+	// With a non-uniform precision vector that contains zeros, diam/prec is
+	// +oo for every variable with a null precision: they all tie and the first
+	// one is always bisected. Variables with a null precision are therefore
+	// compared first, by their diameter.
+	if (!uniform_prec()) {
+		for (int i=0; i< box.size(); i++)
+			if (prec(i)==0 && !nobisectable(box,i) && (var==-1 || box[i].diam()>l)) {
+				var=i;
+				l=box[i].diam();
+			}
+		if (var!=-1) return BisectionPoint(var,ratio,true);
+	}
+
 	for (int i=0; i< box.size(); i++)	{
 	  if (!(nobisectable (box,i))){
 			if (var==-1) {

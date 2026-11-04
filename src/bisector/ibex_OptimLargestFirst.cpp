@@ -29,6 +29,20 @@ BisectionPoint OptimLargestFirst::choose_var(const Cell& cell) {
 const IntervalVector& box=cell.box;
 	int var =-1;
 	double l=0.0;
+
+	// As in LargestFirst: with a non-uniform precision vector that contains
+	// zeros (the default eps_x of the optimizer is 0), diam/prec is +oo for
+	// all those variables and the first one was always bisected. Variables
+	// with a null precision are compared first, by their diameter; l is then a
+	// diameter and the comparison with the objective below is homogeneous.
+	if (!uniform_prec()) {
+		for (int i=0; i< box.size(); i++)
+			if (i!=goal_var && prec(i)==0 && !nobisectable(box,i) && (var==-1 || box[i].diam()>l)) {
+				var=i;
+				l=box[i].diam();
+			}
+	}
+	if (var==-1)
 	for (int i=0; i< box.size(); i++){
 	  if (i!= goal_var){
 	    if ( ! nobisectable (box,i)){
