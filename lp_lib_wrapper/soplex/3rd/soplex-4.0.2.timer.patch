@@ -1,0 +1,64 @@
+--- a/src/soplex/slufactor.h
++++ b/src/soplex/slufactor.h
+@@ -265,6 +265,15 @@
+    {
+       return solveCount;
+    }
++   /// change the timer type of the solve and factorization timers
++   /// (ibex patch: in SoPlex 4.0.2 the TIMER parameter did not reach them)
++   void changeTimer(const Timer::TYPE ttype)
++   {
++      solveTime = TimerFactory::switchTimer(solveTime, ttype);
++      factorTime = TimerFactory::switchTimer(factorTime, ttype);
++      timerType = ttype;
++   }
++
+    /// reset timers and counters
+    void resetCounters()
+    {
+--- a/src/soplex/statistics.h
++++ b/src/soplex/statistics.h
+@@ -23,6 +23,7 @@
+ 
+ #include "soplex.h"
+ #include "soplex/timer.h"
++#include "soplex/timerfactory.h"
+ 
+ namespace soplex
+ {
+@@ -47,6 +48,20 @@
+    /// assignment operator
+    Statistics& operator=(const Statistics& rhs);
+ 
++   /// change the type of all timers (ibex patch)
++   void setTimerType(Timer::TYPE ttype)
++   {
++      readingTime = TimerFactory::switchTimer(readingTime, ttype);
++      solvingTime = TimerFactory::switchTimer(solvingTime, ttype);
++      preprocessingTime = TimerFactory::switchTimer(preprocessingTime, ttype);
++      simplexTime = TimerFactory::switchTimer(simplexTime, ttype);
++      syncTime = TimerFactory::switchTimer(syncTime, ttype);
++      transformTime = TimerFactory::switchTimer(transformTime, ttype);
++      rationalTime = TimerFactory::switchTimer(rationalTime, ttype);
++      reconstructionTime = TimerFactory::switchTimer(reconstructionTime, ttype);
++      timerType = ttype;
++   }
++
+    /// destructor
+    ~Statistics()
+    {
+--- a/src/soplex.cpp
++++ b/src/soplex.cpp
+@@ -6228,6 +6228,12 @@
+          return false;
+       }
+ 
++      // ibex patch: also the LU and the statistics timers
++      _slufactor.changeTimer(_solver.getTiming());
++
++      if(_statistics != 0)
++         _statistics->setTimerType(_solver.getTiming());
++
+       break;
+ 
+    // mode of hyper pricing

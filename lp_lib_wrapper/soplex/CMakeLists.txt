@@ -47,6 +47,12 @@ else ()
   patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
           "${logdir}" "${soplex_basename}.CMake.patch")
 
+  # The TIMER parameter must also switch the timers of the LU factorization
+  # and of the statistics: otherwise every FTRAN/BTRAN reads the clock (a
+  # system call), even with TIMER_OFF.
+  patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
+          "${logdir}" "${soplex_basename}.timer.patch")
+
   ### Configure
   message (STATUS "${SOPLEX_NAME}: configure")
   # Original values will be restored at the end of this file
