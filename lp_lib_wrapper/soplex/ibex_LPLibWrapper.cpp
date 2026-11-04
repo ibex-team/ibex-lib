@@ -115,13 +115,28 @@ LPSolver::~LPSolver() {
     delete mysoplex;
 }
 
+namespace {
+
+// Reading the clock is a system call that SoPlex makes at every
+// FTRAN/BTRAN of its LU factorization; on the small LPs of a contractor it
+// is a large part of the cost of a call. The clock is only needed to
+// enforce a time limit, so it is switched off unless the time limit is
+// below the default one (which no LP of a contractor reaches).
+void set_timelimit(soplex::SoPlex* mysoplex, double timeout) {
+    mysoplex->setRealParam(soplex::SoPlex::TIMELIMIT, timeout);
+    mysoplex->setIntParam(soplex::SoPlex::TIMER,
+            timeout < LPSolver::default_timeout ? soplex::SoPlex::TIMER_CPU : soplex::SoPlex::TIMER_OFF);
+}
+
+} // anonymous namespace
+
 void LPSolver::init(LPSolver::Mode mode, double tolerance, double timeout, int max_iter) {
 	statistics = NULL; // by default
     mysoplex = new soplex::SoPlex();
     mode_ = mode;
     mysoplex->setIntParam(SoPlex::VERBOSITY, SoPlex::VERBOSITY_ERROR);
     mysoplex->setIntParam(SoPlex::ITERLIMIT, max_iter);
-	mysoplex->setRealParam(SoPlex::TIMELIMIT, timeout);
+	set_timelimit(mysoplex, timeout);
 	mysoplex->setRealParam(SoPlex::FEASTOL, tolerance);
 	mysoplex->setRealParam(SoPlex::OPTTOL, tolerance);
 	mysoplex->setIntParam(SoPlex::SOLVEMODE, SoPlex::SOLVEMODE_REAL);
@@ -312,7 +327,7 @@ void LPSolver::set_tolerance(double tolerance) {
 
 void LPSolver::set_timeout(double timeout) {
     has_changed = true;
-    mysoplex->setRealParam(SoPlex::TIMELIMIT, timeout);
+    set_timelimit(mysoplex, timeout);
 }
 
 void LPSolver::set_max_iter(int max_iter) {
