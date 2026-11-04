@@ -159,7 +159,20 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				break;
 			}
 
-			else if (stat == LPSolver::Status::Unknown) {
+			else {
+				// MaxIter, Timeout or Unknown: the dual of the basis where the
+				// solver stopped still gives a certified bound. Apply it and go
+				// on with the next bound instead of abandoning the pass.
+				double lb = mylinearsolver.proved_bound_at_stop();
+				if (lb > box[i].ub()) {
+					delete[] inf_bound;
+					delete[] sup_bound;
+					throw PolytopeHullEmptyBoxException();
+				}
+				if (lb > box[i].lb()) {
+					box[i]=Interval(lb,box[i].ub());
+					mylinearsolver.set_bounds(i,box[i]);
+				}
 				int next=-1;
 				for (int j=0;j<nb_var;j++) {
 					if (inf_bound[j]==0) {
@@ -213,7 +226,18 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				break;
 			}
 
-			else if (stat == LPSolver::Status::Unknown) {
+			else {
+				// MaxIter, Timeout or Unknown: see the left bound.
+				double ub = -mylinearsolver.proved_bound_at_stop();
+				if (ub < box[i].lb()) {
+					delete[] inf_bound;
+					delete[] sup_bound;
+					throw PolytopeHullEmptyBoxException();
+				}
+				if (ub < box[i].ub()) {
+					box[i]=Interval(box[i].lb(),ub);
+					mylinearsolver.set_bounds(i,box[i]);
+				}
 				int next=-1;
 				for (int j=0;j<nb_var;j++) {
 					if (inf_bound[j]==0) {
@@ -228,7 +252,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				if (next==-1) break;
 			}
 		}
-		else break; // in case of stat==MAX_ITER  we do not recall the simplex on a another variable  (for efficiency reason)
+		else break;
 	}
 	delete[] inf_bound;
 	delete[] sup_bound;

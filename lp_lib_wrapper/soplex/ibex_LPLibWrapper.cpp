@@ -250,9 +250,11 @@ LPSolver::Status LPSolver::minimize() {
         break;
     case SPxSolver::ABORT_TIME:
         status_ = LPSolver::Status::Timeout;
+        bound_from_last_basis();
         break;
     case SPxSolver::ABORT_ITER:
         status_ = LPSolver::Status::MaxIter;
+        bound_from_last_basis();
         break;
     case SPxSolver::INFEASIBLE:
         {
@@ -277,8 +279,19 @@ LPSolver::Status LPSolver::minimize() {
     default:
 		if (statistics!=NULL) statistics->add_unexpected_status(soplex_status);        
         status_ = LPSolver::Status::Unknown;
+        bound_from_last_basis();
     }
     return status_;
+}
+
+void LPSolver::bound_from_last_basis() {
+    if (mode_ != LPSolver::Mode::Certified || !mysoplex->hasSol()) return;
+    DVectorReal dvec_dual(nb_rows());
+    if (!mysoplex->getDualReal(dvec_dual)) return;
+    uncertified_dual_ = dvec2ivec(dvec_dual);
+    neumaier_shcherbina_postprocessing();
+    // An empty enclosure means an empty polytope (a row with lhs > rhs).
+    bound_at_stop_ = obj_.is_empty() ? POS_INFINITY : obj_.lb();
 }
 
 void LPSolver::set_cost(const Vector& obj) {
