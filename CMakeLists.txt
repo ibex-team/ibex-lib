@@ -31,6 +31,15 @@ if (MSVC)
   add_compile_options("/fp:strict")
 endif()
 
+# Fix issue #580:
+# GCC 15 detects invalid array assignments in Soplex 4.0.2. 
+# This has been fixed in later releases of Soplex. Meanwhile, we discard this type of error:
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+   AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15)
+    message(STATUS "Applying GCC 15 compatibility fix")
+    add_compile_options(-Wno-template-body)
+endif()
+
 add_subdirectory (interval_lib_wrapper)
 add_subdirectory (lp_lib_wrapper)
 
