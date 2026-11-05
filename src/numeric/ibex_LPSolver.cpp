@@ -59,16 +59,15 @@ std::ostream& operator<<(std::ostream& os, const LPSolver::Status x){
 
 namespace {
 
-// Computes lambda'*b (in interval arithmetic) and A'*lambda (in floating
-// point, as the dense product Matrix*Vector did) row by row, skipping the
-// rows with a null multiplier. The simplex multipliers are sparse (only the
+// Computes lambda'*b and A'*lambda, both in interval arithmetic, row by
+// row, skipping the rows with a null multiplier. The simplex multipliers are sparse (only the
 // rows active in the basis are nonzero), so this avoids building rows() and
 // its transpose, two dense matrices, at every call.
-void sparse_dual_products(const LPSolver& lp, const Vector& lambda, Interval& lambda_b, Vector& At_lambda) {
+void sparse_dual_products(const LPSolver& lp, const Vector& lambda, Interval& lambda_b, IntervalVector& At_lambda) {
 	const int n = lp.nb_vars();
 	const int m = lp.nb_rows();
 	lambda_b = Interval::zero();
-	At_lambda = Vector::zeros(n);
+	At_lambda = IntervalVector(n, Interval::zero());
 	for (int i = 0; i < m; ++i) {
 		// A row with lhs > rhs makes the polytope empty. The dense product
 		// propagated its empty interval to the bound even with a null
@@ -78,8 +77,10 @@ void sparse_dual_products(const LPSolver& lp, const Vector& lambda, Interval& la
 		if (li == 0.0) continue;
 		lambda_b += li*lp.lhs_rhs(i);
 		const Vector r = lp.row(i);
+		// A'*lambda is accumulated in interval arithmetic: the bound is valid
+		// for any lambda only if the residual A'*lambda - c is enclosed.
 		for (int j = 0; j < n; ++j)
-			if (r[j] != 0.0) At_lambda[j] += li*r[j];
+			if (r[j] != 0.0) At_lambda[j] += Interval(li)*r[j];
 	}
 }
 
@@ -87,9 +88,8 @@ void sparse_dual_products(const LPSolver& lp, const Vector& lambda, Interval& la
 
 bool LPSolver::neumaier_shcherbina_postprocessing() {
 	Interval lambda_b;
-	Vector At_lambda(nb_vars());
-	sparse_dual_products(*this, uncertified_dual_, lambda_b, At_lambda);
-	IntervalVector rest(At_lambda);
+	IntervalVector rest(nb_vars());
+	sparse_dual_products(*this, uncertified_dual_, lambda_b, rest);
 	rest -= cost();
 	obj_ = lambda_b - rest*ivec_bounds_;
 	return true;
@@ -105,9 +105,8 @@ bool LPSolver::neumaier_shcherbina_infeasibility_test() {
     }
 
 	Interval lambda_b;
-	Vector At_lambda(nb_vars());
-	sparse_dual_products(*this, lambda, lambda_b, At_lambda);
-    IntervalVector rest(At_lambda);
+	IntervalVector rest(nb_vars());
+	sparse_dual_products(*this, lambda, lambda_b, rest);
     Interval d = rest * ivec_bounds_ - lambda_b;
 
     // if 0 does not belong to d, the infeasibility is proved
