@@ -241,10 +241,11 @@ static const char* BENCHS[NB_BENCHS] = {
 };
 
 void  TestSolver::benchs() {
+	const long max_cells = 2000;
 	for (unsigned int i=0; i<NB_BENCHS; i++) {
 		System sys((string(SRCDIR_TESTS)+BENCHS[i]).c_str());
 		DefaultSolver solver(sys);
-		solver.time_limit = 10;
+		solver.cell_limit = max_cells;
 		Solver::Status status = solver.solve(sys.box);	
 		const CovSolverData& data = solver.get_data();
 
