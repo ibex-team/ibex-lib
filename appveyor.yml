@@ -35,7 +35,7 @@ build_script:
   - cd c:\projects\ibex-lib
   - mkdir build
   - cd build
-  - cmake -G "%CMAKE_PLATFORM%" -DBUILD_TESTING=1 -DCMAKE_BUILD_TYPE=Release -DINTERVAL_LIB=filib -DCPPUNIT_DIR="%CPPUNIT_DIR%" -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON ../
+  - cmake -G "%CMAKE_PLATFORM%" -DBUILD_TESTING=1 -DCMAKE_BUILD_TYPE=Release -DINTERVAL_LIB=filib -DLP_LIB=soplex -DCPPUNIT_DIR="%CPPUNIT_DIR%" -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON ../
   - cmake --build . --config Release
   - cmake --install . --config Release
   - set PATH=%PATH%;%IBEX_PATH%\bin;%IBEX_PATH%\lib
