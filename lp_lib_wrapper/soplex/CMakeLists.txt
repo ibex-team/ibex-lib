@@ -58,8 +58,11 @@ else ()
   # Original values will be restored at the end of this file
   set (CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR_3RD})
   set (CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR_3RD})
-  set (BOOST OFF CACHE BOOL "" FORCE)
-  set (PAPILO OFF CACHE BOOL "" FORCE)
+  set(BOOST OFF CACHE BOOL "" FORCE)
+  set(PAPILO OFF CACHE BOOL "" FORCE)
+  set(GMP OFF CACHE BOOL "" FORCE)
+  set(MPFR OFF CACHE BOOL "" FORCE)
+  set(ZLIB OFF CACHE BOOL "" FORCE)
   add_subdirectory (${wdir} ${wdir}-build)
   message (STATUS "${SOPLEX_NAME}: configure - done")
 
