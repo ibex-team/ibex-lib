@@ -64,6 +64,11 @@ else ()
   message (STATUS "${SOPLEX_NAME}: configure - done")
 
   ###
-  set (SOPLEX_TARGET "libsoplex" PARENT_SCOPE)
+  if (BUILD_SHARED_LIBS)
+    set (SOPLEX_TARGET "libsoplex-pic" PARENT_SCOPE)
+  else ()
+    set (SOPLEX_TARGET "libsoplex" PARENT_SCOPE)
+  endif ()
+  
   set (SOPLEX_VERSION ${SOPLEX_VERSION} PARENT_SCOPE)
 endif ()
