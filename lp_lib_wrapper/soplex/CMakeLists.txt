@@ -24,7 +24,7 @@ else ()
   message (STATUS "Will install and use library SoPlex from 3rd/ subdirectory")
 
   ###
-  set (SOPLEX_VERSION "4.0.2")
+  set (SOPLEX_VERSION "8.1.0")
   set (soplex_basename "soplex-${SOPLEX_VERSION}")
   set (soplex_archive_name "${soplex_basename}.tar")
   set (soplex_archive "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${soplex_archive_name}")
@@ -41,27 +41,29 @@ else ()
                          STATUS_PREFIX "${SOPLEX_NAME}: ")
 
   ### Apply patch
-  patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
-          "${logdir}" "${soplex_basename}.all.all.patch")
+  #patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
+  #         "${logdir}" "${soplex_basename}.all.all.patch")
   
-  patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
-          "${logdir}" "${soplex_basename}.CMake.patch")
+  #patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
+  #        "${logdir}" "${soplex_basename}.CMake.patch")
 
   # The TIMER parameter must also switch the timers of the LU factorization
   # and of the statistics: otherwise every FTRAN/BTRAN reads the clock (a
   # system call), even with TIMER_OFF.
-  patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
-          "${logdir}" "${soplex_basename}.timer.patch")
+  #patch ("${SOPLEX_NAME}: " "${CMAKE_CURRENT_SOURCE_DIR}/3rd" "${wdir}"
+  #        "${logdir}" "${soplex_basename}.timer.patch")
 
   ### Configure
   message (STATUS "${SOPLEX_NAME}: configure")
   # Original values will be restored at the end of this file
   set (CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR_3RD})
   set (CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR_3RD})
+  set (BOOST OFF CACHE BOOL "" FORCE)
+  set (PAPILO OFF CACHE BOOL "" FORCE)
   add_subdirectory (${wdir} ${wdir}-build)
   message (STATUS "${SOPLEX_NAME}: configure - done")
 
   ###
-  set (SOPLEX_TARGET "soplex" PARENT_SCOPE)
+  set (SOPLEX_TARGET "libsoplex" PARENT_SCOPE)
   set (SOPLEX_VERSION ${SOPLEX_VERSION} PARENT_SCOPE)
 endif ()
