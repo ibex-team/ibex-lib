@@ -126,6 +126,7 @@ void set_timelimit(soplex::SoPlex* mysoplex, double timeout) {
     mysoplex->setRealParam(soplex::SoPlex::TIMELIMIT, timeout);
     mysoplex->setIntParam(soplex::SoPlex::TIMER,
             timeout < LPSolver::default_timeout ? soplex::SoPlex::TIMER_CPU : soplex::SoPlex::TIMER_OFF);
+    mysoplex->setIntParam(SoPlex::STATTIMER, 0);
 }
 
 } // anonymous namespace
@@ -232,8 +233,8 @@ LPSolver::Status LPSolver::minimize() {
         {
             DVectorReal dvec_primal(nb_vars());
             DVectorReal dvec_dual(nb_rows());
-            mysoplex->getPrimalReal(dvec_primal);
-            mysoplex->getDualReal(dvec_dual);
+            mysoplex->getPrimal(dvec_primal);
+            mysoplex->getDual(dvec_dual);
             obj_ = mysoplex->objValueReal();
 
             uncertified_dual_ = dvec2ivec(dvec_dual);
@@ -260,7 +261,7 @@ LPSolver::Status LPSolver::minimize() {
         {
             status_ = LPSolver::Status::Infeasible;
             DVectorReal dual_farkas(nb_rows());
-            bool b = mysoplex->getDualFarkasReal(dual_farkas);
+            bool b = mysoplex->getDualFarkas(dual_farkas);
             if(b) {
                 uncertified_infeasible_dir_ = dvec2ivec(dual_farkas);
                 has_infeasible_dir_ = true;
@@ -287,7 +288,7 @@ LPSolver::Status LPSolver::minimize() {
 void LPSolver::bound_from_last_basis() {
     if (mode_ != LPSolver::Mode::Certified || !mysoplex->hasSol()) return;
     DVectorReal dvec_dual(nb_rows());
-    if (!mysoplex->getDualReal(dvec_dual)) return;
+    if (!mysoplex->getDual(dvec_dual)) return;
     uncertified_dual_ = dvec2ivec(dvec_dual);
     neumaier_shcherbina_postprocessing();
     // An empty enclosure means an empty polytope (a row with lhs > rhs).
