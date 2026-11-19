@@ -29,6 +29,21 @@ class DefaultOptimizerConfig : public OptimizerConfig, protected Memory {
 public:
 
 	/**
+	 * \brief Bisection heuristics that can be selected (see #set_bisector()).
+	 *
+	 * - LSMEAR_MG_BSC      : LSmear, mode LSMEAR_MG (default)
+	 * - LSMEAR_BSC         : LSmear, mode LSMEAR
+	 * - SMEAR_SUM_BSC      : SmearSum
+	 * - SMEAR_MAX_BSC      : SmearMax
+	 * - SMEAR_SUM_REL_BSC  : SmearSumRelative
+	 * - SMEAR_MAX_REL_BSC  : SmearMaxRelative
+	 * - LARGEST_FIRST_BSC  : LargestFirst
+	 * - ROUND_ROBIN_BSC    : RoundRobin
+	 */
+	typedef enum { LSMEAR_MG_BSC, LSMEAR_BSC, SMEAR_SUM_BSC, SMEAR_MAX_BSC,
+		SMEAR_SUM_REL_BSC, SMEAR_MAX_REL_BSC, LARGEST_FIRST_BSC, ROUND_ROBIN_BSC } bisector_type;
+
+	/**
 	 * \brief Create default configuration
 	 *
 	 * \param sys         - The system to optimize.
@@ -98,6 +113,14 @@ public:
 	 */
 	void set_random_seed(double random_seed);
 
+	/**
+	 * \brief Set the bisection heuristic.
+	 *
+	 * Must be called before the optimizer is built.
+	 * By default: #default_bisector.
+	 */
+	void set_bisector(bisector_type bisector);
+
 	/** \see #set_eps_h(). */
 	double get_eps_h();
 
@@ -113,6 +136,9 @@ public:
 	/** \see #set_random_seed(). */
 	double get_random_seed();
 
+	/** \see #set_bisector(). */
+	bisector_type get_bisector();
+
 	/** Default random seed: 1.0. */
 	static constexpr double default_random_seed = 1.0;
 
@@ -127,6 +153,9 @@ public:
 
 	/** Default ratio for choosing bisection point. */
 	static constexpr double default_bisect_ratio = 0.5;
+
+	/** Default bisector: LSmear (mode LSMEAR_MG). */
+	static constexpr bisector_type default_bisector = LSMEAR_MG_BSC;
 
 protected:
 
@@ -163,6 +192,7 @@ protected:
 	bool inHC4;
 	bool kkt;
 	double random_seed;
+	bisector_type bisector;
 };
 
 
@@ -175,6 +205,8 @@ inline bool DefaultOptimizerConfig::with_inHC4() { return inHC4; }
 inline bool DefaultOptimizerConfig::with_kkt() { return kkt; }
 
 inline double DefaultOptimizerConfig::get_random_seed() { return random_seed; }
+
+inline DefaultOptimizerConfig::bisector_type DefaultOptimizerConfig::get_bisector() { return bisector; }
 
 } /* namespace ibex */
 

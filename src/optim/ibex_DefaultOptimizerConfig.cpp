@@ -18,6 +18,8 @@
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_LSmear.h"
+#include "ibex_LargestFirst.h"
+#include "ibex_RoundRobin.h"
 #include "ibex_LoupFinderDefault.h"
 #include "ibex_LoupFinderCertify.h"
 #include "ibex_Array.h"
@@ -36,6 +38,7 @@ constexpr bool DefaultOptimizerConfig::default_rigor;
 constexpr bool DefaultOptimizerConfig::default_inHC4;
 constexpr double DefaultOptimizerConfig::default_relax_ratio;
 constexpr double DefaultOptimizerConfig::default_bisect_ratio;
+constexpr DefaultOptimizerConfig::bisector_type DefaultOptimizerConfig::default_bisector;
 
 namespace {
 
@@ -48,7 +51,7 @@ enum { 	NORMALIZED_SYSTEM_TAG,
 
 }
 
-DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys), kkt(false) {
+DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys), kkt(false), bisector(default_bisector) {
 	set_eps_h(ExtendedSystem::default_eps_h);
 	set_rigor(default_rigor);
 	set_inHC4(default_inHC4);
@@ -60,7 +63,7 @@ DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys), kk
 // note:deprecated.
 DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys, double rel_eps_f, double abs_eps_f,
 							double eps_h, bool rigor, bool inHC4, bool kkt,
-							double random_seed, const Vector& eps_x) : sys(sys) {
+							double random_seed, const Vector& eps_x) : sys(sys), bisector(default_bisector) {
 
 	set_rel_eps_f(rel_eps_f);
 	set_abs_eps_f(abs_eps_f);
@@ -124,6 +127,10 @@ void DefaultOptimizerConfig::set_kkt(bool _kkt) {
 void DefaultOptimizerConfig::set_random_seed(double _random_seed) {
 	random_seed = _random_seed;
 	RNG::srand(random_seed);
+}
+
+void DefaultOptimizerConfig::set_bisector(bisector_type _bisector) {
+	bisector = _bisector;
 }
 
 // The two next functions are necessary because we need
@@ -200,10 +207,32 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 	// This question is probably related to the discussion #400
 	eps_x_extended[ext_sys.goal_var()] = OptimizerConfig::default_eps_x;
 
-	return rec(new LSmear(
-			ext_sys, eps_x_extended,
-			rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
-			BSC_TAG);
+	switch (bisector) {
+	case LSMEAR_BSC:
+		return rec(new LSmear(
+				ext_sys, eps_x_extended,
+				rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio)),
+				LSMEAR),
+				BSC_TAG);
+	case SMEAR_SUM_BSC:
+		return rec(new SmearSum(ext_sys, eps_x_extended), BSC_TAG);
+	case SMEAR_MAX_BSC:
+		return rec(new SmearMax(ext_sys, eps_x_extended), BSC_TAG);
+	case SMEAR_SUM_REL_BSC:
+		return rec(new SmearSumRelative(ext_sys, eps_x_extended), BSC_TAG);
+	case SMEAR_MAX_REL_BSC:
+		return rec(new SmearMaxRelative(ext_sys, eps_x_extended), BSC_TAG);
+	case LARGEST_FIRST_BSC:
+		return rec(new LargestFirst(eps_x_extended), BSC_TAG);
+	case ROUND_ROBIN_BSC:
+		return rec(new RoundRobin(eps_x_extended), BSC_TAG);
+	case LSMEAR_MG_BSC:
+	default:
+		return rec(new LSmear(
+				ext_sys, eps_x_extended,
+				rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
+				BSC_TAG);
+	}
 }
 
 LoupFinder& DefaultOptimizerConfig::get_loup_finder() {

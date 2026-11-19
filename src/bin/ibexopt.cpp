@@ -61,6 +61,15 @@ int main(int argc, char** argv) {
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
 	args::ValueFlag<string> no_split_arg(parser, "vars","Prevent some variables to be bisected, separated by '+'.\nExample: --no-split=x+y",{"no-split"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
+	args::ValueFlag<string> bisector_arg(parser, "name", "Bisection heuristic. Possible values are:\n"
+			"\t\t* lsmear-mg:\tLSmear, mode LSMEAR_MG (default)\n"
+			"\t\t* lsmear:\tLSmear, mode LSMEAR\n"
+			"\t\t* smearsum:\tSmearSum\n"
+			"\t\t* smearmax:\tSmearMax\n"
+			"\t\t* smearsumrel:\tSmearSumRelative\n"
+			"\t\t* smearmaxrel:\tSmearMaxRelative\n"
+			"\t\t* largestfirst:\tLargestFirst\n"
+			"\t\t* roundrobin:\tRoundRobin", {"bisector"});
 
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
@@ -193,6 +202,26 @@ int main(int argc, char** argv) {
 			config.set_kkt(kkt.Get());
 			if (!quiet)
 				cout << "  KKT contractor:\tON" << endl;
+		}
+
+		if (bisector_arg) {
+			const string& b = bisector_arg.Get();
+			DefaultOptimizerConfig::bisector_type bsc;
+			if      (b=="lsmear-mg")    bsc = DefaultOptimizerConfig::LSMEAR_MG_BSC;
+			else if (b=="lsmear")       bsc = DefaultOptimizerConfig::LSMEAR_BSC;
+			else if (b=="smearsum")     bsc = DefaultOptimizerConfig::SMEAR_SUM_BSC;
+			else if (b=="smearmax")     bsc = DefaultOptimizerConfig::SMEAR_MAX_BSC;
+			else if (b=="smearsumrel")  bsc = DefaultOptimizerConfig::SMEAR_SUM_REL_BSC;
+			else if (b=="smearmaxrel")  bsc = DefaultOptimizerConfig::SMEAR_MAX_REL_BSC;
+			else if (b=="largestfirst") bsc = DefaultOptimizerConfig::LARGEST_FIRST_BSC;
+			else if (b=="roundrobin")   bsc = DefaultOptimizerConfig::ROUND_ROBIN_BSC;
+			else {
+				cerr << "Error: unknown bisector '" << b << "' (try ibexopt --help)" << endl;
+				exit(1);
+			}
+			config.set_bisector(bsc);
+			if (!quiet)
+				cout << "  bisector:\t\t" << b << endl;
 		}
 
 		if (simpl_level)
