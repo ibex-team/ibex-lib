@@ -7,6 +7,72 @@
 //============================================================================
 
 #include "ibex_LPSolver.h"
+#include "ibex_LPLibWrapper.h"
+
+using namespace std;
+
+using namespace soplex;
+
+#ifdef GENERATE_SOPLEX_REPLAY
+    #define ITER_START 0 // See comment in ibex_LPLibWrapper.h !
+    static int soplex_instance = 0;
+    static long int iter_count = 0;
+#endif
+
+#ifdef GENERATE_SOPLEX_REPLAY
+
+namespace ibex {
+
+long LPSolver::ivec2dsvec_replay(const ibex::Vector& ivec) {
+    static long ivec2dsvec_count = 0;
+    ivec2dsvec_count++;
+    replay << "    auto ivec2dsvec_" << ivec2dsvec_count << " = []() {" << endl;
+    replay << "        DSVectorReal dsvec(" << ivec.size() << ");" << endl;
+    for (int i = 0; i < ivec.size(); ++i) {
+        replay << "        dsvec.add(" << i << ", " << ivec[i] << ");" << endl;
+    }
+    replay << "        return dsvec;" << endl;
+    replay << "    };" << endl;
+    return ivec2dsvec_count;
+}
+
+long LPSolver::ivec2dvec_replay(const ibex::Vector& ivec) {
+    static long ivec2dvec_count = 0;
+    ivec2dvec_count++;
+    replay << "    auto ivec2dvec_" << ivec2dvec_count << " = []() {" << endl;
+    replay << "        double ivec[] = {";
+    for (int i = 0; i < ivec.size(); ++i) { 
+        replay << (i>0 ? "," : "") << ivec[i]; 
+    }
+    replay << "};" << endl;
+    replay << "        return DVectorReal(VectorReal(" << ivec.size() << ", ivec));" << endl;
+    replay << "    };" << endl;
+    return ivec2dvec_count;
+}
+
+long LPSolver::cmpop2type_replay(ibex::CmpOp op) {
+    static long cmpop2type_count = 0;
+    cmpop2type_count++;
+    replay << "    auto cmpop2type_" << cmpop2type_count << " = []() { return ";
+    switch(op) {
+    case ibex::LT:
+    case ibex::LEQ:
+        replay << "LPRowReal::Type::LESS_EQUAL";
+        break;
+    case ibex::GT:
+    case ibex::GEQ:
+        replay << "LPRowReal::Type::GREATER_EQUAL";
+        break;
+    case ibex::EQ:
+        replay << "LPRowReal::Type::EQUAL";
+        break;
+    }        
+    replay << "; };" << endl;
+    return cmpop2type_count;
+}
+} // end namespace ibex
+
+#endif
 
 namespace {
 
@@ -85,8 +151,6 @@ bool isfinite(const ibex::Vector& v) {
 
 namespace ibex {
 
-using namespace soplex;
-
 LPSolver::LPSolver(int nb_vars, LPSolver::Mode mode, double tolerance,
         double timeout, int max_iter)
 {
@@ -99,6 +163,12 @@ LPSolver::LPSolver(int nb_vars, LPSolver::Mode mode, double tolerance,
 
 LPSolver::LPSolver(std::string filename) {
     init(LPSolver::Mode::NotCertified, LPSolver::default_tolerance, LPSolver::default_timeout, LPSolver::default_max_iter);
+
+    #ifdef GENERATE_SOPLEX_REPLAY
+        replay << "    soplex.setIntParam(SoPlex::READMODE, SoPlex::READMODE_REAL);" << endl;
+        replay << " soplex.readFile(" << filename.c_str() << ");" << endl;
+    #endif
+
     mysoplex->setIntParam(SoPlex::READMODE, SoPlex::READMODE_REAL);
     bool result = mysoplex->readFile(filename.c_str());
     if(!result) {
@@ -132,15 +202,33 @@ void set_timelimit(soplex::SoPlex* mysoplex, double timeout) {
 } // anonymous namespace
 
 void LPSolver::init(LPSolver::Mode mode, double tolerance, double timeout, int max_iter) {
-	statistics = NULL; // by default
+    #ifdef GENERATE_SOPLEX_REPLAY
+		stringstream ss;
+		ss << "soplex-replay-" << (++soplex_instance) << ".cpp";
+		replay.open(ss.str(), std::ofstream::out | std::ofstream::trunc);
+        replay << "#include \"soplex.h\"" << endl;
+        replay << "using namespace soplex;" << endl;
+        replay << "int main() {" << endl;
+        replay << "    SoPlex soplex;" << endl;
+        replay << std::hexfloat;
+        replay << "    soplex.setIntParam(SoPlex::VERBOSITY, SoPlex::VERBOSITY_ERROR);" << endl;
+        replay << "    soplex.setIntParam(SoPlex::ITERLIMIT," << max_iter << ");" << endl;
+        replay << "    soplex.setRealParam(SoPlex::FEASTOL, " << tolerance << ");" << endl;
+        replay << "    soplex.setRealParam(SoPlex::OPTTOL, " << tolerance << ");" << endl;
+        replay << "    soplex.setIntParam(SoPlex::SOLVEMODE, SoPlex::SOLVEMODE_REAL);" << endl;
+        replay << "    soplex.setIntParam(SoPlex::OBJSENSE, SoPlex::OBJSENSE_MINIMIZE);" << endl;
+        replay << "    soplex.setBoolParam(SoPlex::ENSURERAY, true);" << endl;
+    #endif
+    
+    statistics = NULL; // by default
     mysoplex = new soplex::SoPlex();
     mode_ = mode;
     mysoplex->setIntParam(SoPlex::VERBOSITY, SoPlex::VERBOSITY_ERROR);
     mysoplex->setIntParam(SoPlex::ITERLIMIT, max_iter);
-	set_timelimit(mysoplex, timeout);
-	mysoplex->setRealParam(SoPlex::FEASTOL, tolerance);
-	mysoplex->setRealParam(SoPlex::OPTTOL, tolerance);
-	mysoplex->setIntParam(SoPlex::SOLVEMODE, SoPlex::SOLVEMODE_REAL);
+    set_timeout(timeout);
+    mysoplex->setRealParam(SoPlex::FEASTOL, tolerance);
+    mysoplex->setRealParam(SoPlex::OPTTOL, tolerance);
+    mysoplex->setIntParam(SoPlex::SOLVEMODE, SoPlex::SOLVEMODE_REAL);
     mysoplex->setIntParam(SoPlex::OBJSENSE, SoPlex::OBJSENSE_MINIMIZE);
     mysoplex->setBoolParam(SoPlex::ENSURERAY, true);
 }
@@ -182,6 +270,13 @@ int LPSolver::add_constraint(double lhs, const Vector& row, double rhs) {
     //assert(std::isfinite(lhs) && std::isfinite(rhs));
     assert(isfinite(row));
 
+    #ifdef GENERATE_SOPLEX_REPLAY
+        if (iter_count >= ITER_START) {
+            long _n = ivec2dsvec_replay(row);
+            replay << "    soplex.addRowReal(LPRowReal(" << lhs << ", ivec2dsvec_" << _n << "(), " << rhs << "));" << endl; 
+        }
+    #endif
+    
     has_changed = true;
     mysoplex->addRowReal(LPRowReal(lhs, ivec2dsvec(row), rhs));
     return nb_rows()-1;
@@ -191,6 +286,14 @@ int LPSolver::add_constraint(const Vector& row, CmpOp op, double rhs) {
     assert(row.size() == nb_vars());
     assert(isfinite(row));
     assert(std::isfinite(rhs));
+
+    #ifdef GENERATE_SOPLEX_REPLAY
+        if (iter_count >= ITER_START) {
+            long _n1 = ivec2dsvec_replay(row);
+            long _n2 = cmpop2type_replay(op);
+            replay << "    soplex.addRowReal(LPRowReal(ivec2dsvec_" << _n1 << "(), cmpop2type_" << _n2 << "(), " << rhs << "));" << endl; 
+        }
+    #endif
 
     has_changed = true;
     using Type = soplex::LPRowReal::Type;
@@ -221,6 +324,15 @@ void LPSolver::add_constraints(const Matrix& rows, CmpOp op, const Vector& rhs) 
 }
 
 LPSolver::Status LPSolver::minimize() {
+
+    #ifdef GENERATE_SOPLEX_REPLAY
+        iter_count ++;
+        if (iter_count >= ITER_START) {
+            replay << "    soplex.solve();" << endl; 
+            replay << "    soplex.ignoreUnscaledViolations();" << endl;
+        }
+    #endif
+    
     invalidate();
     //assert(!ivec_bounds_.is_unbounded());
 	if (statistics!=NULL) statistics->add_call();
@@ -298,6 +410,14 @@ void LPSolver::bound_from_last_basis() {
 void LPSolver::set_cost(const Vector& obj) {
     assert(obj.size() == nb_vars());
     assert(isfinite(obj));
+
+    #ifdef GENERATE_SOPLEX_REPLAY
+        if (iter_count >= ITER_START) {
+            long _n = ivec2dvec_replay(obj);
+            replay << "    soplex.changeObjReal(ivec2dvec_" << _n << "());" << endl; 
+        }
+    #endif
+    
     has_changed = true;
     mysoplex->changeObjReal(ivec2dvec(obj));
 }
@@ -305,6 +425,13 @@ void LPSolver::set_cost(const Vector& obj) {
 void LPSolver::set_cost(int index, double value) {
     assert(index >= 0 && index < nb_vars());
     assert(std::isfinite(value));
+
+    #ifdef GENERATE_SOPLEX_REPLAY
+        if (iter_count >= ITER_START) {
+            replay << "    soplex.changeObjReal(" << index << ", " << value << ");" << endl; 
+        }
+    #endif
+
     has_changed = true;
     mysoplex->changeObjReal(index, value);
 }
@@ -317,6 +444,18 @@ void LPSolver::set_bounds(const IntervalVector& bounds) {
     // The bounds have to be changed in 3 places: ivec_bounds_,
     // in soplex variable bounds, and in bounds constraints.
     ivec_bounds_ = bounds;
+
+    #ifdef GENERATE_SOPLEX_REPLAY
+        if (iter_count >= ITER_START) {
+            long _nl = ivec2dvec_replay(bounds.lb());
+            long _nu = ivec2dvec_replay(bounds.ub());
+            replay << "    soplex.changeBoundsReal(ivec2dvec_" << _nl << "(), ivec2dvec_" << _nu << "());" << endl; 
+            for(int i = 0; i < nb_vars(); ++i) {
+                replay << "    soplex.changeRangeReal(" << i << ", " << bounds[i].lb() << ", " << bounds[i].ub() << ");" << endl;
+            }
+        }
+    #endif
+
     mysoplex->changeBoundsReal(ivec2dvec(bounds.lb()), ivec2dvec(bounds.ub()));
     const int n = nb_vars();
     for(int i = 0; i < n; ++i) {
@@ -327,6 +466,14 @@ void LPSolver::set_bounds(const IntervalVector& bounds) {
 void LPSolver::set_bounds(int var, const Interval& bounds) {
     assert(var >= 0 && var < nb_vars());
     //assert(!bounds.is_unbounded());
+
+    #ifdef GENERATE_SOPLEX_REPLAY
+        if (iter_count >= ITER_START) {
+            replay << "    soplex.changeBoundsReal(" << var << ", " << bounds.lb() << ", " << bounds.ub() << ");" << endl;
+            replay << "    soplex.changeRangeReal(" << var << ", " << bounds.lb() << ", " << bounds.ub() << ");" << endl;
+        }
+    #endif
+
     has_changed = true;
     ivec_bounds_[var] = bounds;
     mysoplex->changeBoundsReal(var, bounds.lb(), bounds.ub());
@@ -334,17 +481,33 @@ void LPSolver::set_bounds(int var, const Interval& bounds) {
 }
 
 void LPSolver::set_tolerance(double tolerance) {
+    #ifdef GENERATE_SOPLEX_REPLAY
+        replay << "    soplex.setRealParam(SoPlex::FEASTOL, " << tolerance << ");" << endl;
+        replay << "    soplex.setRealParam(SoPlex::OPTTOL, " << tolerance << ");" << endl;
+    #endif
+        
     has_changed = true;
 	mysoplex->setRealParam(SoPlex::FEASTOL, tolerance);
 	mysoplex->setRealParam(SoPlex::OPTTOL, tolerance);
 }
 
 void LPSolver::set_timeout(double timeout) {
+    #ifdef GENERATE_SOPLEX_REPLAY
+        replay << "    soplex.setRealParam(soplex::SoPlex::TIMELIMIT, " << timeout << ");" << endl;
+        replay << "    soplex.setIntParam(soplex::SoPlex::TIMER, " <<
+            (timeout < LPSolver::default_timeout ? "SoPlex::TIMER_CPU" : "SoPlex::TIMER_OFF") << ");" << endl;
+        replay << "    soplex.setIntParam(SoPlex::STATTIMER, 0);" << endl;
+    #endif
+
     has_changed = true;
     set_timelimit(mysoplex, timeout);
 }
 
 void LPSolver::set_max_iter(int max_iter) {
+    #ifdef GENERATE_SOPLEX_REPLAY
+        replay << "    soplex.setIntParam(SoPlex::ITERLIMIT, " << max_iter << ");" << endl;
+    #endif
+    
     has_changed = true;
 	mysoplex->setIntParam(SoPlex::ITERLIMIT, max_iter);
 }
@@ -487,12 +650,28 @@ void LPSolver::write_to_file(const std::string& filename) const {
 
 // Clear functions
 void LPSolver::set_cost_to_zero() {
+    #ifdef GENERATE_SOPLEX_REPLAY
+        if (iter_count >= ITER_START) {
+            replay << "    {" << endl;
+            replay << "        DVectorReal new_obj(" << nb_vars() << ");" << endl;
+            replay << "        new_obj.clear();" << endl;
+            replay << "        soplex.changeObjReal(new_obj);" << endl;
+            replay << "    }" << endl;
+        }
+    #endif
+    
     DVectorReal new_obj(nb_vars());
     new_obj.clear();
     mysoplex->changeObjReal(new_obj);
 }
 
 void LPSolver::clear_constraints() {
+    #ifdef GENERATE_SOPLEX_REPLAY
+        if (iter_count >= ITER_START) {
+        replay << "    soplex.removeRowRangeReal(" << nb_vars() << "," << nb_rows()-1 << ");" << endl;
+    }
+    #endif
+    
     mysoplex->removeRowRangeReal(nb_vars(), nb_rows()-1);
 }
 
@@ -503,6 +682,24 @@ void LPSolver::clear_bounds() {
 
 void LPSolver::reset(int nb_vars) {
     assert(nb_vars > 0);
+    
+    #ifdef GENERATE_SOPLEX_REPLAY
+        replay << "    soplex.clearLPReal();" << endl;
+        replay << "    soplex.setIntParam(SoPlex::OBJSENSE, SoPlex::OBJSENSE_MINIMIZE);" << endl;
+        replay << "    {" << endl;
+        replay << "        DSVectorReal dscol(0);" << endl;
+        replay << "        for (int i = 0; i < " << nb_vars << "; ++i) {" << endl;
+        replay << "            soplex.addColReal(LPColReal(0, dscol, soplex::infinity, -soplex::infinity));" << endl;
+        replay << "        }" << endl;
+        replay << "        DSVectorReal dsrow(" << nb_vars << ");" << endl;
+        replay << "        for (int i = 0; i < " << nb_vars << "; ++i) {" << endl;
+        replay << "            dsrow.add(i, 1);" << endl;
+        replay << "            soplex.addRowReal(LPRowReal(-soplex::infinity, dsrow, soplex::infinity));" << endl;
+        replay << "            dsrow.clear();" << endl;
+        replay << "        }" << endl;
+        replay << "    }" << endl;
+    #endif
+    
     invalidate();
     mysoplex->clearLPReal();
 
