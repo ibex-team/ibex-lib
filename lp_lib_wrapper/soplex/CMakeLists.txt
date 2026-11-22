@@ -24,7 +24,9 @@ else ()
   message (STATUS "Will install and use library SoPlex from 3rd/ subdirectory")
 
   ###
-  set (SOPLEX_VERSION "8.1.0")
+  # The version of soplex that we name here "8.1.0.1" corresponds
+  # to the commit 93f74d680e0cb5e735e5648ff3c5a47276c8f3b2
+  set (SOPLEX_VERSION "8.1.0.1")
   set (soplex_basename "soplex-${SOPLEX_VERSION}")
   set (soplex_archive_name "${soplex_basename}.tar")
   set (soplex_archive "${CMAKE_CURRENT_SOURCE_DIR}/3rd/${soplex_archive_name}")
