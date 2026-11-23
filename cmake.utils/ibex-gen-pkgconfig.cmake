@@ -68,6 +68,12 @@ function (get_target_libs outvarname target)
     get_target_property (is_imported ${target} IMPORTED)
     if (NOT is_imported)
       get_target_property (_propvalue ${target} NAME)
+      
+      # Remove the "lib" prefix if present (happens with Soplex)
+      if (_propvalue MATCHES "^lib(.+)")
+        set (_propvalue "${CMAKE_MATCH_1}")
+      endif ()
+       
       if (NOT target STREQUAL "ibex")
         list (APPEND Libs "-L\${libdir}/ibex/3rd;-l${_propvalue}")
       else ()
